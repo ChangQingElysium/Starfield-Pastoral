@@ -191,9 +191,6 @@ public class StardewCraft {
     public void onServerStarting(ServerStartingEvent event) {
         LOGGER.info("HELLO from server starting");
 
-        // 加载任务数据
-        com.stardew.craft.quest.QuestDataLoader.load();
-
         // 注册温室季节豁免规则
         com.stardew.craft.greenhouse.GreenhouseManager.registerSeasonRule();
 

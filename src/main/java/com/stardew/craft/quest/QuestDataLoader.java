@@ -3,16 +3,16 @@ package com.stardew.craft.quest;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.stardew.craft.StardewCraft;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceManager;
 
 import javax.annotation.Nullable;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * SDV Data/Quests 数据加载器
@@ -29,24 +29,35 @@ public class QuestDataLoader {
     /**
      * 加载 quests.json（应在服务端启动时调用）
      */
-    public static void load() {
+    public static void load(ResourceManager resourceManager) {
         RAW_DATA.clear();
-        try {
-            InputStream is = QuestDataLoader.class.getResourceAsStream(
-                "/data/stardewcraft/quests.json"
-            );
-            if (is == null) {
-                StardewCraft.LOGGER.warn("[Quest] quests.json not found, no quests loaded");
-                return;
+
+        ResourceLocation location = ResourceLocation.fromNamespaceAndPath(
+                StardewCraft.MODID,
+                "quests.json"
+        );
+
+        Optional<Resource> resource = resourceManager.getResource(location);
+
+        if (resource.isEmpty()) {
+            StardewCraft.LOGGER.warn("[Quest] quests.json not found, no quests loaded");
+            return;
+        }
+
+        try (InputStreamReader reader = new InputStreamReader(
+                resource.get().open(),
+                StandardCharsets.UTF_8
+        )) {
+
+            Type mapType = new TypeToken<Map<String, String>>() {}.getType();
+            Map<String, String> parsed = GSON.fromJson(reader, mapType);
+
+            if (parsed != null) {
+                RAW_DATA.putAll(parsed);
             }
-            try (InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
-                Type mapType = new TypeToken<Map<String, String>>() {}.getType();
-                Map<String, String> parsed = GSON.fromJson(reader, mapType);
-                if (parsed != null) {
-                    RAW_DATA.putAll(parsed);
-                }
-            }
+
             StardewCraft.LOGGER.info("[Quest] Loaded {} quest definitions", RAW_DATA.size());
+
         } catch (Exception e) {
             StardewCraft.LOGGER.error("[Quest] Failed to load quests.json", e);
         }
