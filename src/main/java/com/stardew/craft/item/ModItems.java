@@ -1035,6 +1035,21 @@ public class ModItems {
                         () -> new StardewBlockItem(ModBlocks.WALL_BLACKSMITH_HAMMERS.get(), "stardewcraft.type.furniture", -1, new Item.Properties().stacksTo(999)));
         public static final DeferredItem<Item> SQUID_KID_PAINTING = ITEMS.register("squid_kid_painting",
                         () -> new StardewBlockItem(ModBlocks.SQUID_KID_PAINTING.get(), "stardewcraft.type.furniture_painting", 500, new Item.Properties().stacksTo(999)));
+        public static final DeferredItem<Item> RED_EAGLE = nightMarketPainting("red_eagle", ModBlocks.RED_EAGLE);
+        public static final DeferredItem<Item> PORTRAIT_OF_A_MERMAID = nightMarketPainting("portrait_of_a_mermaid", ModBlocks.PORTRAIT_OF_A_MERMAID);
+        public static final DeferredItem<Item> SOLAR_KINGDOM = nightMarketPainting("solar_kingdom", ModBlocks.SOLAR_KINGDOM);
+        public static final DeferredItem<Item> CLOUDS = nightMarketPainting("clouds", ModBlocks.CLOUDS);
+        public static final DeferredItem<Item> THOUSAND_YEARS_FROM_NOW = nightMarketPainting("1000_years_from_now", ModBlocks.THOUSAND_YEARS_FROM_NOW);
+        public static final DeferredItem<Item> THREE_TREES = nightMarketPainting("three_trees", ModBlocks.THREE_TREES);
+        public static final DeferredItem<Item> THE_SERPENT = nightMarketPainting("the_serpent", ModBlocks.THE_SERPENT);
+        public static final DeferredItem<Item> TROPICAL_FISH_173 = nightMarketPainting("tropical_fish_173", ModBlocks.TROPICAL_FISH_173);
+        public static final DeferredItem<Item> LAND_OF_CLAY = nightMarketPainting("land_of_clay", ModBlocks.LAND_OF_CLAY);
+
+        private static DeferredItem<Item> nightMarketPainting(String name, DeferredBlock<?> block) {
+                return ITEMS.register(name,
+                                () -> new StardewBlockItem(block.get(), "stardewcraft.type.furniture_painting", 1000,
+                                                new Item.Properties().stacksTo(999)));
+        }
         public static final DeferredItem<Item> SHOP_WINDOW_1 = ITEMS.register("shop_window_1",
                         () -> new StardewBlockItem(ModBlocks.SHOP_WINDOW_1.get(), "stardewcraft.type.furniture", -1, new Item.Properties().stacksTo(999)));
         public static final DeferredItem<Item> SHOP_WINDOW_2 = ITEMS.register("shop_window_2",
@@ -3027,6 +3042,22 @@ public class ModItems {
     public static final DeferredItem<Item> SAILORS_CAP = registerHat("sailors_cap", "17");
     public static final DeferredItem<Item> EARMUFFS = registerHat("earmuffs", "11");
     public static final DeferredItem<Item> TOP_HAT = registerHat("top_hat", "2");
+    public static final DeferredItem<Item> BLUE_RIBBON = registerHat("blue_ribbon", "BlueRibbon");
+    public static final DeferredItem<Item> BUTTERFLY_BOW = registerHat("butterfly_bow", "14");
+    public static final DeferredItem<Item> DAISY = registerHat("daisy", "29");
+    public static final DeferredItem<Item> DELICATE_BOW = registerHat("delicate_bow", "12");
+    public static final DeferredItem<Item> EYE_PATCH = registerHat("eye_patch", "24");
+    public static final DeferredItem<Item> SQUID_HAT = registerHat("squid_hat", "SquidHat");
+    public static final DeferredItem<Item> SUNGLASSES = registerHat("sunglasses", "88");
+    public static final DeferredItem<Item> TIARA = registerHat("tiara", "26");
+    public static final DeferredItem<Item> GARBAGE_HAT = registerHat("garbage_hat", "66");
+    public static final DeferredItem<Item> TROPICLIP = registerHat("tropiclip", "13");
+    public static final DeferredItem<Item> WATERMELON_BAND = registerHat("watermelon_band", "30");
+    public static final DeferredItem<Item> LUCKY_BOW = registerHat("lucky_bow", "21");
+    public static final DeferredItem<Item> POLKA_BOW = registerHat("polka_bow", "22");
+    public static final DeferredItem<Item> PINK_BOW = registerHat("pink_bow", "77");
+    public static final DeferredItem<Item> BLUE_BOW = registerHat("blue_bow", "BlueBow");
+    public static final DeferredItem<Item> ABIGAILS_BOW = registerHat("abigails_bow", "AbigailsBow");
 
     // ============ 靴子 (Boots) ============
     public static final DeferredItem<Item> SNEAKERS = ITEMS.register("sneakers",

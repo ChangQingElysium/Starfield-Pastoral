@@ -1,8 +1,13 @@
 package com.stardew.craft.client.gui.quest;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.client.ClientPlayerDataCache;
 import com.stardew.craft.client.gui.common.CommonGuiTextures;
 import com.stardew.craft.client.hud.StardewTimeHud;
+import com.stardew.craft.communitycenter.state.CCStoryFlags;
+import com.stardew.craft.festival.FestivalDefinition;
+import com.stardew.craft.festival.FestivalRegistry;
+import com.stardew.craft.festival.FestivalType;
 import com.stardew.craft.npc.data.NpcDataRegistry;
 import com.stardew.craft.quest.StardewQuest;
 import com.stardew.craft.quest.network.AcceptQuestPayload;
@@ -17,7 +22,11 @@ import net.minecraft.util.FormattedCharSequence;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -31,8 +40,14 @@ public class BillboardScreen extends Screen {
     private static final ResourceLocation CALENDAR_BACKGROUND = billboard("calendar_background");
     private static final ResourceLocation DAILY_QUEST_BACKGROUND = billboard("daily_quest_background");
     private static final ResourceLocation QUEST_DONE_STAR = billboard("quest_done_star");
+    private static final ResourceLocation BILLBOARD_TEXTURE = gui("billboard");
+    private static final ResourceLocation CURSORS_TEXTURE = gui("cursors");
+    private static final ResourceLocation CURSORS_1_6_TEXTURE = gui("cursors_1_6");
     private static final int CAL_W = 301, CAL_H = 198;
     private static final int QUEST_W = 338, QUEST_H = 198;
+    private static final int BILLBOARD_TEXTURE_W = 338, BILLBOARD_TEXTURE_H = 512;
+    private static final int CURSORS_TEXTURE_W = 704, CURSORS_TEXTURE_H = 2256;
+    private static final int CURSORS_1_6_TEXTURE_W = 512, CURSORS_1_6_TEXTURE_H = 512;
 
     // ─── 日历格子 ───
     @SuppressWarnings("unused")
@@ -170,6 +185,8 @@ public class BillboardScreen extends Screen {
         int currentDay = getCurrentDay();
         String currentSeason = StardewTimeHud.getClientTimeCache().getSeasonName().toLowerCase();
         Map<Integer, String> birthdaysByDay = buildBirthdayMap(currentSeason);
+        Map<Integer, List<CalendarFestivalEvent>> festivalsByDay = buildFestivalMap(
+            StardewTimeHud.getClientTimeCache().getCurrentSeason());
 
         // ── 季节名 + 年份标签（对应 SDV Billboard.cs:416-417） ──
         int seasonX = windowX + Math.round(160 * s4 / 4);
@@ -210,6 +227,35 @@ public class BillboardScreen extends Screen {
                 drawNpcMugshotRect(g, birthdayNpc, mugX, mugY, mugW, mugH);
             }
 
+            // SDV Billboard.cs: passive star, active festival flag, then fishing derby fish.
+            List<CalendarFestivalEvent> festivalEvents = festivalsByDay.getOrDefault(day, List.of());
+            EnumSet<CalendarFestivalType> festivalTypes = EnumSet.noneOf(CalendarFestivalType.class);
+            for (CalendarFestivalEvent event : festivalEvents) {
+                festivalTypes.add(event.type());
+            }
+            int pulseOffset = calendarPulseOffset();
+            if (festivalTypes.contains(CalendarFestivalType.PASSIVE)) {
+                CalendarFestivalEvent passive = festivalEvents.stream()
+                    .filter(event -> event.type() == CalendarFestivalType.PASSIVE)
+                    .findFirst()
+                    .orElseThrow();
+                drawCalendarIconWithShadow(g, CURSORS_TEXTURE,
+                    cx + Math.round(3 * s4), cy + Math.round(15 * s4) - pulseOffset,
+                    346, 392, 8, 8, CURSORS_TEXTURE_W, CURSORS_TEXTURE_H, passive.locked());
+            }
+            if (festivalTypes.contains(CalendarFestivalType.ACTIVE)) {
+                int frame = (int) (net.minecraft.Util.getMillis() % 600L / 100L);
+                drawCalendarIconWithShadow(g, BILLBOARD_TEXTURE,
+                    cx + Math.round(10 * s4), cy + Math.round(14 * s4) - pulseOffset,
+                    1 + frame * 14, 398, 14, 12,
+                    BILLBOARD_TEXTURE_W, BILLBOARD_TEXTURE_H, false);
+            }
+            if (festivalTypes.contains(CalendarFestivalType.FISHING_DERBY)) {
+                drawCalendarIconWithShadow(g, CURSORS_1_6_TEXTURE,
+                    cx + Math.round(2 * s4), cy + Math.round(15 * s4) - pulseOffset,
+                    103, 2, 10, 11, CURSORS_1_6_TEXTURE_W, CURSORS_1_6_TEXTURE_H, false);
+            }
+
             // ── 每日任务完成星标（本模组扩展，SDV 无此功能） ──
             if (ClientQuestData.isDailyQuestCompletedOnDay(day)) {
                 int starX = cx + cellSize - Math.round(STAR_W * s4) - Math.round(s4 / 4);
@@ -231,19 +277,29 @@ public class BillboardScreen extends Screen {
             }
         }
 
-        // ── 生日 tooltip ──
+        // ── 日历事件 tooltip（SDV：节日在前，生日在后，每项一行） ──
         for (int day = 1; day <= 28; day++) {
             String bNpc = birthdaysByDay.get(day);
-            if (bNpc == null) continue;
+            List<CalendarFestivalEvent> festivalEvents = festivalsByDay.getOrDefault(day, List.of());
+            if (bNpc == null && festivalEvents.isEmpty()) continue;
             int idx = day - 1;
             int col = idx % GRID_COLS;
             int row = idx / GRID_COLS;
             int cx = windowX + gridOffX + col * cellStride;
             int cy = windowY + gridOffY + row * cellStride;
             if (mouseX >= cx && mouseX < cx + cellSize && mouseY >= cy && mouseY < cy + cellSize) {
-                Component tip = Component.translatable("stardewcraft.gui.billboard.birthday_tooltip",
-                        Component.translatable("entity.stardewcraft.npc." + bNpc));
-                g.renderTooltip(font, tip, mouseX, mouseY);
+                List<Component> lines = new ArrayList<>();
+                for (CalendarFestivalEvent event : festivalEvents) {
+                    lines.add(event.locked()
+                        ? Component.literal("???")
+                        : Component.translatable("stardewcraft.festival.calendar."
+                            + event.festivalId().toLowerCase(Locale.ROOT)));
+                }
+                if (bNpc != null) {
+                    lines.add(Component.translatable("stardewcraft.gui.billboard.birthday_tooltip",
+                        Component.translatable("entity.stardewcraft.npc." + bNpc)));
+                }
+                g.renderTooltip(font, lines, java.util.Optional.empty(), mouseX, mouseY);
                 break;
             }
         }
@@ -274,6 +330,81 @@ public class BillboardScreen extends Screen {
             }
         } catch (Exception ignored) {}
         return result;
+    }
+
+    /** Build the source-ordered festival events shown by vanilla Billboard.GetEventsForDay. */
+    private Map<Integer, List<CalendarFestivalEvent>> buildFestivalMap(int season) {
+        Map<Integer, List<CalendarFestivalEvent>> result = new HashMap<>();
+        for (FestivalDefinition definition : FestivalRegistry.all()) {
+            if (definition.season() != season) continue;
+
+            CalendarFestivalType type;
+            if (definition.type() == FestivalType.ACTIVE) {
+                type = CalendarFestivalType.ACTIVE;
+            } else if (definition.showOnCalendar()) {
+                type = CalendarFestivalType.PASSIVE;
+            } else if (definition.id().equalsIgnoreCase("TroutDerby")
+                    || definition.id().equalsIgnoreCase("SquidFest")) {
+                type = CalendarFestivalType.FISHING_DERBY;
+            } else {
+                continue;
+            }
+
+            boolean locked = type == CalendarFestivalType.PASSIVE && isCalendarFestivalLocked(definition);
+            for (int day = definition.startDay(); day <= definition.endDay(); day++) {
+                result.computeIfAbsent(day, ignored -> new ArrayList<>())
+                    .add(new CalendarFestivalEvent(type, definition.id(), locked));
+            }
+        }
+        return result;
+    }
+
+    private boolean isCalendarFestivalLocked(FestivalDefinition definition) {
+        if (!definition.id().equalsIgnoreCase("DesertFestival")) {
+            return false;
+        }
+        return !ClientPlayerDataCache.hasMailFlag(CCStoryFlags.CC_VAULT)
+            && !ClientPlayerDataCache.hasMailFlag(CCStoryFlags.JOJA_VAULT);
+    }
+
+    private int calendarPulseOffset() {
+        double phase = net.minecraft.Util.getMillis() % 1570L / 500.0D;
+        return Math.round((float) (2.0D * s4 * Math.sin(phase)));
+    }
+
+    /** SDV Utility.drawWithShadow: shadow at (-4,+4) screen px, then the source-colored icon. */
+    private void drawCalendarIconWithShadow(
+            GuiGraphics g,
+            ResourceLocation texture,
+            int x,
+            int y,
+            int sourceX,
+            int sourceY,
+            int sourceW,
+            int sourceH,
+            int textureW,
+            int textureH,
+            boolean locked) {
+        int drawW = Math.round(sourceW * s4);
+        int drawH = Math.round(sourceH * s4);
+        int shadowOffset = Math.max(1, Math.round(s4));
+        g.setColor(0.0F, 0.0F, 0.0F, locked ? 0.105F : 0.35F);
+        g.blit(texture, x - shadowOffset, y + shadowOffset, drawW, drawH,
+            sourceX, sourceY, sourceW, sourceH, textureW, textureH);
+        g.setColor(locked ? 0.0F : 1.0F, locked ? 0.0F : 1.0F, locked ? 0.0F : 1.0F,
+            locked ? 0.3F : 1.0F);
+        g.blit(texture, x, y, drawW, drawH,
+            sourceX, sourceY, sourceW, sourceH, textureW, textureH);
+        g.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+    }
+
+    private enum CalendarFestivalType {
+        ACTIVE,
+        FISHING_DERBY,
+        PASSIVE
+    }
+
+    private record CalendarFestivalEvent(CalendarFestivalType type, String festivalId, boolean locked) {
     }
 
 
@@ -468,6 +599,10 @@ public class BillboardScreen extends Screen {
 
     private static ResourceLocation billboard(String name) {
         return ResourceLocation.fromNamespaceAndPath("stardewcraft", "textures/gui/billboard/" + name + ".png");
+    }
+
+    private static ResourceLocation gui(String name) {
+        return ResourceLocation.fromNamespaceAndPath("stardewcraft", "textures/gui/" + name + ".png");
     }
 
     private int getCurrentDay() {

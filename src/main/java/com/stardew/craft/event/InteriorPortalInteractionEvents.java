@@ -63,11 +63,18 @@ public class InteriorPortalInteractionEvents {
             event.setCancellationResult(net.minecraft.world.InteractionResult.SUCCESS);
             return;
         }
+        if (target.getTags().contains(com.stardew.craft.festival.nightmarket.NightMarketWarperService.INTERACTION_MARKER_TAG)) {
+            com.stardew.craft.festival.nightmarket.NightMarketWarperService.open(player);
+            event.setCanceled(true);
+            event.setCancellationResult(net.minecraft.world.InteractionResult.SUCCESS);
+            return;
+        }
         Optional<String> targetId = findTagValue(target.getTags(), TAG_TARGET_PREFIX);
         if (targetId.isEmpty()) return;
 
         handlePortalInteraction(player, targetId.get());
         event.setCanceled(true);
+        event.setCancellationResult(net.minecraft.world.InteractionResult.SUCCESS);
     }
 
     @SubscribeEvent
@@ -76,10 +83,23 @@ public class InteriorPortalInteractionEvents {
         if (event.getHand() != InteractionHand.MAIN_HAND) return;
 
         Entity target = event.getTarget();
-        if (!target.getTags().contains(com.stardew.craft.festival.desert.DesertFestivalSpecialInteractionService.WARPER_MARKER_TAG)) {
+        if (target.getTags().contains(com.stardew.craft.festival.desert.DesertFestivalSpecialInteractionService.WARPER_MARKER_TAG)) {
+            com.stardew.craft.festival.desert.DesertFestivalSpecialInteractionService.openWarper(player);
+            event.setCanceled(true);
+            event.setCancellationResult(net.minecraft.world.InteractionResult.SUCCESS);
             return;
         }
-        com.stardew.craft.festival.desert.DesertFestivalSpecialInteractionService.openWarper(player);
+        if (target.getTags().contains(com.stardew.craft.festival.nightmarket.NightMarketWarperService.INTERACTION_MARKER_TAG)) {
+            com.stardew.craft.festival.nightmarket.NightMarketWarperService.open(player);
+            event.setCanceled(true);
+            event.setCancellationResult(net.minecraft.world.InteractionResult.SUCCESS);
+            return;
+        }
+
+        Optional<String> targetId = findTagValue(target.getTags(), TAG_TARGET_PREFIX);
+        if (targetId.isEmpty()) return;
+
+        handlePortalInteraction(player, targetId.get());
         event.setCanceled(true);
         event.setCancellationResult(net.minecraft.world.InteractionResult.SUCCESS);
     }
@@ -193,6 +213,46 @@ public class InteriorPortalInteractionEvents {
 
         if (com.stardew.craft.festival.FestivalOfIceService.TRAVELING_MERCHANT_TARGET_ID.equals(targetId)) {
             com.stardew.craft.festival.FestivalOfIceService.openTravelingMerchantShop(player);
+            return;
+        }
+
+        if (com.stardew.craft.festival.nightmarket.NightMarketPainterService.TARGET_ID.equals(targetId)) {
+            com.stardew.craft.festival.nightmarket.NightMarketPainterService.open(player);
+            return;
+        }
+
+        if (com.stardew.craft.festival.nightmarket.NightMarketCoffeeService.TARGET_ID.equals(targetId)) {
+            com.stardew.craft.festival.nightmarket.NightMarketCoffeeService.open(player);
+            return;
+        }
+
+        if (com.stardew.craft.festival.nightmarket.NightMarketWarperService.TARGET_ID.equals(targetId)) {
+            com.stardew.craft.festival.nightmarket.NightMarketWarperService.open(player);
+            return;
+        }
+
+        if (com.stardew.craft.festival.nightmarket.NightMarketShopService.DECORATION_BOAT_TARGET_ID.equals(targetId)) {
+            com.stardew.craft.festival.nightmarket.NightMarketShopService.openDecorationBoat(player);
+            return;
+        }
+
+        if (com.stardew.craft.festival.nightmarket.NightMarketShopService.MAGIC_BOAT_TARGET_ID.equals(targetId)) {
+            com.stardew.craft.festival.nightmarket.NightMarketShopService.openMagicBoat(player);
+            return;
+        }
+
+        if (com.stardew.craft.festival.nightmarket.NightMarketSubmarineService.ENTRANCE_TARGET_ID.equals(targetId)) {
+            com.stardew.craft.festival.nightmarket.NightMarketSubmarineService.openEntrance(player);
+            return;
+        }
+
+        if (com.stardew.craft.festival.nightmarket.NightMarketSubmarineService.EXIT_TARGET_ID.equals(targetId)) {
+            com.stardew.craft.festival.nightmarket.NightMarketSubmarineService.openExit(player);
+            return;
+        }
+
+        if (com.stardew.craft.festival.nightmarket.NightMarketMermaidService.TARGET_ID.equals(targetId)) {
+            com.stardew.craft.festival.nightmarket.NightMarketMermaidService.open(player);
             return;
         }
 

@@ -90,7 +90,7 @@ public final class FishSplashDebugCommand {
 		}
 
 		Holder<Biome> bh = level.getBiome(chosen);
-		List<String> keys = FishingDataManager.resolveVanillaAlignedLocationKeysStatic(level, bh);
+		List<String> keys = FishingDataManager.resolveVanillaAlignedLocationKeysStatic(level, bh, chosen);
 		String key = keys.stream().filter(k -> !"Default".equals(k)).findFirst().orElse("Default");
 
 		FishSplashState state = FishSplashState.get(stardew);
@@ -157,7 +157,8 @@ public final class FishSplashDebugCommand {
 		ServerPlayer player = ctx.getSource().getPlayerOrException();
 		ServerLevel level = player.serverLevel();
 		Holder<Biome> bh = level.getBiome(player.blockPosition());
-		List<String> keys = FishingDataManager.resolveVanillaAlignedLocationKeysStatic(level, bh);
+		List<String> keys = FishingDataManager.resolveVanillaAlignedLocationKeysStatic(
+			level, bh, player.blockPosition());
 		ctx.getSource().sendSuccess(() -> Component.literal("[splash] biome keys = " + keys), false);
 		return 1;
 	}

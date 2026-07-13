@@ -6,6 +6,7 @@ import com.stardew.craft.entity.ModEntities;
 import com.stardew.craft.entity.npc.TravelingCartEntity;
 import com.stardew.craft.festival.desert.DesertFestivalService;
 import com.stardew.craft.festival.desert.DesertFestivalSpecialInteractionService;
+import com.stardew.craft.festival.nightmarket.NightMarketShopService;
 import com.stardew.craft.network.payload.OpenShopScreenPayload;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import net.minecraft.core.BlockPos;
@@ -53,9 +54,10 @@ public final class TravelingCartEvents {
 
         com.stardew.craft.time.StardewTimeManager time = com.stardew.craft.time.StardewTimeManager.get();
         boolean visitDay = shouldTravelingMerchantVisitToday(time.getCurrentDay());
+        boolean guaranteeVisitDay = visitDay || isNightMarketDay(time);
         TravelingCartManager manager = TravelingCartManager.get(level);
         manager.ensureGuaranteeInitialized(level.getServer().overworld().getSeed(), time.getCurrentYear());
-        manager.processDay(time.getAbsoluteDay(), visitDay, time.getCurrentYear());
+        manager.processDay(time.getAbsoluteDay(), guaranteeVisitDay, time.getCurrentYear());
 
         if (!visitDay) {
             setSpawnChunkForced(level, false);
@@ -71,6 +73,12 @@ public final class TravelingCartEvents {
     private static boolean shouldTravelingMerchantVisitToday(int dayOfMonth) {
         int dayOfWeek = Math.floorMod(dayOfMonth - 1, 7);
         return dayOfWeek == 4 || dayOfWeek == 6;
+    }
+
+    private static boolean isNightMarketDay(com.stardew.craft.time.StardewTimeManager time) {
+        return time.getCurrentSeason() == com.stardew.craft.festival.FestivalRegistry.WINTER
+                && time.getCurrentDay() >= 15
+                && time.getCurrentDay() <= 17;
     }
 
     private static void loadSpawnChunk(ServerLevel level) {
@@ -233,7 +241,8 @@ public final class TravelingCartEvents {
         }
         boolean regularCart = cart.getTags().contains(MARKER_TAG);
         boolean festivalCart = cart.getTags().contains(DesertFestivalSpecialInteractionService.FESTIVAL_TRAVELING_CART_MARKER_TAG);
-        if (!regularCart && !festivalCart) {
+        boolean nightMarketCart = cart.getTags().contains(NightMarketShopService.TRAVELING_CART_MARKER_TAG);
+        if (!regularCart && !festivalCart && !nightMarketCart) {
             return;
         }
 
@@ -243,7 +252,7 @@ public final class TravelingCartEvents {
         if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
         }
-        tryOpenTravelingCartShop(player, regularCart, festivalCart);
+        tryOpenTravelingCartShop(player, regularCart, festivalCart, nightMarketCart);
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -255,7 +264,8 @@ public final class TravelingCartEvents {
             return;
         }
         if (!cart.getTags().contains(MARKER_TAG)
-            && !cart.getTags().contains(DesertFestivalSpecialInteractionService.FESTIVAL_TRAVELING_CART_MARKER_TAG)) {
+            && !cart.getTags().contains(DesertFestivalSpecialInteractionService.FESTIVAL_TRAVELING_CART_MARKER_TAG)
+            && !cart.getTags().contains(NightMarketShopService.TRAVELING_CART_MARKER_TAG)) {
             return;
         }
 
@@ -265,11 +275,16 @@ public final class TravelingCartEvents {
         if (event.getEntity() instanceof ServerPlayer player) {
             boolean regularCart = cart.getTags().contains(MARKER_TAG);
             boolean festivalCart = cart.getTags().contains(DesertFestivalSpecialInteractionService.FESTIVAL_TRAVELING_CART_MARKER_TAG);
-            tryOpenTravelingCartShop(player, regularCart, festivalCart);
+            boolean nightMarketCart = cart.getTags().contains(NightMarketShopService.TRAVELING_CART_MARKER_TAG);
+            tryOpenTravelingCartShop(player, regularCart, festivalCart, nightMarketCart);
         }
     }
 
-    private static void tryOpenTravelingCartShop(ServerPlayer player, boolean regularCart, boolean festivalCart) {
+    private static void tryOpenTravelingCartShop(
+            ServerPlayer player,
+            boolean regularCart,
+            boolean festivalCart,
+            boolean nightMarketCart) {
         if (regularCart && !canOpenShopNow()) {
             return;
         }
@@ -280,10 +295,13 @@ public final class TravelingCartEvents {
             player.displayClientMessage(Component.translatable("stardewcraft.desert_festival.traveling_cart.closed"), true);
             return;
         }
-        openTravelingCartShop(player);
+        if (nightMarketCart && !NightMarketShopService.isNightMarketOpen()) {
+            return;
+        }
+        openTravelingCartShop(player, nightMarketCart);
     }
 
-    private static void openTravelingCartShop(ServerPlayer player) {
+    private static void openTravelingCartShop(ServerPlayer player, boolean nightMarketCart) {
         ShopRegistry.ShopDefinition shop = ShopRegistry.get("Traveler");
         if (shop == null) {
             return;
@@ -296,7 +314,7 @@ public final class TravelingCartEvents {
                 money,
                 items,
                 shop.ownerNpcId(),
-                shop.ownerDialogue(),
+                nightMarketCart ? NightMarketShopService.TRAVELING_CART_DIALOGUE : shop.ownerDialogue(),
                 new java.util.ArrayList<>(shop.acceptedSellTypes())
         );
         PacketDistributor.sendToPlayer(player, payload);

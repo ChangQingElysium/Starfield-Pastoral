@@ -1,6 +1,6 @@
 {
-    "parent":  "stardewcraft:decor/bonsai/bonsai_3",
+    "parent":  "stardewcraft:decor/plants/monstera_planter",
     "textures":  {
-                     "particle":  "stardewcraft:block/deco/misc/bonsai/bonsai_3"
+                     "particle":  "stardewcraft:block/decor/plants/monstera_planter"
                  }
 }

@@ -1,7 +1,7 @@
 {
-  "parent": "stardewcraft:decor/common/bonsai_6_5",
+  "parent": "stardewcraft:decor/plants/cactus_pot",
   "textures": {
-    "particle": "stardewcraft:block/deco/misc/common/bonsai_6_5"
+    "particle": "stardewcraft:block/decor/plants/cactus_pot"
   }
 }
 

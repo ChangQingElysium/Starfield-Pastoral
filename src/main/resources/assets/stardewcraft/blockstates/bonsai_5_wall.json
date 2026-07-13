@@ -1,31 +1,40 @@
 {
-    "variants":  {
-                     "part=main,facing=north":  {
-                                                    "model":  "stardewcraft:decor/bonsai/bonsai_5_wall"
-                                                },
-                     "part=main,facing=east":  {
-                                                   "model":  "stardewcraft:decor/bonsai/bonsai_5_wall",
-                                                   "y":  90
-                                               },
-                     "part=main,facing=south":  {
-                                                    "model":  "stardewcraft:decor/bonsai/bonsai_5_wall",
-                                                    "y":  180
-                                                },
-                     "part=main,facing=west":  {
-                                                   "model":  "stardewcraft:decor/bonsai/bonsai_5_wall",
-                                                   "y":  270
-                                               },
-                     "part=extension,facing=north":  {
-                                                         "model":  "stardewcraft:block/decor/extensions/bonsai_5_wall_extension_empty"
-                                                     },
-                     "part=extension,facing=east":  {
-                                                        "model":  "stardewcraft:block/decor/extensions/bonsai_5_wall_extension_empty"
-                                                    },
-                     "part=extension,facing=south":  {
-                                                         "model":  "stardewcraft:block/decor/extensions/bonsai_5_wall_extension_empty"
-                                                     },
-                     "part=extension,facing=west":  {
-                                                        "model":  "stardewcraft:block/decor/extensions/bonsai_5_wall_extension_empty"
-                                                    }
-                 }
+  "multipart": [
+    {
+      "when": { "part": "main", "mount": "ceiling", "facing": "north" },
+      "apply": { "model": "stardewcraft:decor/plants/hanging_dancing_flower_ceiling" }
+    },
+    {
+      "when": { "part": "main", "mount": "ceiling", "facing": "east" },
+      "apply": { "model": "stardewcraft:decor/plants/hanging_dancing_flower_ceiling", "y": 90 }
+    },
+    {
+      "when": { "part": "main", "mount": "ceiling", "facing": "south" },
+      "apply": { "model": "stardewcraft:decor/plants/hanging_dancing_flower_ceiling", "y": 180 }
+    },
+    {
+      "when": { "part": "main", "mount": "ceiling", "facing": "west" },
+      "apply": { "model": "stardewcraft:decor/plants/hanging_dancing_flower_ceiling", "y": 270 }
+    },
+    {
+      "when": { "part": "main", "mount": "wall", "facing": "north" },
+      "apply": { "model": "stardewcraft:decor/plants/hanging_dancing_flower_wall" }
+    },
+    {
+      "when": { "part": "main", "mount": "wall", "facing": "east" },
+      "apply": { "model": "stardewcraft:decor/plants/hanging_dancing_flower_wall", "y": 90 }
+    },
+    {
+      "when": { "part": "main", "mount": "wall", "facing": "south" },
+      "apply": { "model": "stardewcraft:decor/plants/hanging_dancing_flower_wall", "y": 180 }
+    },
+    {
+      "when": { "part": "main", "mount": "wall", "facing": "west" },
+      "apply": { "model": "stardewcraft:decor/plants/hanging_dancing_flower_wall", "y": 270 }
+    },
+    {
+      "when": { "part": "extension" },
+      "apply": { "model": "stardewcraft:block/decor/extensions/bonsai_5_wall_extension_empty" }
+    }
+  ]
 }

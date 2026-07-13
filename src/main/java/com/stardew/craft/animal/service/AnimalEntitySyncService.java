@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @SuppressWarnings("null")
 public final class AnimalEntitySyncService {
@@ -81,18 +80,23 @@ public final class AnimalEntitySyncService {
     private static BaseCoopAnimalEntity spawnEntityForRecord(ServerLevel level,
                                                              AnimalWorldData data,
                                                              FarmAnimalRecord record) {
-        Optional<AnimalBuildingRecord> buildingOpt = data.getBuilding(record.buildingId());
+        AnimalBuildingRecord building = data.getBuilding(record.buildingId()).orElse(null);
+        if (building == null) {
+            StardewCraft.LOGGER.debug("[ANIMAL_SYNC] Skipping spawn for animal {} - building {} is missing or inactive",
+                record.animalId(), record.buildingId());
+            return null;
+        }
+        if (!level.dimension().location().toString().equals(building.dimensionId())) {
+            return null;
+        }
 
-        // 如果建筑区块未加载，跳过 spawn —— 实体可能在卸载的区块中存在，
-        // 强行 spawn 会导致区块重新加载时实体重复。
-        if (buildingOpt.isPresent()) {
-            AnimalBuildingRecord building = buildingOpt.get();
-            BlockPos managerPos = building.managerPos();
-            if (!level.isLoaded(managerPos)) {
-                StardewCraft.LOGGER.debug("[ANIMAL_SYNC] Skipping spawn for animal {} - building chunk not loaded at {}",
-                    record.animalId(), managerPos);
-                return null;
-            }
+        // The persisted entity may still exist in an unloaded chunk. Spawning anywhere else
+        // would create a duplicate, so managed animals never fall back to the world spawn.
+        BlockPos managerPos = building.managerPos();
+        if (!level.isLoaded(managerPos)) {
+            StardewCraft.LOGGER.debug("[ANIMAL_SYNC] Skipping spawn for animal {} - building chunk not loaded at {}",
+                record.animalId(), managerPos);
+            return null;
         }
 
         EntityType<? extends BaseCoopAnimalEntity> type = resolveEntityType(record.animalTypeId());
@@ -107,7 +111,7 @@ public final class AnimalEntitySyncService {
             return null;
         }
 
-        BlockPos spawnPos = findSpawnPos(level, buildingOpt);
+        BlockPos spawnPos = findSpawnPos(level, building);
         entity.moveTo(
             spawnPos.getX() + 0.5D,
             spawnPos.getY(),
@@ -116,8 +120,7 @@ public final class AnimalEntitySyncService {
             0.0F
         );
         applyRecord(entity, record);
-        level.addFreshEntity(entity);
-        return entity;
+        return level.addFreshEntity(entity) ? entity : null;
     }
 
     private static void applyRecord(BaseCoopAnimalEntity entity, FarmAnimalRecord record) {
@@ -149,12 +152,7 @@ public final class AnimalEntitySyncService {
         return null;
     }
 
-    private static BlockPos findSpawnPos(ServerLevel level, Optional<AnimalBuildingRecord> buildingOpt) {
-        if (buildingOpt.isEmpty()) {
-            return level.getSharedSpawnPos().above();
-        }
-
-        AnimalBuildingRecord building = buildingOpt.get();
+    private static BlockPos findSpawnPos(ServerLevel level, AnimalBuildingRecord building) {
         BlockPos base = building.managerPos().above();
         if (canStand(level, base)) {
             return base;
@@ -203,11 +201,19 @@ public final class AnimalEntitySyncService {
 
     private static CollectionState collectLoaded(ServerLevel level) {
         Map<Long, BaseCoopAnimalEntity> byManagedId = new HashMap<>();
+        int duplicatesRemoved = 0;
         for (BaseCoopAnimalEntity entity : level.getEntitiesOfClass(BaseCoopAnimalEntity.class, FULL_LEVEL_BOX)) {
             long managedId = entity.getManagedAnimalId();
             if (managedId > 0L) {
-                byManagedId.putIfAbsent(managedId, entity);
+                BaseCoopAnimalEntity existing = byManagedId.putIfAbsent(managedId, entity);
+                if (existing != null) {
+                    entity.discard();
+                    duplicatesRemoved++;
+                }
             }
+        }
+        if (duplicatesRemoved > 0) {
+            StardewCraft.LOGGER.warn("[ANIMAL_SYNC] Removed {} loaded duplicate animal entities", duplicatesRemoved);
         }
         return new CollectionState(byManagedId);
     }

@@ -2,98 +2,8 @@
   "location": "BeachNightMarket",
   "fish": [
     {
-      "id": "midnight_squid",
-      "precedence": 100,
-      "item": "stardewcraft:midnight_squid",
-      "chance": 0.15,
-      "difficulty": 55,
-      "motionType": 3,
-      "minFishSize": 8,
-      "maxFishSize": 25,
-      "minFishingLevel": 0,
-      "timeRanges": [
-        [
-          600,
-          2600
-        ]
-      ],
-      "maxDepth": 3,
-      "depthMultiplier": 0.1,
-      "biomeTags": [
-        "#stardewcraft:is_night_market"
-      ],
-      "weather": "any",
-      "spawnRate": 0.4,
-      "seasons": [
-        "spring",
-        "summer",
-        "fall",
-        "winter"
-      ]
-    },
-    {
-      "id": "spook_fish",
-      "precedence": 100,
-      "item": "stardewcraft:spook_fish",
-      "chance": 0.15,
-      "difficulty": 60,
-      "motionType": 1,
-      "minFishSize": 8,
-      "maxFishSize": 25,
-      "minFishingLevel": 0,
-      "timeRanges": [
-        [
-          600,
-          2600
-        ]
-      ],
-      "maxDepth": 3,
-      "depthMultiplier": 0.1,
-      "biomeTags": [
-        "#stardewcraft:is_night_market"
-      ],
-      "weather": "any",
-      "spawnRate": 0.4,
-      "seasons": [
-        "spring",
-        "summer",
-        "fall",
-        "winter"
-      ]
-    },
-    {
-      "id": "blobfish",
-      "precedence": 100,
-      "item": "stardewcraft:blobfish",
-      "chance": 0.1,
-      "difficulty": 75,
-      "motionType": 4,
-      "minFishSize": 8,
-      "maxFishSize": 25,
-      "minFishingLevel": 0,
-      "timeRanges": [
-        [
-          600,
-          2600
-        ]
-      ],
-      "maxDepth": 3,
-      "depthMultiplier": 0.1,
-      "biomeTags": [
-        "#stardewcraft:is_night_market"
-      ],
-      "weather": "any",
-      "spawnRate": 0.4,
-      "seasons": [
-        "spring",
-        "summer",
-        "fall",
-        "winter"
-      ]
-    },
-    {
       "id": "son_of_crimsonfish",
-      "precedence": -100,
+      "precedence": 500,
       "item": "stardewcraft:son_of_crimsonfish",
       "chance": 0.18,
       "difficulty": 95,
@@ -101,25 +11,11 @@
       "minFishSize": 20,
       "maxFishSize": 20,
       "minFishingLevel": 5,
-      "timeRanges": [
-        [
-          600,
-          2000
-        ]
-      ],
-      "weather": "any",
-      "maxDepth": 4,
-      "depthMultiplier": 0.1,
-      "spawnRate": 0.1,
-      "biomeTags": [
-        "#stardewcraft:is_night_market"
-      ],
+      "minDistanceFromShore": 3,
       "condition": "PLAYER_SPECIAL_ORDER_RULE_ACTIVE Current LEGENDARY_FAMILY",
       "curiosityLureBuff": 0.07,
-      "canBeInherited": false,
-      "seasons": [
-        "winter"
-      ]
+      "ignoreFishDataRequirements": true,
+      "canBeInherited": false
     }
   ]
 }

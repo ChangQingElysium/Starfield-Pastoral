@@ -1519,6 +1519,38 @@
       }
     ]
   },
+  "music_night_market": {
+    "sounds": [
+      {
+        "name": "stardewcraft:music/night_market",
+        "stream": true
+      }
+    ]
+  },
+  "music_mermaid_song": {
+    "sounds": [
+      {
+        "name": "stardewcraft:music/mermaid_song",
+        "stream": true
+      }
+    ]
+  },
+  "clam_tone": {
+    "sounds": [
+      {
+        "name": "stardewcraft:effects/clam_tone",
+        "stream": false
+      }
+    ]
+  },
+  "music_submarine": {
+    "sounds": [
+      {
+        "name": "stardewcraft:music/submarine_song",
+        "stream": true
+      }
+    ]
+  },
   "music_desert": {
     "sounds": [
       {

@@ -2,9 +2,11 @@ package com.stardew.craft.client.sound;
 
 import com.stardew.craft.client.hud.MiningFloorHud;
 import com.stardew.craft.client.hud.StardewTimeHud;
+import com.stardew.craft.block.utility.totem.TotemPoleBlock;
 import com.stardew.craft.core.ModDimensions;
 import com.stardew.craft.core.ModMiningDimensions;
 import com.stardew.craft.desert.DesertConstants;
+import com.stardew.craft.festival.nightmarket.NightMarketSubmarineService;
 import com.stardew.craft.interior.InteriorRegionRegistry;
 import com.stardew.craft.interior.InteriorSubspaceManager;
 import com.stardew.craft.manager.CoalForestArea;
@@ -43,6 +45,8 @@ public final class StardewMusicManager {
 
     /** SDV: nightTime starts around 18:00 (1080 in SDV time units). */
     private static final int NIGHT_TIME = 1080;
+    private static final int NIGHT_MARKET_START_TIME = 1020;
+    private static final int NIGHT_MARKET_END_TIME = 1560;
 
     /** SDV: EarthMine = floors 1-39, FrostMine = floors 40-79. */
     private static final int FROST_MINE_START = 40;
@@ -116,6 +120,7 @@ public final class StardewMusicManager {
     private static final float FADE_IN_START_VOLUME = 0.05F;
     private static int musicDuckTicks = 0;
     private static final float MUSIC_DUCK_VOLUME = 0.35F;
+    private static boolean nightMarketFestivalOpen = false;
 
     // ────────────────────────── Jukebox suppression ──────────────────────────
 
@@ -150,6 +155,13 @@ public final class StardewMusicManager {
     public static void releaseCutsceneOverride() {
         cutsceneOverride = false;
         tickCounter = CHECK_INTERVAL - 1;
+    }
+
+    public static void setNightMarketFestivalOpen(boolean open) {
+        if (nightMarketFestivalOpen != open) {
+            nightMarketFestivalOpen = open;
+            tickCounter = CHECK_INTERVAL - 1;
+        }
     }
 
     public static void duckMusic(int ticks) {
@@ -373,6 +385,18 @@ public final class StardewMusicManager {
             return pickMineTrack();
         }
 
+        if (mc.player != null && NightMarketSubmarineService.isInsideSubmarineBounds(mc.player.blockPosition())) {
+            return ModSounds.MUSIC_SUBMARINE.get();
+        }
+
+        if (isPlayerInOpenNightMarket(mc)) {
+            return ModSounds.MUSIC_NIGHT_MARKET.get();
+        }
+
+        if (mc.player != null && TotemPoleBlock.isInsideBeachBounds(mc.player.blockPosition())) {
+            return ModSounds.MUSIC_OCEAN_AMBIENCE.get();
+        }
+
         // ── Interior music (highest priority in Stardew overworld) ──
         InteriorTrackChoice interiorTrack = pickInteriorTrack(mc);
         if (interiorTrack != null) {
@@ -472,6 +496,23 @@ public final class StardewMusicManager {
     private static boolean isPlayerInDesert(Minecraft mc) {
         if (mc.player == null) return false;
         return DesertConstants.isInDesertRegion(mc.player.blockPosition());
+    }
+
+    private static boolean isPlayerInOpenNightMarket(Minecraft mc) {
+        if (mc.player == null || !TotemPoleBlock.isInsideBeachBounds(mc.player.blockPosition())) {
+            return false;
+        }
+        StardewTimeManager timeCache = StardewTimeHud.getClientTimeCache();
+        if (timeCache == null) {
+            return false;
+        }
+        int time = timeCache.getCurrentTime();
+        boolean scheduledDate = timeCache.getCurrentSeason() == 3
+            && timeCache.getCurrentDay() >= 15
+            && timeCache.getCurrentDay() <= 17;
+        return (nightMarketFestivalOpen || scheduledDate)
+            && time >= NIGHT_MARKET_START_TIME
+            && time < NIGHT_MARKET_END_TIME;
     }
 
     private static boolean isPlayerInSecretWoods(Minecraft mc) {

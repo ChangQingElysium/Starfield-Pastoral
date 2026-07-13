@@ -6,6 +6,7 @@ import com.stardew.craft.item.ModItems;
 import com.stardew.craft.item.totem.TeleportTotemItem;
 import com.stardew.craft.entity.ModEntities;
 import com.stardew.craft.entity.npc.TravelingCartEntity;
+import com.stardew.craft.festival.FestivalFarmWarperDisplayService;
 import com.stardew.craft.festival.FestivalService;
 import com.stardew.craft.network.payload.OpenDesertFestivalQuestionPayload;
 import com.stardew.craft.network.payload.OpenNpcDialogueScreenPayload;
@@ -16,15 +17,14 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.DoubleTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
-import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.ArrayList;
@@ -54,6 +54,7 @@ public final class DesertFestivalSpecialInteractionService {
     private static final double WARPER_DISPLAY_X = -207.5D;
     private static final double WARPER_DISPLAY_Y = 65.6875D;
     private static final double WARPER_DISPLAY_Z = -213.4375D;
+    private static final Vec3 WARPER_DISPLAY_POS = new Vec3(WARPER_DISPLAY_X, WARPER_DISPLAY_Y, WARPER_DISPLAY_Z);
 
     private static final String SCHOLAR_YEAR_KEY = "desert_festival_scholar_year";
     private static final String SCHOLAR_STATE_KEY = "desert_festival_scholar_state";
@@ -151,25 +152,7 @@ public final class DesertFestivalSpecialInteractionService {
     }
 
     public static void spawnWarperDisplay(ServerLevel level) {
-        if (level == null) {
-            return;
-        }
-        if (hasWarperDisplay(level)) {
-            return;
-        }
-        String snbt = "{id:\"minecraft:item_display\",NoGravity:1b,Invulnerable:1b,Silent:1b,Tags:[\"" + WARPER_DISPLAY_TAG + "\"],"
-            + "Pos:[" + WARPER_DISPLAY_X + "d," + WARPER_DISPLAY_Y + "d," + WARPER_DISPLAY_Z + "d],"
-            + "item:{count:1,id:\"stardewcraft:warp_totem_farm\"},"
-            + "transformation:{left_rotation:[0.0f,0.0f,0.0f,1.0f],right_rotation:[0.0f,0.0f,0.0f,1.0f],"
-            + "scale:[1.6f,1.6f,1.6f],translation:[0.0f,0.0f,0.0f]}}";
-        try {
-            Entity entity = EntityType.loadEntityRecursive(TagParser.parseTag(snbt), level, e -> e);
-            if (entity != null) {
-                level.addFreshEntity(entity);
-            }
-        } catch (Exception e) {
-            StardewCraft.LOGGER.error("[DESERT_FESTIVAL] Failed to spawn warper item_display", e);
-        }
+        FestivalFarmWarperDisplayService.spawn(level, WARPER_DISPLAY_TAG, WARPER_DISPLAY_POS);
     }
 
     public static void spawnWarperInteraction(ServerLevel level) {
@@ -270,26 +253,7 @@ public final class DesertFestivalSpecialInteractionService {
     }
 
     public static void removeWarperDisplay(ServerLevel level) {
-        if (level == null) {
-            return;
-        }
-        AABB box = new AABB(
-            WARPER_DISPLAY_X - 2.0D, WARPER_DISPLAY_Y - 2.0D, WARPER_DISPLAY_Z - 2.0D,
-            WARPER_DISPLAY_X + 2.0D, WARPER_DISPLAY_Y + 2.0D, WARPER_DISPLAY_Z + 2.0D
-        );
-        for (Display.ItemDisplay display : level.getEntitiesOfClass(Display.ItemDisplay.class, box,
-            entity -> entity.getTags().contains(WARPER_DISPLAY_TAG))) {
-            display.discard();
-        }
-    }
-
-    private static boolean hasWarperDisplay(ServerLevel level) {
-        AABB box = new AABB(
-            WARPER_DISPLAY_X - 2.0D, WARPER_DISPLAY_Y - 2.0D, WARPER_DISPLAY_Z - 2.0D,
-            WARPER_DISPLAY_X + 2.0D, WARPER_DISPLAY_Y + 2.0D, WARPER_DISPLAY_Z + 2.0D
-        );
-        return !level.getEntitiesOfClass(Display.ItemDisplay.class, box,
-            entity -> entity.getTags().contains(WARPER_DISPLAY_TAG)).isEmpty();
+        FestivalFarmWarperDisplayService.remove(level, WARPER_DISPLAY_TAG, WARPER_DISPLAY_POS);
     }
 
     private static boolean hasWarperInteraction(ServerLevel level) {

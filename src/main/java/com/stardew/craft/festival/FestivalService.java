@@ -28,8 +28,7 @@ public final class FestivalService {
     }
 
     public static boolean isFestivalDay() {
-        StardewTimeManager time = StardewTimeManager.get();
-        return getDebugActiveFestival().isPresent() || isFestivalDay(time.getCurrentDay(), time.getCurrentSeason());
+        return getActiveFestivalToday().isPresent();
     }
 
     public static boolean isFestivalDay(int day, int season) {
@@ -41,16 +40,25 @@ public final class FestivalService {
         if (debugFestival.isPresent()) {
             return debugFestival;
         }
+        if (getDebugPassiveFestival().isPresent()) {
+            return Optional.empty();
+        }
         StardewTimeManager time = StardewTimeManager.get();
         return getActiveFestivalForDate(time.getCurrentDay(), time.getCurrentSeason());
     }
 
     public static void setDebugActiveFestival(String festivalId) {
         debugActiveFestivalId = festivalId == null || festivalId.isBlank() ? null : festivalId.trim();
+        if (debugActiveFestivalId != null) {
+            debugPassiveFestivalId = null;
+        }
     }
 
     public static void setDebugPassiveFestival(String festivalId) {
         debugPassiveFestivalId = festivalId == null || festivalId.isBlank() ? null : festivalId.trim();
+        if (debugPassiveFestivalId != null) {
+            debugActiveFestivalId = null;
+        }
     }
 
     public static void clearDebugActiveFestival(String festivalId) {

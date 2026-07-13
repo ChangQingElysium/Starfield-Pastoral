@@ -10,6 +10,7 @@ import com.stardew.craft.festival.FestivalService;
 import com.stardew.craft.festival.desert.DesertFestivalNpcVisitService;
 import com.stardew.craft.festival.desert.DesertFestivalService;
 import com.stardew.craft.festival.desert.DesertFestivalVendorService;
+import com.stardew.craft.festival.nightmarket.NightMarketNpcVisitService;
 import com.stardew.craft.festival.squid.SquidFestService;
 import com.stardew.craft.festival.trout.TroutDerbyService;
 import com.stardew.craft.time.StardewTimeManager;
@@ -245,6 +246,10 @@ public final class NpcScheduleRuntimeService {
             return new ScheduleNode(SquidFestService.FESTIVAL_ID, 610, "beach", 0, 0,
                 SquidFestService.WILLY_FACING, "", SquidFestService.WILLY_POINT_ID, 0);
         }
+        ScheduleNode nightMarketVisitorNode = resolveNightMarketVisitorNode(npcId, currentTime);
+        if (nightMarketVisitorNode != null) {
+            return nightMarketVisitorNode;
+        }
         ScheduleNode desertVendorNode = resolveDesertFestivalVendorNode(npcId, currentTime);
         if (desertVendorNode != null) {
             return desertVendorNode;
@@ -325,6 +330,24 @@ public final class NpcScheduleRuntimeService {
             2,
             "",
             DesertFestivalVendorService.stallPointForSlot(slot),
+            0
+        );
+    }
+
+    private static ScheduleNode resolveNightMarketVisitorNode(String npcId, int currentTime) {
+        NightMarketNpcVisitService.VisitEntry visit = NightMarketNpcVisitService.currentVisit(npcId, currentTime);
+        if (visit == null) {
+            return null;
+        }
+        return new ScheduleNode(
+            visit.scheduleKey(),
+            visit.arrivalTime(),
+            "beach",
+            0,
+            0,
+            visit.facing(),
+            "",
+            visit.pointId(),
             0
         );
     }

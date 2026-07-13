@@ -3,8 +3,9 @@
 Render Stardew Valley festival actor placement maps.
 
 Examples:
-  python3 tools/render_festival_actor_map.py --preset moonlight_jellies --all
-  python3 tools/render_festival_actor_map.py --festival summer28 --profile y1 --phase main
+  python3 scripts/render_festival_actor_map.py --preset moonlight_jellies --all
+  python3 scripts/render_festival_actor_map.py --preset night_market
+  python3 scripts/render_festival_actor_map.py --festival summer28 --profile y1 --phase main
 """
 
 from __future__ import annotations
@@ -13,6 +14,7 @@ import argparse
 import json
 import math
 import re
+import shlex
 import textwrap
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
@@ -27,6 +29,7 @@ CONTENT_DIR = ROOT / "源文件" / "Content"
 MAPS_DIR = CONTENT_DIR / "Maps"
 DATA_DIR = CONTENT_DIR / "Data"
 PORTRAITS_DIR = CONTENT_DIR / "Portraits"
+SCHEDULES_DIR = CONTENT_DIR / "Characters" / "schedules"
 DEFAULT_OUTPUT_DIR = ROOT / "tools" / "generated" / "festival_actor_maps"
 
 TILE_SIZE = 16
@@ -512,9 +515,60 @@ def render_winter_star_secret_santa_map(output_dir: Path, scale: int, portrait_s
     return output_path
 
 
+def extract_night_market_actors(day: int, scale: int) -> list[ActorMarker]:
+    markers: list[ActorMarker] = []
+    schedule_key = f"winter_{day}"
+    for schedule_path in sorted(SCHEDULES_DIR.glob("*.json")):
+        schedule = json.loads(schedule_path.read_text(encoding="utf-8-sig"))
+        route = schedule.get(schedule_key)
+        if not isinstance(route, str):
+            continue
+        for entry in route.split("/"):
+            parts = shlex.split(entry)
+            if len(parts) < 5 or parts[1].lower() != "beach":
+                continue
+            arrival_time = parts[0]
+            tile_x = int(parts[2])
+            tile_y = int(parts[3])
+            facing = int(parts[4])
+            name = schedule_path.stem
+            portrait_name = "Leo" if name == "LeoMainland" else name
+            markers.append(ActorMarker(
+                name,
+                tile_x,
+                tile_y,
+                facing,
+                ((tile_x + 0.5) * TILE_SIZE * scale, (tile_y + 0.5) * TILE_SIZE * scale),
+                [0.0, 0.0, 0.0, 0.0],
+                f"{display_name(portrait_name)} {arrival_time}",
+                portrait_name,
+            ))
+    return markers
+
+
+def render_night_market_maps(output_dir: Path, scale: int, portrait_size: int) -> list[Path]:
+    map_id = "Beach-NightMarket"
+    tmx_path = MAPS_DIR / f"{map_id}.tmx"
+    base = render_tmx(tmx_path, scale=scale)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    outputs: list[Path] = []
+    for day in (15, 16, 17):
+        markers = extract_night_market_actors(day, scale)
+        title = f"Night Market / Winter {day} / vanilla schedule points ({len(markers)} NPCs)"
+        annotated = annotate_map(base, markers, title, portrait_size=portrait_size)
+        output_path = output_dir / f"night_market_winter_{day}_npc_points.png"
+        annotated.save(output_path)
+        outputs.append(output_path)
+    return outputs
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Render Stardew Valley festival NPC actor maps.")
-    parser.add_argument("--preset", choices=("moonlight_jellies",), help="Convenience preset. moonlight_jellies maps to summer28.")
+    parser.add_argument(
+        "--preset",
+        choices=("moonlight_jellies", "night_market"),
+        help="Convenience preset. night_market renders all three vanilla schedule maps.",
+    )
     parser.add_argument("--festival", default=None, help="Festival data id, for example summer28.")
     parser.add_argument("--profile", choices=("y1", "y2"), default="y1", help="Festival profile/year variant.")
     parser.add_argument("--phase", choices=("setup", "main"), default="setup", help="Actor phase to render.")
@@ -532,6 +586,10 @@ def main() -> None:
     if args.winter_star_secret_santa:
         output_path = render_winter_star_secret_santa_map(args.out, args.scale, args.portrait_size)
         print(output_path.relative_to(ROOT))
+        return
+    if args.preset == "night_market":
+        for output_path in render_night_market_maps(args.out, args.scale, args.portrait_size):
+            print(output_path.relative_to(ROOT))
         return
     festival_id = args.festival
     if args.preset == "moonlight_jellies":

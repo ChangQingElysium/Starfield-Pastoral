@@ -1,7 +1,7 @@
 {
-  "parent": "stardewcraft:decor/common/bonsai_6_6",
+  "parent": "stardewcraft:decor/plants/sunflower_pot",
   "textures": {
-    "particle": "stardewcraft:block/deco/misc/common/bonsai_6_6"
+    "particle": "stardewcraft:block/decor/plants/sunflower_pot_1"
   }
 }
 

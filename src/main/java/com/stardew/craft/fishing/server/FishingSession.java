@@ -173,7 +173,7 @@ public final class FishingSession {
 							if (fs != null) {
 								net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome> bh = level.getBiome(hookPos);
 								java.util.List<String> keys = com.stardew.craft.fishing.data.FishingDataManager
-										.resolveVanillaAlignedLocationKeysStatic(level, bh);
+										.resolveVanillaAlignedLocationKeysStatic(level, bh, hookPos);
 								if (fs.findIntersecting(keys, hookPos) != null) {
 									this.inSplash = true;
 									this.ticksUntilBite = Math.max(1, this.ticksUntilBite / 4);

@@ -1,18 +1,18 @@
 {
     "variants":  {
                      "part=main,facing=north":  {
-                                                    "model":  "stardewcraft:decor/bonsai/bonsai_4"
+                                                    "model":  "stardewcraft:decor/plants/snake_plant_planter"
                                                 },
                      "part=main,facing=east":  {
-                                                   "model":  "stardewcraft:decor/bonsai/bonsai_4",
+                                                   "model":  "stardewcraft:decor/plants/snake_plant_planter",
                                                    "y":  90
                                                },
                      "part=main,facing=south":  {
-                                                    "model":  "stardewcraft:decor/bonsai/bonsai_4",
+                                                    "model":  "stardewcraft:decor/plants/snake_plant_planter",
                                                     "y":  180
                                                 },
                      "part=main,facing=west":  {
-                                                   "model":  "stardewcraft:decor/bonsai/bonsai_4",
+                                                   "model":  "stardewcraft:decor/plants/snake_plant_planter",
                                                    "y":  270
                                                },
                      "part=extension,facing=north":  {

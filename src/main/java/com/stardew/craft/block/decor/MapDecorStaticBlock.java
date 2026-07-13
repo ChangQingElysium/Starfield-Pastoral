@@ -336,6 +336,10 @@ public class MapDecorStaticBlock extends Block {
             if (localOccupiedOffsets != null) {
                 return localOccupiedOffsets;
             }
+            if (presetCellOffsets != null) {
+                localOccupiedOffsets = new LinkedHashSet<>(presetCellOffsets);
+                return localOccupiedOffsets;
+            }
             Set<CellOffset> discovered = new LinkedHashSet<>();
             // For bonsai blocks, use the same canonical shape as orientedShape() so that
             // overflowing decorative geometry in the model does not cause EXTENSION blocks

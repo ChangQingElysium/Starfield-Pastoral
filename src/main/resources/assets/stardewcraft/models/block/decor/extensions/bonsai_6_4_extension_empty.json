@@ -1,7 +1,7 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "stardewcraft:block/deco/misc/common/bonsai_6_4"
+    "particle": "stardewcraft:block/decor/plants/clover_pot"
   },
   "elements": []
 }

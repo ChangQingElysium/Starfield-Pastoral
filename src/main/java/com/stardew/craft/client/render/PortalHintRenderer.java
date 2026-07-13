@@ -20,6 +20,11 @@ import com.stardew.craft.festival.desert.DesertFestivalSpecialInteractionService
 import com.stardew.craft.festival.desert.DesertFestivalWillyFishingService;
 import com.stardew.craft.festival.fair.FairFishingGameService;
 import com.stardew.craft.festival.fair.FairSlingshotGameService;
+import com.stardew.craft.festival.nightmarket.NightMarketCoffeeService;
+import com.stardew.craft.festival.nightmarket.NightMarketMermaidService;
+import com.stardew.craft.festival.nightmarket.NightMarketPainterService;
+import com.stardew.craft.festival.nightmarket.NightMarketShopService;
+import com.stardew.craft.festival.nightmarket.NightMarketSubmarineService;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.GameRenderer;
@@ -355,6 +360,25 @@ public final class PortalHintRenderer {
         if (FestivalOfIceService.TRAVELING_MERCHANT_TARGET_ID.equals(targetId)) {
             return HintStyle.SHOP;
         }
+        if (NightMarketPainterService.TARGET_ID.equals(targetId)) {
+            return HintStyle.SHOP;
+        }
+        if (NightMarketCoffeeService.TARGET_ID.equals(targetId)) {
+            return HintStyle.INTERACT;
+        }
+        if (NightMarketShopService.DECORATION_BOAT_TARGET_ID.equals(targetId)
+                || NightMarketShopService.MAGIC_BOAT_TARGET_ID.equals(targetId)) {
+            return HintStyle.SHOP;
+        }
+        if (NightMarketSubmarineService.ENTRANCE_TARGET_ID.equals(targetId)) {
+            return HintStyle.INTERACT;
+        }
+        if (NightMarketSubmarineService.EXIT_TARGET_ID.equals(targetId)) {
+            return HintStyle.EXIT;
+        }
+        if (NightMarketMermaidService.TARGET_ID.equals(targetId)) {
+            return HintStyle.INTERACT;
+        }
         if (FairFestivalService.STAR_TOKEN_PURCHASE_TARGET_ID.equals(targetId)) {
             return HintStyle.SHOP;
         }
@@ -381,6 +405,13 @@ public final class PortalHintRenderer {
             case FairFishingGameService.TARGET_ID -> "fair_fishing_game";
             case FairFestivalService.STAR_TOKEN_SHOP_TARGET_ID -> "fair_star_token_shop";
             case FestivalOfIceService.TRAVELING_MERCHANT_TARGET_ID -> "festival_of_ice_traveling_merchant";
+            case NightMarketPainterService.TARGET_ID -> "night_market_lupini";
+            case NightMarketCoffeeService.TARGET_ID -> "night_market_coffee";
+            case NightMarketShopService.DECORATION_BOAT_TARGET_ID -> "night_market_decoration_boat";
+            case NightMarketShopService.MAGIC_BOAT_TARGET_ID -> "night_market_magic_boat";
+            case NightMarketSubmarineService.ENTRANCE_TARGET_ID -> "night_market_submarine";
+            case NightMarketSubmarineService.EXIT_TARGET_ID -> "night_market_submarine_exit";
+            case NightMarketMermaidService.TARGET_ID -> "night_market_mermaid_show";
             case FairFestivalService.STAR_TOKEN_PURCHASE_TARGET_ID -> "fair_star_token_purchase";
             case FairFestivalService.FORTUNE_TELLER_TARGET_ID -> "fair_fortune_teller";
             case "quarry_entrance", "quarry_exit" -> "quarry";

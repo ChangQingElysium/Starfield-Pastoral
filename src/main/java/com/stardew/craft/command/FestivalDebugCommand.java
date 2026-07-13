@@ -18,6 +18,7 @@ import com.stardew.craft.festival.FestivalSessionPhase;
 import com.stardew.craft.festival.FestivalType;
 import com.stardew.craft.festival.FestivalWorldData;
 import com.stardew.craft.festival.desert.DesertFestivalService;
+import com.stardew.craft.festival.nightmarket.NightMarketNpcVisitService;
 import com.stardew.craft.festival.squid.SquidFestService;
 import com.stardew.craft.festival.trout.TroutDerbyService;
 import com.stardew.craft.npc.runtime.NpcScheduleRuntimeService;
@@ -218,6 +219,9 @@ public final class FestivalDebugCommand {
         }
         if (SquidFestService.FESTIVAL_ID.equalsIgnoreCase(festival.id())) {
             return SquidFestService.forceRefreshNpcSchedules(level);
+        }
+        if ("NightMarket".equalsIgnoreCase(festival.id())) {
+            return NightMarketNpcVisitService.forceRefreshNpcSchedules(level);
         }
         refreshFestivalSchedules(level);
         return 0;

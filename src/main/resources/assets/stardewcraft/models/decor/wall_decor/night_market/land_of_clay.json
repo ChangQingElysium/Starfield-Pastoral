@@ -1,0 +1,4 @@
+{
+  "parent": "stardewcraft:decor/wall_decor/night_market/painting",
+  "textures": {"1": "stardewcraft:block/decor/wall_decor/night_market/land_of_clay"}
+}

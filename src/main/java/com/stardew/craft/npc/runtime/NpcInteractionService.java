@@ -400,6 +400,11 @@ public final class NpcInteractionService {
 
         // NPC smoothly turns to face the player, then opens dialogue
         String dialogueText = loadCurrentDialogue(serverLevel, npcId, state, dayContext);
+        String nightMarketDialogue = com.stardew.craft.festival.nightmarket.NightMarketNpcVisitService
+            .resolveDialogueKey(npcId);
+        if (!nightMarketDialogue.isBlank()) {
+            dialogueText = nightMarketDialogue;
+        }
         if (com.stardew.craft.festival.desert.DesertFestivalVendorService.shouldUseVendorDialogue(serverPlayer, npcId)) {
             dialogueText = "stardewcraft.festival.desertfestival.dialogue.vendor";
         }

@@ -64,6 +64,26 @@ public record DesertFestivalQuestionResponsePayload(
                     SquidFestService.handleQuestionResponse(player, payload.choiceId());
                     return;
                 }
+                if (com.stardew.craft.festival.nightmarket.NightMarketPainterService.QUESTION_CONTEXT.equals(payload.context())) {
+                    com.stardew.craft.festival.nightmarket.NightMarketPainterService.handleQuestionResponse(
+                        player, payload.choiceId());
+                    return;
+                }
+                if (com.stardew.craft.festival.nightmarket.NightMarketCoffeeService.QUESTION_CONTEXT.equals(payload.context())) {
+                    com.stardew.craft.festival.nightmarket.NightMarketCoffeeService.handleQuestionResponse(
+                        player, payload.choiceId());
+                    return;
+                }
+                if (com.stardew.craft.festival.nightmarket.NightMarketWarperService.QUESTION_CONTEXT.equals(payload.context())) {
+                    com.stardew.craft.festival.nightmarket.NightMarketWarperService.handleQuestionResponse(
+                        player, payload.choiceId());
+                    return;
+                }
+                if (com.stardew.craft.festival.nightmarket.NightMarketSubmarineService.QUESTION_CONTEXT.equals(payload.context())) {
+                    com.stardew.craft.festival.nightmarket.NightMarketSubmarineService.handleQuestionResponse(
+                        player, payload.choiceId());
+                    return;
+                }
                 if ("spirit_eve_shortcut".equals(payload.context())) {
                     com.stardew.craft.festival.SpiritEveFestivalService.handleQuestionResponse(
                         player, payload.context(), payload.choiceId());

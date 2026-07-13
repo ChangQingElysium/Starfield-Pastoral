@@ -17,6 +17,7 @@
     "ServerLevelSleepMixin",
     "LevelWeatherStateMixin",
     "ServerLevelSkeletonHorseTrapMixin",
+    "ManagedAnimalEntityLoadMixin",
     "DoorBlockMasteryCollisionMixin"
   ],
   "client": [

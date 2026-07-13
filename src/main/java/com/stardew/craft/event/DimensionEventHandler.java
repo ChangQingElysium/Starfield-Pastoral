@@ -14,6 +14,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.animal.Parrot;
 import net.minecraft.world.level.block.BedBlock;
+import net.minecraft.world.level.GameRules;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityTravelToDimensionEvent;
@@ -469,6 +470,11 @@ public class DimensionEventHandler {
         // 并发送给客户端，就会和 mod 发的虚拟时间打架 → 天空闪烁。
         // 此处强制对齐，使所有原版代码路径读到的都是正确的虚拟时间。
         StardewTimeManager timeManager = StardewTimeManager.get();
+        // The Stardew clock remains independent even when the host world disables its daylight cycle.
+        if (!server.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)
+                && !com.stardew.craft.festival.ActiveFestivalHandlers.isAnyTimeFreezeActive()) {
+            timeManager.setDayTimeOffsetRaw(timeManager.getDayTimeOffset() + 1L);
+        }
         long virtualDayTime = com.stardew.craft.festival.ActiveFestivalHandlers.applyTimeFreeze(serverLevel, timeManager);
         serverLevel.setDayTime(virtualDayTime);
         ServerLevel miningLevel = server.getLevel(ModMiningDimensions.STARDEW_MINING);

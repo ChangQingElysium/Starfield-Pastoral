@@ -2,203 +2,83 @@
   "location": "Submarine",
   "fish": [
     {
-      "id": "midnight_squid",
-      "precedence": -50,
-      "item": "stardewcraft:midnight_squid",
-      "chance": 0.28,
-      "difficulty": 55,
-      "motionType": 3,
-      "minFishSize": 8,
-      "maxFishSize": 25,
-      "minFishingLevel": 0,
-      "timeRanges": [
-        [
-          600,
-          2600
-        ]
-      ],
-      "maxDepth": 3,
-      "depthMultiplier": 0.1,
-      "biomeTags": [
-        "#stardewcraft:is_night_market"
-      ],
-      "weather": "any",
-      "spawnRate": 0.4,
-      "seasons": [
-        "spring",
-        "summer",
-        "fall",
-        "winter"
-      ]
-    },
-    {
-      "id": "spook_fish",
-      "precedence": -60,
-      "item": "stardewcraft:spook_fish",
-      "chance": 0.18,
-      "difficulty": 60,
-      "motionType": 1,
-      "minFishSize": 8,
-      "maxFishSize": 25,
-      "minFishingLevel": 0,
-      "timeRanges": [
-        [
-          600,
-          2600
-        ]
-      ],
-      "maxDepth": 3,
-      "depthMultiplier": 0.1,
-      "biomeTags": [
-        "#stardewcraft:is_night_market"
-      ],
-      "weather": "any",
-      "spawnRate": 0.4,
-      "curiosityLureBuff": 0.05,
-      "seasons": [
-        "spring",
-        "summer",
-        "fall",
-        "winter"
-      ]
-    },
-    {
       "id": "blobfish",
-      "precedence": -70,
+      "precedence": 70,
       "item": "stardewcraft:blobfish",
       "chance": 0.1,
       "difficulty": 75,
       "motionType": 4,
       "minFishSize": 8,
       "maxFishSize": 25,
-      "minFishingLevel": 0,
-      "timeRanges": [
-        [
-          600,
-          2600
-        ]
-      ],
-      "maxDepth": 3,
-      "depthMultiplier": 0.1,
-      "biomeTags": [
-        "#stardewcraft:is_night_market"
-      ],
-      "weather": "any",
-      "spawnRate": 0.4,
       "curiosityLureBuff": 0.1,
-      "seasons": [
-        "spring",
-        "summer",
-        "fall",
-        "winter"
-      ]
+      "ignoreFishDataRequirements": true
+    },
+    {
+      "id": "spook_fish",
+      "precedence": 60,
+      "item": "stardewcraft:spook_fish",
+      "chance": 0.18,
+      "difficulty": 60,
+      "motionType": 1,
+      "minFishSize": 8,
+      "maxFishSize": 25,
+      "curiosityLureBuff": 0.05,
+      "ignoreFishDataRequirements": true
+    },
+    {
+      "id": "midnight_squid",
+      "precedence": 50,
+      "item": "stardewcraft:midnight_squid",
+      "chance": 0.28,
+      "difficulty": 55,
+      "motionType": 3,
+      "minFishSize": 8,
+      "maxFishSize": 25,
+      "ignoreFishDataRequirements": true
     },
     {
       "id": "sea_cucumber",
-      "precedence": -40,
+      "precedence": 40,
       "item": "stardewcraft:sea_cucumber",
       "chance": 0.1,
       "difficulty": 40,
       "motionType": 3,
       "minFishSize": 3,
       "maxFishSize": 20,
-      "minFishingLevel": 0,
-      "timeRanges": [
-        [
-          600,
-          1900
-        ]
-      ],
-      "weather": "any",
-      "maxDepth": 3,
-      "depthMultiplier": 0.25,
-      "spawnRate": 0.25,
-      "biomeTags": [
-        "#stardewcraft:is_night_market"
-      ],
-      "seasons": [
-        "fall",
-        "winter"
-      ]
+      "ignoreFishDataRequirements": true
     },
     {
       "id": "super_cucumber",
-      "precedence": -30,
+      "precedence": 30,
       "item": "stardewcraft:super_cucumber",
       "chance": 0.08,
       "difficulty": 80,
       "motionType": 3,
       "minFishSize": 12,
       "maxFishSize": 36,
-      "minFishingLevel": 0,
-      "timeRanges": [
-        [
-          1800,
-          2600
-        ]
-      ],
-      "weather": "any",
-      "maxDepth": 4,
-      "depthMultiplier": 0.25,
-      "spawnRate": 0.1,
-      "biomeTags": [
-        "#stardewcraft:is_night_market"
-      ],
       "curiosityLureBuff": 0.1,
-      "seasons": [
-        "summer",
-        "winter"
-      ]
+      "ignoreFishDataRequirements": true
     },
     {
       "id": "octopus",
-      "precedence": -20,
+      "precedence": 20,
       "item": "stardewcraft:octopus",
       "chance": 0.05,
       "difficulty": 95,
       "motionType": 3,
       "minFishSize": 12,
       "maxFishSize": 48,
-      "minFishingLevel": 0,
-      "timeRanges": [
-        [
-          600,
-          1300
-        ]
-      ],
-      "weather": "any",
-      "maxDepth": 5,
-      "depthMultiplier": 0.08,
-      "spawnRate": 0.1,
-      "biomeTags": [
-        "#stardewcraft:is_night_market"
-      ],
-      "seasons": [
-        "summer"
-      ]
+      "ignoreFishDataRequirements": true
     },
     {
       "id": "pearl",
-      "precedence": -10,
+      "precedence": 10,
       "item": "stardewcraft:pearl",
       "chance": 0.01,
       "difficulty": 20,
       "motionType": 0,
-      "minFishingLevel": 0,
-      "timeRanges": [
-        [
-          600,
-          2600
-        ]
-      ],
-      "weather": "any",
-      "maxDepth": 4,
-      "depthMultiplier": 0.0,
-      "spawnRate": 1.0,
-      "biomeTags": [
-        "#stardewcraft:is_night_market"
-      ],
-      "curiosityLureBuff": 0.02
+      "curiosityLureBuff": 0.02,
+      "ignoreFishDataRequirements": true
     },
     {
       "id": "seaweed",
@@ -209,26 +89,7 @@
       "motionType": 4,
       "minFishSize": 5,
       "maxFishSize": 30,
-      "minFishingLevel": 0,
-      "timeRanges": [
-        [
-          600,
-          2600
-        ]
-      ],
-      "weather": "any",
-      "maxDepth": 0,
-      "depthMultiplier": 0.0,
-      "spawnRate": 0.3,
-      "biomeTags": [
-        "#stardewcraft:is_night_market"
-      ],
-      "seasons": [
-        "spring",
-        "summer",
-        "fall",
-        "winter"
-      ]
+      "ignoreFishDataRequirements": true
     },
     {
       "id": "sea_jelly",
@@ -237,20 +98,8 @@
       "chance": 0.1,
       "difficulty": 20,
       "motionType": 0,
-      "minFishingLevel": 0,
-      "timeRanges": [
-        [
-          600,
-          2600
-        ]
-      ],
-      "weather": "any",
-      "maxDepth": 4,
-      "depthMultiplier": 0.0,
-      "spawnRate": 1.0,
-      "biomeTags": [
-        "#stardewcraft:is_night_market"
-      ]
+      "ignoreFishDataRequirements": true,
+      "useFishCaughtSeededRandom": true
     }
   ]
 }

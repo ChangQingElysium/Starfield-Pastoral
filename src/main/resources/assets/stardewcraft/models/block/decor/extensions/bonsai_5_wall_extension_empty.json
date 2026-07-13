@@ -1,7 +1,7 @@
 {
     "parent":  "minecraft:block/block",
     "textures":  {
-                     "particle":  "stardewcraft:block/deco/misc/bonsai/bonsai_5"
+                     "particle":  "stardewcraft:block/decor/plants/hanging_dancing_flower"
                  },
     "elements":  [
 

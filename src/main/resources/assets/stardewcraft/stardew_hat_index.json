@@ -1648,6 +1648,22 @@
     "entityModel": "models/entity/hat/bucket_hat.json"
   },
   {
+    "vanillaId": "SquidHat",
+    "itemId": "squid_hat",
+    "spriteIndex": 103,
+    "internalName": "Squid Hat",
+    "displayName": "Squid Hat",
+    "description": "It's your chance to wear a squid on the head.",
+    "zhDisplayName": "鱿鱼帽",
+    "zhDescription": "是时候在头上顶一条鱿鱼了。",
+    "showFullHair": "false",
+    "ignoreHairOffset": "true",
+    "tags": "",
+    "icon": "textures/item/hat/squid_hat.png",
+    "itemModel": "models/item/squid_hat.json",
+    "entityModel": "models/entity/hat/squid_hat.json"
+  },
+  {
     "vanillaId": "SportsCap",
     "itemId": "sports_cap",
     "spriteIndex": 104,

@@ -58,6 +58,10 @@ public class TotemPoleBlock extends MapUtilityStaticBlock implements EntityBlock
         return totemType;
     }
 
+    public static boolean isInsideBeachBounds(BlockPos pos) {
+        return pos != null && BEACH_BOUNDS.contains(pos);
+    }
+
     @SuppressWarnings("null")
     @Override
     protected void createBlockStateDefinition(@SuppressWarnings("null") StateDefinition.Builder<Block, BlockState> builder) {

@@ -69,7 +69,8 @@ public final class FishSplashTicker {
 		for (ServerPlayer p : players) {
 			if (WaterFeatureSpawnRules.isBlockedSpawnArea(stardew, p.blockPosition())) continue;
 			Holder<Biome> bh = stardew.getBiome(p.blockPosition());
-			List<String> keys = FishingDataManager.resolveVanillaAlignedLocationKeysStatic(stardew, bh);
+			List<String> keys = FishingDataManager.resolveVanillaAlignedLocationKeysStatic(
+				stardew, bh, p.blockPosition());
 			for (String k : keys) {
 				if ("Default".equals(k)) continue;       // never spawn splash for the fallback bucket
 				if ("Sewer".equals(k)) continue;
@@ -153,7 +154,7 @@ public final class FishSplashTicker {
 
 			// Biome key must match.
 			Holder<Biome> bh = level.getBiome(surface);
-			List<String> keys = FishingDataManager.resolveVanillaAlignedLocationKeysStatic(level, bh);
+			List<String> keys = FishingDataManager.resolveVanillaAlignedLocationKeysStatic(level, bh, surface);
 			if (!keys.contains(requiredKey)) continue;
 
 			int dist = distanceToLand(level, surface);

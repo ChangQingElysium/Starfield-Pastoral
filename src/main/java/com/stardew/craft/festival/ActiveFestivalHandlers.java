@@ -348,20 +348,15 @@ public final class ActiveFestivalHandlers {
     }
 
     public static boolean isAnyTimeFreezeActive() {
-        for (ActiveFestivalHandler handler : HANDLERS.values()) {
-            if (handler.isTimeFreezeActive()) {
-                return true;
-            }
-        }
-        return false;
+        return currentActiveHandler()
+            .map(ActiveFestivalHandler::isTimeFreezeActive)
+            .orElse(false);
     }
 
     public static long applyTimeFreeze(ServerLevel level, StardewTimeManager timeManager) {
-        long virtualDayTime = timeManager.getVirtualDayTime(level);
-        for (ActiveFestivalHandler handler : HANDLERS.values()) {
-            virtualDayTime = handler.applyTimeFreeze(level, timeManager);
-        }
-        return virtualDayTime;
+        return currentActiveHandler()
+            .map(handler -> handler.applyTimeFreeze(level, timeManager))
+            .orElseGet(() -> timeManager.getVirtualDayTime(level));
     }
 
     private static String key(String value) {

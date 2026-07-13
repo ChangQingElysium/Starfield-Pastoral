@@ -2823,6 +2823,26 @@ public static final DeferredBlock<Block> DEAD_CROP = BLOCKS.register("dead_crop"
                                         .noOcclusion()
                                         .strength(0.6F, 1.0F), "stardewcraft:decor/wall_decor/common/squid_kid_painting"));
 
+        public static final DeferredBlock<Block> RED_EAGLE = nightMarketPainting("red_eagle");
+        public static final DeferredBlock<Block> PORTRAIT_OF_A_MERMAID = nightMarketPainting("portrait_of_a_mermaid");
+        public static final DeferredBlock<Block> SOLAR_KINGDOM = nightMarketPainting("solar_kingdom");
+        public static final DeferredBlock<Block> CLOUDS = nightMarketPainting("clouds");
+        public static final DeferredBlock<Block> THOUSAND_YEARS_FROM_NOW = nightMarketPainting("1000_years_from_now");
+        public static final DeferredBlock<Block> THREE_TREES = nightMarketPainting("three_trees");
+        public static final DeferredBlock<Block> THE_SERPENT = nightMarketPainting("the_serpent");
+        public static final DeferredBlock<Block> TROPICAL_FISH_173 = nightMarketPainting("tropical_fish_173");
+        public static final DeferredBlock<Block> LAND_OF_CLAY = nightMarketPainting("land_of_clay");
+
+        private static DeferredBlock<Block> nightMarketPainting(String name) {
+                return BLOCKS.register(name,
+                                () -> new com.stardew.craft.block.decor.MapDecorWallStaticBlock(Block.Properties.of()
+                                                .mapColor(net.minecraft.world.level.material.MapColor.WOOD)
+                                                .sound(net.minecraft.world.level.block.SoundType.WOOD)
+                                                .noOcclusion()
+                                                .strength(0.6F, 1.0F),
+                                                "stardewcraft:decor/wall_decor/night_market/" + name));
+        }
+
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> SHOP_WINDOW_1 = BLOCKS.register("shop_window_1",
                         () -> new com.stardew.craft.block.decor.MapDecorWallStaticBlock(Block.Properties.of()
@@ -2854,42 +2874,47 @@ public static final DeferredBlock<Block> DEAD_CROP = BLOCKS.register("dead_crop"
                                         .mapColor(net.minecraft.world.level.material.MapColor.PLANT)
                                         .sound(net.minecraft.world.level.block.SoundType.GRASS)
                                         .noOcclusion()
-                                        .strength(0.4F, 0.8F), "stardewcraft:decor/bonsai/bonsai_1"));
+                                        .strength(0.4F, 0.8F), "stardewcraft:decor/plants/bamboo_planter",
+                                        0.0D, 0.0D, 0.0D, 16.0D, 32.0D, 16.0D));
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> BONSAI_2 = BLOCKS.register("bonsai_2",
                         () -> new com.stardew.craft.block.decor.MapDecorStaticBlock(Block.Properties.of()
                                         .mapColor(net.minecraft.world.level.material.MapColor.PLANT)
                                         .sound(net.minecraft.world.level.block.SoundType.GRASS)
                                         .noOcclusion()
-                                        .strength(0.4F, 0.8F), "stardewcraft:decor/bonsai/bonsai_2"));
+                                        .strength(0.4F, 0.8F), "stardewcraft:decor/plants/hibiscus_planter",
+                                        0.0D, 0.0D, 0.0D, 16.0D, 32.0D, 16.0D));
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> BONSAI_3 = BLOCKS.register("bonsai_3",
                         () -> new com.stardew.craft.block.decor.MapDecorStaticBlock(Block.Properties.of()
                                         .mapColor(net.minecraft.world.level.material.MapColor.PLANT)
                                         .sound(net.minecraft.world.level.block.SoundType.GRASS)
                                         .noOcclusion()
-                                        .strength(0.4F, 0.8F), "stardewcraft:decor/bonsai/bonsai_3"));
+                                        .strength(0.4F, 0.8F), "stardewcraft:decor/plants/monstera_planter",
+                                        0.0D, 0.0D, 0.0D, 16.0D, 32.0D, 16.0D));
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> BONSAI_4 = BLOCKS.register("bonsai_4",
                         () -> new com.stardew.craft.block.decor.MapDecorStaticBlock(Block.Properties.of()
                                         .mapColor(net.minecraft.world.level.material.MapColor.PLANT)
                                         .sound(net.minecraft.world.level.block.SoundType.GRASS)
                                         .noOcclusion()
-                                        .strength(0.4F, 0.8F), "stardewcraft:decor/bonsai/bonsai_4"));
+                                        .strength(0.4F, 0.8F), "stardewcraft:decor/plants/snake_plant_planter",
+                                        0.0D, 0.0D, 0.0D, 16.0D, 32.0D, 16.0D));
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> BONSAI_5_WALL = BLOCKS.register("bonsai_5_wall",
-                        () -> new com.stardew.craft.block.decor.MapDecorWallStaticBlock(Block.Properties.of()
+                        () -> new com.stardew.craft.block.decor.DualMountHangingPlantBlock(Block.Properties.of()
                                         .mapColor(net.minecraft.world.level.material.MapColor.PLANT)
                                         .sound(net.minecraft.world.level.block.SoundType.GRASS)
                                         .noOcclusion()
-                                        .strength(0.4F, 0.8F), "stardewcraft:decor/bonsai/bonsai_5_wall"));
+                                        .strength(0.4F, 0.8F)));
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> BONSAI_BUSH = BLOCKS.register("bonsai_bush",
                         () -> new com.stardew.craft.block.decor.MapDecorStaticBlock(Block.Properties.of()
                                         .mapColor(net.minecraft.world.level.material.MapColor.PLANT)
                                         .sound(net.minecraft.world.level.block.SoundType.GRASS)
                                         .noOcclusion()
-                                        .strength(0.4F, 0.8F), "stardewcraft:decor/bonsai/bonsai_6"));
+                                        .strength(0.4F, 0.8F), "stardewcraft:decor/plants/canna_planter",
+                                        0.0D, 0.0D, 0.0D, 16.0D, 32.0D, 16.0D));
 
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> COMPUTER = BLOCKS.register("computer",
@@ -3009,42 +3034,48 @@ public static final DeferredBlock<Block> DEAD_CROP = BLOCKS.register("dead_crop"
                                         .mapColor(net.minecraft.world.level.material.MapColor.PLANT)
                                         .sound(net.minecraft.world.level.block.SoundType.GRASS)
                                         .noOcclusion()
-                                        .strength(0.4F, 0.8F), "stardewcraft:decor/common/bonsai_6_1"));
+                                        .strength(0.4F, 0.8F), "stardewcraft:decor/plants/succulent_pot",
+                                        4.0D, 0.0D, 4.0D, 12.0D, 8.0D, 12.0D));
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> POTTED_PLANT_2 = BLOCKS.register("potted_plant_2",
                         () -> new com.stardew.craft.block.decor.MapDecorStaticBlock(Block.Properties.of()
                                         .mapColor(net.minecraft.world.level.material.MapColor.PLANT)
                                         .sound(net.minecraft.world.level.block.SoundType.GRASS)
                                         .noOcclusion()
-                                        .strength(0.4F, 0.8F), "stardewcraft:decor/common/bonsai_6_2"));
+                                        .strength(0.4F, 0.8F), "stardewcraft:decor/plants/shrub_pot",
+                                        4.0D, 0.0D, 4.0D, 12.0D, 8.0D, 12.0D));
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> POTTED_PLANT_3 = BLOCKS.register("potted_plant_3",
                         () -> new com.stardew.craft.block.decor.MapDecorStaticBlock(Block.Properties.of()
                                         .mapColor(net.minecraft.world.level.material.MapColor.PLANT)
                                         .sound(net.minecraft.world.level.block.SoundType.GRASS)
                                         .noOcclusion()
-                                        .strength(0.4F, 0.8F), "stardewcraft:decor/common/bonsai_6_3"));
+                                        .strength(0.4F, 0.8F), "stardewcraft:decor/plants/mini_cattail_pot",
+                                        4.0D, 0.0D, 4.0D, 12.0D, 8.0D, 12.0D));
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> POTTED_PLANT_4 = BLOCKS.register("potted_plant_4",
                         () -> new com.stardew.craft.block.decor.MapDecorStaticBlock(Block.Properties.of()
                                         .mapColor(net.minecraft.world.level.material.MapColor.PLANT)
                                         .sound(net.minecraft.world.level.block.SoundType.GRASS)
                                         .noOcclusion()
-                                        .strength(0.4F, 0.8F), "stardewcraft:decor/common/bonsai_6_4"));
+                                        .strength(0.4F, 0.8F), "stardewcraft:decor/plants/clover_pot",
+                                        4.0D, 0.0D, 4.0D, 12.0D, 8.0D, 12.0D));
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> POTTED_PLANT_5 = BLOCKS.register("potted_plant_5",
                         () -> new com.stardew.craft.block.decor.MapDecorStaticBlock(Block.Properties.of()
                                         .mapColor(net.minecraft.world.level.material.MapColor.PLANT)
                                         .sound(net.minecraft.world.level.block.SoundType.GRASS)
                                         .noOcclusion()
-                                        .strength(0.4F, 0.8F), "stardewcraft:decor/common/bonsai_6_5"));
+                                        .strength(0.4F, 0.8F), "stardewcraft:decor/plants/cactus_pot",
+                                        4.0D, 0.0D, 4.0D, 12.0D, 8.0D, 12.0D));
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> POTTED_PLANT_6 = BLOCKS.register("potted_plant_6",
                         () -> new com.stardew.craft.block.decor.MapDecorStaticBlock(Block.Properties.of()
                                         .mapColor(net.minecraft.world.level.material.MapColor.PLANT)
                                         .sound(net.minecraft.world.level.block.SoundType.GRASS)
                                         .noOcclusion()
-                                        .strength(0.4F, 0.8F), "stardewcraft:decor/common/bonsai_6_6"));
+                                        .strength(0.4F, 0.8F), "stardewcraft:decor/plants/sunflower_pot",
+                                        4.0D, 0.0D, 4.0D, 12.0D, 8.0D, 12.0D));
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> SHRINE = BLOCKS.register("shrine",
                         () -> new com.stardew.craft.block.decor.ShrineDecorBlock(Block.Properties.of()

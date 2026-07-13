@@ -950,6 +950,105 @@ public final class ShopRegistry {
         ));
 
         // -------------------------------------------------------------------
+        // Night Market boats
+        // Source of truth: SDV 1.6 Content/Data/Shops.json.
+        // Missing project assets are omitted. The decoration boat's missing
+        // seasonal plants are represented by the project's existing plant set.
+        // -------------------------------------------------------------------
+        REGISTRY.put("Festival_NightMarket_DecorationBoat", new ShopDefinition(
+            "Festival_NightMarket_DecorationBoat",
+            "",
+            "stardewcraft.shop.night_market.decoration_boat.dialogue",
+            List.of(
+                entryAllSeasons("stardewcraft:winter_star_large_green_candy_cane", 200),
+                entryAllSeasons("stardewcraft:winter_star_green_candy_canes", 200),
+                entryAllSeasons("stardewcraft:winter_star_mixed_candy_canes", 200),
+                entryAllSeasons("stardewcraft:winter_star_red_candy_canes", 200),
+                entryAllSeasons("stardewcraft:winter_star_large_red_candy_cane", 200),
+                entryAllSeasons("stardewcraft:seasonal_decor", 500),
+                entryAllSeasons("stardewcraft:bonsai_1", 500),
+                entryAllSeasons("stardewcraft:bonsai_2", 500),
+                entryAllSeasons("stardewcraft:bonsai_3", 500),
+                entryAllSeasons("stardewcraft:bonsai_4", 500),
+                entryAllSeasons("stardewcraft:bonsai_5_wall", 500),
+                entryAllSeasons("stardewcraft:bonsai_bush", 500),
+                entryAllSeasons("stardewcraft:potted_plant_1", 500),
+                entryAllSeasons("stardewcraft:potted_plant_2", 500),
+                entryAllSeasons("stardewcraft:potted_plant_3", 500),
+                entryAllSeasons("stardewcraft:potted_plant_4", 500),
+                entryAllSeasons("stardewcraft:potted_plant_5", 500),
+                entryAllSeasons("stardewcraft:potted_plant_6", 500)
+            ),
+            Set.of()
+        ));
+
+        REGISTRY.put("Festival_NightMarket_MagicBoat_Day1", new ShopDefinition(
+            "Festival_NightMarket_MagicBoat_Day1",
+            "",
+            "stardewcraft.shop.night_market.magic_boat.dialogue",
+            List.of(
+                entryAllSeasons("stardewcraft:fair_grave_stone", 200),
+                entryAllSeasons("stardewcraft:parsnip_seeds", 10),
+                entryAllSeasons("stardewcraft:green_bean_seeds", 30),
+                entryAllSeasons("stardewcraft:cauliflower_seeds", 40),
+                entryAllSeasons("stardewcraft:potato_seeds", 25),
+                entryAllSeasons("stardewcraft:tulip_seeds", 10),
+                entryAllSeasons("stardewcraft:kale_seeds", 35),
+                entryAllSeasons("stardewcraft:blue_jazz_seeds", 15),
+                entryAllSeasonsYear("stardewcraft:garlic_seeds", 20, 2),
+                entryAllSeasons("stardewcraft:scarecrow_7", 5000),
+                entryAllSeasons("stardewcraft:scarecrow_8", 5000)
+            ),
+            Set.of()
+        ));
+
+        REGISTRY.put("Festival_NightMarket_MagicBoat_Day2", new ShopDefinition(
+            "Festival_NightMarket_MagicBoat_Day2",
+            "",
+            "stardewcraft.shop.night_market.magic_boat.dialogue",
+            List.of(
+                entryAllSeasons("stardewcraft:melon_seeds", 40),
+                entryAllSeasons("stardewcraft:tomato_seeds", 25),
+                entryAllSeasons("stardewcraft:blueberry_seeds", 40),
+                entryAllSeasons("stardewcraft:hot_pepper_seeds", 20),
+                entryAllSeasons("stardewcraft:wheat_seeds", 5),
+                entryAllSeasons("stardewcraft:radish_seeds", 20),
+                entryAllSeasons("stardewcraft:poppy_seeds", 50),
+                entryAllSeasons("stardewcraft:summer_spangle_seeds", 25),
+                entryAllSeasons("stardewcraft:hops_seeds", 30),
+                entryAllSeasons("stardewcraft:corn_seeds", 75),
+                entryAllSeasons("stardewcraft:sunflower_seeds", 200),
+                entryAllSeasonsYear("stardewcraft:red_cabbage_seeds", 50, 2),
+                entryAllSeasons("stardewcraft:scarecrow_7", 5000),
+                entryAllSeasons("stardewcraft:scarecrow_8", 5000)
+            ),
+            Set.of()
+        ));
+
+        REGISTRY.put("Festival_NightMarket_MagicBoat_Day3", new ShopDefinition(
+            "Festival_NightMarket_MagicBoat_Day3",
+            "",
+            "stardewcraft.shop.night_market.magic_boat.dialogue",
+            List.of(
+                entryAllSeasons("stardewcraft:corn_seeds", 75),
+                entryAllSeasons("stardewcraft:eggplant_seeds", 10),
+                entryAllSeasons("stardewcraft:pumpkin_seeds", 50),
+                entryAllSeasons("stardewcraft:bok_choy_seeds", 25),
+                entryAllSeasons("stardewcraft:yam_seeds", 30),
+                entryAllSeasons("stardewcraft:cranberry_seeds", 120),
+                entryAllSeasons("stardewcraft:wheat_seeds", 5),
+                entryAllSeasons("stardewcraft:fairy_rose_seeds", 100),
+                entryAllSeasons("stardewcraft:amaranth_seeds", 35),
+                entryAllSeasons("stardewcraft:grape_seeds", 30),
+                entryAllSeasons("stardewcraft:sunflower_seeds", 200),
+                entryAllSeasonsYear("stardewcraft:artichoke_seeds", 15, 2),
+                entryAllSeasons("stardewcraft:scarecrow_7", 5000),
+                entryAllSeasons("stardewcraft:scarecrow_8", 5000)
+            ),
+            Set.of()
+        ));
+
+        // -------------------------------------------------------------------
         // Joja Mart — SDV source: 源文件/Content/Data/Shops.json "Joja" section.
         //
         // SDV pricing rule (PriceModifiers):
@@ -1211,6 +1310,10 @@ public final class ShopRegistry {
                     && data.hasMailFlag(com.stardew.craft.festival.FairFestivalService.FAIR_STARDROP_FLAG)) {
                 continue;
             }
+            if (shopId.startsWith("Festival_NightMarket_MagicBoat_")
+                    && !meetsNightMarketMuseumCondition(player, e.itemId())) {
+                continue;
+            }
             // SDV parity: mine-level and mail-flag conditions
             if (!e.meetsPlayerConditions(playerMineLevel, playerMailFlags)) continue;
             if ("JojaMart".equals(shopId)
@@ -1307,6 +1410,35 @@ public final class ShopRegistry {
             return marked;
         }
         return result;
+    }
+
+    private static boolean meetsNightMarketMuseumCondition(
+            net.minecraft.server.level.ServerPlayer player,
+            String itemId) {
+        if (!"stardewcraft:scarecrow_7".equals(itemId)
+                && !"stardewcraft:scarecrow_8".equals(itemId)) {
+            return true;
+        }
+
+        Set<String> donated = com.stardew.craft.museum.MuseumDonationData
+                .get(player.serverLevel())
+                .getDonatedItems(player.getUUID());
+        int artifactCount = 0;
+        int mineralCount = 0;
+        for (String donatedItemId : donated) {
+            Item item = com.stardew.craft.museum.MuseumRewardRegistry.resolveItem(donatedItemId);
+            if (item instanceof com.stardew.craft.item.IStardewItem stardewItem) {
+                String typeKey = stardewItem.getItemTypeKey();
+                if ("stardewcraft.type.artifact".equals(typeKey)) {
+                    artifactCount++;
+                } else if ("stardewcraft.type.mineral".equals(typeKey)) {
+                    mineralCount++;
+                }
+            }
+        }
+        return "stardewcraft:scarecrow_7".equals(itemId)
+                ? artifactCount >= 20
+                : artifactCount + mineralCount >= 40;
     }
 
     private static void appendDesertFestivalEggShopRandomFood(

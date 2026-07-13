@@ -1739,6 +1739,21 @@ public class PacketHandler {
             com.stardew.craft.network.payload.DesertFestivalRaceActionPayload::handle
         );
         registrar.playToClient(
+            com.stardew.craft.network.payload.OpenNightMarketMermaidPayload.TYPE,
+            com.stardew.craft.network.payload.OpenNightMarketMermaidPayload.STREAM_CODEC,
+            com.stardew.craft.network.payload.OpenNightMarketMermaidPayload::handle
+        );
+        registrar.playToServer(
+            com.stardew.craft.network.payload.NightMarketMermaidActionPayload.TYPE,
+            com.stardew.craft.network.payload.NightMarketMermaidActionPayload.STREAM_CODEC,
+            com.stardew.craft.network.payload.NightMarketMermaidActionPayload::handle
+        );
+        registrar.playToClient(
+            com.stardew.craft.network.payload.NightMarketStatePayload.TYPE,
+            com.stardew.craft.network.payload.NightMarketStatePayload.STREAM_CODEC,
+            com.stardew.craft.network.payload.NightMarketStatePayload::handle
+        );
+        registrar.playToClient(
             com.stardew.craft.network.payload.OpenDesertFestivalQuestionPayload.TYPE,
             com.stardew.craft.network.payload.OpenDesertFestivalQuestionPayload.STREAM_CODEC,
             com.stardew.craft.network.payload.OpenDesertFestivalQuestionPayload::handle

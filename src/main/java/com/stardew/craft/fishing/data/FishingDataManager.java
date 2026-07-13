@@ -186,12 +186,15 @@ public final class FishingDataManager {
 		boolean festivalFishingGame = fairFishingGame || iceFishingContest;
 		List<String> lookupKeys = festivalFishingGame
 				? List.of("fishingGame")
-				: resolveVanillaAlignedLocationKeys(level, level.getBiome(bobberPos));
-		boolean poolOnly = festivalFishingGame || useDesertFestivalPoolOnly(level.getBiome(bobberPos));
+				: resolveVanillaAlignedLocationKeys(level, level.getBiome(bobberPos), bobberPos);
+		Holder<Biome> biomeHolder = level.getBiome(bobberPos);
+		boolean nightMarketFishing = com.stardew.craft.festival.nightmarket.NightMarketSubmarineService
+				.isInsideSubmarineBounds(bobberPos)
+				|| hasBiomeTag(biomeHolder, "stardewcraft:is_night_market");
+		boolean poolOnly = festivalFishingGame || nightMarketFishing || useDesertFestivalPoolOnly(biomeHolder);
 
 		// 获取浮漂位置的群系
 		@SuppressWarnings("null")
-		Holder<Biome> biomeHolder = level.getBiome(bobberPos);
 		ResourceLocation biomeId = biomeHolder.unwrapKey()
 				.map(key -> key.location())
 				.orElse(ResourceLocation.withDefaultNamespace("plains"));
@@ -470,17 +473,33 @@ public final class FishingDataManager {
 	/**
 	 * Match vanilla location buckets first (from Data/Locations), then fall back to legacy keys.
 	 */
-	private List<String> resolveVanillaAlignedLocationKeys(ServerLevel level, Holder<Biome> biomeHolder) {
-		return resolveVanillaAlignedLocationKeysStatic(level, biomeHolder);
+	private List<String> resolveVanillaAlignedLocationKeys(
+			ServerLevel level,
+			Holder<Biome> biomeHolder,
+			BlockPos position) {
+		return resolveVanillaAlignedLocationKeysStatic(level, biomeHolder, position);
 	}
 
 	/** Public access for systems outside selection (e.g. splash-point ticker). */
 	public static List<String> resolveVanillaAlignedLocationKeysStatic(ServerLevel level, Holder<Biome> biomeHolder) {
+		return resolveVanillaAlignedLocationKeysStatic(level, biomeHolder, null);
+	}
+
+	/** Position-aware access for fixed sublocations which share an overworld biome. */
+	public static List<String> resolveVanillaAlignedLocationKeysStatic(
+			ServerLevel level,
+			Holder<Biome> biomeHolder,
+			BlockPos position) {
+		if (com.stardew.craft.festival.nightmarket.NightMarketSubmarineService
+				.isInsideSubmarineBounds(position)) {
+			return List.of("Submarine");
+		}
+
 		List<String> keys = new ArrayList<>();
 
 		if (hasBiomeTag(biomeHolder, "stardewcraft:is_night_market")) {
 			keys.add("BeachNightMarket");
-			keys.add("Submarine");
+			keys.add("Beach");
 		}
 		if (hasBiomeTag(biomeHolder, "stardewcraft:is_pirate_cove")) {
 			keys.add("IslandSouthEastCave");

@@ -144,6 +144,19 @@ public final class FestivalMapOverlayRegistry {
             true
         ));
         register(new FestivalMapOverlayDefinition(
+            "BeachNightMarket",
+            "Beach",
+            new BlockPos(13, 40, 127),
+            "",
+            "data/stardewcraft/structures/festivals/night_market_beach.schem",
+            new BlockPos(13, 40, 127),
+            new BlockPos(127, 78, 180),
+            List.of(),
+            true,
+            true,
+            true
+        ));
+        register(new FestivalMapOverlayDefinition(
             "Forest-IceFestival",
             "Forest",
             new BlockPos(-192, 63, -2),

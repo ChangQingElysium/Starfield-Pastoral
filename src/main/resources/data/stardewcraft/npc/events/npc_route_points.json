@@ -37,6 +37,103 @@
       "note": "沙漠返程公交传送点",
       "indoor": false
     },
+    "_comment_night_market_visitors": "=== Night Market confirmed NPC positions ===",
+    "night_market_day1_linus": {
+      "x": 43, "y": 60, "z": 94, "indoor": false,
+      "note": "Night Market day 1 Linus, south"
+    },
+    "night_market_day1_jas": {
+      "x": 43, "y": 60, "z": 134, "indoor": false,
+      "note": "Night Market day 1 Jas, south"
+    },
+    "night_market_day1_shane": {
+      "x": 45, "y": 60, "z": 134, "indoor": false,
+      "note": "Night Market day 1 Shane, south"
+    },
+    "night_market_day1_emily": {
+      "x": 56, "y": 60, "z": 156, "indoor": false,
+      "note": "Night Market day 1 Emily, south"
+    },
+    "night_market_day1_abigail": {
+      "x": 65, "y": 60, "z": 151, "indoor": false,
+      "note": "Night Market day 1 Abigail, south"
+    },
+    "night_market_day1_penny": {
+      "x": 74, "y": 60, "z": 156, "indoor": false,
+      "note": "Night Market day 1 Penny, south"
+    },
+    "night_market_day1_clint": {
+      "x": 74, "y": 60, "z": 145, "indoor": false,
+      "note": "Night Market day 1 Clint, east"
+    },
+    "night_market_day1_harvey": {
+      "x": 74, "y": 60, "z": 142, "indoor": false,
+      "note": "Night Market day 1 Harvey, east"
+    },
+    "night_market_day1_leah": {
+      "x": 82, "y": 60, "z": 155, "indoor": false,
+      "note": "Night Market day 1 Leah, north"
+    },
+    "night_market_day2_vincent": {
+      "x": 46, "y": 60, "z": 133, "indoor": false,
+      "note": "Night Market day 2 Vincent, south"
+    },
+    "night_market_day2_robin": {
+      "x": 38, "y": 60, "z": 146, "indoor": false,
+      "note": "Night Market day 2 Robin, east"
+    },
+    "night_market_day2_demetrius": {
+      "x": 35, "y": 60, "z": 153, "indoor": false,
+      "note": "Night Market day 2 Demetrius, west"
+    },
+    "night_market_day2_maru": {
+      "x": 35, "y": 60, "z": 155, "indoor": false,
+      "note": "Night Market day 2 Maru, west"
+    },
+    "night_market_day2_sebastian": {
+      "x": 36, "y": 60, "z": 156, "indoor": false,
+      "note": "Night Market day 2 Sebastian, south"
+    },
+    "night_market_day2_caroline": {
+      "x": 54, "y": 60, "z": 147, "indoor": false,
+      "note": "Night Market day 2 Caroline, west"
+    },
+    "night_market_day2_haley": {
+      "x": 59, "y": 60, "z": 150, "indoor": false,
+      "note": "Night Market day 2 Haley, south"
+    },
+    "night_market_day2_lewis": {
+      "x": 79, "y": 60, "z": 152, "indoor": false,
+      "note": "Night Market day 2 Lewis, south"
+    },
+    "night_market_day2_marnie": {
+      "x": 76, "y": 60, "z": 139, "indoor": false,
+      "note": "Night Market day 2 Marnie, north"
+    },
+    "night_market_day3_jodi": {
+      "x": 46, "y": 60, "z": 133, "indoor": false,
+      "note": "Night Market day 3 Jodi, south"
+    },
+    "night_market_day3_alex": {
+      "x": 58, "y": 60, "z": 132, "indoor": false,
+      "note": "Night Market day 3 Alex, east"
+    },
+    "night_market_day3_sam": {
+      "x": 34, "y": 60, "z": 155, "indoor": false,
+      "note": "Night Market day 3 Sam, west"
+    },
+    "night_market_day3_george": {
+      "x": 36, "y": 60, "z": 156, "indoor": false,
+      "note": "Night Market day 3 George, south"
+    },
+    "night_market_day3_evelyn": {
+      "x": 37, "y": 60, "z": 156, "indoor": false,
+      "note": "Night Market day 3 Evelyn, south"
+    },
+    "night_market_day3_elliott": {
+      "x": 74, "y": 60, "z": 156, "indoor": false,
+      "note": "Night Market day 3 Elliott, south"
+    },
     "desert_festival_stall_a": {
       "x": -215,
       "y": 64,

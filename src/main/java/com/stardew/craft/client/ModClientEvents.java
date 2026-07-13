@@ -1304,5 +1304,6 @@ public class ModClientEvents {
         // evaluated before the next PlayerDataSyncPacket arrives.
         com.stardew.craft.client.ClientPlayerDataCache.reset();
         com.stardew.craft.client.hud.StardewTimeHud.resetTimeSync();
+        com.stardew.craft.client.sound.StardewMusicManager.setNightMarketFestivalOpen(false);
     }
 }

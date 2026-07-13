@@ -1,5 +1,53 @@
 # Changelog
 
+## 0.4.13 - 2026-07-14
+
+### Update Log (English)
+
+#### Night Market
+
+- Added the Winter 15-17 Night Market as a multi-day passive Beach festival, including the confirmed Beach overlay, normal time progression, debug apply support, Beach ocean ambience before opening, Night Market music after 5 PM, and cleanup after the final night.
+- Added Famous Painter Lupini with the source-aligned nine-painting three-year rotation, painting furniture assets and icons, 1200g pricing, and the vanilla world/party-shared daily sold state: only one painting is available to the farm each night.
+- Added the free daily coffee merchant, 250g farm warper, decoration boat, supported daily magic boat stock, and the Night Market traveling cart with the Year 1 red-cabbage guarantee visit counter updated across all three nights.
+- Added the direct-entry 1000g submarine fishing tour using the confirmed entrance, exit and submarine bounds, with the source deep-sea fishing pool and submarine music.
+- Added the full 2D Mermaid Show using the original visual and timing sequence, music and effects, clickable clam notes, source password order, delayed pearl reward, and per-player `gotPearl` state.
+- Added source-timed Night Market schedule overrides for the 24 currently supported visiting NPCs, using the confirmed Minecraft positions and facings for each night, automatic return to normal schedules, and their original English and Simplified Chinese schedule dialogue.
+- Restored vanilla calendar festival markers, animation, lock state, and combined hover text for active festivals, passive festivals, and fishing derbies.
+
+#### Night Market Resources And Runtime
+
+- Added the Night Market Beach schematic, painting models and textures, Mermaid Show screen resources, supported plant/decor shop assets, and the verified Night Market, submarine and Mermaid audio resources.
+- Extended shared passive-festival, interaction hint, shop, NPC schedule, fishing-location, music, wall-decoration and farm-warper infrastructure used by the Night Market.
+- Fixed passive Night Market time progression, Beach/Night Market music transitions, farm-warper interaction cleanup, deep-sea fishing-area selection, and duplicate managed-animal loading encountered during integration.
+- Extended the festival actor-map renderer with source-schedule Night Market point maps for Winter 15, 16 and 17.
+
+#### Release
+
+- Updated the public mod version to `0.4.13`.
+
+### 更新日志（中文）
+
+#### 夜市
+
+- 加入冬 15-17 日多日被动型沙滩夜市，包含已确认的 Beach overlay、正常时间流逝、debug apply、开市前的沙滩海洋环境音、下午 5 点后的夜市音乐，以及最终一夜后的清理。
+- 加入著名画家卢皮尼，包含对照源码的九幅画三年轮换、画作家具资源与图标、1200 金价格，以及原版的每日世界/队伍共享售罄状态：每晚整个农场只有一幅可购买画作。
+- 加入每日免费咖啡商人、250 金农场传送图腾、饰品商船、已支持的每日魔法商船库存，以及夜市旅行货车；第一年红叶卷心菜保底访问计数会在夜市三天正确递减。
+- 使用已确认的入口、出口与潜艇范围加入 1000 金直接入场潜艇垂钓之旅，包含原版深海钓鱼池与潜艇音乐。
+- 使用原版画面、时序、音乐与特效加入完整 2D 美人鱼秀，包含可点击的贝壳音符、原版密码顺序、延迟珍珠奖励与玩家独立 `gotPearl` 状态。
+- 为当前已支持的 24 名夜市访客加入对照源码到场/离场时间的日程覆盖，使用每晚已确认的 Minecraft 坐标与朝向，支持离场后自动恢复普通日程，并接入原版英文与简体中文日程对话。
+- 恢复原版日历中的普通节日、被动节日与钓鱼赛事标记、动画、锁定状态及组合悬停文本。
+
+#### 夜市资源与运行时
+
+- 加入夜市沙滩 schematic、画作模型与贴图、美人鱼秀界面资源、已支持的盆栽/装饰商店资源，以及已核对的夜市、潜艇与美人鱼音频资源。
+- 扩展夜市复用的共享被动节日、交互提示、商店、NPC 日程、钓鱼地点、音乐、壁挂装饰与农场传送图腾架构。
+- 修复接入期间发现的夜市被动时间流逝、沙滩/夜市音乐切换、农场图腾交互清理、深海钓鱼区域选择，以及受管动物重复加载问题。
+- 扩展节日 NPC 点位图工具，可根据原版日程生成冬 15、16、17 日夜市点位图。
+
+#### 发布
+
+- 项目公开版本号更新为 `0.4.13`。
+
 ## 0.4.12fix1 - 2026-07-11
 
 ### Update Log (English)

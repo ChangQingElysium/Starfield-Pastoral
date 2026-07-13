@@ -1,9 +1,9 @@
 {
   "variants": {
-    "part=main,facing=north": { "model": "stardewcraft:decor/common/bonsai_6_5" },
-    "part=main,facing=east": { "model": "stardewcraft:decor/common/bonsai_6_5", "y": 90 },
-    "part=main,facing=south": { "model": "stardewcraft:decor/common/bonsai_6_5", "y": 180 },
-    "part=main,facing=west": { "model": "stardewcraft:decor/common/bonsai_6_5", "y": 270 },
+    "part=main,facing=north": { "model": "stardewcraft:decor/plants/cactus_pot" },
+    "part=main,facing=east": { "model": "stardewcraft:decor/plants/cactus_pot", "y": 90 },
+    "part=main,facing=south": { "model": "stardewcraft:decor/plants/cactus_pot", "y": 180 },
+    "part=main,facing=west": { "model": "stardewcraft:decor/plants/cactus_pot", "y": 270 },
     "part=extension,facing=north": { "model": "stardewcraft:block/decor/extensions/bonsai_6_5_extension_empty" },
     "part=extension,facing=east": { "model": "stardewcraft:block/decor/extensions/bonsai_6_5_extension_empty" },
     "part=extension,facing=south": { "model": "stardewcraft:block/decor/extensions/bonsai_6_5_extension_empty" },

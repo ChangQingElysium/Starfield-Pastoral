@@ -2,6 +2,8 @@ package com.stardew.craft.event;
 
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.animal.data.AnimalWorldData;
+import com.stardew.craft.animal.model.AnimalBuildingRecord;
+import com.stardew.craft.animal.model.FarmAnimalRecord;
 import com.stardew.craft.entity.animal.BaseCoopAnimalEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -41,11 +43,14 @@ public class AnimalDuplicateGuardEvents {
         // 防止递归处理
         if (processingIds.contains(managedId)) return;
 
-        // 检查是否在 AnimalWorldData 中存在该动物记录
         AnimalWorldData data = AnimalWorldData.get(level);
-        if (data.getAnimal(managedId).isEmpty()) {
-            // 数据中不存在该动物，可能是残留实体，移除
-            StardewCraft.LOGGER.info("[ANIMAL_GUARD] Discarding orphan entity with managedId {} (not in data)", managedId);
+        FarmAnimalRecord record = data.getAnimal(managedId).orElse(null);
+        AnimalBuildingRecord building = record == null
+            ? null
+            : data.getBuilding(record.buildingId()).orElse(null);
+        if (record == null || building == null
+            || !level.dimension().location().toString().equals(building.dimensionId())) {
+            StardewCraft.LOGGER.info("[ANIMAL_GUARD] Discarding managed animal {} without an active building", managedId);
             event.setCanceled(true);
             animal.discard();
             return;
