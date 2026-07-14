@@ -3,6 +3,8 @@ package com.stardew.craft.cutscene.server;
 import com.stardew.craft.cutscene.data.EventData;
 import com.stardew.craft.cutscene.data.EventPrecondition;
 import com.stardew.craft.cutscene.data.EventRegistry;
+import com.stardew.craft.api.v1.condition.StardewConditionContext;
+import com.stardew.craft.api.v1.condition.StardewConditions;
 import com.stardew.craft.npc.runtime.NpcFriendshipDataManager;
 import com.stardew.craft.player.PlayerDataManager;
 import com.stardew.craft.player.PlayerStardewData;
@@ -11,6 +13,8 @@ import com.stardew.craft.time.StardewTimeManager;
 import com.stardew.craft.weather.WeatherManager;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Items;
 
 import java.util.List;
 import java.util.Locale;
@@ -72,7 +76,12 @@ public final class ServerPreconditionEvaluator {
             case "day_of_week" -> checkDayOfWeek(level, p);
             case "day_of_month" -> checkDayOfMonth(level, p);
             case "days_played" -> checkDaysPlayed(p);
+            case "year" -> checkYear(p);
             case "player_farm_age_days" -> checkPlayerFarmAgeDays(player, p);
+            case "has_item" -> checkHasItem(player, p);
+            case "has_museum_donation" -> checkHasMuseumDonation(player, level);
+            case "museum_empty" -> com.stardew.craft.museum.MuseumDonationData.get(level)
+                    .getDonatedItems(player.getUUID()).isEmpty();
             case "money" -> com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player) >= p.getInt("min", 0);
             case "skill" -> checkSkill(player, p);
             case "mail", "flag" -> {
@@ -84,7 +93,12 @@ public final class ServerPreconditionEvaluator {
                 yield !data.hasMailFlag(p.getString("id"));
             }
             case "is_host" -> isStoryHost(player);
-            default -> true;
+            default -> StardewConditions.decodeLegacy(p.type(), p.raw())
+                    .flatMap(condition -> StardewConditions.test(
+                            condition,
+                            new StardewConditionContext(level, player)))
+                    .result()
+                    .orElse(false);
         };
     }
 
@@ -162,6 +176,17 @@ public final class ServerPreconditionEvaluator {
         return total >= min && total <= max;
     }
 
+    private static boolean checkYear(EventPrecondition p) {
+        int current = StardewTimeManager.get().getCurrentYear();
+        int exact = p.getInt("year", -1);
+        if (exact > 0) {
+            return current == exact;
+        }
+        int min = p.getInt("min", 1);
+        int max = p.getInt("max", Integer.MAX_VALUE);
+        return current >= min && current <= max;
+    }
+
     private static boolean checkPlayerFarmAgeDays(ServerPlayer player, EventPrecondition p) {
         PlayerStardewData data = PlayerDataManager.getPlayerData(player);
         int firstJoinDay = data.getFirstJoinDay();
@@ -185,5 +210,28 @@ public final class ServerPreconditionEvaluator {
         } catch (IllegalArgumentException e) {
             return true;
         }
+    }
+
+    private static boolean checkHasItem(ServerPlayer player, EventPrecondition p) {
+        String itemId = p.getString("item");
+        int count = p.getInt("count", 1);
+        if (itemId == null || itemId.isBlank() || count <= 0) return false;
+        try {
+            var item = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(ResourceLocation.parse(itemId));
+            return item != Items.AIR && player.getInventory().countItem(item) >= count;
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
+
+    private static boolean checkHasMuseumDonation(ServerPlayer player, ServerLevel level) {
+        var data = com.stardew.craft.museum.MuseumDonationData.get(level);
+        for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
+            var stack = player.getInventory().getItem(slot);
+            if (!com.stardew.craft.museum.MuseumDonationItems.isDonatable(stack)) continue;
+            String itemId = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
+            if (!data.isDonated(player.getUUID(), itemId)) return true;
+        }
+        return false;
     }
 }

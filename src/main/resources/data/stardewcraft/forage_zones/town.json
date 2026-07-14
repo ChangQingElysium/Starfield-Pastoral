@@ -1,0 +1,17 @@
+{
+  "areas": [
+    { "min_x": -40, "min_y": 62, "min_z": -99, "max_x": 91, "max_y": 84, "max_z": 17 }
+  ],
+  "min_daily_spawn": 1,
+  "max_daily_spawn": 4,
+  "max_spawned_at_once": 6,
+  "surface": "natural",
+  "entries": [
+    { "block": "stardewcraft:forage_daffodil", "seasons": ["spring"], "chance": 0.9 },
+    { "block": "stardewcraft:forage_sweet_pea", "seasons": ["summer"], "chance": 0.9 },
+    { "block": "stardewcraft:forage_blackberry", "seasons": ["fall"], "chance": 0.6 },
+    { "block": "stardewcraft:forage_crocus", "seasons": ["winter"], "chance": 0.7 },
+    { "block": "stardewcraft:forage_crystal_fruit", "seasons": ["winter"], "chance": 0.1 },
+    { "block": "stardewcraft:forage_holly", "seasons": ["winter"], "chance": 0.5 }
+  ]
+}

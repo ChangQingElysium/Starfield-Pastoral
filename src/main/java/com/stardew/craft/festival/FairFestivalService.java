@@ -11,7 +11,7 @@ import com.stardew.craft.farm.FarmInstance;
 import com.stardew.craft.farm.FarmInstanceRegistry;
 import com.stardew.craft.festival.fair.FairFishingGameService;
 import com.stardew.craft.festival.fair.FairSlingshotGameService;
-import com.stardew.craft.item.IStardewItem;
+import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.item.quality.QualityHelper;
 import com.stardew.craft.menu.FairGrangeDisplayMenu;
@@ -912,9 +912,9 @@ public final class FairFestivalService {
         if (stack == null || stack.isEmpty()) {
             return null;
         }
-        if (stack.getItem() instanceof IStardewItem stardewItem) {
-            String typeKey = stardewItem.getItemTypeKey();
-            int price = Math.max(0, stardewItem.getSellPrice(stack));
+        String typeKey = StardewItemDataApi.getTypeKey(stack);
+        if (!typeKey.isBlank()) {
+            int price = Math.max(0, StardewItemDataApi.getSellPrice(stack));
             if (price <= 0
                 || "stardewcraft.type.tool".equals(typeKey)
                 || "stardewcraft.type.furniture".equals(typeKey)

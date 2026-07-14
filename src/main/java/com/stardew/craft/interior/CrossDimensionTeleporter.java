@@ -180,7 +180,7 @@ public final class CrossDimensionTeleporter {
         com.stardew.craft.farm.FarmInstanceRegistry registry = com.stardew.craft.farm.FarmInstanceRegistry.get();
         com.stardew.craft.farm.FarmInstance farm = registry.getFarmForPlayer(player.getUUID());
         if (farm == null) {
-            ObjectDialogueService.show(player, Component.literal("请先创建自己的农场。"));
+            ObjectDialogueService.show(player, Component.translatable("stardewcraft.farm.create_first"));
             StardewCraft.LOGGER.warn("[WIZARD] Refused Stardew outdoor teleport for {}: no personal farm",
                 player.getName().getString());
             return;
@@ -328,12 +328,12 @@ public final class CrossDimensionTeleporter {
         player.sendSystemMessage(Component.literal(""));
         player.sendSystemMessage(Component.literal("§6§l═══════════ §e§lStardewCraft §6§l═══════════"));
         player.sendSystemMessage(Component.literal(""));
-        player.sendSystemMessage(Component.literal("§c§l⚠ §f本模组尚在内测，有很多未完成的地方，不代表最终品质。"));
+        player.sendSystemMessage(Component.translatable("stardewcraft.welcome.beta_warning"));
         player.sendSystemMessage(Component.literal(""));
-        player.sendSystemMessage(Component.literal("§b§l✉ §f如果你遇到 Bug 或想提建议，欢迎私信作者 B 站账号反馈！"));
+        player.sendSystemMessage(Component.translatable("stardewcraft.welcome.feedback"));
         player.sendSystemMessage(Component.literal(""));
-        player.sendSystemMessage(Component.literal("§a§l📖 §f模组目前没有教程，主界面按 §e§lV §f键（可在按键设置中更改）打开。"));
-        player.sendSystemMessage(Component.literal("§7   可以根据游玩星露谷物语的直觉来游玩本模组。"));
+        player.sendSystemMessage(Component.translatable("stardewcraft.welcome.menu_hint"));
+        player.sendSystemMessage(Component.translatable("stardewcraft.welcome.intuition_hint"));
         player.sendSystemMessage(Component.literal(""));
         player.sendSystemMessage(Component.literal("§6§l═══════════════════════════════════"));
         player.sendSystemMessage(Component.literal(""));
@@ -346,16 +346,16 @@ public final class CrossDimensionTeleporter {
         PlayerStardewData data = PlayerDataManager.getPlayerData(player);
         if (data.isBilibiliRewardClaimed()) return;
 
-        MutableComponent clickMsg = Component.literal("§b§l§n[点击关注作者B站主页]")
+        MutableComponent clickMsg = Component.translatable("stardewcraft.bilibili.follow_link")
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/stardew bilibili_claim"))
                 .withUnderlined(true)
                 .withColor(ChatFormatting.AQUA));
-        MutableComponent hint = Component.literal(" §e§l← 点击获取神秘礼物！");
+        MutableComponent hint = Component.translatable("stardewcraft.bilibili.gift_hint");
 
-        player.sendSystemMessage(Component.literal("§d§l✦ §e§l关注作者 §d§l✦"));
+        player.sendSystemMessage(Component.translatable("stardewcraft.bilibili.follow_title"));
         player.sendSystemMessage(Component.literal(""));
-        player.sendSystemMessage(Component.literal("§f  欢迎关注作者 B 站账号，获取最新开发动态："));
+        player.sendSystemMessage(Component.translatable("stardewcraft.bilibili.follow_description"));
         player.sendSystemMessage(Component.literal("  ").append(clickMsg).append(hint));
         player.sendSystemMessage(Component.literal(""));
         player.sendSystemMessage(Component.literal("§6§l═══════════════════════════════════"));
@@ -367,19 +367,19 @@ public final class CrossDimensionTeleporter {
      */
     private static void sendRuneAnnouncement(ServerPlayer player) {
         player.sendSystemMessage(Component.literal(""));
-        player.sendSystemMessage(Component.literal("§a§l🌿 §a═══════ §e§l祝尼魔的馈赠 §a═══════"));
+        player.sendSystemMessage(Component.translatable("stardewcraft.welcome.rune.title"));
         player.sendSystemMessage(Component.literal(""));
-        player.sendSystemMessage(Component.literal("§f  你感受到了一股温暖而神秘的魔力……"));
+        player.sendSystemMessage(Component.translatable("stardewcraft.welcome.rune.line1"));
         player.sendSystemMessage(Component.literal(""));
-        player.sendSystemMessage(Component.literal("§f  森林深处的§a祝尼魔§f们感应到了你在寒冬中的到来。"));
-        player.sendSystemMessage(Component.literal("§f  它们不忍看你的第一个冬天颗粒无收，"));
-        player.sendSystemMessage(Component.literal("§f  悄悄在你的木箱中放入了一枚§e温室符文§f。"));
+        player.sendSystemMessage(Component.translatable("stardewcraft.welcome.rune.line2"));
+        player.sendSystemMessage(Component.translatable("stardewcraft.welcome.rune.line3"));
+        player.sendSystemMessage(Component.translatable("stardewcraft.welcome.rune.line4"));
         player.sendSystemMessage(Component.literal(""));
-        player.sendSystemMessage(Component.literal("§7  将符文放置在农田中央，7×7 范围内的作物"));
-        player.sendSystemMessage(Component.literal("§7  将不受季节限制，安然生长整个冬天。"));
-        player.sendSystemMessage(Component.literal("§7  符文的魔力会在下个季节来临时自然消散。"));
+        player.sendSystemMessage(Component.translatable("stardewcraft.welcome.rune.line5"));
+        player.sendSystemMessage(Component.translatable("stardewcraft.welcome.rune.line6"));
+        player.sendSystemMessage(Component.translatable("stardewcraft.welcome.rune.line7"));
         player.sendSystemMessage(Component.literal(""));
-        player.sendSystemMessage(Component.literal("§a  ——愿星之果实庇佑你度过这个隆冬 §e❄"));
+        player.sendSystemMessage(Component.translatable("stardewcraft.welcome.rune.closing"));
         player.sendSystemMessage(Component.literal(""));
         player.sendSystemMessage(Component.literal("§a═══════════════════════════════════"));
         player.sendSystemMessage(Component.literal(""));

@@ -1,0 +1,22 @@
+{
+  "inputs": ["minecraft:amethyst_cluster"],
+  "available_when": [
+    {"type": "stardewcraft:always", "data": {"value": true}}
+  ],
+  "entries": [
+    {
+      "weight": 3,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {"item": "minecraft:amethyst_shard", "count": 3}
+      }
+    },
+    {
+      "weight": 1,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {"item": "minecraft:diamond", "count": 1}
+      }
+    }
+  ]
+}

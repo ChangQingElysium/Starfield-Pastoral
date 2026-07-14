@@ -1,0 +1,186 @@
+{
+  "legacy_id": "AdventureShop",
+  "owner_npc": "Marlon",
+  "owner_dialogue": "stardewcraft.shop.adventureshop.dialogue",
+  "entries": [
+    {
+      "item": "stardewcraft:rusty_sword",
+      "price": 250
+    },
+    {
+      "item": "stardewcraft:wooden_blade",
+      "price": 250
+    },
+    {
+      "item": "stardewcraft:steel_smallsword",
+      "price": 750,
+      "min_mine_level": 20
+    },
+    {
+      "item": "stardewcraft:silver_saber",
+      "price": 750,
+      "min_mine_level": 20
+    },
+    {
+      "item": "stardewcraft:pirate_sword",
+      "price": 850,
+      "min_mine_level": 25
+    },
+    {
+      "item": "stardewcraft:cutlass",
+      "price": 1500,
+      "min_mine_level": 25
+    },
+    {
+      "item": "stardewcraft:iron_edge",
+      "price": 2000,
+      "min_mine_level": 40
+    },
+    {
+      "item": "stardewcraft:forest_sword",
+      "price": 2000,
+      "min_mine_level": 40
+    },
+    {
+      "item": "stardewcraft:tempered_broadsword",
+      "price": 4000,
+      "min_mine_level": 55
+    },
+    {
+      "item": "stardewcraft:bone_sword",
+      "price": 6000,
+      "min_mine_level": 75
+    },
+    {
+      "item": "stardewcraft:steel_falchion",
+      "price": 9000,
+      "min_mine_level": 90
+    },
+    {
+      "item": "stardewcraft:obsidian_edge",
+      "price": 9000,
+      "min_mine_level": 90
+    },
+    {
+      "item": "stardewcraft:lava_katana",
+      "price": 25000,
+      "min_mine_level": 120
+    },
+    {
+      "item": "stardewcraft:galaxy_sword",
+      "price": 50000,
+      "mail_flag": "galaxySword"
+    },
+    {
+      "item": "stardewcraft:carving_knife",
+      "price": 100
+    },
+    {
+      "item": "stardewcraft:wind_spire",
+      "price": 500,
+      "min_mine_level": 15
+    },
+    {
+      "item": "stardewcraft:elf_blade",
+      "price": 750,
+      "min_mine_level": 20
+    },
+    {
+      "item": "stardewcraft:iron_dirk",
+      "price": 500,
+      "min_mine_level": 15
+    },
+    {
+      "item": "stardewcraft:crystal_dagger",
+      "price": 4500,
+      "min_mine_level": 60
+    },
+    {
+      "item": "stardewcraft:shadow_dagger",
+      "price": 2000,
+      "min_mine_level": 45
+    },
+    {
+      "item": "stardewcraft:galaxy_dagger",
+      "price": 35000,
+      "mail_flag": "galaxySword"
+    },
+    {
+      "item": "stardewcraft:sneakers",
+      "price": 500
+    },
+    {
+      "item": "stardewcraft:rubber_boots",
+      "price": 500,
+      "min_mine_level": 10
+    },
+    {
+      "item": "stardewcraft:leather_boots",
+      "price": 500,
+      "min_mine_level": 10
+    },
+    {
+      "item": "stardewcraft:tundra_boots",
+      "price": 750,
+      "min_mine_level": 50
+    },
+    {
+      "item": "stardewcraft:thermal_boots",
+      "price": 1250,
+      "min_mine_level": 40
+    },
+    {
+      "item": "stardewcraft:combat_boots",
+      "price": 2000,
+      "min_mine_level": 40
+    },
+    {
+      "item": "stardewcraft:dark_boots",
+      "price": 2500,
+      "min_mine_level": 80
+    },
+    {
+      "item": "stardewcraft:firewalker_boots",
+      "price": 2000,
+      "min_mine_level": 80
+    },
+    {
+      "item": "stardewcraft:space_boots",
+      "price": 5000,
+      "min_mine_level": 110
+    },
+    {
+      "item": "stardewcraft:small_glow_ring",
+      "price": 1000
+    },
+    {
+      "item": "stardewcraft:glow_ring",
+      "price": 2000,
+      "min_mine_level": 40
+    },
+    {
+      "item": "stardewcraft:small_magnet_ring",
+      "price": 1000
+    },
+    {
+      "item": "stardewcraft:magnet_ring",
+      "price": 2000,
+      "min_mine_level": 80
+    },
+    {
+      "item": "stardewcraft:immunity_band",
+      "price": 4000,
+      "min_mine_level": 80
+    }
+  ],
+  "accepted_sell_types": [
+    "stardewcraft.type.boots",
+    "stardewcraft.type.monster_loot",
+    "stardewcraft.type.ring",
+    "stardewcraft.type.weapon",
+    "stardewcraft.type.weapon.club",
+    "stardewcraft.type.weapon.dagger",
+    "stardewcraft.type.weapon.slingshot",
+    "stardewcraft.type.weapon.sword"
+  ]
+}

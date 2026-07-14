@@ -1,0 +1,39 @@
+{
+  "legacy_id": "Robin",
+  "requester": "Robin",
+  "duration": "week",
+  "repeatable": false,
+  "required_tags": [],
+  "title": "stardewcraft.special_orders.Robin.name",
+  "text": "stardewcraft.special_orders.Robin.text",
+  "objectives": [
+    {
+      "type": "collect",
+      "text": "stardewcraft.special_orders.Robin_Objective_0_Text",
+      "required_count": 80,
+      "accepted_tags": "item_hardwood"
+    },
+    {
+      "type": "donate",
+      "text": "stardewcraft.special_orders.Robin_Objective_1_Text",
+      "required_count": 80,
+      "accepted_tags": "item_hardwood",
+      "drop_box": "RobinWood"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "money",
+      "amount": 2000
+    },
+    {
+      "type": "mail",
+      "mail": "robinDeluxeBed",
+      "no_letter": true
+    },
+    {
+      "type": "friendship",
+      "amount": 250
+    }
+  ]
+}

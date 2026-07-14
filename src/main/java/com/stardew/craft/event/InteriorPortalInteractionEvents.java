@@ -654,6 +654,8 @@ public class InteriorPortalInteractionEvents {
             return;
         }
 
+        unlockSkullDoorQuest(player);
+
         // 生成 floor 121 入口大厅（使用 skullkeyentrance.schem）
         com.stardew.craft.mining.MineFloorGenerator.generateFloor(mineLevel, 121);
 
@@ -684,6 +686,25 @@ public class InteriorPortalInteractionEvents {
 
         player.getPersistentData().putLong(PLAYER_LAST_PORTAL_TICK, now);
         StardewCraft.LOGGER.info("[SKULL_CAVERN] {} entered skull cavern lobby at {}", player.getName().getString(), spawn);
+    }
+
+    private static void unlockSkullDoorQuest(ServerPlayer player) {
+        boolean firstUnlock = !com.stardew.craft.mail.MailService.hasOrWillReceiveMail(player, "skullCave");
+        if (firstUnlock) {
+            ObjectDialogueService.show(player, "message.stardewcraft.skull_door_unlock");
+            com.stardew.craft.mail.MailService.addMailForTomorrow(player, "skullCave");
+        }
+
+        com.stardew.craft.quest.QuestManager qm = com.stardew.craft.quest.QuestManager.of(player);
+        if (qm == null || qm.isQuestCompleted("19")) return;
+        if (!qm.hasQuest("19")) {
+            qm.acceptQuest("19", player);
+        }
+        com.stardew.craft.quest.StardewQuest quest = qm.getQuest("19");
+        if (quest != null && !quest.isCompleted()) {
+            quest.questComplete(player);
+            qm.cleanupDestroyed(player);
+        }
     }
 
     /** 骷髅矿大厅出口：传回沙漠，朝南 */
@@ -999,7 +1020,7 @@ public class InteriorPortalInteractionEvents {
 
         net.minecraft.core.BlockPos exitPos = com.stardew.craft.greenhouse.GreenhouseManager.getExitPosForPlayer(player);
         if (exitPos == null) {
-            ObjectDialogueService.show(player, net.minecraft.network.chat.Component.literal("请先创建自己的农场。"));
+            ObjectDialogueService.show(player, net.minecraft.network.chat.Component.translatable("stardewcraft.farm.create_first"));
             StardewCraft.LOGGER.warn("[GREENHOUSE] Refused greenhouse exit for {}: no personal farm",
                     player.getName().getString());
             return;

@@ -1,0 +1,10 @@
+{
+  "floor": 30,
+  "priority": 100,
+  "reward": {
+    "type": "stardewcraft:item",
+    "data": {
+      "item": "minecraft:golden_pickaxe"
+    }
+  }
+}

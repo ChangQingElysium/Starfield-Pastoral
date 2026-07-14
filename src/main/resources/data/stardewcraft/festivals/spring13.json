@@ -1,0 +1,18 @@
+{
+  "type": "active",
+  "legacy_id": "spring13",
+  "display_name": "Egg Festival",
+  "season": 0,
+  "start_day": 13,
+  "end_day": 13,
+  "start_time": 900,
+  "end_time": 1400,
+  "start_message_key": "message.stardewcraft.festival.egg.started",
+  "announcement_mail_id": "spring_12",
+  "world": {
+    "location": "Town",
+    "map_overlay": "Town-EggFestival",
+    "shops": ["Festival_EggFestival_Pierre"],
+    "mechanic_id": "egg_hunt"
+  }
+}

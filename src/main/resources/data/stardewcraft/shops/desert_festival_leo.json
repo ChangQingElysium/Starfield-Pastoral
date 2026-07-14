@@ -1,0 +1,20 @@
+{
+  "legacy_id": "DesertFestival_Leo",
+  "owner_npc": "leo",
+  "owner_dialogue": "stardewcraft.festival.desertfestival.dialogue.vendor",
+  "entries": [
+    {
+      "item": "stardewcraft:poi",
+      "stock": 5,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 20
+    },
+    {
+      "item": "stardewcraft:tropical_curry",
+      "stock": 5,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 30
+    }
+  ],
+  "accepted_sell_types": []
+}

@@ -1,0 +1,20 @@
+{
+  "legacy_id": "DesertFestival_Caroline",
+  "owner_npc": "caroline",
+  "owner_dialogue": "stardewcraft.festival.desertfestival.dialogue.vendor",
+  "entries": [
+    {
+      "item": "stardewcraft:green_tea",
+      "stock": 5,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 10
+    },
+    {
+      "item": "stardewcraft:dandelion",
+      "stock": 5,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 10
+    }
+  ],
+  "accepted_sell_types": []
+}

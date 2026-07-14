@@ -90,7 +90,7 @@ public class CranberryCropBlock extends StardewCropBlock {
     }
 
     @Override
-    public String getCropDisplayName() {
-        return "蔓越莓";
+    public String getCropDisplayNameKey() {
+        return "item.stardewcraft.cranberry";
     }
 }

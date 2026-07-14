@@ -1,17 +1,19 @@
 package com.stardew.craft.manager;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.world.StardewWorldLootPools;
 import com.stardew.craft.block.ModBlocks;
+import com.stardew.craft.world.data.WorldLootPoolData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.neoforged.neoforge.registries.DeferredBlock;
 
 import javax.annotation.Nonnull;
 
@@ -49,35 +51,6 @@ public final class QuarrySpawnService {
     private static final int FLOOR_MIN_Y = 80;
     private static final int FLOOR_MAX_Y = 81;
 
-    // ── 普通石头：6 种 STARDEW_STONES（等价 SDV ID 32/38/40/42/668/670） ──
-    private static final java.util.List<net.neoforged.neoforge.registries.DeferredBlock<Block>> PLAIN_STONES =
-            java.util.List.of(
-                    ModBlocks.EARTH_SHALE,
-                    ModBlocks.FROST_GNEISS,
-                    ModBlocks.LAVA_BASALT,
-                    ModBlocks.BANDED_MARBLE,
-                    ModBlocks.LIMESTONE,
-                    ModBlocks.MOSSY_SANDSTONE
-            );
-
-    // ── 宝石原矿（SDV Object ID 2/4/6/8/10/12/14） ──
-    private static final java.util.List<net.neoforged.neoforge.registries.DeferredBlock<Block>> GEM_ORES =
-            java.util.List.of(
-                    ModBlocks.AMETHYST_ORE,
-                    ModBlocks.AQUAMARINE_ORE,
-                    ModBlocks.DIAMOND_ORE,
-                    ModBlocks.EMERALD_ORE,
-                    ModBlocks.JADE_ORE,
-                    ModBlocks.RUBY_ORE,
-                    ModBlocks.TOPAZ_ORE
-            );
-
-    // ── 树苗（SDV: random 1/2，growthStage=1） ──
-    private static final java.util.List<net.neoforged.neoforge.registries.DeferredBlock<Block>> SAPLINGS =
-            java.util.List.of(
-                    ModBlocks.WILD_OAK_SAPLING1,
-                    ModBlocks.WILD_MAPLE_SAPLING1
-            );
 
     private QuarrySpawnService() {}
 
@@ -181,7 +154,7 @@ public final class QuarrySpawnService {
         if (floor == null) return false;
         BlockPos above = floor.above();
 
-        Block toPlace = pickBlock(r);
+        Block toPlace = pickBlock(level, r);
         if (toPlace == null) return false;
 
         // 其他方块（石头/矿石/树苗等）放在 coarse dirt 顶面上方。
@@ -214,31 +187,14 @@ public final class QuarrySpawnService {
 
     // ======================== 概率级联（SDV parity） ========================
 
-    private static Block pickBlock(RandomSource r) {
-        // 1) 6% 树苗
-        if (r.nextDouble() < 0.06) {
-            return SAPLINGS.get(r.nextInt(SAPLINGS.size())).get();
+    private static Block pickBlock(ServerLevel level, RandomSource random) {
+        var rewards = WorldLootPoolData.resolve(
+                StardewWorldLootPools.QUARRY, "default", level, null, random);
+        if (rewards.isEmpty() || !(rewards.getFirst().getItem() instanceof BlockItem blockItem)) {
+            StardewCraft.LOGGER.error("[QUARRY] World-loot pool returned no placeable block");
+            return null;
         }
-        // 2) 2% 矿物/宝石节点：内 10% 神秘石(→FIRE_QUARTZ)，90% 宝石原矿
-        if (r.nextDouble() < 0.02) {
-            if (r.nextDouble() < 0.1) {
-                return ModBlocks.FIRE_QUARTZ.get();
-            }
-            return GEM_ORES.get(r.nextInt(GEM_ORES.size())).get();
-        }
-        // 3) 15% 大矿脉：0.1% 铱 / 10% 金 / 33% 铁 / 其余 铜
-        if (r.nextDouble() < 0.15) {
-            if (r.nextDouble() < 0.001) return ModBlocks.EARTH_IRIDIUM_ORE.get();
-            if (r.nextDouble() < 0.1)   return ModBlocks.EARTH_GOLD_ORE.get();
-            if (r.nextDouble() < 0.33)  return ModBlocks.EARTH_IRON_ORE.get();
-            return ModBlocks.EARTH_COPPER_ORE.get();
-        }
-        // 4) 10% 煤矿节点
-        if (r.nextDouble() < 0.1) {
-            return ModBlocks.EARTH_COAL_ORE.get();
-        }
-        // 5) 兜底：6 种普通石头等概率
-        return PLAIN_STONES.get(r.nextInt(PLAIN_STONES.size())).get();
+        return blockItem.getBlock();
     }
 
     public static boolean canPlayerBreakInQuarry(BlockState state) {
@@ -250,24 +206,7 @@ public final class QuarrySpawnService {
     }
 
     private static boolean isQuarryResourceBlock(BlockState state) {
-        return state.is(ModBlocks.ARTIFACT_SPOT_DIRT.get())
-                || state.is(ModBlocks.EARTH_COPPER_ORE.get())
-                || state.is(ModBlocks.EARTH_COAL_ORE.get())
-                || state.is(ModBlocks.EARTH_IRON_ORE.get())
-                || state.is(ModBlocks.EARTH_GOLD_ORE.get())
-                || state.is(ModBlocks.EARTH_IRIDIUM_ORE.get())
-                || state.is(ModBlocks.FIRE_QUARTZ.get())
-                || isAny(state, PLAIN_STONES)
-                || isAny(state, GEM_ORES);
-    }
-
-    private static boolean isAny(BlockState state, java.util.List<DeferredBlock<Block>> blocks) {
-        for (DeferredBlock<Block> block : blocks) {
-            if (state.is(block.get())) {
-                return true;
-            }
-        }
-        return false;
+        return state.is(com.stardew.craft.core.ModTags.Blocks.QUARRY_RESOURCES);
     }
 
     // ======================== 持久化（首次初始化标志） ========================

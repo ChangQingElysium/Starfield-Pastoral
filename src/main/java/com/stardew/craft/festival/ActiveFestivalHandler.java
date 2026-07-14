@@ -1,6 +1,7 @@
 package com.stardew.craft.festival;
 
 import com.stardew.craft.time.StardewTimeManager;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -78,7 +79,7 @@ public interface ActiveFestivalHandler {
         return timeManager.getVirtualDayTime(level);
     }
 
-    default String debugApplyMessage() {
-        return "已启动 " + displayName() + " 总调试: 当前日期按 " + festivalId() + " 处理，overlay 应用中，NPC 会在地图应用完成后进入节日点位";
+    default Component debugApplyMessage() {
+        return Component.translatable("stardewcraft.command.festival.debug_started", displayName(), festivalId());
     }
 }

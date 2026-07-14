@@ -3,7 +3,7 @@ package com.stardew.craft.fishpond.service;
 import com.stardew.craft.blockentity.FishPondBucketBlockEntity;
 import com.stardew.craft.fishpond.data.FishPondWorldData;
 import com.stardew.craft.fishpond.model.FishPondRecord;
-import com.stardew.craft.item.IStardewItem;
+import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.network.ItemPickupHudPacket;
 import com.stardew.craft.player.PlayerStardewDataAPI;
@@ -286,12 +286,8 @@ public final class FishPondInteractionService {
     }
 
     private static void awardHarvestExperience(ServerPlayer player, ItemStack stack) {
-        if (!(stack.getItem() instanceof IStardewItem stardewItem)) {
-            PlayerStardewDataAPI.addExperience(player, SkillType.FISHING, HARVEST_BASE_EXP);
-            return;
-        }
-
-        int totalSellPrice = Math.max(0, stardewItem.getSellPrice(stack)) * Math.max(1, stack.getCount());
+        int totalSellPrice = Math.max(0, StardewItemDataApi.getSellPrice(stack))
+                * Math.max(1, stack.getCount());
         int bonusExperience = (int) (totalSellPrice * HARVEST_OUTPUT_EXP_MULTIPLIER);
         PlayerStardewDataAPI.addExperience(player, SkillType.FISHING, HARVEST_BASE_EXP + bonusExperience);
     }

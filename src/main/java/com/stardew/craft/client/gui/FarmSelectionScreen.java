@@ -44,16 +44,8 @@ public class FarmSelectionScreen extends Screen {
     private static final int SDV_H = 880;
 
     // 随机农场名生成池
-    private static final String[] NAME_PREFIXES = {
-        "\u9633\u5149", "\u661f\u9732", "\u7eff\u91ce", "\u6625\u98ce", "\u91d1\u7a57",
-        "\u5f69\u8679", "\u6708\u5149", "\u6668\u66e6", "\u7fe1\u7fe0", "\u78a7\u6ce2",
-        "\u4e30\u6536", "\u82b1\u8bed", "\u68a6\u5e7b", "\u4e91\u7aef", "\u5e78\u798f",
-        "\u6e05\u6cc9"
-    };
-    private static final String[] NAME_SUFFIXES = {
-        "\u519c\u573a", "\u7530\u56ed", "\u7267\u573a", "\u5e84\u56ed",
-        "\u82b1\u56ed", "\u679c\u56ed", "\u4e50\u56ed", "\u5c0f\u9662"
-    };
+    private static final int FARM_NAME_PREFIX_COUNT = 16;
+    private static final int FARM_NAME_SUFFIX_COUNT = 8;
 
     // 状态
     private final List<FarmType> farmTypes = FarmType.allTypes();
@@ -549,14 +541,18 @@ public class FarmSelectionScreen extends Screen {
 
     private String generateDefaultName() {
         if (this.minecraft != null && this.minecraft.player != null) {
-            return this.minecraft.player.getName().getString() + "\u7684\u519c\u573a";
+            return Component.translatable("gui.stardewcraft.farm_selection.default_name.player",
+                    this.minecraft.player.getName()).getString();
         }
-        return "\u6211\u7684\u519c\u573a";
+        return Component.translatable("gui.stardewcraft.farm_selection.default_name").getString();
     }
 
     private String generateRandomName() {
-        return NAME_PREFIXES[random.nextInt(NAME_PREFIXES.length)]
-                + NAME_SUFFIXES[random.nextInt(NAME_SUFFIXES.length)];
+        String prefix = Component.translatable("gui.stardewcraft.farm_selection.random_name.prefix."
+                + random.nextInt(FARM_NAME_PREFIX_COUNT)).getString();
+        String suffix = Component.translatable("gui.stardewcraft.farm_selection.random_name.suffix."
+                + random.nextInt(FARM_NAME_SUFFIX_COUNT)).getString();
+        return Component.translatable("gui.stardewcraft.farm_selection.random_name", prefix, suffix).getString();
     }
 
     private float approach(float current, float target) {

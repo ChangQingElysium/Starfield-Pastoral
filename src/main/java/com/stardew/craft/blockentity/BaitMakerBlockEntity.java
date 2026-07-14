@@ -1,6 +1,6 @@
 package com.stardew.craft.blockentity;
 
-import com.stardew.craft.item.IStardewItem;
+import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.item.SpecificBaitItem;
 import com.stardew.craft.time.StardewTimeManager;
 import net.minecraft.core.BlockPos;
@@ -111,10 +111,7 @@ public class BaitMakerBlockEntity extends TimedProductionBlockEntity {
     }
 
     private static boolean isFishInput(ItemStack stack) {
-        if (!(stack.getItem() instanceof IStardewItem stardewItem)) {
-            return false;
-        }
-        String typeKey = stardewItem.getItemTypeKey();
+        String typeKey = StardewItemDataApi.getTypeKey(stack);
         return "stardewcraft.type.fish".equals(typeKey)
             || "stardewcraft.type.crabpot".equals(typeKey)
             || "stardewcraft.type.legendary_fish".equals(typeKey);

@@ -1,0 +1,23 @@
+{
+  "skill": "stardewcraft:farming",
+  "entries": [
+    {
+      "kind": "item",
+      "item": "stardewcraft:iridium_scythe",
+      "name_key": "stardewcraft.mastery.reward.iridium_scythe.name",
+      "desc_key": "stardewcraft.mastery.reward.iridium_scythe.desc"
+    },
+    {
+      "kind": "recipe",
+      "item": "stardewcraft:statue_of_blessings",
+      "recipe_id": "statue_of_blessings",
+      "name_key": "stardewcraft.mastery.reward.statue_of_blessings.name",
+      "desc_key": "stardewcraft.mastery.reward.statue_of_blessings.desc"
+    },
+    {
+      "kind": "placeholder",
+      "name_key": "stardewcraft.mastery.menu.farming",
+      "desc_key": "stardewcraft.mastery.reward.farming_plaque.desc"
+    }
+  ]
+}

@@ -75,7 +75,7 @@ public class BroccoliCropBlock extends StardewCropBlock {
     }
 
     @Override
-    public String getCropDisplayName() {
-        return "西蓝花";
+    public String getCropDisplayNameKey() {
+        return "item.stardewcraft.broccoli";
     }
 }

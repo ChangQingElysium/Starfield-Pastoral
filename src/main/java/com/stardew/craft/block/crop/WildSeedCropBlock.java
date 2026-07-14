@@ -76,13 +76,13 @@ public class WildSeedCropBlock extends StardewCropBlock {
     }
 
     @Override
-    public String getCropDisplayName() {
+    public String getCropDisplayNameKey() {
         return switch (season) {
-            case 0 -> "春季野生种子";
-            case 1 -> "夏季野生种子";
-            case 2 -> "秋季野生种子";
-            case 3 -> "冬季野生种子";
-            default -> "野生种子";
+            case 0 -> "item.stardewcraft.spring_seeds";
+            case 1 -> "item.stardewcraft.summer_seeds";
+            case 2 -> "item.stardewcraft.fall_seeds";
+            case 3 -> "item.stardewcraft.winter_seeds";
+            default -> "item.stardewcraft.wild_seeds";
         };
     }
 

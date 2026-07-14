@@ -2,9 +2,16 @@ package com.stardew.craft.network;
 
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.fishing.data.FishingDataManager;
+import com.stardew.craft.festival.FestivalRegistry;
+import com.stardew.craft.cooking.service.VanillaCookingRecipeData;
 import com.stardew.craft.item.artisan.ArtisanRecipeDataManager;
 import com.stardew.craft.item.artisan.PreservesIngredientDataManager;
+import com.stardew.craft.interior.InteriorRegionRegistry;
+import com.stardew.craft.mastery.MasteryRewardRegistry;
 import com.stardew.craft.npc.data.NpcDataRegistry;
+import com.stardew.craft.player.UnlockSourceData;
+import com.stardew.craft.player.StardewCraftingRecipeData;
+import com.stardew.craft.player.ProfessionData;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.VarInt;
 import net.minecraft.network.codec.StreamCodec;
@@ -26,9 +33,16 @@ import java.nio.charset.StandardCharsets;
 @SuppressWarnings("null")
 public record DataRegistrySyncPayload(
         String artisanJson,
+        String cookingJson,
+        String craftingJson,
         String preservesJson,
         String fishingJson,
-        String npcEventsJson
+        String npcEventsJson,
+        String unlockSourcesJson,
+        String festivalsJson,
+        String masteryRewardsJson,
+        String locationsJson,
+        String professionsJson
 ) implements CustomPacketPayload {
 
     public static final Type<DataRegistrySyncPayload> TYPE = new Type<>(
@@ -39,18 +53,34 @@ public record DataRegistrySyncPayload(
         @Override
         public DataRegistrySyncPayload decode(ByteBuf buf) {
             String artisan = readLargeString(buf);
+            String cooking = readLargeString(buf);
+            String crafting = readLargeString(buf);
             String preserves = readLargeString(buf);
             String fishing = readLargeString(buf);
             String npcEvents = readLargeString(buf);
-            return new DataRegistrySyncPayload(artisan, preserves, fishing, npcEvents);
+            String unlockSources = readLargeString(buf);
+            String festivals = readLargeString(buf);
+            String masteryRewards = readLargeString(buf);
+            String locations = readLargeString(buf);
+            String professions = readLargeString(buf);
+            return new DataRegistrySyncPayload(
+                    artisan, cooking, crafting, preserves, fishing, npcEvents, unlockSources, festivals,
+                    masteryRewards, locations, professions);
         }
 
         @Override
         public void encode(ByteBuf buf, DataRegistrySyncPayload payload) {
             writeLargeString(buf, payload.artisanJson);
+            writeLargeString(buf, payload.cookingJson);
+            writeLargeString(buf, payload.craftingJson);
             writeLargeString(buf, payload.preservesJson);
             writeLargeString(buf, payload.fishingJson);
             writeLargeString(buf, payload.npcEventsJson);
+            writeLargeString(buf, payload.unlockSourcesJson);
+            writeLargeString(buf, payload.festivalsJson);
+            writeLargeString(buf, payload.masteryRewardsJson);
+            writeLargeString(buf, payload.locationsJson);
+            writeLargeString(buf, payload.professionsJson);
         }
     };
 
@@ -82,6 +112,12 @@ public record DataRegistrySyncPayload(
             if (!payload.artisanJson.isEmpty()) {
                 ArtisanRecipeDataManager.applyFromJson(payload.artisanJson);
             }
+            if (!payload.cookingJson.isEmpty()) {
+                VanillaCookingRecipeData.applyFromJson(payload.cookingJson);
+            }
+            if (!payload.craftingJson.isEmpty()) {
+                StardewCraftingRecipeData.applyFromJson(payload.craftingJson);
+            }
             if (!payload.preservesJson.isEmpty()) {
                 PreservesIngredientDataManager.applyFromJson(payload.preservesJson);
             }
@@ -90,6 +126,21 @@ public record DataRegistrySyncPayload(
             }
             if (!payload.npcEventsJson.isEmpty()) {
                 NpcDataRegistry.applyEventsFromJson(payload.npcEventsJson);
+            }
+            if (!payload.unlockSourcesJson.isEmpty()) {
+                UnlockSourceData.applyFromJson(payload.unlockSourcesJson);
+            }
+            if (!payload.festivalsJson.isEmpty()) {
+                FestivalRegistry.applyFromJson(payload.festivalsJson);
+            }
+            if (!payload.masteryRewardsJson.isEmpty()) {
+                MasteryRewardRegistry.applyFromJson(payload.masteryRewardsJson);
+            }
+            if (!payload.locationsJson.isEmpty()) {
+                InteriorRegionRegistry.applyFromJson(payload.locationsJson);
+            }
+            if (!payload.professionsJson.isEmpty()) {
+                ProfessionData.applyFromJson(payload.professionsJson);
             }
             StardewCraft.LOGGER.info("[DATA-SYNC] Received data registry sync from server");
         });
@@ -100,9 +151,18 @@ public record DataRegistrySyncPayload(
      */
     public static void sendFullSync(ServerPlayer player) {
         String artisan = ArtisanRecipeDataManager.getCachedJson();
+        String cooking = VanillaCookingRecipeData.getCachedJson();
+        String crafting = StardewCraftingRecipeData.getCachedJson();
         String preserves = PreservesIngredientDataManager.getCachedJson();
         String fishing = FishingDataManager.getCachedJson();
         String npcEvents = NpcDataRegistry.getCachedEventsJson();
-        PacketDistributor.sendToPlayer(player, new DataRegistrySyncPayload(artisan, preserves, fishing, npcEvents));
+        String unlockSources = UnlockSourceData.getCachedJson();
+        String festivals = FestivalRegistry.getCachedJson();
+        String masteryRewards = MasteryRewardRegistry.getCachedJson();
+        String locations = InteriorRegionRegistry.getCachedJson();
+        String professions = ProfessionData.getCachedJson();
+        PacketDistributor.sendToPlayer(player, new DataRegistrySyncPayload(
+                artisan, cooking, crafting, preserves, fishing, npcEvents, unlockSources, festivals,
+                masteryRewards, locations, professions));
     }
 }

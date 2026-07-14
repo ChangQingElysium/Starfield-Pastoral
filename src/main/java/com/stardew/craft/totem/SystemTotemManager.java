@@ -43,9 +43,9 @@ public class SystemTotemManager {
         if (!level.dimension().equals(ModDimensions.STARDEW_VALLEY)) return;
 
         removeOldFarmSystemPole(level);
-        ensureSystemPole(level, POS_MOUNTAIN, TotemType.MOUNTAIN, ModBlocks.TOTEM_POLE_MOUNTAIN, SYSTEM_ID_MOUNTAIN, "山区", Direction.NORTH);
-        ensureSystemPole(level, POS_BEACH, TotemType.BEACH, ModBlocks.TOTEM_POLE_BEACH, SYSTEM_ID_BEACH, "海滩", Direction.NORTH);
-        ensureSystemPole(level, POS_DESERT, TotemType.DESERT, ModBlocks.TOTEM_POLE_DESERT, SYSTEM_ID_DESERT, "沙漠", Direction.SOUTH);
+        ensureSystemPole(level, POS_MOUNTAIN, TotemType.MOUNTAIN, ModBlocks.TOTEM_POLE_MOUNTAIN, SYSTEM_ID_MOUNTAIN, Direction.NORTH);
+        ensureSystemPole(level, POS_BEACH, TotemType.BEACH, ModBlocks.TOTEM_POLE_BEACH, SYSTEM_ID_BEACH, Direction.NORTH);
+        ensureSystemPole(level, POS_DESERT, TotemType.DESERT, ModBlocks.TOTEM_POLE_DESERT, SYSTEM_ID_DESERT, Direction.SOUTH);
     }
 
     private static void removeOldFarmSystemPole(ServerLevel level) {
@@ -67,14 +67,15 @@ public class SystemTotemManager {
     @SuppressWarnings("null")
     private static void ensureSystemPole(ServerLevel level, BlockPos pos, TotemType type,
                                          net.neoforged.neoforge.registries.DeferredBlock<Block> blockHolder,
-                                         int systemId, String name, Direction facing) {
+                                         int systemId, Direction facing) {
+        String name = type.getDefaultNameKey();
         // 如果已经是该图腾柱，跳过
         BlockState existing = level.getBlockState(pos);
         if (existing.getBlock() instanceof TotemPoleBlock existingPole
                 && existingPole.getTotemType() == type) {
             // 确保 BE 存在且为系统柱
             if (level.getBlockEntity(pos) instanceof TotemPoleBlockEntity pole) {
-                if (!pole.isSystemPole()) {
+                if (!pole.isSystemPole() || !name.equals(pole.getPoleName())) {
                     pole.initSystemPole(level, systemId, name);
                 }
             }

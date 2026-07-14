@@ -1,0 +1,60 @@
+{
+  "legacy_id": "Gus",
+  "requester": "Gus",
+  "duration": "two_weeks",
+  "repeatable": true,
+  "required_tags": [],
+  "title": "stardewcraft.special_orders.Gus.name",
+  "text": "stardewcraft.special_orders.Gus.text",
+  "objectives": [
+    {
+      "type": "collect",
+      "text": "stardewcraft.special_orders.Gus_Objective_0_Text",
+      "required_count": 24,
+      "accepted_tags": "egg_item"
+    },
+    {
+      "type": "donate",
+      "text": "stardewcraft.special_orders.Gus_Objective_1_Text",
+      "required_count": 24,
+      "accepted_tags": "egg_item",
+      "drop_box": "GusFridge",
+      "minimum_capacity": 30
+    }
+  ],
+  "rewards": [
+    {
+      "type": "money",
+      "amount": 3000
+    },
+    {
+      "type": "mail",
+      "mail": "gusGiantOmelet"
+    }
+  ],
+  "random_elements": [
+    {
+      "name": "Greeting",
+      "options": [
+        {
+          "required_tags": [
+            "!mail_gusGiantOmelet"
+          ],
+          "values": {
+            "Text": "stardewcraft.special_orders.Gus_RE_Greeting_0",
+            "Greeting": "stardewcraft.special_orders.Gus_RE_Greeting_0"
+          }
+        },
+        {
+          "required_tags": [
+            "mail_gusGiantOmelet"
+          ],
+          "values": {
+            "Text": "stardewcraft.special_orders.Gus_RE_Greeting_1",
+            "Greeting": "stardewcraft.special_orders.Gus_RE_Greeting_1"
+          }
+        }
+      ]
+    }
+  ]
+}

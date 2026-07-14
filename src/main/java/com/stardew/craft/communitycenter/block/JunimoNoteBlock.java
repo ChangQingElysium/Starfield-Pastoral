@@ -62,13 +62,15 @@ public class JunimoNoteBlock extends Block {
             return InteractionResult.SUCCESS;
         }
 
-        // SDV parity: 首次看到 JunimoNote → 设置 seenJunimoNote + 安排巫师邀请信 + 接受拜访巫师任务
+        // SDV JunimoNoteMenu.setUpMenu: first view removes Quest 26, records
+        // seenJunimoNote, and schedules the Wizard's letter for tomorrow.
         if (!CCStoryFlags.hasSeenJunimoNote(serverPlayer)) {
+            com.stardew.craft.quest.QuestManager quests = com.stardew.craft.quest.QuestManager.of(serverPlayer);
+            if (quests != null) {
+                quests.removeQuest("26", serverPlayer);
+            }
             CCStoryFlags.addFlag(serverPlayer, CCStoryFlags.SEEN_JUNIMO_NOTE);
-            // 巫师邀请信安排在次日投递
             MailService.addMailForTomorrow(serverPlayer, CCStoryFlags.WIZARD_JUNIMO_NOTE);
-            // 接受 meetTheWizard 任务 (Quest ID 1)
-            com.stardew.craft.quest.QuestManager.of(serverPlayer).acceptQuest("1", serverPlayer);
         }
 
         int areaId = state.getValue(AREA);

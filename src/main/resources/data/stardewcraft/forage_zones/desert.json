@@ -1,0 +1,13 @@
+{
+  "areas": [
+    { "min_x": -310, "min_y": 53, "min_z": -241, "max_x": -158, "max_y": 107, "max_z": -113 }
+  ],
+  "min_daily_spawn": 1,
+  "max_daily_spawn": 3,
+  "max_spawned_at_once": 5,
+  "surface": "sand",
+  "entries": [
+    { "block": "stardewcraft:forage_coconut", "chance": 0.35 },
+    { "block": "stardewcraft:forage_cactus_fruit", "seasons": ["summer", "fall"], "chance": 0.45 }
+  ]
+}

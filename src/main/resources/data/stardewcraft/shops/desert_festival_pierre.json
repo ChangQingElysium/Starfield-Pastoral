@@ -1,0 +1,26 @@
+{
+  "legacy_id": "DesertFestival_Pierre",
+  "owner_npc": "pierre",
+  "owner_dialogue": "stardewcraft.festival.desertfestival.dialogue.vendor",
+  "entries": [
+    {
+      "item": "stardewcraft:squid",
+      "stock": 5,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 10
+    },
+    {
+      "item": "stardewcraft:wheat_flour",
+      "stock": 100,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 2
+    },
+    {
+      "item": "stardewcraft:oil",
+      "stock": 100,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 4
+    }
+  ],
+  "accepted_sell_types": []
+}

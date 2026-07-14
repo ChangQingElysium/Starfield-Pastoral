@@ -75,7 +75,7 @@ public class HotPepperCropBlock extends StardewCropBlock {
     }
 
     @Override
-    public String getCropDisplayName() {
-        return "辣椒";
+    public String getCropDisplayNameKey() {
+        return "item.stardewcraft.hot_pepper";
     }
 }

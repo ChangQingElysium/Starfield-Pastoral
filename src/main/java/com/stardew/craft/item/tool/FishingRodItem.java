@@ -3,6 +3,7 @@ package com.stardew.craft.item.tool;
 import com.stardew.craft.fishing.server.FishingSessionManager;
 import com.stardew.craft.fishing.FishingCastPower;
 import com.stardew.craft.enchantment.StardewEnchantments;
+import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.item.IStardewItem;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.core.ModDimensions;
@@ -192,10 +193,7 @@ public class FishingRodItem extends net.minecraft.world.item.FishingRodItem impl
 		if (bait.isEmpty()) {
 			return 0.0;
 		}
-		if (bait.getItem() instanceof IStardewItem stardewItem) {
-			return stardewItem.getSellPrice(bait) / 10.0;
-		}
-		return 0.0;
+		return Math.max(0, StardewItemDataApi.getSellPrice(bait)) / 10.0;
 	}
 	
 	/**

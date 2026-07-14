@@ -1,0 +1,17 @@
+{
+  "type": "active",
+  "legacy_id": "summer11",
+  "display_name": "Luau",
+  "season": 1,
+  "start_day": 11,
+  "end_day": 11,
+  "start_time": 900,
+  "end_time": 1400,
+  "start_message_key": "message.stardewcraft.festival.luau.started",
+  "announcement_mail_id": "summer_10",
+  "world": {
+    "location": "Beach",
+    "map_overlay": "Beach-Luau",
+    "mechanic_id": "luau_soup"
+  }
+}

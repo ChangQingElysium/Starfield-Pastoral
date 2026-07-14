@@ -1,0 +1,8 @@
+{
+  "dimension": "stardewcraft:stardew_valley",
+  "ledger_id": "example_apple_shed",
+  "min": [10000, 60, 10000],
+  "max": [10020, 90, 10020],
+  "aliases": ["apple_shed"],
+  "priority": 100
+}

@@ -1,7 +1,7 @@
 package com.stardew.craft.specialorder;
 
 import com.stardew.craft.StardewCraft;
-import com.stardew.craft.item.IStardewItem;
+import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.item.quality.QualityHelper;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -98,13 +98,11 @@ public final class SpecialOrderContextTagService {
         if (quality >= QualityHelper.IRIDIUM) {
             tags.add("quality_iridium");
         }
-        if (item instanceof IStardewItem stardewItem) {
-            String type = stardewItem.getItemTypeKey();
-            if (type != null) {
-                tags.add(type);
-                if (type.endsWith(".crop")) tags.add("category_vegetable");
-                if (type.contains("fish")) tags.add("fish_item");
-            }
+        String type = StardewItemDataApi.getTypeKey(stack);
+        if (!type.isBlank()) {
+            tags.add(type);
+            if (type.endsWith(".crop")) tags.add("category_vegetable");
+            if (type.contains("fish")) tags.add("fish_item");
         }
         addAliases(path, tags);
         return tags;

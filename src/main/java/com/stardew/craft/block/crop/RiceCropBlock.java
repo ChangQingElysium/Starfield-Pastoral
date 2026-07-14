@@ -308,7 +308,7 @@ public class RiceCropBlock extends StardewCropBlock implements SimpleWaterlogged
     }
 
     @Override
-    public String getCropDisplayName() {
-        return "水稻";
+    public String getCropDisplayNameKey() {
+        return "item.stardewcraft.rice";
     }
 }

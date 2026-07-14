@@ -262,7 +262,8 @@ public class TotemPoleBlock extends MapUtilityStaticBlock implements EntityBlock
         if (level.dimension() != ModDimensions.STARDEW_VALLEY) {
             return Component.translatable("message.stardewcraft.totem_place_stardew_only");
         }
-        return Component.translatable("message.stardewcraft.totem_place_out_of_bounds", totemType.getDefaultName());
+        return Component.translatable("message.stardewcraft.totem_place_out_of_bounds",
+                Component.translatable(totemType.getDefaultNameKey()));
     }
 
     private record PlacementBounds(int minX, int maxX, int minY, int maxY, int minZ, int maxZ) {

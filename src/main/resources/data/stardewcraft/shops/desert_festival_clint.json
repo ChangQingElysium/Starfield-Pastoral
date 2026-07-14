@@ -1,0 +1,26 @@
+{
+  "legacy_id": "DesertFestival_Clint",
+  "owner_npc": "clint",
+  "owner_dialogue": "stardewcraft.festival.desertfestival.dialogue.vendor",
+  "entries": [
+    {
+      "item": "stardewcraft:coal",
+      "stock": 50,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 5
+    },
+    {
+      "item": "stardewcraft:copper_ore",
+      "stock": 100,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 2
+    },
+    {
+      "item": "stardewcraft:iron_ore",
+      "stock": 100,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 4
+    }
+  ],
+  "accepted_sell_types": []
+}

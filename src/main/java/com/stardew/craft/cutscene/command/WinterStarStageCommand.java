@@ -5,7 +5,6 @@ import com.stardew.craft.cutscene.runtime.EventPlayer;
 import com.stardew.craft.network.payload.ClientNpcVisibilityState;
 import com.stardew.craft.network.payload.OpenNpcDialogueScreenPayload;
 import net.minecraft.client.Minecraft;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 /** Dynamic beats used by the shared Winter Star return-gift cutscene. */
 public final class WinterStarStageCommand implements EventCommand {
@@ -38,8 +37,7 @@ public final class WinterStarStageCommand implements EventCommand {
                     2.5D, 64.0D, 3.5D,
                     0.8F, 0.0F
                 ).start(player);
-                PacketDistributor.sendToServer(
-                    new com.stardew.craft.network.payload.WinterStarClaimReturnGiftPayload());
+                player.sendServerAction("winter_star_open_gift", "");
                 done = true;
             }
             default -> done = true;

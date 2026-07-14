@@ -1,0 +1,13 @@
+[
+  { "id": "floor_10", "floor": 10, "reward": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:leather_boots" } } },
+  { "id": "floor_20", "floor": 20, "reward": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:carving_knife" } } },
+  { "id": "floor_40", "floor": 40, "reward": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:cutlass" } } },
+  { "id": "floor_50", "floor": 50, "reward": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:tundra_boots" } } },
+  { "id": "floor_60", "floor": 60, "reward": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:crystal_dagger" } } },
+  { "id": "floor_70", "floor": 70, "reward": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:tempered_broadsword" } } },
+  { "id": "floor_80", "floor": 80, "reward": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:firewalker_boots" } } },
+  { "id": "floor_90", "floor": 90, "reward": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:shadow_dagger" } } },
+  { "id": "floor_100", "floor": 100, "reward": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:stardrop" } } },
+  { "id": "floor_110", "floor": 110, "reward": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:space_boots" } } },
+  { "id": "floor_120", "floor": 120, "reward": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:skull_key" } } }
+]

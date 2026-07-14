@@ -25,6 +25,14 @@
     "stardewcraft:desert_iron_ore",
     "stardewcraft:desert_gold_ore",
     "stardewcraft:desert_iridium_ore",
-    "stardewcraft:desert_coal_ore"
+    "stardewcraft:desert_coal_ore",
+
+    "stardewcraft:amethyst_ore",
+    "stardewcraft:aquamarine_ore",
+    "stardewcraft:diamond_ore",
+    "stardewcraft:emerald_ore",
+    "stardewcraft:jade_ore",
+    "stardewcraft:ruby_ore",
+    "stardewcraft:topaz_ore"
   ]
 }

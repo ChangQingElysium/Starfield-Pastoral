@@ -1,60 +1,63 @@
 package com.stardew.craft.player;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+
+import java.util.Optional;
+
 /**
  * 职业类型枚举
  * 对应星露谷物语的职业系统（5级和10级选择）
  */
 public enum ProfessionType {
     // 农业职业 (Farming)
-    RANCHER(0, "rancher", "牧场主", SkillType.FARMING, 5),
-    TILLER(1, "tiller", "耕种者", SkillType.FARMING, 5),
-    COOPMASTER(2, "coopmaster", "养鸡达人", SkillType.FARMING, 10),
-    SHEPHERD(3, "shepherd", "牧羊人", SkillType.FARMING, 10),
-    ARTISAN(4, "artisan", "工匠", SkillType.FARMING, 10),
-    AGRICULTURIST(5, "agriculturist", "农业学家", SkillType.FARMING, 10),
+    RANCHER(0, "rancher", SkillType.FARMING, 5),
+    TILLER(1, "tiller", SkillType.FARMING, 5),
+    COOPMASTER(2, "coopmaster", SkillType.FARMING, 10),
+    SHEPHERD(3, "shepherd", SkillType.FARMING, 10),
+    ARTISAN(4, "artisan", SkillType.FARMING, 10),
+    AGRICULTURIST(5, "agriculturist", SkillType.FARMING, 10),
     
     // 钓鱼职业 (Fishing)
-    FISHER(6, "fisher", "渔夫", SkillType.FISHING, 5),
-    TRAPPER(7, "trapper", "捕手", SkillType.FISHING, 5),
-    ANGLER(8, "angler", "垂钓者", SkillType.FISHING, 10),
-    PIRATE(9, "pirate", "海盗", SkillType.FISHING, 10),
-    MARINER(10, "mariner", "水手", SkillType.FISHING, 10),
-    LUREMASTER(11, "luremaster", "诱饵大师", SkillType.FISHING, 10),
+    FISHER(6, "fisher", SkillType.FISHING, 5),
+    TRAPPER(7, "trapper", SkillType.FISHING, 5),
+    ANGLER(8, "angler", SkillType.FISHING, 10),
+    PIRATE(9, "pirate", SkillType.FISHING, 10),
+    MARINER(10, "mariner", SkillType.FISHING, 10),
+    LUREMASTER(11, "luremaster", SkillType.FISHING, 10),
     
     // 觅食职业 (Foraging)
-    FORESTER(12, "forester", "护林人", SkillType.FORAGING, 5),
-    GATHERER(13, "gatherer", "采集者", SkillType.FORAGING, 5),
-    LUMBERJACK(14, "lumberjack", "伐木工", SkillType.FORAGING, 10),
-    TAPPER(15, "tapper", "树液采集者", SkillType.FORAGING, 10),
-    BOTANIST(16, "botanist", "植物学家", SkillType.FORAGING, 10),
-    TRACKER(17, "tracker", "追踪者", SkillType.FORAGING, 10),
+    FORESTER(12, "forester", SkillType.FORAGING, 5),
+    GATHERER(13, "gatherer", SkillType.FORAGING, 5),
+    LUMBERJACK(14, "lumberjack", SkillType.FORAGING, 10),
+    TAPPER(15, "tapper", SkillType.FORAGING, 10),
+    BOTANIST(16, "botanist", SkillType.FORAGING, 10),
+    TRACKER(17, "tracker", SkillType.FORAGING, 10),
     
     // 采矿职业 (Mining)
-    MINER(18, "miner", "矿工", SkillType.MINING, 5),
-    GEOLOGIST(19, "geologist", "地质学家", SkillType.MINING, 5),
-    BLACKSMITH(20, "blacksmith", "铁匠", SkillType.MINING, 10),
-    PROSPECTOR(21, "prospector", "勘探者", SkillType.MINING, 10),
-    EXCAVATOR(22, "excavator", "挖掘专家", SkillType.MINING, 10),
-    GEMOLOGIST(23, "gemologist", "宝石专家", SkillType.MINING, 10),
+    MINER(18, "miner", SkillType.MINING, 5),
+    GEOLOGIST(19, "geologist", SkillType.MINING, 5),
+    BLACKSMITH(20, "blacksmith", SkillType.MINING, 10),
+    PROSPECTOR(21, "prospector", SkillType.MINING, 10),
+    EXCAVATOR(22, "excavator", SkillType.MINING, 10),
+    GEMOLOGIST(23, "gemologist", SkillType.MINING, 10),
     
     // 战斗职业 (Combat)
-    FIGHTER(24, "fighter", "战士", SkillType.COMBAT, 5),
-    SCOUT(25, "scout", "侦察兵", SkillType.COMBAT, 5),
-    BRUTE(26, "brute", "野蛮人", SkillType.COMBAT, 10),
-    DEFENDER(27, "defender", "防御者", SkillType.COMBAT, 10),
-    ACROBAT(28, "acrobat", "杂技演员", SkillType.COMBAT, 10),
-    DESPERADO(29, "desperado", "亡命徒", SkillType.COMBAT, 10);
+    FIGHTER(24, "fighter", SkillType.COMBAT, 5),
+    SCOUT(25, "scout", SkillType.COMBAT, 5),
+    BRUTE(26, "brute", SkillType.COMBAT, 10),
+    DEFENDER(27, "defender", SkillType.COMBAT, 10),
+    ACROBAT(28, "acrobat", SkillType.COMBAT, 10),
+    DESPERADO(29, "desperado", SkillType.COMBAT, 10);
     
     private final int id;
     private final String name;
-    private final String displayName;
     private final SkillType skillType;
     private final int level;  // 需要的技能等级（5或10）
     
-    ProfessionType(int id, String name, String displayName, SkillType skillType, int level) {
+    ProfessionType(int id, String name, SkillType skillType, int level) {
         this.id = id;
         this.name = name;
-        this.displayName = displayName;
         this.skillType = skillType;
         this.level = level;
     }
@@ -67,16 +70,39 @@ public enum ProfessionType {
         return name;
     }
     
-    public String getDisplayName() {
-        return displayName;
+    public String getTranslationKey() {
+        return ProfessionData.definition(this)
+                .map(com.stardew.craft.api.v1.profession.StardewProfessionDefinition::nameKey)
+                .orElse("stardewcraft.levelup.profession." + id + ".name");
+    }
+
+    public String getDescriptionTranslationKey() {
+        return ProfessionData.definition(this)
+                .map(com.stardew.craft.api.v1.profession.StardewProfessionDefinition::descKey)
+                .orElse("stardewcraft.levelup.profession." + id + ".desc");
+    }
+
+    public Component getDisplayName() {
+        return Component.translatable(getTranslationKey());
     }
     
     public SkillType getSkillType() {
-        return skillType;
+        return ProfessionData.definition(this)
+                .map(com.stardew.craft.api.v1.profession.StardewProfessionDefinition::skill)
+                .map(ResourceLocation::getPath)
+                .map(SkillType::fromName)
+                .orElse(skillType);
     }
     
     public int getRequiredLevel() {
-        return level;
+        return ProfessionData.definition(this)
+                .map(com.stardew.craft.api.v1.profession.StardewProfessionDefinition::requiredLevel)
+                .orElse(level);
+    }
+
+    public Optional<ResourceLocation> getParentId() {
+        return ProfessionData.definition(this)
+                .flatMap(com.stardew.craft.api.v1.profession.StardewProfessionDefinition::parent);
     }
     
     /**

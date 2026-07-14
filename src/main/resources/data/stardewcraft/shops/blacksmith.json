@@ -1,0 +1,56 @@
+{
+  "legacy_id": "Blacksmith",
+  "owner_npc": "Clint",
+  "owner_dialogue": "stardewcraft.npc.clint.shop_dialogue",
+  "entries": [
+    {
+      "item": "stardewcraft:copper_ore",
+      "price": 75
+    },
+    {
+      "item": "stardewcraft:iron_ore",
+      "price": 150
+    },
+    {
+      "item": "stardewcraft:coal",
+      "price": 150
+    },
+    {
+      "item": "stardewcraft:gold_ore",
+      "price": 400
+    },
+    {
+      "item": "stardewcraft:pickaxe",
+      "price": 100,
+      "stock": 1
+    },
+    {
+      "item": "stardewcraft:axe",
+      "price": 100,
+      "stock": 1
+    },
+    {
+      "item": "stardewcraft:hoe",
+      "price": 100,
+      "stock": 1
+    },
+    {
+      "item": "stardewcraft:watering_can",
+      "price": 100,
+      "stock": 1
+    },
+    {
+      "item": "stardewcraft:scythe",
+      "price": 100,
+      "stock": 1
+    },
+    {
+      "item": "stardewcraft:copper_pan",
+      "price": 2500,
+      "mail_flag": "ccFishTank"
+    }
+  ],
+  "accepted_sell_types": [
+    "stardewcraft.type.mineral"
+  ]
+}

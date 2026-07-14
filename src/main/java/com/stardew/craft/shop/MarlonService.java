@@ -1,6 +1,7 @@
 package com.stardew.craft.shop;
 
 import com.stardew.craft.book.BookPowerEffects;
+import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.entity.npc.StardewNpcEntity;
 import com.stardew.craft.festival.desert.DesertFestivalMarlonChallengeService;
 import com.stardew.craft.festival.desert.DesertFestivalMineService;
@@ -111,9 +112,11 @@ public final class MarlonService {
         for (MonsterSlayerGoalRegistry.SlayerGoal goal : MonsterSlayerGoalRegistry.getAllGoals()) {
             entries.add(new OpenGilGoalsPayload.GoalEntry(
                 goal.goalKey(),
+                goal.translationKey(),
                 data.getMonsterKills(goal.goalKey()),
                 goal.requiredKills(),
-                data.hasClaimedSlayerReward(goal.goalKey())
+                data.hasClaimedSlayerReward(goal.goalKey()),
+                goal.hasReward()
             ));
         }
         PacketDistributor.sendToPlayer(player, new OpenGilGoalsPayload(entries));
@@ -128,21 +131,18 @@ public final class MarlonService {
         if (data.hasClaimedSlayerReward(goalKey)) return;
         if (data.getMonsterKills(goalKey) < goal.requiredKills()) return;
 
-        data.claimSlayerReward(goalKey);
-
-        // Give reward item if applicable
-        if (goal.rewardItemId() != null) {
-            net.minecraft.resources.ResourceLocation rl =
-                net.minecraft.resources.ResourceLocation.parse(goal.rewardItemId());
-            net.minecraft.world.item.Item item =
-                net.minecraft.core.registries.BuiltInRegistries.ITEM.get(rl);
-            if (item != net.minecraft.world.item.Items.AIR) {
-                ItemStack reward = new ItemStack(item);
-                if (!player.getInventory().add(reward)) {
-                    player.drop(reward, false);
-                }
+        var actionContext = com.stardew.craft.api.v1.action.StardewActionContext.forPlayer(player);
+        for (var reward : goal.rewards()) {
+            var result = com.stardew.craft.api.v1.action.StardewActions.execute(reward, actionContext)
+                    .resultOrPartial(message -> com.stardew.craft.StardewCraft.LOGGER.error(
+                            "[Monster slayer] Reward {} failed for {}: {}",
+                            goalKey, player.getName().getString(), message))
+                    .orElse(null);
+            if (result == null || !result.success()) {
+                return;
             }
         }
+        data.claimSlayerReward(goalKey);
 
         // Refresh the Gil screen
         openGilGoals(player);
@@ -250,10 +250,8 @@ public final class MarlonService {
     }
 
     private static int getItemSellPrice(ItemStack stack) {
-        if (stack.getItem() instanceof com.stardew.craft.item.IStardewItem sdwItem) {
-            int price = sdwItem.getSellPrice(stack);
-            if (price > 0) return price;
-        }
+        int price = StardewItemDataApi.getSellPrice(stack);
+        if (price > 0) return price;
         return 50;
     }
 

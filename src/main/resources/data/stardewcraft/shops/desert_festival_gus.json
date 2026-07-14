@@ -1,0 +1,32 @@
+{
+  "legacy_id": "DesertFestival_Gus",
+  "owner_npc": "gus",
+  "owner_dialogue": "stardewcraft.festival.desertfestival.dialogue.vendor",
+  "entries": [
+    {
+      "item": "stardewcraft:escargot",
+      "stock": 5,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 30
+    },
+    {
+      "item": "stardewcraft:lobster_bisque",
+      "stock": 5,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 30
+    },
+    {
+      "item": "stardewcraft:squid_ink_ravioli",
+      "stock": 5,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 30
+    },
+    {
+      "item": "stardewcraft:eggplant_parmesan",
+      "stock": 5,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 30
+    }
+  ],
+  "accepted_sell_types": []
+}

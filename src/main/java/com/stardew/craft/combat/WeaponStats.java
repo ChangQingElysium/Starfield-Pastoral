@@ -4,6 +4,8 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
+import com.stardew.craft.api.v1.equipment.StardewEquipmentData;
+import com.stardew.craft.api.v1.equipment.StardewEquipmentDataApi;
 
 /**
  * 武器属性
@@ -58,12 +60,12 @@ public class WeaponStats {
         @SuppressWarnings("null")
         CustomData data = stack.get(DataComponents.CUSTOM_DATA);
         if (data == null) {
-            return empty();
+            return fromApiData(stack);
         }
         
         CompoundTag tag = data.copyTag();
         if (!tag.contains(TAG_STARDEW_WEAPON)) {
-            return empty();
+            return fromApiData(stack);
         }
         
         CompoundTag weaponTag = tag.getCompound(TAG_STARDEW_WEAPON);
@@ -80,6 +82,25 @@ public class WeaponStats {
             .knockback(weaponTag.getFloat(TAG_KNOCKBACK))
             .build();
         return applyForgeData(baseStats, WeaponForgeData.read(stack));
+    }
+
+    private static WeaponStats fromApiData(ItemStack stack) {
+        StardewEquipmentData data = StardewEquipmentDataApi.get(stack);
+        if (data == null || data.weapon().isEmpty()) return empty();
+        StardewEquipmentData.Weapon weapon = data.weapon().get();
+        WeaponStats base = builder()
+                .weaponType(WeaponType.fromName(weapon.type()))
+                .minDamage(weapon.minDamage())
+                .maxDamage(weapon.maxDamage())
+                .critChance(weapon.baseCritChance())
+                .bonusCritChance(data.critChance())
+                .bonusCritPower(data.critPower())
+                .speed(weapon.speed())
+                .defense(weapon.defense() + data.defense())
+                .precision(weapon.precision())
+                .knockback(weapon.knockback() + data.knockbackBonus())
+                .build();
+        return applyForgeData(base, WeaponForgeData.read(stack));
     }
 
     public static WeaponStats applyForgeData(WeaponStats baseStats, WeaponForgeData.State forgeState) {

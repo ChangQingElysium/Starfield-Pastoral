@@ -1,47 +1,47 @@
 [
   {
     "id": "mineDeath_Robin",
-    "text": "@：\n\n我在矿井里发现你昏倒了。差点把你当成异域木材搬回去！\n\n总之我把你送回了家，你可能丢了一些东西。\n\n——罗宾",
+    "text": "stardewcraft.mail.mineDeath_Robin",
     "background": 0
   },
   {
     "id": "mineDeath_Clint",
-    "text": "@：\n\n我在矿井发现你晕过去了。把你拖上来的时候差点闪了腰。\n\n下次小心点。\n\n——克林特",
+    "text": "stardewcraft.mail.mineDeath_Clint",
     "background": 0
   },
   {
     "id": "mineDeath_Maru",
-    "text": "@：\n\n我在矿井入口附近找到了你，你伤得不轻。我做了些基本的医疗处理。\n\n以后去矿井要小心啊！\n\n——玛鲁",
+    "text": "stardewcraft.mail.mineDeath_Maru",
     "background": 0
   },
   {
     "id": "mineDeath_Linus",
-    "text": "@：\n\n我在矿井附近那条小路上发现你昏迷不醒。你真走运，我正好路过！\n\n矿井里的生物很危险，要量力而行。\n\n——莱纳斯",
+    "text": "stardewcraft.mail.mineDeath_Linus",
     "background": 0
   },
   {
     "id": "hospitalDeath",
-    "text": "@：\n\n有人把你送到诊所来了。你之前晕倒了！\n\n我已经帮你做了治疗。请注意身体健康。\n\n——哈维医生",
+    "text": "stardewcraft.mail.hospitalDeath",
     "background": 0
   },
   {
     "id": "marlonRecovery",
-    "text": "@：\n\n我在矿井门口发现了你丢的一些东西。来冒险家公会看看吧，我可以帮你找回一件，不过得收点费用。\n\n——马龙",
+    "text": "stardewcraft.mail.marlonRecovery",
     "background": 0
   },
   {
     "id": "passedOut_Linus",
-    "text": "@：\n\n好在我昨晚找到了你！你直接昏倒在外面了。\n\n我看到有人在翻你的口袋……不知道被偷了多少钱。\n\n——莱纳斯",
+    "text": "stardewcraft.mail.passedOut_Linus",
     "background": 0
   },
   {
     "id": "passedOut_Harvey",
-    "text": "@：\n\n有人把你送来诊所了。你因过度劳累晕倒了！\n\n记得早点休息，别太拼命了。\n\n——哈维医生",
+    "text": "stardewcraft.mail.passedOut_Harvey",
     "background": 0
   },
   {
     "id": "passedOut_Marlon",
-    "text": "@：\n\n凌晨巡逻时发现你趴在泥地里。帮你拖回了家。\n\n下次早点回家休息！\n\n——马龙",
+    "text": "stardewcraft.mail.passedOut_Marlon",
     "background": 0
   }
 ]

@@ -44,8 +44,11 @@ public class DecorationSelectionScreen extends Screen {
 
     // Segment override for wallpaper blocks (-1 = auto, 0/1/2 = bottom/middle/top)
     private int selectedSegment;
-    private static final String[] SEGMENT_LABELS = {"下", "中", "上"};
-    private static final String SEGMENT_AUTO_LABEL = "自动";
+    private static final String[] SEGMENT_LABEL_KEYS = {
+            "stardewcraft.ui.deco.segment.bottom",
+            "stardewcraft.ui.deco.segment.middle",
+            "stardewcraft.ui.deco.segment.top"
+    };
 
     // derived constants
     private static final int COLS = 10;
@@ -372,7 +375,7 @@ public class DecorationSelectionScreen extends Screen {
             }
         } else if (option.styleId().equals(payload.currentStyleId())) {
             // Display currently equipped text brightly
-            String eqText = "当前正在使用";
+            Component eqText = Component.translatable("stardewcraft.ui.deco.currently_equipped");
             int eqWidth = this.font.width(eqText);
             int dx = px + (width - eqWidth) / 2;
             int descY = areaY + areaH + 24;
@@ -382,7 +385,7 @@ public class DecorationSelectionScreen extends Screen {
 
     private void drawSegmentButtons(GuiGraphics g, int px, int py, int areaW) {
         // 4 buttons: Auto, Bottom(0), Middle(1), Top(2)
-        String label = "位置:";
+        Component label = Component.translatable("stardewcraft.ui.deco.position");
         g.drawString(this.font, label, px, py + 4, 0xFFAAAAAA, true);
         int btnX = px + this.font.width(label) + 4;
         int btnW = 24;
@@ -390,17 +393,18 @@ public class DecorationSelectionScreen extends Screen {
         int gap = 3;
 
         // Auto button
-        drawSegBtn(g, btnX, py, btnW, btnH, SEGMENT_AUTO_LABEL, selectedSegment == -1);
+        drawSegBtn(g, btnX, py, btnW, btnH,
+                Component.translatable("stardewcraft.ui.deco.segment.auto"), selectedSegment == -1);
         btnX += btnW + gap;
 
         // Segment 0/1/2
         for (int i = 0; i < 3; i++) {
-            drawSegBtn(g, btnX, py, btnW, btnH, SEGMENT_LABELS[i], selectedSegment == i);
+            drawSegBtn(g, btnX, py, btnW, btnH, Component.translatable(SEGMENT_LABEL_KEYS[i]), selectedSegment == i);
             btnX += btnW + gap;
         }
     }
 
-    private void drawSegBtn(GuiGraphics g, int x, int y, int w, int h, String text, boolean active) {
+    private void drawSegBtn(GuiGraphics g, int x, int y, int w, int h, Component text, boolean active) {
         int bg = active ? 0xCC3A5A1F : 0x66333333;
         int border = active ? 0xCC88CC44 : 0x66666666;
         int textColor = active ? 0xFFFFFFDD : 0xFFAAAAAA;
@@ -416,7 +420,7 @@ public class DecorationSelectionScreen extends Screen {
     private int checkSegmentButtonClick(double mouseX, double mouseY) {
         int px = getPanelX() + 10;
         int py = getPanelY() + UI_HEIGHT - 28;
-        String label = "位置:";
+        Component label = Component.translatable("stardewcraft.ui.deco.position");
         int btnX = px + this.font.width(label) + 4;
         int btnW = 24;
         int btnH = 14;

@@ -1,0 +1,14 @@
+[
+  {"id":"Slimes","translation_key":"stardewcraft.slayer.goal.slimes","required_kills":1000,"monster_tags":["sd_mob_slime"],"rewards":[{"type":"stardewcraft:add_item","data":{"item":"stardewcraft:slime_charmer_ring","count":1}}]},
+  {"id":"Shadows","translation_key":"stardewcraft.slayer.goal.shadows","required_kills":150,"monster_tags":["sd_mob_shadow"],"rewards":[{"type":"stardewcraft:add_item","data":{"item":"stardewcraft:savage_ring","count":1}}]},
+  {"id":"Bats","translation_key":"stardewcraft.slayer.goal.bats","required_kills":200,"monster_tags":["sd_mob_bat"],"rewards":[{"type":"stardewcraft:add_item","data":{"item":"stardewcraft:vampire_ring","count":1}}]},
+  {"id":"Skeletons","translation_key":"stardewcraft.slayer.goal.skeletons","required_kills":50,"monster_tags":["sd_mob_skeleton"]},
+  {"id":"Insects","translation_key":"stardewcraft.slayer.goal.insects","required_kills":80,"monster_tags":["sd_mob_fly","sd_mob_grub"],"rewards":[{"type":"stardewcraft:add_item","data":{"item":"stardewcraft:insect_head","count":1}}]},
+  {"id":"Duggy","translation_key":"stardewcraft.slayer.goal.duggies","required_kills":30,"monster_tags":["sd_mob_duggy"]},
+  {"id":"DustSpirits","translation_key":"stardewcraft.slayer.goal.dust_sprites","required_kills":500,"monster_tags":["sd_mob_dust_sprite"],"rewards":[{"type":"stardewcraft:add_item","data":{"item":"stardewcraft:burglars_ring","count":1}}]},
+  {"id":"Crabs","translation_key":"stardewcraft.slayer.goal.crabs","required_kills":60,"monster_tags":["sd_mob_crab"],"rewards":[{"type":"stardewcraft:add_item","data":{"item":"stardewcraft:crabshell_ring","count":1}}]},
+  {"id":"Ghosts","translation_key":"stardewcraft.slayer.goal.ghosts","required_kills":30,"monster_tags":["sd_mob_ghost"]},
+  {"id":"Golems","translation_key":"stardewcraft.slayer.goal.golems","required_kills":60,"monster_tags":["sd_mob_golem"]},
+  {"id":"MetalHeads","translation_key":"stardewcraft.slayer.goal.metal_heads","required_kills":50,"monster_tags":["sd_mob_metal_head"]},
+  {"id":"SquidKids","translation_key":"stardewcraft.slayer.goal.squid_kids","required_kills":30,"monster_tags":["sd_mob_squid"],"rewards":[{"type":"stardewcraft:add_item","data":{"item":"stardewcraft:napalm_ring","count":1}}]}
+]

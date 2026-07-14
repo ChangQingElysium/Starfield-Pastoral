@@ -1,15 +1,18 @@
 [
   {
     "id": "ccBulletinThankYou",
-    "text": "@：\n\n听说你帮忙修好了社区中心的公告板！\n\n镇上的大家都很感动。每个人都让我代表他们向你表示感谢。\n\n你现在是我们当中真正的一员了。\n\n——镇长刘易斯",
+    "text": "stardewcraft.mail.ccBulletinThankYou",
     "background": 0
   },
   {
     "id": "ccFishTankPan",
-    "text": "@：\n\n听说你修好了社区中心的鱼缸区，河里又能看到闪光了。\n\n我做了一把铜锅送给你，用它在水里的闪光处右键就能淘到矿石和宝石。\n\n弄丢了的话到铁匠铺来找我，我可以再打一把。\n\n——克林特",
+    "text": "stardewcraft.mail.ccFishTankPan",
     "background": 0,
     "attachedItems": [
-      {"id": "stardewcraft:copper_pan", "count": 1}
+      {
+        "id": "stardewcraft:copper_pan",
+        "count": 1
+      }
     ]
   }
 ]

@@ -277,6 +277,17 @@ public class StardewWeaponItem extends SwordItem implements IStardewItem, IStard
 
         long nowTick = level.getGameTime();
         String skillId = skill.getId();
+        net.minecraft.resources.ResourceLocation namespacedSkillId = skillId.indexOf(':') >= 0
+                ? net.minecraft.resources.ResourceLocation.tryParse(skillId)
+                : net.minecraft.resources.ResourceLocation.tryBuild("stardewcraft", skillId);
+        if (namespacedSkillId != null) {
+            var externalHandler = com.stardew.craft.api.v1.equipment.StardewWeaponSkillHandlers
+                    .get(namespacedSkillId).orElse(null);
+            if (externalHandler != null) {
+                return externalHandler.use(new com.stardew.craft.api.v1.equipment.StardewWeaponSkillContext(
+                        level, player, hand, stack, namespacedSkillId, majorSkill));
+            }
+        }
         int cooldownTicks = skill.getCooldown() * 20;
 
         boolean isSilverFoldback = "silver_foldback".equals(skillId);

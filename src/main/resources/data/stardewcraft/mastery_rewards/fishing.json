@@ -1,0 +1,23 @@
+{
+  "skill": "stardewcraft:fishing",
+  "entries": [
+    {
+      "kind": "item",
+      "item": "stardewcraft:advanced_iridium_rod",
+      "name_key": "stardewcraft.mastery.reward.advanced_iridium_rod.name",
+      "desc_key": "stardewcraft.mastery.reward.advanced_iridium_rod.desc"
+    },
+    {
+      "kind": "recipe",
+      "item": "stardewcraft:challenge_bait",
+      "recipe_id": "challenge_bait",
+      "name_key": "stardewcraft.mastery.reward.challenge_bait.name",
+      "desc_key": "stardewcraft.mastery.reward.challenge_bait.desc"
+    },
+    {
+      "kind": "placeholder",
+      "name_key": "stardewcraft.mastery.menu.fishing",
+      "desc_key": "stardewcraft.mastery.reward.fishing_plaque.desc"
+    }
+  ]
+}

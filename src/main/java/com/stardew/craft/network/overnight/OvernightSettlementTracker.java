@@ -1,6 +1,6 @@
 package com.stardew.craft.network.overnight;
 
-import com.stardew.craft.item.IStardewItem;
+import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.time.StardewTimeManager;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -158,12 +158,8 @@ public final class OvernightSettlementTracker extends SavedData {
     }
 
     private static int classifyCategory(ItemStack stack) {
-        if (!(stack.getItem() instanceof IStardewItem stardewItem)) {
-            return 4;
-        }
-
-        String typeKey = stardewItem.getItemTypeKey();
-        if (typeKey == null || typeKey.isBlank()) {
+        String typeKey = StardewItemDataApi.getTypeKey(stack);
+        if (typeKey.isBlank()) {
             return 4;
         }
 

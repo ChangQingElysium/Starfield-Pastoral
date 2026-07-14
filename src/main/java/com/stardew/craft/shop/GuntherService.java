@@ -1,15 +1,13 @@
 package com.stardew.craft.shop;
 
 import com.stardew.craft.entity.npc.StardewNpcEntity;
-import com.stardew.craft.item.IStardewItem;
 import com.stardew.craft.cutscene.server.EventSeenData;
 import com.stardew.craft.museum.MuseumDonationData;
+import com.stardew.craft.museum.MuseumDonationItems;
 import com.stardew.craft.museum.MuseumRewardRegistry;
 import com.stardew.craft.network.MuseumDonationSyncPacket;
 import com.stardew.craft.network.payload.OpenGuntherMenuPayload;
 import com.stardew.craft.network.payload.OpenNpcDialogueScreenPayload;
-import com.stardew.craft.player.PlayerDataManager;
-import com.stardew.craft.player.PlayerStardewData;
 import com.stardew.craft.sewer.SewerStoryFlags;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerPlayer;
@@ -136,21 +134,25 @@ public final class GuntherService {
             return false;
         }
 
-        PlayerStardewData pData = PlayerDataManager.getPlayerData(player);
         boolean queuedRustyKeyEvent = false;
         for (MuseumRewardRegistry.MuseumReward reward : claimable) {
             if (MuseumRewardRegistry.RUSTY_KEY_REWARD_ID.equals(reward.id())) {
                 EventSeenData.get(player.serverLevel()).markSeen(playerId, SewerStoryFlags.RUSTY_KEY_EVENT_READY);
                 queuedRustyKeyEvent = true;
             }
-            for (ItemStack stack : MuseumRewardRegistry.createRewardStacks(reward)) {
-                if (!player.getInventory().add(stack.copy())) {
-                    player.drop(stack, false);
+            var actionContext = com.stardew.craft.api.v1.action.StardewActionContext.forPlayer(player);
+            boolean actionFailed = false;
+            for (var action : reward.actions()) {
+                var actionResult = com.stardew.craft.api.v1.action.StardewActions.execute(action, actionContext)
+                        .resultOrPartial(message -> com.stardew.craft.StardewCraft.LOGGER.error(
+                                "[Museum reward] {} failed for {}: {}", reward.id(), player.getName().getString(), message))
+                        .orElse(null);
+                if (actionResult == null || !actionResult.success()) {
+                    actionFailed = true;
+                    break;
                 }
             }
-            if (reward.grantRecipe() != null) {
-                pData.unlockRecipe(reward.grantRecipe());
-            }
+            if (actionFailed) continue;
             data.claimReward(playerId, reward.id());
         }
 
@@ -178,9 +180,7 @@ public final class GuntherService {
         for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
             ItemStack stack = player.getInventory().getItem(i);
             if (stack.isEmpty()) continue;
-            if (!(stack.getItem() instanceof IStardewItem stardewItem)) continue;
-            String typeKey = stardewItem.getItemTypeKey();
-            if (!"stardewcraft.type.mineral".equals(typeKey) && !"stardewcraft.type.artifact".equals(typeKey)) continue;
+            if (!MuseumDonationItems.isDonatable(stack)) continue;
             String itemId = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
             if (!data.isDonated(playerId, itemId)) return true;
         }

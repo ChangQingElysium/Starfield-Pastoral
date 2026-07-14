@@ -263,7 +263,7 @@ public class BlueberryCropBlock extends StardewCropBlock {
     }
 
     @Override
-    public String getCropDisplayName() {
-        return "蓝莓";
+    public String getCropDisplayNameKey() {
+        return "item.stardewcraft.blueberry";
     }
 }

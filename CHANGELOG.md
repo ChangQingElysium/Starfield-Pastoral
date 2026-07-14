@@ -1,5 +1,79 @@
 # Changelog
 
+## 0.5.0 - 2026-07-14
+
+### Update Log (English)
+
+#### Extensibility Platform
+
+- Added the stable `com.stardew.craft.api.v1` surface and shared namespaced Condition, Action, and Item Query systems so data packs and addon mods can extend existing StardewCraft behavior without patching internal classes.
+- Added immutable, versioned and atomic reload snapshots with Codec validation, diagnostics, content hashes and server-to-client synchronization. Invalid candidate data now keeps the last valid runtime snapshot.
+- Added synchronized Data Maps and ordered dynamic providers for Stardew item metadata, crops, trees, animals, buildings and equipment, including public handlers for weapon skills, profession effects, mine monsters, festival mechanics and NPC interactions.
+- Hardened cutscene state changes with server-authorized event sessions, command manifests, branch locking and replay protection.
+
+#### Quests And Gameplay Progression
+
+- Rebuilt quest loading around Minecraft's `ResourceManager`, namespaced definition IDs and data-pack priority, while retaining migration support for legacy numeric quest IDs and old save data.
+- Separated quest definitions from per-player progress, added extensible objective runtimes, shared Condition/Action hooks, data-driven daily quest pools and complete `validate`, `grant`, `complete`, `reset` and `inspect` debug commands.
+- Expanded the early quest flow and connected supported deliveries, item removal, rewards, mail, locations and cutscenes through the shared runtime.
+- Added the Marnie cave-carrot delivery, Jodi fish-casserole dinner and museum archaeology introduction event flows, plus immediate enter-area trigger evaluation and improved event NPC movement, doors, gravity, cameras and music handling.
+- Added the museum lost-book system with world-shared discovery progress, per-player reading state, source-aligned recovery routes and data-driven book text and interaction points.
+
+#### Data-Driven Game Systems
+
+- Migrated 57 built-in static shops and 16 built-in special orders from Java definition tables into the same reloadable public formats available to data packs. Dynamic daily inventories remain runtime providers.
+- Opened data-driven definitions for mail, cutscenes, festivals, machines, cooking, crafting, recipe unlocks, fishing treasure, fish ponds, museum rewards, monster-slayer goals, geodes, prize tickets and mine chests.
+- Added structured world-loot, artifact-spot, forage-zone, quarry, Skull Cavern reward, mine-theme, location and interior-portal definitions while preserving terrain generation and prebuilt-map movement as explicit Java boundaries.
+- Migrated the five mastery reward sets and metadata for all 30 built-in professions, including synchronized client snapshots and public profession effect handlers.
+- Routed general selling, shipping, gifting, museum, fish-pond, machine, catalogue, festival-display and tooltip classification through the public item metadata API and extensible item/block tags.
+
+#### Addon Development And Localization
+
+- Added a runnable example data pack and independently buildable example addon covering quests, shops, mail, events, special orders, production, collection, world content and 15 public Provider/Handler APIs.
+- Added the complete 0.5 addon and data-pack API guide, source audits, quest ledger and extensibility roadmap.
+- Added Russian language support and retained credits for community translation sources; expanded translation auditing to keep supported language files aligned.
+- Verified the release with 29 JUnit tests, full classes/JAR builds, the independent addon build, JSON validation, and dedicated-server startup both with and without the example data pack.
+
+#### Release
+
+- Updated the public mod version to `0.5.0`.
+
+### 更新日志（中文）
+
+#### 开放平台与兼容性
+
+- 加入稳定的 `com.stardew.craft.api.v1` 公开接口，以及共享的命名空间 Condition、Action 和 Item Query 系统，让数据包与附属 Mod 无需修改本体内部类即可扩展现有玩法。
+- 加入不可变、带版本且原子替换的 reload 快照，包含 Codec 校验、诊断信息、内容哈希与服务端到客户端同步；无效候选数据不再污染当前运行快照。
+- 为星露谷物品元数据、作物、树木、动物、建筑与装备加入同步 Data Map 和有序动态 Provider，并开放武器技能、职业效果、矿井怪物、节日机制与 NPC 交互 Handler。
+- 通过服务端授权的剧情会话、命令清单、分支锁定与重放保护，改进剧情状态修改的安全性。
+
+#### 任务与游戏流程
+
+- 使用 Minecraft `ResourceManager`、命名空间定义 ID 与数据包优先级重建任务加载，同时保留旧数字任务 ID 和旧存档的迁移兼容。
+- 分离任务定义与玩家进度，加入可扩展目标运行时、共享 Condition/Action 钩子、数据化日常委托池，以及完整的 `validate`、`grant`、`complete`、`reset` 和 `inspect` 调试指令。
+- 扩展前期任务流程，并将已支持的交付、物品移除、奖励、邮件、地点与剧情接入共享运行时。
+- 加入玛妮洞窟萝卜交付、乔迪鱼肉砂锅晚餐与博物馆考古引导剧情，并改为玩家进入区域时立即检查，同时改进剧情 NPC 行走、开门、重力、摄像机与音乐处理。
+- 加入博物馆遗失藏书系统，包含世界共享发现进度、玩家独立阅读状态、对照原版的找回途径，以及数据化的书籍正文与交互点。
+
+#### 游戏系统数据化
+
+- 将 57 个本体静态商店与 16 条本体特殊订单从 Java 定义表迁入与数据包共用的可 reload 公开格式；每日动态库存继续由运行时 Provider 负责。
+- 开放邮件、剧情、节日、机器、烹饪、合成、配方解锁、钓鱼宝箱、鱼塘、博物馆奖励、杀怪目标、晶球、兑奖券与矿井宝箱的数据化定义。
+- 加入结构化世界掉落、蚯蚓点、采集区、采石场、骷髅矿井奖励、矿层主题、地点与室内传送定义；地形生成和预生成地图移动保留为明确的 Java 边界。
+- 迁移五系精通奖励和全部 30 个本体职业元数据，包含客户端快照同步和公开职业效果 Handler。
+- 将通用的出售、出货、送礼、博物馆、鱼塘、机器、目录、节日展示与 tooltip 分类转入公共物品元数据 API 和可扩展物品/方块标签。
+
+#### 附属开发与本地化
+
+- 加入可直接运行的示例数据包和可独立构建的示例附属，覆盖任务、商店、邮件、剧情、特殊订单、生产、收集、世界内容与 15 类公开 Provider/Handler API。
+- 加入完整的 0.5 附属/数据包 API 指南、源码调研、任务总表与开放接口路线图。
+- 加入俄语支持并保留社区翻译来源致谢，扩展翻译审计工具以保持已支持语言文件一致。
+- 通过 29 项 JUnit 测试、完整 classes/JAR 构建、示例附属独立构建、JSON 校验，以及不带/带示例数据包的专用服务器启动验证本次更新。
+
+#### 发布
+
+- 项目公开版本号更新为 `0.5.0`。
+
 ## 0.4.13 - 2026-07-14
 
 ### Update Log (English)

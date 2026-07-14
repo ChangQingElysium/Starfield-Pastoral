@@ -1,0 +1,52 @@
+{
+  "legacy_id": "Robin2",
+  "requester": "Robin",
+  "duration": "week",
+  "repeatable": true,
+  "required_tags": [],
+  "title": "stardewcraft.special_orders.Robin2.name",
+  "text": "stardewcraft.special_orders.Robin2.text",
+  "objectives": [
+    {
+      "type": "collect",
+      "text": "stardewcraft.special_orders.Robin2_Objective_0_Text",
+      "required_count": 1000,
+      "accepted_tags": "{Resource:Tags}"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "money",
+      "amount": 2500
+    },
+    {
+      "type": "mail",
+      "mail": "robinResource"
+    }
+  ],
+  "random_elements": [
+    {
+      "name": "Resource",
+      "options": [
+        {
+          "required_tags": [],
+          "values": {
+            "option.0.Text": "item.stardewcraft.wood_normal",
+            "option.0.TextPlural": "stardewcraft.special_orders.random.wood_normal.plural",
+            "option.0.TextPluralCapitalized": "stardewcraft.special_orders.random.wood_normal.plural_capitalized",
+            "option.0.Tags": "item_wood_normal",
+            "option.0.Price": "2",
+            "option.0.ItemId": "stardewcraft:wood_normal",
+            "option.1.Text": "item.stardewcraft.stone",
+            "option.1.TextPlural": "stardewcraft.special_orders.random.stone.plural",
+            "option.1.TextPluralCapitalized": "stardewcraft.special_orders.random.stone.plural_capitalized",
+            "option.1.Tags": "item_stone",
+            "option.1.Price": "2",
+            "option.1.ItemId": "stardewcraft:stone",
+            "OptionCount": "2"
+          }
+        }
+      ]
+    }
+  ]
+}

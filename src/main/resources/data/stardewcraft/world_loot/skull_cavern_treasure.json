@@ -1,0 +1,87 @@
+{
+  "source": "stardewcraft:skull_cavern_treasure",
+  "group": "default",
+  "mode": "weighted",
+  "entries": [
+    { "query": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:pale_ale", "count": 5 } } },
+    { "query": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:beer", "count": 10 } } },
+    { "query": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:omni_geode", "count": 5 } } },
+    { "query": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:omni_geode", "count": 5 } } },
+    {
+      "query": {
+        "type": "stardewcraft:weighted",
+        "data": {
+          "entries": [
+            { "weight": 3, "query": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:omni_geode", "count": 5 } } },
+            { "weight": 1, "query": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:omni_geode", "count": 10 } } }
+          ]
+        }
+      }
+    },
+    { "query": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:warp_totem_desert", "count": 5 } } },
+    { "query": { "type": "stardewcraft:random_count", "data": { "min_count": 1, "max_count": 3, "query": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:rain_totem" } } } } },
+    { "query": { "type": "stardewcraft:one_of", "data": { "items": ["stardewcraft:cherry_sapling", "stardewcraft:apricot_sapling", "stardewcraft:orange_sapling", "stardewcraft:peach_sapling", "stardewcraft:pomegranate_sapling", "stardewcraft:apple_sapling"] } } },
+    { "query": { "type": "stardewcraft:random_count", "data": { "min_count": 1, "max_count": 2, "query": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:iridium_sprinkler" } } } } },
+    { "query": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:quality_sprinkler", "count": 4 } } },
+    {
+      "query": {
+        "type": "stardewcraft:one_of_queries",
+        "data": {
+          "queries": [
+            { "type": "stardewcraft:one_of", "data": { "items": ["stardewcraft:parsnip_seeds", "stardewcraft:cauliflower_seeds", "stardewcraft:potato_seeds", "stardewcraft:kale_seeds", "stardewcraft:garlic_seeds", "stardewcraft:blue_jazz_seeds"], "count": 5 } },
+            { "type": "stardewcraft:one_of", "data": { "items": ["stardewcraft:parsnip_seeds", "stardewcraft:cauliflower_seeds", "stardewcraft:potato_seeds", "stardewcraft:kale_seeds", "stardewcraft:garlic_seeds", "stardewcraft:blue_jazz_seeds"], "count": 10 } },
+            { "type": "stardewcraft:one_of", "data": { "items": ["stardewcraft:parsnip_seeds", "stardewcraft:cauliflower_seeds", "stardewcraft:potato_seeds", "stardewcraft:kale_seeds", "stardewcraft:garlic_seeds", "stardewcraft:blue_jazz_seeds"], "count": 15 } },
+            { "type": "stardewcraft:one_of", "data": { "items": ["stardewcraft:parsnip_seeds", "stardewcraft:cauliflower_seeds", "stardewcraft:potato_seeds", "stardewcraft:kale_seeds", "stardewcraft:garlic_seeds", "stardewcraft:blue_jazz_seeds"], "count": 20 } }
+          ]
+        }
+      }
+    },
+    { "query": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:cherry_bomb", "count": 15 } } },
+    { "query": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:omni_geode", "count": 5 } } },
+    { "query": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:omni_geode", "count": 5 } } },
+    {
+      "query": {
+        "type": "stardewcraft:weighted",
+        "data": {
+          "entries": [
+            { "weight": 67, "query": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:omni_geode", "count": 5 } } },
+            { "weight": 16, "query": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:spicy_eel", "count": 5 } } },
+            { "weight": 17, "query": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:crab_cakes", "count": 5 } } }
+          ]
+        }
+      }
+    },
+    { "query": { "type": "stardewcraft:random_count", "data": { "min_count": 2, "max_count": 3, "query": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:iridium_bar" } } } } },
+    {
+      "query": {
+        "type": "stardewcraft:weighted",
+        "data": {
+          "entries": [
+            { "weight": 67, "query": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:omni_geode", "count": 5 } } },
+            { "weight": 16, "query": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:spicy_eel", "count": 5 } } },
+            { "weight": 17, "query": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:crab_cakes", "count": 5 } } }
+          ]
+        }
+      }
+    },
+    { "query": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:prismatic_shard" } } },
+    { "query": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:crystalarium" } } },
+    { "query": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:mayonnaise_machine" } } },
+    { "query": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:omni_geode", "count": 5 } } },
+    { "query": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:omni_geode", "count": 5 } } },
+    {
+      "query": {
+        "type": "stardewcraft:weighted",
+        "data": {
+          "entries": [
+            { "weight": 3, "query": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:omni_geode", "count": 5 } } },
+            { "weight": 1, "query": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:omni_geode", "count": 10 } } }
+          ]
+        }
+      }
+    },
+    { "query": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:omni_geode", "count": 5 } } },
+    { "query": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:omni_geode", "count": 5 } } },
+    { "query": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:omni_geode", "count": 5 } } }
+  ]
+}

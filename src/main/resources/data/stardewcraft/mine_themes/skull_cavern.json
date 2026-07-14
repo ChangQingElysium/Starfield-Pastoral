@@ -1,0 +1,19 @@
+{
+  "mechanic_id": "skull_cavern",
+  "min_floor": 121,
+  "max_floor": 2147483647,
+  "main_stone": "stardewcraft:desert_bedrock",
+  "dark_stone": "stardewcraft:dark_desert_bedrock",
+  "decor_a": ["stardewcraft:sulfur_rock"],
+  "decor_b": [],
+  "decorative_stones": ["stardewcraft:sulfur_rock", "stardewcraft:weathered_stone", "stardewcraft:cracked_slate"],
+  "vanilla_accents": ["minecraft:sandstone", "minecraft:red_sandstone", "minecraft:magma_block"],
+  "cave_decorations": ["stardewcraft:scoria", "stardewcraft:mossy_sandstone", "stardewcraft:salt_rock", "stardewcraft:cracked_slate"],
+  "ores": {
+    "copper": "stardewcraft:desert_copper_ore",
+    "iron": "stardewcraft:desert_iron_ore",
+    "gold": "stardewcraft:desert_gold_ore",
+    "iridium": "stardewcraft:desert_iridium_ore",
+    "coal": "stardewcraft:desert_coal_ore"
+  }
+}

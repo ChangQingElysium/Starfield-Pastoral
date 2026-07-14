@@ -28,6 +28,7 @@ run-dev-server
 # temp/debug artifacts
 _tmp*
 .tmp/
+tmp/
 tmp_models/
 *.log
 *.zip
@@ -37,7 +38,8 @@ command_cases.txt
 precond_list.txt
 precondition_cases.txt
 validation_output.txt
-docs/
+docs/*
+!docs/0.5-addon-api.md
 wiki/
 ui_spec/
 resourcepack-template/

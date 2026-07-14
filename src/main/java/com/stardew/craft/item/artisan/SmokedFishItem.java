@@ -1,6 +1,7 @@
 package com.stardew.craft.item.artisan;
 
 import com.stardew.craft.item.IStardewItem;
+import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.item.quality.QualityHelper;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.minecraft.ChatFormatting;
@@ -87,12 +88,9 @@ public class SmokedFishItem extends Item implements IStardewItem {
     public int getSellPrice(ItemStack stack) {
         int quality = QualityHelper.getQuality(stack);
         Item source = getSourceItem();
-        if (!(source instanceof IStardewItem stardewItem)) {
-            return -1;
-        }
         ItemStack sourceStack = new ItemStack(source);
         QualityHelper.setQuality(sourceStack, quality);
-        int basePrice = stardewItem.getSellPrice(sourceStack);
+        int basePrice = StardewItemDataApi.getSellPrice(sourceStack);
         if (basePrice < 0) {
             return basePrice;
         }
@@ -159,19 +157,12 @@ public class SmokedFishItem extends Item implements IStardewItem {
 
     private int getBaseEdibility(int quality) {
         Item source = getSourceItem();
-        if (!(source instanceof IStardewItem stardewItem)) {
-            return -300;
-        }
-        if (!stardewItem.isFood()) {
-            return -300;
-        }
         ItemStack sourceStack = new ItemStack(source);
         QualityHelper.setQuality(sourceStack, quality);
-        int energy = stardewItem.getEnergy(sourceStack);
-        if (energy <= -300) {
-            return -300;
-        }
-        return (int) Math.round(energy / 2.5f);
+        return StardewItemDataApi.resolve(sourceStack)
+                .filter(data -> data.isFood())
+                .map(data -> data.edibility())
+                .orElse(-300);
     }
 
     private static int energyFromEdibility(int edibility) {

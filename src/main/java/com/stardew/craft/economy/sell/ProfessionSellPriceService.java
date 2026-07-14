@@ -1,11 +1,13 @@
 package com.stardew.craft.economy.sell;
 
 import com.stardew.craft.book.BookPowerEffects;
-import com.stardew.craft.item.IStardewItem;
+import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.item.artisan.SmokedFishItem;
 import com.stardew.craft.player.PlayerStardewData;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import com.stardew.craft.player.ProfessionType;
+import com.stardew.craft.player.ProfessionData;
+import com.stardew.craft.api.v1.profession.StardewProfessionEffectHandlers;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -77,34 +79,36 @@ public final class ProfessionSellPriceService {
     }
 
     private static SellQuote quoteItemWithChecker(ServerPlayer player, ItemStack stack, SellSource source, ProfessionChecker checker) {
-        if (!(stack.getItem() instanceof IStardewItem stardewItem)) {
+        String typeKey = StardewItemDataApi.getTypeKey(stack);
+        int baseUnitPrice = StardewItemDataApi.getSellPrice(stack);
+        if (typeKey.isBlank() || baseUnitPrice < 0) {
             return SellQuote.unsellable(SellContext.forItem(source, ""), stack.getCount());
         }
 
-        SellContext context = SellContext.forItem(source, stardewItem.getItemTypeKey());
-        int baseUnitPrice = stardewItem.getSellPrice(stack);
+        SellContext context = SellContext.forItem(source, typeKey);
         if (player != null) {
             baseUnitPrice = BookPowerEffects.applyArtifactSellPrice(
                     PlayerStardewDataAPI.getData(player), context.itemTypeKey(), baseUnitPrice);
         }
-        return quote(baseUnitPrice, stack.getCount(), context, stack, checker);
+        return quote(baseUnitPrice, stack.getCount(), context, stack, player, checker);
     }
 
     private static SellQuote quoteItemWithData(PlayerStardewData data, ItemStack stack, SellSource source, ProfessionChecker checker) {
-        if (!(stack.getItem() instanceof IStardewItem stardewItem)) {
+        String typeKey = StardewItemDataApi.getTypeKey(stack);
+        int baseUnitPrice = StardewItemDataApi.getSellPrice(stack);
+        if (typeKey.isBlank() || baseUnitPrice < 0) {
             return SellQuote.unsellable(SellContext.forItem(source, ""), stack.getCount());
         }
 
-        SellContext context = SellContext.forItem(source, stardewItem.getItemTypeKey());
-        int baseUnitPrice = stardewItem.getSellPrice(stack);
+        SellContext context = SellContext.forItem(source, typeKey);
         if (data != null) {
             baseUnitPrice = BookPowerEffects.applyArtifactSellPrice(data, context.itemTypeKey(), baseUnitPrice);
         }
-        return quote(baseUnitPrice, stack.getCount(), context, stack, checker);
+        return quote(baseUnitPrice, stack.getCount(), context, stack, null, checker);
     }
 
     public static SellQuote quoteAnimal(ServerPlayer player, int basePrice, SellSource source) {
-        return quote(basePrice, 1, SellContext.forAnimal(source), ItemStack.EMPTY,
+        return quote(basePrice, 1, SellContext.forAnimal(source), ItemStack.EMPTY, player,
             profession -> hasProfession(player, profession));
     }
 
@@ -126,18 +130,20 @@ public final class ProfessionSellPriceService {
         }
     }
 
-    private static SellQuote quote(int baseUnitPrice, int count, SellContext context, ItemStack stack, ProfessionChecker checker) {
+    private static SellQuote quote(int baseUnitPrice, int count, SellContext context, ItemStack stack,
+                                   ServerPlayer player, ProfessionChecker checker) {
         if (baseUnitPrice <= 0 || count <= 0) {
             return SellQuote.unsellable(context, count);
         }
 
-        double multiplier = resolveMultiplier(context, stack, checker);
+        double multiplier = resolveMultiplier(context, stack, player, checker);
         int finalUnitPrice = Math.max(0, (int) Math.floor(baseUnitPrice * multiplier));
         int totalPrice = finalUnitPrice * count;
         return new SellQuote(baseUnitPrice, finalUnitPrice, count, totalPrice, multiplier, context, true);
     }
 
-    private static double resolveMultiplier(SellContext context, ItemStack stack, ProfessionChecker checker) {
+    private static double resolveMultiplier(SellContext context, ItemStack stack, ServerPlayer player,
+                                            ProfessionChecker checker) {
         String typeKey = context.itemTypeKey();
         double multiplier = 1.0;
         boolean isCrop = CROP_TYPES.contains(typeKey);
@@ -180,6 +186,14 @@ public final class ProfessionSellPriceService {
 
         if (isTapperProduct && checker.hasProfession(ProfessionType.TAPPER)) {
             multiplier *= 1.25;
+        }
+
+        for (ProfessionType profession : ProfessionType.values()) {
+            if (checker.hasProfession(profession)) {
+                multiplier = ProfessionData.applyEffect(profession,
+                        StardewProfessionEffectHandlers.SELL_PRICE_MULTIPLIER,
+                        player, stack, multiplier);
+            }
         }
 
         return multiplier;

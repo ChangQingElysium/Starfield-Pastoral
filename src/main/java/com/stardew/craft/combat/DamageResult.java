@@ -64,7 +64,7 @@ public class DamageResult {
         }
         
         StringBuilder sb = new StringBuilder();
-        sb.append(inStardewDimension ? "[星露谷] " : "[主世界] ");
+        sb.append(inStardewDimension ? "[Stardew Valley] " : "[Overworld] ");
         sb.append(String.format("Base: %.1f", baseDamage));
         
         if (isCrit) {

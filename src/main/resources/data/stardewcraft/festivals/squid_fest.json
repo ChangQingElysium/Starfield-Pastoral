@@ -1,0 +1,21 @@
+{
+  "type": "passive",
+  "legacy_id": "SquidFest",
+  "display_name": "SquidFest",
+  "season": 3,
+  "start_day": 12,
+  "end_day": 13,
+  "start_time": 610,
+  "end_time": 2600,
+  "show_on_calendar": false,
+  "only_show_start_message_on_first_day": true,
+  "start_message_key": "message.stardewcraft.festival.passive.squid_fest.started",
+  "presentation": {
+    "start_message_token": "[LocalizedText Strings\\1_6_Strings:SquidFest_NowOpen]"
+  },
+  "world": {
+    "location": "Beach",
+    "map_overlay": "Beach-SquidFest",
+    "mechanic_id": "squid_fest"
+  }
+}

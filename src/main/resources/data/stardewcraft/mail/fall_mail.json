@@ -1,58 +1,58 @@
 [
   {
     "id": "fall_1",
-    "text": "@你好：\n\n秋天到了！这是收获的季节。\n\n我店里有蔓越莓、山药和茄子种子。南瓜也是秋天的好选择！\n\n——皮埃尔",
+    "text": "stardewcraft.mail.fall_1",
     "background": 0
   },
   {
     "id": "fall_2_1",
-    "text": "致 @：\n\n你的农场越来越像样了！\n\n如果你还没有建畜棚的话，可以来找我。养几只鸡下蛋也是不错的收入来源。\n\n——罗宾",
+    "text": "stardewcraft.mail.fall_2_1",
     "background": 0
   },
   {
     "id": "fall_6_1",
-    "text": "@：\n\n秋天的矿石产量比其他季节要高一些。\n\n如果你需要升级工具，现在正是去矿井里收集矿石的好时机。\n\n——克林特",
+    "text": "stardewcraft.mail.fall_6_1",
     "background": 0
   },
   {
     "id": "fall_8_1",
-    "text": "致 @：\n\n秋天正是南瓜收获的季节！能帮我弄到一个南瓜吗？我想做一些植物学研究。\n\n谢谢你！\n\n——德米特里厄斯",
+    "text": "stardewcraft.mail.fall_8_1",
     "background": 0
   },
   {
     "id": "fall_12_1",
-    "text": "@你好：\n\n矿井40到79层的灰尘精灵最近数量激增。冒险家公会需要帮忙控制一下。\n\n如果你有时间的话，帮我们消灭15只。有报酬！\n\n——马龙",
+    "text": "stardewcraft.mail.fall_12_1",
     "background": 0
   },
   {
     "id": "fall_15",
-    "text": "各位居民：\n\n明天是星露谷展览会！\n\n请在上午9点来到广场。大家可以展示自己最引以为豪的农产品！\n\n州长大人将出席评判！\n\n——镇长刘易斯",
+    "text": "stardewcraft.mail.fall_15",
     "background": 0
   },
   {
     "id": "fall_18_1",
-    "text": "亲爱的@：\n\n城里的天气开始变冷了，不过我猜你在乡下过得很充实吧。\n\n爷爷要是看到你打理农场的样子，一定会很骄傲的。\n\n随信附上一点零花钱。\n\n——爸爸",
+    "text": "stardewcraft.mail.fall_18_1",
     "background": 0,
     "money": 500
   },
   {
     "id": "fall_20_1",
-    "text": "@你好：\n\n你种过花椰菜吗？我特别想做一锅奶油花椰菜汤。\n\n如果你有的话，能送一个给我吗？\n\n——卡洛琳",
+    "text": "stardewcraft.mail.fall_20_1",
     "background": 0
   },
   {
     "id": "fall_22_1",
-    "text": "@：\n\n我的渔船最近漏水了，需要一根铁锭来修补。你能帮帮忙吗？\n\n——威利",
+    "text": "stardewcraft.mail.fall_22_1",
     "background": 0
   },
   {
     "id": "fall_26",
-    "text": "各位居民：\n\n精灵前夜节就在明天！\n\n晚上10点到镇广场来吧。我们准备了迷宫和各种惊喜！\n\n——镇长刘易斯",
+    "text": "stardewcraft.mail.fall_26",
     "background": 0
   },
   {
     "id": "fall_27_1",
-    "text": "@：\n\n冬天快来了。你的农场准备好越冬了吗？\n\n冬天可以种不了什么东西，所以赶紧把秋天的庄稼收完吧。\n\n——卡洛琳",
+    "text": "stardewcraft.mail.fall_27_1",
     "background": 0
   }
 ]

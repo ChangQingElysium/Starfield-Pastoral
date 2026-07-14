@@ -1,0 +1,7 @@
+{
+  "condition": "specific_items",
+  "required_items": ["minecraft:apple"],
+  "rewards": [
+    {"type": "stardewcraft:add_money", "data": {"amount": 50}}
+  ]
+}

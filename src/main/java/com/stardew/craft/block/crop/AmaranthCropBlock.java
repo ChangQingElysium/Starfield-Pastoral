@@ -80,7 +80,7 @@ public class AmaranthCropBlock extends StardewCropBlock {
     }
 
     @Override
-    public String getCropDisplayName() {
-        return "苋菜";
+    public String getCropDisplayNameKey() {
+        return "item.stardewcraft.amaranth";
     }
 }

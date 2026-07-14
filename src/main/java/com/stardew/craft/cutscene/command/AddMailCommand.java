@@ -1,8 +1,6 @@
 package com.stardew.craft.cutscene.command;
 
-import com.stardew.craft.cutscene.network.CutsceneServerActionPayload;
 import com.stardew.craft.cutscene.runtime.EventPlayer;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * add_mail: adds a mail flag on the player (server-side).
@@ -20,8 +18,7 @@ public class AddMailCommand implements EventCommand {
 
     @Override
     public void start(EventPlayer player) {
-        PacketDistributor.sendToServer(
-                new CutsceneServerActionPayload("set_flag", mailId));
+        player.sendServerAction("set_flag", mailId);
     }
 
     @Override public void tick(EventPlayer player) {}

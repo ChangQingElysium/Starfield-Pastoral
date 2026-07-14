@@ -75,7 +75,7 @@ public class BeetCropBlock extends StardewCropBlock {
     }
 
     @Override
-    public String getCropDisplayName() {
-        return "甜菜";
+    public String getCropDisplayNameKey() {
+        return "item.stardewcraft.beet";
     }
 }

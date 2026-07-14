@@ -1,0 +1,29 @@
+plugins {
+    id 'java-library'
+    id 'net.neoforged.moddev' version '2.0.137'
+}
+
+group = 'com.example.stardewaddon'
+version = '0.1.0'
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+neoForge {
+    version = project.neo_version
+}
+
+def stardewCraftJars = fileTree('../../build/libs') {
+    include 'stardewcraft-*.jar'
+}
+
+dependencies {
+    implementation stardewCraftJars
+}
+
+tasks.named('compileJava').configure {
+    doFirst {
+        if (stardewCraftJars.isEmpty()) {
+            throw new GradleException('Build StardewCraft first: ../../gradlew jar')
+        }
+    }
+}

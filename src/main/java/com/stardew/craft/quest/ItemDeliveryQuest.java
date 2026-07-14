@@ -42,6 +42,17 @@ public class ItemDeliveryQuest extends StardewQuest {
     }
 
     @Override
+    public boolean matchesItemDelivery(String npcId, String offeredItemId) {
+        return accepted && !completed && !destroy
+                && targetNpc.equalsIgnoreCase(npcId) && itemId.equalsIgnoreCase(offeredItemId);
+    }
+
+    @Override
+    public String getDeliveryTargetMessage() {
+        return targetMessage;
+    }
+
+    @Override
     public void questComplete(ServerPlayer player) {
         if (completed) return;
         super.questComplete(player);

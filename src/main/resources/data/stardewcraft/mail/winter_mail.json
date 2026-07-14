@@ -1,52 +1,52 @@
 [
   {
     "id": "winter_1",
-    "text": "@你好：\n\n冬天来了，但别灰心！\n\n虽然大多数庄稼都种不了了，但这是钓鱼、升级工具和探索矿井的好时机。\n\n——镇长刘易斯",
+    "text": "stardewcraft.mail.winter_1",
     "background": 0
   },
   {
     "id": "winter_2_1",
-    "text": "@：\n\n你知道吗？冬天也有可以采集的东西。\n\n雪山药、冬根和水晶果都能在雪地里找到。\n\n——莱纳斯",
+    "text": "stardewcraft.mail.winter_2_1",
     "background": 0
   },
   {
     "id": "winter_7",
-    "text": "各位居民：\n\n明天是冰雪节！\n\n请于上午9点来到广场。我们将进行钓鱼比赛！\n\n——镇长刘易斯",
+    "text": "stardewcraft.mail.winter_7",
     "background": 0
   },
   {
     "id": "winter_10_1",
-    "text": "@：\n\n矿井深处最近出现了幽灵，对矿工们造成了威胁。冒险家公会需要你的帮助。\n\n消灭5只幽灵，会有丰厚的报酬！\n\n——马龙",
+    "text": "stardewcraft.mail.winter_10_1",
     "background": 0
   },
   {
     "id": "winter_12_1",
-    "text": "致 @：\n\n冬天是升级工具的好时机，因为你不需要每天浇水。\n\n我的铁匠铺随时欢迎你！\n\n——克林特",
+    "text": "stardewcraft.mail.winter_12_1",
     "background": 0
   },
   {
     "id": "winter_14_1",
-    "text": "嘿 @：\n\n冬天也可以钓鱼哦！冬天的鱼跟其他季节完全不一样。\n\n来我的鱼店看看，我有新的鱼饵在售。\n\n——威利",
+    "text": "stardewcraft.mail.winter_14_1",
     "background": 0
   },
   {
     "id": "winter_17",
-    "text": "各位居民：\n\n夜市将从明天开始，持续三天（冬17-19日）！\n\n每天下午5点到次日2点，来海滩逛逛吧。\n\n有各种珍奇的商品和美食！\n\n——镇长刘易斯",
+    "text": "stardewcraft.mail.winter_17",
     "background": 0
   },
   {
     "id": "winter_18",
-    "text": "亲爱的@：\n\n我想和你说下最近的节日和盛事：冬日星盛宴。在这个节日里我们欢聚在一起，回忆过去的一年我们的劳动成果。\n\n我们有一项好玩的传统 \"秘密礼物交换\"，每个人都会随机分配到一位朋友。在宴会的那天，大家都会拿出精心准备的礼物让你的朋友大吃一惊！\n\n今年，你的“神秘朋友”是:\n%secretsanta \n\n别告诉任何人哦！宴会在 25 号的 9 点到 2 点，在镇上的广场举行。不见不散！\n\n——镇长刘易斯",
+    "text": "stardewcraft.mail.winter_18",
     "background": 0
   },
   {
     "id": "winter_24",
-    "text": "亲爱的@：\n\n明天就是冬日星盛宴了！\n\n你有没有为你的“神秘朋友”%secretsanta精心准备一份礼物呢？\n\n宴会在镇里的广场举行，九点开始。不见不散！\n\n——镇长刘易斯",
+    "text": "stardewcraft.mail.winter_24",
     "background": 0
   },
   {
     "id": "winter_27_1",
-    "text": "致 @：\n\n又快到新的一年了！\n\n回想这一年你在农场取得的成绩，真是了不起。\n\n期待来年更精彩！\n\n——镇长刘易斯",
+    "text": "stardewcraft.mail.winter_27_1",
     "background": 0
   }
 ]

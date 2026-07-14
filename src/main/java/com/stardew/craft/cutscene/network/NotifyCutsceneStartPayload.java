@@ -11,10 +11,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
- * Client → Server: notify the server that the client began playing an event locally
- * (e.g. enter_area triggers fired purely client-side).
- *
- * Server uses this to mark the player as cutscene-active so interaction lock applies.
+ * Client → Server: request an enter-area event. The server validates the trigger and
+ * returns {@link TriggerEventPayload} with a fresh session when approved.
  */
 public record NotifyCutsceneStartPayload(String eventId) implements CustomPacketPayload {
 
@@ -29,7 +27,7 @@ public record NotifyCutsceneStartPayload(String eventId) implements CustomPacket
     public static void handle(NotifyCutsceneStartPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
             ServerPlayer player = (ServerPlayer) context.player();
-            ServerCutsceneTracker.markActive(player);
+            ServerCutsceneTracker.requestEnterAreaEvent(player, payload.eventId);
         });
     }
 

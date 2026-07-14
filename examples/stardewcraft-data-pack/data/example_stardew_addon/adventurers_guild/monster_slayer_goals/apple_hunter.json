@@ -1,0 +1,8 @@
+{
+  "translation_key": "example_stardew_addon.goal.apple_hunter",
+  "required_kills": 5,
+  "monster_tags": ["sd_mob_slime"],
+  "rewards": [
+    {"type": "stardewcraft:add_item", "data": {"item": "minecraft:golden_apple", "count": 1}}
+  ]
+}

@@ -117,33 +117,27 @@ public class AnimalPurchaseScreen extends Screen {
 
     private int hoverHotspot = 0;
 
-    private static final Map<String, String[]> NAME_POOLS_EN = Map.ofEntries(
-        Map.entry("white_chicken", new String[]{"Nugget", "Peep", "Dot", "Poppy", "Clover", "Sunny"}),
-        Map.entry("golden_chicken", new String[]{"Aurora", "Glimmer", "Ray", "Dawn", "Shine", "Ember"}),
-        Map.entry("void_chicken", new String[]{"Ink", "Nyx", "Abyss", "Shade", "Nova", "Vanta"}),
-        Map.entry("duck", new String[]{"Quackie", "Ripple", "Mochi", "Puddle", "Flipper", "Bubbles"}),
-        Map.entry("rabbit", new String[]{"Cocoa", "Hop", "Mimi", "Cotton", "Bean", "Sprout"}),
-        Map.entry("ostrich", new String[]{"Stride", "Feather", "Sora", "Dash", "Sandy", "Zephyr"}),
-        Map.entry("dinosaur", new String[]{"Rex", "Leaf", "Spike", "Moss", "Pebble", "Amber"}),
-        Map.entry("cow", new String[]{"MooMoo", "Daisy", "Bessie", "Toffee", "Maple", "Butter"}),
-        Map.entry("goat", new String[]{"Pepper", "Ivy", "Ginger", "Cliff", "Bramble", "Taro"}),
-        Map.entry("sheep", new String[]{"Cloud", "Fleece", "Marsh", "Fluff", "Wooly", "Snow"}),
-        Map.entry("pig", new String[]{"Truffle", "Rosie", "Bacon", "Porky", "Nori", "Acorn"})
+    private static final Map<String, String[]> NAME_POOL_KEYS = Map.ofEntries(
+        Map.entry("white_chicken", randomNameKeys("white_chicken")),
+        Map.entry("golden_chicken", randomNameKeys("golden_chicken")),
+        Map.entry("void_chicken", randomNameKeys("void_chicken")),
+        Map.entry("duck", randomNameKeys("duck")),
+        Map.entry("rabbit", randomNameKeys("rabbit")),
+        Map.entry("ostrich", randomNameKeys("ostrich")),
+        Map.entry("dinosaur", randomNameKeys("dinosaur")),
+        Map.entry("cow", randomNameKeys("cow")),
+        Map.entry("goat", randomNameKeys("goat")),
+        Map.entry("sheep", randomNameKeys("sheep")),
+        Map.entry("pig", randomNameKeys("pig"))
     );
 
-    private static final Map<String, String[]> NAME_POOLS_ZH = Map.ofEntries(
-        Map.entry("white_chicken", new String[]{"小白", "咕咕", "米粒", "团团", "晴晴", "豆豆"}),
-        Map.entry("golden_chicken", new String[]{"金豆", "闪闪", "朝阳", "小金", "暖暖", "星火"}),
-        Map.entry("void_chicken", new String[]{"夜墨", "影子", "深空", "乌云", "玄玄", "黑莓"}),
-        Map.entry("duck", new String[]{"鸭鸭", "泡泡", "小涟", "团鸭", "小脚", "湖湖"}),
-        Map.entry("rabbit", new String[]{"团子", "糯糯", "小白兔", "棉棉", "跳跳", "可可"}),
-        Map.entry("ostrich", new String[]{"长腿", "风行", "沙沙", "羽羽", "奔奔", "追风"}),
-        Map.entry("dinosaur", new String[]{"小恐", "琥珀", "石斧", "青苔", "刺刺", "阿龙"}),
-        Map.entry("cow", new String[]{"奶糖", "花花", "小奶", "布丁", "麦麦", "慢慢"}),
-        Map.entry("goat", new String[]{"阿咩", "山山", "小角", "椒椒", "岩岩", "棕糖"}),
-        Map.entry("sheep", new String[]{"绵绵", "云朵", "棉花", "雪球", "软软", "白云"}),
-        Map.entry("pig", new String[]{"噜噜", "桃桃", "松露", "胖胖", "小猪", "果果"})
-    );
+    private static String[] randomNameKeys(String animalTypeId) {
+        String[] keys = new String[6];
+        for (int i = 0; i < keys.length; i++) {
+            keys[i] = "stardewcraft.animal.random_name." + animalTypeId + "." + i;
+        }
+        return keys;
+    }
 
     private static final class NameLayout {
         int lineX;
@@ -464,7 +458,8 @@ public class AnimalPurchaseScreen extends Screen {
         // 增加质感顶条，而非原本空洞的背景
         graphics.fillGradient(fx(-778), fy(-470), fx(346), fy(-350), alphaColor(0x2A3D3627, alpha), alphaColor(0x00000000, alpha));
         
-        drawScaledBoldText(graphics, "玛尼的动物商店", titleX, titleY, fs(48), alphaColor(0xFFFFF6D5, alpha));
+        drawScaledBoldText(graphics, Component.translatable("stardewcraft.animal.purchase.shop_title"),
+                titleX, titleY, fs(48), alphaColor(0xFFFFF6D5, alpha));
         // 玛尼商店横线（明亮分割线）
         graphics.fill(fx(-635), fy(-356), fx(279), fy(-354), alphaColor(0xFFEADB8C, alpha));
 
@@ -947,26 +942,13 @@ public class AnimalPurchaseScreen extends Screen {
             editCursor = 0;
             return;
         }
-        String[] pool = getLocaleNamePool(item.option.animalTypeId());
+        String[] pool = NAME_POOL_KEYS.get(item.option.animalTypeId());
         if (pool == null || pool.length == 0) {
             editName = resolveDisplayName(item.option.displayName(), item.option.animalTypeId());
         } else {
-            editName = pool[random.nextInt(pool.length)];
+            editName = Component.translatable(pool[random.nextInt(pool.length)]).getString();
         }
         editCursor = editName.length();
-    }
-
-    private String[] getLocaleNamePool(String animalTypeId) {
-        String locale = getCurrentLanguageCode();
-        Map<String, String[]> poolMap = locale.startsWith("zh") ? NAME_POOLS_ZH : NAME_POOLS_EN;
-        return poolMap.get(animalTypeId);
-    }
-
-    private String getCurrentLanguageCode() {
-        if (this.minecraft != null && this.minecraft.getLanguageManager() != null && this.minecraft.getLanguageManager().getSelected() != null) {
-            return this.minecraft.getLanguageManager().getSelected();
-        }
-        return "en_us";
     }
 
     private NameLayout computeBuildingNameLayout() {
@@ -1173,6 +1155,10 @@ public class AnimalPurchaseScreen extends Screen {
         graphics.pose().scale(scale, scale, 1.0f);
         graphics.drawString(this.font, Component.literal(text).withStyle(ChatFormatting.BOLD), 0, 0, color, false);
         graphics.pose().popPose();
+    }
+
+    private void drawScaledBoldText(GuiGraphics graphics, Component text, int x, int y, float scale, int color) {
+        drawScaledBoldText(graphics, text.getString(), x, y, scale, color);
     }
 
     private void drawScaledTextCentered(GuiGraphics graphics, String text, int boxX, int boxW, int y, float scale, int color) {

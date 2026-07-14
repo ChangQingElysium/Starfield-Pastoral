@@ -78,6 +78,29 @@ public final class NpcDataRegistry {
     private NpcDataRegistry() {
     }
 
+    static void replaceAll(
+            Map<String, NpcCapabilityProfile> capabilities,
+            Map<String, JsonObject> dialogues,
+            Map<String, JsonObject> schedules,
+            Map<String, JsonObject> tastes,
+            Map<String, JsonObject> events,
+            Set<String> locationMappings,
+            Map<String, String> locationAliases,
+            Map<String, NpcLocationAnchor> locationAnchors
+    ) {
+        CURRENT = new Snapshot(
+                Collections.unmodifiableMap(new LinkedHashMap<>(capabilities)),
+                Collections.unmodifiableMap(new LinkedHashMap<>(dialogues)),
+                Collections.unmodifiableMap(new LinkedHashMap<>(schedules)),
+                Collections.unmodifiableMap(new LinkedHashMap<>(tastes)),
+                Collections.unmodifiableMap(new LinkedHashMap<>(events)),
+                Collections.unmodifiableSet(new LinkedHashSet<>(locationMappings)),
+                Collections.unmodifiableMap(new LinkedHashMap<>(locationAliases)),
+                Collections.unmodifiableMap(new LinkedHashMap<>(locationAnchors))
+        );
+        CACHED_EVENTS_JSON_REF = new java.lang.ref.SoftReference<>(null);
+    }
+
     public static void replaceCapabilities(Map<String, NpcCapabilityProfile> capabilities) {
         Snapshot s = CURRENT;
         CURRENT = new Snapshot(Collections.unmodifiableMap(new LinkedHashMap<>(capabilities)),

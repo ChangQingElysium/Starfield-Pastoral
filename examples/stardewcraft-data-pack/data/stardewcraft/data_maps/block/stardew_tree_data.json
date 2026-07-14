@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": {
+    "minecraft:oak_log": {
+      "kind": "example_stardew_addon:apple_oak",
+      "days_to_mature": 28,
+      "product": "minecraft:apple",
+      "product_count": 1,
+      "max_stored_product": 3,
+      "fruit_seasons": ["fall"]
+    }
+  }
+}

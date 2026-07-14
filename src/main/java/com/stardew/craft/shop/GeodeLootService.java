@@ -122,6 +122,8 @@ public class GeodeLootService {
 
         String geodeType = getGeodeType(geodeStack);
         if (geodeType == null) return;
+        ResourceLocation customId = geodeType.indexOf(':') >= 0 ? ResourceLocation.tryParse(geodeType) : null;
+        if (customId != null && !GeodeDropData.isAvailable(customId, player)) return;
 
         int money = PlayerStardewDataAPI.getMoney(player);
         if (money < GEODE_COST) return;
@@ -190,6 +192,12 @@ public class GeodeLootService {
         // SDV: prewarm random (mimics seed-based RNG warm-up)
         int prewarm = r.nextInt(9) + 1;
         for (int i = 0; i < prewarm; i++) r.nextDouble();
+
+        if (geodeType.indexOf(':') >= 0) {
+            ResourceLocation customId = ResourceLocation.tryParse(geodeType);
+            if (customId == null) return ItemStack.EMPTY;
+            return GeodeDropData.roll(customId, player, r).orElse(ItemStack.EMPTY);
+        }
         prewarm = r.nextInt(9) + 1;
         for (int i = 0; i < prewarm; i++) r.nextDouble();
 
@@ -246,10 +254,11 @@ public class GeodeLootService {
 
     public static boolean isGeodeCrusherInput(ItemStack stack) {
         String geodeType = getGeodeType(stack);
-        return "geode".equals(geodeType)
+        return geodeType != null && (geodeType.indexOf(':') >= 0
+            || "geode".equals(geodeType)
             || "frozen_geode".equals(geodeType)
             || "magma_geode".equals(geodeType)
-            || "omni_geode".equals(geodeType);
+            || "omni_geode".equals(geodeType));
     }
 
     public static ItemStack getTreasureForGeodeCrusher(ItemStack stack, ServerPlayer player) {
@@ -481,6 +490,8 @@ public class GeodeLootService {
     }
 
     private static String getGeodeType(ItemStack stack) {
+        ResourceLocation custom = GeodeDropData.definitionFor(stack);
+        if (custom != null) return custom.toString();
         ResourceLocation id = BuiltInRegistries.ITEM.getKey(stack.getItem());
         String path = id.getPath();
         return switch (path) {

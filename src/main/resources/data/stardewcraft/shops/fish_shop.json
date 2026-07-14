@@ -1,0 +1,72 @@
+{
+  "legacy_id": "FishShop",
+  "owner_npc": "Willy",
+  "owner_dialogue": "stardewcraft.shop.fishshop.dialogue",
+  "entries": [
+    {
+      "item": "stardewcraft:bait",
+      "price": 5
+    },
+    {
+      "item": "stardewcraft:lead_bobber",
+      "price": 200
+    },
+    {
+      "item": "stardewcraft:spinner",
+      "price": 500
+    },
+    {
+      "item": "stardewcraft:trap_bobber",
+      "price": 500
+    },
+    {
+      "item": "stardewcraft:cork_bobber",
+      "price": 750
+    },
+    {
+      "item": "stardewcraft:treasure_hunter",
+      "price": 750
+    },
+    {
+      "item": "stardewcraft:dressed_spinner",
+      "price": 1000
+    },
+    {
+      "item": "stardewcraft:barbed_hook",
+      "price": 1000
+    },
+    {
+      "item": "stardewcraft:quality_bobber",
+      "price": 2000
+    },
+    {
+      "item": "stardewcraft:fiberglass_rod",
+      "price": 1800,
+      "stock": 1
+    },
+    {
+      "item": "stardewcraft:iridium_rod",
+      "price": 7500,
+      "stock": 1
+    },
+    {
+      "item": "stardewcraft:training_rod",
+      "price": 25,
+      "stock": 1
+    },
+    {
+      "item": "stardewcraft:coral",
+      "price": 80
+    },
+    {
+      "item": "stardewcraft:sea_urchin",
+      "price": 160
+    }
+  ],
+  "accepted_sell_types": [
+    "stardewcraft.type.crabpot",
+    "stardewcraft.type.fish",
+    "stardewcraft.type.fishing",
+    "stardewcraft.type.legendary_fish"
+  ]
+}

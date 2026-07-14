@@ -1,43 +1,50 @@
 package com.stardew.craft.interior;
 
-import com.google.gson.JsonArray;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mojang.serialization.JsonOps;
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.content.AtomicDefinitionStore;
+import com.stardew.craft.api.v1.content.DefinitionDiagnostic;
+import com.stardew.craft.api.v1.content.DefinitionSnapshot;
+import com.stardew.craft.api.v1.world.StardewLocationDefinition;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
+import net.minecraft.util.profiling.ProfilerFiller;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
+/** Reloadable fixed-location lookup used by interiors, music, quests and NPC routing. */
 public final class InteriorRegionRegistry {
-    private static final String RESOURCE_PATH = "data/stardewcraft/interiors/fixed_interior_regions.json";
-    private static final List<InteriorRegion> REGIONS = new ArrayList<>();
-    private static final Map<String, String> ALIASES = new HashMap<>();
-    private static boolean loaded;
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private static final ResourceLocation BUILTIN_TABLE =
+            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "fixed_interiors");
+    private static final AtomicDefinitionStore<StardewLocationDefinition> STORE = new AtomicDefinitionStore<>();
+    private static volatile List<InteriorRegion> regions = List.of();
+    private static volatile Map<String, String> aliases = Map.of();
+    private static volatile String cachedJson = "{}";
 
     private InteriorRegionRegistry() {
     }
 
+    public static DefinitionSnapshot<StardewLocationDefinition> snapshot() {
+        return STORE.snapshot();
+    }
+
     public static Optional<InteriorRegion> fixedInteriorAt(BlockPos pos) {
-        ensureLoaded();
-        if (pos == null) {
-            return Optional.empty();
-        }
-        for (InteriorRegion region : REGIONS) {
-            if (region.contains(pos)) {
-                return Optional.of(region);
-            }
-        }
-        return Optional.empty();
+        if (pos == null) return Optional.empty();
+        return regions.stream().filter(region -> region.contains(pos)).findFirst();
     }
 
     public static String fixedInteriorIdAt(BlockPos pos) {
@@ -49,137 +56,157 @@ public final class InteriorRegionRegistry {
     }
 
     public static String canonicalInteriorId(String idOrAlias) {
-        ensureLoaded();
-        if (idOrAlias == null || idOrAlias.isBlank()) {
-            return "";
-        }
+        if (idOrAlias == null || idOrAlias.isBlank()) return "";
         String normalized = normalize(idOrAlias);
-        return ALIASES.getOrDefault(normalized, normalized);
+        return aliases.getOrDefault(normalized, normalized);
     }
 
     public static boolean hasFixedInteriorAlias(String idOrAlias) {
-        ensureLoaded();
-        if (idOrAlias == null || idOrAlias.isBlank()) {
-            return false;
-        }
-        return ALIASES.containsKey(normalize(idOrAlias));
+        return idOrAlias != null && !idOrAlias.isBlank() && aliases.containsKey(normalize(idOrAlias));
     }
 
     public static List<InteriorRegion> regions() {
-        ensureLoaded();
-        return Collections.unmodifiableList(REGIONS);
+        return regions;
     }
 
-    private static void ensureLoaded() {
-        if (loaded) {
+    public static String getCachedJson() {
+        return cachedJson;
+    }
+
+    public static void applyFromJson(String json) {
+        try {
+            JsonObject root = JsonParser.parseString(json).getAsJsonObject();
+            Map<ResourceLocation, StardewLocationDefinition> definitions = new LinkedHashMap<>();
+            Map<ResourceLocation, String> sources = new LinkedHashMap<>();
+            List<DefinitionDiagnostic> diagnostics = new ArrayList<>();
+            for (Map.Entry<String, JsonElement> entry : root.entrySet()) {
+                ResourceLocation id = ResourceLocation.tryParse(entry.getKey());
+                decode(id, id, entry.getValue(), definitions, sources, diagnostics);
+            }
+            var result = STORE.applyLocal(definitions, sources, diagnostics);
+            logDiagnostics(result.diagnostics());
+            if (!result.accepted()) {
+                StardewCraft.LOGGER.error("[Locations] Rejected client sync; keeping {} locations", regions.size());
+                return;
+            }
+            publish(result.snapshot().definitions());
+            cachedJson = json;
+        } catch (RuntimeException exception) {
+            StardewCraft.LOGGER.error("[Locations] Failed client sync", exception);
+        }
+    }
+
+    public static final class ReloadListener extends SimpleJsonResourceReloadListener {
+        public ReloadListener() {
+            super(GSON, "locations");
+        }
+
+        @Override
+        protected void apply(Map<ResourceLocation, JsonElement> objects, ResourceManager manager,
+                             ProfilerFiller profiler) {
+            Map<ResourceLocation, StardewLocationDefinition> definitions = new LinkedHashMap<>();
+            Map<ResourceLocation, String> sources = new LinkedHashMap<>();
+            List<DefinitionDiagnostic> diagnostics = new ArrayList<>();
+            JsonElement builtin = objects.get(BUILTIN_TABLE);
+            if (builtin == null || !builtin.isJsonObject() || !builtin.getAsJsonObject().has("regions")) {
+                diagnostics.add(DefinitionDiagnostic.error(BUILTIN_TABLE, null,
+                        "Missing built-in fixed-interior location table"));
+            } else {
+                for (JsonElement raw : builtin.getAsJsonObject().getAsJsonArray("regions")) {
+                    if (!raw.isJsonObject()) continue;
+                    JsonObject object = raw.getAsJsonObject().deepCopy();
+                    String path = object.has("id") ? object.remove("id").getAsString() : "";
+                    decode(BUILTIN_TABLE, ResourceLocation.tryBuild(StardewCraft.MODID, normalize(path)),
+                            object, definitions, sources, diagnostics);
+                }
+            }
+            objects.entrySet().stream()
+                    .filter(entry -> !entry.getKey().equals(BUILTIN_TABLE))
+                    .sorted(Map.Entry.comparingByKey(Comparator.comparing(ResourceLocation::toString)))
+                    .forEach(entry -> decode(entry.getKey(), entry.getKey(), entry.getValue(),
+                            definitions, sources, diagnostics));
+            var result = STORE.applyLocal(definitions, sources, diagnostics);
+            logDiagnostics(result.diagnostics());
+            if (!result.accepted()) {
+                StardewCraft.LOGGER.error("[Locations] Rejected reload; keeping {} locations", regions.size());
+                return;
+            }
+            publish(result.snapshot().definitions());
+            cachedJson = encodeDefinitions(result.snapshot().definitions());
+            StardewCraft.LOGGER.info("[Locations] Applied {} locations", regions.size());
+        }
+    }
+
+    private static void publish(Map<ResourceLocation, StardewLocationDefinition> definitions) {
+        List<InteriorRegion> prepared = definitions.entrySet().stream()
+                .sorted(Comparator
+                        .<Map.Entry<ResourceLocation, StardewLocationDefinition>>comparingInt(
+                                entry -> entry.getValue().priority()).reversed()
+                        .thenComparing(entry -> entry.getKey().toString()))
+                .map(entry -> toRegion(entry.getKey(), entry.getValue()))
+                .toList();
+        Map<String, String> preparedAliases = new LinkedHashMap<>();
+        for (InteriorRegion region : prepared) {
+            preparedAliases.put(normalize(region.id()), region.id());
+            region.aliases().forEach(alias -> preparedAliases.put(normalize(alias), region.id()));
+        }
+        regions = List.copyOf(prepared);
+        aliases = Map.copyOf(preparedAliases);
+    }
+
+    private static String encodeDefinitions(Map<ResourceLocation, StardewLocationDefinition> definitions) {
+        JsonObject root = new JsonObject();
+        definitions.forEach((id, definition) -> StardewLocationDefinition.CODEC
+                .encodeStart(JsonOps.INSTANCE, definition).result().ifPresent(json -> root.add(id.toString(), json)));
+        return GSON.toJson(root);
+    }
+
+    private static void decode(ResourceLocation source, ResourceLocation id, JsonElement json,
+                               Map<ResourceLocation, StardewLocationDefinition> definitions,
+                               Map<ResourceLocation, String> sources,
+                               List<DefinitionDiagnostic> diagnostics) {
+        if (id == null) {
+            diagnostics.add(DefinitionDiagnostic.error(source, null, "Missing or invalid location ID"));
             return;
         }
-        loaded = true;
-        REGIONS.clear();
-        ALIASES.clear();
-
-        try (InputStream input = InteriorRegionRegistry.class.getClassLoader().getResourceAsStream(RESOURCE_PATH)) {
-            if (input == null) {
-                StardewCraft.LOGGER.error("[INTERIOR_REGION] Missing {}", RESOURCE_PATH);
-                return;
-            }
-            JsonObject root = JsonParser.parseReader(new InputStreamReader(input, StandardCharsets.UTF_8)).getAsJsonObject();
-            JsonArray regions = root.getAsJsonArray("regions");
-            if (regions == null) {
-                StardewCraft.LOGGER.error("[INTERIOR_REGION] {} has no regions array", RESOURCE_PATH);
-                return;
-            }
-            for (JsonElement element : regions) {
-                if (element == null || !element.isJsonObject()) {
-                    continue;
-                }
-                InteriorRegion region = readRegion(element.getAsJsonObject());
-                if (region == null) {
-                    continue;
-                }
-                REGIONS.add(region);
-                ALIASES.put(normalize(region.id()), region.id());
-                for (String alias : region.aliases()) {
-                    ALIASES.put(normalize(alias), region.id());
-                }
-            }
-            StardewCraft.LOGGER.info("[INTERIOR_REGION] Loaded {} fixed interior regions", REGIONS.size());
-        } catch (Exception ex) {
-            StardewCraft.LOGGER.error("[INTERIOR_REGION] Failed to load {}", RESOURCE_PATH, ex);
-        }
+        StardewLocationDefinition.CODEC.parse(JsonOps.INSTANCE, json)
+                .resultOrPartial(message -> diagnostics.add(DefinitionDiagnostic.error(source, id, message)))
+                .ifPresent(definition -> {
+                    definitions.put(id, definition);
+                    StardewLocationDefinition.CODEC.encodeStart(JsonOps.INSTANCE, definition)
+                            .resultOrPartial(message -> diagnostics.add(DefinitionDiagnostic.error(source, id, message)))
+                            .ifPresent(encoded -> sources.put(id, GSON.toJson(encoded)));
+                });
     }
 
-    private static InteriorRegion readRegion(JsonObject obj) {
-        String id = readString(obj, "id");
-        String ledgerId = readString(obj, "ledger_id");
-        if (id == null || id.isBlank()) {
-            return null;
-        }
-        int[] min = readVec3i(obj.getAsJsonArray("min"));
-        int[] max = readVec3i(obj.getAsJsonArray("max"));
-        if (min == null || max == null) {
-            StardewCraft.LOGGER.error("[INTERIOR_REGION] Region {} is missing min/max", id);
-            return null;
-        }
-        List<String> aliases = new ArrayList<>();
-        JsonArray aliasArray = obj.getAsJsonArray("aliases");
-        if (aliasArray != null) {
-            for (JsonElement alias : aliasArray) {
-                if (alias != null && alias.isJsonPrimitive()) {
-                    aliases.add(alias.getAsString());
-                }
+    private static InteriorRegion toRegion(ResourceLocation id, StardewLocationDefinition definition) {
+        String runtimeId = id.getNamespace().equals(StardewCraft.MODID) ? id.getPath() : id.toString();
+        return new InteriorRegion(runtimeId, definition.ledgerId(),
+                definition.min().x(), definition.min().y(), definition.min().z(),
+                definition.max().x(), definition.max().y(), definition.max().z(),
+                definition.aliases());
+    }
+
+    private static void logDiagnostics(List<DefinitionDiagnostic> diagnostics) {
+        for (DefinitionDiagnostic diagnostic : diagnostics) {
+            if (diagnostic.severity() == DefinitionDiagnostic.Severity.ERROR) {
+                StardewCraft.LOGGER.error("[Locations] {}", diagnostic.message());
+            } else {
+                StardewCraft.LOGGER.warn("[Locations] {}", diagnostic.message());
             }
         }
-        return new InteriorRegion(
-            normalize(id),
-            ledgerId == null ? "" : ledgerId.trim(),
-            Math.min(min[0], max[0]),
-            Math.min(min[1], max[1]),
-            Math.min(min[2], max[2]),
-            Math.max(min[0], max[0]),
-            Math.max(min[1], max[1]),
-            Math.max(min[2], max[2]),
-            List.copyOf(aliases)
-        );
-    }
-
-    private static String readString(JsonObject obj, String key) {
-        if (obj == null || !obj.has(key) || !obj.get(key).isJsonPrimitive()) {
-            return null;
-        }
-        return obj.get(key).getAsString();
-    }
-
-    private static int[] readVec3i(JsonArray array) {
-        if (array == null || array.size() != 3) {
-            return null;
-        }
-        return new int[] {
-            array.get(0).getAsInt(),
-            array.get(1).getAsInt(),
-            array.get(2).getAsInt()
-        };
     }
 
     private static String normalize(String value) {
         return value == null ? "" : value.trim().toLowerCase(Locale.ROOT);
     }
 
-    public record InteriorRegion(
-        String id,
-        String ledgerId,
-        int minX,
-        int minY,
-        int minZ,
-        int maxX,
-        int maxY,
-        int maxZ,
-        List<String> aliases
-    ) {
+    public record InteriorRegion(String id, String ledgerId, int minX, int minY, int minZ,
+                                 int maxX, int maxY, int maxZ, List<String> aliases) {
         public boolean contains(BlockPos pos) {
             return pos.getX() >= minX && pos.getX() <= maxX
-                && pos.getY() >= minY && pos.getY() <= maxY
-                && pos.getZ() >= minZ && pos.getZ() <= maxZ;
+                    && pos.getY() >= minY && pos.getY() <= maxY
+                    && pos.getZ() >= minZ && pos.getZ() <= maxZ;
         }
     }
 }

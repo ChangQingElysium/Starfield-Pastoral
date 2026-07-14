@@ -1,10 +1,8 @@
 package com.stardew.craft.cutscene.command;
 
-import com.stardew.craft.cutscene.network.CutsceneServerActionPayload;
 import com.stardew.craft.cutscene.runtime.EventPlayer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * teleport_cc: requests server to teleport the real player into the Community Center interior.
@@ -34,8 +32,7 @@ public class TeleportCCCommand implements EventCommand {
 
         if (!sent) {
             player.markRealPlayerMovedByServer();
-            PacketDistributor.sendToServer(
-                    new CutsceneServerActionPayload("teleport_cc", ""));
+            player.sendServerAction("teleport_cc", "");
             sent = true;
             return;
         }

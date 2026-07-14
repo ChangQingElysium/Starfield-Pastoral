@@ -60,12 +60,12 @@ public class FarmCaveCommand {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         FarmInstance farm = FarmInstanceRegistry.get().getFarmForPlayer(player.getUUID());
         if (farm == null) {
-            ctx.getSource().sendFailure(Component.literal("§c你还没有农场"));
+            ctx.getSource().sendFailure(Component.translatable("stardewcraft.command.farm_cave.no_farm"));
             return 0;
         }
         FarmCaveChoice c = farm.getCaveChoice();
-        ctx.getSource().sendSuccess(() -> Component.literal(
-                "§e当前洞穴选择：§f" + c.getName()), false);
+        ctx.getSource().sendSuccess(() -> Component.translatable(
+                "stardewcraft.command.farm_cave.current", caveChoiceName(c)), false);
         return 1;
     }
 
@@ -74,22 +74,22 @@ public class FarmCaveCommand {
         String name = StringArgumentType.getString(ctx, "choice");
         FarmCaveChoice choice = FarmCaveChoice.fromName(name);
         if (choice == null) {
-            ctx.getSource().sendFailure(Component.literal("§c未知选项: " + name));
+            ctx.getSource().sendFailure(Component.translatable("stardewcraft.command.unknown_option", name));
             return 0;
         }
         FarmInstanceRegistry reg = FarmInstanceRegistry.get();
         FarmInstance farm = reg.getFarmForPlayer(player.getUUID());
         if (farm == null) {
-            ctx.getSource().sendFailure(Component.literal("§c你不属于任何农场"));
+            ctx.getSource().sendFailure(Component.translatable("stardewcraft.command.farm_cave.not_member"));
             return 0;
         }
         boolean ok = FarmCaveAPI.setCaveChoice(player, choice);
         if (!ok) {
-            ctx.getSource().sendFailure(Component.literal("§c设置失败"));
+            ctx.getSource().sendFailure(Component.translatable("stardewcraft.command.farm_cave.set_failed"));
             return 0;
         }
-        ctx.getSource().sendSuccess(() -> Component.literal(
-                "§a洞穴选择已更新为 §f" + choice.getName()), true);
+        ctx.getSource().sendSuccess(() -> Component.translatable(
+                "stardewcraft.command.farm_cave.updated", caveChoiceName(choice)), true);
         return 1;
     }
 
@@ -98,17 +98,17 @@ public class FarmCaveCommand {
         String name = StringArgumentType.getString(ctx, "choice");
         FarmCaveChoice choice = FarmCaveChoice.fromName(name);
         if (choice == null) {
-            ctx.getSource().sendFailure(Component.literal("§c未知选项: " + name));
+            ctx.getSource().sendFailure(Component.translatable("stardewcraft.command.unknown_option", name));
             return 0;
         }
         boolean ok = FarmCaveAPI.setCaveChoice(target.getUUID(), choice);
         if (!ok) {
-            ctx.getSource().sendFailure(Component.literal("§c目标玩家无农场"));
+            ctx.getSource().sendFailure(Component.translatable("stardewcraft.command.farm_cave.target_no_farm"));
             return 0;
         }
-        ctx.getSource().sendSuccess(() -> Component.literal(
-                "§a已将 " + target.getGameProfile().getName()
-                        + " 的洞穴选择设为 §f" + choice.getName()), true);
+        ctx.getSource().sendSuccess(() -> Component.translatable(
+                "stardewcraft.command.farm_cave.admin_updated",
+                target.getGameProfile().getName(), caveChoiceName(choice)), true);
         return 1;
     }
 
@@ -125,23 +125,27 @@ public class FarmCaveCommand {
     private static int doRebuild(CommandContext<CommandSourceStack> ctx, ServerPlayer target) {
         FarmInstance farm = FarmInstanceRegistry.get().getFarmForPlayer(target.getUUID());
         if (farm == null) {
-            ctx.getSource().sendFailure(Component.literal("§c目标无农场"));
+            ctx.getSource().sendFailure(Component.translatable("stardewcraft.command.farm_cave.target_no_farm"));
             return 0;
         }
         net.minecraft.server.level.ServerLevel stardewLevel =
                 ctx.getSource().getServer().getLevel(com.stardew.craft.core.ModDimensions.STARDEW_VALLEY);
         if (stardewLevel == null) {
-            ctx.getSource().sendFailure(Component.literal("§c星露谷维度未加载"));
+            ctx.getSource().sendFailure(Component.translatable("stardewcraft.command.dimension_not_loaded"));
             return 0;
         }
         boolean placed = com.stardew.craft.farm.FarmInstanceInitializer.backfillFarmCaveIfMissing(stardewLevel, farm);
         if (placed) {
-            ctx.getSource().sendSuccess(() -> Component.literal(
-                    "§a已为 " + target.getGameProfile().getName() + " 补建农场洞穴"), true);
+            ctx.getSource().sendSuccess(() -> Component.translatable(
+                    "stardewcraft.command.farm_cave.rebuilt", target.getGameProfile().getName()), true);
         } else {
-            ctx.getSource().sendSuccess(() -> Component.literal(
-                    "§e" + target.getGameProfile().getName() + " 的洞穴已存在，无需补建"), false);
+            ctx.getSource().sendSuccess(() -> Component.translatable(
+                    "stardewcraft.command.farm_cave.already_exists", target.getGameProfile().getName()), false);
         }
         return 1;
+    }
+
+    private static Component caveChoiceName(FarmCaveChoice choice) {
+        return Component.translatable("stardewcraft.farm_cave.choice." + choice.getName());
     }
 }

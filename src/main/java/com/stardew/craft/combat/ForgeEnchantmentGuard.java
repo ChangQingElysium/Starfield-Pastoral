@@ -1,7 +1,7 @@
 package com.stardew.craft.combat;
 
 import com.stardew.craft.StardewCraft;
-import com.stardew.craft.item.IStardewItem;
+import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.item.weapon.IStardewWeapon;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
@@ -38,13 +38,10 @@ public final class ForgeEnchantmentGuard {
         if (stack.getItem() instanceof IStardewWeapon) {
             return true;
         }
-        if (stack.getItem() instanceof IStardewItem stardewItem) {
-            String typeKey = stardewItem.getItemTypeKey();
-            return typeKey != null && (typeKey.startsWith("stardewcraft.tool.")
-                    || "stardewcraft.type.tool".equals(typeKey)
-                    || "stardewcraft.type.fishing".equals(typeKey));
-        }
-        return false;
+        String typeKey = StardewItemDataApi.getTypeKey(stack);
+        return typeKey.startsWith("stardewcraft.tool.")
+                || "stardewcraft.type.tool".equals(typeKey)
+                || "stardewcraft.type.fishing".equals(typeKey);
     }
 
     public static boolean isProtectedForgeEnchantment(Holder<Enchantment> enchantment) {

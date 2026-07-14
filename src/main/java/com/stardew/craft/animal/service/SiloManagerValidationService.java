@@ -1,6 +1,7 @@
 package com.stardew.craft.animal.service;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -41,7 +42,7 @@ public final class SiloManagerValidationService {
             }
         }
 
-        return new ValidationResult(false, "需要 2×2×10 的红砖柱（管理器需替换其中一个红砖位置）", 0, 0, 0, 0, 0, 0);
+        return new ValidationResult(false, Component.translatable("stardewcraft.manager.silo.validation.structure"), 0, 0, 0, 0, 0, 0);
     }
 
     private static ValidationResult checkColumn(ServerLevel level, BlockPos managerPos,
@@ -65,23 +66,23 @@ public final class SiloManagerValidationService {
                     if (state.is(Blocks.BRICKS)) {
                         brickCount++;
                     } else {
-                        return new ValidationResult(false, "", 0, 0, 0, 0, 0, 0);
+                        return new ValidationResult(false, Component.empty(), 0, 0, 0, 0, 0, 0);
                     }
                 }
             }
         }
 
         if (!managerFound) {
-            return new ValidationResult(false, "", 0, 0, 0, 0, 0, 0);
+            return new ValidationResult(false, Component.empty(), 0, 0, 0, 0, 0, 0);
         }
 
         if (brickCount < totalBlocks) {
-            return new ValidationResult(false, "", 0, 0, 0, 0, 0, 0);
+            return new ValidationResult(false, Component.empty(), 0, 0, 0, 0, 0, 0);
         }
 
         return new ValidationResult(
             true,
-            "校验通过",
+            Component.translatable("stardewcraft.manager.validation.success"),
             baseX, baseY, baseZ,
             baseX + SILO_WIDTH - 1,
             baseY + SILO_HEIGHT - 1,
@@ -89,7 +90,7 @@ public final class SiloManagerValidationService {
         );
     }
 
-    public record ValidationResult(boolean success, String message,
+    public record ValidationResult(boolean success, Component message,
                                    int minX, int minY, int minZ,
                                    int maxX, int maxY, int maxZ) {
     }

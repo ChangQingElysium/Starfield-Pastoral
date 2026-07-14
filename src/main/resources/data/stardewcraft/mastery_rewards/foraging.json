@@ -1,0 +1,24 @@
+{
+  "skill": "stardewcraft:foraging",
+  "entries": [
+    {
+      "kind": "recipe",
+      "item": "stardewcraft:mystic_tree_seed",
+      "recipe_id": "mystic_tree_seed",
+      "name_key": "stardewcraft.mastery.reward.mystic_tree_seed.name",
+      "desc_key": "stardewcraft.mastery.reward.mystic_tree_seed.desc"
+    },
+    {
+      "kind": "recipe",
+      "item": "stardewcraft:treasure_totem",
+      "recipe_id": "treasure_totem",
+      "name_key": "stardewcraft.mastery.reward.treasure_totem.name",
+      "desc_key": "stardewcraft.mastery.reward.treasure_totem.desc"
+    },
+    {
+      "kind": "placeholder",
+      "name_key": "stardewcraft.mastery.menu.foraging",
+      "desc_key": "stardewcraft.mastery.reward.foraging_plaque.desc"
+    }
+  ]
+}

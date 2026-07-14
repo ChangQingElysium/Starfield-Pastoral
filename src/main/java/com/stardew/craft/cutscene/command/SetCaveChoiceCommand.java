@@ -1,8 +1,6 @@
 package com.stardew.craft.cutscene.command;
 
-import com.stardew.craft.cutscene.network.CutsceneServerActionPayload;
 import com.stardew.craft.cutscene.runtime.EventPlayer;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * set_cave_choice: applies a farm-cave type choice to the player's farm (server-side).
@@ -19,8 +17,7 @@ public class SetCaveChoiceCommand implements EventCommand {
 
     @Override
     public void start(EventPlayer player) {
-        PacketDistributor.sendToServer(
-                new CutsceneServerActionPayload("set_cave_choice", choice));
+        player.sendServerAction("set_cave_choice", choice);
     }
 
     @Override public void tick(EventPlayer player) {}

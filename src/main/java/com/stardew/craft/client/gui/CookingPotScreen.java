@@ -7,7 +7,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.gui.common.CommonGuiTextures;
 import com.stardew.craft.cooking.service.VanillaCookingRecipeData;
-import com.stardew.craft.item.ModItems;
+import com.stardew.craft.api.v1.production.StardewCookingIngredient;
 import com.stardew.craft.item.cooking.CookingDishItem;
 import com.stardew.craft.menu.CookingPotMenu;
 import com.stardew.craft.network.payload.CookingPotCookSubmitPayload;
@@ -73,17 +73,13 @@ public class CookingPotScreen extends AbstractContainerScreen<CookingPotMenu> {
         recipeIds.clear();
 
         List<ResourceLocation> allIds = new ArrayList<>();
-        for (String idStr : ModItems.COOKING_DISHES.keySet()) {
-            ResourceLocation rl = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, idStr);
-            Item item = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(rl);
-            if (item != null && item != Items.AIR) {
-                allIds.add(rl);
-            }
+        for (ResourceLocation recipeId : VanillaCookingRecipeData.getRecipeIds()) {
+            if (!VanillaCookingRecipeData.getOutputStack(recipeId, 1).isEmpty()) allIds.add(recipeId);
         }
 
         allIds.sort((r1, r2) -> {
-            boolean unlocked1 = ClientPlayerDataCache.hasRecipe(r1.getPath());
-            boolean unlocked2 = ClientPlayerDataCache.hasRecipe(r2.getPath());
+            boolean unlocked1 = isUnlocked(r1);
+            boolean unlocked2 = isUnlocked(r2);
             boolean craftable1 = canCraft(r1);
             boolean craftable2 = canCraft(r2);
 
@@ -91,12 +87,11 @@ public class CookingPotScreen extends AbstractContainerScreen<CookingPotMenu> {
             int rank2 = craftable2 ? 1 : (unlocked2 ? 2 : 3);
 
             if (rank1 != rank2) return Integer.compare(rank1, rank2);
-            return r1.getPath().compareTo(r2.getPath());
+            return r1.toString().compareTo(r2.toString());
         });
 
         for (ResourceLocation rl : allIds) {
-            Item item = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(rl);
-            availableRecipes.add(new ItemStack(item));
+            availableRecipes.add(VanillaCookingRecipeData.getOutputStack(rl, 1));
             recipeIds.add(rl);
         }
     }
@@ -118,7 +113,7 @@ public class CookingPotScreen extends AbstractContainerScreen<CookingPotMenu> {
             
             if (mouseX >= cx && mouseX <= cx + 16 && mouseY >= cy && mouseY <= cy + 16) {
                 ResourceLocation rl = recipeIds.get(dataIndex);
-                if (!ClientPlayerDataCache.hasRecipe(rl.getPath())) {
+                if (!isUnlocked(rl)) {
                     List<Component> tooltip = List.of(Component.literal("???"));
                     g.renderTooltip(this.font, tooltip, java.util.Optional.empty(), mouseX, mouseY);
                 } else {
@@ -130,7 +125,7 @@ public class CookingPotScreen extends AbstractContainerScreen<CookingPotMenu> {
         
         if (currentFocusIndex >= 0 && currentFocusIndex < availableRecipes.size()) {
             ResourceLocation recipeId = recipeIds.get(currentFocusIndex);
-            List<VanillaCookingRecipeData.IngredientRequirement> reqs = VanillaCookingRecipeData.getRequirements(recipeId.getPath());
+            List<StardewCookingIngredient> reqs = VanillaCookingRecipeData.getRequirements(recipeId);
             if (!reqs.isEmpty()) {
                 int startY = this.topPos + 10 + 128;
                 int exactCount = Math.min(4, reqs.size());
@@ -141,7 +136,7 @@ public class CookingPotScreen extends AbstractContainerScreen<CookingPotMenu> {
                 for (int i = 0; i < exactCount; i++) {
                     int rx = startX + i * reqSpacing;
                     if (mouseX >= rx && mouseX <= rx + 16 && mouseY >= startY && mouseY <= startY + 16) {
-                        g.renderTooltip(this.font, resolveRequirementIcon(reqs.get(i).token()), mouseX, mouseY);
+                        g.renderTooltip(this.font, resolveRequirementIcon(reqs.get(i)), mouseX, mouseY);
                         break;
                     }
                 }
@@ -197,7 +192,7 @@ public class CookingPotScreen extends AbstractContainerScreen<CookingPotMenu> {
             int itemY = Math.round(cy + 8 + lift - itemSize / 2.0f);
 
             ResourceLocation rl = recipeIds.get(dataIndex);
-            boolean unlocked = ClientPlayerDataCache.hasRecipe(rl.getPath());
+            boolean unlocked = isUnlocked(rl);
             boolean craftable = canCraft(rl);
 
             if (!unlocked) {
@@ -249,7 +244,7 @@ public class CookingPotScreen extends AbstractContainerScreen<CookingPotMenu> {
         int width = 130;
         ItemStack selStack = availableRecipes.get(focusIdx);
         ResourceLocation recipeId = recipeIds.get(focusIdx);
-        boolean unlocked = ClientPlayerDataCache.hasRecipe(recipeId.getPath());
+        boolean unlocked = isUnlocked(recipeId);
 
         int alpha = (int)(showcaseAlpha * 255);
         alpha = Mth.clamp(alpha, 0, 255);
@@ -312,8 +307,9 @@ public class CookingPotScreen extends AbstractContainerScreen<CookingPotMenu> {
         g.pose().popPose();
 
         if (!unlocked) {
-            String unlockTxt = "解锁方法：" + I18n.get("recipe.stardewcraft." + recipeId.getPath() + ".unlock_condition");
-            List<FormattedCharSequence> lines = this.font.split(Component.literal(unlockTxt), width - 6);
+            Component unlockTxt = Component.translatable("stardewcraft.cooking.unlock_method",
+                    Component.translatable("recipe.stardewcraft." + recipeId.getPath() + ".unlock_condition"));
+            List<FormattedCharSequence> lines = this.font.split(unlockTxt, width - 6);
             int yPos = py + 110;
             for (FormattedCharSequence line : lines) {
                 int dx = px + (width - this.font.width(line)) / 2;
@@ -361,7 +357,7 @@ public class CookingPotScreen extends AbstractContainerScreen<CookingPotMenu> {
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         }
 
-        List<VanillaCookingRecipeData.IngredientRequirement> reqs = VanillaCookingRecipeData.getRequirements(recipeId.getPath());
+        List<StardewCookingIngredient> reqs = VanillaCookingRecipeData.getRequirements(recipeId);
         if (!reqs.isEmpty()) {
             int startY = py + 128;
             int exactCount = Math.min(4, reqs.size());
@@ -370,9 +366,9 @@ public class CookingPotScreen extends AbstractContainerScreen<CookingPotMenu> {
             int startX = px + (width - totalReqWidth) / 2;
 
             for (int i = 0; i < exactCount; i++) {
-                VanillaCookingRecipeData.IngredientRequirement req = reqs.get(i);
-                ItemStack icon = resolveRequirementIcon(req.token());
-                int has = countMatching(req.token());
+                StardewCookingIngredient req = reqs.get(i);
+                ItemStack icon = resolveRequirementIcon(req);
+                int has = countMatching(req);
                 int need = req.count();
                 boolean enough = has >= need;
 
@@ -432,43 +428,35 @@ public class CookingPotScreen extends AbstractContainerScreen<CookingPotMenu> {
     }
 
     private boolean canCraft(ResourceLocation recipeId) {
-        if (!ClientPlayerDataCache.hasRecipe(recipeId.getPath())) return false;
-        List<VanillaCookingRecipeData.IngredientRequirement> reqs = VanillaCookingRecipeData.getRequirements(recipeId.getPath());
-        for (VanillaCookingRecipeData.IngredientRequirement req : reqs) {
-            if (countMatching(req.token()) < req.count()) {
+        if (!isUnlocked(recipeId)) return false;
+        List<StardewCookingIngredient> reqs = VanillaCookingRecipeData.getRequirements(recipeId);
+        for (StardewCookingIngredient req : reqs) {
+            if (countMatching(req) < req.count()) {
                 return false;
             }
         }
         return true;
     }
 
-    private int countMatching(String token) {
+    private int countMatching(StardewCookingIngredient ingredient) {
         if (this.minecraft == null || this.minecraft.player == null) return 0;
         int count = 0;
         for (int i = 0; i < this.minecraft.player.getInventory().getContainerSize(); i++) {
             ItemStack stack = this.minecraft.player.getInventory().getItem(i);
-            if (!stack.isEmpty() && VanillaCookingRecipeData.matchesToken(stack, token)) {
+            if (!stack.isEmpty() && VanillaCookingRecipeData.matches(stack, ingredient)) {
                 count += stack.getCount();
             }
         }
-        return count + CookingIngredientAvailabilityCache.getFridgeTokenCount(token);
+        return count + CookingIngredientAvailabilityCache.getFridgeTokenCount(ingredient.matcherKey());
     }
 
-    private ItemStack resolveRequirementIcon(String token) {
-        Item item = VanillaCookingRecipeData.resolveTokenItem(token);
-        if (item != null) return new ItemStack(item);
+    private ItemStack resolveRequirementIcon(StardewCookingIngredient ingredient) {
+        ItemStack icon = VanillaCookingRecipeData.getDisplayStack(ingredient);
+        return icon.isEmpty() ? new ItemStack(Items.BARRIER) : icon;
+    }
 
-        try {
-            int category = Integer.parseInt(token);
-            if (category == -4) return new ItemStack(Items.COD);
-            if (category == -5) return new ItemStack(ModItems.EGG_WHITE.get());
-            if (category == -6) return new ItemStack(ModItems.MILK.get());
-        } catch (NumberFormatException ignored) {}
-
-        if ("sugar".equals(token)) return new ItemStack(Items.SUGAR);
-        if ("dandelion".equals(token)) return new ItemStack(Items.DANDELION);
-
-        return new ItemStack(Items.BARRIER);
+    private boolean isUnlocked(ResourceLocation recipeId) {
+        return ClientPlayerDataCache.hasRecipe(VanillaCookingRecipeData.storageId(recipeId));
     }
 
     @Override
@@ -494,12 +482,12 @@ public class CookingPotScreen extends AbstractContainerScreen<CookingPotMenu> {
             if (dataIndex >= availableRecipes.size()) break;
 
             if (mouseX >= cx - 2 && mouseX <= cx + 20 && mouseY >= cy - 2 && mouseY <= cy + 20) {
-                String itemPath = recipeIds.get(dataIndex).getPath();
-                if (ClientPlayerDataCache.hasRecipe(itemPath)) {
+                String recipeId = recipeIds.get(dataIndex).toString();
+                if (isUnlocked(recipeIds.get(dataIndex))) {
                     int craftCount = button == 1 ? 5 : 1;
                     if (hasShiftDown()) craftCount = -1;
 
-                    PacketDistributor.sendToServer(new CookingPotCookSubmitPayload(itemPath, craftCount));
+                    PacketDistributor.sendToServer(new CookingPotCookSubmitPayload(recipeId, craftCount));
                 }
                 return true;
             }
@@ -521,4 +509,3 @@ public class CookingPotScreen extends AbstractContainerScreen<CookingPotMenu> {
         return super.mouseScrolled(mouseX, mouseY, hDelta, vDelta);
     }
 }
-

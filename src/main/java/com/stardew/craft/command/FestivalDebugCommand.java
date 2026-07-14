@@ -99,13 +99,13 @@ public final class FestivalDebugCommand {
         String id = StringArgumentType.getString(context, "id");
         ServerLevel level = stardewLevel(context.getSource());
         if (level == null) {
-            context.getSource().sendFailure(Component.literal("Stardew Valley 维度尚未加载"));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.festival.dimension_unavailable"));
             return 0;
         }
 
         FestivalDefinition festival = FestivalRegistry.get(id).orElse(null);
         if (festival == null) {
-            context.getSource().sendFailure(Component.literal("未注册节日: " + id));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.festival.unknown_festival", id));
             return 0;
         }
 
@@ -115,7 +115,7 @@ public final class FestivalDebugCommand {
 
         ActiveFestivalHandler handler = ActiveFestivalHandlers.get(festival).orElse(null);
         if (handler == null) {
-            context.getSource().sendFailure(Component.literal("当前主动节日未注册调试 handler: " + festival.id()));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.festival.missing_handler", festival.id()));
             return 0;
         }
 
@@ -128,12 +128,12 @@ public final class FestivalDebugCommand {
             time.getCurrentDay()
         );
         if (!overlayStarted) {
-            context.getSource().sendFailure(Component.literal("地图 overlay 启动失败: " + festival.mapOverlayId()));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.festival.overlay_apply_failed", festival.mapOverlayId()));
             return 0;
         }
 
         handler.startDebugFestival(level);
-        context.getSource().sendSuccess(() -> Component.literal(handler.debugApplyMessage()), true);
+        context.getSource().sendSuccess(handler::debugApplyMessage, true);
         return 1;
     }
 
@@ -141,13 +141,13 @@ public final class FestivalDebugCommand {
         String id = StringArgumentType.getString(context, "id");
         ServerLevel level = stardewLevel(context.getSource());
         if (level == null) {
-            context.getSource().sendFailure(Component.literal("Stardew Valley 维度尚未加载"));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.festival.dimension_unavailable"));
             return 0;
         }
 
         FestivalDefinition festival = FestivalRegistry.get(id).orElse(null);
         if (festival == null) {
-            context.getSource().sendFailure(Component.literal("未注册节日: " + id));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.festival.unknown_festival", id));
             return 0;
         }
 
@@ -160,23 +160,27 @@ public final class FestivalDebugCommand {
             data.getSession(festival.id()).ifPresent(session -> session.setPhase(FestivalSessionPhase.CLOSED));
             data.setActivePassiveFestivalIds(FestivalService.getActivePassiveFestivalsToday().stream().map(FestivalDefinition::id).toList());
             refreshFestivalSchedules(level);
-            context.getSource().sendSuccess(() -> Component.literal(overlayRestoreStarted
-                ? "已恢复 passive festival 总调试: " + festival.id() + "，地图 overlay 正在恢复，NPC 日程已刷新"
-                : "已恢复 passive festival 总调试: " + festival.id() + "，地图 overlay 当前无需恢复，NPC 日程已刷新"), true);
+            context.getSource().sendSuccess(() -> Component.translatable(
+                overlayRestoreStarted
+                    ? "stardewcraft.command.festival.passive_restored_overlay"
+                    : "stardewcraft.command.festival.passive_restored",
+                festival.id()), true);
             return 1;
         }
 
         ActiveFestivalHandler handler = ActiveFestivalHandlers.get(festival).orElse(null);
         if (handler == null) {
-            context.getSource().sendFailure(Component.literal("当前主动节日未注册调试 handler: " + festival.id()));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.festival.missing_handler", festival.id()));
             return 0;
         }
 
         handler.restoreDebugFestival(level);
         boolean overlayRestoreStarted = FestivalMapOverlayManager.beginRestore(level, festival.mapOverlayId());
-        context.getSource().sendSuccess(() -> Component.literal(overlayRestoreStarted
-            ? "已恢复主动节日总调试: " + festival.id() + "，玩家状态已恢复，地图 overlay 正在恢复"
-            : "已恢复主动节日总调试: " + festival.id() + "，玩家状态已恢复，地图 overlay 当前无需恢复或尚未应用"), true);
+        context.getSource().sendSuccess(() -> Component.translatable(
+            overlayRestoreStarted
+                ? "stardewcraft.command.festival.active_restored_overlay"
+                : "stardewcraft.command.festival.active_restored",
+            festival.id()), true);
         return 1;
     }
 
@@ -195,7 +199,7 @@ public final class FestivalDebugCommand {
                 time.getCurrentDay()
             );
             if (!overlayStarted) {
-                context.getSource().sendFailure(Component.literal("地图 overlay 启动失败: " + festival.mapOverlayId()));
+                context.getSource().sendFailure(Component.translatable("stardewcraft.command.festival.overlay_apply_failed", festival.mapOverlayId()));
                 return 0;
             }
             phase = FestivalMapOverlayManager.isApplied(level, festival.mapOverlayId())
@@ -205,8 +209,13 @@ public final class FestivalDebugCommand {
         data.getOrCreateSession(festival, time.getCurrentYear(), time.getCurrentSeason(), time.getCurrentDay()).setPhase(phase);
         data.setActivePassiveFestivalIds(FestivalService.getActivePassiveFestivalsToday().stream().map(FestivalDefinition::id).toList());
         int forcedNpcs = forcePassiveFestivalNpcs(level, festival);
-        context.getSource().sendSuccess(() -> Component.literal(
-            "已启动 passive festival 总调试: " + festival.id() + "，overlay " + (festival.mapOverlayId().isBlank() ? "无" : "应用中") + "，NPC 日程已刷新，已同步 NPC " + forcedNpcs), true);
+        context.getSource().sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.festival.passive_applied",
+            festival.id(),
+            Component.translatable(festival.mapOverlayId().isBlank()
+                ? "stardewcraft.command.festival.overlay.none"
+                : "stardewcraft.command.festival.overlay.applying"),
+            forcedNpcs), true);
         return 1;
     }
 
@@ -231,14 +240,14 @@ public final class FestivalDebugCommand {
         String id = StringArgumentType.getString(context, "id");
         Optional<FestivalDefinition> festivalOpt = resolveFestival(id);
         if (festivalOpt.isEmpty()) {
-            context.getSource().sendFailure(Component.literal("未找到带地图 overlay 的节日或 overlay: " + id));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.festival.overlay_or_festival_not_found", id));
             return 0;
         }
 
         FestivalDefinition festival = festivalOpt.get();
         ServerLevel level = stardewLevel(context.getSource());
         if (level == null) {
-            context.getSource().sendFailure(Component.literal("Stardew Valley 维度尚未加载"));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.festival.dimension_unavailable"));
             return 0;
         }
 
@@ -251,13 +260,13 @@ public final class FestivalDebugCommand {
             time.getCurrentDay()
         );
         if (!started) {
-            context.getSource().sendFailure(Component.literal("地图 overlay 启动失败: " + festival.mapOverlayId()));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.festival.overlay_apply_failed", festival.mapOverlayId()));
             return 0;
         }
 
         ActiveFestivalHandlers.get(festival).ifPresent(handler -> handler.requestDebugNpcs(level));
 
-        context.getSource().sendSuccess(() -> Component.literal("已开始应用节日地图 overlay: " + festival.mapOverlayId()), true);
+        context.getSource().sendSuccess(() -> Component.translatable("stardewcraft.command.festival.overlay_apply_started", festival.mapOverlayId()), true);
         return 1;
     }
 
@@ -265,24 +274,24 @@ public final class FestivalDebugCommand {
         String id = StringArgumentType.getString(context, "id");
         Optional<String> overlayId = resolveOverlayId(id);
         if (overlayId.isEmpty()) {
-            context.getSource().sendFailure(Component.literal("未找到 overlay: " + id));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.festival.overlay_not_found", id));
             return 0;
         }
 
         ServerLevel level = stardewLevel(context.getSource());
         if (level == null) {
-            context.getSource().sendFailure(Component.literal("Stardew Valley 维度尚未加载"));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.festival.dimension_unavailable"));
             return 0;
         }
 
         if (!FestivalMapOverlayManager.beginRestore(level, overlayId.get())) {
-            context.getSource().sendFailure(Component.literal("地图 overlay 无法恢复，可能尚未应用: " + overlayId.get()));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.festival.overlay_restore_failed", overlayId.get()));
             return 0;
         }
 
         ActiveFestivalHandlers.restoreNpcsForOverlay(level, overlayId.get());
 
-        context.getSource().sendSuccess(() -> Component.literal("已开始恢复节日地图 overlay: " + overlayId.get()), true);
+        context.getSource().sendSuccess(() -> Component.translatable("stardewcraft.command.festival.overlay_restore_started", overlayId.get()), true);
         return 1;
     }
 
@@ -290,43 +299,44 @@ public final class FestivalDebugCommand {
         String id = StringArgumentType.getString(context, "id");
         ActiveFestivalHandler handler = ActiveFestivalHandlers.get(id).orElse(null);
         if (handler == null) {
-            context.getSource().sendFailure(Component.literal("当前主动节日未注册 NPC 调试 handler: " + id));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.festival.missing_npc_handler", id));
             return 0;
         }
         ServerLevel level = stardewLevel(context.getSource());
         if (level == null) {
-            context.getSource().sendFailure(Component.literal("Stardew Valley 维度尚未加载"));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.festival.dimension_unavailable"));
             return 0;
         }
         handler.requestDebugNpcs(level);
-        context.getSource().sendSuccess(() -> Component.literal("已请求 " + handler.displayName() + " NPC 进入节日点位"), true);
+        context.getSource().sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.festival.npcs_requested", handler.displayName()), true);
         return 1;
     }
 
     private static int giveCalicoEggs(CommandContext<CommandSourceStack> context) {
         if (!(context.getSource().getEntity() instanceof net.minecraft.server.level.ServerPlayer player)) {
-            context.getSource().sendFailure(Component.literal("该命令需要由玩家执行"));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.player_only"));
             return 0;
         }
         int count = IntegerArgumentType.getInteger(context, "count");
         DesertFestivalService.giveEggs(player, count);
-        context.getSource().sendSuccess(() -> Component.literal("已给予 Calico Egg: " + count), true);
+        context.getSource().sendSuccess(() -> Component.translatable("stardewcraft.command.festival.calico_eggs_given", count), true);
         return 1;
     }
 
     private static int clearCalicoEggs(CommandContext<CommandSourceStack> context) {
         if (!(context.getSource().getEntity() instanceof net.minecraft.server.level.ServerPlayer player)) {
-            context.getSource().sendFailure(Component.literal("该命令需要由玩家执行"));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.player_only"));
             return 0;
         }
         int removed = DesertFestivalService.clearEggs(player);
-        context.getSource().sendSuccess(() -> Component.literal("已清理 Calico Egg: " + removed), true);
+        context.getSource().sendSuccess(() -> Component.translatable("stardewcraft.command.festival.calico_eggs_cleared", removed), true);
         return 1;
     }
 
     private static int countCalicoEggs(CommandContext<CommandSourceStack> context) {
         if (!(context.getSource().getEntity() instanceof net.minecraft.server.level.ServerPlayer player)) {
-            context.getSource().sendFailure(Component.literal("该命令需要由玩家执行"));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.player_only"));
             return 0;
         }
         int count = DesertFestivalService.countEggs(player);
@@ -336,14 +346,14 @@ public final class FestivalDebugCommand {
 
     private static int openDesertEggShop(CommandContext<CommandSourceStack> context) {
         if (!(context.getSource().getEntity() instanceof net.minecraft.server.level.ServerPlayer player)) {
-            context.getSource().sendFailure(Component.literal("该命令需要由玩家执行"));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.player_only"));
             return 0;
         }
         if (!DesertFestivalService.openEggShop(player)) {
-            context.getSource().sendFailure(Component.literal("DesertFestival_EggShop 未注册"));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.festival.egg_shop_unregistered"));
             return 0;
         }
-        context.getSource().sendSuccess(() -> Component.literal("已打开 DesertFestival EggShop"), false);
+        context.getSource().sendSuccess(() -> Component.translatable("stardewcraft.command.festival.egg_shop_opened"), false);
         return 1;
     }
 
@@ -351,16 +361,17 @@ public final class FestivalDebugCommand {
         String id = StringArgumentType.getString(context, "id");
         ActiveFestivalHandler handler = ActiveFestivalHandlers.get(id).orElse(null);
         if (handler == null) {
-            context.getSource().sendFailure(Component.literal("当前主动节日未注册 NPC 调试 handler: " + id));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.festival.missing_npc_handler", id));
             return 0;
         }
         ServerLevel level = stardewLevel(context.getSource());
         if (level == null) {
-            context.getSource().sendFailure(Component.literal("Stardew Valley 维度尚未加载"));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.festival.dimension_unavailable"));
             return 0;
         }
         handler.restoreDebugNpcs(level);
-        context.getSource().sendSuccess(() -> Component.literal("已恢复 " + handler.displayName() + " NPC 到当前日程"), true);
+        context.getSource().sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.festival.npcs_restored", handler.displayName()), true);
         return 1;
     }
 
@@ -374,18 +385,20 @@ public final class FestivalDebugCommand {
         String id = StringArgumentType.getString(context, "id");
         ActiveFestivalHandler handler = ActiveFestivalHandlers.get(id).orElse(null);
         if (handler == null || !handler.supportsMainEventDebug()) {
-            context.getSource().sendFailure(Component.literal("当前主动节日未注册主事件调试 handler: " + id));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.festival.missing_main_event_handler", id));
             return 0;
         }
         if (!(context.getSource().getEntity() instanceof net.minecraft.server.level.ServerPlayer player)) {
-            context.getSource().sendFailure(Component.literal("该命令需要由玩家执行"));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.player_only"));
             return 0;
         }
         if (!handler.tryStartMainEvent(player)) {
-            context.getSource().sendFailure(Component.literal("需要先进入 " + handler.displayName() + " 会场"));
+            context.getSource().sendFailure(Component.translatable(
+                "stardewcraft.command.festival.enter_venue_first", handler.displayName()));
             return 0;
         }
-        context.getSource().sendSuccess(() -> Component.literal("已请求 " + handler.displayName() + " 主事件"), true);
+        context.getSource().sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.festival.main_event_requested", handler.displayName()), true);
         return 1;
     }
 
@@ -398,18 +411,19 @@ public final class FestivalDebugCommand {
     private static int statusAll(CommandContext<CommandSourceStack> context) {
         ServerLevel level = stardewLevel(context.getSource());
         if (level == null) {
-            context.getSource().sendFailure(Component.literal("Stardew Valley 维度尚未加载"));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.festival.dimension_unavailable"));
             return 0;
         }
 
         FestivalWorldData data = FestivalWorldData.get(level);
-        StringBuilder message = new StringBuilder("节日地图 overlay 状态:");
+        Component message = Component.translatable("stardewcraft.command.festival.overlay_status_header");
         for (FestivalMapOverlayDefinition definition : FestivalMapOverlayRegistry.all()) {
             FestivalMapOverlayState state = data.getOverlayState(definition.overlayId()).orElse(null);
-            message.append("\n- ").append(definition.overlayId()).append(": ")
-                .append(state == null ? "NONE" : state.phase().name());
+            message = message.copy().append(Component.literal("\n- " + definition.overlayId() + ": "
+                + (state == null ? "NONE" : state.phase().name())));
         }
-        context.getSource().sendSuccess(() -> Component.literal(message.toString()), false);
+        Component finalMessage = message;
+        context.getSource().sendSuccess(() -> finalMessage, false);
         return 1;
     }
 
@@ -417,13 +431,13 @@ public final class FestivalDebugCommand {
         String id = StringArgumentType.getString(context, "id");
         Optional<String> overlayId = resolveOverlayId(id);
         if (overlayId.isEmpty()) {
-            context.getSource().sendFailure(Component.literal("未找到 overlay: " + id));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.festival.overlay_not_found", id));
             return 0;
         }
 
         ServerLevel level = stardewLevel(context.getSource());
         if (level == null) {
-            context.getSource().sendFailure(Component.literal("Stardew Valley 维度尚未加载"));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.festival.dimension_unavailable"));
             return 0;
         }
 

@@ -19,6 +19,7 @@ import java.util.List;
 public record OpenMailPayload(
         String mailId,
         String text,
+        String secretSantaNameKey,
         int background,
         String textColorName,       // "" = default
         List<ItemAttachment> items,
@@ -45,6 +46,7 @@ public record OpenMailPayload(
         public OpenMailPayload decode(ByteBuf buf) {
             String mailId = ByteBufCodecs.STRING_UTF8.decode(buf);
             String text = ByteBufCodecs.STRING_UTF8.decode(buf);
+            String secretSantaNameKey = ByteBufCodecs.STRING_UTF8.decode(buf);
             int background = buf.readInt();
             String textColorName = ByteBufCodecs.STRING_UTF8.decode(buf);
             List<ItemAttachment> items = ITEM_CODEC.apply(ByteBufCodecs.list()).decode(buf);
@@ -53,7 +55,7 @@ public record OpenMailPayload(
             String cookingOrCrafting = ByteBufCodecs.STRING_UTF8.decode(buf);
             boolean hasQuest = buf.readBoolean();
             int remainingMailCount = buf.readInt();
-            return new OpenMailPayload(mailId, text, background, textColorName,
+            return new OpenMailPayload(mailId, text, secretSantaNameKey, background, textColorName,
                     items, money, learnedRecipe, cookingOrCrafting, hasQuest, remainingMailCount);
         }
 
@@ -61,6 +63,7 @@ public record OpenMailPayload(
         public void encode(ByteBuf buf, OpenMailPayload p) {
             ByteBufCodecs.STRING_UTF8.encode(buf, p.mailId);
             ByteBufCodecs.STRING_UTF8.encode(buf, p.text);
+            ByteBufCodecs.STRING_UTF8.encode(buf, p.secretSantaNameKey);
             buf.writeInt(p.background);
             ByteBufCodecs.STRING_UTF8.encode(buf, p.textColorName);
             ITEM_CODEC.apply(ByteBufCodecs.list()).encode(buf, p.items);

@@ -1,0 +1,20 @@
+{
+  "legacy_id": "DesertFestival_Robin",
+  "owner_npc": "robin",
+  "owner_dialogue": "stardewcraft.festival.desertfestival.dialogue.vendor",
+  "entries": [
+    {
+      "item": "stardewcraft:stone",
+      "stock": 500,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 1
+    },
+    {
+      "item": "stardewcraft:wood_normal",
+      "stock": 500,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 1
+    }
+  ],
+  "accepted_sell_types": []
+}

@@ -3,7 +3,7 @@ package com.stardew.craft.event;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.core.ModDimensions;
 import com.stardew.craft.core.ModMiningDimensions;
-import com.stardew.craft.item.IStardewItem;
+import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.network.ItemPickupHudPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -36,11 +36,7 @@ public class ItemPickupEventHandler {
         if (original.isEmpty()) return;
 
         int count = original.getCount();
-        boolean expensive = false;
-        if (original.getItem() instanceof IStardewItem si) {
-            int sellPrice = si.getSellPrice(original);
-            expensive = sellPrice > EXPENSIVE_THRESHOLD;
-        }
+        boolean expensive = StardewItemDataApi.getSellPrice(original) > EXPENSIVE_THRESHOLD;
 
         ItemPickupHudPacket.sendTo(player, original, count, expensive);
 

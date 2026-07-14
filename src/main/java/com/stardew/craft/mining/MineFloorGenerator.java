@@ -4,8 +4,13 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.mastery.TallMasteryBlock;
 import com.stardew.craft.block.mine.CalicoStatueBlock;
+import com.stardew.craft.api.v1.mining.StardewMineMonsterContext;
+import com.stardew.craft.api.v1.mining.StardewMineMonsterProviders;
+import com.stardew.craft.api.v1.mining.StardewMineThemeDefinition;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
@@ -557,6 +562,10 @@ public class MineFloorGenerator {
      */
     private static EntityType<?> pickMonsterForFloor(int floor, RandomSource random,
                                                       boolean isDark, double distFromSpawn) {
+        EntityType<?> provided = StardewMineMonsterProviders.select(
+                new StardewMineMonsterContext(floor, isDark, distFromSpawn, random));
+        if (provided != null) return provided;
+
         // ── 土段 Earth (1-40) — SDV getMineArea() == 0/10 ──
         if (floor <= 40) {
             // 25% Bug（原版全土段出现，非清怪层）
@@ -863,26 +872,14 @@ public class MineFloorGenerator {
     
     /** 装饰石 A 方块数组（按主题） */
     private static Block[] getDecorABlocks(FloorTheme theme) {
-        switch (theme) {
-            case EARTH: return new Block[]{ ModBlocks.LIMESTONE.get(), ModBlocks.CRACKED_SLATE.get() };
-            case FROST: return new Block[]{ ModBlocks.BANDED_MARBLE.get(), ModBlocks.CRACKED_SLATE.get() };
-            case LAVA:  return new Block[]{ ModBlocks.SCORIA.get(), ModBlocks.CRACKED_SLATE.get() };
-            // 骷髅矿：仅 sulfur_rock —— 黄绿斑驳岩石，沙漠火山地质特征
-            case SKULL_CAVERN: return new Block[]{ ModBlocks.SULFUR_ROCK.get() };
-            default:    return new Block[]{ ModBlocks.CRACKED_SLATE.get() };
-        }
+        List<Block> blocks = blocks(themeDefinition(theme), StardewMineThemeDefinition::decorA);
+        return blocks.isEmpty() ? new Block[]{ModBlocks.CRACKED_SLATE.get()} : blocks.toArray(Block[]::new);
     }
     
     /** 装饰石 B 方块数组（按主题） */
     private static Block[] getDecorBBlocks(FloorTheme theme) {
-        switch (theme) {
-            case EARTH: return new Block[]{ ModBlocks.MOSSY_SANDSTONE.get(), ModBlocks.LIMESTONE.get() };
-            case FROST: return new Block[]{ ModBlocks.SALT_ROCK.get(), ModBlocks.BANDED_MARBLE.get() };
-            case LAVA:  return new Block[]{ ModBlocks.CRACKED_SLATE.get(), ModBlocks.SCORIA.get() };
-            // 骷髅矿：不用额外装饰石 B，变化靠 sulfur_rock 斑块 + 危险块地形
-            case SKULL_CAVERN: return new Block[0];
-            default:    return new Block[]{ ModBlocks.CRACKED_SLATE.get() };
-        }
+        List<Block> blocks = blocks(themeDefinition(theme), StardewMineThemeDefinition::decorB);
+        return blocks.toArray(Block[]::new);
     }
     
     /**
@@ -4386,38 +4383,27 @@ public class MineFloorGenerator {
      * 根据楼层确定主题
      */
     private static FloorTheme getThemeForFloor(int floor) {
-        if (floor > 120) {
-            return FloorTheme.SKULL_CAVERN;
-        } else if (floor == 120) {
-            return FloorTheme.SUMMIT;
-        } else if (floor >= 80) {
-            return FloorTheme.LAVA;
-        } else if (floor >= 40) {
-            return FloorTheme.FROST;
-        } else if (floor >= 1) {
-            return FloorTheme.EARTH;
+        StardewMineThemeDefinition definition = MineThemeData.forFloor(floor);
+        if (definition != null) {
+            try {
+                return FloorTheme.valueOf(definition.mechanicId().toUpperCase(java.util.Locale.ROOT));
+            } catch (IllegalArgumentException exception) {
+                StardewCraft.LOGGER.error("[MINE] Unknown terrain mechanic {} for floor {}",
+                        definition.mechanicId(), floor);
+            }
         }
-        return FloorTheme.EARTH; // 默认
+        return FloorTheme.EARTH;
     }
     
     /**
      * 获取主题对应的主石头
      */
     private static Block getMainStone(FloorTheme theme, boolean isDark) {
-        switch (theme) {
-            case EARTH:
-                return isDark ? ModBlocks.DARK_EARTH_SHALE.get() : ModBlocks.EARTH_SHALE.get();
-            case FROST:
-                return isDark ? ModBlocks.DARK_FROST_GNEISS.get() : ModBlocks.FROST_GNEISS.get();
-            case LAVA:
-                return isDark ? ModBlocks.DARK_LAVA_BASALT.get() : ModBlocks.LAVA_BASALT.get();
-            case SKULL_CAVERN:
-                return isDark ? ModBlocks.DARK_DESERT_BEDROCK.get() : ModBlocks.DESERT_BEDROCK.get();
-            case SUMMIT:
-                return ModBlocks.MINE_BARRIER.get();
-            default:
-                return ModBlocks.EARTH_SHALE.get();
+        StardewMineThemeDefinition definition = themeDefinition(theme);
+        if (definition != null) {
+            return block(isDark ? definition.darkStone() : definition.mainStone(), ModBlocks.EARTH_SHALE.get());
         }
+        return ModBlocks.EARTH_SHALE.get();
     }
     
     /**
@@ -4431,159 +4417,57 @@ public class MineFloorGenerator {
      * - salt_rock: 冰段、特殊洞窟标志材
      */
     private static Block getDecorativeStone(FloorTheme theme, RandomSource random) {
-        switch (theme) {
-            case EARTH:
-                // 土段: limestone(石灰岩洞窟), mossy_sandstone(苔斑潮湿角落), cracked_slate(通用边缘)
-                Block[] earthDecor = {
-                    ModBlocks.LIMESTONE.get(),
-                    ModBlocks.MOSSY_SANDSTONE.get(),
-                    ModBlocks.CRACKED_SLATE.get()
-                };
-                return earthDecor[random.nextInt(earthDecor.length)];
-                
-            case FROST:
-                // 冰段: banded_marble(洞窟装饰), salt_rock(特殊洞窟), cracked_slate(通用边缘)
-                Block[] frostDecor = {
-                    ModBlocks.BANDED_MARBLE.get(),
-                    ModBlocks.SALT_ROCK.get(),
-                    ModBlocks.CRACKED_SLATE.get()
-                };
-                return frostDecor[random.nextInt(frostDecor.length)];
-                
-            case LAVA:
-                // 熔岩段: scoria(火山渣岩洞窟), cracked_slate(通用边缘)
-                Block[] lavaDecor = {
-                    ModBlocks.SCORIA.get(),
-                    ModBlocks.CRACKED_SLATE.get()
-                };
-                return lavaDecor[random.nextInt(lavaDecor.length)];
-
-            case SKULL_CAVERN:
-                // 骷髅矿洞: sulfur_rock(硫磺结晶) + weathered_stone(风化石) + cracked_slate(通用)
-                Block[] skullDecor = {
-                    ModBlocks.SULFUR_ROCK.get(),
-                    ModBlocks.WEATHERED_STONE.get(),
-                    ModBlocks.CRACKED_SLATE.get()
-                };
-                return skullDecor[random.nextInt(skullDecor.length)];
-                
-            default:
-                return ModBlocks.CRACKED_SLATE.get(); // 通用
-        }
+        List<Block> blocks = blocks(themeDefinition(theme), StardewMineThemeDefinition::decorativeStones);
+        return blocks.isEmpty() ? ModBlocks.CRACKED_SLATE.get() : blocks.get(random.nextInt(blocks.size()));
     }
     
     /**
      * 获取原版方块点缀（按主题选择，占比最低）
      */
     private static Block getVanillaBlock(FloorTheme theme, RandomSource random) {
-        switch (theme) {
-            case EARTH:
-                // 土段: 安山岩、泥土、沙砾
-                Block[] earthVanilla = {Blocks.ANDESITE, Blocks.DIRT};
-                return earthVanilla[random.nextInt(earthVanilla.length)];
-                
-            case FROST:
-                // 冰段: 蓝冰、浮冰、海晶砖
-                Block[] frostVanilla = {Blocks.BLUE_ICE, Blocks.PACKED_ICE, Blocks.PRISMARINE_BRICKS};
-                return frostVanilla[random.nextInt(frostVanilla.length)];
-                
-            case LAVA:
-                // 熔岩段: 岩浆块、地狱岩
-                Block[] lavaVanilla = {Blocks.MAGMA_BLOCK, Blocks.NETHERRACK};
-                return lavaVanilla[random.nextInt(lavaVanilla.length)];
-
-            case SKULL_CAVERN:
-                // 骷髅矿洞: 砂岩 + 红砂岩 + 岩浆块（沙漠主题）
-                Block[] skullVanilla = {Blocks.SANDSTONE, Blocks.RED_SANDSTONE, Blocks.MAGMA_BLOCK};
-                return skullVanilla[random.nextInt(skullVanilla.length)];
-                
-            default:
-                return Blocks.STONE;
-        }
+        List<Block> blocks = blocks(themeDefinition(theme), StardewMineThemeDefinition::vanillaAccents);
+        return blocks.isEmpty() ? Blocks.STONE : blocks.get(random.nextInt(blocks.size()));
     }
     
     /**
      * 获取洞窟装饰石头（用于洞窟边缘装饰）
      */
     private static List<Block> getCaveDecorationBlocks(FloorTheme theme) {
-        List<Block> blocks = new ArrayList<>();
-        switch (theme) {
-            case EARTH:
-                blocks.add(ModBlocks.LIMESTONE.get());        // 石灰岩 - 土段洞窟
-                blocks.add(ModBlocks.MOSSY_SANDSTONE.get());  // 苔斑砂岩 - 潮湿角落
-                break;
-                
-            case FROST:
-                blocks.add(ModBlocks.BANDED_MARBLE.get());    // 条带大理石 - 冰段洞窟装饰
-                blocks.add(ModBlocks.SALT_ROCK.get());        // 盐霜岩 - 冰段特殊洞窟
-                break;
-                
-            case LAVA:
-                blocks.add(ModBlocks.SCORIA.get());           // 火山渣岩 - 熔岩段洞窟
-                break;
-
-            case SKULL_CAVERN:
-                blocks.add(ModBlocks.SCORIA.get());           // 火山渣岩
-                blocks.add(ModBlocks.MOSSY_SANDSTONE.get());  // 苔斑砂岩 - 远古沉积
-                blocks.add(ModBlocks.SALT_ROCK.get());        // 盐霜岩 - 地下荒漠
-                break;
-                
-            case SUMMIT:
-                blocks.add(ModBlocks.MINE_BARRIER.get());     // 顶峰层特殊
-                break;
-        }
-        blocks.add(ModBlocks.CRACKED_SLATE.get());            // 龟裂板岩 - 三段通用
-        return blocks;
+        List<Block> result = blocks(themeDefinition(theme), StardewMineThemeDefinition::caveDecorations);
+        return result.isEmpty() ? List.of(ModBlocks.CRACKED_SLATE.get()) : result;
     }
     
     /**
      * 获取矿石方块（按主题选择）
      */
     private static Block getOreBlock(FloorTheme theme, String oreType) {
-        switch (theme) {
-            case EARTH:
-                switch (oreType) {
-                    case "copper": return ModBlocks.EARTH_COPPER_ORE.get();
-                    case "iron": return ModBlocks.EARTH_IRON_ORE.get();
-                    case "gold": return ModBlocks.EARTH_GOLD_ORE.get();
-                    case "iridium": return ModBlocks.EARTH_IRIDIUM_ORE.get();
-                    case "coal": return ModBlocks.EARTH_COAL_ORE.get();
-                    default: return ModBlocks.EARTH_COPPER_ORE.get();
-                }
-                
-            case FROST:
-                switch (oreType) {
-                    case "copper": return ModBlocks.FROST_COPPER_ORE.get();
-                    case "iron": return ModBlocks.FROST_IRON_ORE.get();
-                    case "gold": return ModBlocks.FROST_GOLD_ORE.get();
-                    case "iridium": return ModBlocks.FROST_IRIDIUM_ORE.get();
-                    case "coal": return ModBlocks.FROST_COAL_ORE.get();
-                    default: return ModBlocks.FROST_COPPER_ORE.get();
-                }
-                
-            case LAVA:
-                switch (oreType) {
-                    case "copper": return ModBlocks.LAVA_COPPER_ORE.get();
-                    case "iron": return ModBlocks.LAVA_IRON_ORE.get();
-                    case "gold": return ModBlocks.LAVA_GOLD_ORE.get();
-                    case "iridium": return ModBlocks.LAVA_IRIDIUM_ORE.get();
-                    case "coal": return ModBlocks.LAVA_COAL_ORE.get();
-                    default: return ModBlocks.LAVA_COPPER_ORE.get();
-                }
-
-            case SKULL_CAVERN:
-                switch (oreType) {
-                    case "copper": return ModBlocks.DESERT_COPPER_ORE.get();
-                    case "iron": return ModBlocks.DESERT_IRON_ORE.get();
-                    case "gold": return ModBlocks.DESERT_GOLD_ORE.get();
-                    case "iridium": return ModBlocks.DESERT_IRIDIUM_ORE.get();
-                    case "coal": return ModBlocks.DESERT_COAL_ORE.get();
-                    default: return ModBlocks.DESERT_COPPER_ORE.get();
-                }
-                
-            default:
-                return ModBlocks.EARTH_COPPER_ORE.get();
+        StardewMineThemeDefinition definition = themeDefinition(theme);
+        if (definition != null) {
+            ResourceLocation id = definition.ores().getOrDefault(oreType, definition.ores().get("copper"));
+            return block(id, ModBlocks.EARTH_COPPER_ORE.get());
         }
+        return ModBlocks.EARTH_COPPER_ORE.get();
+    }
+
+    private static StardewMineThemeDefinition themeDefinition(FloorTheme theme) {
+        return MineThemeData.forMechanic(theme.name().toLowerCase(java.util.Locale.ROOT));
+    }
+
+    private static List<Block> blocks(
+            StardewMineThemeDefinition definition,
+            java.util.function.Function<StardewMineThemeDefinition, List<ResourceLocation>> selector
+    ) {
+        if (definition == null) return List.of();
+        return selector.apply(definition).stream()
+                .filter(BuiltInRegistries.BLOCK::containsKey)
+                .map(BuiltInRegistries.BLOCK::get)
+                .toList();
+    }
+
+    private static Block block(ResourceLocation id, Block fallback) {
+        return id != null && BuiltInRegistries.BLOCK.containsKey(id)
+                ? BuiltInRegistries.BLOCK.get(id)
+                : fallback;
     }
     
     // ======================== barrel generation ========================

@@ -3,7 +3,7 @@ package com.stardew.craft.integration.jei;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.fishing.data.FishingDataManager;
 import com.stardew.craft.fishing.data.SpawnFishRule;
-import com.stardew.craft.item.IStardewItem;
+import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.item.SpecificBaitItem;
 import com.stardew.craft.item.StardewQualityItem;
@@ -210,13 +210,13 @@ public class StardewJeiPlugin implements IModPlugin {
 
 
     private static boolean isQualityItem(net.minecraft.world.item.Item item) {
-        if (!(item instanceof IStardewItem stardewItem)) {
+        String typeKey = StardewItemDataApi.getTypeKey(new ItemStack(item));
+        if (typeKey.isBlank()) {
             return false;
         }
         if (item instanceof StardewQualityItem qualityItem && qualityItem.supportsQuality()) {
             return true;
         }
-        String typeKey = stardewItem.getItemTypeKey();
         if (item instanceof ArtisanDrinkItem drink && drink.supportsQuality()) {
             return true;
         }
@@ -266,13 +266,11 @@ public class StardewJeiPlugin implements IModPlugin {
         List<ItemStack> stacks = new ArrayList<>();
         for (var holder : ModItems.ITEMS.getEntries()) {
             var item = holder.get();
-            if (!(item instanceof IStardewItem stardewItem)) {
-                continue;
-            }
             ResourceLocation id = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(item);
             // 注意：不再依赖 PreservesIngredientDataManager.hasData() 检查
             // 因为在专用服务器客户端上，数据可能在 JEI 初始化后才通过网络同步
-            String typeKey = stardewItem.getItemTypeKey();
+            String typeKey = StardewItemDataApi.getTypeKey(new ItemStack(item));
+            if (typeKey.isBlank()) continue;
             if (isPreserveCropIngredient(typeKey)) {
                 var preserveType = com.stardew.craft.item.artisan.PreservesCropTypeHelper.getCropPreserveType(id);
                 if (preserveType != null) {
@@ -300,10 +298,7 @@ public class StardewJeiPlugin implements IModPlugin {
         int variantIndex = 0;
         for (var holder : ModItems.ITEMS.getEntries()) {
             var item = holder.get();
-            if (!(item instanceof IStardewItem stardewItem)) {
-                continue;
-            }
-            if (!isPreserveFishIngredient(stardewItem.getItemTypeKey())) {
+            if (!isPreserveFishIngredient(StardewItemDataApi.getTypeKey(new ItemStack(item)))) {
                 continue;
             }
 
@@ -330,11 +325,8 @@ public class StardewJeiPlugin implements IModPlugin {
 
         for (var holder : ModItems.ITEMS.getEntries()) {
             var item = holder.get();
-            if (!(item instanceof IStardewItem stardewItem)) {
-                continue;
-            }
-
-            String typeKey = stardewItem.getItemTypeKey();
+            String typeKey = StardewItemDataApi.getTypeKey(new ItemStack(item));
+            if (typeKey.isBlank()) continue;
             if ("stardewcraft.type.cooking_ingredient".equals(typeKey)) {
                 cookingIngredients.add(item);
             } else if ("stardewcraft.type.crop".equals(typeKey)) {

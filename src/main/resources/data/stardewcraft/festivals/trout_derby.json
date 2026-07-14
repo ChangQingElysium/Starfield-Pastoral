@@ -1,0 +1,21 @@
+{
+  "type": "passive",
+  "legacy_id": "TroutDerby",
+  "display_name": "Trout Derby",
+  "season": 1,
+  "start_day": 20,
+  "end_day": 21,
+  "start_time": 610,
+  "end_time": 2600,
+  "show_on_calendar": false,
+  "only_show_start_message_on_first_day": true,
+  "start_message_key": "message.stardewcraft.festival.passive.trout_derby.started",
+  "presentation": {
+    "start_message_token": "[LocalizedText Strings\\1_6_Strings:TroutDerby_NowOpen]"
+  },
+  "world": {
+    "location": "Forest",
+    "map_overlay": "Forest-TroutDerby",
+    "mechanic_id": "trout_derby"
+  }
+}

@@ -1,8 +1,6 @@
 package com.stardew.craft.cutscene.command;
 
-import com.stardew.craft.cutscene.network.CutsceneServerActionPayload;
 import com.stardew.craft.cutscene.runtime.EventPlayer;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 public class ApplyUnlockSourceCommand implements EventCommand {
     private final String sourceId;
@@ -13,7 +11,7 @@ public class ApplyUnlockSourceCommand implements EventCommand {
 
     @Override
     public void start(EventPlayer player) {
-        PacketDistributor.sendToServer(new CutsceneServerActionPayload("apply_unlock_source", sourceId));
+        player.sendServerAction("apply_unlock_source", sourceId);
     }
 
     @Override public void tick(EventPlayer player) {}

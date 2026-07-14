@@ -1,0 +1,24 @@
+{
+  "skill": "stardewcraft:mining",
+  "entries": [
+    {
+      "kind": "recipe",
+      "item": "stardewcraft:statue_of_dwarf_king",
+      "recipe_id": "statue_of_dwarf_king",
+      "name_key": "stardewcraft.mastery.reward.statue_of_dwarf_king.name",
+      "desc_key": "stardewcraft.mastery.reward.statue_of_dwarf_king.desc"
+    },
+    {
+      "kind": "recipe",
+      "item": "stardewcraft:heavy_furnace",
+      "recipe_id": "heavy_furnace",
+      "name_key": "stardewcraft.mastery.reward.heavy_furnace.name",
+      "desc_key": "stardewcraft.mastery.reward.heavy_furnace.desc"
+    },
+    {
+      "kind": "placeholder",
+      "name_key": "stardewcraft.mastery.menu.mining",
+      "desc_key": "stardewcraft.mastery.reward.mining_plaque.desc"
+    }
+  ]
+}

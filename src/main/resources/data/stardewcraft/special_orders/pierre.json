@@ -1,0 +1,35 @@
+{
+  "legacy_id": "Pierre",
+  "requester": "Pierre",
+  "duration": "month",
+  "repeatable": false,
+  "required_tags": [],
+  "title": "stardewcraft.special_orders.Pierre.name",
+  "text": "stardewcraft.special_orders.Pierre.text",
+  "objectives": [
+    {
+      "type": "collect",
+      "text": "stardewcraft.special_orders.Pierre_Objective_0_Text",
+      "required_count": 25,
+      "accepted_tags": "!forage_item, category_vegetable, quality_gold"
+    },
+    {
+      "type": "donate",
+      "text": "stardewcraft.special_orders.Pierre_Objective_1_Text",
+      "required_count": 25,
+      "accepted_tags": "!forage_item, category_vegetable, quality_gold",
+      "drop_box": "PierreBox"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "money",
+      "amount": 2500
+    },
+    {
+      "type": "mail",
+      "mail": "pierreQualityCrops",
+      "no_letter": true
+    }
+  ]
+}

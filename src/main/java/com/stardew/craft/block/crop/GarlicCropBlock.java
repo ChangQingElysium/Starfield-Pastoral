@@ -87,7 +87,7 @@ public class GarlicCropBlock extends StardewCropBlock {
     }
 
     @Override
-    public String getCropDisplayName() {
-        return "蒜";
+    public String getCropDisplayNameKey() {
+        return "item.stardewcraft.garlic";
     }
 }

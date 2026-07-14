@@ -165,7 +165,8 @@ public class BarnManagerBlock extends Block {
 
         int currentTier = existingOpt.map(record -> record.buildingType().tier()).orElse(0);
         if (currentTier >= 3) {
-            player.sendSystemMessage(Component.literal("[畜棚管理器] 已达到最高等级（3级）。"));
+            player.sendSystemMessage(Component.translatable("stardewcraft.manager.max_tier",
+                    Component.translatable("block.stardewcraft.barn_manager"), 3));
             maybeSendDevHints(player, currentTier, null);
             return false;
         }
@@ -173,7 +174,8 @@ public class BarnManagerBlock extends Block {
         int targetTier = currentTier + 1;
         BarnManagerValidationService.ValidationResult validation = BarnManagerValidationService.validateForTier(level, managerPos, targetTier);
         if (!validation.success()) {
-            player.sendSystemMessage(Component.literal("[畜棚管理器] 触发失败：" + validation.message()));
+            player.sendSystemMessage(Component.translatable("stardewcraft.manager.validation.failed",
+                    Component.translatable("block.stardewcraft.barn_manager"), validation.message()));
             maybeSendDevHints(player, targetTier, validation);
             level.playSound(null, managerPos, SoundEvents.VILLAGER_NO, SoundSource.BLOCKS, 0.8f, 1.0f);
             return false;
@@ -198,9 +200,11 @@ public class BarnManagerBlock extends Block {
         );
 
         if (currentTier == 0) {
-            player.sendSystemMessage(Component.literal("[畜棚管理器] 畜棚已创建为 1级（ID: " + buildingId + "）"));
+            player.sendSystemMessage(Component.translatable("stardewcraft.manager.building.created",
+                    Component.translatable("stardewcraft.manager.building.barn"), 1, buildingId));
         } else {
-            player.sendSystemMessage(Component.literal("[畜棚管理器] 畜棚已升级到 " + targetTier + "级（ID: " + buildingId + "）"));
+            player.sendSystemMessage(Component.translatable("stardewcraft.manager.building.upgraded",
+                    Component.translatable("stardewcraft.manager.building.barn"), targetTier, buildingId));
         }
 
         maybeSendDevHints(player, targetTier, validation);
@@ -293,33 +297,23 @@ public class BarnManagerBlock extends Block {
             return;
         }
 
-        player.sendSystemMessage(Component.literal("[DEV][畜棚管理器] 目标等级: " + targetTier));
+        player.sendSystemMessage(Component.translatable("stardewcraft.manager.dev.target_tier",
+                Component.translatable("block.stardewcraft.barn_manager"), targetTier));
         if (validation == null) {
             return;
         }
 
         var req = validation.requirement();
         var scan = validation.scan();
-        player.sendSystemMessage(Component.literal(
-            "[DEV][需求] 普通槽=" + req.feedTroughCount()
-                + " 自动槽=" + req.autoFeedTroughCount()
-                + " 喂料斗=" + req.hayHopperCount()
-                + " 孵化器=" + req.incubatorCount()
-                + " 内部空间=" + req.minInteriorBlocks() + "格"
-        ));
-        player.sendSystemMessage(Component.literal(
-            "[DEV][检测] 普通槽=" + scan.feedTroughCount()
-                + " 自动槽=" + scan.autoFeedTroughCount()
-                + " 喂料斗=" + scan.hayHopperCount()
-                + " 孵化器=" + scan.incubatorCount()
-                + " 内部空间=" + scan.interiorAirCount() + "格"
-                + " 尺寸=" + scan.width() + "x" + scan.length() + "x" + scan.height()
-                + " 门=" + scan.doorCount()
-                + " 封闭=" + scan.enclosed()
-        ));
-        player.sendSystemMessage(Component.literal(
-            "[DEV][内部包围盒] (" + scan.interiorMinX() + "," + scan.interiorMinY() + "," + scan.interiorMinZ() + ") ~ ("
-                + scan.interiorMaxX() + "," + scan.interiorMaxY() + "," + scan.interiorMaxZ() + ")"
-        ));
+        player.sendSystemMessage(Component.translatable("stardewcraft.manager.dev.requirements",
+                req.feedTroughCount(), req.autoFeedTroughCount(), req.hayHopperCount(),
+                req.incubatorCount(), req.minInteriorBlocks()));
+        player.sendSystemMessage(Component.translatable("stardewcraft.manager.dev.scan",
+                scan.feedTroughCount(), scan.autoFeedTroughCount(), scan.hayHopperCount(),
+                scan.incubatorCount(), scan.interiorAirCount(), scan.width(), scan.length(), scan.height(),
+                scan.doorCount(), scan.enclosed()));
+        player.sendSystemMessage(Component.translatable("stardewcraft.manager.dev.bounds",
+                scan.interiorMinX(), scan.interiorMinY(), scan.interiorMinZ(),
+                scan.interiorMaxX(), scan.interiorMaxY(), scan.interiorMaxZ()));
     }
 }

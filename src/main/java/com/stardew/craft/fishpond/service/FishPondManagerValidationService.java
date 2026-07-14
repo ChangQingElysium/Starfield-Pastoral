@@ -5,6 +5,8 @@ import com.stardew.craft.fishpond.data.FishPondWorldData;
 import com.stardew.craft.fishpond.model.FishPondRecord;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
@@ -32,26 +34,29 @@ public final class FishPondManagerValidationService {
 
     public static ValidationResult validate(ServerLevel level, BlockPos managerPos) {
         ScanResult scan = scan(level, managerPos);
-        List<String> reasons = new ArrayList<>();
+        List<Component> reasons = new ArrayList<>();
         FishPondWorldData worldData = FishPondWorldData.get(level);
 
         if (scan.waterCells().isEmpty()) {
-            reasons.add("未检测到与管理器关联的连通水域");
+            reasons.add(Component.translatable("stardewcraft.manager.fish_pond.validation.no_water"));
         } else {
             if (scan.waterCells().size() < MIN_WATER_CELLS) {
-                reasons.add("连通水域过小：至少需要 " + MIN_WATER_CELLS + " 格连通水域，当前 " + scan.waterCells().size());
+                reasons.add(Component.translatable("stardewcraft.manager.fish_pond.validation.water_cells",
+                        MIN_WATER_CELLS, scan.waterCells().size()));
             }
             if (scan.width() < MIN_WATER_WIDTH || scan.length() < MIN_WATER_LENGTH) {
-                reasons.add("连通水域横向尺寸过小：至少需要 " + MIN_WATER_WIDTH + "x" + MIN_WATER_LENGTH + "，当前 " + scan.width() + "x" + scan.length());
+                reasons.add(Component.translatable("stardewcraft.manager.fish_pond.validation.dimensions",
+                        MIN_WATER_WIDTH, MIN_WATER_LENGTH, scan.width(), scan.length()));
             }
         }
         if (scan.netPositions().isEmpty()) {
-            reasons.add("缺少渔网");
+            reasons.add(Component.translatable("stardewcraft.manager.fish_pond.validation.no_net"));
         }
         if (scan.bucketPositions().isEmpty()) {
-            reasons.add("缺少渔桶");
+            reasons.add(Component.translatable("stardewcraft.manager.fish_pond.validation.no_bucket"));
         } else if (scan.bucketPositions().size() > 1) {
-            reasons.add("渔桶数量不合法：当前阶段每个鱼塘必须且只能绑定 1 个渔桶，当前 " + scan.bucketPositions().size() + " 个");
+            reasons.add(Component.translatable("stardewcraft.manager.fish_pond.validation.bucket_count",
+                    scan.bucketPositions().size()));
         }
 
         if (!scan.waterCells().isEmpty()) {
@@ -63,11 +68,11 @@ public final class FishPondManagerValidationService {
                     continue;
                 }
                 if (existing.containsPosInEnvelope(managerPos)) {
-                    reasons.add("鱼塘管理器位于其他鱼塘的判定区域内：" + existing.pondId());
+                    reasons.add(Component.translatable("stardewcraft.manager.fish_pond.validation.manager_overlap", existing.pondId()));
                     break;
                 }
                 if (scan.intersectsEnvelope(existing)) {
-                    reasons.add("连通水域与现有鱼塘判定区域重叠：" + existing.pondId());
+                    reasons.add(Component.translatable("stardewcraft.manager.fish_pond.validation.water_overlap", existing.pondId()));
                     break;
                 }
             }
@@ -81,20 +86,29 @@ public final class FishPondManagerValidationService {
                 continue;
             }
             if (scan.bucketPositions().contains(existing.bucketPos())) {
-                reasons.add("渔桶已被其他鱼塘占用：" + existing.pondId());
+                reasons.add(Component.translatable("stardewcraft.manager.fish_pond.validation.bucket_in_use", existing.pondId()));
                 break;
             }
             if (!Collections.disjoint(scan.netPositions(), existing.netPositions())) {
-                reasons.add("渔网已被其他鱼塘占用：" + existing.pondId());
+                reasons.add(Component.translatable("stardewcraft.manager.fish_pond.validation.net_in_use", existing.pondId()));
                 break;
             }
         }
 
         boolean ok = reasons.isEmpty();
-        String message = ok
-            ? "鱼塘校验通过"
-            : String.join("；", reasons);
+        Component message = ok
+            ? Component.translatable("stardewcraft.manager.fish_pond.validation.success")
+            : joinReasons(reasons);
         return new ValidationResult(ok, scan, message);
+    }
+
+    private static Component joinReasons(List<Component> reasons) {
+        MutableComponent message = Component.empty();
+        for (int i = 0; i < reasons.size(); i++) {
+            if (i > 0) message.append(Component.translatable("stardewcraft.manager.validation.separator"));
+            message.append(reasons.get(i));
+        }
+        return message;
     }
 
     private static ScanResult scan(ServerLevel level, BlockPos managerPos) {
@@ -259,7 +273,7 @@ public final class FishPondManagerValidationService {
             && pos.getZ() >= scanMinZ && pos.getZ() <= scanMaxZ;
     }
 
-    public record ValidationResult(boolean ok, ScanResult scan, String message) {
+    public record ValidationResult(boolean ok, ScanResult scan, Component message) {
     }
 
     public record ScanResult(Set<Long> waterCells,

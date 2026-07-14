@@ -1,137 +1,208 @@
 package com.stardew.craft.festival;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.mojang.serialization.JsonOps;
+import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.content.AtomicDefinitionStore;
+import com.stardew.craft.api.v1.content.DefinitionDiagnostic;
+import com.stardew.craft.api.v1.content.DefinitionSnapshot;
+import com.stardew.craft.api.v1.festival.StardewFestivalDefinition;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
+import net.minecraft.util.profiling.ProfilerFiller;
+
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
+/** Atomic, namespaced festival metadata with legacy ID lookup for existing saves and handlers. */
+@SuppressWarnings("null")
 public final class FestivalRegistry {
     public static final int SPRING = 0;
     public static final int SUMMER = 1;
     public static final int FALL = 2;
     public static final int WINTER = 3;
 
-    private static final Map<String, FestivalDefinition> DEFINITIONS = new LinkedHashMap<>();
-
-    static {
-        register(new FestivalDefinition(
-            "spring13", FestivalType.ACTIVE, "Egg Festival", "Egg Festival", "",
-            SPRING, 13, 13, 900, 1400, true, false, "",
-            "message.stardewcraft.festival.egg.started", "spring_12",
-            "Town", "Town-EggFestival", Map.of(), List.of("Festival_EggFestival_Pierre"), "egg_hunt"
-        ));
-        register(new FestivalDefinition(
-            "spring24", FestivalType.ACTIVE, "Flower Dance", "Flower Dance", "",
-            SPRING, 24, 24, 900, 1400, true, false, "",
-            "message.stardewcraft.festival.flower_dance.started", "spring_23",
-            "Forest", "Forest-FlowerFestival", Map.of(), List.of("Festival_FlowerDance_Pierre"), "flower_dance"
-        ));
-        register(new FestivalDefinition(
-            "summer11", FestivalType.ACTIVE, "Luau", "Luau", "",
-            SUMMER, 11, 11, 900, 1400, true, false, "",
-            "message.stardewcraft.festival.luau.started", "summer_10",
-            "Beach", "Beach-Luau", Map.of(), List.of(), "luau_soup"
-        ));
-        register(new FestivalDefinition(
-            "summer28", FestivalType.ACTIVE, "Dance of the Moonlight Jellies", "Dance of the Moonlight Jellies", "",
-            SUMMER, 28, 28, 2200, 2400, true, false, "",
-            "message.stardewcraft.festival.moonlight_jellies.started", "summer_28",
-            "Beach", "Beach-Jellies", Map.of(), List.of(), "moonlight_jellies"
-        ));
-        register(new FestivalDefinition(
-            "fall16", FestivalType.ACTIVE, "Stardew Valley Fair", "Stardew Valley Fair", "",
-            FALL, 16, 16, 900, 1500, true, false, "",
-            "message.stardewcraft.festival.fair.started", "fall_15",
-            "Town", "Town-Fair", Map.of(), List.of("Festival_Fair_StarTokenShop"), "stardew_valley_fair"
-        ));
-        register(new FestivalDefinition(
-            "fall27", FestivalType.ACTIVE, "Spirit's Eve", "Spirit's Eve", "",
-            FALL, 27, 27, 2200, 2350, true, false, "",
-            "message.stardewcraft.festival.spirit_eve.started", "fall_26",
-            "Town", "Town-Halloween", Map.of(), List.of("Festival_SpiritsEve_Pierre"), "spirit_eve"
-        ));
-        register(new FestivalDefinition(
-            "winter8", FestivalType.ACTIVE, "Festival of Ice", "Festival of Ice", "",
-            WINTER, 8, 8, 900, 1400, true, false, "",
-            "message.stardewcraft.festival.ice.started", "winter_7",
-            "Forest", "Forest-IceFestival", Map.of(), List.of(), "ice_fishing_contest"
-        ));
-        register(new FestivalDefinition(
-            "winter25", FestivalType.ACTIVE, "Feast of the Winter Star", "Feast of the Winter Star", "",
-            WINTER, 25, 25, 900, 1400, true, false, "",
-            "message.stardewcraft.festival.winter_star.started", "winter_24",
-            "Town", "Town-Christmas", Map.of(), List.of("Festival_FeastOfTheWinterStar_Pierre"), "winter_star_gift"
-        ));
-
-        register(new FestivalDefinition(
-            "DesertFestival", FestivalType.PASSIVE, "Desert Festival", "[LocalizedText Strings\\1_6_Strings:DesertFestival]", "LOCATION_ACCESSIBLE Desert",
-            SPRING, 15, 17, 1000, 2600, true, false, "[LocalizedText Strings\\1_6_Strings:DesertFestival_NowOpen]",
-            "message.stardewcraft.festival.passive.desert.started", "",
-            "Desert", "DesertFestival", Map.of("Desert", "DesertFestival"), List.of(), "desert_festival"
-        ));
-        register(new FestivalDefinition(
-            "TroutDerby", FestivalType.PASSIVE, "Trout Derby", "", "",
-            SUMMER, 20, 21, 610, 2600, false, true, "[LocalizedText Strings\\1_6_Strings:TroutDerby_NowOpen]",
-            "message.stardewcraft.festival.passive.trout_derby.started", "",
-            "Forest", "Forest-TroutDerby", Map.of(), List.of(), "trout_derby"
-        ));
-        register(new FestivalDefinition(
-            "SquidFest", FestivalType.PASSIVE, "SquidFest", "", "",
-            WINTER, 12, 13, 610, 2600, false, true, "[LocalizedText Strings\\1_6_Strings:SquidFest_NowOpen]",
-            "message.stardewcraft.festival.passive.squid_fest.started", "",
-            "Beach", "Beach-SquidFest", Map.of(), List.of(), "squid_fest"
-        ));
-        register(new FestivalDefinition(
-            "NightMarket", FestivalType.PASSIVE, "Night Market", "[LocalizedText Strings\\UI:Billboard_NightMarket]", "",
-            WINTER, 15, 17, 1700, 2600, true, false, "[LocalizedText Strings\\Events:BeachNightMarket_NowOpen]",
-            "message.stardewcraft.festival.passive.night_market.started", "",
-            "Beach", "BeachNightMarket", Map.of("Beach", "BeachNightMarket"), List.of(), "night_market"
-        ));
-    }
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private static final AtomicDefinitionStore<StardewFestivalDefinition> STORE = new AtomicDefinitionStore<>();
+    private static volatile Map<String, FestivalDefinition> aliases = Map.of();
+    private static volatile List<FestivalDefinition> ordered = List.of();
+    private static volatile String cachedJson = "{}";
 
     private FestivalRegistry() {
     }
 
-    private static void register(FestivalDefinition definition) {
-        DEFINITIONS.put(normalizeId(definition.id()), definition);
+    public static DefinitionSnapshot<StardewFestivalDefinition> snapshot() {
+        return STORE.snapshot();
+    }
+
+    public static Optional<FestivalDefinition> get(ResourceLocation id) {
+        return id == null ? Optional.empty() : get(id.toString());
     }
 
     public static Optional<FestivalDefinition> get(String id) {
-        if (id == null || id.isBlank()) {
-            return Optional.empty();
-        }
-        return Optional.ofNullable(DEFINITIONS.get(normalizeId(id)));
+        if (id == null || id.isBlank()) return Optional.empty();
+        return Optional.ofNullable(aliases.get(normalizeId(id)));
     }
 
     public static Optional<FestivalDefinition> getByOverlayId(String overlayId) {
-        if (overlayId == null || overlayId.isBlank()) {
-            return Optional.empty();
-        }
+        if (overlayId == null || overlayId.isBlank()) return Optional.empty();
         String normalized = overlayId.toLowerCase(Locale.ROOT);
-        return DEFINITIONS.values().stream()
-            .filter(definition -> definition.mapOverlayId().toLowerCase(Locale.ROOT).equals(normalized))
-            .findFirst();
+        return ordered.stream()
+                .filter(definition -> definition.mapOverlayId().toLowerCase(Locale.ROOT).equals(normalized))
+                .findFirst();
     }
 
     public static Collection<FestivalDefinition> all() {
-        return List.copyOf(DEFINITIONS.values());
+        return ordered;
     }
 
     public static List<FestivalDefinition> activeFestivals() {
-        return DEFINITIONS.values().stream()
-            .filter(definition -> definition.type() == FestivalType.ACTIVE)
-            .toList();
+        return ordered.stream().filter(definition -> definition.type() == FestivalType.ACTIVE).toList();
     }
 
     public static List<FestivalDefinition> passiveFestivals() {
-        return DEFINITIONS.values().stream()
-            .filter(definition -> definition.type() == FestivalType.PASSIVE)
-            .toList();
+        return ordered.stream().filter(definition -> definition.type() == FestivalType.PASSIVE).toList();
+    }
+
+    public static String getCachedJson() {
+        return cachedJson;
+    }
+
+    public static void applyFromJson(String json) {
+        if (json == null || json.isBlank()) return;
+        JsonElement root;
+        try {
+            root = JsonParser.parseString(json);
+        } catch (RuntimeException exception) {
+            StardewCraft.LOGGER.error("[Festival] Failed to parse synchronized definitions", exception);
+            return;
+        }
+        if (!root.isJsonObject()) return;
+        Map<ResourceLocation, StardewFestivalDefinition> definitions = new LinkedHashMap<>();
+        Map<ResourceLocation, String> sources = new LinkedHashMap<>();
+        List<DefinitionDiagnostic> diagnostics = new ArrayList<>();
+        root.getAsJsonObject().entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .forEach(entry -> decode(ResourceLocation.tryParse(entry.getKey()), entry.getValue(),
+                        definitions, sources, diagnostics));
+        applyCandidate(definitions, sources, diagnostics, false);
+    }
+
+    public static final class ReloadListener extends SimpleJsonResourceReloadListener {
+        public ReloadListener() {
+            super(GSON, "festivals");
+        }
+
+        @Override
+        protected void apply(Map<ResourceLocation, JsonElement> objects, ResourceManager manager,
+                             ProfilerFiller profiler) {
+            Map<ResourceLocation, StardewFestivalDefinition> definitions = new LinkedHashMap<>();
+            Map<ResourceLocation, String> sources = new LinkedHashMap<>();
+            List<DefinitionDiagnostic> diagnostics = new ArrayList<>();
+            objects.entrySet().stream()
+                    .sorted(Map.Entry.comparingByKey(Comparator.comparing(ResourceLocation::toString)))
+                    .forEach(entry -> decode(entry.getKey(), entry.getValue(), definitions, sources, diagnostics));
+            applyCandidate(definitions, sources, diagnostics, true);
+        }
+    }
+
+    private static void decode(ResourceLocation id, JsonElement json,
+                               Map<ResourceLocation, StardewFestivalDefinition> definitions,
+                               Map<ResourceLocation, String> sources,
+                               List<DefinitionDiagnostic> diagnostics) {
+        if (id == null) {
+            diagnostics.add(DefinitionDiagnostic.error(null, null, "Invalid festival ID"));
+            return;
+        }
+        StardewFestivalDefinition.CODEC.parse(JsonOps.INSTANCE, json)
+                .resultOrPartial(message -> diagnostics.add(DefinitionDiagnostic.error(id, id, message)))
+                .ifPresent(definition -> {
+                    if (definitions.putIfAbsent(id, definition) != null) {
+                        diagnostics.add(DefinitionDiagnostic.error(id, id, "Duplicate festival ID"));
+                        return;
+                    }
+                    StardewFestivalDefinition.CODEC.encodeStart(JsonOps.INSTANCE, definition)
+                            .resultOrPartial(message -> diagnostics.add(DefinitionDiagnostic.error(id, id, message)))
+                            .ifPresent(encoded -> sources.put(id, GSON.toJson(encoded)));
+                });
+    }
+
+    private static void applyCandidate(Map<ResourceLocation, StardewFestivalDefinition> definitions,
+                                       Map<ResourceLocation, String> sources,
+                                       List<DefinitionDiagnostic> diagnostics,
+                                       boolean updateCache) {
+        var result = STORE.applyLocal(definitions, sources, diagnostics);
+        for (DefinitionDiagnostic diagnostic : result.diagnostics()) {
+            if (diagnostic.severity() == DefinitionDiagnostic.Severity.ERROR) {
+                StardewCraft.LOGGER.error("[Festival] {}", diagnostic.message());
+            } else {
+                StardewCraft.LOGGER.warn("[Festival] {}", diagnostic.message());
+            }
+        }
+        if (!result.accepted()) {
+            StardewCraft.LOGGER.error("[Festival] Rejected reload; keeping {} festivals", ordered.size());
+            return;
+        }
+
+        List<FestivalDefinition> next = result.snapshot().definitions().entrySet().stream()
+                .map(entry -> toRuntime(entry.getKey(), entry.getValue()))
+                .sorted(Comparator.comparingInt(FestivalDefinition::season)
+                        .thenComparingInt(FestivalDefinition::startDay)
+                        .thenComparing(definition -> definition.resourceId().toString()))
+                .toList();
+        Map<String, FestivalDefinition> nextAliases = new LinkedHashMap<>();
+        for (FestivalDefinition definition : next) {
+            putAlias(nextAliases, definition.resourceId().toString(), definition);
+            putAlias(nextAliases, definition.id(), definition);
+            if (definition.resourceId().getNamespace().equals(StardewCraft.MODID)) {
+                putAlias(nextAliases, definition.resourceId().getPath(), definition);
+            }
+        }
+        ordered = List.copyOf(next);
+        aliases = Map.copyOf(nextAliases);
+        if (updateCache) {
+            var root = new com.google.gson.JsonObject();
+            sources.entrySet().stream().sorted(Map.Entry.comparingByKey())
+                    .forEach(entry -> root.add(entry.getKey().toString(), JsonParser.parseString(entry.getValue())));
+            cachedJson = GSON.toJson(root);
+        }
+        StardewCraft.LOGGER.info("[Festival] Applied {} festivals", ordered.size());
+    }
+
+    private static FestivalDefinition toRuntime(ResourceLocation resourceId, StardewFestivalDefinition source) {
+        String runtimeId = source.legacyId().isBlank() ? resourceId.toString() : source.legacyId();
+        return new FestivalDefinition(
+                resourceId, runtimeId,
+                source.type() == StardewFestivalDefinition.FestivalKind.ACTIVE
+                        ? FestivalType.ACTIVE : FestivalType.PASSIVE,
+                source.displayName(), source.presentation().displayToken(), source.legacyCondition(), source.availableWhen(),
+                source.season(), source.startDay(), source.endDay(), source.startTime(), source.endTime(),
+                source.showOnCalendar(), source.onlyShowStartMessageOnFirstDay(), source.presentation().startMessageToken(),
+                source.startMessageKey(), source.announcementMailId(), source.world().location(), source.world().mapOverlay(),
+                source.world().mapReplacements(), source.world().shops(), source.world().mechanicId());
+    }
+
+    private static void putAlias(Map<String, FestivalDefinition> target, String alias,
+                                 FestivalDefinition definition) {
+        if (alias == null || alias.isBlank()) return;
+        FestivalDefinition previous = target.putIfAbsent(normalizeId(alias), definition);
+        if (previous != null && previous != definition) {
+            StardewCraft.LOGGER.warn("[Festival] Alias {} is already owned by {}; ignoring {}",
+                    alias, previous.resourceId(), definition.resourceId());
+        }
     }
 
     private static String normalizeId(String id) {
-        return id.toLowerCase(Locale.ROOT);
+        return id.trim().toLowerCase(Locale.ROOT);
     }
 }

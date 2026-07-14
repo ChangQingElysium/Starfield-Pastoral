@@ -85,7 +85,7 @@ public class MineExitMenu extends AbstractContainerMenu {
             ServerLevel mineLevel = serverPlayer.server.getLevel(ModMiningDimensions.STARDEW_MINING);
             
             if (mineLevel == null) {
-                StardewCraft.LOGGER.error("矿井维度未加载！");
+                StardewCraft.LOGGER.error("Mining dimension is not loaded");
                 return;
             }
 
@@ -108,7 +108,7 @@ public class MineExitMenu extends AbstractContainerMenu {
             );
             com.stardew.craft.event.MiningBlockBreakHandler.syncLadderStateForPlayer(serverPlayer, targetFloor);
             
-            StardewCraft.LOGGER.info("玩家 {} 通过exit传送到第 {} 层", 
+            StardewCraft.LOGGER.info("Player {} used the exit menu to teleport to floor {}",
                 serverPlayer.getName().getString(), targetFloor);
             
             // 关闭菜单
@@ -125,7 +125,7 @@ public class MineExitMenu extends AbstractContainerMenu {
             ServerLevel overworld = serverPlayer.server.getLevel(Level.OVERWORLD);
             
             if (overworld == null) {
-                StardewCraft.LOGGER.error("主世界未加载！");
+                StardewCraft.LOGGER.error("Overworld is not loaded");
                 return;
             }
             
@@ -138,7 +138,7 @@ public class MineExitMenu extends AbstractContainerMenu {
             ModTeleport.to(serverPlayer, overworld, spawnPos,
                 serverPlayer.getYRot(), serverPlayer.getXRot());
             
-            StardewCraft.LOGGER.info("玩家 {} 退出矿井维度", serverPlayer.getName().getString());
+            StardewCraft.LOGGER.info("Player {} left the mining dimension", serverPlayer.getName().getString());
             
             // 关闭菜单
             serverPlayer.closeContainer();

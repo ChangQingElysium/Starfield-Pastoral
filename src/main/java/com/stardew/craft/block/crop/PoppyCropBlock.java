@@ -98,8 +98,8 @@ public class PoppyCropBlock extends StardewCropBlock {
     }
 
     @Override
-    public String getCropDisplayName() {
-        return "虞美人花";
+    public String getCropDisplayNameKey() {
+        return "item.stardewcraft.poppy";
     }
 
     @Override

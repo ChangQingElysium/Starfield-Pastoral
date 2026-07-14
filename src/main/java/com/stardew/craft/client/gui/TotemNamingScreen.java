@@ -34,18 +34,15 @@ public class TotemNamingScreen extends Screen {
             StardewCraft.MODID, "textures/gui/animal_query/ok_yes_tile46.png");
 
     // ---- 随机名称池（完全复刻SDV Dialogue.randomName风格） ----
-    private static final String[] TOTEM_NAMES_ZH = {
-            "星光", "晨曦", "月影", "暮光", "雨露", "春风", "朝霞", "彩虹",
-            "繁星", "流萤", "碧波", "晚霞", "微风", "云雀", "银河", "露珠",
-            "霜花", "清泉", "绿荫", "花语", "夕照", "碧空", "松涛", "溪流"
-    };
+    private static final String[] TOTEM_NAME_KEYS = createTotemNameKeys();
 
-    private static final String[] TOTEM_NAMES_EN = {
-            "Starlight", "Dawn", "Moonshadow", "Twilight", "Dewdrop", "Breeze",
-            "Aurora", "Rainbow", "Constellation", "Firefly", "Ripple", "Dusk",
-            "Zephyr", "Lark", "Galaxy", "Raindrop", "Frostbloom", "Clearspring",
-            "Greenshade", "Floralwhisper", "Sunset", "Bluesky", "Pinetide", "Brook"
-    };
+    private static String[] createTotemNameKeys() {
+        String[] keys = new String[24];
+        for (int i = 0; i < keys.length; i++) {
+            keys[i] = "stardewcraft.totem.random_name." + i;
+        }
+        return keys;
+    }
 
     // ---- UI 缩放 ----
     private static final float UI_SCALE = 0.5f;
@@ -311,11 +308,7 @@ public class TotemNamingScreen extends Screen {
     /* ========== 随机名称 ========== */
 
     private String rerollNameString() {
-        // 根据语言选择名称池
-        String lang = this.minecraft != null && this.minecraft.options != null
-                ? this.minecraft.options.languageCode : "en_us";
-        String[] pool = lang.startsWith("zh") ? TOTEM_NAMES_ZH : TOTEM_NAMES_EN;
-        return pool[random.nextInt(pool.length)];
+        return Component.translatable(TOTEM_NAME_KEYS[random.nextInt(TOTEM_NAME_KEYS.length)]).getString();
     }
 
     /* ========== 工具方法（与 AnimalPurchaseScreen 一致） ========== */

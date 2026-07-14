@@ -1,0 +1,13 @@
+{
+  "mechanic_id": "summit",
+  "min_floor": 120,
+  "max_floor": 120,
+  "main_stone": "stardewcraft:mine_barrier",
+  "dark_stone": "stardewcraft:mine_barrier",
+  "decor_a": ["stardewcraft:mine_barrier"],
+  "decor_b": [],
+  "decorative_stones": ["stardewcraft:mine_barrier"],
+  "vanilla_accents": ["minecraft:stone"],
+  "cave_decorations": ["stardewcraft:mine_barrier"],
+  "ores": { "copper": "stardewcraft:earth_copper_ore" }
+}

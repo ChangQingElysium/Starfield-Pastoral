@@ -75,7 +75,7 @@ public class SummerSquashCropBlock extends StardewCropBlock {
     }
 
     @Override
-    public String getCropDisplayName() {
-        return "金皮西葫芦";
+    public String getCropDisplayNameKey() {
+        return "item.stardewcraft.summer_squash";
     }
 }

@@ -366,9 +366,7 @@ public class StardewBombEntity extends Entity {
             net.minecraft.world.item.Item oreProduct = getOreDropItem(state);
             if (oreProduct != null) {
                 Block.popResource(level, pos, new net.minecraft.world.item.ItemStack(oreProduct));
-                @SuppressWarnings("null")
-                var oreKey = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(block);
-                if (oreKey != null && oreKey.getPath().contains("iridium_ore")
+                if (state.is(com.stardew.craft.core.ModTags.Blocks.IRIDIUM_ORES)
                         && level.getRandom().nextDouble() < 0.035) {
                     Block.popResource(level, pos,
                         new net.minecraft.world.item.ItemStack(ModItems.PRISMATIC_SHARD.get(), 1));

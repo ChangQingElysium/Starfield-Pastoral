@@ -1,0 +1,18 @@
+{
+  "type": "active",
+  "legacy_id": "fall27",
+  "display_name": "Spirit's Eve",
+  "season": 2,
+  "start_day": 27,
+  "end_day": 27,
+  "start_time": 2200,
+  "end_time": 2350,
+  "start_message_key": "message.stardewcraft.festival.spirit_eve.started",
+  "announcement_mail_id": "fall_26",
+  "world": {
+    "location": "Town",
+    "map_overlay": "Town-Halloween",
+    "shops": ["Festival_SpiritsEve_Pierre"],
+    "mechanic_id": "spirit_eve"
+  }
+}

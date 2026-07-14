@@ -1,0 +1,21 @@
+{
+  "fish": "minecraft:cod",
+  "max_population": 10,
+  "spawn_time": 2,
+  "base_min_produce_chance": 0.25,
+  "base_max_produce_chance": 0.9,
+  "produced_items": [
+    {
+      "item": "minecraft:apple",
+      "required_population": 1,
+      "chance": 1.0,
+      "min_count": 1,
+      "max_count": 2
+    }
+  ],
+  "population_gates": {
+    "4": [
+      {"item": "minecraft:apple", "min_count": 2, "max_count": 4}
+    ]
+  }
+}

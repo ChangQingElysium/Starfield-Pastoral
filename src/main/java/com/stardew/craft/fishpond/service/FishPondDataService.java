@@ -4,13 +4,21 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.mojang.serialization.JsonOps;
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.fishpond.StardewFishPondDefinition;
+import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.fishpond.model.FishPondRecord;
-import com.stardew.craft.item.IStardewItem;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.DyedItemColor;
@@ -26,15 +34,19 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import javax.annotation.Nonnull;
 
 public final class FishPondDataService {
     public static final int NO_OVERRIDE_WATER_COLOR = -1;
     private static final String RESOURCE_PATH = "/data/stardewcraft/fishpond/fish_pond_data.json";
+    private static final ResourceLocation LEGACY_RESOURCE =
+        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "fishpond/fish_pond_data.json");
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final int DEFAULT_MAX_POPULATION = 10;
     private static final FishPondDataService INSTANCE = new FishPondDataService(loadEntries());
     private static final Map<String, String> LEGENDARY_ITEM_QIDS = createLegendaryItemQids();
 
-    private final List<PondData> entries;
+    private volatile List<PondData> entries;
 
     private FishPondDataService(List<PondData> entries) {
         this.entries = entries;
@@ -42,6 +54,10 @@ public final class FishPondDataService {
 
     public static FishPondDataService get() {
         return INSTANCE;
+    }
+
+    private void replaceEntries(List<PondData> next) {
+        this.entries = List.copyOf(next);
     }
 
     public Optional<PondData> resolve(ItemStack stack) {
@@ -52,7 +68,7 @@ public final class FishPondDataService {
         if (itemId == null) {
             return Optional.empty();
         }
-        return resolveByItemPath(itemId.getPath());
+        return resolveByStack(stack, itemId);
     }
 
     public Optional<PondData> resolveFishTypeId(String fishTypeId) {
@@ -63,7 +79,7 @@ public final class FishPondDataService {
         if (itemId == null || !BuiltInRegistries.ITEM.containsKey(itemId)) {
             return Optional.empty();
         }
-        return resolveByItemPath(itemId.getPath());
+        return resolveByStack(new ItemStack(BuiltInRegistries.ITEM.get(itemId)), itemId);
     }
 
     public int resolveWaterColor(FishPondRecord pond, ItemStack inputStack) {
@@ -123,8 +139,11 @@ public final class FishPondDataService {
         }
 
         ItemStack fishStack = createFishStack(pond.fishTypeId());
-        if (!fishStack.isEmpty() && fishStack.getItem() instanceof IStardewItem stardewItem) {
-            int value = stardewItem.getSellPrice(fishStack);
+        if (!fishStack.isEmpty()) {
+            int value = StardewItemDataApi.getSellPrice(fishStack);
+            if (value < 0) {
+                return 3;
+            }
             if (value <= 30) {
                 return 1;
             }
@@ -209,14 +228,26 @@ public final class FishPondDataService {
             .orElse(false);
     }
 
-    private Optional<PondData> resolveByItemPath(String path) {
-        String requiredTag = "item_" + path;
+    private Optional<PondData> resolveByStack(ItemStack stack, ResourceLocation itemId) {
+        Set<String> contextTags = new LinkedHashSet<>(FishPondQualifiedItemService.getContextTags(stack));
+        contextTags.add("item_" + itemId.getPath());
+        contextTags.add("item_id:" + itemId);
+        StardewItemDataApi.resolve(stack).ifPresent(data -> {
+            String category = data.category().getPath();
+            contextTags.add("category_" + category);
+            if ("fish".equals(category) || "legendary_fish".equals(category)) {
+                contextTags.add("category_fish");
+            }
+            if ("legendary_fish".equals(category)) {
+                contextTags.add("fish_legendary");
+            }
+        });
         for (PondData entry : entries) {
-            if (entry.requiredTags().contains(requiredTag)) {
+            if (!entry.requiredTags().isEmpty() && contextTags.containsAll(entry.requiredTags())) {
                 return Optional.of(entry);
             }
         }
-        if (LEGENDARY_ITEM_QIDS.containsKey(path)) {
+        if (LEGENDARY_ITEM_QIDS.containsKey(itemId.getPath())) {
             for (PondData entry : entries) {
                 if (entry.requiredTags().contains("fish_legendary")) {
                     return Optional.of(entry);
@@ -365,6 +396,125 @@ public final class FishPondDataService {
             StardewCraft.LOGGER.error("Failed to load fish pond data from {}", RESOURCE_PATH, ex);
         }
         return loaded;
+    }
+
+    /** Reloads the legacy bundled table and any modern one-definition-per-file pond rules atomically. */
+    public static final class ReloadListener extends SimplePreparableReloadListener<PreparedPondData> {
+        @Override
+        protected PreparedPondData prepare(@Nonnull ResourceManager manager, @Nonnull ProfilerFiller profiler) {
+            List<PondData> loaded = new ArrayList<>();
+            List<String> errors = new ArrayList<>();
+            manager.getResource(LEGACY_RESOURCE).ifPresentOrElse(resource -> {
+                try (InputStreamReader reader = new InputStreamReader(resource.open(), StandardCharsets.UTF_8)) {
+                    loaded.addAll(parseLegacyEntries(JsonParser.parseReader(reader).getAsJsonArray()));
+                } catch (Exception exception) {
+                    errors.add(LEGACY_RESOURCE + ": " + exception.getMessage());
+                }
+            }, () -> errors.add("Missing " + LEGACY_RESOURCE));
+            int legacyCount = loaded.size();
+
+            Map<ResourceLocation, Resource> modern = manager.listResources(
+                    "fishpond/pond_data", id -> id.getPath().endsWith(".json"));
+            modern.entrySet().stream()
+                    .sorted(Map.Entry.comparingByKey(java.util.Comparator.comparing(ResourceLocation::toString)))
+                    .forEach(entry -> {
+                        try (InputStreamReader reader = new InputStreamReader(entry.getValue().open(), StandardCharsets.UTF_8)) {
+                            JsonElement json = JsonParser.parseReader(reader);
+                            StardewFishPondDefinition.CODEC.parse(JsonOps.INSTANCE, json)
+                                    .resultOrPartial(message -> errors.add(entry.getKey() + ": " + message))
+                                    .ifPresent(definition -> loaded.add(fromModern(entry.getKey(), definition)));
+                        } catch (Exception exception) {
+                            errors.add(entry.getKey() + ": " + exception.getMessage());
+                        }
+                    });
+            List<PondData> ordered = new ArrayList<>(loaded.subList(legacyCount, loaded.size()));
+            ordered.addAll(loaded.subList(0, legacyCount));
+            return new PreparedPondData(List.copyOf(ordered), List.copyOf(errors));
+        }
+
+        @Override
+        protected void apply(
+                @Nonnull PreparedPondData prepared,
+                @Nonnull ResourceManager manager,
+                @Nonnull ProfilerFiller profiler
+        ) {
+            if (!prepared.errors().isEmpty()) {
+                prepared.errors().forEach(error -> StardewCraft.LOGGER.error("[Fish pond] {}", error));
+                StardewCraft.LOGGER.error("[Fish pond] Rejected reload; keeping {} rules", INSTANCE.entries.size());
+                return;
+            }
+            INSTANCE.replaceEntries(prepared.entries());
+            StardewCraft.LOGGER.info("[Fish pond] Applied {} rules", prepared.entries().size());
+        }
+    }
+
+    private static List<PondData> parseLegacyEntries(JsonArray root) {
+        List<PondData> loaded = new ArrayList<>();
+        for (JsonElement element : root) {
+            JsonObject object = element.getAsJsonObject();
+            Set<String> requiredTags = new LinkedHashSet<>();
+            JsonArray tags = getArray(object, "RequiredTags");
+            if (tags != null) for (JsonElement tag : tags) requiredTags.add(tag.getAsString().toLowerCase(Locale.ROOT));
+
+            List<WaterColorRule> waterColors = new ArrayList<>();
+            JsonArray waterColorArray = getArray(object, "WaterColor");
+            if (waterColorArray != null) for (JsonElement raw : waterColorArray) {
+                JsonObject value = raw.getAsJsonObject();
+                String color = getString(value, "Color");
+                waterColors.add(new WaterColorRule(getString(value, "Id"), color, parseColor(color),
+                        getInt(value, "MinPopulation", 0), getInt(value, "MinUnlockedPopulationGate", 0),
+                        getString(value, "Condition")));
+            }
+
+            List<ProducedItem> producedItems = new ArrayList<>();
+            JsonArray producedArray = getArray(object, "ProducedItems");
+            if (producedArray != null) for (JsonElement raw : producedArray) {
+                JsonObject value = raw.getAsJsonObject();
+                producedItems.add(new ProducedItem(getString(value, "Id"), getString(value, "ItemId"),
+                        getInt(value, "RequiredPopulation", 0), getDouble(value, "Chance", 0.0D),
+                        getInt(value, "Precedence", 0), getString(value, "Condition"),
+                        getInt(value, "MinStack", -1), getInt(value, "MaxStack", -1)));
+            }
+
+            Map<Integer, List<String>> gates = new HashMap<>();
+            JsonObject gateObject = getObject(object, "PopulationGates");
+            if (gateObject != null) for (Map.Entry<String, JsonElement> gate : gateObject.entrySet()) {
+                List<String> choices = new ArrayList<>();
+                gate.getValue().getAsJsonArray().forEach(choice -> choices.add(choice.getAsString()));
+                gates.put(Integer.parseInt(gate.getKey()), choices);
+            }
+            loaded.add(new PondData(getString(object, "Id"), requiredTags,
+                    getInt(object, "MaxPopulation", -1), getInt(object, "SpawnTime", -1),
+                    getDouble(object, "BaseMinProduceChance", 0.0D),
+                    getDouble(object, "BaseMaxProduceChance", 0.0D), waterColors, producedItems, gates));
+        }
+        return loaded;
+    }
+
+    private static PondData fromModern(ResourceLocation id, StardewFishPondDefinition definition) {
+        List<ProducedItem> produced = definition.producedItems().stream()
+                .map(item -> new ProducedItem(id + "/" + item.item(), item.item().toString(),
+                        item.requiredPopulation(), item.chance(), item.precedence(), "",
+                        item.minCount(), item.maxCount()))
+                .toList();
+        Map<Integer, List<String>> gates = new HashMap<>();
+        definition.populationGates().forEach((rawGate, choices) -> {
+            int gate = Integer.parseInt(rawGate);
+            List<String> expanded = new ArrayList<>();
+            for (StardewFishPondDefinition.GateItem choice : choices) {
+                for (int weight = 0; weight < choice.weight(); weight++) {
+                    expanded.add(choice.item() + " " + choice.minCount() + " " + choice.maxCount());
+                }
+            }
+            gates.put(gate, List.copyOf(expanded));
+        });
+        return new PondData(id.toString(), Set.of("item_id:" + definition.fish()),
+                definition.maxPopulation(), definition.spawnTime(),
+                definition.baseMinProduceChance(), definition.baseMaxProduceChance(),
+                List.of(), produced, Map.copyOf(gates));
+    }
+
+    private record PreparedPondData(List<PondData> entries, List<String> errors) {
     }
 
     private static String getString(JsonObject object, String member) {

@@ -48,6 +48,19 @@ public class EventSeenData extends SavedData {
         setDirty();
     }
 
+    public boolean clearSeen(UUID playerId, String eventId) {
+        Set<String> seen = playerEvents.get(playerId);
+        if (seen == null) return false;
+        boolean removed = seen.remove(eventId);
+        if (seen.isEmpty()) {
+            playerEvents.remove(playerId);
+        }
+        if (removed) {
+            setDirty();
+        }
+        return removed;
+    }
+
     // ─── persistence ───
 
     @Override

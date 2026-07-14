@@ -3,6 +3,8 @@ package com.stardew.craft.festival;
 import com.stardew.craft.time.StardewTimeManager;
 import com.stardew.craft.network.payload.FestivalHudStatePayload;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -47,7 +49,7 @@ public final class ActiveFestivalHandlers {
             EggFestivalService::debugMainEventStatus,
             EggFestivalService::isTimeFreezeActive,
             EggFestivalService::applyTimeFreeze,
-            "已启动 Egg Festival 总调试: 当前日期按 spring13 处理，overlay 应用中，NPC 会在地图应用完成后进入节日点位"
+            Component.translatable("stardewcraft.command.festival.debug_started", "Egg Festival", "spring13")
         ));
         register(new DelegateHandler(
             FlowerDanceService.FESTIVAL_ID,
@@ -72,7 +74,7 @@ public final class ActiveFestivalHandlers {
             FlowerDanceService::debugStatus,
             FlowerDanceService::isTimeFreezeActive,
             FlowerDanceService::applyTimeFreeze,
-            "已启动 Flower Dance 总调试: 当前日期按 spring24 处理，overlay 应用中，已确认的自由阶段 NPC 会进入节日点位"
+            Component.translatable("stardewcraft.command.festival.debug_started", "Flower Dance", "spring24")
         ));
         register(new DelegateHandler(
             LuauFestivalService.FESTIVAL_ID,
@@ -97,7 +99,7 @@ public final class ActiveFestivalHandlers {
             LuauFestivalService::debugStatus,
             LuauFestivalService::isTimeFreezeActive,
             LuauFestivalService::applyTimeFreeze,
-            "已启动 Luau 总调试: 当前日期按 summer11 处理，overlay 应用中，NPC 会在地图应用完成后进入节日点位"
+            Component.translatable("stardewcraft.command.festival.debug_started", "Luau", "summer11")
         ));
         register(new DelegateHandler(
             MoonlightJelliesFestivalService.FESTIVAL_ID,
@@ -122,7 +124,7 @@ public final class ActiveFestivalHandlers {
             MoonlightJelliesFestivalService::debugStatus,
             MoonlightJelliesFestivalService::isTimeFreezeActive,
             MoonlightJelliesFestivalService::applyTimeFreeze,
-            "已启动 Moonlight Jellies 总调试: 当前日期按 summer28 处理，overlay 应用中，NPC 会在地图应用完成后进入节日点位"
+            Component.translatable("stardewcraft.command.festival.debug_started", "Moonlight Jellies", "summer28")
         ));
         register(new DelegateHandler(
             FairFestivalService.FESTIVAL_ID,
@@ -147,7 +149,7 @@ public final class ActiveFestivalHandlers {
             FairFestivalService::debugStatus,
             FairFestivalService::isTimeFreezeActive,
             FairFestivalService::applyTimeFreeze,
-            "已启动 Stardew Valley Fair 总调试: 当前日期按 fall16 处理，overlay 应用中，Lewis 会进入 1 64 -11 朝南，商店/小游戏交互点位会安装"
+            Component.translatable("stardewcraft.command.festival.debug_started", "Stardew Valley Fair", "fall16")
         ));
         register(new DelegateHandler(
             SpiritEveFestivalService.FESTIVAL_ID,
@@ -172,7 +174,7 @@ public final class ActiveFestivalHandlers {
             SpiritEveFestivalService::debugStatus,
             SpiritEveFestivalService::isTimeFreezeActive,
             SpiritEveFestivalService::applyTimeFreeze,
-            "已启动 Spirit's Eve 总调试: 当前日期按 fall27 处理，overlay 应用中，NPC/临时怪物会进入确认点位，Pierre 商店可在摊位 AABB 内交互"
+            Component.translatable("stardewcraft.command.festival.debug_started", "Spirit's Eve", "fall27")
         ));
         register(new DelegateHandler(
             FestivalOfIceService.FESTIVAL_ID,
@@ -197,7 +199,7 @@ public final class ActiveFestivalHandlers {
             FestivalOfIceService::debugStatus,
             FestivalOfIceService::isTimeFreezeActive,
             FestivalOfIceService::applyTimeFreeze,
-            "已启动 Festival of Ice 总调试: 当前日期按 winter8 处理，overlay 应用中；NPC、商店、冰钓与入口/退场点位仍等待确认"
+            Component.translatable("stardewcraft.command.festival.debug_started", "Festival of Ice", "winter8")
         ));
         register(new DelegateHandler(
             WinterStarFestivalService.FESTIVAL_ID,
@@ -222,7 +224,7 @@ public final class ActiveFestivalHandlers {
             WinterStarFestivalService::debugStatus,
             () -> false,
             WinterStarFestivalService::applyTimeFreeze,
-            "已启动 Feast of the Winter Star 总调试: 当前日期按 winter25 处理，Town-Christmas overlay 应用中，Year 1 NPC 会进入已确认点位"
+            Component.translatable("stardewcraft.command.festival.debug_started", "Feast of the Winter Star", "winter25")
         ));
     }
 
@@ -236,6 +238,17 @@ public final class ActiveFestivalHandlers {
         HANDLERS.put(key(handler.festivalId()), handler);
     }
 
+    /** Registers an addon mechanic referenced by a festival definition's mechanic_id. */
+    public static synchronized void register(ResourceLocation mechanicId, ActiveFestivalHandler handler) {
+        if (mechanicId == null || handler == null) {
+            throw new IllegalArgumentException("festival mechanic id and handler must not be null");
+        }
+        String key = key(mechanicId.toString());
+        if (HANDLERS.putIfAbsent(key, handler) != null) {
+            throw new IllegalStateException("Duplicate active festival mechanic: " + mechanicId);
+        }
+    }
+
     public static Optional<ActiveFestivalHandler> get(String festivalId) {
         return Optional.ofNullable(HANDLERS.get(key(festivalId)));
     }
@@ -244,7 +257,8 @@ public final class ActiveFestivalHandlers {
         if (definition == null || definition.type() != FestivalType.ACTIVE) {
             return Optional.empty();
         }
-        return get(definition.id());
+        Optional<ActiveFestivalHandler> mechanic = get(definition.mechanicId());
+        return mechanic.isPresent() ? mechanic : get(definition.id());
     }
 
     public static Collection<ActiveFestivalHandler> all() {
@@ -365,7 +379,7 @@ public final class ActiveFestivalHandlers {
 
     private static Optional<ActiveFestivalHandler> currentActiveHandler() {
         return FestivalService.getActiveFestivalToday()
-            .flatMap(definition -> get(definition.id()));
+            .flatMap(ActiveFestivalHandlers::get);
     }
 
     private static void syncFestivalHud(ServerLevel level) {
@@ -425,7 +439,7 @@ public final class ActiveFestivalHandlers {
         Function<ServerLevel, String> debugMainEventStatusAction,
         BooleanSupplier timeFreezeActiveAction,
         TimeFreezeApplier timeFreezeAction,
-        String debugApplyMessage
+        Component debugApplyMessage
     ) implements ActiveFestivalHandler {
         @Override
         public void tick(ServerLevel level) {
@@ -533,7 +547,7 @@ public final class ActiveFestivalHandlers {
         }
 
         @Override
-        public String debugApplyMessage() {
+        public Component debugApplyMessage() {
             return debugApplyMessage;
         }
     }

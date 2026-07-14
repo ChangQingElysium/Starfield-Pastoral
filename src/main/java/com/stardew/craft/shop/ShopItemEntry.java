@@ -1,5 +1,8 @@
 package com.stardew.craft.shop;
 
+import com.stardew.craft.api.v1.condition.StardewCondition;
+
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -25,8 +28,24 @@ public record ShopItemEntry(
     String mailFlag,      // required player mail flag (null = no requirement)
     int dayOfWeek,        // -1 = any; 0=Mon,1=Tue,2=Wed,3=Thu,4=Fri,5=Sat,6=Sun
     int dayOfMonthParity, // 0 = any; 1 = odd days only; 2 = even days only
-    int purchaseStack     // items granted per single purchase (SDV MinStack); default 1
+    int purchaseStack,    // items granted per single purchase (SDV MinStack); default 1
+    List<StardewCondition> availableWhen
 ) {
+    public ShopItemEntry(
+            String itemId, String displayName, String description, int price, int stock,
+            String tradeItemId, int tradeItemCount, Set<Integer> seasons, int minYear,
+            int minMineLevel, String mailFlag, int dayOfWeek, int dayOfMonthParity,
+            int purchaseStack) {
+        this(itemId, displayName, description, price, stock, tradeItemId, tradeItemCount,
+                seasons, minYear, minMineLevel, mailFlag, dayOfWeek, dayOfMonthParity,
+                purchaseStack, List.of());
+    }
+
+    public ShopItemEntry {
+        seasons = Set.copyOf(seasons);
+        availableWhen = List.copyOf(availableWhen);
+    }
+
     public boolean isFree() {
         return price <= 0 && (tradeItemId == null || tradeItemId.isEmpty());
     }
@@ -79,6 +98,7 @@ public record ShopItemEntry(
             int price, int stock, String tradeItemId, int tradeItemCount,
             int purchaseStack) {
         return new ShopItemEntry(itemId, displayName, description,
-                price, stock, tradeItemId, tradeItemCount, Set.of(), 1, 0, null, -1, 0, purchaseStack);
+                price, stock, tradeItemId, tradeItemCount, Set.of(), 1, 0, null, -1, 0,
+                purchaseStack, List.of());
     }
 }

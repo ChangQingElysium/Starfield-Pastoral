@@ -5,6 +5,7 @@ import com.stardew.craft.economy.sell.ProfessionSellPriceService;
 import com.stardew.craft.economy.sell.SellQuote;
 import com.stardew.craft.economy.sell.SellSource;
 import com.stardew.craft.item.IStardewItem;
+import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.item.StardewBookItem;
 import com.stardew.craft.item.weapon.IStardewWeapon;
@@ -64,7 +65,9 @@ public class ModClientEvents {
     public static void onItemTooltip(ItemTooltipEvent event) {
         ItemStack stack = event.getItemStack();
         appendStardewCraftingConversionTooltip(stack, event.getToolTip());
-        if (stack.getItem() instanceof IStardewItem stardewItem) {
+        var stardewData = StardewItemDataApi.resolve(stack).orElse(null);
+        if (stardewData != null) {
+            IStardewItem legacyItem = stack.getItem() instanceof IStardewItem item ? item : null;
             if (stack.getItem() instanceof StardewBookItem) {
                 return;
             }
@@ -90,8 +93,8 @@ public class ModClientEvents {
             java.util.List<Component> customLines = new java.util.ArrayList<>();
             
             // 描述：第一�?种类：XX
-            if (stardewItem.getItemTypeKey() != null) {
-                String typeKey = stardewItem.getItemTypeKey();
+            String typeKey = StardewItemDataApi.getTypeKey(stack);
+            if (!typeKey.isBlank()) {
                 net.minecraft.ChatFormatting typeColor = net.minecraft.ChatFormatting.GREEN;
                 Integer typeRgbColor = null;
                 
@@ -322,7 +325,7 @@ public class ModClientEvents {
 				}
 			}
             
-            boolean isMuseumItem = isMuseumItem(stardewItem);
+            boolean isMuseumItem = isMuseumItem(typeKey);
             boolean donated = !isMuseumItem || isMuseumDonated(stack);
 
             // 第四行：功能性描�?(灰色细体) / 未捐赠提�?
@@ -372,9 +375,9 @@ public class ModClientEvents {
             }
             
             // 第六行：空行 + 恢复数�?(如果是食�?
-            if (stardewItem.isFood()) {
-                int energy = stardewItem.getEnergy(stack);
-                int health = stardewItem.getHealth(stack);
+            if (stardewData.isFood()) {
+                int energy = stardewData.energy();
+                int health = stardewData.health();
                 
                 // -300 表示完全不可食用，不显示任何图标（与原版一致）
                 if (energy == -300) {
@@ -397,7 +400,9 @@ public class ModClientEvents {
                         customLines.add(statsLine);
 
                         // 吃完�?Buff（若有）
-                        java.util.List<Component> afterEat = stardewItem.getAfterEatTooltipLines(stack);
+                        java.util.List<Component> afterEat = legacyItem == null
+                                ? java.util.List.of()
+                                : legacyItem.getAfterEatTooltipLines(stack);
                         if (!afterEat.isEmpty()) {
                             customLines.add(Component.empty());
                             customLines.add(Component.translatable("stardewcraft.tooltip.after_eaten").withStyle(ChatFormatting.GRAY));
@@ -1273,8 +1278,7 @@ public class ModClientEvents {
         return false;
     }
 
-    private static boolean isMuseumItem(IStardewItem item) {
-        String typeKey = item.getItemTypeKey();
+    private static boolean isMuseumItem(String typeKey) {
         return "stardewcraft.type.mineral".equals(typeKey) || "stardewcraft.type.artifact".equals(typeKey);
     }
 

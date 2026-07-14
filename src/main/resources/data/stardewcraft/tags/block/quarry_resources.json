@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "stardewcraft:artifact_spot_dirt",
+    "#stardewcraft:stardew_stones",
+    "#stardewcraft:stardew_ores",
+    "#stardewcraft:stardew_minerals"
+  ]
+}

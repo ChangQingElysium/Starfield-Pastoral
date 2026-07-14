@@ -368,7 +368,7 @@ public class FarmInstanceInitializer {
         block.setPlacedBy(level, totemPos, mainState, null, net.minecraft.world.item.ItemStack.EMPTY);
 
         if (level.getBlockEntity(totemPos) instanceof com.stardew.craft.blockentity.TotemPoleBlockEntity pole) {
-            String poleName = farm.getFarmName() + "农场柱";
+            String poleName = farm.getFarmName();
             com.stardew.craft.totem.TotemPoleTracker tracker = com.stardew.craft.totem.TotemPoleTracker.get(level);
             int poleId = tracker.allocateId();
             tracker.register(poleId, new com.stardew.craft.totem.TotemPoleTracker.PoleEntry(

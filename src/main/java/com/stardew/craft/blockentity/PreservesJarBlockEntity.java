@@ -1,6 +1,6 @@
 package com.stardew.craft.blockentity;
 
-import com.stardew.craft.item.IStardewItem;
+import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.item.artisan.ArtisanRecipeDataManager;
 import com.stardew.craft.item.artisan.PreserveType;
@@ -151,10 +151,7 @@ public class PreservesJarBlockEntity extends TimedProductionBlockEntity {
 			return true;
 		}
 
-		if (!(item instanceof IStardewItem stardewItem)) {
-			return false;
-		}
-		if (!"stardewcraft.type.crop".equals(stardewItem.getItemTypeKey())) {
+		if (!"stardewcraft.type.crop".equals(StardewItemDataApi.getTypeKey(stack))) {
 			return false;
 		}
 
@@ -250,8 +247,7 @@ public class PreservesJarBlockEntity extends TimedProductionBlockEntity {
 				output = createFlavoredOutput(recipe, ingredientForFlavor);
 				minutes = recipe.minutes();
 			}
-		} else if (item instanceof IStardewItem stardewItem
-				&& "stardewcraft.type.crop".equals(stardewItem.getItemTypeKey())) {
+		} else if ("stardewcraft.type.crop".equals(StardewItemDataApi.getTypeKey(stack))) {
 			ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
 			if (PreservesIngredientDataManager.hasData(id)) {
 				var recipeOpt = ArtisanRecipeDataManager.getRecipe("preserves_jar", stack);

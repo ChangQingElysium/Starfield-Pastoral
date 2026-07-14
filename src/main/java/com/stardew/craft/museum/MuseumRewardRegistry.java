@@ -1,187 +1,148 @@
 package com.stardew.craft.museum;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.mojang.serialization.JsonOps;
 import com.stardew.craft.StardewCraft;
-import com.stardew.craft.item.IStardewItem;
+import com.stardew.craft.api.v1.action.StardewAction;
+import com.stardew.craft.api.v1.item.StardewItemDataApi;
+import com.stardew.craft.api.v1.museum.StardewMuseumRewardDefinition;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-/**
- * Registry of museum donation milestone rewards.
- * SDV parity: rewards given by Gunther when donation count thresholds are met.
- */
+/** Atomic museum milestones. Built-in IDs remain unchanged for save compatibility. */
 @SuppressWarnings("null")
 public final class MuseumRewardRegistry {
     public static final String RUSTY_KEY_REWARD_ID = "museum60";
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private static final ResourceLocation LEGACY_TABLE =
+            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "rewards");
+    private static volatile Map<String, MuseumReward> rewards = Map.of();
 
-    /**
-     * @param id          unique reward id (used as claimed-flag)
-     * @param type        condition type
-     * @param threshold   required count (-1 = all)
-     * @param requiredIds specific item ids required (for SPECIFIC_ITEMS type)
-     * @param rewardItems list of (itemId, count) pairs to give
-     * @param grantRecipe if non-null, recipe id to unlock on claim
-     */
     public record MuseumReward(
-        String id,
-        ConditionType type,
-        int threshold,
-        List<String> requiredIds,
-        List<RewardItem> rewardItems,
-        String grantRecipe
-    ) {}
-
-    public record RewardItem(String itemId, int count) {}
-
-    public enum ConditionType {
-        /** Total donated items (any type) */
-        TOTAL_COUNT,
-        /** Only minerals (stardewcraft.type.mineral) */
-        MINERAL_COUNT,
-        /** Only artifacts (stardewcraft.type.artifact) */
-        ARTIFACT_COUNT,
-        /** Specific items must all be donated */
-        SPECIFIC_ITEMS
+            String id,
+            String condition,
+            int threshold,
+            List<String> requiredIds,
+            List<StardewAction> actions
+    ) {
+        public MuseumReward {
+            requiredIds = List.copyOf(requiredIds);
+            actions = List.copyOf(actions);
+        }
     }
 
-    private static final List<MuseumReward> REWARDS = new ArrayList<>();
-
-    static {
-        // ── Total donation milestones ──
-        total("museum5",  5,  "stardewcraft:cauliflower_seeds", 9);
-        total("museum10", 10, "stardewcraft:melon_seeds", 9);
-        total("museum15", 15, "stardewcraft:starfruit_seeds", 1);
-        total("museum20", 20, "stardewcraft:quality_sprinkler", 1);
-        total("museum25", 25, "stardewcraft:omni_geode", 5);
-        total("museum30", 30, "stardewcraft:gold_bar", 5);
-        total("museum35", 35, "stardewcraft:pumpkin_seeds", 9);
-        total("museum40", 40, "stardewcraft:iridium_sprinkler", 1);
-        total("museum50", 50, "stardewcraft:diamond", 3);
-        totalNoItem(RUSTY_KEY_REWARD_ID, 60);
-        total("museum70", 70, "stardewcraft:triple_shot_espresso", 3);
-        total("museum80", 80, "stardewcraft:warp_totem_farm", 5);
-        total("museum90", 90, "stardewcraft:magic_rock_candy", 1);
-
-        // ── Mineral milestones ──
-        mineral("mineral11", 11, "stardewcraft:omni_geode", 3);
-        mineral("mineral21", 21, "stardewcraft:gold_bar", 3);
-        mineral("mineral31", 31, "stardewcraft:iridium_bar", 2);
-        mineral("mineral40", 40, "stardewcraft:diamond", 1);
-        mineral("mineral50", 50, "stardewcraft:crystalarium", 1);
-
-        // ── Artifact milestones ──
-        artifact("arch15", 15, "stardewcraft:bone_fragment", 50);
-        artifact("arch20", 20, "stardewcraft:mega_bomb", 3);
-
-        // ── Specific items: Dwarf Scrolls → Dwarvish Translation Guide ──
-        REWARDS.add(new MuseumReward(
-            "dwarf_scrolls",
-            ConditionType.SPECIFIC_ITEMS,
-            4,
-            List.of("stardewcraft:dwarf_scroll_i", "stardewcraft:dwarf_scroll_ii",
-                     "stardewcraft:dwarf_scroll_iii", "stardewcraft:dwarf_scroll_iv"),
-            List.of(new RewardItem("stardewcraft:dwarvish_translation_guide", 1)),
-            null
-        ));
-
-        // ── Specific items: Ancient Seed → plantable Ancient Fruit Seeds + recipe ──
-        REWARDS.add(new MuseumReward(
-            "ancient_seed_reward",
-            ConditionType.SPECIFIC_ITEMS,
-            1,
-            List.of("stardewcraft:ancient_seed"),
-            List.of(new RewardItem("stardewcraft:ancient_fruit_seeds", 1)),
-            "ancient_fruit_seeds"
-        ));
-    }
-
-    private static void total(String id, int threshold, String itemId, int count) {
-        REWARDS.add(new MuseumReward(id, ConditionType.TOTAL_COUNT, threshold,
-            List.of(), List.of(new RewardItem(itemId, count)), null));
-    }
-
-    private static void totalNoItem(String id, int threshold) {
-        REWARDS.add(new MuseumReward(id, ConditionType.TOTAL_COUNT, threshold,
-            List.of(), List.of(), null));
-    }
-
-    private static void mineral(String id, int threshold, String itemId, int count) {
-        REWARDS.add(new MuseumReward(id, ConditionType.MINERAL_COUNT, threshold,
-            List.of(), List.of(new RewardItem(itemId, count)), null));
-    }
-
-    private static void artifact(String id, int threshold, String itemId, int count) {
-        REWARDS.add(new MuseumReward(id, ConditionType.ARTIFACT_COUNT, threshold,
-            List.of(), List.of(new RewardItem(itemId, count)), null));
+    private MuseumRewardRegistry() {
     }
 
     public static List<MuseumReward> getAllRewards() {
-        return Collections.unmodifiableList(REWARDS);
+        return List.copyOf(rewards.values());
     }
 
-    /**
-     * Get all unclaimed rewards that the player now qualifies for.
-     */
-    public static List<MuseumReward> getClaimableRewards(MuseumDonationData data, java.util.UUID playerId, Set<String> claimedIds) {
-        Set<String> donated = data.getDonatedItems(playerId);
-        int totalCount = donated.size();
+    public static Item resolveItem(String itemId) {
+        ResourceLocation id = ResourceLocation.tryParse(itemId);
+        if (id == null || !BuiltInRegistries.ITEM.containsKey(id)) return null;
+        Item item = BuiltInRegistries.ITEM.get(id);
+        return item == Items.AIR ? null : item;
+    }
 
-        // Count by type
-        int mineralCount = 0;
-        int artifactCount = 0;
+    public static List<MuseumReward> getClaimableRewards(
+            MuseumDonationData data,
+            java.util.UUID playerId,
+            Set<String> claimedIds
+    ) {
+        Set<String> donated = data.getDonatedItems(playerId);
+        int minerals = 0;
+        int artifacts = 0;
         for (String itemId : donated) {
-            Item item = resolveItem(itemId);
-            if (item instanceof IStardewItem si) {
-                String typeKey = si.getItemTypeKey();
-                if ("stardewcraft.type.mineral".equals(typeKey)) mineralCount++;
-                else if ("stardewcraft.type.artifact".equals(typeKey)) artifactCount++;
-            }
+            ResourceLocation id = ResourceLocation.tryParse(itemId);
+            if (id == null || !BuiltInRegistries.ITEM.containsKey(id)) continue;
+            var metadata = StardewItemDataApi.resolve(new ItemStack(BuiltInRegistries.ITEM.get(id))).orElse(null);
+            if (metadata == null) continue;
+            String category = metadata.category().getPath();
+            if ("mineral".equals(category)) minerals++;
+            if ("artifact".equals(category) || "artifact_quality".equals(category)) artifacts++;
         }
 
         List<MuseumReward> result = new ArrayList<>();
-        for (MuseumReward reward : REWARDS) {
+        for (MuseumReward reward : rewards.values()) {
             if (claimedIds.contains(reward.id())) continue;
-            if (meetsCondition(reward, totalCount, mineralCount, artifactCount, donated)) {
-                result.add(reward);
-            }
+            boolean qualifies = switch (reward.condition()) {
+                case "total_count" -> donated.size() >= reward.threshold();
+                case "mineral_count" -> minerals >= reward.threshold();
+                case "artifact_count" -> artifacts >= reward.threshold();
+                case "specific_items" -> donated.containsAll(reward.requiredIds());
+                default -> false;
+            };
+            if (qualifies) result.add(reward);
         }
         return result;
     }
 
-    private static boolean meetsCondition(MuseumReward reward, int total, int minerals, int artifacts, Set<String> donated) {
-        return switch (reward.type()) {
-            case TOTAL_COUNT -> total >= reward.threshold();
-            case MINERAL_COUNT -> minerals >= reward.threshold();
-            case ARTIFACT_COUNT -> artifacts >= reward.threshold();
-            case SPECIFIC_ITEMS -> donated.containsAll(reward.requiredIds());
-        };
-    }
-
-    public static Item resolveItem(String itemId) {
-        ResourceLocation rl = ResourceLocation.parse(itemId);
-        Item item = BuiltInRegistries.ITEM.get(rl);
-        return item == Items.AIR ? null : item;
-    }
-
-    /**
-     * Create ItemStacks for a reward's items.
-     */
-    public static List<ItemStack> createRewardStacks(MuseumReward reward) {
-        List<ItemStack> stacks = new ArrayList<>();
-        for (RewardItem ri : reward.rewardItems()) {
-            Item item = resolveItem(ri.itemId());
-            if (item != null) {
-                stacks.add(new ItemStack(item, ri.count()));
-            } else {
-                StardewCraft.LOGGER.warn("[MuseumReward] Item not found: {}", ri.itemId());
-            }
+    public static final class ReloadListener extends SimpleJsonResourceReloadListener {
+        public ReloadListener() {
+            super(GSON, "museum_rewards");
         }
-        return stacks;
+
+        @Override
+        protected void apply(Map<ResourceLocation, JsonElement> objects, ResourceManager manager, ProfilerFiller profiler) {
+            Map<String, MuseumReward> next = new LinkedHashMap<>();
+            List<String> errors = new ArrayList<>();
+            JsonElement legacy = objects.get(LEGACY_TABLE);
+            if (legacy == null || !legacy.isJsonArray()) {
+                errors.add("Missing " + LEGACY_TABLE);
+            } else {
+                for (JsonElement raw : legacy.getAsJsonArray()) {
+                    JsonObject object = raw.getAsJsonObject().deepCopy();
+                    String id = object.has("id") ? object.remove("id").getAsString() : "";
+                    decode(LEGACY_TABLE, id, object, next, errors);
+                }
+            }
+            objects.entrySet().stream()
+                    .sorted(Map.Entry.comparingByKey(java.util.Comparator.comparing(ResourceLocation::toString)))
+                    .filter(entry -> entry.getKey().getPath().startsWith("rewards/"))
+                    .forEach(entry -> {
+                        String path = entry.getKey().getPath().substring("rewards/".length());
+                        ResourceLocation id = ResourceLocation.tryBuild(entry.getKey().getNamespace(), path);
+                        decode(entry.getKey(), id == null ? "" : id.toString(), entry.getValue(), next, errors);
+                    });
+            if (!errors.isEmpty()) {
+                errors.forEach(error -> StardewCraft.LOGGER.error("[Museum reward] {}", error));
+                StardewCraft.LOGGER.error("[Museum reward] Rejected reload; keeping {} rewards", rewards.size());
+                return;
+            }
+            rewards = java.util.Collections.unmodifiableMap(new LinkedHashMap<>(next));
+            StardewCraft.LOGGER.info("[Museum reward] Applied {} rewards", rewards.size());
+        }
     }
 
-    private MuseumRewardRegistry() {}
+    private static void decode(ResourceLocation source, String id, JsonElement json,
+                               Map<String, MuseumReward> next, List<String> errors) {
+        if (id == null || id.isBlank()) {
+            errors.add(source + ": missing or invalid reward ID");
+            return;
+        }
+        StardewMuseumRewardDefinition.CODEC.parse(JsonOps.INSTANCE, json)
+                .resultOrPartial(message -> errors.add(source + " [" + id + "]: " + message))
+                .ifPresent(definition -> {
+                    MuseumReward reward = new MuseumReward(id, definition.condition(), definition.threshold(),
+                            definition.requiredItems().stream().map(ResourceLocation::toString).toList(),
+                            definition.rewards());
+                    if (next.putIfAbsent(id, reward) != null) errors.add(source + ": duplicate reward ID " + id);
+                });
+    }
 }

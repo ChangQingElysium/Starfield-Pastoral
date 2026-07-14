@@ -1,0 +1,52 @@
+{
+  "legacy_id": "Festival_NightMarket_MagicBoat_Day1",
+  "owner_dialogue": "stardewcraft.shop.night_market.magic_boat.dialogue",
+  "entries": [
+    {
+      "item": "stardewcraft:fair_grave_stone",
+      "price": 200
+    },
+    {
+      "item": "stardewcraft:parsnip_seeds",
+      "price": 10
+    },
+    {
+      "item": "stardewcraft:green_bean_seeds",
+      "price": 30
+    },
+    {
+      "item": "stardewcraft:cauliflower_seeds",
+      "price": 40
+    },
+    {
+      "item": "stardewcraft:potato_seeds",
+      "price": 25
+    },
+    {
+      "item": "stardewcraft:tulip_seeds",
+      "price": 10
+    },
+    {
+      "item": "stardewcraft:kale_seeds",
+      "price": 35
+    },
+    {
+      "item": "stardewcraft:blue_jazz_seeds",
+      "price": 15
+    },
+    {
+      "item": "stardewcraft:garlic_seeds",
+      "price": 20,
+      "min_year": 2
+    },
+    {
+      "item": "stardewcraft:scarecrow_7",
+      "price": 5000
+    },
+    {
+      "item": "stardewcraft:scarecrow_8",
+      "price": 5000
+    }
+  ],
+  "accepted_sell_types": []
+}

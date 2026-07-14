@@ -2,6 +2,7 @@ package com.stardew.craft.fishing.server;
 
 import com.stardew.craft.enchantment.StardewEnchantments;
 import com.stardew.craft.fishing.data.FishingDataManager;
+import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.player.PlayerDataManager;
 import com.stardew.craft.player.SkillType;
 import net.minecraft.core.BlockPos;
@@ -9,7 +10,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
-import com.stardew.craft.item.IStardewItem;
 
 import java.util.List;
 import java.util.Optional;
@@ -342,10 +342,7 @@ public final class FishingSession {
 		if (plannedCatch == null || plannedCatch.isEmpty()) {
 			return false;
 		}
-		if (!(plannedCatch.getItem() instanceof IStardewItem stardewItem)) {
-			return false;
-		}
-		return "stardewcraft.type.legendary_fish".equals(stardewItem.getItemTypeKey());
+		return "stardewcraft.type.legendary_fish".equals(StardewItemDataApi.getTypeKey(plannedCatch));
 	}
 	
 	public double fishSize() {

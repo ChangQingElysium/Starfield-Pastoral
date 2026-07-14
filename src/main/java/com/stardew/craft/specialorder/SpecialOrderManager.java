@@ -1,6 +1,11 @@
 package com.stardew.craft.specialorder;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.specialorder.SpecialOrderObjectiveContext;
+import com.stardew.craft.api.v1.specialorder.SpecialOrderProgressEvent;
+import com.stardew.craft.api.v1.specialorder.SpecialOrderRewardContext;
+import com.stardew.craft.api.v1.specialorder.StardewSpecialOrderObjectives;
+import com.stardew.craft.api.v1.specialorder.StardewSpecialOrderRewards;
 import com.stardew.craft.mail.MailService;
 import com.stardew.craft.npc.runtime.NpcFriendshipDataManager;
 import com.stardew.craft.npc.runtime.NpcInteractionService;
@@ -228,14 +233,20 @@ public final class SpecialOrderManager {
 
     public static void recordItemReceived(ServerPlayer player, ItemStack stack, int count) {
         progressItem(player, stack, count, Set.of(SpecialOrderDefinition.ObjectiveType.COLLECT));
+        progressExtensions(player, new SpecialOrderProgressEvent(
+                SpecialOrderProgressEvent.Kind.ITEM_RECEIVED, stack, count, null));
     }
 
     public static void recordFishCaught(ServerPlayer player, ItemStack stack, int count) {
         progressItem(player, stack, count, Set.of(SpecialOrderDefinition.ObjectiveType.FISH));
+        progressExtensions(player, new SpecialOrderProgressEvent(
+                SpecialOrderProgressEvent.Kind.FISH_CAUGHT, stack, count, null));
     }
 
     public static void recordShipped(ServerPlayer player, ItemStack stack, int count) {
         progressItem(player, stack, count, Set.of(SpecialOrderDefinition.ObjectiveType.SHIP));
+        progressExtensions(player, new SpecialOrderProgressEvent(
+                SpecialOrderProgressEvent.Kind.ITEM_SHIPPED, stack, count, null));
     }
 
     public static boolean canDonateToDropBox(ServerPlayer player, String dropBoxId, ItemStack stack) {
@@ -283,6 +294,8 @@ public final class SpecialOrderManager {
         if (held.isEmpty()) {
             return NpcDeliveryResult.NONE;
         }
+        ItemStack deliveredStack = held.copy();
+        int deliveredCount = held.getCount();
         SpecialOrderWorldData data = SpecialOrderWorldData.get(player.serverLevel());
         boolean changed = false;
         String messageKey = "";
@@ -316,7 +329,9 @@ public final class SpecialOrderManager {
             data.setDirty();
             syncAll(player.server);
         }
-        return changed ? new NpcDeliveryResult(true, messageKey) : NpcDeliveryResult.NONE;
+        boolean customChanged = progressExtensions(player, new SpecialOrderProgressEvent(
+                SpecialOrderProgressEvent.Kind.NPC_DELIVERY, deliveredStack, deliveredCount, npcId));
+        return changed || customChanged ? new NpcDeliveryResult(true, messageKey) : NpcDeliveryResult.NONE;
     }
 
     public static void recordMonsterSlain(ServerPlayer player, String monsterName) {
@@ -339,6 +354,8 @@ public final class SpecialOrderManager {
             data.setDirty();
             syncAll(player.server);
         }
+        progressExtensions(player, new SpecialOrderProgressEvent(
+                SpecialOrderProgressEvent.Kind.MONSTER_SLAIN, ItemStack.EMPTY, 1, monsterName));
     }
 
     public static boolean donateHeldStack(ServerPlayer player, SpecialOrderDropBoxAnchor anchor, ItemStack held) {
@@ -483,7 +500,7 @@ public final class SpecialOrderManager {
                 SpecialOrderInstance.ObjectiveState state = order.objectives().get(i);
                 CompoundTag objectiveTag = new CompoundTag();
                 objectiveTag.putString("TextKey", objective.textKey());
-                objectiveTag.putString("Type", objective.type().name());
+                objectiveTag.putString("Type", objective.typeName());
                 objectiveTag.putInt("Progress", state.progress());
                 objectiveTag.putInt("Required", state.requiredCount());
                 objectiveTag.putString("DropBox", objective.dropBoxId());
@@ -517,6 +534,38 @@ public final class SpecialOrderManager {
         }
     }
 
+    private static boolean progressExtensions(ServerPlayer player, SpecialOrderProgressEvent event) {
+        SpecialOrderWorldData data = SpecialOrderWorldData.get(player.serverLevel());
+        boolean changed = false;
+        for (SpecialOrderInstance order : List.copyOf(data.active())) {
+            if (!order.accepted() || order.complete() || order.failed()) continue;
+            SpecialOrderDefinition definition = SpecialOrderDefinitions.get(order.orderId());
+            if (definition == null) continue;
+            for (int i = 0; i < definition.objectives().size(); i++) {
+                SpecialOrderDefinition.ObjectiveDefinition objective = definition.objectives().get(i);
+                if (objective.extension() == null) continue;
+                SpecialOrderInstance.ObjectiveState state = order.objectives().get(i);
+                if (state.isComplete()) continue;
+                int amount = StardewSpecialOrderObjectives.progress(
+                                objective.extension(),
+                                new SpecialOrderObjectiveContext(
+                                        player, order.orderId(), state.progress(), state.requiredCount()),
+                                event)
+                        .resultOrPartial(message -> StardewCraft.LOGGER.error(
+                                "[Special order] Objective {} failed for {}: {}",
+                                objective.typeName(), order.orderId(), message))
+                        .orElse(0);
+                if (amount > 0) changed |= addObjectiveProgress(player, order, state, amount, false);
+            }
+            changed |= completeIfReady(player, data, definition, order);
+        }
+        if (changed) {
+            data.setDirty();
+            syncAll(player.server);
+        }
+        return changed;
+    }
+
     private static boolean completeIfReady(ServerPlayer player, SpecialOrderWorldData data,
                                            SpecialOrderDefinition definition, SpecialOrderInstance order) {
         if (order.complete() || !order.isObjectivesComplete()) {
@@ -546,6 +595,14 @@ public final class SpecialOrderManager {
             com.stardew.craft.player.PlayerStardewDataAPI.addMoney(player, money);
         }
         for (SpecialOrderDefinition.RewardDefinition reward : definition.rewards()) {
+            if (reward.extension() != null) {
+                StardewSpecialOrderRewards.grant(
+                                reward.extension(), new SpecialOrderRewardContext(player, order.orderId()))
+                        .resultOrPartial(message -> StardewCraft.LOGGER.error(
+                                "[Special order] Reward {} failed for {}: {}",
+                                reward.typeName(), order.orderId(), message));
+                continue;
+            }
             if (reward.type() == SpecialOrderDefinition.RewardType.MAIL && !reward.mailId().isBlank()) {
                 String mailId = reward.mailId();
                 if ("ClintReward".equals(mailId) && data.hasMailFlag("ClintReward")) {

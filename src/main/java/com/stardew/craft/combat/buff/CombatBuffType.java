@@ -1,5 +1,7 @@
 package com.stardew.craft.combat.buff;
 
+import net.minecraft.network.chat.Component;
+
 /**
  * 战斗相关Buff类型
  * 
@@ -8,34 +10,35 @@ package com.stardew.craft.combat.buff;
  */
 public enum CombatBuffType {
     // 攻击相关
-    ATTACK("攻击", true),         // 增加攻击力
-    CRITICAL("暴击", true),       // 增加暴击率
+    ATTACK("attack", true),         // 增加攻击力
+    CRITICAL("critical", true),       // 增加暴击率
     
     // 防御相关
-    DEFENSE("防御", true),        // 增加防御力
-    IMMUNITY("免疫", true),       // 增加免疫值
+    DEFENSE("defense", true),        // 增加防御力
+    IMMUNITY("immunity", true),       // 增加免疫值
     
     // 移动相关
-    SPEED("速度", true),          // 增加移动速度
+    SPEED("speed", true),          // 增加移动速度
     
     // 战士技能buff
-    WARRIOR_ENERGY("战士活力", true),     // 战士技能 - 攻击时恢复体力
+    WARRIOR_ENERGY("warrior_energy", true),     // 战士技能 - 攻击时恢复体力
     
     // 侦察技能buff
-    ACROBAT_COOLDOWN("杂技师", true),     // 特殊移动技能冷却减少
+    ACROBAT_COOLDOWN("acrobat_cooldown", true),     // 特殊移动技能冷却减少
     
     // 特殊食物buff
-    ROCK_CANDY("岩石糖果", true),          // +250最大体力
-    MONSTER_MUSK("怪物麝香", false);        // 增加怪物遭遇率
+    ROCK_CANDY("rock_candy", true),          // +250最大体力
+    MONSTER_MUSK("monster_musk", false);        // 增加怪物遭遇率
     
-    private final String displayName;
+    private final String id;
     private final boolean isBeneficial;  // 是否有益buff
     
-    CombatBuffType(String displayName, boolean isBeneficial) {
-        this.displayName = displayName;
+    CombatBuffType(String id, boolean isBeneficial) {
+        this.id = id;
         this.isBeneficial = isBeneficial;
     }
     
-    public String getDisplayName() { return displayName; }
+    public String getTranslationKey() { return "stardewcraft.combat.buff." + id; }
+    public Component getDisplayName() { return Component.translatable(getTranslationKey()); }
     public boolean isBeneficial() { return isBeneficial; }
 }

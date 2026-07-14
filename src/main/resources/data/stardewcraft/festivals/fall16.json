@@ -1,0 +1,18 @@
+{
+  "type": "active",
+  "legacy_id": "fall16",
+  "display_name": "Stardew Valley Fair",
+  "season": 2,
+  "start_day": 16,
+  "end_day": 16,
+  "start_time": 900,
+  "end_time": 1500,
+  "start_message_key": "message.stardewcraft.festival.fair.started",
+  "announcement_mail_id": "fall_15",
+  "world": {
+    "location": "Town",
+    "map_overlay": "Town-Fair",
+    "shops": ["Festival_Fair_StarTokenShop"],
+    "mechanic_id": "stardew_valley_fair"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "areas": [
+    { "min_x": -151, "min_y": 63, "min_z": -237, "max_x": -124, "max_y": 91, "max_z": -65 }
+  ],
+  "min_daily_spawn": 1,
+  "max_daily_spawn": 4,
+  "max_spawned_at_once": 6,
+  "entries": [
+    { "block": "stardewcraft:forage_leek", "seasons": ["spring"], "chance": 0.7 },
+    { "block": "stardewcraft:forage_wild_horseradish", "seasons": ["spring"], "chance": 0.5 },
+    { "block": "stardewcraft:forage_spice_berry", "seasons": ["summer"], "chance": 0.5 },
+    { "block": "stardewcraft:forage_grape", "seasons": ["summer"], "chance": 0.8 },
+    { "block": "stardewcraft:forage_common_mushroom", "seasons": ["fall"], "chance": 0.4 },
+    { "block": "stardewcraft:forage_wild_plum", "seasons": ["fall"], "chance": 0.4 },
+    { "block": "stardewcraft:forage_hazelnut", "seasons": ["fall"], "chance": 0.9 },
+    { "block": "stardewcraft:forage_crystal_fruit", "seasons": ["winter"], "chance": 0.25 },
+    { "block": "stardewcraft:forage_crocus", "seasons": ["winter"], "chance": 0.4 },
+    { "block": "stardewcraft:forage_holly", "seasons": ["winter"], "chance": 0.5 }
+  ]
+}

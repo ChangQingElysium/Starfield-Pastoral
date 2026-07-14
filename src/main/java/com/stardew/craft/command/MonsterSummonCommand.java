@@ -45,7 +45,7 @@ public final class MonsterSummonCommand {
         CommandSourceStack source = context.getSource();
         ServerPlayer player = source.getPlayer();
         if (player == null) {
-            source.sendFailure(Component.literal("/stardew summon 只能由玩家执行。"));
+            source.sendFailure(Component.translatable("stardewcraft.command.summon.player_only"));
             return 0;
         }
 
@@ -68,19 +68,18 @@ public final class MonsterSummonCommand {
         }
 
         if (spawned <= 0) {
-            source.sendFailure(Component.literal("未知怪物类型: " + monsterId + "。可用值请用 Tab 补全。"));
+            source.sendFailure(Component.translatable("stardewcraft.command.summon.unknown", monsterId));
             return 0;
         }
 
         Mob resultMob = lastMob;
         int resultCount = spawned;
         int resultFloor = floor;
-        source.sendSuccess(() -> Component.literal(
-                "已召唤 " + resultCount + " 只 "
-                        + (resultMob != null && resultMob.getCustomName() != null
-                        ? resultMob.getCustomName().getString()
-                        : monsterId)
-                        + "，floor=" + resultFloor), true);
+        Component monsterName = resultMob != null && resultMob.getCustomName() != null
+                ? resultMob.getCustomName()
+                : Component.literal(monsterId);
+        source.sendSuccess(() -> Component.translatable(
+                "stardewcraft.command.summon.success", resultCount, monsterName, resultFloor), true);
         return spawned;
     }
 

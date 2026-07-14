@@ -1,0 +1,62 @@
+{
+  "legacy_id": "Emily",
+  "requester": "Emily",
+  "duration": "week",
+  "repeatable": false,
+  "required_tags": [
+    "event_992559"
+  ],
+  "title": "stardewcraft.special_orders.Emily.name",
+  "text": "stardewcraft.special_orders.Emily.text",
+  "objectives": [
+    {
+      "type": "deliver",
+      "text": "stardewcraft.special_orders.Emily_Objective_0_Text",
+      "required_count": 1,
+      "accepted_tags": "item_ruby",
+      "target": "Emily"
+    },
+    {
+      "type": "deliver",
+      "text": "stardewcraft.special_orders.Emily_Objective_1_Text",
+      "required_count": 1,
+      "accepted_tags": "item_topaz",
+      "target": "Emily"
+    },
+    {
+      "type": "deliver",
+      "text": "stardewcraft.special_orders.Emily_Objective_2_Text",
+      "required_count": 1,
+      "accepted_tags": "item_emerald",
+      "target": "Emily"
+    },
+    {
+      "type": "deliver",
+      "text": "stardewcraft.special_orders.Emily_Objective_3_Text",
+      "required_count": 1,
+      "accepted_tags": "item_jade",
+      "target": "Emily"
+    },
+    {
+      "type": "deliver",
+      "text": "stardewcraft.special_orders.Emily_Objective_4_Text",
+      "required_count": 1,
+      "accepted_tags": "item_amethyst",
+      "target": "Emily"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "money",
+      "amount": 1000
+    },
+    {
+      "type": "friendship",
+      "amount": 250
+    },
+    {
+      "type": "mail",
+      "mail": "emilyStones"
+    }
+  ]
+}

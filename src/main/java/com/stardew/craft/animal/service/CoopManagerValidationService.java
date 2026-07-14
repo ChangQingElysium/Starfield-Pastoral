@@ -7,6 +7,8 @@ import com.stardew.craft.block.utility.HayHopperBlock;
 import com.stardew.craft.block.utility.IncubatorBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.state.BlockState;
@@ -31,43 +33,60 @@ public final class CoopManagerValidationService {
         TierRequirement requirement = TierRequirement.fromTier(targetTier);
         ScanResult scan = scan(level, managerPos, requirement.minInteriorBlocks());
 
-        List<String> reasons = new ArrayList<>();
+        List<Component> reasons = new ArrayList<>();
 
         if (!scan.hasInteriorSpace()) {
-            reasons.add("未检测到鸡舍内部空间（请确保管理器附近有可站立空气空间）");
+            reasons.add(Component.translatable("stardewcraft.manager.coop.validation.no_interior"));
         }
 
         if (scan.feedTroughCount() < requirement.feedTroughCount()) {
-            reasons.add("普通喂食槽不足：需要 " + requirement.feedTroughCount() + "，当前 " + scan.feedTroughCount());
+            reasons.add(Component.translatable("stardewcraft.manager.validation.feed_troughs",
+                    requirement.feedTroughCount(), scan.feedTroughCount()));
         }
 
         if (scan.autoFeedTroughCount() < requirement.autoFeedTroughCount()) {
-            reasons.add("自动喂食槽不足：需要 " + requirement.autoFeedTroughCount() + "，当前 " + scan.autoFeedTroughCount());
+            reasons.add(Component.translatable("stardewcraft.manager.validation.auto_feed_troughs",
+                    requirement.autoFeedTroughCount(), scan.autoFeedTroughCount()));
         }
 
         if (scan.hayHopperCount() < requirement.hayHopperCount()) {
-            reasons.add("喂料斗不足：需要 " + requirement.hayHopperCount() + "，当前 " + scan.hayHopperCount());
+            reasons.add(Component.translatable("stardewcraft.manager.validation.hay_hoppers",
+                    requirement.hayHopperCount(), scan.hayHopperCount()));
         }
 
         if (scan.incubatorCount() < requirement.incubatorCount()) {
-            reasons.add("孵化器不足：需要 " + requirement.incubatorCount() + "，当前 " + scan.incubatorCount());
+            reasons.add(Component.translatable("stardewcraft.manager.validation.incubators",
+                    requirement.incubatorCount(), scan.incubatorCount()));
         }
 
         if (scan.interiorAirCount() < requirement.minInteriorBlocks()) {
-            reasons.add("鸡舍内部空间不足：至少 " + requirement.minInteriorBlocks() + " 格，当前 " + scan.interiorAirCount() + " 格");
+            reasons.add(Component.translatable("stardewcraft.manager.coop.validation.interior_size",
+                    requirement.minInteriorBlocks(), scan.interiorAirCount()));
         }
 
         if (Config.COOP_REQUIRE_ENCLOSED.get() && !scan.enclosed()) {
-            reasons.add("鸡舍未封闭（检测到内部空间与扫描边界连通）");
+            reasons.add(Component.translatable("stardewcraft.manager.coop.validation.not_enclosed"));
         }
 
         if (Config.COOP_REQUIRE_DOOR.get() && scan.doorCount() < Config.COOP_MIN_DOOR_COUNT.get()) {
-            reasons.add("门/栅栏门不足：需要 " + Config.COOP_MIN_DOOR_COUNT.get() + "，当前 " + scan.doorCount());
+            reasons.add(Component.translatable("stardewcraft.manager.validation.doors",
+                    Config.COOP_MIN_DOOR_COUNT.get(), scan.doorCount()));
         }
 
         boolean ok = reasons.isEmpty();
-        String message = ok ? "校验通过" : String.join("；", reasons);
+        Component message = ok
+                ? Component.translatable("stardewcraft.manager.validation.success")
+                : joinReasons(reasons);
         return new ValidationResult(ok, targetTier, requirement, scan, message);
+    }
+
+    private static Component joinReasons(List<Component> reasons) {
+        MutableComponent message = Component.empty();
+        for (int i = 0; i < reasons.size(); i++) {
+            if (i > 0) message.append(Component.translatable("stardewcraft.manager.validation.separator"));
+            message.append(reasons.get(i));
+        }
+        return message;
     }
 
     private static ScanResult scan(ServerLevel level, BlockPos managerPos, int minInteriorBlocks) {
@@ -414,7 +433,7 @@ public final class CoopManagerValidationService {
                                    int targetTier,
                                    TierRequirement requirement,
                                    ScanResult scan,
-                                   String message) {
+                                   Component message) {
     }
 
     public record ScanResult(int feedTroughCount,

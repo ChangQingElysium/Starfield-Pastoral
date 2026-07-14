@@ -1,5 +1,9 @@
 package com.stardew.craft.specialorder;
 
+import com.stardew.craft.api.v1.specialorder.StardewSpecialOrderObjective;
+import com.stardew.craft.api.v1.specialorder.StardewSpecialOrderReward;
+
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 
@@ -46,8 +50,16 @@ public record SpecialOrderDefinition(
         String dropBoxId,
         String targetName,
         int minimumCapacity,
-        String messageKey
+        String messageKey,
+        @Nullable StardewSpecialOrderObjective extension,
+        String typeName
     ) {
+        public ObjectiveDefinition(
+                ObjectiveType type, String textKey, int requiredCount, String acceptedTags,
+                String dropBoxId, String targetName, int minimumCapacity, String messageKey) {
+            this(type, textKey, requiredCount, acceptedTags, dropBoxId, targetName,
+                    minimumCapacity, messageKey, null, type.name().toLowerCase(java.util.Locale.ROOT));
+        }
     }
 
     public record RewardDefinition(
@@ -55,8 +67,14 @@ public record SpecialOrderDefinition(
         int amount,
         String mailId,
         boolean noLetter,
-        boolean host
+        boolean host,
+        @Nullable StardewSpecialOrderReward extension,
+        String typeName
     ) {
+        public RewardDefinition(RewardType type, int amount, String mailId, boolean noLetter, boolean host) {
+            this(type, amount, mailId, noLetter, host, null,
+                    type.name().toLowerCase(java.util.Locale.ROOT));
+        }
     }
 
     public record RandomElement(

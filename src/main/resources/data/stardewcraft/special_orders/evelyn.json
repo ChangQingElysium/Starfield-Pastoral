@@ -1,0 +1,36 @@
+{
+  "legacy_id": "Evelyn",
+  "requester": "Evelyn",
+  "duration": "month",
+  "repeatable": false,
+  "required_tags": [
+    "season_spring"
+  ],
+  "title": "stardewcraft.special_orders.Evelyn.name",
+  "text": "stardewcraft.special_orders.Evelyn.text",
+  "objectives": [
+    {
+      "type": "collect",
+      "text": "stardewcraft.special_orders.Evelyn_Objective_0_Text",
+      "required_count": 12,
+      "accepted_tags": "item_leek"
+    },
+    {
+      "type": "donate",
+      "text": "stardewcraft.special_orders.Evelyn_Objective_1_Text",
+      "required_count": 12,
+      "accepted_tags": "item_leek",
+      "drop_box": "EvelynKitchen"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "money",
+      "amount": 2000
+    },
+    {
+      "type": "mail",
+      "mail": "georgeGifts"
+    }
+  ]
+}

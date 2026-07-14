@@ -1,5 +1,7 @@
 package com.stardew.craft.festival;
 
+import com.stardew.craft.api.v1.condition.StardewConditionContext;
+import com.stardew.craft.api.v1.condition.StardewConditions;
 import com.stardew.craft.communitycenter.state.CCStoryFlags;
 import com.stardew.craft.player.PlayerDataManager;
 import com.stardew.craft.player.PlayerStardewData;
@@ -600,6 +602,19 @@ public final class FestivalService {
     }
 
     private static boolean conditionsPass(FestivalDefinition definition) {
+        if (!definition.availableWhen().isEmpty()) {
+            MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+            ServerLevel level = server == null ? null : server.getLevel(com.stardew.craft.core.ModDimensions.STARDEW_VALLEY);
+            if (level == null) {
+                return false;
+            }
+            StardewConditionContext context = new StardewConditionContext(level, null);
+            boolean pass = definition.availableWhen().stream().allMatch(condition ->
+                    StardewConditions.test(condition, context).result().orElse(false));
+            if (!pass) {
+                return false;
+            }
+        }
         String condition = definition.sourceCondition();
         if (condition == null || condition.isBlank()) {
             return true;

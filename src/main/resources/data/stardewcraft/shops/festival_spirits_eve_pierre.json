@@ -1,0 +1,36 @@
+{
+  "legacy_id": "Festival_SpiritsEve_Pierre",
+  "owner_npc": "Pierre",
+  "owner_dialogue": "stardewcraft.shop.spirit_eve.dialogue",
+  "entries": [
+    {
+      "item": "stardewcraft:scarecrow_2",
+      "price": 5000,
+      "stock": 1
+    },
+    {
+      "item": "stardewcraft:spirit_eve_jack_o_lantern",
+      "price": 750,
+      "stock": 5
+    },
+    {
+      "item": "recipe:stardewcraft:spirit_eve_jack_o_lantern",
+      "price": 2000,
+      "stock": 1
+    },
+    {
+      "item": "stardewcraft:fair_grave_stone",
+      "price": 350
+    },
+    {
+      "item": "stardewcraft:carpet_20",
+      "price": 4000
+    },
+    {
+      "item": "stardewcraft:wisp_trail_elixir",
+      "trade_item": "stardewcraft:prismatic_shard",
+      "trade_item_count": 1
+    }
+  ],
+  "accepted_sell_types": []
+}

@@ -1,56 +1,66 @@
 [
   {
     "id": "spring_2_1",
-    "text": "亲爱的@：\n\n欢迎来到星露谷！我是皮埃尔，本地杂货店的店主。\n\n我给你附上了一些防风草种子，帮你开始农场生活。\n\n祝你好运！\n——皮埃尔",
+    "text": "stardewcraft.mail.spring_2_1",
     "background": 0,
-    "attachedItems": [
-      {"id": "stardewcraft:parsnip_seeds", "count": 15}
-    ]
+    "questId": "13"
   },
   {
-
     "id": "joja_welcome",
-    "text": "@，你好！\n\nJoja公司欢迎你成为我们的新邻居！\n\n别忘了来Joja超市逛逛——我们的价格不可能被打败！*\n\n*实际情况可能有所不同。\n——莫里斯",
+    "text": "stardewcraft.mail.joja_welcome",
     "background": 4
   },
   {
-    "id": "spring_3_1",
-    "text": "@：\n\n你好，新来的农夫！我是威利，在鹈鹕镇经营鱼店的。\n\n我有一根旧竹竿想送给你，来海边找我领取吧。\n\n钓鱼可是打发时间的好方式！\n\n——威利",
-    "background": 0
+    "id": "guildQuest",
+    "text": "stardewcraft.mail.guildQuest",
+    "background": 0,
+    "questId": "15"
+  },
+  {
+    "id": "skullCave",
+    "text": "stardewcraft.mail.skullCave",
+    "background": 0,
+    "questId": "20"
+  },
+  {
+    "id": "QiChallengeComplete",
+    "text": "stardewcraft.mail.QiChallengeComplete",
+    "background": 0,
+    "money": 10000
   },
   {
     "id": "spring_5_1",
-    "text": "@你好！\n\n我是卡洛琳，皮埃尔的太太。我发现你的菜地还不错！\n别忘了浇水，不然你的庄稼会枯萎的哦。\n\n加油！\n——卡洛琳",
+    "text": "stardewcraft.mail.spring_5_1",
     "background": 0
   },
   {
     "id": "spring_8_1",
-    "text": "@你好：\n\n最近木工活太多了，我的木材库存快用完了。\n\n你能帮我弄到50块木头吗？我会好好感谢你的！\n\n——罗宾",
+    "text": "stardewcraft.mail.spring_8_1",
     "background": 0
   },
   {
     "id": "spring_12",
-    "text": "星露谷居民们：\n\n明天是一年一度的蛋蛋节！\n\n请于上午9点来镇中心广场集合。我们将举行传统的找蛋活动。\n\n希望大家都能来参加！\n\n——镇长刘易斯",
+    "text": "stardewcraft.mail.spring_12",
     "background": 0
   },
   {
     "id": "spring_15_1",
-    "text": "亲爱的农夫：\n\n听说你一直在努力打理农场，真是了不起！\n\n路过矿井的时候小心点，那里面可不太安全。我在冒险家公会旁边放了一把旧剑，你拿去用吧。\n\n——马龙",
+    "text": "stardewcraft.mail.spring_15_1",
     "background": 0
   },
   {
     "id": "spring_20_1",
-    "text": "致 @：\n\n我注意到你还没有升级过工具。如果你有足够的矿石和金币，带到铁匠铺来找我吧。\n\n我可以帮你把工具升级得更结实耐用。\n\n——克林特",
+    "text": "stardewcraft.mail.spring_20_1",
     "background": 0
   },
   {
     "id": "spring_23",
-    "text": "镇上的各位：\n\n一年一度的花舞节就在明天！\n\n请于上午9点来煤矿森林集合。别忘了穿戴整齐哦！\n\n——镇长刘易斯",
+    "text": "stardewcraft.mail.spring_23",
     "background": 0
   },
   {
     "id": "spring_25_1",
-    "text": "@：\n\n你在农场待了快一个月了吧？不知道你有没有注意到，春天有些特别的东西可以在野外采集到。\n\n水仙花、蒲公英、韭葱……这些可是好东西！\n\n——莱纳斯",
+    "text": "stardewcraft.mail.spring_25_1",
     "background": 0
   }
 ]

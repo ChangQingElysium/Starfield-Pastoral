@@ -1,6 +1,7 @@
 package com.stardew.craft.item.artisan;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.item.IStardewItem;
 import com.stardew.craft.item.quality.QualityHelper;
 import com.stardew.craft.player.PlayerStardewDataAPI;
@@ -285,9 +286,8 @@ public class PreservesItem extends Item implements IStardewItem {
         if (data != null) {
             return data.price;
         }
-        if (ingredient.getItem() instanceof IStardewItem stardewItem) {
-            return stardewItem.getSellPrice(ingredient);
-        }
+        int price = StardewItemDataApi.getSellPrice(ingredient);
+        if (price >= 0) return price;
         StardewCraft.LOGGER.warn("Missing preserves ingredient price data for {}", ingredient.getItem());
         return 0;
     }
@@ -296,6 +296,8 @@ public class PreservesItem extends Item implements IStardewItem {
         if (data != null) {
             return data.edibility;
         }
+        var metadata = StardewItemDataApi.resolve(ingredient).orElse(null);
+        if (metadata != null) return metadata.edibility();
         StardewCraft.LOGGER.warn("Missing preserves ingredient edibility data for {}", ingredient.getItem());
         return -300;
     }

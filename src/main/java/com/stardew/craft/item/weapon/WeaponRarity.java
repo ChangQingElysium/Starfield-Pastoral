@@ -9,22 +9,22 @@ import net.minecraft.network.chat.MutableComponent;
  * 决定武器名称颜色和tooltip边框
  */
 public enum WeaponRarity {
-    COMMON(1, 4, ChatFormatting.WHITE, "普通"),
-    UNCOMMON(5, 8, ChatFormatting.GREEN, "精良"),
-    RARE(9, 12, ChatFormatting.BLUE, "稀有"),
-    EPIC(13, 16, ChatFormatting.DARK_PURPLE, "史诗"),
-    LEGENDARY(17, Integer.MAX_VALUE, ChatFormatting.GOLD, "传说");
+    COMMON(1, 4, ChatFormatting.WHITE, "common"),
+    UNCOMMON(5, 8, ChatFormatting.GREEN, "uncommon"),
+    RARE(9, 12, ChatFormatting.BLUE, "rare"),
+    EPIC(13, 16, ChatFormatting.DARK_PURPLE, "epic"),
+    LEGENDARY(17, Integer.MAX_VALUE, ChatFormatting.GOLD, "legendary");
     
     private final int minLevel;
     private final int maxLevel;
     private final ChatFormatting color;
-    private final String displayName;
+    private final String id;
     
-    WeaponRarity(int minLevel, int maxLevel, ChatFormatting color, String displayName) {
+    WeaponRarity(int minLevel, int maxLevel, ChatFormatting color, String id) {
         this.minLevel = minLevel;
         this.maxLevel = maxLevel;
         this.color = color;
-        this.displayName = displayName;
+        this.id = id;
     }
     
     /**
@@ -43,12 +43,12 @@ public enum WeaponRarity {
         return color;
     }
     
-    public String getDisplayName() {
-        return displayName;
+    public String getTranslationKey() {
+        return "stardewcraft.weapon.rarity." + id;
     }
     
     @SuppressWarnings("null")
     public MutableComponent getDisplayComponent() {
-        return Component.literal(displayName).withStyle(color);
+        return Component.translatable(getTranslationKey()).withStyle(color);
     }
 }

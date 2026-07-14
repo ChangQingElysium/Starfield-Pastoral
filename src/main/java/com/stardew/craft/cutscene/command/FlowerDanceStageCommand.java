@@ -1,8 +1,6 @@
 package com.stardew.craft.cutscene.command;
 
-import com.stardew.craft.cutscene.network.CutsceneServerActionPayload;
 import com.stardew.craft.cutscene.runtime.EventPlayer;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 public class FlowerDanceStageCommand implements EventCommand {
     private final String stage;
@@ -18,7 +16,7 @@ public class FlowerDanceStageCommand implements EventCommand {
     @Override
     public void start(EventPlayer player) {
         player.markRealPlayerMovedByServer();
-        PacketDistributor.sendToServer(new CutsceneServerActionPayload("flower_dance_stage", stage));
+        player.sendServerAction("flower_dance_stage", stage);
         sent = true;
         ticks = 0;
     }

@@ -6,6 +6,8 @@ import com.stardew.craft.player.PlayerStardewData;
 import com.stardew.craft.quest.network.DailyQuestSyncPayload;
 import com.stardew.craft.quest.network.QuestCompletePayload;
 import com.stardew.craft.quest.network.QuestLogSyncPayload;
+import com.stardew.craft.api.v1.condition.StardewConditionContext;
+import com.stardew.craft.api.v1.condition.StardewConditions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerPlayer;
@@ -51,6 +53,21 @@ public class QuestManager {
             StardewCraft.LOGGER.warn("[Quest] Unknown quest id: {}", questId);
             return;
         }
+        if (quest.getDefinitionId() != null) {
+            var definition = QuestDataLoader.getDefinition(quest.getDefinitionId());
+            if (definition != null) {
+                for (var condition : definition.availableWhen()) {
+                    boolean allowed = StardewConditions.test(condition, StardewConditionContext.forPlayer(player))
+                            .resultOrPartial(message -> StardewCraft.LOGGER.error(
+                                    "[Quest] Availability condition failed for {}: {}", quest.getDefinitionId(), message))
+                            .orElse(false);
+                    if (!allowed) {
+                        StardewCraft.LOGGER.debug("[Quest] Definition {} is not currently available", quest.getDefinitionId());
+                        return;
+                    }
+                }
+            }
+        }
         acceptQuest(quest, player);
     }
 
@@ -71,15 +88,27 @@ public class QuestManager {
         }
     }
 
+    public boolean debugGrantQuest(String questId, ServerPlayer player) {
+        if (hasQuest(questId)) {
+            return false;
+        }
+        StardewQuest quest = QuestDataLoader.createQuest(questId);
+        if (quest == null) {
+            return false;
+        }
+        acceptQuest(quest, player);
+        return true;
+    }
+
     public void removeQuest(String questId, ServerPlayer player) {
-        questLog.removeIf(q -> q.getId().equals(questId));
+        questLog.removeIf(q -> QuestDataLoader.idsEqual(q.getId(), questId));
         markOwnerDirty(player);
         syncToClient(player);
     }
 
     public boolean hasQuest(String questId) {
         for (StardewQuest q : questLog) {
-            if (q.getId().equals(questId)) return true;
+            if (QuestDataLoader.idsEqual(q.getId(), questId)) return true;
         }
         return false;
     }
@@ -87,7 +116,7 @@ public class QuestManager {
     @Nullable
     public StardewQuest getQuest(String questId) {
         for (StardewQuest q : questLog) {
-            if (q.getId().equals(questId)) return q;
+            if (QuestDataLoader.idsEqual(q.getId(), questId)) return q;
         }
         return null;
     }
@@ -96,12 +125,45 @@ public class QuestManager {
         return questLog;
     }
 
+    void refreshDefinitions(ServerPlayer player) {
+        boolean changed = false;
+        for (StardewQuest quest : questLog) {
+            if (quest instanceof DataDrivenQuest dataDriven) {
+                dataDriven.refreshDefinition();
+                changed = true;
+            }
+        }
+        if (changed) {
+            markOwnerDirty(player);
+            syncToClient(player);
+        }
+    }
+
     public boolean isQuestCompleted(String questId) {
-        return completedQuestIds.contains(questId);
+        return completedQuestIds.stream().anyMatch(id -> QuestDataLoader.idsEqual(id, questId));
+    }
+
+    public boolean completeActiveQuest(String questId, ServerPlayer player) {
+        StardewQuest quest = getQuest(questId);
+        if (quest == null || quest.isCompleted()) return false;
+        quest.questComplete(player);
+        markOwnerDirty(player);
+        syncToClient(player);
+        cleanupDestroyed(player);
+        return true;
     }
 
     public Set<String> getCompletedQuestIds() {
         return java.util.Collections.unmodifiableSet(completedQuestIds);
+    }
+
+    public boolean debugForgetCompletedQuest(String questId, ServerPlayer player) {
+        boolean removed = completedQuestIds.removeIf(id -> QuestDataLoader.idsEqual(id, questId));
+        if (removed) {
+            markOwnerDirty(player);
+            syncToClient(player);
+        }
+        return removed;
     }
 
     // ─── 每日任务 ───
@@ -142,7 +204,7 @@ public class QuestManager {
     // ─── 事件分发 ───
 
     public void onMonsterSlain(ServerPlayer player, String monsterType) {
-        for (StardewQuest q : questLog) {
+        for (StardewQuest q : List.copyOf(questLog)) {
             q.onMonsterSlain(player, monsterType);
         }
         markOwnerDirty(player);
@@ -151,7 +213,7 @@ public class QuestManager {
     }
 
     public void onFishCaught(ServerPlayer player, String itemId, int count) {
-        for (StardewQuest q : questLog) {
+        for (StardewQuest q : List.copyOf(questLog)) {
             q.onFishCaught(player, itemId, count);
         }
         markOwnerDirty(player);
@@ -160,7 +222,7 @@ public class QuestManager {
     }
 
     public void onItemReceived(ServerPlayer player, String itemId, int count) {
-        for (StardewQuest q : questLog) {
+        for (StardewQuest q : List.copyOf(questLog)) {
             q.onItemReceived(player, itemId, count);
         }
         markOwnerDirty(player);
@@ -173,7 +235,7 @@ public class QuestManager {
      */
     public boolean onItemOfferedToNpc(ServerPlayer player, String npcId, String itemId) {
         boolean consumed = false;
-        for (StardewQuest q : questLog) {
+        for (StardewQuest q : List.copyOf(questLog)) {
             if (q.onItemOfferedToNpc(player, npcId, itemId)) {
                 consumed = true;
                 break; // SDV: onlyOneQuest=true — stop after first match
@@ -186,7 +248,7 @@ public class QuestManager {
     }
 
     public void onRecipeCrafted(ServerPlayer player, String recipeId) {
-        for (StardewQuest q : questLog) {
+        for (StardewQuest q : List.copyOf(questLog)) {
             q.onRecipeCrafted(player, recipeId);
         }
         markOwnerDirty(player);
@@ -195,7 +257,7 @@ public class QuestManager {
     }
 
     public void onNpcSocialized(ServerPlayer player, String npcId) {
-        for (StardewQuest q : questLog) {
+        for (StardewQuest q : List.copyOf(questLog)) {
             q.onNpcSocialized(player, npcId);
         }
         markOwnerDirty(player);
@@ -204,7 +266,7 @@ public class QuestManager {
     }
 
     public void onWarped(ServerPlayer player, String location) {
-        for (StardewQuest q : questLog) {
+        for (StardewQuest q : List.copyOf(questLog)) {
             q.onWarped(player, location);
         }
         markOwnerDirty(player);
@@ -213,7 +275,7 @@ public class QuestManager {
     }
 
     public void onBuildingExists(ServerPlayer player, String buildingType) {
-        for (StardewQuest q : questLog) {
+        for (StardewQuest q : List.copyOf(questLog)) {
             q.onBuildingExists(player, buildingType);
         }
         markOwnerDirty(player);
@@ -225,10 +287,23 @@ public class QuestManager {
      * 矿井到达新最深层时触发 — 检查 Location 类型任务（Explore the Mine 系列）
      */
     public void onMineFloorReached(ServerPlayer player, int floor) {
-        for (StardewQuest q : questLog) {
+        for (StardewQuest q : List.copyOf(questLog)) {
             q.onMineFloorReached(player, floor);
         }
+        if (floor >= 145 && hasQuest("20") && !com.stardew.craft.mail.MailService.hasOrWillReceiveMail(player, "QiChallengeComplete")) {
+            StardewQuest quest = getQuest("20");
+            if (quest != null && !quest.isCompleted()) {
+                quest.questComplete(player);
+            }
+            com.stardew.craft.mail.MailService.addMailForTomorrow(player, "QiChallengeComplete");
+        }
         cleanupDestroyed(player);
+        if (floor >= 5
+                && !hasQuest("15")
+                && !isQuestCompleted("15")
+                && !com.stardew.craft.mail.MailService.hasOrWillReceiveMail(player, "guildQuest")) {
+            com.stardew.craft.mail.MailService.addMailForTomorrow(player, "guildQuest");
+        }
     }
 
     // ─── 天数推进 ───
@@ -298,16 +373,6 @@ public class QuestManager {
             }
         }
 
-        // 春5日起：矿井探索和史莱姆入会任务（SDV Quest 14 + 15）
-        if (season == 0 && dayInSeason >= 5) {
-            if (!isQuestCompleted("14") && !hasQuest("14")) {
-                acceptQuest("14", player);
-            }
-            if (!isQuestCompleted("15") && !hasQuest("15")) {
-                acceptQuest("15", player);
-            }
-        }
-
     }
 
     // ─── 内部工具 ───
@@ -334,7 +399,8 @@ public class QuestManager {
             }
             if (q.isDestroy()) {
                 if (q.isCompleted()) {
-                    completedQuestIds.add(q.getId());
+                    completedQuestIds.add(q.getDefinitionId() == null
+                            ? q.getId() : q.getDefinitionId().toString());
                 }
                 it.remove();
                 changed = true;
@@ -376,7 +442,7 @@ public class QuestManager {
 
         ListTag questListTag = new ListTag();
         for (StardewQuest q : questLog) {
-            questListTag.add(q.save());
+            questListTag.add(q.saveState());
         }
         tag.put("QuestLog", questListTag);
 
@@ -422,7 +488,9 @@ public class QuestManager {
         if (tag.contains("CompletedQuestIds", 9)) {
             ListTag list = tag.getList("CompletedQuestIds", 8);
             for (int i = 0; i < list.size(); i++) {
-                completedQuestIds.add(list.getString(i));
+                String savedId = list.getString(i);
+                var normalized = QuestDataLoader.normalizeId(savedId);
+                completedQuestIds.add(normalized == null ? savedId : normalized.toString());
             }
         }
 
@@ -433,4 +501,5 @@ public class QuestManager {
             }
         }
     }
+
 }

@@ -807,7 +807,15 @@ public class PlayerStardewDataAPI {
             if (data.isRecipeUnlocked(recipe.id())) {
                 continue;
             }
-            if (matchesCraftingUnlockCondition(recipe.unlockCondition(), data, maxMineFloor) && data.unlockRecipe(recipe.id())) {
+            boolean matchesModern = !recipe.unlockWhen().isEmpty()
+                    && recipe.unlockWhen().stream().allMatch(condition ->
+                    com.stardew.craft.api.v1.condition.StardewConditions.test(
+                            condition,
+                            com.stardew.craft.api.v1.condition.StardewConditionContext.forPlayer(player))
+                            .result().orElse(false));
+            boolean matchesLegacy = recipe.unlockWhen().isEmpty()
+                    && matchesCraftingUnlockCondition(recipe.unlockCondition(), data, maxMineFloor);
+            if ((matchesModern || matchesLegacy) && data.unlockRecipe(recipe.id())) {
                 changed = true;
             }
         }

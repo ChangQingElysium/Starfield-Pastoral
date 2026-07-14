@@ -47,25 +47,25 @@ public record CraftingMenuCraftSubmitPayload(String recipeItemId, int craftCount
                 return;
             }
 
-            String recipePath = normalizeRecipePath(payload.recipeItemId);
-            if (recipePath.isBlank() || !RecipeCatalogData.getCraftingRecipeIds().contains(recipePath)) {
+            String recipeId = normalizeRecipeId(payload.recipeItemId);
+            if (recipeId.isBlank() || !RecipeCatalogData.getCraftingRecipeIds().contains(recipeId)) {
                 player.sendSystemMessage(Component.translatable("stardewcraft.crafting.invalid_recipe"));
                 return;
             }
 
-            if (!PlayerStardewDataAPI.getData(player).isRecipeUnlocked(recipePath)) {
+            if (!PlayerStardewDataAPI.getData(player).isRecipeUnlocked(recipeId)) {
                 player.sendSystemMessage(Component.translatable("stardewcraft.crafting.recipe_locked"));
                 return;
             }
 
-            List<Ingredient> ingredients = StardewCraftingRecipeData.toExpandedIngredients(recipePath,
+            List<Ingredient> ingredients = StardewCraftingRecipeData.toExpandedIngredients(recipeId,
                 PlayerStardewDataAPI.hasProfession(player, ProfessionType.TRAPPER));
             if (ingredients.isEmpty()) {
                 player.sendSystemMessage(Component.translatable("stardewcraft.crafting.invalid_recipe"));
                 return;
             }
 
-            ItemStack oneCraftOutput = StardewCraftingRecipeData.getOutputStack(recipePath);
+            ItemStack oneCraftOutput = StardewCraftingRecipeData.getOutputStack(recipeId);
             if (oneCraftOutput.isEmpty()) {
                 player.sendSystemMessage(Component.translatable("stardewcraft.crafting.invalid_recipe"));
                 return;
@@ -98,14 +98,14 @@ public record CraftingMenuCraftSubmitPayload(String recipeItemId, int craftCount
             int totalOutput = outputPerCraft * actualCraftCount;
             moveOutputToCursor(player, oneCraftOutput, totalOutput);
 
-            PlayerStardewDataAPI.recordRecipeCrafted(player, recipePath, outputPerCraft * actualCraftCount);
+            PlayerStardewDataAPI.recordRecipeCrafted(player, recipeId, outputPerCraft * actualCraftCount);
 
             // Quest: recipe crafted
-            com.stardew.craft.quest.StardewQuestEvents.fireRecipeCrafted(player, recipePath);
+            com.stardew.craft.quest.StardewQuestEvents.fireRecipeCrafted(player, recipeId);
         });
     }
 
-    private static String normalizeRecipePath(String recipeItemId) {
+    private static String normalizeRecipeId(String recipeItemId) {
         if (recipeItemId == null) {
             return "";
         }
@@ -115,7 +115,7 @@ public record CraftingMenuCraftSubmitPayload(String recipeItemId, int craftCount
         }
         ResourceLocation parsed = ResourceLocation.tryParse(trimmed);
         if (parsed != null) {
-            return parsed.getPath();
+            return StardewCraftingRecipeData.storageId(parsed);
         }
         return trimmed;
     }

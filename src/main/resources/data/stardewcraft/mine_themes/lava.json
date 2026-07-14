@@ -1,0 +1,19 @@
+{
+  "mechanic_id": "lava",
+  "min_floor": 80,
+  "max_floor": 119,
+  "main_stone": "stardewcraft:lava_basalt",
+  "dark_stone": "stardewcraft:dark_lava_basalt",
+  "decor_a": ["stardewcraft:scoria", "stardewcraft:cracked_slate"],
+  "decor_b": ["stardewcraft:cracked_slate", "stardewcraft:scoria"],
+  "decorative_stones": ["stardewcraft:scoria", "stardewcraft:cracked_slate"],
+  "vanilla_accents": ["minecraft:magma_block", "minecraft:netherrack"],
+  "cave_decorations": ["stardewcraft:scoria", "stardewcraft:cracked_slate"],
+  "ores": {
+    "copper": "stardewcraft:lava_copper_ore",
+    "iron": "stardewcraft:lava_iron_ore",
+    "gold": "stardewcraft:lava_gold_ore",
+    "iridium": "stardewcraft:lava_iridium_ore",
+    "coal": "stardewcraft:lava_coal_ore"
+  }
+}

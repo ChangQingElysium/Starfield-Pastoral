@@ -4,7 +4,7 @@ import com.stardew.craft.block.utility.ShippingBinBlock;
 import com.stardew.craft.economy.sell.ProfessionSellPriceService;
 import com.stardew.craft.economy.sell.SellQuote;
 import com.stardew.craft.economy.sell.SellSource;
-import com.stardew.craft.item.IStardewItem;
+import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.menu.ShippingBinMenu;
 import com.stardew.craft.network.overnight.OvernightSettlementTracker;
 import com.stardew.craft.player.PlayerDataManager;
@@ -167,10 +167,7 @@ public class ShippingBinBlockEntity extends net.minecraft.world.level.block.enti
     }
 
     public static boolean canShip(ItemStack stack) {
-        if (stack.isEmpty() || !(stack.getItem() instanceof IStardewItem stardewItem)) {
-            return false;
-        }
-        return stardewItem.getSellPrice(stack) > 0;
+        return !stack.isEmpty() && StardewItemDataApi.getSellPrice(stack) > 0;
     }
 
     /**

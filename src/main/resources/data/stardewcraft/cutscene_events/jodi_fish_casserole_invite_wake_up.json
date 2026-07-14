@@ -1,0 +1,46 @@
+{
+  "id": "jodi_fish_casserole_invite_wake_up",
+  "skippable": true,
+  "trigger": { "type": "wake_up" },
+  "preconditions": [
+    { "type": "not_saw_event", "id": "jodi_fish_casserole_invite_wake_up" },
+    { "type": "friendship", "npc": "jodi", "min": 1000 },
+    { "type": "day_of_week", "days": ["Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] }
+  ],
+  "commands": [
+    { "cmd": "comment", "text": "=== SDV Farm Event 93: Jodi invites player to Fish Casserole dinner; wake_up maps vanilla 6:00-9:30 farm-door trigger ===" },
+
+    { "cmd": "lock_player" },
+    { "cmd": "fade", "mode": "out", "ticks": 10 },
+
+    { "cmd": "warp", "actor": "player", "x": 0, "y": 0, "z": 0, "anchor": "farm_spawn" },
+    { "cmd": "face_actor", "actor": "player", "yaw": 90 },
+
+    { "cmd": "spawn_actor", "actor": "fake_player", "npc_id": "player",
+      "x": 0, "y": 0, "z": 0, "facing": 90, "anchor": "farm_spawn" },
+
+    { "cmd": "spawn_actor", "actor": "jodi", "npc_id": "jodi",
+      "x": -2, "y": 0, "z": 0, "facing": -90, "anchor": "farm_spawn" },
+
+    { "cmd": "camera", "x": -2.432, "y": 0.378, "z": 2.928,
+      "yaw": -141.4, "pitch": 13.5, "anchor": "farm_spawn" },
+
+    { "cmd": "fade", "mode": "in", "ticks": 20 },
+    { "cmd": "pause", "ticks": 30 },
+
+    { "cmd": "add_quest", "quest_id": "22" },
+    { "cmd": "skippable" },
+    { "cmd": "speak", "npc_id": "jodi", "text": "event.jodi_fish_casserole_invite.greeting" },
+    { "cmd": "emote", "actor": "jodi", "emote": "exclamation" },
+    { "cmd": "pause", "ticks": 10 },
+    { "cmd": "speak", "npc_id": "jodi", "text": "event.jodi_fish_casserole_invite.invite" },
+    { "cmd": "speak", "npc_id": "jodi", "text": "event.jodi_fish_casserole_invite.fish" },
+    { "cmd": "speak", "npc_id": "jodi", "text": "event.jodi_fish_casserole_invite.delivery" },
+    { "cmd": "pause", "ticks": 15 },
+
+    { "cmd": "remove_actor", "actor": "jodi" },
+    { "cmd": "remove_actor", "actor": "fake_player" },
+    { "cmd": "unlock_player" },
+    { "cmd": "end" }
+  ]
+}

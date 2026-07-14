@@ -102,7 +102,13 @@ public class MineChestBlockEntity extends net.minecraft.world.level.block.entity
                         reward = com.stardew.craft.mining.SkullCavernTreasurePool.roll(
                             net.minecraft.util.RandomSource.create(seed), player);
                 } else {
-                    reward = MineChestLootTable.getRewardForFloor(floor);
+                    if (!(level instanceof ServerLevel serverLevel)) return inv;
+                    long seed = ((long) floor * 341873128712L)
+                            ^ playerId.getMostSignificantBits()
+                            ^ playerId.getLeastSignificantBits()
+                            ^ (worldPosition.asLong() * 132897987541L);
+                    reward = MineChestLootTable.getRewardForFloor(
+                            serverLevel, player, floor, new java.util.Random(seed));
                 }
                 if (reward != null && !reward.isEmpty()) {
                     inv.set(MineChestLootTable.REWARD_SLOT, reward.copy());

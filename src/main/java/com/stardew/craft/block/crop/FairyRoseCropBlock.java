@@ -127,8 +127,8 @@ public class FairyRoseCropBlock extends StardewCropBlock {
     }
 
     @Override
-    public String getCropDisplayName() {
-        return "玫瑰仙子";
+    public String getCropDisplayNameKey() {
+        return "item.stardewcraft.fairy_rose";
     }
 
     @Override

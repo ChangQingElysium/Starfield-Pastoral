@@ -158,6 +158,10 @@ public class LetterViewerScreen extends Screen {
             if (minecraft != null && minecraft.player != null) {
                 text = text.replace("@", minecraft.player.getName().getString());
             }
+            if (payload.secretSantaNameKey() != null && !payload.secretSantaNameKey().isBlank()) {
+                text = text.replace("%secretsanta",
+                        Component.translatable(payload.secretSantaNameKey()).getString());
+            }
             text = text.replace("\\n", "\n")
                     .replace("^^", "\n\n")
                     .replace("^", "\n");

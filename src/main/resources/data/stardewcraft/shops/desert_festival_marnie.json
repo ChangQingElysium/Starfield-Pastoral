@@ -1,0 +1,26 @@
+{
+  "legacy_id": "DesertFestival_Marnie",
+  "owner_npc": "marnie",
+  "owner_dialogue": "stardewcraft.festival.desertfestival.dialogue.vendor",
+  "entries": [
+    {
+      "item": "stardewcraft:grass_starter",
+      "stock": 100,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 2
+    },
+    {
+      "item": "stardewcraft:hay",
+      "stock": 150,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 1
+    },
+    {
+      "item": "stardewcraft:truffle_oil",
+      "stock": 1,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 50
+    }
+  ],
+  "accepted_sell_types": []
+}

@@ -1,0 +1,7 @@
+{
+  "legacy_id": "Bookseller",
+  "entries": [],
+  "accepted_sell_types": [
+    "stardewcraft.type.book"
+  ]
+}

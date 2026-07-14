@@ -1,9 +1,7 @@
 package com.stardew.craft.cutscene.command;
 
-import com.stardew.craft.cutscene.network.CutsceneServerActionPayload;
 import com.stardew.craft.cutscene.runtime.EventPlayer;
 import net.minecraft.client.Minecraft;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 public class EggFestivalFinishCommand implements EventCommand {
     private static final int MAX_WAIT_TICKS = 400;
@@ -26,7 +24,7 @@ public class EggFestivalFinishCommand implements EventCommand {
         }
         if (!sent) {
             player.markRealPlayerMovedByServer();
-            PacketDistributor.sendToServer(new CutsceneServerActionPayload("egg_festival_award_complete", ""));
+            player.sendServerAction("egg_festival_award_complete", "");
             sent = true;
             return;
         }

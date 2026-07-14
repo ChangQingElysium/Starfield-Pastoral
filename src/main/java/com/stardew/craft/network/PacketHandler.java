@@ -1430,11 +1430,6 @@ public class PacketHandler {
             com.stardew.craft.network.payload.WinterStarRecipientThanksClosedPayload.STREAM_CODEC,
             com.stardew.craft.network.payload.WinterStarRecipientThanksClosedPayload::handle
         );
-        registrar.playToServer(
-            com.stardew.craft.network.payload.WinterStarClaimReturnGiftPayload.TYPE,
-            com.stardew.craft.network.payload.WinterStarClaimReturnGiftPayload.STREAM_CODEC,
-            com.stardew.craft.network.payload.WinterStarClaimReturnGiftPayload::handle
-        );
         registrar.playToClient(
             com.stardew.craft.network.payload.OpenWinterStarReturnGiftPayload.TYPE,
             com.stardew.craft.network.payload.OpenWinterStarReturnGiftPayload.STREAM_CODEC,

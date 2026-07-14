@@ -212,6 +212,7 @@ public final class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_POOL_AMBIENT = register("music_pool_ambient");
     public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_ELLIOTT_PIANO = register("music_elliott_piano");
 	public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_COMMUNITY_CENTER = register("music_community_center");
+	public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_50S = register("music_50s");
 	public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_DISTANT_BANJO = register("music_distant_banjo");
 	public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_CLUBLOOP = register("music_clubloop");
     public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_OCEAN_AMBIENCE = register("music_ocean_ambience");

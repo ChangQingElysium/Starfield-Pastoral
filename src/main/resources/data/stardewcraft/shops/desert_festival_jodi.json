@@ -1,0 +1,20 @@
+{
+  "legacy_id": "DesertFestival_Jodi",
+  "owner_npc": "jodi",
+  "owner_dialogue": "stardewcraft.festival.desertfestival.dialogue.vendor",
+  "entries": [
+    {
+      "item": "stardewcraft:crispy_bass",
+      "stock": 5,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 25
+    },
+    {
+      "item": "stardewcraft:mixed_seeds",
+      "stock": 25,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 5
+    }
+  ],
+  "accepted_sell_types": []
+}

@@ -8,7 +8,7 @@ import com.stardew.craft.emote.EmoteCatalog;
 import com.stardew.craft.emote.EmoteType;
 import com.stardew.craft.entity.npc.StardewNpcEntity;
 import com.stardew.craft.book.BookPowerEffects;
-import com.stardew.craft.item.IStardewItem;
+import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.npc.data.NpcCapabilityProfile;
 import com.stardew.craft.npc.data.NpcDataRegistry;
 import com.stardew.craft.npc.data.NpcSocialRules;
@@ -152,6 +152,11 @@ public final class NpcInteractionService {
         if (npcId.isBlank()) {
             return InteractionResult.PASS;
         }
+        InteractionResult addonResult = com.stardew.craft.api.v1.npc.StardewNpcInteractions
+                .dispatch(serverPlayer, npc, hand);
+        if (addonResult != InteractionResult.PASS) {
+            return addonResult;
+        }
         // Joja-line NPCs: 不进入通用好感/打招呼流程。
         // 女收银员（joja_cashier）— 无论玩家站在哪里，右键直接打开 Joja 超市商店界面。
         if ("joja_cashier".equals(npcId)) {
@@ -261,7 +266,7 @@ public final class NpcInteractionService {
                 });
                 return InteractionResult.SUCCESS;
             }
-            com.stardew.craft.quest.ItemDeliveryQuest matchingQuest =
+            com.stardew.craft.quest.StardewQuest matchingQuest =
                 findMatchingDeliveryQuest(serverPlayer, npcId, held);
             if (matchingQuest != null) {
                 npc.facePlayerTemporarily(serverPlayer, 60, () -> {
@@ -290,6 +295,10 @@ public final class NpcInteractionService {
 
         // SDV parity: shop counter checks take priority over gift flow.
         // 柜台交互同时触发任务事件（SDV: 杀怪任务找 NPC 复命也可以在商店柜台完成）。
+        if (com.stardew.craft.shop.ShopInteractionBindings.tryOpenNpc(serverPlayer, npcId)) {
+            com.stardew.craft.quest.StardewQuestEvents.fireNpcSocialized(serverPlayer, npcId);
+            return InteractionResult.SUCCESS;
+        }
         if (npcId.equals("clint") && com.stardew.craft.shop.BlacksmithService.isPlayerAtCounter(serverPlayer)) {
             com.stardew.craft.quest.StardewQuestEvents.fireNpcSocialized(serverPlayer, npcId);
             return com.stardew.craft.shop.BlacksmithService.handleBlacksmithInteraction(serverPlayer, npc);
@@ -657,18 +666,14 @@ public final class NpcInteractionService {
      * 交付任务。返回第一个匹配，没有则返回 null。
      */
     @javax.annotation.Nullable
-    private static com.stardew.craft.quest.ItemDeliveryQuest findMatchingDeliveryQuest(
+    private static com.stardew.craft.quest.StardewQuest findMatchingDeliveryQuest(
             ServerPlayer player, String npcId, ItemStack held) {
         if (held.isEmpty()) return null;
         String itemId = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(held.getItem()).toString();
         com.stardew.craft.quest.QuestManager mgr = com.stardew.craft.quest.QuestManager.of(player);
         if (mgr == null) return null;
         for (com.stardew.craft.quest.StardewQuest q : mgr.getQuestLog()) {
-            if (!(q instanceof com.stardew.craft.quest.ItemDeliveryQuest dq)) continue;
-            if (!dq.isAccepted() || dq.isCompleted() || dq.isDestroy()) continue;
-            if (!npcId.equalsIgnoreCase(dq.getTargetNpc())) continue;
-            if (!itemId.equalsIgnoreCase(dq.getItemId())) continue;
-            return dq;
+            if (q.matchesItemDelivery(npcId, itemId)) return q;
         }
         return null;
     }
@@ -685,8 +690,8 @@ public final class NpcInteractionService {
         if (held.isEmpty()) held = player.getOffhandItem();
         if (held.isEmpty()) return;
 
-        com.stardew.craft.quest.ItemDeliveryQuest matching = findMatchingDeliveryQuest(player, npcId, held);
-        if (matching == null || !matching.getId().equals(questId)) {
+        com.stardew.craft.quest.StardewQuest matching = findMatchingDeliveryQuest(player, npcId, held);
+        if (matching == null || !com.stardew.craft.quest.QuestDataLoader.idsEqual(matching.getId(), questId)) {
             // 玩家在等对话框期间换了物品 / 改了任务 — 静默丢弃
             return;
         }
@@ -696,7 +701,8 @@ public final class NpcInteractionService {
         if (!player.getAbilities().instabuild) {
             held.shrink(1);
         }
-        boolean desertFestivalWillyQuest = com.stardew.craft.festival.desert.DesertFestivalWillyFishingService.isWillyChallengeQuest(matching);
+        boolean desertFestivalWillyQuest = matching instanceof com.stardew.craft.quest.ItemDeliveryQuest delivery
+            && com.stardew.craft.festival.desert.DesertFestivalWillyFishingService.isWillyChallengeQuest(delivery);
         // 走 onItemOfferedToNpc → questComplete（带友好度加成）
         com.stardew.craft.quest.StardewQuestEvents.fireItemOfferedToNpc(player, npcId, itemId);
 
@@ -707,7 +713,8 @@ public final class NpcInteractionService {
         // 让 NPC 说一句感谢台词
         StardewNpcEntity npcEntity = NpcSpawnManager.getTrackedNpc(serverLevel, npcId);
         if (desertFestivalWillyQuest) {
-            com.stardew.craft.festival.desert.DesertFestivalWillyFishingService.handleDeliveredGoldenBobber(player, matching);
+            com.stardew.craft.festival.desert.DesertFestivalWillyFishingService.handleDeliveredGoldenBobber(
+                player, (com.stardew.craft.quest.ItemDeliveryQuest) matching);
             return;
         }
         if (npcEntity != null) {
@@ -742,7 +749,7 @@ public final class NpcInteractionService {
         // ── SDV parity: quest delivery intercept (before gift taste processing) ──
         // In SDV NPC.tryToReceiveActiveObject, OnItemOfferedToNpc is checked first.
         // If a delivery quest matches, the item is consumed by the quest; no gift processing.
-        com.stardew.craft.quest.ItemDeliveryQuest matchingQuest = findMatchingDeliveryQuest(player, npcId, held);
+        com.stardew.craft.quest.StardewQuest matchingQuest = findMatchingDeliveryQuest(player, npcId, held);
         boolean questConsumed = matchingQuest != null
             && com.stardew.craft.quest.StardewQuestEvents.fireItemOfferedToNpc(player, npcId, giftItemId);
         if (questConsumed) {
@@ -757,6 +764,13 @@ public final class NpcInteractionService {
 
         if (!canBeGivenAsGift(held) || !NpcSocialRules.canReceiveGifts(npcId, player)) {
             return;
+        }
+
+        // SDV NPC.tryToReceiveActiveObject completes Quest 25 before applying
+        // daily/weekly gift-limit rejection or consuming the item.
+        com.stardew.craft.quest.QuestManager quests = com.stardew.craft.quest.QuestManager.of(player);
+        if (quests != null) {
+            quests.completeActiveQuest("25", player);
         }
 
         // ── Normal gift processing (no quest matched) ──
@@ -924,14 +938,12 @@ public final class NpcInteractionService {
             return true;
         }
 
-        if (held.getItem() instanceof IStardewItem stardewItem) {
-            String typeKey = stardewItem.getItemTypeKey();
-            if (typeKey != null) {
-                String normalizedTypeKey = typeKey.trim().toLowerCase(Locale.ROOT);
-                if (normalizedTypeKey.startsWith("stardewcraft.tool.")
-                        || NON_GIFTABLE_TYPE_KEYS.contains(normalizedTypeKey)) {
-                    return false;
-                }
+        String typeKey = StardewItemDataApi.getTypeKey(held);
+        if (!typeKey.isBlank()) {
+            String normalizedTypeKey = typeKey.trim().toLowerCase(Locale.ROOT);
+            if (normalizedTypeKey.startsWith("stardewcraft.tool.")
+                    || NON_GIFTABLE_TYPE_KEYS.contains(normalizedTypeKey)) {
+                return false;
             }
         } else {
             return false;
@@ -1559,8 +1571,8 @@ public final class NpcInteractionService {
         sendDialoguePacket(player, npcId, translateKey, points, false);
     }
 
-    private static String questDeliveryDialogueText(com.stardew.craft.quest.ItemDeliveryQuest quest) {
-        String targetMessage = quest != null ? quest.getTargetMessage() : "";
+    private static String questDeliveryDialogueText(com.stardew.craft.quest.StardewQuest quest) {
+        String targetMessage = quest != null ? quest.getDeliveryTargetMessage() : "";
         return targetMessage == null || targetMessage.isBlank()
             ? "stardewcraft.npc.generic.quest_delivery_thanks"
             : targetMessage;

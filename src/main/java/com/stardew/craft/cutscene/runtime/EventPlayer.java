@@ -35,7 +35,9 @@ public final class EventPlayer {
     // ─── state ───
     private EventData currentEvent = null;
     private List<EventCommand> commands = List.of();
+    private List<Integer> commandTokens = List.of();
     private int commandIndex = -1;
+    private long sessionId = 0L;
     private boolean running = false;
     private boolean skippable = false;
     private boolean playerFrozen = false;
@@ -63,7 +65,7 @@ public final class EventPlayer {
     /**
      * Start playing an event. Call from client thread only.
      */
-    public void start(EventData event) {
+    public void start(EventData event, long authorizedSessionId) {
         if (running) {
             LOGGER.warn("Tried to start event {} while {} is playing", event.id(), currentEvent.id());
             return;
@@ -71,6 +73,7 @@ public final class EventPlayer {
 
         LOGGER.info("Starting cutscene event: {}", event.id());
         currentEvent = event;
+        sessionId = authorizedSessionId;
         skippable = event.skippable();
         realPlayerMovedByServer = false;
         capturePlayerSnapshot();
@@ -92,17 +95,21 @@ public final class EventPlayer {
 
         // Parse commands
         List<EventCommand> parsed = new ArrayList<>();
-        for (JsonObject obj : event.rawCommands()) {
+        List<Integer> parsedTokens = new ArrayList<>();
+        for (int rawIndex = 0; rawIndex < event.rawCommands().size(); rawIndex++) {
+            JsonObject obj = event.rawCommands().get(rawIndex);
             try {
                 EventCommand cmd = EventCommandFactory.create(obj);
                 if (cmd != null) {
                     parsed.add(cmd);
+                    parsedTokens.add(rawIndex);
                 }
             } catch (Exception e) {
                 LOGGER.error("Failed to parse cutscene command: {} — {}", obj, e.getMessage());
             }
         }
         commands = parsed;
+        commandTokens = parsedTokens;
         commandIndex = 0;
         running = true;
 
@@ -112,14 +119,6 @@ public final class EventPlayer {
             startDimension = cap.dimension();
         } else {
             startDimension = null;
-        }
-
-        // Notify server so it can lock block-break / placement / entity interactions for this player
-        try {
-            PacketDistributor.sendToServer(
-                new com.stardew.craft.cutscene.network.NotifyCutsceneStartPayload(event.id()));
-        } catch (Exception e) {
-            LOGGER.warn("Failed to notify server of cutscene start: {}", e.getMessage());
         }
 
         // Hide all GUI (like spectator)
@@ -186,6 +185,7 @@ public final class EventPlayer {
 
         // Execute all remaining state commands
         for (int i = commandIndex; i < commands.size(); i++) {
+            commandIndex = i;
             EventCommand cmd = commands.get(i);
             if (cmd.isStateCommand()) {
                 cmd.onSkip(this);
@@ -239,7 +239,7 @@ public final class EventPlayer {
         // its connection; PacketDistributor.sendToServer requires a live connection.
         Minecraft mc = Minecraft.getInstance();
         if (mc.getConnection() != null) {
-            PacketDistributor.sendToServer(new MarkEventSeenPayload(eventId));
+            PacketDistributor.sendToServer(new MarkEventSeenPayload(eventId, sessionId));
         } else {
             LOGGER.debug("Skipped server cutscene completion for {} because the client is disconnected", eventId);
         }
@@ -247,7 +247,9 @@ public final class EventPlayer {
         // Clean up
         currentEvent = null;
         commands = List.of();
+        commandTokens = List.of();
         commandIndex = -1;
+        sessionId = 0L;
         running = false;
         skippable = false;
         startDimension = null;
@@ -268,6 +270,16 @@ public final class EventPlayer {
 
     public EventData currentEvent() {
         return currentEvent;
+    }
+
+    public void sendServerAction(String action, String value) {
+        if (!running || currentEvent == null || sessionId == 0L
+                || commandIndex < 0 || commandIndex >= commandTokens.size()) {
+            LOGGER.warn("Ignored cutscene server action '{}' without an authorized command", action);
+            return;
+        }
+        PacketDistributor.sendToServer(new com.stardew.craft.cutscene.network.CutsceneServerActionPayload(
+                currentEvent.id(), sessionId, commandTokens.get(commandIndex), action, value));
     }
 
     public void setSkippable(boolean skippable) {
@@ -374,7 +386,9 @@ public final class EventPlayer {
         }
         currentEvent = null;
         commands = List.of();
+        commandTokens = List.of();
         commandIndex = -1;
+        sessionId = 0L;
         running = false;
         skippable = false;
         playerFrozen = false;

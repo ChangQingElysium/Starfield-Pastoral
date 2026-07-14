@@ -1,0 +1,41 @@
+{
+  "legacy_id": "ShadowShop",
+  "owner_npc": "Krobus",
+  "owner_dialogue": "stardewcraft.shop.shadowshop.dialogue",
+  "entries": [
+    {
+      "item": "stardewcraft:void_essence",
+      "price": 100
+    },
+    {
+      "item": "stardewcraft:solar_essence",
+      "price": 80
+    },
+    {
+      "item": "stardewcraft:void_egg",
+      "price": 5000
+    },
+    {
+      "item": "stardewcraft:stardrop",
+      "price": 20000,
+      "stock": 1
+    },
+    {
+      "item": "stardewcraft:warp_wand",
+      "price": 2000000,
+      "stock": 1
+    },
+    {
+      "item": "stardewcraft:omni_geode",
+      "price": 300,
+      "day_of_week": 1
+    },
+    {
+      "item": "stardewcraft:iridium_sprinkler",
+      "price": 10000,
+      "stock": 1,
+      "day_of_week": 4
+    }
+  ],
+  "accepted_sell_types": []
+}

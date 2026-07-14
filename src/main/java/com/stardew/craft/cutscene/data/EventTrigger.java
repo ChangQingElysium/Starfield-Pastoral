@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
  * Describes how an event is triggered: enter_area, interact_npc, or time_check.
  */
 public record EventTrigger(String type, String location, String npc,
-                            double[] areaMin, double[] areaMax) {
+                            double[] areaMin, double[] areaMax, JsonObject raw) {
 
     public static EventTrigger fromJson(JsonObject obj) {
         String type = obj.get("type").getAsString();
@@ -27,7 +27,9 @@ public record EventTrigger(String type, String location, String npc,
             areaMax = jsonArrayToDoubles(area, "max");
         }
 
-        return new EventTrigger(type, location, npc, areaMin, areaMax);
+        JsonObject raw = obj.deepCopy();
+        raw.remove("type");
+        return new EventTrigger(type, location, npc, areaMin, areaMax, raw);
     }
 
     private static double[] jsonArrayToDoubles(JsonObject parent, String key) {

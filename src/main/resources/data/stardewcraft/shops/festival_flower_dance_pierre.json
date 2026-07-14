@@ -1,0 +1,31 @@
+{
+  "legacy_id": "Festival_FlowerDance_Pierre",
+  "owner_npc": "Pierre",
+  "owner_dialogue": "stardewcraft.shop.flowerdance.dialogue",
+  "entries": [
+    {
+      "item": "stardewcraft:seasonal_decor",
+      "price": 350
+    },
+    {
+      "item": "stardewcraft:flower_cluster",
+      "price": 250
+    },
+    {
+      "item": "stardewcraft:daffodil",
+      "price": 50,
+      "stock": 10
+    },
+    {
+      "item": "stardewcraft:dandelion",
+      "price": 50,
+      "stock": 10
+    },
+    {
+      "item": "stardewcraft:scarecrow_5",
+      "price": 2500,
+      "stock": 1
+    }
+  ],
+  "accepted_sell_types": []
+}

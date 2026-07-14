@@ -2090,7 +2090,7 @@ public class StardewGameMenuScreen extends Screen {
                             int profLevel = i + 1; // 5 or 10
                             ProfessionType chosenProf = getChosenProfessionForRow(j, profLevel);
                             if (chosenProf != null) {
-                                skillsHoverTitle = chosenProf.getDisplayName();
+                                skillsHoverTitle = chosenProf.getDisplayName().getString();
                                 skillsHoverText = Component.translatable(
                                     "stardewcraft.profession." + chosenProf.getName() + ".desc").getString();
                                 skillsHoveredProfessionId = chosenProf.getId();
@@ -4285,7 +4285,7 @@ public class StardewGameMenuScreen extends Screen {
             }
             // Separator + Ingredients section
             lines.add(Component.empty());
-            lines.add(Component.literal("原料:").withStyle(ChatFormatting.GOLD));
+            lines.add(Component.translatable("stardewcraft.crafting.ingredients").withStyle(ChatFormatting.GOLD));
             int ingredientStartLine = lines.size();
             for (RecipeRequirement requirement : requirements) {
                 int have = countMatchingClient(requirement.ingredient());

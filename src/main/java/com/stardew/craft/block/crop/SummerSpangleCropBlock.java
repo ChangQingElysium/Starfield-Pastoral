@@ -98,8 +98,8 @@ public class SummerSpangleCropBlock extends StardewCropBlock {
     }
 
     @Override
-    public String getCropDisplayName() {
-        return "夏季亮片";
+    public String getCropDisplayNameKey() {
+        return "item.stardewcraft.summer_spangle";
     }
 
     @Override

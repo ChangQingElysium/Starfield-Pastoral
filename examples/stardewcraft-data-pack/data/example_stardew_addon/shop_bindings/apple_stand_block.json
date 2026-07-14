@@ -1,0 +1,7 @@
+{
+  "shop": "example_stardew_addon:apple_stand",
+  "dimension": "minecraft:overworld",
+  "min": {"x": 0, "y": -64, "z": 0},
+  "max": {"x": 0, "y": -64, "z": 0},
+  "available_when": []
+}

@@ -1,59 +1,59 @@
 [
   {
     "id": "summer_1",
-    "text": "嘿，@：\n\n夏天到了！别忘了把春天的庄稼清理掉，换上夏天的种子。\n\n我店里有蓝莓、甜瓜和番茄种子在售。\n\n来看看吧！\n——皮埃尔",
+    "text": "stardewcraft.mail.summer_1",
     "background": 0
   },
   {
     "id": "summer_3_1",
-    "text": "@：\n\n我有一个很私人的请求。最近我丢了一条紫色短裤，它对我来说有些……特殊意义。\n\n如果你能帮我悄悄找回来，并直接交给我，我会非常感激。请务必低调处理。\n\n——刘易斯",
+    "text": "stardewcraft.mail.summer_3_1",
     "background": 0,
     "questId": "102"
   },
   {
     "id": "summer_6_1",
-    "text": "@你好：\n\n如果你的庄稼长得不太好，试试用肥料吧。\n\n我卖的基础肥料可以提高作物品质。\n\n——皮埃尔",
+    "text": "stardewcraft.mail.summer_6_1",
     "background": 0
   },
   {
     "id": "summer_8_1",
-    "text": "嘿 @：\n\n最近牧场围栏坏了好几处，我需要40块石头来修好它们。\n\n你能帮我收集一些吗？我会付你报酬的！\n\n——玛妮",
+    "text": "stardewcraft.mail.summer_8_1",
     "background": 0
   },
   {
     "id": "summer_10",
-    "text": "镇上的各位：\n\n明天就是卢奥宴会了！\n\n请在上午9点来到海滩。每位居民可以往大锅里加一种食材。\n\n州长大人会亲自来品尝！请注意：食材的品质会影响整锅汤的味道……\n\n——镇长刘易斯",
+    "text": "stardewcraft.mail.summer_10",
     "background": 0
   },
   {
     "id": "summer_13_1",
-    "text": "致 @：\n\n我注意到你一直很勤劳地工作。这是从城里寄来的一点零花钱，希望对你有帮助。\n\n记得好好吃饭！\n\n爱你的，\n——妈妈",
+    "text": "stardewcraft.mail.summer_13_1",
     "background": 0,
     "money": 500
   },
   {
     "id": "summer_19_1",
-    "text": "@：\n\n你去过矿井底层了吗？听说那里有很多珍贵的矿石。\n\n不过小心那些怪物，它们可不会手下留情。\n\n——克林特",
+    "text": "stardewcraft.mail.summer_19_1",
     "background": 0
   },
   {
     "id": "summer_20_1",
-    "text": "亲爱的@：\n\n你有试过在晚上6点后去海滩散步吗？\n\n夏夜的海边可是很浪漫的。\n\n——艾利奥特",
+    "text": "stardewcraft.mail.summer_20_1",
     "background": 0
   },
   {
     "id": "summer_22_1",
-    "text": "嘿 @：\n\n最近酒吧的番茄用完了，我需要一些新鲜的来做今晚的特色菜。\n\n你那有种番茄吗？送一个过来我请你喝一杯！\n\n——格斯",
+    "text": "stardewcraft.mail.summer_22_1",
     "background": 0
   },
   {
     "id": "summer_27",
-    "text": "各位居民：\n\n水母起舞节就在明天！\n\n晚上10点到海滩来观赏一年一度的水母迁徙吧。\n\n这是星露谷最美的景观之一！\n\n——镇长刘易斯",
+    "text": "stardewcraft.mail.summer_27",
     "background": 0
   },
   {
     "id": "summer_28",
-    "text": "亲爱的@：\n\n今晚大约10点左右，一种稀有而美丽的景象会在星露谷出现。月光水母将会经过鹈鹕镇，顺着温暖的海水向远方迁徙。\n\n镇上的大家都会聚在海滩上观看。你也来吧。\n\n——德米特里厄斯",
+    "text": "stardewcraft.mail.summer_28",
     "background": 0
   }
 ]

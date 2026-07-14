@@ -1,0 +1,169 @@
+{
+  "legacy_id": "Demetrius",
+  "requester": "Demetrius",
+  "duration": "week",
+  "repeatable": true,
+  "required_tags": [],
+  "title": "stardewcraft.special_orders.Demetrius.name",
+  "text": "stardewcraft.special_orders.Demetrius.text",
+  "objectives": [
+    {
+      "type": "fish",
+      "text": "stardewcraft.special_orders.Demetrius_Objective_0_Text",
+      "required_count": 10,
+      "accepted_tags": "{FishType:Tags}"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "money",
+      "amount": -10,
+      "mail": "{FishType:Price}"
+    },
+    {
+      "type": "mail",
+      "mail": "DemetriusReward"
+    }
+  ],
+  "random_elements": [
+    {
+      "name": "FishType",
+      "options": [
+        {
+          "required_tags": [
+            "season_spring"
+          ],
+          "values": {
+            "option.0.Text": "item.stardewcraft.sunfish",
+            "option.0.TextPlural": "stardewcraft.special_orders.random.sunfish.plural",
+            "option.0.TextPluralCapitalized": "stardewcraft.special_orders.random.sunfish.plural_capitalized",
+            "option.0.Tags": "item_sunfish",
+            "option.0.Price": "30",
+            "option.0.ItemId": "stardewcraft:sunfish",
+            "option.1.Text": "item.stardewcraft.sardine",
+            "option.1.TextPlural": "stardewcraft.special_orders.random.sardine.plural",
+            "option.1.TextPluralCapitalized": "stardewcraft.special_orders.random.sardine.plural_capitalized",
+            "option.1.Tags": "item_sardine",
+            "option.1.Price": "40",
+            "option.1.ItemId": "stardewcraft:sardine",
+            "option.2.Text": "item.stardewcraft.flounder",
+            "option.2.TextPlural": "stardewcraft.special_orders.random.flounder.plural",
+            "option.2.TextPluralCapitalized": "stardewcraft.special_orders.random.flounder.plural_capitalized",
+            "option.2.Tags": "item_flounder",
+            "option.2.Price": "100",
+            "option.2.ItemId": "stardewcraft:flounder",
+            "option.3.Text": "item.stardewcraft.largemouth_bass",
+            "option.3.TextPlural": "stardewcraft.special_orders.random.largemouth_bass.plural",
+            "option.3.TextPluralCapitalized": "stardewcraft.special_orders.random.largemouth_bass.plural_capitalized",
+            "option.3.Tags": "item_largemouth_bass",
+            "option.3.Price": "100",
+            "option.3.ItemId": "stardewcraft:largemouth_bass",
+            "option.4.Text": "item.stardewcraft.halibut",
+            "option.4.TextPlural": "stardewcraft.special_orders.random.halibut.plural",
+            "option.4.TextPluralCapitalized": "stardewcraft.special_orders.random.halibut.plural_capitalized",
+            "option.4.Tags": "item_halibut",
+            "option.4.Price": "80",
+            "option.4.ItemId": "stardewcraft:halibut",
+            "OptionCount": "5"
+          }
+        },
+        {
+          "required_tags": [
+            "season_summer"
+          ],
+          "values": {
+            "option.0.Text": "item.stardewcraft.rainbow_trout",
+            "option.0.TextPlural": "stardewcraft.special_orders.random.rainbow_trout.plural",
+            "option.0.TextPluralCapitalized": "stardewcraft.special_orders.random.rainbow_trout.plural_capitalized",
+            "option.0.Tags": "item_rainbow_trout",
+            "option.0.Price": "65",
+            "option.0.ItemId": "stardewcraft:rainbow_trout",
+            "option.1.Text": "item.stardewcraft.dorado",
+            "option.1.TextPlural": "stardewcraft.special_orders.random.dorado.plural",
+            "option.1.TextPluralCapitalized": "stardewcraft.special_orders.random.dorado.plural_capitalized",
+            "option.1.Tags": "item_dorado",
+            "option.1.Price": "100",
+            "option.1.ItemId": "stardewcraft:dorado",
+            "option.2.Text": "item.stardewcraft.tilapia",
+            "option.2.TextPlural": "stardewcraft.special_orders.random.tilapia.plural",
+            "option.2.TextPluralCapitalized": "stardewcraft.special_orders.random.tilapia.plural_capitalized",
+            "option.2.Tags": "item_tilapia",
+            "option.2.Price": "75",
+            "option.2.ItemId": "stardewcraft:tilapia",
+            "option.3.Text": "item.stardewcraft.tuna",
+            "option.3.TextPlural": "stardewcraft.special_orders.random.tuna.plural",
+            "option.3.TextPluralCapitalized": "stardewcraft.special_orders.random.tuna.plural_capitalized",
+            "option.3.Tags": "item_tuna",
+            "option.3.Price": "100",
+            "option.3.ItemId": "stardewcraft:tuna",
+            "option.4.Text": "item.stardewcraft.red_mullet",
+            "option.4.TextPlural": "stardewcraft.special_orders.random.red_mullet.plural",
+            "option.4.TextPluralCapitalized": "stardewcraft.special_orders.random.red_mullet.plural_capitalized",
+            "option.4.Tags": "item_red_mullet",
+            "option.4.Price": "75",
+            "option.4.ItemId": "stardewcraft:red_mullet",
+            "OptionCount": "5"
+          }
+        },
+        {
+          "required_tags": [
+            "season_fall"
+          ],
+          "values": {
+            "option.0.Text": "item.stardewcraft.tiger_trout",
+            "option.0.TextPlural": "stardewcraft.special_orders.random.tiger_trout.plural",
+            "option.0.TextPluralCapitalized": "stardewcraft.special_orders.random.tiger_trout.plural_capitalized",
+            "option.0.Tags": "item_tiger_trout",
+            "option.0.Price": "150",
+            "option.0.ItemId": "stardewcraft:tiger_trout",
+            "option.1.Text": "item.stardewcraft.albacore",
+            "option.1.TextPlural": "stardewcraft.special_orders.random.albacore.plural",
+            "option.1.TextPluralCapitalized": "stardewcraft.special_orders.random.albacore.plural_capitalized",
+            "option.1.Tags": "item_albacore",
+            "option.1.Price": "75",
+            "option.1.ItemId": "stardewcraft:albacore",
+            "option.2.Text": "item.stardewcraft.midnight_carp",
+            "option.2.TextPlural": "stardewcraft.special_orders.random.midnight_carp.plural",
+            "option.2.TextPluralCapitalized": "stardewcraft.special_orders.random.midnight_carp.plural_capitalized",
+            "option.2.Tags": "item_midnight_carp",
+            "option.2.Price": "150",
+            "option.2.ItemId": "stardewcraft:midnight_carp",
+            "option.3.Text": "item.stardewcraft.salmon",
+            "option.3.TextPlural": "stardewcraft.special_orders.random.salmon.plural",
+            "option.3.TextPluralCapitalized": "stardewcraft.special_orders.random.salmon.plural_capitalized",
+            "option.3.Tags": "item_salmon",
+            "option.3.Price": "75",
+            "option.3.ItemId": "stardewcraft:salmon",
+            "OptionCount": "4"
+          }
+        },
+        {
+          "required_tags": [
+            "season_winter"
+          ],
+          "values": {
+            "option.0.Text": "item.stardewcraft.squid",
+            "option.0.TextPlural": "stardewcraft.special_orders.random.squid.plural",
+            "option.0.TextPluralCapitalized": "stardewcraft.special_orders.random.squid.plural_capitalized",
+            "option.0.Tags": "item_squid",
+            "option.0.Price": "80",
+            "option.0.ItemId": "stardewcraft:squid",
+            "option.1.Text": "item.stardewcraft.perch",
+            "option.1.TextPlural": "stardewcraft.special_orders.random.perch.plural",
+            "option.1.TextPluralCapitalized": "stardewcraft.special_orders.random.perch.plural_capitalized",
+            "option.1.Tags": "item_perch",
+            "option.1.Price": "55",
+            "option.1.ItemId": "stardewcraft:perch",
+            "option.2.Text": "item.stardewcraft.lingcod",
+            "option.2.TextPlural": "stardewcraft.special_orders.random.lingcod.plural",
+            "option.2.TextPluralCapitalized": "stardewcraft.special_orders.random.lingcod.plural_capitalized",
+            "option.2.Tags": "item_lingcod",
+            "option.2.Price": "120",
+            "option.2.ItemId": "stardewcraft:lingcod",
+            "OptionCount": "3"
+          }
+        }
+      ]
+    }
+  ]
+}

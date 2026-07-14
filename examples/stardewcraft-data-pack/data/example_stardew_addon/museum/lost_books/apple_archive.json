@@ -1,0 +1,18 @@
+{
+  "unlock_at": 22,
+  "text": "The Apple Archive--\nA patient orchard keeper records each season before judging a harvest.",
+  "available_when": [
+    {
+      "type": "stardewcraft:skill",
+      "data": { "skill": "farming", "level": 2 }
+    }
+  ],
+  "interactions": [
+    {
+      "dimension": "stardewcraft:stardew_valley",
+      "x": 170,
+      "y": 40,
+      "z": 51
+    }
+  ]
+}

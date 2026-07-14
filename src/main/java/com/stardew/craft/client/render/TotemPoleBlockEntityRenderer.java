@@ -75,7 +75,9 @@ public class TotemPoleBlockEntityRenderer implements BlockEntityRenderer<TotemPo
             default -> 0f;
         };
 
-        Component text = Component.literal(name).withStyle(style -> style.withBold(true));
+        Component text = (be.isSystemPole() && name.startsWith("stardewcraft."))
+                ? Component.translatable(name).withStyle(style -> style.withBold(true))
+                : Component.literal(name).withStyle(style -> style.withBold(true));
         float textWidth = font.width(text);
 
         // 正面渲染

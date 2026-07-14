@@ -1,0 +1,16 @@
+{
+  "legacy_id": "Hospital",
+  "owner_npc": "Harvey",
+  "owner_dialogue": "stardewcraft.shop.hospital.dialogue",
+  "entries": [
+    {
+      "item": "stardewcraft:energy_tonic",
+      "price": 1000
+    },
+    {
+      "item": "stardewcraft:muscle_remedy",
+      "price": 1000
+    }
+  ],
+  "accepted_sell_types": []
+}

@@ -1,0 +1,89 @@
+{
+  "source": "stardewcraft:quarry",
+  "group": "default",
+  "mode": "sequential",
+  "entries": [
+    {
+      "chance": 0.06,
+      "query": {
+        "type": "stardewcraft:one_of",
+        "data": {
+          "items": [
+            "stardewcraft:wild_oak_sapling1",
+            "stardewcraft:wild_maple_sapling1"
+          ]
+        }
+      }
+    },
+    {
+      "chance": 0.02,
+      "query": {
+        "type": "stardewcraft:weighted",
+        "data": {
+          "entries": [
+            {
+              "weight": 1,
+              "query": {
+                "type": "stardewcraft:item",
+                "data": { "item": "stardewcraft:fire_quartz" }
+              }
+            },
+            {
+              "weight": 9,
+              "query": {
+                "type": "stardewcraft:one_of",
+                "data": {
+                  "items": [
+                    "stardewcraft:amethyst_ore",
+                    "stardewcraft:aquamarine_ore",
+                    "stardewcraft:diamond_ore",
+                    "stardewcraft:emerald_ore",
+                    "stardewcraft:jade_ore",
+                    "stardewcraft:ruby_ore",
+                    "stardewcraft:topaz_ore"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "chance": 0.15,
+      "query": {
+        "type": "stardewcraft:weighted",
+        "data": {
+          "entries": [
+            { "weight": 1000, "query": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:earth_iridium_ore" } } },
+            { "weight": 99900, "query": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:earth_gold_ore" } } },
+            { "weight": 296703, "query": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:earth_iron_ore" } } },
+            { "weight": 602397, "query": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:earth_copper_ore" } } }
+          ]
+        }
+      }
+    },
+    {
+      "chance": 0.1,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": { "item": "stardewcraft:earth_coal_ore" }
+      }
+    },
+    {
+      "query": {
+        "type": "stardewcraft:one_of",
+        "data": {
+          "items": [
+            "stardewcraft:earth_shale",
+            "stardewcraft:frost_gneiss",
+            "stardewcraft:lava_basalt",
+            "stardewcraft:banded_marble",
+            "stardewcraft:limestone",
+            "stardewcraft:mossy_sandstone"
+          ]
+        }
+      }
+    }
+  ]
+}

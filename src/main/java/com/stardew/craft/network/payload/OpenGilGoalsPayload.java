@@ -16,7 +16,14 @@ import java.util.List;
 @SuppressWarnings("null")
 public record OpenGilGoalsPayload(List<GoalEntry> goals) implements CustomPacketPayload {
 
-    public record GoalEntry(String goalKey, int currentKills, int requiredKills, boolean claimed) {}
+    public record GoalEntry(
+            String goalKey,
+            String translationKey,
+            int currentKills,
+            int requiredKills,
+            boolean claimed,
+            boolean hasReward
+    ) {}
 
     public static final Type<OpenGilGoalsPayload> TYPE =
         new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "open_gil_goals"));
@@ -26,16 +33,19 @@ public record OpenGilGoalsPayload(List<GoalEntry> goals) implements CustomPacket
             buf.writeVarInt(payload.goals.size());
             for (GoalEntry e : payload.goals) {
                 buf.writeUtf(e.goalKey);
+                buf.writeUtf(e.translationKey);
                 buf.writeVarInt(e.currentKills);
                 buf.writeVarInt(e.requiredKills);
                 buf.writeBoolean(e.claimed);
+                buf.writeBoolean(e.hasReward);
             }
         },
         buf -> {
             int size = buf.readVarInt();
             List<GoalEntry> goals = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
-                goals.add(new GoalEntry(buf.readUtf(), buf.readVarInt(), buf.readVarInt(), buf.readBoolean()));
+                goals.add(new GoalEntry(buf.readUtf(), buf.readUtf(), buf.readVarInt(), buf.readVarInt(),
+                        buf.readBoolean(), buf.readBoolean()));
             }
             return new OpenGilGoalsPayload(goals);
         }

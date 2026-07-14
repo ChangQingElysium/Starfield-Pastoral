@@ -87,7 +87,7 @@ public class RhubarbCropBlock extends StardewCropBlock {
     }
 
     @Override
-    public String getCropDisplayName() {
-        return "大黄";
+    public String getCropDisplayNameKey() {
+        return "item.stardewcraft.rhubarb";
     }
 }

@@ -1,0 +1,41 @@
+{
+  "title": {
+    "literal": "An Apple a Day"
+  },
+  "description": {
+    "literal": "Find an apple to begin the sample quest chain."
+  },
+  "objective_text": {
+    "literal": "Obtain an apple"
+  },
+  "objective": {
+    "type": "stardewcraft:item_harvest",
+    "data": {
+      "item": "minecraft:apple",
+      "count": 1
+    }
+  },
+  "available_when": [
+    {
+      "type": "stardewcraft:always",
+      "data": {
+        "value": true
+      }
+    }
+  ],
+  "on_complete": [
+    {
+      "type": "stardewcraft:set_flag",
+      "data": {
+        "id": "example_stardew_addon:sample_started"
+      }
+    },
+    {
+      "type": "stardewcraft:start_quest",
+      "data": {
+        "quest": "example_stardew_addon:sample_chain/finish"
+      }
+    }
+  ],
+  "can_cancel": true
+}

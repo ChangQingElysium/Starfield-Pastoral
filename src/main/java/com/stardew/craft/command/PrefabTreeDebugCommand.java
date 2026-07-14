@@ -63,9 +63,11 @@ public final class PrefabTreeDebugCommand {
 		ServerLevel level = player.serverLevel();
 		BlockPos root = player.blockPosition();
 		boolean ok = PrefabTreeManager.place(level, root, def, variant, false);
-		ctx.getSource().sendSystemMessage(Component.literal(ok
-				? "已放置预制树 " + def.id() + "_" + variant + " @ " + root.toShortString()
-				: "放置失败（结构不存在或缺少树根方块）：" + PrefabTrees.structurePath(PrefabTrees.speciesIndex(def), variant)));
+		ctx.getSource().sendSystemMessage(ok
+				? Component.translatable("stardewcraft.command.prefab_tree.placed",
+						def.id(), variant, root.toShortString())
+				: Component.translatable("stardewcraft.command.prefab_tree.place_failed",
+						PrefabTrees.structurePath(PrefabTrees.speciesIndex(def), variant)));
 		return ok ? 1 : 0;
 	}
 
@@ -78,9 +80,10 @@ public final class PrefabTreeDebugCommand {
 		ServerLevel level = player.serverLevel();
 		BlockPos root = player.blockPosition();
 		boolean ok = PrefabTreeManager.tryPlaceRandomVariant(level, root, def);
-		ctx.getSource().sendSystemMessage(Component.literal(ok
-				? "已随机放置预制树 " + def.id() + " @ " + root.toShortString()
-				: "放置失败（schem 不存在 / 占地被占用）"));
+		ctx.getSource().sendSystemMessage(ok
+				? Component.translatable("stardewcraft.command.prefab_tree.random_placed",
+						def.id(), root.toShortString())
+				: Component.translatable("stardewcraft.command.prefab_tree.random_failed"));
 		return ok ? 1 : 0;
 	}
 
@@ -90,13 +93,16 @@ public final class PrefabTreeDebugCommand {
 		BlockPos pos = player.blockPosition();
 		PrefabTreeInstance inst = PrefabTreeRegistry.get(level).getByMember(pos);
 		if (inst == null) {
-			ctx.getSource().sendSystemMessage(Component.literal("脚下 " + pos.toShortString() + " 不属于任何预制树"));
+			ctx.getSource().sendSystemMessage(Component.translatable(
+					"stardewcraft.command.prefab_tree.not_found_at", pos.toShortString()));
 			return 0;
 		}
-		ctx.getSource().sendSystemMessage(Component.literal(String.format(
-				"预制树 %s_%d  树根=%s  方块数=%d  %s",
-				inst.species(), inst.variant(), inst.root().toShortString(),
-				inst.members().size(), inst.felled() ? "[已砍倒-树桩]" : "[完整]")));
+		ctx.getSource().sendSystemMessage(Component.translatable(
+				"stardewcraft.command.prefab_tree.info",
+				inst.species(), inst.variant(), inst.root().toShortString(), inst.members().size(),
+				Component.translatable(inst.felled()
+						? "stardewcraft.command.prefab_tree.status.felled"
+						: "stardewcraft.command.prefab_tree.status.intact")));
 		return 1;
 	}
 
@@ -104,7 +110,8 @@ public final class PrefabTreeDebugCommand {
 		String species = StringArgumentType.getString(ctx, "species");
 		WildTrees.Def def = PrefabTrees.defById(species);
 		if (def == null) {
-			ctx.getSource().sendSystemMessage(Component.literal("未知树种：" + species));
+			ctx.getSource().sendSystemMessage(Component.translatable(
+					"stardewcraft.command.prefab_tree.unknown_species", species));
 		}
 		return def;
 	}

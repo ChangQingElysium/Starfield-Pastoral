@@ -1,0 +1,26 @@
+{
+  "legacy_id": "Festival_StardewValleyFair_StarTokens",
+  "entries": [
+    {
+      "item": "stardewcraft:scarecrow_1",
+      "price": 800,
+      "stock": 1
+    },
+    {
+      "item": "stardewcraft:stardrop",
+      "price": 2000,
+      "stock": 1
+    },
+    {
+      "item": "stardewcraft:prize_ticket",
+      "price": 1000,
+      "stock": 1
+    },
+    {
+      "item": "stardewcraft:carpet_19",
+      "price": 500,
+      "stock": 1
+    }
+  ],
+  "accepted_sell_types": []
+}

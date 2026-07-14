@@ -75,7 +75,7 @@ public class RedCabbageCropBlock extends StardewCropBlock {
     }
 
     @Override
-    public String getCropDisplayName() {
-        return "红叶卷心菜";
+    public String getCropDisplayNameKey() {
+        return "item.stardewcraft.red_cabbage";
     }
 }

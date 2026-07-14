@@ -9,6 +9,7 @@ import java.util.Set;
  */
 public final class ClientMuseumDonationCache {
     private static final Set<String> DONATED = new HashSet<>();
+    private static boolean synced;
 
     private ClientMuseumDonationCache() {
     }
@@ -18,13 +19,23 @@ public final class ClientMuseumDonationCache {
         if (donatedIds != null) {
             DONATED.addAll(donatedIds);
         }
+        synced = true;
     }
 
     public static boolean isDonated(String itemId) {
         return DONATED.contains(itemId);
     }
 
+    public static boolean isEmpty() {
+        return DONATED.isEmpty();
+    }
+
+    public static boolean isSynced() {
+        return synced;
+    }
+
     public static void clear() {
         DONATED.clear();
+        synced = false;
     }
 }

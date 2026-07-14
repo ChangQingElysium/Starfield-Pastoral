@@ -76,7 +76,7 @@ public class FarmAdminScreen extends Screen {
     private static final int BTN_GAP = 4;
 
     public FarmAdminScreen(List<FarmEntry> farms) {
-        super(Component.literal("Farm Admin"));
+        super(Component.translatable("stardewcraft.farm.admin.title"));
         this.farms = farms;
     }
 
@@ -117,7 +117,9 @@ public class FarmAdminScreen extends Screen {
             int inputX = panelX + PANEL_PAD + 100;
             int inputY = listBottom + (BOTTOM_BAR_H - 20) / 2;
             inputBox = new EditBox(this.font, inputX, inputY, inputW, 18,
-                    Component.literal(currentAction == Action.RENAME ? "新农场名" : "目标玩家名"));
+                    Component.translatable(currentAction == Action.RENAME
+                            ? "stardewcraft.farm.admin.new_name"
+                            : "stardewcraft.farm.admin.target_player"));
             inputBox.setMaxLength(48);
             if (currentAction == Action.RENAME) {
                 inputBox.setValue(actionTarget.farmName());
@@ -152,20 +154,22 @@ public class FarmAdminScreen extends Screen {
         // ── 表头 ──
         g.fill(panelX, panelY, panelX + panelW, panelY + HEADER_H, HEADER_BG);
         // 标题
-        g.drawString(font, "§l农场管理", panelX + PANEL_PAD, panelY + 6, COL_TITLE, false);
+        g.drawString(font, Component.translatable("stardewcraft.farm.admin.title").withStyle(style -> style.withBold(true)),
+                panelX + PANEL_PAD, panelY + 6, COL_TITLE, false);
         // 农场数
-        String countStr = farms.size() + " 个农场";
+        Component countStr = Component.translatable("stardewcraft.farm.admin.count", farms.size());
         g.drawString(font, countStr, panelX + panelW - PANEL_PAD - font.width(countStr),
                 panelY + 6, COL_DETAIL, false);
 
         // 列标题
         int colY = panelY + 22;
         int col0 = panelX + PANEL_PAD;
-        g.drawString(font, "状态", col0, colY, COL_LABEL, false);
-        g.drawString(font, "玩家", col0 + 30, colY, COL_LABEL, false);
-        g.drawString(font, "农场名", col0 + 150, colY, COL_LABEL, false);
-        g.drawString(font, "类型", col0 + 300, colY, COL_LABEL, false);
-        g.drawString(font, "操作", panelX + panelW - PANEL_PAD - 160, colY, COL_LABEL, false);
+        g.drawString(font, Component.translatable("stardewcraft.farm.admin.column.status"), col0, colY, COL_LABEL, false);
+        g.drawString(font, Component.translatable("stardewcraft.farm.admin.column.player"), col0 + 30, colY, COL_LABEL, false);
+        g.drawString(font, Component.translatable("stardewcraft.farm.admin.column.name"), col0 + 150, colY, COL_LABEL, false);
+        g.drawString(font, Component.translatable("stardewcraft.farm.admin.column.type"), col0 + 300, colY, COL_LABEL, false);
+        g.drawString(font, Component.translatable("stardewcraft.farm.admin.column.actions"),
+                panelX + panelW - PANEL_PAD - 160, colY, COL_LABEL, false);
 
         // 表头下分隔线
         g.fill(panelX + 4, listTop - 1, panelX + panelW - 4, listTop, 0xFF333333);
@@ -205,30 +209,33 @@ public class FarmAdminScreen extends Screen {
             g.drawString(font, truncate(farm.farmName(), 20), textX + 150, lineY1, COL_FARM_NAME, false);
 
             // 类型
-            g.drawString(font, farm.farmType(), textX + 300, lineY1, COL_TYPE, false);
+            g.drawString(font, Component.translatable("gui.stardewcraft.farm_type." + farm.farmType() + ".name"),
+                    textX + 300, lineY1, COL_TYPE, false);
 
             // 详情行
-            String memberStr = farm.memberCount() > 1 ? "  成员: " + farm.memberCount() + "/4" : "";
-            String detailStr = String.format("#%d  UUID: %s  在线: 第%d天/季%d  %s%s",
+            Component memberText = farm.memberCount() > 1
+                    ? Component.translatable("stardewcraft.farm.admin.member_count", farm.memberCount(), 4)
+                    : Component.empty();
+            Component detailText = Component.translatable("stardewcraft.farm.admin.details",
                     farm.slotIndex(),
                     farm.ownerUUID().toString().substring(0, 8),
                     farm.lastOnlineDay(),
                     farm.lastOnlineSeason(),
                     farm.origin().toShortString(),
-                    memberStr);
-            g.drawString(font, detailStr, textX + 30, lineY2, COL_DETAIL, false);
+                    memberText);
+            g.drawString(font, detailText, textX + 30, lineY2, COL_DETAIL, false);
 
             // ── 行内按钮 ──
             int btnAreaX = panelX + panelW - PANEL_PAD - (BTN_W_SM + BTN_W_MD * 2 + BTN_W_MD + BTN_GAP * 3);
             int btnY = rowY + (ROW_HEIGHT - BTN_H) / 2;
 
-            drawButton(g, "TP", btnAreaX, btnY, BTN_W_SM, mouseX, mouseY, false);
+            drawButton(g, Component.translatable("stardewcraft.farm.admin.teleport"), btnAreaX, btnY, BTN_W_SM, mouseX, mouseY, false);
             btnAreaX += BTN_W_SM + BTN_GAP;
-            drawButton(g, "改名", btnAreaX, btnY, BTN_W_MD, mouseX, mouseY, false);
+            drawButton(g, Component.translatable("stardewcraft.farm.admin.rename"), btnAreaX, btnY, BTN_W_MD, mouseX, mouseY, false);
             btnAreaX += BTN_W_MD + BTN_GAP;
-            drawButton(g, "转移", btnAreaX, btnY, BTN_W_MD, mouseX, mouseY, false);
+            drawButton(g, Component.translatable("stardewcraft.farm.admin.transfer"), btnAreaX, btnY, BTN_W_MD, mouseX, mouseY, false);
             btnAreaX += BTN_W_MD + BTN_GAP;
-            drawButton(g, "删除", btnAreaX, btnY, BTN_W_MD, mouseX, mouseY, true);
+            drawButton(g, Component.translatable("stardewcraft.farm.admin.delete"), btnAreaX, btnY, BTN_W_MD, mouseX, mouseY, true);
         }
         g.disableScissor();
 
@@ -248,17 +255,17 @@ public class FarmAdminScreen extends Screen {
             g.fill(panelX, barY, panelX + panelW, panelY + panelH, 0xFF1A1A1A);
             g.fill(panelX + 4, barY, panelX + panelW - 4, barY + 1, 0xFF333333);
 
-            String label = currentAction == Action.RENAME
-                    ? "重命名: " + actionTarget.ownerName()
-                    : "转移: " + actionTarget.ownerName() + " →";
+            Component label = Component.translatable(currentAction == Action.RENAME
+                    ? "stardewcraft.farm.admin.rename_target"
+                    : "stardewcraft.farm.admin.transfer_target", actionTarget.ownerName());
             g.drawString(font, label, panelX + PANEL_PAD, barY + (BOTTOM_BAR_H - 8) / 2, COL_FARM_NAME, false);
 
             // 确认 / 取消按钮
             int confirmX = inputBox != null ? inputBox.getX() + inputBox.getWidth() + 8 : panelX + panelW - 120;
             int cancelX = confirmX + 50;
             int btnBY = barY + (BOTTOM_BAR_H - BTN_H) / 2;
-            drawButton(g, "确认", confirmX, btnBY, 44, mouseX, mouseY, false);
-            drawButton(g, "取消", cancelX, btnBY, 44, mouseX, mouseY, false);
+            drawButton(g, Component.translatable("stardewcraft.dialog.confirm"), confirmX, btnBY, 44, mouseX, mouseY, false);
+            drawButton(g, Component.translatable("stardewcraft.dialog.cancel"), cancelX, btnBY, 44, mouseX, mouseY, false);
         }
 
         // ── 渲染 widgets（EditBox 等）——直接渲染，不调用 super.render() ──
@@ -268,7 +275,7 @@ public class FarmAdminScreen extends Screen {
     }
 
     /** 绘制一个简单的小按钮（纯色） */
-    private void drawButton(GuiGraphics g, String text, int x, int y, int w, int mx, int my, boolean danger) {
+    private void drawButton(GuiGraphics g, Component text, int x, int y, int w, int mx, int my, boolean danger) {
         boolean hovered = mx >= x && mx < x + w && my >= y && my < y + BTN_H;
         int bg = danger ? (hovered ? BTN_DANGER_HV : BTN_DANGER) : (hovered ? BTN_HOVER : BTN_BG);
         g.fill(x, y, x + w, y + BTN_H, 0xFF000000); // 外框

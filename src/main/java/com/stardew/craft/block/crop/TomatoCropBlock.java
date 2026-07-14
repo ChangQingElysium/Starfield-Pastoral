@@ -248,7 +248,7 @@ public class TomatoCropBlock extends StardewCropBlock {
     }
 
     @Override
-    public String getCropDisplayName() {
-        return "西红柿";
+    public String getCropDisplayNameKey() {
+        return "item.stardewcraft.tomato";
     }
 }

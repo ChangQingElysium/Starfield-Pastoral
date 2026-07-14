@@ -1,8 +1,6 @@
 package com.stardew.craft.cutscene.command;
 
-import com.stardew.craft.cutscene.network.CutsceneServerActionPayload;
 import com.stardew.craft.cutscene.runtime.EventPlayer;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * add_friendship: adds friendship points for an NPC (server-side).
@@ -22,8 +20,7 @@ public class AddFriendshipCommand implements EventCommand {
     @Override
     public void start(EventPlayer player) {
         // Format: "npc_id:points"
-        PacketDistributor.sendToServer(
-                new CutsceneServerActionPayload("add_friendship", npcId + ":" + points));
+        player.sendServerAction("add_friendship", npcId + ":" + points);
     }
 
     @Override public void tick(EventPlayer player) {}

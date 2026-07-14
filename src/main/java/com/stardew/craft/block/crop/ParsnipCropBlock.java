@@ -87,7 +87,7 @@ public class ParsnipCropBlock extends StardewCropBlock {
     }
 
     @Override
-    public String getCropDisplayName() {
-        return "防风草";
+    public String getCropDisplayNameKey() {
+        return "item.stardewcraft.parsnip";
     }
 }

@@ -1,0 +1,19 @@
+{
+  "owner_npc": "pierre",
+  "owner_dialogue": "example_stardew_addon.shop.apple_stand",
+  "entries": [
+    {
+      "item": "minecraft:golden_apple",
+      "price": 500,
+      "stock": 1,
+      "available_when": [
+        {
+          "type": "stardewcraft:always",
+          "data": {"value": true}
+        }
+      ]
+    }
+  ],
+  "accepted_sell_types": [],
+  "inventory_providers": ["example_stardew_addon:daily_apples"]
+}

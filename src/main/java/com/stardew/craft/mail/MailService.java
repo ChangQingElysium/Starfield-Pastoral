@@ -1,5 +1,11 @@
 package com.stardew.craft.mail;
 
+import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.action.StardewAction;
+import com.stardew.craft.api.v1.action.StardewActionContext;
+import com.stardew.craft.api.v1.action.StardewActions;
+import com.stardew.craft.api.v1.condition.StardewConditionContext;
+import com.stardew.craft.api.v1.condition.StardewConditions;
 import com.stardew.craft.network.payload.OpenMailPayload;
 import com.stardew.craft.player.PlayerDataEventHandler;
 import com.stardew.craft.player.PlayerDataManager;
@@ -37,6 +43,7 @@ public class MailService {
         int before = data.getMailbox().size();
         data.addToMailbox(mailId);
         if (data.getMailbox().size() != before) {
+            executeActions(player, MailRegistry.get(mailId), MailPhase.DELIVERY);
             PlayerDataEventHandler.syncPlayerData(player, data);
         }
     }
@@ -52,6 +59,9 @@ public class MailService {
         data.addToMailbox(mailId);
         data.addMailFlag(deliveryFlag);
         if (data.getMailbox().size() != before || data.hasMailFlag(deliveryFlag)) {
+            if (data.getMailbox().size() != before) {
+                executeActions(player, MailRegistry.get(mailId), MailPhase.DELIVERY);
+            }
             PlayerDataEventHandler.syncPlayerData(player, data);
         }
     }
@@ -140,13 +150,13 @@ public class MailService {
             }
         }
 
-        // 处理文本替换
         String text = entry.getText();
-        text = text.replace("@", player.getName().getString());
-        if (text.contains("%secretsanta")) {
-            text = text.replace("%secretsanta",
-                com.stardew.craft.festival.WinterStarFestivalService.getSecretFriendDisplayName(player).getString());
-        }
+        String secretFriendId = "winter_18".equals(mailId)
+            ? com.stardew.craft.festival.WinterStarFestivalService.getSecretFriendId(player)
+            : "";
+        String secretSantaNameKey = secretFriendId.isBlank()
+            ? ""
+            : "entity.stardewcraft.npc." + secretFriendId;
 
         // 构建附件列表 & 发放物品到玩家背包
         List<OpenMailPayload.ItemAttachment> items = new ArrayList<>();
@@ -187,11 +197,13 @@ public class MailService {
             }
         }
 
+        executeActions(player, entry, MailPhase.READ);
+
         int remaining = data.getMailbox().size();
         PlayerDataEventHandler.syncPlayerData(player, data);
 
         OpenMailPayload payload = new OpenMailPayload(
-                mailId, text, entry.getBackground(),
+                mailId, text, secretSantaNameKey, entry.getBackground(),
                 entry.getTextColor() != null ? entry.getTextColor() : "",
                 items, money, learnedRecipe, cookingOrCrafting,
                 hasQuest, remaining
@@ -210,6 +222,18 @@ public class MailService {
             LOGGER.warn("Ignoring unregistered readable mail '{}' for {} queue on {}",
                     mailId, queueName, player.getName().getString());
             return false;
+        }
+        MailEntry entry = MailRegistry.get(mailId);
+        if (entry == null) return false;
+        for (var condition : entry.availableWhen()) {
+            boolean allowed = StardewConditions.test(condition, StardewConditionContext.forPlayer(player))
+                    .resultOrPartial(message -> LOGGER.error(
+                            "[Mail] Availability condition failed for {}: {}", entry.definitionId(), message))
+                    .orElse(false);
+            if (!allowed) {
+                LOGGER.debug("[Mail] Definition {} is not currently available", entry.definitionId());
+                return false;
+            }
         }
         return true;
     }
@@ -266,13 +290,38 @@ public class MailService {
     private static void dispatchFlushedFlags(ServerPlayer player,
                                              net.minecraft.server.level.ServerLevel stardewLevel,
                                              java.util.List<String> flushed) {
-        if (stardewLevel == null || flushed.isEmpty()) return;
+        if (flushed.isEmpty()) return;
         for (String flag : flushed) {
+            MailEntry mail = MailRegistry.get(flag);
+            if (mail != null) {
+                executeActions(player, mail, MailPhase.DELIVERY);
+            }
             int areaId = ccFlagToAreaId(flag);
-            if (areaId >= 0) {
+            if (areaId >= 0 && stardewLevel != null) {
                 com.stardew.craft.communitycenter.reward.AreaCompletionService.onAreaComplete(
                     player, areaId, stardewLevel, /*jojaPath=*/true);
             }
+        }
+    }
+
+    private static void executeActions(ServerPlayer player, MailEntry entry, MailPhase phase) {
+        if (entry == null) return;
+        List<StardewAction> actions = phase == MailPhase.DELIVERY ? entry.onDelivery() : entry.onRead();
+        StardewActionContext context = StardewActionContext.forPlayer(player);
+        for (StardewAction action : actions) {
+            StardewActions.execute(action, context).resultOrPartial(message -> StardewCraft.LOGGER.error(
+                    "[Mail] {} action failed for {}: {}", phase.logName, entry.definitionId(), message));
+        }
+    }
+
+    private enum MailPhase {
+        DELIVERY("delivery"),
+        READ("read");
+
+        private final String logName;
+
+        MailPhase(String logName) {
+            this.logName = logName;
         }
     }
 

@@ -1,8 +1,6 @@
 package com.stardew.craft.cutscene.command;
 
-import com.stardew.craft.cutscene.network.CutsceneServerActionPayload;
 import com.stardew.craft.cutscene.runtime.EventPlayer;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * set_flag: set a mail flag on the player (server-side).
@@ -17,8 +15,7 @@ public class SetFlagCommand implements EventCommand {
 
     @Override
     public void start(EventPlayer player) {
-        PacketDistributor.sendToServer(
-            new CutsceneServerActionPayload("set_flag", flag));
+        player.sendServerAction("set_flag", flag);
     }
 
     @Override public void tick(EventPlayer player) {}

@@ -79,7 +79,7 @@ public final class CutsceneDebugCommand {
         String eventId = StringArgumentType.getString(context, "eventId");
         EventData data = EventRegistry.getById(eventId);
         if (data == null) {
-            context.getSource().sendFailure(Component.literal("未找到事件: " + eventId));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.event.not_found", eventId));
             return 0;
         }
 
@@ -99,28 +99,29 @@ public final class CutsceneDebugCommand {
             }
             // Send a trigger packet (and mark server-side cutscene active)
             com.stardew.craft.cutscene.server.ServerCutsceneTracker.startEvent(player, eventId);
-            context.getSource().sendSuccess(() -> Component.literal("触发事件: " + eventId), false);
+            context.getSource().sendSuccess(() -> Component.translatable("stardewcraft.command.event.triggered", eventId), false);
             return 1;
         }
 
-        context.getSource().sendFailure(Component.literal("需要玩家执行此命令。"));
+        context.getSource().sendFailure(Component.translatable("stardewcraft.command.player_required"));
         return 0;
     }
 
     private static int listEvents(CommandContext<CommandSourceStack> context) {
         var allEvents = EventRegistry.all();
         if (allEvents.isEmpty()) {
-            context.getSource().sendSuccess(() -> Component.literal("没有已加载的事件。"), false);
+            context.getSource().sendSuccess(() -> Component.translatable("stardewcraft.command.event.none_loaded"), false);
             return 0;
         }
 
-        StringBuilder sb = new StringBuilder("已加载的事件 (").append(allEvents.size()).append("):\n");
+        net.minecraft.network.chat.MutableComponent message = Component.translatable(
+                "stardewcraft.command.event.list_header", allEvents.size());
         for (EventData event : allEvents) {
-            sb.append("  - ").append(event.id())
-              .append(" [").append(event.trigger().type()).append("]")
-              .append(" (").append(event.rawCommands().size()).append(" 条命令)\n");
+            message.append(Component.literal("\n  - ")).append(Component.translatable(
+                    "stardewcraft.command.event.list_entry", event.id(), event.trigger().type(),
+                    event.rawCommands().size()));
         }
-        context.getSource().sendSuccess(() -> Component.literal(sb.toString()), false);
+        context.getSource().sendSuccess(() -> message, false);
         return 1;
     }
 
@@ -129,7 +130,7 @@ public final class CutsceneDebugCommand {
             EventSeenData data = EventSeenData.get(player.serverLevel());
             data.clearSeen(player.getUUID());
             PacketDistributor.sendToPlayer(player, new SyncEventSeenPayload(new ArrayList<>()));
-            context.getSource().sendSuccess(() -> Component.literal("已重置事件观看记录。"), false);
+            context.getSource().sendSuccess(() -> Component.translatable("stardewcraft.command.event.reset"), false);
             return 1;
         }
         return 0;

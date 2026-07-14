@@ -14,6 +14,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.ArrayList;
@@ -37,8 +38,7 @@ public final class CutsceneSystem {
     public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             // Sync cutscene event JSON data so client can play them on dedicated servers
-            PacketDistributor.sendToPlayer(player,
-                    new SyncEventRegistryPayload(new java.util.HashMap<>(EventRegistry.getRawJsonMap())));
+            PacketDistributor.sendToPlayer(player, SyncEventRegistryPayload.current());
 
             EventSeenData data = EventSeenData.get(player.serverLevel());
             var seen = data.getSeenEvents(player.getUUID());
@@ -55,6 +55,30 @@ public final class CutsceneSystem {
         }
     }
 
+    @SubscribeEvent
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer player) || player.tickCount % 10 != 0) return;
+        EventSeenData seen = EventSeenData.get(player.serverLevel());
+        for (var cutscene : EventRegistry.all()) {
+            String rawType = cutscene.trigger().type();
+            if (rawType == null || rawType.indexOf(':') < 1) continue;
+            if (seen.hasSeen(player.getUUID(), cutscene.id())) continue;
+            if (!com.stardew.craft.cutscene.server.ServerPreconditionEvaluator.evaluate(
+                    player, player.serverLevel(), cutscene.preconditions())) continue;
+            var type = net.minecraft.resources.ResourceLocation.tryParse(rawType);
+            if (type == null) continue;
+            boolean matches = com.stardew.craft.api.v1.cutscene.StardewCutsceneTriggers
+                    .test(type, cutscene.trigger().raw(), player)
+                    .resultOrPartial(message -> StardewCraft.LOGGER.error(
+                            "[Cutscene] Trigger {} failed for {}: {}", type, cutscene.id(), message))
+                    .orElse(false);
+            if (matches) {
+                com.stardew.craft.cutscene.server.ServerCutsceneTracker.startEvent(player, cutscene.id());
+                return;
+            }
+        }
+    }
+
     /**
      * Client-side cleanup on disconnect. Without this, the seen-event set from a previous
      * world/server lingers in memory; reconnecting to a different save would incorrectly
@@ -67,6 +91,7 @@ public final class CutsceneSystem {
         @SubscribeEvent
         public static void onClientDisconnect(PlayerEvent.PlayerLoggedOutEvent event) {
             EventPlayer.get().reset();
+            EventRegistry.reset();
             ClientEventSeenCache.reset();
             EventTriggerChecker.reset();
         }

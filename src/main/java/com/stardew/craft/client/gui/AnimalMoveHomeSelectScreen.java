@@ -334,9 +334,11 @@ public class AnimalMoveHomeSelectScreen extends Screen {
         graphics.fill(rowX + si(6), rowY + si(8), rowX + si(6) + lineW, rowY + si(9), alphaColor(COLOR_LINE, alpha));
 
         String occupancy = option.animalCount() + "/" + option.capacity();
-        String status = option.selectable()
-            ? "可用"
-            : (option.buildingId().equals(payload.currentBuildingId()) ? "当前" : "已满");
+        Component status = Component.translatable(option.selectable()
+            ? "stardewcraft.animal.query.move_status.available"
+            : (option.buildingId().equals(payload.currentBuildingId())
+                ? "stardewcraft.animal.query.move_status.current"
+                : "stardewcraft.animal.query.move_status.full"));
         int statusColor = option.selectable() ? 0xFF92E472 : (option.buildingId().equals(payload.currentBuildingId()) ? 0xFFB6A58A : 0xFFCF6E62);
 
         float titleScale = (selected ? 0.92f : 0.78f) * scale;
@@ -591,6 +593,14 @@ public class AnimalMoveHomeSelectScreen extends Screen {
     }
 
     private void drawScaledText(GuiGraphics graphics, String text, int x, int y, float scale, int color) {
+        graphics.pose().pushPose();
+        graphics.pose().translate(x, y, 0);
+        graphics.pose().scale(scale, scale, 1.0f);
+        graphics.drawString(this.font, text, 0, 0, color, false);
+        graphics.pose().popPose();
+    }
+
+    private void drawScaledText(GuiGraphics graphics, Component text, int x, int y, float scale, int color) {
         graphics.pose().pushPose();
         graphics.pose().translate(x, y, 0);
         graphics.pose().scale(scale, scale, 1.0f);

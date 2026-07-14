@@ -110,8 +110,8 @@ public class BlueJazzCropBlock extends StardewCropBlock {
     }
 
     @Override
-    public String getCropDisplayName() {
-        return "蓝爵";
+    public String getCropDisplayNameKey() {
+        return "item.stardewcraft.blue_jazz";
     }
 
     @Override

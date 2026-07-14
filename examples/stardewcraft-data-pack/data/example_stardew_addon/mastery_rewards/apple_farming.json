@@ -1,0 +1,12 @@
+{
+  "skill": "stardewcraft:farming",
+  "priority": 100,
+  "entries": [
+    {
+      "kind": "item",
+      "item": "minecraft:golden_apple",
+      "name_key": "item.minecraft.golden_apple",
+      "desc_key": "item.minecraft.golden_apple"
+    }
+  ]
+}

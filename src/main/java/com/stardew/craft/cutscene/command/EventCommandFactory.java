@@ -3,6 +3,7 @@ package com.stardew.craft.cutscene.command;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.logging.LogUtils;
+import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -23,6 +24,19 @@ public final class EventCommandFactory {
      */
     public static EventCommand create(JsonObject obj) {
         String cmd = obj.get("cmd").getAsString();
+
+        if (cmd.indexOf(':') > 0) {
+            ResourceLocation id = ResourceLocation.tryParse(cmd);
+            if (id == null) {
+                LOGGER.warn("Invalid namespaced event command: {}", cmd);
+                return null;
+            }
+            JsonObject data = obj.deepCopy();
+            data.remove("cmd");
+            EventCommand custom = com.stardew.craft.api.v1.cutscene.StardewCutsceneCommands.create(id, data);
+            if (custom == null) LOGGER.warn("Unknown namespaced event command: {}", cmd);
+            return custom;
+        }
 
         return switch (cmd) {
             case "lock_player"   -> new LockPlayerCommand();
@@ -172,8 +186,15 @@ public final class EventCommandFactory {
                     getFloat(obj, "volume", 1.0f),
                     getFloat(obj, "pitch", 1.0f)
             );
+            case "door"          -> new DoorCommand(
+                    getInt(obj, "x", 0),
+                    getInt(obj, "y", 0),
+                    getInt(obj, "z", 0),
+                    getBool(obj, "open", true)
+            );
             case "message"       -> new MessageCommand(obj.get("text").getAsString());
             case "add_quest"     -> new AddQuestCommand(obj.get("quest_id").getAsString());
+            case "remove_quest"  -> new RemoveQuestCommand(obj.get("quest_id").getAsString());
             case "set_flag"      -> new SetFlagCommand(obj.get("flag").getAsString());
             case "grant_rusty_key" -> new GrantRustyKeyCommand();
             case "mark_opened_sewer" -> new MarkOpenedSewerCommand();
@@ -198,6 +219,10 @@ public final class EventCommandFactory {
                     getInt(obj, "points", 250)
             );
             case "add_item"      -> new AddItemCommand(
+                    obj.get("item").getAsString(),
+                    getInt(obj, "count", 1)
+            );
+            case "remove_item"   -> new RemoveItemCommand(
                     obj.get("item").getAsString(),
                     getInt(obj, "count", 1)
             );

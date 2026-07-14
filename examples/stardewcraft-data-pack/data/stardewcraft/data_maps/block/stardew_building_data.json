@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": {
+    "minecraft:crafting_table": {
+      "type": "example_stardew_addon:apple_shed",
+      "capacity": 4,
+      "accepted_animals": ["minecraft:cow"],
+      "required_interior_blocks": ["minecraft:crafting_table", "minecraft:chest"]
+    }
+  }
+}

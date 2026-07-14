@@ -4,7 +4,7 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.block.crop.StardewCropBlock;
 import com.stardew.craft.block.nature.PastureGrassBlock;
 import com.stardew.craft.block.nature.WildWeedsBlock;
-import com.stardew.craft.item.IStardewItem;
+import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.item.artisan.PreserveType;
 import com.stardew.craft.item.artisan.PreservesItem;
@@ -220,10 +220,7 @@ public final class BookPowerEffects {
     }
 
     private static boolean isFishWithRoe(ItemStack stack) {
-        if (!(stack.getItem() instanceof IStardewItem stardewItem)) {
-            return false;
-        }
-        String typeKey = stardewItem.getItemTypeKey();
+        String typeKey = StardewItemDataApi.getTypeKey(stack);
         return "stardewcraft.type.fish".equals(typeKey)
                 || "stardewcraft.type.legendary_fish".equals(typeKey);
     }

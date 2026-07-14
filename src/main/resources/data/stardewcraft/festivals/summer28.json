@@ -1,0 +1,17 @@
+{
+  "type": "active",
+  "legacy_id": "summer28",
+  "display_name": "Dance of the Moonlight Jellies",
+  "season": 1,
+  "start_day": 28,
+  "end_day": 28,
+  "start_time": 2200,
+  "end_time": 2400,
+  "start_message_key": "message.stardewcraft.festival.moonlight_jellies.started",
+  "announcement_mail_id": "summer_28",
+  "world": {
+    "location": "Beach",
+    "map_overlay": "Beach-Jellies",
+    "mechanic_id": "moonlight_jellies"
+  }
+}

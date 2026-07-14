@@ -1,0 +1,20 @@
+{
+  "legacy_id": "DesertFestival_Shane",
+  "owner_npc": "shane",
+  "owner_dialogue": "stardewcraft.festival.desertfestival.dialogue.vendor",
+  "entries": [
+    {
+      "item": "stardewcraft:pizza",
+      "stock": 5,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 5
+    },
+    {
+      "item": "stardewcraft:pepper_poppers",
+      "stock": 3,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 30
+    }
+  ],
+  "accepted_sell_types": []
+}

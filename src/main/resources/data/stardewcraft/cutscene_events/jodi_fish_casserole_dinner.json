@@ -1,0 +1,105 @@
+{
+  "id": "94",
+  "skippable": true,
+  "trigger": {
+    "type": "enter_area",
+    "location": "samhouse",
+    "area_min": [-32, 38, 18],
+    "area_max": [-6, 42, 44]
+  },
+  "preconditions": [
+    { "type": "not_saw_event", "id": "94" },
+    { "type": "saw_event", "id": "jodi_fish_casserole_invite_wake_up" },
+    { "type": "has_item", "item": "stardewcraft:largemouth_bass", "count": 1 },
+    { "type": "time", "min": 1800, "max": 1950 }
+  ],
+  "commands": [
+    { "cmd": "comment", "text": "=== SDV SamHouse Event 94: Jodi Fish Casserole dinner; Kent omitted until Kent exists ===" },
+
+    { "cmd": "lock_player" },
+    { "cmd": "fade", "mode": "out", "ticks": 10 },
+    { "cmd": "hide_npc", "npc_id": "jodi" },
+    { "cmd": "hide_npc", "npc_id": "sam" },
+
+    { "cmd": "spawn_actor", "actor": "fake_player", "npc_id": "player",
+      "x": -28.5, "y": 38, "z": 42.5, "relative": false, "facing": 180 },
+    { "cmd": "spawn_actor", "actor": "jodi", "npc_id": "jodi",
+      "x": -26.5, "y": 39, "z": 22.5, "relative": false, "facing": 180 },
+    { "cmd": "spawn_actor", "actor": "sam", "npc_id": "sam",
+      "x": -18.5, "y": 39, "z": 31.5, "relative": false, "facing": 0 },
+
+    { "cmd": "camera", "x": -31.177, "y": 39.838, "z": 38.993,
+      "yaw": -137.9, "pitch": 24.6, "relative": false },
+
+    { "cmd": "music", "track": "MUSIC_50S" },
+    { "cmd": "fade", "mode": "in", "ticks": 20 },
+    { "cmd": "pause", "ticks": 15 },
+
+    { "cmd": "remove_quest", "quest_id": "22" },
+    { "cmd": "remove_item", "item": "stardewcraft:largemouth_bass", "count": 1 },
+    { "cmd": "skippable" },
+
+    { "cmd": "move_actor", "actor": "fake_player",
+      "x": -28.5, "y": 38, "z": 39.5, "ticks": 34, "relative": false },
+    { "cmd": "pause", "ticks": 6 },
+
+    { "cmd": "camera", "x": -25.300, "y": 40.200, "z": 31.911,
+      "yaw": 151.2, "pitch": 27.5, "relative": false, "ticks": 8 },
+    { "cmd": "move_actor", "actor": "jodi",
+      "x": -27.5, "y": 38, "z": 34.5, "ticks": 72, "relative": false },
+    { "cmd": "camera", "x": -31.177, "y": 39.838, "z": 38.993,
+      "yaw": -137.9, "pitch": 24.6, "relative": false, "ticks": 8 },
+    { "cmd": "face_actor", "actor": "jodi", "yaw": 0 },
+    { "cmd": "speak", "npc_id": "jodi", "text": "event.jodi_fish_casserole_dinner.greeting" },
+
+    { "cmd": "move_actor", "actor": "fake_player",
+      "x": -27.5, "y": 38, "z": 39.5, "ticks": 18, "relative": false },
+    { "cmd": "move_actor", "actor": "fake_player",
+      "x": -27.5, "y": 38, "z": 37.5, "ticks": 26, "relative": false },
+    { "cmd": "face_actor", "actor": "fake_player", "yaw": 180 },
+    { "cmd": "face_actor", "actor": "jodi", "yaw": 0 },
+    { "cmd": "speak", "npc_id": "jodi", "text": "event.jodi_fish_casserole_dinner.call_sam" },
+
+    { "cmd": "camera", "x": -17.712, "y": 39.838, "z": 35.581,
+      "yaw": 126.1, "pitch": 27.3, "relative": false, "ticks": 8 },
+    { "cmd": "pause", "ticks": 12 },
+    { "cmd": "speak", "npc_id": "sam", "text": "event.jodi_fish_casserole_dinner.sam_reply" },
+    { "cmd": "door", "x": -19, "y": 39, "z": 32, "open": true },
+    { "cmd": "pause", "ticks": 8 },
+    { "cmd": "move_actor", "actor": "sam",
+      "x": -18.5, "y": 39, "z": 34.5, "ticks": 38, "relative": false },
+    { "cmd": "door", "x": -19, "y": 39, "z": 32, "open": false },
+    { "cmd": "move_actor", "actor": "sam",
+      "x": -24.5, "y": 38, "z": 34.5, "ticks": 70, "relative": false },
+    { "cmd": "face_actor", "actor": "sam", "yaw": 90 },
+
+    { "cmd": "camera", "x": -31.177, "y": 39.838, "z": 38.993,
+      "yaw": -137.9, "pitch": 24.6, "relative": false, "ticks": 8 },
+    { "cmd": "face_actor", "actor": "fake_player", "yaw": 180 },
+    { "cmd": "hold_item", "actor": "fake_player", "item": "stardewcraft:largemouth_bass", "ticks": 32 },
+    { "cmd": "pause", "ticks": 20 },
+    { "cmd": "play_sound", "sound": "minecraft:block.wood.step", "volume": 1.0, "pitch": 1.0 },
+    { "cmd": "ground_item", "id": "jodi_fish_casserole_dinner_bass",
+      "item": "stardewcraft:largemouth_bass", "x": -27.5, "y": 38, "z": 35.5,
+      "scale": 0.98, "yaw": -20 },
+    { "cmd": "play_sound", "sound": "minecraft:entity.generic.splash", "volume": 0.9, "pitch": 0.85 },
+    { "cmd": "pause", "ticks": 24 },
+    { "cmd": "face_actor", "actor": "jodi", "yaw": 0 },
+    { "cmd": "speak", "npc_id": "jodi", "text": "event.jodi_fish_casserole_dinner.thanks" },
+
+    { "cmd": "fade", "mode": "out", "ticks": 30 },
+    { "cmd": "pause", "ticks": 20 },
+    { "cmd": "message", "text": "event.jodi_fish_casserole_dinner.meal_1" },
+    { "cmd": "pause", "ticks": 30 },
+    { "cmd": "message", "text": "event.jodi_fish_casserole_dinner.meal_2" },
+    { "cmd": "pause", "ticks": 40 },
+
+    { "cmd": "remove_actor", "actor": "jodi" },
+    { "cmd": "remove_actor", "actor": "sam" },
+    { "cmd": "remove_actor", "actor": "fake_player" },
+    { "cmd": "show_npc", "npc_id": "jodi" },
+    { "cmd": "show_npc", "npc_id": "sam" },
+    { "cmd": "unlock_player" },
+    { "cmd": "end" }
+  ]
+}

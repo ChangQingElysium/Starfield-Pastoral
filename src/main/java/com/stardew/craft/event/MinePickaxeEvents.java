@@ -255,9 +255,7 @@ public final class MinePickaxeEvents {
 
 				// SDV parity: 所有铱矿石（stone 765）3.5% 概率额外掉落五彩碎片
 				// 见 GameLocation.cs::breakStone case "765": `if (r.NextDouble() < 0.035)`
-				@SuppressWarnings("null")
-				String orePath = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(state.getBlock()).getPath();
-				if (orePath.contains("iridium_ore")) {
+				if (state.is(ModTags.Blocks.IRIDIUM_ORES)) {
 					if (level.getRandom().nextDouble() < 0.035) {
 						event.getDrops().add(makeDrop(level, pos,
 							new ItemStack(ModItems.PRISMATIC_SHARD.get(), 1)));
@@ -535,9 +533,7 @@ public final class MinePickaxeEvents {
 				int count = isGemOre(state) ? computeGemOreCount(level, player) : computeStardewOreCount(player, pos);
 				if (count <= 0) count = 1;
 				net.minecraft.world.level.block.Block.popResource(level, pos, new ItemStack(oreProduct, count));
-				@SuppressWarnings("null")
-				String orePath = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(state.getBlock()).getPath();
-				if (orePath.contains("iridium_ore") && level.getRandom().nextDouble() < 0.035) {
+				if (state.is(ModTags.Blocks.IRIDIUM_ORES) && level.getRandom().nextDouble() < 0.035) {
 					net.minecraft.world.level.block.Block.popResource(level, pos,
 						new ItemStack(ModItems.PRISMATIC_SHARD.get(), 1));
 				}
@@ -661,62 +657,18 @@ public final class MinePickaxeEvents {
 
 	@SuppressWarnings("null")
 	private static boolean isStardewMineBlock(BlockState state) {
-		if (state.is(ModTags.Blocks.STARDEW_STONES) || state.is(ModTags.Blocks.STARDEW_ORES)) {
-			return true;
-		}
-		if (isMineralBlock(state)) {
-			return true;
-		}
-		@SuppressWarnings("null")
-		var key = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(state.getBlock());
-		if (key == null || !StardewCraft.MODID.equals(key.getNamespace())) {
-			return false;
-		}
-		String path = key.getPath();
-		return path.endsWith("_ore")
-				|| path.equals("earth_shale")
-				|| path.equals("frost_gneiss")
-				|| path.equals("lava_basalt")
-				|| path.equals("dark_earth_shale")
-				|| path.equals("dark_frost_gneiss")
-				|| path.equals("dark_lava_basalt")
-				|| path.equals("banded_marble")
-				|| path.equals("limestone")
-				|| path.equals("mossy_sandstone")
-				|| path.equals("cracked_slate")
-				|| path.equals("scoria")
-				|| path.equals("salt_rock")
-				|| path.equals("calico_egg_stone");
+		return state.is(ModTags.Blocks.STARDEW_STONES)
+				|| state.is(ModTags.Blocks.STARDEW_ORES)
+				|| state.is(ModTags.Blocks.STARDEW_MINERALS);
 	}
 
 	@SuppressWarnings("null")
 	private static boolean isStardewOre(BlockState state) {
-		if (state.is(ModTags.Blocks.STARDEW_ORES)) {
-			return true;
-		}
-		@SuppressWarnings("null")
-		var key = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(state.getBlock());
-		return key != null && StardewCraft.MODID.equals(key.getNamespace()) && key.getPath().endsWith("_ore");
+		return state.is(ModTags.Blocks.STARDEW_ORES);
 	}
 
 	private static boolean isMineralBlock(BlockState state) {
-		@SuppressWarnings("null")
-		var key = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(state.getBlock());
-		if (key == null || !StardewCraft.MODID.equals(key.getNamespace())) {
-			return false;
-		}
-		String path = key.getPath();
-		return path.equals("quartz")
-				|| path.equals("earth_crystal")
-				|| path.equals("frozen_tear")
-				|| path.equals("fire_quartz")
-				|| path.equals("amethyst_ore")
-				|| path.equals("aquamarine_ore")
-				|| path.equals("diamond_ore")
-				|| path.equals("emerald_ore")
-				|| path.equals("jade_ore")
-				|| path.equals("ruby_ore")
-				|| path.equals("topaz_ore");
+		return state.is(ModTags.Blocks.STARDEW_MINERALS);
 	}
 
 	private static float computeDigSpeed(Player player, ItemStack tool, float baseToolSpeed) {

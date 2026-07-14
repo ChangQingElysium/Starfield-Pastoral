@@ -1,0 +1,20 @@
+{
+  "mechanic_id": "earth",
+  "min_floor": 13,
+  "max_floor": 13,
+  "priority": 100,
+  "main_stone": "minecraft:stone",
+  "dark_stone": "minecraft:deepslate",
+  "decor_a": ["minecraft:moss_block"],
+  "decor_b": ["minecraft:oak_log"],
+  "decorative_stones": ["minecraft:mossy_cobblestone"],
+  "vanilla_accents": ["minecraft:dirt"],
+  "cave_decorations": ["minecraft:oak_leaves"],
+  "ores": {
+    "copper": "minecraft:copper_ore",
+    "iron": "minecraft:iron_ore",
+    "gold": "minecraft:gold_ore",
+    "iridium": "minecraft:diamond_ore",
+    "coal": "minecraft:coal_ore"
+  }
+}

@@ -111,6 +111,10 @@ public final class MorrisService {
                     yield true;
                 }
                 com.stardew.craft.mail.MailService.addMailFlagForTomorrow(player, CCStoryFlags.JOJA_MEMBER);
+                com.stardew.craft.quest.QuestManager quests = com.stardew.craft.quest.QuestManager.of(player);
+                if (quests != null) {
+                    quests.removeQuest("26", player);
+                }
                 speak(player, I18N_SIGNED_UP);
                 yield true;
             }

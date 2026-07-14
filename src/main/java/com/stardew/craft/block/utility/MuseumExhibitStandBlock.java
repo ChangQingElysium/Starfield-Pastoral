@@ -1,9 +1,10 @@
 package com.stardew.craft.block.utility;
 
 import com.stardew.craft.blockentity.MuseumExhibitStandBlockEntity;
-import com.stardew.craft.item.IStardewItem;
 import com.stardew.craft.museum.MuseumDonationData;
+import com.stardew.craft.museum.MuseumDonationItems;
 import com.stardew.craft.museum.MuseumExhibitStandManager;
+import com.stardew.craft.museum.MuseumQuestService;
 import com.stardew.craft.network.MuseumDonationSyncPacket;
 import com.stardew.craft.network.MuseumStandSyncPacket;
 import net.minecraft.core.BlockPos;
@@ -168,12 +169,7 @@ public class MuseumExhibitStandBlock extends MapUtilityStaticBlock implements En
             return net.minecraft.world.ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
 
-        if (!(stack.getItem() instanceof IStardewItem stardewItem)) {
-            return net.minecraft.world.ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
-        }
-
-        String typeKey = stardewItem.getItemTypeKey();
-        if (!"stardewcraft.type.mineral".equals(typeKey) && !"stardewcraft.type.artifact".equals(typeKey)) {
+        if (!MuseumDonationItems.isDonatable(stack)) {
             return net.minecraft.world.ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
 
@@ -193,6 +189,8 @@ public class MuseumExhibitStandBlock extends MapUtilityStaticBlock implements En
         if (!player.getAbilities().instabuild) {
             stack.shrink(1);
         }
+
+        MuseumQuestService.onDonationPlaced(serverPlayer);
 
         syncDonation(serverLevel, data, serverPlayer);
         syncStands(serverLevel, data, serverPlayer);

@@ -174,9 +174,8 @@ public class AnimalDebugCommand {
             capacity
         );
 
-        context.getSource().sendSuccess(() -> Component.literal(
-            "建筑已创建: id=" + id + ", type=" + type.id() + ", name=" + name + ", capacity=" + capacity
-        ), true);
+        context.getSource().sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.animal.building_created", id, type.id(), name, capacity), true);
         return 1;
     }
 
@@ -187,7 +186,8 @@ public class AnimalDebugCommand {
         ServerPlayer player = context.getSource().getPlayerOrException();
         AnimalBuildingType type = AnimalBuildingType.SILO_TIER_1;
         String id = AnimalWorldData.get(level).createBuilding(level, type, player.getUUID(), player.blockPosition(), range, name, type.defaultCapacity());
-        context.getSource().sendSuccess(() -> Component.literal("筒仓已创建: id=" + id + ", hayCap=" + type.hayCapacity()), true);
+        context.getSource().sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.animal.silo_created", id, type.hayCapacity()), true);
         return 1;
     }
 
@@ -199,7 +199,8 @@ public class AnimalDebugCommand {
         ServerPlayer player = context.getSource().getPlayerOrException();
         AnimalBuildingType type = AnimalBuildingType.of("coop", tier);
         String id = AnimalWorldData.get(level).createBuilding(level, type, player.getUUID(), player.blockPosition(), range, name, type.defaultCapacity());
-        context.getSource().sendSuccess(() -> Component.literal("鸡舍已创建: id=" + id + ", cap=" + type.defaultCapacity()), true);
+        context.getSource().sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.animal.coop_created", id, type.defaultCapacity()), true);
         return 1;
     }
 
@@ -211,7 +212,8 @@ public class AnimalDebugCommand {
         ServerPlayer player = context.getSource().getPlayerOrException();
         AnimalBuildingType type = AnimalBuildingType.of("barn", tier);
         String id = AnimalWorldData.get(level).createBuilding(level, type, player.getUUID(), player.blockPosition(), range, name, type.defaultCapacity());
-        context.getSource().sendSuccess(() -> Component.literal("畜棚已创建: id=" + id + ", cap=" + type.defaultCapacity()), true);
+        context.getSource().sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.animal.barn_created", id, type.defaultCapacity()), true);
         return 1;
     }
 
@@ -221,7 +223,8 @@ public class AnimalDebugCommand {
         String name = StringArgumentType.getString(context, "name");
 
         AnimalWorldData.get(level).renameBuilding(buildingId, name);
-        context.getSource().sendSuccess(() -> Component.literal("建筑重命名成功: " + buildingId + " -> " + name), true);
+        context.getSource().sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.animal.building_renamed", buildingId, name), true);
         return 1;
     }
 
@@ -229,7 +232,8 @@ public class AnimalDebugCommand {
         ServerLevel level = requireStardewLevel(context);
         String buildingId = StringArgumentType.getString(context, "buildingId");
         AnimalWorldData.get(level).removeBuilding(buildingId);
-        context.getSource().sendSuccess(() -> Component.literal("建筑已移除: " + buildingId), true);
+        context.getSource().sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.animal.building_removed", buildingId), true);
         return 1;
     }
 
@@ -242,7 +246,8 @@ public class AnimalDebugCommand {
         int hayStored = parseOwnerHay(data, record.ownerPlayerUuid());
         int hayCap = data.getHayCapacity(java.util.UUID.fromString(record.ownerPlayerUuid()));
 
-        context.getSource().sendSuccess(() -> Component.literal("建筑信息: " + record.buildingId()), false);
+        context.getSource().sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.animal.building_info", record.buildingId()), false);
         context.getSource().sendSuccess(() -> Component.literal(
             "type=" + record.buildingType().id()
                 + " | name=" + record.customName()
@@ -283,7 +288,8 @@ public class AnimalDebugCommand {
             ), false);
         }
         if (count == 0) {
-            context.getSource().sendSuccess(() -> Component.literal("未找到 " + family + " 建筑记录"), false);
+            context.getSource().sendSuccess(() -> Component.translatable(
+                "stardewcraft.command.animal.no_buildings_for_family", family), false);
         }
         return 1;
     }
@@ -294,7 +300,8 @@ public class AnimalDebugCommand {
         var record = AnimalWorldData.get(level).getBuilding(buildingId)
             .orElseThrow(() -> new IllegalArgumentException("Building not found: " + buildingId));
         int changed = AnimalDoorStateService.setBoundaryDoorsOpen(level, record, open);
-        context.getSource().sendSuccess(() -> Component.literal("物理门状态已更新: " + buildingId + " -> " + (open ? "open" : "closed") + " (changed=" + changed + ")"), true);
+        context.getSource().sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.animal.door_updated", buildingId, open ? "open" : "closed", changed), true);
         return 1;
     }
 
@@ -305,7 +312,8 @@ public class AnimalDebugCommand {
             .orElseThrow(() -> new IllegalArgumentException("Building not found: " + buildingId));
         boolean next = !AnimalDoorStateService.isAnyBoundaryDoorOpen(level, record);
         int changed = AnimalDoorStateService.setBoundaryDoorsOpen(level, record, next);
-        context.getSource().sendSuccess(() -> Component.literal("物理门状态已切换: " + buildingId + " -> " + (next ? "open" : "closed") + " (changed=" + changed + ")"), true);
+        context.getSource().sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.animal.door_toggled", buildingId, next ? "open" : "closed", changed), true);
         return 1;
     }
 
@@ -313,7 +321,7 @@ public class AnimalDebugCommand {
         ServerLevel level = requireStardewLevel(context);
         var buildings = AnimalWorldData.get(level).getBuildings();
         if (buildings.isEmpty()) {
-            context.getSource().sendSuccess(() -> Component.literal("暂无建筑记录"), false);
+            context.getSource().sendSuccess(() -> Component.translatable("stardewcraft.command.animal.no_buildings"), false);
             return 1;
         }
 
@@ -338,9 +346,8 @@ public class AnimalDebugCommand {
         int hay = data.getHayAmount(player.getUUID());
         int cap = data.getHayCapacity(player.getUUID());
         boolean hasSilo = data.hasAnySilo(player.getUUID());
-        context.getSource().sendSuccess(() -> Component.literal(
-            "干草状态: hay=" + hay + "/" + cap + " | silo=" + (hasSilo ? "yes" : "no")
-        ), false);
+        context.getSource().sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.animal.hay_status", hay, cap, hasSilo), false);
         return 1;
     }
 
@@ -351,15 +358,14 @@ public class AnimalDebugCommand {
         int count = IntegerArgumentType.getInteger(context, "count");
         AnimalWorldData data = AnimalWorldData.get(level);
         if (!data.hasAnySilo(player.getUUID())) {
-            context.getSource().sendFailure(Component.literal("你还没有筒仓，无法存放干草。"));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.animal.silo_required"));
             return 0;
         }
         int stored = data.storeHay(player.getUUID(), count);
         int left = count - stored;
-        context.getSource().sendSuccess(() -> Component.literal(
-            "存草完成: stored=" + stored + ", left=" + left + ", now="
-                + data.getHayAmount(player.getUUID()) + "/" + data.getHayCapacity(player.getUUID())
-        ), true);
+        context.getSource().sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.animal.hay_stored", stored, left,
+            data.getHayAmount(player.getUUID()), data.getHayCapacity(player.getUUID())), true);
         return 1;
     }
 
@@ -369,10 +375,9 @@ public class AnimalDebugCommand {
         int count = IntegerArgumentType.getInteger(context, "count");
         AnimalWorldData data = AnimalWorldData.get(level);
         int removed = data.takeHay(player.getUUID(), count);
-        context.getSource().sendSuccess(() -> Component.literal(
-            "取草完成: removed=" + removed + ", now="
-                + data.getHayAmount(player.getUUID()) + "/" + data.getHayCapacity(player.getUUID())
-        ), true);
+        context.getSource().sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.animal.hay_taken", removed,
+            data.getHayAmount(player.getUUID()), data.getHayCapacity(player.getUUID())), true);
         return 1;
     }
 
@@ -383,14 +388,10 @@ public class AnimalDebugCommand {
         String name = StringArgumentType.getString(context, "name");
 
         var record = AnimalAcquireService.purchase(level, animalType, name, buildingId);
-        context.getSource().sendSuccess(() -> Component.literal(
-            "购买成功: animalId=" + record.animalId()
-                + ", type=" + record.animalTypeId()
-                + ", name=" + record.customName()
-                + ", stage=" + (record.isBaby() ? "baby" : "adult")
-                + ", age=" + record.ageDays() + "/" + record.daysToMature()
-                + ", building=" + record.buildingId()
-        ), true);
+        context.getSource().sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.animal.purchase_success",
+            record.animalId(), record.animalTypeId(), record.customName(),
+            record.isBaby() ? "baby" : "adult", record.ageDays(), record.daysToMature(), record.buildingId()), true);
         return 1;
     }
 
@@ -405,7 +406,7 @@ public class AnimalDebugCommand {
         ServerLevel level = requireStardewLevel(context);
         var animals = AnimalWorldData.get(level).getAnimals();
         if (animals.isEmpty()) {
-            context.getSource().sendSuccess(() -> Component.literal("暂无动物记录"), false);
+            context.getSource().sendSuccess(() -> Component.translatable("stardewcraft.command.animal.no_animals"), false);
             return 1;
         }
 
@@ -426,16 +427,16 @@ public class AnimalDebugCommand {
     private static int syncAnimals(CommandContext<CommandSourceStack> context) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
         ServerLevel level = requireStardewLevel(context);
         AnimalEntitySyncService.SyncResult result = AnimalEntitySyncService.syncAll(level);
-        context.getSource().sendSuccess(() -> Component.literal(
-            "动物同步完成: updated=" + result.updated() + ", spawned=" + result.spawned() + ", orphansRemoved=" + result.orphansRemoved()
-        ), true);
+        context.getSource().sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.animal.sync_complete",
+            result.updated(), result.spawned(), result.orphansRemoved()), true);
         return 1;
     }
 
     private static ServerLevel requireStardewLevel(CommandContext<CommandSourceStack> context) {
         ServerLevel level = context.getSource().getLevel();
         if (!ModDimensions.STARDEW_VALLEY.equals(level.dimension())) {
-            throw new IllegalStateException("此命令只能在星露谷维度使用");
+            throw new IllegalStateException("Animal debug command requires the Stardew Valley dimension");
         }
         return level;
     }

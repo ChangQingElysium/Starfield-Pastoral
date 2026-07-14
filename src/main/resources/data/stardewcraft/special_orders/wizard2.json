@@ -1,0 +1,37 @@
+{
+  "legacy_id": "Wizard2",
+  "requester": "Wizard",
+  "duration": "week",
+  "repeatable": false,
+  "required_tags": [],
+  "title": "stardewcraft.special_orders.Wizard2.name",
+  "text": "stardewcraft.special_orders.Wizard2.text",
+  "objectives": [
+    {
+      "type": "slay",
+      "text": "stardewcraft.special_orders.Wizard2_Objective_0_Text",
+      "required_count": 1,
+      "target": "Prismatic Slime"
+    },
+    {
+      "type": "deliver",
+      "text": "stardewcraft.special_orders.Wizard2_Objective_1_Text",
+      "required_count": 1,
+      "accepted_tags": "item_prismatic_jelly",
+      "target": "Wizard",
+      "message": "stardewcraft.special_orders.Wizard2_Objective_1_Message"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "money",
+      "amount": 5000
+    },
+    {
+      "type": "mail",
+      "mail": "WizardReward"
+    }
+  ],
+  "item_to_remove_on_end": "stardewcraft:prismatic_jelly",
+  "mail_to_remove_on_end": "prismaticJellyDrop"
+}

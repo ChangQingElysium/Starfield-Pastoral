@@ -1,0 +1,13 @@
+{
+  "type": "passive",
+  "display_name": "Apple Day",
+  "season": 2,
+  "start_day": 5,
+  "end_day": 5,
+  "start_time": 900,
+  "end_time": 1400,
+  "start_message_key": "example_stardew_addon.festival.apple_day.started",
+  "world": {
+    "location": "Town"
+  }
+}

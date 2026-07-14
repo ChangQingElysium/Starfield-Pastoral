@@ -6,6 +6,8 @@ import com.stardew.craft.item.equipment.CombinedRingItem;
 import com.stardew.craft.item.equipment.StardewRingItem;
 import com.stardew.craft.player.PlayerDataManager;
 import com.stardew.craft.player.PlayerStardewData;
+import com.stardew.craft.api.v1.equipment.StardewEquipmentData;
+import com.stardew.craft.api.v1.equipment.StardewEquipmentDataApi;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -51,8 +53,11 @@ public final class EquipmentResolver {
         ResourceLocation rl = ResourceLocation.tryParse(itemId);
         if (rl == null) return;
         Item item = BuiltInRegistries.ITEM.get(rl);
+        ItemStack stack = new ItemStack(item);
         if (item instanceof StardewRingItem ring) {
             builder.merge(ring.getEquipmentStats());
+        } else {
+            mergeApiData(stack, builder);
         }
     }
 
@@ -63,6 +68,38 @@ public final class EquipmentResolver {
         Item item = BuiltInRegistries.ITEM.get(rl);
         if (item instanceof StardewBootsItem boots) {
             builder.merge(boots.getEquipmentStats());
+        } else {
+            mergeApiData(new ItemStack(item), builder);
         }
+    }
+
+    private static void mergeApiData(ItemStack stack, EquipmentStats.Builder builder) {
+        StardewEquipmentData data = StardewEquipmentDataApi.get(stack);
+        if (data == null) return;
+        EquipmentStats.Builder resolved = EquipmentStats.builder()
+                .defense(data.defense())
+                .immunity(data.immunity())
+                .attack(data.attack())
+                .critChance(data.critChance())
+                .critPower(data.critPower())
+                .magneticRadius(data.magneticRadius())
+                .knockbackBonus(data.knockbackBonus())
+                .luck(data.luck())
+                .lightLevel(data.lightLevel());
+        for (ResourceLocation effect : data.effects()) {
+            if (!effect.getNamespace().equals("stardewcraft")) continue;
+            switch (effect.getPath()) {
+                case "yoba_protection" -> resolved.yobaProtection(true);
+                case "thorns" -> resolved.thorns(true);
+                case "slime_charmer" -> resolved.slimeCharmer(true);
+                case "sturdy" -> resolved.sturdy(true);
+                case "burglar" -> resolved.burglar(true);
+                case "protection" -> resolved.protection(true);
+                case "phoenix" -> resolved.phoenix(true);
+                default -> {
+                }
+            }
+        }
+        builder.merge(resolved.build());
     }
 }

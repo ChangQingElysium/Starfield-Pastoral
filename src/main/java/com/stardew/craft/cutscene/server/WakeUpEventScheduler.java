@@ -123,7 +123,7 @@ public final class WakeUpEventScheduler {
                         spawn.getY(),
                         spawn.getZ() + 0.5));
 
-        PacketDistributor.sendToPlayer(player, new TriggerEventPayload(nextId));
+        ServerCutsceneTracker.startEvent(player, nextId);
 
         LOGGER.info("[WAKE_UP] Dispatched '{}' to {} at anchor ({}, {}, {})",
                 nextId, player.getName().getString(),

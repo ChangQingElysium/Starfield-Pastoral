@@ -769,7 +769,7 @@ public final class EggFestivalService {
         updateEggHuntDisplays(player.serverLevel());
         if (remaining == 0) {
             for (ServerPlayer participant : onlineParticipants(player.serverLevel())) {
-                participant.displayClientMessage(Component.literal("所有彩蛋都已经被收集完了。"), false);
+                participant.displayClientMessage(Component.translatable("stardewcraft.festival.egg_hunt.all_collected"), false);
             }
         }
         return true;
@@ -1061,7 +1061,8 @@ public final class EggFestivalService {
 
     private static void startEggHuntScoreboard(ServerLevel level) {
         runServerCommand(level, "scoreboard objectives remove " + EGG_HUNT_SCOREBOARD_OBJECTIVE);
-        runServerCommand(level, "scoreboard objectives add " + EGG_HUNT_SCOREBOARD_OBJECTIVE + " dummy {\"text\":\"彩蛋\"}");
+        runServerCommand(level, "scoreboard objectives add " + EGG_HUNT_SCOREBOARD_OBJECTIVE
+                + " dummy {\"translate\":\"stardewcraft.festival.egg_hunt.scoreboard\"}");
         runServerCommand(level, "scoreboard objectives setdisplay sidebar " + EGG_HUNT_SCOREBOARD_OBJECTIVE);
         updateEggHuntScoreboard(level);
     }

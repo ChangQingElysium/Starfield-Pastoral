@@ -1,0 +1,26 @@
+{
+  "legacy_id": "DesertFestival_Evelyn",
+  "owner_npc": "evelyn",
+  "owner_dialogue": "stardewcraft.festival.desertfestival.dialogue.vendor",
+  "entries": [
+    {
+      "item": "stardewcraft:cookie",
+      "stock": 5,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 20
+    },
+    {
+      "item": "stardewcraft:mixed_seeds",
+      "stock": 25,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 4
+    },
+    {
+      "item": "stardewcraft:daffodil",
+      "stock": 5,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 15
+    }
+  ],
+  "accepted_sell_types": []
+}

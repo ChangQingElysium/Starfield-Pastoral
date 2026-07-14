@@ -10,7 +10,7 @@
   "preconditions": [
     { "type": "not_saw_event", "id": "willy_fishing_rod" },
     { "type": "time", "min": 600, "max": 1710 },
-    { "type": "mail", "id": "spring_3_1" }
+    { "type": "mail", "id": "spring_2_1" }
   ],
   "commands": [
     { "cmd": "comment", "text": "=== SDV Event 739330: Willy gives you the fishing rod ===" },
@@ -89,6 +89,7 @@
     { "cmd": "play_sound", "sound": "stardewcraft:jingle1" },
     { "cmd": "add_item", "item": "stardewcraft:fishing_rod", "count": 1 },
     { "cmd": "hold_item", "actor": "fake_player", "item": "stardewcraft:fishing_rod", "ticks": 60, "offset_y": 0.2 },
+    { "cmd": "remove_quest", "quest_id": "13" },
     { "cmd": "set_flag", "flag": "NOQUEST_13" },
 
     { "cmd": "comment", "text": "--- Back to W3: Willy's parting words ---" },

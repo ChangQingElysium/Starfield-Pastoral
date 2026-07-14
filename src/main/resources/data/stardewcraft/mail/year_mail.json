@@ -1,28 +1,28 @@
 [
   {
     "id": "spring_1_2",
-    "text": "亲爱的@：\n\n新的一年开始了！\n\n你在星露谷已经整整一年了。真是了不起的一年呢！\n\n期待今年你的农场能更上一层楼！\n\n——镇长刘易斯",
+    "text": "stardewcraft.mail.spring_1_2",
     "background": 0
   },
   {
     "id": "summer_1_2",
-    "text": "@：\n\n又一个夏天来了。\n\n有没有考虑种一些高价值的长期作物？星星果虽然贵，但利润也很可观。\n\n——皮埃尔",
+    "text": "stardewcraft.mail.summer_1_2",
     "background": 0
   },
   {
     "id": "fall_1_2",
-    "text": "@你好：\n\n第二年的秋天了。你应该已经是个经验丰富的农夫了！\n\n试试种些远古种子吧，那可是传说中的作物。\n\n——巫师",
+    "text": "stardewcraft.mail.fall_1_2",
     "background": 2,
     "textColor": "cyan"
   },
   {
     "id": "winter_1_2",
-    "text": "致 @：\n\n第二年的冬天了。\n\n如果你还没有温室的话，完成社区中心的收集就可以修复它哦。\n\n温室让你全年都能种庄稼！\n\n——镇长刘易斯",
+    "text": "stardewcraft.mail.winter_1_2",
     "background": 0
   },
   {
     "id": "spring_1_3",
-    "text": "致 @：\n\n第三年春天了！\n\n你爷爷的精魂会在今年春天来查看你的农场。\n\n好好准备吧，让他为你的成就感到骄傲！\n\n——一位老朋友",
+    "text": "stardewcraft.mail.spring_1_3",
     "background": 0
   }
 ]

@@ -89,8 +89,8 @@ public class WheatCropBlock extends StardewCropBlock {
     }
 
     @Override
-    public String getCropDisplayName() {
-        return "小麦";
+    public String getCropDisplayNameKey() {
+        return "item.stardewcraft.wheat";
     }
 
     /**

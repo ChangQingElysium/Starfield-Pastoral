@@ -109,9 +109,7 @@ public class ElevatorBlock extends Block {
     protected InteractionResult useWithoutItem(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos,
                                                @SuppressWarnings("null")    Player player, @SuppressWarnings("null")    BlockHitResult hitResult) {
         if (level.dimension() != com.stardew.craft.core.ModMiningDimensions.STARDEW_MINING) {
-            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
-                "电梯只能在矿井维度使用！"
-            ));
+            player.sendSystemMessage(net.minecraft.network.chat.Component.translatable("stardewcraft.elevator.mine_only"));
             return InteractionResult.FAIL;
         }
 

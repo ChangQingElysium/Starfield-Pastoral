@@ -1,6 +1,6 @@
 package com.stardew.craft.item.catalog;
 
-import com.stardew.craft.item.IStardewItem;
+import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.item.SpecificBaitItem;
 import com.stardew.craft.item.StardewQualityItem;
@@ -52,12 +52,9 @@ public final class StardewItemDisplayStacks {
     public static List<ItemStack> preserveVariants() {
         List<ItemStack> stacks = new ArrayList<>();
         for (Item item : StardewItemCatalog.visibleItems()) {
-            if (!(item instanceof IStardewItem stardewItem)) {
-                continue;
-            }
-
             ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
-            String typeKey = stardewItem.getItemTypeKey();
+            String typeKey = StardewItemDataApi.getTypeKey(new ItemStack(item));
+            if (typeKey.isBlank()) continue;
             if (isPreserveCropIngredient(typeKey)) {
                 PreserveType preserveType = PreservesCropTypeHelper.getCropPreserveType(id);
                 if (preserveType != null) {
@@ -136,7 +133,8 @@ public final class StardewItemDisplayStacks {
     }
 
     private static boolean usesQualityDisplay(Item item) {
-        if (!(item instanceof IStardewItem stardewItem)) {
+        String typeKey = StardewItemDataApi.getTypeKey(new ItemStack(item));
+        if (typeKey.isBlank()) {
             return false;
         }
         if (item instanceof StardewQualityItem qualityItem && qualityItem.supportsQuality()) {
@@ -148,8 +146,6 @@ public final class StardewItemDisplayStacks {
         if (item instanceof SmokedFishItem) {
             return true;
         }
-
-        String typeKey = stardewItem.getItemTypeKey();
         return "stardewcraft.type.crop".equals(typeKey)
                 || "stardewcraft.type.crop_seed".equals(typeKey)
                 || "stardewcraft.type.fruit".equals(typeKey)

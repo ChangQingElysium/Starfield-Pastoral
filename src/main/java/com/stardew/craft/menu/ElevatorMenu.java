@@ -101,7 +101,7 @@ public class ElevatorMenu extends AbstractContainerMenu {
         @SuppressWarnings("null")
         ServerLevel mineLevel = serverPlayer.server.getLevel(ModMiningDimensions.STARDEW_MINING);
         if (mineLevel == null) {
-            StardewCraft.LOGGER.error("矿井维度未加载！");
+            StardewCraft.LOGGER.error("Mining dimension is not loaded");
             return;
         }
 

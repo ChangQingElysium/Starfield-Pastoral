@@ -17,7 +17,7 @@ import org.slf4j.Logger;
  * Server → Client: tells the client to start playing an event.
  * Used by debug commands and time_check triggers.
  */
-public record TriggerEventPayload(String eventId) implements CustomPacketPayload {
+public record TriggerEventPayload(String eventId, long sessionId) implements CustomPacketPayload {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -26,6 +26,7 @@ public record TriggerEventPayload(String eventId) implements CustomPacketPayload
 
     public static final StreamCodec<ByteBuf, TriggerEventPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.STRING_UTF8, TriggerEventPayload::eventId,
+            ByteBufCodecs.VAR_LONG, TriggerEventPayload::sessionId,
             TriggerEventPayload::new);
 
     @SuppressWarnings("null")
@@ -33,7 +34,7 @@ public record TriggerEventPayload(String eventId) implements CustomPacketPayload
         context.enqueueWork(() -> {
             EventData data = EventRegistry.getById(payload.eventId);
             if (data != null) {
-                EventPlayer.get().start(data);
+                EventPlayer.get().start(data, payload.sessionId);
             } else {
                 LOGGER.warn("Client EventRegistry has no event '{}' — was the registry synced?", payload.eventId);
             }

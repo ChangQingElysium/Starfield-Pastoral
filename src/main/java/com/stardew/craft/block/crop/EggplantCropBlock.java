@@ -91,8 +91,8 @@ public class EggplantCropBlock extends StardewCropBlock {
     }
 
     @Override
-    public String getCropDisplayName() {
-        return "茄子";
+    public String getCropDisplayNameKey() {
+        return "item.stardewcraft.eggplant";
     }
 
     @Override

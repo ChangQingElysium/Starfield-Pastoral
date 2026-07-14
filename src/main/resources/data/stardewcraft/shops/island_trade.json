@@ -1,0 +1,16 @@
+{
+  "legacy_id": "IslandTrade",
+  "entries": [
+    {
+      "item": "stardewcraft:banana_sapling",
+      "trade_item": "stardewcraft:dragon_tooth",
+      "trade_item_count": 5
+    },
+    {
+      "item": "stardewcraft:mango_sapling",
+      "trade_item": "stardewcraft:mussel",
+      "trade_item_count": 75
+    }
+  ],
+  "accepted_sell_types": []
+}

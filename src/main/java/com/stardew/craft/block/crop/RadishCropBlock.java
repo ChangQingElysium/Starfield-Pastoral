@@ -75,7 +75,7 @@ public class RadishCropBlock extends StardewCropBlock {
     }
 
     @Override
-    public String getCropDisplayName() {
-        return "萝卜";
+    public String getCropDisplayNameKey() {
+        return "item.stardewcraft.radish";
     }
 }

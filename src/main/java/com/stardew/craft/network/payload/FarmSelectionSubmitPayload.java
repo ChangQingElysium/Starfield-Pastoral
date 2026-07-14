@@ -79,7 +79,7 @@ public record FarmSelectionSubmitPayload(
             // 验证名称
             String name = payload.farmName;
             if (name == null || name.isBlank()) {
-                name = player.getName().getString() + "的农场";
+                name = player.getName().getString();
             }
             if (name.length() > 48) {
                 name = name.substring(0, 48);

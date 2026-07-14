@@ -73,11 +73,14 @@ public class StardewCraft {
     // The constructor for the mod class is the first code that is run when your mod is loaded.
     // FML will recognize some parameter types like IEventBus or ModContainer and pass them in automatically.
     public StardewCraft(IEventBus modEventBus, ModContainer modContainer) {
+        com.stardew.craft.api.v1.internal.BuiltinApiTypes.bootstrap();
+
         // Register the commonSetup method for modloading
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(PacketHandler::register);
         modEventBus.addListener(UtilityAutomationCapabilities::registerCapabilities);
         modEventBus.addListener(ModEntities::onEntityAttributeCreation);
+        modEventBus.addListener(com.stardew.craft.data.StardewDataMaps::registerDataMaps);
 
         // Register the Deferred Register to the mod event bus so tabs get registered
         CREATIVE_MODE_TABS.register(modEventBus);

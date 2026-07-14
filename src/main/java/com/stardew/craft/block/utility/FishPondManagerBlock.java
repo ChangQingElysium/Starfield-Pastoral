@@ -105,7 +105,7 @@ public class FishPondManagerBlock extends Block {
             worldData.findPondByManager(level.dimension().location().toString(), player.getUUID(), managerPos);
 
         if (!validation.ok()) {
-            player.displayClientMessage(Component.literal(validation.message()), true);
+            player.displayClientMessage(validation.message(), true);
             return false;
         }
 
@@ -127,14 +127,9 @@ public class FishPondManagerBlock extends Block {
         FishPondWaterService.rebindPondWater(level, existingOwn.orElse(null), validation.scan().waterCells());
         FishPondColorSyncService.broadcastSnapshot(level);
 
-        player.displayClientMessage(
-            Component.literal(
-                existingOwn.isPresent()
-                    ? "鱼塘结构已更新（ID: " + pondId + "）"
-                    : "鱼塘已创建（ID: " + pondId + "）"
-            ),
-            true
-        );
+        player.displayClientMessage(Component.translatable(existingOwn.isPresent()
+                ? "stardewcraft.manager.fish_pond.updated"
+                : "stardewcraft.manager.fish_pond.created", pondId), true);
         return true;
     }
 

@@ -76,7 +76,7 @@ public class FarmJoinCommand {
     private static int handleResponse(CommandContext<CommandSourceStack> ctx, boolean accept) {
         CommandSourceStack source = ctx.getSource();
         if (!(source.getEntity() instanceof ServerPlayer player)) {
-            source.sendFailure(Component.literal("This command can only be used by players"));
+            source.sendFailure(Component.translatable("stardewcraft.command.player_only"));
             return 0;
         }
 
@@ -107,7 +107,7 @@ public class FarmJoinCommand {
         FarmJoinManager.syncPendingState(player, FarmJoinManager.hasPending(player.getUUID()));
         net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
                 new com.stardew.craft.network.payload.OpenFarmSelectionPayload());
-        player.sendSystemMessage(Component.literal("§a[DEBUG] 已打开农场选择界面（左栏底部有\"加入别人的农场\"按钮）"));
+        player.sendSystemMessage(Component.translatable("stardewcraft.command.farm_join.selection_opened"));
         return 1;
     }
 
@@ -118,15 +118,15 @@ public class FarmJoinCommand {
         // 构建模拟农场列表
         List<FarmListSyncPayload.FarmEntry> mockFarms = new ArrayList<>();
         mockFarms.add(new FarmListSyncPayload.FarmEntry(
-                UUID.randomUUID(), "小明", "阳光牧场", "standard", 0, false));
+                UUID.randomUUID(), "Robin", "Sunrise Farm", "standard", 0, false));
         mockFarms.add(new FarmListSyncPayload.FarmEntry(
-                UUID.randomUUID(), "小红", "星露花园", "riverland", 0, false));
+                UUID.randomUUID(), "Ruby", "Starlight Garden", "riverland", 0, false));
         mockFarms.add(new FarmListSyncPayload.FarmEntry(
-                UUID.randomUUID(), "Alex", "丰收庄园", "forest", 0, false));
+                UUID.randomUUID(), "Alex", "Harvest Manor", "forest", 0, false));
         mockFarms.add(new FarmListSyncPayload.FarmEntry(
-                UUID.randomUUID(), "月光猎人", "碧波农场", "hilltop", 0, false));
+                UUID.randomUUID(), "MoonHunter", "Bluewater Farm", "hilltop", 0, false));
         mockFarms.add(new FarmListSyncPayload.FarmEntry(
-                UUID.randomUUID(), "StarFarmer", "幸运小院", "wilderness", 0, false));
+                UUID.randomUUID(), "StarFarmer", "Lucky Homestead", "wilderness", 0, false));
 
         // 也加入真实已有的农场（如果有的话）
         FarmInstanceRegistry registry = FarmInstanceRegistry.get();
@@ -141,7 +141,8 @@ public class FarmJoinCommand {
 
         net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
                 new FarmListSyncPayload(mockFarms, "farm_join"));
-        player.sendSystemMessage(Component.literal("§a[DEBUG] 已打开加入农场列表（含 " + mockFarms.size() + " 个模拟农场）"));
+        player.sendSystemMessage(Component.translatable(
+                "stardewcraft.command.farm_join.list_opened", mockFarms.size()));
         return 1;
     }
 
@@ -150,7 +151,7 @@ public class FarmJoinCommand {
         if (!(ctx.getSource().getEntity() instanceof ServerPlayer player)) return 0;
 
         UUID fakeRequester = UUID.randomUUID();
-        String fakeName = "测试玩家";
+        String fakeName = "TestPlayer";
 
         MutableComponent msg = Component.translatable("stardewcraft.farm.join.incoming", fakeName);
         msg.append(Component.literal(" "));
@@ -181,7 +182,7 @@ public class FarmJoinCommand {
         msg.append(rejectBtn);
 
         player.sendSystemMessage(msg);
-        player.sendSystemMessage(Component.literal("§7[DEBUG] 以上是模拟的加入请求消息，可点击按钮测试"));
+        player.sendSystemMessage(Component.translatable("stardewcraft.command.farm_join.request_sent"));
         return 1;
     }
 
@@ -192,21 +193,21 @@ public class FarmJoinCommand {
         FarmInstanceRegistry registry = FarmInstanceRegistry.get();
         FarmInstance farm = registry.getFarm(player.getUUID());
         if (farm == null) {
-            player.sendSystemMessage(Component.literal("§c[DEBUG] 你还没有农场"));
+            player.sendSystemMessage(Component.translatable("stardewcraft.command.farm_join.no_farm"));
             return 0;
         }
 
         UUID fakeUUID = UUID.randomUUID();
         if (!registry.addMember(player.getUUID(), fakeUUID)) {
             int maxFarmers = ModGameRules.getMaxFarmersPerFarm(player.server);
-            player.sendSystemMessage(Component.literal("§c[DEBUG] 添加失败（农场已满，最多" + maxFarmers + "人）"));
+            player.sendSystemMessage(Component.translatable("stardewcraft.command.farm_join.full", maxFarmers));
             return 0;
         }
 
         int maxFarmers = ModGameRules.getMaxFarmersPerFarm(player.server);
-        player.sendSystemMessage(Component.literal(
-                "§a[DEBUG] 已添加假成员 " + fakeUUID.toString().substring(0, 8) + "... 当前 "
-                        + farm.getFarmerCount() + "/" + maxFarmers + " 人"));
+        player.sendSystemMessage(Component.translatable(
+                "stardewcraft.command.farm_join.member_added",
+                fakeUUID.toString().substring(0, 8), farm.getFarmerCount(), maxFarmers));
         return 1;
     }
 
@@ -217,22 +218,26 @@ public class FarmJoinCommand {
         FarmInstanceRegistry registry = FarmInstanceRegistry.get();
         FarmInstance farm = registry.getFarmForPlayer(player.getUUID());
         if (farm == null) {
-            player.sendSystemMessage(Component.literal("§c[DEBUG] 你还没有农场"));
+            player.sendSystemMessage(Component.translatable("stardewcraft.command.farm_join.no_farm"));
             return 0;
         }
 
         int maxFarmers = ModGameRules.getMaxFarmersPerFarm(player.server);
-        player.sendSystemMessage(Component.literal("§6═══ 农场成员 (" + farm.getFarmerCount()
-                + "/" + maxFarmers + ") ═══"));
-        player.sendSystemMessage(Component.literal("§a★ 主人: " + farm.getOwnerName()
-                + " §7(" + farm.getOwnerUUID().toString().substring(0, 8) + "...)"));
+        player.sendSystemMessage(Component.translatable(
+                "stardewcraft.command.farm_join.members_header", farm.getFarmerCount(), maxFarmers));
+        player.sendSystemMessage(Component.translatable(
+                "stardewcraft.command.farm_join.owner", farm.getOwnerName(),
+                farm.getOwnerUUID().toString().substring(0, 8)));
         int i = 1;
         for (UUID member : farm.getMembers()) {
             // 尝试查找在线玩家名
             ServerPlayer mp = player.server.getPlayerList().getPlayer(member);
-            String name = mp != null ? mp.getName().getString() : "离线/假成员";
-            player.sendSystemMessage(Component.literal("§b  成员" + i + ": " + name
-                    + " §7(" + member.toString().substring(0, 8) + "...)"));
+            Component name = mp != null
+                    ? mp.getName()
+                    : Component.translatable("stardewcraft.command.farm_join.offline_member");
+            player.sendSystemMessage(Component.translatable(
+                    "stardewcraft.command.farm_join.member", i, name,
+                    member.toString().substring(0, 8)));
             i++;
         }
         return 1;
@@ -245,7 +250,7 @@ public class FarmJoinCommand {
         FarmInstanceRegistry registry = FarmInstanceRegistry.get();
         FarmInstance farm = registry.getFarm(player.getUUID());
         if (farm == null) {
-            player.sendSystemMessage(Component.literal("§c[DEBUG] 你还没有农场"));
+            player.sendSystemMessage(Component.translatable("stardewcraft.command.farm_join.no_farm"));
             return 0;
         }
 
@@ -253,7 +258,8 @@ public class FarmJoinCommand {
         for (UUID m : toRemove) {
             registry.removeMember(player.getUUID(), m);
         }
-        player.sendSystemMessage(Component.literal("§a[DEBUG] 已清除 " + toRemove.size() + " 个成员"));
+        player.sendSystemMessage(Component.translatable(
+                "stardewcraft.command.farm_join.members_cleared", toRemove.size()));
         return 1;
     }
 }

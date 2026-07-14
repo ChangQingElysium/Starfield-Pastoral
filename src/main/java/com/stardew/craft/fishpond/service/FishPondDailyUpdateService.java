@@ -156,7 +156,7 @@ public final class FishPondDailyUpdateService {
         }
 
         int count = Math.max(1, producedItem.rollStackCount(random));
-        if ("(O)812".equals(producedItem.itemId())) {
+        if ("(O)812".equals(producedItem.itemId()) || "stardewcraft:roe".equals(producedItem.itemId())) {
             count = applyRoeBonusRolls(count, random);
             return createRoeStack(pond, count);
         }

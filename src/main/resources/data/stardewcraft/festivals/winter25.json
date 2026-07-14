@@ -1,0 +1,18 @@
+{
+  "type": "active",
+  "legacy_id": "winter25",
+  "display_name": "Feast of the Winter Star",
+  "season": 3,
+  "start_day": 25,
+  "end_day": 25,
+  "start_time": 900,
+  "end_time": 1400,
+  "start_message_key": "message.stardewcraft.festival.winter_star.started",
+  "announcement_mail_id": "winter_24",
+  "world": {
+    "location": "Town",
+    "map_overlay": "Town-Christmas",
+    "shops": ["Festival_FeastOfTheWinterStar_Pierre"],
+    "mechanic_id": "winter_star_gift"
+  }
+}

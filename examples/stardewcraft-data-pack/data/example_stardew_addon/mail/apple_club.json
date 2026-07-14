@@ -1,0 +1,17 @@
+{
+  "text": "Welcome to the example apple club.",
+  "background": 0,
+  "attached_items": [
+    {"id": "minecraft:apple", "count": 1}
+  ],
+  "available_when": [
+    {"type": "stardewcraft:always", "data": {"value": true}}
+  ],
+  "on_read": [
+    {"type": "stardewcraft:add_money", "data": {"amount": 25}},
+    {
+      "type": "stardewcraft:apply_unlock_source",
+      "data": {"source": "example_stardew_addon:apple_club"}
+    }
+  ]
+}

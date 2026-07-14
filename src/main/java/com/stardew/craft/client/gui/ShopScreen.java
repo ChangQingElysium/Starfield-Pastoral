@@ -6,7 +6,7 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.gui.common.CommonGuiTextures;
 import com.stardew.craft.client.gui.common.GuiText;
 import com.stardew.craft.client.gui.overnight.StardewGuiUtil;
-import com.stardew.craft.item.IStardewItem;
+import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.network.payload.OpenShopScreenPayload;
 import com.stardew.craft.network.payload.ShopPurchasePayload;
 import com.stardew.craft.network.payload.ShopPurchaseResultPayload;
@@ -201,9 +201,9 @@ public class ShopScreen extends Screen {
             return ItemStack.isSameItemSameComponents(heldItem, stack);
         }
         if (stack.isEmpty()) return false;
-        if (!(stack.getItem() instanceof IStardewItem si)) return false;
-        if (si.getSellPrice(stack) <= 0) return false;
-        return acceptedSellTypeKeys.contains(si.getItemTypeKey()) || matchesShopSpecificSellRule(stack);
+        if (StardewItemDataApi.getSellPrice(stack) <= 0) return false;
+        return acceptedSellTypeKeys.contains(StardewItemDataApi.getTypeKey(stack))
+                || matchesShopSpecificSellRule(stack);
     }
 
     private boolean matchesShopSpecificSellRule(ItemStack stack) {
@@ -786,27 +786,30 @@ public class ShopScreen extends Screen {
         lines.add(Component.empty());
         if (item.price() > 0) {
             boolean ok = playerMoney >= item.price();
-            String currency = isFairStarTokenShop() ? " 星星币" : "g";
-            lines.add(Component.literal("购入：" + item.price() + currency)
+            Component currency = Component.translatable(isFairStarTokenShop()
+                    ? "stardewcraft.shop.currency.star_tokens"
+                    : "stardewcraft.shop.currency.gold");
+            lines.add(Component.translatable("stardewcraft.shop.tooltip.buy", item.price(), currency)
                 .withStyle(ok ? ChatFormatting.GOLD : ChatFormatting.DARK_RED));
         } else {
-            lines.add(Component.literal("免费").withStyle(ChatFormatting.GREEN));
+            lines.add(Component.translatable("stardewcraft.catalogue.free").withStyle(ChatFormatting.GREEN));
         }
         lines.add(Component.literal("[Shift]×5  [Ctrl+Shift]×25").withStyle(ChatFormatting.DARK_GRAY));
         if (item.stock() != Integer.MAX_VALUE)
-            lines.add(Component.literal("剩余库存：" + item.stock()).withStyle(ChatFormatting.AQUA));
+            lines.add(Component.translatable("stardewcraft.shop.tooltip.stock", item.stock()).withStyle(ChatFormatting.AQUA));
         if (item.requiresTrade()) {
             ItemStack trade = resolveStack(item.tradeItemId());
-            String tradeName = trade.isEmpty() ? item.tradeItemId() : trade.getHoverName().getString();
+            Object tradeName = trade.isEmpty() ? item.tradeItemId() : trade.getHoverName();
             int reqCount = Math.max(1, item.tradeItemCount());
             boolean enough = hasTradeItem(item, 1);
-            lines.add(Component.literal("交易需求：" + tradeName + " x" + reqCount)
+            lines.add(Component.translatable("stardewcraft.shop.tooltip.trade_requirement", tradeName, reqCount)
                 .withStyle(enough ? ChatFormatting.GRAY : ChatFormatting.DARK_RED));
         }
-        if (!stack.isEmpty() && stack.getItem() instanceof IStardewItem si) {
-            int sell = si.getSellPrice(stack);
+        if (!stack.isEmpty()) {
+            int sell = StardewItemDataApi.getSellPrice(stack);
             if (sell > 0)
-                lines.add(Component.literal("基础出售价：" + sell + "g").withStyle(ChatFormatting.GRAY));
+                lines.add(Component.translatable("stardewcraft.shop.tooltip.base_sell_price", sell)
+                        .withStyle(ChatFormatting.GRAY));
         }
         g.renderTooltip(font, lines, java.util.Optional.empty(), mx, my);
     }
@@ -820,9 +823,9 @@ public class ShopScreen extends Screen {
             net.minecraft.world.item.Item.TooltipContext.EMPTY, mc.player,
             net.minecraft.world.item.TooltipFlag.Default.NORMAL));
         boolean sellable = canSellAt(stack);
-        if (sellable && stack.getItem() instanceof IStardewItem si) {
-            // Show sell price (what the shop pays = IStardewItem.getSellPrice, the item's sell value)
-            int sellUnit = si.getSellPrice(stack);
+        if (sellable) {
+            // Show the same metadata-driven base sell value used by the server.
+            int sellUnit = StardewItemDataApi.getSellPrice(stack);
             // 应用职业加成显示，与服务器端一致
             try {
                 java.util.Set<String> profNames = new java.util.HashSet<>(
@@ -835,13 +838,14 @@ public class ShopScreen extends Screen {
                 }
             } catch (Throwable ignored) { /* 客户端缓存不可用时退化到基础价 */ }
             if (sellUnit > 0) {
-                lines.add(Component.literal("出售：" + (sellUnit * stack.getCount()) + "g")
+                lines.add(Component.translatable("stardewcraft.shop.tooltip.sell", sellUnit * stack.getCount())
                     .withStyle(ChatFormatting.GOLD));
-                lines.add(Component.literal("[Click]全部出售  [Right-Click]出售1个")
+                lines.add(Component.translatable("stardewcraft.shop.tooltip.sell_controls")
                     .withStyle(ChatFormatting.DARK_GRAY));
             }
         } else if (!sellable && !stack.isEmpty()) {
-            lines.add(Component.literal("此商店不收购此物品").withStyle(ChatFormatting.DARK_GRAY));
+            lines.add(Component.translatable("stardewcraft.shop.tooltip.not_purchased")
+                    .withStyle(ChatFormatting.DARK_GRAY));
         }
         g.renderTooltip(font, lines, java.util.Optional.empty(), mx, my);
     }

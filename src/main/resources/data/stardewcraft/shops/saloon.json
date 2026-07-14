@@ -1,0 +1,82 @@
+{
+  "legacy_id": "Saloon",
+  "owner_npc": "Gus",
+  "owner_dialogue": "stardewcraft.shop.saloon.dialogue",
+  "entries": [
+    {
+      "item": "stardewcraft:beer",
+      "price": 400
+    },
+    {
+      "item": "stardewcraft:salad",
+      "price": 220
+    },
+    {
+      "item": "stardewcraft:bread",
+      "price": 120
+    },
+    {
+      "item": "stardewcraft:spaghetti",
+      "price": 240
+    },
+    {
+      "item": "stardewcraft:pizza",
+      "price": 600
+    },
+    {
+      "item": "stardewcraft:coffee",
+      "price": 300
+    },
+    {
+      "item": "recipe:stardewcraft:hashbrowns",
+      "price": 50,
+      "stock": 1
+    },
+    {
+      "item": "recipe:stardewcraft:omelet",
+      "price": 100,
+      "stock": 1
+    },
+    {
+      "item": "recipe:stardewcraft:pancakes",
+      "price": 100,
+      "stock": 1
+    },
+    {
+      "item": "recipe:stardewcraft:bread",
+      "price": 100,
+      "stock": 1
+    },
+    {
+      "item": "recipe:stardewcraft:tortilla",
+      "price": 100,
+      "stock": 1
+    },
+    {
+      "item": "recipe:stardewcraft:pizza",
+      "price": 150,
+      "stock": 1
+    },
+    {
+      "item": "recipe:stardewcraft:popsicle",
+      "price": 150,
+      "stock": 1
+    },
+    {
+      "item": "recipe:stardewcraft:maki_roll",
+      "price": 300,
+      "stock": 1
+    },
+    {
+      "item": "recipe:stardewcraft:cookie",
+      "price": 300,
+      "stock": 1
+    },
+    {
+      "item": "recipe:stardewcraft:triple_shot_espresso",
+      "price": 5000,
+      "stock": 1
+    }
+  ],
+  "accepted_sell_types": []
+}

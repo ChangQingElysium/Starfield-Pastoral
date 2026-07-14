@@ -53,8 +53,8 @@ public final class LadderHighlightRenderer {
     private static final int SKULL_R = 255, SKULL_G = 60, SKULL_B = 60;
     private static final int SKULL_BG_R = 80, SKULL_BG_G = 20, SKULL_BG_B = 20;
 
-    private static final Component LADDER_TEXT = Component.literal("▼ 楼梯");
-    private static final Component SHAFT_TEXT = Component.literal("▼ 竖井");
+    private static final Component LADDER_TEXT = Component.translatable("stardewcraft.mining.hint.ladder");
+    private static final Component SHAFT_TEXT = Component.translatable("stardewcraft.mining.hint.shaft");
 
     @SuppressWarnings("null")
     private static final RenderType QUAD_TYPE = makeQuadType("stardew_ladder_hint", false);

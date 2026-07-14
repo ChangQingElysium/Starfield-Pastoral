@@ -1,0 +1,264 @@
+{
+  "professions": [
+    {
+      "id": "rancher",
+      "skill": "stardewcraft:farming",
+      "required_level": 5,
+      "name_key": "stardewcraft.levelup.profession.0.name",
+      "desc_key": "stardewcraft.levelup.profession.0.desc",
+      "effect_handler": "stardewcraft:rancher"
+    },
+    {
+      "id": "tiller",
+      "skill": "stardewcraft:farming",
+      "required_level": 5,
+      "name_key": "stardewcraft.levelup.profession.1.name",
+      "desc_key": "stardewcraft.levelup.profession.1.desc",
+      "effect_handler": "stardewcraft:tiller"
+    },
+    {
+      "id": "coopmaster",
+      "skill": "stardewcraft:farming",
+      "required_level": 10,
+      "parent": "stardewcraft:rancher",
+      "name_key": "stardewcraft.levelup.profession.2.name",
+      "desc_key": "stardewcraft.levelup.profession.2.desc",
+      "effect_handler": "stardewcraft:coopmaster"
+    },
+    {
+      "id": "shepherd",
+      "skill": "stardewcraft:farming",
+      "required_level": 10,
+      "parent": "stardewcraft:rancher",
+      "name_key": "stardewcraft.levelup.profession.3.name",
+      "desc_key": "stardewcraft.levelup.profession.3.desc",
+      "effect_handler": "stardewcraft:shepherd"
+    },
+    {
+      "id": "artisan",
+      "skill": "stardewcraft:farming",
+      "required_level": 10,
+      "parent": "stardewcraft:tiller",
+      "name_key": "stardewcraft.levelup.profession.4.name",
+      "desc_key": "stardewcraft.levelup.profession.4.desc",
+      "effect_handler": "stardewcraft:artisan"
+    },
+    {
+      "id": "agriculturist",
+      "skill": "stardewcraft:farming",
+      "required_level": 10,
+      "parent": "stardewcraft:tiller",
+      "name_key": "stardewcraft.levelup.profession.5.name",
+      "desc_key": "stardewcraft.levelup.profession.5.desc",
+      "effect_handler": "stardewcraft:agriculturist"
+    },
+    {
+      "id": "fisher",
+      "skill": "stardewcraft:fishing",
+      "required_level": 5,
+      "name_key": "stardewcraft.levelup.profession.6.name",
+      "desc_key": "stardewcraft.levelup.profession.6.desc",
+      "effect_handler": "stardewcraft:fisher"
+    },
+    {
+      "id": "trapper",
+      "skill": "stardewcraft:fishing",
+      "required_level": 5,
+      "name_key": "stardewcraft.levelup.profession.7.name",
+      "desc_key": "stardewcraft.levelup.profession.7.desc",
+      "effect_handler": "stardewcraft:trapper"
+    },
+    {
+      "id": "angler",
+      "skill": "stardewcraft:fishing",
+      "required_level": 10,
+      "parent": "stardewcraft:fisher",
+      "name_key": "stardewcraft.levelup.profession.8.name",
+      "desc_key": "stardewcraft.levelup.profession.8.desc",
+      "effect_handler": "stardewcraft:angler"
+    },
+    {
+      "id": "pirate",
+      "skill": "stardewcraft:fishing",
+      "required_level": 10,
+      "parent": "stardewcraft:fisher",
+      "name_key": "stardewcraft.levelup.profession.9.name",
+      "desc_key": "stardewcraft.levelup.profession.9.desc",
+      "effect_handler": "stardewcraft:pirate"
+    },
+    {
+      "id": "mariner",
+      "skill": "stardewcraft:fishing",
+      "required_level": 10,
+      "parent": "stardewcraft:trapper",
+      "name_key": "stardewcraft.levelup.profession.10.name",
+      "desc_key": "stardewcraft.levelup.profession.10.desc",
+      "effect_handler": "stardewcraft:mariner"
+    },
+    {
+      "id": "luremaster",
+      "skill": "stardewcraft:fishing",
+      "required_level": 10,
+      "parent": "stardewcraft:trapper",
+      "name_key": "stardewcraft.levelup.profession.11.name",
+      "desc_key": "stardewcraft.levelup.profession.11.desc",
+      "effect_handler": "stardewcraft:luremaster"
+    },
+    {
+      "id": "forester",
+      "skill": "stardewcraft:foraging",
+      "required_level": 5,
+      "name_key": "stardewcraft.levelup.profession.12.name",
+      "desc_key": "stardewcraft.levelup.profession.12.desc",
+      "effect_handler": "stardewcraft:forester"
+    },
+    {
+      "id": "gatherer",
+      "skill": "stardewcraft:foraging",
+      "required_level": 5,
+      "name_key": "stardewcraft.levelup.profession.13.name",
+      "desc_key": "stardewcraft.levelup.profession.13.desc",
+      "effect_handler": "stardewcraft:gatherer"
+    },
+    {
+      "id": "lumberjack",
+      "skill": "stardewcraft:foraging",
+      "required_level": 10,
+      "parent": "stardewcraft:forester",
+      "name_key": "stardewcraft.levelup.profession.14.name",
+      "desc_key": "stardewcraft.levelup.profession.14.desc",
+      "effect_handler": "stardewcraft:lumberjack"
+    },
+    {
+      "id": "tapper",
+      "skill": "stardewcraft:foraging",
+      "required_level": 10,
+      "parent": "stardewcraft:forester",
+      "name_key": "stardewcraft.levelup.profession.15.name",
+      "desc_key": "stardewcraft.levelup.profession.15.desc",
+      "effect_handler": "stardewcraft:tapper"
+    },
+    {
+      "id": "botanist",
+      "skill": "stardewcraft:foraging",
+      "required_level": 10,
+      "parent": "stardewcraft:gatherer",
+      "name_key": "stardewcraft.levelup.profession.16.name",
+      "desc_key": "stardewcraft.levelup.profession.16.desc",
+      "effect_handler": "stardewcraft:botanist"
+    },
+    {
+      "id": "tracker",
+      "skill": "stardewcraft:foraging",
+      "required_level": 10,
+      "parent": "stardewcraft:gatherer",
+      "name_key": "stardewcraft.levelup.profession.17.name",
+      "desc_key": "stardewcraft.levelup.profession.17.desc",
+      "effect_handler": "stardewcraft:tracker"
+    },
+    {
+      "id": "miner",
+      "skill": "stardewcraft:mining",
+      "required_level": 5,
+      "name_key": "stardewcraft.levelup.profession.18.name",
+      "desc_key": "stardewcraft.levelup.profession.18.desc",
+      "effect_handler": "stardewcraft:miner"
+    },
+    {
+      "id": "geologist",
+      "skill": "stardewcraft:mining",
+      "required_level": 5,
+      "name_key": "stardewcraft.levelup.profession.19.name",
+      "desc_key": "stardewcraft.levelup.profession.19.desc",
+      "effect_handler": "stardewcraft:geologist"
+    },
+    {
+      "id": "blacksmith",
+      "skill": "stardewcraft:mining",
+      "required_level": 10,
+      "parent": "stardewcraft:miner",
+      "name_key": "stardewcraft.levelup.profession.20.name",
+      "desc_key": "stardewcraft.levelup.profession.20.desc",
+      "effect_handler": "stardewcraft:blacksmith"
+    },
+    {
+      "id": "prospector",
+      "skill": "stardewcraft:mining",
+      "required_level": 10,
+      "parent": "stardewcraft:miner",
+      "name_key": "stardewcraft.levelup.profession.21.name",
+      "desc_key": "stardewcraft.levelup.profession.21.desc",
+      "effect_handler": "stardewcraft:prospector"
+    },
+    {
+      "id": "excavator",
+      "skill": "stardewcraft:mining",
+      "required_level": 10,
+      "parent": "stardewcraft:geologist",
+      "name_key": "stardewcraft.levelup.profession.22.name",
+      "desc_key": "stardewcraft.levelup.profession.22.desc",
+      "effect_handler": "stardewcraft:excavator"
+    },
+    {
+      "id": "gemologist",
+      "skill": "stardewcraft:mining",
+      "required_level": 10,
+      "parent": "stardewcraft:geologist",
+      "name_key": "stardewcraft.levelup.profession.23.name",
+      "desc_key": "stardewcraft.levelup.profession.23.desc",
+      "effect_handler": "stardewcraft:gemologist"
+    },
+    {
+      "id": "fighter",
+      "skill": "stardewcraft:combat",
+      "required_level": 5,
+      "name_key": "stardewcraft.levelup.profession.24.name",
+      "desc_key": "stardewcraft.levelup.profession.24.desc",
+      "effect_handler": "stardewcraft:fighter"
+    },
+    {
+      "id": "scout",
+      "skill": "stardewcraft:combat",
+      "required_level": 5,
+      "name_key": "stardewcraft.levelup.profession.25.name",
+      "desc_key": "stardewcraft.levelup.profession.25.desc",
+      "effect_handler": "stardewcraft:scout"
+    },
+    {
+      "id": "brute",
+      "skill": "stardewcraft:combat",
+      "required_level": 10,
+      "parent": "stardewcraft:fighter",
+      "name_key": "stardewcraft.levelup.profession.26.name",
+      "desc_key": "stardewcraft.levelup.profession.26.desc",
+      "effect_handler": "stardewcraft:brute"
+    },
+    {
+      "id": "defender",
+      "skill": "stardewcraft:combat",
+      "required_level": 10,
+      "parent": "stardewcraft:fighter",
+      "name_key": "stardewcraft.levelup.profession.27.name",
+      "desc_key": "stardewcraft.levelup.profession.27.desc",
+      "effect_handler": "stardewcraft:defender"
+    },
+    {
+      "id": "acrobat",
+      "skill": "stardewcraft:combat",
+      "required_level": 10,
+      "parent": "stardewcraft:scout",
+      "name_key": "stardewcraft.levelup.profession.28.name",
+      "desc_key": "stardewcraft.levelup.profession.28.desc",
+      "effect_handler": "stardewcraft:acrobat"
+    },
+    {
+      "id": "desperado",
+      "skill": "stardewcraft:combat",
+      "required_level": 10,
+      "parent": "stardewcraft:scout",
+      "name_key": "stardewcraft.levelup.profession.29.name",
+      "desc_key": "stardewcraft.levelup.profession.29.desc",
+      "effect_handler": "stardewcraft:desperado"
+    }
+  ]
+}

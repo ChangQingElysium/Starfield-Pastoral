@@ -1,0 +1,15 @@
+{
+  "legacy_id": "Festival_FeastOfTheWinterStar_Pierre",
+  "owner_dialogue": "stardewcraft.festival.winter25.dialogue.pierre",
+  "entries": [
+    {
+      "item": "stardewcraft:carpet_17",
+      "price": 1000
+    },
+    {
+      "item": "stardewcraft:winter_star_tree",
+      "price": 5000
+    }
+  ],
+  "accepted_sell_types": []
+}

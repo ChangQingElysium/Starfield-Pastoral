@@ -1,7 +1,7 @@
 package com.stardew.craft.item.catalog;
 
 import com.stardew.craft.StardewCraft;
-import com.stardew.craft.item.IStardewItem;
+import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.item.artisan.ArtisanRecipeDataManager;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -201,10 +201,7 @@ public final class StardewItemCatalog {
     }
 
     public static String typeKey(Item item) {
-        if (item instanceof IStardewItem stardewItem) {
-            return stardewItem.getItemTypeKey();
-        }
-        return "";
+        return StardewItemDataApi.getTypeKey(new ItemStack(item));
     }
 
     private static StardewCatalogTab tabForType(String typeKey) {

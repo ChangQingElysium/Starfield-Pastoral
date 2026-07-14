@@ -708,6 +708,11 @@ public abstract class StardewCropBlock extends Block {
     }
 
     private int getHarvestFarmingExperience(BlockState state) {
+        com.stardew.craft.api.v1.agriculture.StardewCropData apiData =
+                com.stardew.craft.api.v1.agriculture.StardewAgricultureDataApi.crop(state);
+        if (apiData != null) {
+            return apiData.farmingExperience();
+        }
         String path = BuiltInRegistries.BLOCK.getKey(state.getBlock()).getPath();
         if (path.endsWith("_crop")) {
             path = path.substring(0, path.length() - 5);
@@ -892,7 +897,7 @@ public abstract class StardewCropBlock extends Block {
     /**
      * 获取作物显示名称（用于Jade等信息显示模组）
      */
-    public abstract String getCropDisplayName();
+    public abstract String getCropDisplayNameKey();
     
     /**
      * 获取作物种子物品

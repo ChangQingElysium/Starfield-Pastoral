@@ -146,7 +146,7 @@ public class StardewTeleportCommand {
         try {
             ServerPlayer player = CommandTargets.resolve(context);
             if (player == null) {
-                sendFailureMsg(context, "需要指定目标玩家或由玩家执行");
+                sendFailureMsg(context, "stardewcraft.command.target_required");
                 return 0;
             }
             @SuppressWarnings("null")
@@ -154,7 +154,7 @@ public class StardewTeleportCommand {
                 .getLevel(ModDimensions.STARDEW_VALLEY);
             
             if (stardewLevel == null) {
-                sendFailureMsg(context, "星露谷维度未加载！");
+                sendFailureMsg(context, "stardewcraft.command.teleport.stardew_unavailable");
                 return 0;
             }
 
@@ -166,13 +166,13 @@ public class StardewTeleportCommand {
             ModTeleport.to(player, stardewLevel, targetPos, player.getYRot(), player.getXRot());
             
             context.getSource().sendSuccess(
-                () -> Component.literal("欢迎来到星露谷！"),
+                () -> Component.translatable("stardewcraft.command.teleport.stardew_success"),
                 false
             );
             
             return 1;
         } catch (Exception e) {
-            sendFailureMsg(context, "传送失败: " + e.getMessage());
+            sendFailureMsg(context, "stardewcraft.command.teleport.failed", e.getMessage());
             return 0;
         }
     }
@@ -182,18 +182,18 @@ public class StardewTeleportCommand {
             @SuppressWarnings("null")
             ServerLevel stardewLevel = context.getSource().getServer().getLevel(ModDimensions.STARDEW_VALLEY);
             if (stardewLevel == null) {
-                sendFailureMsg(context, "星露谷维度未加载！");
+                sendFailureMsg(context, "stardewcraft.command.teleport.stardew_unavailable");
                 return 0;
             }
 
             InteriorSubspaceManager.forceReload(stardewLevel, "manual_command_force_reload");
             context.getSource().sendSuccess(
-                () -> Component.literal("已强制重载室内结构/交互体（manual_command_force_reload）"),
+                () -> Component.translatable("stardewcraft.command.teleport.interior_interactions_reloaded"),
                 false
             );
             return 1;
         } catch (Exception e) {
-            sendFailureMsg(context, "触发室内加载失败: " + e.getMessage());
+            sendFailureMsg(context, "stardewcraft.command.teleport.interior_load_failed", e.getMessage());
             return 0;
         }
     }
@@ -203,18 +203,18 @@ public class StardewTeleportCommand {
             @SuppressWarnings("null")
             ServerLevel stardewLevel = context.getSource().getServer().getLevel(ModDimensions.STARDEW_VALLEY);
             if (stardewLevel == null) {
-                sendFailureMsg(context, "星露谷维度未加载！");
+                sendFailureMsg(context, "stardewcraft.command.teleport.stardew_unavailable");
                 return 0;
             }
 
             InteriorSubspaceManager.forceReload(stardewLevel, "manual_force_reload");
             context.getSource().sendSuccess(
-                () -> Component.literal("已强制重载室内结构（manual_force_reload）"),
+                () -> Component.translatable("stardewcraft.command.teleport.interior_reloaded"),
                 false
             );
             return 1;
         } catch (Exception e) {
-            sendFailureMsg(context, "强制重载室内失败: " + e.getMessage());
+            sendFailureMsg(context, "stardewcraft.command.teleport.interior_reload_failed", e.getMessage());
             return 0;
         }
     }
@@ -223,22 +223,23 @@ public class StardewTeleportCommand {
         try {
             ServerPlayer player = CommandTargets.resolve(context);
             if (player == null) {
-                sendFailureMsg(context, "需要指定目标玩家或由玩家执行");
+                sendFailureMsg(context, "stardewcraft.command.target_required");
                 return 0;
             }
             @SuppressWarnings("null")
             ServerLevel stardewLevel = context.getSource().getServer().getLevel(ModDimensions.STARDEW_VALLEY);
             if (stardewLevel == null) {
-                sendFailureMsg(context, "星露谷维度未加载！");
+                sendFailureMsg(context, "stardewcraft.command.teleport.stardew_unavailable");
                 return 0;
             }
 
             InteriorSubspaceManager.ensureLoaded(stardewLevel, "manual_tp_origin");
             ModTeleport.to(player, stardewLevel, 21.5D, 36.0D, -12.5D, 180.0F, 0.0F);
-            context.getSource().sendSuccess(() -> Component.literal("已传送到内嵌 SeedShop 室内落点: 21 36 -12"), false);
+            context.getSource().sendSuccess(() -> Component.translatable(
+                "stardewcraft.command.teleport.interior_origin_success", "21 36 -12"), false);
             return 1;
         } catch (Exception e) {
-            sendFailureMsg(context, "传送室内原点失败: " + e.getMessage());
+            sendFailureMsg(context, "stardewcraft.command.teleport.interior_origin_failed", e.getMessage());
             return 0;
         }
     }
@@ -247,22 +248,23 @@ public class StardewTeleportCommand {
         try {
             ServerPlayer player = CommandTargets.resolve(context);
             if (player == null) {
-                sendFailureMsg(context, "需要指定目标玩家或由玩家执行");
+                sendFailureMsg(context, "stardewcraft.command.target_required");
                 return 0;
             }
             @SuppressWarnings("null")
             ServerLevel stardewLevel = context.getSource().getServer().getLevel(ModDimensions.STARDEW_VALLEY);
             if (stardewLevel == null) {
-                sendFailureMsg(context, "星露谷维度未加载！");
+                sendFailureMsg(context, "stardewcraft.command.teleport.stardew_unavailable");
                 return 0;
             }
 
             InteriorSubspaceManager.ensureLoaded(stardewLevel, "manual_tp_spawn");
             ModTeleport.to(player, stardewLevel, 12038.5D, 71.0D, 12038.5D, -90.0F, 0.0F);
-            context.getSource().sendSuccess(() -> Component.literal("已传送到室内落点: 12038 71 12038（朝东）"), false);
+            context.getSource().sendSuccess(() -> Component.translatable(
+                "stardewcraft.command.teleport.interior_spawn_success", "12038 71 12038"), false);
             return 1;
         } catch (Exception e) {
-            sendFailureMsg(context, "传送室内落点失败: " + e.getMessage());
+            sendFailureMsg(context, "stardewcraft.command.teleport.interior_spawn_failed", e.getMessage());
             return 0;
         }
     }
@@ -276,14 +278,14 @@ public class StardewTeleportCommand {
         try {
             ServerPlayer player = CommandTargets.resolve(context);
             if (player == null) {
-                sendFailureMsg(context, "需要指定目标玩家或由玩家执行");
+                sendFailureMsg(context, "stardewcraft.command.target_required");
                 return 0;
             }
             @SuppressWarnings("null")
             ServerLevel mineLevel = context.getSource().getServer().getLevel(ModMiningDimensions.STARDEW_MINING);
 
             if (mineLevel == null) {
-                sendFailureMsg(context, "矿井维度未加载！请确认 data/stardewcraft/dimension/stardew_mining.json 已存在且 datapack 已加载。");
+                sendFailureMsg(context, "stardewcraft.command.teleport.mine_unavailable_detailed");
                 return 0;
             }
 
@@ -291,12 +293,12 @@ public class StardewTeleportCommand {
             MiningCoordinates.teleportPlayerToFloor(player, mineLevel, 0);
 
             context.getSource().sendSuccess(
-                () -> Component.literal("已传送到矿井入口（如果是第一次进入，会自动生成大厅）"),
+                () -> Component.translatable("stardewcraft.command.teleport.mine_entrance_success"),
                 false
             );
             return 1;
         } catch (Exception e) {
-            sendFailureMsg(context, "传送到矿井失败: " + e.getMessage());
+            sendFailureMsg(context, "stardewcraft.command.teleport.mine_failed", e.getMessage());
             return 0;
         }
     }
@@ -308,13 +310,13 @@ public class StardewTeleportCommand {
         try {
             ServerPlayer player = CommandTargets.resolve(context);
             if (player == null) {
-                sendFailureMsg(context, "需要指定目标玩家或由玩家执行");
+                sendFailureMsg(context, "stardewcraft.command.target_required");
                 return 0;
             }
             @SuppressWarnings("null")
             ServerLevel mineLevel = context.getSource().getServer().getLevel(ModMiningDimensions.STARDEW_MINING);
             if (mineLevel == null) {
-                sendFailureMsg(context, "矿井维度未加载！");
+                sendFailureMsg(context, "stardewcraft.command.teleport.mine_unavailable");
                 return 0;
             }
 
@@ -329,12 +331,12 @@ public class StardewTeleportCommand {
             ModTeleport.to(player, mineLevel, 0.5, safeY, floorZ + 0.5, player.getYRot(), player.getXRot());
 
             context.getSource().sendSuccess(
-                () -> Component.literal("已传送到骷髅矿洞入口 (Floor 121)"),
+                () -> Component.translatable("stardewcraft.command.teleport.skull_cavern_entrance_success", 121),
                 false
             );
             return 1;
         } catch (Exception e) {
-            sendFailureMsg(context, "传送到骷髅矿洞失败: " + e.getMessage());
+            sendFailureMsg(context, "stardewcraft.command.teleport.skull_cavern_failed", e.getMessage());
             return 0;
         }
     }
@@ -348,7 +350,7 @@ public class StardewTeleportCommand {
         try {
             ServerPlayer player = CommandTargets.resolve(context);
             if (player == null) {
-                sendFailureMsg(context, "需要指定目标玩家或由玩家执行");
+                sendFailureMsg(context, "stardewcraft.command.target_required");
                 return 0;
             }
             int targetFloor = IntegerArgumentType.getInteger(context, "floor");
@@ -356,7 +358,7 @@ public class StardewTeleportCommand {
             @SuppressWarnings("null")
             ServerLevel mineLevel = context.getSource().getServer().getLevel(ModMiningDimensions.STARDEW_MINING);
             if (mineLevel == null) {
-                sendFailureMsg(context, "矿井维度未加载！请确认 data/stardewcraft/dimension/stardew_mining.json 已存在且 datapack 已加载。");
+                sendFailureMsg(context, "stardewcraft.command.teleport.mine_unavailable_detailed");
                 return 0;
             }
 
@@ -374,12 +376,12 @@ public class StardewTeleportCommand {
             com.stardew.craft.event.MiningBlockBreakHandler.syncLadderStateForPlayer(player, targetFloor);
 
             context.getSource().sendSuccess(
-                () -> Component.literal("已传送到矿井第 " + targetFloor + " 层"),
+                () -> Component.translatable("stardewcraft.command.teleport.mine_floor_success", targetFloor),
                 false
             );
             return 1;
         } catch (Exception e) {
-            sendFailureMsg(context, "设置矿井层数失败: " + e.getMessage());
+            sendFailureMsg(context, "stardewcraft.command.teleport.mine_floor_failed", e.getMessage());
             return 0;
         }
     }
@@ -393,7 +395,7 @@ public class StardewTeleportCommand {
         try {
             ServerPlayer player = CommandTargets.resolve(context);
             if (player == null) {
-                sendFailureMsg(context, "需要指定目标玩家或由玩家执行");
+                sendFailureMsg(context, "stardewcraft.command.target_required");
                 return 0;
             }
             int relative = IntegerArgumentType.getInteger(context, "floor");
@@ -401,7 +403,7 @@ public class StardewTeleportCommand {
 
             ServerLevel mineLevel = context.getSource().getServer().getLevel(ModMiningDimensions.STARDEW_MINING);
             if (mineLevel == null) {
-                sendFailureMsg(context, "矿井维度未加载！");
+                sendFailureMsg(context, "stardewcraft.command.teleport.mine_unavailable");
                 return 0;
             }
 
@@ -419,12 +421,13 @@ public class StardewTeleportCommand {
             final int displayFloor = relative;
             final int internal = targetFloor;
             context.getSource().sendSuccess(
-                () -> Component.literal("已传送到骷髅矿井第 " + displayFloor + " 层（内部 floor " + internal + "）"),
+                () -> Component.translatable(
+                    "stardewcraft.command.teleport.skull_cavern_floor_success", displayFloor, internal),
                 false
             );
             return 1;
         } catch (Exception e) {
-            sendFailureMsg(context, "设置骷髅矿井层数失败: " + e.getMessage());
+            sendFailureMsg(context, "stardewcraft.command.teleport.skull_cavern_floor_failed", e.getMessage());
             return 0;
         }
     }
@@ -432,7 +435,7 @@ public class StardewTeleportCommand {
         try {
             ServerPlayer player = CommandTargets.resolve(context);
             if (player == null) {
-                sendFailureMsg(context, "需要指定目标玩家或由玩家执行");
+                sendFailureMsg(context, "stardewcraft.command.target_required");
                 return 0;
             }
             @SuppressWarnings("null")
@@ -440,7 +443,7 @@ public class StardewTeleportCommand {
                 .getLevel(Level.OVERWORLD);
             
             if (overworld == null) {
-                sendFailureMsg(context, "主世界未加载！");
+                sendFailureMsg(context, "stardewcraft.command.teleport.overworld_unavailable");
                 return 0;
             }
             
@@ -450,20 +453,20 @@ public class StardewTeleportCommand {
             ModTeleport.to(player, overworld, spawnPos, player.getYRot(), player.getXRot());
             
             context.getSource().sendSuccess(
-                () -> Component.literal("已返回主世界"),
+                () -> Component.translatable("stardewcraft.command.teleport.overworld_success"),
                 false
             );
             
             return 1;
         } catch (Exception e) {
-            sendFailureMsg(context, "传送失败: " + e.getMessage());
+            sendFailureMsg(context, "stardewcraft.command.teleport.failed", e.getMessage());
             return 0;
         }
     }
     
     @SuppressWarnings("null")
-    private static void sendFailureMsg(CommandContext<CommandSourceStack> context, String message) {
-        context.getSource().sendFailure(Component.literal(message));
+    private static void sendFailureMsg(CommandContext<CommandSourceStack> context, String key, Object... args) {
+        context.getSource().sendFailure(Component.translatable(key, args));
     }
     
     // ================== 时间管理方法 ==================
@@ -472,17 +475,10 @@ public class StardewTeleportCommand {
     private static int getTime(CommandContext<CommandSourceStack> context) {
         StardewTimeManager time = StardewTimeManager.get();
         
-        context.getSource().sendSuccess(() -> 
-            Component.literal(String.format(
-                "当前时间: %s | %s 第%d天, 第%d年 | 游戏时间: %d分钟",
-                time.getFormattedTime12Hour(),
-                time.getSeasonName(),
-                time.getCurrentDay(),
-                time.getCurrentYear(),
-                time.getCurrentTime()
-            )),
-            false
-        );
+        context.getSource().sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.time.info",
+            time.getFormattedTime12Hour(), seasonComponent(time), time.getCurrentDay(),
+            time.getCurrentYear(), time.getCurrentTime()), false);
         
         return 1;
     }
@@ -494,10 +490,8 @@ public class StardewTeleportCommand {
         time.setCurrentDay(day);
         syncTime(time);
         
-        context.getSource().sendSuccess(() ->
-            Component.literal("日期已设置为: 第" + day + "天"),
-            true
-        );
+        context.getSource().sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.time.date_set", day), true);
         return 1;
     }
 
@@ -516,10 +510,8 @@ public class StardewTeleportCommand {
             }
         }
         
-        context.getSource().sendSuccess(() ->
-            Component.literal("季节已设置为: " + time.getSeasonName()),
-            true
-        );
+        context.getSource().sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.time.season_set", seasonComponent(time)), true);
         return 1;
     }
 
@@ -530,10 +522,8 @@ public class StardewTeleportCommand {
         time.setCurrentYear(year);
         syncTime(time);
         
-        context.getSource().sendSuccess(() ->
-            Component.literal("年份已设置为: 第" + year + "年"),
-            true
-        );
+        context.getSource().sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.time.year_set", year), true);
         return 1;
     }
 
@@ -552,10 +542,8 @@ public class StardewTeleportCommand {
         time.setCurrentTime(newTime);
         syncTime(time);
         
-        context.getSource().sendSuccess(() ->
-            Component.literal("时间已设置为: " + time.getFormattedTime12Hour()),
-            true
-        );
+        context.getSource().sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.time.time_set", time.getFormattedTime12Hour()), true);
         
         return 1;
     }
@@ -568,11 +556,8 @@ public class StardewTeleportCommand {
         
         syncTime(time);
         
-        context.getSource().sendSuccess(() ->
-            Component.literal(String.format("增加了%d分钟，当前时间: %s", 
-                minutes, time.getFormattedTime12Hour())),
-            true
-        );
+        context.getSource().sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.time.added", minutes, time.getFormattedTime12Hour()), true);
         
         return 1;
     }
@@ -584,11 +569,8 @@ public class StardewTeleportCommand {
         
         PacketDistributor.sendToAllPlayers(TimeSyncPacket.fromTimeManager(time));
         
-        context.getSource().sendSuccess(() ->
-            Component.literal(String.format("新的一天！%s 第%d天",
-                time.getSeasonName(), time.getCurrentDay())),
-            true
-        );
+        context.getSource().sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.time.new_day", seasonComponent(time), time.getCurrentDay()), true);
         
         return 1;
     }
@@ -604,10 +586,7 @@ public class StardewTeleportCommand {
         com.stardew.craft.event.DimensionEventHandler.updateMCTime(time);
         PacketDistributor.sendToAllPlayers(TimeSyncPacket.fromTimeManager(time));
         
-        context.getSource().sendSuccess(() ->
-            Component.literal("时间已重置到 Spring 1, Year 1, 6:00 AM"),
-            true
-        );
+        context.getSource().sendSuccess(() -> Component.translatable("stardewcraft.command.time.reset"), true);
         
         return 1;
     }
@@ -619,7 +598,7 @@ public class StardewTeleportCommand {
         ServerLevel level = context.getSource().getLevel();
         
         if (!ModDimensions.STARDEW_VALLEY.equals(level.dimension())) {
-            context.getSource().sendFailure(Component.literal("§c此命令只能在星露谷维度使用！"));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.stardew_dimension_only"));
             return 0;
         }
         
@@ -627,24 +606,19 @@ public class StardewTeleportCommand {
         String tomorrowWeather = WeatherManager.getTomorrowWeather(level);
         
         StardewTimeManager timeManager = StardewTimeManager.get();
-        String season = timeManager.getSeasonName();
         int day = timeManager.getCurrentDay();
         
-        context.getSource().sendSuccess(() -> 
-            Component.literal(String.format(
-                "§e=== 星露谷天气信息 ===\n" +
-                "§b当前日期: §f%s 第%d天\n" +
-                "§b今天天气: §f%s §7(%s)\n" +
-                "§b明天天气: §f%s §7(%s)\n" +
-                "§b原版天气: §f%s, 雷暴: %s",
-                season, day,
-                currentWeather, getWeatherDisplayName(currentWeather),
-                tomorrowWeather, getWeatherDisplayName(tomorrowWeather),
-                level.isRaining() ? "下雨" : "晴朗",
-                level.isThundering() ? "是" : "否"
-            )),
-            false
-        );
+        context.getSource().sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.weather.info",
+            seasonComponent(timeManager), day,
+            currentWeather, weatherComponent(currentWeather),
+            tomorrowWeather, weatherComponent(tomorrowWeather),
+            Component.translatable(level.isRaining()
+                ? "stardewcraft.command.weather.mc.raining"
+                : "stardewcraft.command.weather.mc.clear"),
+            Component.translatable(level.isThundering()
+                ? "stardewcraft.common.yes"
+                : "stardewcraft.common.no")), false);
         
         return 1;
     }
@@ -654,22 +628,21 @@ public class StardewTeleportCommand {
         ServerLevel level = context.getSource().getLevel();
         
         if (!ModDimensions.STARDEW_VALLEY.equals(level.dimension())) {
-            context.getSource().sendFailure(Component.literal("§c此命令只能在星露谷维度使用！"));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.stardew_dimension_only"));
             return 0;
         }
         
         WeatherManager.setWeather(level, weatherType);
         
-        context.getSource().sendSuccess(() -> 
-            Component.literal(String.format(
-                "§a天气已设置为: %s §7(%s)\n§7MC天气: %s, 雷暴: %s",
-                weatherType,
-                getWeatherDisplayName(weatherType),
-                level.isRaining() ? "下雨" : "晴朗",
-                level.isThundering() ? "是" : "否"
-            )),
-            true
-        );
+        context.getSource().sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.weather.set",
+            weatherType, weatherComponent(weatherType),
+            Component.translatable(level.isRaining()
+                ? "stardewcraft.command.weather.mc.raining"
+                : "stardewcraft.command.weather.mc.clear"),
+            Component.translatable(level.isThundering()
+                ? "stardewcraft.common.yes"
+                : "stardewcraft.common.no")), true);
         
         return 1;
     }
@@ -679,20 +652,15 @@ public class StardewTeleportCommand {
         ServerLevel level = context.getSource().getLevel();
         
         if (!ModDimensions.STARDEW_VALLEY.equals(level.dimension())) {
-            context.getSource().sendFailure(Component.literal("§c此命令只能在星露谷维度使用！"));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.stardew_dimension_only"));
             return 0;
         }
         
         String tomorrowWeather = WeatherManager.getTomorrowWeather(level);
         
-        context.getSource().sendSuccess(() -> 
-            Component.literal(String.format(
-                "§b明天的天气预测: §f%s §7(%s)",
-                tomorrowWeather,
-                getWeatherDisplayName(tomorrowWeather)
-            )),
-            false
-        );
+        context.getSource().sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.weather.tomorrow", tomorrowWeather,
+            weatherComponent(tomorrowWeather)), false);
         
         return 1;
     }
@@ -702,7 +670,7 @@ public class StardewTeleportCommand {
         ServerLevel level = context.getSource().getLevel();
         
         if (level.dimension() != ModDimensions.STARDEW_VALLEY) {
-            context.getSource().sendFailure(Component.literal("§c此命令只能在星露谷维度使用！"));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.stardew_dimension_only"));
             return 0;
         }
         
@@ -724,21 +692,19 @@ public class StardewTeleportCommand {
             }
         }
         
-        StringBuilder result = new StringBuilder("§e=== 天气概率测试（模拟100天）===\n");
-        result.append(String.format("§b当前季节: §f%s\n\n", currentSeason));
+        var result = Component.translatable(
+            "stardewcraft.command.weather.test_header", 100,
+            Component.translatable("stardewcraft.season." + currentSeason.toLowerCase(java.util.Locale.ROOT)));
         
         for (int i = 0; i < weatherNames.length; i++) {
             if (weatherCount[i] > 0) {
-                result.append(String.format("§f%s: §a%d%% §7(%s)\n",
-                    weatherNames[i],
-                    weatherCount[i],
-                    getWeatherDisplayName(weatherNames[i])
-                ));
+                result.append(Component.translatable(
+                    "stardewcraft.command.weather.test_entry",
+                    weatherNames[i], weatherCount[i], weatherComponent(weatherNames[i])));
             }
         }
-        
-        String finalResult = result.toString();
-        context.getSource().sendSuccess(() -> Component.literal(finalResult), false);
+
+        context.getSource().sendSuccess(() -> result, false);
         
         return 1;
     }
@@ -748,7 +714,7 @@ public class StardewTeleportCommand {
         ServerLevel level = context.getSource().getLevel();
         ServerPlayer player = context.getSource().getPlayer();
         if (player == null) {
-            context.getSource().sendFailure(Component.literal("\u00a7c\u6b64\u547d\u4ee4\u9700\u8981\u73a9\u5bb6\u6267\u884c"));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.player_only"));
             return 0;
         }
 
@@ -772,33 +738,16 @@ public class StardewTeleportCommand {
         String stardewWeather = WeatherManager.getCurrentWeather(level);
         boolean weatherCycleEnabled = level.getGameRules().getBoolean(GameRules.RULE_WEATHER_CYCLE);
 
-        String msg = String.format(
-            "\u00a7e=== \u5929\u6c14\u6e32\u67d3\u8bca\u65ad ===\n" +
-            "\u00a7bStardew\u5929\u6c14: \u00a7f%s\n" +
-            "\u00a7bMC isRaining: \u00a7f%s  \u00a7bthundering: \u00a7f%s\n" +
-            "\u00a7brainLevel: \u00a7f%.3f  \u00a7bthunderLevel: \u00a7f%.3f\n" +
-            "\u00a7bdoWeatherCycle: \u00a7f%s\n" +
-            "\u00a77--- \u73a9\u5bb6\u4f4d\u7f6e ---\n" +
-            "\u00a7bPos: \u00a7f%d, %d, %d\n" +
-            "\u00a7bHeightmap MOTION_BLOCKING: \u00a7f%d  \u00a7bWORLD_SURFACE: \u00a7f%d\n" +
-            "\u00a7bcanSeeSky: \u00a7f%s\n" +
-            "\u00a7bisRainingAt(pos): \u00a7f%s  \u00a7bisRainingAt(pos.above): \u00a7f%s\n" +
-            "\u00a77--- \u751f\u7269\u7fa4\u7cfb ---\n" +
-            "\u00a7bBiome: \u00a7f%s\n" +
-            "\u00a7bhasPrecipitation: \u00a7f%s  \u00a7bprecipType: \u00a7f%s",
-            stardewWeather,
-            isRaining, level.isThundering(),
-            rainLevel, thunderLevel,
+        context.getSource().sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.weather.diagnose",
+            stardewWeather, isRaining, level.isThundering(),
+            String.format(java.util.Locale.ROOT, "%.3f", rainLevel),
+            String.format(java.util.Locale.ROOT, "%.3f", thunderLevel),
             weatherCycleEnabled,
             playerPos.getX(), playerPos.getY(), playerPos.getZ(),
-            hmMotionBlocking, hmWorldSurface,
-            canSeeSky,
+            hmMotionBlocking, hmWorldSurface, canSeeSky,
             isRainingAtPlayer, isRainingAtAbove,
-            biomeName,
-            hasPrecip, precipType
-        );
-
-        context.getSource().sendSuccess(() -> Component.literal(msg), false);
+            biomeName, hasPrecip, precipType), false);
         return 1;
     }
 
@@ -822,24 +771,17 @@ public class StardewTeleportCommand {
             }
         }
 
-        src.sendSuccess(() -> Component.literal(
-            "\u00a7a已清除原版天气状态 (raining=" + wasRaining
-                + ", thundering=" + wasThundering + " -> false)。"
-            + "\n\u00a77请改用 /stardew weather set ... 修改星露谷天气，避免使用原版 /weather。"
-        ), true);
+        src.sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.weather.vanilla_cleared", wasRaining, wasThundering), true);
         return 1;
     }
 
-    private static String getWeatherDisplayName(String weatherType) {
-        return switch (weatherType) {
-            case "Sun" -> "晴天";
-            case "Rain" -> "雨天";
-            case "Storm" -> "暴风雨";
-            case "Snow" -> "雪天";
-            case "WindSpring" -> "春季有风";
-            case "WindFall" -> "秋季有风";
-            case "Festival" -> "节日晴天";
-            default -> "未知";
-        };
+    private static Component weatherComponent(String weatherType) {
+        return Component.translatable("stardewcraft.weather." + weatherType.toLowerCase(java.util.Locale.ROOT));
+    }
+
+    private static Component seasonComponent(StardewTimeManager time) {
+        return Component.translatable("stardewcraft.season."
+            + time.getSeasonName().toLowerCase(java.util.Locale.ROOT));
     }
 }

@@ -248,7 +248,7 @@ public class HopsCropBlock extends StardewCropBlock {
     }
 
     @Override
-    public String getCropDisplayName() {
-        return "啤酒花";
+    public String getCropDisplayNameKey() {
+        return "item.stardewcraft.hops";
     }
 }

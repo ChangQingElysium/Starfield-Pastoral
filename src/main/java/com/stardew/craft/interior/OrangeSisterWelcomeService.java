@@ -193,7 +193,7 @@ public final class OrangeSisterWelcomeService {
         junimo.getNavigation().stop();
         junimo.setTarget(null, null);
 
-        player.displayClientMessage(Component.literal("§6感谢橙子姐的游玩！"), true);
+        player.displayClientMessage(Component.translatable("stardewcraft.orange_sister.thanks"), true);
         player.serverLevel().playSound(null, player.blockPosition(), ModSounds.NEW_ARTIFACT.get(), SoundSource.PLAYERS, 0.9F, 1.15F);
         player.serverLevel().sendParticles(ParticleTypes.END_ROD,
                 player.getX(), player.getY() + 1.0D, player.getZ(),

@@ -5,16 +5,18 @@ import com.stardew.craft.core.ModMiningDimensions;
 import com.stardew.craft.cutscene.data.EventData;
 import com.stardew.craft.cutscene.data.EventRegistry;
 import com.stardew.craft.cutscene.data.EventTrigger;
+import com.stardew.craft.cutscene.data.CutsceneTriggerLocations;
 import com.stardew.craft.cutscene.network.ClientEventSeenCache;
+import com.stardew.craft.cutscene.network.NotifyCutsceneStartPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Client-side trigger checker that runs every N ticks.
@@ -32,44 +34,10 @@ public final class EventTriggerChecker {
     private static int cooldownTicks = 0;
     private static final int POST_EVENT_COOLDOWN = 40; // 2 seconds
 
-    /**
-     * Grace period after joining a world / changing dimension before any
-     * auto-trigger is allowed. This prevents the runtime from firing a
-     * cutscene before the seen-cache and player-data caches have arrived
-     * from the server, and before the player's chunks are fully loaded.
-     */
+    /** Brief grace period after joining or changing dimension. */
     private static final int JOIN_GRACE_TICKS = 4; // ~0.2 seconds
-    private static final int FIRST_JOIN_GRACE_TICKS = 35 * 20;
     private static int joinGraceTicks = JOIN_GRACE_TICKS;
     private static ResourceKey<Level> lastDimension = null;
-
-    /** Maps event trigger location names to their dimension keys. */
-    private static final Map<String, ResourceKey<Level>> LOCATION_TO_DIMENSION = Map.ofEntries(
-            Map.entry("beach", ModDimensions.STARDEW_VALLEY),
-            Map.entry("town", ModDimensions.STARDEW_VALLEY),
-            Map.entry("farm", ModDimensions.STARDEW_VALLEY),
-            Map.entry("forest", ModDimensions.STARDEW_VALLEY),
-            Map.entry("mountain", ModDimensions.STARDEW_VALLEY),
-            Map.entry("trailer", ModDimensions.STARDEW_VALLEY),
-            Map.entry("seedshop", ModDimensions.STARDEW_VALLEY),
-            Map.entry("saloon", ModDimensions.STARDEW_VALLEY),
-            Map.entry("sciencehouse", ModDimensions.STARDEW_VALLEY),
-            Map.entry("haleyhouse", ModDimensions.STARDEW_VALLEY),
-            Map.entry("joshhouse", ModDimensions.STARDEW_VALLEY),
-            Map.entry("mine", ModMiningDimensions.STARDEW_MINING)
-    );
-
-    /**
-     * Locations whose dimension is dedicated entirely to that location.
-     * For these, an enter_area event without AABB triggers anywhere
-     * in the matching dimension (the dimension itself = the location).
-     * Locations NOT listed here share STARDEW_VALLEY with other locations
-     * (beach/town/farm/forest/mountain) and therefore REQUIRE an explicit
-     * AABB to disambiguate which sub-region the player is in.
-     */
-    private static final java.util.Set<String> WHOLE_DIMENSION_LOCATIONS = java.util.Set.of(
-            "mine"
-    );
 
     private EventTriggerChecker() {}
 
@@ -89,10 +57,6 @@ public final class EventTriggerChecker {
             return;
         }
 
-        tickCounter++;
-        if (tickCounter < CHECK_INTERVAL) return;
-        tickCounter = 0;
-
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null) return;
 
@@ -108,20 +72,23 @@ public final class EventTriggerChecker {
             return;
         }
 
-        // Reset grace on dimension change. Initial login gets a longer grace:
-        // auth/login plugins often prompt via chat after the world loads, and
-        // auto-starting a cutscene immediately can hide the GUI until the server
-        // kicks the player for login timeout.
+        // Cache sync checks below already protect initial login from stale data,
+        // so dimension changes only need a few real client ticks for the level
+        // and player position to settle.
         if (lastDimension != currentDim) {
-            boolean firstDimensionSeen = lastDimension == null;
             lastDimension = currentDim;
-            joinGraceTicks = firstDimensionSeen ? FIRST_JOIN_GRACE_TICKS : JOIN_GRACE_TICKS;
+            joinGraceTicks = JOIN_GRACE_TICKS;
+            tickCounter = 0;
         }
 
+        tickCounter++;
         if (joinGraceTicks > 0) {
             joinGraceTicks--;
-            return;
+            if (joinGraceTicks > 0) return;
         }
+
+        if (tickCounter < CHECK_INTERVAL) return;
+        tickCounter = 0;
 
         // Wait for every client cache that any precondition could read. If any of these
         // is stale (pre-login defaults / previous world's data), negative preconditions
@@ -131,6 +98,7 @@ public final class EventTriggerChecker {
         // has already walked past the trigger area.
         if (!ClientEventSeenCache.isSynced()) return;
         if (!com.stardew.craft.client.ClientPlayerDataCache.isSynced()) return;
+        if (!com.stardew.craft.client.ClientMuseumDonationCache.isSynced()) return;
         if (!com.stardew.craft.client.NpcFriendshipClientCache.isSynced()) return;
         if (!com.stardew.craft.weather.ClientWeatherCache.isSynced()) return;
         if (!com.stardew.craft.client.hud.StardewTimeHud.isTimeSynced()) return;
@@ -144,14 +112,10 @@ public final class EventTriggerChecker {
         net.minecraft.core.BlockPos playerBlock = localPlayer.blockPosition();
         if (!localLevel.isLoaded(playerBlock)) return;
 
-        checkEnterAreaEvents(localPlayer, currentDim);
+        checkEnterAreaEvents(localPlayer);
     }
 
-    private static void checkEnterAreaEvents(LocalPlayer player, ResourceKey<Level> currentDim) {
-        double px = player.getX();
-        double py = player.getY();
-        double pz = player.getZ();
-
+    private static void checkEnterAreaEvents(LocalPlayer player) {
         for (EventData event : EventRegistry.all()) {
             EventTrigger trigger = event.trigger();
             if (!"enter_area".equals(trigger.type())) continue;
@@ -159,29 +123,7 @@ public final class EventTriggerChecker {
             String location = trigger.location();
             if (location == null) continue; // ill-formed event, skip
 
-            // 1) Dimension gate: the player's current dimension must match the
-            //    dimension that this location lives in. Unknown locations are
-            //    rejected to avoid accidental dimension-wide triggers.
-            ResourceKey<Level> expectedDim = LOCATION_TO_DIMENSION.get(location);
-            if (expectedDim == null || expectedDim != currentDim) continue;
-
-            // 2) Sub-region gate:
-            //    - If the dimension is shared by multiple locations
-            //      (e.g. STARDEW_VALLEY hosts beach/town/farm/...),
-            //      the event MUST define an explicit AABB.
-            //    - If the location occupies its entire dimension (e.g. "mine"),
-            //      AABB is optional; missing AABB means "anywhere in the dim".
-            double[] min = trigger.areaMin();
-            double[] max = trigger.areaMax();
-            boolean wholeDim = WHOLE_DIMENSION_LOCATIONS.contains(location);
-            if (min == null || max == null) {
-                if (!wholeDim) continue; // sub-area location must specify AABB
-            } else {
-                if (min.length < 3 || max.length < 3) continue;
-                if (px < min[0] || px > max[0]) continue;
-                if (py < min[1] || py > max[1]) continue;
-                if (pz < min[2] || pz > max[2]) continue;
-            }
+            if (!CutsceneTriggerLocations.contains(player, trigger)) continue;
 
             // 3) Per-event seen check (server-synced)
             if (ClientEventSeenCache.hasSeen(event.id())) continue;
@@ -189,8 +131,8 @@ public final class EventTriggerChecker {
             // 4) Preconditions
             if (!PreconditionEvaluator.evaluate(event.preconditions())) continue;
 
-            // Trigger!
-            EventPlayer.get().start(event);
+            PacketDistributor.sendToServer(new NotifyCutsceneStartPayload(event.id()));
+            cooldownTicks = 20;
             return; // only one event at a time
         }
     }

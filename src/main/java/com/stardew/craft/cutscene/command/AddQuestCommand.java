@@ -1,8 +1,6 @@
 package com.stardew.craft.cutscene.command;
 
-import com.stardew.craft.cutscene.network.CutsceneServerActionPayload;
 import com.stardew.craft.cutscene.runtime.EventPlayer;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * add_quest: accept a quest by id (server-side).
@@ -17,8 +15,7 @@ public class AddQuestCommand implements EventCommand {
 
     @Override
     public void start(EventPlayer player) {
-        PacketDistributor.sendToServer(
-            new CutsceneServerActionPayload("add_quest", questId));
+        player.sendServerAction("add_quest", questId);
     }
 
     @Override public void tick(EventPlayer player) {}

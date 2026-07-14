@@ -1,0 +1,34 @@
+{
+  "legacy_id": "Gunther",
+  "requester": "Gunther",
+  "duration": "week",
+  "repeatable": false,
+  "required_tags": [],
+  "title": "stardewcraft.special_orders.Gunther.name",
+  "text": "stardewcraft.special_orders.Gunther.text",
+  "objectives": [
+    {
+      "type": "collect",
+      "text": "stardewcraft.special_orders.Gunther_Objective_1_Text",
+      "required_count": 100,
+      "accepted_tags": "bone_item"
+    },
+    {
+      "type": "donate",
+      "text": "stardewcraft.special_orders.Gunther_Objective_0_Text",
+      "required_count": 100,
+      "accepted_tags": "bone_item",
+      "drop_box": "GuntherBox"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "money",
+      "amount": 3500
+    },
+    {
+      "type": "mail",
+      "mail": "guntherBones"
+    }
+  ]
+}

@@ -507,16 +507,16 @@ public class PlayerDataCommand {
         }
 
         if (data.hasPendingProfessionChoices()) {
-            context.getSource().sendSuccess(() -> Component.literal("待选职业："), false);
+            context.getSource().sendSuccess(() -> Component.translatable("stardewcraft.command.profession.pending_header"), false);
             int index = 1;
             for (PlayerStardewData.ProfessionChoicePrompt prompt : data.getPendingProfessionChoices()) {
                 SkillType skill = prompt.skill();
                 int level = prompt.level();
-                String options = getChoiceOptionsText(skill, level, data);
+                Component options = getChoiceOptionsText(skill, level, data);
                 int currentIndex = index;
-                context.getSource().sendSuccess(() -> Component.literal(
-                    "  " + currentIndex + ") " + skill.getDisplayName() + " Lv." + level + " -> " + options
-                ), false);
+                context.getSource().sendSuccess(() -> Component.translatable(
+                    "stardewcraft.command.profession.pending_entry",
+                    currentIndex, skill.getDisplayName(), level, options), false);
                 index++;
             }
         }
@@ -554,10 +554,10 @@ public class PlayerDataCommand {
         return null;
     }
 
-    private static String getChoiceOptionsText(SkillType skill, int level, PlayerStardewData data) {
+    private static Component getChoiceOptionsText(SkillType skill, int level, PlayerStardewData data) {
         if (level == 5) {
             ProfessionType[] options = ProfessionType.getLevel5Options(skill);
-            return options[0].getName() + " | " + options[1].getName();
+            return Component.literal(options[0].getName() + " | " + options[1].getName());
         }
         if (level == 10) {
             ProfessionType level5 = null;
@@ -570,10 +570,10 @@ public class PlayerDataCommand {
             }
             if (level5 != null) {
                 ProfessionType[] options = ProfessionType.getLevel10Options(skill, level5);
-                return options[0].getName() + " | " + options[1].getName();
+                return Component.literal(options[0].getName() + " | " + options[1].getName());
             }
         }
-        return "(无可用选项)";
+        return Component.translatable("stardewcraft.command.profession.no_options");
     }
 
     private static int listProfessions(CommandContext<CommandSourceStack> context) {
@@ -582,11 +582,11 @@ public class PlayerDataCommand {
 
         PlayerStardewData data = PlayerStardewDataAPI.getData(player);
         if (data.getProfessions().isEmpty()) {
-            context.getSource().sendSuccess(() -> Component.literal("当前没有已选职业。"), false);
+            context.getSource().sendSuccess(() -> Component.translatable("stardewcraft.command.profession.none_selected"), false);
             return 1;
         }
 
-        context.getSource().sendSuccess(() -> Component.literal("已选职业："), false);
+        context.getSource().sendSuccess(() -> Component.translatable("stardewcraft.command.profession.selected_header"), false);
         for (int professionId : data.getProfessions()) {
             ProfessionType profession = ProfessionType.fromId(professionId);
             if (profession != null) {
@@ -604,20 +604,20 @@ public class PlayerDataCommand {
 
         PlayerStardewData data = PlayerStardewDataAPI.getData(player);
         if (!data.hasPendingProfessionChoices()) {
-            context.getSource().sendSuccess(() -> Component.literal("当前没有待选职业。"), false);
+            context.getSource().sendSuccess(() -> Component.translatable("stardewcraft.command.profession.none_pending"), false);
             return 1;
         }
 
-        context.getSource().sendSuccess(() -> Component.literal("待选职业队列："), false);
+        context.getSource().sendSuccess(() -> Component.translatable("stardewcraft.command.profession.pending_queue_header"), false);
         int index = 1;
         for (PlayerStardewData.ProfessionChoicePrompt prompt : data.getPendingProfessionChoices()) {
             SkillType skill = prompt.skill();
             int level = prompt.level();
             int currentIndex = index;
-            String options = getChoiceOptionsText(skill, level, data);
-            context.getSource().sendSuccess(() -> Component.literal(
-                "" + currentIndex + ") " + skill.getName() + " Lv." + level + " -> " + options
-            ), false);
+            Component options = getChoiceOptionsText(skill, level, data);
+            context.getSource().sendSuccess(() -> Component.translatable(
+                "stardewcraft.command.profession.pending_entry",
+                currentIndex, skill.getDisplayName(), level, options), false);
             index++;
         }
         return 1;
@@ -629,17 +629,18 @@ public class PlayerDataCommand {
 
         ProfessionType profession = parseProfession(context);
         if (profession == null) {
-            sendFailure(context.getSource(), "未知职业名称。");
+            sendFailure(context.getSource(), "stardewcraft.command.profession.unknown");
             return 0;
         }
 
         boolean success = PlayerStardewDataAPI.choosePendingProfession(player, profession);
         if (!success) {
-            sendFailure(context.getSource(), "职业选择失败：请先查看 /stardew player profession pending 的队列与可选项。");
+            sendFailure(context.getSource(), "stardewcraft.command.profession.choose_failed");
             return 0;
         }
 
-        context.getSource().sendSuccess(() -> Component.literal("已选择职业：" + profession.getName()), true);
+        context.getSource().sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.profession.chosen", profession.getDisplayName()), true);
         return 1;
     }
 
@@ -649,17 +650,18 @@ public class PlayerDataCommand {
 
         ProfessionType profession = parseProfession(context);
         if (profession == null) {
-            sendFailure(context.getSource(), "未知职业名称。");
+            sendFailure(context.getSource(), "stardewcraft.command.profession.unknown");
             return 0;
         }
 
         boolean changed = PlayerStardewDataAPI.addProfession(player, profession);
         if (!changed) {
-            sendFailure(context.getSource(), "玩家已拥有该职业。");
+            sendFailure(context.getSource(), "stardewcraft.command.profession.already_owned");
             return 0;
         }
 
-        context.getSource().sendSuccess(() -> Component.literal("已授予职业：" + profession.getName()), true);
+        context.getSource().sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.profession.granted", profession.getDisplayName()), true);
         return 1;
     }
 
@@ -669,17 +671,18 @@ public class PlayerDataCommand {
 
         ProfessionType profession = parseProfession(context);
         if (profession == null) {
-            sendFailure(context.getSource(), "未知职业名称。");
+            sendFailure(context.getSource(), "stardewcraft.command.profession.unknown");
             return 0;
         }
 
         boolean changed = PlayerStardewDataAPI.removeProfession(player, profession);
         if (!changed) {
-            sendFailure(context.getSource(), "玩家未拥有该职业。");
+            sendFailure(context.getSource(), "stardewcraft.command.profession.not_owned");
             return 0;
         }
 
-        context.getSource().sendSuccess(() -> Component.literal("已移除职业：" + profession.getName()), true);
+        context.getSource().sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.profession.revoked", profession.getDisplayName()), true);
         return 1;
     }
 
@@ -689,11 +692,11 @@ public class PlayerDataCommand {
 
         boolean changed = PlayerStardewDataAPI.clearProfessions(player);
         if (!changed) {
-            sendFailure(context.getSource(), "当前没有可清空的职业。");
+            sendFailure(context.getSource(), "stardewcraft.command.profession.nothing_to_clear");
             return 0;
         }
 
-        context.getSource().sendSuccess(() -> Component.literal("已清空职业，并按当前技能等级重建待选队列。"), true);
+        context.getSource().sendSuccess(() -> Component.translatable("stardewcraft.command.profession.cleared"), true);
         return 1;
     }
 
@@ -702,13 +705,13 @@ public class PlayerDataCommand {
         if (player == null) return 0;
 
         PlayerStardewDataAPI.repairMissingProfessionChoices(player);
-        context.getSource().sendSuccess(() -> Component.literal("已按当前等级修复遗漏的职业待选项。"), false);
+        context.getSource().sendSuccess(() -> Component.translatable("stardewcraft.command.profession.repaired"), false);
         return 1;
     }
 
     @SuppressWarnings("null")
-    private static void sendFailure(CommandSourceStack source, String message) {
-        source.sendFailure(Component.literal(message));
+    private static void sendFailure(CommandSourceStack source, String key) {
+        source.sendFailure(Component.translatable(key));
     }
     
     /**
@@ -725,8 +728,8 @@ public class PlayerDataCommand {
         int newExp = PlayerStardewDataAPI.getSkillExperience(player, skill);
         
         if (leveledUp) {
-            context.getSource().sendSuccess(() -> Component.literal(
-                "经验已增加并达到升级阈值，等级将在夜间结算时生效。当前已生效等级: " + newLevel), true);
+            context.getSource().sendSuccess(() -> Component.translatable(
+                "stardewcraft.command.exp.pending_level_up", newLevel), true);
         } else {
             context.getSource().sendSuccess(() -> Component.translatable(
                 "stardewcraft.command.exp.added", amount, skill.getDisplayName(), newExp), false);
@@ -985,10 +988,9 @@ public class PlayerDataCommand {
         } catch (Exception ignored) {}
 
         int finalCleared = cleared;
-        context.getSource().sendSuccess(() -> Component.literal(
-            "§a玩家 " + player.getName().getString() + " 的模组数据已完全重置！"
-            + "\n§7  - 清除了 " + finalCleared + " 个数据系统"
-            + "\n§7  - 移除了 " + tagCount + " 个 persistentData 标签"), true);
+        context.getSource().sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.player.reset_complete",
+            player.getName(), finalCleared, tagCount), true);
 
         return 1;
     }

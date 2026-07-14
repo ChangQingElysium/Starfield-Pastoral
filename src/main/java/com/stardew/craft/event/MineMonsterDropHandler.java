@@ -136,14 +136,12 @@ public class MineMonsterDropHandler {
 
         // ---- Monster Slayer kill tracking (SDV Gil goals) ----
         if (event.getSource() != null && event.getSource().getEntity() instanceof ServerPlayer player) {
+            java.util.Set<String> progressedGoals = new java.util.LinkedHashSet<>();
             for (String tag : tags) {
-                String goalKey = MonsterSlayerGoalRegistry.getGoalKeyForTag(tag);
-                if (goalKey != null) {
-                    PlayerStardewData data = PlayerDataManager.getPlayerData(player);
-                    data.addMonsterKills(goalKey, 1);
-                    break;
-                }
+                progressedGoals.addAll(MonsterSlayerGoalRegistry.getGoalKeysForTag(tag));
             }
+            PlayerStardewData slayerData = PlayerDataManager.getPlayerData(player);
+            progressedGoals.forEach(goalKey -> slayerData.addMonsterKills(goalKey, 1));
             for (String tag : tags) {
                 if (tag.startsWith("sd_mob_")) {
                     com.stardew.craft.quest.StardewQuestEvents.fireMonsterSlain(player, tag);

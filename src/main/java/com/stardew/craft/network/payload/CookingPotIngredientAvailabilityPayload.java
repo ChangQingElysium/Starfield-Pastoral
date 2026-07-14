@@ -6,7 +6,7 @@ import com.stardew.craft.block.utility.CookingPotBlock;
 import com.stardew.craft.blockentity.FridgeBlockEntity;
 import com.stardew.craft.cooking.service.CookingPotService;
 import com.stardew.craft.cooking.service.VanillaCookingRecipeData;
-import com.stardew.craft.item.ModItems;
+import com.stardew.craft.api.v1.production.StardewCookingIngredient;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,7 +37,7 @@ public record CookingPotIngredientAvailabilityPayload(Map<String, Integer> fridg
                 Map<String, Integer> counts = payload.fridgeTokenCounts == null ? Map.of() : payload.fridgeTokenCounts;
                 buf.writeVarInt(counts.size());
                 for (Map.Entry<String, Integer> entry : counts.entrySet()) {
-                    buf.writeUtf(entry.getKey(), 64);
+                    buf.writeUtf(entry.getKey(), 256);
                     buf.writeVarInt(Math.max(0, entry.getValue()));
                 }
             },
@@ -45,7 +45,7 @@ public record CookingPotIngredientAvailabilityPayload(Map<String, Integer> fridg
                 int size = Math.max(0, buf.readVarInt());
                 Map<String, Integer> counts = new HashMap<>();
                 for (int i = 0; i < size; i++) {
-                    String token = buf.readUtf(64);
+                    String token = buf.readUtf(256);
                     int count = Math.max(0, buf.readVarInt());
                     counts.put(token, count);
                 }
@@ -64,10 +64,11 @@ public record CookingPotIngredientAvailabilityPayload(Map<String, Integer> fridg
 
     public static CookingPotIngredientAvailabilityPayload fromPlayer(ServerPlayer player) {
         List<FridgeBlockEntity> nearbyFridges = findNearbyFridges(player);
-        Set<String> tokens = collectAllCookingTokens();
+        Map<String, StardewCookingIngredient> ingredients = collectAllCookingIngredients();
         Map<String, Integer> counts = new HashMap<>();
-        for (String token : tokens) {
-            Predicate<ItemStack> matcher = stack -> VanillaCookingRecipeData.matchesToken(stack, token);
+        for (Map.Entry<String, StardewCookingIngredient> entry : ingredients.entrySet()) {
+            String token = entry.getKey();
+            Predicate<ItemStack> matcher = stack -> VanillaCookingRecipeData.matches(stack, entry.getValue());
             int count = countMatchingFridges(nearbyFridges, matcher);
             if (count > 0) {
                 counts.put(token, count);
@@ -76,16 +77,14 @@ public record CookingPotIngredientAvailabilityPayload(Map<String, Integer> fridg
         return new CookingPotIngredientAvailabilityPayload(counts);
     }
 
-    private static Set<String> collectAllCookingTokens() {
-        Set<String> tokens = new LinkedHashSet<>();
-        for (String dishId : ModItems.COOKING_DISHES.keySet()) {
-            for (VanillaCookingRecipeData.IngredientRequirement requirement : VanillaCookingRecipeData.getRequirements(dishId)) {
-                if (requirement.token() != null && !requirement.token().isBlank()) {
-                    tokens.add(requirement.token());
-                }
+    private static Map<String, StardewCookingIngredient> collectAllCookingIngredients() {
+        Map<String, StardewCookingIngredient> ingredients = new java.util.LinkedHashMap<>();
+        for (ResourceLocation recipeId : VanillaCookingRecipeData.getRecipeIds()) {
+            for (StardewCookingIngredient ingredient : VanillaCookingRecipeData.getRequirements(recipeId)) {
+                ingredients.putIfAbsent(ingredient.matcherKey(), ingredient);
             }
         }
-        return tokens;
+        return ingredients;
     }
 
     private static int countMatchingFridges(List<FridgeBlockEntity> fridges, Predicate<ItemStack> matcher) {

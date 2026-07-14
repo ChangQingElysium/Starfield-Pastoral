@@ -97,8 +97,9 @@ public final class FarmCaveAPI {
 
     private static void broadcastChoice(ServerLevel level, FarmInstance farm, FarmCaveChoice choice) {
         var server = level.getServer();
-        net.minecraft.network.chat.Component msg = net.minecraft.network.chat.Component.literal(
-                "§6[农场洞穴] §f" + farm.getOwnerName() + " §e将洞穴类型设为 §f" + choice.getName());
+        net.minecraft.network.chat.Component msg = net.minecraft.network.chat.Component.translatable(
+                "stardewcraft.farm_cave.choice_broadcast", farm.getOwnerName(),
+                net.minecraft.network.chat.Component.translatable("stardewcraft.farm_cave.choice." + choice.getName()));
         for (UUID uuid : farm.getAllFarmers()) {
             ServerPlayer sp = server.getPlayerList().getPlayer(uuid);
             if (sp != null) sp.sendSystemMessage(msg);

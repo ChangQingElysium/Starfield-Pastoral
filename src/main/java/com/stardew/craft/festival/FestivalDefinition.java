@@ -1,14 +1,19 @@
 package com.stardew.craft.festival;
 
+import com.stardew.craft.api.v1.condition.StardewCondition;
+import net.minecraft.resources.ResourceLocation;
+
 import java.util.List;
 import java.util.Map;
 
 public record FestivalDefinition(
+    ResourceLocation resourceId,
     String id,
     FestivalType type,
     String sourceName,
     String sourceDisplayToken,
     String sourceCondition,
+    List<StardewCondition> availableWhen,
     int season,
     int startDay,
     int endDay,
@@ -26,6 +31,9 @@ public record FestivalDefinition(
     String mechanicId
 ) {
     public FestivalDefinition {
+        if (resourceId == null) {
+            throw new IllegalArgumentException("festival resource id must not be null");
+        }
         if (id == null || id.isBlank()) {
             throw new IllegalArgumentException("festival id must not be blank");
         }
@@ -41,6 +49,7 @@ public record FestivalDefinition(
         sourceName = sourceName == null ? id : sourceName;
         sourceDisplayToken = sourceDisplayToken == null ? "" : sourceDisplayToken;
         sourceCondition = sourceCondition == null ? "" : sourceCondition;
+        availableWhen = availableWhen == null ? List.of() : List.copyOf(availableWhen);
         startMessageToken = startMessageToken == null ? "" : startMessageToken;
         startMessageKey = startMessageKey == null ? "" : startMessageKey;
         announcementMailId = announcementMailId == null ? "" : announcementMailId;

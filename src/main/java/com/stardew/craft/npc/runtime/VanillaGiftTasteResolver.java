@@ -4,7 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.stardew.craft.item.IStardewItem;
+import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -240,11 +240,8 @@ final class VanillaGiftTasteResolver {
     }
 
     private static Set<String> typeContextTags(ItemStack held) {
-        if (!(held.getItem() instanceof IStardewItem stardewItem)) {
-            return Set.of();
-        }
-        String typeKey = stardewItem.getItemTypeKey();
-        if (typeKey == null || typeKey.isBlank()) {
+        String typeKey = StardewItemDataApi.getTypeKey(held);
+        if (typeKey.isBlank()) {
             return Set.of();
         }
         return switch (typeKey.trim().toLowerCase(Locale.ROOT)) {
@@ -263,11 +260,8 @@ final class VanillaGiftTasteResolver {
     }
 
     private static String fallbackCategoryToken(ItemStack held) {
-        if (!(held.getItem() instanceof IStardewItem stardewItem)) {
-            return null;
-        }
-        String typeKey = stardewItem.getItemTypeKey();
-        if (typeKey == null) {
+        String typeKey = StardewItemDataApi.getTypeKey(held);
+        if (typeKey.isBlank()) {
             return null;
         }
         String path = BuiltInRegistries.ITEM.getKey(held.getItem()).getPath().toLowerCase(Locale.ROOT);

@@ -1,0 +1,98 @@
+{
+  "id": "0",
+  "skippable": true,
+  "trigger": {
+    "type": "enter_area",
+    "location": "archaeologyhouse",
+    "area_min": [108, 37, 29],
+    "area_max": [178, 41, 56]
+  },
+  "preconditions": [
+    { "type": "not_saw_event", "id": "0" },
+    { "type": "has_museum_donation" },
+    { "type": "museum_empty" }
+  ],
+  "commands": [
+    { "cmd": "comment", "text": "=== SDV ArchaeologyHouse Event 0: Gunther museum introduction ===" },
+
+    { "cmd": "lock_player" },
+    { "cmd": "fade", "mode": "out", "ticks": 10 },
+    { "cmd": "hide_npc", "npc_id": "gunther" },
+
+    { "cmd": "spawn_actor", "actor": "fake_player", "npc_id": "player",
+      "x": 137.5, "y": 38, "z": 44.5, "relative": false, "facing": -90 },
+    { "cmd": "spawn_actor", "actor": "gunther", "npc_id": "gunther",
+      "x": 147.5, "y": 38, "z": 43.5, "relative": false, "facing": 0 },
+
+    { "cmd": "camera", "x": 145.017, "y": 40.200, "z": 51.059,
+      "yaw": -178.0, "pitch": 34.6, "relative": false },
+    { "cmd": "music", "track": "MUSIC_LIBRARY" },
+
+    { "cmd": "remove_quest", "quest_id": "23" },
+    { "cmd": "add_quest", "quest_id": "24" },
+    { "cmd": "skippable" },
+
+    { "cmd": "fade", "mode": "in", "ticks": 20 },
+    { "cmd": "pause", "ticks": 20 },
+
+    { "cmd": "face_actor", "actor": "gunther", "yaw": -90 },
+    { "cmd": "pause", "ticks": 10 },
+    { "cmd": "face_actor", "actor": "gunther", "yaw": 0 },
+    { "cmd": "pause", "ticks": 10 },
+    { "cmd": "face_actor", "actor": "gunther", "yaw": 90 },
+    { "cmd": "pause", "ticks": 10 },
+    { "cmd": "face_actor", "actor": "gunther", "yaw": 0 },
+    { "cmd": "pause", "ticks": 20 },
+    { "cmd": "speak", "npc_id": "gunther", "text": "event.museum_archaeology_intro.empty" },
+
+    { "cmd": "move_actor", "actor": "fake_player",
+      "x": 145.5, "y": 38, "z": 44.5, "ticks": 80, "relative": false },
+    { "cmd": "face_actor", "actor": "fake_player", "yaw": -90 },
+    { "cmd": "face_actor", "actor": "gunther", "yaw": 90 },
+    { "cmd": "pause", "ticks": 16 },
+    { "cmd": "emote", "actor": "gunther", "emote": "exclamation" },
+    { "cmd": "jump", "actor": "gunther", "strength": 0.42 },
+    { "cmd": "pause", "ticks": 16 },
+    { "cmd": "speak", "npc_id": "gunther", "text": "event.museum_archaeology_intro.found" },
+
+    { "cmd": "move_actor", "actor": "fake_player",
+      "x": 145.5, "y": 38, "z": 43.5, "ticks": 18, "relative": false },
+    { "cmd": "face_actor", "actor": "fake_player", "yaw": -90 },
+    { "cmd": "move_actor", "actor": "fake_player",
+      "x": 146.5, "y": 38, "z": 43.5, "ticks": 18, "relative": false },
+    { "cmd": "face_actor", "actor": "fake_player", "yaw": -90 },
+    { "cmd": "pause", "ticks": 10 },
+    { "cmd": "play_sound", "sound": "stardewcraft:coin" },
+    { "cmd": "animate", "actor": "gunther", "anim": "walk", "loop": true },
+    { "cmd": "pause", "ticks": 60 },
+    { "cmd": "animate", "actor": "gunther", "anim": "idle", "loop": true },
+    { "cmd": "speak", "npc_id": "gunther", "text": "event.museum_archaeology_intro.remarkable" },
+
+    { "cmd": "face_actor", "actor": "gunther", "yaw": 90 },
+    { "cmd": "pause", "ticks": 20 },
+    { "cmd": "speak", "npc_id": "gunther", "text": "event.museum_archaeology_intro.favor" },
+    { "cmd": "pause", "ticks": 20 },
+    { "cmd": "face_actor", "actor": "gunther", "yaw": 0 },
+    { "cmd": "pause", "ticks": 10 },
+    { "cmd": "speak", "npc_id": "gunther", "text": "event.museum_archaeology_intro.front_desk" },
+
+    { "cmd": "move_actor", "actor": "fake_player",
+      "x": 142.5, "y": 38, "z": 43.5, "ticks": 48, "relative": false },
+    { "cmd": "face_actor", "actor": "fake_player", "yaw": 0 },
+    { "cmd": "pause", "ticks": 8 },
+    { "cmd": "move_actor", "actor": "fake_player",
+      "x": 142.5, "y": 38, "z": 44.5, "ticks": 18, "relative": false },
+    { "cmd": "face_actor", "actor": "fake_player", "yaw": 90 },
+    { "cmd": "move_actor", "actor": "fake_player",
+      "x": 133.5, "y": 38, "z": 44.5, "ticks": 90, "relative": false },
+    { "cmd": "face_actor", "actor": "fake_player", "yaw": 90 },
+    { "cmd": "pause", "ticks": 20 },
+
+    { "cmd": "fade", "mode": "out", "ticks": 20 },
+    { "cmd": "remove_actor", "actor": "gunther" },
+    { "cmd": "remove_actor", "actor": "fake_player" },
+    { "cmd": "show_npc", "npc_id": "gunther" },
+    { "cmd": "unlock_player" },
+    { "cmd": "end" }
+  ]
+}

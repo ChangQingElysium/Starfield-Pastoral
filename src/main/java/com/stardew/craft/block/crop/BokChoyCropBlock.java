@@ -75,7 +75,7 @@ public class BokChoyCropBlock extends StardewCropBlock {
     }
 
     @Override
-    public String getCropDisplayName() {
-        return "小白菜";
+    public String getCropDisplayNameKey() {
+        return "item.stardewcraft.bok_choy";
     }
 }

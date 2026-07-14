@@ -16,19 +16,27 @@ import java.util.ArrayList;
 /**
  * Client → Server: notify that the player finished watching an event.
  */
-public record MarkEventSeenPayload(String eventId) implements CustomPacketPayload {
+public record MarkEventSeenPayload(String eventId, long sessionId) implements CustomPacketPayload {
 
     public static final Type<MarkEventSeenPayload> TYPE = new Type<>(
             ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "mark_event_seen"));
 
     public static final StreamCodec<ByteBuf, MarkEventSeenPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.STRING_UTF8, MarkEventSeenPayload::eventId,
+            ByteBufCodecs.VAR_LONG, MarkEventSeenPayload::sessionId,
             MarkEventSeenPayload::new);
 
     @SuppressWarnings("null")
     public static void handle(MarkEventSeenPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
             ServerPlayer player = (ServerPlayer) context.player();
+            if (!com.stardew.craft.cutscene.server.ServerCutsceneTracker.authorizeCompletion(
+                    player, payload.sessionId, payload.eventId)) {
+                com.mojang.logging.LogUtils.getLogger().warn(
+                        "Rejected unauthorized cutscene completion '{}' from {}",
+                        payload.eventId, player.getName().getString());
+                return;
+            }
             // Cutscene ended client-side: release server-side action lock
             com.stardew.craft.cutscene.server.ServerCutsceneTracker.clear(player);
             com.stardew.craft.festival.EggFestivalService.onCutsceneCompleted(player, payload.eventId);

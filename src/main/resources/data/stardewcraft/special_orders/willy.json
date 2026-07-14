@@ -1,0 +1,35 @@
+{
+  "legacy_id": "Willy",
+  "requester": "Willy",
+  "duration": "week",
+  "repeatable": false,
+  "required_tags": [],
+  "title": "stardewcraft.special_orders.Willy.name",
+  "text": "stardewcraft.special_orders.Willy.text",
+  "objectives": [
+    {
+      "type": "collect",
+      "text": "stardewcraft.special_orders.Willy_Objective_0_Text",
+      "required_count": 100,
+      "accepted_tags": "item_bug_meat"
+    },
+    {
+      "type": "donate",
+      "text": "stardewcraft.special_orders.Willy_Objective_1_Text",
+      "required_count": 100,
+      "accepted_tags": "item_bug_meat",
+      "drop_box": "WillyBarrel"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "money",
+      "amount": 3000
+    },
+    {
+      "type": "mail",
+      "mail": "willyBugWadCutscene",
+      "no_letter": true
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "skill": "stardewcraft:farming",
+  "required_level": 5,
+  "name_key": "stardewcraft.levelup.profession.1.name",
+  "desc_key": "stardewcraft.levelup.profession.1.desc",
+  "effect_handler": "example_stardew_addon:apple_tiller"
+}

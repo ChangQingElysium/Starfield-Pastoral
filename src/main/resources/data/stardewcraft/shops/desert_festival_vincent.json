@@ -1,0 +1,50 @@
+{
+  "legacy_id": "DesertFestival_Vincent",
+  "owner_npc": "vincent",
+  "owner_dialogue": "stardewcraft.festival.desertfestival.dialogue.vendor",
+  "entries": [
+    {
+      "item": "stardewcraft:fiber",
+      "stock": 1,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 1
+    },
+    {
+      "item": "stardewcraft:bug_meat",
+      "stock": 3,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 1
+    },
+    {
+      "item": "stardewcraft:sap",
+      "stock": 1,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 1
+    },
+    {
+      "item": "stardewcraft:cave_carrot",
+      "stock": 1,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 2
+    },
+    {
+      "item": "stardewcraft:skeletal_hand",
+      "stock": 1,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 2
+    },
+    {
+      "item": "stardewcraft:clay",
+      "stock": 20,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 1
+    },
+    {
+      "item": "stardewcraft:chipped_amphora",
+      "stock": 1,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 1
+    }
+  ],
+  "accepted_sell_types": []
+}

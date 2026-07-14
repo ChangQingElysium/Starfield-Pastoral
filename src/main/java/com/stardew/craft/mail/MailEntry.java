@@ -1,73 +1,53 @@
 package com.stardew.craft.mail;
 
+import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.action.StardewAction;
+import com.stardew.craft.api.v1.condition.StardewCondition;
+import com.stardew.craft.api.v1.mail.StardewMailDefinition;
+import net.minecraft.resources.ResourceLocation;
+
 import javax.annotation.Nullable;
 import java.util.List;
 
-/**
- * 数据驱动的邮件定义，对齐 SDV Data/mail 格式。
- * <p>
- * JSON 结构示例:
- * <pre>
- * {
- *   "id": "spring_2_1",
- *   "text": "亲爱的@：...[#]来自皮埃尔",
- *   "background": 0,
- *   "textColor": null,
- *   "attachedItems": [{"id": "stardewcraft:parsnip_seeds", "count": 15}],
- *   "money": 0,
- *   "learnedRecipe": null,
- *   "recipeIsCooking": false,
- *   "questId": null,
- *   "specialOrderId": null
- * }
- * </pre>
- */
-public class MailEntry {
+/** Compatibility view over the public namespaced mail definition. */
+public final class MailEntry {
+    private final ResourceLocation id;
+    private final String displayId;
+    private final StardewMailDefinition definition;
 
-    private final String id;
-    private final String text;
-    private final int background;           // whichBG index (0-4)
-    @Nullable private final String customBgTexture;  // [letterbg path index] override
-    @Nullable private final String textColor;        // [textcolor xxx]
-    private final List<AttachedItem> attachedItems;
-    private final int money;
-    @Nullable private final String learnedRecipe;
-    private final boolean recipeIsCooking;
-    @Nullable private final String questId;
-    @Nullable private final String specialOrderId;
-
-    public MailEntry(String id, String text, int background,
-                     @Nullable String customBgTexture, @Nullable String textColor,
-                     List<AttachedItem> attachedItems, int money,
-                     @Nullable String learnedRecipe, boolean recipeIsCooking,
-                     @Nullable String questId, @Nullable String specialOrderId) {
+    MailEntry(ResourceLocation id, String displayId, StardewMailDefinition definition) {
         this.id = id;
-        this.text = text;
-        this.background = background;
-        this.customBgTexture = customBgTexture;
-        this.textColor = textColor;
-        this.attachedItems = attachedItems;
-        this.money = money;
-        this.learnedRecipe = learnedRecipe;
-        this.recipeIsCooking = recipeIsCooking;
-        this.questId = questId;
-        this.specialOrderId = specialOrderId;
+        this.displayId = displayId;
+        this.definition = definition;
     }
 
-    public String getId() { return id; }
-    public String getText() { return text; }
-    public int getBackground() { return background; }
-    @Nullable public String getCustomBgTexture() { return customBgTexture; }
-    @Nullable public String getTextColor() { return textColor; }
-    public List<AttachedItem> getAttachedItems() { return attachedItems; }
-    public int getMoney() { return money; }
-    @Nullable public String getLearnedRecipe() { return learnedRecipe; }
-    public boolean isRecipeIsCooking() { return recipeIsCooking; }
-    @Nullable public String getQuestId() { return questId; }
-    @Nullable public String getSpecialOrderId() { return specialOrderId; }
+    public ResourceLocation definitionId() { return id; }
+    public StardewMailDefinition definition() { return definition; }
+    public String getId() { return displayId; }
+    public String getText() { return definition.text(); }
+    public int getBackground() { return definition.background(); }
+    @Nullable public String getCustomBgTexture() { return definition.customBackgroundTexture().orElse(null); }
+    @Nullable public String getTextColor() { return definition.textColor().orElse(null); }
+    public List<AttachedItem> getAttachedItems() {
+        return definition.attachedItems().stream()
+                .map(item -> new AttachedItem(item.item().toString(), item.count()))
+                .toList();
+    }
+    public int getMoney() { return definition.money(); }
+    @Nullable public String getLearnedRecipe() { return definition.learnedRecipe().orElse(null); }
+    public boolean isRecipeIsCooking() { return definition.recipeIsCooking(); }
+    @Nullable public String getQuestId() { return definition.quest().map(MailEntry::displayLinkedId).orElse(null); }
+    @Nullable public String getSpecialOrderId() {
+        return definition.specialOrder().map(ResourceLocation::toString).orElse(null);
+    }
+    public List<StardewCondition> availableWhen() { return definition.availableWhen(); }
+    public List<StardewAction> onDelivery() { return definition.onDelivery(); }
+    public List<StardewAction> onRead() { return definition.onRead(); }
 
-    /**
-     * 邮件附带物品。
-     */
+    private static String displayLinkedId(ResourceLocation id) {
+        return StardewCraft.MODID.equals(id.getNamespace()) && id.getPath().matches("\\d+")
+                ? id.getPath() : id.toString();
+    }
+
     public record AttachedItem(String id, int count) {}
 }

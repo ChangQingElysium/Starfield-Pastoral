@@ -2,7 +2,8 @@
   {
     "id": "wizardJunimoNote",
     "text": "stardewcraft.mail.wizardJunimoNote",
-    "background": 2
+    "background": 2,
+    "questId": "1"
   },
   {
     "id": "pamNewChannel",
@@ -11,329 +12,329 @@
   },
   {
     "id": "robinWell",
-    "text": "@你好：\n\n如果你有兴趣的话，我可以帮你在农场建一口水井。\n\n有了水井就不用大老远跑去湖边取水浇地了。来我这儿看看吧！\n\n——罗宾",
+    "text": "stardewcraft.mail.robinWell",
     "background": 0
   },
   {
     "id": "robinCoop",
-    "text": "@：\n\n我注意到你的农场还没有鸡舍。\n\n想养鸡的话，先来找我建一个鸡舍吧！有了鸡舍你就可以去玛妮那里买小鸡了。\n\n——罗宾",
+    "text": "stardewcraft.mail.robinCoop",
     "background": 0
   },
   {
     "id": "robinBarn",
-    "text": "@你好：\n\n如果你想养牛或者山羊，你需要一个畜棚。\n\n带上足够的木材和金币来找我就行！\n\n——罗宾",
+    "text": "stardewcraft.mail.robinBarn",
     "background": 0
   },
   {
     "id": "pierreGeneral",
-    "text": "@你好：\n\n我店里最近进了一批新种子，快来看看吧！\n\n别忘了每个季节的种子都不一样，要趁季节开始的时候买哦。\n\n——皮埃尔",
+    "text": "stardewcraft.mail.pierreGeneral",
     "background": 0
   },
   {
     "id": "demetriusCave",
-    "text": "致 @：\n\n我注意到你农场附近有一个山洞。我想在那里做一些研究。\n\n你想把它用来养蝙蝠还是种蘑菇？来找我谈谈吧。\n\n——德米特里厄斯",
+    "text": "stardewcraft.mail.demetriusCave",
     "background": 0
   },
   {
     "id": "elliottBook",
-    "text": "亲爱的@：\n\n我最近在写一本新小说，灵感来自于这个小镇。\n\n你的农场生活给了我很多灵感。也许有一天我会把你写进故事里。\n\n——艾利奥特",
+    "text": "stardewcraft.mail.elliottBook",
     "background": 0
   },
   {
     "id": "gusRecipe",
-    "text": "@你好：\n\n我是格斯，酒吧的厨师兼老板。\n\n最近研究出了一种新菜谱，特别适合忙碌的农夫。来酒吧坐坐的时候我教你做！\n\n——格斯",
+    "text": "stardewcraft.mail.gusRecipe",
     "background": 0
   },
   {
     "id": "marnieAnimal",
-    "text": "嘿 @：\n\n你想养些动物吗？我牧场里有各种家畜出售。\n\n鸡、鸭、牛、羊……只要你有鸡舍或畜棚就行！\n\n——玛妮",
+    "text": "stardewcraft.mail.marnieAnimal",
     "background": 0
   },
   {
     "id": "linusTip",
-    "text": "@：\n\n我在山里生活了很多年，学到了一些野外生存的技巧。\n\n如果你在外面走路的时候注意观察地面，有时候能挖到好东西。\n\n——莱纳斯",
+    "text": "stardewcraft.mail.linusTip",
     "background": 0
   },
   {
     "id": "linusTrash",
-    "text": "致 @：\n\n捡垃圾可能听起来不太体面，但你不会相信人们会扔掉什么好东西。\n\n路过镇上的垃圾桶时可以翻翻看……不过别被别人看到！\n\n——莱纳斯",
+    "text": "stardewcraft.mail.linusTrash",
     "background": 0
   },
   {
     "id": "levelUp_farming_2",
-    "text": "@你好：\n\n恭喜你的种田技能提升了！\n\n随着技能的提高，你的庄稼品质也会越来越好。继续加油！\n\n——镇长刘易斯",
+    "text": "stardewcraft.mail.levelUp_farming_2",
     "background": 0
   },
   {
     "id": "levelUp_mining_2",
-    "text": "致 @：\n\n听说你的挖矿技术又进步了。\n\n更高的挖矿技能意味着你可以在每个矿石里找到更多的矿物。\n\n——克林特",
+    "text": "stardewcraft.mail.levelUp_mining_2",
     "background": 0
   },
   {
     "id": "levelUp_fishing_2",
-    "text": "@：\n\n你的钓鱼技术越来越好了！\n\n技能越高，能钓到的鱼种类就越多。继续练习吧！\n\n——威利",
+    "text": "stardewcraft.mail.levelUp_fishing_2",
     "background": 0
   },
   {
     "id": "levelUp_foraging_2",
-    "text": "嘿 @：\n\n你对山野植物的了解越来越深了。\n\n觅食技能提高后，你能找到品质更好的野生物品。\n\n——莱纳斯",
+    "text": "stardewcraft.mail.levelUp_foraging_2",
     "background": 0
   },
   {
     "id": "friendshipRecipeCarolineParsnipSoup",
-    "text": "亲爱的@：\n\n我把一份防风草汤的做法抄给你。它味道温和，很适合忙了一天之后暖暖胃。\n\n——卡洛琳",
+    "text": "stardewcraft.mail.friendshipRecipeCarolineParsnipSoup",
     "background": 0,
     "learnedRecipe": "parsnip_soup",
     "recipeIsCooking": true
   },
   {
     "id": "friendshipRecipeCarolineVegetableMedley",
-    "text": "亲爱的@：\n\n这是我常做的蔬菜什锦。只要食材新鲜，做起来并不复杂，希望你会喜欢。\n\n——卡洛琳",
+    "text": "stardewcraft.mail.friendshipRecipeCarolineVegetableMedley",
     "background": 0,
     "learnedRecipe": "vegetable_medley",
     "recipeIsCooking": true
   },
   {
     "id": "friendshipRecipeClintAlgaeSoup",
-    "text": "@：\n\n矿洞里有时候没什么像样的吃的。我把海藻汤的做法写在下面，也许你下矿前能用得上。\n\n——克林特",
+    "text": "stardewcraft.mail.friendshipRecipeClintAlgaeSoup",
     "background": 0,
     "learnedRecipe": "algae_soup",
     "recipeIsCooking": true
   },
   {
     "id": "friendshipRecipeClintBeanHotpot",
-    "text": "@：\n\n这是豆类火锅的做法。它很实在，热量也够。呃……希望你觉得有用。\n\n——克林特",
+    "text": "stardewcraft.mail.friendshipRecipeClintBeanHotpot",
     "background": 0,
     "learnedRecipe": "bean_hotpot",
     "recipeIsCooking": true
   },
   {
     "id": "friendshipRecipeDemetriusFriedMushroom",
-    "text": "@：\n\n蘑菇如果处理得当，营养价值很不错。我附上了炸蘑菇的步骤，供你参考。\n\n——德米特里厄斯",
+    "text": "stardewcraft.mail.friendshipRecipeDemetriusFriedMushroom",
     "background": 0,
     "learnedRecipe": "fried_mushroom",
     "recipeIsCooking": true
   },
   {
     "id": "friendshipRecipeDemetriusAutumnsBounty",
-    "text": "@：\n\n秋天的作物很适合搭配成一道丰收佳肴。我整理了一份配方，希望对你的农场生活有帮助。\n\n——德米特里厄斯",
+    "text": "stardewcraft.mail.friendshipRecipeDemetriusAutumnsBounty",
     "background": 0,
     "learnedRecipe": "autumn_s_bounty",
     "recipeIsCooking": true
   },
   {
     "id": "friendshipRecipeEmilySalad",
-    "text": "嗨，@！\n\n新鲜蔬菜有一种很轻盈的能量。我把沙拉的做法寄给你，愿它让你今天也闪闪发亮。\n\n——艾米丽",
+    "text": "stardewcraft.mail.friendshipRecipeEmilySalad",
     "background": 0,
     "learnedRecipe": "salad",
     "recipeIsCooking": true
   },
   {
     "id": "friendshipRecipeEmilyRedPlate",
-    "text": "嗨，@！\n\n红色的食物总让我想到热情和勇气。这道红之盛宴送给你。\n\n——艾米丽",
+    "text": "stardewcraft.mail.friendshipRecipeEmilyRedPlate",
     "background": 0,
     "learnedRecipe": "red_plate",
     "recipeIsCooking": true
   },
   {
     "id": "friendshipRecipeEvelynRicePudding",
-    "text": "亲爱的@：\n\n我年轻时常做米布丁。它简单、香甜，也很适合和朋友分享。\n\n——艾芙琳",
+    "text": "stardewcraft.mail.friendshipRecipeEvelynRicePudding",
     "background": 0,
     "learnedRecipe": "rice_pudding",
     "recipeIsCooking": true
   },
   {
     "id": "friendshipRecipeGeorgeFriedEel",
-    "text": "@：\n\n别把鳗鱼做得软趴趴的。照这个方法炸，味道会好很多。\n\n——乔治",
+    "text": "stardewcraft.mail.friendshipRecipeGeorgeFriedEel",
     "background": 0,
     "learnedRecipe": "fried_eel",
     "recipeIsCooking": true
   },
   {
     "id": "friendshipRecipeGeorgeSpicyEel",
-    "text": "@：\n\n既然你已经学会炸鳗鱼了，再试试这个辣一点的版本。别放太多辣椒，除非你真扛得住。\n\n——乔治",
+    "text": "stardewcraft.mail.friendshipRecipeGeorgeSpicyEel",
     "background": 0,
     "learnedRecipe": "spicy_eel",
     "recipeIsCooking": true
   },
   {
     "id": "friendshipRecipeGusSalmonDinner",
-    "text": "你好，@：\n\n这是一份鲑鱼晚餐的配方。好食材配上耐心，往往就能做出让人安心的一餐。\n\n——格斯",
+    "text": "stardewcraft.mail.friendshipRecipeGusSalmonDinner",
     "background": 0,
     "learnedRecipe": "salmon_dinner",
     "recipeIsCooking": true
   },
   {
     "id": "friendshipRecipeGusCranberrySauce",
-    "text": "你好，@：\n\n蔓越莓酱很适合节日餐桌，也能让普通的一餐变得明亮。我把做法写在下面。\n\n——格斯",
+    "text": "stardewcraft.mail.friendshipRecipeGusCranberrySauce",
     "background": 0,
     "learnedRecipe": "cranberry_sauce",
     "recipeIsCooking": true
   },
   {
     "id": "friendshipRecipeJodiFriedCalamari",
-    "text": "@你好：\n\n我家里很喜欢炸鱿鱼。火候要快，外面酥了就可以出锅。\n\n——乔迪",
+    "text": "stardewcraft.mail.friendshipRecipeJodiFriedCalamari",
     "background": 0,
     "learnedRecipe": "fried_calamari",
     "recipeIsCooking": true
   },
   {
     "id": "friendshipRecipeJodiIceCream",
-    "text": "@你好：\n\n天气热的时候，没有什么比一份冰淇淋更让人开心了。这个做法你可以留着试试。\n\n——乔迪",
+    "text": "stardewcraft.mail.friendshipRecipeJodiIceCream",
     "background": 0,
     "learnedRecipe": "ice_cream",
     "recipeIsCooking": true
   },
   {
     "id": "friendshipRecipeKentCrispyBass",
-    "text": "@：\n\n这份香酥鲈鱼的做法很直接。把步骤记牢，处理鱼的时候手要稳。\n\n——肯特",
+    "text": "stardewcraft.mail.friendshipRecipeKentCrispyBass",
     "background": 0,
     "learnedRecipe": "crispy_bass",
     "recipeIsCooking": true
   },
   {
     "id": "friendshipRecipeKentSuperMeal",
-    "text": "@：\n\n干重活前要吃点扎实的东西。这份超级大餐应该能帮你撑过忙碌的一天。\n\n——肯特",
+    "text": "stardewcraft.mail.friendshipRecipeKentSuperMeal",
     "background": 0,
     "learnedRecipe": "super_meal",
     "recipeIsCooking": true
   },
   {
     "id": "friendshipRecipeLeoPoi",
-    "text": "@：\n\n这是我很熟悉的一种食物。把芋头慢慢捣好，味道会变得很温柔。\n\n——雷欧",
+    "text": "stardewcraft.mail.friendshipRecipeLeoPoi",
     "background": 0,
     "learnedRecipe": "poi",
     "recipeIsCooking": true
   },
   {
     "id": "friendshipRecipeLeoMangoStickyRice",
-    "text": "@：\n\n芒果和糯米放在一起很好吃。我把做法写给你，希望你也会喜欢。\n\n——雷欧",
+    "text": "stardewcraft.mail.friendshipRecipeLeoMangoStickyRice",
     "background": 0,
     "learnedRecipe": "mango_sticky_rice",
     "recipeIsCooking": true
   },
   {
     "id": "friendshipRecipeLewisSpaghetti",
-    "text": "@你好：\n\n镇长的工作很忙，但一盘意大利面总能让人恢复精神。把这份配方收下吧。\n\n——刘易斯",
+    "text": "stardewcraft.mail.friendshipRecipeLewisSpaghetti",
     "background": 0,
     "learnedRecipe": "spaghetti",
     "recipeIsCooking": true
   },
   {
     "id": "friendshipRecipeLewisEggplantParmesan",
-    "text": "@你好：\n\n这是茄子帕尔玛干酪的做法。做得好时，它会比看起来更让人满足。\n\n——刘易斯",
+    "text": "stardewcraft.mail.friendshipRecipeLewisEggplantParmesan",
     "background": 0,
     "learnedRecipe": "eggplant_parmesan",
     "recipeIsCooking": true
   },
   {
     "id": "friendshipRecipeLinusSashimi",
-    "text": "@：\n\n如果鱼足够新鲜，其实不需要太复杂的处理。我把生鱼片的做法写给你。\n\n——莱纳斯",
+    "text": "stardewcraft.mail.friendshipRecipeLinusSashimi",
     "background": 0,
     "learnedRecipe": "sashimi",
     "recipeIsCooking": true
   },
   {
     "id": "friendshipRecipeLinusFishTaco",
-    "text": "@：\n\n野外生活教会我，简单的食材也能做得很好吃。这是鱼肉塔可的做法。\n\n——莱纳斯",
+    "text": "stardewcraft.mail.friendshipRecipeLinusFishTaco",
     "background": 0,
     "learnedRecipe": "fish_taco",
     "recipeIsCooking": true
   },
   {
     "id": "friendshipRecipeMarniePaleBroth",
-    "text": "嘿，@：\n\n照顾动物的时候，人也得照顾好自己。这份清汤很简单，身体不舒服时尤其合适。\n\n——玛妮",
+    "text": "stardewcraft.mail.friendshipRecipeMarniePaleBroth",
     "background": 0,
     "learnedRecipe": "pale_broth",
     "recipeIsCooking": true
   },
   {
     "id": "friendshipRecipeMarnieRhubarbPie",
-    "text": "嘿，@：\n\n大黄派酸甜又爽口。我把做法寄给你，有空可以烤一份。\n\n——玛妮",
+    "text": "stardewcraft.mail.friendshipRecipeMarnieRhubarbPie",
     "background": 0,
     "learnedRecipe": "rhubarb_pie",
     "recipeIsCooking": true
   },
   {
     "id": "friendshipRecipePamCheeseCauliflower",
-    "text": "嘿，@：\n\n菜花配奶酪，简单又顶饱。我把做法写给你，别烤糊就行。\n\n——潘姆",
+    "text": "stardewcraft.mail.friendshipRecipePamCheeseCauliflower",
     "background": 0,
     "learnedRecipe": "cheese_cauliflower",
     "recipeIsCooking": true
   },
   {
     "id": "friendshipRecipePamStuffing",
-    "text": "嘿，@：\n\n这份填料菜谱挺管用，节日不节日都能吃。拿去试试吧。\n\n——潘姆",
+    "text": "stardewcraft.mail.friendshipRecipePamStuffing",
     "background": 0,
     "learnedRecipe": "stuffing",
     "recipeIsCooking": true
   },
   {
     "id": "friendshipRecipePierreBlueberryTart",
-    "text": "@你好：\n\n蓝莓挞能让新鲜水果卖出更好的味道。作为本地商人，我强烈推荐你试试。\n\n——皮埃尔",
+    "text": "stardewcraft.mail.friendshipRecipePierreBlueberryTart",
     "background": 0,
     "learnedRecipe": "blueberry_tart",
     "recipeIsCooking": true
   },
   {
     "id": "friendshipRecipeRobinPumpkinSoup",
-    "text": "@你好：\n\n秋天干完木工活以后，一碗南瓜汤正合适。我把家里的做法抄给你。\n\n——罗宾",
+    "text": "stardewcraft.mail.friendshipRecipeRobinPumpkinSoup",
     "background": 0,
     "learnedRecipe": "pumpkin_soup",
     "recipeIsCooking": true
   },
   {
     "id": "friendshipRecipeSandyTomKhaSoup",
-    "text": "亲爱的@：\n\n沙漠里偶尔也需要一点异国风味。这份冬阴功汤做起来很香，记得趁热喝。\n\n——桑迪",
+    "text": "stardewcraft.mail.friendshipRecipeSandyTomKhaSoup",
     "background": 0,
     "learnedRecipe": "tom_kha_soup",
     "recipeIsCooking": true
   },
   {
     "id": "friendshipRecipeShanePepperPoppers",
-    "text": "@：\n\n辣椒爆弹很简单，也很够劲。别问我为什么会做，照着下面来就行。\n\n——谢恩",
+    "text": "stardewcraft.mail.friendshipRecipeShanePepperPoppers",
     "background": 0,
     "learnedRecipe": "pepper_poppers",
     "recipeIsCooking": true
   },
   {
     "id": "friendshipRecipeShaneFriedChickenFries",
-    "text": "@：\n\n炸鸡薯条不难，重点是油温和别把厨房弄得太糟。拿去吧，别到处说是我教你的。\n\n——谢恩",
+    "text": "stardewcraft.mail.friendshipRecipeShaneFriedChickenFries",
     "background": 0,
     "learnedRecipe": "fried_chicken_fries",
     "recipeIsCooking": true
   },
   {
     "id": "friendshipRecipeShaneStrangeBun",
-    "text": "@：\n\n这是奇怪小面包的做法。名字是有点怪，但味道……你自己试试吧。\n\n——谢恩",
+    "text": "stardewcraft.mail.friendshipRecipeShaneStrangeBun",
     "background": 0,
     "learnedRecipe": "strange_bun",
     "recipeIsCooking": true
   },
   {
     "id": "friendshipRecipeWillyChowder",
-    "text": "@：\n\n海上风冷，一碗杂烩汤最顶用。我把做法寄给你，愿它给你带来好运。\n\n——威利",
+    "text": "stardewcraft.mail.friendshipRecipeWillyChowder",
     "background": 0,
     "learnedRecipe": "chowder",
     "recipeIsCooking": true
   },
   {
     "id": "friendshipRecipeWillyEscargot",
-    "text": "@：\n\n蜗牛也能做成像样的菜，关键是耐心。下面这份焗蜗牛配方你收好。\n\n——威利",
+    "text": "stardewcraft.mail.friendshipRecipeWillyEscargot",
     "background": 0,
     "learnedRecipe": "escargot",
     "recipeIsCooking": true
   },
   {
     "id": "friendshipRecipeWillyFishStew",
-    "text": "@：\n\n鱼汤炖得久一点，味道会厚很多。这是我常用的鱼肉炖菜做法。\n\n——威利",
+    "text": "stardewcraft.mail.friendshipRecipeWillyFishStew",
     "background": 0,
     "learnedRecipe": "fish_stew",
     "recipeIsCooking": true
   },
   {
     "id": "friendshipRecipeWillyLobsterBisque",
-    "text": "@：\n\n龙虾浓汤是我很珍惜的一份配方。既然我们已经这么熟了，我想你值得学会它。\n\n——威利",
+    "text": "stardewcraft.mail.friendshipRecipeWillyLobsterBisque",
     "background": 0,
     "learnedRecipe": "lobster_bisque",
     "recipeIsCooking": true

@@ -1,0 +1,38 @@
+{
+  "legacy_id": "Linus",
+  "requester": "Linus",
+  "duration": "week",
+  "repeatable": false,
+  "required_tags": [],
+  "title": "stardewcraft.special_orders.Linus.name",
+  "text": "stardewcraft.special_orders.Linus.text",
+  "objectives": [
+    {
+      "type": "collect",
+      "text": "stardewcraft.special_orders.Linus_Objective_0_Text",
+      "required_count": 20,
+      "accepted_tags": "trash_item"
+    },
+    {
+      "type": "donate",
+      "text": "stardewcraft.special_orders.Linus_Objective_1_Text",
+      "required_count": 20,
+      "accepted_tags": "trash_item",
+      "drop_box": "Dumpster"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "money",
+      "amount": 500
+    },
+    {
+      "type": "mail",
+      "mail": "linusTrashCleanup"
+    },
+    {
+      "type": "friendship",
+      "amount": 250
+    }
+  ]
+}

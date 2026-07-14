@@ -1,0 +1,64 @@
+{
+  "legacy_id": "Festival_NightMarket_MagicBoat_Day3",
+  "owner_dialogue": "stardewcraft.shop.night_market.magic_boat.dialogue",
+  "entries": [
+    {
+      "item": "stardewcraft:corn_seeds",
+      "price": 75
+    },
+    {
+      "item": "stardewcraft:eggplant_seeds",
+      "price": 10
+    },
+    {
+      "item": "stardewcraft:pumpkin_seeds",
+      "price": 50
+    },
+    {
+      "item": "stardewcraft:bok_choy_seeds",
+      "price": 25
+    },
+    {
+      "item": "stardewcraft:yam_seeds",
+      "price": 30
+    },
+    {
+      "item": "stardewcraft:cranberry_seeds",
+      "price": 120
+    },
+    {
+      "item": "stardewcraft:wheat_seeds",
+      "price": 5
+    },
+    {
+      "item": "stardewcraft:fairy_rose_seeds",
+      "price": 100
+    },
+    {
+      "item": "stardewcraft:amaranth_seeds",
+      "price": 35
+    },
+    {
+      "item": "stardewcraft:grape_seeds",
+      "price": 30
+    },
+    {
+      "item": "stardewcraft:sunflower_seeds",
+      "price": 200
+    },
+    {
+      "item": "stardewcraft:artichoke_seeds",
+      "price": 15,
+      "min_year": 2
+    },
+    {
+      "item": "stardewcraft:scarecrow_7",
+      "price": 5000
+    },
+    {
+      "item": "stardewcraft:scarecrow_8",
+      "price": 5000
+    }
+  ],
+  "accepted_sell_types": []
+}

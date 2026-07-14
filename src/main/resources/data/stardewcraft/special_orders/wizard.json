@@ -1,0 +1,31 @@
+{
+  "legacy_id": "Wizard",
+  "requester": "Wizard",
+  "duration": "week",
+  "repeatable": false,
+  "required_tags": [],
+  "title": "stardewcraft.special_orders.Wizard.name",
+  "text": "stardewcraft.special_orders.Wizard.text",
+  "objectives": [
+    {
+      "type": "deliver",
+      "text": "stardewcraft.special_orders.Wizard_Objective_0_Text",
+      "required_count": 1,
+      "accepted_tags": "item_ectoplasm",
+      "target": "Wizard",
+      "message": "stardewcraft.special_orders.Wizard_Objective_0_Message"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "money",
+      "amount": 2500
+    },
+    {
+      "type": "mail",
+      "mail": "WizardReward2"
+    }
+  ],
+  "item_to_remove_on_end": "stardewcraft:ectoplasm",
+  "mail_to_remove_on_end": "ectoplasmDrop"
+}

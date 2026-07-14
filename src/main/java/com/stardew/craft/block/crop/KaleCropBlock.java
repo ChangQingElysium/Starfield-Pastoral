@@ -92,7 +92,7 @@ public class KaleCropBlock extends StardewCropBlock {
     }
 
     @Override
-    public String getCropDisplayName() {
-        return "甘蓝菜";
+    public String getCropDisplayNameKey() {
+        return "item.stardewcraft.kale";
     }
 }

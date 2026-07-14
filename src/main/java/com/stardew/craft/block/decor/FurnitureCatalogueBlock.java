@@ -1,6 +1,6 @@
 package com.stardew.craft.block.decor;
 
-import com.stardew.craft.item.IStardewItem;
+import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.network.payload.OpenShopScreenPayload;
 import com.stardew.craft.shop.ShopItemEntry;
 import net.minecraft.core.BlockPos;
@@ -66,8 +66,7 @@ public class FurnitureCatalogueBlock extends MapDecorStaticBlock {
     public static List<ShopItemEntry> buildCatalogueItems() {
         List<ShopItemEntry> items = new ArrayList<>();
         for (Item item : BuiltInRegistries.ITEM) {
-            if (!(item instanceof IStardewItem si)) continue;
-            String typeKey = si.getItemTypeKey();
+            String typeKey = StardewItemDataApi.getTypeKey(new net.minecraft.world.item.ItemStack(item));
             if ("stardewcraft.type.furniture".equals(typeKey)) {
                 ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
                 items.add(new ShopItemEntry(

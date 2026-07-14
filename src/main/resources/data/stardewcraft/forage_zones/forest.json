@@ -1,0 +1,19 @@
+{
+  "areas": [
+    { "min_x": -194, "min_y": 50, "min_z": -12, "max_x": -47, "max_y": 74, "max_z": 138 }
+  ],
+  "min_daily_spawn": 1,
+  "max_daily_spawn": 4,
+  "max_spawned_at_once": 6,
+  "entries": [
+    { "block": "stardewcraft:forage_wild_horseradish", "seasons": ["spring"], "chance": 0.9 },
+    { "block": "stardewcraft:forage_dandelion", "seasons": ["spring"], "chance": 0.9 },
+    { "block": "stardewcraft:forage_spice_berry", "seasons": ["summer"], "chance": 0.6 },
+    { "block": "stardewcraft:forage_sweet_pea", "seasons": ["summer"], "chance": 0.9 },
+    { "block": "stardewcraft:forage_common_mushroom", "seasons": ["fall"], "chance": 0.9 },
+    { "block": "stardewcraft:forage_blackberry", "seasons": ["fall"], "chance": 0.9 },
+    { "block": "stardewcraft:forage_crocus", "seasons": ["winter"], "chance": 0.9 },
+    { "block": "stardewcraft:forage_crystal_fruit", "seasons": ["winter"], "chance": 0.9 },
+    { "block": "stardewcraft:forage_holly", "seasons": ["winter"], "chance": 0.5 }
+  ]
+}

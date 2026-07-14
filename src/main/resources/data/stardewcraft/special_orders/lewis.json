@@ -1,0 +1,211 @@
+{
+  "legacy_id": "Lewis",
+  "requester": "Lewis",
+  "duration": "month",
+  "repeatable": true,
+  "required_tags": [
+    "!season_winter"
+  ],
+  "title": "stardewcraft.special_orders.Lewis.name",
+  "text": "stardewcraft.special_orders.Lewis.text",
+  "objectives": [
+    {
+      "type": "collect",
+      "text": "stardewcraft.special_orders.Lewis_Objective_1_Text",
+      "required_count": 100,
+      "accepted_tags": "{Crop:Tags}"
+    },
+    {
+      "type": "ship",
+      "text": "stardewcraft.special_orders.Lewis_Objective_0_Text",
+      "required_count": 100,
+      "accepted_tags": "{Crop:Tags}"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "money",
+      "amount": -50,
+      "mail": "{Crop:Price}"
+    },
+    {
+      "type": "mail",
+      "mail": "MSB_Lewis",
+      "host": true
+    }
+  ],
+  "random_elements": [
+    {
+      "name": "Crop",
+      "options": [
+        {
+          "required_tags": [
+            "season_spring"
+          ],
+          "values": {
+            "option.0.Text": "item.stardewcraft.potato",
+            "option.0.TextPlural": "stardewcraft.special_orders.random.potato.plural",
+            "option.0.TextPluralCapitalized": "stardewcraft.special_orders.random.potato.plural_capitalized",
+            "option.0.Tags": "item_potato",
+            "option.0.Price": "80",
+            "option.0.ItemId": "stardewcraft:potato",
+            "option.1.Text": "item.stardewcraft.green_bean",
+            "option.1.TextPlural": "stardewcraft.special_orders.random.green_bean.plural",
+            "option.1.TextPluralCapitalized": "stardewcraft.special_orders.random.green_bean.plural_capitalized",
+            "option.1.Tags": "item_green_bean",
+            "option.1.Price": "40",
+            "option.1.ItemId": "stardewcraft:green_bean",
+            "option.2.Text": "item.stardewcraft.garlic",
+            "option.2.TextPlural": "stardewcraft.special_orders.random.garlic.plural",
+            "option.2.TextPluralCapitalized": "stardewcraft.special_orders.random.garlic.plural_capitalized",
+            "option.2.Tags": "item_garlic",
+            "option.2.Price": "60",
+            "option.2.ItemId": "stardewcraft:garlic",
+            "option.3.Text": "item.stardewcraft.cauliflower",
+            "option.3.TextPlural": "stardewcraft.special_orders.random.cauliflower.plural",
+            "option.3.TextPluralCapitalized": "stardewcraft.special_orders.random.cauliflower.plural_capitalized",
+            "option.3.Tags": "item_cauliflower",
+            "option.3.Price": "175",
+            "option.3.ItemId": "stardewcraft:cauliflower",
+            "OptionCount": "4"
+          }
+        },
+        {
+          "required_tags": [
+            "season_summer"
+          ],
+          "values": {
+            "option.0.Text": "item.stardewcraft.tomato",
+            "option.0.TextPlural": "stardewcraft.special_orders.random.tomato.plural",
+            "option.0.TextPluralCapitalized": "stardewcraft.special_orders.random.tomato.plural_capitalized",
+            "option.0.Tags": "item_tomato",
+            "option.0.Price": "60",
+            "option.0.ItemId": "stardewcraft:tomato",
+            "option.1.Text": "item.stardewcraft.blueberry",
+            "option.1.TextPlural": "stardewcraft.special_orders.random.blueberry.plural",
+            "option.1.TextPluralCapitalized": "stardewcraft.special_orders.random.blueberry.plural_capitalized",
+            "option.1.Tags": "item_blueberry",
+            "option.1.Price": "50",
+            "option.1.ItemId": "stardewcraft:blueberry",
+            "option.2.Text": "item.stardewcraft.radish",
+            "option.2.TextPlural": "stardewcraft.special_orders.random.radish.plural",
+            "option.2.TextPluralCapitalized": "stardewcraft.special_orders.random.radish.plural_capitalized",
+            "option.2.Tags": "item_radish",
+            "option.2.Price": "90",
+            "option.2.ItemId": "stardewcraft:radish",
+            "option.3.Text": "item.stardewcraft.melon",
+            "option.3.TextPlural": "stardewcraft.special_orders.random.melon.plural",
+            "option.3.TextPluralCapitalized": "stardewcraft.special_orders.random.melon.plural_capitalized",
+            "option.3.Tags": "item_melon",
+            "option.3.Price": "250",
+            "option.3.ItemId": "stardewcraft:melon",
+            "option.4.Text": "item.stardewcraft.hot_pepper",
+            "option.4.TextPlural": "stardewcraft.special_orders.random.hot_pepper.plural",
+            "option.4.TextPluralCapitalized": "stardewcraft.special_orders.random.hot_pepper.plural_capitalized",
+            "option.4.Tags": "item_hot_pepper",
+            "option.4.Price": "40",
+            "option.4.ItemId": "stardewcraft:hot_pepper",
+            "option.5.Text": "item.stardewcraft.wheat",
+            "option.5.TextPlural": "stardewcraft.special_orders.random.wheat.plural",
+            "option.5.TextPluralCapitalized": "stardewcraft.special_orders.random.wheat.plural_capitalized",
+            "option.5.Tags": "item_wheat",
+            "option.5.Price": "25",
+            "option.5.ItemId": "stardewcraft:wheat",
+            "OptionCount": "6"
+          }
+        },
+        {
+          "required_tags": [
+            "season_fall"
+          ],
+          "values": {
+            "option.0.Text": "item.stardewcraft.pumpkin",
+            "option.0.TextPlural": "stardewcraft.special_orders.random.pumpkin.plural",
+            "option.0.TextPluralCapitalized": "stardewcraft.special_orders.random.pumpkin.plural_capitalized",
+            "option.0.Tags": "item_pumpkin",
+            "option.0.Price": "320",
+            "option.0.ItemId": "stardewcraft:pumpkin",
+            "option.1.Text": "item.stardewcraft.eggplant",
+            "option.1.TextPlural": "stardewcraft.special_orders.random.eggplant.plural",
+            "option.1.TextPluralCapitalized": "stardewcraft.special_orders.random.eggplant.plural_capitalized",
+            "option.1.Tags": "item_eggplant",
+            "option.1.Price": "60",
+            "option.1.ItemId": "stardewcraft:eggplant",
+            "option.2.Text": "item.stardewcraft.cranberries",
+            "option.2.TextPlural": "stardewcraft.special_orders.random.cranberries.plural",
+            "option.2.TextPluralCapitalized": "stardewcraft.special_orders.random.cranberries.plural_capitalized",
+            "option.2.Tags": "item_cranberries",
+            "option.2.Price": "75",
+            "option.2.ItemId": "stardewcraft:cranberries",
+            "option.3.Text": "item.stardewcraft.bok_choy",
+            "option.3.TextPlural": "stardewcraft.special_orders.random.bok_choy.plural",
+            "option.3.TextPluralCapitalized": "stardewcraft.special_orders.random.bok_choy.plural_capitalized",
+            "option.3.Tags": "item_bok_choy",
+            "option.3.Price": "80",
+            "option.3.ItemId": "stardewcraft:bok_choy",
+            "option.4.Text": "item.stardewcraft.amaranth",
+            "option.4.TextPlural": "stardewcraft.special_orders.random.amaranth.plural",
+            "option.4.TextPluralCapitalized": "stardewcraft.special_orders.random.amaranth.plural_capitalized",
+            "option.4.Tags": "item_amaranth",
+            "option.4.Price": "150",
+            "option.4.ItemId": "stardewcraft:amaranth",
+            "option.5.Text": "item.stardewcraft.grape",
+            "option.5.TextPlural": "stardewcraft.special_orders.random.grape.plural",
+            "option.5.TextPluralCapitalized": "stardewcraft.special_orders.random.grape.plural_capitalized",
+            "option.5.Tags": "item_grape",
+            "option.5.Price": "80",
+            "option.5.ItemId": "stardewcraft:grape",
+            "option.6.Text": "item.stardewcraft.yam",
+            "option.6.TextPlural": "stardewcraft.special_orders.random.yam.plural",
+            "option.6.TextPluralCapitalized": "stardewcraft.special_orders.random.yam.plural_capitalized",
+            "option.6.Tags": "item_yam",
+            "option.6.Price": "160",
+            "option.6.ItemId": "stardewcraft:yam",
+            "option.7.Text": "item.stardewcraft.artichoke",
+            "option.7.TextPlural": "stardewcraft.special_orders.random.artichoke.plural",
+            "option.7.TextPluralCapitalized": "stardewcraft.special_orders.random.artichoke.plural_capitalized",
+            "option.7.Tags": "item_artichoke",
+            "option.7.Price": "160",
+            "option.7.ItemId": "stardewcraft:artichoke",
+            "OptionCount": "8"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Text",
+      "options": [
+        {
+          "required_tags": [],
+          "values": {
+            "Text": "stardewcraft.special_orders.Lewis_RE_Text_0"
+          }
+        },
+        {
+          "required_tags": [],
+          "values": {
+            "Text": "stardewcraft.special_orders.Lewis_RE_Text_1"
+          }
+        },
+        {
+          "required_tags": [],
+          "values": {
+            "Text": "stardewcraft.special_orders.Lewis_RE_Text_2"
+          }
+        },
+        {
+          "required_tags": [],
+          "values": {
+            "Text": "stardewcraft.special_orders.Lewis_RE_Text_3"
+          }
+        },
+        {
+          "required_tags": [],
+          "values": {
+            "Text": "stardewcraft.special_orders.Lewis_RE_Text_4"
+          }
+        }
+      ]
+    }
+  ]
+}

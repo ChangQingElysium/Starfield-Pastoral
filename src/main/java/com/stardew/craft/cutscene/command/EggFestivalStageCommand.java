@@ -1,8 +1,6 @@
 package com.stardew.craft.cutscene.command;
 
-import com.stardew.craft.cutscene.network.CutsceneServerActionPayload;
 import com.stardew.craft.cutscene.runtime.EventPlayer;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 public class EggFestivalStageCommand implements EventCommand {
     private final String stage;
@@ -18,7 +16,7 @@ public class EggFestivalStageCommand implements EventCommand {
     @Override
     public void start(EventPlayer player) {
         player.markRealPlayerMovedByServer();
-        PacketDistributor.sendToServer(new CutsceneServerActionPayload("egg_festival_blackout", stage));
+        player.sendServerAction("egg_festival_blackout", stage);
         sent = true;
         ticks = 0;
     }

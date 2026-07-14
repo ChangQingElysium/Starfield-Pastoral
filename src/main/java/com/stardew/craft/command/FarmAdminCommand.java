@@ -68,9 +68,9 @@ public class FarmAdminCommand {
         PlayerStardewData data = PlayerStardewDataAPI.getData(target);
         data.addMailFlag(STARDEW_OP_FLAG);
 
-        ctx.getSource().sendSuccess(() -> Component.literal(
-                "§a已授予 " + target.getGameProfile().getName() + " 星露谷管理权限"), true);
-        target.displayClientMessage(Component.literal("§a你已获得星露谷管理权限，使用 /stardew admin 打开管理面板"), false);
+        ctx.getSource().sendSuccess(() -> Component.translatable(
+                "stardewcraft.command.admin.granted", target.getGameProfile().getName()), true);
+        target.displayClientMessage(Component.translatable("stardewcraft.command.admin.granted_target"), false);
         return 1;
     }
 
@@ -79,20 +79,20 @@ public class FarmAdminCommand {
         PlayerStardewData data = PlayerStardewDataAPI.getData(target);
         data.removeMailFlag(STARDEW_OP_FLAG);
 
-        ctx.getSource().sendSuccess(() -> Component.literal(
-                "§c已撤销 " + target.getGameProfile().getName() + " 的星露谷管理权限"), true);
-        target.displayClientMessage(Component.literal("§c你的星露谷管理权限已被撤销"), false);
+        ctx.getSource().sendSuccess(() -> Component.translatable(
+                "stardewcraft.command.admin.revoked", target.getGameProfile().getName()), true);
+        target.displayClientMessage(Component.translatable("stardewcraft.command.admin.revoked_target"), false);
         return 1;
     }
 
     private static int openAdmin(CommandContext<CommandSourceStack> ctx) {
         if (!(ctx.getSource().getEntity() instanceof ServerPlayer player)) {
-            ctx.getSource().sendFailure(Component.literal("Must be a player."));
+            ctx.getSource().sendFailure(Component.translatable("stardewcraft.command.player_required"));
             return 0;
         }
 
         if (!isStardewOp(player)) {
-            ctx.getSource().sendFailure(Component.literal("§c你没有星露谷管理权限。"));
+            ctx.getSource().sendFailure(Component.translatable("stardewcraft.command.admin.no_permission"));
             return 0;
         }
 

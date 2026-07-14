@@ -6,6 +6,7 @@ import com.stardew.craft.item.tool.PaintbrushItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.api.distmarker.Dist;
@@ -49,25 +50,25 @@ public final class PaintbrushModeIndicator {
         Font font = mc.font;
 
         // Build display text
-        String modeText;
+        Component modeText;
         int modeColor;
         if (mgr.getMode() == Mode.FLOOD_FILL) {
-            modeText = "刷漆模式：整面填充";
+            modeText = Component.translatable("stardewcraft.paintbrush.mode.flood_fill");
             modeColor = 0x88DDFF; // cool blue
         } else {
-            modeText = "刷漆模式：区域选择";
+            modeText = Component.translatable("stardewcraft.paintbrush.mode.region_select");
             modeColor = 0xFFD050; // warm gold
         }
 
         // Selection status for region mode
-        String statusText = null;
+        Component statusText = null;
         if (mgr.getMode() == Mode.REGION_SELECT) {
             if (!mgr.hasFirstPos()) {
-                statusText = "右键选择第一个角";
+                statusText = Component.translatable("stardewcraft.paintbrush.status.first_corner");
             } else if (!mgr.hasCompleteSelection()) {
-                statusText = "右键选择第二个角";
+                statusText = Component.translatable("stardewcraft.paintbrush.status.second_corner");
             } else {
-                statusText = "选区已完成 - 右键应用";
+                statusText = Component.translatable("stardewcraft.paintbrush.status.ready");
             }
         }
 
@@ -92,7 +93,7 @@ public final class PaintbrushModeIndicator {
         }
 
         // Hint text
-        String hint = "Shift+滚轮切换模式";
+        Component hint = Component.translatable("stardewcraft.paintbrush.hint.switch_mode");
         int hintW = font.width(hint);
         int hintX = (screenW - hintW) / 2;
         int hintAlpha = (int)(displayAlpha * 100);

@@ -1,0 +1,12 @@
+{
+  "id": "example_stardew_addon:apple_club_intro",
+  "skippable": true,
+  "trigger": {"type": "manual"},
+  "preconditions": [],
+  "commands": [
+    {"cmd": "lock_player"},
+    {"cmd": "message", "text": "Welcome to the apple club."},
+    {"cmd": "unlock_player"},
+    {"cmd": "end"}
+  ]
+}

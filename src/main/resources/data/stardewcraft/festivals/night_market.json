@@ -1,0 +1,21 @@
+{
+  "type": "passive",
+  "legacy_id": "NightMarket",
+  "display_name": "Night Market",
+  "season": 3,
+  "start_day": 15,
+  "end_day": 17,
+  "start_time": 1700,
+  "end_time": 2600,
+  "start_message_key": "message.stardewcraft.festival.passive.night_market.started",
+  "presentation": {
+    "display_token": "[LocalizedText Strings\\UI:Billboard_NightMarket]",
+    "start_message_token": "[LocalizedText Strings\\Events:BeachNightMarket_NowOpen]"
+  },
+  "world": {
+    "location": "Beach",
+    "map_overlay": "BeachNightMarket",
+    "map_replacements": {"Beach": "BeachNightMarket"},
+    "mechanic_id": "night_market"
+  }
+}

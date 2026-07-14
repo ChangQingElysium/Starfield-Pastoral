@@ -1,7 +1,9 @@
 package com.stardew.craft.blockentity;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Containers;
@@ -41,8 +43,16 @@ public final class UtilityDropHelper {
             return false;
         }
 
-        if (!player.addItem(product)) {
+        ItemStack harvested = product.copy();
+        int harvestedCount = harvested.getCount();
+        boolean addedAll = player.addItem(product);
+        int receivedCount = addedAll ? harvestedCount : Math.max(0, harvestedCount - product.getCount());
+        if (!addedAll && !product.isEmpty()) {
             player.drop(product, false);
+        }
+        if (receivedCount > 0 && player instanceof ServerPlayer serverPlayer) {
+            String itemId = BuiltInRegistries.ITEM.getKey(harvested.getItem()).toString();
+            com.stardew.craft.quest.StardewQuestEvents.fireItemReceived(serverPlayer, itemId, receivedCount);
         }
         grantHarvestRewards(level, pos, player, vanillaExperience);
         return true;

@@ -150,8 +150,10 @@ public class TeleportTotemItem extends Item implements IStardewItem {
         }
 
         level.playSound(null, mainPos, ModSounds.SMALL_SELECT.get(), SoundSource.BLOCKS, 0.8f, 1.05f);
-        player.displayClientMessage(
-                Component.translatable("message.stardewcraft.totem_bound", pole.getPoleName()), true);
+        Component poleName = pole.isSystemPole() && pole.getPoleName().startsWith("stardewcraft.")
+                ? Component.translatable(pole.getPoleName())
+                : Component.literal(pole.getPoleName());
+        player.displayClientMessage(Component.translatable("message.stardewcraft.totem_bound", poleName), true);
         return InteractionResult.SUCCESS;
     }
 

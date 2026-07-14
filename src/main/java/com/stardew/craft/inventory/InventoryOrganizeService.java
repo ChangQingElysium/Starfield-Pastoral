@@ -1,6 +1,6 @@
 package com.stardew.craft.inventory;
 
-import com.stardew.craft.item.IStardewItem;
+import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.item.quality.QualityHelper;
 import com.stardew.craft.item.weapon.IStardewWeapon;
 import net.minecraft.core.NonNullList;
@@ -187,14 +187,10 @@ public final class InventoryOrganizeService {
             return true;
         }
 
-        if (item instanceof IStardewItem stardewItem) {
-            String typeKey = stardewItem.getItemTypeKey();
-            return "stardewcraft.type.tool".equals(typeKey)
-                    || "stardewcraft.type.weapon".equals(typeKey)
-                    || typeKey.startsWith("stardewcraft.type.weapon.");
-        }
-
-        return false;
+        String typeKey = StardewItemDataApi.getTypeKey(stack);
+        return "stardewcraft.type.tool".equals(typeKey)
+                || "stardewcraft.type.weapon".equals(typeKey)
+                || typeKey.startsWith("stardewcraft.type.weapon.");
     }
 
     private static int typeSortValue(ItemStack stack) {
@@ -205,7 +201,7 @@ public final class InventoryOrganizeService {
         }
 
         Item item = stack.getItem();
-        if (item instanceof IStardewItem) {
+        if (!typeKey.isBlank()) {
             return TYPE_ORDER.size();
         }
         return TYPE_ORDER.size() + vanillaSortBucket(item);
@@ -217,11 +213,7 @@ public final class InventoryOrganizeService {
     }
 
     private static String typeKey(ItemStack stack) {
-        Item item = stack.getItem();
-        if (item instanceof IStardewItem stardewItem) {
-            return stardewItem.getItemTypeKey();
-        }
-        return "";
+        return StardewItemDataApi.getTypeKey(stack);
     }
 
     private static String registryPath(ItemStack stack) {

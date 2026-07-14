@@ -6,7 +6,10 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.stardew.craft.StardewCraft;
-import com.stardew.craft.item.IStardewItem;
+import com.stardew.craft.api.v1.content.AtomicDefinitionStore;
+import com.stardew.craft.api.v1.content.DefinitionDiagnostic;
+import com.stardew.craft.api.v1.content.DefinitionSnapshot;
+import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
@@ -21,6 +24,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -30,6 +34,7 @@ public final class ArtisanRecipeDataManager {
     }
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private static final AtomicDefinitionStore<Recipe> STORE = new AtomicDefinitionStore<>();
     private static volatile Map<String, List<Recipe>> RECIPES_BY_MACHINE = Collections.emptyMap();
     /** 缓存原始 JSON（SoftReference），内存紧张时可被 GC 回收，需要时重新生成 */
     private static volatile java.lang.ref.SoftReference<String> CACHED_JSON_REF = new java.lang.ref.SoftReference<>(null);
@@ -64,13 +69,16 @@ public final class ArtisanRecipeDataManager {
         try {
             com.google.gson.JsonObject root = GSON.fromJson(json, com.google.gson.JsonObject.class);
             if (root == null) return;
-            Map<String, List<Recipe>> loaded = new HashMap<>();
+            Map<String, List<Recipe>> loaded = new LinkedHashMap<>();
             for (Map.Entry<String, JsonElement> entry : root.entrySet()) {
-                String machineKey = entry.getKey();
+                ResourceLocation machineId = normalizeMachineId(entry.getKey(), StardewCraft.MODID);
+                if (machineId == null) continue;
+                String machineKey = machineId.toString();
                 JsonArray recipes = entry.getValue().getAsJsonArray();
                 List<Recipe> list = new ArrayList<>();
+                int index = 0;
                 for (JsonElement el : recipes) {
-                    Recipe r = recipeFromJson(el.getAsJsonObject());
+                    Recipe r = recipeFromJson(el.getAsJsonObject(), machineId, index++);
                     if (r != null) list.add(r);
                 }
                 loaded.put(machineKey, Collections.unmodifiableList(list));
@@ -83,7 +91,7 @@ public final class ArtisanRecipeDataManager {
     }
 
     @Nullable
-    private static Recipe recipeFromJson(JsonObject obj) {
+    private static Recipe recipeFromJson(JsonObject obj, ResourceLocation machineId, int index) {
         try {
             ResourceLocation inputId = obj.has("inputId") && !obj.get("inputId").isJsonNull()
                     ? ResourceLocation.tryParse(obj.get("inputId").getAsString()) : null;
@@ -108,7 +116,9 @@ public final class ArtisanRecipeDataManager {
                         sm.get("seedMin").getAsInt(), sm.get("seedMax").getAsInt());
             }
             OutputMode outputMode = OutputMode.valueOf(obj.get("outputMode").getAsString());
-            return new Recipe(inputId, inputTag, inputMode, outputId, outputCount, minutes,
+            ResourceLocation id = ResourceLocation.fromNamespaceAndPath(
+                    machineId.getNamespace(), "network/" + machineId.getPath() + "/" + index);
+            return new Recipe(id, machineId, inputId, inputTag, inputMode, outputId, outputCount, minutes,
                     consumeCount, keepInputQuality, outputQuality, preserveType, seedMakerRule, outputMode);
         } catch (Exception e) {
             return null;
@@ -139,7 +149,9 @@ public final class ArtisanRecipeDataManager {
 
     private static final SeedMakerRule DEFAULT_SEEDMAKER_RULE = new SeedMakerRule(0.005, 0.02, 1, 4, 1, 3);
 
-    public record Recipe(@Nullable ResourceLocation inputId,
+    public record Recipe(ResourceLocation id,
+                         ResourceLocation machine,
+                         @Nullable ResourceLocation inputId,
                          @Nullable TagKey<Item> inputTag,
                          InputMode inputMode,
                          @Nullable ResourceLocation outputId,
@@ -171,17 +183,16 @@ public final class ArtisanRecipeDataManager {
     }
 
     private static boolean matchesByMode(ItemStack stack, InputMode mode) {
-        Item item = stack.getItem();
-        if (!(item instanceof IStardewItem stardewItem)) {
-            return false;
-        }
-        String typeKey = stardewItem.getItemTypeKey();
+        ResourceLocation category = StardewItemDataApi.resolve(stack)
+                .map(data -> data.category())
+                .orElse(null);
+        if (category == null) return false;
         return switch (mode) {
-            case CROP_TYPE -> "stardewcraft.type.crop".equals(typeKey);
-            case MINERAL_TYPE -> "stardewcraft.type.mineral".equals(typeKey);
-            case FISH_TYPE -> "stardewcraft.type.fish".equals(typeKey)
-                    || "stardewcraft.type.crabpot".equals(typeKey)
-                    || "stardewcraft.type.legendary_fish".equals(typeKey);
+            case CROP_TYPE -> category.equals(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "crop"));
+            case MINERAL_TYPE -> category.equals(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "mineral"));
+            case FISH_TYPE -> category.equals(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "fish"))
+                    || category.equals(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "crabpot"))
+                    || category.equals(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "legendary_fish"));
             default -> false;
         };
     }
@@ -191,7 +202,9 @@ public final class ArtisanRecipeDataManager {
         if (machineKey == null || machineKey.isBlank() || stack == null || stack.isEmpty()) {
             return Optional.empty();
         }
-        List<Recipe> recipes = RECIPES_BY_MACHINE.get(machineKey);
+        ResourceLocation machineId = normalizeMachineId(machineKey, StardewCraft.MODID);
+        if (machineId == null) return Optional.empty();
+        List<Recipe> recipes = RECIPES_BY_MACHINE.get(machineId.toString());
         if (recipes == null || recipes.isEmpty()) {
             return Optional.empty();
         }
@@ -207,7 +220,9 @@ public final class ArtisanRecipeDataManager {
         if (machineKey == null || machineKey.isBlank() || outputId == null) {
             return Optional.empty();
         }
-        List<Recipe> recipes = RECIPES_BY_MACHINE.get(machineKey);
+        ResourceLocation machineId = normalizeMachineId(machineKey, StardewCraft.MODID);
+        if (machineId == null) return Optional.empty();
+        List<Recipe> recipes = RECIPES_BY_MACHINE.get(machineId.toString());
         if (recipes == null || recipes.isEmpty()) {
             return Optional.empty();
         }
@@ -223,12 +238,18 @@ public final class ArtisanRecipeDataManager {
         if (machineKey == null || machineKey.isBlank()) {
             return List.of();
         }
-        List<Recipe> recipes = RECIPES_BY_MACHINE.get(machineKey);
+        ResourceLocation machineId = normalizeMachineId(machineKey, StardewCraft.MODID);
+        if (machineId == null) return List.of();
+        List<Recipe> recipes = RECIPES_BY_MACHINE.get(machineId.toString());
         return recipes == null ? List.of() : recipes;
     }
 
     public static java.util.Set<String> getAllMachineKeys() {
         return RECIPES_BY_MACHINE.keySet();
+    }
+
+    public static DefinitionSnapshot<Recipe> snapshot() {
+        return STORE.snapshot();
     }
 
     public static final class ReloadListener extends SimpleJsonResourceReloadListener {
@@ -240,41 +261,61 @@ public final class ArtisanRecipeDataManager {
         protected void apply(@SuppressWarnings("null") Map<ResourceLocation, JsonElement> objects,
                              @SuppressWarnings("null") ResourceManager resourceManager,
                              @SuppressWarnings("null") ProfilerFiller profiler) {
-            Map<String, List<Recipe>> loaded = new HashMap<>();
-            for (Map.Entry<ResourceLocation, JsonElement> entry : objects.entrySet()) {
+            Map<ResourceLocation, Recipe> definitions = new LinkedHashMap<>();
+            Map<ResourceLocation, String> sources = new LinkedHashMap<>();
+            List<DefinitionDiagnostic> diagnostics = new ArrayList<>();
+            List<Map.Entry<ResourceLocation, JsonElement>> orderedResources = objects.entrySet().stream()
+                    .sorted(java.util.Comparator.comparing(entry -> entry.getKey().toString()))
+                    .toList();
+            for (Map.Entry<ResourceLocation, JsonElement> entry : orderedResources) {
                 ResourceLocation resourceId = entry.getKey();
                 JsonElement element = entry.getValue();
                 if (element == null || !element.isJsonObject()) {
+                    diagnostics.add(DefinitionDiagnostic.error(
+                            resourceId, resourceId, "Machine recipe resource must be an object"));
                     continue;
                 }
                 JsonObject root = element.getAsJsonObject();
-                String machineKey = readString(root, "machine");
-                if (machineKey == null || machineKey.isBlank()) {
-                    StardewCraft.LOGGER.warn("Artisan recipe {} missing machine key", resourceId);
+                ResourceLocation machineId = normalizeMachineId(readString(root, "machine"), resourceId.getNamespace());
+                if (machineId == null) {
+                    diagnostics.add(DefinitionDiagnostic.error(
+                            resourceId, resourceId, "Missing or invalid namespaced machine ID"));
                     continue;
                 }
-                JsonArray recipes = root.has("recipes") && root.get("recipes").isJsonArray()
-                        ? root.getAsJsonArray("recipes")
-                        : new JsonArray();
-                List<Recipe> list = loaded.computeIfAbsent(machineKey, key -> new ArrayList<>());
+                boolean grouped = root.has("recipes");
+                if (grouped && !root.get("recipes").isJsonArray()) {
+                    diagnostics.add(DefinitionDiagnostic.error(
+                            resourceId, resourceId, "Field 'recipes' must be an array"));
+                    continue;
+                }
+                JsonArray recipes = grouped ? root.getAsJsonArray("recipes") : singleton(root);
+                int recipeIndex = 0;
                 for (JsonElement recipeEl : recipes) {
+                    int currentIndex = recipeIndex++;
                     if (!recipeEl.isJsonObject()) {
+                        diagnostics.add(DefinitionDiagnostic.error(
+                                resourceId, definitionId(resourceId, grouped, currentIndex),
+                                "Machine recipe entry must be an object"));
                         continue;
                     }
                     JsonObject recipeObj = recipeEl.getAsJsonObject();
                     if (recipeObj.has("comment")) {
                         continue;
                     }
+                    ResourceLocation definitionId = definitionId(resourceId, grouped, currentIndex);
                     ResourceLocation inputId = readId(recipeObj, "input");
                     TagKey<Item> inputTag = readTag(recipeObj, "tag");
                     InputMode inputMode = readInputMode(recipeObj, "inputMode");
                     if (inputMode == InputMode.DEFAULT && inputId == null && inputTag == null) {
+                        diagnostics.add(DefinitionDiagnostic.error(
+                                resourceId, definitionId, "Recipe needs input, tag, or a supported inputMode"));
                         continue;
                     }
                     OutputMode outputMode = readOutputMode(recipeObj, "outputMode");
                     ResourceLocation outputId = readId(recipeObj, "output");
                     if (outputMode == OutputMode.FIXED && outputId == null) {
-                        StardewCraft.LOGGER.warn("Artisan recipe {} has invalid output", resourceId);
+                        diagnostics.add(DefinitionDiagnostic.error(
+                                resourceId, definitionId, "Fixed recipe needs a valid output item ID"));
                         continue;
                     }
                     int outputCount = readInt(recipeObj, "outputCount", 1);
@@ -286,26 +327,78 @@ public final class ArtisanRecipeDataManager {
                             ? readSeedMakerRule(recipeObj)
                             : null;
                     if (minutes <= 0) {
-                        StardewCraft.LOGGER.warn("Artisan recipe {} has invalid minutes", resourceId);
+                        diagnostics.add(DefinitionDiagnostic.error(
+                                resourceId, definitionId, "Recipe minutes must be positive"));
                         continue;
                     }
                     outputCount = Math.max(1, outputCount);
                     consumeCount = Math.max(1, consumeCount);
-                    list.add(new Recipe(inputId, inputTag, inputMode, outputId, outputCount, minutes, consumeCount,
-                            qualityRule.keepInputQuality(), qualityRule.outputQuality(), preserveType, seedMakerRule, outputMode));
+                    Recipe recipe = new Recipe(definitionId, machineId, inputId, inputTag, inputMode,
+                            outputId, outputCount, minutes, consumeCount, qualityRule.keepInputQuality(),
+                            qualityRule.outputQuality(), preserveType, seedMakerRule, outputMode);
+                    if (definitions.putIfAbsent(definitionId, recipe) != null) {
+                        diagnostics.add(DefinitionDiagnostic.error(
+                                resourceId, definitionId, "Duplicate machine recipe definition ID"));
+                    } else {
+                        JsonObject canonical = recipeObj.deepCopy();
+                        canonical.addProperty("machine", machineId.toString());
+                        sources.put(definitionId, GSON.toJson(canonical));
+                    }
                 }
             }
 
-            Map<String, List<Recipe>> frozen = new HashMap<>();
-            for (Map.Entry<String, List<Recipe>> entry : loaded.entrySet()) {
-                frozen.put(entry.getKey(), Collections.unmodifiableList(entry.getValue()));
+            AtomicDefinitionStore.ApplyResult<Recipe> result = STORE.applyLocal(definitions, sources, diagnostics);
+            for (DefinitionDiagnostic diagnostic : result.diagnostics()) {
+                String source = diagnostic.source() == null ? "<machine recipe reload>" : diagnostic.source().toString();
+                if (diagnostic.severity() == DefinitionDiagnostic.Severity.ERROR) {
+                    StardewCraft.LOGGER.error("[Machine recipe] Definition error [{}]: {}", source, diagnostic.message());
+                } else {
+                    StardewCraft.LOGGER.warn("[Machine recipe] Definition warning [{}]: {}", source, diagnostic.message());
+                }
             }
+            if (!result.accepted()) {
+                StardewCraft.LOGGER.error("[Machine recipe] Rejected snapshot; keeping v{} with {} recipes",
+                        result.snapshot().version(), result.snapshot().definitions().size());
+                return;
+            }
+
+            Map<String, List<Recipe>> loaded = new LinkedHashMap<>();
+            for (Recipe recipe : result.snapshot().definitions().values()) {
+                loaded.computeIfAbsent(recipe.machine().toString(), ignored -> new ArrayList<>()).add(recipe);
+            }
+            Map<String, List<Recipe>> frozen = new LinkedHashMap<>();
+            loaded.forEach((machine, recipeList) -> {
+                recipeList.sort(java.util.Comparator.comparingInt(ReloadListener::matcherPriority)
+                        .thenComparing(recipe -> recipe.id().toString()));
+                frozen.put(machine, List.copyOf(recipeList));
+            });
             RECIPES_BY_MACHINE = Collections.unmodifiableMap(frozen);
 
             // 清除旧的缓存引用，下次 getCachedJson() 时按需重建
             CACHED_JSON_REF = new java.lang.ref.SoftReference<>(null);
 
-            StardewCraft.LOGGER.info("Loaded artisan recipes: {} machines", RECIPES_BY_MACHINE.size());
+            StardewCraft.LOGGER.info("[Machine recipe] Applied snapshot v{} ({} recipes across {} machines)",
+                    result.snapshot().version(), result.snapshot().definitions().size(), RECIPES_BY_MACHINE.size());
+        }
+
+        private static ResourceLocation definitionId(ResourceLocation source, boolean grouped, int index) {
+            return grouped
+                    ? ResourceLocation.fromNamespaceAndPath(source.getNamespace(), source.getPath() + "/" + index)
+                    : source;
+        }
+
+        private static int matcherPriority(Recipe recipe) {
+            if (recipe.inputId() != null) return 0;
+            if (recipe.inputTag() != null) return 1;
+            return 2;
+        }
+
+        private static JsonArray singleton(JsonObject root) {
+            JsonObject recipe = root.deepCopy();
+            recipe.remove("machine");
+            JsonArray array = new JsonArray();
+            array.add(recipe);
+            return array;
         }
 
         @SuppressWarnings("null")
@@ -491,5 +584,14 @@ public final class ArtisanRecipeDataManager {
     }
 
     private record QualityRule(boolean keepInputQuality, int outputQuality) {
+    }
+
+    @Nullable
+    private static ResourceLocation normalizeMachineId(String raw, String defaultNamespace) {
+        if (raw == null || raw.isBlank()) return null;
+        String value = raw.trim();
+        return value.indexOf(':') >= 0
+                ? ResourceLocation.tryParse(value)
+                : ResourceLocation.tryBuild(defaultNamespace, value);
     }
 }

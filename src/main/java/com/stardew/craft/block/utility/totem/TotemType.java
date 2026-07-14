@@ -9,19 +9,17 @@ import javax.annotation.Nonnull;
  */
 @SuppressWarnings("null")
 public enum TotemType implements StringRepresentable {
-    FARM("farm", 0xFF55FF55, "农场"),
-    MOUNTAIN("mountain", 0xFFFF5555, "山区"),
-    BEACH("beach", 0xFF5555FF, "海滩"),
-    DESERT("desert", 0xFFFFD355, "沙漠");
+    FARM("farm", 0xFF55FF55),
+    MOUNTAIN("mountain", 0xFFFF5555),
+    BEACH("beach", 0xFF5555FF),
+    DESERT("desert", 0xFFFFD355);
 
     private final String id;
     private final int textColor;
-    private final String defaultName;
 
-    TotemType(String id, int textColor, String defaultName) {
+    TotemType(String id, int textColor) {
         this.id = id;
         this.textColor = textColor;
-        this.defaultName = defaultName;
     }
 
     public String getId() {
@@ -34,8 +32,8 @@ public enum TotemType implements StringRepresentable {
     }
 
     /** 系统柱默认名称 */
-    public String getDefaultName() {
-        return defaultName;
+    public String getDefaultNameKey() {
+        return "stardewcraft.totem.type." + id;
     }
 
     /** SDV sprinkleColor: 传送动画的粒子颜色（RGB，无alpha） */

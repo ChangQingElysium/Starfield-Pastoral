@@ -75,7 +75,7 @@ public class PowderMelonCropBlock extends StardewCropBlock {
     }
 
     @Override
-    public String getCropDisplayName() {
-        return "霜瓜";
+    public String getCropDisplayNameKey() {
+        return "item.stardewcraft.powder_melon";
     }
 }

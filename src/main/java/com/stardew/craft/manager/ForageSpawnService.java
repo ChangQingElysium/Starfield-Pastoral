@@ -1,8 +1,11 @@
 package com.stardew.craft.manager;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.world.StardewForageZoneDefinition;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.nature.ForageBlock;
+import com.stardew.craft.world.data.ForageZoneData;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
@@ -23,6 +26,7 @@ import net.minecraft.world.level.saveddata.SavedData;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * SDV-parity forage spawning service.
@@ -46,7 +50,7 @@ public final class ForageSpawnService {
 
     // ======================== Forage Entry ========================
 
-    private record ForageEntry(DeferredBlock<Block> block, int season, double chance) {
+    private record ForageEntry(Supplier<? extends Block> block, int season, double chance) {
         /** season = -1 means all seasons */
         boolean matchesSeason(int currentSeason) {
             return season == -1 || season == currentSeason;
@@ -58,21 +62,12 @@ public final class ForageSpawnService {
     /**
      * A rectangular region in the Stardew dimension where forage can spawn.
      */
-    private record ZoneRect(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
+    private record ZoneRect(int minX, int minY, int minZ, int maxX, int maxY, int maxZ, int weight) {
         boolean containsSurfaceY(int y) {
             return y >= minY && y <= maxY;
         }
     }
 
-    private static ZoneRect rect(int x1, int y1, int z1, int x2, int y2, int z2) {
-        return new ZoneRect(
-                Math.min(x1, x2),
-                Math.min(y1, y2),
-                Math.min(z1, z2),
-                Math.max(x1, x2),
-                Math.max(y1, y2),
-                Math.max(z1, z2));
-    }
 
     private record ForageZone(
             String name,
@@ -87,192 +82,8 @@ public final class ForageSpawnService {
     /** 表面要求：NATURAL = 星露谷室外自然可刷地表；SAND = 必须露天沙子。 */
     private enum SurfaceType { NATURAL, SAND }
 
-    // ======================== Zone Definitions (SDV parity) ========================
-
-    // Season constants
-    private static final int SPRING = 0, SUMMER = 1, FALL = 2, WINTER = 3, ANY = -1;
-
-    private static final List<ForageZone> ZONES = List.of(
-            // ---- Town ----
-            // SDV: Daffodil(Spring 0.9), Sweet Pea(Summer 0.9), Blackberry(Fall 0.6),
-            //      Crocus(Winter 0.7), Crystal Fruit(Winter 0.1), Holly(Winter 0.5)
-            new ForageZone("Town",
-                    List.of(
-                        rect(-40, 84, -99, 91, 62, 17)
-                    ),
-                    List.of(
-                            new ForageEntry(ModBlocks.FORAGE_DAFFODIL, SPRING, 0.9),
-                            new ForageEntry(ModBlocks.FORAGE_SWEET_PEA, SUMMER, 0.9),
-                            new ForageEntry(ModBlocks.FORAGE_BLACKBERRY, FALL, 0.6),
-                            new ForageEntry(ModBlocks.FORAGE_CROCUS, WINTER, 0.7),
-                            new ForageEntry(ModBlocks.FORAGE_CRYSTAL_FRUIT, WINTER, 0.1),
-                            new ForageEntry(ModBlocks.FORAGE_HOLLY, WINTER, 0.5)
-                    ),
-                    1, 4, 6, SurfaceType.NATURAL),
-
-            // ---- Forest (Cindersap) ----
-            // SDV: Wild Horseradish(Spring 0.9), Dandelion(Spring 0.9),
-            //      Spice Berry(Summer 0.6), Sweet Pea(Summer 0.9),
-            //      Common Mushroom(Fall 0.9),
-            //      Blackberry(Fall 0.9),
-            //      Crocus(Winter 0.9), Crystal Fruit(Winter 0.9), Holly(Winter 0.5)
-            new ForageZone("Forest",
-                    List.of(
-                        rect(-194, 50, 138, -47, 74, -12)
-                    ),
-                    List.of(
-                            new ForageEntry(ModBlocks.FORAGE_WILD_HORSERADISH, SPRING, 0.9),
-                            new ForageEntry(ModBlocks.FORAGE_DANDELION, SPRING, 0.9),
-                            new ForageEntry(ModBlocks.FORAGE_SPICE_BERRY, SUMMER, 0.6),
-                            new ForageEntry(ModBlocks.FORAGE_SWEET_PEA, SUMMER, 0.9),
-                            new ForageEntry(ModBlocks.FORAGE_COMMON_MUSHROOM, FALL, 0.9),
-                            new ForageEntry(ModBlocks.FORAGE_BLACKBERRY, FALL, 0.9),
-                            new ForageEntry(ModBlocks.FORAGE_CROCUS, WINTER, 0.9),
-                            new ForageEntry(ModBlocks.FORAGE_CRYSTAL_FRUIT, WINTER, 0.9),
-                            new ForageEntry(ModBlocks.FORAGE_HOLLY, WINTER, 0.5)
-                    ),
-                    1, 4, 6, SurfaceType.NATURAL),
-
-            // ---- Mountain ----
-            // SDV: Leek(Spring 0.7), Wild Horseradish(Spring 0.5),
-            //      Spice Berry(Summer 0.5), Grape(Summer 0.8),
-            //      Common Mushroom(Fall 0.4),
-            //      Wild Plum(Fall 0.4), Hazelnut(Fall 0.9),
-            //      Crystal Fruit(Winter 0.85), Crocus(Winter 0.9), Holly(Winter 0.5)
-            new ForageZone("Mountain",
-                    List.of(
-                        rect(-123, 79, -104, -43, 69, -65),
-                        rect(11, 81, -151, 121, 93, -80)
-                    ),
-                    List.of(
-                            new ForageEntry(ModBlocks.FORAGE_LEEK, SPRING, 0.7),
-                            new ForageEntry(ModBlocks.FORAGE_WILD_HORSERADISH, SPRING, 0.5),
-                            new ForageEntry(ModBlocks.FORAGE_SPICE_BERRY, SUMMER, 0.5),
-                            new ForageEntry(ModBlocks.FORAGE_GRAPE, SUMMER, 0.8),
-                            new ForageEntry(ModBlocks.FORAGE_COMMON_MUSHROOM, FALL, 0.4),
-                            new ForageEntry(ModBlocks.FORAGE_WILD_PLUM, FALL, 0.4),
-                            new ForageEntry(ModBlocks.FORAGE_HAZELNUT, FALL, 0.9),
-                            new ForageEntry(ModBlocks.FORAGE_CRYSTAL_FRUIT, WINTER, 0.85),
-                            new ForageEntry(ModBlocks.FORAGE_CROCUS, WINTER, 0.9),
-                            new ForageEntry(ModBlocks.FORAGE_HOLLY, WINTER, 0.5)
-                    ),
-                    1, 4, 6, SurfaceType.NATURAL),
-
-            // ---- BusStop ----
-            // SDV source: Content/Data/Locations.json -> BusStop.Forage.
-            new ForageZone("BusStop",
-                    List.of(
-                        rect(-105, 63, -71, -46, 69, -47)
-                    ),
-                    List.of(
-                            new ForageEntry(ModBlocks.FORAGE_DAFFODIL, SPRING, 0.9),
-                            new ForageEntry(ModBlocks.FORAGE_LEEK, SPRING, 0.4),
-                            new ForageEntry(ModBlocks.FORAGE_DANDELION, SPRING, 0.7),
-                            new ForageEntry(ModBlocks.FORAGE_SPICE_BERRY, SUMMER, 0.4),
-                            new ForageEntry(ModBlocks.FORAGE_GRAPE, SUMMER, 0.4),
-                            new ForageEntry(ModBlocks.FORAGE_SWEET_PEA, SUMMER, 0.7),
-                            new ForageEntry(ModBlocks.FORAGE_WILD_PLUM, FALL, 0.6),
-                            new ForageEntry(ModBlocks.FORAGE_HAZELNUT, FALL, 0.4),
-                            new ForageEntry(ModBlocks.FORAGE_CRYSTAL_FRUIT, WINTER, 0.33),
-                            new ForageEntry(ModBlocks.FORAGE_CROCUS, WINTER, 0.6),
-                            new ForageEntry(ModBlocks.FORAGE_HOLLY, WINTER, 0.5)
-                    ),
-                    1, 4, 6, SurfaceType.NATURAL),
-
-            // ---- Railroad ----
-            // SDV source: Content/Data/Locations.json -> Railroad.Forage.
-            new ForageZone("Railroad",
-                    List.of(
-                        rect(-39, 80, -214, 101, 95, -152)
-                    ),
-                    List.of(
-                            new ForageEntry(ModBlocks.FORAGE_DAFFODIL, SPRING, 0.9),
-                            new ForageEntry(ModBlocks.FORAGE_LEEK, SPRING, 0.4),
-                            new ForageEntry(ModBlocks.FORAGE_DANDELION, SPRING, 0.7),
-                            new ForageEntry(ModBlocks.FORAGE_SPICE_BERRY, SUMMER, 0.4),
-                            new ForageEntry(ModBlocks.FORAGE_GRAPE, SUMMER, 0.4),
-                            new ForageEntry(ModBlocks.FORAGE_SWEET_PEA, SUMMER, 0.7),
-                            new ForageEntry(ModBlocks.FORAGE_WILD_PLUM, FALL, 0.6),
-                            new ForageEntry(ModBlocks.FORAGE_HAZELNUT, FALL, 0.4),
-                            new ForageEntry(ModBlocks.FORAGE_BLACKBERRY, FALL, 0.6),
-                            new ForageEntry(ModBlocks.FORAGE_CRYSTAL_FRUIT, WINTER, 0.8),
-                            new ForageEntry(ModBlocks.FORAGE_CROCUS, WINTER, 0.8)
-                    ),
-                    1, 4, 6, SurfaceType.NATURAL),
-
-            // ---- Backwoods ----
-            // SDV source: Content/Data/Locations.json -> Backwoods.Forage.
-            new ForageZone("Backwoods",
-                    List.of(
-                        rect(-151, 63, -237, -124, 91, -65)
-                    ),
-                    List.of(
-                            new ForageEntry(ModBlocks.FORAGE_LEEK, SPRING, 0.7),
-                            new ForageEntry(ModBlocks.FORAGE_WILD_HORSERADISH, SPRING, 0.5),
-                            new ForageEntry(ModBlocks.FORAGE_SPICE_BERRY, SUMMER, 0.5),
-                            new ForageEntry(ModBlocks.FORAGE_GRAPE, SUMMER, 0.8),
-                            new ForageEntry(ModBlocks.FORAGE_COMMON_MUSHROOM, FALL, 0.4),
-                            new ForageEntry(ModBlocks.FORAGE_WILD_PLUM, FALL, 0.4),
-                            new ForageEntry(ModBlocks.FORAGE_HAZELNUT, FALL, 0.9),
-                            new ForageEntry(ModBlocks.FORAGE_CRYSTAL_FRUIT, WINTER, 0.25),
-                            new ForageEntry(ModBlocks.FORAGE_CROCUS, WINTER, 0.4),
-                            new ForageEntry(ModBlocks.FORAGE_HOLLY, WINTER, 0.5)
-                    ),
-                    1, 4, 6, SurfaceType.NATURAL),
-
-            // ---- Beach ----
-            // SDV Beach: Nautilus Shell(Winter 0.8), Rainbow Shell(Summer 0.5),
-            //            Coral + Sea Urchin via tidepool logic (simplified: all-season)
-                // 当前 pregen 沙滩只用露天沙子，采集物也只落在沙子上。
-            new ForageZone("Beach",
-                    List.of(
-                        rect(-4, 65, 77, 239, 57, 186)
-                    ),
-                    List.of(
-                            new ForageEntry(ModBlocks.FORAGE_CORAL, ANY, 0.8),
-                            new ForageEntry(ModBlocks.FORAGE_SEA_URCHIN, ANY, 0.5),
-                            new ForageEntry(ModBlocks.FORAGE_NAUTILUS_SHELL, WINTER, 0.8),
-                            new ForageEntry(ModBlocks.FORAGE_RAINBOW_SHELL, SUMMER, 0.5)
-                    ),
-                    1, 4, 6, SurfaceType.SAND),
-
-            // ---- Desert (Calico Desert) ----
-            // SDV: Coconut(全年), Cactus Fruit(夏/秋)
-                // 当前 pregen 沙漠只用露天沙子，采集物也只落在沙子上。
-            new ForageZone("Desert",
-                    List.of(
-                        rect(-310, 53, -241, -158, 107, -113)
-                    ),
-                    List.of(
-                            new ForageEntry(ModBlocks.FORAGE_COCONUT, ANY, 0.35),
-                            new ForageEntry(ModBlocks.FORAGE_CACTUS_FRUIT, SUMMER, 0.45),
-                            new ForageEntry(ModBlocks.FORAGE_CACTUS_FRUIT, FALL, 0.45)
-                    ),
-                        1, 3, 5, SurfaceType.SAND),
-
-                    // ---- Secret Woods ----
-                    // SDV Woods forage source: Content/Data/Locations.json -> Woods.Forage.
-                    new ForageZone("SecretWoods",
-                        List.of(
-                            rect(-265, 67, -1, -183, 86, 42)
-                        ),
-                        List.of(
-                            new ForageEntry(ModBlocks.FORAGE_MOREL, SPRING, 0.5),
-                            new ForageEntry(ModBlocks.FORAGE_COMMON_MUSHROOM, SPRING, 0.25),
-                            new ForageEntry(ModBlocks.FORAGE_WILD_HORSERADISH, SPRING, 0.8),
-                            new ForageEntry(ModBlocks.FORAGE_FIDDLEHEAD_FERN, SUMMER, 0.9),
-                            new ForageEntry(ModBlocks.FORAGE_RED_MUSHROOM, SUMMER, 0.25),
-                            new ForageEntry(ModBlocks.FORAGE_CHANTERELLE, FALL, 0.5),
-                            new ForageEntry(ModBlocks.FORAGE_COMMON_MUSHROOM, FALL, 0.6),
-                            new ForageEntry(ModBlocks.FORAGE_RED_MUSHROOM, FALL, 0.2),
-                            new ForageEntry(ModBlocks.FORAGE_HOLLY, WINTER, 0.9)
-                        ),
-                        1, 4, 6, SurfaceType.NATURAL)
-    );
-
-    // ======================== Spawn Weight for Beach Rects ========================
-    // The second beach rect should spawn more items
-    private static final double BEACH_SECOND_RECT_WEIGHT = 1.5;
+    // Season constants used by runtime data and forest-farm forage.
+    private static final int SPRING = 0, SUMMER = 1, FALL = 2, WINTER = 3;
 
     // ======================== Main Entry Point ========================
 
@@ -284,7 +95,7 @@ public final class ForageSpawnService {
         StardewCraft.LOGGER.info("[ForageSpawn] onNewDay called, season={}", season);
 
         int totalSpawned = 0;
-        for (ForageZone zone : ZONES) {
+        for (ForageZone zone : runtimeZones(level)) {
             // Filter entries for current season
             List<ForageEntry> possibleForage = new ArrayList<>();
             for (ForageEntry entry : zone.entries) {
@@ -373,22 +184,59 @@ public final class ForageSpawnService {
 
     // ======================== Helpers ========================
 
+    private static List<ForageZone> runtimeZones(ServerLevel level) {
+        List<ForageZone> result = new ArrayList<>();
+        for (var registered : ForageZoneData.available(level)) {
+            StardewForageZoneDefinition definition = registered.getValue();
+            List<ZoneRect> rects = definition.areas().stream()
+                    .map(area -> new ZoneRect(area.minX(), area.minY(), area.minZ(),
+                            area.maxX(), area.maxY(), area.maxZ(), area.weight()))
+                    .toList();
+            List<ForageEntry> entries = new ArrayList<>();
+            for (StardewForageZoneDefinition.Entry entry : definition.entries()) {
+                if (!BuiltInRegistries.BLOCK.containsKey(entry.block())) {
+                    StardewCraft.LOGGER.error("[Forage data] Zone {} references unknown block {}",
+                            registered.getKey(), entry.block());
+                    continue;
+                }
+                Block block = BuiltInRegistries.BLOCK.get(entry.block());
+                for (String season : entry.seasons()) {
+                    entries.add(new ForageEntry(() -> block, seasonIndex(season), entry.chance()));
+                }
+            }
+            if (entries.isEmpty()) continue;
+            result.add(new ForageZone(
+                    registered.getKey().toString(),
+                    rects,
+                    List.copyOf(entries),
+                    definition.minDailySpawn(),
+                    definition.maxDailySpawn(),
+                    definition.maxSpawnedAtOnce(),
+                    definition.surface() == StardewForageZoneDefinition.Surface.SAND
+                            ? SurfaceType.SAND : SurfaceType.NATURAL));
+        }
+        return List.copyOf(result);
+    }
+
+    private static int seasonIndex(String season) {
+        return switch (season) {
+            case "summer" -> SUMMER;
+            case "fall" -> FALL;
+            case "winter" -> WINTER;
+            default -> SPRING;
+        };
+    }
+
     private static ZoneRect pickRandomRect(ForageZone zone, RandomSource random) {
         List<ZoneRect> rects = zone.rects;
         if (rects.size() == 1) return rects.get(0);
-
-        // For Beach: second rect has higher weight
-        if (zone.name.equals("Beach") && rects.size() == 2) {
-            double total = 1.0 + BEACH_SECOND_RECT_WEIGHT;
-            if (random.nextDouble() * total < 1.0) {
-                return rects.get(0);
-            } else {
-                return rects.get(1);
-            }
+        int totalWeight = rects.stream().mapToInt(ZoneRect::weight).sum();
+        int roll = random.nextInt(totalWeight);
+        for (ZoneRect rect : rects) {
+            roll -= rect.weight();
+            if (roll < 0) return rect;
         }
-
-        // Default: uniform random
-        return rects.get(random.nextInt(rects.size()));
+        return rects.getLast();
     }
 
     /**

@@ -1,86 +1,134 @@
 package com.stardew.craft.shop;
 
-import javax.annotation.Nullable;
-import java.util.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.mojang.serialization.JsonOps;
+import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.action.StardewAction;
+import com.stardew.craft.api.v1.guild.StardewMonsterSlayerGoalDefinition;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
+import net.minecraft.util.profiling.ProfilerFiller;
 
-/**
- * SDV MonsterSlayerQuests parity — 13 goals from Gil at the Adventurer's Guild.
- * Each goal tracks kills of specific monster types; upon reaching the required
- * count the player can claim a reward from Gil.
- *
- * Monster types are identified by entity tags (sd_mob_*) used by MineMonsterDropHandler.
- */
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+/** Atomic, namespaced monster-slayer goals with legacy storage IDs for built-in goals. */
+@SuppressWarnings("null")
 public final class MonsterSlayerGoalRegistry {
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private static final ResourceLocation LEGACY_TABLE =
+            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "monster_slayer_goals");
+    private static volatile Map<String, SlayerGoal> goals = Map.of();
+    private static volatile Map<String, List<String>> tagToGoals = Map.of();
 
     public record SlayerGoal(
-        String goalKey,           // e.g. "Slimes"
-        String translationKey,    // e.g. "stardewcraft.slayer.goal.slimes"
-        int requiredKills,
-        @Nullable String rewardItemId, // null = no item reward (e.g. FlameSpirits → dialogue only)
-        Set<String> monsterTags   // entity tags that count toward this goal
-    ) {}
+            String goalKey,
+            String translationKey,
+            int requiredKills,
+            List<String> monsterTags,
+            List<StardewAction> rewards
+    ) {
+        public SlayerGoal {
+            monsterTags = List.copyOf(monsterTags);
+            rewards = List.copyOf(rewards);
+        }
 
-    private static final List<SlayerGoal> GOALS = new ArrayList<>();
-    // monsterTag → goalKey lookup for fast kill routing
-    private static final Map<String, String> TAG_TO_GOAL = new HashMap<>();
-
-    static {
-        // SDV source: Content/Data/MonsterSlayerQuests.json
-        // Only goals for monsters that actually spawn in our mine (MineMonsterSpawnHandler).
-        register("Slimes",       "stardewcraft.slayer.goal.slimes",        1000,
-            "stardewcraft:slime_charmer_ring",  "sd_mob_slime");
-        register("Shadows",      "stardewcraft.slayer.goal.shadows",        150,
-            "stardewcraft:savage_ring",         "sd_mob_shadow");
-        register("Bats",         "stardewcraft.slayer.goal.bats",           200,
-            "stardewcraft:vampire_ring",        "sd_mob_bat");
-        register("Skeletons",    "stardewcraft.slayer.goal.skeletons",       50,
-            null,                               "sd_mob_skeleton"); // SDV: Skeleton Mask hat
-        register("Insects",      "stardewcraft.slayer.goal.insects",         80,
-            "stardewcraft:insect_head",         "sd_mob_fly", "sd_mob_grub");
-        register("Duggy",        "stardewcraft.slayer.goal.duggies",         30,
-            null,                               "sd_mob_duggy");    // SDV: Hard Hat
-        register("DustSpirits",  "stardewcraft.slayer.goal.dust_sprites",   500,
-            "stardewcraft:burglars_ring",       "sd_mob_dust_sprite");
-        register("Crabs",        "stardewcraft.slayer.goal.crabs",           60,
-            "stardewcraft:crabshell_ring",      "sd_mob_crab");
-        register("Ghosts",       "stardewcraft.slayer.goal.ghosts",          30,
-            null,                               "sd_mob_ghost");
-        register("Golems",       "stardewcraft.slayer.goal.golems",          60,
-            null,                               "sd_mob_golem");
-        register("MetalHeads",   "stardewcraft.slayer.goal.metal_heads",     50,
-            null,                               "sd_mob_metal_head");
-        register("SquidKids",    "stardewcraft.slayer.goal.squid_kids",      30,
-            "stardewcraft:napalm_ring",         "sd_mob_squid");
-    }
-
-    private static void register(String goalKey, String translationKey, int required,
-                                 @Nullable String rewardItemId, String... tags) {
-        Set<String> tagSet = Set.of(tags);
-        GOALS.add(new SlayerGoal(goalKey, translationKey, required, rewardItemId, tagSet));
-        for (String tag : tags) {
-            TAG_TO_GOAL.put(tag, goalKey);
+        public boolean hasReward() {
+            return !rewards.isEmpty();
         }
     }
 
-    /** Returns the goal key for a given monster entity tag, or null if no goal tracks it. */
+    private MonsterSlayerGoalRegistry() {
+    }
+
     @Nullable
     public static String getGoalKeyForTag(String monsterTag) {
-        return TAG_TO_GOAL.get(monsterTag);
+        List<String> matches = tagToGoals.getOrDefault(monsterTag, List.of());
+        return matches.isEmpty() ? null : matches.getFirst();
     }
 
-    /** Returns all registered goals (unmodifiable). */
+    public static List<String> getGoalKeysForTag(String monsterTag) {
+        return tagToGoals.getOrDefault(monsterTag, List.of());
+    }
+
     public static List<SlayerGoal> getAllGoals() {
-        return Collections.unmodifiableList(GOALS);
+        return List.copyOf(goals.values());
     }
 
-    /** Returns a specific goal by key, or null. */
     @Nullable
     public static SlayerGoal getGoal(String goalKey) {
-        for (SlayerGoal g : GOALS) {
-            if (g.goalKey().equals(goalKey)) return g;
-        }
-        return null;
+        return goals.get(goalKey);
     }
 
-    private MonsterSlayerGoalRegistry() {}
+    public static final class ReloadListener extends SimpleJsonResourceReloadListener {
+        public ReloadListener() {
+            super(GSON, "adventurers_guild");
+        }
+
+        @Override
+        protected void apply(Map<ResourceLocation, JsonElement> objects, ResourceManager manager, ProfilerFiller profiler) {
+            Map<String, SlayerGoal> next = new LinkedHashMap<>();
+            List<String> errors = new ArrayList<>();
+            JsonElement legacy = objects.get(LEGACY_TABLE);
+            if (legacy == null || !legacy.isJsonArray()) {
+                errors.add("Missing " + LEGACY_TABLE);
+            } else {
+                for (JsonElement raw : legacy.getAsJsonArray()) {
+                    if (!raw.isJsonObject()) {
+                        errors.add(LEGACY_TABLE + ": entry must be an object");
+                        continue;
+                    }
+                    JsonObject object = raw.getAsJsonObject().deepCopy();
+                    String id = object.has("id") ? object.remove("id").getAsString() : "";
+                    decode(LEGACY_TABLE, id, object, next, errors);
+                }
+            }
+
+            objects.entrySet().stream()
+                    .sorted(Map.Entry.comparingByKey(java.util.Comparator.comparing(ResourceLocation::toString)))
+                    .filter(entry -> entry.getKey().getPath().startsWith("monster_slayer_goals/"))
+                    .forEach(entry -> {
+                        String path = entry.getKey().getPath().substring("monster_slayer_goals/".length());
+                        ResourceLocation id = ResourceLocation.tryBuild(entry.getKey().getNamespace(), path);
+                        decode(entry.getKey(), id == null ? "" : id.toString(), entry.getValue(), next, errors);
+                    });
+
+            if (!errors.isEmpty()) {
+                errors.forEach(error -> StardewCraft.LOGGER.error("[Monster slayer] {}", error));
+                StardewCraft.LOGGER.error("[Monster slayer] Rejected reload; keeping {} goals", goals.size());
+                return;
+            }
+            Map<String, List<String>> routing = new LinkedHashMap<>();
+            next.values().forEach(goal -> goal.monsterTags().forEach(tag ->
+                    routing.computeIfAbsent(tag, ignored -> new ArrayList<>()).add(goal.goalKey())));
+            routing.replaceAll((tag, ids) -> List.copyOf(ids));
+            goals = java.util.Collections.unmodifiableMap(new LinkedHashMap<>(next));
+            tagToGoals = java.util.Collections.unmodifiableMap(new LinkedHashMap<>(routing));
+            StardewCraft.LOGGER.info("[Monster slayer] Applied {} goals across {} monster tags",
+                    goals.size(), tagToGoals.size());
+        }
+    }
+
+    private static void decode(ResourceLocation source, String id, JsonElement json,
+                               Map<String, SlayerGoal> next, List<String> errors) {
+        if (id == null || id.isBlank()) {
+            errors.add(source + ": missing or invalid goal ID");
+            return;
+        }
+        StardewMonsterSlayerGoalDefinition.CODEC.parse(JsonOps.INSTANCE, json)
+                .resultOrPartial(message -> errors.add(source + " [" + id + "]: " + message))
+                .ifPresent(definition -> {
+                    if (next.putIfAbsent(id, new SlayerGoal(id, definition.translationKey(),
+                            definition.requiredKills(), definition.monsterTags(), definition.rewards())) != null) {
+                        errors.add(source + ": duplicate goal ID " + id);
+                    }
+                });
+    }
 }

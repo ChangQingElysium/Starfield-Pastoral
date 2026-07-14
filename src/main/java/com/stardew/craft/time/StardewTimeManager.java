@@ -31,7 +31,6 @@ public class StardewTimeManager extends SavedData {
 
     private static final Set<String> IMPLEMENTED_DATE_TRIGGERED_MAIL = Set.of(
         "spring_2_1",
-        "spring_3_1",
         "spring_5_1",
         "spring_20_1",
         "spring_25_1",
@@ -414,7 +413,7 @@ public class StardewTimeManager extends SavedData {
 
         // 个人日历：从加入当天起算的"季节/日"。这样 _<year> 邮件总是按
         // "玩家进入服务器后的第 N 个游戏日"触发，避免玩家如果在春5日才进服
-        // 就永远收不到 spring_3_1 这类信。
+        // 就永远收不到 spring_2_1 这类信。
         int personalSeason = (personalDays / 28) % 4;
         int personalDay = (personalDays % 28) + 1;
         String personalSeasonName = switch (personalSeason) {
@@ -425,7 +424,7 @@ public class StardewTimeManager extends SavedData {
             default -> "";
         };
 
-        // SDV parity: season_day_year 用个人日历触发（spring_3_1 = 进服后第 3 个游戏日早晨）
+        // SDV parity: season_day_year 用个人日历触发（spring_2_1 = 进服后第 2 个游戏日早晨）
         String keyWithYear = personalSeasonName + "_" + personalDay + "_" + personalYear;
         if (shouldDeliverDateTriggeredMail(keyWithYear)) {
             com.stardew.craft.mail.MailService.addMail(player, keyWithYear);
@@ -489,7 +488,7 @@ public class StardewTimeManager extends SavedData {
         }
 
         // 离线多天后登录时，补跑所有错过的个人日期邮件，
-        // 避免 spring_3_1 这类一次性个人前置被永久漏掉。
+        // 避免 spring_2_1 这类一次性个人前置被永久漏掉。
         for (int absoluteDay = firstJoinDay; absoluteDay <= currentAbsoluteDay; absoluteDay++) {
             schedulePersonalMailForAbsoluteDay(player, absoluteDay);
         }

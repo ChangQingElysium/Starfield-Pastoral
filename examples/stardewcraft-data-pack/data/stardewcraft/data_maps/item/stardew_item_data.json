@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": {
+    "#example_stardew_addon:sample_crops": {
+      "category": "example_stardew_addon:sample_crop",
+      "base_sell_price": 50,
+      "edibility": 10,
+      "energy": 25,
+      "health": 11,
+      "hidden": false
+    }
+  }
+}

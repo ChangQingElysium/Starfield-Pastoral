@@ -1,0 +1,18 @@
+{
+  "type": "active",
+  "legacy_id": "spring24",
+  "display_name": "Flower Dance",
+  "season": 0,
+  "start_day": 24,
+  "end_day": 24,
+  "start_time": 900,
+  "end_time": 1400,
+  "start_message_key": "message.stardewcraft.festival.flower_dance.started",
+  "announcement_mail_id": "spring_23",
+  "world": {
+    "location": "Forest",
+    "map_overlay": "Forest-FlowerFestival",
+    "shops": ["Festival_FlowerDance_Pierre"],
+    "mechanic_id": "flower_dance"
+  }
+}

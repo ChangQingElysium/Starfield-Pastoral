@@ -20,6 +20,7 @@ public final class StardewQuestEvents {
     }
 
     public static void fireItemReceived(ServerPlayer player, String itemId, int count) {
+        com.stardew.craft.museum.MuseumQuestService.onItemReceived(player, itemId);
         QuestManager qm = QuestManager.of(player);
         if (qm != null) qm.onItemReceived(player, itemId, count);
     }

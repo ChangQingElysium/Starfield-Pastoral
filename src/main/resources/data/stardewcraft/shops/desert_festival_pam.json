@@ -1,0 +1,23 @@
+{
+  "legacy_id": "DesertFestival_Pam",
+  "owner_npc": "pam",
+  "owner_dialogue": "stardewcraft.festival.desertfestival.dialogue.vendor",
+  "entries": [
+    {
+      "item": "stardewcraft:beer",
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 20
+    },
+    {
+      "item": "stardewcraft:mead",
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 20
+    },
+    {
+      "item": "stardewcraft:pale_ale",
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 30
+    }
+  ],
+  "accepted_sell_types": []
+}

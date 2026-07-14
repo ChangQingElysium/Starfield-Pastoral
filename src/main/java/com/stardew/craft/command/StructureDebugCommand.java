@@ -42,7 +42,7 @@ public final class StructureDebugCommand {
         CommandSourceStack source = ctx.getSource();
         ServerPlayer player = source.getPlayer();
         if (player == null) {
-            source.sendFailure(Component.literal("该命令仅限玩家使用"));
+            source.sendFailure(Component.translatable("stardewcraft.command.structure.player_only"));
             return 0;
         }
 
@@ -52,7 +52,7 @@ public final class StructureDebugCommand {
         // 放置结构
         boolean success = StructureLoader.loadAndPlaceWithResult(level, WIZARD_TOWER_SCHEM, placePos);
         if (!success) {
-            source.sendFailure(Component.literal("巫师塔结构文件加载失败！"));
+            source.sendFailure(Component.translatable("stardewcraft.command.structure.wizard_tower_failed"));
             return 0;
         }
 
@@ -69,8 +69,9 @@ public final class StructureDebugCommand {
             level, portalPos, PORTAL_HEIGHT, 1, 1,
             MARKER_TAG, TARGET_TAG
         );
-        source.sendSuccess(() -> Component.literal(
-            "巫师塔已生成于 " + placePos.toShortString() + "，传送门已放置于 " + portalPos.toShortString()),
+        source.sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.structure.wizard_tower_success",
+            placePos.toShortString(), portalPos.toShortString()),
             true);
 
         StardewCraft.LOGGER.info("[DEBUG] Player {} spawned wizard tower at {}", player.getName().getString(), placePos);

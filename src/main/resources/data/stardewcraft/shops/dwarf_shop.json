@@ -1,0 +1,37 @@
+{
+  "legacy_id": "DwarfShop",
+  "owner_npc": "Dwarf",
+  "owner_dialogue": "stardewcraft.shop.dwarf.dialogue",
+  "entries": [
+    {
+      "item": "stardewcraft:cherry_bomb",
+      "price": 450
+    },
+    {
+      "item": "stardewcraft:bomb_item",
+      "price": 1000
+    },
+    {
+      "item": "stardewcraft:mega_bomb",
+      "price": 1600
+    },
+    {
+      "item": "stardewcraft:mine_totem",
+      "price": 1000
+    },
+    {
+      "item": "stardewcraft:life_elixir",
+      "price": 2000
+    },
+    {
+      "item": "stardewcraft:oil_of_garlic",
+      "price": 3000
+    },
+    {
+      "item": "stardewcraft:book_bombs",
+      "price": 4000,
+      "stock": 1
+    }
+  ],
+  "accepted_sell_types": []
+}

@@ -1,0 +1,10 @@
+{
+  "level": 5,
+  "priority": 100,
+  "reward": {
+    "type": "stardewcraft:item",
+    "data": {
+      "item": "minecraft:golden_apple"
+    }
+  }
+}

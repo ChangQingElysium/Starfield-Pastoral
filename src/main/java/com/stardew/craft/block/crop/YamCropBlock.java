@@ -75,7 +75,7 @@ public class YamCropBlock extends StardewCropBlock {
     }
 
     @Override
-    public String getCropDisplayName() {
-        return "山药";
+    public String getCropDisplayNameKey() {
+        return "item.stardewcraft.yam";
     }
 }

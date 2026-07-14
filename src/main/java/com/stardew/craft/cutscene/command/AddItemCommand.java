@@ -1,8 +1,6 @@
 package com.stardew.craft.cutscene.command;
 
-import com.stardew.craft.cutscene.network.CutsceneServerActionPayload;
 import com.stardew.craft.cutscene.runtime.EventPlayer;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * add_item: gives item(s) to the player (server-side).
@@ -22,8 +20,7 @@ public class AddItemCommand implements EventCommand {
     @Override
     public void start(EventPlayer player) {
         // Format: "item_id:count"
-        PacketDistributor.sendToServer(
-                new CutsceneServerActionPayload("add_item", itemId + ":" + count));
+        player.sendServerAction("add_item", itemId + ":" + count);
     }
 
     @Override public void tick(EventPlayer player) {}

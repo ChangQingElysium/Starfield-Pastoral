@@ -1,0 +1,15 @@
+{
+  "areas": [
+    { "min_x": -4, "min_y": 57, "min_z": 77, "max_x": 239, "max_y": 65, "max_z": 186 }
+  ],
+  "min_daily_spawn": 1,
+  "max_daily_spawn": 4,
+  "max_spawned_at_once": 6,
+  "surface": "sand",
+  "entries": [
+    { "block": "stardewcraft:forage_coral", "chance": 0.8 },
+    { "block": "stardewcraft:forage_sea_urchin", "chance": 0.5 },
+    { "block": "stardewcraft:forage_nautilus_shell", "seasons": ["winter"], "chance": 0.8 },
+    { "block": "stardewcraft:forage_rainbow_shell", "seasons": ["summer"], "chance": 0.5 }
+  ]
+}

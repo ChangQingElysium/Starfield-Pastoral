@@ -1,0 +1,104 @@
+{
+  "legacy_id": "DesertTrade",
+  "entries": [
+    {
+      "item": "stardewcraft:artifact_trove",
+      "trade_item": "stardewcraft:omni_geode",
+      "trade_item_count": 5
+    },
+    {
+      "item": "stardewcraft:warp_totem_desert",
+      "trade_item": "stardewcraft:omni_geode",
+      "trade_item_count": 3
+    },
+    {
+      "item": "stardewcraft:triple_shot_espresso",
+      "trade_item": "stardewcraft:diamond",
+      "trade_item_count": 1
+    },
+    {
+      "item": "stardewcraft:spicy_eel",
+      "trade_item": "stardewcraft:ruby",
+      "trade_item_count": 1
+    },
+    {
+      "item": "stardewcraft:mega_bomb",
+      "trade_item": "stardewcraft:iridium_ore",
+      "trade_item_count": 5
+    },
+    {
+      "item": "stardewcraft:bomb_item",
+      "trade_item": "stardewcraft:quartz",
+      "trade_item_count": 5
+    },
+    {
+      "item": "stardewcraft:hay",
+      "trade_item": "stardewcraft:omni_geode",
+      "trade_item_count": 1,
+      "day_of_week": 0,
+      "purchase_stack": 3
+    },
+    {
+      "item": "stardewcraft:fiber",
+      "trade_item": "stardewcraft:stone",
+      "trade_item_count": 5,
+      "day_of_week": 1
+    },
+    {
+      "item": "stardewcraft:cloth",
+      "trade_item": "stardewcraft:aquamarine",
+      "trade_item_count": 3,
+      "day_of_week": 2
+    },
+    {
+      "item": "stardewcraft:magic_rock_candy",
+      "stock": 1,
+      "trade_item": "stardewcraft:prismatic_shard",
+      "trade_item_count": 3,
+      "day_of_week": 3
+    },
+    {
+      "item": "stardewcraft:cheese",
+      "trade_item": "stardewcraft:emerald",
+      "trade_item_count": 1,
+      "day_of_week": 4
+    },
+    {
+      "item": "stardewcraft:spring_seeds",
+      "trade_item": "stardewcraft:summer_seeds",
+      "trade_item_count": 2,
+      "day_of_week": 5
+    },
+    {
+      "item": "stardewcraft:summer_seeds",
+      "trade_item": "stardewcraft:fall_seeds",
+      "trade_item_count": 2,
+      "day_of_week": 5
+    },
+    {
+      "item": "stardewcraft:fall_seeds",
+      "trade_item": "stardewcraft:winter_seeds",
+      "trade_item_count": 2,
+      "day_of_week": 5
+    },
+    {
+      "item": "stardewcraft:winter_seeds",
+      "trade_item": "stardewcraft:spring_seeds",
+      "trade_item_count": 2,
+      "day_of_week": 5
+    },
+    {
+      "item": "stardewcraft:mine_ladder",
+      "trade_item": "stardewcraft:jade",
+      "trade_item_count": 1,
+      "day_of_week": 6
+    },
+    {
+      "item": "recipe:stardewcraft:warp_totem_desert",
+      "stock": 1,
+      "trade_item": "stardewcraft:iridium_bar",
+      "trade_item_count": 10
+    }
+  ],
+  "accepted_sell_types": []
+}

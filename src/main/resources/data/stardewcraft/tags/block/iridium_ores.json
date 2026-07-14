@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "stardewcraft:earth_iridium_ore",
+    "stardewcraft:frost_iridium_ore",
+    "stardewcraft:lava_iridium_ore",
+    "stardewcraft:desert_iridium_ore"
+  ]
+}

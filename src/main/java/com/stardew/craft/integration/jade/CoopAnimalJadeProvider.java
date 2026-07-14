@@ -93,7 +93,7 @@ public enum CoopAnimalJadeProvider implements IEntityComponentProvider, IServerD
             ? Component.translatable(nameKey)
             : Component.translatable("entity." + StardewCraft.MODID + "." + animalType);
         Component displayName = data.getBoolean(NBT_IS_BABY)
-            ? Component.literal("(幼年)").append(speciesName)
+            ? Component.translatable("stardewcraft.jade.animal.baby", speciesName)
             : speciesName;
         tooltip.add(Component.translatable("stardewcraft.tooltip.animal.name", displayName)
             .withStyle(ChatFormatting.WHITE));

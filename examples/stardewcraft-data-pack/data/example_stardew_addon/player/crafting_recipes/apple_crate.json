@@ -1,0 +1,9 @@
+{
+  "output": "minecraft:chest",
+  "ingredients": [
+    {
+      "item": "minecraft:apple",
+      "count": 4
+    }
+  ]
+}

@@ -261,7 +261,7 @@ public class PlayerDataEventHandler {
         }
         MineRewardClaimManager.get(player.serverLevel()).markClaimed(player.getUUID(), 100);
         data.setMine100StardropCompensationProcessed(true);
-        player.sendSystemMessage(Component.literal("版本更新补偿（原100层奖励补发）：星之果实已发放。"));
+        player.sendSystemMessage(Component.translatable("stardewcraft.migration.floor_100_stardrop"));
         StardewCraft.LOGGER.info("Backfilled mine floor 100 Stardrop reward for {}", player.getGameProfile().getName());
     }
     

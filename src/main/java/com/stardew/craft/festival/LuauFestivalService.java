@@ -6,7 +6,7 @@ import com.stardew.craft.entity.ModEntities;
 import com.stardew.craft.entity.npc.StardewNpcEntity;
 import com.stardew.craft.farm.FarmInstance;
 import com.stardew.craft.farm.FarmInstanceRegistry;
-import com.stardew.craft.item.IStardewItem;
+import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.network.TimeSyncPacket;
 import com.stardew.craft.network.payload.FestivalMusicStatePayload;
@@ -616,10 +616,7 @@ public final class LuauFestivalService {
         if (isMayorShorts(stack) || isSap(stack)) {
             return true;
         }
-        if (!(stack.getItem() instanceof IStardewItem stardewItem)) {
-            return false;
-        }
-        return stardewItem.getEdibility(stack) > -300;
+        return StardewItemDataApi.resolve(stack).map(data -> data.edibility() > -300).orElse(false);
     }
 
     private static boolean isMayorShorts(ItemStack stack) {
@@ -721,10 +718,11 @@ public final class LuauFestivalService {
             if (isMayorShorts(ingredient)) {
                 return 6;
             }
-            if (ingredient.getItem() instanceof IStardewItem stardewItem) {
+            var metadata = StardewItemDataApi.resolve(ingredient).orElse(null);
+            if (metadata != null) {
                 int quality = com.stardew.craft.item.quality.QualityHelper.getQuality(ingredient);
-                int price = stardewItem.getBaseSellPrice(ingredient);
-                int edibility = stardewItem.getEdibility(ingredient);
+                int price = metadata.baseSellPrice();
+                int edibility = metadata.edibility();
                 if ((quality >= 2 && price >= 160) || (quality == 1 && price >= 300 && edibility > 10)) {
                     itemLevel = 4;
                 } else if (edibility >= 20 || price >= 100 || (price >= 70 && quality >= 1)) {

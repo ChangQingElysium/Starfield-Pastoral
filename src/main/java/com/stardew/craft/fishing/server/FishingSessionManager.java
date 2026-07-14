@@ -821,6 +821,8 @@ public final class FishingSessionManager {
 				dailyLuck,
 				player
 		);
+		com.stardew.craft.fishing.data.FishingTreasurePoolData.appendLoot(
+				loot, player, fishingLevel, session.isGoldenTreasure(), session.waterDepth(), player.getRandom());
 		com.stardew.craft.book.BookPowerEffects.tryAddRoeTreasure(
 				PlayerDataManager.getPlayerData(player), loot, session.plannedCatch(), player.getRandom());
 		com.stardew.craft.book.BookAcquisitionService.recordFishingTreasureAndMaybeAddRoeBook(

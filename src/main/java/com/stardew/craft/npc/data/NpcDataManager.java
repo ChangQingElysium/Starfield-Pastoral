@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.stardew.craft.StardewCraft;
 import com.stardew.craft.npc.runtime.NpcLocationGraph;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -74,28 +75,28 @@ public final class NpcDataManager {
                     continue;
                 }
                 if (lowerPath.startsWith("dialogue/")) {
-                    String npcId = extractNpcId(path, root, "npc_id");
+                    String npcId = extractNpcId(id, path, root, "npc_id");
                     if (npcId != null) {
                         dialogues.put(npcId, root.deepCopy());
                     }
                     continue;
                 }
                 if (lowerPath.startsWith("schedules/")) {
-                    String npcId = extractNpcId(path, root, "npc_id");
+                    String npcId = extractNpcId(id, path, root, "npc_id");
                     if (npcId != null) {
                         schedules.put(npcId, root.deepCopy());
                     }
                     continue;
                 }
                 if (lowerPath.startsWith("tastes/")) {
-                    String npcId = extractNpcId(path, root, "npc_id");
+                    String npcId = extractNpcId(id, path, root, "npc_id");
                     if (npcId != null) {
                         tastes.put(npcId, filterTastesWithDiagnostics(npcId, root));
                     }
                     continue;
                 }
                 if (lowerPath.startsWith("events/")) {
-                    String eventId = extractNpcId(path, root, "event_id");
+                    String eventId = extractNpcId(id, path, root, "event_id");
                     if (eventId != null) {
                         events.put(eventId, root.deepCopy());
                     }
@@ -111,30 +112,25 @@ public final class NpcDataManager {
                 filteredSchedules.put(entry.getKey(), NpcContentFilter.filterSchedules(entry.getValue(), locationMappings));
             }
 
-            NpcDataRegistry.replaceCapabilities(capabilities);
-            NpcDataRegistry.replaceDialogues(dialogues);
-            NpcDataRegistry.replaceSchedules(filteredSchedules);
-            NpcDataRegistry.replaceTastes(tastes);
-            NpcDataRegistry.replaceEvents(events);
-            NpcDataRegistry.replaceLocationMappings(locationMappings);
-            NpcDataRegistry.replaceLocationAliases(locationAliases);
-            NpcDataRegistry.replaceLocationAnchors(locationAnchors);
+            NpcDataRegistry.replaceAll(capabilities, dialogues, filteredSchedules, tastes, events,
+                    locationMappings, locationAliases, locationAnchors);
             NpcLocationGraph.reload();
             NpcDataDiagnostics.validateAndLog(capabilities, dialogues, filteredSchedules, tastes);
 
         }
 
-        private static String extractNpcId(JsonObject root,
+        private static String extractNpcId(ResourceLocation source, JsonObject root,
                                            String preferredKey) {
             String explicit = readString(root, preferredKey);
             if (explicit != null && !explicit.isBlank()) {
-                return explicit.trim().toLowerCase(Locale.ROOT);
+                return namespacedContentId(explicit, source);
             }
             return null;
         }
 
-        private static String extractNpcId(String path, JsonObject root, String preferredKey) {
-            String explicit = extractNpcId(root, preferredKey);
+        private static String extractNpcId(ResourceLocation source, String path, JsonObject root,
+                                           String preferredKey) {
+            String explicit = extractNpcId(source, root, preferredKey);
             if (explicit != null) {
                 return explicit;
             }
@@ -150,7 +146,7 @@ public final class NpcDataManager {
             if (fileName.isBlank()) {
                 return null;
             }
-            return fileName.toLowerCase(Locale.ROOT);
+            return namespacedContentId(fileName, source);
         }
 
         private static void parseCapabilities(JsonObject root,
@@ -171,6 +167,7 @@ public final class NpcDataManager {
                 if (npcId == null || npcId.isBlank()) {
                     continue;
                 }
+                npcId = namespacedContentId(npcId, resourceId);
 
                 boolean implemented = readBoolean(obj, "implemented", false);
                 boolean pathingEnabled = readBoolean(obj, "pathing_enabled", true);
@@ -208,6 +205,16 @@ public final class NpcDataManager {
 
                 output.put(profile.npcId(), profile);
             }
+        }
+
+        private static String namespacedContentId(String rawId, ResourceLocation source) {
+            if (rawId == null || rawId.isBlank()) return null;
+            String normalized = rawId.trim().toLowerCase(Locale.ROOT);
+            if (normalized.indexOf(':') >= 0 || source == null
+                    || StardewCraft.MODID.equals(source.getNamespace())) {
+                return normalized;
+            }
+            return source.getNamespace().toLowerCase(Locale.ROOT) + ":" + normalized;
         }
 
         private static void parseLocationMappings(JsonObject root,

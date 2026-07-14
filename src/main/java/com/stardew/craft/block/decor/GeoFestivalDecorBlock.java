@@ -65,6 +65,7 @@ public class GeoFestivalDecorBlock extends MapDecorStaticBlock implements Entity
             PacketDistributor.sendToPlayer(serverPlayer, new OpenMailPayload(
                 letterTextKey,
                 letterTextKey,
+                "",
                 0,
                 "",
                 List.of(),

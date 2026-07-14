@@ -100,7 +100,7 @@ public class AncientFruitCropBlock extends StardewCropBlock {
     }
 
     @Override
-    public String getCropDisplayName() {
-        return "上古水果";
+    public String getCropDisplayNameKey() {
+        return "item.stardewcraft.ancient_fruit";
     }
 }

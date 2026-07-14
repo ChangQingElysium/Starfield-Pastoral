@@ -1,0 +1,22 @@
+{
+  "type": "passive",
+  "legacy_id": "DesertFestival",
+  "display_name": "Desert Festival",
+  "legacy_condition": "LOCATION_ACCESSIBLE Desert",
+  "season": 0,
+  "start_day": 15,
+  "end_day": 17,
+  "start_time": 1000,
+  "end_time": 2600,
+  "start_message_key": "message.stardewcraft.festival.passive.desert.started",
+  "presentation": {
+    "display_token": "[LocalizedText Strings\\1_6_Strings:DesertFestival]",
+    "start_message_token": "[LocalizedText Strings\\1_6_Strings:DesertFestival_NowOpen]"
+  },
+  "world": {
+    "location": "Desert",
+    "map_overlay": "DesertFestival",
+    "map_replacements": {"Desert": "DesertFestival"},
+    "mechanic_id": "desert_festival"
+  }
+}

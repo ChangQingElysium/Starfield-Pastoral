@@ -75,7 +75,7 @@ public class CornCropBlock extends StardewCropBlock {
     }
 
     @Override
-    public String getCropDisplayName() {
-        return "玉米";
+    public String getCropDisplayNameKey() {
+        return "item.stardewcraft.corn";
     }
 }

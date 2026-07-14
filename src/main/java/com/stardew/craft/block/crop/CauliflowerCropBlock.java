@@ -87,7 +87,7 @@ public class CauliflowerCropBlock extends StardewCropBlock {
     }
 
     @Override
-    public String getCropDisplayName() {
-        return "花椰菜";
+    public String getCropDisplayNameKey() {
+        return "item.stardewcraft.cauliflower";
     }
 }

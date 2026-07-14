@@ -132,6 +132,11 @@ public class MuseumDonationData extends SavedData {
         return Collections.unmodifiableSet(pData.donatedItems);
     }
 
+    public void debugResetPlayer(UUID playerId) {
+        playerData.put(playerId.toString(), new PlayerMuseumData());
+        setDirty();
+    }
+
     public boolean isDonationModeActive(UUID playerId) {
         PlayerMuseumData pData = resolve(playerId);
         return pData != null && pData.donationModeActive;

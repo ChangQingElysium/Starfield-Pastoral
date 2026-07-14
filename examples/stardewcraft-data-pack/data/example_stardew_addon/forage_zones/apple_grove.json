@@ -1,0 +1,12 @@
+{
+  "areas": [
+    { "min_x": 10000, "min_y": 60, "min_z": 10000, "max_x": 10020, "max_y": 90, "max_z": 10020 }
+  ],
+  "min_daily_spawn": 1,
+  "max_daily_spawn": 2,
+  "max_spawned_at_once": 3,
+  "surface": "natural",
+  "entries": [
+    { "block": "minecraft:sweet_berry_bush", "seasons": ["summer", "fall"], "chance": 1.0 }
+  ]
+}

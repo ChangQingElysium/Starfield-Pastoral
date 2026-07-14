@@ -1,9 +1,15 @@
 package com.stardew.craft.quest;
 
-import com.stardew.craft.item.IStardewItem;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.stardew.craft.api.v1.item.StardewItemDataApi;
+import com.stardew.craft.api.v1.query.StardewItemQueries;
+import com.stardew.craft.api.v1.query.StardewItemQueryContext;
 import com.stardew.craft.mining.MiningDataManager;
 import com.stardew.craft.mining.MiningPlayerData;
 import com.stardew.craft.time.StardewTimeManager;
+import com.stardew.craft.quest.data.DailyQuestPoolDefinition;
+import com.stardew.craft.quest.data.DailyQuestPoolRegistry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -12,6 +18,7 @@ import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
 import java.util.Random;
+import java.util.List;
 
 /**
  * 每日任务随机生成器 — 复刻 SDV Utility.getRandomItemFromSeason / Quest generation
@@ -21,64 +28,6 @@ import java.util.Random;
 public final class DailyQuestGenerator {
 
     private DailyQuestGenerator() {}
-
-    // ─── NPC 池 (可接收交付任务的 NPC) ───
-    private static final String[] DELIVERY_NPCS = {
-        "sam", "sebastian", "abigail", "shane", "emily", "leah",
-        "maru", "elliott", "harvey", "caroline", "demetrius",
-        "pierre", "robin", "gus", "clint", "willy", "marnie",
-        "pam", "george", "jodi", "linus", "sandy"
-    };
-
-    // ─── 交付物品池 (按季节) ───
-    private static final String[][] DELIVERY_ITEMS_BY_SEASON = {
-        // 春
-        {"stardewcraft:parsnip", "stardewcraft:potato", "stardewcraft:cauliflower",
-         "stardewcraft:copper_bar", "stardewcraft:wood_normal", "stardewcraft:stone"},
-        // 夏
-        {"stardewcraft:melon", "stardewcraft:tomato", "stardewcraft:corn",
-         "stardewcraft:iron_bar", "stardewcraft:wood_normal", "stardewcraft:coal"},
-        // 秋
-        {"stardewcraft:pumpkin", "stardewcraft:corn",
-         "stardewcraft:gold_bar", "stardewcraft:wood_normal", "stardewcraft:coal"},
-        // 冬
-        {"stardewcraft:copper_bar", "stardewcraft:iron_bar", "stardewcraft:gold_bar",
-         "stardewcraft:wood_normal", "stardewcraft:stone", "stardewcraft:coal"}
-    };
-
-    // ─── 钓鱼物品池 (按季节) ───
-    private static final String[][] FISH_BY_SEASON = {
-        // 春
-        {"stardewcraft:catfish", "stardewcraft:sunfish", "stardewcraft:largemouth_bass",
-         "stardewcraft:carp", "stardewcraft:bullhead", "stardewcraft:chub"},
-        // 夏
-        {"stardewcraft:pufferfish", "stardewcraft:sunfish", "stardewcraft:largemouth_bass",
-         "stardewcraft:carp"},
-        // 秋
-        {"stardewcraft:salmon", "stardewcraft:catfish", "stardewcraft:smallmouth_bass",
-         "stardewcraft:carp", "stardewcraft:bullhead"},
-        // 冬
-        {"stardewcraft:carp", "stardewcraft:bullhead", "stardewcraft:ghostfish",
-         "stardewcraft:chub"}
-    };
-
-    // ─── 资源收集池 ───
-    private static final String[] RESOURCE_ITEMS = {
-        "stardewcraft:copper_ore", "stardewcraft:iron_ore", "stardewcraft:gold_ore",
-        "stardewcraft:wood_normal", "stardewcraft:stone", "stardewcraft:coal"
-    };
-    private static final int[] RESOURCE_AMOUNTS = {20, 15, 10, 50, 40, 20};
-    @SuppressWarnings("unused")
-    private static final int[] RESOURCE_REWARDS = {150, 250, 500, 100, 100, 200};
-    private static final String RESOURCE_NPC = "clint"; // SDV: usually Clint or Robin
-
-    // ─── 怪物讨伐池 ───
-    private static final String[] MONSTER_TYPES = {
-        "sd_mob_slime", "sd_mob_bat", "sd_mob_skeleton", "sd_mob_dust_sprite",
-        "sd_mob_ghost", "sd_mob_crab", "sd_mob_shadow", "sd_mob_fly"
-    };
-    private static final int[] MONSTER_KILL_COUNTS = {10, 10, 8, 15, 5, 5, 5, 12};
-    private static final int[] MONSTER_REWARDS = {100, 100, 150, 100, 200, 150, 150, 100};
 
     /**
      * SDV parity Utility.getQuestOfTheDay (Utility.cs:3195).
@@ -114,6 +63,7 @@ public final class DailyQuestGenerator {
         }
         Random rng = new Random(baseSeed);
         double d = rng.nextDouble();
+        DailyQuestPoolDefinition pool = DailyQuestPoolRegistry.getDefault();
 
         int season = getCurrentSeason();
         String questId = "daily_" + gameDay;
@@ -127,27 +77,27 @@ public final class DailyQuestGenerator {
 
         StardewQuest quest = null;
 
-        if (d < 0.08) {
-            quest = generateResourceQuest(rng, questId);
-        } else if (d < 0.20 && everEnteredMine && gameDay > 5) {
-            quest = generateMonsterQuest(rng, questId);
-        } else if (d < 0.50) {
+        if (d < pool.resourceChance()) {
+            quest = generateResourceQuest(rng, questId, player, pool);
+        } else if (d < pool.monsterChance() && everEnteredMine && gameDay > 5) {
+            quest = generateMonsterQuest(rng, questId, pool);
+        } else if (d < pool.emptyChance()) {
             // 30% 天数没任务
             return null;
-        } else if (d < 0.60) {
-            quest = generateFishingQuest(rng, questId, season);
-        } else if (d < 0.66 && isMonday(gameDay) && !playerHasDoneSocializeQuest(player)) {
+        } else if (d < pool.fishingChance()) {
+            quest = generateFishingQuest(rng, questId, season, player, pool);
+        } else if (d < pool.socialChance() && isMonday(gameDay) && !playerHasDoneSocializeQuest(player)) {
             // 周一 + 本存档还没做过 → 社交任务
             quest = generateSocializeQuest(rng, questId, player);
         } else {
-            quest = generateDeliveryQuest(rng, questId, season);
+            quest = generateDeliveryQuest(rng, questId, season, player, pool);
         }
 
         if (quest == null) return null;
 
         quest.setDailyQuest(true);
         quest.setCanBeCancelled(true);
-        quest.setDaysLeft(2);
+        quest.setDaysLeft(pool.durationDays());
         return quest;
     }
 
@@ -190,13 +140,19 @@ public final class DailyQuestGenerator {
         return q;
     }
 
-    private static ItemDeliveryQuest generateDeliveryQuest(Random rng, String id, int season) {
+    private static ItemDeliveryQuest generateDeliveryQuest(
+            Random rng,
+            String id,
+            int season,
+            @Nullable ServerPlayer player,
+            DailyQuestPoolDefinition pool
+    ) {
         ItemDeliveryQuest q = new ItemDeliveryQuest();
         q.setId(id);
 
-        String npc = DELIVERY_NPCS[rng.nextInt(DELIVERY_NPCS.length)];
-        String[] items = DELIVERY_ITEMS_BY_SEASON[Math.min(season, 3)];
-        String item = items[rng.nextInt(items.length)];
+        String npc = pool.deliveryNpcs().get(rng.nextInt(pool.deliveryNpcs().size()));
+        List<ResourceLocation> items = pool.deliveryItemsBySeason().get(Math.min(season, 3));
+        String item = selectOneItem(items, rng, player);
 
         q.setTargetNpc(npc);
         q.setItemId(item);
@@ -211,12 +167,18 @@ public final class DailyQuestGenerator {
         return q;
     }
 
-    private static FishingQuest generateFishingQuest(Random rng, String id, int season) {
+    private static FishingQuest generateFishingQuest(
+            Random rng,
+            String id,
+            int season,
+            @Nullable ServerPlayer player,
+            DailyQuestPoolDefinition pool
+    ) {
         FishingQuest q = new FishingQuest();
         q.setId(id);
 
-        String[] fishes = FISH_BY_SEASON[Math.min(season, 3)];
-        String fish = fishes[rng.nextInt(fishes.length)];
+        List<ResourceLocation> fishes = pool.fishBySeason().get(Math.min(season, 3));
+        String fish = selectOneItem(fishes, rng, player);
         int count = 1 + rng.nextInt(3); // 1-3 fish
 
         q.setTargetNpc("willy");
@@ -232,20 +194,25 @@ public final class DailyQuestGenerator {
         return q;
     }
 
-    private static ResourceCollectionQuest generateResourceQuest(Random rng, String id) {
+    private static ResourceCollectionQuest generateResourceQuest(
+            Random rng,
+            String id,
+            @Nullable ServerPlayer player,
+            DailyQuestPoolDefinition pool
+    ) {
         ResourceCollectionQuest q = new ResourceCollectionQuest();
         q.setId(id);
 
-        int idx = rng.nextInt(RESOURCE_ITEMS.length);
-        String item = RESOURCE_ITEMS[idx];
-        int amount = RESOURCE_AMOUNTS[idx];
-        int reward = Math.max(100, getItemPrice(item) * amount);
+        DailyQuestPoolDefinition.ResourceEntry entry = pool.resources().get(rng.nextInt(pool.resources().size()));
+        String item = entry.item().toString();
+        int amount = entry.amount();
+        int reward = entry.reward() > 0 ? entry.reward() : Math.max(100, getItemPrice(item) * amount);
 
-        q.setTargetNpc(RESOURCE_NPC);
+        q.setTargetNpc(entry.targetNpc());
         q.setItemId(item);
         q.setNumber(amount);
         String itemKey = itemDescriptionId(item);
-        String clintKey = "entity.stardewcraft.npc." + RESOURCE_NPC;
+        String clintKey = "entity.stardewcraft.npc." + entry.targetNpc();
         q.setLocalizedTitle("stardewcraft.quest.resource.title");
         q.setLocalizedDescription("stardewcraft.quest.resource.desc", clintKey, String.valueOf(amount), itemKey);
         q.setLocalizedObjective("stardewcraft.quest.resource.objective", String.valueOf(amount), itemKey, "0");
@@ -253,17 +220,18 @@ public final class DailyQuestGenerator {
         return q;
     }
 
-    private static SlayMonsterQuest generateMonsterQuest(Random rng, String id) {
+    private static SlayMonsterQuest generateMonsterQuest(
+            Random rng, String id, DailyQuestPoolDefinition pool) {
         SlayMonsterQuest q = new SlayMonsterQuest();
         q.setId(id);
 
-        int idx = rng.nextInt(MONSTER_TYPES.length);
-        String monsterTag = MONSTER_TYPES[idx];
-        int killCount = MONSTER_KILL_COUNTS[idx];
-        int reward = MONSTER_REWARDS[idx];
+        DailyQuestPoolDefinition.MonsterEntry entry = pool.monsters().get(rng.nextInt(pool.monsters().size()));
+        String monsterTag = entry.type();
+        int killCount = entry.count();
+        int reward = entry.reward();
 
         q.setMonsterName(monsterTag);
-        q.setTargetNpc("lewis");
+        q.setTargetNpc(entry.targetNpc());
         q.setNumberToKill(killCount);
         // 怪物名：走翻译键 stardewcraft.monster.<id>（我们在 lang 里加上对应条目）
         String monsterKey = "stardewcraft.monster." + monsterTag;
@@ -283,6 +251,37 @@ public final class DailyQuestGenerator {
         }
     }
 
+    /** Resolve built-in daily pools through the same item-query path exposed to addons. */
+    private static String selectOneItem(
+            List<ResourceLocation> candidates,
+            Random rng,
+            @Nullable ServerPlayer player
+    ) {
+        if (player == null || candidates.isEmpty()) {
+            return candidates.isEmpty() ? "minecraft:air" : candidates.get(rng.nextInt(candidates.size())).toString();
+        }
+
+        JsonArray items = new JsonArray();
+        for (ResourceLocation candidate : candidates) {
+            items.add(candidate.toString());
+        }
+        JsonObject data = new JsonObject();
+        data.add("items", items);
+
+        ResourceLocation type = ResourceLocation.fromNamespaceAndPath("stardewcraft", "one_of");
+        var query = StardewItemQueries.decode(type, data).result();
+        if (query.isPresent()) {
+            var stacks = StardewItemQueries.resolve(
+                    query.get(),
+                    StardewItemQueryContext.forPlayer(player, rng)
+            ).result();
+            if (stacks.isPresent() && !stacks.get().isEmpty()) {
+                return BuiltInRegistries.ITEM.getKey(stacks.get().getFirst().getItem()).toString();
+            }
+        }
+        return candidates.get(rng.nextInt(candidates.size())).toString();
+    }
+
     /**
      * 把 registry id（如 "stardewcraft:carp"）转成物品描述翻译键（"item.stardewcraft.carp"）。
      * 客户端的 lang 文件里登记这个键 → Component.translatable 会自动解析为对应语言的物品名。
@@ -299,10 +298,8 @@ public final class DailyQuestGenerator {
         try {
             ResourceLocation rl = ResourceLocation.parse(itemId);
             Item item = BuiltInRegistries.ITEM.get(rl);
-            if (item instanceof IStardewItem sdItem) {
-                int price = sdItem.getSellPrice(new ItemStack(item));
-                if (price > 0) return price;
-            }
+            int price = StardewItemDataApi.getSellPrice(new ItemStack(item));
+            if (price > 0) return price;
         } catch (Exception ignored) {}
         return 50; // fallback
     }

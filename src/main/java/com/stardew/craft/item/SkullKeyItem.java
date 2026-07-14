@@ -73,6 +73,10 @@ public class SkullKeyItem extends Item implements IStardewItem {
             data.addSpecialItem(CCStoryFlags.SKULL_KEY_SPECIAL_ITEM);
             changed = true;
         }
+        com.stardew.craft.quest.QuestManager qm = com.stardew.craft.quest.QuestManager.of(sp);
+        if (qm != null && !qm.hasQuest("19") && !qm.isQuestCompleted("19")) {
+            qm.acceptQuest("19", sp);
+        }
         if (changed) {
             PlayerDataManager.get().savePlayerData(sp.getUUID(), data);
             PlayerDataEventHandler.syncPlayerData(sp, data);

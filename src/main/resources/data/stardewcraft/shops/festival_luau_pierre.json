@@ -1,0 +1,21 @@
+{
+  "legacy_id": "Festival_Luau_Pierre",
+  "owner_npc": "Pierre",
+  "owner_dialogue": "stardewcraft.shop.luau.dialogue",
+  "entries": [
+    {
+      "item": "stardewcraft:luau_totem",
+      "price": 1000
+    },
+    {
+      "item": "stardewcraft:starfruit",
+      "price": 3000,
+      "stock": 1
+    },
+    {
+      "item": "stardewcraft:luau_torch",
+      "price": 700
+    }
+  ],
+  "accepted_sell_types": []
+}

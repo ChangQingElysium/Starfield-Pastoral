@@ -1,0 +1,25 @@
+{
+  "skill": "stardewcraft:combat",
+  "entries": [
+    {
+      "kind": "recipe",
+      "item": "stardewcraft:anvil_mastery",
+      "recipe_id": "anvil",
+      "name_key": "stardewcraft.mastery.reward.anvil.name",
+      "desc_key": "stardewcraft.mastery.reward.anvil.desc"
+    },
+    {
+      "kind": "recipe",
+      "item": "stardewcraft:mini_forge",
+      "recipe_id": "mini_forge",
+      "name_key": "stardewcraft.mastery.reward.mini_forge.name",
+      "desc_key": "stardewcraft.mastery.reward.mini_forge.desc"
+    },
+    {
+      "kind": "stat",
+      "name_key": "stardewcraft.mastery.reward.trinket_slot.name",
+      "desc_key": "stardewcraft.mastery.reward.trinket_slot.desc",
+      "stat_bonus": "stardewcraft:trinket_slot"
+    }
+  ]
+}

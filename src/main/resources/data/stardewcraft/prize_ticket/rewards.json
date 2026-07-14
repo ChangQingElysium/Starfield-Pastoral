@@ -1,0 +1,185 @@
+[
+  {
+    "id": "level_0_spring",
+    "level": 0,
+    "available_when": [
+      { "type": "stardewcraft:season", "data": { "seasons": ["spring"] } }
+    ],
+    "reward": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:carrot_seeds", "count": 12 } }
+  },
+  {
+    "id": "level_0_summer",
+    "level": 0,
+    "available_when": [
+      { "type": "stardewcraft:season", "data": { "seasons": ["summer"] } }
+    ],
+    "reward": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:summer_squash_seeds", "count": 12 } }
+  },
+  {
+    "id": "level_0_fall",
+    "level": 0,
+    "available_when": [
+      { "type": "stardewcraft:season", "data": { "seasons": ["fall"] } }
+    ],
+    "reward": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:broccoli_seeds", "count": 12 } }
+  },
+  {
+    "id": "level_0_winter",
+    "level": 0,
+    "available_when": [
+      { "type": "stardewcraft:season", "data": { "seasons": ["winter"] } }
+    ],
+    "reward": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:powder_melon_seeds", "count": 12 } }
+  },
+  {
+    "id": "level_1",
+    "level": 1,
+    "reward": { "type": "stardewcraft:one_of", "data": { "items": ["stardewcraft:peach_sapling", "stardewcraft:orange_sapling"] } }
+  },
+  {
+    "id": "level_2",
+    "level": 2,
+    "reward": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:mixed_seeds", "count": 10 } }
+  },
+  {
+    "id": "level_3",
+    "level": 3,
+    "reward": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:mystery_box", "count": 3 } }
+  },
+  {
+    "id": "level_4",
+    "level": 4,
+    "reward": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:stardrop_tea" } }
+  },
+  {
+    "id": "level_6",
+    "level": 6,
+    "reward": { "type": "stardewcraft:one_of", "data": { "items": ["stardewcraft:quality_sprinkler", "stardewcraft:preserves_jar"], "count": 4 } }
+  },
+  {
+    "id": "level_7",
+    "level": 7,
+    "reward": { "type": "stardewcraft:one_of", "data": { "items": ["stardewcraft:apple_sapling", "stardewcraft:pomegranate_sapling"] } }
+  },
+  {
+    "id": "level_8",
+    "level": 8,
+    "reward": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:book_friendship" } }
+  },
+  {
+    "id": "level_9",
+    "level": 9,
+    "reward": {
+      "type": "stardewcraft:one_of_queries",
+      "data": {
+        "queries": [
+          { "type": "stardewcraft:item", "data": { "item": "stardewcraft:cherry_bomb", "count": 20 } },
+          { "type": "stardewcraft:item", "data": { "item": "stardewcraft:bomb_item", "count": 12 } },
+          { "type": "stardewcraft:item", "data": { "item": "stardewcraft:mega_bomb", "count": 6 } }
+        ]
+      }
+    }
+  },
+  {
+    "id": "level_11",
+    "level": 11,
+    "reward": { "type": "stardewcraft:one_of", "data": { "items": ["stardewcraft:fish_smoker", "stardewcraft:dehydrator"] } }
+  },
+  {
+    "id": "level_12",
+    "level": 12,
+    "reward": { "type": "stardewcraft:one_of", "data": { "items": ["stardewcraft:artifact_trove", "stardewcraft:mystery_box"], "count": 4 } }
+  },
+  {
+    "id": "level_14",
+    "level": 14,
+    "reward": { "type": "stardewcraft:one_of", "data": { "items": ["stardewcraft:skill_book_0", "stardewcraft:skill_book_1", "stardewcraft:skill_book_2", "stardewcraft:skill_book_3", "stardewcraft:skill_book_4"] } }
+  },
+  {
+    "id": "level_15",
+    "level": 15,
+    "reward": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:stardrop_tea" } }
+  },
+  {
+    "id": "level_17",
+    "level": 17,
+    "reward": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:omni_geode", "count": 8 } }
+  },
+  {
+    "id": "level_18",
+    "level": 18,
+    "reward": { "type": "stardewcraft:one_of", "data": { "items": ["stardewcraft:bee_house", "stardewcraft:keg"], "count": 4 } }
+  },
+  {
+    "id": "level_19",
+    "level": 19,
+    "reward": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:diamond", "count": 5 } }
+  },
+  {
+    "id": "level_20",
+    "level": 20,
+    "reward": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:mystery_box", "count": 5 } }
+  },
+  {
+    "id": "level_21",
+    "level": 21,
+    "reward": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:magic_rock_candy" } }
+  },
+  {
+    "id": "loop_stardrop_tea",
+    "level": 22,
+    "repeat_every": 9,
+    "reward": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:stardrop_tea" } }
+  },
+  {
+    "id": "loop_treasure_chest",
+    "level": 23,
+    "repeat_every": 9,
+    "reward": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:treasure_chest" } }
+  },
+  {
+    "id": "loop_iridium_sprinkler",
+    "level": 24,
+    "repeat_every": 9,
+    "reward": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:iridium_sprinkler" } }
+  },
+  {
+    "id": "loop_bombs",
+    "level": 26,
+    "repeat_every": 9,
+    "reward": {
+      "type": "stardewcraft:one_of_queries",
+      "data": {
+        "queries": [
+          { "type": "stardewcraft:item", "data": { "item": "stardewcraft:bomb_item", "count": 15 } },
+          { "type": "stardewcraft:item", "data": { "item": "stardewcraft:mega_bomb", "count": 8 } }
+        ]
+      }
+    }
+  },
+  {
+    "id": "loop_mystery_boxes",
+    "level": 27,
+    "repeat_every": 9,
+    "reward": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:mystery_box", "count": 5 } }
+  },
+  {
+    "id": "loop_fairy_dust",
+    "level": 28,
+    "repeat_every": 9,
+    "reward": {
+      "type": "stardewcraft:random_count",
+      "data": {
+        "query": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:fairy_dust" } },
+        "min_count": 1,
+        "max_count": 2
+      }
+    }
+  },
+  {
+    "id": "loop_iridium_or_trove",
+    "level": 29,
+    "repeat_every": 9,
+    "reward": { "type": "stardewcraft:one_of", "data": { "items": ["stardewcraft:iridium_bar", "stardewcraft:artifact_trove"], "count": 5 } }
+  }
+]

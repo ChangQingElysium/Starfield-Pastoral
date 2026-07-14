@@ -1,7 +1,7 @@
 package com.stardew.craft.network.payload;
 
 import com.stardew.craft.StardewCraft;
-import com.stardew.craft.item.IStardewItem;
+import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -59,8 +59,8 @@ public record FurnitureCataloguePurchasePayload(
 
             // Security: only allow furniture-type items, wallpaper, or flooring
             boolean allowed = false;
-            if (mcItem instanceof IStardewItem si) {
-                String typeKey = si.getItemTypeKey();
+            {
+                String typeKey = StardewItemDataApi.getTypeKey(new ItemStack(mcItem));
                 if ("stardewcraft.type.furniture".equals(typeKey) ||
                     "stardewcraft.type.utility".equals(typeKey)) {
                     allowed = true;

@@ -1,0 +1,19 @@
+{
+  "requester": "Pierre",
+  "duration": "week",
+  "repeatable": true,
+  "required_tags": [],
+  "title": "Example Apple Hunt",
+  "text": "Collect five apples for the example order.",
+  "objectives": [
+    {
+      "type": "collect",
+      "text": "Collect apples: {0}/{1}",
+      "required_count": 5,
+      "accepted_tags": "item_apple"
+    }
+  ],
+  "rewards": [
+    {"type": "money", "amount": 250}
+  ]
+}

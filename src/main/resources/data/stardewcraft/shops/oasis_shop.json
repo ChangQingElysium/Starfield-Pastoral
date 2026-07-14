@@ -1,0 +1,33 @@
+{
+  "legacy_id": "OasisShop",
+  "owner_npc": "Sandy",
+  "owner_dialogue": "stardewcraft.shop.oasis.dialogue",
+  "entries": [
+    {
+      "item": "stardewcraft:rhubarb_seeds",
+      "price": 100
+    },
+    {
+      "item": "stardewcraft:starfruit_seeds",
+      "price": 400
+    },
+    {
+      "item": "stardewcraft:beet_seeds",
+      "price": 20
+    },
+    {
+      "item": "stardewcraft:coconut",
+      "price": 400
+    },
+    {
+      "item": "stardewcraft:cactus_fruit",
+      "price": 150
+    }
+  ],
+  "accepted_sell_types": [
+    "stardewcraft.type.crop",
+    "stardewcraft.type.forage",
+    "stardewcraft.type.fruit",
+    "stardewcraft.type.seed"
+  ]
+}

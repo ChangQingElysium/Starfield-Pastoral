@@ -1,49 +1,49 @@
 [
   {
     "id": "mom1",
-    "text": "亲爱的@：\n\n你在那边过得好吗？妈妈一直很想你。\n\n城里一切都好，就是没有你在身边有点冷清。\n\n我给你寄了一点钱，记得好好吃饭！\n\n爱你的，\n——妈妈",
+    "text": "stardewcraft.mail.mom1",
     "background": 0,
     "money": 500
   },
   {
     "id": "mom2",
-    "text": "我最亲爱的@：\n\n听说你的农场经营得不错！妈妈真为你骄傲。\n\n邻居们都问起你呢。珍妮太太说她的女儿也想去乡下住……\n\n随信附上一些钱，别太节省了。\n\n——妈妈",
+    "text": "stardewcraft.mail.mom2",
     "background": 0,
     "money": 500
   },
   {
     "id": "mom3",
-    "text": "最亲爱的@：\n\n你已经在那边待了好长时间了呢。\n\n妈妈把你小时候的相册翻出来看了，你还记得我们一起做饼干的那天吗？\n\n真希望能再和你一起做些点心。\n\n给你寄了点零用钱。\n\n——妈妈",
+    "text": "stardewcraft.mail.mom3",
     "background": 0,
     "money": 1000
   },
   {
     "id": "mom4",
-    "text": "@宝贝：\n\n妈妈最近一直在想你。\n\n记得在乡下也要注意身体，不要太累了。\n\n你爷爷的农场在你手里一定会越来越好的。\n\n随信附上一点心意。\n\n永远爱你的，\n——妈妈",
+    "text": "stardewcraft.mail.mom4",
     "background": 0,
     "money": 1500
   },
   {
     "id": "dad1",
-    "text": "@：\n\n你老爸我终于给你写信了。\n\n说实话，当初你说要去继承爷爷的农场，我还觉得你在开玩笑。\n\n不过看起来你干得还行嘛。\n\n随信附上一点零用钱。\n\n——爸爸",
+    "text": "stardewcraft.mail.dad1",
     "background": 0,
     "money": 500
   },
   {
     "id": "dad2",
-    "text": "嘿 @：\n\n你妈总念叨你，让我也给你写封信。\n\n城里这边没什么变化，一切如常。倒是听说你那边挺热闹的？\n\n照顾好自己，别省钱。\n\n——爸爸",
+    "text": "stardewcraft.mail.dad2",
     "background": 0,
     "money": 500
   },
   {
     "id": "dad3",
-    "text": "@：\n\n我整理旧物的时候发现了你爷爷留下的一些东西。\n\n他年轻时也是个很优秀的农夫。我想他一定很乐意看到你继承了他的事业。\n\n寄了点钱给你。\n\n——爸爸",
+    "text": "stardewcraft.mail.dad3",
     "background": 0,
     "money": 1000
   },
   {
     "id": "dad4",
-    "text": "亲爱的@：\n\n你已经在那个小镇上生活很久了。我和你妈有时间想去看看你。\n\n不过最近工作忙……下次有空一定去。\n\n你爷爷的那片地，你一定打理得比他还好。\n\n——爸爸",
+    "text": "stardewcraft.mail.dad4",
     "background": 0,
     "money": 1500
   }

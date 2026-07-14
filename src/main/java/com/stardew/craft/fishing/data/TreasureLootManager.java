@@ -146,14 +146,15 @@ public class TreasureLootManager extends SimplePreparableReloadListener<Treasure
 
 	/**
 	 * SDV 原版宝箱战利品生成 — 完全按照 FishingRod.openTreasureMenuEndFunction 实现。
-	 * 跳过 mod 中不存在的物品（skill_book, raccoon_seeds, mineral_water, lost_book,
-	 * artifact_trove, book_of_roe, golden_bobber, qi_bean, golden_walnut, treasure_appraisal_guide）。
+ * 跳过 mod 中不存在的物品（skill_book, raccoon_seeds, mineral_water,
+ * artifact_trove, book_of_roe, golden_bobber, qi_bean, golden_walnut, treasure_appraisal_guide）。
 	 */
 	public List<ItemStack> generateTreasure(int fishingLevel, boolean golden, RandomSource random,
 			int clearWaterDistance, double dailyLuck, @Nullable ServerPlayer player) {
 		List<ItemStack> treasures = new ArrayList<>();
 		// SDV clearWaterDistance 上限5
 		int dist = Math.min(5, Math.max(0, clearWaterDistance));
+		boolean foundLostBook = false;
 
 		float chance = 1f;
 		while (random.nextDouble() <= (double) chance) {
@@ -194,13 +195,13 @@ public class TreasureLootManager extends SimplePreparableReloadListener<Treasure
 			switch (random.nextInt(4)) {
 				case 0 -> rollOres(treasures, dist, fishingLevel, random, player);
 				case 1 -> rollBaitAndTackle(treasures, dist, fishingLevel, random);
-				case 2 -> rollArtifactsAndGeodes(treasures, fishingLevel, random);
+				case 2 -> foundLostBook |= rollArtifactsAndGeodes(treasures, fishingLevel, random, player);
 				case 3 -> rollGemsAndEquipment(treasures, dist, fishingLevel, dailyLuck, random, player);
 			}
 		}
 
 		// SDV: 空宝箱 → 给鱼饵
-		if (treasures.isEmpty()) {
+		if (treasures.isEmpty() && !foundLostBook) {
 			addItem(treasures, "stardewcraft:bait", random.nextInt(1, 4) * 5);
 		}
 		if (com.stardew.craft.festival.desert.DesertFestivalWillyFishingService.shouldForceGoldenBobberTreasure(player)) {
@@ -296,9 +297,20 @@ public class TreasureLootManager extends SimplePreparableReloadListener<Treasure
 
 	/**
 	 * SDV case 2: 文物和晶洞
-	 * 跳过 lost_book 和 artifact_trove（mod中不存在）
+	 * Lost Book 是世界进度而非背包物品；其余分支保持原版顺序。
 	 */
-	private void rollArtifactsAndGeodes(List<ItemStack> treasures, int fishingLevel, RandomSource random) {
+	private boolean rollArtifactsAndGeodes(List<ItemStack> treasures, int fishingLevel, RandomSource random,
+			@Nullable ServerPlayer player) {
+		com.stardew.craft.player.PlayerStardewData playerData = player == null
+				? null : PlayerDataManager.getPlayerData(player);
+		if (player != null
+				&& random.nextDouble() < 0.1
+				&& (playerData.hasMailFlag(com.stardew.craft.museum.LostBookService.FIRST_BOOK_FLAG)
+						|| playerData.hasMailFlagForTomorrow(
+								com.stardew.craft.museum.LostBookService.FIRST_BOOK_FLAG))
+				&& com.stardew.craft.museum.LostBookService.find(player)) {
+			return true;
+		}
 		if (random.nextDouble() < 0.5 && fishingLevel > 1) {
 			// SDV: 随机考古文物 (103-119) — 从我们已有的考古文物中选择
 			String[] artifacts = {
@@ -316,6 +328,7 @@ public class TreasureLootManager extends SimplePreparableReloadListener<Treasure
 			// SDV: 晶洞
 			addItem(treasures, "stardewcraft:geode", random.nextInt(1, 3));
 		}
+		return false;
 	}
 
 	/**

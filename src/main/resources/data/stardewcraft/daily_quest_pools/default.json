@@ -1,0 +1,43 @@
+{
+  "resource_chance": 0.08,
+  "monster_chance": 0.20,
+  "empty_chance": 0.50,
+  "fishing_chance": 0.60,
+  "social_chance": 0.66,
+  "duration_days": 2,
+  "delivery_npcs": [
+    "sam", "sebastian", "abigail", "shane", "emily", "leah", "maru", "elliott",
+    "harvey", "caroline", "demetrius", "pierre", "robin", "gus", "clint", "willy",
+    "marnie", "pam", "george", "jodi", "linus", "sandy"
+  ],
+  "delivery_items_by_season": [
+    ["stardewcraft:parsnip", "stardewcraft:potato", "stardewcraft:cauliflower", "stardewcraft:copper_bar", "stardewcraft:wood_normal", "stardewcraft:stone"],
+    ["stardewcraft:melon", "stardewcraft:tomato", "stardewcraft:corn", "stardewcraft:iron_bar", "stardewcraft:wood_normal", "stardewcraft:coal"],
+    ["stardewcraft:pumpkin", "stardewcraft:corn", "stardewcraft:gold_bar", "stardewcraft:wood_normal", "stardewcraft:coal"],
+    ["stardewcraft:copper_bar", "stardewcraft:iron_bar", "stardewcraft:gold_bar", "stardewcraft:wood_normal", "stardewcraft:stone", "stardewcraft:coal"]
+  ],
+  "fish_by_season": [
+    ["stardewcraft:catfish", "stardewcraft:sunfish", "stardewcraft:largemouth_bass", "stardewcraft:carp", "stardewcraft:bullhead", "stardewcraft:chub"],
+    ["stardewcraft:pufferfish", "stardewcraft:sunfish", "stardewcraft:largemouth_bass", "stardewcraft:carp"],
+    ["stardewcraft:salmon", "stardewcraft:catfish", "stardewcraft:smallmouth_bass", "stardewcraft:carp", "stardewcraft:bullhead"],
+    ["stardewcraft:carp", "stardewcraft:bullhead", "stardewcraft:ghostfish", "stardewcraft:chub"]
+  ],
+  "resources": [
+    {"item": "stardewcraft:copper_ore", "amount": 20, "reward": 150, "target_npc": "clint"},
+    {"item": "stardewcraft:iron_ore", "amount": 15, "reward": 250, "target_npc": "clint"},
+    {"item": "stardewcraft:gold_ore", "amount": 10, "reward": 500, "target_npc": "clint"},
+    {"item": "stardewcraft:wood_normal", "amount": 50, "reward": 100, "target_npc": "robin"},
+    {"item": "stardewcraft:stone", "amount": 40, "reward": 100, "target_npc": "robin"},
+    {"item": "stardewcraft:coal", "amount": 20, "reward": 200, "target_npc": "clint"}
+  ],
+  "monsters": [
+    {"type": "sd_mob_slime", "count": 10, "reward": 100},
+    {"type": "sd_mob_bat", "count": 10, "reward": 100},
+    {"type": "sd_mob_skeleton", "count": 8, "reward": 150},
+    {"type": "sd_mob_dust_sprite", "count": 15, "reward": 100},
+    {"type": "sd_mob_ghost", "count": 5, "reward": 200},
+    {"type": "sd_mob_crab", "count": 5, "reward": 150},
+    {"type": "sd_mob_shadow", "count": 5, "reward": 150},
+    {"type": "sd_mob_fly", "count": 12, "reward": 100}
+  ]
+}

@@ -7,6 +7,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
@@ -33,9 +34,12 @@ public class StardewQuest {
     public static final int TYPE_HARVEST   = 9;
     public static final int TYPE_RESOURCE  = 10;
     public static final int TYPE_WEEDING   = 11;
+    public static final int TYPE_DATA_DRIVEN = 12;
 
     // ─── 核心字段（SDV NetFields） ───
     protected String id = "";
+    @Nullable
+    protected ResourceLocation definitionId;
     protected int questType = TYPE_BASIC;
     /** Legacy literal 文案；为空且本地化 key 为空时才显示。新代码用 {@link #titleKey}。 */
     protected String title = "";
@@ -272,6 +276,7 @@ public class StardewQuest {
     public CompoundTag save() {
         CompoundTag tag = new CompoundTag();
         tag.putString("Id", id);
+        if (definitionId != null) tag.putString("DefinitionId", definitionId.toString());
         tag.putInt("Type", questType);
         tag.putString("Title", title);
         tag.putString("Description", description);
@@ -315,15 +320,64 @@ public class StardewQuest {
         return tag;
     }
 
+    /** Persistent form for definition-backed quests: immutable definition fields stay in datapacks. */
+    public CompoundTag saveState() {
+        if (definitionId == null || !(this instanceof DataDrivenQuest)) {
+            return save();
+        }
+        CompoundTag tag = new CompoundTag();
+        tag.putBoolean("StateOnly", true);
+        tag.putString("Id", id);
+        tag.putString("DefinitionId", definitionId.toString());
+        tag.putInt("Type", questType);
+        saveMutableFields(tag);
+        saveStateExtra(tag);
+        return tag;
+    }
+
+    private void saveMutableFields(CompoundTag tag) {
+        tag.putBoolean("Accepted", accepted);
+        tag.putBoolean("Completed", completed);
+        tag.putBoolean("DailyQuest", dailyQuest);
+        tag.putBoolean("ShowNew", showNew);
+        tag.putBoolean("CanBeCancelled", canBeCancelled);
+        tag.putBoolean("Destroy", destroy);
+        tag.putBoolean("NotifiedComplete", notifiedComplete);
+        tag.putInt("DaysLeft", daysLeft);
+        tag.putInt("DayQuestAccepted", dayQuestAccepted);
+    }
+
     /** 子类重写以保存额外字段 */
     protected void saveExtra(CompoundTag tag) {}
+
+    /** Definition-backed persistent state hook. */
+    protected void saveStateExtra(CompoundTag tag) { saveExtra(tag); }
 
     /** 子类重写以加载额外字段 */
     protected void loadExtra(CompoundTag tag) {}
 
+    /** Definition-backed persistent state hook. */
+    protected void loadStateExtra(CompoundTag tag) { loadExtra(tag); }
+
     public static StardewQuest load(CompoundTag tag) {
         int type = tag.getInt("Type");
+        ResourceLocation savedDefinitionId = tag.contains("DefinitionId", 8)
+                ? ResourceLocation.tryParse(tag.getString("DefinitionId")) : null;
+        if (tag.getBoolean("StateOnly") && savedDefinitionId != null) {
+            StardewQuest restored = QuestDataLoader.createQuest(savedDefinitionId.toString());
+            if (restored == null) {
+                restored = createByType(type);
+                restored.definitionId = savedDefinitionId;
+                restored.id = tag.getString("Id");
+                restored.title = "Unavailable quest: " + savedDefinitionId;
+                restored.canBeCancelled = true;
+            }
+            restored.loadMutableFields(tag);
+            restored.loadStateExtra(tag);
+            return restored;
+        }
         StardewQuest quest = createByType(type);
+        quest.definitionId = savedDefinitionId;
         quest.id = tag.getString("Id");
         quest.questType = type;
         quest.title = tag.getString("Title");
@@ -366,6 +420,18 @@ public class StardewQuest {
         return quest;
     }
 
+    private void loadMutableFields(CompoundTag tag) {
+        accepted = tag.getBoolean("Accepted");
+        completed = tag.getBoolean("Completed");
+        dailyQuest = tag.getBoolean("DailyQuest");
+        showNew = tag.getBoolean("ShowNew");
+        canBeCancelled = tag.getBoolean("CanBeCancelled");
+        destroy = tag.getBoolean("Destroy");
+        notifiedComplete = tag.getBoolean("NotifiedComplete");
+        daysLeft = tag.getInt("DaysLeft");
+        dayQuestAccepted = tag.getInt("DayQuestAccepted");
+    }
+
     private static StardewQuest createByType(int type) {
         return switch (type) {
             case TYPE_CRAFTING  -> new CraftingQuest();
@@ -377,6 +443,7 @@ public class StardewQuest {
             case TYPE_BUILDING  -> new HaveBuildingQuest();
             case TYPE_HARVEST   -> new ItemHarvestQuest();
             case TYPE_RESOURCE  -> new ResourceCollectionQuest();
+            case TYPE_DATA_DRIVEN -> new DataDrivenQuest();
             default             -> new StardewQuest();
         };
     }
@@ -420,4 +487,7 @@ public class StardewQuest {
     public void setDayQuestAccepted(int dayQuestAccepted) { this.dayQuestAccepted = dayQuestAccepted; }
     public List<String> getNextQuests() { return nextQuests; }
     public void setNextQuests(List<String> nextQuests) { this.nextQuests = nextQuests; }
+    @Nullable public ResourceLocation getDefinitionId() { return definitionId; }
+    public boolean matchesItemDelivery(String npcId, String itemId) { return false; }
+    public String getDeliveryTargetMessage() { return ""; }
 }

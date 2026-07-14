@@ -1,24 +1,23 @@
 package com.stardew.craft.player;
 
+import net.minecraft.network.chat.Component;
+
 /**
  * 技能类型枚举
  * 对应星露谷物语的5种技能
  */
 public enum SkillType {
-    FARMING(0, "farming", "农业"),
-    FISHING(1, "fishing", "钓鱼"),
-    FORAGING(2, "foraging", "觅食"),
-    MINING(3, "mining", "采矿"),
-    COMBAT(4, "combat", "战斗");
+    FARMING(0, "farming"),
+    FISHING(1, "fishing"),
+    FORAGING(2, "foraging"),
+    MINING(3, "mining"),
+    COMBAT(4, "combat");
     
     private final int id;
     private final String name;
-    private final String displayName;
-    
-    SkillType(int id, String name, String displayName) {
+    SkillType(int id, String name) {
         this.id = id;
         this.name = name;
-        this.displayName = displayName;
     }
     
     public int getId() {
@@ -29,8 +28,12 @@ public enum SkillType {
         return name;
     }
     
-    public String getDisplayName() {
-        return displayName;
+    public String getTranslationKey() {
+        return "stardewcraft.skill." + name;
+    }
+
+    public Component getDisplayName() {
+        return Component.translatable(getTranslationKey());
     }
     
     /**

@@ -244,7 +244,7 @@ public class FiberCropBlock extends StardewCropBlock {
     }
 
     @Override
-    public String getCropDisplayName() {
-        return "纤维";
+    public String getCropDisplayNameKey() {
+        return "item.stardewcraft.fiber";
     }
 }

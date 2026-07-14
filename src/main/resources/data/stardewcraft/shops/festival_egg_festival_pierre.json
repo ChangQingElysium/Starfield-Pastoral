@@ -1,0 +1,29 @@
+{
+  "legacy_id": "Festival_EggFestival_Pierre",
+  "owner_npc": "Pierre",
+  "owner_dialogue": "stardewcraft.shop.eggfestival.dialogue",
+  "entries": [
+    {
+      "item": "stardewcraft:lawn_flamingo",
+      "price": 400
+    },
+    {
+      "item": "stardewcraft:plush_bunny",
+      "price": 2000,
+      "stock": 1
+    },
+    {
+      "item": "stardewcraft:strawberry_seeds",
+      "price": 100
+    },
+    {
+      "item": "stardewcraft:pastel_banner",
+      "price": 1000
+    },
+    {
+      "item": "stardewcraft:standing_hoe",
+      "price": 1000
+    }
+  ],
+  "accepted_sell_types": []
+}

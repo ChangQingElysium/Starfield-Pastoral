@@ -1,0 +1,62 @@
+{
+  "legacy_id": "Clint",
+  "requester": "Clint",
+  "duration": "week",
+  "repeatable": true,
+  "required_tags": [],
+  "title": "stardewcraft.special_orders.Clint.name",
+  "text": "stardewcraft.special_orders.Clint.text",
+  "objectives": [
+    {
+      "type": "slay",
+      "text": "stardewcraft.special_orders.Clint_Objective_0_Text",
+      "required_count": 50,
+      "target": "{Monster:Target}"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "money",
+      "amount": 6000
+    },
+    {
+      "type": "mail",
+      "mail": "ClintReward"
+    }
+  ],
+  "random_elements": [
+    {
+      "name": "Monster",
+      "options": [
+        {
+          "required_tags": [],
+          "values": {
+            "Target": "Bat",
+            "LocalizedName": "stardewcraft.special_orders.Clint_RE_Monster_0_LocalizedName"
+          }
+        },
+        {
+          "required_tags": [],
+          "values": {
+            "Target": "Dust Spirit",
+            "LocalizedName": "stardewcraft.special_orders.Clint_RE_Monster_1_LocalizedName"
+          }
+        },
+        {
+          "required_tags": [],
+          "values": {
+            "Target": "Skeleton",
+            "LocalizedName": "stardewcraft.special_orders.Clint_RE_Monster_2_LocalizedName"
+          }
+        },
+        {
+          "required_tags": [],
+          "values": {
+            "Target": "Grub",
+            "LocalizedName": "stardewcraft.special_orders.Clint_RE_Monster_3_LocalizedName"
+          }
+        }
+      ]
+    }
+  ]
+}

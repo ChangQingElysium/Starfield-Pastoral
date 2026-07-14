@@ -1,0 +1,27 @@
+{
+  "title": {
+    "literal": "A Useful Stick"
+  },
+  "description": {
+    "literal": "Craft something simple to finish the sample quest chain."
+  },
+  "objective_text": {
+    "literal": "Craft a stick"
+  },
+  "objective": {
+    "type": "stardewcraft:crafting",
+    "data": {
+      "recipe": "minecraft:stick"
+    }
+  },
+  "available_when": [
+    {
+      "type": "stardewcraft:flag",
+      "data": {
+        "id": "example_stardew_addon:sample_started"
+      }
+    }
+  ],
+  "money_reward": 100,
+  "can_cancel": true
+}

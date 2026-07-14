@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": {
+    "minecraft:diamond_sword": {
+      "slot": "stardewcraft:weapon",
+      "attack": 2,
+      "crit_chance": 0.03,
+      "effects": ["example_stardew_addon:apple_guard"],
+      "weapon": {
+        "type": "sword",
+        "min_damage": 18.0,
+        "max_damage": 26.0,
+        "primary_skill": "example_stardew_addon:apple_dash"
+      }
+    }
+  }
+}

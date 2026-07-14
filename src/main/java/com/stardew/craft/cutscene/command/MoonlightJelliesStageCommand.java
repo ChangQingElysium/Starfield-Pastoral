@@ -1,8 +1,6 @@
 package com.stardew.craft.cutscene.command;
 
-import com.stardew.craft.cutscene.network.CutsceneServerActionPayload;
 import com.stardew.craft.cutscene.runtime.EventPlayer;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 public class MoonlightJelliesStageCommand implements EventCommand {
     private final String stage;
@@ -17,7 +15,7 @@ public class MoonlightJelliesStageCommand implements EventCommand {
 
     @Override
     public void start(EventPlayer player) {
-        PacketDistributor.sendToServer(new CutsceneServerActionPayload("moonlight_jellies_stage", stage));
+        player.sendServerAction("moonlight_jellies_stage", stage);
         sent = true;
         ticks = 0;
     }

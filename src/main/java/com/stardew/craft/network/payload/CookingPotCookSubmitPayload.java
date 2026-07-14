@@ -6,7 +6,6 @@ import com.stardew.craft.block.utility.CookingPotBlock;
 import com.stardew.craft.blockentity.FridgeBlockEntity;
 import com.stardew.craft.cooking.service.CookingPotService;
 import com.stardew.craft.cooking.service.VanillaCookingRecipeData;
-import com.stardew.craft.item.ModItems;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -57,20 +56,25 @@ public record CookingPotCookSubmitPayload(String recipeItemId, int craftCount) i
             }
 
             String recipeId = payload.recipeItemId == null ? "" : payload.recipeItemId.trim();
-            ResourceLocation recipeLoc = ResourceLocation.tryParse(recipeId);
-            String recipePath = recipeLoc != null ? recipeLoc.getPath() : recipeId;
-            var recipeDeferred = ModItems.COOKING_DISHES.get(recipePath);
-            if (recipeDeferred == null) {
+            ResourceLocation recipeLoc = recipeId.indexOf(':') >= 0
+                    ? ResourceLocation.tryParse(recipeId)
+                    : ResourceLocation.tryBuild(StardewCraft.MODID, recipeId);
+            var definition = recipeLoc == null
+                    ? java.util.Optional.<com.stardew.craft.api.v1.production.StardewCookingRecipeDefinition>empty()
+                    : VanillaCookingRecipeData.getDefinition(recipeLoc);
+            if (recipeLoc == null || definition.isEmpty()) {
                 player.sendSystemMessage(Component.translatable("stardewcraft.cooking.invalid_recipe"));
                 return;
             }
 
-            if (!com.stardew.craft.player.PlayerStardewDataAPI.getData(player).isRecipeUnlocked(recipePath)) {
+            String storageId = VanillaCookingRecipeData.storageId(recipeLoc);
+            if (!com.stardew.craft.player.PlayerStardewDataAPI.getData(player).isRecipeUnlocked(storageId)) {
                 player.sendSystemMessage(Component.translatable("stardewcraft.cooking.recipe_locked"));
                 return;
             }
 
-            List<VanillaCookingRecipeData.IngredientRequirement> requirements = VanillaCookingRecipeData.getRequirements(recipePath);
+            List<com.stardew.craft.api.v1.production.StardewCookingIngredient> requirements =
+                    VanillaCookingRecipeData.getRequirements(recipeLoc);
             List<FridgeBlockEntity> nearbyFridges = findNearbyFridges(player);
             int count = resolveCraftCount(payload.craftCount, player.getInventory(), nearbyFridges, requirements);
             if (count <= 0) {
@@ -80,11 +84,11 @@ public record CookingPotCookSubmitPayload(String recipeItemId, int craftCount) i
 
             for (var req : requirements) {
                 int required = req.count() * count;
-                Predicate<ItemStack> matcher = stack -> VanillaCookingRecipeData.matchesToken(stack, req.token());
+                Predicate<ItemStack> matcher = stack -> VanillaCookingRecipeData.matches(stack, req);
                 if (countMatching(player.getInventory(), matcher) + countMatchingFridges(nearbyFridges, matcher) < required) {
                     player.sendSystemMessage(Component.translatable(
                             "stardewcraft.cooking.missing_ingredient",
-                            VanillaCookingRecipeData.describeToken(req.token()),
+                            VanillaCookingRecipeData.describe(req),
                             required
                     ));
                     return;
@@ -93,14 +97,14 @@ public record CookingPotCookSubmitPayload(String recipeItemId, int craftCount) i
 
             for (var req : requirements) {
                 int required = req.count() * count;
-                Predicate<ItemStack> matcher = stack -> VanillaCookingRecipeData.matchesToken(stack, req.token());
+                Predicate<ItemStack> matcher = stack -> VanillaCookingRecipeData.matches(stack, req);
                 int remain = consumeMatching(player.getInventory(), matcher, required);
                 if (remain > 0) {
                     consumeMatchingFridges(nearbyFridges, matcher, remain);
                 }
             }
 
-            ItemStack output = new ItemStack(recipeDeferred.get(), count);
+            ItemStack output = VanillaCookingRecipeData.getOutputStack(recipeLoc, count);
             moveOutputToCursorFirst(player, output);
             if (!output.isEmpty()) {
                 boolean added = player.getInventory().add(output);
@@ -108,7 +112,7 @@ public record CookingPotCookSubmitPayload(String recipeItemId, int craftCount) i
                     player.drop(output, false);
                 }
             }
-            PlayerStardewDataAPI.recordRecipeCrafted(player, recipePath, count);
+            PlayerStardewDataAPI.recordRecipeCrafted(player, storageId, count);
 
             net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player, CookingPotIngredientAvailabilityPayload.fromPlayer(player));
         });
@@ -117,7 +121,7 @@ public record CookingPotCookSubmitPayload(String recipeItemId, int craftCount) i
     private static int resolveCraftCount(int requestedCount,
                                          Inventory inventory,
                                          List<FridgeBlockEntity> fridges,
-                                         List<VanillaCookingRecipeData.IngredientRequirement> requirements) {
+                                         List<com.stardew.craft.api.v1.production.StardewCookingIngredient> requirements) {
         if (requestedCount == -1) {
             return computeMaxCrafts(inventory, fridges, requirements);
         }
@@ -126,7 +130,7 @@ public record CookingPotCookSubmitPayload(String recipeItemId, int craftCount) i
 
     private static int computeMaxCrafts(Inventory inventory,
                                         List<FridgeBlockEntity> fridges,
-                                        List<VanillaCookingRecipeData.IngredientRequirement> requirements) {
+                                        List<com.stardew.craft.api.v1.production.StardewCookingIngredient> requirements) {
         if (requirements.isEmpty()) {
             return 1;
         }
@@ -136,7 +140,7 @@ public record CookingPotCookSubmitPayload(String recipeItemId, int craftCount) i
             if (req.count() <= 0) {
                 continue;
             }
-            Predicate<ItemStack> matcher = stack -> VanillaCookingRecipeData.matchesToken(stack, req.token());
+            Predicate<ItemStack> matcher = stack -> VanillaCookingRecipeData.matches(stack, req);
             int available = countMatching(inventory, matcher) + countMatchingFridges(fridges, matcher);
             int byThisReq = available / req.count();
             maxCrafts = Math.min(maxCrafts, byThisReq);
@@ -284,4 +288,3 @@ public record CookingPotCookSubmitPayload(String recipeItemId, int craftCount) i
         return result;
     }
 }
-

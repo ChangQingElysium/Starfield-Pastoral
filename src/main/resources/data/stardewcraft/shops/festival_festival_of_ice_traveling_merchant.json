@@ -1,0 +1,34 @@
+{
+  "legacy_id": "Festival_FestivalOfIce_TravelingMerchant",
+  "entries": [
+    {
+      "item": "stardewcraft:scarecrow_4",
+      "price": 5000,
+      "stock": 1
+    },
+    {
+      "item": "stardewcraft:winter_star_tree",
+      "price": 5000
+    },
+    {
+      "item": "stardewcraft:light_6",
+      "price": 3000
+    },
+    {
+      "item": "stardewcraft:cranberry_sauce",
+      "price": 200,
+      "stock": 1
+    },
+    {
+      "item": "stardewcraft:stuffing",
+      "price": 200,
+      "stock": 1
+    },
+    {
+      "item": "stardewcraft:pumpkin_soup",
+      "price": 250,
+      "stock": 1
+    }
+  ],
+  "accepted_sell_types": []
+}

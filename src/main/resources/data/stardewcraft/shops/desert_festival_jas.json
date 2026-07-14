@@ -1,0 +1,26 @@
+{
+  "legacy_id": "DesertFestival_Jas",
+  "owner_npc": "jas",
+  "owner_dialogue": "stardewcraft.festival.desertfestival.dialogue.vendor",
+  "entries": [
+    {
+      "item": "stardewcraft:ancient_doll",
+      "stock": 1,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 1
+    },
+    {
+      "item": "stardewcraft:rabbits_foot",
+      "stock": 1,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 100
+    },
+    {
+      "item": "stardewcraft:magic_rock_candy",
+      "stock": 1,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 300
+    }
+  ],
+  "accepted_sell_types": []
+}

@@ -1,0 +1,12 @@
+{
+  "legacy_id": "Festival_DanceOfTheMoonlightJellies_Pierre",
+  "owner_npc": "Pierre",
+  "owner_dialogue": "stardewcraft.shop.moonlight_jellies.dialogue",
+  "entries": [
+    {
+      "item": "stardewcraft:water_lantern",
+      "price": 800
+    }
+  ],
+  "accepted_sell_types": []
+}

@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": {
+    "minecraft:wheat": {
+      "seasons": ["spring", "summer", "fall"],
+      "phase_days": [1, 1, 1, 1, 1, 1, 1],
+      "farming_experience": 8,
+      "harvest_method": "stardewcraft:grab",
+      "produce": "minecraft:wheat",
+      "seed": "minecraft:wheat_seeds"
+    }
+  }
+}

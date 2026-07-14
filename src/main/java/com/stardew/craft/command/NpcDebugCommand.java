@@ -53,13 +53,13 @@ public final class NpcDebugCommand {
     private static int debugAll(CommandContext<CommandSourceStack> context) {
         ServerLevel level = context.getSource().getServer().getLevel(ModDimensions.STARDEW_VALLEY);
         if (level == null) {
-            context.getSource().sendFailure(Component.literal("星露谷维度未加载。"));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.npc.dimension_unavailable"));
             return 0;
         }
 
         Map<String, NpcRuntimeState> states = NpcRuntimeDataManager.get(level).states();
         if (states.isEmpty()) {
-            context.getSource().sendSuccess(() -> Component.literal("NPC 运行时状态为空。"), false);
+            context.getSource().sendSuccess(() -> Component.translatable("stardewcraft.command.npc.no_runtime_state"), false);
             return 1;
         }
 
@@ -67,7 +67,7 @@ public final class NpcDebugCommand {
         ids.sort(Comparator.naturalOrder());
         int shown = 0;
 
-        context.getSource().sendSuccess(() -> Component.literal("=== NPC 调试总览（最多 20 个）==="), false);
+        context.getSource().sendSuccess(() -> Component.translatable("stardewcraft.command.npc.overview_header", 20), false);
         for (String npcId : ids) {
             if (shown >= 20) {
                 break;
@@ -79,7 +79,8 @@ public final class NpcDebugCommand {
         int hidden = ids.size() - shown;
         if (hidden > 0) {
             int finalHidden = hidden;
-            context.getSource().sendSuccess(() -> Component.literal("... 其余 " + finalHidden + " 个 NPC 未显示。"), false);
+            context.getSource().sendSuccess(() -> Component.translatable(
+                "stardewcraft.command.npc.hidden_count", finalHidden), false);
         }
         return 1;
     }
@@ -88,17 +89,17 @@ public final class NpcDebugCommand {
         String npcId = StringArgumentType.getString(context, "npcId").toLowerCase(Locale.ROOT);
         ServerLevel level = context.getSource().getServer().getLevel(ModDimensions.STARDEW_VALLEY);
         if (level == null) {
-            context.getSource().sendFailure(Component.literal("星露谷维度未加载。"));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.npc.dimension_unavailable"));
             return 0;
         }
 
         NpcRuntimeState state = NpcRuntimeDataManager.get(level).states().get(npcId);
         if (state == null) {
-            context.getSource().sendFailure(Component.literal("未找到 NPC 运行时状态: " + npcId));
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.npc.not_found", npcId));
             return 0;
         }
 
-        context.getSource().sendSuccess(() -> Component.literal("=== NPC 详细调试: " + npcId + " ==="), false);
+        context.getSource().sendSuccess(() -> Component.translatable("stardewcraft.command.npc.details_header", npcId), false);
         sendNpcDetails(context.getSource(), level, npcId, state);
         return 1;
     }
@@ -116,19 +117,13 @@ public final class NpcDebugCommand {
 
         Vec3 t = target == null ? null : target.position();
         String targetText = t == null ? "<none>" : String.format(Locale.ROOT, "(%.1f, %.1f, %.1f)", t.x, t.y, t.z);
-        String summary = String.format(
-            Locale.ROOT,
-            "[%s] 日程=%s@%d 节点=%d 位置=%s 朝向=%d 目标=%s 实体=%s",
-            npcId,
-            state.activeScheduleKey(),
-            state.scheduleCheckpoint(),
-            state.scheduleNodeIndex(),
-            state.locationName(),
-            state.facing(),
-            targetText,
-            entity == null ? "缺失" : "在线"
-        );
-        source.sendSuccess(() -> Component.literal(summary), false);
+        source.sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.npc.summary",
+            npcId, state.activeScheduleKey(), state.scheduleCheckpoint(), state.scheduleNodeIndex(),
+            state.locationName(), state.facing(), targetText,
+            Component.translatable(entity == null
+                ? "stardewcraft.command.npc.entity.missing"
+                : "stardewcraft.command.npc.entity.online")), false);
     }
 
     private static void sendNpcDetails(CommandSourceStack source, ServerLevel level, String npcId, NpcRuntimeState state) {
@@ -142,38 +137,29 @@ public final class NpcDebugCommand {
         Vec3 defaultPosition = entity != null ? entity.position() : Vec3.atCenterOf(level.getSharedSpawnPos());
         NpcScheduleRuntimeService.TargetPoint target = NpcScheduleRuntimeService.resolveWorldTarget(level, state, defaultPosition);
 
-        source.sendSuccess(() -> Component.literal("- 基本状态"), false);
-        source.sendSuccess(() -> Component.literal(String.format(
-            Locale.ROOT,
-            "  日程: %s @ %d (node=%d)",
-            state.activeScheduleKey(),
-            state.scheduleCheckpoint(),
-            state.scheduleNodeIndex()
-        )), false);
-        source.sendSuccess(() -> Component.literal(String.format(
-            Locale.ROOT,
-            "  位置键: %s, tile=(%d,%d), 朝向=%d, 行为=%s, 命名点=%s",
-            state.locationName(),
-            state.tileX(),
-            state.tileY(),
-            state.facing(),
-            state.routeBehaviorToken().isBlank() ? "无" : state.routeBehaviorToken(),
-            state.namedPointId().isBlank() ? "无" : state.namedPointId()
-        )), false);
+        source.sendSuccess(() -> Component.translatable("stardewcraft.command.npc.basic_header"), false);
+        source.sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.npc.schedule",
+            state.activeScheduleKey(), state.scheduleCheckpoint(), state.scheduleNodeIndex()), false);
+        source.sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.npc.location",
+            state.locationName(), state.tileX(), state.tileY(), state.facing(),
+            state.routeBehaviorToken().isBlank() ? "-" : state.routeBehaviorToken(),
+            state.namedPointId().isBlank() ? "-" : state.namedPointId()), false);
 
         if (entity == null) {
-            source.sendSuccess(() -> Component.literal("- 实体状态"), false);
-            source.sendSuccess(() -> Component.literal("  实体: 缺失"), false);
-            source.sendSuccess(() -> Component.literal("  目标: " + formatVec(target == null ? null : target.position())
-                + " indoor=" + (target != null && target.indoorTarget())), false);
+            source.sendSuccess(() -> Component.translatable("stardewcraft.command.npc.entity_header"), false);
+            source.sendSuccess(() -> Component.translatable("stardewcraft.command.npc.entity_missing"), false);
+            source.sendSuccess(() -> Component.translatable("stardewcraft.command.npc.target",
+                formatVec(target == null ? null : target.position()), target != null && target.indoorTarget()), false);
             return;
         }
 
         Vec3 pos = entity.position();
         Vec3 t = target == null ? null : target.position();
         if (t == null) {
-            source.sendSuccess(() -> Component.literal("- 实体状态"), false);
-            source.sendSuccess(() -> Component.literal("  目标: <none>"), false);
+            source.sendSuccess(() -> Component.translatable("stardewcraft.command.npc.entity_header"), false);
+            source.sendSuccess(() -> Component.translatable("stardewcraft.command.npc.no_target"), false);
             return;
         }
         double dx = t.x - pos.x;
@@ -184,25 +170,17 @@ public final class NpcDebugCommand {
         boolean pathDone = !hasPath || nav.getPath().isDone();
         var navTarget = nav.getTargetPos();
 
-        source.sendSuccess(() -> Component.literal("- 实体状态"), false);
-        source.sendSuccess(() -> Component.literal(String.format(Locale.ROOT,
-            "  实体坐标: %s  目标坐标: %s  平面距离: %.2f  indoor目标=%s",
-            formatVec(pos),
-            formatVec(t),
-            dist2d,
-            target.indoorTarget()
-        )), false);
-        source.sendSuccess(() -> Component.literal(String.format(Locale.ROOT,
-            "  导航: hasPath=%s done=%s navTarget=%s 同ID实体数=%d",
-            hasPath,
-            pathDone,
-            navTarget == null ? "<none>" : navTarget.toShortString(),
-            entities.size()
-        )), false);
+        source.sendSuccess(() -> Component.translatable("stardewcraft.command.npc.entity_header"), false);
+        source.sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.npc.entity_position",
+            formatVec(pos), formatVec(t), String.format(Locale.ROOT, "%.2f", dist2d), target.indoorTarget()), false);
+        source.sendSuccess(() -> Component.translatable(
+            "stardewcraft.command.npc.navigation",
+            hasPath, pathDone, navTarget == null ? "<none>" : navTarget.toShortString(), entities.size()), false);
 
         NpcCentralMovementService.DebugSnapshot movement = NpcCentralMovementService.getDebugSnapshot(npcId);
         if (movement != null) {
-            source.sendSuccess(() -> Component.literal("- 移动快照"), false);
+            source.sendSuccess(() -> Component.translatable("stardewcraft.command.npc.movement_header"), false);
             source.sendSuccess(() -> Component.literal(String.format(
                 Locale.ROOT,
                 "  stage=%s loc=%s point=%s path=%d/%d forcedTp=%s",
@@ -234,7 +212,7 @@ public final class NpcDebugCommand {
 
         NpcScheduleRuntimeService.ScheduleKeyTrace keyTrace = NpcScheduleRuntimeService.getLastKeyTrace(npcId);
         if (keyTrace != null) {
-            source.sendSuccess(() -> Component.literal("- 日程选键"), false);
+            source.sendSuccess(() -> Component.translatable("stardewcraft.command.npc.schedule_key_header"), false);
             source.sendSuccess(() -> Component.literal(String.format(
                 Locale.ROOT,
                 "  day=%d season=%s weekday=%s weather=%s hearts=%d selected=%s",
@@ -251,7 +229,7 @@ public final class NpcDebugCommand {
 
         NpcSpawnManager.SpawnDebugSnapshot spawn = NpcSpawnManager.getDebugSnapshot(level, npcId);
         if (spawn != null) {
-            source.sendSuccess(() -> Component.literal("- 生成追踪"), false);
+            source.sendSuccess(() -> Component.translatable("stardewcraft.command.npc.spawn_header"), false);
             source.sendSuccess(() -> Component.literal(String.format(
                 Locale.ROOT,
                 "  tracked=%s alive=%s loaded=%d first=%s miss=%d ageTicks=%d forcedChunk=%s",
@@ -275,7 +253,7 @@ public final class NpcDebugCommand {
             boolean targetCanStand = targetLoaded && NpcPathfinder.canStand(level, targetBP);
             BlockPos entityWalkable = NpcPathfinder.nearestWalkable(level, entity.position());
             BlockPos targetWalkable = NpcPathfinder.nearestWalkable(level, target.position());
-            source.sendSuccess(() -> Component.literal("- 寻路诊断"), false);
+            source.sendSuccess(() -> Component.translatable("stardewcraft.command.npc.pathfinding_header"), false);
             source.sendSuccess(() -> Component.literal(String.format(
                 Locale.ROOT,
                 "  entityPos=%s loaded=%s canStand=%s walkable=%s",

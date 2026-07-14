@@ -39,7 +39,7 @@ public class BilibiliClaimCommand {
 
         PlayerStardewData data = PlayerDataManager.getPlayerData(player);
         if (data.isBilibiliRewardClaimed()) {
-            player.sendSystemMessage(Component.literal("§e你已经领取过关注奖励了！"));
+            player.sendSystemMessage(Component.translatable("stardewcraft.bilibili.reward.already_claimed"));
             return 0;
         }
 
@@ -51,13 +51,14 @@ public class BilibiliClaimCommand {
         data.setBilibiliRewardClaimed(true);
 
         // 发送奖励消息 + B 站链接
-        MutableComponent urlMsg = Component.literal("§b[点击访问作者B站主页]")
+        MutableComponent urlMsg = Component.translatable("stardewcraft.bilibili.author_link")
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, BILIBILI_URL))
                 .withUnderlined(true)
                 .withColor(ChatFormatting.AQUA));
 
-        player.sendSystemMessage(Component.literal("§6§l✦ §e你获得了 §d§l彩虹猫之刃§e！感谢关注！§6§l ✦"));
+        player.sendSystemMessage(Component.translatable("stardewcraft.bilibili.reward.claimed",
+                meowmere.getHoverName()));
         player.sendSystemMessage(urlMsg);
 
         return 1;

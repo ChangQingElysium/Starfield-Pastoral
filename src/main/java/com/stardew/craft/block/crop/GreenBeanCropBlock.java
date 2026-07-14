@@ -257,7 +257,7 @@ public class GreenBeanCropBlock extends StardewCropBlock {
     }
 
     @Override
-    public String getCropDisplayName() {
-        return "青豆";
+    public String getCropDisplayNameKey() {
+        return "item.stardewcraft.green_bean";
     }
 }

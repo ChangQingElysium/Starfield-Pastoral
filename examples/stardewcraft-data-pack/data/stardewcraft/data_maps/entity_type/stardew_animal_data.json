@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": {
+    "minecraft:cow": {
+      "building_type": "example_stardew_addon:apple_shed",
+      "purchase_price": 1500,
+      "days_to_mature": 5,
+      "produce": "minecraft:milk_bucket",
+      "produce_interval_days": 1
+    }
+  }
+}

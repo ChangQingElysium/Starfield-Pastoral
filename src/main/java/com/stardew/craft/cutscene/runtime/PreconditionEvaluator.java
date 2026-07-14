@@ -9,7 +9,10 @@ import com.stardew.craft.player.SkillType;
 import com.stardew.craft.time.StardewTimeManager;
 import com.stardew.craft.weather.ClientWeatherCache;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -48,7 +51,11 @@ public final class PreconditionEvaluator {
             case "day_of_week" -> checkDayOfWeek(p);
             case "day_of_month" -> checkDayOfMonth(p);
             case "days_played" -> checkDaysPlayed(p);
+            case "year" -> checkYear(p);
             case "player_farm_age_days" -> checkPlayerFarmAgeDays(p);
+            case "has_item" -> checkHasItem(p);
+            case "has_museum_donation" -> checkHasMuseumDonation();
+            case "museum_empty" -> com.stardew.craft.client.ClientMuseumDonationCache.isEmpty();
             case "money" -> ClientPlayerDataCache.getMoney() >= p.getInt("min", 0);
             case "skill" -> checkSkill(p);
             case "mail" -> ClientPlayerDataCache.hasMailFlag(p.getString("id"));
@@ -152,6 +159,18 @@ public final class PreconditionEvaluator {
         return total >= min && total <= max;
     }
 
+    private static boolean checkYear(EventPrecondition p) {
+        StardewTimeManager tm = StardewTimeHud.getClientTimeCache();
+        int current = tm.getCurrentYear();
+        int exact = p.getInt("year", -1);
+        if (exact > 0) {
+            return current == exact;
+        }
+        int min = p.getInt("min", 1);
+        int max = p.getInt("max", Integer.MAX_VALUE);
+        return current >= min && current <= max;
+    }
+
     private static boolean checkPlayerFarmAgeDays(EventPrecondition p) {
         int firstJoinDay = ClientPlayerDataCache.getFirstJoinDay();
         if (firstJoinDay < 0) {
@@ -174,5 +193,31 @@ public final class PreconditionEvaluator {
         } catch (IllegalArgumentException e) {
             return true;
         }
+    }
+
+    private static boolean checkHasItem(EventPrecondition p) {
+        String itemId = p.getString("item");
+        int count = p.getInt("count", 1);
+        if (itemId == null || itemId.isBlank() || count <= 0) return false;
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) return false;
+        try {
+            var item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(itemId));
+            return item != Items.AIR && mc.player.getInventory().countItem(item) >= count;
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
+
+    private static boolean checkHasMuseumDonation() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) return false;
+        for (int slot = 0; slot < mc.player.getInventory().getContainerSize(); slot++) {
+            var stack = mc.player.getInventory().getItem(slot);
+            if (!com.stardew.craft.museum.MuseumDonationItems.isDonatable(stack)) continue;
+            String itemId = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
+            if (!com.stardew.craft.client.ClientMuseumDonationCache.isDonated(itemId)) return true;
+        }
+        return false;
     }
 }

@@ -1,0 +1,118 @@
+{
+  "legacy_id": "CarpenterShop",
+  "owner_npc": "Robin",
+  "owner_dialogue": "stardewcraft.shop.carpenter.dialogue",
+  "entries": [
+    {
+      "item": "stardewcraft:wood_normal",
+      "price": 10
+    },
+    {
+      "item": "stardewcraft:stone",
+      "price": 20
+    },
+    {
+      "item": "stardewcraft:wood_hard",
+      "price": 200
+    },
+    {
+      "item": "stardewcraft:moss",
+      "price": 50
+    },
+    {
+      "item": "stardewcraft:wallpaper_block",
+      "price": 2
+    },
+    {
+      "item": "stardewcraft:flooring_block",
+      "price": 2
+    },
+    {
+      "item": "stardewcraft:bed_1",
+      "price": 100
+    },
+    {
+      "item": "stardewcraft:bed_2",
+      "price": 6000,
+      "mail_flag": "robinDeluxeBed"
+    },
+    {
+      "item": "stardewcraft:chair_1",
+      "price": 50
+    },
+    {
+      "item": "stardewcraft:oak_table",
+      "price": 100
+    },
+    {
+      "item": "stardewcraft:light_1",
+      "price": 75
+    },
+    {
+      "item": "stardewcraft:dresser_1",
+      "price": 200
+    },
+    {
+      "item": "stardewcraft:carpet_1",
+      "price": 25
+    },
+    {
+      "item": "stardewcraft:photo_frame",
+      "price": 50
+    },
+    {
+      "item": "stardewcraft:cooking_pot",
+      "price": 5000
+    },
+    {
+      "item": "stardewcraft:fridge",
+      "price": 3000
+    },
+    {
+      "item": "stardewcraft:shipping_bin",
+      "price": 2500
+    },
+    {
+      "item": "stardewcraft:incubator",
+      "price": 5000
+    },
+    {
+      "item": "stardewcraft:hay_hopper",
+      "price": 2000
+    },
+    {
+      "item": "stardewcraft:feed_trough",
+      "price": 1000
+    },
+    {
+      "item": "stardewcraft:autofeed_trough_upgrader",
+      "price": 10000
+    },
+    {
+      "item": "stardewcraft:fish_pond_bucket",
+      "price": 500
+    },
+    {
+      "item": "stardewcraft:fish_net",
+      "price": 250
+    },
+    {
+      "item": "stardewcraft:furniture_catalogue",
+      "price": 200000
+    },
+    {
+      "item": "stardewcraft:paintbrush"
+    },
+    {
+      "item": "stardewcraft:wood_workbench",
+      "price": 500
+    },
+    {
+      "item": "stardewcraft:stone_workbench",
+      "price": 500
+    }
+  ],
+  "accepted_sell_types": [
+    "stardewcraft.type.resource"
+  ]
+}

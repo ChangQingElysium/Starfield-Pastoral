@@ -87,7 +87,7 @@ public class CarrotCropBlock extends StardewCropBlock {
     }
 
     @Override
-    public String getCropDisplayName() {
-        return "胡萝卜";
+    public String getCropDisplayNameKey() {
+        return "item.stardewcraft.carrot";
     }
 }

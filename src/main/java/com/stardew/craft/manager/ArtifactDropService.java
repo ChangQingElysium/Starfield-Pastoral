@@ -3,7 +3,10 @@ package com.stardew.craft.manager;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.world.StardewWorldLootPools;
 import com.stardew.craft.desert.DesertConstants;
 import com.stardew.craft.festival.desert.DesertFestivalService;
 import com.stardew.craft.item.ModItems;
@@ -13,10 +16,15 @@ import com.stardew.craft.player.PlayerDataManager;
 import com.stardew.craft.player.PlayerStardewData;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import com.stardew.craft.time.StardewTimeManager;
+import com.stardew.craft.world.data.WorldLootPoolData;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.registries.DeferredItem;
@@ -110,9 +118,8 @@ public final class ArtifactDropService {
 
     // ======================== ArtifactSpot Data Sources ========================
 
-    private static final String LOCATION_ARTIFACT_SPOTS_RESOURCE =
-            "data/stardewcraft/vanilla/artifact_spots.json";
-    private static final Map<String, List<DropEntry>> LOCATION_DROPS = new LinkedHashMap<>();
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private static volatile Map<String, List<DropEntry>> locationDrops = Map.of();
     private static final Map<String, DeferredItem<? extends Item>> DROP_ITEM_IDS = Map.ofEntries(
             Map.entry("(O)110", ModItems.RUSTY_SPOON),
             Map.entry("(O)273", ModItems.RICE_SHOOT),
@@ -190,47 +197,59 @@ public final class ArtifactDropService {
     private static final Map<String, List<ArtifactChance>> ARTIFACT_SPOT_CHANCES = new LinkedHashMap<>();
 
     static {
-        loadLocationArtifactSpots();
         loadArtifactSpotChances();
     }
 
-    private static void loadLocationArtifactSpots() {
-        try (InputStream stream = ArtifactDropService.class.getClassLoader().getResourceAsStream(LOCATION_ARTIFACT_SPOTS_RESOURCE)) {
-            if (stream == null) {
-                StardewCraft.LOGGER.warn("Artifact spot location source {} was not found", LOCATION_ARTIFACT_SPOTS_RESOURCE);
-                return;
-            }
+    public static final class ReloadListener extends SimpleJsonResourceReloadListener {
+        public ReloadListener() {
+            super(GSON, "artifact_spots");
+        }
 
-            JsonObject root = JsonParser.parseReader(new InputStreamReader(stream, StandardCharsets.UTF_8))
-                    .getAsJsonObject();
-            LOCATION_DROPS.clear();
-
-            for (Map.Entry<String, JsonElement> entry : root.entrySet()) {
-                if (!entry.getValue().isJsonArray()) {
-                    continue;
-                }
-                List<DropEntry> drops = new ArrayList<>();
-                for (JsonElement dropElement : entry.getValue().getAsJsonArray()) {
-                    if (dropElement.isJsonObject()) {
-                        drops.add(parseDropEntry(dropElement.getAsJsonObject()));
+        @Override
+        protected void apply(Map<ResourceLocation, JsonElement> objects, ResourceManager manager,
+                             ProfilerFiller profiler) {
+            Map<String, List<DropEntry>> prepared = new LinkedHashMap<>();
+            try {
+                for (Map.Entry<ResourceLocation, JsonElement> resource : objects.entrySet().stream()
+                        .sorted(Map.Entry.comparingByKey(Comparator.comparing(ResourceLocation::toString)))
+                        .toList()) {
+                    if (!resource.getValue().isJsonObject()) {
+                        throw new IllegalArgumentException(resource.getKey() + " must contain a location object");
+                    }
+                    for (Map.Entry<String, JsonElement> group : resource.getValue().getAsJsonObject().entrySet()) {
+                        if (!group.getValue().isJsonArray()) {
+                            throw new IllegalArgumentException(resource.getKey() + " group " + group.getKey()
+                                    + " must be an array");
+                        }
+                        List<DropEntry> drops = prepared.computeIfAbsent(group.getKey(), key -> new ArrayList<>());
+                        for (JsonElement raw : group.getValue().getAsJsonArray()) {
+                            if (!raw.isJsonObject()) {
+                                throw new IllegalArgumentException(resource.getKey() + " group " + group.getKey()
+                                        + " contains a non-object entry");
+                            }
+                            drops.add(parseDropEntry(raw.getAsJsonObject()));
+                        }
                     }
                 }
-                LOCATION_DROPS.put(entry.getKey(), List.copyOf(drops));
+                buildMixedOutdoorDropTable(prepared);
+            } catch (RuntimeException exception) {
+                StardewCraft.LOGGER.error("[Artifact spots] Rejected reload; keeping {} groups: {}",
+                        locationDrops.size(), exception.getMessage());
+                return;
             }
-            buildMixedOutdoorDropTable();
-        } catch (Exception exception) {
-            StardewCraft.LOGGER.warn("Failed to load artifact spot location data from {}: {}",
-                    LOCATION_ARTIFACT_SPOTS_RESOURCE, exception.getMessage());
-            LOCATION_DROPS.clear();
+            Map<String, List<DropEntry>> immutable = new LinkedHashMap<>();
+            prepared.forEach((key, value) -> immutable.put(key, List.copyOf(value)));
+            locationDrops = Map.copyOf(immutable);
+            StardewCraft.LOGGER.info("[Artifact spots] Applied {} groups", locationDrops.size());
         }
     }
 
-    private static void buildMixedOutdoorDropTable() {
+    private static void buildMixedOutdoorDropTable(Map<String, List<DropEntry>> dropsByLocation) {
         LinkedHashMap<String, Double> mergedChances = new LinkedHashMap<>();
         LinkedHashMap<String, Integer> mergedCounts = new LinkedHashMap<>();
         LinkedHashMap<String, DropEntry> prototypes = new LinkedHashMap<>();
         for (String sourceLocation : MIXED_OUTDOOR_SOURCE_LOCATIONS) {
-            List<DropEntry> drops = LOCATION_DROPS.get(sourceLocation);
+            List<DropEntry> drops = dropsByLocation.get(sourceLocation);
             if (drops == null) {
                 continue;
             }
@@ -259,7 +278,7 @@ public final class ArtifactDropService {
                     prototype.condition
             ));
         }
-        LOCATION_DROPS.put(MIXED_OUTDOOR_LOCATION, List.copyOf(mixedDrops));
+        dropsByLocation.put(MIXED_OUTDOOR_LOCATION, List.copyOf(mixedDrops));
     }
 
     private static String dropMergeKey(DropEntry drop) {
@@ -501,13 +520,13 @@ public final class ArtifactDropService {
 
     private static List<DropEntry> dropsForGroup(String dropGroup) {
         List<DropEntry> drops = new ArrayList<>();
-        List<DropEntry> defaultDrops = LOCATION_DROPS.get(DEFAULT_LOCATION);
+        List<DropEntry> defaultDrops = locationDrops.get(DEFAULT_LOCATION);
         if (defaultDrops == null || defaultDrops.isEmpty()) {
             drops.add(SYNTHETIC_RANDOM_ARTIFACT_DROP);
         } else {
             drops.addAll(defaultDrops);
         }
-        List<DropEntry> locDrops = DEFAULT_LOCATION.equals(dropGroup) ? null : LOCATION_DROPS.get(dropGroup);
+        List<DropEntry> locDrops = DEFAULT_LOCATION.equals(dropGroup) ? null : locationDrops.get(dropGroup);
         if (locDrops != null) {
             for (DropEntry drop : locDrops) {
                 if (!"RANDOM_ARTIFACT_FOR_DIG_SPOT".equals(drop.id)) {
@@ -552,6 +571,17 @@ public final class ArtifactDropService {
             return results;
         }
 
+        List<ItemStack> extensionDrops = WorldLootPoolData.resolve(
+                StardewWorldLootPools.ARTIFACT_SPOT,
+                dropGroup.toLowerCase(Locale.ROOT),
+                level,
+                player,
+                random);
+        if (!extensionDrops.isEmpty()) {
+            results.addAll(extensionDrops);
+            return results;
+        }
+
         for (DropEntry drop : allDrops) {
             if (random.nextDouble() >= drop.chance) {
                 continue;
@@ -566,6 +596,13 @@ public final class ArtifactDropService {
                     results.add(artifact);
                     if (!drop.continueOnDrop) break;
                 }
+                continue;
+            }
+
+            if (drop.id.startsWith("LOST_BOOK_OR_ITEM")
+                    && player != null
+                    && com.stardew.craft.museum.LostBookService.find(player)) {
+                if (!drop.continueOnDrop) break;
                 continue;
             }
 
@@ -608,7 +645,8 @@ public final class ArtifactDropService {
 
     private static ItemStack resolveDropItem(DropEntry drop, RandomSource random, ServerPlayer player) {
         if (drop.id.startsWith("LOST_BOOK_OR_ITEM")) {
-            return ItemStack.EMPTY;
+            String fallback = drop.id.substring("LOST_BOOK_OR_ITEM".length()).trim();
+            return fallback.isEmpty() ? ItemStack.EMPTY : resolveSpecialQueryDrop(fallback, random);
         }
         if (drop.id.startsWith("SECRET_NOTE_OR_ITEM")) {
             return resolveSpecialQueryDrop("(O)390", random);

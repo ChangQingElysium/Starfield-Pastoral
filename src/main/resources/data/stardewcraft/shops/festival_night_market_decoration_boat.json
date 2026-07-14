@@ -1,0 +1,79 @@
+{
+  "legacy_id": "Festival_NightMarket_DecorationBoat",
+  "owner_dialogue": "stardewcraft.shop.night_market.decoration_boat.dialogue",
+  "entries": [
+    {
+      "item": "stardewcraft:winter_star_large_green_candy_cane",
+      "price": 200
+    },
+    {
+      "item": "stardewcraft:winter_star_green_candy_canes",
+      "price": 200
+    },
+    {
+      "item": "stardewcraft:winter_star_mixed_candy_canes",
+      "price": 200
+    },
+    {
+      "item": "stardewcraft:winter_star_red_candy_canes",
+      "price": 200
+    },
+    {
+      "item": "stardewcraft:winter_star_large_red_candy_cane",
+      "price": 200
+    },
+    {
+      "item": "stardewcraft:seasonal_decor",
+      "price": 500
+    },
+    {
+      "item": "stardewcraft:bonsai_1",
+      "price": 500
+    },
+    {
+      "item": "stardewcraft:bonsai_2",
+      "price": 500
+    },
+    {
+      "item": "stardewcraft:bonsai_3",
+      "price": 500
+    },
+    {
+      "item": "stardewcraft:bonsai_4",
+      "price": 500
+    },
+    {
+      "item": "stardewcraft:bonsai_5_wall",
+      "price": 500
+    },
+    {
+      "item": "stardewcraft:bonsai_bush",
+      "price": 500
+    },
+    {
+      "item": "stardewcraft:potted_plant_1",
+      "price": 500
+    },
+    {
+      "item": "stardewcraft:potted_plant_2",
+      "price": 500
+    },
+    {
+      "item": "stardewcraft:potted_plant_3",
+      "price": 500
+    },
+    {
+      "item": "stardewcraft:potted_plant_4",
+      "price": 500
+    },
+    {
+      "item": "stardewcraft:potted_plant_5",
+      "price": 500
+    },
+    {
+      "item": "stardewcraft:potted_plant_6",
+      "price": 500
+    }
+  ],
+  "accepted_sell_types": []
+}

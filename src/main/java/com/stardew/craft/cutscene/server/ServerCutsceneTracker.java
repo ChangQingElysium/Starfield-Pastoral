@@ -1,5 +1,9 @@
 package com.stardew.craft.cutscene.server;
 
+import com.mojang.logging.LogUtils;
+import com.stardew.craft.cutscene.data.CutsceneTriggerLocations;
+import com.stardew.craft.cutscene.data.EventData;
+import com.stardew.craft.cutscene.data.EventRegistry;
 import com.stardew.craft.cutscene.network.TriggerEventPayload;
 import com.stardew.craft.warp.ModTeleport;
 import net.minecraft.resources.ResourceKey;
@@ -7,10 +11,12 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.GameType;
 import net.neoforged.neoforge.network.PacketDistributor;
+import org.slf4j.Logger;
 
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * 服务端侧记录当前正在观看 cutscene 的玩家。
@@ -21,6 +27,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * 回调服务端，届时会清除对应玩家的活动状态。
  */
 public final class ServerCutsceneTracker {
+    private static final Logger LOGGER = LogUtils.getLogger();
+    private static final long SESSION_TIMEOUT_TICKS = 20L * 60L * 20L;
 
     private static final Map<UUID, State> ACTIVE = new ConcurrentHashMap<>();
 
@@ -32,9 +40,14 @@ public final class ServerCutsceneTracker {
         private final double z;
         private final float yaw;
         private final float pitch;
+        private final String eventId;
+        private final long sessionId;
+        private final long startedAtGameTime;
+        private final CutsceneActionManifest actionManifest;
+        private final CutsceneActionManifest.AuthorizationState actionState;
         private boolean restoreOriginalPosition = true;
 
-        private State(ServerPlayer player, GameType originalGameMode) {
+        private State(ServerPlayer player, GameType originalGameMode, EventData event, long sessionId) {
             this.originalGameMode = originalGameMode;
             this.originalDimension = player.level().dimension();
             this.x = player.getX();
@@ -42,6 +55,11 @@ public final class ServerCutsceneTracker {
             this.z = player.getZ();
             this.yaw = player.getYRot();
             this.pitch = player.getXRot();
+            this.eventId = event.id();
+            this.sessionId = sessionId;
+            this.startedAtGameTime = player.serverLevel().getGameTime();
+            this.actionManifest = CutsceneActionManifest.from(event);
+            this.actionState = actionManifest.newState();
         }
     }
 
@@ -49,21 +67,86 @@ public final class ServerCutsceneTracker {
 
     /** 启动一个事件：记录玩家为活动状态并向其发送触发包。 */
     public static void startEvent(ServerPlayer player, String eventId) {
-        markActive(player);
-        PacketDistributor.sendToPlayer(player, new TriggerEventPayload(eventId));
+        EventData event = EventRegistry.getById(eventId);
+        if (event == null) {
+            LOGGER.warn("Cannot start unknown cutscene '{}' for {}", eventId, player.getName().getString());
+            return;
+        }
+        beginAuthorized(player, event);
     }
 
-    /** 仅标记玩家为活动状态（不发送网络包）。 */
-    public static void markActive(ServerPlayer player) {
-        ACTIVE.computeIfAbsent(player.getUUID(), ignored -> {
-            GameType original = player.gameMode.getGameModeForPlayer();
-            State state = new State(player, original);
-            protectPlayer(player);
-            if (original != GameType.SPECTATOR) {
-                player.setGameMode(GameType.SPECTATOR);
-            }
-            return state;
-        });
+    /** Validate a client-detected enter-area trigger and start it only when server state agrees. */
+    public static boolean requestEnterAreaEvent(ServerPlayer player, String eventId) {
+        if (ACTIVE.containsKey(player.getUUID())) {
+            return false;
+        }
+        EventData event = EventRegistry.getById(eventId);
+        if (event == null || event.trigger() == null || !"enter_area".equals(event.trigger().type())) {
+            LOGGER.warn("Rejected invalid enter-area cutscene request '{}' from {}",
+                    eventId, player.getName().getString());
+            return false;
+        }
+        if (EventSeenData.get(player.serverLevel()).hasSeen(player.getUUID(), event.id())
+                || !CutsceneTriggerLocations.contains(player, event.trigger())
+                || !ServerPreconditionEvaluator.evaluate(player, player.serverLevel(), event.preconditions())) {
+            LOGGER.debug("Rejected ineligible enter-area cutscene request '{}' from {}",
+                    eventId, player.getName().getString());
+            return false;
+        }
+        return beginAuthorized(player, event);
+    }
+
+    private static boolean beginAuthorized(ServerPlayer player, EventData event) {
+        if (ACTIVE.containsKey(player.getUUID())) {
+            LOGGER.warn("Cannot start cutscene '{}' for {} while another session is active",
+                    event.id(), player.getName().getString());
+            return false;
+        }
+        GameType original = player.gameMode.getGameModeForPlayer();
+        long sessionId = nextSessionId();
+        State state = new State(player, original, event, sessionId);
+        if (ACTIVE.putIfAbsent(player.getUUID(), state) != null) {
+            return false;
+        }
+        protectPlayer(player);
+        if (original != GameType.SPECTATOR) {
+            player.setGameMode(GameType.SPECTATOR);
+        }
+        PacketDistributor.sendToPlayer(player, new TriggerEventPayload(event.id(), sessionId));
+        return true;
+    }
+
+    public static boolean authorizeAction(
+            ServerPlayer player,
+            long sessionId,
+            String eventId,
+            int commandToken,
+            String action,
+            String value
+    ) {
+        State state = validState(player, sessionId, eventId);
+        if (state == null) {
+            return false;
+        }
+        synchronized (state) {
+            return state.actionManifest.authorize(state.actionState, commandToken, action, value);
+        }
+    }
+
+    public static boolean authorizeCompletion(ServerPlayer player, long sessionId, String eventId) {
+        return validState(player, sessionId, eventId) != null;
+    }
+
+    private static State validState(ServerPlayer player, long sessionId, String eventId) {
+        State state = ACTIVE.get(player.getUUID());
+        if (state == null || state.sessionId != sessionId || !state.eventId.equals(eventId)) {
+            return null;
+        }
+        if (player.serverLevel().getGameTime() - state.startedAtGameTime > SESSION_TIMEOUT_TICKS) {
+            clear(player);
+            return null;
+        }
+        return state;
     }
 
     public static void markServerMovedPlayer(ServerPlayer player) {
@@ -102,7 +185,13 @@ public final class ServerCutsceneTracker {
 
     /** 剧情期间持续清掉环境危险的积累状态。 */
     public static void tickProtection(ServerPlayer player) {
-        if (!isActive(player.getUUID())) {
+        State state = ACTIVE.get(player.getUUID());
+        if (state == null) {
+            return;
+        }
+        if (player.serverLevel().getGameTime() - state.startedAtGameTime > SESSION_TIMEOUT_TICKS) {
+            LOGGER.warn("Expired cutscene session '{}' for {}", state.eventId, player.getName().getString());
+            clear(player);
             return;
         }
         protectPlayer(player);
@@ -111,6 +200,14 @@ public final class ServerCutsceneTracker {
     /** 判断玩家当前是否处于 cutscene 中。 */
     public static boolean isActive(UUID playerId) {
         return ACTIVE.containsKey(playerId);
+    }
+
+    private static long nextSessionId() {
+        long value;
+        do {
+            value = ThreadLocalRandom.current().nextLong(1L, Long.MAX_VALUE);
+        } while (value == 0L);
+        return value;
     }
 
     private static void protectPlayer(ServerPlayer player) {

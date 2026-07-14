@@ -1,0 +1,30 @@
+modLoader="javafml"
+loaderVersion="[1,)"
+license="CC0-1.0"
+
+[[mods]]
+modId="example_stardew_addon"
+version="0.1.0"
+displayName="StardewCraft Example Addon"
+description='''Compile-checked examples for the StardewCraft 0.5 public API.'''
+
+[[dependencies.example_stardew_addon]]
+modId="neoforge"
+type="required"
+versionRange="[21.1.217,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.example_stardew_addon]]
+modId="minecraft"
+type="required"
+versionRange="[1.21.1]"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.example_stardew_addon]]
+modId="stardewcraft"
+type="required"
+versionRange="[0.5.0,)"
+ordering="AFTER"
+side="BOTH"

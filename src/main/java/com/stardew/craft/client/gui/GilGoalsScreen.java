@@ -4,7 +4,6 @@ import com.stardew.craft.client.gui.common.GuiText;
 import com.stardew.craft.client.gui.overnight.StardewGuiUtil;
 import com.stardew.craft.network.payload.GilClaimRewardPayload;
 import com.stardew.craft.network.payload.OpenGilGoalsPayload;
-import com.stardew.craft.shop.MonsterSlayerGoalRegistry;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -125,7 +124,6 @@ public class GilGoalsScreen extends Screen {
 
     private void drawGoalRow(GuiGraphics g, int index, int rowY, int mouseX, int mouseY) {
         OpenGilGoalsPayload.GoalEntry goal = goals.get(index);
-        MonsterSlayerGoalRegistry.SlayerGoal registry = MonsterSlayerGoalRegistry.getGoal(goal.goalKey());
 
         int leftX = boxX + INNER_PAD + 8;
         int rightEdge = boxX + boxW - INNER_PAD - 8;
@@ -139,9 +137,9 @@ public class GilGoalsScreen extends Screen {
         }
 
         // Goal name
-        Component goalName = registry != null
-            ? Component.translatable(registry.translationKey())
-            : Component.literal(goal.goalKey());
+        Component goalName = goal.translationKey().isBlank()
+            ? Component.literal(goal.goalKey())
+            : Component.translatable(goal.translationKey());
         int nameColor = claimed ? COL_CLAIMED : COL_NAME;
         int nameMaxW = Math.max(20, rightEdge - leftX - BAR_WIDTH - 52);
         g.drawString(font, GuiText.ellipsize(font, goalName, nameMaxW), leftX, rowY + 4, nameColor);
@@ -188,7 +186,7 @@ public class GilGoalsScreen extends Screen {
                 btnX + btnW / 2, btnY + 4, btnW - 6, COL_CLAIM_TEXT, false);
         } else {
             // Reward preview text
-            if (registry != null && registry.rewardItemId() != null) {
+            if (goal.hasReward()) {
                 g.drawString(font, "\u2605", rightEdge - font.width("\u2605"), rowY + 10, COL_REWARD);
             }
         }

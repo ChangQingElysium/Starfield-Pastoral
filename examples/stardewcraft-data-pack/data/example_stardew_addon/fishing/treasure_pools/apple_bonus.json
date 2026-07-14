@@ -1,0 +1,20 @@
+{
+  "chest": "any",
+  "chance": 0.25,
+  "rolls": 1,
+  "available_when": [
+    {"type": "stardewcraft:skill", "data": {"skill": "fishing", "level": 1}}
+  ],
+  "entries": [
+    {
+      "query": {"type": "stardewcraft:item", "data": {"item": "minecraft:apple", "count": 1}},
+      "weight": 3
+    },
+    {
+      "query": {"type": "stardewcraft:item", "data": {"item": "minecraft:golden_apple", "count": 1}},
+      "weight": 1,
+      "min_fishing_level": 5,
+      "min_water_distance": 3
+    }
+  ]
+}

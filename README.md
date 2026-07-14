@@ -15,7 +15,7 @@ Current development focus is on expanding feature coverage while tightening Star
 - Minecraft 1.21.1
 - NeoForge 21.1.217
 - Java 21
-- Mod version: 0.4.13
+- Mod version: 0.5.0
 - Mod id: stardewcraft
 
 ## Implemented or In-Progress Systems
@@ -47,6 +47,8 @@ Common local validation commands:
 - ./gradlew classes
 - ./gradlew build
 
+The 0.5 addon/data-pack API guide is in `docs/0.5-addon-api.md`. Runnable examples are under `examples/stardewcraft-data-pack` and `examples/stardewcraft-addon`.
+
 If local dependency resolution gets out of sync, refresh Gradle dependencies and reload the project in your IDE.
 
 ## Pregen World Data
@@ -61,6 +63,11 @@ Expected resource locations include:
 - src/main/resources/pregen/stardew_valley/region/*.mca
 
 If the required pregen data is missing or invalid, travel into the Stardew Valley world space is blocked.
+
+## Localization Credits
+
+- Russian localization incorporates translation work by Annelo and the translators of
+  [annel0/Starfield-Pastoral](https://github.com/annel0/Starfield-Pastoral), with official Stardew Valley localized text taking precedence where available.
 
 ## License and Asset Notice
 

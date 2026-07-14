@@ -75,7 +75,7 @@ public class ArtichokeCropBlock extends StardewCropBlock {
     }
 
     @Override
-    public String getCropDisplayName() {
-        return "洋蓟";
+    public String getCropDisplayNameKey() {
+        return "item.stardewcraft.artichoke";
     }
 }

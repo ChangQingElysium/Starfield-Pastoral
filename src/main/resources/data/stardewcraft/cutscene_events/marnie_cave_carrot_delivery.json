@@ -1,0 +1,76 @@
+{
+  "id": "marnie_cave_carrot_delivery",
+  "skippable": true,
+  "trigger": {
+    "type": "enter_area",
+    "location": "animalshop",
+    "area_min": [-101, 24, 8],
+    "area_max": [-66, 39, 26]
+  },
+  "preconditions": [
+    { "type": "not_saw_event", "id": "marnie_cave_carrot_delivery" },
+    { "type": "saw_event", "id": "marnie_cave_carrot_request_wake_up" },
+    { "type": "has_item", "item": "stardewcraft:cave_carrot", "count": 1 },
+    { "type": "time", "min": 900, "max": 1700 }
+  ],
+  "commands": [
+    { "cmd": "comment", "text": "=== SDV AnimalShop Event 92: Marnie Cave Carrot delivery ===" },
+
+    { "cmd": "lock_player" },
+    { "cmd": "fade", "mode": "out", "ticks": 10 },
+    { "cmd": "hide_npc", "npc_id": "marnie" },
+
+    { "cmd": "spawn_actor", "actor": "fake_player", "npc_id": "player",
+      "x": -83.5, "y": 34, "z": 26.5, "relative": false, "facing": 180 },
+    { "cmd": "spawn_actor", "actor": "marnie", "npc_id": "marnie",
+      "x": -86.5, "y": 34, "z": 21.5, "relative": false, "facing": 0 },
+
+    { "cmd": "camera", "x": -87.139, "y": 36.303, "z": 25.282,
+      "yaw": 179.6, "pitch": 46.2, "relative": false },
+
+    { "cmd": "music", "track": "MUSIC_JAUNTY" },
+    { "cmd": "fade", "mode": "in", "ticks": 20 },
+    { "cmd": "pause", "ticks": 20 },
+
+    { "cmd": "remove_quest", "quest_id": "21" },
+    { "cmd": "remove_item", "item": "stardewcraft:cave_carrot", "count": 1 },
+    { "cmd": "add_friendship", "npc": "marnie", "points": 100 },
+
+    { "cmd": "skippable" },
+    { "cmd": "emote", "actor": "marnie", "emote": "happy" },
+    { "cmd": "speak", "npc_id": "marnie", "text": "event.marnie_cave_carrot_delivery.thanks" },
+
+    { "cmd": "move_actor", "actor": "fake_player",
+      "x": -85.5, "y": 34, "z": 25.5, "ticks": 32, "relative": false },
+    { "cmd": "face_actor", "actor": "fake_player", "yaw": -90 },
+    { "cmd": "pause", "ticks": 12 },
+    { "cmd": "play_sound", "sound": "minecraft:block.wood.step", "volume": 1.0, "pitch": 1.0 },
+    { "cmd": "ground_item", "id": "marnie_cave_carrot_delivery_carrot",
+      "item": "stardewcraft:cave_carrot", "x": -84.5, "y": 34, "z": 24.5,
+      "scale": 0.98, "yaw": 8 },
+    { "cmd": "pause", "ticks": 30 },
+
+    { "cmd": "move_actor", "actor": "marnie",
+      "x": -86.5, "y": 34, "z": 19.5, "ticks": 28, "relative": false },
+    { "cmd": "move_actor", "actor": "marnie",
+      "x": -83.5, "y": 34, "z": 19.5, "ticks": 36, "relative": false },
+    { "cmd": "move_actor", "actor": "marnie",
+      "x": -83.5, "y": 34, "z": 23.5, "ticks": 48, "relative": false },
+    { "cmd": "move_actor", "actor": "marnie",
+      "x": -85.5, "y": 34, "z": 24.5, "ticks": 28, "relative": false },
+    { "cmd": "face_actor", "actor": "marnie", "yaw": -90 },
+    { "cmd": "pause", "ticks": 10 },
+
+    { "cmd": "emote", "actor": "marnie", "emote": "happy" },
+    { "cmd": "speak", "npc_id": "marnie", "text": "event.marnie_cave_carrot_delivery.looks_good" },
+    { "cmd": "pause", "ticks": 20 },
+    { "cmd": "speak", "npc_id": "marnie", "text": "event.marnie_cave_carrot_delivery.appreciate" },
+    { "cmd": "pause", "ticks": 20 },
+
+    { "cmd": "remove_actor", "actor": "marnie" },
+    { "cmd": "remove_actor", "actor": "fake_player" },
+    { "cmd": "show_npc", "npc_id": "marnie" },
+    { "cmd": "unlock_player" },
+    { "cmd": "end" }
+  ]
+}

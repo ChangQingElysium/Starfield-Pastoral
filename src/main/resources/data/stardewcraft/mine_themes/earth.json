@@ -1,0 +1,19 @@
+{
+  "mechanic_id": "earth",
+  "min_floor": 1,
+  "max_floor": 39,
+  "main_stone": "stardewcraft:earth_shale",
+  "dark_stone": "stardewcraft:dark_earth_shale",
+  "decor_a": ["stardewcraft:limestone", "stardewcraft:cracked_slate"],
+  "decor_b": ["stardewcraft:mossy_sandstone", "stardewcraft:limestone"],
+  "decorative_stones": ["stardewcraft:limestone", "stardewcraft:mossy_sandstone", "stardewcraft:cracked_slate"],
+  "vanilla_accents": ["minecraft:andesite", "minecraft:dirt"],
+  "cave_decorations": ["stardewcraft:limestone", "stardewcraft:mossy_sandstone", "stardewcraft:cracked_slate"],
+  "ores": {
+    "copper": "stardewcraft:earth_copper_ore",
+    "iron": "stardewcraft:earth_iron_ore",
+    "gold": "stardewcraft:earth_gold_ore",
+    "iridium": "stardewcraft:earth_iridium_ore",
+    "coal": "stardewcraft:earth_coal_ore"
+  }
+}

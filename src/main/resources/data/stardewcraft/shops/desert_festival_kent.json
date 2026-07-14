@@ -1,0 +1,20 @@
+{
+  "legacy_id": "DesertFestival_Kent",
+  "owner_npc": "kent",
+  "owner_dialogue": "stardewcraft.festival.desertfestival.dialogue.vendor",
+  "entries": [
+    {
+      "item": "stardewcraft:fiddlehead_fern",
+      "stock": 5,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 10
+    },
+    {
+      "item": "stardewcraft:hazelnut",
+      "stock": 5,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 10
+    }
+  ],
+  "accepted_sell_types": []
+}

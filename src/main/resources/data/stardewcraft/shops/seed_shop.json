@@ -1,0 +1,338 @@
+{
+  "legacy_id": "SeedShop",
+  "owner_npc": "Pierre",
+  "owner_dialogue": "stardewcraft.shop.seedshop.dialogue",
+  "entries": [
+    {
+      "item": "stardewcraft:parsnip_seeds",
+      "price": 20,
+      "seasons": [
+        0
+      ]
+    },
+    {
+      "item": "stardewcraft:green_bean_seeds",
+      "price": 60,
+      "seasons": [
+        0
+      ]
+    },
+    {
+      "item": "stardewcraft:cauliflower_seeds",
+      "price": 80,
+      "seasons": [
+        0
+      ]
+    },
+    {
+      "item": "stardewcraft:potato_seeds",
+      "price": 50,
+      "seasons": [
+        0
+      ]
+    },
+    {
+      "item": "stardewcraft:tulip_seeds",
+      "price": 20,
+      "seasons": [
+        0
+      ]
+    },
+    {
+      "item": "stardewcraft:kale_seeds",
+      "price": 70,
+      "seasons": [
+        0
+      ]
+    },
+    {
+      "item": "stardewcraft:blue_jazz_seeds",
+      "price": 30,
+      "seasons": [
+        0
+      ]
+    },
+    {
+      "item": "stardewcraft:garlic_seeds",
+      "price": 40,
+      "seasons": [
+        0
+      ],
+      "min_year": 2
+    },
+    {
+      "item": "stardewcraft:rice_shoot",
+      "price": 40,
+      "seasons": [
+        0
+      ],
+      "min_year": 2
+    },
+    {
+      "item": "stardewcraft:melon_seeds",
+      "price": 80,
+      "seasons": [
+        1
+      ]
+    },
+    {
+      "item": "stardewcraft:tomato_seeds",
+      "price": 50,
+      "seasons": [
+        1
+      ]
+    },
+    {
+      "item": "stardewcraft:blueberry_seeds",
+      "price": 80,
+      "seasons": [
+        1
+      ]
+    },
+    {
+      "item": "stardewcraft:hot_pepper_seeds",
+      "price": 40,
+      "seasons": [
+        1
+      ]
+    },
+    {
+      "item": "stardewcraft:wheat_seeds",
+      "price": 10,
+      "seasons": [
+        1
+      ]
+    },
+    {
+      "item": "stardewcraft:radish_seeds",
+      "price": 40,
+      "seasons": [
+        1
+      ]
+    },
+    {
+      "item": "stardewcraft:poppy_seeds",
+      "price": 100,
+      "seasons": [
+        1
+      ]
+    },
+    {
+      "item": "stardewcraft:summer_spangle_seeds",
+      "price": 50,
+      "seasons": [
+        1
+      ]
+    },
+    {
+      "item": "stardewcraft:hops_seeds",
+      "price": 60,
+      "seasons": [
+        1
+      ]
+    },
+    {
+      "item": "stardewcraft:corn_seeds",
+      "price": 150,
+      "seasons": [
+        1
+      ]
+    },
+    {
+      "item": "stardewcraft:sunflower_seeds",
+      "price": 200,
+      "seasons": [
+        1
+      ]
+    },
+    {
+      "item": "stardewcraft:red_cabbage_seeds",
+      "price": 100,
+      "seasons": [
+        1
+      ],
+      "min_year": 2
+    },
+    {
+      "item": "stardewcraft:eggplant_seeds",
+      "price": 20,
+      "seasons": [
+        2
+      ]
+    },
+    {
+      "item": "stardewcraft:corn_seeds",
+      "price": 150,
+      "seasons": [
+        2
+      ]
+    },
+    {
+      "item": "stardewcraft:pumpkin_seeds",
+      "price": 100,
+      "seasons": [
+        2
+      ]
+    },
+    {
+      "item": "stardewcraft:bok_choy_seeds",
+      "price": 50,
+      "seasons": [
+        2
+      ]
+    },
+    {
+      "item": "stardewcraft:yam_seeds",
+      "price": 60,
+      "seasons": [
+        2
+      ]
+    },
+    {
+      "item": "stardewcraft:cranberry_seeds",
+      "price": 240,
+      "seasons": [
+        2
+      ]
+    },
+    {
+      "item": "stardewcraft:wheat_seeds",
+      "price": 10,
+      "seasons": [
+        2
+      ]
+    },
+    {
+      "item": "stardewcraft:sunflower_seeds",
+      "price": 200,
+      "seasons": [
+        2
+      ]
+    },
+    {
+      "item": "stardewcraft:fairy_rose_seeds",
+      "price": 200,
+      "seasons": [
+        2
+      ]
+    },
+    {
+      "item": "stardewcraft:amaranth_seeds",
+      "price": 70,
+      "seasons": [
+        2
+      ]
+    },
+    {
+      "item": "stardewcraft:grape_seeds",
+      "price": 60,
+      "seasons": [
+        2
+      ]
+    },
+    {
+      "item": "stardewcraft:artichoke_seeds",
+      "price": 30,
+      "seasons": [
+        2
+      ],
+      "min_year": 2
+    },
+    {
+      "item": "stardewcraft:grass_starter",
+      "price": 100
+    },
+    {
+      "item": "stardewcraft:basic_fertilizer",
+      "price": 100
+    },
+    {
+      "item": "stardewcraft:basic_retaining_soil",
+      "price": 100
+    },
+    {
+      "item": "stardewcraft:speed_gro",
+      "price": 100
+    },
+    {
+      "item": "stardewcraft:quality_fertilizer",
+      "price": 150,
+      "min_year": 2
+    },
+    {
+      "item": "stardewcraft:quality_retaining_soil",
+      "price": 150,
+      "min_year": 2
+    },
+    {
+      "item": "stardewcraft:deluxe_speed_gro",
+      "price": 150,
+      "min_year": 2
+    },
+    {
+      "item": "recipe:stardewcraft:dehydrator",
+      "price": 10000,
+      "stock": 1
+    },
+    {
+      "item": "stardewcraft:sugar",
+      "price": 100
+    },
+    {
+      "item": "stardewcraft:wheat_flour",
+      "price": 100
+    },
+    {
+      "item": "stardewcraft:oil",
+      "price": 200
+    },
+    {
+      "item": "stardewcraft:rice",
+      "price": 200
+    },
+    {
+      "item": "stardewcraft:vinegar",
+      "price": 200
+    },
+    {
+      "item": "stardewcraft:cherry_sapling",
+      "price": 1700
+    },
+    {
+      "item": "stardewcraft:apricot_sapling",
+      "price": 1000
+    },
+    {
+      "item": "stardewcraft:orange_sapling",
+      "price": 2000
+    },
+    {
+      "item": "stardewcraft:peach_sapling",
+      "price": 3000
+    },
+    {
+      "item": "stardewcraft:pomegranate_sapling",
+      "price": 3000
+    },
+    {
+      "item": "stardewcraft:apple_sapling",
+      "price": 2000
+    },
+    {
+      "item": "stardewcraft:pineapple",
+      "price": 300
+    }
+  ],
+  "accepted_sell_types": [
+    "stardewcraft.type.animal_product",
+    "stardewcraft.type.artisan_animal_quality",
+    "stardewcraft.type.artisan_goods",
+    "stardewcraft.type.cooking",
+    "stardewcraft.type.cooking_ingredient",
+    "stardewcraft.type.crop",
+    "stardewcraft.type.fertilizer",
+    "stardewcraft.type.forage",
+    "stardewcraft.type.fruit",
+    "stardewcraft.type.seed"
+  ]
+}

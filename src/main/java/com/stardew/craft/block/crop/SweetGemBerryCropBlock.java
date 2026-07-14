@@ -97,8 +97,8 @@ public class SweetGemBerryCropBlock extends StardewCropBlock {
     }
 
     @Override
-    public String getCropDisplayName() {
-        return "宝石甜莓";
+    public String getCropDisplayNameKey() {
+        return "item.stardewcraft.sweet_gem_berry";
     }
 
     @Override

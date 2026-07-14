@@ -110,8 +110,8 @@ public class TulipCropBlock extends StardewCropBlock {
     }
 
     @Override
-    public String getCropDisplayName() {
-        return "郁金香";
+    public String getCropDisplayNameKey() {
+        return "item.stardewcraft.tulip";
     }
 
     @Override

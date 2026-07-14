@@ -1,0 +1,41 @@
+{
+  "legacy_id": "Pam",
+  "requester": "Pam",
+  "duration": "two_weeks",
+  "repeatable": false,
+  "required_tags": [
+    "season_spring"
+  ],
+  "title": "stardewcraft.special_orders.Pam.name",
+  "text": "stardewcraft.special_orders.Pam.text",
+  "objectives": [
+    {
+      "type": "collect",
+      "text": "stardewcraft.special_orders.Pam_Objective_0_Text",
+      "required_count": 12,
+      "accepted_tags": "juice_item, preserve_sheet_index_192"
+    },
+    {
+      "type": "donate",
+      "text": "stardewcraft.special_orders.Pam_Objective_1_Text",
+      "required_count": 12,
+      "accepted_tags": "juice_item, preserve_sheet_index_192",
+      "drop_box": "PamKitchen"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "money",
+      "amount": 3000
+    },
+    {
+      "type": "mail",
+      "mail": "pamPotatoJuice",
+      "no_letter": true
+    },
+    {
+      "type": "friendship",
+      "amount": 250
+    }
+  ]
+}

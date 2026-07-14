@@ -1,0 +1,14 @@
+{
+  "legacy_id": "DesertFestival_Abigail",
+  "owner_npc": "abigail",
+  "owner_dialogue": "stardewcraft.festival.desertfestival.dialogue.vendor",
+  "entries": [
+    {
+      "item": "stardewcraft:abbys_planchette",
+      "stock": 1,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 70
+    }
+  ],
+  "accepted_sell_types": []
+}

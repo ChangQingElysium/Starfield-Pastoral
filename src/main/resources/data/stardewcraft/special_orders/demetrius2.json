@@ -1,0 +1,55 @@
+{
+  "legacy_id": "Demetrius2",
+  "requester": "Demetrius",
+  "duration": "week",
+  "repeatable": true,
+  "required_tags": [],
+  "title": "stardewcraft.special_orders.Demetrius2.name",
+  "text": "stardewcraft.special_orders.Demetrius2.text",
+  "objectives": [
+    {
+      "type": "fish",
+      "text": "stardewcraft.special_orders.Demetrius2_Objective_0_Text",
+      "required_count": 20,
+      "accepted_tags": "{FishType:Tags}"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "money",
+      "amount": 1500
+    },
+    {
+      "type": "mail",
+      "mail": "DemetriusReward"
+    }
+  ],
+  "random_elements": [
+    {
+      "name": "FishType",
+      "options": [
+        {
+          "required_tags": [],
+          "values": {
+            "Text": "stardewcraft.special_orders.Demetrius2_RE_FishType_0_Text",
+            "Tags": "fish_river"
+          }
+        },
+        {
+          "required_tags": [],
+          "values": {
+            "Text": "stardewcraft.special_orders.Demetrius2_RE_FishType_1_Text",
+            "Tags": "fish_ocean"
+          }
+        },
+        {
+          "required_tags": [],
+          "values": {
+            "Text": "stardewcraft.special_orders.Demetrius2_RE_FishType_2_Text",
+            "Tags": "fish_lake"
+          }
+        }
+      ]
+    }
+  ]
+}

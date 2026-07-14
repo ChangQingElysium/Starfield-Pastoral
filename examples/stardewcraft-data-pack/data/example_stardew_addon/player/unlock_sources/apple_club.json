@@ -1,0 +1,6 @@
+{
+  "recipes": [
+    "example_stardew_addon:apple_snack",
+    "example_stardew_addon:apple_crate"
+  ]
+}

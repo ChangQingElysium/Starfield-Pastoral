@@ -1,0 +1,26 @@
+{
+  "legacy_id": "DesertFestival_Demetrius",
+  "owner_npc": "demetrius",
+  "owner_dialogue": "stardewcraft.festival.desertfestival.dialogue.vendor",
+  "entries": [
+    {
+      "item": "stardewcraft:nautilus_shell",
+      "stock": 1,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 50
+    },
+    {
+      "item": "stardewcraft:spice_berry",
+      "stock": 3,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 10
+    },
+    {
+      "item": "stardewcraft:deluxe_speed_gro",
+      "stock": 100,
+      "trade_item": "stardewcraft:calico_egg",
+      "trade_item_count": 2
+    }
+  ],
+  "accepted_sell_types": []
+}

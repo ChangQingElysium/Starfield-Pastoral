@@ -1,0 +1,8 @@
+{
+  "machine": "stardewcraft:keg",
+  "input": "minecraft:apple",
+  "output": "minecraft:golden_apple",
+  "minutes": 60,
+  "consume": 1,
+  "outputCount": 1
+}

@@ -1399,6 +1399,14 @@
       }
     ]
   },
+  "music_50s": {
+    "sounds": [
+      {
+        "name": "stardewcraft:music/50s",
+        "stream": true
+      }
+    ]
+  },
   "music_distant_banjo": {
     "sounds": [
       {

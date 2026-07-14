@@ -1,0 +1,44 @@
+{
+  "legacy_id": "AnimalShop",
+  "owner_npc": "Marnie",
+  "owner_dialogue": "stardewcraft.shop.animalshop.dialogue",
+  "entries": [
+    {
+      "item": "stardewcraft:hay",
+      "price": 50
+    },
+    {
+      "item": "stardewcraft:milk_pail",
+      "price": 2000,
+      "stock": 1
+    },
+    {
+      "item": "stardewcraft:shears",
+      "price": 3000,
+      "stock": 1
+    },
+    {
+      "item": "stardewcraft:heater",
+      "price": 2000
+    },
+    {
+      "item": "stardewcraft:auto_grabber",
+      "price": 25000,
+      "stock": 1
+    },
+    {
+      "item": "stardewcraft:auto_petter",
+      "price": 50000,
+      "stock": 1
+    },
+    {
+      "item": "stardewcraft:book_animal_catalogue",
+      "price": 5000,
+      "min_year": 2
+    }
+  ],
+  "accepted_sell_types": [
+    "stardewcraft.type.animal_product",
+    "stardewcraft.type.artisan_animal_quality"
+  ]
+}

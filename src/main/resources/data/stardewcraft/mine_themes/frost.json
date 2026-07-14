@@ -1,0 +1,19 @@
+{
+  "mechanic_id": "frost",
+  "min_floor": 40,
+  "max_floor": 79,
+  "main_stone": "stardewcraft:frost_gneiss",
+  "dark_stone": "stardewcraft:dark_frost_gneiss",
+  "decor_a": ["stardewcraft:banded_marble", "stardewcraft:cracked_slate"],
+  "decor_b": ["stardewcraft:salt_rock", "stardewcraft:banded_marble"],
+  "decorative_stones": ["stardewcraft:banded_marble", "stardewcraft:salt_rock", "stardewcraft:cracked_slate"],
+  "vanilla_accents": ["minecraft:blue_ice", "minecraft:packed_ice", "minecraft:prismarine_bricks"],
+  "cave_decorations": ["stardewcraft:banded_marble", "stardewcraft:salt_rock", "stardewcraft:cracked_slate"],
+  "ores": {
+    "copper": "stardewcraft:frost_copper_ore",
+    "iron": "stardewcraft:frost_iron_ore",
+    "gold": "stardewcraft:frost_gold_ore",
+    "iridium": "stardewcraft:frost_iridium_ore",
+    "coal": "stardewcraft:frost_coal_ore"
+  }
+}

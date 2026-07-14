@@ -13,7 +13,7 @@ import java.util.UUID;
 
 public final class MoneyContractService {
     public static final UUID DEBUG_TARGET_ID = UUID.fromString("00000000-0000-0000-0000-00000000c001");
-    public static final String DEBUG_TARGET_NAME = "调试农夫";
+    public static final String DEBUG_TARGET_NAME = "Debug Farmer";
     private static final int DEBUG_SHARE_BALANCE = 500;
 
     private MoneyContractService() {
@@ -38,7 +38,8 @@ public final class MoneyContractService {
             switch (choice) {
                 case 0 -> {
                     SharedMoneyData.get().debugMergeWithMember(player, DEBUG_TARGET_ID, DEBUG_SHARE_BALANCE);
-                    player.displayClientMessage(Component.literal("[DEBUG] 已与调试农夫共享金币，调试账本并入 500g。"), false);
+                    player.displayClientMessage(Component.translatable(
+                            "stardewcraft.money_contract.debug.shared", DEBUG_SHARE_BALANCE), false);
                 }
                 case 1 -> openDebugTransferScreen(player);
                 default -> {
@@ -71,7 +72,8 @@ public final class MoneyContractService {
                 playCancel(player);
                 return;
             }
-            player.displayClientMessage(Component.literal("[DEBUG] 已向调试农夫转让 " + amount + "g。"), false);
+            player.displayClientMessage(Component.translatable(
+                    "stardewcraft.money_contract.debug.transferred", amount), false);
             playMoney(player);
             return;
         }

@@ -381,17 +381,19 @@ public class LevelUpMenuScreen extends Screen {
     }
 
     private Component getProfessionName(int profession) {
-        if (profession < 0 || profession > 29) {
+        ProfessionType type = ProfessionType.fromId(profession);
+        if (type == null) {
             return Component.translatable("stardewcraft.levelup.profession.unknown.name");
         }
-        return Component.translatable("stardewcraft.levelup.profession." + profession + ".name");
+        return Component.translatable(type.getTranslationKey());
     }
 
     private Component getProfessionDesc(int profession) {
-        if (profession < 0 || profession > 29) {
+        ProfessionType type = ProfessionType.fromId(profession);
+        if (type == null) {
             return Component.translatable("stardewcraft.levelup.profession.unknown.desc");
         }
-        return Component.translatable("stardewcraft.levelup.profession." + profession + ".desc");
+        return Component.translatable(type.getDescriptionTranslationKey());
     }
 
     private record RecipeDisplayEntry(Component displayName, ItemStack icon) {}

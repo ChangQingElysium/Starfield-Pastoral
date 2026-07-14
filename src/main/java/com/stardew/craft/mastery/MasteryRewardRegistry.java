@@ -1,26 +1,43 @@
 package com.stardew.craft.mastery;
 
-import com.stardew.craft.item.ModItems;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.mojang.serialization.JsonOps;
+import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.content.AtomicDefinitionStore;
+import com.stardew.craft.api.v1.content.DefinitionDiagnostic;
+import com.stardew.craft.api.v1.content.DefinitionSnapshot;
+import com.stardew.craft.api.v1.mastery.StardewMasteryRewardDefinition;
 import com.stardew.craft.player.SkillType;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.EnumMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Supplier;
 
-/**
- * 5 个技能各自的精通奖励物品定义（SDV parity，按 MasteryTrackerMenu.cs:36-151 对齐）。
- *
- * 每条 RewardEntry 含：
- *  - itemStack 工厂（Supplier，避免静态初始化期 ModItems 未就绪）
- *  - name / desc 翻译键
- *  - statBonus：非物品奖励（例 trinket 槽）
- *
- * 非物品条目使用原版 MasteryTrackerMenu 的 plaque 图标展示，不发放物品。
- */
+/** Reloadable mastery reward rows, synchronized to clients for menu parity. */
 public final class MasteryRewardRegistry {
-    private MasteryRewardRegistry() {}
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private static final AtomicDefinitionStore<StardewMasteryRewardDefinition> STORE =
+            new AtomicDefinitionStore<>();
+    private static volatile Map<SkillType, List<RewardEntry>> rewards = Map.of();
+    private static volatile String cachedJson = "{}";
+
+    private MasteryRewardRegistry() {
+    }
 
     public enum StatBonus {
         NONE,
@@ -33,112 +50,131 @@ public final class MasteryRewardRegistry {
         STAT
     }
 
-    public record RewardEntry(
-        Supplier<ItemStack> stack,
-        String recipeId,
-        String nameKey,
-        String descKey,
-        StatBonus statBonus,
-        RewardKind kind
-    ) {
-        public static RewardEntry item(Supplier<ItemStack> stack, String nameKey, String descKey) {
-            return new RewardEntry(stack, "", nameKey, descKey, StatBonus.NONE, RewardKind.ITEM);
-        }
-        public static RewardEntry recipe(String recipeId, Supplier<ItemStack> displayStack, String nameKey, String descKey) {
-            return new RewardEntry(displayStack, recipeId, nameKey, descKey, StatBonus.NONE, RewardKind.RECIPE);
-        }
-        public static RewardEntry stat(StatBonus bonus, String nameKey, String descKey) {
-            return new RewardEntry(() -> ItemStack.EMPTY, "", nameKey, descKey, bonus, RewardKind.STAT);
-        }
-        public static RewardEntry placeholder(String nameKey, String descKey) {
-            return new RewardEntry(() -> ItemStack.EMPTY, "", nameKey, descKey, StatBonus.NONE, RewardKind.STAT);
-        }
+    public record RewardEntry(Supplier<ItemStack> stack, String recipeId, String nameKey,
+                              String descKey, StatBonus statBonus, RewardKind kind) {
         public boolean isItem() { return kind == RewardKind.ITEM && !stack.get().isEmpty(); }
         public boolean isRecipe() { return kind == RewardKind.RECIPE && recipeId != null && !recipeId.isBlank(); }
     }
 
-    private static final Map<SkillType, List<RewardEntry>> REWARDS;
-
-    static {
-        REWARDS = new EnumMap<>(SkillType.class);
-
-        // Farming (0) — Iridium Scythe + Statue of Blessings + skill-description plaque
-        REWARDS.put(SkillType.FARMING, List.of(
-            RewardEntry.item(
-                () -> new ItemStack(ModItems.IRIDIUM_SCYTHE.get()),
-                "stardewcraft.mastery.reward.iridium_scythe.name",
-                "stardewcraft.mastery.reward.iridium_scythe.desc"),
-            RewardEntry.recipe("statue_of_blessings",
-                () -> new ItemStack(ModItems.STATUE_OF_BLESSINGS.get()),
-                "stardewcraft.mastery.reward.statue_of_blessings.name",
-                "stardewcraft.mastery.reward.statue_of_blessings.desc"),
-            RewardEntry.placeholder(
-                "stardewcraft.mastery.menu.farming",
-                "stardewcraft.mastery.reward.farming_plaque.desc")
-        ));
-
-        // Fishing (1) — Advanced Iridium Rod + Challenge Bait + plaque
-        REWARDS.put(SkillType.FISHING, List.of(
-            RewardEntry.item(
-                () -> new ItemStack(ModItems.ADVANCED_IRIDIUM_ROD.get()),
-                "stardewcraft.mastery.reward.advanced_iridium_rod.name",
-                "stardewcraft.mastery.reward.advanced_iridium_rod.desc"),
-            RewardEntry.recipe("challenge_bait",
-                () -> new ItemStack(ModItems.CHALLENGE_BAIT.get()),
-                "stardewcraft.mastery.reward.challenge_bait.name",
-                "stardewcraft.mastery.reward.challenge_bait.desc"),
-            RewardEntry.placeholder(
-                "stardewcraft.mastery.menu.fishing",
-                "stardewcraft.mastery.reward.fishing_plaque.desc")
-        ));
-
-        // Foraging (2) — Mystic Tree Seed + Treasure Totem + plaque
-        REWARDS.put(SkillType.FORAGING, List.of(
-            RewardEntry.recipe("mystic_tree_seed",
-                () -> new ItemStack(ModItems.MYSTIC_TREE_SEED.get()),
-                "stardewcraft.mastery.reward.mystic_tree_seed.name",
-                "stardewcraft.mastery.reward.mystic_tree_seed.desc"),
-            RewardEntry.recipe("treasure_totem",
-                () -> new ItemStack(ModItems.TREASURE_TOTEM.get()),
-                "stardewcraft.mastery.reward.treasure_totem.name",
-                "stardewcraft.mastery.reward.treasure_totem.desc"),
-            RewardEntry.placeholder(
-                "stardewcraft.mastery.menu.foraging",
-                "stardewcraft.mastery.reward.foraging_plaque.desc")
-        ));
-
-        // Mining (3) — Statue of the Dwarf King + Heavy Furnace + plaque
-        REWARDS.put(SkillType.MINING, List.of(
-            RewardEntry.recipe("statue_of_dwarf_king",
-                () -> new ItemStack(ModItems.STATUE_OF_DWARF_KING.get()),
-                "stardewcraft.mastery.reward.statue_of_dwarf_king.name",
-                "stardewcraft.mastery.reward.statue_of_dwarf_king.desc"),
-            RewardEntry.recipe("heavy_furnace",
-                () -> new ItemStack(ModItems.HEAVY_FURNACE.get()),
-                "stardewcraft.mastery.reward.heavy_furnace.name",
-                "stardewcraft.mastery.reward.heavy_furnace.desc"),
-            RewardEntry.placeholder(
-                "stardewcraft.mastery.menu.mining",
-                "stardewcraft.mastery.reward.mining_plaque.desc")
-        ));
-
-        // Combat (4) — Anvil + Mini-Forge + Trinket slot unlock
-        REWARDS.put(SkillType.COMBAT, List.of(
-            RewardEntry.recipe("anvil",
-                () -> new ItemStack(ModItems.ANVIL_MASTERY.get()),
-                "stardewcraft.mastery.reward.anvil.name",
-                "stardewcraft.mastery.reward.anvil.desc"),
-            RewardEntry.recipe("mini_forge",
-                () -> new ItemStack(ModItems.MINI_FORGE.get()),
-                "stardewcraft.mastery.reward.mini_forge.name",
-                "stardewcraft.mastery.reward.mini_forge.desc"),
-            RewardEntry.stat(StatBonus.TRINKET_SLOT,
-                "stardewcraft.mastery.reward.trinket_slot.name",
-                "stardewcraft.mastery.reward.trinket_slot.desc")
-        ));
+    public static DefinitionSnapshot<StardewMasteryRewardDefinition> snapshot() {
+        return STORE.snapshot();
     }
 
     public static List<RewardEntry> rewardsFor(SkillType skill) {
-        return REWARDS.getOrDefault(skill, List.of());
+        return rewards.getOrDefault(skill, List.of());
+    }
+
+    public static String getCachedJson() {
+        return cachedJson;
+    }
+
+    public static void applyFromJson(String json) {
+        try {
+            JsonObject root = JsonParser.parseString(json).getAsJsonObject();
+            Map<ResourceLocation, StardewMasteryRewardDefinition> definitions = new LinkedHashMap<>();
+            for (Map.Entry<String, JsonElement> entry : root.entrySet()) {
+                ResourceLocation id = ResourceLocation.tryParse(entry.getKey());
+                if (id == null) continue;
+                StardewMasteryRewardDefinition.CODEC.parse(JsonOps.INSTANCE, entry.getValue())
+                        .result().ifPresent(definition -> definitions.put(id, definition));
+            }
+            publish(definitions);
+            cachedJson = json;
+        } catch (RuntimeException exception) {
+            StardewCraft.LOGGER.error("[Mastery rewards] Failed client sync", exception);
+        }
+    }
+
+    public static final class ReloadListener extends SimpleJsonResourceReloadListener {
+        public ReloadListener() {
+            super(GSON, "mastery_rewards");
+        }
+
+        @Override
+        protected void apply(Map<ResourceLocation, JsonElement> objects, ResourceManager manager,
+                             ProfilerFiller profiler) {
+            Map<ResourceLocation, StardewMasteryRewardDefinition> definitions = new LinkedHashMap<>();
+            Map<ResourceLocation, String> sources = new LinkedHashMap<>();
+            List<DefinitionDiagnostic> diagnostics = new ArrayList<>();
+            objects.entrySet().stream().sorted(Map.Entry.comparingByKey(Comparator.comparing(ResourceLocation::toString)))
+                    .forEach(entry -> StardewMasteryRewardDefinition.CODEC.parse(JsonOps.INSTANCE, entry.getValue())
+                            .resultOrPartial(message -> diagnostics.add(
+                                    DefinitionDiagnostic.error(entry.getKey(), entry.getKey(), message)))
+                            .ifPresent(definition -> {
+                                definitions.put(entry.getKey(), definition);
+                                StardewMasteryRewardDefinition.CODEC.encodeStart(JsonOps.INSTANCE, definition)
+                                        .resultOrPartial(message -> diagnostics.add(
+                                                DefinitionDiagnostic.error(entry.getKey(), entry.getKey(), message)))
+                                        .ifPresent(encoded -> sources.put(entry.getKey(), GSON.toJson(encoded)));
+                            }));
+            var result = STORE.applyLocal(definitions, sources, diagnostics);
+            for (DefinitionDiagnostic diagnostic : result.diagnostics()) {
+                if (diagnostic.severity() == DefinitionDiagnostic.Severity.ERROR) {
+                    StardewCraft.LOGGER.error("[Mastery rewards] {}", diagnostic.message());
+                } else {
+                    StardewCraft.LOGGER.warn("[Mastery rewards] {}", diagnostic.message());
+                }
+            }
+            if (!result.accepted()) {
+                StardewCraft.LOGGER.error("[Mastery rewards] Rejected reload; keeping previous rewards");
+                return;
+            }
+            publish(result.snapshot().definitions());
+            cachedJson = encodeDefinitions(result.snapshot().definitions());
+            StardewCraft.LOGGER.info("[Mastery rewards] Applied {} reward sets", definitions.size());
+        }
+    }
+
+    private static void publish(Map<ResourceLocation, StardewMasteryRewardDefinition> definitions) {
+        Map<SkillType, List<Map.Entry<ResourceLocation, StardewMasteryRewardDefinition>>> grouped =
+                new EnumMap<>(SkillType.class);
+        definitions.entrySet().stream()
+                .sorted(Comparator
+                        .<Map.Entry<ResourceLocation, StardewMasteryRewardDefinition>>comparingInt(
+                                entry -> entry.getValue().priority()).reversed()
+                        .thenComparing(entry -> entry.getKey().toString()))
+                .forEach(entry -> {
+                    SkillType skill = skill(entry.getValue().skill());
+                    if (skill != null) grouped.computeIfAbsent(skill, ignored -> new ArrayList<>()).add(entry);
+                });
+        Map<SkillType, List<RewardEntry>> prepared = new EnumMap<>(SkillType.class);
+        grouped.forEach((skill, sets) -> prepared.put(skill, sets.stream()
+                .flatMap(entry -> entry.getValue().entries().stream())
+                .map(MasteryRewardRegistry::toRuntime)
+                .toList()));
+        rewards = Map.copyOf(prepared);
+    }
+
+    private static RewardEntry toRuntime(StardewMasteryRewardDefinition.Entry entry) {
+        Supplier<ItemStack> stack = () -> entry.item()
+                .filter(BuiltInRegistries.ITEM::containsKey)
+                .map(id -> new ItemStack(BuiltInRegistries.ITEM.get(id), entry.count()))
+                .orElse(ItemStack.EMPTY);
+        RewardKind kind = switch (entry.kind()) {
+            case ITEM -> RewardKind.ITEM;
+            case RECIPE -> RewardKind.RECIPE;
+            case STAT, PLACEHOLDER -> RewardKind.STAT;
+        };
+        StatBonus bonus = entry.statBonus()
+                .filter(id -> id.equals(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "trinket_slot")))
+                .map(ignored -> StatBonus.TRINKET_SLOT)
+                .orElse(StatBonus.NONE);
+        return new RewardEntry(stack, entry.recipeId(), entry.nameKey(), entry.descKey(), bonus, kind);
+    }
+
+    private static SkillType skill(ResourceLocation id) {
+        try {
+            return SkillType.valueOf(id.getPath().toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException exception) {
+            StardewCraft.LOGGER.error("[Mastery rewards] Unknown core skill {}", id);
+            return null;
+        }
+    }
+
+    private static String encodeDefinitions(Map<ResourceLocation, StardewMasteryRewardDefinition> definitions) {
+        JsonObject root = new JsonObject();
+        definitions.forEach((id, definition) -> StardewMasteryRewardDefinition.CODEC
+                .encodeStart(JsonOps.INSTANCE, definition).result().ifPresent(json -> root.add(id.toString(), json)));
+        return GSON.toJson(root);
     }
 }
