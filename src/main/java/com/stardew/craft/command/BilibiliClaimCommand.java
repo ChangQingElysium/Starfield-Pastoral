@@ -51,7 +51,7 @@ public class BilibiliClaimCommand {
         data.setBilibiliRewardClaimed(true);
 
         // 发送奖励消息 + B 站链接
-        MutableComponent urlMsg = Component.translatable("stardewcraft.bilibili.author_link")
+        MutableComponent urlMsg = Component.translatable("stardewcraft.bilibili.author_link", BILIBILI_URL.toString())
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, BILIBILI_URL))
                 .withUnderlined(true)
