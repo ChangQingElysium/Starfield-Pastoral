@@ -163,7 +163,15 @@ public class ShopInfoCategory implements IRecipeCategory<ShopInfoCategory.Displa
                 boolean isRecipe = itemId.startsWith("recipe:");
                 String actualItemId = isRecipe ? itemId.substring("recipe:".length()) : itemId;
 
-                ItemStack stack = ArtisanRecipeCategory.getItemStack(actualItemId);
+                ItemStack stack = isRecipe
+                        ? com.stardew.craft.player.StardewCraftingRecipeData.getOutputStack(actualItemId)
+                        : ItemStack.EMPTY;
+                if (stack.isEmpty() && isRecipe) {
+                    stack = com.stardew.craft.cooking.service.VanillaCookingRecipeData.getDefinition(actualItemId)
+                            .map(definition -> ArtisanRecipeCategory.getItemStack(definition.output().toString()))
+                            .orElse(ItemStack.EMPTY);
+                }
+                if (stack.isEmpty()) stack = ArtisanRecipeCategory.getItemStack(actualItemId);
                 if (stack.isEmpty()) continue;
 
                 result.add(new DisplayEntry(

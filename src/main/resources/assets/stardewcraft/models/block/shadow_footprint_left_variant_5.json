@@ -1,0 +1,7 @@
+{
+  "parent": "stardewcraft:block/shadow_footprint_variant_5",
+  "textures": {
+    "footprint": "stardewcraft:block/shadow_footprint_left",
+    "particle": "stardewcraft:block/shadow_footprint_left"
+  }
+}

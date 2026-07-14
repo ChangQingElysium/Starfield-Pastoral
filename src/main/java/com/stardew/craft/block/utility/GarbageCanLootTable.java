@@ -1,12 +1,14 @@
 package com.stardew.craft.block.utility;
 
 import com.stardew.craft.book.BookPowerEffects;
+import com.stardew.craft.data.VanillaObjectCatalog;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.mining.MiningDataManager;
 import com.stardew.craft.mining.MiningPlayerData;
 import com.stardew.craft.player.PlayerDataManager;
 import com.stardew.craft.player.PlayerStardewData;
 import com.stardew.craft.time.StardewTimeManager;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -28,6 +30,17 @@ public final class GarbageCanLootTable {
     private static final float DEFAULT_BASE_CHANCE = 0.2f;
 
     private GarbageCanLootTable() {}
+
+    /** User-captured Minecraft positions for the four named vanilla Town garbage cans. */
+    @Nullable
+    public static String namedCanId(BlockPos pos) {
+        if (pos == null) return null;
+        if (pos.equals(new BlockPos(40, 64, 2))) return "Evelyn";
+        if (pos.equals(new BlockPos(33, 64, 12))) return "Saloon";
+        if (pos.equals(new BlockPos(112, 64, 27))) return "Blacksmith";
+        if (pos.equals(new BlockPos(134, 64, 44))) return "Museum";
+        return null;
+    }
 
     /**
      * 结果记录：包含物品和是否 Mega/DoubleMega 标识。
@@ -59,8 +72,69 @@ public final class GarbageCanLootTable {
         Result beforeAll = evaluateBeforeAll(rng, baseChancePassed, trashCansChecked);
         if (beforeAll != null) return beforeAll;
 
-        // ---- AfterAll (所有垃圾桶共享同一掉落池) ----
+        // ---- Named can items (Data/GarbageCans.json) ----
+        Result locationSpecific = evaluateLocationSpecific(
+                canId, rng, baseChancePassed, dailyLuck, daySeed);
+        if (locationSpecific != null) return locationSpecific;
+
+        // ---- AfterAll ----
         return evaluateAfterAll(rng, baseChancePassed, trashCansChecked, player);
+    }
+
+    @Nullable
+    private static Result evaluateLocationSpecific(String canId, Random rng, boolean baseChancePassed,
+                                                   double dailyLuck, long daySeed) {
+        if (!baseChancePassed) return null;
+        double specialChance = 0.2 + dailyLuck;
+        return switch (canId) {
+            case "Evelyn" -> rng.nextDouble() < specialChance
+                    ? result(ModItems.COOKING_DISHES.get("cookie").get(), 1)
+                    : null;
+            case "Blacksmith" -> {
+                if (rng.nextDouble() >= specialChance) yield null;
+                Item[] ores = {
+                        ModItems.EARTH_COPPER_ORE.get(),
+                        ModItems.EARTH_IRON_ORE.get(),
+                        ModItems.EARTH_GOLD_ORE.get()
+                };
+                yield result(ores[rng.nextInt(ores.length)], 1 + rng.nextInt(4));
+            }
+            case "Museum" -> {
+                Random geodeRoll = createSyncedDayRandom(daySeed, "garbage_museum_535");
+                if (geodeRoll.nextDouble() >= specialChance) yield null;
+                Random omniRoll = createSyncedDayRandom(daySeed, "garbage_museum_749");
+                yield omniRoll.nextDouble() < 0.05
+                        ? result(ModItems.OMNI_GEODE.get(), 1)
+                        : result(ModItems.GEODE.get(), 1);
+            }
+            case "Saloon" -> {
+                Random dishRoll = createSyncedDayRandom(daySeed, "garbage_saloon_dish");
+                if (dishRoll.nextDouble() >= specialChance) yield null;
+                ItemStack dish = dishOfTheDay(daySeed);
+                yield dish.isEmpty() ? null : new Result(dish, false, false);
+            }
+            default -> null;
+        };
+    }
+
+    private static Result result(Item item, int count) {
+        return new Result(new ItemStack(item, count), false, false);
+    }
+
+    /** Game1.UpdateDishOfTheDay: random object 194..239, excluding the fixed Saloon stock. */
+    private static ItemStack dishOfTheDay(long daySeed) {
+        Random rng = createSyncedDayRandom(daySeed, "dish_of_the_day");
+        for (int attempt = 0; attempt < 100; attempt++) {
+            int objectId = 194 + rng.nextInt(46);
+            if (objectId == 196 || objectId == 206 || objectId == 216
+                    || objectId == 224 || objectId == 217) {
+                continue;
+            }
+            ItemStack stack = VanillaObjectCatalog.stackFor(
+                    VanillaObjectCatalog.entryByKey(Integer.toString(objectId)));
+            if (!stack.isEmpty()) return stack;
+        }
+        return ItemStack.EMPTY;
     }
 
     // ==================== BeforeAll ====================
@@ -124,10 +198,8 @@ public final class GarbageCanLootTable {
 
     /**
      * AfterAll Fallback 随机池。
-     * <p>合并原版位置特定好物品（矿石/饼干/晶球等）到通用池，所有垃圾桶共享。
      * <p>原版通用: Green Algae, Bread, Acorn, Maple Seed, Pine Cone,
      *          RANDOM_BASE_SEASON_ITEM, Trash, Joja Cola, Broken Glasses, Broken CD, Soggy Newspaper
-     * <p>原版位置特定（已合并）: 矿石(铜/铁/金), Cookie, Geode, Omni Geode, Corn
      */
     private static List<Item> buildFallbackPool(ServerPlayer player, Random rng) {
         List<Item> pool = new ArrayList<>();
@@ -137,14 +209,6 @@ public final class GarbageCanLootTable {
         pool.add(ModItems.ACORN.get());
         pool.add(ModItems.MAPLE_SEED.get());
         pool.add(ModItems.PINE_CONE.get());
-        // 原位置特定物品 — 合并进通用池
-        pool.add(ModItems.EARTH_COPPER_ORE.get());
-        pool.add(ModItems.EARTH_IRON_ORE.get());
-        pool.add(ModItems.EARTH_GOLD_ORE.get());
-        pool.add(ModItems.COOKING_DISHES.get("cookie").get());
-        pool.add(ModItems.GEODE.get());
-        pool.add(ModItems.OMNI_GEODE.get());
-        pool.add(ModItems.CORN.get());
         // RANDOM_BASE_SEASON_ITEM
         Item seasonItem = getRandomItemFromSeason(player, rng);
         if (seasonItem != null) {
@@ -320,7 +384,7 @@ public final class GarbageCanLootTable {
      * 创建确定性垃圾桶 RNG。对齐原版 CreateDaySaveRandom(777 + hash(id))。
      */
     private static Random createGarbageRandom(String canId, long daySeed) {
-        long seed = daySeed ^ (777L + deterministicHash(canId));
+        long seed = daySeed + 777L + deterministicHash(canId);
         Random rng = new Random(seed);
         // 原版 prewarm: 两轮随机预热
         int prewarm = rng.nextInt(100);
@@ -328,6 +392,10 @@ public final class GarbageCanLootTable {
         prewarm = rng.nextInt(100);
         for (int i = 0; i < prewarm; i++) rng.nextDouble();
         return rng;
+    }
+
+    private static Random createSyncedDayRandom(long daySeed, String key) {
+        return new Random(daySeed ^ deterministicHash(key));
     }
 
     /**

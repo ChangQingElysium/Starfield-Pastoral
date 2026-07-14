@@ -13,6 +13,7 @@ import java.util.Set;
 public final class CutsceneTriggerLocations {
     private static final Map<String, ResourceKey<Level>> DIMENSIONS = Map.ofEntries(
             Map.entry("beach", ModDimensions.STARDEW_VALLEY),
+            Map.entry("busstop", ModDimensions.STARDEW_VALLEY),
             Map.entry("town", ModDimensions.STARDEW_VALLEY),
             Map.entry("farm", ModDimensions.STARDEW_VALLEY),
             Map.entry("forest", ModDimensions.STARDEW_VALLEY),

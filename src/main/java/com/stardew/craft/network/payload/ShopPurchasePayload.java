@@ -96,7 +96,7 @@ public record ShopPurchasePayload(
             }
             if (entry == null) return;
 
-            int qty  = Math.max(1, payload.quantity());
+            int qty = entry.itemId().startsWith("recipe:") ? 1 : Math.max(1, payload.quantity());
 
             // Clamp to available stock (also checks per-player daily stock via tracker)
             if (entry.stock() != Integer.MAX_VALUE) {
@@ -157,7 +157,9 @@ public record ShopPurchasePayload(
                 String recipeId = com.stardew.craft.shop.SaloonService.extractRecipeId(entry.itemId());
                 com.stardew.craft.player.PlayerStardewData data =
                     com.stardew.craft.player.PlayerDataManager.getPlayerData(player);
-                if (data.isRecipeUnlocked(recipeId)) {
+                if (recipeId.isBlank()
+                        || !com.stardew.craft.player.RecipeCatalogData.getAllKnownRecipeIds().contains(recipeId)
+                        || data.isRecipeUnlocked(recipeId)) {
                     // Already learned — reject without charging
                     sendResult(player, false, com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player), "", 0, payload.itemIndex());
                     return;

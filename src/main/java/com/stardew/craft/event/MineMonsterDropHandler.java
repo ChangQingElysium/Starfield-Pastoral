@@ -117,6 +117,11 @@ public class MineMonsterDropHandler {
         }
 
         if (event.getSource() != null && event.getSource().getEntity() instanceof ServerPlayer player) {
+			ItemStack secretNote = com.stardew.craft.secretnote.SecretNoteService
+					.tryCreateFromSource(player, random, 0.033F);
+			if (!secretNote.isEmpty()) {
+				addDrop(drops, entity, secretNote);
+			}
             if (tags.contains("sd_mob_ghost")
                 && com.stardew.craft.specialorder.SpecialOrderManager.hasActiveIncompleteOrder(player, "Wizard")
                 && !com.stardew.craft.specialorder.SpecialOrderManager.hasSpecialDropFlag(player, "ectoplasmDrop")
@@ -490,7 +495,11 @@ public class MineMonsterDropHandler {
 
     private static void addDrop(Collection<ItemEntity> drops, LivingEntity entity, Item item, int count) {
         if (item == null || item == Items.AIR) return;
-        ItemStack stack = new ItemStack(item, count);
+		addDrop(drops, entity, new ItemStack(item, count));
+	}
+
+	private static void addDrop(Collection<ItemEntity> drops, LivingEntity entity, ItemStack stack) {
+		if (stack.isEmpty()) return;
         ItemEntity itemEntity = new ItemEntity(entity.level(),
                 entity.getX(), entity.getY(), entity.getZ(), stack);
         itemEntity.setDefaultPickUpDelay();

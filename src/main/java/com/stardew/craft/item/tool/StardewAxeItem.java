@@ -86,7 +86,7 @@ public class StardewAxeItem extends AxeItem implements IStardewItem {
 
 	@Override
 	public String getItemTypeKey() {
-		return "stardewcraft.tool.axe";
+		return "stardewcraft.type.tool";
 	}
 
 	@Override

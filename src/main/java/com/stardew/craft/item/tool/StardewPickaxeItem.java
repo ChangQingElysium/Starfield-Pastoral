@@ -54,7 +54,7 @@ public class StardewPickaxeItem extends PickaxeItem implements IStardewItem {
 
 	@Override
 	public String getItemTypeKey() {
-		return "stardewcraft.tool.pickaxe";
+		return "stardewcraft.type.tool";
 	}
 
 	@Override

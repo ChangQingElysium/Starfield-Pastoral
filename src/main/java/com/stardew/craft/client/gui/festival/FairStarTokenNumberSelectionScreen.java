@@ -65,6 +65,7 @@ public class FairStarTokenNumberSelectionScreen extends Screen {
         amountField = new EditBox(this.font, fieldX, fieldY + (fieldH - font.lineHeight) / 2,
             fieldW, font.lineHeight, Component.empty());
         amountField.setBordered(false);
+        amountField.setTextShadow(false);
         amountField.setMaxLength(3);
         amountField.setTextColor(TEXT_DARK);
         amountField.setTextColorUneditable(TEXT_DARK);

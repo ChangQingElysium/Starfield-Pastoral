@@ -1,8 +1,11 @@
 package com.stardew.craft.client.gui.menu;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.ClientPlayerDataCache;
+import com.stardew.craft.client.ClientMailIndex;
+import com.stardew.craft.client.ClientMuseumDonationCache;
 import com.stardew.craft.client.LeaderboardClientCache;
 import com.stardew.craft.client.ModKeyMappings;
 import com.stardew.craft.client.NpcDisplayNames;
@@ -13,12 +16,17 @@ import com.stardew.craft.client.gui.overnight.LevelUpMenuTextures;
 import com.stardew.craft.client.gui.overnight.StardewGuiUtil;
 import com.stardew.craft.communitycenter.network.BundleClientData;
 import com.stardew.craft.communitycenter.state.CCStoryFlags;
+import com.stardew.craft.cooking.service.VanillaCookingRecipeData;
+import com.stardew.craft.api.v1.secretnote.StardewSecretNoteDefinition;
+import com.stardew.craft.data.VanillaObjectCatalog;
+import com.stardew.craft.item.SecretNoteItem;
 import com.stardew.craft.item.misc.StardropItem;
 import com.stardew.craft.leaderboard.LeaderboardMetric;
 import com.stardew.craft.leaderboard.LeaderboardPeriod;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.item.equipment.CombinedRingData;
 import com.stardew.craft.mastery.MasteryProgress;
+import com.stardew.craft.mail.MailTextSyntax;
 import com.stardew.craft.player.ProfessionType;
 import com.stardew.craft.player.SkillType;
 import com.stardew.craft.network.payload.LeaderboardSyncPayload;
@@ -27,9 +35,11 @@ import com.stardew.craft.network.payload.RequestLeaderboardPayload;
 import com.stardew.craft.network.payload.CraftingMenuCraftSubmitPayload;
 import com.stardew.craft.network.payload.CraftingMenuInventoryActionPayload;
 import com.stardew.craft.network.payload.InventoryOrganizePayload;
+import com.stardew.craft.network.payload.OpenSeenMailPayload;
 import com.stardew.craft.player.RecipeCatalogData;
 import com.stardew.craft.player.StardewCraftingRecipeData;
 import com.stardew.craft.sound.ModSounds;
+import com.stardew.craft.secretnote.SecretNoteRegistry;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -39,6 +49,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.sounds.SoundEvent;
@@ -99,6 +110,7 @@ public class StardewGameMenuScreen extends Screen {
     private static final int TAB_COUNT = 10;
     private static final int TAB_SOCIAL = 2;
     private static final int TAB_POWERS = 6;
+    private static final int TAB_COLLECTIONS = 7;
     private static final int TAB_LEADERBOARD = 8;
     private static final int LEADERBOARD_PAGE_SIZE = 10;
     private static final LeaderboardMetric[] LEADERBOARD_METRICS = LeaderboardMetric.values();
@@ -111,6 +123,19 @@ public class StardewGameMenuScreen extends Screen {
     private static final int LEADERBOARD_TAB_NRM = 0xFFC8A860;
     private static final int LEADERBOARD_TAB_BDR = 0xFF907030;
     private static final int LEADERBOARD_GOLD = 0xFFB08830;
+
+    private static final int COLLECTION_SHIPPED = 0;
+    private static final int COLLECTION_FISH = 1;
+    private static final int COLLECTION_ARTIFACTS = 2;
+    private static final int COLLECTION_MINERALS = 3;
+    private static final int COLLECTION_COOKING = 4;
+    private static final int COLLECTION_ACHIEVEMENTS = 5;
+    private static final int COLLECTION_SECRET_NOTES = 6;
+    private static final int COLLECTION_LETTERS = 7;
+    private static final int COLLECTION_COLUMNS = 10;
+    private static final int COLLECTION_PAGE_SIZE = 80;
+    private static final ResourceLocation SECRET_NOTE_IMAGES = ResourceLocation.fromNamespaceAndPath(
+            StardewCraft.MODID, "textures/gui/secret_notes_images.png");
 
     private static final int SOCIAL_ROW_HEIGHT_SDV = 112;
     private static final int SOCIAL_MAX_VISIBLE = 5;
@@ -150,6 +175,9 @@ public class StardewGameMenuScreen extends Screen {
     private int currentTab;
 
     private int currentCraftingPage;
+    private int currentCollectionTab = COLLECTION_SHIPPED;
+    private int currentCollectionPage;
+    private final float[] collectionHoverScale = new float[COLLECTION_PAGE_SIZE];
     private int selectedCraftingIndex = -1;
     private final Set<Integer> draggedInventorySlots = new LinkedHashSet<>();
     private boolean inventoryDragActive;
@@ -216,6 +244,13 @@ public class StardewGameMenuScreen extends Screen {
     };
 
     private record RecipeRequirement(Ingredient ingredient, ItemStack icon, Component name, int need) {
+    }
+
+    private record CollectionEntry(ItemStack stack, boolean discovered, boolean known,
+                                   VanillaObjectCatalog.Entry source) {
+    }
+
+    private record LetterCollectionEntry(String mailId, String title) {
     }
 
     private record RecipeCell(int recipeIndex, int x, int y, boolean bigCraftable) {
@@ -310,6 +345,9 @@ public class StardewGameMenuScreen extends Screen {
     }
 
     private int activeMenuWidth() {
+        if (currentTab == 1 && usesWideSkillsLayout()) {
+            return skillsPageWidth();
+        }
         if (currentTab == TAB_SOCIAL) {
             return socialPageWidth();
         }
@@ -651,7 +689,23 @@ public class StardewGameMenuScreen extends Screen {
             int y = yBase + (currentTab == i ? selectedOffsetY : 0);
 
             CommonGuiTextures.drawGameMenuTab(graphics, x, y, i, scale);
+            if (i == 1) {
+                drawSkillsTabFace(graphics, x, y);
+            }
         }
+    }
+
+    /** Vanilla overlays the current farmer portrait on the otherwise blank skills tab. */
+    private void drawSkillsTabFace(GuiGraphics graphics, int tabX, int tabY) {
+        if (this.minecraft == null || this.minecraft.player == null) {
+            return;
+        }
+        ResourceLocation skin = this.minecraft.player.getSkin().texture();
+        int faceSize = ui(32);
+        int faceX = tabX + ui(16);
+        int faceY = tabY + ui(16);
+        graphics.blit(skin, faceX, faceY, faceSize, faceSize, 8, 8, 8, 8, 64, 64);
+        graphics.blit(skin, faceX, faceY, faceSize, faceSize, 40, 8, 8, 8, 64, 64);
     }
 
     private void drawCloseButton(GuiGraphics graphics) {
@@ -688,6 +742,11 @@ public class StardewGameMenuScreen extends Screen {
 
         if (currentTab == TAB_POWERS) {
             drawPowersPage(graphics, mouseX, mouseY);
+            return;
+        }
+
+        if (currentTab == TAB_COLLECTIONS) {
+            drawCollectionsPage(graphics, mouseX, mouseY);
             return;
         }
 
@@ -1824,7 +1883,7 @@ public class StardewGameMenuScreen extends Screen {
         new PowerEntry("item.stardewcraft.skull_key", "", 5,
             PowerUnlockKind.MAIL_OR_SPECIAL_ITEM, CCStoryFlags.HAS_SKULL_KEY, CCStoryFlags.SKULL_KEY_SPECIAL_ITEM, "stardewcraft:skull_key"),
         new PowerEntry("stardewcraft.power.magnifying_glass", "", 6,
-            PowerUnlockKind.MAIL_FLAG, "HasMagnifyingGlass", "", ""),
+            PowerUnlockKind.MAIL_OR_SPECIAL_ITEM, "HasMagnifyingGlass", "stardewcraft:magnifying_glass", "stardewcraft:magnifying_glass"),
         new PowerEntry("stardewcraft.power.dark_talisman", "", 7,
             PowerUnlockKind.MAIL_FLAG, "HasDarkTalisman", "", ""),
         new PowerEntry("stardewcraft.power.magic_ink", "", 8,
@@ -1861,6 +1920,23 @@ public class StardewGameMenuScreen extends Screen {
 
     private int skillsLowerPartitionY() {
         return menuY + ui(96 + SKILLS_PAGE_HEIGHT_SDV / 2 + 21);
+    }
+
+    private boolean usesWideSkillsLayout() {
+        if (this.minecraft == null) {
+            return false;
+        }
+        String language = this.minecraft.getLanguageManager().getSelected();
+        return "ru_ru".equalsIgnoreCase(language) || "it_it".equalsIgnoreCase(language);
+    }
+
+    private boolean usesRussianSkillsLayout() {
+        return this.minecraft != null
+                && "ru_ru".equalsIgnoreCase(this.minecraft.getLanguageManager().getSelected());
+    }
+
+    private int skillsPageWidth() {
+        return menuWidth + (usesWideSkillsLayout() ? ui(64) : 0);
     }
 
     /**
@@ -1974,11 +2050,13 @@ public class StardewGameMenuScreen extends Screen {
         // --- Horizontal separator ---
         int sepY = skillsLowerPartitionY();
         int sepX = menuX + spaceSide * 2;
-        int sepW = menuWidth - spaceSide * 4 - ui(8);
+        int sepW = skillsPageWidth() - spaceSide * 4 - ui(8);
         graphics.fill(sepX, sepY, sepX + sepW, sepY + ui(4), 0xFFD68F54);
 
         // --- Skill bars ---
-        int drawX = menuX + borderWidth + spaceTop + ui(256 - 8);
+        int drawX = usesWideSkillsLayout()
+                ? menuX + skillsPageWidth() - ui(448 + 48) + ui(4)
+                : menuX + borderWidth + spaceTop + ui(256 - 8);
         int drawY = menuY + spaceTop + borderWidth - ui(8);
         int verticalSpacing = ui(SKILLS_VERTICAL_SPACING);
         int addedX = 0;
@@ -1998,9 +2076,12 @@ public class StardewGameMenuScreen extends Screen {
                 if (i == 0) {
                     String skillName = Component.translatable(SKILL_NAME_KEYS[j]).getString();
                     Component boldSkillName = Component.literal(skillName).withStyle(ChatFormatting.BOLD);
-                    float skillNameScale = sdvTextScale() * 0.9f;
+                    float skillNameScale = sdvTextScale() * (usesWideSkillsLayout() ? 1.0f : 0.9f);
                     int skillNameRawW = this.font.width(boldSkillName);
-                    int skillNameMaxW = ui(100); // max width for skill name area
+                    // Vanilla gives Russian and Italian an extra 64 px page column and draws
+                    // skill names at normal small-font size. Use that space instead of crushing
+                    // long localized names into the normal 100 px label area.
+                    int skillNameMaxW = ui(usesWideSkillsLayout() ? 156 : 100);
                     float skillNameEffScale = skillNameScale;
                     if (skillNameRawW * skillNameEffScale > skillNameMaxW) {
                         skillNameEffScale = (float) skillNameMaxW / skillNameRawW;
@@ -2145,7 +2226,7 @@ public class StardewGameMenuScreen extends Screen {
         float s4 = mapping.s4();
         BundleClientData bundleData = BundleClientData.INSTANCE;
 
-        graphics.enableScissor(menuX, menuY, menuX + menuWidth, menuY + menuHeight);
+        graphics.enableScissor(menuX, menuY, menuX + skillsPageWidth(), menuY + menuHeight);
         try {
             int x = menuX + ui(32 * 2);
             int y = skillsLowerPartitionY();
@@ -2248,7 +2329,9 @@ public class StardewGameMenuScreen extends Screen {
         long masteryExp = ClientPlayerDataCache.getMasteryExp();
         int masteryBaseYSdv = 492;
         if (masteryExp == 0L) {
-            CommonGuiTextures.drawSkillsMasteryEmpty16Tint(graphics, menuX + ui(292), menuY + ui(477),
+            int emptyMasteryWidth = Math.round(142.0f * mapping.s4());
+            int emptyMasteryX = menuX + skillsPageWidth() - ui(BORDER_WIDTH) - emptyMasteryWidth;
+            CommonGuiTextures.drawSkillsMasteryEmpty16Tint(graphics, emptyMasteryX, menuY + ui(477),
                 mapping.s4(), 1.0f, 1.0f, 1.0f, 0.7f);
             return;
         }
@@ -2273,10 +2356,20 @@ public class StardewGameMenuScreen extends Screen {
             mapping.s4(), 1.0f, 1.0f, 1.0f, 1.0f);
 
         float widthScale = 0.64f - (masteryTextWidthSdv - 100.0f) / 800.0f;
+        if (usesRussianSkillsLayout()) {
+            widthScale += 0.1f;
+        }
 
         int shadowX = menuX + ui(xOffsetSdv + 380) - Math.max(1, ui(1));
         int darkX = menuX + ui(xOffsetSdv + 384);
         int midX = menuX + ui(xOffsetSdv + 388);
+        // Constrain the actual GUI-space track for every locale and reserve room for the
+        // NumberSprite drawn after it. This avoids relying on SpriteFont-derived width math.
+        int trackRightLimit = menuX + skillsPageWidth() - ui(BORDER_WIDTH + 48);
+        int availableTrackWidth = Math.max(1, trackRightLimit - darkX - ui(4) - 1);
+        float maxWidthScale = availableTrackWidth * guiScale() / 584.0f;
+        widthScale = Math.max(0.1f, Math.min(widthScale, maxWidthScale));
+
         int masteryBaseY = menuY + ui(masteryBaseYSdv);
         graphics.fill(shadowX, masteryBaseY, shadowX + ui(Math.round(584.0f * widthScale)) + ui(4), masteryBaseY + ui(40), 0x59000000);
         graphics.fill(darkX, masteryBaseY - ui(4), darkX + ui(Math.round(((masteryLevel >= MasteryProgress.MAX_LEVEL) ? 144.0f : 146.0f) * 4.0f * widthScale)) + ui(4), masteryBaseY - ui(4) + ui(40), 0xFF3C3C19);
@@ -2412,6 +2505,438 @@ public class StardewGameMenuScreen extends Screen {
         if (!hoverTitle.isEmpty() || !hoverText.isEmpty()) {
             drawSkillsTooltip(graphics, mouseX, mouseY, hoverTitle, hoverText);
         }
+    }
+
+    private void drawCollectionsPage(GuiGraphics graphics, int mouseX, int mouseY) {
+        if (currentCollectionTab == COLLECTION_SECRET_NOTES && !hasSecretNotesCollection()) {
+            currentCollectionTab = COLLECTION_SHIPPED;
+            currentCollectionPage = 0;
+        }
+        drawCollectionSideTabs(graphics, mouseX, mouseY);
+        if (currentCollectionTab == COLLECTION_SECRET_NOTES) {
+            drawSecretNotesCollection(graphics, mouseX, mouseY);
+            return;
+        }
+        if (currentCollectionTab == COLLECTION_LETTERS) {
+            drawLettersCollection(graphics, mouseX, mouseY);
+            return;
+        }
+
+        List<CollectionEntry> entries = collectionEntries(currentCollectionTab);
+        int pageCount = Math.max(1, (entries.size() + COLLECTION_PAGE_SIZE - 1) / COLLECTION_PAGE_SIZE);
+        currentCollectionPage = Mth.clamp(currentCollectionPage, 0, pageCount - 1);
+        int first = currentCollectionPage * COLLECTION_PAGE_SIZE;
+        int last = Math.min(entries.size(), first + COLLECTION_PAGE_SIZE);
+        int hovered = -1;
+        for (int index = first; index < last; index++) {
+            int local = index - first;
+            int x = collectionBaseX() + local % COLLECTION_COLUMNS * ui(68);
+            int y = collectionBaseY() + local / COLLECTION_COLUMNS * ui(68);
+            boolean isHovered = contains(mouseX, mouseY, x, y, ui(64), ui(64));
+            float hoverScale = collectionHoverScale[local] <= 0.0F ? 1.0F : collectionHoverScale[local];
+            hoverScale = stepScale(hoverScale, isHovered ? 1.025F : 1.0F, 0.01F);
+            collectionHoverScale[local] = hoverScale;
+
+            CollectionEntry entry = entries.get(index);
+            float itemScale = mapping.s4() * hoverScale;
+            int itemSize = CommonGuiTextures.itemSize(itemScale);
+            int itemX = x + (ui(64) - itemSize) / 2;
+            int itemY = y + (ui(64) - itemSize) / 2;
+            if (entry.discovered()) {
+                CommonGuiTextures.drawItem(graphics, entry.stack(), itemX, itemY, itemScale);
+            } else if (entry.known()) {
+                CommonGuiTextures.drawItemTint(graphics, entry.stack(), itemX, itemY, itemScale,
+                        0.41F, 0.41F, 0.41F, 0.4F);
+            } else {
+                CommonGuiTextures.drawItemTint(graphics, entry.stack(), itemX, itemY, itemScale,
+                        0.0F, 0.0F, 0.0F, 0.2F);
+            }
+            if (isHovered) {
+                hovered = index;
+            }
+        }
+
+        drawCollectionPageArrows(graphics, pageCount);
+        if (hovered >= 0) {
+            CollectionEntry entry = entries.get(hovered);
+            if (entry.discovered() || entry.known()) {
+                graphics.renderTooltip(this.font, entry.stack(), mouseX, mouseY);
+            } else {
+                graphics.renderTooltip(this.font, Component.literal("???"), mouseX, mouseY);
+            }
+        }
+    }
+
+    private void drawLettersCollection(GuiGraphics graphics, int mouseX, int mouseY) {
+        List<LetterCollectionEntry> entries = letterCollectionEntries();
+        int pageCount = Math.max(1, (entries.size() + COLLECTION_PAGE_SIZE - 1) / COLLECTION_PAGE_SIZE);
+        currentCollectionPage = Mth.clamp(currentCollectionPage, 0, pageCount - 1);
+        int first = currentCollectionPage * COLLECTION_PAGE_SIZE;
+        int last = Math.min(entries.size(), first + COLLECTION_PAGE_SIZE);
+        int hovered = -1;
+        for (int index = first; index < last; index++) {
+            int local = index - first;
+            int x = collectionBaseX() + local % COLLECTION_COLUMNS * ui(68);
+            int y = collectionBaseY() + local / COLLECTION_COLUMNS * ui(68);
+            boolean isHovered = contains(mouseX, mouseY, x, y, ui(64), ui(64));
+            float hoverScale = collectionHoverScale[local] <= 0.0F ? 1.0F : collectionHoverScale[local];
+            hoverScale = stepScale(hoverScale, isHovered ? 1.025F : 1.0F, 0.01F);
+            collectionHoverScale[local] = hoverScale;
+            drawVanillaLetterCollectionIcon(graphics, x, y, hoverScale);
+            if (isHovered) hovered = index;
+        }
+
+        drawCollectionPageArrows(graphics, pageCount);
+        if (hovered >= 0) {
+            graphics.renderTooltip(this.font, Component.literal(entries.get(hovered).title()), mouseX, mouseY);
+        }
+    }
+
+    private void drawVanillaLetterCollectionIcon(GuiGraphics graphics, int x, int y, float hoverScale) {
+        int baseWidth = ui(56);
+        int baseHeight = ui(44);
+        int width = Math.round(baseWidth * hoverScale);
+        int height = Math.round(baseHeight * hoverScale);
+        int drawX = x + (ui(64) - width) / 2;
+        int drawY = y + (ui(64) - height) / 2;
+        int shadowOffset = ui(4);
+
+        RenderSystem.setShaderColor(0.0F, 0.0F, 0.0F, 0.35F);
+        graphics.blit(StardewGuiUtil.CURSORS, drawX + shadowOffset, drawY + shadowOffset,
+                width, height, 190, 423, 14, 11, 704, 2256);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        graphics.blit(StardewGuiUtil.CURSORS, drawX, drawY,
+                width, height, 190, 423, 14, 11, 704, 2256);
+    }
+
+    private void drawCollectionSideTabs(GuiGraphics graphics, int mouseX, int mouseY) {
+        int[] tabs = collectionTabs();
+        for (int order = 0; order < tabs.length; order++) {
+            int tab = tabs[order];
+            int x = collectionSideTabX(tab);
+            int y = collectionSideTabY(order);
+            int sourceX = switch (tab) {
+                case COLLECTION_SHIPPED, COLLECTION_FISH -> 640;
+                case COLLECTION_ARTIFACTS, COLLECTION_ACHIEVEMENTS -> 656;
+                case COLLECTION_MINERALS, COLLECTION_SECRET_NOTES -> 672;
+                default -> 688;
+            };
+            int sourceY = switch (tab) {
+                case COLLECTION_SHIPPED, COLLECTION_ACHIEVEMENTS,
+                     COLLECTION_SECRET_NOTES, COLLECTION_LETTERS -> 80;
+                default -> 64;
+            };
+            graphics.blit(StardewGuiUtil.CURSORS, x, y, ui(64), ui(64),
+                    sourceX, sourceY, 16, 16, 704, 2256);
+            if (tab == COLLECTION_SECRET_NOTES && contains(mouseX, mouseY, x, y, ui(64), ui(64))) {
+                graphics.renderTooltip(this.font,
+                        Component.translatable("stardewcraft.collections.secret_notes"), mouseX, mouseY);
+            }
+        }
+    }
+
+    private void drawSecretNotesCollection(GuiGraphics graphics, int mouseX, int mouseY) {
+        if (!hasMagnifyingGlass()) {
+            return;
+        }
+        int hovered = -1;
+        for (int number = SecretNoteItem.FIRST_DISPLAY_NOTE;
+             number <= SecretNoteItem.LAST_DISPLAY_NOTE;
+             number++) {
+            int local = number - SecretNoteItem.FIRST_DISPLAY_NOTE;
+            int x = collectionBaseX() + local % COLLECTION_COLUMNS * ui(68);
+            int y = collectionBaseY() + local / COLLECTION_COLUMNS * ui(68);
+            boolean isHovered = contains(mouseX, mouseY, x, y, ui(64), ui(64));
+            float hoverScale = collectionHoverScale[local] <= 0.0F ? 1.0F : collectionHoverScale[local];
+            hoverScale = stepScale(hoverScale, isHovered ? 1.025F : 1.0F, 0.01F);
+            collectionHoverScale[local] = hoverScale;
+
+            ItemStack icon = SecretNoteItem.createCreativeVariant(number);
+            float itemScale = mapping.s4() * hoverScale;
+            int itemSize = CommonGuiTextures.itemSize(itemScale);
+            int itemX = x + (ui(64) - itemSize) / 2;
+            int itemY = y + (ui(64) - itemSize) / 2;
+            if (hasSeenSecretNote(number)) {
+                CommonGuiTextures.drawItem(graphics, icon, itemX, itemY, itemScale);
+            } else {
+                CommonGuiTextures.drawItemTint(graphics, icon, itemX, itemY, itemScale,
+                        0.0F, 0.0F, 0.0F, 0.2F);
+            }
+            if (isHovered) {
+                hovered = number;
+            }
+        }
+
+        if (hovered > 0) {
+            if (hasSeenSecretNote(hovered)) {
+                drawSecretNoteTooltip(graphics, mouseX, mouseY, hovered);
+            } else {
+                graphics.renderTooltip(this.font, Component.literal("???"), mouseX, mouseY);
+            }
+        }
+    }
+
+    private void drawSecretNoteTooltip(GuiGraphics graphics, int mouseX, int mouseY, int noteNumber) {
+        ResourceLocation id = SecretNoteRegistry.byDisplayNumber(noteNumber);
+        StardewSecretNoteDefinition definition = id == null ? null : SecretNoteRegistry.get(id);
+        String title = Component.translatable("stardewcraft.secret_note.title", noteNumber).getString();
+        if (definition == null) {
+            graphics.renderTooltip(this.font, Component.literal(title), mouseX, mouseY);
+            return;
+        }
+        if (definition.imageIndex() >= 0) {
+            graphics.renderTooltip(this.font, Component.literal(title), mouseX, mouseY);
+            drawSecretNoteImagePreview(graphics, mouseX, mouseY, definition.imageIndex());
+            return;
+        }
+
+        String text = Component.translatable(definition.text()).getString().replace('^', '\n');
+        if (this.minecraft != null && this.minecraft.player != null) {
+            text = text.replace("@", this.minecraft.player.getName().getString());
+        }
+        drawSecretNoteTextTooltip(graphics, mouseX, mouseY, title, text);
+    }
+
+    private void drawSecretNoteTextTooltip(GuiGraphics graphics, int mouseX, int mouseY,
+                                           String title, String text) {
+        float textScale = sdvTextScale();
+        int padding = ui(16);
+        int maxTextWidth = ui(512);
+        int wrapWidth = Math.max(1, Math.round(maxTextWidth / textScale));
+        List<FormattedCharSequence> lines = new ArrayList<>();
+        for (String paragraph : text.split("\\n", -1)) {
+            if (paragraph.isEmpty()) {
+                lines.add(FormattedCharSequence.EMPTY);
+            } else {
+                lines.addAll(this.font.split(Component.literal(paragraph), wrapWidth));
+            }
+        }
+        if (lines.size() > 15) {
+            lines = new ArrayList<>(lines.subList(0, 15));
+            lines.add(Component.literal("(...)").getVisualOrderText());
+        }
+
+        int lineHeight = Math.round(this.font.lineHeight * textScale) + 2;
+        int contentWidth = Math.round(this.font.width(title) * textScale);
+        for (FormattedCharSequence line : lines) {
+            contentWidth = Math.max(contentWidth, Math.round(this.font.width(line) * textScale));
+        }
+        int boxW = Math.min(maxTextWidth, contentWidth) + padding * 2;
+        int boxH = padding * 2 + lineHeight * (lines.size() + 1) + ui(4);
+        int boxX = mouseX + ui(32);
+        int boxY = mouseY + ui(32);
+        if (boxX + boxW > this.width) boxX = mouseX - boxW;
+        if (boxY + boxH > this.height) boxY = mouseY - boxH;
+        boxX = Math.max(0, boxX);
+        boxY = Math.max(0, boxY);
+
+        graphics.pose().pushPose();
+        graphics.pose().translate(0, 0, 400);
+        CommonGuiTextures.drawMenuTextureBox(graphics, boxX, boxY, boxW, boxH,
+                1.0F / guiScale(), true);
+        int drawX = boxX + padding;
+        int drawY = boxY + padding;
+        graphics.pose().pushPose();
+        graphics.pose().translate(drawX, drawY, 0);
+        graphics.pose().scale(textScale, textScale, 1.0F);
+        graphics.drawString(this.font, Component.literal(title).withStyle(ChatFormatting.BOLD),
+                0, 0, 0xFF5B3A1A, false);
+        graphics.pose().popPose();
+        drawY += lineHeight + ui(4);
+        for (FormattedCharSequence line : lines) {
+            graphics.pose().pushPose();
+            graphics.pose().translate(drawX, drawY, 0);
+            graphics.pose().scale(textScale, textScale, 1.0F);
+            graphics.drawString(this.font, line, 0, 0, 0xFF5B3A1A, false);
+            graphics.pose().popPose();
+            drawY += lineHeight;
+        }
+        graphics.pose().popPose();
+    }
+
+    private void drawSecretNoteImagePreview(GuiGraphics graphics, int mouseX, int mouseY, int imageIndex) {
+        int boxSize = ui(288);
+        int boxX = Mth.clamp(mouseX, 0, Math.max(0, this.width - boxSize));
+        int boxY = Mth.clamp(mouseY + ui(96), 0, Math.max(0, this.height - boxSize));
+        graphics.pose().pushPose();
+        graphics.pose().translate(0, 0, 400);
+        CommonGuiTextures.drawMenuTextureBox(graphics, boxX, boxY, boxSize, boxSize,
+                1.0F / guiScale(), true);
+        int sourceX = Math.floorMod(imageIndex, 4) * 64;
+        int sourceY = Math.floorDiv(imageIndex, 4) * 64;
+        graphics.pose().pushPose();
+        graphics.pose().translate(boxX + ui(16), boxY + ui(16), 1);
+        graphics.pose().scale(mapping.s4(), mapping.s4(), 1.0F);
+        graphics.blit(SECRET_NOTE_IMAGES, 0, 0, sourceX, sourceY,
+                64, 64, 256, 256);
+        graphics.pose().popPose();
+        graphics.pose().popPose();
+    }
+
+    private List<CollectionEntry> collectionEntries(int tab) {
+        Map<Item, Boolean> cookedOutputs = new HashMap<>();
+        Map<Item, Boolean> knownCookingOutputs = new HashMap<>();
+        if (tab == COLLECTION_COOKING) {
+            for (ResourceLocation recipeId : VanillaCookingRecipeData.getRecipeIds()) {
+                ItemStack output = VanillaCookingRecipeData.getOutputStack(recipeId, 1);
+                if (output.isEmpty()) continue;
+                String storageId = VanillaCookingRecipeData.storageId(recipeId);
+                boolean made = ClientPlayerDataCache.getRecipeCraftCount(storageId) > 0;
+                boolean known = made || ClientPlayerDataCache.hasRecipe(storageId);
+                cookedOutputs.merge(output.getItem(), made, Boolean::logicalOr);
+                knownCookingOutputs.merge(output.getItem(), known, Boolean::logicalOr);
+            }
+        }
+
+        List<CollectionEntry> entries = new ArrayList<>();
+        for (VanillaObjectCatalog.Entry source : VanillaObjectCatalog.entriesForCollection(tab)) {
+            ItemStack stack = VanillaObjectCatalog.stackFor(source);
+            if (stack.isEmpty()) continue;
+            Item item = stack.getItem();
+            ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
+            String itemId = id.toString();
+            if (tab == COLLECTION_FISH) {
+                boolean caught = ClientPlayerDataCache.getFishCatchCount(itemId) > 0;
+                entries.add(new CollectionEntry(stack, caught, caught, source));
+            } else if (tab == COLLECTION_ARTIFACTS) {
+                boolean donated = ClientMuseumDonationCache.isDonated(itemId);
+                entries.add(new CollectionEntry(stack, donated, donated, source));
+            } else if (tab == COLLECTION_MINERALS) {
+                boolean donated = ClientMuseumDonationCache.isDonated(itemId);
+                entries.add(new CollectionEntry(stack, donated, donated, source));
+            } else if (tab == COLLECTION_COOKING) {
+                boolean made = cookedOutputs.getOrDefault(item, false);
+                boolean known = knownCookingOutputs.getOrDefault(item, false);
+                entries.add(new CollectionEntry(stack, made, known, source));
+            } else if (tab == COLLECTION_SHIPPED) {
+                boolean shipped = ClientPlayerDataCache.hasShippedMatching(
+                        shippedId -> VanillaObjectCatalog.matchesItemId(source, shippedId));
+                entries.add(new CollectionEntry(stack, shipped, shipped, source));
+            }
+        }
+        entries.sort(Comparator.comparing(CollectionEntry::source, VanillaObjectCatalog.sourceOrder()));
+        return entries;
+    }
+
+    private List<LetterCollectionEntry> letterCollectionEntries() {
+        Set<String> received = ClientPlayerDataCache.getMailFlags();
+        List<LetterCollectionEntry> entries = new ArrayList<>();
+        for (ClientMailIndex.Entry entry : ClientMailIndex.entries()) {
+            if (!received.contains(entry.mailId())) continue;
+            String localizedText = Component.translatable(entry.textKey()).getString();
+            entries.add(new LetterCollectionEntry(entry.mailId(), MailTextSyntax.title(localizedText)));
+        }
+        return entries;
+    }
+
+    private void drawCollectionPageArrows(GuiGraphics graphics, int pageCount) {
+        if (currentCollectionPage > 0) {
+            CommonGuiTextures.drawBackArrow(graphics, collectionBackX(), collectionArrowY(), mapping.s4());
+        }
+        if (currentCollectionPage + 1 < pageCount) {
+            CommonGuiTextures.drawForwardArrow(graphics, collectionForwardX(), collectionArrowY(), mapping.s4());
+        }
+    }
+
+    private int collectionSideTabAt(double mouseX, double mouseY) {
+        int[] tabs = collectionTabs();
+        for (int order = 0; order < tabs.length; order++) {
+            int tab = tabs[order];
+            if (contains(mouseX, mouseY, collectionSideTabX(tab), collectionSideTabY(order),
+                    ui(64), ui(64))) {
+                return tab;
+            }
+        }
+        return -1;
+    }
+
+    private int secretNoteAt(double mouseX, double mouseY) {
+        if (currentCollectionTab != COLLECTION_SECRET_NOTES || !hasMagnifyingGlass()) {
+            return -1;
+        }
+        for (int number = SecretNoteItem.FIRST_DISPLAY_NOTE;
+             number <= SecretNoteItem.LAST_DISPLAY_NOTE;
+             number++) {
+            int local = number - SecretNoteItem.FIRST_DISPLAY_NOTE;
+            int x = collectionBaseX() + local % COLLECTION_COLUMNS * ui(68);
+            int y = collectionBaseY() + local / COLLECTION_COLUMNS * ui(68);
+            if (contains(mouseX, mouseY, x, y, ui(64), ui(64))) {
+                return number;
+            }
+        }
+        return -1;
+    }
+
+    private String letterAt(double mouseX, double mouseY) {
+        if (currentCollectionTab != COLLECTION_LETTERS) return null;
+        List<LetterCollectionEntry> entries = letterCollectionEntries();
+        int first = currentCollectionPage * COLLECTION_PAGE_SIZE;
+        int last = Math.min(entries.size(), first + COLLECTION_PAGE_SIZE);
+        for (int index = first; index < last; index++) {
+            int local = index - first;
+            int x = collectionBaseX() + local % COLLECTION_COLUMNS * ui(68);
+            int y = collectionBaseY() + local / COLLECTION_COLUMNS * ui(68);
+            if (contains(mouseX, mouseY, x, y, ui(64), ui(64))) {
+                return entries.get(index).mailId();
+            }
+        }
+        return null;
+    }
+
+    private int[] collectionTabs() {
+        return hasSecretNotesCollection()
+                ? new int[] {COLLECTION_SHIPPED, COLLECTION_FISH, COLLECTION_ARTIFACTS,
+                        COLLECTION_MINERALS, COLLECTION_COOKING, COLLECTION_ACHIEVEMENTS,
+                        COLLECTION_LETTERS, COLLECTION_SECRET_NOTES}
+                : new int[] {COLLECTION_SHIPPED, COLLECTION_FISH, COLLECTION_ARTIFACTS,
+                        COLLECTION_MINERALS, COLLECTION_COOKING, COLLECTION_ACHIEVEMENTS,
+                        COLLECTION_LETTERS};
+    }
+
+    private boolean hasSecretNotesCollection() {
+        return !ClientPlayerDataCache.getSecretNotesSeen().isEmpty();
+    }
+
+    private boolean hasMagnifyingGlass() {
+        return ClientPlayerDataCache.hasMailFlag("HasMagnifyingGlass")
+                || ClientPlayerDataCache.hasSpecialItem("stardewcraft:magnifying_glass");
+    }
+
+    private boolean hasSeenSecretNote(int number) {
+        ResourceLocation id = SecretNoteRegistry.byDisplayNumber(number);
+        return id != null && ClientPlayerDataCache.hasSeenSecretNote(id.toString());
+    }
+
+    private int collectionBaseX() {
+        return menuX + ui(40) + ui(16);
+    }
+
+    private int collectionBaseY() {
+        return menuY + ui(40) + ui(96) - ui(16);
+    }
+
+    private int collectionSideTabX(int tab) {
+        return menuX - ui(48) + (currentCollectionTab == tab ? ui(8) : 0);
+    }
+
+    private int collectionSideTabY(int order) {
+        return menuY + ui(64 * (2 + order));
+    }
+
+    private int collectionBackX() {
+        return menuX + ui(48);
+    }
+
+    private int collectionForwardX() {
+        return menuX + menuWidth - ui(92);
+    }
+
+    private int collectionArrowY() {
+        return menuY + menuHeight - ui(80);
+    }
+
+    private boolean contains(double mouseX, double mouseY, int x, int y, int width, int height) {
+        return mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height;
     }
 
     private ItemStack powerTooltipStack(String itemId) {
@@ -2612,15 +3137,15 @@ public class StardewGameMenuScreen extends Screen {
                 menuWidth, mapping.s4());
 
         // ── 3. Equipment slots (lower-left, SDV placeholder icons) ──
-        String leftRingId = ClientPlayerDataCache.getEquippedLeftRing();
-        String rightRingId = ClientPlayerDataCache.getEquippedRightRing();
-        String bootsId = ClientPlayerDataCache.getEquippedBoots();
+        ItemStack leftRing = ClientPlayerDataCache.getEquippedLeftRingStack();
+        ItemStack rightRing = ClientPlayerDataCache.getEquippedRightRingStack();
+        ItemStack boots = ClientPlayerDataCache.getEquippedBootsStack();
         String hatId = ClientPlayerDataCache.getEquippedHat();
         String shirtId = ClientPlayerDataCache.getEquippedShirt();
         String pantsId = ClientPlayerDataCache.getEquippedPants();
-        drawInvEquipSlot(graphics, 0, leftRingId, mouseX, mouseY);
-        drawInvEquipSlot(graphics, 1, rightRingId, mouseX, mouseY);
-        drawInvEquipSlot(graphics, 2, bootsId, mouseX, mouseY);
+        drawInvEquipSlot(graphics, 0, leftRing, mouseX, mouseY);
+        drawInvEquipSlot(graphics, 1, rightRing, mouseX, mouseY);
+        drawInvEquipSlot(graphics, 2, boots, mouseX, mouseY);
         drawInvCosmeticSlot(graphics, 4, hatId, mouseX, mouseY);
         drawInvCosmeticSlot(graphics, 5, shirtId, mouseX, mouseY);
         drawInvCosmeticSlot(graphics, 6, pantsId, mouseX, mouseY);
@@ -2789,20 +3314,19 @@ public class StardewGameMenuScreen extends Screen {
         return menuY + ui(INV_PAGE_TRINKET_Y);
     }
 
-    private void drawInvEquipSlot(GuiGraphics graphics, int index, String itemId,
+    private void drawInvEquipSlot(GuiGraphics graphics, int index, ItemStack stack,
                                    int mouseX, int mouseY) {
         int x = menuX + ui(INV_PAGE_EQUIP_X);
         int y = invEquipSlotY(index);
         int size = ui(INV_PAGE_EQUIP_SIZE);
-        boolean hasItem = !itemId.isEmpty();
+        boolean hasItem = stack != null && !stack.isEmpty();
         boolean hovered = mouseX >= x && mouseX < x + size
                 && mouseY >= y && mouseY < y + size;
 
         if (hasItem) {
             // SDV: filled slot uses tile 10 + item drawn on top
             CommonGuiTextures.drawMenuTile(graphics, x, y, size, size, 10);
-            ItemStack stack = CombinedRingData.stackFromEquipmentSlot(itemId);
-            if (!stack.isEmpty()) {
+            if (stack != null && !stack.isEmpty()) {
                 CommonGuiTextures.drawItemCenteredInBox(graphics, stack, x, y, size, size, mapping.s4());
             }
         } else {
@@ -3057,10 +3581,17 @@ public class StardewGameMenuScreen extends Screen {
                         mouseX, mouseY);
                 return;
             }
+            ItemStack equippedStack = switch (equipSlot) {
+                case 0 -> ClientPlayerDataCache.getEquippedLeftRingStack();
+                case 1 -> ClientPlayerDataCache.getEquippedRightRingStack();
+                case 2 -> ClientPlayerDataCache.getEquippedBootsStack();
+                default -> ItemStack.EMPTY;
+            };
+            if (!equippedStack.isEmpty()) {
+                graphics.renderTooltip(this.font, equippedStack, mouseX, mouseY);
+                return;
+            }
             String itemId = switch (equipSlot) {
-                case 0 -> ClientPlayerDataCache.getEquippedLeftRing();
-                case 1 -> ClientPlayerDataCache.getEquippedRightRing();
-                case 2 -> ClientPlayerDataCache.getEquippedBoots();
                 case 4 -> ClientPlayerDataCache.getEquippedHat();
                 case 5 -> ClientPlayerDataCache.getEquippedShirt();
                 case 6 -> ClientPlayerDataCache.getEquippedPants();
@@ -4470,7 +5001,8 @@ public class StardewGameMenuScreen extends Screen {
             }
 
             if (currentTab == TAB_SOCIAL) {
-                int total = visibleSocialEntries().size();
+                List<NpcFriendshipClientCache.Entry> socialEntries = visibleSocialEntries();
+                int total = socialEntries.size();
                 int maxScroll = socialMaxScroll(total);
 
                 if (socialUpButtonContains(mouseX, mouseY) && socialScroll > 0) {
@@ -4495,6 +5027,16 @@ public class StardewGameMenuScreen extends Screen {
                     }
                     return true;
                 }
+                for (int visibleRow = 0; visibleRow < SOCIAL_MAX_VISIBLE; visibleRow++) {
+                    int index = socialScroll + visibleRow;
+                    if (index >= socialEntries.size()) break;
+                    int rowY = socialRowPosition(visibleRow);
+                    if (contains(mouseX, mouseY, menuX, rowY, socialPageWidth(), ui(SOCIAL_ROW_HEIGHT_SDV))) {
+                        this.minecraft.setScreen(new StardewNpcProfileScreen(this, socialEntries.get(index), socialEntries));
+                        playUiSound(ModSounds.BIG_SELECT.get(), 1.0F, 1.0F);
+                        return true;
+                    }
+                }
             }
 
             // Farm management tab click handling
@@ -4507,6 +5049,59 @@ public class StardewGameMenuScreen extends Screen {
             if (currentTab == TAB_LEADERBOARD) {
                 if (handleLeaderboardClick((int) mouseX, (int) mouseY)) {
                     return true;
+                }
+            }
+
+            if (currentTab == TAB_COLLECTIONS) {
+                int sideTab = collectionSideTabAt(mouseX, mouseY);
+                if (sideTab >= 0) {
+                    if (currentCollectionTab != sideTab) {
+                        currentCollectionTab = sideTab;
+                        currentCollectionPage = 0;
+                        playUiSound(ModSounds.SMALL_SELECT.get(), 1.0F, 1.0F);
+                    }
+                    return true;
+                }
+
+                if (currentCollectionTab != COLLECTION_SECRET_NOTES) {
+                    int entryCount = currentCollectionTab == COLLECTION_LETTERS
+                            ? letterCollectionEntries().size()
+                            : collectionEntries(currentCollectionTab).size();
+                    int pageCount = Math.max(1,
+                            (entryCount + COLLECTION_PAGE_SIZE - 1) / COLLECTION_PAGE_SIZE);
+                    if (currentCollectionPage > 0
+                            && contains(mouseX, mouseY, collectionBackX(), collectionArrowY(),
+                                    ui(48), ui(44))) {
+                        currentCollectionPage--;
+                        playUiSound(ModSounds.SHWIP.get(), 1.0F, 1.0F);
+                        return true;
+                    }
+                    if (currentCollectionPage + 1 < pageCount
+                            && contains(mouseX, mouseY, collectionForwardX(), collectionArrowY(),
+                                    ui(48), ui(44))) {
+                        currentCollectionPage++;
+                        playUiSound(ModSounds.SHWIP.get(), 1.0F, 1.0F);
+                        return true;
+                    }
+                }
+
+                String mailId = letterAt(mouseX, mouseY);
+                if (mailId != null) {
+                    PacketDistributor.sendToServer(new OpenSeenMailPayload(mailId));
+                    playUiSound(ModSounds.BIG_SELECT.get(), 1.0F, 1.0F);
+                    return true;
+                }
+
+                int noteNumber = secretNoteAt(mouseX, mouseY);
+                if (noteNumber > 0
+                        && hasSeenSecretNote(noteNumber)) {
+                    ResourceLocation noteId = SecretNoteRegistry.byDisplayNumber(noteNumber);
+                    if (noteId != null) {
+                        PacketDistributor.sendToServer(
+                                new com.stardew.craft.network.payload.OpenSeenSecretNotePayload(noteId.toString()));
+                        playUiSound(ModSounds.BIG_SELECT.get(), 1.0F, 1.0F);
+                        return true;
+                    }
                 }
             }
 

@@ -1,5 +1,6 @@
 package com.stardew.craft.api.v1.mining;
 
+import com.stardew.craft.StardewCraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 
@@ -12,6 +13,7 @@ import java.util.Objects;
 /** Ordered add-on hook evaluated before StardewCraft's vanilla-parity monster selector. */
 public final class StardewMineMonsterProviders {
     private static final List<Registered> PROVIDERS = new ArrayList<>();
+    private static volatile List<Registered> providerSnapshot = List.of();
 
     private StardewMineMonsterProviders() {
     }
@@ -29,13 +31,19 @@ public final class StardewMineMonsterProviders {
         PROVIDERS.add(new Registered(id, priority, provider));
         PROVIDERS.sort(Comparator.comparingInt(Registered::priority).reversed()
                 .thenComparing(entry -> entry.id().toString()));
+        providerSnapshot = List.copyOf(PROVIDERS);
     }
 
     @Nullable
-    public static synchronized EntityType<?> select(StardewMineMonsterContext context) {
-        for (Registered registered : PROVIDERS) {
-            EntityType<?> selected = registered.provider().select(context);
-            if (selected != null) return selected;
+    public static EntityType<?> select(StardewMineMonsterContext context) {
+        for (Registered registered : providerSnapshot) {
+            try {
+                EntityType<?> selected = registered.provider().select(context);
+                if (selected != null) return selected;
+            } catch (RuntimeException exception) {
+                StardewCraft.LOGGER.error("Mine monster provider {} failed for floor {}",
+                        registered.id(), context == null ? "?" : context.floor(), exception);
+            }
         }
         return null;
     }

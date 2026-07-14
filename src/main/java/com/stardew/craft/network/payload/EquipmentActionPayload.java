@@ -4,9 +4,6 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.item.cosmetic.StardewCosmeticItem;
 import com.stardew.craft.item.cosmetic.StardewCosmeticSlot;
 import com.stardew.craft.item.equipment.CombinedRingData;
-import com.stardew.craft.item.equipment.CombinedRingItem;
-import com.stardew.craft.item.equipment.StardewBootsItem;
-import com.stardew.craft.item.equipment.StardewRingItem;
 import com.stardew.craft.item.trinket.StardewTrinketItem;
 import com.stardew.craft.player.CosmeticAppearanceSync;
 import com.stardew.craft.player.PlayerDataManager;
@@ -69,9 +66,9 @@ public record EquipmentActionPayload(int slotType) implements CustomPacketPayloa
 
             // sync back to client
             PacketDistributor.sendToPlayer(player, new EquipmentSyncPayload(
-                    data.getEquippedLeftRing(),
-                    data.getEquippedRightRing(),
-                    data.getEquippedBoots(),
+                    data.getEquippedLeftRingStack(),
+                    data.getEquippedRightRingStack(),
+                    data.getEquippedBootsStack(),
                     data.getEquippedTrinket(),
                     data.getEquippedHat(),
                     data.getEquippedShirt(),
@@ -82,53 +79,46 @@ public record EquipmentActionPayload(int slotType) implements CustomPacketPayloa
     }
 
     private static void handleRingSlot(ServerPlayer player, PlayerStardewData data, ItemStack carried, boolean left) {
-        String currentId = left ? data.getEquippedLeftRing() : data.getEquippedRightRing();
+        ItemStack current = left ? data.getEquippedLeftRingStack() : data.getEquippedRightRingStack();
 
         if (carried.isEmpty()) {
             // unequip
-            if (!currentId.isEmpty()) {
-                ItemStack unequipped = idToStack(currentId);
-                player.containerMenu.setCarried(unequipped);
-                if (left) data.setEquippedLeftRing("");
-                else data.setEquippedRightRing("");
+            if (!current.isEmpty()) {
+                player.containerMenu.setCarried(current);
+                if (left) data.setEquippedLeftRingStack(ItemStack.EMPTY);
+                else data.setEquippedRightRingStack(ItemStack.EMPTY);
             }
-        } else if (carried.getItem() instanceof StardewRingItem || carried.getItem() instanceof CombinedRingItem) {
-            String newId = carried.getItem() instanceof CombinedRingItem
-                    ? CombinedRingData.encodeForEquipmentSlot(carried)
-                    : BuiltInRegistries.ITEM.getKey(carried.getItem()).toString();
-            if (newId.isEmpty()) {
-                return;
-            }
-            if (!currentId.isEmpty()) {
+        } else if (com.stardew.craft.combat.equipment.EquipmentSlotResolver.isRing(carried)) {
+            ItemStack equipped = carried.copyWithCount(1);
+            if (!current.isEmpty()) {
                 // swap
-                ItemStack unequipped = idToStack(currentId);
-                player.containerMenu.setCarried(unequipped);
+                player.containerMenu.setCarried(current);
             } else {
-                player.containerMenu.setCarried(ItemStack.EMPTY);
+                carried.shrink(1);
+                player.containerMenu.setCarried(carried.isEmpty() ? ItemStack.EMPTY : carried);
             }
-            if (left) data.setEquippedLeftRing(newId);
-            else data.setEquippedRightRing(newId);
+            if (left) data.setEquippedLeftRingStack(equipped);
+            else data.setEquippedRightRingStack(equipped);
         }
     }
 
     private static void handleBootsSlot(ServerPlayer player, PlayerStardewData data, ItemStack carried) {
-        String currentId = data.getEquippedBoots();
+        ItemStack current = data.getEquippedBootsStack();
 
         if (carried.isEmpty()) {
-            if (!currentId.isEmpty()) {
-                ItemStack unequipped = idToStack(currentId);
-                player.containerMenu.setCarried(unequipped);
-                data.setEquippedBoots("");
+            if (!current.isEmpty()) {
+                player.containerMenu.setCarried(current);
+                data.setEquippedBootsStack(ItemStack.EMPTY);
             }
-        } else if (carried.getItem() instanceof StardewBootsItem) {
-            String newId = BuiltInRegistries.ITEM.getKey(carried.getItem()).toString();
-            if (!currentId.isEmpty()) {
-                ItemStack unequipped = idToStack(currentId);
-                player.containerMenu.setCarried(unequipped);
+        } else if (com.stardew.craft.combat.equipment.EquipmentSlotResolver.isBoots(carried)) {
+            ItemStack equipped = carried.copyWithCount(1);
+            if (!current.isEmpty()) {
+                player.containerMenu.setCarried(current);
             } else {
-                player.containerMenu.setCarried(ItemStack.EMPTY);
+                carried.shrink(1);
+                player.containerMenu.setCarried(carried.isEmpty() ? ItemStack.EMPTY : carried);
             }
-            data.setEquippedBoots(newId);
+            data.setEquippedBootsStack(equipped);
         }
     }
 

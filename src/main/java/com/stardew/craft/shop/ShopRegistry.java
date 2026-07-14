@@ -564,7 +564,8 @@ public final class ShopRegistry {
 
         if (isTravelingCartMultiplayer(player)
                 && travelingCartItemExists("stardewcraft:wedding_ring")
-                && !data.isRecipeUnlocked("stardewcraft:wedding_ring")) {
+                && !data.isRecipeUnlocked(com.stardew.craft.player.RecipeIdNormalizer.storageId(
+                        "stardewcraft:wedding_ring"))) {
             addTravelingCartEntry(result, playerId, avoidRepeat, "recipe:stardewcraft:wedding_ring", 500, 1, false);
         }
     }

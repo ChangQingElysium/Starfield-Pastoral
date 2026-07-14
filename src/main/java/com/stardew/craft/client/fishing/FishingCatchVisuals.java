@@ -1,6 +1,7 @@
 package com.stardew.craft.client.fishing;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.client.gui.LocalizedGuiAssets;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -21,12 +22,12 @@ import net.neoforged.neoforge.client.event.RenderGuiEvent;
  */
 @EventBusSubscriber(modid = StardewCraft.MODID, value = Dist.CLIENT)
 public final class FishingCatchVisuals {
-	private static final ResourceLocation POPUP_TEX = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/fishing/caught_popup.png");
 	private static final ResourceLocation TREASURE_ANIM_TEX = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/fishing/treasure_animate.png");
 	private static final ResourceLocation TREASURE_GOLD_ANIM_TEX = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/fishing/treasure_gold_animate.png");
 
-	private static final int POPUP_W = 292;
-	private static final int POPUP_H = 196;
+	// SDV FishingRod: Cursors[612,1913,74,30], drawn at scale 4.
+	private static final int POPUP_W = 74 * 4;
+	private static final int POPUP_H = 30 * 4;
 	private static final float POPUP_SCALE = 0.75f;
 
 	private static final long POPUP_DURATION_MS = 900L;
@@ -200,7 +201,7 @@ public final class FishingCatchVisuals {
 		int y = (screenH / 2) - h - 20 + (int) bob;
 		y = Mth.clamp(y, 10, Math.max(10, screenH - h - 10));
 
-		ResourceLocation tex = POPUP_TEX;
+		ResourceLocation tex = LocalizedGuiAssets.texture("fishing/caught_popup.png");
 		@SuppressWarnings("null")
 		boolean hasTex = mc.getResourceManager().getResource(tex).isPresent();
 		if (!hasTex) {

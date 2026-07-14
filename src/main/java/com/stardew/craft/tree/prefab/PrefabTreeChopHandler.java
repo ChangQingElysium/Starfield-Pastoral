@@ -11,6 +11,7 @@ import com.stardew.craft.player.PlayerDataManager;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import com.stardew.craft.player.ProfessionType;
 import com.stardew.craft.player.SkillType;
+import com.stardew.craft.secretnote.SecretNoteService;
 import com.stardew.craft.tree.WildTrees;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -189,6 +190,10 @@ public final class PrefabTreeChopHandler {
 			if (hardwood > 0) {
 				drops.add(new ItemStack(ModItems.WOOD_HARD.get(), hardwood));
 			}
+		}
+		ItemStack secretNote = SecretNoteService.tryCreateFromSource(player, level.random, 0.005F);
+		if (!secretNote.isEmpty()) {
+			drops.add(secretNote);
 		}
 
 		// 移除除树根外的全部方块。

@@ -45,7 +45,6 @@ import com.stardew.craft.client.render.ShippingBinBlockEntityRenderer;
 import com.stardew.craft.client.render.StoneChestBlockEntityRenderer;
 import com.stardew.craft.client.render.TrashBinBlockEntityRenderer;
 import com.stardew.craft.client.render.WoodenChestBlockEntityRenderer;
-import com.stardew.craft.client.render.WildWeedsBlockEntityRenderer;
 import com.stardew.craft.client.render.SolarPanelBlockEntityRenderer;
 import com.stardew.craft.client.render.TapperBlockEntityRenderer;
 import com.stardew.craft.client.render.LoomBlockEntityRenderer;
@@ -131,7 +130,6 @@ public final class ModClientSetup {
 		event.registerEntityRenderer(ModEntities.TRAVELING_CART.get(),
 				com.stardew.craft.client.renderer.entity.TravelingCartGeoRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.TAPPER.get(), TapperBlockEntityRenderer::new);
-		event.registerBlockEntityRenderer(ModBlockEntities.WILD_WEEDS.get(), WildWeedsBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.KEG.get(), KegBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.ANVIL.get(), AnvilBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.PRESERVES_JAR.get(), PreservesJarBlockEntityRenderer::new);

@@ -93,7 +93,7 @@ public class PlayerDataManager extends SavedData {
         for (Map.Entry<UUID, PlayerStardewData> entry : playerDataMap.entrySet()) {
             CompoundTag playerTag = new CompoundTag();
             playerTag.putUUID("UUID", entry.getKey());
-            playerTag.put("Data", entry.getValue().toNBT());
+            playerTag.put("Data", entry.getValue().toNBT(provider));
             tag.put("Player_" + index, playerTag);
             index++;
         }
@@ -117,7 +117,7 @@ public class PlayerDataManager extends SavedData {
                 UUID playerUUID = playerTag.getUUID("UUID");
                 CompoundTag dataTag = playerTag.getCompound("Data");
                 
-                PlayerStardewData data = PlayerStardewData.fromNBT(dataTag, playerUUID);
+                PlayerStardewData data = PlayerStardewData.fromNBT(dataTag, playerUUID, provider);
                 manager.playerDataMap.put(playerUUID, data);
             }
         }

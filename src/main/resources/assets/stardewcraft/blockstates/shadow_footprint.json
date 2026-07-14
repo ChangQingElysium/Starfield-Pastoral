@@ -1,0 +1,68 @@
+{
+  "variants": {
+    "facing=north,foot=right": [
+      { "model": "stardewcraft:block/shadow_footprint" },
+      { "model": "stardewcraft:block/shadow_footprint_variant_1" },
+      { "model": "stardewcraft:block/shadow_footprint_variant_2" },
+      { "model": "stardewcraft:block/shadow_footprint_variant_3" },
+      { "model": "stardewcraft:block/shadow_footprint_variant_4" },
+      { "model": "stardewcraft:block/shadow_footprint_variant_5" }
+    ],
+    "facing=east,foot=right": [
+      { "model": "stardewcraft:block/shadow_footprint", "y": 90 },
+      { "model": "stardewcraft:block/shadow_footprint_variant_1", "y": 90 },
+      { "model": "stardewcraft:block/shadow_footprint_variant_2", "y": 90 },
+      { "model": "stardewcraft:block/shadow_footprint_variant_3", "y": 90 },
+      { "model": "stardewcraft:block/shadow_footprint_variant_4", "y": 90 },
+      { "model": "stardewcraft:block/shadow_footprint_variant_5", "y": 90 }
+    ],
+    "facing=south,foot=right": [
+      { "model": "stardewcraft:block/shadow_footprint", "y": 180 },
+      { "model": "stardewcraft:block/shadow_footprint_variant_1", "y": 180 },
+      { "model": "stardewcraft:block/shadow_footprint_variant_2", "y": 180 },
+      { "model": "stardewcraft:block/shadow_footprint_variant_3", "y": 180 },
+      { "model": "stardewcraft:block/shadow_footprint_variant_4", "y": 180 },
+      { "model": "stardewcraft:block/shadow_footprint_variant_5", "y": 180 }
+    ],
+    "facing=west,foot=right": [
+      { "model": "stardewcraft:block/shadow_footprint", "y": 270 },
+      { "model": "stardewcraft:block/shadow_footprint_variant_1", "y": 270 },
+      { "model": "stardewcraft:block/shadow_footprint_variant_2", "y": 270 },
+      { "model": "stardewcraft:block/shadow_footprint_variant_3", "y": 270 },
+      { "model": "stardewcraft:block/shadow_footprint_variant_4", "y": 270 },
+      { "model": "stardewcraft:block/shadow_footprint_variant_5", "y": 270 }
+    ],
+    "facing=north,foot=left": [
+      { "model": "stardewcraft:block/shadow_footprint_left" },
+      { "model": "stardewcraft:block/shadow_footprint_left_variant_1" },
+      { "model": "stardewcraft:block/shadow_footprint_left_variant_2" },
+      { "model": "stardewcraft:block/shadow_footprint_left_variant_3" },
+      { "model": "stardewcraft:block/shadow_footprint_left_variant_4" },
+      { "model": "stardewcraft:block/shadow_footprint_left_variant_5" }
+    ],
+    "facing=east,foot=left": [
+      { "model": "stardewcraft:block/shadow_footprint_left", "y": 90 },
+      { "model": "stardewcraft:block/shadow_footprint_left_variant_1", "y": 90 },
+      { "model": "stardewcraft:block/shadow_footprint_left_variant_2", "y": 90 },
+      { "model": "stardewcraft:block/shadow_footprint_left_variant_3", "y": 90 },
+      { "model": "stardewcraft:block/shadow_footprint_left_variant_4", "y": 90 },
+      { "model": "stardewcraft:block/shadow_footprint_left_variant_5", "y": 90 }
+    ],
+    "facing=south,foot=left": [
+      { "model": "stardewcraft:block/shadow_footprint_left", "y": 180 },
+      { "model": "stardewcraft:block/shadow_footprint_left_variant_1", "y": 180 },
+      { "model": "stardewcraft:block/shadow_footprint_left_variant_2", "y": 180 },
+      { "model": "stardewcraft:block/shadow_footprint_left_variant_3", "y": 180 },
+      { "model": "stardewcraft:block/shadow_footprint_left_variant_4", "y": 180 },
+      { "model": "stardewcraft:block/shadow_footprint_left_variant_5", "y": 180 }
+    ],
+    "facing=west,foot=left": [
+      { "model": "stardewcraft:block/shadow_footprint_left", "y": 270 },
+      { "model": "stardewcraft:block/shadow_footprint_left_variant_1", "y": 270 },
+      { "model": "stardewcraft:block/shadow_footprint_left_variant_2", "y": 270 },
+      { "model": "stardewcraft:block/shadow_footprint_left_variant_3", "y": 270 },
+      { "model": "stardewcraft:block/shadow_footprint_left_variant_4", "y": 270 },
+      { "model": "stardewcraft:block/shadow_footprint_left_variant_5", "y": 270 }
+    ]
+  }
+}

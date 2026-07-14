@@ -1,11 +1,14 @@
 package com.stardew.craft.blockentity;
 
+import com.stardew.craft.api.v1.agriculture.StardewAgricultureDataApi;
+import com.stardew.craft.api.v1.agriculture.StardewTreeData;
 import com.stardew.craft.block.tree.fruit.FruitTreeBlock;
 import com.stardew.craft.item.quality.QualityHelper;
 import com.stardew.craft.sound.ModSounds;
 import com.stardew.craft.tree.fruit.FruitTreeRules;
 import com.stardew.craft.tree.fruit.FruitTreeType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -57,6 +60,11 @@ public class FruitTreeBlockEntity extends BlockEntity implements GeoBlockEntity 
         return fruitCount;
     }
 
+    public int getMaxStoredFruit() {
+        StardewTreeData publicData = resolvePublicData();
+        return publicData == null ? FruitTreeType.MAX_FRUIT : publicData.maxStoredProduct();
+    }
+
     public int getDaysSinceMature() {
         return daysSinceMature;
     }
@@ -103,10 +111,13 @@ public class FruitTreeBlockEntity extends BlockEntity implements GeoBlockEntity 
 
         daysSinceMature++;
         FruitTreeType currentType = getFruitTreeType();
-        if (FruitTreeRules.canFruitToday(level, pos, currentType)
+        StardewTreeData publicData = resolvePublicData();
+        if (FruitTreeRules.canFruitToday(level, pos, currentType, publicData)
                 || (lightningDays > 0 && !FruitTreeRules.isWinterTreeHere(level, pos))) {
-            if (fruitCount < FruitTreeType.MAX_FRUIT) {
-                fruitCount++;
+            int dailyProduct = publicData == null ? 1 : publicData.productCount();
+            int maxStored = publicData == null ? FruitTreeType.MAX_FRUIT : publicData.maxStoredProduct();
+            if (fruitCount < maxStored) {
+                fruitCount = Math.min(maxStored, fruitCount + dailyProduct);
             }
         }
         syncChanged();
@@ -151,9 +162,21 @@ public class FruitTreeBlockEntity extends BlockEntity implements GeoBlockEntity 
         if (lightningDays > 0) {
             return new ItemStack(Items.COAL, count);
         }
-        ItemStack stack = new ItemStack(getFruitTreeType().fruitItem(), count);
+        StardewTreeData publicData = resolvePublicData();
+        net.minecraft.world.item.Item fruit = publicData == null
+                ? getFruitTreeType().fruitItem()
+                : BuiltInRegistries.ITEM.get(publicData.product());
+        if (fruit == Items.AIR) {
+            fruit = getFruitTreeType().fruitItem();
+        }
+        ItemStack stack = new ItemStack(fruit, count);
         QualityHelper.setQuality(stack, getFruitQuality());
         return stack;
+    }
+
+    @Nullable
+    private StardewTreeData resolvePublicData() {
+        return level == null ? null : StardewAgricultureDataApi.tree(level, worldPosition, getBlockState());
     }
 
     private void syncChanged() {
@@ -190,7 +213,7 @@ public class FruitTreeBlockEntity extends BlockEntity implements GeoBlockEntity 
     protected void loadAdditional(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
         type = FruitTreeType.byId(tag.getString(TAG_TYPE));
-        fruitCount = Math.max(0, Math.min(FruitTreeType.MAX_FRUIT, tag.getInt(TAG_FRUIT_COUNT)));
+        fruitCount = Math.max(0, tag.getInt(TAG_FRUIT_COUNT));
         daysSinceMature = Math.max(0, tag.getInt(TAG_DAYS_SINCE_MATURE));
         lightningDays = Math.max(0, tag.getInt(TAG_LIGHTNING_DAYS));
     }

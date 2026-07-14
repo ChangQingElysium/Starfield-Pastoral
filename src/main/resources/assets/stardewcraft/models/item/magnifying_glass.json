@@ -1,0 +1,7 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/misc/magnifying_glass",
+    "particle": "stardewcraft:item/misc/magnifying_glass"
+  }
+}

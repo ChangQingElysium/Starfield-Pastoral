@@ -1,5 +1,6 @@
 package com.stardew.craft.api.v1.profession;
 
+import com.stardew.craft.StardewCraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -40,7 +41,13 @@ public final class StardewProfessionEffectHandlers {
             handler = HANDLERS.get(handlerId);
         }
         if (handler == null) return value;
-        return handler.apply(new StardewProfessionEffectContext(
-                professionId, operation, player, stack == null ? ItemStack.EMPTY : stack, value));
+        try {
+            return handler.apply(new StardewProfessionEffectContext(
+                    professionId, operation, player, stack == null ? ItemStack.EMPTY : stack, value));
+        } catch (RuntimeException exception) {
+            StardewCraft.LOGGER.error("Profession effect handler {} failed for profession {} and operation {}",
+                    handlerId, professionId, operation, exception);
+            return value;
+        }
     }
 }

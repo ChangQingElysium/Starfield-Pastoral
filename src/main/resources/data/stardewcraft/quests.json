@@ -3,7 +3,7 @@
   "6": "ItemHarvest/stardewcraft.quest.6.title/stardewcraft.quest.6.description/stardewcraft.quest.6.objective/stardewcraft:parsnip 1/7 8/100//true/",
   "7": "Building/stardewcraft.quest.7.title/stardewcraft.quest.7.description/stardewcraft.quest.7.objective/Coop//100//true/",
   "8": "Crafting/stardewcraft.quest.8.title/stardewcraft.quest.8.description/stardewcraft.quest.8.objective/scarecrow//100//true/",
-  "9": "Social/stardewcraft.quest.9.title/stardewcraft.quest.9.description/stardewcraft.quest.9.objective/null/25/0/-1/true",
+  "9": "Social/stardewcraft.quest.9.title/stardewcraft.quest.9.description/stardewcraft.quest.socialize.progress/null/25/0/-1/true",
   "11": "Crafting/stardewcraft.quest.11.title/stardewcraft.quest.11.description/stardewcraft.quest.11.objective/furnace/12/0//true/",
   "12": "ItemHarvest/stardewcraft.quest.12.title/stardewcraft.quest.12.description/stardewcraft.quest.12.objective/stardewcraft:copper_bar 1//0//true/",
   "13": "Basic/stardewcraft.quest.13.title/stardewcraft.quest.13.description/stardewcraft.quest.13.objective/-1//0//true/",
@@ -20,5 +20,10 @@
   "24": "Basic/stardewcraft.quest.24.title/stardewcraft.quest.24.description/stardewcraft.quest.24.objective/-1//250//true/",
   "25": "Basic/stardewcraft.quest.25.title/stardewcraft.quest.25.description/stardewcraft.quest.25.objective/-1//100//true/",
   "26": "Basic/stardewcraft.quest.26.title/stardewcraft.quest.26.description/stardewcraft.quest.26.objective/-1//0//true/",
-  "102": "ItemDelivery/stardewcraft.quest.102.title/stardewcraft.quest.102.description/stardewcraft.quest.102.objective/lewis stardewcraft:lucky_purple_shorts 1//750//true/stardewcraft.quest.102.target_message"
+  "29": "Basic/stardewcraft.quest.29.title/stardewcraft.quest.29.description/stardewcraft.quest.29.objective/-1//0//true/",
+  "30": "Basic/stardewcraft.quest.30.title/stardewcraft.quest.30.description/stardewcraft.quest.30.objective/-1//0//true/",
+  "31": "Basic/stardewcraft.quest.31.title/stardewcraft.quest.31.description/stardewcraft.quest.31.objective/-1//0//true/",
+  "102": "ItemDelivery/stardewcraft.quest.102.title/stardewcraft.quest.102.description/stardewcraft.quest.102.objective/lewis stardewcraft:lucky_purple_shorts 1//750//true/stardewcraft.quest.102.target_message",
+  "128": "SecretLostItem/.../.../.../abigail stardewcraft:ornate_necklace 100 129/-1/0/-1/false/stardewcraft.quest.128.target_message",
+  "129": "SecretLostItem/.../.../.../caroline stardewcraft:ornate_necklace 50 128/-1/0/-1/false/stardewcraft.quest.129.target_message"
 }

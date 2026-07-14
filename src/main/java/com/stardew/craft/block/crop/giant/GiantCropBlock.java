@@ -3,6 +3,7 @@ package com.stardew.craft.block.crop.giant;
 import com.stardew.craft.blockentity.GiantCropBlockEntity;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import com.stardew.craft.player.SkillType;
+import com.stardew.craft.secretnote.SecretNoteService;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -166,6 +167,10 @@ public abstract class GiantCropBlock extends Block implements EntityBlock {
                     Block.popResource(serverLevel, mainPos, stack);
 
                     if (player instanceof ServerPlayer sp) {
+						ItemStack secretNote = SecretNoteService.tryCreateUnseenNote(sp, level.random);
+						if (!secretNote.isEmpty()) {
+							Block.popResource(serverLevel, mainPos, secretNote);
+						}
                         PlayerStardewDataAPI.addExperience(sp, SkillType.FARMING, CHOP_FARMING_XP);
                     }
                 }

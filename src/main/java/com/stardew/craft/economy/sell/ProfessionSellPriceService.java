@@ -87,8 +87,8 @@ public final class ProfessionSellPriceService {
 
         SellContext context = SellContext.forItem(source, typeKey);
         if (player != null) {
-            baseUnitPrice = BookPowerEffects.applyArtifactSellPrice(
-                    PlayerStardewDataAPI.getData(player), context.itemTypeKey(), baseUnitPrice);
+            PlayerStardewData data = PlayerStardewDataAPI.getData(player);
+            baseUnitPrice = BookPowerEffects.applyArtifactSellPrice(data, context.itemTypeKey(), baseUnitPrice);
         }
         return quote(baseUnitPrice, stack.getCount(), context, stack, player, checker);
     }

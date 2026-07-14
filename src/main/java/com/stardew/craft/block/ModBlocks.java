@@ -192,6 +192,15 @@ public class ModBlocks {
                                         .noOcclusion()
                                         .strength(0.3F)));
 
+        public static final DeferredBlock<Block> SHADOW_FOOTPRINT = BLOCKS.register("shadow_footprint",
+                        () -> new com.stardew.craft.block.nature.ShadowFootprintBlock(Block.Properties.of()
+                                        .mapColor(net.minecraft.world.level.material.MapColor.NONE)
+                                        .pushReaction(net.minecraft.world.level.material.PushReaction.DESTROY)
+                                        .sound(net.minecraft.world.level.block.SoundType.WOOL)
+                                        .noCollission()
+                                        .noOcclusion()
+                                        .instabreak()));
+
         // ---- 采集物方块 (Forage blocks with cross model, drop corresponding items) ----
         private static final int SPRING = 0;
         private static final int SUMMER = 1;

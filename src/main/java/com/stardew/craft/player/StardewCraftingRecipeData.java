@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -383,14 +382,11 @@ public final class StardewCraftingRecipeData {
 
     @Nullable
     private static ResourceLocation normalizeId(String raw) {
-        if (raw == null || raw.isBlank()) return null;
-        return raw.indexOf(':') >= 0
-                ? ResourceLocation.tryParse(raw)
-                : ResourceLocation.tryBuild(StardewCraft.MODID, raw.trim().toLowerCase(Locale.ROOT));
+        return RecipeIdNormalizer.definitionId(raw);
     }
 
     public static String storageId(ResourceLocation id) {
-        return StardewCraft.MODID.equals(id.getNamespace()) ? id.getPath() : id.toString();
+        return RecipeIdNormalizer.storageId(id);
     }
 
     private static String string(JsonObject root, String key) {

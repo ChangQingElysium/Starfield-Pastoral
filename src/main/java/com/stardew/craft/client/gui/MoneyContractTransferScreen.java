@@ -95,6 +95,7 @@ public class MoneyContractTransferScreen extends Screen {
             Component.translatable("stardewcraft.money_contract.transfer.amount"));
         amountField.setMaxLength(9);
         amountField.setBordered(false);
+        amountField.setTextShadow(false);
         amountField.setTextColor(0xFF3E2723);
         amountField.setTextColorUneditable(0xFF3E2723);
         addWidget(amountField);

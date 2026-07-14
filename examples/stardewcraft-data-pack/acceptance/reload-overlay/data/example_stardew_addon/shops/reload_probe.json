@@ -1,0 +1,11 @@
+{
+  "owner_npc": "pierre",
+  "entries": [
+    {
+      "item": "minecraft:emerald",
+      "display_name": "Reload Probe Emerald",
+      "price": 321,
+      "stock": 1
+    }
+  ]
+}

@@ -29,7 +29,7 @@ import java.util.Set;
  * decides its taste; otherwise the caller should keep the project fallback.
  */
 @SuppressWarnings("null")
-final class VanillaGiftTasteResolver {
+public final class VanillaGiftTasteResolver {
     private static final String VANILLA_TASTES_RESOURCE = "data/stardewcraft/npc/vanilla/data/NPCGiftTastes.json";
     private static final String VANILLA_OBJECTS_RESOURCE = "data/stardewcraft/npc/vanilla/data/Objects.json";
     private static volatile VanillaData cachedData;
@@ -37,7 +37,7 @@ final class VanillaGiftTasteResolver {
     private VanillaGiftTasteResolver() {
     }
 
-    static Result resolve(ItemStack held, String npcId) {
+    public static Result resolve(ItemStack held, String npcId) {
         VanillaData data = data();
         if (data == VanillaData.EMPTY || held == null || held.isEmpty()) {
             return null;
@@ -52,7 +52,7 @@ final class VanillaGiftTasteResolver {
         return new Result(decision.taste(), decision.source());
     }
 
-    static String objectToken(ItemStack held) {
+    public static String objectToken(ItemStack held) {
         VanillaData data = data();
         if (data != VanillaData.EMPTY && held != null && !held.isEmpty()) {
             ItemProfile item = profile(held, data);
@@ -595,7 +595,7 @@ final class VanillaGiftTasteResolver {
         );
     }
 
-    enum Taste {
+    public enum Taste {
         LOVED,
         LIKED,
         NEUTRAL,
@@ -603,7 +603,7 @@ final class VanillaGiftTasteResolver {
         HATED
     }
 
-    record Result(Taste taste, String source) {
+    public record Result(Taste taste, String source) {
     }
 
     private record TasteDecision(Taste taste, String source) {

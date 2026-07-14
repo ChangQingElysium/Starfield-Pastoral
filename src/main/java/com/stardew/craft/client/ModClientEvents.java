@@ -157,7 +157,8 @@ public class ModClientEvents {
                 } else if ("stardewcraft.type.cooking_ingredient".equals(typeKey)) {
                     // 烹饪原料：浅黄色（基础食材）
                     typeColor = net.minecraft.ChatFormatting.YELLOW;
-                } else if (typeKey.startsWith("stardewcraft.tool.")) {
+                } else if ("stardewcraft.type.tool".equals(typeKey)
+                        || typeKey.startsWith("stardewcraft.tool.")) {
                     // 农具：天蓝色
                     typeColor = net.minecraft.ChatFormatting.AQUA;
                 } else if ("stardewcraft.type.trash".equals(typeKey)) {
@@ -194,6 +195,11 @@ public class ModClientEvents {
                     customLines.add(Component.translatable("stardewcraft.tooltip.type_prefix")
                             .withStyle(ChatFormatting.WHITE)
                             .append(SkullKeyClientFx.flowingTypeLabel(
+                                    Component.translatable(typeKey).getString())));
+                } else if (stack.getItem() == ModItems.MAGNIFYING_GLASS.get()) {
+                    customLines.add(Component.translatable("stardewcraft.tooltip.type_prefix")
+                            .withStyle(ChatFormatting.WHITE)
+                            .append(MagnifyingGlassClientFx.flowingTypeLabel(
                                     Component.translatable(typeKey).getString())));
                 } else if (stack.getItem() == ModItems.DWARVISH_TRANSLATION_GUIDE.get()) {
                     customLines.add(Component.translatable("stardewcraft.tooltip.type_prefix")
@@ -276,6 +282,8 @@ public class ModClientEvents {
                 new java.util.HashSet<>(ClientPlayerDataCache.getProfessions()), stack, SellSource.SHOP_COUNTER);
             int sellPrice = quote.finalUnitPrice();
             boolean hidePriceLine = stack.getItem() == ModItems.SKULL_KEY.get()
+                || stack.getItem() == ModItems.MAGNIFYING_GLASS.get()
+                || stack.getItem() == ModItems.SECRET_NOTE.get()
                 || stack.getItem() == ModItems.DWARVISH_TRANSLATION_GUIDE.get()
                 || stack.getItem() == ModItems.RUSTY_KEY.get()
                 || stack.getItem() == ModItems.WARP_WAND.get()
@@ -561,20 +569,20 @@ public class ModClientEvents {
         }
 
         ItemStack stack = mc.player.getMainHandItem();
-        if (!(stack.getItem() instanceof IStardewWeapon weaponItem)) {
+        IStardewWeapon weaponItem = stack.getItem() instanceof IStardewWeapon weapon ? weapon : null;
+        WeaponData data = weaponItem == null ? null : weaponItem.getWeaponData();
+        boolean hasPublicMinor = com.stardew.craft.combat.skill.WeaponSkillDispatcher.hasPublicSkill(stack, false);
+        boolean hasPublicMajor = com.stardew.craft.combat.skill.WeaponSkillDispatcher.hasPublicSkill(stack, true);
+        boolean hasLegacyMinor = data != null && data.getSkill1() != null;
+        boolean hasLegacyMajor = data != null && data.getSkill2() != null;
+        if (!hasPublicMinor && !hasPublicMajor && !hasLegacyMinor && !hasLegacyMajor) {
             drainSkillKeyClicks();
             return;
         }
 
-        WeaponData data = weaponItem.getWeaponData();
-        if (data == null) {
-            drainSkillKeyClicks();
-            return;
-        }
-
-        if (data.getSkill1() != null) {
+        if (hasPublicMinor || hasLegacyMinor) {
             while (ModKeyMappings.SKILL_MINOR.consumeClick()) {
-                if ("femur_slam".equals(data.getSkill1().getId())
+                if (weaponItem != null && data != null && "femur_slam".equals(data.getSkill1().getId())
                     && !com.stardew.craft.client.weapon.WeaponSkillCooldownsClient.isOnCooldown(weaponItem.getWeaponId(), data.getSkill1().getId())
                     && !mc.player.isUsingItem()) {
                     mc.player.startUsingItem(InteractionHand.MAIN_HAND);
@@ -583,7 +591,7 @@ public class ModClientEvents {
             }
         }
 
-        if (data.getSkill2() == null) {
+        if (!hasPublicMajor && !hasLegacyMajor) {
             return;
         }
 
@@ -635,6 +643,7 @@ public class ModClientEvents {
         com.stardew.craft.client.render.BillboardQuestIndicatorRenderer.onRenderLevel(event);
         com.stardew.craft.client.render.SpecialOrderBoardIndicatorRenderer.onRenderLevel(event);
         com.stardew.craft.client.render.PanPointRenderer.onRenderLevel(event);
+        com.stardew.craft.client.render.SecretNote31FootprintRenderer.onRenderLevel(event);
         com.stardew.craft.client.auction.AuctionTooltipBoardRenderer.onRenderLevel(event);
     }
 
@@ -670,6 +679,7 @@ public class ModClientEvents {
         // Cutscene event fade overlay
         com.stardew.craft.cutscene.runtime.EventScreenFade.render(event.getGuiGraphics());
         com.stardew.craft.client.ritual.GalaxySwordRitualClientState.render(event.getGuiGraphics());
+        com.stardew.craft.client.render.PortalHintRenderer.onRenderGui(event.getGuiGraphics());
 
         Minecraft mc = Minecraft.getInstance();
         Player player = mc.player;
@@ -1307,6 +1317,9 @@ public class ModClientEvents {
         // mail/money/skill/friendship from the previous world doesn't leak into preconditions
         // evaluated before the next PlayerDataSyncPacket arrives.
         com.stardew.craft.client.ClientPlayerDataCache.reset();
+        com.stardew.craft.client.ClientMailIndex.clear();
+        com.stardew.craft.client.ClientFestivalAvailability.clear();
+        com.stardew.craft.client.ClientJeiCatalog.clear();
         com.stardew.craft.client.hud.StardewTimeHud.resetTimeSync();
         com.stardew.craft.client.sound.StardewMusicManager.setNightMarketFestivalOpen(false);
     }

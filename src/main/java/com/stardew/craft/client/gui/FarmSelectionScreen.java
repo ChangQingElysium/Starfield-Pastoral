@@ -103,33 +103,34 @@ public class FarmSelectionScreen extends Screen {
         contentW = panelW - borderUnit * 2;
         contentH = panelH - borderUnit * 2;
 
-        // 标题分隔线
-        int titleH = ui(48);
+        // Minecraft 字体高度已经是 GUI 坐标，间距不能只按原始 GUI Scale 继续缩小。
+        int titleH = Math.max(this.font.lineHeight + 10, ui(56));
         partY = contentY + titleH;
 
-        // 左栏宽度 ≈38%
-        int leftColW = (int) (contentW * 0.38f);
+        // 左栏多留一点宽度，避免俄语等较长的农场名称过早截断。
+        int leftColW = (int) (contentW * 0.45f);
         dividerX = contentX + leftColW;
 
-        // 左列表（分隔线下方，留出 borderUnit 间距）
-        listX = contentX + ui(8);
-        listY = partY + borderUnit;
-        listW = leftColW - ui(20);
-        rowH = ui(72);
-        listH = contentY + contentH - listY - ui(8);
-        maxVisible = Math.max(1, listH / rowH);
-        scrollOffset = Math.min(scrollOffset, Math.max(0, farmTypes.size() - maxVisible));
+        int sectionPadding = Math.max(6, ui(16));
+        int sectionGap = Math.max(8, ui(24));
+
+        // 左列表：每行至少保留一个字体高度及足够的点击留白。
+        listX = contentX + sectionPadding;
+        listY = partY + sectionGap;
+        listW = leftColW - sectionPadding * 2;
+        rowH = Math.max(this.font.lineHeight + 10, ui(72));
 
         // 右栏
-        rightX = dividerX + borderUnit + ui(12);
-        rightY = partY + borderUnit;
-        rightW = contentX + contentW - rightX - ui(8);
+        rightX = dividerX + borderUnit + sectionPadding;
+        rightY = partY + sectionGap;
+        rightW = contentX + contentW - rightX - sectionPadding;
 
-        // 名称输入区域（右栏底部，留足空间给标签 + 输入 + 下划线 + OK）
-        nameAreaY = contentY + contentH - ui(100);
+        // 名称输入区域独立占据右栏底部，不再让输入框、骰子和 OK 互相叠压。
+        int nameAreaH = Math.max(76, ui(220));
+        nameAreaY = contentY + contentH - nameAreaH;
         int fieldX = rightX;
-        int fieldY = nameAreaY + ui(24);
-        int fieldW = rightW - ui(64);
+        int fieldY = nameAreaY + this.font.lineHeight + Math.max(10, ui(28));
+        int fieldW = rightW - diceButtonSize() - Math.max(6, ui(16));
         int fieldH = this.font.lineHeight + 6;
 
         // 保留旧输入内容
@@ -139,6 +140,7 @@ public class FarmSelectionScreen extends Screen {
                 Component.translatable("gui.stardewcraft.farm_selection.farm_name"));
         nameField.setMaxLength(48);
         nameField.setBordered(false);
+        nameField.setTextShadow(false);
         nameField.setTextColor(0xFF3E2723);
         if (currentName.isEmpty()) {
             currentName = generateDefaultName();
@@ -147,21 +149,21 @@ public class FarmSelectionScreen extends Screen {
         addWidget(nameField);
         setFocused(nameField);
 
-        // 骰子（名称输入行右端，紧贴 field）
-        diceCx = fieldX + fieldW + ui(24);
+        // 骰子（名称输入行右端）
+        diceCx = rightX + rightW - diceButtonSize() / 2;
         diceCy = fieldY + fieldH / 2;
 
-        // OK 按钮（名称输入下方，右栏底部居中）
+        // OK 按钮（输入行下方，右栏底部居中）
         okCx = rightX + rightW / 2;
-        okCy = contentY + contentH - ui(20);
+        okCy = contentY + contentH - okButtonSize() / 2 - Math.max(4, ui(12));
 
         // "加入农场" 按钮（左栏底部）
         joinBtnW = listW;
-        joinBtnH = ui(36);
+        joinBtnH = Math.max(this.font.lineHeight * 2 + 8, ui(48));
         joinBtnX = listX;
-        joinBtnY = contentY + contentH - joinBtnH - ui(4);
+        joinBtnY = contentY + contentH - joinBtnH - sectionPadding;
         // 缩短列表高度为按钮留出空间
-        listH = joinBtnY - listY - ui(4);
+        listH = joinBtnY - listY - sectionGap;
         maxVisible = Math.max(1, listH / rowH);
         scrollOffset = Math.min(scrollOffset, Math.max(0, farmTypes.size() - maxVisible));
     }
@@ -172,6 +174,14 @@ public class FarmSelectionScreen extends Screen {
 
     private float s4() {
         return 4.0f / guiScale;
+    }
+
+    private int diceButtonSize() {
+        return Math.max(20, ui(48));
+    }
+
+    private int okButtonSize() {
+        return Math.max(22, ui(56));
     }
 
     // ═══════════════════════════════════════════
@@ -222,7 +232,7 @@ public class FarmSelectionScreen extends Screen {
         }
 
         // 骰子
-        int diceS = ui(40);
+        int diceS = diceButtonSize();
         if (inside(mx, my, diceCx - diceS / 2, diceCy - diceS / 2, diceS, diceS)) {
             nameField.setValue(generateRandomName());
             playUi(ModSounds.DRUMKIT6.get(), 0.75f, 1.1f);
@@ -230,7 +240,7 @@ public class FarmSelectionScreen extends Screen {
         }
 
         // OK
-        int okS = ui(48);
+        int okS = okButtonSize();
         if (inside(mx, my, okCx - okS / 2, okCy - okS / 2, okS, okS)) {
             submitSelection();
             return true;
@@ -273,7 +283,9 @@ public class FarmSelectionScreen extends Screen {
         Component title = Component.translatable("gui.stardewcraft.farm_selection.title")
                 .withStyle(ChatFormatting.BOLD);
         GuiText.drawCenteredClamped(graphics, this.font, title,
-            panelX + panelW / 2, contentY + ui(12), contentW, 0x582A11, false);
+                panelX + panelW / 2,
+                contentY + (partY - contentY - this.font.lineHeight) / 2,
+                contentW, 0x582A11, false);
 
         // 标题下方水平分隔线
         StardewGuiUtil.drawHorizontalPartition(graphics, panelX, partY, panelW, s4());
@@ -305,10 +317,10 @@ public class FarmSelectionScreen extends Screen {
     // ═══════════════════════════════════════════
 
     private void drawFarmTypeList(GuiGraphics graphics, int mouseX, int mouseY) {
-        int clipY2 = listY + maxVisible * rowH;
+        int clipY2 = Math.min(listY + listH, listY + maxVisible * rowH);
 
         // scissor 裁剪：确保列表内容不溢出边框
-        graphics.enableScissor(contentX, listY, dividerX - ui(4), clipY2);
+        graphics.enableScissor(contentX, listY, dividerX, clipY2);
 
         for (int i = 0; i < Math.min(maxVisible, farmTypes.size() - scrollOffset); i++) {
             int idx = i + scrollOffset;
@@ -319,20 +331,21 @@ public class FarmSelectionScreen extends Screen {
 
             // 选中高亮
             if (isSelected) {
-                graphics.fill(listX, ry + 1, listX + listW, ry + rowH - 1, 0x44EADB8C);
+                graphics.fill(listX, ry + 2, listX + listW, ry + rowH - 2, 0x55F6E3A5);
+                graphics.fill(listX, ry + 4, listX + 2, ry + rowH - 4, 0xAA8A4B20);
             }
             // Hover
             float hi = (idx < typeHighlight.length) ? typeHighlight[idx] : 0;
             if (hi > 0.01f && !isSelected) {
                 int alpha = (int) (hi * 0x22);
-                graphics.fill(listX, ry + 1, listX + listW, ry + rowH - 1,
+                graphics.fill(listX, ry + 2, listX + listW, ry + rowH - 2,
                         (alpha << 24) | 0xEADB8C);
             }
 
             // 图标
-            int iconH = rowH - ui(16);
+            int iconH = Math.min(rowH - 6, Math.max(16, ui(52)));
             int iconW = Math.round(iconH * 22f / 20f);
-            int iconX = listX + ui(8);
+            int iconX = listX + Math.max(5, ui(12));
             int iconY = ry + (rowH - iconH) / 2;
 
             if (isUnlocked) {
@@ -348,17 +361,18 @@ public class FarmSelectionScreen extends Screen {
 
             // 类型名称
             String name = type.getDisplayName().getString();
-            int nameColor = isSelected ? 0x582A11 : (isUnlocked ? 0x3E2723 : 0x9E9E9E);
-            int nameX = iconX + iconW + ui(10);
+            int nameColor = isSelected ? 0x582A11 : (isUnlocked ? 0x3E2723 : 0x8A6A58);
+            int nameX = iconX + iconW + Math.max(6, ui(12));
             int nameY = ry + (rowH - this.font.lineHeight) / 2;
-            int checkW = isSelected && isUnlocked ? this.font.width("\u2714") + ui(8) : 0;
-            int nameMaxW = Math.max(1, listX + listW - ui(8) - checkW - nameX);
+            int rightPadding = Math.max(5, ui(12));
+            int checkW = isSelected && isUnlocked ? this.font.width("\u2714") + rightPadding : 0;
+            int nameMaxW = Math.max(1, listX + listW - rightPadding - checkW - nameX);
             graphics.drawString(this.font, GuiText.ellipsize(this.font, Component.literal(name), nameMaxW), nameX, nameY, nameColor, false);
 
             // 选中勾号
             if (isSelected && isUnlocked) {
                 graphics.drawString(this.font, "\u2714",
-                        listX + listW - ui(8) - this.font.width("\u2714"),
+                        listX + listW - rightPadding - this.font.width("\u2714"),
                         nameY, 0x2E7D32, false);
             }
         }
@@ -367,13 +381,13 @@ public class FarmSelectionScreen extends Screen {
 
         // 滚动条
         if (farmTypes.size() > maxVisible) {
-            int barX = dividerX - ui(10);
+            int barX = dividerX - Math.max(5, ui(10));
             int barTotalH = maxVisible * rowH;
-            int thumbH = Math.max(ui(20), barTotalH * maxVisible / farmTypes.size());
+            int thumbH = Math.max(8, barTotalH * maxVisible / farmTypes.size());
             int maxScroll = Math.max(1, farmTypes.size() - maxVisible);
             int thumbY = listY + (barTotalH - thumbH) * scrollOffset / maxScroll;
-            graphics.fill(barX, listY, barX + ui(4), listY + barTotalH, 0x22000000);
-            graphics.fill(barX, thumbY, barX + ui(4), thumbY + thumbH, 0x66582A11);
+            graphics.fill(barX, listY, barX + 2, listY + barTotalH, 0x22000000);
+            graphics.fill(barX, thumbY, barX + 2, thumbY + thumbH, 0x77582A11);
         }
     }
 
@@ -384,25 +398,26 @@ public class FarmSelectionScreen extends Screen {
     private void drawRightPanel(GuiGraphics graphics) {
         FarmType selectedType = farmTypes.get(selectedIndex);
 
-        // 类型大标题（与右栏顶端留出间距）
+        // 类型大标题
         Component displayName = Component.literal(selectedType.getDisplayName().getString())
                 .withStyle(ChatFormatting.BOLD);
-        graphics.drawString(this.font, GuiText.ellipsize(this.font, displayName, rightW - ui(8)), rightX, rightY + ui(8), 0x582A11, false);
+        graphics.drawString(this.font, GuiText.ellipsize(this.font, displayName, rightW), rightX, rightY, 0x582A11, false);
 
-        // 描述文字（标题下方留出 28sdv px 间距，自动折行）
-        int descY = rightY + ui(36);
-        String desc = selectedType.getDescription().getString();
-        List<net.minecraft.util.FormattedCharSequence> lines =
-                this.font.split(Component.literal(desc), rightW - ui(8));
-        for (net.minecraft.util.FormattedCharSequence line : lines) {
-            graphics.drawString(this.font, line, rightX, descY, 0x5D4037, false);
-            descY += this.font.lineHeight + 2;
-        }
+        // 描述文字：根据命名区上方的实际可用高度自动决定行数。
+        int descY = rightY + this.font.lineHeight + Math.max(6, ui(16));
+        int descBottom = nameAreaY - Math.max(10, ui(28));
+        int lineStep = this.font.lineHeight + 2;
+        int maxDescriptionLines = Math.max(1, (descBottom - descY) / lineStep);
+        GuiText.drawWrapped(graphics, this.font, selectedType.getDescription(),
+                rightX, descY, rightW, 0x5D4037, false, maxDescriptionLines);
 
         // ---- 名称输入区域 ----
+        int separatorY = nameAreaY - Math.max(5, ui(12));
+        graphics.fill(rightX, separatorY, rightX + rightW, separatorY + 1, 0x448A4B20);
+
         // "农场名称：" 标签
         String nameLabel = Component.translatable("gui.stardewcraft.farm_selection.farm_name").getString();
-        graphics.drawString(this.font, GuiText.ellipsize(this.font, Component.literal(nameLabel), rightW - ui(8)), rightX, nameAreaY, 0x582A11, false);
+        graphics.drawString(this.font, GuiText.ellipsize(this.font, Component.literal(nameLabel), rightW), rightX, nameAreaY, 0x582A11, false);
 
         // 下划线（位于 EditBox 下方）
         int lineY = nameField.getY() + nameField.getHeight() + 2;
@@ -412,7 +427,7 @@ public class FarmSelectionScreen extends Screen {
         graphics.fill(nameField.getX(), lineY, nameField.getX() + lineW, lineY + (focused ? 2 : 1), lineColor);
         if (focused) {
             graphics.fillGradient(nameField.getX(), lineY + 2,
-                    nameField.getX() + lineW, lineY + ui(6),
+                    nameField.getX() + lineW, lineY + Math.max(4, ui(6)),
                     0x44EADB8C, 0x00EADB8C);
         }
     }
@@ -422,10 +437,10 @@ public class FarmSelectionScreen extends Screen {
     // ═══════════════════════════════════════════
 
     private void updateHover(int mouseX, int mouseY) {
-        int okS = ui(48);
+        int okS = okButtonSize();
         okScale = approach(okScale,
                 inside(mouseX, mouseY, okCx - okS / 2, okCy - okS / 2, okS, okS) ? 1.12f : 1.0f);
-        int diceS = ui(40);
+        int diceS = diceButtonSize();
         diceScale = approach(diceScale,
                 inside(mouseX, mouseY, diceCx - diceS / 2, diceCy - diceS / 2, diceS, diceS) ? 1.15f : 1.0f);
         joinBtnScale = approach(joinBtnScale,
@@ -462,12 +477,13 @@ public class FarmSelectionScreen extends Screen {
 
         Component text = Component.translatable("gui.stardewcraft.farm_selection.join_farm");
         int textColor = hovered ? 0x582A11 : 0x8D6E63;
-        Component shown = GuiText.ellipsize(this.font, text, joinBtnW - ui(12));
-        int tw = this.font.width(shown);
-        graphics.drawString(this.font, shown,
-            joinBtnX + (joinBtnW - tw) / 2,
-                joinBtnY + (joinBtnH - this.font.lineHeight) / 2,
-                textColor, false);
+        int textWidth = joinBtnW - Math.max(10, ui(24));
+        int lineCount = GuiText.wrappedLineCount(this.font, text, textWidth, 2);
+        int textHeight = lineCount * this.font.lineHeight + Math.max(0, lineCount - 1) * 2;
+        GuiText.drawWrappedCentered(graphics, this.font, text,
+                joinBtnX + joinBtnW / 2,
+                joinBtnY + (joinBtnH - textHeight) / 2,
+                textWidth, textColor, false, 2);
     }
 
     private void requestJoinList() {
@@ -566,7 +582,7 @@ public class FarmSelectionScreen extends Screen {
     }
 
     private void drawIconButton(GuiGraphics graphics, ResourceLocation icon, int cx, int cy, float scale) {
-        float baseScale = s4() * 0.8f;
+        float baseScale = Math.max(1.0f, s4() * 0.8f);
         float finalScale = baseScale * scale;
         graphics.pose().pushPose();
         graphics.pose().translate(cx, cy, 0);

@@ -11,6 +11,7 @@ import com.stardew.craft.api.v1.content.DefinitionDiagnostic;
 import com.stardew.craft.api.v1.content.DefinitionSnapshot;
 import com.stardew.craft.api.v1.production.StardewCookingIngredient;
 import com.stardew.craft.api.v1.production.StardewCookingRecipeDefinition;
+import com.stardew.craft.player.RecipeIdNormalizer;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -79,7 +80,7 @@ public final class VanillaCookingRecipeData {
     }
 
     public static String storageId(ResourceLocation recipeId) {
-        return StardewCraft.MODID.equals(recipeId.getNamespace()) ? recipeId.getPath() : recipeId.toString();
+        return RecipeIdNormalizer.storageId(recipeId);
     }
 
     public static boolean matches(ItemStack stack, StardewCookingIngredient ingredient) {
@@ -332,10 +333,7 @@ public final class VanillaCookingRecipeData {
 
     @Nullable
     private static ResourceLocation normalizeRecipeId(String raw) {
-        if (raw == null || raw.isBlank()) return null;
-        return raw.indexOf(':') >= 0
-                ? ResourceLocation.tryParse(raw)
-                : ResourceLocation.tryBuild(StardewCraft.MODID, raw.toLowerCase(Locale.ROOT));
+        return RecipeIdNormalizer.definitionId(raw);
     }
 
     private static ResourceLocation id(String path) {

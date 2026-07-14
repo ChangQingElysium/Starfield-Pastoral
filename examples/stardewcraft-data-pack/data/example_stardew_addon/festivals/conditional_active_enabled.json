@@ -1,0 +1,15 @@
+{
+  "type": "active",
+  "display_name": "Enabled Apple Parade",
+  "available_when": [
+    {"type": "stardewcraft:always", "data": {"value": true}}
+  ],
+  "season": 0,
+  "start_day": 2,
+  "end_day": 2,
+  "start_time": 900,
+  "end_time": 1400,
+  "world": {
+    "location": "Town"
+  }
+}

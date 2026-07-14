@@ -273,7 +273,7 @@ public final class StardewHudMessageManager {
 		graphics.pose().scale(TEXT_SCALE, TEXT_SCALE, 1f);
 		// 用纯字符串渲染 — 忽略 Component 里嵌入的样式（如物品名默认白色），
 		// 让 TEXT_COLOR（深棕）统一生效。
-		graphics.drawString(font, message.messageText, 0, 0, textColor, true);
+		graphics.drawString(font, message.messageText, 0, 0, textColor, false);
 		graphics.pose().popPose();
 
 		RenderSystem.setShaderColor(1f, 1f, 1f, 1f);

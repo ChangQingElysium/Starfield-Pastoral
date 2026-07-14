@@ -15,6 +15,7 @@ import com.stardew.craft.core.ModMiningDimensions;
 import com.stardew.craft.player.PlayerDataManager;
 import com.stardew.craft.player.PlayerStardewData;
 import com.stardew.craft.player.PlayerStardewDataAPI;
+import com.stardew.craft.secretnote.SecretNoteService;
 import com.stardew.craft.time.StardewTimeManager;
 import com.stardew.craft.world.data.WorldLootPoolData;
 import net.minecraft.core.BlockPos;
@@ -649,7 +650,12 @@ public final class ArtifactDropService {
             return fallback.isEmpty() ? ItemStack.EMPTY : resolveSpecialQueryDrop(fallback, random);
         }
         if (drop.id.startsWith("SECRET_NOTE_OR_ITEM")) {
-            return resolveSpecialQueryDrop("(O)390", random);
+			ItemStack secretNote = SecretNoteService.tryCreateUnseenNote(player, random);
+			if (!secretNote.isEmpty()) {
+				return secretNote;
+			}
+			String fallback = drop.id.substring("SECRET_NOTE_OR_ITEM".length()).trim();
+			return fallback.isEmpty() ? ItemStack.EMPTY : resolveSpecialQueryDrop(fallback, random);
         }
 
         Item item;

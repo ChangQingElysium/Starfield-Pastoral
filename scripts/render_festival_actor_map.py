@@ -515,6 +515,384 @@ def render_winter_star_secret_santa_map(output_dir: Path, scale: int, portrait_s
     return output_path
 
 
+def draw_numbered_source_points(
+    base: Image.Image,
+    points: list[tuple[str, float, float]],
+    crop_origin: tuple[int, int],
+    scale: int,
+    title: str,
+    route: bool = False,
+) -> Image.Image:
+    map_image = base.convert("RGBA")
+    sidebar_width = 520 if len(points) <= 12 else 0
+    image = Image.new("RGBA", (map_image.width + sidebar_width, map_image.height), (232, 240, 247, 255))
+    image.alpha_composite(map_image, (0, 0))
+    overlay = Image.new("RGBA", image.size, (0, 0, 0, 0))
+    draw = ImageDraw.Draw(overlay)
+    marker_font = load_font(13)
+    label_font = load_font(15)
+    step = TILE_SIZE * scale
+    origin_x, origin_y = crop_origin
+    anchors = [((x - origin_x) * step, (y - origin_y) * step) for _, x, y in points]
+    if route and len(anchors) > 1:
+        draw.line(anchors, fill=(255, 210, 55, 210), width=max(3, scale * 2), joint="curve")
+    for index, ((label, _x, _y), (px, py)) in enumerate(zip(points, anchors), start=1):
+        radius = 11
+        draw.ellipse((px - radius, py - radius, px + radius, py + radius),
+                     fill=(18, 22, 30, 235), outline=(255, 210, 55, 255), width=3)
+        number = str(index)
+        number_box = draw.textbbox((0, 0), number, font=marker_font)
+        draw.text((px - (number_box[2] - number_box[0]) / 2, py - 8), number,
+                  fill=(255, 245, 200, 255), font=marker_font)
+    if sidebar_width:
+        left = map_image.width
+        draw.rectangle((left, 0, image.width, image.height), fill=(237, 243, 248, 255))
+        draw.line((left, 0, left, image.height), fill=(89, 111, 132, 255), width=2)
+        draw.text((left + 24, 24), "Source point legend", fill=(28, 42, 57, 255), font=load_font(24))
+        for index, (label, _x, _y) in enumerate(points, start=1):
+            y = 72 + (index - 1) * 52
+            draw.ellipse((left + 24, y, left + 54, y + 30), fill=(255, 210, 55, 255),
+                         outline=(132, 94, 13, 255), width=2)
+            number = str(index)
+            number_box = draw.textbbox((0, 0), number, font=marker_font)
+            draw.text((left + 39 - (number_box[2] - number_box[0]) / 2, y + 7), number,
+                      fill=(43, 37, 20, 255), font=marker_font)
+            draw.text((left + 66, y + 5), label, fill=(36, 50, 64, 255), font=label_font)
+    draw_title(draw, title, image.width)
+    return Image.alpha_composite(image, overlay)
+
+
+def render_secret_note31_source_maps(output_dir: Path, scale: int) -> list[Path]:
+    """Render only vanilla TMX/source points; no Minecraft-coordinate mapping."""
+    output_dir.mkdir(parents=True, exist_ok=True)
+    outputs: list[Path] = []
+    step = TILE_SIZE * scale
+
+    bus = render_tmx(MAPS_DIR / "BusStop.tmx", scale=scale)
+    bus_crop = (6, 17, 49, 30)
+    bus_image = bus.crop(tuple(value * step for value in bus_crop))
+    bus_image = draw_tile_grid(bus_image, scale, bus_crop[0], bus_crop[1])
+    bus_points = [
+        ("Player start (10,23), facing E", 10.5, 23.5),
+        ("Trigger tile A (11,23)", 11.5, 23.5),
+        ("Trigger tile B (11,24)", 11.5, 24.5),
+        ("Shadow start (26,23), facing W", 26.5, 23.5),
+        ("Shadow notice/jump stop (24,23)", 24.5, 23.5),
+        ("Player follow end (12,23)", 12.5, 23.5),
+        ("Shadow run end (44,23)", 44.5, 23.5),
+        ("Vanilla viewport anchor (24,23)", 24.5, 22.5),
+    ]
+    bus_annotated = draw_numbered_source_points(
+        bus_image, bus_points, (bus_crop[0], bus_crop[1]), scale,
+        "Secret Note 31 / Vanilla BusStop event / source points", route=False)
+    bus_path = output_dir / "secret_note31_bus_stop_vanilla_source_points.png"
+    bus_annotated.save(bus_path)
+    outputs.append(bus_path)
+
+    town = render_tmx(MAPS_DIR / "Town.tmx", scale=scale)
+    footprint_crop = (9, 9, 37, 58)
+    footprint_image = town.crop(tuple(value * step for value in footprint_crop))
+    footprint_image = draw_tile_grid(footprint_image, scale, footprint_crop[0], footprint_crop[1])
+    footprint_coords = [
+        (14.5, 52.75), (13.5, 53.0), (15.5, 53.0), (16.0, 52.25), (17.0, 52.0),
+        (17.5, 51.0), (18.3125, 50.5625), (18.75, 49.875), (21.75, 39.5), (21.0, 39.0),
+        (21.75, 38.25), (22.5, 37.5), (21.75, 36.75), (23.0, 36.0), (22.25, 35.25),
+        (23.5, 34.6), (23.5, 33.6), (24.25, 32.6), (26.75, 26.75), (27.5, 26.0),
+        (30.0, 23.0), (31.0, 22.0), (30.5, 21.0), (31.0, 20.0), (30.0, 19.0),
+        (29.0, 18.0), (29.1, 17.0), (30.0, 17.7), (31.5, 18.2), (30.5, 16.8),
+    ]
+    footprint_points = [(f"Footprint B{index:02d}", x, y)
+                        for index, (x, y) in enumerate(footprint_coords, start=1)]
+    footprint_annotated = draw_numbered_source_points(
+        footprint_image, footprint_points, (footprint_crop[0], footprint_crop[1]), scale,
+        "Secret Note 31 / Vanilla Town footprints / B01-B30", route=True)
+    footprint_path = output_dir / "secret_note31_town_vanilla_footprints.png"
+    footprint_annotated.save(footprint_path)
+    outputs.append(footprint_path)
+
+    finale_crop = (24, 9, 36, 21)
+    finale_image = town.crop(tuple(value * step for value in finale_crop))
+    finale_image = draw_tile_grid(finale_image, scale, finale_crop[0], finale_crop[1])
+    finale_points = [
+        ("Target bush (28,14)", 28.5, 14.5),
+        ("Shadow spawn (29,13)", 29.5, 13.5),
+        ("Landing when player X >= 31: (32,15)", 32.5, 15.5),
+        ("Landing when player X < 31: (31,13)", 31.5, 13.5),
+        ("Source escape direction: south/down", 31.5, 19.5),
+    ]
+    finale_annotated = draw_numbered_source_points(
+        finale_image, finale_points, (finale_crop[0], finale_crop[1]), scale,
+        "SN31 / Vanilla bush finale", route=False)
+    finale_path = output_dir / "secret_note31_town_vanilla_bush_finale.png"
+    finale_annotated.save(finale_path)
+    outputs.append(finale_path)
+    return outputs
+
+
+def render_secret_note_core_source_maps(output_dir: Path, scale: int) -> list[Path]:
+    """Render vanilla source anchors needed by active notes; never infer Minecraft coordinates."""
+    output_dir.mkdir(parents=True, exist_ok=True)
+    town_path = MAPS_DIR / "Town.tmx"
+    town = render_tmx(town_path, scale=scale)
+    step = TILE_SIZE * scale
+    outputs: list[Path] = []
+
+    root = ET.parse(town_path).getroot()
+    buildings_objects = next(
+        (group for group in root.findall("objectgroup") if group.get("name") == "Buildings"), None)
+    if buildings_objects is None:
+        raise ValueError("Town.tmx has no Buildings object layer.")
+    garbage_points: dict[str, tuple[float, float]] = {}
+    for obj in buildings_objects.findall("object"):
+        properties = obj.find("properties")
+        if properties is None:
+            continue
+        action = next((prop.get("value", "") for prop in properties.findall("property")
+                       if prop.get("name") == "Action"), "")
+        if action in {"Garbage Evelyn", "Garbage Saloon", "Garbage Blacksmith", "Garbage Museum"}:
+            garbage_points[action.removeprefix("Garbage ")] = (
+                float(obj.get("x", "0")) / TILE_SIZE + 0.5,
+                float(obj.get("y", "0")) / TILE_SIZE + 0.5,
+            )
+    expected = {"Evelyn", "Saloon", "Blacksmith", "Museum"}
+    if garbage_points.keys() != expected:
+        raise ValueError(f"Unexpected Town garbage anchors: {sorted(garbage_points)}")
+
+    garbage_crop = (40, 56, 116, 99)
+    garbage_image = town.crop(tuple(value * step for value in garbage_crop))
+    garbage_image = draw_tile_grid(garbage_image, scale, garbage_crop[0], garbage_crop[1])
+    garbage_order = ("Evelyn", "Saloon", "Blacksmith", "Museum")
+    garbage_labels = {
+        "Evelyn": "Evelyn can (52,63): cookies",
+        "Saloon": "Saloon can (47,70): dish of the day",
+        "Blacksmith": "Blacksmith can (97,80): copper/iron/gold ore",
+        "Museum": "Museum can (108,91): geode/omni geode",
+    }
+    garbage_source_points = [
+        (garbage_labels[name], *garbage_points[name]) for name in garbage_order
+    ]
+    garbage_annotated = draw_numbered_source_points(
+        garbage_image, garbage_source_points, (garbage_crop[0], garbage_crop[1]), scale,
+        "Secret Note 12 / Vanilla Town named garbage cans / source anchors", route=False)
+    garbage_path = output_dir / "secret_note12_town_vanilla_garbage_cans.png"
+    garbage_annotated.save(garbage_path)
+    outputs.append(garbage_path)
+
+    dig_crop = (90, 0, 106, 13)
+    dig_image = town.crop(tuple(value * step for value in dig_crop))
+    dig_image = draw_tile_grid(dig_image, scale, dig_crop[0], dig_crop[1])
+    dig_annotated = draw_numbered_source_points(
+        dig_image,
+        [("Dig tile (98,5): green strange doll (O)126", 98.5, 5.5)],
+        (dig_crop[0], dig_crop[1]), scale,
+        "SN17 / Vanilla Town / dig spot", route=False)
+    dig_path = output_dir / "secret_note17_town_vanilla_dig_spot.png"
+    dig_annotated.save(dig_path)
+    outputs.append(dig_path)
+    return outputs
+
+
+def render_secret_note10_source_map(output_dir: Path, scale: int) -> Path:
+    """Render the vanilla floor-100 choreography without inventing a Minecraft mapping."""
+    output_dir.mkdir(parents=True, exist_ok=True)
+    step = TILE_SIZE * scale
+    crop_origin = (4, 4)
+    grid_width, grid_height = 12, 9
+    base = Image.new("RGBA", (grid_width * step, grid_height * step), (38, 42, 50, 255))
+    draw = ImageDraw.Draw(base)
+    for tile_y in range(grid_height):
+        for tile_x in range(grid_width):
+            color = (51, 56, 66, 255) if (tile_x + tile_y) % 2 == 0 else (45, 50, 59, 255)
+            draw.rectangle(
+                (tile_x * step, tile_y * step, (tile_x + 1) * step, (tile_y + 1) * step),
+                fill=color,
+            )
+    base = draw_tile_grid(base, scale, crop_origin[0], crop_origin[1])
+
+    def pixel(tile_x: float, tile_y: float) -> tuple[float, float]:
+        return ((tile_x - crop_origin[0]) * step, (tile_y - crop_origin[1]) * step)
+
+    route = [
+        pixel(6.5, 6.5),
+        pixel(6.5, 10.5),
+        pixel(10.5, 10.5),
+        pixel(13.5, 10.5),
+        pixel(13.5, 9.5),
+    ]
+    route_layer = Image.new("RGBA", base.size, (0, 0, 0, 0))
+    route_draw = ImageDraw.Draw(route_layer)
+    route_draw.line(route, fill=(255, 210, 55, 230), width=max(4, scale * 2), joint="curve")
+    for route_point in route:
+        route_draw.ellipse(
+            (route_point[0] - 5, route_point[1] - 5, route_point[0] + 5, route_point[1] + 5),
+            fill=(255, 232, 122, 255),
+        )
+    base = Image.alpha_composite(base, route_layer)
+
+    points = [
+        ("Player start (6,6), facing S", 6.5, 6.5),
+        ("Mr Qi (10,7), facing N; viewport (10,7)", 10.5, 7.5),
+        ("Player route corner (6,10)", 6.5, 10.5),
+        ("Player dialogue stop (10,10)", 10.5, 10.5),
+        ("Player route corner (13,10)", 13.5, 10.5),
+        ("Player drinks milk (13,9), then faces S", 13.5, 9.5),
+        ("Milk/table visual source tile (13,7)", 13.5, 7.5),
+    ]
+    annotated = draw_numbered_source_points(
+        base,
+        points,
+        crop_origin,
+        scale,
+        "SN10 / Vanilla floor 100 choreography",
+        route=False,
+    )
+    output_path = output_dir / "secret_note10_skull_cavern_vanilla_choreography.png"
+    annotated.save(output_path)
+    return output_path
+
+
+def render_minecraft_capture_workbook(
+    output_path: Path,
+    title: str,
+    subtitle: str,
+    entries: list[tuple[str, str, str]],
+) -> Path:
+    """Render a blank coordinate checklist; values always come from the user's planning tool."""
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    width = 1120
+    height = 148 + len(entries) * 66
+    image = Image.new("RGB", (width, height), (229, 240, 249))
+    draw = ImageDraw.Draw(image)
+    title_font = load_font(30)
+    body_font = load_font(20)
+    small_font = load_font(16)
+    draw.text((42, 26), title, fill=(28, 42, 57), font=title_font)
+    draw.text((42, 70), subtitle, fill=(76, 96, 115), font=small_font)
+    for index, (point_id, label, capture) in enumerate(entries):
+        y = 112 + index * 66
+        draw.rounded_rectangle(
+            (42, y, width - 42, y + 52),
+            radius=8,
+            fill=(248, 250, 252),
+            outline=(104, 130, 154),
+            width=2,
+        )
+        draw.ellipse((54, y + 9, 88, y + 43), fill=(255, 196, 55), outline=(157, 112, 19), width=2)
+        id_box = draw.textbbox((0, 0), point_id, font=small_font)
+        draw.text(
+            (71 - (id_box[2] - id_box[0]) / 2, y + 16),
+            point_id,
+            fill=(45, 40, 24),
+            font=small_font,
+        )
+        draw.text((102, y + 7), label, fill=(35, 49, 63), font=body_font)
+        draw.text((102, y + 31), capture, fill=(92, 109, 124), font=small_font)
+    image.save(output_path)
+    return output_path
+
+
+def render_secret_note10_capture_workbook(output_dir: Path) -> Path:
+    entries = [
+        ("Q01", "Floor-100 scene area corner 1", "block x/y/z"),
+        ("Q02", "Floor-100 scene area corner 2", "block x/y/z"),
+        ("Q03", "Player start", "x/y/z + facing"),
+        ("Q04", "Player first route corner", "x/y/z"),
+        ("Q05", "Player dialogue stop", "x/y/z + facing"),
+        ("Q06", "Player second route corner", "x/y/z"),
+        ("Q07", "Player milk-drinking position", "x/y/z + facing"),
+        ("Q08", "Mr Qi standing position", "x/y/z + facing"),
+        ("Q09", "Table and milk visual anchor", "x/y/z + facing"),
+        ("Q10", "Camera rig", "exact x/y/z + yaw + pitch"),
+    ]
+    return render_minecraft_capture_workbook(
+        output_dir / "secret_note10_minecraft_capture_workbook.png",
+        "Secret Note 10 - Minecraft capture workbook",
+        "Every value is intentionally blank. Supply only coordinates captured from the in-game planning tool.",
+        entries,
+    )
+
+
+def render_secret_note_core_capture_workbook(output_dir: Path) -> Path:
+    entries = [
+        ("12A", "Evelyn/Mullner named garbage can", "block x/y/z"),
+        ("12B", "Saloon named garbage can", "block x/y/z"),
+        ("12C", "Blacksmith named garbage can", "block x/y/z"),
+        ("12D", "Museum named garbage can", "block x/y/z"),
+        ("17", "Secret Note 17 dig block", "block x/y/z"),
+    ]
+    return render_minecraft_capture_workbook(
+        output_dir / "secret_note12_17_minecraft_capture_workbook.png",
+        "Secret Notes 12 and 17 - Minecraft capture workbook",
+        "Vanilla source anchors are shown in separate maps; this sheet contains no inferred mapping.",
+        entries,
+    )
+
+
+def render_secret_note31_capture_workbooks(output_dir: Path) -> list[Path]:
+    """Create blank Minecraft capture checklists. The user supplies every value."""
+    output_dir.mkdir(parents=True, exist_ok=True)
+    groups = [
+        ("Scene A - Bus Stop encounter", [
+            ("A01", "Trigger area corner 1", "block x/y/z"),
+            ("A02", "Trigger area corner 2", "block x/y/z"),
+            ("A03", "Player start", "x/y/z + facing"),
+            ("A04", "Player follow endpoint", "x/y/z + facing"),
+            ("A05", "Shadow start", "x/y/z + facing"),
+            ("A06", "Shadow notice + jump stop", "x/y/z + facing"),
+            ("A07", "Shadow escape endpoint outside frame", "x/y/z + facing"),
+            ("A08", "Camera rig", "exact x/y/z + yaw + pitch"),
+        ]),
+        ("Scene B - Snow footprints", [
+            (f"B{index:02d}", f"Footprint {index:02d} in route order", "surface x/y/z + facing")
+            for index in range(1, 31)
+        ]),
+        ("Scene C - Bush finale", [
+            ("C01", "Interactive bush block", "block x/y/z"),
+            ("C02", "Shadow spawn inside bush", "x/y/z + facing"),
+            ("C03", "Player reference position, branch 1", "x/y/z + facing"),
+            ("C04", "Shadow landing, branch 1", "x/y/z + facing"),
+            ("C05", "Shadow escape endpoint, branch 1", "x/y/z + facing"),
+            ("C06", "Camera rig, branch 1", "exact x/y/z + yaw + pitch"),
+            ("C07", "Player reference position, branch 2", "x/y/z + facing"),
+            ("C08", "Shadow landing, branch 2", "x/y/z + facing"),
+            ("C09", "Shadow escape endpoint, branch 2", "x/y/z + facing"),
+            ("C10", "Camera rig, branch 2", "exact x/y/z + yaw + pitch"),
+        ]),
+    ]
+    outputs: list[Path] = []
+    for group_index, (title, entries) in enumerate(groups, start=1):
+        rows_per_column = 15
+        columns = math.ceil(len(entries) / rows_per_column)
+        width = 820 if columns == 1 else 1420
+        height = 150 + min(rows_per_column, len(entries)) * 66
+        image = Image.new("RGB", (width, height), (229, 240, 249))
+        draw = ImageDraw.Draw(image)
+        title_font = load_font(30)
+        body_font = load_font(20)
+        small_font = load_font(16)
+        draw.text((42, 28), f"Secret Note 31 - {title}", fill=(28, 42, 57), font=title_font)
+        draw.text((42, 72), "All Minecraft coordinates are intentionally blank until supplied with the planning tool.",
+                  fill=(76, 96, 115), font=small_font)
+        column_width = (width - 84) // columns
+        for index, (point_id, label, capture) in enumerate(entries):
+            column = index // rows_per_column
+            row = index % rows_per_column
+            x = 42 + column * column_width
+            y = 116 + row * 66
+            draw.rounded_rectangle((x, y, x + column_width - 22, y + 52), radius=8,
+                                   fill=(248, 250, 252), outline=(104, 130, 154), width=2)
+            draw.ellipse((x + 10, y + 9, x + 44, y + 43), fill=(255, 196, 55), outline=(157, 112, 19), width=2)
+            id_box = draw.textbbox((0, 0), point_id, font=small_font)
+            draw.text((x + 27 - (id_box[2] - id_box[0]) / 2, y + 16), point_id,
+                      fill=(45, 40, 24), font=small_font)
+            draw.text((x + 56, y + 7), label, fill=(35, 49, 63), font=body_font)
+            draw.text((x + 56, y + 31), capture, fill=(92, 109, 124), font=small_font)
+        output_path = output_dir / f"secret_note31_minecraft_capture_workbook_{group_index}.png"
+        image.save(output_path)
+        outputs.append(output_path)
+    return outputs
+
+
 def extract_night_market_actors(day: int, scale: int) -> list[ActorMarker]:
     markers: list[ActorMarker] = []
     schedule_key = f"winter_{day}"
@@ -578,6 +956,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--out", type=Path, default=DEFAULT_OUTPUT_DIR, help="Output directory.")
     parser.add_argument("--winter-star-secret-santa", action="store_true",
                         help="Render the vanilla Y1 Secret Santa event-point map.")
+    parser.add_argument("--secret-note-31", action="store_true",
+                        help="Render vanilla source maps and blank Minecraft capture workbooks for Secret Note 31.")
+    parser.add_argument("--secret-note-core", action="store_true",
+                        help="Render vanilla source anchors for active Secret Notes 12 and 17.")
+    parser.add_argument("--secret-note-10", action="store_true",
+                        help="Render the vanilla Note 10 choreography and a blank Minecraft capture workbook.")
     return parser.parse_args()
 
 
@@ -586,6 +970,21 @@ def main() -> None:
     if args.winter_star_secret_santa:
         output_path = render_winter_star_secret_santa_map(args.out, args.scale, args.portrait_size)
         print(output_path.relative_to(ROOT))
+        return
+    if args.secret_note_31:
+        for output_path in render_secret_note31_source_maps(args.out, args.scale):
+            print(output_path.relative_to(ROOT))
+        for output_path in render_secret_note31_capture_workbooks(args.out):
+            print(output_path.relative_to(ROOT))
+        return
+    if args.secret_note_core:
+        for output_path in render_secret_note_core_source_maps(args.out, args.scale):
+            print(output_path.relative_to(ROOT))
+        print(render_secret_note_core_capture_workbook(args.out).relative_to(ROOT))
+        return
+    if args.secret_note_10:
+        print(render_secret_note10_source_map(args.out, args.scale).relative_to(ROOT))
+        print(render_secret_note10_capture_workbook(args.out).relative_to(ROOT))
         return
     if args.preset == "night_market":
         for output_path in render_night_market_maps(args.out, args.scale, args.portrait_size):

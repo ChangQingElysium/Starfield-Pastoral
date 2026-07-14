@@ -1,5 +1,71 @@
 # Changelog
 
+## 0.5.1 - 2026-07-15
+
+### Update Log (English)
+
+#### Secret Notes And Magnifying Glass
+
+- Added the Magnifying Glass special item and unlock flow, including the source-aligned Winter Mystery bus-stop event, player-specific shadow footprints, bush interaction cutscene, and collection-page integration.
+- Added data-driven Secret Notes with continuous in-mod display numbering, creative-inventory variants, source-style text/image presentation, per-player discovery state, and synchronized server/client registries.
+- Implemented the currently supported note-linked gameplay: gift-preference reveals, four named trash-can searches for Note 12, the Mermaid Show sequence for Note 15, buried treasure for Notes 16-18, and the Ornate Necklace fishing and delivery flow for Note 25.
+- Kept unfinished Notes 10, 13, 14, 20-24 and 26 out of natural acquisition until their gameplay is implemented; original Note 19 remains intentionally omitted and later display numbers close the gap.
+
+#### Player Interface And Localization
+
+- Reworked the player menu collection and skill layouts toward the original game's structure, including a smaller Minecraft-skin face portrait, text fitting fixes, Secret Note entries, read-letter entries, and safe rendering of letter command syntax.
+- Rebuilt interaction hints as a compact hover-only overlay with time-based fade animation while retaining the existing distance-faded world outline.
+- Fixed Stardew tool type tooltips so translated tool categories no longer expose internal registry IDs or duplicate description lines.
+- Expanded language and localized GUI-asset coverage to every language currently shipped by the project: English, German, Spanish, French, Hungarian, Italian, Japanese, Korean, Brazilian Portuguese, Russian, Turkish and Simplified Chinese.
+
+#### 0.5 API Stabilization
+
+- Fixed namespaced addon recipe IDs across shops, unlocks, crafting, cooking and save data, while retaining migration support for existing StardewCraft IDs.
+- Unified login and `/reload` client-content synchronization, including replacement of deleted definitions, revision ordering, payload size limits, mail/festival/JEI display snapshots and cache refresh hooks.
+- Connected public agriculture and equipment providers to runtime gameplay, preserved full `ItemStack` data in equipment saves and synchronization, and added legacy equipment-save migration.
+- Applied active-festival availability conditions consistently, isolated failing dynamic providers, and expanded example addon/data-pack validation and runtime contract tests.
+
+#### Gameplay And Runtime Fixes
+
+- Fixed several shared gameplay consumers exposed by the 0.5 API migration, including crop, fruit-tree, animal, building, equipment, profession, mining, shop, mail and quest paths.
+- Improved farm-area resolution, model voxel-shape caching, wild weed models, fishing location data and Spring music resources.
+
+#### Release
+
+- Updated the public mod version to `0.5.1`.
+
+### 更新日志（中文）
+
+#### 秘密纸条与放大镜
+
+- 加入放大镜特殊物品与解锁流程，包含对照原版的“冬日谜团”巴士站事件、玩家独立可见的小黑脚印、灌木互动剧情与收集页接入。
+- 加入数据化秘密纸条，支持 Mod 内连续显示编号、创造物品栏全部变体、接近原版的文字/图像展示、玩家独立发现状态与服务端/客户端注册表同步。
+- 实装当前支持的纸条关联玩法：喜好揭示、12 号纸条的四个指定垃圾桶、15 号纸条的美人鱼演出顺序、16-18 号纸条的锄地宝藏，以及 25 号纸条的华丽项链钓取与交付。
+- 未完成的 10、13、14、20-24 和 26 号纸条在对应玩法实装前不会进入自然获取池；原版 19 号纸条按计划永久省略，后续展示编号自动补位。
+
+#### 玩家界面与多语言
+
+- 按原版结构调整玩家菜单的收集页与技能页，包含缩小的 Minecraft 皮肤正脸头像、文字适配、秘密纸条条目、已读信件条目，以及信件命令语法的安全渲染。
+- 将交互提示改为仅准星指向时显示的简洁界面提示，并加入基于时间的渐显渐隐；方块世界选框仍保留原有的距离渐显。
+- 修复星露谷工具的类型 tooltip，翻译后不再暴露内部注册 ID，也不再重复显示物品描述。
+- 将语言文本与本地化 GUI 资源扩展到项目当前的全部语言：英语、德语、西班牙语、法语、匈牙利语、意大利语、日语、韩语、巴西葡萄牙语、俄语、土耳其语与简体中文。
+
+#### 0.5 API 稳定性修复
+
+- 修复附属 Mod 带命名空间的配方 ID 在商店、解锁、合成、烹饪与存档中丢失命名空间的问题，同时保留现有本体 ID 的迁移兼容。
+- 统一登录与 `/reload` 的客户端内容同步，包含已删定义替换、revision 顺序、载荷大小限制、邮件/节日/JEI 展示快照与缓存刷新。
+- 将公开农业与装备 Provider 接入实际玩法，在装备存档和同步中保留完整 `ItemStack` 数据，并加入旧装备存档迁移。
+- 统一主动节日的可用条件判定，隔离异常的动态 Provider，并扩展示例附属/数据包验证与运行时契约测试。
+
+#### 玩法与运行时修复
+
+- 修复 0.5 API 迁移后暴露的多个共享玩法消费端，涉及作物、果树、动物、建筑、装备、职业、挖矿、商店、邮件与任务。
+- 改进农场区域解析、模型体素形状缓存、野草模型、钓鱼地点数据与春季音乐资源。
+
+#### 发布
+
+- 项目公开版本号更新为 `0.5.1`。
+
 ## 0.5.0 - 2026-07-14
 
 ### Update Log (English)

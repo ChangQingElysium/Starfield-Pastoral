@@ -1,6 +1,7 @@
 package com.stardew.craft.client.hud;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.client.gui.LocalizedGuiAssets;
 import com.stardew.craft.client.sound.LoopingVariablePitchSoundInstance;
 import com.stardew.craft.fishing.FishingCastPower;
 import com.stardew.craft.sound.ModSounds;
@@ -25,7 +26,6 @@ import java.util.Optional;
 @EventBusSubscriber(modid = StardewCraft.MODID, value = Dist.CLIENT)
 public final class FishingCastHud {
 	private static final ResourceLocation TIMING_CAST_TEX = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/fishing/timing_cast.png");
-	private static final ResourceLocation MAX_TEX = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/fishing/max.png");
 
 	// Stardew: background source is 47x12 at scale 4 => 188x48.
 	private static final int FALLBACK_BG_W = 47 * 4;
@@ -181,7 +181,7 @@ public final class FishingCastHud {
 			g.fill(ox, oy, ox + fw, oy + fh, fillColor);
 		}
 
-		renderMaxPopup(g, font, x, y, bgW, HUD_SCALE);
+		renderMaxPopup(g, x, y, bgW, HUD_SCALE);
 	}
 
 	private static float computeTimingCastScale(int srcW, int srcH) {
@@ -194,7 +194,7 @@ public final class FishingCastHud {
 	}
 
 	@SuppressWarnings("null")
-	private static void renderMaxPopup(GuiGraphics g, Font font, int barX, int barY, int bgW, float hudScale) {
+	private static void renderMaxPopup(GuiGraphics g, int barX, int barY, int bgW, float hudScale) {
 		if (maxPopMs <= 0) {
 			return;
 		}
@@ -207,21 +207,20 @@ public final class FishingCastHud {
 		float t = (elapsed - MAX_POP_DELAY_MS) / 50f;
 		float yMotion = (-4f * t) + (0.5f * 0.2f * t * t);
 
-		int maxSrcW = getTextureWidthOrFallback(MAX_TEX, FALLBACK_MAX_W);
-		int maxSrcH = getTextureHeightOrFallback(MAX_TEX, FALLBACK_MAX_H);
+		ResourceLocation maxTexture = LocalizedGuiAssets.texture("fishing/max.png");
+		int maxSrcW = getTextureWidthOrFallback(maxTexture, FALLBACK_MAX_W);
+		int maxSrcH = getTextureHeightOrFallback(maxTexture, FALLBACK_MAX_H);
 		float maxScale = computeMaxScale(maxSrcW, maxSrcH) * hudScale;
 		int maxW = Math.round(maxSrcW * maxScale);
 		int maxH = Math.round(maxSrcH * maxScale);
 		int x = barX + (bgW - maxW) / 2;
 		int y = barY - maxH - 8 + (int) yMotion;
 
-		if (hasResource(MAX_TEX)) {
+		if (hasResource(maxTexture)) {
 			g.pose().pushPose();
 			g.pose().scale(maxScale, maxScale, 1.0f);
-			g.blit(MAX_TEX, Math.round(x / maxScale), Math.round(y / maxScale), 0, 0, maxSrcW, maxSrcH, maxSrcW, maxSrcH);
+			g.blit(maxTexture, Math.round(x / maxScale), Math.round(y / maxScale), 0, 0, maxSrcW, maxSrcH, maxSrcW, maxSrcH);
 			g.pose().popPose();
-		} else {
-			g.drawCenteredString(font, "MAX", barX + bgW / 2, y + (maxH / 2) - 4, 0xFFFFFF);
 		}
 	}
 
@@ -267,7 +266,7 @@ public final class FishingCastHud {
 		if (loc.equals(TIMING_CAST_TEX) && timingTexW > 0) {
 			return timingTexW;
 		}
-		if (loc.equals(MAX_TEX) && maxTexW > 0) {
+		if (isMaxTexture(loc) && maxTexW > 0) {
 			return maxTexW;
 		}
 		return fallback;
@@ -278,7 +277,7 @@ public final class FishingCastHud {
 		if (loc.equals(TIMING_CAST_TEX) && timingTexH > 0) {
 			return timingTexH;
 		}
-		if (loc.equals(MAX_TEX) && maxTexH > 0) {
+		if (isMaxTexture(loc) && maxTexH > 0) {
 			return maxTexH;
 		}
 		return fallback;
@@ -291,7 +290,7 @@ public final class FishingCastHud {
 			timingTexH = dim[1];
 		}
 		if (maxTexW == 0 && maxTexH == 0) {
-			int[] dim = tryReadPngDimensions(MAX_TEX);
+			int[] dim = tryReadPngDimensions(LocalizedGuiAssets.texture("fishing/max.png"));
 			maxTexW = dim[0];
 			maxTexH = dim[1];
 		}
@@ -316,5 +315,9 @@ public final class FishingCastHud {
 		} catch (Exception e) {
 			return new int[] { 0, 0 };
 		}
+	}
+
+	private static boolean isMaxTexture(ResourceLocation loc) {
+		return loc.getPath().endsWith("/fishing/max.png");
 	}
 }

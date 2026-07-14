@@ -30,8 +30,13 @@ public class ClientPlayerDataCache {
     private static List<String> professions = new ArrayList<>();
     private static final java.util.Set<String> unlockedRecipes = new java.util.HashSet<>();
     private static final java.util.Map<String, Integer> recipeCraftCounts = new java.util.HashMap<>();
+    private static final java.util.Map<String, Integer> fishCatchCounts = new java.util.HashMap<>();
+    private static final java.util.Set<String> shippedBasic = new java.util.HashSet<>();
+    private static final java.util.Map<String, Integer> itemsShipped = new java.util.HashMap<>();
     private static final java.util.Set<String> mailFlags = new java.util.HashSet<>();
     private static final java.util.Set<String> specialItems = new java.util.HashSet<>();
+    private static final java.util.Set<String> secretNotesSeen = new java.util.HashSet<>();
+    private static final java.util.Set<String> revealedGiftTastes = new java.util.HashSet<>();
     private static final java.util.Map<String, Integer> stats = new java.util.HashMap<>();
     private static int ticketPrizesClaimed = 0;
     private static int specialOrderPrizeTickets = 0;
@@ -55,9 +60,9 @@ public class ClientPlayerDataCache {
     private static String farmOwnerUuid = "";
 
     // 装备槽
-    private static String equippedLeftRing = "";
-    private static String equippedRightRing = "";
-    private static String equippedBoots = "";
+    private static ItemStack equippedLeftRing = ItemStack.EMPTY;
+    private static ItemStack equippedRightRing = ItemStack.EMPTY;
+    private static ItemStack equippedBoots = ItemStack.EMPTY;
     private static ItemStack equippedTrinket = ItemStack.EMPTY;
     private static String equippedHat = "";
     private static String equippedShirt = "";
@@ -184,6 +189,23 @@ public class ClientPlayerDataCache {
             }
         }
 
+        secretNotesSeen.clear();
+        if (nbt.contains("SecretNotesSeen", Tag.TAG_LIST)) {
+            ListTag noteList = nbt.getList("SecretNotesSeen", Tag.TAG_STRING);
+            for (int i = 0; i < noteList.size(); i++) {
+                String noteId = noteList.getString(i);
+                if (!noteId.isBlank()) secretNotesSeen.add(noteId);
+            }
+        }
+        revealedGiftTastes.clear();
+        if (nbt.contains("RevealedGiftTastes", Tag.TAG_LIST)) {
+            ListTag revealList = nbt.getList("RevealedGiftTastes", Tag.TAG_STRING);
+            for (int i = 0; i < revealList.size(); i++) {
+                String reveal = revealList.getString(i);
+                if (!reveal.isBlank()) revealedGiftTastes.add(reveal);
+            }
+        }
+
         stats.clear();
         if (nbt.contains("Stats", Tag.TAG_COMPOUND)) {
             CompoundTag statsTag = nbt.getCompound("Stats");
@@ -220,6 +242,43 @@ public class ClientPlayerDataCache {
                 int count = Math.max(0, entry.getInt("Count"));
                 if (!recipeId.isBlank() && count > 0) {
                     recipeCraftCounts.put(recipeId, count);
+                }
+            }
+        }
+
+        fishCatchCounts.clear();
+        if (nbt.contains("FishCatchCounts", Tag.TAG_LIST)) {
+            ListTag countList = nbt.getList("FishCatchCounts", Tag.TAG_COMPOUND);
+            for (int i = 0; i < countList.size(); i++) {
+                CompoundTag entry = countList.getCompound(i);
+                String itemId = entry.getString("Item");
+                int count = Math.max(0, entry.getInt("Count"));
+                if (!itemId.isBlank() && count > 0) {
+                    fishCatchCounts.put(itemId, count);
+                }
+            }
+        }
+
+        shippedBasic.clear();
+        if (nbt.contains("ShippedBasic", Tag.TAG_LIST)) {
+            ListTag shippedList = nbt.getList("ShippedBasic", Tag.TAG_STRING);
+            for (int i = 0; i < shippedList.size(); i++) {
+                String itemId = shippedList.getString(i);
+                if (!itemId.isBlank()) {
+                    shippedBasic.add(itemId);
+                }
+            }
+        }
+
+        itemsShipped.clear();
+        if (nbt.contains("ItemsShipped", Tag.TAG_LIST)) {
+            ListTag shippedList = nbt.getList("ItemsShipped", Tag.TAG_COMPOUND);
+            for (int i = 0; i < shippedList.size(); i++) {
+                CompoundTag entry = shippedList.getCompound(i);
+                String itemId = entry.getString("Item");
+                int count = Math.max(0, entry.getInt("Count"));
+                if (!itemId.isBlank() && count > 0) {
+                    itemsShipped.put(itemId, count);
                 }
             }
         }
@@ -376,6 +435,26 @@ public class ClientPlayerDataCache {
         return new java.util.HashMap<>(recipeCraftCounts);
     }
 
+    public static int getFishCatchCount(String itemId) {
+        return itemId == null ? 0 : Math.max(0, fishCatchCounts.getOrDefault(itemId, 0));
+    }
+
+    public static boolean hasShipped(String itemId) {
+        return itemId != null && (shippedBasic.contains(itemId)
+                || itemsShipped.getOrDefault(itemId, 0) > 0);
+    }
+
+    public static boolean hasShippedMatching(java.util.function.Predicate<String> predicate) {
+        if (predicate == null) return false;
+        for (String itemId : shippedBasic) {
+            if (predicate.test(itemId)) return true;
+        }
+        for (java.util.Map.Entry<String, Integer> entry : itemsShipped.entrySet()) {
+            if (entry.getValue() > 0 && predicate.test(entry.getKey())) return true;
+        }
+        return false;
+    }
+
     public static boolean hasMailFlag(String flag) {
         return flag != null && mailFlags.contains(flag);
     }
@@ -394,6 +473,23 @@ public class ClientPlayerDataCache {
 
     public static java.util.Set<String> getSpecialItems() {
         return new java.util.HashSet<>(specialItems);
+    }
+
+    public static boolean hasSeenSecretNote(String noteId) {
+        return noteId != null && secretNotesSeen.contains(noteId);
+    }
+
+    public static java.util.Set<String> getSecretNotesSeen() {
+        return new java.util.HashSet<>(secretNotesSeen);
+    }
+
+    public static boolean hasRevealedGiftTaste(String npcId, String objectId) {
+        if (npcId == null || objectId == null) return false;
+        return revealedGiftTastes.contains(npcId.trim().toLowerCase(java.util.Locale.ROOT) + ":" + objectId.trim());
+    }
+
+    public static java.util.Set<String> getRevealedGiftTastes() {
+        return new java.util.HashSet<>(revealedGiftTastes);
     }
 
     public static int getStat(String key) {
@@ -416,9 +512,12 @@ public class ClientPlayerDataCache {
     }
 
     // Equipment getters/setters
-    public static String getEquippedLeftRing() { return equippedLeftRing; }
-    public static String getEquippedRightRing() { return equippedRightRing; }
-    public static String getEquippedBoots() { return equippedBoots; }
+    public static String getEquippedLeftRing() { return equipmentStorageId(equippedLeftRing); }
+    public static String getEquippedRightRing() { return equipmentStorageId(equippedRightRing); }
+    public static String getEquippedBoots() { return equipmentStorageId(equippedBoots); }
+    public static ItemStack getEquippedLeftRingStack() { return equippedLeftRing.copy(); }
+    public static ItemStack getEquippedRightRingStack() { return equippedRightRing.copy(); }
+    public static ItemStack getEquippedBootsStack() { return equippedBoots.copy(); }
     public static ItemStack getEquippedTrinket() { return equippedTrinket.copy(); }
     public static String getEquippedHat() { return equippedHat; }
     public static String getEquippedShirt() { return equippedShirt; }
@@ -430,9 +529,12 @@ public class ClientPlayerDataCache {
         CosmeticAppearance appearance = cosmeticAppearances.get(playerId);
         return appearance == null ? "" : appearance.hat();
     }
-    public static void setEquippedLeftRing(String id) { equippedLeftRing = id == null ? "" : id; }
-    public static void setEquippedRightRing(String id) { equippedRightRing = id == null ? "" : id; }
-    public static void setEquippedBoots(String id) { equippedBoots = id == null ? "" : id; }
+    public static void setEquippedLeftRing(String id) { equippedLeftRing = equipmentStackFromStorageId(id); }
+    public static void setEquippedRightRing(String id) { equippedRightRing = equipmentStackFromStorageId(id); }
+    public static void setEquippedBoots(String id) { equippedBoots = equipmentStackFromStorageId(id); }
+    public static void setEquippedLeftRingStack(ItemStack stack) { equippedLeftRing = singleEquipmentStack(stack); }
+    public static void setEquippedRightRingStack(ItemStack stack) { equippedRightRing = singleEquipmentStack(stack); }
+    public static void setEquippedBootsStack(ItemStack stack) { equippedBoots = singleEquipmentStack(stack); }
     public static void setEquippedTrinket(ItemStack stack) {
         equippedTrinket = stack == null ? ItemStack.EMPTY : stack.copy();
     }
@@ -472,6 +574,8 @@ public class ClientPlayerDataCache {
         recipeCraftCounts.clear();
         mailFlags.clear();
         specialItems.clear();
+        secretNotesSeen.clear();
+        revealedGiftTastes.clear();
         stats.clear();
         ticketPrizesClaimed = 0;
         specialOrderPrizeTickets = 0;
@@ -487,9 +591,9 @@ public class ClientPlayerDataCache {
         tempFarmingLevelBonus = 0;
         tempForagingLevelBonus = 0;
         tempMiningLevelBonus = 0;
-        equippedLeftRing = "";
-        equippedRightRing = "";
-        equippedBoots = "";
+        equippedLeftRing = ItemStack.EMPTY;
+        equippedRightRing = ItemStack.EMPTY;
+        equippedBoots = ItemStack.EMPTY;
         equippedTrinket = ItemStack.EMPTY;
         equippedHat = "";
         equippedShirt = "";
@@ -514,6 +618,30 @@ public class ClientPlayerDataCache {
             }
         }
         return 10;
+    }
+
+    private static ItemStack singleEquipmentStack(ItemStack stack) {
+        return stack == null || stack.isEmpty() ? ItemStack.EMPTY : stack.copyWithCount(1);
+    }
+
+    private static String equipmentStorageId(ItemStack stack) {
+        if (stack == null || stack.isEmpty()) return "";
+        if (com.stardew.craft.item.equipment.CombinedRingData.isCombinedRing(stack)) {
+            return com.stardew.craft.item.equipment.CombinedRingData.encodeForEquipmentSlot(stack);
+        }
+        return net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
+    }
+
+    private static ItemStack equipmentStackFromStorageId(String id) {
+        if (id == null || id.isBlank()) return ItemStack.EMPTY;
+        if (com.stardew.craft.item.equipment.CombinedRingData.isEncodedEquipmentSlot(id)) {
+            return com.stardew.craft.item.equipment.CombinedRingData.stackFromEquipmentSlot(id);
+        }
+        net.minecraft.resources.ResourceLocation location = net.minecraft.resources.ResourceLocation.tryParse(id);
+        if (location == null || !net.minecraft.core.registries.BuiltInRegistries.ITEM.containsKey(location)) {
+            return ItemStack.EMPTY;
+        }
+        return new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.get(location), 1);
     }
 
     private record CosmeticAppearance(String hat, String shirt, String pants) {

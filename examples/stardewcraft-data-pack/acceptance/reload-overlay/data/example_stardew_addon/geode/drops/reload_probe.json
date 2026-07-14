@@ -1,0 +1,15 @@
+{
+  "inputs": ["minecraft:quartz_block"],
+  "available_when": [
+    {"type": "stardewcraft:always", "data": {"value": true}}
+  ],
+  "entries": [
+    {
+      "weight": 1,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {"item": "minecraft:emerald", "count": 1}
+      }
+    }
+  ]
+}

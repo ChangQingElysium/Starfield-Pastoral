@@ -43,4 +43,9 @@ public interface QuestObjectiveRuntime {
     default String deliveryTargetMessage() {
         return "";
     }
+
+    /** Hidden objectives exist for runtime state but don't appear in the quest log. */
+    default boolean isSecret() {
+        return false;
+    }
 }

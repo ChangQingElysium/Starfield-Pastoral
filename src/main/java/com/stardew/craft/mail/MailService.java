@@ -212,6 +212,34 @@ public class MailService {
         PacketDistributor.sendToPlayer(player, payload);
     }
 
+    /** Reopens an already received letter with vanilla {@code fromCollection} semantics. */
+    public static void openSeenMail(ServerPlayer player, String mailId) {
+        PlayerStardewData data = PlayerDataManager.getPlayerData(player);
+        if (mailId == null || !data.hasMailFlag(mailId)) return;
+        MailEntry entry = MailRegistry.get(mailId);
+        if (entry == null) return;
+
+        String secretFriendId = "winter_18".equals(mailId)
+                ? com.stardew.craft.festival.WinterStarFestivalService.getSecretFriendId(player)
+                : "";
+        String secretSantaNameKey = secretFriendId.isBlank()
+                ? ""
+                : "entity.stardewcraft.npc." + secretFriendId;
+        PacketDistributor.sendToPlayer(player, new OpenMailPayload(
+                mailId,
+                entry.getText(),
+                secretSantaNameKey,
+                entry.getBackground(),
+                entry.getTextColor() != null ? entry.getTextColor() : "",
+                List.of(),
+                0,
+                "",
+                "",
+                false,
+                0
+        ));
+    }
+
     private static boolean canQueueReadableMail(ServerPlayer player, String mailId, String queueName) {
         if (mailId == null || mailId.isBlank()) {
             LOGGER.warn("Ignoring blank readable mail id for {} queue on {}",

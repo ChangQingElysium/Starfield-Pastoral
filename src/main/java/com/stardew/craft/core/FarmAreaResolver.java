@@ -10,18 +10,11 @@ import javax.annotation.Nullable;
 import java.util.UUID;
 
 /**
- * 农场区域动态判定工具 — 替代旧 FarmAreaHelper 的硬编码边界。
+ * 农场区域动态判定工具。
  * 支持多农场实例的坐标判断和归属查询。
- *
- * 旧农场区域（X:36-311, Z:37-154）保留为"公共遗产区域"（入口广场）。
- * 新的玩家农场在 Z>=20001 的远坐标网格中。
+ * 玩家农场位于 Z>=20001 的远坐标网格中。
  */
 public final class FarmAreaResolver {
-
-    // 旧公共农场边界（保留用于入口区域判断）
-    private static final int LEGACY_MIN_X = 36, LEGACY_MAX_X = 311;
-    private static final int LEGACY_MIN_Y = -18, LEGACY_MAX_Y = 103;
-    private static final int LEGACY_MIN_Z = 37, LEGACY_MAX_Z = 154;
 
     private FarmAreaResolver() {}
 
@@ -31,16 +24,11 @@ public final class FarmAreaResolver {
 
     /**
      * 快速判断：坐标是否在任何玩家的农场区域内。
-     * 包括旧公共农场区域和新的实例化农场区域。
      * 用于放置/破坏保护、睡觉限制等通用判断。
      */
     public static boolean isInAnyFarm(Level level, BlockPos pos) {
         if (level.dimension() != ModDimensions.STARDEW_VALLEY) return false;
 
-        // 检查旧公共农场区域
-        if (isInLegacyFarmArea(pos)) return true;
-
-        // 检查新实例化农场区域
         if (!FarmInstanceAllocator.isInFarmInstanceRegion(pos)) return false;
 
         // 通过网格数学确认该槽位确实有人拥有
@@ -69,37 +57,22 @@ public final class FarmAreaResolver {
     }
 
     // ════════════════════════════════════════════════════════
-    //  兼容旧接口：替代 FarmAreaHelper
+    //  通用区域判定
     // ════════════════════════════════════════════════════════
 
     /**
-     * 兼容旧 FarmAreaHelper.isInFarmArea() —
-     * 判断位置是否在"可操作的农场区域"（包括旧公共区域 + 所有实例化农场）。
+     * 判断位置是否在已登记的玩家农场实例中。
      */
     public static boolean isInFarmArea(Level level, BlockPos pos) {
         return isInAnyFarm(level, pos);
     }
 
     /**
-     * 兼容旧 FarmAreaHelper.isInStardewButNotFarm() —
      * 在星露谷维度但不在任何农场区域内。
      */
     public static boolean isInStardewButNotFarm(Level level, BlockPos pos) {
         if (level.dimension() != ModDimensions.STARDEW_VALLEY) return false;
         return !isInAnyFarm(level, pos);
-    }
-
-    // ════════════════════════════════════════════════════════
-    //  旧农场区域（公共遗产区域）
-    // ════════════════════════════════════════════════════════
-
-    /**
-     * 判断坐标是否在旧的公共农场区域（入口广场）。
-     */
-    public static boolean isInLegacyFarmArea(BlockPos pos) {
-        return pos.getX() >= LEGACY_MIN_X && pos.getX() <= LEGACY_MAX_X
-            && pos.getY() >= LEGACY_MIN_Y && pos.getY() <= LEGACY_MAX_Y
-            && pos.getZ() >= LEGACY_MIN_Z && pos.getZ() <= LEGACY_MAX_Z;
     }
 
     /**

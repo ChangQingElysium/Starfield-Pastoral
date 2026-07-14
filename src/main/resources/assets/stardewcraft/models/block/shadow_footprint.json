@@ -1,0 +1,18 @@
+{
+  "render_type": "minecraft:translucent",
+  "ambientocclusion": false,
+  "textures": {
+    "footprint": "stardewcraft:block/shadow_footprint",
+    "particle": "stardewcraft:block/shadow_footprint"
+  },
+  "elements": [
+    {
+      "from": [2, 0, 3],
+      "to": [14, 0.0016, 13],
+      "shade": false,
+      "faces": {
+        "up": { "uv": [0, 0, 16, 16], "texture": "#footprint" }
+      }
+    }
+  ]
+}

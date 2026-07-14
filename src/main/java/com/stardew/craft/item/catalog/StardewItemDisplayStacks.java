@@ -2,6 +2,7 @@ package com.stardew.craft.item.catalog;
 
 import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.item.ModItems;
+import com.stardew.craft.item.SecretNoteItem;
 import com.stardew.craft.item.SpecificBaitItem;
 import com.stardew.craft.item.StardewQualityItem;
 import com.stardew.craft.item.artisan.ArtisanDrinkItem;
@@ -29,6 +30,16 @@ public final class StardewItemDisplayStacks {
     public static List<ItemStack> stacksForItem(Item item) {
         if (isHiddenBaseItem(item)) {
             return List.of();
+        }
+
+        if (item == ModItems.SECRET_NOTE.get()) {
+            List<ItemStack> stacks = new ArrayList<>();
+            for (int displayNumber = SecretNoteItem.FIRST_DISPLAY_NOTE;
+                 displayNumber <= SecretNoteItem.LAST_DISPLAY_NOTE;
+                 displayNumber++) {
+                stacks.add(SecretNoteItem.createCreativeVariant(displayNumber));
+            }
+            return stacks;
         }
 
         Integer colorCount = getFlowerColorVariantCount(item);

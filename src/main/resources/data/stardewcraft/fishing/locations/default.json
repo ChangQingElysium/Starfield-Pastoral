@@ -2,6 +2,17 @@
   "comment": "完整的星露谷物语钓鱼数据 - 所有鱼类及其原版条件",
   "location": "Default",
   "fish": [
+	{
+	  "id": "secret_note_or_item",
+	  "precedence": 1000,
+	  "item": "stardewcraft:secret_note",
+	  "chance": 0.08,
+	  "minFishingLevel": 0,
+	  "minDistanceFromShore": 0,
+	  "maxDistanceFromShore": -1,
+	  "canBeInherited": true,
+	  "skipMinigame": true
+	},
     {
       "comment": "========== 海洋鱼类 (Ocean/Beach) =========="
     },

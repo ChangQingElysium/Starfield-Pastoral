@@ -106,6 +106,10 @@ public record CutsceneServerActionPayload(
                     com.stardew.craft.sewer.SewerService.grantRustyKey(player, false);
                     LOGGER.debug("Cutscene granted Rusty Key to {}", player.getName().getString());
                 }
+                case "grant_magnifying_glass" -> {
+                    com.stardew.craft.secretnote.SecretNoteService.grantMagnifyingGlass(player);
+                    LOGGER.debug("Cutscene granted Magnifying Glass to {}", player.getName().getString());
+                }
                 case "mark_opened_sewer" -> {
                     com.stardew.craft.sewer.SewerService.markOpenedSewer(player);
                     LOGGER.debug("Cutscene marked sewer opened for {}", player.getName().getString());

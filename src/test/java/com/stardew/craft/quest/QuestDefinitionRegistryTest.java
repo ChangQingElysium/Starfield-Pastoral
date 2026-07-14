@@ -1,6 +1,7 @@
 package com.stardew.craft.quest;
 
 import com.stardew.craft.api.v1.internal.BuiltinApiTypes;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -44,5 +45,43 @@ class QuestDefinitionRegistryTest {
         assertTrue(restored.isAccepted());
         assertEquals("stardewcraft:6", restored.getDefinitionId().toString());
         assertEquals(quest.getTitleKey(), restored.getTitleKey());
+    }
+
+    @Test
+    void ornateNecklaceReturnQuestsAreHiddenRuntimeQuests() {
+        StardewQuest abigail = QuestDataLoader.createQuest("128");
+        StardewQuest caroline = QuestDataLoader.createQuest("129");
+
+        assertNotNull(abigail);
+        assertNotNull(caroline);
+        assertTrue(abigail.isSecretQuest());
+        assertTrue(caroline.isSecretQuest());
+    }
+
+    @Test
+    void ornateNecklaceInHandCanRepairAStaleItemFoundFlag() {
+        StardewQuest abigail = QuestDataLoader.createQuest("128");
+        StardewQuest caroline = QuestDataLoader.createQuest("129");
+
+        assertNotNull(abigail);
+        assertNotNull(caroline);
+        abigail.setAccepted(true);
+        caroline.setAccepted(true);
+
+        assertTrue(abigail.matchesItemDelivery("abigail", "stardewcraft:ornate_necklace"));
+        assertTrue(caroline.matchesItemDelivery("caroline", "stardewcraft:ornate_necklace"));
+    }
+
+    @Test
+    void introductionsUsesLocalizedDynamicProgressInsteadOfVanillaSentinel() {
+        StardewQuest quest = QuestDataLoader.createQuest("9");
+
+        assertNotNull(quest);
+        var objective = quest.getObjectiveComponents();
+        assertEquals(1, objective.size());
+        var translated = assertInstanceOf(
+                TranslatableContents.class, objective.getFirst().getContents());
+        assertEquals("stardewcraft.quest.socialize.progress", translated.getKey());
+        assertEquals(2, translated.getArgs().length);
     }
 }

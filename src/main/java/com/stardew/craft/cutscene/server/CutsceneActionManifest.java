@@ -111,6 +111,7 @@ final class CutsceneActionManifest {
                     string(command, "set_flag".equals(type) ? "flag" : "id", ""),
                     branch);
             case "grant_rusty_key" -> action("grant_rusty_key", "", branch);
+            case "grant_magnifying_glass" -> action("grant_magnifying_glass", "", branch);
             case "mark_opened_sewer" -> action("mark_opened_sewer", "", branch);
             case "add_recipe" -> action("add_recipe", string(command, "recipe", ""), branch);
             case "add_mail_now" -> action("add_mail_now", string(command, "id", ""), branch);

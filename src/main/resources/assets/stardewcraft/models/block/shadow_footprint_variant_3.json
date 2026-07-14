@@ -1,0 +1,17 @@
+{
+  "render_type": "minecraft:translucent",
+  "ambientocclusion": false,
+  "textures": {
+    "footprint": "stardewcraft:block/shadow_footprint",
+    "particle": "stardewcraft:block/shadow_footprint"
+  },
+  "elements": [
+    {
+      "from": [2, 0, 4],
+      "to": [13.5, 0.0016, 14],
+      "rotation": { "origin": [7.75, 0.0016, 9], "axis": "y", "angle": 22.5, "rescale": true },
+      "shade": false,
+      "faces": { "up": { "uv": [0, 0, 16, 16], "texture": "#footprint" } }
+    }
+  ]
+}

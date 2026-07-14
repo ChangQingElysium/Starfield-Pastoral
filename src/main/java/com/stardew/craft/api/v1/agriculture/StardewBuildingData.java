@@ -6,6 +6,14 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
 
+/**
+ * Shared building metadata resolved from the building manager block.
+ *
+ * <p>Coop and barn creation consume {@link #capacity()}, and animal acquisition enforces a
+ * non-empty {@link #acceptedAnimals()} list. {@link #type()} and {@link #requiredInteriorBlocks()}
+ * remain descriptive metadata: StardewCraft's scanned free-form interiors do not have a universal
+ * mapping from an arbitrary manager block to a required-block placement rule.
+ */
 public record StardewBuildingData(
         ResourceLocation type,
         int capacity,
@@ -20,4 +28,9 @@ public record StardewBuildingData(
             ResourceLocation.CODEC.listOf().optionalFieldOf("required_interior_blocks", List.of())
                     .forGetter(StardewBuildingData::requiredInteriorBlocks)
     ).apply(instance, StardewBuildingData::new));
+
+    public StardewBuildingData {
+        acceptedAnimals = List.copyOf(acceptedAnimals == null ? List.of() : acceptedAnimals);
+        requiredInteriorBlocks = List.copyOf(requiredInteriorBlocks == null ? List.of() : requiredInteriorBlocks);
+    }
 }

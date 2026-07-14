@@ -221,6 +221,7 @@ public class AuctionCreateScreen extends Screen {
     private EditBox edit(int x, int y, int w, int h, String hintKey, int maxLength) {
         EditBox box = new EditBox(font, x, y, w, h, Component.translatable(hintKey));
         box.setBordered(false);
+        box.setTextShadow(false);
         box.setTextColor(0xFF3F2411);
         box.setTextColorUneditable(0xFF3F2411);
         box.setHint(Component.translatable(hintKey));

@@ -197,6 +197,12 @@ public class PlayerStardewData {
     // Tracks unique items already obtained (e.g. Neptune's Glaive from fishing treasure)
     private final Set<String> specialItems = new HashSet<>();
 
+    // ============ 秘密纸条（SDV Farmer.secretNotesSeen parity） ============
+    // 使用命名空间 ID，原版 1..27 对应 stardewcraft:1 .. stardewcraft:27。
+    private final Set<String> secretNotesSeen = new HashSet<>();
+    // 原版礼物日志：%revealtaste 和玩家亲自送过的物品都记为已知，不改变实际送礼口味。
+    private final Set<String> revealedGiftTastes = new HashSet<>();
+
     // ============ 首次加入日（邮件调度基准） ============
     // -1 表示尚未初始化，首次处理邮件时设为当天全局总天数
     private int firstJoinDay = -1;
@@ -220,10 +226,10 @@ public class PlayerStardewData {
 
     // ============ 装备系统（戒指 + 靴子 + 外观装饰） ============
     // SDV parity: Farmer.leftRing + Farmer.rightRing + Farmer.boots + appearance slots
-    // 存储物品注册ID，如 "stardewcraft:vampire_ring"，空字符串表示未装备
-    private String equippedLeftRing = "";
-    private String equippedRightRing = "";
-    private String equippedBoots = "";
+    // 保存完整物品栈，避免动态装备 Provider 依赖的 Data Component 在装备后丢失。
+    private net.minecraft.world.item.ItemStack equippedLeftRing = net.minecraft.world.item.ItemStack.EMPTY;
+    private net.minecraft.world.item.ItemStack equippedRightRing = net.minecraft.world.item.ItemStack.EMPTY;
+    private net.minecraft.world.item.ItemStack equippedBoots = net.minecraft.world.item.ItemStack.EMPTY;
     private net.minecraft.world.item.ItemStack equippedTrinket = net.minecraft.world.item.ItemStack.EMPTY;
     private String equippedHat = "";
     private String equippedShirt = "";
@@ -306,6 +312,11 @@ public class PlayerStardewData {
      * 从NBT加载数据
      */
     public static PlayerStardewData fromNBT(CompoundTag tag, UUID playerUUID) {
+        return fromNBT(tag, playerUUID, null);
+    }
+
+    public static PlayerStardewData fromNBT(
+            CompoundTag tag, UUID playerUUID, @Nullable net.minecraft.core.HolderLookup.Provider registries) {
         PlayerStardewData data = new PlayerStardewData(playerUUID);
         
         // 基础属性
@@ -455,7 +466,10 @@ public class PlayerStardewData {
         if (tag.contains("UnlockedRecipes")) {
             ListTag list = tag.getList("UnlockedRecipes", 8);
             for (int i = 0; i < list.size(); i++) {
-                data.unlockedRecipes.add(list.getString(i));
+                String recipeId = RecipeIdNormalizer.storageId(list.getString(i));
+                if (!recipeId.isBlank()) {
+                    data.unlockedRecipes.add(recipeId);
+                }
             }
         }
         if (tag.contains("RecipeCraftCounts")) {
@@ -465,7 +479,7 @@ public class PlayerStardewData {
                 if (!entry.contains("Recipe")) {
                     continue;
                 }
-                String recipeId = entry.getString("Recipe");
+                String recipeId = RecipeIdNormalizer.storageId(entry.getString("Recipe"));
                 int count = Math.max(0, entry.getInt("Count"));
                 if (!recipeId.isBlank() && count > 0) {
                     data.recipeCraftCounts.put(recipeId, count);
@@ -632,11 +646,26 @@ public class PlayerStardewData {
             }
         }
 
+        if (tag.contains("SecretNotesSeen", Tag.TAG_LIST)) {
+            ListTag notes = tag.getList("SecretNotesSeen", Tag.TAG_STRING);
+            for (int i = 0; i < notes.size(); i++) {
+                String id = notes.getString(i);
+                if (!id.isBlank()) data.secretNotesSeen.add(id);
+            }
+        }
+        if (tag.contains("RevealedGiftTastes", Tag.TAG_LIST)) {
+            ListTag reveals = tag.getList("RevealedGiftTastes", Tag.TAG_STRING);
+            for (int i = 0; i < reveals.size(); i++) {
+                String reveal = reveals.getString(i);
+                if (!reveal.isBlank()) data.revealedGiftTastes.add(reveal);
+            }
+        }
+
         // 工具升级
         // 装备
-        data.equippedLeftRing = tag.contains("EquippedLeftRing") ? tag.getString("EquippedLeftRing") : "";
-        data.equippedRightRing = tag.contains("EquippedRightRing") ? tag.getString("EquippedRightRing") : "";
-        data.equippedBoots = tag.contains("EquippedBoots") ? tag.getString("EquippedBoots") : "";
+        data.equippedLeftRing = loadEquipmentStack(tag, "EquippedLeftRingStack", "EquippedLeftRing", registries);
+        data.equippedRightRing = loadEquipmentStack(tag, "EquippedRightRingStack", "EquippedRightRing", registries);
+        data.equippedBoots = loadEquipmentStack(tag, "EquippedBootsStack", "EquippedBoots", registries);
         data.equippedTrinket = tag.contains("EquippedTrinket", Tag.TAG_COMPOUND)
             ? com.stardew.craft.item.trinket.StardewTrinketItem.loadStackFromTag(tag.getCompound("EquippedTrinket"))
             : net.minecraft.world.item.ItemStack.EMPTY;
@@ -743,6 +772,11 @@ public class PlayerStardewData {
      */
     @SuppressWarnings("null")
     public CompoundTag toNBT() {
+        return toNBT(null);
+    }
+
+    @SuppressWarnings("null")
+    public CompoundTag toNBT(@Nullable net.minecraft.core.HolderLookup.Provider registries) {
         CompoundTag tag = new CompoundTag();
         
         // 基础属性
@@ -1018,10 +1052,29 @@ public class PlayerStardewData {
             tag.put("SpecialItems", specials);
         }
 
+        if (!secretNotesSeen.isEmpty()) {
+            ListTag notes = new ListTag();
+            secretNotesSeen.stream().sorted().forEach(id -> notes.add(StringTag.valueOf(id)));
+            tag.put("SecretNotesSeen", notes);
+        }
+        if (!revealedGiftTastes.isEmpty()) {
+            ListTag reveals = new ListTag();
+            revealedGiftTastes.stream().sorted().forEach(value -> reveals.add(StringTag.valueOf(value)));
+            tag.put("RevealedGiftTastes", reveals);
+        }
+
         // 装备
-        if (!equippedLeftRing.isEmpty()) tag.putString("EquippedLeftRing", equippedLeftRing);
-        if (!equippedRightRing.isEmpty()) tag.putString("EquippedRightRing", equippedRightRing);
-        if (!equippedBoots.isEmpty()) tag.putString("EquippedBoots", equippedBoots);
+        String leftRingId = getEquippedLeftRing();
+        String rightRingId = getEquippedRightRing();
+        String bootsId = getEquippedBoots();
+        if (!leftRingId.isEmpty()) tag.putString("EquippedLeftRing", leftRingId);
+        if (!rightRingId.isEmpty()) tag.putString("EquippedRightRing", rightRingId);
+        if (!bootsId.isEmpty()) tag.putString("EquippedBoots", bootsId);
+        if (registries != null) {
+            if (!equippedLeftRing.isEmpty()) tag.put("EquippedLeftRingStack", equippedLeftRing.save(registries));
+            if (!equippedRightRing.isEmpty()) tag.put("EquippedRightRingStack", equippedRightRing.save(registries));
+            if (!equippedBoots.isEmpty()) tag.put("EquippedBootsStack", equippedBoots.save(registries));
+        }
         if (!equippedTrinket.isEmpty()) tag.put("EquippedTrinket", com.stardew.craft.item.trinket.StardewTrinketItem.saveStackToTag(equippedTrinket));
         if (!equippedHat.isEmpty()) tag.putString("EquippedHat", equippedHat);
         if (!equippedShirt.isEmpty()) tag.putString("EquippedShirt", equippedShirt);
@@ -1817,17 +1870,19 @@ public class PlayerStardewData {
     }
 
     public boolean isRecipeUnlocked(String recipeId) {
-        if (recipeId == null || recipeId.isBlank()) {
+        String normalized = RecipeIdNormalizer.storageId(recipeId);
+        if (normalized.isBlank()) {
             return false;
         }
-        return unlockedRecipes.contains(recipeId);
+        return unlockedRecipes.contains(normalized);
     }
 
     public boolean unlockRecipe(String recipeId) {
-        if (recipeId == null || recipeId.isBlank()) {
+        String normalized = RecipeIdNormalizer.storageId(recipeId);
+        if (normalized.isBlank()) {
             return false;
         }
-        boolean changed = unlockedRecipes.add(recipeId);
+        boolean changed = unlockedRecipes.add(normalized);
         if (changed) {
             markDirty();
         }
@@ -1835,10 +1890,11 @@ public class PlayerStardewData {
     }
 
     public boolean lockRecipe(String recipeId) {
-        if (recipeId == null || recipeId.isBlank()) {
+        String normalized = RecipeIdNormalizer.storageId(recipeId);
+        if (normalized.isBlank()) {
             return false;
         }
-        boolean changed = unlockedRecipes.remove(recipeId);
+        boolean changed = unlockedRecipes.remove(normalized);
         if (changed) {
             markDirty();
         }
@@ -1875,10 +1931,11 @@ public class PlayerStardewData {
     }
 
     public int getRecipeCraftCount(String recipeId) {
-        if (recipeId == null || recipeId.isBlank()) {
+        String normalized = RecipeIdNormalizer.storageId(recipeId);
+        if (normalized.isBlank()) {
             return 0;
         }
-        return Math.max(0, recipeCraftCounts.getOrDefault(recipeId, 0));
+        return Math.max(0, recipeCraftCounts.getOrDefault(normalized, 0));
     }
 
     public Map<String, Integer> getAllRecipeCraftCounts() {
@@ -1886,18 +1943,19 @@ public class PlayerStardewData {
     }
 
     public boolean recordRecipeCrafted(String recipeId, int craftedAmount) {
-        if (recipeId == null || recipeId.isBlank() || craftedAmount <= 0) {
+        String normalized = RecipeIdNormalizer.storageId(recipeId);
+        if (normalized.isBlank() || craftedAmount <= 0) {
             return false;
         }
 
-        int current = Math.max(0, recipeCraftCounts.getOrDefault(recipeId, 0));
+        int current = Math.max(0, recipeCraftCounts.getOrDefault(normalized, 0));
         int next = current + craftedAmount;
         if (next == current) {
             return false;
         }
 
-        recipeCraftCounts.put(recipeId, next);
-        if (RecipeCatalogData.getCookingRecipeIds().contains(recipeId)) {
+        recipeCraftCounts.put(normalized, next);
+        if (RecipeCatalogData.getCookingRecipeIds().contains(normalized)) {
             addLeaderboardPeriodValue(LeaderboardMetric.COOKING_COUNT.id(), craftedAmount);
         }
         markDirty();
@@ -2366,13 +2424,66 @@ public class PlayerStardewData {
     public boolean hasSpecialItem(String itemId) { return specialItems.contains(itemId); }
     public void addSpecialItem(String itemId) { if (specialItems.add(itemId)) markDirty(); }
 
+    // ──── Secret Notes (per-player collection) ────
+    public Set<String> getSecretNotesSeen() { return Collections.unmodifiableSet(secretNotesSeen); }
+    public boolean hasSeenSecretNote(String noteId) { return noteId != null && secretNotesSeen.contains(noteId); }
+    public boolean markSecretNoteSeen(String noteId) {
+        if (noteId == null || noteId.isBlank()) return false;
+        boolean changed = secretNotesSeen.add(noteId);
+        if (changed) markDirty();
+        return changed;
+    }
+    public boolean forgetSecretNote(String noteId) {
+        boolean changed = noteId != null && secretNotesSeen.remove(noteId);
+        if (changed) markDirty();
+        return changed;
+    }
+    public void clearSecretNotesSeen() {
+        if (!secretNotesSeen.isEmpty()) {
+            secretNotesSeen.clear();
+            markDirty();
+        }
+    }
+
+    public Set<String> getRevealedGiftTastes() { return Collections.unmodifiableSet(revealedGiftTastes); }
+    public boolean hasRevealedGiftTaste(String npcId, String objectId) {
+        return revealedGiftTastes.contains(secretNoteGiftTasteKey(npcId, objectId));
+    }
+    public boolean revealGiftTaste(String npcId, String objectId) {
+        String key = secretNoteGiftTasteKey(npcId, objectId);
+        if (key.isBlank()) return false;
+        boolean changed = revealedGiftTastes.add(key);
+        if (changed) markDirty();
+        return changed;
+    }
+
+    private static String secretNoteGiftTasteKey(String npcId, String objectId) {
+        if (npcId == null || npcId.isBlank() || objectId == null || objectId.isBlank()) return "";
+        return npcId.trim().toLowerCase(java.util.Locale.ROOT) + ":" + objectId.trim();
+    }
+
     // ──── Equipment (Rings + Boots + Cosmetics) ────
-    public String getEquippedLeftRing() { return equippedLeftRing; }
-    public void setEquippedLeftRing(String id) { this.equippedLeftRing = id != null ? id : ""; markDirty(); }
-    public String getEquippedRightRing() { return equippedRightRing; }
-    public void setEquippedRightRing(String id) { this.equippedRightRing = id != null ? id : ""; markDirty(); }
-    public String getEquippedBoots() { return equippedBoots; }
-    public void setEquippedBoots(String id) { this.equippedBoots = id != null ? id : ""; markDirty(); }
+    public String getEquippedLeftRing() { return equipmentStorageId(equippedLeftRing); }
+    public void setEquippedLeftRing(String id) { setEquippedLeftRingStack(equipmentStackFromStorageId(id)); }
+    public net.minecraft.world.item.ItemStack getEquippedLeftRingStack() { return equippedLeftRing.copy(); }
+    public void setEquippedLeftRingStack(net.minecraft.world.item.ItemStack stack) {
+        this.equippedLeftRing = singleEquipmentStack(stack);
+        markDirty();
+    }
+    public String getEquippedRightRing() { return equipmentStorageId(equippedRightRing); }
+    public void setEquippedRightRing(String id) { setEquippedRightRingStack(equipmentStackFromStorageId(id)); }
+    public net.minecraft.world.item.ItemStack getEquippedRightRingStack() { return equippedRightRing.copy(); }
+    public void setEquippedRightRingStack(net.minecraft.world.item.ItemStack stack) {
+        this.equippedRightRing = singleEquipmentStack(stack);
+        markDirty();
+    }
+    public String getEquippedBoots() { return equipmentStorageId(equippedBoots); }
+    public void setEquippedBoots(String id) { setEquippedBootsStack(equipmentStackFromStorageId(id)); }
+    public net.minecraft.world.item.ItemStack getEquippedBootsStack() { return equippedBoots.copy(); }
+    public void setEquippedBootsStack(net.minecraft.world.item.ItemStack stack) {
+        this.equippedBoots = singleEquipmentStack(stack);
+        markDirty();
+    }
     public net.minecraft.world.item.ItemStack getEquippedTrinket() { return equippedTrinket.copy(); }
     public void setEquippedTrinket(net.minecraft.world.item.ItemStack stack) {
         this.equippedTrinket = stack == null ? net.minecraft.world.item.ItemStack.EMPTY : stack.copyWithCount(1);
@@ -2391,7 +2502,7 @@ public class PlayerStardewData {
      * 检查玩家是否装备了指定类型的戒指（左或右）
      */
     public boolean hasRingEquipped(String itemId) {
-        return itemId.equals(equippedLeftRing) || itemId.equals(equippedRightRing);
+        return itemId != null && (itemId.equals(getEquippedLeftRing()) || itemId.equals(getEquippedRightRing()));
     }
 
     /**
@@ -2399,9 +2510,49 @@ public class PlayerStardewData {
      */
     public java.util.List<String> getEquippedRingIds() {
         java.util.List<String> rings = new java.util.ArrayList<>(2);
-        if (!equippedLeftRing.isEmpty()) rings.add(equippedLeftRing);
-        if (!equippedRightRing.isEmpty()) rings.add(equippedRightRing);
+        String left = getEquippedLeftRing();
+        String right = getEquippedRightRing();
+        if (!left.isEmpty()) rings.add(left);
+        if (!right.isEmpty()) rings.add(right);
         return rings;
+    }
+
+    private static net.minecraft.world.item.ItemStack singleEquipmentStack(net.minecraft.world.item.ItemStack stack) {
+        return stack == null || stack.isEmpty()
+                ? net.minecraft.world.item.ItemStack.EMPTY
+                : stack.copyWithCount(1);
+    }
+
+    private static String equipmentStorageId(net.minecraft.world.item.ItemStack stack) {
+        if (stack == null || stack.isEmpty()) return "";
+        if (com.stardew.craft.item.equipment.CombinedRingData.isCombinedRing(stack)) {
+            return com.stardew.craft.item.equipment.CombinedRingData.encodeForEquipmentSlot(stack);
+        }
+        return net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
+    }
+
+    private static net.minecraft.world.item.ItemStack equipmentStackFromStorageId(String id) {
+        if (id == null || id.isBlank()) return net.minecraft.world.item.ItemStack.EMPTY;
+        if (com.stardew.craft.item.equipment.CombinedRingData.isEncodedEquipmentSlot(id)) {
+            return com.stardew.craft.item.equipment.CombinedRingData.stackFromEquipmentSlot(id);
+        }
+        ResourceLocation location = ResourceLocation.tryParse(id);
+        if (location == null || !net.minecraft.core.registries.BuiltInRegistries.ITEM.containsKey(location)) {
+            return net.minecraft.world.item.ItemStack.EMPTY;
+        }
+        return new net.minecraft.world.item.ItemStack(
+                net.minecraft.core.registries.BuiltInRegistries.ITEM.get(location), 1);
+    }
+
+    private static net.minecraft.world.item.ItemStack loadEquipmentStack(
+            CompoundTag root, String stackKey, String legacyKey,
+            @Nullable net.minecraft.core.HolderLookup.Provider registries) {
+        if (registries != null && root.contains(stackKey, Tag.TAG_COMPOUND)) {
+            net.minecraft.world.item.ItemStack loaded = net.minecraft.world.item.ItemStack.parseOptional(
+                    registries, root.getCompound(stackKey));
+            if (!loaded.isEmpty()) return loaded.copyWithCount(1);
+        }
+        return equipmentStackFromStorageId(root.contains(legacyKey) ? root.getString(legacyKey) : "");
     }
 
     // ──── Quest System ────

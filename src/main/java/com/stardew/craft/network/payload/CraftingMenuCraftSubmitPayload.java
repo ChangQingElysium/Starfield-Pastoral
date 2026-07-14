@@ -4,6 +4,7 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import com.stardew.craft.player.ProfessionType;
 import com.stardew.craft.player.RecipeCatalogData;
+import com.stardew.craft.player.RecipeIdNormalizer;
 import com.stardew.craft.player.StardewCraftingRecipeData;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -105,19 +106,8 @@ public record CraftingMenuCraftSubmitPayload(String recipeItemId, int craftCount
         });
     }
 
-    private static String normalizeRecipeId(String recipeItemId) {
-        if (recipeItemId == null) {
-            return "";
-        }
-        String trimmed = recipeItemId.trim();
-        if (trimmed.isEmpty()) {
-            return "";
-        }
-        ResourceLocation parsed = ResourceLocation.tryParse(trimmed);
-        if (parsed != null) {
-            return StardewCraftingRecipeData.storageId(parsed);
-        }
-        return trimmed;
+    static String normalizeRecipeId(String recipeItemId) {
+        return RecipeIdNormalizer.storageId(recipeItemId);
     }
 
     private static int resolveCraftCount(int requestedCount) {

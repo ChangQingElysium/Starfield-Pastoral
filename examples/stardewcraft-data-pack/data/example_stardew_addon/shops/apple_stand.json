@@ -12,6 +12,14 @@
           "data": {"value": true}
         }
       ]
+    },
+    {
+      "item": "recipe:example_stardew_addon:apple_crate",
+      "display_name": "Apple Crate Recipe",
+      "description": "Acceptance fixture for a third-party namespaced crafting recipe.",
+      "price": 250,
+      "stock": 1,
+      "purchase_stack": 1
     }
   ],
   "accepted_sell_types": [],

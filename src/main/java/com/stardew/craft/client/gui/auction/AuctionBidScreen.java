@@ -181,6 +181,7 @@ public class AuctionBidScreen extends Screen {
         bidField = new EditBox(font, fieldBoxX + 31, fieldBoxY + (fieldBoxH - font.lineHeight) / 2,
             Math.max(10, fieldBoxW - 43), font.lineHeight, Component.translatable("stardewcraft.auction.bid.input_hint"));
         bidField.setBordered(false);
+        bidField.setTextShadow(false);
         bidField.setTextColor(0xFF3F2411);
         bidField.setTextColorUneditable(0xFF3F2411);
         bidField.setHint(Component.translatable("stardewcraft.auction.bid.input_hint"));

@@ -33,7 +33,7 @@ public class ScytheItem extends Item implements IStardewItem {
 
 	@Override
 	public String getItemTypeKey() {
-		return "stardewcraft.tool.scythe";
+		return "stardewcraft.type.tool";
 	}
 
 	@Override

@@ -56,8 +56,8 @@ public class StardewTimeHud {
     private static final ResourceLocation CALICO_RATING_ICON = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/desert_festival/calico_rating_icon.png");
     
     // UI尺寸
-    private static final int BG_WIDTH = 72;
-    private static final int BG_HEIGHT = 57;
+    private static final int BG_WIDTH = StardewHudLayout.TIME_BG_WIDTH;
+    private static final int BG_HEIGHT = StardewHudLayout.TIME_BG_HEIGHT;
     private static final int POINTER_WIDTH = 7;
     private static final int POINTER_HEIGHT = 19;
     private static final int ICON_WIDTH = 12;
@@ -101,12 +101,6 @@ public class StardewTimeHud {
     // 对标 SDV DayTimeMoneyBox.timeShakeTimer — 深夜时钟抖动
     private static int timeShakeTimer = 0;
 
-    // HUD锚点边距（右上角）
-    private static final int HUD_MARGIN_RIGHT = 10;
-    private static final int HUD_MARGIN_TOP = 10;
-    // 为右上角原版 Buff 图标留出空间，避免和日期/金钱HUD重叠
-    private static final int HUD_TOP_SAFE_OFFSET = 24;
-    
     public static void updateClientTime(StardewTimeManager timeData) {
         clientTimeCache = timeData;
         timeSyncedFromServer = true;
@@ -220,30 +214,37 @@ public class StardewTimeHud {
     private static void renderStardewHUD(GuiGraphics graphics) {
         Minecraft mc = Minecraft.getInstance();
         int screenWidth = mc.getWindow().getGuiScaledWidth();
+        float renderScale = StardewHudLayout.renderScale(mc.getWindow().getGuiScale());
         
         // HUD位置（右上角）
-        int hudX = screenWidth - BG_WIDTH - HUD_MARGIN_RIGHT;
-        int hudY = HUD_MARGIN_TOP + HUD_TOP_SAFE_OFFSET;
-        
-        // 1. 渲染背景
-        graphics.blit(BACKGROUND, hudX, hudY, 0, 0, BG_WIDTH, BG_HEIGHT, BG_WIDTH, BG_HEIGHT);
-        
-        // 2. 渲染天气图标（位置29,16）
-        String currentWeather = com.stardew.craft.weather.ClientWeatherCache.getCurrentWeather(mc.level.dimension());
-        ResourceLocation weatherIcon = getWeatherIcon(currentWeather);
-        graphics.blit(weatherIcon, hudX + WEATHER_X, hudY + WEATHER_Y, 0, 0, 
-            ICON_WIDTH, ICON_HEIGHT, ICON_WIDTH, ICON_HEIGHT);
-        
-        // 3. 渲染季节图标（位置53,16）
-        ResourceLocation seasonIcon = getSeasonIcon(clientTimeCache.getCurrentSeason());
-        graphics.blit(seasonIcon, hudX + SEASON_X, hudY + SEASON_Y, 0, 0, 
-            ICON_WIDTH, ICON_HEIGHT, ICON_WIDTH, ICON_HEIGHT);
-        
-        // 4. 渲染旋转指针
-        renderPointer(graphics, hudX, hudY);
-        
-        // 5. 渲染文字信息
-        renderText(graphics, hudX, hudY, mc.font);
+        int hudX = StardewHudLayout.anchorX(screenWidth, renderScale);
+        int hudY = StardewHudLayout.anchorY();
+
+        graphics.pose().pushPose();
+        graphics.pose().scale(renderScale, renderScale, 1.0F);
+        try {
+            // 1. 渲染背景
+            graphics.blit(BACKGROUND, hudX, hudY, 0, 0, BG_WIDTH, BG_HEIGHT, BG_WIDTH, BG_HEIGHT);
+
+            // 2. 渲染天气图标（位置29,16）
+            String currentWeather = com.stardew.craft.weather.ClientWeatherCache.getCurrentWeather(mc.level.dimension());
+            ResourceLocation weatherIcon = getWeatherIcon(currentWeather);
+            graphics.blit(weatherIcon, hudX + WEATHER_X, hudY + WEATHER_Y, 0, 0,
+                    ICON_WIDTH, ICON_HEIGHT, ICON_WIDTH, ICON_HEIGHT);
+
+            // 3. 渲染季节图标（位置53,16）
+            ResourceLocation seasonIcon = getSeasonIcon(clientTimeCache.getCurrentSeason());
+            graphics.blit(seasonIcon, hudX + SEASON_X, hudY + SEASON_Y, 0, 0,
+                    ICON_WIDTH, ICON_HEIGHT, ICON_WIDTH, ICON_HEIGHT);
+
+            // 4. 渲染旋转指针
+            renderPointer(graphics, hudX, hudY);
+
+            // 5. 渲染文字信息
+            renderText(graphics, hudX, hudY, mc.font);
+        } finally {
+            graphics.pose().popPose();
+        }
     }
     
     /**

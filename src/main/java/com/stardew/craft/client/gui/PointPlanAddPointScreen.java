@@ -35,6 +35,7 @@ public class PointPlanAddPointScreen extends Screen {
         panelX = (width - PANEL_W) / 2;
         panelY = (height - PANEL_H) / 2;
         npcBox = new EditBox(font, panelX + 70, panelY + 52, PANEL_W - 92, 18, Component.translatable("gui.stardewcraft.point_plan.npc"));
+        npcBox.setTextShadow(false);
         npcBox.setMaxLength(64);
         addRenderableWidget(npcBox);
         setInitialFocus(npcBox);

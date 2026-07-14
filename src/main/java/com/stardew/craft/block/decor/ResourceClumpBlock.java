@@ -4,6 +4,7 @@ import com.stardew.craft.item.tool.StardewAxeItem;
 import com.stardew.craft.item.tool.StardewPickaxeItem;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import com.stardew.craft.player.SkillType;
+import com.stardew.craft.secretnote.SecretNoteService;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -213,6 +214,10 @@ public class ResourceClumpBlock extends MapDecorStaticBlock {
                     && level.getRandom().nextDouble() < bonusDropChance) {
                 Block.popResource(level, mainPos, new ItemStack(bonusDropItem.get(), bonusDropCount));
             }
+			ItemStack secretNote = SecretNoteService.tryCreateFromSource(player, level.getRandom(), 0.05F);
+			if (!secretNote.isEmpty()) {
+				Block.popResource(level, mainPos, secretNote);
+			}
             if (experienceSkill != null && experienceAmount > 0) {
                 PlayerStardewDataAPI.addExperience(player, experienceSkill, experienceAmount);
             }

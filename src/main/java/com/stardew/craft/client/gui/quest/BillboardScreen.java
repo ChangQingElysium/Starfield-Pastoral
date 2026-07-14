@@ -3,6 +3,7 @@ package com.stardew.craft.client.gui.quest;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.ClientPlayerDataCache;
 import com.stardew.craft.client.gui.common.CommonGuiTextures;
+import com.stardew.craft.client.gui.LocalizedGuiAssets;
 import com.stardew.craft.client.hud.StardewTimeHud;
 import com.stardew.craft.communitycenter.state.CCStoryFlags;
 import com.stardew.craft.festival.FestivalDefinition;
@@ -37,8 +38,6 @@ import java.util.Map;
 public class BillboardScreen extends Screen {
 
     // ─── 纹理 ───
-    private static final ResourceLocation CALENDAR_BACKGROUND = billboard("calendar_background");
-    private static final ResourceLocation DAILY_QUEST_BACKGROUND = billboard("daily_quest_background");
     private static final ResourceLocation QUEST_DONE_STAR = billboard("quest_done_star");
     private static final ResourceLocation BILLBOARD_TEXTURE = gui("billboard");
     private static final ResourceLocation CURSORS_TEXTURE = gui("cursors");
@@ -180,7 +179,8 @@ public class BillboardScreen extends Screen {
      */
     private void renderCalendar(GuiGraphics g, int mouseX, int mouseY) {
         // ── 背景 ──
-        drawFull(g, CALENDAR_BACKGROUND, windowX, windowY, CAL_W, CAL_H, s4);
+        drawFull(g, LocalizedGuiAssets.texture("billboard/calendar_background.png"),
+                windowX, windowY, CAL_W, CAL_H, s4);
 
         int currentDay = getCurrentDay();
         String currentSeason = StardewTimeHud.getClientTimeCache().getSeasonName().toLowerCase();
@@ -337,6 +337,7 @@ public class BillboardScreen extends Screen {
         Map<Integer, List<CalendarFestivalEvent>> result = new HashMap<>();
         for (FestivalDefinition definition : FestivalRegistry.all()) {
             if (definition.season() != season) continue;
+            if (!com.stardew.craft.client.ClientFestivalAvailability.allows(definition.id())) continue;
 
             CalendarFestivalType type;
             if (definition.type() == FestivalType.ACTIVE) {
@@ -423,7 +424,8 @@ public class BillboardScreen extends Screen {
      */
     private void renderDailyQuest(GuiGraphics g, int mouseX, int mouseY) {
         // ── 背景 ──
-        drawFull(g, DAILY_QUEST_BACKGROUND, windowX, windowY, QUEST_W, QUEST_H, s4);
+        drawFull(g, LocalizedGuiAssets.texture("billboard/daily_quest_background.png"),
+                windowX, windowY, QUEST_W, QUEST_H, s4);
 
         StardewQuest daily = ClientQuestData.getDailyQuest();
 

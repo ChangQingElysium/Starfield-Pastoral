@@ -15,6 +15,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.EmptyBlockGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -33,6 +34,10 @@ import java.util.Map;
  */
 @SuppressWarnings("null")
 public final class StructureLoader {
+    private static final int SCHEMATIC_BULK_FLAGS = Block.UPDATE_CLIENTS
+        | Block.UPDATE_KNOWN_SHAPE
+        | Block.UPDATE_SUPPRESS_DROPS;
+
     private StructureLoader() {}
 
     @SuppressWarnings("null")
@@ -143,23 +148,8 @@ public final class StructureLoader {
                 return false;
             }
 
-            int index = 0;
-                ensureChunksLoaded(level, origin, width, length);
-            for (int y = 0; y < height; y++) {
-                for (int z = 0; z < length; z++) {
-                    for (int x = 0; x < width; x++) {
-                        int paletteIndex = blockIndices[index++];
-                        if (paletteIndex < 0 || paletteIndex >= paletteStates.length) {
-                            continue;
-                        }
-                        BlockState state = paletteStates[paletteIndex];
-                        if (state == null) {
-                            continue;
-                        }
-                        level.setBlock(origin.offset(x, y, z), state, 3);
-                    }
-                }
-            }
+            ensureChunksLoaded(level, origin, width, length);
+            placeSchematicBlocks(level, origin, width, height, length, paletteStates, blockIndices, false);
 
             applySchematicBlockEntities(level, origin, root, schematic, width, height, length);
 
@@ -330,6 +320,93 @@ public final class StructureLoader {
         }
 
         return outIndex == expectedCount ? out : Arrays.copyOf(out, outIndex);
+    }
+
+    /**
+     * Places full collision blocks before blocks whose survival or shape depends on neighbours,
+     * suppressing neighbour reactions until the entire structure exists. This mirrors vanilla
+     * StructureTemplate ordering and prevents wall decorations from seeing a transient unsupported
+     * state while their backing wall is still being placed.
+     */
+    private static void placeSchematicBlocks(ServerLevel level,
+                                             BlockPos origin,
+                                             int width,
+                                             int height,
+                                             int length,
+                                             BlockState[] paletteStates,
+                                             int[] blockIndices,
+                                             boolean rotateClockwise90) {
+        for (int pass = 0; pass < 2; pass++) {
+            boolean placeFullBlocks = pass == 0;
+            int index = 0;
+            for (int y = 0; y < height; y++) {
+                for (int z = 0; z < length; z++) {
+                    for (int x = 0; x < width; x++) {
+                        int paletteIndex = blockIndices[index++];
+                        if (paletteIndex < 0 || paletteIndex >= paletteStates.length) {
+                            continue;
+                        }
+                        BlockState state = paletteStates[paletteIndex];
+                        if (state == null) {
+                            continue;
+                        }
+                        if (isFullSchematicBlock(state) != placeFullBlocks) {
+                            continue;
+                        }
+
+                        BlockPos target;
+                        if (rotateClockwise90) {
+                            target = origin.offset(length - 1 - z, y, x);
+                            state = rotateCW90(state);
+                        } else {
+                            target = origin.offset(x, y, z);
+                        }
+                        level.setBlock(target, state, SCHEMATIC_BULK_FLAGS);
+                    }
+                }
+            }
+        }
+        updateSchematicShapes(level, origin, width, height, length, paletteStates, blockIndices, rotateClockwise90);
+    }
+
+    private static boolean isFullSchematicBlock(BlockState state) {
+        return !state.getBlock().hasDynamicShape()
+            && state.isCollisionShapeFullBlock(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
+    }
+
+    private static void updateSchematicShapes(ServerLevel level,
+                                              BlockPos origin,
+                                              int width,
+                                              int height,
+                                              int length,
+                                              BlockState[] paletteStates,
+                                              int[] blockIndices,
+                                              boolean rotateClockwise90) {
+        int index = 0;
+        for (int y = 0; y < height; y++) {
+            for (int z = 0; z < length; z++) {
+                for (int x = 0; x < width; x++) {
+                    int paletteIndex = blockIndices[index++];
+                    if (paletteIndex < 0 || paletteIndex >= paletteStates.length) {
+                        continue;
+                    }
+                    BlockState schematicState = paletteStates[paletteIndex];
+                    if (schematicState == null || schematicState.isAir() || isFullSchematicBlock(schematicState)) {
+                        continue;
+                    }
+
+                    BlockPos target = rotateClockwise90
+                        ? origin.offset(length - 1 - z, y, x)
+                        : origin.offset(x, y, z);
+                    BlockState current = level.getBlockState(target);
+                    BlockState updated = Block.updateFromNeighbourShapes(current, level, target);
+                    if (current != updated) {
+                        level.setBlock(target, updated, SCHEMATIC_BULK_FLAGS);
+                    }
+                    level.blockUpdated(target, updated.getBlock());
+                }
+            }
+        }
     }
 
     private static int readDimension(CompoundTag tag, String name) {
@@ -527,22 +604,7 @@ public final class StructureLoader {
             // 旋转后占地：宽=length, 深=width
             ensureChunksLoaded(level, origin, length, width);
 
-            int index = 0;
-            for (int y = 0; y < height; y++) {
-                for (int z = 0; z < length; z++) {
-                    for (int x = 0; x < width; x++) {
-                        int paletteIndex = blockIndices[index++];
-                        if (paletteIndex < 0 || paletteIndex >= paletteStates.length) continue;
-                        BlockState state = paletteStates[paletteIndex];
-                        if (state == null) continue;
-
-                        // CW 90°: (x,y,z) → (length-1-z, y, x)
-                        int rx = length - 1 - z;
-                        int rz = x;
-                        level.setBlock(origin.offset(rx, y, rz), rotateCW90(state), 3);
-                    }
-                }
-            }
+            placeSchematicBlocks(level, origin, width, height, length, paletteStates, blockIndices, true);
 
             applySchematicBlockEntitiesCW90(level, origin, root, schematic, width, height, length);
 

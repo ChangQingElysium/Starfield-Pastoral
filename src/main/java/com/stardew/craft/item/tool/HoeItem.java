@@ -6,6 +6,7 @@ import com.stardew.craft.enchantment.StardewEnchantments;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import com.stardew.craft.player.SkillType;
 import com.stardew.craft.core.ModDimensions;
+import com.stardew.craft.secretnote.SecretNoteBuriedTreasureService;
 import com.stardew.craft.time.StardewTimeManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -94,7 +95,7 @@ public class HoeItem extends Item implements IStardewItem {
 
     @Override
     public String getItemTypeKey() {
-        return "stardewcraft.tool.hoe";
+        return "stardewcraft.type.tool";
     }
 
     @Override
@@ -164,9 +165,15 @@ public class HoeItem extends Item implements IStardewItem {
 
             if (!level.isClientSide && level instanceof ServerLevel serverLevel) {
                 BlockState preTillState = level.getBlockState(pos);
-                boolean tilled = tillTile(serverLevel, player, hand, pos);
+                boolean secretTreasureDug = player instanceof ServerPlayer serverPlayer
+                        && SecretNoteBuriedTreasureService.tryDig(
+                                serverLevel, serverPlayer, pos, preTillState);
+                boolean tilled = secretTreasureDug || tillTile(serverLevel, player, hand, pos);
                 if (tilled) {
-                    rollBuriedDrops(serverLevel, pos, preTillState, player instanceof ServerPlayer sp ? sp : null, stackFromContext(context));
+                    if (!secretTreasureDug) {
+                        rollBuriedDrops(serverLevel, pos, preTillState,
+                                player instanceof ServerPlayer sp ? sp : null, stackFromContext(context));
+                    }
                     applyStaminaAndCooldown(player, stackFromContext(context), 0);
                 }
             }
@@ -301,9 +308,15 @@ public class HoeItem extends Item implements IStardewItem {
             boolean tilledAny = false;
             for (BlockPos pos : targets) {
                 BlockState preTillState = level.getBlockState(pos);
-                if (tillTile((ServerLevel) level, player, usedHand, pos)) {
+                boolean secretTreasureDug = player instanceof ServerPlayer serverPlayer
+                        && SecretNoteBuriedTreasureService.tryDig(
+                                (ServerLevel) level, serverPlayer, pos, preTillState);
+                if (secretTreasureDug || tillTile((ServerLevel) level, player, usedHand, pos)) {
                     tilledAny = true;
-                    rollBuriedDrops((ServerLevel) level, pos, preTillState, player instanceof ServerPlayer sp ? sp : null, stack);
+                    if (!secretTreasureDug) {
+                        rollBuriedDrops((ServerLevel) level, pos, preTillState,
+                                player instanceof ServerPlayer sp ? sp : null, stack);
+                    }
                 }
             }
 
@@ -477,6 +490,11 @@ public class HoeItem extends Item implements IStardewItem {
         }
 
         BlockState state = level.getBlockState(pos);
+        if (SecretNoteBuriedTreasureService.isConfiguredDigSurface(level, pos, state)) {
+            return level.isClientSide
+                    || player instanceof ServerPlayer serverPlayer
+                    && SecretNoteBuriedTreasureService.canDig(serverPlayer, pos, state);
+        }
         if (isPublicYellowDirt(level, pos, state)) {
             return false;
         }

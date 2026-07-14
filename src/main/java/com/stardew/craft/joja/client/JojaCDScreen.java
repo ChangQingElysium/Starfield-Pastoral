@@ -1,6 +1,6 @@
 package com.stardew.craft.joja.client;
 
-import com.stardew.craft.StardewCraft;
+import com.stardew.craft.client.gui.LocalizedGuiAssets;
 import com.stardew.craft.client.gui.common.StardewRenderMapping;
 import com.stardew.craft.client.hud.StardewTimeHud;
 import com.stardew.craft.joja.JojaConstants;
@@ -32,9 +32,6 @@ import java.util.List;
 @OnlyIn(Dist.CLIENT)
 @SuppressWarnings("null")
 public class JojaCDScreen extends Screen {
-
-    private static final ResourceLocation JOJA_CD_FORM = ResourceLocation.fromNamespaceAndPath(
-        StardewCraft.MODID, "textures/gui/joja_cd_form.png");
 
     // SDV geometry, expressed in SDV pixel space (the ×4 scale is applied by render mapping s4())
     private static final int SDV_W = JojaConstants.CD_MENU_WIDTH;   // 1280
@@ -158,7 +155,8 @@ public class JojaCDScreen extends Screen {
         g.pose().pushPose();
         g.pose().translate(menuX, menuY, 0);
         g.pose().scale(s4, s4, 1.0f);
-        g.blit(JOJA_CD_FORM, 0, 0, 0, 0, JojaConstants.FORM_W, JojaConstants.FORM_H,
+        ResourceLocation jojaCdForm = LocalizedGuiAssets.texture("joja/joja_cd_form.png");
+        g.blit(jojaCdForm, 0, 0, 0, 0, JojaConstants.FORM_W, JojaConstants.FORM_H,
             JojaConstants.TEX_W, JojaConstants.TEX_H);
 
         // Completed checkmarks: source rect (0,144,16,16) at (box.left+16, box.top+16) scale 4 in SDV space.
@@ -169,7 +167,7 @@ public class JojaCDScreen extends Screen {
             if (isComplete(b.idx)) {
                 int texX = b.sdvX / 4 + 4;   // SDV +16 offset == tex +4 px
                 int texY = b.sdvY / 4 + 4;
-                g.blit(JOJA_CD_FORM, texX, texY, 0, 144, 16, 16, JojaConstants.TEX_W, JojaConstants.TEX_H);
+                g.blit(jojaCdForm, texX, texY, 0, 144, 16, 16, JojaConstants.TEX_W, JojaConstants.TEX_H);
             }
         }
         g.pose().popPose();

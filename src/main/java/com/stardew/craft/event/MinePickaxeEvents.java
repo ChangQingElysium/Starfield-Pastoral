@@ -239,6 +239,7 @@ public final class MinePickaxeEvents {
 		if (com.stardew.craft.festival.desert.DesertFestivalMineService.isCalicoEggStone(state)) {
 			event.getDrops().clear();
 			com.stardew.craft.festival.desert.DesertFestivalMineService.dropCalicoEggStone(level, player, pos, level.getRandom());
+			addSecretNoteFromStone(event, level, player, pos, state);
 			PlayerStardewDataAPI.addExperience(player, SkillType.MINING, 50);
 			return;
 		}
@@ -262,6 +263,7 @@ public final class MinePickaxeEvents {
 					}
 				}
 			}
+			addSecretNoteFromStone(event, level, player, pos, state);
 			return;
 		}
 
@@ -270,6 +272,19 @@ public final class MinePickaxeEvents {
 			addGeodeDrop(event, level, player, pos, state);
 			addCoalFromStoneDrop(event, level, player, pos, state);
 			com.stardew.craft.festival.desert.DesertFestivalMineService.tryAddStoneEggDrop(level, player, pos, level.getRandom());
+			addSecretNoteFromStone(event, level, player, pos, state);
+		}
+	}
+
+	private static void addSecretNoteFromStone(BlockDropsEvent event, ServerLevel level,
+											 ServerPlayer player, BlockPos pos, BlockState state) {
+		if (!state.is(ModTags.Blocks.STARDEW_STONES) && !state.is(ModTags.Blocks.STARDEW_ORES)) {
+			return;
+		}
+		ItemStack secretNote = com.stardew.craft.secretnote.SecretNoteService
+				.tryCreateFromSource(player, level.getRandom(), 0.0075F);
+		if (!secretNote.isEmpty()) {
+			event.getDrops().add(makeDrop(level, pos, secretNote));
 		}
 	}
 
@@ -524,6 +539,7 @@ public final class MinePickaxeEvents {
 		Item oreProduct = null;
 		if (com.stardew.craft.festival.desert.DesertFestivalMineService.isCalicoEggStone(state)) {
 			com.stardew.craft.festival.desert.DesertFestivalMineService.dropCalicoEggStone(level, player, pos, level.getRandom());
+			tryDropBombSecretNote(level, player, pos, state);
 			PlayerStardewDataAPI.addExperience(player, SkillType.MINING, 50);
 			return ModItems.CALICO_EGG.get();
 		}
@@ -542,11 +558,23 @@ public final class MinePickaxeEvents {
 			rollBombStoneExtras(level, player, pos);
 			com.stardew.craft.festival.desert.DesertFestivalMineService.tryAddStoneEggDrop(level, player, pos, level.getRandom());
 		}
+		tryDropBombSecretNote(level, player, pos, state);
 		int miningExp = getMiningExperienceForBlock(state);
 		if (miningExp > 0) {
 			PlayerStardewDataAPI.addExperience(player, SkillType.MINING, miningExp);
 		}
 		return oreProduct;
+	}
+
+	private static void tryDropBombSecretNote(ServerLevel level, ServerPlayer player, BlockPos pos, BlockState state) {
+		if (!state.is(ModTags.Blocks.STARDEW_STONES) && !state.is(ModTags.Blocks.STARDEW_ORES)) {
+			return;
+		}
+		ItemStack secretNote = com.stardew.craft.secretnote.SecretNoteService
+				.tryCreateFromSource(player, level.getRandom(), 0.0075F);
+		if (!secretNote.isEmpty()) {
+			net.minecraft.world.level.block.Block.popResource(level, pos, secretNote);
+		}
 	}
 
 	/** 炸弹打石头时的额外掉落（晶洞/煤/五彩碎片），与 addGeodeDrop + addCoalFromStoneDrop 等价但直接 popResource。 */

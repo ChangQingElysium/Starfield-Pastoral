@@ -3,6 +3,7 @@ package com.stardew.craft.shop;
 import com.stardew.craft.entity.npc.StardewNpcEntity;
 import com.stardew.craft.network.payload.OpenShopScreenPayload;
 import com.stardew.craft.player.PlayerStardewDataAPI;
+import com.stardew.craft.player.RecipeIdNormalizer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -57,15 +58,8 @@ public final class SaloonService {
         return InteractionResult.SUCCESS;
     }
 
-    /**
-     * Extracts the recipe ID from "recipe:stardewcraft:hashbrowns" → "hashbrowns".
-     * The recipe system uses simple IDs like "hashbrowns", not full ResourceLocations.
-     */
+    /** Converts a shop recipe pseudo ID to the player-storage representation. */
     public static String extractRecipeId(String itemId) {
-        // "recipe:stardewcraft:hashbrowns" → strip "recipe:" → "stardewcraft:hashbrowns"
-        // → then extract just the path part after the namespace colon
-        String afterPrefix = itemId.substring("recipe:".length());
-        int colonIdx = afterPrefix.indexOf(':');
-        return colonIdx >= 0 ? afterPrefix.substring(colonIdx + 1) : afterPrefix;
+        return RecipeIdNormalizer.storageId(itemId);
     }
 }

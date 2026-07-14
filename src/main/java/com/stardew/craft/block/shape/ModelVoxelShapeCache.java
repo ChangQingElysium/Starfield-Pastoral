@@ -23,6 +23,7 @@ public final class ModelVoxelShapeCache {
     private static final Map<String, VoxelShape> SHAPE_CACHE = new ConcurrentHashMap<>();
     private static final Map<String, GeoModelData> GEO_MODEL_CACHE = new ConcurrentHashMap<>();
     private static final Map<String, Map<String, VariantModelRef>> BLOCKSTATE_VARIANTS_CACHE = new ConcurrentHashMap<>();
+    private static final ThreadLocal<Set<String>> SHAPES_LOADING = ThreadLocal.withInitial(HashSet::new);
 
     private ModelVoxelShapeCache() {
     }
@@ -35,11 +36,33 @@ public final class ModelVoxelShapeCache {
         SHAPE_CACHE.clear();
         GEO_MODEL_CACHE.clear();
         BLOCKSTATE_VARIANTS_CACHE.clear();
+        SHAPES_LOADING.remove();
     }
 
     @SuppressWarnings("null")
     public static VoxelShape shapeFromModelId(String modelId) {
-        return SHAPE_CACHE.computeIfAbsent(modelId, ModelVoxelShapeCache::loadShapeFromModelId);
+        VoxelShape cached = SHAPE_CACHE.get(modelId);
+        if (cached != null) {
+            return cached;
+        }
+
+        Set<String> loading = SHAPES_LOADING.get();
+        if (!loading.add(modelId)) {
+            return Shapes.empty();
+        }
+        try {
+            // Model loading may recursively resolve a parent model. ConcurrentHashMap.computeIfAbsent
+            // cannot safely update the same map from inside its mapping function and throws
+            // IllegalStateException("Recursive update") while block-state caches are baked.
+            VoxelShape loaded = loadShapeFromModelId(modelId);
+            VoxelShape raced = SHAPE_CACHE.putIfAbsent(modelId, loaded);
+            return raced == null ? loaded : raced;
+        } finally {
+            loading.remove(modelId);
+            if (loading.isEmpty()) {
+                SHAPES_LOADING.remove();
+            }
+        }
     }
 
     @SuppressWarnings("null")

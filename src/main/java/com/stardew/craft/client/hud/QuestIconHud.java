@@ -19,14 +19,13 @@ import java.util.Random;
 /**
  * SDV DayTimeMoneyBox questButton 复刻。
  *
- * 关键：StardewTimeHud 使用 1:1 固定 GUI 像素坐标（72×57 背景），不做 s4 缩放。
- * 因此 quest icon 也必须匹配 HUD 的固定坐标体系，使用 ICON_SCALE=1.0 绘制。
+ * 关键：quest icon 与 StardewTimeHud 共用 SDV 4x 像素缩放和右上角锚点。
  *
  * SDV 比例关系:
  *   moneyBox 背景 71×43 source at 4× = 284×172 screen px
  *   questButton   11×14 source at 4× = 44×56  screen px  → icon/bg ratio ≈ 15.5%
- * 我们的 HUD:
- *   背景 72×57 GUI px  →  icon 11×14 at scale 1.0  →  11/72 ≈ 15.3%  ✓ 比例一致
+ * 我们的逻辑 HUD:
+ *   背景 72×57 source px  →  icon 11×14 source px  →  11/72 ≈ 15.3%  ✓ 比例一致
  *
  * exclamation "!" 绘制位置:
  *   SDV: (bounds.X+24, bounds.Y+32) with origin(2,4), bounds=(44,46)
@@ -34,13 +33,6 @@ import java.util.Random;
  */
 @EventBusSubscriber(modid = StardewCraft.MODID, value = Dist.CLIENT)
 public class QuestIconHud {
-
-    // ─── StardewTimeHud 锚点常量（必须一致） ───
-    private static final int HUD_MARGIN_RIGHT = 10;
-    private static final int HUD_MARGIN_TOP = 10;
-    private static final int HUD_TOP_SAFE_OFFSET = 24;
-    private static final int TIME_BG_WIDTH = 72;
-    private static final int TIME_BG_HEIGHT = 57;
 
     // ─── Cursors sprite dimensions ───
     private static final int ICON_W = 11, ICON_H = 14;
@@ -89,6 +81,7 @@ public class QuestIconHud {
 
     private static boolean hasNewQuestActivity() {
         for (StardewQuest q : ClientQuestData.getQuestLog()) {
+            if (q.isSecretQuest()) continue;
             if (q.isShowNew()) return true;
             if (q.isCompleted() && q.hasReward()) return true;
         }
@@ -98,61 +91,68 @@ public class QuestIconHud {
     @SuppressWarnings("null")
     private static void render(GuiGraphics g, Minecraft mc) {
         int screenWidth = mc.getWindow().getGuiScaledWidth();
+        float hudScale = StardewHudLayout.renderScale(mc.getWindow().getGuiScale());
 
         // ─── HUD 锚点（与 StardewTimeHud 一致） ───
-        int hudX = screenWidth - TIME_BG_WIDTH - HUD_MARGIN_RIGHT;
-        int hudY = HUD_MARGIN_TOP + HUD_TOP_SAFE_OFFSET;
+        int hudX = StardewHudLayout.anchorX(screenWidth, hudScale);
+        int hudY = StardewHudLayout.anchorY();
 
-        // ─── Quest button: anchored to bottom-right of moneybox ───
-        // SDV: questButton 在 moneyBox 右下角外侧
-        int iconW = Math.round(ICON_W * ICON_SCALE);
-        int iconH = Math.round(ICON_H * ICON_SCALE);
-        int btnX = hudX + TIME_BG_WIDTH - iconW;       // 右对齐 HUD 右边缘
-        int btnY = hudY + TIME_BG_HEIGHT + 2;            // 紧贴 HUD 底部下方 2px
+        g.pose().pushPose();
+        g.pose().scale(hudScale, hudScale, 1.0F);
+        try {
+            // ─── Quest button: anchored to bottom-right of moneybox ───
+            // SDV: questButton 在 moneyBox 右下角外侧
+            int iconW = Math.round(ICON_W * ICON_SCALE);
+            int iconH = Math.round(ICON_H * ICON_SCALE);
+            int btnX = hudX + StardewHudLayout.TIME_BG_WIDTH - iconW; // 右对齐 HUD 右边缘
+            int btnY = hudY + StardewHudLayout.TIME_BG_HEIGHT + 2; // 紧贴 HUD 底部下方 2px
 
-        CommonGuiTextures.drawQuestHudButton(g, btnX, btnY, ICON_SCALE);
+            CommonGuiTextures.drawQuestHudButton(g, btnX, btnY, ICON_SCALE);
 
-        // ─── Exclamation "!" pulse ───
-        // SDV: at (bounds.X+24, bounds.Y+32), origin(2,4), bounds=44×46 → (54.5%, 69.6%)
-        // Our icon=11×14, so anchor at (ceil(11*0.545), round(14*0.696)) = (6, 10)
-        if (questPulseTimer > 0) {
-            float scaleMult = 1.0f / (Math.max(300f, Math.abs(questPulseTimer % 1000 - 500)) / 500f);
-            float exclScale = ICON_SCALE * scaleMult;
+            // ─── Exclamation "!" pulse ───
+            // SDV: at (bounds.X+24, bounds.Y+32), origin(2,4), bounds=44×46 → (54.5%, 69.6%)
+            // Our icon=11×14, so anchor at (ceil(11*0.545), round(14*0.696)) = (6, 10)
+            if (questPulseTimer > 0) {
+                float scaleMult = 1.0f / (Math.max(300f, Math.abs(questPulseTimer % 1000 - 500)) / 500f);
+                float exclScale = ICON_SCALE * scaleMult;
 
-            int exclAnchorX = btnX + iconW / 2;
-            int exclAnchorY = btnY + Math.round(iconH * 0.70f);
+                int exclAnchorX = btnX + iconW / 2;
+                int exclAnchorY = btnY + Math.round(iconH * 0.70f);
 
-            int shakeX = 0, shakeY = 0;
-            if (scaleMult > 1.0f) {
-                shakeX = random.nextInt(3) - 1;
-                shakeY = random.nextInt(3) - 1;
+                int shakeX = 0, shakeY = 0;
+                if (scaleMult > 1.0f) {
+                    shakeX = random.nextInt(3) - 1;
+                    shakeY = random.nextInt(3) - 1;
+                }
+
+                g.pose().pushPose();
+                g.pose().translate(exclAnchorX + shakeX, exclAnchorY + shakeY, 0);
+                g.pose().scale(exclScale, exclScale, 1.0f);
+                CommonGuiTextures.drawQuestDotAtCurrentPose(g, -2, -4);
+                g.pose().popPose();
             }
 
-            g.pose().pushPose();
-            g.pose().translate(exclAnchorX + shakeX, exclAnchorY + shakeY, 0);
-            g.pose().scale(exclScale, exclScale, 1.0f);
-                CommonGuiTextures.drawQuestDotAtCurrentPose(g, -2, -4);
+            // ─── Ping flash below button ───
+            // SDV: (bounds.Left-16, bounds.Bottom+8) at 4×
+            // Proportionally: slightly left of icon, below
+            if (questPingTimer > 0) {
+                int pingFrame = ((questPingTimer / 200) % 2 != 0) ? 1 : 0;
+                int pingW = Math.round(PING_W * ICON_SCALE);
+                int pingX = btnX + iconW / 2 - pingW / 2;
+                int pingY = btnY + iconH + 2;
+                CommonGuiTextures.drawQuestHudPing(g, pingX, pingY, pingFrame, ICON_SCALE);
+            }
+
+            // ─── Key hint ───
+            String keyName = ModKeyMappings.QUEST_LOG.getTranslatedKeyMessage().getString();
+            String hint = "[" + keyName + "]";
+            int hintWidth = mc.font.width(hint);
+            int hintX = btnX + iconW / 2 - hintWidth / 2;
+            int hintY = btnY + iconH + 2;
+            if (questPingTimer > 0) hintY += Math.round(PING_H * ICON_SCALE) + 2;
+            g.drawString(mc.font, hint, hintX, hintY, 0x808080, false);
+        } finally {
             g.pose().popPose();
         }
-
-        // ─── Ping flash below button ───
-        // SDV: (bounds.Left-16, bounds.Bottom+8) at 4×
-        // Proportionally: slightly left of icon, below
-        if (questPingTimer > 0) {
-            int pingFrame = ((questPingTimer / 200) % 2 != 0) ? 1 : 0;
-            int pingW = Math.round(PING_W * ICON_SCALE);
-            int pingX = btnX + iconW / 2 - pingW / 2;
-            int pingY = btnY + iconH + 2;
-            CommonGuiTextures.drawQuestHudPing(g, pingX, pingY, pingFrame, ICON_SCALE);
-        }
-
-        // ─── Key hint ───
-        String keyName = ModKeyMappings.QUEST_LOG.getTranslatedKeyMessage().getString();
-        String hint = "[" + keyName + "]";
-        int hintWidth = mc.font.width(hint);
-        int hintX = btnX + iconW / 2 - hintWidth / 2;
-        int hintY = btnY + iconH + 2;
-        if (questPingTimer > 0) hintY += Math.round(PING_H * ICON_SCALE) + 2;
-        g.drawString(mc.font, hint, hintX, hintY, 0x808080, false);
     }
 }

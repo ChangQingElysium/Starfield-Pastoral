@@ -14,6 +14,7 @@ import com.stardew.craft.player.PlayerStardewDataAPI;
 import com.stardew.craft.player.PlayerDataManager;
 import com.stardew.craft.player.ProfessionType;
 import com.stardew.craft.player.SkillType;
+import com.stardew.craft.secretnote.SecretNoteService;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
@@ -374,6 +375,10 @@ public final class WildTreeChopEvents {
 				fallDrops.add(new ItemStack(ModItems.WOOD_HARD.get(), hardwoodBonus));
 			}
 			com.stardew.craft.book.BookAcquisitionService.recordTreeChoppedAndMaybeAddBook(player, fallDrops, level.random);
+			ItemStack secretNote = SecretNoteService.tryCreateFromSource(player, level.random, 0.005F);
+			if (!secretNote.isEmpty()) {
+				fallDrops.add(secretNote);
+			}
 			WildTreeSeedManager.get(level).untrackTree(level, snapshot.pivotTrunk0Pos);
 			Direction dir = computeFallDirection(player, snapshot.pivotTrunk0Pos);
 			fellTree(level, snapshot, dir, def, fallDrops);

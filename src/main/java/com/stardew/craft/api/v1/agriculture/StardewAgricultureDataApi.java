@@ -1,7 +1,9 @@
 package com.stardew.craft.api.v1.agriculture;
 
+import com.stardew.craft.StardewCraft;
 import com.stardew.craft.data.StardewDataMaps;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
@@ -10,40 +12,50 @@ import net.minecraft.world.level.block.state.BlockState;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /** Dynamic provider layer over the crop, tree, animal and building Data Maps. */
 public final class StardewAgricultureDataApi {
-    private static final List<Registered<CropProvider>> CROPS = new ArrayList<>();
-    private static final List<Registered<TreeProvider>> TREES = new ArrayList<>();
-    private static final List<Registered<AnimalProvider>> ANIMALS = new ArrayList<>();
-    private static final List<Registered<BuildingProvider>> BUILDINGS = new ArrayList<>();
+    private static final Map<ResourceLocation, Registered<CropProvider>> CROPS = new HashMap<>();
+    private static final Map<ResourceLocation, Registered<TreeProvider>> TREES = new HashMap<>();
+    private static final Map<ResourceLocation, Registered<AnimalProvider>> ANIMALS = new HashMap<>();
+    private static final Map<ResourceLocation, Registered<BuildingProvider>> BUILDINGS = new HashMap<>();
+    private static volatile List<Registered<CropProvider>> cropSnapshot = List.of();
+    private static volatile List<Registered<TreeProvider>> treeSnapshot = List.of();
+    private static volatile List<Registered<AnimalProvider>> animalSnapshot = List.of();
+    private static volatile List<Registered<BuildingProvider>> buildingSnapshot = List.of();
 
     private StardewAgricultureDataApi() {
     }
 
     public static synchronized void registerCropProvider(ResourceLocation id, int priority, CropProvider provider) {
-        register(CROPS, id, priority, provider);
+        cropSnapshot = register(CROPS, id, priority, provider);
     }
 
     public static synchronized void registerTreeProvider(ResourceLocation id, int priority, TreeProvider provider) {
-        register(TREES, id, priority, provider);
+        treeSnapshot = register(TREES, id, priority, provider);
     }
 
     public static synchronized void registerAnimalProvider(ResourceLocation id, int priority, AnimalProvider provider) {
-        register(ANIMALS, id, priority, provider);
+        animalSnapshot = register(ANIMALS, id, priority, provider);
     }
 
     public static synchronized void registerBuildingProvider(ResourceLocation id, int priority, BuildingProvider provider) {
-        register(BUILDINGS, id, priority, provider);
+        buildingSnapshot = register(BUILDINGS, id, priority, provider);
     }
 
     @Nullable
-    public static synchronized StardewCropData crop(Level level, BlockPos pos, BlockState state) {
-        for (Registered<CropProvider> entry : CROPS) {
-            StardewCropData data = entry.provider().resolve(level, pos, state);
-            if (data != null) return data;
+    public static StardewCropData crop(Level level, BlockPos pos, BlockState state) {
+        for (Registered<CropProvider> entry : cropSnapshot) {
+            try {
+                StardewCropData data = entry.provider().resolve(level, pos, state);
+                if (data != null) return data;
+            } catch (RuntimeException exception) {
+                logFailure("crop", entry.id(), BuiltInRegistries.BLOCK.getKey(state.getBlock()), exception);
+            }
         }
         return crop(state);
     }
@@ -54,41 +66,62 @@ public final class StardewAgricultureDataApi {
     }
 
     @Nullable
-    public static synchronized StardewTreeData tree(Level level, BlockPos pos, BlockState state) {
-        for (Registered<TreeProvider> entry : TREES) {
-            StardewTreeData data = entry.provider().resolve(level, pos, state);
-            if (data != null) return data;
+    public static StardewTreeData tree(Level level, BlockPos pos, BlockState state) {
+        for (Registered<TreeProvider> entry : treeSnapshot) {
+            try {
+                StardewTreeData data = entry.provider().resolve(level, pos, state);
+                if (data != null) return data;
+            } catch (RuntimeException exception) {
+                logFailure("tree", entry.id(), BuiltInRegistries.BLOCK.getKey(state.getBlock()), exception);
+            }
         }
         return state.getBlock().builtInRegistryHolder().getData(StardewDataMaps.TREE_DATA);
     }
 
     @Nullable
-    public static synchronized StardewAnimalData animal(Entity entity) {
-        for (Registered<AnimalProvider> entry : ANIMALS) {
-            StardewAnimalData data = entry.provider().resolve(entity);
-            if (data != null) return data;
+    public static StardewAnimalData animal(Entity entity) {
+        for (Registered<AnimalProvider> entry : animalSnapshot) {
+            try {
+                StardewAnimalData data = entry.provider().resolve(entity);
+                if (data != null) return data;
+            } catch (RuntimeException exception) {
+                logFailure("animal", entry.id(), BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()), exception);
+            }
         }
         return entity.getType().builtInRegistryHolder().getData(StardewDataMaps.ANIMAL_DATA);
     }
 
     @Nullable
-    public static synchronized StardewBuildingData building(Level level, BlockPos pos, BlockState state) {
-        for (Registered<BuildingProvider> entry : BUILDINGS) {
-            StardewBuildingData data = entry.provider().resolve(level, pos, state);
-            if (data != null) return data;
+    public static StardewBuildingData building(Level level, BlockPos pos, BlockState state) {
+        for (Registered<BuildingProvider> entry : buildingSnapshot) {
+            try {
+                StardewBuildingData data = entry.provider().resolve(level, pos, state);
+                if (data != null) return data;
+            } catch (RuntimeException exception) {
+                logFailure("building", entry.id(), BuiltInRegistries.BLOCK.getKey(state.getBlock()), exception);
+            }
         }
         return state.getBlock().builtInRegistryHolder().getData(StardewDataMaps.BUILDING_DATA);
     }
 
-    private static <T> void register(List<Registered<T>> entries, ResourceLocation id, int priority, T provider) {
+    private static <T> List<Registered<T>> register(Map<ResourceLocation, Registered<T>> entries,
+                                                    ResourceLocation id, int priority, T provider) {
         Objects.requireNonNull(id, "id");
         Objects.requireNonNull(provider, "provider");
-        if (entries.stream().anyMatch(entry -> entry.id().equals(id))) {
+        if (entries.containsKey(id)) {
             throw new IllegalStateException("Agriculture provider already registered: " + id);
         }
-        entries.add(new Registered<>(id, priority, provider));
-        entries.sort(Comparator.comparingInt((Registered<T> entry) -> entry.priority()).reversed()
+        entries.put(id, new Registered<>(id, priority, provider));
+        ArrayList<Registered<T>> sorted = new ArrayList<>(entries.values());
+        sorted.sort(Comparator.comparingInt((Registered<T> entry) -> entry.priority()).reversed()
                 .thenComparing(entry -> entry.id().toString()));
+        return List.copyOf(sorted);
+    }
+
+    private static void logFailure(String kind, ResourceLocation providerId, ResourceLocation targetId,
+                                   RuntimeException exception) {
+        StardewCraft.LOGGER.error("Stardew agriculture {} provider {} failed for {}",
+                kind, providerId, targetId, exception);
     }
 
     @FunctionalInterface public interface CropProvider {

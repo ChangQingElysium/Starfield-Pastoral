@@ -2,6 +2,7 @@ package com.stardew.craft.blockentity;
 
 import com.stardew.craft.block.utility.GarbageCanLootTable;
 import com.stardew.craft.block.utility.TrashBinBlock;
+import com.stardew.craft.core.ModDimensions;
 import com.stardew.craft.desert.DesertConstants;
 import com.stardew.craft.festival.desert.DesertFestivalService;
 import com.stardew.craft.item.ModItems;
@@ -82,9 +83,14 @@ public class TrashBinBlockEntity extends net.minecraft.world.level.block.entity.
         PlayerStardewData data = PlayerDataManager.getPlayerData(player);
         double dailyLuck = data.getDailyLuck();
         int trashCansChecked = data.getTrashCansChecked();
-        long daySeed = stableDaySeed(today);
+        long daySeed = stableDaySeed(((ServerLevel) level).getSeed(), today);
 
-        String canId = worldPosition.getX() + "_" + worldPosition.getY() + "_" + worldPosition.getZ();
+        String namedCanId = level.dimension() == ModDimensions.STARDEW_VALLEY
+                ? GarbageCanLootTable.namedCanId(worldPosition)
+                : null;
+        String canId = namedCanId != null
+                ? namedCanId
+                : worldPosition.getX() + "_" + worldPosition.getY() + "_" + worldPosition.getZ();
         GarbageCanLootTable.Result result = desertFestivalGarbageResult()
             ? new GarbageCanLootTable.Result(new ItemStack(ModItems.CALICO_EGG.get(), 5 + level.random.nextInt(4)), false, false)
             : GarbageCanLootTable.tryGetItem(canId, dailyLuck, trashCansChecked, daySeed, player);
@@ -156,8 +162,9 @@ public class TrashBinBlockEntity extends net.minecraft.world.level.block.entity.
         return (tm.getCurrentYear() - 1) * 112 + tm.getCurrentSeason() * 28 + tm.getCurrentDay();
     }
 
-    private static long stableDaySeed(int daysPlayed) {
-        return (long) daysPlayed * 0x9E3779B97F4A7C15L;
+    private static long stableDaySeed(long saveSeed, int daysPlayed) {
+        // SDV Utility.CreateDaySaveRandom: days played + save ID / 2 + call-specific salt.
+        return daysPlayed + saveSeed / 2L;
     }
 
     // ==================== NBT ====================

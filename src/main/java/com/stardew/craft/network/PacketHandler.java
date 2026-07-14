@@ -85,7 +85,9 @@ public class PacketHandler {
 
     @SubscribeEvent
     public static void register(RegisterPayloadHandlersEvent event) {
-        final PayloadRegistrar registrar = event.registrar("1");
+        // 0.5 API stabilization changes equipment sync from registry IDs to complete ItemStacks
+        // and adds server-authoritative client content snapshots. Reject mixed old/new clients explicitly.
+        final PayloadRegistrar registrar = event.registrar("2");
         
         // 客户端 -> 服务端
         registrar.playToServer(
@@ -1806,10 +1808,25 @@ public class PacketHandler {
             com.stardew.craft.network.payload.CheckMailboxPayload.STREAM_CODEC,
             com.stardew.craft.network.payload.CheckMailboxPayload::handle
         );
+        registrar.playToServer(
+            com.stardew.craft.network.payload.OpenSeenMailPayload.TYPE,
+            com.stardew.craft.network.payload.OpenSeenMailPayload.STREAM_CODEC,
+            com.stardew.craft.network.payload.OpenSeenMailPayload::handle
+        );
         registrar.playToClient(
             com.stardew.craft.network.payload.OpenMailPayload.TYPE,
             com.stardew.craft.network.payload.OpenMailPayload.STREAM_CODEC,
             com.stardew.craft.network.payload.OpenMailPayload::handle
+        );
+        registrar.playToClient(
+            com.stardew.craft.network.payload.OpenSecretNotePayload.TYPE,
+            com.stardew.craft.network.payload.OpenSecretNotePayload.STREAM_CODEC,
+            com.stardew.craft.network.payload.OpenSecretNotePayload::handle
+        );
+        registrar.playToServer(
+            com.stardew.craft.network.payload.OpenSeenSecretNotePayload.TYPE,
+            com.stardew.craft.network.payload.OpenSeenSecretNotePayload.STREAM_CODEC,
+            com.stardew.craft.network.payload.OpenSeenSecretNotePayload::handle
         );
 
         // ─── Quest System ───
@@ -2004,6 +2021,21 @@ public class PacketHandler {
             DataRegistrySyncPayload.TYPE,
             DataRegistrySyncPayload.STREAM_CODEC,
             DataRegistrySyncPayload::handle
+        );
+        registrar.playToClient(
+            MailIndexSyncPayload.TYPE,
+            MailIndexSyncPayload.STREAM_CODEC,
+            MailIndexSyncPayload::handle
+        );
+        registrar.playToClient(
+            FestivalAvailabilitySyncPayload.TYPE,
+            FestivalAvailabilitySyncPayload.STREAM_CODEC,
+            FestivalAvailabilitySyncPayload::handle
+        );
+        registrar.playToClient(
+            JeiCatalogSyncPayload.TYPE,
+            JeiCatalogSyncPayload.STREAM_CODEC,
+            JeiCatalogSyncPayload::handle
         );
 
         // ── Cutscene / Event System ──

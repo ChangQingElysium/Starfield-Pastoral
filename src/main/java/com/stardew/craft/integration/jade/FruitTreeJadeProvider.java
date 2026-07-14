@@ -37,6 +37,7 @@ public enum FruitTreeJadeProvider implements IBlockComponentProvider, IServerDat
     private static final String DAYS_REMAINING = "DaysRemaining";
     private static final String BLOCKED = "Blocked";
     private static final String FRUIT_COUNT = "FruitCount";
+    private static final String MAX_FRUIT_COUNT = "MaxFruitCount";
     private static final String DAYS_SINCE_MATURE = "DaysSinceMature";
     private static final String QUALITY = "Quality";
     private static final String LIGHTNING_DAYS = "LightningDays";
@@ -71,6 +72,7 @@ public enum FruitTreeJadeProvider implements IBlockComponentProvider, IServerDat
         }
         tag.putString(KIND, KIND_MATURE);
         tag.putInt(FRUIT_COUNT, tree.getFruitCount());
+        tag.putInt(MAX_FRUIT_COUNT, tree.getMaxStoredFruit());
         tag.putInt(DAYS_SINCE_MATURE, tree.getDaysSinceMature());
         tag.putInt(QUALITY, tree.getCurrentFruitQuality());
         tag.putInt(LIGHTNING_DAYS, tree.getLightningDays());
@@ -102,7 +104,8 @@ public enum FruitTreeJadeProvider implements IBlockComponentProvider, IServerDat
         if (KIND_MATURE.equals(kind)) {
             int fruitCount = data.getInt(FRUIT_COUNT);
             int lightningDays = data.getInt(LIGHTNING_DAYS);
-            tooltip.add(Component.translatable("stardewcraft.tooltip.fruit_tree_fruit", fruitCount, FruitTreeType.MAX_FRUIT));
+            tooltip.add(Component.translatable("stardewcraft.tooltip.fruit_tree_fruit", fruitCount,
+                    data.getInt(MAX_FRUIT_COUNT)));
             tooltip.add(Component.translatable("stardewcraft.tooltip.fruit_tree_age", data.getInt(DAYS_SINCE_MATURE)));
             if (lightningDays > 0) {
                 tooltip.add(Component.translatable("stardewcraft.tooltip.fruit_tree_lightning", lightningDays)

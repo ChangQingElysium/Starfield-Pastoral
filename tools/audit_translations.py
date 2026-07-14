@@ -11,8 +11,57 @@ LANG_DIR = ROOT / "src/main/resources/assets/stardewcraft/lang"
 DATA_DIR = ROOT / "src/main/resources/data/stardewcraft"
 JAVA_DIR = ROOT / "src/main/java"
 CONTENT_DIR = ROOT / "源文件/Content"
-SUPPORTED_LOCALES = ("en_us", "zh_cn", "ru_ru", "fr_fr")
-OFFICIAL_LOCALE_SUFFIXES = {"ru_ru": "ru-RU", "fr_fr": "fr-FR"}
+LOCALIZED_GUI_DIR = ROOT / "src/main/resources/assets/stardewcraft/textures/gui/localized"
+SUPPORTED_LOCALES = (
+    "en_us",
+    "zh_cn",
+    "ru_ru",
+    "fr_fr",
+    "de_de",
+    "es_es",
+    "pt_br",
+    "ja_jp",
+    "ko_kr",
+    "it_it",
+    "tr_tr",
+    "hu_hu",
+)
+OFFICIAL_LOCALE_SUFFIXES = {
+    "zh_cn": "zh-CN",
+    "ru_ru": "ru-RU",
+    "fr_fr": "fr-FR",
+    "de_de": "de-DE",
+    "es_es": "es-ES",
+    "pt_br": "pt-BR",
+    "ja_jp": "ja-JP",
+    "ko_kr": "ko-KR",
+    "it_it": "it-IT",
+    "tr_tr": "tr-TR",
+    "hu_hu": "hu-HU",
+}
+REQUIRED_LOCALIZED_GUI_ASSETS = (
+    "billboard/calendar_background.png",
+    "billboard/daily_quest_background.png",
+    "bundle/bundle_complete.png",
+    "bundle/purchase.png",
+    "fishing/caught_popup.png",
+    "fishing/max.png",
+    "joja/joja_cd_form.png",
+)
+LOCALIZED_GUI_ASSET_SOURCES = {
+    "billboard/calendar_background.png": ("Billboard", 0, 198, 301, 198),
+    "billboard/daily_quest_background.png": ("Billboard", 0, 0, 338, 198),
+    "bundle/bundle_complete.png": ("Cursors", 128, 1367, 150, 14),
+    "bundle/purchase.png": ("JunimoNote", 517, 286, 65, 20),
+    "fishing/caught_popup.png": ("Cursors", 612, 1913, 74, 30),
+    "fishing/max.png": ("Cursors", 545, 1921, 53, 19),
+    "joja/joja_cd_form.png": ("JojaCDForm", 0, 0, 320, 160),
+}
+KNOWN_TRANSLATION_POLLUTION = {
+    "ja_jp": ("製品情報", "サイトマップ", "よくある質問", "お問い合わせ"),
+    "ko_kr": ("이름 *", "제품정보", "팟캐스트", "사이트맵", "뚝 베어", "회사 소개"),
+}
+HAN_ALLOWED_LOCALES = {"zh_cn", "ja_jp"}
 RUNTIME_ASSET_JSON = (
     ROOT / "src/main/resources/assets/stardewcraft/stardew_hat_index.json",
 )
@@ -46,6 +95,8 @@ SKIP_KEYS = {
     "stardewcraft.event.test.line1",
     "stardewcraft.key",
     "stardewcraft.npcMovementDebug",
+    "stardewcraft.iridium_milk_consumed",
+    "stardewcraft.secret_note_10_scene_pending",
     "stardewcraft.secret_woods_open",
 }
 
@@ -54,16 +105,38 @@ SKIP_BLOCK_SUFFIXES = (
     "_top_render",
 )
 
+# These values are intentionally proper names. Matching an English name like
+# "Ginger" or "Poppy" to an unrelated vanilla common-noun string must not make
+# the audit replace the name with the translated noun.
+OFFICIAL_VALUE_REUSE_SKIP_PREFIXES = (
+    "gui.stardewcraft.farm_selection.random_name.",
+    # One-letter JEI units (d/h/m) collide with unrelated one-letter values in
+    # the official content tables, so value-only source matching is invalid.
+    "stardewcraft.jei.time.",
+    "stardewcraft.animal.random_name.",
+    "stardewcraft.farmer_title.",
+    "stardewcraft.totem.random_name.",
+)
+
 STATIC_STRING_RE = re.compile(r'"((?:[^"\\]|\\.)*)"')
 JAVA_TRANSLATABLE_RE = re.compile(r'(?:Component|TextComponent)?\.?translatable\(\s*"((?:[^"\\]|\\.)*)"')
 TEXT_JSON_TRANSLATE_RE = re.compile(r'\\"translate\\":\\"([^"\\]+)\\"')
 HAN_RE = re.compile(r"[\u3400-\u9fff]")
+PRIVATE_USE_RE = re.compile(r"[\ue000-\uf8ff]|ZXQSEG")
+PATHOLOGICAL_REPEAT_RE = re.compile(
+    r"(?i)\b([A-Za-zÀ-ÖØ-öø-ÿА-Яа-яЁёĞğİıŞşÇçÖöÜüŐőŰű]{3,})\b"
+    r"(?:[\s,.;:!?()\-]+\1\b){3,}"
+)
 PLACEHOLDER_RE = re.compile(r"%(?:(\d+)\$)?([sdf])(?![A-Za-z]{2})")
 STARDEW_CONTROL_RE = re.compile(
     r"%(?:noturn|farm|fork|pet|revealtaste|spouse|time|secretsanta|noun|season|firstnameletter|name)"
     r"(?![A-Za-z])"
 )
 JAVA_FORMAT_RE = re.compile(r"%(?:\d+\$)?[sdf]")
+DIALOGUE_CONTROL_RE = re.compile(r"\$query|\$(?:\d+|[A-Za-z])")
+DIALOGUE_BRANCH_RE = re.compile(r"(?:^|#)\$[qr]\s+-?\d+\s+-?\d+\s+[A-Za-z0-9_]+")
+QUOTED_TEXT_RE = re.compile(r'"((?:\\.|[^"\\])*)"')
+ENGLISH_PROSE_WORD_RE = re.compile(r"[A-Za-z]{2,}")
 NON_RUNTIME_JSON_FIELDS = {"note", "comment", "comments"}
 
 
@@ -94,6 +167,29 @@ GIANT_CROP_OBJECT_KEYS = {
     "giant_melon": "Melon_Name",
     "giant_powdermelon": "Powdermelon_Name",
     "giant_pumpkin": "Pumpkin_Name",
+}
+
+ITEM_DESCRIPTION_KEYS = {
+    "artichoke": "Artichoke_Description",
+    "beet": "Beet_Description",
+    "blueberry": "Blueberry_Description",
+    "cauliflower": "Cauliflower_Description",
+    "coffee_bean": "CoffeeBean_Description",
+    "copper_ore": "CopperOre_Description",
+    "corn": "Corn_Description",
+    "eggplant": "Eggplant_Description",
+    "garlic": "Garlic_Description",
+    "gold_ore": "GoldOre_Description",
+    "iridium_ore": "IridiumOre_Description",
+    "iron_ore": "IronOre_Description",
+    "parsnip": "Parsnip_Description",
+    "pumpkin": "Pumpkin_Description",
+    "red_cabbage": "RedCabbage_Description",
+    "starfruit": "Starfruit_Description",
+    "summer_spangle": "SummerSpangle_Description",
+    "tomato": "Tomato_Description",
+    "tulip": "Tulip_Description",
+    "wheat": "Wheat_Description",
 }
 
 
@@ -253,7 +349,76 @@ def placeholder_signature(value):
 
 
 def stardew_control_signature(value):
-    return sorted(STARDEW_CONTROL_RE.findall(JAVA_FORMAT_RE.sub("", value)))
+    percent_controls = STARDEW_CONTROL_RE.findall(value)
+    without_java_formats = JAVA_FORMAT_RE.sub("", value)
+    dialogue_controls = DIALOGUE_CONTROL_RE.findall(without_java_formats)
+    branch_controls = DIALOGUE_BRANCH_RE.findall(value)
+    return sorted(percent_controls + dialogue_controls + branch_controls)
+
+
+def png_dimensions(path):
+    """Read PNG dimensions without adding an image-library dependency."""
+    data = path.read_bytes()[:24]
+    if len(data) < 24 or data[:8] != b"\x89PNG\r\n\x1a\n" or data[12:16] != b"IHDR":
+        return None
+    return int.from_bytes(data[16:20], "big"), int.from_bytes(data[20:24], "big")
+
+
+def collect_localized_gui_asset_issues():
+    issues = []
+    try:
+        from PIL import Image
+    except ImportError:
+        return [{
+            "problem": "validator_unavailable",
+            "detail": "Install Pillow to verify localized GUI pixels against official atlases.",
+        }]
+    baseline_dimensions = {}
+    for relative_path in REQUIRED_LOCALIZED_GUI_ASSETS:
+        path = LOCALIZED_GUI_DIR / "en_us" / relative_path
+        baseline_dimensions[relative_path] = png_dimensions(path) if path.exists() else None
+    for locale in SUPPORTED_LOCALES:
+        for relative_path in REQUIRED_LOCALIZED_GUI_ASSETS:
+            path = LOCALIZED_GUI_DIR / locale / relative_path
+            if not path.exists():
+                issues.append({"locale": locale, "asset": relative_path, "problem": "missing"})
+                continue
+            dimensions = png_dimensions(path)
+            if dimensions is None:
+                issues.append({"locale": locale, "asset": relative_path, "problem": "invalid_png"})
+            elif dimensions != baseline_dimensions[relative_path]:
+                issues.append({
+                    "locale": locale,
+                    "asset": relative_path,
+                    "problem": "dimension_mismatch",
+                    "current": dimensions,
+                    "en_us": baseline_dimensions[relative_path],
+                })
+                continue
+
+            atlas, u, v, width, height = LOCALIZED_GUI_ASSET_SOURCES[relative_path]
+            suffix = "" if locale == "en_us" else f".{OFFICIAL_LOCALE_SUFFIXES[locale]}"
+            source_path = CONTENT_DIR / "LooseSprites" / f"{atlas}{suffix}.png"
+            if not source_path.exists():
+                issues.append({
+                    "locale": locale,
+                    "asset": relative_path,
+                    "problem": "official_source_missing",
+                    "source": str(source_path.relative_to(ROOT)),
+                })
+                continue
+            with Image.open(source_path) as source_image, Image.open(path) as localized_image:
+                official_crop = source_image.convert("RGBA").crop((u, v, u + width, v + height))
+                localized_pixels = localized_image.convert("RGBA")
+                if official_crop.tobytes() != localized_pixels.tobytes():
+                    issues.append({
+                        "locale": locale,
+                        "asset": relative_path,
+                        "problem": "official_pixel_mismatch",
+                        "source": str(source_path.relative_to(ROOT)),
+                        "rect": [u, v, width, height],
+                    })
+    return issues
 
 
 def add_ref(refs, key, path, detail):
@@ -300,7 +465,7 @@ def flatten_json_strings(node, path=(), result=None):
     return result
 
 
-def build_official_value_map(locale_suffix):
+def build_official_value_map(locale_suffix, include_unchanged=False):
     candidates = defaultdict(set)
     for localized_path in CONTENT_DIR.rglob(f"*.{locale_suffix}.json"):
         english_name = localized_path.name[:-len(f".{locale_suffix}.json")] + ".json"
@@ -314,7 +479,8 @@ def build_official_value_map(locale_suffix):
             continue
         for json_path, english_value in english_values.items():
             localized_value = localized_values.get(json_path)
-            if isinstance(localized_value, str) and localized_value != english_value:
+            if (isinstance(localized_value, str)
+                    and (include_unchanged or localized_value != english_value)):
                 candidates[english_value].add(localized_value)
     return {
         english_value: next(iter(localized_values))
@@ -386,6 +552,159 @@ def vanilla_dialogue_file(npc_id):
         if stem.lower() == wanted:
             return stem
     return None
+
+
+def localized_source_path(base, locale):
+    if locale == "en_us":
+        return CONTENT_DIR / f"{base}.json"
+    suffix = OFFICIAL_LOCALE_SUFFIXES[locale]
+    return CONTENT_DIR / f"{base}.{suffix}.json"
+
+
+def last_sentence(value, locale):
+    value = value.strip()
+    if locale in {"zh_cn", "ja_jp"}:
+        parts = [part for part in re.findall(r"[^。！？]+[。！？]?", value) if part]
+    else:
+        parts = [part for part in re.split(r"(?<=[.!?])\s+", value) if part]
+    return parts[-1] if parts else value
+
+
+def build_keyed_official_values(locale):
+    """Build values whose exact Stardew source key is known for a mod lang key."""
+    values = {}
+    cache = {}
+
+    def source(base):
+        if base not in cache:
+            path = localized_source_path(base, locale)
+            cache[base] = load_json(path) if path.exists() else {}
+        return cache[base]
+
+    def add(lang_key, base, source_key, transform=None):
+        data = source(base)
+        if source_key in data and isinstance(data[source_key], str):
+            value = data[source_key]
+            # The official French Abigail asset leaves Sun_old in English.
+            # Keep the key source-of-truth binding while supplying the missing
+            # localized line instead of forcing the mod back to English.
+            if (locale, base, source_key) == (
+                    "fr_fr", "Characters/Dialogue/Abigail", "Sun_old"):
+                value = ("$p 17#Tu penses qu’il ne se passerait rien, c’est ça ?$u|"
+                         "Peut-être qu’un esprit maléfique apparaîtrait !")
+            values[lang_key] = transform(value) if transform else value
+
+    for lang_key, (base, source_key) in STRING_KEY_MAP.items():
+        add(lang_key, base, source_key)
+
+    for item_id, source_key in ITEM_DESCRIPTION_KEYS.items():
+        add(
+            f"item.stardewcraft.{item_id}.flavor",
+            "Strings/Objects",
+            source_key,
+            lambda value: last_sentence(value, locale),
+        )
+
+    dialogue_dir = DATA_DIR / "npc/dialogue"
+    if dialogue_dir.exists():
+        for data_path in dialogue_dir.glob("*.json"):
+            data = load_json(data_path)
+            npc_id = data.get("npc_id", data_path.stem)
+            source_stem = vanilla_dialogue_file(npc_id)
+            if not source_stem:
+                continue
+            base = f"Characters/Dialogue/{source_stem}"
+            for source_key, lang_key in data.get("entries", {}).items():
+                if isinstance(lang_key, str):
+                    add(lang_key, base, source_key)
+
+    mail = source("Data/mail")
+    for source_key, official_value in mail.items():
+        if isinstance(official_value, str):
+            values[f"stardewcraft.mail.{source_key}"] = official_value
+
+    # The mod renders the vanilla secret-note text itself.  The vanilla values
+    # append %revealtaste directives which StardewCraft handles separately, so
+    # keep the official prose while removing only those source directives.
+    secret_notes = source("Data/SecretNotes")
+    for source_key, official_value in secret_notes.items():
+        lang_key = f"stardewcraft.secret_note.{source_key}"
+        if isinstance(official_value, str) and not official_value.startswith("!image"):
+            values[lang_key] = re.sub(r"%revealtaste:[^%]+", "", official_value)
+
+    # Data/Quests stores slash-delimited fields.  StardewCraft exposes the
+    # vanilla title, description, and objective as independent translation
+    # keys, so bind those fields by quest id rather than by English text.
+    quests = source("Data/Quests")
+    quest_fields = {"title": 1, "description": 2, "objective": 3}
+    for quest_id, encoded in quests.items():
+        if not isinstance(encoded, str):
+            continue
+        fields = encoded.split("/")
+        for field_name, index in quest_fields.items():
+            if index < len(fields):
+                values[f"stardewcraft.quest.{quest_id}.{field_name}"] = fields[index]
+
+    # Festival scripts contain user-visible dialogue embedded in commands.  The
+    # mod key suffix is the lowercase vanilla source key, so bind every exposed
+    # dialogue entry by key instead of hoping the whole script matches by value.
+    festival_ids = ("spring13", "spring24", "summer11", "summer28", "fall16", "fall27", "winter8", "winter25")
+    festival_metadata = {"name", "conditions", "set-up", "mainEvent", "set-up_y2", "mainEvent_y2"}
+    korean_winter8_y2 = {
+        "Impressive, that's a lot of caught fish!$h": "대단하군요, 정말 많은 물고기를 잡았어요!$h",
+        "*gag*... I will never get used to that stench...$s": "*욱*... 이 비린내에는 도저히 익숙해지지 않네요...$s",
+        "Now, for the winner of this year's ice fishing competition...": "그럼, 올해 얼음낚시 대회의 우승자를 발표하겠습니다...",
+        "Here's your prize! Enjoy.": "여기 상품입니다! 마음껏 즐기세요.",
+        "Here's your prize, Willy. Enjoy.": "여기 상품입니다, 윌리. 마음껏 즐기세요.",
+        "Well, that's it for this year's Festival of Ice. Thanks for coming, everyone!#$b#Now let's release these poor fish...$s": "자, 올해 얼음 축제는 이것으로 끝입니다. 모두 와 주셔서 고맙습니다!#$b#이제 이 불쌍한 물고기들을 놓아줍시다...$s",
+        "I can't believe I won! Well, time to head home.": "내가 우승했다니 믿기지 않아! 이제 집에 갈 시간이군.",
+        "I didn't win the competition, but it was still fun! Time to head home.": "대회에서 이기지는 못했지만 그래도 즐거웠어! 이제 집에 갈 시간이군.",
+    }
+    korean_spring13_y2 = {
+        "Wow, look at all these eggs!$h#$b#Now if only I could get you kids to pick up litter this efficiently, we'd have the cleanest town this side of the Gem Sea! *chuckle*$h": "와, 이 달걀들을 좀 보세요!$h#$b#여러분이 이렇게 능숙하게 쓰레기도 주워 준다면, 보석해 이쪽에서 가장 깨끗한 마을이 될 텐데요! *웃음*$h",
+        "And now, the winner of this year's egg hunt...": "그럼, 올해 달걀 찾기 대회의 우승자는...",
+        "Here's your prize! Enjoy.": "여기 상품입니다! 마음껏 즐기세요.",
+        "Well, that's it for this year's Egg Festival. Thanks for coming, everyone!": "자, 올해 달걀 축제는 이것으로 끝입니다. 모두 와 주셔서 고맙습니다!",
+    }
+    untranslated_plain_fallbacks = {
+        ("zh_cn", "By combining their collected eggs... Jas and Vincent!$1"): "把收集到的彩蛋合起来……贾斯和文森特！$1",
+        ("zh_cn", "You say it's raining up above?#$e#Rain... It's almost mythical to us. Some of us live our entire lives without ever experiencing it."): "你说上面正在下雨？#$e#雨……对我们来说几乎只存在于神话中。我们中有些人一辈子都从未亲身经历过。",
+        ("zh_cn", "I heard it's raining back home. Is that why you came here?$h#$e#I kind of miss the rain, actually...$s"): "我听说家乡正在下雨。你就是为了这个才来这里的吗？$h#$e#说实话，我还真有点想念雨……$s",
+        ("es_es", "Need any last minute gifts? I've got you covered! Take a look at my wares.$0"): "¿Necesitas algún regalo de última hora? ¡Yo me encargo! Échale un vistazo a mis productos.$0",
+        ("es_es", "This spot is for the overflow presents. There's just too many to count this year!$0"): "Aquí ponemos los regalos que ya no caben. ¡Este año hay tantos que es imposible contarlos!$0",
+    }
+    for festival_id in festival_ids:
+        festival = source(f"Data/Festivals/{festival_id}")
+        for source_key, official_value in festival.items():
+            if source_key in festival_metadata or not isinstance(official_value, str):
+                continue
+            official_value = untranslated_plain_fallbacks.get((locale, official_value), official_value)
+            if locale == "ko_kr" and festival_id == "winter8" and source_key in {"afterIceFishing_y2", "DickWin_y2"}:
+                for english, korean in korean_winter8_y2.items():
+                    official_value = official_value.replace(f'"{english}"', f'"{korean}"')
+            if locale == "ko_kr" and festival_id == "spring13" and source_key == "afterEggHunt_y2":
+                for english, korean in korean_spring13_y2.items():
+                    official_value = official_value.replace(f'"{english}"', f'"{korean}"')
+            values[f"stardewcraft.festival.{festival_id}.dialogue.{source_key.lower()}"] = official_value
+
+    gift_tastes = source("Data/NPCGiftTastes")
+    taste_indexes = {
+        "loved": 0,
+        "liked": 2,
+        "disliked": 4,
+        "hated": 6,
+        "neutral": 8,
+    }
+    for npc_name, encoded in gift_tastes.items():
+        if not isinstance(encoded, str):
+            continue
+        fields = encoded.split("/")
+        npc_id = npc_name.lower()
+        for taste, index in taste_indexes.items():
+            if index < len(fields) and fields[index]:
+                values[f"stardewcraft.npc.{npc_id}.gift_taste.{taste}"] = fields[index]
+
+    return values
 
 
 def collect_autofill_values():
@@ -550,6 +869,15 @@ def main():
     auto_keys = [key for key in missing_any if key in autofill]
     unresolved = [key for key in missing_any if key not in autofill]
     baseline_keys = set(en_lang)
+    official_value_maps = {
+        locale: build_official_value_map(suffix, include_unchanged=True)
+        for locale, suffix in OFFICIAL_LOCALE_SUFFIXES.items()
+    }
+    keyed_official_values = {
+        locale: build_keyed_official_values(locale)
+        for locale in OFFICIAL_LOCALE_SUFFIXES
+    }
+    keyed_official_values["en_us"] = build_keyed_official_values("en_us")
     key_drift = {
         locale: {
             "missing_from_locale": sorted(baseline_keys - set(lang)),
@@ -574,6 +902,8 @@ def main():
             if isinstance(en_lang[key], str)
             and isinstance(lang[key], str)
             and placeholder_signature(en_lang[key]) != placeholder_signature(lang[key])
+            and official_value_maps.get(locale, {}).get(en_lang[key]) != lang[key]
+            and keyed_official_values.get(locale, {}).get(key) != lang[key]
         ]
     placeholder_mismatches = placeholder_mismatches_by_locale["zh_cn"]
     stardew_control_mismatches_by_locale = {}
@@ -590,6 +920,8 @@ def main():
             if isinstance(en_lang[key], str)
             and isinstance(lang[key], str)
             and stardew_control_signature(en_lang[key]) != stardew_control_signature(lang[key])
+            and official_value_maps.get(locale, {}).get(en_lang[key]) != lang[key]
+            and keyed_official_values.get(locale, {}).get(key) != lang[key]
         ]
     english_han_values = [
         {"key": key, "value": value}
@@ -603,11 +935,42 @@ def main():
             if isinstance(value, str) and HAN_RE.search(value)
         ]
         for locale, lang in languages.items()
-        if locale not in ("en_us", "zh_cn")
+        if locale != "en_us" and locale not in HAN_ALLOWED_LOCALES
     }
     non_string_values_by_locale = {
         locale: [key for key, value in lang.items() if not isinstance(value, str)]
         for locale, lang in languages.items()
+    }
+    leaked_translation_markers_by_locale = {
+        locale: [
+            {"key": key, "value": value}
+            for key, value in lang.items()
+            if isinstance(value, str) and PRIVATE_USE_RE.search(value)
+        ]
+        for locale, lang in languages.items()
+    }
+    pathological_repetitions_by_locale = {
+        locale: [
+            {"key": key, "value": value}
+            for key, value in lang.items()
+            if isinstance(value, str) and PATHOLOGICAL_REPEAT_RE.search(value)
+        ]
+        for locale, lang in languages.items()
+    }
+    unbalanced_brackets_by_locale = {
+        locale: [
+            {"key": key, "value": value}
+            for key, value in lang.items()
+            if isinstance(value, str)
+            and isinstance(en_lang.get(key), str)
+            and keyed_official_values.get(locale, {}).get(key) != value
+            and official_value_maps.get(locale, {}).get(en_lang[key]) != value
+            and en_lang[key].count("(") == en_lang[key].count(")")
+            and en_lang[key].count("[") == en_lang[key].count("]")
+            and (value.count("(") != value.count(")") or value.count("[") != value.count("]"))
+        ]
+        for locale, lang in languages.items()
+        if locale != "en_us"
     }
     unchanged_from_en_by_locale = {
         locale: [
@@ -625,6 +988,7 @@ def main():
         matches = [
             key for key, english_value in en_lang.items()
             if isinstance(english_value, str) and english_value in official_values
+            and not key.startswith(OFFICIAL_VALUE_REUSE_SKIP_PREFIXES)
         ]
         official_source_matches[locale] = len(matches)
         official_source_mismatches[locale] = [
@@ -635,8 +999,62 @@ def main():
             }
             for key in matches
             if lang.get(key) != official_values[en_lang[key]]
+            and keyed_official_values.get(locale, {}).get(key) != lang.get(key)
         ]
     misaligned_official_reuse_by_locale = collect_misaligned_official_reuse(languages)
+    keyed_official_source_mismatches = {
+        locale: [
+            {"key": key, "current": languages[locale].get(key), "official": value}
+            for key, value in official_values.items()
+            if key in languages[locale] and languages[locale][key] != value
+        ]
+        for locale, official_values in keyed_official_values.items()
+    }
+    known_translation_pollution_by_locale = {
+        locale: [
+            {"key": key, "value": value, "pattern": pattern}
+            for key, value in languages[locale].items()
+            if isinstance(value, str)
+            for pattern in patterns
+            if pattern in value
+        ]
+        for locale, patterns in KNOWN_TRANSLATION_POLLUTION.items()
+    }
+    embedded_unchanged_english_by_locale = {}
+    for locale, lang in languages.items():
+        if locale == "en_us":
+            continue
+        findings = []
+        for key in sorted(baseline_keys & set(lang)):
+            english_value = en_lang[key]
+            localized_value = lang[key]
+            if not isinstance(english_value, str) or not isinstance(localized_value, str):
+                continue
+            english_quoted = set(QUOTED_TEXT_RE.findall(english_value))
+            for segment in QUOTED_TEXT_RE.findall(localized_value):
+                if (segment in english_quoted
+                        and len(ENGLISH_PROSE_WORD_RE.findall(segment)) >= 3):
+                    findings.append({"key": key, "segment": segment})
+        embedded_unchanged_english_by_locale[locale] = findings
+    severe_truncations_by_locale = {
+        locale: [
+            {
+                "key": key,
+                "english_length": len(en_lang[key]),
+                "locale_length": len(lang[key]),
+            }
+            for key in sorted(baseline_keys & set(lang))
+            if isinstance(en_lang[key], str)
+            and isinstance(lang[key], str)
+            and len(en_lang[key]) >= 80
+            and len(lang[key]) < max(20, len(en_lang[key]) * 0.25)
+            and keyed_official_values.get(locale, {}).get(key) != lang[key]
+            and official_value_maps.get(locale, {}).get(en_lang[key]) != lang[key]
+        ]
+        for locale, lang in languages.items()
+        if locale not in {"en_us", "zh_cn", "ja_jp", "ko_kr"}
+    }
+    localized_gui_asset_issues = collect_localized_gui_asset_issues()
     hardcoded_java_han = collect_hardcoded_java_han()
     hardcoded_data_han = collect_hardcoded_data_han()
 
@@ -666,10 +1084,18 @@ def main():
         "stardew_control_mismatches_by_locale": stardew_control_mismatches_by_locale,
         "han_values_by_locale": han_values_by_locale,
         "non_string_values_by_locale": non_string_values_by_locale,
+        "leaked_translation_markers_by_locale": leaked_translation_markers_by_locale,
+        "pathological_repetitions_by_locale": pathological_repetitions_by_locale,
+        "unbalanced_brackets_by_locale": unbalanced_brackets_by_locale,
         "unchanged_from_en_by_locale": unchanged_from_en_by_locale,
         "official_source_matches": official_source_matches,
         "official_source_mismatches": official_source_mismatches,
+        "keyed_official_source_mismatches": keyed_official_source_mismatches,
         "misaligned_official_reuse_by_locale": misaligned_official_reuse_by_locale,
+        "known_translation_pollution_by_locale": known_translation_pollution_by_locale,
+        "embedded_unchanged_english_by_locale": embedded_unchanged_english_by_locale,
+        "severe_truncations_by_locale": severe_truncations_by_locale,
+        "localized_gui_asset_issues": localized_gui_asset_issues,
         "auto_fillable_count": len(auto_keys),
         "unresolved_count": len(unresolved),
         "only_en": only_en,
@@ -726,6 +1152,15 @@ def main():
     print("Non-string lang values: " + ", ".join(
         f"{locale}={len(items)}" for locale, items in non_string_values_by_locale.items()
     ))
+    print("Leaked translation markers: " + ", ".join(
+        f"{locale}={len(items)}" for locale, items in leaked_translation_markers_by_locale.items()
+    ))
+    print("Pathological repetitions: " + ", ".join(
+        f"{locale}={len(items)}" for locale, items in pathological_repetitions_by_locale.items()
+    ))
+    print("Unbalanced brackets: " + ", ".join(
+        f"{locale}={len(items)}" for locale, items in unbalanced_brackets_by_locale.items()
+    ))
     print("Values unchanged from en_us: " + ", ".join(
         f"{locale}={len(items)}" for locale, items in unchanged_from_en_by_locale.items()
     ))
@@ -735,9 +1170,22 @@ def main():
     print("Official source mismatches: " + ", ".join(
         f"{locale}={len(items)}" for locale, items in official_source_mismatches.items()
     ))
+    print("Keyed official source mismatches: " + ", ".join(
+        f"{locale}={len(items)}" for locale, items in keyed_official_source_mismatches.items()
+    ))
     print("Misaligned official reuse: " + ", ".join(
         f"{locale}={len(items)}" for locale, items in misaligned_official_reuse_by_locale.items()
     ))
+    print("Known translation pollution: " + ", ".join(
+        f"{locale}={len(items)}" for locale, items in known_translation_pollution_by_locale.items()
+    ))
+    print("Embedded unchanged English prose: " + ", ".join(
+        f"{locale}={len(items)}" for locale, items in embedded_unchanged_english_by_locale.items()
+    ))
+    print("Severe translation truncations: " + ", ".join(
+        f"{locale}={len(items)}" for locale, items in severe_truncations_by_locale.items()
+    ))
+    print(f"Localized GUI asset issues: {len(localized_gui_asset_issues)}")
     print(f"Hardcoded runtime Chinese: java={len(hardcoded_java_han)}, data={len(hardcoded_data_han)}")
     print(f"Report: {report_path.relative_to(ROOT)}")
     if args.fix:
@@ -752,8 +1200,16 @@ def main():
         or english_han_values
         or any(han_values_by_locale.values())
         or any(non_string_values_by_locale.values())
+        or any(leaked_translation_markers_by_locale.values())
+        or any(pathological_repetitions_by_locale.values())
+        or any(unbalanced_brackets_by_locale.values())
         or any(official_source_mismatches.values())
+        or any(keyed_official_source_mismatches.values())
         or any(misaligned_official_reuse_by_locale.values())
+        or any(known_translation_pollution_by_locale.values())
+        or any(embedded_unchanged_english_by_locale.values())
+        or any(severe_truncations_by_locale.values())
+        or localized_gui_asset_issues
         or hardcoded_java_han
         or hardcoded_data_han
     )

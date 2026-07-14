@@ -3,6 +3,11 @@
 
 StarfieldPastoral（星野牧歌） is a non-commercial fan project that recreates the feel and core progression of Stardew Valley inside Minecraft on NeoForge.
 
+## Community | 官方社区
+
+- Official Discord server: [https://discord.gg/cnG3eE58Au](https://discord.gg/cnG3eE58Au)
+- 官方 QQ 群：`961767762`
+
 ## Current Status
 
 The project is in active alpha development. It already contains a broad playable foundation, but it is not yet a full 1:1 parity implementation.
@@ -15,7 +20,7 @@ Current development focus is on expanding feature coverage while tightening Star
 - Minecraft 1.21.1
 - NeoForge 21.1.217
 - Java 21
-- Mod version: 0.5.0
+- Mod version: 0.5.1
 - Mod id: stardewcraft
 
 ## Implemented or In-Progress Systems

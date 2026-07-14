@@ -51,8 +51,9 @@ common/dialogue_question_top,cursors,275,313,1,6
 common/dialogue_question_bottom,cursors,275,328,1,8
 common/dialogue_question_left,cursors,264,325,8,1
 common/dialogue_question_right,cursors,293,324,7,1
-billboard/calendar_background,billboard,0,198,301,198
-billboard/daily_quest_background,billboard,0,0,338,198
+# Text-bearing billboard backgrounds come from each official locale atlas and
+# live under textures/gui/localized/<locale>/billboard/. Do not regenerate an
+# English-only copy here.
 billboard/quest_done_star,billboard,140,397,10,11
 common/shop_coin,cursors,193,373,9,10
 common/money_box,cursors,340,472,65,17

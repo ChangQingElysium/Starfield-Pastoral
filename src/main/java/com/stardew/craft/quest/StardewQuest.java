@@ -490,4 +490,5 @@ public class StardewQuest {
     @Nullable public ResourceLocation getDefinitionId() { return definitionId; }
     public boolean matchesItemDelivery(String npcId, String itemId) { return false; }
     public String getDeliveryTargetMessage() { return ""; }
+    public boolean isSecretQuest() { return false; }
 }

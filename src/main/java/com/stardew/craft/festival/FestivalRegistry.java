@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 /** Atomic, namespaced festival metadata with legacy ID lookup for existing saves and handlers. */
 @SuppressWarnings("null")
@@ -33,6 +34,12 @@ public final class FestivalRegistry {
     public static final int WINTER = 3;
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private static final Set<ResourceLocation> PLAYER_CONTEXT_CONDITIONS = Set.of(
+            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "has_item"),
+            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "money"),
+            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "flag"),
+            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "skill")
+    );
     private static final AtomicDefinitionStore<StardewFestivalDefinition> STORE = new AtomicDefinitionStore<>();
     private static volatile Map<String, FestivalDefinition> aliases = Map.of();
     private static volatile List<FestivalDefinition> ordered = List.of();
@@ -127,6 +134,17 @@ public final class FestivalRegistry {
         StardewFestivalDefinition.CODEC.parse(JsonOps.INSTANCE, json)
                 .resultOrPartial(message -> diagnostics.add(DefinitionDiagnostic.error(id, id, message)))
                 .ifPresent(definition -> {
+                    List<ResourceLocation> playerConditions = definition.availableWhen().stream()
+                            .map(condition -> condition.type())
+                            .filter(FestivalRegistry::requiresPlayerContext)
+                            .distinct()
+                            .toList();
+                    if (!playerConditions.isEmpty()) {
+                        diagnostics.add(DefinitionDiagnostic.error(id, id,
+                                "Festival available_when is world-scoped and cannot use player conditions: "
+                                        + playerConditions));
+                        return;
+                    }
                     if (definitions.putIfAbsent(id, definition) != null) {
                         diagnostics.add(DefinitionDiagnostic.error(id, id, "Duplicate festival ID"));
                         return;
@@ -135,6 +153,10 @@ public final class FestivalRegistry {
                             .resultOrPartial(message -> diagnostics.add(DefinitionDiagnostic.error(id, id, message)))
                             .ifPresent(encoded -> sources.put(id, GSON.toJson(encoded)));
                 });
+    }
+
+    static boolean requiresPlayerContext(ResourceLocation conditionType) {
+        return PLAYER_CONTEXT_CONDITIONS.contains(conditionType);
     }
 
     private static void applyCandidate(Map<ResourceLocation, StardewFestivalDefinition> definitions,

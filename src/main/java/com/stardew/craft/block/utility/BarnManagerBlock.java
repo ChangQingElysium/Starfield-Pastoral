@@ -1,6 +1,8 @@
 package com.stardew.craft.block.utility;
 
 import com.stardew.craft.Config;
+import com.stardew.craft.api.v1.agriculture.StardewAgricultureDataApi;
+import com.stardew.craft.api.v1.agriculture.StardewBuildingData;
 import com.stardew.craft.animal.data.AnimalWorldData;
 import com.stardew.craft.animal.model.AnimalBuildingRecord;
 import com.stardew.craft.animal.model.AnimalBuildingType;
@@ -182,6 +184,9 @@ public class BarnManagerBlock extends Block {
         }
 
         AnimalBuildingType targetType = AnimalBuildingType.of("barn", targetTier);
+        StardewBuildingData publicData = StardewAgricultureDataApi.building(
+                level, managerPos, level.getBlockState(managerPos));
+        int capacity = publicData == null ? targetType.defaultCapacity() : publicData.capacity();
         String defaultName = "Barn Tier " + targetTier;
         String buildingId = data.createOrUpdateBuildingAtManager(
             level,
@@ -196,7 +201,8 @@ public class BarnManagerBlock extends Block {
             validation.scan().interiorMaxY(),
             validation.scan().interiorMaxZ(),
             validation.scan().interiorAirCells(),
-            validation.scan().boundaryDoorCells()
+            validation.scan().boundaryDoorCells(),
+            capacity
         );
 
         if (currentTier == 0) {

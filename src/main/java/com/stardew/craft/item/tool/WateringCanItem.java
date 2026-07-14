@@ -141,7 +141,7 @@ public class WateringCanItem extends Item implements IStardewItem {
 
     @Override
     public String getItemTypeKey() {
-        return "stardewcraft.tool.watering_can";
+        return "stardewcraft.type.tool";
     }
 
     @Override

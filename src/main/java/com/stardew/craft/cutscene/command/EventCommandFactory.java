@@ -116,6 +116,7 @@ public final class EventCommandFactory {
                     obj.get("npc_id").getAsString(),
                     obj.get("text").getAsString()
             );
+            case "object_dialogue" -> new ObjectDialogueCommand(obj.get("text").getAsString());
 
             case "egg_festival_players" -> new EggFestivalPlayersCommand(
                     getString(obj, "action", "spawn_lineup"),
@@ -197,6 +198,7 @@ public final class EventCommandFactory {
             case "remove_quest"  -> new RemoveQuestCommand(obj.get("quest_id").getAsString());
             case "set_flag"      -> new SetFlagCommand(obj.get("flag").getAsString());
             case "grant_rusty_key" -> new GrantRustyKeyCommand();
+            case "grant_magnifying_glass" -> new GrantMagnifyingGlassCommand();
             case "mark_opened_sewer" -> new MarkOpenedSewerCommand();
             case "show_npc"      -> new ShowNpcCommand(obj.get("npc_id").getAsString());
             case "spawn_entity"  -> new SpawnEntityCommand(

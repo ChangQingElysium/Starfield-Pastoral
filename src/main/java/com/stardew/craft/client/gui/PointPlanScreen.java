@@ -35,6 +35,7 @@ public class PointPlanScreen extends Screen {
         panelX = (width - PANEL_W) / 2;
         panelY = (height - PANEL_H) / 2;
         planIdBox = new EditBox(font, panelX + 70, panelY + 27, 220, 18, Component.translatable("gui.stardewcraft.point_plan.plan_id"));
+        planIdBox.setTextShadow(false);
         planIdBox.setMaxLength(96);
         planIdBox.setValue(PointPlanClientState.selectedPlanId());
         addRenderableWidget(planIdBox);

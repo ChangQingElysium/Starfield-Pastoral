@@ -133,6 +133,7 @@ import com.stardew.craft.item.fishing.trash.JojaColaItem;
 import com.stardew.craft.item.tree.TreeSeedItem;
 import com.stardew.craft.item.block.WaterLanternItem;
 import com.stardew.craft.item.block.WildWeedsBlockItem;
+import com.stardew.craft.item.block.ShadowFootprintBlockItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Tiers;
@@ -247,6 +248,8 @@ public class ModItems {
         public static final DeferredItem<Item> BLUE_PASTURE_GRASS = blockItem("blue_pasture_grass", ModBlocks.BLUE_PASTURE_GRASS);
         public static final DeferredItem<Item> SMALL_BUSH = blockItem("small_bush", ModBlocks.SMALL_BUSH);
         public static final DeferredItem<Item> BERRY_BUSH = blockItem("berry_bush", ModBlocks.BERRY_BUSH);
+        public static final DeferredItem<Item> SHADOW_FOOTPRINT = ITEMS.register("shadow_footprint",
+                        () -> new ShadowFootprintBlockItem(ModBlocks.SHADOW_FOOTPRINT.get(), blockItemProps()));
 
         // 农场洞穴：蘑菇培养盆（无 CreativeTab 入口，按设计不可获取）
         public static final DeferredItem<Item> MUSHROOM_BOX = blockItem("mushroom_box", ModBlocks.MUSHROOM_BOX);
@@ -1168,10 +1171,10 @@ public class ModItems {
 
     // 宸ュ叿 - 鐣滅墽宸ュ叿锛堝崰妯★紝鏃犺€愪箙锛?
     public static final DeferredItem<Item> MILK_PAIL = ITEMS.register("milk_pail",
-            () -> new SimpleStardewItem("stardewcraft.tool.scythe", -1, new Item.Properties().stacksTo(1)));
+            () -> new SimpleStardewItem("stardewcraft.type.tool", -1, new Item.Properties().stacksTo(1)));
 
     public static final DeferredItem<Item> SHEARS = ITEMS.register("shears",
-            () -> new SimpleStardewItem("stardewcraft.tool.scythe", -1, new Item.Properties().stacksTo(1)));
+            () -> new SimpleStardewItem("stardewcraft.type.tool", -1, new Item.Properties().stacksTo(1)));
 
     public static final DeferredItem<Item> AUTOFEED_TROUGH_UPGRADER = ITEMS.register("autofeed_trough_upgrader",
             () -> new AutoFeedTroughUpgraderItem(new Item.Properties().stacksTo(64)));
@@ -1782,6 +1785,13 @@ public class ModItems {
                         () -> new DwarvishTranslationGuideItem(new Item.Properties().stacksTo(1)));
         public static final DeferredItem<Item> SKULL_KEY = ITEMS.register("skull_key",
                         () -> new SkullKeyItem(new Item.Properties().stacksTo(1).fireResistant()));
+        public static final DeferredItem<Item> MAGNIFYING_GLASS = ITEMS.register("magnifying_glass",
+                        () -> new MagnifyingGlassItem(new Item.Properties().stacksTo(1).fireResistant()));
+        public static final DeferredItem<Item> SECRET_NOTE = ITEMS.register("secret_note",
+                        () -> new SecretNoteItem(new Item.Properties().stacksTo(999)));
+        public static final DeferredItem<Item> ORNATE_NECKLACE = ITEMS.register("ornate_necklace",
+                        () -> new SimpleStardewItem("stardewcraft.type.quest", 0,
+                                        new Item.Properties().stacksTo(1)));
         public static final DeferredItem<Item> RUSTY_KEY = ITEMS.register("rusty_key",
                         () -> new RustyKeyItem(new Item.Properties().stacksTo(1).fireResistant()));
         public static final DeferredItem<Item> CHIPPED_AMPHORA = ITEMS.register("chipped_amphora",

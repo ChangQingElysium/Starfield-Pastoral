@@ -12,11 +12,7 @@ import com.stardew.craft.player.PlayerStardewData;
 import com.stardew.craft.warp.ModTeleport;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
-import net.minecraft.ChatFormatting;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -157,8 +153,8 @@ public final class CrossDimensionTeleporter {
     }
 
     /**
-    * 从巫师塔内部前往星露谷室外。
-    * 玩家必须已有农场实例；没有农场时不进入旧公共农场区域。
+     * 从巫师塔内部前往星露谷室外。
+     * 玩家必须已有农场实例。
      */
     public static void wizardInteriorToStardewOutdoor(ServerPlayer player) {
         wizardInteriorToStardewOutdoor(player, false);
@@ -244,7 +240,7 @@ public final class CrossDimensionTeleporter {
             giveStarterItemsToInventory(player, starterTools);
             data.setStarterToolsGiven(true);
             StardewCraft.LOGGER.info("[WIZARD] Granted starter items directly to {}'s inventory", player.getName().getString());
-            sendWelcomeAnnouncements(player);
+            sendStarterArrivalNotifications(player);
             return;
         }
 
@@ -273,7 +269,7 @@ public final class CrossDimensionTeleporter {
         data.setStarterToolsGiven(true);
         StardewCraft.LOGGER.info("[WIZARD] Placed starter chest for {} at {}", player.getName().getString(), chestPos);
 
-        sendWelcomeAnnouncements(player);
+        sendStarterArrivalNotifications(player);
     }
 
     private static ItemStack[] createStarterTools() {
@@ -306,60 +302,15 @@ public final class CrossDimensionTeleporter {
         player.inventoryMenu.broadcastChanges();
     }
 
-    private static void sendWelcomeAnnouncements(ServerPlayer player) {
-
-        // 延迟 1 秒发送欢迎公告（让玩家先加载完场景）
+    private static void sendStarterArrivalNotifications(ServerPlayer player) {
         player.server.execute(() ->
             player.server.execute(() -> {
-                sendWelcomeAnnouncement(player);
-                sendBilibiliAnnouncement(player);
                 if (com.stardew.craft.time.StardewTimeManager.get().getCurrentSeason() == 3) {
                     sendRuneAnnouncement(player);
                 }
                 OrangeSisterWelcomeService.scheduleIfEligible(player);
             })
         );
-    }
-
-    /**
-     * 首次进入星露谷时发送内测欢迎公告。
-     */
-    private static void sendWelcomeAnnouncement(ServerPlayer player) {
-        player.sendSystemMessage(Component.literal(""));
-        player.sendSystemMessage(Component.literal("§6§l═══════════ §e§lStardewCraft §6§l═══════════"));
-        player.sendSystemMessage(Component.literal(""));
-        player.sendSystemMessage(Component.translatable("stardewcraft.welcome.beta_warning"));
-        player.sendSystemMessage(Component.literal(""));
-        player.sendSystemMessage(Component.translatable("stardewcraft.welcome.feedback"));
-        player.sendSystemMessage(Component.literal(""));
-        player.sendSystemMessage(Component.translatable("stardewcraft.welcome.menu_hint"));
-        player.sendSystemMessage(Component.translatable("stardewcraft.welcome.intuition_hint"));
-        player.sendSystemMessage(Component.literal(""));
-        player.sendSystemMessage(Component.literal("§6§l═══════════════════════════════════"));
-        player.sendSystemMessage(Component.literal(""));
-    }
-
-    /**
-     * B 站关注公告：提示玩家点击领取彩虹猫之刃。
-     */
-    private static void sendBilibiliAnnouncement(ServerPlayer player) {
-        PlayerStardewData data = PlayerDataManager.getPlayerData(player);
-        if (data.isBilibiliRewardClaimed()) return;
-
-        MutableComponent clickMsg = Component.translatable("stardewcraft.bilibili.follow_link")
-            .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/stardew bilibili_claim"))
-                .withUnderlined(true)
-                .withColor(ChatFormatting.AQUA));
-        MutableComponent hint = Component.translatable("stardewcraft.bilibili.gift_hint");
-
-        player.sendSystemMessage(Component.translatable("stardewcraft.bilibili.follow_title"));
-        player.sendSystemMessage(Component.literal(""));
-        player.sendSystemMessage(Component.translatable("stardewcraft.bilibili.follow_description"));
-        player.sendSystemMessage(Component.literal("  ").append(clickMsg).append(hint));
-        player.sendSystemMessage(Component.literal(""));
-        player.sendSystemMessage(Component.literal("§6§l═══════════════════════════════════"));
-        player.sendSystemMessage(Component.literal(""));
     }
 
     /**

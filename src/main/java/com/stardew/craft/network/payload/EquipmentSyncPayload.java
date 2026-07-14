@@ -12,7 +12,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
  * Server -> Client: sync equipped items so client can render them in UI.
  */
 @SuppressWarnings("null")
-public record EquipmentSyncPayload(String leftRing, String rightRing, String boots, ItemStack trinket,
+public record EquipmentSyncPayload(ItemStack leftRing, ItemStack rightRing, ItemStack boots, ItemStack trinket,
                                    String hat, String shirt, String pants) implements CustomPacketPayload {
 
     public static final Type<EquipmentSyncPayload> TYPE =
@@ -20,15 +20,16 @@ public record EquipmentSyncPayload(String leftRing, String rightRing, String boo
 
     public static final StreamCodec<RegistryFriendlyByteBuf, EquipmentSyncPayload> STREAM_CODEC = StreamCodec.of(
             (buf, payload) -> {
-                buf.writeUtf(payload.leftRing);
-                buf.writeUtf(payload.rightRing);
-                buf.writeUtf(payload.boots);
+                ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, payload.leftRing);
+                ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, payload.rightRing);
+                ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, payload.boots);
                 ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, payload.trinket);
                 buf.writeUtf(payload.hat);
                 buf.writeUtf(payload.shirt);
                 buf.writeUtf(payload.pants);
             },
-            buf -> new EquipmentSyncPayload(buf.readUtf(), buf.readUtf(), buf.readUtf(),
+            buf -> new EquipmentSyncPayload(ItemStack.OPTIONAL_STREAM_CODEC.decode(buf),
+                    ItemStack.OPTIONAL_STREAM_CODEC.decode(buf), ItemStack.OPTIONAL_STREAM_CODEC.decode(buf),
                     ItemStack.OPTIONAL_STREAM_CODEC.decode(buf), buf.readUtf(), buf.readUtf(), buf.readUtf())
     );
 
@@ -39,9 +40,9 @@ public record EquipmentSyncPayload(String leftRing, String rightRing, String boo
 
     public static void handle(EquipmentSyncPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
-            com.stardew.craft.client.ClientPlayerDataCache.setEquippedLeftRing(payload.leftRing);
-            com.stardew.craft.client.ClientPlayerDataCache.setEquippedRightRing(payload.rightRing);
-            com.stardew.craft.client.ClientPlayerDataCache.setEquippedBoots(payload.boots);
+            com.stardew.craft.client.ClientPlayerDataCache.setEquippedLeftRingStack(payload.leftRing);
+            com.stardew.craft.client.ClientPlayerDataCache.setEquippedRightRingStack(payload.rightRing);
+            com.stardew.craft.client.ClientPlayerDataCache.setEquippedBootsStack(payload.boots);
             com.stardew.craft.client.ClientPlayerDataCache.setEquippedTrinket(payload.trinket);
             com.stardew.craft.client.ClientPlayerDataCache.setEquippedHat(payload.hat);
             com.stardew.craft.client.ClientPlayerDataCache.setEquippedShirt(payload.shirt);

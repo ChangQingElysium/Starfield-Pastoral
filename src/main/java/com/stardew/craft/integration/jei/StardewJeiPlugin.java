@@ -26,6 +26,9 @@ import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.ISubtypeRegistration;
+import mezz.jei.api.recipe.IRecipeManager;
+import mezz.jei.api.recipe.RecipeType;
+import mezz.jei.api.runtime.IJeiRuntime;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
@@ -35,7 +38,9 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -45,6 +50,13 @@ import java.util.Set;
 @JeiPlugin
 public class StardewJeiPlugin implements IModPlugin {
     public static final ResourceLocation PLUGIN_ID = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "jei_plugin");
+    private static volatile IJeiRuntime runtime;
+    private static volatile Set<String> registeredMachineKeys = Set.of();
+    private static volatile List<SpawnFishRule> publishedFishingRecipes = List.of();
+    private static volatile Map<String, List<ArtisanRecipeCategory.DisplayRecipe>> publishedArtisanRecipes = Map.of();
+    private static volatile List<StardewCraftingCategory.DisplayRecipe> publishedCraftingRecipes = List.of();
+    private static volatile List<ShopInfoCategory.DisplayEntry> publishedShopRecipes = List.of();
+    private static volatile List<GeodeProcessingCategory.DisplayEntry> publishedGeodeRecipes = List.of();
 
     @Override
     public ResourceLocation getPluginUid() {
@@ -59,12 +71,15 @@ public class StardewJeiPlugin implements IModPlugin {
         registration.addRecipeCategories(new FishingInfoCategory(guiHelper));
 
         // Per-machine artisan categories
+        Set<String> machineKeys = new HashSet<>();
         for (String machineKey : ArtisanRecipeDataManager.getAllMachineKeys()) {
             ItemStack machineIcon = ArtisanRecipeCategory.getItemStack("stardewcraft:" + machineKey);
             if (machineIcon.isEmpty()) continue;
             var recipeType = ArtisanRecipeCategory.getRecipeType(machineKey);
             registration.addRecipeCategories(new ArtisanRecipeCategory(guiHelper, machineKey, machineIcon, recipeType));
+            machineKeys.add(machineKey);
         }
+        registeredMachineKeys = Set.copyOf(machineKeys);
 
         registration.addRecipeCategories(new ShopInfoCategory(guiHelper));
         registration.addRecipeCategories(new GeodeProcessingCategory(guiHelper));
@@ -122,17 +137,7 @@ public class StardewJeiPlugin implements IModPlugin {
     public void registerRecipes(@SuppressWarnings("null") IRecipeRegistration registration) {
         // Fishing info
         List<SpawnFishRule> allRules = FishingDataManager.get().getAllFishRules();
-        
-        // 按 itemId 去重，只保留第一次出现的规则
-        List<SpawnFishRule> uniqueRules = new ArrayList<>();
-        Set<String> seenItemIds = new HashSet<>();
-        
-        for (SpawnFishRule rule : allRules) {
-            if (seenItemIds.add(rule.itemId())) {
-                uniqueRules.add(rule);
-            }
-        }
-        uniqueRules.sort(StardewItemComparator.FISH_RULE);
+        List<SpawnFishRule> uniqueRules = buildFishingRecipes();
         
         if (!uniqueRules.isEmpty()) {
             registration.addRecipes(FishingInfoCategory.RECIPE_TYPE, uniqueRules);
@@ -140,11 +145,14 @@ public class StardewJeiPlugin implements IModPlugin {
         } else {
             StardewCraft.LOGGER.warn("No fishing rules loaded when registering JEI recipes!");
         }
+        publishedFishingRecipes = List.copyOf(uniqueRules);
 
         // Artisan machine recipes — per machine
         int totalArtisan = 0;
+        Map<String, List<ArtisanRecipeCategory.DisplayRecipe>> artisanRecipes = new LinkedHashMap<>();
         for (String machineKey : ArtisanRecipeDataManager.getAllMachineKeys()) {
             var recipes = ArtisanRecipeCategory.buildRecipesForMachine(machineKey);
+            artisanRecipes.put(machineKey, List.copyOf(recipes));
             if (!recipes.isEmpty()) {
                 registration.addRecipes(ArtisanRecipeCategory.getRecipeType(machineKey), recipes);
                 totalArtisan += recipes.size();
@@ -154,6 +162,7 @@ public class StardewJeiPlugin implements IModPlugin {
             StardewCraft.LOGGER.info("Registered {} artisan machine recipes across {} machines for JEI",
                     totalArtisan, ArtisanRecipeDataManager.getAllMachineKeys().size());
         }
+        publishedArtisanRecipes = Map.copyOf(artisanRecipes);
 
         // Shop info
         var shopEntries = ShopInfoCategory.buildAllEntries();
@@ -161,6 +170,7 @@ public class StardewJeiPlugin implements IModPlugin {
             registration.addRecipes(ShopInfoCategory.RECIPE_TYPE, shopEntries);
             StardewCraft.LOGGER.info("Registered {} shop info entries for JEI", shopEntries.size());
         }
+        publishedShopRecipes = List.copyOf(shopEntries);
 
         // Geode processing
         var geodeEntries = GeodeProcessingCategory.buildAllEntries();
@@ -168,6 +178,7 @@ public class StardewJeiPlugin implements IModPlugin {
             registration.addRecipes(GeodeProcessingCategory.RECIPE_TYPE, geodeEntries);
             StardewCraft.LOGGER.info("Registered {} geode processing entries for JEI", geodeEntries.size());
         }
+        publishedGeodeRecipes = List.copyOf(geodeEntries);
 
         // Stardew crafting
         var craftingRecipes = StardewCraftingCategory.buildAllRecipes();
@@ -175,9 +186,107 @@ public class StardewJeiPlugin implements IModPlugin {
             registration.addRecipes(StardewCraftingCategory.RECIPE_TYPE, craftingRecipes);
             StardewCraft.LOGGER.info("Registered {} stardew crafting recipes for JEI", craftingRecipes.size());
         }
+        publishedCraftingRecipes = List.copyOf(craftingRecipes);
 
         // Hide items tagged stardewcraft:hidden
         hideTaggedItems(registration);
+    }
+
+    @Override
+    public void onRuntimeAvailable(IJeiRuntime jeiRuntime) {
+        runtime = jeiRuntime;
+        refreshSyncedRecipes();
+    }
+
+    @Override
+    public void onRuntimeUnavailable() {
+        runtime = null;
+    }
+
+    /** Refreshes the JEI categories backed by registries received in {@code DataRegistrySyncPayload}. */
+    public static void refreshSyncedRecipes() {
+        IJeiRuntime currentRuntime = runtime;
+        if (currentRuntime == null) {
+            return;
+        }
+
+        IRecipeManager recipeManager = currentRuntime.getRecipeManager();
+        List<SpawnFishRule> fishingRecipes = buildFishingRecipes();
+        refreshRecipeType(recipeManager, FishingInfoCategory.RECIPE_TYPE,
+                publishedFishingRecipes, fishingRecipes);
+        publishedFishingRecipes = List.copyOf(fishingRecipes);
+
+        Map<String, List<ArtisanRecipeCategory.DisplayRecipe>> artisanRecipes = new LinkedHashMap<>();
+        for (String machineKey : registeredMachineKeys) {
+            List<ArtisanRecipeCategory.DisplayRecipe> recipes =
+                    List.copyOf(ArtisanRecipeCategory.buildRecipesForMachine(machineKey));
+            artisanRecipes.put(machineKey, recipes);
+            refreshRecipeType(recipeManager, ArtisanRecipeCategory.getRecipeType(machineKey),
+                    publishedArtisanRecipes.getOrDefault(machineKey, List.of()), recipes);
+        }
+        publishedArtisanRecipes = Map.copyOf(artisanRecipes);
+
+        List<StardewCraftingCategory.DisplayRecipe> craftingRecipes =
+                List.copyOf(StardewCraftingCategory.buildAllRecipes());
+        refreshRecipeType(recipeManager, StardewCraftingCategory.RECIPE_TYPE,
+                publishedCraftingRecipes, craftingRecipes);
+        publishedCraftingRecipes = craftingRecipes;
+
+        if (com.stardew.craft.client.ClientJeiCatalog.isSynced()) {
+            List<ShopInfoCategory.DisplayEntry> shopRecipes =
+                    com.stardew.craft.client.ClientJeiCatalog.shops().stream()
+                            .map(entry -> new ShopInfoCategory.DisplayEntry(
+                                    entry.item(), entry.shopId(), entry.price(), entry.stock(),
+                                    entry.seasons(), entry.minYear(), entry.recipe()))
+                            .toList();
+            refreshRecipeType(recipeManager, ShopInfoCategory.RECIPE_TYPE,
+                    publishedShopRecipes, shopRecipes);
+            publishedShopRecipes = List.copyOf(shopRecipes);
+
+            List<GeodeProcessingCategory.DisplayEntry> geodeRecipes = new ArrayList<>(
+                    GeodeProcessingCategory.buildAllEntries());
+            geodeRecipes.addAll(com.stardew.craft.client.ClientJeiCatalog.geodes().stream()
+                    .map(entry -> new GeodeProcessingCategory.DisplayEntry(entry.geode(), entry.output()))
+                    .toList());
+            refreshRecipeType(recipeManager, GeodeProcessingCategory.RECIPE_TYPE,
+                    publishedGeodeRecipes, geodeRecipes);
+            publishedGeodeRecipes = List.copyOf(geodeRecipes);
+        }
+
+        StardewCraft.LOGGER.info("Refreshed JEI from synced server content: {} fishing, {} artisan, {} crafting, {} shop, {} geode recipes",
+                fishingRecipes.size(), artisanRecipes.values().stream().mapToInt(List::size).sum(),
+                craftingRecipes.size(), publishedShopRecipes.size(), publishedGeodeRecipes.size());
+    }
+
+    private static List<SpawnFishRule> buildFishingRecipes() {
+        List<SpawnFishRule> uniqueRules = new ArrayList<>();
+        Set<String> seenItemIds = new HashSet<>();
+        for (SpawnFishRule rule : FishingDataManager.get().getAllFishRules()) {
+            if (seenItemIds.add(rule.itemId())) {
+                uniqueRules.add(rule);
+            }
+        }
+        uniqueRules.sort(StardewItemComparator.FISH_RULE);
+        return uniqueRules;
+    }
+
+    private static <T> void refreshRecipeType(
+            IRecipeManager recipeManager,
+            RecipeType<T> recipeType,
+            List<T> previous,
+            List<T> replacement
+    ) {
+        if (previous.equals(replacement)) {
+            return;
+        }
+        List<T> removed = previous.stream().filter(recipe -> !replacement.contains(recipe)).toList();
+        List<T> added = replacement.stream().filter(recipe -> !previous.contains(recipe)).toList();
+        if (!removed.isEmpty()) {
+            recipeManager.hideRecipes(recipeType, removed);
+        }
+        if (!added.isEmpty()) {
+            recipeManager.addRecipes(recipeType, added);
+        }
     }
 
     @SuppressWarnings("null")

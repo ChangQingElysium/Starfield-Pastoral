@@ -144,7 +144,9 @@ public class QuestLogScreen extends Screen {
         pages.clear();
         List<StardewQuest> all = new ArrayList<>();
         all.addAll(ClientSpecialOrderBoardData.activeQuestLogEntries());
-        all.addAll(ClientQuestData.getQuestLog());
+        ClientQuestData.getQuestLog().stream()
+                .filter(quest -> !quest.isSecretQuest())
+                .forEach(all::add);
         int idx = 0;
         while (idx < all.size()) {
             List<StardewQuest> page = new ArrayList<>();

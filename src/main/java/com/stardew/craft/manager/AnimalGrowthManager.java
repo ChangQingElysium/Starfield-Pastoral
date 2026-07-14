@@ -1,5 +1,7 @@
 package com.stardew.craft.manager;
 
+import com.stardew.craft.api.v1.agriculture.StardewAgricultureDataApi;
+import com.stardew.craft.api.v1.agriculture.StardewAnimalData;
 import com.stardew.craft.animal.data.AnimalWorldData;
 import com.stardew.craft.animal.model.AnimalAcquisitionSource;
 import com.stardew.craft.animal.model.AnimalBuildingRecord;
@@ -323,6 +325,10 @@ public class AnimalGrowthManager extends SavedData {
         AnimalProfile profile = resolveProfile(record.animalTypeId());
         RandomSource random = randomForAnimalDay(record.animalId(), absoluteDaysPlayed);
         AnimalBuildingRecord building = worldData.getBuilding(record.buildingId()).orElse(null);
+        BaseCoopAnimalEntity runtimeEntity = findEntityByManagedId(level, record.animalId(), building);
+        StardewAnimalData publicData = runtimeEntity == null
+                ? null
+                : StardewAgricultureDataApi.animal(runtimeEntity);
         boolean hasHappinessProfession = hasBuildingOwnerProfession(building, profile.professionForHappinessBoost());
         boolean hasQualityProfession = hasBuildingOwnerProfession(building, profile.professionForQualityBoost());
         boolean hasFasterProduceProfession = hasBuildingOwnerProfession(building, profile.professionForFasterProduce());
@@ -395,7 +401,8 @@ public class AnimalGrowthManager extends SavedData {
         if (hasFasterProduceProfession) {
             produceSpeedBonus += 1;
         }
-        int daysToProduce = Math.max(1, profile.daysToProduce() - produceSpeedBonus);
+        int baseDaysToProduce = publicData == null ? profile.daysToProduce() : publicData.produceIntervalDays();
+        int daysToProduce = Math.max(1, baseDaysToProduce - produceSpeedBonus);
         boolean produceToday = record.daysSinceLastProduce() >= daysToProduce
             && random.nextDouble() < record.fullness() / 200.0
             && random.nextDouble() < record.happiness() / 70.0;
@@ -406,7 +413,12 @@ public class AnimalGrowthManager extends SavedData {
         String produceId = "";
 
         if (produceToday && !record.isBaby()) {
-            Item defaultProduce = profile.produceSupplier() == null ? null : profile.produceSupplier().get();
+            Item defaultProduce = publicData == null
+                    ? (profile.produceSupplier() == null ? null : profile.produceSupplier().get())
+                    : BuiltInRegistries.ITEM.get(publicData.produce());
+            if (defaultProduce == Items.AIR) {
+                defaultProduce = profile.produceSupplier() == null ? null : profile.produceSupplier().get();
+            }
             if (defaultProduce != null) {
                 produceStack = new ItemStack(defaultProduce);
             }
@@ -421,7 +433,9 @@ public class AnimalGrowthManager extends SavedData {
                         ? record.happiness() * 1.5f
                         : (record.happiness() <= 100 ? record.happiness() - 100 : 0f);
 
-                    Item deluxeProduce = profile.deluxeProduceSupplier() == null ? null : profile.deluxeProduceSupplier().get();
+                    Item deluxeProduce = publicData != null || profile.deluxeProduceSupplier() == null
+                            ? null
+                            : profile.deluxeProduceSupplier().get();
                     if (deluxeProduce != null
                         && record.friendship() >= profile.deluxeProduceMinimumFriendship()
                         && random.nextDouble() < ((record.friendship() + happinessModifier) / profile.deluxeProduceCareDivisor()) + averageDailyLuck * profile.deluxeProduceLuckMultiplier()) {

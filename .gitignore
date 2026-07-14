@@ -24,6 +24,7 @@ runs
 run-data
 run-dev
 run-dev-server
+run-game-test
 
 # temp/debug artifacts
 _tmp*
@@ -64,6 +65,7 @@ scripts/*
 tools/*
 !tools/ui_atlas_slices.csv
 !tools/audit_translations.py
+!tools/generate_shadow_footprint_candidates.py
 ui_spec/
 wiki/
 stardewcraft-template-1.21.1.sln

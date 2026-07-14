@@ -710,8 +710,7 @@ public class MiniForgeScreen extends AbstractContainerScreen<MiniForgeMenu> {
     }
 
     private ItemStack equippedRingStack(boolean left) {
-        String id = left ? ClientPlayerDataCache.getEquippedLeftRing() : ClientPlayerDataCache.getEquippedRightRing();
-        return id.isEmpty() ? ItemStack.EMPTY : CombinedRingData.stackFromEquipmentSlot(id);
+        return left ? ClientPlayerDataCache.getEquippedLeftRingStack() : ClientPlayerDataCache.getEquippedRightRingStack();
     }
 
     private static int inventorySlotIndex(int row, int col) {

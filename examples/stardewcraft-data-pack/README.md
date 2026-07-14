@@ -11,11 +11,11 @@
 - 新增特殊订单。
 - 用一个现代单配方文件扩展本体小桶。
 - 新增一条结构化食材的烹饪配方。
-- 新增合成配方，并通过邮件 Action 调用解锁来源授予两种配方。
+- 新增合成配方，在商店中出售完整的第三方命名空间 ID，并通过邮件 Action 提供另一条解锁路径。
 - 追加钓鱼宝箱池、鱼塘规则、杀怪目标、博物馆奖励和一本可交互藏书。
 - 把紫水晶簇声明成可由克林特和晶球破碎机处理的自定义晶球。
 - 为兑奖序号 5 添加金苹果，并为普通矿井 30 层添加金镐宝箱奖励。
-- 新增一个无需 Java 玩法 Handler 的秋季“苹果日”。
+- 新增一个无需 Java 玩法 Handler 的秋季“苹果日”，以及一对条件恒真/恒假的主动节日验收定义。
 - 给原版对象演示作物、树、动物、建筑和装备 Data Map。
 - 追加蚯蚓点奖励、远端采集区、13 层矿井主题、地点和传送目标。
 - 给农业精通追加奖励，并把 Tiller 的效果绑定到示例附属 Handler。
@@ -45,6 +45,32 @@ data/stardewcraft/data_maps/item/stardew_item_data.json
 
 数据包只能给已经注册的物品添加元数据，不能创建新物品。
 
+## 自动静态验收
+
+在仓库根目录执行：
+
+```bash
+python3 examples/stardewcraft-data-pack/validate.py
+```
+
+该检查会解析两个数据包中的全部 JSON，并验证配方商店行、邮件解锁源、主动节日对照、晶球、装备技能和 Java Provider 之间的跨文件关系。它是快速失败检查，不代替服务端 Codec 加载和真实客户端验收。
+
+## 登录与 `/reload` 验收
+
+1. 先只安装主数据包并登录。执行 `/stardew mail send example_stardew_addon:apple_club`并阅读后，信件收藏应显示该邮件；JEI 应有 `apple_crate`、`apple_stand` 和紫水晶簇晶球条目。
+2. 保持客户端在线，把 `acceptance/reload-overlay` 作为第二个数据包放入同一存档的 `datapacks/` 中。
+3. 执行 `/reload`。如果服务器没有自动启用新包，先用 `/datapack list` 查看并启用 `reload-overlay`。
+4. 无需重连，`/stardew mail send example_stardew_addon:reload_probe` 应立即可用，阅读后信件收藏应新增该邮件；JEI 商店应新增价格 321 的绿宝石，晶球页应新增“石英块 → 绿宝石”。
+
+## 关键人工验收
+
+| 能力 | 操作 | 通过标准 |
+| --- | --- | --- |
+| 第三方配方 | 执行 `/stardew shop example_stardew_addon:apple_stand`，购买 `recipe:example_stardew_addon:apple_crate`，再用 4 个苹果合成 | 解锁、判重、制作和重连后存档都保留 `example_stardew_addon` 命名空间 |
+| 邮件备选解锁 | 未购买时阅读 `example_stardew_addon:apple_club` | 邮件 Action 通过同名解锁源授予配方；之后商店不再显示已知配方 |
+| 主动节日条件 | 查看春 2 日并进入对应日期 | 只有 `conditional_active_enabled` 出现/触发，`conditional_active_disabled` 在服务端和日历都被过滤 |
+| 装备与农业 Provider | 同时安装示例附属 | 按附属 README 中的 Y > 80 锦标和带附魔光效钻石剑逐项验收 |
+
 `apple_stand` 商店还声明了示例附属提供的动态库存 Provider。只安装数据包时，静态金苹果条目仍然可用；同时安装 `examples/stardewcraft-addon` 后，Provider 会追加每日苹果库存。
 
 主要定义路径：
@@ -68,6 +94,8 @@ data/example_stardew_addon/geode/drops/apple_crystal.json
 data/example_stardew_addon/prize_ticket/rewards/golden_apple.json
 data/example_stardew_addon/mine_chest/rewards/floor_30.json
 data/example_stardew_addon/festivals/apple_day.json
+data/example_stardew_addon/festivals/conditional_active_enabled.json
+data/example_stardew_addon/festivals/conditional_active_disabled.json
 data/example_stardew_addon/world_loot/apple_artifact.json
 data/example_stardew_addon/forage_zones/apple_grove.json
 data/example_stardew_addon/mine_themes/apple_floor.json

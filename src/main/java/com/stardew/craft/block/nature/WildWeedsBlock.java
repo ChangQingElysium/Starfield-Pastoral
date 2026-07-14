@@ -5,6 +5,7 @@ import com.stardew.craft.blockentity.WildWeedsBlockEntity;
 import com.stardew.craft.core.ModDimensions;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.player.PlayerDataManager;
+import com.stardew.craft.secretnote.SecretNoteService;
 import com.stardew.craft.time.StardewTimeManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -216,6 +217,12 @@ public class WildWeedsBlock extends Block implements EntityBlock {
 
 	@SuppressWarnings("null")
 	private static void spawnWeedDrops(ServerLevel level, BlockPos pos, RandomSource random, Player player) {
+		if (player instanceof ServerPlayer serverPlayer) {
+			ItemStack secretNote = SecretNoteService.tryCreateFromSource(serverPlayer, random, 0.009F);
+			if (!secretNote.isEmpty()) {
+				popResource(level, pos, secretNote);
+			}
+		}
 		// 原版 cutWeed：
 		// - 50% 掉 Fiber（这里按 1 个 Fiber 实现）
 		// - 否则，小概率掉 Mixed Seeds

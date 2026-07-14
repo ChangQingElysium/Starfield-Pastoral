@@ -126,6 +126,7 @@ public class AuctionConsignScreen extends Screen {
         priceField = new EditBox(font, priceBoxX + 31, priceBoxY + (fieldH - font.lineHeight) / 2,
             priceBoxW - 43, font.lineHeight, Component.translatable("stardewcraft.auction.consign.price_hint"));
         priceField.setBordered(false);
+        priceField.setTextShadow(false);
         priceField.setTextColor(0xFF3F2411);
         priceField.setTextColorUneditable(0xFF3F2411);
         priceField.setHint(Component.translatable("stardewcraft.auction.consign.price_hint"));

@@ -1,17 +1,14 @@
 package com.stardew.craft.combat.equipment;
 
 import com.stardew.craft.item.equipment.StardewBootsItem;
-import com.stardew.craft.item.equipment.CombinedRingData;
 import com.stardew.craft.item.equipment.CombinedRingItem;
 import com.stardew.craft.item.equipment.StardewRingItem;
 import com.stardew.craft.player.PlayerDataManager;
 import com.stardew.craft.player.PlayerStardewData;
 import com.stardew.craft.api.v1.equipment.StardewEquipmentData;
 import com.stardew.craft.api.v1.equipment.StardewEquipmentDataApi;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 /**
@@ -29,9 +26,9 @@ public final class EquipmentResolver {
         PlayerStardewData data = PlayerDataManager.getPlayerData(player);
         EquipmentStats.Builder builder = EquipmentStats.builder();
 
-        resolveRing(data.getEquippedLeftRing(), builder);
-        resolveRing(data.getEquippedRightRing(), builder);
-        resolveBoots(data.getEquippedBoots(), builder);
+        resolveRing(data.getEquippedLeftRingStack(), builder);
+        resolveRing(data.getEquippedRightRingStack(), builder);
+        resolveBoots(data.getEquippedBootsStack(), builder);
 
         // Curios 可选兼容：合并 Curios 槽位中的装备属性
         if (com.stardew.craft.compat.CuriosCompatBridge.isCuriosLoaded()) {
@@ -41,35 +38,25 @@ public final class EquipmentResolver {
         return builder.build();
     }
 
-    private static void resolveRing(String itemId, EquipmentStats.Builder builder) {
-        if (itemId == null || itemId.isEmpty()) return;
-        if (CombinedRingData.isEncodedEquipmentSlot(itemId)) {
-            ItemStack stack = CombinedRingData.stackFromEquipmentSlot(itemId);
-            if (stack.getItem() instanceof CombinedRingItem ring) {
-                builder.merge(ring.getEquipmentStats(stack));
-            }
+    private static void resolveRing(ItemStack stack, EquipmentStats.Builder builder) {
+        if (stack == null || stack.isEmpty()) return;
+        if (stack.getItem() instanceof CombinedRingItem ring) {
+            builder.merge(ring.getEquipmentStats(stack));
             return;
         }
-        ResourceLocation rl = ResourceLocation.tryParse(itemId);
-        if (rl == null) return;
-        Item item = BuiltInRegistries.ITEM.get(rl);
-        ItemStack stack = new ItemStack(item);
-        if (item instanceof StardewRingItem ring) {
+        if (stack.getItem() instanceof StardewRingItem ring) {
             builder.merge(ring.getEquipmentStats());
         } else {
             mergeApiData(stack, builder);
         }
     }
 
-    private static void resolveBoots(String itemId, EquipmentStats.Builder builder) {
-        if (itemId == null || itemId.isEmpty()) return;
-        ResourceLocation rl = ResourceLocation.tryParse(itemId);
-        if (rl == null) return;
-        Item item = BuiltInRegistries.ITEM.get(rl);
-        if (item instanceof StardewBootsItem boots) {
+    private static void resolveBoots(ItemStack stack, EquipmentStats.Builder builder) {
+        if (stack == null || stack.isEmpty()) return;
+        if (stack.getItem() instanceof StardewBootsItem boots) {
             builder.merge(boots.getEquipmentStats());
         } else {
-            mergeApiData(new ItemStack(item), builder);
+            mergeApiData(stack, builder);
         }
     }
 

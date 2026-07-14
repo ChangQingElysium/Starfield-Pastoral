@@ -1,6 +1,7 @@
 package com.stardew.craft.communitycenter.client;
 
 import com.stardew.craft.client.gui.overnight.StardewGuiUtil;
+import com.stardew.craft.client.gui.LocalizedGuiAssets;
 import net.minecraft.client.gui.GuiGraphics;
 
 /**
@@ -17,7 +18,7 @@ public class ScreenSwipe {
     // Cursors source rects (SDV: ScreenSwipe ctor, which == 0)
     private static final int BG_U = 128, BG_V = 1296, BG_W = 1, BG_H = 71;
     private static final int FLAIR_U = 144, FLAIR_V = 1303, FLAIR_W = 144, FLAIR_H = 58;
-    private static final int MSG_U = 128, MSG_V = 1367, MSG_W = 150, MSG_H = 14;
+    private static final int MSG_W = 150, MSG_H = 14;
     private static final int MFLAIR_U = 643, MFLAIR_V = 768, MFLAIR_W = 8, MFLAIR_H = 13;
 
     // State
@@ -148,8 +149,8 @@ public class ScreenSwipe {
         // Right flair
         drawClipped(g, (int) flairRightX, (int) flairRightY, FLAIR_U, FLAIR_V, FLAIR_W, FLAIR_H);
 
-        // Message text ("Bundle Complete!")
-        drawClipped(g, (int) messageX, (int) messageY, MSG_U, MSG_V, MSG_W, MSG_H);
+        // Official localized message texture.
+        drawLocalizedMessage(g, (int) messageX, (int) messageY);
 
         // Moving flair (small star)
         drawClipped(g, (int) movingFlairX, (int) movingFlairY, MFLAIR_U, MFLAIR_V, MFLAIR_W, MFLAIR_H);
@@ -170,6 +171,20 @@ public class ScreenSwipe {
         g.pose().scale(scale, scale, 1.0f);
         g.blit(StardewGuiUtil.CURSORS, 0, 0, u, v, visibleW, h,
                 StardewGuiUtil.CURSORS_WIDTH, StardewGuiUtil.CURSORS_HEIGHT);
+        g.pose().popPose();
+    }
+
+    private void drawLocalizedMessage(GuiGraphics g, int x, int y) {
+        if (x + MSG_W * scale < bgDestX || x > bgDestX + bgDestWidth) return;
+
+        int visibleW = (int) Math.min(MSG_W, (bgDestWidth - (x - bgDestX)) / scale);
+        if (visibleW <= 0) return;
+
+        g.pose().pushPose();
+        g.pose().translate(x, y, 0.1f);
+        g.pose().scale(scale, scale, 1.0f);
+        g.blit(LocalizedGuiAssets.texture("bundle/bundle_complete.png"),
+                0, 0, 0, 0, visibleW, MSG_H, MSG_W, MSG_H);
         g.pose().popPose();
     }
 }

@@ -6,6 +6,14 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
 
+/**
+ * Shared tree metadata.
+ *
+ * <p>StardewCraft fruit-tree roots consume {@link #product()}, {@link #productCount()},
+ * {@link #maxStoredProduct()} and {@link #fruitSeasons()}. {@link #kind()} and
+ * {@link #daysToMature()} remain descriptive metadata; attaching this record to an arbitrary block
+ * does not create a fruit-tree lifecycle.
+ */
 public record StardewTreeData(
         ResourceLocation kind,
         int daysToMature,
@@ -26,4 +34,8 @@ public record StardewTreeData(
             Codec.STRING.listOf().optionalFieldOf("fruit_seasons", List.of())
                     .forGetter(StardewTreeData::fruitSeasons)
     ).apply(instance, StardewTreeData::new));
+
+    public StardewTreeData {
+        fruitSeasons = List.copyOf(fruitSeasons == null ? List.of() : fruitSeasons);
+    }
 }

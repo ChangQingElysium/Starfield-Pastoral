@@ -203,6 +203,11 @@ public final class DataDrivenQuest extends StardewQuest {
         return runtime == null ? "" : runtime.deliveryTargetMessage();
     }
 
+    @Override
+    public boolean isSecretQuest() {
+        return runtime != null && runtime.isSecret();
+    }
+
     private QuestObjectiveResult progress(ServerPlayer player, QuestProgressEvent event) {
         if (completed || !accepted || runtime == null) {
             return QuestObjectiveResult.NONE;

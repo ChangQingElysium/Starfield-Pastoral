@@ -4,6 +4,14 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.ResourceLocation;
 
+/**
+ * Shared animal metadata.
+ *
+ * <p>Loaded, managed StardewCraft animals consume {@link #produce()} and
+ * {@link #produceIntervalDays()} during daily production. Purchase price, maturity and building
+ * type remain descriptive metadata because those decisions happen before an entity exists and
+ * therefore cannot safely evaluate an entity-sensitive provider.
+ */
 public record StardewAnimalData(
         ResourceLocation buildingType,
         int purchasePrice,

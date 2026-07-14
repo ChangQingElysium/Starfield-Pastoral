@@ -1,0 +1,98 @@
+[
+  {
+    "id": "1", "vanilla_number": 1, "display_number": 1, "sort_order": 1, "text": "stardewcraft.secret_note.1",
+    "gift_reveals": [
+      {"npc": "Abigail", "object_id": "276"}, {"npc": "Abigail", "object_id": "66"},
+      {"npc": "Abigail", "object_id": "220"}, {"npc": "Abigail", "object_id": "226"},
+      {"npc": "Abigail", "object_id": "611"}
+    ]
+  },
+  {
+    "id": "2", "vanilla_number": 2, "display_number": 2, "sort_order": 2, "text": "stardewcraft.secret_note.2",
+    "gift_reveals": [
+      {"npc": "Sebastian", "object_id": "84"}, {"npc": "Sebastian", "object_id": "227"},
+      {"npc": "Penny", "object_id": "60"}, {"npc": "Penny", "object_id": "376"},
+      {"npc": "Vincent", "object_id": "398"}, {"npc": "Vincent", "object_id": "612"},
+      {"npc": "Jodi", "object_id": "214"}, {"npc": "Jodi", "object_id": "211"},
+      {"npc": "Kent", "object_id": "649"}, {"npc": "Kent", "object_id": "607"},
+      {"npc": "Sam", "object_id": "90"}, {"npc": "Sam", "object_id": "731"},
+      {"npc": "Sam", "object_id": "206"}
+    ]
+  },
+  {
+    "id": "3", "vanilla_number": 3, "display_number": 3, "sort_order": 3, "text": "stardewcraft.secret_note.3",
+    "gift_reveals": [
+      {"npc": "Leah", "object_id": "196"}, {"npc": "Leah", "object_id": "426"},
+      {"npc": "Leah", "object_id": "430"}, {"npc": "Leah", "object_id": "348"},
+      {"npc": "Leah", "object_id": "651"}
+    ]
+  },
+  {
+    "id": "4", "vanilla_number": 4, "display_number": 4, "sort_order": 4, "text": "stardewcraft.secret_note.4",
+    "gift_reveals": [
+      {"npc": "Maru", "object_id": "336"}, {"npc": "Maru", "object_id": "337"},
+      {"npc": "Maru", "object_id": "787"}, {"npc": "Maru", "object_id": "72"},
+      {"npc": "Maru", "object_id": "400"}
+    ]
+  },
+  {
+    "id": "5", "vanilla_number": 5, "display_number": 5, "sort_order": 5, "text": "stardewcraft.secret_note.5",
+    "gift_reveals": [
+      {"npc": "Pam", "object_id": "24"}, {"npc": "Pam", "object_id": "208"},
+      {"npc": "Pam", "object_id": "346"}, {"npc": "Jas", "object_id": "595"},
+      {"npc": "Jas", "object_id": "604"}, {"npc": "Vincent", "object_id": "398"},
+      {"npc": "Vincent", "object_id": "221"}, {"npc": "George", "object_id": "20"},
+      {"npc": "George", "object_id": "205"}, {"npc": "Evelyn", "object_id": "284"},
+      {"npc": "Evelyn", "object_id": "591"}
+    ]
+  },
+  {
+    "id": "6", "vanilla_number": 6, "display_number": 6, "sort_order": 6, "text": "stardewcraft.secret_note.6",
+    "gift_reveals": [
+      {"npc": "Lewis", "object_id": "235"}, {"npc": "Marnie", "object_id": "608"},
+      {"npc": "Demetrius", "object_id": "207"}, {"npc": "Caroline", "object_id": "213"}
+    ]
+  },
+  {
+    "id": "7", "vanilla_number": 7, "display_number": 7, "sort_order": 7, "text": "stardewcraft.secret_note.7",
+    "gift_reveals": [
+      {"npc": "Harvey", "object_id": "395"}, {"npc": "Harvey", "object_id": "342"},
+      {"npc": "Elliott", "object_id": "732"}, {"npc": "Elliott", "object_id": "637"},
+      {"npc": "Shane", "object_id": "346"}, {"npc": "Shane", "object_id": "206"},
+      {"npc": "Shane", "object_id": "215"}
+    ]
+  },
+  {
+    "id": "8", "vanilla_number": 8, "display_number": 8, "sort_order": 8, "text": "stardewcraft.secret_note.8",
+    "gift_reveals": [
+      {"npc": "Haley", "object_id": "221"}, {"npc": "Haley", "object_id": "421"},
+      {"npc": "Emily", "object_id": "440"}, {"npc": "Emily", "object_id": "66"},
+      {"npc": "Emily", "object_id": "62"}, {"npc": "Emily", "object_id": "60"},
+      {"npc": "Emily", "object_id": "70"}, {"npc": "Emily", "object_id": "64"},
+      {"npc": "Emily", "object_id": "68"}
+    ]
+  },
+  {
+    "id": "9", "vanilla_number": 9, "display_number": 9, "sort_order": 9, "text": "stardewcraft.secret_note.9",
+    "gift_reveals": [
+      {"npc": "Alex", "object_id": "201"}, {"npc": "Alex", "object_id": "212"}
+    ]
+  },
+  {"id": "10", "vanilla_number": 10, "display_number": 10, "sort_order": 10, "text": "stardewcraft.secret_note.10", "obtainable": false, "implementation_status": "TODO 0.5.1-fix: floor-100 Qi cutscene"},
+  {"id": "11", "vanilla_number": 11, "display_number": 11, "sort_order": 11, "image_index": 6},
+  {"id": "12", "vanilla_number": 12, "display_number": 12, "sort_order": 12, "text": "stardewcraft.secret_note.12"},
+  {"id": "13", "vanilla_number": 13, "display_number": 13, "sort_order": 13, "text": "stardewcraft.secret_note.13", "obtainable": false, "implementation_status": "TODO 0.5.1-fix"},
+  {"id": "14", "vanilla_number": 14, "display_number": 14, "sort_order": 14, "text": "stardewcraft.secret_note.14", "obtainable": false, "implementation_status": "TODO 0.5.1-fix"},
+  {"id": "15", "vanilla_number": 15, "display_number": 15, "sort_order": 15, "text": "stardewcraft.secret_note.15"},
+  {"id": "16", "vanilla_number": 16, "display_number": 16, "sort_order": 16, "image_index": 0},
+  {"id": "17", "vanilla_number": 17, "display_number": 17, "sort_order": 17, "image_index": 1},
+  {"id": "18", "vanilla_number": 18, "display_number": 18, "sort_order": 18, "image_index": 3},
+  {"id": "20", "vanilla_number": 20, "display_number": 19, "sort_order": 19, "image_index": 4, "obtainable": false, "implementation_status": "TODO 0.5.1-fix"},
+  {"id": "21", "vanilla_number": 21, "display_number": 20, "sort_order": 20, "image_index": 5, "obtainable": false, "implementation_status": "TODO 0.5.1-fix"},
+  {"id": "22", "vanilla_number": 22, "display_number": 21, "sort_order": 21, "text": "stardewcraft.secret_note.22", "obtainable": false, "implementation_status": "TODO 0.5.1-fix"},
+  {"id": "23", "vanilla_number": 23, "display_number": 22, "sort_order": 22, "text": "stardewcraft.secret_note.23", "obtainable": false, "implementation_status": "TODO 0.5.1-fix"},
+  {"id": "24", "vanilla_number": 24, "display_number": 23, "sort_order": 23, "text": "stardewcraft.secret_note.24", "obtainable": false, "implementation_status": "TODO 0.5.1-fix"},
+  {"id": "25", "vanilla_number": 25, "display_number": 24, "sort_order": 24, "text": "stardewcraft.secret_note.25"},
+  {"id": "26", "vanilla_number": 26, "display_number": 25, "sort_order": 25, "text": "stardewcraft.secret_note.26", "obtainable": false, "implementation_status": "TODO 0.5.1-fix"},
+  {"id": "27", "vanilla_number": 27, "display_number": 26, "sort_order": 26, "text": "stardewcraft.secret_note.27"}
+]

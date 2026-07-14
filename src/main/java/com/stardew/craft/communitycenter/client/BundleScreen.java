@@ -2,6 +2,7 @@ package com.stardew.craft.communitycenter.client;
 
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.gui.common.GuiText;
+import com.stardew.craft.client.gui.LocalizedGuiAssets;
 import com.stardew.craft.client.gui.common.StardewRenderMapping;
 import com.stardew.craft.client.gui.overnight.StardewGuiUtil;
 import com.stardew.craft.communitycenter.data.BundleDataManager;
@@ -711,7 +712,7 @@ public class BundleScreen extends AbstractContainerScreen<BundleMenu> {
         if (def.isVaultBundle() && !BundleClientData.INSTANCE.isBundleComplete(def.bundleId())) {
             int purchX = menuX + mapping.ui(800);
             int purchY = menuY + mapping.ui(504);
-            drawJunimoNote(g, purchX, purchY, 517, 286, 65, 20, s4);
+            drawLocalizedPurchaseButton(g, purchX, purchY, s4);
         }
 
         // 6b. tempSprites — SDV: drawn with completed_slot_alpha when partial donation active
@@ -1608,6 +1609,15 @@ public class BundleScreen extends AbstractContainerScreen<BundleMenu> {
         g.pose().translate(x, y, 0.5f);
         g.pose().scale(scale, scale, 1.0f);
         g.blit(JUNIMO_NOTE, 0, 0, u, v, w, h, TEX_WIDTH, TEX_HEIGHT);
+        g.pose().popPose();
+    }
+
+    private void drawLocalizedPurchaseButton(GuiGraphics g, int x, int y, float scale) {
+        g.pose().pushPose();
+        g.pose().translate(x, y, 0.5f);
+        g.pose().scale(scale, scale, 1.0f);
+        g.blit(LocalizedGuiAssets.texture("bundle/purchase.png"),
+                0, 0, 0, 0, 65, 20, 65, 20);
         g.pose().popPose();
     }
 

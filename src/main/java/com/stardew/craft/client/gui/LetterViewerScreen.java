@@ -3,6 +3,7 @@ package com.stardew.craft.client.gui;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.gui.common.CommonGuiTextures;
 import com.stardew.craft.client.gui.common.StardewRenderMapping;
+import com.stardew.craft.mail.MailTextSyntax;
 import com.stardew.craft.network.payload.CheckMailboxPayload;
 import com.stardew.craft.network.payload.OpenMailPayload;
 import com.stardew.craft.sound.ModSounds;
@@ -154,6 +155,9 @@ public class LetterViewerScreen extends Screen {
         }
         // 将 SDV 邮件里的换行标记转成真实换行。
         if (text != null) {
+            // Vanilla LetterViewerMenu removes the collection title and consumes
+            // %item/%action blocks before laying out the visible body.
+            text = MailTextSyntax.body(text);
             text = applyLetterFormatting(text);
             if (minecraft != null && minecraft.player != null) {
                 text = text.replace("@", minecraft.player.getName().getString());
@@ -171,8 +175,8 @@ public class LetterViewerScreen extends Screen {
             return;
         }
 
-        // 按 [#] 分段（SDV 翻页分隔符）
-        String[] sections = text.split("\\[#\\]");
+        // [#] is the collection title separator and has already been removed.
+        String[] sections = new String[] {text};
         for (String section : sections) {
             section = section.trim();
             if (section.isEmpty()) continue;

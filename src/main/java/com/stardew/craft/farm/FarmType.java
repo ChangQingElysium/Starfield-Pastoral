@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * 农场类型枚举。
  * 每种类型对应不同的 schematic、图标、描述和布局数据。
- * 只有前 3 种已解锁（有完整布局数据）。
+ * 只有当前公开的类型可供新农场选择。已有农场的布局数据仍保留以兼容旧存档。
  */
 public enum FarmType {
     STANDARD("standard", true, layout(
@@ -33,7 +33,7 @@ public enum FarmType {
             new BlockPos(251, 5, 129), -90.0f
     )),
 
-    RIVERLAND("riverland", true, layout(
+    RIVERLAND("riverland", false, layout(
             0,
             230, 70, 253,
             new BlockPos(162, 10, 202), 90.0f,

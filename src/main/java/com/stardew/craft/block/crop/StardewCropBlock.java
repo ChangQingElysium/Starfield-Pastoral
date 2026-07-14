@@ -1,5 +1,7 @@
 package com.stardew.craft.block.crop;
 
+import com.stardew.craft.api.v1.agriculture.StardewAgricultureDataApi;
+import com.stardew.craft.api.v1.agriculture.StardewCropData;
 import com.stardew.craft.block.shape.ModelVoxelShapeCache;
 import com.stardew.craft.book.BookPowerEffects;
 import com.stardew.craft.core.ModDimensions;
@@ -538,7 +540,7 @@ public abstract class StardewCropBlock extends Block {
                                               @SuppressWarnings("null") Player player, @SuppressWarnings("null") InteractionHand hand,
                                               @SuppressWarnings("null") BlockHitResult hitResult) {
         if (stack.getItem() instanceof WateringCanItem) {
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
         }
 
         InteractionResult result = tryRightClickHarvest(state, level, pos, player);
@@ -625,7 +627,7 @@ public abstract class StardewCropBlock extends Block {
                 }
 
                 if (!decorativePlacedFlower) {
-                    int farmingExp = getHarvestFarmingExperience(interactionState);
+                    int farmingExp = getHarvestFarmingExperience(serverLevel, interactionPos, interactionState);
                     if (farmingExp > 0) {
                         PlayerStardewDataAPI.addExperience(serverPlayer, SkillType.FARMING, farmingExp);
                     }
@@ -674,7 +676,7 @@ public abstract class StardewCropBlock extends Block {
         }
 
         if (!decorativePlacedFlower && player instanceof ServerPlayer serverPlayer && !serverPlayer.isCreative()) {
-            int farmingExp = getHarvestFarmingExperience(currentState);
+            int farmingExp = getHarvestFarmingExperience(level, harvestPos, currentState);
             if (farmingExp > 0) {
                 PlayerStardewDataAPI.addExperience(serverPlayer, SkillType.FARMING, farmingExp);
             }
@@ -707,9 +709,8 @@ public abstract class StardewCropBlock extends Block {
         return Blocks.AIR.defaultBlockState();
     }
 
-    private int getHarvestFarmingExperience(BlockState state) {
-        com.stardew.craft.api.v1.agriculture.StardewCropData apiData =
-                com.stardew.craft.api.v1.agriculture.StardewAgricultureDataApi.crop(state);
+    static int getHarvestFarmingExperience(Level level, BlockPos pos, BlockState state) {
+        StardewCropData apiData = StardewAgricultureDataApi.crop(level, pos, state);
         if (apiData != null) {
             return apiData.farmingExperience();
         }

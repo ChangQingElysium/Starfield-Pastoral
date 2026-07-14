@@ -5,7 +5,10 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.stardew.craft.api.v1.action.StardewActionResult;
 import com.stardew.craft.api.v1.action.StardewActions;
 import com.stardew.craft.api.v1.agriculture.StardewAgricultureDataApi;
+import com.stardew.craft.api.v1.agriculture.StardewAnimalData;
+import com.stardew.craft.api.v1.agriculture.StardewBuildingData;
 import com.stardew.craft.api.v1.agriculture.StardewCropData;
+import com.stardew.craft.api.v1.agriculture.StardewTreeData;
 import com.stardew.craft.api.v1.condition.StardewConditions;
 import com.stardew.craft.api.v1.cutscene.StardewCutsceneTriggers;
 import com.stardew.craft.api.v1.equipment.StardewEquipmentData;
@@ -27,6 +30,7 @@ import com.stardew.craft.api.v1.specialorder.SpecialOrderProgressEvent;
 import com.stardew.craft.api.v1.specialorder.StardewSpecialOrderObjectives;
 import com.stardew.craft.api.v1.specialorder.StardewSpecialOrderRewards;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -34,7 +38,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.level.block.Blocks;
 import net.neoforged.fml.common.Mod;
 
 import java.util.List;
@@ -127,14 +130,32 @@ public final class ExampleStardewAddon {
     }
 
     private static void registerAgricultureProvider() {
-        StardewAgricultureDataApi.registerCropProvider(id("mature_wheat"), 100, (level, pos, state) -> {
-            if (!state.is(Blocks.WHEAT)) return null;
+        StardewAgricultureDataApi.registerCropProvider(id("highland_parsnip"), 100, (level, pos, state) -> {
+            if (pos.getY() <= 80 || !isBlock(state, "parsnip_crop")) return null;
             return new StardewCropData(
                     List.of("spring", "summer", "fall"), List.of(1, 1, 1, 1, 1, 1, 1),
-                    -1, pos.getY() > 80 ? 12 : 8,
+                    -1, 12,
                     ResourceLocation.fromNamespaceAndPath("stardewcraft", "grab"),
-                    ResourceLocation.withDefaultNamespace("wheat"),
-                    ResourceLocation.withDefaultNamespace("wheat_seeds"));
+                    ResourceLocation.fromNamespaceAndPath("stardewcraft", "parsnip"),
+                    ResourceLocation.fromNamespaceAndPath("stardewcraft", "parsnip_seeds"));
+        });
+        StardewAgricultureDataApi.registerTreeProvider(id("highland_apple_tree"), 100, (level, pos, state) -> {
+            if (pos.getY() <= 80 || !isBlock(state, "apple_tree")) return null;
+            return new StardewTreeData(
+                    id("highland_apple_tree"), 28, ResourceLocation.withDefaultNamespace("golden_apple"),
+                    2, 4, List.of("spring", "summer", "fall", "winter"));
+        });
+        StardewAgricultureDataApi.registerAnimalProvider(id("highland_cow"), 100, entity -> {
+            if (entity.getY() <= 80 || entity.getType() != EntityType.COW) return null;
+            return new StardewAnimalData(
+                    id("highland_barn"), 1500, 5,
+                    ResourceLocation.withDefaultNamespace("honey_bottle"), 2);
+        });
+        StardewAgricultureDataApi.registerBuildingProvider(id("highland_manager"), 100, (level, pos, state) -> {
+            if (pos.getY() <= 80
+                    || (!isBlock(state, "coop_manager") && !isBlock(state, "barn_manager"))) return null;
+            return new StardewBuildingData(
+                    id("highland_barn"), 2, List.of(ResourceLocation.withDefaultNamespace("cow")), List.of());
         });
     }
 
@@ -175,6 +196,11 @@ public final class ExampleStardewAddon {
 
     private static ResourceLocation id(String path) {
         return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
+    }
+
+    private static boolean isBlock(net.minecraft.world.level.block.state.BlockState state, String path) {
+        return BuiltInRegistries.BLOCK.getKey(state.getBlock())
+                .equals(ResourceLocation.fromNamespaceAndPath("stardewcraft", path));
     }
 
     private record PlayerNamedCondition(String name) {

@@ -6,7 +6,14 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
 
-/** Shared crop metadata for growth-aware tools, harvest XP and add-on integrations. */
+/**
+ * Shared crop metadata for add-on integrations.
+ *
+ * <p>For {@code StardewCropBlock}, {@link #farmingExperience()} is consumed by the normal harvest
+ * path with world and position aware provider lookup. Growth phases, regrowth, drops and tool
+ * behavior remain properties of the concrete crop implementation; the other fields are metadata
+ * for add-ons and do not globally replace arbitrary Minecraft crop behavior.
+ */
 public record StardewCropData(
         List<String> seasons,
         List<Integer> phaseDays,

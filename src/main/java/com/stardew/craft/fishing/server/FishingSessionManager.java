@@ -449,11 +449,16 @@ public final class FishingSessionManager {
 
 			ItemStack fish = session.plannedCatch();
 			boolean hasPlannedCatch = !fish.isEmpty();
+			boolean ornateNecklace = fish.is(com.stardew.craft.item.ModItems.ORNATE_NECKLACE.get());
+			if (ornateNecklace) {
+				// Quest catches are never duplicated by Wild/Challenge Bait.
+				finalNumCaught = 1;
+			}
 			if (fish.isEmpty()) {
 				// 如果plannedCatch为空（理论上不应该发生），给玩家垃圾而不是COD
 				StardewCraft.LOGGER.warn("Player {} caught fish but plannedCatch is empty! Giving trash.", player.getName().getString());
 				fish = new ItemStack(com.stardew.craft.item.ModItems.TRASH.get());
-			} else {
+			} else if (!ornateNecklace) {
 				// 计算鱼的最终品质（星露谷原版逻辑）
 				int fishQuality = session.initialQuality();  // 初始品质（0-2）
 				boolean wasPerfect = perfect;
@@ -488,7 +493,7 @@ public final class FishingSessionManager {
 				com.stardew.craft.item.quality.QualityHelper.setQuality(fish, fishQuality);
 			}
 
-			if (hasPlannedCatch) {
+			if (hasPlannedCatch && !ornateNecklace) {
 				@SuppressWarnings("null")
 				String itemId = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(fish.getItem()).toString();
 				if (fairFishingGame) {
@@ -532,6 +537,10 @@ public final class FishingSessionManager {
 						}
 						remaining -= give;
 					}
+				}
+				if (ornateNecklace) {
+					com.stardew.craft.quest.StardewQuestEvents.fireItemReceived(
+							player, "stardewcraft:ornate_necklace", 1);
 				}
 			}
 

@@ -16,10 +16,13 @@ import com.stardew.craft.npc.data.NpcSocialRules;
 import com.stardew.craft.npc.runtime.NpcFriendshipDataManager;
 import com.stardew.craft.npc.runtime.NpcInteractionService;
 import com.stardew.craft.player.PlayerDataManager;
+import com.stardew.craft.quest.QuestManager;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
@@ -40,6 +43,8 @@ public final class BuiltinQuestObjectiveTypes {
                 data -> new CounterRuntime(QuestProgressEvents.BUILDING_EXISTS, data.building(), "", 1));
         StardewQuestObjectives.register(id("location"), LocationData.CODEC, LocationRuntime::new);
         StardewQuestObjectives.register(id("item_delivery"), DeliveryData.CODEC, DeliveryRuntime::new);
+        StardewQuestObjectives.register(id("secret_lost_item"), SecretLostItemData.CODEC,
+                SecretLostItemRuntime::new);
         StardewQuestObjectives.register(id("monster"), MonsterData.CODEC,
                 data -> new ReportRuntime(QuestProgressEvents.MONSTER_SLAIN, data.monster(), data.count(), data.targetNpc()));
         StardewQuestObjectives.register(id("fishing"), FishingData.CODEC,
@@ -96,6 +101,22 @@ public final class BuiltinQuestObjectiveTypes {
                 Codec.STRING.optionalFieldOf("target_message", "").forGetter(DeliveryData::targetMessage),
                 Codec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("friendship", 255).forGetter(DeliveryData::friendship)
         ).apply(instance, DeliveryData::new));
+    }
+
+    public record SecretLostItemData(
+            String targetNpc,
+            ResourceLocation item,
+            int friendship,
+            String exclusiveQuest,
+            String targetMessage
+    ) {
+        public static final Codec<SecretLostItemData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                Codec.STRING.fieldOf("target_npc").forGetter(SecretLostItemData::targetNpc),
+                ResourceLocation.CODEC.fieldOf("item").forGetter(SecretLostItemData::item),
+                Codec.intRange(0, Integer.MAX_VALUE).fieldOf("friendship").forGetter(SecretLostItemData::friendship),
+                Codec.STRING.fieldOf("exclusive_quest").forGetter(SecretLostItemData::exclusiveQuest),
+                Codec.STRING.optionalFieldOf("target_message", "").forGetter(SecretLostItemData::targetMessage)
+        ).apply(instance, SecretLostItemData::new));
     }
 
     public record MonsterData(String monster, int count, String targetNpc) {
@@ -252,6 +273,93 @@ public final class BuiltinQuestObjectiveTypes {
         }
     }
 
+    /** SDV {@code SecretLostItemQuest}: hidden, item-found gated and mutually exclusive. */
+    private static final class SecretLostItemRuntime implements QuestObjectiveRuntime {
+        private final SecretLostItemData data;
+        private boolean itemFound;
+
+        private SecretLostItemRuntime(SecretLostItemData data) {
+            this.data = data;
+        }
+
+        @Override
+        public void onAccepted(QuestObjectiveContext context) {
+            if (BuiltInRegistries.ITEM.containsKey(data.item())) {
+                itemFound = context.player().getInventory()
+                        .countItem(BuiltInRegistries.ITEM.get(data.item())) > 0;
+            }
+        }
+
+        @Override
+        public QuestObjectiveResult onProgress(QuestObjectiveContext context, QuestProgressEvent event) {
+            if (QuestProgressEvents.ITEM_RECEIVED.equals(event.type())
+                    && data.item().toString().equals(event.subject())) {
+                if (itemFound) return QuestObjectiveResult.NONE;
+                itemFound = true;
+                return QuestObjectiveResult.progress(false);
+            }
+            if (QuestProgressEvents.ITEM_OFFERED_TO_NPC.equals(event.type())
+                    && data.item().toString().equals(event.subject())
+                    && data.targetNpc().equalsIgnoreCase(event.target())) {
+                // Holding the matching quest item is sufficient proof that it was found.
+                // This also repairs older saves whose hidden quest missed ITEM_RECEIVED.
+                itemFound = true;
+                return QuestObjectiveResult.consumed(true);
+            }
+            return QuestObjectiveResult.NONE;
+        }
+
+        @Override
+        public void onCompleted(QuestObjectiveContext context) {
+            if (data.friendship() > 0 && !data.targetNpc().isBlank()) {
+                NpcFriendshipDataManager manager = NpcFriendshipDataManager.get(context.player().serverLevel());
+                NpcFriendshipDataManager.FriendshipState state = manager.getOrCreate(
+                        context.player().getUUID(), data.targetNpc());
+                int gain = BookPowerEffects.applyFriendshipGain(
+                        PlayerDataManager.getPlayerData(context.player()), data.friendship());
+                state.addPoints(gain, NpcInteractionService.getMaxFriendshipPointsFor(data.targetNpc()));
+                manager.setDirty();
+            }
+            QuestManager quests = QuestManager.of(context.player());
+            if (quests != null && !data.exclusiveQuest().isBlank()) {
+                quests.removeQuest(data.exclusiveQuest(), context.player());
+            }
+        }
+
+        @Override
+        public CompoundTag saveState() {
+            CompoundTag tag = new CompoundTag();
+            tag.putBoolean("ItemFound", itemFound);
+            return tag;
+        }
+
+        @Override
+        public void loadState(CompoundTag state) {
+            itemFound = state.getBoolean("ItemFound");
+        }
+
+        @Override
+        public boolean matchesItemDelivery(String npcId, String itemId) {
+            return data.targetNpc().equalsIgnoreCase(npcId)
+                    && data.item().toString().equalsIgnoreCase(itemId);
+        }
+
+        @Override
+        public String deliveryTargetMessage() {
+            return data.targetMessage();
+        }
+
+        @Override
+        public boolean isSecret() {
+            return true;
+        }
+
+        @Override
+        public List<Component> objectiveComponents(Component fallback) {
+            return List.of();
+        }
+    }
+
     private static final class ReportRuntime extends CounterRuntime {
         private final String targetNpc;
 
@@ -318,6 +426,15 @@ public final class BuiltinQuestObjectiveTypes {
                 return QuestObjectiveResult.NONE;
             }
             return QuestObjectiveResult.progress(remaining.isEmpty());
+        }
+
+        @Override
+        public List<Component> objectiveComponents(Component fallback) {
+            if (fallback.getContents() instanceof TranslatableContents translatable) {
+                return List.of(Component.translatable(
+                        translatable.getKey(), currentCount(), targetCount()));
+            }
+            return QuestObjectiveRuntime.super.objectiveComponents(fallback);
         }
 
         @Override

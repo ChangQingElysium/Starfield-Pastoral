@@ -65,6 +65,7 @@ public class PlayerDataEventHandler {
             syncPlayerData(player, data);
             CosmeticAppearanceSync.syncAllTo(player);
             CosmeticAppearanceSync.broadcast(player, data);
+            JoinAnnouncementService.schedule(player);
 
             try {
                 com.stardew.craft.network.overnight.OvernightSettlementPayload pendingShipping =
@@ -129,9 +130,6 @@ public class PlayerDataEventHandler {
             } catch (Exception ex) {
                 StardewCraft.LOGGER.warn("Failed to apply NPC friendship rewards on login: {}", ex.getMessage());
             }
-
-            // 同步 DataManager 数据到客户端（专用服务器客户端缺少 datapack ReloadListener）
-            com.stardew.craft.network.DataRegistrySyncPayload.sendFullSync(player);
 
             // 同步任务日志到客户端
             com.stardew.craft.quest.QuestManager qm = data.getQuestManager();
@@ -896,9 +894,9 @@ public class PlayerDataEventHandler {
         PacketDistributor.sendToPlayer(player, packet);
         // sync equipment slots
         PacketDistributor.sendToPlayer(player, new com.stardew.craft.network.payload.EquipmentSyncPayload(
-                data.getEquippedLeftRing(),
-                data.getEquippedRightRing(),
-                data.getEquippedBoots(),
+                data.getEquippedLeftRingStack(),
+                data.getEquippedRightRingStack(),
+                data.getEquippedBootsStack(),
                 data.getEquippedTrinket(),
                 data.getEquippedHat(),
                 data.getEquippedShirt(),

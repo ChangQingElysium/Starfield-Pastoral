@@ -472,8 +472,28 @@ public class AnimalWorldData extends SavedData {
                                                   int maxZ,
                                                   Set<Long> interiorAirCells,
                                                   Set<Long> boundaryDoorCells) {
+        return createOrUpdateBuildingAtManager(level, buildingType, ownerPlayerId, managerPos, customName,
+                minX, minY, minZ, maxX, maxY, maxZ, interiorAirCells, boundaryDoorCells,
+                buildingType.defaultCapacity());
+    }
+
+    public String createOrUpdateBuildingAtManager(ServerLevel level,
+                                                  AnimalBuildingType buildingType,
+                                                  UUID ownerPlayerId,
+                                                  BlockPos managerPos,
+                                                  String customName,
+                                                  int minX,
+                                                  int minY,
+                                                  int minZ,
+                                                  int maxX,
+                                                  int maxY,
+                                                  int maxZ,
+                                                  Set<Long> interiorAirCells,
+                                                  Set<Long> boundaryDoorCells,
+                                                  int capacity) {
         String owner = ownerPlayerId.toString();
         String dimensionId = level.dimension().location().toString();
+        int resolvedCapacity = Math.max(0, capacity);
 
         Optional<AnimalBuildingRecord> existingOpt = findBuildingByManager(
             dimensionId,
@@ -510,7 +530,7 @@ public class AnimalWorldData extends SavedData {
                 maxX,
                 maxY,
                 maxZ,
-                buildingType.defaultCapacity(),
+                resolvedCapacity,
                 buildingType.hayCapacity(),
                 true,
                 existing.doorOpen(),
@@ -541,7 +561,7 @@ public class AnimalWorldData extends SavedData {
             maxX,
             maxY,
             maxZ,
-            buildingType.defaultCapacity(),
+            resolvedCapacity,
             buildingType.hayCapacity(),
             true,
             false,

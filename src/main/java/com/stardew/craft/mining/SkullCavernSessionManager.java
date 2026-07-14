@@ -2,12 +2,15 @@ package com.stardew.craft.mining;
 
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.core.ModMiningDimensions;
+import com.stardew.craft.block.ModBlocks;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,11 +25,14 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SkullCavernSessionManager {
 
     private static final Set<UUID> playersInSkullCavern = ConcurrentHashMap.newKeySet();
+    private static final Map<UUID, Integer> craftedStaircasesUsed = new ConcurrentHashMap<>();
     private static int sessionDeepestFloor = 121;
 
     /** 玩家进入骷髅矿（从入口或 /tp 命令触发） */
     public static void onPlayerEnter(ServerPlayer player) {
-        playersInSkullCavern.add(player.getUUID());
+        if (playersInSkullCavern.add(player.getUUID())) {
+            craftedStaircasesUsed.put(player.getUUID(), 0);
+        }
         StardewCraft.LOGGER.info("[SKULL] Player {} entered skull cavern, active={}",
                 player.getName().getString(), playersInSkullCavern.size());
     }
@@ -55,6 +61,10 @@ public class SkullCavernSessionManager {
         return playersInSkullCavern.contains(uuid);
     }
 
+    public static int getCraftedStaircasesUsed(UUID playerId) {
+        return craftedStaircasesUsed.getOrDefault(playerId, 0);
+    }
+
     /**
      * 全部玩家离开 → 异步清理所有骷髅矿楼层数据
      * 方块清理不需要做（下次生成时会覆写），只清 MineFloorDataManager 记录即可。
@@ -73,6 +83,22 @@ public class SkullCavernSessionManager {
     }
 
     // ═══════════ Event Listeners ═══════════
+
+    @SubscribeEvent
+    public static void onLadderPlaced(BlockEvent.EntityPlaceEvent event) {
+        if (!(event.getLevel() instanceof ServerLevel level)
+                || level.dimension() != ModMiningDimensions.STARDEW_MINING
+                || !(event.getEntity() instanceof ServerPlayer player)
+                || !event.getPlacedBlock().is(ModBlocks.MINE_LADDER.get())) {
+            return;
+        }
+        MiningPlayerData mining = MiningDataManager.getPlayerData(player);
+        if (mining.getCurrentFloor() > 120) {
+            // SDV Object.cs increments numberOfCraftedStairsUsedThisRun as soon as
+            // placement successfully creates the ladder, not when it is clicked.
+            craftedStaircasesUsed.merge(player.getUUID(), 1, Integer::sum);
+        }
+    }
 
     @SubscribeEvent
     public static void onDimensionChange(PlayerEvent.PlayerChangedDimensionEvent event) {
@@ -98,6 +124,7 @@ public class SkullCavernSessionManager {
         if (miningLevel != null) {
             onPlayerLeave(sp, miningLevel);
         }
+        craftedStaircasesUsed.remove(sp.getUUID());
     }
 
     @SubscribeEvent

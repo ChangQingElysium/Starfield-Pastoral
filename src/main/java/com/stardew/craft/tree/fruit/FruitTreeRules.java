@@ -1,5 +1,6 @@
 package com.stardew.craft.tree.fruit;
 
+import com.stardew.craft.api.v1.agriculture.StardewTreeData;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.tree.WildTreeSaplingBlock;
 import com.stardew.craft.block.tree.fruit.FruitTreeBlock;
@@ -61,6 +62,26 @@ public final class FruitTreeRules {
         }
         return SeasonLocationRules.seedsIgnoreSeasonsHere(level, pos)
                 || StardewTimeManager.get().getCurrentSeason() == type.season();
+    }
+
+    public static boolean canFruitToday(Level level, BlockPos pos, FruitTreeType type, StardewTreeData data) {
+        if (level.isClientSide()) {
+            return true;
+        }
+        if (SeasonLocationRules.seedsIgnoreSeasonsHere(level, pos)) {
+            return true;
+        }
+        if (data == null || data.fruitSeasons().isEmpty()) {
+            return StardewTimeManager.get().getCurrentSeason() == type.season();
+        }
+        String currentSeason = switch (StardewTimeManager.get().getCurrentSeason()) {
+            case 0 -> "spring";
+            case 1 -> "summer";
+            case 2 -> "fall";
+            case 3 -> "winter";
+            default -> "";
+        };
+        return data.fruitSeasons().stream().anyMatch(currentSeason::equalsIgnoreCase);
     }
 
     public static boolean isWinterTreeHere(Level level, BlockPos pos) {

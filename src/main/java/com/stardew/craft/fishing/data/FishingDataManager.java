@@ -33,6 +33,7 @@ import java.util.*;
 
 public final class FishingDataManager {
 	private static final Gson GSON = new Gson();
+	private static final String SECRET_NOTE_ITEM_ID = "stardewcraft:secret_note";
 	private static final Set<String> INHERITED_POOL_KEYS = Set.of("Default");
 	private static final String LEGACY_COMPAT_POOL_KEY = "stardewcraft:stardew_valley";
 	private static final TagKey<Item> FISHES_TAG = TagKey.create(
@@ -167,6 +168,11 @@ public final class FishingDataManager {
 		if (!isStardewFishingDimension(level)) {
 			return Optional.of(new FishSelection(getRandomJunk(random), 0, 0, 0, 0, true));
 		}
+		Optional<ItemStack> secretNote25Catch = com.stardew.craft.secretnote.SecretNote25Service
+				.tryCreateNecklaceCatch(player, level, bobberPos);
+		if (secretNote25Catch.isPresent()) {
+			return Optional.of(new FishSelection(secretNote25Catch.get(), 0, 0, 0, 0, true));
+		}
 
 		int fishingLevel = PlayerStardewDataAPI.getSkillLevel(player, SkillType.FISHING);
 		int luckBuffLevel = Math.max(0, PlayerStardewDataAPI.getLuckBuffLevel(player));
@@ -242,6 +248,7 @@ public final class FishingDataManager {
 
 		// Stardew Valley style selection: iterate by precedence and roll chance (not weighted).
 		SpawnFishRule chosen = null;
+		ItemStack resolvedSpecialCatch = ItemStack.EMPTY;
 		int targetedBaitTries = 0;
 		SpawnFishRule firstNonTargetRule = null;
 		for (int pass = 0; pass < 2 && chosen == null; pass++) {
@@ -322,6 +329,18 @@ public final class FishingDataManager {
 				}
 				if (!rollPass) {
 					continue;
+				}
+				// SDV Locations rule SECRET_NOTE_OR_ITEM: the 8% rule roll happens first,
+				// then tryToCreateUnseenSecretNote performs its own 80% -> 12% roll.
+				if (SECRET_NOTE_ITEM_ID.equals(rule.itemId())) {
+					ItemStack secretNote = com.stardew.craft.secretnote.SecretNoteService
+							.tryCreateUnseenNote(player, random);
+					if (secretNote.isEmpty()) {
+						continue;
+					}
+					chosen = rule;
+					resolvedSpecialCatch = secretNote;
+					break;
 				}
 				// === SDV CheckGenericFishRequirements: depth-aware spawnRate second roll ===
 				// Replicates GameLocation.cs CheckGenericFishRequirements (1.6 source).
@@ -413,7 +432,9 @@ public final class FishingDataManager {
 		}
 
 		@SuppressWarnings("null")
-		ItemStack stack = new ItemStack(item);
+		ItemStack stack = resolvedSpecialCatch.isEmpty()
+				? new ItemStack(item)
+				: resolvedSpecialCatch.copy();
 		boolean skip = chosen.skipMinigame() || isNonFishCatchable(chosen.itemId());
 		return Optional.of(new FishSelection(stack, chosen.difficulty(), chosen.motionTypeId(),
 				chosen.minFishSize(), chosen.maxFishSize(), skip));

@@ -133,7 +133,8 @@ public final class StardewItemDataApi {
                     return resolved;
                 }
             } catch (RuntimeException exception) {
-                StardewCraft.LOGGER.error("Stardew item data provider {} failed", entry.id(), exception);
+                StardewCraft.LOGGER.error("Stardew item data provider {} failed for item {}",
+                        entry.id(), BuiltInRegistries.ITEM.getKey(stack.getItem()), exception);
             }
         }
         return Optional.empty();
@@ -143,13 +144,16 @@ public final class StardewItemDataApi {
         return BuiltInRegistries.ITEM.wrapAsHolder(stack.getItem()).getData(StardewDataMaps.ITEM_DATA);
     }
 
-    private static ResourceLocation legacyCategory(String typeKey) {
+    static ResourceLocation legacyCategory(String typeKey) {
         if (typeKey == null || typeKey.isBlank()) {
             return StardewItemData.UNKNOWN_CATEGORY;
         }
         String prefix = "stardewcraft.type.";
         if (typeKey.startsWith(prefix) && typeKey.length() > prefix.length()) {
             return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, typeKey.substring(prefix.length()));
+        }
+        if (typeKey.startsWith("stardewcraft.tool.")) {
+            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "tool");
         }
         ResourceLocation parsed = ResourceLocation.tryParse(typeKey);
         return parsed != null ? parsed : StardewItemData.UNKNOWN_CATEGORY;

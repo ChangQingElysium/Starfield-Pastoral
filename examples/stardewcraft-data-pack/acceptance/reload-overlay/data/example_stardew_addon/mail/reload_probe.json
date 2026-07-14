@@ -1,0 +1,7 @@
+{
+  "text": "Reload probe mail supplied by the second acceptance data pack.",
+  "background": 0,
+  "available_when": [
+    {"type": "stardewcraft:always", "data": {"value": true}}
+  ]
+}

@@ -1,5 +1,6 @@
 package com.stardew.craft.festival;
 
+import com.stardew.craft.StardewCraft;
 import com.stardew.craft.api.v1.condition.StardewConditionContext;
 import com.stardew.craft.api.v1.condition.StardewConditions;
 import com.stardew.craft.communitycenter.state.CCStoryFlags;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -108,19 +110,16 @@ public final class FestivalService {
     }
 
     public static Optional<FestivalDefinition> getActiveFestivalForDate(int day, int season) {
-        return FestivalRegistry.activeFestivals().stream()
-            .filter(definition -> definition.isDate(season, day))
-            .findFirst();
+        return availableFestivalsForDate(FestivalRegistry.activeFestivals(), day, season,
+                FestivalService::conditionsPass).stream().findFirst();
     }
 
     public static List<FestivalDefinition> getActivePassiveFestivalsToday() {
         StardewTimeManager time = StardewTimeManager.get();
         int day = time.getCurrentDay();
         int season = time.getCurrentSeason();
-        List<FestivalDefinition> passiveToday = FestivalRegistry.passiveFestivals().stream()
-            .filter(definition -> definition.isDate(season, day))
-            .filter(FestivalService::conditionsPass)
-            .toList();
+        List<FestivalDefinition> passiveToday = availableFestivalsForDate(
+                FestivalRegistry.passiveFestivals(), day, season, FestivalService::conditionsPass);
         Optional<FestivalDefinition> debugFestival = getDebugPassiveFestival();
         if (debugFestival.isEmpty() || passiveToday.stream().anyMatch(definition -> definition.id().equalsIgnoreCase(debugFestival.get().id()))) {
             return passiveToday;
@@ -239,6 +238,7 @@ public final class FestivalService {
             return List.of();
         }
         return FestivalRegistry.activeFestivals().stream()
+            .filter(FestivalService::conditionsPass)
             .map(FestivalDefinition::announcementMailId)
             .filter(id -> !id.isBlank() && id.equals(mailId))
             .toList();
@@ -601,7 +601,20 @@ public final class FestivalService {
         return time.getHour() * 100 + time.getMinute();
     }
 
-    private static boolean conditionsPass(FestivalDefinition definition) {
+    static List<FestivalDefinition> availableFestivalsForDate(
+            List<FestivalDefinition> candidates,
+            int day,
+            int season,
+            Predicate<FestivalDefinition> availability
+    ) {
+        return candidates.stream()
+                .filter(definition -> definition.isDate(season, day))
+                .filter(availability)
+                .sorted(java.util.Comparator.comparing(definition -> definition.resourceId().toString()))
+                .toList();
+    }
+
+    public static boolean passesAvailableWhen(FestivalDefinition definition) {
         if (!definition.availableWhen().isEmpty()) {
             MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
             ServerLevel level = server == null ? null : server.getLevel(com.stardew.craft.core.ModDimensions.STARDEW_VALLEY);
@@ -610,10 +623,21 @@ public final class FestivalService {
             }
             StardewConditionContext context = new StardewConditionContext(level, null);
             boolean pass = definition.availableWhen().stream().allMatch(condition ->
-                    StardewConditions.test(condition, context).result().orElse(false));
+                    StardewConditions.test(condition, context)
+                            .resultOrPartial(message -> StardewCraft.LOGGER.error(
+                                    "[Festival] available_when failed for {}: {}",
+                                    definition.resourceId(), message))
+                            .orElse(false));
             if (!pass) {
                 return false;
             }
+        }
+        return true;
+    }
+
+    private static boolean conditionsPass(FestivalDefinition definition) {
+        if (!passesAvailableWhen(definition)) {
+            return false;
         }
         String condition = definition.sourceCondition();
         if (condition == null || condition.isBlank()) {

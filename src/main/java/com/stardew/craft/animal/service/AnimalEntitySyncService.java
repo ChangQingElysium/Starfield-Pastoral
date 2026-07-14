@@ -182,7 +182,7 @@ public final class AnimalEntitySyncService {
             && !level.getBlockState(pos.below()).getCollisionShape(level, pos.below()).isEmpty();
     }
 
-    private static EntityType<? extends BaseCoopAnimalEntity> resolveEntityType(String animalTypeId) {
+    static EntityType<? extends BaseCoopAnimalEntity> resolveEntityType(String animalTypeId) {
         return switch (animalTypeId) {
             case "white_chicken" -> ModEntities.WHITE_CHICKEN.get();
             case "golden_chicken" -> ModEntities.GOLDEN_CHICKEN.get();

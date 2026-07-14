@@ -4,6 +4,7 @@ import com.stardew.craft.item.IStardewItem;
 import com.stardew.craft.player.PlayerDataEventHandler;
 import com.stardew.craft.player.PlayerStardewData;
 import com.stardew.craft.player.PlayerStardewDataAPI;
+import com.stardew.craft.secretnote.SecretNoteStoryFlags;
 import java.util.List;
 import javax.annotation.Nonnull;
 import net.minecraft.ChatFormatting;
@@ -87,6 +88,10 @@ public class IridiumMilkItem extends Item implements IStardewItem {
     @Override
     public InteractionResultHolder<ItemStack> use(@Nonnull Level level, @Nonnull Player player, @Nonnull InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
+        if (player instanceof ServerPlayer serverPlayer
+                && !canApplyPermanentReward(PlayerStardewDataAPI.getData(serverPlayer))) {
+            return InteractionResultHolder.fail(stack);
+        }
         player.startUsingItem(hand);
         return InteractionResultHolder.consume(stack);
     }
@@ -96,6 +101,10 @@ public class IridiumMilkItem extends Item implements IStardewItem {
             @Nonnull LivingEntity livingEntity) {
         if (!level.isClientSide && livingEntity instanceof ServerPlayer serverPlayer) {
             PlayerStardewData data = PlayerStardewDataAPI.getData(serverPlayer);
+            if (!canApplyPermanentReward(data)) {
+                return stack;
+            }
+            data.addMailFlag(SecretNoteStoryFlags.IRIDIUM_MILK_CONSUMED);
             data.setMaxHealth(data.getMaxHealth() + MAX_HEALTH_GAIN);
             data.setHealth(data.getMaxHealth());
             PlayerDataEventHandler.syncPlayerData(serverPlayer, data);
@@ -107,6 +116,10 @@ public class IridiumMilkItem extends Item implements IStardewItem {
             }
         }
         return stack;
+    }
+
+    static boolean canApplyPermanentReward(PlayerStardewData data) {
+        return data != null && !data.hasMailFlag(SecretNoteStoryFlags.IRIDIUM_MILK_CONSUMED);
     }
 
     private static void playIridiumMilkFeedback(ServerPlayer player) {

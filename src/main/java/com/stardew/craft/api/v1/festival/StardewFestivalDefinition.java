@@ -11,6 +11,10 @@ import java.util.Locale;
 import java.util.Map;
 
 /** Datapack-facing calendar and world metadata for one festival. */
+/**
+ * Data-pack festival metadata. {@code availableWhen} is evaluated as world state;
+ * its condition context intentionally has no player.
+ */
 public record StardewFestivalDefinition(
         FestivalKind type,
         String legacyId,

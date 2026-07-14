@@ -122,7 +122,8 @@ class ExampleArtifactsTest {
         StardewMailDefinition mail = StardewMailDefinition.CODEC
                 .parse(JsonOps.INSTANCE, mailJson).result().orElseThrow();
 
-        assertEquals(1, shop.entries().size());
+        assertEquals(2, shop.entries().size());
+        assertEquals("recipe:example_stardew_addon:apple_crate", shop.entries().get(1).item());
         assertEquals("example_stardew_addon:daily_apples", shop.inventoryProviders().getFirst().toString());
         assertEquals(2, mail.onRead().size());
         assertEquals("example_stardew_addon:apple_club_intro", eventJson.get("id").getAsString());

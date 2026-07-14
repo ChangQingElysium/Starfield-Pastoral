@@ -120,6 +120,7 @@ public class FarmAdminScreen extends Screen {
                     Component.translatable(currentAction == Action.RENAME
                             ? "stardewcraft.farm.admin.new_name"
                             : "stardewcraft.farm.admin.target_player"));
+            inputBox.setTextShadow(false);
             inputBox.setMaxLength(48);
             if (currentAction == Action.RENAME) {
                 inputBox.setValue(actionTarget.farmName());
