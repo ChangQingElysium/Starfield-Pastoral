@@ -45,20 +45,20 @@ public class BilibiliClaimCommand {
 
         // 发放彩虹猫之刃
         ItemStack meowmere = new ItemStack(ModItems.MEOWMERE.get());
+        Component meowmereName = meowmere.getHoverName().copy();
         if (!player.getInventory().add(meowmere)) {
             player.drop(meowmere, false);
         }
         data.setBilibiliRewardClaimed(true);
 
         // 发送奖励消息 + B 站链接
-        MutableComponent urlMsg = Component.translatable("stardewcraft.bilibili.author_link")
+        MutableComponent urlMsg = Component.translatable("stardewcraft.bilibili.author_link", BILIBILI_URL.toString())
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, BILIBILI_URL))
                 .withUnderlined(true)
                 .withColor(ChatFormatting.AQUA));
 
-        player.sendSystemMessage(Component.translatable("stardewcraft.bilibili.reward.claimed",
-                meowmere.getHoverName()));
+        player.sendSystemMessage(Component.translatable("stardewcraft.bilibili.reward.claimed", meowmereName));
         player.sendSystemMessage(urlMsg);
 
         return 1;
