@@ -33,11 +33,11 @@ tmp_models/
 *.log
 *.zip
 /*.jar
-cmd_list.txt
-command_cases.txt
-precond_list.txt
-precondition_cases.txt
-validation_output.txt
+/.*_proxy_env.sh
+/*.py
+/*.js
+/*.mjs
+/*.txt
 docs/*
 !docs/0.5-addon-api.md
 wiki/
@@ -70,7 +70,14 @@ stardewcraft-template-1.21.1.sln
 AGENTS.md
 CLAUDE.md
 
+# local resource intake and raw exports
+/src/main/resources/tmp_models/
+/src/main/resources/**/tmp_models/
+/src/main/resources/data/stardewcraft/deco/intake/
+
 # local planning ledgers and implementation notes
+/PRODUCT.md
+/ROADMAP-*.md
 /*_IMPLEMENTATION_PLAN.md
 /*_REGISTRATION_PLAN.md
 /*_REQUIREMENTS.md

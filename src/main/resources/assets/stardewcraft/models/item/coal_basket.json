@@ -1,6 +1,6 @@
 {
-  "parent": "stardewcraft:decor/tmp_models/6",
+  "parent": "stardewcraft:block/decor/common/coal_basket",
   "textures": {
-    "particle": "stardewcraft:block/deco/misc/tmp_models/6"
+    "particle": "stardewcraft:block/decor/common/coal_basket"
   }
 }

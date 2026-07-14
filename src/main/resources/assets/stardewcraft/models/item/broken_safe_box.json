@@ -1,6 +1,6 @@
 {
-  "parent": "stardewcraft:decor/tmp_models/1_2",
+  "parent": "stardewcraft:block/decor/common/broken_safe_box",
   "textures": {
-    "particle": "stardewcraft:block/deco/misc/tmp_models/1_2"
+    "particle": "stardewcraft:block/decor/common/broken_safe_box"
   }
 }

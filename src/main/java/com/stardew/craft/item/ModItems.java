@@ -3095,7 +3095,7 @@ public class ModItems {
     public static final DeferredItem<Item> CRYSTAL_SHOES = ITEMS.register("crystal_shoes",
             () -> new com.stardew.craft.item.equipment.StardewBootsItem(com.stardew.craft.item.equipment.BootsType.CRYSTAL_SHOES, new Item.Properties()));
 
-    // tmp_models 室内装饰家具
+    // 室内装饰家具
     public static final DeferredItem<Item> SAFE_BOX = ITEMS.register("safe_box",
             () -> new StardewBlockItem(com.stardew.craft.block.ModBlocks.SAFE_BOX.get(), "stardewcraft.type.furniture", -1, new Item.Properties().stacksTo(999)));
     public static final DeferredItem<Item> BROKEN_SAFE_BOX = ITEMS.register("broken_safe_box",

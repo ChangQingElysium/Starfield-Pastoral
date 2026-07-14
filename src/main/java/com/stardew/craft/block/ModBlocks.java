@@ -3777,63 +3777,63 @@ public static final DeferredBlock<Block> DEAD_CROP = BLOCKS.register("dead_crop"
                                         .sound(net.minecraft.world.level.block.SoundType.EMPTY)
                                         .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK)));
 
-        // 临时模型室内装饰（自动 extension + 自动碰撞）
+        // 室内装饰（自动 extension + 自动碰撞）
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> SAFE_BOX = BLOCKS.register("safe_box",
                         () -> new com.stardew.craft.block.decor.MapDecorStaticBlock(Block.Properties.of()
                                         .mapColor(net.minecraft.world.level.material.MapColor.METAL)
                                         .sound(net.minecraft.world.level.block.SoundType.METAL)
                                         .noOcclusion()
-                                        .strength(1.2F, 4.0F), "stardewcraft:decor/tmp_models/1_1"));
+                                        .strength(1.2F, 4.0F), "stardewcraft:block/decor/common/safe_box"));
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> BROKEN_SAFE_BOX = BLOCKS.register("broken_safe_box",
                         () -> new com.stardew.craft.block.decor.MapDecorStaticBlock(Block.Properties.of()
                                         .mapColor(net.minecraft.world.level.material.MapColor.METAL)
                                         .sound(net.minecraft.world.level.block.SoundType.METAL)
                                         .noOcclusion()
-                                        .strength(1.0F, 3.0F), "stardewcraft:decor/tmp_models/1_2"));
+                                        .strength(1.0F, 3.0F), "stardewcraft:block/decor/common/broken_safe_box"));
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> LOOM_MACHINE = BLOCKS.register("loom_machine",
                         () -> new com.stardew.craft.block.decor.MapDecorStaticBlock(Block.Properties.of()
                                         .mapColor(net.minecraft.world.level.material.MapColor.WOOD)
                                         .sound(net.minecraft.world.level.block.SoundType.WOOD)
                                         .noOcclusion()
-                                        .strength(0.8F, 1.2F), "stardewcraft:decor/tmp_models/2"));
+                                        .strength(0.8F, 1.2F), "stardewcraft:block/decor/common/loom_machine"));
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> BOILER_DECOR = BLOCKS.register("boiler_decor",
                         () -> new com.stardew.craft.block.decor.MapDecorStaticBlock(Block.Properties.of()
                                         .mapColor(net.minecraft.world.level.material.MapColor.COLOR_GRAY)
                                         .sound(net.minecraft.world.level.block.SoundType.METAL)
                                         .noOcclusion()
-                                        .strength(1.2F, 3.0F), "stardewcraft:decor/tmp_models/3_1"));
+                                        .strength(1.2F, 3.0F), "stardewcraft:block/decor/common/boiler_decor"));
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> BROKEN_BOILER = BLOCKS.register("broken_boiler",
                         () -> new com.stardew.craft.block.decor.MapDecorStaticBlock(Block.Properties.of()
                                         .mapColor(net.minecraft.world.level.material.MapColor.COLOR_GRAY)
                                         .sound(net.minecraft.world.level.block.SoundType.METAL)
                                         .noOcclusion()
-                                        .strength(1.0F, 2.0F), "stardewcraft:decor/tmp_models/3_2"));
+                                        .strength(1.0F, 2.0F), "stardewcraft:block/decor/common/broken_boiler"));
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> YARN_CABINET = BLOCKS.register("yarn_cabinet",
                         () -> new com.stardew.craft.block.decor.MapDecorStaticBlock(Block.Properties.of()
                                         .mapColor(net.minecraft.world.level.material.MapColor.WOOD)
                                         .sound(net.minecraft.world.level.block.SoundType.WOOD)
                                         .noOcclusion()
-                                        .strength(0.8F, 1.2F), "stardewcraft:decor/tmp_models/4"));
+                                        .strength(0.8F, 1.2F), "stardewcraft:block/decor/common/yarn_cabinet"));
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> BROKEN_CHAIR = BLOCKS.register("broken_chair",
                         () -> new com.stardew.craft.block.decor.MapDecorStaticBlock(Block.Properties.of()
                                         .mapColor(net.minecraft.world.level.material.MapColor.WOOD)
                                         .sound(net.minecraft.world.level.block.SoundType.WOOD)
                                         .noOcclusion()
-                                        .strength(0.4F, 0.8F), "stardewcraft:decor/tmp_models/5"));
+                                        .strength(0.4F, 0.8F), "stardewcraft:block/decor/common/broken_chair"));
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> COAL_BASKET = BLOCKS.register("coal_basket",
                         () -> new com.stardew.craft.block.decor.MapDecorStaticBlock(Block.Properties.of()
                                         .mapColor(net.minecraft.world.level.material.MapColor.WOOD)
                                         .sound(net.minecraft.world.level.block.SoundType.WOOD)
                                         .noOcclusion()
-                                        .strength(0.6F, 1.0F), "stardewcraft:decor/tmp_models/6"));
+                                        .strength(0.6F, 1.0F), "stardewcraft:block/decor/common/coal_basket"));
 
         // 家具目录 (SDV Furniture Catalogue)
         @SuppressWarnings("null")

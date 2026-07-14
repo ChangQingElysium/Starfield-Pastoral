@@ -1,7 +1,7 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "stardewcraft:block/deco/misc/tmp_models/3_2"
+    "particle": "stardewcraft:block/decor/common/broken_boiler"
   },
   "elements": []
 }

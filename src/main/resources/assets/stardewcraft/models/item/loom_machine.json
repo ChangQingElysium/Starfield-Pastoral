@@ -1,6 +1,6 @@
 {
-  "parent": "stardewcraft:decor/tmp_models/2",
+  "parent": "stardewcraft:block/decor/common/loom_machine",
   "textures": {
-    "particle": "stardewcraft:block/deco/misc/tmp_models/2"
+    "particle": "stardewcraft:block/decor/common/loom_machine"
   }
 }

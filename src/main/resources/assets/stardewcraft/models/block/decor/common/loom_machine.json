@@ -7,8 +7,8 @@
     64
   ],
   "textures": {
-    "0": "stardewcraft:block/deco/misc/tmp_models/2",
-    "particle": "stardewcraft:block/deco/misc/tmp_models/2"
+    "0": "stardewcraft:block/decor/common/loom_machine",
+    "particle": "stardewcraft:block/decor/common/loom_machine"
   },
   "elements": [
     {

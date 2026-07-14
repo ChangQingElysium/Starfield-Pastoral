@@ -22,7 +22,7 @@ public final class PrefabTrees {
 	}
 
 	public static final int VARIANTS_PER_SPECIES = 5;
-	private static final String STRUCTURE_DIR = "tmp_models/tree/";
+	private static final String STRUCTURE_DIR = "data/stardewcraft/structures/tree/";
 
 	/** 1=oak 2=maple 3=pine 4=mahogany 5=mystic_tree（与文件命名首位一致）。 */
 	public static int speciesIndex(WildTrees.Def def) {
@@ -45,7 +45,7 @@ public final class PrefabTrees {
 		return null;
 	}
 
-	/** 资源路径，如 {@code tmp_models/tree/1_3.nbt}。 */
+	/** 资源路径，如 {@code data/stardewcraft/structures/tree/1_3.nbt}。 */
 	public static String structurePath(int speciesIndex, int variant) {
 		return STRUCTURE_DIR + speciesIndex + "_" + variant + ".nbt";
 	}

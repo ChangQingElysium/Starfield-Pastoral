@@ -1,6 +1,6 @@
 {
-  "parent": "stardewcraft:decor/tmp_models/3_1",
+  "parent": "stardewcraft:block/decor/common/boiler_decor",
   "textures": {
-    "particle": "stardewcraft:block/deco/misc/tmp_models/3_1"
+    "particle": "stardewcraft:block/decor/common/boiler_decor"
   }
 }

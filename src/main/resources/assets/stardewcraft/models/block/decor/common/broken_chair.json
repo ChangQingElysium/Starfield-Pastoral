@@ -7,8 +7,8 @@
     64
   ],
   "textures": {
-    "1": "stardewcraft:block/deco/misc/tmp_models/5",
-    "particle": "stardewcraft:block/deco/misc/tmp_models/5"
+    "1": "stardewcraft:block/decor/common/broken_chair",
+    "particle": "stardewcraft:block/decor/common/broken_chair"
   },
   "elements": [
     {

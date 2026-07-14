@@ -7,8 +7,8 @@
     128
   ],
   "textures": {
-    "2": "stardewcraft:block/deco/misc/tmp_models/3_2",
-    "particle": "stardewcraft:block/deco/misc/tmp_models/3_2"
+    "2": "stardewcraft:block/decor/common/broken_boiler",
+    "particle": "stardewcraft:block/decor/common/broken_boiler"
   },
   "elements": [
     {

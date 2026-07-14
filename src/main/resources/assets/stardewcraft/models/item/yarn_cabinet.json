@@ -1,6 +1,6 @@
 {
-  "parent": "stardewcraft:decor/tmp_models/4",
+  "parent": "stardewcraft:block/decor/common/yarn_cabinet",
   "textures": {
-    "particle": "stardewcraft:block/deco/misc/tmp_models/4"
+    "particle": "stardewcraft:block/decor/common/yarn_cabinet"
   }
 }

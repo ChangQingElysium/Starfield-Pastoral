@@ -4,8 +4,8 @@
   "credit": "Collision proxy for junimo hut decor occupancy",
   "texture_size": [128, 128],
   "textures": {
-    "0": "stardewcraft:block/deco/misc/tmp_models/junimo_hut_decor",
-    "particle": "stardewcraft:block/deco/misc/tmp_models/junimo_hut_decor"
+    "0": "stardewcraft:block/decor/common/junimo_hut_decor",
+    "particle": "stardewcraft:block/decor/common/junimo_hut_decor"
   },
   "elements": [
     {

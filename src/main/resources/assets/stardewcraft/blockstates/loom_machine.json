@@ -1,18 +1,18 @@
 {
   "variants": {
     "part=main,facing=north": {
-      "model": "stardewcraft:decor/tmp_models/2"
+      "model": "stardewcraft:block/decor/common/loom_machine"
     },
     "part=main,facing=east": {
-      "model": "stardewcraft:decor/tmp_models/2",
+      "model": "stardewcraft:block/decor/common/loom_machine",
       "y": 90
     },
     "part=main,facing=south": {
-      "model": "stardewcraft:decor/tmp_models/2",
+      "model": "stardewcraft:block/decor/common/loom_machine",
       "y": 180
     },
     "part=main,facing=west": {
-      "model": "stardewcraft:decor/tmp_models/2",
+      "model": "stardewcraft:block/decor/common/loom_machine",
       "y": 270
     },
     "part=extension,facing=north": {

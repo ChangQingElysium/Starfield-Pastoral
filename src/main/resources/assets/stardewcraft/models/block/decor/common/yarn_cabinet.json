@@ -7,8 +7,8 @@
     128
   ],
   "textures": {
-    "1": "stardewcraft:block/deco/misc/tmp_models/4",
-    "particle": "stardewcraft:block/deco/misc/tmp_models/4"
+    "1": "stardewcraft:block/decor/common/yarn_cabinet",
+    "particle": "stardewcraft:block/decor/common/yarn_cabinet"
   },
   "elements": [
     {

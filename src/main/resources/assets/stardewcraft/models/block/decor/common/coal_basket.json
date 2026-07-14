@@ -7,8 +7,8 @@
     128
   ],
   "textures": {
-    "2": "stardewcraft:block/deco/misc/tmp_models/6",
-    "particle": "stardewcraft:block/deco/misc/tmp_models/6"
+    "2": "stardewcraft:block/decor/common/coal_basket",
+    "particle": "stardewcraft:block/decor/common/coal_basket"
   },
   "elements": [
     {

@@ -1,18 +1,18 @@
 {
   "variants": {
     "part=main,facing=north": {
-      "model": "stardewcraft:decor/tmp_models/6"
+      "model": "stardewcraft:block/decor/common/coal_basket"
     },
     "part=main,facing=east": {
-      "model": "stardewcraft:decor/tmp_models/6",
+      "model": "stardewcraft:block/decor/common/coal_basket",
       "y": 90
     },
     "part=main,facing=south": {
-      "model": "stardewcraft:decor/tmp_models/6",
+      "model": "stardewcraft:block/decor/common/coal_basket",
       "y": 180
     },
     "part=main,facing=west": {
-      "model": "stardewcraft:decor/tmp_models/6",
+      "model": "stardewcraft:block/decor/common/coal_basket",
       "y": 270
     },
     "part=extension,facing=north": {
