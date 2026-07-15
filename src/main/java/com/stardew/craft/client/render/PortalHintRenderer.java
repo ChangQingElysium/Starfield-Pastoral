@@ -26,6 +26,7 @@ import com.stardew.craft.festival.nightmarket.NightMarketMermaidService;
 import com.stardew.craft.festival.nightmarket.NightMarketPainterService;
 import com.stardew.craft.festival.nightmarket.NightMarketShopService;
 import com.stardew.craft.festival.nightmarket.NightMarketSubmarineService;
+import com.stardew.craft.secretnote.SecretNote20Service;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -39,6 +40,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
@@ -126,6 +128,7 @@ public final class PortalHintRenderer {
     private static final String FAIR_FORTUNE_KEY = "stardewcraft.portal.hint.fair_fortune";
 
     private static final String BUY_TICKET_KEY = "stardewcraft.portal.hint.buy_ticket";
+    private static final String SECRET_NOTE_20_DRIVER_KEY = "stardewcraft.secret_note.20.truck_hint";
 
     @SuppressWarnings("null")
     private static final RenderType QUAD_TYPE = makeQuadType("stardew_portal_hint", false);
@@ -209,6 +212,15 @@ public final class PortalHintRenderer {
     }
 
     private static void updateTargetedHint(Minecraft mc, Player player, List<PortalHint> hints) {
+        if (mc.hitResult instanceof EntityHitResult entityHit
+                && SecretNote20Service.isTruckInteraction(entityHit.getEntity())) {
+            for (PortalHint hint : hints) {
+                if (SecretNote20Service.TARGET_ID.equals(hint.targetId)) {
+                    activateScreenHint(hint);
+                    return;
+                }
+            }
+        }
         if (!(mc.hitResult instanceof BlockHitResult blockHit)) {
             textHintTargeted = false;
             return;
@@ -217,15 +229,19 @@ public final class PortalHintRenderer {
         BlockPos targetedBlock = blockHit.getBlockPos();
         for (PortalHint hint : hints) {
             if (containsBlock(hint, targetedBlock)) {
-                if (!hint.equals(activeScreenHint)) {
-                    activeScreenHint = hint;
-                    textHintAlpha = 0.0F;
-                }
-                textHintTargeted = true;
+                activateScreenHint(hint);
                 return;
             }
         }
         textHintTargeted = false;
+    }
+
+    private static void activateScreenHint(PortalHint hint) {
+        if (!hint.equals(activeScreenHint)) {
+            activeScreenHint = hint;
+            textHintAlpha = 0.0F;
+        }
+        textHintTargeted = true;
     }
 
     private static boolean containsBlock(PortalHint hint, BlockPos block) {
@@ -271,6 +287,17 @@ public final class PortalHintRenderer {
         Vec3 playerPos = player.position();
 
         findPortalBlockHints(player, playerPos, result);
+
+        if (com.stardew.craft.client.ClientPlayerDataCache.hasSeenSecretNote(SecretNote20Service.NOTE_ID)
+                && !com.stardew.craft.client.ClientPlayerDataCache.hasMailFlag(SecretNote20Service.DONE_FLAG)
+                && !com.stardew.craft.client.ClientPlayerDataCache.hasMailFlag(SecretNote20Service.SPECIAL_CHARM_FLAG)
+                && !com.stardew.craft.client.ClientPlayerDataCache.hasSpecialItem(SecretNote20Service.SPECIAL_CHARM_SPECIAL_ITEM)) {
+            Vec3 truckPos = new Vec3(122.5D, 67.0D, -20.5D);
+            if (distSqToHintArea(playerPos, truckPos, 2, 1, 1) <= HINT_RANGE_SQ) {
+                result.add(new PortalHint(truckPos, false, 2, 1, 1,
+                        HintStyle.SHOP, "", SecretNote20Service.TARGET_ID));
+            }
+        }
 
         // Dynamic starter chest hint — 箱子模型比 1 格高，气泡上移 0.4 避免嵌入模型
         Vec3 chestVec = ClientStarterChestState.getHintVec();
@@ -557,6 +584,8 @@ public final class PortalHintRenderer {
         String hintKey;
         if ("starter_chest".equals(hint.destinationKey)) {
             hintKey = CLAIM_KEY;
+        } else if (SecretNote20Service.TARGET_ID.equals(hint.targetId)) {
+            hintKey = SECRET_NOTE_20_DRIVER_KEY;
         } else if (hint.hintStyle == HintStyle.LOCKED) {
             hintKey = LOCKED_KEY;
         } else if (hint.hintStyle == HintStyle.SHOP) {
@@ -593,6 +622,7 @@ public final class PortalHintRenderer {
 
     private static boolean isSingleLineHint(String targetId) {
         return DesertFestivalWillyFishingService.TARGET_ID.equals(targetId)
+                || SecretNote20Service.TARGET_ID.equals(targetId)
                 || DesertFestivalCookService.TARGET_ID.equals(targetId)
                 || FairSlingshotGameService.TARGET_ID.equals(targetId)
                 || FairFishingGameService.TARGET_ID.equals(targetId)

@@ -144,8 +144,10 @@ public class BundleScreen extends AbstractContainerScreen<BundleMenu> {
     protected void init() {
         super.init();
 
+        boolean isRelayout = this.mapping != null;
         float guiScale = (float) this.minecraft.getWindow().getGuiScale();
-        this.mapping = new StardewRenderMapping(this.width, this.height, guiScale);
+        this.mapping = StardewRenderMapping.fitCanvas(
+                this.width, this.height, guiScale, 1280, 720);
         this.s4 = mapping.s4();
 
         // SDV: xPositionOnScreen = viewport.Width/2 - 640, yPositionOnScreen = viewport.Height/2 - 360
@@ -173,6 +175,19 @@ public class BundleScreen extends AbstractContainerScreen<BundleMenu> {
         }
 
         buildBundleOrbs();
+        if (specificBundlePage && selectedBundleId >= 0) {
+            BundleDefinition def = BundleDataManager.getBundle(selectedBundleId);
+            if (def != null) {
+                rebuildDetailLayout(def);
+            }
+        }
+
+        // SDV clears position-bound temporary sprites when its viewport changes.
+        if (isRelayout) {
+            tempSprites.clear();
+            screenSwipe = null;
+            canClick = true;
+        }
 
         this.lastTickMs = System.currentTimeMillis();
     }
@@ -210,7 +225,7 @@ public class BundleScreen extends AbstractContainerScreen<BundleMenu> {
      * Inventory rendering is handled by the parent class.
      * On overview page we skip super.render() to hide inventory.
      * On detail page we call super.render() which draws inventory.
-     * Slot positions are fixed in BundleMenu constructor.
+     * Slot positions and item scale are remapped in init() to match SDV's 6×6 grid.
      */
 
     // ═════════════════════════════════════════════════════════════════════════
@@ -332,7 +347,15 @@ public class BundleScreen extends AbstractContainerScreen<BundleMenu> {
             int rewardX = menuX + mapping.ui(640);
             int rewardY = Math.min(menuY + mapping.ui(740),
                     this.height - mapping.ui(72));
-            drawStringWithScrollCenteredAt(g, Component.translatable(rewardKey), rewardX, rewardY);
+            Component rewardText = Component.translatable(
+                    "stardewcraft.bundle.reward_preview",
+                    Component.translatable(rewardKey), Component.empty());
+            if (BundleClientData.INSTANCE.canReadJunimoText()) {
+                drawStringWithScrollCenteredAt(g, rewardText, rewardX, rewardY);
+            } else {
+                drawMysteryStringWithScrollCenteredAt(
+                        g, getMysteryRewardText(this.menu.getAreaId()), rewardX, rewardY);
+            }
         }
 
         // SDV: canClick check → drawMouse, hoverText
@@ -350,10 +373,13 @@ public class BundleScreen extends AbstractContainerScreen<BundleMenu> {
      */
     @Override
     protected void renderSlot(@Nonnull GuiGraphics g, @Nonnull net.minecraft.world.inventory.Slot slot) {
-        // SDV parity: fromGameMenu viewer has no inventory rendered
-        if (this.menu.isReadOnly()) {
-            return;
-        }
+        // SDV renders inventory items at 64×64 screen pixels inside its 72×72
+        // cells. Scale Minecraft's native 16×16 item renderer to the same size.
+        g.pose().pushPose();
+        g.pose().translate(slot.x, slot.y, 0);
+        g.pose().scale(s4, s4, 1.0f);
+        g.pose().translate(-slot.x, -slot.y, 0);
+
         if (specificBundlePage && selectedBundleId >= 0) {
             BundleDefinition def = BundleDataManager.getBundle(selectedBundleId);
             ItemStack stack = slot.getItem();
@@ -382,10 +408,33 @@ public class BundleScreen extends AbstractContainerScreen<BundleMenu> {
                 } else {
                     super.renderSlot(g, slot);
                 }
+                g.pose().popPose();
                 return;
             }
         }
         super.renderSlot(g, slot);
+        g.pose().popPose();
+    }
+
+    @Override
+    protected void renderSlotHighlight(GuiGraphics g, net.minecraft.world.inventory.Slot slot,
+                                       int mouseX, int mouseY, float partialTick) {
+        g.pose().pushPose();
+        g.pose().translate(slot.x, slot.y, 0);
+        g.pose().scale(s4, s4, 1.0f);
+        g.pose().translate(-slot.x, -slot.y, 0);
+        super.renderSlotHighlight(g, slot, mouseX, mouseY, partialTick);
+        g.pose().popPose();
+    }
+
+    @Override
+    protected boolean isHovering(int x, int y, int width, int height,
+                                 double mouseX, double mouseY) {
+        if (specificBundlePage && width == 16 && height == 16) {
+            int scaledSize = Math.max(1, Math.round(16 * s4));
+            return super.isHovering(x, y, scaledSize, scaledSize, mouseX, mouseY);
+        }
+        return super.isHovering(x, y, width, height, mouseX, mouseY);
     }
 
     /**
@@ -515,18 +564,10 @@ public class BundleScreen extends AbstractContainerScreen<BundleMenu> {
         int titleX = menuX + mapping.ui(656);
         int titleY = menuY + mapping.ui(12);
         // SDV SpriteText default colour is dark brown; white is invisible on the parchment background.
-        int titleShadow = 0xFF3B3022;
         int titleColor = 0xFF5B5045;
-        int titleShadowOff = Math.max(1, mapping.ui(2));
         int titleMaxWidth = mapping.ui(560);
         g.pose().pushPose();
         g.pose().translate(0, 0, 0.2f);
-        GuiText.drawCenteredClamped(g, this.font, displayName,
-            titleX + titleShadowOff, titleY + titleShadowOff, titleMaxWidth, titleShadow, false);
-        GuiText.drawCenteredClamped(g, this.font, displayName,
-            titleX, titleY + titleShadowOff, titleMaxWidth, titleShadow, false);
-        GuiText.drawCenteredClamped(g, this.font, displayName,
-            titleX + titleShadowOff, titleY, titleMaxWidth, titleShadow, false);
         GuiText.drawCenteredClamped(g, this.font, displayName,
             titleX, titleY, titleMaxWidth, titleColor, false);
         g.pose().popPose();
@@ -656,7 +697,7 @@ public class BundleScreen extends AbstractContainerScreen<BundleMenu> {
         g.blit(JUNIMO_NOTE, 0, 0, iconU, iconV, 32, 32, TEX_WIDTH, TEX_HEIGHT);
         g.pose().popPose();
 
-        // 3. Bundle name label (three-part horizontal bar + text with 3-layer shadow)
+        // 3. Bundle name label (three-part horizontal bar + crisp centered text)
         // SDV: text measured with dialogueFont, bar centered at xPos + 936
         // SDV: Game1.content.LoadString("Strings\\UI:JunimoNote_BundleName", label) → "{0} Bundle"
         Component bundleName = BundleClientData.INSTANCE.canReadJunimoText()
@@ -687,18 +728,15 @@ public class BundleScreen extends AbstractContainerScreen<BundleMenu> {
         int barRightX = barCenterX + textWidth / 2;
         drawJunimoNote(g, barRightX, barY, 524, 266, 4, 17, s4);
 
-        // Text with 3-layer shadow (SDV: textShadowColor = 0x3B3022, textColor * 0.9f = ~0x5B5045)
+        // Keep the label crisp. Opaque stacked shadows make Minecraft's small
+        // bitmap glyphs merge into an unreadable dark mass.
         int textX = barCenterX - textWidth / 2;
         int textY = barY + mapping.ui(8);
-        int shadowColor = 0xFF3B3022;
         int textColor = 0xFF5B5045;
-        int shadowOff = Math.max(1, mapping.ui(2));
-
-        // SDV shadow offsets: (2,2), (0,2), (2,0) in screen pixels
-        g.drawString(this.font, shownBundleName, textX + shadowOff, textY + shadowOff, shadowColor, false);
-        g.drawString(this.font, shownBundleName, textX, textY + shadowOff, shadowColor, false);
-        g.drawString(this.font, shownBundleName, textX + shadowOff, textY, shadowColor, false);
+        g.pose().pushPose();
+        g.pose().translate(0, 0, 0.2f);
         g.drawString(this.font, shownBundleName, textX, textY, textColor, false);
+        g.pose().popPose();
 
         // 4. Back button (Cursors tile #44)
         // SDV: xPos + borderWidth*2 + 8, yPos + borderWidth*2 + 4 (borderWidth=32)
@@ -743,6 +781,7 @@ public class BundleScreen extends AbstractContainerScreen<BundleMenu> {
 
         // 9. Player inventory (MC handles via super)
         super.render(g, mouseX, mouseY, partialTick);
+        super.renderTooltip(g, mouseX, mouseY);
 
         // (Reward text drawn in outer render() after both pages — SDV parity)
 
@@ -1355,6 +1394,19 @@ public class BundleScreen extends AbstractContainerScreen<BundleMenu> {
         };
     }
 
+    /** Stable Latin source text for the Junimo glyph mapping before the language is decoded. */
+    private String getMysteryRewardText(int areaId) {
+        return switch (areaId) {
+            case 0 -> "Reward: Greenhouse";
+            case 1 -> "Reward: Quarry Access";
+            case 2 -> "Reward: Panning Unlocked";
+            case 3 -> "Reward: Minecarts Repaired";
+            case 4 -> "Reward: Bus Repaired";
+            case 5 -> "Reward: Friendship Bonus";
+            default -> "Reward: ???";
+        };
+    }
+
     /**
      * SDV: SpriteText.drawStringWithScrollCenteredAt — draws text with a scroll-style background.
      * Uses Cursors (325,318,12,18) left cap, (337,318,1,18) middle, (338,318,12,18) right cap.
@@ -1363,10 +1415,28 @@ public class BundleScreen extends AbstractContainerScreen<BundleMenu> {
         int maxTextWidth = Math.min(mapping.ui(620), this.width - mapping.ui(160));
         Component shownText = GuiText.ellipsize(this.font, text, maxTextWidth);
         int textWidth = this.font.width(shownText);
-        int scrollWidth = textWidth;
-        float scrollScale = s4; // SDV draws scroll at 4× scale
+        drawScrollBackground(g, centerX, centerY, textWidth);
 
-        int x = centerX - textWidth / 2;
+        // Draw text centered on top
+        g.drawString(this.font, shownText, centerX - this.font.width(shownText) / 2,
+                centerY, 0xFF5B5045, false);
+    }
+
+    private void drawMysteryStringWithScrollCenteredAt(GuiGraphics g, String text,
+                                                         int centerX, int centerY) {
+        int maxTextWidth = Math.min(mapping.ui(620), this.width - mapping.ui(160));
+        float junimoScale = 3.0f * s4 / 4.0f;
+        int textWidth = Math.min(maxTextWidth,
+                JunimoTextRenderer.getStringWidth(text, junimoScale));
+        drawScrollBackground(g, centerX, centerY, textWidth);
+        JunimoTextRenderer.drawStringCenteredClamped(
+                g, text, centerX, centerY, maxTextWidth, junimoScale, 1.0f);
+    }
+
+    private void drawScrollBackground(GuiGraphics g, int centerX, int centerY, int textWidth) {
+        int scrollWidth = Math.max(1, textWidth);
+        float scrollScale = s4; // SDV draws scroll at 4× scale
+        int x = centerX - scrollWidth / 2;
         int y = centerY;
 
         // Left cap: (325, 318, 12, 18) at (-12, -3) * 4 = (-48, -12) offset
@@ -1377,7 +1447,7 @@ public class BundleScreen extends AbstractContainerScreen<BundleMenu> {
         g.pose().pushPose();
         g.pose().translate(x, y - (int)(3 * scrollScale), 0);
         // Scale X by textWidth/1, Y by scrollScale
-        g.pose().scale(textWidth, scrollScale, 1.0f);
+        g.pose().scale(scrollWidth, scrollScale, 1.0f);
         g.blit(StardewGuiUtil.CURSORS, 0, 0, 337, 318, 1, 18,
                 StardewGuiUtil.CURSORS_WIDTH, StardewGuiUtil.CURSORS_HEIGHT);
         g.pose().popPose();
@@ -1385,9 +1455,6 @@ public class BundleScreen extends AbstractContainerScreen<BundleMenu> {
         // Right cap: (338, 318, 12, 18) at (scroll_width, -12) offset
         StardewGuiUtil.drawFromCursors(g, x + scrollWidth, y - (int)(3 * scrollScale),
                 338, 318, 12, 18, scrollScale);
-
-        // Draw text centered on top
-        g.drawCenteredString(this.font, shownText, centerX, y, 0xFF5B5045);
     }
 
     private void playSound(net.neoforged.neoforge.registries.DeferredHolder<net.minecraft.sounds.SoundEvent, net.minecraft.sounds.SoundEvent> sound) {
@@ -1463,6 +1530,37 @@ public class BundleScreen extends AbstractContainerScreen<BundleMenu> {
         }
     }
 
+    /** Rebuild absolute detail-page coordinates after a window or GUI-scale change. */
+    private void rebuildDetailLayout(BundleDefinition def) {
+        java.util.Set<Integer> predictedCompleted = new java.util.HashSet<>(localCompletedIngredients);
+        buildIngredientSlots(def);
+
+        for (int ingredientIndex : predictedCompleted) {
+            if (localCompletedIngredients.contains(ingredientIndex)
+                    || ingredientIndex < 0 || ingredientIndex >= def.ingredients().size()) {
+                continue;
+            }
+            for (IngredientSlotVisual slot : ingredientSlots) {
+                if (!slot.filled) {
+                    fillSlotWithIngredient(slot, def.ingredients().get(ingredientIndex), ingredientIndex);
+                    localCompletedIngredients.add(ingredientIndex);
+                    break;
+                }
+            }
+        }
+
+        if (partialDonationItem != null
+                && partialSlotIndex >= 0 && partialSlotIndex < ingredientSlots.size()) {
+            IngredientSlotVisual partialSlot = ingredientSlots.get(partialSlotIndex);
+            partialSlot.filled = true;
+            partialSlot.depositedItem = partialDonationItem.copy();
+            partialSlot.isPartial = true;
+            partialSlot.ingredientDataIndex = partialIngredientIndex;
+        }
+
+        buildIngredientList(def);
+    }
+
     /** Helper: fill a visual slot with a completed ingredient's data. */
     private void fillSlotWithIngredient(IngredientSlotVisual slot, BundleIngredient ing, int ingredientIdx) {
         ItemStack depositedItem = ItemStack.EMPTY;
@@ -1495,7 +1593,8 @@ public class BundleScreen extends AbstractContainerScreen<BundleMenu> {
         for (int i = 0; i < ingredients.size() && i < positions.size(); i++) {
             BundleIngredient ing = ingredients.get(i);
             int[] pos = positions.get(i);
-            boolean completed = cd.isSlotComplete(def.bundleId(), i);
+            boolean completed = cd.isSlotComplete(def.bundleId(), i)
+                    || localCompletedIngredients.contains(i);
 
             ItemStack displayStack = ItemStack.EMPTY;
             if (ing.itemId() != null) {

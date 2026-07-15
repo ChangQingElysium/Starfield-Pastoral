@@ -10,6 +10,7 @@ import com.stardew.craft.client.LeaderboardClientCache;
 import com.stardew.craft.client.ModKeyMappings;
 import com.stardew.craft.client.NpcDisplayNames;
 import com.stardew.craft.client.NpcFriendshipClientCache;
+import com.stardew.craft.client.PlayerGenderText;
 import com.stardew.craft.client.gui.common.CommonGuiTextures;
 import com.stardew.craft.client.gui.common.StardewRenderMapping;
 import com.stardew.craft.client.gui.overnight.LevelUpMenuTextures;
@@ -1844,7 +1845,7 @@ public class StardewGameMenuScreen extends Screen {
         "stardewcraft.farmer_title.rancher",         // 23-24
         "stardewcraft.farmer_title.planter",         // 21-22
         "stardewcraft.farmer_title.granger",         // 19-20
-        "stardewcraft.farmer_title.farmboy",         // 17-18 (male)
+        "stardewcraft.farmer_title.farmboy",         // 17-18 (gendered)
         "stardewcraft.farmer_title.sodbuster",       // 15-16
         "stardewcraft.farmer_title.smallholder",     // 13-14
         "stardewcraft.farmer_title.tiller",          // 11-12
@@ -1879,7 +1880,7 @@ public class StardewGameMenuScreen extends Screen {
         new PowerEntry("stardewcraft.power.club_card", "", 3,
             PowerUnlockKind.MAIL_FLAG, "HasClubCard", "", ""),
         new PowerEntry("stardewcraft.power.special_charm", "", 4,
-            PowerUnlockKind.MAIL_FLAG, "HasSpecialCharm", "", ""),
+            PowerUnlockKind.MAIL_OR_SPECIAL_ITEM, "HasSpecialCharm", "stardewcraft:special_charm", "stardewcraft:special_charm"),
         new PowerEntry("item.stardewcraft.skull_key", "", 5,
             PowerUnlockKind.MAIL_OR_SPECIAL_ITEM, CCStoryFlags.HAS_SKULL_KEY, CCStoryFlags.SKULL_KEY_SPECIAL_ITEM, "stardewcraft:skull_key"),
         new PowerEntry("stardewcraft.power.magnifying_glass", "", 6,
@@ -1905,10 +1906,11 @@ public class StardewGameMenuScreen extends Screen {
         int farmerLevel = totalLevel / 2;
         for (int i = 0; i < FARMER_TITLE_MIN_LEVELS.length; i++) {
             if (farmerLevel >= FARMER_TITLE_MIN_LEVELS[i]) {
-                return Component.translatable(FARMER_TITLE_KEYS[i]).getString();
+                return PlayerGenderText.preprocess(Component.translatable(FARMER_TITLE_KEYS[i]).getString());
             }
         }
-        return Component.translatable("stardewcraft.farmer_title.newcomer").getString();
+        return PlayerGenderText.preprocess(
+                Component.translatable("stardewcraft.farmer_title.newcomer").getString());
     }
 
     // Hover state for skills page
@@ -3068,20 +3070,24 @@ public class StardewGameMenuScreen extends Screen {
     // ============ Tab 0: Inventory Page (SDV InventoryPage 1:1 parity) ============
 
     // --- Grid layout (top section, SDV pixels from menu origin) ---
-    private static final int INV_PAGE_ROW0_Y = 36;      // First main-inventory row
-    private static final int INV_PAGE_ROW_STEP = 68;     // 64 slot + 4 gap
-    private static final int INV_PAGE_HOTBAR_Y = 252;    // Hotbar row (extra gap above)
-    private static final int INV_PAGE_PARTITION_Y = 324;  // Horizontal partition
+    // Keep the established Minecraft layout: three backpack rows with a separate hotbar.
+    // The lower SDV composition still reserves one extra 64px row + 4px gap because
+    // Minecraft has four visible rows instead of vanilla Stardew's three.
+    private static final int INV_PAGE_EXTRA_MC_ROW = 68;
+    private static final int INV_PAGE_ROW0_Y = 36;
+    private static final int INV_PAGE_ROW_STEP = 68;
+    private static final int INV_PAGE_HOTBAR_Y = 252;
+    private static final int INV_PAGE_PARTITION_Y = 40 + 96 + 192 + INV_PAGE_EXTRA_MC_ROW;
 
     // --- Equipment slots (lower-left) ---
     private static final int INV_PAGE_EQUIP_X = 48;
     private static final int INV_PAGE_EQUIP_SIZE = 64;
-    private static final int INV_PAGE_EQUIP_Y0 = 356;    // Left Ring
-    private static final int INV_PAGE_EQUIP_Y1 = 420;    // Right Ring
-    private static final int INV_PAGE_EQUIP_Y2 = 484;    // Boots
-    private static final int INV_PAGE_COSMETIC_X = 312;
-    private static final int INV_PAGE_TRINKET_X = 248;
-    private static final int INV_PAGE_TRINKET_Y = 484;
+    private static final int INV_PAGE_EQUIP_Y0 = 40 + 96 + 4 + 256 - 12 + INV_PAGE_EXTRA_MC_ROW;
+    private static final int INV_PAGE_EQUIP_Y1 = INV_PAGE_EQUIP_Y0 + 64;
+    private static final int INV_PAGE_EQUIP_Y2 = INV_PAGE_EQUIP_Y1 + 64;
+    private static final int INV_PAGE_COSMETIC_X = 48 + 208;
+    private static final int INV_PAGE_TRINKET_X = 48 + 280;
+    private static final int INV_PAGE_TRINKET_Y = INV_PAGE_EQUIP_Y0;
 
     // Empty-slot placeholder tiles (from menu_tiles.png, SDV: getSourceRectForStandardTileSheet)
     private static final int EMPTY_RING_TILE = 41;
@@ -3090,16 +3096,19 @@ public class StardewGameMenuScreen extends Screen {
 
     // --- Player model area (lower-center, SDV: x=120, y=296 from menu origin) ---
     private static final int INV_PAGE_PLAYER_BG_X = 120;
-    private static final int INV_PAGE_PLAYER_BG_Y = 356;
+    private static final int INV_PAGE_PLAYER_BG_Y = 40 + 96 + 256 - 8 + INV_PAGE_EXTRA_MC_ROW;
     private static final int PLAYER_BG_TEX_W = 128;
     private static final int PLAYER_BG_TEX_H = 192;
-    private static final int INV_PAGE_PLAYER_NAME_Y = 556;
+    private static final int PLAYER_MODEL_SCALE_SDV = 48;
+    private static final int INV_PAGE_PLAYER_NAME_Y = 40 + 96 + 448 + 8 + INV_PAGE_EXTRA_MC_ROW;
 
     // --- Right info panel (lower-right, text centered at this X) ---
     private static final int INV_PAGE_INFO_CENTER_X = 576;
-    private static final int INV_PAGE_INFO_Y0 = 364;     // Farm name
-    private static final int INV_PAGE_INFO_Y1 = 428;     // Current funds
-    private static final int INV_PAGE_INFO_Y2 = 492;     // Season / day
+    private static final int INV_PAGE_INFO_Y0 = 40 + 96 + 256 + 4 + INV_PAGE_EXTRA_MC_ROW;
+    private static final int INV_PAGE_INFO_Y1 = INV_PAGE_INFO_Y0 + 64;
+    private static final int INV_PAGE_INFO_Y2 = INV_PAGE_INFO_Y1 + 64;
+
+    private static final int INV_PAGE_TRASH_Y = 40 + 96 + 192 + 64 + INV_PAGE_EXTRA_MC_ROW;
 
     // SDV text color: new Color(86, 22, 12)
     private static final int SDV_TEXT_COLOR = 0xFF56160C;
@@ -3381,6 +3390,8 @@ public class StardewGameMenuScreen extends Screen {
                 CommonGuiTextures.drawItemCenteredInBox(graphics, stack, x, y, size, size, mapping.s4());
             }
         } else {
+            // This project's extracted menu_tiles atlas doesn't contain SDV's
+            // clothing placeholder tiles 42/68/69. Tile 70 is the safe local slot.
             CommonGuiTextures.drawMenuTile(graphics, x, y, size, size, EMPTY_TRINKET_TILE);
         }
 
@@ -3442,16 +3453,16 @@ public class StardewGameMenuScreen extends Screen {
                         graphics,
                         bgX + margin, bgY + margin,
                         bgX + bgW - margin, bgY + bgH - margin,
-                        ui(30), 0.0625F,
+                        ui(PLAYER_MODEL_SCALE_SDV), 0.0625F,
                         (float) mouseX, (float) mouseY,
                         mc.player
                 );
 
         // SDV: player name centered below
         String playerName = mc.player.getName().getString();
-        Component boldName = Component.literal(playerName).withStyle(ChatFormatting.BOLD);
+        Component name = Component.literal(playerName);
         float nameScale = sdvTextScale();
-        int nameRawW = this.font.width(boldName);
+        int nameRawW = this.font.width(name);
         float nameEffScale = nameScale;
         if (nameRawW * nameEffScale > bgW) {
             nameEffScale = (float) bgW / nameRawW;
@@ -3462,7 +3473,7 @@ public class StardewGameMenuScreen extends Screen {
         graphics.pose().pushPose();
         graphics.pose().translate(nameX, nameY, 0);
         graphics.pose().scale(nameEffScale, nameEffScale, 1.0f);
-        graphics.drawString(this.font, boldName, 0, 0, SDV_TEXT_COLOR, false);
+        graphics.drawString(this.font, name, 0, 0, SDV_TEXT_COLOR, false);
         graphics.pose().popPose();
     }
 
@@ -3488,8 +3499,7 @@ public class StardewGameMenuScreen extends Screen {
         if (rawFarmName == null || rawFarmName.isBlank()) {
             rawFarmName = mc.player.getName().getString();
         }
-        String farmName = net.minecraft.client.resources.language.I18n.get(
-            "stardewcraft.game_menu.inventory.farm_name", rawFarmName);
+        String farmName = formatFarmName(rawFarmName);
         drawScaledCenteredSdvText(graphics, farmName, centerX,
                 menuY + ui(INV_PAGE_INFO_Y0), textScale, maxWidth, SDV_TEXT_COLOR);
 
@@ -3504,11 +3514,28 @@ public class StardewGameMenuScreen extends Screen {
         // SDV: date string
         com.stardew.craft.time.StardewTimeManager time =
                 com.stardew.craft.client.hud.StardewTimeHud.getClientTimeCache();
+        String rawSeasonName = time.getSeasonName();
+        String seasonKey = "stardewcraft.season." + rawSeasonName.toLowerCase(Locale.ROOT);
+        String localizedSeasonName = net.minecraft.client.resources.language.I18n.get(seasonKey);
+        if (localizedSeasonName.equals(seasonKey)) {
+            localizedSeasonName = rawSeasonName;
+        }
         String dateStr = net.minecraft.client.resources.language.I18n.get(
                 "stardewcraft.game_menu.inventory.date",
-                time.getSeasonName(), time.getCurrentDay(), time.getCurrentYear());
+                localizedSeasonName, time.getCurrentDay(), time.getCurrentYear());
         drawScaledCenteredSdvText(graphics, dateStr, centerX,
                 menuY + ui(INV_PAGE_INFO_Y2), textScale, maxWidth, SDV_TEXT_COLOR_DIM);
+    }
+
+    private String formatFarmName(String rawFarmName) {
+        String formatSuffix = net.minecraft.client.resources.language.I18n.get(
+                "stardewcraft.game_menu.inventory.farm_name", "").trim();
+        if (!formatSuffix.isEmpty()
+                && rawFarmName.toLowerCase(Locale.ROOT).endsWith(formatSuffix.toLowerCase(Locale.ROOT))) {
+            return rawFarmName;
+        }
+        return net.minecraft.client.resources.language.I18n.get(
+                "stardewcraft.game_menu.inventory.farm_name", rawFarmName);
     }
 
     /**
@@ -3518,8 +3545,8 @@ public class StardewGameMenuScreen extends Screen {
     private void drawScaledCenteredSdvText(GuiGraphics graphics, String text,
                                             int centerX, int y, float scale,
                                             int maxWidth, int color) {
-        Component bold = Component.literal(text).withStyle(ChatFormatting.BOLD);
-        int rawWidth = this.font.width(bold);
+        Component line = Component.literal(text);
+        int rawWidth = this.font.width(line);
         float effectiveScale = scale;
         if (rawWidth * effectiveScale > maxWidth) {
             effectiveScale = (float) maxWidth / rawWidth;
@@ -3529,7 +3556,7 @@ public class StardewGameMenuScreen extends Screen {
         graphics.pose().pushPose();
         graphics.pose().translate(x, y, 0);
         graphics.pose().scale(effectiveScale, effectiveScale, 1.0f);
-        graphics.drawString(this.font, bold, 0, 0, color, false);
+        graphics.drawString(this.font, line, 0, 0, color, false);
         graphics.pose().popPose();
     }
 
@@ -3540,7 +3567,8 @@ public class StardewGameMenuScreen extends Screen {
     }
 
     private int organizeButtonY() {
-        return menuY + ui(INV_PAGE_PARTITION_Y) + ui(20);
+        // Stardew InventoryPage: yPositionOnScreen + height / 3 - 64 + 8.
+        return menuY + menuHeight / 3 - ui(64) + ui(8);
     }
 
     private void drawOrganizeButton(GuiGraphics graphics, int mouseX, int mouseY) {
@@ -4445,11 +4473,12 @@ public class StardewGameMenuScreen extends Screen {
     }
 
     private int trashCanX() {
-        return menuX + menuWidth + ui(4);
+        // Stardew InventoryPage: xPositionOnScreen + width / 3 + 576 + 32.
+        return menuX + menuWidth / 3 + ui(576 + 32);
     }
 
     private int trashCanY() {
-        return menuY + menuHeight - ui(360);
+        return menuY + ui(INV_PAGE_TRASH_Y);
     }
 
     private int recipeCellX(RecipeCell cellData) {

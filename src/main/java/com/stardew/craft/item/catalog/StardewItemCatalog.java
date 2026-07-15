@@ -79,6 +79,7 @@ public final class StardewItemCatalog {
 
     private static final List<String> DECOR_TYPES = List.of(
             "stardewcraft.type.furniture",
+            "stardewcraft.type.special_furniture",
             "stardewcraft.type.furniture_painting",
             "stardewcraft.type.festival_decoration",
             "stardewcraft.type.scarecrow",

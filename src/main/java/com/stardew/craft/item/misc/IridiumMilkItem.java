@@ -104,11 +104,11 @@ public class IridiumMilkItem extends Item implements IStardewItem {
             if (!canApplyPermanentReward(data)) {
                 return stack;
             }
-            data.addMailFlag(SecretNoteStoryFlags.IRIDIUM_MILK_CONSUMED);
+            data.addMailFlag(SecretNoteStoryFlags.QI_CAVE);
+            data.removeMailFlag(SecretNoteStoryFlags.QI_CAVE_SCENE_PENDING);
+            data.removeMailFlag(SecretNoteStoryFlags.QI_CAVE_TEMP_REWARD_GRANTED);
             data.setMaxHealth(data.getMaxHealth() + MAX_HEALTH_GAIN);
-            data.setHealth(data.getMaxHealth());
             PlayerDataEventHandler.syncPlayerData(serverPlayer, data);
-            serverPlayer.setHealth(serverPlayer.getMaxHealth());
             serverPlayer.awardStat(Stats.ITEM_USED.get(this));
             playIridiumMilkFeedback(serverPlayer);
             if (!serverPlayer.getAbilities().instabuild) {
@@ -119,7 +119,9 @@ public class IridiumMilkItem extends Item implements IStardewItem {
     }
 
     static boolean canApplyPermanentReward(PlayerStardewData data) {
-        return data != null && !data.hasMailFlag(SecretNoteStoryFlags.IRIDIUM_MILK_CONSUMED);
+        return data != null
+                && !data.hasMailFlag(SecretNoteStoryFlags.QI_CAVE)
+                && !data.hasMailFlag(SecretNoteStoryFlags.IRIDIUM_MILK_CONSUMED);
     }
 
     private static void playIridiumMilkFeedback(ServerPlayer player) {

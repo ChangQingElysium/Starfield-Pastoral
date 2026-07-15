@@ -44,9 +44,10 @@ public final class LostBookService {
             com.stardew.craft.mail.MailService.addMailFlagForTomorrow(player, FIRST_BOOK_FLAG);
         }
         player.playNotifySound(ModSounds.NEW_ARTIFACT.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
-        player.sendSystemMessage(Component.translatable(firstForPlayer
-                ? "stardewcraft.lost_book.found_first"
-                : "stardewcraft.lost_book.found"));
+		com.stardew.craft.network.GlobalHudMessagePayload.sendTo(player,
+			Component.translatable(firstForPlayer
+				? "stardewcraft.lost_book.found_first"
+				: "stardewcraft.lost_book.found"));
         PlayerDataEventHandler.syncPlayerData(player, playerData);
         return true;
     }

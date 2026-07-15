@@ -11,6 +11,12 @@ import com.stardew.craft.cutscene.network.CutsceneAnchorPayload;
 import com.stardew.craft.cutscene.network.SyncEventSeenPayload;
 import com.stardew.craft.cutscene.server.WakeUpEventScheduler;
 import com.stardew.craft.farm.FarmInstanceRegistry;
+import com.stardew.craft.secretnote.SecretNote21Service;
+import com.stardew.craft.secretnote.SecretNote31BushInteraction;
+import com.stardew.craft.secretnote.SecretNote31FootprintTrail;
+import com.stardew.craft.secretnote.SecretNoteService;
+import com.stardew.craft.player.PlayerDataEventHandler;
+import com.stardew.craft.player.PlayerDataManager;
 import net.minecraft.commands.SharedSuggestionProvider;
 import com.stardew.craft.cutscene.server.EventSeenData;
 import net.minecraft.core.BlockPos;
@@ -52,6 +58,14 @@ public final class CutsceneDebugCommand {
                     )
                     .then(Commands.literal("reset")
                         .executes(CutsceneDebugCommand::resetSeen)
+                    )
+                    .then(Commands.literal("debug")
+                        .then(Commands.literal("21")
+                            .executes(CutsceneDebugCommand::debugSecretNote21)
+                        )
+                        .then(Commands.literal("winter_mystery")
+                            .executes(CutsceneDebugCommand::debugWinterMystery)
+                        )
                     )
                 )
         );
@@ -134,5 +148,42 @@ public final class CutsceneDebugCommand {
             return 1;
         }
         return 0;
+    }
+
+    private static int debugSecretNote21(CommandContext<CommandSourceStack> context) {
+        if (context.getSource().getEntity() instanceof ServerPlayer player
+                && SecretNote21Service.debugPlay(player)) {
+            context.getSource().sendSuccess(
+                    () -> Component.translatable("stardewcraft.command.event.triggered", "secret_note21_bush"),
+                    false);
+            return 1;
+        }
+        context.getSource().sendFailure(Component.translatable("stardewcraft.command.player_required"));
+        return 0;
+    }
+
+    private static int debugWinterMystery(CommandContext<CommandSourceStack> context) {
+        if (!(context.getSource().getEntity() instanceof ServerPlayer player)) {
+            context.getSource().sendFailure(Component.translatable("stardewcraft.command.player_required"));
+            return 0;
+        }
+
+        EventSeenData eventData = EventSeenData.get(player.serverLevel());
+        eventData.markSeen(player.getUUID(), SecretNote31FootprintTrail.BUS_STOP_EVENT_ID);
+        eventData.clearSeen(player.getUUID(), SecretNote31BushInteraction.MAGNIFYING_GLASS_EVENT_ID);
+
+        var playerData = PlayerDataManager.getPlayerData(player);
+        playerData.removeMailFlag(SecretNoteService.MAGNIFYING_GLASS_FLAG);
+        playerData.removeSpecialItem(SecretNoteService.MAGNIFYING_GLASS_SPECIAL_ITEM);
+        PlayerDataManager.get().savePlayerData(player.getUUID(), playerData);
+        PlayerDataEventHandler.syncPlayerData(player, playerData);
+
+        PacketDistributor.sendToPlayer(player,
+                new SyncEventSeenPayload(new ArrayList<>(eventData.getSeenEvents(player.getUUID()))));
+        context.getSource().sendSuccess(
+                () -> Component.translatable("stardewcraft.command.event.triggered",
+                        SecretNote31FootprintTrail.BUS_STOP_EVENT_ID),
+                false);
+        return 1;
     }
 }

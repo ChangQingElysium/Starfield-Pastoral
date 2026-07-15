@@ -223,7 +223,7 @@ public class WarpWheelScreen extends Screen {
             color = (alpha << 24) | (color & 0x00FFFFFF);
 
             g.drawString(minecraft.font, name,
-                    -nameW / 2, -4, color, true);
+                    -nameW / 2, -4, color, false);
 
             // 未解锁时在名称下方小字显示价格
             if (!unlocked) {
@@ -232,7 +232,7 @@ public class WarpWheelScreen extends Screen {
                 int costW = minecraft.font.width(costComp);
                 int costAlpha = (int) (textAlpha * (isHovered ? 200 : 100));
                 g.drawString(minecraft.font, costComp,
-                        -costW / 2, 7, (costAlpha << 24) | 0xFFAA00, true);
+                        -costW / 2, 7, (costAlpha << 24) | 0xFFAA00, false);
             }
 
             pose.popPose();
@@ -307,7 +307,7 @@ public class WarpWheelScreen extends Screen {
                 int costW = minecraft.font.width(costComp);
                 g.drawString(minecraft.font, costComp,
                         cx - costW / 2, cy + 6,
-                        0xFFFFAA00, true);
+                        0xFFFFAA00, false);
             }
         } else {
             // 无选中：显示物品名称

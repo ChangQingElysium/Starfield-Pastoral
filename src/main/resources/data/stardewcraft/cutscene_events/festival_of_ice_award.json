@@ -26,6 +26,7 @@
     { "cmd": "fade", "mode": "out", "ticks": 20 },
     { "cmd": "remove_actor", "actor": "fake_player" },
     { "cmd": "stop_music" },
+	{ "cmd": "ice_fishing_message", "winner_text": "event.festival_of_ice.message.won", "other_text": "event.festival_of_ice.message.not_won" },
     { "cmd": "end" }
   ]
 }

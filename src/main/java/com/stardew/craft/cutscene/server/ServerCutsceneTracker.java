@@ -66,13 +66,13 @@ public final class ServerCutsceneTracker {
     private ServerCutsceneTracker() {}
 
     /** 启动一个事件：记录玩家为活动状态并向其发送触发包。 */
-    public static void startEvent(ServerPlayer player, String eventId) {
+    public static boolean startEvent(ServerPlayer player, String eventId) {
         EventData event = EventRegistry.getById(eventId);
         if (event == null) {
             LOGGER.warn("Cannot start unknown cutscene '{}' for {}", eventId, player.getName().getString());
-            return;
+            return false;
         }
-        beginAuthorized(player, event);
+        return beginAuthorized(player, event);
     }
 
     /** Validate a client-detected enter-area trigger and start it only when server state agrees. */
@@ -135,6 +135,17 @@ public final class ServerCutsceneTracker {
 
     public static boolean authorizeCompletion(ServerPlayer player, long sessionId, String eventId) {
         return validState(player, sessionId, eventId) != null;
+    }
+
+    /** Release a matching session without marking its event as seen or applying completion hooks. */
+    public static boolean abortSession(ServerPlayer player, long sessionId, String eventId) {
+        if (validState(player, sessionId, eventId) == null) {
+            return false;
+        }
+        LOGGER.warn("Client aborted cutscene '{}' for {} before playback started",
+                eventId, player.getName().getString());
+        clear(player);
+        return true;
     }
 
     private static State validState(ServerPlayer player, long sessionId, String eventId) {

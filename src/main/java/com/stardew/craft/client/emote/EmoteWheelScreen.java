@@ -90,7 +90,7 @@ public final class EmoteWheelScreen extends Screen {
 			EmoteType selected = wheelItems.get(selectedIndex);
 			Component label = Component.translatable("stardewcraft.emote." + selected.id());
 			int labelW = minecraft.font.width(label);
-			guiGraphics.drawString(minecraft.font, label, centerX - labelW / 2, centerY - 8, 0xFFF4EED0, true);
+			guiGraphics.drawString(minecraft.font, label, centerX - labelW / 2, centerY - 8, 0xFFF4EED0, false);
 		}
 
 		for (int i = 0; i < count; i++) {

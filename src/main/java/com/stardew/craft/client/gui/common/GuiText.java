@@ -23,14 +23,16 @@ public final class GuiText {
     public static void drawCenteredClamped(GuiGraphics graphics, Font font, Component text,
                                            int centerX, int y, int maxWidth, int color, boolean shadow) {
         Component shown = ellipsize(font, text, maxWidth);
-        graphics.drawString(font, shown, centerX - font.width(shown) / 2, y, color, shadow);
+        // Vanilla's boolean shadow is opaque black and becomes unreadable over
+        // pixel-art panels. This project deliberately renders UI text cleanly.
+        graphics.drawString(font, shown, centerX - font.width(shown) / 2, y, color, false);
     }
 
     public static int drawWrapped(GuiGraphics graphics, Font font, Component text, int x, int y,
                                   int maxWidth, int color, boolean shadow, int maxLines) {
         List<FormattedCharSequence> lines = limitedLines(font, text, maxWidth, maxLines);
         for (FormattedCharSequence line : lines) {
-            graphics.drawString(font, line, x, y, color, shadow);
+            graphics.drawString(font, line, x, y, color, false);
             y += font.lineHeight + 2;
         }
         return y;
@@ -40,7 +42,7 @@ public final class GuiText {
                                           int maxWidth, int color, boolean shadow, int maxLines) {
         List<FormattedCharSequence> lines = limitedLines(font, text, maxWidth, maxLines);
         for (FormattedCharSequence line : lines) {
-            graphics.drawString(font, line, centerX - font.width(line) / 2, y, color, shadow);
+            graphics.drawString(font, line, centerX - font.width(line) / 2, y, color, false);
             y += font.lineHeight + 2;
         }
         return y;

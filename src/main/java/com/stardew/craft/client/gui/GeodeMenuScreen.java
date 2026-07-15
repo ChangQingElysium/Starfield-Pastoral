@@ -621,7 +621,7 @@ public class GeodeMenuScreen extends Screen {
                 g.drawString(font, cnt,
                     mouseX + ui(8) + ui(64) - cw - 2,
                     mouseY + ui(8) + ui(64) - font.lineHeight,
-                    0xFFFFFF, true);
+                    0xFFFFFF, false);
             }
         }
 

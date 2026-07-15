@@ -70,6 +70,6 @@ public final class SpecialOrderBoardIndicatorRenderer {
         float x = -font.width(text) / 2.0F;
         float y = -font.lineHeight / 2.0F;
         int color = (0xFF << 24) | (r << 16) | (g << 8) | b;
-        font.drawInBatch(text, x, y, color, true, ps.last().pose(), buf, Font.DisplayMode.NORMAL, 0, 0xF000F0);
+        font.drawInBatch(text, x, y, color, false, ps.last().pose(), buf, Font.DisplayMode.NORMAL, 0, 0xF000F0);
     }
 }

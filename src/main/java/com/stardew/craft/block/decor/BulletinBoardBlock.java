@@ -50,7 +50,9 @@ public class BulletinBoardBlock extends MapDecorWallStaticBlock {
         if (mainPos == null) return InteractionResult.PASS;
 
         if (level.isClientSide) {
-            openBillboardScreen();
+            // The model's MAIN cell is the board's visual left half; its
+            // EXTENSION cell is the visual right half for every facing.
+            openBillboardScreen(state.getValue(PART) == Part.MAIN);
         } else if (player instanceof ServerPlayer serverPlayer) {
             // 服务端同步每日任务和任务日志到客户端
             PlayerStardewData data = PlayerDataManager.getPlayerData(serverPlayer);
@@ -71,8 +73,10 @@ public class BulletinBoardBlock extends MapDecorWallStaticBlock {
     }
 
     @net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
-    private void openBillboardScreen() {
+    private void openBillboardScreen(boolean calendar) {
         net.minecraft.client.Minecraft.getInstance().setScreen(
-            new com.stardew.craft.client.gui.quest.BillboardScreen());
+            new com.stardew.craft.client.gui.quest.BillboardScreen(calendar
+                    ? com.stardew.craft.client.gui.quest.BillboardScreen.Mode.CALENDAR
+                    : com.stardew.craft.client.gui.quest.BillboardScreen.Mode.DAILY_QUEST));
     }
 }

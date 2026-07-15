@@ -63,6 +63,12 @@ public class PlayerDataEventHandler {
             
             // 同步数据到客户端
             syncPlayerData(player, data);
+            // 旧存档没有性别/称呼/喜好字段：登录后单独补录，不伪造默认值。
+            if (!data.isProfileComplete()
+                    && com.stardew.craft.farm.FarmInstanceRegistry.get().getFarmForPlayer(player.getUUID()) != null) {
+                net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
+                        new com.stardew.craft.network.payload.OpenPlayerProfileSetupPayload());
+            }
             CosmeticAppearanceSync.syncAllTo(player);
             CosmeticAppearanceSync.broadcast(player, data);
             JoinAnnouncementService.schedule(player);

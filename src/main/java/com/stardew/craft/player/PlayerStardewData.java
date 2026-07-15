@@ -37,6 +37,12 @@ public class PlayerStardewData {
     // 玩家UUID
     private UUID playerUUID;
     private String lastKnownName = "";
+
+    // ============ 玩家档案（对话个性化） ============
+    // -1=未选择，0=男性，1=女性。三态值用于识别需要补录资料的旧存档。
+    private int gender = -1;
+    private String preferredName = "";
+    private String favoriteThing = "";
     
     // ============ 基础属性 ============
     private int health;              // 当前生命值
@@ -335,6 +341,9 @@ public class PlayerStardewData {
             ? Math.max(0L, tag.getLong("TotalMoneyEarned"))
             : Math.max(data.money, data.totalShippingGold);
         data.lastKnownName = tag.contains("LastKnownName") ? tag.getString("LastKnownName") : "";
+        data.gender = tag.contains("Gender") ? Math.max(-1, Math.min(1, tag.getInt("Gender"))) : -1;
+        data.preferredName = tag.contains("PreferredName") ? tag.getString("PreferredName").trim() : "";
+        data.favoriteThing = tag.contains("FavoriteThing") ? tag.getString("FavoriteThing").trim() : "";
 
         // 晕倒/死亡系统
         data.passedOutFromCombat = tag.getBoolean("PassedOutFromCombat");
@@ -791,6 +800,9 @@ public class PlayerStardewData {
         tag.putInt("LastFairGrillBurgerDateKey", lastFairGrillBurgerDateKey);
         tag.putLong("TotalMoneyEarned", totalMoneyEarned);
         tag.putString("LastKnownName", lastKnownName == null ? "" : lastKnownName);
+        tag.putInt("Gender", gender);
+        tag.putString("PreferredName", preferredName == null ? "" : preferredName);
+        tag.putString("FavoriteThing", favoriteThing == null ? "" : favoriteThing);
 
         // 晕倒/死亡系统
         tag.putBoolean("PassedOutFromCombat", passedOutFromCombat);
@@ -1782,6 +1794,32 @@ public class PlayerStardewData {
             markDirty();
         }
     }
+
+    public int getGender() { return gender; }
+
+    public boolean isMale() { return gender != 1; }
+
+    public String getPreferredName() { return preferredName == null ? "" : preferredName; }
+
+    public String getFavoriteThing() { return favoriteThing == null ? "" : favoriteThing; }
+
+    public boolean isProfileComplete() {
+        return gender >= 0 && !getPreferredName().isBlank() && !getFavoriteThing().isBlank();
+    }
+
+    public void setProfile(String preferredName, String favoriteThing, int gender) {
+        String normalizedName = preferredName == null ? "" : preferredName.trim();
+        String normalizedFavorite = favoriteThing == null ? "" : favoriteThing.trim();
+        int normalizedGender = gender == 1 ? 1 : 0;
+        if (!normalizedName.equals(this.preferredName)
+                || !normalizedFavorite.equals(this.favoriteThing)
+                || normalizedGender != this.gender) {
+            this.preferredName = normalizedName;
+            this.favoriteThing = normalizedFavorite;
+            this.gender = normalizedGender;
+            markDirty();
+        }
+    }
     
     public int getSkillLevel(SkillType skill) {
         int base = skillLevels[skill.getId()];
@@ -2145,7 +2183,9 @@ public class PlayerStardewData {
     
     public boolean isDirty() { return dirty; }
 
-    public double getDailyLuck() { return dailyLuck; }
+    public double getDailyLuck() {
+        return com.stardew.craft.secretnote.SecretNote20Service.applyDailyLuckBonus(this, dailyLuck);
+    }
 
     public int getDailyLuckDateKey() { return dailyLuckDateKey; }
 
@@ -2423,6 +2463,7 @@ public class PlayerStardewData {
     // ──── Special Items (unique treasure dedup) ────
     public boolean hasSpecialItem(String itemId) { return specialItems.contains(itemId); }
     public void addSpecialItem(String itemId) { if (specialItems.add(itemId)) markDirty(); }
+    public void removeSpecialItem(String itemId) { if (specialItems.remove(itemId)) markDirty(); }
 
     // ──── Secret Notes (per-player collection) ────
     public Set<String> getSecretNotesSeen() { return Collections.unmodifiableSet(secretNotesSeen); }

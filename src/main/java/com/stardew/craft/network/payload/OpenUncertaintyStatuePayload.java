@@ -1,6 +1,7 @@
 package com.stardew.craft.network.payload;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.client.PlayerGenderText;
 import com.stardew.craft.player.SkillType;
 import com.stardew.craft.statue.UncertaintyStatueService;
 import net.minecraft.core.BlockPos;
@@ -95,7 +96,8 @@ public record OpenUncertaintyStatuePayload(BlockPos statuePos, int mode, List<In
             SkillType skill = SkillType.fromId(skillId);
             responses.add(Component.translatable("stardewcraft.skill." + skill.getName()));
         }
-        responses.add(Component.translatable("stardewcraft.uncertainty_statue.cancel"));
+        responses.add(Component.literal(PlayerGenderText.preprocess(
+                Component.translatable("stardewcraft.uncertainty_statue.cancel").getString())));
 
         mc.setScreen(com.stardew.craft.client.gui.common.StardewConfirmDialogScreen.createQuestionDialog(
             com.stardew.craft.client.gui.common.StardewQuestionDialogSpec.of(

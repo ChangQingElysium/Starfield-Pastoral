@@ -71,11 +71,7 @@ public class TextAboveHeadCommand implements EventCommand {
                 ? OpenNpcDialogueScreenPayload.rawTranslation(text)
                 : text;
         String playerName = mc.player == null ? "" : mc.player.getName().getString();
-        displayText = displayText.replace("@", playerName);
-        displayText = OpenNpcDialogueScreenPayload.resolveInlineGenderTokens(displayText, true);
-        displayText = OpenNpcDialogueScreenPayload.resolveGenderSplit(displayText, true);
-        displayText = OpenNpcDialogueScreenPayload.resolveDialogueCommands(displayText);
-        return OpenNpcDialogueScreenPayload.resolvePercentTokens(displayText, playerName);
+        return OpenNpcDialogueScreenPayload.resolvePlayerDialogueText(displayText, playerName);
     }
 
     private void cleanup() {

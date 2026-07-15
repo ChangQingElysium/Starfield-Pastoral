@@ -155,6 +155,22 @@ public class StardewGuiUtil {
     }
 
     public static void drawTextureBox(GuiGraphics graphics, ResourceLocation texture, int texWidth, int texHeight, int srcX, int srcY, int srcW, int srcH, int x, int y, int width, int height, float scale, boolean drawShadow) {
+		drawTextureBox(graphics, texture, texWidth, texHeight, srcX, srcY, srcW, srcH,
+			x, y, width, height, scale, drawShadow, 1.0f);
+	}
+
+	public static void drawTextureBox(GuiGraphics graphics, ResourceLocation texture, int texWidth, int texHeight,
+			int srcX, int srcY, int srcW, int srcH, int x, int y, int width, int height,
+			float scale, boolean drawShadow, float alpha) {
+		drawTextureBox(graphics, texture, texWidth, texHeight, srcX, srcY, srcW, srcH,
+			x, y, width, height, scale, drawShadow, alpha, 8);
+	}
+
+	public static void drawTextureBox(GuiGraphics graphics, ResourceLocation texture, int texWidth, int texHeight,
+			int srcX, int srcY, int srcW, int srcH, int x, int y, int width, int height,
+			float scale, boolean drawShadow, float alpha, int shadowOffset) {
+		alpha = Math.max(0.0f, Math.min(1.0f, alpha));
+		shadowOffset = Math.max(0, shadowOffset);
         if (texture.equals(CURSORS)) {
             if (srcX == 384 && srcY == 373 && srcW == 18 && srcH == 18) {
                 texture = COMMON_TEXTURE_BOX_18;
@@ -213,17 +229,20 @@ public class StardewGuiUtil {
         if (drawShadow) {
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
-            graphics.setColor(0.0F, 0.0F, 0.0F, 0.4F);
-            drawRegion(graphics, texture, texWidth, texHeight, x + width - scaledCorner - 8, y + 8, scaledCorner, scaledCorner, srcX + cornerSize * 2, srcY, cornerSize, cornerSize);
-            drawRegion(graphics, texture, texWidth, texHeight, x - 8, y + height - scaledCorner + 8, scaledCorner, scaledCorner, srcX, srcY + cornerSize * 2, cornerSize, cornerSize);
-            drawRegion(graphics, texture, texWidth, texHeight, x + width - scaledCorner - 8, y + height - scaledCorner + 8, scaledCorner, scaledCorner, srcX + cornerSize * 2, srcY + cornerSize * 2, cornerSize, cornerSize);
-            drawRegion(graphics, texture, texWidth, texHeight, x + scaledCorner - 8, y + 8, Math.max(0, width - scaledCorner * 2), scaledCorner, srcX + cornerSize, srcY, cornerSize, cornerSize);
-            drawRegion(graphics, texture, texWidth, texHeight, x + scaledCorner - 8, y + height - scaledCorner + 8, Math.max(0, width - scaledCorner * 2), scaledCorner, srcX + cornerSize, srcY + cornerSize * 2, cornerSize, cornerSize);
-            drawRegion(graphics, texture, texWidth, texHeight, x - 8, y + scaledCorner + 8, scaledCorner, Math.max(0, height - scaledCorner * 2), srcX, srcY + cornerSize, cornerSize, cornerSize);
-            drawRegion(graphics, texture, texWidth, texHeight, x + width - scaledCorner - 8, y + scaledCorner + 8, scaledCorner, Math.max(0, height - scaledCorner * 2), srcX + cornerSize * 2, srcY + cornerSize, cornerSize, cornerSize);
-            drawRegion(graphics, texture, texWidth, texHeight, x + scaledCorner / 2 - 8, y + scaledCorner / 2 + 8, Math.max(0, width - scaledCorner), Math.max(0, height - scaledCorner), srcX + cornerSize, srcY + cornerSize, cornerSize, cornerSize);
-            graphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+			graphics.setColor(0.0F, 0.0F, 0.0F, 0.4F * alpha);
+			drawRegion(graphics, texture, texWidth, texHeight, x + width - scaledCorner - shadowOffset, y + shadowOffset, scaledCorner, scaledCorner, srcX + cornerSize * 2, srcY, cornerSize, cornerSize);
+			drawRegion(graphics, texture, texWidth, texHeight, x - shadowOffset, y + height - scaledCorner + shadowOffset, scaledCorner, scaledCorner, srcX, srcY + cornerSize * 2, cornerSize, cornerSize);
+			drawRegion(graphics, texture, texWidth, texHeight, x + width - scaledCorner - shadowOffset, y + height - scaledCorner + shadowOffset, scaledCorner, scaledCorner, srcX + cornerSize * 2, srcY + cornerSize * 2, cornerSize, cornerSize);
+			drawRegion(graphics, texture, texWidth, texHeight, x + scaledCorner - shadowOffset, y + shadowOffset, Math.max(0, width - scaledCorner * 2), scaledCorner, srcX + cornerSize, srcY, cornerSize, cornerSize);
+			drawRegion(graphics, texture, texWidth, texHeight, x + scaledCorner - shadowOffset, y + height - scaledCorner + shadowOffset, Math.max(0, width - scaledCorner * 2), scaledCorner, srcX + cornerSize, srcY + cornerSize * 2, cornerSize, cornerSize);
+			drawRegion(graphics, texture, texWidth, texHeight, x - shadowOffset, y + scaledCorner + shadowOffset, scaledCorner, Math.max(0, height - scaledCorner * 2), srcX, srcY + cornerSize, cornerSize, cornerSize);
+			drawRegion(graphics, texture, texWidth, texHeight, x + width - scaledCorner - shadowOffset, y + scaledCorner + shadowOffset, scaledCorner, Math.max(0, height - scaledCorner * 2), srcX + cornerSize * 2, srcY + cornerSize, cornerSize, cornerSize);
+			drawRegion(graphics, texture, texWidth, texHeight, x + scaledCorner / 2 - shadowOffset, y + scaledCorner / 2 + shadowOffset, Math.max(0, width - scaledCorner), Math.max(0, height - scaledCorner), srcX + cornerSize, srcY + cornerSize, cornerSize, cornerSize);
+			graphics.setColor(1.0F, 1.0F, 1.0F, alpha);
         }
+		if (!drawShadow && alpha < 1.0f) {
+			graphics.setColor(1.0F, 1.0F, 1.0F, alpha);
+		}
 
         drawRegion(graphics, texture, texWidth, texHeight, x + scaledCorner, y + scaledCorner, Math.max(0, width - scaledCorner * 2), Math.max(0, height - scaledCorner * 2), srcX + cornerSize, srcY + cornerSize, cornerSize, cornerSize);
         drawRegion(graphics, texture, texWidth, texHeight, x, y, scaledCorner, scaledCorner, srcX, srcY, cornerSize, cornerSize);
@@ -234,6 +253,9 @@ public class StardewGuiUtil {
         drawRegion(graphics, texture, texWidth, texHeight, x + scaledCorner, y + height - scaledCorner, Math.max(0, width - scaledCorner * 2), scaledCorner, srcX + cornerSize, srcY + cornerSize * 2, cornerSize, cornerSize);
         drawRegion(graphics, texture, texWidth, texHeight, x, y + scaledCorner, scaledCorner, Math.max(0, height - scaledCorner * 2), srcX, srcY + cornerSize, cornerSize, cornerSize);
         drawRegion(graphics, texture, texWidth, texHeight, x + width - scaledCorner, y + scaledCorner, scaledCorner, Math.max(0, height - scaledCorner * 2), srcX + cornerSize * 2, srcY + cornerSize, cornerSize, cornerSize);
+		if (alpha < 1.0f) {
+			graphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+		}
     }
 
     private static void drawRegion(GuiGraphics graphics, ResourceLocation texture, int texWidth, int texHeight, int x, int y, int width, int height, int u, int v, int srcWidth, int srcHeight) {

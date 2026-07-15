@@ -21,8 +21,11 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 @SuppressWarnings("null")
 public record FarmSelectionSubmitPayload(
         String farmTypeId,
-    String farmName,
-    boolean forceCancelPending
+        String farmName,
+        boolean forceCancelPending,
+        String preferredName,
+        String favoriteThing,
+        boolean male
 ) implements CustomPacketPayload {
 
     public static final Type<FarmSelectionSubmitPayload> TYPE =
@@ -33,6 +36,9 @@ public record FarmSelectionSubmitPayload(
                     ByteBufCodecs.STRING_UTF8, FarmSelectionSubmitPayload::farmTypeId,
                     ByteBufCodecs.STRING_UTF8, FarmSelectionSubmitPayload::farmName,
                     ByteBufCodecs.BOOL, FarmSelectionSubmitPayload::forceCancelPending,
+                    ByteBufCodecs.STRING_UTF8, FarmSelectionSubmitPayload::preferredName,
+                    ByteBufCodecs.STRING_UTF8, FarmSelectionSubmitPayload::favoriteThing,
+                    ByteBufCodecs.BOOL, FarmSelectionSubmitPayload::male,
                     FarmSelectionSubmitPayload::new
             );
 
@@ -44,6 +50,14 @@ public record FarmSelectionSubmitPayload(
     public static void handle(FarmSelectionSubmitPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
             if (!(context.player() instanceof ServerPlayer player)) return;
+
+            String preferredName = sanitizeProfileText(payload.preferredName(), 48);
+            String favoriteThing = sanitizeProfileText(payload.favoriteThing(), 64);
+            if (preferredName.isBlank() || favoriteThing.isBlank()) {
+                player.sendSystemMessage(net.minecraft.network.chat.Component.translatable(
+                        "stardewcraft.player_profile.validation.required"));
+                return;
+            }
 
             FarmInstanceRegistry registry = FarmInstanceRegistry.get();
 
@@ -87,13 +101,17 @@ public record FarmSelectionSubmitPayload(
             name = name.trim();
 
             // 创建农场实例
+            com.stardew.craft.player.PlayerStardewData playerData =
+                    com.stardew.craft.player.PlayerDataManager.getPlayerData(player);
+            playerData.setProfile(preferredName, favoriteThing, payload.male() ? 0 : 1);
+            com.stardew.craft.player.PlayerDataManager.get().setDirty();
             FarmInstance farm = registry.createFarm(player.getUUID(), player.getName().getString(), name, farmType);
 
             StardewCraft.LOGGER.info("[FARM_SELECT] {} created farm '{}' (type={})",
                     player.getName().getString(), name, farmType.getId());
 
             com.stardew.craft.player.PlayerDataEventHandler.syncPlayerData(
-                    player, com.stardew.craft.player.PlayerDataManager.getPlayerData(player));
+                    player, playerData);
 
             // 获取星露谷维度并初始化农场（分帧异步放置 schematic，减少卡顿）
             ServerLevel stardewLevel = player.server.getLevel(com.stardew.craft.core.ModDimensions.STARDEW_VALLEY);
@@ -118,5 +136,10 @@ public record FarmSelectionSubmitPayload(
                 CrossDimensionTeleporter.wizardInteriorToStardewOutdoor(player);
             }
         });
+    }
+
+    private static String sanitizeProfileText(String value, int maxLength) {
+        String sanitized = value == null ? "" : value.replaceAll("[\\p{Cntrl}]", "").trim();
+        return sanitized.length() <= maxLength ? sanitized : sanitized.substring(0, maxLength).trim();
     }
 }

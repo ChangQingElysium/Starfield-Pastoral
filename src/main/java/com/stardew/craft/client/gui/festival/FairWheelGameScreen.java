@@ -259,7 +259,8 @@ public class FairWheelGameScreen extends Screen {
 
         if (doneSpinning) {
             String result = I18n.get(won ? "stardewcraft.fair.wheel.winner" : "stardewcraft.fair.wheel.lose");
-            graphics.drawCenteredString(font, result, width / 2, Math.max(8, y - ui(72)), won ? 0xFFFFD34A : 0xFFFF6D58);
+            graphics.drawString(font, result, width / 2 - font.width(result) / 2,
+                Math.max(8, y - ui(72)), won ? 0xFFFFD34A : 0xFFFF6D58, false);
         }
     }
 
@@ -276,13 +277,16 @@ public class FairWheelGameScreen extends Screen {
         CommonGuiTextures.drawTextureBox(graphics, numberX, numberY, numberW, numberH, s4, true);
         drawWrapped(graphics, I18n.get("stardewcraft.fair.wheel.wager"),
             numberX + ui(BORDER), numberY + ui(48), numberW - ui(BORDER * 2), 0xFF3F2A13);
-        graphics.drawCenteredString(font, I18n.get("stardewcraft.fair.wheel.tokens", starTokens),
-            numberX + numberW / 2, numberY + ui(132), 0xFF5B3418);
+        String tokenText = I18n.get("stardewcraft.fair.wheel.tokens", starTokens);
+        graphics.drawString(font, tokenText, numberX + numberW / 2 - font.width(tokenText) / 2,
+            numberY + ui(132), 0xFF5B3418, false);
 
         CommonGuiTextures.drawBackArrow(graphics, leftButton.x(), leftButton.y(), s4);
         CommonGuiTextures.drawEntryBox(graphics, numberBox.x(), numberBox.y(), numberBox.width(), numberBox.height(), s4, false);
-        graphics.drawCenteredString(font, String.valueOf(wager),
-            numberBox.x() + numberBox.width() / 2, numberBox.y() + (numberBox.height() - font.lineHeight) / 2, 0xFF3F2A13);
+        String wagerText = String.valueOf(wager);
+        graphics.drawString(font, wagerText,
+            numberBox.x() + numberBox.width() / 2 - font.width(wagerText) / 2,
+            numberBox.y() + (numberBox.height() - font.lineHeight) / 2, 0xFF3F2A13, false);
         CommonGuiTextures.drawForwardArrow(graphics, rightButton.x(), rightButton.y(), s4);
 
         CommonGuiTextures.drawOkCheckSmall(graphics, okButton.x(), okButton.y(), s4);
@@ -308,7 +312,8 @@ public class FairWheelGameScreen extends Screen {
     private void drawButton(GuiGraphics graphics, Rect rect, String text, int mouseX, int mouseY) {
         CommonGuiTextures.drawTextureBoxNoShadow(graphics, rect.x(), rect.y(), rect.width(), rect.height(), s4);
         int color = rect.contains(mouseX, mouseY) ? 0xFF8B4F1B : 0xFF3F2A13;
-        graphics.drawCenteredString(font, text, rect.x() + rect.width() / 2, rect.y() + (rect.height() - font.lineHeight) / 2, color);
+        graphics.drawString(font, text, rect.x() + rect.width() / 2 - font.width(text) / 2,
+            rect.y() + (rect.height() - font.lineHeight) / 2, color, false);
     }
 
     @Override

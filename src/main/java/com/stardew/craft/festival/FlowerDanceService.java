@@ -618,9 +618,6 @@ public final class FlowerDanceService {
         if (mainEventPhase == MainEventPhase.MAIN_EVENT
             && (participants.isEmpty() || containsAllOnlineParticipants(MAIN_EVENT_CUTSCENE_DONE, participants))) {
             mainEventPhase = MainEventPhase.ENDING;
-            for (ServerPlayer participant : participants) {
-                participant.displayClientMessage(Component.translatable("message.stardewcraft.festival.flower_dance.finished"), false);
-            }
             finishFestival(player.serverLevel());
         }
     }

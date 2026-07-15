@@ -40,6 +40,7 @@ class SecretNoteDefinitionTest {
             Set<Integer> vanillaNumbers = new java.util.HashSet<>();
             Set<Integer> displayNumbers = new java.util.HashSet<>();
             Set<Integer> todoNumbers = new java.util.HashSet<>();
+            Map<Integer, Boolean> obtainableByVanillaNumber = new LinkedHashMap<>();
             for (var element : root) {
                 var object = element.getAsJsonObject().deepCopy();
                 object.remove("id");
@@ -47,6 +48,7 @@ class SecretNoteDefinitionTest {
                         .result().orElseThrow();
                 vanillaNumbers.add(definition.vanillaNumber());
                 displayNumbers.add(definition.displayNumber());
+                obtainableByVanillaNumber.put(definition.vanillaNumber(), definition.obtainable());
                 if (!definition.obtainable()) {
                     todoNumbers.add(definition.vanillaNumber());
                     assertTrue(definition.implementationStatus().startsWith("TODO 0.5.1-fix"));
@@ -57,8 +59,10 @@ class SecretNoteDefinitionTest {
                     displayNumbers);
             assertEquals(20, root.get(18).getAsJsonObject().get("vanilla_number").getAsInt());
             assertEquals(19, root.get(18).getAsJsonObject().get("display_number").getAsInt());
-            assertEquals(Set.of(10, 13, 14, 20, 21, 22, 23, 24, 26), todoNumbers);
-            assertEquals(17, root.size() - todoNumbers.size());
+            assertTrue(obtainableByVanillaNumber.get(20));
+            assertTrue(obtainableByVanillaNumber.get(21));
+            assertEquals(Set.of(22, 23, 24, 26), todoNumbers);
+            assertEquals(22, root.size() - todoNumbers.size());
         }
     }
 
@@ -93,7 +97,7 @@ class SecretNoteDefinitionTest {
         Set<String> featureKeys = english.keySet().stream()
                 .filter(SecretNoteDefinitionTest::isSecretNoteFeatureKey)
                 .collect(Collectors.toSet());
-        assertEquals(61, featureKeys.size());
+        assertEquals(71, featureKeys.size());
 
         try (var languages = Files.list(langDirectory)) {
             for (Path language : languages.filter(path -> path.toString().endsWith(".json")).toList()) {
@@ -109,9 +113,11 @@ class SecretNoteDefinitionTest {
 
     private static boolean isSecretNoteFeatureKey(String key) {
         return key.startsWith("item.stardewcraft.magnifying_glass")
+                || key.startsWith("item.stardewcraft.special_charm")
                 || key.startsWith("item.stardewcraft.secret_note")
                 || key.startsWith("item.stardewcraft.ornate_necklace")
                 || key.startsWith("stardewcraft.item.magnifying_glass")
+                || key.startsWith("stardewcraft.item.special_charm")
                 || key.startsWith("stardewcraft.secret_note")
                 || key.startsWith("stardewcraft.collections.secret_notes")
                 || key.startsWith("stardewcraft.profile.gift")

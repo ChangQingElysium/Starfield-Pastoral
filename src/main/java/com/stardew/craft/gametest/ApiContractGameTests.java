@@ -73,6 +73,21 @@ public final class ApiContractGameTests {
     }
 
     @GameTest(templateNamespace = "minecraft", template = "bastion/mobs/empty")
+    public static void playerProfileRoundTripAndLegacyDetection(GameTestHelper helper) {
+        PlayerStardewData legacy = PlayerStardewData.fromNBT(new CompoundTag(), UUID.randomUUID());
+        helper.assertFalse(legacy.isProfileComplete(), "legacy save was not marked for profile collection");
+
+        PlayerStardewData original = new PlayerStardewData(UUID.randomUUID());
+        original.setProfile("Farmer", "strawberries", 1);
+        PlayerStardewData loaded = PlayerStardewData.fromNBT(original.toNBT(), UUID.randomUUID());
+        helper.assertTrue(loaded.isProfileComplete(), "completed player profile was lost");
+        helper.assertFalse(loaded.isMale(), "female gender changed during NBT round trip");
+        helper.assertValueEqual(loaded.getPreferredName(), "Farmer", "preferred name changed");
+        helper.assertValueEqual(loaded.getFavoriteThing(), "strawberries", "favorite thing changed");
+        helper.succeed();
+    }
+
+    @GameTest(templateNamespace = "minecraft", template = "bastion/mobs/empty")
     public static void addonEquipmentSlotControlsGameplayResolver(GameTestHelper helper) {
         ResourceLocation providerId = ResourceLocation.fromNamespaceAndPath(
                 "stardewcraft_gametest", "brick_ring");

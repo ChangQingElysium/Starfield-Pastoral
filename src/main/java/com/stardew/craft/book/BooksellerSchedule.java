@@ -46,7 +46,7 @@ public final class BooksellerSchedule {
         }
         Component message = Component.translatable("stardewcraft.bookseller.in_town");
         for (ServerPlayer player : players) {
-            player.displayClientMessage(message, false);
+			com.stardew.craft.network.GlobalHudMessagePayload.sendTo(player, message);
         }
     }
 

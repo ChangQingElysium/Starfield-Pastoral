@@ -72,7 +72,7 @@ public final class InteractionHintHud {
         int textY = y + VERTICAL_PADDING;
         int textColor = (alphaByte << 24) | 0xFFFFFF;
         for (FormattedCharSequence line : lines) {
-            graphics.drawString(font, line, textX, textY, textColor, true);
+            graphics.drawString(font, line, textX, textY, textColor, false);
             textY += lineStep;
         }
     }

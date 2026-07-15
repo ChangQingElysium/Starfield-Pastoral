@@ -51,11 +51,8 @@ public final class WinterStarStageCommand implements EventCommand {
             return;
         }
         String playerName = mc.player.getName().getString();
-        String text = OpenNpcDialogueScreenPayload.rawTranslation(key).replace("@", playerName);
-        text = OpenNpcDialogueScreenPayload.resolveInlineGenderTokens(text, true);
-        text = OpenNpcDialogueScreenPayload.resolveGenderSplit(text, true);
-        text = OpenNpcDialogueScreenPayload.resolveDialogueCommands(text);
-        text = OpenNpcDialogueScreenPayload.resolvePercentTokens(text, playerName);
+        String text = OpenNpcDialogueScreenPayload.resolvePlayerDialogueText(
+                OpenNpcDialogueScreenPayload.rawTranslation(key), playerName);
         mc.setScreen(new com.stardew.craft.client.gui.common.StardewNpcDialogueScreen(
             WinterStarCutsceneContext.giverId(), text, 0));
         waitingForDialogue = true;

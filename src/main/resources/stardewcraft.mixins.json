@@ -36,6 +36,7 @@
     "ClientLevelTickTimeMixin",
     "ClientSetTimeMixin",
     "ClientWeatherPacketMixin",
+    "MultiPlayerGameModeInteractionMixin",
     "DoorBlockMasteryCollisionClientMixin"
   ],
   "injectors": {

@@ -25,7 +25,7 @@ public record MasteryHintPayload() implements CustomPacketPayload {
 
     public static void handle(MasteryHintPayload payload, IPayloadContext context) {
         context.enqueueWork(() ->
-            com.stardew.craft.client.hud.StardewHudMessageManager.showInfo(
+            com.stardew.craft.client.hud.StardewHudMessageManager.showGlobalMessage(
                 net.minecraft.network.chat.Component.translatable("stardewcraft.mastery.hint")));
     }
 }

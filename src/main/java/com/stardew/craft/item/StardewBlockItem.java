@@ -7,6 +7,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.context.UseOnContext;
 
 import java.util.List;
 
@@ -27,6 +29,14 @@ public class StardewBlockItem extends BlockItem implements IStardewItem {
 		this.itemTypeKey = itemTypeKey;
 		this.sellPrice = sellPrice;
 		this.descriptionKey = descriptionKey;
+	}
+
+	@Override
+	public InteractionResult useOn(UseOnContext context) {
+		if (getBlock() instanceof com.stardew.craft.block.decor.CarpetDecorBlock carpet) {
+			return com.stardew.craft.entity.decor.CarpetPlacementService.place(carpet, context);
+		}
+		return super.useOn(context);
 	}
 
 	@Override

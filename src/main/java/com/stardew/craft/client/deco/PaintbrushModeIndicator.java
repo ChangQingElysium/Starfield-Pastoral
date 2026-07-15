@@ -76,27 +76,29 @@ public final class PaintbrushModeIndicator {
         int screenW = g.guiWidth();
 
         // Position above hotbar
-        int baseY = g.guiHeight() - 52;
+        int baseY = g.guiHeight() - 72;
 
         // Mode text
         int modeW = font.width(modeText);
         int modeX = (screenW - modeW) / 2;
         int colorWithAlpha = (alpha << 24) | (modeColor & 0xFFFFFF);
-        g.drawString(font, modeText, modeX, baseY, colorWithAlpha, true);
+        g.drawString(font, modeText, modeX, baseY, colorWithAlpha, false);
 
         // Status text (smaller, below mode text)
         if (statusText != null) {
             int statusW = font.width(statusText);
             int statusX = (screenW - statusW) / 2;
             int statusAlpha = (int)(displayAlpha * 180);
-            g.drawString(font, statusText, statusX, baseY + 11, (statusAlpha << 24) | 0xCCCCCC, true);
+            g.drawString(font, statusText, statusX, baseY + 11, (statusAlpha << 24) | 0xCCCCCC, false);
         }
 
         // Hint text
-        Component hint = Component.translatable("stardewcraft.paintbrush.hint.switch_mode");
+        Component hint = Component.translatable(
+                "stardewcraft.paintbrush.hint.switch_mode",
+                Component.translatable("stardewcraft.paintbrush.input.shift_scroll"));
         int hintW = font.width(hint);
         int hintX = (screenW - hintW) / 2;
         int hintAlpha = (int)(displayAlpha * 100);
-        g.drawString(font, hint, hintX, baseY - 10, (hintAlpha << 24) | 0x999999, true);
+        g.drawString(font, hint, hintX, baseY - 10, (hintAlpha << 24) | 0x999999, false);
     }
 }

@@ -44,7 +44,7 @@ public class SystemTotemManager {
 
         removeOldFarmSystemPole(level);
         ensureSystemPole(level, POS_MOUNTAIN, TotemType.MOUNTAIN, ModBlocks.TOTEM_POLE_MOUNTAIN, SYSTEM_ID_MOUNTAIN, Direction.NORTH);
-        ensureSystemPole(level, POS_BEACH, TotemType.BEACH, ModBlocks.TOTEM_POLE_BEACH, SYSTEM_ID_BEACH, Direction.NORTH);
+        ensureSystemPole(level, POS_BEACH, TotemType.BEACH, ModBlocks.TOTEM_POLE_BEACH, SYSTEM_ID_BEACH, Direction.SOUTH);
         ensureSystemPole(level, POS_DESERT, TotemType.DESERT, ModBlocks.TOTEM_POLE_DESERT, SYSTEM_ID_DESERT, Direction.SOUTH);
     }
 
@@ -73,6 +73,9 @@ public class SystemTotemManager {
         BlockState existing = level.getBlockState(pos);
         if (existing.getBlock() instanceof TotemPoleBlock existingPole
                 && existingPole.getTotemType() == type) {
+            if (existing.getValue(MapDecorStaticBlock.FACING) != facing) {
+                level.setBlock(pos, existing.setValue(MapDecorStaticBlock.FACING, facing), 3);
+            }
             // 确保 BE 存在且为系统柱
             if (level.getBlockEntity(pos) instanceof TotemPoleBlockEntity pole) {
                 if (!pole.isSystemPole() || !name.equals(pole.getPoleName())) {

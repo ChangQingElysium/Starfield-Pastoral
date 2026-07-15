@@ -9,7 +9,7 @@
   },
   "preconditions": [
     { "type": "not_saw_event", "id": "lewis_cc_tour" },
-    { "type": "days_played", "min": 4 },
+    { "type": "days_played", "min": 5 },
     { "type": "time", "min": 800, "max": 1300 },
     { "type": "weather", "weather": "sunny" },
     { "type": "not_mail", "id": "JojaMember" }

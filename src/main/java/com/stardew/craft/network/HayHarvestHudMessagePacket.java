@@ -36,7 +36,7 @@ public record HayHarvestHudMessagePacket(int hayCount, boolean siloFull) impleme
     public static void handle(HayHarvestHudMessagePacket packet, IPayloadContext context) {
         context.enqueueWork(() -> {
             if (packet.siloFull()) {
-                com.stardew.craft.client.hud.StardewHudMessageManager.showInfo(Component.translatable("stardewcraft.hud.hay_silo_full"));
+                com.stardew.craft.client.hud.StardewHudMessageManager.showGlobalMessage(Component.translatable("stardewcraft.hud.hay_silo_full"));
             } else {
                 com.stardew.craft.client.hud.StardewHudMessageManager.showHayHarvest(packet.hayCount());
             }

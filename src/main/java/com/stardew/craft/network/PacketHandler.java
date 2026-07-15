@@ -839,6 +839,13 @@ public class PacketHandler {
             TimeWarningPayload::handle
         );
 
+        // SDV showGlobalMessage（左下角无图标文本框）
+        registrar.playToClient(
+            GlobalHudMessagePayload.TYPE,
+            GlobalHudMessagePayload.STREAM_CODEC,
+            GlobalHudMessagePayload::handle
+        );
+
         // 矿井出口传送操作
         registrar.playToServer(
             com.stardew.craft.network.payload.MineExitActionPayload.TYPE,
@@ -1127,6 +1134,24 @@ public class PacketHandler {
         );
 
         registrar.playToClient(
+            com.stardew.craft.network.payload.OpenSecretNote20QuestionPayload.TYPE,
+            com.stardew.craft.network.payload.OpenSecretNote20QuestionPayload.STREAM_CODEC,
+            com.stardew.craft.network.payload.OpenSecretNote20QuestionPayload::handle
+        );
+
+        registrar.playToClient(
+            com.stardew.craft.network.payload.PlaySecretNote21BushEventPayload.TYPE,
+            com.stardew.craft.network.payload.PlaySecretNote21BushEventPayload.STREAM_CODEC,
+            com.stardew.craft.network.payload.PlaySecretNote21BushEventPayload::handle
+        );
+
+        registrar.playToServer(
+            com.stardew.craft.network.payload.SecretNote20QuestionResponsePayload.TYPE,
+            com.stardew.craft.network.payload.SecretNote20QuestionResponsePayload.STREAM_CODEC,
+            com.stardew.craft.network.payload.SecretNote20QuestionResponsePayload::handle
+        );
+
+        registrar.playToClient(
             com.stardew.craft.network.payload.OpenObjectDialoguePayload.TYPE,
             com.stardew.craft.network.payload.OpenObjectDialoguePayload.STREAM_CODEC,
             com.stardew.craft.network.payload.OpenObjectDialoguePayload::handle
@@ -1308,6 +1333,18 @@ public class PacketHandler {
             com.stardew.craft.network.payload.FarmSelectionSubmitPayload.TYPE,
             com.stardew.craft.network.payload.FarmSelectionSubmitPayload.STREAM_CODEC,
             com.stardew.craft.network.payload.FarmSelectionSubmitPayload::handle
+        );
+
+        registrar.playToClient(
+            com.stardew.craft.network.payload.OpenPlayerProfileSetupPayload.TYPE,
+            com.stardew.craft.network.payload.OpenPlayerProfileSetupPayload.STREAM_CODEC,
+            com.stardew.craft.network.payload.OpenPlayerProfileSetupPayload::handle
+        );
+
+        registrar.playToServer(
+            com.stardew.craft.network.payload.PlayerProfileSubmitPayload.TYPE,
+            com.stardew.craft.network.payload.PlayerProfileSubmitPayload.STREAM_CODEC,
+            com.stardew.craft.network.payload.PlayerProfileSubmitPayload::handle
         );
 
         // Farm list sync (S→C) — 打开农场入口选择 GUI
@@ -2053,6 +2090,11 @@ public class PacketHandler {
             com.stardew.craft.cutscene.network.MarkEventSeenPayload.TYPE,
             com.stardew.craft.cutscene.network.MarkEventSeenPayload.STREAM_CODEC,
             com.stardew.craft.cutscene.network.MarkEventSeenPayload::handle
+        );
+        registrar.playToServer(
+            com.stardew.craft.cutscene.network.AbortCutscenePayload.TYPE,
+            com.stardew.craft.cutscene.network.AbortCutscenePayload.STREAM_CODEC,
+            com.stardew.craft.cutscene.network.AbortCutscenePayload::handle
         );
         registrar.playToServer(
             com.stardew.craft.cutscene.network.CutsceneServerActionPayload.TYPE,

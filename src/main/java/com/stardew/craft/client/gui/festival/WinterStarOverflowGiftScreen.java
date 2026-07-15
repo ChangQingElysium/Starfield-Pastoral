@@ -52,7 +52,8 @@ public final class WinterStarOverflowGiftScreen extends Screen {
             g.renderItemDecorations(font, reward, panelX + 44, panelY + 60);
         }
         CommonGuiTextures.drawBillboardAcceptBox(g, claimX, claimY, 84, 34, 1.0f);
-        g.drawCenteredString(font, Component.translatable("stardewcraft.festival.winter_star.collect"), claimX + 42, claimY + 12, 0xFF4B2A12);
+        Component collect = Component.translatable("stardewcraft.festival.winter_star.collect");
+        g.drawString(font, collect, claimX + 42 - font.width(collect) / 2, claimY + 12, 0xFF4B2A12, false);
 
         ItemStack hovered = ItemStack.EMPTY;
         for (int row = 0; row < 4; row++) for (int col = 0; col < 9; col++) {

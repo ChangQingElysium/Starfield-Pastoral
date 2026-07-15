@@ -5,6 +5,7 @@ import com.stardew.craft.fishing.data.FishingDataManager;
 import com.stardew.craft.fishing.data.SpawnFishRule;
 import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.item.ModItems;
+import com.stardew.craft.item.SecretNoteItem;
 import com.stardew.craft.item.SpecificBaitItem;
 import com.stardew.craft.item.StardewQualityItem;
 import com.stardew.craft.item.artisan.ArtisanDrinkItem;
@@ -124,6 +125,7 @@ public class StardewJeiPlugin implements IModPlugin {
         registration.registerSubtypeInterpreter(ModItems.DRIED_FRUIT.get(), new PreserveSubtypeInterpreter());
         registration.registerSubtypeInterpreter(ModItems.DRIED_MUSHROOMS.get(), new PreserveSubtypeInterpreter());
         registration.registerSubtypeInterpreter(ModItems.TARGETED_BAIT.get(), new SpecificBaitSubtypeInterpreter());
+        registration.registerSubtypeInterpreter(ModItems.SECRET_NOTE.get(), new SecretNoteSubtypeInterpreter());
     }
 
     @Override
@@ -190,6 +192,7 @@ public class StardewJeiPlugin implements IModPlugin {
 
         // Hide items tagged stardewcraft:hidden
         hideTaggedItems(registration);
+        hideUnboundSecretNote(registration);
     }
 
     @Override
@@ -550,6 +553,25 @@ public class StardewJeiPlugin implements IModPlugin {
             String fishId = SpecificBaitItem.getTargetFishId(stack);
             return fishId == null || fishId.isBlank() ? "target=none" : "target=" + fishId;
         }
+    }
+
+    private static final class SecretNoteSubtypeInterpreter implements ISubtypeInterpreter<ItemStack> {
+        @Override
+        public Object getSubtypeData(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") UidContext context) {
+            return SecretNoteItem.getVariantKey(stack);
+        }
+
+        @Override
+        public String getLegacyStringSubtypeInfo(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") UidContext context) {
+            return SecretNoteItem.getVariantKey(stack);
+        }
+    }
+
+    @SuppressWarnings("null")
+    private static void hideUnboundSecretNote(IRecipeRegistration registration) {
+        registration.getIngredientManager().removeIngredientsAtRuntime(
+                VanillaTypes.ITEM_STACK,
+                List.of(new ItemStack(ModItems.SECRET_NOTE.get())));
     }
 
     /**

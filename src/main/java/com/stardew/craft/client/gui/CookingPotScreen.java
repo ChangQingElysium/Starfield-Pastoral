@@ -204,7 +204,7 @@ public class CookingPotScreen extends AbstractContainerScreen<CookingPotMenu> {
             }
         }
 
-        g.drawString(this.font, Component.translatable("stardewcraft.ui.cooking_pot.title"), x + 158, y + 6, TITLE_COLOR, true);
+        g.drawString(this.font, Component.translatable("stardewcraft.ui.cooking_pot.title"), x + 158, y + 6, TITLE_COLOR, false);
 
         int maxPage = Math.max(1, ((availableRecipes.size() - 1) / 45) + 1);
         String pageTxt = (recipePage + 1) + " / " + maxPage;
@@ -268,7 +268,7 @@ public class CookingPotScreen extends AbstractContainerScreen<CookingPotMenu> {
         int shimmerG = 200 + (int)(30 * Math.sin(System.currentTimeMillis() / 250.0));
         int shimmerB = 100;
         int shimmerColor = (shimmerR << 16) | (shimmerG << 8) | shimmerB;
-        g.drawString(this.font, printTitle, 0, 0, alphaMask | shimmerColor, true);
+        g.drawString(this.font, printTitle, 0, 0, alphaMask | shimmerColor, false);
         g.pose().popPose();
 
         if (unlocked) {
@@ -279,7 +279,7 @@ public class CookingPotScreen extends AbstractContainerScreen<CookingPotMenu> {
             int descY = py + 16;
             for (int i = 0; i < Math.min(3, descLines.size()); i++) {
                 int dx = px + (width - this.font.width(descLines.get(i))) / 2;
-                g.drawString(this.font, descLines.get(i), dx, descY, alphaMask | 0xFFAAAAAA, true);
+                g.drawString(this.font, descLines.get(i), dx, descY, alphaMask | 0xFFAAAAAA, false);
                 descY += this.font.lineHeight;
             }
             }
@@ -313,7 +313,7 @@ public class CookingPotScreen extends AbstractContainerScreen<CookingPotMenu> {
             int yPos = py + 110;
             for (FormattedCharSequence line : lines) {
                 int dx = px + (width - this.font.width(line)) / 2;
-                g.drawString(this.font, line, dx, yPos, alphaMask | 0xFFFFAA, true);
+                g.drawString(this.font, line, dx, yPos, alphaMask | 0xFFFFAA, false);
                 yPos += this.font.lineHeight;
             }
             return;
@@ -339,12 +339,12 @@ public class CookingPotScreen extends AbstractContainerScreen<CookingPotMenu> {
             
             if (e > 0) {
                 g.blit(ENERGY_ICON, curX, statY - 2, 0, 0, 16, 16, 16, 16);
-                g.drawString(this.font, String.valueOf(e), curX + 16, statY + 2, alphaMask | 0xFFFFFF, true);
+                g.drawString(this.font, String.valueOf(e), curX + 16, statY + 2, alphaMask | 0xFFFFFF, false);
                 curX += 18 + this.font.width(String.valueOf(e));
             }
             if (h > 0) {
                 g.blit(HEALTH_ICON, curX, statY - 2, 0, 0, 16, 16, 16, 16);
-                g.drawString(this.font, String.valueOf(h), curX + 16, statY + 2, alphaMask | 0xFFFFFF, true);
+                g.drawString(this.font, String.valueOf(h), curX + 16, statY + 2, alphaMask | 0xFFFFFF, false);
                 curX += 18 + this.font.width(String.valueOf(h));
             }
             
@@ -404,7 +404,7 @@ public class CookingPotScreen extends AbstractContainerScreen<CookingPotMenu> {
                 g.pose().pushPose();
                 g.pose().translate(rx + 8 - (this.font.width(ratio)*rScale)/2, startY + 16, 200);
                 g.pose().scale(rScale, rScale, 1.0f);
-                g.drawString(this.font, ratio, 0, 0, ratioColor, true);
+                g.drawString(this.font, ratio, 0, 0, ratioColor, false);
                 g.pose().popPose();
             }
         }

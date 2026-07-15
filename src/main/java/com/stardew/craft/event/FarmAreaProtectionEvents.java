@@ -22,6 +22,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.FlowerPotBlock;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.ItemAbilities;
@@ -190,6 +191,20 @@ public class FarmAreaProtectionEvents {
         // 别人的农场：检查权限
         return com.stardew.craft.farm.FarmPermissionManager.get()
                 .canModify(ownerUUID, player.getUUID());
+    }
+
+    /** Permission gate for entity-backed decorations which do not emit BlockEvent placement/break events. */
+    public static boolean canModifyDecorationAt(ServerPlayer player, ServerLevel level, BlockPos pos) {
+        if (player.isCreative() || level.dimension() != ModDimensions.STARDEW_VALLEY) {
+            return true;
+        }
+        if (com.stardew.craft.greenhouse.GreenhouseManager.isInGreenhouseExterior(level, pos)) {
+            return false;
+        }
+        if (com.stardew.craft.greenhouse.GreenhouseManager.isInGreenhouseInterior(level, pos)) {
+            return canModifyGreenhouseAt(player, level, pos);
+        }
+        return canModifyAt(player, pos);
     }
 
     public static boolean isProtectedNonFarmArea(ServerLevel level, BlockPos pos) {
@@ -407,6 +422,15 @@ public class FarmAreaProtectionEvents {
         // 传送触发方块不受保护（进入别人家的屋内/屋外必须能触发传送）
         if (event.getLevel().getBlockState(event.getPos()).getBlock()
                 instanceof com.stardew.craft.block.portal.PortalTriggerBlock) {
+            return;
+        }
+        // Public flower pots are fixed map decoration. Never let players swap
+        // their contents; farm-owned pots remain usable and protected by the
+        // normal farm permission gate below.
+        if (event.getLevel().getBlockState(event.getPos()).getBlock() instanceof FlowerPotBlock
+                && FarmAreaResolver.getOwnerAt(event.getPos()) == null) {
+            event.setCanceled(true);
+            event.setCancellationResult(net.minecraft.world.InteractionResult.CONSUME);
             return;
         }
         // 水桶/岩浆桶等流体桶：在任何受保护区域都禁止放置流体

@@ -219,7 +219,7 @@ public class FishPondManagerScreen extends AbstractContainerScreen<FishPondManag
     private int renderUnformedContent(GuiGraphics g, int x, int y, int width) {
         g.drawString(this.font, GuiText.ellipsize(this.font,
             Component.translatable("gui.stardew_craft.fish_pond_manager.requirements"), width),
-            x, y, COL_GOLD, true);
+            x, y, COL_GOLD, false);
         y += lineH;
 
         y = renderRequirementRow(
@@ -305,7 +305,7 @@ public class FishPondManagerScreen extends AbstractContainerScreen<FishPondManag
             y += secGap;
             g.drawString(this.font, GuiText.ellipsize(this.font,
                 Component.translatable("gui.stardew_craft.fish_pond_manager.request_bring"), width),
-                x, y, COL_GOLD, true);
+                x, y, COL_GOLD, false);
             y += lineH;
             ItemStack neededPreview = menu.getNeededItemPreviewStack();
             CommonGuiTextures.drawItem(g, neededPreview.isEmpty() ? new ItemStack(Items.PAPER) : neededPreview, x, y - 3, 1.0f);
@@ -430,7 +430,7 @@ public class FishPondManagerScreen extends AbstractContainerScreen<FishPondManag
             Component.translatable(confirmType == ConfirmType.CLEAR
                 ? "gui.stardew_craft.fish_pond_manager.dialog.clear.title"
                 : "gui.stardew_craft.fish_pond_manager.dialog.demolish.title"), dw - pad * 2),
-            tx, ty, COL_TITLE, true);
+            tx, ty, COL_TITLE, false);
         ty += lineH;
         ty = GuiText.drawWrapped(g, this.font,
             Component.translatable(confirmType == ConfirmType.CLEAR

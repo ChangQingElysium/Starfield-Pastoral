@@ -1,5 +1,73 @@
 # Changelog
 
+## 0.5.1fix1 - 2026-07-15
+
+### Update Log (English)
+
+#### Secret Notes And Special Progression
+
+- Completed another source-aligned Secret Note pass: restored natural acquisition for Notes 10, 13, 14 and 20; implemented the temporary Skull Cavern floor-100 Iridium Milk reward, Note 20's Special Charm truck exchange, Note 21's midnight bush event, and the authored buried-treasure and Ornate Necklace interactions.
+- Completed the multiplayer-safe Winter Mystery flow with the bus-stop shadow event, player-specific footprints, bush cutscene and Magnifying Glass unlock; Secret Note discovery remains player-specific.
+- Fixed Secret Note enumeration in creative/JEI and the player collection page so the registered variants are visible instead of collapsing to a single Note 27 entry.
+- Kept intentionally unfinished notes out of natural acquisition and retained continuous in-mod numbering after the intentionally omitted vanilla Note 19.
+
+#### Special Furniture
+
+- Added the dedicated Special Furniture item type with its own tooltip color and decoration-category sorting while excluding it from the Furniture Catalogue.
+- Added the Upright Piano, Junimo Plush and Stone Junimo from the authored `tmp` models, with source-aligned names, descriptions, prices, block hardness and appropriate tools.
+- Added the Upright Piano to all three Night Market magic-boat inventories for 100,000g.
+- Added the source-aligned Note 13 Junimo Plush bush reward during the full displayed 12:00 time slot on day 28, and a multiplayer-safe per-player Stone Junimo reward at the authored map position.
+
+#### Interface, Localization And Rendering
+
+- Improved player-menu profile, skill, mastery, collection and letter layouts, including a smaller Minecraft-skin face portrait, shared text fitting and safe parsing of embedded letter commands.
+- Reworked interaction hints into a compact hover-only text treatment with time-based fades while preserving the existing distance-faded world outline.
+- Fixed Stardew tool type labels, duplicate tooltip descriptions, several GUI text overflows and multilingual font sizing across the shipped interfaces.
+- Updated every language currently shipped by the project: English, German, Spanish, French, Hungarian, Italian, Japanese, Korean, Brazilian Portuguese, Russian, Turkish and Simplified Chinese.
+
+#### Runtime And Asset Fixes
+
+- Improved cutscene cancellation, message commands, precondition handling, event NPC playback and debug tooling used by the newly implemented Secret Note scenes.
+- Reworked bookshelf and carpet decoration rendering/placement paths and refreshed affected NPC, festival and GUI assets.
+- Restored the Iridium Milk special-item behavior and preserved its special name/type/tooltip presentation.
+
+#### Release
+
+- Updated the public mod version to `0.5.1fix1`.
+
+### 更新日志（中文）
+
+#### 秘密纸条与特殊进度
+
+- 继续按原版源码实装秘密纸条：恢复 10、13、14、20 号纸条自然获取，加入骷髅矿井 100 层的临时铱奶奖励、20 号纸条的特殊魅力货车交换、21 号纸条的午夜灌木事件，以及已确定点位的锄地宝藏和华丽项链流程。
+- 完成多人兼容的“冬日谜影”流程，包含巴士站小黑事件、玩家独立脚印、灌木剧情与放大镜解锁；秘密纸条发现状态继续按玩家独立保存。
+- 修复创造物品栏、JEI 与玩家收集页的秘密纸条枚举，不再只显示单一的 27 号纸条。
+- 尚未实装的纸条继续不会进入自然获取池；原版 19 号纸条按计划省略，Mod 内展示编号保持连续。
+
+#### 特殊家具
+
+- 新增独立的“特殊家具”物品类型、专属 tooltip 颜色与装饰分类排序，同时明确排除在家具目录之外。
+- 使用 `tmp` 中的正式模型加入立式钢琴、祝尼魔毛绒玩具和石祝尼魔，并按原版补齐名称、描述、价格、硬度与适用工具。
+- 立式钢琴加入夜市三天的魔法船商店，原版价格为 100,000g。
+- 加入 13 号纸条对应的祝尼魔毛绒玩具灌木奖励：任意季节 28 日、HUD 显示 12:00 的完整时段可领取；石祝尼魔则在指定地图点位按玩家独立领取，兼容多人游戏。
+
+#### 界面、多语言与渲染
+
+- 改进玩家菜单的档案、技能、精通、收集和信件布局，包含缩小的 Minecraft 皮肤正脸头像、共享文字适配与信件内嵌命令的安全解析。
+- 将交互提示调整为简洁的准星悬停文字与基于时间的渐显渐隐，同时保留原有按距离渐显的世界方块选框。
+- 修复星露谷农具类型文字、重复描述、多个 GUI 文字溢出与多语言字号问题。
+- 更新项目当前发布的全部语言：英语、德语、西班牙语、法语、匈牙利语、意大利语、日语、韩语、巴西葡萄牙语、俄语、土耳其语与简体中文。
+
+#### 运行时与资源修复
+
+- 改进剧情中止、消息命令、前置条件、事件 NPC 播放与调试工具，为本轮秘密纸条剧情提供稳定运行支持。
+- 调整书架与地毯装饰的渲染/放置路径，并刷新相关 NPC、节日与 GUI 资源。
+- 恢复铱奶特殊物品逻辑，同时保留其特殊名称、类型与 tooltip 表现。
+
+#### 发布
+
+- 项目公开版本号更新为 `0.5.1fix1`。
+
 ## 0.5.1 - 2026-07-15
 
 ### Update Log (English)

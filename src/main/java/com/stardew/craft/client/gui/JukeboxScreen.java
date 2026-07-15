@@ -195,7 +195,7 @@ public class JukeboxScreen extends Screen {
         CommonGuiTextures.drawScrollBanner(graphics, textX, titleY - (int)(3 * s4), textWidth, s4);
 
         // Text on top — SDV uses dark brown (Game1.textColor ≈ 0xFF5B5045)
-        graphics.drawCenteredString(font, title, centerX, titleY, 0xFF5B5045);
+        graphics.drawString(font, title, centerX - font.width(title) / 2, titleY, 0xFF5B5045, false);
     }
 
     /**

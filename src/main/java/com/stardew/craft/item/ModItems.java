@@ -705,6 +705,18 @@ public class ModItems {
         public static final DeferredItem<Item> MUSEUM_EXHIBIT_STAND = ITEMS.register("museum_exhibit_stand",
                         () -> new StardewBlockItem(ModBlocks.MUSEUM_EXHIBIT_STAND.get(), "stardewcraft.type.utility", -1, new Item.Properties().stacksTo(999)));
 
+        public static final DeferredItem<Item> UPRIGHT_PIANO = ITEMS.register("upright_piano",
+                        () -> new StardewBlockItem(ModBlocks.UPRIGHT_PIANO.get(), "stardewcraft.type.special_furniture", 999,
+                                        new Item.Properties().stacksTo(999)));
+
+        public static final DeferredItem<Item> JUNIMO_PLUSH = ITEMS.register("junimo_plush",
+                        () -> new StardewBlockItem(ModBlocks.JUNIMO_PLUSH.get(), "stardewcraft.type.special_furniture", 4000,
+                                        new Item.Properties().stacksTo(999)));
+
+        public static final DeferredItem<Item> STONE_JUNIMO = ITEMS.register("stone_junimo",
+                        () -> new StardewBlockItem(ModBlocks.STONE_JUNIMO.get(), "stardewcraft.type.special_furniture", 50,
+                                        new Item.Properties().stacksTo(999)));
+
         public static final DeferredItem<Item> BED_1 = ITEMS.register("bed_1",
                         () -> new StardewBlockItem(ModBlocks.BED_1.get(), "stardewcraft.type.furniture", -1, new Item.Properties().stacksTo(999)));
 
@@ -1787,6 +1799,8 @@ public class ModItems {
                         () -> new SkullKeyItem(new Item.Properties().stacksTo(1).fireResistant()));
         public static final DeferredItem<Item> MAGNIFYING_GLASS = ITEMS.register("magnifying_glass",
                         () -> new MagnifyingGlassItem(new Item.Properties().stacksTo(1).fireResistant()));
+        public static final DeferredItem<Item> SPECIAL_CHARM = ITEMS.register("special_charm",
+                        () -> new SpecialCharmItem(new Item.Properties().stacksTo(1).fireResistant()));
         public static final DeferredItem<Item> SECRET_NOTE = ITEMS.register("secret_note",
                         () -> new SecretNoteItem(new Item.Properties().stacksTo(999)));
         public static final DeferredItem<Item> ORNATE_NECKLACE = ITEMS.register("ornate_necklace",

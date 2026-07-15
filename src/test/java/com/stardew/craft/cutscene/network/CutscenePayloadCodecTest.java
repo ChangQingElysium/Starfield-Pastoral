@@ -31,4 +31,15 @@ class CutscenePayloadCodecTest {
         assertEquals(expected, CutsceneServerActionPayload.STREAM_CODEC.decode(buffer));
         buffer.release();
     }
+
+    @Test
+    void abortRoundTripsTheAuthorizedSessionIdentity() {
+        var expected = new AbortCutscenePayload("example:event", 123456789L);
+        var buffer = Unpooled.buffer();
+
+        AbortCutscenePayload.STREAM_CODEC.encode(buffer, expected);
+
+        assertEquals(expected, AbortCutscenePayload.STREAM_CODEC.decode(buffer));
+        buffer.release();
+    }
 }

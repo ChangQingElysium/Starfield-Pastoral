@@ -1,5 +1,5 @@
 {
   "parent": "minecraft:block/block",
-  "textures": { "particle": "stardewcraft:block/deco/misc/common/bookshelf_3_3" },
+	"textures": { "particle": "stardewcraft:block/deco/misc/common/bookshelf_3_3_1" },
   "elements": []
 }

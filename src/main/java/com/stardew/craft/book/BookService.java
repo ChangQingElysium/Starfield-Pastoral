@@ -188,7 +188,7 @@ public final class BookService {
     private static void scheduleMessage(ServerPlayer player, Component message) {
         player.server.tell(new TickTask(player.server.getTickCount() + READ_MESSAGE_DELAY_TICKS, () -> {
             if (!player.isRemoved()) {
-                player.displayClientMessage(message, false);
+				com.stardew.craft.network.GlobalHudMessagePayload.sendTo(player, message);
             }
         }));
     }

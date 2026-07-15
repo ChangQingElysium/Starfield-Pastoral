@@ -201,7 +201,7 @@ public final class BillboardQuestIndicatorRenderer {
 
         int textColor = (0xFF << 24) | (r << 16) | (g << 8) | b;
         // drawInBatch with drop-shadow=true 会自动画描边
-        font.drawInBatch(c, x, y, textColor, true,
+        font.drawInBatch(c, x, y, textColor, false,
                 ps.last().pose(),
                 buf,
                 Font.DisplayMode.NORMAL,

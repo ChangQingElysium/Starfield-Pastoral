@@ -31,6 +31,15 @@ public final class EventData {
 
     public String id() { return id; }
     public boolean skippable() { return skippable; }
+
+    /** A command-level gate delays skipping even when the event metadata allows it. */
+    public boolean skippableAtStart() {
+        if (!skippable) {
+            return false;
+        }
+        return rawCommands.stream().noneMatch(command ->
+                command.has("cmd") && "skippable".equals(command.get("cmd").getAsString()));
+    }
     public EventTrigger trigger() { return trigger; }
     public List<EventPrecondition> preconditions() { return preconditions; }
     public List<JsonObject> rawCommands() { return rawCommands; }

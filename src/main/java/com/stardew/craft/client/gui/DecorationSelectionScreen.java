@@ -197,7 +197,7 @@ public class DecorationSelectionScreen extends Screen {
         g.fillGradient(px + 144, py + 10, px + 145, py + UI_HEIGHT - 10, 0x40FFFFFF, 0x00FFFFFF);
 
         String titleStr = this.title.getString();
-        g.drawString(this.font, titleStr, px + 154, py + 6, TITLE_COLOR, true);
+        g.drawString(this.font, titleStr, px + 154, py + 6, TITLE_COLOR, false);
 
         // Scroll indicator
         int totalRows = Math.max(1, ((options.size() - 1) / COLS) + 1);
@@ -322,7 +322,7 @@ public class DecorationSelectionScreen extends Screen {
         int shimmerG = 200 + (int)(30 * Math.sin(System.currentTimeMillis() / 250.0));
         int shimmerB = 100;
         int shimmerColor = (shimmerR << 16) | (shimmerG << 8) | shimmerB;
-        g.drawString(this.font, printTitle, 0, 0, alphaMask | shimmerColor, true);
+        g.drawString(this.font, printTitle, 0, 0, alphaMask | shimmerColor, false);
         g.pose().popPose();
 
         // draw preview area
@@ -370,7 +370,7 @@ public class DecorationSelectionScreen extends Screen {
             int descY = areaY + areaH + 24;
             for (int i = 0; i < Math.min(4, descLines.size()); i++) {
                 int dx = px + (width - this.font.width(descLines.get(i))) / 2;
-                g.drawString(this.font, descLines.get(i), dx, descY, alphaMask | 0xFFF38D8D, true);
+                g.drawString(this.font, descLines.get(i), dx, descY, alphaMask | 0xFFF38D8D, false);
                 descY += 10;
             }
         } else if (option.styleId().equals(payload.currentStyleId())) {
@@ -379,14 +379,14 @@ public class DecorationSelectionScreen extends Screen {
             int eqWidth = this.font.width(eqText);
             int dx = px + (width - eqWidth) / 2;
             int descY = areaY + areaH + 24;
-            g.drawString(this.font, eqText, dx, descY, alphaMask | 0xFF88FF88, true);
+            g.drawString(this.font, eqText, dx, descY, alphaMask | 0xFF88FF88, false);
         }
     }
 
     private void drawSegmentButtons(GuiGraphics g, int px, int py, int areaW) {
         // 4 buttons: Auto, Bottom(0), Middle(1), Top(2)
         Component label = Component.translatable("stardewcraft.ui.deco.position");
-        g.drawString(this.font, label, px, py + 4, 0xFFAAAAAA, true);
+        g.drawString(this.font, label, px, py + 4, 0xFFAAAAAA, false);
         int btnX = px + this.font.width(label) + 4;
         int btnW = 24;
         int btnH = 14;

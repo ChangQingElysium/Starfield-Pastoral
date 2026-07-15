@@ -80,8 +80,8 @@ public class FarmAdminCommand {
         data.removeMailFlag(STARDEW_OP_FLAG);
 
         ctx.getSource().sendSuccess(() -> Component.translatable(
-                "stardewcraft.command.admin.revoked", target.getGameProfile().getName()), true);
-        target.displayClientMessage(Component.translatable("stardewcraft.command.admin.revoked_target"), false);
+                "stardewcraft.command.admin.revoked_target", target.getGameProfile().getName()), true);
+        target.displayClientMessage(Component.translatable("stardewcraft.command.admin.revoked"), false);
         return 1;
     }
 

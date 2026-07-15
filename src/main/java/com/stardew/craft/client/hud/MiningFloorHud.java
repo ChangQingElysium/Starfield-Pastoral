@@ -104,7 +104,7 @@ public class MiningFloorHud {
         int textY = y + SLOT_SIZE / 2 - textHeight / 2;
         
         // 绘制文字（启用阴影=加粗效果）
-        guiGraphics.drawString(font, floorText, textX, textY, color, true);
+        guiGraphics.drawString(font, floorText, textX, textY, color, false);
         
         RenderSystem.disableBlend();
     }

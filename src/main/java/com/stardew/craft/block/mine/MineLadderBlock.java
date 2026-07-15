@@ -205,7 +205,7 @@ public class MineLadderBlock extends Block {
             com.stardew.craft.mining.SkullCavernSessionManager.updateDeepestFloor(nextFloor);
             com.stardew.craft.festival.desert.DesertFestivalMineService.recordFloorReached(serverPlayer, currentFloor, nextFloor, false);
             com.stardew.craft.secretnote.SecretNoteStoryTriggerService
-                    .markQiCaveScenePendingIfEligible(serverPlayer, nextFloor);
+                    .grantTemporaryQiCaveRewardIfEligible(serverPlayer, nextFloor);
         }
 
         net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
@@ -274,7 +274,7 @@ public class MineLadderBlock extends Block {
         com.stardew.craft.mining.SkullCavernSessionManager.updateDeepestFloor(targetFloor);
         com.stardew.craft.festival.desert.DesertFestivalMineService.recordFloorReached(serverPlayer, currentFloor, targetFloor, true);
         com.stardew.craft.secretnote.SecretNoteStoryTriggerService
-                .markQiCaveScenePendingIfEligible(serverPlayer, targetFloor);
+                .grantTemporaryQiCaveRewardIfEligible(serverPlayer, targetFloor);
 
         net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
                 serverPlayer, new MiningFloorSyncPacket(targetFloor));

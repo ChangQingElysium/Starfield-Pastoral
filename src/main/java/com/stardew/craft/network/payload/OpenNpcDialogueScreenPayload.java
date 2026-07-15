@@ -89,22 +89,10 @@ public record OpenNpcDialogueScreenPayload(
 
         String finalDisplayText = prefixBuilder.toString() + displayText;
 
-        // Replace @ with player name
+        // Resolve player profile tokens (@, gender branches, %favorite, etc.).
         String playerName = mc.player.getGameProfile() != null ? mc.player.getGameProfile().getName() : "player";
         if (playerName == null || playerName.isBlank()) playerName = "player";
-        finalDisplayText = finalDisplayText.replace("@", playerName);
-
-        // Replace ${male^female}$ inline gender tokens — default to male variant
-        finalDisplayText = resolveInlineGenderTokens(finalDisplayText, true);
-
-        // Replace ^ gender split — keep male variant (text before ^), discard female variant
-        finalDisplayText = resolveGenderSplit(finalDisplayText, true);
-
-        // Resolve $ control tokens ($c, $d, $p, $1, $k, $query, $y) and # page breaks
-        finalDisplayText = resolveDialogueCommands(finalDisplayText);
-
-        // Resolve % substitution tokens (%farm, %season, %pet, etc.)
-        finalDisplayText = resolvePercentTokens(finalDisplayText, playerName);
+        finalDisplayText = resolvePlayerDialogueText(finalDisplayText, playerName);
 
         // SDV parity: garble resolved text to Dwarvish if player can't understand
         if (payload.garbleDwarvish()) {
@@ -143,31 +131,7 @@ public record OpenNpcDialogueScreenPayload(
      * @param male  true to pick male variant, false for female
      */
     public static String resolveInlineGenderTokens(String text, boolean male) {
-        if (text == null || !text.contains("${")) return text;
-        StringBuilder sb = new StringBuilder();
-        int pos = 0;
-        while (pos < text.length()) {
-            int start = text.indexOf("${", pos);
-            if (start < 0) {
-                sb.append(text, pos, text.length());
-                break;
-            }
-            sb.append(text, pos, start);
-            int end = text.indexOf("}$", start + 2);
-            if (end < 0) {
-                sb.append(text, start, text.length());
-                break;
-            }
-            String inner = text.substring(start + 2, end);
-            int caret = inner.indexOf('^');
-            if (caret >= 0) {
-                sb.append(male ? inner.substring(0, caret) : inner.substring(caret + 1));
-            } else {
-                sb.append(inner);
-            }
-            pos = end + 2;
-        }
-        return sb.toString();
+        return com.stardew.craft.client.PlayerGenderText.resolve(text, male);
     }
 
     /**
@@ -180,7 +144,7 @@ public record OpenNpcDialogueScreenPayload(
      * @param male  true to keep male half
      */
     public static String resolveGenderSplit(String text, boolean male) {
-        if (text == null || !text.contains("^")) return text;
+        if (text == null || (!text.contains("^") && !text.contains("¦"))) return text;
         // Don't split inside $q/$r question blocks — those use ^ differently
         // Find the first ^ that is not inside ${...}$
         int depth = 0;
@@ -196,11 +160,25 @@ public record OpenNpcDialogueScreenPayload(
                 i++;
                 continue;
             }
-            if (c == '^' && depth == 0) {
+            if ((c == '^' || c == '¦') && depth == 0) {
                 return male ? text.substring(0, i) : text.substring(i + 1);
             }
         }
         return text;
+    }
+
+    /** Applies the shared player-dependent dialogue pipeline for NPC and cutscene text. */
+    public static String resolvePlayerDialogueText(String text, String fallbackPlayerName) {
+        String fallback = fallbackPlayerName == null || fallbackPlayerName.isBlank()
+                ? "player" : fallbackPlayerName;
+        String preferred = com.stardew.craft.client.ClientPlayerDataCache.getPreferredName();
+        String playerName = preferred == null || preferred.isBlank() ? fallback : preferred;
+        boolean male = com.stardew.craft.client.ClientPlayerDataCache.isPlayerMale();
+        String resolved = text == null ? "" : text.replace("@", playerName);
+        resolved = resolveInlineGenderTokens(resolved, male);
+        resolved = resolveGenderSplit(resolved, male);
+        resolved = resolveDialogueCommands(resolved);
+        return resolvePercentTokens(resolved, playerName);
     }
 
     // ── SDV word lists (from Dialogue.cs) ──────────────────────────────────
@@ -536,7 +514,9 @@ public record OpenNpcDialogueScreenPayload(
         text = replaceToken(text, "spouse", "your partner");
         text = replaceToken(text, "kid1", "your child");
         text = replaceToken(text, "kid2", "your child");
-        text = replaceToken(text, "favorite", "something special");
+        String favoriteThing = com.stardew.craft.client.ClientPlayerDataCache.getFavoriteThing();
+        text = replaceToken(text, "favorite",
+                favoriteThing == null || favoriteThing.isBlank() ? "something special" : favoriteThing);
         text = replaceToken(text, "band", "The Stardew Band");
         text = replaceToken(text, "book", "Blue Tower");
 

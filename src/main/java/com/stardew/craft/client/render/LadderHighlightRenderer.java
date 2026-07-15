@@ -218,7 +218,7 @@ public final class LadderHighlightRenderer {
             displayText,
             -textWidth / 2.0f, -textHeight / 2.0f,
             textColor,
-            true,
+            false,
             ps.last().pose(),
             textBuf,
             Font.DisplayMode.NORMAL,

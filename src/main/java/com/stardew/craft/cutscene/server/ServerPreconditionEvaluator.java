@@ -11,6 +11,7 @@ import com.stardew.craft.player.PlayerStardewData;
 import com.stardew.craft.player.SkillType;
 import com.stardew.craft.time.StardewTimeManager;
 import com.stardew.craft.weather.WeatherManager;
+import com.stardew.craft.weather.WeatherTypeNormalizer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.resources.ResourceLocation;
@@ -144,7 +145,8 @@ public final class ServerPreconditionEvaluator {
     private static boolean checkWeather(ServerLevel level, EventPrecondition p) {
         String expected = p.getString("weather");
         if (expected == null) return true;
-        return expected.equalsIgnoreCase(WeatherManager.getCurrentWeather(level));
+        return WeatherTypeNormalizer.normalize(expected)
+                .equalsIgnoreCase(WeatherTypeNormalizer.normalize(WeatherManager.getCurrentWeather(level)));
     }
 
     private static boolean checkDayOfWeek(ServerLevel level, EventPrecondition p) {

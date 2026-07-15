@@ -42,11 +42,7 @@ public class SpeakCommand implements EventCommand {
 
         // Full SDV text resolution pipeline (same as NPC dialogue)
         String playerName = mc.player.getName().getString();
-        displayText = displayText.replace("@", playerName);
-        displayText = OpenNpcDialogueScreenPayload.resolveInlineGenderTokens(displayText, true);
-        displayText = OpenNpcDialogueScreenPayload.resolveGenderSplit(displayText, true);
-        displayText = OpenNpcDialogueScreenPayload.resolveDialogueCommands(displayText);
-        displayText = OpenNpcDialogueScreenPayload.resolvePercentTokens(displayText, playerName);
+        displayText = OpenNpcDialogueScreenPayload.resolvePlayerDialogueText(displayText, playerName);
 
         mc.setScreen(new com.stardew.craft.client.gui.common.StardewNpcDialogueScreen(
                 npcId, displayText, 0

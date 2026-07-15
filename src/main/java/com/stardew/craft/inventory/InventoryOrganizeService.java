@@ -56,6 +56,7 @@ public final class InventoryOrganizeService {
             "stardewcraft.type.craftable",
             "stardewcraft.type.utility",
             "stardewcraft.type.furniture",
+            "stardewcraft.type.special_furniture",
             "stardewcraft.type.furniture_painting",
             "stardewcraft.type.carpet",
             "stardewcraft.type.festival_decoration",

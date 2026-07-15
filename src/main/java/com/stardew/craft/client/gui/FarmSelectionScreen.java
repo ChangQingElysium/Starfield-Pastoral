@@ -6,7 +6,6 @@ import com.stardew.craft.client.farm.FarmJoinClientState;
 import com.stardew.craft.client.gui.common.GuiText;
 import com.stardew.craft.client.gui.overnight.StardewGuiUtil;
 import com.stardew.craft.farm.FarmType;
-import com.stardew.craft.network.payload.FarmSelectionSubmitPayload;
 import com.stardew.craft.sound.ModSounds;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
@@ -531,9 +530,11 @@ public class FarmSelectionScreen extends Screen {
     }
 
     private void sendSelection(String farmTypeId, String farmName, boolean forceCancelPending) {
-        PacketDistributor.sendToServer(new FarmSelectionSubmitPayload(farmTypeId, farmName, forceCancelPending));
         playUi(ModSounds.NEW_RECIPE.get(), 0.88f, 1.0f);
-        this.onClose();
+        if (this.minecraft != null) {
+            this.minecraft.setScreen(PlayerProfileSetupScreen.forNewFarm(
+                    farmTypeId, farmName, forceCancelPending));
+        }
     }
 
     // ═══════════════════════════════════════════

@@ -19,7 +19,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 /** Source-parity trigger for the A Winter Mystery magnifying-glass scene. */
 @EventBusSubscriber(modid = StardewCraft.MODID)
 public final class SecretNote31BushInteraction {
-    private static final String MAGNIFYING_GLASS_EVENT_ID = "secret_note31_magnifying_glass";
+    public static final String MAGNIFYING_GLASS_EVENT_ID = "secret_note31_magnifying_glass";
 
     private SecretNote31BushInteraction() {}
 

@@ -58,6 +58,10 @@
     {
       "item": "stardewcraft:scarecrow_8",
       "price": 5000
+    },
+    {
+      "item": "stardewcraft:upright_piano",
+      "price": 100000
     }
   ],
   "accepted_sell_types": []

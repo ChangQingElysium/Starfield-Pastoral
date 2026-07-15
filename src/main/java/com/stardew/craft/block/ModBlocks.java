@@ -2002,6 +2002,28 @@ public static final DeferredBlock<Block> DEAD_CROP = BLOCKS.register("dead_crop"
                                         .noOcclusion()
                                         .strength(1.5F, 3.0F)));
 
+        public static final DeferredBlock<Block> UPRIGHT_PIANO = BLOCKS.register("upright_piano",
+                        () -> new com.stardew.craft.block.decor.MapDecorStaticBlock(Block.Properties.of()
+                                        .mapColor(net.minecraft.world.level.material.MapColor.WOOD)
+                                        .sound(net.minecraft.world.level.block.SoundType.WOOD)
+                                        .noOcclusion()
+                                        .strength(2.0F, 3.0F), "stardewcraft:decor/common/upright_piano"));
+
+        public static final DeferredBlock<Block> JUNIMO_PLUSH = BLOCKS.register("junimo_plush",
+                        () -> new com.stardew.craft.block.decor.MapDecorStaticBlock(Block.Properties.of()
+                                        .mapColor(net.minecraft.world.level.material.MapColor.WOOL)
+                                        .sound(net.minecraft.world.level.block.SoundType.WOOL)
+                                        .noOcclusion()
+                                        .strength(0.5F, 1.0F), "stardewcraft:decor/common/junimo_plush"));
+
+        public static final DeferredBlock<Block> STONE_JUNIMO = BLOCKS.register("stone_junimo",
+                        () -> new com.stardew.craft.block.decor.MapDecorStaticBlock(Block.Properties.of()
+                                        .mapColor(net.minecraft.world.level.material.MapColor.STONE)
+                                        .sound(net.minecraft.world.level.block.SoundType.STONE)
+                                        .requiresCorrectToolForDrops()
+                                        .noOcclusion()
+                                        .strength(1.5F, 6.0F), "stardewcraft:decor/common/stone_junimo"));
+
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> BED_1 = BLOCKS.register("bed_1",
                         () -> new com.stardew.craft.block.decor.MapDecorStaticBlock(Block.Properties.of()
@@ -3252,25 +3274,28 @@ public static final DeferredBlock<Block> DEAD_CROP = BLOCKS.register("dead_crop"
                                         .strength(0.5F, 1.0F), "stardewcraft:decor/common/book_stack_2_3"));
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> BOOKSHELF_WALL = BLOCKS.register("bookshelf_wall",
-                        () -> new com.stardew.craft.block.decor.MapDecorWallStaticBlock(Block.Properties.of()
+                        () -> new com.stardew.craft.block.decor.BookshelfWallDecorBlock(Block.Properties.of()
                                         .mapColor(net.minecraft.world.level.material.MapColor.WOOD)
                                         .sound(net.minecraft.world.level.block.SoundType.WOOD)
                                         .noOcclusion()
-                                        .strength(0.8F, 1.6F), "stardewcraft:decor/wall_decor/common/bookshelf_wall_3_1"));
+                                        .strength(0.8F, 1.6F), "stardewcraft:decor/wall_decor/common/bookshelf_wall_3_1",
+                                        -0.5, 2.5, 8.5, 16.5, 13.5, 16.5));
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> BOOKSHELF_TALL_1 = BLOCKS.register("bookshelf_tall_1",
-                        () -> new com.stardew.craft.block.decor.BookshelfGeoDecorBlock(Block.Properties.of()
+                        () -> new com.stardew.craft.block.decor.BookshelfStaticDecorBlock(Block.Properties.of()
                                         .mapColor(net.minecraft.world.level.material.MapColor.WOOD)
                                         .sound(net.minecraft.world.level.block.SoundType.WOOD)
                                         .noOcclusion()
-                                        .strength(1.0F, 2.0F), "stardewcraft:geo/block/decor/bookshelf_3_2.geo.json"));
+                                        .strength(1.0F, 2.0F), "stardewcraft:decor/common/bookshelf_3_2_display",
+                                        -16, 0, 4, 16, 32, 16));
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> BOOKSHELF_TALL_2 = BLOCKS.register("bookshelf_tall_2",
                         () -> new com.stardew.craft.block.decor.BookshelfGeoDecorBlock(Block.Properties.of()
                                         .mapColor(net.minecraft.world.level.material.MapColor.WOOD)
                                         .sound(net.minecraft.world.level.block.SoundType.WOOD)
                                         .noOcclusion()
-                                        .strength(1.0F, 2.0F), "stardewcraft:geo/block/decor/bookshelf_3_3.geo.json"));
+                                        .strength(1.0F, 2.0F), "stardewcraft:decor/common/bookshelf_3_3_display",
+                                        -15, 0, 5, 17, 48, 16));
 
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> WALLPAPER_BLOCK = BLOCKS.register("wallpaper_block",

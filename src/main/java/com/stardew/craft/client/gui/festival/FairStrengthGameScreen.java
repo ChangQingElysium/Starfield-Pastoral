@@ -80,13 +80,15 @@ public class FairStrengthGameScreen extends Screen {
         }
 
         String powerText = String.valueOf(power);
-        graphics.drawCenteredString(font, powerText, panelX + PANEL_WIDTH / 2, barY + BAR_HEIGHT + 10, 0xFF3F2A13);
+        graphics.drawString(font, powerText, panelX + PANEL_WIDTH / 2 - font.width(powerText) / 2,
+            barY + BAR_HEIGHT + 10, 0xFF3F2A13, false);
 
         if (resultKey.isEmpty()) {
             String hint = clicked
                 ? I18n.get("stardewcraft.fair.strength.swinging")
                 : I18n.get("stardewcraft.fair.strength.click");
-            graphics.drawCenteredString(font, hint, panelX + PANEL_WIDTH / 2, panelY + PANEL_HEIGHT - 18, 0xFF5B3418);
+            graphics.drawString(font, hint, panelX + PANEL_WIDTH / 2 - font.width(hint) / 2,
+                panelY + PANEL_HEIGHT - 18, 0xFF5B3418, false);
         } else {
             drawResult(graphics, panelX, panelY);
         }

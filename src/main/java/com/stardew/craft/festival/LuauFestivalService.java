@@ -702,7 +702,6 @@ public final class LuauFestivalService {
         MAIN_EVENT_CUTSCENE_DONE.clear();
         String eventId = MAIN_EVENT_CUTSCENE_ID + "_" + reaction;
         for (ServerPlayer participant : participants) {
-            participant.displayClientMessage(Component.translatable("message.stardewcraft.festival.luau.main_event_start", reaction), false);
             ServerCutsceneTracker.startEvent(participant, eventId);
         }
     }

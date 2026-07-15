@@ -10,6 +10,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.neoforged.neoforge.network.PacketDistributor;
 import com.mojang.logging.LogUtils;
 import org.slf4j.Logger;
 
@@ -34,9 +35,14 @@ public record TriggerEventPayload(String eventId, long sessionId) implements Cus
         context.enqueueWork(() -> {
             EventData data = EventRegistry.getById(payload.eventId);
             if (data != null) {
-                EventPlayer.get().start(data, payload.sessionId);
+                if (!EventPlayer.get().start(data, payload.sessionId)) {
+                    PacketDistributor.sendToServer(new AbortCutscenePayload(
+                            payload.eventId, payload.sessionId));
+                }
             } else {
                 LOGGER.warn("Client EventRegistry has no event '{}' — was the registry synced?", payload.eventId);
+                PacketDistributor.sendToServer(new AbortCutscenePayload(
+                        payload.eventId, payload.sessionId));
             }
         });
     }

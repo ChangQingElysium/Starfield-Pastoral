@@ -71,6 +71,7 @@ public final class NpcInteractionService {
         "stardewcraft.type.ring",
         "stardewcraft.type.boots",
         "stardewcraft.type.furniture",
+        "stardewcraft.type.special_furniture",
         "stardewcraft.type.furniture_painting",
         "stardewcraft.type.utility",
         "stardewcraft.type.scarecrow",

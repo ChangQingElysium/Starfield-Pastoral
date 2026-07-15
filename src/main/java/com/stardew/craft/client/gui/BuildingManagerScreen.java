@@ -285,7 +285,7 @@ public class BuildingManagerScreen extends AbstractContainerScreen<AbstractConta
         // Title row: building name + tier stars
         Component name = getBuildingDisplayName();
         int titleMaxW = tier > 0 ? Math.max(1, cw - 36) : cw;
-        g.drawString(this.font, GuiText.ellipsize(this.font, name, titleMaxW), cx, y, COL_TITLE, true);
+        g.drawString(this.font, GuiText.ellipsize(this.font, name, titleMaxW), cx, y, COL_TITLE, false);
         if (tier > 0) {
             int starX = cx + Math.min(this.font.width(name), titleMaxW) + 6;
             String stars = "\u2605".repeat(tier);
@@ -294,7 +294,7 @@ public class BuildingManagerScreen extends AbstractContainerScreen<AbstractConta
                 case 2 -> 0xFFC0C0C0;
                 default -> 0xFFFFD700;
             };
-            g.drawString(this.font, stars, starX, y, starCol, true);
+            g.drawString(this.font, stars, starX, y, starCol, false);
         }
         y += lineH;
 
@@ -341,7 +341,7 @@ public class BuildingManagerScreen extends AbstractContainerScreen<AbstractConta
         if (mgr.isAtMaxTier()) {
             Component maxText = Component.translatable(
                     "gui.stardew_craft." + family + "_manager.max");
-            g.drawString(this.font, maxText, rx, ry, COL_GOLD, true);
+            g.drawString(this.font, maxText, rx, ry, COL_GOLD, false);
             ry += lineH;
             Component readyText = Component.translatable(
                     "gui.stardew_craft." + family + "_manager.ready");
@@ -354,7 +354,7 @@ public class BuildingManagerScreen extends AbstractContainerScreen<AbstractConta
         Component header = mgr.getCurrentTier() <= 0
                 ? Component.translatable("gui.stardew_craft." + family + "_manager.build")
                 : Component.translatable("gui.stardew_craft." + family + "_manager.upgrade");
-        g.drawString(this.font, header, rx, ry, COL_GOLD, true);
+        g.drawString(this.font, header, rx, ry, COL_GOLD, false);
         ry += lineH;
 
         // Requirement rows
@@ -493,7 +493,7 @@ public class BuildingManagerScreen extends AbstractContainerScreen<AbstractConta
             case RELOCATE -> Component.translatable("gui.stardew_craft." + family + "_manager.dialog.relocate.title");
             default -> Component.empty();
         };
-        g.drawString(this.font, GuiText.ellipsize(this.font, title, contentWidth), tx, ty, COL_TITLE, true);
+        g.drawString(this.font, GuiText.ellipsize(this.font, title, contentWidth), tx, ty, COL_TITLE, false);
         ty += lineH;
 
         for (int i = 0; i < dialogLines.size(); i++) {

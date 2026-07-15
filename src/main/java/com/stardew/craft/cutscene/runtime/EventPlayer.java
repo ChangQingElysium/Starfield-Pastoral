@@ -65,16 +65,16 @@ public final class EventPlayer {
     /**
      * Start playing an event. Call from client thread only.
      */
-    public void start(EventData event, long authorizedSessionId) {
+    public boolean start(EventData event, long authorizedSessionId) {
         if (running) {
             LOGGER.warn("Tried to start event {} while {} is playing", event.id(), currentEvent.id());
-            return;
+            return false;
         }
 
         LOGGER.info("Starting cutscene event: {}", event.id());
         currentEvent = event;
         sessionId = authorizedSessionId;
-        skippable = event.skippable();
+        skippable = event.skippableAtStart();
         realPlayerMovedByServer = false;
         capturePlayerSnapshot();
 
@@ -130,6 +130,7 @@ public final class EventPlayer {
         if (!commands.isEmpty()) {
             commands.get(0).start(this);
         }
+        return true;
     }
 
     /**

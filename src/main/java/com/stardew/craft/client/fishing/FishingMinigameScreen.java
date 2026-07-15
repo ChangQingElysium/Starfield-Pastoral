@@ -903,7 +903,9 @@ public final class FishingMinigameScreen extends Screen {
 		// No top title text (matches desired clean SV-like UI).
 		// Hint removed: user requested no additional on-screen hint text.
 		if (perfect && distanceFromCatching > 0f && !fadeOut) {
-			graphics.drawCenteredString(font, Component.translatable("stardewcraft.fishing.minigame.perfect"), centerX, progY + Math.round(38 * fit), 0xFFE87B);
+			Component perfectText = Component.translatable("stardewcraft.fishing.minigame.perfect");
+			graphics.drawString(font, perfectText, centerX - font.width(perfectText) / 2,
+				progY + Math.round(38 * fit), 0xFFE87B, false);
 		}
 
 		// Do NOT call super.render() here: Screen.render may draw background again on some versions,

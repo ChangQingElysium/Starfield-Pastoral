@@ -340,6 +340,18 @@ public final class CommonGuiTextures {
         StardewGuiUtil.drawTextureBox(graphics, MENU_TEXTURE_BOX_60, 60, 60, 0, 0, 60, 60, x, y, width, height, scale, drawShadow);
     }
 
+	public static void drawMenuTextureBox(GuiGraphics graphics, int x, int y, int width, int height,
+			float scale, boolean drawShadow, float alpha) {
+		StardewGuiUtil.drawTextureBox(graphics, MENU_TEXTURE_BOX_60, 60, 60, 0, 0, 60, 60,
+			x, y, width, height, scale, drawShadow, alpha);
+	}
+
+	public static void drawMenuTextureBox(GuiGraphics graphics, int x, int y, int width, int height,
+			float scale, boolean drawShadow, float alpha, int shadowOffset) {
+		StardewGuiUtil.drawTextureBox(graphics, MENU_TEXTURE_BOX_60, 60, 60, 0, 0, 60, 60,
+			x, y, width, height, scale, drawShadow, alpha, shadowOffset);
+	}
+
     public static void drawMenuTile(GuiGraphics graphics, int x, int y, int width, int height, int tileIndex) {
         StardewGuiUtil.drawMenuTileIndex(graphics, x, y, width, height, tileIndex);
     }

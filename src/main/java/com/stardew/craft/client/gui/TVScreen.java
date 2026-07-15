@@ -2,6 +2,7 @@ package com.stardew.craft.client.gui;
 
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.tv.TVChannelData;
+import com.stardew.craft.client.PlayerGenderText;
 import com.stardew.craft.client.gui.common.CommonGuiTextures;
 import com.stardew.craft.client.gui.common.StardewConfirmDialogScreen;
 import com.stardew.craft.client.gui.common.StardewQuestionDialogSpec;
@@ -252,7 +253,7 @@ public class TVScreen extends Screen {
     // ==================== Text Resolution ====================
 
     private void setCurrentText(Component component) {
-        this.currentText = component.getString();
+        this.currentText = PlayerGenderText.preprocess(component.getString());
         this.characterIndex = 0;
         this.characterAdvanceTimer = 0;
     }

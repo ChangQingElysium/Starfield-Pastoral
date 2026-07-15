@@ -96,7 +96,7 @@ public class MineMonsterHpBarRenderer {
                 nameComp.getVisualOrderText(),
                 -nameWidth / 2f, -5,
                 0xFFFFFFFF,
-                true,
+                false,
                 event.getPoseStack().last().pose(),
                 buffer,
                 Font.DisplayMode.NORMAL,

@@ -31,7 +31,7 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * SDV Billboard UI — 公告栏界面（日历 + 每日任务 双Tab）
+ * SDV Billboard UI — 公告栏界面（日历或每日任务，由交互方块决定）
  * 严格复刻 SDV Billboard.cs 布局
  */
 @SuppressWarnings("null")
@@ -63,7 +63,9 @@ public class BillboardScreen extends Screen {
     private static final int MONEY_COLOR = 0xFF2C6E0F;
 
     // ─── 状态 ───
-    private int currentTab = 0; // 0 = 日历, 1 = 每日任务
+    public enum Mode { CALENDAR, DAILY_QUEST }
+
+    private final Mode mode;
     private int windowX, windowY, windowW, windowH;
     private float s4;
     private int closeX, closeY, closeW2, closeH2;
@@ -72,8 +74,9 @@ public class BillboardScreen extends Screen {
     // Accept button bounds
     private int acceptX, acceptY, acceptW2, acceptH2;
 
-    public BillboardScreen() {
+    public BillboardScreen(Mode mode) {
         super(Component.translatable("gui.stardewcraft.billboard"));
+        this.mode = mode;
         // SDV parity Billboard.cs:171 Game1.playSound("bigSelect")
         net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
         if (mc.getSoundManager() != null) {
@@ -103,7 +106,7 @@ public class BillboardScreen extends Screen {
     }
 
     private void recalcLayout() {
-        if (currentTab == 0) {
+        if (mode == Mode.CALENDAR) {
             // Calendar: 301×198 → 4×
             windowW = Math.round(CAL_W * s4);
             windowH = Math.round(CAL_H * s4);
@@ -136,7 +139,7 @@ public class BillboardScreen extends Screen {
     public void render(@NotNull GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         super.render(g, mouseX, mouseY, partialTick);
 
-        if (currentTab == 0) {
+        if (mode == Mode.CALENDAR) {
             renderCalendar(g, mouseX, mouseY);
         } else {
             renderDailyQuest(g, mouseX, mouseY);
@@ -150,17 +153,11 @@ public class BillboardScreen extends Screen {
         int cdy = closeY + closeH2 / 2 - Math.round(CLOSE_H * cs / 2);
         CommonGuiTextures.drawCloseButton(g, cdx, cdy, cs);
 
-        // Tab indicators — 用加粗 Component 代替 drawShadow（shadow 边缘在高 guiScale 下会变粗变脏）
-        int tabY = windowY - Math.round(32 * s4);
-        Component calLabel = Component.translatable("gui.stardewcraft.billboard.calendar")
-            .withStyle(net.minecraft.ChatFormatting.BOLD);
-        Component questLabel = Component.translatable("gui.stardewcraft.billboard.daily_quest")
-            .withStyle(net.minecraft.ChatFormatting.BOLD);
-        int calLabelX = windowX + Math.round(32 * s4);
-        int questLabelX = windowX + windowW - font.width(questLabel) - Math.round(32 * s4);
-
-        g.drawString(font, calLabel, calLabelX, tabY, currentTab == 0 ? 0xFFFFD700 : 0xFFAAAAAA, false);
-        g.drawString(font, questLabel, questLabelX, tabY, currentTab == 1 ? 0xFFFFD700 : 0xFFAAAAAA, false);
+        Component hint = Component.translatable(mode == Mode.CALENDAR
+            ? "gui.stardewcraft.billboard.hint.right_for_quests"
+            : "gui.stardewcraft.billboard.hint.left_for_calendar");
+        int hintY = windowY + windowH + Math.max(5, Math.round(4 * s4));
+        g.drawString(font, hint, width / 2 - font.width(hint) / 2, hintY, 0xFFE2C89D, false);
     }
 
     /**
@@ -478,10 +475,9 @@ public class BillboardScreen extends Screen {
         if (alreadyAccepted) {
             Component accepted = Component.translatable("gui.stardewcraft.billboard.already_accepted")
                 .withStyle(net.minecraft.ChatFormatting.BOLD);
-            g.drawCenteredString(font, accepted,
-                windowX + windowW / 2,
-                acceptY + acceptH2 / 2 - font.lineHeight / 2,
-                0xFF888888);
+            int acceptedCenterX = windowX + windowW / 2;
+            g.drawString(font, accepted, acceptedCenterX - font.width(accepted) / 2,
+                acceptY + acceptH2 / 2 - font.lineHeight / 2, 0xFF888888, false);
         } else {
             boolean hov = isIn(mouseX, mouseY, acceptX, acceptY, acceptW2, acceptH2);
             // SDV: (scale>1 ? LightPink : White) — hover 时按钮染粉
@@ -528,32 +524,9 @@ public class BillboardScreen extends Screen {
             return true;
         }
 
-        // Tab switching via label click（点击区域与 render 保持同样的加粗 Component 宽度）
-        int tabY = windowY - Math.round(32 * s4);
-        int tabH = font.lineHeight + 4;
-        Component calLabel = Component.translatable("gui.stardewcraft.billboard.calendar")
-            .withStyle(net.minecraft.ChatFormatting.BOLD);
-        Component questLabel = Component.translatable("gui.stardewcraft.billboard.daily_quest")
-            .withStyle(net.minecraft.ChatFormatting.BOLD);
-        int calLabelX = windowX + Math.round(32 * s4);
-        int questLabelX = windowX + windowW - font.width(questLabel) - Math.round(32 * s4);
-
-        if (isIn(mx, my, calLabelX, tabY, font.width(calLabel), tabH) && currentTab != 0) {
-            playSound(com.stardew.craft.sound.ModSounds.SMALL_SELECT.get());
-            currentTab = 0;
-            recalcLayout();
-            return true;
-        }
-        if (isIn(mx, my, questLabelX, tabY, font.width(questLabel), tabH) && currentTab != 1) {
-            playSound(com.stardew.craft.sound.ModSounds.SMALL_SELECT.get());
-            currentTab = 1;
-            recalcLayout();
-            return true;
-        }
-
         // Accept button (daily quest tab) — SDV parity Billboard.cs:365 "newArtifact"
         // 只有在：任务存在 + 未接受 + 未完成 + 不在 questLog 里 时才响应点击
-        if (currentTab == 1) {
+        if (mode == Mode.DAILY_QUEST) {
             StardewQuest daily = ClientQuestData.getDailyQuest();
             if (daily != null
                     && !daily.isAccepted()
@@ -572,11 +545,6 @@ public class BillboardScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == org.lwjgl.glfw.GLFW.GLFW_KEY_TAB) {
-            currentTab = (currentTab + 1) % 2;
-            recalcLayout();
-            return true;
-        }
         if (keyCode == org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE) {
             onClose();
             return true;

@@ -94,8 +94,10 @@ public class SpecialOrdersBoardScreen extends Screen {
                 drawOrder(graphics, active.getCompound(0), 0, mouseX, mouseY, false, true);
                 return;
             }
-            graphics.drawCenteredString(font, Component.translatable("stardewcraft.special_orders.none_available"),
-                winX + winW / 2, winY + u(96), 0xFF422A15);
+            Component noneAvailable = Component.translatable("stardewcraft.special_orders.none_available");
+            int centerX = winX + winW / 2;
+            graphics.drawString(font, noneAvailable, centerX - font.width(noneAvailable) / 2,
+                winY + u(96), 0xFF422A15, false);
             return;
         }
 

@@ -2,6 +2,7 @@ package com.stardew.craft.cutscene.command;
 
 import com.stardew.craft.client.gui.common.StardewObjectDialogueScreen;
 import com.stardew.craft.cutscene.runtime.EventPlayer;
+import com.stardew.craft.network.payload.OpenNpcDialogueScreenPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 
@@ -24,9 +25,12 @@ public final class ObjectDialogueCommand implements EventCommand {
             done = true;
             return;
         }
-        Component message = text.startsWith("stardewcraft.") || text.startsWith("event.")
-                ? Component.translatable(text)
-                : Component.literal(text);
+		String displayText = isTranslationKey(text)
+			? OpenNpcDialogueScreenPayload.rawTranslation(text)
+			: text;
+		displayText = OpenNpcDialogueScreenPayload.resolvePlayerDialogueText(
+			displayText, minecraft.player.getName().getString());
+		Component message = Component.literal(displayText);
         minecraft.setScreen(new StardewObjectDialogueScreen(List.of(message)));
     }
 
@@ -41,4 +45,8 @@ public final class ObjectDialogueCommand implements EventCommand {
     public boolean isComplete() {
         return done;
     }
+
+	private static boolean isTranslationKey(String value) {
+		return value.startsWith("stardewcraft.") || value.startsWith("event.") || value.startsWith("message.");
+	}
 }

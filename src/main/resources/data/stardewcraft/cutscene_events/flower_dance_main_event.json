@@ -49,6 +49,7 @@
     { "cmd": "pause", "ticks": 20 },
     { "cmd": "fade", "mode": "out", "ticks": 30 },
     { "cmd": "pause", "ticks": 10 },
+	{ "cmd": "message", "text": "message.stardewcraft.festival.flower_dance.finished" },
     { "cmd": "end" }
   ]
 }

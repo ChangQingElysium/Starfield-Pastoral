@@ -125,6 +125,9 @@ public class ModClientEvents {
                 } else if ("stardewcraft.type.furniture".equals(typeKey)) {
                     // 家具：青色
                     typeColor = net.minecraft.ChatFormatting.DARK_AQUA;
+                } else if ("stardewcraft.type.special_furniture".equals(typeKey)) {
+                    // 特殊家具：独立的暖紫色，不与普通家具共用类型色。
+                    typeRgbColor = 0xB66FD3;
                 } else if ("stardewcraft.type.furniture_painting".equals(typeKey)) {
                     typeRgbColor = 0x6AA8FF;
                 } else if ("stardewcraft.type.festival_decoration".equals(typeKey)) {
@@ -200,6 +203,11 @@ public class ModClientEvents {
                     customLines.add(Component.translatable("stardewcraft.tooltip.type_prefix")
                             .withStyle(ChatFormatting.WHITE)
                             .append(MagnifyingGlassClientFx.flowingTypeLabel(
+                                    Component.translatable(typeKey).getString())));
+                } else if (stack.getItem() == ModItems.SPECIAL_CHARM.get()) {
+                    customLines.add(Component.translatable("stardewcraft.tooltip.type_prefix")
+                            .withStyle(ChatFormatting.WHITE)
+                            .append(SpecialCharmClientFx.flowingTypeLabel(
                                     Component.translatable(typeKey).getString())));
                 } else if (stack.getItem() == ModItems.DWARVISH_TRANSLATION_GUIDE.get()) {
                     customLines.add(Component.translatable("stardewcraft.tooltip.type_prefix")
@@ -283,6 +291,7 @@ public class ModClientEvents {
             int sellPrice = quote.finalUnitPrice();
             boolean hidePriceLine = stack.getItem() == ModItems.SKULL_KEY.get()
                 || stack.getItem() == ModItems.MAGNIFYING_GLASS.get()
+                || stack.getItem() == ModItems.SPECIAL_CHARM.get()
                 || stack.getItem() == ModItems.SECRET_NOTE.get()
                 || stack.getItem() == ModItems.DWARVISH_TRANSLATION_GUIDE.get()
                 || stack.getItem() == ModItems.RUSTY_KEY.get()
@@ -565,6 +574,7 @@ public class ModClientEvents {
         }
 
         if (mc.screen != null) {
+            drainSkillKeyClicks();
             return;
         }
 
@@ -582,6 +592,9 @@ public class ModClientEvents {
 
         if (hasPublicMinor || hasLegacyMinor) {
             while (ModKeyMappings.SKILL_MINOR.consumeClick()) {
+                if (com.stardew.craft.client.weapon.ConsumedInteractionClientState.wasConsumedThisTick()) {
+                    continue;
+                }
                 if (weaponItem != null && data != null && "femur_slam".equals(data.getSkill1().getId())
                     && !com.stardew.craft.client.weapon.WeaponSkillCooldownsClient.isOnCooldown(weaponItem.getWeaponId(), data.getSkill1().getId())
                     && !mc.player.isUsingItem()) {

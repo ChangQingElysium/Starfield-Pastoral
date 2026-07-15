@@ -72,6 +72,11 @@ public final class SecretNoteItem extends Item implements IStardewItem {
         return -1;
     }
 
+    public static String getVariantKey(ItemStack stack) {
+        int displayNumber = getBoundDisplayNumber(stack);
+        return displayNumber > 0 ? "note=" + displayNumber : "note=unbound";
+    }
+
     @Override
     public Component getName(ItemStack stack) {
         int displayNumber = getBoundDisplayNumber(stack);

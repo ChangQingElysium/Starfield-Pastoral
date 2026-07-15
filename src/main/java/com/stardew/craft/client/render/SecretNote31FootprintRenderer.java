@@ -9,13 +9,10 @@ import com.stardew.craft.cutscene.network.ClientEventSeenCache;
 import com.stardew.craft.secretnote.SecretNote31FootprintTrail;
 import com.stardew.craft.secretnote.SecretNoteService;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.ModelBlockRenderer;
-import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -44,8 +41,7 @@ public final class SecretNote31FootprintRenderer {
         PoseStack poseStack = event.getPoseStack();
         Vec3 camera = event.getCamera().getPosition();
         MultiBufferSource.BufferSource buffers = minecraft.renderBuffers().bufferSource();
-        ModelBlockRenderer modelRenderer = minecraft.getBlockRenderer().getModelRenderer();
-        RenderType renderType = null;
+        boolean rendered = false;
 
         for (SecretNote31FootprintTrail.Footprint footprint : SecretNote31FootprintTrail.FOOTPRINTS) {
             Vec3 center = Vec3.atCenterOf(footprint.pos());
@@ -54,31 +50,24 @@ public final class SecretNote31FootprintRenderer {
             BlockState state = ModBlocks.SHADOW_FOOTPRINT.get().defaultBlockState()
                     .setValue(HorizontalDirectionalBlock.FACING, footprint.direction())
                     .setValue(ShadowFootprintBlock.FOOT, footprint.foot());
-            BakedModel model = minecraft.getBlockRenderer().getBlockModel(state);
-            renderType = ItemBlockRenderTypes.getRenderType(state, false);
-            long seed = footprint.pos().asLong();
 
             poseStack.pushPose();
             poseStack.translate(
                     footprint.pos().getX() - camera.x,
-                    footprint.pos().getY() - camera.y,
+                    footprint.pos().getY() - camera.y + 0.002D,
                     footprint.pos().getZ() - camera.z);
-            modelRenderer.tesselateBlock(
-                    minecraft.level,
-                    model,
+            minecraft.getBlockRenderer().renderSingleBlock(
                     state,
-                    footprint.pos(),
                     poseStack,
-                    buffers.getBuffer(renderType),
-                    false,
-                    RandomSource.create(seed),
-                    seed,
+                    buffers,
+                    LevelRenderer.getLightColor(minecraft.level, footprint.pos()),
                     OverlayTexture.NO_OVERLAY);
             poseStack.popPose();
+            rendered = true;
         }
 
-        if (renderType != null) {
-            buffers.endBatch(renderType);
+        if (rendered) {
+            buffers.endBatch(RenderType.translucent());
         }
     }
 

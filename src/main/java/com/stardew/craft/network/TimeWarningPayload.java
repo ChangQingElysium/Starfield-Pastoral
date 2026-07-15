@@ -46,7 +46,7 @@ public record TimeWarningPayload(int warningType) implements CustomPacketPayload
 
             if (payload.warningType() == MIDNIGHT) {
                 // 午夜：显示全局消息 "It's getting late..."
-                com.stardew.craft.client.hud.StardewHudMessageManager.showInfo(
+                com.stardew.craft.client.hud.StardewHudMessageManager.showGlobalMessage(
                     net.minecraft.network.chat.Component.translatable("stardewcraft.time.getting_late")
                 );
             }

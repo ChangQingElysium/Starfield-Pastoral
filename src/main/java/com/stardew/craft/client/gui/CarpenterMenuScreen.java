@@ -64,9 +64,8 @@ public class CarpenterMenuScreen extends Screen {
     // Colors
     // =========================================================================
     private static final int BG_TINT          = 0x99000000;
-    private static final int TEXT_COLOR        = 0x5C2B00;   // SDV Game1.textColor (brown)
-    private static final int TEXT_COLOR_SHADOW = 0x404040;
-    private static final int RED_COLOR         = 0xFF0000;   // SDV Color.Red
+    private static final int TEXT_COLOR        = 0xFF5C2B00; // SDV Game1.textColor (brown)
+    private static final int RED_COLOR         = 0xFFFF0000; // SDV Color.Red
 
     // =========================================================================
     // State
@@ -383,12 +382,14 @@ public class CarpenterMenuScreen extends Screen {
         int nameWidth = font.width(name);
         int scrollPadding = ui(32);
         int scrollWidth = Math.max(nameWidth + scrollPadding * 2, ui(416));
-        int scrollHeight = ui(56);
+        int scrollHeight = Math.round(18 * s4);
 
         int scrollX = nameCenterX - scrollWidth / 2;
         int scrollY = sdvYPos;  // SDV exact: yPositionOnScreen
 
-        CommonGuiTextures.drawScrollBannerBox(g, scrollX, scrollY, scrollWidth, scrollHeight, s4);
+        int capWidth = Math.round(12 * s4);
+        int middleWidth = Math.max(1, scrollWidth - capWidth * 2);
+        CommonGuiTextures.drawScrollBanner(g, scrollX + capWidth, scrollY, middleWidth, s4);
 
         // Draw name text centered on the scroll
         int textX = nameCenterX - nameWidth / 2;
@@ -398,9 +399,9 @@ public class CarpenterMenuScreen extends Screen {
 
     private void drawDescription(GuiGraphics g, CarpenterBlueprint bp, int sdvXPos, int sdvYPos, float s4) {
         // SDV exact: text at (xPositionOnScreen + maxWidthOfBuildingViewer, yPositionOnScreen + 80 + 16)
-        int textX = sdvXPos + ui(MAX_VIEWER_W);
-        int textY = sdvYPos + ui(80 + 16);
-        int maxWidth = descW - ui(32);
+        int textX = descX + ui(32);
+        int textY = descY + ui(32);
+        int maxWidth = descW - ui(64);
         int maxBottom = sdvYPos + ui(256 + 32) - ui(12);
 
         // Wrap against the actual box width and stop before the price/material area.
@@ -435,8 +436,6 @@ public class CarpenterMenuScreen extends Screen {
             int priceColor = (playerMoney < bp.cost()) ? RED_COLOR : TEXT_COLOR;
             int textX = ingX + ui(64);
             int textY = ingY + ui(8);
-            // Draw with shadow (SDV: Utility.drawTextWithShadow)
-            g.drawString(font, priceStr, textX + 1, textY + 1, 0x000000, false);
             g.drawString(font, priceStr, textX, textY, priceColor, false);
         }
     }
@@ -468,8 +467,6 @@ public class CarpenterMenuScreen extends Screen {
                     String materialText = stack.getHoverName().getString() + " (" + mat.count() + ")";
                     int textX = baseX + ui(64 + 16);
                     int textY = baseY + ui(20);
-                    // Shadow
-                    g.drawString(font, materialText, textX + 1, textY + 1, 0x000000, false);
                     g.drawString(font, materialText, textX, textY, textColor, false);
                 }
             } catch (Exception ignored) {}

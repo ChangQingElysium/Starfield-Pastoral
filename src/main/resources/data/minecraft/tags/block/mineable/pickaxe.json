@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
+    "stardewcraft:stone_junimo",
     "stardewcraft:mine_barrier",
     "stardewcraft:earth_shale",
     "stardewcraft:frost_gneiss",

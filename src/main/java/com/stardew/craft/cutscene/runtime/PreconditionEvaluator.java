@@ -8,6 +8,7 @@ import com.stardew.craft.cutscene.network.ClientEventSeenCache;
 import com.stardew.craft.player.SkillType;
 import com.stardew.craft.time.StardewTimeManager;
 import com.stardew.craft.weather.ClientWeatherCache;
+import com.stardew.craft.weather.WeatherTypeNormalizer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
@@ -108,22 +109,8 @@ public final class PreconditionEvaluator {
         if (mc.level == null) return false;
         ResourceKey<Level> dim = mc.level.dimension();
         String current = ClientWeatherCache.getCurrentWeather(dim);
-        return normalizeWeather(expected).equalsIgnoreCase(normalizeWeather(current));
-    }
-
-    /** Map JSON aliases (sunny/rainy/stormy/snowy) to internal SDV codes (Sun/Rain/Storm/Snow). */
-    private static String normalizeWeather(String w) {
-        if (w == null) return "";
-        return switch (w.toLowerCase(Locale.ROOT)) {
-            case "sunny", "sun" -> "Sun";
-            case "rainy", "rain" -> "Rain";
-            case "stormy", "storm", "lightning" -> "Storm";
-            case "snowy", "snow" -> "Snow";
-            case "windy", "wind", "windspring" -> "WindSpring";
-            case "windfall" -> "WindFall";
-            case "festival" -> "Festival";
-            default -> w;
-        };
+        return WeatherTypeNormalizer.normalize(expected)
+                .equalsIgnoreCase(WeatherTypeNormalizer.normalize(current));
     }
 
     private static boolean checkDayOfWeek(EventPrecondition p) {

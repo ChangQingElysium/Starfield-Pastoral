@@ -323,7 +323,9 @@ public class QuestLogScreen extends Screen {
             if (shownQuest.hasMoneyReward()) {
                 // SDV: rewardBox at (xPos+w/2-80, yPos+h-32-96)
                 int rboxX = winX + winW / 2 - mapping.ui(80);
-                int rboxY = winY + winH - mapping.ui(128);
+                // Keep the complete reward stack clear of the paper's bottom frame.
+                // The old -128 position put the hover hint directly on the border.
+                int rboxY = winY + winH - mapping.ui(160);
                 lastRewardBoxY = rboxY;
                 int rboxSz = mapping.ui(96);
 

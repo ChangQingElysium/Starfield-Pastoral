@@ -206,7 +206,7 @@ public final class FestivalService {
         lastActiveFestivalStartMessageKey = messageKey;
         Component message = Component.translatable(translationKey);
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-            player.displayClientMessage(message, false);
+			com.stardew.craft.network.GlobalHudMessagePayload.sendTo(player, message);
         }
     }
 
@@ -228,7 +228,7 @@ public final class FestivalService {
         }
         Component message = Component.translatable(translationKey);
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-            player.displayClientMessage(message, false);
+			com.stardew.craft.network.GlobalHudMessagePayload.sendTo(player, message);
         }
     }
 

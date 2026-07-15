@@ -15,6 +15,14 @@ class IridiumMilkItemTest {
         PlayerStardewData data = new PlayerStardewData(UUID.randomUUID());
         assertTrue(IridiumMilkItem.canApplyPermanentReward(data));
 
+        data.addMailFlag(SecretNoteStoryFlags.QI_CAVE);
+
+        assertFalse(IridiumMilkItem.canApplyPermanentReward(data));
+    }
+
+    @Test
+    void legacyConsumptionFlagAlsoPreventsDuplicateHealthReward() {
+        PlayerStardewData data = new PlayerStardewData(UUID.randomUUID());
         data.addMailFlag(SecretNoteStoryFlags.IRIDIUM_MILK_CONSUMED);
 
         assertFalse(IridiumMilkItem.canApplyPermanentReward(data));

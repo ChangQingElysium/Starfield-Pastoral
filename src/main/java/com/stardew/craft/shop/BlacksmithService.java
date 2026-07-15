@@ -556,9 +556,8 @@ public final class BlacksmithService {
             Item toolItem = BuiltInRegistries.ITEM.get(rl);
             if (toolItem != null && toolItem != Items.AIR) {
                 String toolName = new ItemStack(toolItem).getHoverName().getString();
-                player.sendSystemMessage(
-                    net.minecraft.network.chat.Component.translatable("stardewcraft.blacksmith.tool_ready", toolName)
-                );
+				com.stardew.craft.network.GlobalHudMessagePayload.sendTo(player,
+					net.minecraft.network.chat.Component.translatable("stardewcraft.blacksmith.tool_ready", toolName));
             }
         } catch (Exception ignored) {}
     }

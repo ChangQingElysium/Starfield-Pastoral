@@ -45,6 +45,9 @@ public class ClientPlayerDataCache {
     private static int maxMineFloorReached = 0;
     private static int firstJoinDay = -1;
     private static String winterStarRecipient = "";
+    private static int gender = -1;
+    private static String preferredName = "";
+    private static String favoriteThing = "";
 
     // 临时Buff（客户端显示/计算用）
     private static int tempFishingLevelBonus = 0;
@@ -103,6 +106,9 @@ public class ClientPlayerDataCache {
         fairStarTokens = nbt.contains("FairStarTokens") ? Math.max(0, nbt.getInt("FairStarTokens")) : 0;
         firstJoinDay = nbt.contains("FirstJoinDay") ? nbt.getInt("FirstJoinDay") : -1;
         winterStarRecipient = nbt.contains("WinterStarRecipient") ? nbt.getString("WinterStarRecipient") : "";
+        gender = nbt.contains("Gender") ? Math.max(-1, Math.min(1, nbt.getInt("Gender"))) : -1;
+        preferredName = nbt.contains("PreferredName") ? nbt.getString("PreferredName").trim() : "";
+        favoriteThing = nbt.contains("FavoriteThing") ? nbt.getString("FavoriteThing").trim() : "";
 
         tempFishingLevelBonus = nbt.contains("TempFishingLevelBonus") ? nbt.getInt("TempFishingLevelBonus") : 0;
         tempLuckBonus = nbt.contains("TempLuckBonus") ? nbt.getInt("TempLuckBonus") : 0;
@@ -334,6 +340,22 @@ public class ClientPlayerDataCache {
 
     public static String getFarmName() {
         return farmName;
+    }
+
+    public static boolean isPlayerMale() {
+        return gender != 1;
+    }
+
+    public static String getPreferredName() {
+        return preferredName;
+    }
+
+    public static String getFavoriteThing() {
+        return favoriteThing;
+    }
+
+    public static boolean isProfileComplete() {
+        return gender >= 0 && !preferredName.isBlank() && !favoriteThing.isBlank();
     }
 
     public static boolean hasFarm() {
@@ -582,6 +604,9 @@ public class ClientPlayerDataCache {
         fairStarTokens = 0;
         fairStarTokenHudActive = false;
         maxMineFloorReached = 0;
+        gender = -1;
+        preferredName = "";
+        favoriteThing = "";
         hasFarm = false;
         farmName = "";
         farmOwnerUuid = "";

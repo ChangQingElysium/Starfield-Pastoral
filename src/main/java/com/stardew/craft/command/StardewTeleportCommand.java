@@ -23,10 +23,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
@@ -132,8 +129,6 @@ public class StardewTeleportCommand {
                         .executes(StardewTeleportCommand::getTomorrowWeather))
                     .then(Commands.literal("test")
                         .executes(StardewTeleportCommand::testWeatherProbability))
-                    .then(Commands.literal("diagnose")
-                        .executes(StardewTeleportCommand::diagnoseRain))
                     .then(Commands.literal("fixvanilla")
                         .executes(StardewTeleportCommand::fixVanillaWeather)))
         );
@@ -709,48 +704,6 @@ public class StardewTeleportCommand {
         return 1;
     }
     
-    @SuppressWarnings("null")
-    private static int diagnoseRain(CommandContext<CommandSourceStack> context) {
-        ServerLevel level = context.getSource().getLevel();
-        ServerPlayer player = context.getSource().getPlayer();
-        if (player == null) {
-            context.getSource().sendFailure(Component.translatable("stardewcraft.command.player_only"));
-            return 0;
-        }
-
-        BlockPos playerPos = player.blockPosition();
-        int hmMotionBlocking = level.getHeight(Heightmap.Types.MOTION_BLOCKING, playerPos.getX(), playerPos.getZ());
-        int hmWorldSurface = level.getHeight(Heightmap.Types.WORLD_SURFACE, playerPos.getX(), playerPos.getZ());
-        boolean canSeeSky = level.canSeeSky(playerPos);
-        boolean isRaining = level.isRaining();
-        boolean isRainingAtPlayer = level.isRainingAt(playerPos);
-        boolean isRainingAtAbove = level.isRainingAt(playerPos.above());
-        float rainLevel = level.getRainLevel(0f);
-        float thunderLevel = level.getThunderLevel(0f);
-
-        var biomeHolder = level.getBiome(playerPos);
-        String biomeName = biomeHolder.unwrapKey()
-                .map(k -> k.location().toString())
-                .orElse("unknown");
-        boolean hasPrecip = biomeHolder.value().hasPrecipitation();
-        Biome.Precipitation precipType = biomeHolder.value().getPrecipitationAt(playerPos);
-
-        String stardewWeather = WeatherManager.getCurrentWeather(level);
-        boolean weatherCycleEnabled = level.getGameRules().getBoolean(GameRules.RULE_WEATHER_CYCLE);
-
-        context.getSource().sendSuccess(() -> Component.translatable(
-            "stardewcraft.command.weather.diagnose",
-            stardewWeather, isRaining, level.isThundering(),
-            String.format(java.util.Locale.ROOT, "%.3f", rainLevel),
-            String.format(java.util.Locale.ROOT, "%.3f", thunderLevel),
-            weatherCycleEnabled,
-            playerPos.getX(), playerPos.getY(), playerPos.getZ(),
-            hmMotionBlocking, hmWorldSurface, canSeeSky,
-            isRainingAtPlayer, isRainingAtAbove,
-            biomeName, hasPrecip, precipType), false);
-        return 1;
-    }
-
     private static int fixVanillaWeather(CommandContext<CommandSourceStack> context) {
         var src = context.getSource();
         var server = src.getServer();

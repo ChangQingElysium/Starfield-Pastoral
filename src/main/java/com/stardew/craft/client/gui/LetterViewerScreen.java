@@ -1,12 +1,16 @@
 package com.stardew.craft.client.gui;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.client.ClientPlayerDataCache;
+import com.stardew.craft.client.PlayerGenderText;
 import com.stardew.craft.client.gui.common.CommonGuiTextures;
 import com.stardew.craft.client.gui.common.StardewRenderMapping;
+import com.stardew.craft.cooking.service.VanillaCookingRecipeData;
 import com.stardew.craft.mail.MailTextSyntax;
 import com.stardew.craft.network.payload.CheckMailboxPayload;
 import com.stardew.craft.network.payload.OpenMailPayload;
 import com.stardew.craft.sound.ModSounds;
+import com.stardew.craft.player.StardewCraftingRecipeData;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -159,8 +163,13 @@ public class LetterViewerScreen extends Screen {
             // %item/%action blocks before laying out the visible body.
             text = MailTextSyntax.body(text);
             text = applyLetterFormatting(text);
+            text = PlayerGenderText.preprocess(text);
             if (minecraft != null && minecraft.player != null) {
-                text = text.replace("@", minecraft.player.getName().getString());
+                String preferredName = ClientPlayerDataCache.getPreferredName();
+                String playerName = preferredName == null || preferredName.isBlank()
+                        ? minecraft.player.getName().getString()
+                        : preferredName;
+                text = text.replace("@", playerName);
             }
             if (payload.secretSantaNameKey() != null && !payload.secretSantaNameKey().isBlank()) {
                 text = text.replace("%secretsanta",
@@ -327,6 +336,12 @@ public class LetterViewerScreen extends Screen {
 
             // 绘制关闭按钮
             drawCloseButton(graphics);
+
+            // Tooltips render last so their opaque vanilla background remains
+            // readable above every letter texture and attachment slot.
+            if (currentPage == pages.size() - 1) {
+                drawAttachmentTooltip(graphics, mouseX, mouseY);
+            }
         }
     }
 
@@ -393,7 +408,10 @@ public class LetterViewerScreen extends Screen {
     }
 
     private void drawAttachments(GuiGraphics graphics) {
-        int attachY = letterY + letterH - mapping.ui(96);
+        // Size the whole attachment stack from the paper's safe bottom edge so
+        // combinations such as money + recipe can never touch the frame.
+        int attachY = attachmentStartY();
+        int cursorY = attachY;
 
         // 金钱附件 — SDV parity: 文字 + 金币图标
         if (payload.money() > 0) {
@@ -404,7 +422,7 @@ public class LetterViewerScreen extends Screen {
             int iconW = (int)(GOLD_ICON_SIZE * iconScale);
             int totalW = tw + iconW + 4;
             int mx = letterX + letterW / 2 - totalW / 2;
-            int my = attachY;
+            int my = cursorY;
 
             // 金币图标（文字左侧）
             graphics.pose().pushPose();
@@ -415,6 +433,7 @@ public class LetterViewerScreen extends Screen {
 
             // 金额文字
             graphics.drawString(font, moneyText, mx + iconW + 4, my, getTextColor(), false);
+            cursorY += Math.max(font.lineHeight, iconW) + 4;
         }
 
         // 配方学习
@@ -423,10 +442,21 @@ public class LetterViewerScreen extends Screen {
                     ? "stardewcraft.letter.learned_recipe_cooking"
                     : "stardewcraft.letter.learned_recipe_crafting";
             String line1 = Component.translatable(recipeTypeKey).getString();
-            String line2 = payload.learnedRecipe();
-            int y1 = attachY;
-            graphics.drawCenteredString(font, line1, letterX + letterW / 2, y1, getTextColor());
-            graphics.drawCenteredString(font, line2, letterX + letterW / 2, y1 + font.lineHeight + 2, getTextColor());
+            int centerX = letterX + letterW / 2;
+            drawCenteredNoShadow(graphics, Component.literal(line1), centerX, cursorY, getTextColor());
+            cursorY += font.lineHeight + 4;
+
+            ItemStack recipeOutput = getLearnedRecipeOutput();
+            if (!recipeOutput.isEmpty()) {
+                float iconScale = Math.max(1.0f, mapping.s4());
+                int iconSize = Math.round(16 * iconScale);
+                CommonGuiTextures.drawItem(graphics, recipeOutput, centerX - iconSize / 2, cursorY, iconScale);
+                cursorY += iconSize + 3;
+                drawCenteredNoShadow(graphics, recipeOutput.getHoverName(), centerX, cursorY, getTextColor());
+            } else {
+                drawCenteredNoShadow(graphics, Component.literal(payload.learnedRecipe()), centerX, cursorY, getTextColor());
+            }
+            cursorY += font.lineHeight + 4;
         }
 
         // 物品附件 — SDV parity: 底部居中显示物品图标 + 数量
@@ -437,7 +467,7 @@ public class LetterViewerScreen extends Screen {
             int gap = (int)(4 * bgScale);
             int totalSlotW = totalItems * slotSize + (totalItems - 1) * gap;
             int startX = letterX + letterW / 2 - totalSlotW / 2;
-            int slotY = attachY + font.lineHeight + 4;
+            int slotY = cursorY;
 
             for (int i = 0; i < totalItems; i++) {
                 OpenMailPayload.ItemAttachment att = payload.items().get(i);
@@ -466,6 +496,78 @@ public class LetterViewerScreen extends Screen {
                     }
                 }
             }
+        }
+    }
+
+    private ItemStack getLearnedRecipeOutput() {
+        String recipeId = payload.learnedRecipe();
+        if ("cooking".equals(payload.cookingOrCrafting())) {
+            return VanillaCookingRecipeData.getDefinition(recipeId)
+                    .map(definition -> {
+                        net.minecraft.world.item.Item item = BuiltInRegistries.ITEM.get(definition.output());
+                        return item == Items.AIR
+                                ? ItemStack.EMPTY
+                                : new ItemStack(item, Math.max(1, definition.outputCount()));
+                    })
+                    .orElse(ItemStack.EMPTY);
+        }
+        return StardewCraftingRecipeData.getOutputStack(recipeId);
+    }
+
+    private int attachmentStartY() {
+        int totalHeight = 0;
+        if (payload.money() > 0) {
+            float iconScale = mapping.s4() * 0.6f;
+            totalHeight += Math.max(font.lineHeight, Math.round(GOLD_ICON_SIZE * iconScale)) + 4;
+        }
+        if (!payload.learnedRecipe().isEmpty()) {
+            ItemStack recipeOutput = getLearnedRecipeOutput();
+            int iconSize = recipeOutput.isEmpty() ? 0 : Math.round(16 * Math.max(1.0f, mapping.s4()));
+            totalHeight += font.lineHeight + 4 + iconSize + 3 + font.lineHeight + 4;
+        }
+        if (!payload.items().isEmpty()) {
+            totalHeight += Math.round(24 * mapping.s4());
+        }
+        return letterY + letterH - mapping.ui(48) - totalHeight;
+    }
+
+    private void drawCenteredNoShadow(GuiGraphics graphics, Component text, int centerX, int y, int color) {
+        graphics.drawString(font, text, centerX - font.width(text) / 2, y, color, false);
+    }
+
+    private void drawAttachmentTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
+        if (payload.items().isEmpty()) {
+            return;
+        }
+        int attachY = attachmentStartY();
+        if (payload.money() > 0) {
+            float iconScale = mapping.s4() * 0.6f;
+            attachY += Math.max(font.lineHeight, Math.round(GOLD_ICON_SIZE * iconScale)) + 4;
+        }
+        if (!payload.learnedRecipe().isEmpty()) {
+            ItemStack recipeOutput = getLearnedRecipeOutput();
+            int iconSize = recipeOutput.isEmpty() ? 0 : Math.round(16 * Math.max(1.0f, mapping.s4()));
+            attachY += font.lineHeight + 4 + iconSize + 3 + font.lineHeight + 4;
+        }
+        float bgScale = mapping.s4();
+        int slotSize = Math.round(24 * bgScale);
+        int gap = Math.round(4 * bgScale);
+        int totalSlotW = payload.items().size() * slotSize + (payload.items().size() - 1) * gap;
+        int startX = letterX + letterW / 2 - totalSlotW / 2;
+        int slotY = attachY;
+
+        for (int index = 0; index < payload.items().size(); index++) {
+            int slotX = startX + index * (slotSize + gap);
+            if (!isInBounds(mouseX, mouseY, slotX, slotY, slotSize, slotSize)) {
+                continue;
+            }
+            OpenMailPayload.ItemAttachment attachment = payload.items().get(index);
+            net.minecraft.world.item.Item item = BuiltInRegistries.ITEM.get(
+                    ResourceLocation.parse(attachment.itemId()));
+            if (item != Items.AIR) {
+                graphics.renderTooltip(font, new ItemStack(item, attachment.count()), mouseX, mouseY);
+            }
+            return;
         }
     }
 

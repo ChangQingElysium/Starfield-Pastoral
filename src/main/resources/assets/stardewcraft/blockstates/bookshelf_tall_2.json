@@ -1,9 +1,9 @@
 {
   "variants": {
-    "part=main,facing=north": { "model": "stardewcraft:decor/common/bookshelf_3_3_collision" },
-    "part=main,facing=east": { "model": "stardewcraft:decor/common/bookshelf_3_3_collision", "y": 90 },
-    "part=main,facing=south": { "model": "stardewcraft:decor/common/bookshelf_3_3_collision", "y": 180 },
-    "part=main,facing=west": { "model": "stardewcraft:decor/common/bookshelf_3_3_collision", "y": 270 },
+    "part=main,facing=north": { "model": "stardewcraft:decor/common/bookshelf_3_3_display" },
+    "part=main,facing=east": { "model": "stardewcraft:decor/common/bookshelf_3_3_display", "y": 90 },
+    "part=main,facing=south": { "model": "stardewcraft:decor/common/bookshelf_3_3_display", "y": 180 },
+    "part=main,facing=west": { "model": "stardewcraft:decor/common/bookshelf_3_3_display", "y": 270 },
     "part=extension,facing=north": { "model": "stardewcraft:block/decor/extensions/bookshelf_3_3_extension_empty" },
     "part=extension,facing=east": { "model": "stardewcraft:block/decor/extensions/bookshelf_3_3_extension_empty" },
     "part=extension,facing=south": { "model": "stardewcraft:block/decor/extensions/bookshelf_3_3_extension_empty" },

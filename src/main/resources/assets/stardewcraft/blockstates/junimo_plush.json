@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "part=main,facing=north": { "model": "stardewcraft:decor/common/junimo_plush" },
+    "part=main,facing=east": { "model": "stardewcraft:decor/common/junimo_plush", "y": 90 },
+    "part=main,facing=south": { "model": "stardewcraft:decor/common/junimo_plush", "y": 180 },
+    "part=main,facing=west": { "model": "stardewcraft:decor/common/junimo_plush", "y": 270 },
+    "part=extension,facing=north": { "model": "stardewcraft:block/decor/extensions/furniture_extension_empty" },
+    "part=extension,facing=east": { "model": "stardewcraft:block/decor/extensions/furniture_extension_empty" },
+    "part=extension,facing=south": { "model": "stardewcraft:block/decor/extensions/furniture_extension_empty" },
+    "part=extension,facing=west": { "model": "stardewcraft:block/decor/extensions/furniture_extension_empty" }
+  }
+}

@@ -41,7 +41,7 @@ public final class WinterStarGiftSelectionScreen extends Screen {
         graphics.fill(0, 0, width, height, 0x88000000);
         graphics.blit(INVENTORY_TEXTURE, leftPos, topPos,
             0, INVENTORY_TEXTURE_Y, PANEL_WIDTH, PANEL_HEIGHT, 256, 256);
-        graphics.drawCenteredString(font, title, width / 2, topPos - 18, 0xFFFFFFFF);
+        graphics.drawString(font, title, width / 2 - font.width(title) / 2, topPos - 18, 0xFFFFFFFF, false);
 
         ItemStack hovered = ItemStack.EMPTY;
         for (int row = 0; row < 3; row++) {

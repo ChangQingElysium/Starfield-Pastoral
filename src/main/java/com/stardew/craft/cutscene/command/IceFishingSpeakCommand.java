@@ -62,11 +62,7 @@ public class IceFishingSpeakCommand implements EventCommand {
 
     private static String resolveDisplayText(String input, String playerName) {
         String displayText = isTranslationKey(input) ? OpenNpcDialogueScreenPayload.rawTranslation(input) : input;
-        displayText = displayText.replace("@", playerName);
-        displayText = OpenNpcDialogueScreenPayload.resolveInlineGenderTokens(displayText, true);
-        displayText = OpenNpcDialogueScreenPayload.resolveGenderSplit(displayText, true);
-        displayText = OpenNpcDialogueScreenPayload.resolveDialogueCommands(displayText);
-        return OpenNpcDialogueScreenPayload.resolvePercentTokens(displayText, playerName);
+        return OpenNpcDialogueScreenPayload.resolvePlayerDialogueText(displayText, playerName);
     }
 
     private static boolean isTranslationKey(String value) {

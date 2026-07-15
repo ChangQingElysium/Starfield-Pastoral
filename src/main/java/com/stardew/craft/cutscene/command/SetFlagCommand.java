@@ -20,4 +20,10 @@ public class SetFlagCommand implements EventCommand {
 
     @Override public void tick(EventPlayer player) {}
     @Override public boolean isComplete() { return true; }
+    @Override public boolean isStateCommand() { return true; }
+
+    @Override
+    public void onSkip(EventPlayer player) {
+        start(player);
+    }
 }

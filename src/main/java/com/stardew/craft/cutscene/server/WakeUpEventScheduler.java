@@ -105,6 +105,11 @@ public final class WakeUpEventScheduler {
 
         String nextId = queue.peekFirst(uuid);
         if (nextId == null) return;
+        if (ServerCutsceneTracker.isActive(uuid)) {
+            LOGGER.debug("[WAKE_UP] Deferred '{}' for {} because another cutscene is active.",
+                    nextId, player.getName().getString());
+            return;
+        }
 
         // Look up THIS player's farm spawn for the anchor. Multiplayer-safe:
         // every player has their own FarmInstance.
@@ -123,7 +128,11 @@ public final class WakeUpEventScheduler {
                         spawn.getY(),
                         spawn.getZ() + 0.5));
 
-        ServerCutsceneTracker.startEvent(player, nextId);
+        if (!ServerCutsceneTracker.startEvent(player, nextId)) {
+            LOGGER.warn("[WAKE_UP] Failed to dispatch '{}' to {}; keeping it queued.",
+                    nextId, player.getName().getString());
+            return;
+        }
 
         LOGGER.info("[WAKE_UP] Dispatched '{}' to {} at anchor ({}, {}, {})",
                 nextId, player.getName().getString(),
@@ -137,9 +146,14 @@ public final class WakeUpEventScheduler {
         WakeUpEventQueueData queue = WakeUpEventQueueData.get(level);
         UUID uuid = player.getUUID();
 
-        // Only pop if this was actually a queued wake_up event. (For other
-        // triggers the queue is simply untouched.)
-        if (!eventId.equals(queue.peekFirst(uuid))) return;
+        // Pop the matching wake-up event. Completion of any other cutscene is
+        // also the retry signal for a queue that was deferred behind it.
+        if (!eventId.equals(queue.peekFirst(uuid))) {
+            // A non-wake-up cutscene may have occupied the only active session while
+            // this queue was waiting. Its completion is the retry signal.
+            dispatchNext(player);
+            return;
+        }
         queue.remove(uuid, eventId);
         LOGGER.info("[WAKE_UP] Event '{}' completed for {}; dispatching next.",
                 eventId, player.getName().getString());

@@ -163,11 +163,9 @@ public class LuauMainEventCommand implements EventCommand {
         commands.add(new JumpCommand("governor", 0.5));
         commands.add(new PauseCommand(10));
         commands.add(new JumpCommand("lewis", 0.5));
-        commands.add(new MessageCommand("event.luau.reaction6.lewis_head"));
-        commands.add(new PauseCommand(20));
+		commands.add(new TextAboveHeadCommand("lewis", "event.luau.reaction6.lewis_head", 20, 0.0));
         commands.add(new JumpCommand("marnie", 0.5));
-        commands.add(new MessageCommand("event.luau.reaction6.marnie_head"));
-        commands.add(new PauseCommand(20));
+		commands.add(new TextAboveHeadCommand("marnie", "event.luau.reaction6.marnie_head", 20, 0.0));
         commands.add(new ShakeActorCommand("governor", 40, 0.08));
         commands.add(new EmoteCommand("governor", "angry"));
         commands.add(new PauseCommand(10));
