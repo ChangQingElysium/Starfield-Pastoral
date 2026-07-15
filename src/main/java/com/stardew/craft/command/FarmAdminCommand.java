@@ -69,8 +69,8 @@ public class FarmAdminCommand {
         data.addMailFlag(STARDEW_OP_FLAG);
 
         ctx.getSource().sendSuccess(() -> Component.translatable(
-                "stardewcraft.command.admin.granted", target.getGameProfile().getName()), true);
-        target.displayClientMessage(Component.translatable("stardewcraft.command.admin.granted_target"), false);
+                "stardewcraft.command.admin.granted_target", target.getGameProfile().getName()), true);
+        target.displayClientMessage(Component.translatable("stardewcraft.command.admin.granted"), false);
         return 1;
     }
 
