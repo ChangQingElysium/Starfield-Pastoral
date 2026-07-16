@@ -60,6 +60,7 @@ public final class CamelMerchantEvents {
         ServerLevel level = event.getServer().getLevel(ModDimensions.STARDEW_VALLEY);
         if (level == null) return;
         if (level.players().isEmpty()) return;
+        if (com.stardew.craft.time.StardewTimePauseService.isPaused(event.getServer())) return;
 
         loadSpawnChunk(level);
         ensureSingleEntity(level);

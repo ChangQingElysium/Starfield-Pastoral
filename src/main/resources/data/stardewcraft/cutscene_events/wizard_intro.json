@@ -36,6 +36,7 @@
 
     { "cmd": "comment", "text": "Hard cut to 05: wizard closeup (instant, no ticks)" },
     { "cmd": "camera", "x": -176.844, "y": 35.381, "z": 59.505, "yaw": 151.2, "pitch": 31.5, "relative": false },
+    { "cmd": "skippable" },
     { "cmd": "speak", "npc_id": "wizard", "text": "event.wizard_intro.line1" },
     { "cmd": "pause", "ticks": 10 },
     { "cmd": "speak", "npc_id": "wizard", "text": "event.wizard_intro.line2" },
@@ -45,7 +46,6 @@
     { "cmd": "comment", "text": "Mark first met" },
     { "cmd": "set_flag", "flag": "wizardFirstMet" },
 
-    { "cmd": "skippable" },
     { "cmd": "comment", "text": "Fade out, clean up, end" },
     { "cmd": "fade", "mode": "out", "ticks": 15 },
     { "cmd": "remove_actor", "actor": "wizard" },

@@ -44,11 +44,13 @@ public class TravelingCartEntity extends PathfinderMob implements GeoEntity {
 
     @Override
     public boolean isPushable() {
-        return false;
+        return true;
     }
 
     @Override
-    protected void doPush(net.minecraft.world.entity.Entity entity) {
+    public void push(double x, double y, double z) {
+        // Participate in normal entity collision so players cannot walk
+        // through the cart and pig, but keep this fixed map fixture stationary.
     }
 
     @Override

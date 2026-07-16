@@ -77,6 +77,13 @@ public class StardewTimeManager extends SavedData {
      * 修改此偏移量代替直接修改 overworld 的 dayTime，从而不影响主世界。
      */
     private long dayTimeOffset = 0;
+
+    /**
+     * Pause-aware absolute tick used by the shared Stardew farm/mine simulation.
+     * Initialized from the overworld gameTime when upgrading an existing save, then advanced only
+     * while the Stardew simulation is running.
+     */
+    private long simulationGameTime = -1L;
     
     // 事件标记（防止重复触发）
     private boolean event1800Triggered = false;  // 18:00 事件
@@ -114,6 +121,25 @@ public class StardewTimeManager extends SavedData {
      */
     public void setVirtualDayTime(ServerLevel anyLevel, long targetDayTime) {
         dayTimeOffset = targetDayTime - anyLevel.getServer().overworld().getDayTime();
+        setDirty();
+    }
+
+    public long getSimulationGameTime() {
+        return simulationGameTime;
+    }
+
+    public void initializeSimulationGameTime(long fallbackGameTime) {
+        if (simulationGameTime < 0L) {
+            simulationGameTime = Math.max(0L, fallbackGameTime);
+            setDirty();
+        }
+    }
+
+    public void advanceSimulationGameTime() {
+        if (simulationGameTime < 0L) {
+            throw new IllegalStateException("Stardew simulation gameTime was not initialized");
+        }
+        simulationGameTime++;
         setDirty();
     }
     
@@ -656,6 +682,7 @@ public class StardewTimeManager extends SavedData {
         tag.putInt("currentSeason", currentSeason);
         tag.putInt("currentYear", currentYear);
         tag.putLong("dayTimeOffset", dayTimeOffset);
+        tag.putLong("simulationGameTime", simulationGameTime);
         
         tag.putBoolean("event1800", event1800Triggered);
         tag.putBoolean("event2200", event2200Triggered);
@@ -675,6 +702,9 @@ public class StardewTimeManager extends SavedData {
         data.currentYear = tag.contains("currentYear") ? tag.getInt("currentYear") : 1;
         
         data.dayTimeOffset = tag.getLong("dayTimeOffset");
+        data.simulationGameTime = tag.contains("simulationGameTime")
+            ? tag.getLong("simulationGameTime")
+            : -1L;
         data.event1800Triggered = tag.getBoolean("event1800");
         data.event2200Triggered = tag.getBoolean("event2200");
         data.event0000Triggered = tag.getBoolean("event0000");

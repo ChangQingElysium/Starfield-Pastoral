@@ -25,6 +25,9 @@ public final class FestivalSystem {
         if (level == null) {
             return;
         }
+        if (com.stardew.craft.time.StardewTimePauseService.shouldPauseLevel(level)) {
+            return;
+        }
         FestivalMapOverlayManager.tick(level);
         FestivalService.advancePreparingSessions(level);
         FestivalService.tickPassiveFestivals(level);

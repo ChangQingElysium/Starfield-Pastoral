@@ -134,7 +134,8 @@ public class FarmJoinCommand {
         for (FarmInstance farm : registry.getAllFarms()) {
             if (farm.isInitialized() && farm.getFarmerCount() < maxFarmers) {
                 mockFarms.add(new FarmListSyncPayload.FarmEntry(
-                        farm.getOwnerUUID(), farm.getOwnerName(), farm.getFarmName(),
+                        farm.getOwnerUUID(), com.stardew.craft.player.PlayerDisplayName.get(
+                                player.server, farm.getOwnerUUID()), farm.getFarmName(),
                         farm.getFarmType().getId(), 0, false));
             }
         }
@@ -226,14 +227,15 @@ public class FarmJoinCommand {
         player.sendSystemMessage(Component.translatable(
                 "stardewcraft.command.farm_join.members_header", farm.getFarmerCount(), maxFarmers));
         player.sendSystemMessage(Component.translatable(
-                "stardewcraft.command.farm_join.owner", farm.getOwnerName(),
+                "stardewcraft.command.farm_join.owner",
+                com.stardew.craft.player.PlayerDisplayName.get(player.server, farm.getOwnerUUID()),
                 farm.getOwnerUUID().toString().substring(0, 8)));
         int i = 1;
         for (UUID member : farm.getMembers()) {
             // 尝试查找在线玩家名
             ServerPlayer mp = player.server.getPlayerList().getPlayer(member);
             Component name = mp != null
-                    ? mp.getName()
+                    ? Component.literal(com.stardew.craft.player.PlayerDisplayName.get(mp))
                     : Component.translatable("stardewcraft.command.farm_join.offline_member");
             player.sendSystemMessage(Component.translatable(
                     "stardewcraft.command.farm_join.member", i, name,

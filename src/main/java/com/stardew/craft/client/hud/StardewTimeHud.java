@@ -1,11 +1,13 @@
 package com.stardew.craft.client.hud;
 
+import com.stardew.craft.Config;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.ClientPlayerDataCache;
 import com.stardew.craft.core.ModDimensions;
 import com.stardew.craft.desert.DesertConstants;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.time.StardewTimeManager;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -66,11 +68,6 @@ public class StardewTimeHud {
     private static final int CALICO_CURRENCY_HEIGHT = 26;
     private static final int CALICO_RATING_ICON_WIDTH = 19;
     private static final int CALICO_RATING_ICON_HEIGHT = 21;
-    private static final int VANILLA_HOTBAR_WIDTH = 182;
-    private static final int OFFHAND_SLOT_WIDTH = 29;
-    private static final int OFFHAND_HUD_GAP = 7;
-    private static final int CALICO_HOTBAR_GAP = 4;
-    private static final int CALICO_SCREEN_MARGIN = 4;
     
     // 指针旋转中心（在背景图内的坐标）
     private static final int POINTER_PIVOT_X = 22;  // 右移3格
@@ -186,6 +183,9 @@ public class StardewTimeHud {
         if (mc.player == null || mc.level == null) {
             return;
         }
+        if (mc.screen instanceof StardewHudLayoutEditorScreen) {
+            return;
+        }
         @SuppressWarnings("null")
         boolean spectator = mc.player.isSpectator();
         if (mc.options.hideGui || spectator) {
@@ -214,34 +214,43 @@ public class StardewTimeHud {
     private static void renderStardewHUD(GuiGraphics graphics) {
         Minecraft mc = Minecraft.getInstance();
         int screenWidth = mc.getWindow().getGuiScaledWidth();
-        float renderScale = StardewHudLayout.renderScale(mc.getWindow().getGuiScale());
-        
-        // HUD位置（右上角）
-        int hudX = StardewHudLayout.anchorX(screenWidth, renderScale);
-        int hudY = StardewHudLayout.anchorY();
+        int screenHeight = mc.getWindow().getGuiScaledHeight();
+        StardewHudLayout.Placement placement = StardewHudLayout.current(screenWidth, screenHeight);
+        renderMainHudAt(graphics, placement.x(), placement.y(), placement.scale());
+        renderCalicoEggCurrency(graphics);
+        renderFairStarTokenCurrency(graphics);
+        renderDesertFestivalMineRating(graphics);
+    }
 
+    static void renderPreview(GuiGraphics graphics, int x, int y, float scale) {
+        renderMainHudAt(graphics, x, y, scale);
+    }
+
+    private static void renderMainHudAt(GuiGraphics graphics, int x, int y, float renderScale) {
         graphics.pose().pushPose();
+        graphics.pose().translate(x, y, 0.0F);
         graphics.pose().scale(renderScale, renderScale, 1.0F);
         try {
             // 1. 渲染背景
-            graphics.blit(BACKGROUND, hudX, hudY, 0, 0, BG_WIDTH, BG_HEIGHT, BG_WIDTH, BG_HEIGHT);
+            graphics.blit(BACKGROUND, 0, 0, 0, 0, BG_WIDTH, BG_HEIGHT, BG_WIDTH, BG_HEIGHT);
 
             // 2. 渲染天气图标（位置29,16）
+            Minecraft mc = Minecraft.getInstance();
             String currentWeather = com.stardew.craft.weather.ClientWeatherCache.getCurrentWeather(mc.level.dimension());
             ResourceLocation weatherIcon = getWeatherIcon(currentWeather);
-            graphics.blit(weatherIcon, hudX + WEATHER_X, hudY + WEATHER_Y, 0, 0,
+            graphics.blit(weatherIcon, WEATHER_X, WEATHER_Y, 0, 0,
                     ICON_WIDTH, ICON_HEIGHT, ICON_WIDTH, ICON_HEIGHT);
 
             // 3. 渲染季节图标（位置53,16）
             ResourceLocation seasonIcon = getSeasonIcon(clientTimeCache.getCurrentSeason());
-            graphics.blit(seasonIcon, hudX + SEASON_X, hudY + SEASON_Y, 0, 0,
+            graphics.blit(seasonIcon, SEASON_X, SEASON_Y, 0, 0,
                     ICON_WIDTH, ICON_HEIGHT, ICON_WIDTH, ICON_HEIGHT);
 
             // 4. 渲染旋转指针
-            renderPointer(graphics, hudX, hudY);
+            renderPointer(graphics, 0, 0);
 
             // 5. 渲染文字信息
-            renderText(graphics, hudX, hudY, mc.font);
+            renderText(graphics, 0, 0, mc.font);
         } finally {
             graphics.pose().popPose();
         }
@@ -328,7 +337,17 @@ public class StardewTimeHud {
         
         // 午夜(0:00)后时间文字变红，对标 SDV: (Game1.timeOfDay >= 2400) ? Color.Red : textColor
         boolean isLateNight = currentTime >= 1440; // 1440分钟 = 24:00 = 0:00 AM
-        int timeColor = isLateNight ? 0xFF0000 : 0x000000;
+        int timeColor = isLateNight ? 0xFFFF0000 : 0xFF000000;
+        // SDV DayTimeMoneyBox.draw parity: while shouldTimePass() is false, the time text spends
+        // one second at full brightness and one second at 50% intensity. A black screen fade is
+        // explicitly excluded by the original nofade condition.
+        boolean blackFadeActive = com.stardew.craft.cutscene.runtime.EventScreenFade.isActive();
+        timeColor = pausedTimeTextColor(
+            timeColor,
+            com.stardew.craft.client.StardewClientTimeState.isTimeFrozenCurrentLevel(),
+            blackFadeActive,
+            Util.getMillis()
+        );
         
         // 更新抖动计时器
         if (timeShakeTimer > 0) {
@@ -370,9 +389,17 @@ public class StardewTimeHud {
         int currentMoney = ClientPlayerDataCache.getMoney();
         moneyDial.draw(graphics, moneyX, moneyY, currentMoney);
 
-        renderCalicoEggCurrency(graphics);
-        renderFairStarTokenCurrency(graphics);
-        renderDesertFestivalMineRating(graphics);
+    }
+
+    static int pausedTimeTextColor(int baseColor, boolean timeFrozen, boolean blackFadeActive, long elapsedMillis) {
+        boolean fullBrightness = !timeFrozen || blackFadeActive || elapsedMillis % 2000L > 1000L;
+        if (fullBrightness) {
+            return baseColor;
+        }
+        int red = ((baseColor >>> 16) & 0xFF) / 2;
+        int green = ((baseColor >>> 8) & 0xFF) / 2;
+        int blue = (baseColor & 0xFF) / 2;
+        return 0x80000000 | (red << 16) | (green << 8) | blue;
     }
 
     public static void setFairFishingHudState(boolean active, int remainingMs, int score) {
@@ -394,8 +421,14 @@ public class StardewTimeHud {
         }
         int seconds = Math.max(0, (int) Math.ceil(fairFishingRemainingMs / 1000.0D));
         String time = String.format("%d:%02d", seconds / 60, seconds % 60);
-        drawBorderedText(graphics, mc.font, I18n.get("stardewcraft.fair.fishing.score", fairFishingScore), 16, 32, 0xFFFFFFFF, 0xFF000000);
-        drawBorderedText(graphics, mc.font, I18n.get("stardewcraft.fair.fishing.time", time), 16, 64, 0xFFFFFFFF, 0xFF000000);
+        StardewHudLayout.Placement placement = StardewHudLayout.current(
+                Config.HudElement.FESTIVAL_SCORE, graphics.guiWidth(), graphics.guiHeight());
+        graphics.pose().pushPose();
+        graphics.pose().translate(placement.x(), placement.y(), 0.0F);
+        graphics.pose().scale(placement.scale(), placement.scale(), 1.0F);
+        drawBorderedText(graphics, mc.font, I18n.get("stardewcraft.fair.fishing.score", fairFishingScore), 0, 0, 0xFFFFFFFF, 0xFF000000);
+        drawBorderedText(graphics, mc.font, I18n.get("stardewcraft.fair.fishing.time", time), 0, 32, 0xFFFFFFFF, 0xFF000000);
+        graphics.pose().popPose();
     }
 
     private static void renderIceFishingHud(GuiGraphics graphics) {
@@ -405,8 +438,14 @@ public class StardewTimeHud {
         }
         int seconds = Math.max(0, (int) Math.ceil(iceFishingRemainingMs / 1000.0D));
         String time = String.format("%d:%02d", seconds / 60, seconds % 60);
-        drawBorderedText(graphics, mc.font, I18n.get("stardewcraft.festival.ice_fishing.fish_count", iceFishingFishCaught), 16, 32, 0xFFFFFFFF, 0xFF000000);
-        drawBorderedText(graphics, mc.font, I18n.get("stardewcraft.festival.ice_fishing.time", time), 16, 64, 0xFFFFFFFF, 0xFF000000);
+        StardewHudLayout.Placement placement = StardewHudLayout.current(
+                Config.HudElement.FESTIVAL_SCORE, graphics.guiWidth(), graphics.guiHeight());
+        graphics.pose().pushPose();
+        graphics.pose().translate(placement.x(), placement.y(), 0.0F);
+        graphics.pose().scale(placement.scale(), placement.scale(), 1.0F);
+        drawBorderedText(graphics, mc.font, I18n.get("stardewcraft.festival.ice_fishing.fish_count", iceFishingFishCaught), 0, 0, 0xFFFFFFFF, 0xFF000000);
+        drawBorderedText(graphics, mc.font, I18n.get("stardewcraft.festival.ice_fishing.time", time), 0, 32, 0xFFFFFFFF, 0xFF000000);
+        graphics.pose().popPose();
     }
 
     private static void renderCalicoEggCurrency(GuiGraphics graphics) {
@@ -424,14 +463,18 @@ public class StardewTimeHud {
             return;
         }
 
-        int screenWidth = mc.getWindow().getGuiScaledWidth();
-        int screenHeight = mc.getWindow().getGuiScaledHeight();
-        int boxX = leftOfOffhandBoxX(screenWidth, CALICO_CURRENCY_WIDTH);
-        int boxY = screenHeight - CALICO_CURRENCY_HEIGHT - 1;
+        StardewHudLayout.Placement placement = StardewHudLayout.current(
+                Config.HudElement.FESTIVAL_CURRENCY, graphics.guiWidth(), graphics.guiHeight());
+        int boxX = 23;
+        int boxY = 3;
+        graphics.pose().pushPose();
+        graphics.pose().translate(placement.x(), placement.y(), 0.0F);
+        graphics.pose().scale(placement.scale(), placement.scale(), 1.0F);
         graphics.blit(CALICO_CURRENCY_BG_HOTBAR, boxX, boxY, 0, 0,
                 CALICO_CURRENCY_WIDTH, CALICO_CURRENCY_HEIGHT,
                 CALICO_CURRENCY_WIDTH, CALICO_CURRENCY_HEIGHT);
         calicoEggDial.draw(graphics, boxX + 7, boxY + 9, count);
+        graphics.pose().popPose();
     }
 
     private static void renderFairStarTokenCurrency(GuiGraphics graphics) {
@@ -445,18 +488,22 @@ public class StardewTimeHud {
             return;
         }
 
-        int screenWidth = mc.getWindow().getGuiScaledWidth();
-        int screenHeight = mc.getWindow().getGuiScaledHeight();
         String text = String.valueOf(count);
         int boxWidth = Math.max(64, 52 + mc.font.width(text) + 8);
         int boxHeight = 32;
-        int boxX = leftOfOffhandBoxX(screenWidth, boxWidth);
-        int boxY = screenHeight - boxHeight - 1;
+        StardewHudLayout.Placement placement = StardewHudLayout.current(
+                Config.HudElement.FESTIVAL_CURRENCY, graphics.guiWidth(), graphics.guiHeight());
+        int boxX = 23;
+        int boxY = 0;
+        graphics.pose().pushPose();
+        graphics.pose().translate(placement.x(), placement.y(), 0.0F);
+        graphics.pose().scale(placement.scale(), placement.scale(), 1.0F);
         graphics.fill(boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xBF000000);
         graphics.blit(VANILLA_CURSORS, boxX + 8, boxY + 8, 16, 16,
                 338, 400, 8, 8,
                 704, 2256);
         drawBorderedText(graphics, mc.font, text, boxX + 36, boxY + 12, 0xFFFFFFFF, 0xFF000000);
+        graphics.pose().popPose();
     }
 
     private static void drawBorderedText(GuiGraphics graphics, Font font, String text, int x, int y, int color, int borderColor) {
@@ -483,14 +530,15 @@ public class StardewTimeHud {
             desertFestivalMineRatingShakeTimer -= (int)(mc.getTimer().getRealtimeDeltaTicks() * 50);
         }
 
-        int screenWidth = mc.getWindow().getGuiScaledWidth();
-        int screenHeight = mc.getWindow().getGuiScaledHeight();
-        int calicoBoxX = leftOfOffhandBoxX(screenWidth, CALICO_CURRENCY_WIDTH);
-        int calicoBoxY = screenHeight - CALICO_CURRENCY_HEIGHT - 1;
         int iconW = CALICO_RATING_ICON_WIDTH;
         int iconH = CALICO_RATING_ICON_HEIGHT;
-        int x = Math.max(CALICO_SCREEN_MARGIN, calicoBoxX - iconW - CALICO_HOTBAR_GAP);
-        int y = calicoBoxY + (CALICO_CURRENCY_HEIGHT - iconH) / 2;
+        StardewHudLayout.Placement placement = StardewHudLayout.current(
+                Config.HudElement.FESTIVAL_CURRENCY, graphics.guiWidth(), graphics.guiHeight());
+        int x = 0;
+        int y = (Config.HudElement.FESTIVAL_CURRENCY.baseHeight() - iconH) / 2;
+        graphics.pose().pushPose();
+        graphics.pose().translate(placement.x(), placement.y(), 0.0F);
+        graphics.pose().scale(placement.scale(), placement.scale(), 1.0F);
         if (desertFestivalMineRatingShakeTimer > 0) {
             x += (int)(Math.random() * 7 - 3);
             y += (int)(Math.random() * 7 - 3);
@@ -501,12 +549,7 @@ public class StardewTimeHud {
             CALICO_RATING_ICON_WIDTH, CALICO_RATING_ICON_HEIGHT);
         String rating = String.valueOf(desertFestivalMineRating);
         drawCenteredScaledText(graphics, mc.font, rating, x + iconW / 2, y + iconH / 2 - 1, 0xFF3F2A13, 0.75F, true);
-    }
-
-    private static int leftOfOffhandBoxX(int screenWidth, int boxWidth) {
-        int hotbarX = (screenWidth - VANILLA_HOTBAR_WIDTH) / 2;
-        int offhandLeft = hotbarX - OFFHAND_SLOT_WIDTH;
-        return Math.max(CALICO_SCREEN_MARGIN, offhandLeft - boxWidth - OFFHAND_HUD_GAP);
+        graphics.pose().popPose();
     }
 
     private static void drawCenteredScaledText(GuiGraphics graphics, Font font, String text, int centerX, int centerY,

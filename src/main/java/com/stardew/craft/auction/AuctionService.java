@@ -15,6 +15,7 @@ import com.stardew.craft.network.payload.OpenAuctionEntryChoicePayload;
 import com.stardew.craft.network.payload.OpenAuctionJoinListPayload;
 import com.stardew.craft.network.payload.OpenLewisConfirmPayload;
 import com.stardew.craft.network.payload.SyncAuctionBoardPayload;
+import com.stardew.craft.player.PlayerDisplayName;
 import com.stardew.craft.sound.ModSounds;
 import com.stardew.craft.time.StardewTimeManager;
 import net.minecraft.ChatFormatting;
@@ -113,7 +114,8 @@ public final class AuctionService {
             .filter(auction -> !auction.creatorId().equals(player.getUUID()))
             .sorted(Comparator.comparingInt(AuctionRecord::scheduledDay).thenComparingInt(AuctionRecord::startMinute))
             .map(auction -> new OpenAuctionJoinListPayload.AuctionSummary(
-                auction.id(), auction.name(), auction.creatorName(), auction.scheduledDay(), auction.startMinute(), auction.lots().size()))
+                auction.id(), auction.name(), PlayerDisplayName.get(player.server, auction.creatorId()),
+                auction.scheduledDay(), auction.startMinute(), auction.lots().size()))
             .toList();
         PacketDistributor.sendToPlayer(player, new OpenAuctionJoinListPayload(summaries));
         play(player, ModSounds.BOOK_READ.get(), 0.65f, 1.05f);
@@ -152,15 +154,17 @@ public final class AuctionService {
 
         String name = cleanText(rawName, 48);
         if (name.isBlank()) {
-            name = Component.translatable("stardewcraft.auction.default_name", player.getName().getString()).getString();
+            name = Component.translatable("stardewcraft.auction.default_name",
+                    PlayerDisplayName.get(player)).getString();
         }
         String promo = cleanText(rawPromo, 160);
         if (promo.isBlank()) {
             promo = Component.translatable("stardewcraft.auction.default_promo").getString();
         }
-        AuctionLot lot = new AuctionLot(UUID.randomUUID(), player.getUUID(), player.getName().getString(),
+        String playerName = PlayerDisplayName.get(player);
+        AuctionLot lot = new AuctionLot(UUID.randomUUID(), player.getUUID(), playerName,
             stack, startingPrice, null, "", 0);
-        AuctionRecord auction = new AuctionRecord(UUID.randomUUID(), player.getUUID(), player.getName().getString(),
+        AuctionRecord auction = new AuctionRecord(UUID.randomUUID(), player.getUUID(), playerName,
             scheduledDay, startMinute, name, promo, Status.SCHEDULED, List.of(lot), 0, 0L, 0, false);
         data.auctions().put(auction.id(), auction);
         data.setDirty();
@@ -190,7 +194,7 @@ public final class AuctionService {
             return;
         }
         List<AuctionLot> lots = new ArrayList<>(auction.lots());
-        lots.add(new AuctionLot(UUID.randomUUID(), player.getUUID(), player.getName().getString(),
+        lots.add(new AuctionLot(UUID.randomUUID(), player.getUUID(), PlayerDisplayName.get(player),
             stack, startingPrice, null, "", 0));
         data.auctions().put(auction.id(), auction.withLots(lots));
         data.setDirty();
@@ -275,7 +279,8 @@ public final class AuctionService {
                     && auction.creatorId().equals(player.getUUID())) {
                 player.displayClientMessage(Component.translatable("stardewcraft.auction.enter.host_hint"), false);
             } else {
-                player.displayClientMessage(Component.translatable("stardewcraft.auction.enter.wait_hint", auction.creatorName()), false);
+                player.displayClientMessage(Component.translatable("stardewcraft.auction.enter.wait_hint",
+                        PlayerDisplayName.get(player.server, auction.creatorId())), false);
             }
         });
         play(player, ModSounds.BIG_SELECT.get(), 0.72f, 1.05f);
@@ -312,7 +317,8 @@ public final class AuctionService {
         if (auction.status() == Status.IN_PROGRESS) {
             openBidScreen(player);
         } else {
-            player.displayClientMessage(Component.translatable("stardewcraft.auction.waiting_for_host", auction.creatorName()), true);
+            player.displayClientMessage(Component.translatable("stardewcraft.auction.waiting_for_host",
+                    PlayerDisplayName.get(player.server, auction.creatorId())), true);
             play(player, ModSounds.BUTTON_TAP.get(), 0.55f, 0.9f);
         }
         return true;
@@ -352,7 +358,8 @@ public final class AuctionService {
             return;
         }
         long remainingTicks = Math.max(0L, auction.lotEndTick() - player.serverLevel().getGameTime());
-        PacketDistributor.sendToPlayer(player, OpenAuctionBidPayload.from(auction, lot, (int) (remainingTicks / 20L), canBid(player, lot)));
+        PacketDistributor.sendToPlayer(player, OpenAuctionBidPayload.from(
+                player.server, auction, lot, (int) (remainingTicks / 20L), canBid(player, lot)));
     }
 
     public static void submitBid(ServerPlayer player, int bid) {
@@ -383,7 +390,7 @@ public final class AuctionService {
             SharedMoneyService.addMoney(lot.highestBidderId(), lot.highestBid());
         }
 
-        AuctionLot nextLot = lot.withBid(player.getUUID(), player.getName().getString(), bid);
+        AuctionLot nextLot = lot.withBid(player.getUUID(), PlayerDisplayName.get(player), bid);
         List<AuctionLot> lots = new ArrayList<>(auction.lots());
         lots.set(auction.currentLotIndex(), nextLot);
         long now = player.serverLevel().getGameTime();
@@ -395,7 +402,7 @@ public final class AuctionService {
         AuctionWorldData.get().auctions().put(next.id(), next);
         AuctionWorldData.get().setDirty();
         broadcastInRoom(player.server, Component.translatable("stardewcraft.auction.bid.broadcast",
-            player.getName(), bid, nextLot.stack().getHoverName()).withStyle(ChatFormatting.GOLD), false);
+            PlayerDisplayName.get(player), bid, nextLot.stack().getHoverName()).withStyle(ChatFormatting.GOLD), false);
         playInRoom(player.server, ModSounds.BUTTON_PRESS.get(), 0.45f, 1.1f);
         playInRoom(player.server, ModSounds.COIN.get(), 0.42f, 1.24f);
         play(player, ModSounds.MONEY_DIAL.get(), 0.50f, 1.0f);
@@ -442,7 +449,8 @@ public final class AuctionService {
                 if (auction.creatorId().equals(player.getUUID())) {
                     player.displayClientMessage(Component.translatable("stardewcraft.auction.actionbar.host_start"), true);
                 } else {
-                    player.displayClientMessage(Component.translatable("stardewcraft.auction.actionbar.waiting", auction.creatorName()), true);
+                    player.displayClientMessage(Component.translatable("stardewcraft.auction.actionbar.waiting",
+                            PlayerDisplayName.get(server, auction.creatorId())), true);
                 }
             }
         } else if (auction.status() == Status.IN_PROGRESS) {
@@ -544,7 +552,8 @@ public final class AuctionService {
             SharedMoneyService.addMoney(lot.sellerId(), lot.highestBid());
             deliverItem(server, lot.highestBidderId(), lot.stack());
             broadcastInRoom(server, Component.translatable("stardewcraft.auction.sold",
-                lot.stack().getHoverName(), lot.highestBidderName(), lot.highestBid()).withStyle(ChatFormatting.GOLD), false);
+                lot.stack().getHoverName(), PlayerDisplayName.get(server, lot.highestBidderId()),
+                lot.highestBid()).withStyle(ChatFormatting.GOLD), false);
             playInRoom(server, ModSounds.HAMMER.get(), 0.75f, 1.0f);
             playInRoom(server, ModSounds.COIN.get(), 0.62f, 1.0f);
         } else {
@@ -708,7 +717,7 @@ public final class AuctionService {
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             if (isInAuctionRoom(player)) {
                 PacketDistributor.sendToPlayer(player,
-                    SyncAuctionBoardPayload.from(auction, lot, remainingSeconds, canBid(player, lot)));
+                    SyncAuctionBoardPayload.from(server, auction, lot, remainingSeconds, canBid(player, lot)));
             }
         }
     }

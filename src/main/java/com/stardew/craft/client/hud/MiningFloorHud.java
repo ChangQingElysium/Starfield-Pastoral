@@ -1,6 +1,7 @@
 package com.stardew.craft.client.hud;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.stardew.craft.Config;
 import com.stardew.craft.mining.MiningCoordinates;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.core.ModMiningDimensions;
@@ -24,10 +25,6 @@ public class MiningFloorHud {
         StardewCraft.MODID, "textures/gui/jei/empty_slot.png"
     );
     private static final int SLOT_SIZE = 32;
-    private static final int VANILLA_HOTBAR_WIDTH = 182;
-    private static final int OFFHAND_SLOT_WIDTH = 29;
-    private static final int OFFHAND_HUD_GAP = 7;
-    private static final int SCREEN_MARGIN = 4;
     
     // 客户端缓存的当前层数（由网络包同步）
     private static int currentFloor = 0;
@@ -53,6 +50,9 @@ public class MiningFloorHud {
         if (mc.player == null || mc.level == null) {
             return;
         }
+        if (mc.screen instanceof StardewHudLayoutEditorScreen) {
+            return;
+        }
         if (mc.options.hideGui || mc.player.isSpectator()) {
             return;
         }
@@ -69,12 +69,13 @@ public class MiningFloorHud {
         GuiGraphics guiGraphics = event.getGuiGraphics();
         Font font = mc.font;
         
-        int screenWidth = mc.getWindow().getGuiScaledWidth();
-        int screenHeight = mc.getWindow().getGuiScaledHeight();
-        int hotbarX = (screenWidth - VANILLA_HOTBAR_WIDTH) / 2;
-        int offhandLeft = hotbarX - OFFHAND_SLOT_WIDTH;
-        int x = Math.max(SCREEN_MARGIN, offhandLeft - SLOT_SIZE - OFFHAND_HUD_GAP);
-        int y = screenHeight - SLOT_SIZE - 1;
+        StardewHudLayout.Placement placement = StardewHudLayout.current(
+                Config.HudElement.MINING_FLOOR, guiGraphics.guiWidth(), guiGraphics.guiHeight());
+        int x = 0;
+        int y = 0;
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(placement.x(), placement.y(), 0.0F);
+        guiGraphics.pose().scale(placement.scale(), placement.scale(), 1.0F);
         
         // 绘制 empty_slot 背景，放大2倍（32x32）
         // 使用正确的blit方法：指定屏幕坐标、UV坐标、宽高、纹理总大小
@@ -105,7 +106,7 @@ public class MiningFloorHud {
         
         // 绘制文字（启用阴影=加粗效果）
         guiGraphics.drawString(font, floorText, textX, textY, color, false);
-        
+        guiGraphics.pose().popPose();
         RenderSystem.disableBlend();
     }
 }

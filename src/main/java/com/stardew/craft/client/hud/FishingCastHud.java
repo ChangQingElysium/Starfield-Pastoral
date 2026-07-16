@@ -1,5 +1,6 @@
 package com.stardew.craft.client.hud;
 
+import com.stardew.craft.Config;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.gui.LocalizedGuiAssets;
 import com.stardew.craft.client.sound.LoopingVariablePitchSoundInstance;
@@ -45,9 +46,6 @@ public final class FishingCastHud {
 	private FishingCastHud() {
 	}
 
-	// User-requested: shrink HUD a bit.
-	private static final float HUD_SCALE = 0.3f;
-
 	private static boolean wasUsing;
 	private static int postReleaseCountdownMs;
 	private static int maxPopMs;
@@ -63,7 +61,8 @@ public final class FishingCastHud {
 	public static void onRenderGui(RenderGuiEvent.Post event) {
 		Minecraft mc = Minecraft.getInstance();
 		// Never render the casting HUD behind the minigame.
-		if (mc.screen instanceof com.stardew.craft.client.fishing.FishingMinigameScreen) {
+		if (mc.screen instanceof com.stardew.craft.client.fishing.FishingMinigameScreen
+				|| mc.screen instanceof StardewHudLayoutEditorScreen) {
 			stopSinWave(mc);
 			return;
 		}
@@ -125,19 +124,17 @@ public final class FishingCastHud {
 	@SuppressWarnings("null")
 	private static void renderTimingCast(GuiGraphics g, Font font, float progress, boolean usingRod) {
 		Minecraft mc = Minecraft.getInstance();
-		int w = mc.getWindow().getGuiScaledWidth();
-		int h = mc.getWindow().getGuiScaledHeight();
-
 		int srcW = getTextureWidthOrFallback(TIMING_CAST_TEX, FALLBACK_BG_W);
 		int srcH = getTextureHeightOrFallback(TIMING_CAST_TEX, FALLBACK_BG_H);
 		float baseScale = computeTimingCastScale(srcW, srcH);
-		float bgScale = baseScale * HUD_SCALE;
+		float bgScale = baseScale;
 		int bgW = Math.round(srcW * bgScale);
 		int bgH = Math.round(srcH * bgScale);
 
-		// Anchor under the crosshair (screen center).
-		int x = (w - bgW) / 2;
-		int yBase = h / 2 + 22;
+		StardewHudLayout.Placement placement = StardewHudLayout.current(
+			Config.HudElement.FISHING_CAST, g.guiWidth(), g.guiHeight());
+		int x = 0;
+		int yBase = 0;
 
 		int yOffset = 0;
 		float alpha = 1f;
@@ -151,6 +148,9 @@ public final class FishingCastHud {
 		}
 
 		int y = yBase + yOffset;
+		g.pose().pushPose();
+		g.pose().translate(placement.x(), placement.y(), 0.0F);
+		g.pose().scale(placement.scale(), placement.scale(), 1.0F);
 
 		// background
 		g.setColor(1f, 1f, 1f, alpha);
@@ -181,7 +181,8 @@ public final class FishingCastHud {
 			g.fill(ox, oy, ox + fw, oy + fh, fillColor);
 		}
 
-		renderMaxPopup(g, x, y, bgW, HUD_SCALE);
+		renderMaxPopup(g, x, y, bgW, 1.0F);
+		g.pose().popPose();
 	}
 
 	private static float computeTimingCastScale(int srcW, int srcH) {

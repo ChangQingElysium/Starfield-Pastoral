@@ -59,6 +59,14 @@ public final class ModKeyMappings {
 
     private ModKeyMappings() {}
 
+    /**
+     * Reads a configurable key without forwarding GLFW's invalid -1 value
+     * when the player has explicitly left the mapping unbound.
+     */
+    public static boolean isDown(KeyMapping mapping) {
+        return mapping != null && !mapping.isUnbound() && mapping.isDown();
+    }
+
     @SuppressWarnings("null")
     @SubscribeEvent
     public static void registerKeyMappings(RegisterKeyMappingsEvent event) {

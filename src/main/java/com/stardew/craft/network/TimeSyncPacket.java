@@ -20,7 +20,8 @@ public record TimeSyncPacket(
     int currentSeason,
     int currentYear,
     long virtualDayTime,
-    boolean timeFrozen
+    boolean timeFrozen,
+    boolean simulationPaused
 ) implements CustomPacketPayload {
     
     @SuppressWarnings("null")
@@ -29,14 +30,25 @@ public record TimeSyncPacket(
     );
     
     @SuppressWarnings("null")
-    public static final StreamCodec<ByteBuf, TimeSyncPacket> STREAM_CODEC = StreamCodec.composite(
-        ByteBufCodecs.INT, TimeSyncPacket::currentTime,
-        ByteBufCodecs.INT, TimeSyncPacket::currentDay,
-        ByteBufCodecs.INT, TimeSyncPacket::currentSeason,
-        ByteBufCodecs.INT, TimeSyncPacket::currentYear,
-        ByteBufCodecs.VAR_LONG, TimeSyncPacket::virtualDayTime,
-        ByteBufCodecs.BOOL, TimeSyncPacket::timeFrozen,
-        TimeSyncPacket::new
+    public static final StreamCodec<ByteBuf, TimeSyncPacket> STREAM_CODEC = StreamCodec.of(
+        (buffer, packet) -> {
+            ByteBufCodecs.INT.encode(buffer, packet.currentTime());
+            ByteBufCodecs.INT.encode(buffer, packet.currentDay());
+            ByteBufCodecs.INT.encode(buffer, packet.currentSeason());
+            ByteBufCodecs.INT.encode(buffer, packet.currentYear());
+            ByteBufCodecs.VAR_LONG.encode(buffer, packet.virtualDayTime());
+            ByteBufCodecs.BOOL.encode(buffer, packet.timeFrozen());
+            ByteBufCodecs.BOOL.encode(buffer, packet.simulationPaused());
+        },
+        buffer -> new TimeSyncPacket(
+            ByteBufCodecs.INT.decode(buffer),
+            ByteBufCodecs.INT.decode(buffer),
+            ByteBufCodecs.INT.decode(buffer),
+            ByteBufCodecs.INT.decode(buffer),
+            ByteBufCodecs.VAR_LONG.decode(buffer),
+            ByteBufCodecs.BOOL.decode(buffer),
+            ByteBufCodecs.BOOL.decode(buffer)
+        )
     );
     
     @Override
@@ -60,6 +72,8 @@ public record TimeSyncPacket(
             timeManager.getCurrentYear(),
             vdt,
             com.stardew.craft.festival.ActiveFestivalHandlers.isAnyTimeFreezeActive()
+                || (server != null && com.stardew.craft.time.StardewTimePauseService.isPaused(server)),
+            server != null && com.stardew.craft.time.StardewTimePauseService.isPaused(server)
         );
     }
     
@@ -79,7 +93,8 @@ public record TimeSyncPacket(
             com.stardew.craft.client.specialorder.ClientSpecialOrderUnlockState.refreshBoardRenderIfChanged();
             
             // 更新客户端天空时间（每 tick 会强制覆盖 ClientLevel.dayTime）
-            com.stardew.craft.client.StardewClientTimeState.onServerTimeSync(packet.virtualDayTime(), packet.timeFrozen());
+            com.stardew.craft.client.StardewClientTimeState.onServerTimeSync(
+                packet.virtualDayTime(), packet.timeFrozen(), packet.simulationPaused());
         });
     }
 }

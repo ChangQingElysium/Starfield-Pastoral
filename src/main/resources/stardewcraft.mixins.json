@@ -13,8 +13,10 @@
     "FishingHookDisableVanillaBiteMixin",
     "PlayerSweepAttackMixin",
     "LivingEntityStardewBedOrientationMixin",
+    "LevelStardewGameTimeMixin",
     "MinecraftServerTimeSyncMixin",
     "ServerLevelSleepMixin",
+    "ServerLevelStardewPauseMixin",
     "LevelWeatherStateMixin",
     "ServerLevelSkeletonHorseTrapMixin",
     "ManagedAnimalEntityLoadMixin",
@@ -37,6 +39,8 @@
     "ClientSetTimeMixin",
     "ClientWeatherPacketMixin",
     "MultiPlayerGameModeInteractionMixin",
+    "MinecraftStardewPauseMixin",
+    "AbstractContainerScreenSlotHitMixin",
     "DoorBlockMasteryCollisionClientMixin"
   ],
   "injectors": {

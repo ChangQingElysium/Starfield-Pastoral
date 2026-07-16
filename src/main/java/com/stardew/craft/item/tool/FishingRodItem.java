@@ -561,7 +561,7 @@ public class FishingRodItem extends net.minecraft.world.item.FishingRodItem impl
 		// 对齐原版 SV FishingRod.DoFunction：抛竿开始时扣体力
 		// who.Stamina -= 8f - who.FishingLevel * 0.1f;
 		if (!player.isCreative() && player.level().dimension() == ModDimensions.STARDEW_VALLEY) {
-			int fishingLevel = PlayerStardewDataAPI.getSkillLevel(serverPlayer, SkillType.FISHING);
+			int fishingLevel = com.stardew.craft.enchantment.StardewEnchantments.effectiveFishingLevel(serverPlayer, stack);
 			float staminaCost = 8.0f - (fishingLevel * 0.1f);
 			if (staminaCost > 0.0f) {
 				PlayerStardewDataAPI.consumeEnergy(serverPlayer, staminaCost);

@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    "stardewcraft:earth_shale_wall",
+    "stardewcraft:frost_gneiss_wall",
+    "stardewcraft:lava_basalt_wall",
+    "stardewcraft:dark_earth_shale_wall",
+    "stardewcraft:dark_frost_gneiss_wall",
+    "stardewcraft:dark_lava_basalt_wall",
+    "stardewcraft:banded_marble_wall",
+    "stardewcraft:limestone_wall",
+    "stardewcraft:mossy_sandstone_wall",
+    "stardewcraft:cracked_slate_wall",
+    "stardewcraft:scoria_wall",
+    "stardewcraft:salt_rock_wall"
+  ]
+}

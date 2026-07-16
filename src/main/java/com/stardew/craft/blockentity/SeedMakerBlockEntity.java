@@ -3,14 +3,13 @@ package com.stardew.craft.blockentity;
 import com.stardew.craft.core.ModTags;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.item.artisan.ArtisanRecipeDataManager;
+import com.stardew.craft.item.artisan.SeedMakerOutputResolver;
 import com.stardew.craft.time.StardewTimeManager;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -143,7 +142,7 @@ public class SeedMakerBlockEntity extends TimedProductionBlockEntity implements 
         if (rule == null) {
             return ItemStack.EMPTY;
         }
-        Item seedItem = resolveSeedMakerOutputItem(stack.getItem());
+        Item seedItem = SeedMakerOutputResolver.resolve(stack.getItem());
         if (seedItem == null) {
             return ItemStack.EMPTY;
         }
@@ -160,36 +159,6 @@ public class SeedMakerBlockEntity extends TimedProductionBlockEntity implements 
         int range = Math.max(0, rule.seedMax() - rule.seedMin() + 1);
         int count = range == 0 ? rule.seedMin() : rule.seedMin() + random.nextInt(range);
         return new ItemStack(seedItem, count);
-    }
-
-    @Nullable
-    private static Item resolveSeedMakerOutputItem(Item item) {
-        ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
-        if ("stardewcraft".equals(id.getNamespace()) && "sweet_gem_berry".equals(id.getPath())) {
-            return ModItems.RARE_SEED.get();
-        }
-
-        Item wildSeedItem = seasonalWildSeedFor(id.getPath());
-        if (wildSeedItem != null) {
-            return wildSeedItem;
-        }
-
-        ResourceLocation seedId = ResourceLocation.fromNamespaceAndPath(id.getNamespace(), id.getPath() + "_seeds");
-        if (!BuiltInRegistries.ITEM.containsKey(seedId)) {
-            return null;
-        }
-        return BuiltInRegistries.ITEM.get(seedId);
-    }
-
-    @Nullable
-    private static Item seasonalWildSeedFor(String itemPath) {
-        return switch (itemPath) {
-            case "wild_horseradish", "daffodil", "leek", "dandelion" -> ModItems.SPRING_SEEDS.get();
-            case "grape", "spice_berry", "sweet_pea" -> ModItems.SUMMER_SEEDS.get();
-            case "wild_plum", "hazelnut", "blackberry", "common_mushroom" -> ModItems.FALL_SEEDS.get();
-            case "winter_root", "crystal_fruit", "snow_yam", "crocus" -> ModItems.WINTER_SEEDS.get();
-            default -> null;
-        };
     }
 
     private void startWork(ItemStack inputStack, ItemStack output, int minutesUntilReady, Player player) {

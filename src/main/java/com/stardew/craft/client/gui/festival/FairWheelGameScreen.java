@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Random;
 
-public class FairWheelGameScreen extends Screen {
+public class FairWheelGameScreen extends Screen implements com.stardew.craft.client.gui.StardewRealtimeScreen {
     private static final int WHEEL_SDV_W = 640;
     private static final int WHEEL_SDV_H = 448;
     private static final int QUESTION_W = 1200;

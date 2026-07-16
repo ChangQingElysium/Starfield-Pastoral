@@ -1,9 +1,6 @@
 package com.stardew.craft.client.emote;
 
-import org.lwjgl.glfw.GLFW;
-
 import com.stardew.craft.client.ModKeyMappings;
-import com.mojang.blaze3d.platform.InputConstants;
 
 import net.minecraft.client.Minecraft;
 
@@ -25,7 +22,7 @@ public final class EmoteWheelClient {
 			return;
 		}
 
-		boolean down = isWheelKeyHeld(mc);
+		boolean down = isWheelKeyHeld();
 		if (down && !wasDown && mc.screen == null) {
 			mc.setScreen(new EmoteWheelScreen());
 		}
@@ -36,13 +33,8 @@ public final class EmoteWheelClient {
 		wasDown = down;
 	}
 
-	public static boolean isWheelKeyHeld(Minecraft mc) {
-		InputConstants.Key key = ModKeyMappings.EMOTE_WHEEL.getKey();
-		long window = mc.getWindow().getWindow();
-		if (key.getType() == InputConstants.Type.MOUSE) {
-			return GLFW.glfwGetMouseButton(window, key.getValue()) == GLFW.GLFW_PRESS;
-		}
-		return InputConstants.isKeyDown(window, key.getValue());
+	public static boolean isWheelKeyHeld() {
+		return ModKeyMappings.isDown(ModKeyMappings.EMOTE_WHEEL);
 	}
 
 	public static void render(net.minecraft.client.gui.GuiGraphics guiGraphics) {

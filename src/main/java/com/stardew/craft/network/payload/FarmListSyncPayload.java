@@ -106,7 +106,7 @@ public record FarmListSyncPayload(
             boolean isMember = farm.isFarmer(playerUUID);
             entries.add(new FarmEntry(
                     farm.getOwnerUUID(),
-                    farm.getOwnerName(),
+                    com.stardew.craft.player.PlayerDisplayName.get(player.server, farm.getOwnerUUID()),
                     farm.getFarmName(),
                     farm.getFarmType().getId(),
                     perm,

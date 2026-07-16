@@ -53,7 +53,7 @@ public final class FishingSession {
 	private int maxFishSize;
 	private int caughtFishSize;
 	private int initialQuality;  // 基础品质（0-2）
-	private float castPower;  // 0.0-1.0，抛竿力度（对应SDV clearWaterDistance/5）
+	private boolean castFromDryLand;
 
 	public FishingSession(UUID id, BlockPos bobberPos, int waterDepth, int ticksUntilBite) {
 		this.id = id;
@@ -75,15 +75,11 @@ public final class FishingSession {
 		this.maxFishSize = 0;
 		this.caughtFishSize = 0;
 		this.initialQuality = 0;
-		this.castPower = 0.0f;
+		this.castFromDryLand = true;
 	}
 
-	public float castPower() {
-		return castPower;
-	}
-
-	public void setCastPower(float castPower) {
-		this.castPower = castPower;
+	public void setCastFromDryLand(boolean castFromDryLand) {
+		this.castFromDryLand = castFromDryLand;
 	}
 
 	public UUID id() {
@@ -165,7 +161,7 @@ public final class FishingSession {
 						this.inSplash = false;
 					} else {
 						// SDV uses tile coords with practical max ~5 (legendary maxDepth). Cap to 5 to match.
-						this.waterDepth = com.stardew.craft.fishing.server.FishingSessionManager.estimateWaterDepth(level, hookPos, 5);
+						this.waterDepth = FishingWaterDepthService.estimateClearWaterDistance(level, hookPos, 5);
 						// SDV: bobber within fishSplashPoint rect → timeUntilFishingBite /= 4 + later +0.4 chance + +1 depth.
 						try {
 							com.stardew.craft.fishing.splash.FishSplashState fs =
@@ -216,59 +212,19 @@ public final class FishingSession {
 				this.caughtFishSize = 0;
 				this.initialQuality = 0;
 			} else {
-				// 找到鱼了！计算鱼的大小和初始品质
-				// SDV原版公式：fishSize = (clearWaterDistance/5) * random(min,max)/5 * favBait * ±10%
-				// MC中用castPower替代clearWaterDistance/5，下限0.2（SDV短抛至少戉1格离岸距离=0.2）
-					ItemStack rod = getRodFromPlayer(player);
+				// SDV品质使用浮漂周围的方形环离岸深度，与抛竿蓄力无关。
+				ItemStack rod = getRodFromPlayer(player);
 				int fishingLevel = StardewEnchantments.effectiveFishingLevel(player, rod);
-
-				// 1. 抛竿力度因子（SDV: clearWaterDistance/5，范围0.2-1.0）
-				this.fishSize = Math.max(0.2, (double) this.castPower);
-
-				// 2. 钓鱼等级随机项：random(1+level/2, max(6, 1+level/2)) / 5
-				int minimumSizeContribution = 1 + fishingLevel / 2;
-				int upperBound = Math.max(6, minimumSizeContribution);
-				if (upperBound <= minimumSizeContribution) {
-					this.fishSize *= (double) minimumSizeContribution / 5.0;
-				} else {
-					this.fishSize *= (double) (minimumSizeContribution + random.nextInt(upperBound - minimumSizeContribution)) / 5.0;
-				}
-
-				// 3. 偏爱饵料加成（Targeted Bait匹配目标鱼时×1.2）
-					rod = getRodFromPlayer(player);
-				if (rod != null && rod.getItem() instanceof com.stardew.craft.item.tool.FishingRodItem fishingRodItem) {
-					ItemStack baitStack = fishingRodItem.getAttachmentsForTooltip(rod).bait();
-					if (!baitStack.isEmpty() && baitStack.getItem() instanceof com.stardew.craft.item.SpecificBaitItem) {
-						String targetFishId = com.stardew.craft.item.SpecificBaitItem.getTargetFishId(baitStack);
-						if (targetFishId != null) {
-							@SuppressWarnings("null")
-							String caughtFishId = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(selected.get().stack().getItem()).toString();
-							if (targetFishId.equals(caughtFishId)) {
-								this.fishSize *= 1.2;
-							}
-						}
-					}
-				}
-
-				// 4. ±10%随机波动
-				this.fishSize *= 1.0 + (double) (random.nextInt(21) - 10) / 100.0;
-
-				// 5. Clamp到[0,1]
-				this.fishSize = Math.max(0.0, Math.min(1.0, this.fishSize));
+				int qualityDepth = FishingWaterDepthService.qualityDepth(this.waterDepth, this.castFromDryLand);
+				this.fishSize = FishingQualityCalculator.rollFishSize(
+						qualityDepth, fishingLevel, isFavoredBaitFor(rod, selected.get().stack()), random);
 				this.minFishSize = Math.max(0, selected.get().minFishSize());
 				this.maxFishSize = Math.max(this.minFishSize, selected.get().maxFishSize());
 				this.caughtFishSize = (int) ((float) this.minFishSize
 						+ (float) (this.maxFishSize - this.minFishSize) * (float) this.fishSize);
 				this.caughtFishSize++;
 				
-				// 根据fishSize决定初始品质（星露谷原版逻辑）
-				if (this.fishSize < 0.33) {
-					this.initialQuality = 0;  // 普通
-				} else if (this.fishSize < 0.66) {
-					this.initialQuality = 1;  // 银星
-				} else {
-					this.initialQuality = 2;  // 金星
-				}
+				this.initialQuality = FishingQualityCalculator.initialQuality(this.fishSize);
 
 				if (rod != null && rod.getItem() instanceof com.stardew.craft.item.tool.FishingRodItem fishingRodItem
 						&& fishingRodItem.getTier() == com.stardew.craft.item.tool.FishingRodItem.RodTier.TRAINING_ROD) {
@@ -455,5 +411,20 @@ public final class FishingSession {
 			return ItemStack.EMPTY;
 		}
 		return com.stardew.craft.item.tool.FishingRodItem.findRod(player);
+	}
+
+	@SuppressWarnings("null")
+	private static boolean isFavoredBaitFor(ItemStack rod, ItemStack caughtFish) {
+		if (rod == null || rod.isEmpty()
+				|| !(rod.getItem() instanceof com.stardew.craft.item.tool.FishingRodItem fishingRodItem)) {
+			return false;
+		}
+		ItemStack bait = fishingRodItem.getAttachmentsForTooltip(rod).bait();
+		if (bait.isEmpty() || !(bait.getItem() instanceof com.stardew.craft.item.SpecificBaitItem)) {
+			return false;
+		}
+		String targetFishId = com.stardew.craft.item.SpecificBaitItem.getTargetFishId(bait);
+		return targetFishId != null
+				&& targetFishId.equals(net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(caughtFish.getItem()).toString());
 	}
 }

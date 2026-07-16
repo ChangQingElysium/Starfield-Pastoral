@@ -10,7 +10,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.phys.AABB;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,8 +18,6 @@ import java.util.Map;
 
 @SuppressWarnings("null")
 public final class AnimalEntitySyncService {
-    private static final AABB FULL_LEVEL_BOX = new AABB(-30_000_000, -64, -30_000_000, 30_000_000, 320, 30_000_000);
-
     private AnimalEntitySyncService() {
     }
 
@@ -61,20 +58,58 @@ public final class AnimalEntitySyncService {
                 }
                 continue;
             }
-            applyRecord(entity, record);
+            applyAuthoritativeState(entity, record);
             updated++;
         }
 
         return new SyncResult(updated, spawned, orphanIds.size());
     }
 
-    public static BaseCoopAnimalEntity spawnOrSyncSingle(ServerLevel level, FarmAnimalRecord record) {
-        BaseCoopAnimalEntity existing = findLoadedByManagedId(level, record.animalId());
+    /**
+     * Ensures a projection exists immediately for an explicit lifecycle action
+     * such as purchase, incubation or moving home. This may load the target
+     * building chunk; passive reconciliation must use {@link #syncAll(ServerLevel)}.
+     */
+    public static BaseCoopAnimalEntity ensurePresentNow(ServerLevel level, FarmAnimalRecord record) {
+        AnimalWorldData data = AnimalWorldData.get(level);
+        AnimalBuildingRecord building = data.getBuilding(record.buildingId()).orElse(null);
+        if (building == null
+            || !level.dimension().location().toString().equals(building.dimensionId())) {
+            return null;
+        }
+        BlockPos managerPos = building.managerPos();
+        level.getChunk(managerPos.getX() >> 4, managerPos.getZ() >> 4);
+
+        BaseCoopAnimalEntity existing = findLoaded(level, record.animalId());
         if (existing != null) {
-            applyRecord(existing, record);
+            applyAuthoritativeState(existing, record);
             return existing;
         }
-        return spawnEntityForRecord(level, AnimalWorldData.get(level), record);
+        return spawnEntityForRecord(level, data, record);
+    }
+
+    /** Updates an existing projection without creating an entity for an unloaded animal. */
+    public static BaseCoopAnimalEntity updateLoaded(ServerLevel level, FarmAnimalRecord record) {
+        BaseCoopAnimalEntity existing = findLoaded(level, record.animalId());
+        if (existing != null) {
+            applyAuthoritativeState(existing, record);
+        }
+        return existing;
+    }
+
+    /** Removes the loaded projection while leaving the authoritative record untouched. */
+    public static BaseCoopAnimalEntity removeLoaded(ServerLevel level, long animalId) {
+        BaseCoopAnimalEntity existing = findLoaded(level, animalId);
+        if (existing != null) {
+            existing.discard();
+        }
+        return existing;
+    }
+
+    /** Rebuilds a loaded animal at its authoritative building after a home change. */
+    public static BaseCoopAnimalEntity relocateNow(ServerLevel level, FarmAnimalRecord record) {
+        removeLoaded(level, record.animalId());
+        return ensurePresentNow(level, record);
     }
 
     private static BaseCoopAnimalEntity spawnEntityForRecord(ServerLevel level,
@@ -119,11 +154,11 @@ public final class AnimalEntitySyncService {
             level.random.nextFloat() * 360.0F,
             0.0F
         );
-        applyRecord(entity, record);
+        applyAuthoritativeState(entity, record);
         return level.addFreshEntity(entity) ? entity : null;
     }
 
-    private static void applyRecord(BaseCoopAnimalEntity entity, FarmAnimalRecord record) {
+    public static void applyAuthoritativeState(BaseCoopAnimalEntity entity, FarmAnimalRecord record) {
         entity.setManagedAnimalId(record.animalId());
         entity.setManagedAnimalType(record.animalTypeId());
         entity.setBaby(record.isBaby());
@@ -140,16 +175,8 @@ public final class AnimalEntitySyncService {
         entity.setCustomNameVisible(true);
     }
 
-    private static BaseCoopAnimalEntity findLoadedByManagedId(ServerLevel level, long animalId) {
-        if (animalId <= 0L) {
-            return null;
-        }
-        for (BaseCoopAnimalEntity entity : level.getEntitiesOfClass(BaseCoopAnimalEntity.class, FULL_LEVEL_BOX)) {
-            if (entity.getManagedAnimalId() == animalId) {
-                return entity;
-            }
-        }
-        return null;
+    public static BaseCoopAnimalEntity findLoaded(ServerLevel level, long animalId) {
+        return ManagedAnimalRuntimeIndex.find(level, animalId);
     }
 
     private static BlockPos findSpawnPos(ServerLevel level, AnimalBuildingRecord building) {
@@ -201,19 +228,11 @@ public final class AnimalEntitySyncService {
 
     private static CollectionState collectLoaded(ServerLevel level) {
         Map<Long, BaseCoopAnimalEntity> byManagedId = new HashMap<>();
-        int duplicatesRemoved = 0;
-        for (BaseCoopAnimalEntity entity : level.getEntitiesOfClass(BaseCoopAnimalEntity.class, FULL_LEVEL_BOX)) {
+        for (BaseCoopAnimalEntity entity : ManagedAnimalRuntimeIndex.snapshot(level)) {
             long managedId = entity.getManagedAnimalId();
             if (managedId > 0L) {
-                BaseCoopAnimalEntity existing = byManagedId.putIfAbsent(managedId, entity);
-                if (existing != null) {
-                    entity.discard();
-                    duplicatesRemoved++;
-                }
+                byManagedId.put(managedId, entity);
             }
-        }
-        if (duplicatesRemoved > 0) {
-            StardewCraft.LOGGER.warn("[ANIMAL_SYNC] Removed {} loaded duplicate animal entities", duplicatesRemoved);
         }
         return new CollectionState(byManagedId);
     }

@@ -1,6 +1,7 @@
 package com.stardew.craft.communitycenter.restore;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.block.decor.MapDecorStaticBlock;
 import com.stardew.craft.interior.InteriorSubspaceManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -105,8 +106,8 @@ public final class AreaRestoreHandler {
                     BlockPos pos = new BlockPos(x, y, z);
                     BlockState current = level.getBlockState(pos);
                     if (!current.equals(newState)) {
-                        // 使用 flag 2 (无方块更新通知) + 最后批量通知
-                        level.setBlock(pos, newState, 2);
+                        // 结构翻新不是玩家破坏；禁止多格装饰的 extension 安全网生成掉落物。
+                        MapDecorStaticBlock.runWithDropsSuppressed(() -> level.setBlock(pos, newState, 2));
                         count++;
                     }
 

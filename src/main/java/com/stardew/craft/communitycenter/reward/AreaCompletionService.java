@@ -1,8 +1,10 @@
 package com.stardew.craft.communitycenter.reward;
 
+import com.stardew.craft.communitycenter.JunimoNotePlacer;
 import com.stardew.craft.communitycenter.state.CCStoryFlags;
 import com.stardew.craft.communitycenter.state.CommunityCenterSavedData;
 import com.stardew.craft.greenhouse.GreenhouseManager;
+import com.stardew.craft.interior.PlayerInteriorAllocator;
 import com.stardew.craft.mail.MailService;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -32,6 +34,12 @@ public final class AreaCompletionService {
      * @param jojaPath true if this was purchased via Joja CD form (skip interior Junimo cutscene)
      */
     public static void onAreaComplete(ServerPlayer player, int areaId, ServerLevel level, boolean jojaPath) {
+        // area 已标记完成后立刻重算，确保该房间的 Junimo Note 当场消失。
+        if (!jojaPath) {
+            JunimoNotePlacer.ensureJunimoNotes(level, player.getUUID(),
+                    PlayerInteriorAllocator.get(level).getCCOrigin(player.getUUID()));
+        }
+
         // 1) 可读邮件 —— SDV: CommunityCenter.cs 的 onAreaCompletion 触发 ccXxx 邮件
         MailService.addMail(player, "cc_area_complete_" + areaId);
 

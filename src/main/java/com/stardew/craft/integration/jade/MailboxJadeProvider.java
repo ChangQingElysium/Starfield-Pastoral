@@ -8,6 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import snownee.jade.api.BlockAccessor;
@@ -36,7 +37,12 @@ public enum MailboxJadeProvider implements IBlockComponentProvider, IServerDataP
 		if (mailbox != null) {
 			tag.putBoolean(NBT_HAS_OWNER, mailbox.hasOwner());
 			if (mailbox.hasOwner()) {
-				tag.putString(NBT_OWNER_NAME, mailbox.getOwnerName());
+				String ownerName = mailbox.getOwnerName();
+				if (mailbox.getOwnerUUID() != null && accessor.getLevel() instanceof ServerLevel serverLevel) {
+					ownerName = com.stardew.craft.player.PlayerDisplayName.get(
+							serverLevel.getServer(), mailbox.getOwnerUUID());
+				}
+				tag.putString(NBT_OWNER_NAME, ownerName);
 			}
 		}
 	}

@@ -112,7 +112,7 @@ public final class FishingSessionManager {
 
 		// Placeholder pos/depth; the session will update them once the hook actually lands in water.
 		FishingSession session = new FishingSession(UUID.randomUUID(), player.blockPosition(), 1, ticksUntilBite);
-		session.setCastPower(castPower01);
+		session.setCastFromDryLand(FishingWaterDepthService.isDryLandCastOrigin(player));
 
 		// 使用原版 FishingHook：直接获得原版鱼线/鱼钩渲染。
 		FishingHook hook = spawnVanillaHook(player, castPower01);
@@ -220,6 +220,7 @@ public final class FishingSessionManager {
 		int barbedHookCount = 0;
 		int leadBobberCount = 0;
 		int corkBobberCount = 0;
+		int treasureHunterCount = 0;
 		boolean hasSonarBobber = false;
 		String sonarFishItemId = "";
 		
@@ -251,6 +252,7 @@ public final class FishingSessionManager {
 			// Barbed Hook & Lead Bobber counts (client-side physics)
 			barbedHookCount = FishingRodItem.countTackle(rod, "stardewcraft:barbed_hook");
 			leadBobberCount = FishingRodItem.countTackle(rod, "stardewcraft:lead_bobber");
+			treasureHunterCount = FishingRodItem.countTackle(rod, "stardewcraft:treasure_hunter");
 
 			// Sonar Bobber: shows hooked fish before it's caught
 			hasSonarBobber = FishingRodItem.hasTackle(rod, "stardewcraft:sonar_bobber");
@@ -260,6 +262,14 @@ public final class FishingSessionManager {
 					sonarFishItemId = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(planned.getItem()).toString();
 				}
 			}
+		}
+		if (rod != null && rod.getItem() instanceof FishingRodItem rodItem
+				&& rodItem.getTier() == FishingRodItem.RodTier.TRAINING_ROD) {
+			int fishingLevel = StardewEnchantments.effectiveFishingLevel(player, rod);
+			if (fishingLevel < 5) {
+				barSizeBonus += 40 - fishingLevel * 8;
+			}
+			escapeLossPerTick = 0.002f;
 		}
 
 		int minigameDifficulty = session.difficulty();
@@ -295,6 +305,7 @@ public final class FishingSessionManager {
 				minigameEscapeLossPerTick,
 				barbedHookCount,
 				leadBobberCount,
+				treasureHunterCount,
 				session.minFishSize(),
 				session.maxFishSize(),
 				session.caughtFishSize(),
@@ -459,35 +470,12 @@ public final class FishingSessionManager {
 				StardewCraft.LOGGER.warn("Player {} caught fish but plannedCatch is empty! Giving trash.", player.getName().getString());
 				fish = new ItemStack(com.stardew.craft.item.ModItems.TRASH.get());
 			} else if (!ornateNecklace) {
-				// 计算鱼的最终品质（星露谷原版逻辑）
-				int fishQuality = session.initialQuality();  // 初始品质（0-2）
-				boolean wasPerfect = perfect;
-				
-				// 1. Quality Bobber效果：每个+1品质等级（SDV: >2直接跳到铱星）
-				if (rod != null && rod.getItem() instanceof FishingRodItem) {
-					if (FishingRodItem.hasTackle(rod, "stardewcraft:quality_bobber")) {
-						fishQuality++;
-						if (fishQuality > 2) {
-							fishQuality = 3;  // 铱星（mod内部值3=SDV的4）
-						}
-					}
-				}
-				
-				// 2. 训练竿强制普通品质（SDV: beginnersRod → quality=0）
-				if (rod != null && rod.getItem() instanceof FishingRodItem fishingRodItem2
-						&& fishingRodItem2.getTier() == FishingRodItem.RodTier.TRAINING_ROD) {
-					fishQuality = 0;
-				}
-				
-				// 3. Perfect效果：额外提升品质（在训练竿检查之后，所以训练竿不受perfect影响）
-				if (fishQuality >= 2 && wasPerfect) {
-					fishQuality = 3;  // 金星 → 铱星
-				} else if (fishQuality >= 1 && wasPerfect) {
-					fishQuality = 2;  // 银星 → 金星
-				}
-				
-				// 确保品质在0-3范围内
-				fishQuality = Math.max(0, Math.min(3, fishQuality));
+				int qualityBobberCount = rod == null ? 0
+						: FishingRodItem.countTackle(rod, "stardewcraft:quality_bobber");
+				boolean trainingRod = rod != null && rod.getItem() instanceof FishingRodItem fishingRodItem2
+						&& fishingRodItem2.getTier() == FishingRodItem.RodTier.TRAINING_ROD;
+				int fishQuality = FishingQualityCalculator.finalQuality(
+						session.initialQuality(), qualityBobberCount, trainingRod, perfect);
 				
 				// 使用QualityHelper设置品质
 				com.stardew.craft.item.quality.QualityHelper.setQuality(fish, fishQuality);
@@ -629,6 +617,10 @@ public final class FishingSessionManager {
 				it.remove();
 				continue;
 			}
+			ServerLevel level = player.serverLevel();
+			if (com.stardew.craft.time.StardewTimePauseService.shouldPauseLevel(level)) {
+				continue;
+			}
 			if (!isHoldingStardewFishingRod(player)) {
 				// 玩家不再持竿（切换物品/死亡等）：直接取消会话。
 				cleanupHook(player.serverLevel(), session);
@@ -636,7 +628,6 @@ public final class FishingSessionManager {
 				it.remove();
 				continue;
 			}
-			ServerLevel level = player.serverLevel();
 			if (!isHookAlive(level, session)) {
 				clearAllRodCastFlags(player);
 				it.remove();
@@ -755,8 +746,7 @@ public final class FishingSessionManager {
 			//   level 4  -> 2 (max 6 tiles)
 			//   level 8  -> 3 (max 7 tiles)
 			//   level 15 -> 4 (max 8 tiles)
-			int fishingLevel = com.stardew.craft.player.PlayerStardewDataAPI.getSkillLevel(
-					player, com.stardew.craft.player.SkillType.FISHING);
+			int fishingLevel = StardewEnchantments.effectiveFishingLevel(player, getRodFromPlayer(player));
 			int addedDistance;
 			if (fishingLevel >= 15) addedDistance = 4;
 			else if (fishingLevel >= 8) addedDistance = 3;
@@ -789,26 +779,6 @@ public final class FishingSessionManager {
 			}
 		}
 		return null;
-	}
-
-	@SuppressWarnings("null")
-	static int estimateWaterDepth(ServerLevel level, BlockPos pos, int maxRadius) {
-		// 近似实现：在平面上找最近的“非水方块”，以曼哈顿距离作为离岸距离。
-		int best = maxRadius + 1;
-		for (int dx = -maxRadius; dx <= maxRadius; dx++) {
-			for (int dz = -maxRadius; dz <= maxRadius; dz++) {
-				int dist = Math.abs(dx) + Math.abs(dz);
-				if (dist == 0 || dist >= best) {
-					continue;
-				}
-				BlockPos p = pos.offset(dx, 0, dz);
-				var fs = level.getFluidState(p);
-				if (!fs.is(net.minecraft.tags.FluidTags.WATER) && !fs.is(net.minecraft.tags.FluidTags.LAVA)) {
-					best = dist;
-				}
-			}
-		}
-		return Math.max(1, Math.min(best, maxRadius));
 	}
 
 	/**

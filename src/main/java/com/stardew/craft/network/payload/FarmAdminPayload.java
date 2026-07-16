@@ -70,11 +70,13 @@ public record FarmAdminPayload(
                     PacketDistributor.sendToPlayer(player, FarmAdminSyncPayload.fromRegistry(registry));
                 }
                 case 1 -> { // 删除农场
+                    String ownerDisplayName = com.stardew.craft.player.PlayerDisplayName.get(
+                            player.server, payload.targetUUID);
                     FarmInstance farm = registry.deleteFarm(payload.targetUUID);
                     if (farm != null) {
                         FarmPermissionManager.get().clearAllForOwner(payload.targetUUID);
                         player.displayClientMessage(Component.translatable(
-                                "stardewcraft.farm.admin.deleted", farm.getOwnerName()), false);
+                                "stardewcraft.farm.admin.deleted", ownerDisplayName), false);
                     } else {
                         player.displayClientMessage(Component.translatable("stardewcraft.farm.admin.not_found"), false);
                     }
@@ -100,7 +102,9 @@ public record FarmAdminPayload(
                                 tp.getX() + 0.5, tp.getY(), tp.getZ() + 0.5,
                                 0, 0);
                         player.displayClientMessage(Component.translatable(
-                                "stardewcraft.farm.admin.teleported", farm.getOwnerName()), true);
+                                "stardewcraft.farm.admin.teleported",
+                                com.stardew.craft.player.PlayerDisplayName.get(
+                                        player.server, farm.getOwnerUUID())), true);
                     } else {
                         player.displayClientMessage(Component.translatable("stardewcraft.farm.admin.not_found"), false);
                     }
@@ -117,11 +121,12 @@ public record FarmAdminPayload(
                                 "stardewcraft.farm.admin.player_offline", targetName), false);
                         return;
                     }
-                    boolean ok = registry.transferFarm(payload.targetUUID, targetPlayer.getUUID(), targetName);
+                    String targetDisplayName = com.stardew.craft.player.PlayerDisplayName.get(targetPlayer);
+                    boolean ok = registry.transferFarm(payload.targetUUID, targetPlayer.getUUID(), targetDisplayName);
                     if (ok) {
                         FarmPermissionManager.get().transferPermissions(payload.targetUUID, targetPlayer.getUUID());
                         player.displayClientMessage(Component.translatable(
-                                "stardewcraft.farm.admin.transferred", targetName), false);
+                                "stardewcraft.farm.admin.transferred", targetDisplayName), false);
                     } else {
                         player.displayClientMessage(Component.translatable(
                                 "stardewcraft.farm.admin.transfer_failed"), false);

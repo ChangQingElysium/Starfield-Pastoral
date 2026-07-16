@@ -36,7 +36,10 @@ public class MinecartStationManager extends SavedData {
     private static final String DATA_NAME = "stardew_minecart_stations";
 
     /** 改站点坐标或铁轨范围后 +1，老存档会清旧实体再重放。 */
-    private static final int CURRENT_VERSION = 2;
+    private static final int CURRENT_VERSION = 3;
+
+    /** 模型默认是东西朝向；旋转 90 度后统一为南北朝向。 */
+    private static final float STATION_Y_ROT = 90.0F;
 
     private static final BlockPos TOWN_STATION = new BlockPos(123, 64, 26);
     private static final BlockPos MINES_STATION = new BlockPos(-7, 66, -12);
@@ -73,8 +76,10 @@ public class MinecartStationManager extends SavedData {
         removeAllStationsIn(sdv);
         removeAllStationsIn(mine);
 
-        // 在矿井维度铺一条东西向铁轨：X=-16..-7, Y=66, Z=-12
-        placeRails(mine, -16, 66, -12, -7);
+        // 仅首次初始化或手动 reset 时铺轨；版本迁移不覆盖玩家之后调整过的站点布局。
+        if (placedVersion == 0) {
+            placeRails(mine, -16, 66, -12, -7);
+        }
 
         // 四个站点实体
         spawnStation(sdv, TOWN_STATION, "town");
@@ -90,6 +95,7 @@ public class MinecartStationManager extends SavedData {
     private void spawnStation(ServerLevel level, BlockPos pos, String stationId) {
         level.getChunk(pos.getX() >> 4, pos.getZ() >> 4);
         MinecartStationEntity e = new MinecartStationEntity(level, pos, stationId);
+        e.setYRot(STATION_Y_ROT);
         level.addFreshEntity(e);
     }
 

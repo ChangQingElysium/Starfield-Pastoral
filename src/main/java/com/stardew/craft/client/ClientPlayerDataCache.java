@@ -350,6 +350,16 @@ public class ClientPlayerDataCache {
         return preferredName;
     }
 
+    /** Character name for mod-owned UI; the Minecraft account name is only a legacy fallback. */
+    public static String getPlayerDisplayName(String minecraftNameFallback) {
+        String characterName = preferredName == null ? "" : preferredName.trim();
+        if (!characterName.isBlank()) {
+            return characterName;
+        }
+        String fallback = minecraftNameFallback == null ? "" : minecraftNameFallback.trim();
+        return fallback.isBlank() ? "Player" : fallback;
+    }
+
     public static String getFavoriteThing() {
         return favoriteThing;
     }

@@ -41,6 +41,7 @@ tmp_models/
 /*.txt
 docs/*
 !docs/0.5-addon-api.md
+!docs/npc-schedule-parity-audit-2026-07-16.md
 wiki/
 ui_spec/
 resourcepack-template/

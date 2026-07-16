@@ -123,9 +123,13 @@ public class BillboardScreen extends Screen {
         closeX = windowX + windowW - Math.round(20 * s4);
         closeY = windowY - Math.round(8 * s4);
 
-        // Accept button
-        acceptW2 = Math.round(128 * s4);
-        acceptH2 = Math.round(32 * s4);
+        // SDV sizes this button from the localized label, not as a fixed
+        // 128-pixel-wide panel: text bounds + 24 screen pixels of padding.
+        Component acceptText = Component.translatable("gui.stardewcraft.billboard.accept")
+                .withStyle(net.minecraft.ChatFormatting.BOLD);
+        int buttonPadding = Math.max(6, Math.round(24 * s4 / 4));
+        acceptW2 = font.width(acceptText) + buttonPadding;
+        acceptH2 = font.lineHeight + buttonPadding;
         acceptX = windowX + windowW / 2 - acceptW2 / 2;
         acceptY = windowY + windowH - Math.round(32 * s4);
     }
@@ -486,10 +490,10 @@ public class BillboardScreen extends Screen {
             CommonGuiTextures.drawBillboardAcceptBox(g, acceptX, acceptY, acceptW2, acceptH2, s4);
             if (hov) g.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 
-            // SDV: text at (btn.X+12, btn.Y+16) screen px
+            // Keep every localized label centered inside its content-sized box.
             Component acceptText = Component.translatable("gui.stardewcraft.billboard.accept")
                 .withStyle(net.minecraft.ChatFormatting.BOLD);
-            int textX = acceptX + Math.round(12 * s4 / 4);
+            int textX = acceptX + (acceptW2 - font.width(acceptText)) / 2;
             int textY = acceptY + acceptH2 / 2 - font.lineHeight / 2;
             g.drawString(font, acceptText, textX, textY, TEXT_COLOR, false);
         }

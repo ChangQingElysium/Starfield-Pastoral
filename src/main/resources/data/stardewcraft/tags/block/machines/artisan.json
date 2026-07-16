@@ -4,11 +4,16 @@
     "stardewcraft:keg",
     "stardewcraft:preserves_jar",
     "stardewcraft:dehydrator",
+    "stardewcraft:bait_maker",
     "stardewcraft:fish_smoker",
     "stardewcraft:cask",
     "stardewcraft:cheese_press",
     "stardewcraft:mayonnaise_machine",
     "stardewcraft:oil_maker",
-    "stardewcraft:loom"
+    "stardewcraft:loom",
+    "stardewcraft:heavy_furnace",
+    "stardewcraft:geode_crusher",
+    "stardewcraft:bone_mill",
+    "stardewcraft:coffee_maker"
   ]
 }

@@ -65,11 +65,10 @@ public final class DashMovementTracker {
         if (server == null || ACTIVE.isEmpty()) {
             return;
         }
-        long nowTick = server.overworld().getGameTime();
         Iterator<State> iterator = ACTIVE.values().iterator();
         while (iterator.hasNext()) {
             State state = iterator.next();
-            if (state == null || nowTick > state.endTick) {
+            if (state == null) {
                 sendClientState(server, state, false, 0, null);
                 iterator.remove();
                 continue;
@@ -87,6 +86,15 @@ public final class DashMovementTracker {
             }
             if (player.level() != level) {
                 sendClientState(player, false, 0, null);
+                iterator.remove();
+                continue;
+            }
+            if (com.stardew.craft.time.StardewTimePauseService.shouldPauseLevel(level)) {
+                continue;
+            }
+            long nowTick = level.getGameTime();
+            if (nowTick > state.endTick) {
+                sendClientState(server, state, false, 0, null);
                 iterator.remove();
                 continue;
             }

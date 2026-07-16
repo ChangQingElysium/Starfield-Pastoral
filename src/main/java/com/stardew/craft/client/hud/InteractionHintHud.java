@@ -1,6 +1,8 @@
 package com.stardew.craft.client.hud;
 
+import com.stardew.craft.Config;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -31,9 +33,12 @@ public final class InteractionHintHud {
         if (alpha <= 0.01F || graphics.guiWidth() <= SCREEN_MARGIN * 2) {
             return;
         }
+        if (Minecraft.getInstance().screen instanceof StardewHudLayoutEditorScreen) {
+            return;
+        }
 
         int maxTextWidth = Math.min(MAX_TEXT_WIDTH,
-                graphics.guiWidth() - SCREEN_MARGIN * 2 - HORIZONTAL_PADDING * 2);
+                Config.HudElement.INTERACTION_HINT.baseWidth() - HORIZONTAL_PADDING * 2);
         if (maxTextWidth <= 0) {
             return;
         }
@@ -46,16 +51,20 @@ public final class InteractionHintHud {
         List<FormattedCharSequence> lines = font.split(label, maxTextWidth);
 
         int contentWidth = widest(font, lines);
-        int panelWidth = Math.min(graphics.guiWidth() - SCREEN_MARGIN * 2,
+        int panelWidth = Math.min(Config.HudElement.INTERACTION_HINT.baseWidth(),
                 contentWidth + HORIZONTAL_PADDING * 2);
         int lineStep = font.lineHeight + LINE_GAP;
         int contentHeight = lines.size() * lineStep - LINE_GAP;
         int panelHeight = VERTICAL_PADDING * 2 + Math.max(font.lineHeight, contentHeight);
 
-        int x = (graphics.guiWidth() - panelWidth) / 2;
-        int preferredY = graphics.guiHeight() / 2 + 14;
-        int y = Math.max(SCREEN_MARGIN,
-                Math.min(preferredY, graphics.guiHeight() - panelHeight - SCREEN_MARGIN));
+        int x = (Config.HudElement.INTERACTION_HINT.baseWidth() - panelWidth) / 2;
+        int y = (Config.HudElement.INTERACTION_HINT.baseHeight() - panelHeight) / 2;
+
+        StardewHudLayout.Placement placement = StardewHudLayout.current(
+                Config.HudElement.INTERACTION_HINT, graphics.guiWidth(), graphics.guiHeight());
+        graphics.pose().pushPose();
+        graphics.pose().translate(placement.x(), placement.y(), 0.0F);
+        graphics.pose().scale(placement.scale(), placement.scale(), 1.0F);
 
         int alphaByte = Math.max(0, Math.min(255, Math.round(alpha * 255.0F)));
         int borderAlpha = Math.round(Math.min(1.0F, alpha) * 0.9F * 255.0F);
@@ -75,6 +84,7 @@ public final class InteractionHintHud {
             graphics.drawString(font, line, textX, textY, textColor, false);
             textY += lineStep;
         }
+        graphics.pose().popPose();
     }
 
     @SafeVarargs

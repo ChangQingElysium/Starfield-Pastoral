@@ -166,17 +166,20 @@ public final class WickedKrisPoisonTracker {
         if (server == null) {
             return;
         }
-        long nowTick = server.overworld().getGameTime();
-        DETONATIONS.values().removeIf(state -> detonateIfReady(server, state, nowTick));
+        DETONATIONS.values().removeIf(state -> detonateIfReady(server, state));
     }
 
-    private static boolean detonateIfReady(MinecraftServer server, DetonationState state, long nowTick) {
-        if (nowTick < state.detonateTick) {
-            return false;
-        }
+    private static boolean detonateIfReady(MinecraftServer server, DetonationState state) {
         ServerLevel level = state.dimension != null ? server.getLevel(state.dimension) : null;
         if (level == null) {
             return true;
+        }
+        if (com.stardew.craft.time.StardewTimePauseService.shouldPauseLevel(level)) {
+            return false;
+        }
+        long nowTick = level.getGameTime();
+        if (nowTick < state.detonateTick) {
+            return false;
         }
         if (state.ownerId == null) {
             return true;

@@ -35,20 +35,21 @@ public final class StardewPayCommand {
         }
 
         int currentMoney = PlayerStardewDataAPI.getMoney(player);
+        String playerName = com.stardew.craft.player.PlayerDisplayName.get(player);
         if (currentMoney < amount) {
             context.getSource().sendFailure(Component.literal(
-                player.getScoreboardName() + " only has " + currentMoney + "g; required " + amount + "g."));
+                playerName + " only has " + currentMoney + "g; required " + amount + "g."));
             return 0;
         }
 
         if (!PlayerStardewDataAPI.removeMoney(player, amount)) {
             context.getSource().sendFailure(Component.literal(
-                player.getScoreboardName() + " does not have enough money."));
+                playerName + " does not have enough money."));
             return 0;
         }
 
         context.getSource().sendSuccess(() -> Component.literal(
-            "Charged " + amount + "g from " + player.getScoreboardName() + "."), true);
+            "Charged " + amount + "g from " + playerName + "."), true);
         context.getSource().getServer().getCommands().performPrefixedCommand(context.getSource(), command);
         return 1;
     }

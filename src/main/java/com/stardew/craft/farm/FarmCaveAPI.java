@@ -98,7 +98,8 @@ public final class FarmCaveAPI {
     private static void broadcastChoice(ServerLevel level, FarmInstance farm, FarmCaveChoice choice) {
         var server = level.getServer();
         net.minecraft.network.chat.Component msg = net.minecraft.network.chat.Component.translatable(
-                "stardewcraft.farm_cave.choice_broadcast", farm.getOwnerName(),
+                "stardewcraft.farm_cave.choice_broadcast",
+                com.stardew.craft.player.PlayerDisplayName.get(server, farm.getOwnerUUID()),
                 net.minecraft.network.chat.Component.translatable("stardewcraft.farm_cave.choice." + choice.getName()));
         for (UUID uuid : farm.getAllFarmers()) {
             ServerPlayer sp = server.getPlayerList().getPlayer(uuid);

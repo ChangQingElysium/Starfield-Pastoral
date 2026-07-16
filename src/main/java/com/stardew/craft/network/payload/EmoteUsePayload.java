@@ -54,7 +54,8 @@ public record EmoteUsePayload(String emoteId) implements CustomPacketPayload {
 				.append(EmoteCatalog.getChatIconComponent(emote))
 				.append(Component.literal(" "))
 				.append(Component.translatable("stardewcraft.emote." + emote.id()));
-			Component chatLine = Component.translatable("stardewcraft.emote.chat", serverPlayer.getDisplayName(), emoteDisplay);
+			Component chatLine = Component.translatable("stardewcraft.emote.chat",
+					com.stardew.craft.player.PlayerDisplayName.get(serverPlayer), emoteDisplay);
 			for (ServerPlayer target : serverPlayer.server.getPlayerList().getPlayers()) {
 				target.sendSystemMessage(chatLine);
 			}

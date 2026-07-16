@@ -32,7 +32,7 @@ public class MasteryStatueBlockEntity extends BlockEntity {
 
     public void setOwner(ServerPlayer player) {
         ownerUUID = player.getUUID();
-        ownerName = player.getName().getString();
+        ownerName = com.stardew.craft.player.PlayerDisplayName.get(player);
         setChanged();
         syncToClient();
     }

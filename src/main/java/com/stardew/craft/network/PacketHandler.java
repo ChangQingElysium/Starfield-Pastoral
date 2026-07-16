@@ -85,9 +85,10 @@ public class PacketHandler {
 
     @SubscribeEvent
     public static void register(RegisterPayloadHandlersEvent event) {
-        // 0.5 API stabilization changes equipment sync from registry IDs to complete ItemStacks
-        // and adds server-authoritative client content snapshots. Reject mixed old/new clients explicitly.
-        final PayloadRegistrar registrar = event.registrar("2");
+        // 0.5 API stabilization changes equipment sync from registry IDs to complete ItemStacks,
+        // adds server-authoritative client content snapshots, and synchronizes collective pause state.
+        // Reject mixed old/new clients explicitly.
+        final PayloadRegistrar registrar = event.registrar("3");
         
         // 客户端 -> 服务端
         registrar.playToServer(
@@ -178,6 +179,12 @@ public class PacketHandler {
             com.stardew.craft.network.payload.WardrobeActionPayload.TYPE,
             com.stardew.craft.network.payload.WardrobeActionPayload.STREAM_CODEC,
             com.stardew.craft.network.payload.WardrobeActionPayload::handle
+        );
+
+        registrar.playToServer(
+            com.stardew.craft.network.payload.StardewPauseStatePayload.TYPE,
+            com.stardew.craft.network.payload.StardewPauseStatePayload.STREAM_CODEC,
+            com.stardew.craft.network.payload.StardewPauseStatePayload::handle
         );
 
         // 服务端 -> 客户端
@@ -1083,6 +1090,12 @@ public class PacketHandler {
             com.stardew.craft.network.payload.CraftingMenuCraftSubmitPayload.TYPE,
             com.stardew.craft.network.payload.CraftingMenuCraftSubmitPayload.STREAM_CODEC,
             com.stardew.craft.network.payload.CraftingMenuCraftSubmitPayload::handle
+        );
+
+        registrar.playToServer(
+            com.stardew.craft.network.payload.OpenStardewGameMenuPayload.TYPE,
+            com.stardew.craft.network.payload.OpenStardewGameMenuPayload.STREAM_CODEC,
+            com.stardew.craft.network.payload.OpenStardewGameMenuPayload::handle
         );
 
         registrar.playToServer(

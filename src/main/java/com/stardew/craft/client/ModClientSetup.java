@@ -197,6 +197,7 @@ public final class ModClientSetup {
 	@SuppressWarnings({"null", "unchecked", "rawtypes"})
 	@SubscribeEvent
 	public static void onRegisterMenuScreens(RegisterMenuScreensEvent event) {
+		event.register(ModMenuTypes.STARDEW_GAME_MENU.get(), com.stardew.craft.client.gui.menu.StardewGameMenuScreen::new);
 		event.register(ModMenuTypes.MINE_EXIT.get(), MineExitScreen::new);
 		event.register(ModMenuTypes.ELEVATOR.get(), ElevatorScreen::new);
 		event.register((net.minecraft.world.inventory.MenuType) ModMenuTypes.COOP_MANAGER.get(), BuildingManagerScreen::new);

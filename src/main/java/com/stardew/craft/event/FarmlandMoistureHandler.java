@@ -38,6 +38,9 @@ public class FarmlandMoistureHandler {
         if (!level.dimension().equals(ModDimensions.STARDEW_VALLEY)) {
             return;
         }
+        if (com.stardew.craft.time.StardewTimePauseService.shouldPauseLevel(level)) {
+            return;
+        }
         
         // 低频执行：每 100 tick（5秒）扫一次
         tickCounter++;

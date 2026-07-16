@@ -16,6 +16,7 @@ import com.stardew.craft.network.payload.OpenFestivalConfirmPayload;
 import com.stardew.craft.network.payload.OpenShopScreenPayload;
 import com.stardew.craft.player.PlayerDataEventHandler;
 import com.stardew.craft.player.PlayerStardewDataAPI;
+import com.stardew.craft.player.PlayerDisplayName;
 import com.stardew.craft.shop.ShopItemEntry;
 import com.stardew.craft.shop.ShopRegistry;
 import com.stardew.craft.sound.ModSounds;
@@ -32,6 +33,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.scores.ScoreHolder;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
@@ -88,7 +90,6 @@ public final class FestivalOfIceService {
     private static final Map<UUID, Vec3> LAST_INSIDE_ENTRY = new LinkedHashMap<>();
 
     private static Integer frozenMinute;
-    private static Long frozenOverworldDayTime;
     private static boolean debugRequested;
     private static MainEventPhase mainEventPhase = MainEventPhase.FREE;
     private static int iceFishingTicksRemaining;
@@ -384,19 +385,12 @@ public final class FestivalOfIceService {
     public static long applyTimeFreeze(ServerLevel level, StardewTimeManager timeManager) {
         long currentVirtual = timeManager.getVirtualDayTime(level);
         if (frozenMinute == null || (!hasCurrentSessionParticipant(level) && !FestivalService.isDebugActiveFestival(FESTIVAL_ID))) {
-            frozenOverworldDayTime = null;
             return currentVirtual;
         }
         ServerLevel overworld = level.getServer().overworld();
-        if (frozenOverworldDayTime == null) {
-            frozenOverworldDayTime = overworld.getDayTime();
-        }
         long dayBase = Math.floorDiv(currentVirtual, 24000L) * 24000L;
         long target = dayBase + com.stardew.craft.event.DimensionEventHandler.stardewMinutesToMcTime(frozenMinute);
-        if (overworld.getDayTime() != frozenOverworldDayTime) {
-            overworld.setDayTime(frozenOverworldDayTime);
-        }
-        long targetOffset = target - frozenOverworldDayTime;
+        long targetOffset = target - overworld.getDayTime();
         if (timeManager.getDayTimeOffset() != targetOffset) {
             timeManager.setDayTimeOffsetRaw(targetOffset);
         }
@@ -613,7 +607,7 @@ public final class FestivalOfIceService {
         List<String> names = new ArrayList<>();
         for (ServerPlayer participant : participants) {
             if (WINNERS.contains(participant.getUUID())) {
-                names.add(participant.getScoreboardName());
+                names.add(PlayerDisplayName.get(participant));
             }
         }
         if (names.size() == 1) {
@@ -898,11 +892,18 @@ public final class FestivalOfIceService {
         if (level == null) {
             return;
         }
+        var scoreboard = level.getScoreboard();
+        var objective = scoreboard.getObjective(ICE_FISHING_SCOREBOARD_OBJECTIVE);
+        if (objective == null) {
+            return;
+        }
         for (ServerPlayer participant : onlineParticipants(level)) {
             IceFishingPlayerState state = ICE_FISHING_PLAYERS.get(participant.getUUID());
             int count = state == null ? 0 : state.fishCaught;
-            runServerCommand(level, "scoreboard players set " + participant.getScoreboardName() + " "
-                + ICE_FISHING_SCOREBOARD_OBJECTIVE + " " + count);
+            var score = scoreboard.getOrCreatePlayerScore(
+                    ScoreHolder.forNameOnly(participant.getStringUUID()), objective);
+            score.set(count);
+            score.display(Component.literal(PlayerDisplayName.get(participant)));
         }
     }
 
@@ -995,14 +996,10 @@ public final class FestivalOfIceService {
         if (frozenMinute == null) {
             frozenMinute = FESTIVAL_START_MINUTE;
         }
-        if (level != null && frozenOverworldDayTime == null) {
-            frozenOverworldDayTime = level.getServer().overworld().getDayTime();
-        }
     }
 
     private static void stopTimeFreeze() {
         frozenMinute = null;
-        frozenOverworldDayTime = null;
     }
 
     private static void clearRuntimeState(ServerLevel level) {

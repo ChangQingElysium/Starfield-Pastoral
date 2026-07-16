@@ -115,7 +115,6 @@ public final class SpiritEveFestivalService {
     private static final Set<UUID> EXIT_VOTE_PARTICIPANTS = CONFIRM_STATE.voteParticipants(OpenFestivalConfirmPayload.Action.EXIT);
 
     private static Integer frozenMinute;
-    private static Long frozenOverworldDayTime;
 
     private SpiritEveFestivalService() {
     }
@@ -405,19 +404,12 @@ public final class SpiritEveFestivalService {
     public static long applyTimeFreeze(ServerLevel level, StardewTimeManager timeManager) {
         long currentVirtual = timeManager.getVirtualDayTime(level);
         if (frozenMinute == null || (!hasCurrentSessionParticipant(level) && !FestivalService.isDebugActiveFestival(FESTIVAL_ID))) {
-            frozenOverworldDayTime = null;
             return currentVirtual;
         }
         ServerLevel overworld = level.getServer().overworld();
-        if (frozenOverworldDayTime == null) {
-            frozenOverworldDayTime = overworld.getDayTime();
-        }
         long dayBase = Math.floorDiv(currentVirtual, 24000L) * 24000L;
         long target = dayBase + com.stardew.craft.event.DimensionEventHandler.stardewMinutesToMcTime(frozenMinute);
-        if (overworld.getDayTime() != frozenOverworldDayTime) {
-            overworld.setDayTime(frozenOverworldDayTime);
-        }
-        long targetOffset = target - frozenOverworldDayTime;
+        long targetOffset = target - overworld.getDayTime();
         if (timeManager.getDayTimeOffset() != targetOffset) {
             timeManager.setDayTimeOffsetRaw(targetOffset);
         }
@@ -471,14 +463,10 @@ public final class SpiritEveFestivalService {
         if (frozenMinute == null) {
             frozenMinute = FESTIVAL_START_MINUTE;
         }
-        if (level != null && frozenOverworldDayTime == null) {
-            frozenOverworldDayTime = level.getServer().overworld().getDayTime();
-        }
     }
 
     private static void stopTimeFreeze() {
         frozenMinute = null;
-        frozenOverworldDayTime = null;
     }
 
     private static void clearRuntimeState(ServerLevel level) {

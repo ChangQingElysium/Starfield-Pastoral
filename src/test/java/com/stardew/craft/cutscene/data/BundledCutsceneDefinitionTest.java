@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BundledCutsceneDefinitionTest {
     @Test
@@ -42,6 +43,21 @@ class BundledCutsceneDefinitionTest {
                 assertFalse(event.skippableAtStart(),
                         () -> path + " bypasses its explicit skippable command");
             }
+        }
+    }
+
+    @Test
+    void wizardCutscenesEnableSkippingBeforeTheirFirstDialogue() throws Exception {
+        for (String fileName : java.util.List.of("wizard_intro.json", "wizard_e112.json")) {
+            Path path = eventsRoot().resolve(fileName);
+            EventData event = read(path);
+            int skippableIndex = commandIndex(event, "skippable");
+            int firstDialogueIndex = commandIndex(event, "speak");
+
+            assertTrue(skippableIndex >= 0, () -> path + " is missing its skippable gate");
+            assertTrue(firstDialogueIndex >= 0, () -> path + " has no dialogue command");
+            assertTrue(skippableIndex < firstDialogueIndex,
+                    () -> path + " does not enable skipping before its first dialogue");
         }
     }
 
@@ -82,6 +98,15 @@ class BundledCutsceneDefinitionTest {
 
     private static EventData read(Path path) throws Exception {
         return EventData.fromJson(JsonParser.parseString(Files.readString(path)).getAsJsonObject());
+    }
+
+    private static int commandIndex(EventData event, String commandType) {
+        for (int index = 0; index < event.rawCommands().size(); index++) {
+            if (commandType.equals(event.rawCommands().get(index).get("cmd").getAsString())) {
+                return index;
+            }
+        }
+        return -1;
     }
 
     private static Path eventsRoot() {

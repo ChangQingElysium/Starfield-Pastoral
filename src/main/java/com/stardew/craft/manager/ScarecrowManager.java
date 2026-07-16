@@ -1,5 +1,6 @@
 package com.stardew.craft.manager;
 
+import com.stardew.craft.block.decor.ScarecrowBlock;
 import com.stardew.craft.blockentity.ScarecrowBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -54,10 +55,7 @@ public class ScarecrowManager extends SavedData {
         for (Map.Entry<Long, Integer> entry : radiusByPos.entrySet()) {
             BlockPos sp = BlockPos.of(entry.getKey());
             int r = entry.getValue();
-            int dx = sp.getX() - target.getX();
-            int dz = sp.getZ() - target.getZ();
-            // 圆形范围（XZ 平面）
-            if (dx * dx + dz * dz <= r * r) {
+            if (ScarecrowBlock.protects(sp, target, r)) {
                 return sp;
             }
         }

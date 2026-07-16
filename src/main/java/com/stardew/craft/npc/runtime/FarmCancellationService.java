@@ -69,7 +69,9 @@ public final class FarmCancellationService {
         }
         if (!accepted) {
             PENDING.remove(requestId);
-            notifyMembers(responder.server, pending, Component.translatable("stardewcraft.lewis.farm_cancel.rejected", responder.getName()));
+            notifyMembers(responder.server, pending, Component.translatable(
+                    "stardewcraft.lewis.farm_cancel.rejected",
+                    com.stardew.craft.player.PlayerDisplayName.get(responder)));
             return;
         }
         PendingCancellation next = pending.withAccepted(responder.getUUID());

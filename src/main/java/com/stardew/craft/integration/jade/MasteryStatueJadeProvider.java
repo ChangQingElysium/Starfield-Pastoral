@@ -8,6 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import snownee.jade.api.BlockAccessor;
@@ -36,7 +37,12 @@ public enum MasteryStatueJadeProvider implements IBlockComponentProvider, IServe
         if (statue != null) {
             tag.putBoolean(NBT_HAS_OWNER, statue.hasOwner());
             if (statue.hasOwner()) {
-                tag.putString(NBT_OWNER_NAME, statue.getOwnerName());
+                String ownerName = statue.getOwnerName();
+                if (statue.getOwnerUUID() != null && accessor.getLevel() instanceof ServerLevel serverLevel) {
+                    ownerName = com.stardew.craft.player.PlayerDisplayName.get(
+                            serverLevel.getServer(), statue.getOwnerUUID());
+                }
+                tag.putString(NBT_OWNER_NAME, ownerName);
             }
         }
     }

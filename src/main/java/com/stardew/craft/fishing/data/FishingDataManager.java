@@ -6,12 +6,13 @@ import com.google.gson.JsonObject;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.core.ModDimensions;
 import com.stardew.craft.core.ModMiningDimensions;
+import com.stardew.craft.core.ModTags;
+import com.stardew.craft.enchantment.StardewEnchantments;
 import com.stardew.craft.festival.FestivalService;
 import com.stardew.craft.festival.desert.DesertFestivalService;
 import com.stardew.craft.item.SpecificBaitItem;
 import com.stardew.craft.player.PlayerStardewData;
 import com.stardew.craft.player.PlayerStardewDataAPI;
-import com.stardew.craft.player.SkillType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
@@ -36,10 +37,6 @@ public final class FishingDataManager {
 	private static final String SECRET_NOTE_ITEM_ID = "stardewcraft:secret_note";
 	private static final Set<String> INHERITED_POOL_KEYS = Set.of("Default");
 	private static final String LEGACY_COMPAT_POOL_KEY = "stardewcraft:stardew_valley";
-	private static final TagKey<Item> FISHES_TAG = TagKey.create(
-			Registries.ITEM,
-			ResourceLocation.fromNamespaceAndPath("stardewcraft", "fishes")
-	);
 
 	/**
 	 * Items that are technically caught while fishing but are not backed by
@@ -174,11 +171,11 @@ public final class FishingDataManager {
 			return Optional.of(new FishSelection(secretNote25Catch.get(), 0, 0, 0, 0, true));
 		}
 
-		int fishingLevel = PlayerStardewDataAPI.getSkillLevel(player, SkillType.FISHING);
 		int luckBuffLevel = Math.max(0, PlayerStardewDataAPI.getLuckBuffLevel(player));
 		PlayerStardewData playerData = PlayerStardewDataAPI.getData(player);
 		boolean hasCuriosityLure = hasCuriosityLure(player);
 		ItemStack rodStack = getRodFromPlayer(player);
+		int fishingLevel = StardewEnchantments.effectiveFishingLevel(player, rodStack);
 		boolean usingMagicBait = !rodStack.isEmpty()
 				&& (rodStack.getItem() instanceof com.stardew.craft.item.tool.FishingRodItem)
 				&& com.stardew.craft.item.tool.FishingRodItem.hasBait(rodStack, "stardewcraft:magic_bait");
@@ -449,7 +446,7 @@ public final class FishingDataManager {
 			return false;
 		}
 		Item item = BuiltInRegistries.ITEM.get(id);
-		return item != null && item != Items.AIR && item.builtInRegistryHolder().is(FISHES_TAG);
+		return item != null && item != Items.AIR && item.builtInRegistryHolder().is(ModTags.Items.FISHES);
 	}
 
 	private List<CandidateRule> collectCandidatesByKeys(List<String> lookupKeys) {

@@ -1,7 +1,10 @@
 package com.stardew.craft.client.deco;
 
+import com.stardew.craft.Config;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.deco.PaintbrushSelectionManager.Mode;
+import com.stardew.craft.client.hud.StardewHudLayout;
+import com.stardew.craft.client.hud.StardewHudLayoutEditorScreen;
 import com.stardew.craft.item.tool.PaintbrushItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -36,7 +39,7 @@ public final class PaintbrushModeIndicator {
         Minecraft mc = Minecraft.getInstance();
         Player player = mc.player;
         if (player == null) return;
-        if (mc.options.hideGui || player.isSpectator()) return;
+        if (mc.options.hideGui || player.isSpectator() || mc.screen instanceof StardewHudLayoutEditorScreen) return;
 
         boolean holding = player.getMainHandItem().getItem() instanceof PaintbrushItem
                        || player.getOffhandItem().getItem() instanceof PaintbrushItem;
@@ -73,10 +76,13 @@ public final class PaintbrushModeIndicator {
         }
 
         int alpha = (int)(displayAlpha * 255);
-        int screenW = g.guiWidth();
-
-        // Position above hotbar
-        int baseY = g.guiHeight() - 72;
+        StardewHudLayout.Placement placement = StardewHudLayout.current(
+                Config.HudElement.TOOL_HINT, g.guiWidth(), g.guiHeight());
+        g.pose().pushPose();
+        g.pose().translate(placement.x(), placement.y(), 0.0F);
+        g.pose().scale(placement.scale(), placement.scale(), 1.0F);
+        int screenW = Config.HudElement.TOOL_HINT.baseWidth();
+        int baseY = 10;
 
         // Mode text
         int modeW = font.width(modeText);
@@ -100,5 +106,6 @@ public final class PaintbrushModeIndicator {
         int hintX = (screenW - hintW) / 2;
         int hintAlpha = (int)(displayAlpha * 100);
         g.drawString(font, hint, hintX, baseY - 10, (hintAlpha << 24) | 0x999999, false);
+        g.pose().popPose();
     }
 }

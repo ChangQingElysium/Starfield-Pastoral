@@ -5,7 +5,6 @@ import com.stardew.craft.core.ModDimensions;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.network.payload.OpenObjectDialoguePayload;
 import com.stardew.craft.network.payload.OpenSecretNote20QuestionPayload;
-import com.stardew.craft.network.payload.OpenNpcDialogueScreenPayload;
 import com.stardew.craft.player.PlayerDataEventHandler;
 import com.stardew.craft.player.PlayerDataManager;
 import com.stardew.craft.player.PlayerStardewData;
@@ -26,6 +25,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Interaction;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -182,9 +182,9 @@ public final class SecretNote20Service {
         if (!player.getInventory().add(charm)) player.drop(charm, false);
         player.getInventory().setChanged();
         player.playSound(net.minecraft.sounds.SoundEvents.PLAYER_LEVELUP, 1.0F, 1.12F);
-        PacketDistributor.sendToPlayer(player, new OpenNpcDialogueScreenPayload(
-                "", "stardewcraft.item.special_charm.obtained", 0,
-                SPECIAL_CHARM_SPECIAL_ITEM, false));
+        PacketDistributor.sendToPlayer(player, new OpenObjectDialoguePayload(
+                Component.translatable("stardewcraft.item.special_charm.obtained"),
+                SPECIAL_CHARM_SPECIAL_ITEM));
     }
 
     public static boolean grantSpecialCharm(ServerPlayer player, PlayerStardewData data) {

@@ -1,6 +1,5 @@
 package com.stardew.craft.leaderboard;
 
-import com.mojang.authlib.GameProfile;
 import com.stardew.craft.animal.data.AnimalWorldData;
 import com.stardew.craft.mining.MiningDataManager;
 import com.stardew.craft.mining.MiningPlayerData;
@@ -8,6 +7,7 @@ import com.stardew.craft.player.PlayerDataManager;
 import com.stardew.craft.player.RecipeCatalogData;
 import com.stardew.craft.player.SkillType;
 import com.stardew.craft.player.PlayerStardewData;
+import com.stardew.craft.player.PlayerDisplayName;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -55,7 +55,7 @@ public final class LeaderboardService {
         for (UUID playerId : playerIds) {
             PlayerStardewData data = playerData.get(playerId);
             long value = valueFor(metric, safePeriod, data, miningData.get(playerId), animalData, playerId);
-            unranked.add(new UnrankedEntry(playerId, resolvePlayerName(requester.server, playerId, data), value,
+            unranked.add(new UnrankedEntry(playerId, resolvePlayerName(requester.server, playerId), value,
                     requester.server.getPlayerList().getPlayer(playerId) != null,
                     requester.getUUID().equals(playerId)));
         }
@@ -144,22 +144,8 @@ public final class LeaderboardService {
                 .sum();
     }
 
-    private static String resolvePlayerName(MinecraftServer server, UUID playerId, PlayerStardewData playerData) {
-        ServerPlayer online = server.getPlayerList().getPlayer(playerId);
-        if (online != null) {
-            return online.getName().getString();
-        }
-        if (playerData != null && !playerData.getLastKnownName().isBlank()) {
-            return playerData.getLastKnownName();
-        }
-        var profileCache = server.getProfileCache();
-        if (profileCache != null) {
-            return profileCache.get(playerId)
-                    .map(GameProfile::getName)
-                    .filter(name -> !name.isBlank())
-                    .orElse("Player-" + playerId.toString().substring(0, 8));
-        }
-        return "Player-" + playerId.toString().substring(0, 8);
+    private static String resolvePlayerName(MinecraftServer server, UUID playerId) {
+        return PlayerDisplayName.get(server, playerId);
     }
 
     private record UnrankedEntry(UUID playerId, String playerName, long value, boolean online, boolean self) {

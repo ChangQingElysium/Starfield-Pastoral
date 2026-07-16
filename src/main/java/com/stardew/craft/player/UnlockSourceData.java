@@ -70,6 +70,18 @@ public final class UnlockSourceData {
         return sources.keySet().stream().map(ResourceLocation::toString).toList();
     }
 
+    /** Returns every configured source that teaches the requested player-storage recipe ID. */
+    public static List<ResourceLocation> getSourceIdsForRecipe(String recipeId) {
+        String target = RecipeIdNormalizer.storageId(recipeId);
+        if (target.isBlank()) return List.of();
+        return sources.entrySet().stream()
+                .filter(entry -> entry.getValue().recipes().stream()
+                        .map(RecipeIdNormalizer::storageId)
+                        .anyMatch(target::equals))
+                .map(Map.Entry::getKey)
+                .toList();
+    }
+
     public static String skillLevelSourceId(SkillType skill, int level) {
         if (skill == null || level <= 0) return "";
         return StardewCraft.MODID + ":skill/" + skill.getName().toLowerCase(Locale.ROOT) + "/" + level;

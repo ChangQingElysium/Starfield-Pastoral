@@ -2,6 +2,7 @@ package com.stardew.craft.money;
 
 import com.stardew.craft.network.payload.OpenLewisConfirmPayload;
 import com.stardew.craft.sound.ModSounds;
+import com.stardew.craft.player.PlayerDisplayName;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.server.MinecraftServer;
@@ -67,22 +68,25 @@ public final class SharedMoneyService {
         }
         SharedMoneyData data = SharedMoneyData.get();
         if (data.sameGroup(requester, target)) {
-            requester.displayClientMessage(Component.translatable("stardewcraft.lewis.money_share.already_shared", target.getName()), true);
+            requester.displayClientMessage(Component.translatable("stardewcraft.lewis.money_share.already_shared",
+                    PlayerDisplayName.get(target)), true);
             playCancel(requester);
             return;
         }
 
         UUID requestId = UUID.randomUUID();
         PendingShare pending = new PendingShare(requestId, requester.getUUID(), target.getUUID(),
-            requester.getName().getString(), target.getName().getString(), Set.of(target.getUUID()));
+            PlayerDisplayName.get(requester), PlayerDisplayName.get(target), Set.of(target.getUUID()));
         PENDING_SHARES.put(requestId, pending);
 
         PacketDistributor.sendToPlayer(target, new OpenLewisConfirmPayload(
             requestId, CONFIRM_KIND, "stardewcraft.lewis.money_share.target_question",
-            List.of(requester.getName().getString(), requester.getName().getString(), target.getName().getString()),
+            List.of(PlayerDisplayName.get(requester), PlayerDisplayName.get(requester),
+                    PlayerDisplayName.get(target)),
                 "stardewcraft.dialog.yes",
                 "stardewcraft.dialog.no"));
-        requester.displayClientMessage(Component.translatable("stardewcraft.lewis.money_share.sent", target.getName()), true);
+        requester.displayClientMessage(Component.translatable("stardewcraft.lewis.money_share.sent",
+                PlayerDisplayName.get(target)), true);
         requester.playNotifySound(ModSounds.BOOK_READ.get(), SoundSource.PLAYERS, 0.58f, 1.12f);
     }
 
@@ -93,7 +97,8 @@ public final class SharedMoneyService {
         }
         if (!accepted) {
             PENDING_SHARES.remove(requestId);
-            notifyParticipants(pending, Component.translatable("stardewcraft.lewis.money_share.rejected", responder.getName()));
+            notifyParticipants(pending, Component.translatable("stardewcraft.lewis.money_share.rejected",
+                    PlayerDisplayName.get(responder)));
             playForParticipants(pending, false);
             return;
         }
@@ -134,11 +139,9 @@ public final class SharedMoneyService {
         List<String> involvedNames = new ArrayList<>();
         for (UUID memberId : involved) {
             ServerPlayer online = server.getPlayerList().getPlayer(memberId);
-            if (online != null) {
-                involvedNames.add(online.getName().getString());
-            } else {
-                involvedNames.add(memberId.toString().substring(0, 8));
-            }
+            involvedNames.add(online != null
+                    ? PlayerDisplayName.get(online)
+                    : PlayerDisplayName.get(server, memberId));
             if (!memberId.equals(pending.requesterId()) && !memberId.equals(pending.targetId()) && online != null) {
                 required.add(memberId);
             }

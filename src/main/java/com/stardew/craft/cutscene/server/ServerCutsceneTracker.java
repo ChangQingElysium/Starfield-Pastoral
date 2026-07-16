@@ -42,7 +42,7 @@ public final class ServerCutsceneTracker {
         private final float pitch;
         private final String eventId;
         private final long sessionId;
-        private final long startedAtGameTime;
+        private final long startedAtServerTick;
         private final CutsceneActionManifest actionManifest;
         private final CutsceneActionManifest.AuthorizationState actionState;
         private boolean restoreOriginalPosition = true;
@@ -57,7 +57,9 @@ public final class ServerCutsceneTracker {
             this.pitch = player.getXRot();
             this.eventId = event.id();
             this.sessionId = sessionId;
-            this.startedAtGameTime = player.serverLevel().getGameTime();
+            // Cutscenes are allowed to pause the Stardew simulation. Their watchdog must use the
+            // real server clock or an unresponsive client could keep the shared world paused forever.
+            this.startedAtServerTick = player.server.getTickCount();
             this.actionManifest = CutsceneActionManifest.from(event);
             this.actionState = actionManifest.newState();
         }
@@ -153,7 +155,7 @@ public final class ServerCutsceneTracker {
         if (state == null || state.sessionId != sessionId || !state.eventId.equals(eventId)) {
             return null;
         }
-        if (player.serverLevel().getGameTime() - state.startedAtGameTime > SESSION_TIMEOUT_TICKS) {
+        if (player.server.getTickCount() - state.startedAtServerTick > SESSION_TIMEOUT_TICKS) {
             clear(player);
             return null;
         }
@@ -200,7 +202,7 @@ public final class ServerCutsceneTracker {
         if (state == null) {
             return;
         }
-        if (player.serverLevel().getGameTime() - state.startedAtGameTime > SESSION_TIMEOUT_TICKS) {
+        if (player.server.getTickCount() - state.startedAtServerTick > SESSION_TIMEOUT_TICKS) {
             LOGGER.warn("Expired cutscene session '{}' for {}", state.eventId, player.getName().getString());
             clear(player);
             return;

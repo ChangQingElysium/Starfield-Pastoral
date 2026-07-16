@@ -15,6 +15,7 @@ import com.stardew.craft.client.gui.common.CommonGuiTextures;
 import com.stardew.craft.client.gui.common.StardewRenderMapping;
 import com.stardew.craft.client.gui.overnight.LevelUpMenuTextures;
 import com.stardew.craft.client.gui.overnight.StardewGuiUtil;
+import com.stardew.craft.client.hud.StardewHudLayoutEditorScreen;
 import com.stardew.craft.communitycenter.network.BundleClientData;
 import com.stardew.craft.communitycenter.state.CCStoryFlags;
 import com.stardew.craft.cooking.service.VanillaCookingRecipeData;
@@ -22,12 +23,14 @@ import com.stardew.craft.api.v1.secretnote.StardewSecretNoteDefinition;
 import com.stardew.craft.data.VanillaObjectCatalog;
 import com.stardew.craft.item.SecretNoteItem;
 import com.stardew.craft.item.misc.StardropItem;
+import com.stardew.craft.inventory.InventoryTrashPolicy;
 import com.stardew.craft.leaderboard.LeaderboardMetric;
 import com.stardew.craft.leaderboard.LeaderboardPeriod;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.item.equipment.CombinedRingData;
 import com.stardew.craft.mastery.MasteryProgress;
 import com.stardew.craft.mail.MailTextSyntax;
+import com.stardew.craft.menu.StardewGameMenu;
 import com.stardew.craft.player.ProfessionType;
 import com.stardew.craft.player.SkillType;
 import com.stardew.craft.network.payload.LeaderboardSyncPayload;
@@ -45,7 +48,7 @@ import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -54,6 +57,9 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -66,7 +72,6 @@ import java.util.ArrayList;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -74,7 +79,13 @@ import java.util.Set;
 import java.util.Comparator;
 
 @SuppressWarnings({"null", "unused"})
-public class StardewGameMenuScreen extends Screen {
+public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMenu> {
+    public interface QuickCraftStateAccess {
+        int stardewcraft$quickCraftingType();
+
+        int stardewcraft$quickCraftingRemainder();
+    }
+
     private static final int STD_TILE_SIZE = 16;
     private static final float ITEM_VISUAL_SCALE = 1.0f;
     private static final int CARRIED_ITEM_OFFSET_SDV = 16;
@@ -83,17 +94,80 @@ public class StardewGameMenuScreen extends Screen {
     private static final int INVENTORY_SLOT_SDV = 64;
     private static final int INVENTORY_GAP_SDV = 4;
     private static final int INVENTORY_TOP_SDV = 432;
-    private static final long INVENTORY_DOUBLE_CLICK_MS = 250L;
 
     private static final int CRAFTING_GRID_X_SDV = 64;
     private static final int CRAFTING_GRID_Y_SDV = 104;
-    private static final int CRAFTING_RECIPE_SLOT_SDV = 88;
-    private static final int CRAFTING_RECIPE_STEP_SDV = 96;
-    private static final int CRAFTING_RECIPE_ITEM_SDV = 80;
-    private static final int CRAFTING_RECIPE_COLUMNS = 7;
-    private static final int CRAFTING_RECIPE_ROWS = 3;
+    private static final int CRAFTING_RECIPE_SLOT_SDV = 64;
+    private static final int CRAFTING_RECIPE_STEP_SDV = 72;
+    private static final int CRAFTING_RECIPE_ITEM_SDV = 64;
+    private static final int CRAFTING_RECIPE_COLUMNS = 10;
+    private static final int CRAFTING_RECIPE_ROWS = 4;
     private static final int CRAFTING_RECIPES_PER_PAGE = CRAFTING_RECIPE_COLUMNS * CRAFTING_RECIPE_ROWS;
     private static final int CRAFTING_PARTITION_Y_SDV = 384;
+    private static final ResourceLocation VANILLA_BIG_CRAFTABLES = ResourceLocation.fromNamespaceAndPath(
+            StardewCraft.MODID, "textures/gui/crafting/vanilla_big_craftables.png");
+    private static final int VANILLA_BIG_CRAFTABLES_WIDTH = 128;
+    private static final int VANILLA_BIG_CRAFTABLES_HEIGHT = 1472;
+    private static final int VANILLA_BIG_CRAFTABLE_COLUMNS = 8;
+    private static final Map<String, Integer> VANILLA_BIG_CRAFTABLE_SPRITES = Map.ofEntries(
+            Map.entry("anvil", 293),
+            Map.entry("bait_maker", 285),
+            Map.entry("bee_house", 10),
+            Map.entry("bone_mill", 90),
+            Map.entry("cask", 163),
+            Map.entry("charcoal_kiln", 114),
+            Map.entry("cheese_press", 16),
+            Map.entry("crystalarium", 21),
+            Map.entry("dehydrator", 286),
+            Map.entry("deluxe_worm_bin", 298),
+            Map.entry("farm_computer", 239),
+            Map.entry("fish_smoker", 296),
+            Map.entry("furnace", 13),
+            Map.entry("geode_crusher", 182),
+            Map.entry("heavy_furnace", 288),
+            Map.entry("keg", 12),
+            Map.entry("lightning_rod", 9),
+            Map.entry("loom", 17),
+            Map.entry("mayonnaise_machine", 24),
+            Map.entry("mine_ladder", 71),
+            Map.entry("mini_forge", 294),
+            Map.entry("mini_jukebox", 209),
+            Map.entry("mini_obelisk", 238),
+            Map.entry("oil_maker", 19),
+            Map.entry("preserves_jar", 15),
+            Map.entry("recycling_machine", 20),
+            Map.entry("scarecrow", 8),
+            Map.entry("seed_maker", 25),
+            Map.entry("solar_panel", 231),
+            Map.entry("statue_of_blessings", 290),
+            Map.entry("statue_of_dwarf_king", 292),
+            Map.entry("stone_chest", 232),
+            Map.entry("tapper", 105),
+            Map.entry("wooden_chest", 130),
+            Map.entry("worm_bin", 154));
+    private static final List<String> VANILLA_CRAFTING_DISPLAY_ORDER = List.of(
+            "grass_starter", "wooden_chest", "stone_chest", "torch", "scarecrow",
+            "bee_house", "keg", "cask", "dehydrator", "furnace", "heavy_furnace",
+            "anvil", "mini_forge", "cheese_press", "mayonnaise_machine", "seed_maker",
+            "loom", "oil_maker", "recycling_machine", "worm_bin", "deluxe_worm_bin",
+            "bait_maker", "fish_smoker", "preserves_jar", "charcoal_kiln", "tapper",
+            "lightning_rod", "crystalarium", "mini_jukebox", "sprinkler",
+            "quality_sprinkler", "iridium_sprinkler", "mine_ladder", "basic_fertilizer",
+            "tree_fertilizer", "mystic_tree_seed", "basic_retaining_soil",
+            "quality_retaining_soil", "speed_gro", "deluxe_speed_gro", "deluxe_fertilizer",
+            "deluxe_retaining_soil", "cherry_bomb", "bomb_item", "mega_bomb", "iron_bar",
+            "gold_bar", "ancient_fruit_seeds", "wild_seeds_spring", "wild_seeds_summer",
+            "wild_seeds_fall", "wild_seeds_winter", "fiber_seeds", "warp_totem_farm",
+            "warp_totem_mountain", "warp_totem_beach", "warp_totem_desert", "rain_totem",
+            "treasure_totem", "field_snack", "statue_of_blessings", "statue_of_dwarf_king",
+            "spirit_eve_jack_o_lantern", "bait", "deluxe_bait", "challenge_bait", "magnet",
+            "spinner", "dressed_spinner", "trap_bobber", "sonar_bobber", "cork_bobber",
+            "treasure_hunter", "barbed_hook", "oil_of_garlic", "life_elixir", "crab_pot",
+            "iridium_band", "ring_of_yoba", "sturdy_ring", "warrior_ring", "fairy_dust",
+            "bug_steak", "quality_bobber", "monster_musk", "mini_obelisk", "farm_computer",
+            "geode_crusher", "solar_panel", "bone_mill", "thorns_ring", "glowstone_ring");
+    private static final Map<String, Integer> VANILLA_CRAFTING_DISPLAY_RANKS =
+            createVanillaCraftingDisplayRanks();
 
     private static final int BORDER_WIDTH = 32;
     private static final int MENU_WIDTH_SDV = 800 + BORDER_WIDTH * 2;
@@ -112,7 +186,9 @@ public class StardewGameMenuScreen extends Screen {
     private static final int TAB_SOCIAL = 2;
     private static final int TAB_POWERS = 6;
     private static final int TAB_COLLECTIONS = 7;
-    private static final int TAB_LEADERBOARD = 8;
+    private static final int TAB_OPTIONS = 8;
+    private static final int OPTIONS_PAGE_SETTINGS = 0;
+    private static final int OPTIONS_PAGE_LEADERBOARD = 1;
     private static final int LEADERBOARD_PAGE_SIZE = 10;
     private static final LeaderboardMetric[] LEADERBOARD_METRICS = LeaderboardMetric.values();
     private static final int LEADERBOARD_TAB_SIZE_SDV = 56;
@@ -178,16 +254,10 @@ public class StardewGameMenuScreen extends Screen {
     private int currentCraftingPage;
     private int currentCollectionTab = COLLECTION_SHIPPED;
     private int currentCollectionPage;
+    private int currentOptionsPage = OPTIONS_PAGE_SETTINGS;
     private final float[] collectionHoverScale = new float[COLLECTION_PAGE_SIZE];
     private int selectedCraftingIndex = -1;
-    private final Set<Integer> draggedInventorySlots = new LinkedHashSet<>();
-    private boolean inventoryDragActive;
-    private boolean inventoryDragMoved;
-    private int inventoryDragButton = -1;
-    private int inventoryDragStartSlot = -1;
-    private long lastInventoryClickMillis;
-    private int lastInventoryClickSlot = -1;
-    private int lastInventoryClickButton = -1;
+    private boolean craftingKeyboardFocus;
 
     // ---- Farm Management Tab (tab 3) ----
     private int farmMgmtScroll = 0;
@@ -285,12 +355,15 @@ public class StardewGameMenuScreen extends Screen {
     private record LeaderboardPeriodButtonBounds(LeaderboardPeriod period, int x, int y, int w, int h) {
     }
 
-    public StardewGameMenuScreen() {
-        super(Component.translatable("stardewcraft.game_menu.title"));
+    public StardewGameMenuScreen(StardewGameMenu menu, Inventory inventory, Component title) {
+        super(menu, inventory, title);
     }
 
     @Override
     protected void init() {
+        this.mapping = new StardewRenderMapping(this.width, this.height, guiScale());
+        this.imageWidth = ui(MENU_WIDTH_SDV);
+        this.imageHeight = ui(MENU_HEIGHT_SDV);
         super.init();
         recalcLayout();
         rebuildCraftingEntries();
@@ -311,6 +384,47 @@ public class StardewGameMenuScreen extends Screen {
         this.menuHeight = ui(MENU_HEIGHT_SDV);
         this.menuX = mapping.centerX(this.menuWidth);
         this.menuY = this.height / 2 - this.menuHeight / 2;
+        this.leftPos = this.menuX;
+        this.topPos = this.menuY;
+        this.imageWidth = this.menuWidth;
+        this.imageHeight = this.menuHeight;
+        positionInventorySlots();
+    }
+
+    private void positionInventorySlots() {
+        int visualSize = ui(INVENTORY_SLOT_SDV);
+        int itemOffset = Math.max(0, (visualSize - 16) / 2);
+
+        boolean visible = currentTab == 0 || currentTab == 4;
+        for (int row = 0; row < 3; row++) {
+            for (int col = 0; col < INVENTORY_COLS; col++) {
+                int menuSlot = row * INVENTORY_COLS + col;
+                int x = currentTab == 0 ? invPageSlotX(col) : inventorySlotX(col);
+                int y = currentTab == 0
+                        ? menuY + ui(INV_PAGE_ROW0_Y + row * INV_PAGE_ROW_STEP)
+                        : inventorySlotY(row);
+                positionInventorySlot(menuSlot, x, y, itemOffset, visible);
+            }
+        }
+
+        int hotbarY = currentTab == 0 ? menuY + ui(INV_PAGE_HOTBAR_Y) : inventoryHotbarY();
+        for (int col = 0; col < INVENTORY_COLS; col++) {
+            int x = currentTab == 0 ? invPageSlotX(col) : inventorySlotX(col);
+            positionInventorySlot(StardewGameMenu.MAIN_INVENTORY_SLOT_COUNT + col,
+                    x, hotbarY, itemOffset, visible);
+        }
+    }
+
+    private void positionInventorySlot(int menuSlotIndex, int screenX, int screenY,
+                                       int itemOffset, boolean visible) {
+        Slot slot = menu.slots.get(menuSlotIndex);
+        if (!visible) {
+            slot.x = -10_000;
+            slot.y = -10_000;
+            return;
+        }
+        slot.x = screenX - leftPos + itemOffset;
+        slot.y = screenY - topPos + itemOffset;
     }
 
     private void playUiSound(SoundEvent sound, float volume, float pitch) {
@@ -352,7 +466,7 @@ public class StardewGameMenuScreen extends Screen {
         if (currentTab == TAB_SOCIAL) {
             return socialPageWidth();
         }
-        if (currentTab == TAB_LEADERBOARD) {
+        if (showingLeaderboardPage()) {
             return leaderboardPageWidth();
         }
         return menuWidth;
@@ -361,6 +475,7 @@ public class StardewGameMenuScreen extends Screen {
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         recalcLayout();
+        this.hoveredSlot = activeMenuSlotAt(mouseX, mouseY);
         graphics.fill(0, 0, this.width, this.height, 0x66000000);
 
         if (currentTab == 4) {
@@ -374,7 +489,7 @@ public class StardewGameMenuScreen extends Screen {
 
         if (currentTab == 0) {
             drawInventoryPageTooltips(graphics, mouseX, mouseY);
-            ItemStack carried = currentCarriedItem();
+            ItemStack carried = displayedCarriedItem();
             if (!carried.isEmpty()) {
                 int itemSize = CommonGuiTextures.itemSize(mapping.s4());
                 int drawX = mouseX - itemSize / 2;
@@ -391,7 +506,7 @@ public class StardewGameMenuScreen extends Screen {
                 drawPageArrows(graphics, mouseX, mouseY);
             }
             drawCraftingTooltips(graphics, mouseX, mouseY);
-            ItemStack carried = currentCarriedItem();
+            ItemStack carried = displayedCarriedItem();
             if (!carried.isEmpty()) {
                 int itemSize = CommonGuiTextures.itemSize(mapping.s4());
                 int drawX = mouseX - itemSize / 2;
@@ -411,6 +526,20 @@ public class StardewGameMenuScreen extends Screen {
         if (currentTab == TAB_SOCIAL && socialTuneMode) {
             drawSocialTuneOverlay(graphics);
         }
+    }
+
+    @Override
+    protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
+        // This screen keeps its existing Stardew rendering pipeline in render().
+    }
+
+    @Override
+    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
+    }
+
+    @Override
+    protected void renderSlot(GuiGraphics graphics, Slot slot) {
+        // Player slots are rendered by drawInvPageGrid/drawPlayerInventory with SDV assets.
     }
 
     private int socialTuneUiX(int target) {
@@ -751,8 +880,8 @@ public class StardewGameMenuScreen extends Screen {
             return;
         }
 
-        if (currentTab == TAB_LEADERBOARD) {
-            drawLeaderboardPage(graphics, mouseX, mouseY);
+        if (currentTab == TAB_OPTIONS) {
+            drawOptionsPage(graphics, mouseX, mouseY);
             return;
         }
 
@@ -766,6 +895,141 @@ public class StardewGameMenuScreen extends Screen {
 
         graphics.drawString(this.font, title, titleX, centerY - 10, 0xFFF3E6C6, false);
         graphics.drawString(this.font, line, lineX, centerY + 8, 0xFFD8C9A8, false);
+    }
+
+    // ============ Tab 8: Options Page (设置 / 排行榜入口) ============
+
+    private boolean showingLeaderboardPage() {
+        return currentTab == TAB_OPTIONS && currentOptionsPage == OPTIONS_PAGE_LEADERBOARD;
+    }
+
+    private void drawOptionsPage(GuiGraphics graphics, int mouseX, int mouseY) {
+        if (showingLeaderboardPage()) {
+            drawLeaderboardPage(graphics, mouseX, mouseY);
+            drawOptionsBackButton(graphics, optionsLeaderboardBackX(), optionsLeaderboardBackY(),
+                    optionsLeaderboardBackWidth(), optionsButtonHeight(),
+                    Component.translatable("stardewcraft.game_menu.options.settings"),
+                    optionContains(mouseX, mouseY, optionsLeaderboardBackX(), optionsLeaderboardBackY(),
+                            optionsLeaderboardBackWidth(), optionsButtonHeight()));
+            return;
+        }
+
+        Component title = Component.translatable("stardewcraft.game_menu.options.title");
+        graphics.drawString(this.font, title,
+                menuX + menuWidth / 2 - this.font.width(title) / 2,
+                menuY + ui(88), 0xFF5B2F18, false);
+
+        int rowX = optionsRowX();
+        int rowWidth = optionsRowWidth();
+        int rowHeight = optionsRowHeight();
+        int editorY = optionsRowY(0);
+        int leaderboardY = optionsRowY(1);
+        drawOptionsButton(graphics, rowX, editorY, rowWidth, rowHeight,
+                Component.translatable("stardewcraft.game_menu.options.hud_position"),
+                optionContains(mouseX, mouseY, rowX, editorY, rowWidth, rowHeight));
+        drawOptionsButton(graphics, rowX, leaderboardY, rowWidth, rowHeight,
+                Component.translatable("stardewcraft.game_menu.options.leaderboard"),
+                optionContains(mouseX, mouseY, rowX, leaderboardY, rowWidth, rowHeight));
+    }
+
+    private void drawOptionsButton(GuiGraphics graphics, int x, int y, int width, int height,
+                                   Component label, boolean hovered) {
+        int textY = y + (height - this.font.lineHeight) / 2;
+        if (hovered) {
+            graphics.fill(x, y, x + width, y + height, 0x18FFFFFF);
+        }
+        graphics.fill(x, y + height - 1, x + width, y + height, 0x508B572A);
+        graphics.drawString(this.font, label, x + ui(24), textY, 0xFF4A2815, false);
+        float arrowScale = 1.0F;
+        int arrowWidth = Math.round(12 * arrowScale);
+        int arrowHeight = Math.round(11 * arrowScale);
+        CommonGuiTextures.drawForwardArrow(graphics, x + width - ui(24) - arrowWidth,
+                y + (height - arrowHeight) / 2, arrowScale);
+    }
+
+    private void drawOptionsBackButton(GuiGraphics graphics, int x, int y, int width, int height,
+                                       Component label, boolean hovered) {
+        if (hovered) {
+            graphics.fill(x, y, x + width, y + height, 0x18FFFFFF);
+        }
+        int arrowWidth = 12;
+        int arrowHeight = 11;
+        CommonGuiTextures.drawBackArrow(graphics, x + ui(12), y + (height - arrowHeight) / 2, 1.0F);
+        graphics.drawString(this.font, label, x + ui(12) + arrowWidth + ui(10),
+                y + (height - this.font.lineHeight) / 2, 0xFF4A2815, false);
+    }
+
+    private int optionsRowWidth() {
+        return Math.min(menuWidth - ui(120), Math.max(ui(420), menuWidth * 3 / 5));
+    }
+
+    private int optionsRowX() {
+        return menuX + (menuWidth - optionsRowWidth()) / 2;
+    }
+
+    private int optionsRowHeight() {
+        return Math.max(this.font.lineHeight + 10, ui(64));
+    }
+
+    private int optionsRowY(int index) {
+        return menuY + ui(220) + index * (optionsRowHeight() + ui(28));
+    }
+
+    private int optionsButtonHeight() {
+        return Math.max(this.font.lineHeight + 4, ui(48));
+    }
+
+    private int optionButtonWidth(Component label, int minimumSdvWidth) {
+        return Math.min(menuWidth - ui(80), Math.max(ui(minimumSdvWidth), this.font.width(label) + 12));
+    }
+
+    private boolean optionContains(double mouseX, double mouseY, int x, int y, int width, int height) {
+        return mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height;
+    }
+
+    private int optionsLeaderboardBackX() {
+        return leaderboardLayout().contentX() + ui(8);
+    }
+
+    private int optionsLeaderboardBackY() {
+        return leaderboardLayout().titleY() - ui(6);
+    }
+
+    private int optionsLeaderboardBackWidth() {
+        Component label = Component.translatable("stardewcraft.game_menu.options.settings");
+        return Math.max(ui(150), this.font.width(label) + ui(44));
+    }
+
+    private boolean handleOptionsClick(double mouseX, double mouseY) {
+        if (showingLeaderboardPage()) {
+            if (optionContains(mouseX, mouseY, optionsLeaderboardBackX(), optionsLeaderboardBackY(),
+                    optionsLeaderboardBackWidth(), optionsButtonHeight())) {
+                currentOptionsPage = OPTIONS_PAGE_SETTINGS;
+                playUiSound(ModSounds.SMALL_SELECT.get(), 1.0F, 1.0F);
+                return true;
+            }
+            return handleLeaderboardClick((int) mouseX, (int) mouseY);
+        }
+
+        int rowX = optionsRowX();
+        int rowWidth = optionsRowWidth();
+        int rowHeight = optionsRowHeight();
+        int editorY = optionsRowY(0);
+        if (optionContains(mouseX, mouseY, rowX, editorY, rowWidth, rowHeight)) {
+            playUiSound(ModSounds.BIG_SELECT.get(), 1.0F, 1.0F);
+            this.minecraft.setScreen(new StardewHudLayoutEditorScreen(this));
+            return true;
+        }
+
+        int leaderboardY = optionsRowY(1);
+        if (optionContains(mouseX, mouseY, rowX, leaderboardY, rowWidth, rowHeight)) {
+            currentOptionsPage = OPTIONS_PAGE_LEADERBOARD;
+            leaderboardScroll = 0;
+            requestLeaderboard();
+            playUiSound(ModSounds.BIG_SELECT.get(), 1.0F, 1.0F);
+            return true;
+        }
+        return false;
     }
 
     // ============ Tab 8: Leaderboard Page (排行榜) ============
@@ -2012,7 +2276,7 @@ public class StardewGameMenuScreen extends Screen {
                 );
 
             // Player name (centered under the panel)
-            String playerName = mc.player.getName().getString();
+            String playerName = ClientPlayerDataCache.getPlayerDisplayName(mc.player.getName().getString());
             Component boldPlayerName = Component.literal(playerName).withStyle(ChatFormatting.BOLD);
             float nameScale = sdvTextScale();
             int nameRawW = this.font.width(boldPlayerName);
@@ -2694,7 +2958,8 @@ public class StardewGameMenuScreen extends Screen {
 
         String text = Component.translatable(definition.text()).getString().replace('^', '\n');
         if (this.minecraft != null && this.minecraft.player != null) {
-            text = text.replace("@", this.minecraft.player.getName().getString());
+            text = text.replace("@", ClientPlayerDataCache.getPlayerDisplayName(
+                    this.minecraft.player.getName().getString()));
         }
         drawSecretNoteTextTooltip(graphics, mouseX, mouseY, title, text);
     }
@@ -3266,7 +3531,7 @@ public class StardewGameMenuScreen extends Screen {
                 boolean hovered = mouseX >= x && mouseX < x + ui(INVENTORY_SLOT_SDV)
                         && mouseY >= rowY && mouseY < rowY + ui(INVENTORY_SLOT_SDV);
                 drawInventorySlot(graphics, x, rowY,
-                        mc.player.getInventory().getItem(invIndex), hovered);
+                        mc.player.getInventory().getItem(invIndex), hovered, invIndex);
             }
         }
 
@@ -3277,7 +3542,7 @@ public class StardewGameMenuScreen extends Screen {
             boolean hovered = mouseX >= x && mouseX < x + ui(INVENTORY_SLOT_SDV)
                     && mouseY >= hotbarY && mouseY < hotbarY + ui(INVENTORY_SLOT_SDV);
             drawInventorySlot(graphics, x, hotbarY,
-                    mc.player.getInventory().getItem(col), hovered);
+                    mc.player.getInventory().getItem(col), hovered, col);
         }
     }
 
@@ -3459,7 +3724,7 @@ public class StardewGameMenuScreen extends Screen {
                 );
 
         // SDV: player name centered below
-        String playerName = mc.player.getName().getString();
+        String playerName = ClientPlayerDataCache.getPlayerDisplayName(mc.player.getName().getString());
         Component name = Component.literal(playerName);
         float nameScale = sdvTextScale();
         int nameRawW = this.font.width(name);
@@ -3497,7 +3762,7 @@ public class StardewGameMenuScreen extends Screen {
         // SDV: "{farmName} Farm"
         String rawFarmName = ClientPlayerDataCache.getFarmName();
         if (rawFarmName == null || rawFarmName.isBlank()) {
-            rawFarmName = mc.player.getName().getString();
+            rawFarmName = ClientPlayerDataCache.getPlayerDisplayName(mc.player.getName().getString());
         }
         String farmName = formatFarmName(rawFarmName);
         drawScaledCenteredSdvText(graphics, farmName, centerX,
@@ -4141,6 +4406,7 @@ public class StardewGameMenuScreen extends Screen {
 
     private void rebuildCraftingEntries() {
         List<String> recipeIds = new ArrayList<>(RecipeCatalogData.getCraftingRecipeIds());
+        recipeIds.sort(Comparator.comparingInt(StardewGameMenuScreen::vanillaCraftingDisplayRank));
 
         List<String> validIds = new ArrayList<>();
         List<ItemStack> stacks = new ArrayList<>();
@@ -4174,6 +4440,23 @@ public class StardewGameMenuScreen extends Screen {
         return StardewCraftingRecipeData.getOutputStack(recipeId);
     }
 
+    private static Map<String, Integer> createVanillaCraftingDisplayRanks() {
+        Map<String, Integer> ranks = new HashMap<>();
+        for (int index = 0; index < VANILLA_CRAFTING_DISPLAY_ORDER.size(); index++) {
+            ranks.put(VANILLA_CRAFTING_DISPLAY_ORDER.get(index), index);
+        }
+        return Map.copyOf(ranks);
+    }
+
+    private static int vanillaCraftingDisplayRank(String recipeId) {
+        ResourceLocation id = ResourceLocation.tryParse(recipeId);
+        if (recipeId.indexOf(':') >= 0 && (id == null || !StardewCraft.MODID.equals(id.getNamespace()))) {
+            return Integer.MAX_VALUE;
+        }
+        String path = id == null ? recipeId : id.getPath();
+        return VANILLA_CRAFTING_DISPLAY_RANKS.getOrDefault(path, Integer.MAX_VALUE);
+    }
+
     private void clampCraftingPage() {
         int maxPage = Math.max(0, craftingPages.size() - 1);
         if (currentCraftingPage < 0) {
@@ -4191,17 +4474,40 @@ public class StardewGameMenuScreen extends Screen {
             return pages;
         }
 
+        List<RecipeCell> page = new ArrayList<>();
+        boolean[][] occupied = new boolean[CRAFTING_RECIPE_COLUMNS][CRAFTING_RECIPE_ROWS];
+        pages.add(page);
         for (int recipeIndex = 0; recipeIndex < craftingRecipeIds.size(); recipeIndex++) {
-            int local = recipeIndex % CRAFTING_RECIPES_PER_PAGE;
-            if (local == 0) {
-                pages.add(new ArrayList<>());
+            boolean bigCraftable = StardewCraftingRecipeData.isBigCraftable(craftingRecipeIds.get(recipeIndex));
+            int[] position = firstFreeCraftingCell(occupied, bigCraftable);
+            if (position == null) {
+                page = new ArrayList<>();
+                pages.add(page);
+                occupied = new boolean[CRAFTING_RECIPE_COLUMNS][CRAFTING_RECIPE_ROWS];
+                position = firstFreeCraftingCell(occupied, bigCraftable);
             }
-            int x = local % CRAFTING_RECIPE_COLUMNS;
-            int y = local / CRAFTING_RECIPE_COLUMNS;
-            pages.get(pages.size() - 1).add(new RecipeCell(recipeIndex, x, y, false));
+            int x = position[0];
+            int y = position[1];
+            occupied[x][y] = true;
+            if (bigCraftable) {
+                occupied[x][y + 1] = true;
+            }
+            page.add(new RecipeCell(recipeIndex, x, y, bigCraftable));
         }
 
         return pages;
+    }
+
+    private static int[] firstFreeCraftingCell(boolean[][] occupied, boolean bigCraftable) {
+        for (int y = 0; y < CRAFTING_RECIPE_ROWS; y++) {
+            for (int x = 0; x < CRAFTING_RECIPE_COLUMNS; x++) {
+                if (!occupied[x][y]
+                        && (!bigCraftable || y + 1 < CRAFTING_RECIPE_ROWS && !occupied[x][y + 1])) {
+                    return new int[]{x, y};
+                }
+            }
+        }
+        return null;
     }
 
     private void drawCraftingPage(GuiGraphics graphics, int mouseX, int mouseY) {
@@ -4233,7 +4539,8 @@ public class StardewGameMenuScreen extends Screen {
             ItemStack stack = craftingRecipeStacks.get(index);
             String recipeId = craftingRecipeIds.get(index);
             boolean craftable = computeMaxCraftsClient(getRecipeIngredients(recipeId), 1) > 0;
-            boolean hovered = recipeContains(mouseX, mouseY, x, y, w, h, ui(4));
+            boolean hovered = recipeContains(mouseX, mouseY, x, y, w, h, ui(4))
+                    || craftingKeyboardFocus && selectedCraftingIndex == index;
 
             if (local >= 0 && local < recipeHoverScale.length) {
                 recipeHoverScale[local] = stepScale(recipeHoverScale[local], hovered ? 1.1f : 1.0f, 0.02f);
@@ -4242,12 +4549,19 @@ public class StardewGameMenuScreen extends Screen {
                     ? recipeHoverScale[local]
                     : 1.0f;
 
+            Integer bigCraftableSprite = cellData.bigCraftable()
+                    ? vanillaBigCraftableSprite(recipeId)
+                    : null;
             float itemScale = mapping.s4() * (CRAFTING_RECIPE_ITEM_SDV / 64.0f) * scale;
             int itemSize = CommonGuiTextures.itemSize(itemScale);
             int itemX = x + (w - itemSize) / 2;
             int itemY = y + (h - itemSize) / 2;
-
-            if (!craftable) {
+            if (bigCraftableSprite != null) {
+                drawVanillaBigCraftable(graphics, bigCraftableSprite, x, y, w, h, scale, craftable);
+                itemX = x;
+                itemY = y;
+                itemScale = mapping.s4();
+            } else if (!craftable) {
                 CommonGuiTextures.drawItemTint(graphics, stack, itemX, itemY, itemScale, 0.41F, 0.41F, 0.41F, 0.4F);
             } else {
                 CommonGuiTextures.drawItem(graphics, stack, itemX, itemY, itemScale);
@@ -4266,6 +4580,31 @@ public class StardewGameMenuScreen extends Screen {
                 CommonGuiTextures.drawItemDecorations(graphics, this.font, stack, itemX, itemY, itemScale);
             }
         }
+    }
+
+    private static Integer vanillaBigCraftableSprite(String recipeId) {
+        ResourceLocation id = ResourceLocation.tryParse(recipeId);
+        String path = id == null ? recipeId : id.getPath();
+        return VANILLA_BIG_CRAFTABLE_SPRITES.get(path);
+    }
+
+    private void drawVanillaBigCraftable(GuiGraphics graphics, int spriteIndex,
+                                         int cellX, int cellY, int cellWidth, int cellHeight,
+                                         float hoverScale, boolean craftable) {
+        int drawWidth = Math.round(ui(64) * hoverScale);
+        int drawHeight = Math.round(ui(128) * hoverScale);
+        int drawX = cellX + (cellWidth - drawWidth) / 2;
+        int drawY = cellY + (cellHeight - drawHeight) / 2;
+        int sourceX = spriteIndex % VANILLA_BIG_CRAFTABLE_COLUMNS * 16;
+        int sourceY = spriteIndex / VANILLA_BIG_CRAFTABLE_COLUMNS * 32;
+
+        if (!craftable) {
+            RenderSystem.setShaderColor(0.41F, 0.41F, 0.41F, 0.4F);
+        }
+        graphics.blit(VANILLA_BIG_CRAFTABLES, drawX, drawY, drawWidth, drawHeight,
+                sourceX, sourceY, 16, 32,
+                VANILLA_BIG_CRAFTABLES_WIDTH, VANILLA_BIG_CRAFTABLES_HEIGHT);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
     // drawMCStyleCount removed
@@ -4350,7 +4689,7 @@ public class StardewGameMenuScreen extends Screen {
                 int x = inventorySlotX(col);
                 int y = inventorySlotY(row);
                 boolean hovered = mouseX >= x && mouseX < x + ui(INVENTORY_SLOT_SDV) && mouseY >= y && mouseY < y + ui(INVENTORY_SLOT_SDV);
-                drawInventorySlot(graphics, x, y, mc.player.getInventory().getItem(invIndex), hovered);
+                drawInventorySlot(graphics, x, y, mc.player.getInventory().getItem(invIndex), hovered, invIndex);
             }
         }
 
@@ -4358,22 +4697,60 @@ public class StardewGameMenuScreen extends Screen {
         for (int col = 0; col < INVENTORY_COLS; col++) {
             int x = inventorySlotX(col);
             boolean hovered = mouseX >= x && mouseX < x + ui(INVENTORY_SLOT_SDV) && mouseY >= hotbarY && mouseY < hotbarY + ui(INVENTORY_SLOT_SDV);
-            drawInventorySlot(graphics, x, hotbarY, mc.player.getInventory().getItem(col), hovered);
+            drawInventorySlot(graphics, x, hotbarY, mc.player.getInventory().getItem(col), hovered, col);
         }
     }
 
-    private void drawInventorySlot(GuiGraphics graphics, int x, int y, ItemStack stack, boolean hovered) {
+    private void drawInventorySlot(GuiGraphics graphics, int x, int y, ItemStack stack,
+                                   boolean hovered, int inventoryIndex) {
         CommonGuiTextures.drawMenuTile(graphics, x, y, ui(INVENTORY_SLOT_SDV), ui(INVENTORY_SLOT_SDV), 10);
         if (hovered) {
             graphics.pose().pushPose();
-            graphics.pose().translate(0, 0, 100);
-            graphics.fill(x, y, x + ui(INVENTORY_SLOT_SDV), y + ui(INVENTORY_SLOT_SDV), 0x35FFFFFF);
+            graphics.fill(x, y, x + ui(INVENTORY_SLOT_SDV), y + ui(INVENTORY_SLOT_SDV),
+                    0x35FFFFFF);
             graphics.pose().popPose();
         }
-        if (!stack.isEmpty()) {
+        ItemStack displayedStack = quickCraftPreviewStack(inventoryIndex, stack);
+        if (!displayedStack.isEmpty()) {
             int boxW = ui(INVENTORY_SLOT_SDV);
-            CommonGuiTextures.drawItemWithDecorationsCenteredInBox(graphics, this.font, stack, x, y, boxW, boxW, mapping.s4());
+            CommonGuiTextures.drawItemWithDecorationsCenteredInBox(
+                    graphics, this.font, displayedStack, x, y, boxW, boxW, mapping.s4());
         }
+    }
+
+    private ItemStack quickCraftPreviewStack(int inventoryIndex, ItemStack currentStack) {
+        int menuSlot = StardewGameMenu.menuSlotForInventoryIndex(inventoryIndex);
+        if (!isQuickCrafting || quickCraftSlots.size() <= 1
+                || menuSlot < 0 || menuSlot >= menu.slots.size()) {
+            return currentStack;
+        }
+
+        Slot slot = menu.slots.get(menuSlot);
+        ItemStack carried = currentCarriedItem();
+        if (!quickCraftSlots.contains(slot) || carried.isEmpty()
+                || !AbstractContainerMenu.canItemQuickReplace(slot, carried, true)
+                || !menu.canDragTo(slot)) {
+            return currentStack;
+        }
+
+        int existing = currentStack.isEmpty() ? 0 : currentStack.getCount();
+        int limit = Math.min(carried.getMaxStackSize(), slot.getMaxStackSize(carried));
+        int distributed = AbstractContainerMenu.getQuickCraftPlaceCount(
+                quickCraftSlots, quickCraftState().stardewcraft$quickCraftingType(), carried);
+        return carried.copyWithCount(Math.min(limit, existing + distributed));
+    }
+
+    private ItemStack displayedCarriedItem() {
+        ItemStack carried = currentCarriedItem();
+        if (carried.isEmpty() || !isQuickCrafting || quickCraftSlots.size() <= 1) {
+            return carried;
+        }
+        int remainder = quickCraftState().stardewcraft$quickCraftingRemainder();
+        return remainder <= 0 ? ItemStack.EMPTY : carried.copyWithCount(remainder);
+    }
+
+    private QuickCraftStateAccess quickCraftState() {
+        return (QuickCraftStateAccess) (Object) this;
     }
 
     private int inventoryGridWidth() {
@@ -4497,6 +4874,44 @@ public class StardewGameMenuScreen extends Screen {
         return ui(cellData.bigCraftable() ? CRAFTING_RECIPE_SLOT_SDV * 2 : CRAFTING_RECIPE_SLOT_SDV);
     }
 
+    /** JEI bridge for recipe outputs drawn outside normal container slots. */
+    public ClickableItem jeiIngredientAt(double mouseX, double mouseY) {
+        int recipeIndex = craftingGridIndexAt(mouseX, mouseY, ui(4));
+        if (recipeIndex < 0 || recipeIndex >= craftingRecipeStacks.size()) {
+            return null;
+        }
+        for (RecipeCell cell : craftingPages.get(currentCraftingPage)) {
+            if (cell.recipeIndex() == recipeIndex) {
+                return new ClickableItem(craftingRecipeStacks.get(recipeIndex).copy(),
+                        recipeCellX(cell), recipeCellY(cell), recipeCellWidth(), recipeCellHeight(cell));
+            }
+        }
+        return null;
+    }
+
+    public boolean shouldShowJei() {
+        return currentTab == 0 || currentTab == 4;
+    }
+
+    public int jeiGuiLeft() {
+        return menuX;
+    }
+
+    public int jeiGuiTop() {
+        return menuY;
+    }
+
+    public int jeiGuiWidth() {
+        return menuWidth;
+    }
+
+    public int jeiGuiHeight() {
+        return menuHeight;
+    }
+
+    public record ClickableItem(ItemStack stack, int x, int y, int width, int height) {
+    }
+
     private boolean recipeContains(double mouseX, double mouseY, int x, int y, int w, int h, int pad) {
         return mouseX >= x - pad && mouseX < x + w + pad && mouseY >= y - pad && mouseY < y + h + pad;
     }
@@ -4530,32 +4945,8 @@ public class StardewGameMenuScreen extends Screen {
         PacketDistributor.sendToServer(new CraftingMenuCraftSubmitPayload(recipeId, requestedCount));
     }
 
-    private void submitInventoryClickRequest(int slotIndex, boolean rightClick) {
-        PacketDistributor.sendToServer(new CraftingMenuInventoryActionPayload(CraftingMenuInventoryActionPayload.ACTION_CLICK_SLOT, slotIndex, rightClick));
-    }
-
-    private void submitInventoryShiftRightClickRequest(int slotIndex) {
-        PacketDistributor.sendToServer(new CraftingMenuInventoryActionPayload(CraftingMenuInventoryActionPayload.ACTION_SHIFT_RIGHT_CLICK_SLOT, slotIndex, true));
-    }
-
-    private void submitInventoryShiftClickRequest(int slotIndex) {
-        PacketDistributor.sendToServer(new CraftingMenuInventoryActionPayload(CraftingMenuInventoryActionPayload.ACTION_SHIFT_CLICK_SLOT, slotIndex, false));
-    }
-
-    private void submitInventoryDragRequest(boolean rightClick, int[] slots) {
-        PacketDistributor.sendToServer(new CraftingMenuInventoryActionPayload(CraftingMenuInventoryActionPayload.ACTION_DRAG_DISTRIBUTE, -1, rightClick, slots));
-    }
-
-    private void submitInventoryDoubleClickRequest(int slotIndex) {
-        PacketDistributor.sendToServer(new CraftingMenuInventoryActionPayload(CraftingMenuInventoryActionPayload.ACTION_DOUBLE_CLICK_COLLECT, slotIndex, false));
-    }
-
     private void submitTrashCarriedRequest() {
         PacketDistributor.sendToServer(new CraftingMenuInventoryActionPayload(CraftingMenuInventoryActionPayload.ACTION_TRASH_CARRIED, -1, false));
-    }
-
-    private void submitDropCarriedRequest() {
-        PacketDistributor.sendToServer(new CraftingMenuInventoryActionPayload(CraftingMenuInventoryActionPayload.ACTION_DROP_CARRIED, -1, false));
     }
 
     private void submitOrganizeInventoryRequest() {
@@ -4563,10 +4954,7 @@ public class StardewGameMenuScreen extends Screen {
     }
 
     private ItemStack currentCarriedItem() {
-        if (this.minecraft == null || this.minecraft.player == null || this.minecraft.player.containerMenu == null) {
-            return ItemStack.EMPTY;
-        }
-        ItemStack carried = this.minecraft.player.containerMenu.getCarried();
+        ItemStack carried = this.menu.getCarried();
         return carried == null ? ItemStack.EMPTY : carried;
     }
 
@@ -4574,7 +4962,7 @@ public class StardewGameMenuScreen extends Screen {
         return !currentCarriedItem().isEmpty();
     }
 
-    private int activeInventorySlotAt(double mouseX, double mouseY) {
+    private int activeInventoryIndexAt(double mouseX, double mouseY) {
         if (currentTab == 0) {
             return invPageHoveredSlot(mouseX, mouseY);
         }
@@ -4584,108 +4972,34 @@ public class StardewGameMenuScreen extends Screen {
         return -1;
     }
 
-    private boolean handleInventorySlotPress(double mouseX, double mouseY, int button) {
-        if (button != 0 && button != 1) {
+    private Slot activeMenuSlotAt(double mouseX, double mouseY) {
+        int inventoryIndex = activeInventoryIndexAt(mouseX, mouseY);
+        int menuSlotIndex = StardewGameMenu.menuSlotForInventoryIndex(inventoryIndex);
+        if (menuSlotIndex < 0 || menuSlotIndex >= menu.slots.size()) {
+            return null;
+        }
+        return menu.slots.get(menuSlotIndex);
+    }
+
+    /** Used by the container hit-test mixin so the whole SDV tile counts as its Slot. */
+    public Slot findVisualInventorySlot(double mouseX, double mouseY) {
+        return activeMenuSlotAt(mouseX, mouseY);
+    }
+
+    private double mappedSlotMouseX(Slot slot, double fallback) {
+        return slot == null ? fallback : leftPos + slot.x + 8.0;
+    }
+
+    private double mappedSlotMouseY(Slot slot, double fallback) {
+        return slot == null ? fallback : topPos + slot.y + 8.0;
+    }
+
+    private boolean handleStandardInventoryClick(double mouseX, double mouseY, int button) {
+        Slot slot = activeMenuSlotAt(mouseX, mouseY);
+        if (slot == null) {
             return false;
         }
-
-        int slot = activeInventorySlotAt(mouseX, mouseY);
-        if (slot < 0) {
-            return false;
-        }
-
-        long now = System.currentTimeMillis();
-        boolean doubleClick = button == 0
-                && lastInventoryClickSlot == slot
-                && lastInventoryClickButton == button
-                && now - lastInventoryClickMillis <= INVENTORY_DOUBLE_CLICK_MS;
-
-        if (doubleClick) {
-            submitInventoryDoubleClickRequest(slot);
-            rememberInventoryClick(-1, -1);
-            playUiSound(ModSounds.SMALL_SELECT.get(), 1.0f, 1.0f);
-            return true;
-        }
-
-        if (button == 0 && hasShiftDown()) {
-            submitInventoryShiftClickRequest(slot);
-            rememberInventoryClick(slot, button);
-            playUiSound(ModSounds.SMALL_SELECT.get(), 1.0f, 1.0f);
-            return true;
-        }
-
-        if (button == 1 && hasShiftDown()) {
-            submitInventoryShiftRightClickRequest(slot);
-            rememberInventoryClick(slot, button);
-            playUiSound(ModSounds.SMALL_SELECT.get(), 1.0f, 1.0f);
-            return true;
-        }
-
-        if (hasCarriedItem()) {
-            beginInventoryDrag(slot, button);
-            return true;
-        }
-
-        submitInventoryClickRequest(slot, button == 1);
-        rememberInventoryClick(slot, button);
-        playUiSound(ModSounds.SMALL_SELECT.get(), 1.0f, 1.0f);
-        return true;
-    }
-
-    private void rememberInventoryClick(int slot, int button) {
-        lastInventoryClickSlot = slot;
-        lastInventoryClickButton = button;
-        lastInventoryClickMillis = System.currentTimeMillis();
-    }
-
-    private void beginInventoryDrag(int slot, int button) {
-        inventoryDragActive = true;
-        inventoryDragMoved = false;
-        inventoryDragButton = button;
-        inventoryDragStartSlot = slot;
-        draggedInventorySlots.clear();
-        draggedInventorySlots.add(slot);
-    }
-
-    private boolean updateInventoryDrag(double mouseX, double mouseY, int button) {
-        if (!inventoryDragActive || button != inventoryDragButton) {
-            return false;
-        }
-
-        int slot = activeInventorySlotAt(mouseX, mouseY);
-        if (slot >= 0 && draggedInventorySlots.add(slot)) {
-            inventoryDragMoved = true;
-        }
-        return true;
-    }
-
-    private boolean finishInventoryDrag(int button) {
-        if (!inventoryDragActive || button != inventoryDragButton) {
-            return false;
-        }
-
-        int[] slots = draggedInventorySlots.stream().mapToInt(Integer::intValue).toArray();
-        if (inventoryDragMoved && slots.length > 1) {
-            submitInventoryDragRequest(inventoryDragButton == 1, slots);
-        } else if (inventoryDragStartSlot >= 0) {
-            submitInventoryClickRequest(inventoryDragStartSlot, inventoryDragButton == 1);
-        }
-        rememberInventoryClick(inventoryDragStartSlot, inventoryDragButton);
-        resetInventoryDrag();
-        playUiSound(ModSounds.SMALL_SELECT.get(), 1.0f, 1.0f);
-        return true;
-    }
-
-    private void resetInventoryDrag() {
-        inventoryDragActive = false;
-        inventoryDragMoved = false;
-        inventoryDragButton = -1;
-        inventoryDragStartSlot = -1;
-        draggedInventorySlots.clear();
-    }
-
-    private boolean pointInsideMainMenu(double mouseX, double mouseY) {
-        return mouseX >= menuX && mouseX < menuX + activeMenuWidth() && mouseY >= menuY && mouseY < menuY + menuHeight;
+        return super.mouseClicked(mappedSlotMouseX(slot, mouseX), mappedSlotMouseY(slot, mouseY), button);
     }
 
     private int vanillaLikeCraftAmountOnLeftClick() {
@@ -4949,12 +5263,75 @@ public class StardewGameMenuScreen extends Screen {
     }
 
     private void updateCraftingHoverState(int mouseX, int mouseY) {
-        hoveredCraftingIndex = -1;
+        if (craftingKeyboardFocus) {
+            hoveredCraftingIndex = selectedCraftingIndex;
+            return;
+        }
 
+        hoveredCraftingIndex = -1;
         int hoverGridIndex = craftingGridIndexAt(mouseX, mouseY, ui(4));
         if (hoverGridIndex >= 0 && hoverGridIndex < craftingRecipeIds.size()) {
             hoveredCraftingIndex = hoverGridIndex;
         }
+    }
+
+    private boolean moveCraftingSelection(int deltaX, int deltaY) {
+        if (currentCraftingPage < 0 || currentCraftingPage >= craftingPages.size()) {
+            return false;
+        }
+        List<RecipeCell> page = craftingPages.get(currentCraftingPage);
+        if (page.isEmpty()) {
+            return false;
+        }
+
+        RecipeCell current = page.stream()
+                .filter(cell -> cell.recipeIndex() == selectedCraftingIndex)
+                .findFirst()
+                .orElse(page.getFirst());
+        RecipeCell best = null;
+        int bestScore = Integer.MAX_VALUE;
+        for (RecipeCell candidate : page) {
+            if (candidate == current) {
+                continue;
+            }
+            int xDistance = candidate.x() - current.x();
+            int yDistance = candidate.y() - current.y();
+            if (deltaX < 0 && xDistance >= 0 || deltaX > 0 && xDistance <= 0
+                    || deltaY < 0 && yDistance >= 0 || deltaY > 0 && yDistance <= 0) {
+                continue;
+            }
+            int primary = deltaX == 0 ? Math.abs(yDistance) : Math.abs(xDistance);
+            int secondary = deltaX == 0 ? Math.abs(xDistance) : Math.abs(yDistance);
+            int score = primary * 100 + secondary;
+            if (score < bestScore) {
+                bestScore = score;
+                best = candidate;
+            }
+        }
+        if (best == null) {
+            return false;
+        }
+
+        selectedCraftingIndex = best.recipeIndex();
+        hoveredCraftingIndex = selectedCraftingIndex;
+        craftingKeyboardFocus = true;
+        playUiSound(ModSounds.SHWIP.get(), 1.0f, 1.0f);
+        return true;
+    }
+
+    private boolean changeCraftingPage(int delta, boolean keyboardFocus) {
+        int oldPage = currentCraftingPage;
+        currentCraftingPage += delta;
+        clampCraftingPage();
+        if (oldPage == currentCraftingPage) {
+            return false;
+        }
+        List<RecipeCell> page = craftingPages.get(currentCraftingPage);
+        selectedCraftingIndex = page.isEmpty() ? -1 : page.getFirst().recipeIndex();
+        hoveredCraftingIndex = keyboardFocus ? selectedCraftingIndex : -1;
+        craftingKeyboardFocus = keyboardFocus;
+        playUiSound(ModSounds.SHWIP.get(), 1.0f, 1.0f);
+        return true;
     }
 
     private int hoveredInventorySlot(double mouseX, double mouseY) {
@@ -4975,7 +5352,6 @@ public class StardewGameMenuScreen extends Screen {
                 return col;
             }
         }
-
         return -1;
     }
 
@@ -4985,9 +5361,13 @@ public class StardewGameMenuScreen extends Screen {
             return;
         }
         playUiSound(ModSounds.BIG_DESELECT.get(), 1.0f, 1.0f);
-        if (this.minecraft != null) {
-            this.minecraft.setScreen(null);
-        }
+        this.onClose();
+    }
+
+    @Override
+    public void mouseMoved(double mouseX, double mouseY) {
+        craftingKeyboardFocus = false;
+        super.mouseMoved(mouseX, mouseY);
     }
 
     @Override
@@ -5009,8 +5389,13 @@ public class StardewGameMenuScreen extends Screen {
             }
             for (int i = 0; i < TAB_COUNT; i++) {
                 if (tabContains(i, mouseX, mouseY)) {
+                    if (hasCarriedItem() && i != 0 && i != 4) {
+                        playUiSound(ModSounds.CANCEL.get(), 1.0f, 1.0f);
+                        return true;
+                    }
                     if (currentTab != i) {
                         currentTab = i;
+                        positionInventorySlots();
                         if (currentTab == TAB_SOCIAL) {
                             socialScroll = 0;
                             PacketDistributor.sendToServer(new RequestNpcFriendshipOverviewPayload());
@@ -5019,9 +5404,8 @@ public class StardewGameMenuScreen extends Screen {
                             farmMgmtScroll = 0;
                             PacketDistributor.sendToServer(new com.stardew.craft.network.payload.RequestFarmPermPayload());
                         }
-                        if (currentTab == TAB_LEADERBOARD) {
-                            leaderboardScroll = 0;
-                            requestLeaderboard();
+                        if (currentTab == TAB_OPTIONS) {
+                            currentOptionsPage = OPTIONS_PAGE_SETTINGS;
                         }
                         playUiSound(ModSounds.SMALL_SELECT.get(), 1.0f, 1.0f);
                     }
@@ -5075,10 +5459,11 @@ public class StardewGameMenuScreen extends Screen {
                 }
             }
 
-            if (currentTab == TAB_LEADERBOARD) {
-                if (handleLeaderboardClick((int) mouseX, (int) mouseY)) {
+            if (currentTab == TAB_OPTIONS) {
+                if (handleOptionsClick(mouseX, mouseY)) {
                     return true;
                 }
+                return super.mouseClicked(mouseX, mouseY, button);
             }
 
             if (currentTab == TAB_COLLECTIONS) {
@@ -5149,7 +5534,7 @@ public class StardewGameMenuScreen extends Screen {
                     playUiSound(ModSounds.SMALL_SELECT.get(), 1.0f, 1.0f);
                     return true;
                 }
-                if (handleInventorySlotPress(mouseX, mouseY, button)) {
+                if (handleStandardInventoryClick(mouseX, mouseY, button)) {
                     return true;
                 }
                 // Organize button
@@ -5161,56 +5546,45 @@ public class StardewGameMenuScreen extends Screen {
                 }
                 // Trash can click
                 if (trashCanContains(mouseX, mouseY) && hasCarriedItem()) {
-                    submitTrashCarriedRequest();
-                    playUiSound(ModSounds.THROW_DOWN_ITEM.get(), 1.0f, 1.0f);
-                    return true;
-                }
-                // Drop outside
-                if (!pointInsideMainMenu(mouseX, mouseY) && hasCarriedItem()) {
-                    submitDropCarriedRequest();
-                    playUiSound(ModSounds.THROW_DOWN_ITEM.get(), 1.0f, 1.0f);
+                    if (InventoryTrashPolicy.canTrash(currentCarriedItem())) {
+                        submitTrashCarriedRequest();
+                        playUiSound(ModSounds.THROW_DOWN_ITEM.get(), 1.0f, 1.0f);
+                    } else {
+                        playUiSound(ModSounds.CANCEL.get(), 1.0f, 1.0f);
+                    }
                     return true;
                 }
             }
 
             if (currentTab == 4) {
-                if (handleInventorySlotPress(mouseX, mouseY, button)) {
+                if (handleStandardInventoryClick(mouseX, mouseY, button)) {
                     return true;
                 }
             }
 
             if (currentTab == 4 && upButtonContains(mouseX, mouseY) && currentCraftingPage > 0) {
-                currentCraftingPage--;
-                clampCraftingPage();
-                playUiSound(ModSounds.SHWIP.get(), 1.0f, 1.0f);
+                changeCraftingPage(-1, false);
                 return true;
             }
 
             if (currentTab == 4 && downButtonContains(mouseX, mouseY) && currentCraftingPage < Math.max(0, craftingPages.size() - 1)) {
-                currentCraftingPage++;
-                clampCraftingPage();
-                playUiSound(ModSounds.SHWIP.get(), 1.0f, 1.0f);
+                changeCraftingPage(1, false);
                 return true;
             }
 
             if (currentTab == 4 && trashCanContains(mouseX, mouseY) && hasCarriedItem()) {
-                submitTrashCarriedRequest();
-                playUiSound(ModSounds.THROW_DOWN_ITEM.get(), 1.0f, 1.0f);
+                if (InventoryTrashPolicy.canTrash(currentCarriedItem())) {
+                    submitTrashCarriedRequest();
+                    playUiSound(ModSounds.THROW_DOWN_ITEM.get(), 1.0f, 1.0f);
+                } else {
+                    playUiSound(ModSounds.CANCEL.get(), 1.0f, 1.0f);
+                }
                 return true;
-            }
-
-            if (currentTab == 4 && !pointInsideMainMenu(mouseX, mouseY) && hasCarriedItem()) {
-                submitDropCarriedRequest();
-                playUiSound(ModSounds.THROW_DOWN_ITEM.get(), 1.0f, 1.0f);
-                return true;
-            }
-
-            if (!pointInsideMainMenu(mouseX, mouseY)) {
-                return super.mouseClicked(mouseX, mouseY, button);
             }
 
             int gridIndex = craftingGridIndexAt(mouseX, mouseY, ui(4));
             if (gridIndex >= 0 && gridIndex < craftingRecipeIds.size()) {
+                craftingKeyboardFocus = false;
                 if (selectedCraftingIndex != gridIndex) {
                     selectedCraftingIndex = gridIndex;
                 }
@@ -5224,18 +5598,19 @@ public class StardewGameMenuScreen extends Screen {
         }
 
         if (button == 1 && currentTab == 0) {
-            if (handleInventorySlotPress(mouseX, mouseY, button)) {
+            if (handleStandardInventoryClick(mouseX, mouseY, button)) {
                 return true;
             }
         }
 
         if (button == 1 && currentTab == 4) {
-            if (handleInventorySlotPress(mouseX, mouseY, button)) {
+            if (handleStandardInventoryClick(mouseX, mouseY, button)) {
                 return true;
             }
 
             int gridIndex = craftingGridIndexAt(mouseX, mouseY, ui(4));
             if (gridIndex >= 0 && gridIndex < craftingRecipeIds.size()) {
+                craftingKeyboardFocus = false;
                 selectedCraftingIndex = gridIndex;
                 if (isCraftableClient(gridIndex)) {
                     submitCraftRequest(1);
@@ -5291,7 +5666,7 @@ public class StardewGameMenuScreen extends Screen {
             return true;
         }
 
-        if (currentTab == TAB_LEADERBOARD) {
+        if (showingLeaderboardPage()) {
             LeaderboardLayout layout = leaderboardLayout();
             if (insideLeaderboardMetricTabStrip(layout, mouseX, mouseY)) {
                 int maxTabScroll = leaderboardMetricMaxTabScroll(layout);
@@ -5320,16 +5695,8 @@ public class StardewGameMenuScreen extends Screen {
             return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
         }
 
-        int oldPage = currentCraftingPage;
-        if (scrollY > 0) {
-            currentCraftingPage--;
-        } else if (scrollY < 0) {
-            currentCraftingPage++;
-        }
-        clampCraftingPage();
-
-        if (oldPage != currentCraftingPage) {
-            playUiSound(ModSounds.SHWIP.get(), 1.0f, 1.0f);
+        if (scrollY > 0 && changeCraftingPage(-1, false)
+                || scrollY < 0 && changeCraftingPage(1, false)) {
             return true;
         }
 
@@ -5338,10 +5705,6 @@ public class StardewGameMenuScreen extends Screen {
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
-        if (updateInventoryDrag(mouseX, mouseY, button)) {
-            return true;
-        }
-
         if (currentTab == TAB_SOCIAL && socialTuneMode && socialTuneDragging && button == 0 && socialTuneTarget >= 0) {
             int dx = Math.round((float) dragX * guiScale());
             int dy = Math.round((float) dragY * guiScale());
@@ -5360,18 +5723,25 @@ public class StardewGameMenuScreen extends Screen {
             }
             return true;
         }
+
+        if (currentTab == 0 || currentTab == 4) {
+            Slot slot = activeMenuSlotAt(mouseX, mouseY);
+            return super.mouseDragged(mappedSlotMouseX(slot, mouseX), mappedSlotMouseY(slot, mouseY),
+                    button, dragX, dragY);
+        }
         return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
     }
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (finishInventoryDrag(button)) {
-            return true;
-        }
-
         if (button == 0) {
             socialScrolling = false;
             socialTuneDragging = false;
+        }
+
+        if (currentTab == 0 || currentTab == 4) {
+            Slot slot = activeMenuSlotAt(mouseX, mouseY);
+            return super.mouseReleased(mappedSlotMouseX(slot, mouseX), mappedSlotMouseY(slot, mouseY), button);
         }
         return super.mouseReleased(mouseX, mouseY, button);
     }
@@ -5407,7 +5777,7 @@ public class StardewGameMenuScreen extends Screen {
                 return true;
             }
         }
-        if (currentTab == TAB_LEADERBOARD) {
+        if (showingLeaderboardPage()) {
             LeaderboardLayout layout = leaderboardLayout();
             leaderboardVisibleRows = layout.visibleRows();
                 int maxScroll = LeaderboardClientCache.hasData(leaderboardMetric.id(), leaderboardPeriod.id(), leaderboardPage)
@@ -5438,36 +5808,42 @@ public class StardewGameMenuScreen extends Screen {
                 return true;
             }
         }
-        if (keyCode == 265 && currentTab == 4) {
-            int old = currentCraftingPage;
-            currentCraftingPage--;
-            clampCraftingPage();
-            if (old != currentCraftingPage) {
-                playUiSound(ModSounds.SHWIP.get(), 1.0f, 1.0f);
+        if (currentTab == 4) {
+            if (keyCode == GLFW.GLFW_KEY_LEFT && moveCraftingSelection(-1, 0)
+                    || keyCode == GLFW.GLFW_KEY_RIGHT && moveCraftingSelection(1, 0)
+                    || keyCode == GLFW.GLFW_KEY_UP && moveCraftingSelection(0, -1)
+                    || keyCode == GLFW.GLFW_KEY_DOWN && moveCraftingSelection(0, 1)) {
                 return true;
             }
-        }
-        if (keyCode == 264 && currentTab == 4) {
-            int old = currentCraftingPage;
-            currentCraftingPage++;
-            clampCraftingPage();
-            if (old != currentCraftingPage) {
-                playUiSound(ModSounds.SHWIP.get(), 1.0f, 1.0f);
+            if (keyCode == GLFW.GLFW_KEY_PAGE_UP && changeCraftingPage(-1, true)
+                    || keyCode == GLFW.GLFW_KEY_PAGE_DOWN && changeCraftingPage(1, true)) {
+                return true;
+            }
+            if ((keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER
+                    || keyCode == GLFW.GLFW_KEY_SPACE)
+                    && craftingKeyboardFocus
+                    && selectedCraftingIndex >= 0 && isCraftableClient(selectedCraftingIndex)) {
+                submitCraftRequestForIndex(selectedCraftingIndex, 1);
+                playUiSound(ModSounds.COIN.get(), 1.0f, 1.0f);
                 return true;
             }
         }
 
         if (keyCode == InputConstants.KEY_DELETE && (currentTab == 0 || currentTab == 4) && hasCarriedItem()) {
-            submitTrashCarriedRequest();
-            playUiSound(ModSounds.THROW_DOWN_ITEM.get(), 1.0f, 1.0f);
+            if (InventoryTrashPolicy.canTrash(currentCarriedItem())) {
+                submitTrashCarriedRequest();
+                playUiSound(ModSounds.THROW_DOWN_ITEM.get(), 1.0f, 1.0f);
+            } else {
+                playUiSound(ModSounds.CANCEL.get(), 1.0f, 1.0f);
+            }
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override
-    public void tick() {
-        super.tick();
+    protected void containerTick() {
+        super.containerTick();
         Minecraft mc = this.minecraft;
         if (mc != null && mc.player != null && currentTab == 4) {
             rebuildCraftingEntries();

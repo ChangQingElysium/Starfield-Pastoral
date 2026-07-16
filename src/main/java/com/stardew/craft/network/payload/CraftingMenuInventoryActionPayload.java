@@ -1,6 +1,7 @@
 package com.stardew.craft.network.payload;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.inventory.InventoryTrashPolicy;
 import com.stardew.craft.item.tool.FishingRodItem;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -306,7 +307,7 @@ public record CraftingMenuInventoryActionPayload(int action, int slotIndex, bool
 
     private static void trashCarried(ServerPlayer player) {
         ItemStack carried = player.containerMenu.getCarried();
-        if (carried.isEmpty()) {
+        if (!InventoryTrashPolicy.canTrash(carried)) {
             return;
         }
         player.containerMenu.setCarried(ItemStack.EMPTY);

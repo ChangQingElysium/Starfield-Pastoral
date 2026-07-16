@@ -4,6 +4,7 @@ import com.stardew.craft.animal.data.AnimalWorldData;
 import com.stardew.craft.animal.model.AnimalBuildingRecord;
 import com.stardew.craft.animal.model.AnimalTypeCatalog;
 import com.stardew.craft.animal.model.FarmAnimalRecord;
+import com.stardew.craft.animal.service.AnimalEntitySyncService;
 import com.stardew.craft.economy.sell.ProfessionSellPriceService;
 import com.stardew.craft.economy.sell.SellQuote;
 import com.stardew.craft.economy.sell.SellSource;
@@ -18,7 +19,6 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.ArrayList;
@@ -27,9 +27,6 @@ import javax.annotation.Nonnull;
 
 @SuppressWarnings("null")
 public class AnimalQueryMenu extends AbstractContainerMenu {
-
-    private static final AABB FULL_LEVEL_BOX = new AABB(-30_000_000, -64, -30_000_000, 30_000_000, 320, 30_000_000);
-
     private final Player player;
     private long animalId;
     private int ageDays;
@@ -350,25 +347,23 @@ public class AnimalQueryMenu extends AbstractContainerMenu {
 
         ProfessionSellPriceService.payout(serverPlayer, quote);
 
-        for (BaseCoopAnimalEntity entity : serverPlayer.serverLevel().getEntitiesOfClass(BaseCoopAnimalEntity.class, FULL_LEVEL_BOX)) {
-            if (entity.getManagedAnimalId() == animalId) {
-                serverPlayer.serverLevel().sendParticles(
-                    ParticleTypes.CLOUD,
-                    entity.getX(),
-                    entity.getY() + 0.6D,
-                    entity.getZ(),
-                    14,
-                    0.6D,
-                    0.4D,
-                    0.6D,
-                    0.02D
-                );
-                serverPlayer.serverLevel().playSound(null, entity.blockPosition(), ModSounds.NEW_RECIPE.get(), SoundSource.PLAYERS, 0.9f, 1.0f);
-                serverPlayer.serverLevel().playSound(null, entity.blockPosition(), ModSounds.MONEY.get(), SoundSource.PLAYERS, 0.9f, 1.0f);
-                entity.discard();
-                break;
-            }
+        BaseCoopAnimalEntity entity = AnimalEntitySyncService.findLoaded(serverPlayer.serverLevel(), animalId);
+        if (entity != null) {
+            serverPlayer.serverLevel().sendParticles(
+                ParticleTypes.CLOUD,
+                entity.getX(),
+                entity.getY() + 0.6D,
+                entity.getZ(),
+                14,
+                0.6D,
+                0.4D,
+                0.6D,
+                0.02D
+            );
+            serverPlayer.serverLevel().playSound(null, entity.blockPosition(), ModSounds.NEW_RECIPE.get(), SoundSource.PLAYERS, 0.9f, 1.0f);
+            serverPlayer.serverLevel().playSound(null, entity.blockPosition(), ModSounds.MONEY.get(), SoundSource.PLAYERS, 0.9f, 1.0f);
         }
+        AnimalEntitySyncService.removeLoaded(serverPlayer.serverLevel(), animalId);
         serverPlayer.closeContainer();
     }
 

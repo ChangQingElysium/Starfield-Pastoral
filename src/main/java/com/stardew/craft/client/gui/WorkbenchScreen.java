@@ -829,6 +829,34 @@ public class WorkbenchScreen extends Screen {
         return (item != null && item != Items.AIR) ? new ItemStack(item).getHoverName().getString() : itemId;
     }
 
+    /** JEI bridge for this non-container crafting screen. */
+    public ClickableItem jeiIngredientAt(double mouseX, double mouseY) {
+        for (int row = 0; row < ROWS; row++) {
+            for (int col = 0; col < COLS; col++) {
+                int x = grdX + col * (cellGui + gapGui);
+                int y = grdY + row * (cellGui + gapGui);
+                if (mouseX < x || mouseX >= x + cellGui || mouseY < y || mouseY >= y + cellGui) {
+                    continue;
+                }
+                int index = page * COLS * ROWS + row * COLS + col;
+                if (index >= filtered.size()) {
+                    return null;
+                }
+                ItemStack stack = resolveStack(filtered.get(index).itemId());
+                return stack.isEmpty() ? null : new ClickableItem(stack, x, y, cellGui, cellGui);
+            }
+        }
+        return null;
+    }
+
+    public int jeiGuiLeft() { return pnlX; }
+    public int jeiGuiTop() { return pnlY; }
+    public int jeiGuiWidth() { return pnlW; }
+    public int jeiGuiHeight() { return pnlH; }
+
+    public record ClickableItem(ItemStack stack, int x, int y, int width, int height) {
+    }
+
     @Override
     public boolean isPauseScreen() { return false; }
 }

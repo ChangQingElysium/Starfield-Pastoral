@@ -1,9 +1,9 @@
 package com.stardew.craft.client.hud;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.stardew.craft.Config;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.gui.common.CommonGuiTextures;
-import com.stardew.craft.client.gui.common.StardewRenderMapping;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.sound.ModSounds;
 import net.minecraft.client.Minecraft;
@@ -11,6 +11,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -50,27 +51,17 @@ public final class StardewHudMessageManager {
 	private static final int DIGIT_TEX_W = 5;
 	private static final int DIGIT_TEX_H = 70;
 
-	/** Uniform scale applied to the entire HUD toast (box + text + icon). */
-	private static final float HUD_SCALE = 0.70f;
-
 	private static final float VANILLA_TO_MC = 0.40f;
 	private static final int BOX_HEIGHT = Math.round(112f * VANILLA_TO_MC);
-	private static final int BOX_MARGIN_LEFT = Math.round(16f * VANILLA_TO_MC);
-	private static final int BOX_MARGIN_BOTTOM = Math.round(64f * VANILLA_TO_MC);
-	private static final int SMALL_SCREEN_SHIFT = Math.round(48f * VANILLA_TO_MC);
 	private static final float UI_SCALE = 4f * VANILLA_TO_MC;
 	private static final float TEXT_SCALE = 1.12f;
-	private static final int CORNER_WRAP_WIDTH_SDV = 384;
-	private static final int CORNER_BOX_EXTRA_WIDTH_SDV = 36;
-	private static final int CORNER_BOX_EXTRA_HEIGHT_SDV = 32;
-	private static final int CORNER_MIN_HEIGHT_SDV = 60;
-	private static final int CORNER_TEXT_X_SDV = 16;
-	private static final int CORNER_TEXT_Y_SDV = 20;
-	private static final int CORNER_STACK_EXTRA_SDV = 64;
-	private static final int CORNER_BOTTOM_MARGIN_SDV = 64;
-	private static final int CORNER_SMALL_SCREEN_WIDTH_SDV = 1400;
-	private static final int CORNER_SMALL_SCREEN_SHIFT_SDV = 64;
-	private static final int CORNER_SHADOW_OFFSET_SDV = 8;
+	private static final int CORNER_MAX_TEXT_WIDTH = 220;
+	private static final int CORNER_MIN_WIDTH = 72;
+	private static final int CORNER_MIN_HEIGHT = 30;
+	private static final int CORNER_HORIZONTAL_PADDING = 12;
+	private static final int CORNER_VERTICAL_PADDING = 8;
+	private static final int CORNER_LINE_GAP = 1;
+	private static final int CORNER_STACK_GAP = 6;
 	private static final int TEXT_OFFSET_X = Math.round(99f * VANILLA_TO_MC);
 	private static final float TINY_DIGIT_SCALE = 3f * VANILLA_TO_MC;
 	private static final int SEGMENT_OVERLAP = 1;
@@ -148,25 +139,87 @@ public final class StardewHudMessageManager {
 		}
 		updateMessages();
 		Minecraft mc = Minecraft.getInstance();
-		if (mc.options.hideGui || (mc.player != null && mc.player.isSpectator())) {
+		if (mc.options.hideGui || mc.screen instanceof StardewHudLayoutEditorScreen
+				|| (mc.player != null && mc.player.isSpectator())) {
 			return;
 		}
 		Font font = mc.font;
-		// Scale screen coords so the entire toast is drawn at HUD_SCALE
-		int screenWidth = Math.round(mc.getWindow().getGuiScaledWidth() / HUD_SCALE);
-		int screenHeight = Math.round(mc.getWindow().getGuiScaledHeight() / HUD_SCALE);
-		int heightUsed = 0;
 		GuiGraphics graphics = event.getGuiGraphics();
+		renderMessageGroup(graphics, font, Config.HudElement.ITEM_PICKUP, false);
+		renderMessageGroup(graphics, font, Config.HudElement.TEXT_MESSAGE, true);
+	}
 
+	private static void renderMessageGroup(GuiGraphics graphics, Font font, Config.HudElement element,
+			boolean cornerTextboxes) {
+		if (cornerTextboxes) {
+			renderCornerMessageGroup(graphics, font);
+			return;
+		}
+		StardewHudLayout.Placement placement = StardewHudLayout.current(
+			element, graphics.guiWidth(), graphics.guiHeight());
 		graphics.pose().pushPose();
-		graphics.pose().scale(HUD_SCALE, HUD_SCALE, 1f);
-
+		graphics.pose().translate(placement.x(), placement.y(), 0.0F);
+		graphics.pose().scale(placement.scale(), placement.scale(), 1.0F);
+		int heightUsed = 0;
 		for (int i = MESSAGES.size() - 1; i >= 0; i--) {
 			HudMessage message = MESSAGES.get(i);
-			heightUsed += drawMessage(graphics, font, screenWidth, screenHeight, message, heightUsed);
+			boolean isCorner = message.kind == MessageKind.CORNER_TEXTBOX;
+			if (isCorner != cornerTextboxes) continue;
+			drawToastMessage(graphics, font, message, heightUsed);
+			heightUsed += BOX_HEIGHT;
 		}
-
 		graphics.pose().popPose();
+	}
+
+	private static void renderCornerMessageGroup(GuiGraphics graphics, Font font) {
+		int heightUsed = 0;
+		for (int i = MESSAGES.size() - 1; i >= 0; i--) {
+			HudMessage message = MESSAGES.get(i);
+			if (message.kind != MessageKind.CORNER_TEXTBOX) continue;
+			CornerBoxLayout layout = cornerBoxLayout(font, message.messageText);
+			StardewHudLayout.Placement placement = StardewHudLayout.current(
+				Config.HudElement.TEXT_MESSAGE, graphics.guiWidth(), graphics.guiHeight(),
+				layout.width(), layout.height());
+			graphics.pose().pushPose();
+			graphics.pose().translate(placement.x(),
+				placement.y() - Math.round(heightUsed * placement.scale()), 0.0F);
+			graphics.pose().scale(placement.scale(), placement.scale(), 1.0F);
+			drawCornerTextbox(graphics, font, message, 0);
+			graphics.pose().popPose();
+			heightUsed += layout.height() + CORNER_STACK_GAP;
+		}
+	}
+
+	public static void renderItemPickupPreview(GuiGraphics graphics, Font font, int x, int y, float scale) {
+		ItemStack stack = new ItemStack(ModItems.HAY.get());
+		HudMessage message = new HudMessage(stack.getHoverName(), MessageKind.ITEM_PICKUP);
+		message.messageSubject = stack;
+		message.number = 3;
+		message.timeLeftMs = 2500.0F;
+		message.transparency = 1.0F;
+		graphics.pose().pushPose();
+		graphics.pose().translate(x, y, 0.0F);
+		graphics.pose().scale(scale, scale, 1.0F);
+		drawToastMessage(graphics, font, message, 0);
+		graphics.pose().popPose();
+	}
+
+	public static void renderTextMessagePreview(GuiGraphics graphics, Font font, int x, int y, float scale) {
+		HudMessage message = new HudMessage(
+			Component.translatable("stardewcraft.hud_editor.preview.text_message"),
+			MessageKind.CORNER_TEXTBOX);
+		message.transparency = 1.0F;
+		graphics.pose().pushPose();
+		graphics.pose().translate(x, y, 0.0F);
+		graphics.pose().scale(scale, scale, 1.0F);
+		drawCornerTextbox(graphics, font, message, 0);
+		graphics.pose().popPose();
+	}
+
+	public static CornerBoxSize textMessagePreviewSize(Font font) {
+		CornerBoxLayout layout = cornerBoxLayout(font,
+			Component.translatable("stardewcraft.hud_editor.preview.text_message").getString());
+		return new CornerBoxSize(layout.width(), layout.height());
 	}
 
 	private static void updateMessages() {
@@ -222,78 +275,50 @@ public final class StardewHudMessageManager {
 		MESSAGES.add(firstCornerTextbox, message);
 	}
 
-	@SuppressWarnings("null")
-	private static int drawMessage(GuiGraphics graphics, Font font, int screenWidth, int screenHeight, HudMessage message, int heightUsed) {
-		if (message.kind == MessageKind.CORNER_TEXTBOX) {
-			return drawCornerTextbox(graphics, font, screenWidth, screenHeight, message, heightUsed);
-		}
-		drawToastMessage(graphics, font, screenWidth, screenHeight, message, heightUsed);
-		return BOX_HEIGHT;
-	}
-
-	private static int drawCornerTextbox(GuiGraphics graphics, Font font, int screenWidth, int screenHeight,
+	private static int drawCornerTextbox(GuiGraphics graphics, Font font,
 			HudMessage message, int heightUsed) {
-		Minecraft minecraft = Minecraft.getInstance();
-		float guiScale = minecraft.getWindow() == null ? 1.0f : (float) minecraft.getWindow().getGuiScale();
-		StardewRenderMapping mapping = new StardewRenderMapping(screenWidth, screenHeight, guiScale);
-		float textureScale = 1.0f / Math.max(1.0f, guiScale);
-		float textScale = Math.max(1.0f, mapping.s4());
-		int marginLeft = mapping.ui(16);
-		int availableWidth = Math.max(1, screenWidth - marginLeft * 2);
-		int maxTextWidth = Math.max(1, Math.min(mapping.ui(CORNER_WRAP_WIDTH_SDV),
-			availableWidth - mapping.ui(CORNER_BOX_EXTRA_WIDTH_SDV)));
-		int unscaledWrapWidth = Math.max(1, Math.round(maxTextWidth / textScale));
-		List<net.minecraft.util.FormattedCharSequence> lines = font.split(
-			Component.literal(message.messageText), unscaledWrapWidth);
-		if (lines.isEmpty()) {
-			lines = List.of(net.minecraft.util.FormattedCharSequence.EMPTY);
-		}
-
-		int maxLineWidth = 1;
-		for (net.minecraft.util.FormattedCharSequence line : lines) {
-			maxLineWidth = Math.max(maxLineWidth, font.width(line));
-		}
-		int textWidth = Math.round(maxLineWidth * textScale);
-		int lineHeight = Math.max(1, Math.round(font.lineHeight * textScale));
-		int textHeight = lines.size() * lineHeight;
-		int boxWidth = Math.min(availableWidth, textWidth + mapping.ui(CORNER_BOX_EXTRA_WIDTH_SDV));
-		int boxHeight = Math.max(mapping.ui(CORNER_MIN_HEIGHT_SDV),
-			textHeight + mapping.ui(CORNER_BOX_EXTRA_HEIGHT_SDV));
-		int stackHeight = textHeight + mapping.ui(CORNER_STACK_EXTRA_SDV);
-		int boxX = marginLeft;
-		int boxY = screenHeight - stackHeight - heightUsed - mapping.ui(CORNER_BOTTOM_MARGIN_SDV);
-		if (screenWidth < mapping.ui(CORNER_SMALL_SCREEN_WIDTH_SDV)) {
-			boxY -= mapping.ui(CORNER_SMALL_SCREEN_SHIFT_SDV);
-		}
+		CornerBoxLayout layout = cornerBoxLayout(font, message.messageText);
+		int boxY = -heightUsed;
 
 		float alpha = message.transparency;
 		int alphaInt = Math.max(0, Math.min(255, Math.round(255f * alpha)));
+		Minecraft minecraft = Minecraft.getInstance();
+		float guiScale = minecraft.getWindow() == null ? 1.0F : (float) minecraft.getWindow().getGuiScale();
+		float textureScale = 1.0F / Math.max(1.0F, guiScale);
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
-		CommonGuiTextures.drawMenuTextureBox(graphics, boxX, boxY, boxWidth, boxHeight,
-			textureScale, true, alpha, mapping.ui(CORNER_SHADOW_OFFSET_SDV));
+		CommonGuiTextures.drawMenuTextureBox(graphics, 0, boxY, layout.width(), layout.height(),
+			textureScale, true, alpha, Math.max(1, Math.round(2 * textureScale)));
 
 		int textColor = (alphaInt << 24) | (TEXT_COLOR & 0xFFFFFF);
-		graphics.pose().pushPose();
-		graphics.pose().translate(boxX + mapping.ui(CORNER_TEXT_X_SDV),
-			boxY + mapping.ui(CORNER_TEXT_Y_SDV), 0f);
-		graphics.pose().scale(textScale, textScale, 1f);
-		int drawY = 0;
-		for (net.minecraft.util.FormattedCharSequence line : lines) {
-			graphics.drawString(font, line, 0, drawY, textColor, false);
-			drawY += font.lineHeight;
+		int drawY = boxY + (layout.height() - layout.textHeight()) / 2;
+		for (FormattedCharSequence line : layout.lines()) {
+			int drawX = (layout.width() - font.width(line)) / 2;
+			graphics.drawString(font, line, drawX, drawY, textColor, false);
+			drawY += font.lineHeight + CORNER_LINE_GAP;
 		}
-		graphics.pose().popPose();
 		RenderSystem.disableBlend();
-		return stackHeight;
+		return layout.height() + CORNER_STACK_GAP;
 	}
 
-	private static void drawToastMessage(GuiGraphics graphics, Font font, int screenWidth, int screenHeight, HudMessage message, int heightUsed) {
-		float boxLeft = BOX_MARGIN_LEFT;
-		float boxTop = screenHeight - BOX_HEIGHT - heightUsed - BOX_MARGIN_BOTTOM;
-		if (screenWidth < 1400) {
-			boxTop -= SMALL_SCREEN_SHIFT;
+	private static CornerBoxLayout cornerBoxLayout(Font font, String text) {
+		List<FormattedCharSequence> lines = font.split(Component.literal(text), CORNER_MAX_TEXT_WIDTH);
+		if (lines.isEmpty()) {
+			lines = List.of(FormattedCharSequence.EMPTY);
 		}
+		int textWidth = 0;
+		for (FormattedCharSequence line : lines) {
+			textWidth = Math.max(textWidth, font.width(line));
+		}
+		int textHeight = lines.size() * font.lineHeight + Math.max(0, lines.size() - 1) * CORNER_LINE_GAP;
+		int width = Math.max(CORNER_MIN_WIDTH, textWidth + CORNER_HORIZONTAL_PADDING * 2);
+		int height = Math.max(CORNER_MIN_HEIGHT, textHeight + CORNER_VERTICAL_PADDING * 2);
+		return new CornerBoxLayout(lines, width, height, textHeight);
+	}
+
+	private static void drawToastMessage(GuiGraphics graphics, Font font, HudMessage message, int heightUsed) {
+		float boxLeft = 0;
+		float boxTop = -heightUsed;
 
 		float alpha = message.transparency;
 		int alphaInt = Math.max(0, Math.min(255, Math.round(255f * alpha)));
@@ -419,6 +444,12 @@ public final class StardewHudMessageManager {
 		if (mc.player != null) {
 			mc.player.playSound(net.minecraft.sounds.SoundEvents.ITEM_PICKUP, 0.4f, 1.0f);
 		}
+	}
+
+	public record CornerBoxSize(int width, int height) {
+	}
+
+	private record CornerBoxLayout(List<FormattedCharSequence> lines, int width, int height, int textHeight) {
 	}
 
 	private static final class HudMessage {

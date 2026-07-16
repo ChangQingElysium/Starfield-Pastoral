@@ -990,7 +990,7 @@ public class PlayerDataCommand {
         int finalCleared = cleared;
         context.getSource().sendSuccess(() -> Component.translatable(
             "stardewcraft.command.player.reset_complete",
-            player.getName(), finalCleared, tagCount), true);
+            com.stardew.craft.player.PlayerDisplayName.get(player), finalCleared, tagCount), true);
 
         return 1;
     }

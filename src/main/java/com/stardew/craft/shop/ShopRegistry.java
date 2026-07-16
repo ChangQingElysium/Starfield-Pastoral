@@ -11,11 +11,10 @@ import com.stardew.craft.api.v1.shop.StardewShopDefinition;
 import com.stardew.craft.api.v1.shop.StardewShopEntry;
 import com.stardew.craft.api.v1.shop.StardewShopInventoryContext;
 import com.stardew.craft.api.v1.shop.StardewShopInventoryProviders;
+import com.stardew.craft.core.ModTags;
 
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
@@ -38,9 +37,6 @@ import java.util.stream.Collectors;
  * Season constants: 0=spring, 1=summer, 2=fall, 3=winter  (matches StardewTimeManager)
  */
 public final class ShopRegistry {
-
-    private static final TagKey<Item> BLACKSMITH_ORES_TAG = itemTag("ores");
-    private static final TagKey<Item> BLACKSMITH_BARS_TAG = itemTag("bars");
 
     private record TravelingCartPortraitEntry(String npcId, String itemId) {}
 
@@ -1062,12 +1058,8 @@ public final class ShopRegistry {
         if (!"Blacksmith".equals(shopId)) {
             return false;
         }
-        return stack.is(BLACKSMITH_ORES_TAG)
-                || stack.is(BLACKSMITH_BARS_TAG)
+        return stack.is(ModTags.Items.ORES)
+                || stack.is(ModTags.Items.BARS)
                 || "stardewcraft:coal".equals(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString());
-    }
-
-    private static TagKey<Item> itemTag(String path) {
-        return TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("stardewcraft", path));
     }
 }

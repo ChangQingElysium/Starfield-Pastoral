@@ -67,6 +67,16 @@ public final class StardewConditions {
         }
     }
 
+    /** Encodes only a condition's registered payload, for inspection and display adapters. */
+    public static DataResult<JsonElement> encodeData(StardewCondition condition) {
+        Objects.requireNonNull(condition, "condition");
+        StardewConditionType<?> registered = TYPES.get(condition.type());
+        if (registered == null) {
+            return DataResult.error(() -> "Condition type is no longer registered: " + condition.type());
+        }
+        return encodeTyped(registered, condition.data());
+    }
+
     /** Decodes old flat event JSON after its legacy type has been mapped to a namespaced ID. */
     public static DataResult<StardewCondition> decodeLegacy(String legacyType, JsonObject raw) {
         Objects.requireNonNull(legacyType, "legacyType");

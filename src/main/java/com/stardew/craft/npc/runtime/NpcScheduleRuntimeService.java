@@ -2,6 +2,7 @@ package com.stardew.craft.npc.runtime;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.stardew.craft.communitycenter.state.CCStoryFlags;
 import com.stardew.craft.npc.data.NpcCapabilityProfile;
 import com.stardew.craft.npc.data.NpcLocationAnchor;
 import com.stardew.craft.npc.data.NpcDataRegistry;
@@ -386,6 +387,12 @@ public final class NpcScheduleRuntimeService {
         String weather = activeWeather == null ? "" : activeWeather.toLowerCase(Locale.ROOT);
         int hearts = Math.max(0, friendship.getPointsForNpc(schedulePlayerId, canonicalNpcId(npcId)) / NpcInteractionService.POINTS_PER_HEART);
 
+        // Vanilla checks Green Rain before passive festivals and Pam's repaired-bus schedule.
+        if (timeManager.getCurrentYear() == 1 && weather.contains("greenrain")) {
+            candidates.add("GreenRain");
+            candidates.add("greenrain");
+        }
+
         for (FestivalDefinition festival : FestivalService.getActivePassiveFestivalsToday()) {
             int dayOfFestival = festival.dayOfFestival(timeManager.getCurrentSeason(), day);
             if (dayOfFestival > 0) {
@@ -403,14 +410,12 @@ public final class NpcScheduleRuntimeService {
         // 3) <day>
         candidates.add(String.valueOf(day));
 
-        // 4) bus (Pam special key, kept in chain for parity completeness)
-        candidates.add("bus");
-
-        // 5/6/7) Weather overrides: GreenRain > rain2 > rain > snow
-        if (weather.contains("greenrain")) {
-            candidates.add("GreenRain");
-            candidates.add("greenrain");
+        // 4) Pam uses the dedicated bus schedule only after the Vault is complete.
+        if (shouldUsePamBusSchedule(npcId)) {
+            candidates.add("bus");
         }
+
+        // 5/6/7) Weather overrides: rain2 > rain > snow
         if (weather.contains("rain") || weather.contains("storm")) {
             candidates.add("rain2");
             candidates.add("rain");
@@ -497,6 +502,11 @@ public final class NpcScheduleRuntimeService {
             )
         );
         return null;
+    }
+
+    private static boolean shouldUsePamBusSchedule(String npcId) {
+        return "pam".equals(canonicalNpcId(npcId))
+            && CCStoryFlags.anyPlayerHasFlag(CCStoryFlags.CC_VAULT);
     }
 
     private static String canonicalNpcId(String npcId) {

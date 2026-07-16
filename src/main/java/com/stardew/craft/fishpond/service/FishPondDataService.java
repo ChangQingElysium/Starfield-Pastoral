@@ -11,6 +11,9 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.api.v1.fishpond.StardewFishPondDefinition;
 import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.fishpond.model.FishPondRecord;
+import com.stardew.craft.item.ModItems;
+import com.stardew.craft.item.artisan.PreserveType;
+import com.stardew.craft.item.artisan.PreservesItem;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
@@ -185,6 +188,48 @@ public final class FishPondDataService {
             selected = producedItem;
         }
         return Optional.ofNullable(selected);
+    }
+
+    /**
+     * Enumerates the concrete products reachable from this fish using the same pond rule
+     * selection and qualified-item resolver as daily gameplay. The returned stacks are
+     * display projections only; the daily production roll remains server-authoritative.
+     */
+    public List<DisplayProduction> getDisplayProductions(ItemStack fishStack) {
+        if (fishStack == null || fishStack.isEmpty()) {
+            return List.of();
+        }
+        PondData pondData = resolve(fishStack).orElse(null);
+        if (pondData == null) {
+            return List.of();
+        }
+
+        List<DisplayProduction> result = new ArrayList<>();
+        for (ProducedItem producedItem : pondData.producedItems()) {
+            if (!matchesCondition(producedItem.condition(), fishStack)) {
+                continue;
+            }
+            int minCount = producedItem.minStack() > 0 ? producedItem.minStack() : 1;
+            int maxCount = producedItem.maxStack() >= minCount ? producedItem.maxStack() : minCount;
+            ItemStack output = FishPondQualifiedItemService.createItemStack(producedItem.itemId(), minCount);
+            if (output.isEmpty()) {
+                continue;
+            }
+            boolean roeBonus = output.is(ModItems.ROE.get());
+            if (roeBonus) {
+                PreservesItem.createFlavored(PreserveType.ROE, fishStack, output);
+            }
+            result.add(new DisplayProduction(
+                    output,
+                    producedItem.requiredPopulation(),
+                    producedItem.chance(),
+                    pondData.baseMinProduceChance(),
+                    pondData.baseMaxProduceChance(),
+                    minCount,
+                    maxCount,
+                    roeBonus));
+        }
+        return List.copyOf(result);
     }
 
     public Optional<NeededItemData> resolveNeededItem(FishPondRecord pond) {
@@ -605,6 +650,36 @@ public final class FishPondDataService {
                 return minStack;
             }
             return 1;
+        }
+    }
+
+    public record DisplayProduction(
+            ItemStack output,
+            int requiredPopulation,
+            double outputChance,
+            double dailyMinChance,
+            double dailyMaxChance,
+            int minCount,
+            int maxCount,
+            boolean bonusCountPossible
+    ) {
+        public DisplayProduction {
+            output = output == null ? ItemStack.EMPTY : output.copy();
+            requiredPopulation = Math.max(0, requiredPopulation);
+            outputChance = clampChance(outputChance);
+            dailyMinChance = clampChance(dailyMinChance);
+            dailyMaxChance = clampChance(dailyMaxChance);
+            minCount = Math.max(1, minCount);
+            maxCount = Math.max(minCount, maxCount);
+        }
+
+        @Override
+        public ItemStack output() {
+            return output.copy();
+        }
+
+        private static double clampChance(double value) {
+            return Math.max(0.0D, Math.min(1.0D, value));
         }
     }
 

@@ -273,6 +273,16 @@ public class FarmInstanceRegistry extends SavedData {
         return true;
     }
 
+    /** Keeps the persisted owner label aligned with the Stardew character name. */
+    public void updateOwnerName(UUID playerUUID, String ownerName) {
+        FarmInstance farm = instances.get(playerUUID);
+        String normalized = ownerName == null ? "" : ownerName.trim();
+        if (farm != null && !normalized.isBlank() && !normalized.equals(farm.getOwnerName())) {
+            farm.setOwnerName(normalized);
+            setDirty();
+        }
+    }
+
     // ── 分配方法 ──
 
     /**

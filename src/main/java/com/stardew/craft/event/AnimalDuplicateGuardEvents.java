@@ -4,14 +4,16 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.animal.data.AnimalWorldData;
 import com.stardew.craft.animal.model.AnimalBuildingRecord;
 import com.stardew.craft.animal.model.FarmAnimalRecord;
+import com.stardew.craft.animal.service.AnimalEntityRecoveryState;
+import com.stardew.craft.animal.service.AnimalEntitySyncService;
+import com.stardew.craft.animal.service.ManagedAnimalRuntimeIndex;
 import com.stardew.craft.entity.animal.BaseCoopAnimalEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
-
-import java.util.HashSet;
-import java.util.Set;
+import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
+import net.neoforged.neoforge.event.level.LevelEvent;
 
 /**
  * 防止动物实体重复加入世界。
@@ -27,10 +29,6 @@ import java.util.Set;
  */
 @EventBusSubscriber(modid = StardewCraft.MODID)
 public class AnimalDuplicateGuardEvents {
-
-    /** 正在处理中的 ID，防止递归 */
-    private static final Set<Long> processingIds = new HashSet<>();
-
     @SubscribeEvent
     public static void onEntityJoinLevel(EntityJoinLevelEvent event) {
         if (event.getLevel().isClientSide()) return;
@@ -39,9 +37,6 @@ public class AnimalDuplicateGuardEvents {
 
         long managedId = animal.getManagedAnimalId();
         if (managedId <= 0L) return;
-
-        // 防止递归处理
-        if (processingIds.contains(managedId)) return;
 
         AnimalWorldData data = AnimalWorldData.get(level);
         FarmAnimalRecord record = data.getAnimal(managedId).orElse(null);
@@ -56,23 +51,28 @@ public class AnimalDuplicateGuardEvents {
             return;
         }
 
-        // 检查是否已有相同 ID 的实体在世界中
-        processingIds.add(managedId);
-        try {
-            for (BaseCoopAnimalEntity existing : level.getEntitiesOfClass(
-                    BaseCoopAnimalEntity.class, 
-                    animal.getBoundingBox().inflate(256))) {
-                if (existing == animal) continue;
-                if (existing.getManagedAnimalId() == managedId) {
-                    // 发现重复，取消当前实体加入
-                    StardewCraft.LOGGER.info("[ANIMAL_GUARD] Duplicate detected for managedId {}, discarding new entity", managedId);
-                    event.setCanceled(true);
-                    animal.discard();
-                    return;
-                }
-            }
-        } finally {
-            processingIds.remove(managedId);
+        AnimalEntitySyncService.applyAuthoritativeState(animal, record);
+        BaseCoopAnimalEntity existing = ManagedAnimalRuntimeIndex.register(level, animal);
+        if (existing != null) {
+            StardewCraft.LOGGER.info("[ANIMAL_GUARD] Duplicate detected for managedId {}, discarding new entity", managedId);
+            event.setCanceled(true);
+            animal.discard();
+        }
+    }
+
+    @SubscribeEvent
+    public static void onEntityLeaveLevel(EntityLeaveLevelEvent event) {
+        if (event.getLevel() instanceof ServerLevel level
+            && event.getEntity() instanceof BaseCoopAnimalEntity animal) {
+            ManagedAnimalRuntimeIndex.remove(level, animal);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onLevelUnload(LevelEvent.Unload event) {
+        if (event.getLevel() instanceof ServerLevel level) {
+            ManagedAnimalRuntimeIndex.clear(level);
+            AnimalEntityRecoveryState.clear(level);
         }
     }
 }

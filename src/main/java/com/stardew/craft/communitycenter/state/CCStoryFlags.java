@@ -104,6 +104,18 @@ public final class CCStoryFlags {
         return PlayerDataManager.getPlayerData(player).hasMailFlag(flag);
     }
 
+    /**
+     * Checks a world-level story unlock backed by any persisted player's progress.
+     * Global NPC schedules must not depend on which player happens to be online first.
+     */
+    public static boolean anyPlayerHasFlag(String flag) {
+        if (flag == null || flag.isBlank()) {
+            return false;
+        }
+        return PlayerDataManager.get().getAllPlayerData().values().stream()
+                .anyMatch(data -> data.hasMailFlag(flag));
+    }
+
     public static void addFlag(ServerPlayer player, String flag) {
         PlayerDataManager.getPlayerData(player).addMailFlag(flag);
     }

@@ -9,6 +9,7 @@ import com.stardew.craft.emote.EmoteType;
 import com.stardew.craft.entity.npc.StardewNpcEntity;
 import com.stardew.craft.book.BookPowerEffects;
 import com.stardew.craft.api.v1.item.StardewItemDataApi;
+import com.stardew.craft.core.ModTags;
 import com.stardew.craft.npc.data.NpcCapabilityProfile;
 import com.stardew.craft.npc.data.NpcDataRegistry;
 import com.stardew.craft.npc.data.NpcSocialRules;
@@ -19,14 +20,11 @@ import com.stardew.craft.player.PlayerDataManager;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import com.stardew.craft.time.StardewTimeManager;
 import com.stardew.craft.weather.WeatherManager;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -59,8 +57,6 @@ public final class NpcInteractionService {
     private static final String GOLDEN_PUMPKIN_ID = "stardewcraft:golden_pumpkin";
     private static final String MAGIC_ROCK_CANDY_ID = "stardewcraft:magic_rock_candy";
     private static final String VANILLA_OBJECTS_RESOURCE = "data/stardewcraft/npc/vanilla/data/Objects.json";
-    private static final TagKey<Item> TOOL_ITEMS = TagKey.create(
-        Registries.ITEM, ResourceLocation.fromNamespaceAndPath("stardewcraft", "tools"));
     private static final Set<String> NON_GIFTABLE_TYPE_KEYS = Set.of(
         "stardewcraft.type.tool",
         "stardewcraft.type.weapon",
@@ -944,7 +940,7 @@ public final class NpcInteractionService {
         if (isAlwaysGiftableSpecial(held)) {
             return true;
         }
-        if (held.is(TOOL_ITEMS)) {
+        if (held.is(ModTags.Items.TOOLS)) {
             return false;
         }
 

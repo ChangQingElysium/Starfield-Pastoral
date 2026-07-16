@@ -69,7 +69,8 @@ public class FarmAdminCommand {
         data.addMailFlag(STARDEW_OP_FLAG);
 
         ctx.getSource().sendSuccess(() -> Component.translatable(
-                "stardewcraft.command.admin.granted_target", target.getGameProfile().getName()), true);
+                "stardewcraft.command.admin.granted_target",
+                com.stardew.craft.player.PlayerDisplayName.get(target)), true);
         target.displayClientMessage(Component.translatable("stardewcraft.command.admin.granted"), false);
         return 1;
     }
@@ -80,7 +81,8 @@ public class FarmAdminCommand {
         data.removeMailFlag(STARDEW_OP_FLAG);
 
         ctx.getSource().sendSuccess(() -> Component.translatable(
-                "stardewcraft.command.admin.revoked_target", target.getGameProfile().getName()), true);
+                "stardewcraft.command.admin.revoked_target",
+                com.stardew.craft.player.PlayerDisplayName.get(target)), true);
         target.displayClientMessage(Component.translatable("stardewcraft.command.admin.revoked"), false);
         return 1;
     }

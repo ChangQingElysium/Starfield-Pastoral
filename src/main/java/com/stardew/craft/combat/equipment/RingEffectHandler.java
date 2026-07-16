@@ -34,7 +34,7 @@ public class RingEffectHandler {
         if (killed instanceof ServerPlayer) return; // don't trigger on player kills
 
         PlayerStardewData data = PlayerDataManager.getPlayerData(player);
-        List<RingType> equippedRings = getEquippedRingTypes(player, data);
+        List<RingType> equippedRings = getEquippedRingTypes(data);
 
         for (RingType ring : equippedRings) {
             applyOnKillEffect(player, data, ring, killed);
@@ -89,17 +89,6 @@ public class RingEffectHandler {
         List<RingType> result = new ArrayList<>(2);
         addRingType(data.getEquippedLeftRing(), result);
         addRingType(data.getEquippedRightRing(), result);
-        return result;
-    }
-
-    /**
-     * 获取包含 Curios 槽位的完整已装备戒指列表。
-     */
-    public static List<RingType> getEquippedRingTypes(ServerPlayer player, PlayerStardewData data) {
-        List<RingType> result = getEquippedRingTypes(data);
-        if (com.stardew.craft.compat.CuriosCompatBridge.isCuriosLoaded()) {
-            com.stardew.craft.compat.CuriosRingReader.addRingTypesFromCurios(player, result);
-        }
         return result;
     }
 

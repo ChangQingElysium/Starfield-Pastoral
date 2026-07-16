@@ -69,7 +69,7 @@ public record AnimalRenamePayload(long animalId, String newName) implements Cust
 
             // Push name change to loaded entity immediately so HUD/name queries reflect the update now.
             data.getAnimal(payload.animalId).ifPresent(record ->
-                AnimalEntitySyncService.spawnOrSyncSingle(serverPlayer.serverLevel(), record)
+                AnimalEntitySyncService.updateLoaded(serverPlayer.serverLevel(), record)
             );
         });
     }

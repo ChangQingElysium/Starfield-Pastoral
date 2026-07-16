@@ -108,7 +108,7 @@ public class FarmCaveCommand {
         }
         ctx.getSource().sendSuccess(() -> Component.translatable(
                 "stardewcraft.command.farm_cave.admin_updated",
-                target.getGameProfile().getName(), caveChoiceName(choice)), true);
+                com.stardew.craft.player.PlayerDisplayName.get(target), caveChoiceName(choice)), true);
         return 1;
     }
 
@@ -137,10 +137,12 @@ public class FarmCaveCommand {
         boolean placed = com.stardew.craft.farm.FarmInstanceInitializer.backfillFarmCaveIfMissing(stardewLevel, farm);
         if (placed) {
             ctx.getSource().sendSuccess(() -> Component.translatable(
-                    "stardewcraft.command.farm_cave.rebuilt", target.getGameProfile().getName()), true);
+                    "stardewcraft.command.farm_cave.rebuilt",
+                    com.stardew.craft.player.PlayerDisplayName.get(target)), true);
         } else {
             ctx.getSource().sendSuccess(() -> Component.translatable(
-                    "stardewcraft.command.farm_cave.already_exists", target.getGameProfile().getName()), false);
+                    "stardewcraft.command.farm_cave.already_exists",
+                    com.stardew.craft.player.PlayerDisplayName.get(target)), false);
         }
         return 1;
     }

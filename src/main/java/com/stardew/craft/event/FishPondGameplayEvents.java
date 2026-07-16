@@ -43,7 +43,9 @@ public final class FishPondGameplayEvents {
 
     @SubscribeEvent
     public static void onLevelTick(LevelTickEvent.Post event) {
-        if (!(event.getLevel() instanceof ServerLevel level) || level.getGameTime() % ITEM_SCAN_INTERVAL != 0L) {
+        if (!(event.getLevel() instanceof ServerLevel level)
+                || com.stardew.craft.time.StardewTimePauseService.shouldPauseLevel(level)
+                || level.getGameTime() % ITEM_SCAN_INTERVAL != 0L) {
             return;
         }
 

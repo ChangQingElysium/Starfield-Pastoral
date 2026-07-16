@@ -152,19 +152,6 @@ public class StardewCraft {
                     com.stardew.craft.player.PassOutService::onCombatDeath);
         });
 
-        // Curios 可选兼容：如果安装了 Curios，注册戒指/靴子到 Curios 槽位
-        event.enqueueWork(() -> {
-            if (com.stardew.craft.compat.CuriosCompatBridge.isCuriosLoaded()) {
-                LOGGER.info("[Curios] Curios detected, registering ring/boots items as curio-compatible");
-                com.stardew.craft.item.ModItems.ITEMS.getEntries().forEach(entry -> {
-                    net.minecraft.world.item.Item item = entry.get();
-                    if (item instanceof com.stardew.craft.item.equipment.StardewRingItem
-                            || item instanceof com.stardew.craft.item.equipment.StardewBootsItem) {
-                        com.stardew.craft.compat.CuriosCompatBridge.registerItem(item);
-                    }
-                });
-            }
-        });
     }
 
     /**

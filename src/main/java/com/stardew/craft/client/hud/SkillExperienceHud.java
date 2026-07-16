@@ -1,13 +1,16 @@
 package com.stardew.craft.client.hud;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.stardew.craft.Config;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.network.payload.SkillExperienceGainPayload;
 import com.stardew.craft.player.SkillType;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -93,7 +96,8 @@ public final class SkillExperienceHud {
         if (!event.getName().equals(VanillaGuiLayers.HOTBAR)) return;
 
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.options.hideGui || mc.player.isSpectator()) return;
+        if (mc.player == null || mc.options.hideGui || mc.player.isSpectator()
+                || mc.screen instanceof StardewHudLayoutEditorScreen) return;
 
         long nowNanos = System.nanoTime();
         float deltaMs = (nowNanos - lastUpdateNanos) / 1_000_000f;
@@ -123,72 +127,68 @@ public final class SkillExperienceHud {
             if (xpShowRemaining <= 0) {
                 currentXpSkill = null;
             } else {
-                int displayHeight = mc.getWindow().getGuiScaledHeight();
-
-                int boxW = 100;
-                int boxH = 28;
-                int boxX = 10;
-                int boxY = displayHeight - boxH - 10;
-
-                // Main panel (Stardew UI face)
-                g.fill(boxX + 2, boxY + 2, boxX + boxW - 2, boxY + boxH - 2, 0xFFFFCC7A);
-
-                // Outer borders (#4B2413)
-                g.fill(boxX + 2, boxY, boxX + boxW - 2, boxY + 2, 0xFF4B2413); // Top
-                g.fill(boxX + 2, boxY + boxH - 2, boxX + boxW - 2, boxY + boxH, 0xFF4B2413); // Bottom
-                g.fill(boxX, boxY + 2, boxX + 2, boxY + boxH - 2, 0xFF4B2413); // Left
-                g.fill(boxX + boxW - 2, boxY + 2, boxX + boxW, boxY + boxH - 2, 0xFF4B2413); // Right
-                
-                // Corners: pixel-art step
-                g.fill(boxX + 1, boxY + 1, boxX + 2, boxY + 2, 0xFF4B2413); // TL
-                g.fill(boxX + boxW - 2, boxY + 1, boxX + boxW - 1, boxY + 2, 0xFF4B2413); // TR
-                g.fill(boxX + 1, boxY + boxH - 2, boxX + 2, boxY + boxH - 1, 0xFF4B2413); // BL
-                g.fill(boxX + boxW - 2, boxY + boxH - 2, boxX + boxW - 1, boxY + boxH - 1, 0xFF4B2413); // BR
-
-                // Inner Highlights (#FEE2AD)
-                g.fill(boxX + 2, boxY + 2, boxX + boxW - 2, boxY + 4, 0xFFFEE2AD); // Top
-                g.fill(boxX + 2, boxY + 2, boxX + 4, boxY + boxH - 2, 0xFFFEE2AD); // Left
-
-                // Inner Shadows (#D28B3B)
-                g.fill(boxX + 2, boxY + boxH - 4, boxX + boxW - 2, boxY + boxH - 2, 0xFFD28B3B); // Bottom
-                g.fill(boxX + boxW - 4, boxY + 2, boxX + boxW - 2, boxY + boxH - 2, 0xFFD28B3B); // Right
-
-                // Draw Skill icon
-                ResourceLocation iconTex = getSkillIcon(currentXpSkill);
-                RenderSystem.setShaderTexture(0, iconTex);
-                RenderSystem.enableBlend();
+                StardewHudLayout.Placement placement = StardewHudLayout.current(
+                        Config.HudElement.SKILL_XP, g.guiWidth(), g.guiHeight());
                 g.pose().pushPose();
-                g.pose().translate(boxX + 6, boxY + 6, 0); 
-                g.pose().scale(1.6f, 1.6f, 1.0f);
-                g.blit(iconTex, 0, 0, 0, 0, 10, 10, 10, 10);
-                g.pose().popPose();
-
-                // Draw Bar Track (Stardew UI experience bar empty bg)
-                int barX = boxX + 26;
-                int barY = boxY + 14;
-                int barW = 66;
-                int barH = 6;
-                int barColor = getSkillColor(currentXpSkill);
-
-                // Track background (#8B4B32) with a top shadow
-                g.fill(barX, barY, barX + barW, barY + barH, 0xFF8B4B32);
-                g.fill(barX, barY, barX + barW, barY + 1, 0x55000000); // shadow
-
-                // Filled Track
-                int filledWidth = (int)(barW * lastXpBarFillPct);
-                if (filledWidth > 0) {
-                    g.fill(barX, barY, barX + filledWidth, barY + barH, barColor);
-                    g.fill(barX, barY, barX + filledWidth, barY + 1, 0x44FFFFFF); // highlight
-                }
-
-                // Draw Level text neatly matching UI Info Suite 2 position
-                String lvlTxt = String.valueOf(currentXpLevel); 
-                g.pose().pushPose();
-                g.pose().scale(0.75f, 0.75f, 1.0f);
-                g.drawString(mc.font, lvlTxt, (int)((boxX + 26) / 0.75f), (int)((boxY + 5) / 0.75f), 0x50281F, false);
+                g.pose().translate(placement.x(), placement.y(), 0.0F);
+                g.pose().scale(placement.scale(), placement.scale(), 1.0F);
+                renderXpPanel(g, mc.font, currentXpSkill, currentXpLevel, lastXpBarFillPct);
                 g.pose().popPose();
             }
         }
+    }
+
+    public static void renderPreview(GuiGraphics g, int x, int y, float scale) {
+        Minecraft mc = Minecraft.getInstance();
+        g.pose().pushPose();
+        g.pose().translate(x, y, 0.0F);
+        g.pose().scale(scale, scale, 1.0F);
+        renderXpPanel(g, mc.font, SkillType.FARMING, 6, 0.62F);
+        g.pose().popPose();
+    }
+
+    private static void renderXpPanel(GuiGraphics g, Font font, SkillType skill, int level, float fillPct) {
+        int boxW = 100;
+        int boxH = 28;
+        g.fill(2, 2, boxW - 2, boxH - 2, 0xFFFFCC7A);
+        g.fill(2, 0, boxW - 2, 2, 0xFF4B2413);
+        g.fill(2, boxH - 2, boxW - 2, boxH, 0xFF4B2413);
+        g.fill(0, 2, 2, boxH - 2, 0xFF4B2413);
+        g.fill(boxW - 2, 2, boxW, boxH - 2, 0xFF4B2413);
+        g.fill(1, 1, 2, 2, 0xFF4B2413);
+        g.fill(boxW - 2, 1, boxW - 1, 2, 0xFF4B2413);
+        g.fill(1, boxH - 2, 2, boxH - 1, 0xFF4B2413);
+        g.fill(boxW - 2, boxH - 2, boxW - 1, boxH - 1, 0xFF4B2413);
+        g.fill(2, 2, boxW - 2, 4, 0xFFFEE2AD);
+        g.fill(2, 2, 4, boxH - 2, 0xFFFEE2AD);
+        g.fill(2, boxH - 4, boxW - 2, boxH - 2, 0xFFD28B3B);
+        g.fill(boxW - 4, 2, boxW - 2, boxH - 2, 0xFFD28B3B);
+
+        ResourceLocation iconTex = getSkillIcon(skill);
+        RenderSystem.setShaderTexture(0, iconTex);
+        RenderSystem.enableBlend();
+        g.pose().pushPose();
+        g.pose().translate(6, 6, 0);
+        g.pose().scale(1.6F, 1.6F, 1.0F);
+        g.blit(iconTex, 0, 0, 0, 0, 10, 10, 10, 10);
+        g.pose().popPose();
+
+        int barX = 26;
+        int barY = 14;
+        int barW = 66;
+        int barH = 6;
+        g.fill(barX, barY, barX + barW, barY + barH, 0xFF8B4B32);
+        g.fill(barX, barY, barX + barW, barY + 1, 0x55000000);
+        int filledWidth = (int) (barW * Mth.clamp(fillPct, 0.0F, 1.0F));
+        if (filledWidth > 0) {
+            g.fill(barX, barY, barX + filledWidth, barY + barH, getSkillColor(skill));
+            g.fill(barX, barY, barX + filledWidth, barY + 1, 0x44FFFFFF);
+        }
+
+        g.pose().pushPose();
+        g.pose().scale(0.75F, 0.75F, 1.0F);
+        g.drawString(font, String.valueOf(level), (int) (26 / 0.75F), (int) (5 / 0.75F), 0x50281F, false);
+        g.pose().popPose();
     }
 
 
@@ -228,14 +228,17 @@ public final class SkillExperienceHud {
         int boxW = Math.max(textW, line2W) + 40;
         int boxH = 40;
 
-        int sw = mc.getWindow().getGuiScaledWidth();
-        
-        // Centered horizontally, neat toast at the top
-        int boxX = (sw / 2) - (boxW / 2);
-        int boxY = 20;
+        StardewHudLayout.Placement placement = StardewHudLayout.current(
+                Config.HudElement.SKILL_LEVEL_UP, g.guiWidth(), g.guiHeight());
+        int boxX = (Config.HudElement.SKILL_LEVEL_UP.baseWidth() - boxW) / 2;
+        int boxY = 0;
 
         int a = (int) (activeLocal.alpha() * 255);
         if (a <= 5) return;
+
+        g.pose().pushPose();
+        g.pose().translate(placement.x(), placement.y(), 0.0F);
+        g.pose().scale(placement.scale(), placement.scale(), 1.0F);
 
         // Render Stardew Style Box with Alpha
         g.fill(boxX + 2, boxY + 2, boxX + boxW - 2, boxY + boxH - 2, withAlpha(0xFFFFCC7A, a));
@@ -265,6 +268,7 @@ public final class SkillExperienceHud {
 
         g.drawString(mc.font, message, textX, boxY + 8, withAlpha(0x50281F, a), false);
         g.drawString(mc.font, line2, textX2, boxY + 22, withAlpha(0x1B5A24, a), false);
+        g.pose().popPose();
     }
 
     private record LevelUpEvent(SkillType skillId, int level, float showMs, float alpha) {

@@ -100,6 +100,7 @@
     },
     {
       "id": "crystalarium",
+      "bigCraftable": true,
       "unlockCondition": "s Mining 9",
       "output": {
         "item": "stardewcraft:crystalarium",
@@ -126,6 +127,7 @@
     },
     {
       "id": "solar_panel",
+      "bigCraftable": true,
       "unlockCondition": "null",
       "output": {
         "item": "stardewcraft:solar_panel",
@@ -148,6 +150,7 @@
     },
     {
       "id": "mini_obelisk",
+      "bigCraftable": true,
       "unlockCondition": "null",
       "output": {
         "item": "stardewcraft:mini_obelisk",
@@ -170,6 +173,7 @@
     },
     {
       "id": "farm_computer",
+      "bigCraftable": true,
       "unlockCondition": "null",
       "output": {
         "item": "stardewcraft:farm_computer",
@@ -214,6 +218,7 @@
     },
     {
       "id": "geode_crusher",
+      "bigCraftable": true,
       "unlockCondition": "null",
       "output": {
         "item": "stardewcraft:geode_crusher",
@@ -276,6 +281,7 @@
     },
     {
       "id": "bone_mill",
+      "bigCraftable": true,
       "unlockCondition": "null",
       "output": {
         "item": "stardewcraft:bone_mill",
@@ -298,6 +304,7 @@
     },
     {
       "id": "wooden_chest",
+      "bigCraftable": true,
       "unlockCondition": "default",
       "output": {
         "item": "stardewcraft:wooden_chest",
@@ -348,6 +355,7 @@
     },
     {
       "id": "worm_bin",
+      "bigCraftable": true,
       "unlockCondition": "s Fishing 4",
       "output": {
         "item": "stardewcraft:worm_bin",
@@ -406,6 +414,7 @@
     },
     {
       "id": "cask",
+      "bigCraftable": true,
       "unlockCondition": "null",
       "output": {
         "item": "stardewcraft:cask",
@@ -424,6 +433,7 @@
     },
     {
       "id": "cheese_press",
+      "bigCraftable": true,
       "unlockCondition": "s Farming 6",
       "output": {
         "item": "stardewcraft:cheese_press",
@@ -486,6 +496,7 @@
     },
     {
       "id": "loom",
+      "bigCraftable": true,
       "unlockCondition": "s Farming 7",
       "output": {
         "item": "stardewcraft:loom",
@@ -508,6 +519,7 @@
     },
     {
       "id": "furnace",
+      "bigCraftable": true,
       "unlockCondition": "l 2",
       "output": {
         "item": "stardewcraft:furnace",
@@ -666,6 +678,7 @@
     },
     {
       "id": "preserves_jar",
+      "bigCraftable": true,
       "unlockCondition": "s Farming 4",
       "output": {
         "item": "stardewcraft:preserves_jar",
@@ -738,6 +751,7 @@
     },
     {
       "id": "mayonnaise_machine",
+      "bigCraftable": true,
       "unlockCondition": "s Farming 2",
       "output": {
         "item": "stardewcraft:mayonnaise_machine",
@@ -778,6 +792,7 @@
     },
     {
       "id": "charcoal_kiln",
+      "bigCraftable": true,
       "unlockCondition": "s Foraging 2",
       "output": {
         "item": "stardewcraft:charcoal_kiln",
@@ -814,6 +829,7 @@
     },
     {
       "id": "seed_maker",
+      "bigCraftable": true,
       "unlockCondition": "s Farming 9",
       "output": {
         "item": "stardewcraft:seed_maker",
@@ -876,6 +892,7 @@
     },
     {
       "id": "keg",
+      "bigCraftable": true,
       "unlockCondition": "s Farming 8",
       "output": {
         "item": "stardewcraft:keg",
@@ -902,6 +919,7 @@
     },
     {
       "id": "recycling_machine",
+      "bigCraftable": true,
       "unlockCondition": "s Fishing 4",
       "output": {
         "item": "stardewcraft:recycling_machine",
@@ -924,6 +942,7 @@
     },
     {
       "id": "tapper",
+      "bigCraftable": true,
       "unlockCondition": "s Foraging 4",
       "output": {
         "item": "stardewcraft:tapper",
@@ -942,6 +961,7 @@
     },
     {
       "id": "bee_house",
+      "bigCraftable": true,
       "unlockCondition": "s Farming 3",
       "output": {
         "item": "stardewcraft:bee_house",
@@ -968,6 +988,7 @@
     },
     {
       "id": "dehydrator",
+      "bigCraftable": true,
       "unlockCondition": "null",
       "output": {
         "item": "stardewcraft:dehydrator",
@@ -990,6 +1011,7 @@
     },
     {
       "id": "stone_chest",
+      "bigCraftable": true,
       "unlockCondition": "null",
       "output": {
         "item": "stardewcraft:stone_chest",
@@ -1108,6 +1130,7 @@
     },
     {
       "id": "oil_maker",
+      "bigCraftable": true,
       "unlockCondition": "s Farming 8",
       "output": {
         "item": "stardewcraft:oil_maker",
@@ -1130,6 +1153,7 @@
     },
     {
       "id": "lightning_rod",
+      "bigCraftable": true,
       "unlockCondition": "s Foraging 6",
       "output": {
         "item": "stardewcraft:lightning_rod",
@@ -1152,6 +1176,7 @@
     },
     {
       "id": "fish_smoker",
+      "bigCraftable": true,
       "unlockCondition": "default",
       "output": {
         "item": "stardewcraft:fish_smoker",
@@ -1178,6 +1203,7 @@
     },
     {
       "id": "bait_maker",
+      "bigCraftable": true,
       "unlockCondition": "s Fishing 6",
       "output": {
         "item": "stardewcraft:bait_maker",
@@ -1200,6 +1226,7 @@
     },
     {
       "id": "deluxe_worm_bin",
+      "bigCraftable": true,
       "unlockCondition": "s Fishing 8",
       "output": {
         "item": "stardewcraft:deluxe_worm_bin",
@@ -1582,6 +1609,7 @@
     },
     {
       "id": "mine_ladder",
+      "bigCraftable": true,
       "unlockCondition": "s Mining 2",
       "output": {
         "item": "stardewcraft:mine_ladder",
@@ -1714,6 +1742,7 @@
     },
     {
       "id": "mini_jukebox",
+      "bigCraftable": true,
       "unlockCondition": "default",
       "output": {
         "item": "stardewcraft:jukebox",
@@ -1732,6 +1761,7 @@
     },
     {
       "id": "scarecrow",
+      "bigCraftable": true,
       "unlockCondition": "s Farming 1",
       "output": {
         "item": "stardewcraft:scarecrow_0",
@@ -1754,6 +1784,7 @@
     },
     {
       "id": "heavy_furnace",
+      "bigCraftable": true,
       "unlockCondition": "null",
       "output": {
         "item": "stardewcraft:heavy_furnace",
@@ -1776,6 +1807,7 @@
     },
     {
       "id": "anvil",
+      "bigCraftable": true,
       "unlockCondition": "null",
       "output": {
         "item": "stardewcraft:anvil_mastery",
@@ -1790,6 +1822,7 @@
     },
     {
       "id": "mini_forge",
+      "bigCraftable": true,
       "unlockCondition": "null",
       "output": {
         "item": "stardewcraft:mini_forge",
@@ -1864,6 +1897,7 @@
     },
     {
       "id": "statue_of_blessings",
+      "bigCraftable": true,
       "unlockCondition": "null",
       "output": {
         "item": "stardewcraft:statue_of_blessings",
@@ -1890,6 +1924,7 @@
     },
     {
       "id": "statue_of_dwarf_king",
+      "bigCraftable": true,
       "unlockCondition": "null",
       "output": {
         "item": "stardewcraft:statue_of_dwarf_king",

@@ -2,6 +2,9 @@ package com.stardew.craft;
 
 import net.neoforged.neoforge.common.ModConfigSpec;
 
+import java.util.EnumMap;
+import java.util.Map;
+
 public final class Config {
     private static final ModConfigSpec.Builder COMMON_BUILDER = new ModConfigSpec.Builder();
     private static final ModConfigSpec.Builder CLIENT_BUILDER = new ModConfigSpec.Builder();
@@ -89,6 +92,12 @@ public final class Config {
         public final ModConfigSpec.BooleanValue ENABLE_WEAPON_SPECIAL_EFFECTS;
         public final ModConfigSpec.BooleanValue ENABLE_WEAPON_POST_EFFECTS;
         public final ModConfigSpec.BooleanValue ENABLE_UI_INFO_SUITE;
+        public final ModConfigSpec.IntValue HUD_SCALE_PERCENT;
+        public final ModConfigSpec.EnumValue<HudHorizontalAnchor> HUD_HORIZONTAL_ANCHOR;
+        public final ModConfigSpec.EnumValue<HudVerticalAnchor> HUD_VERTICAL_ANCHOR;
+        public final ModConfigSpec.IntValue HUD_OFFSET_X;
+        public final ModConfigSpec.IntValue HUD_OFFSET_Y;
+        public final Map<HudElement, HudElementSettings> HUD_ELEMENTS = new EnumMap<>(HudElement.class);
 
         private Client(ModConfigSpec.Builder builder) {
             builder.push("client");
@@ -108,8 +117,121 @@ public final class Config {
                     .translation("config.stardewcraft.client.ui_info_suite")
                     .define("enabled", true);
             builder.pop();
+
+            builder.push("hud");
+            HUD_SCALE_PERCENT = builder
+                    .comment("Scale of the Stardew time, date, money, and quest HUD")
+                    .translation("config.stardewcraft.client.hud_scale")
+                    .defineInRange("scalePercent", 100, 25, 200);
+            HUD_HORIZONTAL_ANCHOR = builder
+                    .comment("Horizontal anchor used when the window size changes")
+                    .defineEnum("horizontalAnchor", HudHorizontalAnchor.RIGHT);
+            HUD_VERTICAL_ANCHOR = builder
+                    .comment("Vertical anchor used when the window size changes")
+                    .defineEnum("verticalAnchor", HudVerticalAnchor.TOP);
+            HUD_OFFSET_X = builder
+                    .comment("Horizontal offset from the selected HUD anchor")
+                    .defineInRange("offsetX", 10, -9999, 9999);
+            HUD_OFFSET_Y = builder
+                    .comment("Vertical offset from the selected HUD anchor")
+                    .defineInRange("offsetY", 10, -9999, 9999);
+            HUD_ELEMENTS.put(HudElement.MAIN,
+                    new HudElementSettings(HUD_SCALE_PERCENT, HUD_HORIZONTAL_ANCHOR,
+                            HUD_VERTICAL_ANCHOR, HUD_OFFSET_X, HUD_OFFSET_Y));
+
+            for (HudElement element : HudElement.values()) {
+                if (element == HudElement.MAIN) {
+                    continue;
+                }
+                builder.push(element.configKey());
+                ModConfigSpec.IntValue scale = builder
+                        .comment("HUD element scale percentage")
+                        .defineInRange("scalePercent", element.defaultScalePercent(), 25, 200);
+                ModConfigSpec.EnumValue<HudHorizontalAnchor> horizontalAnchor = builder
+                        .comment("Horizontal anchor used when the window size changes")
+                        .defineEnum("horizontalAnchor", element.defaultHorizontalAnchor());
+                ModConfigSpec.EnumValue<HudVerticalAnchor> verticalAnchor = builder
+                        .comment("Vertical anchor used when the window size changes")
+                        .defineEnum("verticalAnchor", element.defaultVerticalAnchor());
+                ModConfigSpec.IntValue offsetX = builder
+                        .comment("Horizontal offset from the selected anchor")
+                        .defineInRange("offsetX", element.defaultOffsetX(), -9999, 9999);
+                ModConfigSpec.IntValue offsetY = builder
+                        .comment("Vertical offset from the selected anchor")
+                        .defineInRange("offsetY", element.defaultOffsetY(), -9999, 9999);
+                HUD_ELEMENTS.put(element,
+                        new HudElementSettings(scale, horizontalAnchor, verticalAnchor, offsetX, offsetY));
+                builder.pop();
+            }
+            builder.pop();
             builder.pop();
         }
+    }
+
+    public record HudElementSettings(ModConfigSpec.IntValue scalePercent,
+                                     ModConfigSpec.EnumValue<HudHorizontalAnchor> horizontalAnchor,
+                                     ModConfigSpec.EnumValue<HudVerticalAnchor> verticalAnchor,
+                                     ModConfigSpec.IntValue offsetX,
+                                     ModConfigSpec.IntValue offsetY) {
+    }
+
+    public enum HudElement {
+        MAIN("main", 72, 84, 100, HudHorizontalAnchor.RIGHT, HudVerticalAnchor.TOP, 10, 10),
+        PLAYER_BARS("playerBars", 278, 18, 100, HudHorizontalAnchor.CENTER, HudVerticalAnchor.BOTTOM, 0, 31),
+        MINING_FLOOR("miningFloor", 32, 32, 100, HudHorizontalAnchor.CENTER, HudVerticalAnchor.BOTTOM, -143, 1),
+        FESTIVAL_SCORE("festivalScore", 220, 48, 100, HudHorizontalAnchor.LEFT, HudVerticalAnchor.TOP, 16, 32),
+        FESTIVAL_CURRENCY("festivalCurrency", 96, 32, 100, HudHorizontalAnchor.CENTER, HudVerticalAnchor.BOTTOM, -159, 37),
+        ITEM_PICKUP("itemPickup", 220, 45, 70, HudHorizontalAnchor.LEFT, HudVerticalAnchor.BOTTOM, 10, 48),
+        TEXT_MESSAGE("textMessage", 180, 32, 100, HudHorizontalAnchor.LEFT, HudVerticalAnchor.BOTTOM, 10, 104),
+        SKILL_XP("skillXp", 100, 28, 100, HudHorizontalAnchor.LEFT, HudVerticalAnchor.BOTTOM, 10, 10),
+        SKILL_LEVEL_UP("skillLevelUp", 180, 40, 100, HudHorizontalAnchor.CENTER, HudVerticalAnchor.TOP, 0, 20),
+        INTERACTION_HINT("interactionHint", 280, 32, 100, HudHorizontalAnchor.CENTER, HudVerticalAnchor.CENTER, 0, 30),
+        WEAPON_SKILLS("weaponSkills", 44, 90, 100, HudHorizontalAnchor.LEFT, HudVerticalAnchor.CENTER, 0, 0),
+        TOOL_HINT("toolHint", 220, 32, 100, HudHorizontalAnchor.CENTER, HudVerticalAnchor.BOTTOM, 0, 72),
+        FISHING_CAST("fishingCast", 188, 48, 30, HudHorizontalAnchor.CENTER, HudVerticalAnchor.CENTER, 0, 22);
+
+        private final String configKey;
+        private final int baseWidth;
+        private final int baseHeight;
+        private final int defaultScalePercent;
+        private final HudHorizontalAnchor defaultHorizontalAnchor;
+        private final HudVerticalAnchor defaultVerticalAnchor;
+        private final int defaultOffsetX;
+        private final int defaultOffsetY;
+
+        HudElement(String configKey, int baseWidth, int baseHeight, int defaultScalePercent,
+                   HudHorizontalAnchor defaultHorizontalAnchor, HudVerticalAnchor defaultVerticalAnchor,
+                   int defaultOffsetX, int defaultOffsetY) {
+            this.configKey = configKey;
+            this.baseWidth = baseWidth;
+            this.baseHeight = baseHeight;
+            this.defaultScalePercent = defaultScalePercent;
+            this.defaultHorizontalAnchor = defaultHorizontalAnchor;
+            this.defaultVerticalAnchor = defaultVerticalAnchor;
+            this.defaultOffsetX = defaultOffsetX;
+            this.defaultOffsetY = defaultOffsetY;
+        }
+
+        public String configKey() { return configKey; }
+        public int baseWidth() { return baseWidth; }
+        public int baseHeight() { return baseHeight; }
+        public int defaultScalePercent() { return defaultScalePercent; }
+        public HudHorizontalAnchor defaultHorizontalAnchor() { return defaultHorizontalAnchor; }
+        public HudVerticalAnchor defaultVerticalAnchor() { return defaultVerticalAnchor; }
+        public int defaultOffsetX() { return defaultOffsetX; }
+        public int defaultOffsetY() { return defaultOffsetY; }
+    }
+
+    public enum HudHorizontalAnchor {
+        LEFT,
+        CENTER,
+        RIGHT
+    }
+
+    public enum HudVerticalAnchor {
+        TOP,
+        CENTER,
+        BOTTOM
     }
 
     public static final class General {

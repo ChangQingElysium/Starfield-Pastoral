@@ -398,10 +398,25 @@ public class FarmAreaProtectionEvents {
      */
     @SubscribeEvent
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
-        if (!(event.getEntity() instanceof ServerPlayer player)) {
+        if (event.getEntity().level().dimension() != ModDimensions.STARDEW_VALLEY) {
             return;
         }
-        if (player.level().dimension() != ModDimensions.STARDEW_VALLEY) {
+
+        // Fixed flower pots in the public map must be blocked on both sides.
+        // FlowerPotBlock mutates client state immediately, so a server-only
+        // cancellation still lets the local player appear to take the flower.
+        // The farm-instance region is coordinate-defined and therefore safe to
+        // check on the client without relying on the server-only farm registry.
+        if (event.getLevel().getBlockState(event.getPos()).getBlock() instanceof FlowerPotBlock
+                && !com.stardew.craft.farm.FarmInstanceAllocator.isInFarmInstanceRegion(event.getPos())
+                && !com.stardew.craft.greenhouse.GreenhouseManager.isInGreenhouseInterior(
+                        event.getLevel(), event.getPos())) {
+            event.setCanceled(true);
+            event.setCancellationResult(net.minecraft.world.InteractionResult.CONSUME);
+            return;
+        }
+
+        if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
         }
         if (player.isCreative()) {
@@ -422,15 +437,6 @@ public class FarmAreaProtectionEvents {
         // 传送触发方块不受保护（进入别人家的屋内/屋外必须能触发传送）
         if (event.getLevel().getBlockState(event.getPos()).getBlock()
                 instanceof com.stardew.craft.block.portal.PortalTriggerBlock) {
-            return;
-        }
-        // Public flower pots are fixed map decoration. Never let players swap
-        // their contents; farm-owned pots remain usable and protected by the
-        // normal farm permission gate below.
-        if (event.getLevel().getBlockState(event.getPos()).getBlock() instanceof FlowerPotBlock
-                && FarmAreaResolver.getOwnerAt(event.getPos()) == null) {
-            event.setCanceled(true);
-            event.setCancellationResult(net.minecraft.world.InteractionResult.CONSUME);
             return;
         }
         // 水桶/岩浆桶等流体桶：在任何受保护区域都禁止放置流体

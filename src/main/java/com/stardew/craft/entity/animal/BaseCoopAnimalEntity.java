@@ -4,6 +4,7 @@ import com.stardew.craft.animal.data.AnimalWorldData;
 import com.stardew.craft.animal.model.AnimalBuildingRecord;
 import com.stardew.craft.animal.model.FarmAnimalRecord;
 import com.stardew.craft.animal.service.AnimalDoorStateService;
+import com.stardew.craft.animal.service.AnimalEntityRecoveryState;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.nature.PastureGrassBlock;
 import com.stardew.craft.menu.AnimalQueryMenu;
@@ -333,7 +334,6 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 			return;
 		}
 
-		syncManagedRecordAgeState();
 		updateStationaryRescue();
 		logAiStateSnapshot();
 		tryPlayAmbientAnimalSound();
@@ -350,24 +350,13 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 		}
 	}
 
-	private void syncManagedRecordAgeState() {
-		if (!(this.level() instanceof ServerLevel serverLevel) || managedAnimalId <= 0L) {
+	@Override
+	protected void pushEntities() {
+		if (this.level() instanceof ServerLevel serverLevel
+				&& AnimalEntityRecoveryState.isRecovering(serverLevel, this.chunkPosition())) {
 			return;
 		}
-		FarmAnimalRecord record = AnimalWorldData.get(serverLevel).getAnimal(managedAnimalId).orElse(null);
-		if (record == null) {
-			return;
-		}
-		if (!record.animalTypeId().equals(managedAnimalType)) {
-			setManagedAnimalType(record.animalTypeId());
-		}
-		boolean shouldBeBaby = record.isBaby();
-		if (this.isBaby() != shouldBeBaby) {
-			this.setBaby(shouldBeBaby);
-		}
-		if (!shouldBeBaby && this.getAge() != 0) {
-			this.setAge(0);
-		}
+		super.pushEntities();
 	}
 
 	private void updateStationaryRescue() {

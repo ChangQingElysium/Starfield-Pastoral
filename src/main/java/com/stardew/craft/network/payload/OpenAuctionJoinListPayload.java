@@ -55,14 +55,14 @@ public record OpenAuctionJoinListPayload(List<AuctionSummary> auctions) implemen
         private void write(FriendlyByteBuf buf) {
             buf.writeUUID(id);
             buf.writeUtf(name, 64);
-            buf.writeUtf(creatorName, 32);
+            buf.writeUtf(creatorName, 48);
             buf.writeVarInt(scheduledDay);
             buf.writeVarInt(startMinute);
             buf.writeVarInt(lotCount);
         }
 
         private static AuctionSummary read(FriendlyByteBuf buf) {
-            return new AuctionSummary(buf.readUUID(), buf.readUtf(64), buf.readUtf(32),
+            return new AuctionSummary(buf.readUUID(), buf.readUtf(64), buf.readUtf(48),
                 buf.readVarInt(), buf.readVarInt(), buf.readVarInt());
         }
     }

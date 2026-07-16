@@ -1,5 +1,105 @@
 # Changelog
 
+## 0.5.1fix2 - 2026-07-17
+
+### Update Log (English)
+
+#### HUD, Menus And Time Flow
+
+- Rebuilt the V-menu Options entry and HUD editor around live in-game renderers. The main money/time box, energy and health bars, item pickup and text notifications, weapon skills and skill experience can now be dragged and scaled with grid snapping, screen-edge anchoring, persistent positions and one global reset action.
+- Repositioned the affected HUD and festival overlays through shared per-element bounds so small windows, high GUI scales and fullscreen layouts keep sensible margins instead of reusing one oversized canvas. Pickup notices and corner text boxes now size themselves from their actual content.
+- Improved the Stardew game menu, inventory and crafting interaction paths, including responsive canvas fitting, safer slot mapping and trash behavior, real crafting previews and corrected big-craftable presentation.
+- Added synchronized Stardew simulation pause state for menu/non-gameplay screens and multiplayer-aware time progression, including the original-style blinking frozen clock without interfering with black screen fades.
+
+#### JEI And Item Information Overhaul
+
+- Rebuilt JEI integration around the real synchronized data sources for all 13 supported machines, Stardew crafting, cooking, shops, geodes, fish ponds and fishing information. Inputs, fuel, catalysts, trades and outputs are now real JEI slots, including multi-output and dynamic machine behavior.
+- Added source-aligned processing information for kegs, preserves jars, fish smokers, dehydrators, seed makers, crystalariums and the remaining supported machines; fixed missing wine, jelly, preserve, smoked-fish and related `R`/`U` navigation.
+- Fishing information is now exactly one page per catchable item. Locations, time windows, seasons and weather are merged into that page, duplicate rules no longer create repeated pages, and the opaque “special conditions apply” placeholder was removed.
+- Quality and flower-colour variants now share the same recipe lookup identity. Normal, silver, gold and iridium stacks open the same `R`/`U` results, while source-flavoured products such as jelly and roe still retain their meaningful ingredient identity.
+- Reworked category visuals with existing Stardew GUI assets, centered partial ingredient grids, compact shop portraits and measured text rows; removed the Minecraft crafting-table identity and decorative red selection frames.
+- Expanded server-to-client JEI catalog synchronization and completed the JEI key set across all 12 shipped languages, including special shops, owner-derived shop names, machine labels, conditions and fishing locations.
+
+#### Community Center, Bus And World Parity
+
+- Community Center restoration no longer drops internal multi-block extension pieces such as Broken Safe Boxes or Broken Boilers. Completed Junimo Notes disappear immediately, and finishing every room now restores the remaining central damage and decoration state.
+- Bus travel now follows Pam’s selected schedule and physical bus-stop position. A Vault completion by any player unlocks the shared bus schedule, while self-driving is only allowed on valid days when Pam’s chosen schedule does not visit the bus stop.
+- Expanded Pam’s bundled schedule data toward the original key and route structure and added an NPC schedule parity audit documenting the remaining project-wide gaps.
+- Rotated generated minecart stations to the intended north-south orientation without overwriting player-edited rail layouts during migration.
+- Migrated the mountain system totem to `(52, 88, -128)`, made it face south, removed both historical duplicate positions and repaired stale tracker entries.
+- Changed the Special Charm reward to the shared object-notification flow instead of presenting it as dialogue spoken by Lewis.
+
+#### Fishing Accuracy
+
+- Replaced cast-power-based fish quality with the original-style clear-water-distance calculation around the bobber, including diagonal shore checks, open-water depth caps and no deep-water credit while casting from water or boats.
+- Reworked fish size and quality ordering for targeted bait, initial quality thresholds, stacked Quality Bobbers, perfect catches and the Training Rod’s normal-quality restriction.
+- Hardened server-authoritative fishing session and minigame state so water depth, selected catch, completion and quality remain consistent across client/server transitions.
+
+#### Stability, Multiplayer And Interaction Fixes
+
+- Rebuilt managed-animal runtime indexing and chunk recovery so duplicate, invalid or excess managed entities are sanitized without deleting unrelated entities; improved acquisition, synchronization and load recovery around the same stable managed IDs.
+- Fixed failed placement beside integrated tree roots, branches and similar multi-block decorations so cancellation preserves the player’s item instead of restoring snapshots after the item has already been consumed.
+- Added shared character-name resolution so multiplayer messages prefer the Stardew character name and only fall back to the Minecraft account name for incomplete legacy profiles.
+- Tightened payload validation, farm administration, equipment actions, auction flows, player selection and several debug/runtime command paths against stale or invalid client state.
+- Added a Scarecrow range preview using the same inclusive circular coverage calculation as crow protection, and expanded shared sprinkler/range rendering support.
+- Hardened public-map interaction and farm-area boundaries, including client-visible protection for fixed flower pots and safer handling of decorative/public areas.
+
+#### Compatibility, Data And Verification
+
+- Removed the optional Curios integration and its data/dependency surface; rings and boots continue through StardewCraft’s own complete `ItemStack` equipment storage and migration path.
+- Updated JEI to `19.27.0.340`, repaired machine/mining/shape tag coverage, added current item/block shape tags and strengthened automated tag-integrity checks.
+- Added broad regression coverage for HUD anchoring, time pause behavior, Pam schedules, fishing depth and quality, JEI recipe semantics, animal recovery, equipment persistence, menu slots, display names, tags and scarecrow coverage.
+- Updated the public mod version to `0.5.1fix2`.
+
+### 更新日志（中文）
+
+#### HUD、菜单与时间流逝
+
+- 使用游戏内真实渲染器重做 V 菜单的“选项”入口与 HUD 编辑器。右上角金钱/时间框、能量与生命条、物品拾取与文字提示、武器技能和技能经验现在可以拖动、缩放，并支持网格吸附、屏幕边缘锚定、位置持久化和统一重置。
+- 将相关 HUD 与节日覆盖层接入独立组件边界；小窗口、高 GUI 缩放和全屏状态不再共用一个过大的画布。拾取提示与左下角文字框会根据实际内容计算尺寸。
+- 改进星露谷游戏菜单、背包和制作交互，包含响应式画布适配、更安全的槽位映射与丢弃逻辑、真实制作预览，以及正确的大型制作物显示。
+- 加入服务端同步的星露谷模拟暂停状态，使菜单/非游戏界面与多人时间流逝保持一致；暂停时钟按原版方式闪烁，同时不会干扰黑屏淡入淡出。
+
+#### JEI 与物品信息全面重整
+
+- 使用真实同步数据重建 JEI：覆盖 13 种已支持机器、星露谷制作、烹饪、商店、晶球、鱼塘和钓鱼信息。材料、燃料、催化物、交换物与产物均为真正的 JEI 槽位，并支持多产物和动态机器逻辑。
+- 补齐酒桶、腌菜罐、熏鱼机、脱水机、种子制造机、水晶复制机及其余机器的真实加工信息，修复葡萄酒、果酱、腌制品、熏鱼等内容缺少 `R`/`U` 查询的问题。
+- 钓鱼信息严格改为每种可钓物品只有一页；地点、时间、季节与天气在同一页合并，重复规则不再生成大量页面，并删除无法说明内容的“需满足特殊条件”。
+- 品质与花朵颜色不再拆分配方查询身份。普通、银星、金星和铱星物品会打开相同的 `R`/`U` 结果；果酱、鱼籽等带原材料来源的产物仍保留有意义的来源区分。
+- 使用项目已有的星露谷 GUI 资源重排分类界面，按材料数量居中槽位，恢复紧凑商店头像与按行测量的文字布局；移除 MC 工作台语义和无意义的红色选中框。
+- 扩展服务端到客户端的 JEI 目录同步，并为当前发布的 12 种语言补齐特殊商店、店主商店名、机器、条件与钓鱼地点等 JEI 文本。
+
+#### 社区中心、巴士与世界一致性
+
+- 社区中心翻新不再掉落 Broken Safe Box、Broken Boiler 等内部多格扩展方块；完成房间后祝尼魔纸条立即消失，完成全部房间后会继续修复中央区域剩余的破损和装饰状态。
+- 巴士出行现在检查 Pam 实际选中的日程和她是否已站到巴士站点。任意玩家完成金库都会解锁全局巴士日程；只有 Pam 当天选中的日程根本不经过巴士站时，玩家才可在有效日期自行驾驶。
+- 将 Pam 的内置日程补充到更接近原版的 key 与路线结构，并加入 NPC 日程一致性审查文档，记录整个项目仍需处理的差异。
+- 将系统生成的矿车站旋转为正确的南北方向；版本迁移不会覆盖玩家之后自行修改的轨道布局。
+- 将山区系统图腾迁移至 `(52, 88, -128)` 并朝南，清理两个历史重复点位，同时修复过期的追踪数据。
+- 特殊魅力奖励改用共享物品提示，不再伪装成刘易斯对玩家说话。
+
+#### 钓鱼准确性
+
+- 使用浮漂周围的原版式净水距离替代抛竿蓄力计算鱼的品质，包含斜向岸边检测、开放水域深度上限，以及玩家在水中或船上抛竿时不获得深水品质加成。
+- 按正确顺序重做鱼尺寸与品质计算，覆盖针对性鱼饵、初始品质阈值、多个品质浮标、完美捕获与训练用鱼竿强制普通品质。
+- 加固服务端权威的钓鱼会话和小游戏状态，使水深、选中鱼获、完成状态与品质在客户端/服务端切换中保持一致。
+
+#### 稳定性、多人游戏与交互修复
+
+- 重建受管动物运行时索引与区块恢复流程：重复、无效或超量的受管动物会被安全清理，同时不会误删同区块的其它实体；购买、同步与加载恢复统一使用稳定的受管 ID。
+- 修复在树根、树枝等整体多格装饰旁放置失败时物品被吞的问题；现在会在物品消耗前直接取消放置，不再事后恢复方块快照。
+- 加入共享角色名解析，多人消息优先显示星露谷角色名；只有资料不完整的旧存档才回退 Minecraft 账号名。
+- 加固载荷校验、农场管理、装备操作、拍卖、玩家选择和多项调试/运行时指令，避免旧客户端状态或非法请求影响服务端。
+- 为稻草人加入范围预览，并与乌鸦保护使用完全相同的包含边界圆形判定；同时扩展共享洒水器/范围渲染支持。
+- 加固公共地图交互与农场边界，包含客户端可见的固定花盆保护，以及更安全的装饰区/公共区域处理。
+
+#### 兼容性、数据与验证
+
+- 移除可选 Curios 集成及其数据和依赖；戒指与靴子继续使用 StardewCraft 自己的完整 `ItemStack` 装备存储与旧存档迁移。
+- 将 JEI 更新至 `19.27.0.340`，修复机器、挖掘和形状标签覆盖，加入当前物品/方块形状标签并加强标签完整性自动检查。
+- 新增大量回归测试，覆盖 HUD 锚定、时间暂停、Pam 日程、钓鱼深度与品质、JEI 配方语义、动物恢复、装备持久化、菜单槽位、角色名、标签和稻草人范围。
+- 项目公开版本号更新为 `0.5.1fix2`。
+
 ## 0.5.1fix1 - 2026-07-15
 
 ### Update Log (English)

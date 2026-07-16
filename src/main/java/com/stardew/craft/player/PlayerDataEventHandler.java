@@ -55,6 +55,10 @@ public class PlayerDataEventHandler {
             // 获取或创建玩家数据（会自动从NBT加载）
             PlayerStardewData data = PlayerDataManager.getPlayerData(player);
             data.setLastKnownName(player.getName().getString());
+            if (!data.getPreferredName().isBlank()) {
+                com.stardew.craft.farm.FarmInstanceRegistry.get()
+                        .updateOwnerName(player.getUUID(), data.getPreferredName());
+            }
             handlePregenRelocationIfNeeded(player, data);
             PlayerStardewDataAPI.applyStardewCraftingConditionUnlocks(player);
             backfillMine100StardropReward(player, data);

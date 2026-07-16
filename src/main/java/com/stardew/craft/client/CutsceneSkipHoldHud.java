@@ -1,6 +1,5 @@
 package com.stardew.craft.client;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.gui.overnight.StardewGuiUtil;
 import com.stardew.craft.cutscene.runtime.EventPlayer;
@@ -40,7 +39,7 @@ public final class CutsceneSkipHoldHud {
             return;
         }
 
-        if (isSkipKeyDown(mc)) {
+        if (isSkipKeyDown()) {
             if (skipRequested) {
                 return;
             }
@@ -99,12 +98,8 @@ public final class CutsceneSkipHoldHud {
         return mc.player != null && EventPlayer.get().isSkippable();
     }
 
-    private static boolean isSkipKeyDown(Minecraft mc) {
-        InputConstants.Key key = ModKeyMappings.CUTSCENE_SKIP.getKey();
-        if (key.getType() == InputConstants.Type.KEYSYM) {
-            return InputConstants.isKeyDown(mc.getWindow().getWindow(), key.getValue());
-        }
-        return ModKeyMappings.CUTSCENE_SKIP.isDown();
+    private static boolean isSkipKeyDown() {
+        return ModKeyMappings.isDown(ModKeyMappings.CUTSCENE_SKIP);
     }
 
     private static void drawFilledCircle(GuiGraphics graphics, int cx, int cy, float radius, int argb) {

@@ -1,6 +1,7 @@
 package com.stardew.craft.client.fishing;
 
 import com.stardew.craft.client.ClientPlayerDataCache;
+import com.stardew.craft.enchantment.StardewEnchantments;
 import com.stardew.craft.fishing.network.FishingResultPayload;
 import com.stardew.craft.item.tool.FishingRodItem;
 import com.stardew.craft.player.SkillType;
@@ -22,7 +23,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import java.util.Random;
 import java.util.UUID;
 
-public final class FishingMinigameScreen extends Screen {
+public final class FishingMinigameScreen extends Screen implements com.stardew.craft.client.gui.StardewRealtimeScreen {
 	private static final float UI_SCALE = 0.7f;
 	// Stardew values (see StardewValley.Menus.BobberBar)
 	private static final int BOBBER_TRACK_HEIGHT = 548;
@@ -66,6 +67,7 @@ public final class FishingMinigameScreen extends Screen {
 	private final float escapeLossPerTick;    // Trap Bobber（不在条内时掉进度）
 	private final int barbedHookCount;        // Barbed Hook（吸附/重力）
 	private final int leadBobberCount;        // Lead Bobber（底部反弹衰减）
+	private final int treasureHunterCount;    // Treasure Hunter（捕获宝箱时保护鱼的进度）
 	private final int minFishSize;
 	private final int maxFishSize;
 	private final boolean hasSonarBobber;
@@ -134,6 +136,7 @@ public final class FishingMinigameScreen extends Screen {
 	                             boolean hasTreasure, boolean goldenTreasure,
 	                             boolean hasSonarBobber, String sonarFishItemId,
 	                             int barSizeBonus, float escapeLossPerTick, int barbedHookCount, int leadBobberCount,
+	                             int treasureHunterCount,
 	                             int minFishSize, int maxFishSize, int currentFishSize,
 	                             float initialCatchProgress, boolean loseProgressOutsideBar) {
 		// Title should not render in the UI; keep screen title empty.
@@ -157,6 +160,7 @@ public final class FishingMinigameScreen extends Screen {
 		this.escapeLossPerTick = escapeLossPerTick;
 		this.barbedHookCount = Math.max(0, barbedHookCount);
 		this.leadBobberCount = Math.max(0, leadBobberCount);
+		this.treasureHunterCount = Math.max(0, treasureHunterCount);
 		this.minFishSize = Math.max(0, minFishSize);
 		this.maxFishSize = Math.max(this.minFishSize, maxFishSize);
 		this.currentFishSize = Mth.clamp(currentFishSize, this.minFishSize, Math.max(this.maxFishSize + 1, currentFishSize));
@@ -187,6 +191,10 @@ public final class FishingMinigameScreen extends Screen {
 		this.reelRotation = 0f;
 
 		int fishingLevel = ClientPlayerDataCache.getSkillLevel(SkillType.FISHING);
+		if (Minecraft.getInstance().player != null
+				&& StardewEnchantments.has(FishingRodItem.findRod(Minecraft.getInstance().player), StardewEnchantments.MASTER)) {
+			fishingLevel++;
+		}
 		// 浮标大小（星露谷逻辑）：基础(96+等级*8) + 像素加成
 		this.bobberBarHeight = (96 + fishingLevel * 8) + barSizeBonus;
 		this.bobberBarPos = BOBBER_BAR_TRACK_HEIGHT - bobberBarHeight;
@@ -609,7 +617,7 @@ public final class FishingMinigameScreen extends Screen {
 			fishShakeY = (float) (random.nextInt(21) - 10) / 10f;
 			barShakeX = 0f;
 			barShakeY = 0f;
-		} else {
+		} else if (!treasureInBar || treasureCaught || treasureHunterCount <= 0) {
 			if (!(fishShakeX == 0f && fishShakeY == 0f)) {
 				// SV: leaving the bar breaks perfect and (with Challenge Bait) reduces remaining fish.
 				perfect = false;

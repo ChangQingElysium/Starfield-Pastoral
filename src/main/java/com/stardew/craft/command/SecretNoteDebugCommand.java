@@ -53,7 +53,7 @@ public final class SecretNoteDebugCommand {
                 .filter(entry -> data.hasSeenSecretNote(entry.getKey().toString()))
                 .count();
         context.getSource().sendSuccess(() -> Component.literal(
-                "Secret notes for " + player.getName().getString()
+                "Secret notes for " + com.stardew.craft.player.PlayerDisplayName.get(player)
                         + ": magnifyingGlass=" + SecretNoteService.hasMagnifyingGlass(data)
                         + ", seen=" + seen + "/" + total
                         + ", loose=" + player.getInventory().countItem(ModItems.SECRET_NOTE.get())), false);
@@ -67,7 +67,7 @@ public final class SecretNoteDebugCommand {
         if (!player.addItem(stack)) player.drop(stack, false);
         SecretNoteService.grantMagnifyingGlass(player);
         context.getSource().sendSuccess(() -> Component.literal("Granted Magnifying Glass to "
-                + player.getName().getString()), true);
+                + com.stardew.craft.player.PlayerDisplayName.get(player)), true);
         return 1;
     }
 

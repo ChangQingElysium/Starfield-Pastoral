@@ -56,7 +56,7 @@ public record FarmJoinListRequestPayload() implements CustomPacketPayload {
                 if (farm.getFarmerCount() >= maxFarmers) continue;
                 entries.add(new FarmListSyncPayload.FarmEntry(
                         farm.getOwnerUUID(),
-                        farm.getOwnerName(),
+                        com.stardew.craft.player.PlayerDisplayName.get(player.server, farm.getOwnerUUID()),
                         farm.getFarmName(),
                         farm.getFarmType().getId(),
                         0, // permission irrelevant for join list

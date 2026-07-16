@@ -2,6 +2,7 @@ package com.stardew.craft.blockentity;
 
 import com.stardew.craft.time.StardewTimeManager;
 import com.stardew.craft.book.BookPowerEffects;
+import com.stardew.craft.core.ModTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -10,7 +11,6 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -82,11 +82,6 @@ public class CrabPotBlockEntity extends BlockEntity implements UtilityAutomation
 	};
 
 	@SuppressWarnings("null")
-	private static final TagKey<Item> CRAB_POT_ITEMS_TAG = TagKey.create(
-		BuiltInRegistries.ITEM.key(),
-		ResourceLocation.fromNamespaceAndPath("stardewcraft", "crab_pot_items")
-	);
-
 	public CrabPotBlockEntity(BlockPos pos, BlockState state) {
 		super(ModBlockEntities.CRAB_POT.get(), pos, state);
 	}
@@ -225,7 +220,7 @@ public class CrabPotBlockEntity extends BlockEntity implements UtilityAutomation
 		// 获取所有蟹笼物品
 		var registry = BuiltInRegistries.ITEM;
 		@SuppressWarnings("null")
-		var tagContents = registry.getTag(CRAB_POT_ITEMS_TAG);
+		var tagContents = registry.getTag(ModTags.Items.CRAB_POT_ITEMS);
 		
 		if (tagContents.isEmpty()) {
 			// 如果 tag 为空，返回默认物品

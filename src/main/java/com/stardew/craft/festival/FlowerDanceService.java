@@ -83,7 +83,6 @@ public final class FlowerDanceService {
     private static final Set<UUID> EXIT_VOTES = CONFIRM_STATE.votes(OpenFestivalConfirmPayload.Action.EXIT);
     private static final Set<UUID> EXIT_VOTE_PARTICIPANTS = CONFIRM_STATE.voteParticipants(OpenFestivalConfirmPayload.Action.EXIT);
     private static Integer frozenMinute;
-    private static Long frozenOverworldDayTime;
     private static MainEventPhase mainEventPhase = MainEventPhase.FREE;
     private static boolean mainEventStagePrepared;
     private static final Set<UUID> MAIN_EVENT_CUTSCENE_PARTICIPANTS = new LinkedHashSet<>();
@@ -130,19 +129,12 @@ public final class FlowerDanceService {
     public static long applyTimeFreeze(ServerLevel level, StardewTimeManager timeManager) {
         long currentVirtual = timeManager.getVirtualDayTime(level);
         if (frozenMinute == null || !hasCurrentSessionParticipant(level)) {
-            frozenOverworldDayTime = null;
             return currentVirtual;
         }
         ServerLevel overworld = level.getServer().overworld();
-        if (frozenOverworldDayTime == null) {
-            frozenOverworldDayTime = overworld.getDayTime();
-        }
         long dayBase = Math.floorDiv(currentVirtual, 24000L) * 24000L;
         long target = dayBase + com.stardew.craft.event.DimensionEventHandler.stardewMinutesToMcTime(frozenMinute);
-        if (overworld.getDayTime() != frozenOverworldDayTime) {
-            overworld.setDayTime(frozenOverworldDayTime);
-        }
-        long targetOffset = target - frozenOverworldDayTime;
+        long targetOffset = target - overworld.getDayTime();
         if (timeManager.getDayTimeOffset() != targetOffset) {
             timeManager.setDayTimeOffsetRaw(targetOffset);
         }
@@ -246,10 +238,12 @@ public final class FlowerDanceService {
             return true;
         }
         if (hasDancePartner(target)) {
-            sender.displayClientMessage(Component.translatable("message.stardewcraft.festival.flower_dance.target_has_partner", target.getScoreboardName()), true);
+            sender.displayClientMessage(Component.translatable("message.stardewcraft.festival.flower_dance.target_has_partner",
+                    com.stardew.craft.player.PlayerDisplayName.get(target)), true);
             return true;
         }
-        PacketDistributor.sendToPlayer(sender, new OpenFlowerDancePlayerAskPayload(target.getUUID(), target.getScoreboardName()));
+        PacketDistributor.sendToPlayer(sender, new OpenFlowerDancePlayerAskPayload(
+                target.getUUID(), com.stardew.craft.player.PlayerDisplayName.get(target)));
         return true;
     }
 
@@ -267,7 +261,8 @@ public final class FlowerDanceService {
             return;
         }
         if (hasDancePartner(target)) {
-            sender.displayClientMessage(Component.translatable("message.stardewcraft.festival.flower_dance.target_has_partner", target.getScoreboardName()), true);
+            sender.displayClientMessage(Component.translatable("message.stardewcraft.festival.flower_dance.target_has_partner",
+                    com.stardew.craft.player.PlayerDisplayName.get(target)), true);
             return;
         }
 
@@ -276,8 +271,10 @@ public final class FlowerDanceService {
         UUID inviteId = UUID.randomUUID();
         PendingPlayerInvite invite = new PendingPlayerInvite(inviteId, sender.getUUID(), target.getUUID(), sender.serverLevel().getGameTime());
         PENDING_PLAYER_INVITES.put(inviteId, invite);
-        PacketDistributor.sendToPlayer(target, new OpenFlowerDancePlayerInvitePayload(inviteId, sender.getScoreboardName()));
-        sender.displayClientMessage(Component.translatable("message.stardewcraft.festival.flower_dance.player_invite_sent", target.getScoreboardName()), true);
+        PacketDistributor.sendToPlayer(target, new OpenFlowerDancePlayerInvitePayload(
+                inviteId, com.stardew.craft.player.PlayerDisplayName.get(sender)));
+        sender.displayClientMessage(Component.translatable("message.stardewcraft.festival.flower_dance.player_invite_sent",
+                com.stardew.craft.player.PlayerDisplayName.get(target)), true);
     }
 
     public static void handlePlayerDanceInviteResponse(ServerPlayer target, UUID inviteId, boolean accepted) {
@@ -295,7 +292,8 @@ public final class FlowerDanceService {
             return;
         }
         if (!accepted) {
-            sender.displayClientMessage(Component.translatable("message.stardewcraft.festival.flower_dance.player_invite_rejected", target.getScoreboardName()), true);
+            sender.displayClientMessage(Component.translatable("message.stardewcraft.festival.flower_dance.player_invite_rejected",
+                    com.stardew.craft.player.PlayerDisplayName.get(target)), true);
             return;
         }
         if (hasDancePartner(sender) || hasDancePartner(target)) {
@@ -307,8 +305,10 @@ public final class FlowerDanceService {
         DANCE_PARTNERS.put(target.getUUID(), PartnerSelection.player(sender.getUUID()));
         cancelPendingPlayerInvitesFor(sender.getUUID());
         cancelPendingPlayerInvitesFor(target.getUUID());
-        sender.displayClientMessage(Component.translatable("message.stardewcraft.festival.flower_dance.player_invite_accepted", target.getScoreboardName()), true);
-        target.displayClientMessage(Component.translatable("message.stardewcraft.festival.flower_dance.player_partner_set", sender.getScoreboardName()), true);
+        sender.displayClientMessage(Component.translatable("message.stardewcraft.festival.flower_dance.player_invite_accepted",
+                com.stardew.craft.player.PlayerDisplayName.get(target)), true);
+        target.displayClientMessage(Component.translatable("message.stardewcraft.festival.flower_dance.player_partner_set",
+                com.stardew.craft.player.PlayerDisplayName.get(sender)), true);
     }
 
     public static void onPlayerLogout(ServerPlayer player) {
@@ -1038,14 +1038,10 @@ public final class FlowerDanceService {
         if (frozenMinute == null) {
             frozenMinute = FESTIVAL_START_MINUTE;
         }
-        if (level != null && frozenOverworldDayTime == null) {
-            frozenOverworldDayTime = level.getServer().overworld().getDayTime();
-        }
     }
 
     private static void stopTimeFreeze() {
         frozenMinute = null;
-        frozenOverworldDayTime = null;
     }
 
     private static boolean isActiveFlowerDanceDay() {

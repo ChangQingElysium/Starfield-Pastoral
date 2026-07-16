@@ -1,65 +1,73 @@
 package com.stardew.craft.mixin;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.animal.service.AnimalEntityRecoveryState;
+import com.stardew.craft.animal.service.ManagedAnimalEntitySanitizer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.chunk.storage.EntityStorage;
+import net.minecraft.world.level.chunk.storage.SimpleRegionStorage;
+import net.minecraft.world.level.entity.ChunkEntities;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.function.Function;
 
-@Mixin(EntityType.class)
+@Mixin(EntityStorage.class)
 public abstract class ManagedAnimalEntityLoadMixin {
-    private static final String MANAGED_ID_TAG = "stardewManagedAnimalId";
-    private static final String MANAGED_TYPE_TAG = "stardewManagedAnimalType";
-    private static final int MAX_STARDEW_ANIMALS_PER_ENTITY_CHUNK = 128;
+    @Shadow @Final private ServerLevel level;
+    @Shadow @Final private SimpleRegionStorage simpleRegionStorage;
 
-    @ModifyVariable(method = "loadEntitiesRecursive", at = @At("HEAD"), argsOnly = true, ordinal = 0)
-    private static List<? extends Tag> stardewcraft$sanitizeManagedAnimalEntities(List<? extends Tag> tags) {
-        if (tags.size() <= 1) {
-            return tags;
-        }
-
-        Set<Long> managedIds = new HashSet<>();
-        ListTag sanitized = new ListTag();
-        int keptStardewAnimals = 0;
-        int removed = 0;
-
-        for (Tag tag : tags) {
-            if (!(tag instanceof CompoundTag entityTag) || !isStardewAnimal(entityTag)) {
-                sanitized.add(tag);
-                continue;
+    @Redirect(
+        method = "loadEntities",
+        at = @At(
+            value = "INVOKE",
+            target = "Ljava/util/concurrent/CompletableFuture;thenApplyAsync(Ljava/util/function/Function;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;"
+        )
+    )
+    private CompletableFuture<ChunkEntities<Entity>> stardewcraft$sanitizeAndPersistManagedAnimals(
+        CompletableFuture<Optional<CompoundTag>> future,
+        Function<? super Optional<CompoundTag>, ? extends ChunkEntities<Entity>> decoder,
+        Executor executor,
+        ChunkPos pos
+    ) {
+        return future.thenApplyAsync(optionalTag -> {
+            if (optionalTag.isPresent()) {
+                CompoundTag chunkTag = optionalTag.get();
+                ListTag entities = chunkTag.getList("Entities", CompoundTag.TAG_COMPOUND);
+                ManagedAnimalEntitySanitizer.Result result = ManagedAnimalEntitySanitizer.sanitize(entities);
+                if (result.changed()) {
+                    chunkTag.put("Entities", result.sanitized());
+                    AnimalEntityRecoveryState.markRecovering(level, pos);
+                    simpleRegionStorage.write(pos, chunkTag.copy()).whenComplete((ignored, error) -> {
+                        if (error != null) {
+                            StardewCraft.LOGGER.error(
+                                "[ANIMAL_RECOVERY] Failed to persist repaired entity chunk {} in {}",
+                                pos, level.dimension().location(), error);
+                        }
+                    });
+                    StardewCraft.LOGGER.warn(
+                        "[ANIMAL_RECOVERY] Repaired and queued entity chunk {} in {} for persistence: "
+                            + "removed {} duplicates, {} invalid entries and {} excess entries; kept {} managed animals ({} total entries before repair)",
+                        pos,
+                        level.dimension().location(),
+                        result.duplicateCount(),
+                        result.invalidCount(),
+                        result.excessCount(),
+                        result.keptManagedAnimals(),
+                        result.original().size());
+                }
             }
-
-            long managedId = entityTag.getLong(MANAGED_ID_TAG);
-            boolean duplicate = managedId > 0L && !managedIds.add(managedId);
-            if (duplicate || keptStardewAnimals >= MAX_STARDEW_ANIMALS_PER_ENTITY_CHUNK) {
-                removed++;
-                continue;
-            }
-
-            sanitized.add(tag);
-            keptStardewAnimals++;
-        }
-
-        if (removed == 0) {
-            return tags;
-        }
-
-        StardewCraft.LOGGER.warn(
-            "[ANIMAL_RECOVERY] Removed {} duplicate/excess animal entities before loading (kept {}, original entities {})",
-            removed, keptStardewAnimals, tags.size());
-        return sanitized;
-    }
-
-    private static boolean isStardewAnimal(CompoundTag tag) {
-        return tag.getString("id").startsWith(StardewCraft.MODID + ":")
-            && tag.contains(MANAGED_ID_TAG, Tag.TAG_LONG)
-            && tag.contains(MANAGED_TYPE_TAG, Tag.TAG_STRING);
+            return decoder.apply(optionalTag);
+        }, executor);
     }
 }

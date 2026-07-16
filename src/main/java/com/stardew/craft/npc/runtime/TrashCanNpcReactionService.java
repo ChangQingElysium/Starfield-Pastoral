@@ -55,7 +55,8 @@ public final class TrashCanNpcReactionService {
 
         Component npcName = npc.getName();
         level.getServer().getPlayerList().broadcastSystemMessage(
-            Component.translatable("stardewcraft.chat.trash_can", player.getDisplayName(), npcName),
+            Component.translatable("stardewcraft.chat.trash_can",
+                    com.stardew.craft.player.PlayerDisplayName.get(player), npcName),
             false
         );
         if ("linus".equals(npcId)) {

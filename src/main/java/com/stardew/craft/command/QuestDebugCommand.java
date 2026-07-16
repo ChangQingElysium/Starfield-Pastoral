@@ -158,7 +158,8 @@ public final class QuestDebugCommand {
         QuestManager mgr = QuestManager.of(target);
         if (mgr == null) return fail(context, "stardewcraft.command.quest.no_data");
 
-        var message = Component.translatable("stardewcraft.command.quest.status_header", target.getName());
+        var message = Component.translatable("stardewcraft.command.quest.status_header",
+                com.stardew.craft.player.PlayerDisplayName.get(target));
         if (mgr.getQuestLog().isEmpty()) {
             message.append(Component.translatable("stardewcraft.command.quest.active_empty"));
         } else {
@@ -212,7 +213,8 @@ public final class QuestDebugCommand {
             return fail(context, "stardewcraft.command.quest.unknown", questId);
         }
         context.getSource().sendSuccess(() -> Component.literal(
-            "Granted quest " + questId + " to " + target.getScoreboardName()), false);
+            "Granted quest " + questId + " to "
+                    + com.stardew.craft.player.PlayerDisplayName.get(target)), false);
         return 1;
     }
 
@@ -246,7 +248,8 @@ public final class QuestDebugCommand {
         manager.removeQuest(questId, target);
         manager.debugForgetCompletedQuest(questId, target);
         context.getSource().sendSuccess(() -> Component.literal(
-            "Reset quest " + questId + " for " + target.getScoreboardName()), false);
+            "Reset quest " + questId + " for "
+                    + com.stardew.craft.player.PlayerDisplayName.get(target)), false);
         return 1;
     }
 
@@ -261,7 +264,8 @@ public final class QuestDebugCommand {
         }
         mgr.debugGrantQuest(questId, target);
         context.getSource().sendSuccess(() -> Component.translatable(
-            "stardewcraft.command.quest.accepted", questId, target.getName()), false);
+            "stardewcraft.command.quest.accepted", questId,
+                com.stardew.craft.player.PlayerDisplayName.get(target)), false);
         return 1;
     }
 
@@ -276,7 +280,8 @@ public final class QuestDebugCommand {
         quest.questComplete(target);
         mgr.cleanupDestroyed(target);
         context.getSource().sendSuccess(() -> Component.translatable(
-            "stardewcraft.command.quest.completed_for", questId, target.getName()), false);
+            "stardewcraft.command.quest.completed_for", questId,
+                com.stardew.craft.player.PlayerDisplayName.get(target)), false);
         return 1;
     }
 
@@ -288,7 +293,8 @@ public final class QuestDebugCommand {
         if (mgr == null) return fail(context, "stardewcraft.command.quest.no_data");
         mgr.removeQuest(questId, target);
         context.getSource().sendSuccess(() -> Component.translatable(
-            "stardewcraft.command.quest.removed", questId, target.getName()), false);
+            "stardewcraft.command.quest.removed", questId,
+                com.stardew.craft.player.PlayerDisplayName.get(target)), false);
         return 1;
     }
 

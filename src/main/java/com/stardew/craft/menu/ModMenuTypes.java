@@ -15,6 +15,11 @@ public class ModMenuTypes {
     @SuppressWarnings("null")
     public static final DeferredRegister<MenuType<?>> MENU_TYPES = 
         DeferredRegister.create(Registries.MENU, StardewCraft.MODID);
+
+    @SuppressWarnings("null")
+    public static final DeferredHolder<MenuType<?>, MenuType<StardewGameMenu>> STARDEW_GAME_MENU =
+        MENU_TYPES.register("stardew_game_menu",
+            () -> new MenuType<>(StardewGameMenu::new, FeatureFlags.DEFAULT_FLAGS));
     
     // 矿井出口菜单（简单的无额外数据Menu）
     @SuppressWarnings("null")

@@ -187,6 +187,13 @@ public final class AreaRestoreCutscene {
                 int replaced = AreaRestoreHandler.restoreArea(activeLevel, currentAreaId, getCCOrigin());
                 StardewCraft.LOGGER.info("[CC-CUTSCENE] Area {} restored, {} blocks replaced", currentAreaId, replaced);
 
+                CommunityCenterSavedData data = CommunityCenterSavedData.get();
+                java.util.UUID uid = ownerUUID != null ? ownerUUID : new java.util.UUID(0L, 0L);
+                if (data.areAllAreasComplete(uid)) {
+                    int remaining = AreaRestoreHandler.restoreAllRemaining(activeLevel, getCCOrigin());
+                    StardewCraft.LOGGER.info("[CC-CUTSCENE] All areas complete; restored {} remaining blocks", remaining);
+                }
+
                 // SDV: localSound("wand") + localSound("woodyHit") + Game1.flashAlpha = 1f
                 activeLevel.playSound(null, center, ModSounds.WAND.get(), SoundSource.NEUTRAL, 1.0f, 1.4f);
                 activeLevel.playSound(null, center, ModSounds.SHIP.get(), SoundSource.NEUTRAL, 0.8f, 1.0f);

@@ -500,7 +500,8 @@ public final class DesertFestivalRaceService {
 
         private void createRoom(ServerPlayer player) {
             String id = "R" + nextRoomId++;
-            rooms.put(id, new BettingRoom(id, player.getUUID(), player.getGameProfile().getName()));
+            rooms.put(id, new BettingRoom(id, player.getUUID(),
+                    com.stardew.craft.player.PlayerDisplayName.get(player)));
             toast(player, "stardewcraft.desert_festival.race.room_created");
         }
 

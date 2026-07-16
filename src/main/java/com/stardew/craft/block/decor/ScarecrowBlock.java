@@ -36,6 +36,13 @@ public class ScarecrowBlock extends MapDecorStaticBlock implements EntityBlock {
     public int getRadius() { return radius; }
     public int getVariantIndex() { return variantIndex; }
 
+    /** Shared XZ-plane coverage test used by crow attacks and the client range preview. */
+    public static boolean protects(BlockPos scarecrowPos, BlockPos targetPos, int radius) {
+        int dx = scarecrowPos.getX() - targetPos.getX();
+        int dz = scarecrowPos.getZ() - targetPos.getZ();
+        return dx * dx + dz * dz <= radius * radius;
+    }
+
     @Override
     @Nullable
     public BlockEntity newBlockEntity(@Nonnull BlockPos pos, @Nonnull BlockState state) {

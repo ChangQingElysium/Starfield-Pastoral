@@ -132,7 +132,6 @@ public final class LuauFestivalService {
     private static boolean mainEventActive;
     private static int mainEventReaction = 2;
     private static Integer frozenMinute;
-    private static Long frozenOverworldDayTime;
 
     private LuauFestivalService() {
     }
@@ -264,19 +263,12 @@ public final class LuauFestivalService {
     public static long applyTimeFreeze(ServerLevel level, StardewTimeManager timeManager) {
         long currentVirtual = timeManager.getVirtualDayTime(level);
         if (frozenMinute == null || !hasCurrentSessionParticipant(level)) {
-            frozenOverworldDayTime = null;
             return currentVirtual;
         }
         ServerLevel overworld = level.getServer().overworld();
-        if (frozenOverworldDayTime == null) {
-            frozenOverworldDayTime = overworld.getDayTime();
-        }
         long dayBase = Math.floorDiv(currentVirtual, 24000L) * 24000L;
         long target = dayBase + com.stardew.craft.event.DimensionEventHandler.stardewMinutesToMcTime(frozenMinute);
-        if (overworld.getDayTime() != frozenOverworldDayTime) {
-            overworld.setDayTime(frozenOverworldDayTime);
-        }
-        long targetOffset = target - frozenOverworldDayTime;
+        long targetOffset = target - overworld.getDayTime();
         if (timeManager.getDayTimeOffset() != targetOffset) {
             timeManager.setDayTimeOffsetRaw(targetOffset);
         }
@@ -604,7 +596,9 @@ public final class LuauFestivalService {
         player.displayClientMessage(Component.translatable("message.stardewcraft.festival.luau.added_self", itemName), false);
         for (ServerPlayer participant : onlineParticipants(player.serverLevel())) {
             if (!participant.getUUID().equals(player.getUUID())) {
-                participant.displayClientMessage(Component.translatable("message.stardewcraft.festival.luau.added_broadcast", player.getDisplayName(), itemName), false);
+                participant.displayClientMessage(Component.translatable(
+                        "message.stardewcraft.festival.luau.added_broadcast",
+                        com.stardew.craft.player.PlayerDisplayName.get(player), itemName), false);
             }
         }
     }
@@ -1006,14 +1000,10 @@ public final class LuauFestivalService {
         if (frozenMinute == null) {
             frozenMinute = FESTIVAL_START_MINUTE;
         }
-        if (level != null && frozenOverworldDayTime == null) {
-            frozenOverworldDayTime = level.getServer().overworld().getDayTime();
-        }
     }
 
     private static void stopTimeFreeze() {
         frozenMinute = null;
-        frozenOverworldDayTime = null;
     }
 
     private static Optional<FestivalSessionState> currentSession(ServerLevel level) {

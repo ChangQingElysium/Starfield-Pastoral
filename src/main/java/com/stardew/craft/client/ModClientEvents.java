@@ -1,5 +1,6 @@
 package com.stardew.craft.client;
 
+import com.stardew.craft.Config;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.economy.sell.ProfessionSellPriceService;
 import com.stardew.craft.economy.sell.SellQuote;
@@ -12,7 +13,10 @@ import com.stardew.craft.item.weapon.IStardewWeapon;
 import com.stardew.craft.item.weapon.WeaponData;
 import com.stardew.craft.item.weapon.WeaponSkillData;
 import com.stardew.craft.client.gui.menu.StardewGameMenuScreen;
+import com.stardew.craft.client.hud.StardewHudLayout;
+import com.stardew.craft.client.hud.StardewHudLayoutEditorScreen;
 import com.stardew.craft.client.weapon.FireRingEffectClient;
+import com.stardew.craft.core.ModTags;
 import com.stardew.craft.network.payload.RequestNpcFriendshipOverviewPayload;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
@@ -23,9 +27,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -52,15 +54,6 @@ import java.util.Locale;
 public class ModClientEvents {
 
     private static final Pattern NEWLINE_SPLIT = Pattern.compile("(?:\\\\n|\\n)");
-    private static final TagKey<Item> STARDEW_CRAFTING_LOGS = TagKey.create(Registries.ITEM,
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "crafting_logs"));
-    private static final TagKey<Item> STARDEW_CRAFTING_PLANKS = TagKey.create(Registries.ITEM,
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "crafting_planks"));
-    private static final TagKey<Item> STARDEW_CRAFTING_HARDWOOD_LOGS = TagKey.create(Registries.ITEM,
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "crafting_hardwood_logs"));
-    private static final TagKey<Item> STARDEW_CRAFTING_HARDWOOD_PLANKS = TagKey.create(Registries.ITEM,
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "crafting_hardwood_planks"));
-
     @SubscribeEvent
     public static void onItemTooltip(ItemTooltipEvent event) {
         ItemStack stack = event.getItemStack();
@@ -444,16 +437,16 @@ public class ModClientEvents {
         }
 
         Component line = null;
-        if (stack.is(STARDEW_CRAFTING_HARDWOOD_LOGS)) {
+        if (stack.is(ModTags.Items.CRAFTING_HARDWOOD_LOGS)) {
             line = Component.translatable("stardewcraft.tooltip.convertible_hardwood_log_to_hardwood_in_stardew_crafting")
                 .withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD);
-        } else if (stack.is(STARDEW_CRAFTING_HARDWOOD_PLANKS)) {
+        } else if (stack.is(ModTags.Items.CRAFTING_HARDWOOD_PLANKS)) {
             line = Component.translatable("stardewcraft.tooltip.convertible_hardwood_planks_to_hardwood_in_stardew_crafting")
                 .withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD);
-        } else if (stack.is(STARDEW_CRAFTING_LOGS)) {
+        } else if (stack.is(ModTags.Items.CRAFTING_LOGS)) {
             line = Component.translatable("stardewcraft.tooltip.convertible_log_to_wood_in_stardew_crafting")
                 .withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD);
-        } else if (stack.is(STARDEW_CRAFTING_PLANKS)) {
+        } else if (stack.is(ModTags.Items.CRAFTING_PLANKS)) {
             line = Component.translatable("stardewcraft.tooltip.convertible_planks_to_wood_in_stardew_crafting")
                 .withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD);
         }
@@ -563,7 +556,7 @@ public class ModClientEvents {
         while (ModKeyMappings.GAME_MENU.consumeClick()) {
             if (mc.screen == null) {
                 PacketDistributor.sendToServer(new RequestNpcFriendshipOverviewPayload());
-                mc.setScreen(new StardewGameMenuScreen());
+                PacketDistributor.sendToServer(new com.stardew.craft.network.payload.OpenStardewGameMenuPayload());
             }
         }
 
@@ -699,7 +692,7 @@ public class ModClientEvents {
         if (player == null) {
             return;
         }
-        if (mc.options.hideGui || player.isSpectator()) {
+        if (mc.options.hideGui || player.isSpectator() || mc.screen instanceof StardewHudLayoutEditorScreen) {
             return;
         }
 
@@ -722,10 +715,13 @@ public class ModClientEvents {
         GuiGraphics gg = event.getGuiGraphics();
         Font font = mc.font;
 
-        int screenH = gg.guiHeight();
-
+        StardewHudLayout.Placement placement = StardewHudLayout.current(
+                Config.HudElement.WEAPON_SKILLS, gg.guiWidth(), gg.guiHeight());
+        gg.pose().pushPose();
+        gg.pose().translate(placement.x(), placement.y(), 0.0F);
+        gg.pose().scale(placement.scale(), placement.scale(), 1.0F);
         int baseX = 22;
-        int baseY = (int) (screenH * 0.46f);
+        int baseY = 20;
         int spacingY = 46;
 
         int index = 0;
@@ -738,6 +734,33 @@ public class ModClientEvents {
             drawSkillHud(gg, font, player, weaponItem.getWeaponId(), skill2,
                     baseX, baseY + (spacingY * index), ModKeyMappings.SKILL_MAJOR);
         }
+        gg.pose().popPose();
+    }
+
+    public static void renderWeaponSkillPreview(GuiGraphics graphics, int x, int y, float scale) {
+        Minecraft mc = Minecraft.getInstance();
+        Player player = mc.player;
+        if (player == null || !(ModItems.GALAXY_SWORD.get() instanceof IStardewWeapon weaponItem)) {
+            return;
+        }
+        WeaponData data = weaponItem.getWeaponData();
+        if (data == null) {
+            return;
+        }
+        graphics.pose().pushPose();
+        graphics.pose().translate(x, y, 0.0F);
+        graphics.pose().scale(scale, scale, 1.0F);
+        int index = 0;
+        if (data.getSkill1() != null) {
+            drawSkillHud(graphics, mc.font, player, weaponItem.getWeaponId(), data.getSkill1(),
+                    22, 20, ModKeyMappings.SKILL_MINOR);
+            index++;
+        }
+        if (data.getSkill2() != null) {
+            drawSkillHud(graphics, mc.font, player, weaponItem.getWeaponId(), data.getSkill2(),
+                    22, 20 + 46 * index, ModKeyMappings.SKILL_MAJOR);
+        }
+        graphics.pose().popPose();
     }
 
     private static void drawSkillHud(GuiGraphics gg, Font font, Player player, String weaponId,
@@ -1333,6 +1356,7 @@ public class ModClientEvents {
         com.stardew.craft.client.ClientMailIndex.clear();
         com.stardew.craft.client.ClientFestivalAvailability.clear();
         com.stardew.craft.client.ClientJeiCatalog.clear();
+        com.stardew.craft.client.ClientContentRefreshHooks.onSyncedRegistriesChanged();
         com.stardew.craft.client.hud.StardewTimeHud.resetTimeSync();
         com.stardew.craft.client.sound.StardewMusicManager.setNightMarketFestivalOpen(false);
     }

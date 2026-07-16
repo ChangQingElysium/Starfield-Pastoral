@@ -5,6 +5,7 @@ import com.stardew.craft.core.ModGameRules;
 import com.stardew.craft.interior.CrossDimensionTeleporter;
 import com.stardew.craft.network.payload.OpenFarmJoinInvitePayload;
 import com.stardew.craft.network.payload.FarmJoinPendingStatePayload;
+import com.stardew.craft.player.PlayerDisplayName;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -78,13 +79,14 @@ public final class FarmJoinManager {
 
         // 存储请求
         long tick = server.overworld().getGameTime();
-        pendingRequests.put(reqUUID, new JoinRequest(reqUUID, requester.getName().getString(),
+        String requesterName = PlayerDisplayName.get(requester);
+        pendingRequests.put(reqUUID, new JoinRequest(reqUUID, requesterName,
                 ownerUUID, tick));
 
         // 向农场主人发送加入申请弹窗
         ServerPlayer owner = server.getPlayerList().getPlayer(ownerUUID);
         if (owner != null) {
-            sendJoinRequestToOwner(owner, requester.getName().getString(), reqUUID, farm.getFarmName());
+            sendJoinRequestToOwner(owner, requesterName, reqUUID, farm.getFarmName());
         } else {
                         syncPendingState(requester, false);
             requester.sendSystemMessage(
@@ -129,7 +131,7 @@ public final class FarmJoinManager {
                 syncPendingState(requester, false);
                 requester.sendSystemMessage(
                         Component.translatable("stardewcraft.farm.join.rejected",
-                                owner.getName().getString()));
+                                PlayerDisplayName.get(owner)));
             }
             owner.sendSystemMessage(
                     Component.translatable("stardewcraft.farm.join.you_rejected",
@@ -171,7 +173,7 @@ public final class FarmJoinManager {
                     requester, com.stardew.craft.player.PlayerDataManager.getPlayerData(requester));
             requester.sendSystemMessage(
                     Component.translatable("stardewcraft.farm.join.welcome",
-                            farmName, owner.getName().getString()));
+                            farmName, PlayerDisplayName.get(owner)));
                         CrossDimensionTeleporter.wizardInteriorToStardewOutdoor(requester, true);
         }
 

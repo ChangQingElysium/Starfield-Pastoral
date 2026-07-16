@@ -189,7 +189,6 @@ public final class FairFestivalService {
     private static long grangeJudgingRouteWaitUntil;
     private static boolean grangeJudgingReturned;
     private static Integer frozenMinute;
-    private static Long frozenOverworldDayTime;
     private record GrangeScoreProfile(int quality, int price, int category) {
     }
 
@@ -655,19 +654,12 @@ public final class FairFestivalService {
     public static long applyTimeFreeze(ServerLevel level, StardewTimeManager timeManager) {
         long currentVirtual = timeManager.getVirtualDayTime(level);
         if (frozenMinute == null || (!hasCurrentSessionParticipant(level) && !FestivalService.isDebugActiveFestival(FESTIVAL_ID))) {
-            frozenOverworldDayTime = null;
             return currentVirtual;
         }
         ServerLevel overworld = level.getServer().overworld();
-        if (frozenOverworldDayTime == null) {
-            frozenOverworldDayTime = overworld.getDayTime();
-        }
         long dayBase = Math.floorDiv(currentVirtual, 24000L) * 24000L;
         long target = dayBase + com.stardew.craft.event.DimensionEventHandler.stardewMinutesToMcTime(frozenMinute);
-        if (overworld.getDayTime() != frozenOverworldDayTime) {
-            overworld.setDayTime(frozenOverworldDayTime);
-        }
-        long targetOffset = target - frozenOverworldDayTime;
+        long targetOffset = target - overworld.getDayTime();
         if (timeManager.getDayTimeOffset() != targetOffset) {
             timeManager.setDayTimeOffsetRaw(targetOffset);
         }
@@ -1416,7 +1408,8 @@ public final class FairFestivalService {
         syncStarTokenHud(player, true);
         GRANGE_REWARD_CLAIMED.add(player.getUUID());
         player.playNotifySound(sound, SoundSource.PLAYERS, 1.0F, 1.0F);
-        ObjectDialogueService.show(player, Component.translatable(key, score, player.getName().getString()));
+        ObjectDialogueService.show(player, Component.translatable(key, score,
+                com.stardew.craft.player.PlayerDisplayName.get(player)));
     }
 
     private static void giveOrDrop(ServerPlayer player, ItemStack stack) {
@@ -1721,14 +1714,10 @@ public final class FairFestivalService {
         if (frozenMinute == null) {
             frozenMinute = FESTIVAL_START_MINUTE;
         }
-        if (level != null && frozenOverworldDayTime == null) {
-            frozenOverworldDayTime = level.getServer().overworld().getDayTime();
-        }
     }
 
     private static void stopTimeFreeze() {
         frozenMinute = null;
-        frozenOverworldDayTime = null;
     }
 
     private static void clearRuntimeState(ServerLevel level) {

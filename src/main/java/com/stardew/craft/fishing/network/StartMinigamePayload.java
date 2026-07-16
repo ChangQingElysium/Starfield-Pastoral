@@ -28,6 +28,7 @@ public record StartMinigamePayload(
 		float escapeLossPerTick,    // Trap Bobber: distanceFromCatching decrease when fish is NOT in bar
 		int barbedHookCount,        // Barbed Hook: affects bar gravity + auto-tracking
 		int leadBobberCount,        // Lead Bobber: damps bounce at bottom
+		int treasureHunterCount,    // Treasure Hunter: protects the fish meter while catching treasure
 		int minFishSize,
 		int maxFishSize,
 		int currentFishSize,
@@ -85,6 +86,8 @@ public record StartMinigamePayload(
 			@SuppressWarnings("null")
 			int leadBobberCount = ByteBufCodecs.VAR_INT.decode(buf);
 			@SuppressWarnings("null")
+			int treasureHunterCount = ByteBufCodecs.VAR_INT.decode(buf);
+			@SuppressWarnings("null")
 			int minFishSize = ByteBufCodecs.VAR_INT.decode(buf);
 			@SuppressWarnings("null")
 			int maxFishSize = ByteBufCodecs.VAR_INT.decode(buf);
@@ -96,7 +99,7 @@ public record StartMinigamePayload(
 			boolean loseProgressOutsideBar = ByteBufCodecs.BOOL.decode(buf);
 			return new StartMinigamePayload(sessionId, difficulty, motionTypeId, legendaryFish, durationTicks,
 					hasTreasure, goldenTreasure, hasSonarBobber, sonarFishItemId,
-					barSizeBonus, escapeLossPerTick, barbedHookCount, leadBobberCount,
+					barSizeBonus, escapeLossPerTick, barbedHookCount, leadBobberCount, treasureHunterCount,
 					minFishSize, maxFishSize, currentFishSize, initialCatchProgress, loseProgressOutsideBar);
 		}
 
@@ -116,6 +119,7 @@ public record StartMinigamePayload(
 			ByteBufCodecs.FLOAT.encode(buf, value.escapeLossPerTick());
 			ByteBufCodecs.VAR_INT.encode(buf, value.barbedHookCount());
 			ByteBufCodecs.VAR_INT.encode(buf, value.leadBobberCount());
+			ByteBufCodecs.VAR_INT.encode(buf, value.treasureHunterCount());
 			ByteBufCodecs.VAR_INT.encode(buf, value.minFishSize());
 			ByteBufCodecs.VAR_INT.encode(buf, value.maxFishSize());
 			ByteBufCodecs.VAR_INT.encode(buf, value.currentFishSize());
@@ -151,6 +155,7 @@ public record StartMinigamePayload(
 					payload.escapeLossPerTick(),
 					payload.barbedHookCount(),
 					payload.leadBobberCount(),
+					payload.treasureHunterCount(),
 					payload.minFishSize(),
 					payload.maxFishSize(),
 					payload.currentFishSize(),

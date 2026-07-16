@@ -41,10 +41,16 @@ public class StardewObjectDialogueScreen extends Screen {
     private int transitionHeight;
     private long lastUpdateMs;
     private long lastRenderMs;
+    private Runnable afterCloseAction;
 
     public StardewObjectDialogueScreen(List<Component> messages) {
         super(Component.literal("Object Dialogue"));
         this.rawMessages = List.copyOf(messages == null || messages.isEmpty() ? List.of(Component.literal("...")) : messages);
+    }
+
+    public StardewObjectDialogueScreen withAfterClose(Runnable action) {
+        this.afterCloseAction = action;
+        return this;
     }
 
     @Override
@@ -214,6 +220,11 @@ public class StardewObjectDialogueScreen extends Screen {
         transitionHeight = Math.max(0, transitionHeight - speedY * 2);
         if (transitionWidth == 0 && transitionHeight == 0 && this.minecraft != null) {
             this.minecraft.setScreen(null);
+            if (afterCloseAction != null) {
+                Runnable action = afterCloseAction;
+                afterCloseAction = null;
+                action.run();
+            }
         }
     }
 

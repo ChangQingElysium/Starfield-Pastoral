@@ -32,8 +32,14 @@ public class SystemTotemManager {
     private static final int SYSTEM_ID_BEACH = 2;
     private static final int SYSTEM_ID_DESERT = 3;
 
+    /** 山区系统柱的历史坐标；加载时迁移清除。 */
+    private static final BlockPos[] OLD_POS_MOUNTAIN = {
+            new BlockPos(-290, -14, 256),
+            new BlockPos(75, 81, -105)
+    };
+
     /** 系统柱坐标 */
-    private static final BlockPos POS_MOUNTAIN = new BlockPos(75, 81, -105);
+    private static final BlockPos POS_MOUNTAIN = new BlockPos(52, 88, -128);
     private static final BlockPos POS_BEACH = new BlockPos(44, 60, 93);
     private static final BlockPos POS_DESERT = new BlockPos(-203, 64, -157);
 
@@ -43,7 +49,8 @@ public class SystemTotemManager {
         if (!level.dimension().equals(ModDimensions.STARDEW_VALLEY)) return;
 
         removeOldFarmSystemPole(level);
-        ensureSystemPole(level, POS_MOUNTAIN, TotemType.MOUNTAIN, ModBlocks.TOTEM_POLE_MOUNTAIN, SYSTEM_ID_MOUNTAIN, Direction.NORTH);
+        removeOldMountainSystemPoles(level);
+        ensureSystemPole(level, POS_MOUNTAIN, TotemType.MOUNTAIN, ModBlocks.TOTEM_POLE_MOUNTAIN, SYSTEM_ID_MOUNTAIN, Direction.SOUTH);
         ensureSystemPole(level, POS_BEACH, TotemType.BEACH, ModBlocks.TOTEM_POLE_BEACH, SYSTEM_ID_BEACH, Direction.SOUTH);
         ensureSystemPole(level, POS_DESERT, TotemType.DESERT, ModBlocks.TOTEM_POLE_DESERT, SYSTEM_ID_DESERT, Direction.SOUTH);
     }
@@ -64,6 +71,26 @@ public class SystemTotemManager {
         }
     }
 
+    private static void removeOldMountainSystemPoles(ServerLevel level) {
+        TotemPoleTracker tracker = TotemPoleTracker.get(level);
+        for (BlockPos oldPos : OLD_POS_MOUNTAIN) {
+            BlockState existing = level.getBlockState(oldPos);
+            if (existing.getBlock() instanceof TotemPoleBlock existingPole
+                    && existingPole.getTotemType() == TotemType.MOUNTAIN) {
+                if (level.getBlockEntity(oldPos) instanceof TotemPoleBlockEntity pole) {
+                    tracker.unregister(pole.getPoleId());
+                }
+                level.setBlock(oldPos, Blocks.AIR.defaultBlockState(), 35);
+                StardewCraft.LOGGER.info("Removed old mountain system totem pole at {}", oldPos);
+            }
+
+            TotemPoleTracker.PoleEntry tracked = tracker.getPole(SYSTEM_ID_MOUNTAIN);
+            if (tracked != null && tracked.pos().equals(oldPos)) {
+                tracker.unregister(SYSTEM_ID_MOUNTAIN);
+            }
+        }
+    }
+
     @SuppressWarnings("null")
     private static void ensureSystemPole(ServerLevel level, BlockPos pos, TotemType type,
                                          net.neoforged.neoforge.registries.DeferredBlock<Block> blockHolder,
@@ -78,7 +105,13 @@ public class SystemTotemManager {
             }
             // 确保 BE 存在且为系统柱
             if (level.getBlockEntity(pos) instanceof TotemPoleBlockEntity pole) {
-                if (!pole.isSystemPole() || !name.equals(pole.getPoleName())) {
+                TotemPoleTracker.PoleEntry tracked = TotemPoleTracker.get(level).getPole(systemId);
+                if (!pole.isSystemPole()
+                        || !name.equals(pole.getPoleName())
+                        || tracked == null
+                        || !tracked.systemPole()
+                        || tracked.type() != type
+                        || !tracked.pos().equals(pos)) {
                     pole.initSystemPole(level, systemId, name);
                 }
             }

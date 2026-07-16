@@ -1,10 +1,10 @@
 package com.stardew.craft.integration.jei;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.client.gui.common.CommonGuiTextures;
+import com.stardew.craft.client.gui.common.GuiText;
 import com.stardew.craft.player.StardewCraftingRecipeData;
-import com.stardew.craft.player.StardewCraftingRecipeData.IngredientEntry;
 import com.stardew.craft.player.StardewCraftingRecipeData.RecipeEntry;
-import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
@@ -17,127 +17,137 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-/**
- * JEI category for Stardew Valley crafting recipes (non-vanilla workbench).
- * Shows ingredients → output with unlock condition.
- */
-public class StardewCraftingCategory implements IRecipeCategory<StardewCraftingCategory.DisplayRecipe> {
+/** JEI projection of the real Stardew crafting registry. */
+public final class StardewCraftingCategory implements IRecipeCategory<StardewCraftingCategory.DisplayRecipe> {
     public static final RecipeType<DisplayRecipe> RECIPE_TYPE = RecipeType.create(
             StardewCraft.MODID, "stardew_crafting", DisplayRecipe.class);
 
-    private static final int GUI_WIDTH = 166;
-    private static final int GUI_HEIGHT = 60;
+    private static final int WIDTH = 176;
+    private static final int HEIGHT = 76;
+    private static final int INPUT_X = 10;
+    private static final int INPUT_Y = 10;
+    private static final int OUTPUT_X = 138;
+    private static final int MAIN_SLOT_Y = 21;
+    private static final int BAND_Y = 56;
 
     private final IDrawable icon;
     private final Component title;
 
     public record DisplayRecipe(
             String recipeId,
-            List<ItemStack> inputs,
+            List<JeiIngredientStacks.Input> inputs,
             ItemStack output,
-            String unlockCondition
-    ) {}
+            Optional<Component> unlockText
+    ) {
+        public DisplayRecipe {
+            inputs = List.copyOf(inputs);
+            output = output.copy();
+            unlockText = unlockText == null ? Optional.empty() : unlockText;
+        }
 
-    @SuppressWarnings("null")
+        public String contentSignature() {
+            return recipeId + '|' + JeiRecipeSignatures.inputs(inputs) + '|'
+                    + JeiRecipeSignatures.stack(output) + '|'
+                    + unlockText.map(text -> text.getContents().toString()).orElse("");
+        }
+    }
+
     public StardewCraftingCategory(IGuiHelper guiHelper) {
-        this.icon = guiHelper.createDrawableIngredient(VanillaTypes.ITEM_STACK,
-                ArtisanRecipeCategory.getItemStack("minecraft:crafting_table"));
+        this.icon = guiHelper.drawableBuilder(
+                        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,
+                                "textures/gui/common/game_menu_tab_4.png"),
+                        0, 0, 16, 16)
+                .setTextureSize(16, 16)
+                .build();
         this.title = Component.translatable("stardewcraft.jei.stardew_crafting");
     }
 
-    @Override public RecipeType<DisplayRecipe> getRecipeType() { return RECIPE_TYPE; }
-    @Override public Component getTitle() { return title; }
-    @Override public int getWidth() { return GUI_WIDTH; }
-    @Override public int getHeight() { return GUI_HEIGHT; }
-    @Override public IDrawable getIcon() { return icon; }
-
-    @SuppressWarnings("null")
     @Override
-    public void setRecipe(@SuppressWarnings("null") IRecipeLayoutBuilder builder,
-                          @SuppressWarnings("null") DisplayRecipe recipe,
-                          @SuppressWarnings("null") IFocusGroup focuses) {
-        // Input slots — up to 4 inputs arranged in a 2×2 grid
-        List<ItemStack> inputs = recipe.inputs();
-        for (int i = 0; i < inputs.size() && i < 4; i++) {
-            int col = i % 2;
-            int row = i / 2;
-            builder.addSlot(RecipeIngredientRole.INPUT, 10 + col * 22, 8 + row * 22)
-                    .addItemStack(inputs.get(i));
-        }
-
-        // Output slot — right side, vertically centred
-        builder.addSlot(RecipeIngredientRole.OUTPUT, 110, 18)
-                .addItemStack(recipe.output());
+    public RecipeType<DisplayRecipe> getRecipeType() {
+        return RECIPE_TYPE;
     }
 
-    @SuppressWarnings("null")
     @Override
-    public void draw(@SuppressWarnings("null") DisplayRecipe recipe,
-                     @SuppressWarnings("null") IRecipeSlotsView recipeSlotsView,
-                     @SuppressWarnings("null") GuiGraphics guiGraphics,
-                     double mouseX, double mouseY) {
+    public Component getTitle() {
+        return title;
+    }
+
+    @Override
+    public int getWidth() {
+        return WIDTH;
+    }
+
+    @Override
+    public int getHeight() {
+        return HEIGHT;
+    }
+
+    @Override
+    public IDrawable getIcon() {
+        return icon;
+    }
+
+    @Override
+    public void setRecipe(IRecipeLayoutBuilder builder, DisplayRecipe recipe, IFocusGroup focuses) {
+        for (int i = 0; i < recipe.inputs().size() && i < 4; i++) {
+            JeiInputGrid.Position position = JeiInputGrid.position(
+                    recipe.inputs().size(), i, INPUT_X, INPUT_Y);
+            builder.addSlot(RecipeIngredientRole.INPUT, position.x(), position.y())
+                    .addItemStacks(recipe.inputs().get(i).stacks())
+                    .setSlotName("input_" + i);
+        }
+        builder.addSlot(RecipeIngredientRole.OUTPUT, OUTPUT_X, MAIN_SLOT_Y)
+                .addItemStack(recipe.output())
+                .setSlotName("output");
+    }
+
+    @Override
+    public void draw(DisplayRecipe recipe, IRecipeSlotsView recipeSlotsView,
+                     GuiGraphics graphics, double mouseX, double mouseY) {
         Font font = Minecraft.getInstance().font;
+        CommonGuiTextures.drawTextureBoxNoShadow(graphics, 0, 0, WIDTH, HEIGHT, 1.0F);
 
-        // Background panel
-        JeiDrawHelper.drawPanel(guiGraphics, 0, 0, GUI_WIDTH, GUI_HEIGHT);
-
-        // Input slot backgrounds (2×2 grid)
-        List<ItemStack> inputs = recipe.inputs();
-        for (int i = 0; i < inputs.size() && i < 4; i++) {
-            int col = i % 2;
-            int row = i / 2;
-            JeiDrawHelper.drawSlotBg(guiGraphics, 9 + col * 22, 7 + row * 22);
+        for (int i = 0; i < recipe.inputs().size() && i < 4; i++) {
+            JeiInputGrid.Position position = JeiInputGrid.position(
+                    recipe.inputs().size(), i, INPUT_X, INPUT_Y);
+            CommonGuiTextures.drawItemSlot18(graphics,
+                    position.x() - 1, position.y() - 1, 1.0F);
         }
+        CommonGuiTextures.drawItemSlot18(graphics, OUTPUT_X - 1, MAIN_SLOT_Y - 1, 1.0F);
+        CommonGuiTextures.drawForwardArrow(graphics, 91, MAIN_SLOT_Y + 3, 1.0F);
 
-        // Output slot — golden highlight
-        JeiDrawHelper.drawOutputSlotBg(guiGraphics, 109, 17);
-
-        // Arrow (between grid and output)
-        JeiDrawHelper.drawArrow(guiGraphics, 60, 20);
-
-        // Unlock condition — bottom of panel
-        if (recipe.unlockCondition() != null && !recipe.unlockCondition().isEmpty()) {
-            String condText = recipe.unlockCondition();
-            int maxW = GUI_WIDTH - 14;
-            if (font.width(condText) > maxW) {
-                // Truncate with ellipsis
-                while (font.width(condText + "…") > maxW && condText.length() > 1) {
-                    condText = condText.substring(0, condText.length() - 1);
-                }
-                condText += "…";
+        recipe.unlockText().ifPresent(text -> {
+            CommonGuiTextures.drawEntryBox(graphics, 8, BAND_Y, WIDTH - 16, 15, 1.0F, false);
+            GuiText.drawCenteredClamped(graphics, font, text, WIDTH / 2,
+                    BAND_Y + 3, WIDTH - 28, JeiDrawHelper.TEXT_BODY, false);
+            if (mouseX >= 8 && mouseX < WIDTH - 8 && mouseY >= BAND_Y && mouseY < BAND_Y + 15
+                    && font.width(text) > WIDTH - 28) {
+                graphics.renderTooltip(font, text, (int) mouseX, (int) mouseY);
             }
-            guiGraphics.drawString(font, condText, 7, 50, JeiDrawHelper.TEXT_MUTED, false);
-        }
+        });
     }
 
-    /**
-     * Build all display recipes from StardewCraftingRecipeData.
-     */
     public static List<DisplayRecipe> buildAllRecipes() {
         List<DisplayRecipe> result = new ArrayList<>();
         for (RecipeEntry entry : StardewCraftingRecipeData.getRecipes()) {
             ItemStack output = StardewCraftingRecipeData.getOutputStack(entry.id());
             if (output.isEmpty()) continue;
 
-            List<ItemStack> inputs = new ArrayList<>();
-            for (IngredientEntry ingr : StardewCraftingRecipeData.getIngredientEntries(entry.id())) {
-                ItemStack inStack = StardewCraftingRecipeData.getDisplayStack(ingr);
-                if (inStack.isEmpty()) continue;
-                if (ingr.count() > 1) {
-                    inStack.setCount(ingr.count());
-                }
-                inputs.add(inStack);
-            }
-            if (inputs.isEmpty()) continue;
-
-            String unlock = StardewCraftingRecipeData.getUnlockCondition(entry.id());
-            result.add(new DisplayRecipe(entry.id(), inputs, output, unlock));
+            List<JeiIngredientStacks.Input> inputs = StardewCraftingRecipeData
+                    .getIngredientEntries(entry.id()).stream()
+                    .map(JeiIngredientStacks::crafting)
+                    .filter(input -> !input.isEmpty())
+                    .toList();
+            if (inputs.isEmpty() || inputs.size() > 4) continue;
+            result.add(new DisplayRecipe(entry.id(), inputs, output, JeiUnlockText.crafting(entry)));
         }
-        return result;
+        return List.copyOf(result);
     }
 }

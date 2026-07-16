@@ -144,10 +144,11 @@ public class LevelUpMenuScreen extends Screen {
             star.draw(graphics, now);
         }
 
-        // Header ribbon (mouseCursors 363,87,58,22, scale 4)
-        LevelUpMenuTextures.drawHeaderRibbon(graphics, xPos + guiWidth / 2 - px(116), yPos - px(40), s4());
-
         StardewGuiUtil.drawDialogueBoxFrame(graphics, xPos, yPos, guiWidth, guiHeight);
+
+        // The ribbon overlaps the frame in vanilla, so it must be drawn after
+        // the frame. Drawing it first hid the lower half of the title.
+        LevelUpMenuTextures.drawHeaderRibbon(graphics, xPos + guiWidth / 2 - px(116), yPos - px(40), s4());
 
         if (isProfessionChooser) {
             drawSkillIcon(graphics, currentSkill, xPos + px(SPACE_SIDE + BORDER_WIDTH), yPos + px(SPACE_TOP + 16));

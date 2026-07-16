@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    "stardewcraft:earth_shale_stairs",
+    "stardewcraft:frost_gneiss_stairs",
+    "stardewcraft:lava_basalt_stairs",
+    "stardewcraft:dark_earth_shale_stairs",
+    "stardewcraft:dark_frost_gneiss_stairs",
+    "stardewcraft:dark_lava_basalt_stairs",
+    "stardewcraft:banded_marble_stairs",
+    "stardewcraft:limestone_stairs",
+    "stardewcraft:mossy_sandstone_stairs",
+    "stardewcraft:cracked_slate_stairs",
+    "stardewcraft:scoria_stairs",
+    "stardewcraft:salt_rock_stairs"
+  ]
+}

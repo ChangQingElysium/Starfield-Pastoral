@@ -32,6 +32,20 @@ public class GeodeLootService {
 
     private static final int GEODE_COST = 25;
 
+    /** Static candidate used by recipe viewers; gameplay rolls continue through {@link #getTreasureFromGeode}. */
+    public record DisplayOutput(ItemStack stack, int minCount, int maxCount) {
+        public DisplayOutput {
+            stack = stack == null ? ItemStack.EMPTY : stack.copy();
+            minCount = Math.max(1, minCount);
+            maxCount = Math.max(minCount, maxCount);
+        }
+
+        @Override
+        public ItemStack stack() {
+            return stack.copy();
+        }
+    }
+
     /**
      * Pending treasure per player — SDV only gives treasure when geodeAnimationTimer <= 0.
      * Stored here until the client sends GeodeClaimPayload after animation finishes.
@@ -267,6 +281,54 @@ public class GeodeLootService {
             return ItemStack.EMPTY;
         }
         return getTreasureFromGeode(geodeType, player);
+    }
+
+    /**
+     * Enumerates every output reachable from the same vanilla geode pools used by gameplay.
+     * This deliberately lives here so JEI cannot drift into a second copied mineral table.
+     */
+    public static List<DisplayOutput> getDisplayOutputs(ItemStack geode) {
+        String geodeType = getGeodeType(geode);
+        if (geodeType == null || geodeType.indexOf(':') >= 0) return List.of();
+
+        LinkedHashMap<Item, int[]> ranges = new LinkedHashMap<>();
+        for (Supplier<Item> supplier : getMineralPool(geodeType)) {
+            addDisplayRange(ranges, supplier.get(), 1, 1);
+        }
+        addDisplayRange(ranges, ModItems.STONE.get(), 1, 20);
+        addDisplayRange(ranges, ModItems.CLAY.get(), 1, 1);
+        switch (geodeType) {
+            case "geode" -> addDisplayRange(ranges, ModItems.EARTH_CRYSTAL.get(), 1, 1);
+            case "frozen_geode" -> addDisplayRange(ranges, ModItems.FROZEN_TEAR.get(), 1, 1);
+            case "magma_geode" -> addDisplayRange(ranges, ModItems.FIRE_QUARTZ.get(), 1, 1);
+            case "omni_geode" -> {
+                addDisplayRange(ranges, ModItems.EARTH_CRYSTAL.get(), 1, 1);
+                addDisplayRange(ranges, ModItems.FROZEN_TEAR.get(), 1, 1);
+                addDisplayRange(ranges, ModItems.FIRE_QUARTZ.get(), 1, 1);
+                addDisplayRange(ranges, ModItems.PRISMATIC_SHARD.get(), 1, 1);
+            }
+            default -> {
+                return List.of();
+            }
+        }
+        addDisplayRange(ranges, ModItems.COPPER_ORE.get(), 1, 20);
+        addDisplayRange(ranges, ModItems.IRON_ORE.get(), 1, 20);
+        addDisplayRange(ranges, ModItems.COAL.get(), 1, 20);
+        if (!"geode".equals(geodeType)) {
+            addDisplayRange(ranges, ModItems.GOLD_ORE.get(), 1, 20);
+        }
+        if ("magma_geode".equals(geodeType) || "omni_geode".equals(geodeType)) {
+            addDisplayRange(ranges, ModItems.IRIDIUM_ORE.get(), 1, 11);
+        }
+        return ranges.entrySet().stream()
+                .map(entry -> new DisplayOutput(new ItemStack(entry.getKey()),
+                        entry.getValue()[0], entry.getValue()[1]))
+                .toList();
+    }
+
+    private static void addDisplayRange(Map<Item, int[]> ranges, Item item, int minCount, int maxCount) {
+        ranges.merge(item, new int[]{minCount, maxCount}, (existing, added) -> new int[]{
+                Math.min(existing[0], added[0]), Math.max(existing[1], added[1])});
     }
 
     // ────────────────────────────────────────────────────────────────────

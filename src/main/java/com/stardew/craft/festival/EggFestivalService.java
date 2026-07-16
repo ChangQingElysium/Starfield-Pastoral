@@ -13,6 +13,7 @@ import com.stardew.craft.network.payload.FestivalMusicStatePayload;
 import com.stardew.craft.network.payload.OpenFestivalConfirmPayload;
 import com.stardew.craft.network.payload.OpenShopScreenPayload;
 import com.stardew.craft.player.PlayerStardewDataAPI;
+import com.stardew.craft.player.PlayerDisplayName;
 import com.stardew.craft.shop.ShopItemEntry;
 import com.stardew.craft.shop.ShopRegistry;
 import com.stardew.craft.sound.ModSounds;
@@ -33,6 +34,7 @@ import net.minecraft.world.entity.Interaction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.scores.ScoreHolder;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.ArrayList;
@@ -122,7 +124,6 @@ public final class EggFestivalService {
     private static final Set<UUID> AWARD_CUTSCENE_PARTICIPANTS = new LinkedHashSet<>();
     private static final Set<UUID> AWARD_CUTSCENE_DONE = new LinkedHashSet<>();
     private static Integer frozenMinute;
-    private static Long frozenOverworldDayTime;
     private static MainEventPhase mainEventPhase = MainEventPhase.FREE;
     private static long eggHuntEndTick = -1L;
     private static long lastEggHuntHudTick = -1L;
@@ -172,19 +173,12 @@ public final class EggFestivalService {
     public static long applyTimeFreeze(ServerLevel level, StardewTimeManager timeManager) {
         long currentVirtual = timeManager.getVirtualDayTime(level);
         if (frozenMinute == null || !hasOnlineParticipant(level)) {
-            frozenOverworldDayTime = null;
             return currentVirtual;
         }
         ServerLevel overworld = level.getServer().overworld();
-        if (frozenOverworldDayTime == null) {
-            frozenOverworldDayTime = overworld.getDayTime();
-        }
         long dayBase = Math.floorDiv(currentVirtual, 24000L) * 24000L;
         long target = dayBase + com.stardew.craft.event.DimensionEventHandler.stardewMinutesToMcTime(frozenMinute);
-        if (overworld.getDayTime() != frozenOverworldDayTime) {
-            overworld.setDayTime(frozenOverworldDayTime);
-        }
-        long targetOffset = target - frozenOverworldDayTime;
+        long targetOffset = target - overworld.getDayTime();
         if (timeManager.getDayTimeOffset() != targetOffset) {
             timeManager.setDayTimeOffsetRaw(targetOffset);
         }
@@ -589,7 +583,7 @@ public final class EggFestivalService {
                 grantWinnerPrizeTicket(winner);
             }
             awardWinnerText = winners.size() == 1
-                ? winners.get(0).getScoreboardName() + "!"
+                ? PlayerDisplayName.get(winners.get(0)) + "!"
                 : "The winners are " + winnerNames(winners) + "!";
         } else {
             awardWinnerText = "Abigail!";
@@ -1054,7 +1048,7 @@ public final class EggFestivalService {
 
     private static String winnerNames(List<ServerPlayer> winners) {
         return winners.stream()
-            .map(ServerPlayer::getScoreboardName)
+            .map(PlayerDisplayName::get)
             .reduce((left, right) -> left + "、" + right)
             .orElse("<none>");
     }
@@ -1071,9 +1065,16 @@ public final class EggFestivalService {
         if (level == null) {
             return;
         }
+        var scoreboard = level.getScoreboard();
+        var objective = scoreboard.getObjective(EGG_HUNT_SCOREBOARD_OBJECTIVE);
+        if (objective == null) {
+            return;
+        }
         for (ServerPlayer participant : onlineParticipants(level)) {
-            runServerCommand(level, "scoreboard players set " + participant.getScoreboardName() + " "
-                + EGG_HUNT_SCOREBOARD_OBJECTIVE + " " + EGG_HUNT_COUNTS.getOrDefault(participant.getUUID(), 0));
+            var score = scoreboard.getOrCreatePlayerScore(
+                    ScoreHolder.forNameOnly(participant.getStringUUID()), objective);
+            score.set(EGG_HUNT_COUNTS.getOrDefault(participant.getUUID(), 0));
+            score.display(Component.literal(PlayerDisplayName.get(participant)));
         }
     }
 
@@ -1252,14 +1253,10 @@ public final class EggFestivalService {
         if (frozenMinute == null) {
             frozenMinute = FESTIVAL_START_MINUTE;
         }
-        if (level != null && frozenOverworldDayTime == null) {
-            frozenOverworldDayTime = level.getServer().overworld().getDayTime();
-        }
     }
 
     private static void stopTimeFreeze() {
         frozenMinute = null;
-        frozenOverworldDayTime = null;
     }
 
     private static void resetMainEventState() {

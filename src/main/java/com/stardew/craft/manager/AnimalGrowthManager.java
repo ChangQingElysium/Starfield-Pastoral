@@ -48,8 +48,6 @@ import javax.annotation.Nonnull;
 @SuppressWarnings("null")
 public class AnimalGrowthManager extends SavedData {
     private static final String DATA_NAME = "stardew_animal_growth_manager";
-    /** 动物搜索范围：建筑边界外扩 64 格（覆盖牧场区域） */
-    private static final int ENTITY_SEARCH_EXPAND = 64;
     private static final double PIG_TRUFFLE_FIND_CHANCE_PER_TICK = 0.0002D;
     private static final int APPROX_TICKS_PER_TEN_MINUTE_SLOT = 167;
     private static final double PIG_TRUFFLE_FIND_CHANCE_PER_SLOT = 1.0D
@@ -224,7 +222,7 @@ public class AnimalGrowthManager extends SavedData {
                 continue;
             }
 
-            BaseCoopAnimalEntity pigEntity = findEntityByManagedId(level, record.animalId(), building);
+            BaseCoopAnimalEntity pigEntity = findEntityByManagedId(level, record.animalId());
             if (pigEntity == null) {
                 continue;
             }
@@ -286,34 +284,8 @@ public class AnimalGrowthManager extends SavedData {
         return random.nextDouble() < (record.friendship() / 1500.0D);
     }
 
-    private BaseCoopAnimalEntity findEntityByManagedId(ServerLevel level, long animalId, AnimalBuildingRecord building) {
-        if (animalId <= 0L) {
-            return null;
-        }
-        AABB searchBox = buildingSearchBox(building);
-        for (BaseCoopAnimalEntity entity : level.getEntitiesOfClass(BaseCoopAnimalEntity.class, searchBox)) {
-            if (entity.getManagedAnimalId() == animalId) {
-                return entity;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * 根据建筑边界构造搜索 AABB。如果 building 为 null，退回到全世界搜索。
-     */
-    private static AABB buildingSearchBox(AnimalBuildingRecord building) {
-        if (building == null) {
-            return new AABB(-30_000_000, -64, -30_000_000, 30_000_000, 320, 30_000_000);
-        }
-        return new AABB(
-            building.minX() - ENTITY_SEARCH_EXPAND,
-            building.minY() - 4,
-            building.minZ() - ENTITY_SEARCH_EXPAND,
-            building.maxX() + ENTITY_SEARCH_EXPAND,
-            building.maxY() + 4,
-            building.maxZ() + ENTITY_SEARCH_EXPAND
-        );
+    private BaseCoopAnimalEntity findEntityByManagedId(ServerLevel level, long animalId) {
+        return AnimalEntitySyncService.findLoaded(level, animalId);
     }
 
     /**
@@ -325,7 +297,7 @@ public class AnimalGrowthManager extends SavedData {
         AnimalProfile profile = resolveProfile(record.animalTypeId());
         RandomSource random = randomForAnimalDay(record.animalId(), absoluteDaysPlayed);
         AnimalBuildingRecord building = worldData.getBuilding(record.buildingId()).orElse(null);
-        BaseCoopAnimalEntity runtimeEntity = findEntityByManagedId(level, record.animalId(), building);
+        BaseCoopAnimalEntity runtimeEntity = findEntityByManagedId(level, record.animalId());
         StardewAnimalData publicData = runtimeEntity == null
                 ? null
                 : StardewAgricultureDataApi.animal(runtimeEntity);
@@ -683,7 +655,7 @@ public class AnimalGrowthManager extends SavedData {
             return false;
         }
 
-        BaseCoopAnimalEntity entity = findEntityByManagedId(level, record.animalId(), building);
+        BaseCoopAnimalEntity entity = findEntityByManagedId(level, record.animalId());
         if (entity == null) {
             // 区块已加载但找不到实体 —— 可能是动物在别处，保守假设室内
             return false;
@@ -695,7 +667,7 @@ public class AnimalGrowthManager extends SavedData {
         if (building == null) {
             return;
         }
-        BaseCoopAnimalEntity entity = findEntityByManagedId(level, record.animalId(), building);
+        BaseCoopAnimalEntity entity = findEntityByManagedId(level, record.animalId());
         if (entity == null) {
             return;
         }

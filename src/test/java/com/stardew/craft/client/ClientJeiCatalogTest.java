@@ -26,7 +26,9 @@ class ClientJeiCatalogTest {
         Set<Integer> seasons = new HashSet<>(Set.of(0));
         List<ClientJeiCatalog.ShopEntry> shops = new ArrayList<>(List.of(
                 new ClientJeiCatalog.ShopEntry(
-                        source, "example:apple_shop", 50, 1, seasons, 1, false)));
+                        source, "example:apple_shop", "Pierre", 50, 1,
+                        new ItemStack(Items.EMERALD, 3), 3, 2,
+                        seasons, 2, 40, true, 4, 1, true, List.of("unknown"), false)));
         List<ClientJeiCatalog.GeodeEntry> geodes = new ArrayList<>(List.of(
                 new ClientJeiCatalog.GeodeEntry(
                         new ItemStack(Items.AMETHYST_CLUSTER), new ItemStack(Items.DIAMOND, 2))));
@@ -39,7 +41,10 @@ class ClientJeiCatalogTest {
 
         assertTrue(ClientJeiCatalog.isSynced());
         assertEquals(4, ClientJeiCatalog.shops().getFirst().item().getCount());
+        assertEquals("Pierre", ClientJeiCatalog.shops().getFirst().ownerNpcId());
         assertEquals(Set.of(0), ClientJeiCatalog.shops().getFirst().seasons());
+        assertEquals(3, ClientJeiCatalog.shops().getFirst().tradeItem().getCount());
+        assertEquals(2, ClientJeiCatalog.shops().getFirst().purchaseStack());
         ItemStack returned = ClientJeiCatalog.shops().getFirst().item();
         returned.setCount(2);
         assertEquals(4, ClientJeiCatalog.shops().getFirst().item().getCount());

@@ -354,11 +354,6 @@ public class PreservesItem extends Item implements IStardewItem {
         }
         ResourceLocation sourceId = getSourceItemId(stack);
         String sourceKey = sourceId == null ? "" : sourceId.toString();
-        if (preservesItem.getPreserveType() == PreserveType.DRIED_FRUIT
-                || preservesItem.getPreserveType() == PreserveType.DRIED_MUSHROOMS) {
-            int quality = getIntTag(stack, TAG_QUALITY, QualityHelper.NORMAL);
-            return preservesItem.getPreserveType().name() + ":" + sourceKey + ":q=" + quality;
-        }
         return preservesItem.getPreserveType().name() + ":" + sourceKey;
     }
 

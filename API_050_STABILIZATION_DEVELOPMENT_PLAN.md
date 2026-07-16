@@ -386,7 +386,7 @@ flowchart TD
 
 1. 优先读取 `StardewEquipmentDataApi.get(stack).slot()`。
 2. 没有公共数据时回退现有 `StardewRingItem`、`CombinedRingItem`、`StardewBootsItem` 兼容判断。
-3. `EquipmentActionPayload`、属性计算、界面提示和可选 Curios 兼容使用同一结果。
+3. `EquipmentActionPayload`、属性计算和界面提示使用同一结果。
 4. 服务端再次验证槽位，不能信任客户端发送的目标槽。
 
 ### 11.2 为什么必须迁移为完整 `ItemStack`

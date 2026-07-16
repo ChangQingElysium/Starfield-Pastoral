@@ -89,7 +89,8 @@ public record FarmPermSyncPayload(
             // 跳过农场成员（他们已有完整权限）
             if (farm != null && farm.getMembers().contains(online.getUUID())) continue;
             int override = mgr.getOverridePermission(ownerUUID, online.getUUID());
-            entries.add(new PlayerPermEntry(online.getUUID(), online.getName().getString(), override));
+            entries.add(new PlayerPermEntry(online.getUUID(),
+                    com.stardew.craft.player.PlayerDisplayName.get(online), override));
         }
 
         net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,

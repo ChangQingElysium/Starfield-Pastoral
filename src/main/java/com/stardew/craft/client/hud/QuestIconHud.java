@@ -58,6 +58,7 @@ public class QuestIconHud {
     public static void onRenderGui(RenderGuiEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null) return;
+        if (mc.screen instanceof StardewHudLayoutEditorScreen) return;
         if (mc.options.hideGui || mc.player.isSpectator()) return;
         if (com.stardew.craft.client.hud.FestivalHudState.hidden()) return;
 
@@ -91,21 +92,26 @@ public class QuestIconHud {
     @SuppressWarnings("null")
     private static void render(GuiGraphics g, Minecraft mc) {
         int screenWidth = mc.getWindow().getGuiScaledWidth();
-        float hudScale = StardewHudLayout.renderScale(mc.getWindow().getGuiScale());
+        int screenHeight = mc.getWindow().getGuiScaledHeight();
+        StardewHudLayout.Placement placement = StardewHudLayout.current(screenWidth, screenHeight);
+        renderAt(g, mc, placement.x(), placement.y(), placement.scale());
+    }
 
-        // ─── HUD 锚点（与 StardewTimeHud 一致） ───
-        int hudX = StardewHudLayout.anchorX(screenWidth, hudScale);
-        int hudY = StardewHudLayout.anchorY();
+    static void renderPreview(GuiGraphics g, int x, int y, float scale) {
+        renderAt(g, Minecraft.getInstance(), x, y, scale);
+    }
 
+    private static void renderAt(GuiGraphics g, Minecraft mc, int hudX, int hudY, float hudScale) {
         g.pose().pushPose();
+        g.pose().translate(hudX, hudY, 0.0F);
         g.pose().scale(hudScale, hudScale, 1.0F);
         try {
             // ─── Quest button: anchored to bottom-right of moneybox ───
             // SDV: questButton 在 moneyBox 右下角外侧
             int iconW = Math.round(ICON_W * ICON_SCALE);
             int iconH = Math.round(ICON_H * ICON_SCALE);
-            int btnX = hudX + StardewHudLayout.TIME_BG_WIDTH - iconW; // 右对齐 HUD 右边缘
-            int btnY = hudY + StardewHudLayout.TIME_BG_HEIGHT + 2; // 紧贴 HUD 底部下方 2px
+            int btnX = StardewHudLayout.TIME_BG_WIDTH - iconW; // 右对齐 HUD 右边缘
+            int btnY = StardewHudLayout.TIME_BG_HEIGHT + 2; // 紧贴 HUD 底部下方 2px
 
             CommonGuiTextures.drawQuestHudButton(g, btnX, btnY, ICON_SCALE);
 

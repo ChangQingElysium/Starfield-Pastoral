@@ -1,6 +1,7 @@
 package com.stardew.craft.client.hud;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.stardew.craft.Config;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.ClientPlayerDataCache;
 import com.stardew.craft.core.ModDimensions;
@@ -83,6 +84,7 @@ public class StardewPlayerHud {
     public static void onRenderCustomHUD(RenderGuiLayerEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
+        if (mc.screen instanceof StardewHudLayoutEditorScreen) return;
         
         // 只在星露谷维度渲染自定义HUD
         if (!shouldRenderCustomHUD(mc.player)) {
@@ -120,17 +122,10 @@ public class StardewPlayerHud {
      * 渲染星露谷风格的能量和生命条
      */
     private static void renderStardewBars(GuiGraphics graphics, Player player) {
-        // 获取窗口尺寸
         int screenWidth = graphics.guiWidth();
         int screenHeight = graphics.guiHeight();
-
-        // 计算位置：放在“经验条正上方”。
-        // 原版经验条大致在 screenHeight - 32 + 3。
-        int expBarY = screenHeight - 32 + 3;
-        int barY = expBarY - BAR_HEIGHT - 2;
-        
-        // 屏幕中心X坐标
-        int centerX = screenWidth / 2;
+        StardewHudLayout.Placement placement = StardewHudLayout.current(
+                Config.HudElement.PLAYER_BARS, screenWidth, screenHeight);
         
         // 直接从客户端缓存获取数据（和金币HUD一样）
         float currentEnergy = ClientPlayerDataCache.getEnergy();
@@ -164,26 +159,11 @@ public class StardewPlayerHud {
         // 是否疲惫
         boolean exhausted = currentEnergy <= 0;
         
-        // 布局计算：完全对称
-        // 左边：能量条 (图标 - 间距 - 能量条) --(GAP)-- 中心
-        // 右边：中心 --(GAP)-- 能量条 --(间距) - 图标
-        
-        int gap = 15; // 中心两侧的间隙
-        
-        // 左侧渲染坐标
-        // 能量条的右边界是 centerX - gap
-        // 所以能量条的左边界(barX) = centerX - gap - BAR_WIDTH
-        int leftBarX = centerX - gap - BAR_WIDTH;
-        int leftIconX = leftBarX - 4 - ICON_SIZE; // 图标再往左
-        
-        renderEnergyBar(graphics, leftIconX, leftBarX, barY, currentEnergy, (int)maxEnergy, exhausted);
-        
-        // 右侧渲染坐标
-        // 生命条的左边界(barX) = centerX + gap
-        int rightBarX = centerX + gap;
-        int rightIconX = rightBarX + BAR_WIDTH + 4; // 图标在右边
-        
-        renderHealthBar(graphics, rightBarX, rightIconX, barY, currentHealth, maxHealth);
+        graphics.pose().pushPose();
+        graphics.pose().translate(placement.x(), placement.y(), 0.0F);
+        graphics.pose().scale(placement.scale(), placement.scale(), 1.0F);
+        renderBarsAtCurrentPose(graphics, currentEnergy, (int) maxEnergy, exhausted, currentHealth, maxHealth);
+        graphics.pose().popPose();
         
         // 更新抖动计时器
         long currentTime = System.currentTimeMillis();
@@ -199,6 +179,20 @@ public class StardewPlayerHud {
             }
         }
         lastUpdateTime = currentTime;
+    }
+
+    public static void renderPreview(GuiGraphics graphics, int x, int y, float scale) {
+        graphics.pose().pushPose();
+        graphics.pose().translate(x, y, 0.0F);
+        graphics.pose().scale(scale, scale, 1.0F);
+        renderBarsAtCurrentPose(graphics, 270.0F, 270, false, 90, 100);
+        graphics.pose().popPose();
+    }
+
+    private static void renderBarsAtCurrentPose(GuiGraphics graphics, float energy, int maxEnergy,
+                                                boolean exhausted, int health, int maxHealth) {
+        renderEnergyBar(graphics, 0, 16, 3, energy, maxEnergy, exhausted);
+        renderHealthBar(graphics, 154, 266, 3, health, maxHealth);
     }
     
     /**

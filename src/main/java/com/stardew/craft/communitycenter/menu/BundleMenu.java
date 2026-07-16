@@ -605,7 +605,7 @@ public class BundleMenu extends AbstractContainerMenu {
     private void broadcastBundleDonateMessage(ServerPlayer player, Component itemName) {
         if (!(player.level() instanceof ServerLevel serverLevel)) return;
         Component msg = Component.translatable("stardewcraft.chat.bundleDonate",
-                player.getDisplayName(), itemName);
+                com.stardew.craft.player.PlayerDisplayName.get(player), itemName);
         for (ServerPlayer sp : serverLevel.getServer().getPlayerList().getPlayers()) {
             sp.sendSystemMessage(msg);
         }
@@ -618,7 +618,7 @@ public class BundleMenu extends AbstractContainerMenu {
     private void broadcastBundleCompleteMessage(ServerPlayer player) {
         if (!(player.level() instanceof ServerLevel serverLevel)) return;
         Component msg = Component.translatable("stardewcraft.chat.bundleComplete",
-                player.getDisplayName());
+                com.stardew.craft.player.PlayerDisplayName.get(player));
         for (ServerPlayer sp : serverLevel.getServer().getPlayerList().getPlayers()) {
             sp.sendSystemMessage(msg);
         }

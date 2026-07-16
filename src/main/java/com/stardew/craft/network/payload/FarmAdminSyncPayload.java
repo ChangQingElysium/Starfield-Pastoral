@@ -73,12 +73,15 @@ public record FarmAdminSyncPayload(
     }
 
     public static FarmAdminSyncPayload fromRegistry(FarmInstanceRegistry registry) {
+        net.minecraft.server.MinecraftServer server =
+                net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer();
         Collection<FarmInstance> farms = registry.getAllFarms();
         List<FarmEntry> entries = new ArrayList<>(farms.size());
         for (FarmInstance farm : farms) {
             entries.add(new FarmEntry(
                     farm.getOwnerUUID(),
-                    farm.getOwnerName(),
+                    server == null ? farm.getOwnerName()
+                            : com.stardew.craft.player.PlayerDisplayName.get(server, farm.getOwnerUUID()),
                     farm.getFarmName(),
                     farm.getSlotIndex(),
                     farm.getOrigin(),

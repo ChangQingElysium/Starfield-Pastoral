@@ -1,7 +1,10 @@
 package com.stardew.craft.integration.jei;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.client.gui.common.CommonGuiTextures;
+import com.stardew.craft.client.gui.common.GuiText;
 import com.stardew.craft.item.ModItems;
+import com.stardew.craft.shop.GeodeLootService;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
@@ -15,134 +18,132 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
-/**
- * JEI category for geode processing — shows each geode type and all possible mineral outputs.
- * Each "recipe" displays one geode → one possible output mineral.
- */
-@SuppressWarnings("null")
-public class GeodeProcessingCategory implements IRecipeCategory<GeodeProcessingCategory.DisplayEntry> {
+/** Geode source pages built from the output candidates exposed by the gameplay service. */
+public final class GeodeProcessingCategory implements IRecipeCategory<GeodeProcessingCategory.DisplayEntry> {
     public static final RecipeType<DisplayEntry> RECIPE_TYPE = RecipeType.create(
             StardewCraft.MODID, "geode_processing", DisplayEntry.class);
 
-    private static final int GUI_WIDTH = 160;
-    private static final int GUI_HEIGHT = 44;
+    private static final int WIDTH = 176;
+    private static final int HEIGHT = 64;
+    private static final int INPUT_X = 10;
+    private static final int CRUSHER_X = 77;
+    private static final int OUTPUT_X = 138;
+    private static final int SLOT_Y = 13;
 
     private final IDrawable icon;
     private final Component title;
 
-    public record DisplayEntry(ItemStack geode, ItemStack mineral) {}
+    public record DisplayEntry(ItemStack geode, ItemStack output, int minCount, int maxCount) {
+        public DisplayEntry {
+            geode = geode == null ? ItemStack.EMPTY : geode.copy();
+            output = output == null ? ItemStack.EMPTY : output.copy();
+            minCount = Math.max(1, minCount);
+            maxCount = Math.max(minCount, maxCount);
+        }
 
-    @SuppressWarnings("null")
+        public DisplayEntry(ItemStack geode, ItemStack output) {
+            this(geode, output, Math.max(1, output.getCount()), Math.max(1, output.getCount()));
+        }
+
+        @Override
+        public ItemStack geode() {
+            return geode.copy();
+        }
+
+        @Override
+        public ItemStack output() {
+            return output.copy();
+        }
+
+        public String contentSignature() {
+            return JeiRecipeSignatures.stack(geode) + '|' + JeiRecipeSignatures.stack(output)
+                    + '|' + minCount + '|' + maxCount;
+        }
+    }
+
     public GeodeProcessingCategory(IGuiHelper guiHelper) {
         this.icon = guiHelper.createDrawableIngredient(VanillaTypes.ITEM_STACK,
                 new ItemStack(ModItems.GEODE.get()));
         this.title = Component.translatable("stardewcraft.jei.geode_processing");
-        JeiDrawHelper.initGoldIcon(guiHelper);
     }
 
-    @Override public RecipeType<DisplayEntry> getRecipeType() { return RECIPE_TYPE; }
-    @Override public Component getTitle() { return title; }
-    @Override public int getWidth() { return GUI_WIDTH; }
-    @Override public int getHeight() { return GUI_HEIGHT; }
-    @Override public IDrawable getIcon() { return icon; }
-
-    @SuppressWarnings("null")
     @Override
-    public void setRecipe(@SuppressWarnings("null") IRecipeLayoutBuilder builder,
-                          @SuppressWarnings("null") DisplayEntry recipe,
-                          @SuppressWarnings("null") IFocusGroup focuses) {
-        builder.addSlot(RecipeIngredientRole.INPUT, 12, 15)
-                .addItemStack(recipe.geode());
-        builder.addSlot(RecipeIngredientRole.OUTPUT, 62, 15)
-                .addItemStack(recipe.mineral());
+    public RecipeType<DisplayEntry> getRecipeType() {
+        return RECIPE_TYPE;
     }
 
-    @SuppressWarnings("null")
     @Override
-    public void draw(@SuppressWarnings("null") DisplayEntry recipe,
-                     @SuppressWarnings("null") IRecipeSlotsView recipeSlotsView,
-                     @SuppressWarnings("null") GuiGraphics guiGraphics,
-                     double mouseX, double mouseY) {
+    public Component getTitle() {
+        return title;
+    }
+
+    @Override
+    public int getWidth() {
+        return WIDTH;
+    }
+
+    @Override
+    public int getHeight() {
+        return HEIGHT;
+    }
+
+    @Override
+    public IDrawable getIcon() {
+        return icon;
+    }
+
+    @Override
+    public void setRecipe(IRecipeLayoutBuilder builder, DisplayEntry recipe, IFocusGroup focuses) {
+        builder.addSlot(RecipeIngredientRole.INPUT, INPUT_X, SLOT_Y)
+                .addItemStack(recipe.geode())
+                .setSlotName("geode");
+        builder.addSlot(RecipeIngredientRole.CATALYST, CRUSHER_X, SLOT_Y)
+                .addItemStack(new ItemStack(ModItems.GEODE_CRUSHER.get()))
+                .setSlotName("processor");
+        builder.addSlot(RecipeIngredientRole.OUTPUT, OUTPUT_X, SLOT_Y)
+                .addItemStack(recipe.output())
+                .setSlotName("output");
+    }
+
+    @Override
+    public void draw(DisplayEntry recipe, IRecipeSlotsView recipeSlotsView,
+                     GuiGraphics graphics, double mouseX, double mouseY) {
         Font font = Minecraft.getInstance().font;
+        CommonGuiTextures.drawTextureBoxNoShadow(graphics, 0, 0, WIDTH, HEIGHT, 1.0F);
+        CommonGuiTextures.drawItemSlot18(graphics, INPUT_X - 1, SLOT_Y - 1, 1.0F);
+        CommonGuiTextures.drawItemSlot18(graphics, CRUSHER_X - 1, SLOT_Y - 1, 1.0F);
+        CommonGuiTextures.drawItemSlot18(graphics, OUTPUT_X - 1, SLOT_Y - 1, 1.0F);
+        CommonGuiTextures.drawForwardArrow(graphics, 56, SLOT_Y + 3, 1.0F);
+        CommonGuiTextures.drawForwardArrow(graphics, 117, SLOT_Y + 3, 1.0F);
 
-        // Background panel
-        JeiDrawHelper.drawPanel(guiGraphics, 0, 0, GUI_WIDTH, GUI_HEIGHT);
-
-        // Slots
-        JeiDrawHelper.drawSlotBg(guiGraphics, 11, 14);
-        JeiDrawHelper.drawOutputSlotBg(guiGraphics, 61, 14);
-
-        // Arrow
-        JeiDrawHelper.drawArrow(guiGraphics, 34, 17);
-
-        // Geode name — right side (from item's translated name)
-        String geodeName = recipe.geode().getHoverName().getString();
-        guiGraphics.drawString(font, geodeName, 86, 10, JeiDrawHelper.TEXT_TITLE, false);
-
-        // Cost with gold icon
-        JeiDrawHelper.drawGoldAmount(guiGraphics, font, 86, 24, 25);
+        CommonGuiTextures.drawEntryBox(graphics, 8, 44, WIDTH - 16, 15, 1.0F, false);
+        MutableComponent details = Component.translatable("stardewcraft.jei.geode.cost", 25);
+        if (recipe.minCount() != recipe.maxCount()) {
+            details.append("  •  ").append(Component.translatable(
+                    "stardewcraft.jei.geode.output_range", recipe.minCount(), recipe.maxCount()));
+        }
+        GuiText.drawCenteredClamped(graphics, font, details, WIDTH / 2, 47,
+                WIDTH - 28, JeiDrawHelper.TEXT_BODY, false);
     }
 
-    /**
-     * Build all display entries — one per geode/mineral pair.
-     * Uses reflection-free access to the hardcoded arrays in GeodeLootService.
-     * Since the pools are package-private, we duplicate the pool references here.
-     */
     public static List<DisplayEntry> buildAllEntries() {
         List<DisplayEntry> result = new ArrayList<>();
-
-        addGeodeEntries(result, ModItems.GEODE,
-                ModItems.ALAMITE, ModItems.CALCITE, ModItems.JAMBORITE, ModItems.JAGOITE,
-                ModItems.MALACHITE, ModItems.NEKOITE, ModItems.ORPIMENT, ModItems.PETRIFIED_SLIME,
-                ModItems.THUNDER_EGG, ModItems.CELESTINE, ModItems.SANDSTONE, ModItems.GRANITE,
-                ModItems.LIMESTONE_MINERAL, ModItems.MUDSTONE, ModItems.SLATE, ModItems.DWARVISH_HELM);
-
-        addGeodeEntries(result, ModItems.FROZEN_GEODE,
-                ModItems.AERINITE, ModItems.ESPERITE, ModItems.FLUORAPATITE, ModItems.GEMINITE,
-                ModItems.KYANITE, ModItems.LUNARITE, ModItems.PYRITE, ModItems.OCEAN_STONE,
-                ModItems.GHOST_CRYSTAL, ModItems.OPAL, ModItems.MARBLE, ModItems.SOAPSTONE,
-                ModItems.HEMATITE, ModItems.FAIRY_STONE, ModItems.ANCIENT_DRUM);
-
-        addGeodeEntries(result, ModItems.MAGMA_GEODE,
-                ModItems.BIXITE, ModItems.BARYTE, ModItems.DOLOMITE, ModItems.HELVITE,
-                ModItems.NEPTUNITE, ModItems.LEMON_STONE, ModItems.TIGERSEYE, ModItems.JASPER,
-                ModItems.FIRE_OPAL, ModItems.BASALT, ModItems.OBSIDIAN, ModItems.STAR_SHARDS,
-                ModItems.DWARF_GADGET);
-
-        // Omni geode shows all minerals from all three pools - can drop any of them
-        addGeodeEntries(result, ModItems.OMNI_GEODE,
-                ModItems.ALAMITE, ModItems.CALCITE, ModItems.JAMBORITE, ModItems.JAGOITE,
-                ModItems.MALACHITE, ModItems.NEKOITE, ModItems.ORPIMENT, ModItems.PETRIFIED_SLIME,
-                ModItems.THUNDER_EGG, ModItems.CELESTINE, ModItems.SANDSTONE, ModItems.GRANITE,
-                ModItems.LIMESTONE_MINERAL, ModItems.MUDSTONE, ModItems.SLATE, ModItems.DWARVISH_HELM,
-                ModItems.AERINITE, ModItems.ESPERITE, ModItems.FLUORAPATITE, ModItems.GEMINITE,
-                ModItems.KYANITE, ModItems.LUNARITE, ModItems.PYRITE, ModItems.OCEAN_STONE,
-                ModItems.GHOST_CRYSTAL, ModItems.OPAL, ModItems.MARBLE, ModItems.SOAPSTONE,
-                ModItems.HEMATITE, ModItems.FAIRY_STONE, ModItems.ANCIENT_DRUM,
-                ModItems.BIXITE, ModItems.BARYTE, ModItems.DOLOMITE, ModItems.HELVITE,
-                ModItems.NEPTUNITE, ModItems.LEMON_STONE, ModItems.TIGERSEYE, ModItems.JASPER,
-                ModItems.FIRE_OPAL, ModItems.BASALT, ModItems.OBSIDIAN, ModItems.STAR_SHARDS,
-                ModItems.DWARF_GADGET);
-
-        return result;
+        addVanilla(result, new ItemStack(ModItems.GEODE.get()));
+        addVanilla(result, new ItemStack(ModItems.FROZEN_GEODE.get()));
+        addVanilla(result, new ItemStack(ModItems.MAGMA_GEODE.get()));
+        addVanilla(result, new ItemStack(ModItems.OMNI_GEODE.get()));
+        return List.copyOf(result);
     }
 
-    @SafeVarargs
-    private static void addGeodeEntries(List<DisplayEntry> result,
-                                        Supplier<? extends net.minecraft.world.item.Item> geodeSupplier,
-                                        Supplier<? extends net.minecraft.world.item.Item>... minerals) {
-        ItemStack geode = new ItemStack(geodeSupplier.get());
-        for (var mineralSupplier : minerals) {
-            ItemStack mineral = new ItemStack(mineralSupplier.get());
-            if (!mineral.isEmpty()) {
-                result.add(new DisplayEntry(geode.copy(), mineral));
-            }
+    private static void addVanilla(List<DisplayEntry> result, ItemStack geode) {
+        for (GeodeLootService.DisplayOutput output : GeodeLootService.getDisplayOutputs(geode)) {
+            result.add(new DisplayEntry(geode, output.stack(), output.minCount(), output.maxCount()));
         }
     }
 }

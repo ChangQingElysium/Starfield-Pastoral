@@ -112,16 +112,17 @@ public class FarmSelectionScreen extends Screen {
 
         int sectionPadding = Math.max(6, ui(16));
         int sectionGap = Math.max(8, ui(24));
+        int contentTopGap = sectionGap + Math.max(4, ui(16));
 
         // 左列表：每行至少保留一个字体高度及足够的点击留白。
         listX = contentX + sectionPadding;
-        listY = partY + sectionGap;
+        listY = partY + contentTopGap;
         listW = leftColW - sectionPadding * 2;
         rowH = Math.max(this.font.lineHeight + 10, ui(72));
 
         // 右栏
         rightX = dividerX + borderUnit + sectionPadding;
-        rightY = partY + sectionGap;
+        rightY = partY + contentTopGap;
         rightW = contentX + contentW - rightX - sectionPadding;
 
         // 名称输入区域独立占据右栏底部，不再让输入框、骰子和 OK 互相叠压。
@@ -559,7 +560,8 @@ public class FarmSelectionScreen extends Screen {
     private String generateDefaultName() {
         if (this.minecraft != null && this.minecraft.player != null) {
             return Component.translatable("gui.stardewcraft.farm_selection.default_name.player",
-                    this.minecraft.player.getName()).getString();
+                    com.stardew.craft.client.ClientPlayerDataCache.getPlayerDisplayName(
+                            this.minecraft.player.getName().getString())).getString();
         }
         return Component.translatable("gui.stardewcraft.farm_selection.default_name").getString();
     }

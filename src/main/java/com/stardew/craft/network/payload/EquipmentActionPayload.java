@@ -12,6 +12,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
@@ -65,7 +66,57 @@ public record EquipmentActionPayload(int slotType) implements CustomPacketPayloa
             }
 
             // sync back to client
-            PacketDistributor.sendToPlayer(player, new EquipmentSyncPayload(
+            syncEquipment(player, data);
+            player.containerMenu.broadcastChanges();
+            player.connection.send(new ClientboundContainerSetSlotPacket(
+                    -1, player.containerMenu.getStateId(), -1, player.containerMenu.getCarried()));
+        });
+    }
+
+    /** Original InventoryPage parity: shift-click equips an item into the first compatible empty slot. */
+    public static boolean tryQuickEquip(ServerPlayer player, ItemStack source) {
+        if (source.isEmpty()) {
+            return false;
+        }
+
+        PlayerStardewData data = PlayerDataManager.getPlayerData(player);
+        ItemStack equipped = source.copyWithCount(1);
+        if (com.stardew.craft.combat.equipment.EquipmentSlotResolver.isRing(source)) {
+            if (data.getEquippedLeftRingStack().isEmpty()) {
+                data.setEquippedLeftRingStack(equipped);
+            } else if (data.getEquippedRightRingStack().isEmpty()) {
+                data.setEquippedRightRingStack(equipped);
+            } else {
+                return false;
+            }
+        } else if (com.stardew.craft.combat.equipment.EquipmentSlotResolver.isBoots(source)) {
+            if (!data.getEquippedBootsStack().isEmpty()) {
+                return false;
+            }
+            data.setEquippedBootsStack(equipped);
+        } else if (source.getItem() instanceof StardewTrinketItem) {
+            if (data.getUnlockedTrinketSlots() <= 0 || !data.getEquippedTrinket().isEmpty()) {
+                return false;
+            }
+            StardewTrinketItem.ensureGenerated(equipped, data.getTotalMoneyEarned(), player.getRandom());
+            data.setEquippedTrinket(equipped);
+        } else if (source.getItem() instanceof StardewCosmeticItem cosmetic) {
+            StardewCosmeticSlot slot = cosmetic.getCosmeticSlot();
+            if (!getEquippedCosmetic(data, slot).isEmpty()) {
+                return false;
+            }
+            setEquippedCosmetic(data, slot, BuiltInRegistries.ITEM.getKey(source.getItem()).toString());
+        } else {
+            return false;
+        }
+
+        source.shrink(1);
+        syncEquipment(player, data);
+        return true;
+    }
+
+    private static void syncEquipment(ServerPlayer player, PlayerStardewData data) {
+        PacketDistributor.sendToPlayer(player, new EquipmentSyncPayload(
                     data.getEquippedLeftRingStack(),
                     data.getEquippedRightRingStack(),
                     data.getEquippedBootsStack(),
@@ -74,8 +125,7 @@ public record EquipmentActionPayload(int slotType) implements CustomPacketPayloa
                     data.getEquippedShirt(),
                     data.getEquippedPants()
             ));
-            CosmeticAppearanceSync.broadcast(player, data);
-        });
+        CosmeticAppearanceSync.broadcast(player, data);
     }
 
     private static void handleRingSlot(ServerPlayer player, PlayerStardewData data, ItemStack carried, boolean left) {

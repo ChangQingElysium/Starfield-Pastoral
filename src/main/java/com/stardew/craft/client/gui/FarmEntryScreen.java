@@ -44,7 +44,7 @@ public class FarmEntryScreen extends Screen {
     private int panelX, panelY, panelW, panelH;
     private int borderUnit;
     private int contentX, contentY, contentW, contentH;
-    private int listY, listH;
+    private int partY, listY, listH;
     private int rowH;
     private int scrollOffset = 0;
     private int maxVisible;
@@ -95,7 +95,8 @@ public class FarmEntryScreen extends Screen {
         // 行高：两行文字(农场名 + 主人名) + 间距
         rowH = this.font.lineHeight * 2 + ui(24);
         int titleAreaH = ui(48);
-        listY = contentY + titleAreaH + borderUnit;
+        partY = contentY + titleAreaH + borderUnit / 2;
+        listY = contentY + titleAreaH + borderUnit + Math.max(4, ui(16));
         listH = contentY + contentH - listY;
         maxVisible = Math.max(1, listH / rowH);
         scrollOffset = Math.min(scrollOffset, Math.max(0, sortedFarms.size() - maxVisible));
@@ -205,7 +206,6 @@ public class FarmEntryScreen extends Screen {
             contentY + ui(12), panelW - ui(96), 0x582A11, false);
 
         // 标题下方分隔线
-        int partY = listY - borderUnit / 2;
         StardewGuiUtil.drawHorizontalPartition(graphics, panelX, partY, panelW, s4());
 
         // 列表（scissor 裁剪）

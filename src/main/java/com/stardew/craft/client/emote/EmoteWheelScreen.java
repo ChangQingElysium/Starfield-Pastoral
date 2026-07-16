@@ -19,7 +19,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 @SuppressWarnings("null")
-public final class EmoteWheelScreen extends Screen {
+public final class EmoteWheelScreen extends Screen implements com.stardew.craft.client.gui.StardewRealtimeScreen {
 
 	private static final ResourceLocation EMOTES_TEXTURE = ResourceLocation.fromNamespaceAndPath("stardewcraft", "textures/gui/emotes.png");
 	private static final int EMOTES_TEX_W = 64;
@@ -61,7 +61,7 @@ public final class EmoteWheelScreen extends Screen {
 			onClose();
 			return;
 		}
-		if (!EmoteWheelClient.isWheelKeyHeld(minecraft)) {
+		if (!EmoteWheelClient.isWheelKeyHeld()) {
 			confirmAndClose();
 		}
 	}

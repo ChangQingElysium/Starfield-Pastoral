@@ -18,6 +18,9 @@ public final class NewTreeFootprintEvents {
 
 	@SubscribeEvent
 	public static void onBlockPlace(BlockEvent.EntityPlaceEvent event) {
+		if (event instanceof BlockEvent.EntityMultiPlaceEvent) {
+			return;
+		}
 		if (!(event.getLevel() instanceof ServerLevel level)) {
 			return;
 		}
@@ -25,7 +28,7 @@ public final class NewTreeFootprintEvents {
 		if (!violatesTreeFootprint(level, pos)) {
 			return;
 		}
-		event.getBlockSnapshot().restore();
+		event.setCanceled(true);
 		if (event.getEntity() instanceof ServerPlayer player) {
 			player.displayClientMessage(Component.translatable("stardewcraft.message.tree.clear_footprint"), true);
 		}
@@ -40,9 +43,7 @@ public final class NewTreeFootprintEvents {
 			if (!violatesTreeFootprint(level, snapshot.getPos())) {
 				continue;
 			}
-			for (var restore : event.getReplacedBlockSnapshots()) {
-				restore.restore();
-			}
+			event.setCanceled(true);
 			if (event.getEntity() instanceof ServerPlayer player) {
 				player.displayClientMessage(Component.translatable("stardewcraft.message.tree.clear_footprint"), true);
 			}

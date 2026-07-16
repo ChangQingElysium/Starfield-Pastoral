@@ -118,7 +118,8 @@ public final class NightMarketPainterService {
         ItemPickupHudPacket.sendTo(player, painting, 1, false);
         player.playNotifySound(ModSounds.PURCHASE.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
         player.server.getPlayerList().broadcastSystemMessage(
-            Component.translatable("stardewcraft.night_market.painter.announcement", player.getName()),
+            Component.translatable("stardewcraft.night_market.painter.announcement",
+                    com.stardew.craft.player.PlayerDisplayName.get(player)),
             false
         );
     }

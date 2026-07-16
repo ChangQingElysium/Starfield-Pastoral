@@ -30,11 +30,6 @@ public final class EquipmentResolver {
         resolveRing(data.getEquippedRightRingStack(), builder);
         resolveBoots(data.getEquippedBootsStack(), builder);
 
-        // Curios 可选兼容：合并 Curios 槽位中的装备属性
-        if (com.stardew.craft.compat.CuriosCompatBridge.isCuriosLoaded()) {
-            com.stardew.craft.compat.CuriosEquipmentReader.mergeFromCurios(player, builder);
-        }
-
         return builder.build();
     }
 

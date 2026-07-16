@@ -93,7 +93,7 @@ public record FarmSelectionSubmitPayload(
             // 验证名称
             String name = payload.farmName;
             if (name == null || name.isBlank()) {
-                name = player.getName().getString();
+                name = preferredName;
             }
             if (name.length() > 48) {
                 name = name.substring(0, 48);
@@ -105,7 +105,7 @@ public record FarmSelectionSubmitPayload(
                     com.stardew.craft.player.PlayerDataManager.getPlayerData(player);
             playerData.setProfile(preferredName, favoriteThing, payload.male() ? 0 : 1);
             com.stardew.craft.player.PlayerDataManager.get().setDirty();
-            FarmInstance farm = registry.createFarm(player.getUUID(), player.getName().getString(), name, farmType);
+            FarmInstance farm = registry.createFarm(player.getUUID(), preferredName, name, farmType);
 
             StardewCraft.LOGGER.info("[FARM_SELECT] {} created farm '{}' (type={})",
                     player.getName().getString(), name, farmType.getId());

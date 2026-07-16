@@ -71,7 +71,8 @@ public class MailDebugCommand {
             return 0;
         }
         MailService.addMail(player, mailId);
-        ctx.getSource().sendSuccess(() -> Component.literal("Sent mail '" + mailId + "' to " + player.getName().getString()), true);
+        ctx.getSource().sendSuccess(() -> Component.literal("Sent mail '" + mailId + "' to "
+                + com.stardew.craft.player.PlayerDisplayName.get(player)), true);
         return 1;
     }
 

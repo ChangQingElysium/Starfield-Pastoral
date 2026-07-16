@@ -32,10 +32,6 @@ repositories {
         url = "https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/"
     }
     maven {
-        name = "Curios"
-        url = "https://maven.theillusivec4.top/"
-    }
-    maven {
         name = "AppleSkin"
         url = "https://maven.ryanliptak.com/"
     }
@@ -170,16 +166,13 @@ dependencies {
     compileOnly "snownee.jade:Jade-1.21.1-NeoForge:15.10.4"
     
     // JEI optional dependency for fishing info display (Compile Only - Local - FlatDir)
-    compileOnly "mezz.jei:jei-1.21.1-neoforge:19.21.0.247"
-    localRuntime "mezz.jei:jei-1.21.1-neoforge:19.21.0.247"
+    compileOnly "mezz.jei:jei-1.21.1-neoforge:${jei_version}"
+    localRuntime "mezz.jei:jei-1.21.1-neoforge:${jei_version}"
+    testImplementation "mezz.jei:jei-1.21.1-neoforge:${jei_version}"
 
     // GeckoLib (embedded via JarJar like ConfluenceOtherworld)
     implementation "software.bernie.geckolib:geckolib-neoforge-1.21.1:${geckolib_version}"
     jarJar "software.bernie.geckolib:geckolib-neoforge-1.21.1:${geckolib_version}"
-
-    // Curios API (optional soft dependency — rings/boots can go in curios slots if present)
-    compileOnly "top.theillusivec4.curios:curios-neoforge:9.2.2+1.21.1"
-    localRuntime "top.theillusivec4.curios:curios-neoforge:9.2.2+1.21.1"
 
     // AppleSkin API (optional soft dependency — hide its vanilla hunger overlays in Stardew HUD dimensions)
     compileOnly "squeek.appleskin:appleskin-neoforge:mc1.21-3.0.9:api"

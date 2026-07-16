@@ -36,7 +36,7 @@ public class FarmJoinSelectScreen extends Screen {
     private int panelX, panelY, panelW, panelH;
     private int borderUnit;
     private int contentX, contentY, contentW, contentH;
-    private int listY, listH;
+    private int partY, listY, listH;
     private int rowH;
     private int scrollOffset = 0;
     private int maxVisible;
@@ -75,7 +75,8 @@ public class FarmJoinSelectScreen extends Screen {
 
         rowH = this.font.lineHeight * 2 + ui(24);
         int titleAreaH = ui(48);
-        listY = contentY + titleAreaH + borderUnit;
+        partY = contentY + titleAreaH + borderUnit / 2;
+        listY = contentY + titleAreaH + borderUnit + Math.max(4, ui(16));
         int hintAreaH = this.font.lineHeight + ui(12);
         listH = contentY + contentH - listY - hintAreaH;
         maxVisible = Math.max(1, listH / rowH);
@@ -171,7 +172,6 @@ public class FarmJoinSelectScreen extends Screen {
             panelX + panelW / 2, contentY + ui(12), contentW, 0x582A11, false);
 
         // 标题下方分隔线
-        int partY = listY - borderUnit / 2;
         StardewGuiUtil.drawHorizontalPartition(graphics, panelX, partY, panelW, s4());
 
         if (sortedFarms.isEmpty()) {

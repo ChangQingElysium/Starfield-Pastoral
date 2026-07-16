@@ -3,6 +3,7 @@ package com.stardew.craft.money;
 import com.stardew.craft.network.payload.OpenMoneyContractActionPayload;
 import com.stardew.craft.network.payload.OpenMoneyContractTransferPayload;
 import com.stardew.craft.player.PlayerStardewDataAPI;
+import com.stardew.craft.player.PlayerDisplayName;
 import com.stardew.craft.sound.ModSounds;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundSource;
@@ -23,7 +24,8 @@ public final class MoneyContractService {
         if (!validateTarget(player, target)) {
             return;
         }
-        PacketDistributor.sendToPlayer(player, new OpenMoneyContractActionPayload(target.getUUID(), target.getName().getString()));
+        PacketDistributor.sendToPlayer(player, new OpenMoneyContractActionPayload(
+                target.getUUID(), PlayerDisplayName.get(target)));
     }
 
     public static void openDebugActionMenu(ServerPlayer player) {
@@ -93,8 +95,10 @@ public final class MoneyContractService {
             return;
         }
         PlayerStardewDataAPI.addMoney(target, amount);
-        player.displayClientMessage(Component.translatable("stardewcraft.money_contract.transfer.sent", amount, target.getName()), false);
-        target.displayClientMessage(Component.translatable("stardewcraft.money_contract.transfer.received", amount, player.getName()), false);
+        player.displayClientMessage(Component.translatable("stardewcraft.money_contract.transfer.sent",
+                amount, PlayerDisplayName.get(target)), false);
+        target.displayClientMessage(Component.translatable("stardewcraft.money_contract.transfer.received",
+                amount, PlayerDisplayName.get(player)), false);
         playMoney(player);
         playMoney(target);
     }
@@ -102,7 +106,7 @@ public final class MoneyContractService {
     private static void openTransferScreen(ServerPlayer player, ServerPlayer target) {
         PacketDistributor.sendToPlayer(player,
                 new OpenMoneyContractTransferPayload(PlayerStardewDataAPI.getMoney(player),
-                        target.getUUID(), target.getName().getString()));
+                        target.getUUID(), PlayerDisplayName.get(target)));
     }
 
     private static void openDebugTransferScreen(ServerPlayer player) {

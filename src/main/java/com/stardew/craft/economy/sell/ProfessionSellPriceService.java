@@ -8,8 +8,7 @@ import com.stardew.craft.player.PlayerStardewDataAPI;
 import com.stardew.craft.player.ProfessionType;
 import com.stardew.craft.player.ProfessionData;
 import com.stardew.craft.api.v1.profession.StardewProfessionEffectHandlers;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import com.stardew.craft.core.ModTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
@@ -20,11 +19,6 @@ import java.util.Locale;
 import java.util.Set;
 
 public final class ProfessionSellPriceService {
-    private static final TagKey<Item> FISH_TAG = itemTag("fishes");
-    private static final TagKey<Item> BLACKSMITH_TAG = itemTag("profession_price/blacksmith");
-    private static final TagKey<Item> GEMOLOGIST_TAG = itemTag("profession_price/gemologist");
-    private static final TagKey<Item> TAPPER_TAG = itemTag("profession_price/tapper");
-
     private static final Set<String> CROP_TYPES = Set.of(
         "stardewcraft.type.crop"
     );
@@ -149,13 +143,13 @@ public final class ProfessionSellPriceService {
         boolean isCrop = CROP_TYPES.contains(typeKey);
         boolean isAnimalProduct = ANIMAL_PRODUCT_TYPES.contains(typeKey);
         boolean isArtisan = ARTISAN_TYPES.contains(typeKey);
-        boolean isFish = FISH_TYPES.contains(typeKey) || isInTag(stack, FISH_TAG);
+        boolean isFish = FISH_TYPES.contains(typeKey) || isInTag(stack, ModTags.Items.FISHES);
         // SDV Object.getPriceAfterMultipliers 对 PreserveType.SmokedFish 额外触发
         // Fisher/Angler 加成（与 Category=-4 鱼并行），与 Artisan 1.4× 乘法叠加。
         boolean isSmokedFish = stack != null && stack.getItem() instanceof SmokedFishItem;
-        boolean isMetalBar = METAL_BAR_TYPES.contains(typeKey) || isInTag(stack, BLACKSMITH_TAG);
-        boolean isGem = GEM_TYPES.contains(typeKey) || isInTag(stack, GEMOLOGIST_TAG);
-        boolean isTapperProduct = TAPPER_TYPES.contains(typeKey) || isInTag(stack, TAPPER_TAG);
+        boolean isMetalBar = METAL_BAR_TYPES.contains(typeKey) || isInTag(stack, ModTags.Items.BLACKSMITH_PRICE_ITEMS);
+        boolean isGem = GEM_TYPES.contains(typeKey) || isInTag(stack, ModTags.Items.GEMOLOGIST_PRICE_ITEMS);
+        boolean isTapperProduct = TAPPER_TYPES.contains(typeKey) || isInTag(stack, ModTags.Items.TAPPER_PRICE_ITEMS);
 
         if (isCrop && checker.hasProfession(ProfessionType.TILLER)) {
             multiplier *= 1.10;
@@ -215,11 +209,6 @@ public final class ProfessionSellPriceService {
 
     private static boolean hasProfession(PlayerStardewData data, ProfessionType profession) {
         return data != null && data.hasProfession(profession);
-    }
-
-    @SuppressWarnings("null")
-    private static TagKey<Item> itemTag(String path) {
-        return TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("stardewcraft", path));
     }
 
     @SuppressWarnings("null")

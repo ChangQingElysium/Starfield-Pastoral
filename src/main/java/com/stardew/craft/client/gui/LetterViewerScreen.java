@@ -165,10 +165,8 @@ public class LetterViewerScreen extends Screen {
             text = applyLetterFormatting(text);
             text = PlayerGenderText.preprocess(text);
             if (minecraft != null && minecraft.player != null) {
-                String preferredName = ClientPlayerDataCache.getPreferredName();
-                String playerName = preferredName == null || preferredName.isBlank()
-                        ? minecraft.player.getName().getString()
-                        : preferredName;
+                String playerName = ClientPlayerDataCache.getPlayerDisplayName(
+                        minecraft.player.getName().getString());
                 text = text.replace("@", playerName);
             }
             if (payload.secretSantaNameKey() != null && !payload.secretSantaNameKey().isBlank()) {

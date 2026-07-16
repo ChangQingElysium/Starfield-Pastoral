@@ -2,6 +2,7 @@ package com.stardew.craft.network.payload;
 
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.animal.data.AnimalWorldData;
+import com.stardew.craft.animal.service.AnimalEntitySyncService;
 import com.stardew.craft.menu.AnimalQueryMenu;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -59,6 +60,9 @@ public record AnimalMoveHomeSelectPayload(long animalId, String targetBuildingId
 
             boolean moved = data.moveAnimalToBuilding(payload.animalId, payload.targetBuildingId, serverPlayer.getUUID().toString());
             if (moved) {
+                data.getAnimal(payload.animalId).ifPresent(record ->
+                    AnimalEntitySyncService.relocateNow(serverPlayer.serverLevel(), record)
+                );
                 serverPlayer.sendSystemMessage(Component.translatable("stardewcraft.animal.query.move_success"));
             } else {
                 serverPlayer.sendSystemMessage(Component.translatable("stardewcraft.animal.query.move_failed"));

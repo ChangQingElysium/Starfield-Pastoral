@@ -7,6 +7,7 @@ import com.stardew.craft.client.gui.common.CommonGuiTextures;
 import com.stardew.craft.client.gui.common.GuiText;
 import com.stardew.craft.client.gui.overnight.StardewGuiUtil;
 import com.stardew.craft.api.v1.item.StardewItemDataApi;
+import com.stardew.craft.core.ModTags;
 import com.stardew.craft.network.payload.OpenShopScreenPayload;
 import com.stardew.craft.network.payload.ShopPurchasePayload;
 import com.stardew.craft.network.payload.ShopPurchaseResultPayload;
@@ -19,11 +20,9 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -66,8 +65,6 @@ public class ShopScreen extends Screen {
     private static final int BG_TINT = 0xBF000000;
     private static final long BUY_HOLD_INITIAL_DELAY_MS = 320;
     private static final long BUY_HOLD_REPEAT_MS = 95;
-    private static final TagKey<Item> BLACKSMITH_ORES_TAG = itemTag("ores");
-    private static final TagKey<Item> BLACKSMITH_BARS_TAG = itemTag("bars");
     private static final String FAIR_STAR_TOKEN_SHOP_ID = "Festival_StardewValleyFair_StarTokens";
 
     // -------------------------------------------------------------------------
@@ -210,15 +207,10 @@ public class ShopScreen extends Screen {
         if (!"Blacksmith".equals(shopId)) {
             return false;
         }
-        return stack.is(BLACKSMITH_ORES_TAG)
-            || stack.is(BLACKSMITH_BARS_TAG)
+        return stack.is(ModTags.Items.ORES)
+            || stack.is(ModTags.Items.BARS)
             || "stardewcraft:coal".equals(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString());
     }
-
-    private static TagKey<Item> itemTag(String path) {
-        return TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, path));
-    }
-
     // =========================================================================
     // init
     // =========================================================================

@@ -47,6 +47,7 @@ public record PlayerProfileSubmitPayload(
             PlayerStardewData data = PlayerDataManager.getPlayerData(player);
             data.setProfile(name, favorite, payload.male() ? 0 : 1);
             PlayerDataManager.get().setDirty();
+            com.stardew.craft.farm.FarmInstanceRegistry.get().updateOwnerName(player.getUUID(), name);
             PlayerDataEventHandler.syncPlayerData(player, data);
         });
     }

@@ -42,7 +42,7 @@ public class MailboxBlockEntity extends BlockEntity {
 
     public void setOwner(ServerPlayer player) {
         this.ownerUUID = player.getUUID();
-        this.ownerName = player.getName().getString();
+        this.ownerName = com.stardew.craft.player.PlayerDisplayName.get(player);
         setChanged();
         syncToClient();
     }

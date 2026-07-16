@@ -1,11 +1,18 @@
 package com.stardew.craft.desert;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.communitycenter.state.CCStoryFlags;
 import com.stardew.craft.core.ModDimensions;
+import com.stardew.craft.entity.npc.StardewNpcEntity;
 import com.stardew.craft.network.ObjectDialogueService;
 import com.stardew.craft.network.payload.DesertBusFadePayload;
 import com.stardew.craft.network.payload.OpenDesertBusConfirmPayload;
+import com.stardew.craft.npc.data.NpcDataRegistry;
+import com.stardew.craft.npc.runtime.NpcRuntimeDataManager;
+import com.stardew.craft.npc.runtime.NpcRuntimeState;
+import com.stardew.craft.npc.runtime.NpcSpawnManager;
 import com.stardew.craft.player.PlayerStardewData;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import com.stardew.craft.sound.ModSounds;
@@ -14,11 +21,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
+import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -57,6 +67,8 @@ public final class DesertBusService {
     private static final int FADE_IN_AT = 60;
     private static final int FADE_IN_TICKS = 20;
     private static final int RIDE_TOTAL = 90; // 清理 tag
+    private static final Vec3 PAM_BUS_STOP = new Vec3(-61.5D, 64.0D, -60.5D);
+    private static final double PAM_READY_DISTANCE_SQR = 4.0D;
 
     /**
      * 去沙漠：做前置检查 + 弹出买票确认。
@@ -105,6 +117,11 @@ public final class DesertBusService {
                 ObjectDialogueService.show(player, "message.stardewcraft.desert_bus.locked");
                 return;
             }
+            if (!isPamReadyToDrive(player.serverLevel())
+                    && !canDriveYourselfToday(player.serverLevel())) {
+                ObjectDialogueService.show(player, "message.stardewcraft.desert_bus.no_driver");
+                return;
+            }
             if (PlayerStardewDataAPI.getMoney(player) < DesertConstants.BUS_TICKET_PRICE) {
                 ObjectDialogueService.show(player, "message.stardewcraft.desert_bus.no_money",
                         DesertConstants.BUS_TICKET_PRICE);
@@ -125,6 +142,70 @@ public final class DesertBusService {
     /** 根据玩家当前位置是否落在沙漠包围盒内判断方向。 */
     private static int detectDirection(ServerPlayer player) {
         return DesertConstants.isInDesertRegion(player.blockPosition()) ? DIR_TO_TOWN : DIR_TO_DESERT;
+    }
+
+    private static boolean isPamReadyToDrive(ServerLevel level) {
+        NpcRuntimeState schedule = NpcRuntimeDataManager.get(level).states().get("pam");
+        if (schedule == null || !"pam_busstop_bench".equals(schedule.namedPointId())) {
+            return false;
+        }
+        StardewNpcEntity pam = NpcSpawnManager.getTrackedNpc(level, "pam");
+        return pam != null && pam.isAlive() && !pam.isRemoved()
+                && pam.position().distanceToSqr(PAM_BUS_STOP) <= PAM_READY_DISTANCE_SQR;
+    }
+
+    /**
+     * Vanilla's {@code canDriveYourselfToday}: once the bus is globally repaired,
+     * players may drive on days when Pam's selected schedule never visits BusStop.
+     * Green Rain is the sole no-driver exception.
+     */
+    private static boolean canDriveYourselfToday(ServerLevel level) {
+        if (!CCStoryFlags.anyPlayerHasFlag(CCStoryFlags.CC_VAULT)) {
+            return false;
+        }
+        NpcRuntimeState pam = NpcRuntimeDataManager.get(level).states().get("pam");
+        if (pam == null || "greenrain".equalsIgnoreCase(pam.activeScheduleKey())) {
+            return false;
+        }
+
+        JsonObject root = NpcDataRegistry.schedules().get("pam");
+        JsonObject schedule = findSchedule(root, pam.activeScheduleKey());
+        return schedule != null && !scheduleVisitsBusStop(root, schedule, new java.util.HashSet<>());
+    }
+
+    private static boolean scheduleVisitsBusStop(JsonObject root,
+                                                 JsonObject schedule,
+                                                 Set<String> visited) {
+        if (schedule.has("_goto") && schedule.get("_goto").isJsonPrimitive()) {
+            String target = schedule.get("_goto").getAsString();
+            if (!visited.add(target.toLowerCase(Locale.ROOT))) {
+                return true;
+            }
+            JsonObject next = findSchedule(root, target);
+            return next == null || scheduleVisitsBusStop(root, next, visited);
+        }
+        for (Map.Entry<String, JsonElement> entry : schedule.entrySet()) {
+            if (entry.getKey().startsWith("_") || !entry.getValue().isJsonPrimitive()) {
+                continue;
+            }
+            String node = entry.getValue().getAsString().trim().toLowerCase(Locale.ROOT);
+            if (node.startsWith("busstop ") || node.contains("@pam_busstop_bench")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static JsonObject findSchedule(JsonObject root, String key) {
+        if (root == null || key == null || key.isBlank()) {
+            return null;
+        }
+        for (Map.Entry<String, JsonElement> entry : root.entrySet()) {
+            if (entry.getKey().equalsIgnoreCase(key) && entry.getValue().isJsonObject()) {
+                return entry.getValue().getAsJsonObject();
+            }
+        }
+        return null;
     }
 
     public static boolean isRiding(ServerPlayer player) {

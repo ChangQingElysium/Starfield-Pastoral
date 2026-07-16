@@ -79,6 +79,10 @@ public final class NpcSystem {
             return;
         }
 
+        if (com.stardew.craft.time.StardewTimePauseService.isPaused(event.getServer())) {
+            return;
+        }
+
         if (!previouslyHadPlayers) {
             // Player just entered — invalidate caches & snap NPCs into position.
             NpcScheduleRuntimeService.invalidateCache();

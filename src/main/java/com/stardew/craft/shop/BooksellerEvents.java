@@ -43,6 +43,9 @@ public final class BooksellerEvents {
         if (level == null || level.players().isEmpty()) {
             return;
         }
+        if (com.stardew.craft.time.StardewTimePauseService.isPaused(event.getServer())) {
+            return;
+        }
 
         if (!BooksellerSchedule.isToday(level)) {
             releaseSpawnChunk(level);

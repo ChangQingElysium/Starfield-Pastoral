@@ -30,15 +30,17 @@ public final class StardewClientTimeState {
     /** 接收 baseDayTime 时的客户端 gameTime。 */
     private static long baseGameTime = -1;
     private static boolean timeFrozen;
+    private static boolean simulationPaused;
 
     private StardewClientTimeState() {}
 
     /**
      * 由 TimeSyncPacket 的客户端处理器调用，记录基准时间。
      */
-    public static void onServerTimeSync(long virtualDayTime, boolean frozen) {
+    public static void onServerTimeSync(long virtualDayTime, boolean frozen, boolean paused) {
         baseDayTime = virtualDayTime;
         timeFrozen = frozen;
+        simulationPaused = paused;
         Minecraft mc = Minecraft.getInstance();
         if (mc.level != null) {
             baseGameTime = mc.level.getGameTime();
@@ -52,6 +54,24 @@ public final class StardewClientTimeState {
         baseDayTime = -1;
         baseGameTime = -1;
         timeFrozen = false;
+        simulationPaused = false;
+    }
+
+    public static boolean shouldPauseCurrentLevel() {
+        Minecraft minecraft = Minecraft.getInstance();
+        return simulationPaused
+            && minecraft.level != null
+            && (ModDimensions.STARDEW_VALLEY.equals(minecraft.level.dimension())
+                || ModMiningDimensions.STARDEW_MINING.equals(minecraft.level.dimension()));
+    }
+
+    /** True when the server says the visible Stardew clock is not advancing for any reason. */
+    public static boolean isTimeFrozenCurrentLevel() {
+        Minecraft minecraft = Minecraft.getInstance();
+        return timeFrozen
+            && minecraft.level != null
+            && (ModDimensions.STARDEW_VALLEY.equals(minecraft.level.dimension())
+                || ModMiningDimensions.STARDEW_MINING.equals(minecraft.level.dimension()));
     }
 
     /**
@@ -66,8 +86,8 @@ public final class StardewClientTimeState {
             return;
         }
 
-        boolean inStardew = level.dimension() == ModDimensions.STARDEW_VALLEY
-                || level.dimension() == ModMiningDimensions.STARDEW_MINING;
+        boolean inStardew = ModDimensions.STARDEW_VALLEY.equals(level.dimension())
+                || ModMiningDimensions.STARDEW_MINING.equals(level.dimension());
         if (!inStardew) {
             if (baseDayTime != -1) {
                 reset();

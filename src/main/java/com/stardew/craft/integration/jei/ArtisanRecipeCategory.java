@@ -1,15 +1,8 @@
 package com.stardew.craft.integration.jei;
 
-import com.stardew.craft.StardewCraft;
-import com.stardew.craft.item.ModItems;
-import com.stardew.craft.item.artisan.ArtisanRecipeDataManager;
-import com.stardew.craft.item.artisan.ArtisanRecipeDataManager.InputMode;
-import com.stardew.craft.item.artisan.ArtisanRecipeDataManager.OutputMode;
-import com.stardew.craft.item.artisan.PreserveType;
-import com.stardew.craft.item.artisan.PreservesCropTypeHelper;
-import com.stardew.craft.item.artisan.PreservesItem;
-import com.stardew.craft.item.artisan.SmokedFishItem;
-import com.stardew.craft.item.catalog.StardewItemCatalog;
+import com.stardew.craft.client.gui.common.CommonGuiTextures;
+import com.stardew.craft.client.gui.common.GuiText;
+import com.stardew.craft.item.quality.QualityHelper;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
@@ -29,65 +22,28 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
-/**
- * JEI category for artisan machine processing recipes.
- * Each machine gets its own instance with a unique RecipeType.
- * Shows: [input item] → [machine icon] → [output item] with processing time.
- */
+import java.util.List;
+import java.util.Locale;
+
+/** JEI category instance for one fixed artisan machine type. */
 @SuppressWarnings("null")
-public class ArtisanRecipeCategory implements IRecipeCategory<ArtisanRecipeCategory.DisplayRecipe> {
+public final class ArtisanRecipeCategory implements IRecipeCategory<ArtisanJeiRecipe> {
+    private static final int WIDTH = 176;
+    private static final int SLOT_SIZE = 18;
 
-    // ─── Per-machine RecipeType registry ───────────────────────────────
-    private static final java.util.Map<String, RecipeType<DisplayRecipe>> RECIPE_TYPES = new java.util.HashMap<>();
-
-    /**
-     * Get (or create) the RecipeType for a specific machine.
-     * The type ID is "stardewcraft:machine/{machineKey}".
-     */
-    public static RecipeType<DisplayRecipe> getRecipeType(String machineKey) {
-        return RECIPE_TYPES.computeIfAbsent(machineKey, k ->
-                RecipeType.create(StardewCraft.MODID, "machine/" + k, DisplayRecipe.class));
-    }
-
-    /** @deprecated Use {@link #getRecipeType(String)} instead. Kept for backward compat during transition. */
-    @Deprecated
-    public static final RecipeType<DisplayRecipe> RECIPE_TYPE = RecipeType.create(
-            StardewCraft.MODID, "artisan_recipe", DisplayRecipe.class);
-
-    private static final int GUI_WIDTH = 160;
-    private static final int GUI_HEIGHT = 50;
-
-    private final RecipeType<DisplayRecipe> recipeType;
+    private final MachineJeiRegistry.Machine machine;
     private final IDrawable icon;
     private final Component title;
 
-    public record DisplayRecipe(
-            String machineKey,
-            ItemStack input,
-            int consumeCount,
-            ItemStack output,
-            ItemStack machineIcon,
-            int minutes
-    ) {}
-
-    /**
-     * Create a category instance for a specific machine.
-     *
-     * @param machineKey  e.g. "keg", "preserves_jar"
-     * @param machineIcon the machine's ItemStack for the tab icon
-     * @param recipeType  the per-machine RecipeType from {@link #getRecipeType(String)}
-     */
-    @SuppressWarnings("null")
-    public ArtisanRecipeCategory(IGuiHelper guiHelper, String machineKey, ItemStack machineIcon, RecipeType<DisplayRecipe> recipeType) {
-        this.recipeType = recipeType;
+    public ArtisanRecipeCategory(IGuiHelper guiHelper, MachineJeiRegistry.Machine machine, ItemStack machineIcon) {
+        this.machine = machine;
         this.icon = guiHelper.createDrawableIngredient(VanillaTypes.ITEM_STACK, machineIcon);
-        this.title = Component.translatable("stardewcraft.jei.machine." + machineKey);
-        JeiDrawHelper.initGoldIcon(guiHelper);
+        this.title = Component.translatable(machine.translationKey());
     }
 
     @Override
-    public RecipeType<DisplayRecipe> getRecipeType() {
-        return recipeType;
+    public RecipeType<ArtisanJeiRecipe> getRecipeType() {
+        return machine.recipeType();
     }
 
     @Override
@@ -97,12 +53,12 @@ public class ArtisanRecipeCategory implements IRecipeCategory<ArtisanRecipeCateg
 
     @Override
     public int getWidth() {
-        return GUI_WIDTH;
+        return WIDTH;
     }
 
     @Override
     public int getHeight() {
-        return GUI_HEIGHT;
+        return machine.layout().height();
     }
 
     @Override
@@ -110,208 +66,156 @@ public class ArtisanRecipeCategory implements IRecipeCategory<ArtisanRecipeCateg
         return icon;
     }
 
-    @SuppressWarnings("null")
     @Override
-    public void setRecipe(@SuppressWarnings("null") IRecipeLayoutBuilder builder,
-                          @SuppressWarnings("null") DisplayRecipe recipe,
-                          @SuppressWarnings("null") IFocusGroup focuses) {
-        // Input slot — left side
-        builder.addSlot(RecipeIngredientRole.INPUT, 12, 18)
-                .addItemStack(recipe.input());
+    public void setRecipe(IRecipeLayoutBuilder builder, ArtisanJeiRecipe recipe, IFocusGroup focuses) {
+        LayoutPositions positions = positions(recipe);
+        for (int i = 0; i < recipe.inputs().size(); i++) {
+            ArtisanJeiRecipe.Input input = recipe.inputs().get(i);
+            int x = i == 0 ? positions.primaryInputX() : positions.auxiliaryInputX();
+            builder.addSlot(RecipeIngredientRole.INPUT, x, positions.slotY())
+                    .addItemStacks(input.stacks())
+                    .setSlotName(input.auxiliary() ? "auxiliary_input" : "primary_input");
+        }
 
-        // Machine as catalyst — centre
-        builder.addSlot(RecipeIngredientRole.CATALYST, 65, 18)
-                .addItemStack(recipe.machineIcon());
+        builder.addSlot(RecipeIngredientRole.CATALYST, positions.machineX(), positions.slotY())
+                .addItemStack(itemStack(machine.itemId().toString()))
+                .setSlotName("machine");
 
-        // Output slot — right side
-        builder.addSlot(RecipeIngredientRole.OUTPUT, 120, 18)
-                .addItemStack(recipe.output());
+        for (int i = 0; i < recipe.outputs().size(); i++) {
+            ArtisanJeiRecipe.Output output = recipe.outputs().get(i);
+            int x = positions.outputX() + i * 22;
+            builder.addSlot(RecipeIngredientRole.OUTPUT, x, positions.slotY())
+                    .addItemStacks(output.stacks())
+                    .setSlotName("output_" + i);
+        }
     }
 
-    @SuppressWarnings("null")
     @Override
-    public void draw(@SuppressWarnings("null") DisplayRecipe recipe,
-                     @SuppressWarnings("null") IRecipeSlotsView recipeSlotsView,
-                     @SuppressWarnings("null") GuiGraphics guiGraphics,
-                     double mouseX, double mouseY) {
+    public void draw(ArtisanJeiRecipe recipe, IRecipeSlotsView recipeSlotsView,
+                     GuiGraphics graphics, double mouseX, double mouseY) {
+        int height = getHeight();
         Font font = Minecraft.getInstance().font;
+        LayoutPositions positions = positions(recipe);
 
-        // Background panel
-        JeiDrawHelper.drawPanel(guiGraphics, 0, 0, GUI_WIDTH, GUI_HEIGHT);
+        CommonGuiTextures.drawTextureBoxNoShadow(graphics, 0, 0, WIDTH, height, 1.0F);
 
-        // Slot backgrounds
-        JeiDrawHelper.drawSlotBg(guiGraphics, 11, 17);
-        JeiDrawHelper.drawSlotBg(guiGraphics, 64, 17);
-        JeiDrawHelper.drawOutputSlotBg(guiGraphics, 119, 17);
+        for (int i = 0; i < recipe.inputs().size(); i++) {
+            int x = i == 0 ? positions.primaryInputX() : positions.auxiliaryInputX();
+            CommonGuiTextures.drawItemSlot18(graphics, x - 1, positions.slotY() - 1, 1.0F);
+        }
+        CommonGuiTextures.drawItemSlot18(graphics,
+                positions.machineX() - 1, positions.slotY() - 1, 1.0F);
+        for (int i = 0; i < recipe.outputs().size(); i++) {
+            int x = positions.outputX() + i * 22;
+            CommonGuiTextures.drawItemSlot18(graphics, x - 1, positions.slotY() - 1, 1.0F);
+        }
 
-        // Arrows (input → machine → output)
-        JeiDrawHelper.drawArrow(guiGraphics, 34, 19);
-        JeiDrawHelper.drawArrow(guiGraphics, 88, 19);
+        drawFlow(graphics, font, recipe, positions);
+        drawMetadata(graphics, font, recipe, height, positions);
+    }
 
-        // Processing time — centred above machine slot
-        String timeText = JeiDrawHelper.formatTime(recipe.minutes());
-        int timeWidth = font.width(timeText);
-        guiGraphics.drawString(font, timeText, (GUI_WIDTH - timeWidth) / 2, 5, JeiDrawHelper.TEXT_MUTED, false);
+    private static void drawFlow(
+            GuiGraphics graphics, Font font, ArtisanJeiRecipe recipe, LayoutPositions positions
+    ) {
+        if (recipe.inputs().size() > 1) {
+            graphics.drawString(font, "+", positions.auxiliaryInputX() - 9,
+                    positions.slotY() + 5, JeiDrawHelper.TEXT_BODY, false);
+        }
 
-        // Consume count (if > 1) — below input slot
-        if (recipe.consumeCount() > 1) {
-            String countText = "×" + recipe.consumeCount();
-            guiGraphics.drawString(font, countText, 12, 38, JeiDrawHelper.TEXT_BODY, false);
+        int firstArrowX = positions.machineX() - 20;
+        CommonGuiTextures.drawForwardArrow(graphics, firstArrowX, positions.slotY() + 3, 1.0F);
+        if (!recipe.outputs().isEmpty()) {
+            CommonGuiTextures.drawForwardArrow(graphics,
+                    positions.outputX() - 20, positions.slotY() + 3, 1.0F);
         }
     }
 
-    @SuppressWarnings("null")
-    static ItemStack getItemStack(String id) {
-        ResourceLocation loc = ResourceLocation.tryParse(id);
-        if (loc == null) return ItemStack.EMPTY;
-        Item item = BuiltInRegistries.ITEM.get(loc);
-        if (item == null || item == Items.AIR) return ItemStack.EMPTY;
-        return new ItemStack(item);
-    }
-
-    /**
-     * Build display recipes for a single machine.
-     * Handles both static (inputId) and dynamic (inputMode) recipes.
-     *
-     * @param machineKey the machine to build recipes for (e.g. "keg")
-     */
-    public static java.util.List<DisplayRecipe> buildRecipesForMachine(String machineKey) {
-        java.util.List<DisplayRecipe> result = new java.util.ArrayList<>();
-        ItemStack machineIcon = getItemStack("stardewcraft:" + machineKey);
-        if (machineIcon.isEmpty()) return result;
-
-        for (ArtisanRecipeDataManager.Recipe recipe : ArtisanRecipeDataManager.getRecipes(machineKey)) {
-            if (recipe.inputMode() != InputMode.DEFAULT) {
-                expandDynamicRecipes(result, machineKey, machineIcon, recipe);
-                continue;
-            }
-
-            ItemStack input;
-            if (recipe.inputId() != null) {
-                input = getItemStack(recipe.inputId().toString());
-            } else {
-                continue;
-            }
-            if (input.isEmpty()) continue;
-
-            ItemStack output;
-            if (recipe.outputId() != null) {
-                output = getItemStack(recipe.outputId().toString());
-            } else {
-                continue;
-            }
-            if (output.isEmpty()) continue;
-
-            int outputCount = recipe.outputCount();
-            if (outputCount > 1) {
-                output.setCount(outputCount);
-            }
-
-            int consumeCount = recipe.consumeCount();
-            if (consumeCount > 1) {
-                input.setCount(consumeCount);
-            }
-
-            result.add(new DisplayRecipe(machineKey, input, consumeCount, output, machineIcon.copy(), recipe.minutes()));
-        }
-        return result;
-    }
-
-    /**
-     * Build all display recipes across all machines (legacy helper).
-     * @deprecated Use {@link #buildRecipesForMachine(String)} per machine instead.
-     */
-    @Deprecated
-    public static java.util.List<DisplayRecipe> buildAllRecipes() {
-        java.util.List<DisplayRecipe> result = new java.util.ArrayList<>();
-        for (String machineKey : ArtisanRecipeDataManager.getAllMachineKeys()) {
-            result.addAll(buildRecipesForMachine(machineKey));
-        }
-        return result;
-    }
-
-    /**
-     * Expand a dynamic recipe (CROP_TYPE/FISH_TYPE/MINERAL_TYPE) into concrete
-     * per-item display recipes by iterating all matching registered items.
-     */
-    @SuppressWarnings("null")
-    private static void expandDynamicRecipes(java.util.List<DisplayRecipe> result,
-                                              String machineKey,
-                                              ItemStack machineIcon,
-                                              ArtisanRecipeDataManager.Recipe recipe) {
-        for (Item item : StardewItemCatalog.itemsForDynamicInput(recipe.inputMode())) {
-            ItemStack input = new ItemStack(item);
-            ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item);
-
-            ItemStack output = resolveOutputForDynamic(recipe, item, itemId, input);
-            if (output == null || output.isEmpty()) continue;
-
-            int consumeCount = recipe.consumeCount();
-            if (consumeCount > 1) {
-                input.setCount(consumeCount);
-            }
-
-            result.add(new DisplayRecipe(machineKey, input, consumeCount, output, machineIcon.copy(), recipe.minutes()));
-        }
-    }
-
-    /**
-     * Resolve the output ItemStack for a dynamic recipe given a matched input item.
-     */
-    @SuppressWarnings("null")
-    private static ItemStack resolveOutputForDynamic(ArtisanRecipeDataManager.Recipe recipe,
-                                                      Item inputItem,
-                                                      ResourceLocation inputId,
-                                                      ItemStack inputStack) {
-        // If the recipe has a preserve type, build a flavored preserve
-        if (recipe.preserveType() != null) {
-            PreserveType pType = recipe.preserveType();
-            // For CROP_TYPE preserves, check if this crop matches the expected preserve type
-            if (recipe.inputMode() == InputMode.CROP_TYPE) {
-                PreserveType cropType = PreservesCropTypeHelper.getCropPreserveType(inputId);
-                if (cropType == null || cropType != pType) return null;
-            }
-            Item baseItem = getPreserveBaseItem(pType);
-            if (baseItem == null) return null;
-            ItemStack resultStack = new ItemStack(baseItem);
-            PreservesItem.createFlavored(pType, inputStack, resultStack);
-            return resultStack;
-        }
-
-        // SMOKED output mode — find matching smoked fish item
-        if (recipe.outputMode() == OutputMode.SMOKED) {
-            for (var smokedHolder : ModItems.ITEMS.getEntries()) {
-                Item smokedItem = smokedHolder.get();
-                if (smokedItem instanceof SmokedFishItem smoked) {
-                    if (smoked.getSourceItem() == inputItem) {
-                        return new ItemStack(smokedItem);
-                    }
+    private static void drawMetadata(
+            GuiGraphics graphics, Font font, ArtisanJeiRecipe recipe,
+            int height, LayoutPositions positions
+    ) {
+        if (recipe.machine().layout() == MachineJeiRegistry.Layout.RANDOM_OUTPUT) {
+            for (int i = 0; i < recipe.outputs().size(); i++) {
+                ArtisanJeiRecipe.Output output = recipe.outputs().get(i);
+                int centerX = positions.outputX() + i * 22 + 8;
+                int detailY = positions.slotY() + 20;
+                if (output.minCount() != output.maxCount()) {
+                    GuiText.drawCenteredClamped(graphics, font,
+                            Component.literal(output.minCount() + "-" + output.maxCount()),
+                            centerX, detailY, 22, JeiDrawHelper.TEXT_BODY, false);
+                    detailY += font.lineHeight + 1;
                 }
+                GuiText.drawCenteredClamped(graphics, font, chanceText(output.chance()), centerX,
+                        detailY, 22, JeiDrawHelper.TEXT_MUTED, false);
             }
+        }
+
+        int bandY = height - 20;
+        CommonGuiTextures.drawEntryBox(graphics, 8, bandY, WIDTH - 16, 15, 1.0F, false);
+        Component time = Component.translatable(
+                "stardewcraft.jei.time", JeiDrawHelper.formatTime(recipe.minutes()));
+        Component quality = qualityText(recipe);
+        if (quality == null) {
+            GuiText.drawCenteredClamped(graphics, font, time, WIDTH / 2,
+                    bandY + 3, WIDTH - 28, JeiDrawHelper.TEXT_BODY, false);
+            return;
+        }
+
+        GuiText.drawCenteredClamped(graphics, font, time, 49,
+                bandY + 3, 76, JeiDrawHelper.TEXT_BODY, false);
+        GuiText.drawCenteredClamped(graphics, font, quality, 127,
+                bandY + 3, 72, JeiDrawHelper.TEXT_MUTED, false);
+    }
+
+    private static Component chanceText(double chance) {
+        double percent = chance * 100.0D;
+        String formatted = percent < 1.0D
+                ? String.format(Locale.ROOT, "%.1f", percent)
+                : String.valueOf(Math.round(percent));
+        return Component.translatable("stardewcraft.jei.chance", formatted);
+    }
+
+    private static Component qualityText(ArtisanJeiRecipe recipe) {
+        if (recipe.keepInputQuality()) {
+            return Component.translatable("stardewcraft.jei.quality.keep");
+        }
+        if (recipe.outputQuality() < QualityHelper.NORMAL) {
             return null;
         }
-
-        // Fixed output — use outputId
-        if (recipe.outputId() != null) {
-            ItemStack out = getItemStack(recipe.outputId().toString());
-            if (recipe.outputCount() > 1) {
-                out.setCount(recipe.outputCount());
-            }
-            return out;
-        }
-
-        return null;
+        String key = switch (recipe.outputQuality()) {
+            case QualityHelper.SILVER -> "silver";
+            case QualityHelper.GOLD -> "gold";
+            case QualityHelper.IRIDIUM -> "iridium";
+            default -> "normal";
+        };
+        return Component.literal("★ ").append(Component.translatable("stardewcraft.jei.quality." + key));
     }
 
-    private static Item getPreserveBaseItem(PreserveType type) {
-        return switch (type) {
-            case JELLY -> ModItems.JELLY.get();
-            case PICKLES -> ModItems.PICKLES.get();
-            case ROE -> ModItems.ROE.get();
-            case AGED_ROE -> ModItems.AGED_ROE.get();
-            case CAVIAR -> ModItems.CAVIAR.get();
-            case DRIED_FRUIT -> ModItems.DRIED_FRUIT.get();
-            case DRIED_MUSHROOMS -> ModItems.DRIED_MUSHROOMS.get();
+    private LayoutPositions positions(ArtisanJeiRecipe recipe) {
+        return switch (machine.layout()) {
+            case AUXILIARY_INPUT -> new LayoutPositions(9, 35, 78, 137, 17);
+            case RANDOM_OUTPUT -> new LayoutPositions(10, 10, 68, 110, 17);
+            case STANDARD -> recipe.outputs().isEmpty()
+                    ? new LayoutPositions(38, 38, 106, 0, 17)
+                    : new LayoutPositions(14, 14, 76, 137, 17);
         };
+    }
+
+    public static ItemStack itemStack(String id) {
+        ResourceLocation location = ResourceLocation.tryParse(id);
+        if (location == null || !BuiltInRegistries.ITEM.containsKey(location)) {
+            return ItemStack.EMPTY;
+        }
+        Item item = BuiltInRegistries.ITEM.get(location);
+        return item == Items.AIR ? ItemStack.EMPTY : new ItemStack(item);
+    }
+
+    private record LayoutPositions(
+            int primaryInputX,
+            int auxiliaryInputX,
+            int machineX,
+            int outputX,
+            int slotY
+    ) {
     }
 }

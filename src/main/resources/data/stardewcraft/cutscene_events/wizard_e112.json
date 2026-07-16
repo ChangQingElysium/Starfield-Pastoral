@@ -22,6 +22,7 @@
     { "cmd": "pause", "ticks": 15 },
 
     { "cmd": "comment", "text": "Phase 0: Wizard self-introduction" },
+    { "cmd": "skippable" },
     { "cmd": "play_sound", "sound": "stardewcraft:dwop" },
     { "cmd": "emote", "actor": "wizard", "emote": "note" },
     { "cmd": "speak", "npc_id": "wizard", "text": "event.wizard_e112.intro" },
@@ -103,7 +104,6 @@
     { "cmd": "comment", "text": "Final: completion message" },
     { "cmd": "speak", "npc_id": "wizard", "text": "event.wizard_e112.complete" },
 
-    { "cmd": "skippable" },
     { "cmd": "comment", "text": "Cleanup and end" },
     { "cmd": "fade", "mode": "out", "ticks": 15 },
     { "cmd": "remove_actor", "actor": "wizard" },

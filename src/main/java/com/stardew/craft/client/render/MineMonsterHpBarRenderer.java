@@ -2,7 +2,6 @@ package com.stardew.craft.client.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.stardew.craft.Config;
-import com.stardew.craft.StardewCraft;
 import com.stardew.craft.core.ModMiningDimensions;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -26,8 +25,6 @@ public class MineMonsterHpBarRenderer {
 
     private static final float RENDER_DISTANCE = 24f;
 
-    private static long lastDebugLog = 0;
-
     public static void onRenderLevel(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_ENTITIES) return;
         if (!Config.SHOW_MONSTER_HP_BAR.get()) return;
@@ -36,12 +33,6 @@ public class MineMonsterHpBarRenderer {
         if (mc.player == null || mc.level == null) return;
 
         boolean inMine = mc.level.dimension().equals(ModMiningDimensions.STARDEW_MINING);
-
-        long now = System.currentTimeMillis();
-        if (now - lastDebugLog > 5000) {
-            lastDebugLog = now;
-            StardewCraft.LOGGER.info("[MOB_HP_DEBUG] called! dim={} inMine={}", mc.level.dimension().location(), inMine);
-        }
 
         if (!inMine) return;
 
@@ -52,10 +43,6 @@ public class MineMonsterHpBarRenderer {
 
         List<Mob> mobs = mc.level.getEntitiesOfClass(Mob.class, searchBox,
                 m -> m.isAlive() && m.getCustomName() != null);
-
-        if (now - lastDebugLog < 100) {
-            StardewCraft.LOGGER.info("[MOB_HP_DEBUG] found {} mobs with customName", mobs.size());
-        }
 
         if (mobs.isEmpty()) return;
 

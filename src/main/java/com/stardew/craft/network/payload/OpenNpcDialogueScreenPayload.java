@@ -90,8 +90,8 @@ public record OpenNpcDialogueScreenPayload(
         String finalDisplayText = prefixBuilder.toString() + displayText;
 
         // Resolve player profile tokens (@, gender branches, %favorite, etc.).
-        String playerName = mc.player.getGameProfile() != null ? mc.player.getGameProfile().getName() : "player";
-        if (playerName == null || playerName.isBlank()) playerName = "player";
+        String accountName = mc.player.getGameProfile() != null ? mc.player.getGameProfile().getName() : "player";
+        String playerName = com.stardew.craft.client.ClientPlayerDataCache.getPlayerDisplayName(accountName);
         finalDisplayText = resolvePlayerDialogueText(finalDisplayText, playerName);
 
         // SDV parity: garble resolved text to Dwarvish if player can't understand
@@ -171,8 +171,7 @@ public record OpenNpcDialogueScreenPayload(
     public static String resolvePlayerDialogueText(String text, String fallbackPlayerName) {
         String fallback = fallbackPlayerName == null || fallbackPlayerName.isBlank()
                 ? "player" : fallbackPlayerName;
-        String preferred = com.stardew.craft.client.ClientPlayerDataCache.getPreferredName();
-        String playerName = preferred == null || preferred.isBlank() ? fallback : preferred;
+        String playerName = com.stardew.craft.client.ClientPlayerDataCache.getPlayerDisplayName(fallback);
         boolean male = com.stardew.craft.client.ClientPlayerDataCache.isPlayerMale();
         String resolved = text == null ? "" : text.replace("@", playerName);
         resolved = resolveInlineGenderTokens(resolved, male);
