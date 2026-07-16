@@ -219,8 +219,8 @@ public class MineLadderBlock extends Block {
         ));
 
         if (nextFloor <= 120 && nextFloor % 5 == 0 && nextFloor > previousMaxFloor) {
-            level.getServer().tell(new net.minecraft.server.TickTask(
-                level.getServer().getTickCount() + 30,
+            com.stardew.craft.time.StardewSimulationTaskScheduler.schedule(
+                level, 30,
                 () -> {
                     if (serverPlayer.isAlive() && serverPlayer.level().dimension() == ModMiningDimensions.STARDEW_MINING) {
                         level.playSound(null, serverPlayer.blockPosition(),
@@ -228,7 +228,7 @@ public class MineLadderBlock extends Block {
                             SoundSource.BLOCKS, 1.0F, 1.0F);
                     }
                 }
-            ));
+            );
         }
     }
 

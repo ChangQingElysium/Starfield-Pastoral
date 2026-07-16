@@ -61,7 +61,8 @@ public final class StardewPauseClientState {
         if (screen == null) {
             return false;
         }
-        // These screens are direct real-time controls, equivalent to SDV's BobberBar exception.
+        // Ordinary screens pause collectively. Loading screens and explicit realtime controls are
+        // exceptions, equivalent to SDV's BobberBar behavior.
         return !(screen instanceof ChatScreen
             || screen instanceof ReceivingLevelScreen
             || screen instanceof LevelLoadingScreen

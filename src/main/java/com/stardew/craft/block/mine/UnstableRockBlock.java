@@ -120,11 +120,10 @@ public class UnstableRockBlock extends Block {
         // 不行——scheduleTick 只能对同一 block 调度一次。
         // 最终方案：在这一次 tick 里同步循环处理所有阶段，每阶段之间无真实延迟，
         // 改为用一个回调机制。
-        // → 正确做法：利用 ServerLevel.getServer().tell() 来延迟执行
-        level.getServer().tell(new net.minecraft.server.TickTask(
-                level.getServer().getTickCount() + TICKS_PER_STAGE,
-                () -> advanceCrackStage(level, pos, state, destroyId, nextStage)
-        ));
+        // 使用关卡模拟时间，菜单时停期间裂纹阶段不会越过实体/方块模拟偷跑。
+        com.stardew.craft.time.StardewSimulationTaskScheduler.schedule(
+                level, TICKS_PER_STAGE,
+                () -> advanceCrackStage(level, pos, state, destroyId, nextStage));
     }
 
     @Override

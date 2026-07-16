@@ -72,7 +72,7 @@ public record TimeSyncPacket(
             timeManager.getCurrentYear(),
             vdt,
             com.stardew.craft.festival.ActiveFestivalHandlers.isAnyTimeFreezeActive()
-                || (server != null && com.stardew.craft.time.StardewTimePauseService.isPaused(server)),
+                || (server != null && com.stardew.craft.time.StardewTimePauseService.isClockPaused(server)),
             server != null && com.stardew.craft.time.StardewTimePauseService.isPaused(server)
         );
     }
@@ -94,7 +94,7 @@ public record TimeSyncPacket(
             
             // 更新客户端天空时间（每 tick 会强制覆盖 ClientLevel.dayTime）
             com.stardew.craft.client.StardewClientTimeState.onServerTimeSync(
-                packet.virtualDayTime(), packet.timeFrozen(), packet.simulationPaused());
+                packet.virtualDayTime(), packet.timeFrozen());
         });
     }
 }

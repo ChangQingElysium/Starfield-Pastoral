@@ -48,6 +48,7 @@ import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -4187,10 +4188,12 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         int maxScroll = socialMaxScroll(total);
 
         if (socialScroll > 0) {
-            drawArrowFromCursors(graphics, upX, upY, 12, 0.8f);
+            drawArrowFromCursors(graphics, upX, upY,
+                    socialArrowBoundWidth(), socialArrowBoundHeight(), 12, 0.8f);
         }
         if (socialScroll < maxScroll) {
-            drawArrowFromCursors(graphics, downX, downY, 11, 0.8f);
+            drawArrowFromCursors(graphics, downX, downY,
+                    socialArrowBoundWidth(), socialArrowBoundHeight(), 11, 0.8f);
         }
 
         CommonGuiTextures.drawScrollTrackBox(
@@ -4629,6 +4632,12 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
     }
 
     private void drawArrowFromCursors(GuiGraphics graphics, int boundX, int boundY, int tilePosition, float vanillaScale) {
+        drawArrowFromCursors(graphics, boundX, boundY, ui(64), ui(64), tilePosition, vanillaScale);
+    }
+
+    private void drawArrowFromCursors(GuiGraphics graphics, int boundX, int boundY,
+                                      int boundWidth, int boundHeight,
+                                      int tilePosition, float vanillaScale) {
         float drawScale = mapping.s4() * vanillaScale;
         // 11 is down arrow, 12 is up arrow in standard Stardew logic (from Game1.mouseCursors)
         // Up arrow: u=421, v=459, w=11, h=12
@@ -4636,14 +4645,18 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         int w = 11;
         int h = 12;
 
-        int offsetX = (ui(64) - Math.round(w * drawScale)) / 2;
-        int offsetY = (ui(64) - Math.round(h * drawScale)) / 2;
+        int offsetX = centeredArrowOffset(boundWidth, w, drawScale);
+        int offsetY = centeredArrowOffset(boundHeight, h, drawScale);
 
         if (tilePosition == 12) {
             CommonGuiTextures.drawScrollArrowUp(graphics, boundX + offsetX, boundY + offsetY, drawScale);
         } else {
             CommonGuiTextures.drawScrollArrowDown(graphics, boundX + offsetX, boundY + offsetY, drawScale);
         }
+    }
+
+    static int centeredArrowOffset(int boundSize, int texturePixels, float drawScale) {
+        return (boundSize - Math.round(texturePixels * drawScale)) / 2;
     }
 
     private void drawTrashCan(GuiGraphics graphics, int mouseX, int mouseY) {
@@ -4890,7 +4903,36 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
     }
 
     public boolean shouldShowJei() {
-        return currentTab == 0 || currentTab == 4;
+        return tabSupportsJei(currentTab);
+    }
+
+    static boolean tabSupportsJei(int tab) {
+        return tab == 0 || tab == 4;
+    }
+
+    /**
+     * Areas drawn outside the main menu rectangle. JEI uses these to move its
+     * ingredient and bookmark panels instead of covering tabs or controls.
+     */
+    public List<Rect2i> jeiGuiExtraAreas() {
+        if (!shouldShowJei()) {
+            return List.of();
+        }
+
+        List<Rect2i> areas = new ArrayList<>(3);
+        int firstTabX = tabX(0);
+        int tabsRight = tabX(TAB_COUNT - 1) + tabSize();
+        areas.add(new Rect2i(firstTabX, tabY(), tabsRight - firstTabX, tabSize()));
+
+        int closeX = menuX + activeMenuWidth() - ui(CLOSE_X_OFFSET_SDV);
+        int closeY = menuY - ui(CLOSE_Y_OFFSET_SDV);
+        areas.add(new Rect2i(closeX, closeY, ui(CLOSE_SIZE_SDV), ui(CLOSE_SIZE_SDV)));
+
+        if (currentTab == 0 && shouldShowJunimoNoteIcon()) {
+            int size = junimoIconHoverSize();
+            areas.add(new Rect2i(junimoIconX(), junimoIconY(), size, size));
+        }
+        return List.copyOf(areas);
     }
 
     public int jeiGuiLeft() {

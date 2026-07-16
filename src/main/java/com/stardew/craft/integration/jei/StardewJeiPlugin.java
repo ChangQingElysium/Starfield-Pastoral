@@ -104,8 +104,16 @@ public class StardewJeiPlugin implements IModPlugin {
         registration.addGuiContainerHandler(StardewGameMenuScreen.class,
                 new IGuiContainerHandler<StardewGameMenuScreen>() {
                     @Override
+                    public List<Rect2i> getGuiExtraAreas(StardewGameMenuScreen screen) {
+                        return screen.jeiGuiExtraAreas();
+                    }
+
+                    @Override
                     public Optional<IClickableIngredient<?>> getClickableIngredientUnderMouse(
                             StardewGameMenuScreen screen, double mouseX, double mouseY) {
+                        if (!screen.shouldShowJei()) {
+                            return Optional.empty();
+                        }
                         StardewGameMenuScreen.ClickableItem target = screen.jeiIngredientAt(mouseX, mouseY);
                         return target == null ? Optional.empty() : clickableIngredient(ingredientManager,
                                 target.stack(), target.x(), target.y(), target.width(), target.height());

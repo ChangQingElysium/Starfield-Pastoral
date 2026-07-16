@@ -360,6 +360,10 @@ public final class PassOutService {
     }
 
     private static long serverTick(ServerPlayer player) {
+        if (player.level() instanceof net.minecraft.server.level.ServerLevel level
+                && com.stardew.craft.time.StardewTimePauseService.isStardewTimeDimension(level)) {
+            return level.getGameTime();
+        }
         return player.server.overworld().getGameTime();
     }
 

@@ -34,7 +34,7 @@ import java.util.List;
  * - 扇区数量动态计算，不硬编码
  */
 @SuppressWarnings("null")
-public class WarpWheelScreen extends Screen {
+public class WarpWheelScreen extends Screen implements StardewRealtimeScreen {
 
     // ── 布局常量 ──
     private static final int OPEN_ANIM_MS = 200;

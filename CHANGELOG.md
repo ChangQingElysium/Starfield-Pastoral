@@ -10,6 +10,9 @@
 - Repositioned the affected HUD and festival overlays through shared per-element bounds so small windows, high GUI scales and fullscreen layouts keep sensible margins instead of reusing one oversized canvas. Pickup notices and corner text boxes now size themselves from their actual content.
 - Improved the Stardew game menu, inventory and crafting interaction paths, including responsive canvas fitting, safer slot mapping and trash behavior, real crafting previews and corrected big-craftable presentation.
 - Added synchronized Stardew simulation pause state for menu/non-gameplay screens and multiplayer-aware time progression, including the original-style blinking frozen clock without interfering with black screen fades.
+- Fixed cutscene actors sliding or floating by separating clock freezes from world simulation and removing the client-level Minecraft pause override. Scripted fake players now keep their movement animations while the Stardew clock remains frozen.
+- Moved delayed gameplay actions onto the pause-aware Stardew simulation timeline and repaired farm creation/loading transitions so progress labels, hand animation and player control remain responsive.
+- Kept live auctions, the Night Market Mermaid Show, the warp wheel, fishing and festival minigames outside collective menu pause, and stopped server container state from overriding explicit realtime-screen behavior.
 
 #### JEI And Item Information Overhaul
 
@@ -59,6 +62,9 @@
 - 将相关 HUD 与节日覆盖层接入独立组件边界；小窗口、高 GUI 缩放和全屏状态不再共用一个过大的画布。拾取提示与左下角文字框会根据实际内容计算尺寸。
 - 改进星露谷游戏菜单、背包和制作交互，包含响应式画布适配、更安全的槽位映射与丢弃逻辑、真实制作预览，以及正确的大型制作物显示。
 - 加入服务端同步的星露谷模拟暂停状态，使菜单/非游戏界面与多人时间流逝保持一致；暂停时钟按原版方式闪烁，同时不会干扰黑屏淡入淡出。
+- 将时钟冻结与世界模拟分离，并移除客户端层面的 Minecraft 暂停覆盖，修复过场角色直接平移或漂浮的问题；脚本假玩家现在会正常播放移动动画，同时星露谷时钟仍保持冻结。
+- 将延迟游戏逻辑迁移到支持暂停的星露谷模拟时间线，并修复农场创建/加载过渡，使创建提示、手部动画与玩家操作不再被时停卡住。
+- 实时拍卖、夜市美人鱼演出、传送轮盘、钓鱼与节日小游戏不再触发集体菜单暂停；服务端容器状态也不会再覆盖界面明确声明的实时行为。
 
 #### JEI 与物品信息全面重整
 

@@ -10,7 +10,6 @@ import com.stardew.craft.player.SkillType;
 import com.stardew.craft.network.payload.ReadBookVisualPayload;
 import com.stardew.craft.sound.ModSounds;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
@@ -65,7 +64,8 @@ public final class BookService {
 
     public static void scheduleBookRead(ServerPlayer player, BookDefinition definition,
                                         InteractionHand hand, int token, int delayTicks) {
-        player.server.tell(new TickTask(player.server.getTickCount() + Math.max(1, delayTicks), () -> {
+        com.stardew.craft.time.StardewSimulationTaskScheduler.schedule(
+            player.serverLevel(), delayTicks, () -> {
             if (player.isRemoved() || !isReadingTokenActive(player, token)) {
                 return;
             }
@@ -76,7 +76,7 @@ public final class BookService {
                 return;
             }
             finishReadingVisual(player);
-        }));
+        });
     }
 
     public static void tickReadingFreeze(ServerPlayer player) {
@@ -186,10 +186,11 @@ public final class BookService {
     }
 
     private static void scheduleMessage(ServerPlayer player, Component message) {
-        player.server.tell(new TickTask(player.server.getTickCount() + READ_MESSAGE_DELAY_TICKS, () -> {
+        com.stardew.craft.time.StardewSimulationTaskScheduler.schedule(
+            player.serverLevel(), READ_MESSAGE_DELAY_TICKS, () -> {
             if (!player.isRemoved()) {
 				com.stardew.craft.network.GlobalHudMessagePayload.sendTo(player, message);
             }
-        }));
+        });
     }
 }

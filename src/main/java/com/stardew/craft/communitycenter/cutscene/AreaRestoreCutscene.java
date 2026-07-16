@@ -106,6 +106,9 @@ public final class AreaRestoreCutscene {
             stop();
             return;
         }
+        if (com.stardew.craft.time.StardewTimePauseService.shouldPauseLevel(activeLevel)) {
+            return;
+        }
 
         BlockPos center = getCenterPos();
 
@@ -207,11 +210,11 @@ public final class AreaRestoreCutscene {
                     CommunityCenterSavedData data = CommunityCenterSavedData.get();
                     java.util.UUID uid = ownerUUID != null ? ownerUUID : new java.util.UUID(0L, 0L);
                     if (data.areAllAreasComplete(uid)) {
-                        // Delay slightly to let star carrier finish (40 ticks = 2s)
+                        // Delay on simulation time so opening a menu cannot start the dance while
+                        // the star carrier and all other entities are frozen.
                         final ServerLevel level = activeLevel;
-                        activeLevel.getServer().tell(new net.minecraft.server.TickTask(
-                                activeLevel.getServer().getTickCount() + 80,
-                                () -> GoodbyeDanceCutscene.start(level, ccOrig)));
+                        com.stardew.craft.time.StardewSimulationTaskScheduler.schedule(
+                                level, 80, () -> GoodbyeDanceCutscene.start(level, ccOrig));
                     }
                 }
                 stop();

@@ -4,7 +4,6 @@ import com.stardew.craft.effect.ModMobEffects;
 import com.stardew.craft.sound.ModSounds;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
@@ -37,11 +36,11 @@ public class MonsterMuskItem extends SimpleStardewItem {
                 serverPlayer.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, APPLY_DELAY_TICKS, 255, false, false, false));
                 for (int i = 0; i < 3; i++) {
                     int delay = i * 2;
-                    serverPlayer.server.tell(new TickTask(serverPlayer.server.getTickCount() + delay,
-                            () -> spawnPurpleMist(serverLevel, serverPlayer)));
+                    com.stardew.craft.time.StardewSimulationTaskScheduler.schedule(
+                            serverLevel, delay, () -> spawnPurpleMist(serverLevel, serverPlayer));
                 }
-                serverPlayer.server.tell(new TickTask(serverPlayer.server.getTickCount() + APPLY_DELAY_TICKS,
-                        () -> applyMonsterMusk(serverLevel, serverPlayer)));
+                com.stardew.craft.time.StardewSimulationTaskScheduler.schedule(
+                        serverLevel, APPLY_DELAY_TICKS, () -> applyMonsterMusk(serverLevel, serverPlayer));
             }
             if (!player.isCreative()) {
                 stack.shrink(1);

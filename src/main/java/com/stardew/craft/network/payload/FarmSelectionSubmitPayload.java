@@ -51,6 +51,11 @@ public record FarmSelectionSubmitPayload(
         context.enqueueWork(() -> {
             if (!(context.player() instanceof ServerPlayer player)) return;
 
+            // This payload is sent immediately before the profile screen closes. Clear the cached
+            // menu state now so the next server tick cannot keep the Stardew world paused while
+            // the farm initialization task is running.
+            com.stardew.craft.time.StardewTimePauseService.updateClientState(player, false);
+
             String preferredName = sanitizeProfileText(payload.preferredName(), 48);
             String favoriteThing = sanitizeProfileText(payload.favoriteThing(), 64);
             if (preferredName.isBlank() || favoriteThing.isBlank()) {
@@ -124,14 +129,17 @@ public record FarmSelectionSubmitPayload(
                 player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket(
                         10, 200, 20)); // fadeIn=0.5s, stay=10s, fadeOut=1s
 
-                // 延迟 2 tick 执行初始化，让标题先显示
+                // 真正跨 tick 执行初始化，让标题包先在当前 tick 结束时发到客户端。
                 final FarmInstance farmRef = farm;
-                stardewLevel.getServer().execute(() -> {
+                var server = stardewLevel.getServer();
+                server.tell(new net.minecraft.server.TickTask(server.getTickCount() + 2, () -> {
                     com.stardew.craft.farm.FarmInstanceInitializer.initializeFarm(stardewLevel, farmRef);
-                    // 初始化完成 → 清除标题 → 传送玩家
-                    player.connection.send(new net.minecraft.network.protocol.game.ClientboundClearTitlesPacket(true));
-                    CrossDimensionTeleporter.wizardInteriorToStardewOutdoor(player);
-                });
+                    // 再跨一个 tick 清除标题并传送，保证客户端至少渲染一帧完成状态。
+                    server.tell(new net.minecraft.server.TickTask(server.getTickCount() + 1, () -> {
+                        player.connection.send(new net.minecraft.network.protocol.game.ClientboundClearTitlesPacket(true));
+                        CrossDimensionTeleporter.wizardInteriorToStardewOutdoor(player);
+                    }));
+                }));
             } else {
                 CrossDimensionTeleporter.wizardInteriorToStardewOutdoor(player);
             }

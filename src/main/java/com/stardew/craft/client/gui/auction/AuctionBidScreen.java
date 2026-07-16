@@ -1,6 +1,7 @@
 package com.stardew.craft.client.gui.auction;
 
 import com.stardew.craft.client.auction.AuctionClientState;
+import com.stardew.craft.client.gui.StardewRealtimeScreen;
 import com.stardew.craft.client.gui.common.CommonGuiTextures;
 import com.stardew.craft.client.gui.overnight.StardewGuiUtil;
 import com.stardew.craft.auction.AuctionService;
@@ -18,7 +19,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import javax.annotation.Nonnull;
 
 @SuppressWarnings("null")
-public class AuctionBidScreen extends Screen {
+public class AuctionBidScreen extends Screen implements StardewRealtimeScreen {
     // Fixed design canvas, scaled uniformly to fit the screen so the layout is identical at every GUI scale.
     private static final int DESIGN_W = 720;
     private static final int DESIGN_H = 470;

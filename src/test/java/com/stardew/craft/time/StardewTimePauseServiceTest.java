@@ -22,6 +22,22 @@ class StardewTimePauseServiceTest {
     }
 
     @Test
+    void cutscenesFreezeTheClockWithoutFreezingWorldSimulation() {
+        assertFalse(StardewTimePauseService.countsAsSimulationNonGameplay(true, false));
+        assertFalse(StardewTimePauseService.countsAsSimulationNonGameplay(true, true));
+        assertTrue(StardewTimePauseService.countsAsClockNonGameplay(true, false));
+        assertTrue(StardewTimePauseService.countsAsClockNonGameplay(true, true));
+    }
+
+    @Test
+    void ordinaryMenusAndSleepStillPauseBothClockAndSimulation() {
+        assertTrue(StardewTimePauseService.countsAsSimulationNonGameplay(false, true));
+        assertTrue(StardewTimePauseService.countsAsClockNonGameplay(false, true));
+        assertFalse(StardewTimePauseService.countsAsSimulationNonGameplay(false, false));
+        assertFalse(StardewTimePauseService.countsAsClockNonGameplay(false, false));
+    }
+
+    @Test
     void simulationClockAdvancesOnlyWhenExplicitlyRequested() {
         StardewTimeManager time = new StardewTimeManager();
 

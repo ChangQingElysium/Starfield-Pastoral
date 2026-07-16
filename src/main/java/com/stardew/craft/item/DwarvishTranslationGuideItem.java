@@ -56,8 +56,8 @@ public class DwarvishTranslationGuideItem extends Item implements IStardewItem {
         ItemStack stack = player.getItemInHand(hand);
         if (!level.isClientSide && player instanceof ServerPlayer serverPlayer) {
             int token = BookService.startReadingVisual(serverPlayer, USE_DURATION_TICKS);
-            serverPlayer.server.tell(new net.minecraft.server.TickTask(
-                    serverPlayer.server.getTickCount() + USE_DURATION_TICKS,
+            com.stardew.craft.time.StardewSimulationTaskScheduler.schedule(
+                    serverPlayer.serverLevel(), USE_DURATION_TICKS,
                     () -> {
                         if (serverPlayer.isRemoved() || !BookService.isReadingTokenActive(serverPlayer, token)) {
                             return;
@@ -68,7 +68,7 @@ public class DwarvishTranslationGuideItem extends Item implements IStardewItem {
                         } else {
                             BookService.finishReadingVisual(serverPlayer);
                         }
-                    }));
+                    });
         }
         player.startUsingItem(hand);
         return InteractionResultHolder.consume(stack);

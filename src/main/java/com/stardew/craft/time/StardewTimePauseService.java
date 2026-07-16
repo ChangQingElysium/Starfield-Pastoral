@@ -34,7 +34,10 @@ public final class StardewTimePauseService {
     private static final Map<UUID, ClientState> CLIENT_STATES = new HashMap<>();
 
     private static MinecraftServer activeServer;
-    private static boolean paused;
+    /** Freezes entity/chunk/block-entity simulation while every player is in a real menu/sleep. */
+    private static boolean simulationPaused;
+    /** Freezes only the visible Stardew clock; cutscenes use this without freezing their actors. */
+    private static boolean clockPaused;
     private static Long frozenVirtualDayTime;
 
     private StardewTimePauseService() {}
@@ -52,12 +55,20 @@ public final class StardewTimePauseService {
 
     /** Used by the ServerLevel mixin to suppress gameplay simulation while retaining maintenance. */
     public static boolean shouldPauseLevel(ServerLevel level) {
-        return level != null && level.getServer() == activeServer && paused && isStardewTimeDimension(level);
+        return level != null
+            && level.getServer() == activeServer
+            && simulationPaused
+            && isStardewTimeDimension(level);
     }
 
-    /** Includes only collective/no-player pause. Festival clock locks are added by TimeSyncPacket. */
+    /** True only when the Stardew world simulation itself is collectively paused. */
     public static boolean isPaused(MinecraftServer server) {
-        return server != null && server == activeServer && paused;
+        return server != null && server == activeServer && simulationPaused;
+    }
+
+    /** Includes collective menu/sleep pauses and cutscene-only clock freezes. */
+    public static boolean isClockPaused(MinecraftServer server) {
+        return server != null && server == activeServer && clockPaused;
     }
 
     public static boolean isStardewTimeDimension(ServerLevel level) {
@@ -86,26 +97,33 @@ public final class StardewTimePauseService {
         List<ServerPlayer> players = server.getPlayerList().getPlayers().stream()
             .filter(player -> isStardewTimeDimension(player.serverLevel()))
             .toList();
-        int nonGameplayPlayers = 0;
+        int simulationNonGameplayPlayers = 0;
+        int clockNonGameplayPlayers = 0;
         for (ServerPlayer player : players) {
-            if (isNonGameplay(player, now)) {
-                nonGameplayPlayers++;
+            boolean cutsceneActive = ServerCutsceneTracker.isActive(player.getUUID());
+            boolean baseNonGameplay = isBaseNonGameplay(player, now);
+            if (countsAsSimulationNonGameplay(cutsceneActive, baseNonGameplay)) {
+                simulationNonGameplayPlayers++;
+            }
+            if (countsAsClockNonGameplay(cutsceneActive, baseNonGameplay)) {
+                clockNonGameplayPlayers++;
             }
         }
 
-        boolean nextPaused = shouldPauseForCounts(players.size(), nonGameplayPlayers);
+        boolean nextSimulationPaused = shouldPauseForCounts(players.size(), simulationNonGameplayPlayers);
+        boolean nextClockPaused = shouldPauseForCounts(players.size(), clockNonGameplayPlayers);
         StardewTimeManager timeManager = StardewTimeManager.get();
         timeManager.initializeSimulationGameTime(server.overworld().getGameTime());
 
-        // Finish compensating the previous paused tick before deciding whether to resume. Without
+        // Finish compensating the previous clock-paused tick before deciding whether to resume. Without
         // this, the overworld tick immediately before resume leaks into the Stardew clock.
-        if (paused && frozenVirtualDayTime != null
+        if (clockPaused && frozenVirtualDayTime != null
                 && timeManager.getVirtualDayTime(server.overworld()) != frozenVirtualDayTime) {
             timeManager.setVirtualDayTime(server.overworld(), frozenVirtualDayTime);
         }
 
-        if (nextPaused) {
-            if (!paused || frozenVirtualDayTime == null) {
+        if (nextClockPaused) {
+            if (!clockPaused || frozenVirtualDayTime == null) {
                 ServerLevel stardewLevel = server.getLevel(ModDimensions.STARDEW_VALLEY);
                 frozenVirtualDayTime = stardewLevel == null
                     ? timeManager.getVirtualDayTime(server.overworld())
@@ -115,9 +133,10 @@ public final class StardewTimePauseService {
             frozenVirtualDayTime = null;
         }
 
-        boolean changed = paused != nextPaused;
-        paused = nextPaused;
-        if (!paused) {
+        boolean changed = simulationPaused != nextSimulationPaused || clockPaused != nextClockPaused;
+        simulationPaused = nextSimulationPaused;
+        clockPaused = nextClockPaused;
+        if (!simulationPaused) {
             timeManager.advanceSimulationGameTime();
         }
         if (changed) {
@@ -142,13 +161,20 @@ public final class StardewTimePauseService {
         return playerCount == 0 || nonGameplayPlayerCount >= playerCount;
     }
 
-    private static boolean isNonGameplay(ServerPlayer player, long now) {
-        if (ServerCutsceneTracker.isActive(player.getUUID()) || player.isSleeping()) {
+    static boolean countsAsSimulationNonGameplay(boolean cutsceneActive, boolean baseNonGameplay) {
+        return !cutsceneActive && baseNonGameplay;
+    }
+
+    static boolean countsAsClockNonGameplay(boolean cutsceneActive, boolean baseNonGameplay) {
+        return cutsceneActive || baseNonGameplay;
+    }
+
+    private static boolean isBaseNonGameplay(ServerPlayer player, long now) {
+        if (player.isSleeping()) {
             return true;
         }
-        if (player.containerMenu != player.inventoryMenu) {
-            return true;
-        }
+        // The client screen classifier is the source of truth for menus. Do not infer pause from
+        // containerMenu here: a realtime container screen must be able to opt out explicitly.
         ClientState state = CLIENT_STATES.get(player.getUUID());
         return state != null
             && state.nonGameplay()
@@ -158,7 +184,8 @@ public final class StardewTimePauseService {
     private static void reset(MinecraftServer server) {
         activeServer = server;
         CLIENT_STATES.clear();
-        paused = false;
+        simulationPaused = false;
+        clockPaused = false;
         frozenVirtualDayTime = null;
     }
 

@@ -87,6 +87,9 @@ public final class GoodbyeDanceCutscene {
             stop();
             return;
         }
+        if (com.stardew.craft.time.StardewTimePauseService.shouldPauseLevel(activeLevel)) {
+            return;
+        }
 
         phaseTicksRemaining--;
 

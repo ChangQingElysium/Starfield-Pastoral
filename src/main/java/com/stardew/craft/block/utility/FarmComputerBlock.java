@@ -5,8 +5,6 @@ import com.stardew.craft.block.shape.ModelVoxelShapeCache;
 import com.stardew.craft.sound.ModSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
@@ -82,12 +80,11 @@ public class FarmComputerBlock extends Block {
 
     private static void showReport(ServerLevel level, BlockPos pos, ServerPlayer player) {
         level.playSound(null, pos, ModSounds.DWARVISH_SENTRY.get(), SoundSource.BLOCKS, 1.0F, 1.0F);
-        MinecraftServer server = level.getServer();
-        server.tell(new TickTask(server.getTickCount() + 10, () -> {
+        com.stardew.craft.time.StardewSimulationTaskScheduler.schedule(level, 10, () -> {
             if (player.isRemoved() || player.connection == null) {
                 return;
             }
             FarmComputerReport.create(level, pos, player).sendTo(player);
-        }));
+        });
     }
 }

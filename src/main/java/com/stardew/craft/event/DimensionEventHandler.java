@@ -463,6 +463,7 @@ public class DimensionEventHandler {
 
         var server = serverLevel.getServer();
         boolean simulationPaused = com.stardew.craft.time.StardewTimePauseService.isPaused(server);
+        boolean clockPaused = com.stardew.craft.time.StardewTimePauseService.isClockPaused(server);
 
         // ── 每 tick 将维度实际 dayTime 对齐到虚拟时间 ──
         // 原版 ServerLevel.tickTime() 会每 tick 递增维度自身的 dayTime，
@@ -473,7 +474,7 @@ public class DimensionEventHandler {
         StardewTimeManager timeManager = StardewTimeManager.get();
         // The Stardew clock remains independent even when the host world disables its daylight cycle.
         if (!server.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)
-                && !simulationPaused
+                && !clockPaused
                 && !com.stardew.craft.festival.ActiveFestivalHandlers.isAnyTimeFreezeActive()) {
             timeManager.setDayTimeOffsetRaw(timeManager.getDayTimeOffset() + 1L);
         }
