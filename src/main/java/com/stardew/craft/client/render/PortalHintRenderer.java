@@ -27,6 +27,7 @@ import com.stardew.craft.festival.nightmarket.NightMarketPainterService;
 import com.stardew.craft.festival.nightmarket.NightMarketShopService;
 import com.stardew.craft.festival.nightmarket.NightMarketSubmarineService;
 import com.stardew.craft.secretnote.SecretNote20Service;
+import com.stardew.craft.world.OldMasterCannoliService;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -109,6 +110,11 @@ public final class PortalHintRenderer {
     private static final int COOK_R = 255, COOK_G = 145, COOK_B = 45;
     private static final int COOK_EDGE_A = 190;
     private static final int COOK_FACE_A = 28;
+
+    // Old Master Cannoli statue style — white
+    private static final int WHITE_R = 255, WHITE_G = 255, WHITE_B = 255;
+    private static final int WHITE_EDGE_A = 190;
+    private static final int WHITE_FACE_A = 24;
 
     // Bubble text — translatable keys
     private static final String ENTER_KEY = "stardewcraft.portal.hint.enter";
@@ -432,6 +438,9 @@ public final class PortalHintRenderer {
         if (DesertFestivalService.EGG_SHOP_TARGET_ID.equals(targetId)) {
             return HintStyle.SHOP;
         }
+        if (OldMasterCannoliService.TARGET_ID.equals(targetId)) {
+            return HintStyle.WHITE;
+        }
         if (DesertFestivalRaceService.RACE_MAN_TARGET_ID.equals(targetId)) {
             return HintStyle.RACE;
         }
@@ -494,6 +503,7 @@ public final class PortalHintRenderer {
         return switch (targetId) {
             case "desert_bus" -> "desert";
             case "desert_bus_return" -> "pelican_town";
+            case OldMasterCannoliService.TARGET_ID -> "old_master_cannoli";
             case DesertFestivalService.EGG_SHOP_TARGET_ID -> "desert_festival_egg_shop";
             case DesertFestivalRaceService.RACE_MAN_TARGET_ID -> "desert_festival_race_man";
             case DesertFestivalRaceService.SHADY_GUY_TARGET_ID -> "desert_festival_shady_guy";
@@ -606,7 +616,7 @@ public final class PortalHintRenderer {
             hintKey = FAIR_TOKEN_PURCHASE_KEY;
         } else if (FairFestivalService.FORTUNE_TELLER_TARGET_ID.equals(hint.targetId)) {
             hintKey = FAIR_FORTUNE_KEY;
-        } else if (hint.hintStyle == HintStyle.INTERACT) {
+        } else if (hint.hintStyle == HintStyle.INTERACT || hint.hintStyle == HintStyle.WHITE) {
             hintKey = INTERACT_KEY;
         } else if ("desert_bus".equals(hint.targetId)) {
             hintKey = BUY_TICKET_KEY;
@@ -638,6 +648,7 @@ public final class PortalHintRenderer {
             case RACE -> (RACE_R << 16) | (RACE_G << 8) | RACE_B;
             case SHADY -> 0x50483F;
             case COOK -> (COOK_R << 16) | (COOK_G << 8) | COOK_B;
+            case WHITE -> (WHITE_R << 16) | (WHITE_G << 8) | WHITE_B;
             case EXIT -> (EXIT_R << 16) | (EXIT_G << 8) | EXIT_B;
             case ENTER, INTERACT -> (ENTER_R << 16) | (ENTER_G << 8) | ENTER_B;
         };
@@ -679,6 +690,10 @@ public final class PortalHintRenderer {
             r = COOK_R; g = COOK_G; b = COOK_B;
             edgeA = (int) (COOK_EDGE_A * alpha);
             faceA = (int) (COOK_FACE_A * alpha);
+        } else if (hint.hintStyle == HintStyle.WHITE) {
+            r = WHITE_R; g = WHITE_G; b = WHITE_B;
+            edgeA = (int) (WHITE_EDGE_A * alpha);
+            faceA = (int) (WHITE_FACE_A * alpha);
         } else if (hint.isEnter) {
             r = ENTER_R; g = ENTER_G; b = ENTER_B;
             edgeA = (int) (ENTER_EDGE_A * alpha);
@@ -820,6 +835,7 @@ public final class PortalHintRenderer {
         RACE,
         SHADY,
         COOK,
+        WHITE,
         INTERACT
     }
 

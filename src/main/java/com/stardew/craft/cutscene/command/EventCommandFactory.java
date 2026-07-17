@@ -203,6 +203,7 @@ public final class EventCommandFactory {
             case "set_flag"      -> new SetFlagCommand(obj.get("flag").getAsString());
             case "grant_rusty_key" -> new GrantRustyKeyCommand();
             case "grant_magnifying_glass" -> new GrantMagnifyingGlassCommand();
+            case "grant_bear_knowledge" -> new GrantBearKnowledgeCommand();
             case "mark_opened_sewer" -> new MarkOpenedSewerCommand();
             case "show_npc"      -> new ShowNpcCommand(obj.get("npc_id").getAsString());
             case "spawn_entity"  -> new SpawnEntityCommand(

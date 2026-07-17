@@ -240,7 +240,7 @@ public final class MarlonService {
         // Reuse ShopPurchaseResultPayload: success, new money, empty item (already delivered), qty 0, idx 0
         PacketDistributor.sendToPlayer(player,
             new com.stardew.craft.network.payload.ShopPurchaseResultPayload(
-                success, newMoney, "", success ? 1 : 0, 0));
+                success, "MarlonRecovery", newMoney, "", success ? 1 : 0, 0));
     }
 
     /**

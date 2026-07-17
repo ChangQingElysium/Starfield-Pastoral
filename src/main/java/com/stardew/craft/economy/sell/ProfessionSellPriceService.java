@@ -80,14 +80,21 @@ public final class ProfessionSellPriceService {
 
     public static SellQuote quoteItemForProfessionNames(Set<String> professionNames, Set<String> mailFlags,
                                                          ItemStack stack, SellSource source) {
+        return quoteItemForProfessionNames(professionNames, mailFlags, Set.of(), stack, source);
+    }
+
+    public static SellQuote quoteItemForProfessionNames(Set<String> professionNames, Set<String> mailFlags,
+                                                         Set<String> specialItems, ItemStack stack,
+                                                         SellSource source) {
         Set<String> normalizedNames = new HashSet<>();
         for (String name : professionNames) {
             if (name != null && !name.isBlank()) {
                 normalizedNames.add(name.toLowerCase(Locale.ROOT));
             }
         }
-        boolean hasBearKnowledge = mailFlags != null
-                && mailFlags.contains(SecretNoteStoryFlags.BEAR_KNOWLEDGE);
+        boolean hasBearKnowledge = (mailFlags != null
+                && mailFlags.contains(SecretNoteStoryFlags.BEAR_KNOWLEDGE))
+                || (specialItems != null && specialItems.contains(SecretNote23Service.SPECIAL_ITEM_ID));
         return quoteItemWithChecker(null, stack, source, hasBearKnowledge,
                 profession -> normalizedNames.contains(profession.getName().toLowerCase(Locale.ROOT)));
     }

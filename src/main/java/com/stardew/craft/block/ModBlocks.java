@@ -201,6 +201,26 @@ public class ModBlocks {
                                         .noOcclusion()
                                         .instabreak()));
 
+        public static final DeferredBlock<Block> MAGIC_WARP_CIRCLE = BLOCKS.register("magic_warp_circle",
+                        () -> new com.stardew.craft.block.decor.MagicWarpCircleBlock(Block.Properties.of()
+                                        .mapColor(net.minecraft.world.level.material.MapColor.NONE)
+                                        .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK)
+                                        .sound(net.minecraft.world.level.block.SoundType.WOOL)
+                                        .noCollission()
+                                        .noOcclusion()
+                                        .strength(-1.0F, 3600000.0F)
+                                        .noLootTable()));
+
+        public static final DeferredBlock<Block> DARK_TALISMAN_SEAL = BLOCKS.register("dark_talisman_seal",
+                        () -> new com.stardew.craft.block.decor.DarkTalismanSealBlock(Block.Properties.of()
+                                        .mapColor(net.minecraft.world.level.material.MapColor.STONE)
+                                        .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK)
+                                        .sound(net.minecraft.world.level.block.SoundType.STONE)
+                                        .noCollission()
+                                        .noOcclusion()
+                                        .strength(-1.0F, 3600000.0F)
+                                        .noLootTable()));
+
         // ---- 采集物方块 (Forage blocks with cross model, drop corresponding items) ----
         private static final int SPRING = 0;
         private static final int SUMMER = 1;

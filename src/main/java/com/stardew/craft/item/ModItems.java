@@ -1795,12 +1795,44 @@ public class ModItems {
                         () -> new SimpleStardewItem("stardewcraft.type.artifact", 1, new Item.Properties().stacksTo(999)));
         public static final DeferredItem<Item> DWARVISH_TRANSLATION_GUIDE = ITEMS.register("dwarvish_translation_guide",
                         () -> new DwarvishTranslationGuideItem(new Item.Properties().stacksTo(1)));
+        public static final DeferredItem<Item> FOREST_MAGIC = ITEMS.register("forest_magic",
+                        () -> new PowerSpecialItem(new Item.Properties().stacksTo(1).fireResistant(),
+                                        PowerSpecialItemService.FOREST_MAGIC_FLAG,
+                                        PowerSpecialItemService.FOREST_MAGIC_ID,
+                                        PowerSpecialItem.Theme.FOREST));
+        public static final DeferredItem<Item> CLUB_CARD = ITEMS.register("club_card",
+                        () -> new PowerSpecialItem(new Item.Properties().stacksTo(1).fireResistant(),
+                                        PowerSpecialItemService.CLUB_CARD_FLAG,
+                                        PowerSpecialItemService.CLUB_CARD_ID,
+                                        PowerSpecialItem.Theme.CLUB));
+        public static final DeferredItem<Item> DARK_TALISMAN = ITEMS.register("dark_talisman",
+                        () -> new PowerSpecialItem(new Item.Properties().stacksTo(1).fireResistant(),
+                                        PowerSpecialItemService.DARK_TALISMAN_FLAG,
+                                        PowerSpecialItemService.DARK_TALISMAN_ID,
+                                        PowerSpecialItem.Theme.DARK));
+        public static final DeferredItem<Item> MAGIC_INK = ITEMS.register("magic_ink",
+                        () -> new PowerSpecialItem(new Item.Properties().stacksTo(1).fireResistant(),
+                                        PowerSpecialItemService.MAGIC_INK_FLAG,
+                                        PowerSpecialItemService.MAGIC_INK_ID,
+                                        PowerSpecialItem.Theme.INK));
+        public static final DeferredItem<Item> SPRING_ONION_MASTERY = ITEMS.register("spring_onion_mastery",
+                        () -> new PowerSpecialItem(new Item.Properties().stacksTo(1).fireResistant(),
+                                        PowerSpecialItemService.SPRING_ONION_MASTERY_FLAG,
+                                        PowerSpecialItemService.SPRING_ONION_MASTERY_ID,
+                                        PowerSpecialItem.Theme.ONION));
+        public static final DeferredItem<Item> KEY_TO_THE_TOWN = ITEMS.register("key_to_the_town",
+                        () -> new PowerSpecialItem(new Item.Properties().stacksTo(1).fireResistant(),
+                                        PowerSpecialItemService.KEY_TO_THE_TOWN_FLAG,
+                                        PowerSpecialItemService.KEY_TO_THE_TOWN_ID,
+                                        PowerSpecialItem.Theme.TOWN));
         public static final DeferredItem<Item> SKULL_KEY = ITEMS.register("skull_key",
                         () -> new SkullKeyItem(new Item.Properties().stacksTo(1).fireResistant()));
         public static final DeferredItem<Item> MAGNIFYING_GLASS = ITEMS.register("magnifying_glass",
                         () -> new MagnifyingGlassItem(new Item.Properties().stacksTo(1).fireResistant()));
         public static final DeferredItem<Item> SPECIAL_CHARM = ITEMS.register("special_charm",
                         () -> new SpecialCharmItem(new Item.Properties().stacksTo(1).fireResistant()));
+        public static final DeferredItem<Item> BEAR_KNOWLEDGE = ITEMS.register("bear_knowledge",
+                        () -> new BearKnowledgeItem(new Item.Properties().stacksTo(1).fireResistant()));
         public static final DeferredItem<Item> SECRET_NOTE = ITEMS.register("secret_note",
                         () -> new SecretNoteItem(new Item.Properties().stacksTo(999)));
         public static final DeferredItem<Item> ORNATE_NECKLACE = ITEMS.register("ornate_necklace",

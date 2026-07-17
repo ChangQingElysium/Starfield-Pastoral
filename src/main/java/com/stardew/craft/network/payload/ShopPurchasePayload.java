@@ -108,7 +108,7 @@ public record ShopPurchasePayload(
             if (entry.stock() != Integer.MAX_VALUE) {
                 qty = Math.min(qty, entry.stock());
                 if (qty <= 0) {
-                    sendResult(player, false,
+                    sendResult(player, payload.shopId(), false,
                         com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player),
                         "", 0, payload.itemIndex());
                     return;
@@ -132,7 +132,7 @@ public record ShopPurchasePayload(
                 com.stardew.craft.player.PlayerStardewData data =
                     com.stardew.craft.player.PlayerDataManager.getPlayerData(player);
                 if (data.isDecorationUnlocked(decoType, styleId)) {
-                    sendResult(player, false,
+                    sendResult(player, payload.shopId(), false,
                         com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player),
                         "", 0, payload.itemIndex());
                     return;
@@ -140,7 +140,7 @@ public record ShopPurchasePayload(
                 if (cost > 0) {
                     boolean ok = com.stardew.craft.player.PlayerStardewDataAPI.removeMoney(player, cost);
                     if (!ok) {
-                        sendResult(player, false,
+                        sendResult(player, payload.shopId(), false,
                             com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player),
                             "", 0, payload.itemIndex());
                         return;
@@ -152,7 +152,7 @@ public record ShopPurchasePayload(
                 if (entry.stock() != Integer.MAX_VALUE) {
                     ShopStockTracker.recordPurchase(player.getUUID(), payload.shopId(), entry.itemId(), qty);
                 }
-                sendResult(player, true,
+                sendResult(player, payload.shopId(), true,
                     com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player),
                     entry.itemId(), qty, payload.itemIndex());
                 return;
@@ -167,14 +167,14 @@ public record ShopPurchasePayload(
                         || !com.stardew.craft.player.RecipeCatalogData.getAllKnownRecipeIds().contains(recipeId)
                         || data.isRecipeUnlocked(recipeId)) {
                     // Already learned — reject without charging
-                    sendResult(player, false, com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player), "", 0, payload.itemIndex());
+                    sendResult(player, payload.shopId(), false, com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player), "", 0, payload.itemIndex());
                     return;
                 }
                 // Deduct money
                 if (cost > 0) {
                     boolean ok = com.stardew.craft.player.PlayerStardewDataAPI.removeMoney(player, cost);
                     if (!ok) {
-                        sendResult(player, false, com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player), "", 0, payload.itemIndex());
+                        sendResult(player, payload.shopId(), false, com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player), "", 0, payload.itemIndex());
                         return;
                     }
                 }
@@ -185,7 +185,7 @@ public record ShopPurchasePayload(
                 if (entry.stock() != Integer.MAX_VALUE) {
                     ShopStockTracker.recordPurchase(player.getUUID(), payload.shopId(), entry.itemId(), qty);
                 }
-                sendResult(player, true, newMoneyRecipe, entry.itemId(), qty, payload.itemIndex());
+                sendResult(player, payload.shopId(), true, newMoneyRecipe, entry.itemId(), qty, payload.itemIndex());
                 return;
             }
 
@@ -195,20 +195,20 @@ public record ShopPurchasePayload(
                 try {
                     tradeId = ResourceLocation.parse(entry.tradeItemId());
                 } catch (Exception ignored) {
-                    sendResult(player, false, com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player), "", 0, payload.itemIndex());
+                    sendResult(player, payload.shopId(), false, com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player), "", 0, payload.itemIndex());
                     return;
                 }
 
                 net.minecraft.world.item.Item tradeItem =
                     net.minecraft.core.registries.BuiltInRegistries.ITEM.get(tradeId);
                 if (tradeItem == null || tradeItem == net.minecraft.world.item.Items.AIR) {
-                    sendResult(player, false, com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player), "", 0, payload.itemIndex());
+                    sendResult(player, payload.shopId(), false, com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player), "", 0, payload.itemIndex());
                     return;
                 }
 
                 int tradeNeed = Math.max(1, entry.tradeItemCount()) * qty;
                 if (player.getInventory().countItem(tradeItem) < tradeNeed) {
-                    sendResult(player, false, com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player), "", 0, payload.itemIndex());
+                    sendResult(player, payload.shopId(), false, com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player), "", 0, payload.itemIndex());
                     return;
                 }
             }
@@ -218,7 +218,7 @@ public record ShopPurchasePayload(
                 boolean ok = com.stardew.craft.player.PlayerStardewDataAPI.removeMoney(player, cost);
                 if (!ok) {
                     int currentMoney = com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player);
-                    sendResult(player, false, currentMoney, "", 0, payload.itemIndex());
+                    sendResult(player, payload.shopId(), false, currentMoney, "", 0, payload.itemIndex());
                     return;
                 }
             }
@@ -241,15 +241,17 @@ public record ShopPurchasePayload(
                 if (remaining > 0) {
                     // Safety rollback: refund money if trade consumption failed unexpectedly.
                     if (cost > 0) com.stardew.craft.player.PlayerStardewDataAPI.addMoney(player, cost);
-                    sendResult(player, false, com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player), "", 0, payload.itemIndex());
+                    sendResult(player, payload.shopId(), false, com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player), "", 0, payload.itemIndex());
                     return;
                 }
             }
 
+            // Validate the physical item before confirming. The client holds the
+            // confirmed result on the cursor and sends ShopPickupPayload when placed.
             int deliveredQuantity = qty * Math.max(1, entry.purchaseStack());
-            if (!givePurchasedItem(player, entry.itemId(), deliveredQuantity)) {
+            if (!isValidPhysicalItem(entry.itemId())) {
                 if (cost > 0) com.stardew.craft.player.PlayerStardewDataAPI.addMoney(player, cost);
-                sendResult(player, false, com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player), "", 0, payload.itemIndex());
+                sendResult(player, payload.shopId(), false, com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player), "", 0, payload.itemIndex());
                 return;
             }
 
@@ -278,40 +280,24 @@ public record ShopPurchasePayload(
                 com.stardew.craft.player.PlayerDataEventHandler.syncPlayerData(player, data);
             }
 
-            sendResult(player, true, newMoney, entry.itemId(), deliveredQuantity, payload.itemIndex());
+            ShopPickupPayload.recordValidatedPurchase(player, entry.itemId(), deliveredQuantity);
+            sendResult(player, payload.shopId(), true, newMoney, entry.itemId(), deliveredQuantity, payload.itemIndex());
         });
     }
 
-    /** Complete a shop transaction immediately so the still-open shop shows the new inventory. */
-    private static boolean givePurchasedItem(ServerPlayer player, String itemId, int quantity) {
-        if (quantity <= 0) return false;
-        final net.minecraft.world.item.Item item;
+    private static boolean isValidPhysicalItem(String itemId) {
         try {
             ResourceLocation id = ResourceLocation.parse(itemId);
-            item = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(id);
+            net.minecraft.world.item.Item item = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(id);
+            return item != null && item != net.minecraft.world.item.Items.AIR;
         } catch (Exception ignored) {
             return false;
         }
-        if (item == null || item == net.minecraft.world.item.Items.AIR) return false;
-
-        int remaining = quantity;
-        int maxStackSize = Math.max(1, item.getDefaultMaxStackSize());
-        while (remaining > 0) {
-            ItemStack stack = new ItemStack(item, Math.min(remaining, maxStackSize));
-            player.getInventory().add(stack);
-            if (!stack.isEmpty()) {
-                player.drop(stack, false);
-            }
-            remaining -= Math.min(remaining, maxStackSize);
-        }
-        player.getInventory().setChanged();
-        player.inventoryMenu.broadcastChanges();
-        return true;
     }
 
-    private static void sendResult(ServerPlayer player, boolean ok, int money, String itemId, int qty, int idx) {
+    private static void sendResult(ServerPlayer player, String shopId, boolean ok, int money, String itemId, int qty, int idx) {
         net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
-            new com.stardew.craft.network.payload.ShopPurchaseResultPayload(ok, money, itemId, qty, idx));
+            new com.stardew.craft.network.payload.ShopPurchaseResultPayload(ok, shopId, money, itemId, qty, idx));
     }
 
     private static boolean isFairStarTokenShop(String shopId) {
@@ -325,7 +311,7 @@ public record ShopPurchasePayload(
                 || entry.itemId().startsWith("recipe:")
                 || entry.itemId().startsWith("wallpaper:")
                 || entry.itemId().startsWith("flooring:")) {
-            sendResult(player, false, currentTokens, "", 0, payload.itemIndex());
+            sendResult(player, payload.shopId(), false, currentTokens, "", 0, payload.itemIndex());
             return;
         }
 
@@ -333,15 +319,15 @@ public record ShopPurchasePayload(
             com.stardew.craft.player.PlayerStardewData data =
                 com.stardew.craft.player.PlayerDataManager.getPlayerData(player);
             if (data.hasMailFlag(com.stardew.craft.festival.FairFestivalService.FAIR_STARDROP_FLAG)) {
-                sendResult(player, false, currentTokens, "", 0, payload.itemIndex());
+                sendResult(player, payload.shopId(), false, currentTokens, "", 0, payload.itemIndex());
                 return;
             }
             if (!com.stardew.craft.item.misc.StardropItem.consumeImmediately(player)) {
-                sendResult(player, false, currentTokens, "", 0, payload.itemIndex());
+                sendResult(player, payload.shopId(), false, currentTokens, "", 0, payload.itemIndex());
                 return;
             }
             if (!com.stardew.craft.player.PlayerStardewDataAPI.consumeFairStarTokens(player, cost)) {
-                sendResult(player, false, currentTokens, "", 0, payload.itemIndex());
+                sendResult(player, payload.shopId(), false, currentTokens, "", 0, payload.itemIndex());
                 return;
             }
             data = com.stardew.craft.player.PlayerDataManager.getPlayerData(player);
@@ -351,7 +337,7 @@ public record ShopPurchasePayload(
             if (entry.stock() != Integer.MAX_VALUE) {
                 ShopStockTracker.recordPurchase(player.getUUID(), payload.shopId(), entry.itemId(), qty);
             }
-            sendResult(player, true,
+            sendResult(player, payload.shopId(), true,
                 com.stardew.craft.player.PlayerStardewDataAPI.getFairStarTokens(player),
                 "", 0, payload.itemIndex());
             return;
@@ -362,30 +348,24 @@ public record ShopPurchasePayload(
             net.minecraft.world.item.Item mcItem =
                 net.minecraft.core.registries.BuiltInRegistries.ITEM.get(rl);
             if (mcItem == null || mcItem == net.minecraft.world.item.Items.AIR) {
-                sendResult(player, false, currentTokens, "", 0, payload.itemIndex());
+                sendResult(player, payload.shopId(), false, currentTokens, "", 0, payload.itemIndex());
                 return;
             }
         } catch (Exception e) {
-            sendResult(player, false, currentTokens, "", 0, payload.itemIndex());
+            sendResult(player, payload.shopId(), false, currentTokens, "", 0, payload.itemIndex());
             return;
         }
 
         if (!com.stardew.craft.player.PlayerStardewDataAPI.consumeFairStarTokens(player, cost)) {
-            sendResult(player, false, currentTokens, "", 0, payload.itemIndex());
+            sendResult(player, payload.shopId(), false, currentTokens, "", 0, payload.itemIndex());
             return;
         }
         int deliveredQuantity = qty * Math.max(1, entry.purchaseStack());
-        if (!givePurchasedItem(player, entry.itemId(), deliveredQuantity)) {
-            com.stardew.craft.player.PlayerStardewDataAPI.addFairStarTokens(player, cost);
-            sendResult(player, false,
-                com.stardew.craft.player.PlayerStardewDataAPI.getFairStarTokens(player),
-                "", 0, payload.itemIndex());
-            return;
-        }
         if (entry.stock() != Integer.MAX_VALUE) {
             ShopStockTracker.recordPurchase(player.getUUID(), payload.shopId(), entry.itemId(), qty);
         }
-        sendResult(player, true,
+        ShopPickupPayload.recordValidatedPurchase(player, entry.itemId(), deliveredQuantity);
+        sendResult(player, payload.shopId(), true,
             com.stardew.craft.player.PlayerStardewDataAPI.getFairStarTokens(player),
             entry.itemId(), deliveredQuantity, payload.itemIndex());
     }
@@ -408,19 +388,16 @@ public record ShopPurchasePayload(
             net.minecraft.world.item.Item mcItem =
                     net.minecraft.core.registries.BuiltInRegistries.ITEM.get(rl);
             if (mcItem == null || mcItem == net.minecraft.world.item.Items.AIR) {
-                sendResult(player, false, money, "", 0, itemIndex);
+                sendResult(player, com.stardew.craft.block.decor.FurnitureCatalogueBlock.SHOP_ID, false, money, "", 0, itemIndex);
                 return;
             }
         } catch (Exception e) {
-            sendResult(player, false, money, "", 0, itemIndex);
+            sendResult(player, com.stardew.craft.block.decor.FurnitureCatalogueBlock.SHOP_ID, false, money, "", 0, itemIndex);
             return;
         }
 
-        // Free purchase — no money deduction or stock tracking, but still sync now.
-        if (!givePurchasedItem(player, entry.itemId(), qty)) {
-            sendResult(player, false, money, "", 0, itemIndex);
-            return;
-        }
-        sendResult(player, true, money, entry.itemId(), qty, itemIndex);
+        // Free purchase — no money deduction or stock tracking.
+        ShopPickupPayload.recordValidatedPurchase(player, entry.itemId(), qty);
+        sendResult(player, com.stardew.craft.block.decor.FurnitureCatalogueBlock.SHOP_ID, true, money, entry.itemId(), qty, itemIndex);
     }
 }

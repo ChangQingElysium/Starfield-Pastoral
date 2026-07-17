@@ -141,6 +141,11 @@ public class InteriorPortalInteractionEvents {
 
         // ── 星露谷维度 ──
 
+        if (com.stardew.craft.world.OldMasterCannoliService.TARGET_ID.equals(targetId)) {
+            com.stardew.craft.world.OldMasterCannoliService.interact(player);
+            return;
+        }
+
         // Fair participants stay on the festival map. Consume every ordinary building/mine/bus
         // portal before it can start a fade transition, while preserving the dedicated Fair targets.
         if (com.stardew.craft.festival.FairFestivalService.isParticipant(player)

@@ -44,6 +44,7 @@ import com.stardew.craft.player.RecipeCatalogData;
 import com.stardew.craft.player.StardewCraftingRecipeData;
 import com.stardew.craft.sound.ModSounds;
 import com.stardew.craft.secretnote.SecretNoteRegistry;
+import com.stardew.craft.secretnote.SecretNote23Service;
 import com.stardew.craft.secretnote.SecretNoteStoryFlags;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.ChatFormatting;
@@ -2125,42 +2126,23 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         30, 29, 27, 25, 23, 21, 19, 17, 15, 13, 11, 9, 7, 5, 3, 0
     };
 
-    private enum PowerUnlockKind {
-        MAIL_FLAG,
-        MAIL_OR_SPECIAL_ITEM,
-        NEVER
-    }
-
-    private record PowerEntry(String titleKey, String descriptionKey, int iconIndex,
-                              PowerUnlockKind unlockKind, String mailFlag, String specialItemId,
-                              String tooltipItemId) {
+    private record PowerEntry(int iconIndex, String mailFlag, String specialItemId, String tooltipItemId) {
     }
 
     private static final PowerEntry[] POWER_ENTRIES = new PowerEntry[] {
-        new PowerEntry("stardewcraft.power.forest_magic", "stardewcraft.power.forest_magic.desc", 0,
-            PowerUnlockKind.MAIL_FLAG, CCStoryFlags.CAN_READ_JUNIMO, "", ""),
-        new PowerEntry("item.stardewcraft.dwarvish_translation_guide", "item.stardewcraft.dwarvish_translation_guide.desc", 1,
-            PowerUnlockKind.MAIL_OR_SPECIAL_ITEM, "HasDwarvishTranslationGuide", "stardewcraft:dwarvish_translation_guide", "stardewcraft:dwarvish_translation_guide"),
-        new PowerEntry("item.stardewcraft.rusty_key", "", 2,
-            PowerUnlockKind.MAIL_OR_SPECIAL_ITEM, "HasRustyKey", "stardewcraft:rusty_key", "stardewcraft:rusty_key"),
-        new PowerEntry("stardewcraft.power.club_card", "", 3,
-            PowerUnlockKind.MAIL_FLAG, "HasClubCard", "", ""),
-        new PowerEntry("stardewcraft.power.special_charm", "", 4,
-            PowerUnlockKind.MAIL_OR_SPECIAL_ITEM, "HasSpecialCharm", "stardewcraft:special_charm", "stardewcraft:special_charm"),
-        new PowerEntry("item.stardewcraft.skull_key", "", 5,
-            PowerUnlockKind.MAIL_OR_SPECIAL_ITEM, CCStoryFlags.HAS_SKULL_KEY, CCStoryFlags.SKULL_KEY_SPECIAL_ITEM, "stardewcraft:skull_key"),
-        new PowerEntry("stardewcraft.power.magnifying_glass", "", 6,
-            PowerUnlockKind.MAIL_OR_SPECIAL_ITEM, "HasMagnifyingGlass", "stardewcraft:magnifying_glass", "stardewcraft:magnifying_glass"),
-        new PowerEntry("stardewcraft.power.dark_talisman", "", 7,
-            PowerUnlockKind.MAIL_FLAG, "HasDarkTalisman", "", ""),
-        new PowerEntry("stardewcraft.power.magic_ink", "", 8,
-            PowerUnlockKind.MAIL_FLAG, "HasMagicInk", "", ""),
-        new PowerEntry("stardewcraft.power.bear_paw", "stardewcraft.power.bear_paw.desc", 9,
-            PowerUnlockKind.MAIL_FLAG, SecretNoteStoryFlags.BEAR_KNOWLEDGE, "", ""),
-        new PowerEntry("stardewcraft.power.spring_onion_mastery", "stardewcraft.power.spring_onion_mastery.desc", 10,
-            PowerUnlockKind.NEVER, "", "", ""),
-        new PowerEntry("stardewcraft.power.key_to_the_town", "stardewcraft.power.key_to_the_town.desc", 11,
-            PowerUnlockKind.MAIL_FLAG, "HasTownKey", "", "")
+        new PowerEntry(0, CCStoryFlags.CAN_READ_JUNIMO, "stardewcraft:forest_magic", "stardewcraft:forest_magic"),
+        new PowerEntry(1, "HasDwarvishTranslationGuide", "stardewcraft:dwarvish_translation_guide", "stardewcraft:dwarvish_translation_guide"),
+        new PowerEntry(2, "HasRustyKey", "stardewcraft:rusty_key", "stardewcraft:rusty_key"),
+        new PowerEntry(3, "HasClubCard", "stardewcraft:club_card", "stardewcraft:club_card"),
+        new PowerEntry(4, "HasSpecialCharm", "stardewcraft:special_charm", "stardewcraft:special_charm"),
+        new PowerEntry(5, CCStoryFlags.HAS_SKULL_KEY, CCStoryFlags.SKULL_KEY_SPECIAL_ITEM, "stardewcraft:skull_key"),
+        new PowerEntry(6, "HasMagnifyingGlass", "stardewcraft:magnifying_glass", "stardewcraft:magnifying_glass"),
+        new PowerEntry(7, "HasDarkTalisman", "stardewcraft:dark_talisman", "stardewcraft:dark_talisman"),
+        new PowerEntry(8, "HasMagicInk", "stardewcraft:magic_ink", "stardewcraft:magic_ink"),
+        new PowerEntry(9, SecretNoteStoryFlags.BEAR_KNOWLEDGE,
+            SecretNote23Service.SPECIAL_ITEM_ID, SecretNote23Service.SPECIAL_ITEM_ID),
+        new PowerEntry(10, "HasSpringOnionMastery", "stardewcraft:spring_onion_mastery", "stardewcraft:spring_onion_mastery"),
+        new PowerEntry(11, "HasTownKey", "stardewcraft:key_to_the_town", "stardewcraft:key_to_the_town")
     };
 
     private String getFarmerTitle() {
@@ -2726,8 +2708,6 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         int slotStep = ui(76);
         int iconSize = ui(64);
         float iconScale = mapping.s4();
-        String hoverTitle = "";
-        String hoverText = "";
         PowerEntry hoveredEntry = null;
         boolean hoveredUnlocked = false;
 
@@ -2747,15 +2727,6 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
             if (mouseX >= x && mouseX < x + iconSize && mouseY >= y && mouseY < y + iconSize) {
                 hoveredEntry = entry;
                 hoveredUnlocked = unlocked;
-                if (unlocked) {
-                    hoverTitle = Component.translatable(entry.titleKey()).getString();
-                    hoverText = entry.descriptionKey().isBlank()
-                        ? ""
-                        : Component.translatable(entry.descriptionKey()).getString();
-                } else {
-                    hoverTitle = "???";
-                    hoverText = "";
-                }
             }
         }
 
@@ -2763,15 +2734,11 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
             graphics.renderTooltip(this.font, Component.literal("???").withStyle(ChatFormatting.BOLD), mouseX, mouseY);
             return;
         }
-        if (hoveredEntry != null && !hoveredEntry.tooltipItemId().isBlank()) {
+        if (hoveredEntry != null) {
             ItemStack tooltipStack = powerTooltipStack(hoveredEntry.tooltipItemId());
             if (!tooltipStack.isEmpty()) {
                 graphics.renderTooltip(this.font, tooltipStack, mouseX, mouseY);
-                return;
             }
-        }
-        if (!hoverTitle.isEmpty() || !hoverText.isEmpty()) {
-            drawSkillsTooltip(graphics, mouseX, mouseY, hoverTitle, hoverText);
         }
     }
 
@@ -3228,12 +3195,8 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
     }
 
     private boolean isPowerUnlocked(PowerEntry entry) {
-        return switch (entry.unlockKind()) {
-            case MAIL_FLAG -> ClientPlayerDataCache.hasMailFlag(entry.mailFlag());
-            case MAIL_OR_SPECIAL_ITEM -> ClientPlayerDataCache.hasMailFlag(entry.mailFlag())
-                || ClientPlayerDataCache.hasSpecialItem(entry.specialItemId());
-            case NEVER -> false;
-        };
+        return ClientPlayerDataCache.hasMailFlag(entry.mailFlag())
+            || ClientPlayerDataCache.hasSpecialItem(entry.specialItemId());
     }
 
     /**
@@ -4917,7 +4880,9 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
      */
     public List<Rect2i> jeiGuiExtraAreas() {
         if (!shouldShowJei()) {
-            return List.of();
+            return this.width > 0 && this.height > 0
+                    ? List.of(new Rect2i(0, 0, this.width, this.height))
+                    : List.of();
         }
 
         List<Rect2i> areas = new ArrayList<>(6);
@@ -4940,6 +4905,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
             }
         } else if (currentTab == 4) {
             int controlSize = ui(64);
+            areas.add(new Rect2i(trashCanX(), trashCanY(), controlSize, ui(104)));
             if (currentCraftingPage > 0) {
                 areas.add(new Rect2i(pageButtonX(), pageUpButtonY(), controlSize, controlSize));
             }

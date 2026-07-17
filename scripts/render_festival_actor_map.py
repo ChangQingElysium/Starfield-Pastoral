@@ -7,6 +7,7 @@ Examples:
   python3 scripts/render_festival_actor_map.py --preset night_market
   python3 scripts/render_festival_actor_map.py --festival summer28 --profile y1 --phase main
   python3 scripts/render_festival_actor_map.py --secret-note-23
+  python3 scripts/render_festival_actor_map.py --wizard-dark-talisman
 """
 
 from __future__ import annotations
@@ -791,6 +792,53 @@ def render_secret_note23_source_map(output_dir: Path, scale: int) -> Path:
     return output_path
 
 
+def render_wizard_dark_talisman_source_map(output_dir: Path, scale: int) -> Path:
+    """Render vanilla event 529952 without mapping any point to Minecraft coordinates."""
+    output_dir.mkdir(parents=True, exist_ok=True)
+    step = TILE_SIZE * scale
+    railroad = render_tmx(MAPS_DIR / "Railroad.tmx", scale=scale)
+    crop = (43, 29, 62, 46)
+    base = railroad.crop(tuple(value * step for value in crop))
+    base = draw_tile_grid(base, scale, crop[0], crop[1])
+
+    def pixel(tile_x: float, tile_y: float) -> tuple[float, float]:
+        return ((tile_x - crop[0]) * step, (tile_y - crop[1]) * step)
+
+    route_layer = Image.new("RGBA", base.size, (0, 0, 0, 0))
+    route_draw = ImageDraw.Draw(route_layer)
+    player_route = [
+        pixel(50.5, 40.5),
+        pixel(51.5, 40.5),
+        pixel(51.5, 36.5),
+        pixel(52.5, 36.5),
+    ]
+    wizard_step = [pixel(54.5, 36.5), pixel(53.5, 36.5), pixel(54.5, 36.5)]
+    route_draw.line(player_route, fill=(82, 148, 255, 230), width=max(4, scale * 2), joint="curve")
+    route_draw.line(wizard_step, fill=(190, 92, 255, 230), width=max(4, scale * 2), joint="curve")
+    base = Image.alpha_composite(base, route_layer)
+
+    points = [
+        ("Viewport anchor (54,36)", 54.5, 36.5),
+        ("Wizard main position (54,36), facing N", 54.5, 36.5),
+        ("Player start (50,40), facing E", 50.5, 40.5),
+        ("Player first route corner (51,40)", 51.5, 40.5),
+        ("Player north route stop (51,36)", 51.5, 36.5),
+        ("Player dialogue stop (52,36), facing E", 52.5, 36.5),
+        ("Wizard ink-emphasis step (53,36), then returns", 53.5, 36.5),
+    ]
+    annotated = draw_numbered_source_points(
+        base,
+        points,
+        (crop[0], crop[1]),
+        scale,
+        "Dark Talisman / Vanilla Railroad event 529952 / source choreography",
+        route=False,
+    )
+    output_path = output_dir / "wizard_dark_talisman_railroad_vanilla_source_points.png"
+    annotated.save(output_path)
+    return output_path
+
+
 def render_minecraft_capture_workbook(
     output_path: Path,
     title: str,
@@ -867,6 +915,33 @@ def render_secret_note23_capture_workbook(output_dir: Path) -> Path:
         output_dir / "secret_note23_minecraft_capture_workbook.png",
         "Secret Note 23 - Minecraft capture workbook",
         "Bear stays fixed and uses idle only. Every Minecraft coordinate is intentionally blank.",
+        entries,
+    )
+
+
+def render_wizard_dark_talisman_capture_workbook(output_dir: Path) -> Path:
+    entries = [
+        ("D01", "Event trigger area corner 1", "block x/y/z"),
+        ("D02", "Event trigger area corner 2", "block x/y/z"),
+        ("D03", "Player cutscene start", "x/y/z + facing"),
+        ("D04", "Player route corner", "x/y/z + facing"),
+        ("D05", "Player dialogue stop", "x/y/z + facing"),
+        ("D06", "Wizard main dialogue position", "x/y/z + facing"),
+        ("D07", "Wizard ink-emphasis step", "x/y/z + facing"),
+        ("D08", "Dark-talisman seal reference anchor", "block x/y/z + facing; existing point may be reused"),
+        ("D09", "Opening camera rig", "exact x/y/z + yaw + pitch"),
+        ("D10", "Dialogue two-shot camera rig", "exact x/y/z + yaw + pitch"),
+        ("D11", "Seal insert camera rig", "exact x/y/z + yaw + pitch"),
+        ("D12", "Wizard warp effect anchor", "x/y/z"),
+        ("D13", "Witch flyby start outside frame", "x/y/z + facing"),
+        ("D14", "Witch flyby end outside frame", "x/y/z + facing"),
+        ("D15", "Witch flyby camera rig", "exact x/y/z + yaw + pitch"),
+        ("D16", "Player position after cutscene", "x/y/z + facing"),
+    ]
+    return render_minecraft_capture_workbook(
+        output_dir / "wizard_dark_talisman_minecraft_capture_workbook.png",
+        "Dark Talisman opening - Minecraft capture workbook",
+        "Every new runtime coordinate is intentionally blank until supplied with the in-game planning tool.",
         entries,
     )
 
@@ -1023,6 +1098,8 @@ def parse_args() -> argparse.Namespace:
                         help="Render the vanilla Note 10 choreography and a blank Minecraft capture workbook.")
     parser.add_argument("--secret-note-23", action="store_true",
                         help="Render the vanilla Note 23 bear-event anchors and a blank Minecraft capture workbook.")
+    parser.add_argument("--wizard-dark-talisman", action="store_true",
+                        help="Render vanilla Dark Talisman opening anchors and a blank Minecraft capture workbook.")
     return parser.parse_args()
 
 
@@ -1050,6 +1127,10 @@ def main() -> None:
     if args.secret_note_23:
         print(render_secret_note23_source_map(args.out, args.scale).relative_to(ROOT))
         print(render_secret_note23_capture_workbook(args.out).relative_to(ROOT))
+        return
+    if args.wizard_dark_talisman:
+        print(render_wizard_dark_talisman_source_map(args.out, args.scale).relative_to(ROOT))
+        print(render_wizard_dark_talisman_capture_workbook(args.out).relative_to(ROOT))
         return
     if args.preset == "night_market":
         for output_path in render_night_market_maps(args.out, args.scale, args.portrait_size):

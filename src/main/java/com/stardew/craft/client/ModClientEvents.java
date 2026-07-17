@@ -202,6 +202,11 @@ public class ModClientEvents {
                             .withStyle(ChatFormatting.WHITE)
                             .append(SpecialCharmClientFx.flowingTypeLabel(
                                     Component.translatable(typeKey).getString())));
+                } else if (stack.getItem() == ModItems.BEAR_KNOWLEDGE.get()) {
+                    customLines.add(Component.translatable("stardewcraft.tooltip.type_prefix")
+                            .withStyle(ChatFormatting.WHITE)
+                            .append(BearKnowledgeClientFx.flowingTypeLabel(
+                                    Component.translatable(typeKey).getString())));
                 } else if (stack.getItem() == ModItems.DWARVISH_TRANSLATION_GUIDE.get()) {
                     customLines.add(Component.translatable("stardewcraft.tooltip.type_prefix")
                         .withStyle(ChatFormatting.WHITE)
@@ -212,6 +217,11 @@ public class ModClientEvents {
                             .withStyle(ChatFormatting.WHITE)
                             .append(RustyKeyClientFx.flowingTypeLabel(
                                     Component.translatable(typeKey).getString())));
+                } else if (stack.getItem() instanceof com.stardew.craft.item.PowerSpecialItem powerItem) {
+                    customLines.add(Component.translatable("stardewcraft.tooltip.type_prefix")
+                            .withStyle(ChatFormatting.WHITE)
+                            .append(PowerSpecialItemClientFx.flowingTypeLabel(
+                                    Component.translatable(typeKey).getString(), powerItem.theme())));
                 } else if (stack.getItem() == ModItems.WARP_WAND.get()) {
                     customLines.add(Component.translatable("stardewcraft.tooltip.type_prefix")
                         .withStyle(ChatFormatting.WHITE)
@@ -281,14 +291,11 @@ public class ModClientEvents {
 
             SellQuote quote = ProfessionSellPriceService.quoteItemForProfessionNames(
                 new java.util.HashSet<>(ClientPlayerDataCache.getProfessions()),
-                ClientPlayerDataCache.getMailFlags(), stack, SellSource.SHOP_COUNTER);
+                ClientPlayerDataCache.getMailFlags(), ClientPlayerDataCache.getSpecialItems(),
+                stack, SellSource.SHOP_COUNTER);
             int sellPrice = quote.finalUnitPrice();
-            boolean hidePriceLine = stack.getItem() == ModItems.SKULL_KEY.get()
-                || stack.getItem() == ModItems.MAGNIFYING_GLASS.get()
-                || stack.getItem() == ModItems.SPECIAL_CHARM.get()
+            boolean hidePriceLine = "stardewcraft.type.special".equals(typeKey)
                 || stack.getItem() == ModItems.SECRET_NOTE.get()
-                || stack.getItem() == ModItems.DWARVISH_TRANSLATION_GUIDE.get()
-                || stack.getItem() == ModItems.RUSTY_KEY.get()
                 || stack.getItem() == ModItems.WARP_WAND.get()
                 || stack.getItem() == ModItems.STARDROP.get()
                 || stack.getItem() == ModItems.IRIDIUM_MILK.get();

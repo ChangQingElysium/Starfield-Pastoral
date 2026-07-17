@@ -418,7 +418,7 @@ public final class BlacksmithService {
         int newMoney = com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player);
         net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
             new com.stardew.craft.network.payload.ShopPurchaseResultPayload(
-                true, newMoney, "", 0, itemIndex));
+                true, "ClintUpgrade", newMoney, "", 0, itemIndex));
 
         // SDV: Game1.exitActiveMenu() + Game1.DrawDialogue("Tool.cs.14317")
         // Send dialogue — this opens the dialogue screen, replacing the shop screen
@@ -429,7 +429,7 @@ public final class BlacksmithService {
         int money = com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player);
         net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
             new com.stardew.craft.network.payload.ShopPurchaseResultPayload(
-                success, money, "", 0, -1));
+                success, "ClintUpgrade", money, "", 0, -1));
     }
 
     /**

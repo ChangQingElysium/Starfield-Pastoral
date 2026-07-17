@@ -1,7 +1,8 @@
 package com.stardew.craft.cutscene.runtime;
 
+import com.stardew.craft.StardewCraft;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -13,17 +14,22 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animation.*;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
+import java.util.Locale;
+
 /**
- * Lightweight client-only actor entity for cutscene events.
+ * Lightweight, temporary actor entity for cutscenes and photography commands.
  * Reuses NPC GeckoLib models based on npcId.
- * Has no AI, no collision, no server-side logic.
+ * Has no AI, collision, gameplay interaction, or persistence.
  */
 public class EventActorEntity extends Mob implements GeoEntity {
+
+    private static final String NBT_NPC_ID = "NpcId";
 
     public static final EntityDataAccessor<String> DATA_NPC_ID =
             SynchedEntityData.defineId(EventActorEntity.class, EntityDataSerializers.STRING);
@@ -34,6 +40,9 @@ public class EventActorEntity extends Mob implements GeoEntity {
     private static final RawAnimation WALK = RawAnimation.begin().thenLoop("walk");
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
+
+    private Vec3 scriptedWalkTarget;
+    private double scriptedWalkSpeed;
 
     /** Custom animation override (set by animate command). */
     private RawAnimation customAnimation = null;
@@ -59,7 +68,30 @@ public class EventActorEntity extends Mob implements GeoEntity {
     }
 
     public void setNpcId(String id) {
-        this.entityData.set(DATA_NPC_ID, id);
+        this.entityData.set(DATA_NPC_ID, normalizeNpcId(id));
+    }
+
+    public static String normalizeNpcId(String id) {
+        String normalized = id == null ? "" : id.trim().toLowerCase(Locale.ROOT);
+        String ownNamespace = StardewCraft.MODID + ":";
+        if (normalized.startsWith(ownNamespace)) {
+            normalized = normalized.substring(ownNamespace.length());
+        }
+        return normalized.matches("[a-z0-9_./-]+") ? normalized : "";
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        tag.putString(NBT_NPC_ID, getNpcId());
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        if (tag.contains(NBT_NPC_ID)) {
+            setNpcId(tag.getString(NBT_NPC_ID));
+        }
     }
 
     public boolean isWalking() {
@@ -68,6 +100,60 @@ public class EventActorEntity extends Mob implements GeoEntity {
 
     public void setWalking(boolean walking) {
         this.entityData.set(DATA_IS_WALKING, walking);
+    }
+
+    public void walkTo(Vec3 target, double speedBlocksPerTick) {
+        if (target == null) {
+            stopWalking();
+            return;
+        }
+        this.scriptedWalkTarget = target;
+        this.scriptedWalkSpeed = Math.max(0.001D, speedBlocksPerTick);
+        this.setWalking(this.position().distanceToSqr(target) > 1.0E-8D);
+    }
+
+    public void stopWalking() {
+        this.scriptedWalkTarget = null;
+        this.scriptedWalkSpeed = 0.0D;
+        this.setWalking(false);
+        this.setDeltaMovement(Vec3.ZERO);
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (!this.level().isClientSide && this.scriptedWalkTarget != null) {
+            tickScriptedWalk();
+        }
+    }
+
+    private void tickScriptedWalk() {
+        Vec3 current = this.position();
+        Vec3 target = this.scriptedWalkTarget;
+        this.setWalking(true);
+        Vec3 next = nextWalkPosition(current, target, scriptedWalkSpeed);
+        double dx = target.x - current.x;
+        double dz = target.z - current.z;
+        if (dx != 0.0D || dz != 0.0D) {
+            float yaw = (float) (Math.toDegrees(Math.atan2(dz, dx)) - 90.0D);
+            this.setYRot(yaw);
+            this.setYHeadRot(yaw);
+            this.setYBodyRot(yaw);
+        }
+        this.setPos(next.x, next.y, next.z);
+        this.setDeltaMovement(Vec3.ZERO);
+        if (next.distanceToSqr(target) <= 1.0E-8D) {
+            stopWalking();
+        }
+    }
+
+    static Vec3 nextWalkPosition(Vec3 current, Vec3 target, double speedBlocksPerTick) {
+        Vec3 delta = target.subtract(current);
+        double distance = delta.length();
+        if (distance <= speedBlocksPerTick || distance <= 1.0E-8D) {
+            return target;
+        }
+        return current.add(delta.scale(speedBlocksPerTick / distance));
     }
 
     public void setCustomAnimation(String animName, boolean loop) {

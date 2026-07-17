@@ -89,6 +89,11 @@ public final class ScreenFade {
         }
     }
 
+    /** Starts the same full-screen white flash used by restoration cutscenes. */
+    public static void startFlashWhite() {
+        startEffect(Mode.FLASH_WHITE, 1.0f, 0.0f);
+    }
+
     /**
      * 每帧 tick 更新 (在 render 前调用)
      */

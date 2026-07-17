@@ -16,4 +16,5 @@ class StardewGameMenuJeiLayoutTest {
                     () -> "JEI must stay hidden on V-menu tab " + tab);
         }
     }
+
 }

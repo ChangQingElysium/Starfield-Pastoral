@@ -1,5 +1,73 @@
 # Changelog
 
+## 0.5.1fix4 - 2026-07-18
+
+### Update Log (English)
+
+#### Photography Actor Commands
+
+- Added a dedicated, temporary actor system for screenshots and video production. Use `/stardew actor spawn <npc>` (for example, `/stardew actor spawn abigail`) or `/stardew actor list` to discover supported character IDs.
+- Added commands to place actors at coordinates, face the camera, rotate them, switch idle/walk animations, select the nearest actor or all actors, and remove or clear actors after filming.
+- Added deterministic point-to-point movement with `/stardew actor walk`: actors can walk from A to B at a chosen speed, keep their animation and facing synchronized, stop on command, and finish exactly at the requested destination.
+- Photography actors are isolated from real NPCs and do not participate in schedules, dialogue, friendship, shops, saves, collision, or normal AI.
+
+#### Shop Transactions
+
+- Restored the original purchase flow: bought items attach to the cursor and must be placed into an inventory slot manually instead of being inserted automatically.
+- Added persistent server-side pending-pickup storage so purchased items remain recoverable across menu closure, reconnects, or a temporarily full inventory without duplicating or losing the transaction.
+- Fixed selling so the server validates and removes the exact selected stack and quantity before paying the player. Sell sounds now play only after a confirmed successful sale, and transaction replies are scoped to the correct shop.
+
+#### Menus And JEI
+
+- Fixed JEI overlapping and squeezing the Skills, Social, Collections, Powers, Options, Exit, and other non-item tabs. These pages now reserve the full screen, while JEI remains available in the Inventory and Crafting tabs.
+- Updated JEI exclusion bounds dynamically when switching tabs and included the Crafting trash can in the protected layout area.
+
+#### Rewards And World Interactions
+
+- Strengthened the Secret Note 23 reward flow: Bear's Knowledge is now represented by a permanent special item, stays synchronized with the player's reward state, displays its own tooltip and effects, and continues to apply the berry sell-price bonus.
+- Added the Old Master Cannoli interaction: each player can offer a Sweet Gem Berry once to receive the Stardrop reward, with persistent claim tracking, feedback effects, and a portal hint.
+- Added synchronized physical keepsakes and item tooltips for permanent player powers, including automatic backfilling for existing saves.
+- Corrected locked-area rollback at the Secret Woods boundary so players are returned to a safe position without creative or spectator bypasses accidentally weakening the progression gate.
+
+#### Compatibility And Verification
+
+- Updated the affected item resources and all 12 shipped language files.
+- Added regression coverage for actor spawning and movement, shop escrow and selling, JEI tab bounds, special-item synchronization, Secret Note 23, Old Master Cannoli, and area access rollback.
+- Updated the public mod version to `0.5.1fix4`.
+
+### 更新日志（中文）
+
+#### 摄影演员指令
+
+- 新增专用于截图和视频拍摄的临时演员系统。可使用 `/stardew actor spawn <npc>`（例如 `/stardew actor spawn abigail`）生成角色，也可用 `/stardew actor list` 查看支持的角色 ID。
+- 新增坐标放置、面向镜头、旋转、待机/行走动画、选择最近或全部演员，以及拍摄结束后移除或清空演员等指令。
+- 新增 `/stardew actor walk` 定点移动：演员可按指定速度从 A 点走到 B 点，自动同步朝向和动画，支持中途停止，并精确停在目标位置。
+- 摄影演员与真实 NPC 完全隔离，不参与日程、对话、好感、商店、存档、碰撞或普通 AI 行为。
+
+#### 商店交易
+
+- 恢复原有购买流程：购买后的物品会附着在鼠标指针上，需要玩家手动放入物品栏槽位，不再自动塞入背包。
+- 新增服务端持久化的待领取物品暂存；即使关闭商店、重新连接或背包暂时已满，已付款物品仍可安全取回，不会复制或丢失。
+- 修复出售逻辑：服务端会先校验并移除被点击槽位中的准确物品与数量，再向玩家付款。出售声音只会在服务端确认成功后播放，交易结果也会限定到正确的商店。
+
+#### 菜单与 JEI
+
+- 修复 JEI 与技能、社交、收藏、能力、选项、退出等非物品页面互相挤压和重叠的问题。这些页面现在会完整占用屏幕，JEI 仅在物品栏与制作页面继续显示。
+- 切换标签页时会动态刷新 JEI 排除区域，并将制作页面的垃圾桶纳入布局保护范围。
+
+#### 奖励与世界交互
+
+- 加固秘密纸条 23 的奖励流程：“熊的知识”现在拥有永久特殊物品，会与玩家奖励状态同步，显示专属提示和效果，并继续正确应用浆果售价加成。
+- 实装老坎诺利交互：每名玩家可献上一颗宝石甜莓并领取一次星之果实，领取状态会持久保存，同时提供反馈效果与传送门提示。
+- 为永久玩家能力补充可同步的实体纪念物品和物品提示，并为已有存档自动补发缺失物品。
+- 修正秘密森林边界的未解锁区域回退逻辑，玩家会被送回安全位置，创造或旁观模式也不会意外削弱该进度门槛。
+
+#### 兼容性与验证
+
+- 更新相关物品资源与当前发布的全部 12 种语言。
+- 新增演员生成与移动、商店暂存与出售、JEI 标签页边界、特殊物品同步、秘密纸条 23、老坎诺利及区域访问回退的回归测试。
+- 项目公开版本号更新为 `0.5.1fix4`。
+
 ## 0.5.1fix3 - 2026-07-17
 
 ### Update Log (English)

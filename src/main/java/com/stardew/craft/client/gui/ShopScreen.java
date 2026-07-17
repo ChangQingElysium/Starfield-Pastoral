@@ -12,6 +12,7 @@ import com.stardew.craft.network.payload.OpenShopScreenPayload;
 import com.stardew.craft.network.payload.ShopPurchasePayload;
 import com.stardew.craft.network.payload.ShopPurchaseResultPayload;
 import com.stardew.craft.network.payload.ShopSellPayload;
+import com.stardew.craft.network.payload.ShopPickupPayload;
 import com.stardew.craft.network.payload.ShopSellResultPayload;
 import com.stardew.craft.shop.ShopItemEntry;
 import com.stardew.craft.sound.ModSounds;
@@ -115,7 +116,10 @@ public class ShopScreen extends Screen {
     private long  openedAtMs;
     private static final long SAFETY_MS = 250;
 
+    /** Item currently held on cursor (SDV heldItem equivalent). */
+    private ItemStack heldItem = ItemStack.EMPTY;
     private boolean   purchasePending = false;
+    private boolean   sellPending = false;
     private boolean   buyHoldActive = false;
     private int       buyHoldItemIndex = -1;
     private long      buyHoldStartedAtMs = 0L;
@@ -192,6 +196,9 @@ public class ShopScreen extends Screen {
      * at this shop (mirrors SDV highlightItemToSell).
      */
     private boolean canSellAt(ItemStack stack) {
+        if (!heldItem.isEmpty()) {
+            return ItemStack.isSameItemSameComponents(heldItem, stack);
+        }
         if (stack.isEmpty()) return false;
         if (StardewItemDataApi.getSellPrice(stack) <= 0) return false;
         return acceptedSellTypeKeys.contains(StardewItemDataApi.getTypeKey(stack))
@@ -383,11 +390,17 @@ public class ShopScreen extends Screen {
             }
         }
 
-        // 11. Tooltip
+        // 11. Held item on cursor — centered on cursor tip (MC convention: -8,-8)
+        if (!heldItem.isEmpty()) {
+            int itemSize = CommonGuiTextures.itemSize(s4);
+            CommonGuiTextures.drawItemWithDecorations(g, font, heldItem, mouseX - itemSize / 2, mouseY - itemSize / 2, s4);
+        }
+
+        // 12. Tooltip
         if (hoveredRow >= 0) {
             int idx = currentIndex + hoveredRow;
             if (idx < forSale.size()) drawBuyTooltip(g, mouseX, mouseY, forSale.get(idx));
-        } else if (hoveredInvSlot >= 0) {
+        } else if (hoveredInvSlot >= 0 && heldItem.isEmpty()) {
             drawInvTooltip(g, mouseX, mouseY, hoveredInvSlot);
         }
     }
@@ -818,6 +831,7 @@ public class ShopScreen extends Screen {
                 com.stardew.craft.economy.sell.SellQuote q =
                     com.stardew.craft.economy.sell.ProfessionSellPriceService.quoteItemForProfessionNames(
                         profNames, com.stardew.craft.client.ClientPlayerDataCache.getMailFlags(),
+                        com.stardew.craft.client.ClientPlayerDataCache.getSpecialItems(),
                         stack, com.stardew.craft.economy.sell.SellSource.SHOP_COUNTER);
                 if (q.sellable() && q.finalUnitPrice() > 0) {
                     sellUnit = q.finalUnitPrice();
@@ -845,6 +859,7 @@ public class ShopScreen extends Screen {
 
         // Close
         if (isIn(mx,my,closeX,closeY,closeW,closeH)) {
+            if (!heldItem.isEmpty()) placeHeldItemInInventory();
             playSound(ModSounds.DWOP.get());
             onClose();
             return true;
@@ -927,8 +942,11 @@ public class ShopScreen extends Screen {
         ShopItemEntry holdItem = forSale.get(buyHoldItemIndex);
         boolean canAfford = holdItem.price() <= 0 || playerMoney >= holdItem.price();
         boolean inStock   = holdItem.stock() != 0;
-        if (canAfford && inStock && hasTradeItem(holdItem, 1)) {
+        boolean canFitOnCursor = clampPurchaseQuantityToCursor(holdItem, 1) > 0;
+        if (canAfford && inStock && hasTradeItem(holdItem, 1) && canFitOnCursor) {
             playSound(ModSounds.PURCHASE_REPEAT.get());
+        } else if (!canFitOnCursor) {
+            buyHoldActive = false;
         }
 
         tryPurchase(buyHoldItemIndex, true);
@@ -945,9 +963,17 @@ public class ShopScreen extends Screen {
     @Override
     public boolean keyPressed(int keyCode,int scan,int mods){
         if (keyCode==InputConstants.KEY_ESCAPE) {
+            if (!heldItem.isEmpty()) { placeHeldItemInInventory(); return true; }
             onClose(); return true;
         }
         return super.keyPressed(keyCode,scan,mods);
+    }
+
+    @Override
+    public void removed() {
+        // Covers external screen replacement in addition to the close button/Escape paths.
+        if (!heldItem.isEmpty()) placeHeldItemInInventory();
+        super.removed();
     }
 
     // =========================================================================
@@ -963,6 +989,21 @@ public class ShopScreen extends Screen {
         return mc.player.getInventory().countItem(req.getItem()) >= need;
     }
 
+    private int clampPurchaseQuantityToCursor(ShopItemEntry entry, int requestedQty) {
+        ItemStack salable = resolveStack(entry.itemId());
+        if (salable.isEmpty()) return requestedQty;
+
+        int deliveredPerPurchase = Math.max(1, entry.purchaseStack());
+        int maxStackSize = Math.max(1, salable.getMaxStackSize());
+        int availableSpace = maxStackSize;
+
+        if (!heldItem.isEmpty() && ItemStack.isSameItemSameComponents(heldItem, salable)) {
+            availableSpace = Math.max(0, maxStackSize - heldItem.getCount());
+        }
+
+        return Math.min(requestedQty, availableSpace / deliveredPerPurchase);
+    }
+
     private void tryPurchase(int itemIdx, boolean repeating) {
         if (System.currentTimeMillis()-openedAtMs < SAFETY_MS) return;
         if (purchasePending) return;
@@ -975,6 +1016,8 @@ public class ShopScreen extends Screen {
         if (!salable.isEmpty()) {
             qty = Math.min(qty, Math.max(1, salable.getMaxStackSize()));
         }
+        qty = clampPurchaseQuantityToCursor(item, qty);
+
         if (item.stock()!=Integer.MAX_VALUE) qty=Math.min(qty,item.stock());
         if (qty<=0) {
             if (repeating) {
@@ -1046,13 +1089,39 @@ public class ShopScreen extends Screen {
     private void onInventorySlotClicked(int slot,int button) {
         Minecraft mc=Minecraft.getInstance();
         if (mc.player==null) return;
+        if (!heldItem.isEmpty()) { placeHeldItemToSlot(slot); return; }
+        if (sellPending) return;
         ItemStack stack=mc.player.getInventory().getItem(slot);
         if (stack.isEmpty()) return;
         // SDV highlightItemToSell: only allow selling what this shop accepts
         if (!canSellAt(stack)) return;
         int qty=(button==1)?1:stack.getCount();
-        playSound(ModSounds.PURCHASE_CLICK.get());
+        sellPending = true;
         PacketDistributor.sendToServer(new ShopSellPayload(shopId,slot,qty));
+    }
+
+    // =========================================================================
+    // heldItem placement
+    // =========================================================================
+    private void placeHeldItemToSlot(int slot) {
+        if (heldItem.isEmpty()) return;
+        sendPickupPayload(slot); // tell server: place in THIS specific slot
+        heldItem = ItemStack.EMPTY;
+        playSound(ModSounds.SHINY4.get());
+    }
+
+    private void placeHeldItemInInventory() {
+        if (!heldItem.isEmpty()) {
+            sendPickupPayload(-1); // -1 = auto-place in first available slot
+            heldItem = ItemStack.EMPTY;
+        }
+    }
+
+    /** Send ShopPickupPayload to server. targetSlot >= 0 places in that specific slot; -1 = auto. */
+    private void sendPickupPayload(int targetSlot) {
+        if (heldItem.isEmpty()) return;
+        String id = BuiltInRegistries.ITEM.getKey(heldItem.getItem()).toString();
+        PacketDistributor.sendToServer(new ShopPickupPayload(id, heldItem.getCount(), targetSlot));
     }
 
     // =========================================================================
@@ -1086,14 +1155,35 @@ public class ShopScreen extends Screen {
                     old.dayOfWeek(),old.dayOfMonthParity(),old.purchaseStack()));
             }
         }
-        // Physical purchases are inserted and vanilla-synced by the server before
-        // this result arrives, so drawInventory reflects them without closing shop.
+        if (!r.itemId().isEmpty() && r.quantity() > 0) {
+            // Recipe purchases are immediate unlocks — no physical item to hold.
+            if (!r.itemId().startsWith("recipe:")
+                    && !r.itemId().startsWith("wallpaper:")
+                    && !r.itemId().startsWith("flooring:")) {
+                ItemStack bought = resolveStack(r.itemId());
+                if (!bought.isEmpty()) {
+                    bought.setCount(r.quantity());
+                    if (heldItem.isEmpty()) {
+                        heldItem = bought;
+                    } else if (ItemStack.isSameItemSameComponents(heldItem, bought)) {
+                        heldItem.grow(bought.getCount());
+                    } else {
+                        placeHeldItemInInventory();
+                        heldItem = bought;
+                    }
+                }
+            }
+        }
         try { if (ModSounds.COIN!=null) playSound(ModSounds.COIN.get()); } catch(Exception ignored){}
 
         // SDV parity: Marlon Recovery — after buying 1 item, close shop (all lost items cleared)
         if ("MarlonRecovery".equals(shopId) && r.success()) {
             this.onClose();
         }
+    }
+
+    public boolean acceptsPurchaseResult(String resultShopId) {
+        return shopId.equals(resultShopId);
     }
 
     private boolean isFairStarTokenShop() {
@@ -1105,10 +1195,11 @@ public class ShopScreen extends Screen {
     }
 
     public void onSellResult(ShopSellResultPayload r) {
+        sellPending = false;
         if (!r.success()) return;
         playerMoney=r.newMoney();
         playSound(ModSounds.PURCHASE_CLICK.get());
-        // Inventory will sync via vanilla; refresh local view
+        // The server has already removed the items and broadcast the inventory change.
         Minecraft mc=Minecraft.getInstance();
         if (mc.player!=null) mc.player.getInventory().setChanged();
     }

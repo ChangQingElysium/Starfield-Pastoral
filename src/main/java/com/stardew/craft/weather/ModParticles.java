@@ -35,4 +35,10 @@ public class ModParticles {
     // 温泉蒸汽（白色、半透明、缓慢上漂）
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> HOT_SPRING_STEAM =
         PARTICLES.register("hot_spring_steam", () -> new SimpleParticleType(false));
+
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> MAGIC_WARP_BURST =
+        PARTICLES.register("magic_warp_burst", () -> new SimpleParticleType(false));
+
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> MAGIC_WARP_SWEEP =
+        PARTICLES.register("magic_warp_sweep", () -> new SimpleParticleType(false));
 }

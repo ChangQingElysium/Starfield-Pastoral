@@ -1552,6 +1552,11 @@ public class PacketHandler {
             com.stardew.craft.network.payload.DesertBusFadePayload.STREAM_CODEC,
             com.stardew.craft.network.payload.DesertBusFadePayload::handle
         );
+        registrar.playToClient(
+            com.stardew.craft.network.payload.MagicWarpFlashPayload.TYPE,
+            com.stardew.craft.network.payload.MagicWarpFlashPayload.STREAM_CODEC,
+            com.stardew.craft.network.payload.MagicWarpFlashPayload::handle
+        );
 
         // Festival confirm dialogs and HUD state — S→C open / C→S confirm / S→C HUD sync
         registrar.playToClient(

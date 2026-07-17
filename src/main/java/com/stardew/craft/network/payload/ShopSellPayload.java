@@ -40,44 +40,73 @@ public record ShopSellPayload(
     public static void handle(ShopSellPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
             if (!(context.player() instanceof net.minecraft.server.level.ServerPlayer player)) return;
-
-            com.stardew.craft.shop.ShopRegistry.ShopDefinition shop =
-                com.stardew.craft.shop.ShopRegistry.get(payload.shopId());
-            if (shop == null) return;
-
-            // Resolve slot
-            int slot = payload.inventorySlot();
-            if (slot < 0 || slot >= player.getInventory().getContainerSize()) return;
-            net.minecraft.world.item.ItemStack stack = player.getInventory().getItem(slot);
-            if (stack.isEmpty()) return;
-
-            // Check if this shop accepts this item and compute sell price
-            // (mirrors SDV: highlightItemToSell → canSell, sellToStorePrice × sellPercentage)
-            int sellUnit = com.stardew.craft.shop.ShopRegistry.getSellPrice(stack, shop);
-            if (sellUnit <= 0) return; // shop does not buy this item
-
-            // 应用职业加成（SDV: Farming/Foraging/Fishing/Mining 各派生职业对售价加成）
-            com.stardew.craft.economy.sell.SellQuote quote =
-                com.stardew.craft.economy.sell.ProfessionSellPriceService.quoteItem(
-                    player, stack, com.stardew.craft.economy.sell.SellSource.SHOP_COUNTER);
-            if (quote.sellable() && quote.finalUnitPrice() > 0) {
-                sellUnit = quote.finalUnitPrice();
+            try {
+                handleServer(payload, player);
+            } catch (RuntimeException exception) {
+                com.stardew.craft.StardewCraft.LOGGER.error(
+                    "Failed to sell inventory slot {} at shop {} for {}",
+                    payload.inventorySlot(), payload.shopId(), player.getGameProfile().getName(), exception);
+                sendResult(player, false, payload.inventorySlot(), 0, 0);
             }
-
-            int qty = (payload.quantity() < 0) ? stack.getCount() : Math.min(payload.quantity(), stack.getCount());
-            int earned = sellUnit * qty;
-
-            // Remove items from inventory
-            stack.shrink(qty);
-            if (stack.isEmpty()) player.getInventory().setItem(slot, net.minecraft.world.item.ItemStack.EMPTY);
-
-            // Credit money (SDV: chargePlayer(currency, -price) → negative = add money)
-            com.stardew.craft.player.PlayerStardewDataAPI.addMoney(player, earned);
-            int newMoney = com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player);
-
-            // Notify client
-            net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
-                new ShopSellResultPayload(true, newMoney, slot, qty, earned));
         });
+    }
+
+    private static void handleServer(ShopSellPayload payload, net.minecraft.server.level.ServerPlayer player) {
+        int slot = payload.inventorySlot();
+
+        com.stardew.craft.shop.ShopRegistry.ShopDefinition shop =
+            com.stardew.craft.shop.ShopRegistry.get(payload.shopId());
+        if (shop == null) {
+            sendResult(player, false, slot, 0, 0);
+            return;
+        }
+
+        if (slot < 0 || slot >= player.getInventory().getContainerSize()) {
+            sendResult(player, false, slot, 0, 0);
+            return;
+        }
+        net.minecraft.world.item.ItemStack stack = player.getInventory().getItem(slot);
+        if (stack.isEmpty()) {
+            sendResult(player, false, slot, 0, 0);
+            return;
+        }
+
+        int sellUnit = com.stardew.craft.shop.ShopRegistry.getSellPrice(stack, shop);
+        if (sellUnit <= 0) {
+            sendResult(player, false, slot, 0, 0);
+            return;
+        }
+
+        com.stardew.craft.economy.sell.SellQuote quote =
+            com.stardew.craft.economy.sell.ProfessionSellPriceService.quoteItem(
+                player, stack, com.stardew.craft.economy.sell.SellSource.SHOP_COUNTER);
+        if (quote.sellable() && quote.finalUnitPrice() > 0) {
+            sellUnit = quote.finalUnitPrice();
+        }
+
+        int qty = payload.quantity() < 0
+            ? stack.getCount()
+            : Math.min(payload.quantity(), stack.getCount());
+        long earnedLong = (long) sellUnit * qty;
+        if (qty <= 0 || earnedLong > Integer.MAX_VALUE) {
+            sendResult(player, false, slot, 0, 0);
+            return;
+        }
+        int earned = (int) earnedLong;
+
+        stack.shrink(qty);
+        if (stack.isEmpty()) player.getInventory().setItem(slot, net.minecraft.world.item.ItemStack.EMPTY);
+        player.getInventory().setChanged();
+        player.inventoryMenu.broadcastChanges();
+
+        com.stardew.craft.player.PlayerStardewDataAPI.addMoney(player, earned);
+        sendResult(player, true, slot, qty, earned);
+    }
+
+    private static void sendResult(net.minecraft.server.level.ServerPlayer player, boolean success,
+                                   int slot, int qty, int earned) {
+        int money = com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player);
+        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
+            new ShopSellResultPayload(success, money, slot, qty, earned));
     }
 }

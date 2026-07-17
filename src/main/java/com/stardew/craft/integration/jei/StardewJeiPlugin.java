@@ -95,11 +95,12 @@ public class StardewJeiPlugin implements IModPlugin {
         // The V-menu is a real container now, but only its inventory and crafting tabs
         // should reserve space for JEI. Other tabs use the full screen for non-item UI.
         registration.addGuiScreenHandler(StardewGameMenuScreen.class, screen -> {
-            if (!screen.shouldShowJei() || screen.jeiGuiWidth() <= 0 || screen.jeiGuiHeight() <= 0) {
+            JeiScreenBounds bounds = menuJeiBounds(screen.shouldShowJei(), screen.width, screen.height,
+                    screen.jeiGuiLeft(), screen.jeiGuiTop(), screen.jeiGuiWidth(), screen.jeiGuiHeight());
+            if (bounds == null) {
                 return null;
             }
-            return properties(screen, screen.jeiGuiLeft(), screen.jeiGuiTop(),
-                    screen.jeiGuiWidth(), screen.jeiGuiHeight());
+            return properties(screen, bounds.left(), bounds.top(), bounds.width(), bounds.height());
         });
         registration.addGuiContainerHandler(StardewGameMenuScreen.class,
                 new IGuiContainerHandler<StardewGameMenuScreen>() {
@@ -141,6 +142,27 @@ public class StardewJeiPlugin implements IModPlugin {
                         target.stack(), target.x(), target.y(), target.width(), target.height());
             }
         });
+    }
+
+    /**
+     * Unsupported V-menu tabs deliberately claim the whole screen, leaving JEI no
+     * legal overlay area even when a JEI version applies generic container handling.
+     */
+    static JeiScreenBounds menuJeiBounds(boolean showJei, int screenWidth, int screenHeight,
+                                         int menuLeft, int menuTop, int menuWidth, int menuHeight) {
+        if (screenWidth <= 0 || screenHeight <= 0) {
+            return null;
+        }
+        if (!showJei) {
+            return new JeiScreenBounds(0, 0, screenWidth, screenHeight);
+        }
+        if (menuWidth <= 0 || menuHeight <= 0) {
+            return null;
+        }
+        return new JeiScreenBounds(menuLeft, menuTop, menuWidth, menuHeight);
+    }
+
+    record JeiScreenBounds(int left, int top, int width, int height) {
     }
 
     private static Optional<IClickableIngredient<?>> clickableIngredient(

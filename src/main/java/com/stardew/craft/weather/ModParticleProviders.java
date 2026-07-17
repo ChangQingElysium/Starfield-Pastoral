@@ -39,9 +39,100 @@ public class ModParticleProviders {
         event.registerSpriteSet(ModParticles.HOT_SPRING_STEAM.get(),
             HotSpringSteamParticle.Provider::new);
 
+        event.registerSpriteSet(ModParticles.MAGIC_WARP_BURST.get(),
+            MagicWarpBurstParticle.Provider::new);
+        event.registerSpriteSet(ModParticles.MAGIC_WARP_SWEEP.get(),
+            MagicWarpSweepParticle.Provider::new);
+
         // 注册斩击轨迹粒子
 
         // 注册斩击微火花粒子
+    }
+
+    /** Six original springobjects frames used by Stardew Valley's MagicWarp effect. */
+    public static class MagicWarpBurstParticle extends TextureSheetParticle {
+        private final SpriteSet sprites;
+
+        protected MagicWarpBurstParticle(ClientLevel level, double x, double y, double z, SpriteSet sprites) {
+            super(level, x, y, z);
+            this.sprites = sprites;
+            this.lifetime = 6 + level.random.nextInt(4);
+            this.quadSize = 0.5F;
+            this.hasPhysics = false;
+            this.setSpriteFromAge(sprites);
+        }
+
+        @Override
+        public ParticleRenderType getRenderType() {
+            return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            if (!this.removed) {
+                this.setSpriteFromAge(sprites);
+            }
+        }
+
+        public static class Provider implements ParticleProvider<SimpleParticleType> {
+            private final SpriteSet sprites;
+
+            public Provider(SpriteSet sprites) {
+                this.sprites = sprites;
+            }
+
+            @Override
+            public Particle createParticle(SimpleParticleType type, ClientLevel level,
+                                           double x, double y, double z,
+                                           double xSpeed, double ySpeed, double zSpeed) {
+                return new MagicWarpBurstParticle(level, x, y, z, sprites);
+            }
+        }
+    }
+
+    /** Eight original animation-sheet frames used by MagicWarp's horizontal sweep. */
+    public static class MagicWarpSweepParticle extends TextureSheetParticle {
+        private final SpriteSet sprites;
+
+        protected MagicWarpSweepParticle(ClientLevel level, double x, double y, double z,
+                                         double xSpeed, SpriteSet sprites) {
+            super(level, x, y, z);
+            this.sprites = sprites;
+            this.lifetime = 8;
+            this.quadSize = 0.5F;
+            this.hasPhysics = false;
+            this.xd = xSpeed;
+            this.setSpriteFromAge(sprites);
+        }
+
+        @Override
+        public ParticleRenderType getRenderType() {
+            return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            if (!this.removed) {
+                this.setSpriteFromAge(sprites);
+            }
+        }
+
+        public static class Provider implements ParticleProvider<SimpleParticleType> {
+            private final SpriteSet sprites;
+
+            public Provider(SpriteSet sprites) {
+                this.sprites = sprites;
+            }
+
+            @Override
+            public Particle createParticle(SimpleParticleType type, ClientLevel level,
+                                           double x, double y, double z,
+                                           double xSpeed, double ySpeed, double zSpeed) {
+                return new MagicWarpSweepParticle(level, x, y, z, xSpeed, sprites);
+            }
+        }
     }
     
     /**

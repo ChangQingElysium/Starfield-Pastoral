@@ -50,6 +50,9 @@ public class PlayerDataEventHandler {
     @SubscribeEvent
     public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
+            // Recover shop purchases that were paid for but not placed before disconnect/restart.
+            com.stardew.craft.network.payload.ShopPickupPayload.deliverAllPending(player);
+
             // 初始化 AFK 跟踪
             com.stardew.craft.event.SleepVoteTracker.markActive(player);
             // 获取或创建玩家数据（会自动从NBT加载）
@@ -254,6 +257,9 @@ public class PlayerDataEventHandler {
     @SubscribeEvent
     public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
+            // Settle cursor-held shop purchases before the player inventory is saved.
+            com.stardew.craft.network.payload.ShopPickupPayload.deliverAllPending(player);
+
             // 清理动态光源
             PlayerGlowHandler.onPlayerLeave(player);
 
@@ -262,6 +268,9 @@ public class PlayerDataEventHandler {
 
             // Clean up all combat tracker static maps (prevents memory leak)
             com.stardew.craft.combat.CombatTrackerCleanup.onPlayerLogout(player.getUUID());
+
+            // Clean up cave transition and per-player locked-area rollback state.
+            com.stardew.craft.manager.WitchWarpCaveService.onPlayerLogout(player);
 
             // Clean up active trinket companions/state.
             com.stardew.craft.item.trinket.TrinketEffectHandler.onPlayerLogout(player);
@@ -765,6 +774,7 @@ public class PlayerDataEventHandler {
         // 发光戒指：动态光源
         PlayerGlowHandler.tick(player);
         com.stardew.craft.manager.SecretWoodsAccessManager.tickPlayer(player);
+        com.stardew.craft.manager.WitchWarpCaveService.tickPlayer(player);
 
         // 法师塔指南针：服务端查找最近结构
         if (player.getMainHandItem().getItem() instanceof com.stardew.craft.item.tool.WizardTowerCompassItem

@@ -10,6 +10,7 @@ import com.stardew.craft.player.PlayerDataManager;
 import com.stardew.craft.player.PlayerStardewData;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import com.stardew.craft.player.SkillType;
+import com.stardew.craft.world.PlayerAreaEvictionService;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -40,9 +41,10 @@ public final class SecretWoodsAccessManager {
     private static final int ENTRY_OPENING_MAX_Y = 70;
     private static final int ENTRY_OPENING_MIN_Z = 14;
     private static final int ENTRY_OPENING_MAX_Z = 16;
-    private static final double LOCKED_EXIT_X = -182.25D;
+    private static final String ACCESS_GATE_ID = "secret_woods";
+    // Must floor to block X -182; the old -182.25 target floored to -183 and remained inside.
+    private static final double LOCKED_EXIT_X = -181.75D;
     private static final double LOCKED_EXIT_Z = 15.5D;
-    private static final double LOCKED_PUSH_SPEED = 0.28D;
 
     private SecretWoodsAccessManager() {
     }
@@ -91,26 +93,13 @@ public final class SecretWoodsAccessManager {
             SecretWoodsSlimeSpawnService.ensureTodaySpawned(level);
         }
 
-        if (!isUnlocked(player) && inSecretWoods) {
-            player.displayClientMessage(Component.translatable("stardewcraft.secret_woods.blocked"), true);
-            pushPlayerOutOfSecretWoods(player);
-        }
-    }
-
-    private static void pushPlayerOutOfSecretWoods(ServerPlayer player) {
-        double dx = LOCKED_EXIT_X - player.getX();
-        double dz = LOCKED_EXIT_Z - player.getZ();
-        double length = Math.sqrt(dx * dx + dz * dz);
-        if (length < 0.001D) {
-            dx = 1.0D;
-            dz = 0.0D;
-            length = 1.0D;
-        }
-
-        Vec3 current = player.getDeltaMovement();
-        player.setDeltaMovement(dx / length * LOCKED_PUSH_SPEED, current.y, dz / length * LOCKED_PUSH_SPEED);
-        player.hasImpulse = true;
-        player.hurtMarked = true;
+        PlayerAreaEvictionService.enforce(
+                player,
+                ACCESS_GATE_ID,
+                !isUnlocked(player) && inSecretWoods,
+                new Vec3(LOCKED_EXIT_X, player.getY(), LOCKED_EXIT_Z),
+                Component.translatable("stardewcraft.secret_woods.blocked")
+        );
     }
 
     public static void ensureEntranceReady(ServerLevel level) {

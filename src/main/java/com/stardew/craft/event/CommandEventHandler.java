@@ -11,6 +11,7 @@ import com.stardew.craft.command.MailDebugCommand;
 import com.stardew.craft.command.MonsterSummonCommand;
 import com.stardew.craft.command.MuseumDebugCommand;
 import com.stardew.craft.command.AnimalDebugCommand;
+import com.stardew.craft.command.ActorCommand;
 import com.stardew.craft.command.DecorationDebugCommand;
 import com.stardew.craft.command.PlayerDataCommand;
 import com.stardew.craft.command.QuestDebugCommand;
@@ -46,6 +47,7 @@ public class CommandEventHandler {
         SecretNoteDebugCommand.register(event.getDispatcher());
         MuseumDebugCommand.register(event.getDispatcher(), event.getBuildContext());
         AnimalDebugCommand.register(event.getDispatcher());
+        ActorCommand.register(event.getDispatcher());
         DecorationDebugCommand.register(event.getDispatcher());
         OvernightDebugCommand.register(event.getDispatcher());
         NpcDebugCommand.register(event.getDispatcher());

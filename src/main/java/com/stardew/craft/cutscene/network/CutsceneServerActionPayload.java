@@ -110,6 +110,10 @@ public record CutsceneServerActionPayload(
                     com.stardew.craft.secretnote.SecretNoteService.grantMagnifyingGlass(player);
                     LOGGER.debug("Cutscene granted Magnifying Glass to {}", player.getName().getString());
                 }
+                case "grant_bear_knowledge" -> {
+                    com.stardew.craft.secretnote.SecretNote23Service.grantBearKnowledge(player);
+                    LOGGER.debug("Cutscene granted Bear's Knowledge to {}", player.getName().getString());
+                }
                 case "mark_opened_sewer" -> {
                     com.stardew.craft.sewer.SewerService.markOpenedSewer(player);
                     LOGGER.debug("Cutscene marked sewer opened for {}", player.getName().getString());
