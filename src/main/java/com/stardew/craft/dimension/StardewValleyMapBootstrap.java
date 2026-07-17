@@ -168,22 +168,15 @@ public final class StardewValleyMapBootstrap {
         StardewCraft.LOGGER.info("[VALLEY_MAP] Blocking full pre-generation completed: generated={} chunks", generated);
     }
 
-    public static void markAsPreGenerated(ServerLevel level) {
+    public static void markPrebuiltInstalled(ServerLevel level, int prebuiltVersion) {
         if (level.dimension() != ModDimensions.STARDEW_VALLEY) {
             return;
         }
-
-        LoadedSchematic loaded = loadMainSchematic();
-        if (loaded == null) {
-            return;
-        }
-
-        Bounds bounds = boundsForCenter(loaded.schematic().width(), loaded.schematic().height(), loaded.schematic().length());
         MapSavedData data = MapSavedData.get(level);
-        prepareDataForSchematic(data, loaded, bounds);
-        data.markBuildFinished(loaded.sha256(), bounds, loaded.schematic().nonAirMask());
-        data.setDirty();
-        StardewCraft.LOGGER.info("[VALLEY_MAP] Marked as pre-generated from prebuilt regions. hash={}", loaded.sha256());
+        if (data.markPrebuiltInstalled(prebuiltVersion)) {
+            data.setDirty();
+            StardewCraft.LOGGER.info("[VALLEY_MAP] Marked prebuilt regions ready. version={}", prebuiltVersion);
+        }
     }
 
     public static void ensureGenerated(ServerLevel level) {
@@ -929,6 +922,7 @@ public final class StardewValleyMapBootstrap {
                 d.generatedChunks.add(chunkKey);
             }
             d.pipelineVersion = tag.getInt("pipelineVersion");
+            d.prebuiltVersion = tag.getInt("prebuiltVersion");
             return d;
         }
 
@@ -954,17 +948,42 @@ public final class StardewValleyMapBootstrap {
             tag.putLongArray("generatedChunks", generatedChunksArray);
             tag.putInt("totalMapChunks", totalMapChunks);
             tag.putInt("pipelineVersion", pipelineVersion);
+            tag.putInt("prebuiltVersion", prebuiltVersion);
             return tag;
         }
 
         private int pipelineVersion = 0;
+        private int prebuiltVersion = 0;
 
         boolean isAppliedForHash(String hash) {
             return applied && hash != null && hash.equals(appliedHash) && pipelineVersion == MAP_PIPELINE_VERSION;
         }
 
         boolean hasAppliedMap() {
-            return applied && width > 0 && height > 0 && length > 0;
+            return applied && (prebuiltVersion > 0 || (width > 0 && height > 0 && length > 0));
+        }
+
+        boolean markPrebuiltInstalled(int version) {
+            int normalizedVersion = Math.max(1, version);
+            if (applied && prebuiltVersion == normalizedVersion) {
+                return false;
+            }
+            this.applied = true;
+            this.appliedHash = "pregen:" + normalizedVersion;
+            this.pendingHash = "";
+            this.originX = 0;
+            this.originY = 0;
+            this.originZ = 0;
+            this.width = 0;
+            this.height = 0;
+            this.length = 0;
+            this.nonAirMask = new long[0];
+            this.generatedChunks.clear();
+            this.generatedChunksArray = new long[0];
+            this.totalMapChunks = 0;
+            this.pipelineVersion = MAP_PIPELINE_VERSION;
+            this.prebuiltVersion = normalizedVersion;
+            return true;
         }
 
         boolean matchesSchema(String hash, Bounds bounds, int version) {
@@ -993,6 +1012,7 @@ public final class StardewValleyMapBootstrap {
             this.length = bounds.length;
             this.nonAirMask = newMask == null ? new long[0] : newMask;
             this.pipelineVersion = version;
+            this.prebuiltVersion = 0;
             this.generatedChunks.clear();
             this.generatedChunksArray = new long[0];
             this.totalMapChunks = computeTotalMapChunks(bounds);
@@ -1041,6 +1061,7 @@ public final class StardewValleyMapBootstrap {
             this.length = bounds.length;
             this.nonAirMask = newMask == null ? new long[0] : newMask;
             this.pipelineVersion = MAP_PIPELINE_VERSION;
+            this.prebuiltVersion = 0;
         }
 
         void markBuildFinished(String hash, Bounds bounds, long[] newMask) {
@@ -1055,6 +1076,7 @@ public final class StardewValleyMapBootstrap {
             this.length = bounds.length;
             this.nonAirMask = newMask == null ? new long[0] : newMask;
             this.pipelineVersion = MAP_PIPELINE_VERSION;
+            this.prebuiltVersion = 0;
         }
     }
 }

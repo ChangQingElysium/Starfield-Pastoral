@@ -17,11 +17,17 @@ public class SofaColorSelectionScreen extends Screen {
     private static final int PANEL_PADDING = 8;
 
     private final BlockPos targetPos;
+    private final int targetEntityId;
     private int selectedColor;
 
     public SofaColorSelectionScreen(BlockPos targetPos, int currentColor) {
+        this(targetPos, currentColor, -1);
+    }
+
+    public SofaColorSelectionScreen(BlockPos targetPos, int currentColor, int targetEntityId) {
         super(Component.translatable("stardewcraft.furniture.color_picker"));
         this.targetPos = targetPos;
+        this.targetEntityId = targetEntityId;
         int clamped = WoodenChestColorPalette.clampIndex(currentColor);
         this.selectedColor = clamped < 0 ? WoodenChestColorPalette.defaultColorIndex() : clamped;
     }
@@ -87,7 +93,7 @@ public class SofaColorSelectionScreen extends Screen {
             int y = swatchY0;
             if (mouseX >= x && mouseX < x + SWATCH_WIDTH && mouseY >= y && mouseY < y + SWATCH_HEIGHT) {
                 this.selectedColor = i;
-                PacketDistributor.sendToServer(new ApplySofaColorPayload(targetPos, i));
+                PacketDistributor.sendToServer(new ApplySofaColorPayload(targetPos, i, targetEntityId));
                 this.onClose();
                 return true;
             }

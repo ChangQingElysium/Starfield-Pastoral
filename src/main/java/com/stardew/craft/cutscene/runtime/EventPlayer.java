@@ -209,8 +209,16 @@ public final class EventPlayer {
         setPlayerFrozen(false);
         restorePlayerSnapshotIfNeeded();
 
-        // Restore GUI
-        Minecraft.getInstance().options.hideGui = previousHideGui;
+        // Restore GUI. A skip can happen while a blocking cutscene dialogue is still open;
+        // close only screens owned by cutscene commands so the finished event cannot leave one
+        // behind, while preserving unrelated menus that may have replaced it.
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.screen instanceof com.stardew.craft.client.gui.common.StardewNpcDialogueScreen
+                || mc.screen instanceof com.stardew.craft.client.gui.common.StardewObjectDialogueScreen
+                || mc.screen instanceof com.stardew.craft.client.gui.common.StardewConfirmDialogScreen) {
+            mc.setScreen(null);
+        }
+        mc.options.hideGui = previousHideGui;
 
         // Remove all actors
         for (Mob actor : actors.values()) {
@@ -238,7 +246,6 @@ public final class EventPlayer {
         // Mark as seen on server if the client is still connected.
         // Disconnect-time aborts can reach here after Minecraft has already cleared
         // its connection; PacketDistributor.sendToServer requires a live connection.
-        Minecraft mc = Minecraft.getInstance();
         if (mc.getConnection() != null) {
             PacketDistributor.sendToServer(new MarkEventSeenPayload(eventId, sessionId));
         } else {

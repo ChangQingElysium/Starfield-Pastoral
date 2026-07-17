@@ -14,7 +14,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.animal.Parrot;
 import net.minecraft.world.level.block.BedBlock;
-import net.minecraft.world.level.GameRules;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityTravelToDimensionEvent;
@@ -83,10 +82,10 @@ public class DimensionEventHandler {
             StardewTimeManager timeManager = StardewTimeManager.get();
 
             // === 通过 offset 推进虚拟 dayTime，不修改主世界 ===
-            long currentVirtual = timeManager.getVirtualDayTime(sourceLevel);
+            long currentVirtual = timeManager.getVirtualDayTime();
             long currentDay = currentVirtual / 24000;
             long newDayTime = (currentDay + 1) * 24000;
-            timeManager.setVirtualDayTime(sourceLevel, newDayTime);
+            timeManager.setVirtualDayTime(newDayTime);
 
             // === 只发时间包给星露谷维度玩家 ===
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
@@ -287,13 +286,15 @@ public class DimensionEventHandler {
             return;
         }
 
-        StardewValleyPrebuiltRegionInstaller.InstallResult result = StardewValleyPrebuiltRegionInstaller.installIfAvailable(player.server);
-        boolean prebuiltReady = result.installedOrUpgraded()
-            || result == StardewValleyPrebuiltRegionInstaller.InstallResult.ALREADY_PRESENT
-            || StardewValleyPrebuiltRegionInstaller.hasInstalledPrebuilt(player.server);
+        // MCA 只能在 ServerAboutToStart、维度尚未加载时安装或修复。
+        // 传送阶段只做只读校验，禁止在运行中的 ServerLevel 下替换 region 文件。
+        boolean prebuiltReady = StardewValleyPrebuiltRegionInstaller.hasInstalledPrebuilt(player.server);
 
-        if (prebuiltReady && !StardewValleyMapBootstrap.isGenerationComplete(stardewLevel)) {
-            StardewValleyMapBootstrap.markAsPreGenerated(stardewLevel);
+        if (prebuiltReady) {
+            StardewValleyMapBootstrap.markPrebuiltInstalled(
+                stardewLevel,
+                StardewValleyPrebuiltRegionInstaller.CURRENT_PREGEN_VERSION
+            );
         }
 
         // pregen region 刚被覆盖会抹掉镇子里所有动态放置的方块（传送触发、
@@ -301,8 +302,7 @@ public class DimensionEventHandler {
         // onPlayerChangeDimension 中的 ensurePlaced() 重新执行放置。
         // 注意：大多数情况在 onServerStarting 中已处理。这里处理启动时维度尚未加载的极端路径，
         // 用于 onServerStarting 时 level 尚未加载的极端场景。
-        if (result.installedOrUpgraded()
-                || com.stardew.craft.StardewCraft.pregenJustInstalled) {
+        if (com.stardew.craft.StardewCraft.pregenJustInstalled) {
             com.stardew.craft.StardewCraft.pregenJustInstalled = false;
             com.stardew.craft.dimension.StardewBiomePatcher.schedulePregenBiomeMigration(
                 stardewLevel, "pregen_region_reinstalled_travel");
@@ -325,7 +325,7 @@ public class DimensionEventHandler {
         if (!prebuiltReady) {
             event.setCanceled(true);
             player.displayClientMessage(net.minecraft.network.chat.Component.translatable("stardewcraft.dimension.pregen_required"), false);
-            StardewCraft.LOGGER.error("[VALLEY_MAP] Denied travel to Stardew Valley: prebuilt region not installed for this save (installResult={})", result);
+            StardewCraft.LOGGER.error("[VALLEY_MAP] Denied travel to Stardew Valley: prebuilt region state validation failed");
         }
     }
 
@@ -370,7 +370,7 @@ public class DimensionEventHandler {
 
             // 发送星露谷虚拟时间包（不修改全局 GameRule）
             StardewTimeManager timeManager = StardewTimeManager.get();
-            long virtualDayTime = timeManager.getVirtualDayTime(level);
+            long virtualDayTime = timeManager.getVirtualDayTime();
             player.connection.send(new ClientboundSetTimePacket(
                 level.getGameTime(), virtualDayTime, true));
 
@@ -472,11 +472,10 @@ public class DimensionEventHandler {
         // 并发送给客户端，就会和 mod 发的虚拟时间打架 → 天空闪烁。
         // 此处强制对齐，使所有原版代码路径读到的都是正确的虚拟时间。
         StardewTimeManager timeManager = StardewTimeManager.get();
-        // The Stardew clock remains independent even when the host world disables its daylight cycle.
-        if (!server.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)
-                && !clockPaused
+        // 星露谷时钟只由自己的暂停/节日状态控制，完全不读取主世界昼夜规则。
+        if (!clockPaused
                 && !com.stardew.craft.festival.ActiveFestivalHandlers.isAnyTimeFreezeActive()) {
-            timeManager.setDayTimeOffsetRaw(timeManager.getDayTimeOffset() + 1L);
+            timeManager.advanceIndependentDayTime(com.stardew.craft.Config.TIME_SPEED_MULTIPLIER.get());
         }
         long virtualDayTime = com.stardew.craft.festival.ActiveFestivalHandlers.applyTimeFreeze(serverLevel, timeManager);
         serverLevel.setDayTime(virtualDayTime);
@@ -611,7 +610,7 @@ public class DimensionEventHandler {
     /**
      * 监听睡觉完成事件。
      * 星露谷维度：触发日结算。
-     * 主世界：补偿 offset，防止主世界睡觉推进影响星露谷虚拟时间。
+     * 主世界睡觉不会影响独立的星露谷时钟。
      */
     @SuppressWarnings("null")
     @SubscribeEvent
@@ -622,19 +621,6 @@ public class DimensionEventHandler {
             StardewTimeManager timeManager = StardewTimeManager.get();
             SleepVoteTracker.clearVotes();
             advanceToNextMorning(level, timeManager.getCurrentTime(), "vanilla_sleep_finished");
-        } else {
-            // 主世界（或其他维度）睡觉完成 → 原版会推进 overworld dayTime。
-            // 为保持星露谷虚拟时间不变，需反向补偿 offset。
-            // SleepFinishedTimeEvent.getNewTime() 是原版将要设置的新 dayTime。
-            StardewTimeManager timeManager = StardewTimeManager.get();
-            long oldOverworldDayTime = level.getServer().overworld().getDayTime();
-            long newOverworldDayTime = event.getNewTime();
-            long delta = newOverworldDayTime - oldOverworldDayTime;
-            if (delta != 0) {
-                // offset -= delta，使 virtualDayTime = (newOverworldDayTime) + (offset - delta) 保持不变
-                long currentOffset = timeManager.getDayTimeOffset();
-                timeManager.setDayTimeOffsetRaw(currentOffset - delta);
-            }
         }
     }
 
@@ -648,12 +634,12 @@ public class DimensionEventHandler {
             long mcTimeOfDay = stardewMinutesToMcTime(timeManager.getCurrentTime());
             
             // 获取当前虚拟天数，用于计算新的虚拟绝对时间
-            long currentVirtual = timeManager.getVirtualDayTime(server.overworld());
+            long currentVirtual = timeManager.getVirtualDayTime();
             long currentDay = currentVirtual / 24000;
             long newVirtualDayTime = currentDay * 24000 + mcTimeOfDay;
             
             // 修改 offset 而非 overworld dayTime
-            timeManager.setVirtualDayTime(server.overworld(), newVirtualDayTime);
+            timeManager.setVirtualDayTime(newVirtualDayTime);
             
             // 发送时间包给星露谷维度的玩家
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
@@ -683,16 +669,19 @@ public class DimensionEventHandler {
     // ── 分帧延迟初始化：把重方块操作分散到多个 tick，每 tick 只跑一个任务，防止 watchdog ──
     /** 标记是否已有待执行的初始化队列（避免多个玩家同时进入重复调度）。 */
     private static volatile boolean deferredInitScheduled = false;
+    private static net.minecraft.server.MinecraftServer deferredInitServer;
 
     /**
     * 将 ensurePlaced / ensureInitialSpawn 操作排入 TickTask 队列，
     * 每 tick 执行一个，不会卡主线程。
      */
-    private static void scheduleDeferredInit(ServerLevel level) {
-        if (deferredInitScheduled) return;
-        deferredInitScheduled = true;
-
+    public static void scheduleDeferredInit(ServerLevel level) {
         var server = level.getServer();
+        if (deferredInitScheduled && deferredInitServer == server) {
+            return;
+        }
+        deferredInitScheduled = true;
+        deferredInitServer = server;
         int baseTick = server.getTickCount() + 1;
 
         // 任务 1: 农场入口触发区
@@ -743,8 +732,20 @@ public class DimensionEventHandler {
             }
         }));
 
-        // 任务 5: 地面采集物初始化
+        // 任务 5: 特殊订单公告板
         server.tell(new net.minecraft.server.TickTask(baseTick + 4, () -> {
+            try {
+                ServerLevel sdv = server.getLevel(ModDimensions.STARDEW_VALLEY);
+                if (sdv != null) {
+                    com.stardew.craft.specialorder.SpecialOrderBoardInstaller.get(sdv).ensurePlaced(sdv);
+                }
+            } catch (Exception e) {
+                StardewCraft.LOGGER.error("[DEFERRED_INIT] SpecialOrderBoard failed", e);
+            }
+        }));
+
+        // 任务 6: 地面采集物初始化
+        server.tell(new net.minecraft.server.TickTask(baseTick + 5, () -> {
             try {
                 ServerLevel sdv = server.getLevel(ModDimensions.STARDEW_VALLEY);
                 if (sdv != null) {
@@ -758,7 +759,7 @@ public class DimensionEventHandler {
         }));
 
         // 任务 5.5: 精通山洞站点（门/讲台/蜡烛/展示实体）
-        server.tell(new net.minecraft.server.TickTask(baseTick + 5, () -> {
+        server.tell(new net.minecraft.server.TickTask(baseTick + 6, () -> {
             try {
                 ServerLevel sdv = server.getLevel(ModDimensions.STARDEW_VALLEY);
                 if (sdv != null) {
@@ -770,8 +771,21 @@ public class DimensionEventHandler {
             }
         }));
 
-        // 任务 6: 采石场石头铺设（强制加载区块 + 5千格扫描）
-        server.tell(new net.minecraft.server.TickTask(baseTick + 6, () -> {
+        // 任务 8: 秘密森林入口与煤森林资源
+        server.tell(new net.minecraft.server.TickTask(baseTick + 7, () -> {
+            try {
+                ServerLevel sdv = server.getLevel(ModDimensions.STARDEW_VALLEY);
+                if (sdv != null) {
+                    com.stardew.craft.manager.CoalForestClumpSpawnService.ensureInitialSpawn(sdv);
+                    com.stardew.craft.manager.SecretWoodsAccessManager.ensureEntranceReady(sdv);
+                }
+            } catch (Exception e) {
+                StardewCraft.LOGGER.error("[DEFERRED_INIT] CoalForest/SecretWoods failed", e);
+            }
+        }));
+
+        // 任务 9: 采石场石头铺设（强制加载区块 + 5千格扫描）
+        server.tell(new net.minecraft.server.TickTask(baseTick + 8, () -> {
             try {
                 ServerLevel sdv = server.getLevel(ModDimensions.STARDEW_VALLEY);
                 if (sdv != null) {
@@ -783,9 +797,12 @@ public class DimensionEventHandler {
             }
         }));
 
-        // 任务 7: 清除调度标记
-        server.tell(new net.minecraft.server.TickTask(baseTick + 7, () -> {
-            deferredInitScheduled = false;
+        // 任务 10: 清除调度标记
+        server.tell(new net.minecraft.server.TickTask(baseTick + 9, () -> {
+            if (deferredInitServer == server) {
+                deferredInitScheduled = false;
+                deferredInitServer = null;
+            }
             StardewCraft.LOGGER.info("[DEFERRED_INIT] All deferred init tasks completed.");
         }));
     }

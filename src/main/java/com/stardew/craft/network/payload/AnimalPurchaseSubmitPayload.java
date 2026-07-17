@@ -6,12 +6,12 @@ import com.stardew.craft.animal.service.AnimalShopService;
 import com.stardew.craft.animal.service.AnimalAcquireService;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 public record AnimalPurchaseSubmitPayload(String animalTypeId, String buildingId, String customName) implements CustomPacketPayload {
 
@@ -44,10 +44,11 @@ public record AnimalPurchaseSubmitPayload(String animalTypeId, String buildingId
             AnimalShopService.ShopAnimalRule rule = AnimalShopService.getRule(payload.animalTypeId);
             int price = rule == null ? -1 : rule.price();
             if (price <= 0) {
+                fail(serverPlayer, "stardewcraft.animal.purchase.failed");
                 return;
             }
             if (PlayerStardewDataAPI.getMoney(serverPlayer) < price) {
-                serverPlayer.sendSystemMessage(Component.translatable("stardewcraft.animal.purchase.no_money"));
+                fail(serverPlayer, "stardewcraft.animal.purchase.no_money");
                 return;
             }
 
@@ -55,43 +56,50 @@ public record AnimalPurchaseSubmitPayload(String animalTypeId, String buildingId
             AnimalWorldData data = AnimalWorldData.get(serverPlayer.serverLevel());
             var buildingOpt = data.getBuilding(payload.buildingId);
             if (buildingOpt.isEmpty()) {
-                serverPlayer.sendSystemMessage(Component.translatable("stardewcraft.animal.purchase.failed"));
+                fail(serverPlayer, "stardewcraft.animal.purchase.failed");
                 return;
             }
 
             String ownerUuid = serverPlayer.getUUID().toString();
             if (!com.stardew.craft.farm.FarmInstanceRegistry.get()
                     .canOperateBuilding(serverPlayer.getUUID(), buildingOpt.get().ownerPlayerUuid())) {
-                serverPlayer.sendSystemMessage(Component.translatable("stardewcraft.animal.purchase.failed"));
+                fail(serverPlayer, "stardewcraft.animal.purchase.failed");
                 return;
             }
 
             int ownerTier = AnimalShopService.getOwnerMaxTier(data, ownerUuid, rule.family());
             if (ownerTier < rule.requiredTier()) {
-                serverPlayer.sendSystemMessage(Component.translatable(rule.lockReasonKey()));
+                fail(serverPlayer, rule.lockReasonKey());
                 return;
             }
 
             if (!AnimalShopService.canPurchaseInBuilding(rule, buildingOpt.get())) {
-                serverPlayer.sendSystemMessage(Component.translatable("stardewcraft.animal.purchase.no_building"));
+                fail(serverPlayer, "stardewcraft.animal.purchase.no_building");
                 return;
             }
 
             String finalName = normalizedName.isBlank() ? rule.defaultName() : normalizedName;
             if (data.hasAnyAnimalWithName(finalName)) {
-                serverPlayer.sendSystemMessage(Component.translatable("stardewcraft.animal.purchase.name_duplicate"));
+                fail(serverPlayer, "stardewcraft.animal.purchase.name_duplicate");
                 return;
             }
 
+            if (!PlayerStardewDataAPI.removeMoney(serverPlayer, price)) {
+                fail(serverPlayer, "stardewcraft.animal.purchase.no_money");
+                return;
+            }
             try {
                 var record = AnimalAcquireService.purchase(serverPlayer.serverLevel(), payload.animalTypeId, finalName, payload.buildingId);
-                if (!PlayerStardewDataAPI.removeMoney(serverPlayer, price)) {
-                    return;
-                }
-                serverPlayer.sendSystemMessage(Component.translatable("stardewcraft.animal.purchase.success", record.customName(), price));
+                PacketDistributor.sendToPlayer(serverPlayer,
+                    AnimalPurchaseResultPayload.success(record.customName()));
             } catch (IllegalArgumentException | IllegalStateException ex) {
-                serverPlayer.sendSystemMessage(Component.translatable("stardewcraft.animal.purchase.failed"));
+                PlayerStardewDataAPI.addMoney(serverPlayer, price);
+                fail(serverPlayer, "stardewcraft.animal.purchase.failed");
             }
         });
+    }
+
+    private static void fail(ServerPlayer player, String messageKey) {
+        PacketDistributor.sendToPlayer(player, AnimalPurchaseResultPayload.failure(messageKey));
     }
 }

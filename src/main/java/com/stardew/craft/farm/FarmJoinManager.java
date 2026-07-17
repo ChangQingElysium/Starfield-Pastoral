@@ -78,7 +78,7 @@ public final class FarmJoinManager {
         }
 
         // 存储请求
-        long tick = server.overworld().getGameTime();
+        long tick = server.getTickCount();
         String requesterName = PlayerDisplayName.get(requester);
         pendingRequests.put(reqUUID, new JoinRequest(reqUUID, requesterName,
                 ownerUUID, tick));
@@ -249,7 +249,7 @@ public final class FarmJoinManager {
      * 清除过期请求。
      */
     private static void cleanExpired(MinecraftServer server) {
-        long now = server.overworld().getGameTime();
+        long now = server.getTickCount();
         pendingRequests.entrySet().removeIf(e -> now - e.getValue().createdTick > EXPIRE_TICKS);
     }
 

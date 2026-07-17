@@ -6,13 +6,13 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * S→C: Junimo 已在星盘上放置一颗星。
- * 客户端收到后递增 BundleClientData.displayStarCount，星盘纹理随之更新。
+ * 客户端收到后按区域标记星星，星盘纹理随之更新。
  */
 @SuppressWarnings("null")
 public record StarPlacedPayload(int areaId) implements CustomPacketPayload {
@@ -31,15 +31,15 @@ public record StarPlacedPayload(int areaId) implements CustomPacketPayload {
         return TYPE;
     }
 
-    /** 客户端处理: 递增星盘显示星星数 */
+    /** 客户端处理: 按区域去重后更新星盘显示星星数。 */
     public static void handle(StarPlacedPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
-            BundleClientData.INSTANCE.incrementDisplayStars();
+            BundleClientData.INSTANCE.markDisplayStarArea(payload.areaId());
         });
     }
 
-    /** 服务端调用: 广播给所有在同一维度的玩家 */
-    public static void broadcastStarPlaced(ServerLevel level, int areaId) {
-        PacketDistributor.sendToPlayersInDimension(level, new StarPlacedPayload(areaId));
+    /** 每个社区中心进度属于单独玩家，只同步给对应所有者。 */
+    public static void sendToPlayer(ServerPlayer player, int areaId) {
+        PacketDistributor.sendToPlayer(player, new StarPlacedPayload(areaId));
     }
 }

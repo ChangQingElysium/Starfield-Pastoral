@@ -370,7 +370,7 @@ public final class ActiveFestivalHandlers {
     public static long applyTimeFreeze(ServerLevel level, StardewTimeManager timeManager) {
         return currentActiveHandler()
             .map(handler -> handler.applyTimeFreeze(level, timeManager))
-            .orElseGet(() -> timeManager.getVirtualDayTime(level));
+            .orElseGet(timeManager::getVirtualDayTime);
     }
 
     private static String key(String value) {

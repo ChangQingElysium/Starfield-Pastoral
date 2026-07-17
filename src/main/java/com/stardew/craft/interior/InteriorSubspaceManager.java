@@ -1390,7 +1390,7 @@ public final class InteriorSubspaceManager {
         BlockPos leahCottageIndoorExitPortal = LEAH_COTTAGE_ORIGIN.offset(LEAH_COTTAGE_INDOOR_EXIT_PORTAL_OFFSET);
 
         // 莉亚小屋室外入口：2高 x 2宽 x 1深。
-        placePortalTriggerArea(level, LEAH_COTTAGE_OUTDOOR_ENTRY_POS, 1, 2, 1,
+        placePortalTriggerArea(level, LEAH_COTTAGE_OUTDOOR_ENTRY_POS, 2, 2, 1,
             TAG_PORTAL_MARKER_LEAH_COTTAGE_OUTSIDE, "sdv_portal_target:leah_cottage_enter");
 
         // 莉亚小屋室内出口：2高 x 1宽。

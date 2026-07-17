@@ -165,13 +165,13 @@ public class StardewCraft {
         var server = event.getServer();
         LOGGER.info("[VALLEY_MAP] Startup: trying prebuilt region install (ServerAboutToStart)");
         var result = com.stardew.craft.dimension.StardewValleyPrebuiltRegionInstaller.installIfAvailable(server);
-        if (result.installedOrUpgraded()) {
+        if (result.changedWorldFiles()) {
             pregenJustInstalled = true;
             LOGGER.info("[VALLEY_MAP] Prebuilt regions {}. Will reset managers on level load.", result);
         } else if (result == com.stardew.craft.dimension.StardewValleyPrebuiltRegionInstaller.InstallResult.ALREADY_PRESENT) {
             LOGGER.info("[VALLEY_MAP] Prebuilt regions ready (ALREADY_PRESENT).");
         } else {
-            LOGGER.error("[VALLEY_MAP] Prebuilt region package missing or invalid. Stardew Valley travel will be blocked until fixed.");
+            throw new IllegalStateException("Stardew Valley prebuilt region package is missing, invalid, or could not be installed: " + result);
         }
     }
 
@@ -194,11 +194,14 @@ public class StardewCraft {
         com.stardew.craft.farming.SeasonLocationRules.registerGracePeriodRule();
 
         var server = event.getServer();
-        // markAsPreGenerated 需要在 level 可用之后执行
+        // 预烘焙 region 已在 level 加载前安装；这里只记录轻量版本状态，不再解析巨型 schematic。
         if (com.stardew.craft.dimension.StardewValleyPrebuiltRegionInstaller.hasInstalledPrebuilt(server)) {
             var stardewLevel = server.getLevel(com.stardew.craft.core.ModDimensions.STARDEW_VALLEY);
             if (stardewLevel != null) {
-                com.stardew.craft.dimension.StardewValleyMapBootstrap.markAsPreGenerated(stardewLevel);
+                com.stardew.craft.dimension.StardewValleyMapBootstrap.markPrebuiltInstalled(
+                    stardewLevel,
+                    com.stardew.craft.dimension.StardewValleyPrebuiltRegionInstaller.CURRENT_PREGEN_VERSION
+                );
 
                 // pregen version 刚升级 → .mca 已在 ServerAboutToStart 被覆盖。
                 // 此时 level 已加载，执行所有管理器 reset，确保 ensurePlaced 会重新放置。

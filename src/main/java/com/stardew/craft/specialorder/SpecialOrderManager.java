@@ -7,6 +7,7 @@ import com.stardew.craft.api.v1.specialorder.SpecialOrderRewardContext;
 import com.stardew.craft.api.v1.specialorder.StardewSpecialOrderObjectives;
 import com.stardew.craft.api.v1.specialorder.StardewSpecialOrderRewards;
 import com.stardew.craft.mail.MailService;
+import com.stardew.craft.lostandfound.LostAndFoundService;
 import com.stardew.craft.npc.runtime.NpcFriendshipDataManager;
 import com.stardew.craft.npc.runtime.NpcInteractionService;
 import com.stardew.craft.player.PlayerDataEventHandler;
@@ -84,7 +85,7 @@ public final class SpecialOrderManager {
     public static void syncState(ServerPlayer player) {
         boolean unlocked = isUnlockedFor(player);
         refreshAvailableIfNeeded(player.serverLevel(), false, unlocked, mailFlagsFor(player));
-        returnQueuedDonations(player);
+        migrateQueuedDonations(player);
         SpecialOrderWorldData data = SpecialOrderWorldData.get(player.serverLevel());
         PacketDistributor.sendToPlayer(player, new com.stardew.craft.network.payload.SpecialOrderStateSyncPayload(snapshot(player, data)));
         SpecialOrderDropBoxService.syncHints(player);
@@ -157,11 +158,12 @@ public final class SpecialOrderManager {
     public static void onNewDay(ServerLevel level, List<ServerPlayer> players) {
         SpecialOrderWorldData data = SpecialOrderWorldData.get(level);
         int today = StardewTimeManager.get().getAbsoluteDay();
+        migrateLegacyReturnedDonations(level, data);
         boolean changed = false;
         for (SpecialOrderInstance order : new ArrayList<>(data.active())) {
             if (order.accepted() && !order.complete() && order.dueDay() <= today) {
                 SpecialOrderDefinition definition = SpecialOrderDefinitions.get(order.orderId());
-                queueReturnedDonations(players, data, order);
+                queueReturnedDonations(level, players, order);
                 cleanupTemporaryOrderState(players, definition);
                 order.setFailed(true);
                 data.active().remove(order);
@@ -750,7 +752,7 @@ public final class SpecialOrderManager {
         }
     }
 
-    private static void queueReturnedDonations(List<ServerPlayer> players, SpecialOrderWorldData data, SpecialOrderInstance order) {
+    private static void queueReturnedDonations(ServerLevel level, List<ServerPlayer> players, SpecialOrderInstance order) {
         if (order.donatedItems().isEmpty()) {
             return;
         }
@@ -759,25 +761,53 @@ public final class SpecialOrderManager {
             return;
         }
         UUID recipient = order.participants().get(0);
-        data.returnedDonations().computeIfAbsent(recipient, ignored -> new ArrayList<>()).addAll(order.donatedItems());
+        LostAndFoundService.queueForPlayer(
+            level,
+            recipient,
+            donatedStacks(order.donatedItems()),
+            StardewTimeManager.get().getAbsoluteDay());
     }
 
-    public static void returnQueuedDonations(ServerPlayer player) {
+    public static void migrateQueuedDonations(ServerPlayer player) {
         SpecialOrderWorldData data = SpecialOrderWorldData.get(player.serverLevel());
         List<SpecialOrderInstance.DonatedItem> queued = data.returnedDonations().remove(player.getUUID());
         if (queued == null || queued.isEmpty()) {
             return;
         }
-        for (SpecialOrderInstance.DonatedItem donated : queued) {
+        LostAndFoundService.queueForPlayer(
+            player.serverLevel(),
+            player.getUUID(),
+            donatedStacks(queued),
+            StardewTimeManager.get().getAbsoluteDay());
+        data.setDirty();
+        LostAndFoundService.onNewDay(player.serverLevel());
+    }
+
+    private static void migrateLegacyReturnedDonations(ServerLevel level, SpecialOrderWorldData data) {
+        if (data.returnedDonations().isEmpty()) {
+            return;
+        }
+        for (Map.Entry<UUID, List<SpecialOrderInstance.DonatedItem>> entry
+                : new ArrayList<>(data.returnedDonations().entrySet())) {
+            LostAndFoundService.queueForPlayer(
+                level,
+                entry.getKey(),
+                donatedStacks(entry.getValue()),
+                StardewTimeManager.get().getAbsoluteDay());
+        }
+        data.returnedDonations().clear();
+        data.setDirty();
+    }
+
+    private static List<ItemStack> donatedStacks(List<SpecialOrderInstance.DonatedItem> donatedItems) {
+        List<ItemStack> stacks = new ArrayList<>();
+        for (SpecialOrderInstance.DonatedItem donated : donatedItems) {
             Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(donated.itemId()));
-            if (item == net.minecraft.world.item.Items.AIR || donated.count() <= 0) continue;
-            ItemStack stack = new ItemStack(item, donated.count());
-            if (!player.getInventory().add(stack)) {
-                player.drop(stack, false);
+            if (item != net.minecraft.world.item.Items.AIR && donated.count() > 0) {
+                stacks.add(new ItemStack(item, donated.count()));
             }
         }
-        data.setDirty();
-        player.displayClientMessage(Component.translatable("stardewcraft.special_orders.returned_donations"), false);
+        return stacks;
     }
 
     private static void cleanupTemporaryOrderState(List<ServerPlayer> players, SpecialOrderDefinition definition) {

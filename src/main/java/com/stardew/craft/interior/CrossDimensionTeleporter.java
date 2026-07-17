@@ -157,11 +157,22 @@ public final class CrossDimensionTeleporter {
      * 玩家必须已有农场实例。
      */
     public static void wizardInteriorToStardewOutdoor(ServerPlayer player) {
-        wizardInteriorToStardewOutdoor(player, false);
+        wizardInteriorToStardewOutdoor(player, false, false);
     }
 
     public static void wizardInteriorToStardewOutdoor(ServerPlayer player, boolean giveStarterItemsInInventory) {
-        if (checkCooldown(player)) return;
+        wizardInteriorToStardewOutdoor(player, giveStarterItemsInInventory, false);
+    }
+
+    /** Completion warp for a newly generated farm; manual portal cooldown must not suppress it. */
+    public static void wizardInteriorToStardewOutdoorAfterFarmInitialization(ServerPlayer player) {
+        wizardInteriorToStardewOutdoor(player, false, true);
+    }
+
+    private static void wizardInteriorToStardewOutdoor(ServerPlayer player,
+                                                       boolean giveStarterItemsInInventory,
+                                                       boolean ignoreCooldown) {
+        if (!ignoreCooldown && checkCooldown(player)) return;
 
         ServerLevel stardewLevel = player.server.getLevel(ModDimensions.STARDEW_VALLEY);
         if (stardewLevel == null) {

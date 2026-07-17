@@ -242,7 +242,7 @@ public class MineLadderBlock extends Block {
 
         // SDV 原版：3-8 层，10% 翻倍
         java.util.Random rng = new java.util.Random(
-                currentFloor * 31L + level.getServer().overworld().getGameTime());
+                currentFloor * 31L + com.stardew.craft.time.StardewTimeManager.get().getIndependentDayTime());
         int levelsDown = 3 + rng.nextInt(6); // 3~8
         if (rng.nextDouble() < 0.1) {
             levelsDown = levelsDown * 2 - 1; // 5~15

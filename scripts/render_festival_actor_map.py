@@ -6,6 +6,7 @@ Examples:
   python3 scripts/render_festival_actor_map.py --preset moonlight_jellies --all
   python3 scripts/render_festival_actor_map.py --preset night_market
   python3 scripts/render_festival_actor_map.py --festival summer28 --profile y1 --phase main
+  python3 scripts/render_festival_actor_map.py --secret-note-23
 """
 
 from __future__ import annotations
@@ -751,6 +752,45 @@ def render_secret_note10_source_map(output_dir: Path, scale: int) -> Path:
     return output_path
 
 
+def render_secret_note23_source_map(output_dir: Path, scale: int) -> Path:
+    """Render the vanilla bear-event anchors without mapping them to Minecraft coordinates."""
+    output_dir.mkdir(parents=True, exist_ok=True)
+    step = TILE_SIZE * scale
+    woods = render_tmx(MAPS_DIR / "Woods.tmx", scale=scale)
+    crop = (7, 12, 29, 23)
+    base = woods.crop(tuple(value * step for value in crop))
+    base = draw_tile_grid(base, scale, crop[0], crop[1])
+
+    route_layer = Image.new("RGBA", base.size, (0, 0, 0, 0))
+    route_draw = ImageDraw.Draw(route_layer)
+
+    def pixel(tile_x: float, tile_y: float) -> tuple[float, float]:
+        return ((tile_x - crop[0]) * step, (tile_y - crop[1]) * step)
+
+    player_route = [pixel(25.5, 17.5), pixel(19.5, 17.5), pixel(14.5, 17.5)]
+    route_draw.line(player_route, fill=(82, 148, 255, 230), width=max(4, scale * 2), joint="curve")
+    base = Image.alpha_composite(base, route_layer)
+
+    points = [
+        ("Player start (25,17), facing W", 25.5, 17.5),
+        ("Player first stop (19,17): notice bear", 19.5, 17.5),
+        ("Player dialogue / syrup presentation stop (14,17)", 14.5, 17.5),
+        ("Maple syrup visual (13,17)", 13.5, 17.5),
+        ("Bear + vanilla viewport anchor (11,17); source turns E/S/E", 11.5, 17.5),
+    ]
+    annotated = draw_numbered_source_points(
+        base,
+        points,
+        (crop[0], crop[1]),
+        scale,
+        "SN23 / Vanilla Secret Woods bear event / source anchors",
+        route=False,
+    )
+    output_path = output_dir / "secret_note23_woods_vanilla_bear_event_points.png"
+    annotated.save(output_path)
+    return output_path
+
+
 def render_minecraft_capture_workbook(
     output_path: Path,
     title: str,
@@ -808,6 +848,25 @@ def render_secret_note10_capture_workbook(output_dir: Path) -> Path:
         output_dir / "secret_note10_minecraft_capture_workbook.png",
         "Secret Note 10 - Minecraft capture workbook",
         "Every value is intentionally blank. Supply only coordinates captured from the in-game planning tool.",
+        entries,
+    )
+
+
+def render_secret_note23_capture_workbook(output_dir: Path) -> Path:
+    entries = [
+        ("B01", "Secret Woods event trigger area corner 1", "block x/y/z"),
+        ("B02", "Secret Woods event trigger area corner 2", "block x/y/z"),
+        ("B03", "Player start", "x/y/z + facing"),
+        ("B04", "Player notice stop", "x/y/z + facing"),
+        ("B05", "Player dialogue and syrup-presentation stop", "x/y/z + facing"),
+        ("B06", "Bear fixed position (idle only)", "x/y/z + facing"),
+        ("B07", "Maple syrup visual anchor", "x/y/z"),
+        ("B08", "Camera rig", "exact x/y/z + yaw + pitch"),
+    ]
+    return render_minecraft_capture_workbook(
+        output_dir / "secret_note23_minecraft_capture_workbook.png",
+        "Secret Note 23 - Minecraft capture workbook",
+        "Bear stays fixed and uses idle only. Every Minecraft coordinate is intentionally blank.",
         entries,
     )
 
@@ -962,6 +1021,8 @@ def parse_args() -> argparse.Namespace:
                         help="Render vanilla source anchors for active Secret Notes 12 and 17.")
     parser.add_argument("--secret-note-10", action="store_true",
                         help="Render the vanilla Note 10 choreography and a blank Minecraft capture workbook.")
+    parser.add_argument("--secret-note-23", action="store_true",
+                        help="Render the vanilla Note 23 bear-event anchors and a blank Minecraft capture workbook.")
     return parser.parse_args()
 
 
@@ -985,6 +1046,10 @@ def main() -> None:
     if args.secret_note_10:
         print(render_secret_note10_source_map(args.out, args.scale).relative_to(ROOT))
         print(render_secret_note10_capture_workbook(args.out).relative_to(ROOT))
+        return
+    if args.secret_note_23:
+        print(render_secret_note23_source_map(args.out, args.scale).relative_to(ROOT))
+        print(render_secret_note23_capture_workbook(args.out).relative_to(ROOT))
         return
     if args.preset == "night_market":
         for output_path in render_night_market_maps(args.out, args.scale, args.portrait_size):

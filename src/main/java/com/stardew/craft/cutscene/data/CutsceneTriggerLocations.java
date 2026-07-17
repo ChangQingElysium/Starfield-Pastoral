@@ -17,6 +17,7 @@ public final class CutsceneTriggerLocations {
             Map.entry("town", ModDimensions.STARDEW_VALLEY),
             Map.entry("farm", ModDimensions.STARDEW_VALLEY),
             Map.entry("forest", ModDimensions.STARDEW_VALLEY),
+            Map.entry("woods", ModDimensions.STARDEW_VALLEY),
             Map.entry("mountain", ModDimensions.STARDEW_VALLEY),
             Map.entry("trailer", ModDimensions.STARDEW_VALLEY),
             Map.entry("seedshop", ModDimensions.STARDEW_VALLEY),

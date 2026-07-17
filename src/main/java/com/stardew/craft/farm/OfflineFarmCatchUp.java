@@ -88,7 +88,7 @@ public final class OfflineFarmCatchUp {
         }
 
         // 临时加载农场区块（追赶完成后立即释放）
-        FarmChunkManager.get().forceLoadFarmChunksForCatchUp(level, farm.getSlotIndex());
+        FarmChunkManager.get().acquireTemporaryFarmChunks(level, farm.getSlotIndex());
 
         try {
             // 1. 批量推进作物生长
@@ -101,7 +101,7 @@ public final class OfflineFarmCatchUp {
             catchUpSprinklers(level, farm);
         } finally {
             // 释放临时加载的区块
-            FarmChunkManager.get().releaseTempChunks(level, farm.getSlotIndex());
+            FarmChunkManager.get().releaseTemporaryFarmChunks(level, farm.getSlotIndex());
         }
 
         // 更新最后在线信息

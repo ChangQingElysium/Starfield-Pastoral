@@ -30,6 +30,7 @@ public class AnimalQueryMenu extends AbstractContainerMenu {
     private final Player player;
     private long animalId;
     private int ageDays;
+    private int daysOwned;
     private int daysToMature;
     private int wasPetToday;
     private int friendship;
@@ -41,13 +42,14 @@ public class AnimalQueryMenu extends AbstractContainerMenu {
     private int fullness;
 
     public AnimalQueryMenu(int containerId, Inventory playerInventory) {
-        this(containerId, playerInventory, -1L, 0, 5, false, 0, false, false, 0, 0, false, 0);
+        this(containerId, playerInventory, -1L, 0, 0, 5, false, 0, false, false, 0, 0, false, 0);
     }
 
     public AnimalQueryMenu(int containerId,
                            Inventory playerInventory,
                            long animalId,
                            int ageDays,
+                           int daysOwned,
                            int daysToMature,
                            boolean wasPetToday,
                            int friendship,
@@ -61,6 +63,7 @@ public class AnimalQueryMenu extends AbstractContainerMenu {
         this.player = playerInventory.player;
         this.animalId = animalId;
         this.ageDays = Math.max(0, ageDays);
+        this.daysOwned = Math.max(0, daysOwned);
         this.daysToMature = Math.max(1, daysToMature);
         this.wasPetToday = wasPetToday ? 1 : 0;
         this.friendship = Math.max(0, friendship);
@@ -80,6 +83,18 @@ public class AnimalQueryMenu extends AbstractContainerMenu {
             @Override
             public void set(int value) {
                 AnimalQueryMenu.this.animalId = value;
+            }
+        });
+
+        this.addDataSlot(new DataSlot() {
+            @Override
+            public int get() {
+                return AnimalQueryMenu.this.daysOwned;
+            }
+
+            @Override
+            public void set(int value) {
+                AnimalQueryMenu.this.daysOwned = Math.max(0, value);
             }
         });
 
@@ -220,6 +235,10 @@ public class AnimalQueryMenu extends AbstractContainerMenu {
         return ageDays;
     }
 
+    public int getDaysOwned() {
+        return daysOwned;
+    }
+
     public int getDaysToMature() {
         return daysToMature;
     }
@@ -261,6 +280,9 @@ public class AnimalQueryMenu extends AbstractContainerMenu {
 
     public String getMoodTranslationKey() {
         return switch (moodMessage) {
+            case 0 -> isBaby()
+                ? "stardewcraft.animal.query.mood.0_baby"
+                : "stardewcraft.animal.query.mood.0_adult";
             case 1 -> "stardewcraft.animal.query.mood.1";
             case 2 -> "stardewcraft.animal.query.mood.2";
             case 3 -> "stardewcraft.animal.query.mood.3";

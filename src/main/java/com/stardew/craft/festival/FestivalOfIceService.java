@@ -94,7 +94,7 @@ public final class FestivalOfIceService {
     private static MainEventPhase mainEventPhase = MainEventPhase.FREE;
     private static int iceFishingTicksRemaining;
     private static int iceFishingHudSyncTicks;
-    private static String winnerDialogue = "";
+    private static Component winnerDialogue = Component.empty();
     private static boolean playerCanWinPrize;
 
     private FestivalOfIceService() {
@@ -383,16 +383,14 @@ public final class FestivalOfIceService {
     }
 
     public static long applyTimeFreeze(ServerLevel level, StardewTimeManager timeManager) {
-        long currentVirtual = timeManager.getVirtualDayTime(level);
+        long currentVirtual = timeManager.getVirtualDayTime();
         if (frozenMinute == null || (!hasCurrentSessionParticipant(level) && !FestivalService.isDebugActiveFestival(FESTIVAL_ID))) {
             return currentVirtual;
         }
-        ServerLevel overworld = level.getServer().overworld();
         long dayBase = Math.floorDiv(currentVirtual, 24000L) * 24000L;
         long target = dayBase + com.stardew.craft.event.DimensionEventHandler.stardewMinutesToMcTime(frozenMinute);
-        long targetOffset = target - overworld.getDayTime();
-        if (timeManager.getDayTimeOffset() != targetOffset) {
-            timeManager.setDayTimeOffsetRaw(targetOffset);
+        if (currentVirtual != target) {
+            timeManager.setVirtualDayTime(target);
         }
         return target;
     }
@@ -600,9 +598,9 @@ public final class FestivalOfIceService {
         winnerDialogue = createWinnerDialogue(participants, best);
     }
 
-    private static String createWinnerDialogue(List<ServerPlayer> participants, int best) {
+    private static Component createWinnerDialogue(List<ServerPlayer> participants, int best) {
         if (WINNERS.isEmpty()) {
-            return "Willy!";
+            return Component.translatable("event.festival_of_ice.award.winner.willy");
         }
         List<String> names = new ArrayList<>();
         for (ServerPlayer participant : participants) {
@@ -611,15 +609,17 @@ public final class FestivalOfIceService {
             }
         }
         if (names.size() == 1) {
-            return names.get(0) + ", with " + best + " fish!";
+            return Component.translatable("event.festival_of_ice.award.winner.player",
+                Component.literal(names.get(0)), best);
         }
-        return "The winners are " + String.join(", ", names) + ", tied with " + best + " fish!";
+        return Component.translatable("event.festival_of_ice.award.winner.players",
+            Component.literal(String.join(", ", names)), best);
     }
 
     private static void sendCutsceneState(ServerPlayer participant) {
         PacketDistributor.sendToPlayer(participant, new IceFishingCutsceneStatePayload(
             WINNERS.contains(participant.getUUID()),
-            winnerDialogue
+            Component.Serializer.toJson(winnerDialogue, participant.registryAccess())
         ));
     }
 
@@ -1069,7 +1069,7 @@ public final class FestivalOfIceService {
         mainEventPhase = MainEventPhase.FREE;
         iceFishingTicksRemaining = 0;
         iceFishingHudSyncTicks = 0;
-        winnerDialogue = "";
+        winnerDialogue = Component.empty();
         playerCanWinPrize = false;
         stopTimeFreeze();
         debugRequested = false;

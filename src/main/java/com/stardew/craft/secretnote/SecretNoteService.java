@@ -176,6 +176,10 @@ public final class SecretNoteService {
             if (!data.hasMailFlag("qiCave") && !quests.hasQuest("30") && !quests.isQuestCompleted("30")) {
                 quests.acceptQuest("30", player);
             }
+        } else if (definition.vanillaNumber() == 23
+                && !quests.hasQuest("29")
+                && !quests.isQuestCompleted("29")) {
+            quests.acceptQuest("29", player);
         }
     }
 

@@ -91,6 +91,12 @@ public final class WizardQuestHandler {
 
         PlayerStardewData data = PlayerDataManager.getPlayerData(player);
 
+        // Repair older saves where Event 112 set canReadJunimoText but the quest
+        // was completed through StardewQuest directly, bypassing manager sync.
+        if (CCStoryFlags.canReadJunimoText(player)) {
+            completeMeetWizardQuest(player);
+        }
+
         // 只在需要自动触发时才继续检测
         boolean needsIntro = !data.isWizardFirstMet();
         boolean needsE112 = CCStoryFlags.hasSeenJunimoNote(player) && !CCStoryFlags.canReadJunimoText(player);
@@ -113,9 +119,7 @@ public final class WizardQuestHandler {
             triggerCutscene(player, "wizard_intro");
         } else {
             // 看过 JunimoNote 但未解锁文字 → 自动触发 wizard_e112
-            com.stardew.craft.quest.QuestManager qm = com.stardew.craft.quest.QuestManager.of(player);
-            com.stardew.craft.quest.StardewQuest meetWizardQuest = qm.getQuest("1");
-            if (meetWizardQuest != null) meetWizardQuest.questComplete(player);
+            completeMeetWizardQuest(player);
             CCStoryFlags.addFlag(player, CCStoryFlags.CAN_READ_JUNIMO);
             com.stardew.craft.communitycenter.network.BundleSyncPayload.sendFullSync(player);
             triggerCutscene(player, "wizard_e112");
@@ -134,9 +138,7 @@ public final class WizardQuestHandler {
         // 玩家看过 JunimoNote（收到巫师邀请信）但尚未解锁 → 触发 cutscene 过场
         if (CCStoryFlags.hasSeenJunimoNote(player) && !CCStoryFlags.canReadJunimoText(player)) {
             // 完成 meetTheWizard 任务 (Quest ID 1)
-            com.stardew.craft.quest.QuestManager qm = com.stardew.craft.quest.QuestManager.of(player);
-            com.stardew.craft.quest.StardewQuest meetWizardQuest = qm.getQuest("1");
-            if (meetWizardQuest != null) meetWizardQuest.questComplete(player);
+            completeMeetWizardQuest(player);
             // 直接在服务端设 flag，不依赖 cutscene 内的 set_flag 命令
             // 防止 cutscene 失败/跳过导致 flag 永远不被设置，锁死交互
             CCStoryFlags.addFlag(player, CCStoryFlags.CAN_READ_JUNIMO);
@@ -185,6 +187,10 @@ public final class WizardQuestHandler {
         }
         sendDialogue(player, "stardewcraft.npc.wizard.daily_locked", 0);
         return true;
+    }
+
+    private static void completeMeetWizardQuest(ServerPlayer player) {
+        com.stardew.craft.quest.QuestManager.of(player).completeActiveQuest("1", player);
     }
 
     /**

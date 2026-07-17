@@ -17,6 +17,7 @@ import com.stardew.craft.command.QuestDebugCommand;
 import com.stardew.craft.command.SecretNoteDebugCommand;
 import com.stardew.craft.command.StardewPayCommand;
 import com.stardew.craft.command.StardewTeleportCommand;
+import com.stardew.craft.command.StardewTimeCommand;
 import com.stardew.craft.command.OvernightDebugCommand;
 import com.stardew.craft.command.NpcDebugCommand;
 import com.stardew.craft.command.PointPlanDebugCommand;
@@ -38,6 +39,7 @@ public class CommandEventHandler {
         // Keep farm join responses first so /stardew farm accept/reject stay available to non-OP players.
         FarmJoinCommand.register(event.getDispatcher());
         StardewTeleportCommand.register(event.getDispatcher());
+        StardewTimeCommand.register(event.getDispatcher());
         StardewPayCommand.register(event.getDispatcher());
         PlayerDataCommand.register(event.getDispatcher());
         QuestDebugCommand.register(event.getDispatcher());

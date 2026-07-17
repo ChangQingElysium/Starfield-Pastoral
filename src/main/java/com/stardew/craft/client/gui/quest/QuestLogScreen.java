@@ -323,9 +323,7 @@ public class QuestLogScreen extends Screen {
             if (shownQuest.hasMoneyReward()) {
                 // SDV: rewardBox at (xPos+w/2-80, yPos+h-32-96)
                 int rboxX = winX + winW / 2 - mapping.ui(80);
-                // Keep the complete reward stack clear of the paper's bottom frame.
-                // The old -128 position put the hover hint directly on the border.
-                int rboxY = winY + winH - mapping.ui(160);
+                int rboxY = winY + winH - mapping.ui(128);
                 lastRewardBoxY = rboxY;
                 int rboxSz = mapping.ui(96);
 
@@ -335,21 +333,21 @@ public class QuestLogScreen extends Screen {
                 g.drawString(font, GuiText.ellipsize(font, rewardLabel, mapping.ui(220)),
                         winX + mapping.ui(36), rboxY + mapping.ui(25), TEXT_COLOR, false);
 
-                // SDV: rewardBox.draw — (293,360,24,24) at 4×
-                CommonGuiTextures.drawRewardSlot(g, rboxX, rboxY, s4);
+                // SDV QuestLog.update: rewardBox.scale = baseScale + dialogueButtonScale / 20.
+                float dialogueButtonScale = (float) (16.0D
+                        * Math.sin((System.currentTimeMillis() % 1570L) / 500.0D));
+                float rewardScale = s4 * (1.0F + dialogueButtonScale / 80.0F);
+                int rewardX = Math.round(rboxX + rboxSz / 2.0F - 12.0F * rewardScale);
+                int rewardY = Math.round(rboxY + rboxSz / 2.0F - 12.0F * rewardScale);
+                CommonGuiTextures.drawRewardSlot(g, rewardX, rewardY, rewardScale);
 
-                // SDV: coin at (rewardBox.X+16, rewardBox.Y+16) at 4×
-                CommonGuiTextures.drawQuestCoin(g, rboxX + mapping.ui(16), rboxY + mapping.ui(16), s4);
+                // SDV: coin follows the same dialogueButtonScale vertical bob.
+                int coinBob = Math.round(dialogueButtonScale * s4 / 8.0F);
+                CommonGuiTextures.drawQuestCoin(g, rboxX + mapping.ui(16),
+                        rboxY + mapping.ui(16) - coinBob, s4);
                 // SDV: money text at (xPos+448, rewardBox.Y+25)
                 g.drawString(font, shownQuest.getMoneyReward() + "g",
                         winX + mapping.ui(448), rboxY + mapping.ui(25), 0xFF2C6E0F, false);
-
-                if (isIn(mouseX, mouseY, rboxX, rboxY, rboxSz, rboxSz)) {
-                    Component collectTip = Component.translatable("gui.stardewcraft.quest_log.collect")
-                        .withStyle(net.minecraft.ChatFormatting.BOLD);
-                    GuiText.drawCenteredClamped(g, font, collectTip,
-                            winX + winW / 2, rboxY + rboxSz + mapping.ui(8), winW - mapping.ui(128), 0xFFFFD700, false);
-                }
             }
         } else {
             // SDV: Objectives — 每帧重新获取，反映最新 N/M 进度

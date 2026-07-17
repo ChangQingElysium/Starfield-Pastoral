@@ -1,5 +1,6 @@
 package com.stardew.craft.manager;
 
+import com.stardew.craft.StardewCraft;
 import com.stardew.craft.api.v1.agriculture.StardewAgricultureDataApi;
 import com.stardew.craft.api.v1.agriculture.StardewAnimalData;
 import com.stardew.craft.animal.data.AnimalWorldData;
@@ -121,6 +122,14 @@ public class AnimalGrowthManager extends SavedData {
         int currentAbsDay = (time.getCurrentYear() - 1) * (28 * 4) + time.getCurrentSeason() * 28 + time.getCurrentDay();
 
         for (FarmAnimalRecord record : worldData.getAnimals()) {
+            AnimalBuildingRecord building = worldData.getBuilding(record.buildingId()).orElse(null);
+            if (building != null && !shouldProcessBuildingToday(level, building)) {
+                continue;
+            }
+            if (building != null) {
+                ensureBuildingLoaded(level, building);
+            }
+
             int lastDay = record.lastProcessedAbsDay();
             
             // 新动物或旧存档：初始化为昨天，只处理今天
@@ -174,6 +183,13 @@ public class AnimalGrowthManager extends SavedData {
         for (FarmAnimalRecord record : worldData.getAnimals()) {
             AnimalProfile profile = resolveProfile(record.animalTypeId());
             AnimalBuildingRecord building = worldData.getBuilding(record.buildingId()).orElse(null);
+            // 十分钟状态更新依赖实体和设施方块；农场未加载时保留记录状态，
+            // 避免把“读不到加热器/动物实体”误判成负面状态。
+            if (building == null
+                    || !shouldProcessBuildingToday(level, building)
+                    || !level.isLoaded(building.managerPos())) {
+                continue;
+            }
             boolean outdoors = isAnimalOutdoors(level, record, building);
 
             int change = 0;
@@ -475,6 +491,10 @@ public class AnimalGrowthManager extends SavedData {
 
     private void tryReproduction(ServerLevel level, AnimalWorldData worldData, int absoluteDaysPlayed) {
         for (AnimalBuildingRecord building : worldData.getBuildings()) {
+            if (!shouldProcessBuildingToday(level, building)) {
+                continue;
+            }
+            ensureBuildingLoaded(level, building);
             if (!"barn".equals(building.buildingType().family())) {
                 continue;
             }
@@ -534,6 +554,25 @@ public class AnimalGrowthManager extends SavedData {
                     "stardewcraft.animal.pregnancy.birth_notification", parentName));
             }
         }
+    }
+
+    private boolean shouldProcessBuildingToday(ServerLevel level, AnimalBuildingRecord building) {
+        try {
+            return com.stardew.craft.farm.FarmDailyProcessHelper.shouldProcessFarmForPlayer(
+                level, UUID.fromString(building.ownerPlayerUuid()));
+        } catch (IllegalArgumentException exception) {
+            StardewCraft.LOGGER.warn("[ANIMAL] Invalid building owner UUID for {}: {}",
+                building.buildingId(), building.ownerPlayerUuid());
+            return false;
+        }
+    }
+
+    private void ensureBuildingLoaded(ServerLevel level, AnimalBuildingRecord building) {
+        com.stardew.craft.farm.FarmDailyProcessHelper.ensureBoundsLoaded(
+            level,
+            new BlockPos(building.minX() - 1, building.minY() - 1, building.minZ() - 1),
+            new BlockPos(building.maxX() + 1, building.maxY() + 1, building.maxZ() + 1)
+        );
     }
 
     private int rollQuality(int friendship, int happiness, boolean hasQualityProfession, RandomSource random) {

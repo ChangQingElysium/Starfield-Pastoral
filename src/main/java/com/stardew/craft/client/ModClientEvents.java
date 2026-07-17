@@ -280,7 +280,8 @@ public class ModClientEvents {
             }
 
             SellQuote quote = ProfessionSellPriceService.quoteItemForProfessionNames(
-                new java.util.HashSet<>(ClientPlayerDataCache.getProfessions()), stack, SellSource.SHOP_COUNTER);
+                new java.util.HashSet<>(ClientPlayerDataCache.getProfessions()),
+                ClientPlayerDataCache.getMailFlags(), stack, SellSource.SHOP_COUNTER);
             int sellPrice = quote.finalUnitPrice();
             boolean hidePriceLine = stack.getItem() == ModItems.SKULL_KEY.get()
                 || stack.getItem() == ModItems.MAGNIFYING_GLASS.get()
@@ -1356,6 +1357,7 @@ public class ModClientEvents {
         com.stardew.craft.client.ClientMailIndex.clear();
         com.stardew.craft.client.ClientFestivalAvailability.clear();
         com.stardew.craft.client.ClientJeiCatalog.clear();
+        com.stardew.craft.communitycenter.network.BundleClientData.INSTANCE.clear();
         com.stardew.craft.client.ClientContentRefreshHooks.onSyncedRegistriesChanged();
         com.stardew.craft.client.hud.StardewTimeHud.resetTimeSync();
         com.stardew.craft.client.sound.StardewMusicManager.setNightMarketFestivalOpen(false);

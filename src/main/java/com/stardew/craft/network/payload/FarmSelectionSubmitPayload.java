@@ -137,7 +137,7 @@ public record FarmSelectionSubmitPayload(
                     // 再跨一个 tick 清除标题并传送，保证客户端至少渲染一帧完成状态。
                     server.tell(new net.minecraft.server.TickTask(server.getTickCount() + 1, () -> {
                         player.connection.send(new net.minecraft.network.protocol.game.ClientboundClearTitlesPacket(true));
-                        CrossDimensionTeleporter.wizardInteriorToStardewOutdoor(player);
+                        CrossDimensionTeleporter.wizardInteriorToStardewOutdoorAfterFarmInitialization(player);
                     }));
                 }));
             } else {

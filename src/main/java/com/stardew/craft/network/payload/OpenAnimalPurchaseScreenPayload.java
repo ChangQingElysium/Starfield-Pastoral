@@ -123,6 +123,11 @@ public record OpenAnimalPurchaseScreenPayload(
         if (minecraft.player == null) {
             return;
         }
-        minecraft.setScreen(new com.stardew.craft.client.gui.AnimalPurchaseScreen(payload));
+        if (payload.incubatorMode() && !payload.animalOptions().isEmpty()) {
+            minecraft.setScreen(new com.stardew.craft.client.gui.AnimalPurchaseBuildingScreen(
+                payload, payload.animalOptions().getFirst()));
+        } else {
+            minecraft.setScreen(new com.stardew.craft.client.gui.AnimalPurchaseScreen(payload));
+        }
     }
 }

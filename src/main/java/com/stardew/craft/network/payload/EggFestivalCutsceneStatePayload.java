@@ -19,6 +19,7 @@ public record EggFestivalCutsceneStatePayload(
     String winnerText,
     List<UUID> participantIds
 ) implements CustomPacketPayload {
+    private static final int MAX_WINNER_TEXT_LENGTH = 1024;
     public EggFestivalCutsceneStatePayload {
         participantIds = participantIds == null ? List.of() : List.copyOf(participantIds);
     }
@@ -31,7 +32,7 @@ public record EggFestivalCutsceneStatePayload(
             buf.writeVarInt(payload.participantCount());
             buf.writeBoolean(payload.playerWon());
             buf.writeVarInt(payload.winnerMask());
-            buf.writeUtf(payload.winnerText() == null ? "" : payload.winnerText(), 256);
+            buf.writeUtf(payload.winnerText() == null ? "" : payload.winnerText(), MAX_WINNER_TEXT_LENGTH);
             int count = Math.min(payload.participantIds().size(), 24);
             buf.writeVarInt(count);
             for (int index = 0; index < count; index++) {
@@ -42,7 +43,7 @@ public record EggFestivalCutsceneStatePayload(
             int participantCount = buf.readVarInt();
             boolean playerWon = buf.readBoolean();
             int winnerMask = buf.readVarInt();
-            String winnerText = buf.readUtf(256);
+            String winnerText = buf.readUtf(MAX_WINNER_TEXT_LENGTH);
             int idCount = Math.min(buf.readVarInt(), 24);
             java.util.ArrayList<UUID> ids = new java.util.ArrayList<>(idCount);
             for (int index = 0; index < idCount; index++) {

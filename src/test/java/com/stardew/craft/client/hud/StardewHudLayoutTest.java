@@ -64,18 +64,22 @@ class StardewHudLayoutTest {
                 0, 31);
         StardewHudLayout.Placement messages = StardewHudLayout.calculate(
                 480, 270,
-                Config.HudElement.TEXT_MESSAGE.baseWidth(), Config.HudElement.TEXT_MESSAGE.baseHeight(),
-                75, Config.HudHorizontalAnchor.LEFT, Config.HudVerticalAnchor.BOTTOM,
-                10, 104);
+                Config.HudElement.NOTIFICATIONS.baseWidth(), Config.HudElement.NOTIFICATIONS.baseHeight(),
+                Config.HudElement.NOTIFICATIONS.defaultScalePercent(),
+                Config.HudElement.NOTIFICATIONS.defaultHorizontalAnchor(),
+                Config.HudElement.NOTIFICATIONS.defaultVerticalAnchor(),
+                Config.HudElement.NOTIFICATIONS.defaultOffsetX(),
+                Config.HudElement.NOTIFICATIONS.defaultOffsetY());
 
         assertEquals(278, playerBars.width());
         assertEquals(18, playerBars.height());
         assertEquals(480 / 2 - playerBars.width() / 2, playerBars.x());
         assertEquals(239 - playerBars.height(), playerBars.y());
-        assertEquals(135, messages.width());
-        assertEquals(24, messages.height());
+        assertEquals(154, messages.width());
+        assertEquals(32, messages.height());
         assertEquals(10, messages.x());
-        assertEquals(142, messages.y());
+        assertEquals(190, messages.y());
+        assertEquals("itemPickup", Config.HudElement.NOTIFICATIONS.configKey());
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.stardew.craft.client;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.gui.overnight.StardewGuiUtil;
 import com.stardew.craft.cutscene.runtime.EventPlayer;
@@ -13,6 +14,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
+import org.lwjgl.glfw.GLFW;
 
 @EventBusSubscriber(modid = StardewCraft.MODID, value = Dist.CLIENT)
 public final class CutsceneSkipHoldHud {
@@ -27,6 +29,7 @@ public final class CutsceneSkipHoldHud {
 
     private static int heldTicks;
     private static boolean skipRequested;
+    private static boolean screenBindingDown;
 
     private CutsceneSkipHoldHud() {
     }
@@ -39,14 +42,13 @@ public final class CutsceneSkipHoldHud {
             return;
         }
 
-        if (isSkipKeyDown()) {
+        if (isSkipKeyDown(mc)) {
             if (skipRequested) {
                 return;
             }
             heldTicks = Math.min(HOLD_TICKS, heldTicks + 1);
             if (heldTicks >= HOLD_TICKS) {
-                skipRequested = true;
-                EventPlayer.get().trySkip();
+                requestSkip();
             }
         } else if (heldTicks > 0) {
             heldTicks--;
@@ -71,10 +73,58 @@ public final class CutsceneSkipHoldHud {
         render(event.getGuiGraphics());
     }
 
+    @SubscribeEvent
+    public static void onScreenKeyPressed(ScreenEvent.KeyPressed.Pre event) {
+        if (!canChargeSkip(Minecraft.getInstance()) || !matchesSkipKey(event.getKeyCode(), event.getScanCode())) {
+            return;
+        }
+        screenBindingDown = true;
+        event.setCanceled(true);
+    }
+
+    @SubscribeEvent
+    public static void onScreenKeyReleased(ScreenEvent.KeyReleased.Pre event) {
+        if (!isSkipKeyCode(event.getKeyCode(), event.getScanCode())) {
+            return;
+        }
+        screenBindingDown = false;
+        if (canChargeSkip(Minecraft.getInstance())) {
+            event.setCanceled(true);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onScreenMousePressed(ScreenEvent.MouseButtonPressed.Pre event) {
+        if (!canChargeSkip(Minecraft.getInstance())) {
+            return;
+        }
+        if (event.getButton() == GLFW.GLFW_MOUSE_BUTTON_LEFT
+                && isInsideSkipButton(event.getScreen().width, event.getMouseX(), event.getMouseY())) {
+            requestSkip();
+            event.setCanceled(true);
+            return;
+        }
+        if (matchesSkipMouseButton(event.getButton())) {
+            screenBindingDown = true;
+            event.setCanceled(true);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onScreenMouseReleased(ScreenEvent.MouseButtonReleased.Pre event) {
+        if (!isSkipMouseButton(event.getButton())) {
+            return;
+        }
+        screenBindingDown = false;
+        if (canChargeSkip(Minecraft.getInstance())) {
+            event.setCanceled(true);
+        }
+    }
+
     private static void render(GuiGraphics graphics) {
         Minecraft mc = Minecraft.getInstance();
         Font font = mc.font;
-        int cx = Math.max(BUTTON_SIZE / 2 + 4, graphics.guiWidth() - SDV_SKIP_MARGIN_RIGHT - BUTTON_SIZE / 2);
+        int cx = skipCenterX(graphics.guiWidth());
         int cy = SDV_SKIP_MARGIN_TOP + BUTTON_SIZE / 2;
         float progress = Mth.clamp(heldTicks / (float) HOLD_TICKS, 0.0F, 1.0F);
 
@@ -92,14 +142,72 @@ public final class CutsceneSkipHoldHud {
     private static void reset() {
         heldTicks = 0;
         skipRequested = false;
+        screenBindingDown = false;
     }
 
     private static boolean canChargeSkip(Minecraft mc) {
         return mc.player != null && EventPlayer.get().isSkippable();
     }
 
-    private static boolean isSkipKeyDown() {
-        return ModKeyMappings.isDown(ModKeyMappings.CUTSCENE_SKIP);
+    private static boolean isSkipKeyDown(Minecraft mc) {
+        if (ModKeyMappings.CUTSCENE_SKIP.isUnbound()) {
+            return false;
+        }
+        InputConstants.Key key = ModKeyMappings.CUTSCENE_SKIP.getKey();
+        long window = mc.getWindow().getWindow();
+        boolean physicallyDown = switch (key.getType()) {
+            case KEYSYM -> InputConstants.isKeyDown(window, key.getValue());
+            case MOUSE -> GLFW.glfwGetMouseButton(window, key.getValue()) == GLFW.GLFW_PRESS;
+            default -> screenBindingDown;
+        };
+        return physicallyDown
+                && ModKeyMappings.CUTSCENE_SKIP.getKeyModifier()
+                        .isActive(ModKeyMappings.CUTSCENE_SKIP.getKeyConflictContext());
+    }
+
+    private static boolean matchesSkipKey(int keyCode, int scanCode) {
+        return isSkipKeyCode(keyCode, scanCode)
+                && ModKeyMappings.CUTSCENE_SKIP.getKeyModifier()
+                        .isActive(ModKeyMappings.CUTSCENE_SKIP.getKeyConflictContext());
+    }
+
+    private static boolean matchesSkipMouseButton(int button) {
+        return isSkipMouseButton(button)
+                && ModKeyMappings.CUTSCENE_SKIP.getKeyModifier()
+                        .isActive(ModKeyMappings.CUTSCENE_SKIP.getKeyConflictContext());
+    }
+
+    private static boolean isSkipKeyCode(int keyCode, int scanCode) {
+        return !ModKeyMappings.CUTSCENE_SKIP.isUnbound()
+                && ModKeyMappings.CUTSCENE_SKIP.getKey().equals(InputConstants.getKey(keyCode, scanCode));
+    }
+
+    private static boolean isSkipMouseButton(int button) {
+        InputConstants.Key key = ModKeyMappings.CUTSCENE_SKIP.getKey();
+        return !ModKeyMappings.CUTSCENE_SKIP.isUnbound()
+                && key.getType() == InputConstants.Type.MOUSE
+                && key.getValue() == button;
+    }
+
+    private static int skipCenterX(int guiWidth) {
+        return Math.max(BUTTON_SIZE / 2 + 4, guiWidth - SDV_SKIP_MARGIN_RIGHT - BUTTON_SIZE / 2);
+    }
+
+    private static boolean isInsideSkipButton(int guiWidth, double mouseX, double mouseY) {
+        int cx = skipCenterX(guiWidth);
+        int cy = SDV_SKIP_MARGIN_TOP + BUTTON_SIZE / 2;
+        int half = BUTTON_SIZE / 2;
+        return mouseX >= cx - half && mouseX <= cx + half
+                && mouseY >= cy - half && mouseY <= cy + half;
+    }
+
+    private static void requestSkip() {
+        if (skipRequested || !EventPlayer.get().isSkippable()) {
+            return;
+        }
+        heldTicks = HOLD_TICKS;
+        skipRequested = true;
+        EventPlayer.get().trySkip();
     }
 
     private static void drawFilledCircle(GuiGraphics graphics, int cx, int cy, float radius, int argb) {

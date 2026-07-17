@@ -11,6 +11,7 @@ import com.stardew.craft.interior.InteriorSubspaceManager;
 import com.stardew.craft.sound.ModSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 
 /**
@@ -35,14 +36,9 @@ public final class StarPlacementAnimator {
      * @param level  server world
      * @param areaId the completed area (determines Junimo color)
      */
-    public static void spawnStarCarrier(ServerLevel level, int areaId) {
-        spawnStarCarrier(level, areaId, null);
-    }
-
-    /**
-     * Per-player 版本，指定 CC 原点。
-     */
-    public static void spawnStarCarrier(ServerLevel level, int areaId, BlockPos ccOrigin) {
+    /** Per-player 版本，指定 CC 原点和该社区中心的所有者。 */
+    public static void spawnStarCarrier(ServerLevel level, int areaId, BlockPos ccOrigin,
+                                        java.util.UUID ownerUUID) {
         BlockPos baseOrigin = ccOrigin != null ? ccOrigin : InteriorSubspaceManager.CC_ORIGIN;
         BlockPos hutPos = baseOrigin.offset(CCAreaRegistry.JUNIMO_HUT_ENTRANCE_OFFSET);
         BlockPos plaquePos = baseOrigin.offset(STAR_PLAQUE_OFFSET);
@@ -62,8 +58,13 @@ public final class StarPlacementAnimator {
 
         // Set target: walk to star plaque
         junimo.setTarget(plaquePos, () -> {
-            // Arrived at plaque — 通知客户端星盘纹理 +1 星
-            StarPlacedPayload.broadcastStarPlaced(level, areaId);
+            // Arrived at plaque — only this Community Center's owner may see the star.
+            ServerPlayer owner = ownerUUID == null
+                    ? null
+                    : level.getServer().getPlayerList().getPlayer(ownerUUID);
+            if (owner != null) {
+                StarPlacedPayload.sendToPlayer(owner, areaId);
+            }
 
             // 同时更新 BlockEntity 用于持久化
             placeStar(level, plaquePos, areaId);

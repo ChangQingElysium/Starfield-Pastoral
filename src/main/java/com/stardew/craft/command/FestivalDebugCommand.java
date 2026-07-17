@@ -17,6 +17,7 @@ import com.stardew.craft.festival.FestivalService;
 import com.stardew.craft.festival.FestivalSessionPhase;
 import com.stardew.craft.festival.FestivalType;
 import com.stardew.craft.festival.FestivalWorldData;
+import com.stardew.craft.festival.PassiveFestivalHandlers;
 import com.stardew.craft.festival.desert.DesertFestivalService;
 import com.stardew.craft.festival.nightmarket.NightMarketNpcVisitService;
 import com.stardew.craft.festival.squid.SquidFestService;
@@ -153,11 +154,14 @@ public final class FestivalDebugCommand {
 
         if (festival.type() == FestivalType.PASSIVE) {
             FestivalService.clearDebugPassiveFestival(festival.id());
+            FestivalWorldData data = FestivalWorldData.get(level);
+            data.getSession(festival.id()).ifPresent(session -> {
+                PassiveFestivalHandlers.onCleanup(level, festival, session);
+                session.setPhase(FestivalSessionPhase.CLOSED);
+            });
             boolean overlayRestoreStarted = festival.mapOverlayId().isBlank()
                 ? false
                 : FestivalMapOverlayManager.beginRestore(level, festival.mapOverlayId());
-            FestivalWorldData data = FestivalWorldData.get(level);
-            data.getSession(festival.id()).ifPresent(session -> session.setPhase(FestivalSessionPhase.CLOSED));
             data.setActivePassiveFestivalIds(FestivalService.getActivePassiveFestivalsToday().stream().map(FestivalDefinition::id).toList());
             refreshFestivalSchedules(level);
             context.getSource().sendSuccess(() -> Component.translatable(

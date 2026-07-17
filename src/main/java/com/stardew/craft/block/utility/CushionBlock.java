@@ -1,6 +1,7 @@
 package com.stardew.craft.block.utility;
 
 import com.stardew.craft.entity.seat.SofaSeatEntity;
+import com.stardew.craft.entity.seat.CushionEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -10,13 +11,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.Vec3;
 
 @SuppressWarnings("null")
 public class CushionBlock extends MapUtilityStaticBlock {
     public static final IntegerProperty COLOR = IntegerProperty.create("color", 0, WoodenChestColorPalette.size() - 1);
-    private static final double SEAT_Y_OFFSET = 3.0D / 16.0D;
-
     public CushionBlock(Properties properties, String modelId) {
         super(properties, modelId);
         registerDefaultState(defaultBlockState()
@@ -40,24 +38,12 @@ public class CushionBlock extends MapUtilityStaticBlock {
             return InteractionResult.SUCCESS;
         }
 
-        SofaSeatEntity seat = SofaSeatEntity.getOrCreate((net.minecraft.server.level.ServerLevel) level, pos, SEAT_Y_OFFSET);
-        if (seat == null) {
+        CushionEntity cushion = CushionEntity.migrateLegacyBlock(
+            (net.minecraft.server.level.ServerLevel) level, pos, state, player);
+        if (cushion == null) {
             return InteractionResult.PASS;
         }
-
-        if (seat.isVehicle()) {
-            return InteractionResult.CONSUME;
-        }
-
-        if (!player.startRiding(seat, false)) {
-            return InteractionResult.PASS;
-        }
-
-        Vec3 seatPos = seat.position();
-        player.teleportTo(seatPos.x, seatPos.y, seatPos.z);
-        player.setYBodyRot(state.getValue(FACING).toYRot() + 180.0F);
-        player.setYRot(state.getValue(FACING).toYRot() + 180.0F);
-        return InteractionResult.CONSUME;
+        return cushion.trySit(player);
     }
 
     @Override

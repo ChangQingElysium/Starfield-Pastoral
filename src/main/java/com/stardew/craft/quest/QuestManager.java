@@ -145,8 +145,12 @@ public class QuestManager {
 
     public boolean completeActiveQuest(String questId, ServerPlayer player) {
         StardewQuest quest = getQuest(questId);
-        if (quest == null || quest.isCompleted()) return false;
-        quest.questComplete(player);
+        if (quest == null) return false;
+        // Older call sites completed the quest object directly without letting the
+        // manager persist, notify and remove it. Treat that state as recoverable.
+        if (!quest.isCompleted()) {
+            quest.questComplete(player);
+        }
         markOwnerDirty(player);
         syncToClient(player);
         cleanupDestroyed(player);

@@ -95,6 +95,9 @@ public final class FairFishingGameService {
             ObjectDialogueService.show(player, "stardewcraft.warp.farm.unavailable");
             return;
         }
+        // A cast started before entering the booth otherwise survives into the minigame and makes
+        // the temporary rod report "already fishing". The booth always starts from a clean session.
+        com.stardew.craft.fishing.server.FishingSessionManager.get(player.server).cancel(player);
         PENDING_RESULTS.remove(player.getUUID());
         removeTemporaryFishingRods(player);
         ActiveFishingGame game = new ActiveFishingGame(
@@ -197,6 +200,7 @@ public final class FairFishingGameService {
     private static void finishFishingGame(ServerPlayer player, ActiveFishingGame game, boolean showResults) {
         ACTIVE_GAMES.remove(player.getUUID());
         syncFishingHud(player, game, false);
+        com.stardew.craft.fishing.server.FishingSessionManager.get(player.server).cancel(player);
         removeTemporaryFishingRods(player);
         restoreDisplacedSelectedItem(player, game);
         ServerLevel stardewLevel = player.server.getLevel(ModDimensions.STARDEW_VALLEY);

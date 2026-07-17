@@ -8,7 +8,11 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public record OpenSofaColorScreenPayload(BlockPos targetPos, int currentColor) implements CustomPacketPayload {
+public record OpenSofaColorScreenPayload(BlockPos targetPos, int currentColor, int targetEntityId) implements CustomPacketPayload {
+    public OpenSofaColorScreenPayload(BlockPos targetPos, int currentColor) {
+        this(targetPos, currentColor, -1);
+    }
+
     @SuppressWarnings("null")
     public static final Type<OpenSofaColorScreenPayload> TYPE =
         new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "open_sofa_color_screen"));
@@ -18,8 +22,9 @@ public record OpenSofaColorScreenPayload(BlockPos targetPos, int currentColor) i
         (buf, payload) -> {
             buf.writeBlockPos(payload.targetPos());
             buf.writeVarInt(payload.currentColor());
+            buf.writeVarInt(payload.targetEntityId());
         },
-        buf -> new OpenSofaColorScreenPayload(buf.readBlockPos(), buf.readVarInt())
+        buf -> new OpenSofaColorScreenPayload(buf.readBlockPos(), buf.readVarInt(), buf.readVarInt())
     );
 
     @Override
@@ -37,6 +42,7 @@ public record OpenSofaColorScreenPayload(BlockPos targetPos, int currentColor) i
         if (minecraft.player == null) {
             return;
         }
-        minecraft.setScreen(new com.stardew.craft.client.gui.SofaColorSelectionScreen(payload.targetPos(), payload.currentColor()));
+        minecraft.setScreen(new com.stardew.craft.client.gui.SofaColorSelectionScreen(
+            payload.targetPos(), payload.currentColor(), payload.targetEntityId()));
     }
 }

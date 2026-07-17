@@ -137,6 +137,9 @@ public class WildTreeSeedManager extends SavedData {
 				continue;
 			}
 			BlockPos pos = gp.pos();
+			if (!com.stardew.craft.farm.FarmDailyProcessHelper.shouldProcessPosition(level, pos)) {
+				continue;
+			}
 			if (!level.isLoaded(pos)) {
 				continue;
 			}
@@ -161,6 +164,9 @@ public class WildTreeSeedManager extends SavedData {
 				continue;
 			}
 			BlockPos pos = gp.pos();
+			if (!com.stardew.craft.farm.FarmDailyProcessHelper.shouldProcessPosition(level, pos)) {
+				continue;
+			}
 			if (!level.isLoaded(pos)) {
 				continue;
 			}

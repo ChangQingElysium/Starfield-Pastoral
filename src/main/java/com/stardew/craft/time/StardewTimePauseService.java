@@ -81,7 +81,29 @@ public final class StardewTimePauseService {
         long simulationGameTime = timeManager.getSimulationGameTime();
         return simulationGameTime >= 0L
             ? simulationGameTime
-            : level.getServer().overworld().getGameTime();
+            : timeManager.getIndependentDayTime();
+    }
+
+    /**
+     * Rebases an active clock pause after an authoritative Stardew time jump.
+     *
+     * <p>Sleep and festival completion deliberately change the virtual day time while the player
+     * can still be classified as sleeping/in a cutscene. Keeping the old frozen value would make
+     * the next server tick restore the pre-sleep or festival-entry time.</p>
+     */
+    static void onAuthoritativeVirtualDayTimeSet(MinecraftServer server, long targetDayTime) {
+        frozenVirtualDayTime = rebaseFrozenVirtualDayTime(
+            server == activeServer && clockPaused,
+            frozenVirtualDayTime,
+            targetDayTime
+        );
+    }
+
+    static Long rebaseFrozenVirtualDayTime(boolean activeClockPause, Long frozenTime, long targetDayTime) {
+        if (activeClockPause && frozenTime != null) {
+            return targetDayTime;
+        }
+        return frozenTime;
     }
 
     @SubscribeEvent
@@ -113,20 +135,13 @@ public final class StardewTimePauseService {
         boolean nextSimulationPaused = shouldPauseForCounts(players.size(), simulationNonGameplayPlayers);
         boolean nextClockPaused = shouldPauseForCounts(players.size(), clockNonGameplayPlayers);
         StardewTimeManager timeManager = StardewTimeManager.get();
-        timeManager.initializeSimulationGameTime(server.overworld().getGameTime());
-
-        // Finish compensating the previous clock-paused tick before deciding whether to resume. Without
-        // this, the overworld tick immediately before resume leaks into the Stardew clock.
-        if (clockPaused && frozenVirtualDayTime != null
-                && timeManager.getVirtualDayTime(server.overworld()) != frozenVirtualDayTime) {
-            timeManager.setVirtualDayTime(server.overworld(), frozenVirtualDayTime);
-        }
+        timeManager.initializeSimulationGameTime(timeManager.getIndependentDayTime());
 
         if (nextClockPaused) {
             if (!clockPaused || frozenVirtualDayTime == null) {
                 ServerLevel stardewLevel = server.getLevel(ModDimensions.STARDEW_VALLEY);
                 frozenVirtualDayTime = stardewLevel == null
-                    ? timeManager.getVirtualDayTime(server.overworld())
+                    ? timeManager.getVirtualDayTime()
                     : com.stardew.craft.festival.ActiveFestivalHandlers.applyTimeFreeze(stardewLevel, timeManager);
             }
         } else {

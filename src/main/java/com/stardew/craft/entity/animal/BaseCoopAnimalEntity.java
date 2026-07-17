@@ -473,6 +473,7 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 				playerInventory,
 				record.animalId(),
 				record.ageDays(),
+				record.daysOwned(),
 				record.daysToMature(),
 				record.wasPetToday(),
 				record.friendship(),
@@ -486,7 +487,6 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 			displayName
 		));
 
-		level().playSound(null, this.blockPosition(), ModSounds.SMALL_SELECT.get(), SoundSource.NEUTRAL, 0.8F, 1.0F);
 	}
 
 	private void playPetFeedback(ServerLevel level, FarmAnimalRecord record, boolean hadAutoPetToday) {

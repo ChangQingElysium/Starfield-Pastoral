@@ -128,7 +128,7 @@ public final class EggFestivalService {
     private static long eggHuntEndTick = -1L;
     private static long lastEggHuntHudTick = -1L;
     private static boolean awardPlayerWon;
-    private static String awardWinnerText = "";
+    private static Component awardWinnerText = Component.empty();
     private static final List<UUID> AWARD_WINNER_IDS = new ArrayList<>();
     private static boolean mainEventBlackoutPrepared;
     private static boolean awardBlackoutPrepared;
@@ -171,16 +171,14 @@ public final class EggFestivalService {
     }
 
     public static long applyTimeFreeze(ServerLevel level, StardewTimeManager timeManager) {
-        long currentVirtual = timeManager.getVirtualDayTime(level);
+        long currentVirtual = timeManager.getVirtualDayTime();
         if (frozenMinute == null || !hasOnlineParticipant(level)) {
             return currentVirtual;
         }
-        ServerLevel overworld = level.getServer().overworld();
         long dayBase = Math.floorDiv(currentVirtual, 24000L) * 24000L;
         long target = dayBase + com.stardew.craft.event.DimensionEventHandler.stardewMinutesToMcTime(frozenMinute);
-        long targetOffset = target - overworld.getDayTime();
-        if (timeManager.getDayTimeOffset() != targetOffset) {
-            timeManager.setDayTimeOffsetRaw(targetOffset);
+        if (currentVirtual != target) {
+            timeManager.setVirtualDayTime(target);
         }
         return target;
     }
@@ -583,10 +581,12 @@ public final class EggFestivalService {
                 grantWinnerPrizeTicket(winner);
             }
             awardWinnerText = winners.size() == 1
-                ? PlayerDisplayName.get(winners.get(0)) + "!"
-                : "The winners are " + winnerNames(winners) + "!";
+                ? Component.translatable("event.egg_festival.award.winner.player",
+                    Component.literal(PlayerDisplayName.get(winners.get(0))))
+                : Component.translatable("event.egg_festival.award.winner.players",
+                    Component.literal(winnerNames(winners)));
         } else {
-            awardWinnerText = "Abigail!";
+            awardWinnerText = Component.translatable("event.egg_festival.award.winner.abigail");
         }
     }
 
@@ -614,15 +614,15 @@ public final class EggFestivalService {
     }
 
     private static void sendCutsceneState(List<ServerPlayer> participants, int winnerMask) {
-        EggFestivalCutsceneStatePayload payload = new EggFestivalCutsceneStatePayload(
-            participants.size(),
-            awardPlayerWon,
-            winnerMask,
-            awardWinnerText,
-            participants.stream().map(ServerPlayer::getUUID).toList()
-        );
         for (ServerPlayer participant : participants) {
-            PacketDistributor.sendToPlayer(participant, payload);
+            String winnerJson = Component.Serializer.toJson(awardWinnerText, participant.registryAccess());
+            PacketDistributor.sendToPlayer(participant, new EggFestivalCutsceneStatePayload(
+                participants.size(),
+                awardPlayerWon,
+                winnerMask,
+                winnerJson,
+                participants.stream().map(ServerPlayer::getUUID).toList()
+            ));
         }
     }
 
@@ -997,7 +997,8 @@ public final class EggFestivalService {
         int seconds = eggHuntSecondsRemaining(level);
         for (ServerPlayer participant : onlineParticipants(level)) {
             int count = EGG_HUNT_COUNTS.getOrDefault(participant.getUUID(), 0);
-            participant.displayClientMessage(Component.translatable("message.stardewcraft.festival.egg.hud", seconds, count), true);
+            participant.displayClientMessage(Component.translatable(
+                    "message.stardewcraft.festival.egg.hud", seconds, count), true);
         }
     }
 
@@ -1049,7 +1050,7 @@ public final class EggFestivalService {
     private static String winnerNames(List<ServerPlayer> winners) {
         return winners.stream()
             .map(PlayerDisplayName::get)
-            .reduce((left, right) -> left + "、" + right)
+            .reduce((left, right) -> left + ", " + right)
             .orElse("<none>");
     }
 
@@ -1267,7 +1268,7 @@ public final class EggFestivalService {
         EGG_HUNT_COUNTS.clear();
         AWARD_WINNER_IDS.clear();
         awardPlayerWon = false;
-        awardWinnerText = "";
+        awardWinnerText = Component.empty();
         mainEventBlackoutPrepared = false;
         awardBlackoutPrepared = false;
         EggFestivalNpcService.setHuntStageActive(false);

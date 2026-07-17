@@ -88,7 +88,7 @@ public class PacketHandler {
         // 0.5 API stabilization changes equipment sync from registry IDs to complete ItemStacks,
         // adds server-authoritative client content snapshots, and synchronizes collective pause state.
         // Reject mixed old/new clients explicitly.
-        final PayloadRegistrar registrar = event.registrar("3");
+        final PayloadRegistrar registrar = event.registrar("4");
         
         // 客户端 -> 服务端
         registrar.playToServer(
@@ -1044,6 +1044,12 @@ public class PacketHandler {
             com.stardew.craft.network.payload.AnimalPurchaseSubmitPayload::handle
         );
 
+        registrar.playToClient(
+            com.stardew.craft.network.payload.AnimalPurchaseResultPayload.TYPE,
+            com.stardew.craft.network.payload.AnimalPurchaseResultPayload.STREAM_CODEC,
+            com.stardew.craft.network.payload.AnimalPurchaseResultPayload::handle
+        );
+
         registrar.playToServer(
             com.stardew.craft.network.payload.IncubatorClaimSubmitPayload.TYPE,
             com.stardew.craft.network.payload.IncubatorClaimSubmitPayload.STREAM_CODEC,
@@ -1564,9 +1570,9 @@ public class PacketHandler {
             com.stardew.craft.network.payload.FestivalHudStatePayload::handle
         );
         registrar.playToClient(
-            com.stardew.craft.network.payload.FairStarTokenHudStatePayload.TYPE,
-            com.stardew.craft.network.payload.FairStarTokenHudStatePayload.STREAM_CODEC,
-            com.stardew.craft.network.payload.FairStarTokenHudStatePayload::handle
+            com.stardew.craft.network.payload.FestivalCurrencyHudStatePayload.TYPE,
+            com.stardew.craft.network.payload.FestivalCurrencyHudStatePayload.STREAM_CODEC,
+            com.stardew.craft.network.payload.FestivalCurrencyHudStatePayload::handle
         );
         registrar.playToClient(
             com.stardew.craft.network.payload.OpenFairFishingResultPayload.TYPE,

@@ -1,5 +1,75 @@
 # Changelog
 
+## 0.5.1fix3 - 2026-07-17
+
+### Update Log (English)
+
+#### Animal Purchase And Management Interfaces
+
+- Rebuilt the animal purchase flow around the original Stardew Valley `PurchaseAnimalsMenu`: extracted standalone source textures, source-proportioned animal sprites, centered scroll labels, responsive 1.5x presentation, original-style hover information, sounds and transitions now replace the previous development UI.
+- Added a dedicated Stardew-style building list for selecting a coop or barn. Animal naming now uses a compact, readable prompt with random-name support, while purchase submission and failure results remain server-authoritative.
+- Reworked the animal information screen with correctly scaled text, hearts and controls. Moving an animal now opens the same building-list presentation instead of the old world-selection overlay, and all three screens fit consistently across GUI scales.
+
+#### Time, Cutscenes And Daily Settlement
+
+- Moved StardewCraft to its own persistent shared day-time clock, independent from Overworld sleeping, commands and daylight rules. Fractional time multipliers now accumulate precisely, and old saves migrate from their stored Stardew date and time.
+- Hardened pause rebasing around sleep, festivals and scripted time jumps. Cutscene skipping can close blocking cutscene dialogue correctly, scripted actors retain their animations, and moving NPCs stop, turn toward the player quickly, then open dialogue.
+- Daily settlement now loads only the farm chunks required by crops, trees, sprinklers, animals and buildings, releases only tickets created by StardewCraft, and isolates individual manager failures so one broken subsystem cannot cancel the rest of the new day.
+- Fixed farms failing to grow when their owner passes out away from the farm or when relevant chunks are unloaded. Pass-out results are tied to the correct settlement day, and collapsing near a bed on the player’s own farm no longer applies rescue fees or mail.
+
+#### World Data, Furniture And Interaction Safety
+
+- Replaced the prebuilt-region installer with a versioned, hashed manifest and staged atomic replacement. Public-map updates verify every bundled region, delete retired managed regions without touching player farm regions, preserve already-modified installed chunks during normal startup, and include a reproducible setup script.
+- Restored dedicated Stardew bed placement and lying behavior while allowing valid wall, bedside-table and chest adjacency. Cushion seating now uses a managed seat entity and matching renderer instead of relying on the previous block-only behavior.
+- Disabled the Wizard Tower exit while a farm is still being generated and ensured the completion warp is not blocked by a stale portal cooldown. Several portal bounds, ladder orientation and public interaction checks were tightened.
+
+#### Festivals, Shops And Recovery
+
+- Completed the Secret Note 23 bear-knowledge branch: finding the note starts the source quest, bringing Maple Syrup to the Secret Woods plays the dedicated bear event, unlocks the Bear's Knowledge power, and triples Salmonberry and Blackberry sell prices.
+- Unified Fair Star Tokens and Calico Eggs under the festival currency HUD state, with automatic visibility updates when entering or leaving the relevant festival area. Festival winner text is now synchronized as localized components for multiplayer clients.
+- Added a server-authoritative Lewis lost-and-found inventory. Uncollected Fair grange-display items return on the following day, notify the farm team and can be reclaimed safely through the existing shop interface.
+- Fixed Fair fishing sessions carrying into the minigame, protected festival scenery and non-display tables, improved shop transaction validation and pickup handling, and corrected several menu, quest, notification and festival layout issues.
+
+#### Compatibility And Verification
+
+- Updated all 12 shipped language files for the new animal, lost-and-found, festival and interaction text, and refreshed the affected extracted GUI and entity assets.
+- Added regression coverage for the independent clock, pause rebasing, pass-out settlement, temporary farm chunk leases, Community Center client state and the hashed prebuilt-region manifest.
+- Updated the public mod version to `0.5.1fix3`.
+
+### 更新日志（中文）
+
+#### 动物购买与管理界面
+
+- 依照星露谷原版 `PurchaseAnimalsMenu` 重做动物购买流程：使用从原版大图截出的独立贴图、原比例动物图标、严格居中的卷轴文字、响应式 1.5 倍显示，以及原版风格的悬浮信息、声音和过渡，替换此前的开发中界面。
+- 新增星露谷风格的鸡舍/畜棚列表选择界面。动物命名改为紧凑、清晰的输入提示并支持随机名称；购买提交与失败结果继续由服务端权威校验。
+- 重做右键动物的信息界面，统一文字、爱心和按钮比例。改变住所现在打开同一套建筑列表，而不是旧的世界选择覆盖层；三个界面在不同 GUI 缩放下保持一致布局。
+
+#### 时间、过场与每日结算
+
+- 为 StardewCraft 建立独立持久化的共享时间，不再受主世界睡眠、命令和昼夜规则影响；小数时间倍率会精确累计，旧存档会依据已有星露谷日期与时间自动迁移。
+- 加固睡眠、节日和脚本跳时期间的暂停重基准。跳过过场会正确关闭阻塞中的过场对话，脚本角色保持动画；移动中的 NPC 会先停止、快速转向玩家，再打开对话。
+- 每日结算只按需加载作物、树木、洒水器、动物和建筑所在的农场区块，并且只释放 StardewCraft 自己添加的票据；单个管理器异常不会再中断整个新一天的其余结算。
+- 修复玩家在农场外晕倒或相关区块未加载时，农场作物和动物不成长的问题。晕倒结果会绑定到正确的结算日；在自己农场的床附近晕倒不再收取救援费用或发送救援信件。
+
+#### 世界数据、家具与交互安全
+
+- 使用带版本、大小和 SHA-256 的清单重做预生成地图安装器，并通过临时目录进行校验后替换。公共地图更新会验证每个内置区域、删除退役的受管区域且不触碰玩家农场；正常启动不会覆盖已经游玩修改过的区块，同时加入可复现的预生成资源脚本。
+- 恢复专用星露谷床的放置与躺卧逻辑，并允许床与有效的墙、床头柜和箱子相邻。坐垫改用受管理的座位实体与专用渲染器，不再只依赖方块本身。
+- 农场生成期间禁止通过法师塔出口离开，生成完成后的传送也不会被旧传送门冷却拦截；同时收紧若干传送范围、梯子朝向和公共区域交互检查。
+
+#### 节日、商店与物品找回
+
+- 完成秘密纸条 23 的熊知识流程：发现纸条后会接受原版任务，携带枫糖浆进入秘密森林会播放专用熊事件、解锁“熊的知识”能力，并使美洲大树莓与黑莓售价变为三倍。
+- 将星露谷展览会星星币与沙漠节花蛋统一接入节日货币 HUD，并根据玩家是否进入对应节日区域自动显示或隐藏；多人节日获胜文本改为同步可本地化组件。
+- 新增服务端权威的刘易斯失物招领。展览会结束后未取回的展台物品会在次日返还、通知整个农场成员，并可通过现有商店界面安全领取。
+- 修复普通钓鱼会话残留到展览会小游戏、节日场景和非展台桌子可被误操作的问题；同时加固商店交易与拾取校验，并修正若干菜单、任务、通知和节日布局。
+
+#### 兼容性与验证
+
+- 为新增动物、失物招领、节日和交互文本更新当前发布的全部 12 种语言，并刷新相关独立 GUI 与角色资源。
+- 新增独立时钟、暂停重基准、晕倒结算、临时农场区块租约、社区中心客户端状态和带哈希预生成地图清单的回归测试。
+- 项目公开版本号更新为 `0.5.1fix3`。
+
 ## 0.5.1fix2 - 2026-07-17
 
 ### Update Log (English)

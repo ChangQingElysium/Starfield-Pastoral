@@ -127,16 +127,14 @@ public final class FlowerDanceService {
     }
 
     public static long applyTimeFreeze(ServerLevel level, StardewTimeManager timeManager) {
-        long currentVirtual = timeManager.getVirtualDayTime(level);
+        long currentVirtual = timeManager.getVirtualDayTime();
         if (frozenMinute == null || !hasCurrentSessionParticipant(level)) {
             return currentVirtual;
         }
-        ServerLevel overworld = level.getServer().overworld();
         long dayBase = Math.floorDiv(currentVirtual, 24000L) * 24000L;
         long target = dayBase + com.stardew.craft.event.DimensionEventHandler.stardewMinutesToMcTime(frozenMinute);
-        long targetOffset = target - overworld.getDayTime();
-        if (timeManager.getDayTimeOffset() != targetOffset) {
-            timeManager.setDayTimeOffsetRaw(targetOffset);
+        if (currentVirtual != target) {
+            timeManager.setVirtualDayTime(target);
         }
         return target;
     }

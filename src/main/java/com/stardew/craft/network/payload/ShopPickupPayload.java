@@ -1,29 +1,17 @@
 package com.stardew.craft.network.payload;
 
 import com.stardew.craft.StardewCraft;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
- * Client → Server: player has closed the shop screen (or placed heldItem into a slot).
- * The server now actually grants the pending cursor item to the player's inventory.
- *
- * This is the second half of the two-phase purchase flow:
- *   1. ShopPurchasePayload   → server deducts money/trade items, sends result
- *   2. ShopPickupPayload     → server grants the item to inventory
- *
- * Security note: the server trusts itemId/quantity as-is only if the amount ≤ what
- * was already charged. This payload carries the full list of pending items so that
- * multiple purchases stacked on the cursor are resolved in one round-trip.
+ * Legacy client payload retained for protocol compatibility. Purchases are now
+ * granted atomically by {@link ShopPurchasePayload}; accepting an item ID from a
+ * follow-up client packet would allow unverified item creation.
  */
 @SuppressWarnings("null")
 public record ShopPickupPayload(
@@ -49,58 +37,6 @@ public record ShopPickupPayload(
     }
 
     public static void handle(ShopPickupPayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> {
-            if (!(context.player() instanceof ServerPlayer player)) return;
-            if (payload.itemId() == null || payload.itemId().isEmpty()) return;
-            // Recipe purchases are handled at purchase time, no pickup needed.
-            if (payload.itemId().startsWith("recipe:")) return;
-            // Decoration style unlocks are handled at purchase time, no item to deliver.
-            if (payload.itemId().startsWith("wallpaper:") || payload.itemId().startsWith("flooring:")) return;
-            int qty = payload.quantity();
-            if (qty <= 0) return;
-
-            ResourceLocation rl;
-            try { rl = ResourceLocation.parse(payload.itemId()); }
-            catch (Exception ignored) { return; }
-
-            Item mcItem = BuiltInRegistries.ITEM.get(rl);
-            if (mcItem == null || mcItem == Items.AIR) return;
-
-            int targetSlot = payload.targetSlot();
-            int maxStackSize = Math.max(1, mcItem.getDefaultMaxStackSize());
-            boolean firstStack = true;
-            while (qty > 0) {
-                int stackSize = Math.min(qty, maxStackSize);
-                ItemStack stack = new ItemStack(mcItem, stackSize);
-
-                if (firstStack && targetSlot >= 0 && targetSlot < player.getInventory().getContainerSize()) {
-                    ItemStack existing = player.getInventory().getItem(targetSlot);
-                    if (existing.isEmpty()) {
-                        // Slot is empty — place directly
-                        player.getInventory().setItem(targetSlot, stack);
-                    } else if (ItemStack.isSameItemSameComponents(existing, stack)
-                            && existing.getCount() < existing.getMaxStackSize()) {
-                        // Same item with room to merge
-                        int canAdd = existing.getMaxStackSize() - existing.getCount();
-                        int toAdd  = Math.min(canAdd, stack.getCount());
-                        existing.grow(toAdd);
-                        if (toAdd < stack.getCount()) {
-                            // Leftover: auto-place remainder
-                            ItemStack leftover = stack.copyWithCount(stack.getCount() - toAdd);
-                            if (!player.getInventory().add(leftover)) player.drop(leftover, false);
-                        }
-                    } else {
-                        // Slot occupied by different item — fall back to auto-place
-                        if (!player.getInventory().add(stack)) player.drop(stack, false);
-                    }
-                } else {
-                    // targetSlot == -1 or subsequent stacks: auto-place in first available slot
-                    if (!player.getInventory().add(stack)) player.drop(stack, false);
-                }
-
-                qty -= stackSize;
-                firstStack = false;
-            }
-        });
+        // Intentionally ignored. The server has already delivered validated purchases.
     }
 }

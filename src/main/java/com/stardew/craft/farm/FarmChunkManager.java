@@ -27,8 +27,20 @@ public class FarmChunkManager {
     /** 每个农场当前在场玩家数（供其他系统查询） */
     private final Map<Integer, Integer> playerCounts = new HashMap<>();
 
-    /** 临时 forceLoad 的区块（仅用于 catch-up，完成后应调用 releaseTempChunks 释放） */
-    private final Map<Integer, Set<ChunkPos>> tempLoadedChunks = new HashMap<>();
+    /**
+     * 临时农场区块租约。引用计数允许登录追赶与每日结算复用同一套加载逻辑，
+     * newlyForcedChunks 只记录本管理器新增的强加载，释放时不会破坏外部票据。
+     */
+    private final Map<Integer, TemporaryFarmLoad> temporaryFarmLoads = new HashMap<>();
+
+    private static final class TemporaryFarmLoad {
+        private final Set<ChunkPos> newlyForcedChunks;
+        private int references = 1;
+
+        private TemporaryFarmLoad(Set<ChunkPos> newlyForcedChunks) {
+            this.newlyForcedChunks = newlyForcedChunks;
+        }
+    }
 
     private FarmChunkManager() {}
 
@@ -74,47 +86,82 @@ public class FarmChunkManager {
     //  临时 forceLoad（仅用于离线追赶等一次性操作）
     // ══════════════════════════════════════════
 
-    /**
-     * 离线追赶用：临时强制加载农场区块。
-     * 调用方完成追赶后应调用 {@link #releaseTempChunks(ServerLevel, int)} 释放。
-     */
-    public void forceLoadFarmChunksForCatchUp(ServerLevel level, int slotIndex) {
+    /** 获取一份临时农场区块租约，供离线追赶和每日结算使用。 */
+    public void acquireTemporaryFarmChunks(ServerLevel level, int slotIndex) {
+        TemporaryFarmLoad existing = temporaryFarmLoads.get(slotIndex);
+        if (existing != null) {
+            existing.references++;
+            return;
+        }
+
         UUID owner = FarmInstanceRegistry.get().getOwnerBySlot(slotIndex);
         if (owner == null) return;
         FarmInstance farm = FarmInstanceRegistry.get().getFarm(owner);
         if (farm == null) return;
 
-        BlockPos min = farm.getFarmBoundsMin();
-        BlockPos max = farm.getFarmBoundsMax();
-        int minCX = min.getX() >> 4;
-        int maxCX = max.getX() >> 4;
-        int minCZ = min.getZ() >> 4;
-        int maxCZ = max.getZ() >> 4;
+        Set<ChunkPos> farmChunks = chunkPositionsForBounds(farm.getFarmBoundsMin(), farm.getFarmBoundsMax());
+        Set<ChunkPos> newlyForced = new HashSet<>();
+        TemporaryFarmLoad load = new TemporaryFarmLoad(newlyForced);
+        temporaryFarmLoads.put(slotIndex, load);
 
+        try {
+            for (ChunkPos chunk : farmChunks) {
+                long chunkKey = chunk.toLong();
+                if (!level.getForcedChunks().contains(chunkKey)) {
+                    level.setChunkForced(chunk.x, chunk.z, true);
+                    newlyForced.add(chunk);
+                }
+                // 强加载只添加票据；日结算在当前 tick 就要读方块，因此同步取到区块。
+                level.getChunk(chunk.x, chunk.z);
+            }
+        } catch (RuntimeException exception) {
+            temporaryFarmLoads.remove(slotIndex, load);
+            for (ChunkPos chunk : newlyForced) {
+                level.setChunkForced(chunk.x, chunk.z, false);
+            }
+            throw exception;
+        }
+
+        StardewCraft.LOGGER.debug("[FARM_CHUNK] Temporarily loaded {} farm chunks ({} newly forced, slot {})",
+                farmChunks.size(), newlyForced.size(), slotIndex);
+    }
+
+    /** 释放一份临时农场区块租约。 */
+    public void releaseTemporaryFarmChunks(ServerLevel level, int slotIndex) {
+        TemporaryFarmLoad load = temporaryFarmLoads.get(slotIndex);
+        if (load == null || --load.references > 0) return;
+
+        temporaryFarmLoads.remove(slotIndex, load);
+
+        for (ChunkPos cp : load.newlyForcedChunks) {
+            level.setChunkForced(cp.x, cp.z, false);
+        }
+        StardewCraft.LOGGER.debug("[FARM_CHUNK] Released {} temporary farm chunk tickets for slot {}",
+                load.newlyForcedChunks.size(), slotIndex);
+    }
+
+    /** 兼容旧调用方。 */
+    public void forceLoadFarmChunksForCatchUp(ServerLevel level, int slotIndex) {
+        acquireTemporaryFarmChunks(level, slotIndex);
+    }
+
+    /** 兼容旧调用方。 */
+    public void releaseTempChunks(ServerLevel level, int slotIndex) {
+        releaseTemporaryFarmChunks(level, slotIndex);
+    }
+
+    static Set<ChunkPos> chunkPositionsForBounds(BlockPos min, BlockPos max) {
+        int minCX = Math.min(min.getX(), max.getX()) >> 4;
+        int maxCX = Math.max(min.getX(), max.getX()) >> 4;
+        int minCZ = Math.min(min.getZ(), max.getZ()) >> 4;
+        int maxCZ = Math.max(min.getZ(), max.getZ()) >> 4;
         Set<ChunkPos> chunks = new HashSet<>();
         for (int cx = minCX; cx <= maxCX; cx++) {
             for (int cz = minCZ; cz <= maxCZ; cz++) {
-                level.setChunkForced(cx, cz, true);
                 chunks.add(new ChunkPos(cx, cz));
             }
         }
-        tempLoadedChunks.put(slotIndex, chunks);
-
-        StardewCraft.LOGGER.info("[FARM_CHUNK] Temp force-loaded {} chunks for catch-up (slot {})",
-                chunks.size(), slotIndex);
-    }
-
-    /**
-     * 释放临时 forceLoad 的区块。
-     */
-    public void releaseTempChunks(ServerLevel level, int slotIndex) {
-        Set<ChunkPos> chunks = tempLoadedChunks.remove(slotIndex);
-        if (chunks == null) return;
-
-        for (ChunkPos cp : chunks) {
-            level.setChunkForced(cp.x, cp.z, false);
-        }
-        StardewCraft.LOGGER.info("[FARM_CHUNK] Released {} temp chunks for slot {}", chunks.size(), slotIndex);
+        return chunks;
     }
 
     // ══════════════════════════════════════════
@@ -151,12 +198,12 @@ public class FarmChunkManager {
      * 服务器关闭时释放所有临时 forceLoad。
      */
     public void onServerStopping(ServerLevel level) {
-        for (Map.Entry<Integer, Set<ChunkPos>> entry : tempLoadedChunks.entrySet()) {
-            for (ChunkPos cp : entry.getValue()) {
+        for (TemporaryFarmLoad load : temporaryFarmLoads.values()) {
+            for (ChunkPos cp : load.newlyForcedChunks) {
                 level.setChunkForced(cp.x, cp.z, false);
             }
         }
-        tempLoadedChunks.clear();
+        temporaryFarmLoads.clear();
         playerCounts.clear();
         StardewCraft.LOGGER.info("[FARM_CHUNK] Cleanup on server stop");
     }

@@ -18,8 +18,7 @@ public final class StardewHudLayoutEditorScreen extends Screen {
     private static final Config.HudElement[] EDITABLE_ELEMENTS = {
             Config.HudElement.MAIN,
             Config.HudElement.PLAYER_BARS,
-            Config.HudElement.ITEM_PICKUP,
-            Config.HudElement.TEXT_MESSAGE,
+            Config.HudElement.NOTIFICATIONS,
             Config.HudElement.WEAPON_SKILLS,
             Config.HudElement.SKILL_XP
     };
@@ -55,12 +54,6 @@ public final class StardewHudLayoutEditorScreen extends Screen {
         for (Config.HudElement element : EDITABLE_ELEMENTS) {
             int baseWidth = element.baseWidth();
             int baseHeight = element.baseHeight();
-            if (element == Config.HudElement.TEXT_MESSAGE) {
-                StardewHudMessageManager.CornerBoxSize size =
-                        StardewHudMessageManager.textMessagePreviewSize(font);
-                baseWidth = size.width();
-                baseHeight = size.height();
-            }
             StardewHudLayout.Placement placement = StardewHudLayout.current(
                     element, width, height, baseWidth, baseHeight);
             boxes.put(element, new HudBox(placement.x(), placement.y(), placement.width(), placement.height(),
@@ -275,9 +268,7 @@ public final class StardewHudLayoutEditorScreen extends Screen {
         switch (element) {
             case MAIN -> StardewTimeHud.renderPreview(graphics, box.x, box.y, box.scale);
             case PLAYER_BARS -> StardewPlayerHud.renderPreview(graphics, box.x, box.y, box.scale);
-            case ITEM_PICKUP -> StardewHudMessageManager.renderItemPickupPreview(
-                    graphics, font, box.x, box.y, box.scale);
-            case TEXT_MESSAGE -> StardewHudMessageManager.renderTextMessagePreview(
+            case NOTIFICATIONS -> StardewHudMessageManager.renderNotificationPreview(
                     graphics, font, box.x, box.y, box.scale);
             case WEAPON_SKILLS -> ModClientEvents.renderWeaponSkillPreview(
                     graphics, box.x, box.y, box.scale);

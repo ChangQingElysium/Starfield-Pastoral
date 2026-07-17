@@ -757,7 +757,7 @@ public class ModItems {
                         () -> new StardewBlockItem(ModBlocks.LIGHT_7.get(), "stardewcraft.type.furniture", -1, new Item.Properties().stacksTo(999)));
 
         public static final DeferredItem<Item> CUSHION = ITEMS.register("cushion",
-                        () -> new StardewBlockItem(ModBlocks.CUSHION.get(), "stardewcraft.type.furniture", -1, new Item.Properties().stacksTo(999)));
+                        () -> new CushionItem(ModBlocks.CUSHION.get(), "stardewcraft.type.furniture", -1, new Item.Properties().stacksTo(999)));
 
         public static final DeferredItem<Item> OFFICE_STOOL = ITEMS.register("office_stool",
                         () -> new StardewBlockItem(ModBlocks.OFFICE_STOOL.get(), "stardewcraft.type.furniture", -1, new Item.Properties().stacksTo(999)));

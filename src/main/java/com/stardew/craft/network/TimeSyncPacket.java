@@ -20,6 +20,7 @@ public record TimeSyncPacket(
     int currentSeason,
     int currentYear,
     long virtualDayTime,
+    double clockSpeed,
     boolean timeFrozen,
     boolean simulationPaused
 ) implements CustomPacketPayload {
@@ -37,6 +38,7 @@ public record TimeSyncPacket(
             ByteBufCodecs.INT.encode(buffer, packet.currentSeason());
             ByteBufCodecs.INT.encode(buffer, packet.currentYear());
             ByteBufCodecs.VAR_LONG.encode(buffer, packet.virtualDayTime());
+            ByteBufCodecs.DOUBLE.encode(buffer, packet.clockSpeed());
             ByteBufCodecs.BOOL.encode(buffer, packet.timeFrozen());
             ByteBufCodecs.BOOL.encode(buffer, packet.simulationPaused());
         },
@@ -46,6 +48,7 @@ public record TimeSyncPacket(
             ByteBufCodecs.INT.decode(buffer),
             ByteBufCodecs.INT.decode(buffer),
             ByteBufCodecs.VAR_LONG.decode(buffer),
+            ByteBufCodecs.DOUBLE.decode(buffer),
             ByteBufCodecs.BOOL.decode(buffer),
             ByteBufCodecs.BOOL.decode(buffer)
         )
@@ -60,17 +63,15 @@ public record TimeSyncPacket(
      * 从时间管理器创建数据包
      */
     public static TimeSyncPacket fromTimeManager(StardewTimeManager timeManager) {
-        long vdt = 0;
+        long vdt = timeManager.getVirtualDayTime();
         var server = net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer();
-        if (server != null) {
-            vdt = timeManager.getVirtualDayTime(server.overworld());
-        }
         return new TimeSyncPacket(
             timeManager.getCurrentTime(),
             timeManager.getCurrentDay(),
             timeManager.getCurrentSeason(),
             timeManager.getCurrentYear(),
             vdt,
+            com.stardew.craft.Config.TIME_SPEED_MULTIPLIER.get(),
             com.stardew.craft.festival.ActiveFestivalHandlers.isAnyTimeFreezeActive()
                 || (server != null && com.stardew.craft.time.StardewTimePauseService.isClockPaused(server)),
             server != null && com.stardew.craft.time.StardewTimePauseService.isPaused(server)
@@ -94,7 +95,7 @@ public record TimeSyncPacket(
             
             // 更新客户端天空时间（每 tick 会强制覆盖 ClientLevel.dayTime）
             com.stardew.craft.client.StardewClientTimeState.onServerTimeSync(
-                packet.virtualDayTime(), packet.timeFrozen());
+                packet.virtualDayTime(), packet.clockSpeed(), packet.timeFrozen());
         });
     }
 }

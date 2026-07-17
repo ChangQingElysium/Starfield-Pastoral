@@ -3,8 +3,11 @@ package com.stardew.craft.festival.desert;
 import com.stardew.craft.festival.FestivalService;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.blockentity.PortalTriggerBlockEntity;
+import com.stardew.craft.core.ModDimensions;
+import com.stardew.craft.desert.DesertConstants;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.network.ItemPickupHudPacket;
+import com.stardew.craft.network.payload.FestivalCurrencyHudStatePayload;
 import com.stardew.craft.network.payload.OpenShopScreenPayload;
 import com.stardew.craft.npc.data.NpcDataRegistry;
 import com.stardew.craft.npc.runtime.NpcScheduleRuntimeService;
@@ -24,6 +27,9 @@ import net.minecraft.world.inventory.Slot;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 public final class DesertFestivalService {
     public static final String FESTIVAL_ID = "DesertFestival";
@@ -31,6 +37,7 @@ public final class DesertFestivalService {
     public static final String EGG_SHOP_TARGET_ID = "desert_festival_egg_shop";
     public static final String EGG_SHOP_MARKER_TAG = "sdv_festival_marker:desert_egg_shop";
     public static final BlockPos EGG_SHOP_INTERACTION_POS = new BlockPos(-198, 65, -200);
+    private static final Set<UUID> CURRENCY_HUD_PLAYERS = new HashSet<>();
 
     private DesertFestivalService() {
     }
@@ -41,6 +48,42 @@ public final class DesertFestivalService {
 
     public static boolean isFestivalOpen() {
         return FestivalService.isPassiveFestivalOpen(FESTIVAL_ID);
+    }
+
+    public static void syncCurrencyHud(MinecraftServer server) {
+        if (server == null) {
+            return;
+        }
+        Set<UUID> online = new HashSet<>();
+        boolean festivalOpen = isFestivalOpen();
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+            online.add(player.getUUID());
+            boolean shouldShow = festivalOpen
+                && player.level().dimension() == ModDimensions.STARDEW_VALLEY
+                && DesertConstants.isInDesertRegion(player.blockPosition());
+            boolean showing = CURRENCY_HUD_PLAYERS.contains(player.getUUID());
+            if (shouldShow == showing) {
+                continue;
+            }
+            if (shouldShow) {
+                CURRENCY_HUD_PLAYERS.add(player.getUUID());
+            } else {
+                CURRENCY_HUD_PLAYERS.remove(player.getUUID());
+            }
+            PacketDistributor.sendToPlayer(player, new FestivalCurrencyHudStatePayload(
+                shouldShow ? FestivalCurrencyHudStatePayload.CALICO_EGG : FestivalCurrencyHudStatePayload.NONE));
+        }
+        CURRENCY_HUD_PLAYERS.retainAll(online);
+    }
+
+    public static void clearCurrencyHud(MinecraftServer server) {
+        if (server != null) {
+            for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+                PacketDistributor.sendToPlayer(player,
+                    new FestivalCurrencyHudStatePayload(FestivalCurrencyHudStatePayload.NONE));
+            }
+        }
+        CURRENCY_HUD_PLAYERS.clear();
     }
 
     public static int countEggs(ServerPlayer player) {

@@ -4,7 +4,6 @@ import com.stardew.craft.Config;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.ClientPlayerDataCache;
 import com.stardew.craft.core.ModDimensions;
-import com.stardew.craft.desert.DesertConstants;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.time.StardewTimeManager;
 import net.minecraft.Util;
@@ -50,9 +49,6 @@ public class StardewTimeHud {
     private static final ResourceLocation WEATHER_WINDY_SPRING = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/windy_spring.png");
     @SuppressWarnings("null")
     private static final ResourceLocation WEATHER_WINDY_FALL = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/windy_fall.png");
-    @SuppressWarnings("null")
-    private static final ResourceLocation CALICO_CURRENCY_BG_HOTBAR = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/desert_festival/calico_currency_bg_hotbar.png");
-    @SuppressWarnings("null")
     private static final ResourceLocation VANILLA_CURSORS = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/cursors.png");
     @SuppressWarnings("null")
     private static final ResourceLocation CALICO_RATING_ICON = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/desert_festival/calico_rating_icon.png");
@@ -64,8 +60,6 @@ public class StardewTimeHud {
     private static final int POINTER_HEIGHT = 19;
     private static final int ICON_WIDTH = 12;
     private static final int ICON_HEIGHT = 8;
-    private static final int CALICO_CURRENCY_WIDTH = 57;
-    private static final int CALICO_CURRENCY_HEIGHT = 26;
     private static final int CALICO_RATING_ICON_WIDTH = 19;
     private static final int CALICO_RATING_ICON_HEIGHT = 21;
     
@@ -82,7 +76,6 @@ public class StardewTimeHud {
     private static StardewTimeManager clientTimeCache = new StardewTimeManager();
     private static volatile boolean timeSyncedFromServer = false;
     private static MoneyDial moneyDial = new MoneyDial(8, true);
-    private static final MoneyDial calicoEggDial = new MoneyDial(4, false);
     private static int moneyShakeTimer = 0;
     private static int desertFestivalMineRating = 0;
     private static int desertFestivalMineRatingShakeTimer = 0;
@@ -109,6 +102,9 @@ public class StardewTimeHud {
 
     public static void resetTimeSync() {
         timeSyncedFromServer = false;
+        fairFishingHudActive = false;
+        iceFishingHudActive = false;
+        FestivalCurrencyHudState.reset();
     }
     
     public static void updateClientMoney(int money) {
@@ -199,7 +195,8 @@ public class StardewTimeHud {
             return;
         }
 
-        if (com.stardew.craft.client.hud.FestivalHudState.hidden()) {
+        if (com.stardew.craft.client.hud.FestivalHudState.hidden()
+                && !FestivalCurrencyHudState.active()) {
             renderFairFishingHud(event.getGuiGraphics());
             renderIceFishingHud(event.getGuiGraphics());
             return;
@@ -217,8 +214,7 @@ public class StardewTimeHud {
         int screenHeight = mc.getWindow().getGuiScaledHeight();
         StardewHudLayout.Placement placement = StardewHudLayout.current(screenWidth, screenHeight);
         renderMainHudAt(graphics, placement.x(), placement.y(), placement.scale());
-        renderCalicoEggCurrency(graphics);
-        renderFairStarTokenCurrency(graphics);
+        renderFestivalCurrency(graphics, placement);
         renderDesertFestivalMineRating(graphics);
     }
 
@@ -308,8 +304,6 @@ public class StardewTimeHud {
      * 渲染文字信息：日期、时间、金钱
      */
     private static void renderText(GuiGraphics graphics, int hudX, int hudY, Font font) {
-        Minecraft.getInstance();
-        
         // 获取时间数据
         int currentTime = clientTimeCache.getCurrentTime();
         int currentDay = clientTimeCache.getCurrentDay();
@@ -325,7 +319,7 @@ public class StardewTimeHud {
         int dateAreaWidth = (int)(38 / 0.7f);  // 区域宽度 65-27=38
         int dateCenterX = dateAreaLeft + (dateAreaWidth - dateWidth) / 2;
         int dateY = (int)((hudY + 8) / 0.7f);  // 区域高度8像素，从5到12，中心约8
-        graphics.drawString(font, dateStr, dateCenterX, dateY, 0x000000, false);
+        graphics.drawString(font, dateStr, dateCenterX, dateY, 0xFF000000, false);
         graphics.pose().popPose();
         
         // 2. 时间显示 "XX:XX" (27,28 到 65,34) 居中，整10分钟显示
@@ -448,61 +442,39 @@ public class StardewTimeHud {
         graphics.pose().popPose();
     }
 
-    private static void renderCalicoEggCurrency(GuiGraphics graphics) {
+    private static void renderFestivalCurrency(GuiGraphics graphics, StardewHudLayout.Placement placement) {
         Minecraft mc = Minecraft.getInstance();
         var player = mc.player;
-        if (player == null || mc.level == null || mc.level.dimension() != ModDimensions.STARDEW_VALLEY) {
+        if (player == null || mc.level == null || mc.level.dimension() != ModDimensions.STARDEW_VALLEY
+                || !FestivalCurrencyHudState.active()) {
             return;
         }
-        boolean inDesert = DesertConstants.isInDesertRegion(player.blockPosition());
-        boolean desertFestivalDay = clientTimeCache.getCurrentSeason() == 0
-                && clientTimeCache.getCurrentDay() >= 15
-            && clientTimeCache.getCurrentDay() <= 17;
-        int count = player.getInventory().countItem(ModItems.CALICO_EGG.get());
-        if (!inDesert || (!desertFestivalDay && count <= 0)) {
-            return;
-        }
-
-        StardewHudLayout.Placement placement = StardewHudLayout.current(
-                Config.HudElement.FESTIVAL_CURRENCY, graphics.guiWidth(), graphics.guiHeight());
-        int boxX = 23;
-        int boxY = 3;
-        graphics.pose().pushPose();
-        graphics.pose().translate(placement.x(), placement.y(), 0.0F);
-        graphics.pose().scale(placement.scale(), placement.scale(), 1.0F);
-        graphics.blit(CALICO_CURRENCY_BG_HOTBAR, boxX, boxY, 0, 0,
-                CALICO_CURRENCY_WIDTH, CALICO_CURRENCY_HEIGHT,
-                CALICO_CURRENCY_WIDTH, CALICO_CURRENCY_HEIGHT);
-        calicoEggDial.draw(graphics, boxX + 7, boxY + 9, count);
-        graphics.pose().popPose();
-    }
-
-    private static void renderFairStarTokenCurrency(GuiGraphics graphics) {
-        Minecraft mc = Minecraft.getInstance();
-        var player = mc.player;
-        if (player == null || mc.level == null || mc.level.dimension() != ModDimensions.STARDEW_VALLEY) {
-            return;
-        }
-        int count = ClientPlayerDataCache.getFairStarTokens();
-        if (!ClientPlayerDataCache.isFairStarTokenHudActive()) {
-            return;
-        }
-
+        byte type = FestivalCurrencyHudState.currencyType();
+        int count = type == FestivalCurrencyHudState.CALICO_EGG
+            ? player.getInventory().countItem(ModItems.CALICO_EGG.get())
+            : ClientPlayerDataCache.getFairStarTokens();
         String text = String.valueOf(count);
-        int boxWidth = Math.max(64, 52 + mc.font.width(text) + 8);
-        int boxHeight = 32;
-        StardewHudLayout.Placement placement = StardewHudLayout.current(
-                Config.HudElement.FESTIVAL_CURRENCY, graphics.guiWidth(), graphics.guiHeight());
-        int boxX = 23;
-        int boxY = 0;
+        int boxWidth = Math.max(42, 24 + mc.font.width(text));
+        int boxHeight = 16;
+        int questButtonX = BG_WIDTH - 11;
+        int boxX = questButtonX - 3 - boxWidth;
+        int boxY = BG_HEIGHT + 2;
         graphics.pose().pushPose();
         graphics.pose().translate(placement.x(), placement.y(), 0.0F);
         graphics.pose().scale(placement.scale(), placement.scale(), 1.0F);
         graphics.fill(boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xBF000000);
-        graphics.blit(VANILLA_CURSORS, boxX + 8, boxY + 8, 16, 16,
-                338, 400, 8, 8,
-                704, 2256);
-        drawBorderedText(graphics, mc.font, text, boxX + 36, boxY + 12, 0xFFFFFFFF, 0xFF000000);
+        if (type == FestivalCurrencyHudState.FAIR_STAR_TOKEN) {
+            graphics.blit(VANILLA_CURSORS, boxX + 5, boxY + 4, 8, 8,
+                    338, 400, 8, 8,
+                    704, 2256);
+        } else {
+            graphics.pose().pushPose();
+            graphics.pose().translate(boxX + 3, boxY + 2, 0.0F);
+            graphics.pose().scale(0.75F, 0.75F, 1.0F);
+            graphics.renderItem(new net.minecraft.world.item.ItemStack(ModItems.CALICO_EGG.get()), 0, 0);
+            graphics.pose().popPose();
+        }
+        drawBorderedText(graphics, mc.font, text, boxX + 18, boxY + 4, 0xFFFFFFFF, 0xB0000000);
         graphics.pose().popPose();
     }
 
@@ -576,7 +548,7 @@ public class StardewTimeHud {
             "stardewcraft.hud.saturday",
             "stardewcraft.hud.sunday"
         };
-        int index = (day - 1) % 7;
+        int index = Math.floorMod(day - 1, 7);
         return net.minecraft.client.resources.language.I18n.get(weekdayKeys[index]);
     }
 }

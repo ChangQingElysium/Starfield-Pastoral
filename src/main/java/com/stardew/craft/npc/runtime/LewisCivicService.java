@@ -2,6 +2,7 @@ package com.stardew.craft.npc.runtime;
 
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.auction.AuctionService;
+import com.stardew.craft.lostandfound.LostAndFoundService;
 import com.stardew.craft.network.payload.OpenLewisConfirmPayload;
 import com.stardew.craft.network.payload.OpenLewisMenuPayload;
 import com.stardew.craft.player.PlayerStardewDataAPI;
@@ -34,6 +35,7 @@ public final class LewisCivicService {
             case 2 -> AuctionService.openJoinList(player);
             case 3 -> AuctionService.requestCancelAuction(player);
             case 4 -> FarmCancellationService.requestCancellation(player);
+            case 5 -> LostAndFoundService.open(player);
             default -> {
             }
         }

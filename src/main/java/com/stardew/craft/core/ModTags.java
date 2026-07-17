@@ -24,6 +24,7 @@ public final class ModTags {
 		public static final TagKey<Block> STARDEW_MINERALS = tag("stardew_minerals");
 		public static final TagKey<Block> IRIDIUM_ORES = tag("iridium_ores");
 		public static final TagKey<Block> QUARRY_RESOURCES = tag("quarry_resources");
+		public static final TagKey<Block> CUSHION_USES_COLLISION_SHAPE = tag("cushion_uses_collision_shape");
 
 		public static final TagKey<Block> REQUIRES_STARDEW_PICKAXE_TIER1 = tag("requires_stardew_pickaxe_tier1");
 		public static final TagKey<Block> REQUIRES_STARDEW_PICKAXE_TIER2 = tag("requires_stardew_pickaxe_tier2");

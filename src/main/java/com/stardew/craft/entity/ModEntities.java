@@ -33,6 +33,7 @@ import com.stardew.craft.cutscene.runtime.EventActorEntity;
 import com.stardew.craft.cutscene.runtime.EventPlayerActorEntity;
 import com.stardew.craft.entity.junimo.JunimoEntity;
 import com.stardew.craft.entity.seat.SofaSeatEntity;
+import com.stardew.craft.entity.seat.CushionEntity;
 import com.stardew.craft.entity.decor.CarpetEntity;
 import com.stardew.craft.entity.minecart.MinecartStationEntity;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
@@ -320,6 +321,17 @@ public final class ModEntities {
 					.clientTrackingRange(8)
 					.updateInterval(1)
 					.build("sofa_seat")
+	);
+
+	public static final DeferredHolder<EntityType<?>, EntityType<CushionEntity>> CUSHION = ENTITY_TYPES.register(
+			"cushion",
+			() -> EntityType.Builder.<CushionEntity>of(CushionEntity::new, MobCategory.MISC)
+					.sized(1.0F, 0.25F)
+					.passengerAttachments(0.25F)
+					.clientTrackingRange(10)
+					.updateInterval(Integer.MAX_VALUE)
+					.setShouldReceiveVelocityUpdates(false)
+					.build("cushion")
 	);
 
 	public static final DeferredHolder<EntityType<?>, EntityType<CarpetEntity>> CARPET = ENTITY_TYPES.register(

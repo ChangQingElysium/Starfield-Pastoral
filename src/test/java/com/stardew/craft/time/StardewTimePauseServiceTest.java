@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class StardewTimePauseServiceTest {
@@ -35,6 +36,13 @@ class StardewTimePauseServiceTest {
         assertTrue(StardewTimePauseService.countsAsClockNonGameplay(false, true));
         assertFalse(StardewTimePauseService.countsAsSimulationNonGameplay(false, false));
         assertFalse(StardewTimePauseService.countsAsClockNonGameplay(false, false));
+    }
+
+    @Test
+    void authoritativeTimeJumpRebasesAnActiveClockPause() {
+        assertEquals(24000L, StardewTimePauseService.rebaseFrozenVirtualDayTime(true, 13500L, 24000L));
+        assertEquals(13500L, StardewTimePauseService.rebaseFrozenVirtualDayTime(false, 13500L, 24000L));
+        assertNull(StardewTimePauseService.rebaseFrozenVirtualDayTime(true, null, 24000L));
     }
 
     @Test

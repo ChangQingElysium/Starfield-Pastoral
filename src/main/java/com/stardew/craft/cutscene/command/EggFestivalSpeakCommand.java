@@ -61,11 +61,7 @@ public class EggFestivalSpeakCommand implements EventCommand {
     }
 
     private static String resolveDisplayText(String input, String playerName) {
-        String displayText = isTranslationKey(input) ? OpenNpcDialogueScreenPayload.rawTranslation(input) : input;
+        String displayText = OpenNpcDialogueScreenPayload.resolveClientTextSource(input);
         return OpenNpcDialogueScreenPayload.resolvePlayerDialogueText(displayText, playerName);
-    }
-
-    private static boolean isTranslationKey(String value) {
-        return value.startsWith("event.") || value.startsWith("stardewcraft.") || value.startsWith("message.");
     }
 }

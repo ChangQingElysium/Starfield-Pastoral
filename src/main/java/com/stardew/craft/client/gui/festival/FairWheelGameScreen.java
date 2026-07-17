@@ -7,6 +7,7 @@ import com.stardew.craft.network.payload.FairWheelGameResultPayload;
 import com.stardew.craft.sound.ModSounds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
@@ -77,6 +78,7 @@ public class FairWheelGameScreen extends Screen implements com.stardew.craft.cli
     private int noTokenW;
     private int noTokenH;
     private Rect noTokenOkButton = Rect.ZERO;
+    private EditBox wagerInput;
 
     public FairWheelGameScreen(int starTokens, int luckLevel) {
         super(Component.translatable("stardewcraft.fair.wheel.title"));
@@ -90,6 +92,21 @@ public class FairWheelGameScreen extends Screen implements com.stardew.craft.cli
         guiScale = (float) Minecraft.getInstance().getWindow().getGuiScale();
         s4 = 4.0F / guiScale;
         computeLayout();
+        wagerInput = new EditBox(font,
+            numberBox.x() + ui(16),
+            numberBox.y() + (numberBox.height() - font.lineHeight) / 2,
+            Math.max(12, numberBox.width() - ui(32)),
+            font.lineHeight,
+            Component.translatable("stardewcraft.fair.wheel.wager"));
+        wagerInput.setBordered(false);
+        wagerInput.setTextShadow(false);
+        wagerInput.setTextColor(0xFF3F2A13);
+        wagerInput.setTextColorUneditable(0xFF3F2A13);
+        wagerInput.setMaxLength(Math.max(1, String.valueOf(Math.max(1, starTokens)).length()));
+        wagerInput.setFilter(value -> value.isEmpty() || value.chars().allMatch(Character::isDigit));
+        wagerInput.setValue("0");
+        wagerInput.visible = false;
+        addWidget(wagerInput);
     }
 
     private void computeLayout() {
@@ -283,10 +300,15 @@ public class FairWheelGameScreen extends Screen implements com.stardew.craft.cli
 
         CommonGuiTextures.drawBackArrow(graphics, leftButton.x(), leftButton.y(), s4);
         CommonGuiTextures.drawEntryBox(graphics, numberBox.x(), numberBox.y(), numberBox.width(), numberBox.height(), s4, false);
-        String wagerText = String.valueOf(wager);
-        graphics.drawString(font, wagerText,
-            numberBox.x() + numberBox.width() / 2 - font.width(wagerText) / 2,
-            numberBox.y() + (numberBox.height() - font.lineHeight) / 2, 0xFF3F2A13, false);
+        if (wagerInput != null) {
+            int centeredTextX = numberBox.x() + numberBox.width() / 2
+                - font.width(wagerInput.getValue()) / 2;
+            wagerInput.setX(centeredTextX);
+            wagerInput.setWidth(Math.max(12, numberBox.x() + numberBox.width() - ui(8) - centeredTextX));
+            wagerInput.visible = true;
+            wagerInput.active = true;
+            wagerInput.render(graphics, mouseX, mouseY, 0.0F);
+        }
         CommonGuiTextures.drawForwardArrow(graphics, rightButton.x(), rightButton.y(), s4);
 
         CommonGuiTextures.drawOkCheckSmall(graphics, okButton.x(), okButton.y(), s4);
@@ -360,14 +382,19 @@ public class FairWheelGameScreen extends Screen implements com.stardew.craft.cli
             return true;
         }
         if (leftButton.contains(mx, my)) {
-            wager = Math.max(1, wager - 1);
+            setWager(Math.max(1, inputWager() - 1));
             play(ModSounds.SMALL_SELECT.get(), 1.0F, 1.0F);
             return true;
         }
         if (rightButton.contains(mx, my)) {
-            wager = Math.min(starTokens, wager + 1);
+            setWager(Math.min(starTokens, inputWager() + 1));
             play(ModSounds.SMALL_SELECT.get(), 1.0F, 1.0F);
             return true;
+        }
+        if (numberBox.contains(mx, my) && wagerInput != null) {
+            setFocused(wagerInput);
+            wagerInput.setFocused(true);
+            return wagerInput.mouseClicked(mouseX, mouseY, button);
         }
         if (okButton.contains(mx, my)) {
             startSpin();
@@ -379,13 +406,19 @@ public class FairWheelGameScreen extends Screen implements com.stardew.craft.cli
     private void chooseColor(boolean green) {
         colorChosen = true;
         choseGreen = green;
-        wager = Math.min(1, starTokens);
+        setWager(Math.min(1, starTokens));
         play(ModSounds.SMALL_SELECT.get(), 1.0F, 1.0F);
     }
 
     private void startSpin() {
+        wager = inputWager();
         if (wager <= 0 || wager > starTokens) {
             return;
+        }
+        setWager(wager);
+        if (wagerInput != null) {
+            wagerInput.visible = false;
+            wagerInput.setFocused(false);
         }
         spinning = true;
         doneSpinning = false;
@@ -405,12 +438,22 @@ public class FairWheelGameScreen extends Screen implements com.stardew.craft.cli
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (keyCode == 257 || keyCode == 335) {
-            if (!spinning && colorChosen && wager > 0 && starTokens > 0) {
+            if (!spinning && colorChosen && inputWager() > 0 && starTokens > 0) {
                 startSpin();
                 return true;
             }
         }
+        if (wagerInput != null && wagerInput.visible
+                && wagerInput.keyPressed(keyCode, scanCode, modifiers)) {
+            return true;
+        }
         return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    @Override
+    public boolean charTyped(char codePoint, int modifiers) {
+        return wagerInput != null && wagerInput.visible && wagerInput.charTyped(codePoint, modifiers)
+            || super.charTyped(codePoint, modifiers);
     }
 
     @Override
@@ -420,6 +463,24 @@ public class FairWheelGameScreen extends Screen implements com.stardew.craft.cli
 
     private int ui(int sdvPx) {
         return Math.round(sdvPx / guiScale);
+    }
+
+    private int inputWager() {
+        if (wagerInput == null || wagerInput.getValue().isBlank()) {
+            return 0;
+        }
+        try {
+            return Math.max(0, Math.min(starTokens, Integer.parseInt(wagerInput.getValue())));
+        } catch (NumberFormatException ignored) {
+            return 0;
+        }
+    }
+
+    private void setWager(int value) {
+        wager = Math.max(0, Math.min(starTokens, value));
+        if (wagerInput != null) {
+            wagerInput.setValue(String.valueOf(wager));
+        }
     }
 
     private Rect rect(int sdvX, int sdvY, int sdvW, int sdvH) {

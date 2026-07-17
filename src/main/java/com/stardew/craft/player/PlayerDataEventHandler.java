@@ -148,33 +148,10 @@ public class PlayerDataEventHandler {
                     qm.getQuestLog(), qm.getBillboardQuestsDone(), qm.getDailyQuestCompletedDays()));
             com.stardew.craft.specialorder.SpecialOrderManager.syncState(player);
 
-            // 如果玩家登录时已在星露谷维度，确保农场初始化
+            // 如果玩家登录时已在星露谷维度，复用维度进入时的分帧初始化队列。
             // （PlayerChangedDimensionEvent 在这种情况下不会触发）
             if (player.serverLevel().dimension() == com.stardew.craft.core.ModDimensions.STARDEW_VALLEY) {
-                // 确保农场入口触发方块已放置（老存档升级兼容）
-                com.stardew.craft.farm.FarmEntryBarrierManager.get(player.serverLevel())
-                        .ensureBarriersPlaced(player.serverLevel());
-                // 采石场访问门（老存档升级兼容）
-                com.stardew.craft.communitycenter.quarry.QuarryAccessManager.get(player.serverLevel())
-                        .ensurePlaced(player.serverLevel());
-                // 下水道访问门（老存档升级兼容）
-                com.stardew.craft.sewer.SewerAccessManager.get(player.serverLevel())
-                    .ensurePlaced(player.serverLevel());
-                // 采石场首次铺设（老存档升级兼容）
-                int year = com.stardew.craft.time.StardewTimeManager.get().getCurrentYear();
-                com.stardew.craft.manager.QuarrySpawnService.ensureInitialSpawn(player.serverLevel(), year);
-                com.stardew.craft.manager.CoalForestClumpSpawnService.ensureInitialSpawn(player.serverLevel());
-                com.stardew.craft.manager.SecretWoodsAccessManager.ensureEntranceReady(player.serverLevel());
-                // 矿车站点 + 矿井铁轨（老存档升级兼容）
-                com.stardew.craft.minecart.MinecartStationManager.get(player.serverLevel())
-                        .ensurePlaced(player.server);
-                // 精通山洞站点（门/讲台/蜡烛/展示实体/interaction）（老存档升级兼容）
-                com.stardew.craft.mastery.MasterySiteInstaller.get(player.serverLevel())
-                        .ensurePlaced(player.serverLevel());
-                com.stardew.craft.statue.UncertaintyStatueInstaller.get(player.serverLevel())
-                        .ensurePlaced(player.serverLevel());
-                com.stardew.craft.specialorder.SpecialOrderBoardInstaller.get(player.serverLevel())
-                        .ensurePlaced(player.serverLevel());
+                com.stardew.craft.event.DimensionEventHandler.scheduleDeferredInit(player.serverLevel());
             }
 
             // 多人农场：离线追赶——批量推进离线期间的作物/树苗生长
@@ -182,8 +159,6 @@ public class PlayerDataEventHandler {
                 net.minecraft.server.level.ServerLevel stardewLevel =
                         player.server.getLevel(com.stardew.craft.core.ModDimensions.STARDEW_VALLEY);
                 if (stardewLevel != null) {
-                    com.stardew.craft.manager.CoalForestClumpSpawnService.ensureInitialSpawn(stardewLevel);
-                    com.stardew.craft.manager.SecretWoodsAccessManager.ensureEntranceReady(stardewLevel);
                     com.stardew.craft.farm.OfflineFarmCatchUp.catchUp(stardewLevel, player.getUUID());
                     // 老存档/老服务器兼容：补放农场洞穴（早于洞穴系统的存档 cavePlaced=false）
                     com.stardew.craft.farm.FarmInstance ownFarm =

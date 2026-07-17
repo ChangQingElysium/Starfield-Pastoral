@@ -10,15 +10,16 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 @SuppressWarnings("null")
 public record IceFishingCutsceneStatePayload(boolean playerWon, String winnerText) implements CustomPacketPayload {
+    private static final int MAX_WINNER_TEXT_LENGTH = 1024;
     public static final Type<IceFishingCutsceneStatePayload> TYPE =
         new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "ice_fishing_cutscene_state"));
 
     public static final StreamCodec<FriendlyByteBuf, IceFishingCutsceneStatePayload> STREAM_CODEC = StreamCodec.of(
         (buf, payload) -> {
             buf.writeBoolean(payload.playerWon());
-            buf.writeUtf(payload.winnerText() == null ? "" : payload.winnerText(), 256);
+            buf.writeUtf(payload.winnerText() == null ? "" : payload.winnerText(), MAX_WINNER_TEXT_LENGTH);
         },
-        buf -> new IceFishingCutsceneStatePayload(buf.readBoolean(), buf.readUtf(256))
+        buf -> new IceFishingCutsceneStatePayload(buf.readBoolean(), buf.readUtf(MAX_WINNER_TEXT_LENGTH))
     );
 
     @Override

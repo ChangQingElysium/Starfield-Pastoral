@@ -47,10 +47,10 @@ public final class StarPlaqueRenderer {
         }
     }
 
-    // ── 渲染中心 (世界绝对坐标, 西墙面朝东) ─────────────────────────────
-    private static final double CENTER_X = 18820.02;
-    private static final double CENTER_Y = 74.0;
-    private static final double CENTER_Z = 18851.0;
+    // ── 渲染中心相对每位玩家自己的 CC 原点 (西墙面朝东) ───────────────
+    private static final double CENTER_OFFSET_X = 4.02;
+    private static final double CENTER_OFFSET_Y = 5.0;
+    private static final double CENTER_OFFSET_Z = 35.0;
 
     // ── 纹理尺寸: 108×96 @3× = 2.25×2 blocks ──────────────────────────
     private static final float HALF_Z = 1.125f;
@@ -65,14 +65,18 @@ public final class StarPlaqueRenderer {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null) return;
 
+        BundleClientData data = BundleClientData.INSTANCE;
+        net.minecraft.core.BlockPos origin = data.getCCOrigin();
+        double centerX = origin.getX() + CENTER_OFFSET_X;
+        double centerY = origin.getY() + CENTER_OFFSET_Y;
+        double centerZ = origin.getZ() + CENTER_OFFSET_Z;
         Vec3 cam = event.getCamera().getPosition();
-        double dx = CENTER_X - cam.x;
-        double dy = CENTER_Y - cam.y;
-        double dz = CENTER_Z - cam.z;
+        double dx = centerX - cam.x;
+        double dy = centerY - cam.y;
+        double dz = centerZ - cam.z;
         if (dx * dx + dy * dy + dz * dz > RENDER_RANGE_SQ) return;
 
         // 统计已显示的星星数（由 StarPlacedPayload 驱动，Junimo 放完才递增）
-        BundleClientData data = BundleClientData.INSTANCE;
         int litCount = data.getDisplayStarCount();
 
         RenderType rt = STAGE_RTS[litCount];

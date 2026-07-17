@@ -205,7 +205,7 @@ public final class AreaRestoreCutscene {
                 // 过场结束 — spawn star carrier Junimo (T3.1)
                 if (activeLevel != null) {
                     BlockPos ccOrig = getCCOrigin();
-                    StarPlacementAnimator.spawnStarCarrier(activeLevel, currentAreaId, ccOrig);
+                    StarPlacementAnimator.spawnStarCarrier(activeLevel, currentAreaId, ccOrig, ownerUUID);
                     // T3.2: If all areas now complete, trigger goodbye dance
                     CommunityCenterSavedData data = CommunityCenterSavedData.get();
                     java.util.UUID uid = ownerUUID != null ? ownerUUID : new java.util.UUID(0L, 0L);

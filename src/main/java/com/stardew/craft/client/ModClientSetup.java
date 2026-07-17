@@ -104,6 +104,7 @@ public final class ModClientSetup {
 		event.registerEntityRenderer(ModEntities.FAIRY_COMPANION.get(), com.stardew.craft.client.renderer.entity.FairyCompanionRenderer::new);
 		event.registerEntityRenderer(ModEntities.STARDEW_BOMB.get(), com.stardew.craft.client.renderer.entity.StardewBombEntityRenderer::new);
 		event.registerEntityRenderer(ModEntities.CARPET.get(), com.stardew.craft.client.renderer.entity.CarpetEntityRenderer::new);
+		event.registerEntityRenderer(ModEntities.CUSHION.get(), com.stardew.craft.client.renderer.entity.CushionEntityRenderer::new);
 		event.registerEntityRenderer(ModEntities.CROW.get(), com.stardew.craft.client.renderer.entity.CrowEntityRenderer::new);
 		event.registerEntityRenderer(ModEntities.LUCKY_PURPLE_SHORTS_MONSTER.get(),
 				com.stardew.craft.client.renderer.entity.LuckyPurpleShortsMonsterRenderer::new);

@@ -2026,19 +2026,19 @@ public static final DeferredBlock<Block> DEAD_CROP = BLOCKS.register("dead_crop"
 
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> BED_1 = BLOCKS.register("bed_1",
-                        () -> new com.stardew.craft.block.decor.MapDecorStaticBlock(Block.Properties.of()
+                        () -> new com.stardew.craft.block.decor.BedDecorBlock(Block.Properties.of()
                                         .mapColor(net.minecraft.world.level.material.MapColor.WOOL)
                                         .sound(net.minecraft.world.level.block.SoundType.WOOD)
                                         .noOcclusion()
-                                        .strength(0.2F), "stardewcraft:decor/common/bed_1"));
+                                        .strength(0.2F), "stardewcraft:decor/common/bed_1", false));
 
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> BED_2 = BLOCKS.register("bed_2",
-                        () -> new com.stardew.craft.block.decor.MapDecorStaticBlock(Block.Properties.of()
+                        () -> new com.stardew.craft.block.decor.BedDecorBlock(Block.Properties.of()
                                         .mapColor(net.minecraft.world.level.material.MapColor.WOOL)
                                         .sound(net.minecraft.world.level.block.SoundType.WOOD)
                                         .noOcclusion()
-                                        .strength(0.2F), "stardewcraft:decor/common/bed_2"));
+                                        .strength(0.2F), "stardewcraft:decor/common/bed_2", true));
 
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> SOFA = BLOCKS.register("sofa",

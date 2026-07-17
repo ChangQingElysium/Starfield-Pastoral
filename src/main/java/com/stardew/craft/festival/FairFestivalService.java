@@ -10,6 +10,7 @@ import com.stardew.craft.entity.npc.StardewNpcEntity;
 import com.stardew.craft.farm.FarmInstance;
 import com.stardew.craft.farm.FarmInstanceRegistry;
 import com.stardew.craft.festival.fair.FairFishingGameService;
+import com.stardew.craft.lostandfound.LostAndFoundService;
 import com.stardew.craft.festival.fair.FairSlingshotGameService;
 import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.item.ModItems;
@@ -20,7 +21,7 @@ import com.stardew.craft.network.payload.OpenDesertFestivalQuestionPayload;
 import com.stardew.craft.network.TimeSyncPacket;
 import com.stardew.craft.network.payload.FairGrangeDisplaySyncPayload;
 import com.stardew.craft.network.payload.FairStarTokenPurchaseResultPayload;
-import com.stardew.craft.network.payload.FairStarTokenHudStatePayload;
+import com.stardew.craft.network.payload.FestivalCurrencyHudStatePayload;
 import com.stardew.craft.network.payload.FestivalMusicStatePayload;
 import com.stardew.craft.network.payload.OpenFairFortunePayload;
 import com.stardew.craft.network.payload.OpenFairStarTokenNumberSelectionPayload;
@@ -652,16 +653,14 @@ public final class FairFestivalService {
     }
 
     public static long applyTimeFreeze(ServerLevel level, StardewTimeManager timeManager) {
-        long currentVirtual = timeManager.getVirtualDayTime(level);
+        long currentVirtual = timeManager.getVirtualDayTime();
         if (frozenMinute == null || (!hasCurrentSessionParticipant(level) && !FestivalService.isDebugActiveFestival(FESTIVAL_ID))) {
             return currentVirtual;
         }
-        ServerLevel overworld = level.getServer().overworld();
         long dayBase = Math.floorDiv(currentVirtual, 24000L) * 24000L;
         long target = dayBase + com.stardew.craft.event.DimensionEventHandler.stardewMinutesToMcTime(frozenMinute);
-        long targetOffset = target - overworld.getDayTime();
-        if (timeManager.getDayTimeOffset() != targetOffset) {
-            timeManager.setDayTimeOffsetRaw(targetOffset);
+        if (currentVirtual != target) {
+            timeManager.setVirtualDayTime(target);
         }
         return target;
     }
@@ -812,7 +811,7 @@ public final class FairFestivalService {
             && (FestivalMapOverlayManager.isApplied(serverLevel, OVERLAY_ID) || FestivalService.isDebugActiveFestival(FESTIVAL_ID));
     }
 
-    private static boolean isPlayerGrangeDisplayTable(BlockPos pos) {
+    public static boolean isPlayerGrangeDisplayTable(BlockPos pos) {
         return pos != null
             && pos.getY() == GRANGE_DISPLAY_MIN.getY()
             && pos.getX() >= GRANGE_DISPLAY_MIN.getX()
@@ -1591,6 +1590,10 @@ public final class FairFestivalService {
         setSessionPhase(level, FestivalSessionPhase.ENDING);
         jumpToFestivalEndTime(level, participants);
         for (ServerPlayer participant : participants) {
+            participant.closeContainer();
+        }
+        LostAndFoundService.queueDisplays(level, GRANGE_DISPLAYS);
+        for (ServerPlayer participant : participants) {
             participant.getPersistentData().putBoolean(TAG_PARTICIPATING, false);
             participant.getPersistentData().putBoolean(TAG_MUSIC_SYNCED, false);
             participant.getPersistentData().putBoolean(TAG_TOKEN_HUD_SYNCED, false);
@@ -1722,6 +1725,7 @@ public final class FairFestivalService {
 
     private static void clearRuntimeState(ServerLevel level) {
         if (level != null) {
+            LostAndFoundService.queueDisplays(level, GRANGE_DISPLAYS);
             removeFairAnimals(level);
             removeFairInteractionBlocks(level);
             restoreNpcs(level);
@@ -1814,7 +1818,8 @@ public final class FairFestivalService {
 
     private static void syncStarTokenHud(ServerPlayer player, boolean active) {
         if (player != null) {
-            PacketDistributor.sendToPlayer(player, new FairStarTokenHudStatePayload(active));
+            PacketDistributor.sendToPlayer(player, new FestivalCurrencyHudStatePayload(
+                active ? FestivalCurrencyHudStatePayload.FAIR_STAR_TOKEN : FestivalCurrencyHudStatePayload.NONE));
         }
     }
 

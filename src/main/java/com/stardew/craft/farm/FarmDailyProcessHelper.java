@@ -4,6 +4,7 @@ import com.stardew.craft.core.FarmAreaResolver;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.ChunkPos;
 
 import javax.annotation.Nullable;
 import java.util.HashSet;
@@ -24,24 +25,42 @@ public final class FarmDailyProcessHelper {
 
     /** 日结算期间缓存的在线玩家 UUID 集合，避免对每个位置线性搜索玩家列表 */
     private static Set<UUID> cachedOnlinePlayers;
+    /** 已在本次结算中确认加载的区块。 */
+    private static Set<Long> cachedEnsuredChunks;
+    /** 本次结算新增的强加载票据；结束时只释放这些票据。 */
+    private static Set<ChunkPos> cachedNewlyForcedChunks;
 
     /**
      * 日结算开始前调用，预计算在线玩家集合。
      */
     public static void beginDailyProcess(ServerLevel level) {
         cachedOnlinePlayers = new HashSet<>();
+        cachedEnsuredChunks = new HashSet<>();
+        cachedNewlyForcedChunks = new HashSet<>();
         for (ServerPlayer player : level.getServer().getPlayerList().getPlayers()) {
             cachedOnlinePlayers.add(player.getUUID());
         }
 
-        // 递减在线玩家农场的跨季宽限倒计时
-        tickGracePeriods(level);
+        try {
+            // 递减在线玩家农场的跨季宽限倒计时
+            tickGracePeriods(level);
+        } catch (RuntimeException exception) {
+            endDailyProcess(level);
+            throw exception;
+        }
     }
 
     /**
      * 日结算结束后调用，释放缓存。
      */
-    public static void endDailyProcess() {
+    public static void endDailyProcess(ServerLevel level) {
+        if (cachedNewlyForcedChunks != null) {
+            for (ChunkPos chunk : cachedNewlyForcedChunks) {
+                level.setChunkForced(chunk.x, chunk.z, false);
+            }
+        }
+        cachedNewlyForcedChunks = null;
+        cachedEnsuredChunks = null;
         cachedOnlinePlayers = null;
     }
 
@@ -64,7 +83,10 @@ public final class FarmDailyProcessHelper {
         if (farm == null) return false;
         if (cachedOnlinePlayers != null) {
             for (UUID farmer : farm.getAllFarmers()) {
-                if (cachedOnlinePlayers.contains(farmer)) return true;
+                if (cachedOnlinePlayers.contains(farmer)) {
+                    ensurePositionNeighborhoodLoaded(level, pos, 8);
+                    return true;
+                }
             }
             return false;
         }
@@ -72,6 +94,60 @@ public final class FarmDailyProcessHelper {
             if (level.getServer().getPlayerList().getPlayer(farmer) != null) return true;
         }
         return false;
+    }
+
+    /** 判断某个农场成员所属农场是否应参与本次日结算。 */
+    public static boolean shouldProcessFarmForPlayer(ServerLevel level, UUID playerId) {
+        FarmInstance farm = FarmInstanceRegistry.get().getFarmForPlayer(playerId);
+        if (farm == null) return false;
+        for (UUID farmer : farm.getAllFarmers()) {
+            if (cachedOnlinePlayers != null
+                    ? cachedOnlinePlayers.contains(farmer)
+                    : level.getServer().getPlayerList().getPlayer(farmer) != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 日结算期间按需同步加载一个对象所在区块。不会加载整张 300×300 以上的农场地图。
+     */
+    public static void ensurePositionLoaded(ServerLevel level, BlockPos pos) {
+        if (cachedEnsuredChunks == null || cachedNewlyForcedChunks == null) return;
+        int chunkX = pos.getX() >> 4;
+        int chunkZ = pos.getZ() >> 4;
+        long chunkKey = ChunkPos.asLong(chunkX, chunkZ);
+        if (!cachedEnsuredChunks.add(chunkKey)) return;
+
+        if (!level.getForcedChunks().contains(chunkKey)) {
+            level.setChunkForced(chunkX, chunkZ, true);
+            cachedNewlyForcedChunks.add(new ChunkPos(chunkX, chunkZ));
+        }
+        level.getChunk(chunkX, chunkZ);
+    }
+
+    /** 为可能跨区块生成结构的树木等对象补齐周边区块。 */
+    public static void ensurePositionNeighborhoodLoaded(ServerLevel level, BlockPos pos, int radius) {
+        int safeRadius = Math.max(0, radius);
+        ensureBoundsLoaded(
+            level,
+            pos.offset(-safeRadius, 0, -safeRadius),
+            pos.offset(safeRadius, 0, safeRadius)
+        );
+    }
+
+    /** 为畜棚、鸡舍等小型结算区域加载其覆盖的区块。 */
+    public static void ensureBoundsLoaded(ServerLevel level, BlockPos min, BlockPos max) {
+        int minChunkX = Math.min(min.getX(), max.getX()) >> 4;
+        int maxChunkX = Math.max(min.getX(), max.getX()) >> 4;
+        int minChunkZ = Math.min(min.getZ(), max.getZ()) >> 4;
+        int maxChunkZ = Math.max(min.getZ(), max.getZ()) >> 4;
+        for (int chunkX = minChunkX; chunkX <= maxChunkX; chunkX++) {
+            for (int chunkZ = minChunkZ; chunkZ <= maxChunkZ; chunkZ++) {
+                ensurePositionLoaded(level, new BlockPos(chunkX << 4, min.getY(), chunkZ << 4));
+            }
+        }
     }
 
     /**

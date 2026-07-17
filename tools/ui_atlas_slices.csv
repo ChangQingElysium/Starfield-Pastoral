@@ -19,6 +19,14 @@ common/entry_box_15,cursors,384,396,15,15
 common/item_slot_18,cursors,296,363,18,18
 common/reward_slot,cursors,293,360,24,24
 animal_query/menu_texture_box_60,menu_tiles,0,256,60,60
+animal_query/sell_icon,cursors,0,384,16,16
+animal_query/move_icon,cursors,16,384,16,16
+animal_query/repro_on,cursors,128,393,9,9
+animal_query/repro_off,cursors,137,393,9,9
+animal_query/heart_filled,cursors,211,428,7,6
+animal_query/heart_empty,cursors,218,428,7,6
+animal_query/heart_half_fill,cursors,211,428,4,6
+animal_query/golden_animal_cracker,objects_2,16,240,16,16
 animal_query/menu_tile_0,menu_tiles,0,0,64,64
 animal_query/menu_tile_2,menu_tiles,128,0,64,64
 animal_query/menu_tile_3,menu_tiles,192,0,64,64
@@ -68,6 +76,18 @@ common/money_digit_6,cursors,286,454,5,8
 common/money_digit_7,cursors,286,446,5,8
 common/money_digit_8,cursors,286,438,5,8
 common/money_digit_9,cursors,286,430,5,8
+# PurchaseAnimalsMenu.cs shop sprites and naming controls. The client uses
+# these standalone textures and never samples the full cursors atlas.
+animal_purchase/white_chicken,cursors,0,448,32,16
+animal_purchase/cow,cursors,32,448,32,16
+animal_purchase/goat,cursors,64,448,32,16
+animal_purchase/duck,cursors,0,464,32,16
+animal_purchase/sheep,cursors,32,464,32,16
+animal_purchase/rabbit,cursors,64,464,32,16
+animal_purchase/pig,cursors,0,480,32,16
+animal_purchase/random_name,cursors,381,361,10,10
+animal_purchase/ok_button,cursors,128,256,64,64
+animal_purchase/cancel_button,cursors,192,256,64,64
 common/number_digit_0,cursors,512,128,8,8
 common/number_digit_1,cursors,520,128,8,8
 common/number_digit_2,cursors,528,128,8,8

@@ -55,6 +55,7 @@ public final class PreconditionEvaluator {
             case "year" -> checkYear(p);
             case "player_farm_age_days" -> checkPlayerFarmAgeDays(p);
             case "has_item" -> checkHasItem(p);
+            case "has_secret_note" -> ClientPlayerDataCache.hasSeenSecretNote(p.getString("id"));
             case "has_museum_donation" -> checkHasMuseumDonation();
             case "museum_empty" -> com.stardew.craft.client.ClientMuseumDonationCache.isEmpty();
             case "money" -> ClientPlayerDataCache.getMoney() >= p.getInt("min", 0);

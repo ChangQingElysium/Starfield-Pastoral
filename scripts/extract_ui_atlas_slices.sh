@@ -12,6 +12,7 @@ atlas_path() {
         cursors_1_6) printf '%s\n' "$GUI_DIR/cursors_1_6.png" ;;
         forge_menu) printf '%s\n' "$GUI_DIR/forge/forge_menu.png" ;;
         menu_tiles) printf '%s\n' "$GUI_DIR/animal_query/menu_tiles.png" ;;
+        objects_2) printf '%s\n' "$ROOT_DIR/源文件/Content/TileSheets/Objects_2.png" ;;
         billboard) printf '%s\n' "$GUI_DIR/billboard.png" ;;
         *)
             printf 'Unknown atlas alias: %s\n' "$1" >&2

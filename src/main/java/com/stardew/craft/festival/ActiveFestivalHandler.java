@@ -76,7 +76,7 @@ public interface ActiveFestivalHandler {
     }
 
     default long applyTimeFreeze(ServerLevel level, StardewTimeManager timeManager) {
-        return timeManager.getVirtualDayTime(level);
+        return timeManager.getVirtualDayTime();
     }
 
     default Component debugApplyMessage() {

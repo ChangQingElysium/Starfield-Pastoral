@@ -487,7 +487,7 @@ public class TreasureLootManager extends SimplePreparableReloadListener<Treasure
 	/**
 	 * 从玩家所在维度获取当前季节名称。
 	 * 注：必须使用 {@link com.stardew.craft.time.StardewTimeManager} 而不是
-	 * {@code level.getDayTime()}，因为星露谷维度通过 dayTimeOffset 与主世界解耦，
+	 * {@code level.getDayTime()}，因为星露谷使用独立于主世界的共享时钟，
 	 * 直接除以 24000 会得到主世界的天数（错误的季节）。
 	 */
 	private String getCurrentSeason(ServerPlayer player) {

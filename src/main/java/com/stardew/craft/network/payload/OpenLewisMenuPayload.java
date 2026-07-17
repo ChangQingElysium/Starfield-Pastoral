@@ -46,10 +46,11 @@ public record OpenLewisMenuPayload() implements CustomPacketPayload {
                     Component.translatable("stardewcraft.lewis.menu.auction_join"),
                     Component.translatable("stardewcraft.lewis.menu.auction_cancel"),
                     Component.translatable("stardewcraft.lewis.menu.cancel_farm"),
+                    Component.translatable("stardewcraft.lewis.menu.lost_and_found"),
                     Component.translatable("stardewcraft.lewis.menu.leave")
                 ),
                 index -> {
-                    if (index >= 0 && index < 5) {
+                    if (index >= 0 && index < 6) {
                         PacketDistributor.sendToServer(new LewisCivicActionPayload(index));
                     }
                 },

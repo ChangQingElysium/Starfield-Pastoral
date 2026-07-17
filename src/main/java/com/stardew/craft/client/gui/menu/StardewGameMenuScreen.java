@@ -44,6 +44,7 @@ import com.stardew.craft.player.RecipeCatalogData;
 import com.stardew.craft.player.StardewCraftingRecipeData;
 import com.stardew.craft.sound.ModSounds;
 import com.stardew.craft.secretnote.SecretNoteRegistry;
+import com.stardew.craft.secretnote.SecretNoteStoryFlags;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -2155,7 +2156,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         new PowerEntry("stardewcraft.power.magic_ink", "", 8,
             PowerUnlockKind.MAIL_FLAG, "HasMagicInk", "", ""),
         new PowerEntry("stardewcraft.power.bear_paw", "stardewcraft.power.bear_paw.desc", 9,
-            PowerUnlockKind.NEVER, "", "", ""),
+            PowerUnlockKind.MAIL_FLAG, SecretNoteStoryFlags.BEAR_KNOWLEDGE, "", ""),
         new PowerEntry("stardewcraft.power.spring_onion_mastery", "stardewcraft.power.spring_onion_mastery.desc", 10,
             PowerUnlockKind.NEVER, "", "", ""),
         new PowerEntry("stardewcraft.power.key_to_the_town", "stardewcraft.power.key_to_the_town.desc", 11,
@@ -4919,7 +4920,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
             return List.of();
         }
 
-        List<Rect2i> areas = new ArrayList<>(3);
+        List<Rect2i> areas = new ArrayList<>(6);
         int firstTabX = tabX(0);
         int tabsRight = tabX(TAB_COUNT - 1) + tabSize();
         areas.add(new Rect2i(firstTabX, tabY(), tabsRight - firstTabX, tabSize()));
@@ -4928,9 +4929,23 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         int closeY = menuY - ui(CLOSE_Y_OFFSET_SDV);
         areas.add(new Rect2i(closeX, closeY, ui(CLOSE_SIZE_SDV), ui(CLOSE_SIZE_SDV)));
 
-        if (currentTab == 0 && shouldShowJunimoNoteIcon()) {
-            int size = junimoIconHoverSize();
-            areas.add(new Rect2i(junimoIconX(), junimoIconY(), size, size));
+        if (currentTab == 0) {
+            int organizeSize = ui(64);
+            areas.add(new Rect2i(organizeButtonX(), organizeButtonY(), organizeSize, organizeSize));
+            areas.add(new Rect2i(trashCanX(), trashCanY(), ui(64), ui(104)));
+
+            if (shouldShowJunimoNoteIcon()) {
+                int size = junimoIconHoverSize();
+                areas.add(new Rect2i(junimoIconX(), junimoIconY(), size, size));
+            }
+        } else if (currentTab == 4) {
+            int controlSize = ui(64);
+            if (currentCraftingPage > 0) {
+                areas.add(new Rect2i(pageButtonX(), pageUpButtonY(), controlSize, controlSize));
+            }
+            if (currentCraftingPage < Math.max(0, craftingPages.size() - 1)) {
+                areas.add(new Rect2i(pageButtonX(), pageDownButtonY(), controlSize, controlSize));
+            }
         }
         return List.copyOf(areas);
     }

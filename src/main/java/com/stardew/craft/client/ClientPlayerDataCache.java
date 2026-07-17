@@ -41,7 +41,6 @@ public class ClientPlayerDataCache {
     private static int ticketPrizesClaimed = 0;
     private static int specialOrderPrizeTickets = 0;
     private static int fairStarTokens = 0;
-    private static boolean fairStarTokenHudActive = false;
     private static int maxMineFloorReached = 0;
     private static int firstJoinDay = -1;
     private static String winterStarRecipient = "";
@@ -330,14 +329,6 @@ public class ClientPlayerDataCache {
         return Math.max(0, fairStarTokens);
     }
 
-    public static boolean isFairStarTokenHudActive() {
-        return fairStarTokenHudActive;
-    }
-
-    public static void setFairStarTokenHudActive(boolean active) {
-        fairStarTokenHudActive = active;
-    }
-
     public static String getFarmName() {
         return farmName;
     }
@@ -612,7 +603,7 @@ public class ClientPlayerDataCache {
         ticketPrizesClaimed = 0;
         specialOrderPrizeTickets = 0;
         fairStarTokens = 0;
-        fairStarTokenHudActive = false;
+        com.stardew.craft.client.hud.FestivalCurrencyHudState.reset();
         maxMineFloorReached = 0;
         gender = -1;
         preferredName = "";

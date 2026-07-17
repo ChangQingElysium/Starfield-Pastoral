@@ -62,6 +62,7 @@ public final class StardewHudMessageManager {
 	private static final int CORNER_VERTICAL_PADDING = 8;
 	private static final int CORNER_LINE_GAP = 1;
 	private static final int CORNER_STACK_GAP = 6;
+	private static final int TOAST_STACK_GAP = 4;
 	private static final int TEXT_OFFSET_X = Math.round(99f * VANILLA_TO_MC);
 	private static final float TINY_DIGIT_SCALE = 3f * VANILLA_TO_MC;
 	private static final int SEGMENT_OVERLAP = 1;
@@ -145,52 +146,41 @@ public final class StardewHudMessageManager {
 		}
 		Font font = mc.font;
 		GuiGraphics graphics = event.getGuiGraphics();
-		renderMessageGroup(graphics, font, Config.HudElement.ITEM_PICKUP, false);
-		renderMessageGroup(graphics, font, Config.HudElement.TEXT_MESSAGE, true);
+		renderNotifications(graphics, font);
 	}
 
-	private static void renderMessageGroup(GuiGraphics graphics, Font font, Config.HudElement element,
-			boolean cornerTextboxes) {
-		if (cornerTextboxes) {
-			renderCornerMessageGroup(graphics, font);
-			return;
-		}
+	/**
+	 * Render every popup in one chronological stack and from one configurable anchor.
+	 * The individual visual styles stay intact, but they can no longer overlap each
+	 * other because each message contributes its real height to the shared stack.
+	 */
+	private static void renderNotifications(GuiGraphics graphics, Font font) {
 		StardewHudLayout.Placement placement = StardewHudLayout.current(
-			element, graphics.guiWidth(), graphics.guiHeight());
+			Config.HudElement.NOTIFICATIONS, graphics.guiWidth(), graphics.guiHeight());
 		graphics.pose().pushPose();
 		graphics.pose().translate(placement.x(), placement.y(), 0.0F);
 		graphics.pose().scale(placement.scale(), placement.scale(), 1.0F);
 		int heightUsed = 0;
 		for (int i = MESSAGES.size() - 1; i >= 0; i--) {
 			HudMessage message = MESSAGES.get(i);
-			boolean isCorner = message.kind == MessageKind.CORNER_TEXTBOX;
-			if (isCorner != cornerTextboxes) continue;
-			drawToastMessage(graphics, font, message, heightUsed);
-			heightUsed += BOX_HEIGHT;
+			if (message.kind == MessageKind.CORNER_TEXTBOX) {
+				drawCornerTextbox(graphics, font, message, heightUsed);
+			} else {
+				drawToastMessage(graphics, font, message, heightUsed);
+			}
+			heightUsed += stackStepFor(font, message);
 		}
 		graphics.pose().popPose();
 	}
 
-	private static void renderCornerMessageGroup(GuiGraphics graphics, Font font) {
-		int heightUsed = 0;
-		for (int i = MESSAGES.size() - 1; i >= 0; i--) {
-			HudMessage message = MESSAGES.get(i);
-			if (message.kind != MessageKind.CORNER_TEXTBOX) continue;
-			CornerBoxLayout layout = cornerBoxLayout(font, message.messageText);
-			StardewHudLayout.Placement placement = StardewHudLayout.current(
-				Config.HudElement.TEXT_MESSAGE, graphics.guiWidth(), graphics.guiHeight(),
-				layout.width(), layout.height());
-			graphics.pose().pushPose();
-			graphics.pose().translate(placement.x(),
-				placement.y() - Math.round(heightUsed * placement.scale()), 0.0F);
-			graphics.pose().scale(placement.scale(), placement.scale(), 1.0F);
-			drawCornerTextbox(graphics, font, message, 0);
-			graphics.pose().popPose();
-			heightUsed += layout.height() + CORNER_STACK_GAP;
+	private static int stackStepFor(Font font, HudMessage message) {
+		if (message.kind == MessageKind.CORNER_TEXTBOX) {
+			return cornerBoxLayout(font, message.messageText).height() + CORNER_STACK_GAP;
 		}
+		return BOX_HEIGHT + TOAST_STACK_GAP;
 	}
 
-	public static void renderItemPickupPreview(GuiGraphics graphics, Font font, int x, int y, float scale) {
+	public static void renderNotificationPreview(GuiGraphics graphics, Font font, int x, int y, float scale) {
 		ItemStack stack = new ItemStack(ModItems.HAY.get());
 		HudMessage message = new HudMessage(stack.getHoverName(), MessageKind.ITEM_PICKUP);
 		message.messageSubject = stack;
@@ -202,24 +192,6 @@ public final class StardewHudMessageManager {
 		graphics.pose().scale(scale, scale, 1.0F);
 		drawToastMessage(graphics, font, message, 0);
 		graphics.pose().popPose();
-	}
-
-	public static void renderTextMessagePreview(GuiGraphics graphics, Font font, int x, int y, float scale) {
-		HudMessage message = new HudMessage(
-			Component.translatable("stardewcraft.hud_editor.preview.text_message"),
-			MessageKind.CORNER_TEXTBOX);
-		message.transparency = 1.0F;
-		graphics.pose().pushPose();
-		graphics.pose().translate(x, y, 0.0F);
-		graphics.pose().scale(scale, scale, 1.0F);
-		drawCornerTextbox(graphics, font, message, 0);
-		graphics.pose().popPose();
-	}
-
-	public static CornerBoxSize textMessagePreviewSize(Font font) {
-		CornerBoxLayout layout = cornerBoxLayout(font,
-			Component.translatable("stardewcraft.hud_editor.preview.text_message").getString());
-		return new CornerBoxSize(layout.width(), layout.height());
 	}
 
 	private static void updateMessages() {
@@ -261,21 +233,10 @@ public final class StardewHudMessageManager {
 		if (MESSAGES.isEmpty()) {
 			lastUpdateNanos = System.nanoTime();
 		}
-		if (message.kind == MessageKind.CORNER_TEXTBOX) {
-			MESSAGES.add(message);
-			return;
-		}
-		int firstCornerTextbox = MESSAGES.size();
-		for (int i = 0; i < MESSAGES.size(); i++) {
-			if (MESSAGES.get(i).kind == MessageKind.CORNER_TEXTBOX) {
-				firstCornerTextbox = i;
-				break;
-			}
-		}
-		MESSAGES.add(firstCornerTextbox, message);
+		MESSAGES.add(message);
 	}
 
-	private static int drawCornerTextbox(GuiGraphics graphics, Font font,
+	private static void drawCornerTextbox(GuiGraphics graphics, Font font,
 			HudMessage message, int heightUsed) {
 		CornerBoxLayout layout = cornerBoxLayout(font, message.messageText);
 		int boxY = -heightUsed;
@@ -298,7 +259,6 @@ public final class StardewHudMessageManager {
 			drawY += font.lineHeight + CORNER_LINE_GAP;
 		}
 		RenderSystem.disableBlend();
-		return layout.height() + CORNER_STACK_GAP;
 	}
 
 	private static CornerBoxLayout cornerBoxLayout(Font font, String text) {
@@ -444,9 +404,6 @@ public final class StardewHudMessageManager {
 		if (mc.player != null) {
 			mc.player.playSound(net.minecraft.sounds.SoundEvents.ITEM_PICKUP, 0.4f, 1.0f);
 		}
-	}
-
-	public record CornerBoxSize(int width, int height) {
 	}
 
 	private record CornerBoxLayout(List<FormattedCharSequence> lines, int width, int height, int textHeight) {

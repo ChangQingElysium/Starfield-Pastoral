@@ -80,6 +80,8 @@ public final class ServerPreconditionEvaluator {
             case "year" -> checkYear(p);
             case "player_farm_age_days" -> checkPlayerFarmAgeDays(player, p);
             case "has_item" -> checkHasItem(player, p);
+            case "has_secret_note" -> PlayerDataManager.getPlayerData(player)
+                    .hasSeenSecretNote(p.getString("id"));
             case "has_museum_donation" -> checkHasMuseumDonation(player, level);
             case "museum_empty" -> com.stardew.craft.museum.MuseumDonationData.get(level)
                     .getDonatedItems(player.getUUID()).isEmpty();

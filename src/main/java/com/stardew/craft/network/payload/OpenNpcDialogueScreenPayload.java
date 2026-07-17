@@ -559,6 +559,28 @@ public record OpenNpcDialogueScreenPayload(
         return net.minecraft.locale.Language.getInstance().getOrDefault(key);
     }
 
+    /** Resolve either a serialized Component or a normal translation key on the client. */
+    public static String resolveClientTextSource(String source) {
+        if (source == null || source.isBlank()) return "";
+        String trimmed = source.trim();
+        if (trimmed.startsWith("{") || trimmed.startsWith("[") || trimmed.startsWith("\"")) {
+            net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+            if (mc.level != null) {
+                try {
+                    Component component = Component.Serializer.fromJson(trimmed, mc.level.registryAccess());
+                    if (component != null) return component.getString();
+                } catch (Exception ignored) {
+                    // Fall through for legacy plain strings.
+                }
+            }
+        }
+        if (source.startsWith("event.") || source.startsWith("stardewcraft.")
+                || source.startsWith("message.")) {
+            return rawTranslation(source);
+        }
+        return source;
+    }
+
     private static String getClientSeason() {
         net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
         if (mc.level == null) return "Spring";

@@ -61,8 +61,9 @@ class SecretNoteDefinitionTest {
             assertEquals(19, root.get(18).getAsJsonObject().get("display_number").getAsInt());
             assertTrue(obtainableByVanillaNumber.get(20));
             assertTrue(obtainableByVanillaNumber.get(21));
-            assertEquals(Set.of(22, 23, 24, 26), todoNumbers);
-            assertEquals(22, root.size() - todoNumbers.size());
+            assertTrue(obtainableByVanillaNumber.get(23));
+            assertEquals(Set.of(22, 24, 26), todoNumbers);
+            assertEquals(23, root.size() - todoNumbers.size());
         }
     }
 

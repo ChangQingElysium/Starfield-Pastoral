@@ -90,7 +90,7 @@
   {"id": "20", "vanilla_number": 20, "display_number": 19, "sort_order": 19, "text": "stardewcraft.secret_note.20"},
   {"id": "21", "vanilla_number": 21, "display_number": 20, "sort_order": 20, "image_index": 5},
   {"id": "22", "vanilla_number": 22, "display_number": 21, "sort_order": 21, "text": "stardewcraft.secret_note.22", "obtainable": false, "implementation_status": "TODO 0.5.1-fix"},
-  {"id": "23", "vanilla_number": 23, "display_number": 22, "sort_order": 22, "text": "stardewcraft.secret_note.23", "obtainable": false, "implementation_status": "TODO 0.5.1-fix"},
+  {"id": "23", "vanilla_number": 23, "display_number": 22, "sort_order": 22, "text": "stardewcraft.secret_note.23"},
   {"id": "24", "vanilla_number": 24, "display_number": 23, "sort_order": 23, "text": "stardewcraft.secret_note.24", "obtainable": false, "implementation_status": "TODO 0.5.1-fix"},
   {"id": "25", "vanilla_number": 25, "display_number": 24, "sort_order": 24, "text": "stardewcraft.secret_note.25"},
   {"id": "26", "vanilla_number": 26, "display_number": 25, "sort_order": 25, "text": "stardewcraft.secret_note.26", "obtainable": false, "implementation_status": "TODO 0.5.1-fix"},

@@ -19,11 +19,11 @@ import java.util.Set;
 /**
  * 星露谷时间管理系统
  * 
- * 新设计：时间直接从MC的dayTime同步，不再自己计数tick
+ * 星露谷使用独立的绝对 dayTime，不依赖主世界昼夜或睡眠跳时。
  * 
  * 时间规则：
  * - 星露谷一天 = 6:00 AM 到 2:00 AM (次日)
- * - 使用MC原版昼夜循环（20分钟一天）
+ * - 默认按 MC 原版昼夜速度推进（20分钟一天）
  * - MC dayTime 0 = 6:00 AM, dayTime 20000 = 2:00 AM
  * - 当到达2:00 AM时，跳到下一天（dayTime重置为0）
  */
@@ -72,11 +72,13 @@ public class StardewTimeManager extends SavedData {
     private int currentYear = 1;               // 当前年份
 
     /**
-     * 维度时间隔离偏移量。
-     * 星露谷的"虚拟 dayTime" = overworld.getDayTime() + dayTimeOffset。
-     * 修改此偏移量代替直接修改 overworld 的 dayTime，从而不影响主世界。
+     * 星露谷共享时钟的绝对 dayTime。农场与矿井都读取这一份权威时间，
+     * 主世界睡觉、命令或 gamerule 均不会改变它。
      */
-    private long dayTimeOffset = 0;
+    private long independentDayTime = 0;
+
+    /** 小数倍率剩余量，例如 0.5 倍每两个 server tick 才推进一个 dayTime tick。 */
+    private double timeAdvanceRemainder = 0.0D;
 
     /**
      * Pause-aware absolute tick used by the shared Stardew farm/mine simulation.
@@ -97,30 +99,77 @@ public class StardewTimeManager extends SavedData {
     public StardewTimeManager() {
     }
 
-    // ── dayTimeOffset API（维度时间隔离）──
+    // ── 独立 dayTime API ──
 
     /**
-     * 获取星露谷维度的"虚拟 dayTime"（不修改主世界 dayTime）。
-     * virtualDayTime = overworld.getDayTime() + dayTimeOffset
+     * 获取星露谷共享时钟的绝对 dayTime。
      */
-    public long getVirtualDayTime(ServerLevel anyLevel) {
-        return anyLevel.getServer().overworld().getDayTime() + dayTimeOffset;
+    public long getVirtualDayTime() {
+        return independentDayTime;
     }
 
-    /** 获取当前偏移量。 */
-    public long getDayTimeOffset() { return dayTimeOffset; }
+    /**
+     * 兼容旧调用。参数不再参与计算。
+     * @deprecated 使用 {@link #getVirtualDayTime()}。
+     */
+    @Deprecated
+    public long getVirtualDayTime(ServerLevel anyLevel) {
+        return independentDayTime;
+    }
 
-    /** 直接设置偏移量（用于补偿主世界时间变化）。 */
-    public void setDayTimeOffsetRaw(long offset) {
-        dayTimeOffset = offset;
+    public long getIndependentDayTime() {
+        return independentDayTime;
+    }
+
+    /**
+     * 按配置倍率推进一次 server tick。小数部分会跨 tick 精确累计。
+     *
+     * @return 本次实际推进的 dayTime tick 数
+     */
+    public long advanceIndependentDayTime(double multiplier) {
+        TimeAdvance advance = calculateTimeAdvance(timeAdvanceRemainder, multiplier);
+        timeAdvanceRemainder = advance.remainder();
+        if (advance.wholeTicks() > 0L) {
+            independentDayTime += advance.wholeTicks();
+        }
+        setDirty();
+        return advance.wholeTicks();
+    }
+
+    /**
+     * 纯计算入口，供单元测试验证任意小数倍率不会因四舍五入失真。
+     */
+    static TimeAdvance calculateTimeAdvance(double previousRemainder, double multiplier) {
+        double safeMultiplier = Math.max(0.0D, multiplier);
+        double accumulated = Math.max(0.0D, previousRemainder) + safeMultiplier;
+        long wholeTicks = (long) Math.floor(accumulated + 1.0E-9D);
+        double remainder = accumulated - wholeTicks;
+        if (remainder < 1.0E-9D) {
+            remainder = 0.0D;
+        }
+        return new TimeAdvance(wholeTicks, remainder);
+    }
+
+    static record TimeAdvance(long wholeTicks, double remainder) {}
+
+    /** 将星露谷共享时钟跳到目标绝对时间。 */
+    public void setVirtualDayTime(long targetDayTime) {
+        independentDayTime = Math.max(0L, targetDayTime);
+        var server = ServerLifecycleHooks.getCurrentServer();
+        if (server != null) {
+            StardewTimePauseService.onAuthoritativeVirtualDayTimeSet(server, independentDayTime);
+        }
         setDirty();
     }
 
     /**
-     * 将星露谷虚拟 dayTime 跳到目标值（修改 offset，不动 overworld）。
+     * 兼容旧调用。参数仅用于取得 server 并重基准暂停状态。
+     * @deprecated 使用 {@link #setVirtualDayTime(long)}。
      */
+    @Deprecated
     public void setVirtualDayTime(ServerLevel anyLevel, long targetDayTime) {
-        dayTimeOffset = targetDayTime - anyLevel.getServer().overworld().getDayTime();
+        independentDayTime = Math.max(0L, targetDayTime);
+        StardewTimePauseService.onAuthoritativeVirtualDayTimeSet(anyLevel.getServer(), independentDayTime);
         setDirty();
     }
 
@@ -265,27 +314,35 @@ public class StardewTimeManager extends SavedData {
                 // 确保所有室内区块（含温室）在日结算期间已加载，
                 // 否则 growDaily / waterDaily 会因 isLoaded(pos)==false 跳过温室作物。
                 com.stardew.craft.interior.InteriorSubspaceManager.setInteriorChunksForced(stardewLevel, true, "daily_settlement");
-                com.stardew.craft.farm.FarmDailyProcessHelper.beginDailyProcess(stardewLevel);
                 try {
-                com.stardew.craft.manager.CropGrowthManager.get(stardewLevel).growDaily(stardewLevel);
-				com.stardew.craft.manager.TreeGrowthManager.get(stardewLevel).growDaily(stardewLevel);
-                com.stardew.craft.manager.FruitTreeGrowthManager.get(stardewLevel).growDaily(stardewLevel);
-                com.stardew.craft.manager.WildTreeSeedManager.get(stardewLevel).onNewDay(stardewLevel, absDay);
-                com.stardew.craft.manager.SprinklerManager.get(stardewLevel).waterDaily(stardewLevel);
-                com.stardew.craft.manager.PastureGrassGrowthManager.get(stardewLevel).growDaily(stardewLevel);
-                com.stardew.craft.manager.AnimalGrowthManager.get(stardewLevel).growDaily(stardewLevel);
-                com.stardew.craft.fishpond.service.FishPondDailyUpdateService.onNewDay(stardewLevel);
-                com.stardew.craft.manager.ForageSpawnService.onNewDay(stardewLevel, currentSeason);
-                com.stardew.craft.manager.ForageSpawnService.onNewDayForestFarms(stardewLevel, currentSeason);
-                com.stardew.craft.manager.ArtifactSpotSpawnService.onNewDay(stardewLevel, currentSeason);
-                com.stardew.craft.manager.QuarrySpawnService.onNewDay(stardewLevel, getCurrentYear());
-                com.stardew.craft.manager.CoalForestClumpSpawnService.onNewDay(stardewLevel);
-                com.stardew.craft.manager.SecretWoodsAccessManager.ensureEntranceReady(stardewLevel);
-                com.stardew.craft.manager.FarmCaveDailyService.onNewDay(stardewLevel);
+                    com.stardew.craft.farm.FarmDailyProcessHelper.beginDailyProcess(stardewLevel);
+                    runWorldDailyStep("crops", () -> com.stardew.craft.manager.CropGrowthManager.get(stardewLevel).growDaily(stardewLevel));
+                    runWorldDailyStep("trees", () -> com.stardew.craft.manager.TreeGrowthManager.get(stardewLevel).growDaily(stardewLevel));
+                    runWorldDailyStep("fruit_trees", () -> com.stardew.craft.manager.FruitTreeGrowthManager.get(stardewLevel).growDaily(stardewLevel));
+                    runWorldDailyStep("wild_tree_seeds", () -> com.stardew.craft.manager.WildTreeSeedManager.get(stardewLevel).onNewDay(stardewLevel, absDay));
+                    runWorldDailyStep("sprinklers", () -> com.stardew.craft.manager.SprinklerManager.get(stardewLevel).waterDaily(stardewLevel));
+                    runWorldDailyStep("pasture_grass", () -> com.stardew.craft.manager.PastureGrassGrowthManager.get(stardewLevel).growDaily(stardewLevel));
+                    runWorldDailyStep("animals", () -> com.stardew.craft.manager.AnimalGrowthManager.get(stardewLevel).growDaily(stardewLevel));
+                    runWorldDailyStep("fish_ponds", () -> com.stardew.craft.fishpond.service.FishPondDailyUpdateService.onNewDay(stardewLevel));
+                    runWorldDailyStep("forage", () -> com.stardew.craft.manager.ForageSpawnService.onNewDay(stardewLevel, currentSeason));
+                    runWorldDailyStep("forest_farm_forage", () -> com.stardew.craft.manager.ForageSpawnService.onNewDayForestFarms(stardewLevel, currentSeason));
+                    runWorldDailyStep("artifact_spots", () -> com.stardew.craft.manager.ArtifactSpotSpawnService.onNewDay(stardewLevel, currentSeason));
+                    runWorldDailyStep("quarry", () -> com.stardew.craft.manager.QuarrySpawnService.onNewDay(stardewLevel, getCurrentYear()));
+                    runWorldDailyStep("coal_forest", () -> com.stardew.craft.manager.CoalForestClumpSpawnService.onNewDay(stardewLevel));
+                    runWorldDailyStep("secret_woods", () -> com.stardew.craft.manager.SecretWoodsAccessManager.ensureEntranceReady(stardewLevel));
+                    runWorldDailyStep("farm_cave", () -> com.stardew.craft.manager.FarmCaveDailyService.onNewDay(stardewLevel));
+                } catch (Exception e) {
+                    StardewCraft.LOGGER.error(
+                        "[DAILY] World settlement lifecycle failed; continuing player settlement",
+                        e
+                    );
                 } finally {
-                    // 日结算完成后立即释放室内区块，避免 784 区块永久 force-loaded
-                    com.stardew.craft.interior.InteriorSubspaceManager.setInteriorChunksForced(stardewLevel, false, "daily_settlement_done");
-                    com.stardew.craft.farm.FarmDailyProcessHelper.endDailyProcess();
+                    try {
+                        com.stardew.craft.farm.FarmDailyProcessHelper.endDailyProcess(stardewLevel);
+                    } finally {
+                        // 日结算完成后立即释放室内区块，避免 784 区块永久 force-loaded
+                        com.stardew.craft.interior.InteriorSubspaceManager.setInteriorChunksForced(stardewLevel, false, "daily_settlement_done");
+                    }
                 }
                 
                 // 多人农场：更新所有在线玩家的 lastOnlineDay
@@ -367,7 +424,7 @@ public class StardewTimeManager extends SavedData {
 
                 // 消费该玩家的 2AM 晕倒结果（如果有的话）合并进结算包
                 com.stardew.craft.player.PassOutService.PassOutResult passOutResult =
-                    com.stardew.craft.player.PassOutService.consumePassOutResult(player.getUUID());
+                    com.stardew.craft.player.PassOutService.consumePassOutResult(player.getUUID(), absDay);
                 int passOutType = passOutResult != null ? passOutResult.type().getId() : -1;
                 int passOutMoneyLost = passOutResult != null ? passOutResult.moneyLost() : 0;
                 java.util.List<net.minecraft.world.item.ItemStack> passOutLostItems =
@@ -393,6 +450,7 @@ public class StardewTimeManager extends SavedData {
                     .filter(player -> player.level().dimension() == ModDimensions.STARDEW_VALLEY)
                     .toList();
                 com.stardew.craft.specialorder.SpecialOrderManager.onNewDay(stardewLevel, stardewPlayers);
+                com.stardew.craft.lostandfound.LostAndFoundService.onNewDay(stardewLevel);
                 com.stardew.craft.book.BooksellerSchedule.onNewDay(stardewLevel, stardewPlayers);
                 com.stardew.craft.shop.BooksellerEvents.forceCheckNow(stardewLevel);
             }
@@ -412,6 +470,14 @@ public class StardewTimeManager extends SavedData {
         }
 
         setDirty();
+    }
+
+    private static void runWorldDailyStep(String name, Runnable step) {
+        try {
+            step.run();
+        } catch (Exception exception) {
+            StardewCraft.LOGGER.error("[DAILY] Step '{}' failed; continuing remaining settlement steps", name, exception);
+        }
     }
 
     /**
@@ -681,7 +747,8 @@ public class StardewTimeManager extends SavedData {
         tag.putInt("currentDay", currentDay);
         tag.putInt("currentSeason", currentSeason);
         tag.putInt("currentYear", currentYear);
-        tag.putLong("dayTimeOffset", dayTimeOffset);
+        tag.putLong("independentDayTime", independentDayTime);
+        tag.putDouble("timeAdvanceRemainder", timeAdvanceRemainder);
         tag.putLong("simulationGameTime", simulationGameTime);
         
         tag.putBoolean("event1800", event1800Triggered);
@@ -701,7 +768,26 @@ public class StardewTimeManager extends SavedData {
         data.currentSeason = tag.contains("currentSeason") ? tag.getInt("currentSeason") : 0;
         data.currentYear = tag.contains("currentYear") ? tag.getInt("currentYear") : 1;
         
-        data.dayTimeOffset = tag.getLong("dayTimeOffset");
+        if (tag.contains("independentDayTime")) {
+            data.independentDayTime = Math.max(0L, tag.getLong("independentDayTime"));
+            data.timeAdvanceRemainder = tag.contains("timeAdvanceRemainder")
+                ? Math.max(0.0D, Math.min(0.999999999D, tag.getDouble("timeAdvanceRemainder")))
+                : 0.0D;
+        } else {
+            // 旧字段 dayTimeOffset 只有相对主世界的偏移，离线加载时没有可靠基准。
+            // 日期与 currentTime 才是旧存档持久化的权威状态，据此恢复绝对时间。
+            long completedDays = (data.currentYear - 1L) * 112L
+                + data.currentSeason * 28L
+                + (data.currentDay - 1L);
+            long timeOfDay = com.stardew.craft.event.DimensionEventHandler
+                .stardewMinutesToMcTime(data.currentTime);
+            data.independentDayTime = Math.max(0L, completedDays * 24000L + timeOfDay);
+            data.timeAdvanceRemainder = 0.0D;
+            StardewCraft.LOGGER.info(
+                "[STARDEW TIME] Migrated legacy offset clock to independentDayTime={}",
+                data.independentDayTime
+            );
+        }
         data.simulationGameTime = tag.contains("simulationGameTime")
             ? tag.getLong("simulationGameTime")
             : -1L;

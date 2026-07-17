@@ -27,6 +27,7 @@ public final class BundleClientData {
      */
     private int displayStarCount = 0;
     private boolean displayStarsInitialized = false;
+    private final boolean[] displayedStarAreas = new boolean[6];
 
     private BundleClientData() {}
 
@@ -43,13 +44,16 @@ public final class BundleClientData {
 
         // 首次同步（登录）：displayStarCount 追平到实际完成数
         // 后续同步（存入物品）：不动 displayStarCount，等 Junimo 放星的包来递增
-        if (!displayStarsInitialized) {
+        int completedAreaCount = 0;
+        for (int i = 0; i < displayedStarAreas.length; i++) {
+            if (areasComplete[i]) completedAreaCount++;
+        }
+        if (!displayStarsInitialized || displayStarCount > completedAreaCount) {
             displayStarsInitialized = true;
-            int count = 0;
-            for (int i = 0; i <= 5; i++) {
-                if (areasComplete[i]) count++;
+            for (int i = 0; i < displayedStarAreas.length; i++) {
+                displayedStarAreas[i] = areasComplete[i];
             }
-            displayStarCount = count;
+            displayStarCount = completedAreaCount;
         }
 
         bundleRewards.clear();
@@ -130,22 +134,23 @@ public final class BundleClientData {
         if (origin != null) this.ccOrigin = origin;
     }
 
-    /** Junimo 放完一颗星后调用 (由 StarPlacedPayload 触发) */
-    public void incrementDisplayStars() {
-        displayStarCount = Math.min(6, displayStarCount + 1);
-    }
-
-    /** 登录时从服务端同步当前已完成区域数作为初始值 */
-    public void setDisplayStarCount(int count) {
-        displayStarCount = Math.max(0, Math.min(6, count));
+    /** Junimo 放完一颗星后调用；按区域去重，重复网络包不会制造假星。 */
+    public void markDisplayStarArea(int areaId) {
+        if (areaId < 0 || areaId >= displayedStarAreas.length || displayedStarAreas[areaId]) {
+            return;
+        }
+        displayedStarAreas[areaId] = true;
+        displayStarCount = Math.min(displayedStarAreas.length, displayStarCount + 1);
     }
 
     public void clear() {
         bundleSlots.clear();
         bundleRewards.clear();
         for (int i = 0; i < 7; i++) areasComplete[i] = false;
+        for (int i = 0; i < displayedStarAreas.length; i++) displayedStarAreas[i] = false;
         displayStarCount = 0;
         displayStarsInitialized = false;
+        ccOrigin = com.stardew.craft.interior.InteriorSubspaceManager.CC_ORIGIN;
         version++;
     }
 }

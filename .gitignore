@@ -61,6 +61,7 @@ software/
 参考/
 resourcepack-template/
 scripts/*
+!scripts/setup_valley_pregen.ps1
 !scripts/extract_ui_atlas_slices.sh
 !scripts/render_festival_actor_map.py
 tools/*

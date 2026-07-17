@@ -71,6 +71,7 @@ public class LetterViewerScreen extends Screen {
 
     // ── Payload 数据 ──
     private final OpenMailPayload payload;
+    private final Screen parent;
     private final List<String> pages = new ArrayList<>();
     private int currentPage;
     private ResourceLocation activeLetterTexture = LETTER_BG;
@@ -93,8 +94,13 @@ public class LetterViewerScreen extends Screen {
     private record CustomLetterBackground(ResourceLocation texture, int width, int height) {}
 
     public LetterViewerScreen(OpenMailPayload payload) {
+        this(payload, null);
+    }
+
+    public LetterViewerScreen(OpenMailPayload payload, Screen parent) {
         super(Component.empty());
         this.payload = payload;
+        this.parent = parent;
     }
 
     @Override
@@ -645,6 +651,13 @@ public class LetterViewerScreen extends Screen {
         // 如果还有信，自动检查下一封
         if (payload.remainingMailCount() > 0) {
             PacketDistributor.sendToServer(new CheckMailboxPayload());
+        }
+    }
+
+    @Override
+    public void onClose() {
+        if (minecraft != null) {
+            minecraft.setScreen(parent);
         }
     }
 

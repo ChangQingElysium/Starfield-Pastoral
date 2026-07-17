@@ -912,8 +912,11 @@ public final class FishingMinigameScreen extends Screen implements com.stardew.c
 		// Hint removed: user requested no additional on-screen hint text.
 		if (perfect && distanceFromCatching > 0f && !fadeOut) {
 			Component perfectText = Component.translatable("stardewcraft.fishing.minigame.perfect");
-			graphics.drawString(font, perfectText, centerX - font.width(perfectText) / 2,
-				progY + Math.round(38 * fit), 0xFFE87B, false);
+			// Vanilla BobberBar anchors SparklingText at
+			// (xPositionOnScreen - 16, yPositionOnScreen - 64), clear of the track.
+			int perfectX = Math.round(uiX - 16f * fit);
+			int perfectY = Math.round(uiY - 64f * fit);
+			graphics.drawString(font, perfectText, perfectX, perfectY, 0xFFE87B, false);
 		}
 
 		// Do NOT call super.render() here: Screen.render may draw background again on some versions,

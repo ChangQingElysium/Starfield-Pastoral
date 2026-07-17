@@ -32,6 +32,7 @@ public final class Config {
     public static final ModConfigSpec.BooleanValue ENABLE_UI_INFO_SUITE = CLIENT.ENABLE_UI_INFO_SUITE;
 
     public static final ModConfigSpec.IntValue MAX_STACK_SIZE = GENERAL.MAX_STACK_SIZE;
+    public static final ModConfigSpec.DoubleValue TIME_SPEED_MULTIPLIER = GENERAL.TIME_SPEED_MULTIPLIER;
 
     public static final ModConfigSpec.BooleanValue TOTEM_POLE_ENFORCE_PLACEMENT_RULES = TOTEM_POLE.ENFORCE_PLACEMENT_RULES;
 
@@ -181,8 +182,9 @@ public final class Config {
         MINING_FLOOR("miningFloor", 32, 32, 100, HudHorizontalAnchor.CENTER, HudVerticalAnchor.BOTTOM, -143, 1),
         FESTIVAL_SCORE("festivalScore", 220, 48, 100, HudHorizontalAnchor.LEFT, HudVerticalAnchor.TOP, 16, 32),
         FESTIVAL_CURRENCY("festivalCurrency", 96, 32, 100, HudHorizontalAnchor.CENTER, HudVerticalAnchor.BOTTOM, -159, 37),
-        ITEM_PICKUP("itemPickup", 220, 45, 70, HudHorizontalAnchor.LEFT, HudVerticalAnchor.BOTTOM, 10, 48),
-        TEXT_MESSAGE("textMessage", 180, 32, 100, HudHorizontalAnchor.LEFT, HudVerticalAnchor.BOTTOM, 10, 104),
+        // Keep the historical itemPickup config path so existing client layouts migrate
+        // transparently, but use one placement for every lower-left popup notification.
+        NOTIFICATIONS("itemPickup", 220, 45, 70, HudHorizontalAnchor.LEFT, HudVerticalAnchor.BOTTOM, 10, 48),
         SKILL_XP("skillXp", 100, 28, 100, HudHorizontalAnchor.LEFT, HudVerticalAnchor.BOTTOM, 10, 10),
         SKILL_LEVEL_UP("skillLevelUp", 180, 40, 100, HudHorizontalAnchor.CENTER, HudVerticalAnchor.TOP, 0, 20),
         INTERACTION_HINT("interactionHint", 280, 32, 100, HudHorizontalAnchor.CENTER, HudVerticalAnchor.CENTER, 0, 30),
@@ -236,6 +238,7 @@ public final class Config {
 
     public static final class General {
         public final ModConfigSpec.IntValue MAX_STACK_SIZE;
+        public final ModConfigSpec.DoubleValue TIME_SPEED_MULTIPLIER;
 
         private General(ModConfigSpec.Builder builder) {
             builder.push("general");
@@ -245,6 +248,11 @@ public final class Config {
                             "Requires restart to take full effect.")
                     .translation("config.stardewcraft.general.max_stack_size")
                     .defineInRange("maxStackSize", 999, 64, 999);
+            TIME_SPEED_MULTIPLIER = builder
+                    .comment("Stardew Valley clock speed multiplier.",
+                            "1.0 is the normal speed; fractional values are accumulated exactly.")
+                    .translation("config.stardewcraft.general.time_speed_multiplier")
+                    .defineInRange("timeSpeedMultiplier", 1.0D, 0.1D, 100.0D);
             builder.pop();
         }
     }

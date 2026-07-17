@@ -141,6 +141,13 @@ public class InteriorPortalInteractionEvents {
 
         // ── 星露谷维度 ──
 
+        // Fair participants stay on the festival map. Consume every ordinary building/mine/bus
+        // portal before it can start a fade transition, while preserving the dedicated Fair targets.
+        if (com.stardew.craft.festival.FairFestivalService.isParticipant(player)
+                && !isFairPortalTarget(targetId)) {
+            return;
+        }
+
         // 矿井入口
         if ("mine_entrance".equals(targetId)) {
             handleMineEntrance(player);
@@ -346,6 +353,17 @@ public class InteriorPortalInteractionEvents {
             return;
         }
 
+        // Farm creation registers its instance before the schematic is ready. Disable both
+        // Wizard Tower exits during that window so neither can start a competing transition or
+        // poison the completion warp's shared cooldown.
+        if ("wizard_tower_exit".equals(targetId) || "wizard_tower_return_overworld".equals(targetId)) {
+            com.stardew.craft.farm.FarmInstance farm = com.stardew.craft.farm.FarmInstanceRegistry.get()
+                    .getFarmForPlayer(player.getUUID());
+            if (farm != null && !farm.isInitialized()) {
+                return;
+            }
+        }
+
         // 巫师塔 → 回主世界
         if ("wizard_tower_return_overworld".equals(targetId)) {
             CrossDimensionTeleporter.wizardInteriorToOverworld(player);
@@ -431,6 +449,14 @@ public class InteriorPortalInteractionEvents {
             }
         }
         return Optional.empty();
+    }
+
+    private static boolean isFairPortalTarget(String targetId) {
+        return com.stardew.craft.festival.fair.FairSlingshotGameService.TARGET_ID.equals(targetId)
+            || com.stardew.craft.festival.fair.FairFishingGameService.TARGET_ID.equals(targetId)
+            || com.stardew.craft.festival.FairFestivalService.STAR_TOKEN_SHOP_TARGET_ID.equals(targetId)
+            || com.stardew.craft.festival.FairFestivalService.STAR_TOKEN_PURCHASE_TARGET_ID.equals(targetId)
+            || com.stardew.craft.festival.FairFestivalService.FORTUNE_TELLER_TARGET_ID.equals(targetId);
     }
 
     private static void applyInteriorFlag(ServerPlayer player, InteriorPortalRegistry.PortalMode mode) {

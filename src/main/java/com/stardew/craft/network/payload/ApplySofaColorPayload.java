@@ -8,6 +8,7 @@ import com.stardew.craft.block.utility.OakTableBlock;
 import com.stardew.craft.block.utility.SofaBlock;
 import com.stardew.craft.block.utility.WoodenChestColorPalette;
 import com.stardew.craft.item.ModItems;
+import com.stardew.craft.entity.seat.CushionEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;
@@ -22,7 +23,11 @@ import java.util.ArrayDeque;
 import java.util.HashSet;
 import java.util.Set;
 
-public record ApplySofaColorPayload(BlockPos targetPos, int colorIndex) implements CustomPacketPayload {
+public record ApplySofaColorPayload(BlockPos targetPos, int colorIndex, int targetEntityId) implements CustomPacketPayload {
+    public ApplySofaColorPayload(BlockPos targetPos, int colorIndex) {
+        this(targetPos, colorIndex, -1);
+    }
+
     @SuppressWarnings("null")
     public static final Type<ApplySofaColorPayload> TYPE =
         new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "apply_sofa_color"));
@@ -32,8 +37,9 @@ public record ApplySofaColorPayload(BlockPos targetPos, int colorIndex) implemen
         (buf, payload) -> {
             buf.writeBlockPos(payload.targetPos());
             buf.writeVarInt(payload.colorIndex());
+            buf.writeVarInt(payload.targetEntityId());
         },
-        buf -> new ApplySofaColorPayload(buf.readBlockPos(), buf.readVarInt())
+        buf -> new ApplySofaColorPayload(buf.readBlockPos(), buf.readVarInt(), buf.readVarInt())
     );
 
     @Override
@@ -54,15 +60,24 @@ public record ApplySofaColorPayload(BlockPos targetPos, int colorIndex) implemen
                 return;
             }
 
+            int clamped = WoodenChestColorPalette.clampIndex(payload.colorIndex());
+            if (clamped < 0) {
+                clamped = WoodenChestColorPalette.defaultColorIndex();
+            }
+
+            if (payload.targetEntityId() >= 0) {
+                if (player.level().getEntity(payload.targetEntityId()) instanceof CushionEntity cushion
+                        && player.distanceToSqr(cushion) <= 100.0D) {
+                    cushion.setColor(clamped);
+                }
+                return;
+            }
+
             if (player.distanceToSqr(payload.targetPos().getX() + 0.5D, payload.targetPos().getY() + 0.5D, payload.targetPos().getZ() + 0.5D) > 100.0D) {
                 return;
             }
 
             BlockState state = player.level().getBlockState(payload.targetPos());
-            int clamped = WoodenChestColorPalette.clampIndex(payload.colorIndex());
-            if (clamped < 0) {
-                clamped = WoodenChestColorPalette.defaultColorIndex();
-            }
 
             if (state.getBlock() instanceof SofaBlock) {
                 for (BlockPos sofaPos : collectConnectedSofas(payload.targetPos(), player.level())) {

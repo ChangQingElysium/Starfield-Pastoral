@@ -223,6 +223,8 @@ public final class MarlonService {
         if (!player.getInventory().add(recovered)) {
             player.drop(recovered, false);
         }
+        player.getInventory().setChanged();
+        player.inventoryMenu.broadcastChanges();
 
         // SDV parity: 买回 1 件后清空全部
         data.clearItemsLostLastDeath();

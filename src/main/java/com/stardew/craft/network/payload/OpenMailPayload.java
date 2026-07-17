@@ -88,6 +88,10 @@ public record OpenMailPayload(
     private static void handleClient(OpenMailPayload payload) {
         net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
         if (mc.player == null) return;
-        mc.setScreen(new com.stardew.craft.client.gui.LetterViewerScreen(payload));
+        net.minecraft.client.gui.screens.Screen parent =
+                mc.screen instanceof com.stardew.craft.client.gui.menu.StardewGameMenuScreen
+                        ? mc.screen
+                        : null;
+        mc.setScreen(new com.stardew.craft.client.gui.LetterViewerScreen(payload, parent));
     }
 }

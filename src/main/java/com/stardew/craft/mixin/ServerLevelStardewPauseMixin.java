@@ -8,7 +8,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.entity.EntityTickList;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 import java.util.function.Consumer;
@@ -30,18 +29,6 @@ public abstract class ServerLevelStardewPauseMixin {
     )
     private boolean stardewcraft$freezeTimedSimulation(TickRateManager tickRateManager) {
         return !stardewcraft$isPaused() && tickRateManager.runsNormally();
-    }
-
-    @ModifyArg(
-        method = "tick",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/server/level/ServerChunkCache;tick(Ljava/util/function/BooleanSupplier;Z)V"
-        ),
-        index = 1
-    )
-    private boolean stardewcraft$skipChunkSimulation(boolean tickChunks) {
-        return tickChunks && !stardewcraft$isPaused();
     }
 
     @WrapWithCondition(

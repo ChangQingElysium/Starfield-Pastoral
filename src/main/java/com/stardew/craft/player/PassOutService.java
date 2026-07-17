@@ -1,6 +1,7 @@
 package com.stardew.craft.player;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.core.ModDimensions;
 import com.stardew.craft.core.ModMiningDimensions;
 import com.stardew.craft.core.ModTags;
@@ -13,6 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.BedBlock;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.ArrayList;
@@ -67,13 +69,36 @@ public final class PassOutService {
      */
     private static final java.util.Map<java.util.UUID, PassOutResult> pendingPassOutResults = new java.util.concurrent.ConcurrentHashMap<>();
 
-    /** 晕倒惩罚结果 */
-    public record PassOutResult(PassOutType type, int moneyLost, List<net.minecraft.world.item.ItemStack> lostItems) {}
+    /** 晕倒惩罚结果；settlementDay 是应展示该结果的次日绝对日期。 */
+    public record PassOutResult(PassOutType type, int moneyLost,
+                                List<net.minecraft.world.item.ItemStack> lostItems,
+                                int settlementDay) {
+        /** 兼容旧调用方；无日期的结果不会被误用于新的夜间结算。 */
+        public PassOutResult(PassOutType type, int moneyLost, List<net.minecraft.world.item.ItemStack> lostItems) {
+            this(type, moneyLost, lostItems, Integer.MIN_VALUE);
+        }
+    }
 
     /** 消费指定玩家的晕倒结果（一次性），返回 null 表示该玩家未晕倒 */
     @javax.annotation.Nullable
     public static PassOutResult consumePassOutResult(java.util.UUID playerId) {
         return pendingPassOutResults.remove(playerId);
+    }
+
+    /** 只消费当前结算日的结果；过期结果直接丢弃，未来结果继续保留。 */
+    @javax.annotation.Nullable
+    public static PassOutResult consumePassOutResult(java.util.UUID playerId, int settlementDay) {
+        PassOutResult result = pendingPassOutResults.get(playerId);
+        if (result == null || result.settlementDay() > settlementDay) {
+            return null;
+        }
+        pendingPassOutResults.remove(playerId, result);
+        if (result.settlementDay() < settlementDay) {
+            LOGGER.warn("[PASSOUT] Discarded stale result for {} (resultDay={}, settlementDay={})",
+                playerId, result.settlementDay(), settlementDay);
+            return null;
+        }
+        return result;
     }
 
     public static boolean hasPendingPassOutResult(java.util.UUID playerId) {
@@ -209,25 +234,27 @@ public final class PassOutService {
             return 0;
         }
 
-        // 金币惩罚
-        int moneyLost = Math.min(1000, PlayerStardewDataAPI.getMoney(player) / 10);
+        boolean nearOwnBed = isNearOwnBed(player, 10);
+        int moneyLost = calculateOvernightMoneyLoss(PlayerStardewDataAPI.getMoney(player), nearOwnBed);
         if (moneyLost > 0) {
             PlayerStardewDataAPI.removeMoney(player, moneyLost);
         }
 
-        // 安排晕倒邮件
-        schedulePassOutMail(player, data, moneyLost);
+        // 在自己的床边只是没能及时入睡，不需要 NPC 救援。
+        if (!nearOwnBed) {
+            schedulePassOutMail(data);
+        }
         data.record2AmPassOut();
 
         // 不再发送单独的 PassOutPayload —— 晕倒数据将合并进 OvernightSettlementPayload，
         // 由客户端在结算流程中统一展示（先渐黑→摘要→升级→出货），避免两个画面冲突。
         pendingPassOutResults.put(player.getUUID(),
-                new PassOutResult(PassOutType.EXHAUSTION_2AM, moneyLost, List.of()));
+                new PassOutResult(PassOutType.EXHAUSTION_2AM, moneyLost, List.of(), nextSettlementDay()));
 
         syncAndSave(player, data);
 
-        LOGGER.info("[PASSOUT] {} 2AM pass out — lost {}g",
-                player.getName().getString(), moneyLost);
+        LOGGER.info("[PASSOUT] {} 2AM pass out — lost {}g{}",
+                player.getName().getString(), moneyLost, nearOwnBed ? " (near own bed)" : "");
 
         return moneyLost;
     }
@@ -252,26 +279,66 @@ public final class PassOutService {
             return;
         }
 
-        // 金币惩罚（同 2AM）
-        int moneyLost = Math.min(1000, PlayerStardewDataAPI.getMoney(player) / 10);
+        boolean nearOwnBed = isNearOwnBed(player, 10);
+        int moneyLost = calculateOvernightMoneyLoss(PlayerStardewDataAPI.getMoney(player), nearOwnBed);
         if (moneyLost > 0) {
             PlayerStardewDataAPI.removeMoney(player, moneyLost);
         }
 
-        // 安排晕倒邮件
-        schedulePassOutMail(player, data, moneyLost);
+        if (!nearOwnBed) {
+            schedulePassOutMail(data);
+        }
         data.recordExhaustionPassOut();
 
         data.setEnergy(0.0F);
 
         pendingPassOutResults.put(player.getUUID(),
-            new PassOutResult(PassOutType.EXHAUSTION_STAMINA, moneyLost, List.of()));
+            new PassOutResult(PassOutType.EXHAUSTION_STAMINA, moneyLost, List.of(), nextSettlementDay()));
 
         syncAndSave(player, data);
         com.stardew.craft.event.DimensionEventHandler.requestPassOutAdvance(player);
 
-        LOGGER.info("[PASSOUT] {} exhaustion pass out — lost {}g",
-                player.getName().getString(), moneyLost);
+        LOGGER.info("[PASSOUT] {} exhaustion pass out — lost {}g{}",
+                player.getName().getString(), moneyLost, nearOwnBed ? " (near own bed)" : "");
+    }
+
+    static int calculateOvernightMoneyLoss(int money, boolean nearOwnBed) {
+        if (nearOwnBed || money <= 0) {
+            return 0;
+        }
+        return Math.min(1000, money / 10);
+    }
+
+    private static int nextSettlementDay() {
+        return com.stardew.craft.time.StardewTimeManager.get().getAbsoluteDay() + 1;
+    }
+
+    /** 查找玩家所属农场内、半径范围中的真实床方块。 */
+    private static boolean isNearOwnBed(ServerPlayer player, int radius) {
+        if (player.level().dimension() != ModDimensions.STARDEW_VALLEY) {
+            return false;
+        }
+        var farm = com.stardew.craft.farm.FarmInstanceRegistry.get()
+            .getFarmForPlayer(player.getUUID());
+        if (farm == null || !farm.contains(player.blockPosition())) {
+            return false;
+        }
+
+        net.minecraft.core.BlockPos center = player.blockPosition();
+        int radiusSq = radius * radius;
+        for (net.minecraft.core.BlockPos pos : net.minecraft.core.BlockPos.betweenClosed(
+                center.offset(-radius, -radius, -radius), center.offset(radius, radius, radius))) {
+            if (center.distSqr(pos) > radiusSq || !farm.contains(pos)) {
+                continue;
+            }
+            var state = player.level().getBlockState(pos);
+            if (state.getBlock() instanceof BedBlock
+                    || state.is(ModBlocks.BED_1.get())
+                    || state.is(ModBlocks.BED_2.get())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // ──────────────────────────────────────
@@ -360,11 +427,7 @@ public final class PassOutService {
     }
 
     private static long serverTick(ServerPlayer player) {
-        if (player.level() instanceof net.minecraft.server.level.ServerLevel level
-                && com.stardew.craft.time.StardewTimePauseService.isStardewTimeDimension(level)) {
-            return level.getGameTime();
-        }
-        return player.server.overworld().getGameTime();
+        return player.server.getTickCount();
     }
 
     /**
@@ -421,7 +484,7 @@ public final class PassOutService {
         }
     }
 
-    private static void schedulePassOutMail(ServerPlayer player, PlayerStardewData data, int moneyLost) {
+    private static void schedulePassOutMail(PlayerStardewData data) {
         // 简化版：Linus 40%, Harvey 40%, Marlon 20%
         double roll = RANDOM.nextDouble();
         String mailId;

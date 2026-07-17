@@ -17,6 +17,7 @@
     "MinecraftServerTimeSyncMixin",
     "ServerLevelSleepMixin",
     "ServerLevelStardewPauseMixin",
+    "ServerChunkCacheStardewPauseMixin",
     "LevelWeatherStateMixin",
     "ServerLevelSkeletonHorseTrapMixin",
     "ManagedAnimalEntityLoadMixin",

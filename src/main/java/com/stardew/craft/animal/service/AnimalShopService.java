@@ -76,6 +76,9 @@ public final class AnimalShopService {
 
         List<OpenAnimalPurchaseScreenPayload.BuildingOption> buildings = new ArrayList<>();
         for (var building : data.getBuildings()) {
+            if (!building.active()) {
+                continue;
+            }
             if (!com.stardew.craft.farm.FarmInstanceRegistry.get()
                     .canOperateBuilding(player.getUUID(), building.ownerPlayerUuid())) {
                 continue;
