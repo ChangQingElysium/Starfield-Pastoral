@@ -1,6 +1,5 @@
 package com.stardew.craft.cutscene.network;
 
-import com.mojang.logging.LogUtils;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.cutscene.runtime.CutsceneAnchorRegistry;
 import io.netty.buffer.ByteBuf;
@@ -9,7 +8,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
-import org.slf4j.Logger;
 
 /**
  * Server → Client: register a named cutscene anchor origin for the current player.
@@ -24,7 +22,6 @@ import org.slf4j.Logger;
 public record CutsceneAnchorPayload(String name, double x, double y, double z)
         implements CustomPacketPayload {
 
-    private static final Logger LOGGER = LogUtils.getLogger();
 
     public static final Type<CutsceneAnchorPayload> TYPE = new Type<>(
             ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "cutscene_anchor"));
@@ -39,8 +36,6 @@ public record CutsceneAnchorPayload(String name, double x, double y, double z)
     public static void handle(CutsceneAnchorPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
             CutsceneAnchorRegistry.set(payload.name, payload.x, payload.y, payload.z);
-            LOGGER.debug("Registered cutscene anchor '{}' at ({}, {}, {})",
-                    payload.name, payload.x, payload.y, payload.z);
         });
     }
 

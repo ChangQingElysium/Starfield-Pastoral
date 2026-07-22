@@ -95,37 +95,6 @@
       ]
     },
     {
-      "id": "carp",
-      "precedence": 100,
-      "item": "stardewcraft:carp",
-      "chance": 0.4,
-      "difficulty": 15,
-      "motionType": 0,
-      "minFishSize": 15,
-      "maxFishSize": 50,
-      "minFishingLevel": 0,
-      "maxDepth": 1,
-      "depthMultiplier": 0.1,
-      "biomeTags": [
-        "#stardewcraft:is_forest_pond",
-        "#stardewcraft:is_mountain_lake",
-        "#stardewcraft:is_secret_woods"
-      ],
-      "timeRanges": [
-        [
-          600,
-          2600
-        ]
-      ],
-      "weather": "any",
-      "spawnRate": 0.45,
-      "seasons": [
-        "spring",
-        "summer",
-        "fall"
-      ]
-    },
-    {
       "id": "perch",
       "precedence": 0,
       "item": "stardewcraft:perch",
@@ -180,37 +149,6 @@
       "spawnRate": 0.33,
       "fishAreaId": "Lake",
       "seasons": [
-        "fall",
-        "winter"
-      ]
-    },
-    {
-      "id": "woodskip",
-      "precedence": 100,
-      "item": "stardewcraft:woodskip",
-      "chance": 0.15,
-      "difficulty": 50,
-      "motionType": 0,
-      "minFishSize": 11,
-      "maxFishSize": 30,
-      "minFishingLevel": 0,
-      "maxDepth": 3,
-      "depthMultiplier": 0.1,
-      "biomeTags": [
-        "#stardewcraft:is_secret_woods",
-        "#stardewcraft:is_forest_pond"
-      ],
-      "timeRanges": [
-        [
-          600,
-          2600
-        ]
-      ],
-      "weather": "any",
-      "spawnRate": 0.2,
-      "seasons": [
-        "spring",
-        "summer",
         "fall",
         "winter"
       ]
@@ -703,6 +641,9 @@
       "precedence": 0,
       "item": "stardewcraft:river_jelly",
       "chance": 0.1,
+      "ignoreFishDataRequirements": true,
+      "useFishCaughtSeededRandom": true,
+      "chanceBoostPerLuckLevel": 0.05,
       "difficulty": 20,
       "motionType": 0,
       "minFishingLevel": 0,

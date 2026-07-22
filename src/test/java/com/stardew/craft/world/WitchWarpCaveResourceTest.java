@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class WitchWarpCaveResourceTest {
@@ -32,5 +33,20 @@ class WitchWarpCaveResourceTest {
         JsonObject variants = JsonParser.parseString(Files.readString(blockstate))
                 .getAsJsonObject().getAsJsonObject("variants");
         assertEquals(180, variants.getAsJsonObject("facing=south").get("y").getAsInt());
+    }
+
+    @Test
+    void sealIsNonCollidingAndUsesPerPlayerVisibilityAndAccess() throws Exception {
+        String blocks = Files.readString(PROJECT.resolve(
+                "src/main/java/com/stardew/craft/block/ModBlocks.java"));
+        int seal = blocks.indexOf("DARK_TALISMAN_SEAL =");
+        String registration = blocks.substring(seal, blocks.indexOf("));", seal) + 3);
+        assertTrue(registration.contains(".noCollission()"));
+
+        String service = Files.readString(PROJECT.resolve(
+                "src/main/java/com/stardew/craft/manager/WitchWarpCaveService.java"));
+        assertTrue(service.contains("hidden ? Blocks.AIR.defaultBlockState()"));
+        assertTrue(service.contains("!hasDarkTalisman && SEALED_AREA.intersects"));
+        assertFalse(service.contains("static boolean hasDarkTalisman"));
     }
 }

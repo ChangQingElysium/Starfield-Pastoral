@@ -136,6 +136,12 @@ final class CutsceneActionManifest {
                             + integer(command, "z", 0) + ":" + bool(command, "open", true),
                     branch);
             case "teleport_cc" -> action("teleport_cc", "", branch);
+            case "place_player" -> action(
+                    "place_player",
+                    decimal(command, "x", 0.0) + "," + decimal(command, "y", 0.0) + ","
+                            + decimal(command, "z", 0.0) + "," + decimal(command, "yaw", 0.0) + ","
+                            + decimal(command, "pitch", 0.0),
+                    branch);
             case "egg_festival_stage" -> action(
                     "egg_festival_blackout", string(command, "stage", "main"), branch);
             case "egg_festival_finish" -> action("egg_festival_award_complete", "", branch);
@@ -160,6 +166,10 @@ final class CutsceneActionManifest {
 
     private static int integer(JsonObject object, String key, int fallback) {
         return object.has(key) ? object.get(key).getAsInt() : fallback;
+    }
+
+    private static double decimal(JsonObject object, String key, double fallback) {
+        return object.has(key) ? object.get(key).getAsDouble() : fallback;
     }
 
     private static boolean bool(JsonObject object, String key, boolean fallback) {

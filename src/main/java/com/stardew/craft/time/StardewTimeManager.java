@@ -320,6 +320,7 @@ public class StardewTimeManager extends SavedData {
                     runWorldDailyStep("trees", () -> com.stardew.craft.manager.TreeGrowthManager.get(stardewLevel).growDaily(stardewLevel));
                     runWorldDailyStep("fruit_trees", () -> com.stardew.craft.manager.FruitTreeGrowthManager.get(stardewLevel).growDaily(stardewLevel));
                     runWorldDailyStep("wild_tree_seeds", () -> com.stardew.craft.manager.WildTreeSeedManager.get(stardewLevel).onNewDay(stardewLevel, absDay));
+                    runWorldDailyStep("farm_debris", () -> com.stardew.craft.farm.FarmDebrisDailyService.onNewDay(stardewLevel));
                     runWorldDailyStep("sprinklers", () -> com.stardew.craft.manager.SprinklerManager.get(stardewLevel).waterDaily(stardewLevel));
                     runWorldDailyStep("pasture_grass", () -> com.stardew.craft.manager.PastureGrassGrowthManager.get(stardewLevel).growDaily(stardewLevel));
                     runWorldDailyStep("animals", () -> com.stardew.craft.manager.AnimalGrowthManager.get(stardewLevel).growDaily(stardewLevel));

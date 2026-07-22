@@ -160,8 +160,8 @@ public final class FishingSession {
 						this.waterDepth = 5;
 						this.inSplash = false;
 					} else {
-						// SDV uses tile coords with practical max ~5 (legendary maxDepth). Cap to 5 to match.
-						this.waterDepth = FishingWaterDepthService.estimateClearWaterDistance(level, hookPos, 5);
+						// Caldera's vanilla location data has distinct rolls through water depth 8.
+						this.waterDepth = FishingWaterDepthService.estimateClearWaterDistance(level, hookPos, 8);
 						// SDV: bobber within fishSplashPoint rect → timeUntilFishingBite /= 4 + later +0.4 chance + +1 depth.
 						try {
 							com.stardew.craft.fishing.splash.FishSplashState fs =

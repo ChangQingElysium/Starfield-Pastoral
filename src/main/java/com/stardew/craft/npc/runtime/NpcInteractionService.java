@@ -169,6 +169,9 @@ public final class NpcInteractionService {
             return com.stardew.craft.joja.MorrisService.handle(serverPlayer, npc);
         }
         ItemStack held = serverPlayer.getItemInHand(hand);
+        if ("henchman".equals(npcId)) {
+            return com.stardew.craft.world.HenchmanService.handleInteraction(serverPlayer, npc, hand);
+        }
 
         DayContext dayContext = currentDayContext(serverLevel);
 

@@ -44,6 +44,7 @@ public record MarkEventSeenPayload(String eventId, long sessionId) implements Cu
             com.stardew.craft.festival.LuauFestivalService.onCutsceneCompleted(player, payload.eventId);
             com.stardew.craft.festival.MoonlightJelliesFestivalService.onCutsceneCompleted(player, payload.eventId);
             com.stardew.craft.festival.FestivalOfIceService.onCutsceneCompleted(player, payload.eventId);
+            com.stardew.craft.quest.DarkTalismanQuestService.onCutsceneCompleted(player, payload.eventId);
             EventSeenData data = EventSeenData.get(player.serverLevel());
             boolean winterStarRuntimeEvent = com.stardew.craft.festival.WinterStarFestivalService
                     .onCutsceneCompleted(player, payload.eventId);

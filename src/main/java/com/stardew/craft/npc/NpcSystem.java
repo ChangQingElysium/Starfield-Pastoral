@@ -15,6 +15,8 @@ import com.stardew.craft.npc.runtime.NpcChunkForceManager;
 import com.stardew.craft.npc.runtime.NpcRuntimeManager;
 import com.stardew.craft.npc.runtime.NpcScheduleRuntimeService;
 import com.stardew.craft.npc.runtime.NpcSpawnManager;
+import com.stardew.craft.server.performance.PerformanceTiming;
+import com.stardew.craft.server.performance.ServerPerformanceRecorder;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Items;
@@ -25,6 +27,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 @EventBusSubscriber(modid = StardewCraft.MODID)
@@ -43,6 +46,15 @@ public final class NpcSystem {
 
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
+        long startedAt = ServerPerformanceRecorder.startTiming();
+        try {
+            tickServer(event);
+        } finally {
+            ServerPerformanceRecorder.finishTiming(PerformanceTiming.NPC_TICK, startedAt);
+        }
+    }
+
+    private static void tickServer(ServerTickEvent.Post event) {
         NpcRuntimeManager.tickServer(event.getServer());
         ServerLevel level = event.getServer().getLevel(ModDimensions.STARDEW_VALLEY);
         if (level == null) {
@@ -103,6 +115,12 @@ public final class NpcSystem {
             } else {
             }
         }
+    }
+
+    @SubscribeEvent
+    public static void onServerStopped(ServerStoppedEvent event) {
+        NpcRuntimeManager.onServerStopped(event.getServer());
+        previouslyHadPlayers = false;
     }
 
     /**

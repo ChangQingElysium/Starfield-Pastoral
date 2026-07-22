@@ -30,6 +30,8 @@ public record CloseNpcDialoguePayload(String npcId) implements CustomPacketPaylo
         context.enqueueWork(() -> {
             if (context.player() instanceof ServerPlayer serverPlayer) {
                 NpcInteractionService.handleDialogueClosed(serverPlayer, payload.npcId());
+                com.stardew.craft.sewer.KrobusUnsealEffectService.onDialogueClosed(serverPlayer, payload.npcId());
+                com.stardew.craft.world.HenchmanService.onDialogueClosed(serverPlayer, payload.npcId());
             }
         });
     }

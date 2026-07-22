@@ -1,5 +1,67 @@
 # Changelog
 
+## 0.5.2 - 2026-07-22
+
+### Update Log (English)
+
+#### Dark Talisman And Witch Questline
+
+- Implemented the Wizard's late-game quest chain from the Dark Talisman opening event through Krobus, the Mutant Bug Lair, the Witch's Swamp, the Henchman, Magic Ink and the final magic-building catalogue unlock.
+- Added the Mutant Bug Lair and Witch's Swamp as dedicated gameplay areas with their own biome treatment, music, fishing pools, portals, access seals and monster rules. Dark Talisman, Henchman and Magic Ink progression is tracked independently for every player in multiplayer.
+- Added the supplied Henchman, magic catalogue and related world assets, source-style quest feedback, per-player one-time rewards and cutscene/camera support for the new events.
+
+#### Wizard Buildings
+
+- Added the Wizard's source-style magical catalogue for obtaining placeable Junimo Hut, Earth Obelisk, Water Obelisk, Desert Obelisk, Island Obelisk and Gold Clock items. Purchases grant the selected item directly instead of entering Robin's construction-placement workflow.
+- Implemented model-sized placement, rotation, collision and farm ownership checks for the magical buildings. Buildings can be reclaimed with the appropriate tool, drop exactly one item from any occupied cell and now use building-icon hit and destruction particles across their full footprint.
+- Implemented functional obelisk warps and restored the Return Scepter to its original single-purpose farm-return behavior while preserving its animated name, enchantment glint and special tooltip styling.
+- Implemented Junimo Hut crop harvesting with worker spawning, source-style movement and return behavior, held-item animations, sounds, item storage and raisin support. Improved three-dimensional navigation and harvesting arrival handling around the hut and crops.
+- Implemented the Gold Clock's active/inactive states, live hour and minute hands, source-aligned farm protection and a solid full-box collision volume. Corrected model orientation, UV handling, textures and hand pivots.
+
+#### Farm, Fishing And Runtime Parity
+
+- Reworked daily farm weeds, stones, existing fallen-log spreading, seasonal grass behavior and fence decay toward the original game rules. Active Gold Clocks suppress the relevant debris and decay processes without introducing unsupported debris blocks.
+- Hardened farm lifecycle and offline catch-up with ownership-aware occupancy tracking, targeted temporary chunk leases and deterministic crop, tree and sprinkler plans. Added safe cleanup and instrumentation for expensive farm operations.
+- Reworked fishing location resolution and source data for regular areas, festivals, mine floors, the Mutant Bug Lair and Witch's Swamp. Fixed stacked duplicate pools, first-catch festival locking, mine rare-fish chances, random catch groups, year/luck conditions and several multiplayer session edge cases.
+- Added Data Map compatibility for external Minecraft and third-party foods so configured items retain their original food behavior while applying Stardew energy and health effects inside Stardew dimensions.
+
+#### Administration, Compatibility And Verification
+
+- Added `/stardew perf start|stop|status|reset` for opt-in server performance diagnostics and a persistent action for dismissing the login community announcement. Routine development logging now defaults to INFO.
+- Improved synchronized client-content snapshot handling, NPC and cutscene state cleanup, festival/fishing isolation, area protection and several portal, interaction and time-flow edge cases uncovered during the new quest implementation.
+- Completed the new Wizard quest and building text across all 12 shipped languages and expanded regression coverage for cutscenes, quest resources, areas, fishing, farm catch-up, performance tracking, external food compatibility, navigation and Gold Clock time display.
+- Updated the public mod version to `0.5.2`.
+
+### 更新日志（中文）
+
+#### 黑暗护身符与女巫任务线
+
+- 实装法师后期任务链：从“黑暗护身符”开场事件、科罗布斯与突变虫穴，一直到女巫沼泽、哥布林、魔法墨水和最终解锁魔法建筑目录。
+- 将突变虫穴与女巫沼泽接入正式游戏区域，补全专属群系、音乐、钓鱼池、传送、封印与怪物规则。黑暗护身符、哥布林和魔法墨水进度在多人游戏中按玩家独立记录。
+- 接入哥布林、魔法目录及相关场景资源，补全原版风格任务反馈、每玩家一次性奖励，以及新事件所需的过场和摄像机支持。
+
+#### 法师建筑
+
+- 新增原版风格的法师魔法建筑目录，可获得并放置祝尼魔屋、土之图腾柱、水之图腾柱、沙漠图腾柱、姜岛图腾柱和黄金时钟。购买后直接获得对应物品，不进入罗宾建造定位流程。
+- 为魔法建筑实装按模型尺寸的放置、旋转、碰撞与农场权限校验。现在可用对应工具敲掉并回收，从任意占地格破坏都只掉落一份建筑物品，命中与破坏碎片也会按整座建筑的占地范围和物品图标生成。
+- 实装各图腾柱传送，并将传送法杖恢复为原版“返回权杖”的单一返回农场功能，同时保留流光名称、附魔光效与特殊提示框。
+- 实装祝尼魔屋自动收割：工作者生成、原版风格行走与返回、手持物动画、音效、物品存储与葡萄干效果均已接入；同时改进小屋和作物周围的三维寻路与到达判定。
+- 实装黄金时钟开启/关闭状态、实时时针与分针、原版规则的农场保护，以及一体化箱式碰撞。修正模型朝向、UV、开关贴图与指针枢轴。
+
+#### 农场、钓鱼与运行逻辑对齐
+
+- 按原版规则重做农场每日杂草、石头、现有倒地原木扩散、季节牧草及篱笆腐烂逻辑。开启的黄金时钟会正确拦截对应杂物与腐烂流程，不再引入项目中不存在的杂物方块。
+- 通过按农场归属的占用跟踪、定向临时区块租约，以及确定性作物/树木/洒水器计划，加固农场生命周期与离线追赶；同时增加安全清理与高开销农场操作计时。
+- 重做普通地点、节日、矿井、突变虫穴和女巫沼泽的钓鱼区域解析与原版数据。修复钓鱼池重复叠加、节日首鱼锁死、矿井稀有鱼概率、随机捕获组、年份/幸运条件及若干多人会话边界问题。
+- 新增 Data Map 外部食物兼容：配置后的 Minecraft 原版或第三方食物会保留原有进食逻辑，并在星露谷维度内结算对应能量与生命效果。
+
+#### 管理、兼容与验证
+
+- 新增 `/stardew perf start|stop|status|reset` 指令，用于按需开启服务端性能诊断；登录社区公告增加持久化关闭操作。日常开发日志默认级别改为 INFO。
+- 改进客户端内容快照同步、NPC 与过场状态清理、节日/钓鱼隔离、区域保护，以及新任务实装中暴露的若干传送、交互与时间流边界问题。
+- 为全部 12 种已发布语言补齐新增法师任务与建筑文本，并扩展过场、任务资源、区域、钓鱼、农场追赶、性能统计、外部食物、寻路与黄金时钟显时的回归验证。
+- 项目公开版本号更新为 `0.5.2`。
+
 ## 0.5.1fix4 - 2026-07-18
 
 ### Update Log (English)

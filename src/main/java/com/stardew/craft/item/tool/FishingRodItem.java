@@ -46,6 +46,7 @@ public class FishingRodItem extends net.minecraft.world.item.FishingRodItem impl
 	private static final String TAG_DAMAGE = "damage";
 	private static final String TAG_CUSTOM_DATA = "custom_data";
 	private static final String TAG_FAIR_TEMPORARY = "FairTemporaryRod";
+	private static final String TAG_TEMPORARY_ROD_OWNER = "TemporaryRodOwner";
 	private static final String TAG_FAIR_ATTACHMENT_SLOTS = "FairAttachmentSlots";
 
 	public enum RodTier {
@@ -139,6 +140,11 @@ public class FishingRodItem extends net.minecraft.world.item.FishingRodItem impl
 	}
 
 	public static void configureFairTemporaryRod(ItemStack rodStack, ItemStack attachment0, ItemStack attachment1) {
+		configureFairTemporaryRod(rodStack, "", attachment0, attachment1);
+	}
+
+	public static void configureFairTemporaryRod(ItemStack rodStack, String owner,
+			ItemStack attachment0, ItemStack attachment1) {
 		if (rodStack == null || !(rodStack.getItem() instanceof FishingRodItem)) {
 			return;
 		}
@@ -151,6 +157,11 @@ public class FishingRodItem extends net.minecraft.world.item.FishingRodItem impl
 			tag.put(TAG_ROOT, root);
 		}
 		root.putBoolean(TAG_FAIR_TEMPORARY, true);
+		if (owner == null || owner.isBlank()) {
+			root.remove(TAG_TEMPORARY_ROD_OWNER);
+		} else {
+			root.putString(TAG_TEMPORARY_ROD_OWNER, owner);
+		}
 		root.putInt(TAG_FAIR_ATTACHMENT_SLOTS, 2);
 		setCustomData(rodStack, tag);
 		writeStack(rodStack, TAG_BAIT, attachment0);
@@ -160,6 +171,15 @@ public class FishingRodItem extends net.minecraft.world.item.FishingRodItem impl
 	public static boolean isFairTemporaryRod(ItemStack rodStack) {
 		CompoundTag root = getRootOrNull(rodStack);
 		return root != null && root.getBoolean(TAG_FAIR_TEMPORARY);
+	}
+
+	public static boolean isFairTemporaryRod(ItemStack rodStack, String owner) {
+		CompoundTag root = getRootOrNull(rodStack);
+		return root != null
+			&& root.getBoolean(TAG_FAIR_TEMPORARY)
+			&& owner != null
+			&& !owner.isBlank()
+			&& owner.equals(root.getString(TAG_TEMPORARY_ROD_OWNER));
 	}
 
 	private static int fairAttachmentSlots(ItemStack rodStack) {

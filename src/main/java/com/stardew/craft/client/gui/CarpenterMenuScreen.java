@@ -24,7 +24,8 @@ import java.util.List;
 /**
  * Client-side screen replicating SDV's CarpenterMenu.
  * Displays building blueprints with preview, description, cost, materials, and build time.
- * Instead of on-farm placement, purchasing gives the player a manager item.
+ * Wizard purchases are deliberately adapted to grant a building item instead
+ * of entering vanilla's on-farm placement mode.
  */
 @OnlyIn(Dist.CLIENT)
 @SuppressWarnings({"null", "unused"})
@@ -54,7 +55,6 @@ public class CarpenterMenuScreen extends Screen {
     // cols = 704 / 64 = 11; row = 47/11=4, col = 47%11=3 → u=192, v=256
     private static final int BACK_W = 12, BACK_H = 11;
     private static final int FWD_W = 12, FWD_H = 11;
-    private static final float MANAGER_PREVIEW_SCALE = 3.0f;
     // Texture box border (from IClickableMenu.drawTextureBox)
     private static final int BOX_U = 384, BOX_V = 373, BOX_W = 18, BOX_H = 18;
     // Scroll banner background (SpriteText scroll: 325,318,11,18 in mouseCursors)
@@ -66,10 +66,17 @@ public class CarpenterMenuScreen extends Screen {
     private static final int BG_TINT          = 0x99000000;
     private static final int TEXT_COLOR        = 0xFF5C2B00; // SDV Game1.textColor (brown)
     private static final int RED_COLOR         = 0xFFFF0000; // SDV Color.Red
+    private static final int MAGICAL_TEXT_COLOR = 0xFFEEE8AA; // XNA Color.PaleGoldenrod
+    private static final int MAGICAL_SHADOW_COLOR = 0x405C2B00;
+    private static final int MAGICAL_PRICE_SHADOW_COLOR = 0x805C2B00;
+    private static final float ROYAL_BLUE_R = 65.0F / 255.0F;
+    private static final float ROYAL_BLUE_G = 105.0F / 255.0F;
+    private static final float ROYAL_BLUE_B = 225.0F / 255.0F;
 
     // =========================================================================
     // State
     // =========================================================================
+    private final String builder;
     private final List<CarpenterBlueprint> blueprints;
     private int playerMoney;
     private int currentIndex = 0;
@@ -84,9 +91,11 @@ public class CarpenterMenuScreen extends Screen {
     private int cancelX, cancelY, cancelW, cancelH;
     private int backX, backY, backW, backH;
     private int fwdX, fwdY, fwdW, fwdH;
+    private int closeX, closeY, closeW, closeH;
 
     public CarpenterMenuScreen(OpenCarpenterMenuPayload payload) {
         super(Component.literal("Carpenter Menu"));
+        this.builder = payload.builder();
         this.blueprints = payload.blueprints();
         this.playerMoney = payload.playerMoney();
     }
@@ -173,6 +182,12 @@ public class CarpenterMenuScreen extends Screen {
         cancelY = sdvYPos + ui(MAX_VIEWER_H + 64);
         cancelW = ui(64);
         cancelH = ui(64);
+
+        // IClickableMenu.initialize(..., showUpperRightCloseButton: true)
+        closeX = sdvXPos + sdvTotalW - ui(36);
+        closeY = sdvYPos - ui(8);
+        closeW = Math.round(12 * s4);
+        closeH = Math.round(12 * s4);
     }
 
     // =========================================================================
@@ -185,8 +200,8 @@ public class CarpenterMenuScreen extends Screen {
 
         // Back button
         if (isInside(mx, my, backX, backY, backW, backH)) {
-            if (currentIndex > 0) {
-                currentIndex--;
+            if (blueprints.size() > 1) {
+                currentIndex = Math.floorMod(currentIndex - 1, blueprints.size());
                 playSound(ModSounds.SHWIP.get());
             }
             return true;
@@ -194,8 +209,8 @@ public class CarpenterMenuScreen extends Screen {
 
         // Forward button
         if (isInside(mx, my, fwdX, fwdY, fwdW, fwdH)) {
-            if (currentIndex < blueprints.size() - 1) {
-                currentIndex++;
+            if (blueprints.size() > 1) {
+                currentIndex = (currentIndex + 1) % blueprints.size();
                 playSound(ModSounds.SHWIP.get());
             }
             return true;
@@ -209,6 +224,12 @@ public class CarpenterMenuScreen extends Screen {
 
         // Cancel button (close)
         if (isInside(mx, my, cancelX, cancelY, cancelW, cancelH)) {
+            playSound(ModSounds.CANCEL.get());
+            onClose();
+            return true;
+        }
+
+        if (isInside(mx, my, closeX, closeY, closeW, closeH)) {
             playSound(ModSounds.CANCEL.get());
             onClose();
             return true;
@@ -245,7 +266,7 @@ public class CarpenterMenuScreen extends Screen {
 
         purchasePending = true;
         playSound(ModSounds.PURCHASE_CLICK.get());
-        PacketDistributor.sendToServer(new CarpenterPurchasePayload(currentIndex));
+        PacketDistributor.sendToServer(new CarpenterPurchasePayload(builder, currentIndex));
     }
 
     private boolean canBuildCurrent() {
@@ -300,10 +321,10 @@ public class CarpenterMenuScreen extends Screen {
         int sdvYPos = height / 2 - ui(MAX_VIEWER_H) / 2 - ui(SPACE_TOP) + ui(32);
         int sdvTotalW = ui(MAX_VIEWER_W + MAX_DESC_W + SPACE_SIDE * 2 + 64);
 
-        // 3. Building viewer box — SDV uses default IClickableMenu.drawTextureBox.
-        CommonGuiTextures.drawTextureBox(g, viewerX, viewerY, viewerW, viewerH, s4, true);
+        // 3. MagicalConstruction uses Color.RoyalBlue; Robin uses Color.White.
+        drawBlueprintBox(g, viewerX, viewerY, viewerW, viewerH, s4, bp.magicalConstruction());
 
-        // 4. Manager block preview (centered in viewer)
+        // 4. Building preview (centered in viewer)
         drawManagerPreview(g, bp);
 
         // 5. Upgrade icon (if applicable)
@@ -316,8 +337,8 @@ public class CarpenterMenuScreen extends Screen {
         // 6. Building name with scroll banner
         drawNameWithScroll(g, bp, sdvXPos, sdvYPos, s4);
 
-        // 7. Description box — SDV uses default IClickableMenu.drawTextureBox.
-        CommonGuiTextures.drawTextureBox(g, descX, descY, descW, descH, s4, true);
+        // 7. Description box follows the same MagicalConstruction tint.
+        drawBlueprintBox(g, descX, descY, descW, descH, s4, bp.magicalConstruction());
 
         // 8. Description text
         drawDescription(g, bp, sdvXPos, sdvYPos, s4);
@@ -329,8 +350,8 @@ public class CarpenterMenuScreen extends Screen {
         drawMaterials(g, bp, sdvXPos, sdvYPos, s4);
 
         // 12. Navigation buttons
-        drawBackArrowButton(g, mouseX, mouseY, currentIndex > 0, s4);
-        drawForwardArrowButton(g, mouseX, mouseY, currentIndex < blueprints.size() - 1, s4);
+        drawBackArrowButton(g, mouseX, mouseY, blueprints.size() > 1, s4);
+        drawForwardArrowButton(g, mouseX, mouseY, blueprints.size() > 1, s4);
 
         // 13. OK button (tinted gray if can't build)
         boolean canBuild = canBuildCurrent();
@@ -347,6 +368,9 @@ public class CarpenterMenuScreen extends Screen {
         float cancelScale = 1.0f / guiScale;
         CommonGuiTextures.drawLargeCancelButton(g, cancelX, cancelY, cancelScale);
 
+        // IClickableMenu's upper-right close button is present in vanilla too.
+        CommonGuiTextures.drawCloseButton(g, closeX, closeY, s4);
+
         // 15. Tooltip / hover text
         drawTooltip(g, mouseX, mouseY);
     }
@@ -359,7 +383,9 @@ public class CarpenterMenuScreen extends Screen {
 
         ItemStack stack = new ItemStack(item);
 
-        float itemScale = MANAGER_PREVIEW_SCALE * s4();
+        // The square icon canvas preserves the original building sprite's dimensions.
+        // Scaling that canvas by SDV's 4x pixel zoom recreates drawInMenu proportions.
+        float itemScale = Math.max(16, bp.previewCanvasSize()) / 16.0F * s4();
         int renderSize = Math.round(16 * itemScale);
         int centerX = viewerX + viewerW / 2;
         int centerY = viewerY + viewerH / 2;
@@ -399,23 +425,17 @@ public class CarpenterMenuScreen extends Screen {
 
     private void drawDescription(GuiGraphics g, CarpenterBlueprint bp, int sdvXPos, int sdvYPos, float s4) {
         // SDV exact: text at (xPositionOnScreen + maxWidthOfBuildingViewer, yPositionOnScreen + 80 + 16)
-        int textX = descX + ui(32);
-        int textY = descY + ui(32);
-        int maxWidth = descW - ui(64);
-        int maxBottom = sdvYPos + ui(256 + 32) - ui(12);
+        int textX = descX + ui(16);
+        int textY = descY + ui(16);
+        int maxWidth = descW - ui(32);
 
-        // Wrap against the actual box width and stop before the price/material area.
         List<FormattedCharSequence> lines = font.split(bp.description(), maxWidth);
-        int maxLines = Math.max(1, (maxBottom - textY) / (font.lineHeight + 2));
-        boolean truncated = lines.size() > maxLines;
-        int drawnLines = Math.min(lines.size(), maxLines);
-        for (int index = 0; index < drawnLines; index++) {
-            FormattedCharSequence line = lines.get(index);
-            if (truncated && index == drawnLines - 1) {
-                String clipped = font.plainSubstrByWidth(bp.description().getString(), Math.max(0, maxWidth - font.width("...")));
-                line = font.split(Component.literal(clipped + "..."), maxWidth).get(0);
+        for (FormattedCharSequence line : lines) {
+            if (bp.magicalConstruction()) {
+                drawMagicalText(g, line, textX, textY);
+            } else {
+                g.drawString(font, line, textX, textY, TEXT_COLOR, false);
             }
-            g.drawString(font, line, textX, textY, TEXT_COLOR, false);
             textY += font.lineHeight + 2;
         }
     }
@@ -423,7 +443,7 @@ public class CarpenterMenuScreen extends Screen {
     private void drawPrice(GuiGraphics g, CarpenterBlueprint bp, int sdvXPos, int sdvYPos, float s4) {
         // SDV: ingredientsPosition = (xPositionOnScreen + maxWidthOfBuildingViewer + 16, yPositionOnScreen + 256 + 32)
         int ingX = sdvXPos + ui(MAX_VIEWER_W + 16);
-        int ingY = sdvYPos + ui(256 + 32);
+        int ingY = sdvYPos + ui(256 + 32) + ingredientsLanguageOffset(bp);
 
         if (bp.cost() >= 0) {
             // Gold icon (from cursors_1_6)
@@ -432,11 +452,18 @@ public class CarpenterMenuScreen extends Screen {
             CommonGuiTextures.drawGoldCoin16(g, goldX, goldY, s4);
 
             // Price text — SDV: (ingredientsPosition.X + 64, ingredientsPosition.Y + 8)
-            String priceStr = formatNumber(bp.cost());
-            int priceColor = (playerMoney < bp.cost()) ? RED_COLOR : TEXT_COLOR;
-            int textX = ingX + ui(64);
-            int textY = ingY + ui(8);
-            g.drawString(font, priceStr, textX, textY, priceColor, false);
+            String priceStr = Component.translatable(
+                    "stardewcraft.carpenter.price", formatNumber(bp.cost())).getString();
+            int priceColor = (playerMoney < bp.cost())
+                    ? RED_COLOR
+                    : (bp.magicalConstruction() ? MAGICAL_TEXT_COLOR : TEXT_COLOR);
+            int textX = ingX + ui(64 + 4);
+            int textY = ingY + ui(4);
+            if (bp.magicalConstruction()) {
+                drawMagicalPriceString(g, priceStr, textX, textY, priceColor);
+            } else {
+                g.drawString(font, priceStr, textX, textY, priceColor, false);
+            }
         }
     }
 
@@ -445,7 +472,7 @@ public class CarpenterMenuScreen extends Screen {
         // then adjusted: X -= 16, Y -= 21
         // Each material: Y += 68, draw icon at ingredientsPosition, text at ingredientsPosition.X + 64 + 16, Y + 20
         int baseX = sdvXPos + ui(MAX_VIEWER_W + 16) - ui(16);
-        int baseY = sdvYPos + ui(256 + 32) - ui(21);
+        int baseY = sdvYPos + ui(256 + 32) + ingredientsLanguageOffset(bp) - ui(21);
 
         for (CarpenterBlueprint.MaterialEntry mat : bp.materials()) {
             baseY += ui(68);
@@ -458,16 +485,22 @@ public class CarpenterMenuScreen extends Screen {
                     ItemStack stack = new ItemStack(matItem, mat.count());
                     // SDV drawInMenu at scale 1f = 64×64 screen pixels = ui(64) GUI pixels
                     // MC renderItem draws 16×16, so scale = ui(64)/16 = 4/guiScale = s4
-                    CommonGuiTextures.drawItem(g, stack, baseX, baseY, s4);
+                    CommonGuiTextures.drawItemWithDecorations(g, font, stack, baseX, baseY, s4);
 
                     // Material name + count
                     boolean hasEnough = minecraft != null && minecraft.player != null
                         && minecraft.player.getInventory().countItem(matItem) >= mat.count();
-                    int textColor = hasEnough ? TEXT_COLOR : RED_COLOR;
-                    String materialText = stack.getHoverName().getString() + " (" + mat.count() + ")";
+                    int textColor = hasEnough
+                            ? (bp.magicalConstruction() ? MAGICAL_TEXT_COLOR : TEXT_COLOR)
+                            : RED_COLOR;
+                    String materialText = stack.getHoverName().getString();
                     int textX = baseX + ui(64 + 16);
                     int textY = baseY + ui(20);
-                    g.drawString(font, materialText, textX, textY, textColor, false);
+                    if (bp.magicalConstruction()) {
+                        drawMagicalString(g, materialText, textX, textY, textColor);
+                    } else {
+                        g.drawString(font, materialText, textX, textY, textColor, false);
+                    }
                 }
             } catch (Exception ignored) {}
         }
@@ -509,7 +542,9 @@ public class CarpenterMenuScreen extends Screen {
         if (isInside(mouseX, mouseY, okX, okY, okW, okH)) {
             CarpenterBlueprint bp = blueprints.get(currentIndex);
             Component tip = canBuildCurrent()
-                ? Component.translatable("stardewcraft.carpenter.tooltip.build", bp.displayName())
+                ? Component.translatable(bp.magicalConstruction()
+                        ? "stardewcraft.carpenter.tooltip.purchase"
+                        : "stardewcraft.carpenter.tooltip.build", bp.displayName())
                 : Component.translatable("stardewcraft.carpenter.tooltip.insufficient_resources");
             g.renderTooltip(font, tip, mouseX, mouseY);
         }
@@ -517,6 +552,47 @@ public class CarpenterMenuScreen extends Screen {
         if (isInside(mouseX, mouseY, cancelX, cancelY, cancelW, cancelH)) {
             g.renderTooltip(font, Component.translatable("stardewcraft.carpenter.tooltip.cancel"), mouseX, mouseY);
         }
+        if (isInside(mouseX, mouseY, closeX, closeY, closeW, closeH)) {
+            g.renderTooltip(font, Component.translatable("stardewcraft.carpenter.tooltip.cancel"), mouseX, mouseY);
+        }
+    }
+
+    private void drawBlueprintBox(GuiGraphics g, int x, int y, int width, int height,
+                                  float scale, boolean magical) {
+        if (magical) {
+            CommonGuiTextures.drawMenuTextureBoxTint(g, x, y, width, height, scale / 4.0F, true,
+                    ROYAL_BLUE_R, ROYAL_BLUE_G, ROYAL_BLUE_B, 1.0F);
+        } else {
+            CommonGuiTextures.drawTextureBox(g, x, y, width, height, scale, true);
+        }
+    }
+
+    private void drawMagicalText(GuiGraphics g, FormattedCharSequence text, int x, int y) {
+        g.drawString(font, text, x - ui(4), y + ui(4), MAGICAL_SHADOW_COLOR, false);
+        g.drawString(font, text, x - ui(1), y + ui(4), MAGICAL_SHADOW_COLOR, false);
+        g.drawString(font, text, x, y, MAGICAL_TEXT_COLOR, false);
+    }
+
+    private void drawMagicalString(GuiGraphics g, String text, int x, int y, int color) {
+        g.drawString(font, text, x - ui(4), y + ui(4), MAGICAL_SHADOW_COLOR, false);
+        g.drawString(font, text, x - ui(1), y + ui(4), MAGICAL_SHADOW_COLOR, false);
+        g.drawString(font, text, x, y, color, false);
+    }
+
+    private void drawMagicalPriceString(GuiGraphics g, String text, int x, int y, int color) {
+        g.drawString(font, text, x - ui(4), y + ui(4), MAGICAL_PRICE_SHADOW_COLOR, false);
+        g.drawString(font, text, x - ui(1), y + ui(4), MAGICAL_SHADOW_COLOR, false);
+        g.drawString(font, text, x, y, color, false);
+    }
+
+    private int ingredientsLanguageOffset(CarpenterBlueprint bp) {
+        if (bp.materials().size() >= 3 || minecraft == null) {
+            return 0;
+        }
+        String language = minecraft.getLanguageManager().getSelected();
+        return ("fr_fr".equals(language) || "ko_kr".equals(language) || "pt_br".equals(language))
+                ? ui(64)
+                : 0;
     }
 
     // =========================================================================

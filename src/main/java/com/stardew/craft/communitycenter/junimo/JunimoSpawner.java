@@ -164,7 +164,6 @@ public final class JunimoSpawner {
                 junimo.goalSelector.addGoal(1, new FleeFromPlayerGoal(junimo, 6.0, 0.6));
             }
             level.addFreshEntity(junimo);
-            StardewCraft.LOGGER.debug("[CC-Junimo] Spawned idle Junimo for area {} at {}", areaId, spawnPos);
         }
     }
 

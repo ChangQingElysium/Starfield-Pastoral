@@ -1,11 +1,16 @@
 package com.stardew.craft.farm;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.core.ModDimensions;
+import com.stardew.craft.server.performance.PerformanceCounter;
+import com.stardew.craft.server.performance.PerformanceTiming;
+import com.stardew.craft.server.performance.ServerPerformanceRecorder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 /**
@@ -24,21 +29,45 @@ public class FarmChunkManager {
 
     private static final FarmChunkManager INSTANCE = new FarmChunkManager();
 
-    /** 每个农场当前在场玩家数（供其他系统查询） */
-    private final Map<Integer, Integer> playerCounts = new HashMap<>();
+    /** 玩家实际所在农场及各农场在场人数。 */
+    private final FarmOccupancyTracker<UUID> occupancy = new FarmOccupancyTracker<>();
 
-    /**
-     * 临时农场区块租约。引用计数允许登录追赶与每日结算复用同一套加载逻辑，
-     * newlyForcedChunks 只记录本管理器新增的强加载，释放时不会破坏外部票据。
-     */
-    private final Map<Integer, TemporaryFarmLoad> temporaryFarmLoads = new HashMap<>();
+    /** 兼容旧 API 的农场级租约引用，按维度对象 identity 与 slot 隔离。 */
+    private final IdentityHashMap<ServerLevel, Map<Integer, TemporaryFarmLoad>> temporaryFarmLoads =
+            new IdentityHashMap<>();
+
+    private final TemporaryChunkLeaseTracker<ServerLevel> temporaryChunkLeases =
+            new TemporaryChunkLeaseTracker<>(new TemporaryChunkLeaseTracker.Backend<>() {
+                @Override
+                public boolean acquire(ServerLevel level, ChunkPos chunk) {
+                    long chunkKey = chunk.toLong();
+                    if (level.getForcedChunks().contains(chunkKey)) return false;
+                    return level.setChunkForced(chunk.x, chunk.z, true);
+                }
+
+                @Override
+                public void load(ServerLevel level, ChunkPos chunk) {
+                    ServerPerformanceRecorder.increment(PerformanceCounter.FARM_SYNC_CHUNK_LOADS, 1L);
+                    long startedAt = ServerPerformanceRecorder.startTiming();
+                    try {
+                        level.getChunk(chunk.x, chunk.z);
+                    } finally {
+                        ServerPerformanceRecorder.finishTiming(PerformanceTiming.FARM_SYNC_CHUNK_LOAD, startedAt);
+                    }
+                }
+
+                @Override
+                public void release(ServerLevel level, ChunkPos chunk) {
+                    level.setChunkForced(chunk.x, chunk.z, false);
+                }
+            });
 
     private static final class TemporaryFarmLoad {
-        private final Set<ChunkPos> newlyForcedChunks;
+        private final TemporaryChunkLeaseTracker.Lease lease;
         private int references = 1;
 
-        private TemporaryFarmLoad(Set<ChunkPos> newlyForcedChunks) {
-            this.newlyForcedChunks = newlyForcedChunks;
+        private TemporaryFarmLoad(TemporaryChunkLeaseTracker.Lease lease) {
+            this.lease = lease;
         }
     }
 
@@ -53,26 +82,47 @@ public class FarmChunkManager {
      * 仅追踪玩家计数，不 forceLoad（由 MC 原生视距加载）。
      */
     public void onPlayerEnterFarm(ServerLevel level, ServerPlayer player, FarmInstance farm) {
-        int slot = farm.getSlotIndex();
-        playerCounts.merge(slot, 1, Integer::sum);
+        FarmOccupancyTracker.Transition transition = occupancy.enter(player.getUUID(), farm.getSlotIndex());
+        if (!transition.changed()) return;
 
+        transition.previous().ifPresent(previous -> StardewCraft.LOGGER.debug(
+                "[FARM_CHUNK] Player {} left farm slot {}, players={}",
+                player.getName().getString(), previous.slot(), previous.count()));
         StardewCraft.LOGGER.debug("[FARM_CHUNK] Player {} entered farm slot {}, players={}",
-                player.getName().getString(), slot, playerCounts.getOrDefault(slot, 0));
+                player.getName().getString(), transition.current().slot(), transition.current().count());
+    }
+
+    /** Reconciles tracked occupancy against the player's real dimension and position. */
+    public void reconcilePlayerOccupancy(ServerPlayer player) {
+        ServerLevel level = player.serverLevel();
+        if (!ModDimensions.STARDEW_VALLEY.equals(level.dimension())) {
+            onPlayerLeaveFarm(level, player);
+            return;
+        }
+
+        FarmInstanceRegistry registry = FarmInstanceRegistry.get();
+        UUID owner = registry.getOwnerAt(player.blockPosition());
+        FarmInstance farm = owner == null ? null : registry.getFarm(owner);
+        if (farm == null || !farm.contains(player.blockPosition())) {
+            onPlayerLeaveFarm(level, player);
+            return;
+        }
+        onPlayerEnterFarm(level, player, farm);
     }
 
     /**
      * 玩家离开农场时调用。
      * 仅减少玩家计数。
      */
+    public void onPlayerLeaveFarm(ServerLevel level, ServerPlayer player) {
+        occupancy.leave(player.getUUID()).ifPresent(transition -> StardewCraft.LOGGER.debug(
+                "[FARM_CHUNK] Player {} left farm slot {}, players={}",
+                player.getName().getString(), transition.current().slot(), transition.current().count()));
+    }
+
+    /** 兼容旧调用方；实际离开的 slot 以玩家记录为准。 */
     public void onPlayerLeaveFarm(ServerLevel level, ServerPlayer player, FarmInstance farm) {
-        int slot = farm.getSlotIndex();
-        int count = playerCounts.getOrDefault(slot, 1) - 1;
-        if (count <= 0) {
-            playerCounts.remove(slot);
-            StardewCraft.LOGGER.debug("[FARM_CHUNK] No players in farm slot {}", slot);
-        } else {
-            playerCounts.put(slot, count);
-        }
+        onPlayerLeaveFarm(level, player);
     }
 
     /**
@@ -86,9 +136,14 @@ public class FarmChunkManager {
     //  临时 forceLoad（仅用于离线追赶等一次性操作）
     // ══════════════════════════════════════════
 
+    TemporaryChunkLeaseTracker.Lease acquireTemporaryChunks(ServerLevel level, Collection<ChunkPos> chunks) {
+        return temporaryChunkLeases.acquire(level, chunks);
+    }
+
     /** 获取一份临时农场区块租约，供离线追赶和每日结算使用。 */
     public void acquireTemporaryFarmChunks(ServerLevel level, int slotIndex) {
-        TemporaryFarmLoad existing = temporaryFarmLoads.get(slotIndex);
+        Map<Integer, TemporaryFarmLoad> loadsForLevel = temporaryFarmLoads.get(level);
+        TemporaryFarmLoad existing = loadsForLevel == null ? null : loadsForLevel.get(slotIndex);
         if (existing != null) {
             existing.references++;
             return;
@@ -100,44 +155,22 @@ public class FarmChunkManager {
         if (farm == null) return;
 
         Set<ChunkPos> farmChunks = chunkPositionsForBounds(farm.getFarmBoundsMin(), farm.getFarmBoundsMax());
-        Set<ChunkPos> newlyForced = new HashSet<>();
-        TemporaryFarmLoad load = new TemporaryFarmLoad(newlyForced);
-        temporaryFarmLoads.put(slotIndex, load);
-
-        try {
-            for (ChunkPos chunk : farmChunks) {
-                long chunkKey = chunk.toLong();
-                if (!level.getForcedChunks().contains(chunkKey)) {
-                    level.setChunkForced(chunk.x, chunk.z, true);
-                    newlyForced.add(chunk);
-                }
-                // 强加载只添加票据；日结算在当前 tick 就要读方块，因此同步取到区块。
-                level.getChunk(chunk.x, chunk.z);
-            }
-        } catch (RuntimeException exception) {
-            temporaryFarmLoads.remove(slotIndex, load);
-            for (ChunkPos chunk : newlyForced) {
-                level.setChunkForced(chunk.x, chunk.z, false);
-            }
-            throw exception;
-        }
-
-        StardewCraft.LOGGER.debug("[FARM_CHUNK] Temporarily loaded {} farm chunks ({} newly forced, slot {})",
-                farmChunks.size(), newlyForced.size(), slotIndex);
+        TemporaryChunkLeaseTracker.Lease lease = acquireTemporaryChunks(level, farmChunks);
+        temporaryFarmLoads.computeIfAbsent(level, ignored -> new HashMap<>())
+                .put(slotIndex, new TemporaryFarmLoad(lease));
     }
 
     /** 释放一份临时农场区块租约。 */
     public void releaseTemporaryFarmChunks(ServerLevel level, int slotIndex) {
-        TemporaryFarmLoad load = temporaryFarmLoads.get(slotIndex);
+        Map<Integer, TemporaryFarmLoad> loadsForLevel = temporaryFarmLoads.get(level);
+        if (loadsForLevel == null) return;
+
+        TemporaryFarmLoad load = loadsForLevel.get(slotIndex);
         if (load == null || --load.references > 0) return;
 
-        temporaryFarmLoads.remove(slotIndex, load);
-
-        for (ChunkPos cp : load.newlyForcedChunks) {
-            level.setChunkForced(cp.x, cp.z, false);
-        }
-        StardewCraft.LOGGER.debug("[FARM_CHUNK] Released {} temporary farm chunk tickets for slot {}",
-                load.newlyForcedChunks.size(), slotIndex);
+        loadsForLevel.remove(slotIndex, load);
+        if (loadsForLevel.isEmpty()) temporaryFarmLoads.remove(level);
+        load.lease.close();
     }
 
     /** 兼容旧调用方。 */
@@ -172,39 +205,42 @@ public class FarmChunkManager {
      * 玩家下线时清理计数。
      */
     public void onPlayerLogout(ServerLevel level, ServerPlayer player) {
-        FarmInstance farm = FarmInstanceRegistry.get().getFarmForPlayer(player.getUUID());
-        if (farm == null) return;
-        int slot = farm.getSlotIndex();
-        if (playerCounts.containsKey(slot)) {
-            onPlayerLeaveFarm(level, player, farm);
-        }
+        onPlayerLeaveFarm(level, player);
     }
 
     /**
      * 判断某个农场当前是否有玩家在场。
      */
     public boolean isFarmLoaded(int slotIndex) {
-        return playerCounts.containsKey(slotIndex);
+        return occupancy.isOccupied(slotIndex);
     }
 
     /**
      * 获取农场在场玩家数。
      */
     public int getPlayerCount(int slotIndex) {
-        return playerCounts.getOrDefault(slotIndex, 0);
+        return occupancy.count(slotIndex);
     }
 
     /**
      * 服务器关闭时释放所有临时 forceLoad。
      */
-    public void onServerStopping(ServerLevel level) {
-        for (TemporaryFarmLoad load : temporaryFarmLoads.values()) {
-            for (ChunkPos cp : load.newlyForcedChunks) {
-                level.setChunkForced(cp.x, cp.z, false);
+    public void onServerStopping(@Nullable ServerLevel level) {
+        Map<Integer, TemporaryFarmLoad> loadsForLevel = level == null ? null : temporaryFarmLoads.remove(level);
+        try {
+            if (loadsForLevel != null) {
+                for (TemporaryFarmLoad load : loadsForLevel.values()) {
+                    load.lease.close();
+                }
+            }
+        } finally {
+            try {
+                temporaryChunkLeases.closeAll();
+            } finally {
+                temporaryFarmLoads.clear();
+                occupancy.clear();
             }
         }
-        temporaryFarmLoads.clear();
-        playerCounts.clear();
         StardewCraft.LOGGER.info("[FARM_CHUNK] Cleanup on server stop");
     }
 }

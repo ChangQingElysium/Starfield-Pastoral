@@ -14,13 +14,17 @@ public final class JoinAnnouncementService {
     private static final String DISCORD_URL = "https://discord.gg/cnG3eE58Au";
     private static final String QQ_GROUP = "961767762";
     private static final String BILIBILI_URL = "https://space.bilibili.com/259427053";
-    private static final String REWARD_COMMAND = "/stardew bilibili_claim";
+    private static final String DISMISS_COMMAND = "/stardew announcement dismiss";
 
     private JoinAnnouncementService() {}
 
     public static void schedule(ServerPlayer player) {
+        if (PlayerDataManager.getPlayerData(player).isJoinAnnouncementDismissed()) {
+            return;
+        }
         player.server.tell(new TickTask(player.server.getTickCount() + ANNOUNCEMENT_DELAY_TICKS, () -> {
-            if (!player.isRemoved()) {
+            if (!player.isRemoved()
+                    && !PlayerDataManager.getPlayerData(player).isJoinAnnouncementDismissed()) {
                 send(player);
             }
         }));
@@ -44,14 +48,13 @@ public final class JoinAnnouncementService {
         player.sendSystemMessage(Component.literal("  • ").withStyle(ChatFormatting.DARK_GRAY)
             .append(Component.translatable("stardewcraft.welcome.menu_hint")
                 .withStyle(ChatFormatting.GRAY)));
-        if (!PlayerDataManager.getPlayerData(player).isBilibiliRewardClaimed()) {
-            player.sendSystemMessage(Component.literal("  → ").withStyle(ChatFormatting.GOLD)
-                .append(Component.translatable("stardewcraft.join_announcement.reward")
-                    .setStyle(Style.EMPTY
-                        .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, REWARD_COMMAND))
-                        .withUnderlined(true)
-                        .withColor(ChatFormatting.GOLD))));
-        }
+        player.sendSystemMessage(Component.literal("  [ ").withStyle(ChatFormatting.DARK_GRAY)
+            .append(Component.translatable("stardewcraft.join_announcement.dismiss")
+                .setStyle(Style.EMPTY
+                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, DISMISS_COMMAND))
+                    .withUnderlined(true)
+                    .withColor(ChatFormatting.GRAY)))
+            .append(Component.literal(" ]").withStyle(ChatFormatting.DARK_GRAY)));
         player.sendSystemMessage(Component.literal("─────────────────────────────")
             .withStyle(ChatFormatting.DARK_GRAY));
         player.sendSystemMessage(Component.literal(""));

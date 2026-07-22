@@ -38,12 +38,14 @@ data/stardewcraft/data_maps/item/stardew_item_data.json
 | --- | ---: | --- |
 | `category` | `stardewcraft:unknown` | 星露谷分类 ID |
 | `base_sell_price` | `-1` | 基础售价；`-1` 表示不可出售 |
-| `edibility` | `-300` | 原版式可食用值 |
-| `energy` | `0` | 恢复能量 |
-| `health` | `0` | 恢复生命 |
-| `hidden` | `false` | 是否属于隐藏内容 |
+| `edibility` | `-300` | 原版式可食用值；高于 `-300` 时将已有 Minecraft 食物接入星露谷食用流程 |
+| `energy` | `0` | 在星露谷维度食用后恢复的能量 |
+| `health` | `0` | 在星露谷维度食用后恢复的生命 |
+| `hidden` | `false` | 预留的隐藏内容标记；0.5.x 暂不改变目录或 JEI 可见性 |
 
-数据包只能给已经注册的物品添加元数据，不能创建新物品。
+数据包只能给已经注册的物品添加元数据，不能创建新物品。食用兼容要求目标物品本身已经具有 Minecraft Food Component；Data Map 不会把普通材料凭空改造成带动画和食用时长的食物。配置后的原版或第三方食物可以在星露谷维度满饥饿时食用，并保留原物品的效果和容器返还；本体随后按 `energy` 和 `health` 结算星露谷属性。
+
+需要隐藏物品时，0.5.x 请继续使用 `stardewcraft:hidden` 物品标签；`hidden` Data Map 字段目前只保留并同步元数据。
 
 ## 自动静态验收
 
@@ -68,6 +70,7 @@ python3 examples/stardewcraft-data-pack/validate.py
 | --- | --- | --- |
 | 第三方配方 | 执行 `/stardew shop example_stardew_addon:apple_stand`，购买 `recipe:example_stardew_addon:apple_crate`，再用 4 个苹果合成 | 解锁、判重、制作和重连后存档都保留 `example_stardew_addon` 命名空间 |
 | 邮件备选解锁 | 未购买时阅读 `example_stardew_addon:apple_club` | 邮件 Action 通过同名解锁源授予配方；之后商店不再显示已知配方 |
+| 外部食物 | 在星露谷维度、原版饥饿值已满时食用示例标签中的苹果或甜浆果 | 能正常开始并完成食用，原物品效果保留，同时恢复 Data Map 声明的星露谷能量与生命 |
 | 主动节日条件 | 查看春 2 日并进入对应日期 | 只有 `conditional_active_enabled` 出现/触发，`conditional_active_disabled` 在服务端和日历都被过滤 |
 | 装备与农业 Provider | 同时安装示例附属 | 按附属 README 中的 Y > 80 锦标和带附魔光效钻石剑逐项验收 |
 

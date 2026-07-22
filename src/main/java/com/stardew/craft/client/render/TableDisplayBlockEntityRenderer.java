@@ -8,6 +8,9 @@ import com.stardew.craft.block.utility.OakRoundTableBlock;
 import com.stardew.craft.block.utility.SpruceCounterBlock;
 import com.stardew.craft.blockentity.TableDisplayBlockEntity;
 import com.stardew.craft.client.festival.FairGrangeDisplayClientCache;
+import com.stardew.craft.client.ClientPlayerDataCache;
+import com.stardew.craft.item.PowerSpecialItemService;
+import com.stardew.craft.world.WitchAreaService;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
@@ -26,6 +29,11 @@ public class TableDisplayBlockEntityRenderer implements BlockEntityRenderer<Tabl
     @SuppressWarnings("null")
     @Override
     public void render(@Nonnull TableDisplayBlockEntity be, float partialTick, @Nonnull PoseStack poseStack, @Nonnull MultiBufferSource buffer, int packedLight, int packedOverlay) {
+        if (WitchAreaService.MAGIC_INK_TABLE_POS.equals(be.getBlockPos())
+                && (ClientPlayerDataCache.hasMailFlag(PowerSpecialItemService.MAGIC_INK_FLAG)
+                || ClientPlayerDataCache.hasMailFlag(WitchAreaService.PICKED_UP_MAGIC_INK_FLAG))) {
+            return;
+        }
         ItemStack display = be.getDisplayItem();
         float yawDegrees = be.getDisplayYawDegrees();
         var fairOverride = FairGrangeDisplayClientCache.get(be.getBlockPos());

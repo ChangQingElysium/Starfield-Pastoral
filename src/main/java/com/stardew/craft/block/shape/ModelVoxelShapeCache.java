@@ -20,8 +20,12 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class ModelVoxelShapeCache {
+    private static final long PACKED_VOXEL_MASK = 0x1FFFFFL;
+    private static final int PACKED_VOXEL_SIGN_BIT = 0x100000;
+    private static final int PACKED_VOXEL_RANGE = 0x200000;
     private static final Map<String, VoxelShape> SHAPE_CACHE = new ConcurrentHashMap<>();
     private static final Map<String, GeoModelData> GEO_MODEL_CACHE = new ConcurrentHashMap<>();
+    private static final Map<String, GeoBounds> GEO_BOUNDS_CACHE = new ConcurrentHashMap<>();
     private static final Map<String, Map<String, VariantModelRef>> BLOCKSTATE_VARIANTS_CACHE = new ConcurrentHashMap<>();
     private static final ThreadLocal<Set<String>> SHAPES_LOADING = ThreadLocal.withInitial(HashSet::new);
 
@@ -35,6 +39,7 @@ public final class ModelVoxelShapeCache {
     public static void clearAll() {
         SHAPE_CACHE.clear();
         GEO_MODEL_CACHE.clear();
+        GEO_BOUNDS_CACHE.clear();
         BLOCKSTATE_VARIANTS_CACHE.clear();
         SHAPES_LOADING.remove();
     }
@@ -320,17 +325,17 @@ public final class ModelVoxelShapeCache {
         if (!isGeoShapeModelId(modelId)) {
             return null;
         }
-        GeoModelData data = GEO_MODEL_CACHE.computeIfAbsent(stripGeoShapeVariant(modelId), ModelVoxelShapeCache::loadGeoModelDataFromModelId);
-        return data == null ? null : data.bounds();
+        return GEO_BOUNDS_CACHE.computeIfAbsent(stripGeoShapeVariant(modelId),
+                ModelVoxelShapeCache::loadGeoBoundsFromModelId);
     }
 
     @SuppressWarnings("null")
     private static VoxelShape loadAabbShapeFromGeoModelId(String modelId) {
-        GeoModelData data = GEO_MODEL_CACHE.computeIfAbsent(stripGeoShapeVariant(modelId), ModelVoxelShapeCache::loadGeoModelDataFromModelId);
-        if (data == null || data.bounds().isEmpty()) {
+        GeoBounds bounds = GEO_BOUNDS_CACHE.computeIfAbsent(stripGeoShapeVariant(modelId),
+                ModelVoxelShapeCache::loadGeoBoundsFromModelId);
+        if (bounds == null || bounds.isEmpty()) {
             return Shapes.empty();
         }
-        GeoBounds bounds = data.bounds();
         return Block.box(bounds.minX() + 8.0D, bounds.minY(), bounds.minZ() + 8.0D,
             bounds.maxX() + 8.0D, bounds.maxY(), bounds.maxZ() + 8.0D);
     }
@@ -346,6 +351,14 @@ public final class ModelVoxelShapeCache {
 
     @SuppressWarnings("null")
     private static GeoModelData loadGeoModelDataFromModelId(String modelId) {
+        return loadGeoModelDataFromModelId(modelId, true);
+    }
+
+    private static GeoBounds loadGeoBoundsFromModelId(String modelId) {
+        return loadGeoModelDataFromModelId(modelId, false).bounds();
+    }
+
+    private static GeoModelData loadGeoModelDataFromModelId(String modelId, boolean buildVoxelShape) {
         JsonObject geoRoot = readGeo(resolveGeoPath(modelId));
         if (geoRoot == null) {
             return GeoModelData.empty();
@@ -392,7 +405,7 @@ public final class ModelVoxelShapeCache {
         for (JsonObject bone : bones.values()) {
             String boneName = bone.get("name").getAsString();
             double[][] boneWorld = resolveBoneWorldTransform(boneName, bones, worldTransformCache);
-            double[] bonePivot = jsonArrayToVec3(bone.getAsJsonArray("pivot"), 0.0, 0.0, 0.0);
+            double[] rawBonePivot = jsonArrayToVec3(bone.getAsJsonArray("pivot"), 0.0, 0.0, 0.0);
 
             JsonArray cubes = bone.getAsJsonArray("cubes");
             if (cubes == null) {
@@ -411,17 +424,26 @@ public final class ModelVoxelShapeCache {
                 }
 
                 double inflate = cube.has("inflate") ? cube.get("inflate").getAsDouble() : 0.0;
-                double oX = originArray.get(0).getAsDouble() - inflate;
+                double rawOriginX = originArray.get(0).getAsDouble();
+                double sizeX = sizeArray.get(0).getAsDouble();
+                // GeckoLib's built-in baker mirrors Bedrock cube origins on X:
+                // rendered X spans [-(originX + sizeX), -originX]. Keep collision
+                // coordinates in the same pixel-space as the baked vertices.
+                double oX = -(rawOriginX + sizeX) - inflate;
                 double oY = originArray.get(1).getAsDouble() - inflate;
                 double oZ = originArray.get(2).getAsDouble() - inflate;
-                double tX = originArray.get(0).getAsDouble() + sizeArray.get(0).getAsDouble() + inflate;
+                double tX = -rawOriginX + inflate;
                 double tY = originArray.get(1).getAsDouble() + sizeArray.get(1).getAsDouble() + inflate;
                 double tZ = originArray.get(2).getAsDouble() + sizeArray.get(2).getAsDouble() + inflate;
 
-                double[] cubePivot = jsonArrayToVec3(cube.getAsJsonArray("pivot"), bonePivot[0], bonePivot[1], bonePivot[2]);
-                double[] cubeRotation = jsonArrayToVec3(cube.getAsJsonArray("rotation"), 0.0, 0.0, 0.0);
+                double[] rawCubePivot = jsonArrayToVec3(cube.getAsJsonArray("pivot"),
+                        rawBonePivot[0], rawBonePivot[1], rawBonePivot[2]);
+                double[] cubePivot = geckoPivot(rawCubePivot);
+                double[] cubeRotation = geckoRotation(
+                        jsonArrayToVec3(cube.getAsJsonArray("rotation"), 0.0, 0.0, 0.0));
                 double[][] cubeTransform = multiplyMatrices(boneWorld, pivotRotationMatrix(cubePivot, cubeRotation));
-                double[][] inverseCubeTransform = invertAffineMatrix(cubeTransform);
+                double[][] inverseCubeTransform = buildVoxelShape
+                        ? invertAffineMatrix(cubeTransform) : null;
 
                 double[][] corners = new double[][] {
                     {oX, oY, oZ}, {oX, oY, tZ}, {oX, tY, oZ}, {oX, tY, tZ},
@@ -453,21 +475,24 @@ public final class ModelVoxelShapeCache {
                 maxY = Math.max(maxY, cubeMaxY);
                 maxZ = Math.max(maxZ, cubeMaxZ);
 
-                int minVX = (int) Math.floor(cubeMinX + 1.0E-6);
-                int minVY = (int) Math.floor(cubeMinY + 1.0E-6);
-                int minVZ = (int) Math.floor(cubeMinZ + 1.0E-6);
-                int maxVX = (int) Math.ceil(cubeMaxX - 1.0E-6) - 1;
-                int maxVY = (int) Math.ceil(cubeMaxY - 1.0E-6) - 1;
-                int maxVZ = (int) Math.ceil(cubeMaxZ - 1.0E-6) - 1;
+                if (buildVoxelShape) {
+                    int minVX = (int) Math.floor(cubeMinX + 1.0E-6);
+                    int minVY = (int) Math.floor(cubeMinY + 1.0E-6);
+                    int minVZ = (int) Math.floor(cubeMinZ + 1.0E-6);
+                    int maxVX = (int) Math.ceil(cubeMaxX - 1.0E-6) - 1;
+                    int maxVY = (int) Math.ceil(cubeMaxY - 1.0E-6) - 1;
+                    int maxVZ = (int) Math.ceil(cubeMaxZ - 1.0E-6) - 1;
 
-                for (int vx = minVX; vx <= maxVX; vx++) {
-                    for (int vy = minVY; vy <= maxVY; vy++) {
-                        for (int vz = minVZ; vz <= maxVZ; vz++) {
-                            double[] localCenter = transformPoint(inverseCubeTransform, vx + 0.5, vy + 0.5, vz + 0.5);
-                            if (localCenter[0] >= oX - 1.0E-6 && localCenter[0] <= tX + 1.0E-6
-                                && localCenter[1] >= oY - 1.0E-6 && localCenter[1] <= tY + 1.0E-6
-                                && localCenter[2] >= oZ - 1.0E-6 && localCenter[2] <= tZ + 1.0E-6) {
-                                occupiedVoxels.add(packVoxel(vx, vy, vz));
+                    for (int vx = minVX; vx <= maxVX; vx++) {
+                        for (int vy = minVY; vy <= maxVY; vy++) {
+                            for (int vz = minVZ; vz <= maxVZ; vz++) {
+                                double[] localCenter = transformPoint(inverseCubeTransform,
+                                        vx + 0.5, vy + 0.5, vz + 0.5);
+                                if (localCenter[0] >= oX - 1.0E-6 && localCenter[0] <= tX + 1.0E-6
+                                    && localCenter[1] >= oY - 1.0E-6 && localCenter[1] <= tY + 1.0E-6
+                                    && localCenter[2] >= oZ - 1.0E-6 && localCenter[2] <= tZ + 1.0E-6) {
+                                    occupiedVoxels.add(packVoxel(vx, vy, vz));
+                                }
                             }
                         }
                     }
@@ -475,7 +500,7 @@ public final class ModelVoxelShapeCache {
             }
         }
 
-        if (!hasCube || occupiedVoxels.isEmpty()) {
+        if (!hasCube || (buildVoxelShape && occupiedVoxels.isEmpty())) {
             return GeoModelData.empty();
         }
 
@@ -489,34 +514,46 @@ public final class ModelVoxelShapeCache {
             maxZ = minZ + 0.0625D;
         }
 
+        GeoBounds bounds = new GeoBounds(minX, minY, minZ, maxX, maxY, maxZ);
+        if (!buildVoxelShape) {
+            return new GeoModelData(Shapes.empty(), bounds);
+        }
+
         VoxelShape shape = Shapes.empty();
         for (long packed : occupiedVoxels) {
             int vx = unpackVoxelX(packed);
             int vy = unpackVoxelY(packed);
             int vz = unpackVoxelZ(packed);
-            shape = Shapes.or(shape, Block.box(vx, vy, vz, vx + 1, vy + 1, vz + 1));
+            // GeoBlockRenderer translates the model origin to the block center.
+            shape = Shapes.or(shape, Block.box(
+                    vx + 8, vy, vz + 8,
+                    vx + 9, vy + 1, vz + 9));
         }
-        GeoBounds bounds = new GeoBounds(minX, minY, minZ, maxX, maxY, maxZ);
         return new GeoModelData(shape.optimize(), bounds);
     }
 
     private static long packVoxel(int x, int y, int z) {
-        long ux = ((long) x - Integer.MIN_VALUE) & 0x1FFFFFL;
-        long uy = ((long) y - Integer.MIN_VALUE) & 0x1FFFFFL;
-        long uz = ((long) z - Integer.MIN_VALUE) & 0x1FFFFFL;
+        long ux = x & PACKED_VOXEL_MASK;
+        long uy = y & PACKED_VOXEL_MASK;
+        long uz = z & PACKED_VOXEL_MASK;
         return (ux << 42) | (uy << 21) | uz;
     }
 
     private static int unpackVoxelX(long packed) {
-        return (int) (((packed >>> 42) & 0x1FFFFFL) + Integer.MIN_VALUE);
+        return unpackSignedVoxel((packed >>> 42) & PACKED_VOXEL_MASK);
     }
 
     private static int unpackVoxelY(long packed) {
-        return (int) (((packed >>> 21) & 0x1FFFFFL) + Integer.MIN_VALUE);
+        return unpackSignedVoxel((packed >>> 21) & PACKED_VOXEL_MASK);
     }
 
     private static int unpackVoxelZ(long packed) {
-        return (int) ((packed & 0x1FFFFFL) + Integer.MIN_VALUE);
+        return unpackSignedVoxel(packed & PACKED_VOXEL_MASK);
+    }
+
+    private static int unpackSignedVoxel(long packedCoordinate) {
+        int value = (int) packedCoordinate;
+        return (value & PACKED_VOXEL_SIGN_BIT) == 0 ? value : value - PACKED_VOXEL_RANGE;
     }
 
     private static double[][] invertAffineMatrix(double[][] m) {
@@ -555,8 +592,8 @@ public final class ModelVoxelShapeCache {
             return identityMatrix();
         }
 
-        double[] pivot = jsonArrayToVec3(bone.getAsJsonArray("pivot"), 0.0, 0.0, 0.0);
-        double[] rotation = jsonArrayToVec3(bone.getAsJsonArray("rotation"), 0.0, 0.0, 0.0);
+        double[] pivot = geckoPivot(jsonArrayToVec3(bone.getAsJsonArray("pivot"), 0.0, 0.0, 0.0));
+        double[] rotation = geckoRotation(jsonArrayToVec3(bone.getAsJsonArray("rotation"), 0.0, 0.0, 0.0));
         double[][] local = pivotRotationMatrix(pivot, rotation);
 
         double[][] world;
@@ -577,6 +614,14 @@ public final class ModelVoxelShapeCache {
             return new double[] { fallbackX, fallbackY, fallbackZ };
         }
         return new double[] { array.get(0).getAsDouble(), array.get(1).getAsDouble(), array.get(2).getAsDouble() };
+    }
+
+    private static double[] geckoPivot(double[] rawPivot) {
+        return new double[] { -rawPivot[0], rawPivot[1], rawPivot[2] };
+    }
+
+    private static double[] geckoRotation(double[] rawRotation) {
+        return new double[] { -rawRotation[0], -rawRotation[1], rawRotation[2] };
     }
 
     private static double[][] identityMatrix() {
@@ -649,9 +694,10 @@ public final class ModelVoxelShapeCache {
 
     private static double[][] pivotRotationMatrix(double[] pivot, double[] rotation) {
         double[][] translateToPivot = translationMatrix(pivot[0], pivot[1], pivot[2]);
+        // RenderUtil applies Z, then Y, then X to the pose matrix.
         double[][] rotate = multiplyMatrices(
-            multiplyMatrices(rotationXMatrix(rotation[0]), rotationYMatrix(rotation[1])),
-            rotationZMatrix(rotation[2])
+            multiplyMatrices(rotationZMatrix(rotation[2]), rotationYMatrix(rotation[1])),
+            rotationXMatrix(rotation[0])
         );
         double[][] translateBack = translationMatrix(-pivot[0], -pivot[1], -pivot[2]);
         return multiplyMatrices(multiplyMatrices(translateToPivot, rotate), translateBack);

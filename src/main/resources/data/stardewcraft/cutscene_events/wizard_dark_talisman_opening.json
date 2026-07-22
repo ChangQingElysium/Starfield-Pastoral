@@ -1,0 +1,96 @@
+{
+  "id": "wizard_dark_talisman_opening",
+  "skippable": true,
+  "trigger": {
+    "type": "enter_area",
+    "location": "railroad",
+    "area_min": [-37, 85, -211],
+    "area_max": [63, 95, -170]
+  },
+  "preconditions": [
+    { "type": "not_saw_event", "id": "wizard_dark_talisman_opening" },
+    { "type": "flag", "id": "ccIsComplete" }
+  ],
+  "commands": [
+    { "cmd": "comment", "text": "=== SDV Railroad event 529952: Dark Talisman opening ===" },
+    { "cmd": "lock_player" },
+    { "cmd": "fade", "mode": "out", "ticks": 10 },
+
+    { "cmd": "hide_npc", "npc_id": "wizard" },
+    { "cmd": "spawn_actor", "actor": "wizard", "npc_id": "wizard",
+      "x": 52, "y": 85, "z": -211, "relative": false, "facing": 180 },
+    { "cmd": "spawn_actor", "actor": "fake_player", "npc_id": "player",
+      "x": 46, "y": 85, "z": -207, "relative": false, "facing": -90 },
+
+    { "cmd": "camera", "x": 57.135, "y": 88.883, "z": -200.933,
+      "yaw": 156.6, "pitch": 26.3, "relative": false },
+    { "cmd": "music", "track": "music_wizard_tower" },
+    { "cmd": "fade", "mode": "in", "ticks": 15 },
+
+    { "cmd": "add_quest", "quest_id": "28" },
+    { "cmd": "skippable" },
+
+    { "cmd": "move_actor", "actor": "fake_player",
+      "x": 48, "y": 85, "z": -207, "ticks": 20, "relative": false },
+    { "cmd": "move_actor", "actor": "fake_player",
+      "x": 48, "y": 85, "z": -211, "ticks": 40, "relative": false },
+    { "cmd": "face_actor", "actor": "wizard", "yaw": 90 },
+    { "cmd": "move_actor", "actor": "fake_player",
+      "x": 50, "y": 85, "z": -211, "ticks": 20, "relative": false },
+    { "cmd": "face_actor", "actor": "fake_player", "yaw": -90 },
+    { "cmd": "pause", "ticks": 16 },
+
+    { "cmd": "face_actor", "actor": "wizard", "yaw": 180 },
+    { "cmd": "pause", "ticks": 12 },
+    { "cmd": "emote", "actor": "wizard", "emote": "pause" },
+    { "cmd": "pause", "ticks": 10 },
+    { "cmd": "speak", "npc_id": "wizard", "text": "event.wizard_dark_talisman.awaiting" },
+
+    { "cmd": "face_actor", "actor": "wizard", "yaw": 90 },
+    { "cmd": "pause", "ticks": 8 },
+    { "cmd": "face_actor", "actor": "wizard", "yaw": 180 },
+    { "cmd": "pause", "ticks": 8 },
+    { "cmd": "speak", "npc_id": "wizard", "text": "event.wizard_dark_talisman.married" },
+
+    { "cmd": "face_actor", "actor": "wizard", "yaw": 90 },
+    { "cmd": "pause", "ticks": 4 },
+    { "cmd": "face_actor", "actor": "wizard", "yaw": 0 },
+    { "cmd": "pause", "ticks": 16 },
+    { "cmd": "speak", "npc_id": "wizard", "text": "event.wizard_dark_talisman.strange" },
+
+    { "cmd": "face_actor", "actor": "wizard", "yaw": 90 },
+    { "cmd": "speak", "npc_id": "wizard", "text": "event.wizard_dark_talisman.mistake" },
+    { "cmd": "face_actor", "actor": "wizard", "yaw": 180 },
+    { "cmd": "speak", "npc_id": "wizard", "text": "event.wizard_dark_talisman.curse" },
+    { "cmd": "speak", "npc_id": "wizard", "text": "event.wizard_dark_talisman.seal" },
+
+    { "cmd": "move_actor", "actor": "wizard",
+      "x": 51, "y": 85, "z": -211, "ticks": 12, "relative": false },
+    { "cmd": "face_actor", "actor": "wizard", "yaw": 90 },
+    { "cmd": "speak", "npc_id": "wizard", "text": "event.wizard_dark_talisman.ink" },
+    { "cmd": "move_actor", "actor": "wizard",
+      "x": 52, "y": 85, "z": -211, "ticks": 12, "relative": false },
+    { "cmd": "face_actor", "actor": "wizard", "yaw": 180 },
+    { "cmd": "speak", "npc_id": "wizard", "text": "event.wizard_dark_talisman.talisman" },
+
+    { "cmd": "pause", "ticks": 10 },
+    { "cmd": "face_actor", "actor": "wizard", "yaw": 90 },
+    { "cmd": "speak", "npc_id": "wizard", "text": "event.wizard_dark_talisman.reward" },
+    { "cmd": "pause", "ticks": 10 },
+
+    { "cmd": "face_actor", "actor": "wizard", "yaw": 0 },
+    { "cmd": "play_sound", "sound": "stardewcraft:wand" },
+    { "cmd": "screen_flash", "ticks": 4 },
+    { "cmd": "remove_actor", "actor": "wizard" },
+    { "cmd": "pause", "ticks": 30 },
+
+    { "cmd": "fade", "mode": "out", "ticks": 10 },
+    { "cmd": "place_player", "x": 50, "y": 85, "z": -211, "yaw": -90, "pitch": 0 },
+    { "cmd": "remove_actor", "actor": "fake_player" },
+    { "cmd": "show_npc", "npc_id": "wizard" },
+    { "cmd": "camera", "action": "reset" },
+    { "cmd": "unlock_player" },
+    { "cmd": "fade", "mode": "in", "ticks": 15 },
+    { "cmd": "end" }
+  ]
+}

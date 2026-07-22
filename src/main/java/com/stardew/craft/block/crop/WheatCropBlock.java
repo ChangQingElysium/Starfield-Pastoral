@@ -20,6 +20,7 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 
 import java.util.function.Supplier;
+import java.util.function.Consumer;
 
 /**
  * 小麦作物
@@ -116,6 +117,15 @@ public class WheatCropBlock extends StardewCropBlock {
         }
         if (leftover > 0) {
             Block.popResource(level, pos, new ItemStack(ModItems.HAY.get(), leftover));
+        }
+    }
+
+    @Override
+    protected void collectJunimoHarvestSideProducts(ServerLevel level, BlockPos pos, BlockState state,
+                                                     RandomSource random, int fertilizerLevel,
+                                                     int farmingLevel, Consumer<ItemStack> output) {
+        if (random.nextDouble() < 0.4) {
+            output.accept(new ItemStack(ModItems.HAY.get()));
         }
     }
 }

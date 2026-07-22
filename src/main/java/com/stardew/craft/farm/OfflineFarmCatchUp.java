@@ -6,6 +6,9 @@ import com.stardew.craft.core.ModDimensions;
 import com.stardew.craft.manager.CropGrowthManager;
 import com.stardew.craft.manager.SprinklerManager;
 import com.stardew.craft.manager.TreeGrowthManager;
+import com.stardew.craft.server.performance.PerformanceCounter;
+import com.stardew.craft.server.performance.PerformanceTiming;
+import com.stardew.craft.server.performance.ServerPerformanceRecorder;
 import com.stardew.craft.time.StardewTimeManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
@@ -13,7 +16,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -61,77 +63,82 @@ public final class OfflineFarmCatchUp {
 
         if (daysMissed <= 0) return;
 
-        StardewCraft.LOGGER.info("[FARM-CATCHUP] Player {} missed {} days (absDay {} → {})",
-                playerUUID, daysMissed, lastAbsDay, currentAbsDay);
+        long startedAt = ServerPerformanceRecorder.startTiming();
+        try {
+            StardewCraft.LOGGER.info("[FARM-CATCHUP] Player {} missed {} days (absDay {} → {})",
+                    playerUUID, daysMissed, lastAbsDay, currentAbsDay);
 
-        // 跨季宽限期：离线期间季节变化了 → 先授予宽限天数，再追赶生长
-        // （必须在 catchUpCrops 之前设置，否则 growCropOneDay 会杀掉过季作物）
-        StardewTimeManager tm = StardewTimeManager.get();
-        int currentSeason = tm.getCurrentSeason();
-        if (farm.getLastOnlineSeason() != currentSeason) {
-            int graceDays = level.getServer().getGameRules()
-                    .getInt(com.stardew.craft.core.ModGameRules.RULE_CROP_GRACE_PERIOD_DAYS);
-            if (graceDays > 0) {
-                farm.setGraceDaysLeft(graceDays);
-                StardewCraft.LOGGER.info("[FARM-CATCHUP] Season changed ({} → {}), granting {} grace days to player {}",
-                        farm.getLastOnlineSeason(), currentSeason, graceDays, playerUUID);
+            // 跨季宽限期：离线期间季节变化了 → 先授予宽限天数，再追赶生长
+            // （必须在 catchUpCrops 之前设置，否则 growCropOneDay 会杀掉过季作物）
+            StardewTimeManager tm = StardewTimeManager.get();
+            int currentSeason = tm.getCurrentSeason();
+            if (farm.getLastOnlineSeason() != currentSeason) {
+                int graceDays = level.getServer().getGameRules()
+                        .getInt(com.stardew.craft.core.ModGameRules.RULE_CROP_GRACE_PERIOD_DAYS);
+                if (graceDays > 0) {
+                    farm.setGraceDaysLeft(graceDays);
+                    StardewCraft.LOGGER.info(
+                            "[FARM-CATCHUP] Season changed ({} → {}), granting {} grace days to player {}",
+                            farm.getLastOnlineSeason(), currentSeason, graceDays, playerUUID);
 
-                // 通知玩家
-                net.minecraft.server.level.ServerPlayer player =
-                        level.getServer().getPlayerList().getPlayer(playerUUID);
-                if (player != null) {
-                    player.sendSystemMessage(
-                            net.minecraft.network.chat.Component.translatable(
-                                    "stardewcraft.farm.grace_period.granted", graceDays));
+                    // 通知玩家
+                    net.minecraft.server.level.ServerPlayer player =
+                            level.getServer().getPlayerList().getPlayer(playerUUID);
+                    if (player != null) {
+                        player.sendSystemMessage(
+                                net.minecraft.network.chat.Component.translatable(
+                                        "stardewcraft.farm.grace_period.granted", graceDays));
+                    }
                 }
             }
-        }
 
-        // 临时加载农场区块（追赶完成后立即释放）
-        FarmChunkManager.get().acquireTemporaryFarmChunks(level, farm.getSlotIndex());
+            CropGrowthManager cropMgr = CropGrowthManager.get(level);
+            TreeGrowthManager treeMgr = TreeGrowthManager.get(level);
+            SprinklerManager sprMgr = SprinklerManager.get(level);
+            OfflineFarmCatchUpPlan plan = OfflineFarmCatchUpPlan.create(
+                    level.dimension(),
+                    farm.getFarmBoundsMin(),
+                    farm.getFarmBoundsMax(),
+                    cropMgr.getAllCropPositions(),
+                    treeMgr.getAllSaplingPositions(),
+                    sprMgr.getAllSprinklerPositions());
+            ServerPerformanceRecorder.increment(PerformanceCounter.FARM_CATCH_UP_CHUNKS,
+                    plan.requiredChunks().size());
+            ServerPerformanceRecorder.increment(PerformanceCounter.FARM_CATCH_UP_OBJECTS,
+                    (long) plan.crops().size() + plan.trees().size() + plan.sprinklers().size());
 
-        try {
-            // 1. 批量推进作物生长
-            catchUpCrops(level, farm, daysMissed);
+            try (TemporaryChunkLeaseTracker.Lease ignored =
+                         FarmChunkManager.get().acquireTemporaryChunks(level, plan.requiredChunks())) {
+                // 1. 批量推进作物生长
+                catchUpCrops(level, cropMgr, plan.crops(), daysMissed);
 
-            // 2. 批量推进树苗生长
-            catchUpTrees(level, farm, daysMissed);
+                // 2. 批量推进树苗生长
+                catchUpTrees(level, treeMgr, plan.trees(), daysMissed);
 
-            // 3. 洒水器浇水（标记为已浇水状态）
-            catchUpSprinklers(level, farm);
+                // 3. 洒水器浇水（标记为已浇水状态）
+                catchUpSprinklers(level, plan.sprinklers());
+            }
+
+            // 更新最后在线信息
+            farm.setLastOnlineDay(currentAbsDay);
+            farm.setLastOnlineSeason(currentSeason);
+            registry.setDirty();
+
+            StardewCraft.LOGGER.info("[FARM-CATCHUP] Catch-up complete for player {}", playerUUID);
         } finally {
-            // 释放临时加载的区块
-            FarmChunkManager.get().releaseTemporaryFarmChunks(level, farm.getSlotIndex());
+            ServerPerformanceRecorder.finishTiming(PerformanceTiming.OFFLINE_FARM_CATCH_UP, startedAt);
         }
-
-        // 更新最后在线信息
-        farm.setLastOnlineDay(currentAbsDay);
-        farm.setLastOnlineSeason(currentSeason);
-        registry.setDirty();
-
-        StardewCraft.LOGGER.info("[FARM-CATCHUP] Catch-up complete for player {}", playerUUID);
     }
 
     /**
      * 批量推进作物生长 N 天。
      * 假设洒水器每天都浇水（离线期间）。
      */
-    private static void catchUpCrops(ServerLevel level, FarmInstance farm, int daysMissed) {
-        CropGrowthManager cropMgr = CropGrowthManager.get(level);
-        BlockPos boundsMin = farm.getFarmBoundsMin();
-        BlockPos boundsMax = farm.getFarmBoundsMax();
-
-        // 收集此农场范围内的所有已注册作物
-        List<GlobalPos> farmCrops = new ArrayList<>();
-        for (GlobalPos gp : cropMgr.getAllCropPositions()) {
-            if (gp.dimension() != level.dimension()) continue;
-            BlockPos pos = gp.pos();
-            if (pos.getX() >= boundsMin.getX() && pos.getX() <= boundsMax.getX()
-                    && pos.getZ() >= boundsMin.getZ() && pos.getZ() <= boundsMax.getZ()) {
-                farmCrops.add(gp);
-            }
-        }
-
+    private static void catchUpCrops(
+            ServerLevel level,
+            CropGrowthManager cropMgr,
+            List<GlobalPos> farmCrops,
+            int daysMissed) {
         if (farmCrops.isEmpty()) return;
 
         StardewCraft.LOGGER.info("[FARM-CATCHUP] Processing {} crops for {} days",
@@ -160,21 +167,11 @@ public final class OfflineFarmCatchUp {
      * 批量推进树苗生长。
      * 直接增加 daysGrown 计数器并检查成熟。
      */
-    private static void catchUpTrees(ServerLevel level, FarmInstance farm, int daysMissed) {
-        TreeGrowthManager treeMgr = TreeGrowthManager.get(level);
-        BlockPos boundsMin = farm.getFarmBoundsMin();
-        BlockPos boundsMax = farm.getFarmBoundsMax();
-
-        List<GlobalPos> farmTrees = new ArrayList<>();
-        for (GlobalPos gp : treeMgr.getAllSaplingPositions()) {
-            if (gp.dimension() != level.dimension()) continue;
-            BlockPos pos = gp.pos();
-            if (pos.getX() >= boundsMin.getX() && pos.getX() <= boundsMax.getX()
-                    && pos.getZ() >= boundsMin.getZ() && pos.getZ() <= boundsMax.getZ()) {
-                farmTrees.add(gp);
-            }
-        }
-
+    private static void catchUpTrees(
+            ServerLevel level,
+            TreeGrowthManager treeMgr,
+            List<GlobalPos> farmTrees,
+            int daysMissed) {
         if (farmTrees.isEmpty()) return;
 
         StardewCraft.LOGGER.info("[FARM-CATCHUP] Processing {} tree saplings for {} days",
@@ -196,21 +193,7 @@ public final class OfflineFarmCatchUp {
     /**
      * 对洒水器覆盖范围重新浇水。
      */
-    private static void catchUpSprinklers(ServerLevel level, FarmInstance farm) {
-        SprinklerManager sprMgr = SprinklerManager.get(level);
-        BlockPos boundsMin = farm.getFarmBoundsMin();
-        BlockPos boundsMax = farm.getFarmBoundsMax();
-
-        List<GlobalPos> farmSprinklers = new ArrayList<>();
-        for (GlobalPos gp : sprMgr.getAllSprinklerPositions()) {
-            if (gp.dimension() != level.dimension()) continue;
-            BlockPos pos = gp.pos();
-            if (pos.getX() >= boundsMin.getX() && pos.getX() <= boundsMax.getX()
-                    && pos.getZ() >= boundsMin.getZ() && pos.getZ() <= boundsMax.getZ()) {
-                farmSprinklers.add(gp);
-            }
-        }
-
+    private static void catchUpSprinklers(ServerLevel level, List<GlobalPos> farmSprinklers) {
         if (farmSprinklers.isEmpty()) return;
 
         for (GlobalPos gp : farmSprinklers) {

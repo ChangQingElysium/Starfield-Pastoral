@@ -277,7 +277,6 @@ public class MineFloorGenerator {
         int halfSize = MAX_SIZE / 2 + 2;
         BlockPos.MutableBlockPos mpos = new BlockPos.MutableBlockPos();
 
-        int count = 0;
         for (int x = center.getX() - halfSize; x <= center.getX() + halfSize; x++) {
             for (int z = center.getZ() - halfSize; z <= center.getZ() + halfSize; z++) {
                 for (int y = FLOOR_Y_START; y <= FLOOR_Y_END; y++) {
@@ -286,12 +285,10 @@ public class MineFloorGenerator {
                     if (state.getLightEmission(level, mpos) > 0) {
                         level.getLightEngine().checkBlock(mpos);
                         level.getChunkSource().blockChanged(mpos);
-                        count++;
                     }
                 }
             }
         }
-        StardewCraft.LOGGER.debug("[MINE] forceClientLightRefresh floor {} — re-sent {} light sources", floorNumber, count);
     }
 
     /**
@@ -1708,8 +1705,6 @@ public class MineFloorGenerator {
         // 上限避免极端卡顿，但允许足够多
         caveOrigins = Math.min(caveOrigins, 75);
 
-        StardewCraft.LOGGER.debug("[MINE] Generating {} cave origins for {}x{} floor", caveOrigins, size, size);
-
         for (int origin = 0; origin < caveOrigins; origin++) {
             // 随机起始位置
             double startX = centerX + (random.nextInt(size - 10) - (size - 10) / 2);
@@ -2414,7 +2409,6 @@ public class MineFloorGenerator {
                 int groundY = findCaveGroundY(level, px, pz, centerX, centerZ, halfSize);
                 if (groundY < 0 || groundY - 1 <= FLOOR_Y_START) continue;
 
-                int placed = 0;
                 for (int dx = -pw / 2; dx <= pw / 2; dx++) {
                     for (int dz = -pd / 2; dz <= pd / 2; dz++) {
                         int x = px + dx;
@@ -2432,12 +2426,8 @@ public class MineFloorGenerator {
                             if (isMainStone(level.getBlockState(belowWater)) && random.nextFloat() < 0.5f) {
                                 level.setBlock(belowWater, ModBlocks.MOSSY_SANDSTONE.get().defaultBlockState(), 2);
                             }
-                            placed++;
                         }
                     }
-                }
-                if (placed > 0) {
-                    StardewCraft.LOGGER.debug("[MINE] Earth: placed water pool {}x at ({}, {})", placed, px, pz);
                 }
             }
         }
@@ -2644,7 +2634,6 @@ public class MineFloorGenerator {
             int groundY = findCaveGroundY(level, px, pz, centerX, centerZ, halfSize);
             if (groundY < 0 || groundY - 1 <= FLOOR_Y_START) continue;
 
-            int placed = 0;
             for (int dx = -pw / 2; dx <= pw / 2; dx++) {
                 for (int dz = -pd / 2; dz <= pd / 2; dz++) {
                     int x = px + dx;
@@ -2660,7 +2649,6 @@ public class MineFloorGenerator {
                         if (isMainStone(level.getBlockState(belowLava))) {
                             level.setBlock(belowLava, Blocks.MAGMA_BLOCK.defaultBlockState(), 2);
                         }
-                        placed++;
                     }
 
                     // 池边（外围一圈）放 MAGMA_BLOCK
@@ -2672,9 +2660,6 @@ public class MineFloorGenerator {
                         }
                     }
                 }
-            }
-            if (placed > 0) {
-                StardewCraft.LOGGER.debug("[MINE] Lava: placed lava pool {}x at ({}, {})", placed, px, pz);
             }
         }
 
@@ -3011,7 +2996,6 @@ public class MineFloorGenerator {
             }
         }
 
-        StardewCraft.LOGGER.debug("[MINE] Generated suspended bridge from ({},{}) to ({},{})", sx, sz, ex, ez);
     }
 
     /**
@@ -3151,7 +3135,6 @@ public class MineFloorGenerator {
             }
         }
 
-        StardewCraft.LOGGER.debug("[MINE] Generated toxic mist zone at ({}, {}), radius={}", zx, zz, zoneR);
     }
 
     /**
@@ -3410,7 +3393,6 @@ public class MineFloorGenerator {
             }
 
             // ── 第二步：挖坑 + 填水（渐进深度） ──
-            int placed = 0;
             for (int dx = -radiusX - 1; dx <= radiusX + 1; dx++) {
                 for (int dz = -radiusZ - 1; dz <= radiusZ + 1; dz++) {
                     int x = px + dx;
@@ -3428,8 +3410,6 @@ public class MineFloorGenerator {
                         if (y <= FLOOR_Y_START) continue;
                         level.setBlock(new BlockPos(x, y, z), fluid, 2);
                     }
-                    placed++;
-
                     // 清空水面上方
                     for (int above = 1; above <= 2; above++) {
                         BlockPos abovePos = new BlockPos(x, groundY + above, z);
@@ -3532,10 +3512,6 @@ public class MineFloorGenerator {
                 }
             }
 
-            if (placed > 0) {
-                StardewCraft.LOGGER.debug("[MINE] Placed fishing pool ({}x, {}) at ({}, {}, {})",
-                    placed, isLava ? "lava" : "water", px, groundY, pz);
-            }
             break;
         }
     }
@@ -3700,7 +3676,6 @@ public class MineFloorGenerator {
             }
         }
 
-        StardewCraft.LOGGER.debug("[MINE] Generated mushroom room at ({}, {})", rx, rz);
     }
 
     /** 矿石密集区：小型洞穴，墙壁 30-50% 替换为该楼层主矿石 */
@@ -3785,7 +3760,6 @@ public class MineFloorGenerator {
             }
         }
 
-        StardewCraft.LOGGER.debug("[MINE] Generated rich vein chamber ({}) at ({}, {})", oreKey, rx, rz);
     }
 
     /** 骨骸房：Lava 段，地面散布 BONE_BLOCK + SKELETON_SKULL + SOUL_LANTERN */
@@ -3848,7 +3822,6 @@ public class MineFloorGenerator {
             }
         }
 
-        StardewCraft.LOGGER.debug("[MINE] Generated bone chamber at ({}, {})", rx, rz);
     }
 
     // ──────── 骷髅矿专属特殊房间 ────────
@@ -3914,7 +3887,6 @@ public class MineFloorGenerator {
             level.setBlock(lightPos, Blocks.SOUL_LANTERN.defaultBlockState(), 3);
         }
 
-        StardewCraft.LOGGER.debug("[MINE] Generated iridium treasure room at ({}, {})", rx, rz);
     }
 
     /** 岩浆湖洞穴：大型开阔洞穴，中央是巨大熔岩湖，周围有矿石环 */
@@ -3966,7 +3938,6 @@ public class MineFloorGenerator {
             }
         }
 
-        StardewCraft.LOGGER.debug("[MINE] Generated lava chamber at ({}, {})", rx, rz);
     }
 
     /** Dino 巢穴：菌丝地面 + 骨头装饰 */
@@ -4024,7 +3995,6 @@ public class MineFloorGenerator {
             }
         }
 
-        StardewCraft.LOGGER.debug("[MINE] Generated dino nest at ({}, {})", rx, rz);
     }
 
     /** 根据楼层返回该层主要矿石类型 */
@@ -4117,7 +4087,6 @@ public class MineFloorGenerator {
                 Block campfire = (theme == FloorTheme.LAVA) ? Blocks.SOUL_CAMPFIRE : Blocks.CAMPFIRE;
                 level.setBlock(campPos, campfire.defaultBlockState(), 2);
 
-                StardewCraft.LOGGER.debug("[MINE] Placed campfire at ({}, {}, {})", cx, groundY, cz);
                 break;
             }
         }
@@ -4497,7 +4466,6 @@ public class MineFloorGenerator {
         int placed = 0;
         int maxAttempts = barrelCount * 40; // 防止无限循环
         boolean shouldPlaceCalicoStatue = shouldPlaceCalicoStatueOnThisFloor(level, random, floorNumber);
-        boolean placedCalicoStatue = false;
 
         for (int attempt = 0; attempt < maxAttempts && placed < barrelCount; attempt++) {
             int x = centerX - halfSize + 2 + random.nextInt(size - 4);
@@ -4523,9 +4491,8 @@ public class MineFloorGenerator {
                     && level.getBlockState(above).isAir()) {
 
                     if (shouldPlaceCalicoStatue && canPlaceCalicoStatue(level, pos)) {
-                        placeCalicoStatue(level, pos, floorNumber);
+                        placeCalicoStatue(level, pos);
                         shouldPlaceCalicoStatue = false;
-                        placedCalicoStatue = true;
                     } else {
                         level.setBlock(pos, com.stardew.craft.block.ModBlocks.MINE_BARREL.get().defaultBlockState(), 2);
                     }
@@ -4535,12 +4502,6 @@ public class MineFloorGenerator {
             }
         }
 
-        if (placed > 0) {
-            StardewCraft.LOGGER.debug("[MINE] Placed {} barrels in room at ({}, {})", placed, centerX, centerZ);
-        }
-        if (placedCalicoStatue) {
-            StardewCraft.LOGGER.debug("[MINE] Replaced one barrel candidate with Calico Statue on floor {}", floorNumber);
-        }
     }
 
     private static boolean shouldPlaceCalicoStatueOnThisFloor(ServerLevel level, RandomSource random, int floorNumber) {
@@ -4557,14 +4518,13 @@ public class MineFloorGenerator {
             && level.getBlockState(backdrop).isSolidRender(level, backdrop);
     }
 
-    private static void placeCalicoStatue(ServerLevel level, BlockPos pos, int floorNumber) {
+    private static void placeCalicoStatue(ServerLevel level, BlockPos pos) {
         BlockState statueState = ModBlocks.CALICO_STATUE.get().defaultBlockState()
             .setValue(CalicoStatueBlock.FACING, Direction.SOUTH)
             .setValue(CalicoStatueBlock.PART, TallMasteryBlock.Part.MAIN)
             .setValue(CalicoStatueBlock.ACTIVATED, false);
         level.setBlock(pos, statueState, 2);
         level.setBlock(pos.above(), statueState.setValue(CalicoStatueBlock.PART, TallMasteryBlock.Part.EXTENSION), 2);
-        StardewCraft.LOGGER.debug("[MINE] Placed Calico Statue on floor {} at {}", floorNumber, pos);
     }
 
     /**

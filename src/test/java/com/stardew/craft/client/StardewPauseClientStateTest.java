@@ -2,7 +2,6 @@ package com.stardew.craft.client;
 
 import com.stardew.craft.client.gui.NightMarketMermaidScreen;
 import com.stardew.craft.client.gui.StardewRealtimeScreen;
-import com.stardew.craft.client.gui.WarpWheelScreen;
 import com.stardew.craft.client.gui.auction.AuctionBidScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -32,7 +31,6 @@ class StardewPauseClientStateTest {
     void liveTimedAndRadialScreensDeclareTheRealtimeContract() {
         assertTrue(StardewRealtimeScreen.class.isAssignableFrom(AuctionBidScreen.class));
         assertTrue(StardewRealtimeScreen.class.isAssignableFrom(NightMarketMermaidScreen.class));
-        assertTrue(StardewRealtimeScreen.class.isAssignableFrom(WarpWheelScreen.class));
     }
 
     private static class TestScreen extends Screen {

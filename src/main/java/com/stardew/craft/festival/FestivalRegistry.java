@@ -43,6 +43,8 @@ public final class FestivalRegistry {
     private static final AtomicDefinitionStore<StardewFestivalDefinition> STORE = new AtomicDefinitionStore<>();
     private static volatile Map<String, FestivalDefinition> aliases = Map.of();
     private static volatile List<FestivalDefinition> ordered = List.of();
+    private static volatile List<FestivalDefinition> activeOrdered = List.of();
+    private static volatile List<FestivalDefinition> passiveOrdered = List.of();
     private static volatile String cachedJson = "{}";
 
     private FestivalRegistry() {
@@ -74,11 +76,11 @@ public final class FestivalRegistry {
     }
 
     public static List<FestivalDefinition> activeFestivals() {
-        return ordered.stream().filter(definition -> definition.type() == FestivalType.ACTIVE).toList();
+        return activeOrdered;
     }
 
     public static List<FestivalDefinition> passiveFestivals() {
-        return ordered.stream().filter(definition -> definition.type() == FestivalType.PASSIVE).toList();
+        return passiveOrdered;
     }
 
     public static String getCachedJson() {
@@ -191,6 +193,12 @@ public final class FestivalRegistry {
             }
         }
         ordered = List.copyOf(next);
+        activeOrdered = ordered.stream()
+                .filter(definition -> definition.type() == FestivalType.ACTIVE)
+                .toList();
+        passiveOrdered = ordered.stream()
+                .filter(definition -> definition.type() == FestivalType.PASSIVE)
+                .toList();
         aliases = Map.copyOf(nextAliases);
         if (updateCache) {
             var root = new com.google.gson.JsonObject();

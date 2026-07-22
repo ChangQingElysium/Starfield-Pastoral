@@ -54,17 +54,102 @@ public final class InteriorSubspaceManager {
     public static void verifyAndRepairNearby(ServerLevel level, ServerPlayer player) {
         ResourceKey<Level> dim = level.dimension();
         BlockPos playerPos = player.blockPosition();
+        registerCurrentFarmExitPortals(player);
         for (PortalPlacement p : PORTAL_REGISTRY.values()) {
             if (!p.dimension.equals(dim)) continue;
-            if (!playerPos.closerThan(p.basePos, REPAIR_CHECK_RANGE)) continue;
-            // 只检查 basePos 处的方块是否仍是 portal_trigger
-            if (!level.getBlockState(p.basePos).is(com.stardew.craft.block.ModBlocks.PORTAL_TRIGGER.get())) {
-                StardewCraft.LOGGER.warn("[PORTAL-REPAIR] Missing portal trigger '{}' at {} — re-placing",
+            if (!isNearPortalArea(playerPos, p, REPAIR_CHECK_RANGE)) continue;
+            if (!isPortalAreaValid(level, p)) {
+                StardewCraft.LOGGER.warn("[PORTAL-REPAIR] Missing or invalid portal trigger '{}' at {} — re-placing",
                         p.markerTag, p.basePos);
                 placePortalTriggerAreaInternal(level, p.basePos, p.heightBlocks, p.xBlocks, p.zBlocks,
                         p.markerTag, p.targetTag, p.solidOnly);
             }
         }
+    }
+
+    /**
+     * 玩家农场出口不属于固定公共地图入口，服务器重启后需要在玩家回到农场时重新加入自修复注册表。
+     * 只登记当前玩家所在的农场，避免为所有离线农场强制加载区块。
+     */
+    private static void registerCurrentFarmExitPortals(ServerPlayer player) {
+        com.stardew.craft.farm.FarmInstance farm = com.stardew.craft.farm.FarmInstanceRegistry.get()
+                .getFarmForPlayer(player.getUUID());
+        if (farm == null || !farm.isInitialized() || !farm.contains(player.blockPosition())) {
+            return;
+        }
+        com.stardew.craft.farm.FarmType.FarmLayout layout = farm.getFarmType().getLayout();
+        if (layout == null) {
+            return;
+        }
+
+        registerExitRegion(player.serverLevel(), farm.getOrigin(), layout.entrySouth(),
+                "sdv_portal_target:farm_exit_south", "sdv_portal_marker:farm_exit");
+        registerExitRegion(player.serverLevel(), farm.getOrigin(), layout.entryEast(),
+                "sdv_portal_target:farm_exit_east", "sdv_portal_marker:farm_exit");
+        registerExitRegion(player.serverLevel(), farm.getOrigin(), layout.entryWest(),
+                "sdv_portal_target:farm_exit_west", "sdv_portal_marker:farm_exit");
+    }
+
+    private static void registerExitRegion(ServerLevel level, BlockPos origin,
+                                           com.stardew.craft.farm.FarmType.EntryData entry,
+                                           String targetTag, String markerTag) {
+        BlockPos min = origin.offset(entry.exitMin());
+        BlockPos max = origin.offset(entry.exitMax());
+        BlockPos base = new BlockPos(
+                Math.min(min.getX(), max.getX()),
+                Math.min(min.getY(), max.getY()),
+                Math.min(min.getZ(), max.getZ()));
+        PortalPlacement placement = new PortalPlacement(
+                level.dimension(),
+                base,
+                Math.abs(max.getY() - min.getY()) + 1,
+                Math.abs(max.getX() - min.getX()) + 1,
+                Math.abs(max.getZ() - min.getZ()) + 1,
+                markerTag,
+                targetTag,
+                false);
+        PORTAL_REGISTRY.putIfAbsent(portalKey(level.dimension(), base), placement);
+    }
+
+    private static boolean isNearPortalArea(BlockPos playerPos, PortalPlacement placement, double range) {
+        int maxX = placement.basePos.getX() + placement.xBlocks - 1;
+        int maxY = placement.basePos.getY() + placement.heightBlocks - 1;
+        int maxZ = placement.basePos.getZ() + placement.zBlocks - 1;
+        int closestX = Math.max(placement.basePos.getX(), Math.min(playerPos.getX(), maxX));
+        int closestY = Math.max(placement.basePos.getY(), Math.min(playerPos.getY(), maxY));
+        int closestZ = Math.max(placement.basePos.getZ(), Math.min(playerPos.getZ(), maxZ));
+        return playerPos.closerThan(new BlockPos(closestX, closestY, closestZ), range);
+    }
+
+    private static boolean isPortalAreaValid(ServerLevel level, PortalPlacement placement) {
+        String expectedTargetId = placement.targetTag;
+        if (expectedTargetId.startsWith("sdv_portal_target:")) {
+            expectedTargetId = expectedTargetId.substring("sdv_portal_target:".length());
+        }
+
+        boolean foundPortal = false;
+        for (int dx = 0; dx < placement.xBlocks; dx++) {
+            for (int dz = 0; dz < placement.zBlocks; dz++) {
+                for (int dy = 0; dy < placement.heightBlocks; dy++) {
+                    BlockPos pos = placement.basePos.offset(dx, dy, dz);
+                    boolean isPortal = level.getBlockState(pos)
+                            .is(com.stardew.craft.block.ModBlocks.PORTAL_TRIGGER.get());
+                    if (placement.solidOnly && !isPortal) {
+                        continue;
+                    }
+                    if (!isPortal) {
+                        return false;
+                    }
+                    foundPortal = true;
+                    if (!(level.getBlockEntity(pos) instanceof
+                            com.stardew.craft.blockentity.PortalTriggerBlockEntity be)
+                            || !expectedTargetId.equals(be.getTargetId())) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return foundPortal;
     }
 
     /**

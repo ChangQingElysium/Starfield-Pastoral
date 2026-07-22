@@ -1,16 +1,23 @@
 package com.stardew.craft.entity.junimo;
 
+import com.stardew.craft.sound.ModSounds;
+import com.stardew.craft.entity.npc.NpcPathNavigation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.damagesource.DamageSource;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
@@ -20,6 +27,8 @@ import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Junimo entity for the Community Center bundle system.
@@ -36,11 +45,18 @@ public class JunimoEntity extends PathfinderMob implements GeoEntity {
     /** SDV parity: bundle color (packed RGB) carried by this Junimo. */
     private static final EntityDataAccessor<Integer> DATA_BUNDLE_COLOR =
             SynchedEntityData.defineId(JunimoEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<ItemStack> DATA_HELD_ITEM =
+            SynchedEntityData.defineId(JunimoEntity.class, EntityDataSerializers.ITEM_STACK);
+    private static final EntityDataAccessor<Boolean> DATA_PRISMATIC =
+            SynchedEntityData.defineId(JunimoEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> DATA_HARVEST_WORKER_NUMBER =
+            SynchedEntityData.defineId(JunimoEntity.class, EntityDataSerializers.INT);
 
     public static final int HOLDING_NONE = 0;
     public static final int HOLDING_BUNDLE = 1;
     public static final int HOLDING_STAR = 2;
     public static final int HOLDING_ORANGE = 3;
+    public static final int HOLDING_ITEM = 4;
 
     private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("idle");
     private static final RawAnimation WALK = RawAnimation.begin().thenLoop("walk");
@@ -69,6 +85,16 @@ public class JunimoEntity extends PathfinderMob implements GeoEntity {
     private int maxLifeTicks = 1200; // 60秒 (玩家可能在 BundleScreen 中停留较久)
     /** 如果 true，不会超时自动移除 (idle Junimos at note positions) */
     private boolean noTimeout = false;
+    /** Persistent assignment used by a placed Junimo Hut. */
+    @Nullable
+    private BlockPos harvestHutPos;
+    @Nullable
+    private BlockPos harvestTargetPos;
+    @Nullable
+    private BlockPos harvestApproachPos;
+    private boolean returningToHarvestHut;
+    private int harvestPickupDelay;
+    private final List<ItemStack> carriedHarvest = new ArrayList<>();
 
     public JunimoEntity(EntityType<? extends PathfinderMob> entityType, Level level) {
         super(entityType, level);
@@ -81,9 +107,16 @@ public class JunimoEntity extends PathfinderMob implements GeoEntity {
         return true;
     }
 
-    /** 寻路卡住计数器——连续多 tick 导航完成但未到达目标时递增 */
-    private int stuckTicks = 0;
-    private static final int STUCK_TELEPORT_THRESHOLD = 60; // 3秒卡住后传送
+    private int stuckChecks;
+    private int progressCheckTicks;
+    private double progressCheckX;
+    private double progressCheckZ;
+    private static final int PROGRESS_CHECK_INTERVAL = 20;
+    private static final int STUCK_REPATH_CHECKS = 4;
+    private static final double PROGRESS_MIN_DISP_SQR = 0.04D;
+    private static final double HARVEST_ARRIVAL_DISTANCE_SQR = 0.8D;
+    private static final double FINISHED_PATH_ARRIVAL_HORIZONTAL_SQR = 2.25D;
+    private static final double FINISHED_PATH_ARRIVAL_MAX_Y = 1.25D;
 
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes()
@@ -91,6 +124,15 @@ public class JunimoEntity extends PathfinderMob implements GeoEntity {
                 .add(Attributes.MOVEMENT_SPEED, 0.28D)
                 .add(Attributes.FOLLOW_RANGE, 64.0D)
                 .add(Attributes.STEP_HEIGHT, 1.0D);
+    }
+
+    @Override
+    protected PathNavigation createNavigation(Level level) {
+        NpcPathNavigation navigation = new NpcPathNavigation(this, level);
+        navigation.setCanOpenDoors(true);
+        navigation.setCanPassDoors(true);
+        navigation.setCanFloat(false);
+        return navigation;
     }
 
     // ── Synched Data ────────────────────────────────────────────
@@ -101,6 +143,9 @@ public class JunimoEntity extends PathfinderMob implements GeoEntity {
         builder.define(DATA_COLOR, DEFAULT_COLOR);
         builder.define(DATA_HOLDING_TYPE, HOLDING_NONE);
         builder.define(DATA_BUNDLE_COLOR, 0x00FF00); // default Lime
+        builder.define(DATA_HELD_ITEM, ItemStack.EMPTY);
+        builder.define(DATA_PRISMATIC, false);
+        builder.define(DATA_HARVEST_WORKER_NUMBER, -1);
     }
 
     public int getJunimoColor() {
@@ -127,6 +172,26 @@ public class JunimoEntity extends PathfinderMob implements GeoEntity {
 
     public void setHoldingType(int type) {
         this.entityData.set(DATA_HOLDING_TYPE, type);
+    }
+
+    public ItemStack getHeldItem() {
+        return this.entityData.get(DATA_HELD_ITEM);
+    }
+
+    public boolean isPrismatic() {
+        return this.entityData.get(DATA_PRISMATIC);
+    }
+
+    public void setPrismatic(boolean prismatic) {
+        this.entityData.set(DATA_PRISMATIC, prismatic);
+    }
+
+    public int getHarvestWorkerNumber() {
+        return this.entityData.get(DATA_HARVEST_WORKER_NUMBER);
+    }
+
+    public void setHarvestWorkerNumber(int workerNumber) {
+        this.entityData.set(DATA_HARVEST_WORKER_NUMBER, workerNumber);
     }
 
     /** SDV parity: the color tint applied to the bundle item this Junimo carries. */
@@ -159,7 +224,9 @@ public class JunimoEntity extends PathfinderMob implements GeoEntity {
      * suitable for tinting render calls.
      */
     public float[] getColorComponents() {
-        int c = getJunimoColor();
+        int c = isPrismatic()
+                ? Mth.hsvToRgb(((tickCount + getId() * 17) % 150) / 150.0F, 0.85F, 1.0F)
+                : getJunimoColor();
         return new float[]{
                 ((c >> 16) & 0xFF) / 255f,
                 ((c >> 8) & 0xFF) / 255f,
@@ -176,6 +243,26 @@ public class JunimoEntity extends PathfinderMob implements GeoEntity {
         tag.putInt("HoldingType", getHoldingType());
         tag.putInt("BundleColor", getBundleColor());
         tag.putBoolean("Holding", isHolding());
+        tag.putBoolean("Prismatic", isPrismatic());
+        tag.putInt("HarvestWorkerNumber", getHarvestWorkerNumber());
+        tag.putInt("HarvestPickupDelay", harvestPickupDelay);
+        ListTag carried = new ListTag();
+        for (ItemStack stack : carriedHarvest) {
+            if (!stack.isEmpty()) {
+                carried.add(stack.save(level().registryAccess()));
+            }
+        }
+        tag.put("CarriedHarvest", carried);
+        if (harvestHutPos != null) {
+            tag.putLong("HarvestHut", harvestHutPos.asLong());
+        }
+        if (harvestTargetPos != null) {
+            tag.putLong("HarvestTarget", harvestTargetPos.asLong());
+        }
+        if (harvestApproachPos != null) {
+            tag.putLong("HarvestApproach", harvestApproachPos.asLong());
+        }
+        tag.putBoolean("ReturningToHarvestHut", returningToHarvestHut);
     }
 
     @Override
@@ -192,6 +279,34 @@ public class JunimoEntity extends PathfinderMob implements GeoEntity {
         if (tag.contains("BundleColor")) {
             setBundleColor(tag.getInt("BundleColor"));
         }
+        setPrismatic(tag.getBoolean("Prismatic"));
+        setHarvestWorkerNumber(tag.contains("HarvestWorkerNumber")
+                ? tag.getInt("HarvestWorkerNumber") : -1);
+        harvestPickupDelay = tag.getInt("HarvestPickupDelay");
+        carriedHarvest.clear();
+        ListTag carried = tag.getList("CarriedHarvest", Tag.TAG_COMPOUND);
+        for (int i = 0; i < carried.size(); i++) {
+            ItemStack stack = ItemStack.parse(level().registryAccess(), carried.getCompound(i))
+                    .orElse(ItemStack.EMPTY);
+            if (!stack.isEmpty()) {
+                carriedHarvest.add(stack);
+            }
+        }
+        if (!carriedHarvest.isEmpty()) {
+            setHeldHarvestItem(carriedHarvest.get(0));
+        }
+        if (tag.contains("HarvestHut")) {
+            harvestHutPos = BlockPos.of(tag.getLong("HarvestHut"));
+            setNoTimeout(true);
+        }
+        if (tag.contains("HarvestTarget")) {
+            harvestTargetPos = BlockPos.of(tag.getLong("HarvestTarget"));
+        }
+        if (tag.contains("HarvestApproach")) {
+            harvestApproachPos = BlockPos.of(tag.getLong("HarvestApproach"));
+            targetPos = harvestApproachPos;
+        }
+        returningToHarvestHut = tag.getBoolean("ReturningToHarvestHut");
     }
 
     // ── AI / Goals ──────────────────────────────────────────────
@@ -210,6 +325,7 @@ public class JunimoEntity extends PathfinderMob implements GeoEntity {
         this.targetPos = pos;
         this.onArrival = arrival;
         if (pos != null) {
+            resetProgressTracking();
             this.getNavigation().moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, 0.5);
         }
     }
@@ -225,6 +341,89 @@ public class JunimoEntity extends PathfinderMob implements GeoEntity {
         if (noTimeout) {
             this.maxLifeTicks = Integer.MAX_VALUE;
         }
+    }
+
+    public void assignHarvestTarget(BlockPos hutPos, BlockPos cropPos, BlockPos approachPos) {
+        this.harvestHutPos = hutPos.immutable();
+        this.harvestTargetPos = cropPos.immutable();
+        this.harvestApproachPos = approachPos.immutable();
+        this.returningToHarvestHut = false;
+        setNoTimeout(true);
+        setTarget(this.harvestApproachPos, null);
+    }
+
+    public void returnToHarvestHut(BlockPos hutPos, BlockPos entrancePos) {
+        this.harvestHutPos = hutPos.immutable();
+        this.harvestApproachPos = entrancePos.immutable();
+        this.returningToHarvestHut = true;
+        setNoTimeout(true);
+        setTarget(this.harvestApproachPos, null);
+    }
+
+    public void beginCarryingHarvest(BlockPos hutPos, BlockPos entrancePos, List<ItemStack> harvested) {
+        carriedHarvest.clear();
+        for (ItemStack stack : harvested) {
+            if (!stack.isEmpty()) {
+                carriedHarvest.add(stack.copy());
+            }
+        }
+        if (carriedHarvest.isEmpty()) {
+            returnToHarvestHut(hutPos, entrancePos);
+            return;
+        }
+        setHeldHarvestItem(carriedHarvest.get(0));
+        this.harvestHutPos = hutPos.immutable();
+        this.harvestApproachPos = entrancePos.immutable();
+        this.returningToHarvestHut = true;
+        this.harvestPickupDelay = 12;
+        this.targetPos = null;
+        this.getNavigation().stop();
+    }
+
+    public List<ItemStack> takeCarriedHarvest() {
+        List<ItemStack> result = carriedHarvest.stream().map(ItemStack::copy).toList();
+        carriedHarvest.clear();
+        setHeldHarvestItem(ItemStack.EMPTY);
+        return result;
+    }
+
+    private void setHeldHarvestItem(ItemStack stack) {
+        ItemStack displayed = stack.isEmpty() ? ItemStack.EMPTY : stack.copyWithCount(1);
+        this.entityData.set(DATA_HELD_ITEM, displayed);
+        setHoldingType(displayed.isEmpty() ? HOLDING_NONE : HOLDING_ITEM);
+    }
+
+    @Nullable
+    public BlockPos getHarvestHutPos() {
+        return harvestHutPos;
+    }
+
+    @Nullable
+    public BlockPos getHarvestTargetPos() {
+        return harvestTargetPos;
+    }
+
+    public boolean isReturningToHarvestHut() {
+        return returningToHarvestHut;
+    }
+
+    public void clearHarvestAssignment() {
+        harvestHutPos = null;
+        harvestTargetPos = null;
+        harvestApproachPos = null;
+        returningToHarvestHut = false;
+        targetPos = null;
+        harvestPickupDelay = 0;
+        carriedHarvest.clear();
+        setHeldHarvestItem(ItemStack.EMPTY);
+        getNavigation().stop();
+    }
+
+    private void resetProgressTracking() {
+        stuckChecks = 0;
+        progressCheckTicks = 0;
+        progressCheckX = getX();
+        progressCheckZ = getZ();
     }
 
     public float getAlpha() {
@@ -260,30 +459,70 @@ public class JunimoEntity extends PathfinderMob implements GeoEntity {
             }
         }
 
+        if (!level().isClientSide && harvestPickupDelay > 0) {
+            harvestPickupDelay--;
+            if (harvestPickupDelay == 6) {
+                playSound(ModSounds.COIN.get(), 0.55F, 1.2F);
+            }
+            if (harvestPickupDelay == 0 && harvestApproachPos != null) {
+                setTarget(harvestApproachPos, null);
+            }
+        }
+
         // 脚本目标到达检测
         if (targetPos != null) {
-            double distSq = this.distanceToSqr(targetPos.getX() + 0.5, targetPos.getY(), targetPos.getZ() + 0.5);
-            if (distSq < 2.5) {
+            double targetX = targetPos.getX() + 0.5D;
+            double targetY = targetPos.getY();
+            double targetZ = targetPos.getZ() + 0.5D;
+            double targetDx = getX() - targetX;
+            double targetDy = getY() - targetY;
+            double targetDz = getZ() - targetZ;
+            double distSq = targetDx * targetDx + targetDy * targetDy + targetDz * targetDz;
+            double arrivalDistanceSq = harvestHutPos == null ? 2.5D : HARVEST_ARRIVAL_DISTANCE_SQR;
+            // GroundPathNavigation may legitimately finish at the edge of the
+            // requested block instead of its exact center. Treat that as an
+            // arrival only while still close to the target, so a failed path
+            // can never harvest remotely.
+            boolean finishedNearby = harvestHutPos != null
+                    && getNavigation().isDone()
+                    && targetDx * targetDx + targetDz * targetDz <= FINISHED_PATH_ARRIVAL_HORIZONTAL_SQR
+                    && Math.abs(targetDy) <= FINISHED_PATH_ARRIVAL_MAX_Y;
+            if (distSq < arrivalDistanceSq || finishedNearby) {
                 // 到达目标
-                stuckTicks = 0;
+                resetProgressTracking();
+                getNavigation().stop();
                 targetPos = null;
+                if (!level().isClientSide && harvestHutPos != null) {
+                    com.stardew.craft.blockentity.WizardBuildingBlockEntity.onHarvesterArrived(this);
+                    return;
+                }
+                harvestTargetPos = null;
                 if (onArrival != null) {
                     Runnable cb = onArrival;
                     onArrival = null;
                     cb.run();
                 }
-            } else if (this.getNavigation().isDone()) {
-                stuckTicks++;
-                if (stuckTicks >= STUCK_TELEPORT_THRESHOLD) {
-                    // 卡住太久——直接传送到目标附近
-                    this.setPos(targetPos.getX() + 0.5, targetPos.getY(), targetPos.getZ() + 0.5);
-                    stuckTicks = 0;
-                } else {
-                    // 重新尝试寻路
-                    this.getNavigation().moveTo(targetPos.getX() + 0.5, targetPos.getY(), targetPos.getZ() + 0.5, 0.5);
+            } else if (!level().isClientSide) {
+                progressCheckTicks++;
+                if (progressCheckTicks >= PROGRESS_CHECK_INTERVAL) {
+                    double dx = getX() - progressCheckX;
+                    double dz = getZ() - progressCheckZ;
+                    boolean progressed = dx * dx + dz * dz >= PROGRESS_MIN_DISP_SQR;
+                    stuckChecks = progressed ? 0 : stuckChecks + 1;
+                    progressCheckTicks = 0;
+                    progressCheckX = getX();
+                    progressCheckZ = getZ();
+
+                    // Match the NPC movement controller: preserve an active path;
+                    // rebuild only when navigation ended or actual displacement has
+                    // been absent for several checks.
+                    if (getNavigation().isDone() || stuckChecks >= STUCK_REPATH_CHECKS) {
+                        getNavigation().stop();
+                        getNavigation().moveTo(targetPos.getX() + 0.5,
+                                targetPos.getY(), targetPos.getZ() + 0.5, 0.5);
+                        stuckChecks = 0;
+                    }
                 }
-            } else {
-                stuckTicks = 0;
             }
         }
     }
@@ -292,11 +531,14 @@ public class JunimoEntity extends PathfinderMob implements GeoEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main", 5, state -> {
+        // Carrying is a discrete sprite state in SDV. Blending walk and hold_walk
+        // makes the item follow the arm downward during pickup/drop-off, so switch
+        // these poses on the same tick as the held-item data changes.
+        controllers.add(new AnimationController<>(this, "main", 0, state -> {
+            if (isHolding()) {
+                return state.setAndContinue(HOLD_WALK);
+            }
             if (this.getDeltaMovement().horizontalDistanceSqr() > 1.0E-6) {
-                if (isHolding()) {
-                    return state.setAndContinue(HOLD_WALK);
-                }
                 return state.setAndContinue(WALK);
             }
             return state.setAndContinue(IDLE);

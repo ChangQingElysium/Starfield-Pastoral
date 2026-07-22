@@ -65,6 +65,13 @@ public final class EventCommandFactory {
                     getBool(obj, "relative", false),
                     getString(obj, "anchor", null)
             );
+            case "place_player"  -> new PlacePlayerCommand(
+                    getDouble(obj, "x", 0),
+                    getDouble(obj, "y", 0),
+                    getDouble(obj, "z", 0),
+                    getFloat(obj, "yaw", 0),
+                    getFloat(obj, "pitch", 0)
+            );
 
             case "move_actor"    -> new MoveActorCommand(
                     obj.get("actor").getAsString(),

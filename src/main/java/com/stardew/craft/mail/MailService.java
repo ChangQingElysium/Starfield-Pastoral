@@ -259,7 +259,6 @@ public class MailService {
                             "[Mail] Availability condition failed for {}: {}", entry.definitionId(), message))
                     .orElse(false);
             if (!allowed) {
-                LOGGER.debug("[Mail] Definition {} is not currently available", entry.definitionId());
                 return false;
             }
         }

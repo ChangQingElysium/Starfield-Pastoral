@@ -1,0 +1,78 @@
+{
+  "id": "wizard_magic_ink_return",
+  "skippable": true,
+  "trigger": {
+    "type": "enter_area",
+    "location": "wizardhouse",
+    "area_min": [-186, 33, 43],
+    "area_max": [-172, 40, 65]
+  },
+  "preconditions": [
+    { "type": "not_saw_event", "id": "wizard_magic_ink_return" },
+    { "type": "flag", "id": "hasPickedUpMagicInk" }
+  ],
+  "commands": [
+    { "cmd": "comment", "text": "=== SDV WizardHouse event 418172: return the Magic Ink ===" },
+    { "cmd": "lock_player" },
+    { "cmd": "fade", "mode": "out", "ticks": 10 },
+
+    { "cmd": "hide_npc", "npc_id": "wizard" },
+    { "cmd": "spawn_actor", "actor": "wizard", "npc_id": "wizard",
+      "x": -186, "y": 34, "z": 55, "relative": false, "facing": 180 },
+    { "cmd": "spawn_actor", "actor": "fake_player", "npc_id": "player",
+      "x": -184, "y": 34, "z": 55, "relative": false, "facing": 180 },
+
+    { "cmd": "camera", "x": -185.736, "y": 35.076, "z": 52.262,
+      "yaw": -23.6, "pitch": 21.7, "relative": false },
+    { "cmd": "music", "track": "music_wizard_tower" },
+    { "cmd": "fade", "mode": "in", "ticks": 15 },
+    { "cmd": "skippable" },
+    { "cmd": "pause", "ticks": 20 },
+
+    { "cmd": "speak", "npc_id": "wizard", "text": "event.wizard_magic_ink.found" },
+    { "cmd": "move_actor", "actor": "wizard",
+      "x": -185, "y": 34, "z": 55, "ticks": 10, "relative": false },
+    { "cmd": "pause", "ticks": 20 },
+    { "cmd": "speak", "npc_id": "wizard", "text": "event.wizard_magic_ink.hesitation" },
+    { "cmd": "face_actor", "actor": "wizard", "face_actor": "fake_player" },
+    { "cmd": "pause", "ticks": 10 },
+    { "cmd": "emote", "actor": "wizard", "emote": "question" },
+    { "cmd": "pause", "ticks": 10 },
+    { "cmd": "speak", "npc_id": "wizard", "text": "event.wizard_magic_ink.exwife" },
+    { "cmd": "emote", "actor": "wizard", "emote": "pause" },
+    { "cmd": "pause", "ticks": 10 },
+    { "cmd": "face_actor", "actor": "wizard", "yaw": 180 },
+    { "cmd": "speak", "npc_id": "wizard", "text": "event.wizard_magic_ink.dont_tell" },
+
+    { "cmd": "pause", "ticks": 20 },
+    { "cmd": "face_actor", "actor": "wizard", "face_actor": "fake_player" },
+    { "cmd": "speak", "npc_id": "wizard", "text": "event.wizard_magic_ink.reward" },
+    { "cmd": "move_actor", "actor": "wizard",
+      "x": -186, "y": 34, "z": 55, "ticks": 10, "relative": false },
+    { "cmd": "pause", "ticks": 16 },
+    { "cmd": "face_actor", "actor": "wizard", "yaw": 180 },
+    { "cmd": "pause", "ticks": 20 },
+    { "cmd": "play_sound", "sound": "stardewcraft:fireball" },
+    { "cmd": "shake_actor", "actor": "wizard", "ticks": 10, "amplitude": 0.05 },
+    { "cmd": "screen_flash", "ticks": 5 },
+    { "cmd": "set_flag", "flag": "wizardBuildingsUnlocked" },
+    { "cmd": "pause", "ticks": 50 },
+
+    { "cmd": "face_actor", "actor": "fake_player", "yaw": 180 },
+    { "cmd": "face_actor", "actor": "wizard", "face_actor": "fake_player" },
+    { "cmd": "speak", "npc_id": "wizard", "text": "event.wizard_magic_ink.book" },
+    { "cmd": "speak", "npc_id": "wizard", "text": "event.wizard_magic_ink.thanks" },
+    { "cmd": "emote", "actor": "fake_player", "emote": "happy" },
+    { "cmd": "pause", "ticks": 16 },
+
+    { "cmd": "fade", "mode": "out", "ticks": 10 },
+    { "cmd": "place_player", "x": -184, "y": 34, "z": 55, "yaw": 180, "pitch": 0 },
+    { "cmd": "remove_actor", "actor": "wizard" },
+    { "cmd": "remove_actor", "actor": "fake_player" },
+    { "cmd": "show_npc", "npc_id": "wizard" },
+    { "cmd": "camera", "action": "reset" },
+    { "cmd": "unlock_player" },
+    { "cmd": "fade", "mode": "in", "ticks": 15 },
+    { "cmd": "end" }
+  ]
+}

@@ -16,6 +16,7 @@ import java.util.List;
  */
 @SuppressWarnings("null")
 public record OpenCarpenterMenuPayload(
+    String builder,
     int playerMoney,
     List<CarpenterBlueprint> blueprints
 ) implements CustomPacketPayload {
@@ -41,7 +42,10 @@ public record OpenCarpenterMenuPayload(
                 List<CarpenterBlueprint.MaterialEntry> materials = MATERIAL_CODEC.apply(ByteBufCodecs.list()).decode(buf);
                 String resultItemId = ByteBufCodecs.STRING_UTF8.decode(buf);
                 boolean isUpgrade = buf.readBoolean();
-                return new CarpenterBlueprint(id, displayNameKey, descriptionKey, cost, materials, resultItemId, isUpgrade);
+                int previewCanvasSize = buf.readVarInt();
+                boolean magicalConstruction = buf.readBoolean();
+                return new CarpenterBlueprint(id, displayNameKey, descriptionKey, cost, materials,
+                        resultItemId, isUpgrade, previewCanvasSize, magicalConstruction);
             }
 
             @Override
@@ -53,11 +57,14 @@ public record OpenCarpenterMenuPayload(
                 MATERIAL_CODEC.apply(ByteBufCodecs.list()).encode(buf, bp.materials());
                 ByteBufCodecs.STRING_UTF8.encode(buf, bp.resultItemId());
                 buf.writeBoolean(bp.isUpgrade());
+                buf.writeVarInt(bp.previewCanvasSize());
+                buf.writeBoolean(bp.magicalConstruction());
             }
         };
 
     public static final StreamCodec<RegistryFriendlyByteBuf, OpenCarpenterMenuPayload> STREAM_CODEC =
         StreamCodec.composite(
+            ByteBufCodecs.STRING_UTF8,                         OpenCarpenterMenuPayload::builder,
             ByteBufCodecs.INT,                                 OpenCarpenterMenuPayload::playerMoney,
             BLUEPRINT_CODEC.apply(ByteBufCodecs.list()),       OpenCarpenterMenuPayload::blueprints,
             OpenCarpenterMenuPayload::new

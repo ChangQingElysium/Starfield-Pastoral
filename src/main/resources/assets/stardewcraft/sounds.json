@@ -4,6 +4,16 @@
       { "name": "stardewcraft:entity/crow/caw", "stream": false }
     ]
   },
+  "music_lava_ambient": {
+    "sounds": [
+      { "name": "stardewcraft:music/lava_ambient", "stream": false }
+    ]
+  },
+  "music_upper_ambient": {
+    "sounds": [
+      { "name": "stardewcraft:music/upper_ambient", "stream": false }
+    ]
+  },
   "crow_flap": {
     "sounds": [
       { "name": "stardewcraft:entity/crow/flap", "stream": false }
@@ -422,6 +432,11 @@
   "debuff_hit": {
     "sounds": [
       { "name": "stardewcraft:debuffhit", "stream": false }
+    ]
+  },
+  "debuff_spell": {
+    "sounds": [
+      { "name": "stardewcraft:debuffspell", "stream": false }
     ]
   },
   "slime_hit": {
@@ -1339,6 +1354,14 @@
     "sounds": [
       {
         "name": "stardewcraft:music/wizard_song",
+        "stream": false
+      }
+    ]
+  },
+  "music_bug_level_loop": {
+    "sounds": [
+      {
+        "name": "stardewcraft:music/bug_level_loop",
         "stream": false
       }
     ]

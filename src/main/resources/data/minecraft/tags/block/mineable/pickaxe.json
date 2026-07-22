@@ -1,6 +1,11 @@
 {
   "replace": false,
   "values": [
+    "stardewcraft:earth_obelisk",
+    "stardewcraft:water_obelisk",
+    "stardewcraft:desert_obelisk",
+    "stardewcraft:island_obelisk",
+    "stardewcraft:gold_clock",
     "stardewcraft:stone_junimo",
     "stardewcraft:mine_barrier",
     "stardewcraft:earth_shale",

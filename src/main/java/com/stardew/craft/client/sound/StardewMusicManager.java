@@ -13,6 +13,8 @@ import com.stardew.craft.manager.CoalForestArea;
 import com.stardew.craft.sound.ModSounds;
 import com.stardew.craft.time.StardewTimeManager;
 import com.stardew.craft.weather.ClientWeatherCache;
+import com.stardew.craft.world.MutantBugLairArea;
+import com.stardew.craft.world.WitchArea;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.AbstractSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
@@ -351,7 +353,6 @@ public final class StardewMusicManager {
     private static void evaluateAndPlay(Minecraft mc, boolean inMine) {
         SoundEvent desired = pickTrack(mc, inMine);
         if (desired == null) {
-            LOG.debug("[StardewMusic] pickTrack returned null, stopping current music");
             // No suitable track -> stop
             if (currentMusic != null) {
                 crossfadeTo(null);
@@ -370,7 +371,6 @@ public final class StardewMusicManager {
         }
 
         // Different track -> crossfade
-        LOG.debug("[StardewMusic] Crossfading to: {}", desired.getLocation());
         crossfadeTo(desired);
     }
 
@@ -401,6 +401,18 @@ public final class StardewMusicManager {
         InteriorTrackChoice interiorTrack = pickInteriorTrack(mc);
         if (interiorTrack != null) {
             return interiorTrack.track();
+        }
+
+        if (mc.player != null && MutantBugLairArea.contains(mc.player.blockPosition())) {
+            return ModSounds.MUSIC_BUG_LEVEL_LOOP.get();
+        }
+
+        if (mc.player != null && WitchArea.isInHut(mc.player.blockPosition())) {
+            return ModSounds.MUSIC_UPPER_AMBIENT.get();
+        }
+
+        if (mc.player != null && WitchArea.isInSwamp(mc.player.blockPosition())) {
+            return ModSounds.MUSIC_LAVA_AMBIENT.get();
         }
 
         if (isPlayerInSewerRegion(mc)) {

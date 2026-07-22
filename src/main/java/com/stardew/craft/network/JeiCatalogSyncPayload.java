@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -78,7 +79,24 @@ public record JeiCatalogSyncPayload(
     }
 
     public static JeiCatalogSyncPayload current(ServerPlayer player) {
-        return new JeiCatalogSyncPayload(buildShops(), buildCustomGeodes(player), buildFishPonds());
+        Objects.requireNonNull(player, "player");
+        return current(player, currentSharedCatalog());
+    }
+
+    static SharedCatalog currentSharedCatalog() {
+        return new SharedCatalog(buildShops(), buildFishPonds());
+    }
+
+    static JeiCatalogSyncPayload fromShared(SharedCatalog shared, List<GeodeEntry> geodes) {
+        Objects.requireNonNull(shared, "shared");
+        Objects.requireNonNull(geodes, "geodes");
+        return new JeiCatalogSyncPayload(shared.shops(), geodes, shared.fishPonds());
+    }
+
+    static JeiCatalogSyncPayload current(ServerPlayer player, SharedCatalog shared) {
+        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(shared, "shared");
+        return fromShared(shared, buildCustomGeodes(player));
     }
 
     @Override
@@ -286,6 +304,16 @@ public record JeiCatalogSyncPayload(
         int count = buf.readVarInt();
         if (count < 0 || count > MAX_ENTRIES) throw new IllegalArgumentException("Invalid JEI entry count " + count);
         return count;
+    }
+
+    record SharedCatalog(List<ShopEntry> shops, List<FishPondEntry> fishPonds) {
+        SharedCatalog {
+            shops = shops == null ? List.of() : List.copyOf(shops);
+            fishPonds = fishPonds == null ? List.of() : List.copyOf(fishPonds);
+            if (shops.size() > MAX_ENTRIES || fishPonds.size() > MAX_ENTRIES) {
+                throw new IllegalArgumentException("JEI catalog exceeds " + MAX_ENTRIES + " entries");
+            }
+        }
     }
 
     public record ShopEntry(ItemStack item, String shopId, String ownerNpcId, int price, int stock,

@@ -30,6 +30,8 @@ public class FarmInstance {
     private int graceDaysLeft;
     /** 洞穴类型选择（对齐 SDV Farmer.caveChoice） */
     private FarmCaveChoice caveChoice = FarmCaveChoice.NONE;
+    private boolean goldClockPresent;
+    private boolean goldClockEnabled = true;
     /** 农场成员 UUID 列表（不含 owner）。容量由 gamerule stardewMaxFarmersPerFarm 控制。 */
     private final List<UUID> members = new ArrayList<>();
 
@@ -62,6 +64,8 @@ public class FarmInstance {
     public int getLastOnlineSeason() { return lastOnlineSeason; }
     public int getGraceDaysLeft() { return graceDaysLeft; }
     public FarmCaveChoice getCaveChoice() { return caveChoice; }
+    public boolean hasActiveGoldClock() { return goldClockPresent && goldClockEnabled; }
+    public boolean hasGoldClock() { return goldClockPresent; }
     /** 获取成员列表（只读，不含 owner） */
     public List<UUID> getMembers() { return Collections.unmodifiableList(members); }
 
@@ -91,6 +95,10 @@ public class FarmInstance {
     public void setGraceDaysLeft(int days) { this.graceDaysLeft = days; }
     public void setCreatedTimestamp(long ts) { this.createdTimestamp = ts; }
     public void setCaveChoice(FarmCaveChoice choice) { this.caveChoice = (choice == null ? FarmCaveChoice.NONE : choice); }
+    public void setGoldClockState(boolean present, boolean enabled) {
+        this.goldClockPresent = present;
+        this.goldClockEnabled = enabled;
+    }
 
     /** 添加成员。返回 false 如果已满或已存在。 */
     public boolean addMember(UUID uuid, int maxFarmers) {
@@ -203,6 +211,8 @@ public class FarmInstance {
         tag.putInt("LastOnlineSeason", lastOnlineSeason);
         tag.putInt("GraceDaysLeft", graceDaysLeft);
         tag.putString("CaveChoice", caveChoice.getName());
+        tag.putBoolean("GoldClockPresent", goldClockPresent);
+        tag.putBoolean("GoldClockEnabled", goldClockEnabled);
         // 成员列表
         if (!members.isEmpty()) {
             ListTag memberList = new ListTag();
@@ -236,6 +246,8 @@ public class FarmInstance {
         } else {
             instance.caveChoice = FarmCaveChoice.NONE;
         }
+        instance.goldClockPresent = tag.getBoolean("GoldClockPresent");
+        instance.goldClockEnabled = !tag.contains("GoldClockEnabled") || tag.getBoolean("GoldClockEnabled");
         // 加载成员列表
         if (tag.contains("Members", Tag.TAG_LIST)) {
             ListTag memberList = tag.getList("Members", Tag.TAG_COMPOUND);

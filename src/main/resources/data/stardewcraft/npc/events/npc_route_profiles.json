@@ -1493,6 +1493,14 @@
         {
           "mode": "walk",
           "point": "trailer_outdoor_door"
+        },
+        {
+          "mode": "warp",
+          "point": "trailer_indoor_entry"
+        },
+        {
+          "mode": "walk",
+          "point": "pam_trailer_sleep"
         }
       ],
       "saloon": [

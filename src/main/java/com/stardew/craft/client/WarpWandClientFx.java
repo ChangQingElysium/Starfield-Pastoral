@@ -63,7 +63,7 @@ public final class WarpWandClientFx {
             k = k * k * (3.0F - 2.0F * k);
             int rgb = lerpRgb(TYPE_BASE_RGB, TYPE_HIGHLIGHT_RGB, k);
             out.append(Component.literal(String.valueOf(raw.charAt(i)))
-                .withStyle(Style.EMPTY.withColor(TextColor.fromRgb(rgb)).withBold(true)));
+                    .withStyle(Style.EMPTY.withColor(TextColor.fromRgb(rgb)).withBold(true)));
         }
         return out;
     }

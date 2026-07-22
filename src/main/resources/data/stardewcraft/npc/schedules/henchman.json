@@ -1,0 +1,9 @@
+{
+  "npc_id": "henchman",
+  "override_vanilla": true,
+  "_format": "time -> \"location @namedPointId facing [behavior]\"",
+  "_note": "The Henchman guards the Witch's Hut path all day and does not path.",
+  "default": {
+    "600": "witchswamp @henchman_guard 2"
+  }
+}

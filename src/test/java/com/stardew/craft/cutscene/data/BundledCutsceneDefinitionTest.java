@@ -48,7 +48,8 @@ class BundledCutsceneDefinitionTest {
 
     @Test
     void wizardCutscenesEnableSkippingBeforeTheirFirstDialogue() throws Exception {
-        for (String fileName : java.util.List.of("wizard_intro.json", "wizard_e112.json")) {
+        for (String fileName : java.util.List.of(
+                "wizard_intro.json", "wizard_e112.json", "wizard_dark_talisman_opening.json")) {
             Path path = eventsRoot().resolve(fileName);
             EventData event = read(path);
             int skippableIndex = commandIndex(event, "skippable");

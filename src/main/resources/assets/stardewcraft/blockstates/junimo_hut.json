@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "part=main,facing=north": { "model": "stardewcraft:block/wizard_building_empty" },
+    "part=main,facing=east": { "model": "stardewcraft:block/wizard_building_empty" },
+    "part=main,facing=south": { "model": "stardewcraft:block/wizard_building_empty" },
+    "part=main,facing=west": { "model": "stardewcraft:block/wizard_building_empty" },
+    "part=extension,facing=north": { "model": "stardewcraft:block/wizard_building_empty" },
+    "part=extension,facing=east": { "model": "stardewcraft:block/wizard_building_empty" },
+    "part=extension,facing=south": { "model": "stardewcraft:block/wizard_building_empty" },
+    "part=extension,facing=west": { "model": "stardewcraft:block/wizard_building_empty" }
+  }
+}

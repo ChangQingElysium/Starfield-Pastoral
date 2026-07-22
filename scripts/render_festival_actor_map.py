@@ -8,6 +8,8 @@ Examples:
   python3 scripts/render_festival_actor_map.py --festival summer28 --profile y1 --phase main
   python3 scripts/render_festival_actor_map.py --secret-note-23
   python3 scripts/render_festival_actor_map.py --wizard-dark-talisman
+  python3 scripts/render_festival_actor_map.py --wizard-magic-ink
+  python3 scripts/render_festival_actor_map.py --dark-talisman-hunt
 """
 
 from __future__ import annotations
@@ -839,6 +841,109 @@ def render_wizard_dark_talisman_source_map(output_dir: Path, scale: int) -> Path
     return output_path
 
 
+def render_wizard_magic_ink_source_map(output_dir: Path, scale: int) -> Path:
+    """Render vanilla WizardHouse event 418172 without inferring Minecraft coordinates."""
+    output_dir.mkdir(parents=True, exist_ok=True)
+    step = TILE_SIZE * scale
+    wizard_house = render_tmx(MAPS_DIR / "WizardHouse.tmx", scale=scale)
+    crop = (0, 8, 8, 19)
+    base = wizard_house.crop(tuple(value * step for value in crop))
+    base = draw_tile_grid(base, scale, crop[0], crop[1])
+
+    def pixel(tile_x: float, tile_y: float) -> tuple[float, float]:
+        return ((tile_x - crop[0]) * step, (tile_y - crop[1]) * step)
+
+    route_layer = Image.new("RGBA", base.size, (0, 0, 0, 0))
+    route_draw = ImageDraw.Draw(route_layer)
+    wizard_route = [pixel(1.5, 14.5), pixel(2.5, 14.5), pixel(1.5, 14.5)]
+    route_draw.line(wizard_route, fill=(190, 92, 255, 230), width=max(4, scale * 2), joint="curve")
+    base = Image.alpha_composite(base, route_layer)
+
+    points = [
+        ("Vanilla viewport anchor (2,14)", 2.5, 14.5),
+        ("Player fixed position (3,14), starts/finally faces W", 3.5, 14.5),
+        ("Wizard main position (1,14), starts E", 1.5, 14.5),
+        ("Wizard question step (2,14), then returns", 2.5, 14.5),
+        ("Summoned book visual and smoke anchor (2,12)", 2.5, 12.5),
+        ("Persistent WizardBook interaction tile (2,13)", 2.5, 13.5),
+    ]
+    annotated = draw_numbered_source_points(
+        base,
+        points,
+        (crop[0], crop[1]),
+        scale,
+        "Magic Ink / Vanilla event 418172 / source points",
+        route=False,
+    )
+    output_path = output_dir / "wizard_magic_ink_wizardhouse_vanilla_source_points.png"
+    annotated.save(output_path)
+    return output_path
+
+
+def render_dark_talisman_hunt_source_maps(output_dir: Path, scale: int) -> list[Path]:
+    """Render the vanilla Sewer -> BugLand hunt anchors without inferring Minecraft coordinates."""
+    output_dir.mkdir(parents=True, exist_ok=True)
+    step = TILE_SIZE * scale
+    outputs: list[Path] = []
+
+    sewer = render_tmx(MAPS_DIR / "Sewer.tmx", scale=scale)
+    sewer_crop = (0, 10, 40, 25)
+    sewer_base = sewer.crop(tuple(value * step for value in sewer_crop))
+    sewer_base = draw_tile_grid(sewer_base, scale, sewer_crop[0], sewer_crop[1])
+    sewer_points = [
+        ("BugLand warp + MagicalSeal touch tile (3,18)", 3.5, 18.5),
+        ("Krobus unseal spell source used by vanilla code (31,17)", 31.5, 17.5),
+    ]
+    sewer_annotated = draw_numbered_source_points(
+        sewer_base,
+        sewer_points,
+        (sewer_crop[0], sewer_crop[1]),
+        scale,
+        "Dark Talisman hunt / Vanilla Sewer anchors",
+        route=False,
+    )
+    sewer_output = output_dir / "dark_talisman_hunt_sewer_vanilla_source_points.png"
+    sewer_annotated.save(sewer_output)
+    outputs.append(sewer_output)
+
+    bugland = render_tmx(MAPS_DIR / "BugLand.tmx", scale=scale)
+    north_crop = (22, 0, 40, 13)
+    north_base = bugland.crop(tuple(value * step for value in north_crop))
+    north_base = draw_tile_grid(north_base, scale, north_crop[0], north_crop[1])
+    north_annotated = draw_numbered_source_points(
+        north_base,
+        [("Dark Talisman reward chest (31,5)", 31.5, 5.5)],
+        (north_crop[0], north_crop[1]),
+        scale,
+        "Dark Talisman hunt / Vanilla BugLand reward",
+        route=False,
+    )
+    north_output = output_dir / "dark_talisman_hunt_bugland_reward_vanilla_source_points.png"
+    north_annotated.save(north_output)
+    outputs.append(north_output)
+
+    south_crop = (8, 47, 23, 60)
+    south_base = bugland.crop(tuple(value * step for value in south_crop))
+    south_base = draw_tile_grid(south_base, scale, south_crop[0], south_crop[1])
+    south_points = [
+        ("Arrival from Sewer (15,53)", 15.5, 53.5),
+        ("Return warp to Sewer (14,55)", 14.5, 55.5),
+        ("Return warp to Sewer (15,55)", 15.5, 55.5),
+    ]
+    south_annotated = draw_numbered_source_points(
+        south_base,
+        south_points,
+        (south_crop[0], south_crop[1]),
+        scale,
+        "Dark Talisman hunt / Vanilla BugLand entrance",
+        route=False,
+    )
+    south_output = output_dir / "dark_talisman_hunt_bugland_entrance_vanilla_source_points.png"
+    south_annotated.save(south_output)
+    outputs.append(south_output)
+    return outputs
+
+
 def render_minecraft_capture_workbook(
     output_path: Path,
     title: str,
@@ -942,6 +1047,46 @@ def render_wizard_dark_talisman_capture_workbook(output_dir: Path) -> Path:
         output_dir / "wizard_dark_talisman_minecraft_capture_workbook.png",
         "Dark Talisman opening - Minecraft capture workbook",
         "Every new runtime coordinate is intentionally blank until supplied with the in-game planning tool.",
+        entries,
+    )
+
+
+def render_wizard_magic_ink_capture_workbook(output_dir: Path) -> Path:
+    entries = [
+        ("I01", "Return-event trigger area corner 1", "block x/y/z"),
+        ("I02", "Return-event trigger area corner 2", "block x/y/z"),
+        ("I03", "Player fixed cutscene position", "x/y/z + facing"),
+        ("I04", "Wizard main dialogue position", "x/y/z + facing"),
+        ("I05", "Wizard question step", "x/y/z + facing"),
+        ("I06", "Summoned book visual/effect anchor", "x/y/z + facing"),
+        ("I07", "Permanent summoning-book interaction block", "block x/y/z + facing"),
+        ("I08", "Opening two-shot camera rig", "exact x/y/z + yaw + pitch"),
+        ("I09", "Book-summoning insert camera rig", "exact x/y/z + yaw + pitch"),
+        ("I10", "Player position after cutscene", "x/y/z + facing"),
+    ]
+    return render_minecraft_capture_workbook(
+        output_dir / "wizard_magic_ink_minecraft_capture_workbook.png",
+        "Magic Ink return - Minecraft capture workbook",
+        "Every Minecraft coordinate is intentionally blank until supplied with the in-game planning tool.",
+        entries,
+    )
+
+
+def render_dark_talisman_hunt_capture_workbook(output_dir: Path) -> Path:
+    entries = [
+        ("T01", "Sewer sealed entrance trigger area corner 1", "block x/y/z"),
+        ("T02", "Sewer sealed entrance trigger area corner 2", "block x/y/z"),
+        ("T03", "Sewer seal / unseal effect impact anchor", "block x/y/z + facing"),
+        ("T04", "Mutant Bug Lair arrival position", "x/y/z + facing"),
+        ("T05", "Mutant Bug Lair return trigger area corner 1", "block x/y/z"),
+        ("T06", "Mutant Bug Lair return trigger area corner 2", "block x/y/z"),
+        ("T07", "Sewer return position", "x/y/z + facing"),
+        ("T08", "Dark Talisman reward chest", "block x/y/z + facing"),
+    ]
+    return render_minecraft_capture_workbook(
+        output_dir / "dark_talisman_hunt_minecraft_capture_workbook.png",
+        "Dark Talisman hunt - Minecraft capture workbook",
+        "Every runtime coordinate is intentionally blank until supplied with the in-game planning tool.",
         entries,
     )
 
@@ -1100,6 +1245,10 @@ def parse_args() -> argparse.Namespace:
                         help="Render the vanilla Note 23 bear-event anchors and a blank Minecraft capture workbook.")
     parser.add_argument("--wizard-dark-talisman", action="store_true",
                         help="Render vanilla Dark Talisman opening anchors and a blank Minecraft capture workbook.")
+    parser.add_argument("--wizard-magic-ink", action="store_true",
+                        help="Render vanilla Magic Ink return anchors and a blank Minecraft capture workbook.")
+    parser.add_argument("--dark-talisman-hunt", action="store_true",
+                        help="Render vanilla Sewer/BugLand hunt anchors and a blank Minecraft capture workbook.")
     return parser.parse_args()
 
 
@@ -1131,6 +1280,15 @@ def main() -> None:
     if args.wizard_dark_talisman:
         print(render_wizard_dark_talisman_source_map(args.out, args.scale).relative_to(ROOT))
         print(render_wizard_dark_talisman_capture_workbook(args.out).relative_to(ROOT))
+        return
+    if args.wizard_magic_ink:
+        print(render_wizard_magic_ink_source_map(args.out, args.scale).relative_to(ROOT))
+        print(render_wizard_magic_ink_capture_workbook(args.out).relative_to(ROOT))
+        return
+    if args.dark_talisman_hunt:
+        for output_path in render_dark_talisman_hunt_source_maps(args.out, args.scale):
+            print(output_path.relative_to(ROOT))
+        print(render_dark_talisman_hunt_capture_workbook(args.out).relative_to(ROOT))
         return
     if args.preset == "night_market":
         for output_path in render_night_market_maps(args.out, args.scale, args.portrait_size):

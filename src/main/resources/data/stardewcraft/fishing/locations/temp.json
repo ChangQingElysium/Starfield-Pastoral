@@ -1,0 +1,77 @@
+{
+  "comment": "SDV Temp location pool used by the winter8 ice-fishing contest",
+  "location": "Temp",
+  "fish": [
+    {
+      "id": "ice_fishing_perch",
+      "precedence": 0,
+      "item": "stardewcraft:perch",
+      "chance": 1.0,
+      "difficulty": 35,
+      "motionType": 1,
+      "minFishSize": 10,
+      "maxFishSize": 24,
+      "minFishingLevel": 0,
+      "minDistanceFromShore": 0,
+      "maxDistanceFromShore": -1,
+      "ignoreFishDataRequirements": true
+    },
+    {
+      "id": "ice_fishing_lingcod",
+      "precedence": 0,
+      "item": "stardewcraft:lingcod",
+      "chance": 0.4,
+      "difficulty": 85,
+      "motionType": 0,
+      "minFishSize": 30,
+      "maxFishSize": 50,
+      "minFishingLevel": 0,
+      "minDistanceFromShore": 0,
+      "maxDistanceFromShore": -1,
+      "condition": "YEAR 2",
+      "ignoreFishDataRequirements": true
+    },
+    {
+      "id": "ice_fishing_midnight_carp",
+      "precedence": 0,
+      "item": "stardewcraft:midnight_carp",
+      "chance": 1.0,
+      "difficulty": 55,
+      "motionType": 0,
+      "minFishSize": 12,
+      "maxFishSize": 52,
+      "minFishingLevel": 0,
+      "minDistanceFromShore": 0,
+      "maxDistanceFromShore": -1,
+      "ignoreFishDataRequirements": true
+    },
+    {
+      "id": "ice_fishing_pike",
+      "precedence": 0,
+      "item": "stardewcraft:pike",
+      "chance": 1.0,
+      "difficulty": 60,
+      "motionType": 1,
+      "minFishSize": 15,
+      "maxFishSize": 60,
+      "minFishingLevel": 0,
+      "minDistanceFromShore": 0,
+      "maxDistanceFromShore": -1,
+      "ignoreFishDataRequirements": true
+    },
+    {
+      "id": "ice_fishing_red_mullet",
+      "precedence": 0,
+      "item": "stardewcraft:red_mullet",
+      "chance": 0.6,
+      "difficulty": 55,
+      "motionType": 2,
+      "minFishSize": 8,
+      "maxFishSize": 22,
+      "minFishingLevel": 0,
+      "minDistanceFromShore": 0,
+      "maxDistanceFromShore": -1,
+      "ignoreFishDataRequirements": true
+    }
+  ]
+}

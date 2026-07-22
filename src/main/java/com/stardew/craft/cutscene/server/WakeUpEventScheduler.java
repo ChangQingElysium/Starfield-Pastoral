@@ -106,8 +106,6 @@ public final class WakeUpEventScheduler {
         String nextId = queue.peekFirst(uuid);
         if (nextId == null) return;
         if (ServerCutsceneTracker.isActive(uuid)) {
-            LOGGER.debug("[WAKE_UP] Deferred '{}' for {} because another cutscene is active.",
-                    nextId, player.getName().getString());
             return;
         }
 

@@ -117,8 +117,6 @@ public final class AnimalEntitySyncService {
                                                              FarmAnimalRecord record) {
         AnimalBuildingRecord building = data.getBuilding(record.buildingId()).orElse(null);
         if (building == null) {
-            StardewCraft.LOGGER.debug("[ANIMAL_SYNC] Skipping spawn for animal {} - building {} is missing or inactive",
-                record.animalId(), record.buildingId());
             return null;
         }
         if (!level.dimension().location().toString().equals(building.dimensionId())) {
@@ -129,8 +127,6 @@ public final class AnimalEntitySyncService {
         // would create a duplicate, so managed animals never fall back to the world spawn.
         BlockPos managerPos = building.managerPos();
         if (!level.isLoaded(managerPos)) {
-            StardewCraft.LOGGER.debug("[ANIMAL_SYNC] Skipping spawn for animal {} - building chunk not loaded at {}",
-                record.animalId(), managerPos);
             return null;
         }
 

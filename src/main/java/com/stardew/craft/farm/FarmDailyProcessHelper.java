@@ -1,6 +1,9 @@
 package com.stardew.craft.farm;
 
 import com.stardew.craft.core.FarmAreaResolver;
+import com.stardew.craft.server.performance.PerformanceCounter;
+import com.stardew.craft.server.performance.PerformanceTiming;
+import com.stardew.craft.server.performance.ServerPerformanceRecorder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -29,11 +32,13 @@ public final class FarmDailyProcessHelper {
     private static Set<Long> cachedEnsuredChunks;
     /** 本次结算新增的强加载票据；结束时只释放这些票据。 */
     private static Set<ChunkPos> cachedNewlyForcedChunks;
+    private static long dailyProcessStartedAt;
 
     /**
      * 日结算开始前调用，预计算在线玩家集合。
      */
     public static void beginDailyProcess(ServerLevel level) {
+        dailyProcessStartedAt = ServerPerformanceRecorder.startTiming();
         cachedOnlinePlayers = new HashSet<>();
         cachedEnsuredChunks = new HashSet<>();
         cachedNewlyForcedChunks = new HashSet<>();
@@ -54,14 +59,30 @@ public final class FarmDailyProcessHelper {
      * 日结算结束后调用，释放缓存。
      */
     public static void endDailyProcess(ServerLevel level) {
-        if (cachedNewlyForcedChunks != null) {
-            for (ChunkPos chunk : cachedNewlyForcedChunks) {
-                level.setChunkForced(chunk.x, chunk.z, false);
+        long startedAt = dailyProcessStartedAt;
+        dailyProcessStartedAt = 0L;
+        RuntimeException releaseFailure = null;
+        try {
+            if (cachedNewlyForcedChunks != null) {
+                for (ChunkPos chunk : cachedNewlyForcedChunks) {
+                    try {
+                        level.setChunkForced(chunk.x, chunk.z, false);
+                    } catch (RuntimeException exception) {
+                        if (releaseFailure == null) {
+                            releaseFailure = exception;
+                        } else {
+                            releaseFailure.addSuppressed(exception);
+                        }
+                    }
+                }
             }
+        } finally {
+            cachedNewlyForcedChunks = null;
+            cachedEnsuredChunks = null;
+            cachedOnlinePlayers = null;
+            ServerPerformanceRecorder.finishTiming(PerformanceTiming.FARM_DAILY_PROCESS, startedAt);
         }
-        cachedNewlyForcedChunks = null;
-        cachedEnsuredChunks = null;
-        cachedOnlinePlayers = null;
+        if (releaseFailure != null) throw releaseFailure;
     }
 
     /**
@@ -124,7 +145,13 @@ public final class FarmDailyProcessHelper {
             level.setChunkForced(chunkX, chunkZ, true);
             cachedNewlyForcedChunks.add(new ChunkPos(chunkX, chunkZ));
         }
-        level.getChunk(chunkX, chunkZ);
+        ServerPerformanceRecorder.increment(PerformanceCounter.DAILY_SYNC_CHUNK_LOADS, 1L);
+        long startedAt = ServerPerformanceRecorder.startTiming();
+        try {
+            level.getChunk(chunkX, chunkZ);
+        } finally {
+            ServerPerformanceRecorder.finishTiming(PerformanceTiming.DAILY_SYNC_CHUNK_LOAD, startedAt);
+        }
     }
 
     /** 为可能跨区块生成结构的树木等对象补齐周边区块。 */

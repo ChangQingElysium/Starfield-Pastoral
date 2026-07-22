@@ -68,6 +68,7 @@ public final class ModSounds {
 	public static final DeferredHolder<SoundEvent, SoundEvent> GHOST = register("ghost");
 	public static final DeferredHolder<SoundEvent, SoundEvent> SECRET1 = register("secret1");
 	public static final DeferredHolder<SoundEvent, SoundEvent> DEBUFF_HIT = register("debuff_hit");
+	public static final DeferredHolder<SoundEvent, SoundEvent> DEBUFF_SPELL = register("debuff_spell");
 	public static final DeferredHolder<SoundEvent, SoundEvent> DIALOGUE_CHARACTER = register("dialogue_character");
 	public static final DeferredHolder<SoundEvent, SoundEvent> DIALOGUE_CHARACTER_CLOSE = register("dialogue_character_close");
 	public static final DeferredHolder<SoundEvent, SoundEvent> DOG_BARK = register("dog_bark");
@@ -205,6 +206,9 @@ public final class ModSounds {
     // Indoor locations
     public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_SALOON = register("music_saloon");
     public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_WIZARD_TOWER = register("music_wizard_tower");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_BUG_LEVEL_LOOP = register("music_bug_level_loop");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_LAVA_AMBIENT = register("music_lava_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_UPPER_AMBIENT = register("music_upper_ambient");
     public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_LIBRARY = register("music_library");
     public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_ADVENTURER_GUILD = register("music_adventurer_guild");
     public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_HOSPITAL = register("music_hospital");

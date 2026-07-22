@@ -1,7 +1,7 @@
 {
-  "variants": {
-    "variant=0": { "model": "stardewcraft:block/grass/pasture_grass_0" },
-    "variant=1": { "model": "stardewcraft:block/grass/pasture_grass_1" },
-    "variant=2": { "model": "stardewcraft:block/grass/pasture_grass_2" }
-  }
+  "multipart": [
+    { "when": { "variant": "0" }, "apply": { "model": "stardewcraft:block/grass/pasture_grass_0" } },
+    { "when": { "variant": "1" }, "apply": { "model": "stardewcraft:block/grass/pasture_grass_1" } },
+    { "when": { "variant": "2" }, "apply": { "model": "stardewcraft:block/grass/pasture_grass_2" } }
+  ]
 }

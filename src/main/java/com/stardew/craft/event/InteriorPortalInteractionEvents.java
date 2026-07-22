@@ -153,6 +153,26 @@ public class InteriorPortalInteractionEvents {
             return;
         }
 
+        if (com.stardew.craft.world.MutantBugLairService.ENTRANCE_TARGET_ID.equals(targetId)) {
+            com.stardew.craft.world.MutantBugLairService.enter(player);
+            return;
+        }
+
+        if (com.stardew.craft.world.MutantBugLairService.EXIT_TARGET_ID.equals(targetId)) {
+            com.stardew.craft.world.MutantBugLairService.exit(player);
+            return;
+        }
+
+        if (com.stardew.craft.world.WitchAreaService.HUT_ENTRANCE_TARGET_ID.equals(targetId)) {
+            com.stardew.craft.world.WitchAreaService.enterHut(player);
+            return;
+        }
+
+        if (com.stardew.craft.world.WitchAreaService.HUT_EXIT_TARGET_ID.equals(targetId)) {
+            com.stardew.craft.world.WitchAreaService.exitHut(player);
+            return;
+        }
+
         // 矿井入口
         if ("mine_entrance".equals(targetId)) {
             handleMineEntrance(player);
@@ -617,15 +637,12 @@ public class InteriorPortalInteractionEvents {
     private static void handleFarmExit(ServerPlayer player, String exitId) {
         long now = player.serverLevel().getGameTime();
         long last = player.getPersistentData().getLong(PLAYER_LAST_PORTAL_TICK);
-        if (now - last < PORTAL_COOLDOWN_TICKS) return;
+        long elapsed = now - last;
+        if (elapsed >= 0L && elapsed < PORTAL_COOLDOWN_TICKS) return;
         player.getPersistentData().putLong(PLAYER_LAST_PORTAL_TICK, now);
 
-        com.stardew.craft.farm.FarmInstance farm = com.stardew.craft.farm.FarmInstanceRegistry.get()
-                .getFarmForPlayer(player.getUUID());
-        if (farm != null) {
-            com.stardew.craft.farm.FarmChunkManager.get().onPlayerLeaveFarm(
-                    player.serverLevel(), player, farm);
-        }
+        com.stardew.craft.farm.FarmChunkManager.get().onPlayerLeaveFarm(
+                player.serverLevel(), player);
 
         net.minecraft.core.BlockPos target = switch (exitId) {
             case "farm_exit_south" -> PUBLIC_NORTH_FARM_TARGET;
@@ -841,7 +858,6 @@ public class InteriorPortalInteractionEvents {
         player.getPersistentData().putLong(PLAYER_LAST_PORTAL_TICK, player.serverLevel().getGameTime());
         applyInteriorFlag(player, InteriorPortalRegistry.PortalMode.ENTRANCE);
 
-        StardewCraft.LOGGER.debug("[CC-PORTAL] Player {} entered their CC at {}", player.getName().getString(), ccOrigin);
     }
 
     private static void handleCCExit(ServerPlayer player) {
@@ -883,7 +899,6 @@ public class InteriorPortalInteractionEvents {
         player.getPersistentData().putLong(PLAYER_LAST_PORTAL_TICK, now);
         applyInteriorFlag(player, InteriorPortalRegistry.PortalMode.ENTRANCE);
 
-        StardewCraft.LOGGER.debug("[GH-PORTAL] Player {} entered their greenhouse at {}", player.getName().getString(), ghOrigin);
     }
 
     // ════════════════════════════════════════════════════════════════
@@ -915,8 +930,6 @@ public class InteriorPortalInteractionEvents {
         player.getPersistentData().putLong(PLAYER_LAST_PORTAL_TICK, now);
         applyInteriorFlag(player, InteriorPortalRegistry.PortalMode.ENTRANCE);
 
-        StardewCraft.LOGGER.debug("[FARM-CAVE] Player {} entered cave of {} at {}",
-                player.getName().getString(), caveOwner, caveOrigin);
     }
 
     private static void handleFarmCaveExit(ServerPlayer player) {
@@ -953,7 +966,6 @@ public class InteriorPortalInteractionEvents {
         player.getPersistentData().putLong(PLAYER_LAST_PORTAL_TICK, now);
         applyInteriorFlag(player, InteriorPortalRegistry.PortalMode.EXIT);
 
-        StardewCraft.LOGGER.debug("[FARM-CAVE] Player {} exited cave to {}", player.getName().getString(), exitAbs);
     }
 
     // ════════════════════════════════════════════════════════════════

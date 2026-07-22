@@ -335,6 +335,12 @@ public class DimensionEventHandler {
     @SuppressWarnings("null")
     @SubscribeEvent
     public static void onPlayerChangeDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
+        if (ModDimensions.STARDEW_VALLEY.equals(event.getFrom())) {
+            ServerPlayer player = (ServerPlayer) event.getEntity();
+            com.stardew.craft.farm.FarmChunkManager.get()
+                    .onPlayerLeaveFarm(player.serverLevel(), player);
+        }
+
         // 星露谷维度和矿井维度都需要确保昼夜循环开启
         if (ModDimensions.STARDEW_VALLEY.equals(event.getTo()) || ModMiningDimensions.STARDEW_MINING.equals(event.getTo())) {
             ServerPlayer player = (ServerPlayer) event.getEntity();
@@ -362,6 +368,8 @@ public class DimensionEventHandler {
                         player.teleportTo(level, spawnPos.getX() + 0.5D, spawnPos.getY(), spawnPos.getZ() + 0.5D, player.getYRot(), player.getXRot());
                     }
                 }
+
+                com.stardew.craft.farm.FarmChunkManager.get().reconcilePlayerOccupancy(player);
 
                 // 把各 ensurePlaced() 分散到后续 tick 执行，防止同帧堆叠触发 watchdog。
                 // 每个任务本身有 SavedData 版本检查，已完成的会立即跳过（< 1ms）。

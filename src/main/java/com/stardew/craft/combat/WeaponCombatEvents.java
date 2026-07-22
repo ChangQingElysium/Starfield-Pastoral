@@ -377,10 +377,6 @@ public class WeaponCombatEvents {
             float attackStrength = player.getAttackStrengthScale(0.5F);
             if (attackStrength < 0.85F) {
                 // 自愈：服务端蓄力值不可靠，强制视为满蓄力
-                if (attackStrength < 0.5F && player instanceof net.minecraft.server.level.ServerPlayer) {
-                    StardewCraft.LOGGER.debug("[COMBAT] Charge desync detected for {}: scale={}, forcing full charge",
-                            player.getName().getString(), attackStrength);
-                }
                 attackStrength = 1.0F;
             }
             float strengthMultiplier = 0.2F + attackStrength * attackStrength * 0.8F;
@@ -1171,4 +1167,3 @@ public class WeaponCombatEvents {
         CLUB_SWEEP_DAMAGE.remove(playerId);
     }
 }
-

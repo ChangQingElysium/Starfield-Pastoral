@@ -1,12 +1,12 @@
 package com.stardew.craft.event;
 
 import com.stardew.craft.StardewCraft;
-import com.stardew.craft.command.BilibiliClaimCommand;
 import com.stardew.craft.command.CommunityCenterCommand;
 import com.stardew.craft.command.FarmAdminCommand;
 import com.stardew.craft.command.FestivalDebugCommand;
 import com.stardew.craft.command.FarmJoinCommand;
 import com.stardew.craft.command.FriendshipDoorCommand;
+import com.stardew.craft.command.JoinAnnouncementCommand;
 import com.stardew.craft.command.MailDebugCommand;
 import com.stardew.craft.command.MonsterSummonCommand;
 import com.stardew.craft.command.MuseumDebugCommand;
@@ -20,6 +20,7 @@ import com.stardew.craft.command.StardewPayCommand;
 import com.stardew.craft.command.StardewTeleportCommand;
 import com.stardew.craft.command.StardewTimeCommand;
 import com.stardew.craft.command.OvernightDebugCommand;
+import com.stardew.craft.command.PerformanceCommand;
 import com.stardew.craft.command.NpcDebugCommand;
 import com.stardew.craft.command.PointPlanDebugCommand;
 import com.stardew.craft.command.RouteEditorDebugCommand;
@@ -62,7 +63,8 @@ public class CommandEventHandler {
         PointPlanDebugCommand.register(event.getDispatcher());
         com.stardew.craft.command.FarmCaveCommand.register(event.getDispatcher());
         StructureDebugCommand.register(event.getDispatcher());
-        BilibiliClaimCommand.register(event.getDispatcher());
+        PerformanceCommand.register(event.getDispatcher());
+        JoinAnnouncementCommand.register(event.getDispatcher());
         com.stardew.craft.command.CutsceneDebugCommand.register(event.getDispatcher());
         com.stardew.craft.command.CameraDebugCommand.register(event.getDispatcher());
         com.stardew.craft.command.FishSplashDebugCommand.register(event.getDispatcher());

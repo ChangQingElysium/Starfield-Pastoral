@@ -2,7 +2,7 @@
   "location": "Caldera",
   "fish": [
     {
-      "id": "lava_eel",
+      "id": "lava_eel_depth_1",
       "precedence": -10,
       "item": "stardewcraft:lava_eel",
       "chance": 0.1,
@@ -10,27 +10,100 @@
       "motionType": 0,
       "minFishSize": 32,
       "maxFishSize": 32,
-      "minFishingLevel": 7,
-      "maxDepth": 2,
-      "depthMultiplier": 0.1,
-      "biomeTags": [
-        "#stardewcraft:is_mines_100",
-        "#stardewcraft:is_volcano"
-      ],
-      "timeRanges": [
-        [
-          600,
-          2600
-        ]
-      ],
-      "weather": "any",
-      "spawnRate": 0.05,
-      "seasons": [
-        "spring",
-        "summer",
-        "fall",
-        "winter"
-      ]
+      "minDistanceFromShore": 1,
+      "ignoreFishDataRequirements": true,
+      "biomeTags": ["#stardewcraft:is_volcano"]
+    },
+    {
+      "id": "lava_eel_depth_2",
+      "precedence": -10,
+      "item": "stardewcraft:lava_eel",
+      "chance": 0.2,
+      "difficulty": 90,
+      "motionType": 0,
+      "minFishSize": 32,
+      "maxFishSize": 32,
+      "minDistanceFromShore": 2,
+      "ignoreFishDataRequirements": true,
+      "biomeTags": ["#stardewcraft:is_volcano"]
+    },
+    {
+      "id": "lava_eel_depth_3",
+      "precedence": -10,
+      "item": "stardewcraft:lava_eel",
+      "chance": 0.3,
+      "difficulty": 90,
+      "motionType": 0,
+      "minFishSize": 32,
+      "maxFishSize": 32,
+      "minDistanceFromShore": 3,
+      "ignoreFishDataRequirements": true,
+      "biomeTags": ["#stardewcraft:is_volcano"]
+    },
+    {
+      "id": "lava_eel_depth_4",
+      "precedence": -10,
+      "item": "stardewcraft:lava_eel",
+      "chance": 0.4,
+      "difficulty": 90,
+      "motionType": 0,
+      "minFishSize": 32,
+      "maxFishSize": 32,
+      "minDistanceFromShore": 4,
+      "ignoreFishDataRequirements": true,
+      "biomeTags": ["#stardewcraft:is_volcano"]
+    },
+    {
+      "id": "lava_eel_depth_5",
+      "precedence": -10,
+      "item": "stardewcraft:lava_eel",
+      "chance": 0.5,
+      "difficulty": 90,
+      "motionType": 0,
+      "minFishSize": 32,
+      "maxFishSize": 32,
+      "minDistanceFromShore": 5,
+      "ignoreFishDataRequirements": true,
+      "biomeTags": ["#stardewcraft:is_volcano"]
+    },
+    {
+      "id": "lava_eel_depth_6",
+      "precedence": -10,
+      "item": "stardewcraft:lava_eel",
+      "chance": 0.6,
+      "difficulty": 90,
+      "motionType": 0,
+      "minFishSize": 32,
+      "maxFishSize": 32,
+      "minDistanceFromShore": 6,
+      "ignoreFishDataRequirements": true,
+      "biomeTags": ["#stardewcraft:is_volcano"]
+    },
+    {
+      "id": "lava_eel_depth_7",
+      "precedence": -10,
+      "item": "stardewcraft:lava_eel",
+      "chance": 0.7,
+      "difficulty": 90,
+      "motionType": 0,
+      "minFishSize": 32,
+      "maxFishSize": 32,
+      "minDistanceFromShore": 7,
+      "ignoreFishDataRequirements": true,
+      "biomeTags": ["#stardewcraft:is_volcano"]
+    },
+    {
+      "id": "lava_eel_depth_8",
+      "precedence": -10,
+      "item": "stardewcraft:lava_eel",
+      "chance": 0.8,
+      "difficulty": 90,
+      "motionType": 0,
+      "minFishSize": 32,
+      "maxFishSize": 32,
+      "minDistanceFromShore": 8,
+      "ignoreFishDataRequirements": true,
+      "biomeTags": ["#stardewcraft:is_volcano"]
     }
   ]
 }

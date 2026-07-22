@@ -2,6 +2,7 @@ package com.stardew.craft.cutscene.data;
 
 import com.google.gson.JsonParser;
 import com.stardew.craft.cutscene.command.AddQuestCommand;
+import com.stardew.craft.cutscene.command.PlacePlayerCommand;
 import com.stardew.craft.cutscene.command.SetFlagCommand;
 import org.junit.jupiter.api.Test;
 
@@ -35,6 +36,7 @@ class EventDataSkipSemanticsTest {
     void persistentQuestAndFlagCommandsSurviveSkipping() {
         assertTrue(new AddQuestCommand("26").isStateCommand());
         assertTrue(new SetFlagCommand("canReadJunimoText").isStateCommand());
+        assertTrue(new PlacePlayerCommand(50, 85, -211, -90, 0).isStateCommand());
     }
 
     private static EventData event(boolean skippable, String commands) {

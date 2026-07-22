@@ -91,8 +91,6 @@ public final class ServerCutsceneTracker {
         if (EventSeenData.get(player.serverLevel()).hasSeen(player.getUUID(), event.id())
                 || !CutsceneTriggerLocations.contains(player, event.trigger())
                 || !ServerPreconditionEvaluator.evaluate(player, player.serverLevel(), event.preconditions())) {
-            LOGGER.debug("Rejected ineligible enter-area cutscene request '{}' from {}",
-                    eventId, player.getName().getString());
             return false;
         }
         return beginAuthorized(player, event);

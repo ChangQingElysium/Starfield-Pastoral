@@ -13,7 +13,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
-import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -32,12 +32,25 @@ final class BlockbenchElementRenderer {
 
     static void renderAll(ResourceLocation modelLocation, PoseStack poseStack, MultiBufferSource buffer,
                           int packedLight, int packedOverlay) {
-        render(modelLocation, poseStack, buffer, packedLight, packedOverlay, false);
+        render(modelLocation, poseStack, buffer, packedLight, packedOverlay, false, false, null);
+    }
+
+    /** Render a Java/Blockbench element model whose face U direction follows vanilla model JSON. */
+    static void renderAllWithReversedU(ResourceLocation modelLocation, PoseStack poseStack, MultiBufferSource buffer,
+                                       int packedLight, int packedOverlay) {
+        render(modelLocation, poseStack, buffer, packedLight, packedOverlay, false, true, null);
+    }
+
+    /** Render the enabled Gold Clock with model-authored hand pivots and live Z rotations. */
+    static void renderGoldClock(ResourceLocation modelLocation, PoseStack poseStack, MultiBufferSource buffer,
+                                int packedLight, int packedOverlay, float hourDegrees, float minuteDegrees) {
+        render(modelLocation, poseStack, buffer, packedLight, packedOverlay, false, true,
+                new ClockHandAngles(hourDegrees, minuteDegrees));
     }
 
     static void renderNegativeOnly(ResourceLocation modelLocation, PoseStack poseStack, MultiBufferSource buffer,
                                    int packedLight, int packedOverlay) {
-        render(modelLocation, poseStack, buffer, packedLight, packedOverlay, true);
+        render(modelLocation, poseStack, buffer, packedLight, packedOverlay, true, false, null);
     }
 
     static void renderHeadDisplay(ResourceLocation modelLocation, PoseStack poseStack, MultiBufferSource buffer,
@@ -47,27 +60,30 @@ final class BlockbenchElementRenderer {
             return;
         }
         poseStack.pushPose();
+        // Match vanilla CustomHeadLayer.translateToHead before applying ItemDisplayContext.HEAD.
         poseStack.translate(0.0F, -0.25F, 0.0F);
+        poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
         poseStack.scale(0.625F, -0.625F, -0.625F);
         model.headDisplay().apply(poseStack);
-        poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
         poseStack.translate(-0.5F, -0.5F, -0.5F);
-        renderLoaded(model, poseStack, buffer, packedLight, packedOverlay, false);
+        renderLoaded(model, poseStack, buffer, packedLight, packedOverlay, false, false, null);
         poseStack.popPose();
     }
 
     private static void render(ResourceLocation modelLocation, PoseStack poseStack, MultiBufferSource buffer,
-                               int packedLight, int packedOverlay, boolean negativeOnly) {
+                               int packedLight, int packedOverlay, boolean negativeOnly, boolean reverseU,
+                               ClockHandAngles clockHands) {
         Model model = CACHE.computeIfAbsent(modelLocation, BlockbenchElementRenderer::load).orElse(null);
         if (model == null) {
             return;
         }
-        renderLoaded(model, poseStack, buffer, packedLight, packedOverlay, negativeOnly);
+        renderLoaded(model, poseStack, buffer, packedLight, packedOverlay, negativeOnly, reverseU, clockHands);
     }
 
     private static void renderLoaded(Model model, PoseStack poseStack, MultiBufferSource buffer,
-                                     int packedLight, int packedOverlay, boolean negativeOnly) {
-        Matrix4f matrix = poseStack.last().pose();
+                                     int packedLight, int packedOverlay, boolean negativeOnly, boolean reverseU,
+                                     ClockHandAngles clockHands) {
+        PoseStack.Pose pose = poseStack.last();
         for (JsonElement elementValue : model.elements()) {
             if (!elementValue.isJsonObject()) {
                 continue;
@@ -86,6 +102,14 @@ final class BlockbenchElementRenderer {
             }
 
             Rotation rotation = rotation(element);
+            if (clockHands != null && element.has("name")) {
+                String name = element.get("name").getAsString();
+                if ("hour".equals(name)) {
+                    rotation = withAdditionalZ(rotation, element, clockHands.hourDegrees());
+                } else if ("minute".equals(name)) {
+                    rotation = withAdditionalZ(rotation, element, clockHands.minuteDegrees());
+                }
+            }
             float minX = Math.min(from[0], to[0]) / 16.0F;
             float minY = Math.min(from[1], to[1]) / 16.0F;
             float minZ = Math.min(from[2], to[2]) / 16.0F;
@@ -106,9 +130,9 @@ final class BlockbenchElementRenderer {
                     continue;
                 }
                 VertexConsumer consumer = buffer.getBuffer(RenderType.entityTranslucent(texture));
-                renderFace(consumer, matrix, rotation, faceEntry.getKey().toLowerCase(Locale.ROOT), face,
+                renderFace(consumer, pose, rotation, faceEntry.getKey().toLowerCase(Locale.ROOT), face,
                         minX, minY, minZ, maxX, maxY, maxZ, model.textureWidth(), model.textureHeight(),
-                        packedLight, packedOverlay, negative, model.javaModelUv(), thinX, thinY, thinZ);
+                        packedLight, packedOverlay, negative, model.javaModelUv(), thinX, thinY, thinZ, reverseU);
             }
         }
     }
@@ -155,11 +179,11 @@ final class BlockbenchElementRenderer {
         }
     }
 
-    private static void renderFace(VertexConsumer consumer, Matrix4f matrix, Rotation rotation, String side,
+    private static void renderFace(VertexConsumer consumer, PoseStack.Pose pose, Rotation rotation, String side,
                                    JsonObject face, float minX, float minY, float minZ,
                                    float maxX, float maxY, float maxZ, int textureWidth, int textureHeight,
                                    int packedLight, int packedOverlay, boolean inward, boolean javaModelUv,
-                                   boolean thinX, boolean thinY, boolean thinZ) {
+                                   boolean thinX, boolean thinY, boolean thinZ, boolean reverseU) {
         float[] uv = face.has("uv") ? vector4(face.getAsJsonArray("uv")) : new float[] {0, 0, 16, 16};
         float uScale = javaModelUv ? JAVA_MODEL_UV_SIZE : textureWidth;
         float vScale = javaModelUv ? JAVA_MODEL_UV_SIZE : textureHeight;
@@ -167,6 +191,25 @@ final class BlockbenchElementRenderer {
         float v1 = uv[1] / vScale;
         float u2 = uv[2] / uScale;
         float v2 = uv[3] / vScale;
+        if (reverseU) {
+            float swap = u1;
+            u1 = u2;
+            u2 = swap;
+        }
+        // Blockbench writes the Gold Clock hour hand with a 180-degree
+        // per-face UV rotation. Geometry rotation and face UV rotation are
+        // separate model properties; ignoring the latter corrupts only the
+        // hour hand because the minute hand uses the default UV orientation.
+        int faceRotation = face.has("rotation")
+                ? Math.floorMod(face.get("rotation").getAsInt(), 360) : 0;
+        if (faceRotation == 180) {
+            float swap = u1;
+            u1 = u2;
+            u2 = swap;
+            swap = v1;
+            v1 = v2;
+            v2 = swap;
+        }
         float[] normal = faceNormal(side);
         if (rotation != null) {
             normal = rotateNormal(rotation, normal);
@@ -177,27 +220,27 @@ final class BlockbenchElementRenderer {
         float[] faceOffset = thinFaceOffset(side, thinX, thinY, thinZ);
 
         switch (side) {
-            case "north" -> quad(consumer, matrix, rotation, packedLight, packedOverlay, inward,
+            case "north" -> quad(consumer, pose, rotation, packedLight, packedOverlay, inward,
                     normal, faceOffset,
                     minX, minY, minZ, u1, v2, minX, maxY, minZ, u1, v1,
                     maxX, maxY, minZ, u2, v1, maxX, minY, minZ, u2, v2);
-            case "south" -> quad(consumer, matrix, rotation, packedLight, packedOverlay, inward,
+            case "south" -> quad(consumer, pose, rotation, packedLight, packedOverlay, inward,
                     normal, faceOffset,
                     maxX, minY, maxZ, u1, v2, maxX, maxY, maxZ, u1, v1,
                     minX, maxY, maxZ, u2, v1, minX, minY, maxZ, u2, v2);
-            case "east" -> quad(consumer, matrix, rotation, packedLight, packedOverlay, inward,
+            case "east" -> quad(consumer, pose, rotation, packedLight, packedOverlay, inward,
                     normal, faceOffset,
                     maxX, minY, minZ, u1, v2, maxX, maxY, minZ, u1, v1,
                     maxX, maxY, maxZ, u2, v1, maxX, minY, maxZ, u2, v2);
-            case "west" -> quad(consumer, matrix, rotation, packedLight, packedOverlay, inward,
+            case "west" -> quad(consumer, pose, rotation, packedLight, packedOverlay, inward,
                     normal, faceOffset,
                     minX, minY, maxZ, u1, v2, minX, maxY, maxZ, u1, v1,
                     minX, maxY, minZ, u2, v1, minX, minY, minZ, u2, v2);
-            case "up" -> quad(consumer, matrix, rotation, packedLight, packedOverlay, inward,
+            case "up" -> quad(consumer, pose, rotation, packedLight, packedOverlay, inward,
                     normal, faceOffset,
                     minX, maxY, minZ, u1, v2, minX, maxY, maxZ, u1, v1,
                     maxX, maxY, maxZ, u2, v1, maxX, maxY, minZ, u2, v2);
-            case "down" -> quad(consumer, matrix, rotation, packedLight, packedOverlay, inward,
+            case "down" -> quad(consumer, pose, rotation, packedLight, packedOverlay, inward,
                     normal, faceOffset,
                     minX, minY, maxZ, u1, v2, minX, minY, minZ, u1, v1,
                     maxX, minY, minZ, u2, v1, maxX, minY, maxZ, u2, v2);
@@ -206,38 +249,38 @@ final class BlockbenchElementRenderer {
         }
     }
 
-    private static void quad(VertexConsumer consumer, Matrix4f matrix, Rotation rotation,
+    private static void quad(VertexConsumer consumer, PoseStack.Pose pose, Rotation rotation,
                              int packedLight, int packedOverlay, boolean inward, float[] normal, float[] faceOffset,
                              float x1, float y1, float z1, float u1, float v1,
                              float x2, float y2, float z2, float u2, float v2,
                              float x3, float y3, float z3, float u3, float v3,
                              float x4, float y4, float z4, float u4, float v4) {
         if (inward) {
-            vertex(consumer, matrix, rotation, packedLight, packedOverlay, normal, faceOffset, x1, y1, z1, u1, v1);
-            vertex(consumer, matrix, rotation, packedLight, packedOverlay, normal, faceOffset, x4, y4, z4, u4, v4);
-            vertex(consumer, matrix, rotation, packedLight, packedOverlay, normal, faceOffset, x3, y3, z3, u3, v3);
-            vertex(consumer, matrix, rotation, packedLight, packedOverlay, normal, faceOffset, x2, y2, z2, u2, v2);
+            vertex(consumer, pose, rotation, packedLight, packedOverlay, normal, faceOffset, x1, y1, z1, u1, v1);
+            vertex(consumer, pose, rotation, packedLight, packedOverlay, normal, faceOffset, x4, y4, z4, u4, v4);
+            vertex(consumer, pose, rotation, packedLight, packedOverlay, normal, faceOffset, x3, y3, z3, u3, v3);
+            vertex(consumer, pose, rotation, packedLight, packedOverlay, normal, faceOffset, x2, y2, z2, u2, v2);
             return;
         }
-        vertex(consumer, matrix, rotation, packedLight, packedOverlay, normal, faceOffset, x1, y1, z1, u1, v1);
-        vertex(consumer, matrix, rotation, packedLight, packedOverlay, normal, faceOffset, x2, y2, z2, u2, v2);
-        vertex(consumer, matrix, rotation, packedLight, packedOverlay, normal, faceOffset, x3, y3, z3, u3, v3);
-        vertex(consumer, matrix, rotation, packedLight, packedOverlay, normal, faceOffset, x4, y4, z4, u4, v4);
+        vertex(consumer, pose, rotation, packedLight, packedOverlay, normal, faceOffset, x1, y1, z1, u1, v1);
+        vertex(consumer, pose, rotation, packedLight, packedOverlay, normal, faceOffset, x2, y2, z2, u2, v2);
+        vertex(consumer, pose, rotation, packedLight, packedOverlay, normal, faceOffset, x3, y3, z3, u3, v3);
+        vertex(consumer, pose, rotation, packedLight, packedOverlay, normal, faceOffset, x4, y4, z4, u4, v4);
     }
 
-    private static void vertex(VertexConsumer consumer, Matrix4f matrix, Rotation rotation,
+    private static void vertex(VertexConsumer consumer, PoseStack.Pose pose, Rotation rotation,
                                int packedLight, int packedOverlay, float[] normal, float[] faceOffset,
                                float x, float y, float z, float u, float v) {
         x += faceOffset[0];
         y += faceOffset[1];
         z += faceOffset[2];
         float[] rotated = rotate(rotation, x, y, z);
-        consumer.addVertex(matrix, rotated[0], rotated[1], rotated[2])
+        consumer.addVertex(pose, rotated[0], rotated[1], rotated[2])
                 .setColor(255, 255, 255, 255)
                 .setUv(u, v)
                 .setOverlay(packedOverlay == 0 ? OverlayTexture.NO_OVERLAY : packedOverlay)
                 .setLight(packedLight)
-                .setNormal(normal[0], normal[1], normal[2]);
+                .setNormal(pose, normal[0], normal[1], normal[2]);
     }
 
     private static float[] rotate(Rotation rotation, float x, float y, float z) {
@@ -327,6 +370,15 @@ final class BlockbenchElementRenderer {
             };
         }
         return null;
+    }
+
+    private static Rotation withAdditionalZ(Rotation base, JsonObject element, float degrees) {
+        if (base != null) {
+            return new Rotation(base.x(), base.y(), base.z() + degrees, base.origin());
+        }
+        float[] origin = element.has("origin")
+                ? vector3(element.getAsJsonArray("origin")) : new float[] {8.0F, 8.0F, 8.0F};
+        return new Rotation(0.0F, 0.0F, degrees, origin);
     }
 
     private static String textureKey(JsonObject face) {
@@ -420,13 +472,18 @@ final class BlockbenchElementRenderer {
 
         private void apply(PoseStack poseStack) {
             poseStack.translate(translation[0] / 16.0F, translation[1] / 16.0F, translation[2] / 16.0F);
-            poseStack.mulPose(Axis.XP.rotationDegrees(rotation[0]));
-            poseStack.mulPose(Axis.YP.rotationDegrees(rotation[1]));
-            poseStack.mulPose(Axis.ZP.rotationDegrees(rotation[2]));
+            float radians = (float) (Math.PI / 180.0);
+            poseStack.mulPose(new Quaternionf().rotationXYZ(
+                    rotation[0] * radians,
+                    rotation[1] * radians,
+                    rotation[2] * radians));
             poseStack.scale(scale[0], scale[1], scale[2]);
         }
     }
 
     private record Rotation(float x, float y, float z, float[] origin) {
+    }
+
+    private record ClockHandAngles(float hourDegrees, float minuteDegrees) {
     }
 }

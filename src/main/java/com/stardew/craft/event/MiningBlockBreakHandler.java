@@ -165,9 +165,6 @@ public class MiningBlockBreakHandler {
         floorData.decrementStone();
         manager.setFloorData(floorNumber, floorData);
 
-        StardewCraft.LOGGER.debug("[MINE] Stone broken by {} on floor {}, stones left: {}",
-            player.getName().getString(), floorNumber, floorData.getStonesLeft());
-
         // 动态楼梯生成：每次挖石后判断概率
         if (!floorData.hasLadderFound()) {
             double ladderChance = LadderProbabilityCalculator.calculateProbability(

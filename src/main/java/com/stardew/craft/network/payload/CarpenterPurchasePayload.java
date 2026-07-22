@@ -4,6 +4,7 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import com.stardew.craft.shop.CarpenterBlueprint;
 import com.stardew.craft.shop.RobinService;
+import com.stardew.craft.shop.WizardBuildingService;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -24,6 +25,7 @@ import java.util.List;
  */
 @SuppressWarnings("null")
 public record CarpenterPurchasePayload(
+    String builder,
     int blueprintIndex
 ) implements CustomPacketPayload {
 
@@ -32,6 +34,7 @@ public record CarpenterPurchasePayload(
 
     public static final StreamCodec<RegistryFriendlyByteBuf, CarpenterPurchasePayload> STREAM_CODEC =
         StreamCodec.composite(
+            ByteBufCodecs.STRING_UTF8, CarpenterPurchasePayload::builder,
             ByteBufCodecs.INT, CarpenterPurchasePayload::blueprintIndex,
             CarpenterPurchasePayload::new
         );
@@ -45,7 +48,19 @@ public record CarpenterPurchasePayload(
         context.enqueueWork(() -> {
             if (!(context.player() instanceof ServerPlayer player)) return;
 
-            List<CarpenterBlueprint> blueprints = RobinService.getBlueprints();
+            List<CarpenterBlueprint> blueprints;
+            if (WizardBuildingService.BUILDER_ID.equals(payload.builder())) {
+                if (!WizardBuildingService.canUse(player)) {
+                    sendResult(player, false, PlayerStardewDataAPI.getMoney(player), "",
+                            payload.blueprintIndex());
+                    return;
+                }
+                blueprints = WizardBuildingService.getBlueprints(player);
+            } else if ("Robin".equals(payload.builder())) {
+                blueprints = RobinService.getBlueprints();
+            } else {
+                return;
+            }
             if (payload.blueprintIndex() < 0 || payload.blueprintIndex() >= blueprints.size()) return;
 
             CarpenterBlueprint bp = blueprints.get(payload.blueprintIndex());
@@ -121,7 +136,7 @@ public record CarpenterPurchasePayload(
                 }
             }
 
-            // Give the manager item to player
+            // Give the selected building item to the player.
             ItemStack resultStack = new ItemStack(resultItem);
             if (!player.getInventory().add(resultStack)) {
                 // Drop on ground if inventory full

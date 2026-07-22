@@ -33,7 +33,7 @@ public final class FishingSessionManager {
 	private static final Map<MinecraftServer, FishingSessionManager> BY_SERVER = new ConcurrentHashMap<>();
 
 	public static FishingSessionManager get(MinecraftServer server) {
-		return BY_SERVER.computeIfAbsent(server, s -> new FishingSessionManager());
+		return BY_SERVER.computeIfAbsent(server, FishingSessionManager::new);
 	}
 
 	public static void tickAllServers() {
@@ -42,14 +42,21 @@ public final class FishingSessionManager {
 		}
 	}
 
+	public static void tickServer(MinecraftServer server) {
+		FishingSessionManager manager = BY_SERVER.get(server);
+		if (manager != null) manager.tick();
+	}
+
 	private final Map<UUID, FishingSession> sessionsByPlayer = new HashMap<>();
 	private final Map<UUID, PendingTreasureChest> pendingTreasureByPlayer = new HashMap<>();
 	private final com.stardew.craft.fishing.data.TreasureLootManager lootManager = createLootManager();
+	private final MinecraftServer server;
 
 	private record PendingTreasureChest(long chestId, List<ItemStack> loot, boolean golden) {
 	}
 
-	private FishingSessionManager() {
+	private FishingSessionManager(MinecraftServer server) {
+		this.server = Objects.requireNonNull(server, "server");
 	}
 
 	public boolean start(ServerPlayer player, float castPower01) {
@@ -771,14 +778,7 @@ public final class FishingSessionManager {
 	}
 
 	private ServerPlayer getAnyPlayer(UUID playerId) {
-		for (MinecraftServer server : BY_SERVER.keySet()) {
-			@SuppressWarnings("null")
-			ServerPlayer player = server.getPlayerList().getPlayer(playerId);
-			if (player != null) {
-				return player;
-			}
-		}
-		return null;
+		return server.getPlayerList().getPlayer(playerId);
 	}
 
 	/**

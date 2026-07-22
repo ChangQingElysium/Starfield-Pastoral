@@ -3,6 +3,8 @@ package com.stardew.craft.dimension;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.core.ModDimensions;
 import com.stardew.craft.desert.DesertConstants;
+import com.stardew.craft.world.MutantBugLairArea;
+import com.stardew.craft.world.WitchArea;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -55,6 +57,12 @@ public final class StardewBiomePatcher {
     private static final ResourceKey<Biome> CALICO_DESERT_KEY =
             ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath("stardewcraft", "calico_desert"));
 
+    private static final ResourceKey<Biome> MUTANT_BUG_LAIR_KEY =
+            ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath("stardewcraft", "mutant_bug_lair"));
+
+    private static final ResourceKey<Biome> WITCH_SWAMP_KEY =
+            ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath("stardewcraft", "witch_swamp"));
+
     // pregen 主地图内嵌沙漠包围盒（世界坐标）
     private static final int DESERT_MIN_X = DesertConstants.DESERT_BBOX_MIN_X;
     private static final int DESERT_MAX_X = DesertConstants.DESERT_BBOX_MAX_X;
@@ -88,6 +96,12 @@ public final class StardewBiomePatcher {
                     .registryOrThrow(Registries.BIOME)
                     .getHolderOrThrow(STARDEW_DEFAULT_KEY);
         }
+        Holder<Biome> mutantBugLairBiome = serverLevel.registryAccess()
+                .registryOrThrow(Registries.BIOME)
+                .getHolderOrThrow(MUTANT_BUG_LAIR_KEY);
+        Holder<Biome> witchSwampBiome = serverLevel.registryAccess()
+                .registryOrThrow(Registries.BIOME)
+                .getHolderOrThrow(WITCH_SWAMP_KEY);
 
         boolean modified = false;
 
@@ -99,13 +113,25 @@ public final class StardewBiomePatcher {
             PalettedContainerRO<Holder<Biome>> biomesRO = section.getBiomes();
             if (!(biomesRO instanceof PalettedContainer<Holder<Biome>> biomes)) continue;
 
+            int sectionMinY = chunk.getSectionYFromSectionIndex(sIdx) << 4;
+
             // Biome container is 4×4×4 (one biome per 4-block cube)
             for (int bx = 0; bx < 4; bx++) {
                 for (int by = 0; by < 4; by++) {
                     for (int bz = 0; bz < 4; bz++) {
                         Holder<Biome> current = biomes.get(bx, by, bz);
-                        if (shouldReplace(current, isDesertChunk)) {
-                            biomes.getAndSetUnchecked(bx, by, bz, targetBiome);
+                        int cellMinX = chunk.getPos().getMinBlockX() + bx * 4;
+                        int cellMinY = sectionMinY + by * 4;
+                        int cellMinZ = chunk.getPos().getMinBlockZ() + bz * 4;
+                        boolean inMutantBugLair = MutantBugLairArea.biomeCellIntersects(cellMinX, cellMinY, cellMinZ);
+                        boolean inWitchSwamp = WitchArea.swampBiomeCellIntersects(cellMinX, cellMinY, cellMinZ);
+                        Holder<Biome> desired = inMutantBugLair
+                                ? mutantBugLairBiome
+                                : inWitchSwamp ? witchSwampBiome : targetBiome;
+                        if ((inMutantBugLair && !current.is(MUTANT_BUG_LAIR_KEY))
+                                || (inWitchSwamp && !current.is(WITCH_SWAMP_KEY))
+                                || (!inMutantBugLair && !inWitchSwamp && shouldReplace(current, isDesertChunk))) {
+                            biomes.getAndSetUnchecked(bx, by, bz, desired);
                             modified = true;
                         }
                     }

@@ -3114,6 +3114,8 @@ public class ModItems {
     public static final DeferredItem<Item> PINK_BOW = registerHat("pink_bow", "77");
     public static final DeferredItem<Item> BLUE_BOW = registerHat("blue_bow", "BlueBow");
     public static final DeferredItem<Item> ABIGAILS_BOW = registerHat("abigails_bow", "AbigailsBow");
+    public static final DeferredItem<Item> MOUSE_EARS = registerHat("mouse_ears", "31");
+    public static final DeferredItem<Item> CAT_EARS = registerHat("cat_ears", "32");
 
     // ============ 靴子 (Boots) ============
     public static final DeferredItem<Item> SNEAKERS = ITEMS.register("sneakers",
@@ -3205,6 +3207,26 @@ public class ModItems {
     // ── 传送魔杖 (Warp Wand) ──────────────────────────
     public static final DeferredItem<Item> WARP_WAND = ITEMS.register("warp_wand",
             () -> new com.stardew.craft.item.tool.WarpWandItem(new Item.Properties().stacksTo(1)));
+
+    // ── 法师魔法建筑 ──
+    public static final DeferredItem<Item> JUNIMO_HUT = ITEMS.register("junimo_hut",
+            () -> new StardewBlockItem(ModBlocks.JUNIMO_HUT.get(), "stardewcraft.type.utility", -1,
+                    new Item.Properties().stacksTo(1)));
+    public static final DeferredItem<Item> EARTH_OBELISK = ITEMS.register("earth_obelisk",
+            () -> new StardewBlockItem(ModBlocks.EARTH_OBELISK.get(), "stardewcraft.type.utility", -1,
+                    new Item.Properties().stacksTo(1)));
+    public static final DeferredItem<Item> WATER_OBELISK = ITEMS.register("water_obelisk",
+            () -> new StardewBlockItem(ModBlocks.WATER_OBELISK.get(), "stardewcraft.type.utility", -1,
+                    new Item.Properties().stacksTo(1)));
+    public static final DeferredItem<Item> DESERT_OBELISK = ITEMS.register("desert_obelisk",
+            () -> new StardewBlockItem(ModBlocks.DESERT_OBELISK.get(), "stardewcraft.type.utility", -1,
+                    new Item.Properties().stacksTo(1)));
+    public static final DeferredItem<Item> ISLAND_OBELISK = ITEMS.register("island_obelisk",
+            () -> new StardewBlockItem(ModBlocks.ISLAND_OBELISK.get(), "stardewcraft.type.utility", -1,
+                    new Item.Properties().stacksTo(1)));
+    public static final DeferredItem<Item> GOLD_CLOCK = ITEMS.register("gold_clock",
+            () -> new StardewBlockItem(ModBlocks.GOLD_CLOCK.get(), "stardewcraft.type.utility", -1,
+                    new Item.Properties().stacksTo(1)));
 
     // ── 装饰：农场常用 (Farm Common Decor) ──────────────────────────
     public static final DeferredItem<Item> STANDING_HOE = ITEMS.register("standing_hoe",

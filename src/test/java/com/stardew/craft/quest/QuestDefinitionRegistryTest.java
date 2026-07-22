@@ -84,4 +84,13 @@ class QuestDefinitionRegistryTest {
         assertEquals("stardewcraft.quest.socialize.progress", translated.getKey());
         assertEquals(2, translated.getArgs().length);
     }
+
+    @Test
+    void darkTalismanCutsceneQuestIsRegistered() {
+        StardewQuest quest = QuestDataLoader.createQuest("28");
+
+        assertNotNull(quest);
+        assertEquals("stardewcraft.quest.28.title", quest.getTitleKey());
+        assertEquals("stardewcraft:28", quest.getDefinitionId().toString());
+    }
 }

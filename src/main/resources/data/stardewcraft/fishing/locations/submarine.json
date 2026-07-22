@@ -3,7 +3,7 @@
   "fish": [
     {
       "id": "blobfish",
-      "precedence": 70,
+      "precedence": -70,
       "item": "stardewcraft:blobfish",
       "chance": 0.1,
       "difficulty": 75,
@@ -15,7 +15,7 @@
     },
     {
       "id": "spook_fish",
-      "precedence": 60,
+      "precedence": -60,
       "item": "stardewcraft:spook_fish",
       "chance": 0.18,
       "difficulty": 60,
@@ -27,7 +27,7 @@
     },
     {
       "id": "midnight_squid",
-      "precedence": 50,
+      "precedence": -50,
       "item": "stardewcraft:midnight_squid",
       "chance": 0.28,
       "difficulty": 55,
@@ -38,7 +38,7 @@
     },
     {
       "id": "sea_cucumber",
-      "precedence": 40,
+      "precedence": -40,
       "item": "stardewcraft:sea_cucumber",
       "chance": 0.1,
       "difficulty": 40,
@@ -49,7 +49,7 @@
     },
     {
       "id": "super_cucumber",
-      "precedence": 30,
+      "precedence": -30,
       "item": "stardewcraft:super_cucumber",
       "chance": 0.08,
       "difficulty": 80,
@@ -61,7 +61,7 @@
     },
     {
       "id": "octopus",
-      "precedence": 20,
+      "precedence": -20,
       "item": "stardewcraft:octopus",
       "chance": 0.05,
       "difficulty": 95,
@@ -72,7 +72,7 @@
     },
     {
       "id": "pearl",
-      "precedence": 10,
+      "precedence": -10,
       "item": "stardewcraft:pearl",
       "chance": 0.01,
       "difficulty": 20,
@@ -99,7 +99,8 @@
       "difficulty": 20,
       "motionType": 0,
       "ignoreFishDataRequirements": true,
-      "useFishCaughtSeededRandom": true
+      "useFishCaughtSeededRandom": true,
+      "chanceBoostPerLuckLevel": 0.05
     }
   ]
 }

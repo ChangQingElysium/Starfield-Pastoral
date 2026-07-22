@@ -1,7 +1,6 @@
 package com.stardew.craft.network.payload;
 
 import com.stardew.craft.StardewCraft;
-import com.stardew.craft.farm.FarmChunkManager;
 import com.stardew.craft.farm.FarmInstance;
 import com.stardew.craft.farm.FarmInstanceRegistry;
 import com.stardew.craft.farm.FarmPermissionManager;
@@ -75,8 +74,6 @@ public record FarmEntryRequestPayload(
                 player.displayClientMessage(Component.translatable("stardewcraft.farm.not_found"), true);
                 return;
             }
-            FarmChunkManager.get().onPlayerEnterFarm(stardewLevel, player, farm);
-
             // 根据入口方向路由
             BlockPos targetPos;
             float yaw;

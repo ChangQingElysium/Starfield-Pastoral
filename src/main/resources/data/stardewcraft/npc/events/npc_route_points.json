@@ -1630,6 +1630,20 @@
       "note": "Trailer (Pam's Home) 室外入口门点（朝南）",
       "indoor": false
     },
+    "trailer_indoor_entry": {
+      "x": 72,
+      "y": 35,
+      "z": 4,
+      "note": "Trailer NPC 室内入口落点（复用 trailer_enter）",
+      "indoor": true
+    },
+    "trailer_indoor_exit": {
+      "x": 71,
+      "y": 35,
+      "z": 5,
+      "note": "Trailer NPC 室内出口点（复用 trailer_exit）",
+      "indoor": true
+    },
     "_comment_maru": {
       "note": "=== Maru 专属停留点 ==="
     },
@@ -2224,6 +2238,13 @@
       "z": 54,
       "indoor": true,
       "note": "Krobus 下水道固定位置（朝南）"
+    },
+    "henchman_guard": {
+      "x": 51,
+      "y": 48,
+      "z": -235,
+      "indoor": false,
+      "note": "Henchman 女巫沼泽固定守卫位置（朝南）"
     },
     "desert_npc_points": {
       "x": -254,

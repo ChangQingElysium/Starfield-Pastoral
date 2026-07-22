@@ -39,14 +39,16 @@ public final class FishingDataManager {
 	private static final String LEGACY_COMPAT_POOL_KEY = "stardewcraft:stardew_valley";
 
 	/**
-	 * Items that are technically caught while fishing but are not backed by
-	 * Data/Fish entries, so SDV pulls them from the water without BobberBar.
-	 * Algae and seaweed are intentionally excluded: vanilla Data/Fish gives them
-	 * difficulty/motion/size fields, so they do use BobberBar.
+	 * Items that SDV pulls from the water without opening BobberBar. Most aren't
+	 * backed by Data/Fish, but FishingRod also explicitly treats seaweed and both
+	 * algae types as junk even though they do have Data/Fish entries.
 	 * The JSON {@code skipMinigame} flag is honored when true; this set is an
 	 * additional safety-net so a missing flag never accidentally forces a minigame.
 	 */
 	private static final Set<String> NON_FISH_CATCHABLE_IDS = Set.of(
+			"stardewcraft:seaweed",
+			"stardewcraft:green_algae",
+			"stardewcraft:white_algae",
 			"stardewcraft:sea_jelly",
 			"stardewcraft:river_jelly",
 			"stardewcraft:cave_jelly",
@@ -184,23 +186,26 @@ public final class FishingDataManager {
 				&& fri.getTier() == com.stardew.craft.item.tool.FishingRodItem.RodTier.TRAINING_ROD;
 		boolean usingGoodBait = isUsingGoodBait(rodStack);
 		String baitTargetFishId = getTargetedBaitFishId(rodStack);
+		Holder<Biome> biomeHolder = level.getBiome(bobberPos);
+		Optional<FishSelection> mineCatch = trySelectVanillaMineCatch(
+				biomeHolder, isTrainingRod, fishingLevel, effectiveDepth,
+				luckBuffLevel, hasCuriosityLure, baitTargetFishId, random);
+		if (mineCatch.isPresent()) {
+			return mineCatch;
+		}
 		boolean fairFishingGame = com.stardew.craft.festival.fair.FairFishingGameService.isFishingGameActive(player);
 		boolean iceFishingContest = com.stardew.craft.festival.FestivalOfIceService.isFishingContestActive(player);
 		boolean festivalFishingGame = fairFishingGame || iceFishingContest;
-		List<String> lookupKeys = festivalFishingGame
-				? List.of("fishingGame")
-				: resolveVanillaAlignedLocationKeys(level, level.getBiome(bobberPos), bobberPos);
-		Holder<Biome> biomeHolder = level.getBiome(bobberPos);
+		List<String> lookupKeys = resolveFishingLookupKeys(
+				fairFishingGame,
+				iceFishingContest,
+				festivalFishingGame
+						? List.of()
+						: resolveVanillaAlignedLocationKeys(level, level.getBiome(bobberPos), bobberPos));
 		boolean nightMarketFishing = com.stardew.craft.festival.nightmarket.NightMarketSubmarineService
 				.isInsideSubmarineBounds(bobberPos)
 				|| hasBiomeTag(biomeHolder, "stardewcraft:is_night_market");
 		boolean poolOnly = festivalFishingGame || nightMarketFishing || useDesertFestivalPoolOnly(biomeHolder);
-
-		// 获取浮漂位置的群系
-		@SuppressWarnings("null")
-		ResourceLocation biomeId = biomeHolder.unwrapKey()
-				.map(key -> key.location())
-				.orElse(ResourceLocation.withDefaultNamespace("plains"));
 
 		// 获取当前环境条件
 		boolean isRaining = com.stardew.craft.weather.WeatherManager.isRaining(level);
@@ -219,8 +224,6 @@ public final class FishingDataManager {
 
 		if (candidates.isEmpty()) {
 			// 如果没有任何候选鱼（数据未加载或配置错误），直接返回垃圾
-			StardewCraft.LOGGER.debug("No fish candidates found for keys {} at biome {}. Check if fishing data loaded correctly!",
-					lookupKeys, biomeId);
 			return Optional.of(new FishSelection(getRandomJunk(random), 0, 0, 0, 0, true));
 		}
 
@@ -235,12 +238,14 @@ public final class FishingDataManager {
 				break;
 			}
 		}
-		boolean isTutorialCatch = hasTutorialFishHere && playerData.getDistinctFishCaughtCount() == 0;
+		boolean isTutorialCatch = shouldApplyTutorialCatchGate(
+				festivalFishingGame,
+				hasTutorialFishHere,
+				playerData.getDistinctFishCaughtCount());
 
-		// 按优先级排序，同优先级内随机
-		// 模组数据约定："高 precedence = 高优先级"（与 SDV 源数据语义相反，SDV 用 -1000..2000 + OrderByAsc）
-		// 采用降序：precedence 大的鱼（如 legendary=200、regular fish=50~150）先于 algae（0）尝试。
-		candidates.sort((a, b) -> Integer.compare(b.rule().precedence(), a.rule().precedence()));
+		// SDV GameLocation.GetFishFromLocationData: OrderBy(Precedence), then shuffle ties.
+		// Smaller values therefore run first (legendary/special rules use negative precedence).
+		candidates.sort(Comparator.comparingInt(candidate -> candidate.rule().precedence()));
 		List<CandidateRule> ordered = stableShuffleByPrecedence(candidates, random);
 
 		// Stardew Valley style selection: iterate by precedence and roll chance (not weighted).
@@ -296,10 +301,7 @@ public final class FishingDataManager {
 				if (rule.applyDailyLuck()) {
 					chance += (float) playerData.getDailyLuck();
 				}
-				if (luckBuffLevel > 0) {
-					// Spirit Blessing buff (mod-extended): +2% per level on first roll.
-					chance += 0.02f * luckBuffLevel;
-				}
+				chance += rule.chanceBoostPerLuckLevel() * luckBuffLevel;
 				if (baitTargetFishId != null && !baitTargetFishId.isBlank()
 						&& baitTargetFishId.equals(rule.itemId())) {
 					chance *= 1.66f;
@@ -418,9 +420,15 @@ public final class FishingDataManager {
 			}
 			return Optional.of(new FishSelection(getRandomJunk(random), 0, 0, 0, 0, true));
 		}
+		String resolvedItemId = chosen.itemId();
+		SpawnFishRule resultRule = chosen;
+		if (chosen.randomItemIds() != null && !chosen.randomItemIds().isEmpty()) {
+			resolvedItemId = chosen.randomItemIds().get(random.nextInt(chosen.randomItemIds().size()));
+			resultRule = getRuleByItemId(resolvedItemId).orElse(chosen);
+		}
 		Item item;
 		try {
-			item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(chosen.itemId()));
+			item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(resolvedItemId));
 		} catch (Exception ex) {
 			item = Items.COD;
 		}
@@ -432,9 +440,76 @@ public final class FishingDataManager {
 		ItemStack stack = resolvedSpecialCatch.isEmpty()
 				? new ItemStack(item)
 				: resolvedSpecialCatch.copy();
-		boolean skip = chosen.skipMinigame() || isNonFishCatchable(chosen.itemId());
-		return Optional.of(new FishSelection(stack, chosen.difficulty(), chosen.motionTypeId(),
-				chosen.minFishSize(), chosen.maxFishSize(), skip));
+		boolean skip = chosen.skipMinigame() || isNonFishCatchable(resolvedItemId);
+		return Optional.of(new FishSelection(stack, resultRule.difficulty(), resultRule.motionTypeId(),
+				resultRule.minFishSize(), resultRule.maxFishSize(), skip));
+	}
+
+	private Optional<FishSelection> trySelectVanillaMineCatch(
+			Holder<Biome> biome,
+			boolean trainingRod,
+			int fishingLevel,
+			int waterDepth,
+			int luckLevel,
+			boolean curiosityLure,
+			String targetedFishId,
+			RandomSource random) {
+		String fishId = null;
+		float chance = 0f;
+		boolean lavaArea = hasBiomeTag(biome, "stardewcraft:is_mines_100");
+		if (hasBiomeTag(biome, "stardewcraft:is_mines_20")) {
+			fishId = "stardewcraft:stonefish";
+			chance = mineRareFishChance(0.02f, 0.01f, fishingLevel, waterDepth,
+					curiosityLure, fishId.equals(targetedFishId));
+		} else if (hasBiomeTag(biome, "stardewcraft:is_mines_60")) {
+			fishId = "stardewcraft:ice_pip";
+			chance = mineRareFishChance(0.015f, 0.009f, fishingLevel, waterDepth,
+					curiosityLure, fishId.equals(targetedFishId));
+		} else if (lavaArea) {
+			fishId = "stardewcraft:lava_eel";
+			chance = mineRareFishChance(0.01f, 0.008f, fishingLevel, waterDepth,
+					curiosityLure, fishId.equals(targetedFishId));
+		} else {
+			return Optional.empty();
+		}
+
+		// MineShaft.getFish returns uniform trash immediately for Training Rods.
+		if (trainingRod) {
+			return Optional.of(new FishSelection(getRandomJunk(random), 0, 0, 0, 0, true));
+		}
+		if (random.nextFloat() < chance) {
+			return createSelectionForItem(fishId, false);
+		}
+		if (lavaArea) {
+			if (random.nextFloat() < 0.05f + Math.max(0, luckLevel) * 0.05f) {
+				return createSelectionForItem("stardewcraft:cave_jelly", true);
+			}
+			return Optional.of(new FishSelection(getRandomJunk(random), 0, 0, 0, 0, true));
+		}
+		return Optional.empty();
+	}
+
+	static float mineRareFishChance(float baseChance, float multiplier,
+			int fishingLevel, int waterDepth, boolean curiosityLure, boolean targetedBait) {
+		float chanceMultiplier = 1f + 0.4f * fishingLevel + 0.1f * waterDepth;
+		if (curiosityLure) chanceMultiplier += 5f;
+		if (targetedBait) chanceMultiplier += 10f;
+		return baseChance + multiplier * chanceMultiplier;
+	}
+
+	private Optional<FishSelection> createSelectionForItem(String itemId, boolean forceSkipMinigame) {
+		ResourceLocation id = ResourceLocation.tryParse(itemId);
+		if (id == null) return Optional.empty();
+		Item item = BuiltInRegistries.ITEM.get(id);
+		if (item == null || item == Items.AIR) return Optional.empty();
+		SpawnFishRule metadata = getRuleByItemId(itemId).orElse(null);
+		if (metadata == null) {
+			return Optional.of(new FishSelection(new ItemStack(item), 0, 0, 0, 0,
+					forceSkipMinigame || isNonFishCatchable(itemId)));
+		}
+		return Optional.of(new FishSelection(new ItemStack(item), metadata.difficulty(), metadata.motionTypeId(),
+				metadata.minFishSize(), metadata.maxFishSize(),
+				forceSkipMinigame || metadata.skipMinigame() || isNonFishCatchable(itemId)));
 	}
 
 	private static boolean isFishRule(SpawnFishRule rule) {
@@ -447,6 +522,30 @@ public final class FishingDataManager {
 		}
 		Item item = BuiltInRegistries.ITEM.get(id);
 		return item != null && item != Items.AIR && item.builtInRegistryHolder().is(ModTags.Items.FISHES);
+	}
+
+	static List<String> resolveFishingLookupKeys(
+			boolean fairFishingGame,
+			boolean iceFishingContest,
+			List<String> regularLocationKeys) {
+		if (fairFishingGame) {
+			return List.of("fishingGame");
+		}
+		if (iceFishingContest) {
+			// SDV changes winter8 to a temporary location whose dedicated pool contains
+			// the ice-contest fish; it does not use fall16's FishingGame location.
+			return List.of("Temp");
+		}
+		return regularLocationKeys;
+	}
+
+	static boolean shouldApplyTutorialCatchGate(
+			boolean festivalFishingGame,
+			boolean hasTutorialFishHere,
+			int distinctFishCaught) {
+		// Festival catches intentionally don't update the permanent collection. Applying
+		// the first-catch gate here would therefore lock a new player to Sunfish forever.
+		return !festivalFishingGame && hasTutorialFishHere && distinctFishCaught == 0;
 	}
 
 	private List<CandidateRule> collectCandidatesByKeys(List<String> lookupKeys) {
@@ -468,14 +567,23 @@ public final class FishingDataManager {
 		}
 
 		List<CandidateRule> out = new ArrayList<>();
+		Set<String> idsFromEarlierPools = new HashSet<>();
 		for (String key : uniqueKeys) {
 			FishingLocationData data = byLocationKey.get(key);
 			if (data != null) {
 				boolean inherited = (INHERITED_POOL_KEYS.contains(key) && !lookupKeys.contains(key))
 						|| LEGACY_COMPAT_POOL_KEY.equals(key);
+				Set<String> idsInThisPool = new HashSet<>();
 				for (SpawnFishRule rule : data.fish()) {
-					out.add(new CandidateRule(rule, inherited));
+					// LOCATION_FISH and the project's shared Ginger Island biome may combine
+					// vanilla pools. Identical rules from a later pool must not gain extra rolls;
+					// duplicate variants inside one pool (e.g. SquidFest) remain distinct.
+					if (!idsFromEarlierPools.contains(rule.id())) {
+						out.add(new CandidateRule(rule, inherited));
+					}
+					idsInThisPool.add(rule.id());
 				}
+				idsFromEarlierPools.addAll(idsInThisPool);
 			}
 		}
 		return out;
@@ -513,71 +621,73 @@ public final class FishingDataManager {
 			return List.of("Submarine");
 		}
 
-		List<String> keys = new ArrayList<>();
-
 		if (hasBiomeTag(biomeHolder, "stardewcraft:is_night_market")) {
-			keys.add("BeachNightMarket");
-			keys.add("Beach");
+			// BeachNightMarket's vanilla LOCATION_FISH rule delegates to Beach.
+			return List.of("BeachNightMarket", "Beach");
 		}
 		if (hasBiomeTag(biomeHolder, "stardewcraft:is_pirate_cove")) {
-			keys.add("IslandSouthEastCave");
+			return List.of("IslandSouthEastCave");
 		}
 		if (hasBiomeTag(biomeHolder, "stardewcraft:is_ginger_island_ocean")) {
-			keys.add("IslandSouth");
-			keys.add("IslandSouthEast");
-			keys.add("IslandWest");
+			// South and SouthEast have identical fish rules. IslandWest adds Octopus
+			// to ocean water, so include it once for the project's shared island-ocean biome.
+			return List.of("IslandSouth", "IslandWest");
 		}
 		if (hasBiomeTag(biomeHolder, "stardewcraft:is_ginger_island_river")) {
-			keys.add("IslandNorth");
-			keys.add("IslandWest");
+			// North and West freshwater have the same ordinary fish pool.
+			return List.of("IslandNorth");
 		}
 		if (hasBiomeTag(biomeHolder, "stardewcraft:is_ginger_island_pond")) {
-			keys.add("IslandWest");
+			return List.of("IslandWest");
 		}
 		if (hasBiomeTag(biomeHolder, "stardewcraft:is_volcano")) {
-			keys.add("Caldera");
+			return List.of("Caldera");
 		}
 		if (hasBiomeTag(biomeHolder, "stardewcraft:is_witch_swamp")) {
-			keys.add("WitchSwamp");
+			return List.of("WitchSwamp");
 		}
 		if (hasBiomeTag(biomeHolder, "stardewcraft:is_mutant_bug_lair")) {
-			keys.add("BugLand");
+			return List.of("BugLand");
 		}
 		if (hasBiomeTag(biomeHolder, "stardewcraft:is_sewers")) {
-			keys.add("Sewer");
+			return List.of("Sewer");
 		}
 		if (hasBiomeTag(biomeHolder, "stardewcraft:is_desert")) {
-			keys.add("Desert");
+			return List.of("Desert");
 		}
 		if (hasBiomeTag(biomeHolder, "stardewcraft:is_mines_20")
 				|| hasBiomeTag(biomeHolder, "stardewcraft:is_mines_60")
 				|| hasBiomeTag(biomeHolder, "stardewcraft:is_mines_100")) {
-			keys.add("UndergroundMine");
+			return List.of("UndergroundMine");
 		}
 		if (hasBiomeTag(biomeHolder, "stardewcraft:is_beach") || hasBiomeTag(biomeHolder, "stardewcraft:is_ocean")) {
-			keys.add("Beach");
+			return List.of("Beach");
 		}
 		if (hasBiomeTag(biomeHolder, "stardewcraft:is_town_river") || hasBiomeTag(biomeHolder, "stardewcraft:is_jojamart_bridge")) {
-			keys.add("Town");
+			return List.of("Town");
 		}
 		if (hasBiomeTag(biomeHolder, "stardewcraft:is_mountain_lake")) {
-			keys.add("Mountain");
+			return List.of("Mountain");
+		}
+		// secret_woods_pond is also (incorrectly) included in is_forest_pond;
+		// resolve the more specific vanilla Woods location first so pools never stack.
+		if (hasBiomeId(biomeHolder, "stardewcraft:secret_woods_pond")) {
+			return List.of("Woods");
 		}
 		if (hasBiomeTag(biomeHolder, "stardewcraft:is_forest_pond")
 				|| hasBiomeTag(biomeHolder, "stardewcraft:is_forest_river")
 				|| hasBiomeTag(biomeHolder, "stardewcraft:is_forest_waterfall")) {
-			keys.add("Forest");
+			return List.of("Forest");
 		}
 		if (hasBiomeTag(biomeHolder, "stardewcraft:is_secret_woods")) {
-			keys.add("Woods");
+			return List.of("Woods");
 		}
+		return List.of("Default");
+	}
 
-		if (keys.isEmpty()) {
-			keys.add("Default");
-		}
-
-		LinkedHashSet<String> deduped = new LinkedHashSet<>(keys);
-		return new ArrayList<>(deduped);
+	private static boolean hasBiomeId(Holder<Biome> biomeHolder, String biomeId) {
+		ResourceLocation expected = ResourceLocation.parse(biomeId);
+		return biomeHolder.unwrapKey().map(key -> key.location().equals(expected)).orElse(false);
 	}
 
 	private String resolveVanillaFishAreaId(Holder<Biome> biomeHolder) {
@@ -800,6 +910,17 @@ public final class FishingDataManager {
 				}
 				return false;
 			}
+			case "YEAR": {
+				// YEAR <minimum year>, matching SDV's year-gated location rules.
+				if (parts.length < 2) return false;
+				com.stardew.craft.time.StardewTimeManager tm = com.stardew.craft.time.StardewTimeManager.get();
+				if (tm == null) return false;
+				try {
+					return tm.getCurrentYear() >= Integer.parseInt(parts[1]);
+				} catch (NumberFormatException ex) {
+					return false;
+				}
+			}
 			case "DAY_OF_MONTH": {
 				// DAY_OF_MONTH <day1> [<day2> ...]   ("even"/"odd" 也支持)
 				if (parts.length < 2) return false;
@@ -1021,6 +1142,11 @@ public final class FishingDataManager {
 		o.addProperty("id", r.id());
 		o.addProperty("precedence", r.precedence());
 		o.addProperty("item", r.itemId());
+		if (r.randomItemIds() != null && !r.randomItemIds().isEmpty()) {
+			com.google.gson.JsonArray randomItems = new com.google.gson.JsonArray();
+			r.randomItemIds().forEach(randomItems::add);
+			o.add("randomItems", randomItems);
+		}
 		o.addProperty("chance", r.chance());
 		o.addProperty("difficulty", r.difficulty());
 		o.addProperty("motionType", r.motionTypeId());
@@ -1039,6 +1165,9 @@ public final class FishingDataManager {
 		if (r.isTutorialFish()) o.addProperty("isTutorialFish", true);
 		if (r.ignoreFishDataRequirements()) o.addProperty("ignoreFishDataRequirements", true);
 		if (r.useFishCaughtSeededRandom()) o.addProperty("useFishCaughtSeededRandom", true);
+		if (r.chanceBoostPerLuckLevel() != 0f) {
+			o.addProperty("chanceBoostPerLuckLevel", r.chanceBoostPerLuckLevel());
+		}
 		if (r.chanceModifiers() != null && !r.chanceModifiers().isEmpty()) {
 			com.google.gson.JsonArray arr = new com.google.gson.JsonArray();
 			for (QuantityModifier.Entry m : r.chanceModifiers()) {

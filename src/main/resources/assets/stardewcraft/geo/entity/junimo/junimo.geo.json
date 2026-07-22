@@ -122,8 +122,8 @@
 				},
 				{
 					"name": "right_item",
-					"parent": "arm_right",
-					"pivot": [-5.7, 3.1, 0]
+					"parent": "body",
+					"pivot": [0, 13, 0]
 				},
 				{
 					"name": "arm_left",

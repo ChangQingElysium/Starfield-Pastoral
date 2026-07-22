@@ -1,6 +1,5 @@
 package com.stardew.craft.communitycenter;
 
-import com.stardew.craft.StardewCraft;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.communitycenter.block.JunimoNoteBlock;
 import com.stardew.craft.communitycenter.restore.CCAreaRegistry;
@@ -55,7 +54,6 @@ public final class JunimoNotePlacer {
                 if (!(existing.getBlock() instanceof JunimoNoteBlock)) {
                     level.setBlock(worldPos, noteState, 2);
                     newlyPlaced.add(areaId);
-                    StardewCraft.LOGGER.debug("[CC] Placed JunimoNote for area {} at {}", areaId, worldPos);
 
                     // SDV parity: addJunimoNote() plays "reward" sound + burst particles (4 sparkles)
                     level.playSound(null, worldPos, ModSounds.REWARD.get(),
@@ -69,7 +67,6 @@ public final class JunimoNotePlacer {
                 BlockState existing = level.getBlockState(worldPos);
                 if (existing.getBlock() instanceof JunimoNoteBlock) {
                     level.removeBlock(worldPos, false);
-                    StardewCraft.LOGGER.debug("[CC] Removed JunimoNote for area {} at {}", areaId, worldPos);
                 }
             }
         }

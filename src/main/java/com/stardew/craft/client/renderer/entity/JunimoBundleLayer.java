@@ -15,6 +15,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
+import com.mojang.math.Axis;
 import software.bernie.geckolib.cache.object.GeoBone;
 import software.bernie.geckolib.renderer.GeoRenderer;
 import software.bernie.geckolib.renderer.layer.BlockAndItemGeoLayer;
@@ -22,14 +23,20 @@ import software.bernie.geckolib.util.RenderUtil;
 
 /**
  * SDV parity: Renders the correct held item on the Junimo's right_item bone.
- * The item is always rendered upright (no bone rotation applied).
  * Bundle color is applied via MC's ItemColor system (see StardewCraftClient).
  */
 @SuppressWarnings("null")
 public class JunimoBundleLayer extends BlockAndItemGeoLayer<JunimoEntity> {
-    private static final float HELD_ITEM_TARGET_X = 0.0F;
-    private static final float HELD_ITEM_TARGET_Y = 12.0F;
-    private static final float HELD_ITEM_TARGET_Z = 0.0F;
+    // Final attachment tuning lives here. The model bone defines the actual
+    // head-top anchor; these values only define how an item faces at that anchor.
+    // Keep them centralized so visual tuning never touches harvesting logic.
+    private static final float HELD_ITEM_OFFSET_X = 0.0F;
+    private static final float HELD_ITEM_OFFSET_Y = 0.0F;
+    private static final float HELD_ITEM_OFFSET_Z = 0.0F;
+    private static final float HELD_ITEM_ROTATION_X = 0.0F;
+    private static final float HELD_ITEM_ROTATION_Y = 180.0F;
+    private static final float HELD_ITEM_ROTATION_Z = 0.0F;
+    private static final float HELD_ITEM_SCALE = 1.0F;
 
     /**
      * Thread-local current bundle color for the ItemColor handler to read.
@@ -78,6 +85,7 @@ public class JunimoBundleLayer extends BlockAndItemGeoLayer<JunimoEntity> {
             if (type == JunimoEntity.HOLDING_BUNDLE) return getBundleItem();
             if (type == JunimoEntity.HOLDING_STAR)   return getStarItem();
             if (type == JunimoEntity.HOLDING_ORANGE) return getOrangeItem();
+            if (type == JunimoEntity.HOLDING_ITEM)   return animatable.getHeldItem();
         }
         return null;
     }
@@ -93,11 +101,7 @@ public class JunimoBundleLayer extends BlockAndItemGeoLayer<JunimoEntity> {
         return ItemDisplayContext.GROUND;
     }
 
-    /**
-     * Override to apply only the bone's translation (not rotation),
-     * so the held item always faces upright regardless of bone orientation.
-     * Bundle color is set via static field for ItemColor to pick up.
-     */
+    /** Bundle color is set via static field for ItemColor to pick up. */
     @Override
     public void renderForBone(PoseStack poseStack, JunimoEntity animatable, GeoBone bone,
                               RenderType renderType, MultiBufferSource bufferSource,
@@ -110,12 +114,15 @@ public class JunimoBundleLayer extends BlockAndItemGeoLayer<JunimoEntity> {
         if (animatable.getAlpha() < 0.5f) return;
 
         poseStack.pushPose();
-        // Apply only bone pivot translation, skip rotation so item stays upright
-        RenderUtil.translateToPivotPoint(poseStack, bone);
-        poseStack.translate(
-                (HELD_ITEM_TARGET_X - bone.getPivotX()) / 16.0F,
-                (HELD_ITEM_TARGET_Y - bone.getPivotY()) / 16.0F,
-                (HELD_ITEM_TARGET_Z - bone.getPivotZ()) / 16.0F);
+        // The parent transform is already present here. Applying the complete
+        // local transform places us at the body-owned head-top anchor.
+        RenderUtil.translateAndRotateMatrixForBone(poseStack, bone);
+        poseStack.translate(HELD_ITEM_OFFSET_X / 16.0F,
+                HELD_ITEM_OFFSET_Y / 16.0F, HELD_ITEM_OFFSET_Z / 16.0F);
+        poseStack.mulPose(Axis.ZP.rotationDegrees(HELD_ITEM_ROTATION_Z));
+        poseStack.mulPose(Axis.YP.rotationDegrees(HELD_ITEM_ROTATION_Y));
+        poseStack.mulPose(Axis.XP.rotationDegrees(HELD_ITEM_ROTATION_X));
+        poseStack.scale(HELD_ITEM_SCALE, HELD_ITEM_SCALE, HELD_ITEM_SCALE);
 
         // SDV parity: set the bundle color for the ItemColor handler to read
         if (animatable.getHoldingType() == JunimoEntity.HOLDING_BUNDLE) {

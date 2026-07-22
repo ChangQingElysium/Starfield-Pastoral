@@ -51,8 +51,6 @@ public class InteriorSubspaceLifecycleEvents {
         for (String tag : interaction.getTags()) {
             if (tag.startsWith("sdv_portal_marker:") || tag.startsWith("sdv_portal_target:")) {
                 event.setCanceled(true);
-                StardewCraft.LOGGER.debug("[PORTAL_CLEANUP] Blocked legacy portal Interaction entity at {}",
-                    interaction.blockPosition());
                 return;
             }
         }

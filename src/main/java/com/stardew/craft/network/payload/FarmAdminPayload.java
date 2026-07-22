@@ -97,7 +97,8 @@ public record FarmAdminPayload(
                     FarmInstance farm = registry.getFarm(payload.targetUUID);
                     if (farm != null) {
                         net.minecraft.core.BlockPos tp = farm.getOrigin().offset(128, 10, 128);
-                        player.teleportTo(
+                        com.stardew.craft.warp.ModTeleport.to(
+                                player,
                                 player.serverLevel(),
                                 tp.getX() + 0.5, tp.getY(), tp.getZ() + 0.5,
                                 0, 0);

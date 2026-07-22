@@ -50,6 +50,7 @@ import com.stardew.craft.client.render.TapperBlockEntityRenderer;
 import com.stardew.craft.client.render.LoomBlockEntityRenderer;
 import com.stardew.craft.client.render.WormBinBlockEntityRenderer;
 import com.stardew.craft.client.render.UncertaintyStatueBlockEntityRenderer;
+import com.stardew.craft.client.render.WizardBuildingCatalogBlockEntityRenderer;
 import com.stardew.craft.client.render.FeedTroughBlockEntityRenderer;
 import com.stardew.craft.client.render.FairStrengthTesterBlockEntityRenderer;
 import com.stardew.craft.client.render.FishNetBlockEntityRenderer;
@@ -176,6 +177,7 @@ public final class ModClientSetup {
 		event.registerBlockEntityRenderer(ModBlockEntities.LARGE_FIREPLACE.get(), LargeFireplaceBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.SHRINE.get(), ShrineBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.JUNIMO_HUT_DECOR.get(), com.stardew.craft.client.render.JunimoHutDecorBlockEntityRenderer::new);
+		event.registerBlockEntityRenderer(ModBlockEntities.WIZARD_BUILDING.get(), com.stardew.craft.client.render.WizardBuildingBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.FLOWER_DANCE_DECOR.get(), com.stardew.craft.client.render.FlowerDanceDecorBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.LUAU_FESTIVAL_DECOR.get(), LuauFestivalDecorBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.FAIR_STRENGTH_TESTER.get(), FairStrengthTesterBlockEntityRenderer::new);
@@ -193,6 +195,7 @@ public final class ModClientSetup {
 		event.registerBlockEntityRenderer(ModBlockEntities.TOTEM_POLE.get(), com.stardew.craft.client.render.TotemPoleBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.MAILBOX.get(), com.stardew.craft.client.render.MailboxBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.UNCERTAINTY_STATUE.get(), UncertaintyStatueBlockEntityRenderer::new);
+		event.registerBlockEntityRenderer(ModBlockEntities.WIZARD_BUILDING_CATALOG.get(), WizardBuildingCatalogBlockEntityRenderer::new);
 			}
 
 	@SuppressWarnings({"null", "unchecked", "rawtypes"})

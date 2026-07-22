@@ -51,6 +51,7 @@ import static com.stardew.craft.festival.FestivalNpcActorRuntime.canonical;
 
 public final class FestivalOfIceService {
     public static final String FESTIVAL_ID = "winter8";
+    private static final String TEMPORARY_ROD_OWNER = "winter8_ice_fishing";
     public static final String TRAVELING_MERCHANT_TARGET_ID = "festival_of_ice_traveling_merchant";
 
     private static final String OVERLAY_ID = "Forest-IceFestival";
@@ -352,7 +353,7 @@ public final class FestivalOfIceService {
         if (!isFishingContestActive(player)) {
             return rodStack != null && !rodStack.isEmpty() && rodStack.getItem() instanceof FishingRodItem;
         }
-        return FishingRodItem.isFairTemporaryRod(rodStack);
+        return FishingRodItem.isFairTemporaryRod(rodStack, TEMPORARY_ROD_OWNER);
     }
 
     public static void onFishingCatch(ServerPlayer player, boolean fish) {
@@ -802,6 +803,7 @@ public final class FestivalOfIceService {
         ItemStack rod = new ItemStack(ModItems.FISHING_ROD.get());
         FishingRodItem.configureFairTemporaryRod(
             rod,
+            TEMPORARY_ROD_OWNER,
             ItemStack.EMPTY,
             new ItemStack(ModItems.DRESSED_SPINNER.get())
         );
@@ -835,14 +837,14 @@ public final class FestivalOfIceService {
 
     private static void selectTemporaryFishingRod(ServerPlayer player) {
         for (int i = 0; i < 9; i++) {
-            if (FishingRodItem.isFairTemporaryRod(player.getInventory().items.get(i))) {
+            if (FishingRodItem.isFairTemporaryRod(player.getInventory().items.get(i), TEMPORARY_ROD_OWNER)) {
                 player.getInventory().selected = i;
                 player.getInventory().setChanged();
                 return;
             }
         }
         for (int i = 9; i < player.getInventory().items.size(); i++) {
-            if (FishingRodItem.isFairTemporaryRod(player.getInventory().items.get(i))) {
+            if (FishingRodItem.isFairTemporaryRod(player.getInventory().items.get(i), TEMPORARY_ROD_OWNER)) {
                 ItemStack rod = player.getInventory().items.get(i);
                 int selected = player.getInventory().selected;
                 player.getInventory().items.set(i, player.getInventory().items.get(selected));
@@ -856,13 +858,13 @@ public final class FestivalOfIceService {
     private static void removeTemporaryFishingRods(ServerPlayer player) {
         for (int i = 0; i < player.getInventory().items.size(); i++) {
             ItemStack stack = player.getInventory().items.get(i);
-            if (FishingRodItem.isFairTemporaryRod(stack)) {
+            if (FishingRodItem.isFairTemporaryRod(stack, TEMPORARY_ROD_OWNER)) {
                 player.getInventory().items.set(i, ItemStack.EMPTY);
             }
         }
         for (int i = 0; i < player.getInventory().offhand.size(); i++) {
             ItemStack stack = player.getInventory().offhand.get(i);
-            if (FishingRodItem.isFairTemporaryRod(stack)) {
+            if (FishingRodItem.isFairTemporaryRod(stack, TEMPORARY_ROD_OWNER)) {
                 player.getInventory().offhand.set(i, ItemStack.EMPTY);
             }
         }
@@ -874,7 +876,7 @@ public final class FestivalOfIceService {
 
     private static void removeDroppedTemporaryFishingRods(ServerLevel level) {
         for (ItemEntity itemEntity : level.getEntitiesOfClass(ItemEntity.class, TEMP_ROD_CLEANUP_BOUNDS)) {
-            if (FishingRodItem.isFairTemporaryRod(itemEntity.getItem())) {
+            if (FishingRodItem.isFairTemporaryRod(itemEntity.getItem(), TEMPORARY_ROD_OWNER)) {
                 itemEntity.discard();
             }
         }

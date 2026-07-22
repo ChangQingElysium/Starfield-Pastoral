@@ -5,10 +5,10 @@
   "effects": {
     "sky_color": 7907327,
     "fog_color": 12638463,
-    "water_color": 4159204,
-    "water_fog_color": 329011,
-    "grass_color": 9551028,
-    "foliage_color": 7842607,
+    "water_color": 3234446,
+    "water_fog_color": 1447738,
+    "grass_color": 4937281,
+    "foliage_color": 2777900,
     "mood_sound": {
       "sound": "minecraft:ambient.cave",
       "tick_delay": 6000,

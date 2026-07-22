@@ -248,8 +248,6 @@ public final class EventPlayer {
         // its connection; PacketDistributor.sendToServer requires a live connection.
         if (mc.getConnection() != null) {
             PacketDistributor.sendToServer(new MarkEventSeenPayload(eventId, sessionId));
-        } else {
-            LOGGER.debug("Skipped server cutscene completion for {} because the client is disconnected", eventId);
         }
 
         // Clean up

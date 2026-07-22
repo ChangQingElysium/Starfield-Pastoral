@@ -45,6 +45,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import com.stardew.craft.manager.CropGrowthManager;
 import javax.annotation.Nonnull;
@@ -745,6 +746,58 @@ public abstract class StardewCropBlock extends Block {
         }
         harvest(level, harvestPos, harvestState, player);
         return true;
+    }
+
+    /**
+     * Harvest entry used by a Junimo Hut. Unlike player harvesting, every result is
+     * inserted into the hut and no farming experience is awarded.
+     *
+     * @return the primary harvested stack, or {@link ItemStack#EMPTY} if nothing was harvested.
+     */
+    public ItemStack tryHarvestByJunimo(ServerLevel level, BlockPos pos, BlockState state,
+                                        int farmingLevel, Consumer<ItemStack> output) {
+        BlockPos harvestPos = resolveMultiBlockRootPos(level, pos, state);
+        BlockState harvestState = level.getBlockState(harvestPos);
+        if (harvestState.getBlock() != this
+                || harvestState.getValue(AGE) < MAX_AGE
+                || !isMature(level, harvestPos, harvestState)
+                || isPlayerPlacedDecorative(level, harvestPos, harvestState)) {
+            return ItemStack.EMPTY;
+        }
+
+        RandomSource random = level.getRandom();
+        int fertilizerLevel = getFertilizerLevel(level, harvestPos);
+        int quality = getHarvestQuality(random, fertilizerLevel, farmingLevel);
+        ItemStack harvested = getHarvestItem(quality);
+        harvested.setCount(getHarvestCount(random, farmingLevel));
+        harvested = applyHarvestItemCustomization(harvested, harvestState);
+        output.accept(harvested.copy());
+        collectJunimoHarvestSideProducts(level, harvestPos, harvestState, random,
+                fertilizerLevel, farmingLevel, output);
+
+        level.playSound(null, harvestPos, SoundEvents.CROP_BREAK, SoundSource.BLOCKS, 1.0F, 1.0F);
+        if (canRegrow()) {
+            int regrowAge = getRegrowAge();
+            BlockState regrowState = harvestState.setValue(AGE, regrowAge);
+            level.setBlock(harvestPos, regrowState, 3);
+            syncMultiBlockPartnerFromRoot(level, harvestPos, regrowState);
+
+            CropGrowthManager.CropGrowthState growthState = CropGrowthManager.get(level).getState(level, harvestPos);
+            int[] phaseDays = withHarvestSentinel(applySpeedGroToPhaseDays(
+                    getPhaseDays(), getTotalSpeedBoost(level, harvestPos, growthState)));
+            int lastPhase = Math.max(0, phaseDays.length - 1);
+            CropGrowthManager.get(level).setRegrowing(level, harvestPos, true,
+                    Math.max(1, getRegrowDays()), lastPhase);
+        } else {
+            level.setBlock(harvestPos, getPostHarvestState(level, harvestPos, harvestState), 3);
+        }
+        return harvested;
+    }
+
+    /** Side products routed to a Junimo Hut instead of the world/player silo. */
+    protected void collectJunimoHarvestSideProducts(ServerLevel level, BlockPos pos, BlockState state,
+                                                     RandomSource random, int fertilizerLevel,
+                                                     int farmingLevel, Consumer<ItemStack> output) {
     }
 
     protected HarvestMethod getHarvestMethod() {

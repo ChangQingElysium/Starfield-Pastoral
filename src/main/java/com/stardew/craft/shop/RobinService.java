@@ -36,6 +36,8 @@ public final class RobinService {
                 new CarpenterBlueprint.MaterialEntry("stardewcraft:stone", 100)
             ),
             "stardewcraft:coop_manager",
+            false,
+            16,
             false
         ),
         new CarpenterBlueprint(
@@ -48,6 +50,8 @@ public final class RobinService {
                 new CarpenterBlueprint.MaterialEntry("stardewcraft:stone", 150)
             ),
             "stardewcraft:barn_manager",
+            false,
+            16,
             false
         ),
         new CarpenterBlueprint(
@@ -61,6 +65,8 @@ public final class RobinService {
                 new CarpenterBlueprint.MaterialEntry("stardewcraft:copper_bar", 5)
             ),
             "stardewcraft:silo_manager",
+            false,
+            16,
             false
         ),
         new CarpenterBlueprint(
@@ -74,6 +80,8 @@ public final class RobinService {
                 new CarpenterBlueprint.MaterialEntry("stardewcraft:green_algae", 5)
             ),
             "stardewcraft:fish_pond_manager",
+            false,
+            16,
             false
         )
     );
@@ -123,6 +131,7 @@ public final class RobinService {
     private static void openCarpenterMenu(ServerPlayer player) {
         int money = PlayerStardewDataAPI.getMoney(player);
         OpenCarpenterMenuPayload payload = new OpenCarpenterMenuPayload(
+            "Robin",
             money,
             new ArrayList<>(BLUEPRINTS)
         );

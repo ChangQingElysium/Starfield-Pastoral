@@ -28,6 +28,24 @@ class CutsceneActionManifestTest {
         assertFalse(manifest.authorize(state, 2, "set_cave_choice", "mushrooms"));
     }
 
+    @Test
+    void placePlayerRequiresTheExactAuthoredEndpoint() {
+        EventData event = EventData.fromJson(JsonParser.parseString("""
+                {
+                  "id": "place_player_test",
+                  "trigger": {"type": "manual"},
+                  "commands": [
+                    {"cmd":"place_player","x":50,"y":85,"z":-211,"yaw":-90,"pitch":0}
+                  ]
+                }
+                """).getAsJsonObject());
+        CutsceneActionManifest manifest = CutsceneActionManifest.from(event);
+        var state = manifest.newState();
+
+        assertFalse(manifest.authorize(state, 0, "place_player", "50.0,85.0,-210.0,-90.0,0.0"));
+        assertTrue(manifest.authorize(state, 0, "place_player", "50.0,85.0,-211.0,-90.0,0.0"));
+    }
+
     private static EventData event() {
         return EventData.fromJson(JsonParser.parseString("""
                 {

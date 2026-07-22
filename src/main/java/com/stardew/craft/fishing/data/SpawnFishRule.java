@@ -78,7 +78,11 @@ public record SpawnFishRule(
 		/** SDV {@code SpawnFishData.ChanceModifierMode}: how multiple modifiers combine (Stack/Min/Max). */
 		QuantityModifier.Mode chanceModifierMode,
 		/** SDV {@code SpawnFishData.UseFishCaughtSeededRandom}: use seeded RNG keyed on PreciseFishCaught for first roll. */
-		boolean useFishCaughtSeededRandom
+		boolean useFishCaughtSeededRandom,
+		/** SDV SpawnFishData.ChanceBoostPerLuckLevel. */
+		float chanceBoostPerLuckLevel,
+		/** SDV {@code RandomItemId}: choose one item uniformly after this spawn rule succeeds. */
+		List<String> randomItemIds
 ) {
 	/**
 	 * 检查基础条件（钓鱼等级、水深）
@@ -253,12 +257,16 @@ public record SpawnFishRule(
 		List<QuantityModifier.Entry> chanceModifiers = QuantityModifier.parseList(obj, "chanceModifiers");
 		QuantityModifier.Mode chanceModifierMode = QuantityModifier.parseMode(obj, "chanceModifierMode");
 		boolean useFishCaughtSeededRandom = obj.has("useFishCaughtSeededRandom") && obj.get("useFishCaughtSeededRandom").getAsBoolean();
+		float chanceBoostPerLuckLevel = obj.has("chanceBoostPerLuckLevel")
+				? obj.get("chanceBoostPerLuckLevel").getAsFloat() : 0f;
+		List<String> randomItemIds = parseStringList(obj, "randomItems");
 
 		return new SpawnFishRule(id, precedence, item, chance, difficulty, motion, minFishSize, maxFishSize, minLevel, minDepth, maxDepth,
 				biomes, biomeTags, seasons, weather, timeRanges, skipMinigame,
 				fishAreaId, canBeInherited, requireMagicBait, catchLimit, condition,
 				spawnRate, maxFishDepth, depthMultiplier, applyDailyLuck, curiosityLureBuff, isBossFish,
-				isTutorialFish, ignoreFishDataRequirements, chanceModifiers, chanceModifierMode, useFishCaughtSeededRandom);
+				isTutorialFish, ignoreFishDataRequirements, chanceModifiers, chanceModifierMode,
+				useFishCaughtSeededRandom, chanceBoostPerLuckLevel, randomItemIds);
 	}
 
 	private static List<String> parseStringList(JsonObject obj, String key) {

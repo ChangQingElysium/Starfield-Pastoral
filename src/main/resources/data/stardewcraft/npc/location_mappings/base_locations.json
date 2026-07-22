@@ -30,7 +30,8 @@
     "adventurer_guild",
     "oasis",
     "wizard_tower",
-    "sebastianroom"
+    "sebastianroom",
+    "witchswamp"
   ],
   "aliases": {
     "pierreshop": "seedshop",
@@ -242,11 +243,12 @@
       "indoor_exit_point": "joshhouse_indoor_exit"
     },
     "trailer": {
-      "x": -231.0,
-      "y": -18.0,
-      "z": 20.0,
-      "indoor": false,
-      "use_ground_height": true
+      "indoor": true,
+      "portal_target": "trailer_enter",
+      "use_ground_height": false,
+      "outdoor_door_point": "trailer_outdoor_door",
+      "indoor_entry_point": "trailer_indoor_entry",
+      "indoor_exit_point": "trailer_indoor_exit"
     },
     "leahhouse": {
       "indoor": true,
@@ -263,6 +265,14 @@
       "outdoor_door_point": "wizard_tower_outdoor_door",
       "indoor_entry_point": "wizard_tower_indoor_entry",
       "indoor_exit_point": "wizard_tower_indoor_exit"
+    },
+    "witchswamp": {
+      "x": 51.5,
+      "y": 48.0,
+      "z": -234.5,
+      "indoor": false,
+      "use_ground_height": false,
+      "use_schedule_tile_offset": false
     }
   }
 }

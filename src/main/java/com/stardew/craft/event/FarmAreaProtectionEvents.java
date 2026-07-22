@@ -378,6 +378,9 @@ public class FarmAreaProtectionEvents {
         if (mob.getPersistentData().getBoolean("StardewTrinketParrot")) {
             return;
         }
+        if (com.stardew.craft.world.MutantBugLairService.isLairMonster(mob)) {
+            return;
+        }
         if (!isProtectedNonFarmArea(level, mob.blockPosition())) {
             return;
         }

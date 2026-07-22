@@ -99,10 +99,6 @@ public record OpenNpcDialogueScreenPayload(
             finalDisplayText = com.stardew.craft.shop.DwarfService.convertToDwarvish(finalDisplayText);
         }
 
-        StardewCraft.LOGGER.debug("[NPC_DIALOGUE_CLIENT] key={} resolved(first80)={}",
-            payload.translateKey(),
-            finalDisplayText.length() > 80 ? finalDisplayText.substring(0, 80) : finalDisplayText);
-
         com.stardew.craft.client.gui.common.StardewNpcDialogueScreen screen = new com.stardew.craft.client.gui.common.StardewNpcDialogueScreen(
             payload.npcId(), finalDisplayText, payload.friendshipPoints());
 

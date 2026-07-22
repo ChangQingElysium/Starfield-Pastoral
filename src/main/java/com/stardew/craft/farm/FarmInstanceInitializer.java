@@ -375,8 +375,6 @@ public class FarmInstanceInitializer {
                     totemPos, poleName, com.stardew.craft.block.utility.totem.TotemType.FARM, false));
             pole.initSystemPole(level, poleId, poleName);
         }
-
-        StardewCraft.LOGGER.debug("[FARM_INIT] Placed totem pole at {} (WEST) for {}", totemPos, farm.getOwnerName());
     }
 
     // ══════════════════════════════════════════

@@ -206,11 +206,6 @@ public class StardewNpcEntity extends PathfinderMob implements GeoEntity {
                 if (this.tickCount >= 10
                     && !this.getTags().contains(com.stardew.craft.auction.AuctionService.AUCTION_HOST_TAG)
                     && !com.stardew.craft.npc.runtime.NpcSpawnManager.isOfficialInstance(this)) {
-                    StardewCraft.LOGGER.debug(
-                        "Self-destructing strictly forbidden duplicate StardewNpcEntity id='{}' uuid={}",
-                        getNpcId(),
-                        this.getUUID()
-                    );
                     this.discard();
                     return;
                 }
@@ -490,6 +485,11 @@ public class StardewNpcEntity extends PathfinderMob implements GeoEntity {
     @Override
     public boolean isPushable() {
         return false;
+    }
+
+    @Override
+    public boolean canBeCollidedWith() {
+        return !"henchman".equals(getNpcId()) && super.canBeCollidedWith();
     }
 
     @Override

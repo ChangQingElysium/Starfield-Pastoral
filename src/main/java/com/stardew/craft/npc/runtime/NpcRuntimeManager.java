@@ -38,14 +38,17 @@ public final class NpcRuntimeManager {
         }
     }
 
-    private static Map<String, NpcCapabilityProfile> lastCapabilitiesSnapshot = Map.of();
+    public static void onServerStopped(MinecraftServer server) {
+        SNAPSHOTS.remove(server);
+    }
 
     private static boolean refreshFromData(RuntimeSnapshot snapshot) {
         Map<String, NpcCapabilityProfile> capabilities = NpcDataRegistry.capabilities();
-        if (capabilities == lastCapabilitiesSnapshot && !snapshot.implementedNpcIds.isEmpty()) {
+        if (snapshot.capabilitiesInitialized && capabilities == snapshot.capabilitiesSnapshot) {
             return false;
         }
-        lastCapabilitiesSnapshot = capabilities;
+        snapshot.capabilitiesSnapshot = capabilities;
+        snapshot.capabilitiesInitialized = true;
 
         snapshot.implementedNpcIds.clear();
         snapshot.pathingNpcIds.clear();
@@ -84,6 +87,8 @@ public final class NpcRuntimeManager {
     private static final class RuntimeSnapshot {
         private final Set<String> implementedNpcIds = ConcurrentHashMap.newKeySet();
         private final Set<String> pathingNpcIds = ConcurrentHashMap.newKeySet();
+        private Map<String, NpcCapabilityProfile> capabilitiesSnapshot = Map.of();
+        private boolean capabilitiesInitialized;
         private boolean syncedRuntimeState;
         private boolean loggedOnce;
     }

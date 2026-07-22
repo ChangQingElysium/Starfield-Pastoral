@@ -1159,6 +1159,18 @@ public class PacketHandler {
         );
 
         registrar.playToClient(
+            com.stardew.craft.network.payload.OpenGoldClockQuestionPayload.TYPE,
+            com.stardew.craft.network.payload.OpenGoldClockQuestionPayload.STREAM_CODEC,
+            com.stardew.craft.network.payload.OpenGoldClockQuestionPayload::handle
+        );
+
+        registrar.playToServer(
+            com.stardew.craft.network.payload.GoldClockQuestionResponsePayload.TYPE,
+            com.stardew.craft.network.payload.GoldClockQuestionResponsePayload.STREAM_CODEC,
+            com.stardew.craft.network.payload.GoldClockQuestionResponsePayload::handle
+        );
+
+        registrar.playToClient(
             com.stardew.craft.network.payload.PlaySecretNote21BushEventPayload.TYPE,
             com.stardew.craft.network.payload.PlaySecretNote21BushEventPayload.STREAM_CODEC,
             com.stardew.craft.network.payload.PlaySecretNote21BushEventPayload::handle
@@ -2056,27 +2068,6 @@ public class PacketHandler {
         );
 
         // ── Warp Wand ────────────────────────────────────────
-        registrar.playToClient(
-            com.stardew.craft.network.payload.WarpWandSyncPayload.TYPE,
-            com.stardew.craft.network.payload.WarpWandSyncPayload.STREAM_CODEC,
-            com.stardew.craft.network.payload.WarpWandSyncPayload::handle
-        );
-        registrar.playToClient(
-            com.stardew.craft.network.payload.OpenWarpWheelPayload.TYPE,
-            com.stardew.craft.network.payload.OpenWarpWheelPayload.STREAM_CODEC,
-            com.stardew.craft.network.payload.OpenWarpWheelPayload::handle
-        );
-        registrar.playToServer(
-            com.stardew.craft.network.payload.WarpWandTeleportPayload.TYPE,
-            com.stardew.craft.network.payload.WarpWandTeleportPayload.STREAM_CODEC,
-            com.stardew.craft.network.payload.WarpWandTeleportPayload::handle
-        );
-        registrar.playToServer(
-            com.stardew.craft.network.payload.WarpWandUnlockPayload.TYPE,
-            com.stardew.craft.network.payload.WarpWandUnlockPayload.STREAM_CODEC,
-            com.stardew.craft.network.payload.WarpWandUnlockPayload::handle
-        );
-
         // ── Data Registry Sync (Artisan / Preserves / Fishing / NPC Events) ──
         registrar.playToClient(
             DataRegistrySyncPayload.TYPE,

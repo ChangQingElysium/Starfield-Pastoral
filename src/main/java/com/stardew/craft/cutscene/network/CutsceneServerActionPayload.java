@@ -74,19 +74,16 @@ public record CutsceneServerActionPayload(
                 case "add_quest" -> {
                     QuestManager mgr = QuestManager.of(player);
                     mgr.acceptQuest(payload.value, player);
-                    LOGGER.debug("Cutscene added quest {} for {}", payload.value, player.getName().getString());
                 }
                 case "remove_quest" -> {
                     QuestManager mgr = QuestManager.of(player);
                     if (mgr != null) {
                         mgr.removeQuest(payload.value, player);
                     }
-                    LOGGER.debug("Cutscene removed quest {} for {}", payload.value, player.getName().getString());
                 }
                 case "set_flag" -> {
                     PlayerStardewData data = PlayerDataManager.getPlayerData(player);
                     data.addMailFlag(payload.value);
-                    LOGGER.debug("Cutscene set flag '{}' for {}", payload.value, player.getName().getString());
                     com.stardew.craft.player.PlayerDataEventHandler.syncPlayerData(player, data);
                     // canReadJunimoText 影响 bundle 界面渲染，需同步到客户端
                     if ("canReadJunimoText".equals(payload.value)) {
@@ -104,25 +101,19 @@ public record CutsceneServerActionPayload(
                 }
                 case "grant_rusty_key" -> {
                     com.stardew.craft.sewer.SewerService.grantRustyKey(player, false);
-                    LOGGER.debug("Cutscene granted Rusty Key to {}", player.getName().getString());
                 }
                 case "grant_magnifying_glass" -> {
                     com.stardew.craft.secretnote.SecretNoteService.grantMagnifyingGlass(player);
-                    LOGGER.debug("Cutscene granted Magnifying Glass to {}", player.getName().getString());
                 }
                 case "grant_bear_knowledge" -> {
                     com.stardew.craft.secretnote.SecretNote23Service.grantBearKnowledge(player);
-                    LOGGER.debug("Cutscene granted Bear's Knowledge to {}", player.getName().getString());
                 }
                 case "mark_opened_sewer" -> {
                     com.stardew.craft.sewer.SewerService.markOpenedSewer(player);
-                    LOGGER.debug("Cutscene marked sewer opened for {}", player.getName().getString());
                 }
                 case "add_recipe" -> {
                     PlayerStardewData data = PlayerDataManager.getPlayerData(player);
                     if (data.unlockRecipe(payload.value)) {
-                        LOGGER.debug("Cutscene unlocked recipe '{}' for {}",
-                                payload.value, player.getName().getString());
                         // markDirty() only flags save; we must push to the client
                         // so JEI / crafting UIs see the new recipe immediately.
                         com.stardew.craft.player.PlayerDataEventHandler.syncPlayerData(player, data);
@@ -132,18 +123,14 @@ public record CutsceneServerActionPayload(
                     com.stardew.craft.mail.MailService.addMail(player, payload.value);
                     PlayerStardewData data = PlayerDataManager.getPlayerData(player);
                     com.stardew.craft.player.PlayerDataEventHandler.syncPlayerData(player, data);
-                    LOGGER.debug("Cutscene added mail '{}' for {}", payload.value, player.getName().getString());
                 }
                 case "add_mail_for_tomorrow" -> {
                     com.stardew.craft.mail.MailService.addMailForTomorrow(player, payload.value);
                     PlayerStardewData data = PlayerDataManager.getPlayerData(player);
                     com.stardew.craft.player.PlayerDataEventHandler.syncPlayerData(player, data);
-                    LOGGER.debug("Cutscene queued mail '{}' for tomorrow for {}", payload.value, player.getName().getString());
                 }
                 case "apply_unlock_source" -> {
-                    boolean changed = com.stardew.craft.player.PlayerStardewDataAPI.applyUnlockSource(player, payload.value);
-                    LOGGER.debug("Cutscene applied unlock source '{}' for {} changed={}",
-                            payload.value, player.getName().getString(), changed);
+                    com.stardew.craft.player.PlayerStardewDataAPI.applyUnlockSource(player, payload.value);
                 }
                 case "set_cave_choice" -> {
                     com.stardew.craft.farm.FarmCaveChoice choice =
@@ -153,9 +140,6 @@ public record CutsceneServerActionPayload(
                     } else if (!com.stardew.craft.farm.FarmCaveAPI.setCaveChoice(player, choice)) {
                         LOGGER.warn("Cutscene set_cave_choice failed for {} (no farm or not owner)",
                                 player.getName().getString());
-                    } else {
-                        LOGGER.debug("Cutscene set cave choice '{}' for {}",
-                                choice.getName(), player.getName().getString());
                     }
                 }
                 case "door" -> {
@@ -175,8 +159,6 @@ public record CutsceneServerActionPayload(
                         state.addPoints(points, com.stardew.craft.npc.runtime.NpcInteractionService.getMaxFriendshipPointsFor(npcId));
                         fm.setDirty();
                         com.stardew.craft.npc.runtime.NpcFriendshipRewardService.applyEligibleRewards(player, npcId, state.points());
-                        LOGGER.debug("Cutscene added {} friendship to {} for {}", points, npcId,
-                                player.getName().getString());
                     }
                 }
                 case "add_item" -> {
@@ -193,8 +175,6 @@ public record CutsceneServerActionPayload(
                                 if (!player.getInventory().add(stack)) {
                                     player.drop(stack, false);
                                 }
-                                LOGGER.debug("Cutscene gave {}x{} to {}", count, rl,
-                                        player.getName().getString());
                             }
                         } catch (Exception e) {
                             LOGGER.warn("Cutscene add_item failed: {}", e.getMessage());
@@ -210,12 +190,9 @@ public record CutsceneServerActionPayload(
                             var rl = ResourceLocation.parse(parts[0]);
                             int count = Integer.parseInt(parts[1]);
                             var item = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(rl);
-                            if (item != net.minecraft.world.item.Items.AIR
-                                    && player.getInventory().countItem(item) >= count
-                                    && removeItems(player, item, count)) {
-                                LOGGER.debug("Cutscene removed {}x{} from {}", count, rl,
-                                        player.getName().getString());
-                            } else {
+                            if (item == net.minecraft.world.item.Items.AIR
+                                    || player.getInventory().countItem(item) < count
+                                    || !removeItems(player, item, count)) {
                                 LOGGER.warn("Cutscene remove_item skipped: {} lacks {}x{}",
                                         player.getName().getString(), count, rl);
                             }
@@ -240,31 +217,25 @@ public record CutsceneServerActionPayload(
                     } catch (Exception e) {
                         LOGGER.warn("Failed to send cc_interior anchor: {}", e.getMessage());
                     }
-                    LOGGER.debug("Cutscene teleported {} to CC interior", player.getName().getString());
                 }
+                case "place_player" -> placePlayer(player, payload.value);
                 case "egg_festival_award_complete" -> {
                     com.stardew.craft.cutscene.server.ServerCutsceneTracker.markServerMovedPlayer(player);
                     com.stardew.craft.festival.EggFestivalService.onCutsceneCompleted(player, "egg_festival_award");
-                    LOGGER.debug("Cutscene completed Egg Festival award for {}", player.getName().getString());
                 }
                 case "egg_festival_blackout" -> {
                     com.stardew.craft.cutscene.server.ServerCutsceneTracker.markServerMovedPlayer(player);
                     com.stardew.craft.festival.EggFestivalService.onCutsceneBlackout(player, payload.value);
-                    LOGGER.debug("Cutscene prepared Egg Festival {} stage for {}", payload.value, player.getName().getString());
                 }
                 case "flower_dance_stage" -> {
                     com.stardew.craft.cutscene.server.ServerCutsceneTracker.markServerMovedPlayer(player);
                     com.stardew.craft.festival.FlowerDanceService.onCutsceneStage(player, payload.value);
-                    LOGGER.debug("Cutscene prepared Flower Dance {} stage for {}", payload.value, player.getName().getString());
                 }
                 case "moonlight_jellies_stage" -> {
                     com.stardew.craft.festival.MoonlightJelliesFestivalService.onCutsceneStage(player, payload.value);
-                    LOGGER.debug("Cutscene prepared Moonlight Jellies {} stage for {}", payload.value, player.getName().getString());
                 }
                 case "winter_star_open_gift" -> {
                     com.stardew.craft.festival.WinterStarFestivalService.claimReturnGiftDuringCutscene(player);
-                    LOGGER.debug("Cutscene revealed Winter Star return gift for {}",
-                            player.getName().getString());
                 }
                 default -> LOGGER.warn("Unknown cutscene server action: {}", payload.action);
             }
@@ -288,6 +259,25 @@ public record CutsceneServerActionPayload(
         }
         player.inventoryMenu.broadcastChanges();
         return remaining == 0;
+    }
+
+    private static void placePlayer(ServerPlayer player, String value) {
+        String[] parts = value.split(",", 5);
+        if (parts.length != 5) {
+            LOGGER.warn("Cutscene place_player has invalid payload '{}'", value);
+            return;
+        }
+        try {
+            double x = Double.parseDouble(parts[0]);
+            double y = Double.parseDouble(parts[1]);
+            double z = Double.parseDouble(parts[2]);
+            float yaw = Float.parseFloat(parts[3]);
+            float pitch = Float.parseFloat(parts[4]);
+            com.stardew.craft.cutscene.server.ServerCutsceneTracker.markServerMovedPlayer(player);
+            com.stardew.craft.warp.ModTeleport.to(player, player.serverLevel(), x, y, z, yaw, pitch);
+        } catch (NumberFormatException e) {
+            LOGGER.warn("Cutscene place_player has invalid numbers '{}': {}", value, e.getMessage());
+        }
     }
 
     private static void setDoorOpen(ServerPlayer player, String value) {
@@ -325,8 +315,6 @@ public record CutsceneServerActionPayload(
             if (state.getValue(DoorBlock.OPEN) != open) {
                 door.setOpen(player, player.level(), state, pos, open);
             }
-            LOGGER.debug("Cutscene set door {} open={} for {}", pos.toShortString(), open,
-                    player.getName().getString());
         } catch (Exception e) {
             LOGGER.warn("Cutscene door action failed: {}", e.getMessage());
         }

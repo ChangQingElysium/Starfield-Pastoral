@@ -1,6 +1,5 @@
 package com.stardew.craft.fishing.splash;
 
-import com.stardew.craft.StardewCraft;
 import com.stardew.craft.core.ModDimensions;
 import com.stardew.craft.fishing.WaterFeatureSpawnRules;
 import com.stardew.craft.fishing.data.FishingDataManager;
@@ -94,7 +93,6 @@ public final class FishSplashTicker {
 			if (chosen != null) {
 				state.put(key, new FishSplashState.Entry(chosen, nowMin));
 				FishSplashState.broadcastChange(stardew, key, chosen);
-				StardewCraft.LOGGER.debug("[SPLASH] generated splash for {} at {}", key, chosen);
 			}
 		}
 	}
@@ -125,7 +123,6 @@ public final class FishSplashTicker {
 		for (String key : toRemove) {
 			state.remove(key);
 			FishSplashState.broadcastChange(stardew, key, null);
-			StardewCraft.LOGGER.debug("[SPLASH] expired splash for {}", key);
 		}
 	}
 

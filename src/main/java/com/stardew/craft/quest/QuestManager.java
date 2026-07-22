@@ -62,7 +62,6 @@ public class QuestManager {
                                     "[Quest] Availability condition failed for {}: {}", quest.getDefinitionId(), message))
                             .orElse(false);
                     if (!allowed) {
-                        StardewCraft.LOGGER.debug("[Quest] Definition {} is not currently available", quest.getDefinitionId());
                         return;
                     }
                 }
@@ -362,7 +361,6 @@ public class QuestManager {
         // 此时不应发布任何故事任务，等正式进入维度后再触发。
         PlayerStardewData pData = PlayerDataManager.getPlayerData(player);
         if (!pData.isWizardQuestComplete()) {
-            StardewCraft.LOGGER.debug("[Quest] Skipping story quests — wizard quest not yet complete");
             return;
         }
 

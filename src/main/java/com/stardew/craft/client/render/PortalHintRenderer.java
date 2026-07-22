@@ -417,6 +417,12 @@ public final class PortalHintRenderer {
     }
 
     private static HintStyle styleForTarget(String targetId, boolean isEnter) {
+        if (com.stardew.craft.world.MutantBugLairService.ENTRANCE_TARGET_ID.equals(targetId)) {
+            return com.stardew.craft.client.ClientPlayerDataCache.hasMailFlag(
+                    com.stardew.craft.sewer.SewerStoryFlags.KROBUS_UNSEAL)
+                    ? HintStyle.ENTER
+                    : HintStyle.LOCKED;
+        }
         if ("quarry_entrance".equals(targetId)) {
             return com.stardew.craft.client.ClientPlayerDataCache.hasMailFlag(
                     com.stardew.craft.communitycenter.state.CCStoryFlags.CC_CRAFTS_ROOM)
@@ -525,6 +531,8 @@ public final class PortalHintRenderer {
             case FairFestivalService.FORTUNE_TELLER_TARGET_ID -> "fair_fortune_teller";
             case "quarry_entrance", "quarry_exit" -> "quarry";
             case "sewer_enter" -> "sewer";
+            case "mutant_bug_lair_enter", "mutant_bug_lair_exit" -> "mutant_bug_lair";
+            case "witch_hut_enter", "witch_hut_exit" -> "witch_hut";
             case "sewer_exit" -> "pelican_town";
             case "greenhouse_enter", "greenhouse_exit" -> "greenhouse";
             case "farm_cave_enter", "farm_cave_exit" -> "farm_cave";

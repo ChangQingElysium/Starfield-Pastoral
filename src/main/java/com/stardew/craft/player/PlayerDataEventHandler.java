@@ -13,6 +13,7 @@ import com.stardew.craft.mining.MiningDataManager;
 import com.stardew.craft.mining.MiningPlayerData;
 import com.stardew.craft.network.PlayerDataSyncPacket;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -154,6 +155,7 @@ public class PlayerDataEventHandler {
             // 如果玩家登录时已在星露谷维度，复用维度进入时的分帧初始化队列。
             // （PlayerChangedDimensionEvent 在这种情况下不会触发）
             if (player.serverLevel().dimension() == com.stardew.craft.core.ModDimensions.STARDEW_VALLEY) {
+                com.stardew.craft.farm.FarmChunkManager.get().reconcilePlayerOccupancy(player);
                 com.stardew.craft.event.DimensionEventHandler.scheduleDeferredInit(player.serverLevel());
             }
 
@@ -257,6 +259,8 @@ public class PlayerDataEventHandler {
     @SubscribeEvent
     public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
+            com.stardew.craft.farm.FarmChunkManager.get()
+                    .onPlayerLogout(player.serverLevel(), player);
             // Settle cursor-held shop purchases before the player inventory is saved.
             com.stardew.craft.network.payload.ShopPickupPayload.deliverAllPending(player);
 
@@ -290,28 +294,6 @@ public class PlayerDataEventHandler {
             // Let active festivals clear only per-connection state; durable same-day choices
             // such as Flower Dance partners must survive reconnect.
             com.stardew.craft.festival.ActiveFestivalHandlers.onPlayerLogout(player);
-
-            // 多人农场：更新最后在线天数 + 卸载农场区块
-            {
-                com.stardew.craft.farm.FarmInstanceRegistry registry =
-                        com.stardew.craft.farm.FarmInstanceRegistry.get();
-                com.stardew.craft.farm.FarmInstance farm = registry.getFarmForPlayer(player.getUUID());
-                if (farm != null) {
-                    int absDay = com.stardew.craft.farm.OfflineFarmCatchUp.computeAbsoluteDay();
-                    com.stardew.craft.time.StardewTimeManager tm = com.stardew.craft.time.StardewTimeManager.get();
-                    farm.setLastOnlineDay(absDay);
-                    farm.setLastOnlineSeason(tm.getCurrentSeason());
-                    registry.setDirty();
-
-                    // 通知 FarmChunkManager 玩家离开农场
-                    net.minecraft.server.level.ServerLevel stardewLevel =
-                            player.server.getLevel(com.stardew.craft.core.ModDimensions.STARDEW_VALLEY);
-                    if (stardewLevel != null) {
-                        com.stardew.craft.farm.FarmChunkManager.get().onPlayerLeaveFarm(
-                                stardewLevel, player, farm);
-                    }
-                }
-            }
 
             // 睡眠投票：玩家登出后如果剩余人全部已投票，推进日期
             if (com.stardew.craft.event.SleepVoteTracker.hasAnyVotes()) {
@@ -852,6 +834,13 @@ public class PlayerDataEventHandler {
             StardewCraft.LOGGER.info("Server stopping, saved all player data");
         } catch (Exception e) {
             StardewCraft.LOGGER.error("Error saving player data on server stop", e);
+        }
+
+        ServerLevel stardewLevel = event.getServer().getLevel(ModDimensions.STARDEW_VALLEY);
+        try {
+            com.stardew.craft.farm.FarmChunkManager.get().onServerStopping(stardewLevel);
+        } catch (RuntimeException exception) {
+            StardewCraft.LOGGER.error("Error releasing temporary farm chunks on server stop", exception);
         }
 
         // 释放服务端静态缓存，防止内存泄漏

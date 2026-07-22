@@ -14,11 +14,9 @@ import com.stardew.craft.mining.MineRewardClaimManager;
 import com.stardew.craft.mining.MiningDataManager;
 import com.stardew.craft.network.payload.FarmPermSyncPayload;
 import com.stardew.craft.network.payload.SyncNpcFriendshipOverviewPayload;
-import com.stardew.craft.network.payload.WarpWandSyncPayload;
 import com.stardew.craft.npc.runtime.NpcFriendshipDataManager;
 import com.stardew.craft.player.*;
 import com.stardew.craft.time.StardewTimeManager;
-import com.stardew.craft.warp.WarpWandSavedData;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.nbt.CompoundTag;
@@ -27,7 +25,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -952,37 +949,29 @@ public class PlayerDataCommand {
         // 5. 矿井进度
         try { MiningDataManager.clearPlayerData(player); cleared++; } catch (Exception ignored) {}
 
-        // 6. 传送魔杖解锁
-        try { WarpWandSavedData.get().clearPlayer(uuid); cleared++; } catch (Exception ignored) {}
-
-        // 7. 农场权限
+        // 6. 农场权限
         try { FarmPermissionManager.get().clearAllForOwner(uuid); cleared++; } catch (Exception ignored) {}
 
-        // 8. 农场实例
+        // 7. 农场实例
         try { FarmInstanceRegistry.get().deleteFarm(uuid); cleared++; } catch (Exception ignored) {}
 
-        // 9. 玩家 persistentData 中的模组标签
+        // 8. 玩家 persistentData 中的模组标签
         int tagCount = clearModPersistentTags(player);
 
-        // 10. 同步到客户端
+        // 9. 同步到客户端
         syncPlayerData(player, freshData);
 
-        // 11. 同步事件已看数据（清空后）到客户端，否则客户端缓存仍认为剧情已看过
+        // 10. 同步事件已看数据（清空后）到客户端，否则客户端缓存仍认为剧情已看过
         try {
             PacketDistributor.sendToPlayer(player, new SyncEventSeenPayload(List.of()));
         } catch (Exception ignored) {}
 
-        // 12. 同步传送魔杖解锁（清空后）到客户端
-        try {
-            PacketDistributor.sendToPlayer(player, new WarpWandSyncPayload(new HashSet<>()));
-        } catch (Exception ignored) {}
-
-        // 13. 同步 NPC 好感度（清空后）到客户端
+        // 11. 同步 NPC 好感度（清空后）到客户端
         try {
             PacketDistributor.sendToPlayer(player, new SyncNpcFriendshipOverviewPayload(List.of()));
         } catch (Exception ignored) {}
 
-        // 14. 同步农场权限（清空后）到客户端
+        // 12. 同步农场权限（清空后）到客户端
         try {
             FarmPermSyncPayload.sendToPlayer(player);
         } catch (Exception ignored) {}

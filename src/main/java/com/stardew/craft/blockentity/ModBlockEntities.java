@@ -288,6 +288,12 @@ public final class ModBlockEntities {
 			BLOCK_ENTITIES.register("junimo_hut_decor", () -> BlockEntityType.Builder.of(JunimoHutDecorBlockEntity::new, ModBlocks.JUNIMO_HUT_DECOR.get()).build(null));
 
 	@SuppressWarnings("null")
+	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<WizardBuildingBlockEntity>> WIZARD_BUILDING =
+			BLOCK_ENTITIES.register("wizard_building", () -> BlockEntityType.Builder.of(WizardBuildingBlockEntity::new,
+					ModBlocks.JUNIMO_HUT.get(), ModBlocks.EARTH_OBELISK.get(), ModBlocks.WATER_OBELISK.get(),
+					ModBlocks.DESERT_OBELISK.get(), ModBlocks.ISLAND_OBELISK.get(), ModBlocks.GOLD_CLOCK.get()).build(null));
+
+	@SuppressWarnings("null")
 	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<com.stardew.craft.blockentity.GiantCropBlockEntity>> GIANT_CROP =
 			BLOCK_ENTITIES.register("giant_crop", () -> BlockEntityType.Builder.of(
 					com.stardew.craft.blockentity.GiantCropBlockEntity::new,
@@ -362,6 +368,11 @@ public final class ModBlockEntities {
 	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<UncertaintyStatueBlockEntity>> UNCERTAINTY_STATUE =
 			BLOCK_ENTITIES.register("uncertainty_statue", () -> BlockEntityType.Builder.of(UncertaintyStatueBlockEntity::new,
 				ModBlocks.UNCERTAINTY_STATUE.get()).build(null));
+
+	@SuppressWarnings("null")
+	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<WizardBuildingCatalogBlockEntity>> WIZARD_BUILDING_CATALOG =
+			BLOCK_ENTITIES.register("wizard_building_catalog", () -> BlockEntityType.Builder.of(
+				WizardBuildingCatalogBlockEntity::new, ModBlocks.WIZARD_BUILDING_CATALOG.get()).build(null));
 
 	@SuppressWarnings("null")
 	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MineChestBlockEntity>> MINE_CHEST =

@@ -217,7 +217,7 @@ public class PlayerStardewData {
     private boolean wizardQuestComplete;          // 末影之眼已交付，星露谷入口已解锁
     private boolean wizardFirstMet;               // 是否已经看过巫师的初次剧情
     private boolean starterToolsGiven;            // 是否已给予新手工具六件套
-    private boolean bilibiliRewardClaimed;          // 是否已领取B站关注奖励（彩虹猫之刃）
+    private boolean joinAnnouncementDismissed;    // 是否已永久关闭登录公告
     private boolean mine100StardropCompensationProcessed; // 100层旧奖励修正补偿是否已处理
     private int handledPregenRelocationVersion;   // 已处理的 pregen 升级回农场版本
     private int lastGotDesertFestivalRatingPrizeFromMarlon = Integer.MIN_VALUE;
@@ -698,7 +698,7 @@ public class PlayerStardewData {
         data.wizardQuestComplete = tag.getBoolean("WizardQuestComplete");
         data.wizardFirstMet = tag.getBoolean("WizardFirstMet");
         data.starterToolsGiven = tag.getBoolean("StarterToolsGiven");
-        data.bilibiliRewardClaimed = tag.getBoolean("BilibiliRewardClaimed");
+        data.joinAnnouncementDismissed = tag.getBoolean("JoinAnnouncementDismissed");
         data.mine100StardropCompensationProcessed = tag.getBoolean("Mine100StardropCompensationProcessed");
         data.handledPregenRelocationVersion = tag.contains("HandledPregenRelocationVersion") ? tag.getInt("HandledPregenRelocationVersion") : 0;
         data.lastGotDesertFestivalRatingPrizeFromMarlon = tag.contains("LastGotDesertFestivalRatingPrizeFromMarlon")
@@ -1107,7 +1107,7 @@ public class PlayerStardewData {
         tag.putBoolean("WizardQuestComplete", wizardQuestComplete);
         tag.putBoolean("WizardFirstMet", wizardFirstMet);
         tag.putBoolean("StarterToolsGiven", starterToolsGiven);
-        tag.putBoolean("BilibiliRewardClaimed", bilibiliRewardClaimed);
+        tag.putBoolean("JoinAnnouncementDismissed", joinAnnouncementDismissed);
         tag.putBoolean("Mine100StardropCompensationProcessed", mine100StardropCompensationProcessed);
         tag.putInt("HandledPregenRelocationVersion", handledPregenRelocationVersion);
         tag.putInt("LastGotDesertFestivalRatingPrizeFromMarlon", lastGotDesertFestivalRatingPrizeFromMarlon);
@@ -2624,8 +2624,11 @@ public class PlayerStardewData {
     public void setWizardSourceDimension(@Nullable ResourceKey<Level> dim) { this.wizardSourceDimension = dim; markDirty(); }
     public boolean isStarterToolsGiven() { return starterToolsGiven; }
     public void setStarterToolsGiven(boolean given) { this.starterToolsGiven = given; markDirty(); }
-    public boolean isBilibiliRewardClaimed() { return bilibiliRewardClaimed; }
-    public void setBilibiliRewardClaimed(boolean claimed) { this.bilibiliRewardClaimed = claimed; markDirty(); }
+    public boolean isJoinAnnouncementDismissed() { return joinAnnouncementDismissed; }
+    public void setJoinAnnouncementDismissed(boolean dismissed) {
+        this.joinAnnouncementDismissed = dismissed;
+        markDirty();
+    }
 
     public int getLastGotDesertFestivalRatingPrizeFromMarlon() { return lastGotDesertFestivalRatingPrizeFromMarlon; }
     public void setLastGotDesertFestivalRatingPrizeFromMarlon(int absoluteDay) {

@@ -1,6 +1,7 @@
 package com.stardew.craft.client.renderer.entity;
 
 import com.stardew.craft.client.model.entity.NpcGeoModel;
+import com.stardew.craft.client.ClientPlayerDataCache;
 import com.stardew.craft.client.renderer.entity.indicator.NpcOverheadIndicator;
 import com.stardew.craft.client.renderer.entity.indicator.NpcOverheadIndicatorRegistry;
 import com.stardew.craft.entity.npc.StardewNpcEntity;
@@ -27,7 +28,7 @@ public class NpcGeoRenderer extends GeoEntityRenderer<StardewNpcEntity> {
     @Override
     public boolean shouldRender(StardewNpcEntity entity, Frustum camera, double camX, double camY, double camZ) {
         String npcId = entity.getNpcId();
-        if (npcId != null && ClientNpcVisibilityState.isHidden(npcId)) {
+        if (isHiddenForLocalPlayer(npcId)) {
             return false;
         }
         return super.shouldRender(entity, camera, camX, camY, camZ);
@@ -42,11 +43,17 @@ public class NpcGeoRenderer extends GeoEntityRenderer<StardewNpcEntity> {
                        int packedLight) {
         // Per-player cutscene visibility: skip rendering if hidden for this client
         String npcId = entity.getNpcId();
-        if (npcId != null && ClientNpcVisibilityState.isHidden(npcId)) {
+        if (isHiddenForLocalPlayer(npcId)) {
             return;
         }
         super.render(entity, entityYaw, partialTick, poseStack, bufferSource, packedLight);
         renderOverheadIndicator(entity, poseStack, bufferSource, packedLight);
+    }
+
+    private static boolean isHiddenForLocalPlayer(String npcId) {
+        return npcId != null && (ClientNpcVisibilityState.isHidden(npcId)
+                || ("henchman".equalsIgnoreCase(npcId)
+                && ClientPlayerDataCache.hasMailFlag("henchmanGone")));
     }
 
     private void renderOverheadIndicator(StardewNpcEntity entity,

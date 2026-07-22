@@ -2,6 +2,7 @@ package com.stardew.craft.farm;
 
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.core.ModGameRules;
+import com.stardew.craft.time.StardewTimeManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -289,6 +290,13 @@ public class FarmInstanceRegistry extends SavedData {
      * 为玩家创建新农场实例。如果已有农场则返回现有的。
      */
     public FarmInstance createFarm(UUID playerUUID, String playerName, String farmName, FarmType farmType) {
+        StardewTimeManager timeManager = StardewTimeManager.get();
+        return createFarmAtDate(playerUUID, playerName, farmName, farmType,
+                timeManager.getAbsoluteDay(), timeManager.getCurrentSeason());
+    }
+
+    FarmInstance createFarmAtDate(UUID playerUUID, String playerName, String farmName, FarmType farmType,
+                                  int absoluteDay, int season) {
         if (instances.containsKey(playerUUID)) {
             StardewCraft.LOGGER.warn("[FARM_REGISTRY] Player {} already has a farm, returning existing", playerUUID);
             return instances.get(playerUUID);
@@ -297,6 +305,8 @@ public class FarmInstanceRegistry extends SavedData {
         int slotIndex = recycledSlots.isEmpty() ? nextSlotIndex++ : recycledSlots.poll();
         BlockPos origin = FarmInstanceAllocator.getFarmOrigin(slotIndex, farmType);
         FarmInstance instance = new FarmInstance(playerUUID, playerName, farmName, slotIndex, origin, farmType);
+        instance.setLastOnlineDay(absoluteDay);
+        instance.setLastOnlineSeason(season);
 
         instances.put(playerUUID, instance);
         slotToOwner.put(slotIndex, playerUUID);

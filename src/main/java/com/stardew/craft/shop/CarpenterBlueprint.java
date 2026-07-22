@@ -15,7 +15,9 @@ public record CarpenterBlueprint(
     int cost,
     List<MaterialEntry> materials,
     String resultItemId,
-    boolean isUpgrade
+    boolean isUpgrade,
+    int previewCanvasSize,
+    boolean magicalConstruction
 ) {
     public Component displayName() {
         return Component.translatable(displayNameKey);

@@ -8,6 +8,8 @@ import com.stardew.craft.cutscene.network.SyncEventSeenPayload;
 import com.stardew.craft.cutscene.runtime.EventPlayer;
 import com.stardew.craft.cutscene.runtime.EventTriggerChecker;
 import com.stardew.craft.cutscene.server.EventSeenData;
+import com.stardew.craft.server.performance.PerformanceTiming;
+import com.stardew.craft.server.performance.ServerPerformanceRecorder;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -58,6 +60,15 @@ public final class CutsceneSystem {
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
         if (!(event.getEntity() instanceof ServerPlayer player) || player.tickCount % 10 != 0) return;
+        long startedAt = ServerPerformanceRecorder.startTiming();
+        try {
+            scanTriggers(player);
+        } finally {
+            ServerPerformanceRecorder.finishTiming(PerformanceTiming.CUTSCENE_TRIGGER_SCAN, startedAt);
+        }
+    }
+
+    private static void scanTriggers(ServerPlayer player) {
         EventSeenData seen = EventSeenData.get(player.serverLevel());
         for (var cutscene : EventRegistry.all()) {
             String rawType = cutscene.trigger().type();

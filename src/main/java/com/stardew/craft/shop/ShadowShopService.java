@@ -48,6 +48,7 @@ public final class ShadowShopService {
         questManager.removeQuest(DARK_TALISMAN_QUEST_ID, player);
         data.addMailFlag(SewerStoryFlags.KROBUS_UNSEAL);
         PlayerDataEventHandler.syncPlayerData(player, data);
+        com.stardew.craft.sewer.KrobusUnsealEffectService.armAfterDialogueEffect(player);
 
         krobus.facePlayerTemporarily(player, 60, () -> PacketDistributor.sendToPlayer(player,
             new OpenNpcDialogueScreenPayload("krobus", DARK_TALISMAN_DIALOGUE, 0)));

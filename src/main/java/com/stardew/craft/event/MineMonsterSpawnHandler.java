@@ -26,6 +26,8 @@ import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
+import java.util.function.Consumer;
+
 /**
  * 矿井怪物刷怪事件处理器
  *
@@ -103,6 +105,13 @@ public class MineMonsterSpawnHandler {
     }
 
     public static Mob spawnConfiguredMonster(ServerLevel level, String monsterId, Vec3 position, float yaw, int floor) {
+        return spawnConfiguredMonster(level, monsterId, position, yaw, floor, ignored -> {
+        });
+    }
+
+    /** Configures caller-owned marker tags before EntityJoinLevelEvent filters inspect the mob. */
+    public static Mob spawnConfiguredMonster(ServerLevel level, String monsterId, Vec3 position, float yaw, int floor,
+                                             Consumer<Mob> configureBeforeSpawn) {
         if (level == null || monsterId == null || monsterId.isBlank() || position == null) {
             return null;
         }
@@ -121,6 +130,9 @@ public class MineMonsterSpawnHandler {
         mob.moveTo(position.x, position.y, position.z, yaw, 0.0F);
         if (!applySummonProfile(mob, normalizedId, floor)) {
             return null;
+        }
+        if (configureBeforeSpawn != null) {
+            configureBeforeSpawn.accept(mob);
         }
         if (!level.addFreshEntity(mob)) {
             return null;
@@ -650,6 +662,22 @@ public class MineMonsterSpawnHandler {
             speedAttr.removeModifier(MOD_SPEED);
             speedAttr.addPermanentModifier(new AttributeModifier(
                     MOD_SPEED, diff, AttributeModifier.Operation.ADD_VALUE));
+        }
+    }
+
+    /** Applies the original hard-mode BugLand values after using the shared monster factory. */
+    public static void applyMutantBugLairProfile(Mob mob, String monsterId) {
+        if (mob == null || monsterId == null) {
+            return;
+        }
+        if ("grub".equals(monsterId)) {
+            mob.addTag("sd_mob_mutant_grub");
+            setStats(mob, 100, 12, 0, 0.15);
+            setSDVName(mob, "Mutant Grub");
+        } else if ("fly".equals(monsterId)) {
+            mob.addTag("sd_mob_mutant_fly");
+            setStats(mob, 66, 12, 0, 0.30);
+            setSDVName(mob, "Mutant Fly");
         }
     }
 

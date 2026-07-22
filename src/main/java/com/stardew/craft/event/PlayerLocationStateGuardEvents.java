@@ -52,9 +52,15 @@ public final class PlayerLocationStateGuardEvents {
             return;
         }
 
-        player.server.tell(new net.minecraft.server.TickTask(
-            player.server.getTickCount() + 1,
-            () -> reconcileLocationState(player, true)));
+        var server = player.server;
+        UUID playerId = player.getUUID();
+        server.tell(new net.minecraft.server.TickTask(
+            server.getTickCount() + 1,
+            () -> {
+                if (server.getPlayerList().getPlayer(playerId) == player) {
+                    reconcileLocationState(player, true);
+                }
+            }));
     }
 
     @SubscribeEvent
@@ -65,6 +71,7 @@ public final class PlayerLocationStateGuardEvents {
     }
 
     public static void reconcileLocationState(ServerPlayer player, boolean justTeleported) {
+        com.stardew.craft.farm.FarmChunkManager.get().reconcilePlayerOccupancy(player);
         ResourceKey<Level> dimension = player.serverLevel().dimension();
 
         if (!ModMiningDimensions.STARDEW_MINING.equals(dimension)) {

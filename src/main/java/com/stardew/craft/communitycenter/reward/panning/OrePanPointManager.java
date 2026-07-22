@@ -1,6 +1,5 @@
 package com.stardew.craft.communitycenter.reward.panning;
 
-import com.stardew.craft.StardewCraft;
 import com.stardew.craft.communitycenter.state.CCStoryFlags;
 import com.stardew.craft.core.ModDimensions;
 import com.stardew.craft.core.ModMiningDimensions;
@@ -136,9 +135,6 @@ public final class OrePanPointManager extends SavedData {
             if (chosen != null) {
                 mgr.setPoint(player.getUUID(), level, chosen);
                 mgr.syncToClient(player);
-                StardewCraft.LOGGER.debug(
-                    "[PANNING] Generated ore-pan point at {} for {} in {}",
-                    chosen, player.getName().getString(), level.dimension().location());
             }
         }
     }

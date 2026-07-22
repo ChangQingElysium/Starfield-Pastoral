@@ -221,6 +221,16 @@ public class ModBlocks {
                                         .strength(-1.0F, 3600000.0F)
                                         .noLootTable()));
 
+        /** Story-installed catalog; deliberately has no BlockItem or creative-tab entry. */
+        public static final DeferredBlock<Block> WIZARD_BUILDING_CATALOG = BLOCKS.register("wizard_building_catalog",
+                        () -> new com.stardew.craft.block.decor.WizardBuildingCatalogBlock(Block.Properties.of()
+                                        .mapColor(net.minecraft.world.level.material.MapColor.WOOD)
+                                        .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK)
+                                        .sound(net.minecraft.world.level.block.SoundType.WOOD)
+                                        .noOcclusion()
+                                        .strength(-1.0F, 3600000.0F)
+                                        .noLootTable()));
+
         // ---- 采集物方块 (Forage blocks with cross model, drop corresponding items) ----
         private static final int SPRING = 0;
         private static final int SUMMER = 1;
@@ -3213,6 +3223,39 @@ public static final DeferredBlock<Block> DEAD_CROP = BLOCKS.register("dead_crop"
                                         .sound(net.minecraft.world.level.block.SoundType.WOOD)
                                         .noOcclusion()
                                         .strength(1.5F, 6.0F), "stardewcraft:geo/block/decor/junimo_hut_decor.geo.json"));
+
+        // ── Wizard buildings: footprint and collision are derived from each GeckoLib model. ──
+        @SuppressWarnings("null")
+        public static final DeferredBlock<Block> JUNIMO_HUT = BLOCKS.register("junimo_hut",
+                        () -> new com.stardew.craft.block.utility.WizardBuildingBlock(Block.Properties.of()
+                                        .mapColor(MapColor.PLANT).sound(SoundType.WOOD).noOcclusion()
+                                        .strength(2.0F, 6.0F),
+                                        com.stardew.craft.block.utility.WizardBuildingKind.JUNIMO_HUT));
+        @SuppressWarnings("null")
+        public static final DeferredBlock<Block> EARTH_OBELISK = BLOCKS.register("earth_obelisk",
+                        () -> wizardObelisk(com.stardew.craft.block.utility.WizardBuildingKind.EARTH_OBELISK));
+        @SuppressWarnings("null")
+        public static final DeferredBlock<Block> WATER_OBELISK = BLOCKS.register("water_obelisk",
+                        () -> wizardObelisk(com.stardew.craft.block.utility.WizardBuildingKind.WATER_OBELISK));
+        @SuppressWarnings("null")
+        public static final DeferredBlock<Block> DESERT_OBELISK = BLOCKS.register("desert_obelisk",
+                        () -> wizardObelisk(com.stardew.craft.block.utility.WizardBuildingKind.DESERT_OBELISK));
+        @SuppressWarnings("null")
+        public static final DeferredBlock<Block> ISLAND_OBELISK = BLOCKS.register("island_obelisk",
+                        () -> wizardObelisk(com.stardew.craft.block.utility.WizardBuildingKind.ISLAND_OBELISK));
+        @SuppressWarnings("null")
+        public static final DeferredBlock<Block> GOLD_CLOCK = BLOCKS.register("gold_clock",
+                        () -> new com.stardew.craft.block.utility.WizardBuildingBlock(Block.Properties.of()
+                                        .mapColor(MapColor.GOLD).sound(SoundType.METAL).noOcclusion()
+                                        .strength(6.0F, 12.0F),
+                                        com.stardew.craft.block.utility.WizardBuildingKind.GOLD_CLOCK,
+                                        -12.0D, 0.0D, -12.0D, 28.0D, 48.0D, 12.0D));
+
+        private static Block wizardObelisk(com.stardew.craft.block.utility.WizardBuildingKind kind) {
+                return new com.stardew.craft.block.utility.WizardBuildingBlock(Block.Properties.of()
+                                .mapColor(MapColor.COLOR_PURPLE).sound(SoundType.STONE).noOcclusion()
+                                .strength(6.0F, 12.0F), kind);
+        }
 
         // ── Giant Crops (3×3×2 GeckoLib block, spawned via GiantCropSpawner only) ──
         @SuppressWarnings("null")

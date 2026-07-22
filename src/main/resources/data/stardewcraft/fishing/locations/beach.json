@@ -499,33 +499,6 @@
       ]
     },
     {
-      "id": "lingcod",
-      "precedence": 100,
-      "item": "stardewcraft:lingcod",
-      "chance": 0.15,
-      "difficulty": 85,
-      "motionType": 0,
-      "minFishSize": 30,
-      "maxFishSize": 50,
-      "minFishingLevel": 0,
-      "seasons": [
-        "winter"
-      ],
-      "maxDepth": 3,
-      "depthMultiplier": 0.05,
-      "biomeTags": [
-        "#stardewcraft:is_ocean"
-      ],
-      "timeRanges": [
-        [
-          600,
-          2600
-        ]
-      ],
-      "weather": "any",
-      "spawnRate": 0.3
-    },
-    {
       "id": "crimsonfish",
       "precedence": -100,
       "item": "stardewcraft:crimsonfish",
@@ -590,9 +563,14 @@
       ]
     },
     {
-      "id": "midnight_squid",
+      "id": "beach_deep_magic_fish",
       "precedence": -10,
       "item": "stardewcraft:midnight_squid",
+      "randomItems": [
+        "stardewcraft:midnight_squid",
+        "stardewcraft:spook_fish",
+        "stardewcraft:blobfish"
+      ],
       "chance": 0.1,
       "difficulty": 55,
       "motionType": 3,
@@ -613,6 +591,7 @@
         "#stardewcraft:is_ocean"
       ],
       "requireMagicBait": true,
+      "ignoreFishDataRequirements": true,
       "curiosityLureBuff": 0.205,
       "canBeInherited": false,
       "seasons": [
@@ -657,6 +636,9 @@
       "precedence": 0,
       "item": "stardewcraft:sea_jelly",
       "chance": 0.1,
+      "ignoreFishDataRequirements": true,
+      "useFishCaughtSeededRandom": true,
+      "chanceBoostPerLuckLevel": 0.05,
       "difficulty": 20,
       "motionType": 0,
       "minFishingLevel": 0,

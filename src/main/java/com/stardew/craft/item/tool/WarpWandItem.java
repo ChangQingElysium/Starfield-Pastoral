@@ -1,17 +1,11 @@
 package com.stardew.craft.item.tool;
 
 import com.stardew.craft.item.IStardewItem;
-import com.stardew.craft.network.ObjectDialogueService;
-import com.stardew.craft.network.payload.OpenWarpWheelPayload;
-import com.stardew.craft.player.PlayerDataEventHandler;
-import com.stardew.craft.player.PlayerDataManager;
-import com.stardew.craft.player.PlayerStardewData;
-import com.stardew.craft.sewer.SewerStoryFlags;
+import com.stardew.craft.warp.ReturnScepterService;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -19,11 +13,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
- * 传送魔杖 — 右键打开传送轮盘 UI，选择目的地进行传送。
- * 对应 SDV Return Scepter，扩展为多目的地版本。
+ * Return Scepter. Like SDV's {@code Wand}, using it always returns the holder
+ * to their own farmhouse entrance; it has no destination-selection UI.
  */
 public class WarpWandItem extends Item implements IStardewItem {
     private static final float NAME_SWEEP_SPEED = 0.40F;
@@ -48,25 +41,12 @@ public class WarpWandItem extends Item implements IStardewItem {
     @Override
     public InteractionResultHolder<ItemStack> use(@javax.annotation.Nonnull Level level, @javax.annotation.Nonnull Player player, @javax.annotation.Nonnull InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
-        if (!level.isClientSide && player instanceof ServerPlayer serverPlayer) {
-            PlayerStardewData data = PlayerDataManager.getPlayerData(serverPlayer);
-            if (!data.hasMailFlag(SewerStoryFlags.RETURN_SCEPTER_PURCHASED)) {
-                ObjectDialogueService.show(serverPlayer, "stardewcraft.warp_wand.not_purchased");
+        if (!level.isClientSide && player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+            if (!ReturnScepterService.begin(serverPlayer)) {
                 return InteractionResultHolder.fail(stack);
             }
-            ensureSpecialItemBackfill(serverPlayer, data);
-            PacketDistributor.sendToPlayer(serverPlayer, new OpenWarpWheelPayload());
         }
-        return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
-    }
-
-    private static void ensureSpecialItemBackfill(ServerPlayer player, PlayerStardewData data) {
-        if (data.hasSpecialItem(SewerStoryFlags.RETURN_SCEPTER_SPECIAL_ITEM)) {
-            return;
-        }
-        data.addSpecialItem(SewerStoryFlags.RETURN_SCEPTER_SPECIAL_ITEM);
-        PlayerDataManager.get().savePlayerData(player.getUUID(), data);
-        PlayerDataEventHandler.syncPlayerData(player, data);
+        return InteractionResultHolder.consume(stack);
     }
 
     @Override
@@ -75,18 +55,20 @@ public class WarpWandItem extends Item implements IStardewItem {
     }
 
     @Override
-    public boolean canBeHurtBy(@javax.annotation.Nonnull ItemStack stack, @javax.annotation.Nonnull net.minecraft.world.damagesource.DamageSource source) {
+    public boolean canBeHurtBy(@javax.annotation.Nonnull ItemStack stack,
+                               @javax.annotation.Nonnull net.minecraft.world.damagesource.DamageSource source) {
         return false;
     }
 
     @Override
     public Component getName(@javax.annotation.Nonnull ItemStack stack) {
         String raw = Component.translatable(this.getDescriptionId(stack)).getString();
-        return sweepHighlight(raw, NAME_BASE_RGB, NAME_HIGHLIGHT_RGB, NAME_SWEEP_SPEED, NAME_SWEEP_WIDTH, true);
+        return sweepHighlight(raw, NAME_BASE_RGB, NAME_HIGHLIGHT_RGB,
+                NAME_SWEEP_SPEED, NAME_SWEEP_WIDTH, true);
     }
 
     private static MutableComponent sweepHighlight(String raw, int baseRgb, int highlightRgb,
-                                                   float speedPerSec, float halfWidth, boolean bold) {
+                                                    float speedPerSec, float halfWidth, boolean bold) {
         long ms = System.currentTimeMillis();
         float t = (ms % 60_000L) / 1000.0F;
         float span = 1.0F + halfWidth * 2.0F;
@@ -121,4 +103,5 @@ public class WarpWandItem extends Item implements IStardewItem {
         int bl = Math.round(ab + (bb - ab) * k);
         return (r << 16) | (g << 8) | bl;
     }
+
 }

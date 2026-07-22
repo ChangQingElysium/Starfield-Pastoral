@@ -34,6 +34,7 @@ public final class FairFishingGameService {
     public static final String TARGET_ID = "fair_fishing_game";
     public static final String MARKER_TAG = "sdv_festival_marker:fair_fishing_game";
     public static final String QUESTION_CONTEXT = "fair_fishing_game";
+    private static final String TEMPORARY_ROD_OWNER = "fall16_fishing_game";
 
     private static final String YES_ID = "yes";
     private static final int ENTRY_COST = 50;
@@ -122,7 +123,7 @@ public final class FairFishingGameService {
         if (!isFishingGameActive(player)) {
             return rodStack != null && !rodStack.isEmpty() && rodStack.getItem() instanceof FishingRodItem;
         }
-        return FishingRodItem.isFairTemporaryRod(rodStack);
+        return FishingRodItem.isFairTemporaryRod(rodStack, TEMPORARY_ROD_OWNER);
     }
 
     public static void onFishingCatch(ServerPlayer player, boolean fish, int size, boolean perfect) {
@@ -281,19 +282,19 @@ public final class FairFishingGameService {
         // attachments[0]=(O)690 x99, attachments[1]=(O)687.
         FishingRodItem.configureFairTemporaryRod(
             rod,
+            TEMPORARY_ROD_OWNER,
             new ItemStack(ModItems.WARP_TOTEM_BEACH.get(), 99),
             new ItemStack(ModItems.DRESSED_SPINNER.get())
         );
-        if (player.getInventory().add(rod)) {
-            selectTemporaryFishingRod(player);
-        } else {
-            int selected = player.getInventory().selected;
-            ItemStack displaced = player.getInventory().items.get(selected);
-            game.displacedSelectedSlot = selected;
-            game.displacedSelectedStack = displaced.copy();
-            player.getInventory().items.set(selected, rod);
-            player.getInventory().setChanged();
-        }
+        // Keep the client-selected hotbar index unchanged and replace that slot directly. Merely
+        // changing Inventory.selected on the server is not a reliable held-slot sync, especially
+        // when this starts from a modal question while collective menu pause is still unwinding.
+        int selected = player.getInventory().selected;
+        ItemStack displaced = player.getInventory().items.get(selected);
+        game.displacedSelectedSlot = selected;
+        game.displacedSelectedStack = displaced.copy();
+        player.getInventory().items.set(selected, rod);
+        syncInventory(player);
     }
 
     private static void restoreDisplacedSelectedItem(ServerPlayer player, ActiveFishingGame game) {
@@ -309,52 +310,40 @@ public final class FairFishingGameService {
         }
         game.displacedSelectedStack = ItemStack.EMPTY;
         game.displacedSelectedSlot = -1;
-        player.getInventory().setChanged();
-    }
-
-    private static void selectTemporaryFishingRod(ServerPlayer player) {
-        for (int i = 0; i < 9; i++) {
-            if (FishingRodItem.isFairTemporaryRod(player.getInventory().items.get(i))) {
-                player.getInventory().selected = i;
-                player.getInventory().setChanged();
-                return;
-            }
-        }
-        for (int i = 9; i < player.getInventory().items.size(); i++) {
-            if (FishingRodItem.isFairTemporaryRod(player.getInventory().items.get(i))) {
-                ItemStack rod = player.getInventory().items.get(i);
-                int selected = player.getInventory().selected;
-                player.getInventory().items.set(i, player.getInventory().items.get(selected));
-                player.getInventory().items.set(selected, rod);
-                player.getInventory().setChanged();
-                return;
-            }
-        }
+        syncInventory(player);
     }
 
     private static void removeTemporaryFishingRods(ServerPlayer player) {
         for (int i = 0; i < player.getInventory().items.size(); i++) {
             ItemStack stack = player.getInventory().items.get(i);
-            if (FishingRodItem.isFairTemporaryRod(stack)) {
+            if (FishingRodItem.isFairTemporaryRod(stack, TEMPORARY_ROD_OWNER)) {
                 player.getInventory().items.set(i, ItemStack.EMPTY);
             }
         }
         for (int i = 0; i < player.getInventory().offhand.size(); i++) {
             ItemStack stack = player.getInventory().offhand.get(i);
-            if (FishingRodItem.isFairTemporaryRod(stack)) {
+            if (FishingRodItem.isFairTemporaryRod(stack, TEMPORARY_ROD_OWNER)) {
                 player.getInventory().offhand.set(i, ItemStack.EMPTY);
             }
         }
-        player.getInventory().setChanged();
+        syncInventory(player);
         if (player.level() instanceof ServerLevel level) {
             removeDroppedTemporaryFishingRods(level);
+        }
+    }
+
+    private static void syncInventory(ServerPlayer player) {
+        player.getInventory().setChanged();
+        player.inventoryMenu.broadcastChanges();
+        if (player.containerMenu != player.inventoryMenu) {
+            player.containerMenu.broadcastChanges();
         }
     }
 
     private static void removeDroppedTemporaryFishingRods(ServerLevel level) {
         AABB cleanupBox = AABB.ofSize(FISHING_ROOM_START.getCenter(), 16.0D, 8.0D, 16.0D);
         for (ItemEntity itemEntity : level.getEntitiesOfClass(ItemEntity.class, cleanupBox)) {
-            if (FishingRodItem.isFairTemporaryRod(itemEntity.getItem())) {
+            if (FishingRodItem.isFairTemporaryRod(itemEntity.getItem(), TEMPORARY_ROD_OWNER)) {
                 itemEntity.discard();
             }
         }

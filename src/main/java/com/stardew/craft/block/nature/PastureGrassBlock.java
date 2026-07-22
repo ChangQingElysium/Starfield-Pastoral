@@ -31,6 +31,8 @@ import java.util.List;
 public class PastureGrassBlock extends BushBlock {
     public static final MapCodec<PastureGrassBlock> CODEC = simpleCodec(PastureGrassBlock::new);
     public static final IntegerProperty VARIANT = IntegerProperty.create("variant", 0, 2);
+    /** SDV Grass.numberOfWeeds: clump density stored in one farm tile. */
+    public static final IntegerProperty CLUMPS = IntegerProperty.create("clumps", 1, 4);
 
     @Override
     protected MapCodec<? extends BushBlock> codec() {
@@ -40,12 +42,12 @@ public class PastureGrassBlock extends BushBlock {
     @SuppressWarnings("null")
     public PastureGrassBlock(Properties properties) {
         super(properties);
-        registerDefaultState(stateDefinition.any().setValue(VARIANT, 0));
+        registerDefaultState(stateDefinition.any().setValue(VARIANT, 0).setValue(CLUMPS, 4));
     }
 
     @Override
     protected void createBlockStateDefinition(@SuppressWarnings("null") StateDefinition.Builder<net.minecraft.world.level.block.Block, BlockState> builder) {
-        builder.add(VARIANT);
+        builder.add(VARIANT, CLUMPS);
     }
 
     @SuppressWarnings("null")
@@ -70,7 +72,7 @@ public class PastureGrassBlock extends BushBlock {
     @Override
     public BlockState getStateForPlacement(@SuppressWarnings("null") net.minecraft.world.item.context.BlockPlaceContext context) {
         int variant = context.getLevel().getRandom().nextInt(3);
-        return defaultBlockState().setValue(VARIANT, variant);
+        return defaultBlockState().setValue(VARIANT, variant).setValue(CLUMPS, 4);
     }
 
     @SuppressWarnings("null")
@@ -86,32 +88,9 @@ public class PastureGrassBlock extends BushBlock {
             return;
         }
 
-        // 扩散：极低概率 + 单方向尝试 + 全 O(1) 检查，零额外扫描，对服务器最友好。
-        // 参考 SDV growWeedGrass：原版每天结算一次、每株 65% 尝试、4 邻 25% 落地。
-        // MC randomTick 触发频率高得多（默认 ~3/section/tick），所以基础概率必须压到极低。
-        // 1/24 + 单邻 = 期望每 24 次 randomTick 才放一格，长草节奏接近 SDV 的"几天才铺一片"。
-        if (random.nextInt(24) != 0) {
-            return;
-        }
-        Direction dir = Direction.Plane.HORIZONTAL.getRandomDirection(random);
-        BlockPos targetPos = pos.relative(dir);
-        // 必须已加载，避免触发邻区块加载
-        if (!level.isLoaded(targetPos)) {
-            return;
-        }
-        if (!level.getBlockState(targetPos).isAir()) {
-            return;
-        }
-        BlockPos belowTarget = targetPos.below();
-        BlockState belowState = level.getBlockState(belowTarget);
-        if (!mayPlaceOn(belowState, level, belowTarget)) {
-            return;
-        }
-        // VARIANT 仅材质差异（0/1/2 三种贴图），随机一个即可。
-        int variant = random.nextInt(3);
-        level.setBlock(targetPos,
-            this.defaultBlockState().setValue(VARIANT, variant),
-            net.minecraft.world.level.block.Block.UPDATE_ALL);
+        // SDV grows grass once during the new-day settlement. Doing it again
+        // through Minecraft random ticks doubled growth and made its rate depend
+        // on loaded chunks, so non-winter random ticks deliberately do nothing.
     }
 
     @SuppressWarnings("null")
@@ -176,29 +155,41 @@ public class PastureGrassBlock extends BushBlock {
             return false;
         }
 
-        List<BlockPos> clumps = collectNearbySameTypeGrass(level, pos, state, clumpsNeeded);
-        if (clumps.size() < clumpsNeeded) {
+        List<BlockPos> tiles = collectNearbySameTypeGrass(level, pos, state, clumpsNeeded);
+        int available = tiles.stream().mapToInt(tile -> level.getBlockState(tile).getValue(CLUMPS)).sum();
+        if (available < clumpsNeeded) {
             return false;
         }
 
-        for (int i = 0; i < clumpsNeeded; i++) {
-            level.removeBlock(clumps.get(i), false);
+        int remaining = clumpsNeeded;
+        for (BlockPos tile : tiles) {
+            if (remaining <= 0) break;
+            BlockState grass = level.getBlockState(tile);
+            int count = grass.getValue(CLUMPS);
+            int eaten = Math.min(count, remaining);
+            if (eaten == count) {
+                level.removeBlock(tile, false);
+            } else {
+                level.setBlock(tile, grass.setValue(CLUMPS, count - eaten), net.minecraft.world.level.block.Block.UPDATE_ALL);
+            }
+            remaining -= eaten;
         }
         return true;
     }
 
     private static List<BlockPos> collectNearbySameTypeGrass(ServerLevel level, BlockPos origin, BlockState targetState, int clumpsNeeded) {
-        List<BlockPos> result = new ArrayList<>(clumpsNeeded);
+        List<BlockPos> result = new ArrayList<>();
         result.add(origin.immutable());
-        if (clumpsNeeded == 1) {
+        int foundClumps = targetState.getValue(CLUMPS);
+        if (foundClumps >= clumpsNeeded) {
             return result;
         }
 
         int radius = 5;
-        for (int dist = 1; dist <= radius && result.size() < clumpsNeeded; dist++) {
-            for (int x = origin.getX() - dist; x <= origin.getX() + dist && result.size() < clumpsNeeded; x++) {
-                for (int y = origin.getY() - 1; y <= origin.getY() + 1 && result.size() < clumpsNeeded; y++) {
-                    for (int z = origin.getZ() - dist; z <= origin.getZ() + dist && result.size() < clumpsNeeded; z++) {
+        for (int dist = 1; dist <= radius && foundClumps < clumpsNeeded; dist++) {
+            for (int x = origin.getX() - dist; x <= origin.getX() + dist && foundClumps < clumpsNeeded; x++) {
+                for (int y = origin.getY() - 1; y <= origin.getY() + 1 && foundClumps < clumpsNeeded; y++) {
+                    for (int z = origin.getZ() - dist; z <= origin.getZ() + dist && foundClumps < clumpsNeeded; z++) {
                         BlockPos candidate = new BlockPos(x, y, z);
                         if (candidate.equals(origin)) {
                             continue;
@@ -211,6 +202,7 @@ public class PastureGrassBlock extends BushBlock {
                             continue;
                         }
                         result.add(candidate.immutable());
+                        foundClumps += candidateState.getValue(CLUMPS);
                     }
                 }
             }
