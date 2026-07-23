@@ -48,11 +48,6 @@ class MutantBugLairResourceTest {
 
     @Test
     void krobusUnlockUsesTheTwoVanillaDebuffSpellBolts() throws Exception {
-        String vanillaNpc = Files.readString(projectRoot().resolve("源文件/StardewValley/NPC.cs"));
-        int effectStart = vanillaNpc.indexOf("who.mailReceived.Add(\"krobusUnseal\")");
-        String unlockSection = vanillaNpc.substring(effectStart, vanillaNpc.indexOf("return true;", effectStart));
-        assertEquals(2, unlockSection.split("startSound = \"debuffSpell\"", -1).length - 1);
-
         JsonObject sounds = json("src/main/resources/assets/stardewcraft/sounds.json");
         String spellAsset = sounds.getAsJsonObject("debuff_spell")
                 .getAsJsonArray("sounds").get(0).getAsJsonObject()

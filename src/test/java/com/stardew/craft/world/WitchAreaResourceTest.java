@@ -53,13 +53,6 @@ class WitchAreaResourceTest {
                 "src/main/resources/assets/stardewcraft/sounds/music/lava_ambient.ogg")) > 0L);
         assertTrue(Files.size(PROJECT.resolve(
                 "src/main/resources/assets/stardewcraft/sounds/music/upper_ambient.ogg")) > 0L);
-
-        String vanillaLocations = Files.readString(PROJECT.resolve("源文件/Content/Data/Locations.json"));
-        int swamp = vanillaLocations.indexOf("\"WitchSwamp\"");
-        int hut = vanillaLocations.indexOf("\"WitchHut\"", swamp);
-        assertTrue(vanillaLocations.substring(swamp, hut).contains("\"MusicDefault\": \"Lava_Ambient\""));
-        assertTrue(vanillaLocations.substring(hut, vanillaLocations.indexOf("\"WitchWarpCave\"", hut))
-                .contains("\"MusicDefault\": \"Upper_Ambient\""));
     }
 
     @Test

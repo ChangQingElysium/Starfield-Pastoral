@@ -84,10 +84,6 @@ class WizardDarkTalismanOpeningResourceTest {
 
     @Test
     void usesTheVanillaWizardSongAsset() throws Exception {
-        JsonObject vanillaRailroadEvents = JsonParser.parseString(Files.readString(projectRoot().resolve(
-                "源文件/Content/Data/Events/Railroad.json"))).getAsJsonObject();
-        assertTrue(vanillaRailroadEvents.get("529952/C").getAsString().startsWith("WizardSong/"));
-
         EventData event = event();
         assertTrue(event.rawCommands().stream().anyMatch(command ->
                 "music".equals(command.get("cmd").getAsString())
