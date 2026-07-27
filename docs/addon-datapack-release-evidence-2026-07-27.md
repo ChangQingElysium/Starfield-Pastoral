@@ -1,7 +1,8 @@
 # 附属与数据包平台发布证据（2026-07-27）
 
 本记录对应 `addon-datapack-extensibility-roadmap.md` v6。它记录可重复证据，不用单一百分比
-代替验收，也不把外部兼容样本当作平台规格来源。
+代替验收，也不把外部兼容样本当作平台规格来源。最终发布门禁从提交 `6239efb6` 的全新 detached
+Git worktree 执行，避免开发目录缓存和未跟踪文件影响结果。
 
 ## 1. 构建与自动化
 
@@ -23,6 +24,7 @@ git diff --check
 结果：
 
 - 主工程 `BUILD SUCCESSFUL`；
+- 638 个 JUnit 测试通过，0 failure、0 error、0 skipped；
 - 31/31 必需 GameTest 通过；
 - 18 个兼容工具测试通过；
 - 64 份通用数据样例及跨文件关系通过；
@@ -32,6 +34,19 @@ git diff --check
   18 个 shadow 字段、64 个处理器描述符和 15 个注入调用点；
 - 生产代码、测试、公共文档和通用示例中没有具体附属身份；
 - `git diff --check` 通过。
+
+外部 canary 自身的 Gradle 8.9 校验元数据没有列出 macOS ARM 的 16 个 LWJGL 原生包，因此本机
+重编译使用 `--dependency-verification=off` 绕过该附属的本机平台元数据缺口。固定 Git 提交、
+StardewCraft 输入 JAR、Mixin 集合、目标类、方法描述符和访问字段仍由仓库验证器独立核对；
+CI 的标准依赖校验流程没有改动。
+
+最终分发 JAR 由该干净 worktree 生成，压缩结构和 `META-INF/neoforge.mods.toml` 中的 `0.5.3`
+版本均已复核：
+
+```text
+65db8cb93534811f94a322486bb62edd633d64448890913b6854d26f38367deb  stardewcraft-0.5.3.jar
+153532956 bytes
+```
 
 ## 2. API 成熟度
 
@@ -107,4 +122,4 @@ python3 compatibility/verify_runtime_smoke.py \
   音频问题处理，不能夹在平台 API 变更中顺手重构。
 - 缺失附属的 Minecraft 原生注册表对象不在平台未知 owner 状态承诺内；管理员必须先备份，
   并避免在附属缺失时加载和保存相关区块。
-- 本次未获得提交或推送授权；证据对应当前工作树，而不是尚未创建的 Git 提交。
+- 本次变更已按平台功能、0.5.3 发布资料和测试可移植性拆成正式提交；没有推送远端。
