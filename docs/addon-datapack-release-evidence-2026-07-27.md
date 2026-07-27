@@ -1,7 +1,7 @@
 # 附属与数据包平台发布证据（2026-07-27）
 
 本记录对应 `addon-datapack-extensibility-roadmap.md` v6。它记录可重复证据，不用单一百分比
-代替验收，也不把外部兼容样本当作平台规格来源。最终发布门禁从提交 `9bf6c3b0` 的全新 detached
+代替验收，也不把外部兼容样本当作平台规格来源。最终发布门禁从提交 `f2066c92` 的全新 detached
 Git worktree 执行，避免开发目录缓存和未跟踪文件影响结果。
 
 ## 1. 构建与自动化
@@ -24,7 +24,7 @@ git diff --check
 结果：
 
 - 主工程 `BUILD SUCCESSFUL`；
-- 640 个 JUnit 测试通过，0 failure、0 error、0 skipped；
+- 641 个 JUnit 测试通过，0 failure、0 error、0 skipped；
 - 31/31 必需 GameTest 通过；
 - 18 个兼容工具测试通过；
 - 64 份通用数据样例及跨文件关系通过；
@@ -44,8 +44,8 @@ CI 的标准依赖校验流程没有改动。
 版本均已复核：
 
 ```text
-944ef46f269b9ec23b83ccfdcc6575fa931d72bb6553aa4dcbc3e501a949e280  stardewcraft-0.5.3.jar
-153533524 bytes
+9c69fa162ab4ba42dd15cb3c00e8dc250a276db2ca7d9a402801d2550968dfdb  stardewcraft-0.5.3.jar
+153533723 bytes
 ```
 
 ## 2. API 成熟度
@@ -115,13 +115,14 @@ python3 compatibility/verify_runtime_smoke.py \
 - 同一 server epoch 的旧或重复 revision 被拒绝；
 - 断线清除跨服务器会话缓存。
 - 核心 NPC 的 capability 在 fallback Display 中保持 `datable` 一致；
-- 附属 Display provider 给出冲突展示元数据时，由权威 capability 统一关系规则。
+- Display provider 给出冲突展示元数据时，统一 Profile 优先，旧 capability 次之。
 
 用户报告的社交页崩溃可由旧报告
 `run/crash-reports/crash-2026-07-27_13.35.35-client.txt` 精确定位到 Profile 与 Display 的
 `datable` 不一致。修复后真实客户端重新加载同一“新的世界”存档并正常停止，没有生成新的
-crash report；两项新增 JUnit 回归分别锁定 fallback 和 provider 冲突路径。俄语页签同时从
-容易被直译成“世俗”的 `Светское` 改为明确的 `Отношения`（关系）。
+crash report；三项新增 JUnit 回归分别锁定 fallback、核心 provider 冲突和纯附属统一
+Profile 冲突路径。俄语页签同时从容易被直译成“世俗”的 `Светское` 改为明确的
+`Отношения`（关系）。
 
 ## 6. 保留风险与发布边界
 
@@ -130,5 +131,5 @@ crash report；两项新增 JUnit 回归分别锁定 fallback 和 provider 冲�
   音频问题处理，不能夹在平台 API 变更中顺手重构。
 - 缺失附属的 Minecraft 原生注册表对象不在平台未知 owner 状态承诺内；管理员必须先备份，
   并避免在附属缺失时加载和保存相关区块。
-- 本次变更已按平台功能、0.5.3 发布资料、测试可移植性和社交页热修复拆成正式提交，并进入
-  GitHub Draft PR #14。
+- 平台功能、0.5.3 发布资料和测试可移植性已由 PR #14 合并；社交页与同类附属冲突热修复
+  直接提交到 `main`。
