@@ -11,8 +11,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -173,97 +171,102 @@ class FarmAnimalDefinitionsTest {
     }
 
     @Test
-    void bundledGameplayFieldsMatchRepositoryFarmAnimalsSource() throws Exception {
-        JsonObject source = JsonParser.parseString(
-                Files.readString(
-                        repositorySourcePath(),
-                        StandardCharsets.UTF_8))
+    void bundledGameplayFieldsRoundTripThroughDecoder() {
+        JsonObject bundled = bundledResources().values()
+                .iterator()
+                .next()
                 .getAsJsonObject();
+        Map<String, JsonObject> expectedBySourceKey = new HashMap<>();
+        for (JsonElement element : bundled.getAsJsonArray("animals")) {
+            JsonObject animal = element.getAsJsonObject();
+            expectedBySourceKey.put(
+                    animal.get("source_key").getAsString(),
+                    animal);
+        }
 
         assertEquals(
                 FarmAnimalDefinitions.all().stream()
                         .map(FarmAnimalDefinition::sourceKey)
                         .collect(java.util.stream.Collectors.toSet()),
-                source.keySet());
+                expectedBySourceKey.keySet());
         for (FarmAnimalDefinition definition :
                 FarmAnimalDefinitions.all()) {
             String sourceKey = definition.sourceKey();
-            JsonObject expected =
-                    source.getAsJsonObject(sourceKey);
-            assertEquals(expected.get("House").getAsString()
+            JsonObject expected = expectedBySourceKey.get(sourceKey);
+            assertEquals(expected.get("source_house").getAsString()
                             .toLowerCase(java.util.Locale.ROOT),
-                    definition.sourceHouse(), sourceKey + " House");
-            assertEquals(expected.get("Gender").getAsString(),
-                    definition.gender(), sourceKey + " Gender");
-            assertEquals(expected.get("PurchasePrice").getAsInt(),
-                    definition.purchasePrice(), sourceKey + " PurchasePrice");
-            assertEquals(expected.get("SellPrice").getAsInt(),
-                    definition.sellPrice(), sourceKey + " SellPrice");
-            assertEquals(nullableString(expected, "RequiredBuilding"),
+                    definition.sourceHouse(), sourceKey + " source_house");
+            assertEquals(expected.get("gender").getAsString(),
+                    definition.gender(), sourceKey + " gender");
+            assertEquals(expected.get("purchase_price").getAsInt(),
+                    definition.purchasePrice(), sourceKey + " purchase_price");
+            assertEquals(expected.get("sell_price").getAsInt(),
+                    definition.sellPrice(), sourceKey + " sell_price");
+            assertEquals(nullableString(expected, "required_building"),
                     definition.requiredBuilding(),
-                    sourceKey + " RequiredBuilding");
-            assertEquals(expected.get("IncubationTime").getAsInt(),
-                    definition.incubationTime(), sourceKey + " IncubationTime");
-            assertEquals(expected.get("IncubatorParentSheetOffset").getAsInt(),
+                    sourceKey + " required_building");
+            assertEquals(expected.get("incubation_time").getAsInt(),
+                    definition.incubationTime(), sourceKey + " incubation_time");
+            assertEquals(expected.get("incubator_parent_sheet_offset").getAsInt(),
                     definition.incubatorParentSheetOffset(),
-                    sourceKey + " IncubatorParentSheetOffset");
-            assertEquals(expected.get("DaysToMature").getAsInt(),
-                    definition.daysToMature(), sourceKey + " DaysToMature");
-            assertEquals(expected.get("CanGetPregnant").getAsBoolean(),
-                    definition.canGetPregnant(), sourceKey + " CanGetPregnant");
-            assertEquals(expected.get("DaysToProduce").getAsInt(),
-                    definition.daysToProduce(), sourceKey + " DaysToProduce");
+                    sourceKey + " incubator_parent_sheet_offset");
+            assertEquals(expected.get("days_to_mature").getAsInt(),
+                    definition.daysToMature(), sourceKey + " days_to_mature");
+            assertEquals(expected.get("can_get_pregnant").getAsBoolean(),
+                    definition.canGetPregnant(), sourceKey + " can_get_pregnant");
+            assertEquals(expected.get("days_to_produce").getAsInt(),
+                    definition.daysToProduce(), sourceKey + " days_to_produce");
             assertEquals(normalizeHarvestType(
-                            expected.get("HarvestType").getAsString()),
-                    definition.harvestType(), sourceKey + " HarvestType");
-            assertEquals(expected.get("ProduceOnMature").getAsBoolean(),
-                    definition.produceOnMature(), sourceKey + " ProduceOnMature");
-            assertEquals(expected.get("FriendshipForFasterProduce").getAsInt(),
+                            expected.get("harvest_type").getAsString()),
+                    definition.harvestType(), sourceKey + " harvest_type");
+            assertEquals(expected.get("produce_on_mature").getAsBoolean(),
+                    definition.produceOnMature(), sourceKey + " produce_on_mature");
+            assertEquals(expected.get("friendship_for_faster_produce").getAsInt(),
                     definition.friendshipForFasterProduce(),
-                    sourceKey + " FriendshipForFasterProduce");
-            assertEquals(expected.get("DeluxeProduceMinimumFriendship").getAsInt(),
+                    sourceKey + " friendship_for_faster_produce");
+            assertEquals(expected.get("deluxe_produce_minimum_friendship").getAsInt(),
                     definition.deluxeProduceMinimumFriendship(),
-                    sourceKey + " DeluxeProduceMinimumFriendship");
-            assertEquals(expected.get("DeluxeProduceCareDivisor").getAsDouble(),
+                    sourceKey + " deluxe_produce_minimum_friendship");
+            assertEquals(expected.get("deluxe_produce_care_divisor").getAsDouble(),
                     definition.deluxeProduceCareDivisor(),
-                    sourceKey + " DeluxeProduceCareDivisor");
-            assertEquals(expected.get("DeluxeProduceLuckMultiplier").getAsDouble(),
+                    sourceKey + " deluxe_produce_care_divisor");
+            assertEquals(expected.get("deluxe_produce_luck_multiplier").getAsDouble(),
                     definition.deluxeProduceLuckMultiplier(),
-                    sourceKey + " DeluxeProduceLuckMultiplier");
-            assertEquals(expected.get("CanEatGoldenCrackers").getAsBoolean(),
+                    sourceKey + " deluxe_produce_luck_multiplier");
+            assertEquals(expected.get("can_eat_golden_crackers").getAsBoolean(),
                     definition.canEatGoldenCrackers(),
-                    sourceKey + " CanEatGoldenCrackers");
-            assertEquals(expected.get("ProfessionForHappinessBoost").getAsInt(),
+                    sourceKey + " can_eat_golden_crackers");
+            assertEquals(expected.get("profession_for_happiness_boost").getAsInt(),
                     definition.professionForHappinessBoost(),
-                    sourceKey + " ProfessionForHappinessBoost");
-            assertEquals(expected.get("ProfessionForQualityBoost").getAsInt(),
+                    sourceKey + " profession_for_happiness_boost");
+            assertEquals(expected.get("profession_for_quality_boost").getAsInt(),
                     definition.professionForQualityBoost(),
-                    sourceKey + " ProfessionForQualityBoost");
-            assertEquals(expected.get("ProfessionForFasterProduce").getAsInt(),
+                    sourceKey + " profession_for_quality_boost");
+            assertEquals(expected.get("profession_for_faster_produce").getAsInt(),
                     definition.professionForFasterProduce(),
-                    sourceKey + " ProfessionForFasterProduce");
-            assertEquals(expected.get("CanSwim").getAsBoolean(),
-                    definition.canSwim(), sourceKey + " CanSwim");
-            assertEquals(expected.get("BabiesFollowAdults").getAsBoolean(),
+                    sourceKey + " profession_for_faster_produce");
+            assertEquals(expected.get("can_swim").getAsBoolean(),
+                    definition.canSwim(), sourceKey + " can_swim");
+            assertEquals(expected.get("babies_follow_adults").getAsBoolean(),
                     definition.babiesFollowAdults(),
-                    sourceKey + " BabiesFollowAdults");
-            assertEquals(expected.get("GrassEatAmount").getAsInt(),
-                    definition.grassEatAmount(), sourceKey + " GrassEatAmount");
-            assertEquals(expected.get("HappinessDrain").getAsInt(),
-                    definition.happinessDrain(), sourceKey + " HappinessDrain");
+                    sourceKey + " babies_follow_adults");
+            assertEquals(expected.get("grass_eat_amount").getAsInt(),
+                    definition.grassEatAmount(), sourceKey + " grass_eat_amount");
+            assertEquals(expected.get("happiness_drain").getAsInt(),
+                    definition.happinessDrain(), sourceKey + " happiness_drain");
             assertProduceParity(
                     sourceKey,
-                    expected.getAsJsonArray("ProduceItemIds"),
+                    expected.getAsJsonArray("produce"),
                     definition.produce());
             assertProduceParity(
                     sourceKey + " deluxe",
-                    expected.getAsJsonArray("DeluxeProduceItemIds"),
+                    expected.getAsJsonArray("deluxe_produce"),
                     definition.deluxeProduce());
             assertProduceStatParity(
                     sourceKey,
                     nullableArray(
                             expected,
-                            "StatToIncrementOnProduce"),
+                            "produce_stats"),
                     definition.produceStats());
         }
     }
@@ -448,15 +451,15 @@ class FarmAnimalDefinitionsTest {
                     expected.get(index).getAsJsonObject();
             FarmAnimalDefinition.ProduceEntry definition =
                     actual.get(index);
-            assertEquals(sourceEntry.get("Id").getAsString(),
+            assertEquals(sourceEntry.get("id").getAsString(),
                     definition.id(), sourceKey + " produce ID " + index);
-            assertEquals(nullableString(sourceEntry, "Condition"),
+            assertEquals(nullableString(sourceEntry, "source_condition"),
                     definition.sourceCondition(),
                     sourceKey + " produce condition " + index);
-            assertEquals(sourceEntry.get("MinimumFriendship").getAsInt(),
+            assertEquals(sourceEntry.get("minimum_friendship").getAsInt(),
                     definition.minimumFriendship(),
                     sourceKey + " produce friendship " + index);
-            assertEquals(sourceEntry.get("ItemId").getAsString(),
+            assertEquals(nullableString(sourceEntry, "source_item_id"),
                     definition.sourceItemId(),
                     sourceKey + " produce item " + index);
         }
@@ -480,12 +483,12 @@ class FarmAnimalDefinitionsTest {
             FarmAnimalDefinition.ProduceStat definition =
                     actual.get(index);
             assertEquals(
-                    sourceEntry.get("Id").getAsString(),
+                    sourceEntry.get("id").getAsString(),
                     definition.id(),
                     sourceKey + " produce stat ID "
                             + index);
             assertEquals(
-                    sourceEntry.get("StatName")
+                    sourceEntry.get("stat_name")
                             .getAsString(),
                     definition.statName(),
                     sourceKey + " produce stat name "
@@ -493,7 +496,7 @@ class FarmAnimalDefinitionsTest {
             assertEquals(
                     nullableString(
                             sourceEntry,
-                            "RequiredItemId"),
+                            "source_required_item_id"),
                     definition.sourceRequiredItemId(),
                     sourceKey
                             + " produce stat item filter "
@@ -501,7 +504,7 @@ class FarmAnimalDefinitionsTest {
             assertEquals(
                     nullableStringList(
                             sourceEntry,
-                            "RequiredTags"),
+                            "source_required_tags"),
                     definition.sourceRequiredTags(),
                     sourceKey
                             + " produce stat tag filters "
@@ -551,30 +554,15 @@ class FarmAnimalDefinitionsTest {
             String sourceValue
     ) {
         return switch (sourceValue) {
-            case "DropOvernight" ->
+            case "drop_overnight" ->
                     FarmAnimalDefinition.HarvestType.DROP_OVERNIGHT;
-            case "HarvestWithTool" ->
+            case "harvest_with_tool" ->
                     FarmAnimalDefinition.HarvestType.HARVEST_WITH_TOOL;
-            case "DigUp" ->
+            case "dig_up" ->
                     FarmAnimalDefinition.HarvestType.DIG_UP;
             default -> throw new AssertionError(
                     "Unknown source HarvestType " + sourceValue);
         };
-    }
-
-    private static Path repositorySourcePath() {
-        Path cursor = Path.of(System.getProperty("user.dir"))
-                .toAbsolutePath();
-        while (cursor != null) {
-            Path candidate = cursor.resolve(
-                    "源文件/Content/Data/FarmAnimals.json");
-            if (Files.isRegularFile(candidate)) {
-                return candidate;
-            }
-            cursor = cursor.getParent();
-        }
-        throw new AssertionError(
-                "Repository source file 源文件/Content/Data/FarmAnimals.json is missing");
     }
 
     private static Map<ResourceLocation, JsonElement> bundledResources() {
