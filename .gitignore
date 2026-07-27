@@ -35,12 +35,15 @@ tmp_models/
 *.zip
 /*.jar
 /.*_proxy_env.sh
+/.canary/
 /*.py
 /*.js
 /*.mjs
 /*.txt
 docs/*
 !docs/0.5-addon-api.md
+!docs/addon-datapack-extensibility-roadmap.md
+!docs/addon-datapack-release-evidence-2026-07-27.md
 !docs/npc-schedule-parity-audit-2026-07-16.md
 wiki/
 ui_spec/
