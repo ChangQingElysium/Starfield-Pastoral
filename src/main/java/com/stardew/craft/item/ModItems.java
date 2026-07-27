@@ -86,6 +86,7 @@ import com.stardew.craft.item.crop.fall.YamItem;
 import com.stardew.craft.item.crop.fall.YamSeedItem;
 import com.stardew.craft.item.artisan.ArtisanDrinkItem;
 import com.stardew.craft.item.artisan.DriedMushroomsItem;
+import com.stardew.craft.item.artisan.FlavoredArtisanDrinkItem;
 import com.stardew.craft.item.artisan.PreserveType;
 import com.stardew.craft.item.artisan.PreservesItem;
 import com.stardew.craft.item.artisan.SmokedFishItem;
@@ -1380,7 +1381,15 @@ public class ModItems {
     // Vanilla object 348/341. Winter Star's generic return-gift pool requires
     // these exact base objects (not a fruit-specific wine or furniture block).
     public static final DeferredItem<Item> WINE = ITEMS.register("wine",
-            () -> new ArtisanDrinkItem(400, 50, 22, -1, 30 * 20, true, new Item.Properties().stacksTo(999)));
+            () -> new FlavoredArtisanDrinkItem(PreserveType.WINE, new Item.Properties().stacksTo(999)));
+    public static final DeferredItem<Item> JUICE = ITEMS.register("juice",
+            () -> new FlavoredArtisanDrinkItem(PreserveType.JUICE, new Item.Properties().stacksTo(999)));
+    /**
+     * Retains retired source-specific IDs so existing worlds can load them.
+     * These are hidden compatibility items; all new machine outputs use WINE/JUICE.
+     */
+    public static final java.util.Map<String, DeferredItem<Item>> LEGACY_FLAVORED_DRINKS =
+            registerLegacyFlavoredDrinks();
     public static final DeferredItem<Item> TEA_SET = ITEMS.register("tea_set",
             () -> new SimpleStardewItem("stardewcraft.type.misc", 200, new Item.Properties().stacksTo(999)));
 
@@ -1551,72 +1560,6 @@ public class ModItems {
                         () -> new ArtisanDrinkItem(300, 75, 33, -1, 30 * 20, true, new Item.Properties().stacksTo(999)));
         public static final DeferredItem<Item> COFFEE = ITEMS.register("coffee",
                         () -> new ArtisanDrinkItem(150, 3, 1, 1, 83 * 20, new Item.Properties().stacksTo(999)));
-
-        // 宸ュ尃鐗╁搧 - 鏋滈厭
-        public static final DeferredItem<Item> ANCIENT_FRUIT_WINE = ITEMS.register("ancient_fruit_wine",
-                        () -> new ArtisanDrinkItem(1650, 105, 43, -1, 30 * 20, true, new Item.Properties().stacksTo(999)));
-        public static final DeferredItem<Item> BLUEBERRY_WINE = ITEMS.register("blueberry_wine",
-                        () -> new ArtisanDrinkItem(150, 43, 17, -1, 30 * 20, true, new Item.Properties().stacksTo(999)));
-        public static final DeferredItem<Item> CRANBERRY_WINE = ITEMS.register("cranberry_wine",
-                        () -> new ArtisanDrinkItem(225, 66, 26, -1, 30 * 20, true, new Item.Properties().stacksTo(999)));
-        public static final DeferredItem<Item> CRYSTAL_FRUIT_WINE = ITEMS.register("crystal_fruit_wine",
-                        () -> new ArtisanDrinkItem(450, 108, 43, -1, 30 * 20, true, new Item.Properties().stacksTo(999)));
-        public static final DeferredItem<Item> GRAPE_WINE = ITEMS.register("grape_wine",
-                        () -> new ArtisanDrinkItem(240, 66, 26, -1, 30 * 20, true, new Item.Properties().stacksTo(999)));
-        public static final DeferredItem<Item> HOT_PEPPER_WINE = ITEMS.register("hot_pepper_wine",
-                        () -> new ArtisanDrinkItem(120, 43, 17, -1, 30 * 20, true, new Item.Properties().stacksTo(999)));
-        public static final DeferredItem<Item> MELON_WINE = ITEMS.register("melon_wine",
-                        () -> new ArtisanDrinkItem(750, 183, 78, -1, 30 * 20, true, new Item.Properties().stacksTo(999)));
-        public static final DeferredItem<Item> POWDER_MELON_WINE = ITEMS.register("powder_melon_wine",
-                        () -> new ArtisanDrinkItem(180, 183, 78, -1, 30 * 20, true, new Item.Properties().stacksTo(999)));
-        public static final DeferredItem<Item> RHUBARB_WINE = ITEMS.register("rhubarb_wine",
-                        () -> new ArtisanDrinkItem(660, 87, 38, -1, 30 * 20, true, new Item.Properties().stacksTo(999)));
-        public static final DeferredItem<Item> STARFRUIT_WINE = ITEMS.register("starfruit_wine",
-                        () -> new ArtisanDrinkItem(2250, 148, 59, -1, 30 * 20, true, new Item.Properties().stacksTo(999)));
-        public static final DeferredItem<Item> STRAWBERRY_WINE = ITEMS.register("strawberry_wine",
-                        () -> new ArtisanDrinkItem(360, 87, 38, -1, 30 * 20, true, new Item.Properties().stacksTo(999)));
-
-        // 宸ュ尃鐗╁搧 - 鏋滄眮
-        public static final DeferredItem<Item> AMARANTH_JUICE = ITEMS.register("amaranth_juice",
-                        () -> new ArtisanDrinkItem(337, 100, 44, 0, 0, new Item.Properties().stacksTo(999)));
-        public static final DeferredItem<Item> ARTICHOKE_JUICE = ITEMS.register("artichoke_juice",
-                        () -> new ArtisanDrinkItem(360, 150, 60, 0, 0, new Item.Properties().stacksTo(999)));
-        public static final DeferredItem<Item> BEET_JUICE = ITEMS.register("beet_juice",
-                        () -> new ArtisanDrinkItem(225, 60, 26, 0, 0, new Item.Properties().stacksTo(999)));
-        public static final DeferredItem<Item> BOK_CHOY_JUICE = ITEMS.register("bok_choy_juice",
-                        () -> new ArtisanDrinkItem(180, 90, 36, 0, 0, new Item.Properties().stacksTo(999)));
-        public static final DeferredItem<Item> BROCCOLI_JUICE = ITEMS.register("broccoli_juice",
-                        () -> new ArtisanDrinkItem(157, 174, 70, 0, 0, new Item.Properties().stacksTo(999)));
-        public static final DeferredItem<Item> CARROT_JUICE = ITEMS.register("carrot_juice",
-                        () -> new ArtisanDrinkItem(78, 70, 30, 0, 0, new Item.Properties().stacksTo(999)));
-        public static final DeferredItem<Item> CAULIFLOWER_JUICE = ITEMS.register("cauliflower_juice",
-                        () -> new ArtisanDrinkItem(393, 150, 60, 0, 0, new Item.Properties().stacksTo(999)));
-        public static final DeferredItem<Item> CORN_JUICE = ITEMS.register("corn_juice",
-                        () -> new ArtisanDrinkItem(112, 50, 20, 0, 0, new Item.Properties().stacksTo(999)));
-        public static final DeferredItem<Item> EGGPLANT_JUICE = ITEMS.register("eggplant_juice",
-                        () -> new ArtisanDrinkItem(135, 100, 40, 0, 0, new Item.Properties().stacksTo(999)));
-        public static final DeferredItem<Item> GARLIC_JUICE = ITEMS.register("garlic_juice",
-                        () -> new ArtisanDrinkItem(135, 64, 26, 0, 0, new Item.Properties().stacksTo(999)));
-        public static final DeferredItem<Item> GREEN_BEAN_JUICE = ITEMS.register("green_bean_juice",
-                        () -> new ArtisanDrinkItem(90, 50, 20, 0, 0, new Item.Properties().stacksTo(999)));
-        public static final DeferredItem<Item> KALE_JUICE = ITEMS.register("kale_juice",
-                        () -> new ArtisanDrinkItem(247, 100, 44, 0, 0, new Item.Properties().stacksTo(999)));
-        public static final DeferredItem<Item> PARSNIP_JUICE = ITEMS.register("parsnip_juice",
-                        () -> new ArtisanDrinkItem(78, 50, 20, 0, 0, new Item.Properties().stacksTo(999)));
-        public static final DeferredItem<Item> POTATO_JUICE = ITEMS.register("potato_juice",
-                        () -> new ArtisanDrinkItem(180, 50, 20, 0, 0, new Item.Properties().stacksTo(999)));
-        public static final DeferredItem<Item> PUMPKIN_JUICE = ITEMS.register("pumpkin_juice",
-                        () -> new ArtisanDrinkItem(720, 210, 90, 0, 0, new Item.Properties().stacksTo(999)));
-        public static final DeferredItem<Item> RADISH_JUICE = ITEMS.register("radish_juice",
-                        () -> new ArtisanDrinkItem(202, 90, 36, 0, 0, new Item.Properties().stacksTo(999)));
-        public static final DeferredItem<Item> RED_CABBAGE_JUICE = ITEMS.register("red_cabbage_juice",
-                        () -> new ArtisanDrinkItem(585, 150, 60, 0, 0, new Item.Properties().stacksTo(999)));
-        public static final DeferredItem<Item> SUMMER_SQUASH_JUICE = ITEMS.register("summer_squash_juice",
-                        () -> new ArtisanDrinkItem(101, 130, 54, 0, 0, new Item.Properties().stacksTo(999)));
-        public static final DeferredItem<Item> TOMATO_JUICE = ITEMS.register("tomato_juice",
-                        () -> new ArtisanDrinkItem(135, 40, 16, 0, 0, new Item.Properties().stacksTo(999)));
-        public static final DeferredItem<Item> YAM_JUICE = ITEMS.register("yam_juice",
-                        () -> new ArtisanDrinkItem(360, 90, 36, 0, 0, new Item.Properties().stacksTo(999)));
 
         // 鐭夸簳璧勬簮锛堜綘宸叉妸璐村浘鏀惧湪 textures/item/resource 涓嬶級
         public static final DeferredItem<Item> COPPER_ORE = ITEMS.register("copper_ore",
@@ -3210,22 +3153,22 @@ public class ModItems {
 
     // ── 法师魔法建筑 ──
     public static final DeferredItem<Item> JUNIMO_HUT = ITEMS.register("junimo_hut",
-            () -> new StardewBlockItem(ModBlocks.JUNIMO_HUT.get(), "stardewcraft.type.utility", -1,
+            () -> new WizardBuildingItem(ModBlocks.JUNIMO_HUT.get(), "item.stardewcraft.junimo_hut.desc",
                     new Item.Properties().stacksTo(1)));
     public static final DeferredItem<Item> EARTH_OBELISK = ITEMS.register("earth_obelisk",
-            () -> new StardewBlockItem(ModBlocks.EARTH_OBELISK.get(), "stardewcraft.type.utility", -1,
+            () -> new WizardBuildingItem(ModBlocks.EARTH_OBELISK.get(), "item.stardewcraft.earth_obelisk.desc",
                     new Item.Properties().stacksTo(1)));
     public static final DeferredItem<Item> WATER_OBELISK = ITEMS.register("water_obelisk",
-            () -> new StardewBlockItem(ModBlocks.WATER_OBELISK.get(), "stardewcraft.type.utility", -1,
+            () -> new WizardBuildingItem(ModBlocks.WATER_OBELISK.get(), "item.stardewcraft.water_obelisk.desc",
                     new Item.Properties().stacksTo(1)));
     public static final DeferredItem<Item> DESERT_OBELISK = ITEMS.register("desert_obelisk",
-            () -> new StardewBlockItem(ModBlocks.DESERT_OBELISK.get(), "stardewcraft.type.utility", -1,
+            () -> new WizardBuildingItem(ModBlocks.DESERT_OBELISK.get(), "item.stardewcraft.desert_obelisk.desc",
                     new Item.Properties().stacksTo(1)));
     public static final DeferredItem<Item> ISLAND_OBELISK = ITEMS.register("island_obelisk",
-            () -> new StardewBlockItem(ModBlocks.ISLAND_OBELISK.get(), "stardewcraft.type.utility", -1,
+            () -> new WizardBuildingItem(ModBlocks.ISLAND_OBELISK.get(), "item.stardewcraft.island_obelisk.desc",
                     new Item.Properties().stacksTo(1)));
     public static final DeferredItem<Item> GOLD_CLOCK = ITEMS.register("gold_clock",
-            () -> new StardewBlockItem(ModBlocks.GOLD_CLOCK.get(), "stardewcraft.type.utility", -1,
+            () -> new WizardBuildingItem(ModBlocks.GOLD_CLOCK.get(), "item.stardewcraft.gold_clock.desc",
                     new Item.Properties().stacksTo(1)));
 
     // ── 装饰：农场常用 (Farm Common Decor) ──────────────────────────
@@ -3241,6 +3184,39 @@ public class ModItems {
     public static final DeferredItem<Item> LONG_POTTED_PLANT = ITEMS.register("long_potted_plant",
             () -> new StardewBlockItem(com.stardew.craft.block.ModBlocks.LONG_POTTED_PLANT.get(),
                     "stardewcraft.type.furniture", -1, new Item.Properties().stacksTo(999)));
+
+    private static java.util.Map<String, DeferredItem<Item>> registerLegacyFlavoredDrinks() {
+        java.util.LinkedHashMap<String, DeferredItem<Item>> items = new java.util.LinkedHashMap<>();
+        for (String source : java.util.List.of(
+                "ancient_fruit", "blueberry", "cranberry", "crystal_fruit", "grape",
+                "hot_pepper", "melon", "powder_melon", "rhubarb", "starfruit", "strawberry"
+        )) {
+            registerLegacyFlavoredDrink(items, source, PreserveType.WINE);
+        }
+        for (String source : java.util.List.of(
+                "amaranth", "artichoke", "beet", "bok_choy", "broccoli", "carrot",
+                "cauliflower", "corn", "eggplant", "garlic", "green_bean", "kale",
+                "parsnip", "potato", "pumpkin", "radish", "red_cabbage",
+                "summer_squash", "tomato", "yam"
+        )) {
+            registerLegacyFlavoredDrink(items, source, PreserveType.JUICE);
+        }
+        return java.util.Collections.unmodifiableMap(items);
+    }
+
+    private static void registerLegacyFlavoredDrink(
+            java.util.Map<String, DeferredItem<Item>> items,
+            String source,
+            PreserveType type
+    ) {
+        String suffix = type == PreserveType.WINE ? "_wine" : "_juice";
+        String legacyId = source + suffix;
+        items.put(legacyId, ITEMS.register(legacyId,
+                () -> new FlavoredArtisanDrinkItem(
+                        type,
+                        net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, source),
+                        new Item.Properties().stacksTo(999))));
+    }
 
     private static DeferredItem<Item> registerHat(String itemId, String vanillaId) {
         return ITEMS.register(itemId,

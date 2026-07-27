@@ -1,5 +1,6 @@
 package com.stardew.craft.blockentity;
 
+import com.stardew.craft.api.v1.machine.StardewMachineCycleKind;
 import com.stardew.craft.blockentity.registry.LightningRodRegistry;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.time.StardewTimeManager;
@@ -60,16 +61,30 @@ public class LightningRodBlockEntity extends TimedProductionBlockEntity {
     @SuppressWarnings("null")
     public void startChargingFromStrike() {
         if (isBusy()) return;
-        product = new ItemStack((net.minecraft.world.level.ItemLike) ModItems.BATTERY_PACK.get());
-        readyAtAbsMinute = getCurrentAbsMinute() + EFFECTIVE_MINUTES_PER_DAY;
-        ready = false;
-        setChanged();
-        syncToClient();
+        ItemStack proposed = new ItemStack(
+                (net.minecraft.world.level.ItemLike)
+                        ModItems.BATTERY_PACK.get());
+        var plan = prepareMachineCycle(
+                StardewMachineCycleKind.ENVIRONMENTAL,
+                ItemStack.EMPTY,
+                proposed,
+                EFFECTIVE_MINUTES_PER_DAY,
+                null,
+                true);
+        plan.ifPresent(value -> restartMachineCycle(
+                value,
+                StardewMachineCycleKind.ENVIRONMENTAL,
+                true));
     }
 
 
     public boolean isReady() {
-        return ready;
+        return refreshReady();
+    }
+
+    @Override
+    protected StardewMachineCycleKind defaultCycleKind() {
+        return StardewMachineCycleKind.ENVIRONMENTAL;
     }
 
     public boolean isWorking() {
@@ -90,16 +105,7 @@ public class LightningRodBlockEntity extends TimedProductionBlockEntity {
     }
 
     public ItemStack harvestOne() {
-        if (!isReady()) {
-            return ItemStack.EMPTY;
-        }
-        ItemStack out = product.copy();
-        product = ItemStack.EMPTY;
-        readyAtAbsMinute = -1;
-        ready = false;
-        setChanged();
-        syncToClient();
-        return out;
+        return collectProduction();
     }
 
     @Override

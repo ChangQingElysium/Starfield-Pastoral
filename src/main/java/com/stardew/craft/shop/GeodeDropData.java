@@ -35,25 +35,27 @@ public final class GeodeDropData {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final AtomicDefinitionStore<StardewGeodeDropDefinition> STORE =
             new AtomicDefinitionStore<>();
-    private static volatile Map<ResourceLocation, StardewGeodeDropDefinition> definitions = Map.of();
-    private static volatile Map<ResourceLocation, ResourceLocation> inputToDefinition = Map.of();
+    private static volatile Catalog catalog = Catalog.empty();
 
     private GeodeDropData() {
     }
 
     public static DefinitionSnapshot<StardewGeodeDropDefinition> snapshot() {
-        return STORE.snapshot();
+        return catalog.definitions();
     }
 
     public static ResourceLocation definitionFor(ItemStack stack) {
         if (stack == null || stack.isEmpty()) return null;
-        return inputToDefinition.get(BuiltInRegistries.ITEM.getKey(stack.getItem()));
+        return catalog.inputToDefinition().get(
+                BuiltInRegistries.ITEM.getKey(stack.getItem()));
     }
 
     public static Optional<ItemStack> roll(ResourceLocation id, ServerPlayer player, Random random) {
-        StardewGeodeDropDefinition definition = definitions.get(id);
+        Catalog current = catalog;
+        StardewGeodeDropDefinition definition =
+                current.definitions().definitions().get(id);
         if (definition == null || player == null) return Optional.empty();
-        if (!isAvailable(id, player)) return Optional.of(ItemStack.EMPTY);
+        if (!isAvailable(definition, player)) return Optional.of(ItemStack.EMPTY);
 
         int totalWeight = definition.entries().stream().mapToInt(StardewGeodeDropDefinition.Entry::weight).sum();
         int selectedWeight = random.nextInt(totalWeight);
@@ -74,8 +76,16 @@ public final class GeodeDropData {
     }
 
     public static boolean isAvailable(ResourceLocation id, ServerPlayer player) {
-        StardewGeodeDropDefinition definition = definitions.get(id);
+        StardewGeodeDropDefinition definition =
+                catalog.definitions().definitions().get(id);
         if (definition == null || player == null) return false;
+        return isAvailable(definition, player);
+    }
+
+    private static boolean isAvailable(
+            StardewGeodeDropDefinition definition,
+            ServerPlayer player
+    ) {
         StardewConditionContext conditionContext = StardewConditionContext.forPlayer(player);
         return definition.availableWhen().stream().allMatch(condition ->
                 StardewConditions.test(condition, conditionContext).result().orElse(false));
@@ -97,38 +107,59 @@ public final class GeodeDropData {
                     .filter(entry -> entry.getKey().getPath().startsWith("drops/"))
                     .forEach(entry -> decode(entry, next, sources, diagnostics));
 
-            Map<ResourceLocation, ResourceLocation> inputIndex = new LinkedHashMap<>();
-            for (Map.Entry<ResourceLocation, StardewGeodeDropDefinition> entry : next.entrySet()) {
-                for (ResourceLocation input : entry.getValue().inputs()) {
-                    ResourceLocation previous = inputIndex.putIfAbsent(input, entry.getKey());
-                    if (previous != null) {
-                        diagnostics.add(DefinitionDiagnostic.error(null, entry.getKey(),
-                                "Input " + input + " is already assigned to " + previous));
-                    }
-                    if (!BuiltInRegistries.ITEM.containsKey(input)) {
-                        diagnostics.add(DefinitionDiagnostic.error(null, entry.getKey(),
-                                "Unknown geode input item " + input));
-                    }
-                }
-            }
-
-            var result = STORE.applyLocal(next, sources, diagnostics);
-            for (DefinitionDiagnostic diagnostic : result.diagnostics()) {
-                if (diagnostic.severity() == DefinitionDiagnostic.Severity.ERROR) {
-                    StardewCraft.LOGGER.error("[Geode drop] {}", diagnostic.message());
-                } else {
-                    StardewCraft.LOGGER.warn("[Geode drop] {}", diagnostic.message());
-                }
-            }
-            if (!result.accepted()) {
-                StardewCraft.LOGGER.error("[Geode drop] Rejected reload; keeping {} custom geodes",
-                        definitions.size());
-                return;
-            }
-            definitions = result.snapshot().definitions();
-            inputToDefinition = Map.copyOf(inputIndex);
-            StardewCraft.LOGGER.info("[Geode drop] Applied {} custom geodes", definitions.size());
+            applyCandidate(next, sources, diagnostics);
         }
+    }
+
+    static synchronized void applyCandidate(
+            Map<ResourceLocation, StardewGeodeDropDefinition> definitions,
+            Map<ResourceLocation, String> sources,
+            List<DefinitionDiagnostic> diagnostics
+    ) {
+        List<DefinitionDiagnostic> preparedDiagnostics =
+                new ArrayList<>(diagnostics);
+        Map<ResourceLocation, ResourceLocation> inputIndex =
+                new LinkedHashMap<>();
+        for (Map.Entry<ResourceLocation, StardewGeodeDropDefinition> entry
+                : definitions.entrySet()) {
+            for (ResourceLocation input : entry.getValue().inputs()) {
+                ResourceLocation previous =
+                        inputIndex.putIfAbsent(input, entry.getKey());
+                if (previous != null) {
+                    preparedDiagnostics.add(DefinitionDiagnostic.error(
+                            null, entry.getKey(),
+                            "Input " + input
+                                    + " is already assigned to " + previous));
+                }
+                if (!BuiltInRegistries.ITEM.containsKey(input)) {
+                    preparedDiagnostics.add(DefinitionDiagnostic.error(
+                            null, entry.getKey(),
+                            "Unknown geode input item " + input));
+                }
+            }
+        }
+
+        var result = STORE.applyLocal(
+                definitions, sources, preparedDiagnostics);
+        for (DefinitionDiagnostic diagnostic : result.diagnostics()) {
+            if (diagnostic.severity() == DefinitionDiagnostic.Severity.ERROR) {
+                StardewCraft.LOGGER.error(
+                        "[Geode drop] {}", diagnostic.message());
+            } else {
+                StardewCraft.LOGGER.warn(
+                        "[Geode drop] {}", diagnostic.message());
+            }
+        }
+        if (!result.accepted()) {
+            StardewCraft.LOGGER.error(
+                    "[Geode drop] Rejected reload; keeping {} custom geodes",
+                    catalog.definitions().definitions().size());
+            return;
+        }
+        catalog = new Catalog(result.snapshot(), inputIndex);
+        StardewCraft.LOGGER.info(
+                "[Geode drop] Applied {} custom geodes",
+                catalog.definitions().definitions().size());
     }
 
     private static void decode(
@@ -152,5 +183,24 @@ public final class GeodeDropData {
                                     DefinitionDiagnostic.error(entry.getKey(), id, message)))
                             .ifPresent(encoded -> sources.put(id, GSON.toJson(encoded)));
                 });
+    }
+
+    static Catalog catalog() {
+        return catalog;
+    }
+
+    record Catalog(
+            DefinitionSnapshot<StardewGeodeDropDefinition> definitions,
+            Map<ResourceLocation, ResourceLocation> inputToDefinition
+    ) {
+        Catalog {
+            definitions = java.util.Objects.requireNonNull(
+                    definitions, "definitions");
+            inputToDefinition = Map.copyOf(inputToDefinition);
+        }
+
+        private static Catalog empty() {
+            return new Catalog(DefinitionSnapshot.empty(), Map.of());
+        }
     }
 }

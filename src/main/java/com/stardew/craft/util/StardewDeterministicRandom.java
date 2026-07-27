@@ -64,6 +64,10 @@ public final class StardewDeterministicRandom {
         return (int) (sample() * maxExclusive);
     }
 
+    public double nextDouble() {
+        return sample();
+    }
+
     private double sample() {
         return internalSample() * (1.0D / MBIG);
     }

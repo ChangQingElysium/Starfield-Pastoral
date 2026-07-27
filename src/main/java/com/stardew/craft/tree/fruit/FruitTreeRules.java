@@ -1,6 +1,7 @@
 package com.stardew.craft.tree.fruit;
 
 import com.stardew.craft.api.v1.agriculture.StardewTreeData;
+import com.stardew.craft.api.v1.internal.tree.StardewTreeRuntimeRegistry;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.tree.WildTreeSaplingBlock;
 import com.stardew.craft.block.tree.fruit.FruitTreeBlock;
@@ -116,6 +117,8 @@ public final class FruitTreeRules {
         if (state.getBlock() instanceof WildTreeSaplingBlock) {
             return true;
         }
-        return WildTrees.isAnyWildTreeTrunk0(state) || WildTrees.findByModernRoot(state) != null;
+        return WildTrees.isAnyWildTreeTrunk0(state)
+                || WildTrees.findByModernRoot(state) != null
+                || StardewTreeRuntimeRegistry.inspectAddon(level, pos) != null;
     }
 }

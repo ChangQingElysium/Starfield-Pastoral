@@ -108,7 +108,7 @@ public record FarmListSyncPayload(
                     farm.getOwnerUUID(),
                     com.stardew.craft.player.PlayerDisplayName.get(player.server, farm.getOwnerUUID()),
                     farm.getFarmName(),
-                    farm.getFarmType().getId(),
+                    farm.getFarmLayoutId().toString(),
                     perm,
                     isMember
             ));

@@ -1,8 +1,0 @@
-{
-    "parent":  "minecraft:item/generated",
-    "textures":  {
-                     "layer0":  "stardewcraft:item/artisan/wine/crystal_fruit",
-                     "layer1":  "stardewcraft:item/quality/silver_star",
-                     "particle":  "stardewcraft:item/artisan/wine/crystal_fruit"
-                 }
-}

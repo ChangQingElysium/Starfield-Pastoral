@@ -2,6 +2,7 @@ package com.stardew.craft.data;
 
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.api.v1.item.StardewItemData;
+import com.stardew.craft.api.v1.item.StardewFoodEffectData;
 import com.stardew.craft.api.v1.equipment.StardewEquipmentData;
 import com.stardew.craft.api.v1.agriculture.StardewAnimalData;
 import com.stardew.craft.api.v1.agriculture.StardewBuildingData;
@@ -13,6 +14,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.registries.datamaps.DataMapType;
+import net.neoforged.neoforge.registries.datamaps.AdvancedDataMapType;
 import net.neoforged.neoforge.registries.datamaps.RegisterDataMapTypesEvent;
 
 /** Data Maps owned by the public StardewCraft content API. */
@@ -22,6 +24,15 @@ public final class StardewDataMaps {
             Registries.ITEM,
             StardewItemData.CODEC
     ).synced(StardewItemData.CODEC, false).build();
+
+    public static final DataMapType<Item, StardewFoodEffectData> FOOD_EFFECTS =
+            AdvancedDataMapType.builder(
+                    ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "stardew_food_effects"),
+                    Registries.ITEM,
+                    StardewFoodEffectData.CODEC
+            ).merger((registry, first, firstValue, second, secondValue) -> firstValue.merge(secondValue))
+                    .synced(StardewFoodEffectData.CODEC, false)
+                    .build();
 
     public static final DataMapType<Item, StardewEquipmentData> EQUIPMENT_DATA = DataMapType.builder(
             ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "stardew_equipment_data"),
@@ -58,6 +69,7 @@ public final class StardewDataMaps {
 
     public static void registerDataMaps(RegisterDataMapTypesEvent event) {
         event.register(ITEM_DATA);
+        event.register(FOOD_EFFECTS);
         event.register(EQUIPMENT_DATA);
         event.register(CROP_DATA);
         event.register(TREE_DATA);

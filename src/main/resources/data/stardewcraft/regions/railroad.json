@@ -1,0 +1,10 @@
+{
+  "dimension": "stardewcraft:stardew_valley",
+  "location": "stardewcraft:railroad",
+  "include": {
+    "min": [-39, 80, -214],
+    "max": [101, 95, -152]
+  },
+  "tags": ["stardewcraft:outdoor", "stardewcraft:railroad"],
+  "priority": -100
+}

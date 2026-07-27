@@ -69,23 +69,16 @@ public final class FishingDataManager {
 	private static volatile FishingDataManager INSTANCE = new FishingDataManager(
 			Collections.singletonMap("Default", FishingLocationData.defaultFallback())
 	);
-	/** 缓存原始 JSON（SoftReference），内存紧张时可被 GC 回收 */
-	private static volatile java.lang.ref.SoftReference<String> CACHED_JSON_REF = new java.lang.ref.SoftReference<>(null);
 
 	/** 获取缓存的 JSON（服务端调用）。若 GC 回收则重新序列化 */
 	public static String getCachedJson() {
-		String json = CACHED_JSON_REF.get();
-		if (json != null) return json;
-		json = rebuildCacheJson();
-		CACHED_JSON_REF = new java.lang.ref.SoftReference<>(json);
-		return json;
+		return INSTANCE.cachedJson();
 	}
 
-	private static String rebuildCacheJson() {
-		Map<String, FishingLocationData> current = INSTANCE.byLocationKey;
-		if (current.isEmpty()) return "";
+	private String rebuildCacheJson() {
+		if (byLocationKey.isEmpty()) return "";
 		com.google.gson.JsonObject cacheRoot = new com.google.gson.JsonObject();
-		for (Map.Entry<String, FishingLocationData> me : current.entrySet()) {
+		for (Map.Entry<String, FishingLocationData> me : byLocationKey.entrySet()) {
 			com.google.gson.JsonObject locObj = new com.google.gson.JsonObject();
 			locObj.addProperty("location", me.getValue().locationKey());
 			com.google.gson.JsonArray fishArr = new com.google.gson.JsonArray();
@@ -109,7 +102,8 @@ public final class FishingDataManager {
 				loaded.put(entry.getKey(), data);
 			}
 			loaded.putIfAbsent("Default", FishingLocationData.defaultFallback());
-			INSTANCE = new FishingDataManager(Collections.unmodifiableMap(loaded));
+			INSTANCE = new FishingDataManager(
+					Collections.unmodifiableMap(loaded));
 			StardewCraft.LOGGER.info("[DATA-SYNC] Applied fishing data from network: {}", loaded.keySet());
 		} catch (Exception e) {
 			StardewCraft.LOGGER.error("[DATA-SYNC] Failed to apply fishing JSON", e);
@@ -134,9 +128,19 @@ public final class FishingDataManager {
 	}
 
 	private final Map<String, FishingLocationData> byLocationKey;
+	private volatile java.lang.ref.SoftReference<String> cachedJson;
 
 	private FishingDataManager(Map<String, FishingLocationData> byLocationKey) {
 		this.byLocationKey = byLocationKey;
+		this.cachedJson = new java.lang.ref.SoftReference<>(null);
+	}
+
+	private String cachedJson() {
+		String json = cachedJson.get();
+		if (json != null) return json;
+		json = rebuildCacheJson();
+		cachedJson = new java.lang.ref.SoftReference<>(json);
+		return json;
 	}
 
 	/**
@@ -616,6 +620,18 @@ public final class FishingDataManager {
 			ServerLevel level,
 			Holder<Biome> biomeHolder,
 			BlockPos position) {
+		return com.stardew.craft.api.v1.internal.fishing.StardewFishingLocationKeyRegistry
+				.resolve(
+						level,
+						biomeHolder,
+						position,
+						resolveCoreLocationKeys(level, biomeHolder, position));
+	}
+
+	private static List<String> resolveCoreLocationKeys(
+			ServerLevel level,
+			Holder<Biome> biomeHolder,
+			BlockPos position) {
 		if (com.stardew.craft.festival.nightmarket.NightMarketSubmarineService
 				.isInsideSubmarineBounds(position)) {
 			return List.of("Submarine");
@@ -819,7 +835,22 @@ public final class FishingDataManager {
 
 	private static boolean matchesVanillaCondition(ServerPlayer player, ServerLevel level, BlockPos bobberPos,
 									  Holder<Biome> biomeHolder, SpawnFishRule rule, boolean usingMagicBait) {
-		return evalGsqCondition(player, level, bobberPos, biomeHolder, rule.condition(), usingMagicBait);
+		boolean proposed = evalGsqCondition(
+				player,
+				level,
+				bobberPos,
+				biomeHolder,
+				rule.condition(),
+				usingMagicBait);
+		return com.stardew.craft.api.v1.internal.fishing
+				.StardewFishingRuleConditionRegistry.evaluate(
+						player,
+						level,
+						bobberPos,
+						biomeHolder,
+						rule,
+						usingMagicBait,
+						proposed);
 	}
 
 	/** SDV {@code GameStateQuery.CheckConditions}: evaluates a free-form condition string. */
@@ -1234,9 +1265,6 @@ public final class FishingDataManager {
 			// 确保至少有 Default
 			loaded.putIfAbsent("Default", FishingLocationData.defaultFallback());
 			INSTANCE = new FishingDataManager(Collections.unmodifiableMap(loaded));
-
-			// 清除旧的缓存引用，下次 getCachedJson() 时按需重建
-			CACHED_JSON_REF = new java.lang.ref.SoftReference<>(null);
 
 			StardewCraft.LOGGER.info("Loaded fishing locations: {}", INSTANCE.byLocationKey.keySet());
 		}

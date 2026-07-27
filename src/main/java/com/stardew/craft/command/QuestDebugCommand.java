@@ -277,8 +277,7 @@ public final class QuestDebugCommand {
         if (mgr == null) return fail(context, "stardewcraft.command.quest.no_data");
         StardewQuest quest = mgr.getQuest(questId);
         if (quest == null) return fail(context, "stardewcraft.command.quest.not_active", questId);
-        quest.questComplete(target);
-        mgr.cleanupDestroyed(target);
+        mgr.completeActiveQuest(questId, target);
         context.getSource().sendSuccess(() -> Component.translatable(
             "stardewcraft.command.quest.completed_for", questId,
                 com.stardew.craft.player.PlayerDisplayName.get(target)), false);

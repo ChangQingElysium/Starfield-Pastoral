@@ -5,37 +5,17 @@
     { "input": "stardewcraft:hops", "output": "stardewcraft:pale_ale", "minutes": 1260 },
     { "input": "stardewcraft:honey", "output": "stardewcraft:mead", "minutes": 600 },
     { "input": "stardewcraft:coffee_bean", "output": "stardewcraft:coffee", "minutes": 120, "consume": 5 },
-
-    { "input": "stardewcraft:ancient_fruit", "output": "stardewcraft:ancient_fruit_wine", "minutes": 8820 },
-    { "input": "stardewcraft:blueberry", "output": "stardewcraft:blueberry_wine", "minutes": 8820 },
-    { "input": "stardewcraft:cranberry", "output": "stardewcraft:cranberry_wine", "minutes": 8820 },
-    { "input": "stardewcraft:grape", "output": "stardewcraft:grape_wine", "minutes": 8820 },
-    { "input": "stardewcraft:hot_pepper", "output": "stardewcraft:hot_pepper_wine", "minutes": 8820 },
-    { "input": "stardewcraft:melon", "output": "stardewcraft:melon_wine", "minutes": 8820 },
-    { "input": "stardewcraft:powder_melon", "output": "stardewcraft:powder_melon_wine", "minutes": 8820 },
-    { "input": "stardewcraft:rhubarb", "output": "stardewcraft:rhubarb_wine", "minutes": 8820 },
-    { "input": "stardewcraft:starfruit", "output": "stardewcraft:starfruit_wine", "minutes": 8820 },
-    { "input": "stardewcraft:strawberry", "output": "stardewcraft:strawberry_wine", "minutes": 8820 },
-
-    { "input": "stardewcraft:amaranth", "output": "stardewcraft:amaranth_juice", "minutes": 5040 },
-    { "input": "stardewcraft:artichoke", "output": "stardewcraft:artichoke_juice", "minutes": 5040 },
-    { "input": "stardewcraft:beet", "output": "stardewcraft:beet_juice", "minutes": 5040 },
-    { "input": "stardewcraft:bok_choy", "output": "stardewcraft:bok_choy_juice", "minutes": 5040 },
-    { "input": "stardewcraft:broccoli", "output": "stardewcraft:broccoli_juice", "minutes": 5040 },
-    { "input": "stardewcraft:carrot", "output": "stardewcraft:carrot_juice", "minutes": 5040 },
-    { "input": "stardewcraft:cauliflower", "output": "stardewcraft:cauliflower_juice", "minutes": 5040 },
-    { "input": "stardewcraft:corn", "output": "stardewcraft:corn_juice", "minutes": 5040 },
-    { "input": "stardewcraft:eggplant", "output": "stardewcraft:eggplant_juice", "minutes": 5040 },
-    { "input": "stardewcraft:garlic", "output": "stardewcraft:garlic_juice", "minutes": 5040 },
-    { "input": "stardewcraft:green_bean", "output": "stardewcraft:green_bean_juice", "minutes": 5040 },
-    { "input": "stardewcraft:kale", "output": "stardewcraft:kale_juice", "minutes": 5040 },
-    { "input": "stardewcraft:parsnip", "output": "stardewcraft:parsnip_juice", "minutes": 5040 },
-    { "input": "stardewcraft:potato", "output": "stardewcraft:potato_juice", "minutes": 5040 },
-    { "input": "stardewcraft:pumpkin", "output": "stardewcraft:pumpkin_juice", "minutes": 5040 },
-    { "input": "stardewcraft:radish", "output": "stardewcraft:radish_juice", "minutes": 5040 },
-    { "input": "stardewcraft:red_cabbage", "output": "stardewcraft:red_cabbage_juice", "minutes": 5040 },
-    { "input": "stardewcraft:summer_squash", "output": "stardewcraft:summer_squash_juice", "minutes": 5040 },
-    { "input": "stardewcraft:tomato", "output": "stardewcraft:tomato_juice", "minutes": 5040 },
-    { "input": "stardewcraft:yam", "output": "stardewcraft:yam_juice", "minutes": 5040 }
+    {
+      "tag": "stardewcraft:keg_juice_inputs",
+      "output": "stardewcraft:juice",
+      "minutes": 5040,
+      "preserveType": "JUICE"
+    },
+    {
+      "tag": "stardewcraft:keg_wine_inputs",
+      "output": "stardewcraft:wine",
+      "minutes": 8820,
+      "preserveType": "WINE"
+    }
   ]
 }

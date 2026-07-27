@@ -37,18 +37,19 @@ public final class PrizeTicketRewardData {
             ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "rewards");
     private static final AtomicDefinitionStore<StardewPrizeTicketRewardDefinition> STORE =
             new AtomicDefinitionStore<>();
-    private static volatile List<Map.Entry<ResourceLocation, StardewPrizeTicketRewardDefinition>> ordered = List.of();
+    private static volatile Catalog catalog = Catalog.empty();
 
     private PrizeTicketRewardData() {
     }
 
     public static DefinitionSnapshot<StardewPrizeTicketRewardDefinition> snapshot() {
-        return STORE.snapshot();
+        return catalog.definitions();
     }
 
     public static Optional<ItemStack> resolve(ServerPlayer player, int prizeLevel, Random random) {
         StardewConditionContext conditionContext = StardewConditionContext.forPlayer(player);
-        for (Map.Entry<ResourceLocation, StardewPrizeTicketRewardDefinition> entry : ordered) {
+        for (Map.Entry<ResourceLocation, StardewPrizeTicketRewardDefinition> entry
+                : catalog.ordered()) {
             StardewPrizeTicketRewardDefinition definition = entry.getValue();
             if (!definition.matches(prizeLevel)) continue;
             boolean available = definition.availableWhen().stream().allMatch(condition ->
@@ -85,20 +86,40 @@ public final class PrizeTicketRewardData {
                                 entry.getValue(), definitions, sources, diagnostics);
                     });
 
-            var result = STORE.applyLocal(definitions, sources, diagnostics);
-            logDiagnostics(result.diagnostics());
-            if (!result.accepted()) {
-                StardewCraft.LOGGER.error("[Prize ticket] Rejected reload; keeping {} rewards", ordered.size());
-                return;
-            }
-            ordered = result.snapshot().definitions().entrySet().stream()
-                    .sorted(Comparator
-                            .<Map.Entry<ResourceLocation, StardewPrizeTicketRewardDefinition>>comparingInt(
-                                    entry -> entry.getValue().priority()).reversed()
-                            .thenComparing(entry -> entry.getKey().toString()))
-                    .toList();
-            StardewCraft.LOGGER.info("[Prize ticket] Applied {} rewards", ordered.size());
+            applyCandidate(definitions, sources, diagnostics);
         }
+    }
+
+    static synchronized void applyCandidate(
+            Map<ResourceLocation, StardewPrizeTicketRewardDefinition> definitions,
+            Map<ResourceLocation, String> sources,
+            List<DefinitionDiagnostic> diagnostics
+    ) {
+        List<Map.Entry<ResourceLocation,
+                StardewPrizeTicketRewardDefinition>> prepared =
+                definitions.entrySet().stream()
+                        .sorted(Comparator
+                                .<Map.Entry<ResourceLocation,
+                                        StardewPrizeTicketRewardDefinition>>
+                                        comparingInt(entry ->
+                                                entry.getValue().priority())
+                                .reversed()
+                                .thenComparing(entry ->
+                                        entry.getKey().toString()))
+                        .toList();
+        var result = STORE.applyLocal(
+                definitions, sources, diagnostics);
+        logDiagnostics(result.diagnostics());
+        if (!result.accepted()) {
+            StardewCraft.LOGGER.error(
+                    "[Prize ticket] Rejected reload; keeping {} rewards",
+                    catalog.ordered().size());
+            return;
+        }
+        catalog = new Catalog(result.snapshot(), prepared);
+        StardewCraft.LOGGER.info(
+                "[Prize ticket] Applied {} rewards",
+                catalog.ordered().size());
     }
 
     private static void decodeBuiltinTable(
@@ -158,6 +179,27 @@ public final class PrizeTicketRewardData {
             } else {
                 StardewCraft.LOGGER.warn("[Prize ticket] {}", diagnostic.message());
             }
+        }
+    }
+
+    static Catalog catalog() {
+        return catalog;
+    }
+
+    record Catalog(
+            DefinitionSnapshot<StardewPrizeTicketRewardDefinition> definitions,
+            List<Map.Entry<ResourceLocation,
+                    StardewPrizeTicketRewardDefinition>> ordered
+    ) {
+        Catalog {
+            definitions = java.util.Objects.requireNonNull(
+                    definitions, "definitions");
+            ordered = List.copyOf(ordered);
+        }
+
+        private static Catalog empty() {
+            return new Catalog(
+                    DefinitionSnapshot.empty(), List.of());
         }
     }
 }

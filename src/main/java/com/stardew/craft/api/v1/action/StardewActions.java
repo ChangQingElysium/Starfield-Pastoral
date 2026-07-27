@@ -6,16 +6,23 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JsonOps;
+import com.stardew.craft.api.v1.content.StardewContentKey;
+import com.stardew.craft.api.v1.content.StardewContentReference;
+import com.stardew.craft.api.v1.content.StardewTypedContentReferenceProvider;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.List;
 
 /** Public registry and codec for server-authoritative content actions. */
 public final class StardewActions {
     private static final Map<ResourceLocation, StardewActionType<?>> TYPES = new LinkedHashMap<>();
+    private static final Map<ResourceLocation,
+            StardewTypedContentReferenceProvider<?>>
+            REFERENCE_PROVIDERS = new LinkedHashMap<>();
 
     public static final Codec<StardewAction> CODEC = Codec.PASSTHROUGH.flatXmap(
             StardewActions::decodeDynamic,
@@ -39,6 +46,17 @@ public final class StardewActions {
             StardewActionExecutor<T> executor
     ) {
         register(id, new StardewActionType<>(codec, executor));
+    }
+
+    public static synchronized <T> void register(
+            ResourceLocation id,
+            Codec<T> codec,
+            StardewActionExecutor<T> executor,
+            StardewTypedContentReferenceProvider<T> references
+    ) {
+        Objects.requireNonNull(references, "references");
+        register(id, new StardewActionType<>(codec, executor));
+        REFERENCE_PROVIDERS.put(id, references);
     }
 
     public static synchronized Set<ResourceLocation> registeredIds() {
@@ -71,6 +89,30 @@ public final class StardewActions {
             return DataResult.success(result);
         } catch (RuntimeException exception) {
             return DataResult.error(() -> "Action " + action.type() + " failed: " + exception.getMessage());
+        }
+    }
+
+    public static DataResult<List<StardewContentReference>>
+    contentReferences(
+            StardewContentKey owner,
+            StardewAction action
+    ) {
+        Objects.requireNonNull(owner, "owner");
+        Objects.requireNonNull(action, "action");
+        StardewTypedContentReferenceProvider<?> provider =
+                REFERENCE_PROVIDERS.get(action.type());
+        if (provider == null) {
+            return DataResult.success(List.of());
+        }
+        try {
+            return DataResult.success(
+                    extractReferences(
+                            provider, owner, action.data()));
+        } catch (RuntimeException exception) {
+            return DataResult.error(() ->
+                    "Action reference provider "
+                            + action.type() + " failed: "
+                            + exception.getMessage());
         }
     }
 
@@ -128,6 +170,19 @@ public final class StardewActions {
             Object data
     ) {
         return type.executor().execute(context, (T) data);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> List<StardewContentReference>
+    extractReferences(
+            StardewTypedContentReferenceProvider<T> provider,
+            StardewContentKey owner,
+            Object data
+    ) {
+        var references = provider.references(owner, (T) data);
+        return List.copyOf(Objects.requireNonNull(
+                references,
+                "action reference provider result"));
     }
 
     private static void requireNamespaced(ResourceLocation id) {

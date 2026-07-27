@@ -6,6 +6,10 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.api.v1.action.StardewActionResult;
 import com.stardew.craft.api.v1.action.StardewActions;
 import com.stardew.craft.api.v1.condition.StardewConditions;
+import com.stardew.craft.api.v1.content.StardewContentKey;
+import com.stardew.craft.api.v1.content.StardewContentReference;
+import com.stardew.craft.api.v1.content.StardewContentReferenceRoles;
+import com.stardew.craft.api.v1.content.StardewContentTypes;
 import com.stardew.craft.api.v1.query.StardewItemQueries;
 import com.stardew.craft.api.v1.query.StardewItemQuery;
 import com.stardew.craft.quest.data.BuiltinQuestObjectiveTypes;
@@ -23,7 +27,9 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 
 /** Registers the built-in v1 condition, query and action types. */
 public final class BuiltinApiTypes {
@@ -53,7 +59,21 @@ public final class BuiltinApiTypes {
             }
             Item item = BuiltInRegistries.ITEM.get(data.item());
             return context.player().getInventory().countItem(item) >= data.count();
-        });
+        }, (owner, data) -> List.of(reference(
+                StardewContentReferenceRoles.CONDITION_ITEM,
+                StardewContentTypes.ITEM,
+                data.item())));
+
+        StardewConditions.register(id("lacks_item"), HasItemCondition.CODEC, (context, data) -> {
+            if (context.player() == null || !BuiltInRegistries.ITEM.containsKey(data.item())) {
+                return false;
+            }
+            Item item = BuiltInRegistries.ITEM.get(data.item());
+            return context.player().getInventory().countItem(item) < data.count();
+        }, (owner, data) -> List.of(reference(
+                StardewContentReferenceRoles.CONDITION_ITEM,
+                StardewContentTypes.ITEM,
+                data.item())));
 
         StardewConditions.register(id("money"), MoneyCondition.CODEC, (context, data) -> {
             if (context.player() == null) {
@@ -89,6 +109,71 @@ public final class BuiltinApiTypes {
             };
             return data.seasons().contains(season);
         });
+
+        StardewConditions.register(id("time"), TimeCondition.CODEC,
+                (context, data) -> data.includes(
+                        com.stardew.craft.time.StardewTimeManager
+                                .get().getCurrentTime()));
+
+        StardewConditions.register(id("seen_event"), SeenEventCondition.CODEC, (context, data) -> {
+            if (context.player() == null) {
+                return false;
+            }
+            java.util.UUID playerId = context.player().getUUID();
+            if ("host".equals(data.scope())) {
+                java.util.UUID owner =
+                        com.stardew.craft.farm.FarmInstanceRegistry.get(
+                                        context.level().getServer())
+                                .getOwnerForPlayer(playerId);
+                if (owner != null) {
+                    playerId = owner;
+                }
+            }
+            return com.stardew.craft.cutscene.server.EventSeenData.get(context.level())
+                    .hasSeen(playerId, data.id());
+        });
+
+        StardewConditions.register(
+                id("location"), LocationCondition.CODEC,
+                (context, data) -> {
+                    if (context.player() == null) {
+                        return false;
+                    }
+                    var location = com.stardew.craft.api.v1.world
+                            .StardewLocations.find(
+                                    context.level(),
+                                    context.player().blockPosition())
+                            .orElse(null);
+                    if (location == null) {
+                        return false;
+                    }
+                    if (!data.locations().isEmpty()
+                            && data.locations().stream().noneMatch(
+                                    expected -> com.stardew.craft.api.v1
+                                            .world.StardewLocations.isWithin(
+                                                    location.id(),
+                                                    expected))) {
+                        return false;
+                    }
+                    if (!location.tags().containsAll(
+                            data.requiredTags())) {
+                        return false;
+                    }
+                    if (data.excludedTags().stream()
+                            .anyMatch(location.tags()::contains)) {
+                        return false;
+                    }
+                    return data.properties().entrySet().stream()
+                            .allMatch(entry -> entry.getValue().equals(
+                                    location.properties().get(
+                                            entry.getKey())));
+                },
+                (owner, data) -> data.locations().stream()
+                        .map(location -> reference(
+                                StardewContentReferenceRoles.LOCATION,
+                                StardewContentTypes.LOCATION,
+                                location))
+                        .toList());
     }
 
     private static void registerItemQueries() {
@@ -97,7 +182,10 @@ public final class BuiltinApiTypes {
                 return List.of();
             }
             return List.of(new ItemStack(BuiltInRegistries.ITEM.get(data.item()), data.count()));
-        });
+        }, (owner, data) -> List.of(reference(
+                StardewContentReferenceRoles.QUERY_ITEM,
+                StardewContentTypes.ITEM,
+                data.item())));
 
         StardewItemQueries.register(id("random_tag"), RandomTagQuery.CODEC, (context, data) -> {
             TagKey<Item> tag = TagKey.create(Registries.ITEM, data.tag());
@@ -121,7 +209,12 @@ public final class BuiltinApiTypes {
             }
             Item item = candidates.get(context.random().nextInt(candidates.size()));
             return List.of(new ItemStack(item, data.count()));
-        });
+        }, (owner, data) -> data.items().stream()
+                .map(item -> reference(
+                        StardewContentReferenceRoles.QUERY_ITEM,
+                        StardewContentTypes.ITEM,
+                        item))
+                .toList());
 
         StardewItemQueries.register(id("random_count"), RandomCountItemQuery.CODEC, (context, data) -> {
             int count = data.minCount() == data.maxCount()
@@ -134,12 +227,16 @@ public final class BuiltinApiTypes {
                         return copy;
                     })
                     .toList();
-        });
+        }, (owner, data) -> StardewItemQueries.contentReferences(
+                owner, data.query()).getOrThrow());
 
         StardewItemQueries.register(id("one_of_queries"), OneOfQueriesItemQuery.CODEC, (context, data) -> {
             StardewItemQuery selected = data.queries().get(context.random().nextInt(data.queries().size()));
             return StardewItemQueries.resolve(selected, context).result().orElse(List.of());
-        });
+        }, (owner, data) -> data.queries().stream()
+                .flatMap(query -> StardewItemQueries.contentReferences(
+                        owner, query).getOrThrow().stream())
+                .toList());
 
         StardewItemQueries.register(id("weighted"), WeightedItemQuery.CODEC, (context, data) -> {
             long totalWeight = data.entries().stream().mapToLong(WeightedQueryEntry::weight).sum();
@@ -151,7 +248,10 @@ public final class BuiltinApiTypes {
                 }
             }
             return List.of();
-        });
+        }, (owner, data) -> data.entries().stream()
+                .flatMap(entry -> StardewItemQueries.contentReferences(
+                        owner, entry.query()).getOrThrow().stream())
+                .toList());
     }
 
     private static void registerActions() {
@@ -187,7 +287,10 @@ public final class BuiltinApiTypes {
                 context.player().drop(stack, false);
             }
             return StardewActionResult.ok();
-        });
+        }, (owner, data) -> List.of(reference(
+                StardewContentReferenceRoles.ACTION_ITEM,
+                StardewContentTypes.ITEM,
+                data.item())));
 
         StardewActions.register(id("remove_item"), RemoveItemAction.CODEC, (context, data) -> {
             if (!BuiltInRegistries.ITEM.containsKey(data.item())) {
@@ -211,7 +314,10 @@ public final class BuiltinApiTypes {
             }
             context.player().inventoryMenu.broadcastChanges();
             return StardewActionResult.ok();
-        });
+        }, (owner, data) -> List.of(reference(
+                StardewContentReferenceRoles.ACTION_ITEM,
+                StardewContentTypes.ITEM,
+                data.item())));
 
         StardewActions.register(id("start_quest"), StartQuestAction.CODEC, (context, data) -> {
             if (QuestDataLoader.createQuest(data.quest()) == null) {
@@ -223,7 +329,8 @@ public final class BuiltinApiTypes {
             }
             manager.acceptQuest(data.quest(), context.player());
             return StardewActionResult.ok();
-        });
+        }, (owner, data) -> questReference(
+                owner, data.quest()));
 
         StardewActions.register(id("remove_quest"), RemoveQuestAction.CODEC, (context, data) -> {
             QuestManager manager = QuestManager.of(context.player());
@@ -232,7 +339,8 @@ public final class BuiltinApiTypes {
             }
             manager.removeQuest(data.quest(), context.player());
             return StardewActionResult.ok();
-        });
+        }, (owner, data) -> questReference(
+                owner, data.quest()));
 
         StardewActions.register(id("apply_unlock_source"), ApplyUnlockSourceAction.CODEC, (context, data) -> {
             if (!com.stardew.craft.player.UnlockSourceData.hasSource(data.source())) {
@@ -241,6 +349,43 @@ public final class BuiltinApiTypes {
             PlayerStardewDataAPI.applyUnlockSource(context.player(), data.source());
             return StardewActionResult.ok();
         });
+    }
+
+    private static StardewContentReference reference(
+            ResourceLocation role,
+            ResourceLocation type,
+            ResourceLocation target
+    ) {
+        return StardewContentReference.required(
+                role, new StardewContentKey(type, target));
+    }
+
+    private static List<StardewContentReference> questReference(
+            StardewContentKey owner,
+            String rawQuest
+    ) {
+        ResourceLocation quest = ownedReference(owner, rawQuest);
+        return quest == null
+                ? List.of()
+                : List.of(reference(
+                        StardewContentReferenceRoles.QUEST,
+                        StardewContentTypes.QUEST,
+                        quest));
+    }
+
+    private static ResourceLocation ownedReference(
+            StardewContentKey owner,
+            String raw
+    ) {
+        if (raw == null || raw.isBlank()) {
+            return null;
+        }
+        String normalized = raw.trim().toLowerCase(
+                java.util.Locale.ROOT);
+        return normalized.indexOf(':') >= 0
+                ? ResourceLocation.tryParse(normalized)
+                : ResourceLocation.tryBuild(
+                        owner.id().getNamespace(), normalized);
     }
 
     private static ResourceLocation id(String path) {
@@ -299,6 +444,131 @@ public final class BuiltinApiTypes {
             }
             return com.mojang.serialization.DataResult.success(data);
         });
+    }
+
+    private record TimeCondition(int start, int end) {
+        private static final Codec<TimeCondition> CODEC =
+                RecordCodecBuilder.<TimeCondition>create(
+                        instance -> instance.group(
+                        Codec.intRange(0, 2600).optionalFieldOf(
+                                        "start", 0)
+                                .forGetter(TimeCondition::start),
+                        Codec.intRange(0, 2600).optionalFieldOf(
+                                        "end", 2600)
+                                .forGetter(TimeCondition::end)
+                ).apply(instance, TimeCondition::new))
+                        .validate(value -> validHhmm(value.start())
+                                        && validHhmm(value.end())
+                                ? com.mojang.serialization.DataResult
+                                        .success(value)
+                                : com.mojang.serialization.DataResult
+                                        .error(() ->
+                                                "time values must use HHMM with minutes below 60"));
+
+        private boolean includes(int currentMinutes) {
+            int startMinutes = toMinutes(start);
+            int endMinutes = toMinutes(end);
+            if (startMinutes == endMinutes) {
+                return true;
+            }
+            return startMinutes < endMinutes
+                    ? currentMinutes >= startMinutes
+                            && currentMinutes < endMinutes
+                    : currentMinutes >= startMinutes
+                            || currentMinutes < endMinutes;
+        }
+
+        private static boolean validHhmm(int value) {
+            return value / 100 <= 26 && value % 100 < 60;
+        }
+
+        private static int toMinutes(int value) {
+            return value / 100 * 60 + value % 100;
+        }
+    }
+
+    private record SeenEventCondition(String id, String scope) {
+        private static final Codec<SeenEventCondition> CODEC =
+                RecordCodecBuilder.<SeenEventCondition>create(instance -> instance.group(
+                        Codec.STRING.fieldOf("id").forGetter(SeenEventCondition::id),
+                        Codec.STRING.optionalFieldOf("scope", "current")
+                                .forGetter(SeenEventCondition::scope)
+                ).apply(instance, SeenEventCondition::new))
+                        .validate(value -> List.of("current", "host")
+                                        .contains(value.scope())
+                                ? com.mojang.serialization.DataResult.success(value)
+                                : com.mojang.serialization.DataResult.error(
+                                        () -> "seen_event.scope must be current or host"));
+    }
+
+    private record LocationCondition(
+            List<ResourceLocation> locations,
+            List<ResourceLocation> requiredTags,
+            List<ResourceLocation> excludedTags,
+            Map<ResourceLocation, String> properties
+    ) {
+        private static final Codec<LocationCondition> BASE_CODEC =
+                RecordCodecBuilder.create(instance -> instance.group(
+                        ResourceLocation.CODEC.listOf()
+                                .optionalFieldOf(
+                                        "locations", List.of())
+                                .forGetter(LocationCondition::locations),
+                        ResourceLocation.CODEC.listOf()
+                                .optionalFieldOf(
+                                        "required_tags", List.of())
+                                .forGetter(
+                                        LocationCondition::requiredTags),
+                        ResourceLocation.CODEC.listOf()
+                                .optionalFieldOf(
+                                        "excluded_tags", List.of())
+                                .forGetter(
+                                        LocationCondition::excludedTags),
+                        Codec.unboundedMap(
+                                        ResourceLocation.CODEC,
+                                        Codec.STRING)
+                                .optionalFieldOf(
+                                        "properties", Map.of())
+                                .forGetter(LocationCondition::properties)
+                ).apply(instance, LocationCondition::new));
+        private static final Codec<LocationCondition> CODEC =
+                BASE_CODEC.validate(data -> {
+                    if (data.locations().isEmpty()
+                            && data.requiredTags().isEmpty()
+                            && data.excludedTags().isEmpty()
+                            && data.properties().isEmpty()) {
+                        return com.mojang.serialization.DataResult.error(
+                                () -> "location condition must declare "
+                                        + "at least one criterion");
+                    }
+                    if (new LinkedHashSet<>(data.requiredTags()).stream()
+                            .anyMatch(new LinkedHashSet<>(
+                                    data.excludedTags())::contains)) {
+                        return com.mojang.serialization.DataResult.error(
+                                () -> "location condition cannot require "
+                                        + "and exclude the same tag");
+                    }
+                    if (data.properties().entrySet().stream()
+                            .anyMatch(entry ->
+                                    entry.getValue().isBlank()
+                                            || entry.getValue().length()
+                                            > 256)) {
+                        return com.mojang.serialization.DataResult.error(
+                                () -> "location condition property values "
+                                        + "must contain 1-256 characters");
+                    }
+                    return com.mojang.serialization.DataResult.success(
+                            data);
+                });
+
+        private LocationCondition {
+            locations = List.copyOf(new LinkedHashSet<>(locations));
+            requiredTags = List.copyOf(
+                    new LinkedHashSet<>(requiredTags));
+            excludedTags = List.copyOf(
+                    new LinkedHashSet<>(excludedTags));
+            properties = java.util.Collections.unmodifiableMap(
+                    new java.util.LinkedHashMap<>(properties));
+        }
     }
 
     private record DirectItemQuery(ResourceLocation item, int count) {

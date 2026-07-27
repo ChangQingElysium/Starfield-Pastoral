@@ -28,18 +28,18 @@ public final class ForageZoneData {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final AtomicDefinitionStore<StardewForageZoneDefinition> STORE =
             new AtomicDefinitionStore<>();
-    private static volatile List<Map.Entry<ResourceLocation, StardewForageZoneDefinition>> ordered = List.of();
+    private static volatile Catalog catalog = Catalog.empty();
 
     private ForageZoneData() {
     }
 
     public static DefinitionSnapshot<StardewForageZoneDefinition> snapshot() {
-        return STORE.snapshot();
+        return catalog.definitions();
     }
 
     public static List<Map.Entry<ResourceLocation, StardewForageZoneDefinition>> available(ServerLevel level) {
         StardewConditionContext context = new StardewConditionContext(level, null);
-        return ordered.stream().filter(entry -> entry.getValue().availableWhen().stream().allMatch(condition ->
+        return catalog.ordered().stream().filter(entry -> entry.getValue().availableWhen().stream().allMatch(condition ->
                 StardewConditions.test(condition, context).result().orElse(false))).toList();
     }
 
@@ -66,25 +66,67 @@ public final class ForageZoneData {
                                                 DefinitionDiagnostic.error(entry.getKey(), entry.getKey(), message)))
                                         .ifPresent(encoded -> sources.put(entry.getKey(), GSON.toJson(encoded)));
                             }));
-            var result = STORE.applyLocal(definitions, sources, diagnostics);
-            for (DefinitionDiagnostic diagnostic : result.diagnostics()) {
-                if (diagnostic.severity() == DefinitionDiagnostic.Severity.ERROR) {
-                    StardewCraft.LOGGER.error("[Forage data] {}", diagnostic.message());
-                } else {
-                    StardewCraft.LOGGER.warn("[Forage data] {}", diagnostic.message());
-                }
+            applyCandidate(definitions, sources, diagnostics);
+        }
+    }
+
+    static synchronized void applyCandidate(
+            Map<ResourceLocation, StardewForageZoneDefinition> definitions,
+            Map<ResourceLocation, String> sources,
+            List<DefinitionDiagnostic> diagnostics
+    ) {
+        List<Map.Entry<ResourceLocation, StardewForageZoneDefinition>>
+                prepared = definitions.entrySet().stream()
+                .sorted(Comparator
+                        .<Map.Entry<ResourceLocation,
+                                StardewForageZoneDefinition>>
+                                comparingInt(entry ->
+                                        entry.getValue().priority())
+                        .reversed()
+                        .thenComparing(entry ->
+                                entry.getKey().toString()))
+                .toList();
+        var result = STORE.applyLocal(
+                definitions, sources, diagnostics);
+        for (DefinitionDiagnostic diagnostic : result.diagnostics()) {
+            if (diagnostic.severity() == DefinitionDiagnostic.Severity.ERROR) {
+                StardewCraft.LOGGER.error(
+                        "[Forage data] {}", diagnostic.message());
+            } else {
+                StardewCraft.LOGGER.warn(
+                        "[Forage data] {}", diagnostic.message());
             }
-            if (!result.accepted()) {
-                StardewCraft.LOGGER.error("[Forage data] Rejected reload; keeping {} zones", ordered.size());
-                return;
-            }
-            ordered = result.snapshot().definitions().entrySet().stream()
-                    .sorted(Comparator
-                            .<Map.Entry<ResourceLocation, StardewForageZoneDefinition>>comparingInt(
-                                    entry -> entry.getValue().priority()).reversed()
-                            .thenComparing(entry -> entry.getKey().toString()))
-                    .toList();
-            StardewCraft.LOGGER.info("[Forage data] Applied {} zones", ordered.size());
+        }
+        if (!result.accepted()) {
+            StardewCraft.LOGGER.error(
+                    "[Forage data] Rejected reload; keeping {} zones",
+                    catalog.ordered().size());
+            return;
+        }
+        catalog = new Catalog(result.snapshot(), prepared);
+        StardewCraft.LOGGER.info(
+                "[Forage data] Applied {} zones",
+                catalog.ordered().size());
+    }
+
+    static Catalog catalog() {
+        return catalog;
+    }
+
+    record Catalog(
+            DefinitionSnapshot<StardewForageZoneDefinition> definitions,
+            List<Map.Entry<ResourceLocation,
+                    StardewForageZoneDefinition>> ordered
+    ) {
+        Catalog {
+            definitions = java.util.Objects.requireNonNull(
+                    definitions, "definitions");
+            ordered = List.copyOf(ordered);
+        }
+
+        private static Catalog empty() {
+            return new Catalog(
+                    DefinitionSnapshot.empty(), List.of());
         }
     }
 }

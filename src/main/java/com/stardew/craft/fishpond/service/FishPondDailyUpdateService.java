@@ -1,5 +1,8 @@
 package com.stardew.craft.fishpond.service;
 
+import com.stardew.craft.api.v1.fishpond.StardewFishPondDailyContext;
+import com.stardew.craft.api.v1.internal.fishpond.StardewFishPondEventRegistry;
+import com.stardew.craft.api.v1.internal.fishpond.StardewFishPondSnapshots;
 import com.stardew.craft.blockentity.FishPondBucketBlockEntity;
 import com.stardew.craft.fishpond.data.FishPondWorldData;
 import com.stardew.craft.fishpond.model.FishPondRecord;
@@ -145,6 +148,11 @@ public final class FishPondDailyUpdateService {
             worldData.markChanged();
             FishPondBucketBlockEntity.syncVisualState(level, pond.bucketPos());
         }
+        StardewFishPondEventRegistry.announceDaily(
+            new StardewFishPondDailyContext(
+                level,
+                absoluteDay,
+                StardewFishPondSnapshots.from(level, pond)));
         return changed;
     }
 

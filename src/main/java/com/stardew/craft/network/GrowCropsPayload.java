@@ -1,6 +1,8 @@
 package com.stardew.craft.network;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.agriculture.StardewCropRuntime;
+import com.stardew.craft.api.v1.agriculture.StardewCropState;
 import com.stardew.craft.block.crop.StardewCropBlock;
 import com.stardew.craft.manager.CropGrowthManager;
 import io.netty.buffer.ByteBuf;
@@ -46,12 +48,14 @@ public record GrowCropsPayload() implements CustomPacketPayload {
                         @SuppressWarnings("null")
                         BlockState state = level.getBlockState(pos);
                         
-                        if (state.getBlock() instanceof StardewCropBlock) {
-                            StardewCropBlock crop = (StardewCropBlock) state.getBlock();
+                        StardewCropState runtimeCrop =
+                                StardewCropRuntime.inspect(serverLevel, pos);
+                        if (runtimeCrop != null
+                                && runtimeCrop.root().equals(pos)) {
                             CropGrowthManager cropManager = CropGrowthManager.get(serverLevel);
-                            CropGrowthManager.CropGrowthState gs = cropManager.getOrCreateState(serverLevel, pos);
                             // Debug: 视为“推进一天且已浇水”，避免把所有作物误导成只走 AGE 0-3。
-                            crop.growCropOneDay(serverLevel, pos, state, true, gs);
+                            StardewCropRuntime.growOneDay(
+                                    serverLevel, pos, true, false);
                             cropManager.setDirty();
 
                             // SDV 对齐：成熟当日 1% 概率长成 3×3 巨型作物

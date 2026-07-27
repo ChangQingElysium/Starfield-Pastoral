@@ -1,0 +1,32 @@
+{
+  "replace": false,
+  "values": [
+    "stardewcraft:ancient_fruit",
+    "stardewcraft:apple",
+    "stardewcraft:apricot",
+    "stardewcraft:banana",
+    "stardewcraft:blackberry",
+    "stardewcraft:blueberry",
+    "stardewcraft:cactus_fruit",
+    "stardewcraft:cherry",
+    "stardewcraft:coconut",
+    "stardewcraft:cranberry",
+    "stardewcraft:crystal_fruit",
+    "stardewcraft:grape",
+    "stardewcraft:hot_pepper",
+    "stardewcraft:mango",
+    "stardewcraft:melon",
+    "stardewcraft:orange",
+    "stardewcraft:peach",
+    "stardewcraft:pineapple",
+    "stardewcraft:pomegranate",
+    "stardewcraft:powder_melon",
+    "stardewcraft:qi_fruit",
+    "stardewcraft:rhubarb",
+    "stardewcraft:salmonberry",
+    "stardewcraft:spice_berry",
+    "stardewcraft:starfruit",
+    "stardewcraft:strawberry",
+    "stardewcraft:wild_plum"
+  ]
+}

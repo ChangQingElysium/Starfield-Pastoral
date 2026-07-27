@@ -1,6 +1,9 @@
 package com.stardew.craft.network;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.internal.tree.StardewTreeRuntimeRegistry;
+import com.stardew.craft.api.v1.tree.StardewTreeRuntime;
+import com.stardew.craft.api.v1.tree.StardewTreeState;
 import com.stardew.craft.block.tree.fruit.FruitTreeBlock;
 import com.stardew.craft.block.tree.fruit.FruitTreeExtensionBlock;
 import com.stardew.craft.block.tree.fruit.FruitTreeSaplingBlock;
@@ -48,6 +51,7 @@ public record GrowTreesPayload() implements CustomPacketPayload {
 			TreeGrowthManager manager = TreeGrowthManager.get(serverLevel);
 			FruitTreeGrowthManager fruitTreeManager = FruitTreeGrowthManager.get(serverLevel);
 			java.util.Set<BlockPos> advancedFruitTrees = new java.util.HashSet<>();
+			java.util.Set<AddonTreeKey> advancedAddonTrees = new java.util.HashSet<>();
 
 			for (int x = -5; x <= 5; x++) {
 				for (int y = -2; y <= 2; y++) {
@@ -69,10 +73,24 @@ public record GrowTreesPayload() implements CustomPacketPayload {
 							if (root != null && advancedFruitTrees.add(root.immutable())) {
 								fruitTreeManager.growOneDay(serverLevel, root);
 							}
+						} else {
+							StardewTreeState addonTree =
+									StardewTreeRuntimeRegistry.inspectAddon(serverLevel, pos);
+							if (addonTree != null
+									&& advancedAddonTrees.add(new AddonTreeKey(
+											addonTree.typeId(), addonTree.root()))) {
+								StardewTreeRuntime.growOneDay(serverLevel, addonTree.root());
+							}
 						}
 					}
 				}
 			}
 		});
+	}
+
+	private record AddonTreeKey(ResourceLocation typeId, BlockPos root) {
+		private AddonTreeKey {
+			root = root.immutable();
+		}
 	}
 }

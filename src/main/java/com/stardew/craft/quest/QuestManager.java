@@ -6,8 +6,15 @@ import com.stardew.craft.player.PlayerStardewData;
 import com.stardew.craft.quest.network.DailyQuestSyncPayload;
 import com.stardew.craft.quest.network.QuestCompletePayload;
 import com.stardew.craft.quest.network.QuestLogSyncPayload;
-import com.stardew.craft.api.v1.condition.StardewConditionContext;
-import com.stardew.craft.api.v1.condition.StardewConditions;
+import com.stardew.craft.api.v1.internal.progress.StardewProgressRegistry;
+import com.stardew.craft.api.v1.progress.StardewProgressCauses;
+import com.stardew.craft.api.v1.progress.StardewProgressEvent;
+import com.stardew.craft.api.v1.progress.StardewProgressEventType;
+import com.stardew.craft.api.v1.progress.StardewProgressKey;
+import com.stardew.craft.api.v1.progress.StardewProgressPhase;
+import com.stardew.craft.api.v1.progress.StardewProgressOperation;
+import com.stardew.craft.api.v1.progress.StardewProgressRequirements;
+import com.stardew.craft.api.v1.progress.StardewProgressSnapshot;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerPlayer;
@@ -17,7 +24,10 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -48,24 +58,22 @@ public class QuestManager {
 
     public void acceptQuest(String questId, ServerPlayer player) {
         if (hasQuest(questId)) return;
+        var normalizedId = QuestDataLoader.normalizeId(questId);
+        if (normalizedId == null
+                || !StardewProgressRequirements.requirements(
+                                player,
+                                new StardewProgressKey(
+                                        com.stardew.craft.api.v1.progress
+                                                .StardewProgressDomains.QUEST,
+                                        normalizedId),
+                                StardewProgressOperation.ACCEPT)
+                        .satisfied()) {
+            return;
+        }
         StardewQuest quest = QuestDataLoader.createQuest(questId);
         if (quest == null) {
             StardewCraft.LOGGER.warn("[Quest] Unknown quest id: {}", questId);
             return;
-        }
-        if (quest.getDefinitionId() != null) {
-            var definition = QuestDataLoader.getDefinition(quest.getDefinitionId());
-            if (definition != null) {
-                for (var condition : definition.availableWhen()) {
-                    boolean allowed = StardewConditions.test(condition, StardewConditionContext.forPlayer(player))
-                            .resultOrPartial(message -> StardewCraft.LOGGER.error(
-                                    "[Quest] Availability condition failed for {}: {}", quest.getDefinitionId(), message))
-                            .orElse(false);
-                    if (!allowed) {
-                        return;
-                    }
-                }
-            }
         }
         acceptQuest(quest, player);
     }
@@ -80,6 +88,15 @@ public class QuestManager {
         }
         questLog.add(quest);
         quest.onAccept(player);
+        StardewProgressSnapshot accepted =
+                StardewProgressRegistry.questSnapshot(quest, null);
+        StardewProgressRegistry.dispatch(new StardewProgressEvent(
+                StardewProgressEventType.ACCEPTED,
+                player.serverLevel(),
+                Optional.of(player.getUUID()),
+                Optional.empty(),
+                accepted,
+                StardewProgressCauses.ACCEPT));
         markOwnerDirty(player);
         syncToClient(player);
         if ("102".equals(quest.getId())) {
@@ -100,7 +117,22 @@ public class QuestManager {
     }
 
     public void removeQuest(String questId, ServerPlayer player) {
+        StardewQuest removed = getQuest(questId);
         questLog.removeIf(q -> QuestDataLoader.idsEqual(q.getId(), questId));
+        if (removed != null) {
+            StardewProgressSnapshot before =
+                    StardewProgressRegistry.questSnapshot(removed, null);
+            StardewProgressSnapshot after =
+                    StardewProgressRegistry.questSnapshot(
+                            removed, StardewProgressPhase.CANCELLED);
+            StardewProgressRegistry.dispatch(new StardewProgressEvent(
+                    StardewProgressEventType.CANCELLED,
+                    player.serverLevel(),
+                    Optional.of(player.getUUID()),
+                    Optional.of(before),
+                    after,
+                    StardewProgressCauses.CANCEL));
+        }
         markOwnerDirty(player);
         syncToClient(player);
     }
@@ -145,11 +177,15 @@ public class QuestManager {
     public boolean completeActiveQuest(String questId, ServerPlayer player) {
         StardewQuest quest = getQuest(questId);
         if (quest == null) return false;
+        Map<StardewProgressKey, StardewProgressSnapshot> before =
+                captureQuestSnapshots();
         // Older call sites completed the quest object directly without letting the
         // manager persist, notify and remove it. Treat that state as recoverable.
         if (!quest.isCompleted()) {
             quest.questComplete(player);
         }
+        publishQuestChanges(
+                player, before, StardewProgressCauses.OBJECTIVE_EVENT);
         markOwnerDirty(player);
         syncToClient(player);
         cleanupDestroyed(player);
@@ -207,27 +243,39 @@ public class QuestManager {
     // ─── 事件分发 ───
 
     public void onMonsterSlain(ServerPlayer player, String monsterType) {
+        Map<StardewProgressKey, StardewProgressSnapshot> before =
+                captureQuestSnapshots();
         for (StardewQuest q : List.copyOf(questLog)) {
             q.onMonsterSlain(player, monsterType);
         }
+        publishQuestChanges(
+                player, before, StardewProgressCauses.OBJECTIVE_EVENT);
         markOwnerDirty(player);
         syncToClient(player);
         cleanupDestroyed(player);
     }
 
     public void onFishCaught(ServerPlayer player, String itemId, int count) {
+        Map<StardewProgressKey, StardewProgressSnapshot> before =
+                captureQuestSnapshots();
         for (StardewQuest q : List.copyOf(questLog)) {
             q.onFishCaught(player, itemId, count);
         }
+        publishQuestChanges(
+                player, before, StardewProgressCauses.OBJECTIVE_EVENT);
         markOwnerDirty(player);
         syncToClient(player);
         cleanupDestroyed(player);
     }
 
     public void onItemReceived(ServerPlayer player, String itemId, int count) {
+        Map<StardewProgressKey, StardewProgressSnapshot> before =
+                captureQuestSnapshots();
         for (StardewQuest q : List.copyOf(questLog)) {
             q.onItemReceived(player, itemId, count);
         }
+        publishQuestChanges(
+                player, before, StardewProgressCauses.OBJECTIVE_EVENT);
         markOwnerDirty(player);
         syncToClient(player);
         cleanupDestroyed(player);
@@ -237,6 +285,8 @@ public class QuestManager {
      * @return true if any quest consumed the offered item (SDV: intercepts before gift processing)
      */
     public boolean onItemOfferedToNpc(ServerPlayer player, String npcId, String itemId) {
+        Map<StardewProgressKey, StardewProgressSnapshot> before =
+                captureQuestSnapshots();
         boolean consumed = false;
         for (StardewQuest q : List.copyOf(questLog)) {
             if (q.onItemOfferedToNpc(player, npcId, itemId)) {
@@ -244,6 +294,8 @@ public class QuestManager {
                 break; // SDV: onlyOneQuest=true — stop after first match
             }
         }
+        publishQuestChanges(
+                player, before, StardewProgressCauses.OBJECTIVE_EVENT);
         markOwnerDirty(player);
         syncToClient(player);
         cleanupDestroyed(player);
@@ -251,36 +303,52 @@ public class QuestManager {
     }
 
     public void onRecipeCrafted(ServerPlayer player, String recipeId) {
+        Map<StardewProgressKey, StardewProgressSnapshot> before =
+                captureQuestSnapshots();
         for (StardewQuest q : List.copyOf(questLog)) {
             q.onRecipeCrafted(player, recipeId);
         }
+        publishQuestChanges(
+                player, before, StardewProgressCauses.OBJECTIVE_EVENT);
         markOwnerDirty(player);
         syncToClient(player);
         cleanupDestroyed(player);
     }
 
     public void onNpcSocialized(ServerPlayer player, String npcId) {
+        Map<StardewProgressKey, StardewProgressSnapshot> before =
+                captureQuestSnapshots();
         for (StardewQuest q : List.copyOf(questLog)) {
             q.onNpcSocialized(player, npcId);
         }
+        publishQuestChanges(
+                player, before, StardewProgressCauses.OBJECTIVE_EVENT);
         markOwnerDirty(player);
         syncToClient(player);
         cleanupDestroyed(player);
     }
 
     public void onWarped(ServerPlayer player, String location) {
+        Map<StardewProgressKey, StardewProgressSnapshot> before =
+                captureQuestSnapshots();
         for (StardewQuest q : List.copyOf(questLog)) {
             q.onWarped(player, location);
         }
+        publishQuestChanges(
+                player, before, StardewProgressCauses.OBJECTIVE_EVENT);
         markOwnerDirty(player);
         syncToClient(player);
         cleanupDestroyed(player);
     }
 
     public void onBuildingExists(ServerPlayer player, String buildingType) {
+        Map<StardewProgressKey, StardewProgressSnapshot> before =
+                captureQuestSnapshots();
         for (StardewQuest q : List.copyOf(questLog)) {
             q.onBuildingExists(player, buildingType);
         }
+        publishQuestChanges(
+                player, before, StardewProgressCauses.OBJECTIVE_EVENT);
         markOwnerDirty(player);
         syncToClient(player);
         cleanupDestroyed(player);
@@ -290,6 +358,8 @@ public class QuestManager {
      * 矿井到达新最深层时触发 — 检查 Location 类型任务（Explore the Mine 系列）
      */
     public void onMineFloorReached(ServerPlayer player, int floor) {
+        Map<StardewProgressKey, StardewProgressSnapshot> before =
+                captureQuestSnapshots();
         for (StardewQuest q : List.copyOf(questLog)) {
             q.onMineFloorReached(player, floor);
         }
@@ -300,6 +370,8 @@ public class QuestManager {
             }
             com.stardew.craft.mail.MailService.addMailForTomorrow(player, "QiChallengeComplete");
         }
+        publishQuestChanges(
+                player, before, StardewProgressCauses.OBJECTIVE_EVENT);
         cleanupDestroyed(player);
         if (floor >= 5
                 && !hasQuest("15")
@@ -312,10 +384,14 @@ public class QuestManager {
     // ─── 天数推进 ───
 
     public void onDayStarted(ServerPlayer player, int gameDay) {
+        Map<StardewProgressKey, StardewProgressSnapshot> before =
+                captureQuestSnapshots();
         // 减少定时任务天数 (SDV 在天结束时递减，我们在天开始时调用但跳过接受当天)
         for (StardewQuest q : questLog) {
             q.tickDay(gameDay);
         }
+        publishQuestChanges(
+                player, before, StardewProgressCauses.DAY_TICK);
         cleanupDestroyed(player);
 
         // ── SDV 故事任务自动触发 ──
@@ -429,6 +505,69 @@ public class QuestManager {
         if (data != null) {
             data.markDirty();
         }
+    }
+
+    private Map<StardewProgressKey, StardewProgressSnapshot> captureQuestSnapshots() {
+        Map<StardewProgressKey, StardewProgressSnapshot> snapshots =
+                new LinkedHashMap<>();
+        for (StardewQuest quest : questLog) {
+            StardewProgressSnapshot snapshot =
+                    StardewProgressRegistry.questSnapshot(quest, null);
+            snapshots.put(snapshot.key(), snapshot);
+        }
+        return snapshots;
+    }
+
+    private void publishQuestChanges(
+            ServerPlayer player,
+            Map<StardewProgressKey, StardewProgressSnapshot> before,
+            net.minecraft.resources.ResourceLocation cause
+    ) {
+        for (StardewQuest quest : questLog) {
+            StardewProgressSnapshot after =
+                    StardewProgressRegistry.questSnapshot(quest, null);
+            StardewProgressSnapshot previous = before.get(after.key());
+            if (previous == null || previous.equals(after)) {
+                continue;
+            }
+            if (!previous.metrics().equals(after.metrics())) {
+                StardewProgressRegistry.dispatch(new StardewProgressEvent(
+                        StardewProgressEventType.PROGRESSED,
+                        player.serverLevel(),
+                        Optional.of(player.getUUID()),
+                        Optional.of(previous),
+                        after,
+                        cause));
+            }
+            if (previous.phase() != after.phase()) {
+                StardewProgressRegistry.dispatch(new StardewProgressEvent(
+                        eventTypeFor(after.phase()),
+                        player.serverLevel(),
+                        Optional.of(player.getUUID()),
+                        Optional.of(previous),
+                        after,
+                        cause));
+            }
+        }
+    }
+
+    private static StardewProgressEventType eventTypeFor(
+            StardewProgressPhase phase
+    ) {
+        return switch (phase) {
+            case REWARD_AVAILABLE ->
+                    StardewProgressEventType.REWARD_BECAME_AVAILABLE;
+            case COMPLETED -> StardewProgressEventType.COMPLETED;
+            case FAILED -> StardewProgressEventType.FAILED;
+            case EXPIRED -> StardewProgressEventType.EXPIRED;
+            case CANCELLED -> StardewProgressEventType.CANCELLED;
+            case UNAVAILABLE ->
+                    StardewProgressEventType.BECAME_UNAVAILABLE;
+            case AVAILABLE -> StardewProgressEventType.MADE_AVAILABLE;
+            case SCHEDULED -> StardewProgressEventType.SCHEDULED;
+            case ACTIVE -> StardewProgressEventType.ACCEPTED;
+            case NOT_STARTED -> StardewProgressEventType.PROGRESSED;
+        };
     }
 
     /** 同步完整任务日志到客户端 */

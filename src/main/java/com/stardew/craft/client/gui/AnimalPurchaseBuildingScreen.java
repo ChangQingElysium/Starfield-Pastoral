@@ -17,6 +17,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -654,16 +655,14 @@ public final class AnimalPurchaseBuildingScreen extends Screen {
     }
 
     private void playAnimalSound() {
-        SoundEvent sound = switch (this.animal.animalTypeId().toLowerCase(Locale.ROOT)) {
-            case "white_chicken" -> ModSounds.CLUCK.get();
-            case "duck" -> ModSounds.DUCK.get();
-            case "rabbit" -> ModSounds.RABBIT.get();
-            case "cow" -> ModSounds.COW.get();
-            case "goat" -> ModSounds.GOAT.get();
-            case "sheep" -> ModSounds.SHEEP.get();
-            case "pig" -> ModSounds.PIG.get();
-            default -> ModSounds.SMALL_SELECT.get();
-        };
+        ResourceLocation soundId =
+                ResourceLocation.tryParse(
+                        this.animal.soundEventId());
+        SoundEvent sound = soundId != null
+                && BuiltInRegistries.SOUND_EVENT
+                        .containsKey(soundId)
+                ? BuiltInRegistries.SOUND_EVENT.get(soundId)
+                : ModSounds.SMALL_SELECT.get();
         play(sound, 1.0F, 1.2F + (this.random.nextFloat() - 0.5F) * 0.4F);
     }
 

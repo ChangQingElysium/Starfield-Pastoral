@@ -2,6 +2,7 @@ package com.stardew.craft.npc.runtime;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.stardew.craft.api.v1.world.StardewMapSlots;
 import com.stardew.craft.desert.DesertConstants;
 import com.stardew.craft.interior.InteriorRegionRegistry;
 import com.stardew.craft.interior.InteriorPortalRegistry;
@@ -187,6 +188,10 @@ final class NpcRoutePlanner {
     }
 
     static Vec3 pointFromConfig(String pointId, Vec3 defaultPoint) {
+        var registered = StardewMapSlots.resolveWorldAnchor(pointId);
+        if (registered.isPresent()) {
+            return registered.get().position();
+        }
         JsonObject root = routePointsRoot();
         if (root != null && root.has("points") && root.get("points").isJsonObject()) {
             JsonObject points = root.getAsJsonObject("points");
@@ -525,6 +530,10 @@ final class NpcRoutePlanner {
     }
 
     private static Vec3 pointFromConfigStrict(String pointId, NpcRuntimeState state, String canonicalLocation) {
+        var registered = StardewMapSlots.resolveWorldAnchor(pointId);
+        if (registered.isPresent()) {
+            return registered.get().position();
+        }
         JsonObject root = routePointsRoot();
         if (root == null || !root.has("points") || !root.get("points").isJsonObject()) {
             emitHardEndpointWarning("missing_points_root", pointId, canonicalLocation, state);
@@ -577,6 +586,10 @@ final class NpcRoutePlanner {
      * Checks if the given route point has {@code "indoor": true} in npc_route_points.json.
      */
     private static boolean isPointIndoor(String pointId) {
+        var registered = StardewMapSlots.resolveWorldAnchor(pointId);
+        if (registered.isPresent()) {
+            return registered.get().indoor();
+        }
         if (pointId != null) {
             String normalizedPointId = pointId.trim().toLowerCase(Locale.ROOT);
             for (Map.Entry<String, NpcLocationAnchor> entry : NpcDataRegistry.locationAnchors().entrySet()) {

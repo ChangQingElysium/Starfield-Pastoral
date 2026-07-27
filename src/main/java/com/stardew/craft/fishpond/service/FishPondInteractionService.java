@@ -3,6 +3,9 @@ package com.stardew.craft.fishpond.service;
 import com.stardew.craft.blockentity.FishPondBucketBlockEntity;
 import com.stardew.craft.fishpond.data.FishPondWorldData;
 import com.stardew.craft.fishpond.model.FishPondRecord;
+import com.stardew.craft.api.v1.fishpond.StardewFishPondRequestContext;
+import com.stardew.craft.api.v1.internal.fishpond.StardewFishPondEventRegistry;
+import com.stardew.craft.api.v1.internal.fishpond.StardewFishPondSnapshots;
 import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.network.ItemPickupHudPacket;
@@ -200,9 +203,17 @@ public final class FishPondInteractionService {
             return ItemAbsorbResult.IGNORED;
         }
 
+        String completedItem = pond.neededItemId();
         pond.setNeededItemCount(Math.max(0, pond.neededItemCount() - consumed));
-        if (pond.neededItemCount() <= 0) {
-            FishPondDailyUpdateService.resolveNeeds(level, pond, resolveResponsiblePlayer(level, itemEntity, pond));
+        ServerPlayer responsiblePlayer = null;
+        boolean completedRequest = pond.neededItemCount() <= 0;
+        if (completedRequest) {
+            responsiblePlayer =
+                resolveResponsiblePlayer(level, itemEntity, pond);
+            FishPondDailyUpdateService.resolveNeeds(
+                level,
+                pond,
+                responsiblePlayer);
         }
         pond.setWaterColor(FishPondDataService.get().resolveWaterColor(pond));
         FishPondWorldData.get(level).markChanged();
@@ -210,6 +221,15 @@ public final class FishPondInteractionService {
         FishPondColorSyncService.broadcastSnapshot(level);
 
         consumeItemEntity(level, itemEntity, stack, consumed);
+        if (completedRequest) {
+            StardewFishPondEventRegistry.announceRequest(
+                new StardewFishPondRequestContext(
+                    level,
+                    responsiblePlayer,
+                    completedItem,
+                    consumed,
+                    StardewFishPondSnapshots.from(level, pond)));
+        }
         return ItemAbsorbResult.NEED_ITEM_ACCEPTED;
     }
 

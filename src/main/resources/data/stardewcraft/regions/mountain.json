@@ -1,0 +1,16 @@
+{
+  "dimension": "stardewcraft:stardew_valley",
+  "location": "stardewcraft:mountain",
+  "include": [
+    {
+      "min": [-123, 69, -104],
+      "max": [-43, 79, -65]
+    },
+    {
+      "min": [11, 81, -151],
+      "max": [121, 93, -80]
+    }
+  ],
+  "tags": ["stardewcraft:outdoor", "stardewcraft:mountain"],
+  "priority": -100
+}

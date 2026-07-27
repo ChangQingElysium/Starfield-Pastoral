@@ -117,34 +117,26 @@ public class RecyclingMachineBlockEntity extends TimedProductionBlockEntity {
 			return InsertResult.fail();
 		}
 
-		startWork(stack, output, player);
+		var plan = prepareProduction(
+				stack, output, MINUTES_UNTIL_READY,
+				player, false);
+		if (plan.isEmpty()) {
+			return InsertResult.fail();
+		}
+		startWork(stack, plan.get(), player);
 		return InsertResult.success();
 	}
 
-	private void startWork(ItemStack inputStack, ItemStack output, @Nullable Player player) {
-		input = inputStack.copyWithCount(1);
-		product = output;
-		readyAtAbsMinute = getCurrentAbsMinute() + MINUTES_UNTIL_READY;
-		ready = false;
-		if (player == null || !player.isCreative()) {
-			inputStack.shrink(1);
-		}
-		setChanged();
-		syncToClient();
+	private void startWork(
+			ItemStack inputStack,
+			com.stardew.craft.api.v1.machine.StardewProductionPlan plan,
+			@Nullable Player player
+	) {
+		commitProduction(inputStack, plan, 1, player);
 	}
 
 	public ItemStack harvestOne() {
-		if (!isReady()) {
-			return ItemStack.EMPTY;
-		}
-		ItemStack out = product.copy();
-		product = ItemStack.EMPTY;
-		input = ItemStack.EMPTY;
-		readyAtAbsMinute = -1;
-		ready = false;
-		setChanged();
-		syncToClient();
-		return out;
+		return collectProduction();
 	}
 
 	@Override
@@ -177,9 +169,15 @@ public class RecyclingMachineBlockEntity extends TimedProductionBlockEntity {
 		if (output.isEmpty()) {
 			return stack;
 		}
+		var plan = prepareProduction(
+				stack, output, MINUTES_UNTIL_READY,
+				null, true);
+		if (plan.isEmpty()) {
+			return stack;
+		}
 
 		ItemStack inputCopy = stack.copy();
-		startWork(inputCopy, output, null);
+		startWork(inputCopy, plan.get(), null);
 		return AutomationStackHelper.remainderAfterInsert(stack, 1);
 	}
 

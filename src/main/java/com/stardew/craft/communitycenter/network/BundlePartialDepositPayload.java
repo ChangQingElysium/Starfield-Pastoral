@@ -1,14 +1,13 @@
 package com.stardew.craft.communitycenter.network;
 
 import com.stardew.craft.StardewCraft;
-import com.stardew.craft.communitycenter.menu.BundleMenu;
+import com.stardew.craft.api.v1.communitycenter.StardewCommunityCenterActions;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
@@ -43,16 +42,8 @@ public record BundlePartialDepositPayload(
     public static void handle(BundlePartialDepositPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
             if (!(context.player() instanceof ServerPlayer sp)) return;
-            if (!(sp.containerMenu instanceof BundleMenu menu)) return;
-
-            ItemStack carried = menu.getCarried();
-            if (carried.isEmpty()) return;
-
-            boolean success = menu.handlePartialDeposit(sp, payload.bundleId,
-                    payload.ingredientIndex, payload.amount, carried);
-            if (success) {
-                sp.containerMenu.broadcastChanges();
-            }
+            StardewCommunityCenterActions.partialDeposit(
+                    sp, payload.bundleId, payload.ingredientIndex, payload.amount);
         });
     }
 }

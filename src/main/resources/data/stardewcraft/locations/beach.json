@@ -1,0 +1,8 @@
+{
+  "dimension": "stardewcraft:stardew_valley",
+  "min": [-4, 57, 77],
+  "max": [239, 65, 186],
+  "aliases": ["Beach"],
+  "priority": -100,
+  "indoor": false
+}

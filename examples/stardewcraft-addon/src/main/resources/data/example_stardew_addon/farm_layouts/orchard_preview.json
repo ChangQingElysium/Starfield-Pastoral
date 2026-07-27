@@ -1,0 +1,167 @@
+{
+  "format": 1,
+  "version": 1,
+  "selectable": false,
+  "display_name": "Orchard layout data example",
+  "description": "A non-selectable schema canary that borrows the core standard structure.",
+  "icon": "stardewcraft:textures/gui/farm_select/icon_standard.png",
+  "schematic": "stardewcraft:farm/standard.schem",
+  "origin_y": 0,
+  "size": [
+    337,
+    23,
+    382
+  ],
+  "spawn": {
+    "offset": [
+      229,
+      5,
+      257
+    ],
+    "yaw": 90
+  },
+  "greenhouse": [
+    236,
+    5,
+    137
+  ],
+  "totem": [
+    265,
+    5,
+    200
+  ],
+  "entries": {
+    "south": {
+      "teleport": [
+        266,
+        5,
+        174
+      ],
+      "yaw": 90,
+      "exit_min": [
+        267,
+        5,
+        171
+      ],
+      "exit_max": [
+        267,
+        7,
+        177
+      ]
+    },
+    "east": {
+      "teleport": [
+        38,
+        5,
+        174
+      ],
+      "yaw": -90,
+      "exit_min": [
+        37,
+        5,
+        172
+      ],
+      "exit_max": [
+        37,
+        7,
+        177
+      ]
+    },
+    "west": {
+      "teleport": [
+        225,
+        5,
+        298
+      ],
+      "yaw": 180,
+      "exit_min": [
+        217,
+        5,
+        300
+      ],
+      "exit_max": [
+        239,
+        7,
+        300
+      ]
+    }
+  },
+  "biome": "minecraft:plains",
+  "cave": {
+    "black_wall": {
+      "min": [
+        254,
+        5,
+        127
+      ],
+      "max": [
+        254,
+        7,
+        131
+      ]
+    },
+    "portal_wall": {
+      "min": [
+        253,
+        5,
+        127
+      ],
+      "max": [
+        253,
+        7,
+        131
+      ]
+    },
+    "exit": {
+      "offset": [
+        251,
+        5,
+        129
+      ],
+      "yaw": -90
+    }
+  },
+  "configuration": [
+    {
+      "id": "starter_cabins",
+      "type": "integer",
+      "label": "Starter cabins",
+      "description": "Example of a server-authoritative bounded option.",
+      "default": 1,
+      "minimum": 0,
+      "maximum": 4
+    },
+    {
+      "id": "water_style",
+      "type": "choice",
+      "label": "Water style",
+      "default": "ponds",
+      "choices": [
+        "ponds",
+        "river",
+        "dry"
+      ]
+    },
+    {
+      "id": "debris",
+      "type": "boolean",
+      "label": "Start with debris",
+      "default": true
+    }
+  ],
+  "attachments": [
+    {
+      "id": "orchard_festival_stage",
+      "offset": [
+        144,
+        4,
+        92
+      ],
+      "yaw": 180,
+      "tags": [
+        "stardewcraft:festival",
+        "stardewcraft:npc"
+      ]
+    }
+  ]
+}

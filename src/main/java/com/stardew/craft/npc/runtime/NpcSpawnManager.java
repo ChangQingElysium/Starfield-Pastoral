@@ -585,6 +585,8 @@ public final class NpcSpawnManager {
             TRACKED_NPC_UUIDS.put(npcId, npc.getUUID());
             TRACKED_MISS_COUNTS.put(npcId, 0);
             LAST_SPAWN_GAME_TIME.put(npcId, level.getGameTime());
+            com.stardew.craft.api.v1.npc.StardewNpcLifecycleEvents
+                    .announceSpawned(npcId, npc, "scheduled_spawn");
         }
     }
 
@@ -652,6 +654,9 @@ public final class NpcSpawnManager {
                 TRACKED_NPC_UUIDS.put(npcId, npc.getUUID());
                 TRACKED_MISS_COUNTS.put(npcId, 0);
                 LAST_SPAWN_GAME_TIME.put(npcId, mineLevel.getGameTime());
+                com.stardew.craft.api.v1.npc.StardewNpcLifecycleEvents
+                        .announceSpawned(
+                                npcId, npc, "mining_dimension_spawn");
             } else {
             }
         }
@@ -1189,6 +1194,8 @@ public final class NpcSpawnManager {
         }
         // discard() directly removes the entity from the world.
         // kill() does NOT work here because StardewNpcEntity.hurt() returns false (invulnerable).
+        com.stardew.craft.api.v1.npc.StardewNpcLifecycleEvents
+                .announceRemoved(npc.getNpcId(), npc, reason);
         npc.discard();
     }
 

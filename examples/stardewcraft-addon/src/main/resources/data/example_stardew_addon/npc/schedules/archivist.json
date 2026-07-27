@@ -1,0 +1,17 @@
+{
+  "npc_id": "archivist",
+  "_format": "time -> \"location @world_anchor facing [behavior]\"",
+  "spring": {
+    "600": "example_stardew_addon:orchard @example_stardew_addon:orchard_stage 0",
+    "1800": "example_stardew_addon:orchard @example_stardew_addon:orchard_stage 2"
+  },
+  "summer": {
+    "_goto": "spring"
+  },
+  "fall": {
+    "_goto": "spring"
+  },
+  "winter": {
+    "_goto": "spring"
+  }
+}

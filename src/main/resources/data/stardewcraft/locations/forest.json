@@ -1,0 +1,8 @@
+{
+  "dimension": "stardewcraft:stardew_valley",
+  "min": [-194, 50, -12],
+  "max": [-47, 74, 138],
+  "aliases": ["Forest"],
+  "priority": -100,
+  "indoor": false
+}

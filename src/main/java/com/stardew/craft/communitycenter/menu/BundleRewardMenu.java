@@ -1,9 +1,11 @@
 package com.stardew.craft.communitycenter.menu;
 
-import com.stardew.craft.communitycenter.data.BundleDataManager;
 import com.stardew.craft.communitycenter.data.BundleDefinition;
 import com.stardew.craft.communitycenter.network.BundleClaimRewardPayload;
 import com.stardew.craft.communitycenter.state.CommunityCenterSavedData;
+import com.stardew.craft.api.v1.internal.communitycenter.StardewCommunityCenterVariantRegistry;
+import com.stardew.craft.api.v1.internal.communitycenter.StardewCommunityCenterRewardRegistry;
+import net.minecraft.server.level.ServerPlayer;
 import com.stardew.craft.menu.ModMenuTypes;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -53,7 +55,12 @@ public class BundleRewardMenu extends AbstractContainerMenu {
         // Populate reward items (server-side only; client sees via slot sync)
         if (!playerInventory.player.level().isClientSide) {
             this.playerUUID = playerInventory.player.getUUID();
-            populateRewards(areaId);
+            populateRewards(
+                    areaId,
+                    playerInventory.player instanceof ServerPlayer serverPlayer
+                            ? serverPlayer
+                            : null
+            );
         }
 
         // Reward slots — 1 row of 9, standard chest layout
@@ -74,9 +81,10 @@ public class BundleRewardMenu extends AbstractContainerMenu {
         }
     }
 
-    private void populateRewards(int areaId) {
+    private void populateRewards(int areaId, ServerPlayer player) {
         CommunityCenterSavedData data = CommunityCenterSavedData.get();
-        List<BundleDefinition> bundles = BundleDataManager.getBundlesForArea(areaId);
+        List<BundleDefinition> bundles =
+                StardewCommunityCenterVariantRegistry.area(playerUUID, areaId);
         java.util.Arrays.fill(slotBundleIds, -1);
 
         int slot = 0;
@@ -84,6 +92,10 @@ public class BundleRewardMenu extends AbstractContainerMenu {
             if (slot >= MAX_REWARD_SLOTS) break;
             if (data.isRewardAvailable(playerUUID, def.bundleId())) {
                 ItemStack reward = BundleClaimRewardPayload.parseRewardString(def.rewardString());
+                if (player != null) {
+                    reward = StardewCommunityCenterRewardRegistry.resolve(
+                            player, def.bundleId(), def.rewardString(), reward);
+                }
                 if (!reward.isEmpty()) {
                     rewardContainer.setItem(slot, reward);
                     slotBundleIds[slot] = def.bundleId();

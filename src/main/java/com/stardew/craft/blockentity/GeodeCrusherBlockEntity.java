@@ -93,35 +93,31 @@ public class GeodeCrusherBlockEntity extends TimedProductionBlockEntity implemen
             return false;
         }
 
-        startWork(stack, output, player);
+        var plan = prepareProduction(
+                stack, output, MINUTES_UNTIL_READY,
+                player, false);
+        if (plan.isEmpty()) {
+            return false;
+        }
+        startWork(stack, plan.get(), player);
         return true;
     }
 
-    private void startWork(ItemStack inputStack, ItemStack output, @Nullable Player player) {
-        input = inputStack.copy();
-        input.setCount(1);
-        product = output.copy();
-        readyAtAbsMinute = getCurrentAbsMinute() + MINUTES_UNTIL_READY;
-        ready = false;
-        if (player == null || !player.isCreative()) {
-            inputStack.shrink(1);
-        }
+    private void startWork(
+            ItemStack inputStack,
+            com.stardew.craft.api.v1.machine
+                    .StardewProductionPlan plan,
+            @Nullable Player player
+    ) {
+        commitProduction(inputStack, plan, 1, player);
         playLoadEffects();
-        setChanged();
-        syncToClient();
     }
 
     public ItemStack harvestOne() {
-        if (!isReady()) {
+        ItemStack out = collectProduction();
+        if (out.isEmpty()) {
             return ItemStack.EMPTY;
         }
-        ItemStack out = product.copy();
-        input = ItemStack.EMPTY;
-        product = ItemStack.EMPTY;
-        readyAtAbsMinute = -1;
-        ready = false;
-        setChanged();
-        syncToClient();
         Level currentLevel = level;
         if (currentLevel != null && !currentLevel.isClientSide) {
             updateWorkingState(currentLevel, worldPosition, getBlockState());
@@ -154,8 +150,14 @@ public class GeodeCrusherBlockEntity extends TimedProductionBlockEntity implemen
         if (simulate) {
             return AutomationStackHelper.remainderAfterInsert(stack, 1);
         }
+        var plan = prepareProduction(
+                stack, output, MINUTES_UNTIL_READY,
+                null, true);
+        if (plan.isEmpty()) {
+            return stack;
+        }
         ItemStack inputCopy = stack.copy();
-        startWork(inputCopy, output, null);
+        startWork(inputCopy, plan.get(), null);
         return AutomationStackHelper.remainderAfterInsert(stack, 1);
     }
 

@@ -1,0 +1,104 @@
+{
+  "source": "Stardew Valley 1.6.15 Content/Data/Buildings.json",
+  "buildings": [
+    {
+      "family": "coop",
+      "tier": 1,
+      "capacity": 4,
+      "hay_capacity": 0,
+      "allows_pregnancy": false,
+      "automatic_feed": false,
+      "build_days": 3,
+      "money": 4000,
+      "materials": [
+        { "item": "stardewcraft:wood_normal", "count": 300 },
+        { "item": "stardewcraft:stone", "count": 100 }
+      ]
+    },
+    {
+      "family": "coop",
+      "tier": 2,
+      "capacity": 8,
+      "hay_capacity": 0,
+      "allows_pregnancy": false,
+      "automatic_feed": false,
+      "build_days": 2,
+      "money": 10000,
+      "materials": [
+        { "item": "stardewcraft:wood_normal", "count": 400 },
+        { "item": "stardewcraft:stone", "count": 150 }
+      ]
+    },
+    {
+      "family": "coop",
+      "tier": 3,
+      "capacity": 12,
+      "hay_capacity": 0,
+      "allows_pregnancy": false,
+      "automatic_feed": true,
+      "build_days": 2,
+      "money": 20000,
+      "materials": [
+        { "item": "stardewcraft:wood_normal", "count": 500 },
+        { "item": "stardewcraft:stone", "count": 200 }
+      ]
+    },
+    {
+      "family": "barn",
+      "tier": 1,
+      "capacity": 4,
+      "hay_capacity": 0,
+      "allows_pregnancy": false,
+      "automatic_feed": false,
+      "build_days": 3,
+      "money": 6000,
+      "materials": [
+        { "item": "stardewcraft:wood_normal", "count": 350 },
+        { "item": "stardewcraft:stone", "count": 150 }
+      ]
+    },
+    {
+      "family": "barn",
+      "tier": 2,
+      "capacity": 8,
+      "hay_capacity": 0,
+      "allows_pregnancy": true,
+      "automatic_feed": false,
+      "build_days": 2,
+      "money": 12000,
+      "materials": [
+        { "item": "stardewcraft:wood_normal", "count": 450 },
+        { "item": "stardewcraft:stone", "count": 200 }
+      ]
+    },
+    {
+      "family": "barn",
+      "tier": 3,
+      "capacity": 12,
+      "hay_capacity": 0,
+      "allows_pregnancy": true,
+      "automatic_feed": true,
+      "build_days": 2,
+      "money": 25000,
+      "materials": [
+        { "item": "stardewcraft:wood_normal", "count": 550 },
+        { "item": "stardewcraft:stone", "count": 300 }
+      ]
+    },
+    {
+      "family": "silo",
+      "tier": 1,
+      "capacity": 0,
+      "hay_capacity": 240,
+      "allows_pregnancy": false,
+      "automatic_feed": false,
+      "build_days": 2,
+      "money": 100,
+      "materials": [
+        { "item": "stardewcraft:stone", "count": 100 },
+        { "item": "stardewcraft:clay", "count": 10 },
+        { "item": "stardewcraft:copper_bar", "count": 5 }
+      ]
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 package com.stardew.craft.communitycenter.data;
 
+import com.stardew.craft.api.v1.internal.communitycenter.StardewCommunityCenterVariantRegistry;
 import com.stardew.craft.communitycenter.state.CommunityCenterSavedData;
 
 import java.util.UUID;
@@ -23,7 +24,7 @@ public final class BundleAreaVisibility {
     private BundleAreaVisibility() {}
 
     public static boolean shouldNoteAppearInArea(UUID player, int area) {
-        if (!hasAnyBundle(area)) return false;
+        if (!hasAnyBundle(player, area)) return false;
 
         CommunityCenterSavedData data = CommunityCenterSavedData.get();
         if (data.isAreaComplete(player, area)) return false;
@@ -39,8 +40,9 @@ public final class BundleAreaVisibility {
         };
     }
 
-    private static boolean hasAnyBundle(int area) {
-        for (BundleDefinition def : BundleDataManager.getBundlesForArea(area)) {
+    private static boolean hasAnyBundle(UUID player, int area) {
+        for (BundleDefinition def
+                : StardewCommunityCenterVariantRegistry.area(player, area)) {
             if (def != null) return true;
         }
         return false;
@@ -49,7 +51,8 @@ public final class BundleAreaVisibility {
     private static int countCompleteBundles(CommunityCenterSavedData data, UUID player) {
         int n = 0;
         for (int a = 0; a < 6; a++) {
-            for (BundleDefinition def : BundleDataManager.getBundlesForArea(a)) {
+            for (BundleDefinition def
+                    : StardewCommunityCenterVariantRegistry.area(player, a)) {
                 if (def != null && data.isBundleComplete(player, def.bundleId())) n++;
             }
         }

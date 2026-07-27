@@ -1,5 +1,9 @@
 {
   "1": "Basic/stardewcraft.quest.1.title/stardewcraft.quest.1.description/stardewcraft.quest.1.objective///0//false/",
+  "2": "Basic/stardewcraft.quest.2.title/stardewcraft.quest.2.description/stardewcraft.quest.2.objective/null/-1/0/-1/false",
+  "3": "Basic/stardewcraft.quest.3.title/stardewcraft.quest.3.description/stardewcraft.quest.3.objective/null/-1/0/-1/false",
+  "4": "Basic/stardewcraft.quest.4.title/stardewcraft.quest.4.description/stardewcraft.quest.4.objective/null/-1/0/-1/false",
+  "5": "Basic/stardewcraft.quest.5.title/stardewcraft.quest.5.description/stardewcraft.quest.5.objective/null/-1/0/-1/false",
   "6": "ItemHarvest/stardewcraft.quest.6.title/stardewcraft.quest.6.description/stardewcraft.quest.6.objective/stardewcraft:parsnip 1/7 8/100//true/",
   "7": "Building/stardewcraft.quest.7.title/stardewcraft.quest.7.description/stardewcraft.quest.7.objective/Coop//100//true/",
   "8": "Crafting/stardewcraft.quest.8.title/stardewcraft.quest.8.description/stardewcraft.quest.8.objective/scarecrow//100//true/",

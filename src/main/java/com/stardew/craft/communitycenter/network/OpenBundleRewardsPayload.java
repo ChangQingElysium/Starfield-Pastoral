@@ -1,11 +1,11 @@
 package com.stardew.craft.communitycenter.network;
 
 import com.stardew.craft.StardewCraft;
-import com.stardew.craft.communitycenter.data.BundleDataManager;
 import com.stardew.craft.communitycenter.data.BundleDefinition;
 import com.stardew.craft.communitycenter.menu.BundleMenu;
 import com.stardew.craft.communitycenter.menu.BundleRewardMenu;
 import com.stardew.craft.communitycenter.state.CommunityCenterSavedData;
+import com.stardew.craft.api.v1.internal.communitycenter.StardewCommunityCenterVariantRegistry;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -51,7 +51,8 @@ public record OpenBundleRewardsPayload(
             // Verify there are actually rewards to claim
             CommunityCenterSavedData data = CommunityCenterSavedData.get();
             boolean hasRewards = false;
-            for (BundleDefinition def : BundleDataManager.getBundlesForArea(areaId)) {
+            for (BundleDefinition def
+                    : StardewCommunityCenterVariantRegistry.area(sp.getUUID(), areaId)) {
                 if (data.isRewardAvailable(sp.getUUID(), def.bundleId())) {
                     hasRewards = true;
                     break;

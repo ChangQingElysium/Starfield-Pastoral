@@ -4,7 +4,7 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.animal.data.AnimalWorldData;
 import com.stardew.craft.animal.model.AnimalBuildingRecord;
 import com.stardew.craft.animal.model.FarmAnimalRecord;
-import com.stardew.craft.animal.service.AnimalEntityRecoveryState;
+import com.stardew.craft.animal.service.AnimalEntityProjectionPolicy;
 import com.stardew.craft.animal.service.AnimalEntitySyncService;
 import com.stardew.craft.animal.service.ManagedAnimalRuntimeIndex;
 import com.stardew.craft.entity.animal.BaseCoopAnimalEntity;
@@ -42,10 +42,26 @@ public class AnimalDuplicateGuardEvents {
         FarmAnimalRecord record = data.getAnimal(managedId).orElse(null);
         AnimalBuildingRecord building = record == null
             ? null
-            : data.getBuilding(record.buildingId()).orElse(null);
-        if (record == null || building == null
-            || !level.dimension().location().toString().equals(building.dimensionId())) {
-            StardewCraft.LOGGER.info("[ANIMAL_GUARD] Discarding managed animal {} without an active building", managedId);
+            : data.getBuildingIncludingInactive(
+                    record.buildingId()).orElse(null);
+        AnimalEntityProjectionPolicy.JoinDecision decision =
+                AnimalEntityProjectionPolicy.decideJoin(
+                        record != null,
+                        building != null,
+                        building != null
+                                && building.isGameplayEnabled(),
+                        building != null
+                                && level.dimension().location()
+                                        .toString().equals(
+                                                building.dimensionId()));
+        if (decision != AnimalEntityProjectionPolicy
+                .JoinDecision.ACCEPT_ACTIVE
+                && decision != AnimalEntityProjectionPolicy
+                .JoinDecision.ACCEPT_PAUSED) {
+            StardewCraft.LOGGER.info(
+                    "[ANIMAL_GUARD] Discarding projection {} for managed animal {}",
+                    decision,
+                    managedId);
             event.setCanceled(true);
             animal.discard();
             return;
@@ -57,6 +73,10 @@ public class AnimalDuplicateGuardEvents {
             StardewCraft.LOGGER.info("[ANIMAL_GUARD] Duplicate detected for managedId {}, discarding new entity", managedId);
             event.setCanceled(true);
             animal.discard();
+        } else if (record.updateProjectionAnchor(
+                level.dimension().location().toString(),
+                animal.blockPosition())) {
+            data.markChanged();
         }
     }
 
@@ -64,6 +84,18 @@ public class AnimalDuplicateGuardEvents {
     public static void onEntityLeaveLevel(EntityLeaveLevelEvent event) {
         if (event.getLevel() instanceof ServerLevel level
             && event.getEntity() instanceof BaseCoopAnimalEntity animal) {
+            if (ManagedAnimalRuntimeIndex.isCanonical(level, animal)) {
+                AnimalWorldData data = AnimalWorldData.get(level);
+                data.getAnimal(animal.getManagedAnimalId())
+                        .ifPresent(record -> {
+                            if (record.updateProjectionAnchor(
+                                    level.dimension().location()
+                                            .toString(),
+                                    animal.blockPosition())) {
+                                data.markChanged();
+                            }
+                        });
+            }
             ManagedAnimalRuntimeIndex.remove(level, animal);
         }
     }
@@ -72,7 +104,6 @@ public class AnimalDuplicateGuardEvents {
     public static void onLevelUnload(LevelEvent.Unload event) {
         if (event.getLevel() instanceof ServerLevel level) {
             ManagedAnimalRuntimeIndex.clear(level);
-            AnimalEntityRecoveryState.clear(level);
         }
     }
 }

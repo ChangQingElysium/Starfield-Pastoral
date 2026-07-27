@@ -1,8 +1,11 @@
 package com.stardew.craft.communitycenter.state;
 
 import com.stardew.craft.StardewCraft;
-import com.stardew.craft.communitycenter.data.BundleDataManager;
+import com.stardew.craft.api.v1.internal.progress.StardewProgressRegistry;
+import com.stardew.craft.api.v1.progress.StardewProgressCauses;
+import com.stardew.craft.api.v1.progress.StardewProgressSnapshot;
 import com.stardew.craft.communitycenter.data.BundleDefinition;
+import com.stardew.craft.api.v1.internal.communitycenter.StardewCommunityCenterVariantRegistry;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -33,6 +36,7 @@ public class CommunityCenterSavedData extends SavedData {
     private static final String TAG_REWARD_AVAILABLE = "RewardAvailable";
     private static final String TAG_AREAS_COMPLETE = "AreasComplete";
     private static final String TAG_VERSION = "Version";
+    private static final String TAG_ADDON_DATA = "AddonData";
 
     /** 当前存储版本 (2 = per-player) */
     private static final int CURRENT_VERSION = 2;
@@ -42,6 +46,7 @@ public class CommunityCenterSavedData extends SavedData {
         final Map<Integer, boolean[]> bundleSlots = new HashMap<>();
         final Map<Integer, Boolean> bundleRewards = new HashMap<>();
         final boolean[] areasComplete = new boolean[7];
+        CompoundTag addonData = new CompoundTag();
     }
 
     private final Map<UUID, PlayerProgress> playerData = new HashMap<>();
@@ -124,6 +129,9 @@ public class CommunityCenterSavedData extends SavedData {
                 progress.areasComplete[i] = areaBytes[i] != 0;
             }
         }
+        if (tag.contains(TAG_ADDON_DATA, Tag.TAG_COMPOUND)) {
+            progress.addonData = tag.getCompound(TAG_ADDON_DATA).copy();
+        }
     }
 
     @Override
@@ -166,6 +174,9 @@ public class CommunityCenterSavedData extends SavedData {
             areaBytes[i] = (byte) (progress.areasComplete[i] ? 1 : 0);
         }
         tag.putByteArray(TAG_AREAS_COMPLETE, areaBytes);
+        if (!progress.addonData.isEmpty()) {
+            tag.put(TAG_ADDON_DATA, progress.addonData.copy());
+        }
     }
 
     // ── Bundle Slot Operations (all take UUID) ──
@@ -173,7 +184,8 @@ public class CommunityCenterSavedData extends SavedData {
     /** Get or initialize the slot array for a bundle. */
     public boolean[] getSlots(UUID player, int bundleId) {
         return getProgress(player).bundleSlots.computeIfAbsent(bundleId, id -> {
-            BundleDefinition def = BundleDataManager.getBundle(id);
+            BundleDefinition def =
+                    StardewCommunityCenterVariantRegistry.bundle(player, id);
             int size = (def != null) ? def.totalSlots() : 0;
             return new boolean[size];
         });
@@ -185,8 +197,15 @@ public class CommunityCenterSavedData extends SavedData {
         if (slotIndex < 0 || slotIndex >= slots.length) return false;
         if (slots[slotIndex]) return false;
 
+        var online = onlinePlayer(player);
+        StardewProgressSnapshot before = online == null
+                ? null : StardewProgressRegistry
+                        .communityCenterBundleSnapshot(online, bundleId);
         slots[slotIndex] = true;
         setDirty();
+        dispatchBundleChange(
+                online, bundleId, before,
+                StardewProgressCauses.BUNDLE_DEPOSIT);
         return true;
     }
 
@@ -212,7 +231,8 @@ public class CommunityCenterSavedData extends SavedData {
      * Check if a bundle is complete (filled slots >= requiredCount).
      */
     public boolean isBundleComplete(UUID player, int bundleId) {
-        BundleDefinition def = BundleDataManager.getBundle(bundleId);
+        BundleDefinition def =
+                StardewCommunityCenterVariantRegistry.bundle(player, bundleId);
         if (def == null) return false;
         return countFilledSlots(player, bundleId) >= def.requiredCount();
     }
@@ -221,13 +241,22 @@ public class CommunityCenterSavedData extends SavedData {
     public void markBundleAllSlotsComplete(UUID player, int bundleId) {
         boolean[] slots = getSlots(player, bundleId);
         boolean changed = false;
+        var online = onlinePlayer(player);
+        StardewProgressSnapshot before = online == null
+                ? null : StardewProgressRegistry
+                        .communityCenterBundleSnapshot(online, bundleId);
         for (int i = 0; i < slots.length; i++) {
             if (!slots[i]) {
                 slots[i] = true;
                 changed = true;
             }
         }
-        if (changed) setDirty();
+        if (changed) {
+            setDirty();
+            dispatchBundleChange(
+                    online, bundleId, before,
+                    StardewProgressCauses.BUNDLE_DEPOSIT);
+        }
     }
 
     // ── Bundle Reward Operations ──
@@ -237,8 +266,22 @@ public class CommunityCenterSavedData extends SavedData {
     }
 
     public void setRewardAvailable(UUID player, int bundleId, boolean available) {
+        boolean previous = getProgress(player).bundleRewards
+                .getOrDefault(bundleId, false);
+        if (previous == available) {
+            return;
+        }
+        var online = onlinePlayer(player);
+        StardewProgressSnapshot before = online == null
+                ? null : StardewProgressRegistry
+                        .communityCenterBundleSnapshot(online, bundleId);
         getProgress(player).bundleRewards.put(bundleId, available);
         setDirty();
+        dispatchBundleChange(
+                online, bundleId, before,
+                available
+                        ? StardewProgressCauses.BUNDLE_DEPOSIT
+                        : StardewProgressCauses.REWARD_CLAIM);
     }
 
     // ── Area Operations ──
@@ -254,8 +297,21 @@ public class CommunityCenterSavedData extends SavedData {
         PlayerProgress p = getProgress(player);
         if (areaId < 0 || areaId >= p.areasComplete.length) return false;
         if (p.areasComplete[areaId]) return false;
+        var online = onlinePlayer(player);
+        StardewProgressSnapshot before = online == null
+                ? null : StardewProgressRegistry
+                        .communityCenterAreaSnapshot(online, areaId);
         p.areasComplete[areaId] = true;
         setDirty();
+        if (online != null && before != null) {
+            StardewProgressSnapshot after = StardewProgressRegistry
+                    .communityCenterAreaSnapshot(online, areaId);
+            if (after != null) {
+                StardewProgressRegistry.dispatchChanges(
+                        online, before, after,
+                        StardewProgressCauses.BUNDLE_DEPOSIT);
+            }
+        }
         return true;
     }
 
@@ -296,7 +352,8 @@ public class CommunityCenterSavedData extends SavedData {
     /** Complete everything for a player (debug). */
     public void completeAll(UUID player) {
         PlayerProgress p = getProgress(player);
-        for (BundleDefinition def : BundleDataManager.getAllBundles()) {
+        for (BundleDefinition def
+                : StardewCommunityCenterVariantRegistry.all(player)) {
             boolean[] slots = getSlots(player, def.bundleId());
             Arrays.fill(slots, true);
             p.bundleRewards.put(def.bundleId(), false); // reward already claimed
@@ -317,5 +374,60 @@ public class CommunityCenterSavedData extends SavedData {
     /** Get all tracked player UUIDs. */
     public Set<UUID> getAllPlayers() {
         return Collections.unmodifiableSet(playerData.keySet());
+    }
+
+    public CompoundTag getAddonData(UUID player) {
+        PlayerProgress progress = playerData.get(player);
+        return progress == null
+                ? new CompoundTag()
+                : progress.addonData.copy();
+    }
+
+    public CompoundTag getAddonData(UUID player, String id) {
+        PlayerProgress progress = playerData.get(player);
+        if (progress == null || !progress.addonData.contains(id, Tag.TAG_COMPOUND)) {
+            return null;
+        }
+        return progress.addonData.getCompound(id).copy();
+    }
+
+    public void putAddonData(UUID player, String id, CompoundTag value) {
+        getProgress(player).addonData.put(id, value.copy());
+        setDirty();
+    }
+
+    public boolean removeAddonData(UUID player, String id) {
+        PlayerProgress progress = playerData.get(player);
+        if (progress == null || !progress.addonData.contains(id)) {
+            return false;
+        }
+        progress.addonData.remove(id);
+        setDirty();
+        return true;
+    }
+
+    private static net.minecraft.server.level.ServerPlayer onlinePlayer(
+            UUID playerId
+    ) {
+        var server = ServerLifecycleHooks.getCurrentServer();
+        return server == null
+                ? null : server.getPlayerList().getPlayer(playerId);
+    }
+
+    private static void dispatchBundleChange(
+            net.minecraft.server.level.ServerPlayer player,
+            int bundleId,
+            StardewProgressSnapshot before,
+            net.minecraft.resources.ResourceLocation cause
+    ) {
+        if (player == null || before == null) {
+            return;
+        }
+        StardewProgressSnapshot after = StardewProgressRegistry
+                .communityCenterBundleSnapshot(player, bundleId);
+        if (after != null) {
+            StardewProgressRegistry.dispatchChanges(
+                    player, before, after, cause);
+        }
     }
 }

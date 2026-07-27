@@ -66,31 +66,83 @@ public final class MuseumRewardRegistry {
             Set<String> claimedIds
     ) {
         Set<String> donated = data.getDonatedItems(playerId);
+        DonationCounts counts = countDonations(donated);
+
+        List<MuseumReward> result = new ArrayList<>();
+        for (MuseumReward reward : rewards.values()) {
+            if (claimedIds.contains(reward.id())) continue;
+            if (progress(reward, donated, counts).qualified()) result.add(reward);
+        }
+        return result;
+    }
+
+    /** Canonical museum category counts shared by rewards and public projections. */
+    public static DonationCounts countDonations(Set<String> donated) {
         int minerals = 0;
         int artifacts = 0;
         for (String itemId : donated) {
             ResourceLocation id = ResourceLocation.tryParse(itemId);
             if (id == null || !BuiltInRegistries.ITEM.containsKey(id)) continue;
-            var metadata = StardewItemDataApi.resolve(new ItemStack(BuiltInRegistries.ITEM.get(id))).orElse(null);
+            var metadata = StardewItemDataApi.resolve(
+                    new ItemStack(BuiltInRegistries.ITEM.get(id)))
+                    .orElse(null);
             if (metadata == null) continue;
             String category = metadata.category().getPath();
             if ("mineral".equals(category)) minerals++;
-            if ("artifact".equals(category) || "artifact_quality".equals(category)) artifacts++;
+            if ("artifact".equals(category)
+                    || "artifact_quality".equals(category)) artifacts++;
         }
+        return new DonationCounts(donated.size(), minerals, artifacts);
+    }
 
-        List<MuseumReward> result = new ArrayList<>();
-        for (MuseumReward reward : rewards.values()) {
-            if (claimedIds.contains(reward.id())) continue;
-            boolean qualifies = switch (reward.condition()) {
-                case "total_count" -> donated.size() >= reward.threshold();
-                case "mineral_count" -> minerals >= reward.threshold();
-                case "artifact_count" -> artifacts >= reward.threshold();
-                case "specific_items" -> donated.containsAll(reward.requiredIds());
-                default -> false;
-            };
-            if (qualifies) result.add(reward);
+    /** Canonical current/target evaluation for one reward definition. */
+    public static RewardProgress progress(
+            MuseumReward reward,
+            Set<String> donated
+    ) {
+        return progress(reward, donated, countDonations(donated));
+    }
+
+    private static RewardProgress progress(
+            MuseumReward reward,
+            Set<String> donated,
+            DonationCounts counts
+    ) {
+        int current;
+        int target;
+        switch (reward.condition()) {
+            case "total_count" -> {
+                current = counts.total();
+                target = reward.threshold();
+            }
+            case "mineral_count" -> {
+                current = counts.minerals();
+                target = reward.threshold();
+            }
+            case "artifact_count" -> {
+                current = counts.artifacts();
+                target = reward.threshold();
+            }
+            case "specific_items" -> {
+                current = 0;
+                for (String required : reward.requiredIds()) {
+                    if (donated.contains(required)) current++;
+                }
+                target = reward.requiredIds().size();
+            }
+            default -> {
+                current = 0;
+                target = 0;
+            }
         }
-        return result;
+        return new RewardProgress(
+                current, target, target > 0 && current >= target);
+    }
+
+    public record DonationCounts(int total, int minerals, int artifacts) {
+    }
+
+    public record RewardProgress(int current, int target, boolean qualified) {
     }
 
     public static final class ReloadListener extends SimpleJsonResourceReloadListener {

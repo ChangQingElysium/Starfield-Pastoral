@@ -1,0 +1,15 @@
+{
+  "builder": "stardewcraft:wizard",
+  "order": 10,
+  "display_name": "item.stardewcraft.junimo_hut",
+  "description": "item.stardewcraft.junimo_hut.desc",
+  "money": 20000,
+  "materials": [
+    { "item": "stardewcraft:stone", "count": 200 },
+    { "item": "stardewcraft:starfruit", "count": 9 },
+    { "item": "stardewcraft:fiber", "count": 100 }
+  ],
+  "result_item": "stardewcraft:junimo_hut",
+  "preview_canvas_size": 64,
+  "magical_construction": true
+}

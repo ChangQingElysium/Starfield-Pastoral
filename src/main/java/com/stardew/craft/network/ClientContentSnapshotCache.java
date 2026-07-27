@@ -28,8 +28,6 @@ final class ClientContentSnapshotCache<K, V> {
         rejectReentrantBuild();
         Objects.requireNonNull(owner, "owner");
         Objects.requireNonNull(builder, "builder");
-        this.owner = null;
-        entry = null;
 
         building = true;
         try {

@@ -6,6 +6,14 @@ import com.stardew.craft.api.v1.specialorder.SpecialOrderProgressEvent;
 import com.stardew.craft.api.v1.specialorder.SpecialOrderRewardContext;
 import com.stardew.craft.api.v1.specialorder.StardewSpecialOrderObjectives;
 import com.stardew.craft.api.v1.specialorder.StardewSpecialOrderRewards;
+import com.stardew.craft.api.v1.internal.progress.StardewProgressRegistry;
+import com.stardew.craft.api.v1.progress.StardewProgressCauses;
+import com.stardew.craft.api.v1.progress.StardewProgressEvent;
+import com.stardew.craft.api.v1.progress.StardewProgressEventType;
+import com.stardew.craft.api.v1.progress.StardewProgressPhase;
+import com.stardew.craft.api.v1.progress.StardewProgressOperation;
+import com.stardew.craft.api.v1.progress.StardewProgressRequirements;
+import com.stardew.craft.api.v1.requirement.StardewRequirementTypes;
 import com.stardew.craft.mail.MailService;
 import com.stardew.craft.lostandfound.LostAndFoundService;
 import com.stardew.craft.npc.runtime.NpcFriendshipDataManager;
@@ -98,20 +106,27 @@ public final class SpecialOrderManager {
     }
 
     public static void accept(ServerPlayer player, String orderId) {
-        if (!isUnlockedFor(player)) {
+        var key = StardewProgressRegistry.specialOrderKey(orderId);
+        var requirements =
+                StardewProgressRequirements.requirements(
+                        player, key,
+                        StardewProgressOperation.ACCEPT);
+        if (!requirements.satisfied()) {
+            if (requirements.blocking().stream()
+                    .anyMatch(requirement -> requirement.type()
+                            .equals(StardewRequirementTypes
+                                    .PROGRESS_ACCEPTANCE_SLOT_AVAILABLE))) {
+                player.displayClientMessage(
+                        Component.translatable(
+                                "stardewcraft.special_orders.accept.already_active"),
+                        true);
+            }
+            if (isUnlockedFor(player)) {
+                sendBoard(player);
+            }
             return;
         }
         SpecialOrderWorldData data = SpecialOrderWorldData.get(player.serverLevel());
-        if (data.active().stream().anyMatch(order -> order.accepted() && !order.complete() && !order.failed())) {
-            player.displayClientMessage(Component.translatable("stardewcraft.special_orders.accept.already_active"), true);
-            sendBoard(player);
-            return;
-        }
-        if (data.normalOrderAcceptedThisRefresh()) {
-            player.displayClientMessage(Component.translatable("stardewcraft.special_orders.accept.already_active"), true);
-            sendBoard(player);
-            return;
-        }
         Optional<SpecialOrderInstance> selected = data.available().stream()
             .filter(order -> order.orderId().equals(orderId))
             .findFirst();
@@ -120,17 +135,35 @@ public final class SpecialOrderManager {
             return;
         }
         SpecialOrderInstance order = selected.get();
+        var before = StardewProgressRegistry.specialOrderSnapshot(
+                player, order, StardewProgressPhase.AVAILABLE);
         order.setAccepted(true);
         order.addParticipant(player.getUUID());
         data.active().add(order);
         data.setNormalOrderAcceptedThisRefresh(true);
         data.setDirty();
         PlayerDataManager.getPlayerData(player).markDirty();
+        dispatchProgress(
+                StardewProgressEventType.ACCEPTED,
+                player,
+                before,
+                StardewProgressRegistry.specialOrderSnapshot(
+                        player, order, null),
+                StardewProgressCauses.ACCEPT);
         player.playNotifySound(ModSounds.NEW_ARTIFACT.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
         syncAll(player.server);
     }
 
     public static void claimReward(ServerPlayer player, String orderId) {
+        if (!StardewProgressRequirements.requirements(
+                        player,
+                        StardewProgressRegistry
+                                .specialOrderKey(orderId),
+                        StardewProgressOperation.CLAIM_REWARD)
+                .satisfied()) {
+            sendBoard(player);
+            return;
+        }
         SpecialOrderWorldData data = SpecialOrderWorldData.get(player.serverLevel());
         SpecialOrderInstance order = findActive(data, orderId).orElse(null);
         if (order == null || !order.hasUnclaimedReward(player.getUUID())) {
@@ -141,6 +174,8 @@ public final class SpecialOrderManager {
         if (definition == null) {
             return;
         }
+        var before = StardewProgressRegistry.specialOrderSnapshot(
+                player, order, null);
         grantRewards(player, definition, order);
         cleanupTemporaryOrderState(List.of(player), definition);
         order.markRewardClaimed(player.getUUID());
@@ -151,6 +186,13 @@ public final class SpecialOrderManager {
             data.active().remove(order);
         }
         data.setDirty();
+        dispatchProgress(
+                StardewProgressEventType.REWARD_CLAIMED,
+                player,
+                before,
+                StardewProgressRegistry.specialOrderSnapshot(
+                        player, order, StardewProgressPhase.COMPLETED),
+                StardewProgressCauses.REWARD_CLAIM);
         player.playNotifySound(ModSounds.QUEST_COMPLETE.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
         syncAll(player.server);
     }
@@ -163,10 +205,21 @@ public final class SpecialOrderManager {
         for (SpecialOrderInstance order : new ArrayList<>(data.active())) {
             if (order.accepted() && !order.complete() && order.dueDay() <= today) {
                 SpecialOrderDefinition definition = SpecialOrderDefinitions.get(order.orderId());
+                var before = StardewProgressRegistry.specialOrderSnapshot(
+                        (UUID) null, order, StardewProgressPhase.ACTIVE);
                 queueReturnedDonations(level, players, order);
                 cleanupTemporaryOrderState(players, definition);
                 order.setFailed(true);
                 data.active().remove(order);
+                StardewProgressRegistry.dispatch(new StardewProgressEvent(
+                        StardewProgressEventType.FAILED,
+                        level,
+                        Optional.empty(),
+                        Optional.of(before),
+                        StardewProgressRegistry.specialOrderSnapshot(
+                                (UUID) null, order,
+                                StardewProgressPhase.FAILED),
+                        StardewProgressCauses.DAY_TICK));
                 changed = true;
             }
         }
@@ -573,21 +626,57 @@ public final class SpecialOrderManager {
         if (order.complete() || !order.isObjectivesComplete()) {
             return false;
         }
+        var before = StardewProgressRegistry.specialOrderSnapshot(
+                player, order, null);
         order.setComplete(true);
         order.addParticipant(player.getUUID());
         data.setDirty();
+        dispatchProgress(
+                StardewProgressEventType.REWARD_BECAME_AVAILABLE,
+                player,
+                before,
+                StardewProgressRegistry.specialOrderSnapshot(
+                        player, order, null),
+                StardewProgressCauses.OBJECTIVE_EVENT);
         return true;
     }
 
     private static boolean addObjectiveProgress(ServerPlayer player, SpecialOrderInstance order,
                                                 SpecialOrderInstance.ObjectiveState state, int amount,
                                                 boolean suppressJingle) {
+        var before = StardewProgressRegistry.specialOrderSnapshot(
+                player, order, null);
         boolean wasComplete = state.isComplete();
         boolean changed = state.add(amount);
+        if (changed) {
+            dispatchProgress(
+                    StardewProgressEventType.PROGRESSED,
+                    player,
+                    before,
+                    StardewProgressRegistry.specialOrderSnapshot(
+                            player, order, null),
+                    StardewProgressCauses.OBJECTIVE_EVENT);
+        }
         if (changed && !wasComplete && state.isComplete() && !order.isObjectivesComplete() && !suppressJingle) {
             player.playNotifySound(ModSounds.JINGLE1.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
         }
         return changed;
+    }
+
+    private static void dispatchProgress(
+            StardewProgressEventType type,
+            ServerPlayer player,
+            com.stardew.craft.api.v1.progress.StardewProgressSnapshot before,
+            com.stardew.craft.api.v1.progress.StardewProgressSnapshot after,
+            ResourceLocation cause
+    ) {
+        StardewProgressRegistry.dispatch(new StardewProgressEvent(
+                type,
+                player.serverLevel(),
+                Optional.of(player.getUUID()),
+                Optional.of(before),
+                after,
+                cause));
     }
 
     private static void grantRewards(ServerPlayer player, SpecialOrderDefinition definition, SpecialOrderInstance order) {

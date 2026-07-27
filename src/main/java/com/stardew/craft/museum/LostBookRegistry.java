@@ -30,37 +30,30 @@ public final class LostBookRegistry {
             ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "lost_books");
     private static final AtomicDefinitionStore<StardewLostBookDefinition> STORE =
             new AtomicDefinitionStore<>();
-    private static volatile Map<ResourceLocation, StardewLostBookDefinition> books = Map.of();
-    private static volatile Map<InteractionKey, ResourceLocation> interactions = Map.of();
+    private static volatile Catalog catalog = Catalog.empty();
 
     private LostBookRegistry() {
     }
 
     public static DefinitionSnapshot<StardewLostBookDefinition> snapshot() {
-        return STORE.snapshot();
+        return catalog.definitions();
     }
 
     public static StardewLostBookDefinition get(ResourceLocation id) {
-        return books.get(id);
+        return catalog.books().get(id);
     }
 
     public static ResourceLocation at(ResourceLocation dimension, BlockPos pos) {
-        return interactions.get(new InteractionKey(dimension, pos.asLong()));
+        return catalog.interactions().get(
+                new InteractionKey(dimension, pos.asLong()));
     }
 
     public static int discoveryMaximum() {
-        int configured = books.values().stream()
-                .mapToInt(StardewLostBookDefinition::unlockAt)
-                .max().orElse(0);
-        return Math.max(21, configured);
+        return catalog.discoveryMaximum();
     }
 
     public static List<Map.Entry<ResourceLocation, StardewLostBookDefinition>> orderedBooks() {
-        return books.entrySet().stream()
-                .sorted(Comparator.comparingInt((Map.Entry<ResourceLocation, StardewLostBookDefinition> entry) ->
-                                entry.getValue().unlockAt())
-                        .thenComparing(entry -> entry.getKey().toString()))
-                .toList();
+        return catalog.orderedBooks();
     }
 
     public static final class ReloadListener extends SimpleJsonResourceReloadListener {
@@ -102,19 +95,55 @@ public final class LostBookRegistry {
                         decode(entry.getKey(), id, entry.getValue(), definitions, sources, diagnostics);
                     });
 
-            Map<InteractionKey, ResourceLocation> nextInteractions = buildInteractions(definitions, diagnostics);
-            var result = STORE.applyLocal(definitions, sources, diagnostics);
-            logDiagnostics(result.diagnostics());
-            if (!result.accepted()) {
-                StardewCraft.LOGGER.error("[Lost books] Rejected snapshot; keeping v{} with {} books",
-                        result.snapshot().version(), result.snapshot().definitions().size());
-                return;
-            }
-            books = result.snapshot().definitions();
-            interactions = Map.copyOf(nextInteractions);
-            StardewCraft.LOGGER.info("[Lost books] Applied snapshot v{} ({} books, {} interaction points)",
-                    result.snapshot().version(), books.size(), interactions.size());
+            applyCandidate(definitions, sources, diagnostics);
         }
+    }
+
+    static synchronized void applyCandidate(
+            Map<ResourceLocation, StardewLostBookDefinition> definitions,
+            Map<ResourceLocation, String> sources,
+            List<DefinitionDiagnostic> diagnostics
+    ) {
+        Map<InteractionKey, ResourceLocation> nextInteractions =
+                buildInteractions(definitions, diagnostics);
+        List<Map.Entry<ResourceLocation, StardewLostBookDefinition>> nextOrdered =
+                definitions.entrySet().stream()
+                        .sorted(Comparator.comparingInt(
+                                        (Map.Entry<ResourceLocation, StardewLostBookDefinition> entry) ->
+                                                entry.getValue().unlockAt())
+                                .thenComparing(entry ->
+                                        entry.getKey().toString()))
+                        .map(entry -> Map.entry(
+                                entry.getKey(), entry.getValue()))
+                        .toList();
+        int nextDiscoveryMaximum = Math.max(
+                21,
+                definitions.values().stream()
+                        .mapToInt(StardewLostBookDefinition::unlockAt)
+                        .max()
+                        .orElse(0));
+
+        var result = STORE.applyLocal(
+                definitions, sources, diagnostics);
+        logDiagnostics(result.diagnostics());
+        if (!result.accepted()) {
+            StardewCraft.LOGGER.error(
+                    "[Lost books] Rejected snapshot; keeping v{} with {} books",
+                    catalog.definitions().version(),
+                    catalog.books().size());
+            return;
+        }
+
+        catalog = new Catalog(
+                result.snapshot(),
+                nextInteractions,
+                nextOrdered,
+                nextDiscoveryMaximum);
+        StardewCraft.LOGGER.info(
+                "[Lost books] Applied snapshot v{} ({} books, {} interaction points)",
+                catalog.definitions().version(),
+                catalog.books().size(),
+                catalog.interactions().size());
     }
 
     private static void decode(
@@ -173,6 +202,40 @@ public final class LostBookRegistry {
         }
     }
 
-    private record InteractionKey(ResourceLocation dimension, long position) {
+    static Catalog catalog() {
+        return catalog;
+    }
+
+    record Catalog(
+            DefinitionSnapshot<StardewLostBookDefinition> definitions,
+            Map<InteractionKey, ResourceLocation> interactions,
+            List<Map.Entry<ResourceLocation, StardewLostBookDefinition>> orderedBooks,
+            int discoveryMaximum
+    ) {
+        Catalog {
+            definitions = java.util.Objects.requireNonNull(
+                    definitions, "definitions");
+            interactions = Map.copyOf(interactions);
+            orderedBooks = List.copyOf(orderedBooks);
+            if (discoveryMaximum < 21) {
+                throw new IllegalArgumentException(
+                        "Lost-book discovery maximum must preserve the legacy minimum");
+            }
+        }
+
+        Map<ResourceLocation, StardewLostBookDefinition> books() {
+            return definitions.definitions();
+        }
+
+        private static Catalog empty() {
+            return new Catalog(
+                    DefinitionSnapshot.empty(),
+                    Map.of(),
+                    List.of(),
+                    21);
+        }
+    }
+
+    record InteractionKey(ResourceLocation dimension, long position) {
     }
 }

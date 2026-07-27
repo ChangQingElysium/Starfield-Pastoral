@@ -77,7 +77,8 @@ public final class InteriorSubspaceManager {
         if (farm == null || !farm.isInitialized() || !farm.contains(player.blockPosition())) {
             return;
         }
-        com.stardew.craft.farm.FarmType.FarmLayout layout = farm.getFarmType().getLayout();
+        com.stardew.craft.api.v1.farm.StardewFarmLayout layout =
+                farm.getFarmLayout();
         if (layout == null) {
             return;
         }
@@ -91,7 +92,7 @@ public final class InteriorSubspaceManager {
     }
 
     private static void registerExitRegion(ServerLevel level, BlockPos origin,
-                                           com.stardew.craft.farm.FarmType.EntryData entry,
+                                           com.stardew.craft.api.v1.farm.StardewFarmLayout.Entry entry,
                                            String targetTag, String markerTag) {
         BlockPos min = origin.offset(entry.exitMin());
         BlockPos max = origin.offset(entry.exitMax());
@@ -1600,7 +1601,8 @@ public final class InteriorSubspaceManager {
         int farmPortals = 0;
         for (com.stardew.craft.farm.FarmInstance farm : registry.getAllFarms()) {
             if (!farm.isInitialized()) continue;
-            com.stardew.craft.farm.FarmType.FarmLayout layout = farm.getFarmType().getLayout();
+            com.stardew.craft.api.v1.farm.StardewFarmLayout layout =
+                    farm.getFarmLayout();
             if (layout == null) continue;
 
             BlockPos origin = farm.getOrigin();
@@ -1641,7 +1643,7 @@ public final class InteriorSubspaceManager {
      * 逻辑与 FarmInstanceInitializer.spawnExitEntityRegion 一致。
      */
     private static void placeExitRegion(ServerLevel level, BlockPos origin,
-                                         com.stardew.craft.farm.FarmType.EntryData entry,
+                                         com.stardew.craft.api.v1.farm.StardewFarmLayout.Entry entry,
                                          String targetTag, String markerTag) {
         BlockPos min = origin.offset(entry.exitMin());
         BlockPos max = origin.offset(entry.exitMax());

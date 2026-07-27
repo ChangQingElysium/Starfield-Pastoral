@@ -7,6 +7,7 @@ import com.stardew.craft.fishing.data.SpawnFishRule;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.item.SecretNoteItem;
 import com.stardew.craft.item.SpecificBaitItem;
+import com.stardew.craft.item.artisan.FlavoredArtisanDrinkItem;
 import com.stardew.craft.item.artisan.PreservesItem;
 import com.stardew.craft.item.catalog.StardewItemCatalog;
 import com.stardew.craft.client.gui.WorkbenchScreen;
@@ -191,6 +192,8 @@ public class StardewJeiPlugin implements IModPlugin {
         registration.registerSubtypeInterpreter(ModItems.AGED_ROE.get(), new PreserveSubtypeInterpreter());
         registration.registerSubtypeInterpreter(ModItems.DRIED_FRUIT.get(), new PreserveSubtypeInterpreter());
         registration.registerSubtypeInterpreter(ModItems.DRIED_MUSHROOMS.get(), new PreserveSubtypeInterpreter());
+        registration.registerSubtypeInterpreter(ModItems.WINE.get(), new FlavoredDrinkSubtypeInterpreter());
+        registration.registerSubtypeInterpreter(ModItems.JUICE.get(), new FlavoredDrinkSubtypeInterpreter());
         registration.registerSubtypeInterpreter(ModItems.TARGETED_BAIT.get(), new SpecificBaitSubtypeInterpreter());
         registration.registerSubtypeInterpreter(ModItems.SECRET_NOTE.get(), new SecretNoteSubtypeInterpreter());
     }
@@ -326,9 +329,11 @@ public class StardewJeiPlugin implements IModPlugin {
                 CookingRecipeCategory.DisplayRecipe::contentSignature);
         publishedCookingRecipes = cookingRecipes;
 
-        boolean hasServerCatalog = com.stardew.craft.client.ClientJeiCatalog.isSynced();
+        com.stardew.craft.client.ClientJeiCatalog.Snapshot serverCatalog =
+                com.stardew.craft.client.ClientJeiCatalog.snapshot();
+        boolean hasServerCatalog = serverCatalog.synced();
         List<ShopInfoCategory.DisplayEntry> shopRecipes = hasServerCatalog
-                ? com.stardew.craft.client.ClientJeiCatalog.shops().stream()
+                ? serverCatalog.shops().stream()
                             .map(entry -> new ShopInfoCategory.DisplayEntry(
                                     entry.item(), entry.shopId(), entry.ownerNpcId(), entry.price(), entry.stock(),
                                     entry.tradeItem(), entry.tradeItemCount(), entry.purchaseStack(),
@@ -344,7 +349,7 @@ public class StardewJeiPlugin implements IModPlugin {
         List<GeodeProcessingCategory.DisplayEntry> geodeRecipes = new ArrayList<>(
                 GeodeProcessingCategory.buildAllEntries());
         if (hasServerCatalog) {
-            geodeRecipes.addAll(com.stardew.craft.client.ClientJeiCatalog.geodes().stream()
+            geodeRecipes.addAll(serverCatalog.geodes().stream()
                     .map(entry -> new GeodeProcessingCategory.DisplayEntry(entry.geode(), entry.output()))
                     .toList());
         }
@@ -354,7 +359,7 @@ public class StardewJeiPlugin implements IModPlugin {
         publishedGeodeRecipes = List.copyOf(geodeRecipes);
 
         List<FishPondInfoCategory.DisplayEntry> fishPondRecipes = hasServerCatalog
-                ? com.stardew.craft.client.ClientJeiCatalog.fishPonds().stream()
+                ? serverCatalog.fishPonds().stream()
                             .map(entry -> new FishPondInfoCategory.DisplayEntry(
                                     entry.fish(), entry.output(), entry.requiredPopulation(),
                                     entry.outputChance(), entry.dailyMinChance(), entry.dailyMaxChance(),
@@ -471,6 +476,18 @@ public class StardewJeiPlugin implements IModPlugin {
         public String getLegacyStringSubtypeInfo(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") UidContext context) {
             String fishId = SpecificBaitItem.getTargetFishId(stack);
             return fishId == null || fishId.isBlank() ? "target=none" : "target=" + fishId;
+        }
+    }
+
+    private static final class FlavoredDrinkSubtypeInterpreter implements ISubtypeInterpreter<ItemStack> {
+        @Override
+        public Object getSubtypeData(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") UidContext context) {
+            return FlavoredArtisanDrinkItem.getSubtypeKey(stack);
+        }
+
+        @Override
+        public String getLegacyStringSubtypeInfo(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") UidContext context) {
+            return FlavoredArtisanDrinkItem.getSubtypeKey(stack);
         }
     }
 

@@ -3964,7 +3964,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
                                NpcFriendshipClientCache.Entry entry,
                                int visibleRow) {
         int y = socialRowPosition(visibleRow);
-        boolean datable = DATEABLE_NPCS.contains(normalizeNpcId(entry.npcId()));
+        boolean datable = isDatableNpc(entry.npcId());
 
         String name = socialDisplayName(entry);
         drawSocialPortrait(graphics, entry.npcId(), socialPortraitX(), y);
@@ -4284,9 +4284,19 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
     }
 
     private PortraitResource resolveSocialMugshot(String npcId) {
-        String normalized = normalizeNpcId(npcId);
-        ResourceLocation mugshotLocation = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/mugshots/" + normalized + ".png");
-        return loadPortrait(mugshotLocation, 16, 24);
+        com.stardew.craft.api.v1.npc.StardewNpcDisplay display =
+                com.stardew.craft.api.v1.npc.StardewNpcDisplays.resolve(npcId);
+        ResourceLocation fallback = ResourceLocation.fromNamespaceAndPath(
+                StardewCraft.MODID, "textures/mugshots/lewis.png");
+        ResourceLocation requested =
+                display == null ? null : display.mugshotTexture();
+        ResourceLocation resolved =
+                com.stardew.craft.client.ClientDisplayFallbacks
+                        .availableResource(requested, fallback, this::hasResource);
+        return loadPortrait(
+                resolved,
+                resolved.equals(requested) ? display.mugshotSheetWidth() : 16,
+                resolved.equals(requested) ? display.mugshotSheetHeight() : 24);
     }
 
     private List<NpcFriendshipClientCache.Entry> visibleSocialEntries() {
@@ -4315,8 +4325,10 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
     }
 
     private boolean hasSocialPortraitAndCharacter(String normalizedNpcId) {
-        ResourceLocation mugshotLocation = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/mugshots/" + normalizedNpcId + ".png");
-        return hasResource(mugshotLocation);
+        com.stardew.craft.api.v1.npc.StardewNpcDisplay display =
+                com.stardew.craft.api.v1.npc.StardewNpcDisplays.resolve(
+                        normalizedNpcId);
+        return display != null;
     }
 
     private String socialDisplayName(NpcFriendshipClientCache.Entry entry) {
@@ -4324,7 +4336,21 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
     }
 
     private boolean isDatableHeartLocked(NpcFriendshipClientCache.Entry entry) {
-        return DATEABLE_NPCS.contains(normalizeNpcId(entry.npcId()));
+        return isDatableNpc(entry.npcId());
+    }
+
+    private boolean isDatableNpc(String npcId) {
+        var definition =
+                com.stardew.craft.api.v1.npc.StardewNpcProfiles.resolve(npcId)
+                        .orElse(null);
+        if (definition != null) {
+            return definition.profile().datable();
+        }
+        com.stardew.craft.api.v1.npc.StardewNpcDisplay display =
+                com.stardew.craft.api.v1.npc.StardewNpcDisplays.resolve(
+                        npcId);
+        return DATEABLE_NPCS.contains(normalizeNpcId(npcId))
+                || display != null && display.datable();
     }
 
     private String normalizeNpcId(String npcId) {

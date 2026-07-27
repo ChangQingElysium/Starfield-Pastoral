@@ -1,9 +1,12 @@
 package com.stardew.craft.network.payload;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.building.StardewBuildingBlueprint;
+import com.stardew.craft.api.v1.building.StardewBuildingBuilders;
+import com.stardew.craft.building.BuildingBlueprintRegistry;
+import com.stardew.craft.building.BuildingCatalogService;
+import com.stardew.craft.item.WizardBuildingItem;
 import com.stardew.craft.player.PlayerStardewDataAPI;
-import com.stardew.craft.shop.CarpenterBlueprint;
-import com.stardew.craft.shop.RobinService;
 import com.stardew.craft.shop.WizardBuildingService;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -18,138 +21,211 @@ import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Client → Server: player wants to purchase blueprint at blueprintIndex.
+ * Client request for a stable blueprint ID from an authorized catalog snapshot.
  */
 @SuppressWarnings("null")
 public record CarpenterPurchasePayload(
-    String builder,
-    int blueprintIndex
+        String builder,
+        int blueprintIndex,
+        String blueprintId,
+        long catalogRevision
 ) implements CustomPacketPayload {
-
     public static final Type<CarpenterPurchasePayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "carpenter_purchase"));
+            new Type<>(ResourceLocation.fromNamespaceAndPath(
+                    StardewCraft.MODID, "carpenter_purchase"));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, CarpenterPurchasePayload> STREAM_CODEC =
-        StreamCodec.composite(
-            ByteBufCodecs.STRING_UTF8, CarpenterPurchasePayload::builder,
-            ByteBufCodecs.INT, CarpenterPurchasePayload::blueprintIndex,
-            CarpenterPurchasePayload::new
-        );
+    public static final StreamCodec<
+            RegistryFriendlyByteBuf,
+            CarpenterPurchasePayload> STREAM_CODEC =
+            new StreamCodec<>() {
+                @Override
+                public CarpenterPurchasePayload decode(
+                        RegistryFriendlyByteBuf buffer
+                ) {
+                    return new CarpenterPurchasePayload(
+                            ByteBufCodecs.STRING_UTF8.decode(buffer),
+                            buffer.readInt(),
+                            ByteBufCodecs.STRING_UTF8.decode(buffer),
+                            buffer.readVarLong());
+                }
+
+                @Override
+                public void encode(
+                        RegistryFriendlyByteBuf buffer,
+                        CarpenterPurchasePayload payload
+                ) {
+                    ByteBufCodecs.STRING_UTF8.encode(
+                            buffer, payload.builder());
+                    buffer.writeInt(payload.blueprintIndex());
+                    ByteBufCodecs.STRING_UTF8.encode(
+                            buffer, payload.blueprintId());
+                    buffer.writeVarLong(payload.catalogRevision());
+                }
+            };
+
+    /**
+     * Source-compatible constructor. Requests without the server-issued
+     * blueprint ID and revision are intentionally not authorized.
+     */
+    public CarpenterPurchasePayload(
+            String builder,
+            int blueprintIndex
+    ) {
+        this(builder, blueprintIndex, "", -1L);
+    }
 
     @Override
     public Type<? extends CustomPacketPayload> type() {
         return TYPE;
     }
 
-    public static void handle(CarpenterPurchasePayload payload, IPayloadContext context) {
+    public static void handle(
+            CarpenterPurchasePayload payload,
+            IPayloadContext context
+    ) {
         context.enqueueWork(() -> {
-            if (!(context.player() instanceof ServerPlayer player)) return;
-
-            List<CarpenterBlueprint> blueprints;
-            if (WizardBuildingService.BUILDER_ID.equals(payload.builder())) {
-                if (!WizardBuildingService.canUse(player)) {
-                    sendResult(player, false, PlayerStardewDataAPI.getMoney(player), "",
-                            payload.blueprintIndex());
-                    return;
-                }
-                blueprints = WizardBuildingService.getBlueprints(player);
-            } else if ("Robin".equals(payload.builder())) {
-                blueprints = RobinService.getBlueprints();
-            } else {
+            if (!(context.player() instanceof ServerPlayer player)) {
                 return;
             }
-            if (payload.blueprintIndex() < 0 || payload.blueprintIndex() >= blueprints.size()) return;
-
-            CarpenterBlueprint bp = blueprints.get(payload.blueprintIndex());
-
-            // Check money
-            int currentMoney = PlayerStardewDataAPI.getMoney(player);
-            if (bp.cost() > 0 && currentMoney < bp.cost()) {
-                sendResult(player, false, currentMoney, "", payload.blueprintIndex());
+            ResourceLocation builder =
+                    ResourceLocation.tryParse(payload.builder());
+            ResourceLocation blueprintId =
+                    ResourceLocation.tryParse(payload.blueprintId());
+            if (builder == null || blueprintId == null
+                    || !BuildingCatalogService.authorizes(
+                            player, builder, blueprintId,
+                            payload.catalogRevision())) {
+                fail(player, payload.blueprintIndex());
                 return;
             }
-
-            // Check materials
-            for (CarpenterBlueprint.MaterialEntry mat : bp.materials()) {
-                ResourceLocation matId;
-                try {
-                    matId = ResourceLocation.parse(mat.itemId());
-                } catch (Exception e) {
-                    sendResult(player, false, currentMoney, "", payload.blueprintIndex());
-                    return;
-                }
-                Item matItem = BuiltInRegistries.ITEM.get(matId);
-                if (matItem == null || matItem == Items.AIR) {
-                    sendResult(player, false, currentMoney, "", payload.blueprintIndex());
-                    return;
-                }
-                if (player.getInventory().countItem(matItem) < mat.count()) {
-                    sendResult(player, false, currentMoney, "", payload.blueprintIndex());
-                    return;
-                }
-            }
-
-            // Validate result item
-            ResourceLocation resultId;
-            try {
-                resultId = ResourceLocation.parse(bp.resultItemId());
-            } catch (Exception e) {
-                sendResult(player, false, currentMoney, "", payload.blueprintIndex());
+            StardewBuildingBlueprint blueprint =
+                    BuildingBlueprintRegistry.find(blueprintId)
+                            .orElse(null);
+            if (blueprint == null
+                    || !blueprint.definition().builder().equals(builder)
+                    || BuildingBlueprintRegistry.availableFor(
+                            player, builder).stream()
+                            .noneMatch(candidate ->
+                                    candidate.id().equals(blueprintId))) {
+                fail(player, payload.blueprintIndex());
                 return;
             }
-            Item resultItem = BuiltInRegistries.ITEM.get(resultId);
-            if (resultItem == null || resultItem == Items.AIR) {
-                sendResult(player, false, currentMoney, "", payload.blueprintIndex());
+            if (StardewBuildingBuilders.WIZARD.equals(builder)
+                    && !WizardBuildingService.canUse(player)) {
+                fail(player, payload.blueprintIndex());
                 return;
             }
-
-            // Deduct money
-            if (bp.cost() > 0) {
-                boolean ok = PlayerStardewDataAPI.removeMoney(player, bp.cost());
-                if (!ok) {
-                    sendResult(player, false, PlayerStardewDataAPI.getMoney(player), "", payload.blueprintIndex());
-                    return;
-                }
-            }
-
-            // Consume materials
-            for (CarpenterBlueprint.MaterialEntry mat : bp.materials()) {
-                ResourceLocation matId = ResourceLocation.parse(mat.itemId());
-                Item matItem = BuiltInRegistries.ITEM.get(matId);
-                int remaining = mat.count();
-                for (int i = 0; i < player.getInventory().getContainerSize() && remaining > 0; i++) {
-                    ItemStack slot = player.getInventory().getItem(i);
-                    if (!slot.isEmpty() && slot.is(matItem)) {
-                        int take = Math.min(remaining, slot.getCount());
-                        slot.shrink(take);
-                        remaining -= take;
-                    }
-                }
-                if (remaining > 0) {
-                    // Rollback money if material consumption failed
-                    if (bp.cost() > 0) PlayerStardewDataAPI.addMoney(player, bp.cost());
-                    sendResult(player, false, PlayerStardewDataAPI.getMoney(player), "", payload.blueprintIndex());
-                    return;
-                }
-            }
-
-            // Give the selected building item to the player.
-            ItemStack resultStack = new ItemStack(resultItem);
-            if (!player.getInventory().add(resultStack)) {
-                // Drop on ground if inventory full
-                player.drop(resultStack, false);
-            }
-
-            int newMoney = PlayerStardewDataAPI.getMoney(player);
-            sendResult(player, true, newMoney, bp.resultItemId(), payload.blueprintIndex());
+            purchase(player, blueprint, payload.blueprintIndex());
         });
     }
 
-    private static void sendResult(ServerPlayer player, boolean success, int newMoney, String resultItemId, int blueprintIndex) {
+    private static void purchase(
+            ServerPlayer player,
+            StardewBuildingBlueprint blueprint,
+            int clientIndex
+    ) {
+        var definition = blueprint.definition();
+        int currentMoney = PlayerStardewDataAPI.getMoney(player);
+        if (currentMoney < definition.money()) {
+            fail(player, clientIndex);
+            return;
+        }
+
+        Item resultItem = BuiltInRegistries.ITEM.get(
+                definition.resultItem());
+        if (resultItem == null || resultItem == Items.AIR) {
+            fail(player, clientIndex);
+            return;
+        }
+
+        ArrayList<Consumption> plan = new ArrayList<>();
+        for (var material : definition.materials()) {
+            Item item = BuiltInRegistries.ITEM.get(material.item());
+            if (item == null || item == Items.AIR
+                    || !planConsumption(
+                            player, item, material.count(), plan)) {
+                fail(player, clientIndex);
+                return;
+            }
+        }
+
+        if (definition.money() > 0
+                && !PlayerStardewDataAPI.removeMoney(
+                        player, definition.money())) {
+            fail(player, clientIndex);
+            return;
+        }
+
+        // The complete slot plan was validated on this server task before
+        // payment; no partially consumed material loop can now fail.
+        for (Consumption consumption : plan) {
+            player.getInventory().getItem(consumption.slot())
+                    .shrink(consumption.count());
+        }
+
+        ItemStack resultStack = new ItemStack(
+                resultItem, definition.resultCount());
+        if (resultItem instanceof WizardBuildingItem) {
+            WizardBuildingItem.bindTo(resultStack, player);
+        }
+        if (!player.getInventory().add(resultStack)) {
+            player.drop(resultStack, false);
+        }
+        sendResult(
+                player, true,
+                PlayerStardewDataAPI.getMoney(player),
+                definition.resultItem().toString(),
+                clientIndex);
+    }
+
+    private static boolean planConsumption(
+            ServerPlayer player,
+            Item item,
+            int count,
+            List<Consumption> plan
+    ) {
+        int remaining = count;
+        for (int slotIndex = 0;
+             slotIndex < player.getInventory().getContainerSize()
+                     && remaining > 0;
+             slotIndex++) {
+            ItemStack stack = player.getInventory().getItem(slotIndex);
+            if (!stack.isEmpty() && stack.is(item)) {
+                int take = Math.min(remaining, stack.getCount());
+                plan.add(new Consumption(slotIndex, take));
+                remaining -= take;
+            }
+        }
+        return remaining == 0;
+    }
+
+    private static void fail(
+            ServerPlayer player,
+            int blueprintIndex
+    ) {
+        sendResult(
+                player, false,
+                PlayerStardewDataAPI.getMoney(player),
+                "", blueprintIndex);
+    }
+
+    private static void sendResult(
+            ServerPlayer player,
+            boolean success,
+            int newMoney,
+            String resultItemId,
+            int blueprintIndex
+    ) {
         PacketDistributor.sendToPlayer(player,
-            new CarpenterPurchaseResultPayload(success, newMoney, resultItemId, blueprintIndex));
+                new CarpenterPurchaseResultPayload(
+                        success, newMoney, resultItemId,
+                        blueprintIndex));
+    }
+
+    private record Consumption(int slot, int count) {
     }
 }

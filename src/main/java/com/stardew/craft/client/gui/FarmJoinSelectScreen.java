@@ -1,5 +1,7 @@
 package com.stardew.craft.client.gui;
 
+import com.stardew.craft.api.v1.farm.StardewFarmLayout;
+import com.stardew.craft.api.v1.farm.StardewFarmLayouts;
 import com.stardew.craft.client.farm.FarmJoinClientState;
 import com.stardew.craft.client.gui.common.GuiText;
 import com.stardew.craft.client.gui.overnight.StardewGuiUtil;
@@ -11,6 +13,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
@@ -223,8 +226,13 @@ public class FarmJoinSelectScreen extends Screen {
             int iconW = Math.round(iconH * 22f / 20f);
             int iconX = contentX + ui(24);
             int iconY = ry + (rowH - iconH) / 2;
-            FarmType farmType = FarmType.fromId(entry.farmTypeId());
-            graphics.blit(farmType.getIconTexture(), iconX, iconY, 0, 0, iconW, iconH, iconW, iconH);
+            ResourceLocation layoutId = ResourceLocation.tryParse(entry.farmTypeId());
+            ResourceLocation icon = layoutId == null
+                    ? FarmType.STANDARD.getIconTexture()
+                    : StardewFarmLayouts.find(layoutId)
+                            .map(StardewFarmLayout::iconTexture)
+                            .orElse(FarmType.STANDARD.getIconTexture());
+            graphics.blit(icon, iconX, iconY, 0, 0, iconW, iconH, iconW, iconH);
 
             // 文字区域
             int textX = iconX + iconW + ui(14);

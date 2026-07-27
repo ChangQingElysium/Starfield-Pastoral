@@ -1,0 +1,11 @@
+{
+  "shop": "example_stardew_addon:orchard_stand",
+  "item": "example_stardew_addon:orchard_blessing",
+  "priority": 100,
+  "action": {
+    "type": "example_stardew_addon:heal",
+    "data": {
+      "health": 4.0
+    }
+  }
+}

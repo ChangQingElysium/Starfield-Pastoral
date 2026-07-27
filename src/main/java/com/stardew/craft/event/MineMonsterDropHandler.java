@@ -88,7 +88,9 @@ public class MineMonsterDropHandler {
             if (tags.contains("sd_tier_skull")) dropCarbonGhost(drops, entity, random);
             else dropGhost(drops, entity, random);
         } else if (tags.contains("sd_mob_crab")) {
-            if (tags.contains("sd_tier_4") || tags.contains("sd_tier_skull")) {
+            if (tags.contains("sd_truffle_crab")) {
+                dropTruffleCrab(drops, entity, random);
+            } else if (tags.contains("sd_tier_4") || tags.contains("sd_tier_skull")) {
                 dropIridiumCrab(drops, entity, random);
             } else if (tags.contains("sd_tier_2")) {
                 dropLavaCrab(drops, entity, random);
@@ -340,6 +342,15 @@ public class MineMonsterDropHandler {
         rollDrop(drops, e, r, 0.40f, ModItems.CHERRY_BOMB.get(), 1);
         rollDrop(drops, e, r, 0.005f, ModItems.DWARF_SCROLL_I.get(), 1);
         rollDrop(drops, e, r, 0.001f, ModItems.DWARF_SCROLL_IV.get(), 1);
+    }
+
+    /** SDV Truffle Crab: 430 .999 | 430 .5 | 430 .1 | 717 .25 | 432 .1 */
+    private static void dropTruffleCrab(Collection<ItemEntity> drops, LivingEntity e, RandomSource r) {
+        rollDrop(drops, e, r, 0.999f, ModItems.TRUFFLE.get(), 1);
+        rollDrop(drops, e, r, 0.50f, ModItems.TRUFFLE.get(), 1);
+        rollDrop(drops, e, r, 0.10f, ModItems.TRUFFLE.get(), 1);
+        rollDrop(drops, e, r, 0.25f, ModItems.CRAB.get(), 1);
+        rollDrop(drops, e, r, 0.10f, ModItems.TRUFFLE_OIL.get(), 1);
     }
 
     /** SDV Lava Crab: 717 .25 | 287 .4 | 98 .005 | 99 .001 */

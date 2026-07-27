@@ -122,6 +122,7 @@ public final class StardewItemCatalog {
 
         if (tab == StardewCatalogTab.COOKING_ARTISAN) {
             StardewItemDisplayStacks.preserveVariants().forEach(output::accept);
+            StardewItemDisplayStacks.flavoredDrinkVariants().forEach(output::accept);
         } else if (tab == StardewCatalogTab.FISHING) {
             StardewItemDisplayStacks.specificBaitVariants().forEach(output::accept);
         } else if (tab == StardewCatalogTab.SPECIAL) {
@@ -158,6 +159,7 @@ public final class StardewItemCatalog {
             }
         }
         stacks.addAll(StardewItemDisplayStacks.preserveVariants());
+        stacks.addAll(StardewItemDisplayStacks.flavoredDrinkVariants());
         stacks.addAll(StardewItemDisplayStacks.specificBaitVariants());
         stacks.sort(StardewItemComparator.STACK);
         return stacks;

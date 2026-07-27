@@ -1,0 +1,21 @@
+{
+  "builder": "stardewcraft:wizard",
+  "order": 50,
+  "display_name": "item.stardewcraft.island_obelisk",
+  "description": "item.stardewcraft.island_obelisk.desc",
+  "money": 1000000,
+  "materials": [
+    { "item": "stardewcraft:iridium_bar", "count": 10 },
+    { "item": "stardewcraft:dragon_tooth", "count": 10 },
+    { "item": "stardewcraft:banana", "count": 10 }
+  ],
+  "result_item": "stardewcraft:island_obelisk",
+  "preview_canvas_size": 128,
+  "magical_construction": true,
+  "available_when": [
+    {
+      "type": "stardewcraft:flag",
+      "data": { "id": "Visited_Island" }
+    }
+  ]
+}

@@ -63,6 +63,11 @@ public final class FishPondDataService {
         this.entries = List.copyOf(next);
     }
 
+    /** Immutable view of all currently accepted legacy and namespaced pond rules. */
+    public List<PondData> snapshot() {
+        return entries;
+    }
+
     public Optional<PondData> resolve(ItemStack stack) {
         if (stack.isEmpty()) {
             return Optional.empty();
@@ -632,6 +637,15 @@ public final class FishPondDataService {
                            List<WaterColorRule> waterColors,
                            List<ProducedItem> producedItems,
                            Map<Integer, List<String>> populationGates) {
+        public PondData {
+            requiredTags = Set.copyOf(requiredTags);
+            waterColors = List.copyOf(waterColors);
+            producedItems = List.copyOf(producedItems);
+            Map<Integer, List<String>> copiedGates = new HashMap<>();
+            populationGates.forEach((gate, choices) ->
+                    copiedGates.put(gate, List.copyOf(choices)));
+            populationGates = Map.copyOf(copiedGates);
+        }
     }
 
     public record ProducedItem(String id,

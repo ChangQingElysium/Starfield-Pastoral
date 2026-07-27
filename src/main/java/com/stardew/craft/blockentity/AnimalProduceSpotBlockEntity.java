@@ -18,6 +18,7 @@ public class AnimalProduceSpotBlockEntity extends BlockEntity {
     private ItemStack produceStack = ItemStack.EMPTY;
     private long animalId = -1L;
     private String buildingId = "";
+    private long produceLedgerEntryId = -1L;
 
     public AnimalProduceSpotBlockEntity(BlockPos pos, BlockState blockState) {
         super(ModBlockEntities.ANIMAL_PRODUCE_SPOT.get(), pos, blockState);
@@ -53,6 +54,17 @@ public class AnimalProduceSpotBlockEntity extends BlockEntity {
 
     public void setBuildingId(String buildingId) {
         this.buildingId = buildingId == null ? "" : buildingId;
+        setChangedAndSync();
+    }
+
+    public long getProduceLedgerEntryId() {
+        return produceLedgerEntryId;
+    }
+
+    public void setProduceLedgerEntryId(long produceLedgerEntryId) {
+        this.produceLedgerEntryId = produceLedgerEntryId > 0L
+                ? produceLedgerEntryId
+                : -1L;
         setChangedAndSync();
     }
 
@@ -99,6 +111,9 @@ public class AnimalProduceSpotBlockEntity extends BlockEntity {
         }
         tag.putLong("animalId", animalId);
         tag.putString("buildingId", buildingId);
+        if (produceLedgerEntryId > 0L) {
+            tag.putLong("produceLedgerEntryId", produceLedgerEntryId);
+        }
     }
 
     @Override
@@ -107,5 +122,8 @@ public class AnimalProduceSpotBlockEntity extends BlockEntity {
         produceStack = tag.contains("produceStack") ? ItemStack.parse(registries, tag.getCompound("produceStack")).orElse(ItemStack.EMPTY) : ItemStack.EMPTY;
         animalId = tag.contains("animalId") ? tag.getLong("animalId") : -1L;
         buildingId = tag.contains("buildingId") ? tag.getString("buildingId") : "";
+        produceLedgerEntryId = tag.contains("produceLedgerEntryId")
+                ? tag.getLong("produceLedgerEntryId")
+                : -1L;
     }
 }

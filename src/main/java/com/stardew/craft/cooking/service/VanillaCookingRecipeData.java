@@ -24,7 +24,6 @@ import net.minecraft.world.item.Items;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -48,27 +47,28 @@ public final class VanillaCookingRecipeData {
             "moss", ResourceLocation.fromNamespaceAndPath("minecraft", "moss_block")
     );
 
-    private static volatile Map<ResourceLocation, StardewCookingRecipeDefinition> recipes = Map.of();
-    private static volatile String cachedJson = "";
+    private static volatile Catalog catalog = Catalog.empty();
 
     private VanillaCookingRecipeData() {
     }
 
     public static DefinitionSnapshot<StardewCookingRecipeDefinition> snapshot() {
-        return STORE.snapshot();
+        return catalog.definitions();
     }
 
     public static List<ResourceLocation> getRecipeIds() {
-        return List.copyOf(recipes.keySet());
+        return List.copyOf(catalog.recipes().keySet());
     }
 
     public static Optional<StardewCookingRecipeDefinition> getDefinition(String recipeId) {
         ResourceLocation id = normalizeRecipeId(recipeId);
-        return id == null ? Optional.empty() : Optional.ofNullable(recipes.get(id));
+        return id == null
+                ? Optional.empty()
+                : Optional.ofNullable(catalog.recipes().get(id));
     }
 
     public static Optional<StardewCookingRecipeDefinition> getDefinition(ResourceLocation recipeId) {
-        return Optional.ofNullable(recipes.get(recipeId));
+        return Optional.ofNullable(catalog.recipes().get(recipeId));
     }
 
     public static List<StardewCookingIngredient> getRequirements(String recipeId) {
@@ -88,7 +88,8 @@ public final class VanillaCookingRecipeData {
     }
 
     public static ItemStack getOutputStack(ResourceLocation recipeId, int crafts) {
-        StardewCookingRecipeDefinition definition = recipes.get(recipeId);
+        StardewCookingRecipeDefinition definition =
+                catalog.recipes().get(recipeId);
         if (definition == null) return ItemStack.EMPTY;
         Item item = BuiltInRegistries.ITEM.get(definition.output());
         if (item == null || item == Items.AIR) return ItemStack.EMPTY;
@@ -121,16 +122,7 @@ public final class VanillaCookingRecipeData {
     }
 
     public static String getCachedJson() {
-        String current = cachedJson;
-        if (!current.isEmpty()) return current;
-        JsonObject root = new JsonObject();
-        recipes.forEach((id, definition) -> StardewCookingRecipeDefinition.CODEC
-                .encodeStart(JsonOps.INSTANCE, definition)
-                .result()
-                .ifPresent(json -> root.add(id.toString(), json)));
-        current = GSON.toJson(root);
-        cachedJson = current;
-        return current;
+        return catalog.cachedJson();
     }
 
     public static void applyFromJson(String json) {
@@ -138,24 +130,38 @@ public final class VanillaCookingRecipeData {
             JsonObject root = GSON.fromJson(json, JsonObject.class);
             if (root == null) return;
             Map<ResourceLocation, StardewCookingRecipeDefinition> decoded = new LinkedHashMap<>();
-            List<String> errors = new ArrayList<>();
+            Map<ResourceLocation, String> sources =
+                    new LinkedHashMap<>();
+            List<DefinitionDiagnostic> diagnostics =
+                    new ArrayList<>();
             for (Map.Entry<String, JsonElement> entry : root.entrySet()) {
                 ResourceLocation id = ResourceLocation.tryParse(entry.getKey());
                 if (id == null) {
-                    errors.add("Invalid cooking recipe ID " + entry.getKey());
+                    diagnostics.add(DefinitionDiagnostic.error(
+                            null,
+                            null,
+                            "Invalid cooking recipe ID "
+                                    + entry.getKey()));
                     continue;
                 }
                 StardewCookingRecipeDefinition.CODEC.parse(JsonOps.INSTANCE, entry.getValue())
-                        .resultOrPartial(errors::add)
-                        .ifPresent(definition -> decoded.put(id, definition));
+                        .resultOrPartial(message ->
+                                diagnostics.add(
+                                        DefinitionDiagnostic.error(
+                                                id, id, message)))
+                        .ifPresent(definition -> {
+                            decoded.put(id, definition);
+                            sources.put(
+                                    id,
+                                    encodeDefinition(definition));
+                        });
             }
-            if (!errors.isEmpty()) {
-                StardewCraft.LOGGER.error("[DATA-SYNC] Rejected cooking recipes: {}", String.join("; ", errors));
-                return;
-            }
-            recipes = Collections.unmodifiableMap(new LinkedHashMap<>(decoded));
-            cachedJson = json;
-            StardewCraft.LOGGER.info("[DATA-SYNC] Applied {} cooking recipes", recipes.size());
+            applyCandidate(
+                    decoded,
+                    sources,
+                    diagnostics,
+                    json,
+                    "client sync");
         } catch (RuntimeException exception) {
             StardewCraft.LOGGER.error("[DATA-SYNC] Failed to apply cooking recipes", exception);
         }
@@ -186,18 +192,63 @@ public final class VanillaCookingRecipeData {
                     .filter(entry -> entry.getKey().getPath().startsWith("recipes/"))
                     .forEach(entry -> parseModernRecipe(entry, definitions, sources, diagnostics));
 
-            var result = STORE.applyLocal(definitions, sources, diagnostics);
-            logDiagnostics(result.diagnostics());
-            if (!result.accepted()) {
-                StardewCraft.LOGGER.error("[Cooking] Rejected snapshot; keeping v{} with {} recipes",
-                        result.snapshot().version(), result.snapshot().definitions().size());
-                return;
-            }
-            recipes = result.snapshot().definitions();
-            cachedJson = "";
-            StardewCraft.LOGGER.info("[Cooking] Applied snapshot v{} ({} recipes)",
-                    result.snapshot().version(), recipes.size());
+            applyCandidate(
+                    definitions,
+                    sources,
+                    diagnostics,
+                    null,
+                    "reload");
         }
+    }
+
+    private static synchronized void applyCandidate(
+            Map<ResourceLocation, StardewCookingRecipeDefinition> definitions,
+            Map<ResourceLocation, String> sources,
+            List<DefinitionDiagnostic> diagnostics,
+            @Nullable String sourceJson,
+            String operation
+    ) {
+        List<DefinitionDiagnostic> preparedDiagnostics =
+                new ArrayList<>(diagnostics);
+        String nextCachedJson = sourceJson;
+        if (nextCachedJson == null && preparedDiagnostics.stream()
+                .noneMatch(diagnostic -> diagnostic.severity()
+                        == DefinitionDiagnostic.Severity.ERROR)) {
+            try {
+                nextCachedJson = encodeDefinitions(definitions);
+            } catch (RuntimeException exception) {
+                preparedDiagnostics.add(DefinitionDiagnostic.error(
+                        null,
+                        null,
+                        "Failed to encode cooking sync catalog: "
+                                + exception.getMessage()));
+            }
+        }
+
+        var result = STORE.applyLocal(
+                definitions, sources, preparedDiagnostics);
+        logDiagnostics(result.diagnostics());
+        if (!result.accepted()) {
+            StardewCraft.LOGGER.error(
+                    "[Cooking] Rejected {}; keeping v{} with {} recipes",
+                    operation,
+                    catalog.definitions().version(),
+                    catalog.recipes().size());
+            return;
+        }
+        if (nextCachedJson == null) {
+            throw new IllegalStateException(
+                    "Accepted cooking definitions have no sync catalog");
+        }
+
+        catalog = new Catalog(
+                result.snapshot(),
+                nextCachedJson);
+        StardewCraft.LOGGER.info(
+                "[Cooking] Applied {} v{} ({} recipes)",
+                operation,
+                catalog.definitions().version(),
+                catalog.recipes().size());
     }
 
     private static Map<String, String> parseLegacyTokenMap(
@@ -320,6 +371,22 @@ public final class VanillaCookingRecipeData {
                 .result().map(GSON::toJson).orElse("{}");
     }
 
+    private static String encodeDefinitions(
+            Map<ResourceLocation, StardewCookingRecipeDefinition> definitions
+    ) {
+        JsonObject root = new JsonObject();
+        definitions.forEach((id, definition) ->
+                StardewCookingRecipeDefinition.CODEC
+                        .encodeStart(JsonOps.INSTANCE, definition)
+                        .resultOrPartial(message -> {
+                            throw new IllegalArgumentException(
+                                    id + ": " + message);
+                        })
+                        .ifPresent(json ->
+                                root.add(id.toString(), json)));
+        return GSON.toJson(root);
+    }
+
     private static void logDiagnostics(List<DefinitionDiagnostic> diagnostics) {
         for (DefinitionDiagnostic diagnostic : diagnostics) {
             String source = diagnostic.source() == null ? "<cooking reload>" : diagnostic.source().toString();
@@ -338,5 +405,31 @@ public final class VanillaCookingRecipeData {
 
     private static ResourceLocation id(String path) {
         return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, path);
+    }
+
+    static Catalog catalog() {
+        return catalog;
+    }
+
+    record Catalog(
+            DefinitionSnapshot<StardewCookingRecipeDefinition> definitions,
+            String cachedJson
+    ) {
+        Catalog {
+            definitions = java.util.Objects.requireNonNull(
+                    definitions, "definitions");
+            cachedJson = java.util.Objects.requireNonNull(
+                    cachedJson, "cachedJson");
+        }
+
+        Map<ResourceLocation, StardewCookingRecipeDefinition> recipes() {
+            return definitions.definitions();
+        }
+
+        private static Catalog empty() {
+            return new Catalog(
+                    DefinitionSnapshot.empty(),
+                    "{}");
+        }
     }
 }

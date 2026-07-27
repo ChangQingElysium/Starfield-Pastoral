@@ -1,5 +1,7 @@
 package com.stardew.craft.blockentity;
 
+import com.stardew.craft.api.v1.machine.StardewMachineCycleKind;
+import com.stardew.craft.api.v1.machine.StardewProductionPhase;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.time.StardewTimeManager;
 import net.minecraft.core.BlockPos;
@@ -41,6 +43,10 @@ public class WormBinBlockEntity extends TimedProductionBlockEntity implements Bu
 
     private void tickServer(Level level) {
         if (product.isEmpty()) {
+            if (readyAtAbsMinute >= 0
+                    && getCurrentAbsMinute() < readyAtAbsMinute) {
+                return;
+            }
             if (readyAtAbsMinute >= 0 || ready) {
                 clearState();
             }
@@ -57,8 +63,25 @@ public class WormBinBlockEntity extends TimedProductionBlockEntity implements Bu
     }
 
     private void startCycle(Level level) {
-        product = createOutput(level.random);
-        readyAtAbsMinute = getCurrentAbsMinute() + (long) DAYS_UNTIL_READY * (long) EFFECTIVE_MINUTES_PER_DAY;
+        ItemStack proposed = createOutput(level.random);
+        var plan = prepareMachineCycle(
+                StardewMachineCycleKind.PASSIVE,
+                ItemStack.EMPTY,
+                proposed,
+                DAYS_UNTIL_READY * EFFECTIVE_MINUTES_PER_DAY,
+                null,
+                true);
+        if (plan.isPresent()) {
+            restartMachineCycle(
+                    plan.get(),
+                    StardewMachineCycleKind.PASSIVE,
+                    true);
+            return;
+        }
+        // Autonomous rejection pauses retries instead of evaluating providers
+        // and consuming randomness every server tick.
+        readyAtAbsMinute = getCurrentAbsMinute()
+                + EFFECTIVE_MINUTES_PER_DAY;
         ready = false;
         setChanged();
         syncToClient();
@@ -80,7 +103,12 @@ public class WormBinBlockEntity extends TimedProductionBlockEntity implements Bu
 
 
     public boolean isReady() {
-        return ready;
+        return refreshReady();
+    }
+
+    @Override
+    protected StardewMachineCycleKind defaultCycleKind() {
+        return StardewMachineCycleKind.PASSIVE;
     }
 
     public boolean isWorking() {
@@ -129,6 +157,7 @@ public class WormBinBlockEntity extends TimedProductionBlockEntity implements Bu
             return ItemStack.EMPTY;
         }
         ItemStack out = product.copy();
+        emitProductionEvent(StardewProductionPhase.COLLECTED);
         clearState();
         Level currentLevel = level;
         if (currentLevel != null && !currentLevel.isClientSide) {

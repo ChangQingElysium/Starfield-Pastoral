@@ -2,6 +2,7 @@ package com.stardew.craft.npc.runtime;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.stardew.craft.api.v1.world.StardewWorldAnchors;
 import com.stardew.craft.communitycenter.state.CCStoryFlags;
 import com.stardew.craft.npc.data.NpcCapabilityProfile;
 import com.stardew.craft.npc.data.NpcLocationAnchor;
@@ -181,6 +182,16 @@ public final class NpcScheduleRuntimeService {
         // This bypasses anchor lookup and returns the exact world position from route_points.json.
         String pointId = state.namedPointId();
         if (pointId != null && !pointId.isBlank()) {
+            var registered = StardewWorldAnchors.resolve(pointId)
+                    .filter(anchor -> anchor.dimension().equals(
+                            level.dimension().location()));
+            if (registered.isPresent()) {
+                var anchor = registered.get();
+                return new TargetPoint(
+                        anchor.position(),
+                        anchor.useGroundHeight(),
+                        anchor.indoor());
+            }
             com.google.gson.JsonObject routePointsRoot = NpcDataRegistry.events().get("npc_route_points");
             if (routePointsRoot != null && routePointsRoot.has("points")) {
                 com.google.gson.JsonObject points = routePointsRoot.getAsJsonObject("points");

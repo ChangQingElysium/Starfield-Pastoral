@@ -1,5 +1,8 @@
 package com.stardew.craft.museum;
 
+import com.stardew.craft.api.v1.internal.progress.StardewProgressRegistry;
+import com.stardew.craft.api.v1.progress.StardewProgressCauses;
+import com.stardew.craft.api.v1.progress.StardewProgressSnapshot;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -9,6 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import javax.annotation.Nonnull;
 
@@ -116,8 +120,13 @@ public class MuseumDonationData extends SavedData {
 
     public boolean donate(UUID playerId, String itemId) {
         PlayerMuseumData pData = getOrCreate(playerId);
+        var online = onlinePlayer(playerId);
+        MuseumTransitionBefore before = captureBefore(online);
         boolean added = pData.donatedItems.add(itemId);
-        if (added) setDirty();
+        if (added) {
+            setDirty();
+            dispatchMuseumChanges(online, before);
+        }
         return added;
     }
 
@@ -159,12 +168,15 @@ public class MuseumDonationData extends SavedData {
             return new EndSessionResult(false, missing);
         }
 
+        var online = onlinePlayer(playerId);
+        MuseumTransitionBefore before = captureBefore(online);
         for (String itemId : getManagedStandItems(pData).values()) {
             pData.donatedItems.add(itemId);
         }
         pData.donationModeActive = false;
         pData.sessionPendingItems.clear();
         setDirty();
+        dispatchMuseumChanges(online, before);
         return new EndSessionResult(true, Collections.emptySet());
     }
 
@@ -175,6 +187,8 @@ public class MuseumDonationData extends SavedData {
     public void forceEndDonationMode(UUID playerId) {
         PlayerMuseumData pData = playerData.get(playerId.toString());
         if (pData == null) return;
+        var online = onlinePlayer(playerId);
+        MuseumTransitionBefore before = captureBefore(online);
         for (String itemId : getManagedStandItems(pData).values()) {
             pData.donatedItems.add(itemId);
         }
@@ -182,6 +196,7 @@ public class MuseumDonationData extends SavedData {
         pData.sessionPendingItems.clear();
         pData.standDisplayItems.clear();
         setDirty();
+        dispatchMuseumChanges(online, before);
     }
 
     public boolean canDonateItem(UUID playerId, String itemId) {
@@ -304,13 +319,18 @@ public class MuseumDonationData extends SavedData {
     }
 
     public boolean isRewardClaimed(UUID playerId, String rewardId) {
-        PlayerMuseumData pData = playerData.get(playerId.toString());
+        PlayerMuseumData pData = resolve(playerId);
         return pData != null && pData.claimedMuseumRewards.contains(rewardId);
     }
 
     public void claimReward(UUID playerId, String rewardId) {
         PlayerMuseumData pData = getOrCreate(playerId);
-        if (pData.claimedMuseumRewards.add(rewardId)) setDirty();
+        var online = onlinePlayer(playerId);
+        MuseumTransitionBefore before = captureBefore(online);
+        if (pData.claimedMuseumRewards.add(rewardId)) {
+            setDirty();
+            dispatchMuseumChanges(online, before);
+        }
     }
 
     /**
@@ -318,6 +338,69 @@ public class MuseumDonationData extends SavedData {
      */
     public Set<String> getAllPlayerUUIDs() {
         return Collections.unmodifiableSet(playerData.keySet());
+    }
+
+    private static net.minecraft.server.level.ServerPlayer onlinePlayer(
+            UUID playerId
+    ) {
+        var server = ServerLifecycleHooks.getCurrentServer();
+        return server == null
+                ? null : server.getPlayerList().getPlayer(playerId);
+    }
+
+    private static MuseumTransitionBefore captureBefore(
+            net.minecraft.server.level.ServerPlayer player
+    ) {
+        if (player == null) {
+            return null;
+        }
+        Map<String, StardewProgressSnapshot> rewards =
+                new LinkedHashMap<>();
+        for (MuseumRewardRegistry.MuseumReward reward
+                : MuseumRewardRegistry.getAllRewards()) {
+            rewards.put(
+                    reward.id(),
+                    StardewProgressRegistry.museumRewardSnapshot(
+                            player, reward));
+        }
+        return new MuseumTransitionBefore(
+                StardewProgressRegistry.museumCollectionSnapshot(player),
+                rewards);
+    }
+
+    private static void dispatchMuseumChanges(
+            net.minecraft.server.level.ServerPlayer player,
+            MuseumTransitionBefore before
+    ) {
+        if (player == null || before == null) {
+            return;
+        }
+        StardewProgressRegistry.dispatchChanges(
+                player,
+                before.collection(),
+                StardewProgressRegistry.museumCollectionSnapshot(player),
+                StardewProgressCauses.MUSEUM_DONATION);
+        for (MuseumRewardRegistry.MuseumReward reward
+                : MuseumRewardRegistry.getAllRewards()) {
+            StardewProgressSnapshot previous =
+                    before.rewards().get(reward.id());
+            if (previous != null) {
+                StardewProgressRegistry.dispatchChanges(
+                        player,
+                        previous,
+                        StardewProgressRegistry.museumRewardSnapshot(
+                                player, reward),
+                        previous.rewardClaimable()
+                                ? StardewProgressCauses.REWARD_CLAIM
+                                : StardewProgressCauses.MUSEUM_DONATION);
+            }
+        }
+    }
+
+    private record MuseumTransitionBefore(
+            StardewProgressSnapshot collection,
+            Map<String, StardewProgressSnapshot> rewards
+    ) {
     }
 
     // ── Inner class for per-player data ──

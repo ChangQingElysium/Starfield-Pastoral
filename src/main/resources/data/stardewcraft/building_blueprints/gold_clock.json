@@ -1,0 +1,10 @@
+{
+  "builder": "stardewcraft:wizard",
+  "order": 60,
+  "display_name": "item.stardewcraft.gold_clock",
+  "description": "item.stardewcraft.gold_clock.desc",
+  "money": 10000000,
+  "result_item": "stardewcraft:gold_clock",
+  "preview_canvas_size": 80,
+  "magical_construction": true
+}

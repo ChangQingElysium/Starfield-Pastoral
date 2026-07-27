@@ -1,6 +1,9 @@
 package com.stardew.craft.manager;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.farm.StardewFarmCaveDailyHandlers;
+import com.stardew.craft.api.v1.internal.farm.StardewFarmCaveDailyRegistry;
+import com.stardew.craft.api.v1.internal.farm.StardewFarmSnapshots;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.blockentity.MushroomBoxBlockEntity;
 import com.stardew.craft.farm.FarmCaveChoice;
@@ -84,11 +87,18 @@ public final class FarmCaveDailyService {
             if (!alloc.isCavePlaced(ownerUUID)) continue;
 
             FarmCaveChoice choice = farm.getCaveChoice();
+            BlockPos caveOrigin = alloc.getCaveOrigin(ownerUUID);
+            StardewFarmCaveDailyHandlers.Context addonContext =
+                    new StardewFarmCaveDailyHandlers.Context(
+                            level, StardewFarmSnapshots.from(farm), caveOrigin, rng);
+            if (StardewFarmCaveDailyRegistry.runHandlers(addonContext)
+                    == StardewFarmCaveDailyHandlers.Result.SKIP_DEFAULT) {
+                continue;
+            }
             if (choice == FarmCaveChoice.NONE) continue;
 
-            BlockPos caveOrigin = alloc.getCaveOrigin(ownerUUID);
             if (choice == FarmCaveChoice.FRUIT_BATS) {
-                fruitCount += processFruitBats(level, caveOrigin, rng);
+                fruitCount += processFruitBats(level, farm, caveOrigin, rng);
             } else if (choice == FarmCaveChoice.MUSHROOMS) {
                 mushroomCount += processMushrooms(level, caveOrigin, rng);
             }
@@ -101,7 +111,12 @@ public final class FarmCaveDailyService {
 
     // ── Fruit Bats ──
 
-    private static int processFruitBats(ServerLevel level, BlockPos caveOrigin, RandomSource rng) {
+    private static int processFruitBats(
+            ServerLevel level,
+            FarmInstance farm,
+            BlockPos caveOrigin,
+            RandomSource rng
+    ) {
         // SDV FarmCave.DayUpdate: 不清旧水果，直接累积 → 玩家拾取前一直存在。
         int placed = 0;
         while (rng.nextDouble() < 0.66D) {
@@ -115,7 +130,14 @@ public final class FarmCaveDailyService {
             if (!level.getBlockState(place).isAir()) continue;
             if (!level.getBlockState(below).isFaceSturdy(level, below, Direction.UP)) continue;
 
-            Block block = pickFruitBlock(rng);
+            Block block = StardewFarmCaveDailyRegistry.resolveFruit(
+                    new StardewFarmCaveDailyHandlers.FruitContext(
+                            level,
+                            StardewFarmSnapshots.from(farm),
+                            caveOrigin,
+                            rng,
+                            pickFruitBlock(rng)
+                    ));
             level.setBlock(place, block.defaultBlockState(), Block.UPDATE_ALL);
             placed++;
         }

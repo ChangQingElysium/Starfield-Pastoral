@@ -1,8 +1,16 @@
 package com.stardew.craft.npc.data;
 
+import com.stardew.craft.api.v1.internal.npc.StardewNpcSocialRuleRegistry;
+import com.stardew.craft.api.v1.internal.npc.StardewNpcProfileRegistry;
+import com.stardew.craft.api.v1.npc.StardewNpcFriendshipSnapshot;
+import com.stardew.craft.api.v1.npc.StardewNpcInteractions;
+import com.stardew.craft.api.v1.npc.StardewNpcProfile;
+import com.stardew.craft.api.v1.npc.StardewNpcSocialContext;
+import com.stardew.craft.api.v1.npc.StardewNpcSocialRules;
 import com.stardew.craft.communitycenter.state.CCStoryFlags;
 import com.stardew.craft.npc.runtime.NpcFriendshipDataManager;
 import com.stardew.craft.player.PlayerStardewDataAPI;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Locale;
@@ -61,50 +69,66 @@ public final class NpcSocialRules {
 
     public static boolean canSocialize(String npcId) {
         String key = normalize(npcId);
-        return !key.isEmpty() && !CAN_SOCIALIZE_FALSE.contains(key);
+        boolean proposed = !key.isEmpty() && !CAN_SOCIALIZE_FALSE.contains(key);
+        return evaluate(key, null, null, null,
+                StardewNpcSocialRules.Rule.CAN_SOCIALIZE, proposed);
     }
 
     public static boolean canSocialize(String npcId, ServerPlayer player) {
         String key = normalize(npcId);
-        if (!canSocialize(key)) {
-            return false;
+        boolean proposed = !key.isEmpty() && !CAN_SOCIALIZE_FALSE.contains(key);
+        if (proposed && "sandy".equals(key)) {
+            proposed = player != null
+                    && PlayerStardewDataAPI.getData(player).hasMailFlag(CCStoryFlags.CC_VAULT);
         }
-        if ("sandy".equals(key)) {
-            return player != null && PlayerStardewDataAPI.getData(player).hasMailFlag(CCStoryFlags.CC_VAULT);
-        }
-        return true;
+        return evaluate(key, player, null, null,
+                StardewNpcSocialRules.Rule.CAN_SOCIALIZE, proposed);
     }
 
     public static boolean canReceiveGifts(String npcId) {
         String key = normalize(npcId);
-        return canSocialize(key) && NpcDataRegistry.tastes().containsKey(key);
+        boolean proposed = canSocialize(key) && NpcDataRegistry.tastes().containsKey(key);
+        return evaluate(key, null, null, null,
+                StardewNpcSocialRules.Rule.CAN_RECEIVE_GIFTS, proposed);
     }
 
     public static boolean canReceiveGifts(String npcId, ServerPlayer player) {
         String key = normalize(npcId);
-        return canSocialize(key, player) && NpcDataRegistry.tastes().containsKey(key);
+        boolean proposed = canSocialize(key, player)
+                && NpcDataRegistry.tastes().containsKey(key);
+        return evaluate(key, player, null, null,
+                StardewNpcSocialRules.Rule.CAN_RECEIVE_GIFTS, proposed);
     }
 
     public static boolean shouldShowOnSocialPage(String npcId,
                                                  NpcCapabilityProfile profile,
                                                  NpcFriendshipDataManager.FriendshipState state,
                                                  ServerPlayer player) {
-        if (profile == null || !profile.implemented()) {
-            return false;
-        }
         String key = normalize(npcId);
-        if (key.isEmpty() || !canSocialize(key, player)) {
-            return false;
+        ResourceLocation normalizedId = StardewNpcInteractions.normalizeNpcId(key);
+        StardewNpcProfile publicProfile = normalizedId == null
+                ? null
+                : StardewNpcProfileRegistry.publicProfile(normalizedId, profile);
+        boolean proposed = publicProfile != null
+                && publicProfile.implemented()
+                && !key.isEmpty()
+                && canSocialize(key, player);
+        if (proposed) {
+            proposed = switch (socialTab(key)) {
+                case HIDDEN_ALWAYS -> false;
+                case HIDDEN_UNTIL_MET -> state != null;
+                case ALWAYS_SHOWN, UNKNOWN_UNTIL_MET -> true;
+            };
         }
-        return switch (socialTab(key)) {
-            case HIDDEN_ALWAYS -> false;
-            case HIDDEN_UNTIL_MET -> state != null;
-            case ALWAYS_SHOWN, UNKNOWN_UNTIL_MET -> true;
-        };
+        return evaluate(key, player, profile, state,
+                StardewNpcSocialRules.Rule.SHOW_ON_SOCIAL_PAGE, proposed);
     }
 
     public static boolean shouldCreateFriendshipForSocialPage(String npcId) {
-        return socialTab(normalize(npcId)) == SocialTab.ALWAYS_SHOWN;
+        String key = normalize(npcId);
+        boolean proposed = socialTab(key) == SocialTab.ALWAYS_SHOWN;
+        return evaluate(key, null, null, null,
+                StardewNpcSocialRules.Rule.CREATE_FRIENDSHIP_FOR_SOCIAL_PAGE, proposed);
     }
 
     public static boolean isMet(NpcFriendshipDataManager.FriendshipState state) {
@@ -113,11 +137,17 @@ public final class NpcSocialRules {
 
     public static boolean isIntroductionsNpc(String npcId, NpcCapabilityProfile profile) {
         String key = normalize(npcId);
-        return profile != null
-            && profile.implemented()
-            && profile.canRunPathing()
-            && canSocialize(key)
-            && !INTRODUCTIONS_EXCLUDED.contains(key);
+        ResourceLocation normalizedId = StardewNpcInteractions.normalizeNpcId(key);
+        StardewNpcProfile publicProfile = normalizedId == null
+                ? null
+                : StardewNpcProfileRegistry.publicProfile(normalizedId, profile);
+        boolean proposed = publicProfile != null
+                && publicProfile.implemented()
+                && publicProfile.pathingEnabled()
+                && canSocialize(key)
+                && !INTRODUCTIONS_EXCLUDED.contains(key);
+        return evaluate(key, null, profile, null,
+                StardewNpcSocialRules.Rule.INCLUDE_IN_INTRODUCTIONS, proposed);
     }
 
     private static SocialTab socialTab(String npcId) {
@@ -135,5 +165,36 @@ public final class NpcSocialRules {
 
     private static String normalize(String npcId) {
         return npcId == null ? "" : npcId.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private static boolean evaluate(
+            String npcId,
+            ServerPlayer player,
+            NpcCapabilityProfile profile,
+            NpcFriendshipDataManager.FriendshipState state,
+            StardewNpcSocialRules.Rule rule,
+            boolean proposed
+    ) {
+        ResourceLocation normalizedId = StardewNpcInteractions.normalizeNpcId(npcId);
+        if (normalizedId == null) {
+            return proposed;
+        }
+        StardewNpcProfile publicProfile =
+                StardewNpcProfileRegistry.publicProfile(normalizedId, profile);
+        StardewNpcFriendshipSnapshot publicState = state == null ? null
+                : new StardewNpcFriendshipSnapshot(
+                        Math.max(0, state.points()),
+                        Math.max(0, state.giftsThisWeek()),
+                        state.lastGiftDayKey(),
+                        state.lastGiftWeekKey(),
+                        state.lastTalkDayKey(),
+                        state.firstMetDayKey(),
+                        state.dialogueDayKey(),
+                        Math.max(0, state.dialogueInteractionsToday()));
+        return StardewNpcSocialRuleRegistry.evaluate(
+                new StardewNpcSocialContext(
+                        normalizedId, player, publicProfile, publicState),
+                rule,
+                proposed);
     }
 }

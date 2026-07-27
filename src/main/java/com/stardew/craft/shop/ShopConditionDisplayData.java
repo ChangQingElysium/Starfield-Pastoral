@@ -45,6 +45,8 @@ public final class ShopConditionDisplayData {
                 case "always" -> getBoolean(data, "value", true) ? null : "never";
                 case "has_item" -> "has_item|" + data.get("item").getAsString()
                         + '|' + getInt(data, "count", 1);
+                case "lacks_item" -> "lacks_item|" + data.get("item").getAsString()
+                        + '|' + getInt(data, "count", 1);
                 case "money" -> "money|" + getInt(data, "min", Integer.MIN_VALUE)
                         + '|' + getInt(data, "max", Integer.MAX_VALUE);
                 case "flag" -> "flag|" + getBoolean(data, "present", true);

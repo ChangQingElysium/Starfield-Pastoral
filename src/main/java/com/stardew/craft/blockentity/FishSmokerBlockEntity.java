@@ -1,9 +1,8 @@
 package com.stardew.craft.blockentity;
 
-import com.stardew.craft.StardewCraft;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.item.artisan.ArtisanRecipeDataManager;
-import com.stardew.craft.item.artisan.SmokedFishItem;
+import com.stardew.craft.item.artisan.SmokedOutputResolver;
 import com.stardew.craft.item.quality.QualityHelper;
 import com.stardew.craft.time.StardewTimeManager;
 import net.minecraft.core.BlockPos;
@@ -12,7 +11,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -21,7 +19,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 
 import javax.annotation.Nullable;
-import java.util.Objects;
 
 public class FishSmokerBlockEntity extends TimedProductionBlockEntity {
     private static final int EFFECTIVE_MINUTES_PER_DAY = 1260;
@@ -127,6 +124,12 @@ public class FishSmokerBlockEntity extends TimedProductionBlockEntity {
         if (output.isEmpty()) {
             return InsertResult.fail();
         }
+        var plan = prepareProduction(
+                stack, output, recipe.minutes(),
+                player, false);
+        if (plan.isEmpty()) {
+            return InsertResult.fail();
+        }
 
         if (player == null) {
             return InsertResult.fail();
@@ -138,35 +141,21 @@ public class FishSmokerBlockEntity extends TimedProductionBlockEntity {
             return InsertResult.fail();
         }
 
-        startWork(stack, output, recipe.minutes(), player);
+        startWork(stack, plan.get(), player);
         return InsertResult.success();
     }
 
-    private void startWork(ItemStack inputStack, ItemStack output, int minutesUntilReady, Player player) {
-        input = inputStack.copy();
-        input.setCount(1);
-        product = output;
-        readyAtAbsMinute = getCurrentAbsMinute() + minutesUntilReady;
-        ready = false;
-        if (player == null || !player.isCreative()) {
-            inputStack.shrink(1);
-        }
-        setChanged();
-        syncToClient();
+    private void startWork(
+            ItemStack inputStack,
+            com.stardew.craft.api.v1.machine
+                    .StardewProductionPlan plan,
+            Player player
+    ) {
+        commitProduction(inputStack, plan, 1, player);
     }
 
     public ItemStack harvestOne() {
-        if (!isReady()) {
-            return ItemStack.EMPTY;
-        }
-        ItemStack out = product.copy();
-        product = ItemStack.EMPTY;
-        input = ItemStack.EMPTY;
-        readyAtAbsMinute = -1;
-        ready = false;
-        setChanged();
-        syncToClient();
-        return out;
+        return collectProduction();
     }
 
     @Override
@@ -199,6 +188,12 @@ public class FishSmokerBlockEntity extends TimedProductionBlockEntity {
         if (output.isEmpty()) {
             return stack;
         }
+        var plan = prepareProduction(
+                stack, output, recipe.minutes(),
+                null, true);
+        if (plan.isEmpty()) {
+            return stack;
+        }
         if (coalBuffer <= 0) {
             return stack;
         }
@@ -207,7 +202,7 @@ public class FishSmokerBlockEntity extends TimedProductionBlockEntity {
         }
         coalBuffer = Math.max(0, coalBuffer - 1);
         ItemStack inputCopy = stack.copy();
-        startWork(inputCopy, output, recipe.minutes(), null);
+        startWork(inputCopy, plan.get(), null);
         return AutomationStackHelper.remainderAfterInsert(stack, 1);
     }
 
@@ -258,22 +253,7 @@ public class FishSmokerBlockEntity extends TimedProductionBlockEntity {
 
     @SuppressWarnings("null")
     private static ItemStack createSmokedOutput(ItemStack inputStack) {
-        ResourceLocation id = BuiltInRegistries.ITEM.getKey(inputStack.getItem());
-        if (id == null || !StardewCraft.MODID.equals(id.getNamespace())) {
-            return ItemStack.EMPTY;
-        }
-        ResourceLocation smokedId = Objects.requireNonNull(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "smoked_" + id.getPath()),
-            "smokedId"
-        );
-        if (!BuiltInRegistries.ITEM.containsKey(smokedId)) {
-            return ItemStack.EMPTY;
-        }
-        Item smokedItem = BuiltInRegistries.ITEM.get(smokedId);
-        if (!(smokedItem instanceof SmokedFishItem)) {
-            return ItemStack.EMPTY;
-        }
-        return new ItemStack(smokedItem);
+        return SmokedOutputResolver.resolve(inputStack);
     }
 
     private ItemStack createOutputFromRecipe(ArtisanRecipeDataManager.Recipe recipe, ItemStack input) {

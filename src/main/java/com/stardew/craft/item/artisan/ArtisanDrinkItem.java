@@ -137,16 +137,19 @@ public class ArtisanDrinkItem extends Item implements IStardewItem {
         @SuppressWarnings("null")
         ItemStack result = super.finishUsingItem(stack, level, livingEntity);
         if (!level.isClientSide && livingEntity instanceof ServerPlayer serverPlayer) {
-            if (health != 0) {
+            int restoredHealth = getHealth(stack);
+            int restoredEnergy = getEnergy(stack);
+            if (restoredHealth != 0) {
                 int current = com.stardew.craft.player.PlayerStardewDataAPI.getHealth(serverPlayer);
                 int max = com.stardew.craft.player.PlayerStardewDataAPI.getMaxHealth(serverPlayer);
-                com.stardew.craft.player.PlayerStardewDataAPI.setHealth(serverPlayer, Math.max(0, Math.min(max, current + health)));
+                com.stardew.craft.player.PlayerStardewDataAPI.setHealth(serverPlayer,
+                        Math.max(0, Math.min(max, current + restoredHealth)));
             }
-            if (energy != 0) {
-                if (energy > 0) {
-                    com.stardew.craft.player.PlayerStardewDataAPI.restoreEnergy(serverPlayer, energy);
+            if (restoredEnergy != 0) {
+                if (restoredEnergy > 0) {
+                    com.stardew.craft.player.PlayerStardewDataAPI.restoreEnergy(serverPlayer, restoredEnergy);
                 } else {
-                    com.stardew.craft.player.PlayerStardewDataAPI.consumeEnergy(serverPlayer, -energy);
+                    com.stardew.craft.player.PlayerStardewDataAPI.consumeEnergy(serverPlayer, -restoredEnergy);
                 }
             }
 

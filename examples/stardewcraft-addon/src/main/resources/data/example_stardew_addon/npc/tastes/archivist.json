@@ -1,0 +1,20 @@
+{
+  "npc_id": "archivist",
+  "loved": [
+    "minecraft:apple",
+    "minecraft:golden_apple"
+  ],
+  "liked": [
+    "minecraft:book"
+  ],
+  "neutral": [],
+  "disliked": [
+    "minecraft:rotten_flesh"
+  ],
+  "hated": [],
+  "loved_msg": "example_stardew_addon.npc.archivist.gift_loved",
+  "liked_msg": "example_stardew_addon.npc.archivist.gift_liked",
+  "neutral_msg": "example_stardew_addon.npc.archivist.gift_neutral",
+  "disliked_msg": "example_stardew_addon.npc.archivist.gift_disliked",
+  "hated_msg": "example_stardew_addon.npc.archivist.gift_hated"
+}

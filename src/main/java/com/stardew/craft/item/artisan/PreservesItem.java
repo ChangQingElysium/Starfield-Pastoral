@@ -105,6 +105,8 @@ public class PreservesItem extends Item implements IStardewItem {
         Component sourceName = sourceStack.getHoverName();
 
         return switch (preserveType) {
+            case WINE, JUICE -> Component.translatable(this.getDescriptionId(stack))
+                    .withStyle(ChatFormatting.WHITE);
             case JELLY -> Component.translatable("stardewcraft.preserve.jelly.flavored_name", sourceName)
                     .withStyle(ChatFormatting.WHITE);
             case PICKLES -> Component.translatable("stardewcraft.preserve.pickles.flavored_name", sourceName)
@@ -182,6 +184,8 @@ public class PreservesItem extends Item implements IStardewItem {
 
     private int getBasePrice() {
         return switch (preserveType) {
+            case WINE -> 400;
+            case JUICE -> 150;
             case JELLY -> 160;
             case PICKLES -> 100;
             case ROE -> BASE_ROE_PRICE;
@@ -193,6 +197,8 @@ public class PreservesItem extends Item implements IStardewItem {
 
     private int getBaseEdibility() {
         return switch (preserveType) {
+            case WINE -> 20;
+            case JUICE -> 30;
             case JELLY -> -300;
             case PICKLES -> -300;
             case ROE -> BASE_ROE_EDIBILITY;
@@ -219,6 +225,10 @@ public class PreservesItem extends Item implements IStardewItem {
         int edibility;
 
         switch (type) {
+            case WINE, JUICE -> {
+                price = ingredientPrice;
+                edibility = ingredientEdibility;
+            }
             case JELLY -> {
                 price = ingredientPrice * 2 + 50;
                 edibility = computePreserveEdibility(ingredientEdibility, ingredientPrice, 2.0f, 0.2f);

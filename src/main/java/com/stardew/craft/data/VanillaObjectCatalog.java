@@ -95,8 +95,8 @@ public final class VanillaObjectCatalog {
         Entry direct = DATA.byItemPath().get(path.toLowerCase(Locale.ROOT));
         if (direct != null && direct.key().equals(entry.key())) return true;
         return switch (entry.key()) {
-            case "348" -> "wine".equals(path) || path.endsWith("_wine");
-            case "350" -> "juice".equals(path) || path.endsWith("_juice");
+            case "348" -> "wine".equals(path);
+            case "350" -> "juice".equals(path);
             case "SmokedFish" -> path.startsWith("smoked_");
             default -> false;
         };
@@ -248,8 +248,7 @@ public final class VanillaObjectCatalog {
         Map<String, String> aliases = new LinkedHashMap<>();
         aliases.put("autumn_s_bounty", "235");
         aliases.put("wine", "348");
-        aliases.put("grape_wine", "348");
-        aliases.put("tomato_juice", "350");
+        aliases.put("juice", "350");
         aliases.put("strange_doll_green", "126");
         aliases.put("strange_doll_yellow", "127");
         aliases.put("dried_fruit", "DriedFruit");

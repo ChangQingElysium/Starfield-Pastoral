@@ -1,27 +1,22 @@
 {
-    "parent":  "minecraft:item/generated",
-    "textures":  {
-                     "layer0":  "stardewcraft:item/artisan/wine/powder_melon",
-                     "particle":  "stardewcraft:item/artisan/wine/powder_melon"
-                 },
-    "overrides":  [
-                      {
-                          "predicate":  {
-                                            "custom_model_data":  1
-                                        },
-                          "model":  "stardewcraft:item/powder_melon_wine_silver"
-                      },
-                      {
-                          "predicate":  {
-                                            "custom_model_data":  2
-                                        },
-                          "model":  "stardewcraft:item/powder_melon_wine_gold"
-                      },
-                      {
-                          "predicate":  {
-                                            "custom_model_data":  3
-                                        },
-                          "model":  "stardewcraft:item/powder_melon_wine_iridium"
-                      }
-                  ]
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/artisan/drinks/wine_base",
+    "layer1": "stardewcraft:item/artisan/drinks/wine_overlay",
+    "particle": "stardewcraft:item/artisan/drinks/wine_base"
+  },
+  "overrides": [
+    {
+      "predicate": { "custom_model_data": 1 },
+      "model": "stardewcraft:item/wine_silver"
+    },
+    {
+      "predicate": { "custom_model_data": 2 },
+      "model": "stardewcraft:item/wine_gold"
+    },
+    {
+      "predicate": { "custom_model_data": 3 },
+      "model": "stardewcraft:item/wine_iridium"
+    }
+  ]
 }

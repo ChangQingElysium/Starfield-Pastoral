@@ -22,10 +22,7 @@ public final class BundleDataManager {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     // ── Singleton state ──
-    private static Map<Integer, BundleDefinition> bundlesById = Collections.emptyMap();
-    private static Map<Integer, List<BundleDefinition>> bundlesByArea = Collections.emptyMap();
-    private static Map<Integer, String> areaNames = Collections.emptyMap();
-    private static Map<Integer, String> areaDisplayNameKeys = Collections.emptyMap();
+    private static volatile Catalog catalog = Catalog.empty();
 
     private BundleDataManager() {}
 
@@ -34,34 +31,35 @@ public final class BundleDataManager {
     /** Get a bundle definition by its ID. */
     @Nullable
     public static BundleDefinition getBundle(int bundleId) {
-        return bundlesById.get(bundleId);
+        return catalog.bundlesById().get(bundleId);
     }
 
     /** Get all bundles for a given area. */
     public static List<BundleDefinition> getBundlesForArea(int areaId) {
-        return bundlesByArea.getOrDefault(areaId, Collections.emptyList());
+        return catalog.bundlesByArea()
+                .getOrDefault(areaId, Collections.emptyList());
     }
 
     /** Get all loaded bundle definitions. */
     public static Collection<BundleDefinition> getAllBundles() {
-        return bundlesById.values();
+        return catalog.bundlesById().values();
     }
 
     /** Get the internal name for an area (e.g. "Pantry"). */
     @Nullable
     public static String getAreaName(int areaId) {
-        return areaNames.get(areaId);
+        return catalog.areaNames().get(areaId);
     }
 
     /** Get the i18n key for an area's display name. */
     @Nullable
     public static String getAreaDisplayNameKey(int areaId) {
-        return areaDisplayNameKeys.get(areaId);
+        return catalog.areaDisplayNameKeys().get(areaId);
     }
 
     /** Total number of bundles loaded. */
     public static int bundleCount() {
-        return bundlesById.size();
+        return catalog.bundlesById().size();
     }
 
     /**
@@ -78,13 +76,7 @@ public final class BundleDataManager {
             newById.put(def.bundleId(), def);
             newByArea.computeIfAbsent(def.areaId(), k -> new ArrayList<>()).add(def);
         }
-        for (Map.Entry<Integer, List<BundleDefinition>> e : newByArea.entrySet()) {
-            e.setValue(Collections.unmodifiableList(e.getValue()));
-        }
-        bundlesById = Collections.unmodifiableMap(newById);
-        bundlesByArea = Collections.unmodifiableMap(newByArea);
-        areaNames = Collections.unmodifiableMap(new HashMap<>(names));
-        areaDisplayNameKeys = Collections.unmodifiableMap(new HashMap<>(displayKeys));
+        publish(newById, newByArea, names, displayKeys);
     }
 
     // ── Reload Listener ──
@@ -154,18 +146,18 @@ public final class BundleDataManager {
                 }
             }
 
-            // Freeze all collections
-            for (Map.Entry<Integer, List<BundleDefinition>> e : newBundlesByArea.entrySet()) {
-                e.setValue(Collections.unmodifiableList(e.getValue()));
-            }
+            Catalog applied = publish(
+                    newBundlesById,
+                    newBundlesByArea,
+                    newAreaNames,
+                    newAreaDisplayKeys);
 
-            bundlesById = Collections.unmodifiableMap(newBundlesById);
-            bundlesByArea = Collections.unmodifiableMap(newBundlesByArea);
-            areaNames = Collections.unmodifiableMap(newAreaNames);
-            areaDisplayNameKeys = Collections.unmodifiableMap(newAreaDisplayKeys);
-
-            StardewCraft.LOGGER.info("[COMMUNITY CENTER] Loaded {} bundles across {} areas",
-                    newBundlesById.size(), newBundlesByArea.size());
+            StardewCraft.LOGGER.info(
+                    "[COMMUNITY CENTER] Applied snapshot v{} "
+                            + "({} bundles across {} areas)",
+                    applied.revision(),
+                    applied.bundlesById().size(),
+                    applied.bundlesByArea().size());
         }
 
         private static List<BundleIngredient> parseIngredients(String raw) {
@@ -199,6 +191,68 @@ public final class BundleDataManager {
                 }
             }
             return list;
+        }
+    }
+
+    static Catalog catalog() {
+        return catalog;
+    }
+
+    private static synchronized Catalog publish(
+            Map<Integer, BundleDefinition> bundlesById,
+            Map<Integer, List<BundleDefinition>> bundlesByArea,
+            Map<Integer, String> areaNames,
+            Map<Integer, String> areaDisplayNameKeys
+    ) {
+        Catalog next = new Catalog(
+                catalog.revision() + 1,
+                bundlesById,
+                bundlesByArea,
+                areaNames,
+                areaDisplayNameKeys);
+        catalog = next;
+        return next;
+    }
+
+    record Catalog(
+            long revision,
+            Map<Integer, BundleDefinition> bundlesById,
+            Map<Integer, List<BundleDefinition>> bundlesByArea,
+            Map<Integer, String> areaNames,
+            Map<Integer, String> areaDisplayNameKeys
+    ) {
+        Catalog {
+            if (revision < 0) {
+                throw new IllegalArgumentException(
+                        "revision must be non-negative");
+            }
+            bundlesById = Collections.unmodifiableMap(
+                    new LinkedHashMap<>(
+                            Objects.requireNonNull(
+                                    bundlesById, "bundlesById")));
+            LinkedHashMap<Integer, List<BundleDefinition>> frozenByArea =
+                    new LinkedHashMap<>();
+            Objects.requireNonNull(bundlesByArea, "bundlesByArea")
+                    .forEach((areaId, definitions) ->
+                            frozenByArea.put(
+                                    areaId, List.copyOf(definitions)));
+            bundlesByArea = Collections.unmodifiableMap(frozenByArea);
+            areaNames = Collections.unmodifiableMap(
+                    new LinkedHashMap<>(Objects.requireNonNull(
+                            areaNames, "areaNames")));
+            areaDisplayNameKeys = Collections.unmodifiableMap(
+                    new LinkedHashMap<>(Objects.requireNonNull(
+                            areaDisplayNameKeys,
+                            "areaDisplayNameKeys")));
+        }
+
+        private static Catalog empty() {
+            return new Catalog(
+                    0,
+                    Map.of(),
+                    Map.of(),
+                    Map.of(),
+                    Map.of());
         }
     }
 }

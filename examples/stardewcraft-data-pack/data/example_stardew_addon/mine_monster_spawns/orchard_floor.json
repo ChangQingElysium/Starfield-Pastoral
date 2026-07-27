@@ -1,0 +1,20 @@
+{
+  "min_floor": 13,
+  "max_floor": 13,
+  "priority": 100,
+  "themes": [
+    "example_stardew_addon:apple_floor"
+  ],
+  "dark": false,
+  "min_distance": 6.0,
+  "entries": [
+    {
+      "profile": "stardewcraft:rock_crab",
+      "weight": 3
+    },
+    {
+      "profile": "stardewcraft:green_slime",
+      "weight": 1
+    }
+  ]
+}

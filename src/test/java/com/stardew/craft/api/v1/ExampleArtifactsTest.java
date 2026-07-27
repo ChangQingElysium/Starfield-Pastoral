@@ -27,6 +27,7 @@ import com.stardew.craft.api.v1.loot.StardewPrizeTicketRewardDefinition;
 import com.stardew.craft.api.v1.quest.StardewQuestDefinition;
 import com.stardew.craft.api.v1.profession.StardewProfessionDefinition;
 import com.stardew.craft.api.v1.shop.StardewShopDefinition;
+import com.stardew.craft.api.v1.shop.StardewShopBinding;
 import com.stardew.craft.api.v1.world.StardewForageZoneDefinition;
 import com.stardew.craft.api.v1.world.StardewLocationDefinition;
 import com.stardew.craft.api.v1.world.StardewPortalDefinition;
@@ -42,6 +43,107 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ExampleArtifactsTest {
+    @Test
+    void addonLocationHierarchyExampleMatchesPublicCodec()
+            throws Exception {
+        BuiltinApiTypes.bootstrap();
+        Path location = Path.of(
+                        System.getProperty("stardewcraft.projectDir"))
+                .resolve("examples/stardewcraft-addon/src/main/resources"
+                        + "/data/example_stardew_addon/locations/orchard.json");
+        StardewLocationDefinition definition =
+                StardewLocationDefinition.CODEC
+                        .parse(JsonOps.INSTANCE,
+                                JsonParser.parseString(
+                                        Files.readString(location)))
+                        .result()
+                        .orElseThrow();
+
+        assertEquals("stardewcraft:forest",
+                definition.parentId().toString());
+        assertEquals("Example Orchard",
+                definition.displayName().getString());
+        assertEquals("temperate",
+                definition.properties().get(
+                        net.minecraft.resources.ResourceLocation
+                                .parse("stardewcraft:climate")));
+        assertEquals("stardewcraft:music_woods",
+                definition.properties().get(
+                        net.minecraft.resources.ResourceLocation
+                                .parse("stardewcraft:music_profile")));
+
+        Path binding = location.getParent().getParent()
+                .resolve("shop_bindings/orchard_archivist.json");
+        StardewShopBinding shopBinding =
+                StardewShopBinding.CODEC.parse(
+                                JsonOps.INSTANCE,
+                                JsonParser.parseString(
+                                        Files.readString(binding)))
+                        .result()
+                        .orElseThrow();
+        assertEquals("stardewcraft:location",
+                shopBinding.availableWhen().getFirst()
+                        .type().toString());
+        assertEquals("stardewcraft:time",
+                shopBinding.availableWhen().get(1)
+                        .type().toString());
+    }
+
+    @Test
+    void addonNpcExampleJoinsOneProfileAcrossWorldAndServiceData()
+            throws Exception {
+        BuiltinApiTypes.bootstrap();
+        Path data = Path.of(
+                        System.getProperty("stardewcraft.projectDir"))
+                .resolve("examples/stardewcraft-addon/src/main/resources"
+                        + "/data/example_stardew_addon");
+
+        var dialogue = JsonParser.parseString(Files.readString(
+                data.resolve("npc/dialogue/archivist.json")))
+                .getAsJsonObject();
+        var schedule = JsonParser.parseString(Files.readString(
+                data.resolve("npc/schedules/archivist.json")))
+                .getAsJsonObject();
+        var tastes = JsonParser.parseString(Files.readString(
+                data.resolve("npc/tastes/archivist.json")))
+                .getAsJsonObject();
+        var locations = JsonParser.parseString(Files.readString(
+                data.resolve("npc/location_mappings/orchard.json")))
+                .getAsJsonObject();
+        var anchor = JsonParser.parseString(Files.readString(
+                data.resolve("anchors/orchard_stage.json")))
+                .getAsJsonObject();
+        var festivalJson = JsonParser.parseString(Files.readString(
+                data.resolve("festivals/orchard_celebration.json")));
+        var bindingJson = JsonParser.parseString(Files.readString(
+                data.resolve("shop_bindings/orchard_archivist.json")));
+
+        assertEquals("archivist", dialogue.get("npc_id").getAsString());
+        assertEquals("archivist", schedule.get("npc_id").getAsString());
+        assertEquals("archivist", tastes.get("npc_id").getAsString());
+        String route = schedule.getAsJsonObject("spring")
+                .get("600").getAsString();
+        assertTrue(route.startsWith("example_stardew_addon:orchard "));
+        assertTrue(route.contains(
+                "@example_stardew_addon:orchard_stage"));
+        assertEquals("example_stardew_addon:orchard",
+                locations.getAsJsonArray("locations")
+                        .get(0).getAsString());
+        assertEquals("example_stardew_addon:orchard",
+                anchor.get("location").getAsString());
+
+        StardewFestivalDefinition festival =
+                StardewFestivalDefinition.CODEC.parse(
+                                JsonOps.INSTANCE, festivalJson)
+                        .result().orElseThrow();
+        StardewShopBinding binding = StardewShopBinding.CODEC.parse(
+                        JsonOps.INSTANCE, bindingJson)
+                .result().orElseThrow();
+        assertEquals("example_stardew_addon:orchard",
+                festival.world().location());
+        assertEquals("archivist", binding.npc().orElseThrow());
+    }
+
     @Test
     void exampleDatapackMetadataMatchesThePublicCodec() throws Exception {
         Path root = Path.of(System.getProperty("stardewcraft.projectDir"))

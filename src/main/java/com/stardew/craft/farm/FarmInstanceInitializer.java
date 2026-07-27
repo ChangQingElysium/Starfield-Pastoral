@@ -1,6 +1,10 @@
 package com.stardew.craft.farm;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.farm.StardewFarmLayout;
+import com.stardew.craft.api.v1.internal.farm.StardewFarmLayoutRegistry;
+import com.stardew.craft.api.v1.farm.StardewFarmInitializationSteps;
+import com.stardew.craft.api.v1.farm.StardewFarmLayoutMigrations;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.decor.MapDecorStaticBlock;
 import com.stardew.craft.block.nature.PastureGrassBlock;
@@ -56,18 +60,22 @@ public class FarmInstanceInitializer {
     public static boolean initializeFarm(ServerLevel level, FarmInstance farm) {
         if (farm.isInitialized()) {
             StardewCraft.LOGGER.warn("[FARM_INIT] Farm for {} already initialized", farm.getOwnerName());
+            StardewFarmLayoutMigrations.runPending(level, farm.getOwnerUUID());
+            StardewFarmInitializationSteps.runPending(level, farm.getOwnerUUID());
             return true;
         }
 
-        FarmType.FarmLayout layout = farm.getFarmType().getLayout();
+        StardewFarmLayout layout = farm.getFarmLayout();
         if (layout == null) {
-            StardewCraft.LOGGER.error("[FARM_INIT] No layout data for farm type {}", farm.getFarmType().getId());
+            StardewCraft.LOGGER.error(
+                    "[FARM_INIT] No layout data for farm type {}",
+                    farm.getFarmLayoutId());
             return false;
         }
 
         BlockPos origin = farm.getOrigin();
         StardewCraft.LOGGER.info("[FARM_INIT] Initializing {} farm for {} at origin {}",
-                farm.getFarmType().getId(), farm.getOwnerName(), origin);
+                farm.getFarmLayoutId(), farm.getOwnerName(), origin);
 
         // 1. 预加载区块
         preloadFarmChunks(level, farm);
@@ -99,12 +107,15 @@ public class FarmInstanceInitializer {
         placeFarmCaveSystem(level, farm, layout);
 
         // 8. 河边农场特殊：送熏鱼机
-        if (farm.getFarmType() == FarmType.RIVERLAND) {
+        if (farm.getFarmLayoutId().equals(
+                StardewFarmLayoutRegistry.builtinId(FarmType.RIVERLAND))) {
             giveStarterItem(level, farm, ModBlocks.FISH_SMOKER.get().asItem());
         }
 
         farm.markInitialized();
         FarmInstanceRegistry.get().setDirty();
+        StardewFarmLayoutMigrations.runPending(level, farm.getOwnerUUID());
+        StardewFarmInitializationSteps.runPending(level, farm.getOwnerUUID());
         StardewCraft.LOGGER.info("[FARM_INIT] Farm initialization complete for {}", farm.getOwnerName());
         return true;
     }
@@ -114,7 +125,7 @@ public class FarmInstanceInitializer {
     // ══════════════════════════════════════════
 
     private static void placeSchematic(ServerLevel level, FarmInstance farm) {
-        String path = farm.getFarmType().getSchematicPath();
+        ResourceLocation path = farm.getFarmLayout().schematic();
         BlockPos origin = farm.getOrigin();
         boolean result = com.stardew.craft.mining.StructureLoader.loadAndPlaceWithResult(level, path, origin);
         if (!result) {
@@ -128,13 +139,17 @@ public class FarmInstanceInitializer {
      * 在农场 schematic 底面正下方铺一整层基岩，防止玩家掉出世界。
      * Y = origin.getY() - 1，覆盖 schemWidth × schemLength 的完整区域。
      */
-    private static void placeBedrockFloor(ServerLevel level, FarmInstance farm, FarmType.FarmLayout layout) {
+    private static void placeBedrockFloor(
+            ServerLevel level,
+            FarmInstance farm,
+            StardewFarmLayout layout
+    ) {
         BlockPos origin = farm.getOrigin();
         int bedrockY = origin.getY() - 1;
         int startX = origin.getX();
         int startZ = origin.getZ();
-        int endX = startX + layout.schemWidth();
-        int endZ = startZ + layout.schemLength();
+        int endX = startX + layout.width();
+        int endZ = startZ + layout.length();
         net.minecraft.world.level.block.state.BlockState bedrock = net.minecraft.world.level.block.Blocks.BEDROCK.defaultBlockState();
 
         for (int x = startX; x < endX; x++) {
@@ -143,7 +158,7 @@ public class FarmInstanceInitializer {
             }
         }
         StardewCraft.LOGGER.info("[FARM_INIT] Bedrock floor placed at Y={} ({} x {} blocks)",
-                bedrockY, layout.schemWidth(), layout.schemLength());
+                bedrockY, layout.width(), layout.length());
     }
 
     // ══════════════════════════════════════════
@@ -151,8 +166,17 @@ public class FarmInstanceInitializer {
     // ══════════════════════════════════════════
 
     private static void setFarmBiome(ServerLevel level, FarmInstance farm, String biomeId) {
+        ResourceLocation biomeLocation = biomeId.indexOf(':') >= 0
+                ? ResourceLocation.tryParse(biomeId)
+                : ResourceLocation.tryBuild(
+                        StardewCraft.MODID, biomeId);
+        if (biomeLocation == null) {
+            StardewCraft.LOGGER.error(
+                    "[FARM_INIT] Invalid biome ID {}", biomeId);
+            return;
+        }
         ResourceKey<Biome> biomeKey = ResourceKey.create(Registries.BIOME,
-                ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, biomeId));
+                biomeLocation);
         Holder<Biome> biomeHolder;
         try {
             biomeHolder = level.registryAccess()
@@ -208,7 +232,8 @@ public class FarmInstanceInitializer {
         BlockPos boundsMax = farm.getFarmBoundsMax();
         BlockPos spawnPos = farm.getSpawnPoint();
         BlockPos greenhousePos = farm.getGreenhousePos();
-        boolean isForest = farm.getFarmType() == FarmType.FOREST;
+        boolean isForest = farm.getFarmLayoutId().equals(
+                StardewFarmLayoutRegistry.builtinId(FarmType.FOREST));
 
         Block yellowDirt = ModBlocks.YELLOW_DIRT.get();
         Block grassBlock = Blocks.GRASS_BLOCK;
@@ -381,7 +406,11 @@ public class FarmInstanceInitializer {
     //  出口交互实体
     // ══════════════════════════════════════════
 
-    private static void spawnExitPortals(ServerLevel level, FarmInstance farm, FarmType.FarmLayout layout) {
+    private static void spawnExitPortals(
+            ServerLevel level,
+            FarmInstance farm,
+            StardewFarmLayout layout
+    ) {
         BlockPos origin = farm.getOrigin();
 
         spawnExitEntityRegion(level, origin, layout.entrySouth(),
@@ -395,7 +424,7 @@ public class FarmInstanceInitializer {
     }
 
     private static void spawnExitEntityRegion(ServerLevel level, BlockPos origin,
-                                               FarmType.EntryData entry,
+                                               StardewFarmLayout.Entry entry,
                                                String targetTag, String markerTag) {
         BlockPos min = origin.offset(entry.exitMin());
         BlockPos max = origin.offset(entry.exitMax());
@@ -439,7 +468,7 @@ public class FarmInstanceInitializer {
      */
     public static boolean backfillFarmCaveIfMissing(ServerLevel level, FarmInstance farm) {
         if (farm == null || !farm.isInitialized()) return false;
-        FarmType.FarmLayout layout = farm.getFarmType().getLayout();
+        StardewFarmLayout layout = farm.getFarmLayout();
         if (layout == null) return false;
         com.stardew.craft.interior.PlayerInteriorAllocator alloc =
                 com.stardew.craft.interior.PlayerInteriorAllocator.get(level);
@@ -463,23 +492,27 @@ public class FarmInstanceInitializer {
         return true;
     }
 
-    private static void placeFarmCaveSystem(ServerLevel level, FarmInstance farm, FarmType.FarmLayout layout) {
+    private static void placeFarmCaveSystem(
+            ServerLevel level,
+            FarmInstance farm,
+            StardewFarmLayout layout
+    ) {
         BlockPos origin = farm.getOrigin();
 
         // 1. 清空区域（仅 FOREST）
-        FarmType.CaveRegion clear = layout.caveClearBox();
+        StardewFarmLayout.Region clear = layout.caveClearBox();
         if (clear != null) {
             fillRegion(level, origin, clear, Blocks.AIR.defaultBlockState());
         }
 
         // 2. 黑色混凝土墙（STANDARD/FOREST）
-        FarmType.CaveRegion blackWall = layout.caveBlackWall();
+        StardewFarmLayout.Region blackWall = layout.caveBlackWall();
         if (blackWall != null) {
             fillRegion(level, origin, blackWall, Blocks.BLACK_CONCRETE.defaultBlockState());
         }
 
         // 3. 外部传送方块
-        FarmType.CaveRegion portalWall = layout.cavePortalWall();
+        StardewFarmLayout.Region portalWall = layout.cavePortalWall();
         if (portalWall != null) {
             BlockPos absMin = origin.offset(portalWall.min());
             BlockPos absMax = origin.offset(portalWall.max());
@@ -497,7 +530,12 @@ public class FarmInstanceInitializer {
     /**
      * 在 (origin + region.min)~(origin + region.max) 的立方体区域填充 state。min/max 均包含。
      */
-    private static void fillRegion(ServerLevel level, BlockPos origin, FarmType.CaveRegion region, BlockState state) {
+    private static void fillRegion(
+            ServerLevel level,
+            BlockPos origin,
+            StardewFarmLayout.Region region,
+            BlockState state
+    ) {
         BlockPos min = origin.offset(region.min());
         BlockPos max = origin.offset(region.max());
         int minX = Math.min(min.getX(), max.getX());

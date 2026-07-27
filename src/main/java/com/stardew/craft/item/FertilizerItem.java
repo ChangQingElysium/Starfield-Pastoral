@@ -1,5 +1,6 @@
 package com.stardew.craft.item;
 
+import com.stardew.craft.api.v1.agriculture.StardewCropRuntime;
 import com.stardew.craft.block.FertilizerType;
 import com.stardew.craft.manager.FertilizerManager;
 import net.minecraft.core.BlockPos;
@@ -74,13 +75,10 @@ public class FertilizerItem extends SimpleStardewItem {
                 if (aboveState.getBlock() instanceof net.minecraft.world.level.block.CropBlock vanillaCrop) {
                     // age>0 视为已发芽
                     hasSproutedCrop = vanillaCrop.getAge(aboveState) > 0;
-                } else if (aboveState.getBlock() instanceof com.stardew.craft.block.crop.StardewCropBlock) {
-                    // Stardew 作物：age>0 视为已发芽
-                    if (aboveState.hasProperty(com.stardew.craft.block.crop.StardewCropBlock.AGE)) {
-                        hasSproutedCrop = aboveState.getValue(com.stardew.craft.block.crop.StardewCropBlock.AGE) > 0;
-                    } else {
-                        // 理论不该发生，兜底：有作物就视为已发芽
-                        hasSproutedCrop = true;
+                } else {
+                    var crop = StardewCropRuntime.inspect(level, abovePos);
+                    if (crop != null) {
+                        hasSproutedCrop = crop.visualStage() > 0;
                     }
                 }
             }

@@ -6,6 +6,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JsonOps;
+import com.stardew.craft.api.v1.content.StardewContentKey;
+import com.stardew.craft.api.v1.content.StardewContentReference;
+import com.stardew.craft.api.v1.content.StardewTypedContentReferenceProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
@@ -18,6 +21,8 @@ import java.util.Set;
 /** Public registry and codec for item selection used by content definitions. */
 public final class StardewItemQueries {
     private static final Map<ResourceLocation, StardewItemQueryType<?>> TYPES = new LinkedHashMap<>();
+    private static final Map<ResourceLocation, StardewTypedContentReferenceProvider<?>>
+            REFERENCE_PROVIDERS = new LinkedHashMap<>();
 
     public static final Codec<StardewItemQuery> CODEC = Codec.PASSTHROUGH.flatXmap(
             StardewItemQueries::decodeDynamic,
@@ -41,6 +46,17 @@ public final class StardewItemQueries {
             StardewItemQueryResolver<T> resolver
     ) {
         register(id, new StardewItemQueryType<>(codec, resolver));
+    }
+
+    public static synchronized <T> void register(
+            ResourceLocation id,
+            Codec<T> codec,
+            StardewItemQueryResolver<T> resolver,
+            StardewTypedContentReferenceProvider<T> references
+    ) {
+        Objects.requireNonNull(references, "references");
+        register(id, new StardewItemQueryType<>(codec, resolver));
+        REFERENCE_PROVIDERS.put(id, references);
     }
 
     public static synchronized Set<ResourceLocation> registeredIds() {
@@ -77,6 +93,29 @@ public final class StardewItemQueries {
                     .toList());
         } catch (RuntimeException exception) {
             return DataResult.error(() -> "Item query " + query.type() + " failed: " + exception.getMessage());
+        }
+    }
+
+    public static DataResult<List<StardewContentReference>>
+    contentReferences(
+            StardewContentKey owner,
+            StardewItemQuery query
+    ) {
+        Objects.requireNonNull(owner, "owner");
+        Objects.requireNonNull(query, "query");
+        StardewTypedContentReferenceProvider<?> provider =
+                REFERENCE_PROVIDERS.get(query.type());
+        if (provider == null) {
+            return DataResult.success(List.of());
+        }
+        try {
+            return DataResult.success(
+                    extractReferences(provider, owner, query.data()));
+        } catch (RuntimeException exception) {
+            return DataResult.error(() ->
+                    "Item-query reference provider "
+                            + query.type() + " failed: "
+                            + exception.getMessage());
         }
     }
 
@@ -134,6 +173,19 @@ public final class StardewItemQueries {
             Object data
     ) {
         return type.resolver().resolve(context, (T) data);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> List<StardewContentReference>
+    extractReferences(
+            StardewTypedContentReferenceProvider<T> provider,
+            StardewContentKey owner,
+            Object data
+    ) {
+        var references = provider.references(owner, (T) data);
+        return List.copyOf(Objects.requireNonNull(
+                references,
+                "item-query reference provider result"));
     }
 
     private static void requireNamespaced(ResourceLocation id) {

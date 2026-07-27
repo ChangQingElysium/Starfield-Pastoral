@@ -18,7 +18,8 @@ import java.util.List;
 public record OpenCarpenterMenuPayload(
     String builder,
     int playerMoney,
-    List<CarpenterBlueprint> blueprints
+    List<CarpenterBlueprint> blueprints,
+    long catalogRevision
 ) implements CustomPacketPayload {
 
     public static final Type<OpenCarpenterMenuPayload> TYPE =
@@ -63,12 +64,41 @@ public record OpenCarpenterMenuPayload(
         };
 
     public static final StreamCodec<RegistryFriendlyByteBuf, OpenCarpenterMenuPayload> STREAM_CODEC =
-        StreamCodec.composite(
-            ByteBufCodecs.STRING_UTF8,                         OpenCarpenterMenuPayload::builder,
-            ByteBufCodecs.INT,                                 OpenCarpenterMenuPayload::playerMoney,
-            BLUEPRINT_CODEC.apply(ByteBufCodecs.list()),       OpenCarpenterMenuPayload::blueprints,
-            OpenCarpenterMenuPayload::new
-        );
+        new StreamCodec<>() {
+            @Override
+            public OpenCarpenterMenuPayload decode(
+                    RegistryFriendlyByteBuf buffer
+            ) {
+                return new OpenCarpenterMenuPayload(
+                        ByteBufCodecs.STRING_UTF8.decode(buffer),
+                        buffer.readInt(),
+                        BLUEPRINT_CODEC.apply(ByteBufCodecs.list())
+                                .decode(buffer),
+                        buffer.readVarLong());
+            }
+
+            @Override
+            public void encode(
+                    RegistryFriendlyByteBuf buffer,
+                    OpenCarpenterMenuPayload payload
+            ) {
+                ByteBufCodecs.STRING_UTF8.encode(
+                        buffer, payload.builder());
+                buffer.writeInt(payload.playerMoney());
+                BLUEPRINT_CODEC.apply(ByteBufCodecs.list())
+                        .encode(buffer, payload.blueprints());
+                buffer.writeVarLong(payload.catalogRevision());
+            }
+        };
+
+    /** Source-compatible constructor for callers predating catalog sessions. */
+    public OpenCarpenterMenuPayload(
+            String builder,
+            int playerMoney,
+            List<CarpenterBlueprint> blueprints
+    ) {
+        this(builder, playerMoney, blueprints, -1L);
+    }
 
     @Override
     public Type<? extends CustomPacketPayload> type() {

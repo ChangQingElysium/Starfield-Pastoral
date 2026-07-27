@@ -1,6 +1,7 @@
 package com.stardew.craft.network.payload;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.npc.StardewNpcProfiles;
 import com.stardew.craft.npc.data.NpcCapabilityProfile;
 import com.stardew.craft.npc.data.NpcDataRegistry;
 import com.stardew.craft.npc.data.NpcSocialRules;
@@ -19,7 +20,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -69,15 +69,11 @@ public record RequestNpcFriendshipOverviewPayload() implements CustomPacketPaylo
         boolean normalizedAnyWeek = false;
 
         List<SyncNpcFriendshipOverviewPayload.Entry> rows = new ArrayList<>();
-        for (NpcCapabilityProfile profile : capabilities.values()) {
-            if (profile == null || !profile.implemented()) {
-                continue;
-            }
-            String npcId = profile.npcId();
-            if (npcId == null || npcId.isBlank()) {
-                continue;
-            }
-            String normalizedNpcId = npcId.toLowerCase(Locale.ROOT);
+        for (ResourceLocation npcId : StardewNpcProfiles.ids()) {
+            String normalizedNpcId = StardewCraft.MODID.equals(npcId.getNamespace())
+                    ? npcId.getPath()
+                    : npcId.toString();
+            NpcCapabilityProfile profile = capabilities.get(normalizedNpcId);
             NpcFriendshipDataManager.FriendshipState state = friendshipManager.get(player.getUUID(), normalizedNpcId);
             if (!NpcSocialRules.shouldShowOnSocialPage(normalizedNpcId, profile, state, player)) {
                 continue;

@@ -121,7 +121,15 @@ public class DehydratorBlockEntity extends TimedProductionBlockEntity {
 			return InsertResult.missing(new MissingItemRequirement(stack.getItem(), recipe.consumeCount()));
 		}
 
-		startWork(stack, output, recipe.minutes(), recipe.consumeCount(), player);
+		var plan = prepareProduction(
+				stack, output, recipe.minutes(),
+				player, false);
+		if (plan.isEmpty()) {
+			return InsertResult.fail();
+		}
+		startWork(
+				stack, plan.get(),
+				recipe.consumeCount(), player);
 		return InsertResult.success();
 	}
 
@@ -135,31 +143,18 @@ public class DehydratorBlockEntity extends TimedProductionBlockEntity {
 		return output;
 	}
 
-	private void startWork(ItemStack inputStack, ItemStack output, int minutesUntilReady, int consumeCount, Player player) {
-		input = inputStack.copy();
-		input.setCount(Math.min(consumeCount, input.getMaxStackSize()));
-		product = output;
-		readyAtAbsMinute = getCurrentAbsMinute() + minutesUntilReady;
-		ready = false;
-		if (player == null || !player.isCreative()) {
-			inputStack.shrink(consumeCount);
-		}
-		setChanged();
-		syncToClient();
+	private void startWork(
+			ItemStack inputStack,
+			com.stardew.craft.api.v1.machine.StardewProductionPlan plan,
+			int consumeCount,
+			Player player
+	) {
+		commitProduction(
+				inputStack, plan, consumeCount, player);
 	}
 
 	public ItemStack harvestOne() {
-		if (!isReady()) {
-			return ItemStack.EMPTY;
-		}
-		ItemStack out = product.copy();
-		product = ItemStack.EMPTY;
-		input = ItemStack.EMPTY;
-		readyAtAbsMinute = -1;
-		ready = false;
-		setChanged();
-		syncToClient();
-		return out;
+		return collectProduction();
 	}
 
 	@Override
@@ -189,11 +184,19 @@ public class DehydratorBlockEntity extends TimedProductionBlockEntity {
 		if (output.isEmpty()) {
 			return stack;
 		}
+		var plan = prepareProduction(
+				stack, output, recipe.minutes(),
+				null, true);
+		if (plan.isEmpty()) {
+			return stack;
+		}
 		if (simulate) {
 			return AutomationStackHelper.remainderAfterInsert(stack, recipe.consumeCount());
 		}
 		ItemStack inputCopy = stack.copy();
-		startWork(inputCopy, output, recipe.minutes(), recipe.consumeCount(), null);
+		startWork(
+				inputCopy, plan.get(),
+				recipe.consumeCount(), null);
 		return AutomationStackHelper.remainderAfterInsert(stack, recipe.consumeCount());
 	}
 

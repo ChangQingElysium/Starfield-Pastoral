@@ -1,6 +1,7 @@
 package com.stardew.craft.blockentity;
 
 import com.stardew.craft.item.artisan.ArtisanRecipeDataManager;
+import com.stardew.craft.item.artisan.FlavoredArtisanOutputResolver;
 import com.stardew.craft.item.quality.QualityHelper;
 import com.stardew.craft.time.StardewTimeManager;
 import net.minecraft.core.BlockPos;
@@ -140,36 +141,32 @@ public class KegBlockEntity extends TimedProductionBlockEntity {
 		}
 		Item outputItem = BuiltInRegistries.ITEM.get(recipe.outputId());
 		ItemStack output = new ItemStack(outputItem, recipe.outputCount());
+		if (recipe.preserveType() != null) {
+			FlavoredArtisanOutputResolver.apply(recipe.preserveType(), stack, output);
+		}
 		QualityHelper.setQuality(output, QualityHelper.NORMAL);
-		startWork(stack, output, recipe.minutes(), consumeCount, player);
+		var plan = prepareProduction(
+				stack, output, recipe.minutes(),
+				player, false);
+		if (plan.isEmpty()) {
+			return InsertResult.fail();
+		}
+		startWork(stack, plan.get(), consumeCount, player);
 		return InsertResult.success();
 	}
 
-	private void startWork(ItemStack inputStack, ItemStack output, int minutesUntilReady, int consumeCount, Player player) {
-		input = inputStack.copy();
-		input.setCount(Math.min(consumeCount, input.getMaxStackSize()));
-		product = output;
-		readyAtAbsMinute = getCurrentAbsMinute() + minutesUntilReady;
-		ready = false;
-		if (player == null || !player.isCreative()) {
-			inputStack.shrink(consumeCount);
-		}
-		setChanged();
-		syncToClient();
+	private void startWork(
+			ItemStack inputStack,
+			com.stardew.craft.api.v1.machine.StardewProductionPlan plan,
+			int consumeCount,
+			Player player
+	) {
+		commitProduction(
+				inputStack, plan, consumeCount, player);
 	}
 
 	public ItemStack harvestOne() {
-		if (!isReady()) {
-			return ItemStack.EMPTY;
-		}
-		ItemStack out = product.copy();
-		product = ItemStack.EMPTY;
-		input = ItemStack.EMPTY;
-		readyAtAbsMinute = -1;
-		ready = false;
-		setChanged();
-		syncToClient();
-		return out;
+		return collectProduction();
 	}
 
 	@Override
@@ -200,15 +197,25 @@ public class KegBlockEntity extends TimedProductionBlockEntity {
 		}
 		Item outputItem = BuiltInRegistries.ITEM.get(recipe.outputId());
 		ItemStack output = new ItemStack(outputItem, recipe.outputCount());
+		if (recipe.preserveType() != null) {
+			FlavoredArtisanOutputResolver.apply(recipe.preserveType(), stack, output);
+		}
 		QualityHelper.setQuality(output, QualityHelper.NORMAL);
 		int minutes = recipe.minutes();
+		var plan = prepareProduction(
+				stack, output, minutes,
+				null, true);
+		if (plan.isEmpty()) {
+			return stack;
+		}
 
 		if (simulate) {
 			return AutomationStackHelper.remainderAfterInsert(stack, consumeCount);
 		}
 
 		ItemStack inputCopy = stack.copy();
-		startWork(inputCopy, output, minutes, consumeCount, null);
+		startWork(
+				inputCopy, plan.get(), consumeCount, null);
 		return AutomationStackHelper.remainderAfterInsert(stack, consumeCount);
 	}
 

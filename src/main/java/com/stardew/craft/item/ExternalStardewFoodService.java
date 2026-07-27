@@ -3,11 +3,16 @@ package com.stardew.craft.item;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.api.v1.item.StardewItemData;
 import com.stardew.craft.api.v1.item.StardewItemDataApi;
+import com.stardew.craft.api.v1.item.StardewFoodEffect;
+import com.stardew.craft.api.v1.item.StardewFoodEffects;
 import com.stardew.craft.core.ModDimensions;
 import com.stardew.craft.core.ModMiningDimensions;
 import com.stardew.craft.festival.desert.DesertFestivalMineService;
 import com.stardew.craft.player.PlayerStardewDataAPI;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -17,11 +22,14 @@ import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /** Bridges external vanilla-food items with Stardew item metadata. */
 @EventBusSubscriber(modid = StardewCraft.MODID)
 public final class ExternalStardewFoodService {
     private static final ThreadLocal<Deque<ItemStack>> USE_CONTEXT = new ThreadLocal<>();
+    private static final Set<ResourceLocation> REPORTED_MISSING_EFFECTS = ConcurrentHashMap.newKeySet();
 
     private ExternalStardewFoodService() {
     }
@@ -52,7 +60,11 @@ public final class ExternalStardewFoodService {
     /** Returns true only for configured external foods while using Stardew's energy model. */
     public static boolean shouldAllowCurrentFoodAtFullHunger(Player player) {
         Deque<ItemStack> context = USE_CONTEXT.get();
-        return context != null && !context.isEmpty() && isConfiguredExternalFood(player, context.peek());
+        if (context == null || context.isEmpty() || !isStardewDimension(player)) {
+            return false;
+        }
+        ItemStack stack = context.peek();
+        return isConfiguredExternalFood(player, stack) || StardewFoodEffects.resolve(stack).isPresent();
     }
 
     @SubscribeEvent
@@ -60,6 +72,8 @@ public final class ExternalStardewFoodService {
         if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
         }
+
+        applyConfiguredFoodEffects(player, event.getItem());
 
         StardewItemData data = configuredExternalFoodData(player, event.getItem()).orElse(null);
         if (data == null) {
@@ -82,6 +96,10 @@ public final class ExternalStardewFoodService {
             return amount;
         }
         return Math.max(1, amount / 2);
+    }
+
+    static boolean shouldApply(double chance, double roll) {
+        return chance >= 1.0D || (chance > 0.0D && roll < chance);
     }
 
     private static boolean isConfiguredExternalFood(Player player, ItemStack stack) {
@@ -116,6 +134,45 @@ public final class ExternalStardewFoodService {
             PlayerStardewDataAPI.restoreEnergy(player, energy);
         } else if (energy < 0) {
             PlayerStardewDataAPI.consumeEnergy(player, -energy);
+        }
+    }
+
+    private static void applyConfiguredFoodEffects(ServerPlayer player, ItemStack stack) {
+        if (stack == null || stack.isEmpty() || stack.getFoodProperties(player) == null) {
+            return;
+        }
+        StardewFoodEffects.resolve(stack).ifPresent(data -> data.effects().forEach((entryId, configured) -> {
+            double roll = configured.chance() <= 0.0D || configured.chance() >= 1.0D
+                    ? 0.0D
+                    : player.getRandom().nextDouble();
+            if (!shouldApply(configured.chance(), roll)) {
+                return;
+            }
+            BuiltInRegistries.MOB_EFFECT.getHolder(configured.effect()).ifPresentOrElse(
+                    effect -> player.addEffect(toInstance(effect, configured)),
+                    () -> reportMissingEffect(entryId, configured.effect()));
+        }));
+    }
+
+    private static MobEffectInstance toInstance(
+            net.minecraft.core.Holder<net.minecraft.world.effect.MobEffect> effect,
+            StardewFoodEffect configured
+    ) {
+        return new MobEffectInstance(
+                effect,
+                configured.durationTicks(),
+                configured.amplifier(),
+                configured.ambient(),
+                configured.showParticles(),
+                configured.showIcon());
+    }
+
+    private static void reportMissingEffect(ResourceLocation entryId, ResourceLocation effectId) {
+        if (REPORTED_MISSING_EFFECTS.add(effectId)) {
+            StardewCraft.LOGGER.warn(
+                    "Food effect entry {} references missing MobEffect {}; it will be ignored",
+                    entryId,
+                    effectId);
         }
     }
 }

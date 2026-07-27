@@ -74,10 +74,19 @@ public class StardewCraft {
     // FML will recognize some parameter types like IEventBus or ModContainer and pass them in automatically.
     public StardewCraft(IEventBus modEventBus, ModContainer modContainer) {
         com.stardew.craft.api.v1.internal.BuiltinApiTypes.bootstrap();
+        com.stardew.craft.api.v1.internal.item.StardewAcquisitionSourceRegistry
+                .bootstrap();
+        com.stardew.craft.api.v1.internal.economy.StardewCurrencyRegistry
+                .bootstrap();
+        com.stardew.craft.api.v1.internal.shop.StardewShopProductRegistry
+                .bootstrap();
+        com.stardew.craft.api.v1.internal.network
+                .StardewNetworkCapabilityRegistry.bootstrap();
 
         // Register the commonSetup method for modloading
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(PacketHandler::register);
+        modEventBus.addListener(PacketHandler::registerConfigurationTasks);
         modEventBus.addListener(UtilityAutomationCapabilities::registerCapabilities);
         modEventBus.addListener(ModEntities::onEntityAttributeCreation);
         modEventBus.addListener(com.stardew.craft.data.StardewDataMaps::registerDataMaps);
@@ -231,5 +240,20 @@ public class StardewCraft {
                 LOGGER.info("[VALLEY_MAP] Stardew level not loaded at startup, will mark pre-generated on first travel.");
             }
         }
+    }
+
+    @SubscribeEvent(priority = net.neoforged.bus.api.EventPriority.LOWEST)
+    public void onServerStarted(
+            net.neoforged.neoforge.event.server.ServerStartedEvent event
+    ) {
+        if (net.neoforged.neoforge.gametest.GameTestHooks
+                .isGametestServer()) {
+            LOGGER.info(
+                    "Keeping extension registrations open for isolated GameTests");
+            return;
+        }
+        com.stardew.craft.api.v1.internal.extension.ExtensionPointCatalog
+                .freezeAll();
+        LOGGER.info("Stardew extension registrations frozen");
     }
 }

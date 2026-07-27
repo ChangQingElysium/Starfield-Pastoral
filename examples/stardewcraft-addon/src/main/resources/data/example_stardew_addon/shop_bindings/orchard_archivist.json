@@ -1,0 +1,27 @@
+{
+  "shop": "orchard_stand",
+  "npc": "archivist",
+  "available_when": [
+    {
+      "type": "stardewcraft:location",
+      "data": {
+        "locations": [
+          "example_stardew_addon:orchard"
+        ],
+        "required_tags": [
+          "stardewcraft:outdoor"
+        ],
+        "properties": {
+          "example_stardew_addon:primary_fruit": "apple"
+        }
+      }
+    },
+    {
+      "type": "stardewcraft:time",
+      "data": {
+        "start": 900,
+        "end": 1700
+      }
+    }
+  ]
+}

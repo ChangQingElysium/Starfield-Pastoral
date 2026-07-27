@@ -6,6 +6,9 @@ import com.stardew.craft.api.v1.agriculture.StardewBuildingData;
 import com.stardew.craft.animal.data.AnimalWorldData;
 import com.stardew.craft.animal.model.AnimalBuildingRecord;
 import com.stardew.craft.animal.model.AnimalBuildingType;
+import com.stardew.craft.animal.service.AnimalBuildingConstructionService;
+import com.stardew.craft.animal.service.AnimalEntitySyncService;
+import com.stardew.craft.animal.service.AnimalProducePlacementService;
 import com.stardew.craft.animal.service.CoopManagerValidationService;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.menu.CoopManagerMenu;
@@ -46,6 +49,8 @@ public class CoopManagerBlock extends Block {
     public static final String TAG_FAMILY = "family";
     public static final String TAG_TIER = "tier";
     public static final String TAG_ANIMAL_COUNT = "animalCount";
+    public static final String TAG_STRUCTURE_REVISION =
+            "structureRevision";
 
     public CoopManagerBlock(Properties properties) {
         super(properties);
@@ -127,6 +132,8 @@ public class CoopManagerBlock extends Block {
         }
         CompoundTag relocateTag = tag.getCompound(TAG_RELOCATE);
         if (relocateTag == null) {
+            refundFailedRelocation(
+                    level, pos, stack, serverPlayer);
             return;
         }
 
@@ -134,29 +141,129 @@ public class CoopManagerBlock extends Block {
         String owner = relocateTag.getString(TAG_OWNER);
         String dimension = relocateTag.getString(TAG_DIMENSION);
         String family = relocateTag.getString(TAG_FAMILY);
-        if (buildingId.isBlank() || owner.isBlank() || family.isBlank() || !"coop".equalsIgnoreCase(family)) {
+        long expectedRevision =
+                relocateTag.getLong(TAG_STRUCTURE_REVISION);
+        if (buildingId.isBlank() || owner.isBlank()
+                || family.isBlank()
+                || !"coop".equalsIgnoreCase(family)
+                || expectedRevision <= 0L) {
+            rejectStaleRelocation(level, pos, serverPlayer);
             return;
         }
         if (!com.stardew.craft.farm.FarmInstanceRegistry.get()
                 .canOperateBuilding(serverPlayer.getUUID(), owner)) {
             serverPlayer.sendSystemMessage(Component.translatable("message.stardew_craft.manager.relocate_owner_mismatch"));
+            rejectStaleRelocation(level, pos, serverPlayer);
+            return;
+        }
+        String currentDimension =
+                serverLevel.dimension().location().toString();
+        if (!dimension.isBlank()
+                && !dimension.equals(currentDimension)) {
+            refundFailedRelocation(
+                    level, pos, stack, serverPlayer);
             return;
         }
 
-        boolean moved = AnimalWorldData.get(serverLevel).moveBuildingManagerFromItem(
-            buildingId,
-            serverPlayer.getUUID(),
-            dimension.isBlank() ? serverLevel.dimension().location().toString() : dimension,
-            pos,
-            family
-        );
-
-        if (moved) {
-            serverPlayer.sendSystemMessage(Component.translatable("message.stardew_craft.manager.relocate_pending"));
+        AnimalWorldData data = AnimalWorldData.get(serverLevel);
+        AnimalBuildingRecord existing = data
+                .getBuilding(buildingId).orElse(null);
+        if (existing == null
+                || existing.structureRevision()
+                        != expectedRevision) {
+            rejectStaleRelocation(level, pos, serverPlayer);
+            return;
         }
+        CoopManagerValidationService.ValidationResult validation =
+                CoopManagerValidationService.validateForTier(
+                        serverLevel,
+                        pos,
+                        existing.buildingType().tier());
+        if (!validation.success()) {
+            refundFailedRelocation(
+                    level, pos, stack, serverPlayer);
+            serverPlayer.sendSystemMessage(Component.translatable(
+                    "stardewcraft.manager.validation.failed",
+                    Component.translatable(
+                            "block.stardewcraft.coop_manager"),
+                    validation.message()));
+            return;
+        }
+        AnimalBuildingType type = existing.buildingType();
+        StardewBuildingData publicData =
+                StardewAgricultureDataApi.building(
+                        serverLevel,
+                        pos,
+                        serverLevel.getBlockState(pos));
+        int capacity = publicData == null
+                ? type.defaultCapacity()
+                : publicData.capacity();
+        BlockPos oldManagerPos = existing.managerPos();
+        AnimalProducePlacementService
+                .releaseProjectionsForBuildingRelocation(
+                        serverLevel, data, existing);
+        boolean moved = data.rebindValidatedBuildingManager(
+                buildingId,
+                serverPlayer.getUUID(),
+                currentDimension,
+                pos,
+                family,
+                expectedRevision,
+                validation.scan().interiorMinX(),
+                validation.scan().interiorMinY(),
+                validation.scan().interiorMinZ(),
+                validation.scan().interiorMaxX(),
+                validation.scan().interiorMaxY(),
+                validation.scan().interiorMaxZ(),
+                validation.scan().interiorAirCells(),
+                validation.scan().boundaryDoorCells(),
+                capacity);
+        if (!moved) {
+            refundFailedRelocation(
+                    level, pos, stack, serverPlayer);
+            return;
+        }
+        if (!oldManagerPos.equals(pos)) {
+            serverLevel.removeBlock(oldManagerPos, false);
+        }
+        data.getBuilding(buildingId).ifPresent(rebound ->
+                AnimalEntitySyncService
+                        .relocateBuildingAnimalsNow(
+                                serverLevel, rebound));
+        serverPlayer.sendSystemMessage(Component.translatable(
+                "message.stardew_craft.manager.relocate_completed"));
+    }
+
+    private static void refundFailedRelocation(
+            Level level,
+            BlockPos pos,
+            ItemStack stack,
+            ServerPlayer player
+    ) {
+        ItemStack refund = stack.copy();
+        refund.setCount(1);
+        level.removeBlock(pos, false);
+        if (!player.getInventory().add(refund)) {
+            popResource(level, pos, refund);
+        }
+        player.sendSystemMessage(Component.translatable(
+                "message.stardew_craft.manager.relocate_failed_refunded"));
+    }
+
+    private static void rejectStaleRelocation(
+            Level level,
+            BlockPos pos,
+            ServerPlayer player
+    ) {
+        level.removeBlock(pos, false);
+        player.sendSystemMessage(Component.translatable(
+                "message.stardew_craft.manager.relocate_stale"));
     }
 
     public static boolean tryBuildOrUpgrade(ServerLevel level, BlockPos managerPos, Player player) {
+        if (!(player instanceof ServerPlayer serverPlayer)) {
+            return false;
+        }
         AnimalWorldData data = AnimalWorldData.get(level);
         Optional<AnimalBuildingRecord> existingOpt = data.findBuildingByManager(
             level.dimension().location().toString(),
@@ -166,16 +273,35 @@ public class CoopManagerBlock extends Block {
         );
 
         int currentTier = existingOpt.map(record -> record.buildingType().tier()).orElse(0);
-        if (currentTier >= 3) {
+        if (existingOpt.filter(AnimalBuildingRecord::hasPendingConstruction)
+                .filter(record -> record.validationState()
+                        == AnimalBuildingRecord.ValidationState.CONSTRUCTING)
+                .isPresent()) {
+            player.sendSystemMessage(Component.translatable(
+                    "stardewcraft.manager.construction.in_progress"));
+            return false;
+        }
+        boolean revalidating = existingOpt
+                .map(record -> !record.isGameplayEnabled())
+                .orElse(false);
+        if (!revalidating && currentTier >= 3) {
             player.sendSystemMessage(Component.translatable("stardewcraft.manager.max_tier",
                     Component.translatable("block.stardewcraft.coop_manager"), 3));
             maybeSendDevHints(player, currentTier, null);
             return false;
         }
 
-        int targetTier = currentTier + 1;
+        int targetTier = revalidating
+                ? currentTier
+                : currentTier + 1;
         CoopManagerValidationService.ValidationResult validation = CoopManagerValidationService.validateForTier(level, managerPos, targetTier);
         if (!validation.success()) {
+            if (revalidating) {
+                existingOpt.ifPresent(existing ->
+                        data.markBuildingValidationFailed(
+                                existing.buildingId(),
+                                validation.message().getString()));
+            }
             player.sendSystemMessage(Component.translatable("stardewcraft.manager.validation.failed",
                     Component.translatable("block.stardewcraft.coop_manager"), validation.message()));
             maybeSendDevHints(player, targetTier, validation);
@@ -188,38 +314,62 @@ public class CoopManagerBlock extends Block {
                 level, managerPos, level.getBlockState(managerPos));
         int capacity = publicData == null ? targetType.defaultCapacity() : publicData.capacity();
         String defaultName = "Coop Tier " + targetTier;
-        String buildingId = data.createOrUpdateBuildingAtManager(
-            level,
-            targetType,
-            player.getUUID(),
-            managerPos,
-            defaultName,
-            validation.scan().interiorMinX(),
-            validation.scan().interiorMinY(),
-            validation.scan().interiorMinZ(),
-            validation.scan().interiorMaxX(),
-            validation.scan().interiorMaxY(),
-            validation.scan().interiorMaxZ(),
-            validation.scan().interiorAirCells(),
-            validation.scan().boundaryDoorCells(),
-            capacity
-        );
+        java.util.function.Supplier<String> applyStructure = () ->
+                data.createOrUpdateBuildingAtManager(
+                        level,
+                        targetType,
+                        player.getUUID(),
+                        managerPos,
+                        defaultName,
+                        validation.scan().interiorMinX(),
+                        validation.scan().interiorMinY(),
+                        validation.scan().interiorMinZ(),
+                        validation.scan().interiorMaxX(),
+                        validation.scan().interiorMaxY(),
+                        validation.scan().interiorMaxZ(),
+                        validation.scan().interiorAirCells(),
+                        validation.scan().boundaryDoorCells(),
+                        capacity);
 
-        if (currentTier == 0) {
-            player.sendSystemMessage(Component.translatable("stardewcraft.manager.building.created",
-                    Component.translatable("stardewcraft.manager.building.coop"), 1, buildingId));
-        } else {
-            player.sendSystemMessage(Component.translatable("stardewcraft.manager.building.upgraded",
-                    Component.translatable("stardewcraft.manager.building.coop"), targetTier, buildingId));
+        if (revalidating) {
+            String buildingId = applyStructure.get();
+            data.checkpointPausedAnimalsAt(
+                    buildingId,
+                    AnimalBuildingConstructionService
+                            .currentAbsoluteDay());
+            player.sendSystemMessage(Component.translatable(
+                    "stardewcraft.manager.validation.restored",
+                    buildingId));
+            maybeSendDevHints(player, targetTier, validation);
+            level.playSound(null, managerPos, SoundEvents.ANVIL_USE,
+                    SoundSource.BLOCKS, 0.6f, 1.1f);
+            return true;
         }
+
+        AnimalBuildingConstructionService.StartResult construction =
+                AnimalBuildingConstructionService.start(
+                        level,
+                        serverPlayer,
+                        targetType,
+                        currentTier == 0,
+                        applyStructure);
+        if (!construction.started()) {
+            player.sendSystemMessage(Component.translatable(
+                    "stardewcraft.manager.construction.missing_cost"));
+            level.playSound(null, managerPos, SoundEvents.VILLAGER_NO,
+                    SoundSource.BLOCKS, 0.8f, 1.0f);
+            return false;
+        }
+        player.sendSystemMessage(Component.translatable(
+                "stardewcraft.manager.construction.started",
+                Component.translatable(
+                        "stardewcraft.manager.building.coop"),
+                targetTier,
+                targetType.definition().buildDays()));
 
         maybeSendDevHints(player, targetTier, validation);
         level.playSound(null, managerPos, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 0.6f, 1.1f);
 
-        // 通知任务系统：建筑已建造/升级
-        if (player instanceof net.minecraft.server.level.ServerPlayer sp) {
-            com.stardew.craft.quest.StardewQuestEvents.fireBuildingExists(sp, "Coop");
-        }
         return true;
     }
 
@@ -272,8 +422,11 @@ public class CoopManagerBlock extends Block {
         }
 
         AnimalBuildingRecord existing = existingOpt.get();
-        data.deactivateBuildingForRelocation(existing.buildingId());
-
+        if (existing.hasPendingConstruction()) {
+            player.sendSystemMessage(Component.translatable(
+                    "stardewcraft.manager.construction.in_progress"));
+            return false;
+        }
         ItemStack managerItem = new ItemStack(ModBlocks.COOP_MANAGER.get().asItem());
         CompoundTag rootTag = managerItem.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
         CompoundTag relocateTag = new CompoundTag();
@@ -283,6 +436,9 @@ public class CoopManagerBlock extends Block {
         relocateTag.putString(TAG_FAMILY, existing.buildingType().family());
         relocateTag.putInt(TAG_TIER, existing.buildingType().tier());
         relocateTag.putInt(TAG_ANIMAL_COUNT, existing.memberAnimalIds().size());
+        relocateTag.putLong(
+                TAG_STRUCTURE_REVISION,
+                existing.structureRevision());
         rootTag.put(TAG_RELOCATE, relocateTag);
         managerItem.set(DataComponents.CUSTOM_DATA, CustomData.of(rootTag));
 
@@ -290,11 +446,9 @@ public class CoopManagerBlock extends Block {
             popResource(level, managerPos, managerItem);
         }
 
-        BlockState state = level.getBlockState(managerPos);
-        level.levelEvent(2001, managerPos, Block.getId(state));
-        level.removeBlock(managerPos, false);
         level.playSound(null, managerPos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.6f, 1.0f);
-        player.sendSystemMessage(Component.translatable("message.stardew_craft.manager.relocate_pickup"));
+        player.sendSystemMessage(Component.translatable(
+                "message.stardew_craft.manager.relocate_candidate"));
         return true;
     }
 

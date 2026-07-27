@@ -66,6 +66,18 @@ public class PlayerStardewDataAPI {
         return next;
     }
 
+    public static int incrementStat(
+            UUID playerId,
+            String key,
+            int amount
+    ) {
+        if (playerId == null) {
+            return 0;
+        }
+        return PlayerDataManager.getPlayerData(
+                playerId).incrementStat(key, amount);
+    }
+
     public static int getTicketPrizesClaimed(ServerPlayer player) {
         return getData(player).getTicketPrizesClaimed();
     }

@@ -1,5 +1,11 @@
 package com.stardew.craft.farm;
 
+import com.stardew.craft.api.v1.agriculture.StardewCropRemovalCause;
+import com.stardew.craft.api.v1.agriculture.StardewCropRuntime;
+import com.stardew.craft.api.v1.farm.StardewFarmDebrisPlacements;
+import com.stardew.craft.api.v1.farm.StardewFarmSnapshot;
+import com.stardew.craft.api.v1.internal.farm.StardewFarmDebrisPlacementRegistry;
+import com.stardew.craft.api.v1.internal.farm.StardewFarmSnapshots;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.crop.StardewCropBlock;
 import com.stardew.craft.block.nature.PastureGrassBlock;
@@ -63,6 +69,7 @@ public final class FarmDebrisDailyService {
     private static void spawnRandomDebris(ServerLevel level, FarmInstance farm, int attempts,
                                           boolean weedsOnly, int season) {
         RandomSource random = level.getRandom();
+        StardewFarmSnapshot farmSnapshot = StardewFarmSnapshots.from(farm);
         for (int i = 0; i < attempts; i++) {
             BlockPos target = findRandomEmptyPlace(level, farm, random);
             if (target == null) {
@@ -91,11 +98,29 @@ public final class FarmDebrisDailyService {
                 // map stage 0 to sapling0 and stages 1/2 to sapling1.
                 BlockState sapling = (random.nextInt(3) == 0
                         ? tree.sapling0().get() : tree.sapling1().get()).defaultBlockState();
+                sapling = StardewFarmDebrisPlacementRegistry.resolve(
+                        new StardewFarmDebrisPlacements.Context(
+                                level,
+                                farmSnapshot,
+                                target,
+                                sapling,
+                                StardewFarmDebrisPlacements.Stage.YOUNG_TREE,
+                                random
+                        ));
                 if (sapling.canSurvive(level, target)) {
                     level.setBlock(target, sapling, 3);
                     continue;
                 }
             }
+            placed = StardewFarmDebrisPlacementRegistry.resolve(
+                    new StardewFarmDebrisPlacements.Context(
+                            level,
+                            farmSnapshot,
+                            target,
+                            placed,
+                            StardewFarmDebrisPlacements.Stage.DEBRIS,
+                            random
+                    ));
             level.setBlock(target, placed, 3);
         }
     }
@@ -132,7 +157,7 @@ public final class FarmDebrisDailyService {
                 continue;
             }
             BlockState targetState = level.getBlockState(target);
-            if (!canDebrisReplace(targetState)) {
+            if (!canDebrisReplace(level, target, targetState)) {
                 continue;
             }
 
@@ -155,6 +180,11 @@ public final class FarmDebrisDailyService {
                     case 2 -> ModBlocks.EARTH_SHALE.get().defaultBlockState();
                     default -> ModBlocks.MOSSY_SANDSTONE.get().defaultBlockState();
                 };
+            }
+            if (StardewCropRuntime.inspect(level, target) != null
+                    && !StardewCropRuntime.remove(
+                            level, target, StardewCropRemovalCause.FARM_DEBRIS)) {
+                continue;
             }
             clearTilledGroundBelow(level, target);
             level.setBlock(target, placed, 3);
@@ -212,7 +242,8 @@ public final class FarmDebrisDailyService {
         for (int y = near.getY() + 1; y >= near.getY() - 1; y--) {
             BlockPos place = new BlockPos(near.getX(), y, near.getZ());
             BlockState ground = level.getBlockState(place.below());
-            if (isDiggableFarmGround(ground.getBlock()) && canDebrisReplace(level.getBlockState(place))) {
+            if (isDiggableFarmGround(ground.getBlock())
+                    && canDebrisReplace(level, place, level.getBlockState(place))) {
                 return place;
             }
         }
@@ -246,12 +277,17 @@ public final class FarmDebrisDailyService {
                 || block == Blocks.FARMLAND;
     }
 
-    private static boolean canDebrisReplace(BlockState state) {
+    private static boolean canDebrisReplace(
+            ServerLevel level,
+            BlockPos position,
+            BlockState state
+    ) {
         Block block = state.getBlock();
         return state.isAir()
                 || block instanceof WildWeedsBlock
                 || block instanceof PastureGrassBlock
                 || block instanceof StardewCropBlock
+                || StardewCropRuntime.inspect(level, position) != null
                 || isFarmStone(block)
                 || isFarmLog(state);
     }

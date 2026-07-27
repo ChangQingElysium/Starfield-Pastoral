@@ -2,6 +2,7 @@ package com.stardew.craft.network.payload;
 
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.animal.data.AnimalWorldData;
+import com.stardew.craft.animal.model.AnimalNameRules;
 import com.stardew.craft.animal.service.AnimalShopService;
 import com.stardew.craft.animal.service.AnimalAcquireService;
 import com.stardew.craft.player.PlayerStardewDataAPI;
@@ -51,8 +52,19 @@ public record AnimalPurchaseSubmitPayload(String animalTypeId, String buildingId
                 fail(serverPlayer, "stardewcraft.animal.purchase.no_money");
                 return;
             }
+            if (!AnimalShopService.isConditionUnlocked(rule, serverPlayer)) {
+                fail(serverPlayer, rule.lockReasonKey());
+                return;
+            }
 
-            String normalizedName = payload.customName == null ? "" : payload.customName.trim();
+            String normalizedName =
+                    AnimalNameRules.normalize(payload.customName);
+            if (!AnimalNameRules.isValidOptionalName(
+                    normalizedName)) {
+                fail(serverPlayer,
+                        "stardewcraft.animal.purchase.failed");
+                return;
+            }
             AnimalWorldData data = AnimalWorldData.get(serverPlayer.serverLevel());
             var buildingOpt = data.getBuilding(payload.buildingId);
             if (buildingOpt.isEmpty()) {
@@ -79,6 +91,11 @@ public record AnimalPurchaseSubmitPayload(String animalTypeId, String buildingId
             }
 
             String finalName = normalizedName.isBlank() ? rule.defaultName() : normalizedName;
+            if (!AnimalNameRules.isValidExplicitName(finalName)) {
+                fail(serverPlayer,
+                        "stardewcraft.animal.purchase.failed");
+                return;
+            }
             if (data.hasAnyAnimalWithName(finalName)) {
                 fail(serverPlayer, "stardewcraft.animal.purchase.name_duplicate");
                 return;
@@ -89,10 +106,16 @@ public record AnimalPurchaseSubmitPayload(String animalTypeId, String buildingId
                 return;
             }
             try {
-                var record = AnimalAcquireService.purchase(serverPlayer.serverLevel(), payload.animalTypeId, finalName, payload.buildingId);
+                String selectedAnimalType = AnimalShopService.selectPurchasedAnimalType(
+                        payload.animalTypeId, serverPlayer);
+                var record = AnimalAcquireService.purchase(
+                        serverPlayer.serverLevel(),
+                        selectedAnimalType,
+                        finalName,
+                        payload.buildingId);
                 PacketDistributor.sendToPlayer(serverPlayer,
                     AnimalPurchaseResultPayload.success(record.customName()));
-            } catch (IllegalArgumentException | IllegalStateException ex) {
+            } catch (RuntimeException ex) {
                 PlayerStardewDataAPI.addMoney(serverPlayer, price);
                 fail(serverPlayer, "stardewcraft.animal.purchase.failed");
             }

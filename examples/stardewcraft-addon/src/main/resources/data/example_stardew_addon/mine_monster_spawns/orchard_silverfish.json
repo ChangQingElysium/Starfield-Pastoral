@@ -1,0 +1,16 @@
+{
+  "min_floor": 13,
+  "max_floor": 13,
+  "priority": 200,
+  "mechanics": [
+    "earth"
+  ],
+  "dark": false,
+  "min_distance": 6.0,
+  "entries": [
+    {
+      "profile": "example_stardew_addon:orchard_silverfish",
+      "weight": 1
+    }
+  ]
+}

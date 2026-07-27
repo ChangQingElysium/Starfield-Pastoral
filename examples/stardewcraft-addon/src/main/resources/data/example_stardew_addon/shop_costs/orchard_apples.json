@@ -1,0 +1,11 @@
+{
+  "shop": "example_stardew_addon:orchard_stand",
+  "item": "minecraft:apple",
+  "priority": 100,
+  "currencies": [
+    {
+      "id": "example_stardew_addon:orchard_marks",
+      "amount": 2
+    }
+  ]
+}

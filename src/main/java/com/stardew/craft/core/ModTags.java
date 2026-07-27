@@ -43,6 +43,8 @@ public final class ModTags {
 		public static final TagKey<Item> WATERING_CANS = tag("watering_cans");
 		public static final TagKey<Item> SCYTHES = tag("scythes");
 		public static final TagKey<Item> CROPS = tag("crops");
+		public static final TagKey<Item> KEG_WINE_INPUTS = tag("keg_wine_inputs");
+		public static final TagKey<Item> KEG_JUICE_INPUTS = tag("keg_juice_inputs");
 		public static final TagKey<Item> SEEDMAKER_BANNED = tag("seedmaker_banned");
 		public static final TagKey<Item> CRYSTALARIUM_BANNED = tag("crystalarium_banned");
 		public static final TagKey<Item> BONE_ITEMS = tag("bone_items");

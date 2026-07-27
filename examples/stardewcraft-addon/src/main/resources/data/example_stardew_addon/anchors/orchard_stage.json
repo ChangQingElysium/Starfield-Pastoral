@@ -1,0 +1,14 @@
+{
+  "dimension": "stardewcraft:stardew_valley",
+  "position": [-149, 64, 82],
+  "yaw": 180,
+  "indoor": false,
+  "use_ground_height": false,
+  "location": "example_stardew_addon:orchard",
+  "roles": [
+    "stardewcraft:npc",
+    "stardewcraft:npc_schedule",
+    "stardewcraft:festival",
+    "stardewcraft:festival_stage"
+  ]
+}

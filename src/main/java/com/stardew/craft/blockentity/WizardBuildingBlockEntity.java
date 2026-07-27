@@ -1,6 +1,8 @@
 package com.stardew.craft.blockentity;
 
 import com.stardew.craft.block.crop.StardewCropBlock;
+import com.stardew.craft.api.v1.agriculture.StardewCropRuntime;
+import com.stardew.craft.api.v1.agriculture.StardewCropState;
 import com.stardew.craft.block.decor.MapDecorStaticBlock;
 import com.stardew.craft.block.utility.WizardBuildingBlock;
 import com.stardew.craft.block.utility.WizardBuildingKind;
@@ -117,7 +119,8 @@ public final class WizardBuildingBlockEntity extends net.minecraft.world.level.b
         if (!kind().isGoldClock() || owner == null) {
             return;
         }
-        com.stardew.craft.farm.FarmInstance farm = com.stardew.craft.farm.FarmInstanceRegistry.get().getFarm(owner);
+        com.stardew.craft.farm.FarmInstance farm = com.stardew.craft.farm.FarmInstanceRegistry.get()
+                .getFarmForPlayer(owner);
         if (farm != null) {
             farm.setGoldClockState(true, goldClockEnabled);
             com.stardew.craft.farm.FarmInstanceRegistry.get().setDirty();
@@ -196,13 +199,14 @@ public final class WizardBuildingBlockEntity extends net.minecraft.world.level.b
         List<ItemStack> harvested = new ArrayList<>();
         ItemStack primary = ItemStack.EMPTY;
         if (targetPos != null) {
-            BlockState cropState = level.getBlockState(targetPos);
-            if (cropState.getBlock() instanceof StardewCropBlock crop) {
-                primary = crop.tryHarvestByJunimo(level, targetPos, cropState,
-                        hut.ownerFarmingLevel(), harvested::add);
-                if (!primary.isEmpty() && hut.raisinDaysLeft > 0 && level.random.nextDouble() < 0.2) {
-                    harvested.add(primary.copyWithCount(1));
-                }
+            var result = StardewCropRuntime.harvestForAutomation(
+                    level, targetPos, hut.ownerFarmingLevel(), harvested::add);
+            if (result.harvested() && !harvested.isEmpty()) {
+                primary = harvested.getFirst().copy();
+            }
+            if (!primary.isEmpty() && hut.raisinDaysLeft > 0
+                    && level.random.nextDouble() < 0.2) {
+                harvested.add(primary.copyWithCount(1));
             }
         }
 
@@ -262,7 +266,10 @@ public final class WizardBuildingBlockEntity extends net.minecraft.world.level.b
                 continue;
             }
             BlockState state = serverLevel.getBlockState(pos);
-            if (!(state.getBlock() instanceof StardewCropBlock crop)) {
+            StardewCropState crop = StardewCropRuntime.inspect(serverLevel, pos);
+            if (crop == null
+                    || crop.part() != StardewCropState.Part.ROOT
+                    || !crop.mature()) {
                 continue;
             }
             if (state.hasProperty(BlockStateProperties.DOUBLE_BLOCK_HALF)
@@ -270,11 +277,14 @@ public final class WizardBuildingBlockEntity extends net.minecraft.world.level.b
                 continue;
             }
             UUID cropOwner = com.stardew.craft.core.FarmAreaResolver.getOwnerAt(pos);
-            if (owner != null && cropOwner != null && !owner.equals(cropOwner)) {
+            if (owner != null && cropOwner != null
+                    && !com.stardew.craft.farm.FarmInstanceRegistry.get()
+                    .areFarmmates(owner, cropOwner)) {
                 continue;
             }
-            if (crop.isReadyForFarmComputer(serverLevel, pos, state)
-                    && !StardewCropBlock.isPlayerPlacedDecorative(serverLevel, pos, state)) {
+            if (!(state.getBlock() instanceof StardewCropBlock)
+                    || !StardewCropBlock.isPlayerPlacedDecorative(
+                            serverLevel, pos, state)) {
                 candidates.add(pos);
             }
         }

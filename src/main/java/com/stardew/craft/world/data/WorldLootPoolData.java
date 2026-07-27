@@ -34,13 +34,13 @@ public final class WorldLootPoolData {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final AtomicDefinitionStore<StardewWorldLootPoolDefinition> STORE =
             new AtomicDefinitionStore<>();
-    private static volatile List<Map.Entry<ResourceLocation, StardewWorldLootPoolDefinition>> ordered = List.of();
+    private static volatile Catalog catalog = Catalog.empty();
 
     private WorldLootPoolData() {
     }
 
     public static DefinitionSnapshot<StardewWorldLootPoolDefinition> snapshot() {
-        return STORE.snapshot();
+        return catalog.definitions();
     }
 
     public static List<ItemStack> resolve(
@@ -50,7 +50,8 @@ public final class WorldLootPoolData {
             @Nullable ServerPlayer player,
             RandomSource random
     ) {
-        List<Map.Entry<ResourceLocation, StardewWorldLootPoolDefinition>> matching = ordered.stream()
+        List<Map.Entry<ResourceLocation, StardewWorldLootPoolDefinition>> matching =
+                catalog.ordered().stream()
                 .filter(entry -> entry.getValue().source().equals(source))
                 .filter(entry -> entry.getValue().group().equals(group))
                 .filter(entry -> available(entry.getValue().availableWhen(), level, player))
@@ -150,20 +151,39 @@ public final class WorldLootPoolData {
             objects.entrySet().stream()
                     .sorted(Map.Entry.comparingByKey(Comparator.comparing(ResourceLocation::toString)))
                     .forEach(entry -> decode(entry.getKey(), entry.getValue(), definitions, sources, diagnostics));
-            var result = STORE.applyLocal(definitions, sources, diagnostics);
-            logDiagnostics(result.diagnostics());
-            if (!result.accepted()) {
-                StardewCraft.LOGGER.error("[World loot] Rejected reload; keeping {} pools", ordered.size());
-                return;
-            }
-            ordered = result.snapshot().definitions().entrySet().stream()
-                    .sorted(Comparator
-                            .<Map.Entry<ResourceLocation, StardewWorldLootPoolDefinition>>comparingInt(
-                                    entry -> entry.getValue().priority()).reversed()
-                            .thenComparing(entry -> entry.getKey().toString()))
-                    .toList();
-            StardewCraft.LOGGER.info("[World loot] Applied {} pools", ordered.size());
+            applyCandidate(definitions, sources, diagnostics);
         }
+    }
+
+    static synchronized void applyCandidate(
+            Map<ResourceLocation, StardewWorldLootPoolDefinition> definitions,
+            Map<ResourceLocation, String> sources,
+            List<DefinitionDiagnostic> diagnostics
+    ) {
+        List<Map.Entry<ResourceLocation, StardewWorldLootPoolDefinition>>
+                prepared = definitions.entrySet().stream()
+                .sorted(Comparator
+                        .<Map.Entry<ResourceLocation,
+                                StardewWorldLootPoolDefinition>>
+                                comparingInt(entry ->
+                                        entry.getValue().priority())
+                        .reversed()
+                        .thenComparing(entry ->
+                                entry.getKey().toString()))
+                .toList();
+        var result = STORE.applyLocal(
+                definitions, sources, diagnostics);
+        logDiagnostics(result.diagnostics());
+        if (!result.accepted()) {
+            StardewCraft.LOGGER.error(
+                    "[World loot] Rejected reload; keeping {} pools",
+                    catalog.ordered().size());
+            return;
+        }
+        catalog = new Catalog(result.snapshot(), prepared);
+        StardewCraft.LOGGER.info(
+                "[World loot] Applied {} pools",
+                catalog.ordered().size());
     }
 
     private static void decode(
@@ -194,5 +214,26 @@ public final class WorldLootPoolData {
     }
 
     private record ResolvedEntry(ResourceLocation id, StardewWorldLootPoolDefinition.Entry entry) {
+    }
+
+    static Catalog catalog() {
+        return catalog;
+    }
+
+    record Catalog(
+            DefinitionSnapshot<StardewWorldLootPoolDefinition> definitions,
+            List<Map.Entry<ResourceLocation,
+                    StardewWorldLootPoolDefinition>> ordered
+    ) {
+        Catalog {
+            definitions = java.util.Objects.requireNonNull(
+                    definitions, "definitions");
+            ordered = List.copyOf(ordered);
+        }
+
+        private static Catalog empty() {
+            return new Catalog(
+                    DefinitionSnapshot.empty(), List.of());
+        }
     }
 }

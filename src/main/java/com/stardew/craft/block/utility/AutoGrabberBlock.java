@@ -1,11 +1,14 @@
 package com.stardew.craft.block.utility;
 
+import com.stardew.craft.animal.data.AnimalWorldData;
+import com.stardew.craft.animal.model.AnimalBuildingRecord;
+import com.stardew.craft.animal.service.AnimalProducePlacementService;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.shape.ModelVoxelShapeCache;
 import com.stardew.craft.blockentity.AutoGrabberBlockEntity;
-import com.stardew.craft.blockentity.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -23,8 +26,6 @@ import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityTicker;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -123,17 +124,6 @@ public class AutoGrabberBlock extends Block implements EntityBlock {
 
     @Override
     @Nullable
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(@Nonnull Level level,
-                                                                   @Nonnull BlockState state,
-                                                                   @Nonnull BlockEntityType<T> type) {
-        if (state.getValue(PART) == Part.EXTENSION || level.isClientSide || type != ModBlockEntities.AUTO_GRABBER.get()) {
-            return null;
-        }
-        return (lvl, pos, st, be) -> AutoGrabberBlockEntity.serverTick(lvl, pos, st, (AutoGrabberBlockEntity) be);
-    }
-
-    @Override
-    @Nullable
     public BlockState getStateForPlacement(@Nonnull BlockPlaceContext context) {
         Level level = context.getLevel();
         BlockPos pos = context.getClickedPos();
@@ -162,6 +152,21 @@ public class AutoGrabberBlock extends Block implements EntityBlock {
         }
         BlockPos extensionPos = pos.above();
         level.setBlock(extensionPos, state.setValue(PART, Part.EXTENSION), 3);
+        if (level instanceof ServerLevel serverLevel) {
+            AnimalWorldData data = AnimalWorldData.get(serverLevel);
+            for (AnimalBuildingRecord building : data.getBuildings()) {
+                if (building.dimensionId().equals(
+                                serverLevel.dimension().location().toString())
+                        && building.isInBounds(pos)) {
+                    AnimalProducePlacementService.projectPendingForBuilding(
+                            serverLevel,
+                            data,
+                            building
+                    );
+                    break;
+                }
+            }
+        }
     }
 
     @Override

@@ -1,6 +1,8 @@
 package com.stardew.craft.client.gui;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.farm.StardewFarmLayout;
+import com.stardew.craft.api.v1.farm.StardewFarmLayouts;
 import com.stardew.craft.client.gui.common.GuiText;
 import com.stardew.craft.client.gui.overnight.StardewGuiUtil;
 import com.stardew.craft.farm.FarmPermissionManager;
@@ -254,8 +256,13 @@ public class FarmEntryScreen extends Screen {
             int iconX = contentX + ui(24);
             int iconY = ry + (rowH - iconH) / 2;
             if (locked) graphics.setColor(0.4f, 0.4f, 0.4f, 0.5f);
-            FarmType farmType = FarmType.fromId(entry.farmTypeId());
-            graphics.blit(farmType.getIconTexture(), iconX, iconY, 0, 0, iconW, iconH, iconW, iconH);
+            ResourceLocation layoutId = ResourceLocation.tryParse(entry.farmTypeId());
+            ResourceLocation icon = layoutId == null
+                    ? FarmType.STANDARD.getIconTexture()
+                    : StardewFarmLayouts.find(layoutId)
+                            .map(StardewFarmLayout::iconTexture)
+                            .orElse(FarmType.STANDARD.getIconTexture());
+            graphics.blit(icon, iconX, iconY, 0, 0, iconW, iconH, iconW, iconH);
             if (locked) graphics.setColor(1f, 1f, 1f, 1f);
 
             // 文字区域

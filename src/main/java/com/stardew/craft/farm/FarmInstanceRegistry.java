@@ -1,6 +1,14 @@
 package com.stardew.craft.farm;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.farm.StardewFarmLifecycle;
+import com.stardew.craft.api.v1.farm.StardewFarmLayout;
+import com.stardew.craft.api.v1.farm.StardewFarmLayoutConfiguration;
+import com.stardew.craft.api.v1.farm.StardewFarmLayoutRegistration;
+import com.stardew.craft.api.v1.farm.StardewFarmLayouts;
+import com.stardew.craft.api.v1.farm.StardewFarmSnapshot;
+import com.stardew.craft.api.v1.internal.farm.StardewFarmLifecycleRegistry;
+import com.stardew.craft.api.v1.internal.farm.StardewFarmSnapshots;
 import com.stardew.craft.core.ModGameRules;
 import com.stardew.craft.time.StardewTimeManager;
 import net.minecraft.core.BlockPos;
@@ -8,6 +16,8 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
@@ -43,7 +53,12 @@ public class FarmInstanceRegistry extends SavedData {
     public static FarmInstanceRegistry get() {
         var server = ServerLifecycleHooks.getCurrentServer();
         if (server == null) return new FarmInstanceRegistry();
-        return server.overworld().getDataStorage().computeIfAbsent(factory(), DATA_NAME);
+        return get(server);
+    }
+
+    public static FarmInstanceRegistry get(MinecraftServer server) {
+        return Objects.requireNonNull(server, "server")
+                .overworld().getDataStorage().computeIfAbsent(factory(), DATA_NAME);
     }
 
     /**
@@ -206,8 +221,14 @@ public class FarmInstanceRegistry extends SavedData {
      */
     @Nullable
     public FarmInstance deleteFarm(UUID playerUUID) {
-        FarmInstance farm = instances.remove(playerUUID);
+        FarmInstance farm = instances.get(playerUUID);
         if (farm == null) return null;
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        StardewFarmLifecycle.FarmContext context = new StardewFarmLifecycle.FarmContext(
+                server, StardewFarmSnapshots.from(farm));
+        StardewFarmLifecycleRegistry.beforeDelete(context);
+
+        instances.remove(playerUUID);
         slotToOwner.remove(farm.getSlotIndex());
         recycledSlots.add(farm.getSlotIndex());
         // 清除所有成员的 memberToOwner 映射
@@ -216,6 +237,7 @@ public class FarmInstanceRegistry extends SavedData {
         }
         setDirty();
         StardewCraft.LOGGER.info("[FARM_REGISTRY] Deleted farm for {} (slot={})", playerUUID, farm.getSlotIndex());
+        StardewFarmLifecycleRegistry.afterDelete(context);
         return farm;
     }
 
@@ -228,16 +250,19 @@ public class FarmInstanceRegistry extends SavedData {
         if (farm == null) return false;
         if (instances.containsKey(toUUID)) return false;
 
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        StardewFarmSnapshot sourceSnapshot = StardewFarmSnapshots.from(farm);
+        StardewFarmLifecycleRegistry.beforeTransfer(new StardewFarmLifecycle.TransferRequest(
+                server, sourceSnapshot, toUUID, newOwnerName));
+
         instances.remove(fromUUID);
         // 创建新实例保持相同槽位和坐标
         FarmInstance transferred = new FarmInstance(
             toUUID, newOwnerName, farm.getFarmName(),
-            farm.getSlotIndex(), farm.getOrigin(), farm.getFarmType()
+            farm.getSlotIndex(), farm.getOrigin(), farm.getFarmLayoutId(),
+            farm.getFarmLayout()
         );
-        if (farm.isInitialized()) transferred.markInitialized();
-        transferred.setCreatedTimestamp(farm.getCreatedTimestamp());
-        transferred.setLastOnlineDay(farm.getLastOnlineDay());
-        transferred.setLastOnlineSeason(farm.getLastOnlineSeason());
+        transferred.copyTransferStateFrom(farm);
 
         // 迁移成员列表（排除新 owner 如果之前是成员）
         int maxFarmers = maxFarmersPerFarm();
@@ -260,6 +285,8 @@ public class FarmInstanceRegistry extends SavedData {
         setDirty();
         StardewCraft.LOGGER.info("[FARM_REGISTRY] Transferred farm slot={} from {} to {}",
                 farm.getSlotIndex(), fromUUID, toUUID);
+        StardewFarmLifecycleRegistry.afterTransfer(new StardewFarmLifecycle.TransferResult(
+                server, sourceSnapshot, StardewFarmSnapshots.from(transferred)));
         return true;
     }
 
@@ -290,21 +317,98 @@ public class FarmInstanceRegistry extends SavedData {
      * 为玩家创建新农场实例。如果已有农场则返回现有的。
      */
     public FarmInstance createFarm(UUID playerUUID, String playerName, String farmName, FarmType farmType) {
+        return createFarm(
+                playerUUID,
+                playerName,
+                farmName,
+                com.stardew.craft.api.v1.internal.farm
+                        .StardewFarmLayoutRegistry.builtinId(farmType));
+    }
+
+    public FarmInstance createFarm(
+            UUID playerUUID,
+            String playerName,
+            String farmName,
+            ResourceLocation farmLayoutId
+    ) {
+        return createFarm(
+                playerUUID, playerName, farmName, farmLayoutId, Map.of());
+    }
+
+    public FarmInstance createFarm(
+            UUID playerUUID,
+            String playerName,
+            String farmName,
+            ResourceLocation farmLayoutId,
+            Map<ResourceLocation, String> requestedConfiguration
+    ) {
         StardewTimeManager timeManager = StardewTimeManager.get();
-        return createFarmAtDate(playerUUID, playerName, farmName, farmType,
+        return createFarmAtDate(
+                playerUUID, playerName, farmName, farmLayoutId,
+                requestedConfiguration,
                 timeManager.getAbsoluteDay(), timeManager.getCurrentSeason());
     }
 
     FarmInstance createFarmAtDate(UUID playerUUID, String playerName, String farmName, FarmType farmType,
                                   int absoluteDay, int season) {
+        return createFarmAtDate(
+                playerUUID,
+                playerName,
+                farmName,
+                com.stardew.craft.api.v1.internal.farm
+                        .StardewFarmLayoutRegistry.builtinId(farmType),
+                absoluteDay,
+                season);
+    }
+
+    FarmInstance createFarmAtDate(
+            UUID playerUUID,
+            String playerName,
+            String farmName,
+            ResourceLocation farmLayoutId,
+            int absoluteDay,
+            int season
+    ) {
+        return createFarmAtDate(
+                playerUUID, playerName, farmName, farmLayoutId, Map.of(),
+                absoluteDay, season);
+    }
+
+    FarmInstance createFarmAtDate(
+            UUID playerUUID,
+            String playerName,
+            String farmName,
+            ResourceLocation farmLayoutId,
+            Map<ResourceLocation, String> requestedConfiguration,
+            int absoluteDay,
+            int season
+    ) {
         if (instances.containsKey(playerUUID)) {
             StardewCraft.LOGGER.warn("[FARM_REGISTRY] Player {} already has a farm, returning existing", playerUUID);
             return instances.get(playerUUID);
         }
 
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        StardewFarmLayoutRegistration registration =
+                StardewFarmLayouts.findRegistration(farmLayoutId)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Unknown farm layout: " + farmLayoutId));
+        StardewFarmLayout layout = registration.layout();
+        StardewFarmLayoutConfiguration configuration =
+                StardewFarmLayoutConfiguration.validate(
+                        registration.configurationFields(),
+                        Objects.requireNonNull(
+                                requestedConfiguration,
+                                "requestedConfiguration"));
+        StardewFarmLifecycleRegistry.beforeCreate(new StardewFarmLifecycle.CreateRequest(
+                server, playerUUID, playerName, farmName, farmLayoutId));
+
         int slotIndex = recycledSlots.isEmpty() ? nextSlotIndex++ : recycledSlots.poll();
-        BlockPos origin = FarmInstanceAllocator.getFarmOrigin(slotIndex, farmType);
-        FarmInstance instance = new FarmInstance(playerUUID, playerName, farmName, slotIndex, origin, farmType);
+        BlockPos origin = FarmInstanceAllocator.getFarmOrigin(slotIndex, layout);
+        FarmInstance instance = new FarmInstance(
+                playerUUID, playerName, farmName, slotIndex, origin,
+                farmLayoutId, layout, registration.version(), configuration,
+                registration.attachments());
         instance.setLastOnlineDay(absoluteDay);
         instance.setLastOnlineSeason(season);
 
@@ -313,7 +417,9 @@ public class FarmInstanceRegistry extends SavedData {
         setDirty();
 
         StardewCraft.LOGGER.info("[FARM_REGISTRY] Created farm for {} (slot={}, origin={}, type={})",
-                playerName, slotIndex, origin, farmType.getId());
+                playerName, slotIndex, origin, farmLayoutId);
+        StardewFarmLifecycleRegistry.afterCreate(new StardewFarmLifecycle.FarmContext(
+                server, StardewFarmSnapshots.from(instance)));
         return instance;
     }
 

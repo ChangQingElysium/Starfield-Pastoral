@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.internal.npc.StardewNpcFriendshipRewardRegistry;
 import com.stardew.craft.mail.MailService;
 import com.stardew.craft.player.PlayerDataEventHandler;
 import com.stardew.craft.player.PlayerDataManager;
@@ -39,6 +40,7 @@ public final class NpcFriendshipRewardService {
             }
             changed |= applyReward(player, rule);
         }
+        changed |= StardewNpcFriendshipRewardRegistry.apply(player, normalizedNpc, points);
         return changed;
     }
 

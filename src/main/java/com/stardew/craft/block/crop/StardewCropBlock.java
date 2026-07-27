@@ -748,6 +748,26 @@ public abstract class StardewCropBlock extends Block {
         return true;
     }
 
+    /** Server-authoritative hand-harvest entry used by the public crop runtime bridge. */
+    @SuppressWarnings("null")
+    public boolean tryHarvestByHand(
+            ServerLevel level,
+            BlockPos pos,
+            BlockState state,
+            Player player
+    ) {
+        BlockPos harvestPos = resolveMultiBlockRootPos(level, pos, state);
+        BlockState harvestState = level.getBlockState(harvestPos);
+        if (harvestState.getBlock() != this
+                || getHarvestMethod() != HarvestMethod.GRAB
+                || harvestState.getValue(AGE) < MAX_AGE
+                || !isMature(level, harvestPos, harvestState)) {
+            return false;
+        }
+        harvest(level, harvestPos, harvestState, player);
+        return true;
+    }
+
     /**
      * Harvest entry used by a Junimo Hut. Unlike player harvesting, every result is
      * inserted into the hut and no farming experience is awarded.

@@ -19,6 +19,11 @@ public final class ShopSystem {
     public static void onAddReloadListeners(AddReloadListenerEvent event) {
         event.addListener(new ShopDataLoader.ShopReloadListener());
         event.addListener(new ShopDataLoader.BindingReloadListener());
+        event.addListener(new ShopDataLoader.CostRuleReloadListener());
+        event.addListener(new ShopDataLoader.StockRuleReloadListener());
+        event.addListener(new ShopDataLoader.ProductRuleReloadListener());
+        event.addListener(new com.stardew.craft.building
+                .BuildingBlueprintRegistry.ReloadListener());
         event.addListener(new MonsterSlayerGoalRegistry.ReloadListener());
         event.addListener(new com.stardew.craft.museum.MuseumRewardRegistry.ReloadListener());
         event.addListener(new GeodeDropData.ReloadListener());

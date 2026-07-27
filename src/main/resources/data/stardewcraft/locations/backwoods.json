@@ -1,0 +1,8 @@
+{
+  "dimension": "stardewcraft:stardew_valley",
+  "min": [-151, 63, -237],
+  "max": [-124, 91, -65],
+  "aliases": ["Backwoods"],
+  "priority": -100,
+  "indoor": false
+}

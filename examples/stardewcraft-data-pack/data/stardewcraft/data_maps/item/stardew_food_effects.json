@@ -1,0 +1,25 @@
+{
+  "replace": false,
+  "values": {
+    "minecraft:pumpkin_pie": {
+      "effects": {
+        "example_stardew_addon:harvest_focus": {
+          "effect": "stardewcraft:farmer_blessing",
+          "duration_ticks": 1200,
+          "amplifier": 0,
+          "show_particles": false
+        }
+      }
+    },
+    "minecraft:golden_carrot": {
+      "effects": {
+        "example_stardew_addon:golden_luck": {
+          "effect": "stardewcraft:spirit_blessing",
+          "duration_ticks": 1200,
+          "amplifier": 0,
+          "show_particles": false
+        }
+      }
+    }
+  }
+}

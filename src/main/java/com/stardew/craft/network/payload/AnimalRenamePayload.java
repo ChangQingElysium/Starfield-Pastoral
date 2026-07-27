@@ -2,6 +2,7 @@ package com.stardew.craft.network.payload;
 
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.animal.data.AnimalWorldData;
+import com.stardew.craft.animal.model.AnimalNameRules;
 import com.stardew.craft.animal.service.AnimalEntitySyncService;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -41,7 +42,12 @@ public record AnimalRenamePayload(long animalId, String newName) implements Cust
                 return;
             }
 
-            String normalized = payload.newName == null ? "" : payload.newName.trim();
+            String normalized =
+                    AnimalNameRules.normalize(payload.newName);
+            if (!AnimalNameRules.isValidExplicitName(
+                    normalized)) {
+                return;
+            }
             AnimalWorldData data = AnimalWorldData.get(serverPlayer.serverLevel());
 
             var animalOpt = data.getAnimal(payload.animalId);

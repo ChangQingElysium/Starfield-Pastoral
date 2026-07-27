@@ -1,0 +1,15 @@
+{
+  "builder": "stardewcraft:wizard",
+  "order": 30,
+  "display_name": "item.stardewcraft.water_obelisk",
+  "description": "item.stardewcraft.water_obelisk.desc",
+  "money": 500000,
+  "materials": [
+    { "item": "stardewcraft:iridium_bar", "count": 5 },
+    { "item": "stardewcraft:clam", "count": 10 },
+    { "item": "stardewcraft:coral", "count": 10 }
+  ],
+  "result_item": "stardewcraft:water_obelisk",
+  "preview_canvas_size": 128,
+  "magical_construction": true
+}

@@ -1,6 +1,8 @@
 package com.stardew.craft.integration.jei;
 
+import com.stardew.craft.item.ModItems;
 import com.stardew.craft.item.artisan.ArtisanRecipeDataManager;
+import com.stardew.craft.item.artisan.FlavoredArtisanDrinkItem;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,9 +17,9 @@ class ArtisanJeiRecipeFactoryTest {
             {
               "stardewcraft:keg": [{
                 "inputId": "stardewcraft:grape", "inputTag": null, "inputMode": "DEFAULT",
-                "outputId": "stardewcraft:grape_wine", "outputCount": 1, "minutes": 8820,
+                "outputId": "stardewcraft:wine", "outputCount": 1, "minutes": 8820,
                 "consumeCount": 1, "keepInputQuality": false, "outputQuality": -1,
-                "preserveType": null, "seedMakerRule": null, "outputMode": "FIXED"
+                "preserveType": "WINE", "seedMakerRule": null, "outputMode": "FIXED"
               }],
               "stardewcraft:fish_smoker": [{
                 "inputId": null, "inputTag": null, "inputMode": "FISH_TYPE",
@@ -54,6 +56,10 @@ class ArtisanJeiRecipeFactoryTest {
         assertEquals(1, recipes.size());
         assertFalse(recipes.getFirst().inputs().getFirst().stacks().isEmpty());
         assertFalse(recipes.getFirst().outputs().getFirst().stacks().isEmpty());
+        var output = recipes.getFirst().outputs().getFirst().stacks().getFirst();
+        assertTrue(output.is(ModItems.WINE.get()));
+        assertEquals("stardewcraft:grape",
+                FlavoredArtisanDrinkItem.getSourceItemId(output).toString());
     }
 
     @Test

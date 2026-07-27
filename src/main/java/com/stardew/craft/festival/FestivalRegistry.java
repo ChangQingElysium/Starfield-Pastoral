@@ -38,20 +38,17 @@ public final class FestivalRegistry {
             ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "has_item"),
             ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "money"),
             ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "flag"),
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "skill")
+            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "skill"),
+            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "location")
     );
     private static final AtomicDefinitionStore<StardewFestivalDefinition> STORE = new AtomicDefinitionStore<>();
-    private static volatile Map<String, FestivalDefinition> aliases = Map.of();
-    private static volatile List<FestivalDefinition> ordered = List.of();
-    private static volatile List<FestivalDefinition> activeOrdered = List.of();
-    private static volatile List<FestivalDefinition> passiveOrdered = List.of();
-    private static volatile String cachedJson = "{}";
+    private static volatile Catalog catalog = Catalog.empty();
 
     private FestivalRegistry() {
     }
 
     public static DefinitionSnapshot<StardewFestivalDefinition> snapshot() {
-        return STORE.snapshot();
+        return catalog.definitions();
     }
 
     public static Optional<FestivalDefinition> get(ResourceLocation id) {
@@ -60,31 +57,32 @@ public final class FestivalRegistry {
 
     public static Optional<FestivalDefinition> get(String id) {
         if (id == null || id.isBlank()) return Optional.empty();
-        return Optional.ofNullable(aliases.get(normalizeId(id)));
+        return Optional.ofNullable(
+                catalog.aliases().get(normalizeId(id)));
     }
 
     public static Optional<FestivalDefinition> getByOverlayId(String overlayId) {
         if (overlayId == null || overlayId.isBlank()) return Optional.empty();
         String normalized = overlayId.toLowerCase(Locale.ROOT);
-        return ordered.stream()
+        return catalog.ordered().stream()
                 .filter(definition -> definition.mapOverlayId().toLowerCase(Locale.ROOT).equals(normalized))
                 .findFirst();
     }
 
     public static Collection<FestivalDefinition> all() {
-        return ordered;
+        return catalog.ordered();
     }
 
     public static List<FestivalDefinition> activeFestivals() {
-        return activeOrdered;
+        return catalog.activeOrdered();
     }
 
     public static List<FestivalDefinition> passiveFestivals() {
-        return passiveOrdered;
+        return catalog.passiveOrdered();
     }
 
     public static String getCachedJson() {
-        return cachedJson;
+        return catalog.cachedJson();
     }
 
     public static void applyFromJson(String json) {
@@ -161,11 +159,30 @@ public final class FestivalRegistry {
         return PLAYER_CONTEXT_CONDITIONS.contains(conditionType);
     }
 
-    private static void applyCandidate(Map<ResourceLocation, StardewFestivalDefinition> definitions,
-                                       Map<ResourceLocation, String> sources,
-                                       List<DefinitionDiagnostic> diagnostics,
-                                       boolean updateCache) {
-        var result = STORE.applyLocal(definitions, sources, diagnostics);
+    private static synchronized void applyCandidate(
+            Map<ResourceLocation, StardewFestivalDefinition> definitions,
+            Map<ResourceLocation, String> sources,
+            List<DefinitionDiagnostic> diagnostics,
+            boolean updateCache
+    ) {
+        List<DefinitionDiagnostic> preparedDiagnostics =
+                new ArrayList<>(diagnostics);
+        PreparedCatalog prepared = null;
+        if (preparedDiagnostics.stream().noneMatch(diagnostic ->
+                diagnostic.severity()
+                        == DefinitionDiagnostic.Severity.ERROR)) {
+            try {
+                prepared = prepareCatalog(definitions);
+            } catch (RuntimeException exception) {
+                preparedDiagnostics.add(DefinitionDiagnostic.error(
+                        null,
+                        null,
+                        "Failed to prepare festival runtime catalog: "
+                                + exception.getMessage()));
+            }
+        }
+        var result = STORE.applyLocal(
+                definitions, sources, preparedDiagnostics);
         for (DefinitionDiagnostic diagnostic : result.diagnostics()) {
             if (diagnostic.severity() == DefinitionDiagnostic.Severity.ERROR) {
                 StardewCraft.LOGGER.error("[Festival] {}", diagnostic.message());
@@ -174,11 +191,43 @@ public final class FestivalRegistry {
             }
         }
         if (!result.accepted()) {
-            StardewCraft.LOGGER.error("[Festival] Rejected reload; keeping {} festivals", ordered.size());
+            StardewCraft.LOGGER.error(
+                    "[Festival] Rejected reload; keeping {} festivals",
+                    catalog.ordered().size());
             return;
         }
+        if (prepared == null) {
+            throw new IllegalStateException(
+                    "Accepted festival definitions have no runtime catalog");
+        }
 
-        List<FestivalDefinition> next = result.snapshot().definitions().entrySet().stream()
+        String nextCachedJson = catalog.cachedJson();
+        if (updateCache) {
+            var root = new com.google.gson.JsonObject();
+            sources.entrySet().stream()
+                    .sorted(Map.Entry.comparingByKey())
+                    .forEach(entry -> root.add(
+                            entry.getKey().toString(),
+                            JsonParser.parseString(entry.getValue())));
+            nextCachedJson = GSON.toJson(root);
+        }
+        catalog = new Catalog(
+                result.snapshot(),
+                prepared.aliases(),
+                prepared.ordered(),
+                prepared.activeOrdered(),
+                prepared.passiveOrdered(),
+                nextCachedJson);
+        StardewCraft.LOGGER.info(
+                "[Festival] Applied snapshot v{} ({} festivals)",
+                result.snapshot().version(),
+                catalog.ordered().size());
+    }
+
+    private static PreparedCatalog prepareCatalog(
+            Map<ResourceLocation, StardewFestivalDefinition> definitions
+    ) {
+        List<FestivalDefinition> next = definitions.entrySet().stream()
                 .map(entry -> toRuntime(entry.getKey(), entry.getValue()))
                 .sorted(Comparator.comparingInt(FestivalDefinition::season)
                         .thenComparingInt(FestivalDefinition::startDay)
@@ -192,25 +241,24 @@ public final class FestivalRegistry {
                 putAlias(nextAliases, definition.resourceId().getPath(), definition);
             }
         }
-        ordered = List.copyOf(next);
-        activeOrdered = ordered.stream()
+        List<FestivalDefinition> ordered = List.copyOf(next);
+        List<FestivalDefinition> activeOrdered = ordered.stream()
                 .filter(definition -> definition.type() == FestivalType.ACTIVE)
                 .toList();
-        passiveOrdered = ordered.stream()
+        List<FestivalDefinition> passiveOrdered = ordered.stream()
                 .filter(definition -> definition.type() == FestivalType.PASSIVE)
                 .toList();
-        aliases = Map.copyOf(nextAliases);
-        if (updateCache) {
-            var root = new com.google.gson.JsonObject();
-            sources.entrySet().stream().sorted(Map.Entry.comparingByKey())
-                    .forEach(entry -> root.add(entry.getKey().toString(), JsonParser.parseString(entry.getValue())));
-            cachedJson = GSON.toJson(root);
-        }
-        StardewCraft.LOGGER.info("[Festival] Applied {} festivals", ordered.size());
+        return new PreparedCatalog(
+                Map.copyOf(nextAliases),
+                ordered,
+                activeOrdered,
+                passiveOrdered);
     }
 
     private static FestivalDefinition toRuntime(ResourceLocation resourceId, StardewFestivalDefinition source) {
         String runtimeId = source.legacyId().isBlank() ? resourceId.toString() : source.legacyId();
+        String mechanicId = normalizeOwnedReference(
+                resourceId, source.world().mechanicId());
         return new FestivalDefinition(
                 resourceId, runtimeId,
                 source.type() == StardewFestivalDefinition.FestivalKind.ACTIVE
@@ -219,7 +267,20 @@ public final class FestivalRegistry {
                 source.season(), source.startDay(), source.endDay(), source.startTime(), source.endTime(),
                 source.showOnCalendar(), source.onlyShowStartMessageOnFirstDay(), source.presentation().startMessageToken(),
                 source.startMessageKey(), source.announcementMailId(), source.world().location(), source.world().mapOverlay(),
-                source.world().mapReplacements(), source.world().shops(), source.world().mechanicId());
+                source.world().mapReplacements(), source.world().shops(), mechanicId);
+    }
+
+    static String normalizeOwnedReference(
+            ResourceLocation owner,
+            String raw
+    ) {
+        if (raw == null || raw.isBlank() || raw.indexOf(':') >= 0
+                || owner.getNamespace().equals(StardewCraft.MODID)) {
+            return raw == null ? "" : raw.trim();
+        }
+        ResourceLocation normalized = ResourceLocation.tryBuild(
+                owner.getNamespace(), raw.trim());
+        return normalized == null ? raw.trim() : normalized.toString();
     }
 
     private static void putAlias(Map<String, FestivalDefinition> target, String alias,
@@ -234,5 +295,47 @@ public final class FestivalRegistry {
 
     private static String normalizeId(String id) {
         return id.trim().toLowerCase(Locale.ROOT);
+    }
+
+    static Catalog catalog() {
+        return catalog;
+    }
+
+    record Catalog(
+            DefinitionSnapshot<StardewFestivalDefinition> definitions,
+            Map<String, FestivalDefinition> aliases,
+            List<FestivalDefinition> ordered,
+            List<FestivalDefinition> activeOrdered,
+            List<FestivalDefinition> passiveOrdered,
+            String cachedJson
+    ) {
+        Catalog {
+            definitions = java.util.Objects.requireNonNull(
+                    definitions, "definitions");
+            aliases = Map.copyOf(aliases);
+            ordered = List.copyOf(ordered);
+            activeOrdered = List.copyOf(activeOrdered);
+            passiveOrdered = List.copyOf(passiveOrdered);
+            cachedJson = java.util.Objects.requireNonNull(
+                    cachedJson, "cachedJson");
+        }
+
+        private static Catalog empty() {
+            return new Catalog(
+                    DefinitionSnapshot.empty(),
+                    Map.of(),
+                    List.of(),
+                    List.of(),
+                    List.of(),
+                    "{}");
+        }
+    }
+
+    private record PreparedCatalog(
+            Map<String, FestivalDefinition> aliases,
+            List<FestivalDefinition> ordered,
+            List<FestivalDefinition> activeOrdered,
+            List<FestivalDefinition> passiveOrdered
+    ) {
     }
 }

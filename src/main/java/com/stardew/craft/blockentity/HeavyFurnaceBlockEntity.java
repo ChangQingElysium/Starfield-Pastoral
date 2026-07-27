@@ -85,12 +85,21 @@ public class HeavyFurnaceBlockEntity extends FurnaceBlockEntity {
             return AutomationStackHelper.remainderAfterInsert(stack, recipe.inputCount);
         }
 
-        coalBuffer = Math.max(0, coalBuffer - COAL_PER_BATCH);
         int outputRange = recipe.maxOut - recipe.minOut + 1;
         int outputCount = recipe.minOut + (level != null ? level.getRandom().nextInt(outputRange) : 0);
         ItemStack output = new ItemStack(recipe.output.get(), outputCount);
+        var plan = prepareProduction(
+                stack, output, recipe.minutes,
+                null, true);
+        if (plan.isEmpty()) {
+            return stack;
+        }
+        coalBuffer = Math.max(
+                0, coalBuffer - COAL_PER_BATCH);
         ItemStack inputCopy = stack.copy();
-        startWork(inputCopy, output, recipe.minutes, recipe.inputCount, null);
+        startWork(
+                inputCopy, plan.get(),
+                recipe.inputCount, null);
         return AutomationStackHelper.remainderAfterInsert(stack, recipe.inputCount);
     }
 
@@ -112,15 +121,25 @@ public class HeavyFurnaceBlockEntity extends FurnaceBlockEntity {
         if (!player.isCreative() && countCoal(player) < COAL_PER_BATCH) {
             return InsertResult.missing(new MissingItemRequirement(ModItems.COAL.get(), COAL_PER_BATCH));
         }
+        int outputCount = recipe.minOut + level.getRandom()
+                .nextInt(recipe.maxOut - recipe.minOut + 1);
+        ItemStack output = new ItemStack(
+                recipe.output.get(), outputCount);
+        var plan = prepareProduction(
+                stack, output, recipe.minutes,
+                player, false);
+        if (plan.isEmpty()) {
+            return InsertResult.fail();
+        }
         if (!player.isCreative()) {
             for (int i = 0; i < COAL_PER_BATCH; i++) {
                 if (!consumeCoal(player)) return InsertResult.fail();
             }
         }
 
-        int outputCount = recipe.minOut + level.getRandom().nextInt(recipe.maxOut - recipe.minOut + 1);
-        ItemStack output = new ItemStack(recipe.output.get(), outputCount);
-        startWork(stack, output, recipe.minutes, recipe.inputCount, player);
+        startWork(
+                stack, plan.get(),
+                recipe.inputCount, player);
         return InsertResult.success();
     }
 

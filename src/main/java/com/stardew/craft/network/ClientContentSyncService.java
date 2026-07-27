@@ -1,6 +1,7 @@
 package com.stardew.craft.network;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.internal.content.StardewContentRegistry;
 import com.stardew.craft.server.performance.PerformanceCounter;
 import com.stardew.craft.server.performance.PerformanceTiming;
 import com.stardew.craft.server.performance.ServerPerformanceRecorder;
@@ -45,6 +46,9 @@ public final class ClientContentSyncService {
                 : PerformanceCounter.CONTENT_CACHE_REBUILDS, 1L);
 
         SharedSnapshot shared = cached.value();
+        if (event.getPlayer() == null) {
+            StardewContentRegistry.validateAndLog();
+        }
         FestivalAvailabilitySyncPayload festivalSnapshot = FestivalAvailabilitySyncPayload.current();
         List<ServerPlayer> recipients = event.getRelevantPlayers().toList();
         ServerPerformanceRecorder.increment(PerformanceCounter.CONTENT_SYNC_RECIPIENTS, recipients.size());

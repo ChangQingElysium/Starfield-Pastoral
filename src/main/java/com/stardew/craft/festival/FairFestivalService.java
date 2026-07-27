@@ -13,6 +13,10 @@ import com.stardew.craft.festival.fair.FairFishingGameService;
 import com.stardew.craft.lostandfound.LostAndFoundService;
 import com.stardew.craft.festival.fair.FairSlingshotGameService;
 import com.stardew.craft.api.v1.item.StardewItemDataApi;
+import com.stardew.craft.api.v1.economy.StardewCost;
+import com.stardew.craft.api.v1.economy.StardewCosts;
+import com.stardew.craft.api.v1.economy.StardewCurrencies;
+import com.stardew.craft.api.v1.economy.StardewCurrencyCost;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.item.quality.QualityHelper;
 import com.stardew.craft.menu.FairGrangeDisplayMenu;
@@ -74,6 +78,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -97,13 +102,13 @@ public final class FairFestivalService {
     public static final String STAR_TOKEN_PURCHASE_TARGET_ID = "fair_star_token_purchase";
     public static final String STAR_TOKEN_PURCHASE_MARKER_TAG = "sdv_festival_marker:fair_star_token_purchase";
     public static final String FORTUNE_TELLER_TARGET_ID = "fair_fortune_teller";
-    public static final String FORTUNE_TELLER_MARKER_TAG = "sdv_festival_marker:fair_fortune_teller";
     public static final String QUESTION_CONTEXT_STAR_TOKEN_PURCHASE = "fair_star_token_purchase";
     public static final String QUESTION_CONTEXT_STAR_TOKEN_PURCHASE_AMOUNT = "fair_star_token_purchase_amount";
     public static final String QUESTION_CONTEXT_FORTUNE_TELLER = "fair_fortune_teller";
     public static final String QUESTION_CONTEXT_GRANGE_JUDGE = "fair_grange_judge";
     public static final String FAIR_ANIMAL_MARKER_TAG = "sdv_festival_marker:fair_animal";
     public static final String FAIR_ANIMAL_PERSISTENT_FLAG = "stardewcraft_fair_temporary_animal";
+    private static final String FAIR_ANIMAL_SLOT_TAG_PREFIX = "sdv_festival_marker:fair_animal_slot_";
     public static final String FAIR_STARDROP_FLAG = "CF_Fair";
     private static final String OVERLAY_ID = "Town-Fair";
     private static final String MOVEMENT_OWNER = "stardew_valley_fair";
@@ -133,7 +138,7 @@ public final class FairFestivalService {
     private static final BlockPos FISHING_GAME_POS = new BlockPos(-4, 65, 16);
     private static final BlockPos STAR_TOKEN_SHOP_POS = new BlockPos(-10, 65, -11);
     private static final BlockPos STAR_TOKEN_PURCHASE_POS = new BlockPos(12, 65, 9);
-    private static final BlockPos FORTUNE_TELLER_POS = new BlockPos(52, 65, 39);
+    private static final BlockPos LEGACY_FORTUNE_TELLER_POS = new BlockPos(52, 65, 39);
     private static final BlockPos GRANGE_DISPLAY_MIN = new BlockPos(11, 64, -6);
     private static final BlockPos GRANGE_DISPLAY_MAX = new BlockPos(13, 64, -4);
     private static final int STAR_TOKEN_PURCHASE_PRICE = 50;
@@ -194,6 +199,9 @@ public final class FairFestivalService {
     }
 
     private record FairAnimalSpawn(Supplier<? extends EntityType<? extends Animal>> type, String managedType, BlockPos pos, float yaw) {
+        private String slotTag() {
+            return FAIR_ANIMAL_SLOT_TAG_PREFIX + pos.getX() + "_" + pos.getY() + "_" + pos.getZ();
+        }
     }
 
     private static final List<FairAnimalSpawn> FAIR_ANIMALS = List.of(
@@ -570,12 +578,20 @@ public final class FairFestivalService {
             return;
         }
         int amount = Math.max(0, Math.min(MAX_STAR_TOKEN_PURCHASE, requestedAmount));
-        int cost = amount * STAR_TOKEN_PURCHASE_PRICE;
-        if (amount > 0 && cost <= PlayerStardewDataAPI.getMoney(player) && PlayerStardewDataAPI.removeMoney(player, cost)) {
-            PlayerStardewDataAPI.addFairStarTokens(player, amount);
+        long cost = (long) amount * STAR_TOKEN_PURCHASE_PRICE;
+        var payment = amount > 0
+            ? StardewCosts.pay(player, StardewCost.of(
+                new StardewCurrencyCost(StardewCurrencies.MONEY, cost)))
+            : null;
+        if (payment != null && payment.success()
+                && StardewCurrencies.deposit(
+                    StardewCurrencies.FAIR_STAR_TOKENS, player, amount)) {
             player.playNotifySound(ModSounds.PURCHASE.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
             sendStarTokenPurchaseResult(player, true);
             return;
+        }
+        if (payment != null && payment.success()) {
+            payment.receipt().orElseThrow().refund();
         }
         sendStarTokenPurchaseResult(player, false);
     }
@@ -676,8 +692,6 @@ public final class FairFestivalService {
         String shopTarget = "none";
         String tokenPurchaseBlock = "unloaded";
         String tokenPurchaseTarget = "none";
-        String fortuneBlock = "unloaded";
-        String fortuneTarget = "none";
         int fairAnimals = 0;
         if (level != null) {
             slingshotBlock = String.valueOf(level.getBlockState(SLINGSHOT_GAME_POS).getBlock());
@@ -695,10 +709,6 @@ public final class FairFestivalService {
             tokenPurchaseBlock = String.valueOf(level.getBlockState(STAR_TOKEN_PURCHASE_POS).getBlock());
             if (level.getBlockEntity(STAR_TOKEN_PURCHASE_POS) instanceof PortalTriggerBlockEntity blockEntity) {
                 tokenPurchaseTarget = blockEntity.getTargetId();
-            }
-            fortuneBlock = String.valueOf(level.getBlockState(FORTUNE_TELLER_POS).getBlock());
-            if (level.getBlockEntity(FORTUNE_TELLER_POS) instanceof PortalTriggerBlockEntity blockEntity) {
-                fortuneTarget = blockEntity.getTargetId();
             }
             fairAnimals = level.getEntitiesOfClass(BaseCoopAnimalEntity.class, ENTRY_EXIT_BOUNDS,
                 entity -> entity.getTags().contains(FAIR_ANIMAL_MARKER_TAG)).size();
@@ -719,9 +729,6 @@ public final class FairFestivalService {
             + ", starTokenPurchasePos=" + STAR_TOKEN_PURCHASE_POS.toShortString()
             + ", starTokenPurchaseBlock=" + tokenPurchaseBlock
             + ", starTokenPurchaseTarget=" + tokenPurchaseTarget
-            + ", fortuneTellerPos=" + FORTUNE_TELLER_POS.toShortString()
-            + ", fortuneTellerBlock=" + fortuneBlock
-            + ", fortuneTellerTarget=" + fortuneTarget
             + ", grangeDisplayTables=(11,64,-6)..(13,64,-4)"
             + ", lewisNpcPos=1,64,-11,S"
             + ", npcStatus={" + debugNpcStatus(level) + "}"
@@ -2047,7 +2054,7 @@ public final class FairFestivalService {
         installFairInteractionBlock(level, FISHING_GAME_POS, FairFishingGameService.TARGET_ID, FairFishingGameService.MARKER_TAG);
         installFairInteractionBlock(level, STAR_TOKEN_SHOP_POS, STAR_TOKEN_SHOP_TARGET_ID, STAR_TOKEN_SHOP_MARKER_TAG);
         installFairInteractionBlock(level, STAR_TOKEN_PURCHASE_POS, STAR_TOKEN_PURCHASE_TARGET_ID, STAR_TOKEN_PURCHASE_MARKER_TAG);
-        installFairInteractionBlock(level, FORTUNE_TELLER_POS, FORTUNE_TELLER_TARGET_ID, FORTUNE_TELLER_MARKER_TAG);
+        removeLegacyFortuneTellerBlock(level);
     }
 
     private static void installFairInteractionBlock(ServerLevel level, BlockPos pos, String targetId, String markerTag) {
@@ -2086,10 +2093,14 @@ public final class FairFestivalService {
             && STAR_TOKEN_PURCHASE_TARGET_ID.equals(blockEntity.getTargetId())) {
             level.setBlock(STAR_TOKEN_PURCHASE_POS, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
         }
-        if (level.getBlockState(FORTUNE_TELLER_POS).is(ModBlocks.PORTAL_TRIGGER.get())
-            && level.getBlockEntity(FORTUNE_TELLER_POS) instanceof PortalTriggerBlockEntity blockEntity
+        removeLegacyFortuneTellerBlock(level);
+    }
+
+    private static void removeLegacyFortuneTellerBlock(ServerLevel level) {
+        if (level.getBlockState(LEGACY_FORTUNE_TELLER_POS).is(ModBlocks.PORTAL_TRIGGER.get())
+            && level.getBlockEntity(LEGACY_FORTUNE_TELLER_POS) instanceof PortalTriggerBlockEntity blockEntity
             && FORTUNE_TELLER_TARGET_ID.equals(blockEntity.getTargetId())) {
-            level.setBlock(FORTUNE_TELLER_POS, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
+            level.setBlock(LEGACY_FORTUNE_TELLER_POS, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
         }
     }
 
@@ -2175,40 +2186,81 @@ public final class FairFestivalService {
         if (level == null || level.dimension() != ModDimensions.STARDEW_VALLEY) {
             return;
         }
+        List<BaseCoopAnimalEntity> existing = new ArrayList<>(level.getEntitiesOfClass(
+            BaseCoopAnimalEntity.class,
+            ENTRY_EXIT_BOUNDS.inflate(8.0D),
+            FairFestivalService::isFairAnimal
+        ));
+        Set<UUID> retained = new HashSet<>();
         for (FairAnimalSpawn spawn : FAIR_ANIMALS) {
-            if (hasFairAnimalAt(level, spawn)) {
-                continue;
+            BaseCoopAnimalEntity fairAnimal = findFairAnimalForSpawn(existing, retained, spawn);
+            boolean newlyCreated = false;
+            if (fairAnimal == null) {
+                Animal animal = spawn.type().get().create(level);
+                if (!(animal instanceof BaseCoopAnimalEntity createdAnimal)) {
+                    continue;
+                }
+                fairAnimal = createdAnimal;
+                newlyCreated = true;
             }
-            Animal animal = spawn.type().get().create(level);
-            if (!(animal instanceof BaseCoopAnimalEntity fairAnimal)) {
-                continue;
+            prepareFairAnimal(fairAnimal, spawn);
+            if (newlyCreated) {
+                existing.add(fairAnimal);
+                level.addFreshEntity(fairAnimal);
             }
-            BlockPos pos = spawn.pos();
-            fairAnimal.setManagedAnimalId(-1L);
-            fairAnimal.setManagedAnimalType(spawn.managedType());
-            fairAnimal.addTag(FAIR_ANIMAL_MARKER_TAG);
-            fairAnimal.getPersistentData().putBoolean(FAIR_ANIMAL_PERSISTENT_FLAG, true);
-            fairAnimal.moveTo(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D, spawn.yaw(), 0.0F);
-            fairAnimal.setDeltaMovement(Vec3.ZERO);
-            fairAnimal.setInvulnerable(true);
-            level.addFreshEntity(fairAnimal);
+            retained.add(fairAnimal.getUUID());
+        }
+        for (BaseCoopAnimalEntity fairAnimal : existing) {
+            if (!retained.contains(fairAnimal.getUUID())) {
+                fairAnimal.discard();
+            }
         }
     }
 
-    private static boolean hasFairAnimalAt(ServerLevel level, FairAnimalSpawn spawn) {
-        AABB box = new AABB(spawn.pos()).inflate(0.35D, 1.0D, 0.35D);
-        return !level.getEntitiesOfClass(BaseCoopAnimalEntity.class, box, entity ->
-            entity.getType() == spawn.type().get() && entity.getTags().contains(FAIR_ANIMAL_MARKER_TAG)
-        ).isEmpty();
+    private static BaseCoopAnimalEntity findFairAnimalForSpawn(
+        List<BaseCoopAnimalEntity> existing,
+        Set<UUID> retained,
+        FairAnimalSpawn spawn
+    ) {
+        for (BaseCoopAnimalEntity fairAnimal : existing) {
+            if (retained.contains(fairAnimal.getUUID()) || fairAnimal.getType() != spawn.type().get()) {
+                continue;
+            }
+            if (fairAnimal.getTags().contains(spawn.slotTag())) {
+                return fairAnimal;
+            }
+        }
+        return null;
+    }
+
+    private static void prepareFairAnimal(BaseCoopAnimalEntity fairAnimal, FairAnimalSpawn spawn) {
+        BlockPos pos = spawn.pos();
+        Vec3 target = Vec3.atBottomCenterOf(pos);
+        if (fairAnimal.distanceToSqr(target) > 1.0D) {
+            fairAnimal.moveTo(target.x, target.y, target.z, spawn.yaw(), 0.0F);
+        }
+        fairAnimal.setManagedAnimalId(-1L);
+        fairAnimal.setManagedAnimalType(spawn.managedType());
+        fairAnimal.addTag(FAIR_ANIMAL_MARKER_TAG);
+        fairAnimal.addTag(spawn.slotTag());
+        fairAnimal.getPersistentData().putBoolean(FAIR_ANIMAL_PERSISTENT_FLAG, true);
+        fairAnimal.getNavigation().stop();
+        fairAnimal.setDeltaMovement(Vec3.ZERO);
+        fairAnimal.setNoAi(true);
+        fairAnimal.setInvulnerable(true);
+    }
+
+    private static boolean isFairAnimal(BaseCoopAnimalEntity fairAnimal) {
+        return fairAnimal.getTags().contains(FAIR_ANIMAL_MARKER_TAG)
+            || fairAnimal.getPersistentData().getBoolean(FAIR_ANIMAL_PERSISTENT_FLAG);
     }
 
     private static void removeFairAnimals(ServerLevel level) {
         if (level == null || level.dimension() != ModDimensions.STARDEW_VALLEY) {
             return;
         }
-        level.getEntitiesOfClass(BaseCoopAnimalEntity.class, ENTRY_EXIT_BOUNDS.inflate(8.0D), entity ->
-            entity.getTags().contains(FAIR_ANIMAL_MARKER_TAG)
-                || entity.getPersistentData().getBoolean(FAIR_ANIMAL_PERSISTENT_FLAG)
+        level.getEntitiesOfClass(BaseCoopAnimalEntity.class, ENTRY_EXIT_BOUNDS.inflate(8.0D),
+            FairFestivalService::isFairAnimal
         ).forEach(BaseCoopAnimalEntity::discard);
     }
 

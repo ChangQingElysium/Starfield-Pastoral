@@ -228,6 +228,20 @@ public final class FishingInfoCategory implements IRecipeCategory<FishingInfoCat
     }
 
     private static Component location(String raw) {
+        Component addonLabel =
+                com.stardew.craft.api.v1.internal.fishing
+                        .StardewFishingLocationDisplayRegistry.resolve(raw);
+        if (addonLabel != null) {
+            return addonLabel;
+        }
+        var logicalLocation =
+                com.stardew.craft.api.v1.world.StardewLocations
+                        .resolveId(raw)
+                        .flatMap(com.stardew.craft.api.v1.world
+                                .StardewLocations::get);
+        if (logicalLocation.isPresent()) {
+            return logicalLocation.get().displayName();
+        }
         String value = raw.toLowerCase(Locale.ROOT);
         if (value.contains("beach")) return Component.translatable("stardewcraft.jei.location.beach");
         if (value.contains("ocean")) return Component.translatable("stardewcraft.jei.location.ocean");

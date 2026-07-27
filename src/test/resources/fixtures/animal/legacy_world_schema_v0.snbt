@@ -1,0 +1,53 @@
+{
+  nextBuildingId:1L,
+  nextAnimalId:1L,
+  buildings:[
+    {
+      buildingId:"coop_9",
+      ownerPlayerUuid:"00000000-0000-0000-0000-000000000007",
+      buildingType:"coop_tier_1",
+      customName:"Legacy Coop",
+      dimensionId:"stardewcraft:farm",
+      managerPos:{X:0,Y:64,Z:0},
+      range:4,
+      minX:-4,
+      minY:64,
+      minZ:-4,
+      maxX:4,
+      maxY:68,
+      maxZ:4,
+      capacity:4,
+      hayCapacity:0,
+      active:1b,
+      doorOpen:1b,
+      interiorAirCells:[],
+      boundaryDoorCells:[],
+      memberAnimalIds:[{animalId:999L}]
+    }
+  ],
+  animals:[
+    {
+      animalId:42L,
+      animalTypeId:"white_chicken",
+      customName:"Legacy Hen",
+      buildingId:"coop_9",
+      createdDay:4,
+      createdSeason:0,
+      createdYear:1,
+      ageDays:3,
+      daysToMature:3,
+      wasPetToday:0b,
+      wasAutoPetToday:0b,
+      friendship:200,
+      daysOwned:3,
+      wasFedToday:1b,
+      fullness:255,
+      happiness:255,
+      moodMessage:0,
+      daysSinceLastProduce:0,
+      currentProduceId:"",
+      produceQuality:0,
+      hasEatenAnimalCracker:0b
+    }
+  ]
+}

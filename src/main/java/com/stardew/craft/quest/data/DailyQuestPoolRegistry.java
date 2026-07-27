@@ -8,6 +8,7 @@ import com.mojang.serialization.JsonOps;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.api.v1.content.AtomicDefinitionStore;
 import com.stardew.craft.api.v1.content.DefinitionDiagnostic;
+import com.stardew.craft.api.v1.content.DefinitionSnapshot;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
@@ -27,6 +28,10 @@ public final class DailyQuestPoolRegistry {
     private static final AtomicDefinitionStore<DailyQuestPoolDefinition> STORE = new AtomicDefinitionStore<>();
 
     private DailyQuestPoolRegistry() {
+    }
+
+    public static DefinitionSnapshot<DailyQuestPoolDefinition> snapshot() {
+        return STORE.snapshot();
     }
 
     public static DailyQuestPoolDefinition getDefault() {

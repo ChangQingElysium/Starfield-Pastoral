@@ -3,6 +3,8 @@ package com.stardew.craft.animal.data;
 import com.stardew.craft.animal.model.AnimalAcquisitionSource;
 import com.stardew.craft.animal.model.AnimalBuildingRecord;
 import com.stardew.craft.animal.model.AnimalBuildingType;
+import com.stardew.craft.animal.model.AnimalProduceLedgerEntry;
+import com.stardew.craft.animal.model.AnimalPendingBirth;
 import com.stardew.craft.animal.model.AnimalTypeCatalog;
 import com.stardew.craft.animal.model.FarmAnimalRecord;
 import com.stardew.craft.time.StardewTimeManager;
@@ -10,6 +12,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
 import javax.annotation.Nonnull;
@@ -30,9 +33,13 @@ public class AnimalWorldData extends SavedData {
 
     private final Map<String, AnimalBuildingRecord> buildings = new LinkedHashMap<>();
     private final Map<Long, FarmAnimalRecord> animals = new LinkedHashMap<>();
+    private final Map<Long, AnimalProduceLedgerEntry> produceLedger = new LinkedHashMap<>();
+    private final Map<Long, AnimalPendingBirth> pendingBirths = new LinkedHashMap<>();
     private final Map<String, Integer> hayByOwner = new LinkedHashMap<>();
     private long nextBuildingId = 1L;
     private long nextAnimalId = 1L;
+    private long nextProduceLedgerId = 1L;
+    private long nextPendingBirthId = 1L;
 
     public String createBuilding(ServerLevel level,
                                  AnimalBuildingType buildingType,
@@ -41,7 +48,8 @@ public class AnimalWorldData extends SavedData {
                                  int range,
                                  String customName,
                                  int capacity) {
-        String buildingId = buildingType.family() + "_" + nextBuildingId++;
+        String buildingId = buildingType.family()
+                + "_" + allocateBuildingId();
         int maxCapacity = capacity > 0 ? capacity : buildingType.defaultCapacity();
         int hayCapacity = buildingType.hayCapacity();
 
@@ -98,6 +106,14 @@ public class AnimalWorldData extends SavedData {
         AnimalBuildingRecord record = requireBuilding(buildingId);
         if (!record.memberAnimalIds().isEmpty()) {
             throw new IllegalStateException("Building has animals bound: " + record.memberAnimalIds().size());
+        }
+        if (produceLedger.values().stream()
+                .anyMatch(entry -> entry.buildingId().equals(buildingId))) {
+            throw new IllegalStateException("Building has uncollected animal produce");
+        }
+        if (pendingBirths.values().stream()
+                .anyMatch(event -> event.buildingId().equals(buildingId))) {
+            throw new IllegalStateException("Building has a pending animal birth");
         }
         buildings.remove(buildingId);
         clampHayToCapacity(record.ownerPlayerUuid());
@@ -230,8 +246,9 @@ public class AnimalWorldData extends SavedData {
         }
 
         StardewTimeManager time = StardewTimeManager.get();
-        AnimalTypeCatalog.AnimalTypeSpec typeSpec = AnimalTypeCatalog.resolve(animalTypeId);
-        long animalId = nextAnimalId++;
+        AnimalTypeCatalog.AnimalTypeSpec typeSpec =
+                AnimalTypeCatalog.require(animalTypeId);
+        long animalId = allocateAnimalId();
         FarmAnimalRecord animalRecord = new FarmAnimalRecord(
             animalId,
             animalTypeId,
@@ -244,6 +261,7 @@ public class AnimalWorldData extends SavedData {
             0,
             typeSpec.daysToMature()
         );
+        animalRecord.setOwnerPlayerUuid(building.ownerPlayerUuid());
 
         animals.put(animalId, animalRecord);
         building.addAnimal(animalId);
@@ -269,7 +287,7 @@ public class AnimalWorldData extends SavedData {
 
     public Optional<AnimalBuildingRecord> getBuilding(String buildingId) {
         AnimalBuildingRecord record = buildings.get(buildingId);
-        if (record == null || !record.active()) {
+        if (record == null || !record.isGameplayEnabled()) {
             return Optional.empty();
         }
         return Optional.of(record);
@@ -279,14 +297,120 @@ public class AnimalWorldData extends SavedData {
         return Optional.ofNullable(buildings.get(buildingId));
     }
 
+    public boolean markBuildingValidationFailed(
+            String buildingId,
+            String issue
+    ) {
+        AnimalBuildingRecord record = buildings.get(buildingId);
+        if (record == null) {
+            return false;
+        }
+        record.markStructureInvalid(issue);
+        setDirty();
+        return true;
+    }
+
+    public boolean beginBuildingConstruction(
+            String buildingId,
+            int completionAbsDay
+    ) {
+        AnimalBuildingRecord record = buildings.get(buildingId);
+        if (record == null || !record.active()) {
+            return false;
+        }
+        record.beginConstruction(completionAbsDay);
+        setDirty();
+        return true;
+    }
+
+    public List<AnimalBuildingRecord> completeDueConstructions(
+            int currentAbsDay
+    ) {
+        ArrayList<AnimalBuildingRecord> completed =
+                new ArrayList<>();
+        for (AnimalBuildingRecord record : buildings.values()) {
+            if (record.completeConstruction(currentAbsDay)) {
+                checkpointPausedAnimals(
+                        record, currentAbsDay);
+                completed.add(record);
+            }
+        }
+        if (!completed.isEmpty()) {
+            setDirty();
+        }
+        return List.copyOf(completed);
+    }
+
+    public boolean checkpointPausedAnimalsAt(
+            String buildingId,
+            int currentAbsDay
+    ) {
+        AnimalBuildingRecord record = buildings.get(buildingId);
+        if (record == null) {
+            return false;
+        }
+        checkpointPausedAnimals(record, currentAbsDay);
+        setDirty();
+        return true;
+    }
+
+    private void checkpointPausedAnimals(
+            AnimalBuildingRecord building,
+            int currentAbsDay
+    ) {
+        for (Long animalId : building.memberAnimalIds()) {
+            FarmAnimalRecord animal = animals.get(animalId);
+            if (animal != null
+                    && animal.lastProcessedAbsDay()
+                            < currentAbsDay) {
+                animal.setLastProcessedAbsDay(currentAbsDay);
+            }
+        }
+    }
+
+    public int invalidateStructuresAt(
+            String dimensionId,
+            BlockPos changedPos,
+            String issue
+    ) {
+        int invalidated = 0;
+        for (AnimalBuildingRecord record : buildings.values()) {
+            if (!record.dimensionId().equals(dimensionId)
+                    || !record.active()
+                    || (record.validationState()
+                            != AnimalBuildingRecord.ValidationState.VALID
+                        && record.validationState()
+                            != AnimalBuildingRecord.ValidationState.CONSTRUCTING)
+                    || !record.isStructuralCell(changedPos)) {
+                continue;
+            }
+            record.markStructureInvalid(issue);
+            invalidated++;
+        }
+        if (invalidated > 0) {
+            setDirty();
+        }
+        return invalidated;
+    }
+
     public Collection<AnimalBuildingRecord> getBuildings() {
         List<AnimalBuildingRecord> active = new ArrayList<>();
         for (AnimalBuildingRecord record : buildings.values()) {
-            if (record.active()) {
+            if (record.isGameplayEnabled()) {
                 active.add(record);
             }
         }
         return Collections.unmodifiableList(active);
+    }
+
+    /**
+     * Administrative snapshot used by validation, relocation and cache
+     * invalidation. Callers must still check {@link
+     * AnimalBuildingRecord#isGameplayEnabled()} before running gameplay.
+     */
+    public Collection<AnimalBuildingRecord> getBuildingsIncludingInactive() {
+        return Collections.unmodifiableList(
+                new ArrayList<>(buildings.values()));
     }
 
     public Optional<AnimalBuildingRecord> findBuildingByManager(String dimensionId,
@@ -404,14 +528,100 @@ public class AnimalWorldData extends SavedData {
             maxZ,
             existing.capacity(),
             existing.hayCapacity(),
-            true,
+            false,
             existing.doorOpen(),
-            Collections.emptySet(),
-            Collections.emptySet(),
+            existing.interiorAirCells(),
+            existing.boundaryDoorCells(),
             new java.util.LinkedHashSet<>(existing.memberAnimalIds())
         );
+        moved.setLastAutoFeedProcessedAbsDay(
+                existing.lastAutoFeedProcessedAbsDay());
+        moved.markStructureValidated(existing.structureRevision());
+        if (existing.hasPendingConstruction()) {
+            moved.beginConstruction(
+                    existing.constructionCompletesAbsDay());
+        }
+        moved.markRelocating();
 
         buildings.put(buildingId, moved);
+        setDirty();
+        return true;
+    }
+
+    public boolean rebindValidatedBuildingManager(
+            String buildingId,
+            UUID ownerPlayerId,
+            String dimensionId,
+            BlockPos newManagerPos,
+            String family,
+            long expectedStructureRevision,
+            int minX,
+            int minY,
+            int minZ,
+            int maxX,
+            int maxY,
+            int maxZ,
+            Set<Long> interiorAirCells,
+            Set<Long> boundaryDoorCells,
+            int capacity
+    ) {
+        AnimalBuildingRecord existing = buildings.get(buildingId);
+        if (existing == null
+                || !existing.isGameplayEnabled()
+                || existing.structureRevision()
+                        != expectedStructureRevision
+                || !dimensionId.equals(existing.dimensionId())
+                || !family.equalsIgnoreCase(
+                        existing.buildingType().family())
+                || !com.stardew.craft.farm.FarmInstanceRegistry
+                        .get().canOperateBuilding(
+                                ownerPlayerId,
+                                existing.ownerPlayerUuid())) {
+            return false;
+        }
+        int range = Math.max(
+                Math.max(
+                        Math.abs(newManagerPos.getX() - minX),
+                        Math.abs(maxX - newManagerPos.getX())),
+                Math.max(
+                        Math.max(
+                                Math.abs(newManagerPos.getY() - minY),
+                                Math.abs(maxY - newManagerPos.getY())),
+                        Math.max(
+                                Math.abs(newManagerPos.getZ() - minZ),
+                                Math.abs(maxZ - newManagerPos.getZ()))));
+        AnimalBuildingRecord rebound = new AnimalBuildingRecord(
+                existing.buildingId(),
+                existing.ownerPlayerUuid(),
+                existing.buildingType(),
+                existing.customName(),
+                existing.dimensionId(),
+                newManagerPos.immutable(),
+                range,
+                minX,
+                minY,
+                minZ,
+                maxX,
+                maxY,
+                maxZ,
+                Math.max(0, capacity),
+                existing.hayCapacity(),
+                true,
+                existing.doorOpen(),
+                interiorAirCells,
+                boundaryDoorCells,
+                new LinkedHashSet<>(existing.memberAnimalIds()));
+        rebound.setLastAutoFeedProcessedAbsDay(
+                existing.lastAutoFeedProcessedAbsDay());
+        rebound.markStructureValidated(
+                existing.structureRevision() + 1L);
+        for (Long animalId : rebound.memberAnimalIds()) {
+            FarmAnimalRecord animal = animals.get(animalId);
+            if (animal != null) {
+                animal.clearProjectionAnchor();
+            }
+        }
+        buildings.put(buildingId, rebound);
         setDirty();
         return true;
     }
@@ -436,10 +646,18 @@ public class AnimalWorldData extends SavedData {
             existing.hayCapacity(),
             false,
             existing.doorOpen(),
-            Collections.emptySet(),
-            Collections.emptySet(),
+            existing.interiorAirCells(),
+            existing.boundaryDoorCells(),
             new java.util.LinkedHashSet<>(existing.memberAnimalIds())
         );
+        inactive.setLastAutoFeedProcessedAbsDay(
+                existing.lastAutoFeedProcessedAbsDay());
+        inactive.markStructureValidated(existing.structureRevision());
+        if (existing.hasPendingConstruction()) {
+            inactive.beginConstruction(
+                    existing.constructionCompletesAbsDay());
+        }
+        inactive.markRelocating();
         buildings.put(buildingId, inactive);
         setDirty();
         return inactive.memberAnimalIds().size();
@@ -453,6 +671,10 @@ public class AnimalWorldData extends SavedData {
                 removedAnimals++;
             }
         }
+        produceLedger.values().removeIf(
+                entry -> entry.buildingId().equals(buildingId));
+        pendingBirths.values().removeIf(
+                event -> event.buildingId().equals(buildingId));
         buildings.remove(buildingId);
         clampHayToCapacity(existing.ownerPlayerUuid());
         setDirty();
@@ -538,6 +760,13 @@ public class AnimalWorldData extends SavedData {
                 boundaryDoorCells,
                 new java.util.LinkedHashSet<>(existing.memberAnimalIds())
             );
+            updated.setLastAutoFeedProcessedAbsDay(
+                    existing.lastAutoFeedProcessedAbsDay());
+            updated.markStructureValidated(existing.structureRevision() + 1L);
+            if (existing.hasPendingConstruction()) {
+                updated.beginConstruction(
+                        existing.constructionCompletesAbsDay());
+            }
 
             buildings.put(existing.buildingId(), updated);
             hayByOwner.putIfAbsent(owner, 0);
@@ -546,7 +775,8 @@ public class AnimalWorldData extends SavedData {
             return existing.buildingId();
         }
 
-        String buildingId = buildingType.family() + "_" + nextBuildingId++;
+        String buildingId = buildingType.family()
+                + "_" + allocateBuildingId();
         AnimalBuildingRecord created = new AnimalBuildingRecord(
             buildingId,
             owner,
@@ -589,7 +819,7 @@ public class AnimalWorldData extends SavedData {
             if (!buildingFamilies.contains(record.buildingType().family())) {
                 continue;
             }
-            if (!record.active()) {
+            if (!record.isGameplayEnabled()) {
                 continue;
             }
             if (record.isInBounds(pos)) {
@@ -607,7 +837,7 @@ public class AnimalWorldData extends SavedData {
             if (!buildingFamilies.contains(record.buildingType().family())) {
                 continue;
             }
-            if (!record.active()) {
+            if (!record.isGameplayEnabled()) {
                 continue;
             }
             if (record.isInBounds(pos)) {
@@ -690,7 +920,9 @@ public class AnimalWorldData extends SavedData {
 
         AnimalBuildingRecord source = buildings.get(animal.buildingId());
         AnimalBuildingRecord target = buildings.get(targetBuildingId);
-        if (source == null || target == null || !target.active()) {
+        if (source == null || target == null
+                || !source.isGameplayEnabled()
+                || !target.isGameplayEnabled()) {
             return false;
         }
         if (source.buildingId().equals(target.buildingId())) {
@@ -705,7 +937,12 @@ public class AnimalWorldData extends SavedData {
             }
         }
 
-        String animalFamily = AnimalTypeCatalog.resolve(animal.animalTypeId()).family();
+        AnimalTypeCatalog.AnimalTypeSpec typeSpec =
+                AnimalTypeCatalog.find(animal.animalTypeId());
+        if (typeSpec == null) {
+            return false;
+        }
+        String animalFamily = typeSpec.family();
         if (!animalFamily.equalsIgnoreCase(target.buildingType().family())) {
             return false;
         }
@@ -716,6 +953,7 @@ public class AnimalWorldData extends SavedData {
         source.removeAnimal(animalId);
         target.addAnimal(animalId);
         animal.setBuildingId(target.buildingId());
+        animal.clearProjectionAnchor();
         setDirty();
         return true;
     }
@@ -728,6 +966,184 @@ public class AnimalWorldData extends SavedData {
         AnimalBuildingRecord building = buildings.get(removed.buildingId());
         if (building != null) {
             building.removeAnimal(animalId);
+        }
+        setDirty();
+        return true;
+    }
+
+    public List<AnimalProduceLedgerEntry> submitAnimalProduce(
+            String buildingId,
+            long animalId,
+            int producedAbsDay,
+            ResourceLocation itemId,
+            int quality,
+            int count
+    ) {
+        if (!buildings.containsKey(buildingId)) {
+            return List.of();
+        }
+        if (itemId == null || count <= 0) {
+            return List.of();
+        }
+
+        List<AnimalProduceLedgerEntry> submitted = new ArrayList<>(count);
+        for (int i = 0; i < count; i++) {
+            long entryId = allocateProduceLedgerId();
+            AnimalProduceLedgerEntry entry = new AnimalProduceLedgerEntry(
+                    entryId,
+                    buildingId,
+                    animalId,
+                    producedAbsDay,
+                    itemId,
+                    quality,
+                    "",
+                    0L
+            );
+            produceLedger.put(entryId, entry);
+            submitted.add(entry);
+        }
+        setDirty();
+        return List.copyOf(submitted);
+    }
+
+    public List<AnimalProduceLedgerEntry> submitAnimalProduceNear(
+            String buildingId,
+            long animalId,
+            int producedAbsDay,
+            ResourceLocation itemId,
+            int quality,
+            int count,
+            String dimensionId,
+            BlockPos anchor,
+            int radius
+    ) {
+        if (!buildings.containsKey(buildingId)
+                || itemId == null
+                || count <= 0
+                || dimensionId == null
+                || dimensionId.isBlank()
+                || anchor == null
+                || radius <= 0) {
+            return List.of();
+        }
+
+        List<AnimalProduceLedgerEntry> submitted = new ArrayList<>(count);
+        for (int i = 0; i < count; i++) {
+            long entryId = allocateProduceLedgerId();
+            AnimalProduceLedgerEntry entry = new AnimalProduceLedgerEntry(
+                    entryId,
+                    buildingId,
+                    animalId,
+                    producedAbsDay,
+                    itemId,
+                    quality,
+                    "",
+                    0L,
+                    false,
+                    dimensionId,
+                    anchor.asLong(),
+                    radius
+            );
+            produceLedger.put(entryId, entry);
+            submitted.add(entry);
+        }
+        setDirty();
+        return List.copyOf(submitted);
+    }
+
+    public Optional<AnimalProduceLedgerEntry> getAnimalProduce(long entryId) {
+        return Optional.ofNullable(produceLedger.get(entryId));
+    }
+
+    public AnimalPendingBirth queueAnimalBirth(
+            String ownerPlayerUuid,
+            String buildingId,
+            long parentAnimalId,
+            String animalTypeId,
+            int createdAbsDay
+    ) {
+        AnimalPendingBirth event = new AnimalPendingBirth(
+                allocatePendingBirthId(),
+                ownerPlayerUuid,
+                buildingId,
+                parentAnimalId,
+                animalTypeId,
+                createdAbsDay
+        );
+        pendingBirths.put(event.eventId(), event);
+        setDirty();
+        return event;
+    }
+
+    public Optional<AnimalPendingBirth> getPendingBirth(long eventId) {
+        return Optional.ofNullable(pendingBirths.get(eventId));
+    }
+
+    public List<AnimalPendingBirth> getPendingBirthsForOwner(String ownerPlayerUuid) {
+        return pendingBirths.values().stream()
+                .filter(event -> event.ownerPlayerUuid().equals(ownerPlayerUuid))
+                .toList();
+    }
+
+    public int getPendingBirthCountForBuilding(String buildingId) {
+        return (int) pendingBirths.values().stream()
+                .filter(event -> event.buildingId().equals(buildingId))
+                .count();
+    }
+
+    public boolean completePendingBirth(long eventId) {
+        if (pendingBirths.remove(eventId) == null) {
+            return false;
+        }
+        setDirty();
+        return true;
+    }
+
+    public List<AnimalProduceLedgerEntry> getAnimalProduceForBuilding(String buildingId) {
+        return produceLedger.values().stream()
+                .filter(entry -> entry.buildingId().equals(buildingId))
+                .toList();
+    }
+
+    public Collection<AnimalProduceLedgerEntry> getAnimalProduceLedger() {
+        return List.copyOf(produceLedger.values());
+    }
+
+    public boolean markAnimalProduceProjected(
+            long entryId,
+            String dimensionId,
+            BlockPos pos
+    ) {
+        AnimalProduceLedgerEntry existing = produceLedger.get(entryId);
+        if (existing == null || dimensionId == null || dimensionId.isBlank() || pos == null) {
+            return false;
+        }
+        produceLedger.put(entryId, existing.withProjection(dimensionId, pos));
+        setDirty();
+        return true;
+    }
+
+    public boolean releaseAnimalProduceProjection(
+            long entryId,
+            String dimensionId,
+            BlockPos pos
+    ) {
+        AnimalProduceLedgerEntry existing = produceLedger.get(entryId);
+        if (existing == null || !existing.isProjected()) {
+            return false;
+        }
+        if (!existing.projectedDimensionId().equals(dimensionId)
+                || !existing.projectedPos().equals(pos)) {
+            return false;
+        }
+        produceLedger.put(entryId, existing.withoutProjection());
+        setDirty();
+        return true;
+    }
+
+    public boolean completeAnimalProduce(long entryId) {
+        if (produceLedger.remove(entryId) == null) {
+            return false;
         }
         setDirty();
         return true;
@@ -767,8 +1183,13 @@ public class AnimalWorldData extends SavedData {
     @Override
     @SuppressWarnings("null")
     public CompoundTag save(@Nonnull CompoundTag tag, @Nonnull net.minecraft.core.HolderLookup.Provider provider) {
+        tag.putInt(
+                AnimalWorldDataMigrations.VERSION_FIELD,
+                AnimalWorldDataMigrations.CURRENT_VERSION);
         tag.putLong("nextBuildingId", nextBuildingId);
         tag.putLong("nextAnimalId", nextAnimalId);
+        tag.putLong("nextProduceLedgerId", nextProduceLedgerId);
+        tag.putLong("nextPendingBirthId", nextPendingBirthId);
 
         ListTag buildingList = new ListTag();
         for (AnimalBuildingRecord record : buildings.values()) {
@@ -782,6 +1203,18 @@ public class AnimalWorldData extends SavedData {
         }
         tag.put("animals", animalList);
 
+        ListTag produceLedgerList = new ListTag();
+        for (AnimalProduceLedgerEntry entry : produceLedger.values()) {
+            produceLedgerList.add(entry.save());
+        }
+        tag.put("animalProduceLedger", produceLedgerList);
+
+        ListTag pendingBirthList = new ListTag();
+        for (AnimalPendingBirth event : pendingBirths.values()) {
+            pendingBirthList.add(event.save());
+        }
+        tag.put("pendingAnimalBirths", pendingBirthList);
+
         ListTag hayList = new ListTag();
         for (Map.Entry<String, Integer> entry : hayByOwner.entrySet()) {
             CompoundTag hayTag = new CompoundTag();
@@ -794,16 +1227,37 @@ public class AnimalWorldData extends SavedData {
     }
 
     public static AnimalWorldData load(CompoundTag tag, net.minecraft.core.HolderLookup.Provider provider) {
+        AnimalWorldDataMigrations.MigrationResult migration =
+                AnimalWorldDataMigrations.migrate(tag);
+        tag = migration.tag();
         AnimalWorldData data = new AnimalWorldData();
-        data.nextBuildingId = tag.contains("nextBuildingId") ? tag.getLong("nextBuildingId") : 1L;
-        data.nextAnimalId = tag.contains("nextAnimalId") ? tag.getLong("nextAnimalId") : 1L;
+        data.nextBuildingId = tag.contains("nextBuildingId")
+                ? Math.max(1L, tag.getLong("nextBuildingId"))
+                : 1L;
+        data.nextAnimalId = tag.contains("nextAnimalId")
+                ? Math.max(1L, tag.getLong("nextAnimalId"))
+                : 1L;
+        data.nextProduceLedgerId = tag.contains("nextProduceLedgerId")
+                ? Math.max(1L, tag.getLong("nextProduceLedgerId"))
+                : 1L;
+        data.nextPendingBirthId = tag.contains("nextPendingBirthId")
+                ? Math.max(1L, tag.getLong("nextPendingBirthId"))
+                : 1L;
 
         if (tag.contains("buildings", Tag.TAG_LIST)) {
             ListTag buildingList = tag.getList("buildings", Tag.TAG_COMPOUND);
             for (int i = 0; i < buildingList.size(); i++) {
                 CompoundTag buildingTag = buildingList.getCompound(i);
                 AnimalBuildingRecord record = AnimalBuildingRecord.load(buildingTag);
-                data.buildings.put(record.buildingId(), record);
+                if (data.buildings.putIfAbsent(
+                        record.buildingId(), record) != null) {
+                    throw new IllegalArgumentException(
+                            "Duplicate animal building ID in save: "
+                                    + record.buildingId());
+                }
+                data.nextBuildingId = Math.max(
+                        data.nextBuildingId,
+                        nextBuildingSequence(record.buildingId()));
             }
         }
 
@@ -812,7 +1266,71 @@ public class AnimalWorldData extends SavedData {
             for (int i = 0; i < animalList.size(); i++) {
                 CompoundTag animalTag = animalList.getCompound(i);
                 FarmAnimalRecord record = FarmAnimalRecord.load(animalTag);
-                data.animals.put(record.animalId(), record);
+                if (data.animals.putIfAbsent(
+                        record.animalId(), record) != null) {
+                    throw new IllegalArgumentException(
+                            "Duplicate farm animal ID in save: "
+                                    + record.animalId());
+                }
+                data.nextAnimalId = Math.max(
+                        data.nextAnimalId,
+                        nextSequence(
+                                record.animalId(),
+                                "farm animal"));
+            }
+        }
+        data.rebuildBuildingMembershipIndex();
+
+        if (tag.contains("animalProduceLedger", Tag.TAG_LIST)) {
+            ListTag ledgerList = tag.getList("animalProduceLedger", Tag.TAG_COMPOUND);
+            for (int i = 0; i < ledgerList.size(); i++) {
+                AnimalProduceLedgerEntry entry;
+                try {
+                    entry = AnimalProduceLedgerEntry.load(
+                            ledgerList.getCompound(i));
+                } catch (IllegalArgumentException ignored) {
+                    // Keep the rest of the animal save usable if one ledger entry is corrupt.
+                    continue;
+                }
+                if (data.produceLedger.putIfAbsent(
+                        entry.entryId(), entry) != null) {
+                    throw new IllegalArgumentException(
+                            "Duplicate animal produce ledger ID in save: "
+                                    + entry.entryId());
+                }
+                data.nextProduceLedgerId =
+                        Math.max(
+                                data.nextProduceLedgerId,
+                                nextSequence(
+                                        entry.entryId(),
+                                        "animal produce ledger"));
+            }
+        }
+
+        if (tag.contains("pendingAnimalBirths", Tag.TAG_LIST)) {
+            ListTag pendingBirthList =
+                    tag.getList("pendingAnimalBirths", Tag.TAG_COMPOUND);
+            for (int i = 0; i < pendingBirthList.size(); i++) {
+                AnimalPendingBirth event;
+                try {
+                    event = AnimalPendingBirth.load(
+                            pendingBirthList.getCompound(i));
+                } catch (IllegalArgumentException ignored) {
+                    // Isolate a corrupt prompt without discarding animal/building state.
+                    continue;
+                }
+                if (data.pendingBirths.putIfAbsent(
+                        event.eventId(), event) != null) {
+                    throw new IllegalArgumentException(
+                            "Duplicate pending animal birth ID in save: "
+                                    + event.eventId());
+                }
+                data.nextPendingBirthId = Math.max(
+                        data.nextPendingBirthId,
+                        nextSequence(
+                                event.eventId(),
+                                "pending animal birth")
+                );
             }
         }
 
@@ -833,7 +1351,89 @@ public class AnimalWorldData extends SavedData {
             }
         }
 
+        if (migration.changed()) {
+            data.setDirty();
+        }
         return data;
+    }
+
+    private static long nextBuildingSequence(
+            String buildingId
+    ) {
+        if (buildingId == null) {
+            return 1L;
+        }
+        int separator = buildingId.lastIndexOf('_');
+        if (separator < 0
+                || separator == buildingId.length() - 1) {
+            return 1L;
+        }
+        try {
+            long suffix = Long.parseLong(
+                    buildingId.substring(separator + 1));
+            return suffix < 0L
+                    ? 1L
+                    : nextSequence(suffix, "animal building");
+        } catch (NumberFormatException ignored) {
+            return 1L;
+        }
+    }
+
+    private static long nextSequence(
+            long current,
+            String kind
+    ) {
+        if (current < 0L || current == Long.MAX_VALUE) {
+            throw new IllegalArgumentException(
+                    "Invalid " + kind + " ID in save: " + current);
+        }
+        return current + 1L;
+    }
+
+    private long allocateBuildingId() {
+        long allocated = nextBuildingId;
+        nextBuildingId = nextSequence(
+                allocated, "animal building");
+        return allocated;
+    }
+
+    private long allocateAnimalId() {
+        long allocated = nextAnimalId;
+        nextAnimalId = nextSequence(
+                allocated, "farm animal");
+        return allocated;
+    }
+
+    private long allocateProduceLedgerId() {
+        long allocated = nextProduceLedgerId;
+        nextProduceLedgerId = nextSequence(
+                allocated, "animal produce ledger");
+        return allocated;
+    }
+
+    private long allocatePendingBirthId() {
+        long allocated = nextPendingBirthId;
+        nextPendingBirthId = nextSequence(
+                allocated, "pending animal birth");
+        return allocated;
+    }
+
+    private void rebuildBuildingMembershipIndex() {
+        LinkedHashMap<String, LinkedHashSet<Long>> expected =
+                new LinkedHashMap<>();
+        for (String buildingId : buildings.keySet()) {
+            expected.put(buildingId, new LinkedHashSet<>());
+        }
+        for (FarmAnimalRecord animal : animals.values()) {
+            LinkedHashSet<Long> members =
+                    expected.get(animal.buildingId());
+            if (members != null) {
+                members.add(animal.animalId());
+            }
+        }
+        expected.forEach((buildingId, members) ->
+                buildings.get(buildingId)
+                        .replaceMemberAnimalIds(members));
     }
 
     private void clampHayToCapacity(String ownerUuid) {

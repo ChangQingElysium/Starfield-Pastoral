@@ -6,16 +6,23 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JsonOps;
+import com.stardew.craft.api.v1.content.StardewContentKey;
+import com.stardew.craft.api.v1.content.StardewContentReference;
+import com.stardew.craft.api.v1.content.StardewTypedContentReferenceProvider;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.List;
 
 /** Public registry and codec for data-driven quest objective types. */
 public final class StardewQuestObjectives {
     private static final Map<ResourceLocation, StardewQuestObjectiveType<?>> TYPES = new LinkedHashMap<>();
+    private static final Map<ResourceLocation,
+            StardewTypedContentReferenceProvider<?>>
+            REFERENCE_PROVIDERS = new LinkedHashMap<>();
 
     public static final Codec<StardewQuestObjective> CODEC = Codec.PASSTHROUGH.flatXmap(
             StardewQuestObjectives::decodeDynamic,
@@ -39,6 +46,18 @@ public final class StardewQuestObjectives {
             StardewQuestObjectiveFactory<T> factory
     ) {
         register(id, new StardewQuestObjectiveType<>(codec, factory));
+    }
+
+    public static synchronized <T> void register(
+            ResourceLocation id,
+            Codec<T> codec,
+            StardewQuestObjectiveFactory<T> factory,
+            StardewTypedContentReferenceProvider<T> references
+    ) {
+        Objects.requireNonNull(references, "references");
+        register(id, new StardewQuestObjectiveType<>(
+                codec, factory));
+        REFERENCE_PROVIDERS.put(id, references);
     }
 
     public static synchronized Set<ResourceLocation> registeredIds() {
@@ -66,6 +85,30 @@ public final class StardewQuestObjectives {
         } catch (RuntimeException exception) {
             return DataResult.error(() -> "Quest objective factory failed for " + objective.type()
                     + ": " + exception.getMessage());
+        }
+    }
+
+    public static DataResult<List<StardewContentReference>>
+    contentReferences(
+            StardewContentKey owner,
+            StardewQuestObjective objective
+    ) {
+        Objects.requireNonNull(owner, "owner");
+        Objects.requireNonNull(objective, "objective");
+        StardewTypedContentReferenceProvider<?> provider =
+                REFERENCE_PROVIDERS.get(objective.type());
+        if (provider == null) {
+            return DataResult.success(List.of());
+        }
+        try {
+            return DataResult.success(
+                    extractReferences(
+                            provider, owner, objective.data()));
+        } catch (RuntimeException exception) {
+            return DataResult.error(() ->
+                    "Quest objective reference provider "
+                            + objective.type() + " failed: "
+                            + exception.getMessage());
         }
     }
 
@@ -118,5 +161,18 @@ public final class StardewQuestObjectives {
     @SuppressWarnings("unchecked")
     private static <T> QuestObjectiveRuntime createTyped(StardewQuestObjectiveType<T> type, Object data) {
         return type.factory().create((T) data);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> List<StardewContentReference>
+    extractReferences(
+            StardewTypedContentReferenceProvider<T> provider,
+            StardewContentKey owner,
+            Object data
+    ) {
+        var references = provider.references(owner, (T) data);
+        return List.copyOf(Objects.requireNonNull(
+                references,
+                "quest objective reference provider result"));
     }
 }

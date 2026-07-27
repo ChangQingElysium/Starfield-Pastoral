@@ -1,6 +1,8 @@
 package com.stardew.craft.farm;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.agriculture.StardewCropRuntimeAdapter;
+import com.stardew.craft.api.v1.internal.crop.StardewCropRuntimeRegistry;
 import com.stardew.craft.block.crop.StardewCropBlock;
 import com.stardew.craft.core.ModDimensions;
 import com.stardew.craft.manager.CropGrowthManager;
@@ -149,16 +151,15 @@ public final class OfflineFarmCatchUp {
             if (!level.isLoaded(pos)) continue;
 
             for (int d = 0; d < daysMissed; d++) {
-                BlockState state = level.getBlockState(pos);
-                Block block = state.getBlock();
-                if (!(block instanceof StardewCropBlock cropBlock)) break;
-
-                CropGrowthManager.CropGrowthState growthState =
-                        cropMgr.getOrCreateGrowthState(gp);
-
                 // 离线期间假设洒水器正常工作 → watered=true
-                cropBlock.growCropOneDay(level, pos, state, true, growthState);
+                StardewCropRuntimeAdapter.DailyResult result =
+                        StardewCropRuntimeRegistry.growOneDay(
+                                level, pos, true, true);
                 cropMgr.setDirty();
+                if (result == StardewCropRuntimeAdapter.DailyResult.REMOVED) {
+                    cropMgr.removeCrop(level, pos);
+                    break;
+                }
             }
         }
     }

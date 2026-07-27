@@ -1,0 +1,13 @@
+{
+  "location": "orchard",
+  "origin_anchor": "orchard_stage",
+  "festival_schematic": "stardewcraft:festivals/trout_derby_forest.schem",
+  "bounds_min_offset": [0, 0, 0],
+  "bounds_max_offset": [13, 3, 6],
+  "safe_position_offsets": [
+    [2, 0, 2]
+  ],
+  "requires_black_fade": true,
+  "cleanup_dropped_items": true,
+  "cleanup_tagged_entities": true
+}

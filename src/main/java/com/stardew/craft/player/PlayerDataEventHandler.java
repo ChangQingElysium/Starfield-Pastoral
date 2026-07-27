@@ -103,6 +103,8 @@ public class PlayerDataEventHandler {
             // Re-sync active festival client state after login. HUD/music are client-local,
             // so persistent participation tags alone are not enough after reconnect.
             com.stardew.craft.festival.ActiveFestivalHandlers.onPlayerLogin(player);
+            com.stardew.craft.api.v1.internal.festival
+                    .StardewFestivalSessionSyncService.syncToPlayer(player);
 
             // 同步社区中心 bundle 数据到客户端 (星盘渲染等需要)
             com.stardew.craft.communitycenter.network.BundleSyncPayload.sendFullSync(player);
@@ -170,6 +172,10 @@ public class PlayerDataEventHandler {
                             com.stardew.craft.farm.FarmInstanceRegistry.get().getFarmForPlayer(player.getUUID());
                     if (ownFarm != null) {
                         com.stardew.craft.farm.FarmInstanceInitializer.backfillFarmCaveIfMissing(stardewLevel, ownFarm);
+                        com.stardew.craft.api.v1.farm.StardewFarmLayoutMigrations.runPending(
+                                stardewLevel, ownFarm.getOwnerUUID());
+                        com.stardew.craft.api.v1.farm.StardewFarmInitializationSteps.runPending(
+                                stardewLevel, ownFarm.getOwnerUUID());
                     }
                 }
             }

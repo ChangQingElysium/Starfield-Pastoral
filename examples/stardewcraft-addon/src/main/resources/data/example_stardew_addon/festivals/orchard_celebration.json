@@ -1,0 +1,18 @@
+{
+  "type": "passive",
+  "display_name": "Orchard Celebration",
+  "season": 1,
+  "start_day": 6,
+  "end_day": 6,
+  "start_time": 900,
+  "end_time": 1800,
+  "show_on_calendar": true,
+  "start_message_key": "example_stardew_addon.festival.orchard_celebration.started",
+  "world": {
+    "location": "example_stardew_addon:orchard",
+    "shops": [
+      "example_stardew_addon:orchard_stand"
+    ],
+    "mechanic_id": "orchard_celebration"
+  }
+}

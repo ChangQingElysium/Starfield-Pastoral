@@ -3,7 +3,6 @@ package com.stardew.craft.block.utility;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.shape.ModelVoxelShapeCache;
 import com.stardew.craft.blockentity.AutoFeedTroughBlockEntity;
-import com.stardew.craft.blockentity.ModBlockEntities;
 import com.stardew.craft.blockentity.UtilityDropHelper;
 import com.stardew.craft.item.ModItems;
 import net.minecraft.core.BlockPos;
@@ -25,8 +24,6 @@ import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityTicker;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -107,15 +104,6 @@ public class AutoFeedTroughBlock extends Block implements EntityBlock {
     @Nullable
     public BlockEntity newBlockEntity(@SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") BlockState state) {
         return new AutoFeedTroughBlockEntity(pos, state);
-    }
-
-    @Override
-    @Nullable
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(@SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockState state, @SuppressWarnings("null") BlockEntityType<T> type) {
-        if (level.isClientSide || type != ModBlockEntities.AUTOFEED_TROUGH.get()) {
-            return null;
-        }
-        return (lvl, pos, st, be) -> AutoFeedTroughBlockEntity.serverTick(lvl, pos, st, (AutoFeedTroughBlockEntity) be);
     }
 
     @SuppressWarnings("null")

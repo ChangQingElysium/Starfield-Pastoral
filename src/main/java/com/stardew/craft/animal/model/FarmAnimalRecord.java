@@ -1,12 +1,17 @@
 package com.stardew.craft.animal.model;
 
+import com.stardew.craft.api.v1.agriculture.StardewAnimalPersistentData;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 
 public class FarmAnimalRecord {
     private final long animalId;
     private final String animalTypeId;
     private String customName;
     private String buildingId;
+    private String ownerPlayerUuid = "";
+    private long parentAnimalId = -1L;
     private final AnimalAcquisitionSource acquisitionSource;
     private final int createdDay;
     private final int createdSeason;
@@ -26,8 +31,12 @@ public class FarmAnimalRecord {
     private String currentProduceId;
     private int produceQuality;
     private boolean hasEatenAnimalCracker;
+    private StardewAnimalPersistentData persistentData = StardewAnimalPersistentData.empty();
     /** 上次处理的绝对天数（用于离线追赶）。新动物默认 0，首次 growDaily 时会初始化。 */
     private int lastProcessedAbsDay;
+    private String projectionDimensionId = "";
+    private long projectionPos;
+    private boolean hasProjectionAnchor;
 
     public FarmAnimalRecord(long animalId,
                             String animalTypeId,
@@ -53,7 +62,7 @@ public class FarmAnimalRecord {
             false,
             false,
             0,
-            false,
+            true,
             0,
             false,
             255,
@@ -241,6 +250,10 @@ public class FarmAnimalRecord {
         this.daysSinceLastProduce = Math.max(0, this.daysSinceLastProduce + 1);
     }
 
+    public void setDaysSinceLastProduce(int daysSinceLastProduce) {
+        this.daysSinceLastProduce = Math.max(0, daysSinceLastProduce);
+    }
+
     public void resetDaysSinceLastProduce() {
         this.daysSinceLastProduce = 0;
     }
@@ -285,6 +298,64 @@ public class FarmAnimalRecord {
         this.buildingId = buildingId;
     }
 
+    public boolean hasProjectionAnchor() {
+        return hasProjectionAnchor;
+    }
+
+    public String projectionDimensionId() {
+        return projectionDimensionId;
+    }
+
+    public BlockPos projectionPos() {
+        return BlockPos.of(projectionPos);
+    }
+
+    public boolean updateProjectionAnchor(
+            String dimensionId,
+            BlockPos pos
+    ) {
+        if (dimensionId == null || dimensionId.isBlank()
+                || pos == null) {
+            return false;
+        }
+        long packed = pos.asLong();
+        if (hasProjectionAnchor
+                && projectionDimensionId.equals(dimensionId)
+                && projectionPos == packed) {
+            return false;
+        }
+        projectionDimensionId = dimensionId;
+        projectionPos = packed;
+        hasProjectionAnchor = true;
+        return true;
+    }
+
+    public boolean clearProjectionAnchor() {
+        if (!hasProjectionAnchor) {
+            return false;
+        }
+        projectionDimensionId = "";
+        projectionPos = 0L;
+        hasProjectionAnchor = false;
+        return true;
+    }
+
+    public String ownerPlayerUuid() {
+        return ownerPlayerUuid;
+    }
+
+    public void setOwnerPlayerUuid(String ownerPlayerUuid) {
+        this.ownerPlayerUuid = ownerPlayerUuid == null ? "" : ownerPlayerUuid;
+    }
+
+    public long parentAnimalId() {
+        return parentAnimalId;
+    }
+
+    public void setParentAnimalId(long parentAnimalId) {
+        this.parentAnimalId = parentAnimalId > 0L ? parentAnimalId : -1L;
+    }
+
     public AnimalAcquisitionSource acquisitionSource() {
         return acquisitionSource;
     }
@@ -301,6 +372,10 @@ public class FarmAnimalRecord {
         return createdYear;
     }
 
+    public StardewAnimalPersistentData persistentData() {
+        return persistentData;
+    }
+
     @SuppressWarnings("null")
     public CompoundTag save() {
         CompoundTag tag = new CompoundTag();
@@ -308,6 +383,8 @@ public class FarmAnimalRecord {
         tag.putString("animalTypeId", animalTypeId);
         tag.putString("customName", customName);
         tag.putString("buildingId", buildingId);
+        tag.putString("ownerPlayerUuid", ownerPlayerUuid);
+        tag.putLong("parentAnimalId", parentAnimalId);
         tag.putString("acquisitionSource", acquisitionSource.name());
         tag.putInt("createdDay", createdDay);
         tag.putInt("createdSeason", createdSeason);
@@ -328,6 +405,16 @@ public class FarmAnimalRecord {
         tag.putInt("produceQuality", produceQuality);
         tag.putBoolean("hasEatenAnimalCracker", hasEatenAnimalCracker);
         tag.putInt("lastProcessedAbsDay", lastProcessedAbsDay);
+        if (hasProjectionAnchor) {
+            tag.putString(
+                    "projectionDimensionId",
+                    projectionDimensionId);
+            tag.putLong("projectionPos", projectionPos);
+        }
+        CompoundTag addonData = persistentData.toTag();
+        if (!addonData.isEmpty()) {
+            tag.put("addonData", addonData);
+        }
         return tag;
     }
 
@@ -346,7 +433,7 @@ public class FarmAnimalRecord {
             tag.getBoolean("wasPetToday"),
             tag.getBoolean("wasAutoPetToday"),
             tag.contains("friendship") ? tag.getInt("friendship") : 0,
-            tag.getBoolean("allowReproduction"),
+            !tag.contains("allowReproduction") || tag.getBoolean("allowReproduction"),
             tag.contains("daysOwned") ? tag.getInt("daysOwned") : 0,
             tag.contains("wasFedToday") && tag.getBoolean("wasFedToday"),
             tag.contains("fullness") ? tag.getInt("fullness") : 255,
@@ -359,6 +446,25 @@ public class FarmAnimalRecord {
         );
         // 读取时间戳（旧存档兼容：不存在则为 0，首次处理时会初始化）
         record.lastProcessedAbsDay = tag.contains("lastProcessedAbsDay") ? tag.getInt("lastProcessedAbsDay") : 0;
+        record.ownerPlayerUuid = tag.contains("ownerPlayerUuid")
+                ? tag.getString("ownerPlayerUuid")
+                : "";
+        record.parentAnimalId = tag.contains("parentAnimalId")
+                ? tag.getLong("parentAnimalId")
+                : -1L;
+        if (tag.contains("projectionDimensionId", Tag.TAG_STRING)
+                && tag.contains("projectionPos", Tag.TAG_LONG)
+                && !tag.getString("projectionDimensionId")
+                        .isBlank()) {
+            record.projectionDimensionId =
+                    tag.getString("projectionDimensionId");
+            record.projectionPos = tag.getLong("projectionPos");
+            record.hasProjectionAnchor = true;
+        }
+        if (tag.contains("addonData", Tag.TAG_COMPOUND)) {
+            record.persistentData =
+                    StardewAnimalPersistentData.fromTag(tag.getCompound("addonData"));
+        }
         return record;
     }
 }

@@ -1,6 +1,8 @@
 package com.stardew.craft.block.utility;
 
 import com.stardew.craft.animal.data.AnimalWorldData;
+import com.stardew.craft.api.v1.agriculture.StardewCropRuntime;
+import com.stardew.craft.api.v1.agriculture.StardewCropState;
 import com.stardew.craft.block.crop.StardewCropBlock;
 import com.stardew.craft.block.nature.ForageBlock;
 import com.stardew.craft.blockentity.MushroomBoxBlockEntity;
@@ -142,17 +144,19 @@ public record FarmComputerReport(
                         continue;
                     }
 
-                    if (state.getBlock() instanceof StardewCropBlock crop) {
+                    StardewCropState crop =
+                            StardewCropRuntime.inspect(level, cursor);
+                    if (crop != null && crop.root().equals(cursor)) {
                         if (greenhouseOnly) {
-                            if (crop.isReadyForFarmComputer(level, cursor.immutable(), state)) {
+                            if (crop.mature()) {
                                 counts.greenhouseCropsReady++;
                             }
                         } else {
                             counts.totalCrops++;
-                            if (crop.isReadyForFarmComputer(level, cursor.immutable(), state)) {
+                            if (crop.mature()) {
                                 counts.cropsReady++;
                             }
-                            if (isUnwateredCrop(level, cursor)) {
+                            if (isUnwateredCrop(level, crop)) {
                                 counts.unwateredCrops++;
                             }
                         }
@@ -181,12 +185,15 @@ public record FarmComputerReport(
                 && state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.UPPER;
     }
 
-    private static boolean isUnwateredCrop(ServerLevel level, BlockPos cropPos) {
-        BlockPos below = cropPos.below();
-        BlockState soil = level.getBlockState(below);
-        return soil.getBlock() instanceof FarmBlock
-                && soil.hasProperty(FarmBlock.MOISTURE)
-                && soil.getValue(FarmBlock.MOISTURE) <= 0;
+    private static boolean isUnwateredCrop(
+            ServerLevel level,
+            StardewCropState crop
+    ) {
+        return !crop.soilPositions().isEmpty()
+                && crop.soilPositions().stream()
+                .map(level::getBlockState)
+                .filter(soil -> soil.getBlock() instanceof FarmBlock)
+                .anyMatch(soil -> soil.getValue(FarmBlock.MOISTURE) <= 0);
     }
 
     private static boolean isMachineReady(BlockEntity blockEntity) {
@@ -213,7 +220,7 @@ public record FarmComputerReport(
     }
 
     private static boolean isInsideFarmCave(BlockPos pos, FarmInstance farm) {
-        var layout = farm.getFarmType().getLayout();
+        var layout = farm.getFarmLayout();
         if (layout == null || layout.caveClearBox() == null) {
             return false;
         }

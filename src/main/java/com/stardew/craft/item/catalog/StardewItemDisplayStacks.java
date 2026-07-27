@@ -1,12 +1,14 @@
 package com.stardew.craft.item.catalog;
 
 import com.stardew.craft.api.v1.item.StardewItemDataApi;
+import com.stardew.craft.core.ModTags;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.item.SecretNoteItem;
 import com.stardew.craft.item.SpecificBaitItem;
 import com.stardew.craft.item.StardewQualityItem;
 import com.stardew.craft.item.artisan.ArtisanDrinkItem;
 import com.stardew.craft.item.artisan.DehydratorIngredientHelper;
+import com.stardew.craft.item.artisan.FlavoredArtisanDrinkItem;
 import com.stardew.craft.item.artisan.PreserveType;
 import com.stardew.craft.item.artisan.PreservesCropTypeHelper;
 import com.stardew.craft.item.artisan.PreservesItem;
@@ -104,6 +106,17 @@ public final class StardewItemDisplayStacks {
         return stacks;
     }
 
+    public static List<ItemStack> flavoredDrinkVariants() {
+        List<ItemStack> stacks = new ArrayList<>();
+
+        // Keep the source-less base Wine because vanilla uses object 348 in
+        // generic gift pools, then expose every source-specific output.
+        stacks.add(new ItemStack(ModItems.WINE.get()));
+        addFlavoredDrinkVariants(stacks, PreserveType.WINE, ModItems.WINE.get(), ModTags.Items.KEG_WINE_INPUTS);
+        addFlavoredDrinkVariants(stacks, PreserveType.JUICE, ModItems.JUICE.get(), ModTags.Items.KEG_JUICE_INPUTS);
+        return stacks;
+    }
+
     public static List<ItemStack> junimoNoteAreaVariants() {
         List<ItemStack> stacks = new ArrayList<>();
         for (int area = 0; area <= 6; area++) {
@@ -117,6 +130,9 @@ public final class StardewItemDisplayStacks {
     }
 
     public static boolean isHiddenBaseItem(Item item) {
+        if (item instanceof FlavoredArtisanDrinkItem drink && drink.isLegacyCompatibilityItem()) {
+            return true;
+        }
         return item == ModItems.TARGETED_BAIT.get()
                 || item == ModItems.JELLY.get()
                 || item == ModItems.PICKLES.get()
@@ -125,6 +141,8 @@ public final class StardewItemDisplayStacks {
                 || item == ModItems.CAVIAR.get()
                 || item == ModItems.DRIED_FRUIT.get()
                 || item == ModItems.DRIED_MUSHROOMS.get()
+                || item == ModItems.WINE.get()
+                || item == ModItems.JUICE.get()
                 || item == ModItems.JUNIMO_NOTE.get();
     }
 
@@ -236,8 +254,31 @@ public final class StardewItemDisplayStacks {
         return resultStack;
     }
 
+    private static void addFlavoredDrinkVariants(
+            List<ItemStack> stacks,
+            PreserveType type,
+            Item baseItem,
+            net.minecraft.tags.TagKey<Item> inputTag
+    ) {
+        for (var holder : BuiltInRegistries.ITEM.getTagOrEmpty(inputTag)) {
+            ItemStack ingredient = new ItemStack(holder.value());
+            ItemStack normal = FlavoredArtisanDrinkItem.createFlavored(
+                    type, ingredient, new ItemStack(baseItem));
+            stacks.add(normal);
+            if (type == PreserveType.WINE) {
+                for (int quality = QualityHelper.SILVER; quality <= QualityHelper.IRIDIUM; quality++) {
+                    ItemStack aged = normal.copy();
+                    QualityHelper.setQuality(aged, quality);
+                    stacks.add(aged);
+                }
+            }
+        }
+    }
+
     private static Item getPreserveBaseItem(PreserveType type) {
         return switch (type) {
+            case WINE -> ModItems.WINE.get();
+            case JUICE -> ModItems.JUICE.get();
             case JELLY -> ModItems.JELLY.get();
             case PICKLES -> ModItems.PICKLES.get();
             case ROE -> ModItems.ROE.get();

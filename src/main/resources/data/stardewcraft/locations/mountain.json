@@ -1,0 +1,8 @@
+{
+  "dimension": "stardewcraft:stardew_valley",
+  "min": [-123, 69, -151],
+  "max": [121, 93, -65],
+  "aliases": ["Mountain"],
+  "priority": -100,
+  "indoor": false
+}

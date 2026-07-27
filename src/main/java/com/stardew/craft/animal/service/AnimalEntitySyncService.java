@@ -3,13 +3,17 @@ package com.stardew.craft.animal.service;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.animal.data.AnimalWorldData;
 import com.stardew.craft.animal.model.AnimalBuildingRecord;
+import com.stardew.craft.animal.model.FarmAnimalDefinition;
+import com.stardew.craft.animal.model.FarmAnimalDefinitions;
 import com.stardew.craft.animal.model.FarmAnimalRecord;
-import com.stardew.craft.entity.ModEntities;
+import com.stardew.craft.api.v1.agriculture.StardewAnimalTypes;
 import com.stardew.craft.entity.animal.BaseCoopAnimalEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Entity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,8 +34,11 @@ public final class AnimalEntitySyncService {
         int updated = 0;
         int spawned = 0;
 
-        // Detect orphan animals whose building no longer exists
-        List<Long> orphanIds = new ArrayList<>();
+        // A missing building quarantines the authoritative record. Only its
+        // loaded projection is removed; automatic reconciliation never
+        // deletes animal gameplay data.
+        java.util.LinkedHashSet<Long> orphanIds =
+                new java.util.LinkedHashSet<>();
         for (FarmAnimalRecord record : data.getAnimals()) {
             if (record.buildingId() != null && !record.buildingId().isBlank()
                 && data.getBuilding(record.buildingId()).isEmpty()
@@ -44,11 +51,15 @@ public final class AnimalEntitySyncService {
             if (orphanEntity != null) {
                 orphanEntity.discard();
             }
-            data.removeAnimal(orphanId);
-            StardewCraft.LOGGER.info("[ANIMAL_SYNC] Removed orphan animal {} (building gone)", orphanId);
+            StardewCraft.LOGGER.warn(
+                    "[ANIMAL_SYNC] Preserved animal record {} in quarantine because its building is missing",
+                    orphanId);
         }
 
         for (FarmAnimalRecord record : data.getAnimals()) {
+            if (orphanIds.contains(record.animalId())) {
+                continue;
+            }
             BaseCoopAnimalEntity entity = state.byManagedId.get(record.animalId());
             if (entity == null) {
                 entity = spawnEntityForRecord(level, data, record);
@@ -59,6 +70,11 @@ public final class AnimalEntitySyncService {
                 continue;
             }
             applyAuthoritativeState(entity, record);
+            if (record.updateProjectionAnchor(
+                    level.dimension().location().toString(),
+                    entity.blockPosition())) {
+                data.markChanged();
+            }
             updated++;
         }
 
@@ -101,6 +117,7 @@ public final class AnimalEntitySyncService {
     public static BaseCoopAnimalEntity removeLoaded(ServerLevel level, long animalId) {
         BaseCoopAnimalEntity existing = findLoaded(level, animalId);
         if (existing != null) {
+            ManagedAnimalRuntimeIndex.remove(level, existing);
             existing.discard();
         }
         return existing;
@@ -112,6 +129,23 @@ public final class AnimalEntitySyncService {
         return ensurePresentNow(level, record);
     }
 
+    public static int relocateBuildingAnimalsNow(
+            ServerLevel level,
+            AnimalBuildingRecord building
+    ) {
+        AnimalWorldData data = AnimalWorldData.get(level);
+        int relocated = 0;
+        for (Long animalId : building.memberAnimalIds()) {
+            FarmAnimalRecord record =
+                    data.getAnimal(animalId).orElse(null);
+            if (record != null
+                    && relocateNow(level, record) != null) {
+                relocated++;
+            }
+        }
+        return relocated;
+    }
+
     private static BaseCoopAnimalEntity spawnEntityForRecord(ServerLevel level,
                                                              AnimalWorldData data,
                                                              FarmAnimalRecord record) {
@@ -120,6 +154,12 @@ public final class AnimalEntitySyncService {
             return null;
         }
         if (!level.dimension().location().toString().equals(building.dimensionId())) {
+            return null;
+        }
+        if (record.hasProjectionAnchor()
+                && level.dimension().location().toString()
+                        .equals(record.projectionDimensionId())
+                && !level.isLoaded(record.projectionPos())) {
             return null;
         }
 
@@ -136,13 +176,18 @@ public final class AnimalEntitySyncService {
             return null;
         }
 
-        BaseCoopAnimalEntity entity = type.create(level);
-        if (entity == null) {
-            StardewCraft.LOGGER.warn("[ANIMAL_SYNC] Failed to create entity for type {}", record.animalTypeId());
+        Entity created = ((EntityType<?>) type).create(level);
+        if (!(created instanceof BaseCoopAnimalEntity entity)) {
+            StardewCraft.LOGGER.warn(
+                    "[ANIMAL_SYNC] Entity type for {} must create BaseCoopAnimalEntity, got {}",
+                    record.animalTypeId(),
+                    created == null ? "null" : created.getClass().getName()
+            );
             return null;
         }
 
-        BlockPos spawnPos = findSpawnPos(level, building);
+        BlockPos spawnPos = findSpawnPos(
+                level, building, record);
         entity.moveTo(
             spawnPos.getX() + 0.5D,
             spawnPos.getY(),
@@ -175,7 +220,19 @@ public final class AnimalEntitySyncService {
         return ManagedAnimalRuntimeIndex.find(level, animalId);
     }
 
-    private static BlockPos findSpawnPos(ServerLevel level, AnimalBuildingRecord building) {
+    private static BlockPos findSpawnPos(
+            ServerLevel level,
+            AnimalBuildingRecord building,
+            FarmAnimalRecord record
+    ) {
+        if (record.hasProjectionAnchor()
+                && level.dimension().location().toString()
+                        .equals(record.projectionDimensionId())) {
+            BlockPos anchor = record.projectionPos();
+            if (canStand(level, anchor)) {
+                return anchor;
+            }
+        }
         BlockPos base = building.managerPos().above();
         if (canStand(level, base)) {
             return base;
@@ -205,21 +262,17 @@ public final class AnimalEntitySyncService {
             && !level.getBlockState(pos.below()).getCollisionShape(level, pos.below()).isEmpty();
     }
 
+    @SuppressWarnings("unchecked")
     static EntityType<? extends BaseCoopAnimalEntity> resolveEntityType(String animalTypeId) {
-        return switch (animalTypeId) {
-            case "white_chicken" -> ModEntities.WHITE_CHICKEN.get();
-            case "golden_chicken" -> ModEntities.GOLDEN_CHICKEN.get();
-            case "duck" -> ModEntities.DUCK.get();
-            case "void_chicken" -> ModEntities.VOID_CHICKEN.get();
-            case "rabbit" -> ModEntities.RABBIT.get();
-            case "ostrich" -> ModEntities.OSTRICH.get();
-            case "dinosaur" -> ModEntities.DINOSAUR.get();
-            case "cow" -> ModEntities.COW.get();
-            case "goat" -> ModEntities.GOAT.get();
-            case "sheep" -> ModEntities.SHEEP.get();
-            case "pig" -> ModEntities.PIG.get();
-            default -> null;
-        };
+        FarmAnimalDefinition definition = FarmAnimalDefinitions.find(animalTypeId);
+        if (definition != null
+                && BuiltInRegistries.ENTITY_TYPE.containsKey(definition.entityTypeId())) {
+            // The created instance is checked in spawnEntityForRecord. This permits a code mod to
+            // register its managed entity normally and bind it through the same data-pack schema.
+            return (EntityType<? extends BaseCoopAnimalEntity>) (EntityType<?>)
+                    BuiltInRegistries.ENTITY_TYPE.get(definition.entityTypeId());
+        }
+        return StardewAnimalTypes.entityType(animalTypeId);
     }
 
     private static CollectionState collectLoaded(ServerLevel level) {

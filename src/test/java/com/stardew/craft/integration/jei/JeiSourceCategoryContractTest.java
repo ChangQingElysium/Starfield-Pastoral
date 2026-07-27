@@ -2,6 +2,7 @@ package com.stardew.craft.integration.jei;
 
 import com.stardew.craft.fishing.data.FishingDataManager;
 import com.stardew.craft.item.ModItems;
+import com.stardew.craft.item.artisan.FlavoredArtisanDrinkItem;
 import com.stardew.craft.item.artisan.PreserveType;
 import com.stardew.craft.item.artisan.PreservesItem;
 import com.stardew.craft.item.quality.QualityHelper;
@@ -111,6 +112,8 @@ class JeiSourceCategoryContractTest {
 
         assertFalse(registered.contains(ModItems.PARSNIP.get()));
         assertTrue(registered.contains(ModItems.JELLY.get()));
+        assertTrue(registered.contains(ModItems.WINE.get()));
+        assertTrue(registered.contains(ModItems.JUICE.get()));
     }
 
     @Test
@@ -124,6 +127,21 @@ class JeiSourceCategoryContractTest {
                 goldIngredient, new ItemStack(ModItems.DRIED_FRUIT.get()));
 
         assertEquals(PreservesItem.getSubtypeKey(normal), PreservesItem.getSubtypeKey(gold));
+    }
+
+    @Test
+    void flavoredDrinkSubtypeKeepsSourceButIgnoresQuality() {
+        ItemStack normal = FlavoredArtisanDrinkItem.createFlavored(PreserveType.WINE,
+                new ItemStack(ModItems.GRAPE.get()), new ItemStack(ModItems.WINE.get()));
+        ItemStack gold = normal.copy();
+        QualityHelper.setQuality(gold, QualityHelper.GOLD);
+        ItemStack strawberry = FlavoredArtisanDrinkItem.createFlavored(PreserveType.WINE,
+                new ItemStack(ModItems.STRAWBERRY.get()), new ItemStack(ModItems.WINE.get()));
+
+        assertEquals(FlavoredArtisanDrinkItem.getSubtypeKey(normal),
+                FlavoredArtisanDrinkItem.getSubtypeKey(gold));
+        assertFalse(FlavoredArtisanDrinkItem.getSubtypeKey(normal)
+                .equals(FlavoredArtisanDrinkItem.getSubtypeKey(strawberry)));
     }
 
     @Test

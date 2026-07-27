@@ -4,6 +4,7 @@ import com.stardew.craft.Config;
 import com.stardew.craft.animal.data.AnimalWorldData;
 import com.stardew.craft.animal.model.AnimalBuildingRecord;
 import com.stardew.craft.animal.service.CoopManagerValidationService;
+import com.stardew.craft.animal.service.AnimalBuildingViewService;
 import com.stardew.craft.block.utility.CoopManagerBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -117,7 +118,9 @@ public class CoopManagerMenu extends AbstractContainerMenu implements IBuildingM
             "coop",
             managerPos
         );
-        boundAnimalCount = existing.map(record -> record.memberAnimalIds().size()).orElse(0);
+        boundAnimalCount = existing
+                .map(record -> AnimalBuildingViewService.managedAnimalCount(data, record))
+                .orElse(0);
 
         currentTier = existing.map(record -> record.buildingType().tier()).orElse(0);
         targetTier = Math.min(currentTier + 1, 3);

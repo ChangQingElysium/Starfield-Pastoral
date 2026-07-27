@@ -1,0 +1,7 @@
+{
+  "shop": "example_stardew_addon:orchard_stand",
+  "item": "minecraft:apple",
+  "priority": 100,
+  "scope": "player",
+  "reset": "week"
+}

@@ -78,6 +78,7 @@ public class CarpenterMenuScreen extends Screen {
     // =========================================================================
     private final String builder;
     private final List<CarpenterBlueprint> blueprints;
+    private final long catalogRevision;
     private int playerMoney;
     private int currentIndex = 0;
     private boolean purchasePending = false;
@@ -98,6 +99,7 @@ public class CarpenterMenuScreen extends Screen {
         this.builder = payload.builder();
         this.blueprints = payload.blueprints();
         this.playerMoney = payload.playerMoney();
+        this.catalogRevision = payload.catalogRevision();
     }
 
     // =========================================================================
@@ -266,7 +268,8 @@ public class CarpenterMenuScreen extends Screen {
 
         purchasePending = true;
         playSound(ModSounds.PURCHASE_CLICK.get());
-        PacketDistributor.sendToServer(new CarpenterPurchasePayload(builder, currentIndex));
+        PacketDistributor.sendToServer(new CarpenterPurchasePayload(
+                builder, currentIndex, bp.id(), catalogRevision));
     }
 
     private boolean canBuildCurrent() {

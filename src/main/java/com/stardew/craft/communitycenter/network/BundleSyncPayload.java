@@ -5,6 +5,7 @@ import com.stardew.craft.communitycenter.data.BundleDataManager;
 import com.stardew.craft.communitycenter.data.BundleDefinition;
 import com.stardew.craft.communitycenter.state.CCStoryFlags;
 import com.stardew.craft.communitycenter.state.CommunityCenterSavedData;
+import com.stardew.craft.api.v1.internal.communitycenter.StardewCommunityCenterVariantRegistry;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -203,10 +204,12 @@ public record BundleSyncPayload(
     public static void sendFullSync(ServerPlayer player) {
         CommunityCenterSavedData data = CommunityCenterSavedData.get();
         java.util.UUID uuid = player.getUUID();
+        java.util.Collection<BundleDefinition> resolvedDefinitions =
+                StardewCommunityCenterVariantRegistry.all(uuid);
 
         Map<Integer, boolean[]> allSlots = data.getBundleSlotsView(uuid);
         Map<Integer, boolean[]> slots = new HashMap<>();
-        for (BundleDefinition def : BundleDataManager.getAllBundles()) {
+        for (BundleDefinition def : resolvedDefinitions) {
             boolean[] bundleSlots = allSlots.get(def.bundleId());
             if (bundleSlots != null) {
                 slots.put(def.bundleId(), bundleSlots.clone());
@@ -219,7 +222,7 @@ public record BundleSyncPayload(
         }
 
         Map<Integer, Boolean> rewards = new HashMap<>();
-        for (BundleDefinition def : BundleDataManager.getAllBundles()) {
+        for (BundleDefinition def : resolvedDefinitions) {
             if (data.isRewardAvailable(uuid, def.bundleId())) {
                 rewards.put(def.bundleId(), true);
             }
@@ -234,7 +237,8 @@ public record BundleSyncPayload(
         }
 
         // 收集 bundle 定义 + area 名称（专用服务器客户端需要）
-        java.util.List<BundleDefinition> defs = new java.util.ArrayList<>(BundleDataManager.getAllBundles());
+        java.util.List<BundleDefinition> defs =
+                new java.util.ArrayList<>(resolvedDefinitions);
         Map<Integer, String> aNames = new HashMap<>();
         Map<Integer, String> aDKeys = new HashMap<>();
         for (int i = 0; i <= 6; i++) {

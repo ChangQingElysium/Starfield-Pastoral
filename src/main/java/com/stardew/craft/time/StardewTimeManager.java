@@ -332,6 +332,9 @@ public class StardewTimeManager extends SavedData {
                     runWorldDailyStep("coal_forest", () -> com.stardew.craft.manager.CoalForestClumpSpawnService.onNewDay(stardewLevel));
                     runWorldDailyStep("secret_woods", () -> com.stardew.craft.manager.SecretWoodsAccessManager.ensureEntranceReady(stardewLevel));
                     runWorldDailyStep("farm_cave", () -> com.stardew.craft.manager.FarmCaveDailyService.onNewDay(stardewLevel));
+                    runWorldDailyStep("addon_farm_tasks", () ->
+                            com.stardew.craft.api.v1.internal.farm.StardewFarmDailyTaskRegistry.runActiveFarms(
+                                    stardewLevel, absDay, currentSeason, currentDay));
                 } catch (Exception e) {
                     StardewCraft.LOGGER.error(
                         "[DAILY] World settlement lifecycle failed; continuing player settlement",

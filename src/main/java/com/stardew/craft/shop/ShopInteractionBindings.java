@@ -5,7 +5,11 @@ import com.stardew.craft.api.v1.condition.StardewConditionContext;
 import com.stardew.craft.api.v1.condition.StardewConditions;
 import com.stardew.craft.api.v1.shop.StardewShopBinding;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+
+import java.util.List;
+import java.util.Optional;
 
 /** Resolves datapack-defined NPC and region interactions to shops. */
 public final class ShopInteractionBindings {
@@ -33,6 +37,26 @@ public final class ShopInteractionBindings {
             if (ShopService.open(player, binding.shop())) return true;
         }
         return false;
+    }
+
+    /** Read-only view of bindings whose dimension and optional box contain a position. */
+    public static List<BindingStatus> inspectAt(
+            ServerPlayer player,
+            BlockPos position
+    ) {
+        return ShopDataLoader.bindingSnapshot().definitions().entrySet()
+                .stream()
+                .filter(entry -> matchesWorld(player, entry.getValue()))
+                .filter(entry -> contains(entry.getValue(), position))
+                .map(entry -> {
+                    StardewShopBinding binding = entry.getValue();
+                    return new BindingStatus(
+                            entry.getKey(),
+                            binding.shop(),
+                            binding.npc(),
+                            conditionsMatch(player, entry.getKey(), binding));
+                })
+                .toList();
     }
 
     private static boolean matchesWorld(ServerPlayer player, StardewShopBinding binding) {
@@ -63,5 +87,13 @@ public final class ShopInteractionBindings {
             if (!allowed) return false;
         }
         return true;
+    }
+
+    public record BindingStatus(
+            ResourceLocation id,
+            String shop,
+            Optional<String> npc,
+            boolean available
+    ) {
     }
 }

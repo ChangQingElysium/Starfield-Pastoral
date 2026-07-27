@@ -6,16 +6,23 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JsonOps;
+import com.stardew.craft.api.v1.content.StardewContentKey;
+import com.stardew.craft.api.v1.content.StardewContentReference;
+import com.stardew.craft.api.v1.content.StardewTypedContentReferenceProvider;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.List;
 
 /** Public registry and codec for server-authoritative content conditions. */
 public final class StardewConditions {
     private static final Map<ResourceLocation, StardewConditionType<?>> TYPES = new LinkedHashMap<>();
+    private static final Map<ResourceLocation,
+            StardewTypedContentReferenceProvider<?>>
+            REFERENCE_PROVIDERS = new LinkedHashMap<>();
 
     public static final Codec<StardewCondition> CODEC = Codec.PASSTHROUGH.flatXmap(
             StardewConditions::decodeDynamic,
@@ -41,6 +48,17 @@ public final class StardewConditions {
         register(id, new StardewConditionType<>(codec, evaluator));
     }
 
+    public static synchronized <T> void register(
+            ResourceLocation id,
+            Codec<T> codec,
+            StardewConditionEvaluator<T> evaluator,
+            StardewTypedContentReferenceProvider<T> references
+    ) {
+        Objects.requireNonNull(references, "references");
+        register(id, new StardewConditionType<>(codec, evaluator));
+        REFERENCE_PROVIDERS.put(id, references);
+    }
+
     public static synchronized Set<ResourceLocation> registeredIds() {
         return Set.copyOf(TYPES.keySet());
     }
@@ -64,6 +82,30 @@ public final class StardewConditions {
             return DataResult.success(testTyped(registered, context, condition.data()));
         } catch (RuntimeException exception) {
             return DataResult.error(() -> "Condition " + condition.type() + " failed: " + exception.getMessage());
+        }
+    }
+
+    public static DataResult<List<StardewContentReference>>
+    contentReferences(
+            StardewContentKey owner,
+            StardewCondition condition
+    ) {
+        Objects.requireNonNull(owner, "owner");
+        Objects.requireNonNull(condition, "condition");
+        StardewTypedContentReferenceProvider<?> provider =
+                REFERENCE_PROVIDERS.get(condition.type());
+        if (provider == null) {
+            return DataResult.success(List.of());
+        }
+        try {
+            return DataResult.success(
+                    extractReferences(
+                            provider, owner, condition.data()));
+        } catch (RuntimeException exception) {
+            return DataResult.error(() ->
+                    "Condition reference provider "
+                            + condition.type() + " failed: "
+                            + exception.getMessage());
         }
     }
 
@@ -146,6 +188,19 @@ public final class StardewConditions {
             Object data
     ) {
         return type.evaluator().test(context, (T) data);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> List<StardewContentReference>
+    extractReferences(
+            StardewTypedContentReferenceProvider<T> provider,
+            StardewContentKey owner,
+            Object data
+    ) {
+        var references = provider.references(owner, (T) data);
+        return List.copyOf(Objects.requireNonNull(
+                references,
+                "condition reference provider result"));
     }
 
     private static void requireNamespaced(ResourceLocation id) {

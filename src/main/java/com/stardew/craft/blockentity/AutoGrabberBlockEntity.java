@@ -1,34 +1,26 @@
 package com.stardew.craft.blockentity;
 
-import com.stardew.craft.animal.data.AnimalWorldData;
-import com.stardew.craft.animal.model.AnimalBuildingRecord;
-import com.stardew.craft.animal.model.FarmAnimalRecord;
-import com.stardew.craft.block.animal.AnimalProduceSpotBlock;
 import com.stardew.craft.block.utility.AutoGrabberBlock;
-import com.stardew.craft.item.quality.QualityHelper;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import com.stardew.craft.sound.ModSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
 import net.minecraft.world.Containers;
 import net.minecraft.world.MenuProvider;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -36,46 +28,25 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.sounds.SoundSource;
 
 import javax.annotation.Nullable;
-import java.util.Objects;
 import java.util.UUID;
 
 @SuppressWarnings("null")
 public class AutoGrabberBlockEntity extends BlockEntity implements UtilityAutomationAccess, Container, MenuProvider {
-    private static final String TAG_BUILDING_ID = "buildingId";
     private static final String TAG_ITEMS = "items";
-    private static final int SLOT_COUNT = 36;
-    private static final int COLLECT_INTERVAL_TICKS = 20;
+    public static final int STORAGE_ROWS = 4;
+    public static final int SLOT_COUNT = STORAGE_ROWS * 9;
 
     private final NonNullList<ItemStack> items = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
-    private String buildingId = "";
     private int openCount = 0;
 
     public AutoGrabberBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.AUTO_GRABBER.get(), pos, state);
     }
 
-    public static void serverTick(Level level, BlockPos pos, BlockState state, AutoGrabberBlockEntity blockEntity) {
-        if (!(level instanceof ServerLevel serverLevel)) {
-            return;
-        }
-        if (serverLevel.getGameTime() % COLLECT_INTERVAL_TICKS != 0) {
-            return;
-        }
-
-        AnimalBuildingRecord building = blockEntity.resolveBuilding(serverLevel);
-        if (building == null) {
-            return;
-        }
-
-        int collected = blockEntity.collectBuildingProduce(serverLevel, building);
-        if (collected > 0) {
-            recordOwnerProduce(building.ownerPlayerUuid(), collected);
-            blockEntity.setChanged();
-            blockEntity.syncToClient();
-        }
-    }
-
-    private static void recordOwnerProduce(String ownerPlayerUuid, int collected) {
+    public static void recordCollectedForOwner(
+            String ownerPlayerUuid,
+            int collected
+    ) {
         if (ownerPlayerUuid == null || ownerPlayerUuid.isBlank() || collected <= 0) {
             return;
         }
@@ -83,131 +54,6 @@ public class AutoGrabberBlockEntity extends BlockEntity implements UtilityAutoma
             PlayerStardewDataAPI.recordAnimalProductsCollected(UUID.fromString(ownerPlayerUuid), collected);
         } catch (IllegalArgumentException ignored) {
         }
-    }
-
-    @Nullable
-    private AnimalBuildingRecord resolveBuilding(ServerLevel level) {
-        AnimalWorldData data = AnimalWorldData.get(level);
-        if (!buildingId.isBlank()) {
-            AnimalBuildingRecord existing = data.getBuilding(buildingId).orElse(null);
-            if (existing != null
-                && Objects.equals(existing.dimensionId(), level.dimension().location().toString())
-                && existing.isInBounds(worldPosition)) {
-                return existing;
-            }
-        }
-
-        for (AnimalBuildingRecord candidate : data.getBuildings()) {
-            if (!Objects.equals(candidate.dimensionId(), level.dimension().location().toString())) {
-                continue;
-            }
-            if (!candidate.isInBounds(worldPosition)) {
-                continue;
-            }
-            if (!Objects.equals(buildingId, candidate.buildingId())) {
-                buildingId = candidate.buildingId();
-                setChanged();
-                syncToClient();
-            }
-            return candidate;
-        }
-
-        if (!buildingId.isBlank()) {
-            buildingId = "";
-            setChanged();
-            syncToClient();
-        }
-        return null;
-    }
-
-    private int collectBuildingProduce(ServerLevel level, AnimalBuildingRecord building) {
-        int collected = 0;
-        if (!building.interiorAirCells().isEmpty()) {
-            for (Long cell : building.interiorAirCells()) {
-                BlockPos targetPos = BlockPos.of(cell);
-                collected += tryCollectAt(level, targetPos, building);
-            }
-        } else {
-            for (int y = building.minY(); y <= building.maxY(); y++) {
-                for (int z = building.minZ(); z <= building.maxZ(); z++) {
-                    for (int x = building.minX(); x <= building.maxX(); x++) {
-                        collected += tryCollectAt(level, new BlockPos(x, y, z), building);
-                    }
-                }
-            }
-        }
-        collected += collectHeldAnimalProduce(level, building);
-        return collected;
-    }
-
-    private int collectHeldAnimalProduce(ServerLevel level, AnimalBuildingRecord building) {
-        AnimalWorldData data = AnimalWorldData.get(level);
-        int collected = 0;
-        for (Long animalId : building.memberAnimalIds()) {
-            FarmAnimalRecord record = data.getAnimal(animalId).orElse(null);
-            if (record == null || record.currentProduceId().isBlank()) {
-                continue;
-            }
-            if ("pig".equals(record.animalTypeId())) {
-                continue;
-            }
-
-            ItemStack produce = resolveProduceStack(record);
-            if (produce.isEmpty()) {
-                continue;
-            }
-            ItemStack remainder = insertIntoStorage(produce, false);
-            if (!remainder.isEmpty()) {
-                continue;
-            }
-
-            record.setCurrentProduceId("");
-            record.setProduceQuality(0);
-            data.markChanged();
-            collected += produce.getCount();
-        }
-        return collected;
-    }
-
-    private ItemStack resolveProduceStack(FarmAnimalRecord record) {
-        ResourceLocation id = ResourceLocation.tryParse(record.currentProduceId());
-        if (id == null) {
-            return ItemStack.EMPTY;
-        }
-        Item item = BuiltInRegistries.ITEM.get(id);
-        if (item == Items.AIR) {
-            return ItemStack.EMPTY;
-        }
-        ItemStack stack = new ItemStack(item);
-        QualityHelper.setQuality(stack, record.produceQuality());
-        return stack;
-    }
-
-    private int tryCollectAt(ServerLevel level, BlockPos targetPos, AnimalBuildingRecord building) {
-        BlockState targetState = level.getBlockState(targetPos);
-        if (!(targetState.getBlock() instanceof AnimalProduceSpotBlock)) {
-            return 0;
-        }
-
-        BlockEntity be = level.getBlockEntity(targetPos);
-        if (!(be instanceof AnimalProduceSpotBlockEntity produceBe)) {
-            return 0;
-        }
-
-        ItemStack produce = produceBe.getProduceStack();
-        if (produce.isEmpty()) {
-            return 0;
-        }
-        if (!Objects.equals(produceBe.getBuildingId(), building.buildingId())) {
-            return 0;
-        }
-
-        ItemStack remainder = insertIntoStorage(produce, false);
-        if (remainder.isEmpty()) {
-            level.removeBlock(targetPos, false);
-            return produce.getCount();
-        }
-        return 0;
     }
 
     private ItemStack extractUpTo(int amount, boolean simulate) {
@@ -459,7 +305,13 @@ public class AutoGrabberBlockEntity extends BlockEntity implements UtilityAutoma
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
-        return ChestMenu.threeRows(containerId, playerInventory, this);
+        return new ChestMenu(
+                MenuType.GENERIC_9x4,
+                containerId,
+                playerInventory,
+                this,
+                STORAGE_ROWS
+        );
     }
 
     private void syncToClient() {
@@ -492,7 +344,6 @@ public class AutoGrabberBlockEntity extends BlockEntity implements UtilityAutoma
     @Override
     protected void saveAdditional(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
-        tag.putString(TAG_BUILDING_ID, buildingId);
         ListTag list = new ListTag();
         for (int i = 0; i < items.size(); i++) {
             ItemStack stack = items.get(i);
@@ -510,7 +361,6 @@ public class AutoGrabberBlockEntity extends BlockEntity implements UtilityAutoma
     @Override
     protected void loadAdditional(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
-        buildingId = tag.contains(TAG_BUILDING_ID) ? tag.getString(TAG_BUILDING_ID) : "";
         for (int i = 0; i < items.size(); i++) {
             items.set(i, ItemStack.EMPTY);
         }
