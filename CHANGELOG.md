@@ -1,5 +1,75 @@
 # Changelog
 
+## 0.5.3 - 2026-07-27
+
+### Update Log (English)
+
+#### Addon And Data-Pack Platform
+
+- Added a generic, namespaced extension platform for future addons instead of special-casing any existing addon. Stable content IDs, typed references, aliases, deterministic ordering, conflict diagnostics, lifecycle freezing and atomic reload snapshots now form a shared foundation across the major game systems.
+- Added compatibility-managed world, farm, player, NPC, animal, building, machine, location, festival-session and long-term progress state. Unknown platform-owned namespaces survive save/load while their addon is absent, and migration or cleanup remains explicit and previewable.
+- Added public API maturity classification and binary compatibility baselines. New surfaces remain experimental until their documentation, independent consumers, runtime behavior, multiplayer semantics and migration evidence justify promotion.
+
+#### Maps, Content And Production
+
+- Added extensible locations, regions, map slots, world anchors, farm layouts, portals and building blueprints so new maps can be referenced by NPC schedules, festivals, fishing, forage, quests, music and travel without adding core coordinate branches.
+- Added typed extension paths for crops, trees, managed animals, animal buildings, machines, production plans, fishing, fish ponds, mine monster profiles, combat events and transactional world events.
+- Added synchronized Data Map food effects for arbitrary registered Minecraft or addon foods. Existing food items keep their own consumption behavior while Stardew energy, health, buffs and effects are applied by data.
+- Replaced duplicated per-flavor juice and wine assets with shared tinted drink models while preserving legacy flavored output identities and quality presentation.
+
+#### NPCs, Shops, Festivals And Progress
+
+- Added namespaced NPC profiles, displays, entity resolution, lifecycle events, schedules, dialogue, gift tastes, friendship rewards, social rules and shop bindings.
+- Added extensible currencies, compound costs, stock policies, products, server-authoritative purchase preparation and idempotent transaction handling.
+- Added festival map overlays, participants, mechanics, activities, rewards, persistent sessions and epoch/revision synchronization, together with extensible progress domains, requirements, rewards and production events.
+
+#### Multiplayer, Client Fallbacks And Diagnostics
+
+- Added optional and required network-capability negotiation, bounded synchronized content snapshots, stale-revision rejection, disconnect cache cleanup and server-authoritative client views.
+- Missing translations now fall back to readable stable IDs, and missing portraits or display resources no longer hide gameplay entries. A failed client snapshot refresh keeps the previous complete revision.
+- Added extension diagnostics, state inspection and maintenance commands, failure isolation, deterministic random streams, bounded spatial indexes and performance budgets for high-frequency systems.
+
+#### Examples, Compatibility And Verification
+
+- Expanded the independent Java addon and data-pack examples into vertical samples covering maps, NPCs, shops, festivals, progress, animals, farming, machines, trees, fishing, mining, combat and world events.
+- Added public API compatibility checks, per-type maturity review, atomic reload and legacy-state tests, fixed-commit external addon canaries and a stricter runtime smoke verifier.
+- Verified a real graphical client joining a copied existing world on a dedicated server, forcibly disconnecting, reconnecting, re-negotiating capabilities, reloading player data and completing an orderly five-dimension save.
+- Updated the public mod version to `0.5.3`.
+
+### 更新日志（中文）
+
+#### 附属模组与数据包平台
+
+- 新增面向未来未知附属的通用命名空间扩展平台，不为任何现有附属增加专用判断。稳定内容 ID、强类型引用、别名、确定性排序、冲突诊断、生命周期冻结和原子 reload 快照现在共同服务于主要游戏系统。
+- 新增由平台管理的世界、农场、玩家、NPC、动物、建筑、机器、地点、节日会话和长期进度状态。附属暂时缺席时，平台管理的未知命名空间数据仍可跨读写保存；迁移和清理必须显式预览后执行。
+- 新增公共 API 成熟度分类与二进制兼容基线。新入口在文档、独立消费者、运行时、多人语义和迁移证据充分前继续保持实验状态，不因版本发布批量稳定化。
+
+#### 地图、内容与生产
+
+- 新增可扩展地点、区域、地图槽位、世界锚点、农场布局、传送和建筑蓝图。新地图可被 NPC 日程、节日、钓鱼、采集、任务、音乐和旅行共同引用，不再要求本体增加专用坐标分支。
+- 为作物、树木、托管动物、动物住所、机器、生产计划、钓鱼、鱼塘、矿井怪物、战斗事件和事务化世界事件补充强类型扩展路径。
+- 任意已注册的 Minecraft 原版或附属食物均可通过同步 Data Map 获得星露谷能量、生命、增益和效果，同时保留物品原有的进食行为。
+- 将重复的逐口味果汁与果酒资源收敛为可着色的通用饮品模型，并保留旧口味产物身份和品质显示兼容。
+
+#### NPC、商店、节日与进度
+
+- 新增命名空间 NPC Profile、展示、实体解析、生命周期、日程、对话、礼物喜好、友情奖励、社交规则和商店绑定。
+- 新增可扩展货币、复合成本、库存策略、商品、服务端权威购买准备和幂等事务处理。
+- 新增节日地图覆盖、参与者、玩法、活动、奖励、持久会话与 epoch/revision 同步，并补充可扩展进度领域、条件、奖励和生产事件。
+
+#### 多人、客户端降级与诊断
+
+- 新增可选/必需网络能力协商、有界内容快照、旧 revision 拒绝、断线缓存清理和服务端权威客户端视图。
+- 缺少翻译时显示可读稳定 ID，缺少肖像或展示资源时不再隐藏玩法条目；客户端快照刷新失败时保留上一份完整 revision。
+- 新增扩展诊断、状态检查与维护命令、失败隔离、确定性随机流、有界空间索引和高频系统性能预算。
+
+#### 样例、兼容与验证
+
+- 将独立 Java 附属和数据包样例扩展为贯穿地图、NPC、商店、节日、进度、动物、农场、机器、树木、钓鱼、矿井、战斗和世界事件的纵向样例。
+- 新增公共 API 兼容检查、逐类型成熟度复核、原子 reload 与旧状态测试、固定提交的外部附属 canary，以及更严格的运行时 smoke 验证器。
+- 使用真实图形客户端连接用户旧档副本专服，完成强制断线、重新连接、能力重新协商、玩家数据重载和五维度正常保存。
+- 项目公开版本号更新为 `0.5.3`。
+
 ## 0.5.2 - 2026-07-22
 
 ### Update Log (English)

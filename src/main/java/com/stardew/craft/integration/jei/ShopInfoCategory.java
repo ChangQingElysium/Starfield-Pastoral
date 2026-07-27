@@ -285,6 +285,7 @@ public final class ShopInfoCategory implements IRecipeCategory<ShopInfoCategory.
             return switch (fields[0]) {
                 case "never" -> Component.translatable("stardewcraft.jei.shop.condition.never");
                 case "has_item" -> hasItemCondition(fields);
+                case "lacks_item" -> lacksItemCondition(fields);
                 case "money" -> moneyCondition(fields);
                 case "flag" -> Component.translatable(Boolean.parseBoolean(fields[1])
                         ? "stardewcraft.jei.shop.condition.story_required"
@@ -310,6 +311,19 @@ public final class ShopInfoCategory implements IRecipeCategory<ShopInfoCategory.
         }
         ItemStack stack = new ItemStack(BuiltInRegistries.ITEM.get(itemId));
         return Component.translatable("stardewcraft.jei.shop.condition.has_item", stack.getHoverName(), count);
+    }
+
+    private static Component lacksItemCondition(String[] fields) {
+        ResourceLocation itemId = fields.length > 1 ? ResourceLocation.tryParse(fields[1]) : null;
+        int count = fields.length > 2 ? Integer.parseInt(fields[2]) : 1;
+        if (itemId == null || !BuiltInRegistries.ITEM.containsKey(itemId)) {
+            return Component.translatable("stardewcraft.jei.shop.conditional");
+        }
+        ItemStack stack = new ItemStack(BuiltInRegistries.ITEM.get(itemId));
+        return Component.translatable(
+                "stardewcraft.jei.shop.condition.lacks_item",
+                stack.getHoverName(),
+                count);
     }
 
     private static Component moneyCondition(String[] fields) {

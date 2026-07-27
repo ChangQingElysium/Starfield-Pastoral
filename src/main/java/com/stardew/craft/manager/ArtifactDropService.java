@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.api.v1.world.StardewWorldLootPools;
+import com.stardew.craft.api.v1.world.StardewArtifactSpotDrops;
 import com.stardew.craft.desert.DesertConstants;
 import com.stardew.craft.festival.desert.DesertFestivalService;
 import com.stardew.craft.item.ModItems;
@@ -538,6 +539,59 @@ public final class ArtifactDropService {
         return drops;
     }
 
+    /** Read-only effective rule projection used by the public catalog and diagnostics. */
+    public static List<StardewArtifactSpotDrops.PoolSnapshot>
+    artifactSpotSnapshot() {
+        TreeSet<String> groups = new TreeSet<>(locationDrops.keySet());
+        groups.addAll(ARTIFACT_SPOT_CHANCES.keySet());
+        ArrayList<StardewArtifactSpotDrops.PoolSnapshot> pools =
+                new ArrayList<>();
+        for (String group : groups) {
+            List<StardewArtifactSpotDrops.DropSnapshot> entries =
+                    dropsForGroup(group).stream()
+                            .map(drop -> artifactSpotDropSnapshot(
+                                    group, drop))
+                            .toList();
+            pools.add(new StardewArtifactSpotDrops.PoolSnapshot(
+                    group, entries));
+        }
+        return List.copyOf(pools);
+    }
+
+    private static StardewArtifactSpotDrops.DropSnapshot
+    artifactSpotDropSnapshot(String group, DropEntry drop) {
+        LinkedHashSet<ResourceLocation> items = new LinkedHashSet<>();
+        if (drop.item != null) {
+            items.add(drop.item.getId());
+        }
+        if (drop.randomItems != null) {
+            drop.randomItems.forEach(item -> items.add(item.getId()));
+        }
+        boolean randomArtifact =
+                "RANDOM_ARTIFACT_FOR_DIG_SPOT".equals(drop.id);
+        if (randomArtifact) {
+            ARTIFACT_SPOT_CHANCES.getOrDefault(group, List.of())
+                    .forEach(chance -> items.add(chance.item.getId()));
+        }
+        boolean dynamic = randomArtifact
+                || drop.id.startsWith("LOST_BOOK_OR_ITEM")
+                || drop.id.startsWith("SECRET_NOTE_OR_ITEM");
+        if (drop.id.startsWith("LOST_BOOK_OR_ITEM")
+                || drop.id.startsWith("SECRET_NOTE_OR_ITEM")) {
+            int separator = drop.id.indexOf(' ');
+            if (separator >= 0) {
+                DeferredItem<? extends Item> fallback =
+                        resolveDropItemId(
+                                drop.id.substring(separator + 1).trim());
+                if (fallback != null) {
+                    items.add(fallback.getId());
+                }
+            }
+        }
+        return new StardewArtifactSpotDrops.DropSnapshot(
+                drop.id, List.copyOf(items), dynamic);
+    }
+
     // ======================== Main Drop Logic ========================
 
     /**
@@ -557,6 +611,17 @@ public final class ArtifactDropService {
         RandomSource random = level.getRandom();
         String actualLocation = resolveLocation(level, pos);
         String dropGroup = resolveDropGroup(level, actualLocation);
+        List<ItemStack> addonDrops =
+                com.stardew.craft.api.v1.internal.world
+                        .StardewArtifactSpotDropRegistry.resolve(
+                        level,
+                        pos,
+                        player,
+                        actualLocation,
+                        dropGroup);
+        if (addonDrops != null) {
+            return addonDrops;
+        }
         StardewTimeManager tm = StardewTimeManager.get();
         int season = tm.getCurrentSeason();
         int totalDaysPlayed = (tm.getCurrentYear() - 1) * 112 + season * 28 + tm.getCurrentDay();

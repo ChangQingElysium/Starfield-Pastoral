@@ -2,6 +2,7 @@ package com.stardew.craft.communitycenter.state;
 
 import com.stardew.craft.communitycenter.data.BundleDataManager;
 import com.stardew.craft.communitycenter.data.BundleDefinition;
+import com.stardew.craft.api.v1.internal.communitycenter.StardewCommunityCenterVariantRegistry;
 
 import java.util.List;
 import java.util.UUID;
@@ -44,7 +45,8 @@ public final class CommunityCenterProgress {
      */
     public static boolean areAllBundlesInAreaComplete(int areaId, UUID player) {
         CommunityCenterSavedData data = CommunityCenterSavedData.get();
-        List<BundleDefinition> bundles = BundleDataManager.getBundlesForArea(areaId);
+        List<BundleDefinition> bundles =
+                StardewCommunityCenterVariantRegistry.area(player, areaId);
         if (bundles.isEmpty()) return false;
 
         for (BundleDefinition def : bundles) {
@@ -83,7 +85,8 @@ public final class CommunityCenterProgress {
             if (areaName == null) continue;
 
             boolean complete = data.isAreaComplete(player, areaId);
-            List<BundleDefinition> bundles = BundleDataManager.getBundlesForArea(areaId);
+            List<BundleDefinition> bundles =
+                    StardewCommunityCenterVariantRegistry.area(player, areaId);
 
             sb.append(String.format("  [%s] %s (%d/%d bundles)%s\n",
                     complete ? "\u2713" : " ",

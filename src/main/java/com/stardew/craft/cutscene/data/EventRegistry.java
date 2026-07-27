@@ -32,65 +32,74 @@ public final class EventRegistry {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final AtomicDefinitionStore<EventData> STORE = new AtomicDefinitionStore<>();
 
-    private static volatile RegistryState state = RegistryState.empty();
+    private static volatile Catalog catalog = Catalog.empty();
 
     private EventRegistry() {
     }
 
     public static EventData getById(String id) {
-        return state.byId().get(id);
+        return catalog.state().byId().get(id);
     }
 
     public static List<EventData> getByLocation(String location) {
-        return state.byLocation().getOrDefault(location, List.of());
+        return catalog.state().byLocation()
+                .getOrDefault(location, List.of());
     }
 
     public static List<EventData> getByNpc(String npcId) {
-        return state.byNpc().getOrDefault(npcId, List.of());
+        return catalog.state().byNpc()
+                .getOrDefault(npcId, List.of());
     }
 
     public static List<EventData> getTimeCheckEvents() {
-        return state.timeCheckEvents();
+        return catalog.state().timeCheckEvents();
     }
 
     public static Collection<EventData> all() {
-        return state.byId().values();
+        return catalog.state().byId().values();
     }
 
     public static Map<String, String> getRawJsonMap() {
-        return state.rawJsonById();
+        return catalog.state().rawJsonById();
     }
 
     public static long version() {
-        return STORE.snapshot().version();
+        return catalog.definitions().version();
     }
 
     public static String contentHash() {
-        return STORE.snapshot().contentHash();
+        return catalog.definitions().contentHash();
     }
 
     public static DefinitionSnapshot<EventData> snapshot() {
-        return STORE.snapshot();
+        return catalog.definitions();
+    }
+
+    public static SyncEventRegistryPayload currentSyncPayload() {
+        Catalog current = catalog;
+        return new SyncEventRegistryPayload(
+                current.definitions().version(),
+                current.definitions().contentHash(),
+                new HashMap<>(
+                        current.state().rawJsonById()));
     }
 
     /** Compatibility entry point for callers that do not yet carry sync metadata. */
     public static void loadFromJsonStrings(Map<String, String> jsonMap) {
         Candidate candidate = parseSynced(jsonMap);
-        var result = STORE.applyLocal(candidate.definitions(), candidate.sources(), candidate.diagnostics());
-        finishApply(result, candidate.rawJsonById(), "synced");
+        applyLocalCandidate(candidate, "synced");
     }
 
     /** Client-side atomic application of one server-authoritative snapshot. */
     public static void loadFromJsonStrings(long version, String hash, Map<String, String> jsonMap) {
         Candidate candidate = parseSynced(jsonMap);
-        var result = STORE.applyRemote(
-                version, hash, candidate.definitions(), candidate.sources(), candidate.diagnostics());
-        finishApply(result, candidate.rawJsonById(), "synced");
+        applyRemoteCandidate(
+                version, hash, candidate, "synced");
     }
 
-    public static void reset() {
+    public static synchronized void reset() {
         STORE.reset();
-        state = RegistryState.empty();
+        catalog = Catalog.empty();
     }
 
     private static Candidate parseSynced(Map<String, String> jsonMap) {
@@ -215,24 +224,59 @@ public final class EventRegistry {
                 : ResourceLocation.tryBuild(StardewCraft.MODID, rawId);
     }
 
-    private static void finishApply(
+    private static synchronized boolean applyLocalCandidate(
+            Candidate candidate,
+            String operation
+    ) {
+        var result = STORE.applyLocal(
+                candidate.definitions(),
+                candidate.sources(),
+                candidate.diagnostics());
+        return finishApply(result, candidate, operation);
+    }
+
+    private static synchronized boolean applyRemoteCandidate(
+            long version,
+            String hash,
+            Candidate candidate,
+            String operation
+    ) {
+        var result = STORE.applyRemote(
+                version,
+                hash,
+                candidate.definitions(),
+                candidate.sources(),
+                candidate.diagnostics());
+        return finishApply(result, candidate, operation);
+    }
+
+    private static boolean finishApply(
             AtomicDefinitionStore.ApplyResult<EventData> result,
-            Map<String, String> rawJsonById,
+            Candidate candidate,
             String operation
     ) {
         if (!result.accepted()) {
             logDiagnostics(result.diagnostics());
             LOGGER.error("Rejected {} cutscene snapshot; keeping version {} with {} events",
-                    operation, result.snapshot().version(), state.byId().size());
-            return;
+                    operation,
+                    catalog.definitions().version(),
+                    catalog.state().byId().size());
+            return false;
         }
         if (result.changed()) {
-            state = RegistryState.build(result.snapshot().definitions(), rawJsonById);
+            catalog = new Catalog(
+                    result.snapshot(),
+                    RegistryState.build(
+                            result.snapshot().definitions(),
+                            candidate.rawJsonById()));
         }
         logDiagnostics(result.diagnostics());
         LOGGER.info("Applied {} cutscene snapshot v{} ({}, {} events)",
-                operation, result.snapshot().version(), shortHash(result.snapshot().contentHash()),
-                state.byId().size());
+                operation,
+                catalog.definitions().version(),
+                shortHash(catalog.definitions().contentHash()),
+                catalog.state().byId().size());
+        return result.changed();
     }
 
     private static void logDiagnostics(List<DefinitionDiagnostic> diagnostics) {
@@ -270,10 +314,7 @@ public final class EventRegistry {
                 @javax.annotation.Nonnull ProfilerFiller profiler
         ) {
             Candidate candidate = parseResources(objects);
-            var result = STORE.applyLocal(
-                    candidate.definitions(), candidate.sources(), candidate.diagnostics());
-            finishApply(result, candidate.rawJsonById(), "reload");
-            if (result.accepted() && result.changed()) {
+            if (applyLocalCandidate(candidate, "reload")) {
                 syncOnlinePlayers();
             }
         }
@@ -287,7 +328,29 @@ public final class EventRegistry {
     ) {
     }
 
-    private record RegistryState(
+    static Catalog catalog() {
+        return catalog;
+    }
+
+    record Catalog(
+            DefinitionSnapshot<EventData> definitions,
+            RegistryState state
+    ) {
+        Catalog {
+            definitions = java.util.Objects.requireNonNull(
+                    definitions, "definitions");
+            state = java.util.Objects.requireNonNull(
+                    state, "state");
+        }
+
+        private static Catalog empty() {
+            return new Catalog(
+                    DefinitionSnapshot.empty(),
+                    RegistryState.empty());
+        }
+    }
+
+    record RegistryState(
             Map<String, EventData> byId,
             Map<String, List<EventData>> byLocation,
             Map<String, List<EventData>> byNpc,

@@ -1,0 +1,12 @@
+{
+  "builder": "stardewcraft:robin",
+  "order": 20,
+  "display_name": "stardewcraft.robin.blueprint.barn.name",
+  "description": "stardewcraft.robin.blueprint.barn.desc",
+  "money": 6000,
+  "materials": [
+    { "item": "stardewcraft:wood_normal", "count": 350 },
+    { "item": "stardewcraft:stone", "count": 150 }
+  ],
+  "result_item": "stardewcraft:barn_manager"
+}

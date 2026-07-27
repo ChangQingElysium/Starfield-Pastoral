@@ -1,0 +1,7 @@
+{
+  "owner_npc": "example_stardew_addon:archivist",
+  "owner_dialogue": "example_stardew_addon.shop.orchard_stand",
+  "inventory_providers": [
+    "example_stardew_addon:daily_apples"
+  ]
+}

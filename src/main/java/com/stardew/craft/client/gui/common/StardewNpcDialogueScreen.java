@@ -663,13 +663,35 @@ public class StardewNpcDialogueScreen extends Screen {
 
     private PortraitResource resolvePortraitResource() {
         String id = normalizedNpcId();
-        ResourceLocation vanillaPortrait = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/portraits/" + id + ".png");
-        if (hasResource(vanillaPortrait)) {
-            return loadPortrait(vanillaPortrait, 128, 320);
-        }
-
-        ResourceLocation fallback = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/entity/npc/" + id + ".png");
-        return loadPortrait(fallback, 128, 128);
+        com.stardew.craft.api.v1.npc.StardewNpcDisplay display =
+                com.stardew.craft.api.v1.npc.StardewNpcDisplays.resolve(id);
+        ResourceLocation genericFallback = ResourceLocation.fromNamespaceAndPath(
+                StardewCraft.MODID, "textures/entity/npc/lewis.png");
+        String legacyPath =
+                com.stardew.craft.client.ClientDisplayFallbacks.stablePath(
+                        id, "lewis");
+        ResourceLocation legacyFallback = ResourceLocation.fromNamespaceAndPath(
+                StardewCraft.MODID,
+                "textures/entity/npc/" + legacyPath + ".png");
+        ResourceLocation availableFallback =
+                com.stardew.craft.client.ClientDisplayFallbacks
+                        .availableResource(
+                                legacyFallback,
+                                genericFallback,
+                                this::hasResource);
+        ResourceLocation requested =
+                display == null ? null : display.portraitTexture();
+        ResourceLocation resolved =
+                com.stardew.craft.client.ClientDisplayFallbacks
+                        .availableResource(
+                                requested,
+                                availableFallback,
+                                this::hasResource);
+        boolean usesDisplay = display != null && resolved.equals(requested);
+        return loadPortrait(
+                resolved,
+                usesDisplay ? display.portraitSheetWidth() : 128,
+                usesDisplay ? display.portraitSheetHeight() : 128);
     }
 
     private boolean hasResource(ResourceLocation location) {

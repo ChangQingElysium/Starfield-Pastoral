@@ -32,10 +32,7 @@ public record SyncEventRegistryPayload(
             SyncEventRegistryPayload::new);
 
     public static SyncEventRegistryPayload current() {
-        return new SyncEventRegistryPayload(
-                EventRegistry.version(),
-                EventRegistry.contentHash(),
-                new java.util.HashMap<>(EventRegistry.getRawJsonMap()));
+        return EventRegistry.currentSyncPayload();
     }
 
     public static void handle(SyncEventRegistryPayload payload, IPayloadContext context) {

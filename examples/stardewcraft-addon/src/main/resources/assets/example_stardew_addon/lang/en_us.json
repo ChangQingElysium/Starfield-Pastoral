@@ -1,0 +1,14 @@
+{
+  "entity.example_stardew_addon.npc.archivist": "Orchard Archivist",
+  "example_stardew_addon.relationship.archivist": "Archivist",
+  "example_stardew_addon.npc.archivist.introduction": "I keep the orchard's records. Every tree has a story.",
+  "example_stardew_addon.npc.archivist.default": "The orchard ledger is up to date.",
+  "example_stardew_addon.npc.archivist.monday": "Mondays are for cataloguing apples.",
+  "example_stardew_addon.npc.archivist.gift_positive": "This belongs in the collection.",
+  "example_stardew_addon.npc.archivist.gift_negative": "I am not sure where to file this.",
+  "example_stardew_addon.npc.archivist.gift_loved": "A perfect archival specimen!",
+  "example_stardew_addon.npc.archivist.gift_liked": "Useful. Thank you.",
+  "example_stardew_addon.npc.archivist.gift_neutral": "I can make room for it.",
+  "example_stardew_addon.npc.archivist.gift_disliked": "This may need a sealed cabinet.",
+  "example_stardew_addon.npc.archivist.gift_hated": "Please keep that away from the records."
+}

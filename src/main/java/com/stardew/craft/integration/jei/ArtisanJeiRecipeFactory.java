@@ -1,12 +1,16 @@
 package com.stardew.craft.integration.jei;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.internal.machine.StardewMachineTypeRegistry;
+import com.stardew.craft.api.v1.internal.machine.StardewMachineRecipeDisplayRegistry;
+import com.stardew.craft.api.v1.machine.StardewMachineRecipeDisplay;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.item.artisan.ArtisanRecipeDataManager;
+import com.stardew.craft.item.artisan.FlavoredArtisanOutputResolver;
 import com.stardew.craft.item.artisan.PreserveType;
 import com.stardew.craft.item.artisan.PreservesItem;
 import com.stardew.craft.item.artisan.SeedMakerOutputResolver;
-import com.stardew.craft.item.artisan.SmokedFishItem;
+import com.stardew.craft.item.artisan.SmokedOutputResolver;
 import com.stardew.craft.item.catalog.StardewItemCatalog;
 import com.stardew.craft.item.catalog.StardewItemDisplayStacks;
 import com.stardew.craft.item.quality.QualityHelper;
@@ -62,7 +66,37 @@ public final class ArtisanJeiRecipeFactory {
         if (PRESERVES_JAR.equals(machine.id())) {
             result.addAll(buildRoeRecipes(machine, definitions));
         }
+        for (StardewMachineRecipeDisplay display
+                : StardewMachineRecipeDisplayRegistry.displays(machine.id())) {
+            result.add(fromAddonDisplay(machine, display));
+        }
         return List.copyOf(result);
+    }
+
+    private static ArtisanJeiRecipe fromAddonDisplay(
+            MachineJeiRegistry.Machine machine,
+            StardewMachineRecipeDisplay display
+    ) {
+        List<ArtisanJeiRecipe.Input> inputs = display.inputs().stream()
+                .map(input -> new ArtisanJeiRecipe.Input(
+                        input.stacks(), input.count(), input.auxiliary()))
+                .toList();
+        List<ArtisanJeiRecipe.Output> outputs = display.outputs().stream()
+                .map(output -> new ArtisanJeiRecipe.Output(
+                        output.stacks(),
+                        output.minCount(),
+                        output.maxCount(),
+                        output.chance()))
+                .toList();
+        return new ArtisanJeiRecipe(
+                display.id(),
+                machine,
+                inputs,
+                outputs,
+                display.minutes(),
+                display.keepInputQuality(),
+                display.outputQuality()
+        );
     }
 
     private static ArtisanJeiRecipe buildForItem(
@@ -79,6 +113,19 @@ public final class ArtisanJeiRecipeFactory {
         inputs.add(new ArtisanJeiRecipe.Input(inputStacks, definition.consumeCount(), false));
         if (FISH_SMOKER.equals(machine.id())) {
             inputs.add(new ArtisanJeiRecipe.Input(List.of(new ItemStack(Items.COAL)), 1, true));
+        } else {
+            for (var auxiliary : StardewMachineTypeRegistry.auxiliaryInputs(machine.id())) {
+                if (!BuiltInRegistries.ITEM.containsKey(auxiliary.itemId())) {
+                    continue;
+                }
+                Item auxiliaryItem = BuiltInRegistries.ITEM.get(auxiliary.itemId());
+                List<ItemStack> auxiliaryStacks =
+                        displayStacks(auxiliaryItem, auxiliary.count());
+                if (!auxiliaryStacks.isEmpty()) {
+                    inputs.add(new ArtisanJeiRecipe.Input(
+                            auxiliaryStacks, auxiliary.count(), true));
+                }
+            }
         }
 
         List<ArtisanJeiRecipe.Output> outputs = machine.producesItem()
@@ -129,7 +176,7 @@ public final class ArtisanJeiRecipeFactory {
             for (ItemStack source : sources) {
                 ItemStack output = itemStack(definition.outputId(), count);
                 if (!output.isEmpty()) {
-                    PreservesItem.createFlavored(definition.preserveType(), source, output);
+                    FlavoredArtisanOutputResolver.apply(definition.preserveType(), source, output);
                     flavored.add(output);
                 }
             }
@@ -162,17 +209,13 @@ public final class ArtisanJeiRecipeFactory {
             Item inputItem,
             List<ItemStack> inputStacks
     ) {
-        ResourceLocation inputId = BuiltInRegistries.ITEM.getKey(inputItem);
-        ResourceLocation smokedId = ResourceLocation.fromNamespaceAndPath(
-                StardewCraft.MODID, "smoked_" + inputId.getPath());
-        Item smokedItem = BuiltInRegistries.ITEM.get(smokedId);
-        if (!(smokedItem instanceof SmokedFishItem)) {
-            return List.of();
-        }
-
         List<ItemStack> outputs = new ArrayList<>();
         for (ItemStack input : inputStacks) {
-            ItemStack output = new ItemStack(smokedItem, Math.max(1, definition.outputCount()));
+            ItemStack output = SmokedOutputResolver.resolve(input);
+            if (output.isEmpty()) {
+                continue;
+            }
+            output.setCount(Math.max(1, definition.outputCount()));
             if (definition.keepInputQuality()) {
                 QualityHelper.setQuality(output, QualityHelper.getQuality(input));
             } else if (definition.outputQuality() >= 0) {

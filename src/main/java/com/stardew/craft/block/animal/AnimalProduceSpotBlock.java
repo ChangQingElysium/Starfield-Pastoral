@@ -2,6 +2,7 @@ package com.stardew.craft.block.animal;
 
 import com.stardew.craft.animal.data.AnimalWorldData;
 import com.stardew.craft.animal.model.AnimalBuildingRecord;
+import com.stardew.craft.animal.service.AnimalProducePlacementService;
 import com.stardew.craft.blockentity.AnimalProduceSpotBlockEntity;
 import com.stardew.craft.blockentity.ModBlockEntities;
 import com.stardew.craft.player.PlayerStardewDataAPI;
@@ -95,13 +96,35 @@ public class AnimalProduceSpotBlock extends BaseEntityBlock {
             return InteractionResult.PASS;
         }
 
-        ItemStack stack = produceBe.harvestOne();
+        long ledgerEntryId =
+                produceBe.getProduceLedgerEntryId();
+        AnimalWorldData worldData = null;
+        boolean ledgerBacked =
+                level instanceof ServerLevel
+                        && ledgerEntryId > 0L;
+        ItemStack stack;
+        if (ledgerBacked) {
+            worldData = AnimalWorldData.get(
+                    (ServerLevel) level);
+            var entry = worldData.getAnimalProduce(
+                    ledgerEntryId).orElse(null);
+            if (entry == null) {
+                level.removeBlock(pos, false);
+                return InteractionResult.CONSUME;
+            }
+            stack = AnimalProducePlacementService
+                    .stackForLedgerEntry(entry);
+        } else {
+            stack = produceBe.harvestOne();
+        }
         if (stack.isEmpty()) {
             return InteractionResult.PASS;
         }
 
         if (!player.addItem(stack)) {
-            produceBe.setProduceStack(stack);
+            if (!ledgerBacked) {
+                produceBe.setProduceStack(stack);
+            }
             player.displayClientMessage(net.minecraft.network.chat.Component.translatable("stardewcraft.animal.produce.inventory_full"), true);
             return InteractionResult.CONSUME;
         }
@@ -109,9 +132,35 @@ public class AnimalProduceSpotBlock extends BaseEntityBlock {
         if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
             PlayerStardewDataAPI.recordAnimalProductsCollected(serverPlayer, stack.getCount());
         }
+        if (worldData != null) {
+            worldData.completeAnimalProduce(
+                    ledgerEntryId);
+        }
         level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.6f, 1.0f);
         level.removeBlock(pos, false);
         return InteractionResult.CONSUME;
+    }
+
+    @Override
+    public void onRemove(
+            @Nonnull BlockState state,
+            @Nonnull Level level,
+            @Nonnull BlockPos pos,
+            @Nonnull BlockState newState,
+            boolean isMoving
+    ) {
+        if (!state.is(newState.getBlock()) && level instanceof ServerLevel serverLevel) {
+            BlockEntity blockEntity = level.getBlockEntity(pos);
+            if (blockEntity instanceof AnimalProduceSpotBlockEntity produceSpot
+                    && produceSpot.getProduceLedgerEntryId() > 0L) {
+                AnimalWorldData.get(serverLevel).releaseAnimalProduceProjection(
+                        produceSpot.getProduceLedgerEntryId(),
+                        serverLevel.dimension().location().toString(),
+                        pos
+                );
+            }
+        }
+        super.onRemove(state, level, pos, newState, isMoving);
     }
 
     @Override

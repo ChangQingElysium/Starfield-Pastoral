@@ -1,6 +1,8 @@
 package com.stardew.craft.client.gui;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.agriculture.StardewAnimalPurchaseDisplay;
+import com.stardew.craft.api.v1.agriculture.StardewAnimalPurchaseDisplays;
 import com.stardew.craft.client.gui.common.CommonGuiTextures;
 import com.stardew.craft.client.gui.common.SdvFontAdapter;
 import com.stardew.craft.client.gui.common.SdvTexture;
@@ -47,16 +49,11 @@ public final class AnimalPurchaseScreen extends Screen {
     private static final long GLOBAL_FADE_MS = 833L;
 
     private static final SdvTexture CANCEL_BUTTON = texture("cancel_button", 64, 64);
-    private static final Map<String, SdvTexture> ANIMAL_TEXTURES = Map.of(
-        "white_chicken", texture("white_chicken", 32, 16),
-        "duck", texture("duck", 32, 16),
-        "rabbit", texture("rabbit", 32, 16),
-        "cow", texture("cow", 32, 16),
-        "goat", texture("goat", 32, 16),
-        "sheep", texture("sheep", 32, 16),
-        "pig", texture("pig", 32, 16)
-    );
-
+    /**
+     * Legacy addon texture injection surface. Payload and registry displays
+     * take precedence; this map is consulted only as a compatibility fallback.
+     */
+    private static final Map<String, SdvTexture> ANIMAL_TEXTURES = Map.of();
     private final OpenAnimalPurchaseScreenPayload payload;
     private final List<OpenAnimalPurchaseScreenPayload.AnimalOption> animals;
     private float guiScale;
@@ -172,13 +169,43 @@ public final class AnimalPurchaseScreen extends Screen {
 
     private void drawAnimal(GuiGraphics graphics, OpenAnimalPurchaseScreenPayload.AnimalOption animal,
                             int index, int cellX, int cellY) {
-        SdvTexture texture = ANIMAL_TEXTURES.get(animal.animalTypeId().toLowerCase(Locale.ROOT));
+        SdvTexture texture = null;
+        int textureWidth = animal.shopTextureWidth();
+        int textureHeight = animal.shopTextureHeight();
+        ResourceLocation textureId =
+                ResourceLocation.tryParse(animal.shopTextureId());
+        if (textureId != null
+                && textureWidth > 0
+                && textureHeight > 0) {
+            texture = SdvTexture.full(
+                    textureId, textureWidth, textureHeight);
+        } else {
+            StardewAnimalPurchaseDisplay display =
+                    StardewAnimalPurchaseDisplays.display(animal.animalTypeId());
+            if (display != null) {
+                textureWidth = display.textureWidth();
+                textureHeight = display.textureHeight();
+                texture = SdvTexture.full(
+                        display.texture(),
+                        textureWidth,
+                        textureHeight);
+            }
+        }
+        if (texture == null) {
+            texture = ANIMAL_TEXTURES.get(
+                    animal.animalTypeId()
+                            .toLowerCase(Locale.ROOT));
+            if (texture != null) {
+                textureWidth = 32;
+                textureHeight = 16;
+            }
+        }
         if (texture == null) {
             return;
         }
         float scale = s4() * this.hoverScale[index];
-        int drawW = Math.round(32 * scale);
-        int drawH = Math.round(16 * scale);
+        int drawW = Math.round(textureWidth * scale);
+        int drawH = Math.round(textureHeight * scale);
         int drawX = cellX + (ui(CELL_WIDTH) - drawW) / 2;
         int drawY = cellY + (ui(CELL_HEIGHT) - drawH) / 2;
         if (animal.unlocked()) {

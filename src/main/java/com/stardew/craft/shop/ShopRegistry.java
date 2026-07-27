@@ -4,8 +4,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.stardew.craft.StardewCraft;
-import com.stardew.craft.api.v1.condition.StardewConditionContext;
-import com.stardew.craft.api.v1.condition.StardewConditions;
 import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.api.v1.shop.StardewShopDefinition;
 import com.stardew.craft.api.v1.shop.StardewShopEntry;
@@ -200,101 +198,149 @@ public final class ShopRegistry {
     public static List<ShopItemEntry> getFilteredItemsForPlayer(
             String shopId, ShopDefinition shop,
             net.minecraft.server.level.ServerPlayer player) {
-        com.stardew.craft.time.StardewTimeManager time = com.stardew.craft.time.StardewTimeManager.get();
-        final int season = time.getCurrentSeason();
-        final int year = time.getCurrentYear();
-        final int dayOfMonth = time.getCurrentDay();
-        List<ShopItemEntry> sourceItems = new ArrayList<>(shop.items());
-        ResourceLocation modernShopId = ResourceLocation.tryParse(shopId);
-        if (modernShopId != null) {
-            StardewShopInventoryContext context = new StardewShopInventoryContext(player, modernShopId);
-            for (ResourceLocation providerId : shop.inventoryProviders()) {
-                var provider = StardewShopInventoryProviders.get(providerId);
-                if (provider == null) {
-                    StardewCraft.LOGGER.error("[Shop] Missing inventory provider {} for {}", providerId, shopId);
-                    continue;
+        return getFilteredItemsForPlayer(
+                shopId, shop, player, false);
+    }
+
+    /**
+     * Builds the authoritative runtime inventory. The diagnostic overload can
+     * retain rows with zero remaining stock without changing normal shop
+     * opening or purchase behavior.
+     */
+    public static List<ShopItemEntry> getFilteredItemsForPlayer(
+            String shopId,
+            ShopDefinition shop,
+            net.minecraft.server.level.ServerPlayer player,
+            boolean includeSoldOut
+    ) {
+        return buildRuntimeInventory(
+                shopId,
+                player,
+                includeSoldOut,
+                getSourceItemsForPlayer(shopId, shop, player));
+    }
+
+    /**
+     * Returns every declared/provider row that can be identified for this
+     * player, plus today's generated runtime rows. Unlike the normal inventory,
+     * declared rows are retained when their date, condition, progress or
+     * ownership requirements are not met.
+     */
+    public static List<ShopItemEntry> getCandidateItemsForPlayer(
+            String shopId,
+            ShopDefinition shop,
+            net.minecraft.server.level.ServerPlayer player
+    ) {
+        List<ShopItemEntry> sourceItems =
+                getSourceItemsForPlayer(shopId, shop, player);
+        List<ShopItemEntry> runtimeItems =
+                buildRuntimeInventory(
+                        shopId, player, true, sourceItems);
+
+        LinkedHashMap<String, ShopItemEntry> runtimeById =
+                new LinkedHashMap<>();
+        for (ShopItemEntry entry : runtimeItems) {
+            runtimeById.putIfAbsent(entry.itemId(), entry);
+        }
+
+        LinkedHashMap<String, ShopItemEntry> candidates =
+                new LinkedHashMap<>();
+        for (ShopItemEntry source : sourceItems) {
+            // Placeholders are generator instructions, not purchasable rows.
+            if (source.itemId().startsWith("random:")) {
+                continue;
+            }
+            ShopItemEntry runtime =
+                    runtimeById.remove(source.itemId());
+            candidates.putIfAbsent(
+                    source.itemId(),
+                    runtime == null
+                            ? withRemainingStock(
+                                    player, shopId, source)
+                            : runtime);
+        }
+        runtimeById.forEach(candidates::putIfAbsent);
+        return List.copyOf(candidates.values());
+    }
+
+    private static List<ShopItemEntry> getSourceItemsForPlayer(
+            String shopId,
+            ShopDefinition shop,
+            net.minecraft.server.level.ServerPlayer player
+    ) {
+        List<ShopItemEntry> sourceItems =
+                new ArrayList<>(shop.items());
+        ResourceLocation modernShopId =
+                ResourceLocation.tryParse(shopId);
+        if (modernShopId == null) {
+            return sourceItems;
+        }
+
+        StardewShopInventoryContext context =
+                new StardewShopInventoryContext(
+                        player, modernShopId);
+        for (ResourceLocation providerId
+                : shop.inventoryProviders()) {
+            var provider =
+                    StardewShopInventoryProviders.get(providerId);
+            if (provider == null) {
+                StardewCraft.LOGGER.error(
+                        "[Shop] Missing inventory provider {} for {}",
+                        providerId, shopId);
+                continue;
+            }
+            try {
+                List<StardewShopEntry> provided =
+                        provider.provide(context);
+                if (provided != null) {
+                    provided.stream()
+                            .map(ShopRegistry::fromDataEntry)
+                            .forEach(sourceItems::add);
                 }
-                try {
-                    List<StardewShopEntry> provided = provider.provide(context);
-                    if (provided != null) provided.stream().map(ShopRegistry::fromDataEntry).forEach(sourceItems::add);
-                } catch (RuntimeException exception) {
-                    StardewCraft.LOGGER.error("[Shop] Inventory provider {} failed for {}", providerId, shopId, exception);
-                }
+            } catch (RuntimeException exception) {
+                StardewCraft.LOGGER.error(
+                        "[Shop] Inventory provider {} failed for {}",
+                        providerId, shopId, exception);
             }
         }
-        List<ShopItemEntry> rawItems = sourceItems.stream()
-                .filter(e -> e.isAvailableOnDate(season, year, dayOfMonth))
-                .collect(Collectors.toList());
+        return sourceItems;
+    }
 
+    private static List<ShopItemEntry> buildRuntimeInventory(
+            String shopId,
+            net.minecraft.server.level.ServerPlayer player,
+            boolean includeSoldOut,
+            List<ShopItemEntry> sourceItems
+    ) {
+        com.stardew.craft.time.StardewTimeManager time = com.stardew.craft.time.StardewTimeManager.get();
         java.util.UUID playerId = player.getUUID();
         com.stardew.craft.player.PlayerStardewData data =
             com.stardew.craft.player.PlayerDataManager.getPlayerData(player);
 
-        // Gather player conditions for mine-level / mail-flag filtering
-        int playerMineLevel = com.stardew.craft.mining.MiningDataManager.getPlayerData(player).getMaxFloorReached();
-        java.util.Set<String> playerMailFlags = data.getMailFlags();
-
         List<ShopItemEntry> result = new ArrayList<>();
-        for (ShopItemEntry e : rawItems) {
-            boolean conditionsMatch = true;
-            for (var condition : e.availableWhen()) {
-                boolean allowed = StardewConditions.test(condition, StardewConditionContext.forPlayer(player))
-                        .resultOrPartial(message -> StardewCraft.LOGGER.error(
-                                "[Shop] Entry condition failed for {} / {}: {}", shopId, e.itemId(), message))
-                        .orElse(false);
-                if (!allowed) {
-                    conditionsMatch = false;
-                    break;
-                }
+        for (ShopItemEntry e : sourceItems) {
+            if (!ShopEntryAvailabilityService
+                    .evaluate(player, shopId, e)
+                    .satisfied()) {
+                continue;
             }
-            if (!conditionsMatch) continue;
             if ("DesertFestival_EggShop".equals(shopId)
                     && "random:desert_festival_food".equals(e.itemId())) {
-                appendDesertFestivalEggShopRandomFood(result, playerId, time);
-                continue;
-            }
-            // SDV parity: never show recipes the player already knows
-            if (e.itemId().startsWith("recipe:")) {
-                String recipeId = SaloonService.extractRecipeId(e.itemId());
-                if (data.isRecipeUnlocked(recipeId)) continue;
-            }
-            if ("ShadowShop".equals(shopId)
-                    && "stardewcraft:stardrop".equals(e.itemId())
-                    && data.hasMailFlag(com.stardew.craft.sewer.SewerStoryFlags.SEWER_STARDROP_PURCHASED)) {
-                continue;
-            }
-            if ("ShadowShop".equals(shopId)
-                    && "stardewcraft:warp_wand".equals(e.itemId())
-                    && data.hasMailFlag(com.stardew.craft.sewer.SewerStoryFlags.RETURN_SCEPTER_PURCHASED)) {
-                continue;
-            }
-            if (com.stardew.craft.festival.FairFestivalService.STAR_TOKEN_SHOP_ID.equals(shopId)
-                    && "stardewcraft:stardrop".equals(e.itemId())
-                    && data.hasMailFlag(com.stardew.craft.festival.FairFestivalService.FAIR_STARDROP_FLAG)) {
-                continue;
-            }
-            if (shopId.startsWith("Festival_NightMarket_MagicBoat_")
-                    && !meetsNightMarketMuseumCondition(player, e.itemId())) {
-                continue;
-            }
-            // SDV parity: mine-level and mail-flag conditions
-            if (!e.meetsPlayerConditions(playerMineLevel, playerMailFlags)) continue;
-            if ("JojaMart".equals(shopId)
-                && "stardewcraft:auto_petter".equals(e.itemId())
-                && (!com.stardew.craft.communitycenter.state.CCStoryFlags.isJojaMember(player)
-                    || !com.stardew.craft.communitycenter.state.CCStoryFlags.hasFlag(
-                        player, com.stardew.craft.communitycenter.state.CCStoryFlags.CC_IS_COMPLETE))) {
+                appendDesertFestivalEggShopRandomFood(
+                        result, playerId, time, includeSoldOut);
                 continue;
             }
 
-            int remaining = ShopStockTracker.getRemaining(playerId, shopId, e.itemId(), e.stock());
-            if (remaining == 0) continue;
+            int remaining = ShopStockTracker.getRemaining(
+                    player, shopId, e.itemId(), e.stock());
+            if (!includeSoldOut && remaining == 0) continue;
 
             result.add(remaining == e.stock() ? e : new ShopItemEntry(
                 e.itemId(), e.displayName(), e.description(),
                 e.price(), remaining, e.tradeItemId(), e.tradeItemCount(),
                 e.seasons(), e.minYear(), e.minMineLevel(), e.mailFlag(),
-                e.dayOfWeek(), e.dayOfMonthParity(), e.purchaseStack()
+                e.dayOfWeek(), e.dayOfMonthParity(), e.purchaseStack(),
+                e.availableWhen()
             ));
         }
 
@@ -302,17 +348,23 @@ public final class ShopRegistry {
             net.minecraft.server.level.ServerLevel stardewLevel =
                 player.server.getLevel(com.stardew.craft.core.ModDimensions.STARDEW_VALLEY);
             if (stardewLevel != null) {
-                appendTravelingCartStock(result, player, data, time, TravelingCartManager.get(stardewLevel));
+                appendTravelingCartStock(
+                        result, player, data, time,
+                        TravelingCartManager.get(stardewLevel),
+                        includeSoldOut);
             }
         }
         if ("Bookseller".equals(shopId)) {
-            appendBooksellerStock(result, player, data, time);
+            appendBooksellerStock(
+                    result, player, data, time, includeSoldOut);
         }
         if ("BooksellerTrade".equals(shopId)) {
-            appendBooksellerTradeStock(result, player, time);
+            appendBooksellerTradeStock(
+                    result, player, time, includeSoldOut);
         }
         if ("Festival_FeastOfTheWinterStar_Pierre".equals(shopId)) {
-            appendWinterStarRandomStock(result, player, time);
+            appendWinterStarRandomStock(
+                    result, player, time, includeSoldOut);
         }
 
         if (("Festival_FestivalOfIce_TravelingMerchant".equals(shopId)
@@ -320,7 +372,7 @@ public final class ShopRegistry {
                 && !data.isDecorationUnlocked(com.stardew.craft.deco.DecorationType.WALLPAPER, "MoreWalls:19")) {
             String wpItemId = "wallpaper:MoreWalls:19";
             int wpRemaining = ShopStockTracker.getRemaining(playerId, shopId, wpItemId, 1);
-            if (wpRemaining > 0) {
+            if (includeSoldOut || wpRemaining > 0) {
                 ShopItemEntry wallpaperEntry = new ShopItemEntry(wpItemId, "", "", 500, wpRemaining,
                     null, 0, Set.of(), 1, 0, null, -1, 0, 1);
                 int insertAt = "Festival_FeastOfTheWinterStar_Pierre".equals(shopId)
@@ -367,7 +419,8 @@ public final class ShopRegistry {
                     e.itemId(), e.displayName(), e.description(),
                     markedPrice, e.stock(), e.tradeItemId(), e.tradeItemCount(),
                     e.seasons(), e.minYear(), e.minMineLevel(), e.mailFlag(),
-                    e.dayOfWeek(), e.dayOfMonthParity(), e.purchaseStack()
+                    e.dayOfWeek(), e.dayOfMonthParity(), e.purchaseStack(),
+                    e.availableWhen()
                 ));
             }
             return marked;
@@ -375,7 +428,35 @@ public final class ShopRegistry {
         return result;
     }
 
-    private static boolean meetsNightMarketMuseumCondition(
+    private static ShopItemEntry withRemainingStock(
+            net.minecraft.server.level.ServerPlayer player,
+            String shopId,
+            ShopItemEntry entry
+    ) {
+        int remaining = ShopStockTracker.getRemaining(
+                player, shopId, entry.itemId(), entry.stock());
+        if (remaining == entry.stock()) {
+            return entry;
+        }
+        return new ShopItemEntry(
+                entry.itemId(),
+                entry.displayName(),
+                entry.description(),
+                entry.price(),
+                remaining,
+                entry.tradeItemId(),
+                entry.tradeItemCount(),
+                entry.seasons(),
+                entry.minYear(),
+                entry.minMineLevel(),
+                entry.mailFlag(),
+                entry.dayOfWeek(),
+                entry.dayOfMonthParity(),
+                entry.purchaseStack(),
+                entry.availableWhen());
+    }
+
+    static boolean meetsNightMarketMuseumCondition(
             net.minecraft.server.level.ServerPlayer player,
             String itemId) {
         if (!"stardewcraft:scarecrow_7".equals(itemId)
@@ -406,7 +487,8 @@ public final class ShopRegistry {
     private static void appendDesertFestivalEggShopRandomFood(
             List<ShopItemEntry> result,
             java.util.UUID playerId,
-            com.stardew.craft.time.StardewTimeManager time) {
+            com.stardew.craft.time.StardewTimeManager time,
+            boolean includeSoldOut) {
         List<String> foods = List.of(
             "stardewcraft:spicy_eel",
             "stardewcraft:crab_cakes",
@@ -417,7 +499,7 @@ public final class ShopRegistry {
         int index = Math.floorMod((int)(time.getAbsoluteDay() * 1103515245L + 12345L), foods.size());
         String itemId = foods.get(index);
         int remaining = ShopStockTracker.getRemaining(playerId, "DesertFestival_EggShop", itemId, 5);
-        if (remaining > 0) {
+        if (includeSoldOut || remaining > 0) {
             result.add(new ShopItemEntry(itemId, "", "", 0, remaining,
                 "stardewcraft:calico_egg", 10, Set.of(), 1, 0, null, -1, 0, 1));
         }
@@ -428,7 +510,8 @@ public final class ShopRegistry {
             net.minecraft.server.level.ServerPlayer player,
             com.stardew.craft.player.PlayerStardewData data,
             com.stardew.craft.time.StardewTimeManager time,
-            TravelingCartManager manager) {
+            TravelingCartManager manager,
+            boolean includeSoldOut) {
         int absoluteDay = time.getAbsoluteDay();
         int season = time.getCurrentSeason();
         int year = time.getCurrentYear();
@@ -447,7 +530,8 @@ public final class ShopRegistry {
                 itemId,
                 getTravelingCartObjectPrice(shopRandom, itemId),
                 getTravelingCartRareMultiplierStock(shopRandom),
-                true
+                true,
+                includeSoldOut
             );
         }
 
@@ -461,7 +545,8 @@ public final class ShopRegistry {
                 "stardewcraft:red_cabbage_seeds",
                 getTravelingCartObjectPrice(shopRandom, "stardewcraft:red_cabbage_seeds"),
                 getTravelingCartRareMultiplierStock(shopRandom),
-                true
+                true,
+                includeSoldOut
             );
         }
 
@@ -478,31 +563,33 @@ public final class ShopRegistry {
                 itemId,
                 getTravelingCartFurniturePrice(shopRandom),
                 1,
-                true
+                true,
+                includeSoldOut
             );
             break;
         }
 
         if ((season == SPRING || season == SUMMER) && travelingCartItemExists("stardewcraft:rare_seed")) {
             addTravelingCartEntry(result, playerId, avoidRepeat, "stardewcraft:rare_seed", 1000,
-                    getTravelingCartRareMultiplierStock(shopRandom), true);
+                    getTravelingCartRareMultiplierStock(shopRandom), true,
+                    includeSoldOut);
         }
 
         if ((season == FALL || season == WINTER)
                 && travelingCartItemExists(TRAVELING_CART_RARECROW_ID)
                 && rollTravelingCartChance(absoluteDay, "cart_rarecrow", 0.4)) {
-            addTravelingCartEntry(result, playerId, avoidRepeat, TRAVELING_CART_RARECROW_ID, 4000, 1, false);
+            addTravelingCartEntry(result, playerId, avoidRepeat, TRAVELING_CART_RARECROW_ID, 4000, 1, false, includeSoldOut);
         }
 
         if ((season == FALL || season == WINTER)
                 && travelingCartItemExists("stardewcraft:coffee_bean")
                 && rollTravelingCartChance(absoluteDay, "cart_coffee_bean", 0.25)) {
-            addTravelingCartEntry(result, playerId, avoidRepeat, "stardewcraft:coffee_bean", 2500, 1, false);
+            addTravelingCartEntry(result, playerId, avoidRepeat, "stardewcraft:coffee_bean", 2500, 1, false, includeSoldOut);
         }
 
         if (travelingCartItemExists("stardewcraft:red_fez")
                 && rollTravelingCartChance(absoluteDay, "cart_fez", 0.1)) {
-            addTravelingCartEntry(result, playerId, avoidRepeat, "stardewcraft:red_fez", 8000, 1, false);
+            addTravelingCartEntry(result, playerId, avoidRepeat, "stardewcraft:red_fez", 8000, 1, false, includeSoldOut);
         }
 
         boolean isCommunityCenterComplete =
@@ -511,16 +598,16 @@ public final class ShopRegistry {
         if (isCommunityCenterComplete
                 && travelingCartItemExists("stardewcraft:joja_catalogue")
                 && rollTravelingCartChance(absoluteDay, "cart_jojaCatalogue", 0.1)) {
-            addTravelingCartEntry(result, playerId, avoidRepeat, "stardewcraft:joja_catalogue", 30000, 1, false);
+            addTravelingCartEntry(result, playerId, avoidRepeat, "stardewcraft:joja_catalogue", 30000, 1, false, includeSoldOut);
         }
         if (isCommunityCenterComplete
                 && travelingCartItemExists("stardewcraft:junimo_catalogue")
                 && rollTravelingCartChance(absoluteDay, "cart_junimoCatalogue", 0.1)) {
-            addTravelingCartEntry(result, playerId, avoidRepeat, "stardewcraft:junimo_catalogue", 70000, 1, false);
+            addTravelingCartEntry(result, playerId, avoidRepeat, "stardewcraft:junimo_catalogue", 70000, 1, false, includeSoldOut);
         }
         if (travelingCartItemExists("stardewcraft:retro_catalogue")
                 && rollTravelingCartChance(absoluteDay, "cart_retroCatalogue", 0.1)) {
-            addTravelingCartEntry(result, playerId, avoidRepeat, "stardewcraft:retro_catalogue", 110000, 1, false);
+            addTravelingCartEntry(result, playerId, avoidRepeat, "stardewcraft:retro_catalogue", 110000, 1, false, includeSoldOut);
         }
 
         net.minecraft.server.level.ServerLevel overworld = player.server.overworld();
@@ -533,7 +620,7 @@ public final class ShopRegistry {
                 }
                 int points = friendship.getPointsForNpc(playerId, portrait.npcId());
                 if (points / 250 >= 14) {
-                    addTravelingCartEntry(result, playerId, avoidRepeat, portrait.itemId(), 30000, 1, false);
+                    addTravelingCartEntry(result, playerId, avoidRepeat, portrait.itemId(), 30000, 1, false, includeSoldOut);
                 }
             }
         }
@@ -542,7 +629,7 @@ public final class ShopRegistry {
                 && travelingCartItemExists("stardewcraft:tea_set")
                 && rollTravelingCartChance(absoluteDay, "teaset", 0.05)) {
             addTravelingCartEntry(result, playerId, avoidRepeat, "stardewcraft:tea_set", 1_000_000,
-                    Integer.MAX_VALUE, false);
+                    Integer.MAX_VALUE, false, includeSoldOut);
         }
 
         if (rollTravelingCartChance(absoluteDay, "travelerSkillBook", 0.05)) {
@@ -554,7 +641,7 @@ public final class ShopRegistry {
             }
             if (!availableSkillBooks.isEmpty()) {
                 String skillBookId = availableSkillBooks.get(shopRandom.nextInt(availableSkillBooks.size()));
-                addTravelingCartEntry(result, playerId, avoidRepeat, skillBookId, 6000, Integer.MAX_VALUE, false);
+                addTravelingCartEntry(result, playerId, avoidRepeat, skillBookId, 6000, Integer.MAX_VALUE, false, includeSoldOut);
             }
         }
 
@@ -562,7 +649,7 @@ public final class ShopRegistry {
                 && travelingCartItemExists("stardewcraft:wedding_ring")
                 && !data.isRecipeUnlocked(com.stardew.craft.player.RecipeIdNormalizer.storageId(
                         "stardewcraft:wedding_ring"))) {
-            addTravelingCartEntry(result, playerId, avoidRepeat, "recipe:stardewcraft:wedding_ring", 500, 1, false);
+            addTravelingCartEntry(result, playerId, avoidRepeat, "recipe:stardewcraft:wedding_ring", 500, 1, false, includeSoldOut);
         }
     }
 
@@ -573,14 +660,15 @@ public final class ShopRegistry {
             String itemId,
             int price,
             int stock,
-            boolean shouldAvoidRepeat) {
+            boolean shouldAvoidRepeat,
+            boolean includeSoldOut) {
         if (shouldAvoidRepeat && !avoidRepeat.add(itemId)) {
             return;
         }
         int remaining = stock == Integer.MAX_VALUE
                 ? Integer.MAX_VALUE
                 : ShopStockTracker.getRemaining(playerId, "Traveler", itemId, stock);
-        if (remaining == 0) {
+        if (!includeSoldOut && remaining == 0) {
             return;
         }
         result.add(new ShopItemEntry(
@@ -605,51 +693,53 @@ public final class ShopRegistry {
             List<ShopItemEntry> result,
             net.minecraft.server.level.ServerPlayer player,
             com.stardew.craft.player.PlayerStardewData data,
-            com.stardew.craft.time.StardewTimeManager time) {
+            com.stardew.craft.time.StardewTimeManager time,
+            boolean includeSoldOut) {
         int absoluteDay = time.getAbsoluteDay();
         int year = time.getCurrentYear();
         java.util.UUID playerId = player.getUUID();
         java.util.Set<String> chosenSkillBooks = new java.util.LinkedHashSet<>();
 
         if (rollBooksellerChance(player, absoluteDay, "purple", 0.25D)) {
-            addBooksellerEntry(result, playerId, "stardewcraft:purple_book", 15000, 1);
+            addBooksellerEntry(result, playerId, "stardewcraft:purple_book", 15000, 1, includeSoldOut);
         }
 
         addRandomBooksellerSkillBook(result, player, playerId, absoluteDay, chosenSkillBooks,
-                "skill_slot_1", 0.60D, 10000);
+                "skill_slot_1", 0.60D, 10000, includeSoldOut);
         addRandomBooksellerSkillBook(result, player, playerId, absoluteDay, chosenSkillBooks,
-                "skill_slot_2", 0.80D, 8000);
+                "skill_slot_2", 0.80D, 8000, includeSoldOut);
         addRandomBooksellerSkillBook(result, player, playerId, absoluteDay, chosenSkillBooks,
-                "skill_slot_3", 1.00D, 5000);
+                "skill_slot_3", 1.00D, 5000, includeSoldOut);
 
         if (year >= 3) {
             String itemId = pickBooksellerItem(player, absoluteDay, "random_power", BOOKSELLER_RANDOM_POWER_BOOKS);
             if (itemId != null) {
-                addBooksellerEntry(result, playerId, itemId, 20000, 1);
+                addBooksellerEntry(result, playerId, itemId, 20000, 1, includeSoldOut);
             }
         }
 
-        addBooksellerEntry(result, playerId, "stardewcraft:book_speed", 15000, 1);
+        addBooksellerEntry(result, playerId, "stardewcraft:book_speed", 15000, 1, includeSoldOut);
         if (data.getStat("Book_Speed") > 0) {
-            addBooksellerEntry(result, playerId, "stardewcraft:book_speed2", 35000, 1);
+            addBooksellerEntry(result, playerId, "stardewcraft:book_speed2", 35000, 1, includeSoldOut);
         }
-        addBooksellerEntry(result, playerId, "stardewcraft:book_horse", 25000, 1);
-        addBooksellerEntry(result, playerId, "stardewcraft:book_grass", 25000, 1);
+        addBooksellerEntry(result, playerId, "stardewcraft:book_horse", 25000, 1, includeSoldOut);
+        addBooksellerEntry(result, playerId, "stardewcraft:book_grass", 25000, 1, includeSoldOut);
 
         // TODO: Replace this Year 3 fallback with GoldenWalnutsFound >= 100 once Ginger Island state exists.
         if (time.getCurrentYear() >= 3) {
-            addBooksellerEntry(result, playerId, "stardewcraft:book_queen_of_sauce", 50000, Integer.MAX_VALUE);
+            addBooksellerEntry(result, playerId, "stardewcraft:book_queen_of_sauce", 50000, Integer.MAX_VALUE, includeSoldOut);
         }
 
         if (rollBooksellerChance(player, absoluteDay, "extra_foraging", 0.33D)) {
-            addBooksellerEntry(result, playerId, "stardewcraft:skill_book_2", 8000, 1);
+            addBooksellerEntry(result, playerId, "stardewcraft:skill_book_2", 8000, 1, includeSoldOut);
         }
     }
 
     private static void appendBooksellerTradeStock(
             List<ShopItemEntry> result,
             net.minecraft.server.level.ServerPlayer player,
-            com.stardew.craft.time.StardewTimeManager time) {
+            com.stardew.craft.time.StardewTimeManager time,
+            boolean includeSoldOut) {
         int absoluteDay = time.getAbsoluteDay();
         java.util.UUID playerId = player.getUUID();
 
@@ -699,7 +789,8 @@ public final class ShopRegistry {
             java.util.Set<String> chosenSkillBooks,
             String salt,
             double chance,
-            int price) {
+            int price,
+            boolean includeSoldOut) {
         if (!rollBooksellerChance(player, absoluteDay, salt + "_chance", chance)) {
             return;
         }
@@ -715,7 +806,9 @@ public final class ShopRegistry {
         java.util.Collections.shuffle(candidates, createBooksellerRandom(player, absoluteDay, salt));
         String itemId = candidates.get(0);
         chosenSkillBooks.add(itemId);
-        addBooksellerEntry(result, playerId, itemId, price, 1);
+        addBooksellerEntry(
+                result, playerId, itemId, price, 1,
+                includeSoldOut);
     }
 
     private static void addBooksellerEntry(
@@ -723,14 +816,15 @@ public final class ShopRegistry {
             java.util.UUID playerId,
             String itemId,
             int price,
-            int stock) {
+            int stock,
+            boolean includeSoldOut) {
         if (!shopItemExists(itemId)) {
             return;
         }
         int remaining = stock == Integer.MAX_VALUE
                 ? Integer.MAX_VALUE
                 : ShopStockTracker.getRemaining(playerId, "Bookseller", itemId, stock);
-        if (remaining == 0) {
+        if (!includeSoldOut && remaining == 0) {
             return;
         }
         result.add(new ShopItemEntry(
@@ -814,7 +908,8 @@ public final class ShopRegistry {
     private static void appendWinterStarRandomStock(
             List<ShopItemEntry> result,
             net.minecraft.server.level.ServerPlayer player,
-            com.stardew.craft.time.StardewTimeManager time) {
+            com.stardew.craft.time.StardewTimeManager time,
+            boolean includeSoldOut) {
         long saveId = player.server.overworld() != null ? player.server.overworld().getSeed() : 0L;
         com.stardew.craft.util.StardewDeterministicRandom random =
             com.stardew.craft.util.StardewDeterministicRandom.create(time.getAbsoluteDay(), saveId / 2L, 0L);
@@ -832,7 +927,7 @@ public final class ShopRegistry {
             }
             int remaining = ShopStockTracker.getRemaining(
                 player.getUUID(), "Festival_FeastOfTheWinterStar_Pierre", itemId, 1);
-            if (remaining > 0) {
+            if (includeSoldOut || remaining > 0) {
                 randomStock.add(new ShopItemEntry(itemId, "", "", prices[i], remaining,
                     null, 0, Set.of(), 1, 0, null, -1, 0, 1));
             }

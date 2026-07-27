@@ -9,6 +9,10 @@ import com.stardew.craft.api.v1.quest.QuestObjectiveRuntime;
 import com.stardew.craft.api.v1.quest.QuestProgressEvent;
 import com.stardew.craft.api.v1.quest.QuestProgressEvents;
 import com.stardew.craft.api.v1.quest.StardewQuestObjectives;
+import com.stardew.craft.api.v1.content.StardewContentKey;
+import com.stardew.craft.api.v1.content.StardewContentReference;
+import com.stardew.craft.api.v1.content.StardewContentReferenceRoles;
+import com.stardew.craft.api.v1.content.StardewContentTypes;
 import com.stardew.craft.book.BookPowerEffects;
 import com.stardew.craft.npc.data.NpcCapabilityProfile;
 import com.stardew.craft.npc.data.NpcDataRegistry;
@@ -27,6 +31,7 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /** Registration and implementations for the built-in data-driven objective types. */
 public final class BuiltinQuestObjectiveTypes {
@@ -36,22 +41,132 @@ public final class BuiltinQuestObjectiveTypes {
     public static void registerAll() {
         StardewQuestObjectives.register(id("basic"), Codec.unit(BasicData.INSTANCE), ignored -> new BasicRuntime());
         StardewQuestObjectives.register(id("item_harvest"), ItemCountData.CODEC,
-                data -> new CounterRuntime(QuestProgressEvents.ITEM_RECEIVED, data.item().toString(), "", data.count()));
+                data -> new CounterRuntime(
+                        QuestProgressEvents.ITEM_RECEIVED,
+                        data.item().toString(), "", data.count()),
+                (owner, data) -> List.of(itemReference(data.item())));
         StardewQuestObjectives.register(id("crafting"), CraftingData.CODEC,
-                data -> new CounterRuntime(QuestProgressEvents.RECIPE_CRAFTED, data.recipe(), "", 1));
+                data -> new CounterRuntime(
+                        QuestProgressEvents.RECIPE_CRAFTED,
+                        data.recipe(), "", 1),
+                (owner, data) -> ownedReference(
+                        owner,
+                        StardewContentReferenceRoles.OBJECTIVE_RECIPE,
+                        StardewContentTypes.CRAFTING_RECIPE,
+                        data.recipe()));
         StardewQuestObjectives.register(id("building"), BuildingData.CODEC,
                 data -> new CounterRuntime(QuestProgressEvents.BUILDING_EXISTS, data.building(), "", 1));
-        StardewQuestObjectives.register(id("location"), LocationData.CODEC, LocationRuntime::new);
-        StardewQuestObjectives.register(id("item_delivery"), DeliveryData.CODEC, DeliveryRuntime::new);
+        StardewQuestObjectives.register(
+                id("location"), LocationData.CODEC,
+                LocationRuntime::new,
+                (owner, data) -> data.location()
+                        .startsWith(LocationRuntime.MINE_PREFIX)
+                        ? List.of()
+                        : ownedReference(
+                                owner,
+                                StardewContentReferenceRoles
+                                        .OBJECTIVE_LOCATION,
+                                StardewContentTypes.LOCATION,
+                                data.location()));
+        StardewQuestObjectives.register(
+                id("item_delivery"), DeliveryData.CODEC,
+                DeliveryRuntime::new,
+                (owner, data) -> combine(
+                        List.of(itemReference(data.item())),
+                        npcReference(owner, data.targetNpc())));
         StardewQuestObjectives.register(id("secret_lost_item"), SecretLostItemData.CODEC,
-                SecretLostItemRuntime::new);
+                SecretLostItemRuntime::new,
+                (owner, data) -> combine(
+                        List.of(itemReference(data.item())),
+                        npcReference(owner, data.targetNpc()),
+                        ownedReference(
+                                owner,
+                                StardewContentReferenceRoles
+                                        .EXCLUSIVE_QUEST,
+                                StardewContentTypes.QUEST,
+                                data.exclusiveQuest())));
         StardewQuestObjectives.register(id("monster"), MonsterData.CODEC,
-                data -> new ReportRuntime(QuestProgressEvents.MONSTER_SLAIN, data.monster(), data.count(), data.targetNpc()));
+                data -> new ReportRuntime(
+                        QuestProgressEvents.MONSTER_SLAIN,
+                        data.monster(), data.count(),
+                        data.targetNpc()),
+                (owner, data) ->
+                        npcReference(owner, data.targetNpc()));
         StardewQuestObjectives.register(id("fishing"), FishingData.CODEC,
-                data -> new ReportRuntime(QuestProgressEvents.FISH_CAUGHT, data.item().toString(), data.count(), data.targetNpc()));
+                data -> new ReportRuntime(
+                        QuestProgressEvents.FISH_CAUGHT,
+                        data.item().toString(), data.count(),
+                        data.targetNpc()),
+                (owner, data) -> combine(
+                        List.of(itemReference(data.item())),
+                        npcReference(owner, data.targetNpc())));
         StardewQuestObjectives.register(id("resource"), ResourceData.CODEC,
-                data -> new ReportRuntime(QuestProgressEvents.ITEM_RECEIVED, data.item().toString(), data.count(), data.targetNpc()));
-        StardewQuestObjectives.register(id("socialize"), SocialData.CODEC, SocialRuntime::new);
+                data -> new ReportRuntime(
+                        QuestProgressEvents.ITEM_RECEIVED,
+                        data.item().toString(), data.count(),
+                        data.targetNpc()),
+                (owner, data) -> combine(
+                        List.of(itemReference(data.item())),
+                        npcReference(owner, data.targetNpc())));
+        StardewQuestObjectives.register(
+                id("socialize"), SocialData.CODEC,
+                SocialRuntime::new,
+                (owner, data) -> data.npcs().stream()
+                        .flatMap(npc -> npcReference(owner, npc).stream())
+                        .toList());
+    }
+
+    private static StardewContentReference itemReference(
+            ResourceLocation item
+    ) {
+        return StardewContentReference.required(
+                StardewContentReferenceRoles.OBJECTIVE_ITEM,
+                new StardewContentKey(
+                        StardewContentTypes.ITEM, item));
+    }
+
+    private static List<StardewContentReference> npcReference(
+            StardewContentKey owner,
+            String rawNpc
+    ) {
+        return ownedReference(
+                owner,
+                StardewContentReferenceRoles.TARGET_NPC,
+                StardewContentTypes.NPC,
+                rawNpc);
+    }
+
+    private static List<StardewContentReference> ownedReference(
+            StardewContentKey owner,
+            ResourceLocation role,
+            ResourceLocation type,
+            String raw
+    ) {
+        if (raw == null || raw.isBlank()) {
+            return List.of();
+        }
+        String normalized = raw.trim().toLowerCase(Locale.ROOT);
+        ResourceLocation target = normalized.indexOf(':') >= 0
+                ? ResourceLocation.tryParse(normalized)
+                : ResourceLocation.tryBuild(
+                        owner.id().getNamespace(), normalized);
+        return target == null
+                ? List.of()
+                : List.of(StardewContentReference.required(
+                        role,
+                        new StardewContentKey(type, target)));
+    }
+
+    @SafeVarargs
+    private static List<StardewContentReference> combine(
+            List<StardewContentReference>... groups
+    ) {
+        ArrayList<StardewContentReference> combined =
+                new ArrayList<>();
+        for (List<StardewContentReference> group : groups) {
+            combined.addAll(group);
+        }
+        return List.copyOf(combined);
     }
 
     private static ResourceLocation id(String path) {

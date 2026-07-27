@@ -56,6 +56,24 @@ class ClientContentSnapshotCacheTest {
         assertEquals("retry-1", retry.value());
     }
 
+    @Test
+    void failedRefreshKeepsTheLastCompleteSnapshot() {
+        ClientContentSnapshotCache<Object, String> cache = new ClientContentSnapshotCache<>();
+        Object owner = new Object();
+        var committed = cache.getOrBuild(owner, generation -> "committed-" + generation);
+
+        assertThrows(IllegalStateException.class,
+                () -> cache.rebuild(owner, generation -> {
+                    throw new IllegalStateException("candidate failed");
+                }));
+
+        assertTrue(cache.contains(owner));
+        assertSame(committed, cache.getOrBuild(owner, generation -> "unexpected"));
+        var replacement = cache.rebuild(owner, generation -> "replacement-" + generation);
+        assertEquals(2L, replacement.generation());
+        assertEquals("replacement-2", replacement.value());
+    }
+
     private static final class EqualOwner {
         @Override
         public boolean equals(Object obj) {

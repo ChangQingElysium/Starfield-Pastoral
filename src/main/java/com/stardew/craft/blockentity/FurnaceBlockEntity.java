@@ -153,6 +153,16 @@ public class FurnaceBlockEntity extends TimedProductionBlockEntity {
         if (stack.getCount() < consumeCount) {
             return InsertResult.missing(new MissingItemRequirement(stack.getItem(), consumeCount));
         }
+        Item outputItem = BuiltInRegistries.ITEM.get(
+                recipe.outputId());
+        ItemStack output = new ItemStack(
+                outputItem, recipe.outputCount());
+        var plan = prepareProduction(
+                stack, output, recipe.minutes(),
+                player, false);
+        if (plan.isEmpty()) {
+            return InsertResult.fail();
+        }
 
         if (player == null) {
             return InsertResult.fail();
@@ -164,37 +174,24 @@ public class FurnaceBlockEntity extends TimedProductionBlockEntity {
             return InsertResult.fail();
         }
 
-        Item outputItem = BuiltInRegistries.ITEM.get(recipe.outputId());
-        ItemStack output = new ItemStack(outputItem, recipe.outputCount());
-        startWork(stack, output, recipe.minutes(), consumeCount, player);
+        startWork(
+                stack, plan.get(), consumeCount, player);
         return InsertResult.success();
     }
 
-    protected void startWork(ItemStack inputStack, ItemStack output, int minutesUntilReady, int inputCount, Player player) {
-        input = inputStack.copy();
-        input.setCount(Math.min(inputCount, input.getMaxStackSize()));
-        product = output;
-        readyAtAbsMinute = getCurrentAbsMinute() + minutesUntilReady;
-        ready = false;
-        if (player == null || !player.isCreative()) {
-            inputStack.shrink(inputCount);
-        }
-        setChanged();
-        syncToClient();
+    protected void startWork(
+            ItemStack inputStack,
+            com.stardew.craft.api.v1.machine
+                    .StardewProductionPlan plan,
+            int inputCount,
+            Player player
+    ) {
+        commitProduction(
+                inputStack, plan, inputCount, player);
     }
 
     public ItemStack harvestOne() {
-        if (!isReady()) {
-            return ItemStack.EMPTY;
-        }
-        ItemStack out = product.copy();
-        product = ItemStack.EMPTY;
-        input = ItemStack.EMPTY;
-        readyAtAbsMinute = -1;
-        ready = false;
-        setChanged();
-        syncToClient();
-        return out;
+        return collectProduction();
     }
 
     @Override
@@ -225,6 +222,16 @@ public class FurnaceBlockEntity extends TimedProductionBlockEntity {
         if (stack.getCount() < consumeCount) {
             return stack;
         }
+        Item outputItem = BuiltInRegistries.ITEM.get(
+                recipe.outputId());
+        ItemStack output = new ItemStack(
+                outputItem, recipe.outputCount());
+        var plan = prepareProduction(
+                stack, output, recipe.minutes(),
+                null, true);
+        if (plan.isEmpty()) {
+            return stack;
+        }
         if (coalBuffer <= 0) {
             return stack;
         }
@@ -232,10 +239,9 @@ public class FurnaceBlockEntity extends TimedProductionBlockEntity {
             return AutomationStackHelper.remainderAfterInsert(stack, consumeCount);
         }
         coalBuffer = Math.max(0, coalBuffer - 1);
-        Item outputItem = BuiltInRegistries.ITEM.get(recipe.outputId());
-        ItemStack output = new ItemStack(outputItem, recipe.outputCount());
         ItemStack inputCopy = stack.copy();
-        startWork(inputCopy, output, recipe.minutes(), consumeCount, null);
+        startWork(
+                inputCopy, plan.get(), consumeCount, null);
         return AutomationStackHelper.remainderAfterInsert(stack, consumeCount);
     }
 

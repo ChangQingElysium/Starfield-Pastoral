@@ -1,5 +1,6 @@
 package com.stardew.craft.blockentity;
 
+import com.stardew.craft.api.v1.agriculture.StardewAnimalIncubation;
 import com.stardew.craft.item.artisan.ArtisanRecipeDataManager;
 import com.stardew.craft.animal.data.AnimalWorldData;
 import com.stardew.craft.animal.model.AnimalBuildingRecord;
@@ -83,16 +84,13 @@ public class IncubatorBlockEntity extends TimedProductionBlockEntity {
             return false;
         }
 
-        AnimalBuildingRecord building = getContainingAnimalBuilding(serverLevel);
-        if (building == null || !"coop".equalsIgnoreCase(building.buildingType().family())) {
-            return false;
-        }
-        if (building.memberAnimalIds().size() >= building.capacity()) {
-            return false;
-        }
-
         String animalTypeId = resolveAnimalTypeId(input);
         if (animalTypeId == null) {
+            return false;
+        }
+        AnimalBuildingRecord building =
+                getContainingAnimalBuilding(serverLevel, animalTypeId);
+        if (building == null || !building.hasCapacity()) {
             return false;
         }
 
@@ -101,7 +99,7 @@ public class IncubatorBlockEntity extends TimedProductionBlockEntity {
             AnimalAcquireService.incubation(serverLevel, animalTypeId, generatedName, building.buildingId());
             clearIncubationState();
             return true;
-        } catch (IllegalArgumentException | IllegalStateException ex) {
+        } catch (RuntimeException ex) {
             return false;
         }
     }
@@ -212,7 +210,7 @@ public class IncubatorBlockEntity extends TimedProductionBlockEntity {
         if (egg == ModItems.DINOSAUR_EGG.get()) {
             return "dinosaur";
         }
-        return null;
+        return StardewAnimalIncubation.resolve(eggStack);
     }
 
     public RemainingTime getRemainingTime() {
@@ -226,7 +224,20 @@ public class IncubatorBlockEntity extends TimedProductionBlockEntity {
 
     @Nullable
     public AnimalBuildingRecord getContainingAnimalBuilding(ServerLevel serverLevel) {
-        return resolveContainingBuilding(serverLevel, worldPosition);
+        String animalTypeId = input.isEmpty() ? null : resolveAnimalTypeId(input);
+        return getContainingAnimalBuilding(serverLevel, animalTypeId);
+    }
+
+    @Nullable
+    private AnimalBuildingRecord getContainingAnimalBuilding(
+            ServerLevel serverLevel,
+            @Nullable String animalTypeId
+    ) {
+        String requiredFamily = animalTypeId == null
+                ? null
+                : com.stardew.craft.animal.model.AnimalTypeCatalog
+                        .resolve(animalTypeId).family();
+        return resolveContainingBuilding(serverLevel, worldPosition, requiredFamily);
     }
 
     public ClaimResult claimReadyAnimal(ServerPlayer player, String customName) {
@@ -238,12 +249,15 @@ public class IncubatorBlockEntity extends TimedProductionBlockEntity {
             return ClaimResult.FAILED;
         }
 
-        AnimalBuildingRecord building = getContainingAnimalBuilding(serverLevel);
+        String animalTypeId = resolveAnimalTypeId(input);
+        if (animalTypeId == null) {
+            return ClaimResult.INVALID_EGG;
+        }
+
+        AnimalBuildingRecord building =
+                getContainingAnimalBuilding(serverLevel, animalTypeId);
         if (building == null) {
             return ClaimResult.NOT_IN_BUILDING;
-        }
-        if (!"coop".equalsIgnoreCase(building.buildingType().family())) {
-            return ClaimResult.INVALID_BUILDING;
         }
         if (!com.stardew.craft.farm.FarmInstanceRegistry.get()
                 .canOperateBuilding(player.getUUID(), building.ownerPlayerUuid())) {
@@ -253,12 +267,8 @@ public class IncubatorBlockEntity extends TimedProductionBlockEntity {
             return ClaimResult.BUILDING_FULL;
         }
 
-        String animalTypeId = resolveAnimalTypeId(input);
-        if (animalTypeId == null) {
-            return ClaimResult.INVALID_EGG;
-        }
-
-        String finalName = customName == null ? "" : customName.trim();
+        String finalName =
+                customName == null ? "" : customName.trim();
         if (finalName.isBlank()) {
             finalName = animalTypeId;
         }
@@ -272,7 +282,7 @@ public class IncubatorBlockEntity extends TimedProductionBlockEntity {
             AnimalAcquireService.incubation(serverLevel, animalTypeId, finalName, building.buildingId());
             clearIncubationState();
             return ClaimResult.SUCCESS;
-        } catch (IllegalArgumentException | IllegalStateException ex) {
+        } catch (RuntimeException ex) {
             return ClaimResult.FAILED;
         }
     }
@@ -321,7 +331,8 @@ public class IncubatorBlockEntity extends TimedProductionBlockEntity {
             return minutesUntilReady;
         }
 
-        AnimalBuildingRecord building = resolveContainingBuilding(serverLevel, worldPosition);
+        AnimalBuildingRecord building =
+                resolveContainingBuilding(serverLevel, worldPosition, null);
         if (building == null) {
             return minutesUntilReady;
         }
@@ -334,10 +345,25 @@ public class IncubatorBlockEntity extends TimedProductionBlockEntity {
         return Math.max(1, minutesUntilReady / 2);
     }
 
-    private AnimalBuildingRecord resolveContainingBuilding(net.minecraft.server.level.ServerLevel serverLevel, BlockPos pos) {
+    private AnimalBuildingRecord resolveContainingBuilding(
+            net.minecraft.server.level.ServerLevel serverLevel,
+            BlockPos pos
+    ) {
+        return resolveContainingBuilding(serverLevel, pos, null);
+    }
+
+    private AnimalBuildingRecord resolveContainingBuilding(
+            net.minecraft.server.level.ServerLevel serverLevel,
+            BlockPos pos,
+            @Nullable String requiredFamily
+    ) {
         String dim = serverLevel.dimension().location().toString();
         for (AnimalBuildingRecord record : AnimalWorldData.get(serverLevel).getBuildings()) {
             if (!dim.equals(record.dimensionId())) {
+                continue;
+            }
+            if (requiredFamily != null
+                    && !requiredFamily.equalsIgnoreCase(record.buildingType().family())) {
                 continue;
             }
             if (record.isInBounds(pos)) {

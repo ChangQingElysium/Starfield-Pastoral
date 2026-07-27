@@ -9,6 +9,7 @@ import com.stardew.craft.api.v1.content.AtomicDefinitionStore;
 import com.stardew.craft.api.v1.content.DefinitionDiagnostic;
 import com.stardew.craft.api.v1.content.DefinitionSnapshot;
 import com.stardew.craft.api.v1.world.StardewPortalDefinition;
+import com.stardew.craft.api.v1.world.StardewMapSlots;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
@@ -28,23 +29,46 @@ public final class InteriorPortalRegistry {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final AtomicDefinitionStore<StardewPortalDefinition> STORE = new AtomicDefinitionStore<>();
     private static final Map<String, PortalTarget> RUNTIME_TARGETS = new ConcurrentHashMap<>();
-    private static volatile Map<ResourceLocation, PortalTarget> dataTargets = Map.of();
+    private static volatile Catalog catalog = Catalog.empty();
 
     private InteriorPortalRegistry() {
     }
 
     public static DefinitionSnapshot<StardewPortalDefinition> snapshot() {
-        return STORE.snapshot();
+        return catalog.definitions();
     }
 
     public static Optional<PortalTarget> resolve(String id) {
+        return resolve(id, null);
+    }
+
+    public static Optional<PortalTarget> resolve(
+            String id,
+            ResourceLocation expectedDimension
+    ) {
         if (id == null || id.isBlank()) return Optional.empty();
         String normalized = id.trim().toLowerCase(Locale.ROOT);
         ResourceLocation dataId = normalized.indexOf(':') >= 0
                 ? ResourceLocation.tryParse(normalized)
                 : ResourceLocation.tryBuild(StardewCraft.MODID, normalized);
-        PortalTarget dataTarget = dataId == null ? null : dataTargets.get(dataId);
-        return Optional.ofNullable(dataTarget != null ? dataTarget : RUNTIME_TARGETS.get(normalized));
+        PortalTarget dataTarget = dataId == null
+                ? null
+                : catalog.dataTargets().get(dataId);
+        PortalTarget direct = dataTarget != null
+                ? dataTarget : RUNTIME_TARGETS.get(normalized);
+        if (direct != null) {
+            return Optional.of(direct);
+        }
+        return StardewMapSlots.resolveWorldAnchor(normalized)
+                .filter(slot -> expectedDimension == null
+                        || expectedDimension.equals(slot.dimension()))
+                .map(slot -> new PortalTarget(
+                        slot.position().x,
+                        slot.position().y,
+                        slot.position().z,
+                        slot.yaw(),
+                        0.0F,
+                        PortalMode.NONE));
     }
 
     /** Java registrations remain useful for generated/player-specific interiors. */
@@ -75,24 +99,66 @@ public final class InteriorPortalRegistry {
                                                 DefinitionDiagnostic.error(entry.getKey(), entry.getKey(), message)))
                                         .ifPresent(encoded -> sources.put(entry.getKey(), GSON.toJson(encoded)));
                             }));
-            var result = STORE.applyLocal(definitions, sources, diagnostics);
-            for (DefinitionDiagnostic diagnostic : result.diagnostics()) {
-                if (diagnostic.severity() == DefinitionDiagnostic.Severity.ERROR) {
-                    StardewCraft.LOGGER.error("[Interior portals] {}", diagnostic.message());
-                } else {
-                    StardewCraft.LOGGER.warn("[Interior portals] {}", diagnostic.message());
-                }
+            applyCandidate(definitions, sources, diagnostics);
+        }
+    }
+
+    static synchronized void applyCandidate(
+            Map<ResourceLocation, StardewPortalDefinition> definitions,
+            Map<ResourceLocation, String> sources,
+            List<DefinitionDiagnostic> diagnostics
+    ) {
+        Map<ResourceLocation, PortalTarget> prepared =
+                new LinkedHashMap<>();
+        definitions.forEach((id, definition) ->
+                prepared.put(id, new PortalTarget(
+                        definition.x(),
+                        definition.y(),
+                        definition.z(),
+                        definition.yaw(),
+                        definition.pitch(),
+                        PortalMode.valueOf(
+                                definition.mode().name()))));
+        var result = STORE.applyLocal(
+                definitions, sources, diagnostics);
+        for (DefinitionDiagnostic diagnostic : result.diagnostics()) {
+            if (diagnostic.severity() == DefinitionDiagnostic.Severity.ERROR) {
+                StardewCraft.LOGGER.error(
+                        "[Interior portals] {}", diagnostic.message());
+            } else {
+                StardewCraft.LOGGER.warn(
+                        "[Interior portals] {}", diagnostic.message());
             }
-            if (!result.accepted()) {
-                StardewCraft.LOGGER.error("[Interior portals] Rejected reload; keeping {} targets", dataTargets.size());
-                return;
-            }
-            Map<ResourceLocation, PortalTarget> prepared = new LinkedHashMap<>();
-            result.snapshot().definitions().forEach((id, definition) -> prepared.put(id, new PortalTarget(
-                    definition.x(), definition.y(), definition.z(), definition.yaw(), definition.pitch(),
-                    PortalMode.valueOf(definition.mode().name()))));
-            dataTargets = Map.copyOf(prepared);
-            StardewCraft.LOGGER.info("[Interior portals] Applied {} data targets", dataTargets.size());
+        }
+        if (!result.accepted()) {
+            StardewCraft.LOGGER.error(
+                    "[Interior portals] Rejected reload; keeping {} targets",
+                    catalog.dataTargets().size());
+            return;
+        }
+        catalog = new Catalog(result.snapshot(), prepared);
+        StardewCraft.LOGGER.info(
+                "[Interior portals] Applied {} data targets",
+                catalog.dataTargets().size());
+    }
+
+    static Catalog catalog() {
+        return catalog;
+    }
+
+    record Catalog(
+            DefinitionSnapshot<StardewPortalDefinition> definitions,
+            Map<ResourceLocation, PortalTarget> dataTargets
+    ) {
+        Catalog {
+            definitions = java.util.Objects.requireNonNull(
+                    definitions, "definitions");
+            dataTargets = Map.copyOf(dataTargets);
+        }
+
+        private static Catalog empty() {
+            return new Catalog(
+                    DefinitionSnapshot.empty(), Map.of());
         }
     }
 

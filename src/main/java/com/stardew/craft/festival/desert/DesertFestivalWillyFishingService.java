@@ -86,12 +86,13 @@ public final class DesertFestivalWillyFishingService {
 
     private static boolean completeFishingQuest(ServerPlayer player, FishingQuest quest, StardewNpcEntity npc) {
         int festivalDay = Math.max(1, PlayerStardewDataAPI.getStat(player, LAST_ACCEPTED_DAY_STAT));
-        quest.questComplete(player);
-        DesertFestivalService.giveEggs(player, rewardEggs(festivalDay));
         QuestManager manager = QuestManager.of(player);
         if (manager != null) {
-            manager.cleanupDestroyed(player);
+            manager.completeActiveQuest(quest.getId(), player);
+        } else {
+            quest.questComplete(player);
         }
+        DesertFestivalService.giveEggs(player, rewardEggs(festivalDay));
         if (npc != null) {
             npc.facePlayerTemporarily(player, 60, () -> sendDialogue(player, "willy", returnKey(festivalDay)));
         } else {

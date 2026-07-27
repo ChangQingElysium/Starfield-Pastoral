@@ -136,13 +136,16 @@ public final class TrashCanNpcReactionService {
             return "happy";
         }
         NpcCapabilityProfile profile = NpcDataRegistry.capabilities().get(npcId);
-        if (profile != null) {
-            if (profile.age() == NpcCapabilityProfile.AGE_CHILD) {
-                return "sad";
-            }
-            if (profile.age() == NpcCapabilityProfile.AGE_TEEN) {
-                return "question";
-            }
+        int age = com.stardew.craft.api.v1.npc.StardewNpcProfiles.resolve(npcId)
+                .map(definition -> definition.profile().age())
+                .orElse(profile != null
+                        ? profile.age()
+                        : NpcCapabilityProfile.AGE_ADULT);
+        if (age == NpcCapabilityProfile.AGE_CHILD) {
+            return "sad";
+        }
+        if (age == NpcCapabilityProfile.AGE_TEEN) {
+            return "question";
         }
         return "angry";
     }
@@ -167,13 +170,16 @@ public final class TrashCanNpcReactionService {
         }
 
         NpcCapabilityProfile profile = NpcDataRegistry.capabilities().get(npcId);
-        if (profile != null) {
-            if (profile.age() == NpcCapabilityProfile.AGE_CHILD) {
-                return "stardewcraft.npc.generic.dumpster_dive.child";
-            }
-            if (profile.age() == NpcCapabilityProfile.AGE_TEEN) {
-                return "stardewcraft.npc.generic.dumpster_dive.teen";
-            }
+        int age = com.stardew.craft.api.v1.npc.StardewNpcProfiles.resolve(npcId)
+                .map(definition -> definition.profile().age())
+                .orElse(profile != null
+                        ? profile.age()
+                        : NpcCapabilityProfile.AGE_ADULT);
+        if (age == NpcCapabilityProfile.AGE_CHILD) {
+            return "stardewcraft.npc.generic.dumpster_dive.child";
+        }
+        if (age == NpcCapabilityProfile.AGE_TEEN) {
+            return "stardewcraft.npc.generic.dumpster_dive.teen";
         }
         return "stardewcraft.npc.generic.dumpster_dive.adult";
     }

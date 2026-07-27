@@ -12,11 +12,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class MachineJeiRegistryTest {
     @Test
     void registersAllThirteenMachinesWithStableNamespacedTypes() {
-        assertEquals(13, MachineJeiRegistry.all().size());
+        var builtinMachines = MachineJeiRegistry.all().stream()
+                .filter(machine -> "stardewcraft".equals(machine.id().getNamespace()))
+                .toList();
+        assertEquals(13, builtinMachines.size());
 
         Set<String> machineIds = new HashSet<>();
         Set<String> recipeTypeIds = new HashSet<>();
-        for (MachineJeiRegistry.Machine machine : MachineJeiRegistry.all()) {
+        for (MachineJeiRegistry.Machine machine : builtinMachines) {
             assertEquals("stardewcraft", machine.id().getNamespace());
             assertEquals(machine.id(), machine.itemId());
             assertTrue(machineIds.add(machine.id().toString()), "duplicate machine " + machine.id());
@@ -26,6 +29,11 @@ class MachineJeiRegistryTest {
             assertTrue(recipeTypeId.startsWith("stardewcraft:machine/"));
             assertFalse(machine.recipeType().getUid().getPath().contains(":"));
         }
+        assertEquals(
+                MachineJeiRegistry.all().size(),
+                MachineJeiRegistry.all().stream().map(MachineJeiRegistry.Machine::id).distinct().count(),
+                "addon and built-in machine IDs must remain globally unique"
+        );
     }
 
     @Test

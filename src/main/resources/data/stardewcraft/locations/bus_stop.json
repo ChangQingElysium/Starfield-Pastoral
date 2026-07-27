@@ -1,0 +1,8 @@
+{
+  "dimension": "stardewcraft:stardew_valley",
+  "min": [-105, 63, -71],
+  "max": [-46, 69, -47],
+  "aliases": ["BusStop", "busstop"],
+  "priority": -100,
+  "indoor": false
+}

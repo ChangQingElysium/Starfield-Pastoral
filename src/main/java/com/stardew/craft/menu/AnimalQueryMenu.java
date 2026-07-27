@@ -3,8 +3,12 @@ package com.stardew.craft.menu;
 import com.stardew.craft.animal.data.AnimalWorldData;
 import com.stardew.craft.animal.model.AnimalBuildingRecord;
 import com.stardew.craft.animal.model.AnimalTypeCatalog;
+import com.stardew.craft.animal.model.FarmAnimalDefinition;
+import com.stardew.craft.animal.model.FarmAnimalDefinitions;
 import com.stardew.craft.animal.model.FarmAnimalRecord;
 import com.stardew.craft.animal.service.AnimalEntitySyncService;
+import com.stardew.craft.api.v1.agriculture.StardewAnimalQueryDefinition;
+import com.stardew.craft.api.v1.agriculture.StardewAnimalQueryDefinitions;
 import com.stardew.craft.economy.sell.ProfessionSellPriceService;
 import com.stardew.craft.economy.sell.SellQuote;
 import com.stardew.craft.economy.sell.SellSource;
@@ -40,6 +44,14 @@ public class AnimalQueryMenu extends AbstractContainerMenu {
     private int moodMessage;
     private int wasFedToday;
     private int fullness;
+    private String animalTypeId;
+    private int baseAnimalSellPrice;
+    private int quotedAnimalSellPrice;
+    private int reproductionToggleAvailable;
+    private int parentAnimalId;
+    private int autoPetterAvailable;
+    private int autoGrabberAvailable;
+    private int autoFeederAvailable;
 
     public AnimalQueryMenu(int containerId, Inventory playerInventory) {
         this(containerId, playerInventory, -1L, 0, 0, 5, false, 0, false, false, 0, 0, false, 0);
@@ -59,6 +71,52 @@ public class AnimalQueryMenu extends AbstractContainerMenu {
                            int moodMessage,
                            boolean wasFedToday,
                            int fullness) {
+        this(containerId, playerInventory, animalId, ageDays, daysOwned, daysToMature,
+                wasPetToday, friendship, allowReproduction, hasEatenAnimalCracker,
+                variantIndex, moodMessage, wasFedToday, fullness, null);
+    }
+
+    public AnimalQueryMenu(int containerId,
+                           Inventory playerInventory,
+                           long animalId,
+                           int ageDays,
+                           int daysOwned,
+                           int daysToMature,
+                           boolean wasPetToday,
+                           int friendship,
+                           boolean allowReproduction,
+                           boolean hasEatenAnimalCracker,
+                           int variantIndex,
+                           int moodMessage,
+                           boolean wasFedToday,
+                           int fullness,
+                           String animalTypeId) {
+        this(containerId, playerInventory, animalId, ageDays, daysOwned,
+                daysToMature, wasPetToday, friendship,
+                allowReproduction, hasEatenAnimalCracker,
+                variantIndex, moodMessage, wasFedToday, fullness,
+                animalTypeId, -1L, false, false, false);
+    }
+
+    public AnimalQueryMenu(int containerId,
+                           Inventory playerInventory,
+                           long animalId,
+                           int ageDays,
+                           int daysOwned,
+                           int daysToMature,
+                           boolean wasPetToday,
+                           int friendship,
+                           boolean allowReproduction,
+                           boolean hasEatenAnimalCracker,
+                           int variantIndex,
+                           int moodMessage,
+                           boolean wasFedToday,
+                           int fullness,
+                           String animalTypeId,
+                           long parentAnimalId,
+                           boolean autoPetterAvailable,
+                           boolean autoGrabberAvailable,
+                           boolean autoFeederAvailable) {
         super(ModMenuTypes.ANIMAL_QUERY.get(), containerId);
         this.player = playerInventory.player;
         this.animalId = animalId;
@@ -73,6 +131,31 @@ public class AnimalQueryMenu extends AbstractContainerMenu {
         this.moodMessage = Math.max(0, moodMessage);
         this.wasFedToday = wasFedToday ? 1 : 0;
         this.fullness = Math.max(0, Math.min(255, fullness));
+        this.animalTypeId = animalTypeId;
+        this.parentAnimalId = parentAnimalId > 0L
+                ? (int) Math.min(Integer.MAX_VALUE, parentAnimalId)
+                : -1;
+        this.autoPetterAvailable = autoPetterAvailable ? 1 : 0;
+        this.autoGrabberAvailable = autoGrabberAvailable ? 1 : 0;
+        this.autoFeederAvailable = autoFeederAvailable ? 1 : 0;
+        StardewAnimalQueryDefinition queryDefinition =
+                StardewAnimalQueryDefinitions.definition(animalTypeId);
+        FarmAnimalDefinition builtInDefinition =
+                FarmAnimalDefinitions.find(animalTypeId);
+        this.baseAnimalSellPrice = getBaseAnimalSellPrice();
+        this.quotedAnimalSellPrice =
+                this.player instanceof ServerPlayer serverPlayer
+                        ? ProfessionSellPriceService.quoteAnimal(
+                                serverPlayer,
+                                this.baseAnimalSellPrice,
+                                SellSource.ANIMAL_SALE)
+                                .totalPrice()
+                        : this.baseAnimalSellPrice;
+        this.reproductionToggleAvailable = queryDefinition != null
+                ? (queryDefinition.reproductionToggleAvailable() ? 1 : 0)
+                : builtInDefinition != null
+                        ? (builtInDefinition.canGetPregnant() ? 1 : 0)
+                        : 0;
 
         this.addDataSlot(new DataSlot() {
             @Override
@@ -217,6 +300,45 @@ public class AnimalQueryMenu extends AbstractContainerMenu {
                 AnimalQueryMenu.this.fullness = Math.max(0, Math.min(255, value));
             }
         });
+
+        this.addDataSlot(sync(
+                () -> baseAnimalSellPrice,
+                value -> baseAnimalSellPrice = Math.max(0, value)));
+        this.addDataSlot(sync(
+                () -> quotedAnimalSellPrice,
+                value -> quotedAnimalSellPrice = Math.max(0, value)));
+        this.addDataSlot(sync(
+                () -> reproductionToggleAvailable,
+                value -> reproductionToggleAvailable = value > 0 ? 1 : 0));
+        this.addDataSlot(sync(
+                () -> this.parentAnimalId,
+                value -> this.parentAnimalId = value));
+        this.addDataSlot(sync(
+                () -> this.autoPetterAvailable,
+                value -> this.autoPetterAvailable = value > 0 ? 1 : 0));
+        this.addDataSlot(sync(
+                () -> this.autoGrabberAvailable,
+                value -> this.autoGrabberAvailable = value > 0 ? 1 : 0));
+        this.addDataSlot(sync(
+                () -> this.autoFeederAvailable,
+                value -> this.autoFeederAvailable = value > 0 ? 1 : 0));
+    }
+
+    private static DataSlot sync(
+            java.util.function.IntSupplier getter,
+            java.util.function.IntConsumer setter
+    ) {
+        return new DataSlot() {
+            @Override
+            public int get() {
+                return getter.getAsInt();
+            }
+
+            @Override
+            public void set(int value) {
+                setter.accept(value);
+            }
+        };
     }
 
     public int getFullness() {
@@ -263,7 +385,7 @@ public class AnimalQueryMenu extends AbstractContainerMenu {
         if (isBaby()) {
             return false;
         }
-        return variantIndex >= 7 && variantIndex <= 11;
+        return reproductionToggleAvailable > 0;
     }
 
     public boolean hasEatenAnimalCracker() {
@@ -276,6 +398,22 @@ public class AnimalQueryMenu extends AbstractContainerMenu {
 
     public int getMoodMessage() {
         return moodMessage;
+    }
+
+    public int getParentAnimalId() {
+        return parentAnimalId;
+    }
+
+    public boolean hasAutoPetter() {
+        return autoPetterAvailable > 0;
+    }
+
+    public boolean hasAutoGrabber() {
+        return autoGrabberAvailable > 0;
+    }
+
+    public boolean hasAutoFeeder() {
+        return autoFeederAvailable > 0;
     }
 
     public String getMoodTranslationKey() {
@@ -294,27 +432,7 @@ public class AnimalQueryMenu extends AbstractContainerMenu {
     }
 
     public int getEstimatedSellPrice() {
-        int basePrice = getBaseAnimalSellPrice();
-        if (player instanceof ServerPlayer serverPlayer) {
-            return ProfessionSellPriceService.quoteAnimal(serverPlayer, basePrice, SellSource.ANIMAL_SALE).totalPrice();
-        }
-        return basePrice;
-    }
-
-    private int getBaseAnimalSellPrice() {
-        int base = switch (variantIndex) {
-            case 2 -> 1200; // duck
-            case 4 -> 800;  // rabbit
-            case 5 -> 10000; // ostrich
-            case 6 -> 350;  // dinosaur
-            case 7 -> 1500; // cow
-            case 8 -> 4000; // goat
-            case 9, 10 -> 8000; // sheep / sheared sheep
-            case 11 -> 16000; // pig
-            default -> 800; // chicken types
-        };
-        double friendshipRatio = Math.max(0.0, Math.min(1.0, friendship / 1000.0));
-        return (int) Math.floor(base * (friendshipRatio + 0.3));
+        return quotedAnimalSellPrice;
     }
 
     public void setAllowReproductionValue(boolean allow) {
@@ -328,6 +446,18 @@ public class AnimalQueryMenu extends AbstractContainerMenu {
         AnimalWorldData data = AnimalWorldData.get(serverPlayer.serverLevel());
         FarmAnimalRecord animal = data.getAnimal(animalId).orElse(null);
         if (animal == null) return;
+        StardewAnimalQueryDefinition queryDefinition =
+                StardewAnimalQueryDefinitions.definition(animal.animalTypeId());
+        FarmAnimalDefinition builtInDefinition =
+                FarmAnimalDefinitions.find(animal.animalTypeId());
+        boolean toggleAvailable = queryDefinition != null
+                ? queryDefinition.reproductionToggleAvailable()
+                : builtInDefinition != null
+                        ? builtInDefinition.canGetPregnant()
+                        : false;
+        if (animal.isBaby() || !toggleAvailable) {
+            return;
+        }
         AnimalBuildingRecord building = data.getBuilding(animal.buildingId()).orElse(null);
         if (building == null) return;
         // 权限检查：只有农场成员可以操作
@@ -360,7 +490,9 @@ public class AnimalQueryMenu extends AbstractContainerMenu {
 
         SellQuote quote = ProfessionSellPriceService.quoteAnimal(
             serverPlayer,
-            getBaseAnimalSellPrice(),
+            refreshBaseAnimalSellPrice(
+                    animal.animalTypeId(),
+                    animal.friendship()),
             SellSource.ANIMAL_SALE
         );
         if (!data.removeAnimal(animalId)) {
@@ -389,6 +521,47 @@ public class AnimalQueryMenu extends AbstractContainerMenu {
         serverPlayer.closeContainer();
     }
 
+    /**
+     * Compatibility hook retained for addons that inject custom animal sale prices.
+     */
+    private int getBaseAnimalSellPrice() {
+        return resolveBaseAnimalSellPrice(
+                animalTypeId, friendship);
+    }
+
+    private int refreshBaseAnimalSellPrice(
+            String currentAnimalTypeId,
+            int currentFriendship
+    ) {
+        this.animalTypeId = currentAnimalTypeId;
+        this.friendship = Math.max(0, currentFriendship);
+        return getBaseAnimalSellPrice();
+    }
+
+    static int resolveBaseAnimalSellPrice(
+            String animalTypeId,
+            int friendship
+    ) {
+        StardewAnimalQueryDefinition queryDefinition =
+                StardewAnimalQueryDefinitions.definition(animalTypeId);
+        if (queryDefinition != null) {
+            return Math.max(
+                    0,
+                    queryDefinition.sellPrice(
+                            Math.max(0, friendship))
+            );
+        }
+        FarmAnimalDefinition builtInDefinition =
+                FarmAnimalDefinitions.find(animalTypeId);
+        return builtInDefinition == null
+                ? 0
+                : Math.max(
+                        0,
+                        builtInDefinition.sellPriceAtFriendship(
+                                Math.max(0, friendship))
+                );
+    }
+
     public void handleOpenMoveHomeScreen() {
         if (!(player instanceof ServerPlayer serverPlayer) || animalId <= 0L) {
             return;
@@ -411,7 +584,15 @@ public class AnimalQueryMenu extends AbstractContainerMenu {
             return;
         }
 
-        String family = AnimalTypeCatalog.resolve(animal.animalTypeId()).family();
+        AnimalTypeCatalog.AnimalTypeSpec type =
+                AnimalTypeCatalog.find(animal.animalTypeId());
+        if (type == null) {
+            serverPlayer.sendSystemMessage(
+                    net.minecraft.network.chat.Component.translatable(
+                            "stardewcraft.animal.interact.definition_unavailable"));
+            return;
+        }
+        String family = type.family();
         List<OpenAnimalMoveHomeScreenPayload.BuildingOption> options = new ArrayList<>();
         for (AnimalBuildingRecord building : data.getBuildings()) {
             // 只显示同一农场的建筑（自己的或同农场成员的）

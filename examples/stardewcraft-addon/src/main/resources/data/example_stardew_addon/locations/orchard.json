@@ -1,0 +1,26 @@
+{
+  "dimension": "stardewcraft:stardew_valley",
+  "ledger_id": "example_orchard",
+  "min": [-170, 55, 65],
+  "max": [-120, 90, 115],
+  "aliases": [
+    "example_orchard"
+  ],
+  "priority": 50,
+  "indoor": false,
+  "parent": "stardewcraft:forest",
+  "display_name": "Example Orchard",
+  "description": "A child location that inherits its parent's environment.",
+  "icon": "stardewcraft:textures/gui/farm_select/icon_forest.png",
+  "tags": [
+    "example_stardew_addon:orchard",
+    "stardewcraft:forage"
+  ],
+  "properties": {
+    "stardewcraft:climate": "temperate",
+    "stardewcraft:music_profile": "stardewcraft:music_woods",
+    "stardewcraft:music_start_time": "0600",
+    "stardewcraft:music_end_time": "1800",
+    "example_stardew_addon:primary_fruit": "apple"
+  }
+}

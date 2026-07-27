@@ -1,6 +1,7 @@
 package com.stardew.craft.event;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.agriculture.StardewCropRuntime;
 import com.stardew.craft.block.crop.StardewCropBlock;
 import com.stardew.craft.block.nature.PastureGrassBlock;
 import com.stardew.craft.block.nature.WildWeedsBlock;
@@ -211,6 +212,16 @@ public final class ScytheHarvestEvents {
 			if (scythe == null) return false;
 			if (!canModify) return false; // 公共区域不允许收割作物
 			return crop.tryHarvestByTool(level, pos, state, player, forceScytheHarvest);
+		}
+		if (StardewCropRuntime.inspect(level, pos) != null) {
+			if (scythe == null || !canModify) return false;
+			return StardewCropRuntime.harvestForPlayer(
+					player,
+					pos,
+					InteractionHand.MAIN_HAND,
+					true,
+					forceScytheHarvest
+			).harvested();
 		}
 
 		if (state.getBlock() instanceof WildWeedsBlock) {

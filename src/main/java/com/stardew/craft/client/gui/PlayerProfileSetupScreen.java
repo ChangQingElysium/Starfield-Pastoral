@@ -14,6 +14,8 @@ import net.minecraft.util.Mth;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import javax.annotation.Nullable;
+import java.util.Map;
+import net.minecraft.resources.ResourceLocation;
 
 /** Mandatory three-question profile used by gendered dialogue and favorite-name tokens. */
 @SuppressWarnings("null")
@@ -76,7 +78,19 @@ public final class PlayerProfileSetupScreen extends Screen {
 
     public static PlayerProfileSetupScreen forNewFarm(
             String farmTypeId, String farmName, boolean forceCancelPending) {
-        return new PlayerProfileSetupScreen(new PendingFarm(farmTypeId, farmName, forceCancelPending));
+        return forNewFarm(
+                farmTypeId, farmName, forceCancelPending, Map.of());
+    }
+
+    public static PlayerProfileSetupScreen forNewFarm(
+            String farmTypeId,
+            String farmName,
+            boolean forceCancelPending,
+            Map<ResourceLocation, String> layoutConfiguration
+    ) {
+        return new PlayerProfileSetupScreen(new PendingFarm(
+                farmTypeId, farmName, forceCancelPending,
+                Map.copyOf(layoutConfiguration)));
     }
 
     @Override
@@ -179,7 +193,8 @@ public final class PlayerProfileSetupScreen extends Screen {
         } else {
             PacketDistributor.sendToServer(new FarmSelectionSubmitPayload(
                     pendingFarm.farmTypeId(), pendingFarm.farmName(), pendingFarm.forceCancelPending(),
-                    preferredName, favoriteThing, male));
+                    preferredName, favoriteThing, male,
+                    pendingFarm.layoutConfiguration()));
         }
         if (minecraft != null) minecraft.setScreen(null);
     }
@@ -317,5 +332,10 @@ public final class PlayerProfileSetupScreen extends Screen {
     @Override public boolean shouldCloseOnEsc() { return false; }
     @Override public boolean isPauseScreen() { return false; }
 
-    private record PendingFarm(String farmTypeId, String farmName, boolean forceCancelPending) {}
+    private record PendingFarm(
+            String farmTypeId,
+            String farmName,
+            boolean forceCancelPending,
+            Map<ResourceLocation, String> layoutConfiguration
+    ) {}
 }

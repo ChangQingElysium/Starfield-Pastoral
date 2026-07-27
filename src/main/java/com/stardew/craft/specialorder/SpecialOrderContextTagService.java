@@ -2,6 +2,9 @@ package com.stardew.craft.specialorder;
 
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.api.v1.item.StardewItemDataApi;
+import com.stardew.craft.data.VanillaObjectCatalog;
+import com.stardew.craft.item.artisan.FlavoredArtisanDrinkItem;
+import com.stardew.craft.item.artisan.PreserveType;
 import com.stardew.craft.item.quality.QualityHelper;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -104,6 +107,22 @@ public final class SpecialOrderContextTagService {
             if (type.endsWith(".crop")) tags.add("category_vegetable");
             if (type.contains("fish")) tags.add("fish_item");
         }
+        if (item instanceof FlavoredArtisanDrinkItem drink) {
+            tags.add("drink_item");
+            tags.add(drink.getFlavorType() == PreserveType.WINE ? "wine_item" : "juice_item");
+            if (drink.getFlavorType() == PreserveType.WINE) {
+                tags.add("alcohol_item");
+            }
+            ResourceLocation sourceId = FlavoredArtisanDrinkItem.getSourceItemId(stack);
+            if (sourceId != null && BuiltInRegistries.ITEM.containsKey(sourceId)) {
+                VanillaObjectCatalog.Entry source = VanillaObjectCatalog.resolve(
+                        new ItemStack(BuiltInRegistries.ITEM.get(sourceId)));
+                if (source != null) {
+                    tags.add("preserve_sheet_index_" + source.key().trim()
+                            .toLowerCase(Locale.ROOT).replace(' ', '_').replace("'", ""));
+                }
+            }
+        }
         addAliases(path, tags);
         return tags;
     }
@@ -122,10 +141,6 @@ public final class SpecialOrderContextTagService {
             case "emerald" -> tags.add("item_emerald");
             case "jade" -> tags.add("item_jade");
             case "amethyst" -> tags.add("item_amethyst");
-            case "potato_juice" -> {
-                tags.add("juice_item");
-                tags.add("preserve_sheet_index_192");
-            }
             case "egg_white", "egg_brown", "large_egg_white", "large_egg_brown", "duck_egg", "void_egg", "golden_egg", "ostrich_egg" -> tags.add("egg_item");
             case "trash", "driftwood", "broken_glasses", "broken_cd", "soggy_newspaper", "joja_cola" -> tags.add("trash_item");
             case "bone_fragment", "prehistoric_scapula", "prehistoric_tibia", "prehistoric_skull", "skeletal_hand", "skeletal_tail", "nautilus_fossil", "amphibian_fossil", "palm_fossil", "trilobite", "dinosaur_egg", "bone_flute" -> tags.add("bone_item");

@@ -1,7 +1,8 @@
 {
-    "parent":  "minecraft:item/generated",
-    "textures":  {
-                     "layer0":  "stardewcraft:item/artisan/juice/summer_squash",
-                     "particle":  "stardewcraft:item/artisan/juice/summer_squash"
-                 }
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/artisan/drinks/juice_base",
+    "layer1": "stardewcraft:item/artisan/drinks/juice_overlay",
+    "particle": "stardewcraft:item/artisan/drinks/juice_base"
+  }
 }

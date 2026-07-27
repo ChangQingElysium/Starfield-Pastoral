@@ -35,21 +35,16 @@ public final class ArtisanRecipeDataManager {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final AtomicDefinitionStore<Recipe> STORE = new AtomicDefinitionStore<>();
-    private static volatile Map<String, List<Recipe>> RECIPES_BY_MACHINE = Collections.emptyMap();
-    /** 缓存原始 JSON（SoftReference），内存紧张时可被 GC 回收，需要时重新生成 */
-    private static volatile java.lang.ref.SoftReference<String> CACHED_JSON_REF = new java.lang.ref.SoftReference<>(null);
+    private static volatile Catalog catalog = Catalog.empty();
 
     /** 获取缓存的 JSON（服务端调用）。若 GC 回收则重新序列化 */
     public static String getCachedJson() {
-        String json = CACHED_JSON_REF.get();
-        if (json != null) return json;
-        json = rebuildCacheJson();
-        CACHED_JSON_REF = new java.lang.ref.SoftReference<>(json);
-        return json;
+        return catalog.cachedJson();
     }
 
-    private static String rebuildCacheJson() {
-        Map<String, List<Recipe>> current = RECIPES_BY_MACHINE;
+    private static String rebuildCacheJson(
+            Map<String, List<Recipe>> current
+    ) {
         if (current.isEmpty()) return "";
         JsonObject cacheRoot = new JsonObject();
         for (Map.Entry<String, List<Recipe>> me : current.entrySet()) {
@@ -70,6 +65,10 @@ public final class ArtisanRecipeDataManager {
             com.google.gson.JsonObject root = GSON.fromJson(json, com.google.gson.JsonObject.class);
             if (root == null) return;
             Map<String, List<Recipe>> loaded = new LinkedHashMap<>();
+            Map<ResourceLocation, Recipe> definitions =
+                    new LinkedHashMap<>();
+            Map<ResourceLocation, String> sources =
+                    new LinkedHashMap<>();
             for (Map.Entry<String, JsonElement> entry : root.entrySet()) {
                 ResourceLocation machineId = normalizeMachineId(entry.getKey(), StardewCraft.MODID);
                 if (machineId == null) continue;
@@ -79,12 +78,24 @@ public final class ArtisanRecipeDataManager {
                 int index = 0;
                 for (JsonElement el : recipes) {
                     Recipe r = recipeFromJson(el.getAsJsonObject(), machineId, index++);
-                    if (r != null) list.add(r);
+                    if (r != null) {
+                        list.add(r);
+                        definitions.put(r.id(), r);
+                        sources.put(
+                                r.id(),
+                                GSON.toJson(
+                                        ReloadListener.buildRecipeJson(r)));
+                    }
                 }
-                loaded.put(machineKey, Collections.unmodifiableList(list));
+                loaded.put(machineKey, List.copyOf(list));
             }
-            RECIPES_BY_MACHINE = Collections.unmodifiableMap(loaded);
-            StardewCraft.LOGGER.info("[DATA-SYNC] Applied artisan recipes from network: {} machines", loaded.size());
+            publishCandidate(
+                    definitions,
+                    sources,
+                    List.of(),
+                    loaded,
+                    json,
+                    "network sync");
         } catch (Exception e) {
             StardewCraft.LOGGER.error("[DATA-SYNC] Failed to apply artisan JSON", e);
         }
@@ -204,7 +215,8 @@ public final class ArtisanRecipeDataManager {
         }
         ResourceLocation machineId = normalizeMachineId(machineKey, StardewCraft.MODID);
         if (machineId == null) return Optional.empty();
-        List<Recipe> recipes = RECIPES_BY_MACHINE.get(machineId.toString());
+        List<Recipe> recipes = catalog.recipesByMachine()
+                .get(machineId.toString());
         if (recipes == null || recipes.isEmpty()) {
             return Optional.empty();
         }
@@ -222,7 +234,8 @@ public final class ArtisanRecipeDataManager {
         }
         ResourceLocation machineId = normalizeMachineId(machineKey, StardewCraft.MODID);
         if (machineId == null) return Optional.empty();
-        List<Recipe> recipes = RECIPES_BY_MACHINE.get(machineId.toString());
+        List<Recipe> recipes = catalog.recipesByMachine()
+                .get(machineId.toString());
         if (recipes == null || recipes.isEmpty()) {
             return Optional.empty();
         }
@@ -240,16 +253,17 @@ public final class ArtisanRecipeDataManager {
         }
         ResourceLocation machineId = normalizeMachineId(machineKey, StardewCraft.MODID);
         if (machineId == null) return List.of();
-        List<Recipe> recipes = RECIPES_BY_MACHINE.get(machineId.toString());
+        List<Recipe> recipes = catalog.recipesByMachine()
+                .get(machineId.toString());
         return recipes == null ? List.of() : recipes;
     }
 
     public static java.util.Set<String> getAllMachineKeys() {
-        return RECIPES_BY_MACHINE.keySet();
+        return catalog.recipesByMachine().keySet();
     }
 
     public static DefinitionSnapshot<Recipe> snapshot() {
-        return STORE.snapshot();
+        return catalog.definitions();
     }
 
     public static final class ReloadListener extends SimpleJsonResourceReloadListener {
@@ -347,50 +361,19 @@ public final class ArtisanRecipeDataManager {
                 }
             }
 
-            AtomicDefinitionStore.ApplyResult<Recipe> result = STORE.applyLocal(definitions, sources, diagnostics);
-            for (DefinitionDiagnostic diagnostic : result.diagnostics()) {
-                String source = diagnostic.source() == null ? "<machine recipe reload>" : diagnostic.source().toString();
-                if (diagnostic.severity() == DefinitionDiagnostic.Severity.ERROR) {
-                    StardewCraft.LOGGER.error("[Machine recipe] Definition error [{}]: {}", source, diagnostic.message());
-                } else {
-                    StardewCraft.LOGGER.warn("[Machine recipe] Definition warning [{}]: {}", source, diagnostic.message());
-                }
-            }
-            if (!result.accepted()) {
-                StardewCraft.LOGGER.error("[Machine recipe] Rejected snapshot; keeping v{} with {} recipes",
-                        result.snapshot().version(), result.snapshot().definitions().size());
-                return;
-            }
-
-            Map<String, List<Recipe>> loaded = new LinkedHashMap<>();
-            for (Recipe recipe : result.snapshot().definitions().values()) {
-                loaded.computeIfAbsent(recipe.machine().toString(), ignored -> new ArrayList<>()).add(recipe);
-            }
-            Map<String, List<Recipe>> frozen = new LinkedHashMap<>();
-            loaded.forEach((machine, recipeList) -> {
-                recipeList.sort(java.util.Comparator.comparingInt(ReloadListener::matcherPriority)
-                        .thenComparing(recipe -> recipe.id().toString()));
-                frozen.put(machine, List.copyOf(recipeList));
-            });
-            RECIPES_BY_MACHINE = Collections.unmodifiableMap(frozen);
-
-            // 清除旧的缓存引用，下次 getCachedJson() 时按需重建
-            CACHED_JSON_REF = new java.lang.ref.SoftReference<>(null);
-
-            StardewCraft.LOGGER.info("[Machine recipe] Applied snapshot v{} ({} recipes across {} machines)",
-                    result.snapshot().version(), result.snapshot().definitions().size(), RECIPES_BY_MACHINE.size());
+            publishCandidate(
+                    definitions,
+                    sources,
+                    diagnostics,
+                    indexDefinitions(definitions),
+                    null,
+                    "reload");
         }
 
         private static ResourceLocation definitionId(ResourceLocation source, boolean grouped, int index) {
             return grouped
                     ? ResourceLocation.fromNamespaceAndPath(source.getNamespace(), source.getPath() + "/" + index)
                     : source;
-        }
-
-        private static int matcherPriority(Recipe recipe) {
-            if (recipe.inputId() != null) return 0;
-            if (recipe.inputTag() != null) return 1;
-            return 2;
         }
 
         private static JsonArray singleton(JsonObject root) {
@@ -580,6 +563,165 @@ public final class ArtisanRecipeDataManager {
             } catch (Exception ignored) {
                 return null;
             }
+        }
+    }
+
+    private static Map<String, List<Recipe>> indexDefinitions(
+            Map<ResourceLocation, Recipe> definitions
+    ) {
+        Map<String, List<Recipe>> loaded = new LinkedHashMap<>();
+        for (Recipe recipe : definitions.values()) {
+            loaded.computeIfAbsent(
+                    recipe.machine().toString(),
+                    ignored -> new ArrayList<>()).add(recipe);
+        }
+        Map<String, List<Recipe>> frozen = new LinkedHashMap<>();
+        loaded.forEach((machine, recipeList) -> {
+            recipeList.sort(java.util.Comparator
+                    .comparingInt(
+                            ArtisanRecipeDataManager::matcherPriority)
+                    .thenComparing(recipe ->
+                            recipe.id().toString()));
+            frozen.put(machine, List.copyOf(recipeList));
+        });
+        return Collections.unmodifiableMap(frozen);
+    }
+
+    private static int matcherPriority(Recipe recipe) {
+        if (recipe.inputId() != null) return 0;
+        if (recipe.inputTag() != null) return 1;
+        return 2;
+    }
+
+    private static synchronized void publishCandidate(
+            Map<ResourceLocation, Recipe> definitions,
+            Map<ResourceLocation, String> sources,
+            List<DefinitionDiagnostic> diagnostics,
+            Map<String, List<Recipe>> recipesByMachine,
+            @Nullable String sourceJson,
+            String operation
+    ) {
+        List<DefinitionDiagnostic> preparedDiagnostics =
+                new ArrayList<>(diagnostics);
+        Map<ResourceLocation, Recipe> indexedDefinitions =
+                new LinkedHashMap<>();
+        recipesByMachine.forEach((machine, recipes) -> {
+            for (Recipe recipe : recipes) {
+                if (!machine.equals(recipe.machine().toString())) {
+                    preparedDiagnostics.add(
+                            DefinitionDiagnostic.error(
+                                    recipe.id(),
+                                    recipe.id(),
+                                    "Recipe is indexed under the wrong machine"));
+                }
+                Recipe previous = indexedDefinitions.putIfAbsent(
+                        recipe.id(), recipe);
+                if (previous != null) {
+                    preparedDiagnostics.add(
+                            DefinitionDiagnostic.error(
+                                    recipe.id(),
+                                    recipe.id(),
+                                    "Recipe appears more than once in the machine index"));
+                }
+            }
+        });
+        if (!indexedDefinitions.keySet().equals(
+                definitions.keySet())) {
+            preparedDiagnostics.add(DefinitionDiagnostic.error(
+                    null,
+                    null,
+                    "Machine recipe definition and index IDs differ"));
+        }
+
+        AtomicDefinitionStore.ApplyResult<Recipe> result =
+                STORE.applyLocal(
+                        definitions, sources, preparedDiagnostics);
+        for (DefinitionDiagnostic diagnostic : result.diagnostics()) {
+            String source = diagnostic.source() == null
+                    ? "<machine recipe reload>"
+                    : diagnostic.source().toString();
+            if (diagnostic.severity()
+                    == DefinitionDiagnostic.Severity.ERROR) {
+                StardewCraft.LOGGER.error(
+                        "[Machine recipe] Definition error [{}]: {}",
+                        source,
+                        diagnostic.message());
+            } else {
+                StardewCraft.LOGGER.warn(
+                        "[Machine recipe] Definition warning [{}]: {}",
+                        source,
+                        diagnostic.message());
+            }
+        }
+        if (!result.accepted()) {
+            StardewCraft.LOGGER.error(
+                    "[Machine recipe] Rejected {}; keeping v{} with {} recipes",
+                    operation,
+                    catalog.definitions().version(),
+                    catalog.definitions().definitions().size());
+            return;
+        }
+
+        catalog = new Catalog(
+                result.snapshot(),
+                recipesByMachine,
+                sourceJson);
+        StardewCraft.LOGGER.info(
+                "[Machine recipe] Applied {} v{} ({} recipes across {} machines)",
+                operation,
+                catalog.definitions().version(),
+                catalog.definitions().definitions().size(),
+                catalog.recipesByMachine().size());
+    }
+
+    static Catalog catalog() {
+        return catalog;
+    }
+
+    static final class Catalog {
+        private final DefinitionSnapshot<Recipe> definitions;
+        private final Map<String, List<Recipe>> recipesByMachine;
+        private volatile java.lang.ref.SoftReference<String>
+                cachedJson;
+
+        private Catalog(
+                DefinitionSnapshot<Recipe> definitions,
+                Map<String, List<Recipe>> recipesByMachine,
+                @Nullable String cachedJson
+        ) {
+            this.definitions = java.util.Objects.requireNonNull(
+                    definitions, "definitions");
+            Map<String, List<Recipe>> frozen =
+                    new LinkedHashMap<>();
+            recipesByMachine.forEach((machine, recipes) ->
+                    frozen.put(machine, List.copyOf(recipes)));
+            this.recipesByMachine =
+                    Collections.unmodifiableMap(frozen);
+            this.cachedJson = new java.lang.ref.SoftReference<>(
+                    cachedJson);
+        }
+
+        DefinitionSnapshot<Recipe> definitions() {
+            return definitions;
+        }
+
+        Map<String, List<Recipe>> recipesByMachine() {
+            return recipesByMachine;
+        }
+
+        String cachedJson() {
+            String json = cachedJson.get();
+            if (json != null) return json;
+            json = rebuildCacheJson(recipesByMachine);
+            cachedJson = new java.lang.ref.SoftReference<>(json);
+            return json;
+        }
+
+        private static Catalog empty() {
+            return new Catalog(
+                    DefinitionSnapshot.empty(),
+                    Map.of(),
+                    "");
         }
     }
 

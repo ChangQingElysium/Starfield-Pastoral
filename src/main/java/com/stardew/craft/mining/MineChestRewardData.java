@@ -39,17 +39,18 @@ public final class MineChestRewardData {
             ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "rewards");
     private static final AtomicDefinitionStore<StardewMineChestRewardDefinition> STORE =
             new AtomicDefinitionStore<>();
-    private static volatile List<Map.Entry<ResourceLocation, StardewMineChestRewardDefinition>> ordered = List.of();
+    private static volatile Catalog catalog = Catalog.empty();
 
     private MineChestRewardData() {
     }
 
     public static DefinitionSnapshot<StardewMineChestRewardDefinition> snapshot() {
-        return STORE.snapshot();
+        return catalog.definitions();
     }
 
     public static boolean isRewardFloor(int floor) {
-        return ordered.stream().anyMatch(entry -> entry.getValue().floor() == floor);
+        return catalog.ordered().stream()
+                .anyMatch(entry -> entry.getValue().floor() == floor);
     }
 
     public static Optional<ItemStack> resolve(
@@ -59,7 +60,8 @@ public final class MineChestRewardData {
             Random random
     ) {
         StardewConditionContext conditionContext = new StardewConditionContext(level, player);
-        for (Map.Entry<ResourceLocation, StardewMineChestRewardDefinition> entry : ordered) {
+        for (Map.Entry<ResourceLocation, StardewMineChestRewardDefinition> entry
+                : catalog.ordered()) {
             StardewMineChestRewardDefinition definition = entry.getValue();
             if (definition.floor() != floor) continue;
             boolean available = definition.availableWhen().stream().allMatch(condition ->
@@ -95,20 +97,40 @@ public final class MineChestRewardData {
                         decode(entry.getKey(), ResourceLocation.tryBuild(entry.getKey().getNamespace(), path),
                                 entry.getValue(), definitions, sources, diagnostics);
                     });
-            var result = STORE.applyLocal(definitions, sources, diagnostics);
-            logDiagnostics(result.diagnostics());
-            if (!result.accepted()) {
-                StardewCraft.LOGGER.error("[Mine chest] Rejected reload; keeping {} rewards", ordered.size());
-                return;
-            }
-            ordered = result.snapshot().definitions().entrySet().stream()
-                    .sorted(Comparator
-                            .<Map.Entry<ResourceLocation, StardewMineChestRewardDefinition>>comparingInt(
-                                    entry -> entry.getValue().priority()).reversed()
-                            .thenComparing(entry -> entry.getKey().toString()))
-                    .toList();
-            StardewCraft.LOGGER.info("[Mine chest] Applied {} rewards", ordered.size());
+            applyCandidate(definitions, sources, diagnostics);
         }
+    }
+
+    static synchronized void applyCandidate(
+            Map<ResourceLocation, StardewMineChestRewardDefinition> definitions,
+            Map<ResourceLocation, String> sources,
+            List<DefinitionDiagnostic> diagnostics
+    ) {
+        List<Map.Entry<ResourceLocation,
+                StardewMineChestRewardDefinition>> prepared =
+                definitions.entrySet().stream()
+                        .sorted(Comparator
+                                .<Map.Entry<ResourceLocation,
+                                        StardewMineChestRewardDefinition>>
+                                        comparingInt(entry ->
+                                                entry.getValue().priority())
+                                .reversed()
+                                .thenComparing(entry ->
+                                        entry.getKey().toString()))
+                        .toList();
+        var result = STORE.applyLocal(
+                definitions, sources, diagnostics);
+        logDiagnostics(result.diagnostics());
+        if (!result.accepted()) {
+            StardewCraft.LOGGER.error(
+                    "[Mine chest] Rejected reload; keeping {} rewards",
+                    catalog.ordered().size());
+            return;
+        }
+        catalog = new Catalog(result.snapshot(), prepared);
+        StardewCraft.LOGGER.info(
+                "[Mine chest] Applied {} rewards",
+                catalog.ordered().size());
     }
 
     private static void decodeBuiltinTable(
@@ -168,6 +190,27 @@ public final class MineChestRewardData {
             } else {
                 StardewCraft.LOGGER.warn("[Mine chest] {}", diagnostic.message());
             }
+        }
+    }
+
+    static Catalog catalog() {
+        return catalog;
+    }
+
+    record Catalog(
+            DefinitionSnapshot<StardewMineChestRewardDefinition> definitions,
+            List<Map.Entry<ResourceLocation,
+                    StardewMineChestRewardDefinition>> ordered
+    ) {
+        Catalog {
+            definitions = java.util.Objects.requireNonNull(
+                    definitions, "definitions");
+            ordered = List.copyOf(ordered);
+        }
+
+        private static Catalog empty() {
+            return new Catalog(
+                    DefinitionSnapshot.empty(), List.of());
         }
     }
 }

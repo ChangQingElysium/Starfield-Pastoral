@@ -2,7 +2,7 @@
   "npc_id": "harvey",
   "_vanilla_ref": "Loved: 348=Wine 237=Super Meal 432=Truffle Oil 395=Coffee 342=Pickles. Liked: -81(forage) -79(fruits) -7(cooking) 402=sweet_pea 614=green_tea 418=crocus 422=purple_mushroom 436=goat_milk 438=large_goat_milk 442=duck_egg 444=duck_feather. Disliked: -4(fish) 424=cheese 426=goat_cheese 330=clay 233=ice_cream 232=rice_pudding 238=cranberry_sauce 234=blueberry_tart 223=cookie 222=rhubarb_pie 221=pink_cake 220=chocolate_cake 216=bread 211=pancakes 210=hashbrowns 208=glazed_yams 206=pizza 205=fried_mushroom. Hated: 296=salmonberry 245=fiddlehead_fern 397=sea_cucumber 396=spice_berry 394=rainbow_shell 393=coral 392=nautilus_shell.",
   "loved": [
-    "stardewcraft:grape_wine",
+    "stardewcraft:wine",
     "stardewcraft:super_meal",
     "stardewcraft:truffle_oil",
     "stardewcraft:coffee",

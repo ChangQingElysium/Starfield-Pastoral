@@ -10,9 +10,11 @@ import java.util.List;
  * Shared crop metadata for add-on integrations.
  *
  * <p>For {@code StardewCropBlock}, {@link #farmingExperience()} is consumed by the normal harvest
- * path with world and position aware provider lookup. Growth phases, regrowth, drops and tool
- * behavior remain properties of the concrete crop implementation; the other fields are metadata
- * for add-ons and do not globally replace arbitrary Minecraft crop behavior.
+ * path with world and position aware provider lookup. These fields do not globally replace an
+ * arbitrary block's persistence or interaction behavior. Addon-owned crop blocks can participate
+ * in authoritative daily growth without inheriting the core block through
+ * {@link StardewCropTypes}; their adapter remains responsible for applying this metadata to its
+ * own stored state.
  */
 public record StardewCropData(
         List<String> seasons,

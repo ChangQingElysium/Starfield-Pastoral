@@ -69,6 +69,12 @@ neoForge {
                     ? 'run-dev'
                     : 'run'
             )
+            if (project.hasProperty('quickPlayServer')) {
+                programArguments.addAll(
+                        '--quickPlayMultiplayer',
+                        project.property('quickPlayServer').toString()
+                )
+            }
 
             // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
@@ -78,7 +84,9 @@ neoForge {
             server()
 
             gameDirectory = project.file(
-                    project.hasProperty('isolatedRun') && project.property('isolatedRun').toString().equalsIgnoreCase('true')
+                    project.hasProperty('serverRunDir')
+                            ? project.property('serverRunDir').toString()
+                            : project.hasProperty('isolatedRun') && project.property('isolatedRun').toString().equalsIgnoreCase('true')
                             ? 'run-dev-server'
                             : 'run'
             )
@@ -238,3 +246,5 @@ idea {
         downloadJavadoc = true
     }
 }
+
+apply from: 'gradle/api-compatibility.gradle'

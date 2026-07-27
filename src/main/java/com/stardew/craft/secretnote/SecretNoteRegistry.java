@@ -27,40 +27,32 @@ import java.util.Map;
 public final class SecretNoteRegistry {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final AtomicDefinitionStore<StardewSecretNoteDefinition> STORE = new AtomicDefinitionStore<>();
-    private static volatile Map<ResourceLocation, StardewSecretNoteDefinition> notes = Map.of();
-    private static volatile Map<Integer, ResourceLocation> vanillaNumbers = Map.of();
-    private static volatile Map<Integer, ResourceLocation> displayNumbers = Map.of();
-    private static volatile String cachedJson = "{}";
+    private static volatile Catalog catalog = Catalog.empty();
 
     private SecretNoteRegistry() {}
 
     public static DefinitionSnapshot<StardewSecretNoteDefinition> snapshot() {
-        return STORE.snapshot();
+        return catalog.definitions();
     }
 
     public static StardewSecretNoteDefinition get(ResourceLocation id) {
-        return notes.get(id);
+        return catalog.notes().get(id);
     }
 
     public static ResourceLocation byVanillaNumber(int number) {
-        return vanillaNumbers.get(number);
+        return catalog.vanillaNumbers().get(number);
     }
 
     public static ResourceLocation byDisplayNumber(int number) {
-        return displayNumbers.get(number);
+        return catalog.displayNumbers().get(number);
     }
 
     public static List<Map.Entry<ResourceLocation, StardewSecretNoteDefinition>> orderedNotes() {
-        return notes.entrySet().stream()
-                .sorted(Comparator
-                        .comparingInt((Map.Entry<ResourceLocation, StardewSecretNoteDefinition> entry) ->
-                                entry.getValue().sortOrder())
-                        .thenComparing(entry -> entry.getKey().toString()))
-                .toList();
+        return catalog.orderedNotes();
     }
 
     public static String getCachedJson() {
-        return cachedJson;
+        return catalog.cachedJson();
     }
 
     /** Replays the committed server catalog on a dedicated client. */
@@ -100,7 +92,7 @@ public final class SecretNoteRegistry {
         }
     }
 
-    private static void applyDefinitions(
+    private static synchronized void applyDefinitions(
             Map<ResourceLocation, StardewSecretNoteDefinition> definitions,
             Map<ResourceLocation, String> sources,
             List<DefinitionDiagnostic> diagnostics,
@@ -109,19 +101,55 @@ public final class SecretNoteRegistry {
     ) {
         Map<Integer, ResourceLocation> numberIndex = buildVanillaNumberIndex(definitions, diagnostics);
         Map<Integer, ResourceLocation> displayIndex = buildDisplayNumberIndex(definitions, diagnostics);
-        var result = STORE.applyLocal(definitions, sources, diagnostics);
+        List<Map.Entry<ResourceLocation, StardewSecretNoteDefinition>> ordered =
+                definitions.entrySet().stream()
+                        .sorted(Comparator
+                                .comparingInt((Map.Entry<ResourceLocation, StardewSecretNoteDefinition> entry) ->
+                                        entry.getValue().sortOrder())
+                                .thenComparing(entry -> entry.getKey().toString()))
+                        .map(entry -> Map.entry(
+                                entry.getKey(), entry.getValue()))
+                        .toList();
+        String nextCachedJson = sourceJson;
+        if (nextCachedJson == null && diagnostics.stream()
+                .noneMatch(diagnostic -> diagnostic.severity()
+                        == DefinitionDiagnostic.Severity.ERROR)) {
+            try {
+                nextCachedJson = encodeDefinitions(definitions);
+            } catch (RuntimeException exception) {
+                diagnostics.add(DefinitionDiagnostic.error(
+                        null,
+                        null,
+                        "Failed to encode secret-note sync catalog: "
+                                + exception.getMessage()));
+            }
+        }
+
+        var result = STORE.applyLocal(
+                definitions, sources, diagnostics);
         logDiagnostics(result.diagnostics());
         if (!result.accepted()) {
             StardewCraft.LOGGER.error("[Secret notes] Rejected {}; keeping v{} with {} notes",
-                    operation, result.snapshot().version(), result.snapshot().definitions().size());
+                    operation,
+                    catalog.definitions().version(),
+                    catalog.notes().size());
             return;
         }
-        notes = result.snapshot().definitions();
-        vanillaNumbers = Map.copyOf(numberIndex);
-        displayNumbers = Map.copyOf(displayIndex);
-        cachedJson = sourceJson == null ? encodeDefinitions(notes) : sourceJson;
+        if (nextCachedJson == null) {
+            throw new IllegalStateException(
+                    "Accepted secret-note definitions have no sync catalog");
+        }
+
+        catalog = new Catalog(
+                result.snapshot(),
+                numberIndex,
+                displayIndex,
+                ordered,
+                nextCachedJson);
         StardewCraft.LOGGER.info("[Secret notes] Applied {} v{} ({} notes)",
-                operation, result.snapshot().version(), notes.size());
+                operation,
+                catalog.definitions().version(),
+                catalog.notes().size());
     }
 
     private static void decodeResource(
@@ -234,8 +262,46 @@ public final class SecretNoteRegistry {
         JsonObject root = new JsonObject();
         definitions.forEach((id, definition) -> StardewSecretNoteDefinition.CODEC
                 .encodeStart(JsonOps.INSTANCE, definition)
-                .result()
+                .resultOrPartial(message -> {
+                    throw new IllegalArgumentException(
+                            id + ": " + message);
+                })
                 .ifPresent(json -> root.add(id.toString(), json)));
         return GSON.toJson(root);
+    }
+
+    static Catalog catalog() {
+        return catalog;
+    }
+
+    record Catalog(
+            DefinitionSnapshot<StardewSecretNoteDefinition> definitions,
+            Map<Integer, ResourceLocation> vanillaNumbers,
+            Map<Integer, ResourceLocation> displayNumbers,
+            List<Map.Entry<ResourceLocation, StardewSecretNoteDefinition>> orderedNotes,
+            String cachedJson
+    ) {
+        Catalog {
+            definitions = java.util.Objects.requireNonNull(
+                    definitions, "definitions");
+            vanillaNumbers = Map.copyOf(vanillaNumbers);
+            displayNumbers = Map.copyOf(displayNumbers);
+            orderedNotes = List.copyOf(orderedNotes);
+            cachedJson = java.util.Objects.requireNonNull(
+                    cachedJson, "cachedJson");
+        }
+
+        Map<ResourceLocation, StardewSecretNoteDefinition> notes() {
+            return definitions.definitions();
+        }
+
+        private static Catalog empty() {
+            return new Catalog(
+                    DefinitionSnapshot.empty(),
+                    Map.of(),
+                    Map.of(),
+                    List.of(),
+                    "{}");
+        }
     }
 }

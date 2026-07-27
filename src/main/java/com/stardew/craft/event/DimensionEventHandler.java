@@ -491,6 +491,10 @@ public class DimensionEventHandler {
         if (miningLevel != null) {
             miningLevel.setDayTime(virtualDayTime);
         }
+        if (server.getTickCount() % 5 == 0) {
+            com.stardew.craft.manager.AnimalGrowthManager.get(serverLevel)
+                    .continueCatchUp(serverLevel);
+        }
 
         if (simulationPaused) {
             return;

@@ -1,6 +1,7 @@
 package com.stardew.craft.event;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.mining.StardewMineMonsterProfiles;
 import com.stardew.craft.core.ModMiningDimensions;
 import com.stardew.craft.mining.MiningCoordinates;
 import com.stardew.craft.network.payload.MummyCollapsePayload;
@@ -27,6 +28,7 @@ import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.function.Consumer;
+import java.util.Set;
 
 /**
  * 矿井怪物刷怪事件处理器
@@ -69,6 +71,7 @@ public class MineMonsterSpawnHandler {
             "lava_bat",
             "iridium_bat",
             "rock_crab",
+            "truffle_crab",
             "lava_crab",
             "iridium_crab",
             "duggy",
@@ -85,6 +88,102 @@ public class MineMonsterSpawnHandler {
             "shadow_shaman",
             "squid_kid"
         );
+
+    static {
+        registerBuiltinProfiles();
+    }
+
+    /** Ensures the built-in profiles are initialized before catalog projection. */
+    public static void ensureProfilesRegistered() {
+    }
+
+    private static void registerBuiltinProfiles() {
+        for (String monsterId : SUMMONABLE_MONSTER_IDS) {
+            EntityType<? extends Mob> entityType =
+                    getSummonEntityType(monsterId);
+            if (entityType == null) {
+                continue;
+            }
+            StardewMineMonsterProfiles.register(
+                    ResourceLocation.fromNamespaceAndPath(
+                            StardewCraft.MODID, monsterId),
+                    entityType,
+                    builtinProgressTags(monsterId),
+                    (mob, context) -> {
+                        if (!applySummonProfile(
+                                mob, monsterId, context.floor())) {
+                            throw new IllegalStateException(
+                                    "Unknown built-in monster profile "
+                                            + monsterId);
+                        }
+                    });
+        }
+    }
+
+    private static Set<String> builtinProgressTags(String monsterId) {
+        return switch (monsterId) {
+            case "green_slime" ->
+                    Set.of("sd_mob_slime");
+            case "frost_jelly" ->
+                    Set.of("sd_mob_slime", "sd_tier_2");
+            case "sludge" ->
+                    Set.of("sd_mob_slime", "sd_tier_3");
+            case "bat" ->
+                    Set.of("sd_mob_bat");
+            case "frost_bat" ->
+                    Set.of("sd_mob_bat", "sd_tier_2");
+            case "lava_bat" ->
+                    Set.of("sd_mob_bat", "sd_tier_3");
+            case "iridium_bat" ->
+                    Set.of("sd_mob_bat", "sd_tier_4");
+            case "rock_crab" ->
+                    Set.of("sd_mob_crab");
+            case "truffle_crab" ->
+                    Set.of("sd_mob_crab", "sd_truffle_crab");
+            case "lava_crab" ->
+                    Set.of("sd_mob_crab", "sd_tier_2");
+            case "iridium_crab" ->
+                    Set.of("sd_mob_crab", "sd_tier_4",
+                            "sd_tier_skull");
+            case "duggy" ->
+                    Set.of("sd_mob_duggy");
+            case "grub" ->
+                    Set.of("sd_mob_grub");
+            case "dust_sprite" ->
+                    Set.of("sd_mob_dust_sprite");
+            case "bug" ->
+                    Set.of("sd_mob_bug");
+            case "fly" ->
+                    Set.of("sd_mob_fly");
+            case "ghost" ->
+                    Set.of("sd_mob_ghost");
+            case "carbon_ghost" ->
+                    Set.of("sd_mob_ghost", "sd_tier_skull");
+            case "skeleton" ->
+                    Set.of("sd_mob_skeleton");
+            case "rock_golem" ->
+                    Set.of("sd_mob_golem");
+            case "metal_head" ->
+                    Set.of("sd_mob_metal_head");
+            case "shadow_brute" ->
+                    Set.of("sd_mob_shadow");
+            case "shadow_shaman" ->
+                    Set.of("sd_mob_shadow", "sd_tier_2");
+            case "squid_kid" ->
+                    Set.of("sd_mob_squid");
+            case "mummy" ->
+                    Set.of("sd_mob_mummy", "sd_tier_skull");
+            case "serpent" ->
+                    Set.of("sd_mob_serpent", "sd_tier_skull");
+            case "royal_serpent" ->
+                    Set.of("sd_mob_royal_serpent", "sd_tier_skull");
+            case "pepper_rex" ->
+                    Set.of("sd_mob_dino", "sd_tier_skull");
+            case "big_slime" ->
+                    Set.of("sd_mob_bigslime_skull", "sd_tier_skull");
+            default -> Set.of();
+        };
+    }
 
     public static void invalidateFloorMobCount(int floor) {
         floorMobCounts.remove(floor);
@@ -183,6 +282,13 @@ public class MineMonsterSpawnHandler {
 
         // Increment cached count for this floor
         floorMobCounts.merge(floor, 1, Integer::sum);
+        if (StardewMineMonsterProfiles.hasMarkedProfile(mob)) {
+            if (!StardewMineMonsterProfiles.applyMarkedProfile(
+                    mob, floor)) {
+                event.setCanceled(true);
+            }
+            return;
+        }
         if (!applyDefaultProfile(mob, floor)) {
             // 不属于矿井怪物映射表：取消生成
             event.setCanceled(true);
@@ -528,6 +634,7 @@ public class MineMonsterSpawnHandler {
             case "lava_bat" -> assignBat(mob, clampFloor(resolvedFloor, 80, 119));
             case "iridium_bat" -> assignBat(mob, Math.max(120, resolvedFloor));
             case "rock_crab" -> assignRockCrab(mob, clampFloor(resolvedFloor, 1, 39));
+            case "truffle_crab" -> assignTruffleCrab(mob);
             case "lava_crab" -> assignLavaCrab(mob, clampFloor(resolvedFloor, 80, 119));
             case "iridium_crab" -> assignIridiumCrab(mob, Math.max(121, resolvedFloor));
             case "duggy" -> assignDuggy(mob, clampFloor(resolvedFloor, 1, 79));
@@ -558,7 +665,7 @@ public class MineMonsterSpawnHandler {
             case "big_slime" -> EntityType.MAGMA_CUBE;
             case "green_slime", "frost_jelly", "sludge" -> EntityType.SLIME;
             case "bat", "frost_bat", "lava_bat", "iridium_bat" -> EntityType.PHANTOM;
-            case "rock_crab", "lava_crab", "iridium_crab", "duggy" -> EntityType.SILVERFISH;
+            case "rock_crab", "truffle_crab", "lava_crab", "iridium_crab", "duggy" -> EntityType.SILVERFISH;
             case "grub", "dust_sprite" -> EntityType.ENDERMITE;
             case "bug" -> EntityType.SPIDER;
             case "fly" -> EntityType.CAVE_SPIDER;
@@ -593,6 +700,13 @@ public class MineMonsterSpawnHandler {
         mob.addTag("sd_mob_crab");
         setStats(mob, 30 * s, 5 * s, 8, 0.20);
         setSDVName(mob, "Rock Crab");
+    }
+
+    private static void assignTruffleCrab(Mob mob) {
+        mob.addTag("sd_mob_crab");
+        mob.addTag("sd_truffle_crab");
+        setStats(mob, 30, 5, 8, 0.20);
+        setSDVName(mob, "Truffle Crab");
     }
 
     private static void assignLavaCrab(Mob mob, int floor) {

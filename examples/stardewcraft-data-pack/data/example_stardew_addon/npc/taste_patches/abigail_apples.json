@@ -1,0 +1,14 @@
+{
+  "npc": "stardewcraft:abigail",
+  "priority": 100,
+  "add": {
+    "loved": [
+      "minecraft:apple"
+    ]
+  },
+  "remove": {
+    "disliked": [
+      "stardewcraft:apple"
+    ]
+  }
+}

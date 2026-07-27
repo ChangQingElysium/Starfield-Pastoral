@@ -1,0 +1,8 @@
+{
+  "dimension": "stardewcraft:stardew_valley",
+  "min": [-40, 62, -99],
+  "max": [91, 84, 17],
+  "aliases": ["Town"],
+  "priority": -100,
+  "indoor": false
+}

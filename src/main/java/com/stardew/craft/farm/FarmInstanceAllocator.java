@@ -1,5 +1,6 @@
 package com.stardew.craft.farm;
 
+import com.stardew.craft.api.v1.farm.StardewFarmLayout;
 import net.minecraft.core.BlockPos;
 
 /**
@@ -27,12 +28,22 @@ public final class FarmInstanceAllocator {
      * @return 农场原点坐标（schematic 放置的 min corner）
      */
     public static BlockPos getFarmOrigin(int slotIndex, FarmType farmType) {
+        return getFarmOrigin(slotIndex,
+                com.stardew.craft.api.v1.farm.StardewFarmLayouts.find(
+                        com.stardew.craft.api.v1.internal.farm
+                                .StardewFarmLayoutRegistry.builtinId(farmType))
+                        .orElseThrow());
+    }
+
+    public static BlockPos getFarmOrigin(
+            int slotIndex,
+            StardewFarmLayout layout
+    ) {
         int col = slotIndex % FARMS_PER_ROW;
         int row = slotIndex / FARMS_PER_ROW;
         int x = FARM_REGION_START + col * FARM_SLOT_SIZE;
         int z = FARM_REGION_START + row * FARM_SLOT_SIZE;
-        var layout = farmType.getLayout();
-        int y = (layout != null) ? layout.originY() : 0;
+        int y = layout.originY();
         return new BlockPos(x, y, z);
     }
 

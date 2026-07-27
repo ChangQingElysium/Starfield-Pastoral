@@ -1,0 +1,10 @@
+{
+  "dimension": "stardewcraft:stardew_valley",
+  "location": "stardewcraft:bus_stop",
+  "include": {
+    "min": [-105, 63, -71],
+    "max": [-46, 69, -47]
+  },
+  "tags": ["stardewcraft:outdoor", "stardewcraft:bus_stop"],
+  "priority": -100
+}

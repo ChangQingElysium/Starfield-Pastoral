@@ -25,8 +25,7 @@ public final class MonsterSlayerGoalRegistry {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final ResourceLocation LEGACY_TABLE =
             ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "monster_slayer_goals");
-    private static volatile Map<String, SlayerGoal> goals = Map.of();
-    private static volatile Map<String, List<String>> tagToGoals = Map.of();
+    private static volatile Catalog catalog = Catalog.empty();
 
     public record SlayerGoal(
             String goalKey,
@@ -50,21 +49,22 @@ public final class MonsterSlayerGoalRegistry {
 
     @Nullable
     public static String getGoalKeyForTag(String monsterTag) {
-        List<String> matches = tagToGoals.getOrDefault(monsterTag, List.of());
+        List<String> matches = catalog.tagToGoals()
+                .getOrDefault(monsterTag, List.of());
         return matches.isEmpty() ? null : matches.getFirst();
     }
 
     public static List<String> getGoalKeysForTag(String monsterTag) {
-        return tagToGoals.getOrDefault(monsterTag, List.of());
+        return catalog.tagToGoals().getOrDefault(monsterTag, List.of());
     }
 
     public static List<SlayerGoal> getAllGoals() {
-        return List.copyOf(goals.values());
+        return List.copyOf(catalog.goals().values());
     }
 
     @Nullable
     public static SlayerGoal getGoal(String goalKey) {
-        return goals.get(goalKey);
+        return catalog.goals().get(goalKey);
     }
 
     public static final class ReloadListener extends SimpleJsonResourceReloadListener {
@@ -100,20 +100,35 @@ public final class MonsterSlayerGoalRegistry {
                         decode(entry.getKey(), id == null ? "" : id.toString(), entry.getValue(), next, errors);
                     });
 
-            if (!errors.isEmpty()) {
-                errors.forEach(error -> StardewCraft.LOGGER.error("[Monster slayer] {}", error));
-                StardewCraft.LOGGER.error("[Monster slayer] Rejected reload; keeping {} goals", goals.size());
-                return;
-            }
-            Map<String, List<String>> routing = new LinkedHashMap<>();
-            next.values().forEach(goal -> goal.monsterTags().forEach(tag ->
-                    routing.computeIfAbsent(tag, ignored -> new ArrayList<>()).add(goal.goalKey())));
-            routing.replaceAll((tag, ids) -> List.copyOf(ids));
-            goals = java.util.Collections.unmodifiableMap(new LinkedHashMap<>(next));
-            tagToGoals = java.util.Collections.unmodifiableMap(new LinkedHashMap<>(routing));
-            StardewCraft.LOGGER.info("[Monster slayer] Applied {} goals across {} monster tags",
-                    goals.size(), tagToGoals.size());
+            applyCandidate(next, errors);
         }
+    }
+
+    static synchronized void applyCandidate(
+            Map<String, SlayerGoal> goals,
+            List<String> errors
+    ) {
+        if (!errors.isEmpty()) {
+            errors.forEach(error ->
+                    StardewCraft.LOGGER.error(
+                            "[Monster slayer] {}", error));
+            StardewCraft.LOGGER.error(
+                    "[Monster slayer] Rejected reload; keeping {} goals",
+                    catalog.goals().size());
+            return;
+        }
+        Map<String, List<String>> routing = new LinkedHashMap<>();
+        goals.values().forEach(goal ->
+                goal.monsterTags().forEach(tag ->
+                        routing.computeIfAbsent(
+                                tag, ignored -> new ArrayList<>())
+                                .add(goal.goalKey())));
+        routing.replaceAll((tag, ids) -> List.copyOf(ids));
+        catalog = new Catalog(goals, routing);
+        StardewCraft.LOGGER.info(
+                "[Monster slayer] Applied {} goals across {} monster tags",
+                catalog.goals().size(),
+                catalog.tagToGoals().size());
     }
 
     private static void decode(ResourceLocation source, String id, JsonElement json,
@@ -130,5 +145,29 @@ public final class MonsterSlayerGoalRegistry {
                         errors.add(source + ": duplicate goal ID " + id);
                     }
                 });
+    }
+
+    static Catalog catalog() {
+        return catalog;
+    }
+
+    record Catalog(
+            Map<String, SlayerGoal> goals,
+            Map<String, List<String>> tagToGoals
+    ) {
+        Catalog {
+            goals = java.util.Collections.unmodifiableMap(
+                    new LinkedHashMap<>(goals));
+            Map<String, List<String>> copiedRouting =
+                    new LinkedHashMap<>();
+            tagToGoals.forEach((tag, ids) ->
+                    copiedRouting.put(tag, List.copyOf(ids)));
+            tagToGoals = java.util.Collections.unmodifiableMap(
+                    copiedRouting);
+        }
+
+        private static Catalog empty() {
+            return new Catalog(Map.of(), Map.of());
+        }
     }
 }

@@ -1,5 +1,8 @@
 package com.stardew.craft.manager;
 
+import com.stardew.craft.api.v1.agriculture.StardewCropRemovalCause;
+import com.stardew.craft.api.v1.agriculture.StardewCropRuntime;
+import com.stardew.craft.api.v1.agriculture.StardewCropState;
 import com.stardew.craft.block.crop.StardewCropBlock;
 import com.stardew.craft.entity.passive.CrowEntity;
 import com.stardew.craft.farm.FarmInstance;
@@ -73,9 +76,17 @@ public final class CrowAttackScheduler {
                         || p.getZ() < minB.getZ() || p.getZ() > maxB.getZ()) {
                     continue;
                 }
+                StardewCropState crop = StardewCropRuntime.inspect(stardewLevel, p);
+                if (crop == null || !crop.root().equals(p)) {
+                    continue;
+                }
                 CropGrowthManager.CropGrowthState st = cropMgr.getState(stardewLevel, p);
-                if (st == null) continue;
-                if (st.phase > 1) ripeInFarm.add(p);
+                boolean coreMidGrowth = st != null && st.phase > 1;
+                boolean addonMidGrowth =
+                        !(stardewLevel.getBlockState(p).getBlock()
+                                instanceof StardewCropBlock)
+                                && crop.visualStage() > 1;
+                if (coreMidGrowth || addonMidGrowth) ripeInFarm.add(p);
             }
             if (ripeInFarm.isEmpty()) continue;
 
@@ -106,11 +117,8 @@ public final class CrowAttackScheduler {
 
                 // 销毁作物 + 生成乌鸦。即便 target 所在 chunk 未加载，setBlock 会按需短暂加载，
                 // 开销在每农场/天 ≤4 次级别，完全可忽略，并且与 SDV 行为一致（作物必被吃掉）。
-                BlockState bs = stardewLevel.getBlockState(target);
-                if (bs.getBlock() instanceof StardewCropBlock) {
-                    stardewLevel.setBlock(target, Blocks.AIR.defaultBlockState(), 3);
-                    cropMgr.removeCrop(stardewLevel, target);
-                }
+                StardewCropRuntime.remove(
+                        stardewLevel, target, StardewCropRemovalCause.CROW);
                 try {
                     CrowEntity.spawnAt(stardewLevel, target);
                 } catch (Throwable t) {

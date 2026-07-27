@@ -1,0 +1,15 @@
+{
+  "builder": "stardewcraft:wizard",
+  "order": 40,
+  "display_name": "item.stardewcraft.desert_obelisk",
+  "description": "item.stardewcraft.desert_obelisk.desc",
+  "money": 1000000,
+  "materials": [
+    { "item": "stardewcraft:iridium_bar", "count": 20 },
+    { "item": "stardewcraft:coconut", "count": 10 },
+    { "item": "stardewcraft:cactus_fruit", "count": 10 }
+  ],
+  "result_item": "stardewcraft:desert_obelisk",
+  "preview_canvas_size": 128,
+  "magical_construction": true
+}

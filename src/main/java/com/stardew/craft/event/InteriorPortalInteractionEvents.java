@@ -436,7 +436,9 @@ public class InteriorPortalInteractionEvents {
         }
 
         // ── 通用 Portal Registry 查找 ──
-        Optional<InteriorPortalRegistry.PortalTarget> resolved = InteriorPortalRegistry.resolve(targetId);
+        Optional<InteriorPortalRegistry.PortalTarget> resolved =
+                InteriorPortalRegistry.resolve(
+                        targetId, player.serverLevel().dimension().location());
         if (resolved.isEmpty()) return;
 
         // Museum exit guard
@@ -514,7 +516,10 @@ public class InteriorPortalInteractionEvents {
         long elapsed = player.serverLevel().getGameTime() - start;
         if (elapsed == PORTAL_WARP_AT) {
             String targetId = player.getPersistentData().getString(PLAYER_PENDING_PORTAL_ID);
-            Optional<InteriorPortalRegistry.PortalTarget> resolved = InteriorPortalRegistry.resolve(targetId);
+            Optional<InteriorPortalRegistry.PortalTarget> resolved =
+                    InteriorPortalRegistry.resolve(
+                            targetId,
+                            player.serverLevel().dimension().location());
             if (resolved.isEmpty()) {
                 clearPendingPortalTransition(player);
                 return;
@@ -750,8 +755,7 @@ public class InteriorPortalInteractionEvents {
         }
         com.stardew.craft.quest.StardewQuest quest = qm.getQuest("19");
         if (quest != null && !quest.isCompleted()) {
-            quest.questComplete(player);
-            qm.cleanupDestroyed(player);
+            qm.completeActiveQuest("19", player);
         }
     }
 
@@ -948,14 +952,14 @@ public class InteriorPortalInteractionEvents {
             // 兜底：按玩家自身农场反查
             farm = com.stardew.craft.farm.FarmInstanceRegistry.get().getFarmForPlayer(player.getUUID());
         }
-        if (farm == null || farm.getFarmType().getLayout() == null
-                || farm.getFarmType().getLayout().caveExitSpawn() == null) {
+        if (farm == null || farm.getFarmLayout().caveExitSpawn() == null) {
             StardewCraft.LOGGER.warn("[FARM-CAVE] Cannot resolve exit target for {}, aborting", player.getName().getString());
             return;
         }
 
-        net.minecraft.core.BlockPos exitOffset = farm.getFarmType().getLayout().caveExitSpawn();
-        float yaw = farm.getFarmType().getLayout().caveExitYaw();
+        net.minecraft.core.BlockPos exitOffset =
+                farm.getFarmLayout().caveExitSpawn();
+        float yaw = farm.getFarmLayout().caveExitYaw();
         net.minecraft.core.BlockPos exitAbs = farm.getOrigin().offset(exitOffset);
 
         player.closeContainer();

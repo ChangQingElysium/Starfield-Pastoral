@@ -39,7 +39,7 @@ public record FarmAdminSyncPayload(
                                 buf.readUtf(64),
                                 buf.readVarInt(),
                                 buf.readBlockPos(),
-                                buf.readUtf(32),
+                                buf.readUtf(128),
                                 buf.readBoolean(),
                                 buf.readVarInt(),
                                 buf.readVarInt(),
@@ -58,7 +58,7 @@ public record FarmAdminSyncPayload(
                         buf.writeUtf(entry.farmName, 64);
                         buf.writeVarInt(entry.slotIndex);
                         buf.writeBlockPos(entry.origin);
-                        buf.writeUtf(entry.farmType, 32);
+                        buf.writeUtf(entry.farmType, 128);
                         buf.writeBoolean(entry.initialized);
                         buf.writeVarInt(entry.lastOnlineDay);
                         buf.writeVarInt(entry.lastOnlineSeason);
@@ -85,7 +85,7 @@ public record FarmAdminSyncPayload(
                     farm.getFarmName(),
                     farm.getSlotIndex(),
                     farm.getOrigin(),
-                    farm.getFarmType().name(),
+                    farm.getFarmLayoutId().toString(),
                     farm.isInitialized(),
                     farm.getLastOnlineDay(),
                     farm.getLastOnlineSeason(),

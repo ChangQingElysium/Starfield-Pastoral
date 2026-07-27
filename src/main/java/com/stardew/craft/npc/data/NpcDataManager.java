@@ -6,13 +6,22 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.content.DefinitionDiagnostic;
+import com.stardew.craft.api.v1.npc.StardewNpcGiftTastePatchDefinition;
+import com.stardew.craft.api.v1.world.StardewWorldAnchor;
 import com.stardew.craft.npc.runtime.NpcLocationGraph;
+import com.stardew.craft.world.WorldAnchorRegistry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -46,16 +55,38 @@ public final class NpcDataManager {
         protected void apply(Map<ResourceLocation, JsonElement> objects,
                              ResourceManager resourceManager,
                              ProfilerFiller profiler) {
-            Map<String, NpcCapabilityProfile> capabilities = new HashMap<>();
-            Map<String, JsonObject> dialogues = new HashMap<>();
-            Map<String, JsonObject> schedules = new HashMap<>();
-            Map<String, JsonObject> tastes = new HashMap<>();
-            Map<String, JsonObject> events = new HashMap<>();
+            Map<String, NpcCapabilityProfile> capabilities =
+                    new LinkedHashMap<>();
+            Map<String, JsonObject> dialogues = new LinkedHashMap<>();
+            Map<String, JsonObject> schedules = new LinkedHashMap<>();
+            Map<String, JsonObject> tastes = new LinkedHashMap<>();
+            Map<String, JsonObject> events = new LinkedHashMap<>();
+            Map<String, ResourceLocation> capabilitySources =
+                    new LinkedHashMap<>();
+            Map<String, ResourceLocation> dialogueSources =
+                    new LinkedHashMap<>();
+            Map<String, ResourceLocation> scheduleSources =
+                    new LinkedHashMap<>();
+            Map<String, ResourceLocation> tasteSources =
+                    new LinkedHashMap<>();
+            Map<String, ResourceLocation> eventSources =
+                    new LinkedHashMap<>();
             Set<String> locationMappings = new HashSet<>();
             Map<String, String> locationAliases = new HashMap<>();
             Map<String, NpcLocationAnchor> locationAnchors = new HashMap<>();
+            Map<ResourceLocation, StardewNpcGiftTastePatchDefinition>
+                    tastePatches = new LinkedHashMap<>();
+            Map<ResourceLocation, String> tastePatchSources =
+                    new LinkedHashMap<>();
+            List<DefinitionDiagnostic> tastePatchDiagnostics =
+                    new ArrayList<>();
 
-            for (Map.Entry<ResourceLocation, JsonElement> entry : objects.entrySet()) {
+            for (Map.Entry<ResourceLocation, JsonElement> entry :
+                    objects.entrySet().stream()
+                            .sorted(Map.Entry.comparingByKey(
+                                    Comparator.comparing(
+                                            ResourceLocation::toString)))
+                            .toList()) {
                 ResourceLocation id = entry.getKey();
                 JsonElement element = entry.getValue();
                 if (element == null || !element.isJsonObject()) {
@@ -66,8 +97,23 @@ public final class NpcDataManager {
                 JsonObject root = element.getAsJsonObject();
                 String lowerPath = path.toLowerCase(Locale.ROOT);
 
+                if (lowerPath.startsWith("taste_patches/")) {
+                    NpcGiftTastePatchData.decode(
+                            id,
+                            root,
+                            GSON,
+                            tastePatches,
+                            tastePatchSources,
+                            tastePatchDiagnostics);
+                    continue;
+                }
                 if (lowerPath.startsWith("capabilities/")) {
-                    parseCapabilities(root, capabilities, id);
+                    parseCapabilities(
+                            root,
+                            capabilities,
+                            capabilitySources,
+                            id,
+                            tastePatchDiagnostics);
                     continue;
                 }
                 if (lowerPath.startsWith("location_mappings/")) {
@@ -77,28 +123,56 @@ public final class NpcDataManager {
                 if (lowerPath.startsWith("dialogue/")) {
                     String npcId = extractNpcId(id, path, root, "npc_id");
                     if (npcId != null) {
-                        dialogues.put(npcId, root.deepCopy());
+                        putUniqueDocument(
+                                "dialogue",
+                                npcId,
+                                root.deepCopy(),
+                                id,
+                                dialogues,
+                                dialogueSources,
+                                tastePatchDiagnostics);
                     }
                     continue;
                 }
                 if (lowerPath.startsWith("schedules/")) {
                     String npcId = extractNpcId(id, path, root, "npc_id");
                     if (npcId != null) {
-                        schedules.put(npcId, root.deepCopy());
+                        putUniqueDocument(
+                                "schedule",
+                                npcId,
+                                root.deepCopy(),
+                                id,
+                                schedules,
+                                scheduleSources,
+                                tastePatchDiagnostics);
                     }
                     continue;
                 }
                 if (lowerPath.startsWith("tastes/")) {
                     String npcId = extractNpcId(id, path, root, "npc_id");
                     if (npcId != null) {
-                        tastes.put(npcId, filterTastesWithDiagnostics(npcId, root));
+                        putUniqueDocument(
+                                "gift taste",
+                                npcId,
+                                filterTastesWithDiagnostics(npcId, root),
+                                id,
+                                tastes,
+                                tasteSources,
+                                tastePatchDiagnostics);
                     }
                     continue;
                 }
                 if (lowerPath.startsWith("events/")) {
                     String eventId = extractNpcId(id, path, root, "event_id");
                     if (eventId != null) {
-                        events.put(eventId, root.deepCopy());
+                        putUniqueDocument(
+                                "event",
+                                eventId,
+                                root.deepCopy(),
+                                id,
+                                events,
+                                eventSources,
+                                tastePatchDiagnostics);
                     }
                 }
             }
@@ -112,11 +186,268 @@ public final class NpcDataManager {
                 filteredSchedules.put(entry.getKey(), NpcContentFilter.filterSchedules(entry.getValue(), locationMappings));
             }
 
+            applyTastePatches(
+                    tastes,
+                    tastePatches.entrySet().stream()
+                            .sorted(Comparator
+                                    .<Map.Entry<ResourceLocation,
+                                            StardewNpcGiftTastePatchDefinition>>
+                                            comparingInt(patch ->
+                                                    patch.getValue()
+                                                            .priority())
+                                    .thenComparing(patch ->
+                                            patch.getKey().toString()))
+                            .toList(),
+                    tastePatchDiagnostics);
+            var tastePatchResult = NpcGiftTastePatchData.apply(
+                    tastePatches,
+                    tastePatchSources,
+                    tastePatchDiagnostics);
+            for (DefinitionDiagnostic diagnostic :
+                    tastePatchResult.diagnostics()) {
+                if (diagnostic.severity()
+                        == DefinitionDiagnostic.Severity.ERROR) {
+                    StardewCraft.LOGGER.error(
+                            "[NPC data] {}",
+                            diagnostic.message());
+                } else {
+                    StardewCraft.LOGGER.warn(
+                            "[NPC data] {}",
+                            diagnostic.message());
+                }
+            }
+            if (!tastePatchResult.accepted()) {
+                StardewCraft.LOGGER.error(
+                        "[NPC data] Rejected reload; keeping "
+                                + "the previous NPC snapshot");
+                return;
+            }
+
             NpcDataRegistry.replaceAll(capabilities, dialogues, filteredSchedules, tastes, events,
                     locationMappings, locationAliases, locationAnchors);
+            Map<ResourceLocation, StardewWorldAnchor> legacyAnchors =
+                    legacyRouteAnchors(events);
+            WorldAnchorRegistry.replaceLegacyNpcAnchors(legacyAnchors);
+            StardewCraft.LOGGER.info(
+                    "[WorldAnchors] Projected {} legacy NPC route points",
+                    legacyAnchors.size());
             NpcLocationGraph.reload();
             NpcDataDiagnostics.validateAndLog(capabilities, dialogues, filteredSchedules, tastes);
+            StardewCraft.LOGGER.info(
+                    "[NPC taste patches] Applied {} patches",
+                    tastePatches.size());
 
+        }
+
+        static void putUniqueDocument(
+                String kind,
+                String logicalId,
+                JsonObject document,
+                ResourceLocation source,
+                Map<String, JsonObject> output,
+                Map<String, ResourceLocation> sources,
+                List<DefinitionDiagnostic> diagnostics
+        ) {
+            ResourceLocation previous = sources.putIfAbsent(
+                    logicalId, source);
+            if (previous != null) {
+                diagnostics.add(DefinitionDiagnostic.error(
+                        source,
+                        ResourceLocation.tryParse(logicalId),
+                        "Duplicate NPC " + kind + " logical ID "
+                                + logicalId + " from " + previous
+                                + " and " + source));
+                return;
+            }
+            output.put(logicalId, document);
+        }
+
+        static void applyTastePatches(
+                Map<String, JsonObject> tastes,
+                List<Map.Entry<ResourceLocation,
+                        StardewNpcGiftTastePatchDefinition>> patches,
+                List<DefinitionDiagnostic> diagnostics
+        ) {
+            for (var patchEntry : patches) {
+                ResourceLocation patchId = patchEntry.getKey();
+                StardewNpcGiftTastePatchDefinition patch =
+                        patchEntry.getValue();
+                String targetKey = storageKey(patch.npc());
+                JsonObject target = tastes.get(targetKey);
+                if (target == null) {
+                    if (patch.required()) {
+                        diagnostics.add(DefinitionDiagnostic.error(
+                                patchId,
+                                patch.npc(),
+                                "Unknown NPC gift taste target "
+                                        + patch.npc()));
+                    }
+                    continue;
+                }
+                if (!validatePatchItems(
+                        patchId, patch, diagnostics)) {
+                    continue;
+                }
+                JsonObject patched = target.deepCopy();
+                for (String category :
+                        StardewNpcGiftTastePatchDefinition.CATEGORIES) {
+                    LinkedHashSet<String> items =
+                            readTasteItems(patched, category);
+                    patch.remove()
+                            .getOrDefault(category, List.of())
+                            .stream()
+                            .map(ResourceLocation::toString)
+                            .forEach(items::remove);
+                    patch.add()
+                            .getOrDefault(category, List.of())
+                            .stream()
+                            .map(ResourceLocation::toString)
+                            .forEach(items::add);
+                    JsonArray encoded = new JsonArray();
+                    items.forEach(encoded::add);
+                    patched.add(category, encoded);
+                }
+                tastes.put(targetKey, patched);
+            }
+        }
+
+        private static boolean validatePatchItems(
+                ResourceLocation patchId,
+                StardewNpcGiftTastePatchDefinition patch,
+                List<DefinitionDiagnostic> diagnostics
+        ) {
+            boolean valid = true;
+            LinkedHashSet<ResourceLocation> referenced =
+                    new LinkedHashSet<>();
+            patch.add().values().forEach(referenced::addAll);
+            patch.remove().values().forEach(referenced::addAll);
+            for (ResourceLocation itemId : referenced) {
+                if (!BuiltInRegistries.ITEM.containsKey(itemId)) {
+                    diagnostics.add(DefinitionDiagnostic.error(
+                            patchId,
+                            patch.npc(),
+                            "Unknown NPC gift taste item " + itemId));
+                    valid = false;
+                }
+            }
+            return valid;
+        }
+
+        private static LinkedHashSet<String> readTasteItems(
+                JsonObject target,
+                String category
+        ) {
+            LinkedHashSet<String> items = new LinkedHashSet<>();
+            if (!target.has(category)
+                    || !target.get(category).isJsonArray()) {
+                return items;
+            }
+            for (JsonElement item :
+                    target.getAsJsonArray(category)) {
+                if (item.isJsonPrimitive()) {
+                    items.add(item.getAsString()
+                            .trim().toLowerCase(Locale.ROOT));
+                }
+            }
+            return items;
+        }
+
+        private static String storageKey(ResourceLocation npcId) {
+            return StardewCraft.MODID.equals(npcId.getNamespace())
+                    ? npcId.getPath()
+                    : npcId.toString();
+        }
+
+        static Map<ResourceLocation, StardewWorldAnchor> legacyRouteAnchors(
+                Map<String, JsonObject> events
+        ) {
+            Map<ResourceLocation, StardewWorldAnchor> anchors =
+                    new HashMap<>();
+            ResourceLocation scheduleRole =
+                    ResourceLocation.fromNamespaceAndPath(
+                            StardewCraft.MODID, "npc_schedule");
+            for (Map.Entry<String, JsonObject> event : events.entrySet()) {
+                String eventId = event.getKey();
+                if (!eventId.equals("npc_route_points")
+                        && !eventId.endsWith(":npc_route_points")) {
+                    continue;
+                }
+                JsonObject root = event.getValue();
+                if (!root.has("points")
+                        || !root.get("points").isJsonObject()) {
+                    continue;
+                }
+                String namespace = eventId.indexOf(':') >= 0
+                        ? eventId.substring(0, eventId.indexOf(':'))
+                        : StardewCraft.MODID;
+                for (Map.Entry<String, JsonElement> point
+                        : root.getAsJsonObject("points").entrySet()) {
+                    if (!point.getValue().isJsonObject()) {
+                        continue;
+                    }
+                    JsonObject object = point.getValue().getAsJsonObject();
+                    if (!object.has("x")
+                            || !object.has("y")
+                            || !object.has("z")) {
+                        continue;
+                    }
+                    ResourceLocation pointId =
+                            point.getKey().indexOf(':') >= 0
+                                    ? ResourceLocation.tryParse(
+                                            point.getKey().toLowerCase(
+                                                    Locale.ROOT))
+                                    : ResourceLocation.tryBuild(
+                                            namespace,
+                                            point.getKey().toLowerCase(
+                                                    Locale.ROOT));
+                    if (pointId == null) {
+                        continue;
+                    }
+                    ResourceLocation dimension =
+                            object.has("dimension")
+                                    ? ResourceLocation.tryParse(
+                                            object.get("dimension")
+                                                    .getAsString())
+                                    : ResourceLocation.fromNamespaceAndPath(
+                                            StardewCraft.MODID,
+                                            "stardew_valley");
+                    if (dimension == null) {
+                        continue;
+                    }
+                    boolean indoor = readBoolean(
+                            object, "indoor", false);
+                    ResourceLocation locationId =
+                            object.has("location")
+                                    ? ResourceLocation.tryParse(
+                                            object.get("location")
+                                                    .getAsString())
+                                    : null;
+                    double x = centerLegacyAxis(
+                            object.get("x").getAsDouble());
+                    double y = object.get("y").getAsDouble();
+                    double z = centerLegacyAxis(
+                            object.get("z").getAsDouble());
+                    anchors.put(pointId, new StardewWorldAnchor(
+                            pointId,
+                            dimension,
+                            new Vec3(x, y, z),
+                            object.has("yaw")
+                                    ? object.get("yaw").getAsFloat()
+                                    : 0.0F,
+                            indoor,
+                            readBoolean(
+                                    object,
+                                    "use_ground_height",
+                                    false),
+                            locationId,
+                            Set.of(scheduleRole)));
+                }
+            }
+            return Map.copyOf(anchors);
+        }
+
+        private static double centerLegacyAxis(double value) {
+            return Math.rint(value) == value ? value + 0.5D : value;
         }
 
         private static String extractNpcId(ResourceLocation source, JsonObject root,
@@ -151,7 +482,9 @@ public final class NpcDataManager {
 
         private static void parseCapabilities(JsonObject root,
                                               Map<String, NpcCapabilityProfile> output,
-                                              ResourceLocation resourceId) {
+                                              Map<String, ResourceLocation> sources,
+                                              ResourceLocation resourceId,
+                                              List<DefinitionDiagnostic> diagnostics) {
             if (!root.has("npcs") || !root.get("npcs").isJsonArray()) {
                 return;
             }
@@ -203,6 +536,17 @@ public final class NpcDataManager {
                     datable
                 );
 
+                ResourceLocation previous = sources.putIfAbsent(
+                        profile.npcId(), resourceId);
+                if (previous != null) {
+                    diagnostics.add(DefinitionDiagnostic.error(
+                            resourceId,
+                            ResourceLocation.tryParse(profile.npcId()),
+                            "Duplicate NPC capability logical ID "
+                                    + profile.npcId() + " from "
+                                    + previous + " and " + resourceId));
+                    continue;
+                }
                 output.put(profile.npcId(), profile);
             }
         }

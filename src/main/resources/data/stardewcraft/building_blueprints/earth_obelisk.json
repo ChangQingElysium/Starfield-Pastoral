@@ -1,0 +1,14 @@
+{
+  "builder": "stardewcraft:wizard",
+  "order": 20,
+  "display_name": "item.stardewcraft.earth_obelisk",
+  "description": "item.stardewcraft.earth_obelisk.desc",
+  "money": 500000,
+  "materials": [
+    { "item": "stardewcraft:iridium_bar", "count": 10 },
+    { "item": "stardewcraft:earth_crystal", "count": 10 }
+  ],
+  "result_item": "stardewcraft:earth_obelisk",
+  "preview_canvas_size": 128,
+  "magical_construction": true
+}

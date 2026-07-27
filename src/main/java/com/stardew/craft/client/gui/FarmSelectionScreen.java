@@ -2,14 +2,21 @@ package com.stardew.craft.client.gui;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.farm.StardewFarmLayoutConfigField;
+import com.stardew.craft.api.v1.farm.StardewFarmLayoutPreview;
+import com.stardew.craft.api.v1.farm.StardewFarmLayouts;
+import com.stardew.craft.api.v1.farm.StardewFarmSelectionOptions;
+import com.stardew.craft.api.v1.internal.farm.StardewFarmSelectionOptionRegistry;
 import com.stardew.craft.client.farm.FarmJoinClientState;
+import com.stardew.craft.client.farm.FarmLayoutClientCatalog;
 import com.stardew.craft.client.gui.common.GuiText;
 import com.stardew.craft.client.gui.overnight.StardewGuiUtil;
-import com.stardew.craft.farm.FarmType;
 import com.stardew.craft.sound.ModSounds;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -18,7 +25,9 @@ import net.minecraft.sounds.SoundEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 /**
@@ -47,7 +56,12 @@ public class FarmSelectionScreen extends Screen {
     private static final int FARM_NAME_SUFFIX_COUNT = 8;
 
     // 状态
-    private final List<FarmType> farmTypes = FarmType.allTypes();
+    private final List<StardewFarmLayoutPreview> farmLayouts =
+            FarmLayoutClientCatalog.layouts().isEmpty()
+                    ? StardewFarmLayouts.allRegistrations().stream()
+                            .map(StardewFarmLayoutPreview::from)
+                            .toList()
+                    : FarmLayoutClientCatalog.layouts();
     private int selectedIndex = 0;
     private final float[] typeHighlight;
     private final Random random = new Random();
@@ -79,10 +93,26 @@ public class FarmSelectionScreen extends Screen {
     // 名称输入 — 使用 Minecraft EditBox，支持中文 IME
     private EditBox nameField;
     private String savedName = "";
+    private List<StardewFarmSelectionOptions.Option> selectionOptions = List.of();
+    private final Map<ResourceLocation, Boolean> selectionOptionValues = new HashMap<>();
+    private final Map<ResourceLocation, Map<ResourceLocation, String>>
+            layoutConfigurationValues = new HashMap<>();
+    private int selectionOptionsTop;
+    private int selectionOptionScrollOffset;
+    private int visibleSelectionOptionCount;
+    private int totalSelectionOptionCount;
 
     public FarmSelectionScreen() {
         super(Component.translatable("gui.stardewcraft.farm_selection.title"));
-        typeHighlight = new float[farmTypes.size()];
+        typeHighlight = new float[farmLayouts.size()];
+        for (StardewFarmLayoutPreview layout : farmLayouts) {
+            HashMap<ResourceLocation, String> defaults = new HashMap<>();
+            for (StardewFarmLayoutConfigField field
+                    : layout.configurationFields()) {
+                defaults.put(field.id(), field.defaultValue());
+            }
+            layoutConfigurationValues.put(layout.id(), defaults);
+        }
     }
 
     @Override
@@ -149,6 +179,75 @@ public class FarmSelectionScreen extends Screen {
         addWidget(nameField);
         setFocused(nameField);
 
+        selectionOptions = StardewFarmSelectionOptionRegistry.options();
+        selectionOptions.forEach(option ->
+                selectionOptionValues.putIfAbsent(option.id(), option.defaultSelected()));
+        int optionHeight = Math.max(20, this.font.lineHeight + 8);
+        int optionGap = Math.max(3, ui(8));
+        int optionsBottom = nameAreaY - Math.max(14, ui(36));
+        List<StardewFarmLayoutConfigField> layoutFields =
+                farmLayouts.get(selectedIndex).configurationFields();
+        totalSelectionOptionCount =
+                layoutFields.size() + selectionOptions.size();
+        int optionsTopLimit = rightY
+                + this.font.lineHeight * 4
+                + Math.max(12, ui(32));
+        int maximumVisible = Math.max(
+                1,
+                (optionsBottom - optionsTopLimit + optionGap)
+                        / (optionHeight + optionGap));
+        visibleSelectionOptionCount = Math.min(
+                totalSelectionOptionCount, maximumVisible);
+        selectionOptionScrollOffset = Math.min(
+                selectionOptionScrollOffset,
+                Math.max(0, totalSelectionOptionCount
+                        - visibleSelectionOptionCount));
+        selectionOptionsTop = optionsBottom
+                - visibleSelectionOptionCount * optionHeight
+                - Math.max(0, visibleSelectionOptionCount - 1) * optionGap;
+        for (int i = 0; i < layoutFields.size(); i++) {
+            if (!isVisibleSelectionOption(i)) {
+                continue;
+            }
+            StardewFarmLayoutConfigField field = layoutFields.get(i);
+            int optionY = selectionOptionsTop
+                    + (i - selectionOptionScrollOffset)
+                    * (optionHeight + optionGap);
+            Button button = Button.builder(
+                    layoutFieldLabel(field),
+                    pressed -> {
+                        cycleLayoutField(field);
+                        pressed.setMessage(layoutFieldLabel(field));
+                    }
+            ).bounds(rightX, optionY, rightW, optionHeight).build();
+            if (!field.description().getString().isBlank()) {
+                button.setTooltip(Tooltip.create(field.description()));
+            }
+            addRenderableWidget(button);
+        }
+        for (int i = 0; i < selectionOptions.size(); i++) {
+            StardewFarmSelectionOptions.Option option = selectionOptions.get(i);
+            int optionIndex = layoutFields.size() + i;
+            if (!isVisibleSelectionOption(optionIndex)) {
+                continue;
+            }
+            int optionY = selectionOptionsTop
+                    + (optionIndex - selectionOptionScrollOffset)
+                    * (optionHeight + optionGap);
+            Button button = Button.builder(
+                    selectionOptionLabel(option),
+                    pressed -> {
+                        selectionOptionValues.compute(
+                                option.id(), (ignored, current) -> !Boolean.TRUE.equals(current));
+                        pressed.setMessage(selectionOptionLabel(option));
+                    }
+            ).bounds(rightX, optionY, rightW, optionHeight).build();
+            if (!option.tooltip().getString().isBlank()) {
+                button.setTooltip(Tooltip.create(option.tooltip()));
+            }
+            addRenderableWidget(button);
+        }
+
         // 骰子（名称输入行右端）
         diceCx = rightX + rightW - diceButtonSize() / 2;
         diceCy = fieldY + fieldH / 2;
@@ -165,7 +264,8 @@ public class FarmSelectionScreen extends Screen {
         // 缩短列表高度为按钮留出空间
         listH = joinBtnY - listY - sectionGap;
         maxVisible = Math.max(1, listH / rowH);
-        scrollOffset = Math.min(scrollOffset, Math.max(0, farmTypes.size() - maxVisible));
+        scrollOffset = Math.min(
+                scrollOffset, Math.max(0, farmLayouts.size() - maxVisible));
     }
 
     private int ui(int sdvPixels) {
@@ -216,13 +316,17 @@ public class FarmSelectionScreen extends Screen {
         int mx = (int) mouseX, my = (int) mouseY;
 
         // 左栏农场类型行
-        for (int i = 0; i < Math.min(maxVisible, farmTypes.size() - scrollOffset); i++) {
+        for (int i = 0; i < Math.min(
+                maxVisible, farmLayouts.size() - scrollOffset); i++) {
             int idx = i + scrollOffset;
             int ry = listY + i * rowH;
             if (inside(mx, my, listX, ry, listW, rowH)) {
-                FarmType type = farmTypes.get(idx);
-                if (type.isUnlocked()) {
+                StardewFarmLayoutPreview type = farmLayouts.get(idx);
+                if (type.selectable()) {
                     selectedIndex = idx;
+                    selectionOptionScrollOffset = 0;
+                    savedName = nameField.getValue();
+                    rebuildWidgets();
                     playUi(ModSounds.SMALL_SELECT.get(), 0.7f, 1.05f);
                 } else {
                     playUi(ModSounds.SMALL_SELECT.get(), 0.4f, 0.7f);
@@ -258,8 +362,28 @@ public class FarmSelectionScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (mouseX >= rightX && mouseX <= rightX + rightW
+                && mouseY >= selectionOptionsTop
+                && mouseY < nameAreaY
+                && totalSelectionOptionCount
+                        > visibleSelectionOptionCount) {
+            int maximumOffset = totalSelectionOptionCount
+                    - visibleSelectionOptionCount;
+            int nextOffset = selectionOptionScrollOffset;
+            if (scrollY > 0) {
+                nextOffset = Math.max(0, nextOffset - 1);
+            } else if (scrollY < 0) {
+                nextOffset = Math.min(maximumOffset, nextOffset + 1);
+            }
+            if (nextOffset != selectionOptionScrollOffset) {
+                selectionOptionScrollOffset = nextOffset;
+                savedName = nameField.getValue();
+                rebuildWidgets();
+            }
+            return true;
+        }
         if (mouseX >= contentX && mouseX <= dividerX && mouseY >= listY && mouseY <= listY + listH) {
-            int maxScroll = Math.max(0, farmTypes.size() - maxVisible);
+            int maxScroll = Math.max(0, farmLayouts.size() - maxVisible);
             if (scrollY > 0 && scrollOffset > 0) scrollOffset--;
             if (scrollY < 0 && scrollOffset < maxScroll) scrollOffset++;
             return true;
@@ -322,11 +446,12 @@ public class FarmSelectionScreen extends Screen {
         // scissor 裁剪：确保列表内容不溢出边框
         graphics.enableScissor(contentX, listY, dividerX, clipY2);
 
-        for (int i = 0; i < Math.min(maxVisible, farmTypes.size() - scrollOffset); i++) {
+        for (int i = 0; i < Math.min(
+                maxVisible, farmLayouts.size() - scrollOffset); i++) {
             int idx = i + scrollOffset;
-            FarmType type = farmTypes.get(idx);
+            StardewFarmLayoutPreview type = farmLayouts.get(idx);
             boolean isSelected = (idx == selectedIndex);
-            boolean isUnlocked = type.isUnlocked();
+            boolean isUnlocked = type.selectable();
             int ry = listY + i * rowH;
 
             // 选中高亮
@@ -349,10 +474,10 @@ public class FarmSelectionScreen extends Screen {
             int iconY = ry + (rowH - iconH) / 2;
 
             if (isUnlocked) {
-                graphics.blit(type.getIconTexture(), iconX, iconY, 0, 0, iconW, iconH, iconW, iconH);
+                graphics.blit(type.iconTexture(), iconX, iconY, 0, 0, iconW, iconH, iconW, iconH);
             } else {
                 graphics.setColor(0.5f, 0.5f, 0.5f, 0.4f);
-                graphics.blit(type.getIconTexture(), iconX, iconY, 0, 0, iconW, iconH, iconW, iconH);
+                graphics.blit(type.iconTexture(), iconX, iconY, 0, 0, iconW, iconH, iconW, iconH);
                 graphics.setColor(1f, 1f, 1f, 1f);
                 int lockS = iconH / 2;
                 graphics.blit(LOCK_ICON, iconX + (iconW - lockS) / 2, iconY + (iconH - lockS) / 2,
@@ -360,7 +485,7 @@ public class FarmSelectionScreen extends Screen {
             }
 
             // 类型名称
-            String name = type.getDisplayName().getString();
+            String name = type.displayName().getString();
             int nameColor = isSelected ? 0x582A11 : (isUnlocked ? 0x3E2723 : 0x8A6A58);
             int nameX = iconX + iconW + Math.max(6, ui(12));
             int nameY = ry + (rowH - this.font.lineHeight) / 2;
@@ -380,11 +505,12 @@ public class FarmSelectionScreen extends Screen {
         graphics.disableScissor();
 
         // 滚动条
-        if (farmTypes.size() > maxVisible) {
+        if (farmLayouts.size() > maxVisible) {
             int barX = dividerX - Math.max(5, ui(10));
             int barTotalH = maxVisible * rowH;
-            int thumbH = Math.max(8, barTotalH * maxVisible / farmTypes.size());
-            int maxScroll = Math.max(1, farmTypes.size() - maxVisible);
+            int thumbH = Math.max(
+                    8, barTotalH * maxVisible / farmLayouts.size());
+            int maxScroll = Math.max(1, farmLayouts.size() - maxVisible);
             int thumbY = listY + (barTotalH - thumbH) * scrollOffset / maxScroll;
             graphics.fill(barX, listY, barX + 2, listY + barTotalH, 0x22000000);
             graphics.fill(barX, thumbY, barX + 2, thumbY + thumbH, 0x77582A11);
@@ -396,19 +522,24 @@ public class FarmSelectionScreen extends Screen {
     // ═══════════════════════════════════════════
 
     private void drawRightPanel(GuiGraphics graphics) {
-        FarmType selectedType = farmTypes.get(selectedIndex);
+        StardewFarmLayoutPreview selectedType = farmLayouts.get(selectedIndex);
 
         // 类型大标题
-        Component displayName = Component.literal(selectedType.getDisplayName().getString())
+        Component displayName = Component.literal(
+                        selectedType.displayName().getString())
                 .withStyle(ChatFormatting.BOLD);
         graphics.drawString(this.font, GuiText.ellipsize(this.font, displayName, rightW), rightX, rightY, 0x582A11, false);
 
         // 描述文字：根据命名区上方的实际可用高度自动决定行数。
         int descY = rightY + this.font.lineHeight + Math.max(6, ui(16));
-        int descBottom = nameAreaY - Math.max(10, ui(28));
+        boolean hasOptions = !selectionOptions.isEmpty()
+                || !selectedType.configurationFields().isEmpty();
+        int descBottom = !hasOptions
+                ? nameAreaY - Math.max(10, ui(28))
+                : selectionOptionsTop - Math.max(6, ui(16));
         int lineStep = this.font.lineHeight + 2;
         int maxDescriptionLines = Math.max(1, (descBottom - descY) / lineStep);
-        GuiText.drawWrapped(graphics, this.font, selectedType.getDescription(),
+        GuiText.drawWrapped(graphics, this.font, selectedType.description(),
                 rightX, descY, rightW, 0x5D4037, false, maxDescriptionLines);
 
         // ---- 名称输入区域 ----
@@ -446,7 +577,7 @@ public class FarmSelectionScreen extends Screen {
         joinBtnScale = approach(joinBtnScale,
                 inside(mouseX, mouseY, joinBtnX, joinBtnY, joinBtnW, joinBtnH) ? 1.0f : 0.0f);
 
-        for (int i = 0; i < farmTypes.size(); i++) {
+        for (int i = 0; i < farmLayouts.size(); i++) {
             boolean visible = (i >= scrollOffset && i < scrollOffset + maxVisible);
             if (visible) {
                 int vi = i - scrollOffset;
@@ -502,8 +633,8 @@ public class FarmSelectionScreen extends Screen {
             playUi(ModSounds.SMALL_SELECT.get(), 0.72f, 0.84f);
             return;
         }
-        FarmType selectedType = farmTypes.get(selectedIndex);
-        if (!selectedType.isUnlocked()) {
+        StardewFarmLayoutPreview selectedType = farmLayouts.get(selectedIndex);
+        if (!selectedType.selectable()) {
             playUi(ModSounds.SMALL_SELECT.get(), 0.4f, 0.7f);
             return;
         }
@@ -513,7 +644,10 @@ public class FarmSelectionScreen extends Screen {
                 this.minecraft.setScreen(new ConfirmScreen(
                         confirmed -> {
                             if (confirmed) {
-                                sendSelection(selectedType.getId(), finalName, true);
+                                sendSelection(
+                                        selectedType.id().toString(),
+                                        finalName,
+                                        true);
                             } else if (this.minecraft != null) {
                                 this.minecraft.setScreen(this);
                             }
@@ -527,14 +661,26 @@ public class FarmSelectionScreen extends Screen {
             return;
         }
 
-        sendSelection(selectedType.getId(), finalName, false);
+        sendSelection(selectedType.id().toString(), finalName, false);
     }
 
     private void sendSelection(String farmTypeId, String farmName, boolean forceCancelPending) {
         playUi(ModSounds.NEW_RECIPE.get(), 0.88f, 1.0f);
+        for (StardewFarmSelectionOptions.Option option : selectionOptions) {
+            StardewFarmSelectionOptionRegistry.dispatch(
+                    option,
+                    Boolean.TRUE.equals(selectionOptionValues.get(option.id())),
+                    farmTypeId,
+                    farmName,
+                    forceCancelPending
+            );
+        }
         if (this.minecraft != null) {
+            Map<ResourceLocation, String> configuration =
+                    layoutConfigurationValues.getOrDefault(
+                            ResourceLocation.parse(farmTypeId), Map.of());
             this.minecraft.setScreen(PlayerProfileSetupScreen.forNewFarm(
-                    farmTypeId, farmName, forceCancelPending));
+                    farmTypeId, farmName, forceCancelPending, configuration));
         }
     }
 
@@ -544,9 +690,9 @@ public class FarmSelectionScreen extends Screen {
 
     private void cycleNextUnlockedType() {
         int start = selectedIndex;
-        for (int i = 1; i <= farmTypes.size(); i++) {
-            int idx = (start + i) % farmTypes.size();
-            if (farmTypes.get(idx).isUnlocked()) {
+        for (int i = 1; i <= farmLayouts.size(); i++) {
+            int idx = (start + i) % farmLayouts.size();
+            if (farmLayouts.get(idx).selectable()) {
                 selectedIndex = idx;
                 // 确保选中项在可见范围内
                 if (idx < scrollOffset) scrollOffset = idx;
@@ -555,6 +701,60 @@ public class FarmSelectionScreen extends Screen {
                 return;
             }
         }
+    }
+
+    private Component selectionOptionLabel(StardewFarmSelectionOptions.Option option) {
+        String marker = Boolean.TRUE.equals(selectionOptionValues.get(option.id()))
+                ? "\u2611 " : "\u2610 ";
+        return Component.literal(marker).append(option.label());
+    }
+
+    private boolean isVisibleSelectionOption(int index) {
+        return index >= selectionOptionScrollOffset
+                && index < selectionOptionScrollOffset
+                        + visibleSelectionOptionCount;
+    }
+
+    private Component layoutFieldLabel(StardewFarmLayoutConfigField field) {
+        String value = layoutConfigurationValues
+                .getOrDefault(
+                        farmLayouts.get(selectedIndex).id(), Map.of())
+                .getOrDefault(field.id(), field.defaultValue());
+        Component renderedValue = field.type()
+                == StardewFarmLayoutConfigField.Type.BOOLEAN
+                ? Component.translatable(Boolean.parseBoolean(value)
+                        ? "options.on" : "options.off")
+                : Component.literal(value);
+        return field.label().copy()
+                .append(Component.literal(": "))
+                .append(renderedValue);
+    }
+
+    private void cycleLayoutField(StardewFarmLayoutConfigField field) {
+        Map<ResourceLocation, String> values =
+                layoutConfigurationValues.get(
+                        farmLayouts.get(selectedIndex).id());
+        String current = values.getOrDefault(
+                field.id(), field.defaultValue());
+        String next = switch (field.type()) {
+            case BOOLEAN -> Boolean.toString(!Boolean.parseBoolean(current));
+            case INTEGER -> {
+                int value;
+                try {
+                    value = Integer.parseInt(current);
+                } catch (NumberFormatException ignored) {
+                    value = field.minimum();
+                }
+                yield Integer.toString(
+                        value >= field.maximum() ? field.minimum() : value + 1);
+            }
+            case CHOICE -> {
+                int index = field.choices().indexOf(current);
+                yield field.choices().get(
+                        (index + 1) % field.choices().size());
+            }
+        };
+        values.put(field.id(), next);
     }
 
     private String generateDefaultName() {

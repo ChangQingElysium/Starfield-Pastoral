@@ -1,6 +1,9 @@
 package com.stardew.craft.manager;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.agriculture.StardewCropRuntimeAdapter;
+import com.stardew.craft.api.v1.agriculture.StardewCropState;
+import com.stardew.craft.api.v1.internal.crop.StardewCropRuntimeRegistry;
 import com.stardew.craft.block.crop.StardewCropBlock;
 import com.stardew.craft.manager.FertilizerManager;
 import net.minecraft.core.BlockPos;
@@ -241,36 +244,34 @@ public class CropGrowthManager extends SavedData {
                     BlockState state = serverLevel.getBlockState(pos);
                     Block block = state.getBlock();
 
-                    // 校验：这还是个作物吗？
-                    if (block instanceof StardewCropBlock cropBlock) {
-                        CropGrowthState growthState = cropStates.computeIfAbsent(globalPos, (k) -> new CropGrowthState());
+                    boolean coreCrop = block instanceof StardewCropBlock;
+                    StardewCropState runtimeCrop = coreCrop
+                            ? StardewCropRuntimeRegistry.inspect(serverLevel, pos)
+                            : StardewCropRuntimeRegistry.inspectAddon(serverLevel, pos);
+                    if (runtimeCrop != null) {
+                        boolean isWatered = runtimeCrop.soilPositions().stream()
+                                .map(serverLevel::getBlockState)
+                                .anyMatch(soil -> soil.getBlock() instanceof FarmBlock
+                                        && soil.getValue(FarmBlock.MOISTURE) > 0);
 
-                        // 检查水分 (来自下方耕地)
-                        BlockPos belowPos = pos.below();
-                        @SuppressWarnings("null")
-                        BlockState belowState = serverLevel.getBlockState(belowPos);
-                        boolean isWatered = false;
-
-                        if (belowState.getBlock() instanceof FarmBlock) {
-                            @SuppressWarnings("null")
-                            int moisture = belowState.getValue(FarmBlock.MOISTURE);
-                            isWatered = moisture > 0;
+                        // 运行时桥会重验作物身份；附属负责自己的生长持久化。
+                        StardewCropRuntimeAdapter.DailyResult result =
+                                StardewCropRuntimeRegistry.growOneDay(
+                                        serverLevel, pos, isWatered, false);
+                        setDirty();
+                        if (result == StardewCropRuntimeAdapter.DailyResult.REMOVED) {
+                            removeCrop(serverLevel, pos);
+                            continue;
                         }
 
-                        // growCropOneDay 内部会处理季节判断；若替换为 DEAD_CROP，会触发 onRemove。
-                        // onRemove 调用 removeCrop 时会被延迟处理，避免遍历时 CME。
-                        cropBlock.growCropOneDay(serverLevel, pos, state, isWatered, growthState);
-                        // growthState is mutated in-place
-                        setDirty();
-
-                        // SDV: 成熟当日 1% 概率长成 3×3 巨型作物
+                        // SDV: 核心作物成熟当日 1% 概率长成 3×3 巨型作物。
+                        // 附属作物可在自身 daily adapter 中实现其巨型形态，不强制核心几何。
                         BlockState afterGrow = serverLevel.getBlockState(pos);
                         if (afterGrow.getBlock() instanceof StardewCropBlock matureCheck
                                 && afterGrow.hasProperty(StardewCropBlock.AGE)
                                 && afterGrow.getValue(StardewCropBlock.AGE) == StardewCropBlock.MAX_AGE) {
                             com.stardew.craft.spawner.GiantCropSpawner.tryRoll(serverLevel, pos, matureCheck);
                         }
-
                     } else {
                         // 只要发现位置上不是作物了，就清理掉脏数据
                         removeCrop(serverLevel, pos);
@@ -310,12 +311,16 @@ public class CropGrowthManager extends SavedData {
                 @SuppressWarnings("null")
                 BlockState state = serverLevel.getBlockState(pos);
                 Block block = state.getBlock();
-                if (block instanceof StardewCropBlock cropBlock) {
-                    CropGrowthState growthState = cropStates.computeIfAbsent(globalPos, (k) -> new CropGrowthState());
-                    // 传 watered=false，确保不会推进生长，但仍会触发“不在季节 -> 枯萎”替换。
-                    cropBlock.growCropOneDay(serverLevel, pos, state, false, growthState);
-                    // growthState is mutated in-place
+                if (block instanceof StardewCropBlock
+                        || StardewCropRuntimeRegistry.inspectAddon(serverLevel, pos) != null) {
+                    // 传 watered=false，确保核心作物不会推进生长；附属仍收到季节上下文。
+                    StardewCropRuntimeAdapter.DailyResult result =
+                            StardewCropRuntimeRegistry.growOneDay(
+                                    serverLevel, pos, false, false);
                     setDirty();
+                    if (result == StardewCropRuntimeAdapter.DailyResult.REMOVED) {
+                        removeCrop(serverLevel, pos);
+                    }
                 } else {
                     removeCrop(serverLevel, pos);
                 }
@@ -407,7 +412,7 @@ public class CropGrowthManager extends SavedData {
                                 if (com.stardew.craft.core.FarmAreaResolver.isInStardewButNotFarm(level, realPos)
                                     && !com.stardew.craft.greenhouse.GreenhouseManager.isInGreenhouseInterior(level, realPos)) {
                                     BlockState above = level.getBlockState(realPos.above());
-                                    if (!isSoilProtectingBlock(above)) {
+                                    if (!isSoilProtectingBlock(level, realPos.above(), above)) {
                                         // 在还原为黄土前，清理该位置残留的肥料数据，避免下次再耕后无法施肥
                                         fertilizerManager.removeFertilizer(level, realPos);
                                         level.setBlock(realPos,
@@ -422,7 +427,7 @@ public class CropGrowthManager extends SavedData {
                                 if (!com.stardew.craft.core.FarmAreaResolver.isInStardewButNotFarm(level, realPos)
                                     && !com.stardew.craft.greenhouse.GreenhouseManager.isInGreenhouseInterior(level, realPos)) {
                                     BlockState above = level.getBlockState(realPos.above());
-                                    if (!isSoilProtectingBlock(above)
+                                    if (!isSoilProtectingBlock(level, realPos.above(), above)
                                             && level.random.nextFloat() < 0.1f) {
                                         // 在还原为黄土前，清理该位置残留的肥料数据，避免下次再耕后无法施肥
                                         fertilizerManager.removeFertilizer(level, realPos);
@@ -458,10 +463,15 @@ public class CropGrowthManager extends SavedData {
      *  - {@link StardewCropBlock}：所有自定义作物（含 WildSeedCropBlock）；
      *  - {@link com.stardew.craft.block.nature.ForageBlock}：X 季种成熟后变成的 forage 方块（蒲公英、雪人参等）。
      */
-    private static boolean isSoilProtectingBlock(BlockState above) {
+    private static boolean isSoilProtectingBlock(
+            ServerLevel level,
+            BlockPos abovePos,
+            BlockState above
+    ) {
         Block block = above.getBlock();
         return block instanceof StardewCropBlock
-            || block instanceof com.stardew.craft.block.nature.ForageBlock;
+            || block instanceof com.stardew.craft.block.nature.ForageBlock
+            || StardewCropRuntimeRegistry.inspectAddon(level, abovePos) != null;
     }
 
     @SuppressWarnings("null")

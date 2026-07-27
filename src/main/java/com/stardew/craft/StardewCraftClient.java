@@ -703,6 +703,19 @@ public class StardewCraftClient {
             ModItems.DRIED_FRUIT.get(),
             ModItems.DRIED_MUSHROOMS.get()
         );
+        java.util.ArrayList<Item> flavoredDrinkItems = new java.util.ArrayList<>();
+        flavoredDrinkItems.add(ModItems.WINE.get());
+        flavoredDrinkItems.add(ModItems.JUICE.get());
+        ModItems.LEGACY_FLAVORED_DRINKS.values().forEach(holder -> flavoredDrinkItems.add(holder.get()));
+        event.register((stack, tintIndex) -> {
+            if (!(stack.getItem() instanceof com.stardew.craft.item.artisan.FlavoredArtisanDrinkItem drink)
+                    || tintIndex != 1) {
+                return 0xFFFFFFFF;
+            }
+            int color = drink.getColor(stack);
+            int rgb = color >= 0 ? color : 0xFFFFFF;
+            return 0xFF000000 | (rgb & 0xFFFFFF);
+        }, flavoredDrinkItems.toArray(Item[]::new));
             event.register((stack, tintIndex) -> {
                 if (!(stack.getItem() instanceof SpecificBaitItem specificBaitItem)) {
                     return 0xFFFFFFFF;

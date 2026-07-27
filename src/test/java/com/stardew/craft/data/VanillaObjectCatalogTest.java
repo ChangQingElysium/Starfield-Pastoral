@@ -44,13 +44,15 @@ class VanillaObjectCatalogTest {
     }
 
     @Test
-    void aggregatesProjectVariantsIntoOneVanillaCollectionEntry() {
+    void mapsDynamicProcessedGoodsToTheirSingleVanillaObjects() {
         assertTrue(VanillaObjectCatalog.matchesItemId(
-                entry("350", "Basic", -26, false, false), "stardewcraft:tomato_juice"));
+                entry("350", "Basic", -26, false, false), "stardewcraft:juice"));
         assertTrue(VanillaObjectCatalog.matchesItemId(
-                entry("348", "Basic", -26, false, false), "stardewcraft:melon_wine"));
+                entry("348", "Basic", -26, false, false), "stardewcraft:wine"));
         assertTrue(VanillaObjectCatalog.matchesItemId(
                 entry("SmokedFish", "Basic", -26, false, false), "stardewcraft:smoked_eel"));
+        assertFalse(VanillaObjectCatalog.matchesItemId(
+                entry("348", "Basic", -26, false, false), "stardewcraft:melon_wine"));
         assertFalse(VanillaObjectCatalog.matchesItemId(
                 entry("350", "Basic", -26, false, false), "stardewcraft:tomato"));
     }

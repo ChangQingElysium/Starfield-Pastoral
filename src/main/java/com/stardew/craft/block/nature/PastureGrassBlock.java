@@ -1,6 +1,7 @@
 package com.stardew.craft.block.nature;
 
 import com.stardew.craft.animal.data.AnimalWorldData;
+import com.stardew.craft.animal.service.AnimalGrassTargetService;
 import com.stardew.craft.book.BookPowerEffects;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.core.ModDimensions;
@@ -73,6 +74,41 @@ public class PastureGrassBlock extends BushBlock {
     public BlockState getStateForPlacement(@SuppressWarnings("null") net.minecraft.world.item.context.BlockPlaceContext context) {
         int variant = context.getLevel().getRandom().nextInt(3);
         return defaultBlockState().setValue(VARIANT, variant).setValue(CLUMPS, 4);
+    }
+
+    @Override
+    protected void onPlace(
+            BlockState state,
+            Level level,
+            BlockPos pos,
+            BlockState oldState,
+            boolean movedByPiston
+    ) {
+        super.onPlace(state, level, pos, oldState, movedByPiston);
+        if (level instanceof ServerLevel serverLevel
+                && !(oldState.getBlock()
+                instanceof PastureGrassBlock)) {
+            AnimalGrassTargetService.onGrassStateChanged(
+                    serverLevel, pos, true);
+        }
+    }
+
+    @Override
+    protected void onRemove(
+            BlockState state,
+            Level level,
+            BlockPos pos,
+            BlockState newState,
+            boolean movedByPiston
+    ) {
+        if (level instanceof ServerLevel serverLevel
+                && !(newState.getBlock()
+                instanceof PastureGrassBlock)) {
+            AnimalGrassTargetService.onGrassStateChanged(
+                    serverLevel, pos, false);
+        }
+        super.onRemove(
+                state, level, pos, newState, movedByPiston);
     }
 
     @SuppressWarnings("null")
@@ -190,6 +226,14 @@ public class PastureGrassBlock extends BushBlock {
             for (int x = origin.getX() - dist; x <= origin.getX() + dist && foundClumps < clumpsNeeded; x++) {
                 for (int y = origin.getY() - 1; y <= origin.getY() + 1 && foundClumps < clumpsNeeded; y++) {
                     for (int z = origin.getZ() - dist; z <= origin.getZ() + dist && foundClumps < clumpsNeeded; z++) {
+                        if (!isOnHorizontalRing(
+                                origin.getX(),
+                                origin.getZ(),
+                                x,
+                                z,
+                                dist)) {
+                            continue;
+                        }
                         BlockPos candidate = new BlockPos(x, y, z);
                         if (candidate.equals(origin)) {
                             continue;
@@ -209,6 +253,20 @@ public class PastureGrassBlock extends BushBlock {
         }
 
         return result;
+    }
+
+    static boolean isOnHorizontalRing(
+            int originX,
+            int originZ,
+            int candidateX,
+            int candidateZ,
+            int radius
+    ) {
+        return radius > 0
+                && Math.max(
+                        Math.abs(candidateX - originX),
+                        Math.abs(candidateZ - originZ))
+                == radius;
     }
 
     @SuppressWarnings("null")

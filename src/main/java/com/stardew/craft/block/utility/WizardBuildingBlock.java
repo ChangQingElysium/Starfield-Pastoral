@@ -4,9 +4,11 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.block.decor.MapDecorStaticBlock;
 import com.stardew.craft.blockentity.ModBlockEntities;
 import com.stardew.craft.blockentity.WizardBuildingBlockEntity;
-import com.stardew.craft.core.FarmAreaResolver;
 import com.stardew.craft.core.ModDimensions;
 import com.stardew.craft.event.FarmAreaProtectionEvents;
+import com.stardew.craft.farm.FarmInstance;
+import com.stardew.craft.farm.FarmInstanceRegistry;
+import com.stardew.craft.item.WizardBuildingItem;
 import com.stardew.craft.warp.ObeliskWarpService;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -27,11 +29,15 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Random;
+import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -72,28 +78,36 @@ public final class WizardBuildingBlock extends MapDecorStaticBlock implements En
             return null;
         }
         if (!(context.getLevel() instanceof ServerLevel level)
-                || !(context.getPlayer() instanceof ServerPlayer player)
-                || player.isCreative()) {
+                || !(context.getPlayer() instanceof ServerPlayer player)) {
             return state;
         }
-        if (level.dimension() != ModDimensions.STARDEW_VALLEY) {
+        ItemStack stack = context.getItemInHand();
+        if (WizardBuildingItem.getOwner(stack) == null) {
+            WizardBuildingItem.bindTo(stack, player);
+        }
+        UUID itemOwner = WizardBuildingItem.getOwner(stack);
+        if (itemOwner == null || !itemOwner.equals(player.getUUID())) {
+            player.displayClientMessage(Component.translatable(
+                    "message.stardewcraft.wizard_building.owner_only",
+                    WizardBuildingItem.getOwnerName(stack)), true);
+            return null;
+        }
+        FarmInstance farm = FarmInstanceRegistry.get().getFarmForPlayer(itemOwner);
+        if (level.dimension() != ModDimensions.STARDEW_VALLEY || farm == null) {
             player.displayClientMessage(Component.translatable(
                     "message.stardewcraft.wizard_building.farm_only"), true);
             return null;
         }
         for (CellOffset offset : occupiedOffsets(state.getValue(FACING))) {
             BlockPos occupied = context.getClickedPos().offset(offset.dx(), offset.dy(), offset.dz());
-            if (!FarmAreaProtectionEvents.canModifyAt(player, occupied)) {
+            if (!farm.contains(occupied)) {
                 player.displayClientMessage(Component.translatable(
                         "message.stardewcraft.wizard_building.farm_only"), true);
                 return null;
             }
         }
         if (kind.isGoldClock()) {
-            UUID owner = FarmAreaResolver.getOwnerAt(context.getClickedPos());
-            com.stardew.craft.farm.FarmInstance farm = owner == null ? null
-                    : com.stardew.craft.farm.FarmInstanceRegistry.get().getFarm(owner);
-            if (farm != null && farm.hasGoldClock()) {
+            if (farm.hasGoldClock()) {
                 player.displayClientMessage(Component.translatable(
                         "message.stardewcraft.gold_clock.already_built"), true);
                 return null;
@@ -108,15 +122,52 @@ public final class WizardBuildingBlock extends MapDecorStaticBlock implements En
         super.setPlacedBy(level, pos, state, placer, stack);
         if (!level.isClientSide && state.getValue(PART) == Part.MAIN
                 && level.getBlockEntity(pos) instanceof WizardBuildingBlockEntity building) {
-            UUID farmOwner = FarmAreaResolver.getOwnerAt(pos);
-            if (farmOwner == null && placer instanceof Player player) {
-                farmOwner = player.getUUID();
+            UUID owner = WizardBuildingItem.getOwner(stack);
+            if (owner == null && placer instanceof ServerPlayer player) {
+                WizardBuildingItem.bindTo(stack, player);
+                owner = player.getUUID();
             }
-            building.setOwner(farmOwner);
+            building.setOwner(owner);
             if (kind.isGoldClock()) {
                 building.syncGoldClockFarmState();
             }
         }
+    }
+
+    @Override
+    public boolean onDestroyedByPlayer(BlockState state, Level level, BlockPos pos, Player player,
+                                       boolean willHarvest, FluidState fluid) {
+        if (!level.isClientSide) {
+            BlockPos mainPos = findMainPos(level, pos, state);
+            if (mainPos != null
+                    && level.getBlockEntity(mainPos) instanceof WizardBuildingBlockEntity building
+                    && building.owner() != null
+                    && !building.owner().equals(player.getUUID())) {
+                player.displayClientMessage(Component.translatable(
+                        "message.stardewcraft.wizard_building.owner_only",
+                        building.owner().toString()), true);
+                return false;
+            }
+        }
+        return super.onDestroyedByPlayer(state, level, pos, player, willHarvest, fluid);
+    }
+
+    @Override
+    protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+        if (state.getValue(PART) == Part.EXTENSION) {
+            return List.of();
+        }
+        ItemStack drop = new ItemStack(this);
+        BlockEntity blockEntity = params.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
+        if (blockEntity instanceof WizardBuildingBlockEntity building && building.owner() != null) {
+            String ownerName = "";
+            if (building.getLevel() instanceof ServerLevel serverLevel) {
+                ownerName = com.stardew.craft.player.PlayerDisplayName.get(
+                        serverLevel.getServer(), building.owner());
+            }
+            WizardBuildingItem.bindTo(drop, building.owner(), ownerName);
+        }
+        return List.of(drop);
     }
 
     @Override
@@ -257,11 +308,11 @@ public final class WizardBuildingBlock extends MapDecorStaticBlock implements En
             building.dropAllContents(level, pos);
             building.dismissHarvesters();
             if (kind.isGoldClock() && building.owner() != null) {
-                com.stardew.craft.farm.FarmInstance farm = com.stardew.craft.farm.FarmInstanceRegistry.get()
-                        .getFarm(building.owner());
+                com.stardew.craft.farm.FarmInstance farm = FarmInstanceRegistry.get()
+                        .getFarmForPlayer(building.owner());
                 if (farm != null) {
                     farm.setGoldClockState(false, true);
-                    com.stardew.craft.farm.FarmInstanceRegistry.get().setDirty();
+                    FarmInstanceRegistry.get().setDirty();
                 }
             }
         }

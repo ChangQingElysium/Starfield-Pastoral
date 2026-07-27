@@ -58,7 +58,7 @@ public record FarmJoinListRequestPayload() implements CustomPacketPayload {
                         farm.getOwnerUUID(),
                         com.stardew.craft.player.PlayerDisplayName.get(player.server, farm.getOwnerUUID()),
                         farm.getFarmName(),
-                        farm.getFarmType().getId(),
+                        farm.getFarmLayoutId().toString(),
                         0, // permission irrelevant for join list
                         false
                 ));

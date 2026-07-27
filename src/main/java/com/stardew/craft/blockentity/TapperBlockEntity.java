@@ -1,5 +1,8 @@
 package com.stardew.craft.blockentity;
 
+import com.stardew.craft.api.v1.internal.tree.StardewTreeRuntimeRegistry;
+import com.stardew.craft.api.v1.tree.StardewTreeRuntimeAdapter;
+import com.stardew.craft.api.v1.tree.StardewTreeState;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.time.StardewTimeManager;
 import com.stardew.craft.block.utility.TapperBlock;
@@ -68,7 +71,7 @@ public class TapperBlockEntity extends TimedProductionBlockEntity {
 	}
 
 	public boolean isProductionSiteValid() {
-		return currentValidSupportDef() != null;
+		return currentValidSupportDef() != null || currentValidAddonSupport() != null;
 	}
 
 	@SuppressWarnings("null")
@@ -84,10 +87,15 @@ public class TapperBlockEntity extends TimedProductionBlockEntity {
 			return;
 		}
 		WildTrees.Def def = TapperBlock.findValidProductionDef(currentLevel, worldPosition, state);
-		if (def == null) {
+		if (def != null) {
+			startCycleIfEmpty(def.id());
 			return;
 		}
-		startCycleIfEmpty(def.id());
+		StardewTreeState addonTree =
+				TapperBlock.findValidAddonProductionState(currentLevel, worldPosition, state);
+		if (addonTree != null) {
+			startAddonCycleIfEmpty(addonTree);
+		}
 	}
 
 	public boolean applyFairyDust() {
@@ -98,7 +106,7 @@ public class TapperBlockEntity extends TimedProductionBlockEntity {
 		if (currentLevel == null || currentLevel.isClientSide) {
 			return false;
 		}
-		if (currentValidSupportDef() == null) {
+		if (!isProductionSiteValid()) {
 			return false;
 		}
 		readyAtAbsMinute = getCurrentAbsMinute();
@@ -150,14 +158,44 @@ public class TapperBlockEntity extends TimedProductionBlockEntity {
 
 	public void startCycleIfEmpty() {
 		WildTrees.Def supportDef = currentValidSupportDef();
-		if (supportDef == null) {
+		if (supportDef != null) {
+			startCycleIfEmpty(supportDef.id());
 			return;
 		}
-		startCycleIfEmpty(supportDef.id());
+		StardewTreeState addonTree = currentValidAddonSupport();
+		if (addonTree != null) {
+			startAddonCycleIfEmpty(addonTree);
+		}
+	}
+
+	public void startAddonCycleIfEmpty(StardewTreeState expectedTree) {
+		if (!product.isEmpty() || level == null || level.isClientSide()) {
+			return;
+		}
+		if (!(level instanceof net.minecraft.server.level.ServerLevel serverLevel)) {
+			return;
+		}
+		BlockPos supportPosition = currentSupportPosition();
+		if (supportPosition == null) {
+			return;
+		}
+		StardewTreeRuntimeAdapter.TapperCycle cycle =
+				StardewTreeRuntimeRegistry.resolveAddonTapperCycle(
+						serverLevel, expectedTree, supportPosition);
+		if (cycle == null) {
+			return;
+		}
+		treeId = expectedTree.typeId().toString();
+		product = cycle.output();
+		readyAtAbsMinute =
+				(getCurrentDayIndex() + cycle.daysUntilReady()) * EFFECTIVE_MINUTES_PER_DAY;
+		ready = false;
+		setChanged();
+		syncToClient();
 	}
 
 	public ItemStack harvestOne() {
-		if (!isReady() || currentValidSupportDef() == null) {
+		if (!isReady() || !isProductionSiteValid()) {
 			return ItemStack.EMPTY;
 		}
 		ItemStack out = product.copy();
@@ -178,7 +216,7 @@ public class TapperBlockEntity extends TimedProductionBlockEntity {
 
 	@Override
 	public ItemStack getAutomationOutput() {
-		return ready && currentValidSupportDef() != null ? product : ItemStack.EMPTY;
+		return ready && isProductionSiteValid() ? product : ItemStack.EMPTY;
 	}
 
 	@Override
@@ -188,7 +226,7 @@ public class TapperBlockEntity extends TimedProductionBlockEntity {
 
 	@Override
 	public ItemStack extractAutomation(int amount, boolean simulate) {
-		if (!ready || product.isEmpty() || currentValidSupportDef() == null) {
+		if (!ready || product.isEmpty() || !isProductionSiteValid()) {
 			return ItemStack.EMPTY;
 		}
 		ItemStack out = AutomationStackHelper.extractUpTo(product, amount);
@@ -214,6 +252,29 @@ public class TapperBlockEntity extends TimedProductionBlockEntity {
 			return null;
 		}
 		return TapperBlock.findValidProductionDef(currentLevel, worldPosition, state);
+	}
+
+	private StardewTreeState currentValidAddonSupport() {
+		Level currentLevel = level;
+		if (currentLevel == null || currentLevel.isClientSide) {
+			return null;
+		}
+		BlockState state = getBlockState();
+		if (!(state.getBlock() instanceof TapperBlock)) {
+			return null;
+		}
+		return TapperBlock.findValidAddonProductionState(
+				currentLevel, worldPosition, state);
+	}
+
+	@Nullable
+	private BlockPos currentSupportPosition() {
+		BlockState state = getBlockState();
+		if (!(state.getBlock() instanceof TapperBlock)
+				|| !state.hasProperty(TapperBlock.FACING)) {
+			return null;
+		}
+		return worldPosition.relative(state.getValue(TapperBlock.FACING));
 	}
 
 	private record Cycle(String treeId, int daysUntilReady) {

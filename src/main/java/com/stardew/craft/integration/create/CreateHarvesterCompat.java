@@ -1,6 +1,7 @@
 package com.stardew.craft.integration.create;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.agriculture.StardewCropRuntime;
 import com.stardew.craft.block.crop.StardewCropBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -30,21 +31,25 @@ public final class CreateHarvesterCompat {
     public static void onBlockBreak(BlockEvent.BreakEvent event) {
         if (event.getLevel().isClientSide()) return;
 
-        BlockState state = event.getState();
-        if (!(state.getBlock() instanceof StardewCropBlock cropBlock)) return;
-
         Player player = event.getPlayer();
         if (player == null || !isCreateFakePlayer(player)) return;
 
         if (!(event.getLevel() instanceof Level lvl) || !(lvl instanceof ServerLevel server)) return;
 
         BlockPos pos = event.getPos();
+        if (StardewCropRuntime.inspect(server, pos) == null) return;
 
         // 不论成熟与否，都要阻止 Create 的破坏（多年生作物绝不能被无脑挖掉）
         event.setCanceled(true);
 
-        // 成熟则走我们自己的收割路径（forceScytheHarvest=true 可绕过 GRAB/SCYTHE 限制）
-        cropBlock.tryHarvestByTool(server, pos, state, player, true);
+        // 作为无经验自动化输出处理；核心与附属作物使用同一个事务入口。
+        StardewCropRuntime.harvestForAutomation(
+                server,
+                pos,
+                0,
+                stack -> net.minecraft.world.level.block.Block.popResource(
+                        server, pos, stack)
+        );
     }
 
     /** 通过类名字符串识别 Create 的 DeployerFakePlayer，避免硬编译依赖。 */

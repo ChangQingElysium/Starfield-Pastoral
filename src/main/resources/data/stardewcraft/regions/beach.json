@@ -1,0 +1,10 @@
+{
+  "dimension": "stardewcraft:stardew_valley",
+  "location": "stardewcraft:beach",
+  "include": {
+    "min": [-4, 57, 77],
+    "max": [239, 65, 186]
+  },
+  "tags": ["stardewcraft:outdoor", "stardewcraft:beach"],
+  "priority": -100
+}

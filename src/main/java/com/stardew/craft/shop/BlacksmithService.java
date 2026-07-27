@@ -1,6 +1,8 @@
 package com.stardew.craft.shop;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.economy.StardewCosts;
+import com.stardew.craft.api.v1.economy.StardewCurrencies;
 import com.stardew.craft.entity.npc.StardewNpcEntity;
 import com.stardew.craft.item.tool.HoeItem;
 import com.stardew.craft.item.tool.PanItem;
@@ -358,57 +360,28 @@ public final class BlacksmithService {
         }
 
         ShopItemEntry entry = items.get(itemIndex);
-        int cost = entry.price();
-
-        // Check money
-        if (cost > 0 && com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player) < cost) {
+        String oldToolId = getOldToolId(entry.itemId());
+        if (oldToolId == null) {
+            sendPurchaseResult(player, false);
+            return;
+        }
+        Item oldTool = BuiltInRegistries.ITEM.get(
+            ResourceLocation.parse(oldToolId));
+        if (oldTool == null || oldTool == Items.AIR
+                || player.getInventory().countItem(oldTool) < 1) {
             sendPurchaseResult(player, false);
             return;
         }
 
-        // Check trade items (bars)
-        if (entry.requiresTrade()) {
-            ResourceLocation tradeId = ResourceLocation.parse(entry.tradeItemId());
-            Item tradeItem = BuiltInRegistries.ITEM.get(tradeId);
-            if (tradeItem == null || tradeItem == Items.AIR) {
-                sendPurchaseResult(player, false);
-                return;
-            }
-            int tradeNeed = entry.tradeItemCount();
-            if (player.getInventory().countItem(tradeItem) < tradeNeed) {
-                sendPurchaseResult(player, false);
-                return;
-            }
-        }
-
-        // Deduct money
-        if (cost > 0) {
-            if (!com.stardew.craft.player.PlayerStardewDataAPI.removeMoney(player, cost)) {
-                sendPurchaseResult(player, false);
-                return;
-            }
-        }
-
-        // Consume trade items
-        if (entry.requiresTrade()) {
-            ResourceLocation tradeId = ResourceLocation.parse(entry.tradeItemId());
-            Item tradeItem = BuiltInRegistries.ITEM.get(tradeId);
-            int tradeNeed = entry.tradeItemCount();
-            int remaining = tradeNeed;
-            for (int i = 0; i < player.getInventory().getContainerSize() && remaining > 0; i++) {
-                ItemStack slot = player.getInventory().getItem(i);
-                if (!slot.isEmpty() && slot.is(tradeItem)) {
-                    int take = Math.min(remaining, slot.getCount());
-                    slot.shrink(take);
-                    remaining -= take;
-                }
-            }
-            if (remaining > 0) {
-                // Rollback money
-                if (cost > 0) com.stardew.craft.player.PlayerStardewDataAPI.addMoney(player, cost);
-                sendPurchaseResult(player, false);
-                return;
-            }
+        var resolvedCost = ShopCostService.resolve(
+                player, "ClintUpgrade", entry, 1,
+                StardewCurrencies.MONEY);
+        if (resolvedCost.isEmpty()
+                || !StardewCosts.pay(
+                        player, resolvedCost.get().cost())
+                        .success()) {
+            sendPurchaseResult(player, false);
+            return;
         }
 
         // Process the upgrade (remove old tool, set upgrade state)

@@ -1,7 +1,8 @@
 package com.stardew.craft.communitycenter.menu;
 
-import com.stardew.craft.communitycenter.data.BundleDataManager;
 import com.stardew.craft.communitycenter.data.BundleDefinition;
+import com.stardew.craft.api.v1.internal.communitycenter.StardewCommunityCenterVariantRegistry;
+import com.stardew.craft.api.v1.internal.communitycenter.StardewCommunityCenterRewardRegistry;
 import com.stardew.craft.communitycenter.data.BundleIngredient;
 import com.stardew.craft.communitycenter.data.BundleItemResolver;
 import com.stardew.craft.communitycenter.junimo.JunimoSpawner;
@@ -167,7 +168,8 @@ public class BundleMenu extends AbstractContainerMenu {
         if (player.level().isClientSide()) return false;
         if (readOnly) return false;
 
-        BundleDefinition def = BundleDataManager.getBundle(bundleId);
+        BundleDefinition def = StardewCommunityCenterVariantRegistry.bundle(
+                player.getUUID(), bundleId);
         if (def == null || def.areaId() != this.areaId) return false;
 
         CommunityCenterSavedData data = CommunityCenterSavedData.get();
@@ -208,7 +210,8 @@ public class BundleMenu extends AbstractContainerMenu {
         if (readOnly) return false;
         if (this.areaId != 4) return false;
 
-        BundleDefinition def = BundleDataManager.getBundle(bundleId);
+        BundleDefinition def = StardewCommunityCenterVariantRegistry.bundle(
+                player.getUUID(), bundleId);
         if (def == null || !def.isVaultBundle()) return false;
 
         CommunityCenterSavedData data = CommunityCenterSavedData.get();
@@ -239,7 +242,8 @@ public class BundleMenu extends AbstractContainerMenu {
         }
 
         boolean allDone = true;
-        for (BundleDefinition bd : BundleDataManager.getBundlesForArea(4)) {
+        for (BundleDefinition bd
+                : StardewCommunityCenterVariantRegistry.area(uuid, 4)) {
             if (!data.isBundleComplete(uuid, bd.bundleId())) {
                 allDone = false;
                 break;
@@ -282,11 +286,14 @@ public class BundleMenu extends AbstractContainerMenu {
         CommunityCenterSavedData data = CommunityCenterSavedData.get();
         java.util.UUID uuid = sp.getUUID();
 
-        for (BundleDefinition def : BundleDataManager.getBundlesForArea(areaId)) {
+        for (BundleDefinition def
+                : StardewCommunityCenterVariantRegistry.area(uuid, areaId)) {
             if (!data.isRewardAvailable(uuid, def.bundleId())) continue;
 
             ItemStack reward = com.stardew.craft.communitycenter.network.BundleClaimRewardPayload
                     .parseRewardString(def.rewardString());
+            reward = StardewCommunityCenterRewardRegistry.resolve(
+                    sp, def.bundleId(), def.rewardString(), reward);
             if (!reward.isEmpty()) {
                 if (!sp.getInventory().add(reward)) {
                     sp.drop(reward, false);
@@ -361,7 +368,8 @@ public class BundleMenu extends AbstractContainerMenu {
      */
     public boolean handlePartialDeposit(ServerPlayer player, int bundleId, int ingredientIndex, int amount, ItemStack carried) {
         if (readOnly) return false;
-        BundleDefinition def = BundleDataManager.getBundle(bundleId);
+        BundleDefinition def = StardewCommunityCenterVariantRegistry.bundle(
+                player.getUUID(), bundleId);
         if (def == null || def.areaId() != this.areaId || def.isVaultBundle()) return false;
 
         List<BundleIngredient> ingredients = def.ingredients();
@@ -581,7 +589,8 @@ public class BundleMenu extends AbstractContainerMenu {
             }
 
             boolean allDone = true;
-            for (BundleDefinition bd : BundleDataManager.getBundlesForArea(def.areaId())) {
+            for (BundleDefinition bd
+                    : StardewCommunityCenterVariantRegistry.area(uuid, def.areaId())) {
                 if (!data.isBundleComplete(uuid, bd.bundleId())) {
                     allDone = false;
                     break;

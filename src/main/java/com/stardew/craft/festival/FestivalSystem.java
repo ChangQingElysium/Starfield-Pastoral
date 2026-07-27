@@ -19,6 +19,8 @@ public final class FestivalSystem {
     @SubscribeEvent
     public static void onAddReloadListeners(AddReloadListenerEvent event) {
         event.addListener(new FestivalRegistry.ReloadListener());
+        event.addListener(
+                new FestivalMapOverlayRegistry.ReloadListener());
     }
 
     @SubscribeEvent(priority = EventPriority.HIGH)
@@ -43,5 +45,22 @@ public final class FestivalSystem {
         FestivalService.advancePreparingSessions(level);
         FestivalService.tickPassiveFestivals(level);
         ActiveFestivalHandlers.tickAll(level);
+        tickAddonMechanics(level);
+    }
+
+    private static void tickAddonMechanics(ServerLevel level) {
+        FestivalWorldData data = FestivalWorldData.get(level);
+        for (FestivalDefinition definition : FestivalRegistry.all()) {
+            data.getSession(definition.id()).ifPresent(session -> {
+                if (session.phase() != FestivalSessionPhase.OPEN
+                        && session.phase()
+                        != FestivalSessionPhase.MAIN_EVENT) {
+                    return;
+                }
+                com.stardew.craft.api.v1.internal.festival
+                        .StardewFestivalMechanicRegistry.tick(
+                                level, definition, session);
+            });
+        }
     }
 }

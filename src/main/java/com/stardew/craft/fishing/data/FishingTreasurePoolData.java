@@ -34,13 +34,13 @@ public final class FishingTreasurePoolData {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final AtomicDefinitionStore<StardewFishingTreasurePoolDefinition> STORE =
             new AtomicDefinitionStore<>();
-    private static volatile Map<ResourceLocation, StardewFishingTreasurePoolDefinition> pools = Map.of();
+    private static volatile Catalog catalog = Catalog.empty();
 
     private FishingTreasurePoolData() {
     }
 
     public static DefinitionSnapshot<StardewFishingTreasurePoolDefinition> snapshot() {
-        return STORE.snapshot();
+        return catalog.definitions();
     }
 
     public static void appendLoot(
@@ -51,6 +51,8 @@ public final class FishingTreasurePoolData {
             int waterDistance,
             RandomSource random
     ) {
+        Map<ResourceLocation, StardewFishingTreasurePoolDefinition> pools =
+                catalog.definitions().definitions();
         if (output == null || player == null || pools.isEmpty()) return;
         int distance = Math.max(0, Math.min(5, waterDistance));
         StardewConditionContext conditionContext = StardewConditionContext.forPlayer(player);
@@ -113,18 +115,30 @@ public final class FishingTreasurePoolData {
                     .filter(entry -> entry.getKey().getPath().startsWith("treasure_pools/"))
                     .forEach(entry -> decode(entry, definitions, sources, diagnostics));
 
-            var result = STORE.applyLocal(definitions, sources, diagnostics);
-            logDiagnostics(result.diagnostics());
-            if (!result.accepted()) {
-                StardewCraft.LOGGER.error(
-                        "[Fishing treasure] Rejected snapshot; keeping v{} with {} pools",
-                        result.snapshot().version(), result.snapshot().definitions().size());
-                return;
-            }
-            pools = result.snapshot().definitions();
-            StardewCraft.LOGGER.info("[Fishing treasure] Applied snapshot v{} ({} additive pools)",
-                    result.snapshot().version(), pools.size());
+            applyCandidate(definitions, sources, diagnostics);
         }
+    }
+
+    static synchronized void applyCandidate(
+            Map<ResourceLocation, StardewFishingTreasurePoolDefinition> definitions,
+            Map<ResourceLocation, String> sources,
+            List<DefinitionDiagnostic> diagnostics
+    ) {
+        var result = STORE.applyLocal(
+                definitions, sources, diagnostics);
+        logDiagnostics(result.diagnostics());
+        if (!result.accepted()) {
+            StardewCraft.LOGGER.error(
+                    "[Fishing treasure] Rejected snapshot; keeping v{} with {} pools",
+                    catalog.definitions().version(),
+                    catalog.definitions().definitions().size());
+            return;
+        }
+        catalog = new Catalog(result.snapshot());
+        StardewCraft.LOGGER.info(
+                "[Fishing treasure] Applied snapshot v{} ({} additive pools)",
+                catalog.definitions().version(),
+                catalog.definitions().definitions().size());
     }
 
     private static void decode(
@@ -158,6 +172,24 @@ public final class FishingTreasurePoolData {
             } else {
                 StardewCraft.LOGGER.warn("[Fishing treasure] Definition warning [{}]: {}", source, diagnostic.message());
             }
+        }
+    }
+
+    static Catalog catalog() {
+        return catalog;
+    }
+
+    record Catalog(
+            DefinitionSnapshot<StardewFishingTreasurePoolDefinition>
+                    definitions
+    ) {
+        Catalog {
+            definitions = java.util.Objects.requireNonNull(
+                    definitions, "definitions");
+        }
+
+        private static Catalog empty() {
+            return new Catalog(DefinitionSnapshot.empty());
         }
     }
 }

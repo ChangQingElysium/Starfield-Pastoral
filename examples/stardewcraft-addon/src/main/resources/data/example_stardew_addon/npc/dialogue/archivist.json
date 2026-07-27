@@ -1,0 +1,10 @@
+{
+  "npc_id": "archivist",
+  "entries": {
+    "Introduction": "example_stardew_addon.npc.archivist.introduction",
+    "default": "example_stardew_addon.npc.archivist.default",
+    "Mon": "example_stardew_addon.npc.archivist.monday",
+    "AcceptGift_Positive": "example_stardew_addon.npc.archivist.gift_positive",
+    "AcceptGift_Negative": "example_stardew_addon.npc.archivist.gift_negative"
+  }
+}

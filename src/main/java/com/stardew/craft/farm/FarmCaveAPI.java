@@ -1,6 +1,7 @@
 package com.stardew.craft.farm;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.internal.farm.StardewFarmCaveDailyRegistry;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.interior.PlayerInteriorAllocator;
 import com.stardew.craft.manager.FarmCaveDailyService;
@@ -131,13 +132,14 @@ public final class FarmCaveAPI {
         // 这里直接对水果层做一次快速扫描。
         int w = com.stardew.craft.interior.InteriorSubspaceManager.FARM_CAVE_SCHEM_W;
         int l = com.stardew.craft.interior.InteriorSubspaceManager.FARM_CAVE_SCHEM_L;
-        Block[] fruits = new Block[] {
+        java.util.Set<Block> fruits = new java.util.LinkedHashSet<>(java.util.List.of(
                 ModBlocks.FORAGE_SALMONBERRY.get(), ModBlocks.FORAGE_SPICE_BERRY.get(),
                 ModBlocks.FORAGE_WILD_PLUM.get(), ModBlocks.FORAGE_BLACKBERRY.get(),
                 ModBlocks.FORAGE_APPLE.get(), ModBlocks.FORAGE_APRICOT.get(),
                 ModBlocks.FORAGE_ORANGE.get(), ModBlocks.FORAGE_PEACH.get(),
                 ModBlocks.FORAGE_POMEGRANATE.get(), ModBlocks.FORAGE_MANGO.get()
-        };
+        ));
+        fruits.addAll(StardewFarmCaveDailyRegistry.managedFruitBlocks());
         for (int lx = 0; lx < w; lx++) {
             for (int lz = 0; lz < l; lz++) {
                 BlockPos p = caveOrigin.offset(lx, 1, lz);

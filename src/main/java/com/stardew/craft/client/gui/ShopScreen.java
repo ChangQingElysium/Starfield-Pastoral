@@ -3,14 +3,19 @@ package com.stardew.craft.client.gui;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.internal.network.StardewNetworkCapabilityRegistry;
 import com.stardew.craft.client.gui.common.CommonGuiTextures;
 import com.stardew.craft.client.gui.common.GuiText;
 import com.stardew.craft.client.gui.overnight.StardewGuiUtil;
 import com.stardew.craft.api.v1.item.StardewItemDataApi;
+import com.stardew.craft.api.v1.network.StardewNetworkCapabilities;
 import com.stardew.craft.core.ModTags;
 import com.stardew.craft.network.payload.OpenShopScreenPayload;
 import com.stardew.craft.network.payload.ShopPurchasePayload;
+import com.stardew.craft.network.payload.ShopPurchaseRequestPayload;
 import com.stardew.craft.network.payload.ShopPurchaseResultPayload;
+import com.stardew.craft.network.payload.ShopCostRequestPayload;
+import com.stardew.craft.network.payload.ShopCostSnapshotPayload;
 import com.stardew.craft.network.payload.ShopSellPayload;
 import com.stardew.craft.network.payload.ShopPickupPayload;
 import com.stardew.craft.network.payload.ShopSellResultPayload;
@@ -31,10 +36,12 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @SuppressWarnings("null")
@@ -81,6 +88,8 @@ public class ShopScreen extends Screen {
      * Sent from server via OpenShopScreenPayload (mirrors SDV SalableItemTags).
      */
     private final Set<String>         acceptedSellTypeKeys;
+    private final Map<Integer, ShopCostSnapshotPayload.Row>
+            customCosts = new HashMap<>();
 
     // Layout (MC gui coords)
     private int panelX, panelY;
@@ -266,6 +275,30 @@ public class ShopScreen extends Screen {
         // rounding does not drift when GUI scale is not 4x.
         currencyX = panelX - ui(36);
         currencyY = panelY + mainHGui - ui(12);
+        requestCostSnapshot();
+    }
+
+    public void applyCostSnapshot(
+            ShopCostSnapshotPayload payload
+    ) {
+        if (!shopId.equals(payload.shopId())) {
+            return;
+        }
+        customCosts.clear();
+        for (ShopCostSnapshotPayload.Row row : payload.rows()) {
+            if (row.index() < 0
+                    || row.index() >= forSale.size()
+                    || !forSale.get(row.index()).itemId()
+                            .equals(row.itemId())) {
+                continue;
+            }
+            customCosts.put(row.index(), row);
+        }
+    }
+
+    private void requestCostSnapshot() {
+        PacketDistributor.sendToServer(
+                new ShopCostRequestPayload(shopId));
     }
 
     // =========================================================================
@@ -399,7 +432,11 @@ public class ShopScreen extends Screen {
         // 12. Tooltip
         if (hoveredRow >= 0) {
             int idx = currentIndex + hoveredRow;
-            if (idx < forSale.size()) drawBuyTooltip(g, mouseX, mouseY, forSale.get(idx));
+            if (idx < forSale.size()) {
+                drawBuyTooltip(
+                    g, mouseX, mouseY, idx,
+                    forSale.get(idx));
+            }
         } else if (hoveredInvSlot >= 0 && heldItem.isEmpty()) {
             drawInvTooltip(g, mouseX, mouseY, hoveredInvSlot);
         }
@@ -434,18 +471,43 @@ public class ShopScreen extends Screen {
 
     /** Load portrait texture with actual NativeImage dimensions, cached. */
     private PortraitInfo resolvePortraitInfo(String npcId) {
-        ResourceLocation portrait = ResourceLocation.fromNamespaceAndPath(
-            StardewCraft.MODID, "textures/portraits/" + npcId + ".png");
+        var display =
+            com.stardew.craft.api.v1.npc.StardewNpcDisplays.resolve(npcId);
+        String legacyPath =
+            com.stardew.craft.client.ClientDisplayFallbacks.stablePath(
+                npcId, "lewis");
+        ResourceLocation genericFallback = ResourceLocation.fromNamespaceAndPath(
+            StardewCraft.MODID, "textures/entity/npc/lewis.png");
+        ResourceLocation entityFallback = ResourceLocation.fromNamespaceAndPath(
+            StardewCraft.MODID,
+            "textures/entity/npc/" + legacyPath + ".png");
+        ResourceLocation availableEntityFallback =
+            com.stardew.craft.client.ClientDisplayFallbacks.availableResource(
+                entityFallback,
+                genericFallback,
+                this::hasClientResource);
+        ResourceLocation legacyPortrait = ResourceLocation.fromNamespaceAndPath(
+            StardewCraft.MODID,
+            "textures/portraits/" + legacyPath + ".png");
+        ResourceLocation availableLegacyPortrait =
+            com.stardew.craft.client.ClientDisplayFallbacks.availableResource(
+                legacyPortrait,
+                availableEntityFallback,
+                this::hasClientResource);
+        ResourceLocation portrait =
+            com.stardew.craft.client.ClientDisplayFallbacks.availableResource(
+                display == null ? null : display.portraitTexture(),
+                availableLegacyPortrait,
+                this::hasClientResource);
         PortraitInfo cached = PORTRAIT_CACHE.get(portrait);
         if (cached != null) return cached;
 
         Minecraft mc = Minecraft.getInstance();
-        if (mc.getResourceManager().getResource(portrait).isEmpty()) {
-            portrait = ResourceLocation.fromNamespaceAndPath(
-                StardewCraft.MODID, "textures/entity/npc/" + npcId + ".png");
-        }
 
-        int w = 128, h = 256; // safe defaults
+        int w = display != null && portrait.equals(display.portraitTexture())
+            ? display.portraitSheetWidth() : 128;
+        int h = display != null && portrait.equals(display.portraitTexture())
+            ? display.portraitSheetHeight() : 256;
         try {
             var res = mc.getResourceManager().getResource(portrait).orElse(null);
             if (res != null) {
@@ -459,6 +521,13 @@ public class ShopScreen extends Screen {
         PortraitInfo info = new PortraitInfo(portrait, Math.max(64, w), Math.max(64, h));
         PORTRAIT_CACHE.put(portrait, info);
         return info;
+    }
+
+    private boolean hasClientResource(ResourceLocation location) {
+        Minecraft mc = Minecraft.getInstance();
+        return mc != null
+            && mc.getResourceManager() != null
+            && mc.getResourceManager().getResource(location).isPresent();
     }
 
     // SDV money box sprite: cursors (340,472,65,17) ×4 = background banner
@@ -542,8 +611,14 @@ public class ShopScreen extends Screen {
 
     private void drawItemRow(GuiGraphics g, int mouseX, int mouseY, float s4, int i, int itemIdx) {
         ShopItemEntry item = forSale.get(itemIdx);
-        boolean canAfford = item.price() <= 0 || playerMoney >= item.price();
-        boolean hasTrade = hasTradeItem(item, 1);
+        ShopCostSnapshotPayload.Row customCost =
+                customCosts.get(itemIdx);
+        boolean canAfford = customCost != null
+                ? canAfford(customCost, 1)
+                : item.price() <= 0
+                        || playerMoney >= item.price();
+        boolean hasTrade = customCost != null
+                || hasTradeItem(item, 1);
         boolean outOfStock = item.stock() == 0;
         boolean canBuy = canAfford && hasTrade && !outOfStock;
 
@@ -579,7 +654,11 @@ public class ShopScreen extends Screen {
 
         // Name — resolved from MC registry (localised), not hardcoded
         int nameX = rowX + ui(104);
-        int nameMaxWidth = Math.max(ui(120), rowWGui - ui(item.price() > 0 || item.requiresTrade() ? 360 : 180));
+        int nameMaxWidth = Math.max(
+            ui(120),
+            rowWGui - ui(customCost != null
+                || item.price() > 0 || item.requiresTrade()
+                    ? 360 : 180));
         Component name = GuiText.ellipsize(font, Component.literal(resolveItemName(item)), nameMaxWidth);
         // SDV SpriteText ItemRowTextColor = Color.Black (0x000000), we approximate with 0x1a1a1a
         g.drawString(font, name, nameX, rowY + ui(28),
@@ -590,6 +669,11 @@ public class ShopScreen extends Screen {
         int tradeRight = rowX + rowWGui; // SDV: right = forSaleButton.bounds.Right
         int tradeIconY = rowY + ui(28);  // default (no-price) Y for trade icon
         int tradeTextY = rowY + ui(28);  // default Y for trade count text
+        if (customCost != null) {
+            drawCustomCost(
+                g, customCost, rowX, rowY, rowWGui,
+                canAfford);
+        } else {
         if (item.price() > 0) {
             String prStr = item.price() + " ";
             int prW   = font.width(prStr);
@@ -638,6 +722,7 @@ public class ShopScreen extends Screen {
             g.drawString(font, reqText, tradeRight - reqTextW - ui(16), tradeTextY,
                 enough ? 0x404040 : 0x992222, false);
         }
+        }
 
         // SDV stock count: drawn as tiny digits on item icon, NOT as freestanding text.
         // SDV explicitly skips stock digits for "ClintUpgrade" shop and recipe items.
@@ -649,6 +734,45 @@ public class ShopScreen extends Screen {
             int stockY = iconY + ui(47);
             drawTinyDigits(g, item.stock(), stockX, stockY, 3.0f, canBuy ? 1.0f : 0.25f);
         }
+    }
+
+    private void drawCustomCost(
+            GuiGraphics graphics,
+            ShopCostSnapshotPayload.Row row,
+            int rowX,
+            int rowY,
+            int rowWidth,
+            boolean affordable
+    ) {
+        Component summary;
+        if (row.costs().isEmpty()) {
+            summary = Component.translatable(
+                    "stardewcraft.catalogue.free");
+        } else {
+            var text = Component.empty();
+            for (int index = 0;
+                 index < row.costs().size(); index++) {
+                var cost = row.costs().get(index);
+                if (index > 0) {
+                    text.append(Component.literal(" + "));
+                }
+                text.append(Component.literal(
+                        cost.amount() + " "));
+                text.append(cost.displayName());
+            }
+            summary = text;
+        }
+        int maximumWidth = ui(300);
+        Component visible = GuiText.ellipsize(
+                font, summary, maximumWidth);
+        graphics.drawString(
+                font,
+                visible,
+                rowX + rowWidth - ui(20)
+                        - font.width(visible),
+                rowY + ui(28),
+                affordable ? 0x404040 : 0x992222,
+                false);
     }
 
     private void drawTinyDigits(GuiGraphics g, int value, int x, int y, float sdvScale, float alpha) {
@@ -762,7 +886,13 @@ public class ShopScreen extends Screen {
         g.setColor(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
-    private void drawBuyTooltip(GuiGraphics g, int mx, int my, ShopItemEntry item) {
+    private void drawBuyTooltip(
+            GuiGraphics g,
+            int mx,
+            int my,
+            int itemIndex,
+            ShopItemEntry item
+    ) {
         Minecraft mc = Minecraft.getInstance();
         ItemStack stack = resolveStack(item.itemId());
 
@@ -782,7 +912,28 @@ public class ShopScreen extends Screen {
 
         // --- 商店自定义信息（空行分隔）---
         lines.add(Component.empty());
-        if (item.price() > 0) {
+        ShopCostSnapshotPayload.Row customCost =
+                customCosts.get(itemIndex);
+        if (customCost != null) {
+            if (customCost.costs().isEmpty()) {
+                lines.add(Component.translatable(
+                        "stardewcraft.catalogue.free")
+                        .withStyle(ChatFormatting.GREEN));
+            }
+            for (var cost : customCost.costs()) {
+                boolean enough =
+                        cost.available() >= cost.amount();
+                lines.add(Component.literal(
+                                cost.amount() + " × ")
+                        .append(cost.displayName())
+                        .append(Component.literal(
+                                "  [" + cost.available()
+                                        + "]"))
+                        .withStyle(enough
+                                ? ChatFormatting.GRAY
+                                : ChatFormatting.DARK_RED));
+            }
+        } else if (item.price() > 0) {
             boolean ok = playerMoney >= item.price();
             Component currency = Component.translatable(isFairStarTokenShop()
                     ? "stardewcraft.shop.currency.star_tokens"
@@ -795,7 +946,7 @@ public class ShopScreen extends Screen {
         lines.add(Component.literal("[Shift]×5  [Ctrl+Shift]×25").withStyle(ChatFormatting.DARK_GRAY));
         if (item.stock() != Integer.MAX_VALUE)
             lines.add(Component.translatable("stardewcraft.shop.tooltip.stock", item.stock()).withStyle(ChatFormatting.AQUA));
-        if (item.requiresTrade()) {
+        if (customCost == null && item.requiresTrade()) {
             ItemStack trade = resolveStack(item.tradeItemId());
             Object tradeName = trade.isEmpty() ? item.tradeItemId() : trade.getHoverName();
             int reqCount = Math.max(1, item.tradeItemCount());
@@ -940,10 +1091,18 @@ public class ShopScreen extends Screen {
         // SDV parity: play the repeat-purchase sound on every hold tick,
         // independently of purchasePending (which only gates the network packet).
         ShopItemEntry holdItem = forSale.get(buyHoldItemIndex);
-        boolean canAfford = holdItem.price() <= 0 || playerMoney >= holdItem.price();
+        ShopCostSnapshotPayload.Row customCost =
+                customCosts.get(buyHoldItemIndex);
+        boolean canAfford = customCost != null
+                ? canAfford(customCost, 1)
+                : holdItem.price() <= 0
+                        || playerMoney >= holdItem.price();
         boolean inStock   = holdItem.stock() != 0;
         boolean canFitOnCursor = clampPurchaseQuantityToCursor(holdItem, 1) > 0;
-        if (canAfford && inStock && hasTradeItem(holdItem, 1) && canFitOnCursor) {
+        boolean hasCostItems = customCost != null
+                || hasTradeItem(holdItem, 1);
+        if (canAfford && inStock && hasCostItems
+                && canFitOnCursor) {
             playSound(ModSounds.PURCHASE_REPEAT.get());
         } else if (!canFitOnCursor) {
             buyHoldActive = false;
@@ -1009,7 +1168,8 @@ public class ShopScreen extends Screen {
         if (purchasePending) return;
 
         ShopItemEntry item = forSale.get(itemIdx);
-        int qty = purchaseQuantityForCurrentModifiers(item);
+        int qty = purchaseQuantityForCurrentModifiers(
+                itemIdx, item);
 
         // SDV parity: never buy more than this salable's max stack size.
         ItemStack salable = resolveStack(item.itemId());
@@ -1028,8 +1188,14 @@ public class ShopScreen extends Screen {
             return;
         }
 
-        int cost=item.price()*qty;
-        if (cost>playerMoney || !hasTradeItem(item, qty)) {
+        ShopCostSnapshotPayload.Row customCost =
+                customCosts.get(itemIdx);
+        int cost = item.price() * qty;
+        boolean affordable = customCost != null
+                ? canAfford(customCost, qty)
+                : cost <= playerMoney
+                        && hasTradeItem(item, qty);
+        if (!affordable) {
             if (repeating) {
                 buyHoldActive = false;
             } else {
@@ -1038,15 +1204,36 @@ public class ShopScreen extends Screen {
             return;
         }
 
-        playerMoney -= cost; // optimistic
+        if (customCost != null) {
+            spendCustomCost(itemIdx, customCost, qty);
+        } else {
+            playerMoney -= cost; // optimistic
+        }
         purchasePending = true;
         if (!repeating && !isLostAndFoundShop()) {
             playSound(ModSounds.PURCHASE_CLICK.get());
         }
-        PacketDistributor.sendToServer(new ShopPurchasePayload(shopId, itemIdx, item.itemId(), qty));
+        var clientConnection = Minecraft.getInstance().getConnection();
+        if (clientConnection != null
+                && StardewNetworkCapabilities.supports(
+                        clientConnection.getConnection(),
+                        StardewNetworkCapabilityRegistry
+                                .SHOP_PURCHASE_IDEMPOTENCY)) {
+            PacketDistributor.sendToServer(
+                    new ShopPurchaseRequestPayload(
+                            UUID.randomUUID(), shopId, itemIdx,
+                            item.itemId(), qty));
+        } else {
+            PacketDistributor.sendToServer(
+                    new ShopPurchasePayload(
+                            shopId, itemIdx, item.itemId(), qty));
+        }
     }
 
-    private int purchaseQuantityForCurrentModifiers(ShopItemEntry item) {
+    private int purchaseQuantityForCurrentModifiers(
+            int itemIndex,
+            ShopItemEntry item
+    ) {
         if (!hasShiftDown()) {
             return 1;
         }
@@ -1055,9 +1242,20 @@ public class ShopScreen extends Screen {
         }
         if (isBuyAllModifierDown()) {
             int stock = item.stock() == Integer.MAX_VALUE ? Integer.MAX_VALUE : Math.max(1, item.stock());
-            int affordable = item.price() <= 0 ? Integer.MAX_VALUE : playerMoney / Math.max(1, item.price());
-            int tradeAvailable = maxTradePurchases(item);
-            return Math.max(1, Math.min(999, Math.min(stock, Math.min(affordable, tradeAvailable))));
+            ShopCostSnapshotPayload.Row customCost =
+                    customCosts.get(itemIndex);
+            int affordable = customCost != null
+                    ? maxAffordablePurchases(customCost)
+                    : item.price() <= 0
+                            ? Integer.MAX_VALUE
+                            : playerMoney / Math.max(
+                                    1, item.price());
+            int tradeAvailable = customCost != null
+                    ? Integer.MAX_VALUE
+                    : maxTradePurchases(item);
+            return Math.max(1, Math.min(999,
+                    Math.min(stock, Math.min(
+                            affordable, tradeAvailable))));
         }
         return 25;
     }
@@ -1081,6 +1279,63 @@ public class ShopScreen extends Screen {
             return 0;
         }
         return mc.player.getInventory().countItem(req.getItem()) / Math.max(1, item.tradeItemCount());
+    }
+
+    private static boolean canAfford(
+            ShopCostSnapshotPayload.Row row,
+            int quantity
+    ) {
+        if (quantity <= 0) {
+            return false;
+        }
+        for (var cost : row.costs()) {
+            if (cost.amount() <= 0L
+                    || cost.amount()
+                            > cost.available() / quantity) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static int maxAffordablePurchases(
+            ShopCostSnapshotPayload.Row row
+    ) {
+        long maximum = Integer.MAX_VALUE;
+        for (var cost : row.costs()) {
+            if (cost.amount() <= 0L) {
+                return 0;
+            }
+            maximum = Math.min(
+                    maximum,
+                    cost.available() / cost.amount());
+        }
+        return (int) Math.min(
+                Integer.MAX_VALUE, maximum);
+    }
+
+    private void spendCustomCost(
+            int itemIndex,
+            ShopCostSnapshotPayload.Row row,
+            int quantity
+    ) {
+        ArrayList<ShopCostSnapshotPayload.CostView> next =
+                new ArrayList<>(row.costs().size());
+        for (var cost : row.costs()) {
+            long spent = cost.amount() * quantity;
+            next.add(new ShopCostSnapshotPayload.CostView(
+                    cost.kind(),
+                    cost.id(),
+                    cost.amount(),
+                    Math.max(0L,
+                            cost.available() - spent),
+                    cost.displayName(),
+                    cost.icon()));
+        }
+        customCosts.put(
+                itemIndex,
+                new ShopCostSnapshotPayload.Row(
+                        row.index(), row.itemId(), next));
     }
 
     // =========================================================================
@@ -1130,6 +1385,7 @@ public class ShopScreen extends Screen {
     public void onPurchaseResult(ShopPurchaseResultPayload r) {
         purchasePending=false;
         playerMoney=r.newMoney();
+        requestCostSnapshot();
         if (!r.success()) { playSound(ModSounds.CANCEL.get()); return; }
         if (isFairStarTokenShop()
                 && r.itemId().isEmpty()

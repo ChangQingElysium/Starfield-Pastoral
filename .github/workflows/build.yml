@@ -27,4 +27,42 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew build --no-daemon --console=plain
+
+      - name: Test compatibility verifiers
+        run: python3 -m unittest discover -s compatibility -p 'test_*.py'
+
+      - name: Run dedicated GameTest server
+        run: ./gradlew runGameTestServer --no-daemon --console=plain
+
+      - name: Verify GameTest runtime shutdown
+        run: >-
+          python3 compatibility/verify_runtime_smoke.py
+          run-game-test/logs/latest.log --scenario game-test
+
+      - name: Build example addon
+        run: ./gradlew -p examples/stardewcraft-addon build --no-daemon --console=plain
+
+      - name: Validate example data pack
+        run: python3 examples/stardewcraft-data-pack/validate.py
+
+      - name: Prepare current JAR for addon canaries
+        run: ./gradlew prepareAddonCanaryJar --no-daemon --console=plain
+
+      - name: Checkout pinned addon canary
+        run: >-
+          python3 compatibility/checkout_addon_canary.py
+          pinned_mixin_addon .canary/pinned-mixin-addon
+
+      - name: Build pinned addon against current main
+        working-directory: .canary/pinned-mixin-addon
+        env:
+          STARDEWCRAFT_JAR: ${{ github.workspace }}/build/compatibility/stardewcraft-canary.jar
+        run: ./gradlew check jar --no-daemon --console=plain
+
+      - name: Verify pinned addon compatibility targets
+        run: >-
+          python3 compatibility/verify_addon_canary.py
+          pinned_mixin_addon .canary/pinned-mixin-addon
+          --addon-classes
+          .canary/pinned-mixin-addon/build/classes/java/main

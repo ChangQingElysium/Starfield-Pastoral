@@ -1,7 +1,7 @@
 package com.stardew.craft.communitycenter.network;
 
 import com.stardew.craft.StardewCraft;
-import com.stardew.craft.communitycenter.menu.BundleMenu;
+import com.stardew.craft.api.v1.communitycenter.StardewCommunityCenterActions;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -36,13 +36,7 @@ public record BundlePurchasePayload(
     public static void handle(BundlePurchasePayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
             if (!(context.player() instanceof ServerPlayer sp)) return;
-            if (!(sp.containerMenu instanceof BundleMenu menu)) return;
-
-            boolean success = menu.tryPurchaseVault(sp, payload.bundleId);
-            if (success) {
-                sp.containerMenu.broadcastChanges();
-                BundleSyncPayload.sendFullSync(sp);
-            }
+            StardewCommunityCenterActions.purchaseVault(sp, payload.bundleId);
         });
     }
 }

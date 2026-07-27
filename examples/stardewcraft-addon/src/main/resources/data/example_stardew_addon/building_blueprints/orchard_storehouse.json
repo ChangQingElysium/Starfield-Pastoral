@@ -1,0 +1,19 @@
+{
+  "builder": "example_stardew_addon:orchard_carpenter",
+  "order": 10,
+  "display_name": "building.example_stardew_addon.orchard_storehouse",
+  "description": "building.example_stardew_addon.orchard_storehouse.desc",
+  "money": 2500,
+  "materials": [
+    { "item": "minecraft:oak_log", "count": 64 },
+    { "item": "minecraft:stone", "count": 32 }
+  ],
+  "result_item": "minecraft:barrel",
+  "tags": [
+    "stardewcraft:storage",
+    "example_stardew_addon:orchard"
+  ],
+  "properties": {
+    "example_stardew_addon:placement_hint": "orchard"
+  }
+}

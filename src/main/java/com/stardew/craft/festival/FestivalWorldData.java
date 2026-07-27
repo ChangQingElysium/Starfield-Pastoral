@@ -1,6 +1,7 @@
 package com.stardew.craft.festival;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.core.ModDimensions;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -22,12 +23,18 @@ public final class FestivalWorldData extends SavedData {
     private final Set<String> activePassiveFestivalIds = new LinkedHashSet<>();
     private final Map<String, FestivalSessionState> sessions = new LinkedHashMap<>();
     private final Map<String, FestivalMapOverlayState> overlayStates = new LinkedHashMap<>();
+    private transient ServerLevel level;
 
     public static FestivalWorldData get(ServerLevel level) {
-        return level.getServer().overworld().getDataStorage().computeIfAbsent(
+        FestivalWorldData data =
+                level.getServer().overworld().getDataStorage().computeIfAbsent(
             new SavedData.Factory<>(FestivalWorldData::new, FestivalWorldData::load),
             DATA_NAME
         );
+        ServerLevel festivalLevel = level.getServer()
+                .getLevel(ModDimensions.STARDEW_VALLEY);
+        data.attachLevel(festivalLevel != null ? festivalLevel : level);
+        return data;
     }
 
     public Set<String> activePassiveFestivalIds() {
@@ -57,6 +64,7 @@ public final class FestivalWorldData extends SavedData {
             return existing;
         }
         FestivalSessionState created = new FestivalSessionState(definition.id(), year, season, day);
+        created.attachLevel(level);
         sessions.put(key, created);
         setDirty();
         return created;
@@ -149,6 +157,13 @@ public final class FestivalWorldData extends SavedData {
 
     private static String sessionKey(String festivalId) {
         return key(festivalId);
+    }
+
+    private void attachLevel(ServerLevel level) {
+        this.level = level;
+        for (FestivalSessionState session : sessions.values()) {
+            session.attachLevel(level);
+        }
     }
 
     private static String key(String value) {

@@ -1,0 +1,12 @@
+{
+  "builder": "stardewcraft:robin",
+  "order": 10,
+  "display_name": "stardewcraft.robin.blueprint.coop.name",
+  "description": "stardewcraft.robin.blueprint.coop.desc",
+  "money": 4000,
+  "materials": [
+    { "item": "stardewcraft:wood_normal", "count": 300 },
+    { "item": "stardewcraft:stone", "count": 100 }
+  ],
+  "result_item": "stardewcraft:coop_manager"
+}

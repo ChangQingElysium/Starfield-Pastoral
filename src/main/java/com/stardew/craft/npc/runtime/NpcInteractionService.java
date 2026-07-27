@@ -356,7 +356,34 @@ public final class NpcInteractionService {
             return InteractionResult.SUCCESS;
         }
 
-        boolean hasGiftableHeld = NpcSocialRules.canReceiveGifts(npcId, serverPlayer) && canBeGivenAsGift(held);
+        boolean hasGiftableHeld =
+                NpcSocialRules.canReceiveGifts(npcId, serverPlayer)
+                        && canBeGivenAsGift(held);
+        com.stardew.craft.api.v1.npc.StardewNpcGifts.Confirmation giftConfirmation =
+                com.stardew.craft.api.v1.npc.StardewNpcGifts.Confirmation
+                        .REQUIRE_CONFIRMATION;
+        if (hasGiftableHeld) {
+            ResourceLocation publicNpcId =
+                    com.stardew.craft.api.v1.npc.StardewNpcInteractions
+                            .normalizeNpcId(npcId);
+            if (publicNpcId != null) {
+                giftConfirmation =
+                        com.stardew.craft.api.v1.internal.npc.StardewNpcGiftRegistry
+                                .confirmation(
+                                        new com.stardew.craft.api.v1.npc.StardewNpcGifts
+                                                .OfferContext(
+                                                serverPlayer,
+                                                npc,
+                                                publicNpcId,
+                                                hand,
+                                                held));
+                if (giftConfirmation
+                        == com.stardew.craft.api.v1.npc.StardewNpcGifts
+                                .Confirmation.SKIP_GIFT) {
+                    hasGiftableHeld = false;
+                }
+            }
+        }
 
         // ═══════════════════════════════════════════════════════════════
         // SDV parity: HEART EVENT CHECK — before gifts/dialogue, check
@@ -379,6 +406,12 @@ public final class NpcInteractionService {
         // SDV parity: you CAN gift Dwarf without understanding, but friendship won't increase
         // and the response dialogue will be garbled (handled in receiveGift / response)
         if (hasGiftableHeld) {
+            if (giftConfirmation
+                    == com.stardew.craft.api.v1.npc.StardewNpcGifts
+                            .Confirmation.GIVE_IMMEDIATELY) {
+                handleConfirmedGift(serverPlayer, npcId);
+                return InteractionResult.SUCCESS;
+            }
             // NPC smoothly turns to face the player, then opens gift confirm screen
             String npcDisplayName = npc.getDisplayName().getString();
             String itemDisplayNameJson = serializeGiftItemDisplayName(held, serverLevel);
@@ -746,7 +779,17 @@ public final class NpcInteractionService {
         }
         if (held.isEmpty()) return; // Player no longer holding anything
 
-        StardewNpcEntity npcEntity = NpcSpawnManager.getTrackedNpc(serverLevel, npcId);
+        net.minecraft.world.entity.Entity npcEntity =
+                NpcSpawnManager.getTrackedNpc(serverLevel, npcId);
+        if (npcEntity == null) {
+            ResourceLocation resolvedNpcId =
+                    com.stardew.craft.api.v1.npc.StardewNpcInteractions
+                            .normalizeNpcId(npcId);
+            if (resolvedNpcId != null) {
+                npcEntity = com.stardew.craft.api.v1.internal.npc.StardewNpcEntityRegistry
+                        .resolve(serverLevel, resolvedNpcId);
+            }
+        }
         if (npcEntity == null) return;
 
         String giftItemId = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(held.getItem()).toString();
@@ -771,25 +814,74 @@ public final class NpcInteractionService {
             return;
         }
 
+        // ── Normal gift processing (no quest matched) ──
+        DayContext dayContext = currentDayContext(serverLevel);
+        NpcFriendshipDataManager friendshipManager = NpcFriendshipDataManager.get(serverLevel);
+        NpcFriendshipDataManager.FriendshipState state =
+                friendshipManager.get(player.getUUID(), npcId);
+        boolean existingFriendship = state != null;
+        if (state == null) {
+            state = new NpcFriendshipDataManager.FriendshipState();
+        }
+
+        ResourceLocation publicNpcId =
+                com.stardew.craft.api.v1.npc.StardewNpcInteractions
+                        .normalizeNpcId(npcId);
+        if (publicNpcId != null
+                && !com.stardew.craft.api.v1.internal.npc.StardewNpcGiftRegistry
+                        .before(new com.stardew.craft.api.v1.npc.StardewNpcGifts
+                                .BeforeContext(
+                                player,
+                                npcEntity,
+                                publicNpcId,
+                                held,
+                                friendshipSnapshot(state)))) {
+            return;
+        }
+        if (!existingFriendship) {
+            state = friendshipManager.getOrCreate(player.getUUID(), npcId);
+        }
+        state.normalizeGiftWeek(dayContext.weekKey());
+
         // SDV NPC.tryToReceiveActiveObject completes Quest 25 before applying
-        // daily/weekly gift-limit rejection or consuming the item.
-        com.stardew.craft.quest.QuestManager quests = com.stardew.craft.quest.QuestManager.of(player);
+        // daily/weekly gift-limit rejection or consuming the item. Addon vetoes
+        // run first so a denied gift has no core side effects.
+        com.stardew.craft.quest.QuestManager quests =
+                com.stardew.craft.quest.QuestManager.of(player);
         if (quests != null) {
             quests.completeActiveQuest("25", player);
         }
 
-        // ── Normal gift processing (no quest matched) ──
-        DayContext dayContext = currentDayContext(serverLevel);
-        NpcFriendshipDataManager friendshipManager = NpcFriendshipDataManager.get(serverLevel);
-        NpcFriendshipDataManager.FriendshipState state = friendshipManager.getOrCreate(player.getUUID(), npcId);
-        state.normalizeGiftWeek(dayContext.weekKey());
-
-        String resultText = receiveGift(player, npcEntity, held, npcId, state, dayContext);
+        GiftProcessResult giftResult =
+                receiveGift(player, npcEntity, held, npcId, state, dayContext);
+        if (publicNpcId != null) {
+            com.stardew.craft.api.v1.internal.npc.StardewNpcGiftRegistry.after(
+                    new com.stardew.craft.api.v1.npc.StardewNpcGifts.Result(
+                            player,
+                            npcEntity,
+                            publicNpcId,
+                            giftResult.gift(),
+                            giftResult.status(),
+                            giftResult.taste() == null
+                                    ? null
+                                    : com.stardew.craft.api.v1.npc.StardewNpcGifts
+                                            .Taste.valueOf(
+                                            giftResult.taste().name()),
+                            giftResult.tasteSource(),
+                            giftResult.birthday(),
+                            giftResult.friendshipDelta(),
+                            giftResult.resultingPoints()));
+        }
         NpcFriendshipRewardService.applyEligibleRewards(player, npcId, state.points());
         friendshipManager.setDirty();
         syncFriendshipStatus(player, npcId, state, dayContext);
         boolean garbleGift = npcId.equals("dwarf") && !com.stardew.craft.shop.DwarfService.canUnderstandDwarves(player);
-        sendDialoguePacket(player, npcId, resultText, state.points(), garbleGift);
+        sendDialoguePacket(
+                player,
+                npcId,
+                giftResult.responseText(),
+                state.points(),
+                garbleGift);
     }
 
     /**
@@ -804,8 +896,32 @@ public final class NpcInteractionService {
         ServerLevel level = player.serverLevel();
         DayContext dayContext = currentDayContext(level);
         NpcFriendshipDataManager friendshipManager = NpcFriendshipDataManager.get(level);
-        NpcFriendshipDataManager.FriendshipState state = friendshipManager.getOrCreate(player.getUUID(), npcId);
-        GiftTaste taste = getGiftTasteForThisItem(gift, npcId).taste();
+        NpcFriendshipDataManager.FriendshipState state =
+                friendshipManager.get(player.getUUID(), npcId);
+        boolean existingFriendship = state != null;
+        if (state == null) {
+            state = new NpcFriendshipDataManager.FriendshipState();
+        }
+        ResourceLocation publicNpcId =
+                com.stardew.craft.api.v1.npc.StardewNpcInteractions
+                        .normalizeNpcId(npcId);
+        if (publicNpcId != null
+                && !com.stardew.craft.api.v1.internal.npc.StardewNpcGiftRegistry
+                        .before(new com.stardew.craft.api.v1.npc.StardewNpcGifts
+                                .BeforeContext(
+                                player,
+                                npcEntity,
+                                publicNpcId,
+                                gift,
+                                friendshipSnapshot(state)))) {
+            return false;
+        }
+        if (!existingFriendship) {
+            state = friendshipManager.getOrCreate(player.getUUID(), npcId);
+        }
+        ItemStack giftSnapshot = gift.copy();
+        GiftTasteResult tasteResult = getGiftTasteForThisItem(gift, npcId);
+        GiftTaste taste = tasteResult.taste();
 
         int delta;
         if (isStardropTea(gift)) {
@@ -827,6 +943,22 @@ public final class NpcInteractionService {
             com.stardew.craft.sound.ModSounds.GIVE_GIFT.get(),
             net.minecraft.sounds.SoundSource.PLAYERS, 1.0F, 1.0F);
         broadcastGiftEmote(npcEntity, taste);
+        if (publicNpcId != null) {
+            com.stardew.craft.api.v1.internal.npc.StardewNpcGiftRegistry.after(
+                    new com.stardew.craft.api.v1.npc.StardewNpcGifts.Result(
+                            player,
+                            npcEntity,
+                            publicNpcId,
+                            giftSnapshot,
+                            com.stardew.craft.api.v1.npc.StardewNpcGifts.Status
+                                    .ACCEPTED,
+                            com.stardew.craft.api.v1.npc.StardewNpcGifts.Taste
+                                    .valueOf(taste.name()),
+                            tasteResult.source(),
+                            false,
+                            delta,
+                            Math.max(0, state.points())));
+        }
         NpcFriendshipRewardService.applyEligibleRewards(player, npcId, state.points());
         friendshipManager.setDirty();
         syncFriendshipStatus(player, npcId, state, dayContext);
@@ -880,7 +1012,9 @@ public final class NpcInteractionService {
 
     public static int getMaxFriendshipPointsFor(String npcId) {
         NpcCapabilityProfile profile = NpcDataRegistry.capabilities().get(npcId);
-        boolean datable = profile != null && profile.datable();
+        boolean datable = com.stardew.craft.api.v1.npc.StardewNpcProfiles.resolve(npcId)
+                .map(definition -> definition.profile().datable())
+                .orElse(profile != null && profile.datable());
         // Since we don't have a dating/bouquet system yet, datable NPCs are capped at 8 hearts.
         int maxHearts = datable ? 8 : 10;
         // Vanilla formula: (maxHearts + 1) * POINTS_PER_HEART - 1
@@ -1040,21 +1174,34 @@ public final class NpcInteractionService {
         return normalized.toString();
     }
 
-    private static String receiveGift(ServerPlayer player,
-                                      StardewNpcEntity npcEntity,
-                                      ItemStack held,
-                                      String npcId,
-                                      NpcFriendshipDataManager.FriendshipState state,
-                                      DayContext dayContext) {
+    private static GiftProcessResult receiveGift(
+            ServerPlayer player,
+            net.minecraft.world.entity.Entity npcEntity,
+            ItemStack held,
+            String npcId,
+            NpcFriendshipDataManager.FriendshipState state,
+            DayContext dayContext
+    ) {
+        ItemStack giftSnapshot = held.copy();
         boolean stardropTea = isStardropTea(held);
 
         // StardropTea bypasses daily & weekly limits (vanilla parity)
         if (!stardropTea) {
             if (state.lastGiftDayKey() == dayContext.dayKey()) {
-                return "stardewcraft.npc.generic.gift.already_today";
+                return GiftProcessResult.rejected(
+                        "stardewcraft.npc.generic.gift.already_today",
+                        giftSnapshot,
+                        com.stardew.craft.api.v1.npc.StardewNpcGifts.Status
+                                .REJECTED_DAILY_LIMIT,
+                        state.points());
             }
             if (state.giftsThisWeek() >= 2) {
-                return "stardewcraft.npc.generic.gift.already_week_limit";
+                return GiftProcessResult.rejected(
+                        "stardewcraft.npc.generic.gift.already_week_limit",
+                        giftSnapshot,
+                        com.stardew.craft.api.v1.npc.StardewNpcGifts.Status
+                                .REJECTED_WEEKLY_LIMIT,
+                        state.points());
             }
         }
 
@@ -1111,9 +1258,33 @@ public final class NpcInteractionService {
         // Broadcast NPC emote to all players (vanilla parity)
         broadcastGiftEmote(npcEntity, taste);
 
-        String responseText = buildGiftResponseText(npcId, held, taste, birthday, finalDelta);
+        String responseText = buildGiftResponseText(
+                npcId, giftSnapshot, taste, birthday, finalDelta);
         // SDV parity: Dwarf gift response garble flag — applied client-side after translation
-        return responseText;
+        return new GiftProcessResult(
+                responseText,
+                giftSnapshot,
+                com.stardew.craft.api.v1.npc.StardewNpcGifts.Status.ACCEPTED,
+                taste,
+                tasteResult.source(),
+                birthday,
+                finalDelta,
+                Math.max(0, state.points()));
+    }
+
+    private static com.stardew.craft.api.v1.npc.StardewNpcFriendshipSnapshot
+            friendshipSnapshot(
+                    NpcFriendshipDataManager.FriendshipState state
+            ) {
+        return new com.stardew.craft.api.v1.npc.StardewNpcFriendshipSnapshot(
+                Math.max(0, state.points()),
+                Math.max(0, state.giftsThisWeek()),
+                state.lastGiftDayKey(),
+                state.lastGiftWeekKey(),
+                state.lastTalkDayKey(),
+                state.firstMetDayKey(),
+                state.dialogueDayKey(),
+                Math.max(0, state.dialogueInteractionsToday()));
     }
 
     private static GiftTasteResult getGiftTasteForThisItem(ItemStack held, String npcId) {
@@ -1299,7 +1470,11 @@ public final class NpcInteractionService {
                                                 int finalDelta) {
         JsonObject dialogueRoot = NpcDataRegistry.dialogues().get(npcId);
         NpcCapabilityProfile profile = NpcDataRegistry.capabilities().get(npcId);
-        int manners = profile != null ? profile.manners() : NpcCapabilityProfile.MANNERS_NEUTRAL;
+        int manners = com.stardew.craft.api.v1.npc.StardewNpcProfiles.resolve(npcId)
+                .map(definition -> definition.profile().manners())
+                .orElse(profile != null
+                        ? profile.manners()
+                        : NpcCapabilityProfile.MANNERS_NEUTRAL);
 
         if (birthday) {
             if (taste == GiftTaste.LOVED) {
@@ -1405,7 +1580,10 @@ public final class NpcInteractionService {
      * Vanilla parity: loved → heart(20), liked → happy(32), hated → angry(12),
      * disliked → sad(28), neutral → no emote.
      */
-    private static void broadcastGiftEmote(StardewNpcEntity npcEntity, GiftTaste taste) {
+    private static void broadcastGiftEmote(
+            net.minecraft.world.entity.Entity npcEntity,
+            GiftTaste taste
+    ) {
         EmoteType emote = switch (taste) {
             case LOVED -> EmoteCatalog.byId("heart");
             case LIKED -> EmoteCatalog.byId("happy");
@@ -1729,6 +1907,43 @@ public final class NpcInteractionService {
         StardewTimeManager tm = StardewTimeManager.get();
         if (tm == null) return 1;
         return (tm.getCurrentYear() - 1) * DAYS_PER_YEAR + tm.getCurrentSeason() * DAYS_PER_SEASON + tm.getCurrentDay();
+    }
+
+    private record GiftProcessResult(
+            String responseText,
+            ItemStack gift,
+            com.stardew.craft.api.v1.npc.StardewNpcGifts.Status status,
+            GiftTaste taste,
+            String tasteSource,
+            boolean birthday,
+            int friendshipDelta,
+            int resultingPoints
+    ) {
+        private GiftProcessResult {
+            gift = gift.copy();
+        }
+
+        @Override
+        public ItemStack gift() {
+            return gift.copy();
+        }
+
+        private static GiftProcessResult rejected(
+                String responseText,
+                ItemStack gift,
+                com.stardew.craft.api.v1.npc.StardewNpcGifts.Status status,
+                int resultingPoints
+        ) {
+            return new GiftProcessResult(
+                    responseText,
+                    gift,
+                    status,
+                    null,
+                    "",
+                    false,
+                    0,
+                    Math.max(0, resultingPoints));
+        }
     }
 
     private enum GiftTaste {

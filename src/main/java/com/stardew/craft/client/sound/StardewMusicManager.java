@@ -15,11 +15,14 @@ import com.stardew.craft.time.StardewTimeManager;
 import com.stardew.craft.weather.ClientWeatherCache;
 import com.stardew.craft.world.MutantBugLairArea;
 import com.stardew.craft.world.WitchArea;
+import com.stardew.craft.world.LocationMusicEnvironment;
+import com.stardew.craft.api.v1.world.StardewLocations;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.AbstractSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.client.resources.sounds.TickableSoundInstance;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -572,8 +575,8 @@ public final class StardewMusicManager {
     }
 
     /**
-     * Checks if the player is inside a fixed interior region and returns its original SDV music.
-     * A matched region with null music means the original location has no location-specific track.
+     * Resolves inherited location music properties first, then legacy fixed
+     * interiors and per-player interior slots as compatibility fallbacks.
      */
     @Nullable
     private static InteriorTrackChoice pickInteriorTrack(Minecraft mc) {
@@ -582,6 +585,27 @@ public final class StardewMusicManager {
         int px = mc.player.getBlockX();
         int py = mc.player.getBlockY();
         int pz = mc.player.getBlockZ();
+
+        if (mc.level != null) {
+            var location = StardewLocations.find(
+                    mc.level.dimension().location(),
+                    new BlockPos(px, py, pz)).orElse(null);
+            StardewTimeManager clock =
+                    StardewTimeHud.getClientTimeCache();
+            var environment = LocationMusicEnvironment.resolve(
+                    location,
+                    clock == null ? -1 : clock.getCurrentTime());
+            if (environment.decision()
+                    == LocationMusicEnvironment.Decision.SILENCE) {
+                return new InteriorTrackChoice(null);
+            }
+            if (environment.decision()
+                    == LocationMusicEnvironment.Decision.TRACK) {
+                return new InteriorTrackChoice(
+                        BuiltInRegistries.SOUND_EVENT.get(
+                                environment.track()));
+            }
+        }
 
         InteriorMusicDefinition fixedInteriorMusic = InteriorRegionRegistry.fixedInteriorAt(new BlockPos(px, py, pz))
                 .map(region -> FIXED_INTERIOR_MUSIC.get(region.id()))

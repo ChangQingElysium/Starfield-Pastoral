@@ -5,6 +5,8 @@ import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.mastery.TallMasteryBlock;
 import com.stardew.craft.block.mine.CalicoStatueBlock;
 import com.stardew.craft.api.v1.mining.StardewMineMonsterContext;
+import com.stardew.craft.api.v1.mining.StardewMineMonsterProfile;
+import com.stardew.craft.api.v1.mining.StardewMineMonsterProfiles;
 import com.stardew.craft.api.v1.mining.StardewMineMonsterProviders;
 import com.stardew.craft.api.v1.mining.StardewMineThemeDefinition;
 import net.minecraft.core.BlockPos;
@@ -471,15 +473,26 @@ public class MineFloorGenerator {
             // SDV 瀑布概率选择怪物类型
             // 骷髅矿：isDark 时必出 Carbon Ghost，飞行怪须远离出生点
             double distFromCenter = Math.sqrt((x - centerX) * (x - centerX) + (z - centerZ) * (z - centerZ));
-            EntityType<?> type = pickMonsterForFloor(floorNumber, random, isDark, distFromCenter);
+            MonsterSelection selection = pickMonsterForFloor(
+                    floorNumber, random, isDark, distFromCenter);
+            EntityType<?> type = selection.entityType();
             if (floorNumber > 120) {
-                type = com.stardew.craft.festival.desert.DesertFestivalMineService.applyCalicoStatueInvasion(level, random, type);
+                EntityType<?> invaded =
+                        com.stardew.craft.festival.desert
+                                .DesertFestivalMineService
+                                .applyCalicoStatueInvasion(
+                                        level, random, type);
+                if (invaded != type) {
+                    selection = new MonsterSelection(invaded, null);
+                    type = invaded;
+                }
             }
 
             // Ghost 限制：每层最多 1 只（匹配 SDV ghostAdded 标记）
             if (type == EntityType.HUSK) {
                 if (ghostSpawned) {
                     type = EntityType.SLIME; // 回退为史莱姆
+                    selection = new MonsterSelection(type, null);
                 } else {
                     ghostSpawned = true;
                 }
@@ -497,6 +510,7 @@ public class MineFloorGenerator {
                 if (mob != null) {
                     mob.moveTo(x + 0.5, y, z + 0.5, random.nextFloat() * 360, 0);
                     mob.setPersistenceRequired();
+                    markSelectedProfile(mob, selection);
                     level.addFreshEntity(mob);
                     spawned++;
                 }
@@ -511,6 +525,7 @@ public class MineFloorGenerator {
                         if (mob != null) {
                             mob.moveTo(x + 0.5, y, z + 0.5, random.nextFloat() * 360, 0);
                             mob.setPersistenceRequired();
+                            markSelectedProfile(mob, selection);
                             level.addFreshEntity(mob);
                             spawned++;
                         }
@@ -526,6 +541,19 @@ public class MineFloorGenerator {
         } else {
             StardewCraft.LOGGER.warn("[MINE] FAILED to spawn any monsters on floor {} (target={}, attempts={})", 
                     floorNumber, totalCount, maxAttempts);
+        }
+    }
+
+    private static void markSelectedProfile(
+            Mob mob,
+            MonsterSelection selection
+    ) {
+        if (selection.profileId() != null
+                && !StardewMineMonsterProfiles.mark(
+                        mob, selection.profileId())) {
+            StardewCraft.LOGGER.error(
+                    "[MINE] Selected unknown monster profile {}",
+                    selection.profileId());
         }
     }
 
@@ -557,7 +585,33 @@ public class MineFloorGenerator {
      * - Stray       → Shadow Shaman（远程魔法型）
      * - Blaze       → Squid Kid
      */
-    private static EntityType<?> pickMonsterForFloor(int floor, RandomSource random,
+    private static MonsterSelection pickMonsterForFloor(
+            int floor,
+            RandomSource random,
+            boolean isDark,
+            double distFromSpawn
+    ) {
+        StardewMineMonsterContext context =
+                new StardewMineMonsterContext(
+                        floor, isDark, distFromSpawn, random);
+        StardewMineMonsterProfile profile =
+                StardewMineMonsterProfiles.select(context);
+        if (profile != null) {
+            return new MonsterSelection(
+                    profile.entityType(), profile.id());
+        }
+        profile = MineMonsterSpawnTableData.select(context);
+        if (profile != null) {
+            return new MonsterSelection(
+                    profile.entityType(), profile.id());
+        }
+        return new MonsterSelection(
+                pickMonsterEntityTypeForFloor(
+                        floor, random, isDark, distFromSpawn),
+                null);
+    }
+
+    private static EntityType<?> pickMonsterEntityTypeForFloor(int floor, RandomSource random,
                                                       boolean isDark, double distFromSpawn) {
         EntityType<?> provided = StardewMineMonsterProviders.select(
                 new StardewMineMonsterContext(floor, isDark, distFromSpawn, random));
@@ -667,6 +721,12 @@ public class MineFloorGenerator {
             if (pick < acc) return types[i];
         }
         return EntityType.MAGMA_CUBE;
+    }
+
+    private record MonsterSelection(
+            EntityType<?> entityType,
+            ResourceLocation profileId
+    ) {
     }
     
     /**

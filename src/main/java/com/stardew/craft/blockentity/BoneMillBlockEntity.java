@@ -68,35 +68,33 @@ public class BoneMillBlockEntity extends TimedProductionBlockEntity implements U
         if (output.isEmpty()) {
             return false;
         }
-        startWork(stack, required, output, player);
+        var plan = prepareProduction(
+                stack, output, MINUTES_UNTIL_READY,
+                player, false);
+        if (plan.isEmpty()) {
+            return false;
+        }
+        startWork(stack, required, plan.get(), player);
         return true;
     }
 
-    private void startWork(ItemStack source, int required, ItemStack output, @Nullable Player player) {
-        input = source.copy();
-        input.setCount(required);
-        product = output.copy();
-        readyAtAbsMinute = getCurrentAbsMinute() + MINUTES_UNTIL_READY;
-        ready = false;
-        if (player == null || !player.isCreative()) {
-            source.shrink(required);
-        }
+    private void startWork(
+            ItemStack source,
+            int required,
+            com.stardew.craft.api.v1.machine
+                    .StardewProductionPlan plan,
+            @Nullable Player player
+    ) {
+        commitProduction(
+                source, plan, required, player);
         playLoadEffects();
-        setChanged();
-        syncToClient();
     }
 
     public ItemStack harvestOne() {
-        if (!isReady()) {
+        ItemStack out = collectProduction();
+        if (out.isEmpty()) {
             return ItemStack.EMPTY;
         }
-        ItemStack out = product.copy();
-        input = ItemStack.EMPTY;
-        product = ItemStack.EMPTY;
-        readyAtAbsMinute = -1;
-        ready = false;
-        setChanged();
-        syncToClient();
         Level currentLevel = level;
         if (currentLevel != null && !currentLevel.isClientSide) {
             updateWorkingState(currentLevel, worldPosition, getBlockState());
@@ -130,8 +128,15 @@ public class BoneMillBlockEntity extends TimedProductionBlockEntity implements U
         if (simulate) {
             return AutomationStackHelper.remainderAfterInsert(stack, required);
         }
+        var plan = prepareProduction(
+                stack, output, MINUTES_UNTIL_READY,
+                null, true);
+        if (plan.isEmpty()) {
+            return stack;
+        }
         ItemStack inputCopy = stack.copy();
-        startWork(inputCopy, required, output, null);
+        startWork(
+                inputCopy, required, plan.get(), null);
         return AutomationStackHelper.remainderAfterInsert(stack, required);
     }
 

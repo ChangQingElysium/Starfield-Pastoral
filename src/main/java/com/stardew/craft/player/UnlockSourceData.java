@@ -18,7 +18,6 @@ import net.minecraft.util.profiling.ProfilerFiller;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -42,39 +41,112 @@ public final class UnlockSourceData {
         }
     }
 
+    private static synchronized void applyCandidate(
+            Map<ResourceLocation, UnlockBundle> definitions,
+            Map<ResourceLocation, String> canonicalSources,
+            List<DefinitionDiagnostic> diagnostics,
+            @Nullable String sourceJson,
+            String operation
+    ) {
+        List<DefinitionDiagnostic> preparedDiagnostics =
+                new ArrayList<>(diagnostics);
+        String nextCachedJson = sourceJson;
+        if (nextCachedJson == null && preparedDiagnostics.stream()
+                .noneMatch(diagnostic -> diagnostic.severity()
+                        == DefinitionDiagnostic.Severity.ERROR)) {
+            try {
+                nextCachedJson = encodeDefinitions(definitions);
+            } catch (RuntimeException exception) {
+                preparedDiagnostics.add(DefinitionDiagnostic.error(
+                        null,
+                        null,
+                        "Failed to encode unlock-source sync catalog: "
+                                + exception.getMessage()));
+            }
+        }
+
+        var result = STORE.applyLocal(
+                definitions,
+                canonicalSources,
+                preparedDiagnostics);
+        for (DefinitionDiagnostic diagnostic : result.diagnostics()) {
+            String source = diagnostic.source() == null
+                    ? "<unlock reload>"
+                    : diagnostic.source().toString();
+            if (diagnostic.severity()
+                    == DefinitionDiagnostic.Severity.ERROR) {
+                StardewCraft.LOGGER.error(
+                        "[Unlock] Definition error [{}]: {}",
+                        source,
+                        diagnostic.message());
+            } else {
+                StardewCraft.LOGGER.warn(
+                        "[Unlock] Definition warning [{}]: {}",
+                        source,
+                        diagnostic.message());
+            }
+        }
+        if (!result.accepted()) {
+            StardewCraft.LOGGER.error(
+                    "[Unlock] Rejected {}; keeping v{} with {} sources",
+                    operation,
+                    catalog.definitions().version(),
+                    catalog.sources().size());
+            return;
+        }
+        if (nextCachedJson == null) {
+            throw new IllegalStateException(
+                    "Accepted unlock-source definitions have no sync catalog");
+        }
+
+        catalog = new Catalog(
+                result.snapshot(),
+                nextCachedJson);
+        StardewCraft.LOGGER.info(
+                "[Unlock] Applied {} v{} ({} sources)",
+                operation,
+                catalog.definitions().version(),
+                catalog.sources().size());
+    }
+
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final ResourceLocation LEGACY_TABLE =
             ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "unlock_sources");
     private static final AtomicDefinitionStore<UnlockBundle> STORE = new AtomicDefinitionStore<>();
-    private static volatile Map<ResourceLocation, UnlockBundle> sources = Map.of();
-    private static volatile String cachedJson = "";
+    private static volatile Catalog catalog = Catalog.empty();
 
     private UnlockSourceData() {
     }
 
     public static DefinitionSnapshot<UnlockBundle> snapshot() {
-        return STORE.snapshot();
+        return catalog.definitions();
     }
 
     public static UnlockBundle getUnlocks(String sourceId) {
         ResourceLocation id = normalizeSourceId(sourceId);
-        return id == null ? UnlockBundle.EMPTY : sources.getOrDefault(id, UnlockBundle.EMPTY);
+        return id == null
+                ? UnlockBundle.EMPTY
+                : catalog.sources().getOrDefault(
+                        id, UnlockBundle.EMPTY);
     }
 
     public static boolean hasSource(String sourceId) {
         ResourceLocation id = normalizeSourceId(sourceId);
-        return id != null && sources.containsKey(id);
+        return id != null
+                && catalog.sources().containsKey(id);
     }
 
     public static List<String> getSourceIds() {
-        return sources.keySet().stream().map(ResourceLocation::toString).toList();
+        return catalog.sources().keySet().stream()
+                .map(ResourceLocation::toString)
+                .toList();
     }
 
     /** Returns every configured source that teaches the requested player-storage recipe ID. */
     public static List<ResourceLocation> getSourceIdsForRecipe(String recipeId) {
         String target = RecipeIdNormalizer.storageId(recipeId);
         if (target.isBlank()) return List.of();
-        return sources.entrySet().stream()
+        return catalog.sources().entrySet().stream()
                 .filter(entry -> entry.getValue().recipes().stream()
                         .map(RecipeIdNormalizer::storageId)
                         .anyMatch(target::equals))
@@ -92,14 +164,7 @@ public final class UnlockSourceData {
     }
 
     public static String getCachedJson() {
-        String current = cachedJson;
-        if (!current.isEmpty()) return current;
-        JsonObject root = new JsonObject();
-        sources.forEach((id, bundle) -> UnlockBundle.CODEC.encodeStart(JsonOps.INSTANCE, bundle)
-                .result().ifPresent(json -> root.add(id.toString(), json)));
-        current = GSON.toJson(root);
-        cachedJson = current;
-        return current;
+        return catalog.cachedJson();
     }
 
     public static void applyFromJson(String json) {
@@ -107,24 +172,38 @@ public final class UnlockSourceData {
             JsonObject root = GSON.fromJson(json, JsonObject.class);
             if (root == null) return;
             Map<ResourceLocation, UnlockBundle> decoded = new LinkedHashMap<>();
-            List<String> errors = new ArrayList<>();
+            Map<ResourceLocation, String> canonicalSources =
+                    new LinkedHashMap<>();
+            List<DefinitionDiagnostic> diagnostics =
+                    new ArrayList<>();
             for (Map.Entry<String, JsonElement> entry : root.entrySet()) {
                 ResourceLocation id = ResourceLocation.tryParse(entry.getKey());
                 if (id == null) {
-                    errors.add("Invalid unlock source ID " + entry.getKey());
+                    diagnostics.add(DefinitionDiagnostic.error(
+                            null,
+                            null,
+                            "Invalid unlock source ID "
+                                    + entry.getKey()));
                     continue;
                 }
                 UnlockBundle.CODEC.parse(JsonOps.INSTANCE, entry.getValue())
-                        .resultOrPartial(errors::add)
-                        .ifPresent(bundle -> decoded.put(id, bundle));
+                        .resultOrPartial(message ->
+                                diagnostics.add(
+                                        DefinitionDiagnostic.error(
+                                                id, id, message)))
+                        .ifPresent(bundle -> {
+                            decoded.put(id, bundle);
+                            canonicalSources.put(
+                                    id,
+                                    encodeBundle(id, bundle));
+                        });
             }
-            if (!errors.isEmpty()) {
-                StardewCraft.LOGGER.error("[DATA-SYNC] Rejected unlock sources: {}", String.join("; ", errors));
-                return;
-            }
-            sources = Collections.unmodifiableMap(new LinkedHashMap<>(decoded));
-            cachedJson = json;
-            StardewCraft.LOGGER.info("[DATA-SYNC] Applied {} unlock sources", sources.size());
+            applyCandidate(
+                    decoded,
+                    canonicalSources,
+                    diagnostics,
+                    json,
+                    "client sync");
         } catch (RuntimeException exception) {
             StardewCraft.LOGGER.error("[DATA-SYNC] Failed to apply unlock sources", exception);
         }
@@ -160,24 +239,12 @@ public final class UnlockSourceData {
                         decode(entry.getKey(), id, entry.getValue(), definitions, canonicalSources, diagnostics);
                     });
 
-            var result = STORE.applyLocal(definitions, canonicalSources, diagnostics);
-            for (DefinitionDiagnostic diagnostic : result.diagnostics()) {
-                String source = diagnostic.source() == null ? "<unlock reload>" : diagnostic.source().toString();
-                if (diagnostic.severity() == DefinitionDiagnostic.Severity.ERROR) {
-                    StardewCraft.LOGGER.error("[Unlock] Definition error [{}]: {}", source, diagnostic.message());
-                } else {
-                    StardewCraft.LOGGER.warn("[Unlock] Definition warning [{}]: {}", source, diagnostic.message());
-                }
-            }
-            if (!result.accepted()) {
-                StardewCraft.LOGGER.error("[Unlock] Rejected snapshot; keeping v{} with {} sources",
-                        result.snapshot().version(), result.snapshot().definitions().size());
-                return;
-            }
-            sources = result.snapshot().definitions();
-            cachedJson = "";
-            StardewCraft.LOGGER.info("[Unlock] Applied snapshot v{} ({} sources)",
-                    result.snapshot().version(), sources.size());
+            applyCandidate(
+                    definitions,
+                    canonicalSources,
+                    diagnostics,
+                    null,
+                    "reload");
         }
     }
 
@@ -229,5 +296,58 @@ public final class UnlockSourceData {
             if (value != null && !value.isBlank() && !result.contains(value)) result.add(value);
         }
         return List.copyOf(result);
+    }
+
+    private static String encodeBundle(
+            ResourceLocation id,
+            UnlockBundle bundle
+    ) {
+        return UnlockBundle.CODEC
+                .encodeStart(JsonOps.INSTANCE, bundle)
+                .resultOrPartial(message -> {
+                    throw new IllegalArgumentException(
+                            id + ": " + message);
+                })
+                .map(GSON::toJson)
+                .orElseThrow();
+    }
+
+    private static String encodeDefinitions(
+            Map<ResourceLocation, UnlockBundle> definitions
+    ) {
+        JsonObject root = new JsonObject();
+        definitions.forEach((id, bundle) ->
+                root.add(
+                        id.toString(),
+                        GSON.fromJson(
+                                encodeBundle(id, bundle),
+                                JsonElement.class)));
+        return GSON.toJson(root);
+    }
+
+    static Catalog catalog() {
+        return catalog;
+    }
+
+    record Catalog(
+            DefinitionSnapshot<UnlockBundle> definitions,
+            String cachedJson
+    ) {
+        Catalog {
+            definitions = java.util.Objects.requireNonNull(
+                    definitions, "definitions");
+            cachedJson = java.util.Objects.requireNonNull(
+                    cachedJson, "cachedJson");
+        }
+
+        Map<ResourceLocation, UnlockBundle> sources() {
+            return definitions.definitions();
+        }
+
+        private static Catalog empty() {
+            return new Catalog(
+                    DefinitionSnapshot.empty(),
+                    "{}");
+        }
     }
 }

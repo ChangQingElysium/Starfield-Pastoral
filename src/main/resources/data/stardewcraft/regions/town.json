@@ -1,0 +1,10 @@
+{
+  "dimension": "stardewcraft:stardew_valley",
+  "location": "stardewcraft:town",
+  "include": {
+    "min": [-40, 62, -99],
+    "max": [91, 84, 17]
+  },
+  "tags": ["stardewcraft:outdoor", "stardewcraft:town"],
+  "priority": -100
+}

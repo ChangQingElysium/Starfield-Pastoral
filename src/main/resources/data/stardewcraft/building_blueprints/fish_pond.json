@@ -1,0 +1,13 @@
+{
+  "builder": "stardewcraft:robin",
+  "order": 40,
+  "display_name": "stardewcraft.robin.blueprint.fish_pond.name",
+  "description": "stardewcraft.robin.blueprint.fish_pond.desc",
+  "money": 5000,
+  "materials": [
+    { "item": "stardewcraft:stone", "count": 200 },
+    { "item": "stardewcraft:seaweed", "count": 5 },
+    { "item": "stardewcraft:green_algae", "count": 5 }
+  ],
+  "result_item": "stardewcraft:fish_pond_manager"
+}

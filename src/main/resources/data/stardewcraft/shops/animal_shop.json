@@ -9,13 +9,29 @@
     },
     {
       "item": "stardewcraft:milk_pail",
-      "price": 2000,
-      "stock": 1
+      "price": 1000,
+      "stock": 1,
+      "available_when": [
+        {
+          "type": "stardewcraft:lacks_item",
+          "data": {
+            "item": "stardewcraft:milk_pail"
+          }
+        }
+      ]
     },
     {
       "item": "stardewcraft:shears",
-      "price": 3000,
-      "stock": 1
+      "price": 1000,
+      "stock": 1,
+      "available_when": [
+        {
+          "type": "stardewcraft:lacks_item",
+          "data": {
+            "item": "stardewcraft:shears"
+          }
+        }
+      ]
     },
     {
       "item": "stardewcraft:heater",
@@ -24,12 +40,16 @@
     {
       "item": "stardewcraft:auto_grabber",
       "price": 25000,
-      "stock": 1
-    },
-    {
-      "item": "stardewcraft:auto_petter",
-      "price": 50000,
-      "stock": 1
+      "stock": 1,
+      "available_when": [
+        {
+          "type": "stardewcraft:skill",
+          "data": {
+            "skill": "farming",
+            "level": 10
+          }
+        }
+      ]
     },
     {
       "item": "stardewcraft:book_animal_catalogue",

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -44,9 +45,103 @@ class FestivalServiceTest {
         assertTrue(FestivalRegistry.requiresPlayerContext(id("has_item")));
         assertTrue(FestivalRegistry.requiresPlayerContext(id("flag")));
         assertTrue(FestivalRegistry.requiresPlayerContext(id("skill")));
+        assertTrue(FestivalRegistry.requiresPlayerContext(id("location")));
         assertFalse(FestivalRegistry.requiresPlayerContext(id("season")));
         assertFalse(FestivalRegistry.requiresPlayerContext(
                 ResourceLocation.fromNamespaceAndPath("addon", "world_condition")));
+    }
+
+    @Test
+    void bareAddonMechanicReferencesBelongToTheFestivalNamespace() {
+        ResourceLocation addonFestival = ResourceLocation
+                .fromNamespaceAndPath("orchard_addon", "apple_day");
+        ResourceLocation coreFestival = ResourceLocation
+                .fromNamespaceAndPath("stardewcraft", "spring13");
+
+        assertEquals(
+                "orchard_addon:apple_game",
+                FestivalRegistry.normalizeOwnedReference(
+                        addonFestival, "apple_game"));
+        assertEquals(
+                "shared:apple_game",
+                FestivalRegistry.normalizeOwnedReference(
+                        addonFestival, "shared:apple_game"));
+        assertEquals(
+                "egg_hunt",
+                FestivalRegistry.normalizeOwnedReference(
+                        coreFestival, "egg_hunt"));
+    }
+
+    @Test
+    void festivalDefinitionsAndRuntimeViewsShareOneSnapshot() {
+        String before = FestivalRegistry.getCachedJson();
+        try {
+            FestivalRegistry.applyFromJson("""
+                    {
+                      "festival_test:first": {
+                        "type": "active",
+                        "legacy_id": "legacy_first",
+                        "display_name": "First",
+                        "season": 0,
+                        "start_day": 2,
+                        "end_day": 2,
+                        "start_time": 900,
+                        "end_time": 1400,
+                        "start_message_key": "first.started",
+                        "world": {"location": "Town"}
+                      }
+                    }
+                    """);
+            assertCoherent(FestivalRegistry.catalog());
+            assertTrue(FestivalRegistry.get(
+                    "legacy_first").isPresent());
+
+            FestivalRegistry.applyFromJson("""
+                    {
+                      "festival_test:second": {
+                        "type": "passive",
+                        "display_name": "Second",
+                        "season": 1,
+                        "start_day": 3,
+                        "end_day": 3,
+                        "start_time": 1000,
+                        "end_time": 1500,
+                        "start_message_key": "second.started",
+                        "world": {"location": "Town"}
+                      }
+                    }
+                    """);
+            assertCoherent(FestivalRegistry.catalog());
+            assertTrue(FestivalRegistry.get(
+                    "legacy_first").isEmpty());
+            assertEquals(1,
+                    FestivalRegistry.passiveFestivals().size());
+            assertTrue(FestivalRegistry.activeFestivals().isEmpty());
+        } finally {
+            FestivalRegistry.applyFromJson(before);
+        }
+    }
+
+    private static void assertCoherent(
+            FestivalRegistry.Catalog catalog
+    ) {
+        Set<ResourceLocation> definitionIds =
+                catalog.definitions().definitions().keySet();
+        Set<ResourceLocation> runtimeIds = catalog.ordered().stream()
+                .map(FestivalDefinition::resourceId)
+                .collect(java.util.stream.Collectors.toSet());
+        assertEquals(definitionIds, runtimeIds);
+        assertEquals(catalog.ordered().size(),
+                catalog.activeOrdered().size()
+                        + catalog.passiveOrdered().size());
+        for (FestivalDefinition definition : catalog.ordered()) {
+            assertEquals(definition,
+                    catalog.aliases().get(
+                            definition.resourceId()
+                                    .toString()
+                                    .toLowerCase(
+                                            java.util.Locale.ROOT)));
+        }
     }
 
     private static FestivalDefinition festival(String resourceId, String legacyId, FestivalType type) {

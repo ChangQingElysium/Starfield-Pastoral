@@ -19,6 +19,7 @@ import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.ItemStack;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumMap;
@@ -33,8 +34,7 @@ public final class MasteryRewardRegistry {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final AtomicDefinitionStore<StardewMasteryRewardDefinition> STORE =
             new AtomicDefinitionStore<>();
-    private static volatile Map<SkillType, List<RewardEntry>> rewards = Map.of();
-    private static volatile String cachedJson = "{}";
+    private static volatile Catalog catalog = Catalog.empty();
 
     private MasteryRewardRegistry() {
     }
@@ -57,29 +57,39 @@ public final class MasteryRewardRegistry {
     }
 
     public static DefinitionSnapshot<StardewMasteryRewardDefinition> snapshot() {
-        return STORE.snapshot();
+        return catalog.definitions();
     }
 
     public static List<RewardEntry> rewardsFor(SkillType skill) {
-        return rewards.getOrDefault(skill, List.of());
+        return catalog.rewards().getOrDefault(skill, List.of());
     }
 
     public static String getCachedJson() {
-        return cachedJson;
+        return catalog.cachedJson();
     }
 
     public static void applyFromJson(String json) {
         try {
             JsonObject root = JsonParser.parseString(json).getAsJsonObject();
             Map<ResourceLocation, StardewMasteryRewardDefinition> definitions = new LinkedHashMap<>();
+            Map<ResourceLocation, String> sources = new LinkedHashMap<>();
+            List<DefinitionDiagnostic> diagnostics = new ArrayList<>();
             for (Map.Entry<String, JsonElement> entry : root.entrySet()) {
                 ResourceLocation id = ResourceLocation.tryParse(entry.getKey());
-                if (id == null) continue;
+                if (id == null) {
+                    diagnostics.add(DefinitionDiagnostic.error(
+                            null, null, "Invalid mastery reward ID " + entry.getKey()));
+                    continue;
+                }
                 StardewMasteryRewardDefinition.CODEC.parse(JsonOps.INSTANCE, entry.getValue())
-                        .result().ifPresent(definition -> definitions.put(id, definition));
+                        .resultOrPartial(message -> diagnostics.add(
+                                DefinitionDiagnostic.error(id, id, message)))
+                        .ifPresent(definition -> {
+                            definitions.put(id, definition);
+                            sources.put(id, encodeDefinition(definition));
+                        });
             }
-            publish(definitions);
-            cachedJson = json;
+            applyCandidate(definitions, sources, diagnostics, json, "client sync");
         } catch (RuntimeException exception) {
             StardewCraft.LOGGER.error("[Mastery rewards] Failed client sync", exception);
         }
@@ -107,25 +117,59 @@ public final class MasteryRewardRegistry {
                                                 DefinitionDiagnostic.error(entry.getKey(), entry.getKey(), message)))
                                         .ifPresent(encoded -> sources.put(entry.getKey(), GSON.toJson(encoded)));
                             }));
-            var result = STORE.applyLocal(definitions, sources, diagnostics);
-            for (DefinitionDiagnostic diagnostic : result.diagnostics()) {
-                if (diagnostic.severity() == DefinitionDiagnostic.Severity.ERROR) {
-                    StardewCraft.LOGGER.error("[Mastery rewards] {}", diagnostic.message());
-                } else {
-                    StardewCraft.LOGGER.warn("[Mastery rewards] {}", diagnostic.message());
-                }
-            }
-            if (!result.accepted()) {
-                StardewCraft.LOGGER.error("[Mastery rewards] Rejected reload; keeping previous rewards");
-                return;
-            }
-            publish(result.snapshot().definitions());
-            cachedJson = encodeDefinitions(result.snapshot().definitions());
-            StardewCraft.LOGGER.info("[Mastery rewards] Applied {} reward sets", definitions.size());
+            applyCandidate(definitions, sources, diagnostics, null, "reload");
         }
     }
 
-    private static void publish(Map<ResourceLocation, StardewMasteryRewardDefinition> definitions) {
+    static synchronized void applyCandidate(
+            Map<ResourceLocation, StardewMasteryRewardDefinition> definitions,
+            Map<ResourceLocation, String> sources,
+            List<DefinitionDiagnostic> diagnostics,
+            @Nullable String sourceJson,
+            String operation
+    ) {
+        List<DefinitionDiagnostic> preparedDiagnostics = new ArrayList<>(diagnostics);
+        String nextCachedJson = sourceJson;
+        Map<SkillType, List<RewardEntry>> nextRewards = prepareRewards(definitions);
+        if (nextCachedJson == null && preparedDiagnostics.stream().noneMatch(
+                diagnostic -> diagnostic.severity() == DefinitionDiagnostic.Severity.ERROR)) {
+            try {
+                nextCachedJson = encodeDefinitions(definitions);
+            } catch (RuntimeException exception) {
+                preparedDiagnostics.add(DefinitionDiagnostic.error(
+                        null, null, "Failed to encode mastery reward sync catalog: "
+                                + exception.getMessage()));
+            }
+        }
+
+        var result = STORE.applyLocal(definitions, sources, preparedDiagnostics);
+        for (DefinitionDiagnostic diagnostic : result.diagnostics()) {
+            if (diagnostic.severity() == DefinitionDiagnostic.Severity.ERROR) {
+                StardewCraft.LOGGER.error("[Mastery rewards] {}", diagnostic.message());
+            } else {
+                StardewCraft.LOGGER.warn("[Mastery rewards] {}", diagnostic.message());
+            }
+        }
+        if (!result.accepted()) {
+            StardewCraft.LOGGER.error(
+                    "[Mastery rewards] Rejected {}; keeping v{} with {} reward sets",
+                    operation, catalog.definitions().version(),
+                    catalog.definitions().definitions().size());
+            return;
+        }
+        if (nextCachedJson == null) {
+            throw new IllegalStateException("Accepted mastery rewards have no sync catalog");
+        }
+        catalog = new Catalog(result.snapshot(), nextRewards, nextCachedJson);
+        StardewCraft.LOGGER.info(
+                "[Mastery rewards] Applied {} v{} ({} reward sets)",
+                operation, catalog.definitions().version(),
+                catalog.definitions().definitions().size());
+    }
+
+    private static Map<SkillType, List<RewardEntry>> prepareRewards(
+            Map<ResourceLocation, StardewMasteryRewardDefinition> definitions
+    ) {
         Map<SkillType, List<Map.Entry<ResourceLocation, StardewMasteryRewardDefinition>>> grouped =
                 new EnumMap<>(SkillType.class);
         definitions.entrySet().stream()
@@ -142,7 +186,7 @@ public final class MasteryRewardRegistry {
                 .flatMap(entry -> entry.getValue().entries().stream())
                 .map(MasteryRewardRegistry::toRuntime)
                 .toList()));
-        rewards = Map.copyOf(prepared);
+        return Map.copyOf(prepared);
     }
 
     private static RewardEntry toRuntime(StardewMasteryRewardDefinition.Entry entry) {
@@ -173,8 +217,37 @@ public final class MasteryRewardRegistry {
 
     private static String encodeDefinitions(Map<ResourceLocation, StardewMasteryRewardDefinition> definitions) {
         JsonObject root = new JsonObject();
-        definitions.forEach((id, definition) -> StardewMasteryRewardDefinition.CODEC
-                .encodeStart(JsonOps.INSTANCE, definition).result().ifPresent(json -> root.add(id.toString(), json)));
+        definitions.forEach((id, definition) ->
+                root.add(id.toString(), JsonParser.parseString(encodeDefinition(definition))));
         return GSON.toJson(root);
+    }
+
+    private static String encodeDefinition(StardewMasteryRewardDefinition definition) {
+        return StardewMasteryRewardDefinition.CODEC.encodeStart(JsonOps.INSTANCE, definition)
+                .resultOrPartial(message -> {
+                    throw new IllegalArgumentException(message);
+                })
+                .map(GSON::toJson)
+                .orElseThrow();
+    }
+
+    static Catalog catalog() {
+        return catalog;
+    }
+
+    record Catalog(
+            DefinitionSnapshot<StardewMasteryRewardDefinition> definitions,
+            Map<SkillType, List<RewardEntry>> rewards,
+            String cachedJson
+    ) {
+        Catalog {
+            definitions = java.util.Objects.requireNonNull(definitions, "definitions");
+            rewards = Map.copyOf(rewards);
+            cachedJson = java.util.Objects.requireNonNull(cachedJson, "cachedJson");
+        }
+
+        private static Catalog empty() {
+            return new Catalog(DefinitionSnapshot.empty(), Map.of(), "{}");
+        }
     }
 }

@@ -136,7 +136,7 @@ public class FarmJoinCommand {
                 mockFarms.add(new FarmListSyncPayload.FarmEntry(
                         farm.getOwnerUUID(), com.stardew.craft.player.PlayerDisplayName.get(
                                 player.server, farm.getOwnerUUID()), farm.getFarmName(),
-                        farm.getFarmType().getId(), 0, false));
+                        farm.getFarmLayoutId().toString(), 0, false));
             }
         }
 

@@ -2,6 +2,7 @@ package com.stardew.craft.client.gui;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.client.AnimalQueryClientDetails;
 import com.stardew.craft.client.gui.common.SdvEditBoxRenderer;
 import com.stardew.craft.client.gui.common.SdvFontAdapter;
 import com.stardew.craft.client.gui.common.SdvTexture;
@@ -154,6 +155,7 @@ public final class AnimalQueryScreen extends Screen implements MenuAccess<Animal
         drawAge(graphics);
         drawFriendship(graphics);
         drawMood(graphics);
+        drawAuthorityDetails(graphics);
         drawGoldenCracker(graphics);
         drawButtons(graphics);
     }
@@ -249,6 +251,62 @@ public final class AnimalQueryScreen extends Screen implements MenuAccess<Animal
         int y = this.panelY + ui(224);
         GOLDEN_CRACKER.drawPixelZoomTint(graphics, x + ui(2), y + ui(2), s4(), 0.0F, 0.0F, 0.0F, 0.35F);
         GOLDEN_CRACKER.drawPixelZoom(graphics, x, y, s4());
+    }
+
+    private void drawAuthorityDetails(GuiGraphics graphics) {
+        int x = this.panelX + ui(SDV_BORDER + 32);
+        int y = this.panelY + ui(400);
+        int maxWidth = ui(this.sourceWidth - 96);
+        float scale = smallTextScale() * 0.82F;
+
+        AnimalQueryClientDetails.Details details =
+                AnimalQueryClientDetails.get(
+                        this.menu.getAnimalId());
+        String parentName = details == null
+                ? ""
+                : details.parentName();
+        Component parent = null;
+        if (details != null && !parentName.isBlank()) {
+            parent = Component.translatable(
+                    "stardewcraft.animal.query.parent",
+                    parentName);
+        } else if (details == null
+                && this.menu.getParentAnimalId() > 0) {
+            parent = Component.translatable(
+                    "stardewcraft.animal.query.parent.pending",
+                    this.menu.getParentAnimalId());
+        }
+        int devicesY = y;
+        if (parent != null) {
+            scale = Math.min(
+                    scale,
+                    maxWidth / (float) Math.max(
+                            1, this.font.width(parent)));
+            SdvFontAdapter.draw(
+                    graphics, this.font, parent, x, y, scale, TEXT_COLOR);
+            devicesY += ui(30);
+        }
+
+        Component devices = Component.translatable(
+                "stardewcraft.animal.query.devices",
+                statusText(this.menu.hasAutoPetter()),
+                statusText(this.menu.hasAutoGrabber()),
+                statusText(this.menu.hasAutoFeeder())
+        );
+        float deviceScale = Math.min(
+                smallTextScale() * 0.72F,
+                maxWidth / (float) Math.max(
+                        1, this.font.width(devices)));
+        SdvFontAdapter.draw(
+                graphics, this.font, devices, x,
+                devicesY, deviceScale, TEXT_COLOR);
+    }
+
+    private static Component statusText(boolean available) {
+        return Component.translatable(
+                available
+                        ? "stardewcraft.animal.query.device.present"
+                        : "stardewcraft.animal.query.device.absent");
     }
 
     private void drawButtons(GuiGraphics graphics) {
@@ -531,6 +589,7 @@ public final class AnimalQueryScreen extends Screen implements MenuAccess<Animal
     @Override
     public void removed() {
         submitRenameIfChanged();
+        AnimalQueryClientDetails.remove(this.menu.getAnimalId());
         super.removed();
         if (this.hudVisibilityCaptured) {
             this.minecraft.options.hideGui = this.previousHideGui;

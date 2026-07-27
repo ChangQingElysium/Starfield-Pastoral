@@ -37,6 +37,14 @@ class ExternalStardewFoodServiceTest {
     }
 
     @Test
+    void foodEffectChanceHandlesDisabledGuaranteedAndBoundaries() {
+        assertFalse(ExternalStardewFoodService.shouldApply(0.0D, 0.0D));
+        assertTrue(ExternalStardewFoodService.shouldApply(1.0D, 0.999999D));
+        assertTrue(ExternalStardewFoodService.shouldApply(0.25D, 0.249999D));
+        assertFalse(ExternalStardewFoodService.shouldApply(0.25D, 0.25D));
+    }
+
+    @Test
     void foodContextMixinsAreEnabled() throws Exception {
         try (var stream = ExternalStardewFoodServiceTest.class.getClassLoader()
                 .getResourceAsStream("stardewcraft.mixins.json")) {

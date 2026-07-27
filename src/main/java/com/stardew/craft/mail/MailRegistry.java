@@ -28,7 +28,7 @@ import java.util.Map;
 public final class MailRegistry {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final AtomicDefinitionStore<StardewMailDefinition> STORE = new AtomicDefinitionStore<>();
-    private static volatile Map<ResourceLocation, String> DISPLAY_IDS = Map.of();
+    private static volatile Catalog catalog = Catalog.empty();
 
     private MailRegistry() {
     }
@@ -37,28 +37,38 @@ public final class MailRegistry {
     public static MailEntry get(String mailId) {
         ResourceLocation id = normalizeId(mailId);
         if (id == null) return null;
-        StardewMailDefinition definition = STORE.snapshot().definitions().get(id);
-        return definition == null ? null : new MailEntry(id, displayId(id), definition);
+        Catalog current = catalog;
+        StardewMailDefinition definition =
+                current.definitions().definitions().get(id);
+        return definition == null
+                ? null
+                : new MailEntry(
+                        id, displayId(current, id), definition);
     }
 
     @Nullable
     public static StardewMailDefinition getDefinition(ResourceLocation id) {
-        return STORE.snapshot().definitions().get(id);
+        return catalog.definitions().definitions().get(id);
     }
 
     public static Collection<MailEntry> getAll() {
-        return STORE.snapshot().definitions().entrySet().stream()
-                .map(entry -> new MailEntry(entry.getKey(), displayId(entry.getKey()), entry.getValue()))
+        Catalog current = catalog;
+        return current.definitions().definitions().entrySet().stream()
+                .map(entry -> new MailEntry(
+                        entry.getKey(),
+                        displayId(current, entry.getKey()),
+                        entry.getValue()))
                 .toList();
     }
 
     public static boolean contains(String mailId) {
         ResourceLocation id = normalizeId(mailId);
-        return id != null && STORE.snapshot().definitions().containsKey(id);
+        return id != null
+                && catalog.definitions().definitions().containsKey(id);
     }
 
     public static DefinitionSnapshot<StardewMailDefinition> snapshot() {
-        return STORE.snapshot();
+        return catalog.definitions();
     }
 
     @Nullable
@@ -70,7 +80,11 @@ public final class MailRegistry {
     }
 
     static String displayId(ResourceLocation id) {
-        return DISPLAY_IDS.getOrDefault(id,
+        return displayId(catalog, id);
+    }
+
+    private static String displayId(Catalog catalog, ResourceLocation id) {
+        return catalog.displayIds().getOrDefault(id,
                 StardewCraft.MODID.equals(id.getNamespace()) ? id.getPath() : id.toString());
     }
 
@@ -189,10 +203,11 @@ public final class MailRegistry {
         return array;
     }
 
-    private static void finishApply(
-            AtomicDefinitionStore.ApplyResult<StardewMailDefinition> result,
-            Map<ResourceLocation, String> displayIds
-    ) {
+    static synchronized void applyCandidate(Candidate candidate) {
+        var result = STORE.applyLocal(
+                candidate.definitions(),
+                candidate.sources(),
+                candidate.diagnostics());
         for (DefinitionDiagnostic diagnostic : result.diagnostics()) {
             String source = diagnostic.source() == null ? "<mail reload>" : diagnostic.source().toString();
             if (diagnostic.severity() == DefinitionDiagnostic.Severity.ERROR) {
@@ -203,12 +218,17 @@ public final class MailRegistry {
         }
         if (!result.accepted()) {
             StardewCraft.LOGGER.error("[Mail] Rejected datapack snapshot; keeping v{} with {} definitions",
-                    result.snapshot().version(), result.snapshot().definitions().size());
+                    catalog.definitions().version(),
+                    catalog.definitions().definitions().size());
             return;
         }
-        if (result.changed()) DISPLAY_IDS = Map.copyOf(displayIds);
+        if (result.changed()) {
+            catalog = new Catalog(
+                    result.snapshot(), candidate.displayIds());
+        }
         StardewCraft.LOGGER.info("[Mail] Applied snapshot v{} ({} definitions)",
-                result.snapshot().version(), result.snapshot().definitions().size());
+                catalog.definitions().version(),
+                catalog.definitions().definitions().size());
     }
 
     public static final class ReloadListener extends SimpleJsonResourceReloadListener {
@@ -219,16 +239,34 @@ public final class MailRegistry {
         @Override
         protected void apply(Map<ResourceLocation, JsonElement> objects, ResourceManager manager, ProfilerFiller profiler) {
             Candidate candidate = parseCandidate(objects);
-            finishApply(STORE.applyLocal(
-                    candidate.definitions(), candidate.sources(), candidate.diagnostics()), candidate.displayIds());
+            applyCandidate(candidate);
         }
     }
 
-    private record Candidate(
+    record Candidate(
             Map<ResourceLocation, StardewMailDefinition> definitions,
             Map<ResourceLocation, String> sources,
             Map<ResourceLocation, String> displayIds,
             List<DefinitionDiagnostic> diagnostics
     ) {
+    }
+
+    static Catalog catalog() {
+        return catalog;
+    }
+
+    record Catalog(
+            DefinitionSnapshot<StardewMailDefinition> definitions,
+            Map<ResourceLocation, String> displayIds
+    ) {
+        Catalog {
+            definitions = java.util.Objects.requireNonNull(
+                    definitions, "definitions");
+            displayIds = Map.copyOf(displayIds);
+        }
+
+        private static Catalog empty() {
+            return new Catalog(DefinitionSnapshot.empty(), Map.of());
+        }
     }
 }

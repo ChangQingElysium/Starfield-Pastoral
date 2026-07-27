@@ -1,11 +1,8 @@
 package com.stardew.craft.communitycenter.network;
 
 import com.stardew.craft.StardewCraft;
-import com.stardew.craft.communitycenter.data.BundleDataManager;
-import com.stardew.craft.communitycenter.data.BundleDefinition;
+import com.stardew.craft.api.v1.communitycenter.StardewCommunityCenterActions;
 import com.stardew.craft.communitycenter.data.BundleItemResolver;
-import com.stardew.craft.communitycenter.menu.BundleMenu;
-import com.stardew.craft.communitycenter.state.CommunityCenterSavedData;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -38,28 +35,7 @@ public record BundleClaimRewardPayload(
     public static void handle(BundleClaimRewardPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
             if (!(context.player() instanceof ServerPlayer sp)) return;
-            if (!(sp.containerMenu instanceof BundleMenu)) return;
-
-            CommunityCenterSavedData data = CommunityCenterSavedData.get();
-            if (!data.isRewardAvailable(sp.getUUID(), payload.bundleId)) return;
-
-            BundleDefinition def = BundleDataManager.getBundle(payload.bundleId);
-            if (def == null) return;
-
-            // Parse reward string: "O <id> <count>" or "BO <id> <count>" or "R <id> <count>"
-            ItemStack reward = parseRewardString(def.rewardString());
-            if (!reward.isEmpty()) {
-                // Give to player (drop if inventory full)
-                if (!sp.getInventory().add(reward)) {
-                    sp.drop(reward, false);
-                }
-            }
-
-            // Mark reward as claimed
-            data.setRewardAvailable(sp.getUUID(), payload.bundleId, false);
-
-            // Sync to client
-            BundleSyncPayload.sendFullSync(sp);
+            StardewCommunityCenterActions.claimReward(sp, payload.bundleId);
         });
     }
 

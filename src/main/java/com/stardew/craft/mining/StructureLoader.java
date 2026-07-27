@@ -40,38 +40,101 @@ public final class StructureLoader {
 
     private StructureLoader() {}
 
+    /**
+     * Loads a namespaced structure resource from
+     * {@code data/<namespace>/structures/<path>}.
+     */
+    public static boolean loadAndPlaceWithResult(
+            ServerLevel level,
+            ResourceLocation structureId,
+            BlockPos pos
+    ) {
+        ResourceLocation resourceId =
+                ResourceLocation.fromNamespaceAndPath(
+                        structureId.getNamespace(),
+                        "structures/" + structureId.getPath());
+        var resource = level.getServer().getResourceManager()
+                .getResource(resourceId);
+        if (resource.isPresent()) {
+            try (InputStream stream = resource.get().open()) {
+                return loadAndPlaceFromStream(
+                        level, stream,
+                        "data/" + resourceId.getNamespace()
+                                + "/" + resourceId.getPath(),
+                        pos);
+            } catch (Exception exception) {
+                StardewCraft.LOGGER.error(
+                        "Failed to open structure resource {}: {}",
+                        resourceId,
+                        exception.getMessage(),
+                        exception);
+                return false;
+            }
+        }
+        // Compatibility fallback for callers whose resource was historically
+        // exposed only through the mod class path.
+        return loadAndPlaceWithResult(
+                level,
+                "data/" + structureId.getNamespace()
+                        + "/structures/" + structureId.getPath(),
+                pos);
+    }
+
     @SuppressWarnings("null")
     public static boolean loadAndPlaceWithResult(ServerLevel level, String structurePath, BlockPos pos) {
-        if (structurePath != null && structurePath.toLowerCase(Locale.ROOT).endsWith(".schem")) {
-            return loadAndPlaceSchematic(level, structurePath, pos);
-        }
-
-        try {
-            InputStream stream = StructureLoader.class.getClassLoader().getResourceAsStream(structurePath);
+        try (InputStream stream = StructureLoader.class.getClassLoader()
+                .getResourceAsStream(structurePath)) {
             if (stream == null) {
                 StardewCraft.LOGGER.error("Structure file not found: {}", structurePath);
                 return false;
             }
-
-            @SuppressWarnings("null")
-            CompoundTag nbt = NbtIo.readCompressed(stream, NbtAccounter.unlimitedHeap());
-            stream.close();
-
-            StructureTemplate template = new StructureTemplate();
-            template.load(level.holderLookup(net.minecraft.core.registries.Registries.BLOCK), nbt);
-
-            Vec3i size = template.getSize();
-            ensureChunksLoaded(level, pos, Math.max(1, size.getX()), Math.max(1, size.getZ()));
-
-            StructurePlaceSettings settings = new StructurePlaceSettings()
-                .setIgnoreEntities(false);
-
-            template.placeInWorld(level, pos, pos, settings, level.random, 3);
-
-            StardewCraft.LOGGER.info("Successfully placed structure {} at {}", structurePath, pos);
-            return true;
+            return loadAndPlaceFromStream(
+                    level, stream, structurePath, pos);
         } catch (Exception e) {
             StardewCraft.LOGGER.error("Failed to load/place structure {}: {}", structurePath, e.getMessage(), e);
+            return false;
+        }
+    }
+
+    private static boolean loadAndPlaceFromStream(
+            ServerLevel level,
+            InputStream stream,
+            String structurePath,
+            BlockPos pos
+    ) {
+        if (structurePath.toLowerCase(Locale.ROOT)
+                .endsWith(".schem")) {
+            return loadAndPlaceSchematic(
+                    level, stream, structurePath, pos);
+        }
+        try {
+            CompoundTag nbt = NbtIo.readCompressed(
+                    stream, NbtAccounter.unlimitedHeap());
+            StructureTemplate template = new StructureTemplate();
+            template.load(
+                    level.holderLookup(
+                            net.minecraft.core.registries.Registries.BLOCK),
+                    nbt);
+            Vec3i size = template.getSize();
+            ensureChunksLoaded(
+                    level, pos,
+                    Math.max(1, size.getX()),
+                    Math.max(1, size.getZ()));
+            StructurePlaceSettings settings =
+                    new StructurePlaceSettings()
+                            .setIgnoreEntities(false);
+            template.placeInWorld(
+                    level, pos, pos, settings, level.random, 3);
+            StardewCraft.LOGGER.info(
+                    "Successfully placed structure {} at {}",
+                    structurePath, pos);
+            return true;
+        } catch (Exception exception) {
+            StardewCraft.LOGGER.error(
+                    "Failed to load/place structure {}: {}",
+                    structurePath,
+                    exception.getMessage(),
+                    exception);
             return false;
         }
     }
@@ -96,8 +159,22 @@ public final class StructureLoader {
                 return false;
             }
 
-            CompoundTag root = NbtIo.readCompressed(stream, NbtAccounter.unlimitedHeap());
+            return loadAndPlaceSchematic(
+                    level, stream, structurePath, origin);
+        } catch (Exception e) {
+            StardewCraft.LOGGER.error("Failed to load/place schematic {}: {}", structurePath, e.getMessage(), e);
+            return false;
+        }
+    }
 
+    private static boolean loadAndPlaceSchematic(
+            ServerLevel level,
+            InputStream stream,
+            String structurePath,
+            BlockPos origin
+    ) {
+        try {
+            CompoundTag root = NbtIo.readCompressed(stream, NbtAccounter.unlimitedHeap());
             CompoundTag schematic = root;
             if ((readDimension(root, "Width") == 0 || readDimension(root, "Height") == 0 || readDimension(root, "Length") == 0)
                 && root.contains("Schematic", Tag.TAG_COMPOUND)) {

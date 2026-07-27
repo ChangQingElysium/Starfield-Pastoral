@@ -1,5 +1,6 @@
 package com.stardew.craft.festival;
 
+import com.stardew.craft.StardewCraft;
 import com.stardew.craft.core.ModDimensions;
 import com.stardew.craft.cutscene.server.ServerCutsceneTracker;
 import com.stardew.craft.farm.FarmInstance;
@@ -25,6 +26,7 @@ import net.minecraft.nbt.DoubleTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -48,6 +50,12 @@ import java.util.UUID;
 
 public final class EggFestivalService {
     public static final String FESTIVAL_ID = "spring13";
+    private static final ResourceLocation PROGRESS_FESTIVAL_ID =
+            ResourceLocation.fromNamespaceAndPath(
+                    StardewCraft.MODID, "spring13");
+    private static final ResourceLocation EGG_HUNT_ACTIVITY_ID =
+            ResourceLocation.fromNamespaceAndPath(
+                    StardewCraft.MODID, "egg_hunt");
     private static final String OVERLAY_ID = "Town-EggFestival";
     private static final String MAIN_EVENT_CUTSCENE_ID = "egg_festival_main_event";
     private static final String AWARD_CUTSCENE_ID = "egg_festival_award";
@@ -230,6 +238,26 @@ public final class EggFestivalService {
 
     public static boolean isEggHuntActive() {
         return mainEventPhase == MainEventPhase.EGG_HUNT_ACTIVE;
+    }
+
+    public static boolean hasEggHuntStarted() {
+        return mainEventPhase == MainEventPhase.EGG_HUNT_ACTIVE
+                || isEggHuntFinished();
+    }
+
+    public static boolean isEggHuntFinished() {
+        return mainEventPhase == MainEventPhase.AWARD_CUTSCENE
+                || mainEventPhase == MainEventPhase.FESTIVAL_ENDING;
+    }
+
+    public static int eggHuntScore(UUID playerId) {
+        return playerId == null
+                ? 0 : EGG_HUNT_COUNTS.getOrDefault(playerId, 0);
+    }
+
+    public static int eggHuntTarget(ServerLevel level) {
+        return eggsNeededToWin(
+                level == null ? 1 : onlineParticipants(level).size());
     }
 
     public static boolean isTimeFreezeActive() {
@@ -757,7 +785,31 @@ public final class EggFestivalService {
         if (removed <= 0) {
             return true;
         }
+        var before = com.stardew.craft.api.v1.internal.progress
+                .StardewProgressRegistry.inspect(
+                        player,
+                        com.stardew.craft.api.v1.festival
+                                .StardewFestivalActivities.progressKey(
+                                        PROGRESS_FESTIVAL_ID,
+                                        EGG_HUNT_ACTIVITY_ID));
         EGG_HUNT_COUNTS.merge(player.getUUID(), 1, Integer::sum);
+        var after = com.stardew.craft.api.v1.internal.progress
+                .StardewProgressRegistry.inspect(
+                        player,
+                        com.stardew.craft.api.v1.festival
+                                .StardewFestivalActivities.progressKey(
+                                        PROGRESS_FESTIVAL_ID,
+                                        EGG_HUNT_ACTIVITY_ID));
+        if (before != null && after != null) {
+            com.stardew.craft.api.v1.internal.progress
+                    .StardewProgressRegistry.dispatchChanges(
+                            player,
+                            before,
+                            after,
+                            com.stardew.craft.api.v1.progress
+                                    .StardewProgressCauses
+                                    .FESTIVAL_ACTIVITY);
+        }
         playCoin(player);
         int remaining = countRemainingEggInteractions(player.serverLevel());
         updateEggHuntDisplays(player.serverLevel());

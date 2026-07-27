@@ -28,7 +28,6 @@ import net.minecraft.world.item.crafting.Ingredient;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -62,33 +61,35 @@ public final class StardewCraftingRecipeData {
     private static final ResourceLocation LEGACY_TABLE =
             ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "vanilla_crafting_recipes");
     private static final AtomicDefinitionStore<RecipeEntry> STORE = new AtomicDefinitionStore<>();
-    private static volatile Map<ResourceLocation, RecipeEntry> recipes = Map.of();
-    private static volatile Set<ResourceLocation> bigCraftableRecipes = Set.of();
-    private static volatile String cachedJson = "";
+    private static volatile Catalog catalog = Catalog.empty();
 
     private StardewCraftingRecipeData() {
     }
 
     public static DefinitionSnapshot<RecipeEntry> snapshot() {
-        return STORE.snapshot();
+        return catalog.definitions();
     }
 
     public static List<String> getRecipeIds() {
-        return recipes.keySet().stream().map(StardewCraftingRecipeData::storageId).toList();
+        return catalog.recipes().keySet().stream()
+                .map(StardewCraftingRecipeData::storageId)
+                .toList();
     }
 
     public static Optional<RecipeEntry> getRecipe(String id) {
         ResourceLocation key = normalizeId(id);
-        return key == null ? Optional.empty() : Optional.ofNullable(recipes.get(key));
+        return key == null
+                ? Optional.empty()
+                : Optional.ofNullable(catalog.recipes().get(key));
     }
 
     public static List<RecipeEntry> getRecipes() {
-        return List.copyOf(recipes.values());
+        return List.copyOf(catalog.recipes().values());
     }
 
     public static boolean isBigCraftable(String id) {
         ResourceLocation key = normalizeId(id);
-        return key != null && bigCraftableRecipes.contains(key);
+        return key != null && catalog.bigCraftableRecipes().contains(key);
     }
 
     public static String getUnlockCondition(String id) {
@@ -176,20 +177,7 @@ public final class StardewCraftingRecipeData {
     }
 
     public static String getCachedJson() {
-        String current = cachedJson;
-        if (!current.isEmpty()) return current;
-        JsonObject root = new JsonObject();
-        recipes.forEach((id, recipe) -> StardewCraftingRecipeDefinition.CODEC
-                .encodeStart(JsonOps.INSTANCE, toDefinition(recipe))
-                .result().ifPresent(json -> {
-                    if (bigCraftableRecipes.contains(id) && json.isJsonObject()) {
-                        json.getAsJsonObject().addProperty("big_craftable", true);
-                    }
-                    root.add(id.toString(), json);
-                }));
-        current = GSON.toJson(root);
-        cachedJson = current;
-        return current;
+        return catalog.cachedJson();
     }
 
     public static void applyFromJson(String json) {
@@ -197,30 +185,39 @@ public final class StardewCraftingRecipeData {
             JsonObject root = GSON.fromJson(json, JsonObject.class);
             if (root == null) return;
             Map<ResourceLocation, RecipeEntry> decoded = new LinkedHashMap<>();
+            Map<ResourceLocation, String> sources = new LinkedHashMap<>();
             Set<ResourceLocation> decodedBigCraftables = new LinkedHashSet<>();
-            List<String> errors = new ArrayList<>();
+            List<DefinitionDiagnostic> diagnostics = new ArrayList<>();
             for (Map.Entry<String, JsonElement> entry : root.entrySet()) {
                 ResourceLocation id = ResourceLocation.tryParse(entry.getKey());
                 if (id == null) {
-                    errors.add("Invalid crafting recipe ID " + entry.getKey());
+                    diagnostics.add(DefinitionDiagnostic.error(
+                            null, null,
+                            "Invalid crafting recipe ID " + entry.getKey()));
                     continue;
                 }
                 StardewCraftingRecipeDefinition.CODEC.parse(JsonOps.INSTANCE, entry.getValue())
-                        .resultOrPartial(errors::add)
-                        .ifPresent(definition -> decoded.put(id, fromDefinition(id, definition)));
+                        .resultOrPartial(message -> diagnostics.add(
+                                DefinitionDiagnostic.error(id, id, message)))
+                        .ifPresent(definition -> put(
+                                id,
+                                id,
+                                fromDefinition(id, definition),
+                                decoded,
+                                sources,
+                                diagnostics));
                 if (entry.getValue().isJsonObject()
                         && booleanValue(entry.getValue().getAsJsonObject(), "big_craftable", false)) {
                     decodedBigCraftables.add(id);
                 }
             }
-            if (!errors.isEmpty()) {
-                StardewCraft.LOGGER.error("[DATA-SYNC] Rejected crafting recipes: {}", String.join("; ", errors));
-                return;
-            }
-            recipes = Collections.unmodifiableMap(new LinkedHashMap<>(decoded));
-            bigCraftableRecipes = Set.copyOf(decodedBigCraftables);
-            cachedJson = json;
-            StardewCraft.LOGGER.info("[DATA-SYNC] Applied {} crafting recipes", recipes.size());
+            applyCandidate(
+                    decoded,
+                    sources,
+                    diagnostics,
+                    decodedBigCraftables,
+                    json,
+                    "client sync");
         } catch (RuntimeException exception) {
             StardewCraft.LOGGER.error("[DATA-SYNC] Failed to apply crafting recipes", exception);
         }
@@ -244,19 +241,78 @@ public final class StardewCraftingRecipeData {
                     .filter(entry -> entry.getKey().getPath().startsWith("crafting_recipes/"))
                     .forEach(entry -> parseModern(entry, definitions, sources, diagnostics, decodedBigCraftables));
 
-            var result = STORE.applyLocal(definitions, sources, diagnostics);
-            logDiagnostics(result.diagnostics());
-            if (!result.accepted()) {
-                StardewCraft.LOGGER.error("[Crafting] Rejected snapshot; keeping v{} with {} recipes",
-                        result.snapshot().version(), result.snapshot().definitions().size());
-                return;
-            }
-            recipes = result.snapshot().definitions();
-            bigCraftableRecipes = Set.copyOf(decodedBigCraftables);
-            cachedJson = "";
-            StardewCraft.LOGGER.info("[Crafting] Applied snapshot v{} ({} recipes)",
-                    result.snapshot().version(), recipes.size());
+            applyCandidate(
+                    definitions,
+                    sources,
+                    diagnostics,
+                    decodedBigCraftables,
+                    null,
+                    "reload");
         }
+    }
+
+    private static synchronized void applyCandidate(
+            Map<ResourceLocation, RecipeEntry> definitions,
+            Map<ResourceLocation, String> sources,
+            List<DefinitionDiagnostic> diagnostics,
+            Set<ResourceLocation> decodedBigCraftables,
+            @Nullable String sourceJson,
+            String operation
+    ) {
+        List<DefinitionDiagnostic> preparedDiagnostics =
+                new ArrayList<>(diagnostics);
+        Set<ResourceLocation> nextBigCraftables =
+                Set.copyOf(decodedBigCraftables);
+        for (ResourceLocation id : nextBigCraftables) {
+            if (!definitions.containsKey(id)) {
+                preparedDiagnostics.add(DefinitionDiagnostic.error(
+                        id,
+                        id,
+                        "Big-craftable marker does not reference an accepted recipe"));
+            }
+        }
+
+        String nextCachedJson = sourceJson;
+        if (nextCachedJson == null && preparedDiagnostics.stream()
+                .noneMatch(diagnostic -> diagnostic.severity()
+                        == DefinitionDiagnostic.Severity.ERROR)) {
+            try {
+                nextCachedJson = encodeDefinitions(
+                        definitions, nextBigCraftables);
+            } catch (RuntimeException exception) {
+                preparedDiagnostics.add(DefinitionDiagnostic.error(
+                        null,
+                        null,
+                        "Failed to encode crafting sync catalog: "
+                                + exception.getMessage()));
+            }
+        }
+
+        var result = STORE.applyLocal(
+                definitions, sources, preparedDiagnostics);
+        logDiagnostics(result.diagnostics());
+        if (!result.accepted()) {
+            StardewCraft.LOGGER.error(
+                    "[Crafting] Rejected {}; keeping v{} with {} recipes",
+                    operation,
+                    catalog.definitions().version(),
+                    catalog.recipes().size());
+            return;
+        }
+        if (nextCachedJson == null) {
+            throw new IllegalStateException(
+                    "Accepted crafting definitions have no sync catalog");
+        }
+
+        catalog = new Catalog(
+                result.snapshot(),
+                nextBigCraftables,
+                nextCachedJson);
+        StardewCraft.LOGGER.info(
+                "[Crafting] Applied {} v{} ({} recipes)",
+                operation,
+                catalog.definitions().version(),
+                catalog.recipes().size());
     }
 
     private static void parseLegacy(
@@ -394,6 +450,29 @@ public final class StardewCraftingRecipeData {
                 Optional.ofNullable(recipe.unlockCondition()).filter(value -> !value.isBlank()));
     }
 
+    private static String encodeDefinitions(
+            Map<ResourceLocation, RecipeEntry> definitions,
+            Set<ResourceLocation> bigCraftables
+    ) {
+        JsonObject root = new JsonObject();
+        definitions.forEach((id, recipe) ->
+                StardewCraftingRecipeDefinition.CODEC
+                        .encodeStart(JsonOps.INSTANCE, toDefinition(recipe))
+                        .resultOrPartial(message -> {
+                            throw new IllegalArgumentException(
+                                    id + ": " + message);
+                        })
+                        .ifPresent(json -> {
+                            if (bigCraftables.contains(id)
+                                    && json.isJsonObject()) {
+                                json.getAsJsonObject().addProperty(
+                                        "big_craftable", true);
+                            }
+                            root.add(id.toString(), json);
+                        }));
+        return GSON.toJson(root);
+    }
+
     private static void logDiagnostics(List<DefinitionDiagnostic> diagnostics) {
         for (DefinitionDiagnostic diagnostic : diagnostics) {
             String source = diagnostic.source() == null ? "<crafting reload>" : diagnostic.source().toString();
@@ -436,5 +515,40 @@ public final class StardewCraftingRecipeData {
 
     private static boolean booleanValue(JsonObject root, String key, boolean fallback) {
         return root.has(key) ? root.get(key).getAsBoolean() : fallback;
+    }
+
+    static Catalog catalog() {
+        return catalog;
+    }
+
+    record Catalog(
+            DefinitionSnapshot<RecipeEntry> definitions,
+            Set<ResourceLocation> bigCraftableRecipes,
+            String cachedJson
+    ) {
+        Catalog {
+            definitions = java.util.Objects.requireNonNull(
+                    definitions, "definitions");
+            bigCraftableRecipes = Set.copyOf(
+                    bigCraftableRecipes);
+            cachedJson = java.util.Objects.requireNonNull(
+                    cachedJson, "cachedJson");
+            if (!definitions.definitions().keySet()
+                    .containsAll(bigCraftableRecipes)) {
+                throw new IllegalArgumentException(
+                        "Big-craftable IDs must reference recipes");
+            }
+        }
+
+        Map<ResourceLocation, RecipeEntry> recipes() {
+            return definitions.definitions();
+        }
+
+        private static Catalog empty() {
+            return new Catalog(
+                    DefinitionSnapshot.empty(),
+                    Set.of(),
+                    "{}");
+        }
     }
 }

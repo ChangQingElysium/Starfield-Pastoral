@@ -79,9 +79,7 @@ public final class UtilityDropHelper {
             return;
         }
 
-        ItemStack drop = access.isAutomationReady()
-            ? access.getAutomationOutput()
-            : access.getAutomationInput();
+        ItemStack drop = primaryDrop(access);
         if (!drop.isEmpty()) {
             Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), drop.copy());
         }
@@ -90,5 +88,15 @@ public final class UtilityDropHelper {
         if (!extra.isEmpty()) {
             Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), extra.copy());
         }
+    }
+
+    static ItemStack primaryDrop(UtilityAutomationAccess access) {
+        if (access == null) {
+            return ItemStack.EMPTY;
+        }
+        ItemStack selected = access.isAutomationReady()
+                ? access.getAutomationOutput()
+                : access.getAutomationInput();
+        return selected == null ? ItemStack.EMPTY : selected.copy();
     }
 }

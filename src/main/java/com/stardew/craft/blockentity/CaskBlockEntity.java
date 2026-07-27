@@ -1,6 +1,9 @@
 package com.stardew.craft.blockentity;
 
+import com.stardew.craft.api.v1.internal.machine.StardewArtisanResolverRegistry;
 import com.stardew.craft.item.ModItems;
+import com.stardew.craft.item.artisan.FlavoredArtisanDrinkItem;
+import com.stardew.craft.item.artisan.PreserveType;
 import com.stardew.craft.item.quality.QualityHelper;
 import com.stardew.craft.time.StardewTimeManager;
 import net.minecraft.core.BlockPos;
@@ -50,17 +53,7 @@ public class CaskBlockEntity extends BlockEntity implements UtilityAutomationAcc
         Map.entry(ModItems.MEAD.get(), 2f),
         Map.entry(ModItems.BEER.get(), 2f),
         Map.entry(ModItems.PALE_ALE.get(), 1.66f),
-        Map.entry(ModItems.ANCIENT_FRUIT_WINE.get(), 1f),
-        Map.entry(ModItems.BLUEBERRY_WINE.get(), 1f),
-        Map.entry(ModItems.CRANBERRY_WINE.get(), 1f),
-        Map.entry(ModItems.CRYSTAL_FRUIT_WINE.get(), 1f),
-        Map.entry(ModItems.GRAPE_WINE.get(), 1f),
-        Map.entry(ModItems.HOT_PEPPER_WINE.get(), 1f),
-        Map.entry(ModItems.MELON_WINE.get(), 1f),
-        Map.entry(ModItems.POWDER_MELON_WINE.get(), 1f),
-        Map.entry(ModItems.RHUBARB_WINE.get(), 1f),
-        Map.entry(ModItems.STARFRUIT_WINE.get(), 1f),
-        Map.entry(ModItems.STRAWBERRY_WINE.get(), 1f)
+        Map.entry(ModItems.WINE.get(), 1f)
     );
 
     public record RemainingTime(int days, int hours, int minutes) {}
@@ -165,8 +158,8 @@ public class CaskBlockEntity extends BlockEntity implements UtilityAutomationAcc
             return false;
         }
 
-        Item item = stack.getItem();
-        Float rate = AGING_RATES.get(item);
+        Float rate = resolveAgingRate(
+                stack, AGING_RATES.get(stack.getItem()));
         if (rate == null) {
             return false;
         }
@@ -224,8 +217,8 @@ public class CaskBlockEntity extends BlockEntity implements UtilityAutomationAcc
         if (stack.isEmpty() || !product.isEmpty()) {
             return stack;
         }
-        Item item = stack.getItem();
-        Float rate = AGING_RATES.get(item);
+        Float rate = resolveAgingRate(
+                stack, AGING_RATES.get(stack.getItem()));
         if (rate == null) {
             return stack;
         }
@@ -248,6 +241,26 @@ public class CaskBlockEntity extends BlockEntity implements UtilityAutomationAcc
         setChanged();
         syncToClient();
         return AutomationStackHelper.remainderAfterInsert(stack, 1);
+    }
+
+    @Nullable
+    static Float resolveAgingRate(ItemStack stack) {
+        return resolveAgingRate(
+                stack, AGING_RATES.get(stack.getItem()));
+    }
+
+    @Nullable
+    private static Float resolveAgingRate(
+            ItemStack stack,
+            @Nullable Float legacyConfiguredRate
+    ) {
+        if (stack.getItem() instanceof FlavoredArtisanDrinkItem drink
+                && drink.getFlavorType() == PreserveType.WINE) {
+            return 1f;
+        }
+        return legacyConfiguredRate != null
+                ? legacyConfiguredRate
+                : StardewArtisanResolverRegistry.resolveCaskAgingRate(stack);
     }
 
     @Override

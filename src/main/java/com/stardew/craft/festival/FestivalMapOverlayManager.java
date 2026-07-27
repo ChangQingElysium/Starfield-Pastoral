@@ -12,12 +12,16 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public final class FestivalMapOverlayManager {
     private static final int BLOCKS_PER_TICK = 1500;
     private static final int BULK_REPLACE_FLAGS = Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE | Block.UPDATE_SUPPRESS_DROPS;
     private static final Map<String, FestivalMapPatch> PATCH_CACHE = new HashMap<>();
+    private static final Set<String> MISSING_RECOVERY_WARNINGS =
+            new HashSet<>();
 
     private FestivalMapOverlayManager() {
     }
@@ -26,7 +30,9 @@ public final class FestivalMapOverlayManager {
         if (level == null || festival == null || festival.mapOverlayId().isBlank()) {
             return false;
         }
-        FestivalMapOverlayDefinition definition = FestivalMapOverlayRegistry.get(festival.mapOverlayId()).orElse(null);
+        FestivalMapOverlayDefinition definition =
+                FestivalMapOverlayRegistry.get(
+                        level, festival.mapOverlayId()).orElse(null);
         if (definition == null) {
             StardewCraft.LOGGER.warn("[FESTIVAL_OVERLAY] Overlay {} for festival {} is not registered yet", festival.mapOverlayId(), festival.id());
             return false;
@@ -47,11 +53,10 @@ public final class FestivalMapOverlayManager {
             return false;
         }
         state.begin(festival.id(), year, season, day, FestivalMapOverlayPhase.APPLYING);
-        if (definition.usesRuntimeBase()) {
-            state.setRuntimePatch(patch);
-        } else {
-            state.clearRuntimePatch();
-        }
+        // Persist the exact applied patch even for fixed-base overlays. This
+        // is the recovery contract when a data pack is removed or changes
+        // while its festival map is still active.
+        state.setRuntimePatch(patch);
         notifyPassiveOverlayApplyStarted(level, state);
         forceChunks(level, patch, true);
         data.setDirty();
@@ -62,16 +67,25 @@ public final class FestivalMapOverlayManager {
         if (level == null || overlayId == null || overlayId.isBlank()) {
             return false;
         }
-        FestivalMapOverlayDefinition definition = FestivalMapOverlayRegistry.get(overlayId).orElse(null);
-        if (definition == null) {
-            return false;
-        }
         FestivalWorldData data = FestivalWorldData.get(level);
-        FestivalMapOverlayState state = data.getOrCreateOverlayState(definition.overlayId());
-        if (state.phase() != FestivalMapOverlayPhase.APPLIED) {
+        FestivalMapOverlayState state = data.getOverlayState(overlayId)
+                .orElse(null);
+        if (state == null
+                || state.phase() != FestivalMapOverlayPhase.APPLIED) {
             return false;
         }
-        FestivalMapPatch patch = patch(level, definition, state);
+        FestivalMapOverlayDefinition definition =
+                FestivalMapOverlayRegistry.get(
+                        level, overlayId).orElse(null);
+        FestivalMapPatch patch = state.runtimePatch();
+        if (patch == null && definition != null) {
+            patch = patch(level, definition, state);
+        }
+        if (patch == null) {
+            warnMissingRecovery(state);
+            return false;
+        }
+        clearMissingRecoveryWarning(state);
         if (patch == null || patch.width() <= 0 || patch.height() <= 0 || patch.length() <= 0) {
             return false;
         }
@@ -109,14 +123,18 @@ public final class FestivalMapOverlayManager {
             if (state.phase() != FestivalMapOverlayPhase.APPLYING && state.phase() != FestivalMapOverlayPhase.RESTORING) {
                 continue;
             }
-            FestivalMapOverlayDefinition definition = FestivalMapOverlayRegistry.get(state.overlayId()).orElse(null);
-            if (definition == null) {
-                continue;
+            FestivalMapOverlayDefinition definition =
+                    FestivalMapOverlayRegistry.get(
+                            level, state.overlayId()).orElse(null);
+            FestivalMapPatch patch = state.runtimePatch();
+            if (patch == null && definition != null) {
+                patch = patch(level, definition, state);
             }
-            FestivalMapPatch patch = patch(level, definition, state);
             if (patch == null) {
+                warnMissingRecovery(state);
                 continue;
             }
+            clearMissingRecoveryWarning(state);
             applyBatch(level, state, patch);
             data.setDirty();
         }
@@ -235,16 +253,21 @@ public final class FestivalMapOverlayManager {
     }
 
     private static FestivalMapPatch patch(FestivalMapOverlayDefinition definition) {
-        return PATCH_CACHE.computeIfAbsent(definition.overlayId(), ignored -> FestivalMapPatch.build(definition));
+        String cacheKey = definition.overlayId()
+                + "|" + definition.origin()
+                + "|" + definition.baseSchematicPath()
+                + "|" + definition.festivalSchematicPath();
+        return PATCH_CACHE.computeIfAbsent(
+                cacheKey, ignored -> FestivalMapPatch.build(definition));
     }
 
     private static FestivalMapPatch patch(ServerLevel level, FestivalMapOverlayDefinition definition, FestivalMapOverlayState state) {
-        if (!definition.usesRuntimeBase()) {
-            return patch(definition);
-        }
         FestivalMapPatch runtimePatch = state.runtimePatch();
         if (runtimePatch != null) {
             return runtimePatch;
+        }
+        if (!definition.usesRuntimeBase()) {
+            return patch(definition);
         }
         if (state.phase() == FestivalMapOverlayPhase.APPLIED || state.phase() == FestivalMapOverlayPhase.RESTORING) {
             StardewCraft.LOGGER.warn("[FESTIVAL_OVERLAY] Runtime backup for overlay {} is missing", definition.overlayId());
@@ -266,5 +289,24 @@ public final class FestivalMapOverlayManager {
                 level.setChunkForced(chunkX, chunkZ, forced);
             }
         }
+    }
+
+    private static void warnMissingRecovery(
+            FestivalMapOverlayState state
+    ) {
+        String key = state.overlayId() + "|" + state.phase();
+        if (MISSING_RECOVERY_WARNINGS.add(key)) {
+            StardewCraft.LOGGER.warn(
+                    "[FESTIVAL_OVERLAY] Paused overlay {} in phase {}: "
+                            + "definition and persisted patch are unavailable",
+                    state.overlayId(), state.phase());
+        }
+    }
+
+    private static void clearMissingRecoveryWarning(
+            FestivalMapOverlayState state
+    ) {
+        MISSING_RECOVERY_WARNINGS.remove(
+                state.overlayId() + "|" + state.phase());
     }
 }

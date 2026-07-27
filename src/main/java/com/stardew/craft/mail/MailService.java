@@ -1,6 +1,12 @@
 package com.stardew.craft.mail;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.internal.progress.StardewProgressRegistry;
+import com.stardew.craft.api.v1.progress.StardewProgressCauses;
+import com.stardew.craft.api.v1.progress.StardewProgressEvent;
+import com.stardew.craft.api.v1.progress.StardewProgressEventType;
+import com.stardew.craft.api.v1.progress.StardewProgressPhase;
+import com.stardew.craft.api.v1.progress.StardewProgressSnapshot;
 import com.stardew.craft.api.v1.action.StardewAction;
 import com.stardew.craft.api.v1.action.StardewActionContext;
 import com.stardew.craft.api.v1.action.StardewActions;
@@ -18,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 邮件系统服务层（服务端）。
@@ -40,11 +47,19 @@ public class MailService {
         if (!canQueueReadableMail(player, mailId, "mailbox")) return;
         PlayerStardewData data = PlayerDataManager.getPlayerData(player);
         if (data.hasMailFlag(mailId)) return;  // 已读过
-        int before = data.getMailbox().size();
+        StardewProgressSnapshot before = currentMailSnapshot(player, mailId);
+        int beforeSize = data.getMailbox().size();
         data.addToMailbox(mailId);
-        if (data.getMailbox().size() != before) {
+        if (data.getMailbox().size() != beforeSize) {
             executeActions(player, MailRegistry.get(mailId), MailPhase.DELIVERY);
-            PlayerDataEventHandler.syncPlayerData(player, data);
+            dispatchMail(
+                    StardewProgressEventType.MADE_AVAILABLE,
+                    player,
+                    before,
+                    StardewProgressRegistry.mailSnapshot(
+                            mailId, StardewProgressPhase.AVAILABLE),
+                    StardewProgressCauses.MAIL_DELIVERY);
+            syncPlayerData(player, data);
         }
     }
 
@@ -62,7 +77,7 @@ public class MailService {
             if (data.getMailbox().size() != before) {
                 executeActions(player, MailRegistry.get(mailId), MailPhase.DELIVERY);
             }
-            PlayerDataEventHandler.syncPlayerData(player, data);
+            syncPlayerData(player, data);
         }
     }
 
@@ -73,10 +88,18 @@ public class MailService {
         if (!canQueueReadableMail(player, mailId, "mailForTomorrow")) return;
         PlayerStardewData data = PlayerDataManager.getPlayerData(player);
         if (data.hasMailFlag(mailId)) return;
-        int before = data.getMailForTomorrow().size();
+        StardewProgressSnapshot before = currentMailSnapshot(player, mailId);
+        int beforeSize = data.getMailForTomorrow().size();
         data.addMailForTomorrow(mailId);
-        if (data.getMailForTomorrow().size() != before) {
-            PlayerDataEventHandler.syncPlayerData(player, data);
+        if (data.getMailForTomorrow().size() != beforeSize) {
+            dispatchMail(
+                    StardewProgressEventType.SCHEDULED,
+                    player,
+                    before,
+                    StardewProgressRegistry.mailSnapshot(
+                            mailId, StardewProgressPhase.SCHEDULED),
+                    StardewProgressCauses.MAIL_QUEUE);
+            syncPlayerData(player, data);
         }
     }
 
@@ -123,7 +146,7 @@ public class MailService {
         while (true) {
             mailId = data.popMailFromMailbox();
             if (mailId == null) {
-                PlayerDataEventHandler.syncPlayerData(player, data);
+                syncPlayerData(player, data);
                 player.sendSystemMessage(Component.translatable("stardewcraft.mailbox.empty"));
                 return;
             }
@@ -137,6 +160,9 @@ public class MailService {
         }
 
         // 标记为已读
+        StardewProgressSnapshot progressBefore =
+                StardewProgressRegistry.mailSnapshot(
+                        mailId, StardewProgressPhase.AVAILABLE);
         data.addMailFlag(mailId);
         if ("winter_18".equals(mailId)) {
             // Vanilla LetterViewerMenu records this only when the actual letter is opened.
@@ -198,9 +224,16 @@ public class MailService {
         }
 
         executeActions(player, entry, MailPhase.READ);
+        dispatchMail(
+                StardewProgressEventType.COMPLETED,
+                player,
+                progressBefore,
+                StardewProgressRegistry.mailSnapshot(
+                        mailId, StardewProgressPhase.COMPLETED),
+                StardewProgressCauses.MAIL_READ);
 
         int remaining = data.getMailbox().size();
-        PlayerDataEventHandler.syncPlayerData(player, data);
+        syncPlayerData(player, data);
 
         OpenMailPayload payload = new OpenMailPayload(
                 mailId, text, secretSantaNameKey, entry.getBackground(),
@@ -282,11 +315,16 @@ public class MailService {
             PlayerStardewData data = manager.getOrCreateData(player.getUUID());
             int beforeMailbox = data.getMailbox().size();
             int beforeTomorrow = data.getMailForTomorrow().size();
+            java.util.List<String> readableTomorrow =
+                    java.util.List.copyOf(data.getMailForTomorrow());
+            java.util.Set<String> mailboxBefore =
+                    java.util.Set.copyOf(data.getMailbox());
             java.util.List<String> flushed = data.deliverTomorrowMail(today);
+            dispatchDeliveredTomorrowMail(player, data, readableTomorrow, mailboxBefore);
             if (data.getMailbox().size() != beforeMailbox
                     || data.getMailForTomorrow().size() != beforeTomorrow
                     || !flushed.isEmpty()) {
-                PlayerDataEventHandler.syncPlayerData(player, data);
+                syncPlayerData(player, data);
             }
             dispatchFlushedFlags(player, stardewLevel, flushed);
         }
@@ -301,11 +339,16 @@ public class MailService {
         PlayerStardewData data = PlayerDataManager.getPlayerData(player);
         int beforeMailbox = data.getMailbox().size();
         int beforeTomorrow = data.getMailForTomorrow().size();
+        java.util.List<String> readableTomorrow =
+                java.util.List.copyOf(data.getMailForTomorrow());
+        java.util.Set<String> mailboxBefore =
+                java.util.Set.copyOf(data.getMailbox());
         java.util.List<String> flushed = data.deliverTomorrowMail(today);
+        dispatchDeliveredTomorrowMail(player, data, readableTomorrow, mailboxBefore);
         if (data.getMailbox().size() != beforeMailbox
                 || data.getMailForTomorrow().size() != beforeTomorrow
                 || !flushed.isEmpty()) {
-            PlayerDataEventHandler.syncPlayerData(player, data);
+            syncPlayerData(player, data);
         }
         if (flushed.isEmpty()) return;
         net.minecraft.server.level.ServerLevel stardewLevel =
@@ -339,6 +382,64 @@ public class MailService {
             StardewActions.execute(action, context).resultOrPartial(message -> StardewCraft.LOGGER.error(
                     "[Mail] {} action failed for {}: {}", phase.logName, entry.definitionId(), message));
         }
+    }
+
+    private static StardewProgressSnapshot currentMailSnapshot(
+            ServerPlayer player,
+            String mailId
+    ) {
+        StardewProgressSnapshot snapshot = StardewProgressRegistry.inspect(
+                player, StardewProgressRegistry.mailKey(mailId));
+        return snapshot == null
+                ? StardewProgressRegistry.mailSnapshot(
+                        mailId, StardewProgressPhase.NOT_STARTED)
+                : snapshot;
+    }
+
+    private static void syncPlayerData(
+            ServerPlayer player,
+            PlayerStardewData data
+    ) {
+        if (!player.isFakePlayer()) {
+            PlayerDataEventHandler.syncPlayerData(player, data);
+        }
+    }
+
+    private static void dispatchDeliveredTomorrowMail(
+            ServerPlayer player,
+            PlayerStardewData data,
+            List<String> readableTomorrow,
+            java.util.Set<String> mailboxBefore
+    ) {
+        for (String mailId : readableTomorrow) {
+            if (mailboxBefore.contains(mailId) || !data.getMailbox().contains(mailId)) {
+                continue;
+            }
+            dispatchMail(
+                    StardewProgressEventType.MADE_AVAILABLE,
+                    player,
+                    StardewProgressRegistry.mailSnapshot(
+                            mailId, StardewProgressPhase.SCHEDULED),
+                    StardewProgressRegistry.mailSnapshot(
+                            mailId, StardewProgressPhase.AVAILABLE),
+                    StardewProgressCauses.MAIL_DELIVERY);
+        }
+    }
+
+    private static void dispatchMail(
+            StardewProgressEventType type,
+            ServerPlayer player,
+            StardewProgressSnapshot before,
+            StardewProgressSnapshot after,
+            net.minecraft.resources.ResourceLocation cause
+    ) {
+        StardewProgressRegistry.dispatch(new StardewProgressEvent(
+                type,
+                player.serverLevel(),
+                Optional.of(player.getUUID()),
+                Optional.of(before),
+                after,
+                cause));
     }
 
     private enum MailPhase {

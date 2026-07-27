@@ -28,6 +28,11 @@ public class AnimalBuildingRecord {
     private final int hayCapacity;
     private final boolean active;
     private boolean doorOpen;
+    private int lastAutoFeedProcessedAbsDay = -1;
+    private long structureRevision = 1L;
+    private ValidationState validationState;
+    private String validationIssue = "";
+    private int constructionCompletesAbsDay = -1;
     private final Set<Long> interiorAirCells;
     private final Set<Long> boundaryDoorCells;
     private final Set<Long> memberAnimalIds;
@@ -68,6 +73,9 @@ public class AnimalBuildingRecord {
         this.capacity = capacity;
         this.hayCapacity = hayCapacity;
         this.active = active;
+        this.validationState = active
+                ? ValidationState.VALID
+                : ValidationState.RELOCATING;
         this.doorOpen = doorOpen;
         this.interiorAirCells = interiorAirCells == null ? new LinkedHashSet<>() : new LinkedHashSet<>(interiorAirCells);
         this.boundaryDoorCells = boundaryDoorCells == null ? new LinkedHashSet<>() : new LinkedHashSet<>(boundaryDoorCells);
@@ -142,12 +150,84 @@ public class AnimalBuildingRecord {
         return active;
     }
 
+    public boolean isGameplayEnabled() {
+        return active && validationState == ValidationState.VALID;
+    }
+
+    public AnimalBuildingCapabilities capabilities() {
+        return AnimalBuildingCapabilities.from(this);
+    }
+
+    public long structureRevision() {
+        return structureRevision;
+    }
+
+    public ValidationState validationState() {
+        return validationState;
+    }
+
+    public String validationIssue() {
+        return validationIssue;
+    }
+
+    public int constructionCompletesAbsDay() {
+        return constructionCompletesAbsDay;
+    }
+
+    public boolean hasPendingConstruction() {
+        return constructionCompletesAbsDay >= 0;
+    }
+
+    public void beginConstruction(int completionAbsDay) {
+        constructionCompletesAbsDay = Math.max(0, completionAbsDay);
+        validationState = ValidationState.CONSTRUCTING;
+        validationIssue = "";
+    }
+
+    public boolean completeConstruction(int currentAbsDay) {
+        if (validationState != ValidationState.CONSTRUCTING
+                || constructionCompletesAbsDay < 0
+                || currentAbsDay < constructionCompletesAbsDay) {
+            return false;
+        }
+        constructionCompletesAbsDay = -1;
+        validationState = ValidationState.VALID;
+        validationIssue = "";
+        return true;
+    }
+
+    public void markStructureValidated(long revision) {
+        structureRevision = Math.max(1L, revision);
+        validationState = ValidationState.VALID;
+        validationIssue = "";
+    }
+
+    public void markStructureInvalid(String issue) {
+        structureRevision = Math.max(
+                1L, structureRevision + 1L);
+        validationState = ValidationState.INVALID;
+        validationIssue = issue == null ? "" : issue;
+    }
+
+    public void markRelocating() {
+        validationState = ValidationState.RELOCATING;
+        validationIssue = "";
+    }
+
     public boolean doorOpen() {
         return doorOpen;
     }
 
     public void setDoorOpen(boolean doorOpen) {
         this.doorOpen = doorOpen;
+    }
+
+    public int lastAutoFeedProcessedAbsDay() {
+        return lastAutoFeedProcessedAbsDay;
+    }
+
+    public void setLastAutoFeedProcessedAbsDay(int absoluteDay) {
+        lastAutoFeedProcessedAbsDay = absoluteDay;
     }
 
     public Set<Long> memberAnimalIds() {
@@ -178,6 +258,20 @@ public class AnimalBuildingRecord {
             && z >= minZ && z <= maxZ;
     }
 
+    /**
+     * The utility index inspects the validated interior and its immediately
+     * adjacent cells. A block change in that volume must evict the daily
+     * utility snapshot even when it is not a structural change.
+     */
+    public boolean isUtilityScanCell(BlockPos pos) {
+        int x = pos.getX();
+        int y = pos.getY();
+        int z = pos.getZ();
+        return x >= minX - 1 && x <= maxX + 1
+                && y >= minY - 1 && y <= maxY + 1
+                && z >= minZ - 1 && z <= maxZ + 1;
+    }
+
     public boolean isBoundaryDoor(BlockPos pos) {
         if (!boundaryDoorCells.isEmpty()) {
             return boundaryDoorCells.contains(pos.asLong());
@@ -190,6 +284,29 @@ public class AnimalBuildingRecord {
             && z >= minZ - 1 && z <= maxZ + 1;
     }
 
+    public boolean isStructuralCell(BlockPos pos) {
+        if (boundaryDoorCells.contains(pos.asLong())) {
+            return true;
+        }
+        if (interiorAirCells.isEmpty()) {
+            return isWithinBoundingBox(pos);
+        }
+        if (interiorAirCells.contains(pos.asLong())) {
+            return false;
+        }
+        if (isWithinBoundingBox(pos)) {
+            return true;
+        }
+        for (net.minecraft.core.Direction direction :
+                net.minecraft.core.Direction.values()) {
+            if (interiorAirCells.contains(
+                    pos.relative(direction).asLong())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public boolean hasCapacity() {
         return memberAnimalIds.size() < capacity;
     }
@@ -200,6 +317,15 @@ public class AnimalBuildingRecord {
 
     public void removeAnimal(long animalId) {
         memberAnimalIds.remove(animalId);
+    }
+
+    public void replaceMemberAnimalIds(
+            java.util.Collection<Long> animalIds
+    ) {
+        memberAnimalIds.clear();
+        if (animalIds != null) {
+            memberAnimalIds.addAll(animalIds);
+        }
     }
 
     @SuppressWarnings("null")
@@ -222,6 +348,17 @@ public class AnimalBuildingRecord {
         tag.putInt("hayCapacity", hayCapacity);
         tag.putBoolean("active", active);
         tag.putBoolean("doorOpen", doorOpen);
+        tag.putInt("lastAutoFeedProcessedAbsDay", lastAutoFeedProcessedAbsDay);
+        tag.putLong("structureRevision", structureRevision);
+        tag.putString("validationState", validationState.name());
+        if (!validationIssue.isBlank()) {
+            tag.putString("validationIssue", validationIssue);
+        }
+        if (constructionCompletesAbsDay >= 0) {
+            tag.putInt(
+                    "constructionCompletesAbsDay",
+                    constructionCompletesAbsDay);
+        }
 
         ListTag interiorTag = new ListTag();
         for (Long cell : interiorAirCells) {
@@ -272,7 +409,7 @@ public class AnimalBuildingRecord {
             memberIds.add(memberTag.getLong("animalId"));
         }
 
-        return new AnimalBuildingRecord(
+        AnimalBuildingRecord record = new AnimalBuildingRecord(
             tag.getString("buildingId"),
             tag.contains("ownerPlayerUuid") ? tag.getString("ownerPlayerUuid") : "",
             AnimalBuildingType.fromId(tag.getString("buildingType")),
@@ -294,5 +431,39 @@ public class AnimalBuildingRecord {
             boundaryDoorCells,
             memberIds
         );
+        record.setLastAutoFeedProcessedAbsDay(
+                tag.contains("lastAutoFeedProcessedAbsDay")
+                        ? tag.getInt("lastAutoFeedProcessedAbsDay")
+                        : -1
+        );
+        record.structureRevision = tag.contains("structureRevision")
+                ? Math.max(1L, tag.getLong("structureRevision"))
+                : 1L;
+        if (tag.contains("validationState")) {
+            try {
+                record.validationState = ValidationState.valueOf(
+                        tag.getString("validationState"));
+            } catch (IllegalArgumentException ignored) {
+                record.validationState = record.active
+                        ? ValidationState.VALID
+                        : ValidationState.RELOCATING;
+            }
+        }
+        record.validationIssue = tag.getString("validationIssue");
+        record.constructionCompletesAbsDay =
+                tag.contains("constructionCompletesAbsDay")
+                        ? Math.max(
+                                0,
+                                tag.getInt(
+                                        "constructionCompletesAbsDay"))
+                        : -1;
+        return record;
+    }
+
+    public enum ValidationState {
+        VALID,
+        INVALID,
+        RELOCATING,
+        CONSTRUCTING
     }
 }

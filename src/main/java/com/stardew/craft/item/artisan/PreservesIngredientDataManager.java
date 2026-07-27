@@ -14,8 +14,10 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import java.io.IOException;
+import java.lang.ref.SoftReference;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -45,27 +47,11 @@ public final class PreservesIngredientDataManager {
     }
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static volatile Map<String, IngredientData> DATA = Collections.emptyMap();
-    /** 缓存原始 JSON（SoftReference），内存紧张时可被 GC 回收 */
-    private static volatile java.lang.ref.SoftReference<String> CACHED_JSON_REF = new java.lang.ref.SoftReference<>(null);
+    private static volatile Catalog catalog = Catalog.empty();
 
     /** 获取缓存的 JSON（服务端调用）。若 GC 回收则重新序列化 */
     public static String getCachedJson() {
-        String json = CACHED_JSON_REF.get();
-        if (json != null) return json;
-        json = rebuildCacheJson();
-        CACHED_JSON_REF = new java.lang.ref.SoftReference<>(json);
-        return json;
-    }
-
-    private static String rebuildCacheJson() {
-        Map<String, IngredientData> current = DATA;
-        if (current.isEmpty()) return "";
-        com.google.gson.JsonObject cacheRoot = new com.google.gson.JsonObject();
-        for (Map.Entry<String, IngredientData> me : current.entrySet()) {
-            cacheRoot.add(me.getKey(), GSON.toJsonTree(me.getValue()));
-        }
-        return GSON.toJson(cacheRoot);
+        return catalog.cachedJson();
     }
 
     /** 从 JSON 字符串重放解析（客户端调用） */
@@ -78,7 +64,7 @@ public final class PreservesIngredientDataManager {
                 IngredientData data = GSON.fromJson(entry.getValue(), IngredientData.class);
                 if (data != null) loaded.put(entry.getKey(), data);
             }
-            DATA = Collections.unmodifiableMap(loaded);
+            publish(loaded);
             com.stardew.craft.StardewCraft.LOGGER.info("[DATA-SYNC] Applied preserves data from network: {} entries", loaded.size());
         } catch (Exception e) {
             com.stardew.craft.StardewCraft.LOGGER.error("[DATA-SYNC] Failed to apply preserves JSON", e);
@@ -92,21 +78,21 @@ public final class PreservesIngredientDataManager {
         }
         Item item = stack.getItem();
         ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
-        return Optional.ofNullable(DATA.get(id.getPath()));
+        return Optional.ofNullable(catalog.data().get(id.getPath()));
     }
 
     public static Optional<IngredientData> getData(ResourceLocation id) {
         if (id == null) {
             return Optional.empty();
         }
-        return Optional.ofNullable(DATA.get(id.getPath()));
+        return Optional.ofNullable(catalog.data().get(id.getPath()));
     }
 
     public static boolean hasData(ResourceLocation id) {
         if (id == null) {
             return false;
         }
-        return DATA.containsKey(id.getPath());
+        return catalog.data().containsKey(id.getPath());
     }
 
     public static final class ReloadListener extends SimpleJsonResourceReloadListener {
@@ -119,7 +105,9 @@ public final class PreservesIngredientDataManager {
                              @SuppressWarnings("null") ResourceManager resourceManager,
                              @SuppressWarnings("null") ProfilerFiller profiler) {
             Map<String, IngredientData> loaded = new HashMap<>();
-            for (Map.Entry<ResourceLocation, JsonElement> entry : objects.entrySet()) {
+            var entries = new java.util.ArrayList<>(objects.entrySet());
+            entries.sort(Map.Entry.comparingByKey());
+            for (Map.Entry<ResourceLocation, JsonElement> entry : entries) {
                 ResourceLocation resourceId = entry.getKey();
                 if (StardewCraft.MODID.equals(resourceId.getNamespace()) && "vanilla_objects".equals(resourceId.getPath())) {
                     continue;
@@ -140,15 +128,14 @@ public final class PreservesIngredientDataManager {
                     loaded.put(itemEntry.getKey(), data);
                 }
             }
-            DATA = Collections.unmodifiableMap(loaded);
-
-            // 清除旧的缓存引用，下次 getCachedJson() 时按需重建
-            CACHED_JSON_REF = new java.lang.ref.SoftReference<>(null);
-
-            StardewCraft.LOGGER.info("Loaded preserves ingredient data: {} entries", DATA.size());
-
             applyVanillaOverrides(loaded, resourceManager);
+            publish(loaded);
+            StardewCraft.LOGGER.info("Loaded preserves ingredient data: {} entries", loaded.size());
         }
+    }
+
+    private static synchronized void publish(Map<String, IngredientData> loaded) {
+        catalog = new Catalog(loaded);
     }
 
     @SuppressWarnings("null")
@@ -188,5 +175,39 @@ public final class PreservesIngredientDataManager {
                 StardewCraft.LOGGER.warn("Failed to read bundled vanilla overrides: {}", ex.getMessage());
             }
         });
+    }
+
+    static Catalog catalog() {
+        return catalog;
+    }
+
+    static final class Catalog {
+        private final Map<String, IngredientData> data;
+        private volatile SoftReference<String> cachedJson =
+                new SoftReference<>(null);
+
+        private Catalog(Map<String, IngredientData> data) {
+            this.data = Collections.unmodifiableMap(
+                    new LinkedHashMap<>(data));
+        }
+
+        Map<String, IngredientData> data() {
+            return data;
+        }
+
+        String cachedJson() {
+            String json = cachedJson.get();
+            if (json != null) return json;
+            JsonObject cacheRoot = new JsonObject();
+            data.forEach((id, value) ->
+                    cacheRoot.add(id, GSON.toJsonTree(value)));
+            json = data.isEmpty() ? "" : GSON.toJson(cacheRoot);
+            cachedJson = new SoftReference<>(json);
+            return json;
+        }
+
+        private static Catalog empty() {
+            return new Catalog(Map.of());
+        }
     }
 }

@@ -1,5 +1,9 @@
 package com.stardew.craft.item;
 
+import com.stardew.craft.api.v1.internal.tree.StardewTreeRuntimeRegistry;
+import com.stardew.craft.api.v1.tree.StardewTreeRuntime;
+import com.stardew.craft.api.v1.tree.StardewTreeRuntimeAdapter;
+import com.stardew.craft.api.v1.tree.StardewTreeState;
 import com.stardew.craft.block.tree.WildTreeSaplingBlock;
 import com.stardew.craft.manager.TreeGrowthManager;
 import com.stardew.craft.tree.WildTrees;
@@ -29,6 +33,29 @@ public class TreeFertilizerItem extends SimpleStardewItem {
 		@SuppressWarnings("null")
 		BlockState state = level.getBlockState(pos);
 
+		StardewTreeState addonTree = StardewTreeRuntimeRegistry.inspectAddon(level, pos);
+		if (addonTree != null) {
+			if (level.isClientSide) {
+				return InteractionResult.SUCCESS;
+			}
+			StardewTreeRuntimeAdapter.FertilizerResult result =
+					StardewTreeRuntime.fertilize((ServerLevel) level, pos);
+			if (result != StardewTreeRuntimeAdapter.FertilizerResult.PASS) {
+				if (result == StardewTreeRuntimeAdapter.FertilizerResult.APPLIED) {
+					consumeAndShowSuccess(context, (ServerLevel) level, pos);
+				} else if (context.getPlayer() != null) {
+					context.getPlayer().displayClientMessage(Component.translatable(
+							switch (result) {
+								case ALREADY_APPLIED -> "stardewcraft.tree_fertilizer.already";
+								case MATURE -> "stardewcraft.tree_fertilizer.mature";
+								default -> "stardewcraft.tree_fertilizer.cannot";
+							}
+					), true);
+				}
+				return InteractionResult.CONSUME;
+			}
+		}
+
 		if (!(state.getBlock() instanceof WildTreeSaplingBlock)) {
 			if (!level.isClientSide && WildTrees.findByAnyPart(state) != null && context.getPlayer() != null) {
 				context.getPlayer().displayClientMessage(Component.translatable("stardewcraft.tree_fertilizer.mature"), true);
@@ -47,13 +74,7 @@ public class TreeFertilizerItem extends SimpleStardewItem {
 		boolean fertilized = manager.fertilize(serverLevel, pos);
 
 		if (fertilized) {
-			if (context.getPlayer() != null && !context.getPlayer().isCreative()) {
-				context.getItemInHand().shrink(1);
-			}
-			level.playSound(null, pos, SoundEvents.BONE_MEAL_USE, SoundSource.BLOCKS, 1.0f, 1.0f);
-			serverLevel.sendParticles(ParticleTypes.HAPPY_VILLAGER,
-					pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
-					10, 0.3, 0.3, 0.3, 0.0);
+			consumeAndShowSuccess(context, serverLevel, pos);
 			return InteractionResult.CONSUME;
 		}
 
@@ -65,5 +86,19 @@ public class TreeFertilizerItem extends SimpleStardewItem {
 			), true);
 		}
 		return InteractionResult.CONSUME;
+	}
+
+	private static void consumeAndShowSuccess(
+			UseOnContext context,
+			ServerLevel level,
+			BlockPos pos
+	) {
+		if (context.getPlayer() != null && !context.getPlayer().isCreative()) {
+			context.getItemInHand().shrink(1);
+		}
+		level.playSound(null, pos, SoundEvents.BONE_MEAL_USE, SoundSource.BLOCKS, 1.0f, 1.0f);
+		level.sendParticles(ParticleTypes.HAPPY_VILLAGER,
+				pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
+				10, 0.3, 0.3, 0.3, 0.0);
 	}
 }

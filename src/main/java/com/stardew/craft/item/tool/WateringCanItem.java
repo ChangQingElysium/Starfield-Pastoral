@@ -1,6 +1,8 @@
 package com.stardew.craft.item.tool;
 
 import com.stardew.craft.item.IStardewItem;
+import com.stardew.craft.api.v1.agriculture.StardewCropRuntime;
+import com.stardew.craft.api.v1.agriculture.StardewCropState;
 import com.stardew.craft.block.crop.DeadCropBlock;
 import com.stardew.craft.block.crop.StardewCropBlock;
 import com.stardew.craft.enchantment.StardewEnchantments;
@@ -496,7 +498,7 @@ public class WateringCanItem extends Item implements IStardewItem {
              BlockPos abovePos = pos.above();
              BlockState aboveState = level.getBlockState(abovePos);
                // 作物长在耕地上时不应当阻挡洒水/预览
-               if (aboveState.getBlock() instanceof com.stardew.craft.block.crop.StardewCropBlock) return false;
+               if (StardewCropRuntime.inspect(level, abovePos) != null) return false;
                if (aboveState.getBlock() instanceof com.stardew.craft.block.crop.DeadCropBlock) return false;
              return !aboveState.getCollisionShape(level, abovePos).isEmpty();
         });
@@ -515,15 +517,22 @@ public class WateringCanItem extends Item implements IStardewItem {
         }
 
         BlockState state = level.getBlockState(pos);
-        if (state.getBlock() instanceof StardewCropBlock || state.getBlock() instanceof DeadCropBlock) {
+        StardewCropState crop = StardewCropRuntime.inspect(level, pos);
+        if (crop != null && !crop.soilPositions().isEmpty()) {
+            for (BlockPos soilPos : crop.soilPositions()) {
+                if (level.getBlockState(soilPos).getBlock() instanceof FarmBlock) {
+                    return soilPos;
+                }
+            }
+        }
+        if (state.getBlock() instanceof DeadCropBlock) {
             BlockPos cursor = below;
             for (int i = 0; i < 3; i++) {
                 BlockState cursorState = level.getBlockState(cursor);
                 if (cursorState.getBlock() instanceof FarmBlock) {
                     return cursor;
                 }
-                if (!(cursorState.getBlock() instanceof StardewCropBlock)
-                        && !(cursorState.getBlock() instanceof DeadCropBlock)) {
+                if (!(cursorState.getBlock() instanceof DeadCropBlock)) {
                     break;
                 }
                 cursor = cursor.below();

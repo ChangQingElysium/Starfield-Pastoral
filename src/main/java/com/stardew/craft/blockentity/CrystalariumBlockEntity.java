@@ -1,6 +1,8 @@
 package com.stardew.craft.blockentity;
 
 import com.stardew.craft.core.ModTags;
+import com.stardew.craft.api.v1.machine.StardewMachineCycleKind;
+import com.stardew.craft.api.v1.machine.StardewProductionPlan;
 import com.stardew.craft.item.artisan.ArtisanRecipeDataManager;
 import com.stardew.craft.time.StardewTimeManager;
 import net.minecraft.core.BlockPos;
@@ -59,7 +61,12 @@ public class CrystalariumBlockEntity extends TimedProductionBlockEntity implemen
 
 
     public boolean isReady() {
-        return ready;
+        return refreshReady();
+    }
+
+    @Override
+    protected StardewMachineCycleKind defaultCycleKind() {
+        return StardewMachineCycleKind.REPEATING;
     }
 
     public boolean isWorking() {
@@ -136,7 +143,14 @@ public class CrystalariumBlockEntity extends TimedProductionBlockEntity implemen
             return InsertResult.fail();
         }
 
-        startWork(stack, output, recipe.minutes(), player);
+        var plan = prepareMachineCycle(
+                StardewMachineCycleKind.REPEATING,
+                stack, output, recipe.minutes(),
+                player, false);
+        if (plan.isEmpty()) {
+            return InsertResult.fail();
+        }
+        startWork(stack, plan.get(), player, false);
         return InsertResult.success();
     }
 
@@ -152,17 +166,16 @@ public class CrystalariumBlockEntity extends TimedProductionBlockEntity implemen
         return ItemStack.EMPTY;
     }
 
-    private void startWork(ItemStack inputStack, ItemStack output, int minutesUntilReady, Player player) {
-        input = inputStack.copy();
-        input.setCount(1);
-        product = output;
-        readyAtAbsMinute = getCurrentAbsMinute() + minutesUntilReady;
-        ready = false;
-        if (player == null || !player.isCreative()) {
-            inputStack.shrink(1);
-        }
-        setChanged();
-        syncToClient();
+    private void startWork(
+            ItemStack inputStack,
+            StardewProductionPlan plan,
+            Player player,
+            boolean automation
+    ) {
+        commitMachineCycle(
+                inputStack, plan, 1, player,
+                StardewMachineCycleKind.REPEATING,
+                automation);
     }
 
     public ItemStack harvestOne() {
@@ -170,6 +183,9 @@ public class CrystalariumBlockEntity extends TimedProductionBlockEntity implemen
             return ItemStack.EMPTY;
         }
         ItemStack out = product.copy();
+        emitProductionEvent(
+                com.stardew.craft.api.v1.machine
+                        .StardewProductionPhase.COLLECTED);
         if (input.isEmpty()) {
             product = ItemStack.EMPTY;
             readyAtAbsMinute = -1;
@@ -185,12 +201,23 @@ public class CrystalariumBlockEntity extends TimedProductionBlockEntity implemen
             nextOutput = input.copy();
             nextOutput.setCount(1);
         }
-        product = nextOutput;
         int minutes = recipe != null ? recipe.minutes() : TIME_DEFAULT;
-        readyAtAbsMinute = getCurrentAbsMinute() + minutes;
-        ready = false;
-        setChanged();
-        syncToClient();
+        var nextPlan = prepareMachineCycle(
+                StardewMachineCycleKind.REPEATING,
+                input, nextOutput, minutes,
+                null, true);
+        if (nextPlan.isPresent()) {
+            restartMachineCycle(
+                    nextPlan.get(),
+                    StardewMachineCycleKind.REPEATING,
+                    true);
+        } else {
+            product = ItemStack.EMPTY;
+            readyAtAbsMinute = -1;
+            ready = false;
+            setChanged();
+            syncToClient();
+        }
         return out;
     }
 
@@ -222,11 +249,18 @@ public class CrystalariumBlockEntity extends TimedProductionBlockEntity implemen
         if (output.isEmpty()) {
             return stack;
         }
+        var plan = prepareMachineCycle(
+                StardewMachineCycleKind.REPEATING,
+                stack, output, recipe.minutes(),
+                null, true);
+        if (plan.isEmpty()) {
+            return stack;
+        }
         if (simulate) {
             return AutomationStackHelper.remainderAfterInsert(stack, 1);
         }
         ItemStack inputCopy = stack.copy();
-        startWork(inputCopy, output, recipe.minutes(), null);
+        startWork(inputCopy, plan.get(), null, true);
         return AutomationStackHelper.remainderAfterInsert(stack, 1);
     }
 

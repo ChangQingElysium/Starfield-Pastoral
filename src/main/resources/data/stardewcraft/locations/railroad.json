@@ -1,0 +1,8 @@
+{
+  "dimension": "stardewcraft:stardew_valley",
+  "min": [-39, 80, -214],
+  "max": [101, 95, -152],
+  "aliases": ["Railroad"],
+  "priority": -100,
+  "indoor": false
+}

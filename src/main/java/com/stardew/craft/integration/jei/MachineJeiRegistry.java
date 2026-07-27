@@ -1,6 +1,8 @@
 package com.stardew.craft.integration.jei;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.internal.machine.StardewMachineTypeRegistry;
+import com.stardew.craft.api.v1.machine.StardewMachineType;
 import mezz.jei.api.recipe.RecipeType;
 import net.minecraft.resources.ResourceLocation;
 
@@ -35,7 +37,7 @@ public final class MachineJeiRegistry {
             boolean producesItem
     ) {
         public String translationKey() {
-            return "stardewcraft.jei.machine." + id.getPath();
+            return StardewMachineTypeRegistry.translationKey(id);
         }
     }
 
@@ -55,17 +57,32 @@ public final class MachineJeiRegistry {
             machine("seed_maker", Layout.RANDOM_OUTPUT, true)
     );
 
-    private static final Map<ResourceLocation, Machine> BY_ID = buildIndex();
+    private static volatile Catalog catalog;
 
     private MachineJeiRegistry() {
     }
 
-    public static List<Machine> all() {
-        return MACHINES;
+    public static synchronized List<Machine> all() {
+        return catalog().machines();
+    }
+
+    private static synchronized Catalog catalog() {
+        Catalog current = catalog;
+        if (current == null) {
+            List<Machine> combined = new java.util.ArrayList<>(MACHINES);
+            for (StardewMachineType definition
+                    : StardewMachineTypeRegistry.freezeAndGetDefinitions()) {
+                combined.add(fromAddonDefinition(definition));
+            }
+            List<Machine> machines = List.copyOf(combined);
+            current = new Catalog(machines, buildIndex(machines));
+            catalog = current;
+        }
+        return current;
     }
 
     public static Optional<Machine> find(ResourceLocation id) {
-        return Optional.ofNullable(BY_ID.get(id));
+        return Optional.ofNullable(catalog().byId().get(id));
     }
 
     private static Machine machine(String path, Layout layout, boolean producesItem) {
@@ -75,14 +92,40 @@ public final class MachineJeiRegistry {
         return new Machine(id, id, recipeType, layout, producesItem);
     }
 
-    private static Map<ResourceLocation, Machine> buildIndex() {
+    private static Machine fromAddonDefinition(StardewMachineType definition) {
+        Layout layout = switch (definition.layout()) {
+            case STANDARD -> Layout.STANDARD;
+            case AUXILIARY_INPUT -> Layout.AUXILIARY_INPUT;
+            case RANDOM_OUTPUT -> Layout.RANDOM_OUTPUT;
+        };
+        RecipeType<ArtisanJeiRecipe> recipeType = RecipeType.create(
+                definition.id().getNamespace(),
+                "machine/" + definition.id().getPath(),
+                ArtisanJeiRecipe.class
+        );
+        return new Machine(
+                definition.id(),
+                definition.itemId(),
+                recipeType,
+                layout,
+                definition.producesItem()
+        );
+    }
+
+    private static Map<ResourceLocation, Machine> buildIndex(List<Machine> machines) {
         Map<ResourceLocation, Machine> result = new LinkedHashMap<>();
-        for (Machine machine : MACHINES) {
+        for (Machine machine : machines) {
             Machine duplicate = result.put(machine.id(), machine);
             if (duplicate != null) {
                 throw new IllegalStateException("Duplicate JEI machine descriptor: " + machine.id());
             }
         }
         return Map.copyOf(result);
+    }
+
+    private record Catalog(
+            List<Machine> machines,
+            Map<ResourceLocation, Machine> byId
+    ) {
     }
 }

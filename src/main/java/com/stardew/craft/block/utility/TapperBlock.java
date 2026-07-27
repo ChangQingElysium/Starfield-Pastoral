@@ -1,5 +1,7 @@
 package com.stardew.craft.block.utility;
 
+import com.stardew.craft.api.v1.internal.tree.StardewTreeRuntimeRegistry;
+import com.stardew.craft.api.v1.tree.StardewTreeState;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.shape.ModelVoxelShapeCache;
 import com.stardew.craft.blockentity.TapperBlockEntity;
@@ -92,16 +94,17 @@ public class TapperBlock extends Block implements EntityBlock {
 		BlockPos placePos = context.getClickedPos();
 		BlockPos trunkPos = placePos.relative(face.getOpposite());
 		WildTrees.Def def = WildTrees.findTapperSupportDef(level, trunkPos);
-		if (def == null) {
-			return null;
-		}
-		BlockPos treeRoot = WildTrees.findTapperTreeRoot(level, trunkPos);
-		if (treeRoot == null) {
-			return null;
-		}
-
-		if (hasReachedTapperLimit(level, treeRoot, def)) {
-			return null;
+		if (def != null) {
+			BlockPos treeRoot = WildTrees.findTapperTreeRoot(level, trunkPos);
+			if (treeRoot == null || hasReachedTapperLimit(level, treeRoot, def)) {
+				return null;
+			}
+		} else {
+			StardewTreeState addonTree =
+					StardewTreeRuntimeRegistry.findAddonTapperSupport(level, trunkPos);
+			if (addonTree == null || hasReachedAddonTapperLimit(level, addonTree)) {
+				return null;
+			}
 		}
 
 		// Place into the adjacent air block; FACING points back to the trunk.
@@ -115,7 +118,8 @@ public class TapperBlock extends Block implements EntityBlock {
 		Direction supportDir = state.getValue(FACING);
 		@SuppressWarnings("null")
 		BlockPos supportPos = pos.relative(supportDir);
-		return WildTrees.findTapperSupportDef(level, supportPos) != null;
+		return WildTrees.findTapperSupportDef(level, supportPos) != null
+				|| StardewTreeRuntimeRegistry.findAddonTapperSupport(level, supportPos) != null;
 	}
 
 	@SuppressWarnings("null")
@@ -237,10 +241,14 @@ public class TapperBlock extends Block implements EntityBlock {
 			return;
 		}
 		WildTrees.Def def = findValidProductionDef(level, pos, state);
-		if (def == null) {
+		if (def != null) {
+			tapper.startCycleIfEmpty(def.id());
 			return;
 		}
-		tapper.startCycleIfEmpty(def.id());
+		StardewTreeState addonTree = findValidAddonProductionState(level, pos, state);
+		if (addonTree != null) {
+			tapper.startAddonCycleIfEmpty(addonTree);
+		}
 	}
 
 	@Nullable
@@ -265,11 +273,47 @@ public class TapperBlock extends Block implements EntityBlock {
 	}
 
 	public static boolean isValidProductionSite(LevelReader level, BlockPos pos, BlockState state) {
-		return findValidProductionDef(level, pos, state) != null;
+		return findValidProductionDef(level, pos, state) != null
+				|| findValidAddonProductionState(level, pos, state) != null;
+	}
+
+	@Nullable
+	public static StardewTreeState findValidAddonProductionState(
+			LevelReader level,
+			BlockPos pos,
+			BlockState state
+	) {
+		if (!state.is(ModBlocks.TAPPER.get()) || !state.hasProperty(FACING)) {
+			return null;
+		}
+		Direction supportDir = state.getValue(FACING);
+		BlockPos supportPos = pos.relative(supportDir);
+		StardewTreeState tree =
+				StardewTreeRuntimeRegistry.findAddonTapperSupport(level, supportPos);
+		if (tree == null) {
+			return null;
+		}
+		int tappers = countAddonTappersOnTree(level, tree);
+		return tappers > 0 && tappers <= MAX_TAPPERS_PER_TREE ? tree : null;
 	}
 
 	private static boolean hasReachedTapperLimit(LevelReader level, BlockPos treeRoot, WildTrees.Def def) {
 		return countTappersOnTree(level, treeRoot, def) >= MAX_TAPPERS_PER_TREE;
+	}
+
+	private static boolean hasReachedAddonTapperLimit(
+			LevelReader level,
+			StardewTreeState tree
+	) {
+		return countAddonTappersOnTree(level, tree) >= MAX_TAPPERS_PER_TREE;
+	}
+
+	private static int countAddonTappersOnTree(LevelReader level, StardewTreeState tree) {
+		Set<BlockPos> tappers = new HashSet<>();
+		for (BlockPos support : tree.tapperSupports()) {
+			collectAdjacentTappers(level, support, tappers);
+		}
+		return tappers.size();
 	}
 
 	private static int countTappersOnTree(LevelReader level, BlockPos treeRoot, WildTrees.Def def) {

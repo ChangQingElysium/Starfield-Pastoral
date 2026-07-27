@@ -1,0 +1,13 @@
+{
+  "builder": "stardewcraft:robin",
+  "order": 30,
+  "display_name": "stardewcraft.robin.blueprint.silo.name",
+  "description": "stardewcraft.robin.blueprint.silo.desc",
+  "money": 100,
+  "materials": [
+    { "item": "stardewcraft:stone", "count": 100 },
+    { "item": "stardewcraft:clay", "count": 10 },
+    { "item": "stardewcraft:copper_bar", "count": 5 }
+  ],
+  "result_item": "stardewcraft:silo_manager"
+}

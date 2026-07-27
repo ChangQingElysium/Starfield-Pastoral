@@ -27,7 +27,11 @@ public record OpenAnimalPurchaseScreenPayload(
         int price,
         boolean unlocked,
         String descriptionKey,
-        String lockReasonKey
+        String lockReasonKey,
+        String shopTextureId,
+        int shopTextureWidth,
+        int shopTextureHeight,
+        String soundEventId
     ) {
         @SuppressWarnings("null")
         public static final StreamCodec<RegistryFriendlyByteBuf, AnimalOption> STREAM_CODEC = StreamCodec.of(
@@ -40,6 +44,10 @@ public record OpenAnimalPurchaseScreenPayload(
                 buf.writeBoolean(option.unlocked());
                 buf.writeUtf(option.descriptionKey());
                 buf.writeUtf(option.lockReasonKey());
+                buf.writeUtf(option.shopTextureId());
+                buf.writeInt(option.shopTextureWidth());
+                buf.writeInt(option.shopTextureHeight());
+                buf.writeUtf(option.soundEventId());
             },
             buf -> new AnimalOption(
                 buf.readUtf(),
@@ -49,6 +57,10 @@ public record OpenAnimalPurchaseScreenPayload(
                 buf.readInt(),
                 buf.readBoolean(),
                 buf.readUtf(),
+                buf.readUtf(),
+                buf.readUtf(),
+                buf.readInt(),
+                buf.readInt(),
                 buf.readUtf()
             )
         );

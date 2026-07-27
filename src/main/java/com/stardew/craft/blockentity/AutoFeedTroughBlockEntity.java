@@ -1,11 +1,9 @@
 package com.stardew.craft.blockentity;
 
 import com.stardew.craft.animal.data.AnimalWorldData;
-import com.stardew.craft.animal.model.AnimalBuildingRecord;
 import com.stardew.craft.block.utility.AutoFeedTroughBlock;
 import com.stardew.craft.item.ModItems;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -18,14 +16,11 @@ import net.neoforged.neoforge.items.IItemHandler;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @SuppressWarnings("null")
 public class AutoFeedTroughBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity implements UtilityAutomationAccess {
     private static final String TAG_HAY = "hay";
-    private static final int REFILL_INTERVAL_TICKS = 20;
-    private static final Set<String> FEED_BUILDING_FAMILIES = Set.of("coop", "barn");
 
     private final IItemHandler automationItemHandler = new IItemHandler() {
         @Override
@@ -73,65 +68,6 @@ public class AutoFeedTroughBlockEntity extends net.minecraft.world.level.block.e
 
     public AutoFeedTroughBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.AUTOFEED_TROUGH.get(), pos, state);
-    }
-
-    public static void serverTick(Level level, BlockPos pos, BlockState state, AutoFeedTroughBlockEntity blockEntity) {
-        if (!(level instanceof ServerLevel serverLevel)) {
-            return;
-        }
-        if (!shouldRunRefillTick(serverLevel, pos)) {
-            return;
-        }
-        if (blockEntity.hayCount() > 0) {
-            return;
-        }
-
-        AnimalWorldData data = AnimalWorldData.get(serverLevel);
-        AnimalBuildingRecord building = resolveFeedBuilding(data, serverLevel, pos);
-        if (building == null) {
-            return;
-        }
-
-        UUID ownerId;
-        try {
-            ownerId = UUID.fromString(building.ownerPlayerUuid());
-        } catch (IllegalArgumentException ex) {
-            return;
-        }
-
-        refillConnectedNetwork(serverLevel, pos, ownerId, 1);
-    }
-
-    private static boolean shouldRunRefillTick(ServerLevel level, BlockPos pos) {
-        return Math.floorMod(level.getGameTime() + pos.asLong(), REFILL_INTERVAL_TICKS) == 0;
-    }
-
-    private static AnimalBuildingRecord resolveFeedBuilding(AnimalWorldData data, ServerLevel level, BlockPos pos) {
-        String dimensionId = level.dimension().location().toString();
-        for (AnimalBuildingRecord building : data.getBuildings()) {
-            if (!dimensionId.equals(building.dimensionId())) {
-                continue;
-            }
-            if (!FEED_BUILDING_FAMILIES.contains(building.buildingType().family())) {
-                continue;
-            }
-            if (building.isInBounds(pos) || isAdjacentToInteriorAir(building, pos)) {
-                return building;
-            }
-        }
-        return null;
-    }
-
-    private static boolean isAdjacentToInteriorAir(AnimalBuildingRecord building, BlockPos pos) {
-        if (building.interiorAirCells().isEmpty()) {
-            return building.isWithinBoundingBox(pos);
-        }
-        for (Direction direction : Direction.values()) {
-            if (building.interiorAirCells().contains(pos.relative(direction).asLong())) {
-                return true;
-            }
-        }
-        return false;
     }
 
     public static int refillConnectedNetwork(ServerLevel level, BlockPos origin, UUID ownerPlayerId, int maxHay) {

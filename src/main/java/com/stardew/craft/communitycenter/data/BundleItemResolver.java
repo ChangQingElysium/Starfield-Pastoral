@@ -74,6 +74,14 @@ public final class BundleItemResolver {
     public static ItemStack resolveItemStack(String modPath) {
         if (modPath == null || modPath.isBlank()) return ItemStack.EMPTY;
 
+        if (modPath.contains(":")) {
+            ResourceLocation namespacedId = ResourceLocation.tryParse(modPath);
+            if (namespacedId == null || !BuiltInRegistries.ITEM.containsKey(namespacedId)) {
+                return ItemStack.EMPTY;
+            }
+            return new ItemStack(BuiltInRegistries.ITEM.get(namespacedId));
+        }
+
         ResourceLocation modId = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, modPath);
         if (BuiltInRegistries.ITEM.containsKey(modId)) {
             return new ItemStack(BuiltInRegistries.ITEM.get(modId));

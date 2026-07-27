@@ -2,19 +2,28 @@ package com.stardew.craft.entity.animal;
 
 import com.stardew.craft.animal.data.AnimalWorldData;
 import com.stardew.craft.animal.model.AnimalBuildingRecord;
+import com.stardew.craft.animal.model.AnimalBuildingDailyContext;
+import com.stardew.craft.animal.model.FarmAnimalDefinition;
+import com.stardew.craft.animal.model.FarmAnimalDefinitions;
 import com.stardew.craft.animal.model.FarmAnimalRecord;
+import com.stardew.craft.animal.rule.AnimalParityRules;
 import com.stardew.craft.animal.service.AnimalDoorStateService;
-import com.stardew.craft.animal.service.AnimalEntityRecoveryState;
+import com.stardew.craft.animal.service.AnimalBuildingPositionIndex;
+import com.stardew.craft.animal.service.AnimalGrassTargetService;
+import com.stardew.craft.animal.service.AnimalPathfindingBudget;
+import com.stardew.craft.animal.service.AnimalInteractionService;
+import com.stardew.craft.animal.service.AnimalToolHarvestService;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.nature.PastureGrassBlock;
 import com.stardew.craft.menu.AnimalQueryMenu;
+import com.stardew.craft.manager.AnimalGrowthManager;
+import com.stardew.craft.network.payload.AnimalQueryDetailsPayload;
 import com.stardew.craft.item.ModItems;
-import com.stardew.craft.player.PlayerStardewDataAPI;
-import com.stardew.craft.player.ProfessionType;
 import com.stardew.craft.sound.ModSounds;
 import com.stardew.craft.time.StardewTimeManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -23,19 +32,16 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.goal.BreedGoal;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
-import net.minecraft.world.entity.ai.goal.PanicGoal;
-import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.InteractionHand;
@@ -50,10 +56,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.network.PacketDistributor;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.EnumSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.List;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animation.AnimatableManager;
@@ -87,7 +94,7 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 	private static final int MINUTES_1700 = 17 * 60;
 	private static final int MINUTES_2000 = 20 * 60;
 	private static final int STATIONARY_RESCUE_TICKS = 120;
-	private static final boolean AI_DIAGNOSTICS = true;
+	private static final boolean AI_DIAGNOSTICS = false;
 	private static final double STUCK_MOVE_THRESHOLD_SQR = 0.01D;
 	private static final double DOORWAY_SETTLE_DISTANCE_SQR = 2.25D;
 	private static final int WANDER_MIN_RANGE = 2;
@@ -96,6 +103,7 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 	private static final double AMBIENT_SOUND_CHANCE_PER_TICK = 0.001D;
 	private static final EntityDataAccessor<Integer> DATA_EMOTE_BASE_INDEX = SynchedEntityData.defineId(BaseCoopAnimalEntity.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> DATA_EMOTE_TICKS_LEFT = SynchedEntityData.defineId(BaseCoopAnimalEntity.class, EntityDataSerializers.INT);
+	private static final EntityDataAccessor<Boolean> DATA_SLEEPING = SynchedEntityData.defineId(BaseCoopAnimalEntity.class, EntityDataSerializers.BOOLEAN);
 
 	private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 	private long managedAnimalId = -1L;
@@ -119,31 +127,37 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 
 	public abstract CoopAnimalVariant getVariant();
 
-	protected abstract Ingredient getBreedIngredient();
+	/**
+	 * Legacy subclass hook retained for source and binary compatibility.
+	 *
+	 * <p>Managed animals no longer use Minecraft hand breeding, so the base
+	 * implementation deliberately accepts no ingredient.
+	 */
+	@Deprecated(forRemoval = false)
+	protected Ingredient getBreedIngredient() {
+		return Ingredient.EMPTY;
+	}
 
-	protected abstract EntityType<? extends Animal> getOffspringType();
+	/**
+	 * Legacy subclass hook retained for source and binary compatibility.
+	 *
+	 * <p>Offspring are created only by the authoritative overnight transaction;
+	 * the base implementation therefore has no raw entity type.
+	 */
+	@Deprecated(forRemoval = false)
+	protected @Nullable EntityType<? extends Animal> getOffspringType() {
+		return null;
+	}
 
 	@Override
 	protected void registerGoals() {
-		this.goalSelector.addGoal(0, new FloatGoal(this));
-		this.goalSelector.addGoal(1, new PanicGoal(this, 1.25D));
-		this.goalSelector.addGoal(2, new BreedGoal(this, 1.0D));
-		this.goalSelector.addGoal(3, new TemptGoal(this, 1.0D, stack -> getBreedIngredient().test(stack), false));
-		this.goalSelector.addGoal(4, new ReturnHomeAtEveningGoal());
-		this.goalSelector.addGoal(5, new LeaveHomeInDayGoal());
-		this.goalSelector.addGoal(6, new SleepIfNecessaryGoal());
+		this.goalSelector.addGoal(0, new SleepIfNecessaryGoal());
+		this.goalSelector.addGoal(1, new FloatGoal(this));
+		this.goalSelector.addGoal(5, new ReturnHomeAtEveningGoal());
+		this.goalSelector.addGoal(6, new LeaveHomeInDayGoal());
 		this.goalSelector.addGoal(7, new FollowSameTypeAdultGoal());
 		this.goalSelector.addGoal(8, new EatPastureGrassGoal());
 		this.goalSelector.addGoal(9, new StardewRandomMovementGoal());
-		this.goalSelector.addGoal(10, new RandomStrollGoal(this, 0.95D, 35) {
-			@Override
-			public boolean canUse() {
-				if (BaseCoopAnimalEntity.this.eatAnimationTicks > 0) {
-					return false;
-				}
-				return super.canUse();
-			}
-		});
 		this.goalSelector.addGoal(11, new LookAtPlayerGoal(this, Player.class, 6.0F));
 		this.goalSelector.addGoal(12, new RandomLookAroundGoal(this));
 	}
@@ -153,11 +167,19 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 		super.defineSynchedData(builder);
 		builder.define(DATA_EMOTE_BASE_INDEX, -1);
 		builder.define(DATA_EMOTE_TICKS_LEFT, 0);
+		builder.define(DATA_SLEEPING, false);
 	}
 
 	@Override
 	public boolean isFood(@Nonnull ItemStack stack) {
-		return getBreedIngredient().test(stack);
+		// Reproduction is authoritative overnight state, not Minecraft hand breeding.
+		return false;
+	}
+
+	@Override
+	public boolean canMate(@Nonnull Animal otherAnimal) {
+		// Never allow another mod or vanilla state mutation to bypass the overnight transaction.
+		return false;
 	}
 
 	@Override
@@ -173,14 +195,50 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 			return InteractionResult.sidedSuccess(true);
 		}
 
-		if (!(this.level() instanceof ServerLevel serverLevel) || managedAnimalId <= 0L) {
+		if (!(this.level() instanceof ServerLevel serverLevel)
+				|| !(player instanceof ServerPlayer serverPlayer)
+				|| managedAnimalId <= 0L) {
 			return super.mobInteract(player, hand);
 		}
 
 		AnimalWorldData data = AnimalWorldData.get(serverLevel);
 		FarmAnimalRecord record = data.getAnimal(managedAnimalId).orElse(null);
-		if (record == null) {
-			return super.mobInteract(player, hand);
+			if (record == null) {
+				return super.mobInteract(player, hand);
+			}
+			AnimalBuildingRecord home = data
+				.getBuildingIncludingInactive(record.buildingId())
+				.orElse(null);
+			if (home != null && !home.isGameplayEnabled()) {
+				player.displayClientMessage(
+					Component.translatable(
+						"stardewcraft.animal.interact.building_paused"),
+					true
+				);
+				return InteractionResult.SUCCESS;
+			}
+			if (record.lastProcessedAbsDay()
+				< com.stardew.craft.time.StardewTimeManager.get().getAbsoluteDay()) {
+			player.displayClientMessage(
+				Component.translatable("stardewcraft.animal.interact.catching_up"),
+				true
+			);
+			return InteractionResult.SUCCESS;
+		}
+		if (tryHarvestWithHeldTool(serverLevel, serverPlayer)) {
+			return InteractionResult.SUCCESS;
+		}
+		if (isTryingToSleep()) {
+			player.displayClientMessage(
+				Component.translatable(
+					"stardewcraft.animal.interact.trying_to_sleep",
+					record.customName().isBlank()
+						? record.animalTypeId()
+						: record.customName()
+				),
+				true
+			);
+			return InteractionResult.SUCCESS;
 		}
 
 		if (player.isShiftKeyDown()) {
@@ -192,20 +250,23 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 			return InteractionResult.SUCCESS;
 		}
 
-		if (!record.wasPetToday()) {
-			boolean wasAutoPet = record.wasAutoPetToday();
-			record.setWasPetToday(true);
-			record.setWasAutoPetToday(false);
-			record.addFriendship(15);
-			int happinessDrain = getHappinessDrain(record.animalTypeId());
-			int happinessGain = Math.max(5, 30 + happinessDrain);
-			if (player instanceof ServerPlayer serverPlayer && hasHappinessBoostProfession(serverPlayer, record.animalTypeId())) {
-				record.addFriendship(15);
-			}
-			record.addHappiness(happinessGain);
-			data.markChanged();
-			playPetFeedback(serverLevel, record, wasAutoPet);
+		AnimalInteractionService.PetResult petResult =
+			AnimalInteractionService.pet(
+				serverLevel,
+				serverPlayer,
+				data,
+				record
+			);
+		if (petResult.status() == AnimalInteractionService.Status.APPLIED) {
+			playPetFeedback(serverLevel, record, petResult.hadAutoPetToday());
 			player.sendSystemMessage(Component.translatable("stardewcraft.animal.interact.pet_success"));
+		} else if (petResult.status()
+				== AnimalInteractionService.Status.DEFINITION_UNAVAILABLE) {
+			player.displayClientMessage(
+				Component.translatable(
+					"stardewcraft.animal.interact.definition_unavailable"),
+				true
+			);
 		} else {
 			if (!player.getMainHandItem().is(ModItems.HAY.get())) {
 				openAnimalQueryMenu(player, record);
@@ -214,6 +275,57 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 			player.sendSystemMessage(Component.translatable("stardewcraft.animal.interact.already_pet"));
 		}
 		return InteractionResult.SUCCESS;
+	}
+
+	private boolean tryHarvestWithHeldTool(
+			ServerLevel level,
+			ServerPlayer player
+	) {
+		ItemStack held = player.getMainHandItem();
+		if (held.isEmpty()) {
+			return false;
+		}
+		AnimalToolHarvestService.Result result =
+			AnimalToolHarvestService.harvest(
+				level,
+				player,
+				managedAnimalId,
+				BuiltInRegistries.ITEM.getKey(held.getItem())
+			);
+		if (result == AnimalToolHarvestService.Result.NOT_HANDLED) {
+			return false;
+		}
+		if (result == AnimalToolHarvestService.Result.HARVESTED) {
+			SoundEvent sound = null;
+			if (held.is(ModItems.SHEARS.get())) {
+				sound = SoundEvents.SHEEP_SHEAR;
+			} else if (held.is(ModItems.MILK_PAIL.get())) {
+				sound = SoundEvents.COW_MILK;
+			}
+			if (sound != null) {
+				level.playSound(
+					null,
+					blockPosition(),
+					sound,
+					SoundSource.NEUTRAL,
+					1.0F,
+					1.0F
+				);
+			}
+		}
+		return true;
+	}
+
+	private boolean isTryingToSleep() {
+		if (entityData.get(DATA_SLEEPING)) {
+			return true;
+		}
+		boolean moving = getNavigation().isInProgress()
+				|| getDeltaMovement()
+						.horizontalDistanceSqr() >= 1.0E-4D;
+		return AnimalParityRules.isTryingToSleep(
+				StardewTimeManager.get().getCurrentTime(),
+				moving);
 	}
 
 	private boolean isFairTemporaryDecorAnimal() {
@@ -252,18 +364,26 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 	}
 
 	private boolean canEatGoldenCrackers(String animalTypeId) {
-		return !"pig".equals(animalTypeId);
+		FarmAnimalDefinition definition = FarmAnimalDefinitions.find(animalTypeId);
+		return definition != null && definition.canEatGoldenCrackers();
 	}
 
 	@Override
-	public AgeableMob getBreedOffspring(@Nonnull ServerLevel level, @Nonnull AgeableMob otherParent) {
-		EntityType<? extends Animal> offspringType = getOffspringType();
-		return offspringType.create(level);
+	public final @Nullable AgeableMob getBreedOffspring(
+			@Nonnull ServerLevel level,
+			@Nonnull AgeableMob otherParent
+	) {
+		// A raw child entity would have no AnimalWorldData record and must never be projected.
+		return null;
 	}
 
 	@Override
 	public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
 		controllers.add(new AnimationController<>(this, "main", 5, state -> {
+			if (isSleepingProjection()) {
+				state.setAndContinue(IDLE);
+				return PlayState.CONTINUE;
+			}
 			if (shouldPlayEatAnimation()) {
 				state.setAndContinue(EAT);
 				return PlayState.CONTINUE;
@@ -317,7 +437,7 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 	@Override
 	public void aiStep() {
 		super.aiStep();
-		if (!this.level().isClientSide && this.isNoAi()) {
+		if (!this.level().isClientSide && this.isNoAi() && !isFairTemporaryDecorAnimal()) {
 			this.setNoAi(false);
 		}
 		if (eatAnimationTicks > 0) {
@@ -350,16 +470,12 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 		}
 	}
 
-	@Override
-	protected void pushEntities() {
-		if (this.level() instanceof ServerLevel serverLevel
-				&& AnimalEntityRecoveryState.isRecovering(serverLevel, this.chunkPosition())) {
+	private void updateStationaryRescue() {
+		if (isSleepingProjection()) {
+			stationaryTicks = 0;
+			lastServerPosition = this.position();
 			return;
 		}
-		super.pushEntities();
-	}
-
-	private void updateStationaryRescue() {
 		if (this.eatAnimationTicks > 0) {
 			stationaryTicks = 0;
 			lastServerPosition = this.position();
@@ -387,6 +503,9 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 	}
 
 	private void forceShortWanderStep() {
+		if (!tryAcquirePathfindingBudget()) {
+			return;
+		}
 		BlockPos origin = this.blockPosition();
 		Direction[] directions = Direction.Plane.HORIZONTAL.stream().toArray(Direction[]::new);
 		for (int i = directions.length - 1; i > 0; i--) {
@@ -413,6 +532,11 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 				}
 			}
 		}
+	}
+
+	protected boolean tryAcquirePathfindingBudget() {
+		return this.level() instanceof ServerLevel serverLevel
+				&& AnimalPathfindingBudget.tryAcquire(serverLevel);
 	}
 
 	@Override
@@ -448,6 +572,13 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 		return eatAnimationTicks > 0;
 	}
 
+	/**
+	 * Protected compatibility hook for addon animal subclasses with custom animation controllers.
+	 */
+	protected final boolean isPlayingEatAnimation() {
+		return eatAnimationTicks > 0;
+	}
+
 	private void triggerEatAnimation(int ticks) {
 		eatAnimationTicks = Math.max(eatAnimationTicks, ticks);
 		this.getNavigation().stop();
@@ -463,9 +594,36 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 			return;
 		}
 
+		AnimalWorldData worldData =
+				AnimalWorldData.get(serverPlayer.serverLevel());
+		AnimalBuildingRecord building = worldData
+				.getBuilding(record.buildingId())
+				.orElse(null);
+		AnimalBuildingDailyContext buildingContext =
+				AnimalGrowthManager.get(serverPlayer.serverLevel())
+						.buildingDailyContext(
+								serverPlayer.serverLevel(),
+								building);
+		FarmAnimalRecord parent = record.parentAnimalId() > 0L
+				? worldData.getAnimal(record.parentAnimalId())
+						.orElse(null)
+				: null;
+		String parentName = parent == null
+				? ""
+				: parent.customName() == null
+						|| parent.customName().isBlank()
+						? parent.animalTypeId()
+						: parent.customName();
+		PacketDistributor.sendToPlayer(
+				serverPlayer,
+				new AnimalQueryDetailsPayload(
+						record.animalId(), parentName));
 		Component displayName = record.customName() == null || record.customName().isBlank()
-			? Component.translatable("entity.stardewcraft." + record.animalTypeId() + (record.isBaby() ? ".baby" : ""))
+			? Component.translatable(
+					FarmAnimalDefinitions.displayNameKeyFor(
+							record.animalTypeId()))
 			: Component.literal(record.customName());
+		int queryVariantIndex = lambda$openAnimalQueryMenu$3();
 
 		serverPlayer.openMenu(new SimpleMenuProvider(
 			(containerId, playerInventory, ignored) -> new AnimalQueryMenu(
@@ -479,14 +637,33 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 				record.friendship(),
 				record.allowReproduction(),
 				record.hasEatenAnimalCracker(),
-				getVariant().ordinal(),
+				queryVariantIndex,
 				record.moodMessage(),
 				record.wasFedToday(),
-				record.fullness()
+				record.fullness(),
+				record.animalTypeId(),
+				record.parentAnimalId(),
+				buildingContext != null
+						&& buildingContext.autoPetter(),
+				buildingContext != null
+						&& !buildingContext.autoGrabbers()
+								.isEmpty(),
+				buildingContext != null
+						&& buildingContext.capabilities()
+								.automaticFeed()
+						&& !buildingContext.autoFeedTroughs()
+								.isEmpty()
 			),
 			displayName
 		));
 
+	}
+
+	/**
+	 * Compatibility target for addons that redirected the former menu-construction lambda.
+	 */
+	private int lambda$openAnimalQueryMenu$3() {
+		return getVariant().ordinal();
 	}
 
 	private void playPetFeedback(ServerLevel level, FarmAnimalRecord record, boolean hadAutoPetToday) {
@@ -510,7 +687,9 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 	}
 
 	private void tryPlayAmbientAnimalSound() {
-		if (this.isBaby() || this.eatAnimationTicks > 0) {
+		if (isSleepingProjection()
+				|| this.isBaby()
+				|| this.eatAnimationTicks > 0) {
 			return;
 		}
 
@@ -633,37 +812,17 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 		return Math.max(0, EMOTE_FADE_TICKS - 1 - fadeElapsed);
 	}
 
+	public boolean isSleepingProjection() {
+		return entityData.get(DATA_SLEEPING);
+	}
+
 	private SoundEvent mapPetSoundEvent(String animalTypeId) {
-		return switch (animalTypeId) {
-			case "white_chicken", "brown_chicken", "blue_chicken", "golden_chicken", "void_chicken" -> ModSounds.CLUCK.get();
-			case "duck" -> ModSounds.DUCK.get();
-			case "rabbit" -> ModSounds.RABBIT.get();
-			case "ostrich" -> ModSounds.OSTRICH.get();
-			case "cow" -> ModSounds.COW.get();
-			case "goat" -> ModSounds.GOAT.get();
-			case "sheep" -> ModSounds.SHEEP.get();
-			case "pig" -> ModSounds.PIG.get();
-			default -> null;
-		};
-	}
-
-	private boolean hasHappinessBoostProfession(ServerPlayer player, String animalTypeId) {
-		ProfessionType profession = switch (animalTypeId) {
-			case "white_chicken", "brown_chicken", "blue_chicken", "golden_chicken", "void_chicken", "duck", "rabbit", "dinosaur", "ostrich" -> ProfessionType.COOPMASTER;
-			case "cow", "goat", "sheep", "pig" -> ProfessionType.SHEPHERD;
-			default -> null;
-		};
-		return profession != null && PlayerStardewDataAPI.hasProfession(player, profession);
-	}
-
-	private int getHappinessDrain(String animalTypeId) {
-		return switch (animalTypeId) {
-			case "golden_chicken" -> 10;
-			case "void_chicken", "duck", "rabbit", "ostrich" -> 5;
-			case "dinosaur" -> 4;
-			case "cow", "goat", "sheep", "pig" -> 8;
-			default -> 7;
-		};
+		FarmAnimalDefinition definition = FarmAnimalDefinitions.find(animalTypeId);
+		if (definition == null || definition.soundEventId() == null
+				|| !BuiltInRegistries.SOUND_EVENT.containsKey(definition.soundEventId())) {
+			return null;
+		}
+		return BuiltInRegistries.SOUND_EVENT.get(definition.soundEventId());
 	}
 
 	private final class ReturnHomeAtEveningGoal extends Goal {
@@ -687,6 +846,9 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 			int currentMinutes = StardewTimeManager.get().getCurrentTime();
 			int staggerDelay = (int) (Math.abs(BaseCoopAnimalEntity.this.managedAnimalId % 8) * (STAGGER_RETURN_RANGE_MINUTES / 8.0));
 			if (currentMinutes < MINUTES_1700 + staggerDelay) {
+				return false;
+			}
+			if (currentMinutes >= MINUTES_2000) {
 				return false;
 			}
 
@@ -717,7 +879,11 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 
 		@Override
 		public boolean canContinueToUse() {
-			if (homeBuilding == null || timeoutTicks <= 0 || targetInside == null) {
+			if (StardewTimeManager.get().getCurrentTime()
+					>= MINUTES_2000
+					|| homeBuilding == null
+					|| timeoutTicks <= 0
+					|| targetInside == null) {
 				return false;
 			}
 			double distToTarget = BaseCoopAnimalEntity.this.distanceToSqr(targetInside.getX() + 0.5D, targetInside.getY(), targetInside.getZ() + 0.5D);
@@ -761,7 +927,9 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 			}
 
 			repathCooldown--;
-			if (repathCooldown <= 0) {
+			if (repathCooldown <= 0
+					&& BaseCoopAnimalEntity.this
+							.tryAcquirePathfindingBudget()) {
 				BaseCoopAnimalEntity.this.getNavigation().moveTo(targetInside.getX() + 0.5D, targetInside.getY(), targetInside.getZ() + 0.5D, 1.12D);
 				repathCooldown = 15;
 			}
@@ -821,7 +989,7 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 			}
 			int current = StardewTimeManager.get().getCurrentTime();
 			int staggerDelay = (int) (Math.abs(BaseCoopAnimalEntity.this.managedAnimalId % 8) * (STAGGER_LEAVE_RANGE_MINUTES / 8.0));
-			if (current < MINUTES_0600 + staggerDelay || current >= MINUTES_1700) {
+			if (current < MINUTES_0600 + staggerDelay) {
 				return false;
 			}
 
@@ -833,12 +1001,32 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 			if (!isInsideHome(homeBuilding)) {
 				return false;
 			}
+			boolean farmerInside =
+					BaseCoopAnimalEntity.this.level().players()
+							.stream()
+							.anyMatch(player ->
+									homeBuilding.isInBounds(
+											player.blockPosition()));
+			if (!AnimalParityRules.canLeaveHome(
+					current,
+					com.stardew.craft.weather.WeatherManager
+							.isRaining((ServerLevel)
+									BaseCoopAnimalEntity.this
+											.level()),
+					StardewTimeManager.get()
+							.getCurrentSeason() == 3,
+					farmerInside)) {
+				return false;
+			}
 
 			DoorTarget doorTarget = resolveNearestDoorTarget(homeBuilding, true);
 			targetPos = doorTarget != null ? doorTarget.outsidePos() : null;
 			doorPos = doorTarget != null ? doorTarget.doorPos() : null;
 			if (targetPos == null) {
-				logNoOutsideTargetDiagnostics(homeBuilding, doorTarget);
+				if (AI_DIAGNOSTICS) {
+					logNoOutsideTargetDiagnostics(
+							homeBuilding, doorTarget);
+				}
 				BaseCoopAnimalEntity.this.logAiDiag("leave.canUse.blocked", "no_outside_target");
 				return false;
 			}
@@ -877,7 +1065,9 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 			}
 
 			repathCooldown--;
-			if (repathCooldown <= 0) {
+			if (repathCooldown <= 0
+					&& BaseCoopAnimalEntity.this
+							.tryAcquirePathfindingBudget()) {
 				BaseCoopAnimalEntity.this.getNavigation().moveTo(targetPos.getX() + 0.5D, targetPos.getY(), targetPos.getZ() + 0.5D, 1.1D);
 				repathCooldown = 12;
 			}
@@ -920,6 +1110,8 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 
 	private final class FollowSameTypeAdultGoal extends Goal {
 		private BaseCoopAnimalEntity target;
+		private int repathTicks;
+		private int scanCooldownTicks;
 
 		private FollowSameTypeAdultGoal() {
 			this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
@@ -927,31 +1119,62 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 
 		@Override
 		public boolean canUse() {
-			if (!BaseCoopAnimalEntity.this.isBaby()) {
+			if (scanCooldownTicks > 0) {
+				scanCooldownTicks--;
+				return false;
+			}
+			scanCooldownTicks = 20
+				+ BaseCoopAnimalEntity.this.getRandom().nextInt(41);
+
+			FarmAnimalDefinition definition =
+				FarmAnimalDefinitions.find(
+					BaseCoopAnimalEntity.this.managedAnimalType);
+			if (!AnimalParityRules.canFollowAdult(
+					definition,
+					BaseCoopAnimalEntity.this.isBaby())) {
+				return false;
+			}
+			AnimalBuildingRecord homeBuilding = resolveHomeBuilding();
+			if (homeBuilding == null
+					|| isInsideHome(homeBuilding)) {
 				return false;
 			}
 			double bestDistance = Double.MAX_VALUE;
 			target = null;
 			for (BaseCoopAnimalEntity candidate : BaseCoopAnimalEntity.this.level().getEntitiesOfClass(
 				BaseCoopAnimalEntity.class,
-				BaseCoopAnimalEntity.this.getBoundingBox().inflate(8.0D),
-				animal -> animal != BaseCoopAnimalEntity.this && !animal.isBaby() && animal.getType() == BaseCoopAnimalEntity.this.getType())) {
+				BaseCoopAnimalEntity.this.getBoundingBox().inflate(4.0D),
+				animal -> animal != BaseCoopAnimalEntity.this
+					&& !animal.isBaby()
+					&& BaseCoopAnimalEntity.this.managedAnimalType.equals(
+						animal.managedAnimalType))) {
 				double distance = BaseCoopAnimalEntity.this.distanceToSqr(candidate);
 				if (distance < bestDistance) {
 					bestDistance = distance;
 					target = candidate;
 				}
 			}
+			repathTicks = 0;
 			return target != null;
 		}
 
 		@Override
 		public boolean canContinueToUse() {
-			return BaseCoopAnimalEntity.this.isBaby()
+			FarmAnimalDefinition definition =
+				FarmAnimalDefinitions.find(
+					BaseCoopAnimalEntity.this.managedAnimalType);
+			AnimalBuildingRecord homeBuilding = resolveHomeBuilding();
+			return AnimalParityRules.canFollowAdult(
+						definition,
+						BaseCoopAnimalEntity.this.isBaby())
+				&& homeBuilding != null
+				&& !isInsideHome(homeBuilding)
 				&& target != null
 				&& target.isAlive()
 				&& !target.isBaby()
-				&& BaseCoopAnimalEntity.this.distanceToSqr(target) < 144.0D;
+				&& BaseCoopAnimalEntity.this.managedAnimalType.equals(
+					target.managedAnimalType)
+				&& BaseCoopAnimalEntity.this.distanceToSqr(target) < 64.0D;
 		}
 
 		@Override
@@ -960,12 +1183,20 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 				return;
 			}
 			BaseCoopAnimalEntity.this.getLookControl().setLookAt(target, 10.0F, BaseCoopAnimalEntity.this.getMaxHeadXRot());
-			BaseCoopAnimalEntity.this.getNavigation().moveTo(target, 1.1D);
+			repathTicks--;
+			if (repathTicks <= 0
+					&& BaseCoopAnimalEntity.this
+							.tryAcquirePathfindingBudget()) {
+				BaseCoopAnimalEntity.this.getNavigation()
+						.moveTo(target, 1.1D);
+				repathTicks = 20;
+			}
 		}
 
 		@Override
 		public void stop() {
 			target = null;
+			repathTicks = 0;
 		}
 	}
 
@@ -979,24 +1210,30 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 			if (BaseCoopAnimalEntity.this.level().isClientSide) {
 				return false;
 			}
-			if (StardewTimeManager.get().getCurrentTime() < MINUTES_2000) {
-				return false;
-			}
-			AnimalBuildingRecord homeBuilding = resolveHomeBuilding();
-			return isInsideHome(homeBuilding);
+			return BaseCoopAnimalEntity.this.managedAnimalId > 0L
+				&& AnimalParityRules.shouldSleep(
+						StardewTimeManager.get()
+								.getCurrentTime());
 		}
 
 		@Override
 		public boolean canContinueToUse() {
-			if (StardewTimeManager.get().getCurrentTime() < MINUTES_2000) {
-				return false;
-			}
-			AnimalBuildingRecord homeBuilding = resolveHomeBuilding();
-			return isInsideHome(homeBuilding);
+			return AnimalParityRules.shouldSleep(
+					StardewTimeManager.get()
+							.getCurrentTime());
 		}
 
 		@Override
 		public void start() {
+			if (BaseCoopAnimalEntity.this.isInWater()) {
+				AnimalBuildingRecord homeBuilding =
+						resolveHomeBuilding();
+				if (homeBuilding != null) {
+					forceMoveInsideHome(homeBuilding);
+				}
+			}
+			BaseCoopAnimalEntity.this.entityData.set(
+					DATA_SLEEPING, true);
 			BaseCoopAnimalEntity.this.getNavigation().stop();
 		}
 
@@ -1008,6 +1245,8 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 
 		@Override
 		public void stop() {
+			BaseCoopAnimalEntity.this.entityData.set(
+					DATA_SLEEPING, false);
 			BaseCoopAnimalEntity.this.getNavigation().stop();
 		}
 	}
@@ -1049,6 +1288,11 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 				return false;
 			}
 
+			if (!BaseCoopAnimalEntity.this
+					.tryAcquirePathfindingBudget()) {
+				pauseTicks = 1;
+				return false;
+			}
 			Path path = BaseCoopAnimalEntity.this.getNavigation().createPath(target, 0);
 			if (path != null) {
 				BaseCoopAnimalEntity.this.getNavigation().moveTo(path, 1.0D);
@@ -1101,6 +1345,10 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 
 		private void tryEscapeMove() {
 			if (failedAttempts < 4) {
+				return;
+			}
+			if (!BaseCoopAnimalEntity.this
+					.tryAcquirePathfindingBudget()) {
 				return;
 			}
 
@@ -1186,6 +1434,7 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 	private final class EatPastureGrassGoal extends Goal {
 		private BlockPos targetGrass;
 		private int timeoutTicks;
+		private int repathTicks;
 
 		private EatPastureGrassGoal() {
 			this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
@@ -1204,25 +1453,43 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 				return false;
 			}
 			FarmAnimalRecord record = resolveManagedRecord();
-			if (record == null || record.fullness() >= 195) {
+			if (record == null
+					|| FarmAnimalDefinitions.find(
+							record.animalTypeId()) == null
+					|| record.fullness() >= 195) {
 				return false;
 			}
 			if (BaseCoopAnimalEntity.this.getRandom().nextDouble() >= 0.002D) {
 				return false;
 			}
 
-			targetGrass = findNearestGrass(7);
+			if (!(BaseCoopAnimalEntity.this.level() instanceof ServerLevel serverLevel)) {
+				return false;
+			}
+			targetGrass = AnimalGrassTargetService.reserveNearest(
+				serverLevel,
+				BaseCoopAnimalEntity.this.managedAnimalId,
+				BaseCoopAnimalEntity.this.blockPosition(),
+				7
+			);
 			if (targetGrass == null) {
 				return false;
 			}
 
 			timeoutTicks = 100;
+			repathTicks = 0;
 			return true;
 		}
 
 		@Override
 		public boolean canContinueToUse() {
-			return targetGrass != null && timeoutTicks > 0 && isRecognizedPastureGrass(targetGrass);
+			FarmAnimalRecord record = resolveManagedRecord();
+			return targetGrass != null
+				&& timeoutTicks > 0
+				&& record != null
+				&& FarmAnimalDefinitions.find(
+						record.animalTypeId()) != null
+				&& isRecognizedPastureGrass(targetGrass);
 		}
 
 		@Override
@@ -1233,7 +1500,17 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 			}
 
 			Vec3 targetCenter = Vec3.atCenterOf(targetGrass);
-			BaseCoopAnimalEntity.this.getNavigation().moveTo(targetCenter.x, targetCenter.y, targetCenter.z, 1.05D);
+			repathTicks--;
+			if (repathTicks <= 0
+					&& BaseCoopAnimalEntity.this
+							.tryAcquirePathfindingBudget()) {
+				BaseCoopAnimalEntity.this.getNavigation().moveTo(
+						targetCenter.x,
+						targetCenter.y,
+						targetCenter.z,
+						1.05D);
+				repathTicks = 15;
+			}
 
 			double distance = BaseCoopAnimalEntity.this.distanceToSqr(targetCenter);
 			if (distance > 2.2D) {
@@ -1245,6 +1522,9 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 			}
 
 			if (!isRecognizedPastureGrass(targetGrass)) {
+				AnimalGrassTargetService.release(
+					serverLevel, BaseCoopAnimalEntity.this.managedAnimalId);
+				targetGrass = null;
 				return;
 			}
 
@@ -1256,39 +1536,21 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 			applyEatState(serverLevel, ateBlueGrass);
 			BaseCoopAnimalEntity.this.triggerEatAnimation(48);
 			BaseCoopAnimalEntity.this.getNavigation().stop();
+			AnimalGrassTargetService.release(
+				serverLevel, BaseCoopAnimalEntity.this.managedAnimalId);
 			targetGrass = null;
 		}
 
 		@Override
 		public void stop() {
 			BaseCoopAnimalEntity.this.getNavigation().stop();
+			if (BaseCoopAnimalEntity.this.level() instanceof ServerLevel serverLevel) {
+				AnimalGrassTargetService.release(
+					serverLevel, BaseCoopAnimalEntity.this.managedAnimalId);
+			}
 			targetGrass = null;
 			timeoutTicks = 0;
-		}
-
-		private BlockPos findNearestGrass(int radius) {
-			BlockPos origin = BaseCoopAnimalEntity.this.blockPosition();
-			BlockPos best = null;
-			double bestDist = Double.MAX_VALUE;
-
-			for (int x = origin.getX() - radius; x <= origin.getX() + radius; x++) {
-				for (int y = origin.getY() - 2; y <= origin.getY() + 2; y++) {
-					for (int z = origin.getZ() - radius; z <= origin.getZ() + radius; z++) {
-						BlockPos candidate = new BlockPos(x, y, z);
-						if (!isRecognizedPastureGrass(candidate)) {
-							continue;
-						}
-
-						double dist = candidate.distSqr(origin);
-						if (dist < bestDist) {
-							best = candidate;
-							bestDist = dist;
-						}
-					}
-				}
-			}
-
-			return best;
+			repathTicks = 0;
 		}
 
 		private FarmAnimalRecord resolveManagedRecord() {
@@ -1322,12 +1584,17 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 		}
 
 		private int requiredGrassClumps(boolean blueGrass) {
-			// One grass block corresponds to one consumable grass tuft object in Stardew's terrain feature model.
-			return 1;
+			FarmAnimalRecord record = resolveManagedRecord();
+			FarmAnimalDefinition definition = record == null
+				? null
+				: FarmAnimalDefinitions.find(record.animalTypeId());
+			return definition == null
+				? Integer.MAX_VALUE
+				: definition.grassEatAmount();
 		}
 	}
 
-	private AnimalBuildingRecord resolveHomeBuilding() {
+	protected AnimalBuildingRecord resolveHomeBuilding() {
 		if (!(this.level() instanceof ServerLevel serverLevel) || managedAnimalId <= 0L) {
 			return null;
 		}
@@ -1348,7 +1615,7 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 		return building;
 	}
 
-	private boolean isInsideHome(AnimalBuildingRecord building) {
+	protected boolean isInsideHome(AnimalBuildingRecord building) {
 		if (building == null) {
 			return false;
 		}
@@ -1416,7 +1683,7 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 		this.hurtMarked = true;
 	}
 
-	private void forceMoveInsideHome(AnimalBuildingRecord building) {
+	protected void forceMoveInsideHome(AnimalBuildingRecord building) {
 		DoorTarget doorTarget = resolveNearestDoorTarget(building, false);
 		BlockPos preferred = doorTarget != null ? doorTarget.insidePos() : building.managerPos().above();
 		BlockPos safe = findSafeInteriorPosition(building, preferred);
@@ -1436,7 +1703,7 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 		DoorTarget doorTarget = resolveNearestDoorTarget(building, true);
 		BlockPos preferred = doorTarget != null ? doorTarget.outsidePos() : null;
 		BlockPos safe = findSafeExteriorPosition(building, preferred);
-		if (safe == null) {
+		if (safe == null && AI_DIAGNOSTICS) {
 			logNoOutsideTargetDiagnostics(building, doorTarget);
 		}
 		if (safe == null) {
@@ -1460,25 +1727,14 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 			return fallback.immutable();
 		}
 
-		BlockPos best = null;
-		double bestDist = Double.MAX_VALUE;
-		BlockPos center = building.managerPos();
-		for (int y = building.minY(); y <= building.maxY(); y++) {
-			for (int z = building.minZ(); z <= building.maxZ(); z++) {
-				for (int x = building.minX(); x <= building.maxX(); x++) {
-					BlockPos candidate = new BlockPos(x, y, z);
-					if (!canOccupy(candidate)) {
-						continue;
-					}
-					double dist = candidate.distSqr(center);
-					if (dist < bestDist) {
-						bestDist = dist;
-						best = candidate.immutable();
-					}
-				}
+		for (BlockPos candidate :
+				AnimalBuildingPositionIndex.interiorCandidates(
+						building)) {
+			if (canOccupy(candidate)) {
+				return candidate;
 			}
 		}
-		return best;
+		return null;
 	}
 
 	private BlockPos findSafeExteriorPosition(AnimalBuildingRecord building, BlockPos preferred) {
@@ -1489,59 +1745,22 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 			return preferred.immutable();
 		}
 
-		BlockPos best = null;
-		double bestDist = Double.MAX_VALUE;
-		BlockPos center = building.managerPos();
-		for (int y = building.minY() - 1; y <= building.maxY() + 1; y++) {
-			for (int z = building.minZ() - 1; z <= building.maxZ() + 1; z++) {
-				for (int x = building.minX() - 1; x <= building.maxX() + 1; x++) {
-					BlockPos candidate = new BlockPos(x, y, z);
-					if (building.isInBounds(candidate) || !canOccupy(candidate)) {
-						continue;
-					}
-					double dist = candidate.distSqr(center);
-					if (dist < bestDist) {
-						bestDist = dist;
-						best = candidate.immutable();
-					}
-				}
+		for (BlockPos candidate :
+				AnimalBuildingPositionIndex.exteriorCandidates(
+						building)) {
+			if (canOccupy(candidate)) {
+				return candidate;
 			}
 		}
-		return best;
+		return null;
 	}
 
-	private Set<BlockPos> getBoundaryDoorPositions(AnimalBuildingRecord building) {
-		Set<BlockPos> doors = new LinkedHashSet<>();
-		if (building == null) {
-			return doors;
+	private List<BlockPos> getBoundaryDoorPositions(AnimalBuildingRecord building) {
+		if (!(this.level() instanceof ServerLevel serverLevel)) {
+			return List.of();
 		}
-
-		if (!building.boundaryDoorCells().isEmpty()) {
-			for (Long packed : building.boundaryDoorCells()) {
-				BlockPos pos = BlockPos.of(packed);
-				if (building.isBoundaryDoor(pos)) {
-					doors.add(pos.immutable());
-				}
-			}
-			if (!doors.isEmpty()) {
-				return doors;
-			}
-		}
-
-		for (int y = building.minY() - 1; y <= building.maxY() + 1; y++) {
-			for (int z = building.minZ() - 1; z <= building.maxZ() + 1; z++) {
-				for (int x = building.minX() - 1; x <= building.maxX() + 1; x++) {
-					BlockPos pos = new BlockPos(x, y, z);
-					BlockState state = this.level().getBlockState(pos);
-					if (!AnimalDoorStateService.isDoorOrFenceGate(state)) {
-						continue;
-					}
-					doors.add(pos.immutable());
-				}
-			}
-		}
-
-		return doors;
+		return AnimalDoorStateService.boundaryDoorPositions(
+				serverLevel, building);
 	}
 
 	private BlockPos resolveOutsideCandidate(AnimalBuildingRecord building, BlockPos sideA, BlockPos sideB) {

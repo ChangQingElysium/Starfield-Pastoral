@@ -1,18 +1,22 @@
 package com.stardew.craft.network.payload;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.api.v1.farm.StardewFarmLayout;
+import com.stardew.craft.api.v1.farm.StardewFarmLayouts;
+import com.stardew.craft.api.v1.internal.farm.StardewFarmLayoutRegistry;
 import com.stardew.craft.farm.FarmInstance;
 import com.stardew.craft.farm.FarmInstanceRegistry;
-import com.stardew.craft.farm.FarmType;
 import com.stardew.craft.interior.CrossDimensionTeleporter;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * C→S: 玩家在农场选择 GUI 中确认了农场类型和名称。
@@ -25,22 +29,85 @@ public record FarmSelectionSubmitPayload(
         boolean forceCancelPending,
         String preferredName,
         String favoriteThing,
-        boolean male
+        boolean male,
+        Map<ResourceLocation, String> layoutConfiguration
 ) implements CustomPacketPayload {
+    private static final int MAX_CONFIGURATION_FIELDS = 64;
 
     public static final Type<FarmSelectionSubmitPayload> TYPE =
             new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "farm_selection_submit"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, FarmSelectionSubmitPayload> STREAM_CODEC =
-            StreamCodec.composite(
-                    ByteBufCodecs.STRING_UTF8, FarmSelectionSubmitPayload::farmTypeId,
-                    ByteBufCodecs.STRING_UTF8, FarmSelectionSubmitPayload::farmName,
-                    ByteBufCodecs.BOOL, FarmSelectionSubmitPayload::forceCancelPending,
-                    ByteBufCodecs.STRING_UTF8, FarmSelectionSubmitPayload::preferredName,
-                    ByteBufCodecs.STRING_UTF8, FarmSelectionSubmitPayload::favoriteThing,
-                    ByteBufCodecs.BOOL, FarmSelectionSubmitPayload::male,
-                    FarmSelectionSubmitPayload::new
-            );
+            StreamCodec.of(
+                    FarmSelectionSubmitPayload::encode,
+                    FarmSelectionSubmitPayload::decode);
+
+    public FarmSelectionSubmitPayload {
+        layoutConfiguration = Map.copyOf(layoutConfiguration);
+        if (layoutConfiguration.size() > MAX_CONFIGURATION_FIELDS) {
+            throw new IllegalArgumentException(
+                    "Farm layout configuration has too many fields");
+        }
+    }
+
+    /** Source-compatible constructor for clients without typed layout options. */
+    public FarmSelectionSubmitPayload(
+            String farmTypeId,
+            String farmName,
+            boolean forceCancelPending,
+            String preferredName,
+            String favoriteThing,
+            boolean male
+    ) {
+        this(farmTypeId, farmName, forceCancelPending,
+                preferredName, favoriteThing, male, Map.of());
+    }
+
+    private static void encode(
+            RegistryFriendlyByteBuf buffer,
+            FarmSelectionSubmitPayload payload
+    ) {
+        buffer.writeUtf(payload.farmTypeId(), 256);
+        buffer.writeUtf(payload.farmName(), 64);
+        buffer.writeBoolean(payload.forceCancelPending());
+        buffer.writeUtf(payload.preferredName(), 64);
+        buffer.writeUtf(payload.favoriteThing(), 96);
+        buffer.writeBoolean(payload.male());
+        buffer.writeVarInt(payload.layoutConfiguration().size());
+        payload.layoutConfiguration().forEach((id, value) -> {
+            ResourceLocation.STREAM_CODEC.encode(buffer, id);
+            buffer.writeUtf(value, 128);
+        });
+    }
+
+    private static FarmSelectionSubmitPayload decode(
+            RegistryFriendlyByteBuf buffer
+    ) {
+        String farmTypeId = buffer.readUtf(256);
+        String farmName = buffer.readUtf(64);
+        boolean forceCancelPending = buffer.readBoolean();
+        String preferredName = buffer.readUtf(64);
+        String favoriteThing = buffer.readUtf(96);
+        boolean male = buffer.readBoolean();
+        int count = buffer.readVarInt();
+        if (count < 0 || count > MAX_CONFIGURATION_FIELDS) {
+            throw new IllegalArgumentException(
+                    "Invalid farm layout configuration field count: " + count);
+        }
+        LinkedHashMap<ResourceLocation, String> configuration =
+                new LinkedHashMap<>();
+        for (int i = 0; i < count; i++) {
+            ResourceLocation id =
+                    ResourceLocation.STREAM_CODEC.decode(buffer);
+            if (configuration.putIfAbsent(id, buffer.readUtf(128)) != null) {
+                throw new IllegalArgumentException(
+                        "Duplicate farm layout configuration field: " + id);
+            }
+        }
+        return new FarmSelectionSubmitPayload(
+                farmTypeId, farmName, forceCancelPending,
+                preferredName, favoriteThing, male, configuration);
+    }
 
     @Override
     public Type<? extends CustomPacketPayload> type() {
@@ -87,13 +154,23 @@ public record FarmSelectionSubmitPayload(
                 return;
             }
 
-            // 验证农场类型
-            FarmType farmType = FarmType.fromId(payload.farmTypeId);
-            if (!farmType.isUnlocked()) {
+            // Resolve and revalidate the namespaced layout on the server.
+            ResourceLocation requestedLayoutId =
+                    normalizeLayoutId(payload.farmTypeId);
+            StardewFarmLayout layout = StardewFarmLayouts.find(
+                            requestedLayoutId)
+                    .filter(StardewFarmLayout::selectable)
+                    .orElseGet(() -> StardewFarmLayouts.find(
+                            StardewFarmLayoutRegistry.builtinId(
+                                    com.stardew.craft.farm.FarmType.STANDARD))
+                            .orElseThrow());
+            if (!layout.id().equals(requestedLayoutId)) {
                 StardewCraft.LOGGER.warn("[FARM_SELECT] {} tried to select locked farm type: {}",
                         player.getName().getString(), payload.farmTypeId);
-                farmType = FarmType.STANDARD;
             }
+            Map<ResourceLocation, String> requestedConfiguration =
+                    layout.id().equals(requestedLayoutId)
+                            ? payload.layoutConfiguration() : Map.of();
 
             // 验证名称
             String name = payload.farmName;
@@ -110,10 +187,29 @@ public record FarmSelectionSubmitPayload(
                     com.stardew.craft.player.PlayerDataManager.getPlayerData(player);
             playerData.setProfile(preferredName, favoriteThing, payload.male() ? 0 : 1);
             com.stardew.craft.player.PlayerDataManager.get().setDirty();
-            FarmInstance farm = registry.createFarm(player.getUUID(), preferredName, name, farmType);
+            FarmInstance farm;
+            try {
+                farm = registry.createFarm(
+                        player.getUUID(),
+                        preferredName,
+                        name,
+                        layout.id(),
+                        requestedConfiguration);
+            } catch (IllegalArgumentException invalidConfiguration) {
+                StardewCraft.LOGGER.warn(
+                        "[FARM_SELECT] {} sent invalid configuration for {}: {}",
+                        player.getName().getString(),
+                        layout.id(),
+                        invalidConfiguration.getMessage());
+                player.sendSystemMessage(net.minecraft.network.chat.Component.translatable(
+                        "stardewcraft.farm_selection.invalid_configuration"));
+                net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
+                        player, new OpenFarmSelectionPayload());
+                return;
+            }
 
             StardewCraft.LOGGER.info("[FARM_SELECT] {} created farm '{}' (type={})",
-                    player.getName().getString(), name, farmType.getId());
+                    player.getName().getString(), name, layout.id());
 
             com.stardew.craft.player.PlayerDataEventHandler.syncPlayerData(
                     player, playerData);
@@ -144,6 +240,21 @@ public record FarmSelectionSubmitPayload(
                 CrossDimensionTeleporter.wizardInteriorToStardewOutdoor(player);
             }
         });
+    }
+
+    private static ResourceLocation normalizeLayoutId(String rawId) {
+        if (rawId == null || rawId.isBlank()) {
+            return StardewFarmLayoutRegistry.builtinId(
+                    com.stardew.craft.farm.FarmType.STANDARD);
+        }
+        String normalized = rawId.trim();
+        ResourceLocation id = normalized.indexOf(':') >= 0
+                ? ResourceLocation.tryParse(normalized)
+                : ResourceLocation.tryBuild(StardewCraft.MODID, normalized);
+        return id == null
+                ? StardewFarmLayoutRegistry.builtinId(
+                        com.stardew.craft.farm.FarmType.STANDARD)
+                : id;
     }
 
     private static String sanitizeProfileText(String value, int maxLength) {

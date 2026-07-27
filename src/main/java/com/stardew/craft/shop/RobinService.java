@@ -1,9 +1,10 @@
 package com.stardew.craft.shop;
 
 import com.stardew.craft.entity.npc.StardewNpcEntity;
-import com.stardew.craft.network.payload.OpenCarpenterMenuPayload;
 import com.stardew.craft.network.payload.OpenRobinMenuPayload;
 import com.stardew.craft.network.payload.OpenShopScreenPayload;
+import com.stardew.craft.api.v1.building.StardewBuildingBlueprints;
+import com.stardew.craft.api.v1.building.StardewBuildingBuilders;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
@@ -25,71 +26,15 @@ public final class RobinService {
     private static final int COUNTER_MIN_Y = 51, COUNTER_MAX_Y = 53;
     private static final int COUNTER_MIN_Z = -120, COUNTER_MAX_Z = -117;
 
-    private static final List<CarpenterBlueprint> BLUEPRINTS = List.of(
-        new CarpenterBlueprint(
-            "Coop",
-            "stardewcraft.robin.blueprint.coop.name",
-            "stardewcraft.robin.blueprint.coop.desc",
-            4000,
-            List.of(
-                new CarpenterBlueprint.MaterialEntry("stardewcraft:wood_normal", 300),
-                new CarpenterBlueprint.MaterialEntry("stardewcraft:stone", 100)
-            ),
-            "stardewcraft:coop_manager",
-            false,
-            16,
-            false
-        ),
-        new CarpenterBlueprint(
-            "Barn",
-            "stardewcraft.robin.blueprint.barn.name",
-            "stardewcraft.robin.blueprint.barn.desc",
-            6000,
-            List.of(
-                new CarpenterBlueprint.MaterialEntry("stardewcraft:wood_normal", 350),
-                new CarpenterBlueprint.MaterialEntry("stardewcraft:stone", 150)
-            ),
-            "stardewcraft:barn_manager",
-            false,
-            16,
-            false
-        ),
-        new CarpenterBlueprint(
-            "Silo",
-            "stardewcraft.robin.blueprint.silo.name",
-            "stardewcraft.robin.blueprint.silo.desc",
-            100,
-            List.of(
-                new CarpenterBlueprint.MaterialEntry("stardewcraft:stone", 100),
-                new CarpenterBlueprint.MaterialEntry("stardewcraft:clay", 10),
-                new CarpenterBlueprint.MaterialEntry("stardewcraft:copper_bar", 5)
-            ),
-            "stardewcraft:silo_manager",
-            false,
-            16,
-            false
-        ),
-        new CarpenterBlueprint(
-            "Fish Pond",
-            "stardewcraft.robin.blueprint.fish_pond.name",
-            "stardewcraft.robin.blueprint.fish_pond.desc",
-            5000,
-            List.of(
-                new CarpenterBlueprint.MaterialEntry("stardewcraft:stone", 200),
-                new CarpenterBlueprint.MaterialEntry("stardewcraft:seaweed", 5),
-                new CarpenterBlueprint.MaterialEntry("stardewcraft:green_algae", 5)
-            ),
-            "stardewcraft:fish_pond_manager",
-            false,
-            16,
-            false
-        )
-    );
-
     private RobinService() {}
 
+    /** @deprecated use {@link StardewBuildingBlueprints#forBuilder}. */
+    @Deprecated(forRemoval = false)
     public static List<CarpenterBlueprint> getBlueprints() {
-        return BLUEPRINTS;
+        return com.stardew.craft.building.BuildingBlueprintRegistry
+                .forBuilder(StardewBuildingBuilders.ROBIN).stream()
+                .map(CarpenterBlueprint::from)
+                .toList();
     }
 
     public static boolean isPlayerAtCounter(ServerPlayer player) {
@@ -129,13 +74,8 @@ public final class RobinService {
     // ──── Build (CarpenterMenu) ────
 
     private static void openCarpenterMenu(ServerPlayer player) {
-        int money = PlayerStardewDataAPI.getMoney(player);
-        OpenCarpenterMenuPayload payload = new OpenCarpenterMenuPayload(
-            "Robin",
-            money,
-            new ArrayList<>(BLUEPRINTS)
-        );
-        PacketDistributor.sendToPlayer(player, payload);
+        StardewBuildingBlueprints.open(
+                player, StardewBuildingBuilders.ROBIN);
     }
 
     // ──── Shop (material purchase via ShopScreen) ────

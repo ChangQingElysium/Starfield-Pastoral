@@ -102,6 +102,15 @@ public final class ManagedAnimalRuntimeIndex {
         }
     }
 
+    public static boolean isCanonical(
+            ServerLevel level,
+            BaseCoopAnimalEntity animal
+    ) {
+        return animal != null
+                && find(level, animal.getManagedAnimalId())
+                        == animal;
+    }
+
     public static void clear(ServerLevel level) {
         BY_LEVEL.remove(level);
     }

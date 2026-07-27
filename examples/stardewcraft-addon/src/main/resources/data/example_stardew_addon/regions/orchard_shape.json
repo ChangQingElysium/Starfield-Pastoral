@@ -1,0 +1,25 @@
+{
+  "dimension": "stardewcraft:stardew_valley",
+  "location": "orchard",
+  "include": [
+    {
+      "min": [-170, 55, 65],
+      "max": [-140, 90, 95]
+    },
+    {
+      "min": [-139, 55, 80],
+      "max": [-120, 90, 115]
+    }
+  ],
+  "exclude": [
+    {
+      "min": [-155, 55, 70],
+      "max": [-152, 90, 74]
+    }
+  ],
+  "tags": [
+    "stardewcraft:outdoor",
+    "example_stardew_addon:orchard"
+  ],
+  "priority": 50
+}

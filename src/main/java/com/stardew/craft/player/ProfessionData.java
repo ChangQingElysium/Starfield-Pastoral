@@ -34,13 +34,13 @@ public final class ProfessionData {
             ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "vanilla");
     private static final AtomicDefinitionStore<StardewProfessionDefinition> STORE =
             new AtomicDefinitionStore<>();
-    private static volatile String cachedJson = "{}";
+    private static volatile Catalog catalog = Catalog.empty();
 
     private ProfessionData() {
     }
 
     public static DefinitionSnapshot<StardewProfessionDefinition> snapshot() {
-        return STORE.snapshot();
+        return catalog.definitions();
     }
 
     public static ResourceLocation id(ProfessionType profession) {
@@ -48,11 +48,12 @@ public final class ProfessionData {
     }
 
     public static Optional<StardewProfessionDefinition> definition(ProfessionType profession) {
-        return Optional.ofNullable(STORE.snapshot().definitions().get(id(profession)));
+        return Optional.ofNullable(
+                catalog.definitions().definitions().get(id(profession)));
     }
 
     public static String getCachedJson() {
-        return cachedJson;
+        return catalog.cachedJson();
     }
 
     public static double applyEffect(ProfessionType profession, ResourceLocation operation,
@@ -73,9 +74,9 @@ public final class ProfessionData {
                 ResourceLocation id = ResourceLocation.tryParse(entry.getKey());
                 decode(id, id, entry.getValue(), definitions, sources, diagnostics);
             }
-            var result = STORE.applyLocal(definitions, sources, diagnostics);
-            logDiagnostics(result.diagnostics());
-            if (result.accepted()) cachedJson = json;
+            applyCandidate(
+                    definitions, sources, diagnostics,
+                    json, "client sync");
         } catch (RuntimeException exception) {
             StardewCraft.LOGGER.error("[Professions] Failed client sync", exception);
         }
@@ -110,16 +111,57 @@ public final class ProfessionData {
                     .sorted(Map.Entry.comparingByKey(Comparator.comparing(ResourceLocation::toString)))
                     .forEach(entry -> decode(entry.getKey(), entry.getKey(), entry.getValue(),
                             definitions, sources, diagnostics));
-            var result = STORE.applyLocal(definitions, sources, diagnostics);
-            logDiagnostics(result.diagnostics());
-            if (!result.accepted()) {
-                StardewCraft.LOGGER.error("[Professions] Rejected reload; keeping {} definitions",
-                        STORE.snapshot().definitions().size());
-                return;
-            }
-            cachedJson = encodeDefinitions(result.snapshot().definitions());
-            StardewCraft.LOGGER.info("[Professions] Applied {} definitions", definitions.size());
+            applyCandidate(
+                    definitions, sources, diagnostics,
+                    null, "reload");
         }
+    }
+
+    static synchronized void applyCandidate(
+            Map<ResourceLocation, StardewProfessionDefinition> definitions,
+            Map<ResourceLocation, String> sources,
+            List<DefinitionDiagnostic> diagnostics,
+            @Nullable String sourceJson,
+            String operation
+    ) {
+        List<DefinitionDiagnostic> preparedDiagnostics =
+                new ArrayList<>(diagnostics);
+        String nextCachedJson = sourceJson;
+        if (nextCachedJson == null && preparedDiagnostics.stream()
+                .noneMatch(diagnostic -> diagnostic.severity()
+                        == DefinitionDiagnostic.Severity.ERROR)) {
+            try {
+                nextCachedJson = encodeDefinitions(definitions);
+            } catch (RuntimeException exception) {
+                preparedDiagnostics.add(DefinitionDiagnostic.error(
+                        null, null,
+                        "Failed to encode profession sync catalog: "
+                                + exception.getMessage()));
+            }
+        }
+
+        var result = STORE.applyLocal(
+                definitions, sources, preparedDiagnostics);
+        logDiagnostics(result.diagnostics());
+        if (!result.accepted()) {
+            StardewCraft.LOGGER.error(
+                    "[Professions] Rejected {}; keeping v{} with {} definitions",
+                    operation,
+                    catalog.definitions().version(),
+                    catalog.definitions().definitions().size());
+            return;
+        }
+        if (nextCachedJson == null) {
+            throw new IllegalStateException(
+                    "Accepted professions have no sync catalog");
+        }
+        catalog = new Catalog(
+                result.snapshot(), nextCachedJson);
+        StardewCraft.LOGGER.info(
+                "[Professions] Applied {} v{} ({} definitions)",
+                operation,
+                catalog.definitions().version(),
+                catalog.definitions().definitions().size());
     }
 
     private static void decode(ResourceLocation source, ResourceLocation id, JsonElement json,
@@ -142,8 +184,15 @@ public final class ProfessionData {
 
     private static String encodeDefinitions(Map<ResourceLocation, StardewProfessionDefinition> definitions) {
         JsonObject root = new JsonObject();
-        definitions.forEach((id, definition) -> StardewProfessionDefinition.CODEC
-                .encodeStart(JsonOps.INSTANCE, definition).result().ifPresent(json -> root.add(id.toString(), json)));
+        definitions.forEach((id, definition) ->
+                StardewProfessionDefinition.CODEC
+                        .encodeStart(JsonOps.INSTANCE, definition)
+                        .resultOrPartial(message -> {
+                            throw new IllegalArgumentException(
+                                    id + ": " + message);
+                        })
+                        .ifPresent(json ->
+                                root.add(id.toString(), json)));
         return GSON.toJson(root);
     }
 
@@ -154,6 +203,27 @@ public final class ProfessionData {
             } else {
                 StardewCraft.LOGGER.warn("[Professions] {}", diagnostic.message());
             }
+        }
+    }
+
+    static Catalog catalog() {
+        return catalog;
+    }
+
+    record Catalog(
+            DefinitionSnapshot<StardewProfessionDefinition> definitions,
+            String cachedJson
+    ) {
+        Catalog {
+            definitions = java.util.Objects.requireNonNull(
+                    definitions, "definitions");
+            cachedJson = java.util.Objects.requireNonNull(
+                    cachedJson, "cachedJson");
+        }
+
+        private static Catalog empty() {
+            return new Catalog(
+                    DefinitionSnapshot.empty(), "{}");
         }
     }
 }

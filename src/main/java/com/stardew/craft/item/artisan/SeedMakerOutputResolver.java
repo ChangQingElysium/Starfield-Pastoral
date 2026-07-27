@@ -1,5 +1,7 @@
 package com.stardew.craft.item.artisan;
 
+import com.stardew.craft.api.v1.internal.machine.StardewArtisanResolverRegistry;
+import com.stardew.craft.api.v1.machine.StardewArtisanResolvers;
 import com.stardew.craft.item.ModItems;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -14,6 +16,15 @@ public final class SeedMakerOutputResolver {
 
     @Nullable
     public static Item resolve(Item input) {
+        StardewArtisanResolvers.SeedResult addonResult =
+                StardewArtisanResolverRegistry.resolveSeedMaker(input);
+        if (addonResult.decision() == StardewArtisanResolvers.SeedDecision.DENY) {
+            return null;
+        }
+        if (addonResult.decision() == StardewArtisanResolvers.SeedDecision.OUTPUT) {
+            return addonResult.output();
+        }
+
         ResourceLocation id = BuiltInRegistries.ITEM.getKey(input);
         if ("stardewcraft".equals(id.getNamespace()) && "sweet_gem_berry".equals(id.getPath())) {
             return ModItems.RARE_SEED.get();
