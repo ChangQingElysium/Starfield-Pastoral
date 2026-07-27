@@ -201,6 +201,35 @@ class StardewNpcSocialRulesTest {
     }
 
     @Test
+    void unifiedAddonProfileNormalizesConflictingDisplayProvider() {
+        int suffix = IDS.incrementAndGet();
+        ResourceLocation npcId = id("addon_conflicting_display_" + suffix);
+        StardewNpcProfile profile = new StardewNpcProfile(
+                npcId, true, false, "idle_only",
+                2, 1, 1, 0, 1, false);
+        StardewNpcProfiles.register(
+                id("addon_profile_" + suffix),
+                100,
+                new StardewNpcDefinition(
+                        npcId, profile, display(npcId, false)));
+        StardewNpcDisplays.register(
+                id("addon_display_" + suffix),
+                200,
+                requested -> requested.equals(npcId)
+                        ? display(npcId, true)
+                        : null);
+
+        StardewNpcDisplay resolvedDisplay =
+                StardewNpcDisplays.resolve(npcId);
+        StardewNpcDefinition resolvedDefinition =
+                StardewNpcProfiles.resolve(npcId).orElseThrow();
+
+        assertFalse(resolvedDisplay.datable());
+        assertFalse(resolvedDefinition.profile().datable());
+        assertFalse(resolvedDefinition.display().datable());
+    }
+
+    @Test
     void giftRegistrationsRejectDuplicatesWithinEachHookKind() {
         int suffix = IDS.incrementAndGet();
         ResourceLocation confirmationId = id("gift_confirmation_" + suffix);
@@ -227,6 +256,13 @@ class StardewNpcSocialRulesTest {
     }
 
     private static StardewNpcDisplay display(ResourceLocation npcId) {
+        return display(npcId, false);
+    }
+
+    private static StardewNpcDisplay display(
+            ResourceLocation npcId,
+            boolean datable
+    ) {
         return new StardewNpcDisplay(
                 npcId,
                 "entity.npc_social_test.npc." + npcId.getPath(),
@@ -237,7 +273,7 @@ class StardewNpcSocialRulesTest {
                 16,
                 24,
                 "npc_social_test.relationship.friend",
-                false
+                datable
         );
     }
 

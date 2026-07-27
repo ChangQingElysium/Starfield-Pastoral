@@ -20,7 +20,7 @@
 #### NPCs, Shops, Festivals And Progress
 
 - Added namespaced NPC profiles, displays, entity resolution, lifecycle events, schedules, dialogue, gift tastes, friendship rewards, social rules and shop bindings.
-- Fixed the Social tab crashing when a dateable core NPC was projected through the new display API. Core capability data now keeps fallback and addon-provided display metadata consistent, and the Russian tab label now reads “Relationships” instead of the ambiguous “Secular”.
+- Fixed the Social tab crashing when a dateable core NPC was projected through the new display API. Unified profiles and legacy core capability data now keep fallback and addon-provided display metadata consistent, and the Russian tab label now reads “Relationships” instead of the ambiguous “Secular”.
 - Added extensible currencies, compound costs, stock policies, products, server-authoritative purchase preparation and idempotent transaction handling.
 - Added festival map overlays, participants, mechanics, activities, rewards, persistent sessions and epoch/revision synchronization, together with extensible progress domains, requirements, rewards and production events.
 
@@ -55,7 +55,7 @@
 #### NPC、商店、节日与进度
 
 - 新增命名空间 NPC Profile、展示、实体解析、生命周期、日程、对话、礼物喜好、友情奖励、社交规则和商店绑定。
-- 修复可约会核心 NPC 经新展示 API 投影后导致社交页崩溃的问题。核心 capability 现在会统一 fallback 和附属提供的 Display 元数据，并将容易被误解为“世俗”的俄语页签改为“关系”。
+- 修复可约会核心 NPC 经新展示 API 投影后导致社交页崩溃的问题。统一 Profile 与旧核心 capability 现在会统一 fallback 和附属提供的 Display 元数据，并将容易被误解为“世俗”的俄语页签改为“关系”。
 - 新增可扩展货币、复合成本、库存策略、商品、服务端权威购买准备和幂等事务处理。
 - 新增节日地图覆盖、参与者、玩法、活动、奖励、持久会话与 epoch/revision 同步，并补充可扩展进度领域、条件、奖励和生产事件。
 

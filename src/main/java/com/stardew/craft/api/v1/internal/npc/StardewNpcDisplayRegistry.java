@@ -44,7 +44,7 @@ public final class StardewNpcDisplayRegistry {
                                 registered.id(), candidate.npcId(), npcId);
                         continue;
                     }
-                    return alignWithCapability(npcId, candidate);
+                    return alignWithProfile(npcId, candidate);
                 }
             } catch (RuntimeException exception) {
                 StardewCraft.LOGGER.error(
@@ -68,7 +68,7 @@ public final class StardewNpcDisplayRegistry {
         String namespace = npcId.getNamespace();
         String path = npcId.getPath();
         boolean core = StardewCraft.MODID.equals(namespace);
-        NpcCapabilityProfile capability = capability(npcId);
+        Boolean datable = authoritativeDatable(npcId);
         String nameKey = core
                 ? "entity.stardewcraft.npc." + path
                 : "entity." + namespace + ".npc." + path;
@@ -86,21 +86,21 @@ public final class StardewNpcDisplayRegistry {
                 16,
                 24,
                 "stardewcraft.social.relationship.friend",
-                capability != null && capability.datable()
+                datable != null && datable
         );
     }
 
     /**
-     * Capability data is authoritative when a legacy/core NPC is projected into the unified API.
-     * A display provider may customize presentation, but cannot silently change gameplay
-     * relationship rules or make the projected definition internally inconsistent.
+     * The unified profile is authoritative for registered NPCs, followed by capability data
+     * for legacy projections. A display provider may customize presentation, but cannot
+     * silently change gameplay relationship rules or make API views inconsistent.
      */
-    private static StardewNpcDisplay alignWithCapability(
+    private static StardewNpcDisplay alignWithProfile(
             ResourceLocation npcId,
             StardewNpcDisplay display
     ) {
-        NpcCapabilityProfile capability = capability(npcId);
-        if (capability == null || capability.datable() == display.datable()) {
+        Boolean datable = authoritativeDatable(npcId);
+        if (datable == null || datable == display.datable()) {
             return display;
         }
         return new StardewNpcDisplay(
@@ -113,8 +113,17 @@ public final class StardewNpcDisplayRegistry {
                 display.mugshotSheetWidth(),
                 display.mugshotSheetHeight(),
                 display.relationshipTranslationKey(),
-                capability.datable()
+                datable
         );
+    }
+
+    private static Boolean authoritativeDatable(ResourceLocation npcId) {
+        var definition = StardewNpcProfileRegistry.resolveRegistered(npcId);
+        if (definition != null) {
+            return definition.profile().datable();
+        }
+        NpcCapabilityProfile capability = capability(npcId);
+        return capability == null ? null : capability.datable();
     }
 
     private static NpcCapabilityProfile capability(ResourceLocation npcId) {
