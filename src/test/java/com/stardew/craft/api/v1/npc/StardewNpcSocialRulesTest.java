@@ -1,11 +1,15 @@
 package com.stardew.craft.api.v1.npc;
 
 import com.stardew.craft.api.v1.internal.npc.StardewNpcSocialRuleRegistry;
+import com.stardew.craft.npc.data.NpcCapabilityProfile;
+import com.stardew.craft.npc.data.NpcDataRegistry;
 import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -139,6 +143,64 @@ class StardewNpcSocialRulesTest {
     }
 
     @Test
+    void coreCapabilityProjectionKeepsFallbackDisplayDatableInSync() {
+        int suffix = IDS.incrementAndGet();
+        String path = "core_datable_" + suffix;
+        ResourceLocation npcId =
+                ResourceLocation.fromNamespaceAndPath("stardewcraft", path);
+        Map<String, NpcCapabilityProfile> previous =
+                new LinkedHashMap<>(NpcDataRegistry.capabilities());
+        try {
+            Map<String, NpcCapabilityProfile> capabilities =
+                    new LinkedHashMap<>(previous);
+            capabilities.put(path, capability(path, true));
+            NpcDataRegistry.replaceCapabilities(capabilities);
+
+            StardewNpcDisplay display = StardewNpcDisplays.resolve(npcId);
+            StardewNpcDefinition definition =
+                    StardewNpcProfiles.resolve(npcId).orElseThrow();
+
+            assertTrue(display.datable());
+            assertTrue(definition.profile().datable());
+            assertTrue(definition.display().datable());
+        } finally {
+            NpcDataRegistry.replaceCapabilities(previous);
+        }
+    }
+
+    @Test
+    void coreCapabilityProjectionNormalizesConflictingDisplayProvider() {
+        int suffix = IDS.incrementAndGet();
+        String path = "core_conflicting_display_" + suffix;
+        ResourceLocation npcId =
+                ResourceLocation.fromNamespaceAndPath("stardewcraft", path);
+        StardewNpcDisplays.register(
+                id("conflicting_display_" + suffix),
+                100,
+                requested -> requested.equals(npcId)
+                        ? display(npcId)
+                        : null);
+        Map<String, NpcCapabilityProfile> previous =
+                new LinkedHashMap<>(NpcDataRegistry.capabilities());
+        try {
+            Map<String, NpcCapabilityProfile> capabilities =
+                    new LinkedHashMap<>(previous);
+            capabilities.put(path, capability(path, true));
+            NpcDataRegistry.replaceCapabilities(capabilities);
+
+            StardewNpcDisplay display = StardewNpcDisplays.resolve(npcId);
+            StardewNpcDefinition definition =
+                    StardewNpcProfiles.resolve(npcId).orElseThrow();
+
+            assertTrue(display.datable());
+            assertTrue(definition.profile().datable());
+            assertTrue(definition.display().datable());
+        } finally {
+            NpcDataRegistry.replaceCapabilities(previous);
+        }
+    }
+
+    @Test
     void giftRegistrationsRejectDuplicatesWithinEachHookKind() {
         int suffix = IDS.incrementAndGet();
         ResourceLocation confirmationId = id("gift_confirmation_" + suffix);
@@ -176,6 +238,24 @@ class StardewNpcSocialRulesTest {
                 24,
                 "npc_social_test.relationship.friend",
                 false
+        );
+    }
+
+    private static NpcCapabilityProfile capability(
+            String npcId,
+            boolean datable
+    ) {
+        return new NpcCapabilityProfile(
+                npcId,
+                true,
+                true,
+                NpcCapabilityProfile.ANIM_IDLE_WALK,
+                NpcCapabilityProfile.AGE_ADULT,
+                NpcCapabilityProfile.MANNERS_NEUTRAL,
+                NpcCapabilityProfile.SOCIAL_OUTGOING,
+                NpcCapabilityProfile.OPTIMISM_POSITIVE,
+                NpcCapabilityProfile.GENDER_FEMALE,
+                datable
         );
     }
 
