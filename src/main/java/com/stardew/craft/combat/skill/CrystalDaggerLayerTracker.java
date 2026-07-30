@@ -17,7 +17,7 @@ public final class CrystalDaggerLayerTracker {
 
     private static final Map<UUID, State> STATES = new HashMap<>();
 
-    private record State(int stacks, long endTick, long readyTick) {}
+    record State(int stacks, long endTick, long readyTick) {}
 
     private CrystalDaggerLayerTracker() {}
 
@@ -40,26 +40,18 @@ public final class CrystalDaggerLayerTracker {
         if (player == null) {
             return;
         }
-        State state = STATES.get(player.getUUID());
-        int stacks = 0;
-        long endTick = 0L;
-        long readyTick = 0L;
+        State previous = STATES.get(player.getUUID());
+        int previousStacks = activeStacks(previous, nowTick);
+        State next = advance(previous, nowTick);
+        boolean gained = next.stacks > previousStacks;
 
-        if (state != null && nowTick <= state.endTick) {
-            stacks = state.stacks;
-            endTick = state.endTick;
-            readyTick = state.readyTick;
-        }
-
-        int nextStacks = Mth.clamp(stacks + 1, 0, MAX_STACKS);
-        boolean gained = nextStacks > stacks;
-        endTick = nowTick + DURATION_TICKS;
-        if (nextStacks >= MAX_STACKS && stacks < MAX_STACKS) {
-            readyTick = nowTick + 1;
-        }
-
-        STATES.put(player.getUUID(), new State(nextStacks, endTick, readyTick));
-        sync(player, nextStacks, (int) Math.max(0, endTick - nowTick), gained);
+        STATES.put(player.getUUID(), next);
+        sync(
+                player,
+                next.stacks,
+                (int) Math.max(0, next.endTick - nowTick),
+                gained
+        );
     }
 
     public static boolean shouldBurst(ServerPlayer player, long nowTick) {
@@ -74,7 +66,7 @@ public final class CrystalDaggerLayerTracker {
             clearAndSync(player);
             return false;
         }
-        return state.stacks >= MAX_STACKS && nowTick >= state.readyTick;
+        return shouldBurst(state, nowTick);
     }
 
     public static void consumeBurst(ServerPlayer player) {
@@ -110,5 +102,28 @@ public final class CrystalDaggerLayerTracker {
     /** Clean up state when a player logs out to prevent memory leaks. */
     public static void removePlayer(UUID playerId) {
         STATES.remove(playerId);
+    }
+
+    static State advance(State previous, long nowTick) {
+        int stacks = activeStacks(previous, nowTick);
+        long readyTick = stacks > 0 && previous != null
+                ? previous.readyTick
+                : 0L;
+        int nextStacks = Mth.clamp(stacks + 1, 0, MAX_STACKS);
+        if (nextStacks >= MAX_STACKS && stacks < MAX_STACKS) {
+            readyTick = nowTick + 1;
+        }
+        return new State(nextStacks, nowTick + DURATION_TICKS, readyTick);
+    }
+
+    static boolean shouldBurst(State state, long nowTick) {
+        return state != null
+                && nowTick <= state.endTick
+                && state.stacks >= MAX_STACKS
+                && nowTick >= state.readyTick;
+    }
+
+    private static int activeStacks(State state, long nowTick) {
+        return state != null && nowTick <= state.endTick ? state.stacks : 0;
     }
 }

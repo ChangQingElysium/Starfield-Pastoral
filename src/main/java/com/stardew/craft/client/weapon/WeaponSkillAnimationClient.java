@@ -1,6 +1,13 @@
 package com.stardew.craft.client.weapon;
 
+import com.stardew.craft.client.weapon.presentation.SkillPresentationClient;
+import com.stardew.craft.combat.network.WeaponSkillAnimPayload;
+import java.util.HashMap;
+import java.util.Map;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
 public final class WeaponSkillAnimationClient {
@@ -14,6 +21,8 @@ public final class WeaponSkillAnimationClient {
     private static long dragonBreathTick = -9999;
     private static Vec3 windSpireOrigin;
     private static long windSpireTick = -9999;
+    private static final Map<Integer, WorldAction> WORLD_ACTIONS = new HashMap<>();
+    private static ClientLevel actionLevel;
 
     private WeaponSkillAnimationClient() {}
 
@@ -27,11 +36,67 @@ public final class WeaponSkillAnimationClient {
 
     @SuppressWarnings("null")
     public static void start(String weaponId, String skillId, int durationTicks) {
+        startLocalAnimation(weaponId, skillId, durationTicks);
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null || mc.player == null || skillId == null) {
+            return;
+        }
+        SkillEffectsClient.playSkillEffects(skillId, mc.player);
+    }
+
+    public static void start(WeaponSkillAnimPayload payload) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) {
             return;
         }
-        WeaponSkillAnimationClient.startTick = mc.level.getGameTime();
+        if (actionLevel != mc.level) {
+            WORLD_ACTIONS.clear();
+            actionLevel = mc.level;
+        }
+        long playbackStartTick = mc.level.getGameTime();
+        WORLD_ACTIONS.put(
+                payload.casterEntityId(),
+                new WorldAction(payload, playbackStartTick)
+        );
+
+        Entity entity = mc.level.getEntity(payload.casterEntityId());
+        Player caster = entity instanceof Player player ? player : null;
+        boolean localCaster = mc.player != null && mc.player.getId() == payload.casterEntityId();
+        if (localCaster) {
+            startLocalAnimation(
+                    payload.weaponId(),
+                    payload.skillId(),
+                    payload.actionDurationTicks(),
+                    playbackStartTick
+            );
+        }
+
+        boolean migrated = SkillPresentationClient.start(payload, playbackStartTick);
+        if (!migrated && caster != null) {
+            SkillEffectsClient.playSkillEffects(payload.skillId(), caster);
+        }
+    }
+
+    @SuppressWarnings("null")
+    private static void startLocalAnimation(String weaponId, String skillId, int durationTicks) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null) {
+            return;
+        }
+        startLocalAnimation(weaponId, skillId, durationTicks, mc.level.getGameTime());
+    }
+
+    private static void startLocalAnimation(
+            String weaponId,
+            String skillId,
+            int durationTicks,
+            long actionStartTick
+    ) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null) {
+            return;
+        }
+        WeaponSkillAnimationClient.startTick = actionStartTick;
         WeaponSkillAnimationClient.durationTicks = Math.max(1, durationTicks);
         WeaponSkillAnimationClient.weaponId = weaponId;
         WeaponSkillAnimationClient.skillId = skillId;
@@ -64,11 +129,6 @@ public final class WeaponSkillAnimationClient {
                 windSpireOrigin = player.position();
                 windSpireTick = now;
             }
-        }
-        
-        // 播放技能特效（粒子+声音）
-        if (skillId != null && mc.player != null) {
-            SkillEffectsClient.playSkillEffects(skillId, mc.player);
         }
     }
 
@@ -128,4 +188,53 @@ public final class WeaponSkillAnimationClient {
     public static String getSkillId() {
         return skillId;
     }
+
+    public static float getWorldActionProgress(int entityId, float partialTick) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.level == null || actionLevel != minecraft.level) {
+            WORLD_ACTIONS.clear();
+            actionLevel = minecraft.level;
+            return -1.0f;
+        }
+        WorldAction worldAction = WORLD_ACTIONS.get(entityId);
+        if (worldAction == null) {
+            return -1.0f;
+        }
+        float progress = calculatePlaybackProgress(
+                minecraft.level.getGameTime(),
+                worldAction.playbackStartTick,
+                partialTick,
+                worldAction.payload.actionDurationTicks()
+        );
+        if (progress >= 1.0f) {
+            WORLD_ACTIONS.remove(entityId);
+            return -1.0f;
+        }
+        return Math.max(0.0f, progress);
+    }
+
+    public static WeaponSkillAnimPayload getWorldAction(int entityId) {
+        WorldAction action = WORLD_ACTIONS.get(entityId);
+        return action == null ? null : action.payload;
+    }
+
+    public static long getWorldActionPlaybackStartTick(int entityId) {
+        WorldAction action = WORLD_ACTIONS.get(entityId);
+        return action == null ? -1L : action.playbackStartTick;
+    }
+
+    static float calculatePlaybackProgress(
+            long currentTick,
+            long playbackStartTick,
+            float partialTick,
+            int durationTicks
+    ) {
+        float age = (currentTick - playbackStartTick) + partialTick;
+        return age / Math.max(1, durationTicks);
+    }
+
+    private record WorldAction(
+            WeaponSkillAnimPayload payload,
+            long playbackStartTick
+    ) {}
 }

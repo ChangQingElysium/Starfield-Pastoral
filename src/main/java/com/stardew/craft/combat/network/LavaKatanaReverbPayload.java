@@ -40,6 +40,12 @@ public record LavaKatanaReverbPayload(boolean active, int durationTicks) impleme
             net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
             long nowTick = mc.level != null ? mc.level.getGameTime() : 0L;
             com.stardew.craft.client.weapon.LavaKatanaReverbClientState.start(nowTick, payload.durationTicks());
+            if (mc.player != null) {
+                com.stardew.craft.client.weapon.SkillEffectsClient.playSkillEffects(
+                    "lava_katana_reverb",
+                    mc.player
+                );
+            }
         } else {
             com.stardew.craft.client.weapon.LavaKatanaReverbClientState.clear();
         }

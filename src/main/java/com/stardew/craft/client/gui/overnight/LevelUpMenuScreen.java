@@ -4,10 +4,12 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.ClientPlayerDataCache;
 import com.stardew.craft.client.gui.common.CommonGuiTextures;
 import com.stardew.craft.client.gui.common.GuiText;
+import com.stardew.craft.cooking.service.VanillaCookingRecipeData;
 import com.stardew.craft.network.overnight.ClientOvernightHandler;
 import com.stardew.craft.network.overnight.OvernightSettlementPayload;
 import com.stardew.craft.network.payload.OvernightProfessionChoicePayload;
 import com.stardew.craft.player.ProfessionType;
+import com.stardew.craft.player.RecipeIdNormalizer;
 import com.stardew.craft.player.SkillLevelRecipeUnlocks;
 import com.stardew.craft.player.SkillType;
 import com.stardew.craft.player.StardewCraftingRecipeData;
@@ -46,7 +48,10 @@ public class LevelUpMenuScreen extends Screen {
     private boolean isProfessionChooser;
     private int currentLevel;
     private int currentSkill;
+    private int timerBeforeStart = 250;
     private final List<LittleStar> littleStars = new ArrayList<>();
+    private final List<Component> extraInfoForLevel;
+    private final List<RecipeDisplayEntry> unlockedRecipes;
 
     private static final int BORDER_WIDTH = 40;
     private static final int SPACE_TOP = 96;
@@ -69,7 +74,14 @@ public class LevelUpMenuScreen extends Screen {
     }
 
     private int getMenuHeightPx() {
-        return px(512);
+        if (isProfessionChooser) {
+            return px(512);
+        }
+        int recipeHeight = unlockedRecipes.stream()
+            .mapToInt(entry -> entry.bigCraftable() ? 128 : 64)
+            .sum();
+        int stardewHeight = 256 + extraInfoForLevel.size() * 48 + recipeHeight;
+        return px(Math.max(256, stardewHeight));
     }
 
     private int[] getOkButtonRect(int xPos, int yPos, int guiWidth, int guiHeight) {
@@ -96,27 +108,39 @@ public class LevelUpMenuScreen extends Screen {
         littleStars.removeIf(star -> star.isDone(now));
 
         if (ThreadLocalRandom.current().nextDouble() < 0.03) {
-            int yRand = ThreadLocalRandom.current().nextInt(yPos - px(128), yPos - px(4));
-            int y = (int) (Math.floor((double) yRand / 20.0) * 20 + 32);
+            float scale = guiScale();
+            int originalX = Math.round(xPos * scale);
+            int originalY = Math.round(yPos * scale);
+            int originalWidth = Math.round(guiWidth * scale);
+            int y = ThreadLocalRandom.current().nextInt(originalY - 128, originalY - 4) / 20 * 20 + 32;
 
             int x;
             if (ThreadLocalRandom.current().nextBoolean()) {
-                x = ThreadLocalRandom.current().nextInt(xPos + guiWidth / 2 - px(228), xPos + guiWidth / 2 - px(132));
+                x = ThreadLocalRandom.current().nextInt(
+                    originalX + originalWidth / 2 - 228,
+                    originalX + originalWidth / 2 - 132
+                );
             } else {
-                x = ThreadLocalRandom.current().nextInt(xPos + guiWidth / 2 + px(116), xPos + guiWidth - px(160));
+                x = ThreadLocalRandom.current().nextInt(
+                    originalX + originalWidth / 2 + 116,
+                    originalX + originalWidth - 160
+                );
             }
-            if (y < yPos - px(72)) {
-                x = ThreadLocalRandom.current().nextInt(xPos + guiWidth / 2 - px(116), xPos + guiWidth / 2 + px(116));
+            if (y < originalY - 72) {
+                x = ThreadLocalRandom.current().nextInt(
+                    originalX + originalWidth / 2 - 116,
+                    originalX + originalWidth / 2 + 116
+                );
             }
+            x = x / 20 * 20;
 
-            littleStars.add(new LittleStar(x, y, now));
+            littleStars.add(new LittleStar(Math.round(x / scale), Math.round(y / scale), now));
         }
     }
 
     @Override
     protected void init() {
         super.init();
-        playUiSound(ModSounds.BIG_SELECT.get(), 1.0f, 1.0f);
     }
 
     public LevelUpMenuScreen(OvernightSettlementPayload.LevelUpData levelData, List<Screen> siblingScreens) {
@@ -126,29 +150,39 @@ public class LevelUpMenuScreen extends Screen {
         this.currentSkill = levelData.skillIndex();
         this.currentLevel = levelData.newLevel();
         this.isProfessionChooser = (currentLevel == 5 || currentLevel == 10) && currentSkill != 5;
+        this.extraInfoForLevel = getExtraInfoForLevel(currentSkill, currentLevel);
+        this.unlockedRecipes = getUnlockedRecipeEntries();
+    }
+
+    @Override
+    public void tick() {
+        if (timerBeforeStart > 0) {
+            timerBeforeStart = Math.max(0, timerBeforeStart - 50);
+        }
     }
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        // Match Stardew's dim overlay first
-        graphics.fill(0, 0, this.width, this.height, 0x80000000);
-
         int guiWidth = getMenuWidthPx();
         int guiHeight = getMenuHeightPx();
         int xPos = this.width / 2 - guiWidth / 2;
         int yPos = this.height / 2 - guiHeight / 2;
-
+        // Stardew updates these particles during the 250 ms input delay even
+        // though it does not draw the menu yet.
         updateLittleStars(xPos, yPos, guiWidth);
+        if (timerBeforeStart > 0) {
+            return;
+        }
+        // Match Stardew's dim overlay first
+        graphics.fill(0, 0, this.width, this.height, 0x80000000);
+
         long now = System.currentTimeMillis();
         for (LittleStar star : littleStars) {
-            star.draw(graphics, now);
+            star.draw(graphics, now, guiScale());
         }
 
+        LevelUpMenuTextures.drawHeaderRibbon(graphics, xPos + guiWidth / 2 - px(116), yPos - px(20), s4());
         StardewGuiUtil.drawDialogueBoxFrame(graphics, xPos, yPos, guiWidth, guiHeight);
-
-        // The ribbon overlaps the frame in vanilla, so it must be drawn after
-        // the frame. Drawing it first hid the lower half of the title.
-        LevelUpMenuTextures.drawHeaderRibbon(graphics, xPos + guiWidth / 2 - px(116), yPos - px(40), s4());
 
         if (isProfessionChooser) {
             drawSkillIcon(graphics, currentSkill, xPos + px(SPACE_SIDE + BORDER_WIDTH), yPos + px(SPACE_TOP + 16));
@@ -199,40 +233,31 @@ public class LevelUpMenuScreen extends Screen {
             GuiText.drawCenteredClamped(graphics, this.font, title, xPos + guiWidth / 2,
                 yPos + px(SPACE_TOP + 16), guiWidth - px(240), 0x3A2A1A, false);
 
-            Component proficiency = Component.translatable("stardewcraft.levelup.proficiency", getSkillName(currentSkill));
-            GuiText.drawCenteredClamped(graphics, this.font, proficiency, xPos + guiWidth / 2,
-                yPos + px(SPACE_TOP + 82), guiWidth - px(160), 0x3A2A1A, false);
-            Component newRecipesHeader = Component.translatable("stardewcraft.levelup.new_recipes");
-            GuiText.drawCenteredClamped(graphics, this.font, newRecipesHeader, xPos + guiWidth / 2,
-                yPos + px(SPACE_TOP + 130), guiWidth - px(160), 0x3A2A1A, false);
+            int lineY = yPos + px(SPACE_TOP + 80);
+            for (Component info : extraInfoForLevel) {
+                GuiText.drawCenteredClamped(graphics, this.font, info, xPos + guiWidth / 2,
+                    lineY, guiWidth - px(160), 0x3A2A1A, false);
+                lineY += px(48);
+            }
 
-            List<RecipeDisplayEntry> unlockedRecipes = getUnlockedRecipeEntries();
-            int lineY = yPos + px(SPACE_TOP + 160);
-            if (unlockedRecipes.isEmpty()) {
-                Component noneText = Component.translatable("stardewcraft.levelup.new_recipes.none");
-                GuiText.drawCenteredClamped(graphics, this.font, noneText, xPos + guiWidth / 2,
-                    lineY, guiWidth - px(120), 0x5A4A3A, false);
-            } else {
-                int centerX = xPos + guiWidth / 2;
-                // SDV 原版行距：每条配方 ≈ 1 tile（16 coord units）。MC 物品图标高 16、字体 9，
-                // 取 22 coord units 作为行距保证在任意 guiScale 下都不会重叠。
-                int rowStep = 22;
-                for (int i = 0; i < unlockedRecipes.size(); i++) {
-                    RecipeDisplayEntry entry = unlockedRecipes.get(i);
-                    Component message = GuiText.ellipsize(this.font, entry.displayName(), guiWidth - px(180));
-                    int textW = this.font.width(message);
-                    boolean hasIcon = !entry.icon().isEmpty();
-                    // 总宽度 = 图标(16) + 间距(4) + 文字宽，居中对齐
-                    int totalW = textW + (hasIcon ? 20 : 0);
-                    int startX = centerX - totalW / 2;
-                    int itemY = lineY + i * rowStep;
-                    if (hasIcon) {
-                        CommonGuiTextures.drawItem(graphics, entry.icon(), startX, itemY - 4, 1.0f);
-                        graphics.drawString(this.font, message, startX + 20, itemY + 4, 0x3A2A1A, false);
-                    } else {
-                        graphics.drawString(this.font, message, startX, itemY + 4, 0x3A2A1A, false);
-                    }
+            for (RecipeDisplayEntry entry : unlockedRecipes) {
+                Component message = Component.translatable(
+                    "stardewcraft.levelup.new_recipe",
+                    Component.translatable(entry.cooking()
+                        ? "stardewcraft.levelup.recipe_type.cooking"
+                        : "stardewcraft.levelup.recipe_type.crafting"),
+                    entry.displayName());
+                Component shown = GuiText.ellipsize(this.font, message, guiWidth - px(240));
+                int textWidth = this.font.width(shown);
+                int textX = xPos + guiWidth / 2 - textWidth / 2 - px(64);
+                int textY = lineY + px(entry.bigCraftable() ? 38 : 12);
+                graphics.drawString(this.font, shown, textX, textY, 0x3A2A1A, false);
+                if (!entry.icon().isEmpty()) {
+                    CommonGuiTextures.drawItem(graphics, entry.icon(),
+                        xPos + guiWidth / 2 + textWidth / 2 - px(48),
+                        lineY - px(16), s4());
                 }
+                lineY += px((entry.bigCraftable() ? 128 : 64) + 8);
             }
 
             // Draw OK button
@@ -254,6 +279,9 @@ public class LevelUpMenuScreen extends Screen {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (timerBeforeStart > 0) {
+            return true;
+        }
         if (button == 0) {
             int guiWidth = getMenuWidthPx();
             int guiHeight = getMenuHeightPx();
@@ -307,6 +335,38 @@ public class LevelUpMenuScreen extends Screen {
     @Override
     public boolean isPauseScreen() {
         return true;
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (timerBeforeStart > 0 || isProfessionChooser) {
+            return true;
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    private List<Component> getExtraInfoForLevel(int skill, int level) {
+        List<Component> info = new ArrayList<>();
+        switch (skill) {
+            case 0 -> {
+                info.add(Component.translatable("stardewcraft.levelup.extra.farming.watering_can"));
+                info.add(Component.translatable("stardewcraft.levelup.extra.farming.hoe"));
+            }
+            case 1 -> info.add(Component.translatable("stardewcraft.levelup.extra.fishing"));
+            case 2 -> {
+                info.add(Component.translatable("stardewcraft.levelup.extra.foraging.axe"));
+                if (level == 1) {
+                    info.add(Component.translatable("stardewcraft.levelup.extra.foraging.wild_berry"));
+                } else if (level == 4 || level == 8) {
+                    info.add(Component.translatable("stardewcraft.levelup.extra.foraging.berry"));
+                }
+            }
+            case 3 -> info.add(Component.translatable("stardewcraft.levelup.extra.mining"));
+            case 4 -> info.add(Component.translatable("stardewcraft.levelup.extra.combat"));
+            default -> {
+            }
+        }
+        return List.copyOf(info);
     }
 
     private Component getSkillName(int skill) {
@@ -397,7 +457,13 @@ public class LevelUpMenuScreen extends Screen {
         return Component.translatable(type.getDescriptionTranslationKey());
     }
 
-    private record RecipeDisplayEntry(Component displayName, ItemStack icon) {}
+    private record RecipeDisplayEntry(
+        Component displayName,
+        ItemStack icon,
+        boolean cooking,
+        boolean bigCraftable
+    ) {
+    }
 
     private List<RecipeDisplayEntry> getUnlockedRecipeEntries() {
         List<RecipeDisplayEntry> entries = new ArrayList<>();
@@ -431,13 +497,23 @@ public class LevelUpMenuScreen extends Screen {
 
         for (String recipeId : seen) {
             if (recipeId == null || recipeId.isBlank()) continue;
-            ItemStack icon = StardewCraftingRecipeData.getOutputStack(recipeId);
+            ResourceLocation definitionId = RecipeIdNormalizer.definitionId(recipeId);
+            boolean cooking = definitionId != null
+                && VanillaCookingRecipeData.getDefinition(definitionId).isPresent();
+            ItemStack icon = cooking
+                ? VanillaCookingRecipeData.getOutputStack(definitionId, 1)
+                : StardewCraftingRecipeData.getOutputStack(recipeId);
             // SDV parity: 菜单里显示的是配方产物的物品名（不是配方 ID）。
             // 回退到 prettified id 以应对找不到产物的旧配方。
             Component name = icon.isEmpty()
                     ? Component.literal(prettifyRecipeId(recipeId))
                     : icon.getHoverName();
-            entries.add(new RecipeDisplayEntry(name, icon));
+            entries.add(new RecipeDisplayEntry(
+                name,
+                icon,
+                cooking,
+                !cooking && StardewCraftingRecipeData.isBigCraftable(recipeId)
+            ));
         }
         return entries;
     }
@@ -482,7 +558,7 @@ public class LevelUpMenuScreen extends Screen {
             return now - startMs >= (long) FRAME_MS * FRAME_COUNT;
         }
 
-        private void draw(GuiGraphics graphics, long now) {
+        private void draw(GuiGraphics graphics, long now, float guiScale) {
             long age = now - startMs;
             int frame = (int) (age / FRAME_MS);
             if (frame < 0 || frame >= FRAME_COUNT) {
@@ -490,7 +566,7 @@ public class LevelUpMenuScreen extends Screen {
             }
             graphics.pose().pushPose();
             graphics.pose().translate(x, y, 0);
-            graphics.pose().scale(4.0f, 4.0f, 1.0f);
+            graphics.pose().scale(4.0f / guiScale, 4.0f / guiScale, 1.0f);
             graphics.blit(TEX_LITTLE_STAR, 0, 0, frame * SIZE, 0, SIZE, SIZE, 35, 5);
             graphics.pose().popPose();
         }

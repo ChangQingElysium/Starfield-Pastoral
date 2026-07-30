@@ -2,11 +2,10 @@ package com.stardew.craft.client.gui.overnight;
 
 import com.stardew.craft.client.gui.common.CommonGuiTextures;
 import com.stardew.craft.client.gui.common.GuiText;
-import com.stardew.craft.client.hud.StardewTimeHud;
+import com.stardew.craft.client.sound.StardewMusicManager;
 import com.stardew.craft.network.overnight.ClientOvernightHandler;
 import com.stardew.craft.network.overnight.OvernightSettlementPayload;
 import com.stardew.craft.sound.ModSounds;
-import com.stardew.craft.time.StardewTimeManager;
 import com.stardew.craft.weather.ClientWeatherCache;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.gui.GuiGraphics;
@@ -21,16 +20,22 @@ import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 @OnlyIn(Dist.CLIENT)
 @SuppressWarnings("null")
 public class ShippingMenuScreen extends Screen {
+    private static final int INTRO_DURATION = 3500;
+    private static final int OUTRO_FADE_DURATION = 800;
+    private static final int OUTRO_DATE_PAUSE = 700;
+    private static final int SAVE_MARGIN = 500;
+    private static final int SAVE_COMPLETE_PAUSE = 1500;
+    private static final int FINAL_OUTRO_DURATION = 2000;
 
     private final List<OvernightSettlementPayload.ShippedItem> shippedItems;
+    private final OvernightSettlementPayload.OvernightContext context;
 
-    private int introTimer = 3500;
+    private int introTimer = INTRO_DURATION;
     private long lastTime;
 
     private int[] categoryTotals = new int[6];
@@ -45,9 +50,25 @@ public class ShippingMenuScreen extends Screen {
     private int itemsPerCategoryPage = 9;
     private boolean outro;
     private int outroFadeTimer;
+    private int outroPauseBeforeDateChange;
+    private int finalOutroTimer;
+    private int saveTimer = -1;
+    private int morningSoundTimer = -1;
+    private int dayPlaqueY;
+    private boolean newDayPlaque;
+    private boolean savedYet;
+    private boolean saveCompleteSoundPlayed;
+    private int sparklingAmplitude = 32;
+    private float sparklingOffsetDecay = 1.0F;
+    private float sparklingFrameRemainder;
     private float weatherX;
     private int moonShake = -1;
     private int timesPokedMoon;
+    private int smokeTimer;
+    private final List<SmokeParticle> smokeParticles = new ArrayList<>();
+    private final List<AmbientSprite> ambientSprites = new ArrayList<>();
+    private float ambientFrameRemainder;
+    private boolean ambientInitialized;
 
     // UI Layout vars
     private int categoryLabelsWidth = 512;
@@ -58,36 +79,39 @@ public class ShippingMenuScreen extends Screen {
 
     private final List<Screen> siblingScreens;
 
-    private static class NightStar {
-        int x;
-        int y;
-        int size;
-        float baseAlpha;
-        float twinkleAmp;
-        float twinkleSpeed;
-        float phase;
-        int color;
-    }
-
-    private final List<NightStar> nightStars = new ArrayList<>();
-    private int starsForWidth = -1;
-    private int starsForHeight = -1;
-
-    public ShippingMenuScreen(List<OvernightSettlementPayload.ShippedItem> shippedItems, List<Screen> siblingScreens) {
+    public ShippingMenuScreen(
+            List<OvernightSettlementPayload.ShippedItem> shippedItems,
+            OvernightSettlementPayload.OvernightContext context,
+            List<Screen> siblingScreens
+    ) {
         super(Component.translatable("stardewcraft.shipping.title"));
         this.shippedItems = shippedItems;
+        this.context = context;
         this.siblingScreens = siblingScreens;
         this.categoryItems = new ArrayList<>();
         for (int i = 0; i < 6; i++) {
             this.categoryItems.add(new ArrayList<>());
-            this.categoryDials[i] = new MoneyDial(7);
+            this.categoryDials[i] = new MoneyDial(7, i == 5);
         }
         
         parseItems();
+        configureOriginalShippingMusic();
+    }
+
+    private void configureOriginalShippingMusic() {
+        // Original ShippingMenu: clear summer nights use nightTime; other
+        // clear seasons stop music. Rain keeps the weather ambience.
+        if (!isRainLikeWeather()) {
+            if (context.newSeason() == 1) {
+                StardewMusicManager.playForCutscene(ModSounds.MUSIC_SPRING_NIGHT_AMBIENT.get());
+            } else {
+                StardewMusicManager.stopForCutsceneSilence();
+            }
+        }
     }
 
     private void parseItems() {
-        for (OvernightSettlementPayload.ShippedItem item : shippedItems) {
+        for (OvernightSettlementPayload.ShippedItem item : consolidateStacks(shippedItems)) {
             int category = item.category();
             if (category < 0 || category > 4) {
                 category = 4; // default to Other
@@ -108,12 +132,58 @@ public class ShippingMenuScreen extends Screen {
         categoryDials[5].previousTargetValue = categoryTotals[5];
     }
 
+    private static List<OvernightSettlementPayload.ShippedItem> consolidateStacks(
+            List<OvernightSettlementPayload.ShippedItem> items
+    ) {
+        List<OvernightSettlementPayload.ShippedItem> consolidated = new ArrayList<>();
+        for (OvernightSettlementPayload.ShippedItem item : items) {
+            int matchingIndex = -1;
+            for (int i = 0; i < consolidated.size(); i++) {
+                OvernightSettlementPayload.ShippedItem existing = consolidated.get(i);
+                if (existing.category() == item.category()
+                        && existing.pricePerItem() == item.pricePerItem()
+                        && ItemStack.isSameItemSameComponents(existing.stack(), item.stack())) {
+                    matchingIndex = i;
+                    break;
+                }
+            }
+            if (matchingIndex < 0) {
+                consolidated.add(new OvernightSettlementPayload.ShippedItem(
+                    item.stack().copy(), item.category(), item.pricePerItem()));
+            } else {
+                OvernightSettlementPayload.ShippedItem existing = consolidated.get(matchingIndex);
+                ItemStack merged = existing.stack().copy();
+                merged.grow(item.stack().getCount());
+                consolidated.set(matchingIndex, new OvernightSettlementPayload.ShippedItem(
+                    merged, existing.category(), existing.pricePerItem()));
+            }
+        }
+        return List.copyOf(consolidated);
+    }
+
     @Override
     protected void init() {
         super.init();
         this.lastTime = System.currentTimeMillis();
         refreshScaledLayout();
+        this.dayPlaqueY = Math.max(px(-64), this.height / 2 + px(-428));
+        initializeAmbientSprites();
         com.stardew.craft.StardewCraft.LOGGER.info("[OVERNIGHT_CLIENT] ShippingMenuScreen.init() items={}, introTimer={}", shippedItems.size(), introTimer);
+    }
+
+    private void initializeAmbientSprites() {
+        if (ambientInitialized) {
+            return;
+        }
+        ambientInitialized = true;
+        if (context.newDay() == 25 && context.newSeason() == 3) {
+            ambientSprites.add(AmbientSprite.cursor(
+                640, 800, 32, 16, 2, 80,
+                Math.round(this.width * guiScale()),
+                ThreadLocalRandom.current().nextInt(0, 200),
+                -4.0f, 0.0f
+            ).withDelay(3000));
+        }
     }
 
     private float guiScale() {
@@ -151,13 +221,8 @@ public class ShippingMenuScreen extends Screen {
             return false;
         }
         ItemStack first = categoryItems.get(0).get(0).stack();
-        String path = first.getItemHolder().getRegisteredName();
-        return path.contains("egg")
-                || path.contains("milk")
-                || path.contains("wool")
-                || path.contains("cheese")
-                || path.contains("mayonnaise")
-                || path.contains("truffle");
+        return "stardewcraft.type.animal_product".equals(
+            com.stardew.craft.api.v1.item.StardewItemDataApi.getTypeKey(first));
     }
 
     private boolean isLeftMousePressed() {
@@ -190,27 +255,57 @@ public class ShippingMenuScreen extends Screen {
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         refreshScaledLayout();
+        graphics.fill(0, 0, this.width, this.height, 0xFF000000);
 
         long currentTime = System.currentTimeMillis();
-        int delta = (int)(currentTime - lastTime);
+        int delta = Math.max(0, Math.min(100, (int) (currentTime - lastTime)));
         this.lastTime = currentTime;
 
         if (outro) {
-            outroFadeTimer -= delta;
-            if (outroFadeTimer <= 0) {
-                closeToNextScreen();
+            updateOutro(delta);
+            if (!ClientOvernightHandler.isSequenceActive()) {
                 return;
             }
+        } else {
+            updateIntro(delta);
         }
-
-        int prevIntro = introTimer;
-        int introSpeed = isLeftMousePressed() ? 3 : 1;
-        introTimer -= delta * introSpeed;
         weatherX += delta * 0.03f;
+        updateSmoke(delta);
+        updateAmbientSprites(delta);
         if (moonShake > 0) {
             moonShake -= delta;
         }
 
+        // Render the complete scene at full opacity, then composite one high-z black layer over
+        // it. Vanilla item models/count decorations live at z=150/200 and otherwise punch through
+        // a normal z=0 fill regardless of Java call order.
+        drawBackground(graphics, 1.0F);
+
+        if (isGreenRainWeather()) {
+            graphics.fill(0, 0, this.width, this.height, 0x1900FF00);
+        }
+
+        if (currentPage == -1) {
+            drawSummaryPage(graphics, mouseX, mouseY);
+        } else {
+            drawItemDetail(graphics, mouseX, mouseY);
+        }
+
+        if (outro) {
+            drawOutro(graphics);
+        } else {
+            drawBlackOverlay(
+                graphics,
+                ShippingMenuFadeTimeline.FINAL_BLACKOUT_Z,
+                ShippingMenuFadeTimeline.introBlackAlpha(introTimer, INTRO_DURATION)
+            );
+        }
+    }
+
+    private void updateIntro(int delta) {
+        int prevIntro = introTimer;
+        int introSpeed = isLeftMousePressed() ? 3 : 1;
+        introTimer -= delta * introSpeed;
         if (prevIntro >= 0 && introTimer >= 0 && prevIntro % 500 < introTimer % 500 && introTimer <= 3000) {
             int categoryThatPoppedUp = 4 - introTimer / 500;
             if (categoryThatPoppedUp > -1 && categoryThatPoppedUp < 6) {
@@ -229,25 +324,243 @@ public class ShippingMenuScreen extends Screen {
             categoryDials[5].currentValue = 0;
             categoryDials[5].previousTargetValue = 0;
         }
+    }
 
-        float alphaOverlay = 1.0f - (float) Math.max(0, introTimer) / 3500.0f;
+    private void updateSmoke(int delta) {
+        smokeParticles.removeIf(particle -> particle.update(delta));
+        if (outro || introTimer >= 0 || getCurrentDay() == 28) {
+            return;
+        }
 
-        drawBackground(graphics, alphaOverlay);
+        smokeTimer -= delta;
+        while (smokeTimer <= 0) {
+            smokeTimer += 50;
+            smokeParticles.add(SmokeParticle.create(
+                188.0f,
+                Math.round(this.height * guiScale()) - 108.0f,
+                isRainLikeWeather()
+            ));
+        }
+    }
 
-        if (currentPage == -1) {
-            drawSummaryPage(graphics, alphaOverlay, mouseX, mouseY);
+    private void drawSmoke(GuiGraphics graphics) {
+        for (SmokeParticle particle : smokeParticles) {
+            particle.draw(graphics, this::px, s4());
+        }
+    }
+
+    private void updateAmbientSprites(int delta) {
+        ambientSprites.removeIf(sprite -> sprite.update(delta));
+        if (outro || introTimer >= 0 || getCurrentDay() == 28 || isRainLikeWeather()) {
+            return;
+        }
+
+        ambientFrameRemainder += delta;
+        float frameDuration = 1000.0f / 60.0f;
+        while (ambientFrameRemainder >= frameDuration) {
+            ambientFrameRemainder -= frameDuration;
+            trySpawnAmbientSprite();
+        }
+    }
+
+    private void trySpawnAmbientSprite() {
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        int viewportWidth = Math.round(this.width * guiScale());
+        int viewportHeight = Math.round(this.height * guiScale());
+        if (random.nextDouble() < 0.001) {
+            boolean flipped = random.nextBoolean();
+            AmbientSprite sprite;
+            if (random.nextBoolean()) {
+                sprite = AmbientSprite.cursor(
+                    640, 826, 16, 8, 4, 40,
+                    random.nextInt(Math.max(1, viewportWidth)),
+                    random.nextInt(Math.max(1, viewportHeight / 2)),
+                    flipped ? -8.0f : 8.0f,
+                    8.0f
+                ).withFlip(flipped).upsideDown();
+            } else {
+                sprite = AmbientSprite.cursor(
+                    258, 1680, 16, 16, 4, 40,
+                    random.nextInt(Math.max(1, viewportWidth)),
+                    random.nextInt(Math.max(1, viewportHeight / 2)),
+                    flipped ? -8.0f : 8.0f,
+                    8.0f
+                ).withFlip(flipped).upsideDown();
+            }
+            ambientSprites.add(sprite);
+        } else if (random.nextDouble() < 0.0002) {
+            ambientSprites.add(AmbientSprite.pixel(
+                viewportWidth,
+                random.nextInt(4, 256),
+                -0.25f,
+                0.25f + random.nextFloat()
+            ));
+        } else if (random.nextDouble() < 0.00005) {
+            int rows = random.nextInt(1, 4);
+            float startY = viewportHeight - 192.0f;
+            for (int row = 0; row < rows; row++) {
+                int step = random.nextInt(15, 18);
+                ambientSprites.add(AmbientSprite.cursor(
+                    640, 752, 16, 16, 4, random.nextInt(60, 101),
+                    viewportWidth + (row + 1) * step,
+                    startY - (row + 1) * 20,
+                    -1.0f, 0.0f
+                ).black());
+                ambientSprites.add(AmbientSprite.cursor(
+                    640, 752, 16, 16, 4, random.nextInt(60, 101),
+                    viewportWidth + (row + 1) * step,
+                    startY + (row + 1) * 20,
+                    -1.0f, 0.0f
+                ).black());
+            }
+        } else if (random.nextDouble() < 0.00001) {
+            ambientSprites.add(AmbientSprite.cursor(
+                640, 784, 16, 16, 4, 75,
+                viewportWidth,
+                random.nextInt(Math.max(1, 200)),
+                -3.0f, 0.0f
+            ).withPeriodicY(8.0f, 1000));
+        }
+    }
+
+    private void drawAmbientEffects(GuiGraphics graphics) {
+        for (AmbientSprite sprite : ambientSprites) {
+            sprite.draw(graphics, this::px, s4());
+        }
+        drawSmoke(graphics);
+    }
+
+    private void updateOutro(int delta) {
+        if (outroFadeTimer > 0) {
+            outroFadeTimer = Math.max(0, outroFadeTimer - delta);
+            return;
+        }
+
+        int targetY = this.height / 2 - px(64);
+        if (dayPlaqueY < targetY) {
+            ambientSprites.clear();
+            smokeParticles.clear();
+            dayPlaqueY = Math.min(targetY,
+                dayPlaqueY + Math.max(1, (int) Math.ceil(delta * 0.35f / guiScale())));
+            if (dayPlaqueY >= targetY) {
+                outroPauseBeforeDateChange = OUTRO_DATE_PAUSE;
+            }
+            return;
+        }
+
+        if (outroPauseBeforeDateChange > 0) {
+            outroPauseBeforeDateChange -= delta;
+            if (outroPauseBeforeDateChange <= 0) {
+                newDayPlaque = true;
+                finalOutroTimer = FINAL_OUTRO_DURATION;
+                saveTimer = SAVE_MARGIN + SAVE_COMPLETE_PAUSE;
+                morningSoundTimer = 1500;
+                playUiSound(ModSounds.NEW_RECIPE.get(), 1.0f, 1.0f);
+            }
+            return;
+        }
+
+        if (morningSoundTimer > 0) {
+            morningSoundTimer -= delta;
+            if (morningSoundTimer <= 0 && context.newSeason() != 3) {
+                playUiSound(isCurrentMorningRain()
+                    ? ModSounds.RAIN_SOUND.get()
+                    : ModSounds.ROOSTER.get(), 1.0f, 1.0f);
+            }
+        }
+
+        if (saveTimer > 0) {
+            int oldTimer = saveTimer;
+            saveTimer = Math.max(0, saveTimer - delta);
+            if (!saveCompleteSoundPlayed && oldTimer > SAVE_COMPLETE_PAUSE
+                    && saveTimer <= SAVE_COMPLETE_PAUSE) {
+                saveCompleteSoundPlayed = true;
+                playUiSound(ModSounds.MONEY.get(), 1.0f, 1.0f);
+            }
+            if (saveTimer <= SAVE_COMPLETE_PAUSE) {
+                sparklingFrameRemainder += delta;
+                while (sparklingFrameRemainder >= 1000.0F / 60.0F) {
+                    sparklingFrameRemainder -= 1000.0F / 60.0F;
+                    sparklingOffsetDecay -= 0.001F;
+                    sparklingAmplitude = (int) (sparklingAmplitude * sparklingOffsetDecay);
+                }
+            }
+            if (saveTimer == 0) {
+                savedYet = true;
+            }
+            return;
+        }
+
+        if (savedYet && finalOutroTimer > 0) {
+            finalOutroTimer = Math.max(0, finalOutroTimer - delta);
+            if (finalOutroTimer == 0) {
+                closeToNextScreen();
+            }
+        }
+    }
+
+    private void drawOutro(GuiGraphics graphics) {
+        // Cover the outgoing shipping rows above vanilla's z=150 item models and z=200 count
+        // decorations. The date plaque is intentionally one layer higher, matching Stardew's
+        // transition where the old scene goes black before the plaque moves/changes.
+        drawBlackOverlay(
+            graphics,
+            ShippingMenuFadeTimeline.CONTENT_BLACKOUT_Z,
+            ShippingMenuFadeTimeline.outroBlackAlpha(outroFadeTimer, OUTRO_FADE_DURATION)
+        );
+
+        graphics.pose().pushPose();
+        graphics.pose().translate(0.0F, 0.0F, ShippingMenuFadeTimeline.OUTRO_FOREGROUND_Z);
+        drawDatePlaque(graphics, newDayPlaque ? getNewDayLabel() : getYesterdayLabel(), dayPlaqueY);
+        drawAmbientEffects(graphics);
+        drawSaveStatus(graphics);
+        graphics.pose().popPose();
+
+        if (savedYet) {
+            drawBlackOverlay(
+                graphics,
+                ShippingMenuFadeTimeline.FINAL_BLACKOUT_Z,
+                ShippingMenuFadeTimeline.outroBlackAlpha(finalOutroTimer, FINAL_OUTRO_DURATION)
+            );
+        }
+    }
+
+    private void drawBlackOverlay(GuiGraphics graphics, int z, float alpha) {
+        int color = ShippingMenuFadeTimeline.blackArgb(alpha);
+        if ((color >>> 24) == 0) {
+            return;
+        }
+        graphics.fill(0, 0, this.width, this.height, z, color);
+    }
+
+    private void drawDatePlaque(GuiGraphics graphics, Component text, int y) {
+        Component shown = GuiText.ellipsize(this.font, text, Math.max(1, this.width - px(160)));
+        int textWidth = this.font.width(shown);
+        int textX = this.width / 2 - textWidth / 2;
+        CommonGuiTextures.drawScrollBanner(graphics, textX, y - px(12), textWidth, s4());
+        graphics.drawString(this.font, shown, textX, y, 0xFF5B5045, false);
+    }
+
+    private void drawSaveStatus(GuiGraphics graphics) {
+        if (!newDayPlaque || saveTimer < 0 || savedYet) {
+            return;
+        }
+        if (saveTimer > SAVE_COMPLETE_PAUSE) {
+            Component text = Component.translatable("stardewcraft.overnight.saving");
+            Component shown = GuiText.ellipsize(font, text, Math.max(1, width - px(128)));
+            graphics.drawString(font, shown, px(64), height - px(64), 0xFFFFFFFF, false);
         } else {
-            drawItemDetail(graphics, mouseX, mouseY);
-        }
-
-        if (outro) {
-            float t = 1.0f - (float) Math.max(0, outroFadeTimer) / 800.0f;
-            int a = Math.max(0, Math.min(255, (int) (t * 255.0f)));
-            graphics.fill(0, 0, this.width, this.height, (a << 24));
-        }
-
-        if (isGreenRainWeather()) {
-            graphics.fill(0, 0, this.width, this.height, 0x1900FF00);
+            SaveGameMenuScreen.drawSparklingSavedText(
+                graphics,
+                font,
+                Component.translatable("stardewcraft.overnight.saved").getString(),
+                px(64),
+                height - px(64),
+                sparklingAmplitude,
+                saveTimer,
+                px(2),
+                Math.max(1, width - px(128))
+            );
         }
     }
 
@@ -256,25 +569,20 @@ public class ShippingMenuScreen extends Screen {
             return;
         }
         outro = true;
-        outroFadeTimer = 800;
+        outroFadeTimer = OUTRO_FADE_DURATION;
         playUiSound(ModSounds.BIG_DESELECT.get(), 1.0f, 1.0f);
+        StardewMusicManager.stopForCutsceneSilence();
     }
 
     private void closeToNextScreen() {
         com.stardew.craft.StardewCraft.LOGGER.info("[OVERNIGHT_CLIENT] ShippingMenuScreen.closeToNextScreen() siblingCount={}",
             this.siblingScreens != null ? this.siblingScreens.size() : -1);
+        StardewMusicManager.releaseCutsceneOverride();
         if (ClientOvernightHandler.isSequenceActive()) {
-            net.neoforged.neoforge.network.PacketDistributor.sendToServer(
-                new com.stardew.craft.cutscene.network.PlayerWokeUpPayload());
-            ClientOvernightHandler.completeSequence("shipping");
-            super.onClose();
+            ClientOvernightHandler.openNextScreen("shipping");
         } else if (this.siblingScreens != null && !this.siblingScreens.isEmpty()) {
             this.minecraft.setScreen(this.siblingScreens.remove(0));
         } else {
-            // Overnight flow is fully done — tell the server the player just
-            // regained control so any queued wake_up cutscenes can dispatch.
-            net.neoforged.neoforge.network.PacketDistributor.sendToServer(
-                new com.stardew.craft.cutscene.network.PlayerWokeUpPayload());
             super.onClose();
         }
     }
@@ -288,42 +596,6 @@ public class ShippingMenuScreen extends Screen {
             return false;
         }
         return categoryItems.get(currentPage).size() > itemsPerCategoryPage * (currentTab + 1);
-    }
-
-    private void rebuildNightStars(int w, int h) {
-        nightStars.clear();
-        starsForWidth = w;
-        starsForHeight = h;
-        Random rng = new Random(0x5A17D3L);
-
-        int count = Math.max(40, (w * h) / 12000);
-        int maxY = Math.max(1, h - px(220));
-        for (int i = 0; i < count; i++) {
-            NightStar star = new NightStar();
-            star.x = rng.nextInt(Math.max(1, w));
-            star.y = rng.nextInt(maxY);
-            star.size = rng.nextDouble() < 0.2 ? 2 : 1;
-            star.baseAlpha = 0.45f + rng.nextFloat() * 0.45f;
-            star.twinkleAmp = 0.08f + rng.nextFloat() * 0.18f;
-            star.twinkleSpeed = 0.7f + rng.nextFloat() * 1.6f;
-            star.phase = rng.nextFloat() * (float) (Math.PI * 2.0);
-            star.color = rng.nextDouble() < 0.22 ? 0xBFD6FF : 0xF5F8FF;
-            nightStars.add(star);
-        }
-    }
-
-    private void drawNightStars(GuiGraphics graphics, float alpha, int w, int h) {
-        if (nightStars.isEmpty() || starsForWidth != w || starsForHeight != h) {
-            rebuildNightStars(w, h);
-        }
-        float t = System.currentTimeMillis() / 1000.0f;
-        for (NightStar star : nightStars) {
-            float twinkle = (float) Math.sin(t * star.twinkleSpeed + star.phase) * star.twinkleAmp;
-            float a = Math.max(0.0f, Math.min(1.0f, (star.baseAlpha + twinkle) * alpha));
-            int ai = Math.max(0, Math.min(255, Math.round(a * 255.0f)));
-            int c = (ai << 24) | (star.color & 0x00FFFFFF);
-            graphics.fill(star.x, star.y, star.x + star.size, star.y + star.size, c);
-        }
     }
 
     private void drawBackground(GuiGraphics graphics, float alpha) {
@@ -358,14 +630,16 @@ public class ShippingMenuScreen extends Screen {
                 ShippingMenuTextures.drawSkyStrip(graphics, w, h, true, 105.0F / 255.0F, 105.0F / 255.0F, 105.0F / 255.0F, alpha * 0.8f);
             }
 
-            for (int x = -244; x < w + 244; x += 244) {
+            for (int x = -px(244); x < w + px(244); x += px(244)) {
                 ShippingMenuTextures.drawWeatherCloudTint(graphics, x + px((int) ((weatherX / 2.0f) % 244f)), px(32), s4(),
                         47.0F / 255.0F, 79.0F / 255.0F, 79.0F / 255.0F, alpha);
             }
 
             for (int i = 0; i < stardewViewWidth; i += 639) {
                 if (isWinter) {
-                    ShippingMenuTextures.drawLandBackTint(graphics, px(i * 4), h - px(192), true, s4(), 1.0F, 1.0F, 1.0F, alpha * 0.25f);
+                    float winterBackAlpha = Math.max(0.0f,
+                        0.25f * (0.5f - (float) Math.max(0, introTimer) / INTRO_DURATION));
+                    ShippingMenuTextures.drawLandBackTint(graphics, px(i * 4), h - px(192), true, s4(), 1.0F, 1.0F, 1.0F, winterBackAlpha);
                     ShippingMenuTextures.drawLandFrontTint(graphics, px(i * 4), h - px(128), true, s4(), 1.0F, 1.0F, 1.0F, alpha * 0.5f);
                 } else {
                     float lowerBackAlpha = 0.5f - (float) Math.max(0, introTimer) / 3500.0f;
@@ -376,11 +650,14 @@ public class ShippingMenuScreen extends Screen {
 
             ShippingMenuTextures.drawShippingBin(graphics, px(160), h - px(128) + px(24), s4(), alpha);
 
-            for (int x = -244; x < w + 244; x += 244) {
+            for (int x = -px(244); x < w + px(244); x += px(244)) {
                 ShippingMenuTextures.drawWeatherCloudTint(graphics, x + px((int) (weatherX % 244f)), px(-32), s4(),
                         112.0F / 255.0F, 128.0F / 255.0F, 144.0F / 255.0F, alpha * 0.85f);
             }
-            for (int x = -244; x < w + 244; x += 244) {
+            if (!outro) {
+                drawAmbientEffects(graphics);
+            }
+            for (int x = -px(244); x < w + px(244); x += px(244)) {
                 ShippingMenuTextures.drawWeatherCloudTint(graphics, x + px((int) ((weatherX * 1.5f) % 244f)), px(-128), s4(),
                         119.0F / 255.0F, 136.0F / 255.0F, 153.0F / 255.0F, alpha);
             }
@@ -391,7 +668,9 @@ public class ShippingMenuScreen extends Screen {
         ShippingMenuTextures.drawSkyStrip(graphics, w, h, false, 1.0F, 1.0F, 1.0F, alpha);
 
         if (!rainLike) {
-            drawNightStars(graphics, alpha, w, h);
+            for (int x = 0; x < w; x += px(2556)) {
+                ShippingMenuTextures.drawStarBackdrop(graphics, x, 0, s4(), alpha);
+            }
 
             if (day == 28) {
                 int shakeX = 0;
@@ -428,10 +707,13 @@ public class ShippingMenuScreen extends Screen {
 
         // Shipping bin icon in background
         ShippingMenuTextures.drawShippingBin(graphics, px(160), h - px(128) + px(24), s4(), alpha);
+        if (!outro) {
+            drawAmbientEffects(graphics);
+        }
     }
 
     @SuppressWarnings("null")
-    private void drawSummaryPage(GuiGraphics graphics, float alpha, int mouseX, int mouseY) {
+    private void drawSummaryPage(GuiGraphics graphics, int mouseX, int mouseY) {
         int centerX = this.width / 2;
         int centerY = this.height / 2;
 
@@ -439,9 +721,7 @@ public class ShippingMenuScreen extends Screen {
         int scrollDrawY = firstCategoryY + px(-128);
 
         if (scrollDrawY >= 0) {
-            Component title = getYesterdayLabel();
-            GuiText.drawCenteredClamped(graphics, this.font, title, centerX, scrollDrawY,
-                Math.max(1, this.width - px(160)), 0xFFFFFF, false);
+            drawDatePlaque(graphics, getYesterdayLabel(), scrollDrawY);
         }
 
         int yOffset = px(-20);
@@ -709,56 +989,67 @@ public class ShippingMenuScreen extends Screen {
         }
         return super.mouseClicked(mouseX, mouseY, button);
     }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (!canReceiveInput()) {
+            return true;
+        }
+        if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+            if (currentPage == -1) {
+                beginOutroClose();
+            } else if (currentTab == 0) {
+                currentPage = -1;
+                playUiSound(ModSounds.SHWIP.get(), 1.0f, 1.0f);
+            } else {
+                currentTab--;
+                playUiSound(ModSounds.SHWIP.get(), 1.0f, 1.0f);
+            }
+            return true;
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
     
     @Override
     public boolean isPauseScreen() {
         return true;
     }
 
-    private StardewTimeManager getClientTime() {
-        return StardewTimeHud.getClientTimeCache();
-    }
-
     private int getCurrentDay() {
-        return Math.max(1, getClientTime().getCurrentDay());
+        return context.newDay();
     }
 
     private int getCurrentSeason() {
-        return Math.max(0, getClientTime().getCurrentSeason());
+        return context.newSeason();
     }
 
     private boolean isRainLikeWeather() {
-        if (this.minecraft == null || this.minecraft.level == null) {
-            return false;
-        }
-        String weather = ClientWeatherCache.getCurrentWeather(this.minecraft.level.dimension());
-        return "Rain".equals(weather) || "Storm".equals(weather) || "Snow".equals(weather);
+        String weather = context.previousWeather();
+        return "Rain".equals(weather) || "Storm".equals(weather)
+            || "Snow".equals(weather) || "GreenRain".equals(weather);
     }
 
     private boolean isGreenRainWeather() {
+        return "GreenRain".equals(context.previousWeather());
+    }
+
+    private boolean isCurrentMorningRain() {
         if (this.minecraft == null || this.minecraft.level == null) {
             return false;
         }
         String weather = ClientWeatherCache.getCurrentWeather(this.minecraft.level.dimension());
-        return "GreenRain".equals(weather);
+        return "Rain".equals(weather) || "Storm".equals(weather) || "GreenRain".equals(weather);
     }
 
     private Component getYesterdayLabel() {
-        StardewTimeManager t = getClientTime();
-        int day = Math.max(1, t.getCurrentDay()) - 1;
-        int season = Math.max(0, t.getCurrentSeason());
-        int year = Math.max(1, t.getCurrentYear());
-        if (day <= 0) {
-            day = 28;
-            season -= 1;
-            if (season < 0) {
-                season = 3;
-                year -= 1;
-                if (year <= 0) {
-                    year = 1;
-                }
-            }
-        }
+        return getDateLabel(context.previousDay(), context.previousSeason(), context.previousYear());
+    }
+
+    private Component getNewDayLabel() {
+        return getDateLabel(context.newDay(), context.newSeason(), context.newYear());
+    }
+
+    private Component getDateLabel(int day, int season, int year) {
         Component seasonName = switch (season) {
             case 0 -> Component.translatable("stardewcraft.shipping.season.spring");
             case 1 -> Component.translatable("stardewcraft.shipping.season.summer");
@@ -767,5 +1058,230 @@ public class ShippingMenuScreen extends Screen {
             default -> Component.translatable("stardewcraft.shipping.season.spring");
         };
         return Component.translatable("stardewcraft.shipping.yesterday_label", seasonName, day, year);
+    }
+
+    @FunctionalInterface
+    private interface PixelScaler {
+        int scale(int value);
+    }
+
+    private static final class SmokeParticle {
+        private float x;
+        private float y;
+        private float velocityX;
+        private final float velocityY;
+        private float alpha = 1.0f;
+        private final boolean rainTint;
+
+        private SmokeParticle(float x, float y, float velocityY, boolean rainTint) {
+            this.x = x;
+            this.y = y;
+            this.velocityY = velocityY;
+            this.rainTint = rainTint;
+        }
+
+        private static SmokeParticle create(float x, float y, boolean rainTint) {
+            float rise = -ThreadLocalRandom.current().nextInt(25, 75) / 100.0f / 4.0f;
+            return new SmokeParticle(x, y, rise, rainTint);
+        }
+
+        private boolean update(int deltaMs) {
+            float frames = deltaMs / (1000.0f / 60.0f);
+            x += velocityX * frames;
+            y += velocityY * frames;
+            velocityX -= 0.001f * frames;
+            alpha -= 0.0025f * frames;
+            return alpha <= 0.0f;
+        }
+
+        private void draw(GuiGraphics graphics, PixelScaler scaler, float scale) {
+            float red = rainTint ? 112.0f / 255.0f : 1.0f;
+            float green = rainTint ? 128.0f / 255.0f : 1.0f;
+            float blue = rainTint ? 144.0f / 255.0f : 1.0f;
+            StardewGuiUtil.drawFromCursorsTint(
+                graphics,
+                scaler.scale(Math.round(x)),
+                scaler.scale(Math.round(y)),
+                684,
+                1075,
+                1,
+                1,
+                scale,
+                red,
+                green,
+                blue,
+                Math.max(0.0f, alpha)
+            );
+        }
+    }
+
+    private static final class AmbientSprite {
+        private final int sourceX;
+        private final int sourceY;
+        private final int sourceWidth;
+        private final int sourceHeight;
+        private final int frameCount;
+        private final int frameDurationMs;
+        private float x;
+        private float y;
+        private final float velocityX;
+        private final float velocityY;
+        private int delayMs;
+        private int animationMs;
+        private int lifeMs;
+        private boolean flipped;
+        private boolean rotated;
+        private boolean pixel;
+        private float red = 1.0f;
+        private float green = 1.0f;
+        private float blue = 1.0f;
+        private float alpha = 1.0f;
+        private float periodicRange;
+        private int periodicDurationMs;
+        private float periodicBaseY;
+
+        private AmbientSprite(
+                int sourceX,
+                int sourceY,
+                int sourceWidth,
+                int sourceHeight,
+                int frameCount,
+                int frameDurationMs,
+                float x,
+                float y,
+                float velocityX,
+                float velocityY
+        ) {
+            this.sourceX = sourceX;
+            this.sourceY = sourceY;
+            this.sourceWidth = sourceWidth;
+            this.sourceHeight = sourceHeight;
+            this.frameCount = frameCount;
+            this.frameDurationMs = frameDurationMs;
+            this.x = x;
+            this.y = y;
+            this.velocityX = velocityX;
+            this.velocityY = velocityY;
+            this.periodicBaseY = y;
+        }
+
+        private static AmbientSprite cursor(
+                int sourceX,
+                int sourceY,
+                int sourceWidth,
+                int sourceHeight,
+                int frameCount,
+                int frameDurationMs,
+                float x,
+                float y,
+                float velocityX,
+                float velocityY
+        ) {
+            return new AmbientSprite(
+                sourceX, sourceY, sourceWidth, sourceHeight,
+                frameCount, frameDurationMs, x, y, velocityX, velocityY);
+        }
+
+        private static AmbientSprite pixel(float x, float y, float velocityX, float alpha) {
+            AmbientSprite sprite = new AmbientSprite(
+                0, 0, 1, 1, 1, Integer.MAX_VALUE,
+                x, y, velocityX, 0.0f);
+            sprite.pixel = true;
+            sprite.alpha = alpha;
+            return sprite;
+        }
+
+        private AmbientSprite withDelay(int delayMs) {
+            this.delayMs = delayMs;
+            return this;
+        }
+
+        private AmbientSprite withFlip(boolean flipped) {
+            this.flipped = flipped;
+            return this;
+        }
+
+        private AmbientSprite upsideDown() {
+            this.rotated = true;
+            return this;
+        }
+
+        private AmbientSprite black() {
+            this.red = 0.0f;
+            this.green = 0.0f;
+            this.blue = 0.0f;
+            return this;
+        }
+
+        private AmbientSprite withPeriodicY(float range, int durationMs) {
+            this.periodicRange = range;
+            this.periodicDurationMs = durationMs;
+            this.periodicBaseY = y;
+            return this;
+        }
+
+        private boolean update(int deltaMs) {
+            lifeMs += deltaMs;
+            if (delayMs > 0) {
+                delayMs = Math.max(0, delayMs - deltaMs);
+                return false;
+            }
+
+            animationMs += deltaMs;
+            float frames = deltaMs / (1000.0f / 60.0f);
+            x += velocityX * frames;
+            y += velocityY * frames;
+            if (periodicDurationMs > 0) {
+                y = periodicBaseY
+                    + (float) Math.sin(animationMs * Math.PI * 2.0 / periodicDurationMs)
+                    * periodicRange;
+            }
+            return lifeMs > (pixel ? 180_000 : 30_000)
+                || x < -256.0f
+                || y < -256.0f
+                || y > 10_000.0f;
+        }
+
+        private void draw(GuiGraphics graphics, PixelScaler scaler, float scale) {
+            if (delayMs > 0) {
+                return;
+            }
+            int drawX = scaler.scale(Math.round(x));
+            int drawY = scaler.scale(Math.round(y));
+            if (pixel) {
+                int size = Math.max(1, scaler.scale(4));
+                int alphaByte = Math.max(0, Math.min(255, Math.round(alpha * 255.0f)));
+                graphics.fill(drawX, drawY, drawX + size, drawY + size, alphaByte << 24 | 0xFFFFFF);
+                return;
+            }
+
+            int frame = frameCount <= 1
+                ? 0
+                : animationMs / Math.max(1, frameDurationMs) % frameCount;
+            if (rotated) {
+                float width = sourceWidth * scale;
+                float height = sourceHeight * scale;
+                graphics.pose().pushPose();
+                graphics.pose().translate(drawX + width / 2.0f, drawY + height / 2.0f, 0);
+                graphics.pose().mulPose(com.mojang.math.Axis.ZP.rotationDegrees(180.0f));
+                graphics.pose().translate(-(drawX + width / 2.0f), -(drawY + height / 2.0f), 0);
+            }
+            if (flipped) {
+                StardewGuiUtil.drawFromCursorsTintFlipped(
+                    graphics, drawX, drawY,
+                    sourceX + frame * sourceWidth, sourceY,
+                    sourceWidth, sourceHeight, scale,
+                    red, green, blue, alpha);
+            } else {
+                StardewGuiUtil.drawFromCursorsTint(
+                    graphics, drawX, drawY,
+                    sourceX + frame * sourceWidth, sourceY,
+                    sourceWidth, sourceHeight, scale,
+                    red, green, blue, alpha);
+            }
+            if (rotated) {
+                graphics.pose().popPose();
+            }
+        }
     }
 }

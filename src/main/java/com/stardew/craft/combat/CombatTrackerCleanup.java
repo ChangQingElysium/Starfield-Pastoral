@@ -8,7 +8,6 @@ import com.stardew.craft.combat.skill.CrystalDaggerLayerTracker;
 import com.stardew.craft.combat.skill.DarkSwordBloodDebtTracker;
 import com.stardew.craft.combat.skill.DarkSwordBloodMoonTracker;
 import com.stardew.craft.combat.skill.DashMovementTracker;
-import com.stardew.craft.combat.skill.DesperatePlunderTracker;
 import com.stardew.craft.combat.skill.DragonBreathTracker;
 import com.stardew.craft.combat.skill.DragontoothShivBreathTracker;
 import com.stardew.craft.combat.skill.DwarfDaggerRushTracker;
@@ -17,7 +16,6 @@ import com.stardew.craft.combat.skill.DwarfFortressTracker;
 import com.stardew.craft.combat.skill.ElfBladeTracker;
 import com.stardew.craft.combat.skill.EternalCollapseTracker;
 import com.stardew.craft.combat.skill.FemurSlamTracker;
-import com.stardew.craft.combat.skill.ForestBlessingTracker;
 import com.stardew.craft.combat.skill.GalaxyDaggerThrustTracker;
 import com.stardew.craft.combat.skill.HolyBladeDodgeTracker;
 import com.stardew.craft.combat.skill.HolyBladeSanctuaryTracker;
@@ -35,6 +33,8 @@ import com.stardew.craft.combat.skill.OssifiedExecutionTracker;
 import com.stardew.craft.combat.skill.RiftPathDamageTracker;
 import com.stardew.craft.combat.skill.SingularityEvolveTracker;
 import com.stardew.craft.combat.skill.SingularityTracker;
+import com.stardew.craft.combat.skill.SilverSaberFoldbackState;
+import com.stardew.craft.combat.skill.SilverSaberSkillHelper;
 import com.stardew.craft.combat.skill.StarfallTracker;
 import com.stardew.craft.combat.skill.StartrailTracker;
 import com.stardew.craft.combat.skill.SteelFalchionLineTracker;
@@ -45,8 +45,11 @@ import com.stardew.craft.combat.skill.TemplarJudgementTracker;
 import com.stardew.craft.combat.skill.TemplarVowTracker;
 import com.stardew.craft.combat.skill.WickedKrisPoisonTracker;
 import com.stardew.craft.combat.skill.WindSpireTracker;
+import com.stardew.craft.combat.skill.YetiToothSpineTracker;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
 
 import java.util.UUID;
+import net.minecraft.server.level.ServerPlayer;
 
 /**
  * Centralized cleanup for all combat tracker static maps on player logout.
@@ -61,6 +64,29 @@ public final class CombatTrackerCleanup {
      * Removes entries for the given player from every combat tracker.
      */
     public static void onPlayerLogout(UUID playerId) {
+        WeaponSkillRuntime.removePlayer(playerId);
+        clearTrackers(playerId);
+    }
+
+    /**
+     * Ends runtime executions and player-backed transient state while the
+     * concrete server player is still available.
+     */
+    public static void onPlayerUnavailable(ServerPlayer player) {
+        if (player == null) {
+            return;
+        }
+        UUID playerId = player.getUUID();
+        WeaponSkillRuntime.removePlayer(playerId);
+        SilverSaberSkillHelper.cancelFoldback(
+                player,
+                player.level().getGameTime()
+        );
+        SilverSaberFoldbackState.clear(player);
+        clearTrackers(playerId);
+    }
+
+    private static void clearTrackers(UUID playerId) {
         BrokenTridentCatchTracker.removePlayer(playerId);
         BrokenTridentThrustTracker.removePlayer(playerId);
         CarvingKnifeThrustTracker.removePlayer(playerId);
@@ -69,16 +95,14 @@ public final class CombatTrackerCleanup {
         DarkSwordBloodDebtTracker.removePlayer(playerId);
         DarkSwordBloodMoonTracker.removePlayer(playerId);
         DashMovementTracker.removePlayer(playerId);
-        DesperatePlunderTracker.removePlayer(playerId);
         DragonBreathTracker.removePlayer(playerId);
         DragontoothShivBreathTracker.removePlayer(playerId);
         DwarfDaggerRushTracker.removePlayer(playerId);
         DwarfDaggerThrustTracker.removePlayer(playerId);
         DwarfFortressTracker.removePlayer(playerId);
-        ElfBladeTracker.removePlayer(playerId);
         EternalCollapseTracker.removePlayer(playerId);
         FemurSlamTracker.removePlayer(playerId);
-        ForestBlessingTracker.removePlayer(playerId);
+        ElfBladeTracker.removePlayer(playerId);
         GalaxyDaggerThrustTracker.removePlayer(playerId);
         HolyBladeDodgeTracker.removePlayer(playerId);
         HolyBladeSanctuaryTracker.removePlayer(playerId);
@@ -106,7 +130,10 @@ public final class CombatTrackerCleanup {
         TemplarVowTracker.removePlayer(playerId);
         WickedKrisPoisonTracker.removePlayer(playerId);
         WindSpireTracker.removePlayer(playerId);
+        YetiToothSpineTracker.removePlayer(playerId);
         AttackTargetTracker.removePlayer(playerId);
+        DamageNumberContextStore.removePlayer(playerId);
         WeaponCombatEvents.removePlayer(playerId);
+        com.stardew.craft.combat.equipment.EquipmentFireProtection.clear(playerId);
     }
 }

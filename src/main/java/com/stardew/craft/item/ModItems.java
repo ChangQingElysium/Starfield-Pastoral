@@ -1201,6 +1201,12 @@ public class ModItems {
     public static final DeferredItem<Item> POINT_PLAN_WAND = ITEMS.register("point_plan_wand",
             () -> new PointPlanWandItem(new Item.Properties().stacksTo(1)));
 
+    public static final DeferredItem<Item> MAP_INTERACTION_POINT_WAND =
+            ITEMS.register("map_interaction_point_wand",
+                    () -> new PointPlanWandItem(
+                            new Item.Properties().stacksTo(1),
+                            PointPlanWandItem.EditorKind.MAP_INTERACTION));
+
     public static final DeferredItem<Item> MINE_TOTEM = ITEMS.register("mine_totem",
             () -> new com.stardew.craft.item.tool.MineTotemItem(new Item.Properties().stacksTo(1)));
 
@@ -1211,6 +1217,19 @@ public class ModItems {
 
     public static final DeferredItem<Item> FLOORING_ICON = ITEMS.register("flooring_icon",
             () -> new SimpleStardewItem("stardewcraft.type.hidden", -1, new Item.Properties().stacksTo(1)));
+
+    public static final DeferredItem<Item> STATUE_OF_ENDLESS_FORTUNE =
+            ITEMS.register("statue_of_endless_fortune",
+                    () -> new StardewBlockItem(
+                            ModBlocks.STATUE_OF_ENDLESS_FORTUNE.get(),
+                            "stardewcraft.type.utility", -1,
+                            new Item.Properties().stacksTo(999)));
+    public static final DeferredItem<Item> STATUE_OF_PERFECTION =
+            ITEMS.register("statue_of_perfection",
+                    () -> new StardewBlockItem(
+                            ModBlocks.STATUE_OF_PERFECTION.get(),
+                            "stardewcraft.type.utility", -1,
+                            new Item.Properties().stacksTo(999)));
 
     // 宸ュ叿 - 闀愬瓙锛堟槦闇茶胺鍛藉悕锛氬熀纭€/閾?閽?閲?閾憋紱鍐呴儴 tier0-4 閫昏緫涓嶅彉锛?
     public static final DeferredItem<Item> PICKAXE = ITEMS.register("pickaxe",
@@ -1313,6 +1332,13 @@ public class ModItems {
 
     public static final DeferredItem<Item> MAGNET = ITEMS.register("magnet",
             () -> new SimpleStardewItem("stardewcraft.type.fishing", 15, new Item.Properties().stacksTo(999)));
+
+    public static final DeferredItem<Item> CASINO_FIREWORK_RED = registerCasinoFirework(
+            "casino_firework_red", 0xFF0000);
+    public static final DeferredItem<Item> CASINO_FIREWORK_PURPLE = registerCasinoFirework(
+            "casino_firework_purple", 0x800080);
+    public static final DeferredItem<Item> CASINO_FIREWORK_GREEN = registerCasinoFirework(
+            "casino_firework_green", 0x00AA00);
 
     public static final DeferredItem<Item> WILD_BAIT = ITEMS.register("wild_bait",
             () -> new SimpleStardewItem("stardewcraft.type.fishing", 15, new Item.Properties().stacksTo(999)));
@@ -2796,6 +2822,12 @@ public class ModItems {
             () -> new StardewBlockItem(com.stardew.craft.block.ModBlocks.WHITE_TEACUP.get(), "stardewcraft.type.furniture", -1, new Item.Properties().stacksTo(999)));
     public static final DeferredItem<Item> POOL_TABLE = ITEMS.register("pool_table",
             () -> new StardewBlockItem(com.stardew.craft.block.ModBlocks.POOL_TABLE.get(), "stardewcraft.type.furniture", -1, new Item.Properties().stacksTo(999)));
+    public static final DeferredItem<Item> CLUB_COMPUTER = ITEMS.register("club_computer",
+            () -> new StardewBlockItem(com.stardew.craft.block.ModBlocks.CLUB_COMPUTER.get(), "stardewcraft.type.hidden", -1, new Item.Properties().stacksTo(64)));
+    public static final DeferredItem<Item> CALICO_JACK_TABLE = ITEMS.register("calico_jack_table",
+            () -> new StardewBlockItem(com.stardew.craft.block.ModBlocks.CALICO_JACK_TABLE.get(), "stardewcraft.type.hidden", -1, new Item.Properties().stacksTo(64)));
+    public static final DeferredItem<Item> SLOT_MACHINE = ITEMS.register("slot_machine",
+            () -> new StardewBlockItem(com.stardew.craft.block.ModBlocks.SLOT_MACHINE.get(), "stardewcraft.type.hidden", -1, new Item.Properties().stacksTo(64)));
     public static final DeferredItem<Item> GLOBE = ITEMS.register("globe",
             () -> new StardewBlockItem(com.stardew.craft.block.ModBlocks.GLOBE.get(), "stardewcraft.type.furniture", -1, new Item.Properties().stacksTo(999)));
     public static final DeferredItem<Item> TELESCOPE = ITEMS.register("telescope",
@@ -3153,23 +3185,37 @@ public class ModItems {
 
     // ── 法师魔法建筑 ──
     public static final DeferredItem<Item> JUNIMO_HUT = ITEMS.register("junimo_hut",
-            () -> new WizardBuildingItem(ModBlocks.JUNIMO_HUT.get(), "item.stardewcraft.junimo_hut.desc",
-                    new Item.Properties().stacksTo(1)));
+            () -> new WizardBuildingItem(ModBlocks.JUNIMO_HUT.get(), WizardBuildingItem.Kind.JUNIMO_HUT,
+                    new Item.Properties().stacksTo(1).fireResistant()));
     public static final DeferredItem<Item> EARTH_OBELISK = ITEMS.register("earth_obelisk",
-            () -> new WizardBuildingItem(ModBlocks.EARTH_OBELISK.get(), "item.stardewcraft.earth_obelisk.desc",
-                    new Item.Properties().stacksTo(1)));
+            () -> new WizardBuildingItem(ModBlocks.EARTH_OBELISK.get(), WizardBuildingItem.Kind.EARTH_OBELISK,
+                    new Item.Properties().stacksTo(1).fireResistant()));
     public static final DeferredItem<Item> WATER_OBELISK = ITEMS.register("water_obelisk",
-            () -> new WizardBuildingItem(ModBlocks.WATER_OBELISK.get(), "item.stardewcraft.water_obelisk.desc",
-                    new Item.Properties().stacksTo(1)));
+            () -> new WizardBuildingItem(ModBlocks.WATER_OBELISK.get(), WizardBuildingItem.Kind.WATER_OBELISK,
+                    new Item.Properties().stacksTo(1).fireResistant()));
     public static final DeferredItem<Item> DESERT_OBELISK = ITEMS.register("desert_obelisk",
-            () -> new WizardBuildingItem(ModBlocks.DESERT_OBELISK.get(), "item.stardewcraft.desert_obelisk.desc",
-                    new Item.Properties().stacksTo(1)));
+            () -> new WizardBuildingItem(ModBlocks.DESERT_OBELISK.get(), WizardBuildingItem.Kind.DESERT_OBELISK,
+                    new Item.Properties().stacksTo(1).fireResistant()));
     public static final DeferredItem<Item> ISLAND_OBELISK = ITEMS.register("island_obelisk",
-            () -> new WizardBuildingItem(ModBlocks.ISLAND_OBELISK.get(), "item.stardewcraft.island_obelisk.desc",
-                    new Item.Properties().stacksTo(1)));
+            () -> new WizardBuildingItem(ModBlocks.ISLAND_OBELISK.get(), WizardBuildingItem.Kind.ISLAND_OBELISK,
+                    new Item.Properties().stacksTo(1).fireResistant()));
     public static final DeferredItem<Item> GOLD_CLOCK = ITEMS.register("gold_clock",
-            () -> new WizardBuildingItem(ModBlocks.GOLD_CLOCK.get(), "item.stardewcraft.gold_clock.desc",
-                    new Item.Properties().stacksTo(1)));
+            () -> new WizardBuildingItem(ModBlocks.GOLD_CLOCK.get(), WizardBuildingItem.Kind.GOLD_CLOCK,
+                    new Item.Properties().stacksTo(1).fireResistant()));
+
+    private static DeferredItem<Item> registerCasinoFirework(String id, int color) {
+        return ITEMS.register(id, () -> new CasinoFireworkItem(
+                new Item.Properties().stacksTo(64).component(
+                        net.minecraft.core.component.DataComponents.FIREWORKS,
+                        new net.minecraft.world.item.component.Fireworks(
+                                1,
+                                java.util.List.of(new net.minecraft.world.item.component.FireworkExplosion(
+                                        net.minecraft.world.item.component.FireworkExplosion.Shape.SMALL_BALL,
+                                        new it.unimi.dsi.fastutil.ints.IntArrayList(new int[]{color}),
+                                        new it.unimi.dsi.fastutil.ints.IntArrayList(),
+                                        false,
+                                        false))))));
+    }
 
     // ── 装饰：农场常用 (Farm Common Decor) ──────────────────────────
     public static final DeferredItem<Item> STANDING_HOE = ITEMS.register("standing_hoe",

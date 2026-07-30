@@ -53,18 +53,11 @@ public final class LewisBasementEntranceEvents {
         if (!(rawPlayer instanceof ServerPlayer player)) {
             return false;
         }
-        if (!stack.is(ModItems.MINE_LADDER.get())) {
+        if (!canEnterBasement(player, stack)) {
             return false;
         }
 
         ServerLevel level = player.serverLevel();
-        if (level.dimension() != ModDimensions.STARDEW_VALLEY) {
-            return false;
-        }
-        if (!isInLewisStaircaseArea(player.blockPosition())) {
-            return false;
-        }
-
         if (!player.getAbilities().instabuild) {
             stack.shrink(1);
         }
@@ -73,6 +66,18 @@ public final class LewisBasementEntranceEvents {
         LuckyPurpleShortsWorldEvents.onEnteredLewisBasement(player);
         level.playSound(null, BlockPos.containing(TARGET_X, TARGET_Y, TARGET_Z), SoundEvents.LADDER_STEP, SoundSource.PLAYERS, 0.9F, 0.95F);
         return true;
+    }
+
+    public static boolean canEnterBasement(
+            ServerPlayer player,
+            ItemStack stack
+    ) {
+        return player != null
+                && stack != null
+                && stack.is(ModItems.MINE_LADDER.get())
+                && player.serverLevel().dimension()
+                        == ModDimensions.STARDEW_VALLEY
+                && isInLewisStaircaseArea(player.blockPosition());
     }
 
     private static boolean isInLewisStaircaseArea(BlockPos pos) {

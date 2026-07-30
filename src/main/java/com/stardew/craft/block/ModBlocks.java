@@ -1763,6 +1763,28 @@ public static final DeferredBlock<Block> DEAD_CROP = BLOCKS.register("dead_crop"
                                                 .sound(SoundType.METAL)
                                                 .noOcclusion()
                                                 .strength(1.5F, 3.0F)));
+                public static final DeferredBlock<Block> STATUE_OF_ENDLESS_FORTUNE =
+                                BLOCKS.register("statue_of_endless_fortune",
+                                                () -> new com.stardew.craft.block.utility.DailyStatueBlock(
+                                                                com.stardew.craft.blockentity.DailyStatueBlockEntity.Kind.ENDLESS_FORTUNE,
+                                                                "stardewcraft:block/utility/statue_of_endless_fortune",
+                                                                Block.Properties.of()
+                                                                                .mapColor(MapColor.GOLD)
+                                                                                .sound(SoundType.METAL)
+                                                                                .noOcclusion()
+                                                                                .requiresCorrectToolForDrops()
+                                                                                .strength(3.0F, 6.0F)));
+                public static final DeferredBlock<Block> STATUE_OF_PERFECTION =
+                                BLOCKS.register("statue_of_perfection",
+                                                () -> new com.stardew.craft.block.utility.DailyStatueBlock(
+                                                                com.stardew.craft.blockentity.DailyStatueBlockEntity.Kind.PERFECTION,
+                                                                "stardewcraft:block/utility/statue_of_perfection",
+                                                                Block.Properties.of()
+                                                                                .mapColor(MapColor.COLOR_PURPLE)
+                                                                                .sound(SoundType.METAL)
+                                                                                .noOcclusion()
+                                                                                .requiresCorrectToolForDrops()
+                                                                                .strength(5.0F, 10.0F)));
 
 
                 @SuppressWarnings("null")
@@ -3463,6 +3485,29 @@ public static final DeferredBlock<Block> DEAD_CROP = BLOCKS.register("dead_crop"
                                         .sound(net.minecraft.world.level.block.SoundType.WOOD)
                                         .noOcclusion()
                                         .strength(1.0F, 2.0F), "stardewcraft:decor/common/pool_table"));
+        public static final DeferredBlock<Block> CLUB_COMPUTER = BLOCKS.register("club_computer",
+                        () -> new com.stardew.craft.block.casino.ClubComputerBlock(Block.Properties.of()
+                                        .mapColor(net.minecraft.world.level.material.MapColor.METAL)
+                                        .sound(net.minecraft.world.level.block.SoundType.METAL)
+                                        .requiresCorrectToolForDrops()
+                                        .noOcclusion()
+                                        .strength(3.0F, 6.0F)));
+        public static final DeferredBlock<Block> CALICO_JACK_TABLE = BLOCKS.register("calico_jack_table",
+                        () -> new com.stardew.craft.block.casino.CalicoJackTableBlock(Block.Properties.of()
+                                        .mapColor(net.minecraft.world.level.material.MapColor.COLOR_GREEN)
+                                        .sound(net.minecraft.world.level.block.SoundType.WOOD)
+                                        .noOcclusion()
+                                        .strength(1.5F, 3.0F)));
+        public static final DeferredBlock<Block> SLOT_MACHINE = BLOCKS.register("slot_machine",
+                        () -> new com.stardew.craft.block.casino.CasinoInteractiveBlock(Block.Properties.of()
+                                        .mapColor(net.minecraft.world.level.material.MapColor.METAL)
+                                        .sound(net.minecraft.world.level.block.SoundType.METAL)
+                                        .requiresCorrectToolForDrops()
+                                        .noOcclusion()
+                                        .strength(3.0F, 6.0F),
+                                        "stardewcraft:casino/slot_machine",
+                                        0.0D, 0.0D, 0.0D, 16.0D, 26.5D, 16.0D,
+                                        com.stardew.craft.block.casino.CasinoInteractiveBlock.Kind.SLOT_MACHINE));
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> GLOBE = BLOCKS.register("globe",
                         () -> new com.stardew.craft.block.decor.MapDecorStaticBlock(Block.Properties.of()
@@ -3872,6 +3917,17 @@ public static final DeferredBlock<Block> DEAD_CROP = BLOCKS.register("dead_crop"
                                         .noLootTable()
                                         .strength(-1.0f, 3600000.0f)
                                         .sound(net.minecraft.world.level.block.SoundType.EMPTY)
+                                        .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK)));
+
+        // 齐先生任务：隧道墙上的保险箱（地图固定方块，不注册对应物品）
+        @SuppressWarnings("null")
+        public static final DeferredBlock<Block> QI_TUNNEL_SAFE = BLOCKS.register("qi_tunnel_safe",
+                        () -> new com.stardew.craft.block.utility.MrQiTunnelSafeBlock(Block.Properties.of()
+                                        .mapColor(net.minecraft.world.level.material.MapColor.METAL)
+                                        .sound(net.minecraft.world.level.block.SoundType.METAL)
+                                        .noOcclusion()
+                                        .noLootTable()
+                                        .strength(-1.0F, 3600000.0F)
                                         .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK)));
 
         // 室内装饰（自动 extension + 自动碰撞）

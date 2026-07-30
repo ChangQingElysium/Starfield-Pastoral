@@ -1,11 +1,12 @@
 package com.stardew.craft.combat.skill;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.combat.CombatHealing;
 import com.stardew.craft.combat.network.DamageNumberPayload;
-import com.stardew.craft.player.PlayerStardewDataAPI;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -15,12 +16,10 @@ import java.util.List;
 @EventBusSubscriber(modid = StardewCraft.MODID)
 public final class TemplarJudgementHandler {
 
-    private static final float SHARE_RATIO = 0.35f;
-
     private TemplarJudgementHandler() {}
 
     @SuppressWarnings("null")
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.LOW)
     public static void onPlayerDamaged(LivingIncomingDamageEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
@@ -44,11 +43,10 @@ public final class TemplarJudgementHandler {
             return;
         }
 
-        float total = damage * SHARE_RATIO;
-        float cap = PlayerStardewDataAPI.getMaxHealth(player) * 0.25f;
-        if (cap > 0.0f) {
-            total = Math.min(total, cap);
-        }
+        float total = TemplarJudgementTracker.cappedSharedDamage(
+                damage,
+                CombatHealing.maximumHealth(player)
+        );
         if (total <= 0.0f) {
             return;
         }

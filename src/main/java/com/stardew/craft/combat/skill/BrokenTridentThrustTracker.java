@@ -19,8 +19,13 @@ import java.util.UUID;
 
 public final class BrokenTridentThrustTracker {
 
-    private static final int DEFAULT_INTERVAL_TICKS = 3;
-    private static final int FISH_CATCH_DURATION_TICKS = 100;
+    public static final int DEFAULT_STRIKES = 3;
+    public static final int DEFAULT_INTERVAL_TICKS = 3;
+    public static final int FISH_CATCH_DURATION_TICKS = 100;
+    public static final float FISH_CATCH_DAMAGE_BONUS = 0.10f;
+    public static final int FISH_CATCH_SLOW_AMPLIFIER = 0;
+    public static final int HIT_CONTEXT_LIFETIME_TICKS = 5;
+    public static final double REACQUIRE_RANGE = 2.5;
 
     private static final Map<UUID, State> ACTIVE = new HashMap<>();
 
@@ -41,7 +46,16 @@ public final class BrokenTridentThrustTracker {
 
     public static void start(ServerPlayer player, long nowTick, LivingEntity target,
                              String weaponId, String skillId, float baseDamageMultiplier) {
-        start(player, nowTick, target, weaponId, skillId, baseDamageMultiplier, 3, DEFAULT_INTERVAL_TICKS);
+        start(
+            player,
+            nowTick,
+            target,
+            weaponId,
+            skillId,
+            baseDamageMultiplier,
+            DEFAULT_STRIKES,
+            DEFAULT_INTERVAL_TICKS
+        );
     }
 
     @SuppressWarnings("null")
@@ -82,15 +96,19 @@ public final class BrokenTridentThrustTracker {
         target.hurtTime = 0;
 
         boolean fishCatchActive = BrokenTridentCatchTracker.isActive(player, nowTick);
-        float damageMultiplier = baseDamageMultiplier + (fishCatchActive ? 0.10f : 0.0f);
+        float damageMultiplier = damageMultiplier(baseDamageMultiplier, fishCatchActive);
 
         SkillContext context = SkillContext.builder()
             .skillId(skillId)
             .tier(SkillContext.SkillTier.MINOR)
             .damageMultiplier(damageMultiplier)
             .build();
-        WeaponSkillContextStore.setPending(player, context, nowTick + 5);
-        boolean hit = target.hurt(player.damageSources().playerAttack(player), 1.0F);
+        boolean hit = WeaponSkillDamage.apply(
+                player,
+                target,
+                context,
+                nowTick + HIT_CONTEXT_LIFETIME_TICKS
+        );
 
         if (hit) {
             PacketDistributor.sendToPlayer(player, new BrokenTridentThrustStrikePayload());
@@ -105,7 +123,14 @@ public final class BrokenTridentThrustTracker {
 
     @SuppressWarnings("null")
     private static void applyFishCatchSlow(LivingEntity target) {
-        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, FISH_CATCH_DURATION_TICKS, 0, false, true, true));
+        target.addEffect(new MobEffectInstance(
+            MobEffects.MOVEMENT_SLOWDOWN,
+            FISH_CATCH_DURATION_TICKS,
+            FISH_CATCH_SLOW_AMPLIFIER,
+            false,
+            true,
+            true
+        ));
     }
 
     private static LivingEntity resolveTarget(ServerLevel level, ServerPlayer player, UUID targetId) {
@@ -115,7 +140,7 @@ public final class BrokenTridentThrustTracker {
                 return living;
             }
         }
-        return findTargetInFront(player, 2.5);
+        return findTargetInFront(player, REACQUIRE_RANGE);
     }
 
     @SuppressWarnings("null")
@@ -140,5 +165,14 @@ public final class BrokenTridentThrustTracker {
     /** Clean up state when a player logs out to prevent memory leaks. */
     public static void removePlayer(UUID playerId) {
         ACTIVE.remove(playerId);
+    }
+
+    public static boolean isActive(UUID playerId) {
+        return ACTIVE.containsKey(playerId);
+    }
+
+    static float damageMultiplier(float baseDamageMultiplier, boolean fishCatchActive) {
+        return baseDamageMultiplier
+            + (fishCatchActive ? FISH_CATCH_DAMAGE_BONUS : 0.0f);
     }
 }

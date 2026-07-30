@@ -1,0 +1,40 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "SeedShop",
+    "tile_action": "Message \"SeedShop.4\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:pierre_house",
+    "boxes": [
+      {
+        "min": [
+          38,
+          37,
+          -42
+        ],
+        "max": [
+          38,
+          39,
+          -42
+        ]
+      }
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.seed_shop.4",
+          "fallback": "'The Enduring Value Of Small Business'"
+        }
+      ]
+    }
+  ]
+}

@@ -41,6 +41,7 @@ public class ClientPlayerDataCache {
     private static int ticketPrizesClaimed = 0;
     private static int specialOrderPrizeTickets = 0;
     private static int fairStarTokens = 0;
+    private static int clubCoins = 0;
     private static int maxMineFloorReached = 0;
     private static int firstJoinDay = -1;
     private static String winterStarRecipient = "";
@@ -103,6 +104,7 @@ public class ClientPlayerDataCache {
         ticketPrizesClaimed = nbt.contains("TicketPrizesClaimed") ? Math.max(0, nbt.getInt("TicketPrizesClaimed")) : 0;
         specialOrderPrizeTickets = nbt.contains("SpecialOrderPrizeTickets") ? Math.max(0, nbt.getInt("SpecialOrderPrizeTickets")) : 0;
         fairStarTokens = nbt.contains("FairStarTokens") ? Math.max(0, nbt.getInt("FairStarTokens")) : 0;
+        clubCoins = nbt.contains("ClubCoins") ? Math.max(0, nbt.getInt("ClubCoins")) : 0;
         firstJoinDay = nbt.contains("FirstJoinDay") ? nbt.getInt("FirstJoinDay") : -1;
         winterStarRecipient = nbt.contains("WinterStarRecipient") ? nbt.getString("WinterStarRecipient") : "";
         gender = nbt.contains("Gender") ? Math.max(-1, Math.min(1, nbt.getInt("Gender"))) : -1;
@@ -296,6 +298,12 @@ public class ClientPlayerDataCache {
     public static int getHealth() {
         return health;
     }
+
+    public static void updateVitals(int updatedHealth, int updatedMaxHealth) {
+        maxHealth = Math.max(1, updatedMaxHealth);
+        health = Math.max(0, Math.min(updatedHealth, maxHealth));
+        syncedFromServer = true;
+    }
     
     public static int getMaxHealth() {
         return maxHealth;
@@ -327,6 +335,10 @@ public class ClientPlayerDataCache {
 
     public static int getFairStarTokens() {
         return Math.max(0, fairStarTokens);
+    }
+
+    public static int getClubCoins() {
+        return Math.max(0, clubCoins);
     }
 
     public static String getFarmName() {
@@ -603,6 +615,7 @@ public class ClientPlayerDataCache {
         ticketPrizesClaimed = 0;
         specialOrderPrizeTickets = 0;
         fairStarTokens = 0;
+        clubCoins = 0;
         com.stardew.craft.client.hud.FestivalCurrencyHudState.reset();
         maxMineFloorReached = 0;
         gender = -1;

@@ -76,14 +76,18 @@ public enum RingType {
             // 磁力型，数值直接表示 MC 吸附半径（格）。
             case SMALL_MAGNET_RING -> b.magneticRadius(3);
             case MAGNET_RING -> b.magneticRadius(6);
-            case IRIDIUM_BAND -> { b.magneticRadius(6); b.lightLevel(10); }
+            case IRIDIUM_BAND -> {
+                b.magneticRadius(6);
+                b.lightLevel(10);
+                b.attackMultiplier(0.1f);
+            }
             // attackMult handled separately in combat system
             case AMETHYST_RING -> b.knockbackBonus(0.1f);
             case TOPAZ_RING -> b.defense(1);
             case AQUAMARINE_RING -> b.critChance(0.1f);
             case JADE_RING -> b.critPower(0.1f);
-            case EMERALD_RING -> {} // weaponSpeedMult — handled in weapon swing code
-            case RUBY_RING -> {} // attackMult — handled in damage calc
+            case EMERALD_RING -> b.weaponSpeedMultiplier(0.1f);
+            case RUBY_RING -> b.attackMultiplier(0.1f);
             case CRABSHELL_RING -> b.defense(5);
             case LUCKY_RING -> b.luck(1);
             case IMMUNITY_BAND -> b.immunity(4);

@@ -16,9 +16,9 @@ import java.util.UUID;
  */
 public final class SteelSpineFuryState {
 
-    private static final int MAX_BONUS_DAMAGE = 12;
-    private static final float BONUS_RATIO = 0.40f;
-    private static final float FALLBACK_MULTIPLIER = 1.40f;
+    static final int MAX_BONUS_DAMAGE = 12;
+    static final float BONUS_RATIO = 0.40f;
+    static final float FALLBACK_MULTIPLIER = 1.40f;
 
     private static final class State {
         private long endTick;
@@ -73,7 +73,7 @@ public final class SteelSpineFuryState {
         state.tookHit = true;
         state.ready = true;
         state.weak = false;
-        state.bonusDamage = Math.min(MAX_BONUS_DAMAGE, (int) Math.ceil(stardewDamage * BONUS_RATIO));
+        state.bonusDamage = calculateBonusDamage(stardewDamage);
         state.endTick = nowTick;
 
         if (!state.cooldownApplied && state.cooldownTicks > 0) {
@@ -115,15 +115,23 @@ public final class SteelSpineFuryState {
         State state = ACTIVE.get(player.getUUID());
         if (state == null || !state.ready) return null;
 
-        boolean strong = !state.weak;
-        float multiplier = state.weak ? FALLBACK_MULTIPLIER : 1.0f;
-        int bonus = strong ? state.bonusDamage : 0;
+        AttackBoost boost = createAttackBoost(state.weak, state.bonusDamage);
         state.ready = false;
         state.consumed = true;
         if (state.cooldownApplied) {
             ACTIVE.remove(player.getUUID());
         }
-        return new AttackBoost(strong, bonus, multiplier);
+        return boost;
+    }
+
+    static int calculateBonusDamage(int stardewDamage) {
+        return Math.min(MAX_BONUS_DAMAGE, (int) Math.ceil(stardewDamage * BONUS_RATIO));
+    }
+
+    static AttackBoost createAttackBoost(boolean weak, int bonusDamage) {
+        return weak
+                ? new AttackBoost(false, 0, FALLBACK_MULTIPLIER)
+                : new AttackBoost(true, bonusDamage, 1.0f);
     }
 
     /** Clean up state when a player logs out to prevent memory leaks. */

@@ -201,14 +201,24 @@ public class SiloManagerScreen extends AbstractContainerScreen<SiloManagerMenu> 
     protected void renderLabels(GuiGraphics g, int mx, int my) { }
 
     private void renderTitleBanner(GuiGraphics g, float scale) {
-        Component title = GuiText.ellipsize(this.font,
-                Component.translatable("container.stardew_craft.silo_manager"), panelW - pad * 3);
-        int textWidth = this.font.width(title);
-        int textX = panelX + (panelW - textWidth) / 2;
+        Component title = Component.translatable(
+                "container.stardew_craft.silo_manager");
+        int availableWidth = Math.max(1, panelW - pad * 3);
+        int bannerWidth = Math.min(this.font.width(title), availableWidth);
+        int textX = panelX + (panelW - bannerWidth) / 2;
         int bannerY = panelY + Math.max(5, Math.round(5 * scale));
-        CommonGuiTextures.drawScrollBanner(g, textX, bannerY, textWidth, scale);
+        CommonGuiTextures.drawScrollBanner(
+                g, textX, bannerY, bannerWidth, scale);
         int textY = bannerY + Math.max(0, (Math.round(18 * scale) - this.font.lineHeight) / 2);
-        g.drawString(this.font, title, textX, textY, COL_TITLE, false);
+        GuiText.drawCenteredFitted(
+                g,
+                this.font,
+                title,
+                panelX + panelW / 2,
+                textY + this.font.lineHeight / 2,
+                availableWidth,
+                COL_TITLE,
+                false);
     }
 
     private void renderStorageCard(GuiGraphics g, int x, int y, int w, int h) {
@@ -219,10 +229,15 @@ public class SiloManagerScreen extends AbstractContainerScreen<SiloManagerMenu> 
 
         if (mgr.isFormed()) {
             Component status = Component.translatable("gui.stardew_craft.silo_manager.stage.formed");
-            g.drawString(this.font, GuiText.ellipsize(this.font, status, tw), tx, y + inset, COL_OK, false);
+            int statusBottom = GuiText.drawWrapped(
+                    g, this.font, status, tx, y + inset, tw,
+                    COL_OK, false, 0);
 
-            int iconBox = Math.min(46, Math.max(28, h - inset * 2 - lineH));
-            int iconY = y + (h - iconBox) / 2 + lineH / 2;
+            int statusHeight = Math.max(lineH, statusBottom - (y + inset));
+            int iconBox = Math.min(
+                    46,
+                    Math.max(28, h - inset * 2 - statusHeight));
+            int iconY = y + (h - iconBox + statusHeight) / 2;
             CommonGuiTextures.drawTextureBoxNoShadow(g, tx, iconY, iconBox, iconBox, 1.0f);
             g.pose().pushPose();
             float itemScale = Math.max(1.0f, Math.min(2.0f, (iconBox - 8) / 16.0f));
@@ -237,24 +252,33 @@ public class SiloManagerScreen extends AbstractContainerScreen<SiloManagerMenu> 
                 "gui.stardew_craft.silo_manager.hay",
                 mgr.getHayAmount(), mgr.getHayCapacity()
             );
-            int infoY = y + inset + lineH + Math.max(4, (h - inset * 2 - lineH * 2) / 4);
-            g.drawString(this.font, GuiText.ellipsize(this.font, hayLabel, infoW), infoX, infoY, COL_TEXT, false);
-            int barY = infoY + lineH + 2;
+            int infoY = y + inset + statusHeight
+                    + Math.max(4, (h - inset * 2 - statusHeight * 2) / 4);
+            int labelBottom = GuiText.drawWrapped(
+                    g, this.font, hayLabel, infoX, infoY, infoW,
+                    COL_TEXT, false, 0);
+            int barY = labelBottom + 2;
             drawHayBar(g, infoX, barY, infoW, Math.max(10, this.font.lineHeight + 2), barProgress);
         } else {
             Component status = Component.translatable("gui.stardew_craft.silo_manager.stage.unformed");
-            g.drawString(this.font, GuiText.ellipsize(this.font, status, tw), tx, y + inset, COL_GRAY, false);
+            int statusBottom = GuiText.drawWrapped(
+                    g, this.font, status, tx, y + inset, tw,
+                    COL_GRAY, false, 0);
             Component hint = Component.translatable("gui.stardew_craft.silo_manager.build_hint");
-            int hintY = y + inset + lineH + 5;
-            int readyY = GuiText.drawWrapped(g, this.font, hint, tx, hintY, tw, COL_TEXT, false, 3) + 7;
+            int hintY = statusBottom + 5;
+            int readyY = GuiText.drawWrapped(g, this.font, hint, tx, hintY, tw, COL_TEXT, false, 0) + 7;
 
             if (mgr.canBuild()) {
                 float breathe = 0.6f + 0.4f * Mth.sin(tickCount * 0.1f);
                 Component ready = Component.translatable("gui.stardew_craft.silo_manager.ready");
-                g.drawString(this.font, GuiText.ellipsize(this.font, ready, tw), tx, readyY, withAlpha(COL_GOLD, breathe), false);
+                GuiText.drawWrapped(
+                        g, this.font, ready, tx, readyY, tw,
+                        withAlpha(COL_GOLD, breathe), false, 0);
             } else {
                 Component notReady = Component.translatable("gui.stardew_craft.silo_manager.not_ready");
-                g.drawString(this.font, GuiText.ellipsize(this.font, notReady, tw), tx, readyY, COL_RED, false);
+                GuiText.drawWrapped(
+                        g, this.font, notReady, tx, readyY, tw,
+                        COL_RED, false, 0);
             }
         }
     }
@@ -310,8 +334,9 @@ public class SiloManagerScreen extends AbstractContainerScreen<SiloManagerMenu> 
         }
 
         int textColor = !active ? 0xFF909090 : (hovered ? COL_TITLE : COL_TEXT);
-        int th = this.font.lineHeight;
-        GuiText.drawCenteredClamped(g, this.font, label, x + w / 2, y + (h - th) / 2, w - 8, textColor, hovered);
+        GuiText.drawCenteredFitted(
+                g, this.font, label, x + w / 2, y + h / 2,
+                w - 8, textColor, hovered);
         g.pose().popPose();
     }
 
@@ -330,9 +355,11 @@ public class SiloManagerScreen extends AbstractContainerScreen<SiloManagerMenu> 
         Component line2 = confirmType == ConfirmType.DEMOLISH
             ? Component.translatable("gui.stardew_craft.silo_manager.dialog.demolish.line2")
             : Component.translatable("gui.stardew_craft.silo_manager.dialog.relocate.line2");
-        int textLines = 1
-            + GuiText.wrappedLineCount(this.font, line1, contentWidth, 3)
-            + GuiText.wrappedLineCount(this.font, line2, contentWidth, 3);
+        Component title = confirmDialogTitle();
+        int textLines = GuiText.wrappedLineCount(
+                this.font, title, contentWidth, 0)
+            + GuiText.wrappedLineCount(this.font, line1, contentWidth, 0)
+            + GuiText.wrappedLineCount(this.font, line2, contentWidth, 0);
         int dh = pad * 2 + textLines * lineH + secGap + btnH;
         int dx = (this.width - dw) / 2;
         int dy = (this.height - dh) / 2;
@@ -352,14 +379,12 @@ public class SiloManagerScreen extends AbstractContainerScreen<SiloManagerMenu> 
         int tx = dx + pad;
         int ty = dy + pad;
 
-        Component title = confirmType == ConfirmType.DEMOLISH
-            ? Component.translatable("gui.stardew_craft.silo_manager.dialog.demolish.title")
-            : Component.translatable("gui.stardew_craft.silo_manager.dialog.relocate.title");
-        g.drawString(this.font, GuiText.ellipsize(this.font, title, contentWidth), tx, ty, COL_TITLE, false);
-        ty += lineH;
+        ty = GuiText.drawWrapped(
+                g, this.font, title, tx, ty, contentWidth,
+                COL_TITLE, false, 0);
 
-        ty = GuiText.drawWrapped(g, this.font, line1, tx, ty, contentWidth, COL_TEXT, false, 3) + 3;
-        GuiText.drawWrapped(g, this.font, line2, tx, ty, contentWidth, COL_RED, false, 3);
+        ty = GuiText.drawWrapped(g, this.font, line1, tx, ty, contentWidth, COL_TEXT, false, 0) + 3;
+        GuiText.drawWrapped(g, this.font, line2, tx, ty, contentWidth, COL_RED, false, 0);
 
         int cbW = 70;
         int cbH = this.font.lineHeight + 12;
@@ -390,8 +415,9 @@ public class SiloManagerScreen extends AbstractContainerScreen<SiloManagerMenu> 
         }
 
         int textColor = !active ? 0xFF909090 : (hovered ? COL_TITLE : COL_TEXT);
-        int th = this.font.lineHeight;
-        GuiText.drawCenteredClamped(g, this.font, label, x + w / 2, y + (h - th) / 2, w - 8, textColor, hovered);
+        GuiText.drawCenteredFitted(
+                g, this.font, label, x + w / 2, y + h / 2,
+                w - 8, textColor, hovered);
     }
 
     // ============================
@@ -446,9 +472,10 @@ public class SiloManagerScreen extends AbstractContainerScreen<SiloManagerMenu> 
         Component line2 = confirmType == ConfirmType.DEMOLISH
             ? Component.translatable("gui.stardew_craft.silo_manager.dialog.demolish.line2")
             : Component.translatable("gui.stardew_craft.silo_manager.dialog.relocate.line2");
-        int textLines = 1
-            + GuiText.wrappedLineCount(this.font, line1, contentWidth, 3)
-            + GuiText.wrappedLineCount(this.font, line2, contentWidth, 3);
+        int textLines = GuiText.wrappedLineCount(
+                this.font, confirmDialogTitle(), contentWidth, 0)
+            + GuiText.wrappedLineCount(this.font, line1, contentWidth, 0)
+            + GuiText.wrappedLineCount(this.font, line2, contentWidth, 0);
         int dh = pad * 2 + textLines * lineH + secGap + btnH;
         int dx = (this.width - dw) / 2;
         int dy = (this.height - dh) / 2;
@@ -472,6 +499,14 @@ public class SiloManagerScreen extends AbstractContainerScreen<SiloManagerMenu> 
             return true;
         }
         return true;
+    }
+
+    private Component confirmDialogTitle() {
+        return confirmType == ConfirmType.DEMOLISH
+                ? Component.translatable(
+                        "gui.stardew_craft.silo_manager.dialog.demolish.title")
+                : Component.translatable(
+                        "gui.stardew_craft.silo_manager.dialog.relocate.title");
     }
 
     @Override

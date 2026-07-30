@@ -1,0 +1,40 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "LeahHouse",
+    "tile_action": "Message \"LeahHouse.4\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:leah_cottage",
+    "boxes": [
+      {
+        "min": [
+          -81,
+          38,
+          46
+        ],
+        "max": [
+          -81,
+          39,
+          46
+        ]
+      }
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.leah_house.4",
+          "fallback": "'How To Deal With Overbearing People'"
+        }
+      ]
+    }
+  ]
+}

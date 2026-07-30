@@ -5,16 +5,16 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
- * 维度伤害映射系统
+ * 维度数值边界
  * 
  * 核心设计：
  * - 在星露谷维度内，使用原版星露谷数值（100HP、武器伤害10-100+等）
- * - 在星露谷维度外（主世界等），伤害按5:1比例映射到MC系统
+ * - 星露谷武器与攻击伤害在所有维度都保持同一数值，不做削弱
+ * - 仅生命显示仍需在星露谷100HP与Minecraft 20HP之间换算
  * 
- * 映射比例（星露谷 → Minecraft）：
- * - 伤害: 5:1 （星露谷25伤害 = MC 5伤害 = 2.5颗心）
+ * 映射比例：
+ * - 伤害: 1:1（其他维度允许星露谷武器保持高强度）
  * - 生命: 5:1 （星露谷100HP = MC 20HP = 10颗心）
- * - 防御: 直接映射 （星露谷防御值 ≈ MC护甲点）
  */
 public class DimensionDamageMapper {
     
@@ -23,9 +23,6 @@ public class DimensionDamageMapper {
         ResourceLocation.fromNamespaceAndPath("stardewcraft", "stardew_valley");
     private static final ResourceLocation STARDEW_MINING_DIMENSION =
         ResourceLocation.fromNamespaceAndPath("stardewcraft", "stardew_mining");
-    
-    // 伤害映射比例
-    private static final float DAMAGE_RATIO = 5.0f;
     
     // 生命映射比例
     private static final float HEALTH_RATIO = 5.0f;
@@ -54,13 +51,7 @@ public class DimensionDamageMapper {
      * @return 实际应用的伤害值
      */
     public static float mapDamage(float stardewDamage, boolean isInStardewDimension) {
-        if (isInStardewDimension) {
-            // 在星露谷维度，使用原版数值
-            return stardewDamage;
-        } else {
-            // 在其他维度，按比例缩小
-            return stardewDamage / DAMAGE_RATIO;
-        }
+        return stardewDamage;
     }
     
     /**
@@ -78,29 +69,16 @@ public class DimensionDamageMapper {
         }
     }
     
-    /**
-     * 反向映射伤害（从MC伤害转换为星露谷伤害）
-     * 用于计算原版MC伤害对星露谷玩家的影响
-     * 
-     * @param mcDamage Minecraft伤害值
-     * @param isInStardewDimension 是否在星露谷维度
-     * @return 转换后的星露谷伤害值
-     */
+    /** 伤害不再进行反向维度换算；保留入口以兼容现有调用。 */
     public static float reverseMapDamage(float mcDamage, boolean isInStardewDimension) {
-        if (isInStardewDimension) {
-            // 在星露谷维度，MC伤害转换为星露谷数值
-            return mcDamage * DAMAGE_RATIO;
-        } else {
-            // 在其他维度，直接使用MC伤害
-            return mcDamage;
-        }
+        return mcDamage;
     }
     
     /**
      * 获取伤害映射比例
      */
     public static float getDamageRatio() {
-        return DAMAGE_RATIO;
+        return 1.0f;
     }
     
     /**

@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "stardewcraft:block/utility/statue_of_perfection" },
+    "facing=east": { "model": "stardewcraft:block/utility/statue_of_perfection", "y": 90 },
+    "facing=south": { "model": "stardewcraft:block/utility/statue_of_perfection", "y": 180 },
+    "facing=west": { "model": "stardewcraft:block/utility/statue_of_perfection", "y": 270 }
+  }
+}

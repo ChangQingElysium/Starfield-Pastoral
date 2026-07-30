@@ -1,0 +1,855 @@
+{
+  "format": 2,
+  "geometry": {
+    "unpaired_points": "single_block",
+    "paired_suffixes": ["_1", "_2"],
+    "paired_points": "inclusive_cuboid"
+  },
+  "source_numbering": "phase3_approval_image_order",
+  "batches": [
+    {
+      "section": "seedshop",
+      "map": "SeedShop",
+      "location": "stardewcraft:pierre_house",
+      "omitted": ["3 (merged into 2)", "9", "10"],
+      "interactions": [
+        {
+          "id": "seed_shop_1",
+          "approval_index": "1",
+          "original_key": "SeedShop.1",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.seed_shop.1",
+          "points": [
+            { "name": "1", "x": 32, "y": 38, "z": -42 }
+          ]
+        },
+        {
+          "id": "seed_shop_2",
+          "approval_index": "2",
+          "original_key": "SeedShop.2",
+          "equivalent_original_keys": ["SeedShop.3"],
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.seed_shop.2",
+          "points": [
+            { "name": "2_1", "x": 28, "y": 37, "z": -42 },
+            { "name": "2_2", "x": 29, "y": 37, "z": -42 }
+          ]
+        },
+        {
+          "id": "seed_shop_abigail_drawers",
+          "approval_index": "12",
+          "original_action": "NPCMessage Abigail \"Data\\ExtraDialogue:SeedShop_Abigail_Drawers/Strings\\Locations:SeedShop_Abigail_Drawers\"",
+          "type": "npc_message",
+          "npc": "abigail",
+          "nearby": {
+            "source": "Data/ExtraDialogue",
+            "original_key": "SeedShop_Abigail_Drawers",
+            "text_key": "stardewcraft.map_interaction.seed_shop.abigail_drawers.nearby"
+          },
+          "fallback": {
+            "source": "Strings/Locations",
+            "original_key": "SeedShop_Abigail_Drawers",
+            "text_key": "stardewcraft.map_interaction.seed_shop.abigail_drawers.fallback"
+          },
+          "announce_snooping": true,
+          "points": [
+            { "name": "12_1", "x": 30, "y": 37, "z": -42 },
+            { "name": "12_2", "x": 31, "y": 38, "z": -42 }
+          ]
+        },
+        {
+          "id": "seed_shop_7",
+          "approval_index": "7",
+          "original_key": "SeedShop.7",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.seed_shop.7",
+          "points": [
+            { "name": "7", "x": 20, "y": 37, "z": -40 }
+          ]
+        },
+        {
+          "id": "seed_shop_4",
+          "approval_index": "4",
+          "original_key": "SeedShop.4",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.seed_shop.4",
+          "points": [
+            { "name": "4_1", "x": 38, "y": 37, "z": -42 },
+            { "name": "4_2", "x": 38, "y": 39, "z": -42 }
+          ]
+        },
+        {
+          "id": "seed_shop_5",
+          "approval_index": "5",
+          "original_key": "SeedShop.5",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.seed_shop.5",
+          "points": [
+            { "name": "5_1", "x": 39, "y": 37, "z": -42 },
+            { "name": "5_2", "x": 39, "y": 39, "z": -42 }
+          ]
+        },
+        {
+          "id": "seed_shop_8",
+          "approval_index": "8",
+          "original_key": "SeedShop.8",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.seed_shop.8",
+          "points": [
+            { "name": "8", "x": 44, "y": 38, "z": -37 }
+          ]
+        },
+        {
+          "id": "seed_shop_6",
+          "approval_index": "6",
+          "original_key": "SeedShop.6",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.seed_shop.6",
+          "points": [
+            { "name": "6_1", "x": 58, "y": 37, "z": -44 },
+            { "name": "6_2", "x": 58, "y": 38, "z": -44 }
+          ]
+        },
+        {
+          "id": "seed_shop_12",
+          "approval_index": "11",
+          "original_key": "SeedShop.12",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.seed_shop.12",
+          "points": [
+            { "name": "11_1", "x": 37, "y": 36, "z": -16 },
+            { "name": "11_2", "x": 37, "y": 36, "z": -17 }
+          ]
+        }
+      ]
+    },
+    {
+      "section": "samhouse",
+      "map": "SamHouse",
+      "location": "stardewcraft:1_willow_lane",
+      "omitted": ["12"],
+      "interactions": [
+        {
+          "id": "sam_house_1",
+          "approval_index": "1",
+          "original_key": "SamHouse.1",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.sam_house.1",
+          "points": [
+            { "name": "1", "x": -31, "y": 39, "z": 20 }
+          ]
+        },
+        {
+          "id": "sam_house_2",
+          "approval_index": "2",
+          "original_key": "SamHouse.2",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.sam_house.2",
+          "points": [
+            { "name": "2_1", "x": -26, "y": 39, "z": 20 },
+            { "name": "2_2", "x": -26, "y": 40, "z": 20 }
+          ]
+        },
+        {
+          "id": "sam_house_3",
+          "approval_index": "3",
+          "original_key": "SamHouse.3",
+          "type": "letter",
+          "text_key": "stardewcraft.strings_from_maps.sam_house.3",
+          "points": [
+            { "name": "3", "x": -15, "y": 39, "z": 18 }
+          ]
+        },
+        {
+          "id": "sam_house_4",
+          "approval_index": "4",
+          "original_key": "SamHouse.4",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.sam_house.4",
+          "points": [
+            { "name": "4", "x": -28, "y": 39, "z": 33 }
+          ]
+        },
+        {
+          "id": "sam_house_5",
+          "approval_index": "5",
+          "original_key": "SamHouse.5",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.sam_house.5",
+          "points": [
+            { "name": "5_1", "x": -16, "y": 39, "z": 26 },
+            { "name": "5_2", "x": -16, "y": 40, "z": 26 }
+          ]
+        },
+        {
+          "id": "sam_house_6",
+          "approval_index": "6",
+          "original_key": "SamHouse.6",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.sam_house.6",
+          "points": [
+            { "name": "6_1", "x": -15, "y": 39, "z": 26 },
+            { "name": "6_2", "x": -15, "y": 40, "z": 26 }
+          ]
+        },
+        {
+          "id": "sam_house_7",
+          "approval_index": "7",
+          "original_key": "SamHouse.7",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.sam_house.7",
+          "points": [
+            { "name": "7_1", "x": -13, "y": 39, "z": 26 },
+            { "name": "7_2", "x": -13, "y": 40, "z": 26 }
+          ]
+        },
+        {
+          "id": "sam_house_8",
+          "approval_index": "8",
+          "original_key": "SamHouse.8",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.sam_house.8",
+          "points": [
+            { "name": "8_1", "x": -12, "y": 39, "z": 26 },
+            { "name": "8_2", "x": -12, "y": 40, "z": 26 }
+          ]
+        },
+        {
+          "id": "sam_house_9",
+          "approval_index": "9",
+          "original_key": "SamHouse.9",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.sam_house.9",
+          "points": [
+            { "name": "9", "x": -11, "y": 39, "z": 27 }
+          ]
+        },
+        {
+          "id": "sam_house_11",
+          "approval_index": "11",
+          "original_key": "SamHouse.11",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.sam_house.11",
+          "points": [
+            { "name": "11", "x": -7, "y": 40, "z": 30 }
+          ]
+        },
+        {
+          "id": "sam_house_10",
+          "approval_index": "10",
+          "original_key": "SamHouse.10",
+          "type": "letter",
+          "text_key": "stardewcraft.strings_from_maps.sam_house.10",
+          "points": [
+            { "name": "10", "x": -26, "y": 39, "z": 37 }
+          ]
+        },
+        {
+          "id": "sam_house_sam_trash",
+          "approval_index": "13",
+          "original_action": "NPCMessage Sam \"Data\\ExtraDialogue:SamHouse_Sam_Trash/Strings\\Locations:SamHouse_Sam_Trash\"",
+          "type": "npc_message",
+          "npc": "sam",
+          "nearby": {
+            "source": "Data/ExtraDialogue",
+            "original_key": "SamHouse_Sam_Trash",
+            "text_key": "stardewcraft.map_interaction.sam_house.sam_trash.nearby"
+          },
+          "fallback": {
+            "source": "Strings/Locations",
+            "original_key": "SamHouse_Sam_Trash",
+            "text_key": "stardewcraft.map_interaction.sam_house.sam_trash.fallback"
+          },
+          "announce_snooping": true,
+          "points": [
+            { "name": "13", "x": -14, "y": 39, "z": 26 }
+          ]
+        }
+      ]
+    },
+    {
+      "section": "joshhouse",
+      "map": "JoshHouse",
+      "location": "stardewcraft:1_river_road",
+      "omitted": ["6", "9", "10"],
+      "interactions": [
+        {
+          "id": "josh_house_1",
+          "approval_index": "1",
+          "original_key": "JoshHouse.1",
+          "type": "letter",
+          "text_key": "stardewcraft.strings_from_maps.josh_house.1",
+          "points": [
+            { "name": "1", "x": 38, "y": 22, "z": -19 }
+          ]
+        },
+        {
+          "id": "josh_house_2",
+          "approval_index": "2",
+          "original_key": "JoshHouse.2",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.josh_house.2",
+          "points": [
+            { "name": "2", "x": 39, "y": 23, "z": -19 }
+          ]
+        },
+        {
+          "id": "josh_house_3",
+          "approval_index": "3",
+          "original_key": "JoshHouse.3",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.josh_house.3",
+          "points": [
+            { "name": "3", "x": 50, "y": 22, "z": -19 }
+          ]
+        },
+        {
+          "id": "josh_house_4",
+          "approval_index": "4",
+          "original_key": "JoshHouse.4",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.josh_house.4",
+          "points": [
+            { "name": "4_1", "x": 51, "y": 22, "z": -19 },
+            { "name": "4_2", "x": 51, "y": 23, "z": -19 }
+          ]
+        },
+        {
+          "id": "josh_house_5",
+          "approval_index": "5",
+          "original_key": "JoshHouse.5",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.josh_house.5",
+          "points": [
+            { "name": "5_1", "x": 52, "y": 22, "z": -19 },
+            { "name": "5_2", "x": 52, "y": 23, "z": -19 }
+          ]
+        },
+        {
+          "id": "josh_house_alex_trash",
+          "approval_index": "15",
+          "original_action": "NPCMessage Alex \"Data\\ExtraDialogue:JoshHouse_Alex_Trash/Strings\\Locations:JoshHouse_Alex_Trash\"",
+          "type": "npc_message",
+          "npc": "alex",
+          "nearby": {
+            "source": "Data/ExtraDialogue",
+            "original_key": "JoshHouse_Alex_Trash",
+            "text_key": "stardewcraft.map_interaction.josh_house.alex_trash.nearby"
+          },
+          "fallback": {
+            "source": "Strings/Locations",
+            "original_key": "JoshHouse_Alex_Trash",
+            "text_key": "stardewcraft.map_interaction.josh_house.alex_trash.fallback"
+          },
+          "announce_snooping": true,
+          "points": [
+            { "name": "15", "x": 54, "y": 22, "z": -19 }
+          ]
+        },
+        {
+          "id": "josh_house_7",
+          "approval_index": "7",
+          "original_key": "JoshHouse.7",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.josh_house.7",
+          "points": [
+            { "name": "7_1", "x": 55, "y": 22, "z": -19 },
+            { "name": "7_2", "x": 55, "y": 23, "z": -19 }
+          ]
+        },
+        {
+          "id": "josh_house_8",
+          "approval_index": "8",
+          "original_key": "JoshHouse.8",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.josh_house.8",
+          "points": [
+            { "name": "8_1", "x": 56, "y": 22, "z": -19 },
+            { "name": "8_2", "x": 56, "y": 23, "z": -19 }
+          ]
+        },
+        {
+          "id": "josh_house_14",
+          "approval_index": "14",
+          "original_key": "JoshHouse.14",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.josh_house.14",
+          "points": [
+            { "name": "14", "x": 38, "y": 22, "z": -2 }
+          ]
+        },
+        {
+          "id": "josh_house_11",
+          "approval_index": "11",
+          "original_key": "JoshHouse.11",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.josh_house.11",
+          "points": [
+            { "name": "11_1", "x": 42, "y": 22, "z": -4 },
+            { "name": "11_2", "x": 42, "y": 23, "z": -4 }
+          ]
+        },
+        {
+          "id": "josh_house_12",
+          "approval_index": "12",
+          "original_key": "JoshHouse.12",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.josh_house.12",
+          "points": [
+            { "name": "12_1", "x": 58, "y": 22, "z": -4 },
+            { "name": "12_2", "x": 58, "y": 23, "z": -4 }
+          ]
+        },
+        {
+          "id": "josh_house_13",
+          "approval_index": "13",
+          "original_key": "JoshHouse.13",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.josh_house.13",
+          "points": [
+            { "name": "13_1", "x": 59, "y": 22, "z": -4 },
+            { "name": "13_2", "x": 59, "y": 23, "z": -4 }
+          ]
+        }
+      ]
+    },
+    {
+      "section": "haleyhouse",
+      "map": "HaleyHouse",
+      "location": "stardewcraft:2_willow_lane",
+      "omitted": ["3", "7", "11"],
+      "interactions": [
+        {
+          "id": "haley_house_1",
+          "approval_index": "1",
+          "original_key": "HaleyHouse.1",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.haley_house.1",
+          "points": [
+            { "name": "1_1", "x": -8, "y": 24, "z": 20 },
+            { "name": "1_2", "x": -8, "y": 25, "z": 20 }
+          ]
+        },
+        {
+          "id": "haley_house_2",
+          "approval_index": "2",
+          "original_key": "HaleyHouse.2",
+          "equivalent_original_keys": ["HaleyHouse.3"],
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.haley_house.2",
+          "points": [
+            { "name": "2_1", "x": -5, "y": 24, "z": 21 },
+            { "name": "2_2", "x": -4, "y": 25, "z": 21 }
+          ]
+        },
+        {
+          "id": "haley_house_4",
+          "approval_index": "4",
+          "original_key": "HaleyHouse.4",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.haley_house.4",
+          "points": [
+            { "name": "4", "x": -3, "y": 25, "z": 21 }
+          ]
+        },
+        {
+          "id": "haley_house_5",
+          "approval_index": "5",
+          "original_key": "HaleyHouse.5",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.haley_house.5",
+          "points": [
+            { "name": "5", "x": -3, "y": 24, "z": 23 }
+          ]
+        },
+        {
+          "id": "haley_house_10",
+          "approval_index": "10",
+          "original_key": "HaleyHouse.10",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.haley_house.10",
+          "points": [
+            { "name": "10", "x": -3, "y": 25, "z": 25 }
+          ]
+        },
+        {
+          "id": "haley_house_9",
+          "approval_index": "9",
+          "original_key": "HaleyHouse.9",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.haley_house.9",
+          "points": [
+            { "name": "9", "x": -11, "y": 24, "z": 25 }
+          ]
+        },
+        {
+          "id": "haley_house_11",
+          "approval_index": "12",
+          "original_key": "HaleyHouse.11",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.haley_house.11",
+          "points": [
+            { "name": "12", "x": -11, "y": 25, "z": 26 }
+          ]
+        },
+        {
+          "id": "haley_house_6",
+          "approval_index": "6",
+          "original_key": "HaleyHouse.6",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.haley_house.6",
+          "points": [
+            { "name": "6", "x": 1, "y": 24, "z": 23 }
+          ]
+        },
+        {
+          "id": "haley_house_8",
+          "approval_index": "8",
+          "original_key": "HaleyHouse.8",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.haley_house.8",
+          "points": [
+            { "name": "8", "x": 11, "y": 25, "z": 24 }
+          ]
+        },
+        {
+          "id": "haley_house_12",
+          "approval_index": "13",
+          "original_key": "HaleyHouse.12",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.haley_house.12",
+          "points": [
+            { "name": "13_1", "x": -10, "y": 24, "z": 30 },
+            { "name": "13_2", "x": -10, "y": 26, "z": 30 }
+          ]
+        },
+        {
+          "id": "haley_house_13",
+          "approval_index": "14",
+          "original_key": "HaleyHouse.13",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.haley_house.13",
+          "points": [
+            { "name": "14_1", "x": -9, "y": 24, "z": 30 },
+            { "name": "14_2", "x": -9, "y": 26, "z": 30 }
+          ]
+        },
+        {
+          "id": "haley_house_14",
+          "approval_index": "15",
+          "original_key": "HaleyHouse.14",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.haley_house.14",
+          "points": [
+            { "name": "15", "x": -4, "y": 25, "z": 30 }
+          ]
+        },
+        {
+          "id": "haley_house_18",
+          "approval_index": "19",
+          "original_key": "HaleyHouse.18",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.haley_house.18",
+          "points": [
+            { "name": "19", "x": -8, "y": 25, "z": 38 }
+          ]
+        },
+        {
+          "id": "haley_house_15",
+          "approval_index": "16",
+          "original_key": "HaleyHouse.15",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.haley_house.15",
+          "points": [
+            { "name": "16", "x": 10, "y": 24, "z": 30 }
+          ]
+        },
+        {
+          "id": "haley_house_16",
+          "approval_index": "17",
+          "original_key": "HaleyHouse.16",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.haley_house.16",
+          "points": [
+            { "name": "17_1", "x": 12, "y": 24, "z": 30 },
+            { "name": "17_2", "x": 12, "y": 25, "z": 30 }
+          ]
+        },
+        {
+          "id": "haley_house_17",
+          "approval_index": "18",
+          "original_key": "HaleyHouse.17",
+          "type": "letter",
+          "text_key": "stardewcraft.strings_from_maps.haley_house.17",
+          "points": [
+            { "name": "18", "x": 14, "y": 24, "z": 30 }
+          ]
+        }
+      ]
+    },
+    {
+      "section": "animal_shop",
+      "map": "AnimalShop",
+      "location": "stardewcraft:marnie_ranch",
+      "omitted": ["2 (merged into 1)", "4", "5", "9", "10", "12", "13", "14", "15"],
+      "interactions": [
+        {
+          "id": "animal_shop_1",
+          "approval_index": "1",
+          "original_key": "AnimalShop.1",
+          "equivalent_original_keys": ["AnimalShop.2"],
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.animal_shop.1",
+          "points": [
+            { "name": "1_1", "x": -99, "y": 34, "z": 9 },
+            { "name": "1_2", "x": -98, "y": 35, "z": 9 }
+          ]
+        },
+        {
+          "id": "animal_shop_3",
+          "approval_index": "3",
+          "original_key": "AnimalShop.3",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.animal_shop.3",
+          "points": [
+            { "name": "3", "x": -95, "y": 34, "z": 9 }
+          ]
+        },
+        {
+          "id": "animal_shop_16",
+          "approval_index": "16",
+          "original_key": "AnimalShop.16",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.animal_shop.16",
+          "points": [
+            { "name": "16", "x": -97, "y": 34, "z": 16 }
+          ]
+        },
+        {
+          "id": "animal_shop_6",
+          "approval_index": "6",
+          "original_key": "AnimalShop.6",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.animal_shop.6",
+          "points": [
+            { "name": "6", "x": -84, "y": 34, "z": 8 }
+          ]
+        },
+        {
+          "id": "animal_shop_7",
+          "approval_index": "7",
+          "original_key": "AnimalShop.7",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.animal_shop.7",
+          "points": [
+            { "name": "7", "x": -83, "y": 34, "z": 8 }
+          ]
+        },
+        {
+          "id": "animal_shop_8",
+          "approval_index": "8",
+          "original_key": "AnimalShop.8",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.animal_shop.8",
+          "points": [
+            { "name": "8", "x": -75, "y": 35, "z": 9 }
+          ]
+        },
+        {
+          "id": "animal_shop_11",
+          "approval_index": "11",
+          "original_key": "AnimalShop.11",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.animal_shop.11",
+          "points": [
+            { "name": "11", "x": -66, "y": 34, "z": 10 }
+          ]
+        },
+        {
+          "id": "animal_shop_18",
+          "approval_index": "18",
+          "original_key": "AnimalShop.18",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.animal_shop.18",
+          "points": [
+            { "name": "18", "x": -74, "y": 35, "z": 19 }
+          ]
+        },
+        {
+          "id": "animal_shop_19",
+          "approval_index": "19",
+          "original_key": "AnimalShop.19",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.animal_shop.19",
+          "points": [
+            { "name": "19", "x": -73, "y": 34, "z": 19 }
+          ]
+        },
+        {
+          "id": "animal_shop_marnie_trash",
+          "approval_index": "20",
+          "original_action": "NPCMessage Marnie \"Strings\\StringsFromMaps:AnimalShop.20/Strings\\StringsFromMaps:AnimalShop.21\"",
+          "type": "npc_message",
+          "npc": "marnie",
+          "nearby": {
+            "source": "Strings/StringsFromMaps",
+            "original_key": "AnimalShop.20",
+            "text_key": "stardewcraft.map_interaction.animal_shop.marnie_trash.nearby"
+          },
+          "fallback": {
+            "source": "Strings/StringsFromMaps",
+            "original_key": "AnimalShop.21",
+            "text_key": "stardewcraft.map_interaction.animal_shop.marnie_trash.fallback"
+          },
+          "announce_snooping": true,
+          "points": [
+            { "name": "20", "x": -70, "y": 34, "z": 19 }
+          ]
+        },
+        {
+          "id": "animal_shop_17",
+          "approval_index": "17",
+          "original_key": "AnimalShop.17",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.animal_shop.17",
+          "points": [
+            { "name": "17_1", "x": -67, "y": 34, "z": 18 },
+            { "name": "17_2", "x": -67, "y": 35, "z": 18 }
+          ]
+        }
+      ]
+    },
+    {
+      "section": "sciencehouse",
+      "map": "ScienceHouse",
+      "location": "stardewcraft:carpenter_shop",
+      "omitted": ["7", "11"],
+      "interactions": [
+        {
+          "id": "science_house_1",
+          "approval_index": "1",
+          "original_key": "ScienceHouse.1",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.science_house.1",
+          "points": [
+            { "name": "1", "x": 29, "y": 59, "z": -126 }
+          ]
+        },
+        {
+          "id": "science_house_2",
+          "approval_index": "2",
+          "original_key": "ScienceHouse.2",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.science_house.2",
+          "points": [
+            { "name": "2", "x": 30, "y": 59, "z": -126 }
+          ]
+        },
+        {
+          "id": "science_house_6",
+          "approval_index": "6",
+          "original_key": "ScienceHouse.6",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.science_house.6",
+          "points": [
+            { "name": "6", "x": 23, "y": 58, "z": -123 }
+          ]
+        },
+        {
+          "id": "science_house_5",
+          "approval_index": "5",
+          "original_key": "ScienceHouse.5",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.science_house.5",
+          "points": [
+            { "name": "5", "x": 33, "y": 59, "z": -124 }
+          ]
+        },
+        {
+          "id": "science_house_8",
+          "approval_index": "8",
+          "original_key": "ScienceHouse.8",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.science_house.8",
+          "points": [
+            { "name": "8", "x": 33, "y": 58, "z": -123 }
+          ]
+        },
+        {
+          "id": "science_house_3",
+          "approval_index": "3",
+          "original_key": "ScienceHouse.3",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.science_house.3",
+          "points": [
+            { "name": "3_1", "x": 42, "y": 58, "z": -126 },
+            { "name": "3_2", "x": 42, "y": 59, "z": -126 }
+          ]
+        },
+        {
+          "id": "science_house_4",
+          "approval_index": "4",
+          "original_key": "ScienceHouse.4",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.science_house.4",
+          "points": [
+            { "name": "4_1", "x": 43, "y": 59, "z": -126 },
+            { "name": "4_2", "x": 43, "y": 59, "z": -126 }
+          ]
+        },
+        {
+          "id": "science_house_9",
+          "approval_index": "9",
+          "original_key": "ScienceHouse.9",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.science_house.9",
+          "points": [
+            { "name": "9_1", "x": 54, "y": 58, "z": -122 },
+            { "name": "9_2", "x": 54, "y": 59, "z": -122 }
+          ]
+        },
+        {
+          "id": "science_house_10",
+          "approval_index": "10",
+          "original_key": "ScienceHouse.10",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.science_house.10",
+          "points": [
+            { "name": "10_1", "x": 44, "y": 53, "z": -122 },
+            { "name": "10_2", "x": 44, "y": 53, "z": -122 }
+          ]
+        },
+        {
+          "id": "science_house_12",
+          "approval_index": "12",
+          "original_key": "ScienceHouse.12",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.science_house.12",
+          "points": [
+            { "name": "12", "x": 40, "y": 52, "z": -122 }
+          ]
+        },
+        {
+          "id": "science_house_13",
+          "approval_index": "13",
+          "original_key": "ScienceHouse.13",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.science_house.13",
+          "points": [
+            { "name": "13", "x": 42, "y": 51, "z": -122 }
+          ]
+        },
+        {
+          "id": "science_house_14",
+          "approval_index": "14",
+          "original_key": "ScienceHouse.14",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.science_house.14",
+          "points": [
+            { "name": "14", "x": 46, "y": 52, "z": -118 }
+          ]
+        }
+      ]
+    }
+  ]
+}

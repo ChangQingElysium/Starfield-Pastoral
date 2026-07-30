@@ -1,0 +1,380 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/ChangQingElysium/Starfield-Pastoral/main/docs/schemas/farm-layout-v1.schema.json",
+  "title": "StardewCraft farm layout definition v1",
+  "description": "Schema for data/<namespace>/farm_layouts/<path>.json. Relative resource IDs use the definition file namespace.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "version",
+    "selectable",
+    "display_name",
+    "description",
+    "icon",
+    "schematic",
+    "origin_y",
+    "size",
+    "spawn",
+    "greenhouse",
+    "totem",
+    "entries"
+  ],
+  "properties": {
+    "format": {
+      "const": 1
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "selectable": {
+      "type": "boolean"
+    },
+    "display_name": {
+      "$ref": "#/$defs/component"
+    },
+    "description": {
+      "$ref": "#/$defs/component"
+    },
+    "icon": {
+      "$ref": "#/$defs/resource_id"
+    },
+    "schematic": {
+      "type": "string",
+      "pattern": "^(?:[a-z0-9_.-]+:)?[a-z0-9/._-]+\\.(?:schem|nbt)$"
+    },
+    "origin_y": {
+      "type": "integer"
+    },
+    "size": {
+      "$ref": "#/$defs/size"
+    },
+    "spawn": {
+      "$ref": "#/$defs/point"
+    },
+    "greenhouse": {
+      "$ref": "#/$defs/position"
+    },
+    "totem": {
+      "$ref": "#/$defs/position"
+    },
+    "entries": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "south",
+        "east",
+        "west"
+      ],
+      "properties": {
+        "south": {
+          "$ref": "#/$defs/entry"
+        },
+        "east": {
+          "$ref": "#/$defs/entry"
+        },
+        "west": {
+          "$ref": "#/$defs/entry"
+        }
+      }
+    },
+    "biome": {
+      "$ref": "#/$defs/resource_id"
+    },
+    "forage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "min",
+        "max"
+      ],
+      "properties": {
+        "min": {
+          "$ref": "#/$defs/position"
+        },
+        "max": {
+          "$ref": "#/$defs/position"
+        }
+      }
+    },
+    "cave": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "black_wall": {
+          "$ref": "#/$defs/region"
+        },
+        "portal_wall": {
+          "$ref": "#/$defs/region"
+        },
+        "clear_box": {
+          "$ref": "#/$defs/region"
+        },
+        "exit": {
+          "$ref": "#/$defs/point"
+        }
+      }
+    },
+    "configuration": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/configuration_field"
+      }
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/attachment"
+      }
+    }
+  },
+  "$defs": {
+    "resource_id": {
+      "type": "string",
+      "pattern": "^(?:[a-z0-9_.-]+:)?[a-z0-9/._-]+$"
+    },
+    "component": {
+      "description": "A Minecraft text component in JSON form.",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "object"
+        },
+        {
+          "type": "array",
+          "minItems": 1
+        }
+      ]
+    },
+    "position": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "integer"
+        },
+        {
+          "type": "integer"
+        }
+      ],
+      "items": false,
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "size": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 512
+        },
+        {
+          "type": "integer",
+          "minimum": 1
+        },
+        {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 512
+        }
+      ],
+      "items": false,
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "point": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "offset"
+      ],
+      "properties": {
+        "offset": {
+          "$ref": "#/$defs/position"
+        },
+        "yaw": {
+          "type": "number"
+        }
+      }
+    },
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "teleport",
+        "exit_min",
+        "exit_max"
+      ],
+      "properties": {
+        "teleport": {
+          "$ref": "#/$defs/position"
+        },
+        "yaw": {
+          "type": "number"
+        },
+        "exit_min": {
+          "$ref": "#/$defs/position"
+        },
+        "exit_max": {
+          "$ref": "#/$defs/position"
+        }
+      }
+    },
+    "region": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "min",
+        "max"
+      ],
+      "properties": {
+        "min": {
+          "$ref": "#/$defs/position"
+        },
+        "max": {
+          "$ref": "#/$defs/position"
+        }
+      }
+    },
+    "configuration_field": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "type",
+            "label",
+            "default"
+          ],
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/resource_id"
+            },
+            "type": {
+              "const": "boolean"
+            },
+            "label": {
+              "$ref": "#/$defs/component"
+            },
+            "description": {
+              "$ref": "#/$defs/component"
+            },
+            "default": {
+              "type": "boolean"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "type",
+            "label",
+            "default",
+            "minimum",
+            "maximum"
+          ],
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/resource_id"
+            },
+            "type": {
+              "const": "integer"
+            },
+            "label": {
+              "$ref": "#/$defs/component"
+            },
+            "description": {
+              "$ref": "#/$defs/component"
+            },
+            "default": {
+              "type": "integer"
+            },
+            "minimum": {
+              "type": "integer"
+            },
+            "maximum": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "type",
+            "label",
+            "default",
+            "choices"
+          ],
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/resource_id"
+            },
+            "type": {
+              "const": "choice"
+            },
+            "label": {
+              "$ref": "#/$defs/component"
+            },
+            "description": {
+              "$ref": "#/$defs/component"
+            },
+            "default": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "choices": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 64,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              }
+            }
+          }
+        }
+      ]
+    },
+    "attachment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "offset"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/resource_id"
+        },
+        "offset": {
+          "$ref": "#/$defs/position"
+        },
+        "yaw": {
+          "type": "number"
+        },
+        "tags": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/resource_id"
+          }
+        }
+      }
+    }
+  }
+}

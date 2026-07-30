@@ -1,21 +1,25 @@
 package com.stardew.craft.entity.effect;
 
 import com.stardew.craft.combat.skill.SkillContext;
-import com.stardew.craft.combat.skill.WeaponSkillContextStore;
+import com.stardew.craft.combat.skill.WeaponDamageSnapshot;
+import com.stardew.craft.combat.skill.WeaponSkillDamage;
 import com.stardew.craft.combat.skill.YetiToothEffects;
 import com.stardew.craft.entity.ModEntities;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -36,6 +40,7 @@ public class IceSpineEffectEntity extends Entity {
     private Vec3 startPos = Vec3.ZERO;
     private int directFreezeTicks;
     private double maxDistance = DEFAULT_MAX_DISTANCE;
+    private WeaponDamageSnapshot releaseWeaponSnapshot;
     private final Set<UUID> hitTargets = new HashSet<>();
 
     public IceSpineEffectEntity(EntityType<?> type, Level level) {
@@ -44,6 +49,26 @@ public class IceSpineEffectEntity extends Entity {
     }
 
     public IceSpineEffectEntity(Level level, LivingEntity owner, Vec3 start, Vec3 direction, float damageMultiplier, String skillId) {
+        this(
+            level,
+            owner,
+            start,
+            direction,
+            damageMultiplier,
+            skillId,
+            null
+        );
+    }
+
+    public IceSpineEffectEntity(
+        Level level,
+        LivingEntity owner,
+        Vec3 start,
+        Vec3 direction,
+        float damageMultiplier,
+        String skillId,
+        WeaponDamageSnapshot releaseWeaponSnapshot
+    ) {
         super(ModEntities.ICE_SPINE_EFFECT.get(), level);
         this.noPhysics = true;
         this.ownerId = owner != null ? owner.getUUID() : null;
@@ -52,6 +77,7 @@ public class IceSpineEffectEntity extends Entity {
         if (skillId != null) {
             this.skillId = skillId;
         }
+        this.releaseWeaponSnapshot = releaseWeaponSnapshot;
         this.setPos(start.x, start.y, start.z);
         Vec3 vel = direction.normalize().scale(SPEED);
         this.setDeltaMovement(vel);
@@ -149,12 +175,24 @@ public class IceSpineEffectEntity extends Entity {
             .tier(SkillContext.SkillTier.MAJOR)
             .damageMultiplier(damageMultiplier)
             .build();
-        WeaponSkillContextStore.setPending(player, context, nowTick + 5);
-
         target.invulnerableTime = 0;
         target.hurtTime = 0;
-        DamageSource source = player.damageSources().playerAttack(player);
-        target.hurt(source, 1.0F);
+        if (releaseWeaponSnapshot == null) {
+            WeaponSkillDamage.apply(
+                player,
+                target,
+                context,
+                nowTick + 5
+            );
+        } else {
+            WeaponSkillDamage.apply(
+                player,
+                target,
+                context,
+                releaseWeaponSnapshot,
+                nowTick + 5
+            );
+        }
 
         boolean hasSlow = target.hasEffect(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN);
         if (hasSlow && target.level() instanceof ServerLevel serverLevel) {
@@ -195,6 +233,10 @@ public class IceSpineEffectEntity extends Entity {
         if (tag.contains("StartX")) {
             this.startPos = new Vec3(tag.getDouble("StartX"), tag.getDouble("StartY"), tag.getDouble("StartZ"));
         }
+        this.releaseWeaponSnapshot = readReleaseWeaponSnapshot(
+            tag,
+            this.level().registryAccess()
+        );
     }
 
     @Override
@@ -210,6 +252,48 @@ public class IceSpineEffectEntity extends Entity {
         tag.putDouble("StartX", startPos.x);
         tag.putDouble("StartY", startPos.y);
         tag.putDouble("StartZ", startPos.z);
+        writeReleaseWeaponSnapshot(
+            tag,
+            releaseWeaponSnapshot,
+            this.level().registryAccess()
+        );
+    }
+
+    static void writeReleaseWeaponSnapshot(
+        CompoundTag tag,
+        WeaponDamageSnapshot snapshot,
+        HolderLookup.Provider registries
+    ) {
+        if (snapshot == null) {
+            return;
+        }
+        ItemStack weapon = snapshot.weapon();
+        if (weapon.isEmpty()) {
+            return;
+        }
+        tag.putString("ReleaseWeaponId", snapshot.weaponId().toString());
+        tag.put("ReleaseWeapon", weapon.saveOptional(registries));
+    }
+
+    static WeaponDamageSnapshot readReleaseWeaponSnapshot(
+        CompoundTag tag,
+        HolderLookup.Provider registries
+    ) {
+        if (!tag.contains("ReleaseWeapon", Tag.TAG_COMPOUND)) {
+            return null;
+        }
+        ResourceLocation weaponId =
+            ResourceLocation.tryParse(tag.getString("ReleaseWeaponId"));
+        if (weaponId == null) {
+            return null;
+        }
+        ItemStack weapon = ItemStack.parseOptional(
+            registries,
+            tag.getCompound("ReleaseWeapon")
+        );
+        return weapon.isEmpty()
+            ? null
+            : WeaponDamageSnapshot.capture(weaponId, weapon);
     }
 
     @SuppressWarnings("null")

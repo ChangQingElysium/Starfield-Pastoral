@@ -18,6 +18,7 @@ public record PointPlanSyncPayload(
     String selectedPlanId,
     List<PointPlanWandItem.Plan> plans,
     List<String> npcIds,
+    boolean mapInteractionEditor,
     String openMode,
     PointPlanWandItem.PendingPoint pendingPoint
 ) implements CustomPacketPayload {
@@ -45,6 +46,7 @@ public record PointPlanSyncPayload(
             for (String npcId : payload.npcIds()) {
                 buf.writeUtf(npcId);
             }
+            buf.writeBoolean(payload.mapInteractionEditor());
             buf.writeUtf(payload.openMode());
             buf.writeBoolean(payload.pendingPoint() != null);
             if (payload.pendingPoint() != null) {
@@ -70,12 +72,20 @@ public record PointPlanSyncPayload(
             for (int i = 0; i < npcCount; i++) {
                 npcIds.add(buf.readUtf());
             }
+            boolean mapInteractionEditor = buf.readBoolean();
             String openMode = buf.readUtf();
             PointPlanWandItem.PendingPoint pendingPoint = null;
             if (buf.readBoolean()) {
                 pendingPoint = new PointPlanWandItem.PendingPoint(buf.readBlockPos(), buf.readUtf());
             }
-            return new PointPlanSyncPayload(selectedPlanId, plans, npcIds, openMode, pendingPoint);
+            return new PointPlanSyncPayload(
+                selectedPlanId,
+                plans,
+                npcIds,
+                mapInteractionEditor,
+                openMode,
+                pendingPoint
+            );
         }
     );
 
@@ -100,6 +110,7 @@ public record PointPlanSyncPayload(
             payload.selectedPlanId(),
             payload.plans(),
             payload.npcIds(),
+            payload.mapInteractionEditor(),
             payload.pendingPoint()
         );
         net.minecraft.client.Minecraft minecraft = net.minecraft.client.Minecraft.getInstance();

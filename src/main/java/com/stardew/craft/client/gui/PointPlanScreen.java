@@ -27,7 +27,10 @@ public class PointPlanScreen extends Screen {
     private int selectedPoint = -1;
 
     public PointPlanScreen() {
-        super(Component.translatable("gui.stardewcraft.point_plan.title"));
+        super(Component.translatable(
+            PointPlanClientState.isMapInteractionEditor()
+                ? "gui.stardewcraft.point_plan.map_title"
+                : "gui.stardewcraft.point_plan.title"));
     }
 
     @Override
@@ -138,9 +141,19 @@ public class PointPlanScreen extends Screen {
         graphics.fill(listX - 1, listY - 1, listX + listW + 1, listY + listH + 1, 0xFF8B6136);
         graphics.fill(listX, listY, listX + listW, listY + listH, 0xFFEEC78E);
         graphics.drawString(font, "#", listX + 6, listY + 3, 0xFF3A2014, false);
-        graphics.drawString(font, "npc", listX + 42, listY + 3, 0xFF3A2014, false);
-        graphics.drawString(font, "x y z", listX + 188, listY + 3, 0xFF3A2014, false);
-        graphics.drawString(font, "direction", listX + 330, listY + 3, 0xFF3A2014, false);
+        graphics.drawString(
+            font,
+            Component.translatable(
+                PointPlanClientState.isMapInteractionEditor()
+                    ? "gui.stardewcraft.point_plan.name"
+                    : "gui.stardewcraft.point_plan.npc"),
+            listX + 42, listY + 3, 0xFF3A2014, false);
+        int coordinateX = PointPlanClientState.isMapInteractionEditor()
+            ? 310 : 188;
+        graphics.drawString(font, "x y z", listX + coordinateX, listY + 3, 0xFF3A2014, false);
+        if (!PointPlanClientState.isMapInteractionEditor()) {
+            graphics.drawString(font, "direction", listX + 330, listY + 3, 0xFF3A2014, false);
+        }
 
         int rows = (listH - ROW_H) / ROW_H;
         int end = Math.min(points.size(), scroll + rows);
@@ -153,11 +166,19 @@ public class PointPlanScreen extends Screen {
             }
             graphics.drawString(font, String.format("%03d", i + 1), listX + 6, y, 0xFF2A1A10, false);
             graphics.drawString(font, point.npcId(), listX + 42, y, 0xFF2A1A10, false);
-            graphics.drawString(font, String.format("%d %d %d", pos.getX(), pos.getY(), pos.getZ()), listX + 188, y, 0xFF2A1A10, false);
-            graphics.drawString(font, point.direction(), listX + 330, y, 0xFF2A1A10, false);
+            graphics.drawString(font, String.format("%d %d %d", pos.getX(), pos.getY(), pos.getZ()), listX + coordinateX, y, 0xFF2A1A10, false);
+            if (!PointPlanClientState.isMapInteractionEditor()) {
+                graphics.drawString(font, point.direction(), listX + 330, y, 0xFF2A1A10, false);
+            }
         }
         if (points.isEmpty()) {
-            graphics.drawString(font, Component.translatable("gui.stardewcraft.point_plan.empty"), listX + 6, listY + ROW_H + 6, 0xFF7A5A35, false);
+            graphics.drawString(
+                font,
+                Component.translatable(
+                    PointPlanClientState.isMapInteractionEditor()
+                        ? "gui.stardewcraft.point_plan.map_empty"
+                        : "gui.stardewcraft.point_plan.empty"),
+                listX + 6, listY + ROW_H + 6, 0xFF7A5A35, false);
         }
     }
 

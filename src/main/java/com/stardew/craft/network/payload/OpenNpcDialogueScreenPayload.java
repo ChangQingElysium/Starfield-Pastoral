@@ -33,6 +33,11 @@ public record OpenNpcDialogueScreenPayload(
 ) implements CustomPacketPayload {
     public static final String DIRECT_DIALOGUE_PREFIX = "__direct_dialogue::";
 
+    /** Encodes literal text for the existing client-side NPC dialogue pipeline. */
+    public static String directText(String text) {
+        return DIRECT_DIALOGUE_PREFIX + encodeDirectDialogue(text);
+    }
+
     /** Convenience: no afterClose action, no garble. */
     public OpenNpcDialogueScreenPayload(String npcId, String translateKey, int friendshipPoints) {
         this(npcId, translateKey, friendshipPoints, "", false);
@@ -46,13 +51,13 @@ public record OpenNpcDialogueScreenPayload(
     public static final StreamCodec<FriendlyByteBuf, OpenNpcDialogueScreenPayload> STREAM_CODEC = StreamCodec.of(
         (buf, payload) -> {
             buf.writeUtf(payload.npcId(), 64);
-            buf.writeUtf(payload.translateKey(), 512);
+            buf.writeUtf(payload.translateKey(), 32767);
             buf.writeInt(payload.friendshipPoints());
             buf.writeUtf(payload.afterCloseItemId(), 256);
             buf.writeBoolean(payload.garbleDwarvish());
         },
         buf -> new OpenNpcDialogueScreenPayload(
-            buf.readUtf(64), buf.readUtf(512), buf.readInt(), buf.readUtf(256), buf.readBoolean())
+            buf.readUtf(64), buf.readUtf(32767), buf.readInt(), buf.readUtf(256), buf.readBoolean())
     );
 
     @Override
@@ -85,7 +90,7 @@ public record OpenNpcDialogueScreenPayload(
         }
 
         String trueKey = rawKey.substring(i);
-        String displayText = rawTranslation(trueKey);
+        String displayText = resolveClientTextSource(trueKey);
 
         String finalDisplayText = prefixBuilder.toString() + displayText;
 
@@ -558,6 +563,9 @@ public record OpenNpcDialogueScreenPayload(
     /** Resolve either a serialized Component or a normal translation key on the client. */
     public static String resolveClientTextSource(String source) {
         if (source == null || source.isBlank()) return "";
+        if (source.startsWith(DIRECT_DIALOGUE_PREFIX)) {
+            return rawTranslation(source);
+        }
         String trimmed = source.trim();
         if (trimmed.startsWith("{") || trimmed.startsWith("[") || trimmed.startsWith("\"")) {
             net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
@@ -570,11 +578,7 @@ public record OpenNpcDialogueScreenPayload(
                 }
             }
         }
-        if (source.startsWith("event.") || source.startsWith("stardewcraft.")
-                || source.startsWith("message.")) {
-            return rawTranslation(source);
-        }
-        return source;
+        return rawTranslation(source);
     }
 
     private static String getClientSeason() {

@@ -42,20 +42,47 @@ public final class WeaponSkillCooldowns {
 
     @SuppressWarnings("null")
     public static void setCooldown(Player player, String weaponId, String skillId, long nowTick, int durationTicks) {
-        int appliedDuration = applyProfessionModifiers(player, durationTicks);
+        int appliedDuration = adjustedDuration(player, durationTicks);
+        setCooldownUntil(
+                player,
+                weaponId,
+                skillId,
+                nowTick,
+                nowTick + appliedDuration
+        );
+    }
+
+    @SuppressWarnings("null")
+    public static void setCooldownUntil(
+            Player player,
+            String weaponId,
+            String skillId,
+            long nowTick,
+            long endTick
+    ) {
+        long normalizedEndTick = Math.max(nowTick, endTick);
+        int remainingTicks = (int) Math.min(
+                Integer.MAX_VALUE,
+                normalizedEndTick - nowTick
+        );
         CompoundTag root = player.getPersistentData();
         CompoundTag cd = root.contains(TAG_ROOT) ? root.getCompound(TAG_ROOT) : new CompoundTag();
-        cd.putLong(getKey(weaponId, skillId), nowTick + appliedDuration);
+        cd.putLong(getKey(weaponId, skillId), normalizedEndTick);
         root.put(TAG_ROOT, cd);
-        
+
         // 同步冷却信息到客户端
         if (player instanceof ServerPlayer serverPlayer) {
-            PacketDistributor.sendToPlayer(serverPlayer, 
-                new SkillCooldownSyncPayload(weaponId, skillId, appliedDuration, appliedDuration));
+            PacketDistributor.sendToPlayer(serverPlayer,
+                new SkillCooldownSyncPayload(
+                        weaponId,
+                        skillId,
+                        remainingTicks,
+                        remainingTicks
+                ));
         }
     }
 
-    private static int applyProfessionModifiers(Player player, int durationTicks) {
+    static int adjustedDuration(Player player, int durationTicks) {
         if (durationTicks <= 0) {
             return durationTicks;
         }

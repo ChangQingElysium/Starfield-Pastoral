@@ -18,16 +18,26 @@ import java.util.List;
  */
 @SuppressWarnings("null")
 public record PassOutPayload(
+        long transactionId,
         PassOutService.PassOutType passOutType,
         int moneyLost,
         List<ItemStack> lostItems
 ) implements CustomPacketPayload {
+
+    public PassOutPayload(
+            PassOutService.PassOutType passOutType,
+            int moneyLost,
+            List<ItemStack> lostItems
+    ) {
+        this(0L, passOutType, moneyLost, lostItems);
+    }
 
     public static final Type<PassOutPayload> TYPE =
             new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "pass_out"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, PassOutPayload> STREAM_CODEC =
             StreamCodec.composite(
+                    ByteBufCodecs.VAR_LONG, PassOutPayload::transactionId,
                     ByteBufCodecs.VAR_INT.map(PassOutService.PassOutType::fromId, PassOutService.PassOutType::getId),
                     PassOutPayload::passOutType,
                     ByteBufCodecs.VAR_INT, PassOutPayload::moneyLost,

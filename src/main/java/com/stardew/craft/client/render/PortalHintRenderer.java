@@ -26,6 +26,9 @@ import com.stardew.craft.festival.nightmarket.NightMarketMermaidService;
 import com.stardew.craft.festival.nightmarket.NightMarketPainterService;
 import com.stardew.craft.festival.nightmarket.NightMarketShopService;
 import com.stardew.craft.festival.nightmarket.NightMarketSubmarineService;
+import com.stardew.craft.qi.MrQiQuestInteractionService;
+import com.stardew.craft.qi.MrQiQuestRules;
+import com.stardew.craft.quest.network.ClientQuestData;
 import com.stardew.craft.secretnote.SecretNote20Service;
 import com.stardew.craft.world.OldMasterCannoliService;
 import net.minecraft.Util;
@@ -132,6 +135,10 @@ public final class PortalHintRenderer {
     private static final String FAIR_FISHING_KEY = "stardewcraft.portal.hint.fair_fishing";
     private static final String FAIR_TOKEN_PURCHASE_KEY = "stardewcraft.portal.hint.fair_token_purchase";
     private static final String FAIR_FORTUNE_KEY = "stardewcraft.portal.hint.fair_fortune";
+    private static final String CASINO_QI_COIN_MACHINE_KEY =
+            "stardewcraft.portal.hint.casino_qi_coin_machine";
+    private static final String CASINO_QI_COIN_SHOP_KEY =
+            "stardewcraft.portal.hint.casino_qi_coin_shop";
 
     private static final String BUY_TICKET_KEY = "stardewcraft.portal.hint.buy_ticket";
     private static final String SECRET_NOTE_20_DRIVER_KEY = "stardewcraft.secret_note.20.truck_hint";
@@ -337,6 +344,13 @@ public final class PortalHintRenderer {
                     if (!(be instanceof PortalTriggerBlockEntity ptbe)) continue;
                     String targetId = ptbe.getTargetId();
                     if (targetId == null || targetId.isBlank()) continue;
+                    if (MrQiQuestInteractionService.SAND_DRAGON_TARGET_ID.equals(targetId)
+                            && !ClientQuestData.hasQuest(MrQiQuestRules.QUEST_SAND_DRAGON)) {
+                        continue;
+                    }
+                    if (!canShowCasinoPortal(player, targetId)) {
+                        continue;
+                    }
 
                     portalBlocks.computeIfAbsent(targetId, k -> new LinkedHashSet<>()).add(pos.immutable());
                 }
@@ -358,6 +372,22 @@ public final class PortalHintRenderer {
                 result.add(new PortalHint(minPos, isEnter, xBlocks, heightBlocks, zBlocks, style, locKey, targetId));
             }
         }
+    }
+
+    private static boolean canShowCasinoPortal(Player player, String targetId) {
+        if (com.stardew.craft.casino.CasinoAccessService.ENTRY_TARGET_ID.equals(targetId)) {
+            return (com.stardew.craft.client.ClientPlayerDataCache.hasMailFlag(
+                    com.stardew.craft.item.PowerSpecialItemService.CLUB_CARD_FLAG)
+                    || com.stardew.craft.client.ClientPlayerDataCache.hasSpecialItem(
+                    com.stardew.craft.item.PowerSpecialItemService.CLUB_CARD_ID))
+                    && com.stardew.craft.client.ClientPlayerDataCache.hasMailFlag(
+                    com.stardew.craft.casino.CasinoAccessService.BOUNCER_GONE_FLAG);
+        }
+        if (com.stardew.craft.casino.CasinoAccessService.EXIT_TARGET_ID.equals(targetId)) {
+            return com.stardew.craft.casino.CasinoAccessService.isCasinoPosition(
+                    player.getX(), player.getY(), player.getZ());
+        }
+        return true;
     }
 
     private static List<PortalBounds> splitConnectedBounds(Set<BlockPos> blocks) {
@@ -447,6 +477,13 @@ public final class PortalHintRenderer {
         if (OldMasterCannoliService.TARGET_ID.equals(targetId)) {
             return HintStyle.WHITE;
         }
+        if (com.stardew.craft.casino.CasinoAccessService.QI_COIN_MACHINE_TARGET_ID.equals(targetId)
+                || com.stardew.craft.casino.CasinoAccessService.QI_COIN_SHOP_TARGET_ID.equals(targetId)) {
+            return HintStyle.SHOP;
+        }
+        if (MrQiQuestInteractionService.SAND_DRAGON_TARGET_ID.equals(targetId)) {
+            return HintStyle.INTERACT;
+        }
         if (DesertFestivalRaceService.RACE_MAN_TARGET_ID.equals(targetId)) {
             return HintStyle.RACE;
         }
@@ -510,6 +547,7 @@ public final class PortalHintRenderer {
             case "desert_bus" -> "desert";
             case "desert_bus_return" -> "pelican_town";
             case OldMasterCannoliService.TARGET_ID -> "old_master_cannoli";
+            case MrQiQuestInteractionService.SAND_DRAGON_TARGET_ID -> "";
             case DesertFestivalService.EGG_SHOP_TARGET_ID -> "desert_festival_egg_shop";
             case DesertFestivalRaceService.RACE_MAN_TARGET_ID -> "desert_festival_race_man";
             case DesertFestivalRaceService.SHADY_GUY_TARGET_ID -> "desert_festival_shady_guy";
@@ -540,6 +578,10 @@ public final class PortalHintRenderer {
             case "mine_entrance", "mine_exit" -> "mine";
             case "desert_mine_enter", "skull_cavern_exit" -> "desert_mine";
             case "oasis_enter", "oasis_exit" -> "oasis";
+            case "casino_enter" -> "casino";
+            case "casino_exit" -> "oasis";
+            case "casino_qi_coin_machine" -> "casino_qi_coin_machine";
+            case "casino_qi_coin_shop" -> "casino_qi_coin_shop";
             case "community_center_enter", "community_center_exit" -> "community_center";
             case "wizard_tower_return_overworld" -> "overworld";
             case "wizard_tower_overworld_enter" -> "wizard_tower";
@@ -604,6 +646,12 @@ public final class PortalHintRenderer {
             hintKey = CLAIM_KEY;
         } else if (SecretNote20Service.TARGET_ID.equals(hint.targetId)) {
             hintKey = SECRET_NOTE_20_DRIVER_KEY;
+        } else if (com.stardew.craft.casino.CasinoAccessService.QI_COIN_MACHINE_TARGET_ID
+                .equals(hint.targetId)) {
+            hintKey = CASINO_QI_COIN_MACHINE_KEY;
+        } else if (com.stardew.craft.casino.CasinoAccessService.QI_COIN_SHOP_TARGET_ID
+                .equals(hint.targetId)) {
+            hintKey = CASINO_QI_COIN_SHOP_KEY;
         } else if (hint.hintStyle == HintStyle.LOCKED) {
             hintKey = LOCKED_KEY;
         } else if (hint.hintStyle == HintStyle.SHOP) {
@@ -641,9 +689,12 @@ public final class PortalHintRenderer {
     private static boolean isSingleLineHint(String targetId) {
         return DesertFestivalWillyFishingService.TARGET_ID.equals(targetId)
                 || SecretNote20Service.TARGET_ID.equals(targetId)
+                || MrQiQuestInteractionService.SAND_DRAGON_TARGET_ID.equals(targetId)
                 || DesertFestivalCookService.TARGET_ID.equals(targetId)
                 || FairSlingshotGameService.TARGET_ID.equals(targetId)
                 || FairFishingGameService.TARGET_ID.equals(targetId)
+                || com.stardew.craft.casino.CasinoAccessService.QI_COIN_MACHINE_TARGET_ID.equals(targetId)
+                || com.stardew.craft.casino.CasinoAccessService.QI_COIN_SHOP_TARGET_ID.equals(targetId)
                 || FairFestivalService.STAR_TOKEN_PURCHASE_TARGET_ID.equals(targetId)
                 || FairFestivalService.FORTUNE_TELLER_TARGET_ID.equals(targetId);
     }

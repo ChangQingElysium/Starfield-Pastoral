@@ -1,0 +1,33 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "Hospital",
+    "tile_action": "Message \"Hospital.3\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:clinic",
+    "positions": [
+      [
+        1,
+        43,
+        -26
+      ]
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.hospital.3",
+          "fallback": "It's probably not a good idea to stick your hands in there. It's full of used syringes, dirty swabs, and little nozzles that Harvey stuck into people's ears."
+        }
+      ]
+    }
+  ]
+}

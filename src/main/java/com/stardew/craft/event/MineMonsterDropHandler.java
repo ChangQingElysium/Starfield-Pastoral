@@ -67,6 +67,67 @@ public class MineMonsterDropHandler {
 
         RandomSource random = serverLevel.getRandom();
 
+        // 盗贼戒指按原版语义额外重掷一次怪物基础掉落表，而不是复制
+        // 已生成的任务物品、秘密纸条、饰品或节日奖励。
+        int baseDropRolls = 1;
+        if (event.getSource() != null
+                && event.getSource().getEntity() instanceof ServerPlayer player
+                && com.stardew.craft.combat.equipment.RingEffectHandler.hasBurglar(player)) {
+            baseDropRolls++;
+        }
+        for (int roll = 0; roll < baseDropRolls; roll++) {
+            addBaseMonsterDrops(drops, entity, random, tags);
+        }
+
+        if (event.getSource() != null && event.getSource().getEntity() instanceof ServerPlayer player) {
+			ItemStack secretNote = com.stardew.craft.secretnote.SecretNoteService
+					.tryCreateFromSource(player, random, 0.033F);
+			if (!secretNote.isEmpty()) {
+				addDrop(drops, entity, secretNote);
+			}
+            if (tags.contains("sd_mob_ghost")
+                && com.stardew.craft.specialorder.SpecialOrderManager.hasActiveIncompleteOrder(player, "Wizard")
+                && !com.stardew.craft.specialorder.SpecialOrderManager.hasSpecialDropFlag(player, "ectoplasmDrop")
+                && random.nextFloat() < 0.095F) {
+                addDrop(drops, entity, ModItems.ECTOPLASM.get(), 1);
+            }
+            if (tags.contains("sd_mob_prismatic_slime")
+                && com.stardew.craft.specialorder.SpecialOrderManager.hasActiveIncompleteOrder(player, "Wizard2")
+                && !com.stardew.craft.specialorder.SpecialOrderManager.hasSpecialDropFlag(player, "prismaticJellyDrop")) {
+                addDrop(drops, entity, ModItems.PRISMATIC_JELLY.get(), 1);
+                com.stardew.craft.specialorder.SpecialOrderManager.recordMonsterSlain(player, "Prismatic Slime");
+            }
+            BookPowerEffects.applyVoidMonsterDropDuplicate(PlayerDataManager.getPlayerData(player), drops, entity, random);
+            com.stardew.craft.book.BookAcquisitionService.recordMonsterKilledAndMaybeAddVoidBook(player, drops, entity, random);
+            TrinketDropService.tryAddMonsterDrop(drops, entity, player, random);
+        }
+
+        // ---- Monster Slayer kill tracking (SDV Gil goals) ----
+        if (event.getSource() != null && event.getSource().getEntity() instanceof ServerPlayer player) {
+            java.util.Set<String> progressedGoals = new java.util.LinkedHashSet<>();
+            for (String tag : tags) {
+                progressedGoals.addAll(MonsterSlayerGoalRegistry.getGoalKeysForTag(tag));
+            }
+            PlayerStardewData slayerData = PlayerDataManager.getPlayerData(player);
+            progressedGoals.forEach(goalKey -> slayerData.addMonsterKills(goalKey, 1));
+            for (String tag : tags) {
+                if (tag.startsWith("sd_mob_")) {
+                    com.stardew.craft.quest.StardewQuestEvents.fireMonsterSlain(player, tag);
+                    com.stardew.craft.specialorder.SpecialOrderManager.recordMonsterSlain(player, tag);
+                }
+            }
+            com.stardew.craft.festival.desert.DesertFestivalMarlonChallengeService.recordMonsterSlain(player, tags);
+            com.stardew.craft.festival.desert.DesertFestivalMineService.tryAddMonsterEggDrop(drops, entity, player, random);
+            MiningBlockBreakHandler.tryCreateLadderFromMonsterDrop(serverLevel, player, entity.blockPosition());
+        }
+    }
+
+    private static void addBaseMonsterDrops(
+            Collection<ItemEntity> drops,
+            LivingEntity entity,
+            RandomSource random,
+            Set<String> tags
+    ) {
         // 标签分派 — 按 MineMonsterSpawnHandler 的分组
         if (tags.contains("sd_mob_slime")) {
             dropSlimeVariant(drops, entity, random, tags);
@@ -116,48 +177,6 @@ public class MineMonsterDropHandler {
             dropSerpent(drops, entity, random);
         } else if (tags.contains("sd_mob_dino")) {
             dropPepperRex(drops, entity, random);
-        }
-
-        if (event.getSource() != null && event.getSource().getEntity() instanceof ServerPlayer player) {
-			ItemStack secretNote = com.stardew.craft.secretnote.SecretNoteService
-					.tryCreateFromSource(player, random, 0.033F);
-			if (!secretNote.isEmpty()) {
-				addDrop(drops, entity, secretNote);
-			}
-            if (tags.contains("sd_mob_ghost")
-                && com.stardew.craft.specialorder.SpecialOrderManager.hasActiveIncompleteOrder(player, "Wizard")
-                && !com.stardew.craft.specialorder.SpecialOrderManager.hasSpecialDropFlag(player, "ectoplasmDrop")
-                && random.nextFloat() < 0.095F) {
-                addDrop(drops, entity, ModItems.ECTOPLASM.get(), 1);
-            }
-            if (tags.contains("sd_mob_prismatic_slime")
-                && com.stardew.craft.specialorder.SpecialOrderManager.hasActiveIncompleteOrder(player, "Wizard2")
-                && !com.stardew.craft.specialorder.SpecialOrderManager.hasSpecialDropFlag(player, "prismaticJellyDrop")) {
-                addDrop(drops, entity, ModItems.PRISMATIC_JELLY.get(), 1);
-                com.stardew.craft.specialorder.SpecialOrderManager.recordMonsterSlain(player, "Prismatic Slime");
-            }
-            BookPowerEffects.applyVoidMonsterDropDuplicate(PlayerDataManager.getPlayerData(player), drops, entity, random);
-            com.stardew.craft.book.BookAcquisitionService.recordMonsterKilledAndMaybeAddVoidBook(player, drops, entity, random);
-            TrinketDropService.tryAddMonsterDrop(drops, entity, player, random);
-        }
-
-        // ---- Monster Slayer kill tracking (SDV Gil goals) ----
-        if (event.getSource() != null && event.getSource().getEntity() instanceof ServerPlayer player) {
-            java.util.Set<String> progressedGoals = new java.util.LinkedHashSet<>();
-            for (String tag : tags) {
-                progressedGoals.addAll(MonsterSlayerGoalRegistry.getGoalKeysForTag(tag));
-            }
-            PlayerStardewData slayerData = PlayerDataManager.getPlayerData(player);
-            progressedGoals.forEach(goalKey -> slayerData.addMonsterKills(goalKey, 1));
-            for (String tag : tags) {
-                if (tag.startsWith("sd_mob_")) {
-                    com.stardew.craft.quest.StardewQuestEvents.fireMonsterSlain(player, tag);
-                    com.stardew.craft.specialorder.SpecialOrderManager.recordMonsterSlain(player, tag);
-                }
-            }
-            com.stardew.craft.festival.desert.DesertFestivalMarlonChallengeService.recordMonsterSlain(player, tags);
-            com.stardew.craft.festival.desert.DesertFestivalMineService.tryAddMonsterEggDrop(drops, entity, player, random);
-            MiningBlockBreakHandler.tryCreateLadderFromMonsterDrop(serverLevel, player, entity.blockPosition());
         }
     }
 

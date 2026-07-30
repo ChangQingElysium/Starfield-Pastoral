@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -23,15 +24,24 @@ public final class RiftPathDamageTracker {
         private final float length;
         private final int durationTicks;
         private final String skillId;
+        private final WeaponDamageSnapshot weaponSnapshot;
         private int age = 0;
         private final Set<UUID> hit = new HashSet<>();
 
-        private State(Vec3 start, float yaw, float length, int durationTicks, String skillId) {
+        private State(
+                Vec3 start,
+                float yaw,
+                float length,
+                int durationTicks,
+                String skillId,
+                WeaponDamageSnapshot weaponSnapshot
+        ) {
             this.start = start;
             this.yaw = yaw;
             this.length = length;
             this.durationTicks = durationTicks;
             this.skillId = skillId;
+            this.weaponSnapshot = weaponSnapshot;
         }
     }
 
@@ -40,10 +50,63 @@ public final class RiftPathDamageTracker {
     private RiftPathDamageTracker() {}
 
     public static void start(ServerPlayer player, Vec3 start, float yaw, float length, int durationTicks, String skillId) {
+        startInternal(
+                player,
+                start,
+                yaw,
+                length,
+                durationTicks,
+                skillId,
+                null
+        );
+    }
+
+    public static void start(
+            ServerPlayer player,
+            Vec3 start,
+            float yaw,
+            float length,
+            int durationTicks,
+            String skillId,
+            WeaponDamageSnapshot weaponSnapshot
+    ) {
+        startInternal(
+                player,
+                start,
+                yaw,
+                length,
+                durationTicks,
+                skillId,
+                Objects.requireNonNull(
+                        weaponSnapshot,
+                        "weaponSnapshot"
+                )
+        );
+    }
+
+    private static void startInternal(
+            ServerPlayer player,
+            Vec3 start,
+            float yaw,
+            float length,
+            int durationTicks,
+            String skillId,
+            WeaponDamageSnapshot weaponSnapshot
+    ) {
         if (player == null || durationTicks <= 0 || length <= 0.0f) {
             return;
         }
-        ACTIVE.put(player.getUUID(), new State(start, yaw, length, durationTicks, skillId));
+        ACTIVE.put(
+                player.getUUID(),
+                new State(
+                        start,
+                        yaw,
+                        length,
+                        durationTicks,
+                        skillId,
+                        weaponSnapshot
+                )
+        );
     }
 
     public static void tick(ServerPlayer player, long nowTick) {
@@ -84,10 +147,28 @@ public final class RiftPathDamageTracker {
                 .tier(SkillContext.SkillTier.MINOR)
                 .damageMultiplier(0.60f)
                 .build();
-            WeaponSkillContextStore.setPending(player, context, level.getGameTime() + 5);
             target.invulnerableTime = 0;
             target.hurtTime = 0;
-            player.attack(target);
+            if (state.weaponSnapshot == null) {
+                WeaponSkillDamage.apply(
+                        player,
+                        target,
+                        context,
+                        level.getGameTime() + 5,
+                        WeaponSkillDamage.AttackGatePolicy
+                                .RESPECT_AT_IMPACT
+                );
+            } else {
+                WeaponSkillDamage.apply(
+                        player,
+                        target,
+                        context,
+                        state.weaponSnapshot,
+                        level.getGameTime() + 5,
+                        WeaponSkillDamage.AttackGatePolicy
+                                .RESPECT_AT_IMPACT
+                );
+            }
         }
     }
 
@@ -109,10 +190,28 @@ public final class RiftPathDamageTracker {
                 .tier(SkillContext.SkillTier.MINOR)
                 .damageMultiplier(1.00f)
                 .build();
-            WeaponSkillContextStore.setPending(player, context, level.getGameTime() + 5);
             target.invulnerableTime = 0;
             target.hurtTime = 0;
-            player.attack(target);
+            if (state.weaponSnapshot == null) {
+                WeaponSkillDamage.apply(
+                        player,
+                        target,
+                        context,
+                        level.getGameTime() + 5,
+                        WeaponSkillDamage.AttackGatePolicy
+                                .RESPECT_AT_IMPACT
+                );
+            } else {
+                WeaponSkillDamage.apply(
+                        player,
+                        target,
+                        context,
+                        state.weaponSnapshot,
+                        level.getGameTime() + 5,
+                        WeaponSkillDamage.AttackGatePolicy
+                                .RESPECT_AT_IMPACT
+                );
+            }
         }
     }
 

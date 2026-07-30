@@ -17,13 +17,31 @@ public final class ShopInteractionBindings {
     }
 
     public static boolean tryOpenNpc(ServerPlayer player, String npcId) {
-        String normalizedNpc = npcId == null ? "" : npcId.trim().toLowerCase(java.util.Locale.ROOT);
+        String normalizedNpc = normalizeNpcId(npcId);
         for (var entry : ShopDataLoader.bindingSnapshot().definitions().entrySet()) {
             StardewShopBinding binding = entry.getValue();
             if (binding.npc().isEmpty() || !binding.npc().get().equalsIgnoreCase(normalizedNpc)) continue;
             if (!matchesWorld(player, binding) || !contains(binding, player.blockPosition())) continue;
             if (!conditionsMatch(player, entry.getKey(), binding)) continue;
             if (ShopService.open(player, binding.shop())) return true;
+        }
+        return false;
+    }
+
+    /** Resolve a data-pack NPC shop binding without opening its screen. */
+    public static boolean canOpenNpc(ServerPlayer player, String npcId) {
+        String normalizedNpc = normalizeNpcId(npcId);
+        for (var entry : ShopDataLoader.bindingSnapshot().definitions().entrySet()) {
+            StardewShopBinding binding = entry.getValue();
+            if (binding.npc().isEmpty()
+                    || !binding.npc().get().equalsIgnoreCase(normalizedNpc)
+                    || !matchesWorld(player, binding)
+                    || !contains(binding, player.blockPosition())) {
+                continue;
+            }
+            if (conditionsMatch(player, entry.getKey(), binding)) {
+                return true;
+            }
         }
         return false;
     }
@@ -35,6 +53,27 @@ public final class ShopInteractionBindings {
             if (!matchesWorld(player, binding) || !contains(binding, clickedPos)) continue;
             if (!conditionsMatch(player, entry.getKey(), binding)) continue;
             if (ShopService.open(player, binding.shop())) return true;
+        }
+        return false;
+    }
+
+    /** Resolve a data-pack block shop binding without opening its screen. */
+    public static boolean canOpenBlock(
+            ServerPlayer player,
+            BlockPos clickedPos
+    ) {
+        for (var entry : ShopDataLoader.bindingSnapshot().definitions().entrySet()) {
+            StardewShopBinding binding = entry.getValue();
+            if (binding.npc().isPresent()
+                    || binding.min().isEmpty()
+                    || binding.max().isEmpty()
+                    || !matchesWorld(player, binding)
+                    || !contains(binding, clickedPos)) {
+                continue;
+            }
+            if (conditionsMatch(player, entry.getKey(), binding)) {
+                return true;
+            }
         }
         return false;
     }
@@ -62,6 +101,12 @@ public final class ShopInteractionBindings {
     private static boolean matchesWorld(ServerPlayer player, StardewShopBinding binding) {
         return binding.dimension().isEmpty()
                 || binding.dimension().get().equals(player.level().dimension().location());
+    }
+
+    private static String normalizeNpcId(String npcId) {
+        return npcId == null
+                ? ""
+                : npcId.trim().toLowerCase(java.util.Locale.ROOT);
     }
 
     private static boolean contains(StardewShopBinding binding, BlockPos pos) {

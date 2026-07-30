@@ -2,10 +2,14 @@ package com.stardew.craft.entity.projectile;
 
 import com.stardew.craft.combat.skill.SkillContext;
 import com.stardew.craft.combat.skill.TemperedFireRingTracker;
-import com.stardew.craft.combat.skill.WeaponSkillContextStore;
+import com.stardew.craft.combat.skill.WeaponDamageSnapshot;
+import com.stardew.craft.combat.skill.WeaponSkillDamage;
 import com.stardew.craft.entity.ModEntities;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -14,6 +18,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -31,6 +36,7 @@ public class TemperedBilletProjectileEntity extends ThrowableProjectile {
     private float damage = 10.0f;
     private String skillId = "tempered_billet";
     private UUID targetId = null;
+    private WeaponDamageSnapshot releaseWeaponSnapshot;
 
     public TemperedBilletProjectileEntity(EntityType<? extends ThrowableProjectile> type, Level level) {
         super(type, level);
@@ -38,11 +44,23 @@ public class TemperedBilletProjectileEntity extends ThrowableProjectile {
     }
 
     public TemperedBilletProjectileEntity(Level level, LivingEntity owner, float damage, String skillId, LivingEntity target) {
+        this(level, owner, damage, skillId, target, null);
+    }
+
+    public TemperedBilletProjectileEntity(
+            Level level,
+            LivingEntity owner,
+            float damage,
+            String skillId,
+            LivingEntity target,
+            WeaponDamageSnapshot releaseWeaponSnapshot
+    ) {
         super(ModEntities.TEMPERED_BILLET_PROJECTILE.get(), owner, level);
         this.damage = damage;
         if (skillId != null) {
             this.skillId = skillId;
         }
+        this.releaseWeaponSnapshot = releaseWeaponSnapshot;
         this.setNoGravity(true);
         if (target != null) {
             this.targetId = target.getUUID();
@@ -164,12 +182,43 @@ public class TemperedBilletProjectileEntity extends ThrowableProjectile {
                 .tier(SkillContext.SkillTier.MAJOR)
                 .damageMultiplier(1.0f)
                 .build();
-            WeaponSkillContextStore.setPending(player, context, this.level().getGameTime() + 5);
-            livingTarget.hurt(player.damageSources().playerAttack(player), 1.0F);
+            long nowTick = this.level().getGameTime();
+            if (this.releaseWeaponSnapshot == null) {
+                WeaponSkillDamage.apply(
+                        player,
+                        livingTarget,
+                        context,
+                        nowTick + 5
+                );
+            } else {
+                WeaponSkillDamage.apply(
+                        player,
+                        livingTarget,
+                        context,
+                        this.releaseWeaponSnapshot,
+                        nowTick + 5
+                );
+            }
 
             if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
-                TemperedFireRingTracker.start(serverPlayer,
-                    livingTarget.position(), this.level().getGameTime(), 2.5f, 10);
+                if (this.releaseWeaponSnapshot == null) {
+                    TemperedFireRingTracker.start(
+                            serverPlayer,
+                            livingTarget.position(),
+                            nowTick,
+                            2.5f,
+                            10
+                    );
+                } else {
+                    TemperedFireRingTracker.start(
+                            serverPlayer,
+                            livingTarget.position(),
+                            nowTick,
+                            2.5f,
+                            10,
+                            this.releaseWeaponSnapshot
+                    );
+                }
             }
         }
 
@@ -210,6 +259,11 @@ public class TemperedBilletProjectileEntity extends ThrowableProjectile {
             tag.putUUID("Target", this.targetId);
         }
         tag.putFloat("Damage", this.damage);
+        writeReleaseWeaponSnapshot(
+                tag,
+                this.releaseWeaponSnapshot,
+                this.level().registryAccess()
+        );
     }
 
     @SuppressWarnings("null")
@@ -222,5 +276,47 @@ public class TemperedBilletProjectileEntity extends ThrowableProjectile {
             this.targetId = tag.getUUID("Target");
         }
         this.damage = tag.getFloat("Damage");
+        this.releaseWeaponSnapshot = readReleaseWeaponSnapshot(
+                tag,
+                this.level().registryAccess()
+        );
     }
+
+    static void writeReleaseWeaponSnapshot(
+            CompoundTag tag,
+            WeaponDamageSnapshot snapshot,
+            HolderLookup.Provider registries
+    ) {
+        if (snapshot == null) {
+            return;
+        }
+        ItemStack weapon = snapshot.weapon();
+        if (weapon.isEmpty()) {
+            return;
+        }
+        tag.putString("ReleaseWeaponId", snapshot.weaponId().toString());
+        tag.put("ReleaseWeapon", weapon.saveOptional(registries));
+    }
+
+    static WeaponDamageSnapshot readReleaseWeaponSnapshot(
+            CompoundTag tag,
+            HolderLookup.Provider registries
+    ) {
+        if (!tag.contains("ReleaseWeapon", Tag.TAG_COMPOUND)) {
+            return null;
+        }
+        ResourceLocation weaponId =
+                ResourceLocation.tryParse(tag.getString("ReleaseWeaponId"));
+        if (weaponId == null) {
+            return null;
+        }
+        ItemStack weapon = ItemStack.parseOptional(
+                registries,
+                tag.getCompound("ReleaseWeapon")
+        );
+        return weapon.isEmpty()
+                ? null
+                : WeaponDamageSnapshot.capture(weaponId, weapon);
+    }
+
 }

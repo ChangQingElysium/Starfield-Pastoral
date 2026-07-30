@@ -10,31 +10,27 @@ public final class DarkSwordBloodDebtTracker {
 
     private static final class State {
         private final long endTick;
-        private final String weaponId;
-        private final String skillId;
-        private final int cooldownTicks;
-        private State(long endTick) {
-            this(endTick, "", "", 0);
-        }
 
-        private State(long endTick, String weaponId, String skillId, int cooldownTicks) {
+        private State(long endTick) {
             this.endTick = endTick;
-            this.weaponId = weaponId;
-            this.skillId = skillId;
-            this.cooldownTicks = cooldownTicks;
         }
     }
 
     private static final Map<UUID, State> ACTIVE = new HashMap<>();
-    private static final float LIFESTEAL_RATIO = 0.20f;
+    public static final int ACTIVE_DURATION_TICKS = 100;
+    public static final float LIFESTEAL_RATIO = 0.20F;
 
     private DarkSwordBloodDebtTracker() {}
 
-    public static void start(ServerPlayer player, long nowTick, int durationTicks, String weaponId, String skillId, int cooldownTicks) {
+    public static void start(
+            ServerPlayer player,
+            long nowTick,
+            int durationTicks
+    ) {
         if (player == null || durationTicks <= 0) {
             return;
         }
-        ACTIVE.put(player.getUUID(), new State(nowTick + durationTicks, weaponId, skillId, cooldownTicks));
+        ACTIVE.put(player.getUUID(), new State(nowTick + durationTicks));
     }
 
     public static boolean isActive(ServerPlayer player, long nowTick) {
@@ -52,17 +48,17 @@ public final class DarkSwordBloodDebtTracker {
         State state = ACTIVE.get(player.getUUID());
         if (state == null) return;
         if (nowTick > state.endTick) {
-            finish(player, state, nowTick);
             ACTIVE.remove(player.getUUID());
         }
     }
 
-    private static void finish(ServerPlayer player, State state, long nowTick) {
-        if (player == null) {
-            return;
-        }
-        if (state.cooldownTicks > 0 && !state.weaponId.isEmpty() && !state.skillId.isEmpty()) {
-            WeaponSkillCooldowns.setCooldown(player, state.weaponId, state.skillId, nowTick, state.cooldownTicks);
+    public static boolean isTracked(ServerPlayer player) {
+        return player != null && ACTIVE.containsKey(player.getUUID());
+    }
+
+    public static void cancel(ServerPlayer player) {
+        if (player != null) {
+            ACTIVE.remove(player.getUUID());
         }
     }
 

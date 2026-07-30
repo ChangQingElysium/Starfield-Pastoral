@@ -1,93 +1,71 @@
 package com.stardew.craft.client.weapon.animation;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
+import org.joml.Vector3f;
 
 public final class CutlassCrescentSlashAnimation implements WeaponSkillAnimation {
 
     private static final WeaponSkillPose BASE_RIGHT = new WeaponSkillPose(0f, -90f, 25f, 1.13f, 3.2f, 1.13f);
-    private static final WeaponSkillPose BASE_LEFT = WeaponSkillPose.mirrorRightToLeft(BASE_RIGHT);
-
-    // 来自你给的三点（起点/中点/终点）
-    private static final WeaponSkillPose P1_RIGHT = new WeaponSkillPose(-75.71f, 3.01f, 128.55f, -15.37f, 3.7f, -2.87f);
-    private static final WeaponSkillPose P2_RIGHT = new WeaponSkillPose(-82.93f, -12.86f, 55.93f, -8.62f, 3.7f, -8.87f);
-    private static final WeaponSkillPose P3_RIGHT = new WeaponSkillPose(-93.67f, -0.57f, -14.34f, 1.63f, 2.7f, -4.37f);
-
-    private static final float T1 = 0.16f; // 默认 -> P3
-    private static final float T2 = 0.50f; // P3 -> P1（跳过P2）
-    @SuppressWarnings("unused")
-    private static final float T3 = 0.65f; // P1 停留开始
-    private static final float T4 = 0.78f; // P1 停留结束（约0.13s）
+    private static final Vector3f GRIP_PIVOT = new Vector3f(0.0f, -6.0f / 16.0f, 0.0f);
+    private static final WeaponSkillPose WIND_UP =
+            new WeaponSkillPose(-82f, -26f, -36f, 4.25f, 3.55f, 0.40f);
+    private static final WeaponSkillPose COMPRESSED =
+            new WeaponSkillPose(-88f, -18f, -22f, 4.85f, 3.15f, -1.10f);
+    private static final WeaponSkillPose CONTACT =
+            new WeaponSkillPose(-84f, -4f, 48f, -1.60f, 2.55f, -3.25f);
+    private static final WeaponSkillPose FOLLOW_THROUGH =
+            new WeaponSkillPose(-76f, 14f, 104f, -7.80f, 3.05f, -1.20f);
+    private static final WeaponSkillPose SETTLE =
+            new WeaponSkillPose(-78f, 12f, 92f, -6.90f, 3.20f, -0.70f);
+    private static final WeaponSkillKeyframeTimeline TIMELINE =
+            new WeaponSkillKeyframeTimeline(
+                    8.0f,
+                    BASE_RIGHT,
+                    GRIP_PIVOT,
+                    new WeaponSkillKeyframeTimeline.Keyframe(
+                            0.0f,
+                            BASE_RIGHT,
+                            WeaponSkillKeyframeTimeline.Easing.LINEAR
+                    ),
+                    new WeaponSkillKeyframeTimeline.Keyframe(
+                            1.25f,
+                            WIND_UP,
+                            WeaponSkillKeyframeTimeline.Easing.EASE_OUT_CUBIC
+                    ),
+                    new WeaponSkillKeyframeTimeline.Keyframe(
+                            2.0f,
+                            COMPRESSED,
+                            WeaponSkillKeyframeTimeline.Easing.SMOOTH
+                    ),
+                    new WeaponSkillKeyframeTimeline.Keyframe(
+                            3.0f,
+                            CONTACT,
+                            WeaponSkillKeyframeTimeline.Easing.EASE_IN_QUAD
+                    ),
+                    new WeaponSkillKeyframeTimeline.Keyframe(
+                            4.25f,
+                            FOLLOW_THROUGH,
+                            WeaponSkillKeyframeTimeline.Easing.EASE_OUT_CUBIC
+                    ),
+                    new WeaponSkillKeyframeTimeline.Keyframe(
+                            5.0f,
+                            SETTLE,
+                            WeaponSkillKeyframeTimeline.Easing.SMOOTH
+                    ),
+                    new WeaponSkillKeyframeTimeline.Keyframe(
+                            8.0f,
+                            BASE_RIGHT,
+                            WeaponSkillKeyframeTimeline.Easing.SMOOTH
+                    )
+            );
 
     @Override
     public boolean apply(PoseStack poseStack, HumanoidArm arm, float progress) {
-        float t = Mth.clamp(progress, 0.0f, 1.0f);
-        boolean right = arm == HumanoidArm.RIGHT;
-
-        WeaponSkillPose base = right ? BASE_RIGHT : BASE_LEFT;
-        WeaponSkillPose p1 = right ? P1_RIGHT : WeaponSkillPose.mirrorRightToLeft(P1_RIGHT);
-        @SuppressWarnings("unused")
-        WeaponSkillPose p2 = right ? P2_RIGHT : WeaponSkillPose.mirrorRightToLeft(P2_RIGHT);
-        WeaponSkillPose p3 = right ? P3_RIGHT : WeaponSkillPose.mirrorRightToLeft(P3_RIGHT);
-
-        WeaponSkillPose out;
-        if (t <= T1) {
-            // 加过渡：默认 -> P3
-            float u = t / T1;
-            out = WeaponSkillPose.lerp(base, p3, easeOutQuad(u));
-        } else if (t <= T2) {
-            float u = (t - T1) / (T2 - T1);
-            out = WeaponSkillPose.lerp(p3, p1, easeInCubic(u));
-        } else if (t <= T4) {
-            // 停留在 P1
-            out = p1;
-        } else {
-            // 短过渡：P1 -> 默认
-            float u = (t - T4) / (1.0f - T4);
-            out = WeaponSkillPose.lerp(p1, base, easeOutQuad(u));
-        }
-
-        WeaponSkillAnimationMath.applyDeltaFromBaseDisplay(poseStack, base, out);
-        return true;
+        return TIMELINE.apply(poseStack, arm, progress);
     }
 
-    @SuppressWarnings("unused")
-    private static WeaponSkillPose arcLerp(WeaponSkillPose a, WeaponSkillPose b, float u, boolean right) {
-        float t = easeInOutSine(u);
-        WeaponSkillPose base = WeaponSkillPose.lerp(a, b, t);
-
-        // 画圆感：中段抬起与旋转形成弧线（两端归零）
-        float arc = Mth.sin(u * Mth.PI);
-        float arcRx = 12.0f * arc;
-        float arcRz = (right ? 22.0f : -22.0f) * arc;
-        float arcTx = (right ? 0.9f : -0.9f) * arc;
-        float arcTy = 0.35f * arc;
-        float arcTz = -1.4f * arc;
-
-        return new WeaponSkillPose(
-                base.rx() + arcRx,
-                base.ry(),
-                base.rz() + arcRz,
-                base.tx() + arcTx,
-                base.ty() + arcTy,
-                base.tz() + arcTz
-        );
-    }
-
-    private static float easeInCubic(float t) {
-        t = Mth.clamp(t, 0.0f, 1.0f);
-        return t * t * t;
-    }
-
-    private static float easeOutQuad(float t) {
-        t = Mth.clamp(t, 0.0f, 1.0f);
-        float inv = 1.0f - t;
-        return 1.0f - inv * inv;
-    }
-
-    private static float easeInOutSine(float t) {
-        t = Mth.clamp(t, 0.0f, 1.0f);
-        return (float) (0.5 - 0.5 * Math.cos(Math.PI * t));
+    static WeaponSkillPose sampleRightAtTick(float tick) {
+        return TIMELINE.sampleRight(tick / 8.0f);
     }
 }

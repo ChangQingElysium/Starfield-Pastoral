@@ -1,0 +1,33 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "SeedShop",
+    "tile_action": "Message \"SeedShop.7\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:pierre_house",
+    "positions": [
+      [
+        20,
+        37,
+        -40
+      ]
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.seed_shop.7",
+          "fallback": "'Journey Of The Prairie King: Console Edition'"
+        }
+      ]
+    }
+  ]
+}

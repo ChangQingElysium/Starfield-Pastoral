@@ -2,6 +2,7 @@ package com.stardew.craft.cutscene.command;
 
 import com.stardew.craft.cutscene.runtime.EventActorEntity;
 import com.stardew.craft.cutscene.runtime.EventPlayer;
+import com.stardew.craft.cutscene.runtime.EventPlayerActorEntity;
 import net.minecraft.world.entity.Mob;
 
 /**
@@ -25,6 +26,12 @@ public class AnimateCommand implements EventCommand {
         Mob actor = player.getActor(actorTag);
         if (actor instanceof EventActorEntity npcActor) {
             npcActor.setCustomAnimation(animName, loop);
+        } else if (actor instanceof EventPlayerActorEntity playerActor) {
+            if ("collapsed".equals(animName)) {
+                playerActor.setCollapsed(true);
+            } else if ("idle".equals(animName)) {
+                playerActor.setCollapsed(false);
+            }
         }
     }
 

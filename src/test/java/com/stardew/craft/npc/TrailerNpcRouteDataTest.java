@@ -50,7 +50,7 @@ class TrailerNpcRouteDataTest {
 
         JsonArray min = trailer.getAsJsonArray("min");
         JsonArray max = trailer.getAsJsonArray("max");
-        assertCoordinates(min, 64, 34, -2);
+        assertCoordinates(min, 59, 34, -3);
         assertCoordinates(max, 80, 40, 10);
 
         JsonObject points = load("data/stardewcraft/npc/events/npc_route_points.json")

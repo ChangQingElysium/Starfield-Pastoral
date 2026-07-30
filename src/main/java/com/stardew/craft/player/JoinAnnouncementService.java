@@ -19,18 +19,34 @@ public final class JoinAnnouncementService {
     private JoinAnnouncementService() {}
 
     public static void schedule(ServerPlayer player) {
-        if (PlayerDataManager.getPlayerData(player).isJoinAnnouncementDismissed()) {
-            return;
-        }
+        var updateCheck = ModUpdateChecker.checkAsync();
         player.server.tell(new TickTask(player.server.getTickCount() + ANNOUNCEMENT_DELAY_TICKS, () -> {
-            if (!player.isRemoved()
-                    && !PlayerDataManager.getPlayerData(player).isJoinAnnouncementDismissed()) {
-                send(player);
+            if (player.isRemoved()) {
+                return;
             }
+            updateCheck.thenAccept(status -> player.server.execute(() -> {
+                if (player.isRemoved()) {
+                    return;
+                }
+                boolean dismissed = PlayerDataManager.getPlayerData(player)
+                        .isJoinAnnouncementDismissed();
+                if (!dismissed) {
+                    send(player, status);
+                } else if (shouldSendUpdateNotice(dismissed, status)) {
+                    sendUpdateNotice(player, status);
+                }
+            }));
         }));
     }
 
-    private static void send(ServerPlayer player) {
+    static boolean shouldSendUpdateNotice(
+            boolean announcementDismissed,
+            ModUpdateChecker.VersionStatus status
+    ) {
+        return announcementDismissed && status.isOutdated();
+    }
+
+    private static void send(ServerPlayer player, ModUpdateChecker.VersionStatus status) {
         player.sendSystemMessage(Component.literal(""));
         player.sendSystemMessage(Component.literal("────── ").withStyle(ChatFormatting.DARK_GRAY)
             .append(Component.literal("Starfield Pastoral").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD))
@@ -38,6 +54,9 @@ public final class JoinAnnouncementService {
         player.sendSystemMessage(Component.literal("[!] ").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD)
             .append(Component.translatable("stardewcraft.join_announcement.public_test")
                 .withStyle(ChatFormatting.GRAY)));
+        sendVersionStatus(player, status);
+        player.sendSystemMessage(linkLine(
+                "stardewcraft.join_announcement.modrinth", ModUpdateChecker.MODRINTH_URL));
         player.sendSystemMessage(linkLine("stardewcraft.join_announcement.discord", DISCORD_URL));
         player.sendSystemMessage(Component.literal("  • ").withStyle(ChatFormatting.DARK_GRAY)
             .append(Component.translatable("stardewcraft.join_announcement.qq")
@@ -58,6 +77,61 @@ public final class JoinAnnouncementService {
         player.sendSystemMessage(Component.literal("─────────────────────────────")
             .withStyle(ChatFormatting.DARK_GRAY));
         player.sendSystemMessage(Component.literal(""));
+    }
+
+    private static void sendUpdateNotice(
+            ServerPlayer player,
+            ModUpdateChecker.VersionStatus status
+    ) {
+        player.sendSystemMessage(Component.literal(""));
+        player.sendSystemMessage(Component.literal("[!] ").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD)
+                .append(Component.translatable("stardewcraft.join_announcement.update_available")
+                        .withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD)));
+        sendVersionStatus(player, status);
+        player.sendSystemMessage(linkLine(
+                "stardewcraft.join_announcement.modrinth", ModUpdateChecker.MODRINTH_URL));
+        player.sendSystemMessage(Component.literal(""));
+    }
+
+    private static void sendVersionStatus(
+            ServerPlayer player,
+            ModUpdateChecker.VersionStatus status
+    ) {
+        player.sendSystemMessage(Component.literal("  • ").withStyle(ChatFormatting.DARK_GRAY)
+                .append(Component.translatable(
+                        "stardewcraft.join_announcement.current_version",
+                        status.installedVersion()).withStyle(ChatFormatting.GRAY)));
+        switch (status.state()) {
+            case UP_TO_DATE -> player.sendSystemMessage(Component.literal("  • ")
+                    .withStyle(ChatFormatting.DARK_GRAY)
+                    .append(Component.translatable("stardewcraft.join_announcement.up_to_date")
+                            .withStyle(ChatFormatting.GREEN)));
+            case OUTDATED -> {
+                player.sendSystemMessage(Component.literal("  • ").withStyle(ChatFormatting.DARK_GRAY)
+                        .append(Component.translatable(
+                                "stardewcraft.join_announcement.latest_version",
+                                status.latestVersion()).withStyle(ChatFormatting.YELLOW)));
+                player.sendSystemMessage(Component.literal("  • ").withStyle(ChatFormatting.DARK_GRAY)
+                        .append(Component.translatable(
+                                "stardewcraft.join_announcement.update_recommended")
+                                .withStyle(ChatFormatting.GOLD)));
+            }
+            case AHEAD -> {
+                player.sendSystemMessage(Component.literal("  • ").withStyle(ChatFormatting.DARK_GRAY)
+                        .append(Component.translatable(
+                                "stardewcraft.join_announcement.latest_version",
+                                status.latestVersion()).withStyle(ChatFormatting.GRAY)));
+                player.sendSystemMessage(Component.literal("  • ").withStyle(ChatFormatting.DARK_GRAY)
+                        .append(Component.translatable(
+                                "stardewcraft.join_announcement.ahead_of_public")
+                                .withStyle(ChatFormatting.GREEN)));
+            }
+            case UNAVAILABLE -> player.sendSystemMessage(Component.literal("  • ")
+                    .withStyle(ChatFormatting.DARK_GRAY)
+                    .append(Component.translatable(
+                            "stardewcraft.join_announcement.latest_unavailable")
+                            .withStyle(ChatFormatting.DARK_GRAY)));
+        }
     }
 
     private static MutableComponent linkLine(String labelKey, String url) {

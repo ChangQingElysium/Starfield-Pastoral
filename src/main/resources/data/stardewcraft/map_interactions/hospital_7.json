@@ -1,0 +1,40 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "Hospital",
+    "tile_action": "Message \"Hospital.7\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:clinic",
+    "boxes": [
+      {
+        "min": [
+          14,
+          43,
+          -16
+        ],
+        "max": [
+          14,
+          44,
+          -16
+        ]
+      }
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.hospital.7",
+          "fallback": "Hey, this plant's fake!"
+        }
+      ]
+    }
+  ]
+}

@@ -33,7 +33,7 @@ displayName="${mod_name}" #mandatory
 #updateJSONURL="https://change.me.example.invalid/updates.json" #optional
 
 # A URL for the "homepage" for this mod, displayed in the mod UI
-#displayURL="https://change.me.to.your.mods.homepage.example.invalid/" #optional
+displayURL="https://modrinth.com/mod/starfield-pastoral" #optional
 
 # A file name (in the root of the mod JAR) containing a logo for display
 logoFile="assets/stardewcraft/icon.png"

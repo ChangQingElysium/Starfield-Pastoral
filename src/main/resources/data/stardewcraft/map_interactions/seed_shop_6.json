@@ -1,0 +1,40 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "SeedShop",
+    "tile_action": "Message \"SeedShop.6\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:pierre_house",
+    "boxes": [
+      {
+        "min": [
+          58,
+          37,
+          -44
+        ],
+        "max": [
+          58,
+          38,
+          -44
+        ]
+      }
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.seed_shop.6",
+          "fallback": "It's loaded with fresh veggies."
+        }
+      ]
+    }
+  ]
+}

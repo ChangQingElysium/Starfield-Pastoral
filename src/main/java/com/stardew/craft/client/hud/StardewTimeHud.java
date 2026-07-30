@@ -196,7 +196,8 @@ public class StardewTimeHud {
         }
 
         if (com.stardew.craft.client.hud.FestivalHudState.hidden()
-                && !FestivalCurrencyHudState.active()) {
+                && !FestivalCurrencyHudState.active()
+                && !isCasinoCurrencyActive()) {
             renderFairFishingHud(event.getGuiGraphics());
             renderIceFishingHud(event.getGuiGraphics());
             return;
@@ -214,7 +215,7 @@ public class StardewTimeHud {
         int screenHeight = mc.getWindow().getGuiScaledHeight();
         StardewHudLayout.Placement placement = StardewHudLayout.current(screenWidth, screenHeight);
         renderMainHudAt(graphics, placement.x(), placement.y(), placement.scale());
-        renderFestivalCurrency(graphics, placement);
+        renderAttachedCurrency(graphics, placement);
         renderDesertFestivalMineRating(graphics);
     }
 
@@ -442,17 +443,23 @@ public class StardewTimeHud {
         graphics.pose().popPose();
     }
 
-    private static void renderFestivalCurrency(GuiGraphics graphics, StardewHudLayout.Placement placement) {
+    private static void renderAttachedCurrency(GuiGraphics graphics, StardewHudLayout.Placement placement) {
         Minecraft mc = Minecraft.getInstance();
         var player = mc.player;
-        if (player == null || mc.level == null || mc.level.dimension() != ModDimensions.STARDEW_VALLEY
-                || !FestivalCurrencyHudState.active()) {
+        if (player == null || mc.level == null || mc.level.dimension() != ModDimensions.STARDEW_VALLEY) {
+            return;
+        }
+        boolean festivalCurrency = FestivalCurrencyHudState.active();
+        boolean casinoCurrency = !festivalCurrency && isCasinoCurrencyActive();
+        if (!festivalCurrency && !casinoCurrency) {
             return;
         }
         byte type = FestivalCurrencyHudState.currencyType();
-        int count = type == FestivalCurrencyHudState.CALICO_EGG
-            ? player.getInventory().countItem(ModItems.CALICO_EGG.get())
-            : ClientPlayerDataCache.getFairStarTokens();
+        int count = casinoCurrency
+                ? ClientPlayerDataCache.getClubCoins()
+                : type == FestivalCurrencyHudState.CALICO_EGG
+                ? player.getInventory().countItem(ModItems.CALICO_EGG.get())
+                : ClientPlayerDataCache.getFairStarTokens();
         String text = String.valueOf(count);
         int boxWidth = Math.max(42, 24 + mc.font.width(text));
         int boxHeight = 16;
@@ -463,7 +470,10 @@ public class StardewTimeHud {
         graphics.pose().translate(placement.x(), placement.y(), 0.0F);
         graphics.pose().scale(placement.scale(), placement.scale(), 1.0F);
         graphics.fill(boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xBF000000);
-        if (type == FestivalCurrencyHudState.FAIR_STAR_TOKEN) {
+        if (casinoCurrency) {
+            com.stardew.craft.client.gui.common.CommonGuiTextures.drawQiCoin(
+                    graphics, boxX + 5, boxY + 3, 1.0F);
+        } else if (type == FestivalCurrencyHudState.FAIR_STAR_TOKEN) {
             graphics.blit(VANILLA_CURSORS, boxX + 5, boxY + 4, 8, 8,
                     338, 400, 8, 8,
                     704, 2256);
@@ -476,6 +486,20 @@ public class StardewTimeHud {
         }
         drawBorderedText(graphics, mc.font, text, boxX + 18, boxY + 4, 0xFFFFFFFF, 0xB0000000);
         graphics.pose().popPose();
+    }
+
+    private static boolean isCasinoCurrencyActive() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null || mc.level == null
+                || mc.level.dimension() != ModDimensions.STARDEW_VALLEY
+                || mc.screen instanceof com.stardew.craft.client.gui.casino.CalicoJackScreen
+                || mc.screen instanceof com.stardew.craft.client.gui.casino.SlotsScreen) {
+            return false;
+        }
+        return com.stardew.craft.interior.InteriorRegionRegistry.fixedInteriorAt(
+                        mc.player.blockPosition())
+                .map(region -> region.id().equals("casino"))
+                .orElse(false);
     }
 
     private static void drawBorderedText(GuiGraphics graphics, Font font, String text, int x, int y, int color, int borderColor) {

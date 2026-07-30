@@ -1,0 +1,33 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "FishShop",
+    "tile_action": "Message \"FishShop.5\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:fish_shop",
+    "positions": [
+      [
+        67,
+        31,
+        145
+      ]
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.fish_shop.5",
+          "fallback": "Well, it's a bin full of writhing, wriggling worms. It smells something awful."
+        }
+      ]
+    }
+  ]
+}

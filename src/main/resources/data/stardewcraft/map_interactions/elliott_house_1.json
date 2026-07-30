@@ -1,0 +1,33 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "ElliottHouse",
+    "tile_action": "Message \"ElliottHouse.1\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:elliott_cabin",
+    "positions": [
+      [
+        76,
+        47,
+        96
+      ]
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.elliott_house.1",
+          "fallback": "It's a painting by Leah."
+        }
+      ]
+    }
+  ]
+}

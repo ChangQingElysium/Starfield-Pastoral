@@ -1,0 +1,33 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "Blacksmith",
+    "tile_action": "Message \"Blacksmith.10\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:blacksmith",
+    "positions": [
+      [
+        102,
+        46,
+        28
+      ]
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.blacksmith.10",
+          "fallback": "It's full of soot."
+        }
+      ]
+    }
+  ]
+}

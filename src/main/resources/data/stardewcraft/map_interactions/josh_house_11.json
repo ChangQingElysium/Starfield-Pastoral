@@ -1,0 +1,40 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "JoshHouse",
+    "tile_action": "Message \"JoshHouse.11\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:1_river_road",
+    "boxes": [
+      {
+        "min": [
+          42,
+          22,
+          -4
+        ],
+        "max": [
+          42,
+          23,
+          -4
+        ]
+      }
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.josh_house.11",
+          "fallback": "It's a well-stocked refrigerator."
+        }
+      ]
+    }
+  ]
+}

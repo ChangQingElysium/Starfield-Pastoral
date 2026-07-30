@@ -74,6 +74,8 @@ public class StardewCraft {
     // FML will recognize some parameter types like IEventBus or ModContainer and pass them in automatically.
     public StardewCraft(IEventBus modEventBus, ModContainer modContainer) {
         com.stardew.craft.api.v1.internal.BuiltinApiTypes.bootstrap();
+        com.stardew.craft.world.interaction.BuiltinMapInteractionActions
+                .bootstrap();
         com.stardew.craft.api.v1.internal.item.StardewAcquisitionSourceRegistry
                 .bootstrap();
         com.stardew.craft.api.v1.internal.economy.StardewCurrencyRegistry

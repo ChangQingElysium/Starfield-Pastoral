@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stardewcraft.example/schemas/building-blueprint-v1.schema.json",
+  "title": "StardewCraft building blueprint",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "builder",
+    "display_name",
+    "description",
+    "result_item"
+  ],
+  "properties": {
+    "builder": { "$ref": "#/$defs/id" },
+    "order": { "type": "integer" },
+    "display_name": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "description": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "money": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
+    "materials": {
+      "type": "array",
+      "maxItems": 32,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["item", "count"],
+        "properties": {
+          "item": { "$ref": "#/$defs/id" },
+          "count": { "type": "integer", "minimum": 1, "maximum": 1000000 }
+        }
+      }
+    },
+    "result_item": { "$ref": "#/$defs/id" },
+    "result_count": { "type": "integer", "minimum": 1, "maximum": 64 },
+    "upgrade": { "type": "boolean" },
+    "preview_canvas_size": { "type": "integer", "minimum": 8, "maximum": 512 },
+    "magical_construction": { "type": "boolean" },
+    "available_when": {
+      "type": "array",
+      "maxItems": 32,
+      "items": { "type": "object" }
+    },
+    "tags": {
+      "type": "array",
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/id" }
+    },
+    "properties": {
+      "type": "object",
+      "maxProperties": 32,
+      "additionalProperties": { "type": "string" },
+      "propertyNames": { "pattern": "^[a-z0-9_.-]+:[a-z0-9/._-]+$" }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_.-]+:[a-z0-9/._-]+$"
+    }
+  }
+}

@@ -89,6 +89,25 @@ public final class WildTreeShakeEvents {
 		event.setCancellationResult(InteractionResult.SUCCESS);
 	}
 
+	public static boolean canShake(ServerPlayer player, BlockPos clickedPos) {
+		if (player == null || clickedPos == null
+				|| !player.getMainHandItem().isEmpty()) {
+			return false;
+		}
+		ServerLevel level = player.serverLevel();
+		WildTrees.Def def = WildTrees.findByAnyPart(
+				level.getBlockState(clickedPos));
+		if (def == null) {
+			return false;
+		}
+		BlockPos root = findBaseTrunk0(level, clickedPos, def);
+		return root != null
+				&& (level.dimension()
+						!= com.stardew.craft.core.ModDimensions.STARDEW_VALLEY
+					|| player.isCreative()
+					|| FarmAreaProtectionEvents.canModifyAt(player, root));
+	}
+
 	@SuppressWarnings("null")
 	private static BlockPos findBaseTrunk0(ServerLevel level, BlockPos clickedPos, WildTrees.Def def) {
 		@SuppressWarnings("null")

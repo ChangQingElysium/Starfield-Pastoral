@@ -1,7 +1,6 @@
 package com.stardew.craft.network.payload;
 
 import com.stardew.craft.StardewCraft;
-import com.stardew.craft.item.ModItems;
 import com.stardew.craft.item.tool.PointPlanWandItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -85,10 +84,11 @@ public record PointPlanActionPayload(
 
     private static ItemStack heldEditor(ServerPlayer player) {
         ItemStack main = player.getMainHandItem();
-        if (main.is(ModItems.POINT_PLAN_WAND.get())) {
+        if (main.getItem() instanceof PointPlanWandItem) {
             return main;
         }
         ItemStack offhand = player.getOffhandItem();
-        return offhand.is(ModItems.POINT_PLAN_WAND.get()) ? offhand : ItemStack.EMPTY;
+        return offhand.getItem() instanceof PointPlanWandItem
+                ? offhand : ItemStack.EMPTY;
     }
 }

@@ -1,11 +1,13 @@
 package com.stardew.craft.combat.skill;
 
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -24,7 +26,18 @@ import java.util.UUID;
  */
 public final class StarfallTracker {
 
-    private static final int STRIKE_INTERVAL_TICKS = 10;
+    public enum Status {
+        ACTIVE,
+        COMPLETED,
+        INVALIDATED
+    }
+
+    public static final int STRIKE_INTERVAL_TICKS = 10;
+    public static final int DEFAULT_STRIKES = 3;
+    public static final int MAX_EXTRA_HITS = 3;
+    public static final double DEFAULT_RADIUS = 4.0D;
+    public static final float DEFAULT_DAMAGE_MULTIPLIER = 0.70F;
+    public static final int HIT_CONTEXT_LIFETIME_TICKS = 5;
 
     private static final class State {
         private long nextStrikeTick;
@@ -33,14 +46,27 @@ public final class StarfallTracker {
         private final double radius;
         private final float damageMultiplier;
         private final String skillId;
+        private final ResourceKey<Level> dimension;
+        private final WeaponDamageSnapshot weaponSnapshot;
 
-        private State(long nextStrikeTick, int remainingStrikes, int extraHits, double radius, float damageMultiplier, String skillId) {
+        private State(
+                long nextStrikeTick,
+                int remainingStrikes,
+                int extraHits,
+                double radius,
+                float damageMultiplier,
+                String skillId,
+                ResourceKey<Level> dimension,
+                WeaponDamageSnapshot weaponSnapshot
+        ) {
             this.nextStrikeTick = nextStrikeTick;
             this.remainingStrikes = remainingStrikes;
             this.extraHits = extraHits;
             this.radius = radius;
             this.damageMultiplier = damageMultiplier;
             this.skillId = skillId;
+            this.dimension = dimension;
+            this.weaponSnapshot = weaponSnapshot;
         }
     }
 
@@ -50,28 +76,105 @@ public final class StarfallTracker {
 
     public static void start(ServerPlayer player, long nowTick, int strikes, int extraHits, double radius,
                              float damageMultiplier, String skillId) {
+        startInternal(
+                player,
+                nowTick,
+                strikes,
+                extraHits,
+                radius,
+                damageMultiplier,
+                skillId,
+                null
+        );
+    }
+
+    public static void start(
+            ServerPlayer player,
+            long nowTick,
+            int strikes,
+            int extraHits,
+            double radius,
+            float damageMultiplier,
+            String skillId,
+            WeaponDamageSnapshot weaponSnapshot
+    ) {
+        startInternal(
+                player,
+                nowTick,
+                strikes,
+                extraHits,
+                radius,
+                damageMultiplier,
+                skillId,
+                java.util.Objects.requireNonNull(
+                        weaponSnapshot,
+                        "weaponSnapshot"
+                )
+        );
+    }
+
+    private static void startInternal(
+            ServerPlayer player,
+            long nowTick,
+            int strikes,
+            int extraHits,
+            double radius,
+            float damageMultiplier,
+            String skillId,
+            WeaponDamageSnapshot weaponSnapshot
+    ) {
         if (player == null || strikes <= 0) {
             return;
         }
-        ACTIVE.put(player.getUUID(), new State(nowTick + STRIKE_INTERVAL_TICKS, strikes, extraHits, radius, damageMultiplier, skillId));
+        ACTIVE.put(
+                player.getUUID(),
+                new State(
+                        nowTick + STRIKE_INTERVAL_TICKS,
+                        strikes,
+                        Math.min(
+                                MAX_EXTRA_HITS,
+                                Math.max(0, extraHits)
+                        ),
+                        radius,
+                        damageMultiplier,
+                        skillId,
+                        player.level().dimension(),
+                        weaponSnapshot
+                )
+        );
     }
 
-    public static void tick(ServerPlayer player, long nowTick) {
+    public static Status tick(ServerPlayer player, long nowTick) {
+        if (player == null) {
+            return Status.INVALIDATED;
+        }
         State state = ACTIVE.get(player.getUUID());
         if (state == null) {
-            return;
+            return Status.INVALIDATED;
         }
-        if (nowTick < state.nextStrikeTick) {
-            return;
+        if (!isValidContext(
+                player.isAlive() && !player.isRemoved(),
+                isSameDimension(
+                        state.dimension,
+                        player.level().dimension()
+                )
+        )) {
+            ACTIVE.remove(player.getUUID());
+            return Status.INVALIDATED;
+        }
+        if (!shouldStrike(nowTick, state.nextStrikeTick)) {
+            return Status.ACTIVE;
         }
 
         strike(player, nowTick, state);
         state.remainingStrikes -= 1;
         if (state.remainingStrikes <= 0) {
             ACTIVE.remove(player.getUUID());
+            return Status.COMPLETED;
         } else {
-            state.nextStrikeTick = nowTick + STRIKE_INTERVAL_TICKS;
+            state.nextStrikeTick = nextStrikeTick(nowTick);
         }
+        return Status.ACTIVE;
     }
 
     @SuppressWarnings("null")
@@ -83,24 +186,44 @@ public final class StarfallTracker {
             center.x + state.radius, center.y + 2.0, center.z + state.radius
         );
 
-        List<LivingEntity> targets = level.getEntitiesOfClass(
-            LivingEntity.class,
-            box,
-            entity -> entity.isPickable() && entity != player
+        List<LivingEntity> targets = List.copyOf(
+                level.getEntitiesOfClass(
+                        LivingEntity.class,
+                        box,
+                        entity -> entity.isPickable()
+                                && entity != player
+                )
         );
 
-        int hits = 1 + Math.max(0, state.extraHits);
+        int hits = hitsPerTarget(state.extraHits);
         for (LivingEntity target : targets) {
             for (int i = 0; i < hits; i++) {
-                SkillContext context = SkillContext.builder()
-                    .skillId(state.skillId)
-                    .tier(SkillContext.SkillTier.MAJOR)
-                    .damageMultiplier(state.damageMultiplier)
-                    .build();
-                WeaponSkillContextStore.setPending(player, context, nowTick + 5);
+                SkillContext context = createStrikeContext(
+                        state.skillId,
+                        state.damageMultiplier
+                );
                 target.invulnerableTime = 0;
                 target.hurtTime = 0;
-                player.attack(target);
+                if (state.weaponSnapshot == null) {
+                    WeaponSkillDamage.apply(
+                            player,
+                            target,
+                            context,
+                            nowTick + HIT_CONTEXT_LIFETIME_TICKS,
+                            WeaponSkillDamage.AttackGatePolicy
+                                    .RESPECT_AT_IMPACT
+                    );
+                } else {
+                    WeaponSkillDamage.apply(
+                            player,
+                            target,
+                            context,
+                            state.weaponSnapshot,
+                            nowTick + HIT_CONTEXT_LIFETIME_TICKS,
+                            WeaponSkillDamage.AttackGatePolicy
+                                    .RESPECT_AT_IMPACT
+                    );
+                }
             }
         }
 
@@ -129,8 +252,56 @@ public final class StarfallTracker {
             new StarfallShockwavePostPayload((float) center.x, (float) center.y + 0.2f, (float) center.z, 0.28f, 0.9f, 8));
     }
 
+    public static boolean hasState(UUID playerId) {
+        return playerId != null && ACTIVE.containsKey(playerId);
+    }
+
+    public static void cancel(ServerPlayer player) {
+        if (player != null) {
+            ACTIVE.remove(player.getUUID());
+        }
+    }
+
     /** Clean up state when a player logs out to prevent memory leaks. */
     public static void removePlayer(UUID playerId) {
         ACTIVE.remove(playerId);
     }
+
+    static boolean shouldStrike(long nowTick, long nextStrikeTick) {
+        return nowTick >= nextStrikeTick;
+    }
+
+    static long nextStrikeTick(long nowTick) {
+        return nowTick + STRIKE_INTERVAL_TICKS;
+    }
+
+    static int hitsPerTarget(int extraHits) {
+        return 1 + Math.max(0, extraHits);
+    }
+
+    static boolean isValidContext(
+            boolean casterAvailable,
+            boolean sameDimension
+    ) {
+        return casterAvailable && sameDimension;
+    }
+
+    static boolean isSameDimension(
+            ResourceKey<Level> expected,
+            ResourceKey<Level> actual
+    ) {
+        return expected.equals(actual);
+    }
+
+    static SkillContext createStrikeContext(
+            String skillId,
+            float damageMultiplier
+    ) {
+        return SkillContext.builder()
+                .skillId(skillId)
+                .tier(SkillContext.SkillTier.MAJOR)
+                .damageMultiplier(damageMultiplier)
+                .build();
+    }
+
 }

@@ -41,4 +41,13 @@ public class ModParticles {
 
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> MAGIC_WARP_SWEEP =
         PARTICLES.register("magic_warp_sweep", () -> new SimpleParticleType(false));
+
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> CRESCENT_IMPACT =
+        PARTICLES.register("crescent_impact", () -> new SimpleParticleType(false));
+
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> FOREST_LEAF =
+        PARTICLES.register("forest_leaf", () -> new SimpleParticleType(false));
+
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> FOREST_WISP =
+        PARTICLES.register("forest_wisp", () -> new SimpleParticleType(false));
 }

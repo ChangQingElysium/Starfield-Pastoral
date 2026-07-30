@@ -1,0 +1,40 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "SamHouse",
+    "tile_action": "Message \"SamHouse.2\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:1_willow_lane",
+    "boxes": [
+      {
+        "min": [
+          -26,
+          39,
+          20
+        ],
+        "max": [
+          -26,
+          40,
+          20
+        ]
+      }
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.sam_house.2",
+          "fallback": "Eggs, bread, carrots, and milk."
+        }
+      ]
+    }
+  ]
+}

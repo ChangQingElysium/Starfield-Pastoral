@@ -26,7 +26,8 @@ class WizardBuildingItemTest {
             "tooltip.stardewcraft.wizard_building.owner_unassigned",
             "tooltip.stardewcraft.wizard_building.bound",
             "tooltip.stardewcraft.wizard_building.farm_only",
-            "message.stardewcraft.wizard_building.owner_only");
+            "message.stardewcraft.wizard_building.owner_only",
+            "stardewcraft.type.wizard_building");
 
     @Test
     void ownershipBindsOnceAndCannotBeTransferred() {
@@ -57,7 +58,12 @@ class WizardBuildingItemTest {
             assertTrue(registration >= 0, id);
             assertTrue(items.substring(registration, Math.min(items.length(), registration + 300))
                     .contains("new WizardBuildingItem"), id);
+            assertTrue(items.substring(registration, Math.min(items.length(), registration + 300))
+                    .contains(".fireResistant()"), id);
         }
+        assertFalse(items.substring(wizardSection).contains(
+                "new WizardBuildingItem(ModBlocks.JUNIMO_HUT.get(), \"item.stardewcraft.junimo_hut.desc\""),
+                "the common Stardew item tooltip already supplies the description");
 
         String purchase = Files.readString(PROJECT.resolve(
                 "src/main/java/com/stardew/craft/network/payload/CarpenterPurchasePayload.java"));

@@ -389,6 +389,51 @@ public final class SpecialOrderManager {
         return changed || customChanged ? new NpcDeliveryResult(true, messageKey) : NpcDeliveryResult.NONE;
     }
 
+    /**
+     * Read-only counterpart to {@link #recordNpcDelivery}; used by contextual
+     * UI without consuming an item or advancing an objective.
+     */
+    public static boolean canDeliverToNpc(
+            ServerPlayer player,
+            String npcId,
+            ItemStack held
+    ) {
+        if (player == null || npcId == null || held == null || held.isEmpty()) {
+            return false;
+        }
+        SpecialOrderWorldData data =
+                SpecialOrderWorldData.get(player.serverLevel());
+        for (SpecialOrderInstance order : data.active()) {
+            if (!order.accepted() || order.complete() || order.failed()) {
+                continue;
+            }
+            SpecialOrderDefinition definition =
+                    SpecialOrderDefinitions.get(order.orderId());
+            if (definition == null) {
+                continue;
+            }
+            for (int i = 0; i < definition.objectives().size(); i++) {
+                SpecialOrderDefinition.ObjectiveDefinition objective =
+                        definition.objectives().get(i);
+                if (objective.type()
+                        != SpecialOrderDefinition.ObjectiveType.DELIVER
+                        || !objective.targetName().equalsIgnoreCase(npcId)
+                        || !SpecialOrderContextTagService.matches(
+                                held, objective.acceptedTags(), order)) {
+                    continue;
+                }
+                SpecialOrderInstance.ObjectiveState state =
+                        order.objectives().get(i);
+                int remaining = state.requiredCount() - state.progress();
+                if (!state.isComplete() && remaining > 0
+                        && held.getCount() >= remaining) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public static void recordMonsterSlain(ServerPlayer player, String monsterName) {
         SpecialOrderWorldData data = SpecialOrderWorldData.get(player.serverLevel());
         boolean changed = false;

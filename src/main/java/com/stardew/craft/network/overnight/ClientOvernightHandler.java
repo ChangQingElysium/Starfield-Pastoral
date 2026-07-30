@@ -1,18 +1,16 @@
 package com.stardew.craft.network.overnight;
 
 import com.stardew.craft.StardewCraft;
-import com.stardew.craft.network.payload.PassOutPayload;
-import com.stardew.craft.player.PassOutService;
+import com.stardew.craft.client.gui.overnight.SaveGameMenuScreen;
+import com.stardew.craft.cutscene.network.PlayerWokeUpPayload;
+import com.stardew.craft.sound.ModSounds;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.client.gui.screens.Screen;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 import com.stardew.craft.client.gui.overnight.ShippingMenuScreen;
-import com.stardew.craft.client.gui.overnight.PassOutOverlayScreen;
-import com.stardew.craft.client.gui.overnight.PassOutSummaryScreen;
 import com.stardew.craft.client.gui.overnight.LevelUpMenuScreen;
 import com.stardew.craft.player.ProfessionType;
 
@@ -23,18 +21,23 @@ import java.util.List;
 import java.util.Set;
 
 @OnlyIn(Dist.CLIENT)
-@EventBusSubscriber(modid = StardewCraft.MODID, value = Dist.CLIENT)
 public class ClientOvernightHandler {
     private static final Set<Integer> LOCAL_OVERNIGHT_PROFESSIONS = new HashSet<>();
     private static final Deque<Screen> PENDING_SCREENS = new ArrayDeque<>();
     private static boolean sequenceActive;
-    private static Screen activeScreen;
 
     public static void beginSequence() {
         LOCAL_OVERNIGHT_PROFESSIONS.clear();
         PENDING_SCREENS.clear();
         sequenceActive = false;
-        activeScreen = null;
+    }
+
+    /** Clears menu/fade state on disconnect or an aborted settlement. */
+    public static void resetSession() {
+        LOCAL_OVERNIGHT_PROFESSIONS.clear();
+        PENDING_SCREENS.clear();
+        sequenceActive = false;
+        com.stardew.craft.cutscene.runtime.EventScreenFade.clear();
     }
 
     public static void recordLocalProfessionChoice(int professionId) {
@@ -59,7 +62,6 @@ public class ClientOvernightHandler {
             completeSequence(source);
             return false;
         }
-        activeScreen = next;
         StardewCraft.LOGGER.info("[OVERNIGHT_CLIENT] Opening next settlement screen from {}: {} (remaining={})",
             source, next.getClass().getSimpleName(), PENDING_SCREENS.size());
         minecraft.setScreen(next);
@@ -67,32 +69,21 @@ public class ClientOvernightHandler {
     }
 
     public static void completeSequence(String source) {
-        if (sequenceActive) {
-            StardewCraft.LOGGER.info("[OVERNIGHT_CLIENT] Settlement sequence completed by {}", source);
+        if (!sequenceActive) {
+            return;
         }
+        StardewCraft.LOGGER.info("[OVERNIGHT_CLIENT] Settlement sequence completed by {}", source);
         PENDING_SCREENS.clear();
         sequenceActive = false;
-        activeScreen = null;
-    }
-
-    @SubscribeEvent
-    public static void onClientTick(ClientTickEvent.Post event) {
-        if (!sequenceActive || activeScreen == null) {
-            return;
-        }
-        Minecraft minecraft = Minecraft.getInstance();
-        Screen current = minecraft.screen;
-        if (current == activeScreen) {
-            return;
-        }
-        StardewCraft.LOGGER.warn("[OVERNIGHT_CLIENT] Settlement screen was interrupted by {}; restoring {}",
-            current == null ? "null" : current.getClass().getSimpleName(),
-            activeScreen.getClass().getSimpleName());
-        minecraft.setScreen(activeScreen);
+        PacketDistributor.sendToServer(new PlayerWokeUpPayload());
+        Minecraft.getInstance().setScreen(null);
     }
 
     public static void startSequence(OvernightSettlementPayload payload) {
         beginSequence();
+        // Game1.NewDay keeps the screen black while the new-day task runs, then
+        // fades back in over the end-of-night menus.
+        com.stardew.craft.cutscene.runtime.EventScreenFade.startFadeFromBlack(12);
 
         // 如果玩家正在睡觉（原版 InBedChatScreen），关闭该界面
         if (Minecraft.getInstance().screen instanceof net.minecraft.client.gui.screens.InBedChatScreen) {
@@ -105,20 +96,18 @@ public class ClientOvernightHandler {
 
         List<Screen> screenStack = new java.util.ArrayList<>();
 
-        // 如果是 2AM 晕倒，先展示渐黑 + 惩罚摘要画面，再进入正常结算流程
-        if (payload.hasPassOut()) {
-            PassOutPayload passOutPayload = new PassOutPayload(
-                PassOutService.PassOutType.fromId(payload.passOutType()),
-                payload.passOutMoneyLost(),
-                payload.passOutLostItems()
-            );
-            screenStack.add(new PassOutOverlayScreen(passOutPayload, screenStack));
-            screenStack.add(new PassOutSummaryScreen(passOutPayload, screenStack));
-        }
-
-        // 技能升级画面
-        for (OvernightSettlementPayload.LevelUpData levelData : payload.levelUps()) {
-            screenStack.add(new com.stardew.craft.client.gui.overnight.LevelUpMenuScreen(levelData, screenStack));
+        // 原版 pass-out 罚款通过次日邮件说明，不在 showEndOfNightStuff
+        // 中插入自定义摘要页。夜间菜单链只包含升级页和 Shipping/Save。
+        int levelIndex = 0;
+        for (OvernightSequencePlanner.Stage stage : OvernightSequencePlanner.plan(
+                payload.levelUps().size(), !payload.shippedItems().isEmpty())) {
+            switch (stage) {
+                case LEVEL_UP -> screenStack.add(
+                    new LevelUpMenuScreen(payload.levelUps().get(levelIndex++), screenStack));
+                case SHIPPING -> screenStack.add(
+                    new ShippingMenuScreen(payload.shippedItems(), payload.context(), screenStack));
+                case SAVE -> screenStack.add(new SaveGameMenuScreen(screenStack));
+            }
         }
 
         long levelUpScreenCount = screenStack.stream().filter(LevelUpMenuScreen.class::isInstance).count();
@@ -127,8 +116,11 @@ public class ClientOvernightHandler {
                 payload.levelUps().size(), levelUpScreenCount);
         }
 
-        // 始终添加出货结算画面（即使没有出货物品也要展示夜间过渡动画）
-        screenStack.add(new ShippingMenuScreen(payload.shippedItems(), screenStack));
+        if (!payload.levelUps().isEmpty()) {
+            Minecraft.getInstance().getSoundManager().play(
+                SimpleSoundInstance.forUI(ModSounds.LEVEL_UP.get(), 1.0f, 1.0f));
+        }
+
         PENDING_SCREENS.addAll(screenStack);
         sequenceActive = true;
         StardewCraft.LOGGER.info("[OVERNIGHT_CLIENT] Screen chain size={}, opening first screen: {}",

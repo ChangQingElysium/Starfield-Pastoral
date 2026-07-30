@@ -1,0 +1,33 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "HaleyHouse",
+    "tile_action": "Message \"HaleyHouse.6\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:2_willow_lane",
+    "positions": [
+      [
+        1,
+        24,
+        23
+      ]
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.haley_house.6",
+          "fallback": "There's a little note on the pot. 'Something to remember me by. -Sandy'"
+        }
+      ]
+    }
+  ]
+}

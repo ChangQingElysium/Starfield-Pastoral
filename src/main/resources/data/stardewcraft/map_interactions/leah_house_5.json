@@ -1,0 +1,40 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "LeahHouse",
+    "tile_action": "Message \"LeahHouse.5\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:leah_cottage",
+    "boxes": [
+      {
+        "min": [
+          -86,
+          38,
+          50
+        ],
+        "max": [
+          -86,
+          39,
+          50
+        ]
+      }
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.leah_house.5",
+          "fallback": "It's a wooden sculpture Leah's working on. It has a wonderful cedar smell."
+        }
+      ]
+    }
+  ]
+}

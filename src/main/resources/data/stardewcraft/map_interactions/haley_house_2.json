@@ -1,0 +1,40 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "HaleyHouse",
+    "tile_action": "Message \"HaleyHouse.2\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:2_willow_lane",
+    "boxes": [
+      {
+        "min": [
+          -5,
+          24,
+          21
+        ],
+        "max": [
+          -4,
+          25,
+          21
+        ]
+      }
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.haley_house.2",
+          "fallback": "You quickly peek into Haley's private dresser. It's stuffed with clothes. "
+        }
+      ]
+    }
+  ]
+}

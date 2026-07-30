@@ -1,0 +1,40 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "SamHouse",
+    "tile_action": "Message \"SamHouse.7\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:1_willow_lane",
+    "boxes": [
+      {
+        "min": [
+          -13,
+          39,
+          26
+        ],
+        "max": [
+          -13,
+          40,
+          26
+        ]
+      }
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.sam_house.7",
+          "fallback": "There's a bunch of skateboarding magazines."
+        }
+      ]
+    }
+  ]
+}

@@ -4,7 +4,9 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.combat.network.WickedKrisPoisonStatusPayload;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -13,6 +15,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -24,6 +27,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -39,13 +43,17 @@ public final class WickedKrisPoisonTracker {
     private static final String TAG_LAST_X = "stardewcraft_wicked_kris_poison_last_x";
     private static final String TAG_LAST_Y = "stardewcraft_wicked_kris_poison_last_y";
     private static final String TAG_LAST_Z = "stardewcraft_wicked_kris_poison_last_z";
+    private static final String TAG_RELEASE_WEAPON_ID =
+        "stardewcraft_wicked_kris_poison_weapon_id";
+    private static final String TAG_RELEASE_WEAPON =
+        "stardewcraft_wicked_kris_poison_weapon";
 
-    private static final int MAX_STACKS = 5;
-    private static final long DOT_INTERVAL_TICKS = 20L;
-    private static final float STACK_DAMAGE_RATIO = 0.10f;
-    private static final int DETONATE_DELAY_TICKS = 60;
-    private static final float DETONATE_MULTIPLIER = 1.5f;
-    private static final float DETONATE_RADIUS = 3.5f;
+    public static final int MAX_STACKS = 5;
+    public static final long DOT_INTERVAL_TICKS = 20L;
+    public static final float STACK_DAMAGE_RATIO = 0.10f;
+    public static final int DETONATE_DELAY_TICKS = 60;
+    public static final float DETONATE_MULTIPLIER = 1.5f;
+    public static final float DETONATE_RADIUS = 3.5f;
 
     private static final Map<UUID, DetonationState> DETONATIONS = new ConcurrentHashMap<>();
 
@@ -59,6 +67,7 @@ public final class WickedKrisPoisonTracker {
         private long detonateTick;
         private long poisonEndTick;
         private int stacks;
+        private WeaponDamageSnapshot weaponSnapshot;
 
         private DetonationState(UUID targetId) {
             this.targetId = targetId;
@@ -67,21 +76,72 @@ public final class WickedKrisPoisonTracker {
 
     public static void applyPoison(LivingEntity target, ServerPlayer owner, long nowTick,
                                    int durationTicks, int stacks, boolean scheduleDetonation) {
+        applyPoisonInternal(
+            target,
+            owner,
+            nowTick,
+            durationTicks,
+            stacks,
+            scheduleDetonation,
+            null
+        );
+    }
+
+    public static void applyPoison(
+        LivingEntity target,
+        ServerPlayer owner,
+        long nowTick,
+        int durationTicks,
+        int stacks,
+        boolean scheduleDetonation,
+        WeaponDamageSnapshot weaponSnapshot
+    ) {
+        applyPoisonInternal(
+            target,
+            owner,
+            nowTick,
+            durationTicks,
+            stacks,
+            scheduleDetonation,
+            Objects.requireNonNull(
+                weaponSnapshot,
+                "weaponSnapshot"
+            )
+        );
+    }
+
+    private static void applyPoisonInternal(
+        LivingEntity target,
+        ServerPlayer owner,
+        long nowTick,
+        int durationTicks,
+        int stacks,
+        boolean scheduleDetonation,
+        WeaponDamageSnapshot weaponSnapshot
+    ) {
         if (target == null || owner == null || durationTicks <= 0) {
             return;
         }
-        int clampedStacks = Mth.clamp(stacks, 1, MAX_STACKS);
+        int clampedStacks = clampStacks(stacks);
         CompoundTag tag = target.getPersistentData();
         tag.putLong(TAG_END_TICK, nowTick + durationTicks);
         tag.putUUID(TAG_OWNER, owner.getUUID());
         tag.putInt(TAG_STACKS, clampedStacks);
         tag.putLong(TAG_NEXT_TICK, nowTick + DOT_INTERVAL_TICKS);
         updateLastPos(tag, target);
+        writeWeaponSnapshot(target, tag, weaponSnapshot);
 
         if (scheduleDetonation) {
             long detonateTick = nowTick + DETONATE_DELAY_TICKS;
             tag.putLong(TAG_DETONATE_TICK, detonateTick);
-            registerDetonation(target, owner, detonateTick, nowTick + durationTicks, clampedStacks);
+            registerDetonation(
+                target,
+                owner,
+                detonateTick,
+                nowTick + durationTicks,
+                clampedStacks,
+                weaponSnapshot
+            );
             sendStatus(owner, clampedStacks, durationTicks, (int) (detonateTick - nowTick), DETONATE_DELAY_TICKS);
         } else {
             sendStatus(owner, clampedStacks, durationTicks, -1, 0);
@@ -202,9 +262,11 @@ public final class WickedKrisPoisonTracker {
             return true;
         }
 
-        long remainingTicks = Math.max(0L, state.poisonEndTick - nowTick);
-        int remainingJumps = (int) Math.max(0L, (remainingTicks + DOT_INTERVAL_TICKS - 1L) / DOT_INTERVAL_TICKS);
-        float damageMultiplier = remainingJumps * state.stacks * STACK_DAMAGE_RATIO * DETONATE_MULTIPLIER;
+        float damageMultiplier = detonationDamageMultiplier(
+            state.poisonEndTick,
+            nowTick,
+            state.stacks
+        );
 
         AABB box = new AABB(
             center.x - DETONATE_RADIUS, center.y - DETONATE_RADIUS, center.z - DETONATE_RADIUS,
@@ -220,11 +282,24 @@ public final class WickedKrisPoisonTracker {
                     .tier(SkillContext.SkillTier.MAJOR)
                     .damageMultiplier(damageMultiplier)
                     .build();
-                WeaponSkillContextStore.setPending(owner, context, nowTick + 5);
-
                 target.invulnerableTime = 0;
                 target.hurtTime = 0;
-                target.hurt(owner.damageSources().playerAttack(owner), 1.0F);
+                if (state.weaponSnapshot == null) {
+                    WeaponSkillDamage.apply(
+                        owner,
+                        target,
+                        context,
+                        nowTick + 5
+                    );
+                } else {
+                    WeaponSkillDamage.apply(
+                        owner,
+                        target,
+                        context,
+                        state.weaponSnapshot,
+                        nowTick + 5
+                    );
+                }
             }
         }
 
@@ -274,17 +349,32 @@ public final class WickedKrisPoisonTracker {
             return;
         }
 
-        float damageMultiplier = stacks * STACK_DAMAGE_RATIO;
+        float damageMultiplier = dotDamageMultiplier(stacks);
         SkillContext context = SkillContext.builder()
             .skillId("wicked_kris_poison_dot")
             .tier(SkillContext.SkillTier.MINOR)
             .damageMultiplier(damageMultiplier)
             .build();
-        WeaponSkillContextStore.setPending(owner, context, nowTick + 5);
-
+        WeaponDamageSnapshot weaponSnapshot =
+            readWeaponSnapshot(target, tag);
         target.invulnerableTime = 0;
         target.hurtTime = 0;
-        target.hurt(owner.damageSources().playerAttack(owner), 1.0F);
+        if (weaponSnapshot == null) {
+            WeaponSkillDamage.apply(
+                owner,
+                target,
+                context,
+                nowTick + 5
+            );
+        } else {
+            WeaponSkillDamage.apply(
+                owner,
+                target,
+                context,
+                weaponSnapshot,
+                nowTick + 5
+            );
+        }
 
         double x = target.getX();
         double y = target.getY() + target.getBbHeight() * 0.55;
@@ -317,10 +407,12 @@ public final class WickedKrisPoisonTracker {
         state.lastPos = target.position();
         state.poisonEndTick = tag.getLong(TAG_END_TICK);
         state.stacks = Math.max(0, tag.getInt(TAG_STACKS));
+        state.weaponSnapshot = readWeaponSnapshot(target, tag);
     }
 
     private static void registerDetonation(LivingEntity target, ServerPlayer owner,
-                                           long detonateTick, long poisonEndTick, int stacks) {
+                                           long detonateTick, long poisonEndTick, int stacks,
+                                           WeaponDamageSnapshot weaponSnapshot) {
         DetonationState state = DETONATIONS.computeIfAbsent(target.getUUID(), DetonationState::new);
         state.ownerId = owner.getUUID();
         state.dimension = target.level().dimension();
@@ -328,6 +420,7 @@ public final class WickedKrisPoisonTracker {
         state.detonateTick = detonateTick;
         state.poisonEndTick = poisonEndTick;
         state.stacks = stacks;
+        state.weaponSnapshot = weaponSnapshot;
     }
 
     private static void clearPoison(LivingEntity target, CompoundTag tag) {
@@ -340,6 +433,8 @@ public final class WickedKrisPoisonTracker {
         tag.remove(TAG_LAST_X);
         tag.remove(TAG_LAST_Y);
         tag.remove(TAG_LAST_Z);
+        tag.remove(TAG_RELEASE_WEAPON_ID);
+        tag.remove(TAG_RELEASE_WEAPON);
         DETONATIONS.remove(target.getUUID());
 
         if (ownerId != null && target.level() instanceof ServerLevel serverLevel) {
@@ -357,8 +452,81 @@ public final class WickedKrisPoisonTracker {
         );
     }
 
+    static int clampStacks(int stacks) {
+        return Mth.clamp(stacks, 1, MAX_STACKS);
+    }
+
+    static float dotDamageMultiplier(int stacks) {
+        return Math.max(0, stacks) * STACK_DAMAGE_RATIO;
+    }
+
+    static int remainingDotApplications(long poisonEndTick, long nowTick) {
+        long remainingTicks = Math.max(0L, poisonEndTick - nowTick);
+        return (int) Math.max(
+            0L,
+            (remainingTicks + DOT_INTERVAL_TICKS - 1L) / DOT_INTERVAL_TICKS
+        );
+    }
+
+    static float detonationDamageMultiplier(
+            long poisonEndTick,
+            long nowTick,
+            int stacks
+    ) {
+        return remainingDotApplications(poisonEndTick, nowTick)
+            * Math.max(0, stacks)
+            * STACK_DAMAGE_RATIO
+            * DETONATE_MULTIPLIER;
+    }
+
+    private static void writeWeaponSnapshot(
+        LivingEntity target,
+        CompoundTag tag,
+        WeaponDamageSnapshot weaponSnapshot
+    ) {
+        if (weaponSnapshot == null) {
+            tag.remove(TAG_RELEASE_WEAPON_ID);
+            tag.remove(TAG_RELEASE_WEAPON);
+            return;
+        }
+        tag.putString(
+            TAG_RELEASE_WEAPON_ID,
+            weaponSnapshot.weaponId().toString()
+        );
+        tag.put(
+            TAG_RELEASE_WEAPON,
+            weaponSnapshot.weapon().saveOptional(
+                target.level().registryAccess()
+            )
+        );
+    }
+
+    private static WeaponDamageSnapshot readWeaponSnapshot(
+        LivingEntity target,
+        CompoundTag tag
+    ) {
+        if (!tag.contains(TAG_RELEASE_WEAPON_ID, Tag.TAG_STRING)
+            || !tag.contains(TAG_RELEASE_WEAPON, Tag.TAG_COMPOUND)) {
+            return null;
+        }
+        ResourceLocation weaponId = ResourceLocation.tryParse(
+            tag.getString(TAG_RELEASE_WEAPON_ID)
+        );
+        if (weaponId == null) {
+            return null;
+        }
+        ItemStack weapon = ItemStack.parse(
+            target.level().registryAccess(),
+            tag.getCompound(TAG_RELEASE_WEAPON)
+        ).orElse(ItemStack.EMPTY);
+        return WeaponDamageSnapshot.capture(weaponId, weapon);
+    }
+
     /** Clean up state when a player logs out to prevent memory leaks. */
     public static void removePlayer(UUID playerId) {
-        DETONATIONS.remove(playerId);
+        DETONATIONS.entrySet().removeIf(entry ->
+            entry.getKey().equals(playerId)
+                || playerId.equals(entry.getValue().ownerId)
+        );
     }
 }

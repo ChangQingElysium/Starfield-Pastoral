@@ -101,12 +101,24 @@ def main() -> None:
     geode = load(f"data/{NAMESPACE}/geode/drops/apple_crystal.json")
     require(bool(geode["inputs"]) and bool(geode["entries"]), "geode JEI probe must have input and output")
 
+    map_interaction = load(
+        f"data/{NAMESPACE}/map_interactions/apple_shed_notice.json"
+    )
+    require(
+        map_interaction["trigger"]["location"]
+        == f"{NAMESPACE}:apple_shed"
+        and map_interaction["branches"][0]["messages"][0]["literal"],
+        "standalone datapack must include a self-contained map message",
+    )
+
     source = ADDON_SOURCE.read_text(encoding="utf-8")
     for marker in (
         "registerCropProvider", "registerTreeProvider", "registerAnimalProvider",
         "registerBuildingProvider", "StardewEquipmentDataApi.registerProvider",
         "StardewWeaponSkillHandlers.register(id(\"apple_dash\")",
         "StardewTruffleFoundHandlers.register(",
+        "StardewMapInteractionActions.register(",
+        "StardewMapInteractions.register(",
     ):
         require(marker in source, f"missing addon acceptance marker: {marker}")
 

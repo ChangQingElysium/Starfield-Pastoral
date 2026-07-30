@@ -2,6 +2,8 @@ package com.stardew.craft.item.weapon;
 
 import com.stardew.craft.combat.WeaponType;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -1244,7 +1246,10 @@ public class WeaponRegistry {
     }
     
     private static void register(WeaponData data) {
-        WEAPONS.put(data.getId(), data);
+        WeaponData previous = WEAPONS.putIfAbsent(data.getId(), data);
+        if (previous != null) {
+            throw new IllegalStateException("Duplicate weapon id: " + data.getId());
+        }
     }
     
     /**
@@ -1264,7 +1269,14 @@ public class WeaponRegistry {
     /**
      * 获取所有武器ID
      */
-    public static Iterable<String> getAllIds() {
-        return WEAPONS.keySet();
+    public static Collection<String> getAllIds() {
+        return Collections.unmodifiableSet(WEAPONS.keySet());
+    }
+
+    /**
+     * Immutable view used by validation, tooling and data generation.
+     */
+    public static Collection<WeaponData> getAll() {
+        return Collections.unmodifiableCollection(WEAPONS.values());
     }
 }

@@ -1,0 +1,35 @@
+{
+  "format": 1,
+  "priority": 1000,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "ManorHouse",
+    "tile_action": "MayorFridge",
+    "code": "StardewValley.Locations.ManorHouse.performAction"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:mayor_house",
+    "boxes": [
+      {
+        "min": [57, 50, 20],
+        "max": [57, 51, 20]
+      }
+    ],
+    "blocks": [
+      "stardewcraft:fridge"
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "mr_qi_state_machine",
+      "action": {
+        "type": "stardewcraft:mr_qi_anchor",
+        "data": {
+          "anchor": "mayor_fridge"
+        }
+      }
+    }
+  ]
+}

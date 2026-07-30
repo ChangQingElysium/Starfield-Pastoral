@@ -1,0 +1,33 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "SamHouse",
+    "tile_action": "Message \"SamHouse.1\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:1_willow_lane",
+    "positions": [
+      [
+        -31,
+        39,
+        20
+      ]
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.sam_house.1",
+          "fallback": "It's empty."
+        }
+      ]
+    }
+  ]
+}

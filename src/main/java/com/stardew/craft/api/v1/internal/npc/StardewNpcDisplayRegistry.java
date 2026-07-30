@@ -72,8 +72,15 @@ public final class StardewNpcDisplayRegistry {
         String nameKey = core
                 ? "entity.stardewcraft.npc." + path
                 : "entity." + namespace + ".npc." + path;
+        // The canonical Stardew asset is Portraits/MrQi.png while the NPC's
+        // runtime identity is "Mister Qi". Keep the gameplay ID stable and
+        // explicitly bind it to the source portrait instead of falling back
+        // to an unrelated entity texture.
+        String portraitPath = core && "mister_qi".equals(path)
+                ? "mrqi"
+                : path;
         ResourceLocation portrait = ResourceLocation.fromNamespaceAndPath(
-                namespace, "textures/portraits/" + path + ".png");
+                namespace, "textures/portraits/" + portraitPath + ".png");
         ResourceLocation mugshot = ResourceLocation.fromNamespaceAndPath(
                 namespace, "textures/mugshots/" + path + ".png");
         return new StardewNpcDisplay(

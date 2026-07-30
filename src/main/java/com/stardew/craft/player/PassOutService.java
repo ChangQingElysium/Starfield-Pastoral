@@ -5,9 +5,11 @@ import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.core.ModDimensions;
 import com.stardew.craft.core.ModMiningDimensions;
 import com.stardew.craft.core.ModTags;
+import com.stardew.craft.cutscene.server.CombatRescueCutsceneCoordinator;
 import com.stardew.craft.item.equipment.StardewBootsItem;
 import com.stardew.craft.item.equipment.StardewRingItem;
 import com.stardew.craft.item.weapon.StardewWeaponItem;
+import com.stardew.craft.network.payload.CombatRescueOutcomePayload;
 import com.stardew.craft.network.payload.PassOutPayload;
 import com.stardew.craft.warp.ModTeleport;
 import net.minecraft.resources.ResourceLocation;
@@ -16,13 +18,14 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.BedBlock;
 import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.random.RandomGenerator;
 
 /**
  * 晕倒/死亡核心逻辑。
@@ -39,10 +42,6 @@ public final class PassOutService {
 
     private static final org.slf4j.Logger LOGGER = com.mojang.logging.LogUtils.getLogger();
     private static final Random RANDOM = new Random();
-    private static final Map<UUID, RescueTarget> PENDING_RESCUE_TARGETS = new ConcurrentHashMap<>();
-    private static final RescueTarget DESERT_FESTIVAL_MEDICAL_TENT_RESCUE = new RescueTarget(
-        -221.0D, 64.0D, -195.0D, 0.0F, 0.0F
-    );
 
     /**
      * 防止同一 tick 内对同一玩家重复触发 onCombatDeath。
@@ -51,23 +50,14 @@ public final class PassOutService {
     private static final java.util.Map<java.util.UUID, Long> lastKnockoutTick = new java.util.WeakHashMap<>();
 
     /**
-     * 击倒状态：玩家 HP 归零后到传送完成前，完全免疫所有伤害。
-     * 防止在持续伤害环境（如岩浆块）中反复死亡导致黑屏卡死。
-     */
-    private static final java.util.Set<java.util.UUID> knockedOutPlayers = java.util.Collections.newSetFromMap(new java.util.WeakHashMap<>());
-
-    /**
      * 战斗死亡救援后的保护窗口。防止玩家刚被传送回农场时，残留伤害或危险出生点
      * 再次触发同一条死亡链。
      */
     private static final long COMBAT_DEATH_RECOVERY_TICKS = 20L * 20L;
+    private static final int COMBAT_COLLAPSE_TICKS = 20 * 8;
     private static final java.util.Map<java.util.UUID, Long> combatDeathRecoveryUntilTick = new java.util.concurrent.ConcurrentHashMap<>();
-
-    /**
-     * 过夜晕倒的惩罚结果（暂存），由 advanceDayWithSleepTime 消费后合并进 OvernightSettlementPayload。
-     * 战斗死亡不写入这里；它是当日个人救援，直接发送 PassOutPayload 给死亡玩家。
-     */
-    private static final java.util.Map<java.util.UUID, PassOutResult> pendingPassOutResults = new java.util.concurrent.ConcurrentHashMap<>();
+    private static final java.util.Map<java.util.UUID, Integer> combatCollapseNotBeforeTick =
+            new java.util.concurrent.ConcurrentHashMap<>();
 
     /** 晕倒惩罚结果；settlementDay 是应展示该结果的次日绝对日期。 */
     public record PassOutResult(PassOutType type, int moneyLost,
@@ -82,37 +72,104 @@ public final class PassOutService {
     /** 消费指定玩家的晕倒结果（一次性），返回 null 表示该玩家未晕倒 */
     @javax.annotation.Nullable
     public static PassOutResult consumePassOutResult(java.util.UUID playerId) {
-        return pendingPassOutResults.remove(playerId);
+        var server = ServerLifecycleHooks.getCurrentServer();
+        if (server == null) {
+            return null;
+        }
+        PassOutRecoveryData recovery = PassOutRecoveryData.get(server);
+        PassOutRecoveryData.Entry entry = recovery.get(playerId);
+        if (entry == null || entry.combat()) {
+            return null;
+        }
+        recovery.remove(playerId);
+        return new PassOutResult(
+                entry.type(), entry.moneyLost(), entry.lostItems(), entry.settlementDay());
     }
 
     /** 只消费当前结算日的结果；过期结果直接丢弃，未来结果继续保留。 */
     @javax.annotation.Nullable
     public static PassOutResult consumePassOutResult(java.util.UUID playerId, int settlementDay) {
-        PassOutResult result = pendingPassOutResults.get(playerId);
-        if (result == null || result.settlementDay() > settlementDay) {
+        var server = ServerLifecycleHooks.getCurrentServer();
+        if (server == null) {
             return null;
         }
-        pendingPassOutResults.remove(playerId, result);
-        if (result.settlementDay() < settlementDay) {
-            LOGGER.warn("[PASSOUT] Discarded stale result for {} (resultDay={}, settlementDay={})",
-                playerId, result.settlementDay(), settlementDay);
-            return null;
-        }
-        return result;
+        PassOutRecoveryData.Entry entry =
+                PassOutRecoveryData.get(server).consumeOvernight(playerId, settlementDay);
+        return entry == null
+                ? null
+                : new PassOutResult(
+                        entry.type(), entry.moneyLost(), entry.lostItems(), entry.settlementDay());
     }
 
     public static boolean hasPendingPassOutResult(java.util.UUID playerId) {
-        return pendingPassOutResults.containsKey(playerId);
+        var server = ServerLifecycleHooks.getCurrentServer();
+        if (server == null) {
+            return false;
+        }
+        PassOutRecoveryData.Entry entry = PassOutRecoveryData.get(server).get(playerId);
+        return entry != null && !entry.combat();
+    }
+
+    /** True for either an overnight collapse or a combat-rescue transaction. */
+    public static boolean hasPendingRecovery(java.util.UUID playerId) {
+        var server = ServerLifecycleHooks.getCurrentServer();
+        return server != null && PassOutRecoveryData.get(server).get(playerId) != null;
+    }
+
+    /** Replays a same-day overnight collapse which was interrupted by logout. */
+    public static void resumePendingOvernight(ServerPlayer player) {
+        PassOutRecoveryData.Entry entry =
+                PassOutRecoveryData.get(player.server).get(player.getUUID());
+        if (entry == null || entry.combat()) {
+            return;
+        }
+        int currentDay =
+                com.stardew.craft.time.StardewTimeManager.get().getAbsoluteDay();
+        if (entry.settlementDay() <= currentDay) {
+            // Defensive migration for an offline player whose target day has
+            // already arrived without an online settlement payload.
+            teleportToFarmSpawn(player);
+            PlayerStardewData data = PlayerDataManager.getPlayerData(player);
+            data.sleep(1560);
+            data.setHealth(data.getMaxHealth());
+            PassOutRecoveryData.get(player.server).remove(player.getUUID());
+            syncAndSave(player, data);
+            return;
+        }
+
+        PacketDistributor.sendToPlayer(
+                player,
+                new com.stardew.craft.network.overnight.OvernightCollapseStartPayload(
+                        entry.settlementDay(),
+                        entry.type() == PassOutType.EXHAUSTION_STAMINA
+                                ? com.stardew.craft.network.overnight
+                                        .OvernightCollapseStartPayload.Cause.STAMINA
+                                : com.stardew.craft.network.overnight
+                                        .OvernightCollapseStartPayload.Cause.TWO_AM));
+        // Rebuild the non-durable multiplayer readiness vote and reuse the
+        // normal animation-aware transition/return-to-bed scheduling.
+        com.stardew.craft.event.DimensionEventHandler.requestPassOutAdvance(player);
     }
 
     /** 检查玩家是否处于击倒状态（正在黑屏过渡中） */
     public static boolean isKnockedOut(ServerPlayer player) {
-        return knockedOutPlayers.contains(player.getUUID());
+        return player != null
+                && PassOutRecoveryData.get(player.server).hasCombat(player.getUUID());
     }
 
-    /** 清除击倒状态（传送完成后调用） */
+    /**
+     * Legacy compatibility hook. A durable combat transaction is cleared only
+     * after its rescue cutscene/outcome has completed.
+     */
     public static void clearKnockedOut(ServerPlayer player) {
-        knockedOutPlayers.remove(player.getUUID());
+        // Deliberately no-op.
+    }
+
+    /** Clears process-local timing guards when an integrated/dedicated server stops. */
+    public static void clearRuntimeState() {
+        lastKnockoutTick.clear();
+        combatCollapseNotBeforeTick.clear();
+        combatDeathRecoveryUntilTick.clear();
     }
 
     public static boolean isInCombatDeathRecovery(ServerPlayer player) {
@@ -133,13 +190,10 @@ public final class PassOutService {
         player.setHealth(player.getMaxHealth());
         player.getFoodData().setFoodLevel(20);
         player.getFoodData().setSaturation(5.0f);
-
-        PlayerStardewData data = PlayerDataManager.getPlayerData(player);
-        if (data.getHealth() < data.getMaxHealth()) {
-            data.setHealth(data.getMaxHealth());
-            PlayerDataEventHandler.syncPlayerData(player, data);
-            PlayerDataManager.get().setDirty();
-        }
+        // Keep only Minecraft's entity-health layer alive during the rescue
+        // protection window. The authoritative Stardew values were restored
+        // to 10 health / at most 2 energy by the completed transaction and
+        // must not be silently healed to full here.
     }
 
     private PassOutService() {}
@@ -154,6 +208,14 @@ public final class PassOutService {
     public static void onCombatDeath(ServerPlayer player, DamageSource source) {
         if (isInCombatDeathRecovery(player)) {
             restoreDuringCombatDeathRecovery(player);
+            return;
+        }
+        PassOutRecoveryData recovery = PassOutRecoveryData.get(player.server);
+        PassOutRecoveryData.Entry existing = recovery.get(player.getUUID());
+        if (existing != null) {
+            if (existing.combat()) {
+                resumePending(player);
+            }
             return;
         }
 
@@ -175,46 +237,54 @@ public final class PassOutService {
         }
 
         boolean inMine = player.level().dimension() == ModMiningDimensions.STARDEW_MINING;
-
-        // 1. 金币惩罚
-        int moneyLost = calcCombatMoneyLoss(data, player, inMine);
-        if (moneyLost > 0) {
-            PlayerStardewDataAPI.removeMoney(player, moneyLost);
-        }
-
-        // 2. 物品丢失
         boolean desertFestivalSkullCavernDeath = com.stardew.craft.festival.desert.DesertFestivalMineService.isInFestivalSkullCavern(player);
-        List<ItemStack> lostItems;
-        if (desertFestivalSkullCavernDeath) {
-            removeDesertFestivalEggPenalty(player);
-            lostItems = List.of();
-            PENDING_RESCUE_TARGETS.put(player.getUUID(), DESERT_FESTIVAL_MEDICAL_TENT_RESCUE);
-        } else {
-            lostItems = loseItemsOnDeath(player, data);
-            PENDING_RESCUE_TARGETS.remove(player.getUUID());
-        }
-        data.setItemsLostLastDeath(lostItems);
+        PassOutType passOutType = desertFestivalSkullCavernDeath
+                ? PassOutType.COMBAT_DESERT_FESTIVAL
+                : (inMine ? PassOutType.COMBAT_MINE : PassOutType.COMBAT_OVERWORLD);
 
-        // 3. 战斗死亡统计。战斗死亡只救援本人，不推进到次日。
+        // Desert Festival is the one original branch which removes its event
+        // currency during the collapse. Mine/hospital money and item loss is
+        // deliberately deferred until the rescue dialogue reaches its end.
+        List<ItemStack> immediateLostItems = List.of();
+        if (desertFestivalSkullCavernDeath) {
+            immediateLostItems = removeDesertFestivalEggPenalty(player);
+        }
+        data.setItemsLostLastDeath(immediateLostItems);
+
+        // Combat knockouts rescue only this player and never advance the day.
         data.setPassedOutFromCombat(false);
         data.recordCombatDeath();
+        data.setHealth(0);
 
-        // 4. 标记击倒状态（HP 保持 0，免疫后续伤害，直到客户端黑屏完成并 ACK）
-        knockedOutPlayers.add(player.getUUID());
-        // 不恢复 SDV 血量——保持 0 直到传送后再恢复
-
-        // 5. 安排死亡邮件
-        scheduleDeathMail(player, data, inMine, moneyLost, !lostItems.isEmpty());
-
-        PassOutType passOutType = inMine ? PassOutType.COMBAT_MINE : PassOutType.COMBAT_OVERWORLD;
+        long transactionId = ThreadLocalRandom.current().nextLong(1L, Long.MAX_VALUE);
+        PassOutRecoveryData.Entry transaction = new PassOutRecoveryData.Entry(
+                transactionId,
+                passOutType,
+                true,
+                PassOutRecoveryData.Stage.COLLAPSING,
+                0,
+                immediateLostItems,
+                Integer.MIN_VALUE,
+                "",
+                ""
+        );
+        if (passOutType == PassOutType.COMBAT_MINE) {
+            CombatRescueCutsceneCoordinator.MineRescueChoice choice =
+                    CombatRescueCutsceneCoordinator.selectVanillaMineRescuer(
+                            ThreadLocalRandom.current(), null, false, data.isMale());
+            transaction.setRescuer(choice.npcId(), choice.dialogue().name());
+        }
+        recovery.put(player.getUUID(), transaction);
 
         syncAndSave(player, data);
-        PacketDistributor.sendToPlayer(player, new PassOutPayload(passOutType, moneyLost, List.copyOf(lostItems)));
+        PacketDistributor.sendToPlayer(player, new PassOutPayload(
+                transactionId, passOutType, 0, immediateLostItems));
+        scheduleCombatCollapseFallback(player, transactionId);
 
-        LOGGER.info("[PASSOUT] {} combat death in {} — lost {}g, {} items",
+        LOGGER.info("[PASSOUT] {} combat knockout in {} — transaction {}",
                 player.getName().getString(),
-                inMine ? "mine" : "overworld",
-                moneyLost, lostItems.size());
+                passOutType,
+                transactionId);
     }
 
     // ──────────────────────────────────────
@@ -230,31 +300,54 @@ public final class PassOutService {
         PlayerStardewData data = PlayerDataManager.getPlayerData(player);
 
         // 创造模式豁免
-        if (player.isCreative()) {
+        if (hasPendingRecovery(player.getUUID())
+                || player.isCreative()
+                || player.isSpectator()
+                || !com.stardew.craft.farm.FarmInstanceRegistry.get().hasFarm(player.getUUID())) {
             return 0;
         }
 
-        boolean nearOwnBed = isNearOwnBed(player, 10);
-        int moneyLost = calculateOvernightMoneyLoss(PlayerStardewDataAPI.getMoney(player), nearOwnBed);
+        int settlementDay = nextSettlementDay();
+        PacketDistributor.sendToPlayer(
+                player,
+                new com.stardew.craft.network.overnight.OvernightCollapseStartPayload(
+                        settlementDay,
+                        com.stardew.craft.network.overnight.OvernightCollapseStartPayload.Cause.TWO_AM
+                )
+        );
+
+        boolean passOutSafe = isPassOutSafe(player);
+        OvernightPenalty penalty = createOvernightPenalty(player, passOutSafe);
+        int moneyLost = penalty.moneyLost();
         if (moneyLost > 0) {
             PlayerStardewDataAPI.removeMoney(player, moneyLost);
         }
 
-        // 在自己的床边只是没能及时入睡，不需要 NPC 救援。
-        if (!nearOwnBed) {
-            schedulePassOutMail(data);
+        if (penalty.mailId() != null) {
+            data.addMailForTomorrow(penalty.mailId());
         }
         data.record2AmPassOut();
 
-        // 不再发送单独的 PassOutPayload —— 晕倒数据将合并进 OvernightSettlementPayload，
-        // 由客户端在结算流程中统一展示（先渐黑→摘要→升级→出货），避免两个画面冲突。
-        pendingPassOutResults.put(player.getUUID(),
-                new PassOutResult(PassOutType.EXHAUSTION_2AM, moneyLost, List.of(), nextSettlementDay()));
+        // 不发送单独的 PassOutPayload：原版过夜链没有罚款摘要页，
+        // 次日由救援邮件说明损失，再正常进入升级/出货/保存菜单。
+        PassOutRecoveryData.get(player.server).put(
+                player.getUUID(),
+                new PassOutRecoveryData.Entry(
+                        ThreadLocalRandom.current().nextLong(1L, Long.MAX_VALUE),
+                        PassOutType.EXHAUSTION_2AM,
+                        false,
+                        PassOutRecoveryData.Stage.AWAITING_OVERNIGHT,
+                        moneyLost,
+                        List.of(),
+                        settlementDay,
+                        "",
+                        ""
+                ));
 
         syncAndSave(player, data);
 
         LOGGER.info("[PASSOUT] {} 2AM pass out — lost {}g{}",
-                player.getName().getString(), moneyLost, nearOwnBed ? " (near own bed)" : "");
+                player.getName().getString(), moneyLost, passOutSafe ? " (safe location)" : "");
 
         return moneyLost;
     }
@@ -269,37 +362,61 @@ public final class PassOutService {
      * 体力耗尽属于过夜晕倒；多人时计入睡眠投票，达到阈值后统一进入夜间结算黑屏。
      */
     public static void onExhaustionPassOut(ServerPlayer player) {
-        if (hasPendingPassOutResult(player.getUUID())) {
+        if (hasPendingRecovery(player.getUUID())) {
             return;
         }
 
         PlayerStardewData data = PlayerDataManager.getPlayerData(player);
 
-        if (player.isCreative()) {
+        if (player.isCreative()
+                || player.isSpectator()
+                || !com.stardew.craft.farm.FarmInstanceRegistry.get()
+                        .hasFarm(player.getUUID())) {
             return;
         }
 
-        boolean nearOwnBed = isNearOwnBed(player, 10);
-        int moneyLost = calculateOvernightMoneyLoss(PlayerStardewDataAPI.getMoney(player), nearOwnBed);
+        int settlementDay = nextSettlementDay();
+        PacketDistributor.sendToPlayer(
+                player,
+                new com.stardew.craft.network.overnight.OvernightCollapseStartPayload(
+                        settlementDay,
+                        com.stardew.craft.network.overnight.OvernightCollapseStartPayload.Cause.STAMINA
+                )
+        );
+
+        boolean passOutSafe = isPassOutSafe(player);
+        OvernightPenalty penalty = createOvernightPenalty(player, passOutSafe);
+        int moneyLost = penalty.moneyLost();
         if (moneyLost > 0) {
             PlayerStardewDataAPI.removeMoney(player, moneyLost);
         }
 
-        if (!nearOwnBed) {
-            schedulePassOutMail(data);
+        if (penalty.mailId() != null) {
+            data.addMailForTomorrow(penalty.mailId());
         }
         data.recordExhaustionPassOut();
 
         data.setEnergy(0.0F);
 
-        pendingPassOutResults.put(player.getUUID(),
-            new PassOutResult(PassOutType.EXHAUSTION_STAMINA, moneyLost, List.of(), nextSettlementDay()));
+        PassOutRecoveryData.get(player.server).put(
+                player.getUUID(),
+                new PassOutRecoveryData.Entry(
+                        ThreadLocalRandom.current().nextLong(1L, Long.MAX_VALUE),
+                        PassOutType.EXHAUSTION_STAMINA,
+                        false,
+                        PassOutRecoveryData.Stage.AWAITING_OVERNIGHT,
+                        moneyLost,
+                        List.of(),
+                        settlementDay,
+                        "",
+                        ""
+                ));
 
         syncAndSave(player, data);
         com.stardew.craft.event.DimensionEventHandler.requestPassOutAdvance(player);
 
         LOGGER.info("[PASSOUT] {} exhaustion pass out — lost {}g{}",
-                player.getName().getString(), moneyLost, nearOwnBed ? " (near own bed)" : "");
+                player.getName().getString(), moneyLost, passOutSafe ? " (safe location)" : "");
     }
 
     static int calculateOvernightMoneyLoss(int money, boolean nearOwnBed) {
@@ -313,8 +430,32 @@ public final class PassOutService {
         return com.stardew.craft.time.StardewTimeManager.get().getAbsoluteDay() + 1;
     }
 
-    /** 查找玩家所属农场内、半径范围中的真实床方块。 */
-    private static boolean isNearOwnBed(ServerPlayer player, int radius) {
+    /**
+     * Original safe locations are FarmHouse/IslandFarmHouse/Cellar or maps
+     * with PassOutSafe. Dynamic farm interiors are not yet separate logical
+     * locations in this project, so a real bed on the player's own farm is
+     * retained as the compatibility fallback.
+     */
+    private static boolean isPassOutSafe(ServerPlayer player) {
+        net.minecraft.resources.ResourceLocation passOutSafeProperty =
+                ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "pass_out_safe");
+        boolean explicitSafe = com.stardew.craft.api.v1.world.StardewLocations
+                .find(player.level(), player.blockPosition())
+                .map(location -> {
+                    String path = location.id().getPath();
+                    return location.property(passOutSafeProperty)
+                            .map(Boolean::parseBoolean)
+                            .orElse(false)
+                            || path.contains("farmhouse")
+                            || path.contains("farm_house")
+                            || path.contains("cellar");
+                })
+                .orElse(false);
+        if (explicitSafe) {
+            return true;
+        }
+
+        int radius = 10;
         if (player.level().dimension() != ModDimensions.STARDEW_VALLEY) {
             return false;
         }
@@ -341,6 +482,67 @@ public final class PassOutService {
         return false;
     }
 
+    private static OvernightPenalty createOvernightPenalty(
+            ServerPlayer player,
+            boolean passOutSafe
+    ) {
+        if (passOutSafe) {
+            return new OvernightPenalty(0, null);
+        }
+        boolean communityCenterComplete =
+                com.stardew.craft.communitycenter.state.CCStoryFlags.hasFlag(
+                        player,
+                        com.stardew.craft.communitycenter.state.CCStoryFlags.CC_IS_COMPLETE);
+        // Marriage/engagement is not yet represented by project player data.
+        // Keep Harvey eligible instead of inventing a spouse from friendship.
+        PassOutMailChoice choice = selectDefaultPassOutMail(
+                ThreadLocalRandom.current(), communityCenterComplete, true);
+        int baseLoss = calculateOvernightMoneyLoss(
+                PlayerStardewDataAPI.getMoney(player), false);
+        int adjustedLoss = choice == PassOutMailChoice.MARLON ? 0 : baseLoss;
+        return new OvernightPenalty(adjustedLoss, choice.mailId());
+    }
+
+    static PassOutMailChoice selectDefaultPassOutMail(
+            RandomGenerator random,
+            boolean communityCenterComplete,
+            boolean harveyEligible
+    ) {
+        RandomGenerator source = random == null ? ThreadLocalRandom.current() : random;
+        if (communityCenterComplete && source.nextDouble() < 0.33D) {
+            return PassOutMailChoice.MARLON;
+        }
+        List<PassOutMailChoice> candidates = new ArrayList<>();
+        if (harveyEligible) {
+            candidates.add(PassOutMailChoice.HARVEY);
+        }
+        if (!communityCenterComplete) {
+            candidates.add(PassOutMailChoice.JOJA);
+        }
+        candidates.add(PassOutMailChoice.LINUS);
+        return candidates.get(source.nextInt(candidates.size()));
+    }
+
+    enum PassOutMailChoice {
+        MARLON("passedOut_Marlon"),
+        HARVEY("passedOut_Harvey"),
+        JOJA("passedOut_Joja"),
+        LINUS("passedOut_Linus");
+
+        private final String mailId;
+
+        PassOutMailChoice(String mailId) {
+            this.mailId = mailId;
+        }
+
+        String mailId() {
+            return mailId;
+        }
+    }
+
+    private record OvernightPenalty(int moneyLost, @javax.annotation.Nullable String mailId) {
+    }
+
     // ──────────────────────────────────────
     //  金币计算
     // ──────────────────────────────────────
@@ -357,7 +559,8 @@ public final class PassOutService {
             if (hi <= lo) {
                 moneyToLose = lo;
             } else {
-                moneyToLose = lo + RANDOM.nextInt(hi - lo + 1);
+                // C# Random.Next(min, max) excludes max.
+                moneyToLose = lo + RANDOM.nextInt(hi - lo);
             }
             moneyToLose = Math.min(moneyToLose, 15000);
 
@@ -402,16 +605,17 @@ public final class PassOutService {
         return lostItems;
     }
 
-    private static void removeDesertFestivalEggPenalty(ServerPlayer player) {
+    private static List<ItemStack> removeDesertFestivalEggPenalty(ServerPlayer player) {
         if (!(player.level() instanceof net.minecraft.server.level.ServerLevel level)) {
-            return;
+            return List.of();
         }
         int eggCount = player.getInventory().countItem(com.stardew.craft.item.ModItems.CALICO_EGG.get());
         if (eggCount <= 0) {
-            return;
+            return List.of();
         }
         float percent = com.stardew.craft.festival.desert.DesertFestivalMineService.thinShellsActive(level) ? 0.5F : 0.2F;
-        int remaining = Math.max(0, (int)(eggCount * percent));
+        int removed = Math.max(0, (int)(eggCount * percent));
+        int remaining = removed;
         for (int slot = 0; slot < player.getInventory().getContainerSize() && remaining > 0; slot++) {
             ItemStack stack = player.getInventory().getItem(slot);
             if (stack.is(com.stardew.craft.item.ModItems.CALICO_EGG.get())) {
@@ -420,6 +624,10 @@ public final class PassOutService {
                 remaining -= take;
             }
         }
+        int actualRemoved = removed - remaining;
+        return actualRemoved <= 0
+                ? List.of()
+                : List.of(new ItemStack(com.stardew.craft.item.ModItems.CALICO_EGG.get(), actualRemoved));
     }
 
     private static void grantCombatDeathRecovery(ServerPlayer player) {
@@ -460,45 +668,6 @@ public final class PassOutService {
     }
 
     // ──────────────────────────────────────
-    //  邮件安排
-    // ──────────────────────────────────────
-
-    private static final String[] MINE_DEATH_MAILS = {
-            "mineDeath_Robin", "mineDeath_Clint", "mineDeath_Maru", "mineDeath_Linus"
-    };
-
-    private static void scheduleDeathMail(ServerPlayer player, PlayerStardewData data,
-                                          boolean inMine, int moneyLost, boolean itemsLost) {
-        if (inMine) {
-            // 随机选一个矿井救援邮件
-            String mailId = MINE_DEATH_MAILS[RANDOM.nextInt(MINE_DEATH_MAILS.length)];
-            data.addMailForTomorrow(mailId);
-        } else {
-            // Harvey 诊所邮件
-            data.addMailForTomorrow("hospitalDeath");
-        }
-
-        // Marlon 物品找回邮件
-        if (itemsLost) {
-            data.addMailForTomorrow("marlonRecovery");
-        }
-    }
-
-    private static void schedulePassOutMail(PlayerStardewData data) {
-        // 简化版：Linus 40%, Harvey 40%, Marlon 20%
-        double roll = RANDOM.nextDouble();
-        String mailId;
-        if (roll < 0.4) {
-            mailId = "passedOut_Linus";
-        } else if (roll < 0.8) {
-            mailId = "passedOut_Harvey";
-        } else {
-            mailId = "passedOut_Marlon";
-        }
-        data.addMailForTomorrow(mailId);
-    }
-
-    // ──────────────────────────────────────
     //  次日体力覆盖（由 StardewTimeManager 调用）
     // ──────────────────────────────────────
 
@@ -514,20 +683,212 @@ public final class PassOutService {
     }
 
     // ──────────────────────────────────────
-    //  传送回农场
+    //  战斗救援事务
     // ──────────────────────────────────────
 
+    /** Legacy entry point retained for old packet callers. */
     public static void teleportAfterPassOutAck(ServerPlayer player) {
-        RescueTarget rescueTarget = PENDING_RESCUE_TARGETS.remove(player.getUUID());
-        if (rescueTarget != null && teleportToRescueTarget(player, rescueTarget)) {
-            completeCombatDeathRescue(player);
+        PassOutRecoveryData.Entry entry =
+                PassOutRecoveryData.get(player.server).get(player.getUUID());
+        if (entry != null && entry.combat()) {
+            acknowledgeCombatCollapse(player, entry.transactionId());
+        }
+    }
+
+    public static void acknowledgeCombatCollapse(ServerPlayer player, long transactionId) {
+        PassOutRecoveryData recovery = PassOutRecoveryData.get(player.server);
+        PassOutRecoveryData.Entry entry = recovery.get(player.getUUID());
+        if (entry == null
+                || !entry.combat()
+                || entry.transactionId() != transactionId
+                || entry.stage() != PassOutRecoveryData.Stage.COLLAPSING) {
             return;
         }
-        teleportToFarmSpawn(player);
+        Integer notBefore = combatCollapseNotBeforeTick.get(player.getUUID());
+        if (notBefore != null
+                && !hasReachedCombatCollapseDeadline(
+                        player.server.getTickCount(), notBefore)) {
+            LOGGER.warn(
+                    "[PASSOUT] Ignored early combat-collapse ACK transaction={} for {}; {} ticks remain",
+                    transactionId,
+                    player.getName().getString(),
+                    notBefore - player.server.getTickCount());
+            return;
+        }
+
+        // Original Game1.updatePause restores ten health immediately before
+        // the revive warp, while the player is still protected by killScreen.
+        PlayerStardewData data = PlayerDataManager.getPlayerData(player);
+        data.setHealth(Math.min(10, data.getMaxHealth()));
+        syncAndSave(player, data);
+        combatCollapseNotBeforeTick.remove(player.getUUID());
+        startCombatRescue(player, entry, recovery);
+    }
+
+    static boolean hasReachedCombatCollapseDeadline(int currentTick, int notBeforeTick) {
+        return currentTick - notBeforeTick >= 0;
+    }
+
+    /** Resumes an interrupted collapse/rescue after reconnect or restart. */
+    public static void resumePending(ServerPlayer player) {
+        PassOutRecoveryData recovery = PassOutRecoveryData.get(player.server);
+        PassOutRecoveryData.Entry entry = recovery.get(player.getUUID());
+        if (entry == null || !entry.combat()) {
+            return;
+        }
+        if (entry.stage() == PassOutRecoveryData.Stage.COLLAPSING) {
+            PacketDistributor.sendToPlayer(player, new PassOutPayload(
+                    entry.transactionId(),
+                    entry.type(),
+                    entry.moneyLost(),
+                    entry.lostItems()
+            ));
+            scheduleCombatCollapseFallback(player, entry.transactionId());
+            return;
+        }
+        if (entry.stage() == PassOutRecoveryData.Stage.OUTCOME_PENDING) {
+            sendCombatOutcome(player, entry);
+            return;
+        }
+        startCombatRescue(player, entry, recovery);
     }
 
     /**
-     * 将玩家传送回星露谷维度农场出生点。
+     * The client ACK aligns the rescue with its eight-second presentation, but
+     * cannot be allowed to own server progress. Lost packets, reconnect races,
+     * or a broken client therefore fall through to the same idempotent
+     * transition at the authoritative deadline.
+     */
+    private static void scheduleCombatCollapseFallback(ServerPlayer player, long transactionId) {
+        java.util.UUID playerId = player.getUUID();
+        var server = player.server;
+        combatCollapseNotBeforeTick.put(
+                playerId,
+                server.getTickCount() + COMBAT_COLLAPSE_TICKS);
+        com.stardew.craft.time.ServerRealTickTaskScheduler.schedule(
+                server,
+                COMBAT_COLLAPSE_TICKS,
+                () -> {
+                    ServerPlayer connected = server.getPlayerList().getPlayer(playerId);
+                    if (connected != null) {
+                        acknowledgeCombatCollapse(connected, transactionId);
+                    }
+                });
+    }
+
+    private static void startCombatRescue(
+            ServerPlayer player,
+            PassOutRecoveryData.Entry entry,
+            PassOutRecoveryData recovery
+    ) {
+        if (CombatRescueCutsceneCoordinator.isPending(player.getUUID())) {
+            return;
+        }
+        entry.setStage(PassOutRecoveryData.Stage.WAITING_FOR_DESTINATION);
+        recovery.put(player.getUUID(), entry);
+
+        CombatRescueCutsceneCoordinator.Completion completion =
+                (rescuedPlayer, result) -> completeCombatRescue(rescuedPlayer, entry.transactionId(), result);
+        boolean started = switch (entry.type()) {
+            case COMBAT_MINE -> {
+                CombatRescueCutsceneCoordinator.MineDialogue dialogue;
+                try {
+                    dialogue = CombatRescueCutsceneCoordinator.MineDialogue.valueOf(entry.dialogueName());
+                } catch (RuntimeException ignored) {
+                    dialogue = CombatRescueCutsceneCoordinator.MineDialogue.LINUS;
+                }
+                yield CombatRescueCutsceneCoordinator.beginMineRescue(
+                        player, entry.rescuerNpcId(), dialogue, completion);
+            }
+            case COMBAT_DESERT_FESTIVAL ->
+                    CombatRescueCutsceneCoordinator.beginDesertFestivalRecovery(player, completion);
+            default -> CombatRescueCutsceneCoordinator.beginHospitalRescue(player, completion);
+        };
+
+        if (!started) {
+            completeCombatRescue(
+                    player,
+                    entry.transactionId(),
+                    CombatRescueCutsceneCoordinator.Result.DESTINATION_UNAVAILABLE
+            );
+        }
+    }
+
+    private static void completeCombatRescue(
+            ServerPlayer player,
+            long transactionId,
+            CombatRescueCutsceneCoordinator.Result result
+    ) {
+        PassOutRecoveryData recovery = PassOutRecoveryData.get(player.server);
+        PassOutRecoveryData.Entry entry = recovery.get(player.getUUID());
+        if (entry == null || !entry.combat() || entry.transactionId() != transactionId) {
+            return;
+        }
+
+        PlayerStardewData data = PlayerDataManager.getPlayerData(player);
+        int moneyLost = entry.moneyLost();
+        List<ItemStack> lostItems = entry.lostItems();
+        if (entry.type() == PassOutType.COMBAT_MINE) {
+            moneyLost = calcCombatMoneyLoss(data, player, true);
+            lostItems = loseItemsOnDeath(player, data);
+        } else if (entry.type() == PassOutType.COMBAT_OVERWORLD) {
+            moneyLost = Math.min(1000, PlayerStardewDataAPI.getMoney(player));
+            lostItems = loseItemsOnDeath(player, data);
+        }
+
+        if (moneyLost > 0) {
+            PlayerStardewDataAPI.removeMoney(player, moneyLost);
+        }
+        data.setItemsLostLastDeath(lostItems);
+        data.setEnergy(Math.min(data.getEnergy(), 2.0F));
+        data.setHealth(Math.min(10, data.getMaxHealth()));
+        data.setPassedOutFromCombat(false);
+        syncAndSave(player, data);
+
+        if (entry.type() == PassOutType.COMBAT_MINE
+                || entry.type() == PassOutType.COMBAT_DESERT_FESTIVAL) {
+            com.stardew.craft.mining.MiningPlayerData miningData =
+                    com.stardew.craft.mining.MiningDataManager.getPlayerData(player);
+            miningData.setCurrentFloor(0);
+            com.stardew.craft.mining.MiningDataManager.savePlayerData(player, miningData);
+        }
+
+        entry.setOutcome(moneyLost, lostItems);
+        entry.setStage(PassOutRecoveryData.Stage.OUTCOME_PENDING);
+        recovery.put(player.getUUID(), entry);
+        grantCombatDeathRecovery(player);
+        sendCombatOutcome(player, entry);
+        LOGGER.info("[PASSOUT] Completed combat rescue {} for {} with result {}; lost {}g and {} item stacks",
+                transactionId, player.getName().getString(), result, moneyLost, lostItems.size());
+    }
+
+    private static void sendCombatOutcome(
+            ServerPlayer player,
+            PassOutRecoveryData.Entry entry
+    ) {
+        PacketDistributor.sendToPlayer(player, new CombatRescueOutcomePayload(
+                entry.transactionId(),
+                entry.type(),
+                entry.moneyLost(),
+                entry.lostItems()));
+    }
+
+    /** Removes the durable outcome only after the client confirms receipt. */
+    public static void acknowledgeCombatOutcome(ServerPlayer player, long transactionId) {
+        PassOutRecoveryData recovery = PassOutRecoveryData.get(player.server);
+        PassOutRecoveryData.Entry entry = recovery.get(player.getUUID());
+        if (entry == null
+                || !entry.combat()
+                || entry.transactionId() != transactionId
+                || entry.stage() != PassOutRecoveryData.Stage.OUTCOME_PENDING) {
+            return;
+        }
+        recovery.remove(player.getUUID());
+    }
+
+    /**
+     * Overnight-only wake-up warp. This must not grant combat recovery,
+     * reset mine progress through the combat path, or clear combat state.
      */
     public static void teleportToFarmSpawn(ServerPlayer player) {
         var server = player.server;
@@ -536,13 +897,17 @@ public final class PassOutService {
 
         // 查询玩家的农场出生点
         com.stardew.craft.farm.FarmInstanceRegistry registry = com.stardew.craft.farm.FarmInstanceRegistry.get();
-        net.minecraft.core.BlockPos spawnPos = registry.getFarmSpawnPoint(player.getUUID());
+        com.stardew.craft.farm.FarmInstance farm = registry.getFarmForPlayer(player.getUUID());
+        net.minecraft.core.BlockPos spawnPos = PlayerDataManager.getPlayerData(player)
+                .getLastSleepPoint()
+                .filter(pos -> farm != null
+                        && farm.contains(pos)
+                        && isSleepBlock(stardewLevel.getBlockState(pos)))
+                .orElseGet(() -> registry.getFarmSpawnPoint(player.getUUID()));
         if (spawnPos == null) {
             player.displayClientMessage(net.minecraft.network.chat.Component.translatable("stardewcraft.warp.farm.unavailable"), true);
             LOGGER.warn("[PASS_OUT] Player {} has no farm spawn; skipping farm return teleport.",
                 player.getName().getString());
-            grantCombatDeathRecovery(player);
-            restoreDuringCombatDeathRecovery(player);
             return;
         }
 
@@ -551,34 +916,13 @@ public final class PassOutService {
         double sz = spawnPos.getZ() + 0.5;
 
         ModTeleport.to(player, stardewLevel, sx, sy, sz, player.getYRot(), player.getXRot());
-        completeCombatDeathRescue(player);
     }
 
-    private static boolean teleportToRescueTarget(ServerPlayer player, RescueTarget target) {
-        var server = player.server;
-        var stardewLevel = server.getLevel(ModDimensions.STARDEW_VALLEY);
-        if (stardewLevel == null) return false;
-        ModTeleport.to(player, stardewLevel, target.x(), target.y(), target.z(), target.yaw(), target.pitch());
-        return true;
+    private static boolean isSleepBlock(net.minecraft.world.level.block.state.BlockState state) {
+        return state.getBlock() instanceof BedBlock
+                || state.is(ModBlocks.BED_1.get())
+                || state.is(ModBlocks.BED_2.get());
     }
-
-    private static void completeCombatDeathRescue(ServerPlayer player) {
-        // 传送完成：清除击倒状态，恢复满血
-        grantCombatDeathRecovery(player);
-        clearKnockedOut(player);
-        PlayerStardewData data = PlayerDataManager.getPlayerData(player);
-        data.setHealth(data.getMaxHealth());
-        PlayerDataEventHandler.syncPlayerData(player, data);
-        PlayerDataManager.get().setDirty();
-
-        // 重置矿井层数到 0（SDV 原版：晕倒后回到大厅）
-        com.stardew.craft.mining.MiningPlayerData miningData =
-            com.stardew.craft.mining.MiningDataManager.getPlayerData(player);
-        miningData.setCurrentFloor(0);
-        com.stardew.craft.mining.MiningDataManager.savePlayerData(player, miningData);
-    }
-
-    private record RescueTarget(double x, double y, double z, float yaw, float pitch) {}
 
     // ──────────────────────────────────────
     //  工具方法
@@ -596,7 +940,8 @@ public final class PassOutService {
         COMBAT_MINE(0),
         COMBAT_OVERWORLD(1),
         EXHAUSTION_2AM(2),
-        EXHAUSTION_STAMINA(3);
+        EXHAUSTION_STAMINA(3),
+        COMBAT_DESERT_FESTIVAL(4);
 
         private final int id;
         PassOutType(int id) { this.id = id; }
@@ -608,6 +953,7 @@ public final class PassOutService {
                 case 1 -> COMBAT_OVERWORLD;
                 case 2 -> EXHAUSTION_2AM;
                 case 3 -> EXHAUSTION_STAMINA;
+                case 4 -> COMBAT_DESERT_FESTIVAL;
                 default -> EXHAUSTION_2AM;
             };
         }

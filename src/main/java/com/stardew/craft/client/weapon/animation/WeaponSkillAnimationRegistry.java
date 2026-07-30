@@ -50,6 +50,7 @@ public final class WeaponSkillAnimationRegistry {
         registerSkill("claymore", "claymore_foldback_return", new ClaymoreFoldbackReturnAnimation());
         registerSkill("pirate_sword", "desperate_plunder", new PirateSwordPlunderAnimation());
         registerSkill("cutlass", "crescent_slash", new CutlassCrescentSlashAnimation());
+        registerSkill("forest_sword", "forest_blessing", new ForestBlessingCastAnimation());
         registerSkill("steel_smallsword", "light_counter", new SteelSmallswordGuardAnimation());
         registerSkill("steel_smallsword", "light_counter_counter", new SteelSmallswordCounterAnimation());
         registerSkill("carving_knife", "carving_thrust", new CarvingKnifeThrustAnimation());

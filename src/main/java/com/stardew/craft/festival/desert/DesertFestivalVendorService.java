@@ -244,11 +244,29 @@ public final class DesertFestivalVendorService {
     }
 
     private static boolean tryOpenAtPlayer(ServerPlayer player) {
-        if (player == null || player.level().dimension() != ModDimensions.STARDEW_VALLEY) {
+        if (!canOpenAtPlayer(player)) {
             return false;
         }
         int slot = stallAt(player.blockPosition());
-        return slot >= 0 && openVendorShop(player, slot);
+        return openVendorShop(player, slot);
+    }
+
+    public static boolean canOpenAtPlayer(ServerPlayer player) {
+        if (player == null
+            || player.level().dimension() != ModDimensions.STARDEW_VALLEY
+            || !DesertFestivalService.isFestivalOpen()) {
+            return false;
+        }
+        int slot = stallAt(player.blockPosition());
+        if (slot < 0) {
+            return false;
+        }
+        DailySelection selection = currentSelection();
+        VendorCandidate vendor = slot == 0
+            ? selection.stallA()
+            : selection.stallB();
+        return isVendorAtStall(player, vendor.npcId(), slot)
+            && ShopRegistry.get(vendor.shopId()) != null;
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)

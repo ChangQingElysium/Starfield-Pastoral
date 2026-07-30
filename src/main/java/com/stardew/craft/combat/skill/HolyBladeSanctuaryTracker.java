@@ -16,13 +16,18 @@ import java.util.UUID;
 
 @SuppressWarnings("null")
 public final class HolyBladeSanctuaryTracker {
+    public static final int PULSE_INTERVAL_TICKS = 20;
+    public static final float PULSE_DAMAGE_MULTIPLIER = 0.75F;
+    public static final int HIT_CONTEXT_LIFETIME_TICKS = 5;
+    public static final int HEAL_AMOUNT = 4;
+    public static final int RING_DURATION_TICKS = 12;
 
     private static final class SanctuaryState {
         private final float maxRadius;
-        private long endTick;
+        private final long endTick;
         private long nextPulseTick;
 
-        private SanctuaryState(Vec3 center, float maxRadius, long startTick, long endTick, long nextPulseTick) {
+        private SanctuaryState(float maxRadius, long endTick, long nextPulseTick) {
             this.maxRadius = maxRadius;
             this.endTick = endTick;
             this.nextPulseTick = nextPulseTick;
@@ -38,20 +43,19 @@ public final class HolyBladeSanctuaryTracker {
         if (player == null || durationTicks <= 0 || maxRadius <= 0.0f) {
             return;
         }
-        Vec3 center = player.position();
-        SanctuaryState state = new SanctuaryState(center, maxRadius, nowTick, nowTick + durationTicks, nowTick);
+        SanctuaryState state = new SanctuaryState(
+            maxRadius,
+            nowTick + durationTicks,
+            nowTick
+        );
         ACTIVE.put(player.getUUID(), state);
 
         HolyBladeEffects.playDomainActivate(player);
     }
 
     public static void tick(ServerPlayer player, long nowTick) {
-        SanctuaryState state = ACTIVE.get(player.getUUID());
+        SanctuaryState state = activeState(player, nowTick);
         if (state == null) {
-            return;
-        }
-        if (nowTick >= state.endTick) {
-            ACTIVE.remove(player.getUUID());
             return;
         }
 
@@ -59,32 +63,71 @@ public final class HolyBladeSanctuaryTracker {
             return;
         }
 
-        if (nowTick >= state.nextPulseTick) {
-            state.nextPulseTick += 20;
+        if (shouldPulse(nowTick, state.nextPulseTick)) {
+            state.nextPulseTick += PULSE_INTERVAL_TICKS;
 
             Vec3 center = player.position();
             float radius = state.maxRadius;
             PacketDistributor.sendToPlayersTrackingEntityAndSelf(player,
-                new HolyBladeRingPayload((float) center.x, (float) center.y, (float) center.z, state.maxRadius, 12));
+                new HolyBladeRingPayload(
+                    (float) center.x,
+                    (float) center.y,
+                    (float) center.z,
+                    state.maxRadius,
+                    RING_DURATION_TICKS
+                ));
             List<LivingEntity> targets = getTargetsInRadius(serverLevel, center, radius, player);
 
             for (LivingEntity target : targets) {
                 SkillContext context = SkillContext.builder()
                     .skillId("holy_domain")
                     .tier(SkillContext.SkillTier.MAJOR)
-                    .damageMultiplier(0.75f)
+                    .damageMultiplier(PULSE_DAMAGE_MULTIPLIER)
                     .build();
-                WeaponSkillContextStore.setPending(player, context, nowTick + 5);
-
                 target.invulnerableTime = 0;
                 target.hurtTime = 0;
-                target.hurt(player.damageSources().playerAttack(player), 1.0F);
+                WeaponSkillDamage.apply(
+                        player,
+                        target,
+                        context,
+                        nowTick + HIT_CONTEXT_LIFETIME_TICKS
+                );
 
                 HolyBladeEffects.playDomainPulse(serverLevel, target);
             }
 
-            HolyBladeEffects.playHeal(player, 4);
+            HolyBladeEffects.playHeal(player, HEAL_AMOUNT);
         }
+    }
+
+    public static boolean isActive(Player player, long nowTick) {
+        return activeState(player, nowTick) != null;
+    }
+
+    public static void stop(Player player) {
+        if (player != null) {
+            ACTIVE.remove(player.getUUID());
+        }
+    }
+
+    static boolean isExpired(long nowTick, long endTick) {
+        return nowTick >= endTick;
+    }
+
+    static boolean shouldPulse(long nowTick, long nextPulseTick) {
+        return nowTick >= nextPulseTick;
+    }
+
+    private static SanctuaryState activeState(Player player, long nowTick) {
+        if (player == null) {
+            return null;
+        }
+        SanctuaryState state = ACTIVE.get(player.getUUID());
+        if (state != null && isExpired(nowTick, state.endTick)) {
+            ACTIVE.remove(player.getUUID());
+            return null;
+        }
+        return state;
     }
 
     private static List<LivingEntity> getTargetsInRadius(ServerLevel level, Vec3 center, float radius, Player owner) {

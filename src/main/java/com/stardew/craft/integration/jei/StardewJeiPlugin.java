@@ -10,6 +10,8 @@ import com.stardew.craft.item.SpecificBaitItem;
 import com.stardew.craft.item.artisan.FlavoredArtisanDrinkItem;
 import com.stardew.craft.item.artisan.PreservesItem;
 import com.stardew.craft.item.catalog.StardewItemCatalog;
+import com.stardew.craft.item.catalog.StardewItemDisplayStacks;
+import com.stardew.craft.item.quality.QualityHelper;
 import com.stardew.craft.client.gui.WorkbenchScreen;
 import com.stardew.craft.client.gui.menu.StardewGameMenuScreen;
 import mezz.jei.api.IModPlugin;
@@ -184,8 +186,15 @@ public class StardewJeiPlugin implements IModPlugin {
     @Override
     @SuppressWarnings("null")
     public void registerItemSubtypes(ISubtypeRegistration registration) {
-        // Quality and flower colour are presentation data, not recipe identity.
-        // Leaving them without subtype interpreters makes every quality share U/R lookups.
+        // JEI uses Ingredient identity to deduplicate its item list and Recipe identity
+        // for usage/recipe matching. Keep qualities distinct only in the former so all
+        // display variants survive while every quality still shares the same recipes.
+        QualitySubtypeInterpreter qualitySubtype = new QualitySubtypeInterpreter();
+        for (Item item : StardewItemCatalog.visibleItems()) {
+            if (StardewItemDisplayStacks.hasQualityVariants(item)) {
+                registration.registerSubtypeInterpreter(item, qualitySubtype);
+            }
+        }
         registration.registerSubtypeInterpreter(ModItems.JELLY.get(), new PreserveSubtypeInterpreter());
         registration.registerSubtypeInterpreter(ModItems.PICKLES.get(), new PreserveSubtypeInterpreter());
         registration.registerSubtypeInterpreter(ModItems.ROE.get(), new PreserveSubtypeInterpreter());
@@ -456,12 +465,40 @@ public class StardewJeiPlugin implements IModPlugin {
     private static final class PreserveSubtypeInterpreter implements ISubtypeInterpreter<ItemStack> {
         @Override
         public Object getSubtypeData(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") UidContext context) {
-            return PreservesItem.getSubtypeKey(stack);
+            String source = PreservesItem.getSubtypeKey(stack);
+            return context == UidContext.Ingredient
+                    ? new SourceQualitySubtype(source, QualityHelper.getQuality(stack))
+                    : source;
         }
 
         @Override
         public String getLegacyStringSubtypeInfo(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") UidContext context) {
-            return PreservesItem.getSubtypeKey(stack);
+            String source = PreservesItem.getSubtypeKey(stack);
+            return context == UidContext.Ingredient
+                    ? source + "|quality=" + QualityHelper.getQuality(stack)
+                    : source;
+        }
+    }
+
+    private static final class QualitySubtypeInterpreter implements ISubtypeInterpreter<ItemStack> {
+        @Override
+        public Object getSubtypeData(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") UidContext context) {
+            if (context == UidContext.Recipe) {
+                return null;
+            }
+            return new QualitySubtype(
+                    QualityHelper.getQuality(stack),
+                    StardewItemDisplayStacks.getFlowerColor(stack));
+        }
+
+        @Override
+        public String getLegacyStringSubtypeInfo(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") UidContext context) {
+            if (context == UidContext.Recipe) {
+                return "";
+            }
+            Integer color = StardewItemDisplayStacks.getFlowerColor(stack);
+            return "quality=" + QualityHelper.getQuality(stack)
+                    + (color == null ? "" : "|flower_color=" + color);
         }
     }
 
@@ -482,13 +519,25 @@ public class StardewJeiPlugin implements IModPlugin {
     private static final class FlavoredDrinkSubtypeInterpreter implements ISubtypeInterpreter<ItemStack> {
         @Override
         public Object getSubtypeData(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") UidContext context) {
-            return FlavoredArtisanDrinkItem.getSubtypeKey(stack);
+            String source = FlavoredArtisanDrinkItem.getSubtypeKey(stack);
+            return context == UidContext.Ingredient
+                    ? new SourceQualitySubtype(source, QualityHelper.getQuality(stack))
+                    : source;
         }
 
         @Override
         public String getLegacyStringSubtypeInfo(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") UidContext context) {
-            return FlavoredArtisanDrinkItem.getSubtypeKey(stack);
+            String source = FlavoredArtisanDrinkItem.getSubtypeKey(stack);
+            return context == UidContext.Ingredient
+                    ? source + "|quality=" + QualityHelper.getQuality(stack)
+                    : source;
         }
+    }
+
+    private record QualitySubtype(int quality, Integer flowerColor) {
+    }
+
+    private record SourceQualitySubtype(String source, int quality) {
     }
 
     private static final class SecretNoteSubtypeInterpreter implements ISubtypeInterpreter<ItemStack> {

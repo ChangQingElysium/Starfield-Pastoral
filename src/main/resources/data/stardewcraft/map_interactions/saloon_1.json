@@ -1,0 +1,32 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "Saloon",
+    "tile_action": "Message \"Saloon.1\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "positions": [
+      [
+        33,
+        37,
+        -3
+      ]
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.saloon.1",
+          "fallback": "There's a half-empty mug of beer."
+        }
+      ]
+    }
+  ]
+}

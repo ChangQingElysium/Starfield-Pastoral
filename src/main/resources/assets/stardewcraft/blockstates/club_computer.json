@@ -1,0 +1,31 @@
+{
+  "variants": {
+    "part=main,facing=north,model_slice=0": { "model": "stardewcraft:casino/club_computer" },
+    "part=main,facing=east,model_slice=0": { "model": "stardewcraft:casino/club_computer", "y": 90 },
+    "part=main,facing=south,model_slice=0": { "model": "stardewcraft:casino/club_computer", "y": 180 },
+    "part=main,facing=west,model_slice=0": { "model": "stardewcraft:casino/club_computer", "y": 270 },
+
+    "part=extension,facing=north,model_slice=1": { "model": "stardewcraft:casino/club_computer_upper" },
+    "part=extension,facing=east,model_slice=1": { "model": "stardewcraft:casino/club_computer_upper", "y": 90 },
+    "part=extension,facing=south,model_slice=1": { "model": "stardewcraft:casino/club_computer_upper", "y": 180 },
+    "part=extension,facing=west,model_slice=1": { "model": "stardewcraft:casino/club_computer_upper", "y": 270 },
+
+    "part=extension,facing=north,model_slice=0": { "model": "stardewcraft:block/decor/extensions/furniture_extension_empty" },
+    "part=extension,facing=east,model_slice=0": { "model": "stardewcraft:block/decor/extensions/furniture_extension_empty" },
+    "part=extension,facing=south,model_slice=0": { "model": "stardewcraft:block/decor/extensions/furniture_extension_empty" },
+    "part=extension,facing=west,model_slice=0": { "model": "stardewcraft:block/decor/extensions/furniture_extension_empty" },
+    "part=extension,facing=north,model_slice=2": { "model": "stardewcraft:block/decor/extensions/furniture_extension_empty" },
+    "part=extension,facing=east,model_slice=2": { "model": "stardewcraft:block/decor/extensions/furniture_extension_empty" },
+    "part=extension,facing=south,model_slice=2": { "model": "stardewcraft:block/decor/extensions/furniture_extension_empty" },
+    "part=extension,facing=west,model_slice=2": { "model": "stardewcraft:block/decor/extensions/furniture_extension_empty" },
+
+    "part=main,facing=north,model_slice=1": { "model": "stardewcraft:casino/club_computer" },
+    "part=main,facing=east,model_slice=1": { "model": "stardewcraft:casino/club_computer", "y": 90 },
+    "part=main,facing=south,model_slice=1": { "model": "stardewcraft:casino/club_computer", "y": 180 },
+    "part=main,facing=west,model_slice=1": { "model": "stardewcraft:casino/club_computer", "y": 270 },
+    "part=main,facing=north,model_slice=2": { "model": "stardewcraft:casino/club_computer" },
+    "part=main,facing=east,model_slice=2": { "model": "stardewcraft:casino/club_computer", "y": 90 },
+    "part=main,facing=south,model_slice=2": { "model": "stardewcraft:casino/club_computer", "y": 180 },
+    "part=main,facing=west,model_slice=2": { "model": "stardewcraft:casino/club_computer", "y": 270 }
+  }
+}

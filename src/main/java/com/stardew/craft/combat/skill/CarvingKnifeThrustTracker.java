@@ -18,10 +18,13 @@ import java.util.UUID;
 
 public final class CarvingKnifeThrustTracker {
 
-    private static final float BASE_DAMAGE_MULTIPLIER = 0.45f;
-    private static final float BONUS_DAMAGE_MULTIPLIER = 0.60f;
-    private static final int DEFAULT_INTERVAL_TICKS = 3;
-    private static final int BONUS_DELAY_TICKS = 2;
+    public static final float BASE_DAMAGE_MULTIPLIER = 0.45f;
+    public static final float BONUS_DAMAGE_MULTIPLIER = 0.60f;
+    public static final int DEFAULT_STRIKES = 3;
+    public static final int DEFAULT_INTERVAL_TICKS = 3;
+    public static final int BONUS_DELAY_TICKS = 2;
+    public static final int HIT_CONTEXT_LIFETIME_TICKS = 5;
+    public static final double REACQUIRE_RANGE = 2.5;
 
     private static final Map<UUID, State> ACTIVE = new HashMap<>();
 
@@ -32,7 +35,7 @@ public final class CarvingKnifeThrustTracker {
 
     public static void start(ServerPlayer player, long nowTick, LivingEntity target,
                              String weaponId, String skillId) {
-        start(player, nowTick, target, weaponId, skillId, 3, DEFAULT_INTERVAL_TICKS);
+        start(player, nowTick, target, weaponId, skillId, DEFAULT_STRIKES, DEFAULT_INTERVAL_TICKS);
     }
 
     public static void start(ServerPlayer player, long nowTick, LivingEntity target,
@@ -96,9 +99,13 @@ public final class CarvingKnifeThrustTracker {
             .tier(SkillContext.SkillTier.MINOR)
             .damageMultiplier(damageMultiplier)
             .build();
-        WeaponSkillContextStore.setPending(player, context, nowTick + 5);
         @SuppressWarnings("null")
-        boolean hit = target.hurt(player.damageSources().playerAttack(player), 1.0F);
+        boolean hit = WeaponSkillDamage.apply(
+                player,
+                target,
+                context,
+                nowTick + HIT_CONTEXT_LIFETIME_TICKS
+        );
         if (hit) {
             PacketDistributor.sendToPlayer(player, new CarvingKnifeThrustStrikePayload());
         }
@@ -114,7 +121,7 @@ public final class CarvingKnifeThrustTracker {
                 return living;
             }
         }
-        return findTargetInFront(player, 2.5);
+        return findTargetInFront(player, REACQUIRE_RANGE);
     }
 
     @SuppressWarnings("null")
@@ -142,5 +149,9 @@ public final class CarvingKnifeThrustTracker {
     /** Clean up state when a player logs out to prevent memory leaks. */
     public static void removePlayer(UUID playerId) {
         ACTIVE.remove(playerId);
+    }
+
+    public static boolean isActive(UUID playerId) {
+        return ACTIVE.containsKey(playerId);
     }
 }

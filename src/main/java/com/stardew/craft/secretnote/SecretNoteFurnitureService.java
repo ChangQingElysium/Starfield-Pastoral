@@ -114,6 +114,32 @@ public final class SecretNoteFurnitureService {
         return data != null && !data.hasMailFlag(STONE_JUNIMO_FLAG);
     }
 
+    public static boolean canClaimAt(
+            ServerPlayer player,
+            BlockPos pos
+    ) {
+        if (player == null || pos == null
+                || !isStardewLevel(player.serverLevel())) {
+            return false;
+        }
+        BlockState state = player.serverLevel().getBlockState(pos);
+        PlayerStardewData data =
+                PlayerDataManager.getPlayerData(player);
+        if (isStoneJunimoPart(pos)
+                && state.is(ModBlocks.STONE_JUNIMO.get())) {
+            return canClaimStoneJunimo(data);
+        }
+        if (isJunimoPlushBush(pos)
+                && state.is(ModBlocks.BERRY_BUSH.get())) {
+            StardewTimeManager time = StardewTimeManager.get();
+            return time != null && canClaimJunimoPlush(
+                    data,
+                    time.getCurrentDay(),
+                    time.getCurrentTime());
+        }
+        return false;
+    }
+
     private static boolean claimJunimoPlush(ServerPlayer player, int day, int currentTime) {
         PlayerStardewData data = PlayerDataManager.getPlayerData(player);
         if (!canClaimJunimoPlush(data, day, currentTime)) {

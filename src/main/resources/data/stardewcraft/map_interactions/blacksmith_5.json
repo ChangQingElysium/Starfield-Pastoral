@@ -1,0 +1,40 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "Blacksmith",
+    "tile_action": "Message \"Blacksmith.5\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:blacksmith",
+    "boxes": [
+      {
+        "min": [
+          110,
+          46,
+          19
+        ],
+        "max": [
+          113,
+          48,
+          20
+        ]
+      }
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.blacksmith.5",
+          "fallback": "It's a professional-grade furnace. Peering inside, you see molten metal bubbling and churning."
+        }
+      ]
+    }
+  ]
+}

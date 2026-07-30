@@ -19,6 +19,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ public final class MailRegistry {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final AtomicDefinitionStore<StardewMailDefinition> STORE = new AtomicDefinitionStore<>();
     private static volatile Catalog catalog = Catalog.empty();
+    private static volatile List<DefinitionDiagnostic> lastReloadDiagnostics = List.of();
 
     private MailRegistry() {
     }
@@ -71,6 +73,10 @@ public final class MailRegistry {
         return catalog.definitions();
     }
 
+    public static List<DefinitionDiagnostic> lastReloadDiagnostics() {
+        return lastReloadDiagnostics;
+    }
+
     @Nullable
     public static ResourceLocation normalizeId(String rawId) {
         if (rawId == null || rawId.isBlank()) return null;
@@ -88,26 +94,90 @@ public final class MailRegistry {
                 StardewCraft.MODID.equals(id.getNamespace()) ? id.getPath() : id.toString());
     }
 
-    private static Candidate parseCandidate(Map<ResourceLocation, JsonElement> resources) {
+    static Candidate parseCandidate(Map<ResourceLocation, JsonElement> resources) {
         Map<ResourceLocation, StardewMailDefinition> definitions = new LinkedHashMap<>();
         Map<ResourceLocation, String> sources = new LinkedHashMap<>();
         Map<ResourceLocation, String> displayIds = new LinkedHashMap<>();
+        Map<ResourceLocation, ResourceLocation> definitionSources = new LinkedHashMap<>();
         List<DefinitionDiagnostic> diagnostics = new ArrayList<>();
 
-        for (Map.Entry<ResourceLocation, JsonElement> resource : resources.entrySet()) {
+        List<Map.Entry<ResourceLocation, JsonElement>> sortedResources =
+                new ArrayList<>(resources.entrySet());
+        sortedResources.sort(Comparator.comparing(entry -> entry.getKey().toString()));
+        for (Map.Entry<ResourceLocation, JsonElement> resource : sortedResources) {
+            Map<ResourceLocation, StardewMailDefinition> resourceDefinitions = new LinkedHashMap<>();
+            Map<ResourceLocation, String> resourceSources = new LinkedHashMap<>();
+            Map<ResourceLocation, String> resourceDisplayIds = new LinkedHashMap<>();
+            List<DefinitionDiagnostic> resourceDiagnostics = new ArrayList<>();
             JsonElement root = resource.getValue();
             if (root == null || (!root.isJsonObject() && !root.isJsonArray())) {
-                diagnostics.add(DefinitionDiagnostic.error(
+                resourceDiagnostics.add(DefinitionDiagnostic.error(
                         resource.getKey(), null, "Mail resource must be an object or array"));
+            } else {
+                try {
+                    JsonArray entries = root.isJsonArray() ? root.getAsJsonArray() : singleton(root);
+                    int index = 0;
+                    for (JsonElement element : entries) {
+                        parseEntry(
+                                resource.getKey(),
+                                index++,
+                                element,
+                                resourceDefinitions,
+                                resourceSources,
+                                resourceDisplayIds,
+                                resourceDiagnostics);
+                    }
+                } catch (RuntimeException exception) {
+                    resourceDiagnostics.add(DefinitionDiagnostic.error(
+                            resource.getKey(),
+                            null,
+                            "Could not parse mail resource: " + exception.getMessage()));
+                }
+            }
+            if (hasErrors(resourceDiagnostics)) {
+                quarantine(resource.getKey(), resourceDiagnostics, diagnostics);
                 continue;
             }
-            JsonArray entries = root.isJsonArray() ? root.getAsJsonArray() : singleton(root);
-            int index = 0;
-            for (JsonElement element : entries) {
-                parseEntry(resource.getKey(), index++, element, definitions, sources, displayIds, diagnostics);
+
+            ResourceLocation duplicate = resourceDefinitions.keySet().stream()
+                    .filter(definitions::containsKey)
+                    .findFirst()
+                    .orElse(null);
+            if (duplicate != null) {
+                ResourceLocation previousSource = definitionSources.get(duplicate);
+                diagnostics.add(DefinitionDiagnostic.warning(
+                        resource.getKey(),
+                        duplicate,
+                        "Ignored mail resource because ID '" + duplicate
+                                + "' is already defined by " + previousSource));
+                continue;
             }
+
+            definitions.putAll(resourceDefinitions);
+            sources.putAll(resourceSources);
+            displayIds.putAll(resourceDisplayIds);
+            resourceDefinitions.keySet().forEach(id -> definitionSources.put(id, resource.getKey()));
+            diagnostics.addAll(resourceDiagnostics);
         }
         return new Candidate(definitions, sources, displayIds, diagnostics);
+    }
+
+    private static boolean hasErrors(List<DefinitionDiagnostic> diagnostics) {
+        return diagnostics.stream().anyMatch(
+                diagnostic -> diagnostic.severity() == DefinitionDiagnostic.Severity.ERROR);
+    }
+
+    private static void quarantine(
+            ResourceLocation source,
+            List<DefinitionDiagnostic> resourceDiagnostics,
+            List<DefinitionDiagnostic> diagnostics
+    ) {
+        for (DefinitionDiagnostic diagnostic : resourceDiagnostics) {
+            diagnostics.add(DefinitionDiagnostic.warning(
+                    source,
+                    diagnostic.definitionId(),
+                    "Ignored invalid mail resource: " + diagnostic.message()));
+        }
     }
 
     private static void parseEntry(
@@ -208,6 +278,7 @@ public final class MailRegistry {
                 candidate.definitions(),
                 candidate.sources(),
                 candidate.diagnostics());
+        lastReloadDiagnostics = result.diagnostics();
         for (DefinitionDiagnostic diagnostic : result.diagnostics()) {
             String source = diagnostic.source() == null ? "<mail reload>" : diagnostic.source().toString();
             if (diagnostic.severity() == DefinitionDiagnostic.Severity.ERROR) {

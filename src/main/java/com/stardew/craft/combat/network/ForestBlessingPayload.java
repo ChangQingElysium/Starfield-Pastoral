@@ -9,7 +9,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
-public record ForestBlessingPayload(boolean active, int durationTicks) implements CustomPacketPayload {
+public record ForestBlessingPayload(
+        int casterEntityId,
+        boolean active,
+        int durationTicks,
+        boolean completedCycle
+) implements CustomPacketPayload {
 
     @SuppressWarnings("null")
     public static final Type<ForestBlessingPayload> TYPE = new Type<>(
@@ -18,10 +23,14 @@ public record ForestBlessingPayload(boolean active, int durationTicks) implement
 
     @SuppressWarnings("null")
     public static final StreamCodec<ByteBuf, ForestBlessingPayload> STREAM_CODEC = StreamCodec.composite(
+        ByteBufCodecs.VAR_INT,
+        ForestBlessingPayload::casterEntityId,
         ByteBufCodecs.BOOL,
         ForestBlessingPayload::active,
         ByteBufCodecs.VAR_INT,
         ForestBlessingPayload::durationTicks,
+        ByteBufCodecs.BOOL,
+        ForestBlessingPayload::completedCycle,
         ForestBlessingPayload::new
     );
 
@@ -36,8 +45,18 @@ public record ForestBlessingPayload(boolean active, int durationTicks) implement
 
     @net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
     private static void handleClient(ForestBlessingPayload payload) {
+        net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+        com.stardew.craft.client.weapon.presentation.SkillPresentationClient
+                .setForestBlessingState(
+                        payload.casterEntityId(),
+                        payload.active(),
+                        payload.durationTicks(),
+                        payload.completedCycle()
+                );
+        if (mc.player == null || mc.player.getId() != payload.casterEntityId()) {
+            return;
+        }
         if (payload.active()) {
-            net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
             long nowTick = mc.level != null ? mc.level.getGameTime() : 0L;
             com.stardew.craft.client.weapon.ForestBlessingClientState.start(nowTick, payload.durationTicks());
         } else {

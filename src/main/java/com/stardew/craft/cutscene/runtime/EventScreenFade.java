@@ -45,6 +45,15 @@ public final class EventScreenFade {
         active = true;
     }
 
+    /** Keeps the frame black until a later fade-from-black command takes ownership. */
+    public static void holdBlack() {
+        alpha = 1f;
+        alphaPerTick = 0f;
+        fadingOut = true;
+        active = true;
+        updateHideGui();
+    }
+
     public static void tick() {
         if (active) {
             if (fadingOut) {

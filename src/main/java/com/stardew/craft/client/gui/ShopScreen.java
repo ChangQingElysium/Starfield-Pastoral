@@ -73,6 +73,7 @@ public class ShopScreen extends Screen {
     private static final long BUY_HOLD_INITIAL_DELAY_MS = 320;
     private static final long BUY_HOLD_REPEAT_MS = 95;
     private static final String FAIR_STAR_TOKEN_SHOP_ID = "Festival_StardewValleyFair_StarTokens";
+    private static final String CASINO_SHOP_ID = "Casino";
     private static final String LOST_AND_FOUND_SHOP_PREFIX = "LewisLostAndFound:";
 
     // -------------------------------------------------------------------------
@@ -325,7 +326,7 @@ public class ShopScreen extends Screen {
         CommonGuiTextures.drawTextureBox(g, invBoxXGui, invBoxYGui, invBoxWGui, invBoxHGui, s4, false);
 
         // 3. Currency
-        if (!isLostAndFoundShop()) {
+        if (!isLostAndFoundShop() && !isFairStarTokenShop() && !isCasinoShop()) {
             drawCurrency(g, s4);
         }
 
@@ -689,6 +690,13 @@ public class ShopScreen extends Screen {
                 } else {
                     CommonGuiTextures.drawFairStarToken(g, rowX + rowWGui - ui(52), rowY + ui(36), s4);
                 }
+            } else if (isCasinoShop()) {
+                if (coinA < 1f) {
+                    CommonGuiTextures.drawQiCoinTint(g, rowX + rowWGui - ui(52), rowY + ui(36),
+                            s4, 1f, 1f, 1f, coinA);
+                } else {
+                    CommonGuiTextures.drawQiCoin(g, rowX + rowWGui - ui(52), rowY + ui(36), s4);
+                }
             } else if (coinA < 1f) {
                 CommonGuiTextures.drawShopCoinTint(g, rowX + rowWGui - ui(52), rowY + ui(36), s4, 1f, 1f, 1f, coinA);
             } else {
@@ -937,7 +945,9 @@ public class ShopScreen extends Screen {
             boolean ok = playerMoney >= item.price();
             Component currency = Component.translatable(isFairStarTokenShop()
                     ? "stardewcraft.shop.currency.star_tokens"
-                    : "stardewcraft.shop.currency.gold");
+                    : isCasinoShop()
+                            ? "stardewcraft.shop.currency.qi_coins"
+                            : "stardewcraft.shop.currency.gold");
             lines.add(Component.translatable("stardewcraft.shop.tooltip.buy", item.price(), currency)
                 .withStyle(ok ? ChatFormatting.GOLD : ChatFormatting.DARK_RED));
         } else {
@@ -1444,6 +1454,10 @@ public class ShopScreen extends Screen {
 
     private boolean isFairStarTokenShop() {
         return FAIR_STAR_TOKEN_SHOP_ID.equals(shopId);
+    }
+
+    private boolean isCasinoShop() {
+        return CASINO_SHOP_ID.equals(shopId);
     }
 
     private boolean isLostAndFoundShop() {

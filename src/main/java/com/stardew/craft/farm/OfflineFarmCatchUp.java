@@ -87,7 +87,8 @@ public final class OfflineFarmCatchUp {
                     net.minecraft.server.level.ServerPlayer player =
                             level.getServer().getPlayerList().getPlayer(playerUUID);
                     if (player != null) {
-                        player.sendSystemMessage(
+                        com.stardew.craft.network.GlobalHudMessagePayload.sendTo(
+                                player,
                                 net.minecraft.network.chat.Component.translatable(
                                         "stardewcraft.farm.grace_period.granted", graceDays));
                     }

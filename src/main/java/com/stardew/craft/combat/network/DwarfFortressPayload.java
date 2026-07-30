@@ -40,6 +40,12 @@ public record DwarfFortressPayload(boolean active, int durationTicks) implements
             net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
             long nowTick = mc.level != null ? mc.level.getGameTime() : 0L;
             com.stardew.craft.client.weapon.DwarfFortressClientState.start(nowTick, payload.durationTicks());
+            if (mc.player != null) {
+                com.stardew.craft.client.weapon.SkillEffectsClient.playSkillEffects(
+                        "dwarf_fortress",
+                        mc.player
+                );
+            }
         } else {
             com.stardew.craft.client.weapon.DwarfFortressClientState.clear();
         }

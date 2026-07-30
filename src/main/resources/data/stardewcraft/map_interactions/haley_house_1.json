@@ -1,0 +1,40 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "HaleyHouse",
+    "tile_action": "Message \"HaleyHouse.1\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:2_willow_lane",
+    "boxes": [
+      {
+        "min": [
+          -8,
+          24,
+          20
+        ],
+        "max": [
+          -8,
+          25,
+          20
+        ]
+      }
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.haley_house.1",
+          "fallback": "It's locked."
+        }
+      ]
+    }
+  ]
+}

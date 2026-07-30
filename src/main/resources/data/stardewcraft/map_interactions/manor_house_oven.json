@@ -1,0 +1,33 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "ManorHouse",
+    "tile_action": "Message \"ManorHouse.1\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:mayor_house",
+    "positions": [
+      [55, 50, 20],
+      [55, 51, 20]
+    ],
+    "blocks": [
+      "stardewcraft:cooking_pot"
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.manor_house.1",
+          "fallback": "Mayor's oven could use a good cleaning."
+        }
+      ]
+    }
+  ]
+}

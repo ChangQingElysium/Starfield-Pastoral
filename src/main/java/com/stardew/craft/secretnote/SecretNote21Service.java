@@ -45,7 +45,7 @@ public final class SecretNote21Service {
         }
     }
 
-    static boolean isTargetBush(BlockPos pos) {
+    public static boolean isTargetBush(BlockPos pos) {
         return pos != null
                 && pos.getX() >= 34 && pos.getX() <= 36
                 && pos.getY() >= 64 && pos.getY() <= 65
@@ -57,6 +57,21 @@ public final class SecretNote21Service {
                 && data.hasSeenSecretNote(NOTE_ID)
                 && !data.hasMailFlag(DONE_FLAG)
                 && currentTime == TRIGGER_TIME;
+    }
+
+    public static boolean canTrigger(
+            ServerPlayer player,
+            BlockPos pos
+    ) {
+        return player != null
+                && ModDimensions.STARDEW_VALLEY.equals(
+                        player.serverLevel().dimension())
+                && isTargetBush(pos)
+                && player.serverLevel().getBlockState(pos)
+                        .is(ModBlocks.BERRY_BUSH.get())
+                && canTrigger(
+                        PlayerDataManager.getPlayerData(player),
+                        StardewTimeManager.get().getCurrentTime());
     }
 
     /**

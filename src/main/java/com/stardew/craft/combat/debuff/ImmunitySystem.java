@@ -42,7 +42,19 @@ public class ImmunitySystem {
         if (immunity >= IMMUNITY_ROLL_BOUND) {
             return true;
         }
-        return RANDOM.nextInt(IMMUNITY_ROLL_BOUND) < immunity;
+        return resistsWithRoll(immunity, RANDOM.nextInt(IMMUNITY_ROLL_BOUND));
+    }
+
+    /**
+     * Deterministic form of the Stardew immunity roll.
+     *
+     * @param immunity immunity value
+     * @param roll an integer roll from 0 through 10
+     */
+    public static boolean resistsWithRoll(int immunity, int roll) {
+        int clampedImmunity = Math.min(Math.max(immunity, 0), IMMUNITY_ROLL_BOUND);
+        int clampedRoll = Math.min(Math.max(roll, 0), IMMUNITY_ROLL_BOUND - 1);
+        return clampedRoll < clampedImmunity;
     }
     
     /**

@@ -12,6 +12,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
@@ -489,7 +490,21 @@ public class StardewNpcEntity extends PathfinderMob implements GeoEntity {
 
     @Override
     public boolean canBeCollidedWith() {
-        return !"henchman".equals(getNpcId()) && super.canBeCollidedWith();
+        return !"henchman".equals(getNpcId())
+                && !"bouncer".equals(getNpcId())
+                && super.canBeCollidedWith();
+    }
+
+    @Override
+    protected void doPush(Entity entity) {
+        // These story gates use an explicit per-player eviction volume. Letting
+        // their shared NPC entity run LivingEntity#doPush would still apply
+        // velocity to a player for whom the NPC has already been hidden.
+        String npcId = getNpcId();
+        if ("henchman".equals(npcId) || "bouncer".equals(npcId)) {
+            return;
+        }
+        super.doPush(entity);
     }
 
     @Override

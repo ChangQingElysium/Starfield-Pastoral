@@ -1,0 +1,40 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "SamHouse",
+    "tile_action": "Message \"SamHouse.5\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:1_willow_lane",
+    "boxes": [
+      {
+        "min": [
+          -16,
+          39,
+          26
+        ],
+        "max": [
+          -16,
+          40,
+          26
+        ]
+      }
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.sam_house.5",
+          "fallback": "Guitar picks and skateboard wheels."
+        }
+      ]
+    }
+  ]
+}

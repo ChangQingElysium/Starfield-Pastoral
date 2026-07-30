@@ -1,83 +1,128 @@
+<p align="center">
+  <img src=".github/assets/starfield-pastoral-hero.png" alt="A farm, river, and mine under a starry sky" width="100%">
+</p>
 
-# StarfieldPastoral | 星野牧歌
+<h1 align="center">Starfield Pastoral · 星野牧歌</h1>
 
-StarfieldPastoral（星野牧歌） is a non-commercial fan project that recreates the feel and core progression of Stardew Valley inside Minecraft on NeoForge.
+<p align="center">
+  <strong>Farm, fish, raise animals, meet the villagers, and explore the mines in Minecraft 1.21.1.</strong>
+  <br>
+  A non-commercial NeoForge fan project based on the farming, town life, and progression of Stardew Valley.
+</p>
 
-## Community | 官方社区
+<p align="center">
+  <a href="https://www.curseforge.com/minecraft/mc-mods/starfield-pastoral"><img src="https://img.shields.io/curseforge/dt/1525680?style=flat-square&logo=curseforge&label=Downloads&color=F16436" alt="CurseForge downloads"></a>
+  <a href="https://github.com/ChangQingElysium/Starfield-Pastoral/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/ChangQingElysium/Starfield-Pastoral/build.yml?branch=main&style=flat-square&logo=github&label=Build" alt="Build status"></a>
+  <img src="https://img.shields.io/badge/Minecraft-1.21.1-62B47A?style=flat-square" alt="Minecraft 1.21.1">
+  <img src="https://img.shields.io/badge/NeoForge-21.1.217-E78A2F?style=flat-square" alt="NeoForge 21.1.217">
+  <img src="https://img.shields.io/badge/Status-Alpha-F4C542?style=flat-square" alt="Alpha status">
+</p>
 
-- Official Discord server: [https://discord.gg/cnG3eE58Au](https://discord.gg/cnG3eE58Au)
-- 官方 QQ 群：`961767762`
+<p align="center">
+  <a href="https://www.curseforge.com/minecraft/mc-mods/starfield-pastoral">Download on CurseForge</a>
+  ·
+  <a href="https://discord.gg/cnG3eE58Au">Join Discord</a>
+  ·
+  <a href="https://www.mcmod.cn/class/26689.html">MCMod.cn (Chinese)</a>
+  ·
+  <a href="https://github.com/ChangQingElysium/Starfield-Pastoral/discussions/categories/ideas">Share feedback</a>
+  ·
+  <a href="https://github.com/ChangQingElysium/Starfield-Pastoral/issues">Report a bug</a>
+</p>
 
-## Current Status
+## About
 
-The project is in active alpha development. It already contains a broad playable foundation, but it is not yet a full 1:1 parity implementation.
+Starfield Pastoral is a NeoForge mod for Minecraft 1.21.1. A new game begins in the Overworld. Find the Wizard's Tower, complete the Wizard's request, enter the Stardew Valley dimension, and take over your grandfather's farm.
 
-Current development focus is on expanding feature coverage while tightening Stardew Valley behavioral parity across existing systems.
+Current builds include farming, animals, fishing, NPC schedules, dialogue, mail, shops, mines, time progression, and overnight settlement.
 
-## Platform
+> [!WARNING]
+> Starfield Pastoral is in alpha. Updates may change systems and world data. Back up your world before installing a new version.
 
-- Project name: StarfieldPastoral | 星野牧歌
-- Minecraft 1.21.1
-- NeoForge 21.1.217
-- Java 21
-- Mod version: 0.5.3
-- Mod id: stardewcraft
+## Features
 
-## Implemented or In-Progress Systems
+- 🌱 **Farming:** Grow seasonal crops, use fertilizer and sprinklers, and process harvests in kegs, preserves jars, and other machines.
+- 🐄 **Animals:** Build coops and barns, manage hay and feed, care for animals, and collect eggs, milk, wool, and other produce.
+- 🎣 **Fishing:** Catch fish based on location, season, and weather. Fishing includes a minigame, bait, tackle, and treasure.
+- 🏘️ **Villagers:** Follow NPC schedules, talk to residents, receive mail, build friendships, visit shops, and trigger events.
+- ⛏️ **Exploration:** Fight and gather ore in the mines, restore the Community Center, and unlock minecarts, warps, and new areas.
+- 🤝 **Multiplayer:** Run a farm together in a shared Stardew Valley world.
 
-- core farm flow, farmland, crops, growth management, and related item content;
-- animal systems including barns, coops, feed troughs, hay flow, pasture grass eating, and animal interaction UI;
-- fishing data, fish location rules, treasure tables, and fishing session runtime;
-- NPC runtime systems including schedules, dialogue, mail, event triggers, and friendship-related content;
-- cutscenes, overnight settlement flow, time management, pass-out handling, and player data systems;
-- interior and subspace systems for farm buildings and special locations;
-- artisan and utility blocks such as kegs, casks, looms, furnaces, smokers, worm bins, and similar facilities;
-- community center, shop, minecart, warp, weather, mining, and desert-related content foundations.
+## Getting started
 
-## Repository Scope
+1. Use the **Wizard Tower Compass** in the Overworld to find the nearest Wizard's Tower.
+2. Talk to the Wizard and accept his opening quest.
+3. Give the Wizard an **Eye of Ender** to stabilize the dimensional route.
+4. Enter the Stardew Valley dimension and travel to the farm.
 
-This repository is intended to keep the actual mod project itself:
+## Download and requirements
 
-- source code and gameplay resources under src;
-- Gradle build files and wrapper files;
-- required local dependency jars under libs;
-- essential repository metadata such as README, license, and workflow files.
+| Requirement | Version |
+| --- | --- |
+| Minecraft | 1.21.1 |
+| Mod loader | NeoForge 21.1.217 or a compatible newer build |
+| Java | 21 |
+| Environment | Client and server |
+| Source version | 0.5.4 |
+| Official download | [CurseForge](https://www.curseforge.com/minecraft/mc-mods/starfield-pastoral) |
 
-Local planning notes, reverse-engineering reference material, scratch assets, and temporary working files are intentionally kept out of version control.
+JEI is optional and adds information for fishing and other content. Read the release notes before updating an existing world.
 
-## Development
+## Community
+
+- **Discord:** [Join the official server](https://discord.gg/cnG3eE58Au)
+- **QQ group:** `961767762`
+- **Ideas and player feedback:** [GitHub Discussions](https://github.com/ChangQingElysium/Starfield-Pastoral/discussions/categories/ideas)
+- **Bug reports:** [GitHub Issues](https://github.com/ChangQingElysium/Starfield-Pastoral/issues)
+
+## Add-ons and development
+
+Data packs and NeoForge add-ons can use the 0.5 API to extend supported farm layouts, buildings, locations, and other content.
+
+- Read the [0.5 add-on and data-pack API guide](docs/0.5-addon-api.md).
+- Review the [example data pack](examples/stardewcraft-data-pack) and [example NeoForge add-on](examples/stardewcraft-addon).
+- Check player-facing changes in the [changelog](CHANGELOG.md).
 
 Common local validation commands:
 
-- ./gradlew classes
-- ./gradlew build
+```shell
+./gradlew classes
+./gradlew build
+```
 
-The 0.5 addon/data-pack API guide is in `docs/0.5-addon-api.md`. Runnable examples are under `examples/stardewcraft-data-pack` and `examples/stardewcraft-addon`.
+<details>
+<summary><strong>Prebuilt world data for development</strong></summary>
 
-If local dependency resolution gets out of sync, refresh Gradle dependencies and reload the project in your IDE.
+The Stardew Valley dimension loads prebuilt region data. Development checkouts need the following files:
 
-## Pregen World Data
+```text
+src/main/resources/data/stardewcraft/structures/stardew_valley/main.schem
+src/main/resources/data/stardewcraft/structures/mine/main.schem
+src/main/resources/pregen/stardew_valley/region_manifest.txt
+src/main/resources/pregen/stardew_valley/region/*.mca
+```
 
-The Stardew Valley dimension relies on prebuilt region data instead of runtime chunk-by-chunk generation.
+The mod blocks entry to the Stardew Valley dimension when these files are missing or fail validation.
 
-Expected resource locations include:
+</details>
 
-- src/main/resources/data/stardewcraft/structures/stardew_valley/main.schem
-- src/main/resources/data/stardewcraft/structures/mine/main.schem
-- src/main/resources/pregen/stardew_valley/region_manifest.txt
-- src/main/resources/pregen/stardew_valley/region/*.mca
+## Credits and license
 
-If the required pregen data is missing or invalid, travel into the Stardew Valley world space is blocked.
+Russian localization includes work by Annelo and contributors to [annel0/Starfield-Pastoral](https://github.com/annel0/Starfield-Pastoral). Existing official localization text takes priority.
 
-## Localization Credits
+Starfield Pastoral uses a [custom non-commercial fan project license](LICENSE.md). Original project code and content belong to the project team and contributors. Third-party and game-derived materials remain the property of their respective rightsholders. The project license does not cover those materials.
 
-- Russian localization incorporates translation work by Annelo and the translators of
-  [annel0/Starfield-Pastoral](https://github.com/annel0/Starfield-Pastoral), with official Stardew Valley localized text taking precedence where available.
+Starfield Pastoral has no affiliation with ConcernedApe, Mojang, or Microsoft.
 
-## License and Asset Notice
+<details>
+<summary><strong>简体中文简介</strong></summary>
 
-This repository is distributed as a non-commercial fan project.
+星野牧歌是适用于 Minecraft 1.21.1 的 NeoForge 非商业同人模组。玩家从主世界出发，找到法师塔，完成任务后进入星露谷维度，并在爷爷留下的农场开始生活。
 
-Source code and project-original content belong to the StarfieldPastoral project team and contributors. Any included third-party or original-game-derived assets remain subject to their original rightsholders and are not relicensed by this repository.
+目前可体验种植、养殖、钓鱼、居民互动、矿洞、商店、社区中心和多人联机等内容。项目仍处于 Alpha 开发阶段，更新前请备份存档。
 
-See LICENSE.md for the current project license terms.
+- [前往 CurseForge 下载](https://www.curseforge.com/minecraft/mc-mods/starfield-pastoral)
+- [加入 Discord](https://discord.gg/cnG3eE58Au)
+- QQ 群：`961767762`
+
+</details>

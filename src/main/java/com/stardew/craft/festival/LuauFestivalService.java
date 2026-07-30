@@ -353,7 +353,7 @@ public final class LuauFestivalService {
     }
 
     public static boolean tryOpenSoupContribution(ServerPlayer player, BlockPos clickedPos, InteractionHand hand) {
-        if (player == null || clickedPos == null || hand == null || !SOUP_CAULDRON_ZONE.contains(Vec3.atCenterOf(clickedPos)) || !isParticipant(player)) {
+        if (hand == null || !canInteractWithSoup(player, clickedPos)) {
             return false;
         }
         if (LUAU_INGREDIENTS.containsKey(player.getUUID())) {
@@ -372,6 +372,13 @@ public final class LuauFestivalService {
         PENDING_SOUP_HAND.put(player.getUUID(), hand);
         PacketDistributor.sendToPlayer(player, new OpenFestivalConfirmPayload(OpenFestivalConfirmPayload.Action.LUAU_ADD_SOUP));
         return true;
+    }
+
+    public static boolean canInteractWithSoup(ServerPlayer player, BlockPos clickedPos) {
+        return player != null
+            && clickedPos != null
+            && isParticipant(player)
+            && SOUP_CAULDRON_ZONE.contains(Vec3.atCenterOf(clickedPos));
     }
 
     public static boolean hasPendingSoupContribution(ServerPlayer player, InteractionHand hand) {
@@ -399,7 +406,7 @@ public final class LuauFestivalService {
     }
 
     public static boolean tryOpenPierreFestivalShop(ServerPlayer player) {
-        if (player == null || !PIERRE_SHOP_ZONE.contains(player.position()) || !isParticipant(player)) {
+        if (!canOpenPierreFestivalShop(player)) {
             return false;
         }
         ShopRegistry.ShopDefinition shop = ShopRegistry.get(SHOP_ID);
@@ -418,6 +425,12 @@ public final class LuauFestivalService {
             new ArrayList<>(shop.acceptedSellTypes())
         ));
         return true;
+    }
+
+    public static boolean canOpenPierreFestivalShop(ServerPlayer player) {
+        return player != null
+            && isParticipant(player)
+            && PIERRE_SHOP_ZONE.contains(player.position());
     }
 
     public static String resolveDialogueKey(ServerPlayer player, String npcId) {

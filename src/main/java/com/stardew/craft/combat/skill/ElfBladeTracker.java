@@ -8,13 +8,15 @@ import net.minecraft.world.entity.LivingEntity;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public final class ElfBladeTracker {
 
-    private static final int LEAF_COUNT = 3;
+    public static final int LEAF_COUNT = 3;
     private static final Map<UUID, State> ACTIVE = new HashMap<>();
 
     private static final class State {
@@ -23,6 +25,7 @@ public final class ElfBladeTracker {
         private String skillId;
         private int cooldownTicks;
         private boolean cooldownApplied;
+        private final Set<UUID> leafIds = new LinkedHashSet<>();
 
         private State(long endTick, String weaponId, String skillId, int cooldownTicks) {
             this.endTick = endTick;
@@ -37,6 +40,28 @@ public final class ElfBladeTracker {
 
     public static void start(ServerPlayer player, long nowTick, int durationTicks, float damageMultiplier,
                              String weaponId, String skillId, int cooldownTicks) {
+        start(
+                player,
+                nowTick,
+                durationTicks,
+                damageMultiplier,
+                weaponId,
+                skillId,
+                cooldownTicks,
+                null
+        );
+    }
+
+    public static void start(
+            ServerPlayer player,
+            long nowTick,
+            int durationTicks,
+            float damageMultiplier,
+            String weaponId,
+            String skillId,
+            int cooldownTicks,
+            WeaponDamageSnapshot weaponSnapshot
+    ) {
         if (player == null || durationTicks <= 0 || weaponId == null || skillId == null) {
             return;
         }
@@ -44,17 +69,27 @@ public final class ElfBladeTracker {
         long endTick = nowTick + durationTicks;
         State state = ACTIVE.get(player.getUUID());
         if (state == null) {
-            ACTIVE.put(player.getUUID(), new State(endTick, weaponId, skillId, cooldownTicks));
+            state = new State(endTick, weaponId, skillId, cooldownTicks);
+            ACTIVE.put(player.getUUID(), state);
         } else {
+            clearLeaves(player, state);
             state.endTick = endTick;
             state.weaponId = weaponId;
             state.skillId = skillId;
             state.cooldownTicks = cooldownTicks;
             state.cooldownApplied = false;
+            state.leafIds.clear();
         }
 
         PacketDistributor.sendToPlayer(player, new ElfBladePayload(true, durationTicks));
-        spawnLeaves(player, endTick, damageMultiplier, skillId);
+        spawnLeaves(
+                player,
+                state,
+                endTick,
+                damageMultiplier,
+                skillId,
+                weaponSnapshot
+        );
     }
 
     public static void tick(ServerPlayer player, long nowTick) {
@@ -67,12 +102,7 @@ public final class ElfBladeTracker {
         }
 
         if (nowTick >= state.endTick) {
-            if (!state.cooldownApplied && state.cooldownTicks > 0) {
-                WeaponSkillCooldowns.setCooldown(player, state.weaponId, state.skillId, nowTick, state.cooldownTicks);
-                state.cooldownApplied = true;
-            }
-            PacketDistributor.sendToPlayer(player, new ElfBladePayload(false, 0));
-            ACTIVE.remove(player.getUUID());
+            finish(player, state, nowTick);
         }
     }
 
@@ -85,7 +115,7 @@ public final class ElfBladeTracker {
             return false;
         }
         if (nowTick >= state.endTick) {
-            ACTIVE.remove(player.getUUID());
+            finish(player, state, nowTick);
             return false;
         }
         return true;
@@ -104,16 +134,31 @@ public final class ElfBladeTracker {
         }
     }
 
-    private static void spawnLeaves(ServerPlayer player, long endTick, float damageMultiplier, String skillId) {
+    private static void spawnLeaves(
+            ServerPlayer player,
+            State state,
+            long endTick,
+            float damageMultiplier,
+            String skillId,
+            WeaponDamageSnapshot weaponSnapshot
+    ) {
         if (!(player.level() instanceof ServerLevel level)) {
             return;
         }
-        clearLeaves(player);
 
         for (int i = 0; i < LEAF_COUNT; i++) {
-            ElfBladeLeafEntity leaf = new ElfBladeLeafEntity(level, player, damageMultiplier, skillId, i, endTick);
+            ElfBladeLeafEntity leaf = new ElfBladeLeafEntity(
+                    level,
+                    player,
+                    damageMultiplier,
+                    skillId,
+                    i,
+                    endTick,
+                    weaponSnapshot
+            );
             leaf.setPos(player.getX(), player.getY() + player.getBbHeight() * 0.6, player.getZ());
             level.addFreshEntity(leaf);
+            state.leafIds.add(leaf.getUUID());
         }
     }
 
@@ -142,17 +187,41 @@ public final class ElfBladeTracker {
     }
 
     @SuppressWarnings("null")
-    private static void clearLeaves(ServerPlayer player) {
-        @SuppressWarnings("null")
-        net.minecraft.world.phys.AABB box = player.getBoundingBox().inflate(8.0, 6.0, 8.0);
-        List<ElfBladeLeafEntity> leaves = player.level().getEntitiesOfClass(
-            ElfBladeLeafEntity.class,
-            box,
-            leaf -> leaf.getOwner() == player
-        );
-        for (ElfBladeLeafEntity leaf : leaves) {
-            leaf.discard();
+    private static void clearLeaves(ServerPlayer player, State state) {
+        for (ServerLevel level : player.server.getAllLevels()) {
+            for (UUID leafId : state.leafIds) {
+                if (level.getEntity(leafId) instanceof ElfBladeLeafEntity leaf) {
+                    leaf.discard();
+                }
+            }
         }
+    }
+
+    private static void finish(ServerPlayer player, State state, long nowTick) {
+        if (!state.cooldownApplied && state.cooldownTicks > 0) {
+            WeaponSkillCooldowns.setCooldown(
+                player,
+                state.weaponId,
+                state.skillId,
+                nowTick,
+                state.cooldownTicks
+            );
+            state.cooldownApplied = true;
+        }
+        PacketDistributor.sendToPlayer(player, new ElfBladePayload(false, 0));
+        ACTIVE.remove(player.getUUID());
+    }
+
+    public static void cancel(ServerPlayer player, long nowTick) {
+        if (player == null) {
+            return;
+        }
+        State state = ACTIVE.get(player.getUUID());
+        if (state == null) {
+            return;
+        }
+        clearLeaves(player, state);
+        finish(player, state, nowTick);
     }
 
     /** Clean up state when a player logs out to prevent memory leaks. */

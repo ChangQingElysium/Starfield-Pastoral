@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stardewcraft.example/schemas/location-v1.schema.json",
+  "title": "StardewCraft logical location",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["min", "max"],
+  "properties": {
+    "dimension": { "$ref": "#/$defs/id" },
+    "ledger_id": { "type": "string" },
+    "min": { "$ref": "#/$defs/vector" },
+    "max": { "$ref": "#/$defs/vector" },
+    "aliases": {
+      "type": "array",
+      "maxItems": 64,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "priority": { "type": "integer" },
+    "indoor": { "type": "boolean" },
+    "parent": { "$ref": "#/$defs/id" },
+    "display_name": { "$ref": "#/$defs/component" },
+    "description": { "$ref": "#/$defs/component" },
+    "icon": { "$ref": "#/$defs/id" },
+    "tags": {
+      "type": "array",
+      "maxItems": 64,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/id" }
+    },
+    "properties": {
+      "type": "object",
+      "maxProperties": 128,
+      "propertyNames": {
+        "pattern": "^[a-z0-9_.-]+:[a-z0-9/._-]+$"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256
+      },
+      "properties": {
+        "stardewcraft:music_profile": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "stardewcraft:music_start_time": {
+          "$ref": "#/$defs/hhmm"
+        },
+        "stardewcraft:music_end_time": {
+          "$ref": "#/$defs/hhmm"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_.-]+:[a-z0-9/._-]+$"
+    },
+    "vector": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": { "type": "integer" }
+    },
+    "component": {
+      "oneOf": [
+        { "type": "string" },
+        { "type": "object" },
+        { "type": "array" }
+      ]
+    },
+    "hhmm": {
+      "type": "string",
+      "pattern": "^(?:[0-5]?[0-9]|[0-9][0-5][0-9]|(?:[01][0-9]|2[0-5])[0-5][0-9]|2600)$"
+    }
+  }
+}

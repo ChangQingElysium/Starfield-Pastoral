@@ -1,0 +1,33 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "AnimalShop",
+    "tile_action": "Message \"AnimalShop.19\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:marnie_ranch",
+    "positions": [
+      [
+        -73,
+        34,
+        19
+      ]
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.animal_shop.19",
+          "fallback": "Looks like someone was chopping vegetables but never finished."
+        }
+      ]
+    }
+  ]
+}

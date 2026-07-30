@@ -8,6 +8,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
@@ -17,7 +18,7 @@ public final class TemplarVowHandler {
     private TemplarVowHandler() {}
 
     @SuppressWarnings("null")
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onPlayerHurt(LivingIncomingDamageEvent event) {
         if (!(event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player)) {
             return;
@@ -25,6 +26,9 @@ public final class TemplarVowHandler {
 
         Level level = player.level();
         if (level.isClientSide) {
+            return;
+        }
+        if (event.getAmount() <= 0.0f) {
             return;
         }
 
@@ -40,13 +44,31 @@ public final class TemplarVowHandler {
 
         Entity src = event.getSource().getEntity();
         if (src instanceof LivingEntity attacker && attacker.isAlive()) {
-            SkillContext context = SkillContext.builder()
-                .skillId("templar_vow")
-                .tier(SkillContext.SkillTier.MINOR)
-                .damageMultiplier(1.1f)
-                .build();
-            WeaponSkillContextStore.setPending(player, context, nowTick + 5);
-            player.attack(attacker);
+            SkillContext context = TemplarVowTracker.createStrikeContext(
+                    TemplarVowTracker.COUNTER_DAMAGE_MULTIPLIER
+            );
+            WeaponDamageSnapshot weaponSnapshot =
+                    TemplarVowTracker.getWeaponSnapshot(player).orElse(null);
+            long expireTick = nowTick
+                    + TemplarVowTracker.HIT_CONTEXT_LIFETIME_TICKS;
+            if (weaponSnapshot == null) {
+                WeaponSkillDamage.apply(
+                        player,
+                        attacker,
+                        context,
+                        expireTick,
+                        WeaponSkillDamage.AttackGatePolicy.RESPECT_AT_IMPACT
+                );
+            } else {
+                WeaponSkillDamage.apply(
+                        player,
+                        attacker,
+                        context,
+                        weaponSnapshot,
+                        expireTick,
+                        WeaponSkillDamage.AttackGatePolicy.RESPECT_AT_IMPACT
+                );
+            }
         }
 
         TemplarVowTracker.endNow(player, nowTick);

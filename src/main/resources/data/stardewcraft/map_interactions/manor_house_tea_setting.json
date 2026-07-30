@@ -1,0 +1,35 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "ManorHouse",
+    "tile_action": "Message \"ManorHouse.2\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:mayor_house",
+    "positions": [
+      [59, 51, 21],
+      [59, 51, 22],
+      [60, 51, 21],
+      [60, 51, 22]
+    ],
+    "blocks": [
+      "stardewcraft:tableware_pink"
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.manor_house.2",
+          "fallback": "A traditional tea setting. The mayor must be pretty serious about tea."
+        }
+      ]
+    }
+  ]
+}

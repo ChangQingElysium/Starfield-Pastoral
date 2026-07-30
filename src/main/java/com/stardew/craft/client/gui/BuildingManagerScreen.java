@@ -11,6 +11,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -76,6 +77,11 @@ public class BuildingManagerScreen extends AbstractContainerScreen<AbstractConta
     private int secGap;    // section gap (includes divider)
     private int btnH;      // button height
     private int btnY;      // button row Y (anchored to bottom)
+    private int requirementsViewportTop;
+    private int requirementsViewportBottom;
+    private int requirementsContentHeight;
+    private int requirementsScroll;
+    private int requirementsLayoutKey = Integer.MIN_VALUE;
 
     public BuildingManagerScreen(AbstractContainerMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
@@ -207,6 +213,14 @@ public class BuildingManagerScreen extends AbstractContainerScreen<AbstractConta
         if (entryProgress > 0.99f) entryProgress = 1.0f;
 
         List<RequirementRow> rows = collectRequirements();
+        int layoutKey = 31 * mgr.getCurrentTier()
+                + rows.size()
+                + (mgr.isAtMaxTier() ? 1_000 : 0);
+        if (layoutKey != requirementsLayoutKey) {
+            requirementsLayoutKey = layoutKey;
+            requirementsContentHeight = 0;
+            requirementsScroll = 0;
+        }
         for (int i = 0; i < barProgress.length; i++) {
             float target = i < rows.size() ? rows.get(i).ratio() * entryProgress : 0;
             barProgress[i] += (target - barProgress[i]) * 0.12f;
@@ -243,11 +257,35 @@ public class BuildingManagerScreen extends AbstractContainerScreen<AbstractConta
         y += secGap;
 
         // == REQUIREMENTS SECTION ==
-        // Clip so requirements never overflow into button area
+        // Long localized requirement labels wrap inside a scrollable viewport.
         int reqClipBottom = btnY - secGap;
-        g.enableScissor(panelX, y, panelX + panelW, reqClipBottom);
-        y = renderRequirements(g, cx, y, cw);
-        g.disableScissor();
+        requirementsViewportTop = y;
+        requirementsViewportBottom = Math.max(y, reqClipBottom);
+        int viewportHeight = Math.max(0,
+                requirementsViewportBottom - requirementsViewportTop);
+        clampRequirementsScroll(viewportHeight);
+        if (viewportHeight > 0) {
+            g.enableScissor(
+                    panelX,
+                    requirementsViewportTop,
+                    panelX + panelW,
+                    requirementsViewportBottom);
+            int contentTop = requirementsViewportTop - requirementsScroll;
+            int contentBottom = renderRequirements(g, cx, contentTop, cw - 6);
+            requirementsContentHeight = Math.max(
+                    viewportHeight,
+                    contentBottom - contentTop);
+            g.disableScissor();
+            clampRequirementsScroll(viewportHeight);
+            renderRequirementsScrollbar(
+                    g,
+                    cx + cw - 3,
+                    requirementsViewportTop,
+                    viewportHeight);
+        } else {
+            requirementsContentHeight = 0;
+            requirementsScroll = 0;
+        }
 
         // -- Divider 2 (above buttons) --
         int div2Y = btnY - secGap;
@@ -282,27 +320,39 @@ public class BuildingManagerScreen extends AbstractContainerScreen<AbstractConta
     private int renderHeader(GuiGraphics g, int cx, int y, int cw) {
         int tier = mgr.getCurrentTier();
 
-        // Title row: building name + tier stars
+        // Title row: building name + tier stars. The name wraps while the
+        // compact tier marker keeps its own slot on the first line.
         Component name = getBuildingDisplayName();
-        int titleMaxW = tier > 0 ? Math.max(1, cw - 36) : cw;
-        g.drawString(this.font, GuiText.ellipsize(this.font, name, titleMaxW), cx, y, COL_TITLE, false);
+        String stars = tier > 0 ? "\u2605".repeat(tier) : "";
+        int starWidth = this.font.width(stars);
+        int titleMaxW = tier > 0
+                ? Math.max(1, cw - starWidth - 6)
+                : cw;
+        int titleY = y;
+        y = GuiText.drawWrapped(
+                g, this.font, name, cx, y, titleMaxW,
+                COL_TITLE, false, 0);
         if (tier > 0) {
-            int starX = cx + Math.min(this.font.width(name), titleMaxW) + 6;
-            String stars = "\u2605".repeat(tier);
             int starCol = switch (tier) {
                 case 1 -> 0xFFCD7F32;
                 case 2 -> 0xFFC0C0C0;
                 default -> 0xFFFFD700;
             };
-            g.drawString(this.font, stars, starX, y, starCol, false);
+            g.drawString(
+                    this.font,
+                    stars,
+                    cx + cw - starWidth,
+                    titleY,
+                    starCol,
+                    false);
         }
-        y += lineH;
 
         // Stage subtitle
         Component stage = Component.translatable(
                 "gui.stardew_craft." + family + "_manager.stage", stageLabel());
-        g.drawString(this.font, GuiText.ellipsize(this.font, stage, cw), cx, y, COL_SUBTITLE, false);
-        y += lineH;
+        y = GuiText.drawWrapped(
+                g, this.font, stage, cx, y, cw,
+                COL_SUBTITLE, false, 0);
 
         // Animal count or unbuilt text
         if (mgr.hasExistingBuilding() || tier > 0) {
@@ -310,7 +360,13 @@ public class BuildingManagerScreen extends AbstractContainerScreen<AbstractConta
             int curAnimals = mgr.getBoundAnimalCount();
             Component animals = Component.literal(
                     "\u2767 " + curAnimals + " / " + maxCap);
-                g.drawString(this.font, GuiText.ellipsize(this.font, animals, cw), cx, y, curAnimals >= maxCap ? COL_RED : COL_TEXT, false);
+            g.drawString(
+                    this.font,
+                    animals,
+                    cx,
+                    y,
+                    curAnimals >= maxCap ? COL_RED : COL_TEXT,
+                    false);
             y += lineH;
 
             // Enclosed status
@@ -320,14 +376,16 @@ public class BuildingManagerScreen extends AbstractContainerScreen<AbstractConta
                 Component encText = Component.literal(icon).append(
                         Component.translatable("gui.stardew_craft." + family + "_manager."
                                 + (enc ? "enclosed_ok" : "need.enclosed")));
-                g.drawString(this.font, GuiText.ellipsize(this.font, encText, cw), cx, y, enc ? COL_OK : COL_RED, false);
-                y += lineH;
+                y = GuiText.drawWrapped(
+                        g, this.font, encText, cx, y, cw,
+                        enc ? COL_OK : COL_RED, false, 0);
             }
         } else {
             Component noBuilding = Component.translatable(
                     "gui.stardew_craft." + family + "_manager.stage.unformed");
-                g.drawString(this.font, GuiText.ellipsize(this.font, noBuilding, cw), cx, y, COL_GRAY, false);
-            y += lineH;
+            y = GuiText.drawWrapped(
+                    g, this.font, noBuilding, cx, y, cw,
+                    COL_GRAY, false, 0);
         }
 
         return y;
@@ -341,12 +399,14 @@ public class BuildingManagerScreen extends AbstractContainerScreen<AbstractConta
         if (mgr.isAtMaxTier()) {
             Component maxText = Component.translatable(
                     "gui.stardew_craft." + family + "_manager.max");
-            g.drawString(this.font, maxText, rx, ry, COL_GOLD, false);
-            ry += lineH;
+            ry = GuiText.drawWrapped(
+                    g, this.font, maxText, rx, ry, rw,
+                    COL_GOLD, false, 0);
             Component readyText = Component.translatable(
                     "gui.stardew_craft." + family + "_manager.ready");
-            g.drawString(this.font, readyText, rx, ry, COL_OK, false);
-            ry += lineH;
+            ry = GuiText.drawWrapped(
+                    g, this.font, readyText, rx, ry, rw,
+                    COL_OK, false, 0);
             return ry;
         }
 
@@ -354,8 +414,10 @@ public class BuildingManagerScreen extends AbstractContainerScreen<AbstractConta
         Component header = mgr.getCurrentTier() <= 0
                 ? Component.translatable("gui.stardew_craft." + family + "_manager.build")
                 : Component.translatable("gui.stardew_craft." + family + "_manager.upgrade");
-        g.drawString(this.font, header, rx, ry, COL_GOLD, false);
-        ry += lineH;
+        ry = GuiText.drawWrapped(
+                g, this.font, header, rx, ry, rw,
+                COL_GOLD, false, 0);
+        ry += 2;
 
         // Requirement rows
         List<RequirementRow> rows = collectRequirements();
@@ -370,25 +432,43 @@ public class BuildingManagerScreen extends AbstractContainerScreen<AbstractConta
             float iconScale = (this.font.lineHeight + 2) / 16.0f;
             CommonGuiTextures.drawItem(g, row.icon, rx, rowY - 1, iconScale);
 
-            // Count (right-aligned, drawn first to know its width)
+            // The label owns the whole first row and can wrap. Progress and
+            // count use a dedicated row below it, so localization never has
+            // to compete with the bar for a narrow single-line slot.
+            int labelX = rx + this.font.lineHeight + 6;
+            int labelWidth = Math.max(1, rw - (labelX - rx));
+            List<FormattedCharSequence> labelLines =
+                    this.font.split(row.label, labelWidth);
+            int labelY = rowY;
+            for (FormattedCharSequence line : labelLines) {
+                g.drawString(this.font, line, labelX, labelY,
+                        COL_TEXT, false);
+                labelY += lineH;
+            }
+            int labelBottom = Math.max(rowY + lineH, labelY);
+
+            // Count and progress bar on the following row.
             String countStr = row.current + "/" + row.required;
             int countColor = row.met ? COL_OK : COL_RED;
             int countW = this.font.width(countStr);
-            g.drawString(this.font, countStr, rx + rw - countW, rowY, countColor, false);
+            int progressY = labelBottom;
+            g.drawString(this.font, countStr,
+                    rx + rw - countW, progressY,
+                    countColor, false);
+            int availableBarWidth = Math.max(
+                    12,
+                    rw - (labelX - rx) - countW - 8);
+            int actualBarW = Math.min(barW, availableBarWidth);
+            drawProgressBar(
+                    g,
+                    labelX,
+                    progressY + 2,
+                    actualBarW,
+                    barH,
+                    barProgress[i],
+                    row.met);
 
-            // Progress bar (right of label, left of count)
-            int barX = rx + rw - countW - barW - 8;
-            drawProgressBar(g, barX, rowY + 2, barW, barH, barProgress[i], row.met);
-
-            // Label (between icon and bar, truncated if needed)
-            int labelX = rx + this.font.lineHeight + 6;
-            int maxLabelW = barX - labelX - 4;
-            if (maxLabelW > 10) {
-                String labelStr = this.font.plainSubstrByWidth(row.label.getString(), maxLabelW);
-                g.drawString(this.font, labelStr, labelX, rowY, COL_TEXT, false);
-            }
-
-            ry += lineH;
+            ry = progressY + lineH + 3;
         }
 
         // "Ready!" message
@@ -396,11 +476,52 @@ public class BuildingManagerScreen extends AbstractContainerScreen<AbstractConta
             float breathe = 0.6f + 0.4f * Mth.sin(tickCount * 0.1f);
             Component ready = Component.translatable(
                     "gui.stardew_craft." + family + "_manager.ready");
-            GuiText.drawCenteredClamped(g, this.font, ready, rx + rw / 2, ry, rw, withAlpha(COL_GOLD, breathe), true);
-            ry += lineH;
+            ry = GuiText.drawWrappedCentered(
+                    g,
+                    this.font,
+                    ready,
+                    rx + rw / 2,
+                    ry,
+                    rw,
+                    withAlpha(COL_GOLD, breathe),
+                    true,
+                    0);
         }
 
         return ry;
+    }
+
+    private void clampRequirementsScroll(int viewportHeight) {
+        int maxScroll = Math.max(
+                0,
+                requirementsContentHeight - Math.max(0, viewportHeight));
+        requirementsScroll = Mth.clamp(
+                requirementsScroll,
+                0,
+                maxScroll);
+    }
+
+    private void renderRequirementsScrollbar(
+            GuiGraphics g,
+            int x,
+            int y,
+            int viewportHeight
+    ) {
+        if (requirementsContentHeight <= viewportHeight
+                || viewportHeight <= 0) {
+            return;
+        }
+        g.fill(x, y, x + 2, y + viewportHeight, 0x403A3228);
+        int thumbHeight = Math.max(
+                10,
+                viewportHeight * viewportHeight
+                        / requirementsContentHeight);
+        int maxScroll = requirementsContentHeight - viewportHeight;
+        int travel = viewportHeight - thumbHeight;
+        int thumbY = y + (maxScroll <= 0
+                ? 0
+                : requirementsScroll * travel / maxScroll);
+        g.fill(x, thumbY, x + 2, thumbY + thumbHeight, COL_GOLD);
     }
 
     private void drawProgressBar(GuiGraphics g, int x, int y, int w, int h, float progress, boolean met) {
@@ -450,8 +571,9 @@ public class BuildingManagerScreen extends AbstractContainerScreen<AbstractConta
         }
 
         int textColor = !active ? 0xFF909090 : (hovered ? COL_TITLE : COL_TEXT);
-        int th = this.font.lineHeight;
-        GuiText.drawCenteredClamped(g, this.font, label, x + w / 2, y + (h - th) / 2, w - 8, textColor, hovered);
+        GuiText.drawCenteredFitted(
+                g, this.font, label, x + w / 2, y + h / 2,
+                w - 8, textColor, hovered);
         g.pose().popPose();
     }
 
@@ -465,9 +587,11 @@ public class BuildingManagerScreen extends AbstractContainerScreen<AbstractConta
         int dw = Math.min(panelW - pad, this.width - 16);
         int contentWidth = Math.max(1, dw - pad * 2);
         List<Component> dialogLines = confirmDialogLines();
-        int dLines = 1;
+        Component title = confirmDialogTitle();
+        int dLines = GuiText.wrappedLineCount(
+                this.font, title, contentWidth, 0);
         for (Component line : dialogLines) {
-            dLines += GuiText.wrappedLineCount(this.font, line, contentWidth, 3);
+            dLines += GuiText.wrappedLineCount(this.font, line, contentWidth, 0);
         }
         int dh = pad * 2 + dLines * lineH + secGap + btnH;
         int dx = (this.width - dw) / 2;
@@ -488,20 +612,16 @@ public class BuildingManagerScreen extends AbstractContainerScreen<AbstractConta
         int tx = dx + pad;
         int ty = dy + pad;
 
-        Component title = switch (confirmType) {
-            case DEMOLISH -> Component.translatable("gui.stardew_craft." + family + "_manager.dialog.demolish.title");
-            case RELOCATE -> Component.translatable("gui.stardew_craft." + family + "_manager.dialog.relocate.title");
-            default -> Component.empty();
-        };
-        g.drawString(this.font, GuiText.ellipsize(this.font, title, contentWidth), tx, ty, COL_TITLE, false);
-        ty += lineH;
+        ty = GuiText.drawWrapped(
+                g, this.font, title, tx, ty, contentWidth,
+                COL_TITLE, false, 0);
 
         for (int i = 0; i < dialogLines.size(); i++) {
             int color = i == dialogLines.size() - 1 ? COL_RED : COL_TEXT;
             if (confirmType == ConfirmType.DEMOLISH && i == dialogLines.size() - 1 && mgr.getBoundAnimalCount() > 0) {
                 color = COL_RED_SOFT;
             }
-            ty = GuiText.drawWrapped(g, this.font, dialogLines.get(i), tx, ty, contentWidth, color, false, 3) + 3;
+            ty = GuiText.drawWrapped(g, this.font, dialogLines.get(i), tx, ty, contentWidth, color, false, 0) + 3;
         }
 
         int cbW = 70;
@@ -533,8 +653,9 @@ public class BuildingManagerScreen extends AbstractContainerScreen<AbstractConta
         }
 
         int textColor = !active ? 0xFF909090 : (hovered ? COL_TITLE : COL_TEXT);
-        int th = this.font.lineHeight;
-        GuiText.drawCenteredClamped(g, this.font, label, x + w / 2, y + (h - th) / 2, w - 8, textColor, hovered);
+        GuiText.drawCenteredFitted(
+                g, this.font, label, x + w / 2, y + h / 2,
+                w - 8, textColor, hovered);
     }
 
     private List<Component> confirmDialogLines() {
@@ -560,6 +681,41 @@ public class BuildingManagerScreen extends AbstractContainerScreen<AbstractConta
     // ============================
     // Input
     // ============================
+
+    @Override
+    public boolean mouseScrolled(
+            double mouseX,
+            double mouseY,
+            double scrollX,
+            double scrollY
+    ) {
+        if (confirmType == ConfirmType.NONE
+                && inside(
+                        (int) mouseX,
+                        (int) mouseY,
+                        panelX,
+                        requirementsViewportTop,
+                        panelW,
+                        Math.max(
+                                0,
+                                requirementsViewportBottom
+                                        - requirementsViewportTop))
+                && requirementsContentHeight
+                        > requirementsViewportBottom
+                                - requirementsViewportTop) {
+            requirementsScroll -= (int) Math.round(
+                    scrollY * lineH * 2.0D);
+            clampRequirementsScroll(
+                    requirementsViewportBottom
+                            - requirementsViewportTop);
+            return true;
+        }
+        return super.mouseScrolled(
+                mouseX,
+                mouseY,
+                scrollX,
+                scrollY);
+    }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
@@ -604,9 +760,10 @@ public class BuildingManagerScreen extends AbstractContainerScreen<AbstractConta
     private boolean handleConfirmClick(int mx, int my) {
         int dw = Math.min(panelW - pad, this.width - 16);
         int contentWidth = Math.max(1, dw - pad * 2);
-        int dLines = 1;
+        int dLines = GuiText.wrappedLineCount(
+                this.font, confirmDialogTitle(), contentWidth, 0);
         for (Component line : confirmDialogLines()) {
-            dLines += GuiText.wrappedLineCount(this.font, line, contentWidth, 3);
+            dLines += GuiText.wrappedLineCount(this.font, line, contentWidth, 0);
         }
         int dh = pad * 2 + dLines * lineH + secGap + btnH;
         int dx = (this.width - dw) / 2;
@@ -631,6 +788,18 @@ public class BuildingManagerScreen extends AbstractContainerScreen<AbstractConta
             return true;
         }
         return true;
+    }
+
+    private Component confirmDialogTitle() {
+        return switch (confirmType) {
+            case DEMOLISH -> Component.translatable(
+                    "gui.stardew_craft." + family
+                            + "_manager.dialog.demolish.title");
+            case RELOCATE -> Component.translatable(
+                    "gui.stardew_craft." + family
+                            + "_manager.dialog.relocate.title");
+            default -> Component.empty();
+        };
     }
 
     @Override

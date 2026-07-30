@@ -108,6 +108,11 @@ import com.stardew.craft.api.v1.machine.StardewMachineCycles;
 import com.stardew.craft.api.v1.machine.StardewProductionPlan;
 import com.stardew.craft.api.v1.machine.StardewProductionPlans;
 import com.stardew.craft.api.v1.machine.StardewProductionEvents;
+import com.stardew.craft.api.v1.mapinteraction.StardewMapInteractionActionExecutor;
+import com.stardew.craft.api.v1.mapinteraction.StardewMapInteractionActions;
+import com.stardew.craft.api.v1.mapinteraction.StardewMapInteractionContext;
+import com.stardew.craft.api.v1.mapinteraction.StardewMapInteractionProvider;
+import com.stardew.craft.api.v1.mapinteraction.StardewMapInteractions;
 import com.stardew.craft.api.v1.tree.StardewTreeRuntimeAdapter;
 import com.stardew.craft.api.v1.tree.StardewTreeState;
 import com.stardew.craft.api.v1.tree.StardewTreeType;
@@ -171,6 +176,7 @@ public final class ExampleStardewAddon {
         registerSpecialOrderTypes();
         registerProgressExamples();
         registerNpcInteractionProvider();
+        registerMapInteractions();
         registerNpcSocialExtensions();
         registerAgricultureProvider();
         registerCropRuntimeExample();
@@ -467,6 +473,39 @@ public final class ExampleStardewAddon {
             context.player().displayClientMessage(Component.literal("Lewis notices the addon apple."), false);
             return InteractionResult.SUCCESS;
         });
+    }
+
+    private static void registerMapInteractions() {
+        StardewMapInteractionActionExecutor<HeldItemMapAction> executor =
+                (context, data) -> BuiltInRegistries.ITEM
+                        .getOptional(data.item())
+                        .filter(item -> context.player()
+                                .getItemInHand(context.hand()).is(item))
+                        .map(item -> InteractionResult.SUCCESS)
+                        .orElse(InteractionResult.PASS);
+        StardewMapInteractionActions.register(
+                id("held_item"),
+                HeldItemMapAction.CODEC,
+                executor);
+
+        StardewMapInteractionProvider provider =
+                (StardewMapInteractionContext context) -> {
+                    if (!context.hit().getBlockPos().equals(
+                            new BlockPos(10012, 61, 10010))
+                            || !context.player().isShiftKeyDown()
+                            || !context.player()
+                                    .getItemInHand(context.hand())
+                                    .is(Items.APPLE)) {
+                        return InteractionResult.PASS;
+                    }
+                    context.player().displayClientMessage(
+                            Component.literal(
+                                    "The addon handled this dynamic map point."),
+                            false);
+                    return InteractionResult.SUCCESS;
+                };
+        StardewMapInteractions.register(
+                id("dynamic_apple_shed_point"), 100, provider);
     }
 
     private static void registerNpcSocialExtensions() {
@@ -1266,6 +1305,14 @@ public final class ExampleStardewAddon {
         private static final Codec<HealAction> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 Codec.floatRange(0.0F, 1024.0F).fieldOf("health").forGetter(HealAction::health)
         ).apply(instance, HealAction::new));
+    }
+
+    private record HeldItemMapAction(ResourceLocation item) {
+        private static final Codec<HeldItemMapAction> CODEC =
+                RecordCodecBuilder.create(instance -> instance.group(
+                        ResourceLocation.CODEC.fieldOf("item")
+                                .forGetter(HeldItemMapAction::item)
+                ).apply(instance, HeldItemMapAction::new));
     }
 
     private record BreakTargetsObjective(String target, int count) {

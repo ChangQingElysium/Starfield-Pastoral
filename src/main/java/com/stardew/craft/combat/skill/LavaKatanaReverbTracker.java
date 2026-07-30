@@ -1,26 +1,54 @@
 package com.stardew.craft.combat.skill;
 
+import com.stardew.craft.StardewCraft;
 import com.stardew.craft.combat.WeaponStats;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 
 public final class LavaKatanaReverbTracker {
 
+    public enum Status {
+        ACTIVE,
+        COMPLETED,
+        INVALIDATED
+    }
+
+    public static final String FINISHER_SKILL_ID =
+            "lava_katana_finisher";
+    public static final int ACTIVE_DURATION_TICKS = 80;
+    public static final double TARGET_RANGE = 8.0D;
+    public static final int MINIMUM_HEAT = 5;
+    public static final int HIT_CONTEXT_LIFETIME_TICKS = 5;
+    public static final float FINISHER_BASE_SCALAR = 1.5F;
+    public static final float FINISHER_HEAT_SCALAR = 0.05F;
+
     private static final class State {
+        private final ResourceKey<Level> dimension;
         private final long endTick;
-        private State(long endTick) {
+        private final WeaponDamageSnapshot weaponSnapshot;
+
+        private State(
+            ResourceKey<Level> dimension,
+            long endTick,
+            WeaponDamageSnapshot weaponSnapshot
+        ) {
+            this.dimension = dimension;
             this.endTick = endTick;
+            this.weaponSnapshot = weaponSnapshot;
         }
     }
 
@@ -29,31 +57,108 @@ public final class LavaKatanaReverbTracker {
     private LavaKatanaReverbTracker() {}
 
     public static void start(ServerPlayer player, long nowTick, int durationTicks) {
+        if (player == null) {
+            return;
+        }
+        start(
+            player,
+            nowTick,
+            durationTicks,
+            WeaponDamageSnapshot.capture(
+                ResourceLocation.fromNamespaceAndPath(
+                    StardewCraft.MODID,
+                    "lava_katana"
+                ),
+                player.getMainHandItem()
+            )
+        );
+    }
+
+    public static void start(
+        ServerPlayer player,
+        long nowTick,
+        int durationTicks,
+        WeaponDamageSnapshot weaponSnapshot
+    ) {
         if (player == null || durationTicks <= 0) {
             return;
         }
-        ACTIVE.put(player.getUUID(), new State(nowTick + durationTicks));
+        ACTIVE.put(
+            player.getUUID(),
+            new State(
+                player.level().dimension(),
+                nowTick + durationTicks,
+                Objects.requireNonNull(
+                    weaponSnapshot,
+                    "weaponSnapshot"
+                )
+            )
+        );
     }
 
     public static boolean isActive(ServerPlayer player, long nowTick) {
         if (player == null) return false;
         State state = ACTIVE.get(player.getUUID());
-        return state != null && nowTick <= state.endTick;
+        if (state == null) {
+            return false;
+        }
+        Status status = statusForSnapshot(
+            isSameDimension(
+                state.dimension,
+                player.level().dimension()
+            ),
+            nowTick,
+            state.endTick
+        );
+        if (status == Status.INVALIDATED) {
+            ACTIVE.remove(player.getUUID());
+            return false;
+        }
+        return status == Status.ACTIVE;
     }
 
-    public static void tick(ServerPlayer player, long nowTick) {
-        if (player == null) return;
-        State state = ACTIVE.get(player.getUUID());
-        if (state == null) return;
+    public static boolean hasState(ServerPlayer player) {
+        return player != null && ACTIVE.containsKey(player.getUUID());
+    }
 
-        if (nowTick > state.endTick) {
-            finish(player, nowTick);
+    public static Status tick(ServerPlayer player, long nowTick) {
+        if (player == null) {
+            return Status.INVALIDATED;
+        }
+        State state = ACTIVE.get(player.getUUID());
+        if (state == null) {
+            return Status.INVALIDATED;
+        }
+        Status status = statusForSnapshot(
+            isSameDimension(
+                state.dimension,
+                player.level().dimension()
+            ),
+            nowTick,
+            state.endTick
+        );
+        if (status == Status.INVALIDATED) {
+            ACTIVE.remove(player.getUUID());
+            return Status.INVALIDATED;
+        }
+        if (status == Status.ACTIVE) {
+            return Status.ACTIVE;
+        }
+
+        try {
+            finish(player, nowTick, state);
+        } finally {
             ACTIVE.remove(player.getUUID());
         }
+        return Status.COMPLETED;
     }
 
     @SuppressWarnings("null")
-    private static void finish(ServerPlayer player, long nowTick) {
+    private static void finish(
+        ServerPlayer player,
+        long nowTick,
+        State state
+    ) {
         if (!(player.level() instanceof ServerLevel level)) {
             return;
         }
@@ -75,33 +180,32 @@ public final class LavaKatanaReverbTracker {
             }
 
             int remainingTicks = LavaKatanaMarkTracker.getRemainingTicks(target, nowTick);
-            int remainingJumps = Math.max(0, (remainingTicks + 9) / 10);
+            int remainingJumps = remainingBurnJumps(remainingTicks);
             if (remainingJumps <= 0) {
                 LavaKatanaMarkTracker.clearMark(target);
                 continue;
             }
 
             int heat = LavaKatanaMarkTracker.getHeat(target);
-            float baseJumpRatio = 0.15f + heat * 0.08f;
-            float finisherMultiplier = remainingJumps * baseJumpRatio * (1.5f + 0.05f * heat);
+            float finisherMultiplier =
+                finisherDamageMultiplier(remainingTicks, heat);
 
-            WeaponStats weaponStats = WeaponStats.fromItemStack(player.getMainHandItem());
+            WeaponStats weaponStats =
+                weaponStatsFromSnapshot(state.weaponSnapshot);
             if (weaponStats.getAverageDamage() <= 0.0f) {
                 LavaKatanaMarkTracker.clearMark(target);
                 continue;
             }
 
-            SkillContext context = SkillContext.builder()
-                .skillId("lava_katana_finisher")
-                .tier(SkillContext.SkillTier.MAJOR)
-                .damageMultiplier(finisherMultiplier)
-                .build();
-            WeaponSkillContextStore.setPending(player, context, nowTick + 5);
-
             target.invulnerableTime = 0;
             target.hurtTime = 0;
-            var source = player.damageSources().playerAttack(player);
-            target.hurt(source, 1.0F);
+            WeaponSkillDamage.apply(
+                player,
+                target,
+                createFinisherContext(finisherMultiplier),
+                state.weaponSnapshot,
+                nowTick + HIT_CONTEXT_LIFETIME_TICKS
+            );
 
             playFinisherImpact(level, target);
             LavaKatanaMarkTracker.clearMark(target);
@@ -151,8 +255,82 @@ public final class LavaKatanaReverbTracker {
                 && LavaKatanaMarkTracker.isMarkedBy(entity, owner, nowTick));
     }
 
+    public static void cancel(ServerPlayer player) {
+        if (player != null) {
+            ACTIVE.remove(player.getUUID());
+        }
+    }
+
     /** Clean up state when a player logs out to prevent memory leaks. */
     public static void removePlayer(UUID playerId) {
         ACTIVE.remove(playerId);
+    }
+
+    static boolean isWithinActiveWindow(long nowTick, long endTick) {
+        return nowTick <= endTick;
+    }
+
+    static Status statusForSnapshot(
+        boolean sameDimension,
+        long nowTick,
+        long endTick
+    ) {
+        if (!sameDimension) {
+            return Status.INVALIDATED;
+        }
+        return isWithinActiveWindow(nowTick, endTick)
+            ? Status.ACTIVE
+            : Status.COMPLETED;
+    }
+
+    static boolean isSameDimension(
+        ResourceKey<Level> expected,
+        ResourceKey<Level> actual
+    ) {
+        return expected.equals(actual);
+    }
+
+    static int remainingBurnJumps(int remainingTicks) {
+        return (int) Math.max(
+            0L,
+            ((long) remainingTicks
+                + LavaKatanaMarkTracker.BURN_INTERVAL_TICKS
+                - 1L)
+                / LavaKatanaMarkTracker.BURN_INTERVAL_TICKS
+        );
+    }
+
+    static float finisherDamageMultiplier(
+        int remainingTicks,
+        int heat
+    ) {
+        int nonNegativeHeat = Math.max(0, heat);
+        float baseJumpRatio =
+            LavaKatanaMarkTracker.BASE_BURN_RATIO
+                + nonNegativeHeat
+                * LavaKatanaMarkTracker.HEAT_BONUS_REVERB_RATIO;
+        return remainingBurnJumps(remainingTicks)
+            * baseJumpRatio
+            * (FINISHER_BASE_SCALAR
+                + FINISHER_HEAT_SCALAR * nonNegativeHeat);
+    }
+
+    static SkillContext createFinisherContext(float damageMultiplier) {
+        return SkillContext.builder()
+            .skillId(FINISHER_SKILL_ID)
+            .tier(SkillContext.SkillTier.MAJOR)
+            .damageMultiplier(damageMultiplier)
+            .build();
+    }
+
+    static WeaponStats weaponStatsFromSnapshot(
+        WeaponDamageSnapshot weaponSnapshot
+    ) {
+        return WeaponStats.fromItemStack(
+            Objects.requireNonNull(
+                weaponSnapshot,
+                "weaponSnapshot"
+            ).weapon()
+        );
     }
 }

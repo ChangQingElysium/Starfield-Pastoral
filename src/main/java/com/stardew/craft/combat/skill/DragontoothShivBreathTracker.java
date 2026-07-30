@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public final class DragontoothShivBreathTracker {
+    public static final int ACTIVE_DURATION_TICKS = 120;
 
     private static final class State {
         private final long endTick;
@@ -33,7 +34,9 @@ public final class DragontoothShivBreathTracker {
         if (player == null) return false;
         State state = ACTIVE.get(player.getUUID());
         if (state == null) return false;
-        if (nowTick > state.endTick) {
+        if (!player.isAlive()
+                || player.isRemoved()
+                || nowTick > state.endTick) {
             clear(player);
             return false;
         }
@@ -43,15 +46,25 @@ public final class DragontoothShivBreathTracker {
     public static void tick(ServerPlayer player, long nowTick) {
         if (player == null) return;
         State state = ACTIVE.get(player.getUUID());
-        if (state != null && nowTick > state.endTick) {
+        if (state != null && (!player.isAlive()
+                || player.isRemoved()
+                || nowTick > state.endTick)) {
             clear(player);
         }
     }
 
     public static void clear(ServerPlayer player) {
         if (player == null) return;
-        ACTIVE.remove(player.getUUID());
-        PacketDistributor.sendToPlayer(player, new DragontoothShivBreathPayload(false, 0));
+        if (ACTIVE.remove(player.getUUID()) != null) {
+            PacketDistributor.sendToPlayer(
+                    player,
+                    new DragontoothShivBreathPayload(false, 0)
+            );
+        }
+    }
+
+    public static boolean hasState(UUID playerId) {
+        return playerId != null && ACTIVE.containsKey(playerId);
     }
 
     /** Clean up state when a player logs out to prevent memory leaks. */

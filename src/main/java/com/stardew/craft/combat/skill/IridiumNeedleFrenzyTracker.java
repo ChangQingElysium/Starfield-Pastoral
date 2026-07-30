@@ -9,6 +9,11 @@ import java.util.Map;
 import java.util.UUID;
 
 public final class IridiumNeedleFrenzyTracker {
+    public static final float CRIT_CHANCE_BONUS = 0.30F;
+    public static final int CRITICAL_HEAL_AMOUNT = 5;
+    public static final float CRITICAL_ENERGY_RESTORE = 10.0F;
+    public static final int CRITICAL_VULNERABLE_DURATION_TICKS = 40;
+    public static final int CRITICAL_VULNERABLE_AMPLIFIER = 1;
 
     private static final Map<UUID, Long> ACTIVE = new HashMap<>();
 
@@ -30,7 +35,7 @@ public final class IridiumNeedleFrenzyTracker {
         if (endTick == null) {
             return false;
         }
-        if (nowTick > endTick) {
+        if (!isWithinActiveWindow(nowTick, endTick)) {
             clear(player);
             return false;
         }
@@ -45,17 +50,26 @@ public final class IridiumNeedleFrenzyTracker {
         if (endTick == null) {
             return;
         }
-        if (nowTick > endTick) {
+        if (!isWithinActiveWindow(nowTick, endTick)) {
             clear(player);
         }
+    }
+
+    static boolean isWithinActiveWindow(long nowTick, long endTick) {
+        return nowTick <= endTick;
     }
 
     public static void clear(ServerPlayer player) {
         if (player == null) {
             return;
         }
-        ACTIVE.remove(player.getUUID());
-        PacketDistributor.sendToPlayer(player, new IridiumNeedleFrenzyPayload(false, 0));
+        Long removed = ACTIVE.remove(player.getUUID());
+        if (removed != null) {
+            PacketDistributor.sendToPlayer(
+                player,
+                new IridiumNeedleFrenzyPayload(false, 0)
+            );
+        }
     }
 
     /** Clean up state when a player logs out to prevent memory leaks. */

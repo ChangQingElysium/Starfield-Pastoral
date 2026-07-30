@@ -1,0 +1,33 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "Blacksmith",
+    "tile_action": "Message \"Blacksmith.7\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:blacksmith",
+    "positions": [
+      [
+        115,
+        46,
+        22
+      ]
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.blacksmith.7",
+          "fallback": "Clint's quality anvil. It's made from an iridium alloy."
+        }
+      ]
+    }
+  ]
+}

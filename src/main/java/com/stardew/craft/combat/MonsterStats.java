@@ -3,6 +3,8 @@ package com.stardew.craft.combat;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 
 /**
  * 怪物属性
@@ -12,11 +14,13 @@ public class MonsterStats {
     
     // NBT标签名（用于自定义怪物数据）
     public static final String TAG_STARDEW_MONSTER = "StardewMonster";
+    public static final String TAG_DATA_VERSION = "DataVersion";
     public static final String TAG_DAMAGE = "Damage";
     public static final String TAG_RESILIENCE = "Resilience";  // 韧性/护甲
     public static final String TAG_MISS_CHANCE = "MissChance"; // 闪避率
     public static final String TAG_EXPERIENCE = "Experience";
     public static final String TAG_IS_DANGEROUS = "IsDangerous"; // 是否危险版本
+    public static final int CURRENT_DATA_VERSION = 1;
     
     private final float damage;          // 对玩家造成的伤害
     private final float resilience;      // 韧性（减伤）
@@ -71,6 +75,7 @@ public class MonsterStats {
      */
     public CompoundTag toNBT() {
         CompoundTag tag = new CompoundTag();
+        tag.putInt(TAG_DATA_VERSION, CURRENT_DATA_VERSION);
         tag.putFloat(TAG_DAMAGE, damage);
         tag.putFloat(TAG_RESILIENCE, resilience);
         tag.putFloat(TAG_MISS_CHANCE, missChance);
@@ -91,13 +96,13 @@ public class MonsterStats {
      * 原版实体的默认属性映射
      */
     private static MonsterStats fromVanillaEntity(LivingEntity entity) {
-        // TODO: 根据实体类型返回适当的属性
-        // 例如：僵尸、骷髅等映射到合理的星露谷风格数值
+        AttributeInstance attack = entity.getAttribute(Attributes.ATTACK_DAMAGE);
+        AttributeInstance armor = entity.getAttribute(Attributes.ARMOR);
         return builder()
-            .damage(5)
-            .resilience(0)
+            .damage(attack == null ? 0.0f : (float) attack.getValue())
+            .resilience(armor == null ? 0.0f : (float) armor.getValue())
             .missChance(0)
-            .experience(3)
+            .experience(0)
             .build();
     }
     

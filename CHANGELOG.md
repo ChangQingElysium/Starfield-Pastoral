@@ -1,5 +1,121 @@
 # Changelog
 
+## 0.5.4 - 2026-07-30
+
+### Update Log (English)
+
+#### Casino And “The Mysterious Qi”
+
+- Implemented the complete original “The Mysterious Qi” scavenger hunt. Reading the corresponding Secret Note now starts the per-player quest chain through the tunnel safe, railroad box, Mayor Lewis's refrigerator and sand dragon, consuming a Battery Pack, Rainbow Shell, ten Beets and Solar Essence in the original order before delivering the Club Card by mail.
+- Added the Casino as a fully managed location: entry and exit interactions, Club Card checks, per-player bouncer removal and access control, Casino music and time-pause behavior, Qi Coin HUD integration and multiplayer-safe state are all connected to the new public-map layout.
+- Added the bouncer, Mr. Qi and casino prize seller with source-style one-time dialogue and per-player visibility. Hidden NPCs no longer retain collision, push the player or leak through Jade tooltips.
+- Implemented CalicoJack in normal and high-stakes variants and the Slots minigame with source-derived rules, server-authoritative wagers and settlement, original-style sounds, animation timing and responsive interfaces that remain usable across GUI scales.
+- Added the Club Computer/Farmer File statistics display, the Qi Coin exchange machine, the Casino prize shop and their original interaction semantics. Casino actions are rejected outside the Casino and interrupted minigames settle safely instead of refunding losing wagers.
+- Added the Statue of Endless Fortune and Statue of Perfection as functional utility facilities with per-day output behavior, together with the source-style statue seller and casino rewards.
+- Added separate red, purple and green Casino Firework items. They retain their original icons, names, descriptions, Qi Coin prices and stock while launching compatible Minecraft firework behavior.
+
+#### Combat And Weapon Skills
+
+- Rebuilt combat around one authoritative damage pipeline with explicit requests, outcomes, adjustments, healing and damage history. Immediate and delayed hits now share the same authorization and settlement rules instead of dispatching duplicate attack events.
+- Migrated all 64 built-in weapon skills to a centralized handler registry and runtime. Per-player ticking, lifecycle cleanup, cooldowns and event routing are now deterministic and avoid the previous long chain of independent hot-path calls.
+- Added immutable weapon-damage snapshots for delayed projectiles, marks, echoes and chained attacks, preventing later equipment changes or cross-dimension transitions from corrupting an already-authorized hit.
+- Consolidated shared sword, club and dagger item behavior while preserving each weapon's Stardew data, skill identity and special presentation. Cross-dimension damage and healing now use consistent one-to-one values.
+- Reworked skill state for thrusts, counters, marks, poison, burning, freezing, execution, resonance, starfall and other multi-stage effects, with stricter target validation and cleanup on death, logout and dimension changes.
+- Added a dedicated weapon-skill presentation layer for first- and third-person animation, trails, particles, sound and synchronized impacts. Crescent Slash and Forest Blessing now use authored visual assets and deterministic network playback.
+- Hardened rings, equipment attributes, fire protection, monster combat profiles, drops and names, and added broad regression coverage for damage, skills, projectiles, effects and lifecycle behavior.
+
+#### Interaction System And World Content
+
+- Added a semantic interaction-hint system for grab, gift, talk, look and harvest actions. The server resolves the exact block face or entity under the crosshair, while the client renders a compact time-faded hint only for the current target.
+- Hints now support per-player completion state, completed styling, explicit suppression tags and priority-based addon providers. Portal and story interactions use the same presentation without revealing locked or unfinished content.
+- Added a data-driven map-interaction platform with namespaced definitions, position and area targets, requirements, actions, dialogue, sounds and one-time read state. Definitions reload atomically and remain server-authoritative in multiplayer.
+- Published addon APIs, JSON schemas, examples, validation scripts and an approval-map workflow for interaction hints and map interactions, so new content can be reviewed spatially before being synchronized into the game.
+- Converted authored world interactions for the Qi quest, Casino, Secret Notes and other fixed-map content to the shared interaction infrastructure, reducing duplicated coordinate polling and inconsistent hint behavior.
+- Improved object and NPC dialogue presentation, wrapping and one-time conversation handling. Interaction feedback now uses the intended Stardew-style dialogue or HUD path instead of chat spam.
+
+#### Overnight, Pass-Out And Recovery
+
+- Rebuilt the overnight sequence to follow the source order: all pending level-up pages are shown first, followed by the shipping summary when applicable, then the save screen and new-day transition.
+- Reworked the Shipping Menu with source-style category tabs, item rows, money counting, animations, sounds and transitions. The level-up, saving and pass-out screens now share responsive layout rules across GUI scales and languages.
+- Added the source collapse timeline for exhaustion and combat defeat, including drowsy, falling, prone and fade-to-black phases, instead of immediately teleporting the player.
+- Added a persistent per-player recovery ledger for collapse, rescue, outcome and overnight settlement. Interrupted sessions can resume safely after disconnects or server restarts without duplicate fees, lost rewards or a permanently blocked day.
+- Added coordinated hospital, island and mine rescue cutscenes and persistent pass-out mail/outcome data. Item loss, money loss, destination choice and near-bed exemptions are resolved once on the server.
+- Hardened multiplayer overnight acknowledgements, sleep voting, time pausing, save timing and farm catch-up so one player, menu or manager failure cannot silently desynchronize the shared day.
+
+#### Interfaces, Runtime And Quality
+
+- Reworked building, fish-pond, silo, shop, confirmation and point-planning screens for reliable scaling, text wrapping and input placement. Long Russian, French and other localized strings no longer require a language-specific layout.
+- Reduced combat and player-data hot-path work by replacing dozens of per-tick tracker calls with one runtime dispatcher, synchronizing only changed vitals during combat and marking persistent data dirty only when state actually changes.
+- Added an asynchronous, cached Modrinth update check to the login notice. Players may permanently dismiss the community announcement, while an important notice still appears when the installed version is outdated.
+- Removed the overpowered automatic Meowmere opening reward while retaining the weapon and its normal progression path.
+- Fixed protected public-area and fish-pond placement handling so denied single- and multi-block placements cancel atomically and retain the original item stack.
+- Fixed JEI collapsing quality-bearing crops and other Stardew items to a single iridium-quality entry; ingredient-list identity now preserves quality and flower colour while recipe lookups remain intentionally quality-agnostic.
+- Removed obsolete gameplay debug commands and expanded automated coverage for Casino, Qi quests, combat, interactions, overnight recovery, UI scaling, networking, items and map resources.
+
+#### Maps, Assets And Compatibility
+
+- Advanced the bundled Stardew Valley public-map layout to version 12 and refreshed the managed region manifest. Updated public `.mca` files are installed through the existing hashed migration path without claiming player farm regions.
+- Added Casino blocks, models, NPC assets, portraits, GUI textures, sounds, Qi Coin presentation, statues, fireworks and quest resources as standalone assets rather than runtime crops from source sheets.
+- Updated every affected name, description, dialogue, hint, shop entry and interface string across all 12 shipped languages: German, English, Spanish, French, Hungarian, Italian, Japanese, Korean, Brazilian Portuguese, Russian, Turkish and Simplified Chinese.
+- Expanded the public interaction and combat architecture documentation, data-pack examples, validation tools and project README, and updated the public mod version to `0.5.4`.
+
+### 更新日志（中文）
+
+#### 赌场与“神秘的齐先生”
+
+- 完整实装原版“神秘的齐先生”寻物任务。阅读对应秘密纸条后会按玩家独立开启任务链，依次经过隧道保险箱、火车站箱子、刘易斯镇长的冰箱与沙漠巨龙，按原版顺序消耗电池组、彩虹贝壳、十个甜菜和太阳精华，最后通过邮箱发放会员卡。
+- 将赌场接入为完整受管理区域：进出交互、会员卡校验、按玩家隐藏门卫与开放入口、赌场音乐、区域时间暂停、齐币 HUD 和多人状态均已连接到新版公共地图。
+- 新增门卫、齐先生和赌场奖品商人，并按原版处理一次性对话与玩家独立可见性。对当前玩家隐藏的 NPC 不再保留碰撞、挤动玩家或通过 Jade 暴露提示。
+- 实装普通与高额“卡利科杰克”二十一点以及老虎机小游戏：规则、下注与结算由服务端权威处理，接入原版风格的声音、动画节奏和响应式界面，在不同 GUI 缩放下均可正常操作。
+- 新增赌场电脑/农场主档案统计、齐币兑换机、赌场奖品商店及其原版交互语义。离开赌场后无法伪造赌场操作，中途退出小游戏也会安全结算，不再错误返还已经输掉的下注。
+- 新增可正常运作的无尽财富之雕像与完美之雕像，按日生成对应物品，并接入原版风格的雕像商人与赌场奖励。
+- 将红色、紫色、绿色赌场烟花分别注册为独立杂项物品，保留原版图标、名称、描述、齐币售价与库存，并以兼容 Minecraft 的烟花行为发射。
+
+#### 战斗与武器技能
+
+- 将战斗重构为单一服务端权威伤害管线，明确区分伤害请求、结算结果、数值调整、治疗与伤害历史。即时命中与延迟命中现在遵循同一套授权与结算规则，不再重复触发攻击事件。
+- 将全部 64 个内置武器技能迁移到统一 Handler 注册表和运行时。玩家 tick、生命周期清理、冷却与事件分发由单一入口确定性执行，移除了原本热路径中冗长的独立调用链。
+- 为延迟弹射物、标记、回响和连锁攻击加入不可变武器伤害快照，避免攻击已经授权后因换装或跨维度导致伤害上下文被污染。
+- 收拢剑、锤与匕首的共用物品行为，同时保留每件武器的星露谷数据、技能身份与特殊表现。跨维度伤害和治疗现在统一使用一比一数值。
+- 重写突刺、反击、标记、中毒、燃烧、冻结、处决、共鸣、星落等多阶段技能状态，并加强目标校验，以及死亡、退出和切换维度时的清理。
+- 新增独立的武器技能表现层，统一处理第一/第三人称动画、拖尾、粒子、声音与同步命中；弦月斩和森林祝福现已使用定制视觉资产与确定性网络播放。
+- 加固戒指、装备属性、防火效果、矿井怪物战斗配置、掉落和名称，并为伤害、技能、弹射物、状态效果与生命周期补充大量回归测试。
+
+#### 交互系统与世界内容
+
+- 新增拾取、赠送、交谈、查看与收获五类语义化交互提示。服务端解析准星实际命中的方块面或实体，客户端只为当前目标显示紧凑且按时间渐显渐隐的提示。
+- 提示支持玩家独立完成状态、完成后样式、显式禁用标签和带优先级的附属 Provider；传送与剧情交互共用同一套表现，同时不会向未解锁玩家泄露内容。
+- 新增数据驱动地图交互平台，可通过命名空间定义坐标/区域目标、条件、动作、对话、声音和一次性阅读状态；所有定义原子 reload，并在多人游戏中由服务端权威裁定。
+- 发布交互提示与地图交互的附属 API、JSON Schema、示例、校验脚本和点位审批图工作流，使新增内容可以先进行空间审核，再同步进入游戏。
+- 将齐先生任务、赌场、秘密纸条及其他固定地图内容迁移到共享交互基础设施，减少重复坐标轮询与不一致的提示实现。
+- 改进物体/NPC 对话的显示、换行与一次性对话处理，交互反馈改走对应的星露谷风格对话框或 HUD，不再滥用聊天栏。
+
+#### 过夜、晕倒与救援
+
+- 按原版顺序重做过夜流程：依次展示全部待处理技能升级页面；存在出货时再展示出货总结；最后进入存档画面并切换新一天。
+- 重做出货总结界面，补全原版风格分类页签、物品行、金额滚动、动画、声音与转场；技能升级、保存和晕倒页面也统一适配不同 GUI 缩放与语言。
+- 新增原版式体力耗尽/战斗倒地时间线，包含困倦、倒下、趴地与黑屏阶段，不再立即生硬传送玩家。
+- 新增按玩家持久保存的恢复账本，覆盖倒地、救援、结果和过夜结算阶段。断线或服务器重启后可安全续接，不会重复扣费、丢失奖励或永久卡住当天。
+- 新增医院、姜岛与矿井救援过场协调和持久化晕倒信件/结算数据；物品损失、金钱损失、救援地点和床边豁免只在服务端结算一次。
+- 加固多人过夜 ACK、睡眠投票、时间暂停、保存时机和农场离线追赶，单个玩家、界面或管理器异常不再悄悄破坏共享日期同步。
+
+#### 界面、运行效率与质量修复
+
+- 重做建筑、鱼塘、筒仓、商店、确认框与点位规划界面的缩放、文字换行和控件定位；俄语、法语等较长文本不再依赖单独的语言特判。
+- 将战斗与玩家数据热路径从数十个独立技能逐 tick 调用收敛为单一运行时，只在战斗中同步发生变化的生命数据，并仅在持久状态确实变化时标记存档为 dirty。
+- 为登录公告新增异步且带缓存的 Modrinth 版本检查。玩家可以永久关闭社区公告，但安装版本过旧时仍会收到必要的更新提醒。
+- 移除开局自动发放、强度过高的喵刀奖励，同时保留武器本身及其正常获取路径。
+- 修复公共保护区与鱼塘保护的方块放置拦截；单方块和多方块放置被拒绝时会原子取消事务并保留原物品堆。
+- 修复 JEI 将带品质作物及其他星露谷物品折叠为单一铱星条目的问题；物品列表保留品质与花色，配方查询则继续有意忽略品质。
+- 移除过时的玩法调试指令，并为赌场、齐先生任务、战斗、交互、过夜恢复、界面缩放、网络、物品与地图资源扩充自动化测试。
+
+#### 地图、资产与兼容
+
+- 将内置星露谷公共地图布局推进到版本 12，并刷新受管理 region 清单。新版公共 `.mca` 继续通过带哈希的迁移流程安装，不会接管玩家农场 region。
+- 补充赌场方块、模型、NPC 资产、肖像、GUI 贴图、声音、齐币表现、雕像、烟花与任务资源；运行时不再直接从原版大图临时裁切这些资产。
+- 为当前发布的全部 12 种语言同步更新受影响的名称、描述、对话、提示、商店条目和界面文本：德语、英语、西班牙语、法语、匈牙利语、意大利语、日语、韩语、巴西葡萄牙语、俄语、土耳其语与简体中文。
+- 扩充公开交互/战斗架构文档、数据包示例、校验工具与项目 README，并将公开模组版本号更新为 `0.5.4`。
+
 ## 0.5.3 - 2026-07-27
 
 ### Update Log (English)

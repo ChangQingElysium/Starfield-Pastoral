@@ -267,6 +267,18 @@ public final class WinterStarFestivalService {
         return true;
     }
 
+    /** Read-only form of the secret-recipient prompt check. */
+    public static boolean canPromptSecretGift(
+            ServerPlayer player,
+            String npcId
+    ) {
+        return player != null
+                && npcId != null
+                && isInteractionEnabled(player)
+                && !hasSecretGiftCompleted(player)
+                && npcId.equalsIgnoreCase(getSecretFriendId(player));
+    }
+
     public static void handleSelectedSecretGift(ServerPlayer player, String npcId, int slot) {
         if (player == null || npcId == null || slot < 0 || slot >= player.getInventory().getContainerSize()
             || !isInteractionEnabled(player) || hasSecretGiftCompleted(player)

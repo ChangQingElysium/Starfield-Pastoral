@@ -1,0 +1,355 @@
+{
+  "format": 2,
+  "geometry": {
+    "unpaired_points": "single_block",
+    "paired_suffixes": ["_1", "_2"],
+    "paired_points": "inclusive_cuboid"
+  },
+  "batches": [
+    {
+      "section": "4_2",
+      "map": "Hospital",
+      "location": "stardewcraft:clinic",
+      "omitted": ["1", "2"],
+      "interactions": [
+        {
+          "id": "hospital_3",
+          "original_key": "Hospital.3",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.hospital.3",
+          "points": [
+            { "name": "3", "x": 1, "y": 43, "z": -26 }
+          ]
+        },
+        {
+          "id": "hospital_4",
+          "original_key": "Hospital.4",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.hospital.4",
+          "points": [
+            { "name": "4", "x": 6, "y": 44, "z": -20 }
+          ]
+        },
+        {
+          "id": "hospital_5",
+          "original_key": "Hospital.5",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.hospital.5",
+          "points": [
+            { "name": "5", "x": 11, "y": 44, "z": -16 }
+          ]
+        },
+        {
+          "id": "hospital_6",
+          "original_key": "Hospital.6",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.hospital.6",
+          "points": [
+            { "name": "6", "x": 12, "y": 44, "z": -16 }
+          ]
+        },
+        {
+          "id": "hospital_7",
+          "original_key": "Hospital.7",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.hospital.7",
+          "points": [
+            { "name": "7_1", "x": 14, "y": 43, "z": -16 },
+            { "name": "7_2", "x": 14, "y": 44, "z": -16 }
+          ]
+        }
+      ]
+    },
+    {
+      "section": "4_3",
+      "map": "LeahHouse",
+      "location": "stardewcraft:leah_cottage",
+      "omitted": ["2"],
+      "interactions": [
+        {
+          "id": "leah_house_1",
+          "original_key": "LeahHouse.1",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.leah_house.1",
+          "points": [
+            { "name": "1", "x": -85, "y": 38, "z": 46 }
+          ]
+        },
+        {
+          "id": "leah_house_3",
+          "original_key": "LeahHouse.3",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.leah_house.3",
+          "points": [
+            { "name": "3_1", "x": -82, "y": 38, "z": 46 },
+            { "name": "3_2", "x": -82, "y": 39, "z": 46 }
+          ]
+        },
+        {
+          "id": "leah_house_4",
+          "original_key": "LeahHouse.4",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.leah_house.4",
+          "points": [
+            { "name": "4_1", "x": -81, "y": 38, "z": 46 },
+            { "name": "4_2", "x": -81, "y": 39, "z": 46 }
+          ]
+        },
+        {
+          "id": "leah_house_5",
+          "original_key": "LeahHouse.5",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.leah_house.5",
+          "points": [
+            { "name": "5_1", "x": -86, "y": 38, "z": 50 },
+            { "name": "5_2", "x": -86, "y": 39, "z": 50 }
+          ]
+        },
+        {
+          "id": "leah_house_6",
+          "original_key": "LeahHouse.6",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.leah_house.6",
+          "points": [
+            { "name": "6", "x": -75, "y": 39, "z": 50 }
+          ]
+        }
+      ]
+    },
+    {
+      "section": "4_4",
+      "map": "Saloon",
+      "location": "stardewcraft:saloon",
+      "omitted": [],
+      "interactions": [
+        {
+          "id": "saloon_1",
+          "original_key": "Saloon.1",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.saloon.1",
+          "location": null,
+          "points": [
+            { "name": "1", "x": 33, "y": 37, "z": -3 }
+          ]
+        },
+        {
+          "id": "saloon_2",
+          "original_key": "Saloon.2",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.saloon.2",
+          "points": [
+            { "name": "2", "x": 31, "y": 37, "z": 0 }
+          ]
+        }
+      ]
+    },
+    {
+      "section": "4_5",
+      "map": "FishShop",
+      "location": "stardewcraft:fish_shop",
+      "omitted": [],
+      "interactions": [
+        {
+          "id": "fish_shop_1",
+          "original_key": "FishShop.1",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.fish_shop.1",
+          "points": [
+            { "name": "1_1", "x": 61, "y": 31, "z": 142 },
+            { "name": "1_2", "x": 61, "y": 34, "z": 142 }
+          ]
+        },
+        {
+          "id": "fish_shop_2",
+          "original_key": "FishShop.2",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.fish_shop.2",
+          "points": [
+            { "name": "2", "x": 69, "y": 31, "z": 142 }
+          ]
+        },
+        {
+          "id": "fish_shop_3",
+          "original_key": "FishShop.3",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.fish_shop.3",
+          "points": [
+            { "name": "3", "x": 70, "y": 32, "z": 142 }
+          ]
+        },
+        {
+          "id": "fish_shop_4",
+          "original_key": "FishShop.4",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.fish_shop.4",
+          "points": [
+            { "name": "4", "x": 63, "y": 31, "z": 145 }
+          ]
+        },
+        {
+          "id": "fish_shop_5",
+          "original_key": "FishShop.5",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.fish_shop.5",
+          "points": [
+            { "name": "5", "x": 67, "y": 31, "z": 145 }
+          ]
+        },
+        {
+          "id": "fish_shop_6",
+          "original_key": "FishShop.6",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.fish_shop.6",
+          "points": [
+            { "name": "6", "x": 63, "y": 31, "z": 146 }
+          ]
+        },
+        {
+          "id": "fish_shop_7",
+          "original_key": "FishShop.7",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.fish_shop.7",
+          "points": [
+            { "name": "7", "x": 67, "y": 31, "z": 146 }
+          ]
+        }
+      ]
+    },
+    {
+      "section": "4_6",
+      "map": "Blacksmith",
+      "location": "stardewcraft:blacksmith",
+      "omitted": ["3", "6", "8"],
+      "interactions": [
+        {
+          "id": "blacksmith_1",
+          "original_key": "Blacksmith.1",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.blacksmith.1",
+          "points": [
+            { "name": "1", "x": 101, "y": 46, "z": 11 }
+          ]
+        },
+        {
+          "id": "blacksmith_2",
+          "original_key": "Blacksmith.2",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.blacksmith.2",
+          "points": [
+            { "name": "2_1", "x": 104, "y": 46, "z": 11 },
+            { "name": "2_2", "x": 105, "y": 47, "z": 11 }
+          ]
+        },
+        {
+          "id": "blacksmith_4",
+          "original_key": "Blacksmith.4",
+          "type": "letter",
+          "text_key": "stardewcraft.strings_from_maps.blacksmith.4",
+          "points": [
+            { "name": "4", "x": 102, "y": 47, "z": 14 }
+          ]
+        },
+        {
+          "id": "blacksmith_5",
+          "original_key": "Blacksmith.5",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.blacksmith.5",
+          "points": [
+            { "name": "5_1", "x": 110, "y": 46, "z": 20 },
+            { "name": "5_2", "x": 113, "y": 48, "z": 19 }
+          ]
+        },
+        {
+          "id": "blacksmith_7",
+          "original_key": "Blacksmith.7",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.blacksmith.7",
+          "points": [
+            { "name": "7", "x": 115, "y": 46, "z": 22 }
+          ]
+        },
+        {
+          "id": "blacksmith_9",
+          "original_key": "Blacksmith.9",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.blacksmith.9",
+          "points": [
+            { "name": "9", "x": 115, "y": 47, "z": 26 }
+          ]
+        },
+        {
+          "id": "blacksmith_10",
+          "original_key": "Blacksmith.10",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.blacksmith.10",
+          "points": [
+            { "name": "10", "x": 102, "y": 46, "z": 28 }
+          ]
+        }
+      ]
+    },
+    {
+      "section": "4_7",
+      "map": "ElliottHouse",
+      "location": "stardewcraft:elliott_cabin",
+      "omitted": [],
+      "interactions": [
+        {
+          "id": "elliott_house_1",
+          "original_key": "ElliottHouse.1",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.elliott_house.1",
+          "points": [
+            { "name": "1", "x": 76, "y": 47, "z": 96 }
+          ]
+        },
+        {
+          "id": "elliott_house_2",
+          "original_key": "ElliottHouse.2",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.elliott_house.2",
+          "points": [
+            { "name": "2", "x": 73, "y": 46, "z": 96 }
+          ]
+        },
+        {
+          "id": "elliott_house_3",
+          "original_key": "ElliottHouse.3",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.elliott_house.3",
+          "points": [
+            { "name": "3", "x": 85, "y": 45, "z": 96 }
+          ]
+        },
+        {
+          "id": "elliott_house_4",
+          "original_key": "ElliottHouse.4",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.elliott_house.4",
+          "points": [
+            { "name": "4", "x": 78, "y": 46, "z": 102 }
+          ]
+        },
+        {
+          "id": "elliott_house_5",
+          "original_key": "ElliottHouse.5",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.elliott_house.5",
+          "points": [
+            { "name": "5_1", "x": 73, "y": 45, "z": 102 },
+            { "name": "5_2", "x": 73, "y": 46, "z": 102 }
+          ]
+        },
+        {
+          "id": "elliott_house_6",
+          "original_key": "ElliottHouse.6",
+          "type": "message",
+          "text_key": "stardewcraft.strings_from_maps.elliott_house.6",
+          "points": [
+            { "name": "6", "x": 77, "y": 46, "z": 102 }
+          ]
+        }
+      ]
+    }
+  ]
+}

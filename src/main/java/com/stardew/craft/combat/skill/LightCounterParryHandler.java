@@ -8,6 +8,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
@@ -17,7 +18,7 @@ public final class LightCounterParryHandler {
     private LightCounterParryHandler() {}
 
     @SuppressWarnings("null")
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.LOW)
     public static void onPlayerHurt(LivingIncomingDamageEvent event) {
         if (!(event.getEntity() instanceof Player player)) {
             return;
@@ -25,6 +26,9 @@ public final class LightCounterParryHandler {
 
         Level level = player.level();
         if (level.isClientSide) {
+            return;
+        }
+        if (event.getAmount() <= 0.0f) {
             return;
         }
 
@@ -37,6 +41,8 @@ public final class LightCounterParryHandler {
         if (weaponId == null || weaponId.isEmpty()) {
             return;
         }
+        WeaponDamageSnapshot weaponSnapshot =
+                LightCounterParryState.getWeaponSnapshot(player).orElse(null);
 
         // Consume the parry window
         LightCounterParryState.clear(player);
@@ -53,8 +59,24 @@ public final class LightCounterParryHandler {
                     .tier(SkillContext.SkillTier.MINOR)
                     .damageMultiplier(1.2f)
                     .build();
-            WeaponSkillContextStore.setPending(player, context, nowTick + 5);
-            player.attack(attacker);
+            if (weaponSnapshot == null) {
+                WeaponSkillDamage.apply(
+                        player,
+                        attacker,
+                        context,
+                        nowTick + 5,
+                        WeaponSkillDamage.AttackGatePolicy.RESPECT_AT_IMPACT
+                );
+            } else {
+                WeaponSkillDamage.apply(
+                        player,
+                        attacker,
+                        context,
+                        weaponSnapshot,
+                        nowTick + 5,
+                        WeaponSkillDamage.AttackGatePolicy.RESPECT_AT_IMPACT
+                );
+            }
         }
 
         if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
@@ -66,4 +88,5 @@ public final class LightCounterParryHandler {
             );
         }
     }
+
 }

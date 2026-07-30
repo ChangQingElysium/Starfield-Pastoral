@@ -40,11 +40,15 @@ public final class YetiFreezeTracker {
             return false;
         }
         long endTick = tag.getLong(TAG_END_TICK);
-        if (nowTick >= endTick) {
+        if (!isWithinFreezeWindow(nowTick, endTick)) {
             clear(target, tag);
             return false;
         }
         return true;
+    }
+
+    static boolean isWithinFreezeWindow(long nowTick, long endTick) {
+        return nowTick < endTick;
     }
 
     @SubscribeEvent

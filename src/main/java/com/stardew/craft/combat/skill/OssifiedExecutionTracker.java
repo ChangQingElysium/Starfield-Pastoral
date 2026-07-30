@@ -2,12 +2,14 @@ package com.stardew.craft.combat.skill;
 
 import com.stardew.craft.combat.network.OssifiedExecutionCirclePayload;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -18,18 +20,37 @@ import java.util.Map;
 import java.util.UUID;
 
 public final class OssifiedExecutionTracker {
+    public static final int DAMAGE_INTERVAL_TICKS = 20;
+    public static final int HIT_CONTEXT_LIFETIME_TICKS = 5;
+    public static final float PULSE_DAMAGE_MULTIPLIER = 1.0F;
+    public static final float CRIT_DAMAGE_BONUS = 0.20F;
+    public static final int RING_PARTICLE_INTERVAL_TICKS = 5;
+    public static final double MINIMUM_PULL_DISTANCE = 0.01;
+    public static final double BASE_PULL_STRENGTH = 0.02;
+    public static final double INNER_PULL_BONUS = 0.03;
 
     private static final class CircleState {
         private final Vec3 center;
         private final float radius;
-        private long endTick;
+        private final ResourceKey<Level> dimension;
+        private final long endTick;
+        private final WeaponDamageSnapshot weaponSnapshot;
         private long nextDamageTick;
 
-        private CircleState(Vec3 center, float radius, long endTick, long nextDamageTick) {
+        private CircleState(
+                Vec3 center,
+                float radius,
+                ResourceKey<Level> dimension,
+                long endTick,
+                long nextDamageTick,
+                WeaponDamageSnapshot weaponSnapshot
+        ) {
             this.center = center;
             this.radius = radius;
+            this.dimension = dimension;
             this.endTick = endTick;
             this.nextDamageTick = nextDamageTick;
+            this.weaponSnapshot = weaponSnapshot;
         }
     }
 
@@ -39,11 +60,58 @@ public final class OssifiedExecutionTracker {
 
     @SuppressWarnings("null")
     public static void start(ServerPlayer player, LivingEntity anchor, long nowTick, float radius, int durationTicks) {
+        startInternal(
+                player,
+                anchor,
+                nowTick,
+                radius,
+                durationTicks,
+                null
+        );
+    }
+
+    @SuppressWarnings("null")
+    public static void start(
+            ServerPlayer player,
+            LivingEntity anchor,
+            long nowTick,
+            float radius,
+            int durationTicks,
+            WeaponDamageSnapshot weaponSnapshot
+    ) {
+        startInternal(
+                player,
+                anchor,
+                nowTick,
+                radius,
+                durationTicks,
+                java.util.Objects.requireNonNull(
+                        weaponSnapshot,
+                        "weaponSnapshot"
+                )
+        );
+    }
+
+    private static void startInternal(
+            ServerPlayer player,
+            LivingEntity anchor,
+            long nowTick,
+            float radius,
+            int durationTicks,
+            WeaponDamageSnapshot weaponSnapshot
+    ) {
         if (player == null || anchor == null || durationTicks <= 0) {
             return;
         }
         Vec3 center = anchor.position();
-        CircleState state = new CircleState(center, radius, nowTick + durationTicks, nowTick);
+        CircleState state = new CircleState(
+            center,
+            radius,
+            player.level().dimension(),
+            nowTick + durationTicks,
+            nowTick,
+            weaponSnapshot
+        );
         ACTIVE.put(player.getUUID(), state);
 
         if (player.level() instanceof ServerLevel serverLevel) {
@@ -68,12 +136,8 @@ public final class OssifiedExecutionTracker {
 
     @SuppressWarnings("null")
     public static void tick(ServerPlayer player, long nowTick) {
-        CircleState state = ACTIVE.get(player.getUUID());
+        CircleState state = activeState(player, nowTick);
         if (state == null) {
-            return;
-        }
-        if (nowTick >= state.endTick) {
-            ACTIVE.remove(player.getUUID());
             return;
         }
 
@@ -84,7 +148,7 @@ public final class OssifiedExecutionTracker {
         List<LivingEntity> targets = getTargetsInRadius(serverLevel, state.center, state.radius, player);
         pullTargets(targets, state.center, state.radius);
 
-        if (nowTick % 5L == 0L) {
+        if (nowTick % RING_PARTICLE_INTERVAL_TICKS == 0L) {
             for (int i = 0; i < 16; i++) {
                 double ang = (Math.PI * 2.0) * (i / 16.0);
                 double px = state.center.x + Math.cos(ang) * state.radius;
@@ -96,18 +160,17 @@ public final class OssifiedExecutionTracker {
         }
 
         if (nowTick >= state.nextDamageTick) {
-            state.nextDamageTick += 20;
+            state.nextDamageTick += DAMAGE_INTERVAL_TICKS;
             for (LivingEntity target : targets) {
-                SkillContext context = SkillContext.builder()
-                    .skillId("ossified_execution_dot")
-                    .tier(SkillContext.SkillTier.MAJOR)
-                    .damageMultiplier(1.0f)
-                    .build();
-                WeaponSkillContextStore.setPending(player, context, nowTick + 5);
-
                 target.invulnerableTime = 0;
                 target.hurtTime = 0;
-                target.hurt(player.damageSources().playerAttack(player), 1.0F);
+                applyDamage(
+                        player,
+                        target,
+                        createPulseContext(),
+                        state.weaponSnapshot,
+                        nowTick + HIT_CONTEXT_LIFETIME_TICKS
+                );
 
                 serverLevel.sendParticles(ParticleTypes.ASH,
                     target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(),
@@ -121,15 +184,90 @@ public final class OssifiedExecutionTracker {
         }
     }
 
+    private static void applyDamage(
+            ServerPlayer player,
+            LivingEntity target,
+            SkillContext context,
+            WeaponDamageSnapshot weaponSnapshot,
+            long expireTick
+    ) {
+        if (weaponSnapshot == null) {
+            WeaponSkillDamage.apply(
+                    player,
+                    target,
+                    context,
+                    expireTick
+            );
+            return;
+        }
+        WeaponSkillDamage.apply(
+                player,
+                target,
+                context,
+                weaponSnapshot,
+                expireTick
+        );
+    }
+
     public static float getCritDamageBonus(Player attacker, LivingEntity target, long nowTick) {
-        CircleState state = ACTIVE.get(attacker.getUUID());
-        if (state == null || nowTick >= state.endTick) {
+        CircleState state = activeState(attacker, nowTick);
+        if (state == null
+                || !isSameDimension(
+                        state.dimension,
+                        target.level().dimension()
+                )) {
             return 0.0f;
         }
         if (target.distanceToSqr(state.center.x, state.center.y, state.center.z) > state.radius * state.radius) {
             return 0.0f;
         }
-        return 0.20f;
+        return CRIT_DAMAGE_BONUS;
+    }
+
+    public static boolean isActive(Player player, long nowTick) {
+        return activeState(player, nowTick) != null;
+    }
+
+    public static void stop(Player player) {
+        if (player != null) {
+            ACTIVE.remove(player.getUUID());
+        }
+    }
+
+    static SkillContext createPulseContext() {
+        return SkillContext.builder()
+            .skillId("ossified_execution_dot")
+            .tier(SkillContext.SkillTier.MAJOR)
+            .damageMultiplier(PULSE_DAMAGE_MULTIPLIER)
+            .build();
+    }
+
+    static boolean isExpired(long nowTick, long endTick) {
+        return nowTick >= endTick;
+    }
+
+    static boolean isSameDimension(
+            ResourceKey<Level> expected,
+            ResourceKey<Level> actual
+    ) {
+        return expected.equals(actual);
+    }
+
+    private static CircleState activeState(Player player, long nowTick) {
+        if (player == null) {
+            return null;
+        }
+        CircleState state = ACTIVE.get(player.getUUID());
+        if (state != null
+                && (isExpired(nowTick, state.endTick)
+                || !isSameDimension(
+                        state.dimension,
+                        player.level().dimension()
+                ))) {
+            ACTIVE.remove(player.getUUID());
+            return null;
+        }
+        return state;
     }
 
     private static List<LivingEntity> getTargetsInRadius(ServerLevel level, Vec3 center, float radius, Player owner) {
@@ -146,11 +284,12 @@ public final class OssifiedExecutionTracker {
         for (LivingEntity target : targets) {
             Vec3 toCenter = new Vec3(center.x - target.getX(), 0.0, center.z - target.getZ());
             double dist = toCenter.length();
-            if (dist < 0.01 || dist > radius) {
+            if (dist < MINIMUM_PULL_DISTANCE || dist > radius) {
                 continue;
             }
             Vec3 dir = toCenter.normalize();
-            double strength = 0.02 + (1.0 - (dist / radius)) * 0.03;
+            double strength = BASE_PULL_STRENGTH
+                + (1.0 - (dist / radius)) * INNER_PULL_BONUS;
             Vec3 pull = new Vec3(dir.x * strength, 0.0, dir.z * strength);
             target.setDeltaMovement(target.getDeltaMovement().add(pull));
         }

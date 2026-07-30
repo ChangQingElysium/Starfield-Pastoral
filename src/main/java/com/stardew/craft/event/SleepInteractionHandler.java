@@ -131,6 +131,10 @@ public final class SleepInteractionHandler {
         }
         if (player.isSleeping()) {
             storePendingBedPos(player, sleepAnchor);
+            com.stardew.craft.player.PlayerStardewData sleepData =
+                    com.stardew.craft.player.PlayerDataManager.getPlayerData(player);
+            sleepData.setLastSleepPoint(sleepAnchor);
+            com.stardew.craft.player.PlayerDataManager.get().setDirty();
             PacketDistributor.sendToPlayer(player, new OpenSleepConfirmScreenPayload(currentMinute));
         }
         event.setCanceled(true);

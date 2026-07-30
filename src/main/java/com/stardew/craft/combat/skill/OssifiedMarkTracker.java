@@ -18,11 +18,18 @@ import java.util.UUID;
 
 @EventBusSubscriber(modid = StardewCraft.MODID)
 public final class OssifiedMarkTracker {
+    public static final float CRIT_CHANCE_BONUS = 0.10F;
+    public static final float BONUS_DAMAGE_MULTIPLIER = 1.0F;
+    public static final int UNTRIGGERED_COOLDOWN_TOTAL_TICKS = 80;
 
     private static final String TAG_END_TICK = "stardewcraft_ossified_mark_until";
     private static final String TAG_OWNER = "stardewcraft_ossified_mark_owner";
     private static final String TAG_BONUS_USED = "stardewcraft_ossified_mark_bonus_used";
     private static final String TAG_START_TICK = "stardewcraft_ossified_mark_start";
+    private static final String TAG_UNTRIGGERED_COOLDOWN_END =
+            "stardewcraft_ossified_mark_cooldown_end";
+    private static final String WEAPON_ID = "ossified_blade";
+    private static final String SKILL_ID = "ossified_mark";
 
     private OssifiedMarkTracker() {}
 
@@ -36,6 +43,13 @@ public final class OssifiedMarkTracker {
         tag.putUUID(TAG_OWNER, owner.getUUID());
         tag.putBoolean(TAG_BONUS_USED, false);
         tag.putLong(TAG_START_TICK, nowTick);
+        tag.putLong(
+                TAG_UNTRIGGERED_COOLDOWN_END,
+                nowTick + WeaponSkillCooldowns.adjustedDuration(
+                        owner,
+                        UNTRIGGERED_COOLDOWN_TOTAL_TICKS
+                )
+        );
 
         if (!target.level().isClientSide) {
             PacketDistributor.sendToPlayersTrackingEntityAndSelf(
@@ -69,8 +83,8 @@ public final class OssifiedMarkTracker {
             return false;
         }
         long endTick = tag.getLong(TAG_END_TICK);
-        if (nowTick >= endTick) {
-            clearMark(tag);
+        if (isExpired(nowTick, endTick)) {
+            expireMark(target, tag, nowTick);
             return false;
         }
         return true;
@@ -109,7 +123,7 @@ public final class OssifiedMarkTracker {
     }
 
     public static float getCritChanceBonus(LivingEntity target, Player player, long nowTick) {
-        return isMarkedBy(target, player, nowTick) ? 0.10f : 0.0f;
+        return isMarkedBy(target, player, nowTick) ? CRIT_CHANCE_BONUS : 0.0f;
     }
 
     @SubscribeEvent
@@ -126,10 +140,27 @@ public final class OssifiedMarkTracker {
         }
         long nowTick = entity.level().getGameTime();
         long endTick = tag.getLong(TAG_END_TICK);
-        if (nowTick >= endTick) {
-            handleExpire(entity, tag, nowTick);
-            clearMark(tag);
+        if (isExpired(nowTick, endTick)) {
+            expireMark(entity, tag, nowTick);
         }
+    }
+
+    static boolean isExpired(long nowTick, long endTick) {
+        return nowTick >= endTick;
+    }
+
+    static int untriggeredCooldownRemaining(long startTick, long nowTick) {
+        long desiredEnd = startTick + UNTRIGGERED_COOLDOWN_TOTAL_TICKS;
+        return (int) Math.max(0L, desiredEnd - nowTick);
+    }
+
+    private static void expireMark(
+            LivingEntity entity,
+            CompoundTag tag,
+            long nowTick
+    ) {
+        handleExpire(entity, tag, nowTick);
+        clearMark(tag);
     }
 
     @SuppressWarnings("null")
@@ -143,18 +174,30 @@ public final class OssifiedMarkTracker {
         if (!(entity.level() instanceof ServerLevel serverLevel)) {
             return;
         }
-        Player owner = serverLevel.getPlayerByUUID(tag.getUUID(TAG_OWNER));
+        ServerPlayer owner = serverLevel.getServer()
+            .getPlayerList()
+            .getPlayer(tag.getUUID(TAG_OWNER));
         if (owner == null) {
             return;
         }
-        long startTick = tag.getLong(TAG_START_TICK);
-        long desiredEnd = startTick + 4L * 20L;
-        int remaining = (int) Math.max(0L, desiredEnd - nowTick);
-        if (remaining > 0) {
-            WeaponSkillCooldowns.setCooldown(owner, "ossified_blade", "ossified_mark", nowTick, remaining);
-        } else {
-            WeaponSkillCooldowns.setCooldown(owner, "ossified_blade", "ossified_mark", nowTick, 0);
-        }
+        long cooldownEndTick = tag.contains(
+                TAG_UNTRIGGERED_COOLDOWN_END
+        )
+                ? tag.getLong(TAG_UNTRIGGERED_COOLDOWN_END)
+                : nowTick + WeaponSkillCooldowns.adjustedDuration(
+                        owner,
+                        untriggeredCooldownRemaining(
+                                tag.getLong(TAG_START_TICK),
+                                nowTick
+                        )
+                );
+        WeaponSkillCooldowns.setCooldownUntil(
+                owner,
+                WEAPON_ID,
+                SKILL_ID,
+                nowTick,
+                cooldownEndTick
+        );
     }
 
     private static void clearMark(CompoundTag tag) {
@@ -162,5 +205,6 @@ public final class OssifiedMarkTracker {
         tag.remove(TAG_OWNER);
         tag.remove(TAG_BONUS_USED);
         tag.remove(TAG_START_TICK);
+        tag.remove(TAG_UNTRIGGERED_COOLDOWN_END);
     }
 }

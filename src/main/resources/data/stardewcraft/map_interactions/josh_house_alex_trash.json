@@ -1,0 +1,45 @@
+{
+  "format": 1,
+  "priority": 100,
+  "hint": "read",
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "JoshHouse",
+    "tile_action": "NPCMessage Alex \"Data\\ExtraDialogue:JoshHouse_Alex_Trash/Strings\\Locations:JoshHouse_Alex_Trash\"",
+    "code": "StardewValley.GameLocation.performAction:NPCMessage"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:1_river_road",
+    "positions": [
+      [
+        54,
+        22,
+        -19
+      ]
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "action": {
+        "type": "stardewcraft:npc_message",
+        "data": {
+          "npc": "alex",
+          "nearby": {
+            "translate": "stardewcraft.map_interaction.josh_house.alex_trash.nearby",
+            "fallback": "Uh.. What are you doing?$s"
+          },
+          "fallback": {
+            "translate": "stardewcraft.map_interaction.josh_house.alex_trash.fallback",
+            "fallback": "There's a bunch of protein bar wrappers."
+          },
+          "radius": 14,
+          "vertical_radius": 4,
+          "announce_snooping": true
+        }
+      }
+    }
+  ]
+}

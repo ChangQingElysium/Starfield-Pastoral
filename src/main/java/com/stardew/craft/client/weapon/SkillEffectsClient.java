@@ -37,8 +37,6 @@ public final class SkillEffectsClient {
             case "tree_blessing" -> playTreeBlessing(player);
             case "desperate_plunder" -> playDesperatePlunder(player);
             case "silver_foldback" -> playSilverFoldback(player);
-            case "crescent_slash" -> playCrescentSlash(player);
-            case "forest_blessing" -> playForestBlessing(player);
             case "bone_fracture" -> playBoneFracture(player);
             case "claymore_foldback" -> playClaymoreFoldback(player);
             case "elf_blade_leaf" -> playElfBladeLeaf(player);
@@ -1854,46 +1852,6 @@ public final class SkillEffectsClient {
     }
 
     /**
-     * 森林赐福 - 温柔持续治愈
-     * 粒子：柔和绿光 + 少量叶屑
-     * 声音：树叶沙沙 + 轻微治愈音
-     */
-    @SuppressWarnings("null")
-    private static void playForestBlessing(Player player) {
-        Minecraft mc = Minecraft.getInstance();
-        Vec3 pos = player.position();
-
-        player.playSound(SoundEvents.AZALEA_LEAVES_PLACE, 0.7f, 1.1f);
-        player.playSound(SoundEvents.EXPERIENCE_ORB_PICKUP, 0.4f, 1.6f);
-
-        double centerY = pos.y + player.getBbHeight() * 0.55;
-
-        // 绿色柔光
-        for (int i = 0; i < 6; i++) {
-            @SuppressWarnings("null")
-            double offsetX = (mc.level.random.nextDouble() - 0.5) * 0.6;
-            @SuppressWarnings("null")
-            double offsetY = (mc.level.random.nextDouble() - 0.5) * 0.4;
-            @SuppressWarnings("null")
-            double offsetZ = (mc.level.random.nextDouble() - 0.5) * 0.6;
-            mc.level.addParticle(ParticleTypes.HAPPY_VILLAGER,
-                pos.x + offsetX, centerY + offsetY, pos.z + offsetZ,
-                0, 0.02, 0);
-        }
-
-        // 轻微叶屑
-        for (int i = 0; i < 4; i++) {
-            @SuppressWarnings("null")
-            double offsetX = (mc.level.random.nextDouble() - 0.5) * 0.8;
-            @SuppressWarnings("null")
-            double offsetZ = (mc.level.random.nextDouble() - 0.5) * 0.8;
-            mc.level.addParticle(ParticleTypes.COMPOSTER,
-                pos.x + offsetX, pos.y + 0.1, pos.z + offsetZ,
-                0, 0.04 + mc.level.random.nextDouble() * 0.03, 0);
-        }
-    }
-
-    /**
      * 通用技能效果（后备）
      */
     @SuppressWarnings("null")
@@ -1998,30 +1956,6 @@ public final class SkillEffectsClient {
 
         mc.level.addParticle(ParticleTypes.SWEEP_ATTACK,
             frontX, frontY, frontZ,
-            0, 0, 0);
-    }
-
-    /**
-     * 弦月斩 - 月光弧斩
-     * 粒子：弧形月光 + 扫击轨迹 + 少量金色火花
-     * 声音：清脆挥砍 + 轻微晶体回响
-     */
-    @SuppressWarnings("null")
-    private static void playCrescentSlash(Player player) {
-        Minecraft mc = Minecraft.getInstance();
-        Vec3 pos = player.position();
-        Vec3 look = player.getLookAngle();
-
-        player.playSound(SoundEvents.PLAYER_ATTACK_SWEEP, 0.9f, 1.15f);
-        player.playSound(SoundEvents.AMETHYST_BLOCK_CHIME, 0.35f, 1.75f);
-
-        double centerX = pos.x + look.x * 1.4;
-        double centerY = pos.y + player.getBbHeight() * 0.6;
-        double centerZ = pos.z + look.z * 1.4;
-
-        // 扫击轨迹
-        mc.level.addParticle(ParticleTypes.SWEEP_ATTACK,
-            centerX, centerY, centerZ,
             0, 0, 0);
     }
 

@@ -39,6 +39,16 @@ class StardewTimePauseServiceTest {
     }
 
     @Test
+    void overnightSettlementPausesBeforeTheClientScreenHeartbeatArrives() {
+        assertTrue(StardewTimePauseService.countsAsBaseNonGameplay(true, false, false));
+        assertTrue(StardewTimePauseService.countsAsBaseNonGameplay(false, true, false));
+        assertTrue(StardewTimePauseService.countsAsBaseNonGameplay(false, false, true));
+        assertFalse(StardewTimePauseService.countsAsBaseNonGameplay(false, false, false));
+        assertTrue(StardewTimePauseService.shouldPauseDuringOvernight(true, 3, 1));
+        assertFalse(StardewTimePauseService.shouldPauseDuringOvernight(false, 3, 1));
+    }
+
+    @Test
     void authoritativeTimeJumpRebasesAnActiveClockPause() {
         assertEquals(24000L, StardewTimePauseService.rebaseFrozenVirtualDayTime(true, 13500L, 24000L));
         assertEquals(13500L, StardewTimePauseService.rebaseFrozenVirtualDayTime(false, 13500L, 24000L));

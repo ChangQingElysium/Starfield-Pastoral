@@ -1,6 +1,7 @@
 package com.stardew.craft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import com.stardew.craft.cutscene.runtime.EventPlayerActorEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidArmorModel;
@@ -66,6 +67,14 @@ public class EventPlayerActorRenderer extends MobRenderer<EventPlayerActorEntity
     public void render(@javax.annotation.Nonnull EventPlayerActorEntity entity, float entityYaw, float partialTicks,
                        @javax.annotation.Nonnull PoseStack poseStack, @javax.annotation.Nonnull MultiBufferSource buffer, int packedLight) {
         this.model = entity.isSlimSkinModel() ? slimModel : wideModel;
+        poseStack.pushPose();
+        if (entity.isCollapsed()) {
+            // SDV's PlayerKilled event uses showFrame 5 while the farmer is
+            // unconscious. Minecraft has no equivalent frame, so rotate the
+            // full player model onto the floor until the authored "idle" cue.
+            poseStack.translate(0.0D, 0.18D, 0.0D);
+            poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
+        }
         // Apply item-above-head arm pose before rendering
         if (entity.isHoldingItemAboveHead()) {
             PlayerModel<EventPlayerActorEntity> model = this.getModel();
@@ -78,6 +87,7 @@ public class EventPlayerActorRenderer extends MobRenderer<EventPlayerActorEntity
             model.rightArm.zRot = (float) Math.toRadians(-10);
         }
         super.render(entity, entityYaw, partialTicks, poseStack, buffer, packedLight);
+        poseStack.popPose();
     }
 
     private static AbstractClientPlayer findSkinSource(EventPlayerActorEntity entity) {

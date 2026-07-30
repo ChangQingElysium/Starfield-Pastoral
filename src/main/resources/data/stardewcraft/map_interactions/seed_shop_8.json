@@ -1,0 +1,33 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "SeedShop",
+    "tile_action": "Message \"SeedShop.8\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:pierre_house",
+    "positions": [
+      [
+        44,
+        38,
+        -37
+      ]
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.seed_shop.8",
+          "fallback": "'Why JojaCo Must Be Stopped'"
+        }
+      ]
+    }
+  ]
+}

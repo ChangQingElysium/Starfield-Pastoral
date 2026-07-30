@@ -2,7 +2,10 @@ package com.stardew.craft.combat;
 
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.combat.skill.SkillContext;
+import com.stardew.craft.combat.skill.WeaponDamageSnapshot;
+import com.stardew.craft.combat.skill.WeaponSkillDamage;
 import com.stardew.craft.combat.skill.WeaponSkillContextStore;
+import com.stardew.craft.combat.skill.handler.HolySmiteSkillHandler;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationLock;
 import com.stardew.craft.combat.skill.SilverSaberFoldbackState;
 import com.stardew.craft.combat.skill.SteelSpineFuryState;
@@ -24,6 +27,8 @@ import com.stardew.craft.combat.skill.ElfBladeTracker;
 import com.stardew.craft.combat.skill.HolyBladeDodgeTracker;
 import com.stardew.craft.combat.skill.HolyBladeEffects;
 import com.stardew.craft.combat.skill.TemperedQuenchTracker;
+import com.stardew.craft.combat.skill.TideMarkTracker;
+import com.stardew.craft.combat.skill.handler.TemperedQuenchSkillHandler;
 import com.stardew.craft.combat.skill.YetiToothMarkTracker;
 import com.stardew.craft.combat.skill.YetiToothEffects;
 import com.stardew.craft.combat.skill.IridiumNeedleCritTracker;
@@ -67,18 +72,11 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.minecraft.world.phys.Vec3;
 import java.util.Objects;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 
 @EventBusSubscriber(modid = StardewCraft.MODID)
 public class WeaponCombatEvents {
-
-    private static final Map<UUID, ClubSweepRecord> CLUB_SWEEP_DAMAGE = new ConcurrentHashMap<>();
-    private static final long CLUB_SWEEP_WINDOW_TICKS = 2L;
-
-    private record ClubSweepRecord(long tick, float damage) {}
 
     @SubscribeEvent
     public static void onAttackEntity(AttackEntityEvent event) {
@@ -147,14 +145,10 @@ public class WeaponCombatEvents {
 
         if (!SilverSaberFoldbackState.isActiveRaw(player)) {
             long nowTick = player.level().getGameTime();
-            DragontoothShivBreathTracker.tick(player, nowTick);
-            IridiumNeedleFrenzyTracker.tick(player, nowTick);
             return;
         }
 
         long nowTick = player.level().getGameTime();
-        DragontoothShivBreathTracker.tick(player, nowTick);
-        IridiumNeedleFrenzyTracker.tick(player, nowTick);
         long endTick = SilverSaberFoldbackState.getEndTick(player);
         if (nowTick <= endTick) {
             return;
@@ -206,15 +200,32 @@ public class WeaponCombatEvents {
         Entity attacker = event.getSource().getEntity();
         if (!(attacker instanceof Player player)) return;
 
-        ItemStack weapon = player.getMainHandItem();
+        long nowTick = target.level().getGameTime();
+        WeaponSkillContextStore.PendingHit pendingHit =
+                WeaponSkillContextStore.consumePending(player, nowTick);
+        WeaponDamageSnapshot releaseWeapon = pendingHit == null
+                ? null
+                : pendingHit.weaponSnapshot().orElse(null);
+        ItemStack weapon = releaseWeapon != null
+                ? releaseWeapon.weapon()
+                : player.getMainHandItem();
         if (!(weapon.getItem() instanceof IStardewWeapon)) return;
         boolean isSweepSource = isSweepDamageSource(event.getSource());
 
-        long nowTick = target.level().getGameTime();
-        SkillContext skillContext = WeaponSkillContextStore.consume(player, nowTick);
-        if (skillContext == null) {
-            skillContext = SkillContext.normalAttack();
-        }
+        SkillContext skillContext = pendingHit != null
+                ? pendingHit.skillContext()
+                : SkillContext.normalAttack();
+        WeaponDamageSnapshot damageWeaponSnapshot = releaseWeapon != null
+                ? releaseWeapon
+                : WeaponDamageSnapshot.capture(
+                        net.minecraft.resources.ResourceLocation
+                                .fromNamespaceAndPath(
+                                        StardewCraft.MODID,
+                                        ((IStardewWeapon) weapon.getItem())
+                                                .getWeaponId()
+                                ),
+                        weapon
+                );
 
         if ("normal".equals(skillContext.getSkillId()) && player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
             SkillContext stanceContext = InsectEyeStanceTracker.getSkillContext(serverPlayer, nowTick);
@@ -299,7 +310,8 @@ public class WeaponCombatEvents {
                 if (frenzyActive && "normal".equals(nextSkillId)) {
                     nextSkillId = "iridium_needle_frenzy";
                 }
-                float critBonus = skillContext.getCritChanceBonus() + (frenzyActive ? 0.30f : 0.0f);
+                float critBonus = skillContext.getCritChanceBonus()
+                        + (frenzyActive ? IridiumNeedleFrenzyTracker.CRIT_CHANCE_BONUS : 0.0F);
                 skillContext = SkillContext.builder()
                     .skillId(nextSkillId)
                     .tier(skillContext.getTier())
@@ -317,27 +329,9 @@ public class WeaponCombatEvents {
             return;
         }
 
-        // SDV GameLocation.cs:4683 — Blessing of Fangs: +10% 武器暴击概率
-        if (player instanceof net.minecraft.server.level.ServerPlayer sp5
-                && sp5.hasEffect(com.stardew.craft.effect.ModMobEffects.STATUE_OF_BLESSINGS_5)) {
-            skillContext = SkillContext.builder()
-                .skillId(skillContext.getSkillId())
-                .tier(skillContext.getTier())
-                .damageMultiplier(skillContext.getDamageMultiplier())
-                .ignoreDefense(skillContext.isIgnoreDefense())
-                .guaranteedCrit(skillContext.isGuaranteedCrit())
-                .critChanceBonus(skillContext.getCritChanceBonus() + 0.1f)
-                .build();
-        }
-
         com.stardew.craft.combat.equipment.EquipmentStats equipStats = null;
         if (player instanceof net.minecraft.server.level.ServerPlayer sp) {
             equipStats = com.stardew.craft.combat.equipment.EquipmentResolver.getMergedStats(sp);
-        }
-        DamageResult result = DamageCalculator.calculatePlayerDamage(player, target, weapon, skillContext, null, equipStats);
-        float finalDamage = result.getFinalDamage();
-        if (spineBoost != null && !result.isDodged()) {
-            finalDamage += spineBoost.bonusDamage();
         }
 
         boolean isPrimaryTarget = AttackTargetTracker.isPrimaryTarget(player, target, nowTick);
@@ -369,6 +363,19 @@ public class WeaponCombatEvents {
             return;
         }
 
+        DamageRequest.Builder damageRequest = DamageCalculator.createPlayerDamageRequest(
+                player,
+                target,
+                weapon,
+                skillContext,
+                equipStats
+        ).toBuilder();
+        if (spineBoost != null) {
+            damageRequest.addPostDefenseAdjustment(
+                    DamageAdjustment.add("steel_spine_bonus", spineBoost.bonusDamage())
+            );
+        }
+
         // MC 原版蓄力冷却惩罚 — SDV 武器跳过此机制
         // 服务器上 attackStrengthTicker 与客户端不同步，
         // 导致 getAttackStrengthScale() 返回 0 → 0.2F + 0*0*0.8F = 0.2 = 恰好 1/5 伤害。
@@ -380,49 +387,58 @@ public class WeaponCombatEvents {
                 attackStrength = 1.0F;
             }
             float strengthMultiplier = 0.2F + attackStrength * attackStrength * 0.8F;
-            finalDamage *= strengthMultiplier;
-        }
-
-        if (isSweepTarget && sweepWeaponType == WeaponType.CLUB) {
-            ClubSweepRecord record = CLUB_SWEEP_DAMAGE.get(player.getUUID());
-            if (record != null && (nowTick - record.tick) <= CLUB_SWEEP_WINDOW_TICKS) {
-                finalDamage = record.damage;
-            }
+            damageRequest.addPostDefenseAdjustment(
+                    DamageAdjustment.multiply("attack_strength", strengthMultiplier)
+            );
         }
 
         if (isSweepTarget && sweepWeaponType == WeaponType.SWORD) {
-            float baseForSweep = result.getBaseDamage();
-            int sweepingLevel = getItemEnchantmentLevel(player, player.getMainHandItem(), Enchantments.SWEEPING_EDGE);
+            int sweepingLevel = getItemEnchantmentLevel(
+                    player,
+                    weapon,
+                    Enchantments.SWEEPING_EDGE
+            );
             float sweepRatio = sweepingLevel > 0
                 ? 1.0f - (1.0f / (sweepingLevel + 1.0f))
                 : 0.10f;
-            float sweepDamage = sweepRatio * baseForSweep;
-            finalDamage = Math.max(0.0f, sweepDamage);
+            damageRequest.addPostDefenseAdjustment(
+                    DamageAdjustment.replaceWithBaseMultiplier("sword_sweep", sweepRatio)
+            );
         }
 
         boolean bloodMoonActive = player instanceof net.minecraft.server.level.ServerPlayer serverPlayer
             && DarkSwordBloodMoonTracker.isActive(serverPlayer, nowTick);
         if (bloodMoonActive) {
-            finalDamage *= DarkSwordBloodMoonTracker.getDamageBonusMultiplier((net.minecraft.server.level.ServerPlayer) player, nowTick);
+            damageRequest.addPostDefenseAdjustment(DamageAdjustment.multiply(
+                    "dark_sword_blood_moon",
+                    DarkSwordBloodMoonTracker.getDamageBonusMultiplier(
+                            (net.minecraft.server.level.ServerPlayer) player,
+                            nowTick
+                    )
+            ));
         }
 
-        if (!result.isDodged() && finalDamage > 0.0f) {
-            if (StardewEnchantments.has(weapon, StardewEnchantments.BUG_KILLER)
-                    && StardewEnchantments.isBugKillerTarget(target)) {
-                finalDamage *= 2.0f;
-            }
-            if (StardewEnchantments.has(weapon, StardewEnchantments.CRUSADER)
-                    && StardewEnchantments.isCrusaderTarget(target)) {
-                finalDamage *= 1.5f;
-            }
-            if (hasDragonToothBonus(weapon, "slime_slayer") && isDragonToothSlimeSlayerTarget(target)) {
-                finalDamage = finalDamage * 1.33f + 1.0f;
-            }
+        if (StardewEnchantments.has(weapon, StardewEnchantments.BUG_KILLER)
+                && StardewEnchantments.isBugKillerTarget(target)) {
+            damageRequest.addPreDefenseAdjustment(
+                    DamageAdjustment.multiplyFloor("enchantment_bug_killer", 2.0f)
+            );
         }
-
-        if (isNormalAttack && !isSweepTarget && sweepWeaponType == WeaponType.CLUB) {
-            CLUB_SWEEP_DAMAGE.put(player.getUUID(), new ClubSweepRecord(nowTick, finalDamage));
+        if (StardewEnchantments.has(weapon, StardewEnchantments.CRUSADER)
+                && StardewEnchantments.isCrusaderTarget(target)) {
+            damageRequest.addPreDefenseAdjustment(
+                    DamageAdjustment.multiplyFloor("enchantment_crusader", 1.5f)
+            );
         }
+        if (hasDragonToothBonus(weapon, "slime_slayer")
+                && isDragonToothSlimeSlayerTarget(target)) {
+            damageRequest
+                    .addPreDefenseAdjustment(DamageAdjustment.multiply("dragontooth_slime_slayer", 1.33f))
+                    .addPreDefenseAdjustment(DamageAdjustment.addFloor("dragontooth_slime_slayer_flat", 1.0f));
+        }
+        DamageOutcome result = DamagePipeline.evaluate(damageRequest.build());
+        CombatDamageHistory.record(player, nowTick, result);
+        float finalDamage = result.getFinalDamage();
         event.setNewDamage(finalDamage);
 
 
@@ -435,15 +451,26 @@ public class WeaponCombatEvents {
                 && finalDamage > 0
                 && player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
             HolyBladeEffects.playSmiteHit((ServerLevel) target.level(), target);
-            HolyBladeEffects.playHeal(serverPlayer, 6);
-            HolyBladeDodgeTracker.start(serverPlayer, nowTick, 40, 0.20f);
+            HolyBladeEffects.playHeal(serverPlayer, HolySmiteSkillHandler.HEAL_AMOUNT);
+            HolyBladeDodgeTracker.start(
+                    serverPlayer,
+                    nowTick,
+                    HolySmiteSkillHandler.DODGE_DURATION_TICKS,
+                    HolySmiteSkillHandler.DODGE_CHANCE
+            );
         }
 
         if ("tempered_quench".equals(skillContext.getSkillId())
                 && !result.isDodged()
                 && finalDamage > 0
                 && player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
-            TemperedQuenchTracker.start(serverPlayer, target, nowTick, 20);
+            TemperedQuenchTracker.start(
+                    serverPlayer,
+                    target,
+                    nowTick,
+                    TemperedQuenchSkillHandler.BLAST_DELAY_TICKS,
+                    damageWeaponSnapshot
+            );
         }
 
         if (!result.isDodged()
@@ -453,13 +480,9 @@ public class WeaponCombatEvents {
             float moonRatio = DarkSwordBloodMoonTracker.getLifestealRatio(serverPlayer, nowTick);
             float ratio = Math.max(debtRatio, moonRatio);
             if (ratio > 0.0f) {
-                int max = PlayerStardewDataAPI.getMaxHealth(serverPlayer);
-                int current = PlayerStardewDataAPI.getHealth(serverPlayer);
                 int heal = Math.max(1, Math.round(finalDamage * ratio));
-                int next = Math.min(max, current + heal);
-                int actualHeal = Math.max(0, next - current);
-                if (actualHeal > 0) {
-                    PlayerStardewDataAPI.setHealth(serverPlayer, next);
+                float actualHeal = CombatHealing.heal(serverPlayer, heal);
+                if (actualHeal > 0.0F) {
                     DarkSwordBloodMoonTracker.recordLifeSteal(serverPlayer, nowTick, actualHeal);
                     DarkSwordEffects.playLifeSteal(serverPlayer);
                 }
@@ -473,19 +496,24 @@ public class WeaponCombatEvents {
                 && finalDamage > 0) {
             IridiumNeedleCritTracker.recordHit(serverPlayer);
             if (IridiumNeedleFrenzyTracker.isActive(serverPlayer, nowTick) && result.isCrit()) {
-                int max = PlayerStardewDataAPI.getMaxHealth(serverPlayer);
-                int current = PlayerStardewDataAPI.getHealth(serverPlayer);
-                int next = Math.min(max, current + 5);
-                if (next > current) {
-                    PlayerStardewDataAPI.setHealth(serverPlayer, next);
-                }
-                PlayerStardewDataAPI.restoreEnergy(serverPlayer, 10.0f);
+                CombatHealing.heal(serverPlayer, IridiumNeedleFrenzyTracker.CRITICAL_HEAL_AMOUNT);
+                PlayerStardewDataAPI.restoreEnergy(
+                        serverPlayer,
+                        IridiumNeedleFrenzyTracker.CRITICAL_ENERGY_RESTORE
+                );
                 @SuppressWarnings("null")
                 MobEffect vulnerable = Objects.requireNonNull(ModMobEffects.VULNERABLE.get(), "vulnerable");
                 @SuppressWarnings("null")
                 Holder<MobEffect> vulnerableHolder = Holder.direct(vulnerable);
                 @SuppressWarnings("null")
-                MobEffectInstance vulnerableInstance = new MobEffectInstance(vulnerableHolder, 40, 1, false, true, true);
+                MobEffectInstance vulnerableInstance = new MobEffectInstance(
+                        vulnerableHolder,
+                        IridiumNeedleFrenzyTracker.CRITICAL_VULNERABLE_DURATION_TICKS,
+                        IridiumNeedleFrenzyTracker.CRITICAL_VULNERABLE_AMPLIFIER,
+                        false,
+                        true,
+                        true
+                );
                 target.addEffect(vulnerableInstance);
             }
         }
@@ -494,9 +522,9 @@ public class WeaponCombatEvents {
         if (!result.isDodged() && result.getFinalDamage() > 0) {
             WeaponStats weaponStats = WeaponStats.fromItemStack(weapon);
             float strength = calculateKnockbackStrength(weaponStats);
-            // Add ring knockback bonus
+            // SDV BuffEffects.KnockbackMultiplier scales the weapon's knockback.
             if (equipStats != null) {
-                strength += equipStats.getKnockbackBonus();
+                strength *= 1.0f + equipStats.getKnockbackBonus();
             }
             if (strength > 0.0f) {
                 double dx = player.getX() - target.getX();
@@ -520,7 +548,13 @@ public class WeaponCombatEvents {
             skillId = "iridium_needle_thrust";
         }
         boolean displayCrit = result.isCrit() && !isSweepTarget;
-        DamageNumberContextStore.set(player, skillId, displayCrit, nowTick + 2);
+        DamageNumberContextStore.set(
+                player,
+                skillId,
+                displayCrit,
+                damageWeaponSnapshot,
+                nowTick + 2
+        );
 
         if (!"elf_blade_leaf".equals(skillContext.getSkillId())
             && player instanceof net.minecraft.server.level.ServerPlayer serverPlayer
@@ -534,7 +568,13 @@ public class WeaponCombatEvents {
                 && !result.isDodged()
                 && finalDamage > 0) {
             if (ObsidianResonanceTracker.isCharged(serverPlayer, nowTick)) {
-                ObsidianResonanceTracker.consumeAndStrike(serverPlayer, target, nowTick, result.isCrit());
+                ObsidianResonanceTracker.consumeAndStrike(
+                        serverPlayer,
+                        target,
+                        nowTick,
+                        result.isCrit(),
+                        damageWeaponSnapshot
+                );
             }
         }
 
@@ -570,10 +610,15 @@ public class WeaponCombatEvents {
                     .tier(SkillContext.SkillTier.MINOR)
                     .damageMultiplier(0.80f)
                     .build();
-                WeaponSkillContextStore.setPending(player, burstContext, nowTick + 5);
                 target.invulnerableTime = 0;
                 target.hurtTime = 0;
-                player.attack(target);
+                WeaponSkillDamage.apply(
+                        player,
+                        target,
+                        burstContext,
+                        damageWeaponSnapshot,
+                        nowTick + 5
+                );
                 PacketDistributor.sendToPlayer(serverPlayer, new CrystalDaggerBurstPayload());
             }
         }
@@ -590,10 +635,15 @@ public class WeaponCombatEvents {
                     .tier(SkillContext.SkillTier.MINOR)
                     .damageMultiplier(0.30f)
                     .build();
-                WeaponSkillContextStore.setPending(player, followContext, nowTick + 5);
                 target.invulnerableTime = 0;
                 target.hurtTime = 0;
-                player.attack(target);
+                WeaponSkillDamage.apply(
+                        player,
+                        target,
+                        followContext,
+                        damageWeaponSnapshot,
+                        nowTick + 5
+                );
             }
         }
 
@@ -632,6 +682,25 @@ public class WeaponCombatEvents {
         DamageNumberContextStore.Meta meta = DamageNumberContextStore.peek(player, nowTick);
         String skillId = meta != null ? meta.skillId() : null;
         boolean crit = meta != null && meta.crit();
+        ItemStack damageWeapon = meta != null
+                ? meta.weaponSnapshot()
+                        .map(WeaponDamageSnapshot::weapon)
+                        .orElseGet(player::getMainHandItem)
+                : player.getMainHandItem();
+        WeaponDamageSnapshot damageWeaponSnapshot = meta != null
+                ? meta.weaponSnapshot().orElse(null)
+                : null;
+        if (damageWeaponSnapshot == null
+                && damageWeapon.getItem() instanceof IStardewWeapon weaponItem) {
+            damageWeaponSnapshot = WeaponDamageSnapshot.capture(
+                    net.minecraft.resources.ResourceLocation
+                            .fromNamespaceAndPath(
+                                    StardewCraft.MODID,
+                                    weaponItem.getWeaponId()
+                            ),
+                    damageWeapon
+            );
+        }
 
         if ("burglar_shank".equals(skillId)
             && event.getNewDamage() > 0.0f
@@ -649,57 +718,74 @@ public class WeaponCombatEvents {
             }
         }
 
-        if (!DimensionDamageMapper.isInStardewDimension(target)) return;
+        boolean killedByPlayer = (!MineMonsterSpawnHandler.isCollapsedMummy(target))
+                && (!target.isAlive() || target.getHealth() <= 0.0f);
+        boolean dealtPositiveDamage = event.getNewDamage() > 0.0F;
+        if (dealtPositiveDamage
+                && killedByPlayer
+                && StardewEnchantments.has(damageWeapon, StardewEnchantments.VAMPIRIC)
+                && player.getRandom().nextFloat() < 0.09f
+                && player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+            CombatHealing.healFraction(serverPlayer, 0.10F, 1.0F);
+        }
 
-        if (event.getNewDamage() <= 0.0f) {
+        if (!dealtPositiveDamage) {
             return;
         }
 
-        boolean killedByPlayer = (!MineMonsterSpawnHandler.isCollapsedMummy(target))
-                && (!target.isAlive() || target.getHealth() <= 0.0f);
-        if (killedByPlayer
-                && StardewEnchantments.has(player.getMainHandItem(), StardewEnchantments.VAMPIRIC)
-                && player.getRandom().nextFloat() < 0.09f) {
-            player.heal(Math.max(1.0f, player.getMaxHealth() * 0.10f));
-        }
-
+        boolean inStardewDimension =
+                DimensionDamageMapper.isInStardewDimension(target);
         if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
             boolean killed = killedByPlayer;
             if (killed) {
-                if (hasDragonToothBonus(player.getMainHandItem(), "slime_gatherer") && isDragonToothSlimeGathererTarget(target)) {
+                if (hasDragonToothBonus(damageWeapon, "slime_gatherer") && isDragonToothSlimeGathererTarget(target)) {
                     dropDragonToothSlimeGatherer(target, serverPlayer);
                 }
-                PlayerStardewDataAPI.addExperience(serverPlayer, SkillType.COMBAT, getCombatExperienceOnKill(target));
+                if (inStardewDimension) {
+                    PlayerStardewDataAPI.addExperience(
+                            serverPlayer,
+                            SkillType.COMBAT,
+                            getCombatExperienceOnKill(target)
+                    );
+                }
             }
         }
 
-        double headTop = target.getY() + target.getBbHeight();
-        double baseYOffset = Math.max(0.20, target.getBbHeight() * 0.25);
-        double baseY = headTop + baseYOffset;
-        if ("tide_mark_bonus".equals(skillId)) {
-            baseY += target.getBbHeight() * 0.12;
-        } else if ("tide_anchor".equals(skillId)) {
-            baseY += target.getBbHeight() * 0.06;
-        } else if ("tide_reel".equals(skillId)) {
-            baseY += target.getBbHeight() * 0.08;
-        } else if ("templar_judgement_share".equals(skillId)) {
-            baseY += target.getBbHeight() * 0.10;
-        } else if ("templar_judgement".equals(skillId)) {
-            baseY += target.getBbHeight() * 0.08;
-        }
-        int damage = Math.max(0, Math.round(event.getNewDamage()));
-        DamageNumberPayload payload = new DamageNumberPayload(
-                (float) target.getX(),
-                (float) baseY,
-                (float) target.getZ(),
-                damage,
-                crit,
-                skillId
-        );
-        if (target.level() instanceof ServerLevel serverLevel) {
-            PacketDistributor.sendToPlayersInDimension(serverLevel, payload);
-        } else {
-            PacketDistributor.sendToPlayersTrackingEntityAndSelf(target, payload);
+        if (inStardewDimension) {
+            double headTop = target.getY() + target.getBbHeight();
+            double baseYOffset = Math.max(0.20, target.getBbHeight() * 0.25);
+            double baseY = headTop + baseYOffset;
+            if ("tide_mark_bonus".equals(skillId)) {
+                baseY += target.getBbHeight() * 0.12;
+            } else if ("tide_anchor".equals(skillId)) {
+                baseY += target.getBbHeight() * 0.06;
+            } else if ("tide_reel".equals(skillId)) {
+                baseY += target.getBbHeight() * 0.08;
+            } else if ("templar_judgement_share".equals(skillId)) {
+                baseY += target.getBbHeight() * 0.10;
+            } else if ("templar_judgement".equals(skillId)) {
+                baseY += target.getBbHeight() * 0.08;
+            }
+            int damage = Math.max(0, Math.round(event.getNewDamage()));
+            DamageNumberPayload payload = new DamageNumberPayload(
+                    (float) target.getX(),
+                    (float) baseY,
+                    (float) target.getZ(),
+                    damage,
+                    crit,
+                    skillId
+            );
+            if (target.level() instanceof ServerLevel serverLevel) {
+                PacketDistributor.sendToPlayersInDimension(
+                        serverLevel,
+                        payload
+                );
+            } else {
+                PacketDistributor.sendToPlayersTrackingEntityAndSelf(
+                        target,
+                        payload
+                );
+            }
         }
 
         // === 潮汐印记追加伤害：命中反�?===
@@ -864,12 +950,21 @@ public class WeaponCombatEvents {
         }
 
         // === 雪怪之牙：冻牙刻印命中后施加印记与减�?===
-        if ("yeti_tooth_mark".equals(skillId)
+        if (YetiToothMarkTracker.SKILL_ID.equals(skillId)
             && event.getNewDamage() > 0.0f
             && attacker instanceof net.minecraft.server.level.ServerPlayer serverPlayer
             && target.level() instanceof ServerLevel) {
-            YetiToothMarkTracker.apply(target, serverPlayer, nowTick, 60);
-            YetiToothEffects.applySlow(target, 60, 0);
+            YetiToothMarkTracker.apply(
+                    target,
+                    serverPlayer,
+                    nowTick,
+                    YetiToothMarkTracker.MARK_DURATION_TICKS
+            );
+            YetiToothEffects.applySlow(
+                    target,
+                    YetiToothMarkTracker.SLOW_DURATION_TICKS,
+                    YetiToothMarkTracker.SLOW_AMPLIFIER
+            );
         }
 
         // === 熔岩武士刀：熔铸刻印命中后施加熔印 ===
@@ -877,7 +972,12 @@ public class WeaponCombatEvents {
             && event.getNewDamage() > 0.0f
             && attacker instanceof net.minecraft.server.level.ServerPlayer serverPlayer
             && target.level() instanceof ServerLevel) {
-            com.stardew.craft.combat.skill.LavaKatanaMarkTracker.apply(target, serverPlayer, nowTick, 120);
+            com.stardew.craft.combat.skill.LavaKatanaMarkTracker.apply(
+                    target,
+                    serverPlayer,
+                    nowTick,
+                    com.stardew.craft.combat.skill.LavaKatanaMarkTracker.MARK_DURATION_TICKS
+            );
         }
 
         boolean isOssifiedExtra = meta != null
@@ -887,8 +987,8 @@ public class WeaponCombatEvents {
             && event.getNewDamage() > 0.0f
             && meta != null
             && meta.crit()) {
-            ItemStack weapon = player.getMainHandItem();
-            if (weapon.getItem() instanceof IStardewWeapon weaponItem
+            if (damageWeaponSnapshot != null
+                && damageWeapon.getItem() instanceof IStardewWeapon weaponItem
                 && "ossified_blade".equals(weaponItem.getWeaponId())
                 && OssifiedMarkTracker.consumeBonusIfEligible(target, player, nowTick)) {
                 SkillContext bonusContext = SkillContext.builder()
@@ -896,10 +996,15 @@ public class WeaponCombatEvents {
                     .tier(SkillContext.SkillTier.MINOR)
                     .damageMultiplier(1.0f)
                     .build();
-                WeaponSkillContextStore.setPending(player, bonusContext, nowTick + 5);
                 target.invulnerableTime = 0;
                 target.hurtTime = 0;
-                target.hurt(player.damageSources().playerAttack(player), 1.0F);
+                WeaponSkillDamage.apply(
+                        player,
+                        target,
+                        bonusContext,
+                        damageWeaponSnapshot,
+                        nowTick + 5
+                );
 
                 if (target.level() instanceof ServerLevel serverLevel) {
                     double x = target.getX();
@@ -922,16 +1027,20 @@ public class WeaponCombatEvents {
         if (event.getNewDamage() > 0.0f
             && attacker instanceof net.minecraft.server.level.ServerPlayer serverPlayer
             && target.level() instanceof ServerLevel serverLevel) {
-            if (!"yeti_tooth_mark".equals(skillId)
+            if (YetiToothMarkTracker.isEligibleFollowupSkill(skillId)
                 && YetiToothMarkTracker.consumeIfEligible(target, serverPlayer, nowTick)) {
-                YetiToothEffects.applyFreeze(serverLevel, target, 40);
+                YetiToothEffects.applyFreeze(
+                        serverLevel,
+                        target,
+                        YetiToothMarkTracker.FREEZE_DURATION_TICKS
+                );
             }
         }
 
         // === 熔岩武士刀：命中叠加热�?===
         if (event.getNewDamage() > 0.0f
             && attacker instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
-            ItemStack weapon = player.getMainHandItem();
+            ItemStack weapon = damageWeapon;
             if (weapon.getItem() instanceof IStardewWeapon weaponItem
                 && "lava_katana".equals(weaponItem.getWeaponId())) {
                 boolean isBurn = "lava_katana_burn".equals(skillId);
@@ -949,17 +1058,23 @@ public class WeaponCombatEvents {
 
         if (event.getNewDamage() > 0.0f
             && attacker instanceof net.minecraft.server.level.ServerPlayer serverPlayer
-            && !isGalaxyBonus) {
+            && !isGalaxyBonus
+            && damageWeaponSnapshot != null) {
             if (GalaxyDaggerMarkTracker.consumeIfEligible(target, serverPlayer, nowTick)) {
                 SkillContext bonusContext = SkillContext.builder()
                     .skillId("galaxy_dagger_mark_bonus")
                     .tier(SkillContext.SkillTier.MINOR)
                     .damageMultiplier(0.80f)
                     .build();
-                WeaponSkillContextStore.setPending(player, bonusContext, nowTick + 5);
                 target.invulnerableTime = 0;
                 target.hurtTime = 0;
-                target.hurt(player.damageSources().playerAttack(player), 1.0F);
+                WeaponSkillDamage.apply(
+                        player,
+                        target,
+                        bonusContext,
+                        damageWeaponSnapshot,
+                        nowTick + 5
+                );
 
                 if (target.level() instanceof ServerLevel serverLevel) {
                     double x = target.getX();
@@ -985,17 +1100,23 @@ public class WeaponCombatEvents {
         if (event.getNewDamage() > 0.0f
             && attacker instanceof net.minecraft.server.level.ServerPlayer serverPlayer
             && !isInfinityBonus
-            && !skipInfinityMark) {
+            && !skipInfinityMark
+            && damageWeaponSnapshot != null) {
             if (InfinityDaggerMarkTracker.consumeIfEligible(target, serverPlayer, nowTick)) {
                 SkillContext bonusContext = SkillContext.builder()
                     .skillId("infinity_dagger_mark_bonus")
                     .tier(SkillContext.SkillTier.MINOR)
                     .damageMultiplier(1.20f)
                     .build();
-                WeaponSkillContextStore.setPending(player, bonusContext, nowTick + 5);
                 target.invulnerableTime = 0;
                 target.hurtTime = 0;
-                target.hurt(player.damageSources().playerAttack(player), 1.0F);
+                WeaponSkillDamage.apply(
+                        player,
+                        target,
+                        bonusContext,
+                        damageWeaponSnapshot,
+                        nowTick + 5
+                );
 
                 if (target.level() instanceof ServerLevel serverLevel) {
                     double x = target.getX();
@@ -1026,7 +1147,7 @@ public class WeaponCombatEvents {
         }
 
         // === 海王星大剑：潮汐印记追加伤害 ===
-        if (meta != null && "tide_mark_bonus".equals(meta.skillId())) {
+        if (meta != null && TideMarkTracker.BONUS_SKILL_ID.equals(meta.skillId())) {
             return;
         }
 
@@ -1034,8 +1155,8 @@ public class WeaponCombatEvents {
             return;
         }
 
-        ItemStack weapon = player.getMainHandItem();
-        if (!(weapon.getItem() instanceof IStardewWeapon weaponItem)) {
+        if (damageWeaponSnapshot == null
+                || !(damageWeapon.getItem() instanceof IStardewWeapon weaponItem)) {
             return;
         }
 
@@ -1043,19 +1164,19 @@ public class WeaponCombatEvents {
             return;
         }
 
-        if (!com.stardew.craft.combat.skill.TideMarkTracker.isMarked(target, nowTick)) {
+        if (!TideMarkTracker.isMarkedBy(target, player, nowTick)) {
             return;
         }
 
-        SkillContext bonusContext = SkillContext.builder()
-            .skillId("tide_mark_bonus")
-            .tier(SkillContext.SkillTier.MINOR)
-            .damageMultiplier(0.30f)
-            .build();
-        WeaponSkillContextStore.setPending(player, bonusContext, nowTick + 5);
         target.invulnerableTime = 0;
         target.hurtTime = 0;
-        target.hurt(player.damageSources().playerAttack(player), 1.0F);
+        WeaponSkillDamage.apply(
+                player,
+                target,
+                TideMarkTracker.createBonusContext(),
+                damageWeaponSnapshot,
+                nowTick + TideMarkTracker.HIT_CONTEXT_LIFETIME_TICKS
+        );
     }
 
     private static int getCombatExperienceOnKill(LivingEntity target) {
@@ -1164,6 +1285,6 @@ public class WeaponCombatEvents {
 
     /** Clean up state when a player logs out to prevent memory leaks. */
     public static void removePlayer(UUID playerId) {
-        CLUB_SWEEP_DAMAGE.remove(playerId);
+        CombatDamageHistory.remove(playerId);
     }
 }

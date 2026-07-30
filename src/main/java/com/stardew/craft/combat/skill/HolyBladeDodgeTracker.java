@@ -38,7 +38,7 @@ public final class HolyBladeDodgeTracker {
         if (state == null) {
             return 0.0f;
         }
-        if (nowTick > state.endTick) {
+        if (isExpired(nowTick, state.endTick)) {
             ACTIVE.remove(player.getUUID());
             return 0.0f;
         }
@@ -47,6 +47,10 @@ public final class HolyBladeDodgeTracker {
 
     public static boolean isActive(Player player, long nowTick) {
         return getDodgeChance(player, nowTick) > 0.0f;
+    }
+
+    static boolean isExpired(long nowTick, long endTick) {
+        return nowTick >= endTick;
     }
 
     /** Clean up state when a player logs out to prevent memory leaks. */

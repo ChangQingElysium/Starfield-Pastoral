@@ -1,0 +1,33 @@
+[
+  {
+    "id": "mrQiClubCard",
+    "text": "stardewcraft.mail.mrQiClubCard",
+    "background": 0,
+    "attachedItems": [
+      {
+        "id": "stardewcraft:club_card",
+        "count": 1
+      }
+    ],
+    "on_read": [
+      {
+        "type": "stardewcraft:set_flag",
+        "data": {
+          "id": "TH_LumberPile"
+        }
+      },
+      {
+        "type": "stardewcraft:set_flag",
+        "data": {
+          "id": "HasClubCard"
+        }
+      },
+      {
+        "type": "stardewcraft:remove_quest",
+        "data": {
+          "quest": "5"
+        }
+      }
+    ]
+  }
+]

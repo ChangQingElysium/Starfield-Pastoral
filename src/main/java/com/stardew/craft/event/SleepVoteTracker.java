@@ -26,6 +26,10 @@ public final class SleepVoteTracker {
 
     /** playerUUID → sleepMinute at vote time */
     private static final Map<UUID, Integer> votes = new LinkedHashMap<>();
+    /** Forced exhaustion pass-outs share the ready check but cannot be revoked as sleep. */
+    private static final Set<UUID> passOutVotes = new HashSet<>();
+    /** Server tick when each forced collapse began, used to finish animation 293 before warp. */
+    private static final Map<UUID, Integer> passOutStartedAtTick = new HashMap<>();
 
     /** playerUUID → 最后活动的 System.currentTimeMillis() */
     private static final Map<UUID, Long> lastActivityTime = new LinkedHashMap<>();
@@ -38,6 +42,16 @@ public final class SleepVoteTracker {
      */
     public static Set<UUID> getVotedPlayerSnapshot() {
         return new HashSet<>(votes.keySet());
+    }
+
+    public static Set<UUID> getSleepingPlayerSnapshot() {
+        Set<UUID> sleeping = new HashSet<>(votes.keySet());
+        sleeping.removeAll(passOutVotes);
+        return sleeping;
+    }
+
+    public static Set<UUID> getPassOutPlayerSnapshot() {
+        return new HashSet<>(passOutVotes);
     }
 
     private SleepVoteTracker() {}
@@ -73,11 +87,46 @@ public final class SleepVoteTracker {
      * @return true 如果达到阈值（应该推进了）
      */
     public static boolean castVote(ServerPlayer player, int sleepMinute) {
+        passOutVotes.remove(player.getUUID());
         return castVoteInternal(player, sleepMinute, true);
     }
 
     public static boolean castPassOutVote(ServerPlayer player, int sleepMinute) {
+        passOutVotes.add(player.getUUID());
         return castVoteInternal(player, sleepMinute, false);
+    }
+
+    /**
+     * Records a pre-2AM multiplayer pass-out as ready without allowing that
+     * pass-out itself to advance the shared day. A later real sleep vote or
+     * the 2AM hard boundary may advance it.
+     */
+    public static boolean registerEarlyPassOut(ServerPlayer player, int sleepMinute) {
+        passOutVotes.add(player.getUUID());
+        votes.put(player.getUUID(), sleepMinute);
+        passOutStartedAtTick.putIfAbsent(player.getUUID(), player.server.getTickCount());
+        markActive(player);
+        return hasReachedThreshold(player.server);
+    }
+
+    public static int remainingPassOutAnimationTicks(
+            MinecraftServer server,
+            Collection<UUID> playerIds,
+            int totalTicks
+    ) {
+        int remaining = 0;
+        int now = server.getTickCount();
+        for (UUID playerId : playerIds) {
+            Integer started = passOutStartedAtTick.get(playerId);
+            if (started != null) {
+                remaining = Math.max(remaining, Math.max(0, totalTicks - (now - started)));
+            }
+        }
+        return remaining;
+    }
+
+    public static int countStardewPlayersOnline(MinecraftServer server) {
+        return countStardewPlayers(server);
     }
 
     private static boolean castVoteInternal(ServerPlayer player, int sleepMinute, boolean broadcastProgress) {
@@ -138,6 +187,8 @@ public final class SleepVoteTracker {
      */
     public static void clearVotes() {
         votes.clear();
+        passOutVotes.clear();
+        passOutStartedAtTick.clear();
     }
 
     /**
@@ -146,6 +197,8 @@ public final class SleepVoteTracker {
      */
     public static boolean onPlayerLogout(ServerPlayer player) {
         votes.remove(player.getUUID());
+        passOutVotes.remove(player.getUUID());
+        passOutStartedAtTick.remove(player.getUUID());
         lastActivityTime.remove(player.getUUID());
         MinecraftServer server = player.server;
 
@@ -172,6 +225,9 @@ public final class SleepVoteTracker {
      * 玩家取消睡眠投票（按 ESC 退出等待界面）。
      */
     public static void revokeVote(ServerPlayer player) {
+        if (passOutVotes.contains(player.getUUID())) {
+            return;
+        }
         votes.remove(player.getUUID());
     }
 
@@ -179,6 +235,9 @@ public final class SleepVoteTracker {
      * 玩家取消睡眠投票并广播更新。
      */
     public static void revokeVoteAndBroadcast(ServerPlayer player) {
+        if (passOutVotes.contains(player.getUUID())) {
+            return;
+        }
         votes.remove(player.getUUID());
         MinecraftServer server = player.server;
         int afkTimeout = server.getGameRules().getInt(ModGameRules.RULE_STARDEW_AFK_TIMEOUT);
@@ -256,6 +315,13 @@ public final class SleepVoteTracker {
             }
         }
         return count;
+    }
+
+    private static boolean hasReachedThreshold(MinecraftServer server) {
+        int afkTimeout = server.getGameRules().getInt(ModGameRules.RULE_STARDEW_AFK_TIMEOUT);
+        int activeCount = countActiveStardewPlayers(server, afkTimeout);
+        int sleepPct = server.getGameRules().getInt(ModGameRules.RULE_STARDEW_SLEEPING_PERCENTAGE);
+        return countCurrentVotes(server) >= computeRequired(activeCount, sleepPct);
     }
 
     /**

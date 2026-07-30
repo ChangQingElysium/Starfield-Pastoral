@@ -4,6 +4,7 @@ import com.stardew.craft.combat.network.TremorBlockPayload;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -17,6 +18,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.AABB;
@@ -33,16 +35,40 @@ import java.util.UUID;
 
 public final class FemurSlamTracker {
 
-    private static final Map<UUID, State> PENDING = new HashMap<>();
-    private static final double RANGE = 5.0;
-    private static final double MIN_DOT = 0.5;
-    private static final int SLOW_TICKS = 40;
-    private static final int STAGGER_TICKS = 4;
-    private static final float KNOCKBACK_MULTI = 0.7f;
-    private static final float KNOCKBACK_SINGLE = 1.1f;
-    private static final int QUAKE_TREMOR_MAX = 28;
+    public enum Status {
+        ACTIVE,
+        COMPLETED,
+        INVALIDATED
+    }
 
-    private record State(long fireTick, String weaponId, String skillId, float damageMultiplier, int cooldownTicks) {}
+    enum TickDecision {
+        WAIT,
+        FIRE,
+        CANCEL
+    }
+
+    private static final Map<UUID, State> PENDING = new HashMap<>();
+    public static final int CHARGE_TICKS = 20;
+    public static final double RANGE = 5.0D;
+    public static final double MIN_DOT = 0.5D;
+    public static final int SLOW_TICKS = 40;
+    public static final int SLOW_AMPLIFIER = 0;
+    public static final int STAGGER_TICKS = 4;
+    public static final int STAGGER_AMPLIFIER = 0;
+    public static final float KNOCKBACK_MULTI = 0.7F;
+    public static final float KNOCKBACK_SINGLE = 1.1F;
+    public static final int QUAKE_TREMOR_MAX = 28;
+    public static final int HIT_CONTEXT_LIFETIME_TICKS = 5;
+
+    private record State(
+            long fireTick,
+            String weaponId,
+            String skillId,
+            float damageMultiplier,
+            int cooldownTicks,
+            ResourceKey<Level> dimension,
+            WeaponDamageSnapshot weaponSnapshot
+    ) {}
 
     private FemurSlamTracker() {}
 
@@ -52,27 +78,116 @@ public final class FemurSlamTracker {
 
     public static void start(ServerPlayer player, long nowTick, int delayTicks,
                              String weaponId, String skillId, float damageMultiplier, int cooldownTicks) {
+        startInternal(
+                player,
+                nowTick,
+                delayTicks,
+                weaponId,
+                skillId,
+                damageMultiplier,
+                cooldownTicks,
+                null
+        );
+    }
+
+    public static void start(
+            ServerPlayer player,
+            long nowTick,
+            int delayTicks,
+            String weaponId,
+            String skillId,
+            float damageMultiplier,
+            int cooldownTicks,
+            WeaponDamageSnapshot weaponSnapshot
+    ) {
+        startInternal(
+                player,
+                nowTick,
+                delayTicks,
+                weaponId,
+                skillId,
+                damageMultiplier,
+                cooldownTicks,
+                java.util.Objects.requireNonNull(
+                        weaponSnapshot,
+                        "weaponSnapshot"
+                )
+        );
+    }
+
+    private static void startInternal(
+            ServerPlayer player,
+            long nowTick,
+            int delayTicks,
+            String weaponId,
+            String skillId,
+            float damageMultiplier,
+            int cooldownTicks,
+            WeaponDamageSnapshot weaponSnapshot
+    ) {
         if (player == null || weaponId == null || skillId == null) {
             return;
         }
         long fireTick = nowTick + Math.max(1, delayTicks);
-        PENDING.put(player.getUUID(), new State(fireTick, weaponId, skillId, damageMultiplier, cooldownTicks));
+        PENDING.put(
+                player.getUUID(),
+                new State(
+                        fireTick,
+                        weaponId,
+                        skillId,
+                        damageMultiplier,
+                        cooldownTicks,
+                        player.level().dimension(),
+                        weaponSnapshot
+                )
+        );
     }
 
     @SuppressWarnings("null")
-    public static void tick(ServerPlayer player, long nowTick) {
+    public static Status tick(ServerPlayer player, long nowTick) {
+        if (player == null) {
+            return Status.INVALIDATED;
+        }
         State state = PENDING.get(player.getUUID());
-        if (state != null) {
-            if (nowTick < state.fireTick) {
-                if (!player.isUsingItem()) {
-                    PENDING.remove(player.getUUID());
-                }
-            } else {
-                PENDING.remove(player.getUUID());
-                handleSlam(player, nowTick, state);
-            }
+        if (state == null) {
+            return Status.INVALIDATED;
+        }
+        TickDecision decision = tickDecision(
+                state.fireTick,
+                nowTick,
+                player.isAlive() && !player.isRemoved(),
+                isSameDimension(
+                        state.dimension,
+                        player.level().dimension()
+                ),
+                player.isUsingItem()
+        );
+        if (decision == TickDecision.WAIT) {
+            return Status.ACTIVE;
         }
 
+        PENDING.remove(player.getUUID());
+        if (decision == TickDecision.CANCEL) {
+            player.stopUsingItem();
+            return Status.INVALIDATED;
+        }
+
+        try {
+            try {
+                handleSlam(player, nowTick, state);
+            } finally {
+                WeaponSkillCooldowns.setCooldown(
+                        player,
+                        state.weaponId,
+                        state.skillId,
+                        nowTick,
+                        state.cooldownTicks
+                );
+            }
+        } finally {
+            player.stopUsingItem();
+        }
+        return Status.COMPLETED;
     }
 
     @SuppressWarnings("null")
@@ -84,28 +199,63 @@ public final class FemurSlamTracker {
             return;
         }
 
-        List<LivingEntity> targets = findTargetsInArc(player, RANGE, MIN_DOT);
+        List<LivingEntity> targets = findTargetsInArc(
+                player,
+                RANGE,
+                MIN_DOT
+        );
         boolean hitAny = !targets.isEmpty();
 
         if (hitAny) {
             boolean singleTarget = targets.size() == 1;
 
             for (LivingEntity target : targets) {
-                SkillContext context = SkillContext.builder()
-                    .skillId(state.skillId)
-                    .tier(SkillContext.SkillTier.MINOR)
-                    .damageMultiplier(state.damageMultiplier)
-                    .build();
-                WeaponSkillContextStore.setPending(player, context, nowTick + 5);
-                player.attack(target);
+                SkillContext context = createHitContext(
+                        state.skillId,
+                        state.damageMultiplier
+                );
+                if (state.weaponSnapshot == null) {
+                    WeaponSkillDamage.apply(
+                            player,
+                            target,
+                            context,
+                            nowTick + HIT_CONTEXT_LIFETIME_TICKS,
+                            WeaponSkillDamage.AttackGatePolicy
+                                    .RESPECT_AT_IMPACT
+                    );
+                } else {
+                    WeaponSkillDamage.apply(
+                            player,
+                            target,
+                            context,
+                            state.weaponSnapshot,
+                            nowTick + HIT_CONTEXT_LIFETIME_TICKS,
+                            WeaponSkillDamage.AttackGatePolicy
+                                    .RESPECT_AT_IMPACT
+                    );
+                }
 
-                target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, SLOW_TICKS, 0, false, true, true));
+                target.addEffect(new MobEffectInstance(
+                        MobEffects.MOVEMENT_SLOWDOWN,
+                        SLOW_TICKS,
+                        SLOW_AMPLIFIER,
+                        false,
+                        true,
+                        true
+                ));
 
                 float knockback = singleTarget ? KNOCKBACK_SINGLE : KNOCKBACK_MULTI;
                 applyKnockback(player, target, knockback);
 
                 if (singleTarget) {
-                    target.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, STAGGER_TICKS, 0, false, true, true));
+                    target.addEffect(new MobEffectInstance(
+                            MobEffects.DIG_SLOWDOWN,
+                            STAGGER_TICKS,
+                            STAGGER_AMPLIFIER,
+                            false,
+                            true,
+                            true
+                    ));
                     target.setDeltaMovement(0.0, target.getDeltaMovement().y, 0.0);
                     target.hasImpulse = true;
                 }
@@ -118,7 +268,6 @@ public final class FemurSlamTracker {
 
         serverLevel.playSound(null, player.blockPosition(), SoundEvents.IRON_GOLEM_ATTACK, SoundSource.PLAYERS, 0.85f, 0.9f);
         serverLevel.playSound(null, player.blockPosition(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.55f, 0.85f);
-        WeaponSkillCooldowns.setCooldown(player, state.weaponId, state.skillId, nowTick, state.cooldownTicks);
     }
 
     private static void applyKnockback(Player player, LivingEntity target, float strength) {
@@ -224,7 +373,7 @@ public final class FemurSlamTracker {
         });
 
         targets.sort((a, b) -> Double.compare(a.distanceToSqr(player), b.distanceToSqr(player)));
-        return targets;
+        return List.copyOf(targets);
     }
 
     @SuppressWarnings("unused")
@@ -253,4 +402,47 @@ public final class FemurSlamTracker {
     public static void removePlayer(UUID playerId) {
         PENDING.remove(playerId);
     }
+
+    public static void cancel(ServerPlayer player) {
+        if (player == null) {
+            return;
+        }
+        PENDING.remove(player.getUUID());
+        player.stopUsingItem();
+    }
+
+    static TickDecision tickDecision(
+            long fireTick,
+            long nowTick,
+            boolean casterAvailable,
+            boolean sameDimension,
+            boolean usingItem
+    ) {
+        if (!casterAvailable || !sameDimension) {
+            return TickDecision.CANCEL;
+        }
+        if (nowTick >= fireTick) {
+            return TickDecision.FIRE;
+        }
+        return usingItem ? TickDecision.WAIT : TickDecision.CANCEL;
+    }
+
+    static boolean isSameDimension(
+            ResourceKey<Level> expected,
+            ResourceKey<Level> actual
+    ) {
+        return expected.equals(actual);
+    }
+
+    static SkillContext createHitContext(
+            String skillId,
+            float damageMultiplier
+    ) {
+        return SkillContext.builder()
+                .skillId(skillId)
+                .tier(SkillContext.SkillTier.MINOR)
+                .damageMultiplier(damageMultiplier)
+                .build();
+    }
+
 }

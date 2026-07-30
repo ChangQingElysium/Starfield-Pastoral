@@ -1,0 +1,34 @@
+{
+  "format": 1,
+  "priority": 100,
+  "hint": "read",
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "SamHouse",
+    "tile_action": "Letter \"SamHouse.10\"",
+    "code": "StardewValley.GameLocation.performAction:Letter"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:1_willow_lane",
+    "positions": [
+      [
+        -26,
+        39,
+        37
+      ]
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "action": {
+        "type": "stardewcraft:open_letter",
+        "data": {
+          "text": "stardewcraft.strings_from_maps.sam_house.10"
+        }
+      }
+    }
+  ]
+}

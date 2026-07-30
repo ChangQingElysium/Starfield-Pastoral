@@ -19,6 +19,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityTravelToDimensionEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
@@ -55,12 +56,25 @@ public class DimensionEventHandler {
     
     // 防止重复触发新的一天
     private static boolean dayAdvancing = false;
+    /** True while a pass-out animation is finishing before the authoritative morning transition. */
+    private static boolean passOutAdvanceScheduled = false;
     // 深夜警告标记（每天重置一次）
     private static boolean midnightWarned = false;   // 0:00 警告
     private static boolean oneAMWarned = false;      // 1:00 警告
     private static boolean twoAMWarned = false;      // 2:00 警告
     private static int lastAnimalTenMinuteDayKey = Integer.MIN_VALUE;
     private static int lastAnimalTenMinuteSlot = Integer.MIN_VALUE;
+
+    @SubscribeEvent
+    public static void onServerStopped(ServerStoppedEvent event) {
+        dayAdvancing = false;
+        passOutAdvanceScheduled = false;
+        midnightWarned = false;
+        oneAMWarned = false;
+        twoAMWarned = false;
+        SleepVoteTracker.clearVotes();
+        com.stardew.craft.player.PassOutService.clearRuntimeState();
+    }
 
     @SuppressWarnings("null")
     /**
@@ -104,6 +118,18 @@ public class DimensionEventHandler {
                 timeManager.advanceDayWithSleepTime(sleepMinute);
             } catch (Exception e) {
                 StardewCraft.LOGGER.error("Error during advanceDayWithSleepTime (day still advanced to prevent freeze)", e);
+                // A collapse start is a client input lock. If settlement
+                // construction fails, explicitly terminate that presentation
+                // instead of leaving affected clients black forever.
+                for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+                    if (com.stardew.craft.player.PassOutService
+                            .hasPendingPassOutResult(player.getUUID())) {
+                        PacketDistributor.sendToPlayer(
+                                player,
+                                new com.stardew.craft.network.overnight
+                                        .OvernightCollapseCancelPayload());
+                    }
+                }
             }
             wakeSleepingStardewPlayers(server);
 
@@ -149,13 +175,52 @@ public class DimensionEventHandler {
         }
 
         int sleepMinute = StardewTimeManager.get().getCurrentTime();
+        if (shouldReturnEarlyPassOutToBed(
+                sleepMinute,
+                SleepVoteTracker.countStardewPlayersOnline(player.server))) {
+            // Original multiplayer: stamina collapse before 2AM returns only
+            // this farmer to bed. It contributes readiness, but the collapse
+            // itself never calls PassOutNewDay.
+            boolean readyToAdvance = SleepVoteTracker.registerEarlyPassOut(player, sleepMinute);
+            java.util.UUID collapsedPlayerId = player.getUUID();
+            int settlementDay = StardewTimeManager.get().getAbsoluteDay() + 1;
+            if (readyToAdvance) {
+                schedulePassOutAdvance(
+                        stardewLevel,
+                        sleepMinute,
+                        "pass_out_stamina_all_ready",
+                        SleepVoteTracker.getVotedPlayerSnapshot());
+                return;
+            }
+            com.stardew.craft.time.ServerRealTickTaskScheduler.schedule(
+                    player.server,
+                    com.stardew.craft.network.overnight.OvernightCollapseTimeline.COLLAPSE_TICKS,
+                    () -> {
+                        ServerPlayer collapsedPlayer =
+                                player.server.getPlayerList().getPlayer(collapsedPlayerId);
+                        // If another farmer advanced the day while animation
+                        // 293 was running, settlement already consumed this
+                        // entry and owns the morning warp/presentation.
+                        if (collapsedPlayer == null
+                                || !com.stardew.craft.player.PassOutService
+                                        .hasPendingPassOutResult(collapsedPlayerId)) {
+                            return;
+                        }
+                        com.stardew.craft.player.PassOutService
+                                .teleportToFarmSpawn(collapsedPlayer);
+                        PacketDistributor.sendToPlayer(
+                                collapsedPlayer,
+                                new com.stardew.craft.network.overnight
+                                        .OvernightCollapseReturnToBedPayload(settlementDay));
+                    });
+            return;
+        }
         if (SleepVoteTracker.castPassOutVote(player, sleepMinute)) {
-            int effectiveSleepMinute = SleepVoteTracker.getLatestSleepMinute();
-            java.util.Set<java.util.UUID> votedPlayers = SleepVoteTracker.getVotedPlayerSnapshot();
-            java.util.Set<java.util.UUID> pendingPassOutPlayers = collectPendingPassOutPlayers(player.server, votedPlayers);
-            SleepVoteTracker.clearVotes();
-            advanceToNextMorning(stardewLevel, effectiveSleepMinute, "pass_out_stamina");
-            teleportPlayersToFarmSpawn(player.server, pendingPassOutPlayers);
+            schedulePassOutAdvance(
+                    stardewLevel,
+                    SleepVoteTracker.getLatestSleepMinute(),
+                    "pass_out_stamina",
+                    SleepVoteTracker.getVotedPlayerSnapshot());
         }
     }
 
@@ -185,10 +250,64 @@ public class DimensionEventHandler {
             int effectiveSleepMinute = SleepVoteTracker.getLatestSleepMinute();
             java.util.Set<java.util.UUID> votedPlayers = SleepVoteTracker.getVotedPlayerSnapshot();
             java.util.Set<java.util.UUID> pendingPassOutPlayers = collectPendingPassOutPlayers(player.server, votedPlayers);
+            int remainingCollapseTicks = SleepVoteTracker.remainingPassOutAnimationTicks(
+                    player.server,
+                    pendingPassOutPlayers,
+                    com.stardew.craft.network.overnight.OvernightCollapseTimeline.COLLAPSE_TICKS);
+            if (remainingCollapseTicks > 0) {
+                schedulePassOutAdvance(
+                        stardewLevel,
+                        effectiveSleepMinute,
+                        "sleep_confirm_after_pass_out",
+                        votedPlayers);
+                return;
+            }
             SleepVoteTracker.clearVotes();
             advanceToNextMorning(stardewLevel, effectiveSleepMinute, "sleep_confirm");
             teleportPlayersToFarmSpawn(player.server, pendingPassOutPlayers);
         }
+    }
+
+    static boolean shouldReturnEarlyPassOutToBed(
+            int stardewMinute,
+            int onlineStardewPlayers
+    ) {
+        return stardewMinute < 1560 && onlineStardewPlayers > 1;
+    }
+
+    private static void schedulePassOutAdvance(
+            ServerLevel stardewLevel,
+            int sleepMinute,
+            String reason,
+            java.util.Set<java.util.UUID> votedPlayers
+    ) {
+        if (passOutAdvanceScheduled) {
+            return;
+        }
+        var server = stardewLevel.getServer();
+        java.util.Set<java.util.UUID> voteSnapshot = java.util.Set.copyOf(votedPlayers);
+        java.util.Set<java.util.UUID> pendingPassOutPlayers =
+                collectPendingPassOutPlayers(server, voteSnapshot);
+        int delay = SleepVoteTracker.remainingPassOutAnimationTicks(
+                server,
+                pendingPassOutPlayers,
+                com.stardew.craft.network.overnight.OvernightCollapseTimeline.COLLAPSE_TICKS);
+        if (!pendingPassOutPlayers.isEmpty() && delay == 0) {
+            // 2AM/single-player collapses are entered directly rather than
+            // through registerEarlyPassOut, so their animation starts now.
+            delay = com.stardew.craft.network.overnight
+                    .OvernightCollapseTimeline.COLLAPSE_TICKS;
+        }
+        passOutAdvanceScheduled = true;
+        com.stardew.craft.time.ServerRealTickTaskScheduler.schedule(server, delay, () -> {
+            try {
+                SleepVoteTracker.clearVotes();
+                advanceToNextMorning(stardewLevel, sleepMinute, reason);
+                teleportPlayersToFarmSpawn(server, pendingPassOutPlayers);
+            } finally {
+                passOutAdvanceScheduled = false;
+            }
+        });
     }
 
     private static java.util.Set<java.util.UUID> collectPendingPassOutPlayers(
@@ -558,7 +677,7 @@ public class DimensionEventHandler {
         }
 
         // ── 2:00 AM 强制晕倒 + 日推进（对标 SDV timeOfDay >= 2600）──
-        if (dayTime >= DAY_END_TIME && !dayAdvancing) {
+        if (dayTime >= DAY_END_TIME && !dayAdvancing && !passOutAdvanceScheduled) {
             // 时钟抖动
             if (!twoAMWarned) {
                 twoAMWarned = true;
@@ -579,24 +698,30 @@ public class DimensionEventHandler {
                     }
             }
             // 关键：先保存已投票玩家快照，再清空投票
-            java.util.Set<java.util.UUID> votedPlayers = SleepVoteTracker.getVotedPlayerSnapshot();
-                java.util.Set<java.util.UUID> pendingPassOutVoters = collectPendingPassOutPlayers(server, votedPlayers);
+            java.util.Set<java.util.UUID> votedPlayers = SleepVoteTracker.getSleepingPlayerSnapshot();
             // 1. 对每个玩家执行晕倒惩罚（跳过已投睡觉票的玩家——他们选择了睡觉，不算晕倒）
             for (ServerPlayer sp : stardewPlayers) {
-                    if (!votedPlayers.contains(sp.getUUID())) {
+                    if (!votedPlayers.contains(sp.getUUID())
+                            && !com.stardew.craft.player.PassOutService.hasPendingPassOutResult(sp.getUUID())
+                            && !com.stardew.craft.player.PassOutService.isKnockedOut(sp)
+                            && !sp.isCreative()
+                            && !sp.isSpectator()
+                            && com.stardew.craft.farm.FarmInstanceRegistry.get().hasFarm(sp.getUUID())) {
                         com.stardew.craft.player.PassOutService.on2AMPassOut(sp);
                     }
             }
-            // 2. 推进到次日（内部会消费 PassOutResult 并合并进结算包发送给客户端）
-            SleepVoteTracker.clearVotes(); // 2AM 强制推进，清空所有未完成的投票
-            advanceToNextMorning(serverLevel, stardewMinutes, "pass_out_2am");
-            // 3. 只传送未投票的玩家回农场出生点（已投票玩家正常过夜，不惩罚不传送）
+            // 2. 原版先完整播放 animation 293，再推进次日并回床。
+            java.util.Set<java.util.UUID> transitionPlayers = new java.util.HashSet<>(votedPlayers);
             for (ServerPlayer sp : stardewPlayers) {
-                    if (!votedPlayers.contains(sp.getUUID())) {
-                        com.stardew.craft.player.PassOutService.teleportToFarmSpawn(sp);
-                    }
+                if (com.stardew.craft.player.PassOutService.hasPendingPassOutResult(sp.getUUID())) {
+                    transitionPlayers.add(sp.getUUID());
+                }
             }
-            teleportPlayersToFarmSpawn(server, pendingPassOutVoters);
+            schedulePassOutAdvance(
+                    serverLevel,
+                    stardewMinutes,
+                    "pass_out_2am",
+                    transitionPlayers);
         }
         
         // 每秒（20 ticks）同步UI时间+虚拟天空时间到客户端（仅发给星露谷维度玩家）

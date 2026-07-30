@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "stardewcraft:block/utility/statue_of_endless_fortune" },
+    "facing=east": { "model": "stardewcraft:block/utility/statue_of_endless_fortune", "y": 90 },
+    "facing=south": { "model": "stardewcraft:block/utility/statue_of_endless_fortune", "y": 180 },
+    "facing=west": { "model": "stardewcraft:block/utility/statue_of_endless_fortune", "y": 270 }
+  }
+}

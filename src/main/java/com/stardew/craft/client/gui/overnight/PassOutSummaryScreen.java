@@ -133,6 +133,7 @@ public class PassOutSummaryScreen extends Screen {
         return switch (payload.passOutType()) {
             case COMBAT_MINE -> Component.translatable("stardewcraft.passout.reason.mine");
             case COMBAT_OVERWORLD -> Component.translatable("stardewcraft.passout.reason.overworld");
+            case COMBAT_DESERT_FESTIVAL -> Component.translatable("stardewcraft.passout.reason.mine");
             case EXHAUSTION_2AM -> Component.translatable("stardewcraft.passout.reason.2am");
             case EXHAUSTION_STAMINA -> Component.translatable("stardewcraft.passout.reason.stamina");
         };

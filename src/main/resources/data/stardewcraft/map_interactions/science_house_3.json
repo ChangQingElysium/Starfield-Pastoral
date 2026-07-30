@@ -1,0 +1,40 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "ScienceHouse",
+    "tile_action": "Message \"ScienceHouse.3\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:carpenter_shop",
+    "boxes": [
+      {
+        "min": [
+          42,
+          58,
+          -126
+        ],
+        "max": [
+          42,
+          59,
+          -126
+        ]
+      }
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.science_house.3",
+          "fallback": "'Maximizing Your Second Marriage' and 'Practical Tips For First-Time Step-Dads'"
+        }
+      ]
+    }
+  ]
+}

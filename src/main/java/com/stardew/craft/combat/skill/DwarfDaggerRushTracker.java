@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public final class DwarfDaggerRushTracker {
+    public static final int THRUST_COOLDOWN_REFRESH_TICKS = 0;
 
     private static final class State {
         private final long endTick;
@@ -33,7 +34,7 @@ public final class DwarfDaggerRushTracker {
         if (player == null) return false;
         State state = ACTIVE.get(player.getUUID());
         if (state == null) return false;
-        if (nowTick > state.endTick) {
+        if (!isWithinActiveWindow(nowTick, state.endTick)) {
             ACTIVE.remove(player.getUUID());
             PacketDistributor.sendToPlayer(player, new DwarfDaggerRushPayload(false, 0));
             return false;
@@ -41,10 +42,16 @@ public final class DwarfDaggerRushTracker {
         return true;
     }
 
+    static boolean isWithinActiveWindow(long nowTick, long endTick) {
+        return nowTick < endTick;
+    }
+
     public static void clear(ServerPlayer player) {
         if (player == null) return;
-        ACTIVE.remove(player.getUUID());
-        PacketDistributor.sendToPlayer(player, new DwarfDaggerRushPayload(false, 0));
+        State removed = ACTIVE.remove(player.getUUID());
+        if (removed != null) {
+            PacketDistributor.sendToPlayer(player, new DwarfDaggerRushPayload(false, 0));
+        }
     }
 
     /** Clean up state when a player logs out to prevent memory leaks. */

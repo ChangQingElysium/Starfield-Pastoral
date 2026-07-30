@@ -61,7 +61,7 @@ public final class DesertFestivalWillyFishingService {
     }
 
     public static boolean tryCompleteFishingReport(ServerPlayer player, StardewNpcEntity npc, String npcId) {
-        if (player == null || npc == null || !"willy".equalsIgnoreCase(npcId)) {
+        if (npc == null || !canCompleteFishingReport(player, npcId)) {
             return false;
         }
         FishingQuest quest = findReadyFishingQuest(player);
@@ -70,6 +70,18 @@ public final class DesertFestivalWillyFishingService {
         }
         ItemDeliveryQuest goldenBobberQuest = findReadyGoldenBobberQuest(player);
         return goldenBobberQuest != null && completeGoldenBobberQuest(player, goldenBobberQuest, npc);
+    }
+
+    public static boolean canCompleteFishingReport(
+            ServerPlayer player,
+            String npcId
+    ) {
+        if (player == null || !"willy".equalsIgnoreCase(npcId)) {
+            return false;
+        }
+        return findReadyFishingQuest(player) != null
+            || findReadyGoldenBobberQuest(player) != null
+                && hasGoldenBobber(player);
     }
 
     public static boolean tryCompleteChallengeAtBoard(ServerPlayer player) {

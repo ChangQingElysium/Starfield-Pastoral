@@ -87,7 +87,7 @@ public class ModClientEvents {
             
             // 描述：第一�?种类：XX
             String typeKey = StardewItemDataApi.getTypeKey(stack);
-            if (!typeKey.isBlank()) {
+            if (!typeKey.isBlank() && !"stardewcraft.type.hidden".equals(typeKey)) {
                 net.minecraft.ChatFormatting typeColor = net.minecraft.ChatFormatting.GREEN;
                 Integer typeRgbColor = null;
                 
@@ -115,6 +115,8 @@ public class ModClientEvents {
                 } else if ("stardewcraft.type.utility".equals(typeKey)) {
                     // 实用设施：黄色（粗体由下面统一加）
                     typeColor = net.minecraft.ChatFormatting.YELLOW;
+                } else if ("stardewcraft.type.wizard_building".equals(typeKey)) {
+                    typeRgbColor = 0xC995FF;
                 } else if ("stardewcraft.type.furniture".equals(typeKey)) {
                     // 家具：青色
                     typeColor = net.minecraft.ChatFormatting.DARK_AQUA;
@@ -222,6 +224,11 @@ public class ModClientEvents {
                             .withStyle(ChatFormatting.WHITE)
                             .append(PowerSpecialItemClientFx.flowingTypeLabel(
                                     Component.translatable(typeKey).getString(), powerItem.theme())));
+                } else if (stack.getItem() instanceof com.stardew.craft.item.WizardBuildingItem wizardBuilding) {
+                    customLines.add(Component.translatable("stardewcraft.tooltip.type_prefix")
+                            .withStyle(ChatFormatting.WHITE)
+                            .append(WizardBuildingItemClientFx.flowingTypeLabel(
+                                    Component.translatable(typeKey).getString(), wizardBuilding.kind())));
                 } else if (stack.getItem() == ModItems.WARP_WAND.get()) {
                     customLines.add(Component.translatable("stardewcraft.tooltip.type_prefix")
                         .withStyle(ChatFormatting.WHITE)
@@ -468,6 +475,8 @@ public class ModClientEvents {
 
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event) {
+        com.stardew.craft.client.casino.CasinoNpcVisibilityClient.tick();
+        com.stardew.craft.client.render.MapInteractionHintRenderer.onClientTick();
         com.stardew.craft.client.sound.StardewMusicManager.onClientTick();
         com.stardew.craft.client.mastery.MasteryCandleFlameClient.onClientTick();
         com.stardew.craft.client.emote.EmoteBubbleClientState.tick();
@@ -477,6 +486,7 @@ public class ModClientEvents {
         com.stardew.craft.client.combat.DamageNumberClient.onClientTick(event);
         com.stardew.craft.client.weapon.SkillFailShakeState.tick();
         com.stardew.craft.client.weapon.CameraShakeState.tick();
+        com.stardew.craft.client.weapon.presentation.SkillPresentationClient.onClientTick(event);
         com.stardew.craft.client.weapon.TideMarkClientState.onClientTick(event);
         com.stardew.craft.client.weapon.LavaKatanaMarkClientState.onClientTick(event);
         com.stardew.craft.client.weapon.OssifiedMarkClientState.onClientTick(event);
@@ -629,6 +639,7 @@ public class ModClientEvents {
         com.stardew.craft.client.fishpond.ClientFishPondJumpEffects.onRenderLevel(event);
         com.stardew.craft.client.emote.EmoteBubbleWorldRenderer.onRenderLevel(event);
         com.stardew.craft.client.render.CutsceneTextAboveHeadRenderer.onRenderLevel(event);
+        com.stardew.craft.client.weapon.presentation.SkillPresentationClient.onRenderLevel(event);
         com.stardew.craft.client.weapon.TideMarkRenderer.onRenderLevel(event);
         com.stardew.craft.client.weapon.OssifiedMarkRenderer.onRenderLevel(event);
         com.stardew.craft.client.weapon.TemplarMarkRenderer.onRenderLevel(event);
@@ -694,6 +705,7 @@ public class ModClientEvents {
         com.stardew.craft.cutscene.runtime.EventScreenFade.render(event.getGuiGraphics());
         com.stardew.craft.client.ritual.GalaxySwordRitualClientState.render(event.getGuiGraphics());
         com.stardew.craft.client.render.PortalHintRenderer.onRenderGui(event.getGuiGraphics());
+        com.stardew.craft.client.render.MapInteractionHintRenderer.onRenderGui(event.getGuiGraphics());
 
         Minecraft mc = Minecraft.getInstance();
         Player player = mc.player;

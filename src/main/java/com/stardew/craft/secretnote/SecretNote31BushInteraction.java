@@ -45,6 +45,26 @@ public final class SecretNote31BushInteraction {
         ServerCutsceneTracker.startEvent(player, MAGNIFYING_GLASS_EVENT_ID);
     }
 
+    public static boolean canTrigger(
+            ServerPlayer player,
+            BlockPos pos
+    ) {
+        if (player == null
+                || !ModDimensions.STARDEW_VALLEY.equals(
+                        player.serverLevel().dimension())
+                || !insideTargetBush(pos)) {
+            return false;
+        }
+        BlockState state = player.serverLevel().getBlockState(pos);
+        return (state.is(ModBlocks.SMALL_BUSH.get())
+                        || state.is(ModBlocks.BERRY_BUSH.get()))
+                && EventSeenData.get(player.serverLevel()).hasSeen(
+                        player.getUUID(),
+                        SecretNote31FootprintTrail.BUS_STOP_EVENT_ID)
+                && !SecretNoteService.hasMagnifyingGlass(
+                        PlayerDataManager.getPlayerData(player));
+    }
+
     private static boolean insideTargetBush(BlockPos pos) {
         return pos.getX() >= -4 && pos.getX() <= -2
                 && pos.getY() >= 66 && pos.getY() <= 67

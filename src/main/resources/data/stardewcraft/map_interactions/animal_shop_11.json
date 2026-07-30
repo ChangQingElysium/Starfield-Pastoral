@@ -1,0 +1,33 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "AnimalShop",
+    "tile_action": "Message \"AnimalShop.11\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:marnie_ranch",
+    "positions": [
+      [
+        -66,
+        34,
+        10
+      ]
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.animal_shop.11",
+          "fallback": "How To Raise Chickens"
+        }
+      ]
+    }
+  ]
+}

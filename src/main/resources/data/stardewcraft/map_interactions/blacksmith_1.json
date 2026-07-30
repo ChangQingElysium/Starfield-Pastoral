@@ -1,0 +1,33 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "Blacksmith",
+    "tile_action": "Message \"Blacksmith.1\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:blacksmith",
+    "positions": [
+      [
+        101,
+        46,
+        11
+      ]
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.blacksmith.1",
+          "fallback": "There's a tape inside 'The Essential Blues Collection, vol. 2"
+        }
+      ]
+    }
+  ]
+}

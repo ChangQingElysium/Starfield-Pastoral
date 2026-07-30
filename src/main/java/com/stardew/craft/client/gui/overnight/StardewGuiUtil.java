@@ -50,6 +50,31 @@ public class StardewGuiUtil {
         graphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
+    public static void drawFromCursorsTintFlipped(
+            GuiGraphics graphics,
+            int x,
+            int y,
+            int u,
+            int v,
+            int width,
+            int height,
+            float scale,
+            float red,
+            float green,
+            float blue,
+            float alpha
+    ) {
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        graphics.setColor(red, green, blue, alpha);
+        graphics.pose().pushPose();
+        graphics.pose().translate(x + width * scale, y, 0);
+        graphics.pose().scale(-scale, scale, 1.0f);
+        graphics.blit(CURSORS, 0, 0, u, v, width, height, CURSORS_WIDTH, CURSORS_HEIGHT);
+        graphics.pose().popPose();
+        graphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+    }
+
     public static void drawFromCursors2(GuiGraphics graphics, int x, int y, int u, int v, int width, int height, float scale) {
         drawFromCursors2(graphics, x, y, u, v, width, height, scale, 1.0f);
     }

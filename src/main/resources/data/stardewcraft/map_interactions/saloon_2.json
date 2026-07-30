@@ -1,0 +1,33 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "Saloon",
+    "tile_action": "Message \"Saloon.2\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:saloon",
+    "positions": [
+      [
+        31,
+        37,
+        0
+      ]
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.saloon.2",
+          "fallback": "Cooking channel. 24/7 cooking tips, game shows, and restaurant reviews."
+        }
+      ]
+    }
+  ]
+}

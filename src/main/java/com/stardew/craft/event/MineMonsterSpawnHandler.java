@@ -3,9 +3,11 @@ package com.stardew.craft.event;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.api.v1.mining.StardewMineMonsterProfiles;
 import com.stardew.craft.core.ModMiningDimensions;
+import com.stardew.craft.combat.MonsterStats;
+import com.stardew.craft.mining.MineMonsterCombatProfiles;
+import com.stardew.craft.mining.MineMonsterNames;
 import com.stardew.craft.mining.MiningCoordinates;
 import com.stardew.craft.network.payload.MummyCollapsePayload;
-import net.minecraft.network.chat.Component;
 import com.stardew.craft.enchantment.StardewEnchantments;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerLevel;
@@ -36,7 +38,7 @@ import java.util.Set;
  * 当生物加入矿井维度时：
  * 1. 仅允许指定MC原版生物类型
  * 2. 根据楼层分配 sd_mob_* / sd_tier_* 标签
- * 3. 覆写 HP / 攻击力 / 护甲 / 移速 以匹配SDV怪物属性
+ * 3. 从统一战斗配置表投影 HP / 攻击力 / 韧性 / 移速
  */
 @EventBusSubscriber(modid = StardewCraft.MODID)
 @SuppressWarnings("null")
@@ -296,7 +298,7 @@ public class MineMonsterSpawnHandler {
     }
 
     // ======================== 怪物分配 ========================
-    // 数值基于 SDV Monsters.json，加入楼层缩放（zone 起始 0.8x → zone 末尾 1.0x）
+    // 配置以 SDV 为基线并保留现有 MC 适配平衡；这里只负责楼层缩放与实体投影。
 
     /**
      * 楼层难度缩放：每个 zone 内部从 0.8 逐渐升到 1.0
@@ -325,15 +327,15 @@ public class MineMonsterSpawnHandler {
         mob.addTag("sd_mob_slime");
         if (floor >= 80) {
             mob.addTag("sd_tier_3");
-            setStats(mob, 205 * s, 16 * s, 0, 0.25);
-            setSDVName(mob, "Sludge");
+            applyCombatProfile(mob, "sludge", s);
+            setSDVName(mob, "sludge");
         } else if (floor >= 40) {
             mob.addTag("sd_tier_2");
-            setStats(mob, 106 * s, 7 * s, 0, 0.25);
-            setSDVName(mob, "Frost Jelly");
+            applyCombatProfile(mob, "frost_jelly", s);
+            setSDVName(mob, "frost_jelly");
         } else {
-            setStats(mob, 24 * s, 5 * s, 0, 0.25);
-            setSDVName(mob, "Green Slime");
+            applyCombatProfile(mob, "green_slime", s);
+            setSDVName(mob, "green_slime");
         }
         tryMakePrismaticSlime(mob, floor);
     }
@@ -359,7 +361,7 @@ public class MineMonsterSpawnHandler {
         }
         prismaticSlimeFloors.add(key);
         mob.addTag("sd_mob_prismatic_slime");
-        setSDVName(mob, "Prismatic Slime");
+        setSDVName(mob, "prismatic_slime");
     }
 
     private static void assignBat(Mob mob, int floor) {
@@ -367,19 +369,19 @@ public class MineMonsterSpawnHandler {
         mob.addTag("sd_mob_bat");
         if (floor >= 120) {
             mob.addTag("sd_tier_4");
-            setStats(mob, 300 * s, 25 * s, 0, 0.40); // Iridium Bat — 按楼层缩放
-            setSDVName(mob, "Iridium Bat");
+            applyCombatProfile(mob, "iridium_bat", s);
+            setSDVName(mob, "iridium_bat");
         } else if (floor >= 80) {
             mob.addTag("sd_tier_3");
-            setStats(mob, 80 * s, 15 * s, 0, 0.35);
-            setSDVName(mob, "Lava Bat");
+            applyCombatProfile(mob, "lava_bat", s);
+            setSDVName(mob, "lava_bat");
         } else if (floor >= 40) {
             mob.addTag("sd_tier_2");
-            setStats(mob, 36 * s, 7 * s, 0, 0.30);
-            setSDVName(mob, "Frost Bat");
+            applyCombatProfile(mob, "frost_bat", s);
+            setSDVName(mob, "frost_bat");
         } else {
-            setStats(mob, 24 * s, 6 * s, 0, 0.30);
-            setSDVName(mob, "Bat");
+            applyCombatProfile(mob, "bat", s);
+            setSDVName(mob, "bat");
         }
     }
 
@@ -390,27 +392,27 @@ public class MineMonsterSpawnHandler {
             mob.addTag("sd_mob_crab");
             mob.addTag("sd_tier_4");
             mob.addTag("sd_tier_skull");
-            setStats(mob, 300 * s, 28 * s, 16, 0.20);
-            setSDVName(mob, "Iridium Crab");
+            applyCombatProfile(mob, "iridium_crab", s);
+            setSDVName(mob, "iridium_crab");
         } else if (floor >= 80) {
             mob.addTag("sd_mob_crab");
             mob.addTag("sd_tier_2");
-            setStats(mob, 120 * s, 15 * s, 12, 0.25);
-            setSDVName(mob, "Lava Crab");
+            applyCombatProfile(mob, "lava_crab", s);
+            setSDVName(mob, "lava_crab");
         } else if (floor >= 40) {
             mob.addTag("sd_mob_duggy");
-            setStats(mob, 40 * s, 6 * s, 0, 0.20);
-            setSDVName(mob, "Duggy");
+            applyCombatProfile(mob, "duggy", s);
+            setSDVName(mob, "duggy");
         } else {
             // 1-39: Rock Crab 或 Duggy（随机）
             if (mob.getRandom().nextBoolean()) {
                 mob.addTag("sd_mob_crab");
-                setStats(mob, 30 * s, 5 * s, 8, 0.20);
-                setSDVName(mob, "Rock Crab");
+                applyCombatProfile(mob, "rock_crab", s);
+                setSDVName(mob, "rock_crab");
             } else {
                 mob.addTag("sd_mob_duggy");
-                setStats(mob, 40 * s, 6 * s, 0, 0.20);
-                setSDVName(mob, "Duggy");
+                applyCombatProfile(mob, "duggy", s);
+                setSDVName(mob, "duggy");
             }
         }
     }
@@ -419,12 +421,12 @@ public class MineMonsterSpawnHandler {
         float s = getFloorScaling(floor);
         if (floor >= 40) {
             mob.addTag("sd_mob_dust_sprite");
-            setStats(mob, 40 * s, 6 * s, 2, 0.35);
-            setSDVName(mob, "Dust Spirit");
+            applyCombatProfile(mob, "dust_sprite", s);
+            setSDVName(mob, "dust_sprite");
         } else {
             mob.addTag("sd_mob_grub");
-            setStats(mob, 20 * s, 4 * s, 0, 0.15);
-            setSDVName(mob, "Grub");
+            applyCombatProfile(mob, "grub", s);
+            setSDVName(mob, "grub");
         }
     }
 
@@ -432,16 +434,16 @@ public class MineMonsterSpawnHandler {
     private static void assignBug(Mob mob, int floor) {
         float s = getFloorScaling(floor);
         mob.addTag("sd_mob_bug");
-        setStats(mob, 1, 8 * s, 0, 0.30);  // SDV Bug: 1HP 但 8ATK，一碰就死
-        setSDVName(mob, "Bug");
+        applyCombatProfile(mob, "bug", s);
+        setSDVName(mob, "bug");
     }
 
     /** Fly（SDV 苍蝇）— MC Cave Spider 映射 */
     private static void assignFly(Mob mob, int floor) {
         float s = getFloorScaling(floor);
         mob.addTag("sd_mob_fly");
-        setStats(mob, 22 * s, 6 * s, 0, 0.30);
-        setSDVName(mob, "Fly");
+        applyCombatProfile(mob, "fly", s);
+        setSDVName(mob, "fly");
     }
 
     /** Ghost — MC Husk 映射（缓慢肉搏型，每层限 1 只） */
@@ -451,40 +453,40 @@ public class MineMonsterSpawnHandler {
             // 骷髅矿：Carbon Ghost
             mob.addTag("sd_mob_ghost");
             mob.addTag("sd_tier_skull");
-            setStats(mob, 190 * s, 25 * s, 4, 0.30);
-            setSDVName(mob, "Carbon Ghost");
+            applyCombatProfile(mob, "carbon_ghost", s);
+            setSDVName(mob, "carbon_ghost");
         } else {
             mob.addTag("sd_mob_ghost");
-            setStats(mob, 96 * s, 10 * s, 3, 0.25);
-            setSDVName(mob, "Ghost");
+            applyCombatProfile(mob, "ghost", s);
+            setSDVName(mob, "ghost");
         }
     }
 
     private static void assignSkeleton(Mob mob, int floor) {
         float s = getFloorScaling(floor);
         mob.addTag("sd_mob_skeleton");
-        setStats(mob, 140 * s, 10 * s, 2, 0.25);
-        setSDVName(mob, "Skeleton");
+        applyCombatProfile(mob, "skeleton", s);
+        setSDVName(mob, "skeleton");
     }
 
     private static void assignZombie(Mob mob, int floor) {
         float s = getFloorScaling(floor);
         if (floor >= 80) {
             mob.addTag("sd_mob_metal_head");
-            setStats(mob, 40 * s, 15 * s, 16, 0.20);  // SDV Metal Head: 40HP 高甲
-            setSDVName(mob, "Metal Head");
+            applyCombatProfile(mob, "metal_head", s);
+            setSDVName(mob, "metal_head");
         } else {
             mob.addTag("sd_mob_golem");
-            setStats(mob, 45 * s, 5 * s, 10, 0.18);
-            setSDVName(mob, "Rock Golem");
+            applyCombatProfile(mob, "rock_golem", s);
+            setSDVName(mob, "rock_golem");
         }
     }
 
     private static void assignWitherSkeleton(Mob mob, int floor) {
         float s = getFloorScaling(floor);
         mob.addTag("sd_mob_shadow");
-        setStats(mob, 160 * s, 18 * s, 4, 0.30);
-        setSDVName(mob, "Shadow Brute");
+        applyCombatProfile(mob, "shadow_brute", s);
+        setSDVName(mob, "shadow_brute");
     }
 
     /** Shadow Shaman — MC Stray 映射（远程骷髅，替代 Evoker 避免召唤恼鬼） */
@@ -492,15 +494,15 @@ public class MineMonsterSpawnHandler {
         float s = getFloorScaling(floor);
         mob.addTag("sd_mob_shadow");
         mob.addTag("sd_tier_2");
-        setStats(mob, 80 * s, 17 * s, 2, 0.25);
-        setSDVName(mob, "Shadow Shaman");
+        applyCombatProfile(mob, "shadow_shaman", s);
+        setSDVName(mob, "shadow_shaman");
     }
 
     private static void assignBlaze(Mob mob, int floor) {
         float s = getFloorScaling(floor);
         mob.addTag("sd_mob_squid");
-        setStats(mob, 50 * s, 18 * s, 2, 0.25);
-        setSDVName(mob, "Squid Kid");
+        applyCombatProfile(mob, "squid_kid", s);
+        setSDVName(mob, "squid_kid");
     }
 
     // ──────── 骷髅矿洞新增怪物映射 ────────
@@ -510,8 +512,8 @@ public class MineMonsterSpawnHandler {
         float s = getFloorScaling(floor);
         mob.addTag("sd_mob_mummy");
         mob.addTag("sd_tier_skull");
-        setStats(mob, 260 * s, 30 * s, 4, 0.20);
-        setSDVName(mob, "Mummy");
+        applyCombatProfile(mob, "mummy", s);
+        setSDVName(mob, "mummy");
     }
 
     /** Serpent — MC Vex 映射（飞行型，速度快） */
@@ -521,13 +523,13 @@ public class MineMonsterSpawnHandler {
         if (floor >= 200 && s > 1.5f) {
             mob.addTag("sd_mob_royal_serpent");
             mob.addTag("sd_tier_skull");
-            setStats(mob, 300 * s, 30 * s, 3, 0.40);
-            setSDVName(mob, "Royal Serpent");
+            applyCombatProfile(mob, "royal_serpent", s);
+            setSDVName(mob, "royal_serpent");
         } else {
             mob.addTag("sd_mob_serpent");
             mob.addTag("sd_tier_skull");
-            setStats(mob, 150 * s, 23 * s, 2, 0.35);
-            setSDVName(mob, "Serpent");
+            applyCombatProfile(mob, "serpent", s);
+            setSDVName(mob, "serpent");
         }
     }
 
@@ -536,8 +538,8 @@ public class MineMonsterSpawnHandler {
         float s = getFloorScaling(floor);
         mob.addTag("sd_mob_dino");
         mob.addTag("sd_tier_skull");
-        setStats(mob, 300 * s, 15 * s, 6, 0.25);
-        setSDVName(mob, "Pepper Rex");
+        applyCombatProfile(mob, "pepper_rex", s);
+        setSDVName(mob, "pepper_rex");
     }
 
     /** BigSlime (Skull) — MC MagmaCube 映射 */
@@ -545,8 +547,8 @@ public class MineMonsterSpawnHandler {
         float s = getFloorScaling(floor);
         mob.addTag("sd_mob_bigslime_skull");
         mob.addTag("sd_tier_skull");
-        setStats(mob, 200 * s, 20 * s, 2, 0.20);
-        setSDVName(mob, "Big Slime");
+        applyCombatProfile(mob, "big_slime", s);
+        setSDVName(mob, "big_slime");
     }
 
     private static boolean applyDefaultProfile(Mob mob, int floor) {
@@ -698,23 +700,23 @@ public class MineMonsterSpawnHandler {
     private static void assignRockCrab(Mob mob, int floor) {
         float s = getFloorScaling(floor);
         mob.addTag("sd_mob_crab");
-        setStats(mob, 30 * s, 5 * s, 8, 0.20);
-        setSDVName(mob, "Rock Crab");
+        applyCombatProfile(mob, "rock_crab", s);
+        setSDVName(mob, "rock_crab");
     }
 
     private static void assignTruffleCrab(Mob mob) {
         mob.addTag("sd_mob_crab");
         mob.addTag("sd_truffle_crab");
-        setStats(mob, 30, 5, 8, 0.20);
-        setSDVName(mob, "Truffle Crab");
+        applyCombatProfile(mob, "truffle_crab", 1.0f);
+        setSDVName(mob, "truffle_crab");
     }
 
     private static void assignLavaCrab(Mob mob, int floor) {
         float s = getFloorScaling(floor);
         mob.addTag("sd_mob_crab");
         mob.addTag("sd_tier_2");
-        setStats(mob, 120 * s, 15 * s, 12, 0.25);
-        setSDVName(mob, "Lava Crab");
+        applyCombatProfile(mob, "lava_crab", s);
+        setSDVName(mob, "lava_crab");
     }
 
     private static void assignIridiumCrab(Mob mob, int floor) {
@@ -722,18 +724,34 @@ public class MineMonsterSpawnHandler {
         mob.addTag("sd_mob_crab");
         mob.addTag("sd_tier_4");
         mob.addTag("sd_tier_skull");
-        setStats(mob, 300 * s, 28 * s, 16, 0.20);
-        setSDVName(mob, "Iridium Crab");
+        applyCombatProfile(mob, "iridium_crab", s);
+        setSDVName(mob, "iridium_crab");
     }
 
     private static void assignDuggy(Mob mob, int floor) {
         float s = getFloorScaling(floor);
         mob.addTag("sd_mob_duggy");
-        setStats(mob, 40 * s, 6 * s, 0, 0.20);
-        setSDVName(mob, "Duggy");
+        applyCombatProfile(mob, "duggy", s);
+        setSDVName(mob, "duggy");
     }
 
     // ======================== 属性设置 ========================
+
+    private static void applyCombatProfile(
+            Mob mob,
+            String monsterId,
+            float floorScaling
+    ) {
+        MineMonsterCombatProfiles.ResolvedProfile profile =
+                MineMonsterCombatProfiles.resolve(monsterId, floorScaling);
+        setStats(
+                mob,
+                profile.health(),
+                profile.damage(),
+                profile.resilience(),
+                profile.movementSpeed()
+        );
+    }
 
     @SuppressWarnings("null")
     private static void setStats(Mob mob, double hp, double atk, double armor, double speed) {
@@ -777,6 +795,15 @@ public class MineMonsterSpawnHandler {
             speedAttr.addPermanentModifier(new AttributeModifier(
                     MOD_SPEED, diff, AttributeModifier.Operation.ADD_VALUE));
         }
+
+        // MonsterStats is the authoritative Stardew combat snapshot. Vanilla
+        // attributes above are projections used by Minecraft AI and non-Stardew
+        // damage sources.
+        MonsterStats.builder()
+                .damage((float) atk)
+                .resilience((float) armor)
+                .build()
+                .writeToEntity(mob);
     }
 
     /** Applies the original hard-mode BugLand values after using the shared monster factory. */
@@ -786,20 +813,20 @@ public class MineMonsterSpawnHandler {
         }
         if ("grub".equals(monsterId)) {
             mob.addTag("sd_mob_mutant_grub");
-            setStats(mob, 100, 12, 0, 0.15);
-            setSDVName(mob, "Mutant Grub");
+            applyCombatProfile(mob, "mutant_grub", 1.0f);
+            setSDVName(mob, "mutant_grub");
         } else if ("fly".equals(monsterId)) {
             mob.addTag("sd_mob_mutant_fly");
-            setStats(mob, 66, 12, 0, 0.30);
-            setSDVName(mob, "Mutant Fly");
+            applyCombatProfile(mob, "mutant_fly", 1.0f);
+            setSDVName(mob, "mutant_fly");
         }
     }
 
     /**
      * 设置 SDV 显示名（同步到客户端），隐藏原版 nametag。
      */
-    private static void setSDVName(Mob mob, String name) {
-        mob.setCustomName(Component.literal(name));
+    private static void setSDVName(Mob mob, String monsterId) {
+        mob.setCustomName(MineMonsterNames.displayName(monsterId));
         mob.setCustomNameVisible(false);
     }
 

@@ -1,0 +1,40 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "Blacksmith",
+    "tile_action": "Message \"Blacksmith.2\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:blacksmith",
+    "boxes": [
+      {
+        "min": [
+          104,
+          46,
+          11
+        ],
+        "max": [
+          105,
+          47,
+          11
+        ]
+      }
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.blacksmith.2",
+          "fallback": "You rifle through Clint's personal effects. There's a stack of blacksmith aprons, some magazines, an old sword, and a nice picture of his mother."
+        }
+      ]
+    }
+  ]
+}

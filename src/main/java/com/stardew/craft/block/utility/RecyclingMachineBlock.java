@@ -116,6 +116,10 @@ public class RecyclingMachineBlock extends MapUtilityStaticBlock implements Enti
 		if (!stack.isEmpty()) {
 			InsertResult result = machine.tryInsertWithResult(stack, player);
 			if (result.inserted()) {
+				if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+					com.stardew.craft.player.PlayerDataManager.getPlayerData(serverPlayer)
+						.incrementStat("piecesOfTrashRecycled", 1);
+				}
 				if (state.hasProperty(WORKING) && !state.getValue(WORKING)) {
 					level.setBlock(pos, state.setValue(WORKING, true), 3);
 				}

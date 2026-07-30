@@ -66,6 +66,9 @@ public class StardewConfirmDialogScreen extends Screen {
                     Component.translatable("stardewcraft.sleep.confirm.no")
                 ),
                 index -> {
+                    if (index == 0) {
+                        com.stardew.craft.cutscene.runtime.EventScreenFade.startFadeToBlack(12);
+                    }
                     PacketDistributor.sendToServer(new SleepConfirmChoicePayload(index == 0, currentMinute));
                     // 确认后关闭对话框；服务端会调用 startSleeping → 客户端自动弹出原版 InBedChatScreen
                 },
@@ -280,12 +283,13 @@ public class StardewConfirmDialogScreen extends Screen {
 
             if (transitionWidth == 0 && transitionHeight == 0) {
                 transitioning = false;
+                int answerIndex = pendingAnswerIndex;
+                if (this.minecraft != null && this.minecraft.screen == this) {
+                    this.minecraft.setScreen(null);
+                }
                 if (!resolved && pendingAnswerIndex >= 0) {
                     resolved = true;
-                    spec.onAnswer().accept(pendingAnswerIndex);
-                }
-                if (this.minecraft != null) {
-                    this.minecraft.setScreen(null);
+                    spec.onAnswer().accept(answerIndex);
                 }
             }
         }

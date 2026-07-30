@@ -1,0 +1,29 @@
+{
+  "format": 1,
+  "priority": 200,
+  "hint": "read",
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "example_stardew_addon:apple_shed",
+    "positions": [
+      [10011, 61, 10010]
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "holding_apple",
+      "action": {
+        "type": "example_stardew_addon:held_item",
+        "data": {
+          "item": "minecraft:apple"
+        }
+      },
+      "messages": [
+        {
+          "literal": "The shed recognizes the apple in your hand."
+        }
+      ]
+    }
+  ]
+}

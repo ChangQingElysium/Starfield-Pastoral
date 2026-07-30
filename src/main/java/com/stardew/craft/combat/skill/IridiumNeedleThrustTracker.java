@@ -16,8 +16,10 @@ import java.util.Map;
 import java.util.UUID;
 
 public final class IridiumNeedleThrustTracker {
-
-    private static final int DEFAULT_INTERVAL_TICKS = 3;
+    public static final int STRIKE_COUNT = 3;
+    public static final int STRIKE_INTERVAL_TICKS = 3;
+    public static final double RETARGET_RANGE = 2.5;
+    public static final int HIT_CONTEXT_LIFETIME_TICKS = 5;
 
     private static final Map<UUID, State> ACTIVE = new HashMap<>();
 
@@ -28,17 +30,21 @@ public final class IridiumNeedleThrustTracker {
 
     public static void start(ServerPlayer player, long nowTick, LivingEntity target,
                              String weaponId, String skillId, float baseDamageMultiplier) {
-        start(player, nowTick, target, weaponId, skillId, baseDamageMultiplier, 3, DEFAULT_INTERVAL_TICKS);
-    }
-
-    public static void start(ServerPlayer player, long nowTick, LivingEntity target,
-                             String weaponId, String skillId, float baseDamageMultiplier,
-                             int strikes, int intervalTicks) {
-        if (player == null || weaponId == null || skillId == null || strikes <= 0) {
+        if (player == null || weaponId == null || skillId == null) {
             return;
         }
         UUID targetId = target != null ? target.getUUID() : null;
-        ACTIVE.put(player.getUUID(), new State(nowTick, strikes, targetId, weaponId, skillId, baseDamageMultiplier));
+        ACTIVE.put(
+            player.getUUID(),
+            new State(
+                nowTick,
+                STRIKE_COUNT,
+                targetId,
+                weaponId,
+                skillId,
+                baseDamageMultiplier
+            )
+        );
     }
 
     @SuppressWarnings("null")
@@ -64,13 +70,25 @@ public final class IridiumNeedleThrustTracker {
             return;
         }
 
-        boolean guaranteedCrit = state.remainingStrikes <= 1;
+        boolean guaranteedCrit = isGuaranteedCritStrike(state.remainingStrikes);
         strike(player, target, nowTick, state.skillId, state.baseDamageMultiplier, guaranteedCrit);
 
         int remaining = state.remainingStrikes - 1;
-        long nextTick = nowTick + DEFAULT_INTERVAL_TICKS;
+        long nextTick = nextStrikeTick(nowTick);
         ACTIVE.put(player.getUUID(), new State(nextTick, remaining, target.getUUID(),
             state.weaponId, state.skillId, state.baseDamageMultiplier));
+    }
+
+    public static boolean isActive(UUID playerId) {
+        return playerId != null && ACTIVE.containsKey(playerId);
+    }
+
+    static boolean isGuaranteedCritStrike(int remainingStrikes) {
+        return remainingStrikes <= 1;
+    }
+
+    static long nextStrikeTick(long nowTick) {
+        return nowTick + STRIKE_INTERVAL_TICKS;
     }
 
     @SuppressWarnings("null")
@@ -85,8 +103,12 @@ public final class IridiumNeedleThrustTracker {
             .damageMultiplier(baseDamageMultiplier)
             .guaranteedCrit(guaranteedCrit)
             .build();
-        WeaponSkillContextStore.setPending(player, context, nowTick + 5);
-        boolean hit = target.hurt(player.damageSources().playerAttack(player), 1.0F);
+        boolean hit = WeaponSkillDamage.apply(
+                player,
+                target,
+                context,
+                nowTick + HIT_CONTEXT_LIFETIME_TICKS
+        );
 
         if (hit) {
             PacketDistributor.sendToPlayer(player, new IridiumNeedleThrustStrikePayload());
@@ -100,7 +122,7 @@ public final class IridiumNeedleThrustTracker {
                 return living;
             }
         }
-        return findTargetInFront(player, 2.5);
+        return findTargetInFront(player, RETARGET_RANGE);
     }
 
     @SuppressWarnings("null")

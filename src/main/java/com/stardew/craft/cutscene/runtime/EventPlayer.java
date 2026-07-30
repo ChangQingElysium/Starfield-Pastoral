@@ -113,6 +113,11 @@ public final class EventPlayer {
         commandIndex = 0;
         running = true;
 
+        // Combat rescue arrives under an opaque collapse overlay. Transfer
+        // that black frame only after this player has taken ownership, so the
+        // destination never flashes between ready ACK and event start.
+        com.stardew.craft.client.combat.CombatCollapseClientState.handoffToCutscene();
+
         // Capture starting dimension so we can abort if the player teleports out.
         net.minecraft.client.multiplayer.ClientLevel cap = Minecraft.getInstance().level;
         if (cap != null) {
@@ -262,6 +267,7 @@ public final class EventPlayer {
         realPlayerMovedByServer = false;
         playerSnapshot = null;
         CutsceneAnchorRegistry.clear();
+        CombatRescueCutsceneContext.reset();
     }
 
     // ─── state accessors used by commands ───
@@ -402,5 +408,6 @@ public final class EventPlayer {
         realPlayerMovedByServer = false;
         playerSnapshot = null;
         CutsceneAnchorRegistry.clear();
+        CombatRescueCutsceneContext.reset();
     }
 }

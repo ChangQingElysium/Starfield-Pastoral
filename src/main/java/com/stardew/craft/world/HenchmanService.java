@@ -69,6 +69,19 @@ public final class HenchmanService {
         return PlayerDataManager.getPlayerData(player).hasMailFlag(GONE_FLAG);
     }
 
+    public static boolean canOfferVoidMayonnaise(
+            ServerPlayer player,
+            ItemStack held
+    ) {
+        if (player == null || held == null || hasMovedAside(player)) {
+            return false;
+        }
+        PlayerStardewData data = PlayerDataManager.getPlayerData(player);
+        return data.hasMailFlag(INTRO_FLAG)
+                && !data.hasMailFlag(MOVE_PENDING_FLAG)
+                && held.is(ModItems.VOID_MAYONNAISE.get());
+    }
+
     public static InteractionResult handleInteraction(ServerPlayer player,
                                                       StardewNpcEntity henchman,
                                                       InteractionHand hand) {

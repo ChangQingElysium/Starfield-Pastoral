@@ -33,6 +33,13 @@ import java.util.UUID;
 
 @EventBusSubscriber(modid = StardewCraft.MODID)
 public final class DwarfDaggerThrustTracker {
+    public static final double HIT_RADIUS = 1.2;
+    public static final int HIT_CONTEXT_LIFETIME_TICKS = 5;
+    public static final int WEAK_POINT_DURATION_TICKS = 100;
+    public static final int WEAK_POINT_AMPLIFIER = 3;
+    public static final int RESISTANCE_DURATION_TICKS = 50;
+    public static final int RESISTANCE_AMPLIFIER = 2;
+    public static final float ENERGY_RESTORE = 2.0F;
 
     private static final class State {
         private final UUID playerId;
@@ -84,6 +91,16 @@ public final class DwarfDaggerThrustTracker {
         if (player == null) return false;
         State state = ACTIVE.get(player.getUUID());
         return state != null && nowTick <= state.endTick;
+    }
+
+    public static void stop(ServerPlayer player) {
+        if (player == null) {
+            return;
+        }
+        State removed = ACTIVE.remove(player.getUUID());
+        if (removed != null) {
+            sendClientState(player, false, 0, null);
+        }
     }
 
     @SuppressWarnings("null")
@@ -187,7 +204,13 @@ public final class DwarfDaggerThrustTracker {
 
     @SuppressWarnings("null")
     private static void applyHits(ServerLevel level, ServerPlayer player, State state, Vec3 start, Vec3 end, long nowTick) {
-        List<LivingEntity> targets = findTargetsAlongPath(level, player, start, end, 1.2);
+        List<LivingEntity> targets = findTargetsAlongPath(
+            level,
+            player,
+            start,
+            end,
+            HIT_RADIUS
+        );
         if (targets.isEmpty()) {
             return;
         }
@@ -206,22 +229,46 @@ public final class DwarfDaggerThrustTracker {
                 .tier(SkillContext.SkillTier.MINOR)
                 .damageMultiplier(state.damageMultiplier)
                 .build();
-            WeaponSkillContextStore.setPending(player, context, nowTick + 5);
             target.invulnerableTime = 0;
             target.hurtTime = 0;
-            boolean hit = target.hurt(player.damageSources().playerAttack(player), 1.0F);
+            boolean hit = WeaponSkillDamage.apply(
+                    player,
+                    target,
+                    context,
+                    nowTick + HIT_CONTEXT_LIFETIME_TICKS
+            );
             if (hit) {
-                target.addEffect(new MobEffectInstance(ModMobEffects.WEAK_POINT, 100, 3, false, true, true));
+                target.addEffect(new MobEffectInstance(
+                    ModMobEffects.WEAK_POINT,
+                    WEAK_POINT_DURATION_TICKS,
+                    WEAK_POINT_AMPLIFIER,
+                    false,
+                    true,
+                    true
+                ));
                 hitAny = true;
             }
         }
 
         if (hitAny && !state.bonusApplied) {
             state.bonusApplied = true;
-            player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 50, 2, false, true, true));
-            PlayerStardewDataAPI.restoreEnergy(player, 2.0f);
+            player.addEffect(new MobEffectInstance(
+                MobEffects.DAMAGE_RESISTANCE,
+                RESISTANCE_DURATION_TICKS,
+                RESISTANCE_AMPLIFIER,
+                false,
+                true,
+                true
+            ));
+            PlayerStardewDataAPI.restoreEnergy(player, ENERGY_RESTORE);
             if (DwarfDaggerRushTracker.isActive(player, nowTick)) {
-                WeaponSkillCooldowns.setCooldown(player, state.weaponId, state.skillId, nowTick, 0);
+                WeaponSkillCooldowns.setCooldown(
+                    player,
+                    state.weaponId,
+                    state.skillId,
+                    nowTick,
+                    DwarfDaggerRushTracker.THRUST_COOLDOWN_REFRESH_TICKS
+                );
             }
         }
     }

@@ -1,6 +1,7 @@
 package com.stardew.craft.item.weapon;
 
 import com.stardew.craft.combat.WeaponType;
+import java.util.Objects;
 
 /**
  * 武器数据类
@@ -26,7 +27,7 @@ public class WeaponData {
     private WeaponData(Builder builder) {
         this.id = builder.id;
         this.name = builder.name;
-        this.weaponType = builder.weaponType;
+        this.weaponType = Objects.requireNonNull(builder.weaponType, "weaponType");
         this.level = builder.level;
         this.damageMin = builder.damageMin;
         this.damageMax = builder.damageMax;
@@ -55,6 +56,10 @@ public class WeaponData {
     public WeaponSkillData getSkill1() { return skill1; }
     public WeaponSkillData getSkill2() { return skill2; }
     public String getLoreKey() { return loreKey; }
+
+    public WeaponSkillData getSkill(boolean majorSkill) {
+        return majorSkill ? skill2 : skill1;
+    }
     
     /**
      * 获取武器稀有度
@@ -160,6 +165,26 @@ public class WeaponData {
         }
         
         public WeaponData build() {
+            if (id == null || id.isBlank()) {
+                throw new IllegalStateException("Weapon id must not be blank");
+            }
+            if (level < 0) {
+                throw new IllegalStateException("Weapon level must not be negative: " + id);
+            }
+            if (damageMin < 0 || damageMax < damageMin) {
+                throw new IllegalStateException(
+                        "Invalid weapon damage range for " + id + ": " + damageMin + "-" + damageMax
+                );
+            }
+            if (!Double.isFinite(critChance) || critChance < 0.0 || critChance > 1.0) {
+                throw new IllegalStateException("Invalid weapon critical chance for " + id + ": " + critChance);
+            }
+            if (!Double.isFinite(critPower) || critPower < 0.0) {
+                throw new IllegalStateException("Invalid weapon critical power for " + id + ": " + critPower);
+            }
+            if (!Double.isFinite(weight)) {
+                throw new IllegalStateException("Invalid weapon weight for " + id + ": " + weight);
+            }
             return new WeaponData(this);
         }
     }

@@ -504,7 +504,7 @@ public class StardewNpcDialogueScreen extends Screen {
         StringBuilder pageBuilder = new StringBuilder();
         for (String word : words) {
             String candidate = pageBuilder.length() == 0 ? word : pageBuilder + " " + word;
-            int lineCount = this.font.split(Component.literal(candidate), wrapWidth).size();
+            int lineCount = DialogueTextWrapper.wrap(this.font, candidate, wrapWidth).size();
             if (lineCount > maxLines && pageBuilder.length() > 0) {
                 out.add(new DialoguePage(pageBuilder.toString().trim(), chunk.showPortrait(), chunk.portraitIndex()));
                 pageBuilder.setLength(0);
@@ -543,13 +543,13 @@ public class StardewNpcDialogueScreen extends Screen {
         Component visible = Component.literal(all.substring(0, end));
         float scale = textScale();
         int unscaledWrap = Math.max(1, Math.round(wrap / scale));
-        List<net.minecraft.util.FormattedCharSequence> lines = this.font.split(visible, unscaledWrap);
+        List<String> lines = DialogueTextWrapper.wrap(this.font, visible.getString(), unscaledWrap);
 
         graphics.pose().pushPose();
         graphics.pose().translate(textX, textY, 0.0f);
         graphics.pose().scale(scale, scale, 1.0f);
         int drawY = 0;
-        for (net.minecraft.util.FormattedCharSequence line : lines) {
+        for (String line : lines) {
             graphics.drawString(this.font, line, 0, drawY, 0x2E251A, false);
             drawY += this.font.lineHeight;
         }

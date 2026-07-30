@@ -170,6 +170,10 @@ public class HoeItem extends Item implements IStardewItem {
                                 serverLevel, serverPlayer, pos, preTillState);
                 boolean tilled = secretTreasureDug || tillTile(serverLevel, player, hand, pos);
                 if (tilled) {
+                    if (player instanceof ServerPlayer serverPlayer) {
+                        com.stardew.craft.player.PlayerDataManager.getPlayerData(serverPlayer)
+                                .incrementStat("dirtHoed", 1);
+                    }
                     if (!secretTreasureDug) {
                         rollBuriedDrops(serverLevel, pos, preTillState,
                                 player instanceof ServerPlayer sp ? sp : null, stackFromContext(context));
@@ -306,6 +310,7 @@ public class HoeItem extends Item implements IStardewItem {
 
         if (!level.isClientSide) {
             boolean tilledAny = false;
+            int tilledCount = 0;
             for (BlockPos pos : targets) {
                 BlockState preTillState = level.getBlockState(pos);
                 boolean secretTreasureDug = player instanceof ServerPlayer serverPlayer
@@ -313,6 +318,7 @@ public class HoeItem extends Item implements IStardewItem {
                                 (ServerLevel) level, serverPlayer, pos, preTillState);
                 if (secretTreasureDug || tillTile((ServerLevel) level, player, usedHand, pos)) {
                     tilledAny = true;
+                    tilledCount++;
                     if (!secretTreasureDug) {
                         rollBuriedDrops((ServerLevel) level, pos, preTillState,
                                 player instanceof ServerPlayer sp ? sp : null, stack);
@@ -321,6 +327,10 @@ public class HoeItem extends Item implements IStardewItem {
             }
 
             if (tilledAny) {
+                if (player instanceof ServerPlayer serverPlayer) {
+                    com.stardew.craft.player.PlayerDataManager.getPlayerData(serverPlayer)
+                            .incrementStat("dirtHoed", tilledCount);
+                }
                 applyStaminaAndCooldown(player, stack, chargeLevel);
             }
         } else {

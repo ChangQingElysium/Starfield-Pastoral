@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "stardewcraft:block/qi/qi_tunnel_safe"
+    },
+    "facing=east": {
+      "model": "stardewcraft:block/qi/qi_tunnel_safe",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "stardewcraft:block/qi/qi_tunnel_safe",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "stardewcraft:block/qi/qi_tunnel_safe",
+      "y": 270
+    }
+  }
+}

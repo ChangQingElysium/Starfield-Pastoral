@@ -1,0 +1,40 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "AnimalShop",
+    "tile_action": "Message \"AnimalShop.1\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:marnie_ranch",
+    "boxes": [
+      {
+        "min": [
+          -99,
+          34,
+          9
+        ],
+        "max": [
+          -98,
+          35,
+          9
+        ]
+      }
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.animal_shop.1",
+          "fallback": "Ah... an extra large futan bear! It's so plush it can hardly stop from toppling over."
+        }
+      ]
+    }
+  ]
+}

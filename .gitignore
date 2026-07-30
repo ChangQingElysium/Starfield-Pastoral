@@ -42,38 +42,36 @@ tmp_models/
 /*.txt
 docs/*
 !docs/0.5-addon-api.md
-!docs/addon-datapack-extensibility-roadmap.md
-!docs/addon-datapack-release-evidence-2026-07-27.md
-!docs/npc-schedule-parity-audit-2026-07-16.md
-wiki/
-ui_spec/
-resourcepack-template/
+!docs/interaction-hints.md
+!docs/runtime-immediate-hit-player-attack-audit.md
+!docs/weapon-action-vfx-research-baseline.md
+!docs/weapon-sentinel-damage-audit-stage-c.md
+!docs/weapon-skill-vfx-spec-crescent-forest.md
+!docs/weapon-system-architecture.md
+!docs/schemas/
+!docs/schemas/*.schema.json
 
 # local reference and scratch work
 源文件/
-test.java
-mezz/
 net/
-software/
 .claude/settings.local.json
 .vscode/
 .codex/
 .claude/skills/
 .github/skills/
-视频制作/
-参考/
-resourcepack-template/
 scripts/*
 !scripts/setup_valley_pregen.ps1
 !scripts/extract_ui_atlas_slices.sh
 !scripts/render_festival_actor_map.py
+!scripts/render_map_interaction_approval.py
+!scripts/generate_weapon_vfx_assets.mjs
+!scripts/sync_approved_map_interactions.mjs
+!scripts/data/
+!scripts/data/map_interaction_approvals_4_2_to_4_7.json
 tools/*
 !tools/ui_atlas_slices.csv
 !tools/audit_translations.py
 !tools/generate_shadow_footprint_candidates.py
-ui_spec/
-wiki/
-stardewcraft-template-1.21.1.sln
 AGENTS.md
 CLAUDE.md
 
@@ -82,22 +80,20 @@ CLAUDE.md
 /src/main/resources/**/tmp_models/
 /src/main/resources/data/stardewcraft/deco/intake/
 
-# local planning ledgers and implementation notes
+# local workspace, planning notes, and implementation records
+/.workspace/
 /PRODUCT.md
-/ROADMAP-*.md
-/*_IMPLEMENTATION_PLAN.md
-/*_REGISTRATION_PLAN.md
+/*_PLAN.md
+/*_ROADMAP.md
+/*_LEDGER.md
 /*_REQUIREMENTS.md
-/*_SOURCE_LEDGER.md
-/*_SYSTEM_PLAN.md
 /*_POINT_TABLE.md
 /*_GAP_REPORT.md
-/*_MIGRATION_LEDGER.md
-/*_NORMALIZATION_STANDARD.md
-/*_RACE_EXCELLENCE_PLAN.md
+/*_STANDARD.md
+/*_AUDIT.md
+/*_SPEC.md
+/*_DATA_PACK.md
 
 # macOS
 .DS_Store
 **/.DS_Store
-
-repo

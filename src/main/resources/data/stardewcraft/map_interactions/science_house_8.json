@@ -1,0 +1,33 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "ScienceHouse",
+    "tile_action": "Message \"ScienceHouse.8\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:carpenter_shop",
+    "positions": [
+      [
+        33,
+        58,
+        -123
+      ]
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.science_house.8",
+          "fallback": "Star charts for every season."
+        }
+      ]
+    }
+  ]
+}

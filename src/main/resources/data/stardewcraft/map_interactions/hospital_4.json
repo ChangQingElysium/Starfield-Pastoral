@@ -1,0 +1,33 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "Hospital",
+    "tile_action": "Message \"Hospital.4\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:clinic",
+    "positions": [
+      [
+        6,
+        44,
+        -20
+      ]
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.hospital.4",
+          "fallback": "Is life sometimes difficult? Do you ever have trouble staying focused? Talk to your doctor about Pravoloxinone.^(Pravoloxinone is not for everyone. Side effects may include insomnia, severe anger, uncontrollable swelling of the throat, permanent discoloration of the lips, hair loss, and stroke. In extremely rare cases (1 in 500), test subjects experienced complete disintegration of one or more bones.) "
+        }
+      ]
+    }
+  ]
+}

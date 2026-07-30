@@ -1,0 +1,40 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "HaleyHouse",
+    "tile_action": "Message \"HaleyHouse.13\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:2_willow_lane",
+    "boxes": [
+      {
+        "min": [
+          -9,
+          24,
+          30
+        ],
+        "max": [
+          -9,
+          26,
+          30
+        ]
+      }
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.haley_house.13",
+          "fallback": "'Build Your Own Darkroom From Scratch'"
+        }
+      ]
+    }
+  ]
+}

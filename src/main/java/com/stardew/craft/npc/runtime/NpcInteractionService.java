@@ -80,6 +80,180 @@ public final class NpcInteractionService {
     private NpcInteractionService() {
     }
 
+    /**
+     * Mirrors the mutation pipeline's visible outcome without opening UI,
+     * consuming held items, or advancing friendship/quest state.
+     */
+    public static InteractionHintProbe probeInteractionHint(
+            ServerPlayer player,
+            StardewNpcEntity npc
+    ) {
+        if (player == null || npc == null
+                || npc.getNpcId() == null || npc.getNpcId().isBlank()) {
+            return InteractionHintProbe.NONE;
+        }
+        String npcId = npc.getNpcId().trim().toLowerCase(Locale.ROOT);
+        boolean talkedToday = hasTalkedToday(player, npcId);
+        ItemStack held = player.getMainHandItem();
+
+        if ("henchman".equals(npcId)) {
+            boolean gift =
+                    com.stardew.craft.world.HenchmanService
+                            .canOfferVoidMayonnaise(player, held);
+            return new InteractionHintProbe(
+                    gift ? InteractionHintKind.GIFT
+                            : InteractionHintKind.TALK,
+                    !gift && talkedToday);
+        }
+        if ("joja_cashier".equals(npcId)
+                || "morris".equals(npcId)
+                || com.stardew.craft.casino.CasinoAccessService
+                        .BOUNCER_NPC_ID.equals(npcId)
+                || com.stardew.craft.casino.CasinoContentService
+                        .MR_QI_NPC_ID.equals(npcId)
+                || com.stardew.craft.casino.CasinoContentService
+                        .STATUE_VENDOR_NPC_ID.equals(npcId)) {
+            return new InteractionHintProbe(
+                    InteractionHintKind.TALK, talkedToday);
+        }
+
+        var activeFestival =
+                com.stardew.craft.festival.ActiveFestivalHandlers
+                        .getParticipating(player).orElse(null);
+        if (activeFestival != null) {
+            boolean secretGift =
+                    com.stardew.craft.festival.WinterStarFestivalService
+                            .FESTIVAL_ID.equalsIgnoreCase(
+                                    activeFestival.festivalId())
+                    && com.stardew.craft.festival.WinterStarFestivalService
+                            .canPromptSecretGift(player, npcId);
+            return secretGift
+                    ? new InteractionHintProbe(
+                            InteractionHintKind.GIFT, false)
+                    : new InteractionHintProbe(
+                            InteractionHintKind.TALK, talkedToday);
+        }
+
+        if (com.stardew.craft.festival.desert
+                        .DesertFestivalVendorService
+                        .shouldUseVendorDialogue(player, npcId)
+                || "willy".equals(npcId)
+                        && (com.stardew.craft.festival.desert
+                                        .DesertFestivalWillyFishingService
+                                        .canCompleteFishingReport(
+                                                player, npcId)
+                                || com.stardew.craft.festival.squid
+                                        .SquidFestService
+                                        .isPlayerAtBooth(player)
+                                || com.stardew.craft.festival.trout
+                                        .TroutDerbyService
+                                        .isPlayerAtBooth(player))) {
+            return new InteractionHintProbe(
+                    InteractionHintKind.TALK, talkedToday);
+        }
+
+        if (!held.isEmpty()
+                && (com.stardew.craft.specialorder.SpecialOrderManager
+                            .canDeliverToNpc(player, npcId, held)
+                    || findMatchingDeliveryQuest(player, npcId, held)
+                            != null)) {
+            return new InteractionHintProbe(
+                    InteractionHintKind.GIFT, false);
+        }
+
+        if (isShopInteractionContext(player, npcId)) {
+            return new InteractionHintProbe(
+                    InteractionHintKind.TALK, talkedToday);
+        }
+
+        if (!NpcSocialRules.canSocialize(npcId, player)) {
+            return InteractionHintProbe.NONE;
+        }
+
+        if (!held.isEmpty()
+                && NpcSocialRules.canReceiveGifts(npcId, player)
+                && canBeGivenAsGift(held)) {
+            return new InteractionHintProbe(
+                    InteractionHintKind.GIFT, false);
+        }
+
+        return new InteractionHintProbe(
+                InteractionHintKind.TALK, talkedToday);
+    }
+
+    private static boolean hasTalkedToday(
+            ServerPlayer player,
+            String npcId
+    ) {
+        NpcFriendshipDataManager.FriendshipState state =
+                NpcFriendshipDataManager.get(player.serverLevel())
+                        .get(player.getUUID(), npcId);
+        return state != null
+                && state.lastTalkDayKey() == currentDayKey();
+    }
+
+    private static boolean isShopInteractionContext(
+            ServerPlayer player,
+            String npcId
+    ) {
+        if (com.stardew.craft.shop.ShopInteractionBindings
+                .canOpenNpc(player, npcId)) {
+            return true;
+        }
+        return switch (npcId) {
+            case "clint" ->
+                    com.stardew.craft.shop.BlacksmithService
+                            .isPlayerAtCounter(player);
+            case "harvey" ->
+                    com.stardew.craft.shop.ClinicService
+                            .isPlayerAtCounter(player);
+            case "gus" ->
+                    com.stardew.craft.shop.SaloonService
+                            .isPlayerAtCounter(player);
+            case "pierre" ->
+                    com.stardew.craft.shop.PierreService
+                            .isPlayerAtCounter(player);
+            case "marnie" ->
+                    com.stardew.craft.shop.MarnieService
+                            .isPlayerAtCounter(player);
+            case "willy" ->
+                    com.stardew.craft.shop.WillyService
+                            .isPlayerAtCounter(player);
+            case "gunther" ->
+                    com.stardew.craft.shop.GuntherService
+                            .isPlayerAtCounter(player);
+            case "marlon" ->
+                    com.stardew.craft.shop.MarlonService
+                            .isPlayerAtCounter(player)
+                    || com.stardew.craft.shop.MarlonService
+                            .isPlayerAtDesertFestivalBooth(player);
+            case "robin" ->
+                    com.stardew.craft.shop.RobinService
+                            .isPlayerAtCounter(player);
+            case "sandy" ->
+                    com.stardew.craft.shop.SandyService
+                            .isPlayerAtCounter(player);
+            default -> false;
+        };
+    }
+
+    public enum InteractionHintKind {
+        GIFT,
+        TALK
+    }
+
+    public record InteractionHintProbe(
+            InteractionHintKind kind,
+            boolean done
+    ) {
+        private static final InteractionHintProbe NONE =
+                new InteractionHintProbe(null, false);
+
+        public boolean visible() {
+            return kind != null;
+        }
+    }
+
     public static boolean isDialogueMovementLocked(String npcId) {
         if (npcId == null || npcId.isBlank()) {
             return false;
@@ -167,6 +341,16 @@ public final class NpcInteractionService {
         // Morris — 对话 + 入会 + CD form 流程，全在 MorrisService 内部。
         if ("morris".equals(npcId)) {
             return com.stardew.craft.joja.MorrisService.handle(serverPlayer, npc);
+        }
+        if (com.stardew.craft.casino.CasinoAccessService.BOUNCER_NPC_ID.equals(npcId)) {
+            return com.stardew.craft.casino.CasinoAccessService.interactBouncer(
+                    serverPlayer, npc, hand);
+        }
+        if (com.stardew.craft.casino.CasinoContentService.MR_QI_NPC_ID.equals(npcId)) {
+            return com.stardew.craft.casino.CasinoContentService.interactMrQi(serverPlayer, npc);
+        }
+        if (com.stardew.craft.casino.CasinoContentService.STATUE_VENDOR_NPC_ID.equals(npcId)) {
+            return com.stardew.craft.casino.CasinoContentService.interactStatueVendor(serverPlayer, npc);
         }
         ItemStack held = serverPlayer.getItemInHand(hand);
         if ("henchman".equals(npcId)) {

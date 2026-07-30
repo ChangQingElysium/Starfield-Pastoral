@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MrQiQuestResourceTest {
@@ -19,6 +20,7 @@ class MrQiQuestResourceTest {
     );
 
     private static final List<String> REQUIRED_KEYS = List.of(
+            "block.stardewcraft.qi_tunnel_safe",
             "stardewcraft.quest.2.title",
             "stardewcraft.quest.2.description",
             "stardewcraft.quest.2.objective",
@@ -42,7 +44,8 @@ class MrQiQuestResourceTest {
             "stardewcraft.qi.mayor_fridge.mr_qi_note",
             "stardewcraft.qi.sand_dragon.initial",
             "stardewcraft.qi.sand_dragon.consume_essence",
-            "stardewcraft.qi.sand_dragon.mr_qi_note"
+            "stardewcraft.qi.sand_dragon.mr_qi_note",
+            "stardewcraft.mail.mrQiClubCard"
     );
 
     @Test
@@ -68,6 +71,43 @@ class MrQiQuestResourceTest {
                 assertTrue(!language.get(key).getAsString().isBlank(), locale + " has blank " + key);
             }
         }
+    }
+
+    @Test
+    void tunnelSafeUsesItsAuthoredModelParticleAndHasNoItemForm() throws IOException {
+        JsonObject model = readJson(resource("assets/stardewcraft/models/block/qi/qi_tunnel_safe.json"));
+        assertEquals(
+                "stardewcraft:block/qi/qi_tunnel_safe",
+                model.getAsJsonObject("textures").get("particle").getAsString()
+        );
+        assertTrue(Files.isRegularFile(resource(
+                "assets/stardewcraft/textures/block/qi/qi_tunnel_safe.png")));
+        assertFalse(Files.exists(resource(
+                "assets/stardewcraft/models/item/qi_tunnel_safe.json")));
+
+        Path projectDir = Path.of(System.getProperty("stardewcraft.projectDir", "."));
+        String modItems = Files.readString(projectDir.resolve(
+                "src/main/java/com/stardew/craft/item/ModItems.java"));
+        assertFalse(modItems.contains("ITEMS.register(\"qi_tunnel_safe\""));
+    }
+
+    @Test
+    void clubCardMailCarriesTheRewardAndCompletesTheAdaptedFinalStep() throws IOException {
+        var root = JsonParser.parseString(Files.readString(
+                resource("data/stardewcraft/mail/qi_mail.json"))).getAsJsonArray();
+        assertEquals(1, root.size());
+
+        JsonObject mail = root.get(0).getAsJsonObject();
+        assertEquals(MrQiQuestInteractionService.CLUB_CARD_MAIL_ID, mail.get("id").getAsString());
+        JsonObject attachment = mail.getAsJsonArray("attachedItems").get(0).getAsJsonObject();
+        assertEquals("stardewcraft:club_card", attachment.get("id").getAsString());
+        assertEquals(1, attachment.get("count").getAsInt());
+
+        String actions = mail.getAsJsonArray("on_read").toString();
+        assertTrue(actions.contains("\"id\":\"TH_LumberPile\""));
+        assertTrue(actions.contains("\"id\":\"HasClubCard\""));
+        assertTrue(actions.contains("\"type\":\"stardewcraft:remove_quest\""));
+        assertTrue(actions.contains("\"quest\":\"5\""));
     }
 
     private static JsonObject readJson(Path path) throws IOException {

@@ -1,39 +1,50 @@
 package com.stardew.craft.entity.projectile;
 
-import com.stardew.craft.entity.ModEntities;
 import com.stardew.craft.combat.skill.SkillContext;
+import com.stardew.craft.combat.skill.WeaponDamageSnapshot;
 import com.stardew.craft.combat.skill.WeaponSkillContextStore;
+import com.stardew.craft.entity.ModEntities;
 import com.stardew.craft.sound.ModSounds;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
-import java.util.ArrayDeque;
-import java.util.Deque;
 
 public class MeowmereProjectileEntity extends ThrowableProjectile {
 
     @SuppressWarnings("null")
     private static final EntityDataAccessor<Integer> BOUNCES = SynchedEntityData.defineId(MeowmereProjectileEntity.class, EntityDataSerializers.INT);
-    private static final int MAX_BOUNCES = 4; // 最多反弹次数 (泰拉瑞亚原版是4次)
-    private static final double GRAVITY_FACTOR = 0.03; // 低重力
+    public static final int MAX_BOUNCES = 4;
+    public static final int MAX_LIFETIME_TICKS = 200;
+    public static final int HIT_CONTEXT_LIFETIME_TICKS = 5;
+    public static final double GRAVITY_FACTOR = 0.03;
+    public static final double BOUNCE_VELOCITY_RETENTION = 0.85;
+    public static final int TRAIL_MAX_AGE = 5;
+    public static final int TRAIL_MAX_POINTS = 5;
     private float damage = 10.0f;
     private int pierceCount = 0; // 穿透次数
     private String skillId = null;
-    private static final int TRAIL_MAX_AGE = 5; // ticks
-    private static final int TRAIL_MAX_POINTS = 5;
+    private SkillContext.SkillTier skillTier = SkillContext.SkillTier.MINOR;
+    private float damageMultiplier = 1.0F;
+    private WeaponDamageSnapshot releaseWeaponSnapshot;
     private static final float TRAIL_MIN_SPEED = 0.001f;
     private static final int TRAIL_UPDATE_FREQUENCY = 1;
     private static final double TRAIL_MOTION_SHIFT = 0.0;
@@ -45,14 +56,61 @@ public class MeowmereProjectileEntity extends ThrowableProjectile {
     }
 
     public MeowmereProjectileEntity(Level level, LivingEntity owner, float damage, int pierceCount, String skillId) {
+        this(
+                level,
+                owner,
+                damage,
+                pierceCount,
+                skillId,
+                defaultTier(skillId),
+                defaultDamageMultiplier(skillId)
+        );
+    }
+
+    public MeowmereProjectileEntity(
+            Level level,
+            LivingEntity owner,
+            float damage,
+            int pierceCount,
+            String skillId,
+            SkillContext.SkillTier skillTier,
+            float damageMultiplier
+    ) {
+        this(
+                level,
+                owner,
+                damage,
+                pierceCount,
+                skillId,
+                skillTier,
+                damageMultiplier,
+                null
+        );
+    }
+
+    public MeowmereProjectileEntity(
+            Level level,
+            LivingEntity owner,
+            float damage,
+            int pierceCount,
+            String skillId,
+            SkillContext.SkillTier skillTier,
+            float damageMultiplier,
+            WeaponDamageSnapshot releaseWeaponSnapshot
+    ) {
         super(ModEntities.MEOWMERE_PROJECTILE.get(), owner, level);
         this.damage = damage;
         this.pierceCount = pierceCount;
         this.skillId = skillId;
+        this.skillTier = skillTier;
+        this.damageMultiplier = damageMultiplier;
+        this.releaseWeaponSnapshot = releaseWeaponSnapshot;
     }
 
     public void setSkillId(String skillId) {
         this.skillId = skillId;
+        this.skillTier = defaultTier(skillId);
+        this.damageMultiplier = defaultDamageMultiplier(skillId);
     }
 
     @SuppressWarnings("null")
@@ -83,8 +141,8 @@ public class MeowmereProjectileEntity extends ThrowableProjectile {
             if (!this.isNoGravity()) {
                 this.setDeltaMovement(deltaMovement.x, deltaMovement.y * 0.99 - GRAVITY_FACTOR, deltaMovement.z);
             }
-        
-            if (this.tickCount > 200) { // 10秒后消失
+
+            if (isExpired(this.tickCount)) {
                 this.discard();
             }
         }
@@ -155,35 +213,67 @@ public class MeowmereProjectileEntity extends ThrowableProjectile {
         super.onHitEntity(result);
         Entity target = result.getEntity();
         Entity owner = this.getOwner();
-        
+
         if (target == owner) return; // 不伤害自己
         if (target instanceof LivingEntity livingTarget) {
             livingTarget.invulnerableTime = 0;
         }
 
-        DamageSource source = this.damageSources().mobProjectile(this, (LivingEntity) owner);
-        if (owner instanceof net.minecraft.world.entity.player.Player player && skillId != null) {
-            long nowTick = this.level().getGameTime();
-            SkillContext context = SkillContext.builder()
-                .skillId(skillId)
-                .tier("meowmere_symphony".equals(skillId) ? SkillContext.SkillTier.MAJOR : SkillContext.SkillTier.MINOR)
-                .damageMultiplier("meowmere_symphony".equals(skillId) ? 0.8f : 1.0f)
-                .build();
-            WeaponSkillContextStore.setPending(player, context, nowTick + 20);
+        if (!(owner instanceof LivingEntity livingOwner)) {
+            this.discard();
+            return;
         }
-        target.hurt(source, this.damage);
+
+        DamageSource source = this.damageSources().mobProjectile(this, livingOwner);
+        net.minecraft.world.entity.player.Player skillPlayer =
+                owner instanceof net.minecraft.world.entity.player.Player player
+                        && skillId != null
+                        ? player
+                        : null;
+        long nowTick = this.level().getGameTime();
+        if (skillPlayer != null) {
+            SkillContext hitContext = createHitContext(
+                    skillId,
+                    skillTier,
+                    damageMultiplier
+            );
+            if (releaseWeaponSnapshot != null) {
+                WeaponSkillContextStore.setPending(
+                        skillPlayer,
+                        hitContext,
+                        releaseWeaponSnapshot,
+                        nowTick + HIT_CONTEXT_LIFETIME_TICKS
+                );
+            } else {
+                WeaponSkillContextStore.setPending(
+                        skillPlayer,
+                        hitContext,
+                        nowTick + HIT_CONTEXT_LIFETIME_TICKS
+                );
+            }
+        }
+        try {
+            target.hurt(source, this.damage);
+        } finally {
+            if (skillPlayer != null
+                    && WeaponSkillContextStore.hasPending(
+                            skillPlayer,
+                            nowTick
+                    )) {
+                WeaponSkillContextStore.consume(skillPlayer, nowTick);
+            }
+        }
 
         // 命中音效
         if (!this.level().isClientSide) {
             this.level().playSound(null, this.getX(), this.getY(), this.getZ(), ModSounds.MEOW.get(), SoundSource.PLAYERS, 0.6f, 1.0f + (this.random.nextFloat() - 0.5f) * 0.2f);
         }
-        
+
         // 穿透逻辑
-        if (pierceCount < 0) {
-            return;
-        }
-        if (pierceCount > 0) {
-            pierceCount--;
+        if (!discardsAfterEntityHit(pierceCount)) {
+            if (pierceCount > 0) {
+                pierceCount--;
+            }
             return;
         }
         this.discard();
@@ -195,30 +285,31 @@ public class MeowmereProjectileEntity extends ThrowableProjectile {
         // 反弹逻辑
         @SuppressWarnings("null")
         int bounces = this.entityData.get(BOUNCES);
-        if (bounces >= MAX_BOUNCES) {
+        if (!canBounce(bounces)) {
             this.discard();
             return;
         }
 
         this.entityData.set(BOUNCES, bounces + 1);
-        
+
         // 播放反弹音效
         this.level().playSound(null, this.getX(), this.getY(), this.getZ(), ModSounds.MEOW.get(), SoundSource.NEUTRAL, 0.5f, 1.0f + (this.random.nextFloat() - 0.5f) * 0.2f);
-        
+
         // 计算反弹向量
         Vec3 velocity = this.getDeltaMovement();
         @SuppressWarnings("null")
         Vec3 normal = Vec3.atLowerCornerOf(result.getDirection().getNormal());
-        
+
         // V_new = V_old - 2 * (V_old · N) * N
         // 简单的完全弹性碰撞公式，加上一点摩擦力
         @SuppressWarnings("null")
         double dot = velocity.dot(normal);
         @SuppressWarnings("null")
-        Vec3 reflection = velocity.subtract(normal.scale(2 * dot)).scale(0.85); // 0.85 能量保持率
-        
-        this.setDeltaMovement(reflection); 
-        
+        Vec3 reflection = velocity.subtract(normal.scale(2 * dot))
+                .scale(BOUNCE_VELOCITY_RETENTION);
+
+        this.setDeltaMovement(reflection);
+
         // 稍微推开一点，防止卡在墙里
         this.setPos(this.position().add(reflection.normalize().scale(0.1)));
     }
@@ -230,6 +321,14 @@ public class MeowmereProjectileEntity extends ThrowableProjectile {
         tag.putInt("Bounces", this.entityData.get(BOUNCES));
         tag.putFloat("Damage", this.damage);
         tag.putInt("PierceCount", this.pierceCount);
+        tag.putString("SkillId", this.skillId == null ? "" : this.skillId);
+        tag.putString("SkillTier", this.skillTier.name());
+        tag.putFloat("DamageMultiplier", this.damageMultiplier);
+        writeReleaseWeaponSnapshot(
+                tag,
+                this.releaseWeaponSnapshot,
+                this.level().registryAccess()
+        );
     }
 
     @SuppressWarnings("null")
@@ -239,8 +338,111 @@ public class MeowmereProjectileEntity extends ThrowableProjectile {
         if(tag.contains("Bounces")) this.entityData.set(BOUNCES, tag.getInt("Bounces"));
         if(tag.contains("Damage")) this.damage = tag.getFloat("Damage");
         if(tag.contains("PierceCount")) this.pierceCount = tag.getInt("PierceCount");
+        if (tag.contains("SkillId")) {
+            String id = tag.getString("SkillId");
+            this.skillId = id == null || id.isEmpty() ? null : id;
+        }
+        if (tag.contains("SkillTier")) {
+            this.skillTier = parseTier(
+                    tag.getString("SkillTier"),
+                    defaultTier(this.skillId)
+            );
+        } else {
+            this.skillTier = defaultTier(this.skillId);
+        }
+        if (tag.contains("DamageMultiplier")) {
+            this.damageMultiplier = tag.getFloat("DamageMultiplier");
+        } else {
+            this.damageMultiplier = defaultDamageMultiplier(this.skillId);
+        }
+        this.releaseWeaponSnapshot = readReleaseWeaponSnapshot(
+                tag,
+                this.level().registryAccess()
+        );
     }
-    
+
+    static void writeReleaseWeaponSnapshot(
+            CompoundTag tag,
+            WeaponDamageSnapshot snapshot,
+            HolderLookup.Provider registries
+    ) {
+        if (snapshot == null) {
+            return;
+        }
+        ItemStack weapon = snapshot.weapon();
+        if (weapon.isEmpty()) {
+            return;
+        }
+        tag.putString("ReleaseWeaponId", snapshot.weaponId().toString());
+        tag.put("ReleaseWeapon", weapon.saveOptional(registries));
+    }
+
+    static WeaponDamageSnapshot readReleaseWeaponSnapshot(
+            CompoundTag tag,
+            HolderLookup.Provider registries
+    ) {
+        if (!tag.contains("ReleaseWeapon", Tag.TAG_COMPOUND)) {
+            return null;
+        }
+        ResourceLocation weaponId =
+                ResourceLocation.tryParse(tag.getString("ReleaseWeaponId"));
+        if (weaponId == null) {
+            return null;
+        }
+        ItemStack weapon = ItemStack.parseOptional(
+                registries,
+                tag.getCompound("ReleaseWeapon")
+        );
+        return weapon.isEmpty()
+                ? null
+                : WeaponDamageSnapshot.capture(weaponId, weapon);
+    }
+
+    static SkillContext createHitContext(
+            String skillId,
+            SkillContext.SkillTier skillTier,
+            float damageMultiplier
+    ) {
+        return SkillContext.builder()
+                .skillId(skillId)
+                .tier(skillTier)
+                .damageMultiplier(damageMultiplier)
+                .build();
+    }
+
+    static SkillContext.SkillTier defaultTier(String skillId) {
+        return "meowmere_symphony".equals(skillId)
+                ? SkillContext.SkillTier.MAJOR
+                : SkillContext.SkillTier.MINOR;
+    }
+
+    static float defaultDamageMultiplier(String skillId) {
+        return "meowmere_symphony".equals(skillId) ? 0.8F : 1.0F;
+    }
+
+    static boolean isExpired(int tickCount) {
+        return tickCount > MAX_LIFETIME_TICKS;
+    }
+
+    static boolean canBounce(int completedBounces) {
+        return completedBounces < MAX_BOUNCES;
+    }
+
+    static boolean discardsAfterEntityHit(int remainingPierces) {
+        return remainingPierces == 0;
+    }
+
+    private static SkillContext.SkillTier parseTier(
+            String name,
+            SkillContext.SkillTier fallback
+    ) {
+        try {
+            return SkillContext.SkillTier.valueOf(name);
+        } catch (IllegalArgumentException exception) {
+            return fallback;
+        }
+    }
+
     // 渲染需要这些
     @SuppressWarnings("null")
     @Override

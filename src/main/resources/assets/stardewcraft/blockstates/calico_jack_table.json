@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "part=main,facing=north,high_stakes=false": { "model": "stardewcraft:casino/calico_jack_table" },
+    "part=main,facing=east,high_stakes=false": { "model": "stardewcraft:casino/calico_jack_table", "y": 90 },
+    "part=main,facing=south,high_stakes=false": { "model": "stardewcraft:casino/calico_jack_table", "y": 180 },
+    "part=main,facing=west,high_stakes=false": { "model": "stardewcraft:casino/calico_jack_table", "y": 270 },
+    "part=extension,facing=north,high_stakes=false": { "model": "stardewcraft:block/decor/extensions/furniture_extension_empty" },
+    "part=extension,facing=east,high_stakes=false": { "model": "stardewcraft:block/decor/extensions/furniture_extension_empty" },
+    "part=extension,facing=south,high_stakes=false": { "model": "stardewcraft:block/decor/extensions/furniture_extension_empty" },
+    "part=extension,facing=west,high_stakes=false": { "model": "stardewcraft:block/decor/extensions/furniture_extension_empty" },
+    "part=main,facing=north,high_stakes=true": { "model": "stardewcraft:casino/calico_jack_table_high_stakes" },
+    "part=main,facing=east,high_stakes=true": { "model": "stardewcraft:casino/calico_jack_table_high_stakes", "y": 90 },
+    "part=main,facing=south,high_stakes=true": { "model": "stardewcraft:casino/calico_jack_table_high_stakes", "y": 180 },
+    "part=main,facing=west,high_stakes=true": { "model": "stardewcraft:casino/calico_jack_table_high_stakes", "y": 270 },
+    "part=extension,facing=north,high_stakes=true": { "model": "stardewcraft:block/decor/extensions/furniture_extension_empty" },
+    "part=extension,facing=east,high_stakes=true": { "model": "stardewcraft:block/decor/extensions/furniture_extension_empty" },
+    "part=extension,facing=south,high_stakes=true": { "model": "stardewcraft:block/decor/extensions/furniture_extension_empty" },
+    "part=extension,facing=west,high_stakes=true": { "model": "stardewcraft:block/decor/extensions/furniture_extension_empty" }
+  }
+}

@@ -90,6 +90,16 @@ public final class WitchAreaService {
                 || data.hasSpecialItem(PowerSpecialItemService.MAGIC_INK_ID);
     }
 
+    public static boolean isMagicInkInteraction(
+            ServerPlayer player,
+            BlockPos pos
+    ) {
+        return player != null
+                && ModDimensions.STARDEW_VALLEY.equals(
+                        player.serverLevel().dimension())
+                && MAGIC_INK_TABLE_POS.equals(pos);
+    }
+
     @SubscribeEvent(priority = EventPriority.HIGHEST, receiveCanceled = true)
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         if (!(event.getEntity() instanceof ServerPlayer player)

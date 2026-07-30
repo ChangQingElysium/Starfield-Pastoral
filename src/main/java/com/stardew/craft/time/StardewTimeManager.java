@@ -265,6 +265,16 @@ public class StardewTimeManager extends SavedData {
     public void advanceDayWithSleepTime(int sleepMinute) {
         int timeWentToSleepMinutes = sleepMinute;
         boolean seasonChanged = false;
+        List<PendingOvernightSettlement> pendingSettlements = new ArrayList<>();
+        int previousDay = currentDay;
+        int previousSeason = currentSeason;
+        int previousYear = currentYear;
+        var server = ServerLifecycleHooks.getCurrentServer();
+        @SuppressWarnings("null")
+        ServerLevel settlementLevel = server == null ? null : server.getLevel(ModDimensions.STARDEW_VALLEY);
+        String previousWeather = settlementLevel == null
+            ? "Sun"
+            : com.stardew.craft.weather.WeatherManager.getCurrentWeather(settlementLevel);
 
         currentDay++;
         
@@ -291,7 +301,6 @@ public class StardewTimeManager extends SavedData {
             currentYear, getSeasonName(), currentDay);
         
         // 触发每日作物生长
-        var server = ServerLifecycleHooks.getCurrentServer();
         if (server != null) {
             int absDay = (currentYear - 1) * (28 * 4) + currentSeason * 28 + currentDay;
             int totalDaysPlayed = absDay;
@@ -439,14 +448,25 @@ public class StardewTimeManager extends SavedData {
                     List.copyOf(overnightLevelUps),
                     passOutType,
                     passOutMoneyLost,
-                    passOutLostItems
+                    passOutLostItems,
+                    new OvernightSettlementPayload.OvernightContext(
+                        previousDay,
+                        previousSeason,
+                        previousYear,
+                        currentDay,
+                        currentSeason,
+                        currentYear,
+                        previousWeather
+                    )
                 );
 
-                // 始终发送结算包，即使没有出货/升级，以便客户端显示夜间结算过渡画面
-                PacketDistributor.sendToPlayer(player, finalPayload);
-
-                // 扫描并排队所有 wake_up 剧情，等客户端关闭结算画面后按序播放
-                com.stardew.craft.cutscene.server.WakeUpEventScheduler.enqueueAtNightSettlement(player);
+                // Persist before the network send. If the player disconnects
+                // during save/fade/menu playback, login can replay the exact
+                // same settlement instead of silently losing level-up,
+                // shipping or pass-out presentation.
+                OvernightSettlementTracker.storePendingSettlement(player, finalPayload);
+                // 等全部世界/邮件日结算和存档完成后，再统一打开夜间菜单。
+                pendingSettlements.add(new PendingOvernightSettlement(player, finalPayload));
             }
 
             if (stardewLevel != null) {
@@ -474,6 +494,33 @@ public class StardewTimeManager extends SavedData {
         }
 
         setDirty();
+
+        if (server != null) {
+            // PlayerStardewData 的字段会在上面的日结算中批量变化；确保 SavedData
+            // 与日期、邮件及世界状态一起写盘，再让客户端显示原版 SaveGameMenu 节奏。
+            com.stardew.craft.player.PlayerDataManager.get().setDirty();
+            server.saveEverything(true, false, false);
+
+            for (PendingOvernightSettlement pending : pendingSettlements) {
+                net.minecraft.server.level.ServerPlayer connectedPlayer =
+                    server.getPlayerList().getPlayer(pending.player().getUUID());
+                if (connectedPlayer == null) {
+                    continue;
+                }
+
+                // 扫描并排队所有 wake_up 剧情，等客户端关闭结算画面后按序播放。
+                com.stardew.craft.cutscene.server.WakeUpEventScheduler.enqueueAtNightSettlement(connectedPlayer);
+                com.stardew.craft.time.StardewTimePauseService.beginOvernightSettlement(connectedPlayer);
+                // 原版即使没有出货或升级，也会显示 SaveGameMenu。
+                PacketDistributor.sendToPlayer(connectedPlayer, pending.payload());
+            }
+        }
+    }
+
+    private record PendingOvernightSettlement(
+        net.minecraft.server.level.ServerPlayer player,
+        OvernightSettlementPayload payload
+    ) {
     }
 
     private static void runWorldDailyStep(String name, Runnable step) {

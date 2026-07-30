@@ -149,6 +149,12 @@ com.stardew.craft.api.v1.fishpond.StardewFishPondRequestContext	keep_experimenta
 com.stardew.craft.api.v1.fishpond.StardewFishPondRequestListener	keep_experimental	no	no	no	no	core_runtime_reference_missing
 com.stardew.craft.api.v1.fishpond.StardewFishPondSnapshot	keep_experimental	yes	no	no	yes	independent_sample_reference_missing
 com.stardew.craft.api.v1.fishpond.StardewFishPonds	keep_experimental	yes	no	no	yes	independent_sample_reference_missing
+com.stardew.craft.api.v1.interaction.StardewInteractionHint	keep_experimental	yes	no	yes	yes	independent_sample_reference_missing
+com.stardew.craft.api.v1.interaction.StardewInteractionHintContext	keep_experimental	yes	no	no	yes	independent_sample_reference_missing
+com.stardew.craft.api.v1.interaction.StardewInteractionHintDecision	keep_experimental	yes	no	no	yes	independent_sample_reference_missing
+com.stardew.craft.api.v1.interaction.StardewInteractionHintProvider	keep_experimental	no	no	no	yes	core_runtime_reference_missing
+com.stardew.craft.api.v1.interaction.StardewInteractionHintType	keep_experimental	yes	no	yes	yes	independent_sample_reference_missing
+com.stardew.craft.api.v1.interaction.StardewInteractionHints	keep_experimental	yes	no	no	yes	independent_sample_reference_missing
 com.stardew.craft.api.v1.item.StardewAcquisitionContext	keep_experimental	no	no	no	no	core_runtime_reference_missing
 com.stardew.craft.api.v1.item.StardewAcquisitionSource	keep_experimental	yes	yes	yes	yes	real_network_and_second_consumer_evidence_pending
 com.stardew.craft.api.v1.item.StardewAcquisitionSourceProvider	keep_experimental	no	no	no	no	core_runtime_reference_missing
@@ -174,6 +180,13 @@ com.stardew.craft.api.v1.machine.StardewProductionPlan	keep_experimental	yes	yes
 com.stardew.craft.api.v1.machine.StardewProductionPlanProvider	keep_experimental	no	no	no	no	core_runtime_reference_missing
 com.stardew.craft.api.v1.machine.StardewProductionPlans	keep_experimental	yes	yes	no	yes	direct_test_reference_missing
 com.stardew.craft.api.v1.machine.StardewTimedProduction	keep_experimental	yes	no	no	yes	independent_sample_reference_missing
+com.stardew.craft.api.v1.mapinteraction.StardewMapInteractionAction	keep_experimental	yes	no	no	no	independent_sample_reference_missing
+com.stardew.craft.api.v1.mapinteraction.StardewMapInteractionActionExecutor	keep_experimental	no	yes	no	yes	core_runtime_reference_missing
+com.stardew.craft.api.v1.mapinteraction.StardewMapInteractionActionType	keep_experimental	no	no	no	no	core_runtime_reference_missing
+com.stardew.craft.api.v1.mapinteraction.StardewMapInteractionActions	keep_experimental	yes	yes	no	yes	direct_test_reference_missing
+com.stardew.craft.api.v1.mapinteraction.StardewMapInteractionContext	keep_experimental	yes	yes	no	yes	direct_test_reference_missing
+com.stardew.craft.api.v1.mapinteraction.StardewMapInteractionProvider	keep_experimental	no	yes	no	yes	core_runtime_reference_missing
+com.stardew.craft.api.v1.mapinteraction.StardewMapInteractions	keep_experimental	yes	yes	no	yes	direct_test_reference_missing
 com.stardew.craft.api.v1.mining.StardewMineMonsterConfigurator	keep_experimental	no	no	no	no	core_runtime_reference_missing
 com.stardew.craft.api.v1.mining.StardewMineMonsterProfile	keep_experimental	yes	no	yes	no	independent_sample_reference_missing
 com.stardew.craft.api.v1.mining.StardewMineMonsterProfileContext	keep_experimental	no	no	no	no	core_runtime_reference_missing

@@ -27,14 +27,23 @@ public class PointPlanAddPointScreen extends Screen {
     private int panelY;
 
     public PointPlanAddPointScreen() {
-        super(Component.translatable("gui.stardewcraft.point_plan.add_title"));
+        super(Component.translatable(
+            PointPlanClientState.isMapInteractionEditor()
+                ? "gui.stardewcraft.point_plan.map_add_title"
+                : "gui.stardewcraft.point_plan.add_title"));
     }
 
     @Override
     protected void init() {
         panelX = (width - PANEL_W) / 2;
         panelY = (height - PANEL_H) / 2;
-        npcBox = new EditBox(font, panelX + 70, panelY + 52, PANEL_W - 92, 18, Component.translatable("gui.stardewcraft.point_plan.npc"));
+        Component entryLabel = Component.translatable(
+            PointPlanClientState.isMapInteractionEditor()
+                ? "gui.stardewcraft.point_plan.name"
+                : "gui.stardewcraft.point_plan.npc");
+        npcBox = new EditBox(
+            font, panelX + 70, panelY + 52,
+            PANEL_W - 92, 18, entryLabel);
         npcBox.setTextShadow(false);
         npcBox.setMaxLength(64);
         addRenderableWidget(npcBox);
@@ -65,19 +74,35 @@ public class PointPlanAddPointScreen extends Screen {
         graphics.drawString(font, title, panelX + 12, panelY + 10, 0xFF3A2014, false);
         graphics.drawString(font, Component.translatable("gui.stardewcraft.point_plan.plan", PointPlanClientState.selectedPlanId()),
             panelX + 12, panelY + 30, 0xFF6B4B2C, false);
-        graphics.drawString(font, Component.translatable("gui.stardewcraft.point_plan.npc"), panelX + 12, panelY + 57, 0xFF3A2014, false);
+        graphics.drawString(
+            font,
+            Component.translatable(
+                PointPlanClientState.isMapInteractionEditor()
+                    ? "gui.stardewcraft.point_plan.name"
+                    : "gui.stardewcraft.point_plan.npc"),
+            panelX + 12, panelY + 57, 0xFF3A2014, false);
 
         PointPlanWandItem.PendingPoint pending = pendingPoint();
         BlockPos pos = pending.pos();
-        graphics.drawString(font, Component.translatable("gui.stardewcraft.point_plan.pending",
-            pos.getX(), pos.getY(), pos.getZ(), pending.direction()), panelX + 12, panelY + 80, 0xFF6B4B2C, false);
+        Component pendingText = PointPlanClientState.isMapInteractionEditor()
+            ? Component.translatable(
+                "gui.stardewcraft.point_plan.map_pending",
+                pos.getX(), pos.getY(), pos.getZ())
+            : Component.translatable(
+                "gui.stardewcraft.point_plan.pending",
+                pos.getX(), pos.getY(), pos.getZ(),
+                pending.direction());
+        graphics.drawString(
+            font, pendingText,
+            panelX + 12, panelY + 80, 0xFF6B4B2C, false);
         super.render(graphics, mouseX, mouseY, partialTick);
         renderSuggestions(graphics);
     }
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == 258) {
+        if (keyCode == 258
+                && !PointPlanClientState.isMapInteractionEditor()) {
             fillFirstSuggestion();
             return true;
         }
@@ -157,6 +182,9 @@ public class PointPlanAddPointScreen extends Screen {
     }
 
     private List<String> suggestions() {
+        if (PointPlanClientState.isMapInteractionEditor()) {
+            return List.of();
+        }
         String query = npcBox.getValue().trim().toLowerCase(Locale.ROOT);
         List<String> result = new ArrayList<>();
         for (String npcId : PointPlanClientState.npcIds()) {
@@ -175,6 +203,9 @@ public class PointPlanAddPointScreen extends Screen {
         String clean = raw == null ? "" : raw.trim();
         if (clean.isBlank()) {
             return "";
+        }
+        if (PointPlanClientState.isMapInteractionEditor()) {
+            return clean;
         }
         String lower = clean.toLowerCase(Locale.ROOT);
         for (String npcId : PointPlanClientState.npcIds()) {

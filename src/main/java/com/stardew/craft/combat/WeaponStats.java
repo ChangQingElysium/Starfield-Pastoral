@@ -15,6 +15,7 @@ public class WeaponStats {
     
     // NBT标签名
     public static final String TAG_STARDEW_WEAPON = "StardewWeapon";
+    public static final String TAG_DATA_VERSION = "DataVersion";
     public static final String TAG_WEAPON_TYPE = "Type";
     public static final String TAG_MIN_DAMAGE = "MinDamage";
     public static final String TAG_MAX_DAMAGE = "MaxDamage";
@@ -24,6 +25,7 @@ public class WeaponStats {
     public static final String TAG_DEFENSE = "Defense";
     public static final String TAG_PRECISION = "Precision";
     public static final String TAG_KNOCKBACK = "Knockback";
+    public static final int CURRENT_DATA_VERSION = 1;
     
     private final WeaponType weaponType;
     private final float minDamage;
@@ -82,6 +84,23 @@ public class WeaponStats {
             .knockback(weaponTag.getFloat(TAG_KNOCKBACK))
             .build();
         return applyForgeData(baseStats, WeaponForgeData.read(stack));
+    }
+
+    public static boolean hasCurrentDataVersion(ItemStack stack) {
+        if (stack == null || stack.isEmpty()) {
+            return false;
+        }
+        @SuppressWarnings("null")
+        CustomData data = stack.get(DataComponents.CUSTOM_DATA);
+        if (data == null) {
+            return false;
+        }
+        CompoundTag root = data.copyTag();
+        if (!root.contains(TAG_STARDEW_WEAPON)) {
+            return false;
+        }
+        CompoundTag weaponTag = root.getCompound(TAG_STARDEW_WEAPON);
+        return weaponTag.getInt(TAG_DATA_VERSION) == CURRENT_DATA_VERSION;
     }
 
     private static WeaponStats fromApiData(ItemStack stack) {
@@ -192,6 +211,7 @@ public class WeaponStats {
         CompoundTag tag = existingData != null ? existingData.copyTag() : new CompoundTag();
         
         CompoundTag weaponTag = new CompoundTag();
+        weaponTag.putInt(TAG_DATA_VERSION, CURRENT_DATA_VERSION);
         weaponTag.putInt(TAG_WEAPON_TYPE, weaponType.getId());
         weaponTag.putFloat(TAG_MIN_DAMAGE, minDamage);
         weaponTag.putFloat(TAG_MAX_DAMAGE, maxDamage);

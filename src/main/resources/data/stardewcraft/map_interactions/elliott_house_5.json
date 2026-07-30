@@ -1,0 +1,40 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "ElliottHouse",
+    "tile_action": "Message \"ElliottHouse.5\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:elliott_cabin",
+    "boxes": [
+      {
+        "min": [
+          73,
+          45,
+          102
+        ],
+        "max": [
+          73,
+          46,
+          102
+        ]
+      }
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.elliott_house.5",
+          "fallback": "It's a mini-palm, imported from Calico Desert."
+        }
+      ]
+    }
+  ]
+}

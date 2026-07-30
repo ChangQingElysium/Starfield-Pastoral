@@ -17,22 +17,38 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 public final class TemplarVowTracker {
+    public static final int ACTIVE_DURATION_TICKS = 40;
+    public static final double COUNTER_TARGET_RANGE = 4.0;
+    public static final float COUNTER_DAMAGE_MULTIPLIER = 1.10F;
+    public static final float EXPIRE_SLASH_DAMAGE_MULTIPLIER = 0.80F;
+    public static final int HIT_CONTEXT_LIFETIME_TICKS = 5;
+    public static final int EXPIRE_SHELTER_DURATION_TICKS = 40;
+    public static final int EXPIRE_SHELTER_AMPLIFIER = 0;
 
     private static final class State {
         private long endTick;
         private final String weaponId;
         private final String skillId;
         private final int cooldownTicks;
+        private final WeaponDamageSnapshot weaponSnapshot;
         private boolean cooldownApplied;
 
-        private State(long endTick, String weaponId, String skillId, int cooldownTicks) {
+        private State(
+                long endTick,
+                String weaponId,
+                String skillId,
+                int cooldownTicks,
+                WeaponDamageSnapshot weaponSnapshot
+        ) {
             this.endTick = endTick;
             this.weaponId = weaponId;
             this.skillId = skillId;
             this.cooldownTicks = cooldownTicks;
+            this.weaponSnapshot = weaponSnapshot;
             this.cooldownApplied = false;
         }
     }
@@ -42,29 +58,77 @@ public final class TemplarVowTracker {
     private TemplarVowTracker() {}
 
     public static void start(ServerPlayer player, long nowTick, int durationTicks, String weaponId, String skillId, int cooldownTicks) {
+        start(
+                player,
+                nowTick,
+                durationTicks,
+                weaponId,
+                skillId,
+                cooldownTicks,
+                null
+        );
+    }
+
+    public static void start(
+            ServerPlayer player,
+            long nowTick,
+            int durationTicks,
+            String weaponId,
+            String skillId,
+            int cooldownTicks,
+            WeaponDamageSnapshot weaponSnapshot
+    ) {
         if (player == null || durationTicks <= 0 || weaponId == null || skillId == null) {
             return;
         }
-        ACTIVE.put(player.getUUID(), new State(nowTick + durationTicks, weaponId, skillId, cooldownTicks));
+        ACTIVE.put(
+                player.getUUID(),
+                new State(
+                        nowTick + durationTicks,
+                        weaponId,
+                        skillId,
+                        cooldownTicks,
+                        weaponSnapshot
+                )
+        );
         PacketDistributor.sendToPlayer(player, new TemplarVowPayload(true, durationTicks));
     }
 
     public static boolean isActive(ServerPlayer player, long nowTick) {
         State state = ACTIVE.get(player.getUUID());
-        return state != null && nowTick <= state.endTick;
+        return state != null && isWithinActiveWindow(nowTick, state.endTick);
     }
 
     public static boolean isActiveRaw(ServerPlayer player) {
         return ACTIVE.containsKey(player.getUUID());
     }
 
+    public static Optional<WeaponDamageSnapshot> getWeaponSnapshot(
+            ServerPlayer player
+    ) {
+        State state = ACTIVE.get(player.getUUID());
+        return state == null
+                ? Optional.empty()
+                : Optional.ofNullable(state.weaponSnapshot);
+    }
+
     public static void endNow(ServerPlayer player, long nowTick) {
+        cancel(player, nowTick, true);
+    }
+
+    public static void cancel(
+            ServerPlayer player,
+            long nowTick,
+            boolean notifyClient
+    ) {
         State state = ACTIVE.get(player.getUUID());
         if (state == null) {
             return;
         }
         applyCooldown(player, state, nowTick);
-        PacketDistributor.sendToPlayer(player, new TemplarVowPayload(false, 0));
+        if (notifyClient) {
+            PacketDistributor.sendToPlayer(player, new TemplarVowPayload(false, 0));
+        }
         ACTIVE.remove(player.getUUID());
     }
 
@@ -73,8 +137,8 @@ public final class TemplarVowTracker {
         if (state == null) {
             return;
         }
-        if (nowTick > state.endTick) {
-            applyLightSlash(player, nowTick);
+        if (!isWithinActiveWindow(nowTick, state.endTick)) {
+            applyLightSlash(player, nowTick, state.weaponSnapshot);
             player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, true);
             applyCooldown(player, state, nowTick);
             PacketDistributor.sendToPlayer(player, new TemplarVowPayload(false, 0));
@@ -90,27 +154,65 @@ public final class TemplarVowTracker {
     }
 
     @SuppressWarnings("null")
-    private static void applyLightSlash(ServerPlayer player, long nowTick) {
+    private static void applyLightSlash(
+            ServerPlayer player,
+            long nowTick,
+            WeaponDamageSnapshot weaponSnapshot
+    ) {
         if (player == null) {
             return;
         }
 
         MobEffect shelter = Objects.requireNonNull(ModMobEffects.SHELTER.get(), "shelter");
         Holder<MobEffect> shelterHolder = Holder.direct(shelter);
-        player.addEffect(new MobEffectInstance(shelterHolder, 40, 0, false, false, true));
+        player.addEffect(new MobEffectInstance(
+                shelterHolder,
+                EXPIRE_SHELTER_DURATION_TICKS,
+                EXPIRE_SHELTER_AMPLIFIER,
+                false,
+                false,
+                true
+        ));
 
-        LivingEntity target = findTargetEntity(player, 4.0);
+        LivingEntity target = findTargetEntity(player, COUNTER_TARGET_RANGE);
         if (target == null) {
             return;
         }
 
-        SkillContext context = SkillContext.builder()
-            .skillId("templar_vow")
-            .tier(SkillContext.SkillTier.MINOR)
-            .damageMultiplier(0.8f)
-            .build();
-        WeaponSkillContextStore.setPending(player, context, nowTick + 5);
-        player.attack(target);
+        SkillContext context = createStrikeContext(
+                EXPIRE_SLASH_DAMAGE_MULTIPLIER
+        );
+        long expireTick = nowTick + HIT_CONTEXT_LIFETIME_TICKS;
+        if (weaponSnapshot == null) {
+            WeaponSkillDamage.apply(
+                    player,
+                    target,
+                    context,
+                    expireTick,
+                    WeaponSkillDamage.AttackGatePolicy.RESPECT_AT_IMPACT
+            );
+        } else {
+            WeaponSkillDamage.apply(
+                    player,
+                    target,
+                    context,
+                    weaponSnapshot,
+                    expireTick,
+                    WeaponSkillDamage.AttackGatePolicy.RESPECT_AT_IMPACT
+            );
+        }
+    }
+
+    static SkillContext createStrikeContext(float damageMultiplier) {
+        return SkillContext.builder()
+                .skillId("templar_vow")
+                .tier(SkillContext.SkillTier.MINOR)
+                .damageMultiplier(damageMultiplier)
+                .build();
+    }
+
+    static boolean isWithinActiveWindow(long nowTick, long endTick) {
+        return nowTick <= endTick;
     }
 
     private static LivingEntity findTargetEntity(ServerPlayer player, double range) {

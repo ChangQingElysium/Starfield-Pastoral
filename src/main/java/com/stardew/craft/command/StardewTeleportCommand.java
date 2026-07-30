@@ -35,8 +35,7 @@ public class StardewTeleportCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
             Commands.literal("stardew")
-                // 注意：不要在 "stardew" 根节点加 .requires()，
-                // 否则 FarmJoinCommand 的 accept/reject 也会被阻断。
+                // Keep permissions on individual administrative branches.
                 // 各子命令自行限制权限。
                 // 传送相关
                 .then(CommandTargets.executesWithTarget(

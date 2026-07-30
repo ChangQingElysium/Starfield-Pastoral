@@ -1,0 +1,40 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "HaleyHouse",
+    "tile_action": "Message \"HaleyHouse.16\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:2_willow_lane",
+    "boxes": [
+      {
+        "min": [
+          12,
+          24,
+          30
+        ],
+        "max": [
+          12,
+          25,
+          30
+        ]
+      }
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.haley_house.16",
+          "fallback": "Cupcakes, milk, a tightly sealed jar of cornichons, and quinoa salad."
+        }
+      ]
+    }
+  ]
+}

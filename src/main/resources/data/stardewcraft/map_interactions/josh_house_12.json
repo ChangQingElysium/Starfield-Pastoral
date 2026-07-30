@@ -1,0 +1,40 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "JoshHouse",
+    "tile_action": "Message \"JoshHouse.12\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:1_river_road",
+    "boxes": [
+      {
+        "min": [
+          58,
+          22,
+          -4
+        ],
+        "max": [
+          58,
+          23,
+          -4
+        ]
+      }
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.josh_house.12",
+          "fallback": "'Cookies For Every Season'"
+        }
+      ]
+    }
+  ]
+}

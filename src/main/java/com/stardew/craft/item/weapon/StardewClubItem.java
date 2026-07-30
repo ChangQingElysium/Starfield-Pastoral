@@ -1,27 +1,15 @@
 package com.stardew.craft.item.weapon;
 
-import com.stardew.craft.StardewCraft;
-import com.stardew.craft.combat.WeaponForgeData;
-import com.stardew.craft.combat.WeaponStats;
-import com.stardew.craft.combat.skill.FemurSlamTracker;
-import com.stardew.craft.combat.skill.WeaponSkillCooldowns;
 import com.stardew.craft.item.IStardewItem;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.UseAnim;
-import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -34,7 +22,6 @@ import java.util.List;
 public class StardewClubItem extends Item implements IStardewItem, IStardewWeapon {
 
     private static final int CHARGE_TICKS = 20;
-    private static final float BASE_ATTACK_RANGE = 3.0f;
 
     private final String weaponId;
     private final WeaponData weaponData;
@@ -68,43 +55,7 @@ public class StardewClubItem extends Item implements IStardewItem, IStardewWeapo
         if (weaponData == null) {
             return super.getDefaultAttributeModifiers();
         }
-
-        float avgDamage = (float) ((weaponData.getDamageMin() + weaponData.getDamageMax()) / 2.0 - 1);
-        float baseAps = weaponData.getWeaponType().getAttackSpeed();
-        float speedBonusAps = weaponData.getSpeed() * 0.1f;
-        float attackSpeed = (baseAps + speedBonusAps) - 4.0f;
-        float desiredRange = weaponData.getWeaponType().getAttackRange();
-        float attackRangeBonus = desiredRange - BASE_ATTACK_RANGE;
-
-        return ItemAttributeModifiers.builder()
-            .add(
-                Attributes.ATTACK_DAMAGE,
-                new AttributeModifier(
-                    ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "weapon." + weaponId + ".attack_damage"),
-                    avgDamage,
-                    AttributeModifier.Operation.ADD_VALUE
-                ),
-                EquipmentSlotGroup.MAINHAND
-            )
-            .add(
-                Attributes.ATTACK_SPEED,
-                new AttributeModifier(
-                    ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "weapon." + weaponId + ".attack_speed"),
-                    attackSpeed,
-                    AttributeModifier.Operation.ADD_VALUE
-                ),
-                EquipmentSlotGroup.MAINHAND
-            )
-            .add(
-                Attributes.ENTITY_INTERACTION_RANGE,
-                new AttributeModifier(
-                    ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "weapon." + weaponId + ".attack_range"),
-                    attackRangeBonus,
-                    AttributeModifier.Operation.ADD_VALUE
-                ),
-                EquipmentSlotGroup.MAINHAND
-            )
-            .build();
+        return WeaponItemSupport.createAttributeModifiers(weaponId, weaponData);
     }
 
     @Override
@@ -196,54 +147,11 @@ public class StardewClubItem extends Item implements IStardewItem, IStardewWeapo
     }
 
     @SuppressWarnings("null")
+    @Override
     public InteractionResultHolder<ItemStack> useSkill(Level level, net.minecraft.world.entity.player.Player player, InteractionHand hand, boolean majorSkill) {
         @SuppressWarnings("null")
         ItemStack stack = player.getItemInHand(hand);
-        if (weaponData == null) {
-            ensureWeaponStats(stack);
-        }
-        if (weaponData == null) {
-            return InteractionResultHolder.pass(stack);
-        }
-
-        WeaponSkillData skill = majorSkill ? weaponData.getSkill2() : weaponData.getSkill1();
-        if (skill == null) {
-            return InteractionResultHolder.pass(stack);
-        }
-
-        long nowTick = level.getGameTime();
-        String skillId = skill.getId();
-        int cooldownTicks = skill.getCooldown() * 20;
-
-        boolean isFemurSlam = "femur_slam".equals(skillId);
-        if (!isFemurSlam) {
-            return InteractionResultHolder.pass(stack);
-        }
-
-        if (level.isClientSide
-            && com.stardew.craft.client.weapon.WeaponSkillCooldownsClient.isOnCooldown(weaponId, skillId)) {
-            return InteractionResultHolder.fail(stack);
-        }
-
-        if (WeaponSkillCooldowns.isOnCooldown(player, weaponId, skillId, nowTick)
-            || (player instanceof ServerPlayer serverPlayer && FemurSlamTracker.isCharging(serverPlayer))) {
-            if (!level.isClientSide && player instanceof ServerPlayer serverPlayer) {
-                boolean mainHand = (hand == InteractionHand.MAIN_HAND);
-                net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
-                    serverPlayer,
-                    new com.stardew.craft.combat.network.SkillFailFeedbackPayload(mainHand)
-                );
-            }
-            return InteractionResultHolder.fail(stack);
-        }
-
-        if (!level.isClientSide && player instanceof ServerPlayer serverPlayer) {
-            player.startUsingItem(hand);
-            FemurSlamTracker.start(serverPlayer, nowTick, CHARGE_TICKS, weaponId, skillId,
-                skill.getDamagePercent() / 100.0f, cooldownTicks);
-        }
-
-        return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+        return InteractionResultHolder.pass(stack);
     }
 
     public String getWeaponId() {
@@ -256,27 +164,6 @@ public class StardewClubItem extends Item implements IStardewItem, IStardewWeapo
 
     @SuppressWarnings("null")
     private void ensureWeaponStats(ItemStack stack) {
-        if (weaponData == null) return;
-        if (stack.has(DataComponents.CUSTOM_DATA)) {
-            @SuppressWarnings("null")
-            CustomData data = stack.get(DataComponents.CUSTOM_DATA);
-            if (data != null && data.copyTag().contains(WeaponStats.TAG_STARDEW_WEAPON)) {
-                WeaponForgeData.ensure(stack);
-                return;
-            }
-        }
-
-        WeaponStats.builder()
-            .weaponType(weaponData.getWeaponType())
-            .minDamage(weaponData.getDamageMin())
-            .maxDamage(weaponData.getDamageMax())
-            .critChance((float) weaponData.getCritChance())
-            .bonusCritPower((float) Math.max(0, (weaponData.getCritPower() - 1.0) * 100.0))
-            .speed(weaponData.getSpeed())
-            .defense(weaponData.getDefense())
-            .knockback((float) weaponData.getWeight())
-            .build()
-            .writeToItemStack(stack);
-        WeaponForgeData.ensure(stack);
+        WeaponItemSupport.ensureStats(stack, weaponData);
     }
 }

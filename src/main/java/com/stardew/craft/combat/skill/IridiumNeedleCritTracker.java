@@ -11,7 +11,8 @@ import java.util.Objects;
 
 public final class IridiumNeedleCritTracker {
 
-    private static final int MAX_STACKS = 3;
+    public static final int MAX_STACKS = 3;
+    public static final int GUARANTEED_CRIT_THRESHOLD = MAX_STACKS - 1;
     private static final Map<UUID, Integer> STACKS = new HashMap<>();
 
     private IridiumNeedleCritTracker() {}
@@ -24,7 +25,7 @@ public final class IridiumNeedleCritTracker {
     }
 
     public static boolean shouldGuaranteeCrit(ServerPlayer player) {
-        return getStacks(player) >= (MAX_STACKS - 1);
+        return guaranteesCritAtStacks(getStacks(player));
     }
 
     public static void recordHit(ServerPlayer player) {
@@ -32,13 +33,21 @@ public final class IridiumNeedleCritTracker {
             return;
         }
         int current = getStacks(player);
-        int next = (current + 1) % MAX_STACKS;
+        int next = nextStacks(current);
         if (next == 0) {
             STACKS.remove(player.getUUID());
         } else {
             STACKS.put(player.getUUID(), next);
         }
         sync(player, next);
+    }
+
+    static boolean guaranteesCritAtStacks(int stacks) {
+        return stacks >= GUARANTEED_CRIT_THRESHOLD;
+    }
+
+    static int nextStacks(int current) {
+        return (current + 1) % MAX_STACKS;
     }
 
     public static void clear(ServerPlayer player) {

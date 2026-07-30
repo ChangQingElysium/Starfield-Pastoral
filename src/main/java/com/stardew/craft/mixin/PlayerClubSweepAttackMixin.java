@@ -1,11 +1,16 @@
 package com.stardew.craft.mixin;
 
+import com.stardew.craft.StardewCraft;
 import com.stardew.craft.combat.WeaponStats;
 import com.stardew.craft.combat.WeaponType;
+import com.stardew.craft.combat.skill.SkillContext;
+import com.stardew.craft.combat.skill.WeaponDamageSnapshot;
+import com.stardew.craft.combat.skill.WeaponSkillDamage;
 import com.stardew.craft.item.weapon.IStardewWeapon;
 import com.stardew.craft.item.weapon.WeaponData;
 import com.stardew.craft.item.weapon.WeaponRegistry;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -59,6 +64,14 @@ public abstract class PlayerClubSweepAttackMixin {
         if (!(player.level() instanceof ServerLevel serverLevel)) {
             return;
         }
+        WeaponDamageSnapshot weaponSnapshot = WeaponDamageSnapshot.capture(
+                ResourceLocation.fromNamespaceAndPath(
+                        StardewCraft.MODID,
+                        weaponItem.getWeaponId()
+                ),
+                stack
+        );
+        long nowTick = serverLevel.getGameTime();
 
         @Nonnull AABB box = Objects.requireNonNull(player.getBoundingBox());
 
@@ -77,7 +90,13 @@ public abstract class PlayerClubSweepAttackMixin {
                 continue;
             }
             entity.knockback(0.4F, Mth.sin(player.getYRot() * Mth.DEG_TO_RAD), -Mth.cos(player.getYRot() * Mth.DEG_TO_RAD));
-            entity.hurt(Objects.requireNonNull(player.damageSources().playerAttack(player)), 1.0F);
+            WeaponSkillDamage.apply(
+                    player,
+                    entity,
+                    SkillContext.normalAttack(),
+                    weaponSnapshot,
+                    nowTick + 5
+            );
             hitAny = true;
         }
 

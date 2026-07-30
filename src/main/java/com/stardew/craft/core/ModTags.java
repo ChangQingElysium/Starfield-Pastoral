@@ -4,6 +4,7 @@ import com.stardew.craft.StardewCraft;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 
@@ -25,6 +26,12 @@ public final class ModTags {
 		public static final TagKey<Block> IRIDIUM_ORES = tag("iridium_ores");
 		public static final TagKey<Block> QUARRY_RESOURCES = tag("quarry_resources");
 		public static final TagKey<Block> CUSHION_USES_COLLISION_SHAPE = tag("cushion_uses_collision_shape");
+		public static final TagKey<Block> INTERACTION_HINT_NONE = tag("interaction_hints/none");
+		public static final TagKey<Block> INTERACTION_HINT_GRAB = tag("interaction_hints/grab");
+		public static final TagKey<Block> INTERACTION_HINT_GIFT = tag("interaction_hints/gift");
+		public static final TagKey<Block> INTERACTION_HINT_TALK = tag("interaction_hints/talk");
+		public static final TagKey<Block> INTERACTION_HINT_LOOK = tag("interaction_hints/look");
+		public static final TagKey<Block> INTERACTION_HINT_HARVEST = tag("interaction_hints/harvest");
 
 		public static final TagKey<Block> REQUIRES_STARDEW_PICKAXE_TIER1 = tag("requires_stardew_pickaxe_tier1");
 		public static final TagKey<Block> REQUIRES_STARDEW_PICKAXE_TIER2 = tag("requires_stardew_pickaxe_tier2");
@@ -33,6 +40,20 @@ public final class ModTags {
 		@SuppressWarnings("null")
 		private static TagKey<Block> tag(String name) {
 			return TagKey.create(Registries.BLOCK, ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, name));
+		}
+	}
+
+	public static final class EntityTypes {
+		public static final TagKey<EntityType<?>> INTERACTION_HINT_NONE = tag("interaction_hints/none");
+		public static final TagKey<EntityType<?>> INTERACTION_HINT_GRAB = tag("interaction_hints/grab");
+		public static final TagKey<EntityType<?>> INTERACTION_HINT_GIFT = tag("interaction_hints/gift");
+		public static final TagKey<EntityType<?>> INTERACTION_HINT_TALK = tag("interaction_hints/talk");
+		public static final TagKey<EntityType<?>> INTERACTION_HINT_LOOK = tag("interaction_hints/look");
+		public static final TagKey<EntityType<?>> INTERACTION_HINT_HARVEST = tag("interaction_hints/harvest");
+
+		@SuppressWarnings("null")
+		private static TagKey<EntityType<?>> tag(String name) {
+			return TagKey.create(Registries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, name));
 		}
 	}
 

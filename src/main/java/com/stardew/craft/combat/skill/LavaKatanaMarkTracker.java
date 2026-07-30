@@ -3,12 +3,17 @@ package com.stardew.craft.combat.skill;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.combat.network.LavaKatanaMarkPayload;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
@@ -16,6 +21,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,33 +31,101 @@ public final class LavaKatanaMarkTracker {
 
     private static final String TAG_END_TICK = "stardewcraft_lava_katana_mark_until";
     private static final String TAG_OWNER = "stardewcraft_lava_katana_mark_owner";
+    private static final String TAG_OWNER_SESSION = "stardewcraft_lava_katana_mark_owner_session";
+    private static final String TAG_DIMENSION = "stardewcraft_lava_katana_mark_dimension";
     private static final String TAG_HEAT = "stardewcraft_lava_katana_mark_heat";
     private static final String TAG_NEXT_TICK = "stardewcraft_lava_katana_mark_next_tick";
+    private static final String TAG_RELEASE_WEAPON_ID =
+        "stardewcraft_lava_katana_mark_weapon_id";
+    private static final String TAG_RELEASE_WEAPON =
+        "stardewcraft_lava_katana_mark_weapon";
 
-    private static final int HEAT_CAP = 5;
-    private static final long BURN_INTERVAL = 10L;
-    private static final float BASE_BURN_RATIO = 0.15f;
-    private static final float HEAT_BONUS_RATIO = 0.04f;
-    private static final float HEAT_BONUS_REVERB_RATIO = 0.08f;
+    public static final String BURN_SKILL_ID = "lava_katana_burn";
+    public static final int MARK_DURATION_TICKS = 120;
+    public static final int HEAT_CAP = 5;
+    public static final long BURN_INTERVAL_TICKS = 10L;
+    public static final float BASE_BURN_RATIO = 0.15f;
+    public static final float HEAT_BONUS_RATIO = 0.04f;
+    public static final float HEAT_BONUS_REVERB_RATIO = 0.08f;
+    public static final int HIT_CONTEXT_LIFETIME_TICKS = 5;
 
     private static final Map<UUID, Set<UUID>> MARKED_BY_OWNER = new ConcurrentHashMap<>();
+    private static final Map<UUID, UUID> OWNER_SESSIONS = new ConcurrentHashMap<>();
+    private static final Map<UUID, PreparedRelease> PREPARED_RELEASES =
+        new ConcurrentHashMap<>();
+
+    private record PreparedRelease(
+        UUID ownerId,
+        WeaponDamageSnapshot weaponSnapshot
+    ) {}
 
     private LavaKatanaMarkTracker() {}
 
     @SuppressWarnings("null")
     public static void apply(LivingEntity target, ServerPlayer owner, long nowTick, int durationTicks) {
+        WeaponDamageSnapshot weaponSnapshot =
+            consumePreparedRelease(target, owner);
+        applyInternal(
+            target,
+            owner,
+            nowTick,
+            durationTicks,
+            weaponSnapshot
+        );
+    }
+
+    @SuppressWarnings("null")
+    public static void apply(
+        LivingEntity target,
+        ServerPlayer owner,
+        long nowTick,
+        int durationTicks,
+        WeaponDamageSnapshot weaponSnapshot
+    ) {
+        discardPreparedRelease(target, owner);
+        applyInternal(
+            target,
+            owner,
+            nowTick,
+            durationTicks,
+            Objects.requireNonNull(
+                weaponSnapshot,
+                "weaponSnapshot"
+            )
+        );
+    }
+
+    private static void applyInternal(
+        LivingEntity target,
+        ServerPlayer owner,
+        long nowTick,
+        int durationTicks,
+        WeaponDamageSnapshot weaponSnapshot
+    ) {
         if (target == null || owner == null || durationTicks <= 0) {
             return;
         }
 
         CompoundTag tag = target.getPersistentData();
+        detachPreviousOwner(target, tag);
+        UUID ownerId = owner.getUUID();
+        UUID ownerSession = OWNER_SESSIONS.computeIfAbsent(
+            ownerId,
+            ignored -> UUID.randomUUID()
+        );
         tag.putLong(TAG_END_TICK, nowTick + durationTicks);
-        tag.putUUID(TAG_OWNER, owner.getUUID());
+        tag.putUUID(TAG_OWNER, ownerId);
+        tag.putUUID(TAG_OWNER_SESSION, ownerSession);
+        tag.putString(
+            TAG_DIMENSION,
+            target.level().dimension().location().toString()
+        );
         tag.putInt(TAG_HEAT, 0);
-        tag.putLong(TAG_NEXT_TICK, nowTick + BURN_INTERVAL);
+        tag.putLong(TAG_NEXT_TICK, nowTick + BURN_INTERVAL_TICKS);
+        writeWeaponSnapshot(target, tag, weaponSnapshot);
 
         MARKED_BY_OWNER
-            .computeIfAbsent(owner.getUUID(), id -> ConcurrentHashMap.newKeySet())
+            .computeIfAbsent(ownerId, id -> ConcurrentHashMap.newKeySet())
             .add(target.getUUID());
 
         sendMarkSync(target, nowTick);
@@ -75,13 +149,55 @@ public final class LavaKatanaMarkTracker {
         }
     }
 
+    public static void prepareRelease(
+        LivingEntity target,
+        ServerPlayer owner,
+        WeaponDamageSnapshot weaponSnapshot
+    ) {
+        if (target == null || owner == null) {
+            return;
+        }
+        PREPARED_RELEASES.put(
+            target.getUUID(),
+            new PreparedRelease(
+                owner.getUUID(),
+                Objects.requireNonNull(
+                    weaponSnapshot,
+                    "weaponSnapshot"
+                )
+            )
+        );
+    }
+
+    public static void discardPreparedRelease(
+        LivingEntity target,
+        ServerPlayer owner
+    ) {
+        if (target == null || owner == null) {
+            return;
+        }
+        PREPARED_RELEASES.computeIfPresent(
+            target.getUUID(),
+            (targetId, prepared) ->
+                prepared.ownerId().equals(owner.getUUID())
+                    ? null
+                    : prepared
+        );
+    }
+
     public static boolean isMarked(LivingEntity target, long nowTick) {
         CompoundTag tag = target.getPersistentData();
         if (!tag.contains(TAG_END_TICK)) {
             return false;
         }
         long endTick = tag.getLong(TAG_END_TICK);
-        if (nowTick >= endTick) {
+        if (!isWithinMarkWindow(nowTick, endTick)
+            || !hasActiveOwnership(tag)
+            || !matchesDimension(
+                tag.getString(TAG_DIMENSION),
+                target.level().dimension(),
+                target.level().dimension()
+            )) {
             clearMark(target, tag);
             return false;
         }
@@ -97,7 +213,17 @@ public final class LavaKatanaMarkTracker {
             return false;
         }
         UUID ownerId = tag.getUUID(TAG_OWNER);
-        return ownerId.equals(player.getUUID());
+        return matchesOwner(ownerId, player.getUUID())
+            && tag.hasUUID(TAG_OWNER_SESSION)
+            && matchesSession(
+                tag.getUUID(TAG_OWNER_SESSION),
+                OWNER_SESSIONS.get(ownerId)
+            )
+            && matchesDimension(
+                tag.getString(TAG_DIMENSION),
+                target.level().dimension(),
+                player.level().dimension()
+            );
     }
 
     public static int getHeat(LivingEntity target) {
@@ -161,8 +287,13 @@ public final class LavaKatanaMarkTracker {
         UUID targetId = target.getUUID();
         tag.remove(TAG_END_TICK);
         tag.remove(TAG_OWNER);
+        tag.remove(TAG_OWNER_SESSION);
+        tag.remove(TAG_DIMENSION);
         tag.remove(TAG_HEAT);
         tag.remove(TAG_NEXT_TICK);
+        tag.remove(TAG_RELEASE_WEAPON_ID);
+        tag.remove(TAG_RELEASE_WEAPON);
+        PREPARED_RELEASES.remove(targetId);
         if (ownerId != null) {
             removeMarkedTarget(ownerId, targetId);
         }
@@ -210,48 +341,47 @@ public final class LavaKatanaMarkTracker {
             return;
         }
         long nowTick = entity.level().getGameTime();
-        long endTick = tag.getLong(TAG_END_TICK);
-        if (nowTick >= endTick || !entity.isAlive()) {
+        if (!entity.isAlive() || !isMarked(entity, nowTick)) {
+            if (tag.contains(TAG_END_TICK)) {
+                clearMark(entity, tag);
+            }
+            return;
+        }
+        ServerPlayer owner = resolveOwner(entity, tag);
+        if (owner == null) {
             clearMark(entity, tag);
             return;
         }
 
         long nextTick = tag.getLong(TAG_NEXT_TICK);
         if (nowTick >= nextTick) {
-            tag.putLong(TAG_NEXT_TICK, nowTick + BURN_INTERVAL);
-            applyBurnTick(entity, tag, nowTick);
+            tag.putLong(TAG_NEXT_TICK, nowTick + BURN_INTERVAL_TICKS);
+            applyBurnTick(entity, tag, owner, nowTick);
         }
     }
 
     @SuppressWarnings("null")
-    private static void applyBurnTick(LivingEntity target, CompoundTag tag, long nowTick) {
-        if (!tag.hasUUID(TAG_OWNER)) {
-            return;
-        }
+    private static void applyBurnTick(
+        LivingEntity target,
+        CompoundTag tag,
+        ServerPlayer owner,
+        long nowTick
+    ) {
         if (!(target.level() instanceof ServerLevel serverLevel)) {
-            return;
-        }
-        Player ownerPlayer = serverLevel.getPlayerByUUID(tag.getUUID(TAG_OWNER));
-        if (!(ownerPlayer instanceof ServerPlayer owner)) {
             return;
         }
 
         int heat = Math.max(0, tag.getInt(TAG_HEAT));
         boolean reverbActive = LavaKatanaReverbTracker.isActive(owner, nowTick);
-        int effectiveHeat = reverbActive ? heat : Math.min(heat, HEAT_CAP);
-        float bonus = reverbActive ? HEAT_BONUS_REVERB_RATIO : HEAT_BONUS_RATIO;
-        float damageMultiplier = BASE_BURN_RATIO + (effectiveHeat * bonus);
-
-        SkillContext context = SkillContext.builder()
-            .skillId("lava_katana_burn")
-            .tier(SkillContext.SkillTier.MINOR)
-            .damageMultiplier(damageMultiplier)
-            .build();
-        WeaponSkillContextStore.setPending(owner, context, nowTick + 5);
-
         target.invulnerableTime = 0;
         target.hurtTime = 0;
-        target.hurt(owner.damageSources().playerAttack(owner), 1.0F);
+        applyDamage(
+            owner,
+            target,
+            createBurnContext(heat, reverbActive),
+            readWeaponSnapshot(target, tag),
+            nowTick + HIT_CONTEXT_LIFETIME_TICKS
+        );
 
         double x = target.getX();
         double y = target.getY() + target.getBbHeight() * 0.55;
@@ -270,5 +400,200 @@ public final class LavaKatanaMarkTracker {
     /** Clean up state when a player logs out to prevent memory leaks. */
     public static void removePlayer(UUID playerId) {
         MARKED_BY_OWNER.remove(playerId);
+        OWNER_SESSIONS.remove(playerId);
+        PREPARED_RELEASES.entrySet().removeIf(
+            entry -> playerId.equals(entry.getValue().ownerId())
+        );
+    }
+
+    static boolean isWithinMarkWindow(long nowTick, long endTick) {
+        return nowTick < endTick;
+    }
+
+    static boolean matchesOwner(UUID markOwner, UUID playerId) {
+        return markOwner.equals(playerId);
+    }
+
+    static boolean matchesSession(
+        UUID markSession,
+        UUID activeOwnerSession
+    ) {
+        return markSession != null && markSession.equals(activeOwnerSession);
+    }
+
+    static boolean matchesDimension(
+        String storedDimension,
+        ResourceKey<Level> targetDimension,
+        ResourceKey<Level> ownerDimension
+    ) {
+        String target = targetDimension.location().toString();
+        return target.equals(storedDimension)
+            && targetDimension.equals(ownerDimension);
+    }
+
+    static int scheduledBurnTicks(int durationTicks) {
+        if (durationTicks <= 0) {
+            return 0;
+        }
+        return (int) ((durationTicks - 1L) / BURN_INTERVAL_TICKS);
+    }
+
+    static float burnDamageMultiplier(int heat, boolean reverbActive) {
+        int nonNegativeHeat = Math.max(0, heat);
+        int effectiveHeat = reverbActive
+            ? nonNegativeHeat
+            : Math.min(nonNegativeHeat, HEAT_CAP);
+        float bonus = reverbActive
+            ? HEAT_BONUS_REVERB_RATIO
+            : HEAT_BONUS_RATIO;
+        return BASE_BURN_RATIO + effectiveHeat * bonus;
+    }
+
+    static SkillContext createBurnContext(
+        int heat,
+        boolean reverbActive
+    ) {
+        return SkillContext.builder()
+            .skillId(BURN_SKILL_ID)
+            .tier(SkillContext.SkillTier.MINOR)
+            .damageMultiplier(
+                burnDamageMultiplier(heat, reverbActive)
+            )
+            .build();
+    }
+
+    private static void applyDamage(
+        ServerPlayer owner,
+        LivingEntity target,
+        SkillContext context,
+        WeaponDamageSnapshot weaponSnapshot,
+        long expireTick
+    ) {
+        if (weaponSnapshot == null) {
+            WeaponSkillDamage.apply(
+                owner,
+                target,
+                context,
+                expireTick
+            );
+            return;
+        }
+        WeaponSkillDamage.apply(
+            owner,
+            target,
+            context,
+            weaponSnapshot,
+            expireTick
+        );
+    }
+
+    private static void writeWeaponSnapshot(
+        LivingEntity target,
+        CompoundTag tag,
+        WeaponDamageSnapshot weaponSnapshot
+    ) {
+        if (weaponSnapshot == null) {
+            tag.remove(TAG_RELEASE_WEAPON_ID);
+            tag.remove(TAG_RELEASE_WEAPON);
+            return;
+        }
+        tag.putString(
+            TAG_RELEASE_WEAPON_ID,
+            weaponSnapshot.weaponId().toString()
+        );
+        tag.put(
+            TAG_RELEASE_WEAPON,
+            weaponSnapshot.weapon().saveOptional(
+                target.level().registryAccess()
+            )
+        );
+    }
+
+    private static WeaponDamageSnapshot readWeaponSnapshot(
+        LivingEntity target,
+        CompoundTag tag
+    ) {
+        if (!tag.contains(TAG_RELEASE_WEAPON_ID, Tag.TAG_STRING)
+            || !tag.contains(TAG_RELEASE_WEAPON, Tag.TAG_COMPOUND)) {
+            return null;
+        }
+        ResourceLocation weaponId = ResourceLocation.tryParse(
+            tag.getString(TAG_RELEASE_WEAPON_ID)
+        );
+        if (weaponId == null) {
+            return null;
+        }
+        ItemStack weapon = ItemStack.parse(
+            target.level().registryAccess(),
+            tag.getCompound(TAG_RELEASE_WEAPON)
+        ).orElse(ItemStack.EMPTY);
+        return WeaponDamageSnapshot.capture(weaponId, weapon);
+    }
+
+    private static WeaponDamageSnapshot consumePreparedRelease(
+        LivingEntity target,
+        ServerPlayer owner
+    ) {
+        if (target == null || owner == null) {
+            return null;
+        }
+        PreparedRelease prepared = PREPARED_RELEASES.remove(
+            target.getUUID()
+        );
+        return prepared != null
+            && prepared.ownerId().equals(owner.getUUID())
+                ? prepared.weaponSnapshot()
+                : null;
+    }
+
+    private static boolean hasActiveOwnership(CompoundTag tag) {
+        if (!tag.hasUUID(TAG_OWNER) || !tag.hasUUID(TAG_OWNER_SESSION)) {
+            return false;
+        }
+        UUID ownerId = tag.getUUID(TAG_OWNER);
+        return matchesSession(
+            tag.getUUID(TAG_OWNER_SESSION),
+            OWNER_SESSIONS.get(ownerId)
+        );
+    }
+
+    private static ServerPlayer resolveOwner(
+        LivingEntity target,
+        CompoundTag tag
+    ) {
+        if (!(target.level() instanceof ServerLevel serverLevel)
+            || !tag.hasUUID(TAG_OWNER)
+            || !tag.hasUUID(TAG_OWNER_SESSION)) {
+            return null;
+        }
+        UUID ownerId = tag.getUUID(TAG_OWNER);
+        ServerPlayer owner = serverLevel.getServer()
+            .getPlayerList()
+            .getPlayer(ownerId);
+        if (owner == null
+            || !matchesSession(
+                tag.getUUID(TAG_OWNER_SESSION),
+                OWNER_SESSIONS.get(ownerId)
+            )
+            || !matchesDimension(
+                tag.getString(TAG_DIMENSION),
+                target.level().dimension(),
+                owner.level().dimension()
+            )) {
+            return null;
+        }
+        return owner;
+    }
+
+    private static void detachPreviousOwner(
+        LivingEntity target,
+        CompoundTag tag
+    ) {
+        if (tag.hasUUID(TAG_OWNER)) {
+            removeMarkedTarget(
+                tag.getUUID(TAG_OWNER),
+                target.getUUID()
+            );
+        }
     }
 }

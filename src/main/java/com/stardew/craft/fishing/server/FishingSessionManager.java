@@ -128,6 +128,8 @@ public final class FishingSessionManager {
 		}
 
 		sessionsByPlayer.put(playerId, session);
+		com.stardew.craft.player.PlayerDataManager.getPlayerData(player)
+				.incrementStat("timesFished", 1);
 		return true;
 	}
 

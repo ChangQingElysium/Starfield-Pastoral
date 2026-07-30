@@ -15,6 +15,11 @@ import java.util.UUID;
 
 @EventBusSubscriber(modid = StardewCraft.MODID)
 public final class YetiToothMarkTracker {
+    public static final String SKILL_ID = "yeti_tooth_mark";
+    public static final int MARK_DURATION_TICKS = 60;
+    public static final int SLOW_DURATION_TICKS = 60;
+    public static final int SLOW_AMPLIFIER = 0;
+    public static final int FREEZE_DURATION_TICKS = 40;
 
     private static final String TAG_END_TICK = "stardewcraft_yeti_tooth_mark_until";
     private static final String TAG_OWNER = "stardewcraft_yeti_tooth_mark_owner";
@@ -61,11 +66,19 @@ public final class YetiToothMarkTracker {
             return false;
         }
         long endTick = tag.getLong(TAG_END_TICK);
-        if (nowTick >= endTick) {
+        if (!isWithinMarkWindow(nowTick, endTick)) {
             clear(tag);
             return false;
         }
         return true;
+    }
+
+    public static boolean isEligibleFollowupSkill(String skillId) {
+        return !SKILL_ID.equals(skillId);
+    }
+
+    static boolean isWithinMarkWindow(long nowTick, long endTick) {
+        return nowTick < endTick;
     }
 
     public static boolean isMarkedBy(LivingEntity target, ServerPlayer owner, long nowTick) {
@@ -114,7 +127,7 @@ public final class YetiToothMarkTracker {
         }
         long nowTick = entity.level().getGameTime();
         long endTick = tag.getLong(TAG_END_TICK);
-        if (nowTick >= endTick) {
+        if (!isWithinMarkWindow(nowTick, endTick)) {
             clear(tag);
         }
     }

@@ -262,6 +262,7 @@ public final class StardewMusicManager {
         if (cutsceneOverride) return;
 
         tickSewerAmbient(mc);
+        tickCasinoAmbient(mc);
 
         // Periodic track evaluation
         tickCounter++;
@@ -572,6 +573,36 @@ public final class StardewMusicManager {
             );
             sewerAmbientCooldown = 200;
         }
+    }
+
+    /**
+     * StardewValley.Locations.Club.checkForMusic: every environment check has a
+     * 0.002 chance to play the local "boop" cue.
+     */
+    private static void tickCasinoAmbient(Minecraft mc) {
+        if (mc.level == null || mc.player == null
+                || !isPlayerInFixedInterior(mc, "casino")) {
+            return;
+        }
+        if (mc.level.random.nextDouble() < 0.002D) {
+            mc.level.playLocalSound(
+                    mc.player.getX(),
+                    mc.player.getY(),
+                    mc.player.getZ(),
+                    ModSounds.BOOP.get(),
+                    SoundSource.AMBIENT,
+                    1.0F,
+                    1.0F,
+                    false
+            );
+        }
+    }
+
+    private static boolean isPlayerInFixedInterior(Minecraft mc, String interiorId) {
+        return mc.player != null
+                && InteriorRegionRegistry.fixedInteriorAt(mc.player.blockPosition())
+                        .map(region -> region.id().equals(interiorId))
+                        .orElse(false);
     }
 
     /**

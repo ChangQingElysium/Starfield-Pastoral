@@ -18,7 +18,8 @@
     { "id": "elliott_cabin", "ledger_id": "music_region_elliott_cabin", "min": [73, 44, 96], "max": [86, 48, 103], "aliases": ["elliott_cabin", "elliotthouse"], "properties": {"stardewcraft:music_profile": "stardewcraft:music_community_center"} },
     { "id": "wizard_tower", "ledger_id": "music_region_wizard_tower", "min": [-186, 33, 43], "max": [-172, 40, 65], "aliases": ["wizard_tower", "wizardhouse"], "properties": {"stardewcraft:music_profile": "stardewcraft:music_wizard_tower"} },
     { "id": "oasis", "ledger_id": "music_region_oasis", "min": [-255, 29, -151], "max": [-237, 34, -146], "aliases": ["oasis", "sandyhouse", "oasisshop"], "properties": {"stardewcraft:music_profile": "stardewcraft:music_oasis"} },
+    { "id": "casino", "ledger_id": "music_region_casino", "min": [-250, 28, -171], "max": [-219, 40, -153], "aliases": ["casino", "club"], "properties": {"stardewcraft:music_profile": "stardewcraft:music_clubloop"} },
     { "id": "joja_mart", "ledger_id": "music_region_joja_mart", "min": [96, 43, -42], "max": [123, 50, -17], "aliases": ["joja_mart", "jojamart"], "properties": {"stardewcraft:music_profile": "stardewcraft:music_hospital_ambient"} },
-    { "id": "trailer", "ledger_id": "music_region_trailer", "min": [64, 34, -2], "max": [80, 40, 10], "aliases": ["trailer", "pamhouse", "pennyhouse"] }
+    { "id": "trailer", "ledger_id": "music_region_trailer", "min": [59, 34, -3], "max": [80, 40, 10], "aliases": ["trailer", "pamhouse", "pennyhouse"] }
   ]
 }

@@ -134,6 +134,16 @@ public final class MutantBugLairService {
         return mob != null && mob.getTags().contains(LAIR_MOB_TAG);
     }
 
+    public static boolean isRewardChestInteraction(
+            ServerPlayer player,
+            BlockPos pos
+    ) {
+        return player != null
+                && ModDimensions.STARDEW_VALLEY.equals(
+                        player.serverLevel().dimension())
+                && REWARD_CHEST_POS.equals(pos);
+    }
+
     @SubscribeEvent(priority = EventPriority.HIGHEST, receiveCanceled = true)
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         if (!(event.getEntity() instanceof ServerPlayer player)

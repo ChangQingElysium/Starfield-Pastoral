@@ -11,17 +11,9 @@ final class ShippingMenuTextures {
     private static final SdvTexture OK = SdvTexture.full(overnight("btn_ok"), 64, 64);
     private static final SdvTexture BACK = SdvTexture.full(overnight("btn_back"), 12, 11);
     private static final SdvTexture FORWARD = SdvTexture.full(overnight("btn_forward"), 12, 11);
+    private static final SdvTexture STAR_BACKDROP = SdvTexture.full(overnight("bg_stars"), 639, 195);
     private static final SdvTexture SKY_STRIP = SdvTexture.full(overnight("shipping_sky_strip"), 1, 184);
     private static final SdvTexture GREEN_RAIN_SKY_STRIP = SdvTexture.full(overnight("shipping_green_rain_sky_strip"), 1, 184);
-    private static final SdvTexture WEATHER_CLOUD = SdvTexture.full(overnight("shipping_weather_cloud"), 61, 53);
-    private static final SdvTexture LAND_BACK = SdvTexture.full(overnight("shipping_land_back"), 639, 48);
-    private static final SdvTexture LAND_FRONT = SdvTexture.full(overnight("shipping_land_front"), 639, 32);
-    private static final SdvTexture WINTER_LAND_BACK = SdvTexture.full(overnight("shipping_winter_land_back"), 639, 48);
-    private static final SdvTexture WINTER_LAND_FRONT = SdvTexture.full(overnight("shipping_winter_land_front"), 639, 32);
-    private static final SdvTexture SHIPPING_BIN = SdvTexture.full(overnight("shipping_bin_background_icon"), 10, 10);
-    private static final SdvTexture FULL_MOON = SdvTexture.full(overnight("shipping_full_moon"), 43, 43);
-    private static final SdvTexture MOON_FACE = SdvTexture.full(overnight("shipping_moon_face"), 19, 21);
-    private static final SdvTexture MOON_FACE_BLINK = SdvTexture.full(overnight("shipping_moon_face_blink"), 19, 21);
     private static final SdvTexture PLUS_BUTTON = SdvTexture.full(overnight("btn_plus"), 10, 11);
     private static final SdvTexture PLUS_BUTTON_HOVER = SdvTexture.full(overnight("btn_plus_hover"), 10, 11);
     private static final SdvTexture[] DIGITS = new SdvTexture[] {
@@ -60,36 +52,46 @@ final class ShippingMenuTextures {
         FORWARD.drawPixelZoom(graphics, x, y, scale);
     }
 
+    static void drawStarBackdrop(GuiGraphics graphics, int x, int y, float scale, float alpha) {
+        STAR_BACKDROP.drawPixelZoomTint(graphics, x, y, scale, 1.0f, 1.0f, 1.0f, alpha);
+    }
+
     static void drawSkyStrip(GuiGraphics graphics, int width, int height, boolean greenRain, float red, float green, float blue, float alpha) {
         SdvTexture texture = greenRain ? GREEN_RAIN_SKY_STRIP : SKY_STRIP;
         texture.drawStretchedTint(graphics, 0, 0, width, height, red, green, blue, alpha);
     }
 
     static void drawWeatherCloudTint(GuiGraphics graphics, int x, int y, float scale, float red, float green, float blue, float alpha) {
-        WEATHER_CLOUD.drawPixelZoomTint(graphics, x, y, scale, red, green, blue, alpha);
+        StardewGuiUtil.drawFromCursorsTint(
+            graphics, x, y, 643, 1142, 61, 53, scale, red, green, blue, alpha);
     }
 
     static void drawLandBackTint(GuiGraphics graphics, int x, int y, boolean winter, float scale, float red, float green, float blue, float alpha) {
-        SdvTexture texture = winter ? WINTER_LAND_BACK : LAND_BACK;
-        texture.drawPixelZoomTint(graphics, x, y, scale, red, green, blue, alpha);
+        StardewGuiUtil.drawFromCursorsTintFlipped(
+            graphics, x, y, 0, winter ? 1034 : 737, 639, 48,
+            scale, red, green, blue, alpha);
     }
 
     static void drawLandFrontTint(GuiGraphics graphics, int x, int y, boolean winter, float scale, float red, float green, float blue, float alpha) {
-        SdvTexture texture = winter ? WINTER_LAND_FRONT : LAND_FRONT;
-        texture.drawPixelZoomTint(graphics, x, y, scale, red, green, blue, alpha);
+        StardewGuiUtil.drawFromCursorsTint(
+            graphics, x, y, 0, winter ? 1034 : 737, 639, 32,
+            scale, red, green, blue, alpha);
     }
 
     static void drawShippingBin(GuiGraphics graphics, int x, int y, float scale, float alpha) {
-        SHIPPING_BIN.drawPixelZoomTint(graphics, x, y, scale, 1.0f, 1.0f, 1.0f, alpha);
+        StardewGuiUtil.drawFromCursorsTint(
+            graphics, x, y, 653, 880, 10, 10, scale, 1.0f, 1.0f, 1.0f, alpha);
     }
 
     static void drawFullMoon(GuiGraphics graphics, int x, int y, float scale, float alpha) {
-        FULL_MOON.drawPixelZoomTint(graphics, x, y, scale, 1.0f, 1.0f, 1.0f, alpha);
+        StardewGuiUtil.drawFromCursorsTint(
+            graphics, x, y, 642, 835, 43, 43, scale, 1.0f, 1.0f, 1.0f, alpha);
     }
 
     static void drawMoonFace(GuiGraphics graphics, int x, int y, boolean blink, float scale, float alpha) {
-        SdvTexture texture = blink ? MOON_FACE_BLINK : MOON_FACE;
-        texture.drawPixelZoomTint(graphics, x, y, scale, 1.0f, 1.0f, 1.0f, alpha);
+        StardewGuiUtil.drawFromCursorsTint(
+            graphics, x, y, 685, blink ? 865 : 844, 19, 21,
+            scale, 1.0f, 1.0f, 1.0f, alpha);
     }
 
     static void drawPlusButton(GuiGraphics graphics, int x, int y, boolean hovering, float scale) {

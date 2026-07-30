@@ -43,5 +43,10 @@
     "id": "passedOut_Marlon",
     "text": "stardewcraft.mail.passedOut_Marlon",
     "background": 0
+  },
+  {
+    "id": "passedOut_Joja",
+    "text": "stardewcraft.mail.passedOut_Joja",
+    "background": 0
   }
 ]

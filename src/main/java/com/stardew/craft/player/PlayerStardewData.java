@@ -56,6 +56,7 @@ public class PlayerStardewData {
     private int money;               // 金币数量
     private long totalMoneyEarned;    // SDV totalMoneyEarned：累计赚到的金币（不随花费减少）
     private int fairStarTokens;       // SDV Farmer.festivalScore：Stardew Valley Fair 星星币
+    private int clubCoins;            // SDV Farmer.clubCoins：赌场齐币
     private int lastFairGrillBurgerDateKey; // Fall 16 fair grill: one Survival Burger per player per day
     
     // ============ 技能系统 ============
@@ -182,6 +183,10 @@ public class PlayerStardewData {
     // ============ 邮件标记（SDV mailReceived parity） ============
     private final Set<String> mailFlags = new HashSet<>();
 
+    // ============ 地图文本阅读记录 ============
+    // 使用 map interaction 的命名空间 ID，避免坐标调整后丢失阅读状态。
+    private final Set<String> readMapInteractions = new HashSet<>();
+
     // ============ 邮箱系统（SDV mailbox / mailForTomorrow parity） ============
     // mailbox: 当前可读的邮件ID队列（SDV Farmer.mailbox）
     private final List<String> mailbox = new ArrayList<>();
@@ -253,6 +258,8 @@ public class PlayerStardewData {
     private boolean passedOutFromCombat;
     // 上次死亡丢失的物品（供 Marlon 物品找回商店使用）
     private final List<net.minecraft.world.item.ItemStack> itemsLostLastDeath = new ArrayList<>();
+    // Last confirmed Stardew bed, equivalent to Farmer.lastSleepPoint.
+    private net.minecraft.core.BlockPos lastSleepPoint;
     
     // 经验值升级表（根据星露谷物语）
     private static final int[] EXP_TO_LEVEL = {
@@ -282,6 +289,7 @@ public class PlayerStardewData {
         this.exhausted = false;
         this.money = 500;  // 初始金币
         this.fairStarTokens = 0;
+        this.clubCoins = 0;
         this.lastFairGrillBurgerDateKey = -1;
         this.totalMoneyEarned = 500L;
         this.lastSyncTime = System.currentTimeMillis();
@@ -336,6 +344,7 @@ public class PlayerStardewData {
         data.exhausted = tag.getBoolean("Exhausted");
         data.money = tag.contains("Money") ? tag.getInt("Money") : 500;
         data.fairStarTokens = tag.contains("FairStarTokens") ? Math.max(0, tag.getInt("FairStarTokens")) : 0;
+        data.clubCoins = tag.contains("ClubCoins") ? Math.max(0, tag.getInt("ClubCoins")) : 0;
         data.lastFairGrillBurgerDateKey = tag.contains("LastFairGrillBurgerDateKey") ? tag.getInt("LastFairGrillBurgerDateKey") : -1;
         data.totalMoneyEarned = tag.contains("TotalMoneyEarned")
             ? Math.max(0L, tag.getLong("TotalMoneyEarned"))
@@ -347,11 +356,25 @@ public class PlayerStardewData {
 
         // 晕倒/死亡系统
         data.passedOutFromCombat = tag.getBoolean("PassedOutFromCombat");
+        if (tag.contains("LastSleepPoint", Tag.TAG_LONG)) {
+            data.lastSleepPoint = net.minecraft.core.BlockPos.of(tag.getLong("LastSleepPoint"));
+        }
         data.itemsLostLastDeath.clear();
         if (tag.contains("ItemsLostLastDeath")) {
             ListTag lostItemsTag = tag.getList("ItemsLostLastDeath", 10); // 10 = CompoundTag
             for (int li = 0; li < lostItemsTag.size(); li++) {
                 CompoundTag itemTag = lostItemsTag.getCompound(li);
+                if (registries != null && itemTag.contains("Stack", Tag.TAG_COMPOUND)) {
+                    net.minecraft.world.item.ItemStack stack =
+                            net.minecraft.world.item.ItemStack.parse(
+                                    registries, itemTag.getCompound("Stack"))
+                                    .orElse(net.minecraft.world.item.ItemStack.EMPTY);
+                    if (!stack.isEmpty()) {
+                        data.itemsLostLastDeath.add(stack);
+                    }
+                    continue;
+                }
+                // Legacy migration: old saves stored only registry ID + count.
                 var itemRL = ResourceLocation.tryParse(itemTag.getString("Id"));
                 if (itemRL != null && net.minecraft.core.registries.BuiltInRegistries.ITEM.containsKey(itemRL)) {
                     net.minecraft.world.item.Item item = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(itemRL);
@@ -607,6 +630,16 @@ public class PlayerStardewData {
             }
         }
 
+        if (tag.contains("ReadMapInteractions", Tag.TAG_LIST)) {
+            ListTag readList = tag.getList("ReadMapInteractions", Tag.TAG_STRING);
+            for (int i = 0; i < readList.size(); i++) {
+                String interactionId = readList.getString(i);
+                if (!interactionId.isBlank()) {
+                    data.readMapInteractions.add(interactionId);
+                }
+            }
+        }
+
         // 邮箱队列
         if (tag.contains("Mailbox", 9)) {
             ListTag mboxList = tag.getList("Mailbox", 8);
@@ -797,6 +830,7 @@ public class PlayerStardewData {
         tag.putBoolean("Exhausted", exhausted);
         tag.putInt("Money", money);
         tag.putInt("FairStarTokens", fairStarTokens);
+        tag.putInt("ClubCoins", clubCoins);
         tag.putInt("LastFairGrillBurgerDateKey", lastFairGrillBurgerDateKey);
         tag.putLong("TotalMoneyEarned", totalMoneyEarned);
         tag.putString("LastKnownName", lastKnownName == null ? "" : lastKnownName);
@@ -806,12 +840,23 @@ public class PlayerStardewData {
 
         // 晕倒/死亡系统
         tag.putBoolean("PassedOutFromCombat", passedOutFromCombat);
+        if (lastSleepPoint != null) {
+            tag.putLong("LastSleepPoint", lastSleepPoint.asLong());
+        }
         if (!itemsLostLastDeath.isEmpty()) {
             ListTag lostItemsTag = new ListTag();
             for (net.minecraft.world.item.ItemStack stack : itemsLostLastDeath) {
                 CompoundTag itemTag = new CompoundTag();
-                itemTag.putString("Id", net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem()).toString());
-                itemTag.putInt("Count", stack.getCount());
+                if (registries != null) {
+                    itemTag.put("Stack", stack.save(registries));
+                } else {
+                    // Tests and legacy callers may intentionally have no
+                    // registry provider. Preserve the old lossless-enough
+                    // fallback instead of failing the entire player save.
+                    itemTag.putString("Id", net.minecraft.core.registries.BuiltInRegistries.ITEM
+                            .getKey(stack.getItem()).toString());
+                    itemTag.putInt("Count", stack.getCount());
+                }
                 lostItemsTag.add(itemTag);
             }
             tag.put("ItemsLostLastDeath", lostItemsTag);
@@ -1014,6 +1059,15 @@ public class PlayerStardewData {
                 mailList.add(StringTag.valueOf(flag));
             }
             tag.put("MailFlags", mailList);
+        }
+
+        if (!readMapInteractions.isEmpty()) {
+            ListTag readList = new ListTag();
+            readMapInteractions.stream()
+                    .sorted()
+                    .map(StringTag::valueOf)
+                    .forEach(readList::add);
+            tag.put("ReadMapInteractions", readList);
         }
 
         // 邮箱队列
@@ -1699,6 +1753,15 @@ public class PlayerStardewData {
         markDirty();
     }
     public void clearItemsLostLastDeath() { itemsLostLastDeath.clear(); markDirty(); }
+
+    public java.util.Optional<net.minecraft.core.BlockPos> getLastSleepPoint() {
+        return java.util.Optional.ofNullable(lastSleepPoint);
+    }
+
+    public void setLastSleepPoint(net.minecraft.core.BlockPos point) {
+        lastSleepPoint = point == null ? null : point.immutable();
+        markDirty();
+    }
     
     public UUID getPlayerUUID() { return playerUUID; }
     
@@ -1745,7 +1808,11 @@ public class PlayerStardewData {
     
     public int getMoney() { return money; }
     public void setMoney(int money) {
-        this.money = Math.max(0, money);
+        int normalizedMoney = Math.max(0, money);
+        if (this.money == normalizedMoney) {
+            return;
+        }
+        this.money = normalizedMoney;
         markDirty();
     }
 
@@ -1772,6 +1839,35 @@ public class PlayerStardewData {
             return false;
         }
         fairStarTokens -= amount;
+        markDirty();
+        return true;
+    }
+
+    public int getClubCoins() {
+        return Math.max(0, clubCoins);
+    }
+
+    public void setClubCoins(int value) {
+        clubCoins = Math.max(0, value);
+        markDirty();
+    }
+
+    public int addClubCoins(int amount) {
+        if (amount != 0) {
+            clubCoins = Math.max(0, clubCoins + amount);
+            markDirty();
+        }
+        return clubCoins;
+    }
+
+    public boolean consumeClubCoins(int amount) {
+        if (amount <= 0) {
+            return true;
+        }
+        if (clubCoins < amount) {
+            return false;
+        }
+        clubCoins -= amount;
         markDirty();
         return true;
     }
@@ -2364,6 +2460,23 @@ public class PlayerStardewData {
     public boolean hasMailFlag(String flag) { return mailFlags.contains(flag); }
     public void addMailFlag(String flag) { if (mailFlags.add(flag)) markDirty(); }
     public void removeMailFlag(String flag) { if (mailFlags.remove(flag)) markDirty(); }
+
+    // ──── Map interaction read state ────
+    public Set<String> getReadMapInteractions() {
+        return Collections.unmodifiableSet(readMapInteractions);
+    }
+
+    public boolean hasReadMapInteraction(ResourceLocation interactionId) {
+        return interactionId != null
+                && readMapInteractions.contains(interactionId.toString());
+    }
+
+    public void markMapInteractionRead(ResourceLocation interactionId) {
+        if (interactionId != null
+                && readMapInteractions.add(interactionId.toString())) {
+            markDirty();
+        }
+    }
 
     // ──── Mailbox Queue (SDV Farmer.mailbox parity) ────
     public List<String> getMailbox() { return Collections.unmodifiableList(mailbox); }

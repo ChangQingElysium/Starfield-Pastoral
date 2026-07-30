@@ -21,6 +21,7 @@ import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -34,10 +35,23 @@ public class PointPlanWandItem extends Item {
     private static final String TAG_NPC_ID = "NpcId";
     private static final String TAG_POS = "Pos";
     private static final String TAG_DIRECTION = "Direction";
-    private static final String DEFAULT_PLAN_ID = "festival_of_ice_npcs";
+    private static final String NPC_DEFAULT_PLAN_ID =
+            "festival_of_ice_npcs";
+    private static final String MAP_INTERACTION_DEFAULT_PLAN_ID =
+            "map_interactions";
+    private final EditorKind editorKind;
 
     public PointPlanWandItem(Properties properties) {
+        this(properties, EditorKind.NPC);
+    }
+
+    public PointPlanWandItem(
+            Properties properties,
+            EditorKind editorKind
+    ) {
         super(properties);
+        this.editorKind = editorKind == null
+                ? EditorKind.NPC : editorKind;
     }
 
     @Override
@@ -46,17 +60,27 @@ public class PointPlanWandItem extends Item {
         if (player == null) {
             return InteractionResult.PASS;
         }
-        return handleUse(context.getLevel(), player, context.getItemInHand());
+        return handleUse(
+                context.getLevel(),
+                player,
+                context.getItemInHand(),
+                context.getClickedPos());
     }
 
     @Override
     public InteractionResultHolder<ItemStack> use(@Nonnull Level level, @Nonnull Player player, @Nonnull InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
-        InteractionResult result = handleUse(level, player, stack);
+        InteractionResult result = handleUse(
+                level, player, stack, null);
         return new InteractionResultHolder<>(result, stack);
     }
 
-    private InteractionResult handleUse(Level level, Player player, ItemStack stack) {
+    private InteractionResult handleUse(
+            Level level,
+            Player player,
+            ItemStack stack,
+            @Nullable BlockPos clickedPos
+    ) {
         if (level.isClientSide) {
             return InteractionResult.SUCCESS;
         }
@@ -69,7 +93,18 @@ public class PointPlanWandItem extends Item {
             return InteractionResult.CONSUME;
         }
 
-        PendingPoint pendingPoint = new PendingPoint(player.blockPosition().immutable(), normalizeDirection(player));
+        if (editorKind == EditorKind.MAP_INTERACTION
+                && clickedPos == null) {
+            return InteractionResult.PASS;
+        }
+        BlockPos capturedPos = editorKind == EditorKind.MAP_INTERACTION
+                ? clickedPos
+                : player.blockPosition();
+        if (capturedPos == null) {
+            return InteractionResult.PASS;
+        }
+        PendingPoint pendingPoint = new PendingPoint(
+                capturedPos.immutable(), normalizeDirection(player));
         sync(serverPlayer, stack, PointPlanSyncPayload.OPEN_ADD_POINT, pendingPoint);
         return InteractionResult.CONSUME;
     }
@@ -81,13 +116,15 @@ public class PointPlanWandItem extends Item {
             return id;
         }
         List<Plan> plans = getPlans(stack);
-        return plans.isEmpty() ? DEFAULT_PLAN_ID : plans.getFirst().id();
+        return plans.isEmpty()
+                ? defaultPlanId(stack)
+                : plans.getFirst().id();
     }
 
     public static void setSelectedPlanId(ItemStack stack, String planId) {
         String clean = cleanPlanId(planId);
         if (clean.isEmpty()) {
-            clean = DEFAULT_PLAN_ID;
+            clean = defaultPlanId(stack);
         }
         List<Plan> plans = getPlans(stack);
         String targetPlanId = clean;
@@ -116,7 +153,9 @@ public class PointPlanWandItem extends Item {
             for (int pointIndex = 0; pointIndex < pointList.size(); pointIndex++) {
                 CompoundTag pointTag = pointList.getCompound(pointIndex);
                 points.add(new PointEntry(
-                    cleanNpcId(pointTag.getString(TAG_NPC_ID)),
+                    cleanEntryName(
+                        stack,
+                        pointTag.getString(TAG_NPC_ID)),
                     BlockPos.of(pointTag.getLong(TAG_POS)).immutable(),
                     cleanDirection(pointTag.getString(TAG_DIRECTION))
                 ));
@@ -124,7 +163,7 @@ public class PointPlanWandItem extends Item {
             plans.add(new Plan(id, List.copyOf(points)));
         }
         if (plans.isEmpty()) {
-            plans.add(new Plan(DEFAULT_PLAN_ID, List.of()));
+            plans.add(new Plan(defaultPlanId(stack), List.of()));
         }
         plans.sort(Comparator.comparing(Plan::id));
         return List.copyOf(plans);
@@ -143,7 +182,7 @@ public class PointPlanWandItem extends Item {
             }
         }
         if (remaining.isEmpty()) {
-            remaining.add(new Plan(DEFAULT_PLAN_ID, List.of()));
+            remaining.add(new Plan(defaultPlanId(stack), List.of()));
         }
         writePlans(stack, remaining);
         setSelectedPlanId(stack, remaining.getFirst().id());
@@ -170,19 +209,26 @@ public class PointPlanWandItem extends Item {
         }
         Plan plan = getPlan(stack, cleanPlanId);
         List<PointEntry> points = new ArrayList<>(plan == null ? List.of() : plan.points());
-        points.add(new PointEntry(cleanNpcId(point.npcId()), point.pos().immutable(), cleanDirection(point.direction())));
+        points.add(new PointEntry(
+            cleanEntryName(stack, point.npcId()),
+            point.pos().immutable(),
+            cleanDirection(point.direction())));
         replacePlan(stack, cleanPlanId, points);
         setSelectedPlanId(stack, cleanPlanId);
     }
 
     public static void sync(ServerPlayer player, ItemStack stack, String openMode, PendingPoint pendingPoint) {
-        List<String> npcIds = com.stardew.craft.npc.data.NpcDataRegistry.capabilities().keySet().stream()
-            .sorted()
-            .toList();
+        List<String> npcIds = isMapInteractionEditor(stack)
+                ? List.of()
+                : com.stardew.craft.npc.data.NpcDataRegistry
+                        .capabilities().keySet().stream()
+                        .sorted()
+                        .toList();
         PacketDistributor.sendToPlayer(player, new PointPlanSyncPayload(
             getSelectedPlanId(stack),
             getPlans(stack),
             npcIds,
+            isMapInteractionEditor(stack),
             openMode == null ? PointPlanSyncPayload.OPEN_NONE : openMode,
             pendingPoint
         ));
@@ -195,7 +241,7 @@ public class PointPlanWandItem extends Item {
     private static void replacePlan(ItemStack stack, String planId, List<PointEntry> points) {
         String clean = cleanPlanId(planId);
         if (clean.isEmpty()) {
-            clean = DEFAULT_PLAN_ID;
+            clean = defaultPlanId(stack);
         }
         List<Plan> plans = new ArrayList<>();
         boolean replaced = false;
@@ -231,7 +277,9 @@ public class PointPlanWandItem extends Item {
             ListTag pointList = new ListTag();
             for (PointEntry point : plan.points()) {
                 CompoundTag pointTag = new CompoundTag();
-                pointTag.putString(TAG_NPC_ID, cleanNpcId(point.npcId()));
+                pointTag.putString(
+                    TAG_NPC_ID,
+                    cleanEntryName(stack, point.npcId()));
                 pointTag.putLong(TAG_POS, point.pos().asLong());
                 pointTag.putString(TAG_DIRECTION, cleanDirection(point.direction()));
                 pointList.add(pointTag);
@@ -264,6 +312,32 @@ public class PointPlanWandItem extends Item {
         return clean.length() > 64 ? clean.substring(0, 64) : clean;
     }
 
+    private static String cleanPointName(String raw) {
+        String clean = raw == null ? "" : raw.trim();
+        clean = clean.replaceAll("\\p{Cntrl}", "");
+        return clean.length() > 64 ? clean.substring(0, 64) : clean;
+    }
+
+    private static String cleanEntryName(
+            ItemStack stack,
+            String raw
+    ) {
+        return normalizeEntryName(
+                isMapInteractionEditor(stack)
+                        ? EditorKind.MAP_INTERACTION
+                        : EditorKind.NPC,
+                raw);
+    }
+
+    static String normalizeEntryName(
+            EditorKind editorKind,
+            String raw
+    ) {
+        return editorKind == EditorKind.MAP_INTERACTION
+                ? cleanPointName(raw)
+                : cleanNpcId(raw);
+    }
+
     private static String cleanDirection(String raw) {
         String clean = raw == null ? "" : raw.trim().toLowerCase(Locale.ROOT);
         return switch (clean) {
@@ -274,7 +348,45 @@ public class PointPlanWandItem extends Item {
 
     @Override
     public Component getName(@Nonnull ItemStack stack) {
-        return Component.translatable("item.stardewcraft.point_plan_wand");
+        return Component.translatable(editorKind == EditorKind.MAP_INTERACTION
+                ? "item.stardewcraft.map_interaction_point_wand"
+                : "item.stardewcraft.point_plan_wand");
+    }
+
+    public static boolean isMapInteractionEditor(ItemStack stack) {
+        return stack != null
+                && stack.getItem() instanceof PointPlanWandItem wand
+                && wand.editorKind == EditorKind.MAP_INTERACTION;
+    }
+
+    public static InteractionResult captureMapInteractionPoint(
+            ServerPlayer player,
+            ItemStack stack,
+            BlockPos clickedPos
+    ) {
+        if (player == null
+                || clickedPos == null
+                || !(stack.getItem()
+                        instanceof PointPlanWandItem wand)
+                || wand.editorKind != EditorKind.MAP_INTERACTION) {
+            return InteractionResult.PASS;
+        }
+        return wand.handleUse(
+                player.serverLevel(),
+                player,
+                stack,
+                clickedPos);
+    }
+
+    private static String defaultPlanId(ItemStack stack) {
+        return isMapInteractionEditor(stack)
+                ? MAP_INTERACTION_DEFAULT_PLAN_ID
+                : NPC_DEFAULT_PLAN_ID;
+    }
+
+    public enum EditorKind {
+        NPC,
+        MAP_INTERACTION
     }
 
     public record Plan(String id, List<PointEntry> points) {
@@ -286,7 +398,7 @@ public class PointPlanWandItem extends Item {
 
     public record PointEntry(String npcId, BlockPos pos, String direction) {
         public PointEntry {
-            npcId = cleanNpcId(npcId);
+            npcId = cleanPointName(npcId);
             pos = pos == null ? BlockPos.ZERO : pos.immutable();
             direction = cleanDirection(direction);
         }

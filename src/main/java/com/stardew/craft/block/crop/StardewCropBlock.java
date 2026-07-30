@@ -358,6 +358,19 @@ public abstract class StardewCropBlock extends Block {
     public boolean isReadyForFarmComputer(ServerLevel level, BlockPos pos, BlockState state) {
         return isMature(level, pos, state);
     }
+
+    /** Read-only probe shared by contextual UI and the actual right-click rule. */
+    public boolean isReadyForRightClickHarvest(
+            ServerLevel level,
+            BlockPos pos,
+            BlockState state
+    ) {
+        BlockPos rootPos = resolveMultiBlockRootPos(level, pos, state);
+        BlockState rootState = level.getBlockState(rootPos);
+        return rootState.getBlock() == this
+                && getHarvestMethod() == HarvestMethod.GRAB
+                && isMature(level, rootPos, rootState);
+    }
     
     @Override
     protected void createBlockStateDefinition(@SuppressWarnings("null") StateDefinition.Builder<Block, BlockState> builder) {

@@ -5,6 +5,7 @@ import com.stardew.craft.combat.network.SteelFalchionLineCreatePayload;
 import com.stardew.craft.combat.network.SteelFalchionLinePointPayload;
 import com.stardew.craft.combat.network.SteelFalchionLinePulsePayload;
 import com.stardew.craft.combat.network.SteelFalchionTracePayload;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -12,6 +13,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import com.stardew.craft.effect.ModMobEffects;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -28,16 +30,22 @@ import java.util.UUID;
 @SuppressWarnings("null")
 public final class SteelFalchionLineTracker {
 
-    private static final int LINE_DURATION_TICKS = 100;
-    private static final int DOT_DURATION_TICKS = 100;
-    private static final int DOT_INTERVAL_TICKS = 20;
-    private static final int SPEED_DURATION_TICKS = 100;
-    private static final float LINE_LENGTH = 7.0f;
-    private static final float LINE_WIDTH = 0.55f;
-    private static final float TRIGGER_RADIUS = 0.70f;
-    private static final float BURST_RADIUS = 1.0f;
-    private static final float TRACE_POINT_STEP = 0.35f;
-    private static final float TRACE_MIN_DISTANCE = 0.18f;
+    public static final int LINE_DURATION_TICKS = 100;
+    public static final int DOT_DURATION_TICKS = 100;
+    public static final int DOT_INTERVAL_TICKS = 20;
+    public static final int SPEED_DURATION_TICKS = 100;
+    public static final int TRACE_SPEED_AMPLIFIER = 2;
+    public static final int LINE_SPEED_AMPLIFIER = 1;
+    public static final int HIT_CONTEXT_LIFETIME_TICKS = 5;
+    public static final float LINE_LENGTH = 7.0f;
+    public static final float LINE_WIDTH = 0.55f;
+    public static final float TRIGGER_RADIUS = 0.70f;
+    public static final float BURST_RADIUS = 1.0f;
+    public static final float TRACE_POINT_STEP = 0.35f;
+    public static final float TRACE_MIN_DISTANCE = 0.18f;
+    public static final float TRACE_BURST_DAMAGE_MULTIPLIER = 1.0f;
+    public static final String LINE_DOT_SKILL_ID = "steel_falchion_line_dot";
+    public static final String TRACE_SKILL_ID = "steel_falchion_trace";
 
     private static int nextLineId = 1;
 
@@ -51,11 +59,13 @@ public final class SteelFalchionLineTracker {
         private final long endTick;
         private final boolean burstOnEnd;
         private final long burstTick;
+        private final WeaponDamageSnapshot weaponSnapshot;
         private boolean burstDone = false;
         private boolean speedTriggered = false;
 
         private LineState(int id, float width, float dotMultiplier, SkillContext.SkillTier tier,
-                          long endTick, boolean burstOnEnd, long burstTick) {
+                          long endTick, boolean burstOnEnd, long burstTick,
+                          WeaponDamageSnapshot weaponSnapshot) {
             this.id = id;
             this.width = width;
             this.dotMultiplier = dotMultiplier;
@@ -63,6 +73,7 @@ public final class SteelFalchionLineTracker {
             this.endTick = endTick;
             this.burstOnEnd = burstOnEnd;
             this.burstTick = burstTick;
+            this.weaponSnapshot = weaponSnapshot;
         }
     }
 
@@ -83,24 +94,33 @@ public final class SteelFalchionLineTracker {
         private final float damageMultiplier;
         private final SkillContext.SkillTier tier;
         private final String skillId;
+        private final WeaponDamageSnapshot weaponSnapshot;
         private long endTick;
         private long nextDamageTick;
 
         private DotState(UUID targetId, float damageMultiplier, SkillContext.SkillTier tier,
-                         String skillId, long endTick, long nextDamageTick) {
+                         String skillId, long endTick, long nextDamageTick,
+                         WeaponDamageSnapshot weaponSnapshot) {
             this.targetId = targetId;
             this.damageMultiplier = damageMultiplier;
             this.tier = tier;
             this.skillId = skillId;
+            this.weaponSnapshot = weaponSnapshot;
             this.endTick = endTick;
             this.nextDamageTick = nextDamageTick;
         }
     }
 
     private static final class PlayerState {
+        private final ResourceKey<Level> dimension;
         private final List<LineState> lines = new ArrayList<>();
         private final Map<UUID, DotState> dots = new HashMap<>();
         private TraceState trace;
+        private long lastProcessedTick = Long.MIN_VALUE;
+
+        private PlayerState(ResourceKey<Level> dimension) {
+            this.dimension = dimension;
+        }
     }
 
     private static final Map<UUID, PlayerState> ACTIVE = new HashMap<>();
@@ -109,31 +129,131 @@ public final class SteelFalchionLineTracker {
 
     public static void startMinorLine(ServerPlayer player, long nowTick, Vec3 center, float yawDegrees,
                                       float dotMultiplier) {
+        startMinorLineInternal(
+            player,
+            nowTick,
+            center,
+            yawDegrees,
+            dotMultiplier,
+            null
+        );
+    }
+
+    public static void startMinorLine(
+        ServerPlayer player,
+        long nowTick,
+        Vec3 center,
+        float yawDegrees,
+        float dotMultiplier,
+        WeaponDamageSnapshot weaponSnapshot
+    ) {
+        startMinorLineInternal(
+            player,
+            nowTick,
+            center,
+            yawDegrees,
+            dotMultiplier,
+            java.util.Objects.requireNonNull(
+                weaponSnapshot,
+                "weaponSnapshot"
+            )
+        );
+    }
+
+    private static void startMinorLineInternal(
+        ServerPlayer player,
+        long nowTick,
+        Vec3 center,
+        float yawDegrees,
+        float dotMultiplier,
+        WeaponDamageSnapshot weaponSnapshot
+    ) {
         if (player == null) {
             return;
         }
-        Vec3 dir = yawToDir(yawDegrees);
-        Vec3 start = center.add(dir.scale(-LINE_LENGTH * 0.5));
-        Vec3 end = center.add(dir.scale(LINE_LENGTH * 0.5));
-        createLine(player, nowTick, start, end, dotMultiplier, SkillContext.SkillTier.MINOR, false, 0L);
+        List<Vec3> points = createMinorLinePoints(center, yawDegrees);
+        Vec3 start = points.get(0);
+        Vec3 end = points.get(1);
+        createLine(
+            player,
+            nowTick,
+            start,
+            end,
+            dotMultiplier,
+            SkillContext.SkillTier.MINOR,
+            false,
+            0L,
+            weaponSnapshot
+        );
 
         ServerLevel level = player.serverLevel();
         level.playSound(null, player.blockPosition(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.7f, 1.35f);
     }
 
     public static void startTrace(ServerPlayer player, long nowTick, int durationTicks, float dotMultiplier) {
+        startTraceInternal(
+            player,
+            nowTick,
+            durationTicks,
+            dotMultiplier,
+            null
+        );
+    }
+
+    public static void startTrace(
+        ServerPlayer player,
+        long nowTick,
+        int durationTicks,
+        float dotMultiplier,
+        WeaponDamageSnapshot weaponSnapshot
+    ) {
+        startTraceInternal(
+            player,
+            nowTick,
+            durationTicks,
+            dotMultiplier,
+            java.util.Objects.requireNonNull(
+                weaponSnapshot,
+                "weaponSnapshot"
+            )
+        );
+    }
+
+    private static void startTraceInternal(
+        ServerPlayer player,
+        long nowTick,
+        int durationTicks,
+        float dotMultiplier,
+        WeaponDamageSnapshot weaponSnapshot
+    ) {
         if (player == null) {
             return;
         }
-        PlayerState state = ACTIVE.computeIfAbsent(player.getUUID(), key -> new PlayerState());
+        PlayerState state = stateFor(player);
         Vec3 start = new Vec3(player.getX(), player.getY() + 0.02, player.getZ());
-        LineState line = createLine(player, nowTick, start, null, dotMultiplier, SkillContext.SkillTier.MAJOR,
-            true, nowTick + durationTicks);
+        LineState line = createLine(
+            player,
+            nowTick,
+            start,
+            null,
+            dotMultiplier,
+            SkillContext.SkillTier.MAJOR,
+            true,
+            nowTick + durationTicks,
+            weaponSnapshot
+        );
         state.trace = new TraceState(nowTick + durationTicks, line.id, start);
 
         PacketDistributor.sendToPlayer(player, new SteelFalchionTracePayload(true, durationTicks));
 
-        player.addEffect(new MobEffectInstance(ModMobEffects.SPEED, durationTicks, 2, false, true, true));
+        player.addEffect(new MobEffectInstance(
+            ModMobEffects.SPEED,
+            durationTicks,
+            TRACE_SPEED_AMPLIFIER,
+            false,
+            true,
+            true
+        ));
         player.level().playSound(null, player.blockPosition(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.8f, 1.1f);
     }
 
@@ -142,9 +262,20 @@ public final class SteelFalchionLineTracker {
         if (state == null) {
             return;
         }
+        if (state.lastProcessedTick == nowTick) {
+            return;
+        }
+        state.lastProcessedTick = nowTick;
+        if (!isSameDimension(
+            state.dimension,
+            player.level().dimension()
+        )) {
+            cancelAllForDimensionChange(player, state);
+            return;
+        }
 
         if (state.trace != null) {
-            if (nowTick >= state.trace.endTick) {
+            if (isExpired(nowTick, state.trace.endTick)) {
                 state.trace = null;
             } else {
                 updateTrace(player, state, nowTick);
@@ -159,7 +290,7 @@ public final class SteelFalchionLineTracker {
                     burstLine(player, line, nowTick);
                 }
 
-                if (nowTick >= line.endTick) {
+                if (isExpired(nowTick, line.endTick)) {
                     it.remove();
                     continue;
                 }
@@ -177,11 +308,13 @@ public final class SteelFalchionLineTracker {
 
     private static LineState createLine(ServerPlayer player, long nowTick, Vec3 start, Vec3 end,
                                         float dotMultiplier, SkillContext.SkillTier tier,
-                                        boolean burstOnEnd, long burstTick) {
-        PlayerState state = ACTIVE.computeIfAbsent(player.getUUID(), key -> new PlayerState());
+                                        boolean burstOnEnd, long burstTick,
+                                        WeaponDamageSnapshot weaponSnapshot) {
+        PlayerState state = stateFor(player);
         int lineId = nextLineId++;
         LineState line = new LineState(lineId, LINE_WIDTH, dotMultiplier, tier,
-            nowTick + LINE_DURATION_TICKS, burstOnEnd, burstTick);
+            nowTick + LINE_DURATION_TICKS, burstOnEnd, burstTick,
+            weaponSnapshot);
         line.points.add(start);
         state.lines.add(line);
 
@@ -215,11 +348,7 @@ public final class SteelFalchionLineTracker {
             return;
         }
 
-        int steps = Math.max(1, (int) Math.ceil(dist / TRACE_POINT_STEP));
-        Vec3 delta = current.subtract(trace.lastPos);
-        for (int i = 1; i <= steps; i++) {
-            double t = i / (double) steps;
-            Vec3 point = trace.lastPos.add(delta.scale(t));
+        for (Vec3 point : sampleTracePoints(trace.lastPos, current)) {
             line.points.add(point);
             PacketDistributor.sendToPlayersInDimension(player.serverLevel(),
                 new SteelFalchionLinePointPayload(line.id, (float) point.x, (float) point.y, (float) point.z));
@@ -254,20 +383,35 @@ public final class SteelFalchionLineTracker {
             }
 
             line.triggeredTargets.add(target.getUUID());
-            applyDot(state, target, nowTick, line.dotMultiplier, line.tier);
+            applyDot(
+                state,
+                target,
+                nowTick,
+                line.dotMultiplier,
+                line.tier,
+                line.weaponSnapshot
+            );
             PacketDistributor.sendToPlayersInDimension(serverLevel, new SteelFalchionLinePulsePayload(line.id, 8));
             serverLevel.playSound(null, target.blockPosition(), SoundEvents.TRIDENT_HIT, SoundSource.PLAYERS, 0.5f, 1.2f);
         }
 
         if (!line.speedTriggered && distanceToPolylineSqr2D(player.position(), line.points) <= (line.width + 0.05f) * (line.width + 0.05f)) {
             line.speedTriggered = true;
-            player.addEffect(new MobEffectInstance(ModMobEffects.SPEED, SPEED_DURATION_TICKS, 1, false, true, true));
+            player.addEffect(new MobEffectInstance(
+                ModMobEffects.SPEED,
+                SPEED_DURATION_TICKS,
+                LINE_SPEED_AMPLIFIER,
+                false,
+                true,
+                true
+            ));
             serverLevel.playSound(null, player.blockPosition(), SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 0.5f, 1.5f);
         }
     }
 
     private static void applyDot(PlayerState state, LivingEntity target, long nowTick,
-                                 float damageMultiplier, SkillContext.SkillTier tier) {
+                                 float damageMultiplier, SkillContext.SkillTier tier,
+                                 WeaponDamageSnapshot weaponSnapshot) {
         DotState existing = state.dots.get(target.getUUID());
         long endTick = nowTick + DOT_DURATION_TICKS;
         if (existing != null) {
@@ -277,12 +421,15 @@ public final class SteelFalchionLineTracker {
                 : tier;
             long finalEnd = Math.max(existing.endTick, endTick);
             long nextTick = Math.min(existing.nextDamageTick, nowTick);
+            WeaponDamageSnapshot finalSnapshot = weaponSnapshot == null
+                ? existing.weaponSnapshot
+                : weaponSnapshot;
             state.dots.put(target.getUUID(), new DotState(target.getUUID(), finalMultiplier, finalTier,
-                "steel_falchion_line_dot", finalEnd, nextTick));
+                LINE_DOT_SKILL_ID, finalEnd, nextTick, finalSnapshot));
             return;
         }
         DotState dot = new DotState(target.getUUID(), damageMultiplier, tier,
-            "steel_falchion_line_dot", endTick, nowTick);
+            LINE_DOT_SKILL_ID, endTick, nowTick, weaponSnapshot);
         state.dots.put(target.getUUID(), dot);
     }
 
@@ -294,7 +441,7 @@ public final class SteelFalchionLineTracker {
         Iterator<DotState> it = state.dots.values().iterator();
         while (it.hasNext()) {
             DotState dot = it.next();
-            if (nowTick >= dot.endTick) {
+            if (isExpired(nowTick, dot.endTick)) {
                 it.remove();
                 continue;
             }
@@ -308,22 +455,30 @@ public final class SteelFalchionLineTracker {
                 continue;
             }
 
-            applyDotDamage(player, target, nowTick, dot.damageMultiplier, dot.tier, dot.skillId);
+            applyDotDamage(
+                player,
+                target,
+                nowTick,
+                dot.damageMultiplier,
+                dot.tier,
+                dot.skillId,
+                dot.weaponSnapshot
+            );
         }
     }
 
     private static void applyDotDamage(ServerPlayer player, LivingEntity target, long nowTick,
-                                       float damageMultiplier, SkillContext.SkillTier tier, String skillId) {
-        SkillContext context = SkillContext.builder()
-            .skillId(skillId)
-            .tier(tier)
-            .damageMultiplier(damageMultiplier)
-            .build();
-        WeaponSkillContextStore.setPending(player, context, nowTick + 5);
-
+                                       float damageMultiplier, SkillContext.SkillTier tier, String skillId,
+                                       WeaponDamageSnapshot weaponSnapshot) {
         target.invulnerableTime = 0;
         target.hurtTime = 0;
-        target.hurt(player.damageSources().playerAttack(player), 1.0F);
+        applyDamage(
+            player,
+            target,
+            createDamageContext(skillId, tier, damageMultiplier),
+            weaponSnapshot,
+            nowTick + HIT_CONTEXT_LIFETIME_TICKS
+        );
     }
 
     private static void burstLine(ServerPlayer player, LineState line, long nowTick) {
@@ -352,19 +507,43 @@ public final class SteelFalchionLineTracker {
             }
             damaged.add(target.getUUID());
 
-            SkillContext context = SkillContext.builder()
-                .skillId("steel_falchion_trace")
-                .tier(SkillContext.SkillTier.MAJOR)
-                .damageMultiplier(1.0f)
-                .build();
-            WeaponSkillContextStore.setPending(player, context, nowTick + 5);
-
             target.invulnerableTime = 0;
             target.hurtTime = 0;
-            target.hurt(player.damageSources().playerAttack(player), 1.0F);
+            applyDamage(
+                player,
+                target,
+                createTraceBurstContext(),
+                line.weaponSnapshot,
+                nowTick + HIT_CONTEXT_LIFETIME_TICKS
+            );
         }
 
         serverLevel.playSound(null, player.blockPosition(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 0.75f, 1.0f);
+    }
+
+    private static void applyDamage(
+        ServerPlayer player,
+        LivingEntity target,
+        SkillContext context,
+        WeaponDamageSnapshot weaponSnapshot,
+        long expireTick
+    ) {
+        if (weaponSnapshot == null) {
+            WeaponSkillDamage.apply(
+                player,
+                target,
+                context,
+                expireTick
+            );
+            return;
+        }
+        WeaponSkillDamage.apply(
+            player,
+            target,
+            context,
+            weaponSnapshot,
+            expireTick
+        );
     }
 
     private static LineState findLine(PlayerState state, int lineId) {
@@ -379,6 +558,17 @@ public final class SteelFalchionLineTracker {
     private static Vec3 yawToDir(float yawDegrees) {
         double rad = Math.toRadians(yawDegrees);
         return new Vec3(-Math.sin(rad), 0.0, Math.cos(rad));
+    }
+
+    static List<Vec3> createMinorLinePoints(
+        Vec3 center,
+        float yawDegrees
+    ) {
+        Vec3 direction = yawToDir(yawDegrees);
+        return List.of(
+            center.add(direction.scale(-LINE_LENGTH * 0.5)),
+            center.add(direction.scale(LINE_LENGTH * 0.5))
+        );
     }
 
     private static AABB computeBounds(List<Vec3> points) {
@@ -399,7 +589,54 @@ public final class SteelFalchionLineTracker {
         return new AABB(minX, minY, minZ, maxX, maxY, maxZ);
     }
 
-    private static double distanceToPolylineSqr2D(Vec3 p, List<Vec3> points) {
+    static SkillContext createDamageContext(
+        String skillId,
+        SkillContext.SkillTier tier,
+        float damageMultiplier
+    ) {
+        return SkillContext.builder()
+            .skillId(skillId)
+            .tier(tier)
+            .damageMultiplier(damageMultiplier)
+            .build();
+    }
+
+    static SkillContext createTraceBurstContext() {
+        return createDamageContext(
+            TRACE_SKILL_ID,
+            SkillContext.SkillTier.MAJOR,
+            TRACE_BURST_DAMAGE_MULTIPLIER
+        );
+    }
+
+    static boolean isWithinTraceWindow(long nowTick, long endTick) {
+        return !isExpired(nowTick, endTick);
+    }
+
+    static boolean isExpired(long nowTick, long endTick) {
+        return nowTick >= endTick;
+    }
+
+    static boolean isSameDimension(
+        ResourceKey<Level> expected,
+        ResourceKey<Level> actual
+    ) {
+        return expected.equals(actual);
+    }
+
+    static List<Vec3> sampleTracePoints(Vec3 start, Vec3 end) {
+        double distance = end.subtract(start).horizontalDistance();
+        int steps = Math.max(1, (int) Math.ceil(distance / TRACE_POINT_STEP));
+        Vec3 delta = end.subtract(start);
+        List<Vec3> points = new ArrayList<>(steps);
+        for (int i = 1; i <= steps; i++) {
+            double t = i / (double) steps;
+            points.add(start.add(delta.scale(t)));
+        }
+        return points;
+    }
+
+    static double distanceToPolylineSqr2D(Vec3 p, List<Vec3> points) {
         double min = Double.MAX_VALUE;
         for (int i = 0; i < points.size() - 1; i++) {
             Vec3 a = points.get(i);
@@ -431,5 +668,108 @@ public final class SteelFalchionLineTracker {
     /** Clean up state when a player logs out to prevent memory leaks. */
     public static void removePlayer(UUID playerId) {
         ACTIVE.remove(playerId);
+    }
+
+    public static boolean hasTrace(UUID playerId) {
+        PlayerState state = ACTIVE.get(playerId);
+        return state != null && state.trace != null;
+    }
+
+    public static boolean hasMinorLine(UUID playerId) {
+        PlayerState state = ACTIVE.get(playerId);
+        return state != null && state.lines.stream().anyMatch(
+            line -> line.tier == SkillContext.SkillTier.MINOR
+        );
+    }
+
+    public static boolean isTraceBoundToCurrentDimension(
+        ServerPlayer player
+    ) {
+        PlayerState state = ACTIVE.get(player.getUUID());
+        return state != null
+            && state.trace != null
+            && isSameDimension(
+                state.dimension,
+                player.level().dimension()
+            );
+    }
+
+    public static boolean isMinorLineBoundToCurrentDimension(
+        ServerPlayer player
+    ) {
+        PlayerState state = ACTIVE.get(player.getUUID());
+        return state != null
+            && state.lines.stream().anyMatch(
+                line -> line.tier == SkillContext.SkillTier.MINOR
+            )
+            && isSameDimension(
+                state.dimension,
+                player.level().dimension()
+            );
+    }
+
+    public static void cancelTrace(ServerPlayer player, boolean notifyClient) {
+        PlayerState state = ACTIVE.get(player.getUUID());
+        if (state == null || state.trace == null) {
+            return;
+        }
+        int traceLineId = state.trace.lineId;
+        state.trace = null;
+        state.lines.removeIf(line -> line.id == traceLineId);
+        if (notifyClient) {
+            PacketDistributor.sendToPlayer(
+                player,
+                new SteelFalchionTracePayload(false, 0)
+            );
+        }
+        removeIfEmpty(player.getUUID(), state);
+    }
+
+    public static void cancelMinorLines(ServerPlayer player) {
+        PlayerState state = ACTIVE.get(player.getUUID());
+        if (state == null) {
+            return;
+        }
+        state.lines.removeIf(
+            line -> line.tier == SkillContext.SkillTier.MINOR
+        );
+        removeIfEmpty(player.getUUID(), state);
+    }
+
+    private static PlayerState stateFor(ServerPlayer player) {
+        PlayerState state = ACTIVE.get(player.getUUID());
+        if (state != null && !isSameDimension(
+            state.dimension,
+            player.level().dimension()
+        )) {
+            cancelAllForDimensionChange(player, state);
+            state = null;
+        }
+        if (state == null) {
+            state = new PlayerState(player.level().dimension());
+            ACTIVE.put(player.getUUID(), state);
+        }
+        return state;
+    }
+
+    private static void cancelAllForDimensionChange(
+        ServerPlayer player,
+        PlayerState state
+    ) {
+        if (state.trace != null) {
+            PacketDistributor.sendToPlayer(
+                player,
+                new SteelFalchionTracePayload(false, 0)
+            );
+        }
+        ACTIVE.remove(player.getUUID());
+    }
+
+    private static void removeIfEmpty(UUID playerId, PlayerState state) {
+        if (state.lines.isEmpty()
+            && state.dots.isEmpty()
+            && state.trace == null) {
+            ACTIVE.remove(playerId);
+        }
     }
 }

@@ -225,10 +225,7 @@ public final class FlowerDanceService {
     }
 
     public static boolean tryOpenPlayerDanceAsk(ServerPlayer sender, ServerPlayer target) {
-        if (sender == null || target == null || sender.getUUID().equals(target.getUUID())) {
-            return false;
-        }
-        if (!isParticipant(sender) || !isParticipant(target)) {
+        if (!canOpenPlayerDanceAsk(sender, target)) {
             return false;
         }
         if (hasDancePartner(sender)) {
@@ -243,6 +240,14 @@ public final class FlowerDanceService {
         PacketDistributor.sendToPlayer(sender, new OpenFlowerDancePlayerAskPayload(
                 target.getUUID(), com.stardew.craft.player.PlayerDisplayName.get(target)));
         return true;
+    }
+
+    public static boolean canOpenPlayerDanceAsk(ServerPlayer sender, ServerPlayer target) {
+        return sender != null
+            && target != null
+            && !sender.getUUID().equals(target.getUUID())
+            && isParticipant(sender)
+            && isParticipant(target);
     }
 
     public static void handlePlayerDanceAskResponse(ServerPlayer sender, UUID targetPlayerId, boolean confirmed) {

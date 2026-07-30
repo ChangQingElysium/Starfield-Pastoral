@@ -312,6 +312,14 @@
       }
     ]
   },
+  "bat_screech": {
+    "sounds": [
+      {
+        "name": "stardewcraft:bat_screech",
+        "stream": false
+      }
+    ]
+  },
   "big_select": {
     "sounds": [
       {
@@ -1142,6 +1150,14 @@
       }
     ]
   },
+  "rooster": {
+    "sounds": [
+      {
+        "name": "stardewcraft:rooster",
+        "stream": false
+      }
+    ]
+  },
   "thunder": {
     "sounds": [
       {
@@ -1444,6 +1460,11 @@
         "name": "stardewcraft:music/clubloop",
         "stream": true
       }
+    ]
+  },
+  "boop": {
+    "sounds": [
+      "stardewcraft:boop"
     ]
   },
   "music_ocean_ambience": {

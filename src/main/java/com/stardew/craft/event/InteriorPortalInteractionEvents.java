@@ -146,6 +146,19 @@ public class InteriorPortalInteractionEvents {
             return;
         }
 
+        if (com.stardew.craft.qi.MrQiQuestInteractionService.SAND_DRAGON_TARGET_ID.equals(targetId)) {
+            com.stardew.craft.qi.MrQiQuestInteractionService.interactSandDragon(player);
+            return;
+        }
+
+        if (com.stardew.craft.casino.CasinoAccessService.ENTRY_TARGET_ID.equals(targetId)
+                || com.stardew.craft.casino.CasinoAccessService.EXIT_TARGET_ID.equals(targetId)
+                || com.stardew.craft.casino.CasinoAccessService.QI_COIN_MACHINE_TARGET_ID.equals(targetId)
+                || com.stardew.craft.casino.CasinoAccessService.QI_COIN_SHOP_TARGET_ID.equals(targetId)) {
+            com.stardew.craft.casino.CasinoAccessService.handlePortal(player, targetId);
+            return;
+        }
+
         // Fair participants stay on the festival map. Consume every ordinary building/mine/bus
         // portal before it can start a fade transition, while preserving the dedicated Fair targets.
         if (com.stardew.craft.festival.FairFestivalService.isParticipant(player)

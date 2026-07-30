@@ -1,11 +1,13 @@
 package com.stardew.craft.combat.skill;
 
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.HitResult;
@@ -28,6 +30,24 @@ import java.util.UUID;
  */
 public final class SingularityEvolveTracker {
 
+    public enum Status {
+        ACTIVE,
+        COMPLETED,
+        INVALIDATED
+    }
+
+    public static final int ACTIVE_DURATION_TICKS = 20;
+    public static final double EFFECT_RADIUS = 4.0D;
+    public static final float EXPLOSION_DAMAGE_MULTIPLIER = 1.6F;
+    public static final float SLASH_DAMAGE_MULTIPLIER = 1.2F;
+    public static final double DASH_DISTANCE = 5.0D;
+    public static final int DASH_DURATION_TICKS = 5;
+    public static final double PULL_STRENGTH = 0.15D;
+    public static final double SLASH_PATH_HALF_WIDTH = 0.9D;
+    public static final float RIFT_LENGTH = 3.0F;
+    public static final int RIFT_DURATION_TICKS = 40;
+    public static final int HIT_CONTEXT_LIFETIME_TICKS = 5;
+
     private static final class State {
         private final long endTick;
         private final double radius;
@@ -35,14 +55,28 @@ public final class SingularityEvolveTracker {
         private final float slashMultiplier;
         private final String skillId;
         private final boolean evolved;
+        private final ResourceKey<Level> dimension;
+        private final WeaponDamageSnapshot weaponSnapshot;
+        private long lastProcessedTick = Long.MIN_VALUE;
 
-        private State(long endTick, double radius, float explodeMultiplier, float slashMultiplier, String skillId, boolean evolved) {
+        private State(
+                long endTick,
+                double radius,
+                float explodeMultiplier,
+                float slashMultiplier,
+                String skillId,
+                boolean evolved,
+                ResourceKey<Level> dimension,
+                WeaponDamageSnapshot weaponSnapshot
+        ) {
             this.endTick = endTick;
             this.radius = radius;
             this.explodeMultiplier = explodeMultiplier;
             this.slashMultiplier = slashMultiplier;
             this.skillId = skillId;
             this.evolved = evolved;
+            this.dimension = dimension;
+            this.weaponSnapshot = weaponSnapshot;
         }
     }
 
@@ -53,10 +87,74 @@ public final class SingularityEvolveTracker {
     @SuppressWarnings("null")
     public static void start(ServerPlayer player, long nowTick, int durationTicks, double radius,
                              float explodeMultiplier, float slashMultiplier, String skillId, boolean evolved) {
+        startInternal(
+                player,
+                nowTick,
+                durationTicks,
+                radius,
+                explodeMultiplier,
+                slashMultiplier,
+                skillId,
+                evolved,
+                null
+        );
+    }
+
+    @SuppressWarnings("null")
+    public static void start(
+            ServerPlayer player,
+            long nowTick,
+            int durationTicks,
+            double radius,
+            float explodeMultiplier,
+            float slashMultiplier,
+            String skillId,
+            boolean evolved,
+            WeaponDamageSnapshot weaponSnapshot
+    ) {
+        startInternal(
+                player,
+                nowTick,
+                durationTicks,
+                radius,
+                explodeMultiplier,
+                slashMultiplier,
+                skillId,
+                evolved,
+                java.util.Objects.requireNonNull(
+                        weaponSnapshot,
+                        "weaponSnapshot"
+                )
+        );
+    }
+
+    private static void startInternal(
+            ServerPlayer player,
+            long nowTick,
+            int durationTicks,
+            double radius,
+            float explodeMultiplier,
+            float slashMultiplier,
+            String skillId,
+            boolean evolved,
+            WeaponDamageSnapshot weaponSnapshot
+    ) {
         if (player == null) {
             return;
         }
-        ACTIVE.put(player.getUUID(), new State(nowTick + Math.max(1, durationTicks), radius, explodeMultiplier, slashMultiplier, skillId, evolved));
+        ACTIVE.put(
+                player.getUUID(),
+                new State(
+                        nowTick + Math.max(1, durationTicks),
+                        radius,
+                        explodeMultiplier,
+                        slashMultiplier,
+                        skillId,
+                        evolved,
+                        player.level().dimension(),
+                        weaponSnapshot
+                )
+        );
 
         Vec3 pos = player.position();
         ServerLevel level = player.serverLevel();
@@ -69,18 +167,39 @@ public final class SingularityEvolveTracker {
             new SingularityCorePayload((float) pos.x, (float) pos.y + 0.05f, (float) pos.z, 1.15f, durationTicks, color));
     }
 
-    public static void tick(ServerPlayer player, long nowTick) {
+    public static Status tick(ServerPlayer player, long nowTick) {
+        if (player == null) {
+            return Status.INVALIDATED;
+        }
         State state = ACTIVE.get(player.getUUID());
         if (state == null) {
-            return;
+            return Status.INVALIDATED;
         }
-        if (nowTick < state.endTick) {
+        if (!isValidContext(
+                player.isAlive() && !player.isRemoved(),
+                isSameDimension(
+                        state.dimension,
+                        player.level().dimension()
+                )
+        )) {
+            ACTIVE.remove(player.getUUID());
+            return Status.INVALIDATED;
+        }
+        if (!shouldProcessTick(nowTick, state.lastProcessedTick)) {
+            return Status.ACTIVE;
+        }
+        state.lastProcessedTick = nowTick;
+        if (isWithinPullWindow(nowTick, state.endTick)) {
             pullTargets(player, state);
-            return;
+            return Status.ACTIVE;
         }
 
-        explodeAndDash(player, nowTick, state);
-        ACTIVE.remove(player.getUUID());
+        try {
+            explodeAndDash(player, nowTick, state);
+        } finally {
+            ACTIVE.remove(player.getUUID());
+        }
+        return Status.COMPLETED;
     }
 
     @SuppressWarnings("null")
@@ -92,10 +211,13 @@ public final class SingularityEvolveTracker {
             center.x + state.radius, center.y + 2.0, center.z + state.radius
         );
 
-        List<LivingEntity> targets = level.getEntitiesOfClass(
-            LivingEntity.class,
-            box,
-            entity -> entity.isPickable() && entity != player
+        List<LivingEntity> targets = List.copyOf(
+                level.getEntitiesOfClass(
+                        LivingEntity.class,
+                        box,
+                        entity -> entity.isPickable()
+                                && entity != player
+                )
         );
 
         for (LivingEntity target : targets) {
@@ -103,7 +225,7 @@ public final class SingularityEvolveTracker {
             if (dir.lengthSqr() < 1.0E-4) {
                 continue;
             }
-            Vec3 pull = dir.normalize().scale(0.15);
+            Vec3 pull = dir.normalize().scale(PULL_STRENGTH);
             target.setDeltaMovement(target.getDeltaMovement().add(pull));
             target.hurtMarked = true;
             if ((level.getGameTime() & 1L) == 0L) {
@@ -131,22 +253,42 @@ public final class SingularityEvolveTracker {
             center.x + state.radius, center.y + 2.0, center.z + state.radius
         );
 
-        List<LivingEntity> targets = level.getEntitiesOfClass(
-            LivingEntity.class,
-            box,
-            entity -> entity.isPickable() && entity != player
+        List<LivingEntity> targets = List.copyOf(
+                level.getEntitiesOfClass(
+                        LivingEntity.class,
+                        box,
+                        entity -> entity.isPickable()
+                                && entity != player
+                )
         );
 
         for (LivingEntity target : targets) {
-            SkillContext context = SkillContext.builder()
-                .skillId(state.skillId)
-                .tier(SkillContext.SkillTier.MINOR)
-                .damageMultiplier(state.explodeMultiplier)
-                .build();
-            WeaponSkillContextStore.setPending(player, context, nowTick + 5);
+            SkillContext context = createDamageContext(
+                    state.skillId,
+                    state.explodeMultiplier
+            );
             target.invulnerableTime = 0;
             target.hurtTime = 0;
-            player.attack(target);
+            if (state.weaponSnapshot == null) {
+                WeaponSkillDamage.apply(
+                        player,
+                        target,
+                        context,
+                        nowTick + HIT_CONTEXT_LIFETIME_TICKS,
+                        WeaponSkillDamage.AttackGatePolicy
+                                .RESPECT_AT_IMPACT
+                );
+            } else {
+                WeaponSkillDamage.apply(
+                        player,
+                        target,
+                        context,
+                        state.weaponSnapshot,
+                        nowTick + HIT_CONTEXT_LIFETIME_TICKS,
+                        WeaponSkillDamage.AttackGatePolicy
+                                .RESPECT_AT_IMPACT
+                );
+            }
         }
 
         level.playSound(null, player.blockPosition(), SoundEvents.END_PORTAL_SPAWN, SoundSource.PLAYERS, 0.8f, 1.1f);
@@ -155,31 +297,81 @@ public final class SingularityEvolveTracker {
             center.x, center.y + 0.8, center.z,
             30, state.radius * 0.4, 0.6, state.radius * 0.4, 0.05);
 
-        dashForward(player, nowTick, 5.0);
+        dashForward(player, nowTick, DASH_DISTANCE);
 
         if (state.evolved) {
             Vec3 look = getHorizontalLook(player).normalize();
             Vec3 pos = player.position();
             float yaw = (float) (Math.atan2(-look.x, look.z) * (180.0 / Math.PI));
             PacketDistributor.sendToPlayersInDimension(level,
-                new RiftPathPayload((float) pos.x, (float) pos.y, (float) pos.z, yaw, 3.0f, 40, VfxColors.INFINITY_GOLD));
-            RiftPathDamageTracker.start(player, pos, yaw, 3.0f, 40, "singularity_rift_path");
+                new RiftPathPayload(
+                        (float) pos.x,
+                        (float) pos.y,
+                        (float) pos.z,
+                        yaw,
+                        RIFT_LENGTH,
+                        RIFT_DURATION_TICKS,
+                        VfxColors.INFINITY_GOLD
+                ));
+            if (state.weaponSnapshot == null) {
+                RiftPathDamageTracker.start(
+                        player,
+                        pos,
+                        yaw,
+                        RIFT_LENGTH,
+                        RIFT_DURATION_TICKS,
+                        "singularity_rift_path"
+                );
+            } else {
+                RiftPathDamageTracker.start(
+                        player,
+                        pos,
+                        yaw,
+                        RIFT_LENGTH,
+                        RIFT_DURATION_TICKS,
+                        "singularity_rift_path",
+                        state.weaponSnapshot
+                );
+            }
         }
 
         Vec3 start = player.position();
         Vec3 look = getHorizontalLook(player).normalize();
-        Vec3 end = start.add(look.scale(5.0));
-        List<LivingEntity> slashTargets = findTargetsOnPath(level, player, start, end, 0.9);
+        Vec3 end = start.add(look.scale(DASH_DISTANCE));
+        List<LivingEntity> slashTargets = findTargetsOnPath(
+                level,
+                player,
+                start,
+                end,
+                SLASH_PATH_HALF_WIDTH
+        );
         for (LivingEntity target : slashTargets) {
-            SkillContext context = SkillContext.builder()
-                .skillId(state.skillId)
-                .tier(SkillContext.SkillTier.MINOR)
-                .damageMultiplier(state.slashMultiplier)
-                .build();
-            WeaponSkillContextStore.setPending(player, context, nowTick + 5);
+            SkillContext context = createDamageContext(
+                    state.skillId,
+                    state.slashMultiplier
+            );
             target.invulnerableTime = 0;
             target.hurtTime = 0;
-            player.attack(target);
+            if (state.weaponSnapshot == null) {
+                WeaponSkillDamage.apply(
+                        player,
+                        target,
+                        context,
+                        nowTick + HIT_CONTEXT_LIFETIME_TICKS,
+                        WeaponSkillDamage.AttackGatePolicy
+                                .RESPECT_AT_IMPACT
+                );
+            } else {
+                WeaponSkillDamage.apply(
+                        player,
+                        target,
+                        context,
+                        state.weaponSnapshot,
+                        nowTick + HIT_CONTEXT_LIFETIME_TICKS,
+                        WeaponSkillDamage.AttackGatePolicy
+                                .RESPECT_AT_IMPACT
+                );
+            }
         }
     }
 
@@ -212,7 +404,12 @@ public final class SingularityEvolveTracker {
             end = hitPos.subtract(look.scale(0.4));
         }
 
-        DashMovementTracker.start(player, nowTick, end, 5);
+        DashMovementTracker.start(
+                player,
+                nowTick,
+                end,
+                DASH_DURATION_TICKS
+        );
     }
 
     @SuppressWarnings("null")
@@ -220,16 +417,62 @@ public final class SingularityEvolveTracker {
         Vec3 min = new Vec3(Math.min(start.x, end.x), Math.min(start.y, end.y), Math.min(start.z, end.z));
         Vec3 max = new Vec3(Math.max(start.x, end.x), Math.max(start.y, end.y), Math.max(start.z, end.z));
         AABB box = new AABB(min, max).inflate(halfWidth, 1.2, halfWidth);
-        List<LivingEntity> targets = level.getEntitiesOfClass(
-            LivingEntity.class,
-            box,
-            entity -> entity.isPickable() && entity != player
-        );
-        return targets;
+        return List.copyOf(level.getEntitiesOfClass(
+                LivingEntity.class,
+                box,
+                entity -> entity.isPickable() && entity != player
+        ));
+    }
+
+    public static boolean hasState(UUID playerId) {
+        return playerId != null && ACTIVE.containsKey(playerId);
+    }
+
+    public static void cancel(ServerPlayer player) {
+        if (player != null) {
+            ACTIVE.remove(player.getUUID());
+        }
     }
 
     /** Clean up state when a player logs out to prevent memory leaks. */
     public static void removePlayer(UUID playerId) {
         ACTIVE.remove(playerId);
     }
+
+    static boolean isWithinPullWindow(long nowTick, long endTick) {
+        return nowTick < endTick;
+    }
+
+    static boolean shouldProcessTick(
+            long nowTick,
+            long lastProcessedTick
+    ) {
+        return nowTick != lastProcessedTick;
+    }
+
+    static boolean isValidContext(
+            boolean casterAvailable,
+            boolean sameDimension
+    ) {
+        return casterAvailable && sameDimension;
+    }
+
+    static boolean isSameDimension(
+            ResourceKey<Level> expected,
+            ResourceKey<Level> actual
+    ) {
+        return expected.equals(actual);
+    }
+
+    static SkillContext createDamageContext(
+            String skillId,
+            float damageMultiplier
+    ) {
+        return SkillContext.builder()
+                .skillId(skillId)
+                .tier(SkillContext.SkillTier.MINOR)
+                .damageMultiplier(damageMultiplier)
+                .build();
+    }
+
 }

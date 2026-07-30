@@ -20,6 +20,7 @@ public final class CommonGuiTextures {
     private static final SdvTexture SCROLL_ARROW_DOWN = SdvTexture.full(common("scroll_arrow_down"), 11, 12);
     private static final SdvTexture SCROLL_BAR_THUMB = SdvTexture.full(common("scroll_bar_thumb"), 6, 10);
     private static final SdvTexture SHOP_COIN = SdvTexture.full(common("shop_coin"), 9, 10);
+    private static final SdvTexture QI_COIN = SdvTexture.full(common("qi_coin"), 9, 10);
     private static final SdvTexture FAIR_STAR_TOKEN = SdvTexture.full(fairTargetGame("star_token"), 8, 8);
     private static final SdvTexture SHOP_PORTRAIT_FRAME = SdvTexture.full(common("shop_portrait_frame"), 74, 74);
     private static final SdvTexture MONEY_BOX = SdvTexture.full(common("money_box"), 65, 17);
@@ -39,7 +40,6 @@ public final class CommonGuiTextures {
     private static final ResourceLocation TEXTURE_BOX_18 = common("texture_box_18");
     private static final ResourceLocation ENTRY_BOX_15 = common("entry_box_15");
     private static final ResourceLocation SCROLL_TRACK_BOX = common("scroll_track_box");
-    private static final ResourceLocation SCROLL_BANNER_BOX_11 = common("scroll_banner_box_11");
     private static final ResourceLocation OPTION_HIGHLIGHT_BOX = common("option_highlight_box_3");
     private static final ResourceLocation CALENDAR_TODAY_BOX = common("calendar_today_box_3");
     private static final ResourceLocation BILLBOARD_ACCEPT_BOX = common("billboard_accept_box_9");
@@ -223,6 +223,15 @@ public final class CommonGuiTextures {
         SHOP_COIN.drawPixelZoomTint(graphics, x, y, scale, red, green, blue, alpha);
     }
 
+    public static void drawQiCoin(GuiGraphics graphics, int x, int y, float scale) {
+        QI_COIN.drawPixelZoom(graphics, x, y, scale);
+    }
+
+    public static void drawQiCoinTint(GuiGraphics graphics, int x, int y, float scale,
+                                      float red, float green, float blue, float alpha) {
+        QI_COIN.drawPixelZoomTint(graphics, x, y, scale, red, green, blue, alpha);
+    }
+
     public static void drawFairStarToken(GuiGraphics graphics, int x, int y, float scale) {
         FAIR_STAR_TOKEN.drawPixelZoom(graphics, x, y, scale);
     }
@@ -321,7 +330,13 @@ public final class CommonGuiTextures {
     }
 
     public static void drawScrollBannerBox(GuiGraphics graphics, int x, int y, int width, int height, float scale) {
-        StardewGuiUtil.drawTextureBox(graphics, SCROLL_BANNER_BOX_11, 11, 18, 0, 0, 11, 18, x, y, width, height, scale, false);
+        // Stardew's SpriteText banner is not a nine-slice box. It is composed
+        // from a 12x18 left cap, a horizontally stretched 1x18 middle strip,
+        // and a 12x18 right cap. Treating the 11x18 cursor fragment as a 3x3
+        // box clips its lower border and distorts every casino coin banner.
+        int capWidth = Math.max(1, Math.round(12.0F * scale));
+        int middleWidth = Math.max(1, width - capWidth * 2);
+        drawScrollBanner(graphics, x + capWidth, y, middleWidth, scale);
     }
 
     public static void drawCalendarTodayBox(GuiGraphics graphics, int x, int y, int width, int height, float scale) {

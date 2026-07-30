@@ -771,10 +771,7 @@ public final class EggFestivalService {
     }
 
     public static boolean tryCollectEgg(ServerPlayer player, Entity target) {
-        if (player == null || !(target instanceof Interaction) || !target.getTags().contains(TAG_EGG_INTERACTION)) {
-            return false;
-        }
-        if (!isParticipant(player) || mainEventPhase != MainEventPhase.EGG_HUNT_ACTIVE) {
+        if (!canCollectEgg(player, target)) {
             return false;
         }
         String idTag = eggIdTag(target);
@@ -819,6 +816,19 @@ public final class EggFestivalService {
             }
         }
         return true;
+    }
+
+    public static boolean isEggInteraction(Entity target) {
+        return target instanceof Interaction
+            && target.getTags().contains(TAG_EGG_INTERACTION);
+    }
+
+    public static boolean canCollectEgg(ServerPlayer player, Entity target) {
+        return player != null
+            && isEggInteraction(target)
+            && isParticipant(player)
+            && mainEventPhase == MainEventPhase.EGG_HUNT_ACTIVE
+            && eggIdTag(target) != null;
     }
 
     private static void blockUnstartedEntry(ServerLevel level, ServerPlayer player) {

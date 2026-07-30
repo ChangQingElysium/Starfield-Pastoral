@@ -5,6 +5,7 @@ import com.stardew.craft.item.ModItems;
 import com.stardew.craft.item.artisan.FlavoredArtisanDrinkItem;
 import com.stardew.craft.item.artisan.PreserveType;
 import com.stardew.craft.item.artisan.PreservesItem;
+import com.stardew.craft.item.catalog.StardewItemDisplayStacks;
 import com.stardew.craft.item.quality.QualityHelper;
 import com.stardew.craft.shop.GeodeLootService;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
@@ -12,14 +13,16 @@ import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.drawable.IDrawableBuilder;
 import mezz.jei.api.gui.drawable.IDrawableStatic;
 import mezz.jei.api.helpers.IGuiHelper;
+import mezz.jei.api.ingredients.subtypes.ISubtypeInterpreter;
+import mezz.jei.api.ingredients.subtypes.UidContext;
 import mezz.jei.api.registration.ISubtypeRegistration;
 import mezz.jei.api.recipe.RecipeIngredientRole;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Proxy;
-import java.util.Collections;
 import java.util.EnumMap;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -29,6 +32,9 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -99,21 +105,87 @@ class JeiSourceCategoryContractTest {
     }
 
     @Test
-    void qualityIsNotRegisteredAsRecipeIdentity() {
-        Set<net.minecraft.world.item.Item> registered = Collections.newSetFromMap(new IdentityHashMap<>());
-        ISubtypeRegistration registration = proxy(ISubtypeRegistration.class, (proxy, method, args) -> {
-            if (method.getName().equals("registerSubtypeInterpreter")) {
-                registered.add((net.minecraft.world.item.Item) args[0]);
-            }
-            return defaultValue(method.getReturnType());
-        });
+    void qualityIsDistinctInIngredientListButSharedForRecipeLookups() {
+        Map<Item, ISubtypeInterpreter<ItemStack>> registered = registeredSubtypes();
 
-        new StardewJeiPlugin().registerItemSubtypes(registration);
+        ISubtypeInterpreter<ItemStack> crop = registered.get(ModItems.PARSNIP.get());
+        assertNotNull(crop);
+        ItemStack normal = new ItemStack(ModItems.PARSNIP.get());
+        ItemStack iridium = normal.copy();
+        QualityHelper.setQuality(iridium, QualityHelper.IRIDIUM);
 
-        assertFalse(registered.contains(ModItems.PARSNIP.get()));
-        assertTrue(registered.contains(ModItems.JELLY.get()));
-        assertTrue(registered.contains(ModItems.WINE.get()));
-        assertTrue(registered.contains(ModItems.JUICE.get()));
+        Set<Object> ingredientIdentities = StardewItemDisplayStacks
+                .stacksForItem(ModItems.PARSNIP.get()).stream()
+                .map(stack -> crop.getSubtypeData(stack, UidContext.Ingredient))
+                .collect(java.util.stream.Collectors.toSet());
+        assertEquals(4, ingredientIdentities.size());
+
+        assertNotEquals(
+                crop.getSubtypeData(normal, UidContext.Ingredient),
+                crop.getSubtypeData(iridium, UidContext.Ingredient));
+        assertNull(crop.getSubtypeData(normal, UidContext.Recipe));
+        assertNull(crop.getSubtypeData(iridium, UidContext.Recipe));
+
+        assertTrue(registered.containsKey(ModItems.JELLY.get()));
+        assertTrue(registered.containsKey(ModItems.WINE.get()));
+        assertTrue(registered.containsKey(ModItems.JUICE.get()));
+    }
+
+    @Test
+    void flowerColourIsDistinctOnlyInTheIngredientList() {
+        ISubtypeInterpreter<ItemStack> flower =
+                registeredSubtypes().get(ModItems.BLUE_JAZZ.get());
+        assertNotNull(flower);
+        List<ItemStack> variants = StardewItemDisplayStacks
+                .stacksForItem(ModItems.BLUE_JAZZ.get());
+        ItemStack firstColour = variants.stream()
+                .filter(stack -> QualityHelper.getQuality(stack) == QualityHelper.NORMAL)
+                .filter(stack -> Integer.valueOf(0).equals(
+                        StardewItemDisplayStacks.getFlowerColor(stack)))
+                .findFirst().orElseThrow();
+        ItemStack secondColour = variants.stream()
+                .filter(stack -> QualityHelper.getQuality(stack) == QualityHelper.NORMAL)
+                .filter(stack -> Integer.valueOf(1).equals(
+                        StardewItemDisplayStacks.getFlowerColor(stack)))
+                .findFirst().orElseThrow();
+
+        assertNotEquals(
+                flower.getSubtypeData(firstColour, UidContext.Ingredient),
+                flower.getSubtypeData(secondColour, UidContext.Ingredient));
+        assertNull(flower.getSubtypeData(firstColour, UidContext.Recipe));
+        assertNull(flower.getSubtypeData(secondColour, UidContext.Recipe));
+    }
+
+    @Test
+    void sourceVariantsKeepQualityOnlyInTheIngredientList() {
+        Map<Item, ISubtypeInterpreter<ItemStack>> registered = registeredSubtypes();
+        ItemStack normal = FlavoredArtisanDrinkItem.createFlavored(PreserveType.WINE,
+                new ItemStack(ModItems.GRAPE.get()), new ItemStack(ModItems.WINE.get()));
+        ItemStack gold = normal.copy();
+        QualityHelper.setQuality(gold, QualityHelper.GOLD);
+        ISubtypeInterpreter<ItemStack> wine = registered.get(ModItems.WINE.get());
+        assertNotNull(wine);
+
+        assertNotEquals(
+                wine.getSubtypeData(normal, UidContext.Ingredient),
+                wine.getSubtypeData(gold, UidContext.Ingredient));
+        assertEquals(
+                wine.getSubtypeData(normal, UidContext.Recipe),
+                wine.getSubtypeData(gold, UidContext.Recipe));
+
+        ItemStack normalPreserve = PreservesItem.createFlavored(PreserveType.DRIED_FRUIT,
+                new ItemStack(ModItems.PARSNIP.get()), new ItemStack(ModItems.DRIED_FRUIT.get()));
+        ItemStack goldPreserve = normalPreserve.copy();
+        QualityHelper.setQuality(goldPreserve, QualityHelper.GOLD);
+        ISubtypeInterpreter<ItemStack> preserve = registered.get(ModItems.DRIED_FRUIT.get());
+        assertNotNull(preserve);
+
+        assertNotEquals(
+                preserve.getSubtypeData(normalPreserve, UidContext.Ingredient),
+                preserve.getSubtypeData(goldPreserve, UidContext.Ingredient));
+        assertEquals(
+                preserve.getSubtypeData(normalPreserve, UidContext.Recipe),
+                preserve.getSubtypeData(goldPreserve, UidContext.Recipe));
     }
 
     @Test
@@ -166,6 +238,21 @@ class JeiSourceCategoryContractTest {
                 && output.minCount() == 1 && output.maxCount() == 20));
         assertTrue(outputs.stream().anyMatch(output -> output.stack().is(ModItems.COPPER_ORE.get())
                 && output.maxCount() == 20));
+    }
+
+    private static Map<Item, ISubtypeInterpreter<ItemStack>> registeredSubtypes() {
+        Map<Item, ISubtypeInterpreter<ItemStack>> registered = new IdentityHashMap<>();
+        ISubtypeRegistration registration = proxy(ISubtypeRegistration.class, (proxy, method, args) -> {
+            if (method.getName().equals("registerSubtypeInterpreter")) {
+                @SuppressWarnings("unchecked")
+                ISubtypeInterpreter<ItemStack> interpreter =
+                        (ISubtypeInterpreter<ItemStack>) args[1];
+                registered.put((Item) args[0], interpreter);
+            }
+            return defaultValue(method.getReturnType());
+        });
+        new StardewJeiPlugin().registerItemSubtypes(registration);
+        return registered;
     }
 
     private static IGuiHelper guiHelper() {

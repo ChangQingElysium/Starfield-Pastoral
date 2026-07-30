@@ -32,12 +32,17 @@ public class SpeakCommand implements EventCommand {
             return;
         }
 
+        String resolvedNpcId =
+                com.stardew.craft.cutscene.runtime.CombatRescueCutsceneContext.resolveNpcId(npcId);
+        String resolvedText =
+                com.stardew.craft.cutscene.runtime.CombatRescueCutsceneContext.resolveDialogue(text);
+
         // Resolve translation key or use raw text
         String displayText;
-        if (text.startsWith("stardewcraft.") || text.startsWith("event.")) {
-            displayText = OpenNpcDialogueScreenPayload.rawTranslation(text);
+        if (resolvedText.startsWith("stardewcraft.") || resolvedText.startsWith("event.")) {
+            displayText = OpenNpcDialogueScreenPayload.rawTranslation(resolvedText);
         } else {
-            displayText = text;
+            displayText = resolvedText;
         }
 
         // Full SDV text resolution pipeline (same as NPC dialogue)
@@ -45,7 +50,7 @@ public class SpeakCommand implements EventCommand {
         displayText = OpenNpcDialogueScreenPayload.resolvePlayerDialogueText(displayText, playerName);
 
         mc.setScreen(new com.stardew.craft.client.gui.common.StardewNpcDialogueScreen(
-                npcId, displayText, 0
+                resolvedNpcId, displayText, 0
         ));
     }
 

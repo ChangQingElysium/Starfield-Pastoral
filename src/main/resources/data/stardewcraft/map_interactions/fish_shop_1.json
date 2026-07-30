@@ -1,0 +1,40 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "FishShop",
+    "tile_action": "Message \"FishShop.1\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:fish_shop",
+    "boxes": [
+      {
+        "min": [
+          61,
+          31,
+          142
+        ],
+        "max": [
+          61,
+          34,
+          142
+        ]
+      }
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.fish_shop.1",
+          "fallback": "It leads up to a little sleeping cubby. It's off limits."
+        }
+      ]
+    }
+  ]
+}

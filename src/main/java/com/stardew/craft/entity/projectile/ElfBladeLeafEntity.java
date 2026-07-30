@@ -2,12 +2,16 @@ package com.stardew.craft.entity.projectile;
 
 import com.stardew.craft.combat.skill.ElfBladeMarkTracker;
 import com.stardew.craft.combat.skill.SkillContext;
-import com.stardew.craft.combat.skill.WeaponSkillContextStore;
+import com.stardew.craft.combat.skill.WeaponDamageSnapshot;
+import com.stardew.craft.combat.skill.WeaponSkillDamage;
 import com.stardew.craft.entity.ModEntities;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -17,6 +21,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -58,6 +63,7 @@ public class ElfBladeLeafEntity extends ThrowableProjectile {
     private UUID targetId = null;
     private long expireTick = 0L;
     private int homingTicks = 0;
+    private WeaponDamageSnapshot releaseWeaponSnapshot;
 
     private final Deque<TrailPoint> trailPoints = new ArrayDeque<>();
     private Vec3 lastEmitPos = null;
@@ -71,12 +77,34 @@ public class ElfBladeLeafEntity extends ThrowableProjectile {
 
     @SuppressWarnings("null")
     public ElfBladeLeafEntity(Level level, LivingEntity owner, float damageMultiplier, String skillId, int orbitIndex, long expireTick) {
+        this(
+            level,
+            owner,
+            damageMultiplier,
+            skillId,
+            orbitIndex,
+            expireTick,
+            null
+        );
+    }
+
+    @SuppressWarnings("null")
+    public ElfBladeLeafEntity(
+        Level level,
+        LivingEntity owner,
+        float damageMultiplier,
+        String skillId,
+        int orbitIndex,
+        long expireTick,
+        WeaponDamageSnapshot releaseWeaponSnapshot
+    ) {
         super(ModEntities.ELF_BLADE_LEAF.get(), owner, level);
         this.damageMultiplier = damageMultiplier;
         if (skillId != null) {
             this.skillId = skillId;
         }
         this.expireTick = expireTick;
+        this.releaseWeaponSnapshot = releaseWeaponSnapshot;
         this.setNoGravity(true);
         this.entityData.set(ORBIT_INDEX, orbitIndex);
         this.entityData.set(STATE, STATE_ORBIT);
@@ -312,8 +340,22 @@ public class ElfBladeLeafEntity extends ThrowableProjectile {
                 .tier(SkillContext.SkillTier.MINOR)
                 .damageMultiplier(this.damageMultiplier)
                 .build();
-            WeaponSkillContextStore.setPending(player, context, nowTick + 5);
-            livingTarget.hurt(player.damageSources().playerAttack(player), 1.0F);
+            if (releaseWeaponSnapshot == null) {
+                WeaponSkillDamage.apply(
+                    player,
+                    livingTarget,
+                    context,
+                    nowTick + 5
+                );
+            } else {
+                WeaponSkillDamage.apply(
+                    player,
+                    livingTarget,
+                    context,
+                    releaseWeaponSnapshot,
+                    nowTick + 5
+                );
+            }
 
             if (player instanceof ServerPlayer serverPlayer) {
                 ElfBladeMarkTracker.apply(livingTarget, serverPlayer, nowTick, MARK_DURATION_TICKS, 1);
@@ -363,6 +405,11 @@ public class ElfBladeLeafEntity extends ThrowableProjectile {
         if (this.targetId != null) {
             tag.putUUID("Target", this.targetId);
         }
+        writeReleaseWeaponSnapshot(
+            tag,
+            releaseWeaponSnapshot,
+            this.level().registryAccess()
+        );
     }
 
     @SuppressWarnings("null")
@@ -389,5 +436,46 @@ public class ElfBladeLeafEntity extends ThrowableProjectile {
         if (tag.hasUUID("Target")) {
             this.targetId = tag.getUUID("Target");
         }
+        this.releaseWeaponSnapshot = readReleaseWeaponSnapshot(
+            tag,
+            this.level().registryAccess()
+        );
+    }
+
+    static void writeReleaseWeaponSnapshot(
+        CompoundTag tag,
+        WeaponDamageSnapshot snapshot,
+        HolderLookup.Provider registries
+    ) {
+        if (snapshot == null) {
+            return;
+        }
+        ItemStack weapon = snapshot.weapon();
+        if (weapon.isEmpty()) {
+            return;
+        }
+        tag.putString("ReleaseWeaponId", snapshot.weaponId().toString());
+        tag.put("ReleaseWeapon", weapon.saveOptional(registries));
+    }
+
+    static WeaponDamageSnapshot readReleaseWeaponSnapshot(
+        CompoundTag tag,
+        HolderLookup.Provider registries
+    ) {
+        if (!tag.contains("ReleaseWeapon", Tag.TAG_COMPOUND)) {
+            return null;
+        }
+        ResourceLocation weaponId =
+            ResourceLocation.tryParse(tag.getString("ReleaseWeaponId"));
+        if (weaponId == null) {
+            return null;
+        }
+        ItemStack weapon = ItemStack.parseOptional(
+            registries,
+            tag.getCompound("ReleaseWeapon")
+        );
+        return weapon.isEmpty()
+            ? null
+            : WeaponDamageSnapshot.capture(weaponId, weapon);
     }
 }

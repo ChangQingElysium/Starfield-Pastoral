@@ -1,0 +1,33 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "JoshHouse",
+    "tile_action": "Message \"JoshHouse.3\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:1_river_road",
+    "positions": [
+      [
+        50,
+        22,
+        -19
+      ]
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.josh_house.3",
+          "fallback": "'Pro Gridball Season 44: Stats and Standings'"
+        }
+      ]
+    }
+  ]
+}

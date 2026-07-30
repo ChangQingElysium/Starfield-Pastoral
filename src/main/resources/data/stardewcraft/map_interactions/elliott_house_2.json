@@ -1,0 +1,33 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "ElliottHouse",
+    "tile_action": "Message \"ElliottHouse.2\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:elliott_cabin",
+    "positions": [
+      [
+        73,
+        46,
+        96
+      ]
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.elliott_house.2",
+          "fallback": "Elliott's work desk. It's covered in notes and crumpled papers."
+        }
+      ]
+    }
+  ]
+}

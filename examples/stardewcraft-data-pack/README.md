@@ -10,6 +10,7 @@
 - 新增带附件和阅读 Action 的邮件；
 - 新增只使用本体命令的剧情；
 - 新增特殊订单。
+- 新增一个纯 JSON 的地图右键 Textbox 交互。
 - 用一个现代单配方文件扩展本体小桶。
 - 新增一条结构化食材的烹饪配方。
 - 新增合成配方，在商店中出售完整的第三方命名空间 ID，并通过邮件 Action 提供另一条解锁路径。
@@ -92,6 +93,13 @@ python3 examples/stardewcraft-data-pack/validate.py
 
 ## 登录与 `/reload` 验收
 
+KubeJS 数据包应放在
+`kubejs/data/<namespace>/mail/<path>.json`；例如
+`kubejs/data/example_stardew_addon/mail/apple_club.json` 注册出的 ID 是
+`example_stardew_addon:apple_club`。`data/stardewcraft/mail/...` 则会注册到
+`stardewcraft` 命名空间。执行 `/reload` 后可用 `/stardew mail diagnostics`
+查看被隔离的无效文件及具体 Codec 错误。
+
 1. 先只安装主数据包并登录。执行 `/stardew mail send example_stardew_addon:apple_club`并阅读后，信件收藏应显示该邮件；JEI 应有 `apple_crate`、`apple_stand` 和紫水晶簇晶球条目。
 2. 保持客户端在线，把 `acceptance/reload-overlay` 作为第二个数据包放入同一存档的 `datapacks/` 中。
 3. 执行 `/reload`。如果服务器没有自动启用新包，先用 `/datapack list` 查看并启用 `reload-overlay`。
@@ -141,6 +149,7 @@ data/example_stardew_addon/npc/taste_patches/abigail_apples.json
 data/example_stardew_addon/locations/apple_shed.json
 data/example_stardew_addon/interior_portals/apple_shed_exit.json
 data/example_stardew_addon/mastery_rewards/apple_farming.json
+data/example_stardew_addon/map_interactions/apple_shed_notice.json
 data/example_stardew_addon/stardewcraft/farm_animals/goose.json
 data/stardewcraft/professions/tiller.json
 data/stardewcraft/data_maps/block/stardew_crop_data.json
@@ -152,6 +161,79 @@ data/stardewcraft/data_maps/item/stardew_food_effects.json
 ```
 
 `apple_grove` 和 `apple_shed` 使用约 `10000,10000` 的远端示例坐标，避免覆盖本体固定区域。地点和 portal 文件不会创建建筑、入口或传送触发器；实际附属必须自行放置结构并调用对应目标。
+
+`apple_shed_notice` 演示数据包独立提供地图交互；示例 Java 附属还提供一个
+typed map action 和一个动态 provider。数据包中的 `literal` 不需要客户端资源包。
+若改用 `translate` 提供多语言，语言文件属于客户端资源包，需随模组安装或由服务器
+资源包下发；服务端数据包本身不会自动把 `assets/<namespace>/lang` 发给客户端。
+地图交互根节点可选 `hint: "auto" | "read" | "none"`：默认 `auto` 会为
+`messages` 分支显示阅读图标；自定义 action 打开信件或其它文本界面时可用 `read`
+显式启用；`none` 可关闭提示。阅读记录按定义 ID、按玩家持久化。
+
+本体同时提供可由纯数据包调用的信件动作：
+
+```json
+{
+  "hint": "read",
+  "branches": [
+    {
+      "id": "letter",
+      "action": {
+        "type": "stardewcraft:open_letter",
+        "data": {
+          "text": "example_stardew_addon.map.apple_shed_letter",
+          "background": 0,
+          "text_color": ""
+        }
+      }
+    }
+  ]
+}
+```
+
+`text` 可以是直接信件文本，也可以是客户端翻译键；`background` 允许
+`0..7` 且默认 `0`，`text_color` 可省略。翻译键同样需要随客户端资源包或
+服务器资源包提供。
+
+原版 `NPCMessage` 也有内置数据动作。指定 NPC 在玩家同一 3D 层且位于
+水平半径内时打开带头像的 NPC 对话；找不到时显示对象 Textbox：
+
+```json
+{
+  "hint": "read",
+  "branches": [
+    {
+      "id": "snooping",
+      "action": {
+        "type": "stardewcraft:npc_message",
+        "data": {
+          "npc": "abigail",
+          "nearby": {
+            "translate": "example_stardew_addon.abigail.snooping",
+            "fallback": "That's private!"
+          },
+          "fallback": {
+            "literal": "A sword is hidden under the clothes."
+          },
+          "radius": 14.0,
+          "vertical_radius": 4,
+          "announce_snooping": true
+        }
+      }
+    }
+  ]
+}
+```
+
+`nearby` 与 `fallback` 都要求在 `translate` 和 `literal` 中二选一；
+只有 `translate` 可以附带 `fallback`。`announce_snooping` 会按原版方式向
+全服广播玩家被指定 NPC 抓到翻私人物品的消息，默认关闭。半径字段可省略，
+默认分别为水平 `14` 方块和垂直 `4` 方块。
+
+Java 示例分别通过 `StardewMapInteractionActions` 与
+`StardewMapInteractionActionExecutor` 注册带 Codec 的数据 action，并通过
+`StardewMapInteractions`、`StardewMapInteractionProvider` 和
+`StardewMapInteractionContext` 实现需要完整点击信息的动态交互。
 
 `orchard_floor` 只引用本体已有怪物 Profile，因此独立安装数据包也能 reload。示例
 Java 附属还在自己的 JAR 中注册 `orchard_silverfish` Profile 与更高优先级刷怪表，

@@ -31,6 +31,9 @@ public record PlayerWokeUpPayload() implements CustomPacketPayload {
             ServerPlayer player = (ServerPlayer) context.player();
             LOGGER.info("[WAKE_UP] Player {} ack'd wake-up; dispatching.",
                     player.getName().getString());
+            com.stardew.craft.network.overnight.OvernightSettlementTracker
+                    .acknowledgePendingSettlement(player);
+            com.stardew.craft.time.StardewTimePauseService.endOvernightSettlement(player);
             WakeUpEventScheduler.dispatchNext(player);
         });
     }

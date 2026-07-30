@@ -1,6 +1,8 @@
 package com.stardew.craft.cutscene.network;
 
 import io.netty.buffer.Unpooled;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -41,5 +43,25 @@ class CutscenePayloadCodecTest {
 
         assertEquals(expected, AbortCutscenePayload.STREAM_CODEC.decode(buffer));
         buffer.release();
+    }
+
+    @Test
+    void combatRescueReadinessPayloadsRoundTrip() {
+        var prepare = new CombatRescuePreparePayload(
+                456789L,
+                ResourceLocation.fromNamespaceAndPath("stardewcraft", "stardew_mining"),
+                new BlockPos(1, 66, -10),
+                "linus",
+                "event.combat_rescue.mine.linus");
+        var prepareBuffer = Unpooled.buffer();
+        CombatRescuePreparePayload.STREAM_CODEC.encode(prepareBuffer, prepare);
+        assertEquals(prepare, CombatRescuePreparePayload.STREAM_CODEC.decode(prepareBuffer));
+        prepareBuffer.release();
+
+        var ready = new CombatRescueReadyPayload(456789L);
+        var readyBuffer = Unpooled.buffer();
+        CombatRescueReadyPayload.STREAM_CODEC.encode(readyBuffer, ready);
+        assertEquals(ready, CombatRescueReadyPayload.STREAM_CODEC.decode(readyBuffer));
+        readyBuffer.release();
     }
 }

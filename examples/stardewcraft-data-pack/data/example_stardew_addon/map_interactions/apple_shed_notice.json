@@ -1,0 +1,22 @@
+{
+  "format": 1,
+  "priority": 100,
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "example_stardew_addon:apple_shed",
+    "positions": [
+      [10010, 61, 10010]
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "literal": "A data-pack-authored notice in the apple shed."
+        }
+      ]
+    }
+  ]
+}

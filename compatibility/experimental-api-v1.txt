@@ -265,3 +265,16 @@ com.stardew.craft.api.v1.world.StardewMapSlotRoles
 com.stardew.craft.api.v1.world.StardewMapSlotScopes
 com.stardew.craft.api.v1.world.StardewMapSlots
 com.stardew.craft.api.v1.world.StardewWorldEvents
+com.stardew.craft.api.v1.mapinteraction.StardewMapInteractionAction
+com.stardew.craft.api.v1.mapinteraction.StardewMapInteractionActionExecutor
+com.stardew.craft.api.v1.mapinteraction.StardewMapInteractionActionType
+com.stardew.craft.api.v1.mapinteraction.StardewMapInteractionActions
+com.stardew.craft.api.v1.mapinteraction.StardewMapInteractionContext
+com.stardew.craft.api.v1.mapinteraction.StardewMapInteractionProvider
+com.stardew.craft.api.v1.mapinteraction.StardewMapInteractions
+com.stardew.craft.api.v1.interaction.StardewInteractionHint
+com.stardew.craft.api.v1.interaction.StardewInteractionHintContext
+com.stardew.craft.api.v1.interaction.StardewInteractionHintDecision
+com.stardew.craft.api.v1.interaction.StardewInteractionHintProvider
+com.stardew.craft.api.v1.interaction.StardewInteractionHintType
+com.stardew.craft.api.v1.interaction.StardewInteractionHints

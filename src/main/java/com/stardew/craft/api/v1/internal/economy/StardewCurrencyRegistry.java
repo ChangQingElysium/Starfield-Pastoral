@@ -110,7 +110,57 @@ public final class StardewCurrencyRegistry {
                         return true;
                     }
                 });
+        registerInternal(
+                new StardewCurrency(
+                        StardewCurrencies.QI_COINS,
+                        Component.translatable(
+                                "stardewcraft.currency.qi_coins"),
+                        new ItemStack(Items.EMERALD),
+                        Integer.MAX_VALUE),
+                new StardewCurrencyHandler() {
+                    @Override
+                    public long balance(ServerPlayer player) {
+                        return com.stardew.craft.player.PlayerDataManager
+                                .getPlayerData(player).getClubCoins();
+                    }
+
+                    @Override
+                    public boolean withdraw(ServerPlayer player, long amount) {
+                        if (amount > Integer.MAX_VALUE) {
+                            return false;
+                        }
+                        var data = com.stardew.craft.player.PlayerDataManager
+                                .getPlayerData(player);
+                        if (!data.consumeClubCoins((int) amount)) {
+                            return false;
+                        }
+                        saveClubCoins(player, data);
+                        return true;
+                    }
+
+                    @Override
+                    public boolean deposit(ServerPlayer player, long amount) {
+                        var data = com.stardew.craft.player.PlayerDataManager
+                                .getPlayerData(player);
+                        if (amount > Integer.MAX_VALUE - data.getClubCoins()) {
+                            return false;
+                        }
+                        data.addClubCoins((int) amount);
+                        saveClubCoins(player, data);
+                        return true;
+                    }
+                });
         bootstrapped = true;
+    }
+
+    private static void saveClubCoins(
+            ServerPlayer player,
+            com.stardew.craft.player.PlayerStardewData data
+    ) {
+        com.stardew.craft.player.PlayerDataManager.get()
+                .savePlayerData(player.getUUID(), data);
+        com.stardew.craft.player.PlayerDataEventHandler
+                .syncPlayerData(player, data);
     }
 
     public static synchronized void register(

@@ -1,0 +1,40 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "LeahHouse",
+    "tile_action": "Message \"LeahHouse.3\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:leah_cottage",
+    "boxes": [
+      {
+        "min": [
+          -82,
+          38,
+          46
+        ],
+        "max": [
+          -82,
+          39,
+          46
+        ]
+      }
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.leah_house.3",
+          "fallback": "'Living Off The Land: A Practical Guide'"
+        }
+      ]
+    }
+  ]
+}

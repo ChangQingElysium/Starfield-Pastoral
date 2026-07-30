@@ -1,0 +1,51 @@
+{
+  "legacy_id": "Casino",
+  "entries": [
+    {
+      "item": "stardewcraft:top_hat",
+      "price": 8000
+    },
+    {
+      "item": "stardewcraft:scarecrow_3",
+      "price": 10000
+    },
+    {
+      "item": "stardewcraft:magnet",
+      "price": 1000,
+      "stock": 20
+    },
+    {
+      "item": "stardewcraft:warp_totem_farm",
+      "price": 1000,
+      "stock": 20
+    },
+    {
+      "item": "stardewcraft:casino_firework_red",
+      "price": 200,
+      "stock": 20
+    },
+    {
+      "item": "stardewcraft:casino_firework_purple",
+      "price": 200,
+      "stock": 20
+    },
+    {
+      "item": "stardewcraft:casino_firework_green",
+      "price": 200,
+      "stock": 20
+    },
+    {
+      "item": "wallpaper:MoreWalls:24",
+      "price": 10000
+    },
+    {
+      "item": "wallpaper:MoreWalls:25",
+      "price": 100000
+    },
+    {
+      "item": "flooring:MoreFloors:8",
+      "price": 100000
+    }
+  ],
+  "accepted_sell_types": []
+}

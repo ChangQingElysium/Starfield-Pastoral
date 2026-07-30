@@ -16,8 +16,10 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -32,6 +34,7 @@ public final class StardewTimePauseService {
 
     private static final long CLIENT_STATE_TIMEOUT_TICKS = 300L;
     private static final Map<UUID, ClientState> CLIENT_STATES = new HashMap<>();
+    private static final Set<UUID> OVERNIGHT_SETTLEMENT_PLAYERS = new HashSet<>();
 
     private static MinecraftServer activeServer;
     /** Freezes entity/chunk/block-entity simulation while every player is in a real menu/sleep. */
@@ -51,6 +54,18 @@ public final class StardewTimePauseService {
             return;
         }
         CLIENT_STATES.put(player.getUUID(), new ClientState(nonGameplay, player.server.getTickCount()));
+    }
+
+    public static void beginOvernightSettlement(ServerPlayer player) {
+        if (player != null && isStardewTimeDimension(player.serverLevel())) {
+            OVERNIGHT_SETTLEMENT_PLAYERS.add(player.getUUID());
+        }
+    }
+
+    public static void endOvernightSettlement(ServerPlayer player) {
+        if (player != null) {
+            OVERNIGHT_SETTLEMENT_PLAYERS.remove(player.getUUID());
+        }
     }
 
     /** Used by the ServerLevel mixin to suppress gameplay simulation while retaining maintenance. */
@@ -119,6 +134,8 @@ public final class StardewTimePauseService {
         List<ServerPlayer> players = server.getPlayerList().getPlayers().stream()
             .filter(player -> isStardewTimeDimension(player.serverLevel()))
             .toList();
+        boolean overnightSettlementActive = players.stream()
+            .anyMatch(player -> OVERNIGHT_SETTLEMENT_PLAYERS.contains(player.getUUID()));
         int simulationNonGameplayPlayers = 0;
         int clockNonGameplayPlayers = 0;
         for (ServerPlayer player : players) {
@@ -132,8 +149,10 @@ public final class StardewTimePauseService {
             }
         }
 
-        boolean nextSimulationPaused = shouldPauseForCounts(players.size(), simulationNonGameplayPlayers);
-        boolean nextClockPaused = shouldPauseForCounts(players.size(), clockNonGameplayPlayers);
+        boolean nextSimulationPaused = shouldPauseDuringOvernight(
+            overnightSettlementActive, players.size(), simulationNonGameplayPlayers);
+        boolean nextClockPaused = shouldPauseDuringOvernight(
+            overnightSettlementActive, players.size(), clockNonGameplayPlayers);
         StardewTimeManager timeManager = StardewTimeManager.get();
         timeManager.initializeSimulationGameTime(timeManager.getIndependentDayTime());
 
@@ -165,6 +184,7 @@ public final class StardewTimePauseService {
     @SubscribeEvent
     public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         CLIENT_STATES.remove(event.getEntity().getUUID());
+        OVERNIGHT_SETTLEMENT_PLAYERS.remove(event.getEntity().getUUID());
     }
 
     @SubscribeEvent
@@ -176,6 +196,14 @@ public final class StardewTimePauseService {
         return playerCount == 0 || nonGameplayPlayerCount >= playerCount;
     }
 
+    static boolean shouldPauseDuringOvernight(
+            boolean overnightSettlementActive,
+            int playerCount,
+            int nonGameplayPlayerCount
+    ) {
+        return overnightSettlementActive || shouldPauseForCounts(playerCount, nonGameplayPlayerCount);
+    }
+
     static boolean countsAsSimulationNonGameplay(boolean cutsceneActive, boolean baseNonGameplay) {
         return !cutsceneActive && baseNonGameplay;
     }
@@ -185,20 +213,31 @@ public final class StardewTimePauseService {
     }
 
     private static boolean isBaseNonGameplay(ServerPlayer player, long now) {
-        if (player.isSleeping()) {
-            return true;
-        }
         // The client screen classifier is the source of truth for menus. Do not infer pause from
         // containerMenu here: a realtime container screen must be able to opt out explicitly.
         ClientState state = CLIENT_STATES.get(player.getUUID());
-        return state != null
+        boolean clientReportedNonGameplay = state != null
             && state.nonGameplay()
             && now - state.reportedAtTick() <= CLIENT_STATE_TIMEOUT_TICKS;
+        return countsAsBaseNonGameplay(
+            OVERNIGHT_SETTLEMENT_PLAYERS.contains(player.getUUID()),
+            player.isSleeping(),
+            clientReportedNonGameplay
+        );
+    }
+
+    static boolean countsAsBaseNonGameplay(
+            boolean overnightSettlement,
+            boolean sleeping,
+            boolean clientReportedNonGameplay
+    ) {
+        return overnightSettlement || sleeping || clientReportedNonGameplay;
     }
 
     private static void reset(MinecraftServer server) {
         activeServer = server;
         CLIENT_STATES.clear();
+        OVERNIGHT_SETTLEMENT_PLAYERS.clear();
         simulationPaused = false;
         clockPaused = false;
         frozenVirtualDayTime = null;

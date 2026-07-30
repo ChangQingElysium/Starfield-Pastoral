@@ -161,6 +161,11 @@ public final class StardewItemDisplayStacks {
         return null;
     }
 
+    /** Whether JEI and creative displays should enumerate Stardew quality variants for this item. */
+    public static boolean hasQualityVariants(Item item) {
+        return usesQualityDisplay(item);
+    }
+
     private static boolean usesQualityDisplay(Item item) {
         String typeKey = StardewItemDataApi.getTypeKey(new ItemStack(item));
         if (typeKey.isBlank()) {

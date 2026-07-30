@@ -1,0 +1,52 @@
+{
+  "format": 1,
+  "priority": 100,
+  "hint": "read",
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "SeedShop",
+    "tile_action": "NPCMessage Abigail \"Data\\ExtraDialogue:SeedShop_Abigail_Drawers/Strings\\Locations:SeedShop_Abigail_Drawers\"",
+    "code": "StardewValley.GameLocation.performAction:NPCMessage"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:pierre_house",
+    "boxes": [
+      {
+        "min": [
+          30,
+          37,
+          -42
+        ],
+        "max": [
+          31,
+          38,
+          -42
+        ]
+      }
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "action": {
+        "type": "stardewcraft:npc_message",
+        "data": {
+          "npc": "abigail",
+          "nearby": {
+            "translate": "stardewcraft.map_interaction.seed_shop.abigail_drawers.nearby",
+            "fallback": "Hey, don't even think about it! That's private!$a"
+          },
+          "fallback": {
+            "translate": "stardewcraft.map_interaction.seed_shop.abigail_drawers.fallback",
+            "fallback": "It's full of clothes... wait. There's a sword hidden under the clothes."
+          },
+          "radius": 14,
+          "vertical_radius": 4,
+          "announce_snooping": true
+        }
+      }
+    }
+  ]
+}

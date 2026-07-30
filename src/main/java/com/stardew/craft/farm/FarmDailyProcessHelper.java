@@ -233,11 +233,13 @@ public final class FarmDailyProcessHelper {
                 ServerPlayer p = level.getServer().getPlayerList().getPlayer(farmer);
                 if (p == null) continue;
                 if (remaining > 0) {
-                    p.sendSystemMessage(
+                    com.stardew.craft.network.GlobalHudMessagePayload.sendTo(
+                            p,
                             net.minecraft.network.chat.Component.translatable(
                                     "stardewcraft.farm.grace_period.remaining", remaining));
                 } else {
-                    p.sendSystemMessage(
+                    com.stardew.craft.network.GlobalHudMessagePayload.sendTo(
+                            p,
                             net.minecraft.network.chat.Component.translatable(
                                     "stardewcraft.farm.grace_period.expired"));
                 }

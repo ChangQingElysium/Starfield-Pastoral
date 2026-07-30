@@ -10,6 +10,7 @@ public final class PointPlanClientState {
     private static String selectedPlanId = "festival_of_ice_npcs";
     private static List<PointPlanWandItem.Plan> plans = List.of(new PointPlanWandItem.Plan(selectedPlanId, List.of()));
     private static List<String> npcIds = List.of();
+    private static boolean mapInteractionEditor;
     private static PointPlanWandItem.PendingPoint pendingPoint;
 
     private PointPlanClientState() {
@@ -19,6 +20,7 @@ public final class PointPlanClientState {
         String newSelectedPlanId,
         List<PointPlanWandItem.Plan> newPlans,
         List<String> newNpcIds,
+        boolean newMapInteractionEditor,
         PointPlanWandItem.PendingPoint newPendingPoint
     ) {
         selectedPlanId = newSelectedPlanId == null || newSelectedPlanId.isBlank() ? "festival_of_ice_npcs" : newSelectedPlanId;
@@ -26,6 +28,7 @@ public final class PointPlanClientState {
             ? List.of(new PointPlanWandItem.Plan(selectedPlanId, List.of()))
             : newPlans);
         npcIds = List.copyOf(newNpcIds == null ? List.of() : newNpcIds);
+        mapInteractionEditor = newMapInteractionEditor;
         pendingPoint = newPendingPoint;
     }
 
@@ -52,6 +55,10 @@ public final class PointPlanClientState {
 
     public static PointPlanWandItem.PendingPoint pendingPoint() {
         return pendingPoint;
+    }
+
+    public static boolean isMapInteractionEditor() {
+        return mapInteractionEditor;
     }
 
     public static String exportSelected(String overridePlanId) {
@@ -81,11 +88,22 @@ public final class PointPlanClientState {
         for (int i = 0; i < copy.size(); i++) {
             PointPlanWandItem.PointEntry point = copy.get(i);
             BlockPos pos = point.pos();
-            out.append("  { \"npc\": \"").append(escape(point.npcId()))
-                .append("\", \"x\": ").append(pos.getX())
-                .append(", \"y\": ").append(pos.getY())
-                .append(", \"z\": ").append(pos.getZ())
-                .append(", \"direction\": \"").append(escape(point.direction())).append("\" }");
+            if (mapInteractionEditor) {
+                out.append("  { \"name\": \"")
+                    .append(escape(point.npcId()))
+                    .append("\", \"x\": ").append(pos.getX())
+                    .append(", \"y\": ").append(pos.getY())
+                    .append(", \"z\": ").append(pos.getZ())
+                    .append(" }");
+            } else {
+                out.append("  { \"npc\": \"")
+                    .append(escape(point.npcId()))
+                    .append("\", \"x\": ").append(pos.getX())
+                    .append(", \"y\": ").append(pos.getY())
+                    .append(", \"z\": ").append(pos.getZ())
+                    .append(", \"direction\": \"")
+                    .append(escape(point.direction())).append("\" }");
+            }
             if (i + 1 < copy.size()) {
                 out.append(',');
             }

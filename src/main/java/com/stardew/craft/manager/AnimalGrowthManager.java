@@ -312,13 +312,15 @@ public class AnimalGrowthManager extends SavedData {
             if (player == null) {
                 continue;
             }
-            player.sendSystemMessage(Component.translatable(
-                    "stardewcraft.manager.construction.completed",
+            com.stardew.craft.network.GlobalHudMessagePayload.sendTo(
+                    player,
                     Component.translatable(
-                            "stardewcraft.manager.building."
-                                    + building.buildingType()
-                                            .family()),
-                    building.buildingType().tier()));
+                            "stardewcraft.manager.construction.completed",
+                            Component.translatable(
+                                    "stardewcraft.manager.building."
+                                            + building.buildingType()
+                                                    .family()),
+                            building.buildingType().tier()));
             String sourceName =
                     building.buildingType().family()
                             .equalsIgnoreCase("coop")

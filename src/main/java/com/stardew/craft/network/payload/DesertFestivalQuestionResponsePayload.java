@@ -40,6 +40,17 @@ public record DesertFestivalQuestionResponsePayload(
     public static void handle(DesertFestivalQuestionResponsePayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
             if (context.player() instanceof ServerPlayer player) {
+                if (com.stardew.craft.casino.CasinoAccessService.QUESTION_CONTEXT.equals(payload.context())) {
+                    com.stardew.craft.casino.CasinoAccessService.handleQuestionResponse(
+                            player, payload.choiceId());
+                    return;
+                }
+                if (com.stardew.craft.casino.CasinoContentService.BUY_QI_COINS_CONTEXT.equals(payload.context())
+                        || com.stardew.craft.casino.CasinoContentService.BUY_ENDLESS_FORTUNE_CONTEXT.equals(payload.context())) {
+                    com.stardew.craft.casino.CasinoContentService.handleQuestionResponse(
+                            player, payload.context(), payload.choiceId());
+                    return;
+                }
                 if ("willy_fishing".equals(payload.context())) {
                     DesertFestivalWillyFishingService.handleQuestionResponse(player, payload.context(), payload.choiceId());
                     return;

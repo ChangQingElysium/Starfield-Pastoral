@@ -1,6 +1,7 @@
 package com.stardew.craft.weather;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.client.particle.WeaponSkillParticles;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
 import net.minecraft.core.particles.SimpleParticleType;
@@ -44,9 +45,12 @@ public class ModParticleProviders {
         event.registerSpriteSet(ModParticles.MAGIC_WARP_SWEEP.get(),
             MagicWarpSweepParticle.Provider::new);
 
-        // 注册斩击轨迹粒子
-
-        // 注册斩击微火花粒子
+        event.registerSpriteSet(ModParticles.CRESCENT_IMPACT.get(),
+            WeaponSkillParticles.CrescentImpactParticle.Provider::new);
+        event.registerSpriteSet(ModParticles.FOREST_LEAF.get(),
+            WeaponSkillParticles.ForestLeafParticle.Provider::new);
+        event.registerSpriteSet(ModParticles.FOREST_WISP.get(),
+            WeaponSkillParticles.ForestWispParticle.Provider::new);
     }
 
     /** Six original springobjects frames used by Stardew Valley's MagicWarp effect. */

@@ -116,6 +116,13 @@ public final class ModBlockEntities {
 			BLOCK_ENTITIES.register("coffee_maker", () -> BlockEntityType.Builder.of(CoffeeMakerBlockEntity::new, ModBlocks.COFFEE_MAKER.get()).build(null));
 
 	@SuppressWarnings("null")
+	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<DailyStatueBlockEntity>> DAILY_STATUE =
+			BLOCK_ENTITIES.register("daily_statue", () -> BlockEntityType.Builder.of(
+					DailyStatueBlockEntity::new,
+					ModBlocks.STATUE_OF_ENDLESS_FORTUNE.get(),
+					ModBlocks.STATUE_OF_PERFECTION.get()).build(null));
+
+	@SuppressWarnings("null")
 	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BoneMillBlockEntity>> BONE_MILL =
 			BLOCK_ENTITIES.register("bone_mill", () -> BlockEntityType.Builder.of(BoneMillBlockEntity::new, ModBlocks.BONE_MILL.get()).build(null));
 

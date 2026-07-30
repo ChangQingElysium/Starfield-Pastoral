@@ -1,0 +1,33 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "ScienceHouse",
+    "tile_action": "Message \"ScienceHouse.5\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:carpenter_shop",
+    "positions": [
+      [
+        33,
+        59,
+        -124
+      ]
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.science_house.5",
+          "fallback": "'Advanced Neural Networks'"
+        }
+      ]
+    }
+  ]
+}

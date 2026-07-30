@@ -21,11 +21,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FlowerPotBlock;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.ItemAbilities;
+import net.neoforged.neoforge.common.util.TriState;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
@@ -98,13 +101,15 @@ public class FarmAreaProtectionEvents {
     }
 
     /**
-     * 放置方块：EntityPlaceEvent 在方块已放置后触发。
-     * 不取消事件（取消会丢物品），而是立即 destroyBlock 使其掉落回去。
-     * 注意：斧头去皮/除锈、锄头锄地等工具交互也会触发此事件（方块替换），
-     * 此时 replacedBlock 不是空气，应放行。
+     * Placement cancellation is transactional in NeoForge: captured block snapshots are
+     * restored and the pre-placement item stack is retained. Manual restore/destroy logic
+     * bypasses that transaction and can consume or duplicate the held item.
      */
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onBlockPlace(BlockEvent.EntityPlaceEvent event) {
+        if (event instanceof BlockEvent.EntityMultiPlaceEvent) {
+            return;
+        }
         if (!(event.getLevel() instanceof ServerLevel level)) {
             return;
         }
@@ -117,51 +122,18 @@ public class FarmAreaProtectionEvents {
         if (player.isCreative()) {
             return;
         }
-        // 方块替换（去皮、除锈、锄地等工具交互）→ 也需要权限检查
-        // 但远古斑点允许在任何区域被锄（挖掘后变耕地，第二天复原）
+
         BlockPos pos = event.getPos();
-        if (com.stardew.craft.greenhouse.GreenhouseManager.isInGreenhouseExterior(level, pos)) {
-            event.getBlockSnapshot().restore();
+        if (mayCompletePlacement(
+                level,
+                player,
+                pos,
+                event.getBlockSnapshot().getState())) {
             return;
         }
-        if (com.stardew.craft.greenhouse.GreenhouseManager.isInGreenhouseInterior(level, pos)) {
-            if (canModifyGreenhouseAt(player, level, pos)) {
-                return;
-            }
-            event.getBlockSnapshot().restore();
-            player.displayClientMessage(
-                    Component.translatable("stardewcraft.farm.build_farm_only"), true);
-            return;
-        }
-        if (isPublicWaterCrabPot(level, pos)) {
-            return;
-        }
-        if (!event.getBlockSnapshot().getState().isAir()) {
-            if (event.getBlockSnapshot().getState().is(ModBlocks.ARTIFACT_SPOT_DIRT.get())
-                    || event.getBlockSnapshot().getState().is(ModBlocks.DESERT_ARTIFACT_SPOT.get())
-                    || event.getBlockSnapshot().getState().is(ModBlocks.BEACH_ARTIFACT_SPOT.get())) {
-                // 远古斑点（含沙漠/海滩变体）：放行，不受区域保护，避免锄完被回滚
-                return;
-            }
-            if (!canModifyAt(player, pos)) {
-                // 还原为原来的方块
-                event.getBlockSnapshot().restore();
-                player.displayClientMessage(
-                        Component.translatable("stardewcraft.farm.build_farm_only"), true);
-            }
-            return;
-        }
-        // 温室外观区域不可放置
-        if (com.stardew.craft.greenhouse.GreenhouseManager.isInGreenhouseExterior(level, pos)) {
-            level.destroyBlock(pos, true, player);
-            return;
-        }
-        // 温室内部区域可自由操作
-        if (com.stardew.craft.greenhouse.GreenhouseManager.isInGreenhouseInterior(level, pos)) {
-            return;
-        }
-        if (!canModifyAt(player, pos)) {
-            level.destroyBlock(pos, true, player);
+
+        event.setCanceled(true);
+        if (player != null) {
             player.displayClientMessage(
                     Component.translatable("stardewcraft.farm.build_farm_only"), true);
         }
@@ -296,7 +268,7 @@ public class FarmAreaProtectionEvents {
         }
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onBlockMultiPlace(BlockEvent.EntityMultiPlaceEvent event) {
         if (!(event.getLevel() instanceof ServerLevel level)) {
             return;
@@ -308,28 +280,26 @@ public class FarmAreaProtectionEvents {
             return;
         }
 
-        boolean denied = false;
         for (var snapshot : event.getReplacedBlockSnapshots()) {
-            BlockPos pos = snapshot.getPos();
-            if (event.getEntity() instanceof ServerPlayer player) {
-                if (com.stardew.craft.greenhouse.GreenhouseManager.isInGreenhouseInterior(level, pos)) {
-                    if (canModifyGreenhouseAt(player, level, pos)) {
-                        continue;
-                    }
-                } else if (canModifyAt(player, pos)) {
-                    continue;
-                }
-            } else if (!isProtectedNonFarmArea(level, pos)) {
+            ServerPlayer player = event.getEntity() instanceof ServerPlayer serverPlayer
+                    ? serverPlayer
+                    : null;
+            if (mayCompletePlacement(
+                    level,
+                    player,
+                    snapshot.getPos(),
+                    snapshot.getState())) {
                 continue;
             }
 
-            snapshot.restore();
-            denied = true;
-        }
-
-        if (denied && event.getEntity() instanceof ServerPlayer player) {
-            player.displayClientMessage(
-                    Component.translatable("stardewcraft.farm.build_farm_only"), true);
+            event.setCanceled(true);
+            if (player != null) {
+                player.displayClientMessage(
+                        Component.translatable(
+                                "stardewcraft.farm.build_farm_only"),
+                        true);
+            }
+            return;
         }
     }
 
@@ -399,7 +369,7 @@ public class FarmAreaProtectionEvents {
      * 右键方块：阻止在别人农场上进行任何方块交互。
      * 覆盖所有 useWithoutItem / useItemOn / item.useOn 的调用。
      */
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         if (event.getEntity().level().dimension() != ModDimensions.STARDEW_VALLEY) {
             return;
@@ -416,6 +386,27 @@ public class FarmAreaProtectionEvents {
                         event.getLevel(), event.getPos())) {
             event.setCanceled(true);
             event.setCancellationResult(net.minecraft.world.InteractionResult.CONSUME);
+            return;
+        }
+
+        BlockPos targetPos = event.getPos();
+        BlockPos placePos = event.getLevel().getBlockState(targetPos).canBeReplaced()
+                ? targetPos
+                : targetPos.relative(event.getFace());
+        net.minecraft.world.item.ItemStack heldItem = event.getItemStack();
+        if (!event.getEntity().isCreative()
+                && heldItem.getItem() instanceof BlockItem blockItem
+                && isKnownPublicPlacementTarget(event.getLevel(), placePos)
+                && !isPublicCrabPotItem(blockItem)) {
+            // Deny only the held item's use. The clicked public block may still handle its
+            // own interaction (for example, a door can open while a block is held).
+            event.setUseItem(TriState.FALSE);
+            if (event.getEntity() instanceof ServerPlayer player) {
+                player.displayClientMessage(
+                        Component.translatable(
+                                "stardewcraft.farm.build_farm_only"),
+                        true);
+            }
             return;
         }
 
@@ -445,15 +436,9 @@ public class FarmAreaProtectionEvents {
         // 水桶/岩浆桶等流体桶：在任何受保护区域都禁止放置流体
         // （NeoForge 中 BucketItem.emptyContents → LiquidBlock.placeLiquid 不触发 EntityPlaceEvent，
         //  必须在 RightClickBlock 阶段拦截）
-        net.minecraft.world.item.ItemStack heldItem = event.getItemStack();
         if (heldItem.getItem() instanceof net.minecraft.world.item.BucketItem bucket) {
             // 空桶（拾取流体）允许通过；有内容的桶才做放置保护
             if (bucket.content != net.minecraft.world.level.material.Fluids.EMPTY) {
-                // 流体会放在目标方块的面朝向相邻位置（若目标不可替换）或目标位置
-                BlockPos targetPos = event.getPos();
-                BlockPos placePos = event.getLevel().getBlockState(targetPos).canBeReplaced()
-                        ? targetPos
-                        : targetPos.relative(event.getFace());
                 if (!canModifyAt(player, placePos)) {
                     event.setCanceled(true);
                     event.setCancellationResult(net.minecraft.world.InteractionResult.FAIL);
@@ -470,6 +455,50 @@ public class FarmAreaProtectionEvents {
             player.displayClientMessage(
                     Component.translatable("stardewcraft.farm.build_farm_only"), true);
         }
+    }
+
+    private static boolean mayCompletePlacement(
+            ServerLevel level,
+            ServerPlayer player,
+            BlockPos pos,
+            net.minecraft.world.level.block.state.BlockState replacedState
+    ) {
+        if (com.stardew.craft.greenhouse.GreenhouseManager
+                .isInGreenhouseExterior(level, pos)) {
+            return false;
+        }
+        if (com.stardew.craft.greenhouse.GreenhouseManager
+                .isInGreenhouseInterior(level, pos)) {
+            return player != null && canModifyGreenhouseAt(player, level, pos);
+        }
+        if (isPublicWaterCrabPot(level, pos)) {
+            return true;
+        }
+        if (replacedState.is(ModBlocks.ARTIFACT_SPOT_DIRT.get())
+                || replacedState.is(ModBlocks.DESERT_ARTIFACT_SPOT.get())
+                || replacedState.is(ModBlocks.BEACH_ARTIFACT_SPOT.get())) {
+            return true;
+        }
+        return player == null
+                ? !isProtectedNonFarmArea(level, pos)
+                : canModifyAt(player, pos);
+    }
+
+    private static boolean isKnownPublicPlacementTarget(
+            net.minecraft.world.level.Level level,
+            BlockPos pos
+    ) {
+        return level.dimension() == ModDimensions.STARDEW_VALLEY
+                && !com.stardew.craft.farm.FarmInstanceAllocator
+                        .isInFarmInstanceRegion(pos)
+                && !com.stardew.craft.greenhouse.GreenhouseManager
+                        .isInGreenhouseInterior(level, pos)
+                && !com.stardew.craft.communitycenter.quarry
+                        .QuarryAccessManager.isInQuarryArea(pos);
+    }
+
+    private static boolean isPublicCrabPotItem(BlockItem blockItem) {
+        return blockItem.getBlock() == ModBlocks.CRAB_POT.get();
     }
 
     public static boolean canModifyGreenhouseAt(ServerPlayer player, ServerLevel level, BlockPos pos) {

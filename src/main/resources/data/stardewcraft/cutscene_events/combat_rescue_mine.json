@@ -1,0 +1,38 @@
+{
+  "id": "combat_rescue_mine",
+  "skippable": false,
+  "trigger": { "type": "manual" },
+  "preconditions": [],
+  "commands": [
+    { "cmd": "comment", "text": "=== SDV Data/Events/Mine:PlayerKilled; authored in STARDEW_MINING ===" },
+    { "cmd": "lock_player" },
+    { "cmd": "spawn_actor", "actor": "fake_player", "npc_id": "player",
+      "x": 1, "y": 66, "z": -10, "relative": false, "facing": 90 },
+    { "cmd": "animate", "actor": "fake_player", "anim": "collapsed", "loop": true },
+
+    { "cmd": "spawn_actor", "actor": "rescuer", "npc_id": "$combat_rescuer",
+      "x": -1, "y": 66, "z": -10, "relative": false, "facing": -90 },
+
+    { "cmd": "camera", "x": -2.270, "y": 68.256, "z": -7.442,
+      "yaw": -136.5, "pitch": 43.8, "relative": false },
+    { "cmd": "fade", "mode": "in", "ticks": 20 },
+
+    { "cmd": "pause", "ticks": 75 },
+    { "cmd": "message", "text": "event.combat_rescue.wake_first" },
+    { "cmd": "pause", "ticks": 50 },
+    { "cmd": "message", "text": "event.combat_rescue.wake_second" },
+    { "cmd": "pause", "ticks": 50 },
+
+    { "cmd": "speak", "npc_id": "$combat_rescuer", "text": "$combat_rescuer_dialogue" },
+
+    { "cmd": "move_actor", "actor": "rescuer",
+      "x": 0, "y": 66, "z": -8, "ticks": 40, "relative": false },
+    { "cmd": "remove_actor", "actor": "rescuer" },
+
+    { "cmd": "animate", "actor": "fake_player", "anim": "idle", "loop": false },
+    { "cmd": "pause", "ticks": 50 },
+    { "cmd": "emote", "actor": "fake_player", "emote": "sad" },
+    { "cmd": "pause", "ticks": 30 },
+    { "cmd": "end" }
+  ]
+}

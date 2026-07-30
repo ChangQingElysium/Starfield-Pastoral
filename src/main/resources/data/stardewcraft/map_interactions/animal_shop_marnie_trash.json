@@ -1,0 +1,45 @@
+{
+  "format": 1,
+  "priority": 100,
+  "hint": "read",
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "AnimalShop",
+    "tile_action": "NPCMessage Marnie \"Strings\\StringsFromMaps:AnimalShop.20/Strings\\StringsFromMaps:AnimalShop.21\"",
+    "code": "StardewValley.GameLocation.performAction:NPCMessage"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:marnie_ranch",
+    "positions": [
+      [
+        -70,
+        34,
+        19
+      ]
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "action": {
+        "type": "stardewcraft:npc_message",
+        "data": {
+          "npc": "marnie",
+          "nearby": {
+            "translate": "stardewcraft.map_interaction.animal_shop.marnie_trash.nearby",
+            "fallback": "Why are you looking through my trash can?$s"
+          },
+          "fallback": {
+            "translate": "stardewcraft.map_interaction.animal_shop.marnie_trash.fallback",
+            "fallback": "Mostly empty pizza cartons."
+          },
+          "radius": 14,
+          "vertical_radius": 4,
+          "announce_snooping": true
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "format": 1,
+  "priority": 100,
+  "hint": "read",
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "SamHouse",
+    "tile_action": "NPCMessage Sam \"Data\\ExtraDialogue:SamHouse_Sam_Trash/Strings\\Locations:SamHouse_Sam_Trash\"",
+    "code": "StardewValley.GameLocation.performAction:NPCMessage"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:1_willow_lane",
+    "positions": [
+      [
+        -14,
+        39,
+        26
+      ]
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "action": {
+        "type": "stardewcraft:npc_message",
+        "data": {
+          "npc": "sam",
+          "nearby": {
+            "translate": "stardewcraft.map_interaction.sam_house.sam_trash.nearby",
+            "fallback": "Hey, don't look in there!$a"
+          },
+          "fallback": {
+            "translate": "stardewcraft.map_interaction.sam_house.sam_trash.fallback",
+            "fallback": "Looks like Sam cleans his trash bin regularly."
+          },
+          "radius": 14,
+          "vertical_radius": 4,
+          "announce_snooping": true
+        }
+      }
+    }
+  ]
+}

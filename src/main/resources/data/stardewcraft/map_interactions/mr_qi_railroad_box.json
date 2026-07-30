@@ -1,0 +1,32 @@
+{
+  "format": 1,
+  "priority": 1000,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "Railroad",
+    "tile_action": "RailroadBox",
+    "code": "StardewValley.GameLocation.performAction"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:railroad",
+    "boxes": [
+      {
+        "min": [28, 86, -209],
+        "max": [29, 87, -208]
+      }
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "mr_qi_state_machine",
+      "action": {
+        "type": "stardewcraft:mr_qi_anchor",
+        "data": {
+          "anchor": "railroad_box"
+        }
+      }
+    }
+  ]
+}

@@ -24,6 +24,8 @@ public class EventPlayerActorEntity extends Mob {
 
     /** When true, arms are raised straight above the head (item-above-head pose). */
     private boolean holdingItemAboveHead = false;
+    /** Client-authored unconscious pose used by combat rescue scenes. */
+    private boolean collapsed = false;
     private UUID skinSourcePlayerId;
     private boolean slimSkinModel;
 
@@ -78,6 +80,17 @@ public class EventPlayerActorEntity extends Mob {
 
     public void setHoldingItemAboveHead(boolean holding) {
         this.holdingItemAboveHead = holding;
+    }
+
+    public boolean isCollapsed() {
+        return collapsed;
+    }
+
+    public void setCollapsed(boolean collapsed) {
+        this.collapsed = collapsed;
+        if (collapsed) {
+            setWalking(false);
+        }
     }
 
     public UUID getSkinSourcePlayerId() {

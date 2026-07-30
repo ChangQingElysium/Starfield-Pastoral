@@ -30,22 +30,49 @@ public final class WeaponSkillDispatcher {
         return publicSkillId(stack, majorSkill).isPresent();
     }
 
+    /**
+     * Resolves one canonical skill id for both data-driven API weapons and
+     * StardewCraft's legacy weapon items. Stack-aware API data keeps priority
+     * so integrations can intentionally override a built-in item's skill.
+     */
+    public static Optional<ResourceLocation> configuredSkillId(ItemStack stack, boolean majorSkill) {
+        IStardewWeapon builtInWeapon = stack.getItem() instanceof IStardewWeapon weapon
+                ? weapon
+                : null;
+        return configuredSkillId(publicSkillId(stack, majorSkill), builtInWeapon, majorSkill);
+    }
+
+    static Optional<ResourceLocation> configuredSkillId(
+            Optional<ResourceLocation> publicSkill,
+            IStardewWeapon builtInWeapon,
+            boolean majorSkill
+    ) {
+        if (publicSkill.isPresent()) {
+            return publicSkill;
+        }
+        if (builtInWeapon != null) {
+            return builtInWeapon.getSkillId(majorSkill);
+        }
+        return Optional.empty();
+    }
+
     public static InteractionResultHolder<ItemStack> use(
             Level level, Player player, InteractionHand hand, boolean majorSkill) {
+        com.stardew.craft.combat.skill.handler.BuiltinWeaponSkillHandlers.bootstrap();
         ItemStack stack = player.getItemInHand(hand);
-        Optional<ResourceLocation> publicSkill = publicSkillId(stack, majorSkill);
-        if (publicSkill.isPresent()) {
-            var handler = StardewWeaponSkillHandlers.get(publicSkill.get()).orElse(null);
+        Optional<ResourceLocation> configuredSkill = configuredSkillId(stack, majorSkill);
+        if (configuredSkill.isPresent()) {
+            var handler = StardewWeaponSkillHandlers.get(configuredSkill.get()).orElse(null);
             if (handler != null) {
                 try {
                     InteractionResultHolder<ItemStack> result = handler.use(new StardewWeaponSkillContext(
-                            level, player, hand, stack, publicSkill.get(), majorSkill));
+                            level, player, hand, stack, configuredSkill.get(), majorSkill));
                     if (result != null && !result.getResult().equals(net.minecraft.world.InteractionResult.PASS)) {
                         return result;
                     }
                 } catch (RuntimeException exception) {
                     StardewCraft.LOGGER.error("Weapon skill handler {} failed for item {}",
-                            publicSkill.get(), stack.getItem().builtInRegistryHolder().key().location(), exception);
+                            configuredSkill.get(), stack.getItem().builtInRegistryHolder().key().location(), exception);
                 }
             }
         }

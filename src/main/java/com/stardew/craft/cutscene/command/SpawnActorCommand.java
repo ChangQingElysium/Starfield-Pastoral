@@ -47,7 +47,7 @@ public class SpawnActorCommand implements EventCommand {
 
         String resolvedNpcId = "$winter_star_giver".equals(npcId)
             ? com.stardew.craft.client.festival.WinterStarCutsceneContext.giverId()
-            : npcId;
+            : com.stardew.craft.cutscene.runtime.CombatRescueCutsceneContext.resolveNpcId(npcId);
 
         // Choose entity type based on npc_id
         Mob actor;

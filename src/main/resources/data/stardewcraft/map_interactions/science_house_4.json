@@ -1,0 +1,40 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "ScienceHouse",
+    "tile_action": "Message \"ScienceHouse.4\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:carpenter_shop",
+    "boxes": [
+      {
+        "min": [
+          43,
+          59,
+          -126
+        ],
+        "max": [
+          43,
+          59,
+          -126
+        ]
+      }
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.science_house.4",
+          "fallback": "There's a bunch of carpentry magazines."
+        }
+      ]
+    }
+  ]
+}

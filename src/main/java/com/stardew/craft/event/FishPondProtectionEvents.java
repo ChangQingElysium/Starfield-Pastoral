@@ -11,6 +11,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
@@ -60,8 +61,11 @@ public final class FishPondProtectionEvents {
         }
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onBlockPlace(BlockEvent.EntityPlaceEvent event) {
+        if (event instanceof BlockEvent.EntityMultiPlaceEvent) {
+            return;
+        }
         if (!(event.getLevel() instanceof ServerLevel level)) {
             return;
         }
@@ -70,14 +74,14 @@ public final class FishPondProtectionEvents {
         }
 
         if (findProtectedPond(level, event.getPos()).isPresent()) {
-            event.getBlockSnapshot().restore();
+            event.setCanceled(true);
             if (event.getEntity() instanceof ServerPlayer player) {
                 player.displayClientMessage(Component.translatable("message.stardew_craft.fish_pond.protected"), true);
             }
         }
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onBlockMultiPlace(BlockEvent.EntityMultiPlaceEvent event) {
         if (!(event.getLevel() instanceof ServerLevel level)) {
             return;
@@ -88,15 +92,16 @@ public final class FishPondProtectionEvents {
 
         for (var snapshot : event.getReplacedBlockSnapshots()) {
             if (findProtectedPond(level, snapshot.getPos()).isPresent()) {
-                snapshot.restore();
+                event.setCanceled(true);
                 if (event.getEntity() instanceof ServerPlayer player) {
                     player.displayClientMessage(Component.translatable("message.stardew_craft.fish_pond.protected"), true);
                 }
+                return;
             }
         }
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;

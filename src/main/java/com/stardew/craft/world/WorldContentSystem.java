@@ -30,6 +30,8 @@ public final class WorldContentSystem {
         event.addListener(new InteriorRegionRegistry.ReloadListener());
         event.addListener(new WorldRegionRegistry.ReloadListener());
         event.addListener(new WorldAnchorRegistry.ReloadListener());
+        event.addListener(new com.stardew.craft.world.interaction
+                .MapInteractionRegistry.ReloadListener());
         event.addListener(new FarmLayoutDataRegistry.ReloadListener());
         event.addListener(new InteriorPortalRegistry.ReloadListener());
         event.addListener(new MasteryRewardRegistry.ReloadListener());

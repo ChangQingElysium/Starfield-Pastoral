@@ -1,0 +1,33 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "Hospital",
+    "tile_action": "Message \"Hospital.6\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:clinic",
+    "positions": [
+      [
+        12,
+        44,
+        -16
+      ]
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.hospital.6",
+          "fallback": "This clinic is licensed for medical practice by the Ferngill Republic Health Authority."
+        }
+      ]
+    }
+  ]
+}

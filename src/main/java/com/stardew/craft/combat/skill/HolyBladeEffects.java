@@ -1,6 +1,6 @@
 package com.stardew.craft.combat.skill;
 
-import com.stardew.craft.player.PlayerStardewDataAPI;
+import com.stardew.craft.combat.CombatHealing;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -34,12 +34,7 @@ public final class HolyBladeEffects {
         if (player == null) {
             return;
         }
-        int max = PlayerStardewDataAPI.getMaxHealth(player);
-        int current = PlayerStardewDataAPI.getHealth(player);
-        int next = Math.min(max, current + Math.max(0, amount));
-        if (next != current) {
-            PlayerStardewDataAPI.setHealth(player, next);
-        }
+        CombatHealing.heal(player, amount);
 
         if (!(player.level() instanceof ServerLevel level)) {
             return;

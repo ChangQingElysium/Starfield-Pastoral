@@ -15,7 +15,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("null")
-public record OpenObjectDialoguePayload(List<Component> messages, String afterCloseItemId) implements CustomPacketPayload {
+public record OpenObjectDialoguePayload(
+        List<Component> messages,
+        String afterCloseItemId
+) implements CustomPacketPayload {
     public static final Type<OpenObjectDialoguePayload> TYPE =
             new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "open_object_dialogue"));
 
@@ -33,7 +36,8 @@ public record OpenObjectDialoguePayload(List<Component> messages, String afterCl
                 for (int i = 0; i < count; i++) {
                     messages.add(ComponentSerialization.TRUSTED_STREAM_CODEC.decode(buf));
                 }
-                return new OpenObjectDialoguePayload(messages, buf.readUtf(256));
+                return new OpenObjectDialoguePayload(
+                        messages, buf.readUtf(256));
             });
 
     public OpenObjectDialoguePayload(List<Component> messages) {
@@ -63,7 +67,8 @@ public record OpenObjectDialoguePayload(List<Component> messages, String afterCl
         if (mc.player == null) {
             return;
         }
-        var screen = new com.stardew.craft.client.gui.common.StardewObjectDialogueScreen(payload.messages());
+        var screen = new com.stardew.craft.client.gui.common
+                .StardewObjectDialogueScreen(payload.messages());
         String afterItemId = payload.afterCloseItemId();
         if (afterItemId != null && !afterItemId.isEmpty()) {
             screen.withAfterClose(() -> {

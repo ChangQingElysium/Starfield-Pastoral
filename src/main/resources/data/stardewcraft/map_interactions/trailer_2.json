@@ -1,0 +1,32 @@
+{
+  "format": 1,
+  "priority": 100,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "Trailer",
+    "tile_action": "Message \"Trailer.2\"",
+    "code": "StardewValley.GameLocation.performAction:Message"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:trailer",
+    "boxes": [
+      {
+        "min": [65, 35, -3],
+        "max": [65, 37, -3]
+      }
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "default",
+      "messages": [
+        {
+          "translate": "stardewcraft.strings_from_maps.trailer.2",
+          "fallback": "'Marcie And The Underground Castle'"
+        }
+      ]
+    }
+  ]
+}
