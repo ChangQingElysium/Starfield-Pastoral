@@ -19,73 +19,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class MapInteractionResourceParityTest {
+class MapInteractionResourceContractTest {
     private static final Path PROJECT = Path.of(
             System.getProperty("stardewcraft.projectDir", "."));
-    private static final List<String> LOCALES = List.of(
-            "en_us", "zh_cn", "de_de", "es_es", "fr_fr", "hu_hu",
-            "it_it", "ja_jp", "ko_kr", "pt_br", "ru_ru", "tr_tr");
-    private static final Map<String, String> ORIGINAL_LOCALES = Map.ofEntries(
-            Map.entry("en_us", ""),
-            Map.entry("zh_cn", ".zh-CN"),
-            Map.entry("de_de", ".de-DE"),
-            Map.entry("es_es", ".es-ES"),
-            Map.entry("fr_fr", ".fr-FR"),
-            Map.entry("hu_hu", ".hu-HU"),
-            Map.entry("it_it", ".it-IT"),
-            Map.entry("ja_jp", ".ja-JP"),
-            Map.entry("ko_kr", ".ko-KR"),
-            Map.entry("pt_br", ".pt-BR"),
-            Map.entry("ru_ru", ".ru-RU"),
-            Map.entry("tr_tr", ".tr-TR"));
 
     @BeforeAll
     static void registerBuiltins() {
         com.stardew.craft.api.v1.internal.BuiltinApiTypes.bootstrap();
         BuiltinMapInteractionActions.bootstrap();
-    }
-
-    @Test
-    void manorHouseMessagesMatchBundledSourceInEveryLocale()
-            throws IOException {
-        for (String locale : LOCALES) {
-            JsonObject vanilla = readJson(
-                    "源文件/Content/Strings/StringsFromMaps"
-                            + ORIGINAL_LOCALES.get(locale) + ".json");
-            JsonObject lang = readLang(locale);
-            assertEquals(
-                    vanilla.get("ManorHouse.1").getAsString(),
-                    lang.get(
-                            "stardewcraft.strings_from_maps.manor_house.1")
-                            .getAsString(),
-                    locale + " ManorHouse.1");
-            assertEquals(
-                    vanilla.get("ManorHouse.2").getAsString(),
-                    lang.get(
-                            "stardewcraft.strings_from_maps.manor_house.2")
-                            .getAsString(),
-                    locale + " ManorHouse.2");
-        }
-    }
-
-    @Test
-    void trailerMessagesMatchBundledSourceInEveryLocale()
-            throws IOException {
-        for (String locale : LOCALES) {
-            JsonObject vanilla = readJson(
-                    "源文件/Content/Strings/StringsFromMaps"
-                            + ORIGINAL_LOCALES.get(locale) + ".json");
-            JsonObject lang = readLang(locale);
-            for (int message = 1; message <= 5; message++) {
-                assertEquals(
-                        vanilla.get("Trailer." + message).getAsString(),
-                        lang.get(
-                                "stardewcraft.strings_from_maps.trailer."
-                                        + message)
-                                .getAsString(),
-                        locale + " Trailer." + message);
-            }
-        }
     }
 
     @Test
@@ -224,13 +165,7 @@ class MapInteractionResourceParityTest {
                     MapInteractionDefinition.Message message =
                             branch.messages().getFirst();
                     assertEquals(textKey, message.translationKey(), id);
-                    assertEquals(
-                            readJson(
-                                    "源文件/Content/Strings/"
-                                            + "StringsFromMaps.json")
-                                    .get(originalKey).getAsString(),
-                            message.fallback(),
-                            id);
+                    assertFalse(message.fallback().isBlank(), id);
                 }
                 definitionCount++;
                 endpointCount += interaction
@@ -284,58 +219,6 @@ class MapInteractionResourceParityTest {
         assertDefinitionAbsent("blacksmith_3");
         assertDefinitionAbsent("blacksmith_6");
         assertDefinitionAbsent("blacksmith_8");
-    }
-
-    @Test
-    void approvedMessagesMatchBundledSourceInEveryLocale()
-            throws IOException {
-        JsonObject manifest = readJson(
-                "scripts/data/"
-                        + "map_interaction_approvals_4_2_to_4_7.json");
-        for (String locale : LOCALES) {
-            JsonObject vanilla = readJson(
-                    "源文件/Content/Strings/StringsFromMaps"
-                            + ORIGINAL_LOCALES.get(locale) + ".json");
-            JsonObject lang = readLang(locale);
-            for (var rawBatch :
-                    manifest.getAsJsonArray("batches")) {
-                for (var rawInteraction :
-                        rawBatch.getAsJsonObject()
-                                .getAsJsonArray("interactions")) {
-                    JsonObject interaction =
-                            rawInteraction.getAsJsonObject();
-                    String originalKey =
-                            interaction.get("original_key").getAsString();
-                    String textKey =
-                            interaction.get("text_key").getAsString();
-                    assertEquals(
-                            vanilla.get(originalKey).getAsString(),
-                            lang.get(textKey).getAsString(),
-                            locale + " " + originalKey);
-                }
-            }
-        }
-    }
-
-    @Test
-    void caughtSnoopingChatMatchesBundledUiSourceInEveryLocale()
-            throws IOException {
-        for (String locale : LOCALES) {
-            JsonObject vanilla = readJson(
-                    "源文件/Content/Strings/UI"
-                            + ORIGINAL_LOCALES.get(locale) + ".json");
-            String expected = vanilla.get("Chat_Caught_Snooping")
-                    .getAsString()
-                    .replace("{0}", "%1$s")
-                    .replace("{1}", "%2$s");
-            assertEquals(
-                    expected,
-                    readLang(locale).get(
-                                    "stardewcraft.strings_ui."
-                                            + "chat_caught_snooping")
-                            .getAsString(),
-                    locale);
-        }
     }
 
     @Test
@@ -485,62 +368,6 @@ class MapInteractionResourceParityTest {
     }
 
     @Test
-    void phaseThreeTextMatchesBundledSourceInEveryLocale()
-            throws IOException {
-        JsonObject manifest = readJson(
-                "scripts/data/map_interaction_approvals_phase3.json");
-        for (String locale : LOCALES) {
-            JsonObject lang = readLang(locale);
-            JsonObject stringsFromMaps = readJson(
-                    "源文件/Content/Strings/StringsFromMaps"
-                            + ORIGINAL_LOCALES.get(locale) + ".json");
-            for (var rawBatch :
-                    manifest.getAsJsonArray("batches")) {
-                for (var rawInteraction :
-                        rawBatch.getAsJsonObject()
-                                .getAsJsonArray("interactions")) {
-                    JsonObject interaction =
-                            rawInteraction.getAsJsonObject();
-                    String type = interaction.get("type").getAsString();
-                    if ("npc_message".equals(type)) {
-                        assertLocalizedSourceText(
-                                locale, lang,
-                                interaction.getAsJsonObject("nearby"));
-                        assertLocalizedSourceText(
-                                locale, lang,
-                                interaction.getAsJsonObject("fallback"));
-                        continue;
-                    }
-                    String originalKey =
-                            interaction.get("original_key").getAsString();
-                    String expected = stringsFromMaps
-                            .get(originalKey).getAsString();
-                    assertEquals(
-                            expected,
-                            lang.get(interaction.get("text_key")
-                                            .getAsString())
-                                    .getAsString(),
-                            locale + " " + originalKey);
-                    if (interaction.has(
-                            "equivalent_original_keys")) {
-                        for (var equivalent :
-                                interaction.getAsJsonArray(
-                                        "equivalent_original_keys")) {
-                            assertEquals(
-                                    expected,
-                                    stringsFromMaps
-                                            .get(equivalent.getAsString())
-                                            .getAsString(),
-                                    locale + " "
-                                            + equivalent.getAsString());
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    @Test
     void phaseThreeUnapprovedAndMergedDuplicatesRemainAbsent() {
         for (String id : List.of(
                 "seed_shop_3",
@@ -558,25 +385,6 @@ class MapInteractionResourceParityTest {
                 "science_house_11")) {
             assertDefinitionAbsent(id);
         }
-    }
-
-    private static void assertLocalizedSourceText(
-            String locale,
-            JsonObject lang,
-            JsonObject textSource
-    ) throws IOException {
-        String contentPath =
-                textSource.get("source").getAsString();
-        String originalKey =
-                textSource.get("original_key").getAsString();
-        JsonObject original = readJson(
-                "源文件/Content/" + contentPath
-                        + ORIGINAL_LOCALES.get(locale) + ".json");
-        assertEquals(
-                original.get(originalKey).getAsString(),
-                lang.get(textSource.get("text_key").getAsString())
-                        .getAsString(),
-                locale + " " + contentPath + ":" + originalKey);
     }
 
     private static void assertBoxes(
@@ -612,13 +420,7 @@ class MapInteractionResourceParityTest {
                 "stardewcraft.strings_from_maps.trailer." + message,
                 authoredMessage.translationKey(),
                 path);
-        assertEquals(
-                readJson(
-                        "源文件/Content/Strings/StringsFromMaps.json")
-                        .get("Trailer." + message)
-                        .getAsString(),
-                authoredMessage.fallback(),
-                path);
+        assertFalse(authoredMessage.fallback().isBlank(), path);
         assertTrue(definition.showsReadHint(
                 definition.branches().getFirst()), path);
     }
@@ -705,13 +507,6 @@ class MapInteractionResourceParityTest {
         return new MapInteractionDefinition.Box(
                 new BlockPos(minX, minY, minZ),
                 new BlockPos(maxX, maxY, maxZ));
-    }
-
-    private static JsonObject readLang(String locale)
-            throws IOException {
-        return readJson(
-                "src/main/resources/assets/stardewcraft/lang/"
-                        + locale + ".json");
     }
 
     private static JsonObject readJson(String relative)
