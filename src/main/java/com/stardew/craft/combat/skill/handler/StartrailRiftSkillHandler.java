@@ -16,9 +16,11 @@ import com.stardew.craft.combat.skill.runtime.SkillExecutionContext;
 import com.stardew.craft.combat.skill.runtime.SkillInstance;
 import com.stardew.craft.combat.skill.runtime.SkillValidation;
 import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillMovementControl;
 import com.stardew.craft.item.weapon.WeaponSkillData;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import java.util.List;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -49,6 +51,14 @@ public final class StartrailRiftSkillHandler
 
     @Override
     public SkillValidation validate(SkillExecutionContext context) {
+        if (WeaponSkillMovementControl.isLocked(
+                context.player(),
+                context.nowTick()
+        )) {
+            return SkillValidation.reject(
+                    SkillValidation.RejectionReason.INVALID_STATE
+            );
+        }
         if (WeaponSkillRuntime.hasActive(
                 context.player().getUUID(),
                 context.skillId()
@@ -82,6 +92,14 @@ public final class StartrailRiftSkillHandler
             SkillExecutionContext context,
             SkillInstance instance
     ) {
+        if (WeaponSkillMovementControl.isLocked(
+                context.player(),
+                context.nowTick()
+        )) {
+            throw new IllegalStateException(
+                    "Validated Startrail Rift movement is now locked"
+            );
+        }
         Vec3 start = context.player().position();
         Vec3 end = DragonBreathThrustSkillHandler.resolveSafeDashEnd(
                 context.player(),
@@ -108,59 +126,73 @@ public final class StartrailRiftSkillHandler
         boolean boosted = isBoostedForStacks(stacks);
         String weaponId = context.weaponId().getPath();
         String skillId = context.skillData().getId();
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                weaponId,
-                skillId,
-                context.nowTick(),
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 context.skillData().getCooldown() * 20
         );
+        StartrailRiftExecutionState executionState =
+                new StartrailRiftExecutionState(
+                        targets.stream()
+                                .map(LivingEntity::getUUID)
+                                .toList()
+                );
+        instance.initializeExecutionState(executionState);
 
-        for (LivingEntity target : targets) {
-            attackTarget(context, target, boosted);
+        instance.registerCommittedEffect(() -> {
+            for (LivingEntity target : targets) {
+                attackTarget(context, target, boosted);
+            }
+            DashMovementTracker.start(
+                    context.player(),
+                    context.nowTick(),
+                    end,
+                    DASH_DURATION_TICKS
+            );
+            sendRiftPresentation(context, start, end, boosted);
+            context.player().addEffect(new MobEffectInstance(
+                    MobEffects.MOVEMENT_SPEED,
+                    SPEED_DURATION_TICKS,
+                    SPEED_AMPLIFIER,
+                    false,
+                    true,
+                    true
+            ));
+            WeaponSkillAnimationDispatcher.sendSkillAnim(
+                    context.player(),
+                    weaponId,
+                    skillId,
+                    ANIMATION_TICKS
+            );
+            WeaponSkillAnimationLock.setLock(
+                    context.player(),
+                    context.nowTick(),
+                    ANIMATION_TICKS
+            );
+        });
+    }
+
+    /** Settles this cast's reward from its first exact positive applied hit. */
+    public static boolean settleAppliedHitRewards(
+            ServerPlayer player,
+            LivingEntity target
+    ) {
+        if (player == null || target == null) {
+            return false;
         }
-        DashMovementTracker.start(
-                context.player(),
-                context.nowTick(),
-                end,
-                DASH_DURATION_TICKS
-        );
-        sendRiftPresentation(context, start, end, boosted);
-
-        if (!targets.isEmpty()) {
-            StartrailTracker.addStacks(
-                    context.player(),
-                    HIT_STARTRAIL_RESTORE
-            );
-            PlayerStardewDataAPI.restoreEnergy(
-                    context.player(),
-                    HIT_ENERGY_RESTORE
-            );
-            CombatHealing.heal(
-                    context.player(),
-                    HIT_HEALTH_RESTORE
-            );
+        boolean claimed = WeaponSkillRuntime.activeExecutionState(
+                player.getUUID(),
+                BuiltinWeaponSkillHandlers.STARTRAIL_RIFT,
+                StartrailRiftExecutionState.class
+        ).map(state -> state.claimAppliedHitRewards(target.getUUID()))
+                .orElse(false);
+        if (!claimed) {
+            return false;
         }
-        context.player().addEffect(new MobEffectInstance(
-                MobEffects.MOVEMENT_SPEED,
-                SPEED_DURATION_TICKS,
-                SPEED_AMPLIFIER,
-                false,
-                true,
-                true
-        ));
-
-        WeaponSkillAnimationDispatcher.sendSkillAnim(
-                context.player(),
-                weaponId,
-                skillId,
-                ANIMATION_TICKS
-        );
-        WeaponSkillAnimationLock.setLock(
-                context.player(),
-                context.nowTick(),
-                ANIMATION_TICKS
-        );
+        StartrailTracker.addStacks(player, HIT_STARTRAIL_RESTORE);
+        PlayerStardewDataAPI.restoreEnergy(player, HIT_ENERGY_RESTORE);
+        CombatHealing.heal(player, HIT_HEALTH_RESTORE);
+        return true;
     }
 
     static boolean isBoostedForStacks(int stacks) {
@@ -214,7 +246,9 @@ public final class StartrailRiftSkillHandler
                 target,
                 createHitContext(context.skillData(), boosted),
                 context.weaponSnapshot(),
-                context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS
+                context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS,
+                WeaponSkillDamage.AttackGatePolicy.RESPECT_AT_IMPACT,
+                WeaponSkillDamage.HitCooldownPolicy.RESPECT_VANILLA
         );
     }
 

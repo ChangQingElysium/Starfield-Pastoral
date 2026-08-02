@@ -1,6 +1,5 @@
 package com.stardew.craft.combat.skill.handler;
 
-import com.stardew.craft.combat.skill.DwarfDaggerThrustTracker;
 import com.stardew.craft.item.weapon.WeaponData;
 import com.stardew.craft.item.weapon.WeaponRegistry;
 import com.stardew.craft.item.weapon.WeaponSkillData;
@@ -9,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DwarfDaggerThrustSkillHandlerTest {
     @Test
@@ -24,22 +24,60 @@ class DwarfDaggerThrustSkillHandlerTest {
         assertEquals(8.0, DwarfDaggerThrustSkillHandler.THRUST_DISTANCE);
         assertEquals(5, DwarfDaggerThrustSkillHandler.THRUST_DURATION_TICKS);
         assertEquals(8, DwarfDaggerThrustSkillHandler.ANIMATION_TICKS);
-        assertEquals(1.2, DwarfDaggerThrustTracker.HIT_RADIUS);
+        assertEquals(1.2, DwarfDaggerThrustSkillHandler.HIT_RADIUS);
         assertEquals(
                 5,
-                DwarfDaggerThrustTracker.HIT_CONTEXT_LIFETIME_TICKS
+                DwarfDaggerThrustSkillHandler.HIT_CONTEXT_LIFETIME_TICKS
         );
         assertEquals(
                 100,
-                DwarfDaggerThrustTracker.WEAK_POINT_DURATION_TICKS
+                DwarfDaggerThrustSkillHandler.WEAK_POINT_DURATION_TICKS
         );
-        assertEquals(3, DwarfDaggerThrustTracker.WEAK_POINT_AMPLIFIER);
+        assertEquals(3, DwarfDaggerThrustSkillHandler.WEAK_POINT_AMPLIFIER);
         assertEquals(
                 50,
-                DwarfDaggerThrustTracker.RESISTANCE_DURATION_TICKS
+                DwarfDaggerThrustSkillHandler.RESISTANCE_DURATION_TICKS
         );
-        assertEquals(2, DwarfDaggerThrustTracker.RESISTANCE_AMPLIFIER);
-        assertEquals(2.0F, DwarfDaggerThrustTracker.ENERGY_RESTORE);
+        assertEquals(2, DwarfDaggerThrustSkillHandler.RESISTANCE_AMPLIFIER);
+        assertEquals(2.0F, DwarfDaggerThrustSkillHandler.ENERGY_RESTORE);
         assertFalse(new DwarfDaggerThrustSkillHandler().completesImmediately());
+    }
+
+    @Test
+    void executionKeepsTheInclusiveFinalMovementTick() {
+        long endTick = 105L;
+
+        assertTrue(DwarfDaggerThrustExecutionState.isWithinExecutionWindow(
+                endTick,
+                endTick
+        ));
+        assertFalse(DwarfDaggerThrustExecutionState.isWithinExecutionWindow(
+                endTick + 1L,
+                endTick
+        ));
+        assertFalse(DwarfDaggerThrustExecutionState.shouldSnapToEnd(
+                endTick - 2L,
+                endTick
+        ));
+        assertTrue(DwarfDaggerThrustExecutionState.shouldSnapToEnd(
+                endTick - 1L,
+                endTick
+        ));
+    }
+
+    @Test
+    void firstPositiveAppliedHitOwnsTheOneTimeReward() {
+        assertTrue(DwarfDaggerThrustExecutionState.shouldApplyHitBonus(
+                true,
+                false
+        ));
+        assertFalse(DwarfDaggerThrustExecutionState.shouldApplyHitBonus(
+                false,
+                false
+        ));
+        assertFalse(DwarfDaggerThrustExecutionState.shouldApplyHitBonus(
+                true,
+                true
+        ));
     }
 }

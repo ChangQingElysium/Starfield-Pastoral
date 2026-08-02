@@ -8,6 +8,7 @@ import com.stardew.craft.combat.skill.runtime.SkillExecutionContext;
 import com.stardew.craft.combat.skill.runtime.SkillInstance;
 import com.stardew.craft.combat.skill.runtime.SkillTargeting;
 import com.stardew.craft.combat.skill.runtime.SkillValidation;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
 import java.util.List;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -51,19 +52,15 @@ public final class TideMarkSkillHandler implements RuntimeWeaponSkillHandler {
 
         String weaponId = context.weaponId().getPath();
         String skillId = context.skillData().getId();
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                weaponId,
-                skillId,
-                context.nowTick(),
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 context.skillData().getCooldown() * 20
         );
-        TideMarkTracker.apply(
-                target,
-                context.player(),
-                context.nowTick(),
+        instance.registerCommittedEffect(() -> TideMarkTracker.apply(
+                target, context.player(), context.nowTick(),
                 MARK_DURATION_TICKS
-        );
+        ));
 
         // The original skill only sent its animation notification; it did not
         // impose a server-side animation lock.

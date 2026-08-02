@@ -12,6 +12,7 @@ public class SkillContext {
     private final boolean ignoreDefense;    // 是否无视防御
     private final boolean guaranteedCrit;   // 是否必定暴击
     private final float critChanceBonus;    // 额外暴击率加成
+    private final boolean defaultKnockback; // 是否使用武器默认击退
     
     private SkillContext(Builder builder) {
         this.skillId = builder.skillId;
@@ -20,6 +21,7 @@ public class SkillContext {
         this.ignoreDefense = builder.ignoreDefense;
         this.guaranteedCrit = builder.guaranteedCrit;
         this.critChanceBonus = builder.critChanceBonus;
+        this.defaultKnockback = builder.defaultKnockback;
     }
     
     // Getters
@@ -29,6 +31,7 @@ public class SkillContext {
     public boolean isIgnoreDefense() { return ignoreDefense; }
     public boolean isGuaranteedCrit() { return guaranteedCrit; }
     public float getCritChanceBonus() { return critChanceBonus; }
+    public boolean usesDefaultKnockback() { return defaultKnockback; }
     
     /**
      * 技能等级
@@ -71,6 +74,7 @@ public class SkillContext {
         private boolean ignoreDefense = false;
         private boolean guaranteedCrit = false;
         private float critChanceBonus = 0.0f;
+        private boolean defaultKnockback = true;
         
         public Builder skillId(String val) { this.skillId = val; return this; }
         public Builder tier(SkillTier val) { this.tier = val; return this; }
@@ -78,6 +82,7 @@ public class SkillContext {
         public Builder ignoreDefense(boolean val) { this.ignoreDefense = val; return this; }
         public Builder guaranteedCrit(boolean val) { this.guaranteedCrit = val; return this; }
         public Builder critChanceBonus(float val) { this.critChanceBonus = val; return this; }
+        public Builder defaultKnockback(boolean val) { this.defaultKnockback = val; return this; }
         
         public SkillContext build() {
             return new SkillContext(this);

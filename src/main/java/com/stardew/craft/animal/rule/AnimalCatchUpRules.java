@@ -26,6 +26,14 @@ public final class AnimalCatchUpRules {
         return Optional.of(new Step(targetDay, targetDay < currentAbsDay));
     }
 
+    /**
+     * A normal overnight pass must visit every due animal once before the new day is exposed.
+     * The fixed minimum remains useful for catch-up, but must not truncate a large active farm.
+     */
+    public static int initialSettlementBudget(int minimumBudget, int dueAnimalCount) {
+        return Math.max(Math.max(0, minimumBudget), Math.max(0, dueAnimalCount));
+    }
+
     public record Step(int targetAbsDay, boolean offlineCatchUp) {
     }
 }

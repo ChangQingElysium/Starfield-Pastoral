@@ -4,6 +4,10 @@ import com.stardew.craft.combat.skill.SkillContext;
 import com.stardew.craft.combat.skill.TideMarkTracker;
 import com.stardew.craft.combat.skill.WeaponDamageSnapshot;
 import com.stardew.craft.combat.skill.WeaponSkillDamage;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillMovementArbiter;
+import com.stardew.craft.combat.skill.TideAnchorRootTracker;
+import com.stardew.craft.combat.equipment.EquipmentMobEffectHandler;
+import com.stardew.craft.combat.equipment.EquipmentNegativeStatusProtection;
 import com.stardew.craft.combat.network.WaterRingEffectPayload;
 import com.stardew.craft.entity.ModEntities;
 import net.minecraft.core.HolderLookup;
@@ -12,6 +16,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -177,14 +182,18 @@ public class TideAnchorProjectileEntity extends ThrowableProjectile {
                     target,
                     hitContext,
                     releaseWeaponSnapshot,
-                    nowTick + HIT_CONTEXT_LIFETIME_TICKS
+                    nowTick + HIT_CONTEXT_LIFETIME_TICKS,
+                    WeaponSkillDamage.AttackGatePolicy.SKILL_DAMAGE,
+                    WeaponSkillDamage.HitCooldownPolicy.RESPECT_VANILLA
                 );
             } else {
                 WeaponSkillDamage.apply(
                     player,
                     target,
                     hitContext,
-                    nowTick + HIT_CONTEXT_LIFETIME_TICKS
+                    nowTick + HIT_CONTEXT_LIFETIME_TICKS,
+                    WeaponSkillDamage.AttackGatePolicy.SKILL_DAMAGE,
+                    WeaponSkillDamage.HitCooldownPolicy.RESPECT_VANILLA
                 );
             }
         }
@@ -193,24 +202,46 @@ public class TideAnchorProjectileEntity extends ThrowableProjectile {
         LivingEntity marked = findNearestMarkedTarget(player, hitPos);
         if (marked != null) {
             Vec3 oldPos = marked.position();
+            if (marked instanceof ServerPlayer serverPlayer) {
+                WeaponSkillMovementArbiter.revokeCurrent(serverPlayer);
+            }
             marked.teleportTo(hitPos.x, hitPos.y, hitPos.z);
             marked.setDeltaMovement(0, marked.getDeltaMovement().y, 0);
-            marked.addEffect(new MobEffectInstance(
-                MobEffects.MOVEMENT_SLOWDOWN,
-                ROOT_DURATION_TICKS,
-                ROOT_SLOW_AMPLIFIER,
-                false,
-                true,
-                true
-            ));
-            marked.addEffect(new MobEffectInstance(
-                MobEffects.JUMP,
-                ROOT_DURATION_TICKS,
-                ROOT_JUMP_AMPLIFIER,
-                false,
-                false,
-                false
-            ));
+            EquipmentNegativeStatusProtection.Decision protection =
+                    EquipmentNegativeStatusProtection.decide(
+                            marked,
+                            ROOT_DURATION_TICKS
+                    );
+            if (!protection.resisted()) {
+                int rootDuration = protection.durationTicks();
+                TideAnchorRootTracker.applyPreAdjusted(
+                        marked,
+                        nowTick,
+                        rootDuration
+                );
+                EquipmentMobEffectHandler.addPreAdjustedEffect(
+                        marked,
+                        new MobEffectInstance(
+                                MobEffects.MOVEMENT_SLOWDOWN,
+                                rootDuration,
+                                ROOT_SLOW_AMPLIFIER,
+                                false,
+                                true,
+                                true
+                        )
+                );
+                EquipmentMobEffectHandler.addPreAdjustedEffect(
+                        marked,
+                        new MobEffectInstance(
+                                MobEffects.JUMP,
+                                rootDuration,
+                                ROOT_JUMP_AMPLIFIER,
+                                false,
+                                false,
+                                false
+                        )
+                );
+            }
 
             if (serverLevel != null) {
                 serverLevel.playSound(null, hitPos.x, hitPos.y, hitPos.z,

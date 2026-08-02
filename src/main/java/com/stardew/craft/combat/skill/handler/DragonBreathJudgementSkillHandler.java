@@ -10,8 +10,10 @@ import com.stardew.craft.combat.skill.runtime.SkillExecutionContext;
 import com.stardew.craft.combat.skill.runtime.SkillInstance;
 import com.stardew.craft.combat.skill.runtime.SkillTargeting;
 import com.stardew.craft.combat.skill.runtime.SkillValidation;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
 import com.stardew.craft.item.weapon.WeaponSkillData;
 import java.util.List;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
@@ -54,38 +56,58 @@ public final class DragonBreathJudgementSkillHandler
                     "Validated Dragon Breath stacks are no longer available"
             );
         }
+        instance.registerBeginFailureCleanup(() ->
+                DragonBreathTracker.setStacks(
+                        context.player(),
+                        consumedStacks
+                )
+        );
 
         float criticalChanceBonus =
                 criticalChanceBonus(consumedStacks);
-        for (LivingEntity target : targets) {
-            attackTarget(
-                    context,
-                    target,
-                    criticalChanceBonus
-            );
-        }
-
-        int refund = refundForTargetCount(targets.size());
-        if (refund > 0) {
-            DragonBreathTracker.addStacks(
-                    context.player(),
-                    refund
-            );
-        }
-
+        DragonBreathJudgementExecutionState executionState =
+                new DragonBreathJudgementExecutionState();
+        instance.initializeExecutionState(executionState);
         String weaponId = context.weaponId().getPath();
         String skillId = context.skillData().getId();
-        WeaponSkillAnimationDispatcher.sendSkillAnim(
-                context.player(),
-                weaponId,
-                skillId,
-                ANIMATION_TICKS
-        );
-        WeaponSkillAnimationLock.setLock(
-                context.player(),
-                context.nowTick(),
-                ANIMATION_TICKS
-        );
+        instance.registerCommittedEffect(() -> {
+            for (LivingEntity target : targets) {
+                attackTarget(context, target, criticalChanceBonus);
+            }
+            int refund = executionState.settleRefund();
+            if (refund > 0) {
+                DragonBreathTracker.addStacks(
+                        context.player(),
+                        refund
+                );
+            }
+            WeaponSkillAnimationDispatcher.sendSkillAnim(
+                    context.player(),
+                    weaponId,
+                    skillId,
+                    ANIMATION_TICKS
+            );
+            WeaponSkillAnimationLock.setLock(
+                    context.player(),
+                    context.nowTick(),
+                    ANIMATION_TICKS
+            );
+        });
+    }
+
+    public static boolean recordAppliedHit(
+            ServerPlayer player,
+            LivingEntity target
+    ) {
+        if (player == null || target == null) {
+            return false;
+        }
+        return WeaponSkillRuntime.activeExecutionState(
+                player.getUUID(),
+                BuiltinWeaponSkillHandlers.DRAGON_BREATH_JUDGEMENT,
+                DragonBreathJudgementExecutionState.class
+        ).map(state -> state.recordAppliedTarget(target.getUUID()))
+                .orElse(false);
     }
 
     static int extraStacks(int consumedStacks) {
@@ -136,7 +158,9 @@ public final class DragonBreathJudgementSkillHandler
                         criticalChanceBonus
                 ),
                 context.weaponSnapshot(),
-                context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS
+                context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS,
+                WeaponSkillDamage.AttackGatePolicy.RESPECT_AT_IMPACT,
+                WeaponSkillDamage.HitCooldownPolicy.RESPECT_VANILLA
         );
     }
 }

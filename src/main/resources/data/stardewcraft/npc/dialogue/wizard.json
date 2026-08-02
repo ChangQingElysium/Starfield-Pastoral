@@ -21,6 +21,10 @@
     "GreenRain": "stardewcraft.npc.wizard.greenrain",
     "GreenRain_2": "stardewcraft.npc.wizard.greenrain_2",
     "married": "stardewcraft.npc.wizard.married",
-    "default": "stardewcraft.npc.wizard.default"
+    "default": "stardewcraft.npc.wizard.default",
+    "AcceptGift_(O)StardropTea": "stardewcraft.npc.wizard.acceptgift_(o)stardroptea",
+    "accept_868": "stardewcraft.npc.wizard.accept_868",
+    "MovieInvitation": "stardewcraft.npc.wizard.movieinvitation",
+    "roommates_Krobus": "stardewcraft.npc.wizard.roommates_krobus"
   }
 }

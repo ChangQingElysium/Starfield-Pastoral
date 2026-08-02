@@ -2,36 +2,56 @@
   "npc_id": "linus",
   "override_vanilla": true,
   "_format": "time -> \"location @namedPointId facing [behavior]\" | {_goto: key} | {_condition: expr}",
-  "GreenRain": {
-    "800": "mountain @linus_tent_fire 3"
-  },
   "rain": {
-    "900": "mountain @linus_tent_inside 2",
-    "2000": "mountain @linus_tent_sleep 2 linus_sleep"
+    "700": "tent @linus_schedule_11 0",
+    "930": "mountain @linus_schedule_01 1",
+    "1010": "tent @linus_schedule_12 2",
+    "1500": "mountain @linus_schedule_02 2",
+    "1900": "tent @linus_schedule_11 2"
   },
-  "spring": {
-    "800": "mountain @linus_tent_fire 3",
-    "1100": "mountain @linus_mountain_forage 1",
-    "1500": "mountain @linus_tent_fire 3",
-    "2200": "mountain @linus_tent_sleep 2 linus_sleep"
+  "GreenRain": {
+    "610": "mountain @linus_schedule_03 2",
+    "1200": "mountain @linus_schedule_04 1",
+    "1700": "mountain @linus_schedule_05 3",
+    "2200": "tent @linus_schedule_14 2 linus_sleep"
+  },
+  "DesertFestival_2": {
+    "610": "tent @linus_schedule_11 0",
+    "700": "desert @linus_schedule_18 1 dialogue",
+    "2540": "tent @linus_schedule_14 2 linus_sleep"
+  },
+  "winter_15": {
+    "1100": "mountain @linus_schedule_06 1",
+    "1600": "beach @linus_schedule_17 2 dialogue",
+    "2330": "tent @linus_schedule_14 2 linus_sleep"
   },
   "summer": {
-    "800": "mountain @linus_tent_fire 3",
-    "1000": "beach @linus_beach_fish 2",
-    "1500": "mountain @linus_mountain_forage 1",
-    "2000": "mountain @linus_tent_sleep 2 linus_sleep"
+    "630": "mountain @linus_schedule_04 1",
+    "940": "mountain @linus_schedule_07 1 square_3_3",
+    "1300": "mountain @linus_schedule_08 2 square_3_3",
+    "1600": "mountain @linus_schedule_06 1",
+    "2000": "mountain @linus_schedule_01 1",
+    "2020": "tent @linus_schedule_11 2"
   },
   "fall": {
-    "800": "mountain @linus_tent_fire 3",
-    "1100": "mountain @linus_mountain_forage 1",
-    "1500": "town @linus_town_dumpster 0",
-    "1800": "mountain @linus_tent_fire 3",
-    "2200": "mountain @linus_tent_sleep 2 linus_sleep"
+    "700": "mountain @linus_schedule_01 1",
+    "740": "mountain @linus_schedule_06 1",
+    "900": "railroad @linus_schedule_15 2 square_5_5",
+    "1400": "mountain @linus_schedule_09 1",
+    "1800": "tent @linus_schedule_11 2"
   },
   "winter": {
-    "900": "mountain @linus_tent_inside 2",
-    "1200": "mountain @linus_tent_fire 3",
-    "1500": "mountain @linus_mountain_forage 1",
-    "2000": "mountain @linus_tent_sleep 2 linus_sleep"
+    "1100": "mountain @linus_schedule_06 1",
+    "1400": "bathhouse_entry @linus_schedule_16 3 dialogue",
+    "1800": "tent @linus_schedule_11 2"
+  },
+  "spring": {
+    "630": "mountain @linus_schedule_01 1",
+    "700": "mountain @linus_schedule_06 1",
+    "930": "mountain @linus_schedule_10 1",
+    "1400": "mountain @linus_schedule_06 1",
+    "1900": "tent @linus_schedule_12 1",
+    "2100": "tent @linus_schedule_13 2",
+    "2300": "tent @linus_schedule_14 2 linus_sleep"
   }
 }

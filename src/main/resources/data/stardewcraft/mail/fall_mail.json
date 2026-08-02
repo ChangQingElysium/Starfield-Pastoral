@@ -10,6 +10,12 @@
     "background": 0
   },
   {
+    "id": "fall_3_1",
+    "text": "stardewcraft.mail.fall_3_1",
+    "background": 0,
+    "questId": "106"
+  },
+  {
     "id": "fall_6_1",
     "text": "stardewcraft.mail.fall_6_1",
     "background": 0
@@ -17,7 +23,8 @@
   {
     "id": "fall_8_1",
     "text": "stardewcraft.mail.fall_8_1",
-    "background": 0
+    "background": 0,
+    "questId": "107"
   },
   {
     "id": "fall_12_1",
@@ -34,6 +41,12 @@
     "text": "stardewcraft.mail.fall_18_1",
     "background": 0,
     "money": 500
+  },
+  {
+    "id": "fall_19_1",
+    "text": "stardewcraft.mail.fall_19_1",
+    "background": 0,
+    "questId": "108"
   },
   {
     "id": "fall_20_1",
@@ -54,5 +67,17 @@
     "id": "fall_27_1",
     "text": "stardewcraft.mail.fall_27_1",
     "background": 0
+  },
+  {
+    "id": "fall_6_2",
+    "text": "stardewcraft.mail.fall_6_2",
+    "background": 0,
+    "questId": "121"
+  },
+  {
+    "id": "fall_19_2",
+    "text": "stardewcraft.mail.fall_19_2",
+    "background": 0,
+    "questId": "122"
   }
 ]

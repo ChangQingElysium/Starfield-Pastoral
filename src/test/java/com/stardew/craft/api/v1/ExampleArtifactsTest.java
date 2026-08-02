@@ -409,8 +409,18 @@ class ExampleArtifactsTest {
                 "block/stardew_building_data.json", "minecraft:crafting_table")).result().isPresent());
         assertTrue(StardewAnimalData.CODEC.parse(JsonOps.INSTANCE, dataMapValue(root,
                 "entity_type/stardew_animal_data.json", "minecraft:cow")).result().isPresent());
-        assertTrue(StardewEquipmentData.CODEC.parse(JsonOps.INSTANCE, dataMapValue(root,
-                "item/stardew_equipment_data.json", "minecraft:diamond_sword")).result().isPresent());
+        StardewEquipmentData equipment = StardewEquipmentData.CODEC.parse(
+                JsonOps.INSTANCE,
+                dataMapValue(
+                        root,
+                        "item/stardew_equipment_data.json",
+                        "minecraft:diamond_sword"
+                )
+        ).result().orElseThrow();
+        assertEquals(
+                3,
+                equipment.weapon().orElseThrow().rawSpeed().orElseThrow()
+        );
     }
 
     private static com.google.gson.JsonElement read(Path root, String relativePath) throws Exception {

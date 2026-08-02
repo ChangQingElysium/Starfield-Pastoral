@@ -1,6 +1,5 @@
 package com.stardew.craft.combat.skill.handler;
 
-import com.stardew.craft.combat.skill.DragontoothShivBreathTracker;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationDispatcher;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationLock;
 import com.stardew.craft.combat.skill.WeaponSkillCooldowns;
@@ -12,6 +11,7 @@ import com.stardew.craft.combat.skill.runtime.SkillValidation;
 import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
 import com.stardew.craft.effect.ModMobEffects;
 import com.stardew.craft.player.PlayerStardewDataAPI;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 
@@ -21,6 +21,7 @@ import net.minecraft.world.effect.MobEffects;
 public final class DragontoothShivBreathSkillHandler
         implements RuntimeWeaponSkillHandler {
     public static final float ENERGY_COST = 10.0F;
+    public static final int ACTIVE_DURATION_TICKS = 120;
     public static final int SPEED_AMPLIFIER = 0;
     public static final int RESISTANCE_AMPLIFIER = 1;
     public static final int ANIMATION_TICKS = 8;
@@ -40,8 +41,6 @@ public final class DragontoothShivBreathSkillHandler
         if (WeaponSkillRuntime.hasActive(
                 context.player().getUUID(),
                 context.skillId()
-        ) || DragontoothShivBreathTracker.hasState(
-                context.player().getUUID()
         )) {
             return SkillValidation.reject(
                     SkillValidation.RejectionReason.INVALID_STATE
@@ -57,11 +56,11 @@ public final class DragontoothShivBreathSkillHandler
     @Override
     public void begin(SkillExecutionContext context, SkillInstance instance) {
         if (!canPayEnergy(context)
-                || (!context.player().getAbilities().instabuild
-                && !PlayerStardewDataAPI.consumeEnergy(
-                        context.player(),
+                || !WeaponSkillRuntime.consumeEnergyDuringBegin(
+                        context,
+                        instance,
                         ENERGY_COST
-                ))) {
+                )) {
             throw new IllegalStateException(
                     "Validated Dragontooth breath energy is unavailable"
             );
@@ -69,34 +68,40 @@ public final class DragontoothShivBreathSkillHandler
 
         String weaponId = context.weaponId().getPath();
         String skillId = context.skillData().getId();
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                weaponId,
-                skillId,
-                context.nowTick(),
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 context.skillData().getCooldown() * 20
         );
-        DragontoothShivBreathTracker.start(
-                context.player(),
-                context.nowTick(),
-                DragontoothShivBreathTracker.ACTIVE_DURATION_TICKS
-        );
-        context.player().addEffect(new MobEffectInstance(
-                ModMobEffects.SPEED,
-                DragontoothShivBreathTracker.ACTIVE_DURATION_TICKS,
-                SPEED_AMPLIFIER,
-                false,
-                true,
-                true
-        ));
-        context.player().addEffect(new MobEffectInstance(
-                MobEffects.DAMAGE_RESISTANCE,
-                DragontoothShivBreathTracker.ACTIVE_DURATION_TICKS,
-                RESISTANCE_AMPLIFIER,
-                false,
-                true,
-                true
-        ));
+        DragontoothShivBreathExecutionState executionState =
+                new DragontoothShivBreathExecutionState(
+                        context.player().level().dimension(),
+                        context.nowTick(),
+                        ACTIVE_DURATION_TICKS
+                );
+        instance.initializeExecutionState(executionState);
+        instance.registerCommittedEffect(() -> {
+            executionState.start(
+                    context.player(),
+                    ACTIVE_DURATION_TICKS
+            );
+            context.player().addEffect(new MobEffectInstance(
+                    ModMobEffects.SPEED,
+                    ACTIVE_DURATION_TICKS,
+                    SPEED_AMPLIFIER,
+                    false,
+                    true,
+                    true
+            ));
+            context.player().addEffect(new MobEffectInstance(
+                    MobEffects.DAMAGE_RESISTANCE,
+                    ACTIVE_DURATION_TICKS,
+                    RESISTANCE_AMPLIFIER,
+                    false,
+                    true,
+                    true
+            ));
+        });
 
         WeaponSkillAnimationLock.setLock(
                 context.player(),
@@ -116,22 +121,35 @@ public final class DragontoothShivBreathSkillHandler
         return false;
     }
 
+    /**
+     * Exact runtime-owned stance query for normal attacks and damage rules.
+     */
+    public static boolean isActive(
+            ServerPlayer player,
+            long nowTick
+    ) {
+        if (player == null) {
+            return false;
+        }
+        return WeaponSkillRuntime.activeExecutionState(
+                player.getUUID(),
+                BuiltinWeaponSkillHandlers.DRAGONTOOTH_SHIV_BREATH,
+                DragontoothShivBreathExecutionState.class
+        ).filter(state -> state.isActive(
+                nowTick,
+                player.level().dimension(),
+                player.isAlive() && !player.isRemoved()
+        )).isPresent();
+    }
+
     @Override
     public SkillTickResult tick(
             SkillExecutionContext context,
             SkillInstance instance
     ) {
-        DragontoothShivBreathTracker.tick(
-                context.player(),
-                context.nowTick()
-        );
-        return DragontoothShivBreathTracker.hasState(
-                context.player().getUUID()
-        )
-                ? SkillTickResult.CONTINUE
-                : context.player().isAlive()
-                ? SkillTickResult.COMPLETE
-                : SkillTickResult.CANCEL;
+        return instance.requireExecutionState(
+                DragontoothShivBreathExecutionState.class
+        ).advance(context);
     }
 
     @Override
@@ -140,7 +158,8 @@ public final class DragontoothShivBreathSkillHandler
             SkillInstance instance,
             SkillInstance.EndReason reason
     ) {
-        DragontoothShivBreathTracker.clear(context.player());
+        instance.executionState(DragontoothShivBreathExecutionState.class)
+                .ifPresent(state -> state.cancel(context.player()));
     }
 
     static boolean canPayEnergy(

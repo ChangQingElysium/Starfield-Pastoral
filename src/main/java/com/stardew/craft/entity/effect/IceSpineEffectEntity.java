@@ -175,14 +175,15 @@ public class IceSpineEffectEntity extends Entity {
             .tier(SkillContext.SkillTier.MAJOR)
             .damageMultiplier(damageMultiplier)
             .build();
-        target.invulnerableTime = 0;
-        target.hurtTime = 0;
         if (releaseWeaponSnapshot == null) {
             WeaponSkillDamage.apply(
                 player,
                 target,
                 context,
-                nowTick + 5
+                nowTick + 5,
+                WeaponSkillDamage.AttackGatePolicy.SKILL_DAMAGE,
+                WeaponSkillDamage.HitCooldownPolicy
+                        .BYPASS_FOR_AUTHORED_SEQUENCE
             );
         } else {
             WeaponSkillDamage.apply(
@@ -190,16 +191,13 @@ public class IceSpineEffectEntity extends Entity {
                 target,
                 context,
                 releaseWeaponSnapshot,
-                nowTick + 5
+                nowTick + 5,
+                WeaponSkillDamage.AttackGatePolicy.SKILL_DAMAGE,
+                WeaponSkillDamage.HitCooldownPolicy
+                        .BYPASS_FOR_AUTHORED_SEQUENCE
             );
         }
 
-        boolean hasSlow = target.hasEffect(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN);
-        if (hasSlow && target.level() instanceof ServerLevel serverLevel) {
-            YetiToothEffects.applyFreeze(serverLevel, target, 60);
-        } else {
-            YetiToothEffects.applySlow(target, 40, 1);
-        }
     }
 
     @SuppressWarnings("null")

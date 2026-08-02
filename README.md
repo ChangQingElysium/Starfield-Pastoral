@@ -63,7 +63,7 @@ Current builds include farming, animals, fishing, NPC schedules, dialogue, mail,
 | Mod loader | NeoForge 21.1.217 or a compatible newer build |
 | Java | 21 |
 | Environment | Client and server |
-| Source version | 0.5.4 |
+| Source version | 0.5.4fix1 |
 | Official download | [CurseForge](https://www.curseforge.com/minecraft/mc-mods/starfield-pastoral) |
 
 JEI is optional and adds information for fishing and other content. Read the release notes before updating an existing world.

@@ -1,6 +1,8 @@
 package com.stardew.craft.combat.skill;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.combat.skill.runtime.DeferredSkillCooldown;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -21,70 +23,41 @@ public final class SilverSaberFoldbackState {
 
     private static final String TAG_ACTIVE = "StardewSilverFoldbackActive";
     private static final String TAG_END_TICK = "StardewSilverFoldbackEnd";
-    private static final String TAG_DURATION = "StardewSilverFoldbackDuration";
     private static final String TAG_WEAPON_ID = "StardewSilverFoldbackWeapon";
     private static final String TAG_SKILL_ID = "StardewSilverFoldbackSkill";
     private static final String TAG_COOLDOWN = "StardewSilverFoldbackCooldown";
+    private static final String TAG_COOLDOWN_ADJUSTED =
+            "StardewSilverFoldbackCooldownAdjusted";
     private static final String TAG_DIMENSION = "StardewSilverFoldbackDimension";
     private static final String TAG_ORIGIN_X = "StardewSilverFoldbackOriginX";
     private static final String TAG_ORIGIN_Y = "StardewSilverFoldbackOriginY";
     private static final String TAG_ORIGIN_Z = "StardewSilverFoldbackOriginZ";
     private static final Map<UUID, WeaponDamageSnapshot> WEAPON_SNAPSHOTS =
             new HashMap<>();
+    private static final Map<UUID, DeferredSkillCooldown> COOLDOWNS =
+            new HashMap<>();
 
     private SilverSaberFoldbackState() {}
-
-    public static void start(Player player, long nowTick, int durationTicks, String weaponId, Vec3 origin) {
-        start(
-                player,
-                nowTick,
-                durationTicks,
-                weaponId,
-                "",
-                0,
-                origin
-        );
-    }
-
-    public static void start(
-            Player player,
-            long nowTick,
-            int durationTicks,
-            String weaponId,
-            String skillId,
-            int cooldownTicks,
-            Vec3 origin
-    ) {
-        start(
-                player,
-                nowTick,
-                durationTicks,
-                weaponId,
-                skillId,
-                cooldownTicks,
-                origin,
-                null
-        );
-    }
 
     public static synchronized void start(
             Player player,
             long nowTick,
             int durationTicks,
-            String weaponId,
-            String skillId,
-            int cooldownTicks,
             Vec3 origin,
-            WeaponDamageSnapshot weaponSnapshot
+            WeaponDamageSnapshot weaponSnapshot,
+            DeferredSkillCooldown cooldown
     ) {
+        if (player == null || origin == null || cooldown == null) {
+            return;
+        }
         CompoundTag root = player.getPersistentData();
         int duration = Math.max(1, durationTicks);
         root.putBoolean(TAG_ACTIVE, true);
         root.putLong(TAG_END_TICK, nowTick + duration);
-        root.putInt(TAG_DURATION, duration);
-        root.putString(TAG_WEAPON_ID, weaponId == null ? "" : weaponId);
-        root.putString(TAG_SKILL_ID, skillId == null ? "" : skillId);
-        root.putInt(TAG_COOLDOWN, Math.max(0, cooldownTicks));
+        root.putString(TAG_WEAPON_ID, cooldown.weaponId());
+        root.putString(TAG_SKILL_ID, cooldown.skillId());
+        root.putInt(TAG_COOLDOWN, cooldown.appliedDurationTicks());
+        root.putBoolean(TAG_COOLDOWN_ADJUSTED, true);
         root.putString(
                 TAG_DIMENSION,
                 player.level().dimension().location().toString()
@@ -97,6 +70,7 @@ public final class SilverSaberFoldbackState {
         } else {
             WEAPON_SNAPSHOTS.put(player.getUUID(), weaponSnapshot);
         }
+        COOLDOWNS.put(player.getUUID(), cooldown);
     }
 
     public static boolean isActive(Player player, long nowTick) {
@@ -114,11 +88,6 @@ public final class SilverSaberFoldbackState {
     public static boolean isActiveRaw(Player player) {
         CompoundTag root = player.getPersistentData();
         return root.getBoolean(TAG_ACTIVE);
-    }
-
-    public static long getEndTick(Player player) {
-        CompoundTag root = player.getPersistentData();
-        return root.getLong(TAG_END_TICK);
     }
 
     public static String getWeaponId(Player player) {
@@ -164,31 +133,65 @@ public final class SilverSaberFoldbackState {
         return new Vec3(x, y, z);
     }
 
-    public static int getDurationTicks(Player player) {
-        CompoundTag root = player.getPersistentData();
-        int duration = root.getInt(TAG_DURATION);
-        return Math.max(1, duration);
-    }
-
     public static synchronized Optional<WeaponDamageSnapshot> getWeaponSnapshot(
             Player player
     ) {
         return Optional.ofNullable(WEAPON_SNAPSHOTS.get(player.getUUID()));
     }
 
+    public static synchronized Optional<DeferredSkillCooldown> getCooldown(
+            Player player
+    ) {
+        DeferredSkillCooldown cooldown = COOLDOWNS.get(player.getUUID());
+        if (cooldown != null) {
+            return Optional.of(cooldown);
+        }
+        if (!(player instanceof ServerPlayer serverPlayer)
+                || !isActiveRaw(player)) {
+            return Optional.empty();
+        }
+        String weaponId = getWeaponId(player);
+        String skillId = getSkillId(player);
+        int durationTicks = getCooldownTicks(player);
+        if (weaponId == null || weaponId.isBlank()
+                || skillId == null || skillId.isBlank()
+                || durationTicks <= 0) {
+            return Optional.empty();
+        }
+        boolean adjusted = player.getPersistentData().getBoolean(
+                TAG_COOLDOWN_ADJUSTED
+        );
+        cooldown = adjusted
+                ? WeaponSkillRuntime.restoreDeferredCooldown(
+                        serverPlayer,
+                        weaponId,
+                        skillId,
+                        durationTicks
+                )
+                : WeaponSkillRuntime.restoreLegacyDeferredCooldown(
+                        serverPlayer,
+                        weaponId,
+                        skillId,
+                        durationTicks
+                );
+        COOLDOWNS.put(player.getUUID(), cooldown);
+        return Optional.of(cooldown);
+    }
+
     public static synchronized void clear(Player player) {
         CompoundTag root = player.getPersistentData();
         root.remove(TAG_ACTIVE);
         root.remove(TAG_END_TICK);
-        root.remove(TAG_DURATION);
         root.remove(TAG_WEAPON_ID);
         root.remove(TAG_SKILL_ID);
         root.remove(TAG_COOLDOWN);
+        root.remove(TAG_COOLDOWN_ADJUSTED);
         root.remove(TAG_DIMENSION);
         root.remove(TAG_ORIGIN_X);
         root.remove(TAG_ORIGIN_Y);
         root.remove(TAG_ORIGIN_Z);
         WEAPON_SNAPSHOTS.remove(player.getUUID());
+        COOLDOWNS.remove(player.getUUID());
     }
 
     static boolean shouldRemainActive(
@@ -211,13 +214,4 @@ public final class SilverSaberFoldbackState {
         }
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) {
-            SilverSaberSkillHelper.cancelFoldback(
-                    player,
-                    player.level().getGameTime()
-            );
-        }
-    }
 }

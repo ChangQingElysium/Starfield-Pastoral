@@ -1,5 +1,6 @@
 package com.stardew.craft.combat.skill.handler;
 
+import com.stardew.craft.combat.CombatHealing;
 import com.stardew.craft.combat.skill.SkillContext;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationDispatcher;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationLock;
@@ -10,9 +11,11 @@ import com.stardew.craft.combat.skill.runtime.SkillExecutionContext;
 import com.stardew.craft.combat.skill.runtime.SkillInstance;
 import com.stardew.craft.combat.skill.runtime.SkillTargeting;
 import com.stardew.craft.combat.skill.runtime.SkillValidation;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
 import com.stardew.craft.effect.ModMobEffects;
 import com.stardew.craft.item.weapon.WeaponSkillData;
 import java.util.List;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -49,11 +52,9 @@ public final class DesperatePlunderSkillHandler implements RuntimeWeaponSkillHan
         String weaponId = context.weaponId().getPath();
         String skillId = context.skillData().getId();
 
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                weaponId,
-                skillId,
-                context.nowTick(),
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 context.skillData().getCooldown() * 20
         );
 
@@ -64,25 +65,36 @@ public final class DesperatePlunderSkillHandler implements RuntimeWeaponSkillHan
         if (target != null) {
             instance.setTargetEntityIds(List.of(target.getId()));
         }
+        DesperatePlunderExecutionState executionState =
+                new DesperatePlunderExecutionState(
+                        target == null ? null : target.getUUID()
+                );
+        instance.initializeExecutionState(executionState);
 
-        context.player().setHealth(healthAfterCost(context.player().getHealth()));
-
-        if (target == null) {
-            grantFury(context);
-        } else {
-            WeaponSkillDamage.apply(
-                    context.player(),
-                    target,
-                    createHitContext(context.skillData()),
-                    context.weaponSnapshot(),
-                    context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS
-            );
-            if (target.isDeadOrDying() || target.getHealth() <= 0.0F) {
+        WeaponSkillRuntime.spendHealthDuringBegin(
+                context,
+                instance,
+                HEALTH_COST,
+                MINIMUM_REMAINING_HEALTH
+        );
+        instance.registerCommittedEffect(() -> {
+            if (target != null) {
+                WeaponSkillDamage.apply(
+                        context.player(),
+                        target,
+                        createHitContext(context.skillData()),
+                        context.weaponSnapshot(),
+                        context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS,
+                        WeaponSkillDamage.AttackGatePolicy.RESPECT_AT_IMPACT,
+                        WeaponSkillDamage.HitCooldownPolicy.RESPECT_VANILLA
+                );
+            }
+            if (executionState.settleKilledByThisHit()) {
                 healAfterKill(context);
             } else {
                 grantFury(context);
             }
-        }
+        });
 
         WeaponSkillAnimationLock.setLock(
                 context.player(),
@@ -105,21 +117,27 @@ public final class DesperatePlunderSkillHandler implements RuntimeWeaponSkillHan
                 .build();
     }
 
-    static float healthAfterCost(float currentHealth) {
-        return currentHealth > HEALTH_COST + MINIMUM_REMAINING_HEALTH
-                ? currentHealth - HEALTH_COST
-                : MINIMUM_REMAINING_HEALTH;
-    }
-
-    static float healthAfterKillHealing(float currentHealth, float maximumHealth) {
-        return Math.min(currentHealth + KILL_HEALING, maximumHealth);
+    /** Records only this cast's exact positive Applied Post outcome. */
+    public static boolean recordAppliedHit(
+            ServerPlayer player,
+            LivingEntity target,
+            boolean killedByAttacker
+    ) {
+        if (player == null || target == null) {
+            return false;
+        }
+        return WeaponSkillRuntime.activeExecutionState(
+                player.getUUID(),
+                BuiltinWeaponSkillHandlers.DESPERATE_PLUNDER,
+                DesperatePlunderExecutionState.class
+        ).map(state -> state.recordAppliedHit(
+                target.getUUID(),
+                killedByAttacker
+        )).orElse(false);
     }
 
     private static void healAfterKill(SkillExecutionContext context) {
-        context.player().setHealth(healthAfterKillHealing(
-                context.player().getHealth(),
-                context.player().getMaxHealth()
-        ));
+        CombatHealing.heal(context.player(), KILL_HEALING);
         context.player().level().playSound(
                 null,
                 context.player().getX(),

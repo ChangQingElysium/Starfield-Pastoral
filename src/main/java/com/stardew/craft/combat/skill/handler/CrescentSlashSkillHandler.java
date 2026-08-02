@@ -12,10 +12,7 @@ import com.stardew.craft.combat.skill.runtime.SkillTargeting;
 import com.stardew.craft.combat.skill.runtime.SkillTickResult;
 import com.stardew.craft.combat.skill.runtime.SkillValidation;
 import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
@@ -27,8 +24,6 @@ public final class CrescentSlashSkillHandler implements RuntimeWeaponSkillHandle
     public static final int ANIMATION_TICKS = 8;
     public static final int ACTIVE_TICK_OFFSET = 3;
     public static final int HIT_CONTEXT_LIFETIME_TICKS = 5;
-
-    private final Map<UUID, State> states = new HashMap<>();
 
     @Override
     public SkillValidation validate(SkillExecutionContext context) {
@@ -52,16 +47,13 @@ public final class CrescentSlashSkillHandler implements RuntimeWeaponSkillHandle
         String skillId = context.skillData().getId();
         int cooldownTicks = context.skillData().getCooldown() * 20;
 
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                weaponId,
-                skillId,
-                context.nowTick(),
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 cooldownTicks
         );
 
-        states.put(
-                instance.instanceId(),
+        instance.initializeExecutionState(
                 new State(
                         context.nowTick() + ACTIVE_TICK_OFFSET,
                         context.nowTick() + ANIMATION_TICKS
@@ -90,10 +82,7 @@ public final class CrescentSlashSkillHandler implements RuntimeWeaponSkillHandle
 
     @Override
     public SkillTickResult tick(SkillExecutionContext context, SkillInstance instance) {
-        State state = states.get(instance.instanceId());
-        if (state == null) {
-            return SkillTickResult.CANCEL;
-        }
+        State state = instance.requireExecutionState(State.class);
         if (!state.struck && context.nowTick() >= state.hitTick) {
             strike(context, instance);
             state.struck = true;
@@ -101,15 +90,6 @@ public final class CrescentSlashSkillHandler implements RuntimeWeaponSkillHandle
         return context.nowTick() >= state.endTick
                 ? SkillTickResult.COMPLETE
                 : SkillTickResult.CONTINUE;
-    }
-
-    @Override
-    public void finish(
-            SkillExecutionContext context,
-            SkillInstance instance,
-            SkillInstance.EndReason reason
-    ) {
-        states.remove(instance.instanceId());
     }
 
     private static void strike(SkillExecutionContext context, SkillInstance instance) {
@@ -134,7 +114,8 @@ public final class CrescentSlashSkillHandler implements RuntimeWeaponSkillHandle
                     hitContext,
                     context.weaponSnapshot(),
                     context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS,
-                    WeaponSkillDamage.AttackGatePolicy.RESPECT_AT_IMPACT
+                    WeaponSkillDamage.AttackGatePolicy.RESPECT_AT_IMPACT,
+                    WeaponSkillDamage.HitCooldownPolicy.RESPECT_VANILLA
             );
         }
         WeaponSkillAnimationDispatcher.sendImpact(
@@ -145,7 +126,7 @@ public final class CrescentSlashSkillHandler implements RuntimeWeaponSkillHandle
         );
     }
 
-    private static final class State {
+    private static final class State implements SkillInstance.ExecutionState {
         private final long hitTick;
         private final long endTick;
         private boolean struck;

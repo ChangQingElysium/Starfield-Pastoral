@@ -25,31 +25,4 @@ class DragonBreathTrackerTest {
         assertEquals(20, DragonBreathTracker.consumableMajorStacks(25));
     }
 
-    @Test
-    void thrustWindowIsInclusiveAndBoundToCasterDimension() {
-        assertTrue(DragonBreathTracker.shouldRemainThrustActive(
-                105L,
-                105L,
-                true,
-                true
-        ));
-        assertFalse(DragonBreathTracker.shouldRemainThrustActive(
-                105L,
-                106L,
-                true,
-                true
-        ));
-        assertFalse(DragonBreathTracker.shouldRemainThrustActive(
-                105L,
-                103L,
-                false,
-                true
-        ));
-        assertFalse(DragonBreathTracker.shouldRemainThrustActive(
-                105L,
-                103L,
-                true,
-                false
-        ));
-    }
 }

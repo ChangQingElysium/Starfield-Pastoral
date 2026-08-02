@@ -3,6 +3,7 @@ package com.stardew.craft.combat.skill;
 import com.stardew.craft.combat.network.WeaponSkillAnimPayload;
 import com.stardew.craft.combat.network.WeaponSkillCounterAnimPayload;
 import com.stardew.craft.combat.network.WeaponSkillImpactPayload;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
 import java.util.List;
 import java.util.Set;
 import net.minecraft.server.level.ServerPlayer;
@@ -48,6 +49,16 @@ public final class WeaponSkillAnimationDispatcher {
             int presentationDurationTicks,
             int activeTickOffset
     ) {
+        if (WeaponSkillRuntime.deferIfPreparing(() -> sendSkillAnim(
+                player,
+                weaponId,
+                skillId,
+                actionDurationTicks,
+                presentationDurationTicks,
+                activeTickOffset
+        ))) {
+            return;
+        }
         WeaponSkillAnimPayload payload = new WeaponSkillAnimPayload(
                 player.getId(),
                 weaponId,

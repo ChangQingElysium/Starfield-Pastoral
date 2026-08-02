@@ -2,7 +2,6 @@ package com.stardew.craft.combat.skill.handler;
 
 import com.stardew.craft.combat.CombatHealing;
 import com.stardew.craft.combat.network.DarkSwordBloodDebtPayload;
-import com.stardew.craft.combat.skill.DarkSwordBloodDebtTracker;
 import com.stardew.craft.combat.skill.DarkSwordEffects;
 import com.stardew.craft.combat.skill.SkillContext;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationDispatcher;
@@ -18,6 +17,8 @@ import com.stardew.craft.combat.skill.runtime.SkillValidation;
 import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
 import com.stardew.craft.item.weapon.WeaponSkillData;
 import java.util.List;
+import java.util.Optional;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.neoforged.neoforge.network.PacketDistributor;
 
@@ -31,6 +32,8 @@ public final class DarkSwordBloodDebtSkillHandler implements RuntimeWeaponSkillH
     public static final float MINIMUM_REMAINING_HEALTH = 1.0F;
     public static final int HIT_CONTEXT_LIFETIME_TICKS = 5;
     public static final int ANIMATION_TICKS = 8;
+    public static final int ACTIVE_DURATION_TICKS = 100;
+    public static final float LIFESTEAL_RATIO = 0.20F;
 
     @Override
     public SkillValidation validate(SkillExecutionContext context) {
@@ -47,7 +50,7 @@ public final class DarkSwordBloodDebtSkillHandler implements RuntimeWeaponSkillH
         return WeaponSkillRuntime.hasActive(
                 context.player().getUUID(),
                 context.skillId()
-        ) || DarkSwordBloodDebtTracker.isTracked(context.player())
+        )
                 ? SkillValidation.reject(
                         SkillValidation.RejectionReason.INVALID_STATE
                 )
@@ -57,42 +60,49 @@ public final class DarkSwordBloodDebtSkillHandler implements RuntimeWeaponSkillH
     @Override
     public void begin(SkillExecutionContext context, SkillInstance instance) {
         float cost = healthCost(CombatHealing.currentHealth(context.player()));
-        CombatHealing.spendNonlethal(
-                context.player(),
+        WeaponSkillRuntime.spendHealthDuringBegin(
+                context,
+                instance,
                 cost,
                 MINIMUM_REMAINING_HEALTH
         );
 
         String weaponId = context.weaponId().getPath();
         String skillId = context.skillData().getId();
-        DarkSwordBloodDebtTracker.start(
-                context.player(),
-                context.nowTick(),
-                DarkSwordBloodDebtTracker.ACTIVE_DURATION_TICKS
-        );
-        DarkSwordEffects.playBloodDebtCast(context.player());
-        PacketDistributor.sendToPlayer(
-                context.player(),
-                new DarkSwordBloodDebtPayload(
-                        true,
-                        DarkSwordBloodDebtTracker.ACTIVE_DURATION_TICKS
+        instance.initializeExecutionState(
+                new DarkSwordBloodDebtExecutionState(
+                        context.nowTick(),
+                        ACTIVE_DURATION_TICKS
                 )
         );
-
         LivingEntity target = SkillTargeting.findTargetEntity(
                 context.player(),
                 TARGET_RANGE
         );
         if (target != null) {
             instance.setTargetEntityIds(List.of(target.getId()));
-            WeaponSkillDamage.apply(
-                    context.player(),
-                    target,
-                    createHitContext(context.skillData()),
-                    context.weaponSnapshot(),
-                    context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS
-            );
         }
+        instance.registerCommittedEffect(() -> {
+            DarkSwordEffects.playBloodDebtCast(context.player());
+            PacketDistributor.sendToPlayer(
+                    context.player(),
+                    new DarkSwordBloodDebtPayload(
+                            true,
+                            ACTIVE_DURATION_TICKS
+                    )
+            );
+            if (target != null) {
+                WeaponSkillDamage.apply(
+                        context.player(),
+                        target,
+                        createHitContext(context.skillData()),
+                        context.weaponSnapshot(),
+                        context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS,
+                        WeaponSkillDamage.AttackGatePolicy.RESPECT_AT_IMPACT,
+                        WeaponSkillDamage.HitCooldownPolicy.RESPECT_VANILLA
+                );
+            }
+        });
 
         WeaponSkillAnimationDispatcher.sendSkillAnim(
                 context.player(),
@@ -112,18 +122,34 @@ public final class DarkSwordBloodDebtSkillHandler implements RuntimeWeaponSkillH
         return false;
     }
 
+    /**
+     * Read-only combat facade for the exact active Blood Debt execution.
+     */
+    public static boolean isActive(ServerPlayer player, long nowTick) {
+        return activeState(player)
+                .filter(state -> state.isActive(nowTick))
+                .isPresent();
+    }
+
+    /**
+     * Returns the authored lifesteal only while Blood Debt's exact execution
+     * remains active for this caster.
+     */
+    public static float getLifestealRatio(
+            ServerPlayer player,
+            long nowTick
+    ) {
+        return isActive(player, nowTick) ? LIFESTEAL_RATIO : 0.0F;
+    }
+
     @Override
     public SkillTickResult tick(
             SkillExecutionContext context,
             SkillInstance instance
     ) {
-        DarkSwordBloodDebtTracker.tick(
-                context.player(),
-                context.nowTick()
-        );
-        return DarkSwordBloodDebtTracker.isTracked(context.player())
-                ? SkillTickResult.CONTINUE
-                : SkillTickResult.COMPLETE;
+        return instance.requireExecutionState(
+                DarkSwordBloodDebtExecutionState.class
+        ).advance(context.nowTick());
     }
 
     @Override
@@ -132,15 +158,18 @@ public final class DarkSwordBloodDebtSkillHandler implements RuntimeWeaponSkillH
             SkillInstance instance,
             SkillInstance.EndReason reason
     ) {
-        boolean stateWasActive =
-                DarkSwordBloodDebtTracker.isTracked(context.player());
-        DarkSwordBloodDebtTracker.cancel(context.player());
+        Optional<DarkSwordBloodDebtExecutionState> executionState =
+                instance.executionState(
+                        DarkSwordBloodDebtExecutionState.class
+                );
+        boolean stateWasActive = executionState.isPresent();
+        executionState.ifPresent(
+                DarkSwordBloodDebtExecutionState::cancel
+        );
         if (shouldCommitCooldown(reason, stateWasActive)) {
-            WeaponSkillCooldowns.setCooldown(
-                    context.player(),
-                    context.weaponId().getPath(),
-                    context.skillData().getId(),
-                    context.player().level().getGameTime(),
+            WeaponSkillRuntime.commitCooldown(
+                    context,
+                    instance,
                     context.skillData().getCooldown() * 20
             );
         }
@@ -175,6 +204,19 @@ public final class DarkSwordBloodDebtSkillHandler implements RuntimeWeaponSkillH
                         skillData.getDamagePercent() / 100.0F
                 )
                 .build();
+    }
+
+    private static Optional<DarkSwordBloodDebtExecutionState> activeState(
+            ServerPlayer player
+    ) {
+        if (player == null) {
+            return Optional.empty();
+        }
+        return WeaponSkillRuntime.activeExecutionState(
+                player.getUUID(),
+                BuiltinWeaponSkillHandlers.DARK_SWORD_BLOOD_DEBT,
+                DarkSwordBloodDebtExecutionState.class
+        );
     }
 
 }

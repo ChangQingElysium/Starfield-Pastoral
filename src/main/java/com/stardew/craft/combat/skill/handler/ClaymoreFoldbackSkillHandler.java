@@ -1,6 +1,5 @@
 package com.stardew.craft.combat.skill.handler;
 
-import com.stardew.craft.combat.skill.ClaymoreFoldbackTracker;
 import com.stardew.craft.combat.skill.SkillContext;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationDispatcher;
 import com.stardew.craft.combat.skill.WeaponSkillCooldowns;
@@ -11,6 +10,7 @@ import com.stardew.craft.combat.skill.runtime.SkillInstance;
 import com.stardew.craft.combat.skill.runtime.SkillTargeting;
 import com.stardew.craft.combat.skill.runtime.SkillTickResult;
 import com.stardew.craft.combat.skill.runtime.SkillValidation;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
 import com.stardew.craft.item.weapon.WeaponSkillData;
 import java.util.List;
 import net.minecraft.world.entity.LivingEntity;
@@ -24,6 +24,11 @@ public final class ClaymoreFoldbackSkillHandler
     public static final int RETURN_DELAY_TICKS = 12;
     public static final int HIT_CONTEXT_LIFETIME_TICKS = 5;
     public static final int INITIAL_ANIMATION_TICKS = 12;
+    public static final double RETURN_TARGET_RANGE = 4.5D;
+    public static final float RETURN_DAMAGE_MULTIPLIER = 1.2F;
+    public static final int SLOW_DURATION_TICKS = 40;
+    public static final int SLOW_AMPLIFIER = 0;
+    public static final int RETURN_ANIMATION_TICKS = 12;
 
     @Override
     public SkillValidation validate(SkillExecutionContext context) {
@@ -37,8 +42,9 @@ public final class ClaymoreFoldbackSkillHandler
                     SkillValidation.RejectionReason.COOLDOWN
             );
         }
-        return ClaymoreFoldbackTracker.hasState(
-                context.player().getUUID()
+        return WeaponSkillRuntime.hasActive(
+                context.player().getUUID(),
+                context.skillId()
         )
                 ? SkillValidation.reject(
                         SkillValidation.RejectionReason.INVALID_STATE
@@ -50,11 +56,9 @@ public final class ClaymoreFoldbackSkillHandler
     public void begin(SkillExecutionContext context, SkillInstance instance) {
         String weaponId = context.weaponId().getPath();
         String skillId = context.skillData().getId();
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                weaponId,
-                skillId,
-                context.nowTick(),
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 context.skillData().getCooldown() * 20
         );
 
@@ -64,16 +68,17 @@ public final class ClaymoreFoldbackSkillHandler
         );
         if (target != null) {
             instance.setTargetEntityIds(List.of(target.getId()));
-            attackInitialTarget(context, target);
+            instance.registerCommittedEffect(() ->
+                    attackInitialTarget(context, target)
+            );
         }
 
-        ClaymoreFoldbackTracker.start(
-                context.player(),
-                context.nowTick(),
-                RETURN_DELAY_TICKS,
-                target,
-                weaponId,
-                skillId
+        instance.initializeExecutionState(
+                new ClaymoreFoldbackExecutionState(
+                        context.nowTick(),
+                        RETURN_DELAY_TICKS,
+                        target != null ? target.getUUID() : null
+                )
         );
 
         // Preserve the original notification order after the first strike and
@@ -96,31 +101,9 @@ public final class ClaymoreFoldbackSkillHandler
             SkillExecutionContext context,
             SkillInstance instance
     ) {
-        if (!ClaymoreFoldbackTracker.isBoundToCurrentDimension(
-                context.player()
-        )) {
-            return SkillTickResult.CANCEL;
-        }
-        ClaymoreFoldbackTracker.tick(
-                context.player(),
-                context.nowTick()
-        );
-        return ClaymoreFoldbackTracker.hasState(
-                context.player().getUUID()
-        )
-                ? SkillTickResult.CONTINUE
-                : SkillTickResult.COMPLETE;
-    }
-
-    @Override
-    public void finish(
-            SkillExecutionContext context,
-            SkillInstance instance,
-            SkillInstance.EndReason reason
-    ) {
-        ClaymoreFoldbackTracker.removePlayer(
-                context.player().getUUID()
-        );
+        return instance.requireExecutionState(
+                ClaymoreFoldbackExecutionState.class
+        ).advance(context);
     }
 
     static SkillContext createInitialContext(WeaponSkillData skillData) {
@@ -142,7 +125,9 @@ public final class ClaymoreFoldbackSkillHandler
                 target,
                 createInitialContext(context.skillData()),
                 context.weaponSnapshot(),
-                context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS
+                context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS,
+                WeaponSkillDamage.AttackGatePolicy.RESPECT_AT_IMPACT,
+                WeaponSkillDamage.HitCooldownPolicy.RESPECT_VANILLA
         );
     }
 }

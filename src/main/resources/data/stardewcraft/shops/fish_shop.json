@@ -55,6 +55,11 @@
       "stock": 1
     },
     {
+      "item": "recipe:stardewcraft:fish_smoker",
+      "price": 10000,
+      "stock": 1
+    },
+    {
       "item": "stardewcraft:coral",
       "price": 80
     },

@@ -1,16 +1,15 @@
 package com.stardew.craft.combat;
 
 import com.stardew.craft.combat.equipment.EquipmentStats;
-import com.stardew.craft.combat.skill.DragontoothShivBreathTracker;
+import com.stardew.craft.combat.skill.handler.DragontoothShivBreathSkillHandler;
+import com.stardew.craft.combat.skill.handler.OssifiedExecutionSkillHandler;
 import com.stardew.craft.combat.skill.ElfBladeMarkTracker;
-import com.stardew.craft.combat.skill.OssifiedExecutionTracker;
 import com.stardew.craft.combat.skill.OssifiedMarkTracker;
 import com.stardew.craft.combat.skill.SingularityTracker;
 import com.stardew.craft.combat.skill.WindSpireTracker;
 import com.stardew.craft.combat.skill.SkillContext;
 import com.stardew.craft.combat.skill.StartrailTracker;
 import com.stardew.craft.effect.ModMobEffects;
-import com.stardew.craft.item.weapon.IStardewWeapon;
 import com.stardew.craft.player.PlayerDataManager;
 import com.stardew.craft.player.PlayerStardewData;
 import com.stardew.craft.player.ProfessionType;
@@ -49,9 +48,9 @@ public final class DamageCalculator {
         PlayerStardewData playerData = attacker instanceof ServerPlayer serverPlayer
                 ? PlayerDataManager.getPlayerData(serverPlayer)
                 : null;
-        String weaponId = weapon.getItem() instanceof IStardewWeapon stardewWeapon
-                ? stardewWeapon.getWeaponId()
-                : "unknown_weapon";
+        String weaponId = WeaponCombatIdentity.resolve(weapon)
+                .map(WeaponCombatIdentity.Resolved::logicId)
+                .orElse("unknown_weapon");
         long nowTick = attacker.level() != null ? attacker.level().getGameTime() : 0L;
         float ringAttackMultiplier = equipmentStats != null
                 ? 1.0f + equipmentStats.getAttackMultiplier()
@@ -112,7 +111,7 @@ public final class DamageCalculator {
         );
         if (attacker instanceof ServerPlayer serverPlayer
                 && "dragontooth_shiv".equals(weaponId)
-                && DragontoothShivBreathTracker.isActive(serverPlayer, nowTick)) {
+                && DragontoothShivBreathSkillHandler.isActive(serverPlayer, nowTick)) {
             criticalMultiplier = DEFAULT_CRIT_MULTIPLIER;
         }
         request.critical(
@@ -128,7 +127,12 @@ public final class DamageCalculator {
             request.addPreDefenseAdjustment(DamageAdjustment.multiplyCeil("profession_brute", 1.15f));
         }
         if (playerData != null && playerData.hasProfession(ProfessionType.DESPERADO)) {
-            request.addPreDefenseAdjustment(DamageAdjustment.multiplyFloor("profession_desperado", 2.0f));
+            request.addCriticalOnlyAdjustment(
+                    DamageAdjustment.multiplyFloor(
+                            "profession_desperado",
+                            2.0f
+                    )
+            );
         }
         request.addPreDefenseAdjustment(DamageAdjustment.multiply(
                 "skill:" + resolvedSkill.getSkillId(),
@@ -153,10 +157,9 @@ public final class DamageCalculator {
             SkillContext skillContext,
             long nowTick
     ) {
-        float criticalChance = weaponStats.getCritChance() + weaponStats.getBonusCritChance();
-        if (weaponStats.getWeaponType() == WeaponType.DAGGER) {
-            criticalChance = (criticalChance + 0.005f) * 1.12f;
-        }
+        float criticalChance = StardewWeaponCriticalRules.intrinsicChance(
+                weaponStats
+        );
         if (equipmentStats != null) {
             criticalChance *= 1.0f + equipmentStats.getCritChance();
         }
@@ -203,12 +206,20 @@ public final class DamageCalculator {
             EquipmentStats equipmentStats,
             long nowTick
     ) {
-        float multiplier = DEFAULT_CRIT_MULTIPLIER + weaponStats.getBonusCritPower() / 100.0f;
+        float multiplier = weaponCriticalMultiplier(weaponStats);
         if (equipmentStats != null) {
             multiplier *= 1.0f + equipmentStats.getCritPower();
         }
-        multiplier += OssifiedExecutionTracker.getCritDamageBonus(attacker, target, nowTick);
+        multiplier += OssifiedExecutionSkillHandler.getCritDamageBonus(
+                attacker,
+                target,
+                nowTick
+        );
         return multiplier;
+    }
+
+    static float weaponCriticalMultiplier(WeaponStats weaponStats) {
+        return StardewWeaponCriticalRules.multiplier(weaponStats);
     }
 
     private static void addIfNonZero(DamageRequest.Builder request, String id, float value) {

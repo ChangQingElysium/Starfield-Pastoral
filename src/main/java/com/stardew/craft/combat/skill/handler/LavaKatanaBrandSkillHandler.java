@@ -11,6 +11,7 @@ import com.stardew.craft.combat.skill.runtime.SkillExecutionContext;
 import com.stardew.craft.combat.skill.runtime.SkillInstance;
 import com.stardew.craft.combat.skill.runtime.SkillTargeting;
 import com.stardew.craft.combat.skill.runtime.SkillValidation;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
 import com.stardew.craft.item.weapon.WeaponSkillData;
 import java.util.List;
 import net.minecraft.world.entity.LivingEntity;
@@ -55,32 +56,34 @@ public final class LavaKatanaBrandSkillHandler
 
         String weaponId = context.weaponId().getPath();
         String skillId = context.skillData().getId();
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                weaponId,
-                skillId,
-                context.nowTick(),
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 context.skillData().getCooldown() * 20
         );
-        LavaKatanaMarkTracker.prepareRelease(
-                target,
-                context.player(),
-                context.weaponSnapshot()
-        );
-        try {
-            WeaponSkillDamage.apply(
+        instance.registerCommittedEffect(() -> {
+            LavaKatanaMarkTracker.prepareRelease(
+                    target,
                     context.player(),
-                    target,
-                    createHitContext(context.skillData()),
-                    context.weaponSnapshot(),
-                    context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS
+                    context.weaponSnapshot()
             );
-        } finally {
-            LavaKatanaMarkTracker.discardPreparedRelease(
-                    target,
-                    context.player()
-            );
-        }
+            try {
+                WeaponSkillDamage.apply(
+                        context.player(),
+                        target,
+                        createHitContext(context.skillData()),
+                        context.weaponSnapshot(),
+                        context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS,
+                        WeaponSkillDamage.AttackGatePolicy.RESPECT_AT_IMPACT,
+                        WeaponSkillDamage.HitCooldownPolicy.RESPECT_VANILLA
+                );
+            } finally {
+                LavaKatanaMarkTracker.discardPreparedRelease(
+                        target,
+                        context.player()
+                );
+            }
+        });
 
         WeaponSkillAnimationDispatcher.sendSkillAnim(
                 context.player(),

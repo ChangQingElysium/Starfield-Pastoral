@@ -45,7 +45,7 @@ public class StardewNpcDialogueScreen extends Screen {
     private final List<DialoguePage> pages = new ArrayList<>();
     private StardewRenderMapping mapping;
     
-    private record NpcResponseAction(int scoreDelta, String nextNodeId, String responseText) {}
+    private record NpcResponseAction(String answerId, int scoreDelta, String nextNodeId, String responseText) {}
     private final List<NpcResponseAction> questionResponses = new ArrayList<>();
 
     private int pageIndex;
@@ -254,7 +254,7 @@ public class StardewNpcDialogueScreen extends Screen {
                         net.minecraft.client.Minecraft.getInstance().setScreen(null);
                         net.neoforged.neoforge.network.PacketDistributor.sendToServer(
                             new com.stardew.craft.network.payload.AnswerNpcQuestionPayload(
-                                npcId, picked.nextNodeId(), picked.scoreDelta()
+                                npcId, picked.nextNodeId(), picked.scoreDelta(), picked.answerId()
                             )
                         );
                     }
@@ -395,12 +395,13 @@ public class StardewNpcDialogueScreen extends Screen {
                     if (tokens.length >= 3) {
                         int scoreDelta = 0;
                         try { scoreDelta = Integer.parseInt(tokens[1]); } catch (NumberFormatException ignored) {}
+                        String answerId = tokens[0];
                         String nextNodeId = tokens[2];
                         
                         int rHash2 = remain.indexOf("#$r", rHash1);
                         if (rHash2 == -1) rHash2 = remain.length();
                         String responseText = remain.substring(rHash1 + 1, rHash2).trim();
-                        questionResponses.add(new NpcResponseAction(scoreDelta, nextNodeId, responseText));
+                        questionResponses.add(new NpcResponseAction(answerId, scoreDelta, nextNodeId, responseText));
                         remain = remain.substring(rHash2);
                     } else {
                         break;

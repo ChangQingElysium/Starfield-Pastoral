@@ -1,5 +1,6 @@
 {
-  "id": "0",
+  "id": "museum_archaeology_intro",
+  "legacy_ids": ["0"],
   "skippable": true,
   "trigger": {
     "type": "enter_area",
@@ -8,7 +9,7 @@
     "area_max": [178, 41, 56]
   },
   "preconditions": [
-    { "type": "not_saw_event", "id": "0" },
+    { "type": "not_saw_event", "id": "museum_archaeology_intro" },
     { "type": "has_museum_donation" },
     { "type": "museum_empty" }
   ],

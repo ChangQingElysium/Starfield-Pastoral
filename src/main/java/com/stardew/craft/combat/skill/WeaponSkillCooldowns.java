@@ -4,6 +4,7 @@ import com.stardew.craft.enchantment.StardewEnchantments;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 import com.stardew.craft.combat.network.SkillCooldownSyncPayload;
 import com.stardew.craft.player.PlayerStardewDataAPI;
@@ -42,7 +43,30 @@ public final class WeaponSkillCooldowns {
 
     @SuppressWarnings("null")
     public static void setCooldown(Player player, String weaponId, String skillId, long nowTick, int durationTicks) {
-        int appliedDuration = adjustedDuration(player, durationTicks);
+        setCooldown(
+                player,
+                player.getMainHandItem(),
+                weaponId,
+                skillId,
+                nowTick,
+                durationTicks
+        );
+    }
+
+    @SuppressWarnings("null")
+    public static void setCooldown(
+            Player player,
+            ItemStack releaseWeapon,
+            String weaponId,
+            String skillId,
+            long nowTick,
+            int durationTicks
+    ) {
+        int appliedDuration = adjustedDuration(
+                player,
+                releaseWeapon,
+                durationTicks
+        );
         setCooldownUntil(
                 player,
                 weaponId,
@@ -83,16 +107,32 @@ public final class WeaponSkillCooldowns {
     }
 
     static int adjustedDuration(Player player, int durationTicks) {
+        return adjustedDuration(player, player.getMainHandItem(), durationTicks);
+    }
+
+    static int adjustedDuration(
+            Player player,
+            ItemStack releaseWeapon,
+            int durationTicks
+    ) {
         if (durationTicks <= 0) {
             return durationTicks;
         }
-        if (StardewEnchantments.has(player.getMainHandItem(), StardewEnchantments.ARTFUL)) {
+        if (StardewEnchantments.has(releaseWeapon, StardewEnchantments.ARTFUL)) {
             durationTicks = Math.max(1, durationTicks / 2);
         }
         if (player instanceof ServerPlayer serverPlayer && PlayerStardewDataAPI.hasProfession(serverPlayer, ProfessionType.ACROBAT)) {
             return Math.max(1, durationTicks / 2);
         }
         return durationTicks;
+    }
+
+    public static int adjustedDurationForRelease(
+            Player player,
+            ItemStack releaseWeapon,
+            int durationTicks
+    ) {
+        return adjustedDuration(player, releaseWeapon, durationTicks);
     }
 
     private static String getKey(String weaponId, String skillId) {

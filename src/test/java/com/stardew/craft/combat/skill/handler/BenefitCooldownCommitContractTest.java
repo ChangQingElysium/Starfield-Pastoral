@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BenefitCooldownCommitContractTest {
     @Test
-    void bloodDebtFinishesAgainstTheActiveStateAndCurrentServerTick()
+    void bloodDebtFinishesAgainstTheActiveStateAndRuntimeTransaction()
             throws IOException {
         String finish = method(
                 readHandler("DarkSwordBloodDebtSkillHandler.java"),
@@ -17,17 +17,17 @@ class BenefitCooldownCommitContractTest {
         );
 
         int stateCheck = finish.indexOf(
-                "DarkSwordBloodDebtTracker.isTracked("
+                "instance.executionState("
         );
         int cancel = finish.indexOf(
-                "DarkSwordBloodDebtTracker.cancel("
+                "DarkSwordBloodDebtExecutionState::cancel"
         );
         assertTrue(stateCheck >= 0 && cancel > stateCheck);
         assertTrue(finish.contains(
                 "shouldCommitCooldown(reason, stateWasActive)"
         ));
         assertTrue(finish.contains(
-                "context.player().level().getGameTime()"
+                "WeaponSkillRuntime.commitCooldown("
         ));
     }
 
@@ -46,7 +46,7 @@ class BenefitCooldownCommitContractTest {
                 "shouldCommitCooldown(reason, state.activated)"
         ));
         assertTrue(finish.contains(
-                "context.player().level().getGameTime()"
+                "WeaponSkillRuntime.commitCooldown("
         ));
     }
 

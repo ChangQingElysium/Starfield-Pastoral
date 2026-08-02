@@ -1,5 +1,6 @@
 package com.stardew.craft.item.weapon;
 
+import com.stardew.craft.combat.StardewWeaponSpeedRules;
 import com.stardew.craft.item.IStardewItem;
 import java.util.List;
 import net.minecraft.core.BlockPos;
@@ -51,11 +52,11 @@ public class StardewWeaponItem extends SwordItem
                 (float) ((data.getDamageMin() + data.getDamageMax())
                         / 2.0D - 1);
 
-        // 根据武器类型设置攻速（将目标 APS 转成 MC 的 attackSpeed modifier: APS = 4.0 + modifier）
-        // 星露谷 speed: 每点约 +0.1 APS
-        float baseAps = data.getWeaponType().getAttackSpeed();
-        float speedBonusAps = data.getSpeed() * 0.1F;
-        float attackSpeed = (baseAps + speedBonusAps) - 4.0F;
+        float attackSpeed = (float) StardewWeaponSpeedRules.attacksPerSecondFromRawSpeed(
+                data.getWeaponType(),
+                data.getRawSpeed(),
+                0.0F
+        ) - 4.0F;
 
         return new StardewWeaponTier(
                 data.getLevel(),
@@ -100,6 +101,11 @@ public class StardewWeaponItem extends SwordItem
 
     @Override
     public boolean isBarVisible(@SuppressWarnings("null") ItemStack stack) {
+        return false;
+    }
+
+    @Override
+    public boolean isEnchantable(@SuppressWarnings("null") ItemStack stack) {
         return false;
     }
 
@@ -249,7 +255,7 @@ public class StardewWeaponItem extends SwordItem
 
         @Override
         public int getEnchantmentValue() {
-            return level * 2;
+            return 0;
         }
 
         @Override

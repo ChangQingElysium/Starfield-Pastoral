@@ -127,6 +127,8 @@
     "Resort_Towel_3": "stardewcraft.npc.haley.resort_towel_3",
     "Resort_Chair": "stardewcraft.npc.haley.resort_chair",
     "Resort_Bar": "stardewcraft.npc.haley.resort_bar",
-    "Resort": "stardewcraft.npc.haley.resort"
+    "Resort": "stardewcraft.npc.haley.resort",
+    "summer_Sat_old": "stardewcraft.npc.haley.summer_sat_old",
+    "fall_Sat_old": "stardewcraft.npc.haley.fall_sat_old"
   }
 }

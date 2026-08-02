@@ -2,7 +2,6 @@ package com.stardew.craft.combat.skill.handler;
 
 import com.stardew.craft.combat.network.LavaKatanaReverbPayload;
 import com.stardew.craft.combat.skill.LavaKatanaMarkTracker;
-import com.stardew.craft.combat.skill.LavaKatanaReverbTracker;
 import com.stardew.craft.combat.skill.WeaponSkillCooldowns;
 import com.stardew.craft.combat.skill.runtime.RuntimeWeaponSkillHandler;
 import com.stardew.craft.combat.skill.runtime.SkillExecutionContext;
@@ -15,7 +14,10 @@ import com.stardew.craft.effect.ModMobEffects;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import java.util.List;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
@@ -24,13 +26,16 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public final class LavaKatanaReverbSkillHandler
         implements RuntimeWeaponSkillHandler {
     public static final float ENERGY_COST = 12.0F;
+    public static final int ACTIVE_DURATION_TICKS = 80;
+    public static final double TARGET_RANGE = 8.0D;
+    public static final int MINIMUM_HEAT = 5;
 
     @Override
     public SkillValidation validate(SkillExecutionContext context) {
         if (WeaponSkillRuntime.hasActive(
             context.player().getUUID(),
             context.skillId()
-        ) || LavaKatanaReverbTracker.hasState(context.player())) {
+        )) {
             return SkillValidation.reject(
                 SkillValidation.RejectionReason.INVALID_STATE
             );
@@ -69,11 +74,11 @@ public final class LavaKatanaReverbSkillHandler
                 "Validated Molten Reverb energy is no longer available"
             );
         }
-        if (!context.player().getAbilities().instabuild
-            && !PlayerStardewDataAPI.consumeEnergy(
-                context.player(),
-                ENERGY_COST
-            )) {
+        if (!WeaponSkillRuntime.consumeEnergyDuringBegin(
+            context,
+            instance,
+            ENERGY_COST
+        )) {
             throw new IllegalStateException(
                 "Validated Molten Reverb energy payment failed"
             );
@@ -82,49 +87,70 @@ public final class LavaKatanaReverbSkillHandler
         if (plan.fallbackTarget() != null) {
             LivingEntity target = plan.fallbackTarget();
             instance.setTargetEntityIds(List.of(target.getId()));
-            LavaKatanaMarkTracker.apply(
-                target,
-                context.player(),
-                context.nowTick(),
-                LavaKatanaMarkTracker.MARK_DURATION_TICKS,
-                context.weaponSnapshot()
-            );
         } else {
             instance.setTargetEntityIds(
                 plan.markedTargets().stream()
                     .map(LivingEntity::getId)
                     .toList()
             );
-            for (LivingEntity target : plan.markedTargets()) {
-                LavaKatanaMarkTracker.ensureHeatAtLeast(
-                    target,
-                    context.player(),
-                    context.nowTick(),
-                    LavaKatanaReverbTracker.MINIMUM_HEAT
-                );
-            }
         }
 
-        LavaKatanaReverbTracker.start(
-            context.player(),
-            context.nowTick(),
-            LavaKatanaReverbTracker.ACTIVE_DURATION_TICKS,
-            context.weaponSnapshot()
-        );
-        PacketDistributor.sendToPlayer(
-            context.player(),
-            new LavaKatanaReverbPayload(
-                true,
-                LavaKatanaReverbTracker.ACTIVE_DURATION_TICKS
-            )
-        );
-        WeaponSkillCooldowns.setCooldown(
-            context.player(),
-            context.weaponId().getPath(),
-            context.skillData().getId(),
-            context.nowTick(),
+        LavaKatanaReverbExecutionState executionState =
+            new LavaKatanaReverbExecutionState(
+                context.player().level().dimension(),
+                context.nowTick(),
+                ACTIVE_DURATION_TICKS
+            );
+        instance.initializeExecutionState(executionState);
+        WeaponSkillRuntime.commitCooldown(
+            context,
+            instance,
             context.skillData().getCooldown() * 20
         );
+        instance.registerCommittedEffect(() -> {
+            if (plan.fallbackTarget() != null) {
+                LavaKatanaMarkTracker.apply(
+                        plan.fallbackTarget(),
+                        context.player(),
+                        context.nowTick(),
+                        LavaKatanaMarkTracker.MARK_DURATION_TICKS,
+                        context.weaponSnapshot()
+                );
+            } else {
+                for (LivingEntity target : plan.markedTargets()) {
+                    LavaKatanaMarkTracker.ensureHeatAtLeast(
+                            target,
+                            context.player(),
+                            context.nowTick(),
+                            MINIMUM_HEAT
+                    );
+                }
+            }
+            PacketDistributor.sendToPlayer(
+                    context.player(),
+                    new LavaKatanaReverbPayload(
+                            true,
+                            ACTIVE_DURATION_TICKS
+                    )
+            );
+        });
+    }
+
+    public static boolean isActive(
+        ServerPlayer player,
+        long nowTick
+    ) {
+        if (player == null) {
+            return false;
+        }
+        return WeaponSkillRuntime.activeExecutionState(
+            player.getUUID(),
+            BuiltinWeaponSkillHandlers.LAVA_KATANA_REVERB,
+            LavaKatanaReverbExecutionState.class
+        ).filter(state -> state.isActive(
+            nowTick,
+            player.level().dimension()
+        )).isPresent();
     }
 
     @Override
@@ -137,14 +163,9 @@ public final class LavaKatanaReverbSkillHandler
         SkillExecutionContext context,
         SkillInstance instance
     ) {
-        return switch (LavaKatanaReverbTracker.tick(
-            context.player(),
-            context.nowTick()
-        )) {
-            case ACTIVE -> SkillTickResult.CONTINUE;
-            case COMPLETED -> SkillTickResult.COMPLETE;
-            case INVALIDATED -> SkillTickResult.CANCEL;
-        };
+        return instance.requireExecutionState(
+            LavaKatanaReverbExecutionState.class
+        ).advance(context);
     }
 
     @Override
@@ -153,7 +174,8 @@ public final class LavaKatanaReverbSkillHandler
         SkillInstance instance,
         SkillInstance.EndReason reason
     ) {
-        LavaKatanaReverbTracker.cancel(context.player());
+        instance.executionState(LavaKatanaReverbExecutionState.class)
+            .ifPresent(LavaKatanaReverbExecutionState::cancel);
         if (shouldNotifyOnFinish(reason)) {
             PacketDistributor.sendToPlayer(
                 context.player(),
@@ -204,22 +226,50 @@ public final class LavaKatanaReverbSkillHandler
             return null;
         }
         List<LivingEntity> marked =
-            LavaKatanaReverbTracker.findMarkedTargetsInRange(
+            findMarkedTargetsInRange(
                 level,
                 context.player(),
                 context.nowTick(),
-                LavaKatanaReverbTracker.TARGET_RANGE
+                TARGET_RANGE
             );
         if (hasCastTarget(marked.size(), false)) {
             return new CastPlan(List.copyOf(marked), null);
         }
         LivingEntity fallback = SkillTargeting.findTargetEntity(
             context.player(),
-            LavaKatanaReverbTracker.TARGET_RANGE
+            TARGET_RANGE
         );
         return hasCastTarget(0, fallback != null)
             ? new CastPlan(List.of(), fallback)
             : null;
+    }
+
+    private static List<LivingEntity> findMarkedTargetsInRange(
+        ServerLevel level,
+        Player owner,
+        long nowTick,
+        double range
+    ) {
+        AABB bounds = new AABB(
+            owner.getX() - range,
+            owner.getY() - range,
+            owner.getZ() - range,
+            owner.getX() + range,
+            owner.getY() + range,
+            owner.getZ() + range
+        );
+        return level.getEntitiesOfClass(
+            LivingEntity.class,
+            bounds,
+            entity -> entity.isPickable()
+                && entity.isAlive()
+                && entity != owner
+                && LavaKatanaMarkTracker.isMarkedBy(
+                    entity,
+                    owner,
+                    nowTick
+                )
+        );
     }
 
     private record CastPlan(

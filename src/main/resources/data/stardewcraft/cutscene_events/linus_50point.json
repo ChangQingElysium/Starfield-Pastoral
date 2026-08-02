@@ -1,0 +1,162 @@
+{
+  "id": "linus_50point",
+  "legacy_ids": ["502969"],
+  "skippable": true,
+  "trigger": {
+    "type": "enter_area",
+    "location": "town",
+    "area_min": [-8, 63, -29],
+    "area_max": [69, 83, 46]
+  },
+  "preconditions": [
+    { "type": "not_saw_event", "id": "linus_50point" },
+    { "type": "friendship", "npc": "linus", "min": 50 },
+    { "type": "days_played", "min": 8 },
+    { "type": "weather", "weather": "sunny" },
+    { "type": "time", "min": 2000, "max": 2400 }
+  ],
+  "commands": [
+    { "cmd": "comment", "text": "=== SDV Town event 502969: Linus rummages through the garbage ===" },
+    { "cmd": "lock_player" },
+    { "cmd": "fade", "mode": "out", "ticks": 10 },
+    { "cmd": "hide_npc", "npc_id": "linus" },
+    { "cmd": "hide_npc", "npc_id": "george" },
+    { "cmd": "hide_npc", "npc_id": "gus" },
+    { "cmd": "spawn_actor", "actor": "fake_player", "npc_id": "player",
+      "x": 59.5, "y": 64, "z": 3.5, "relative": false, "facing": 90 },
+    { "cmd": "spawn_actor", "actor": "linus", "npc_id": "linus",
+      "x": 39.5, "y": 64, "z": -4.5, "relative": false, "facing": 0 },
+    { "cmd": "camera", "x": 38.592, "y": 66.500, "z": 6.663,
+      "yaw": -108.4, "pitch": 19.0, "relative": false },
+    { "cmd": "music", "track": "MUSIC_NIGHT_TIME" },
+    { "cmd": "fade", "mode": "in", "ticks": 20 },
+    { "cmd": "pause", "ticks": 16 },
+    { "cmd": "skippable" },
+
+    { "cmd": "navigate_actor", "actor": "linus",
+      "x": 39.5, "y": 64, "z": 2.5, "speed": 0.11, "relative": false },
+    { "cmd": "pause", "ticks": 20 },
+    { "cmd": "play_sound", "sound": "stardewcraft:trashcanlid" },
+    { "cmd": "particle", "type": "cloud", "x": 40.5, "y": 64.2, "z": 2.5,
+      "count": 2, "ticks": 4 },
+    { "cmd": "pause", "ticks": 20 },
+    { "cmd": "play_sound", "sound": "stardewcraft:dirty_hit" },
+    { "cmd": "pause", "ticks": 20 },
+    { "cmd": "play_sound", "sound": "stardewcraft:slime_hit" },
+    { "cmd": "pause", "ticks": 20 },
+    { "cmd": "play_sound", "sound": "stardewcraft:dirty_hit" },
+    { "cmd": "pause", "ticks": 32 },
+
+    { "cmd": "spawn_actor", "actor": "george", "npc_id": "george",
+      "x": 48.5, "y": 64, "z": 3.5, "relative": false, "facing": 90 },
+    { "cmd": "play_sound", "sound": "stardewcraft:door_close" },
+    { "cmd": "jump", "actor": "linus" },
+    { "cmd": "shake_actor", "actor": "linus", "ticks": 20 },
+    { "cmd": "navigate_actor", "actor": "linus",
+      "x": 41.5, "y": 64, "z": 0.5, "speed": 0.35, "relative": false },
+    { "cmd": "face_actor", "actor": "george", "yaw": 90 },
+    { "cmd": "emote", "actor": "george", "emote": "angry" },
+    { "cmd": "camera", "x": 54.799, "y": 64.998, "z": 9.154,
+      "yaw": 160.1, "pitch": 11.5, "relative": false },
+    { "cmd": "navigate_actor", "actor": "fake_player",
+      "x": 50.5, "y": 64, "z": 3.5, "speed": 0.15, "relative": false },
+    { "cmd": "speak", "npc_id": "george", "text": "event.linus.502969.george_raccoons" },
+    { "cmd": "face_actor", "actor": "george", "yaw": -90 },
+    { "cmd": "speak", "npc_id": "george", "text": "event.linus.502969.george_request" },
+    { "cmd": "play_sound", "sound": "stardewcraft:door_close" },
+    { "cmd": "remove_actor", "actor": "george" },
+
+    { "cmd": "camera", "x": 38.592, "y": 66.500, "z": 6.663,
+      "yaw": -108.4, "pitch": 19.0, "relative": false },
+    { "cmd": "navigate_actor", "actor": "fake_player",
+      "x": 42.5, "y": 64, "z": 3.5, "speed": 0.15, "relative": false },
+    { "cmd": "navigate_actor", "actor": "linus",
+      "x": 40.5, "y": 64, "z": 3.5, "speed": 0.11, "relative": false },
+    { "cmd": "face_actor", "actor": "linus", "yaw": 180 },
+    { "cmd": "face_actor", "actor": "fake_player", "yaw": 180 },
+    { "cmd": "music", "track": "MUSIC_ECHOS" },
+    { "cmd": "pause", "ticks": 20 },
+    { "cmd": "emote", "actor": "linus", "emote": "sad" },
+    { "cmd": "speak", "npc_id": "linus", "text": "event.linus.502969.confession" },
+    { "cmd": "speak", "npc_id": "linus", "text": "event.linus.502969.fresh_food" },
+    {
+      "cmd": "question",
+      "text": "event.linus.502969.question",
+      "choices": [
+        {
+          "text": "event.linus.502969.choice.1",
+          "commands": [
+            { "cmd": "speak", "npc_id": "linus", "text": "event.linus.502969.response.1" }
+          ]
+        },
+        {
+          "text": "event.linus.502969.choice.2",
+          "commands": [
+            { "cmd": "speak", "npc_id": "linus", "text": "event.linus.502969.response.2" }
+          ]
+        },
+        {
+          "text": "event.linus.502969.choice.3",
+          "commands": [
+            { "cmd": "speak", "npc_id": "linus", "text": "event.linus.502969.response.3" }
+          ]
+        },
+        {
+          "text": "event.linus.502969.choice.4",
+          "commands": [
+            { "cmd": "speak", "npc_id": "linus", "text": "event.linus.502969.response.4" }
+          ]
+        }
+      ]
+    },
+    { "cmd": "music", "track": "MUSIC_NIGHT_TIME" },
+    { "cmd": "face_actor", "actor": "linus", "yaw": 90 },
+    { "cmd": "speak", "npc_id": "linus", "text": "event.linus.502969.promise" },
+
+    { "cmd": "camera", "x": 36.952, "y": 64.676, "z": 18.390,
+      "yaw": 147.9, "pitch": 1.8, "relative": false, "ticks": 100 },
+    { "cmd": "navigate_actor", "actor": "linus",
+      "x": 34.5, "y": 64, "z": 12.5, "speed": 0.11, "relative": false },
+    { "cmd": "navigate_actor", "actor": "fake_player",
+      "x": 29.5, "y": 64, "z": 0.5, "speed": 0.15, "relative": false },
+    { "cmd": "remove_actor", "actor": "fake_player" },
+    { "cmd": "face_actor", "actor": "linus", "yaw": 90 },
+    { "cmd": "pause", "ticks": 12 },
+    { "cmd": "play_sound", "sound": "stardewcraft:slime_hit" },
+    { "cmd": "particle", "type": "cloud", "x": 33.5, "y": 64.2, "z": 12.5,
+      "count": 2, "ticks": 4 },
+    { "cmd": "pause", "ticks": 20 },
+    { "cmd": "play_sound", "sound": "stardewcraft:slime_hit" },
+    { "cmd": "pause", "ticks": 16 },
+
+    { "cmd": "spawn_actor", "actor": "gus", "npc_id": "gus",
+      "x": 30.5, "y": 65, "z": 15.5, "relative": false, "facing": 0 },
+    { "cmd": "play_sound", "sound": "stardewcraft:door_close" },
+    { "cmd": "navigate_actor", "actor": "gus",
+      "x": 30.5, "y": 64, "z": 16.5, "speed": 0.11, "relative": false },
+    { "cmd": "navigate_actor", "actor": "gus",
+      "x": 34.5, "y": 64, "z": 16.5, "speed": 0.11, "relative": false },
+    { "cmd": "jump", "actor": "linus" },
+    { "cmd": "navigate_actor", "actor": "linus",
+      "x": 34.5, "y": 64, "z": 8.5, "speed": 0.22, "relative": false },
+    { "cmd": "navigate_actor", "actor": "gus",
+      "x": 34.5, "y": 64, "z": 13.5, "speed": 0.11, "relative": false },
+    { "cmd": "stop_music" },
+    { "cmd": "speak", "npc_id": "gus", "text": "event.linus.502969.gus_wait" },
+    { "cmd": "face_actor", "actor": "gus", "yaw": 180 },
+    { "cmd": "shake_actor", "actor": "linus", "ticks": 40 },
+    { "cmd": "face_actor", "actor": "linus", "yaw": 180 },
+    { "cmd": "speak", "npc_id": "gus", "text": "event.linus.502969.gus_knows" },
+    { "cmd": "emote", "actor": "gus", "emote": "pause" },
+    { "cmd": "speak", "npc_id": "gus", "text": "event.linus.502969.gus_offer" },
+    { "cmd": "speak", "npc_id": "gus", "text": "event.linus.502969.gus_food" },
+
+    { "cmd": "fade", "mode": "out", "ticks": 20 },
+    { "cmd": "remove_actor", "actor": "linus" },
+    { "cmd": "remove_actor", "actor": "gus" },
+    { "cmd": "stop_music" },
+    { "cmd": "camera", "action": "reset" },
+    { "cmd": "unlock_player" },
+    { "cmd": "end" }
+  ]
+}

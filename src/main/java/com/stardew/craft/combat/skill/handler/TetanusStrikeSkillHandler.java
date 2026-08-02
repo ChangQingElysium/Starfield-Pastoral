@@ -10,10 +10,9 @@ import com.stardew.craft.combat.skill.runtime.SkillExecutionContext;
 import com.stardew.craft.combat.skill.runtime.SkillInstance;
 import com.stardew.craft.combat.skill.runtime.SkillTargeting;
 import com.stardew.craft.combat.skill.runtime.SkillValidation;
-import com.stardew.craft.effect.ModMobEffects;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
 import com.stardew.craft.item.weapon.WeaponSkillData;
 import java.util.List;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
@@ -44,11 +43,9 @@ public final class TetanusStrikeSkillHandler implements RuntimeWeaponSkillHandle
         String weaponId = context.weaponId().getPath();
         String skillId = context.skillData().getId();
 
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                weaponId,
-                skillId,
-                context.nowTick(),
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 context.skillData().getCooldown() * 20
         );
 
@@ -58,20 +55,16 @@ public final class TetanusStrikeSkillHandler implements RuntimeWeaponSkillHandle
         );
         if (target != null) {
             instance.setTargetEntityIds(List.of(target.getId()));
-            // Preserve legacy ordering: Vulnerable is applied before attack so
-            // the activating strike also receives the 10% vulnerability bonus.
-            target.addEffect(new MobEffectInstance(
-                    ModMobEffects.VULNERABLE,
-                    VULNERABLE_DURATION_TICKS,
-                    VULNERABLE_AMPLIFIER
-            ));
-            WeaponSkillDamage.apply(
+            instance.registerCommittedEffect(() -> WeaponSkillDamage.apply(
                     context.player(),
                     target,
                     createHitContext(context.skillData()),
                     context.weaponSnapshot(),
-                    context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS
-            );
+                    context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS,
+                    WeaponSkillDamage.AttackGatePolicy
+                            .RESPECT_AT_IMPACT,
+                    WeaponSkillDamage.HitCooldownPolicy.RESPECT_VANILLA
+            ));
         }
 
         WeaponSkillAnimationLock.setLock(

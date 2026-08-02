@@ -12,24 +12,24 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class WeaponSkillDamageContractTest {
     private static final List<String> COMPATIBILITY_MIGRATIONS = List.of(
-            "combat/skill/BrokenTridentThrustTracker.java",
-            "combat/skill/CarvingKnifeThrustTracker.java",
-            "combat/skill/DwarfDaggerThrustTracker.java",
-            "combat/skill/IridiumNeedleThrustTracker.java",
-            "combat/skill/GalaxyDaggerThrustTracker.java",
-            "combat/skill/InfinityDaggerThrustTracker.java",
-            "combat/skill/ClaymoreFoldbackTracker.java",
-            "combat/skill/ObsidianCrackTracker.java",
-            "combat/skill/DarkSwordBloodMoonTracker.java",
-            "combat/skill/DwarfFortressTracker.java",
-            "combat/skill/HolyBladeSanctuaryTracker.java",
+            "combat/skill/handler/FishcatchThrustExecutionState.java",
+            "combat/skill/handler/CarvingThrustExecutionState.java",
+            "combat/skill/handler/DwarfDaggerThrustExecutionState.java",
+            "combat/skill/handler/IridiumNeedleThrustExecutionState.java",
+            "combat/skill/handler/GalaxyDaggerThrustExecutionState.java",
+            "combat/skill/handler/InfinityDaggerThrustExecutionState.java",
+            "combat/skill/handler/ClaymoreFoldbackExecutionState.java",
+            "combat/skill/handler/ObsidianCrackExecutionState.java",
+            "combat/skill/handler/DarkSwordBloodMoonExecutionState.java",
+            "combat/skill/handler/DwarfFortressExecutionState.java",
+            "combat/skill/handler/HolyDomainExecutionState.java",
             "combat/skill/LavaKatanaMarkTracker.java",
-            "combat/skill/LavaKatanaReverbTracker.java",
-            "combat/skill/ObsidianResonanceTracker.java",
-            "combat/skill/OssifiedExecutionTracker.java",
-            "combat/skill/SteelFalchionLineTracker.java",
+            "combat/skill/handler/LavaKatanaReverbExecutionState.java",
+            "combat/skill/handler/OssifiedExecutionState.java",
+            "combat/skill/handler/SteelFalchionDotTracker.java",
+            "combat/skill/handler/SteelFalchionTraceExecutionState.java",
             "combat/skill/TemperedFireRingTracker.java",
-            "combat/skill/TemplarJudgementTracker.java",
+            "combat/skill/handler/TemplarJudgementExecutionState.java",
             "combat/skill/WickedKrisPoisonTracker.java",
             "entity/effect/IceSpineEffectEntity.java",
             "entity/projectile/ElfBladeLeafEntity.java",
@@ -44,16 +44,17 @@ class WeaponSkillDamageContractTest {
                 "combat/skill/WeaponSkillDamage.java"
         );
 
-        assertEquals(4, occurrences(
+        assertEquals(6, occurrences(
                 source,
-                "public static boolean apply("
+                "public static void apply("
         ));
+        assertFalse(source.contains("public static boolean apply("));
         assertTrue(source.contains(
                 "Objects.requireNonNull(weaponSnapshot, \"weaponSnapshot\")"
         ));
         assertTrue(source.contains(
-                "weaponSnapshot.weapon().getItem() "
-                        + "instanceof IStardewWeapon"
+                "WeaponCombatIdentity.isWeapon("
+                        + "weaponSnapshot.weapon()"
         ));
         assertTrue(source.contains(
                 "attacker instanceof ServerPlayer serverPlayer"
@@ -69,9 +70,12 @@ class WeaponSkillDamageContractTest {
                 "CommonHooks.onPlayerAttackTarget("
         );
         int guardedTry = source.lastIndexOf("try {", attackGate);
-        int gateRejected = source.indexOf("return false;", attackGate);
+        int gateRejected = source.indexOf(
+                "return;",
+                attackGate
+        );
         int hit = source.indexOf(
-                "return target.hurt("
+                "target.hurt("
         );
         int cleanup = source.indexOf(
                 "} finally {",
@@ -156,7 +160,7 @@ class WeaponSkillDamageContractTest {
     }
 
     @Test
-    void arithmeticAndCombatSemanticsRemainInTheCentralEvent()
+    void arithmeticAndCombatSemanticsRemainInTheSharedEvaluator()
             throws IOException {
         String entry = normalizedSource(
                 "combat/skill/WeaponSkillDamage.java"
@@ -164,38 +168,90 @@ class WeaponSkillDamageContractTest {
         String events = normalizedSource(
                 "combat/WeaponCombatEvents.java"
         );
+        String assembly = normalizedSource(
+                "combat/WeaponDamageAssemblyRules.java"
+        );
         String calculator = normalizedSource(
                 "combat/DamageCalculator.java"
         );
 
         int consume = events.indexOf(
-                "WeaponSkillContextStore.consumePending(player, nowTick)"
+                "WeaponSkillContextStore.consumePending("
         );
-        int currentHand = events.indexOf(
-                "player.getMainHandItem()",
+        int missingSnapshotGate = events.indexOf(
+                "if (releaseWeapon == null) return null;",
                 consume
         );
+        int frozenWeapon = events.indexOf(
+                "ItemStack weapon = releaseWeapon.weapon();",
+                missingSnapshotGate
+        );
+        int prepare = events.indexOf(
+                "WeaponHitPreparation.prepare(",
+                frozenWeapon
+        );
         int request = events.indexOf(
-                "DamageCalculator.createPlayerDamageRequest(",
-                currentHand
+                ".createPlayerDamageRequest(",
+                prepare
+        );
+        int assemble = events.indexOf(
+                "WeaponDamageAssemblyRules.apply(",
+                request
         );
         int evaluate = events.indexOf(
                 "DamagePipeline.evaluate(damageRequest.build())",
-                request
+                assemble
         );
-        int applyFinal = events.indexOf(
-                "event.setNewDamage(finalDamage)",
+        int freezeOutcome = events.indexOf(
+                "new IncomingWeaponResolution(hit, "
+                        + "outcome.getFinalDamage())",
                 evaluate
+        );
+        int nativeEntry = events.indexOf(
+                "public static void onLivingIncomingDamage("
+                        + "LivingIncomingDamageEvent event)"
+        );
+        int nativeEvaluate = events.indexOf(
+                "IncomingWeaponResolution resolution = evaluateWeaponHit(",
+                nativeEntry
+        );
+        int nativeAmount = events.indexOf(
+                "event.setAmount(resolution.authoritativeDamage())",
+                nativeEvaluate
+        );
+        int customEntry = events.indexOf(
+                "public static CustomHealthWeaponResolution "
+                        + "evaluateCustomHealthWeaponHit("
+        );
+        int customEvaluate = events.indexOf(
+                "IncomingWeaponResolution resolution = evaluateWeaponHit(",
+                customEntry
         );
 
         assertTrue(entry.contains(
                 "WeaponSkillContextStore.setPending("
         ));
         assertTrue(consume >= 0);
-        assertTrue(currentHand > consume);
-        assertTrue(request > currentHand);
-        assertTrue(evaluate > request);
-        assertTrue(applyFinal > evaluate);
+        assertTrue(missingSnapshotGate > consume);
+        assertTrue(frozenWeapon > missingSnapshotGate);
+        assertTrue(prepare > frozenWeapon);
+        assertTrue(request > prepare);
+        assertTrue(assemble > request);
+        assertTrue(evaluate > assemble);
+        assertTrue(freezeOutcome > evaluate);
+        assertTrue(nativeEntry >= 0);
+        assertTrue(nativeEvaluate > nativeEntry);
+        assertTrue(nativeAmount > nativeEvaluate);
+        assertTrue(customEntry >= 0);
+        assertTrue(customEvaluate > customEntry);
+        int evaluatorEnd = events.indexOf(
+                "public static void onLivingHurt(",
+                consume
+        );
+        assertTrue(evaluatorEnd > consume);
+        assertFalse(events.substring(consume, evaluatorEnd).contains(
+                "player.getMainHandItem()"
+        ));
         assertTrue(calculator.contains(
                 "targetStats.getResilience()"
         ));
@@ -205,9 +261,10 @@ class WeaponSkillDamageContractTest {
         assertTrue(calculator.contains(
                 "equipmentStats.getCritChance()"
         ));
-        assertTrue(events.contains(
+        assertTrue(assembly.contains(
                 "StardewEnchantments.BUG_KILLER"
         ));
+        assertFalse(events.contains("StardewEnchantments.BUG_KILLER"));
     }
 
     @Test
@@ -216,7 +273,7 @@ class WeaponSkillDamageContractTest {
         for (String relative : COMPATIBILITY_MIGRATIONS) {
             String tracker = normalizedSource(relative);
             assertTrue(
-                    tracker.contains("WeaponSkillDamage.apply("),
+                    tracker.contains("WeaponSkillDamage.apply"),
                     relative
             );
             assertFalse(
@@ -227,53 +284,71 @@ class WeaponSkillDamageContractTest {
             );
         }
 
-        assertTrue(normalizedSource(
-                "combat/skill/BrokenTridentThrustTracker.java"
+        String fishcatch = normalizedSource(
+                "combat/skill/handler/FishcatchThrustExecutionState.java"
+        );
+        assertTrue(fishcatch.contains("WeaponSkillDamage.apply("));
+        assertTrue(fishcatch.contains(
+                "beginStrike(target.getUUID(), fishCatchActive)"
+        ));
+        assertTrue(fishcatch.contains("boolean recordAppliedHit("));
+        assertFalse(fishcatch.contains(
+                "boolean hit = WeaponSkillDamage.apply("
+        ));
+        String carving = normalizedSource(
+                "combat/skill/handler/CarvingThrustExecutionState.java"
+        );
+        assertTrue(carving.contains("WeaponSkillDamage.apply("));
+        assertTrue(carving.contains("boolean recordCriticalHit("));
+        assertFalse(carving.contains("WeaponSkillDamage.applyWithResult("));
+        assertTrue(carving.contains("executionContext.weaponSnapshot()"));
+        String dwarf = normalizedSource(
+                "combat/skill/handler/DwarfDaggerThrustExecutionState.java"
+        );
+        assertTrue(dwarf.contains("WeaponSkillDamage.apply("));
+        assertTrue(dwarf.contains("boolean recordAppliedHit("));
+        assertFalse(dwarf.contains(
+                "boolean hit = WeaponSkillDamage.apply("
+        ));
+        assertTrue(dwarf.contains("executionContext.weaponSnapshot()"));
+        assertFalse(normalizedSource(
+                "combat/skill/handler/IridiumNeedleThrustExecutionState.java"
         ).contains(
                 "boolean hit = WeaponSkillDamage.apply("
         ));
-        assertTrue(normalizedSource(
-                "combat/skill/CarvingKnifeThrustTracker.java"
+        assertFalse(normalizedSource(
+                "combat/skill/handler/GalaxyDaggerThrustExecutionState.java"
         ).contains(
-                "boolean hit = WeaponSkillDamage.apply("
+                "return WeaponSkillDamage.apply("
         ));
-        assertTrue(normalizedSource(
-                "combat/skill/DwarfDaggerThrustTracker.java"
-        ).contains(
-                "boolean hit = WeaponSkillDamage.apply("
-        ));
-        assertTrue(normalizedSource(
-                "combat/skill/IridiumNeedleThrustTracker.java"
-        ).contains(
-                "boolean hit = WeaponSkillDamage.apply("
-        ));
-        assertTrue(normalizedSource(
-                "combat/skill/GalaxyDaggerThrustTracker.java"
+        assertFalse(normalizedSource(
+                "combat/skill/handler/InfinityDaggerThrustExecutionState.java"
         ).contains(
                 "return WeaponSkillDamage.apply("
         ));
         assertTrue(normalizedSource(
-                "combat/skill/InfinityDaggerThrustTracker.java"
-        ).contains(
-                "return WeaponSkillDamage.apply("
-        ));
+                "combat/skill/handler/GalaxyDaggerThrustExecutionState.java"
+        ).contains("context.weaponSnapshot()"));
+        assertTrue(normalizedSource(
+                "combat/skill/handler/InfinityDaggerThrustExecutionState.java"
+        ).contains("context.weaponSnapshot()"));
 
-        String tracker = normalizedSource(
-                "combat/skill/TemperedQuenchTracker.java"
+        String state = normalizedSource(
+                "combat/skill/handler/TemperedQuenchExecutionState.java"
         );
 
-        assertTrue(tracker.contains(
-                "WeaponSkillDamage.apply( player, target, "
+        assertTrue(state.contains(
+                "WeaponSkillDamage.apply( context.player(), target, "
                         + "createBlastContext(), weaponSnapshot,"
         ));
-        assertTrue(tracker.contains(
+        assertFalse(state.contains(
                 "if (weaponSnapshot == null)"
         ));
-        assertEquals(2, occurrences(
-                tracker,
+        assertEquals(1, occurrences(
+                state,
                 "WeaponSkillDamage.apply("
         ));
-        assertFalse(tracker.contains(
+        assertFalse(state.contains(
                 "target.hurt( "
                         + "player.damageSources().playerAttack(player), "
                         + "1.0F"

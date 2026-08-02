@@ -1,5 +1,7 @@
 package com.stardew.craft.combat.skill.handler;
 
+import com.stardew.craft.combat.equipment.EquipmentMobEffectHandler;
+import com.stardew.craft.combat.equipment.EquipmentNegativeStatusProtection;
 import com.stardew.craft.combat.network.WaterRingEffectPayload;
 import com.stardew.craft.combat.skill.BrokenTridentCatchTracker;
 import com.stardew.craft.combat.skill.SkillContext;
@@ -12,12 +14,17 @@ import com.stardew.craft.combat.skill.runtime.SkillExecutionContext;
 import com.stardew.craft.combat.skill.runtime.SkillInstance;
 import com.stardew.craft.combat.skill.runtime.SkillTargeting;
 import com.stardew.craft.combat.skill.runtime.SkillValidation;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillMovementArbiter;
 import com.stardew.craft.effect.ModMobEffects;
 import com.stardew.craft.item.weapon.WeaponSkillData;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -81,8 +88,11 @@ public final class TideReelSkillHandler implements RuntimeWeaponSkillHandler {
         }
         instance.setTargetEntityIds(List.of(target.getId()));
 
-        if (!context.player().getAbilities().instabuild
-                && !PlayerStardewDataAPI.consumeEnergy(context.player(), ENERGY_COST)) {
+        if (!WeaponSkillRuntime.consumeEnergyDuringBegin(
+                context,
+                instance,
+                ENERGY_COST
+        )) {
             throw new IllegalStateException(
                     "Validated Tide Reel energy payment is no longer available"
             );
@@ -90,58 +100,57 @@ public final class TideReelSkillHandler implements RuntimeWeaponSkillHandler {
 
         String weaponId = context.weaponId().getPath();
         String skillId = context.skillData().getId();
-        boolean fishCatchActive = BrokenTridentCatchTracker.isActive(
+        Optional<BrokenTridentCatchTracker.CatchSnapshot> consumedCatch =
+                BrokenTridentCatchTracker.consumeForBegin(
                 context.player(),
                 context.nowTick()
         );
-        if (fishCatchActive) {
-            BrokenTridentCatchTracker.consume(context.player(), context.nowTick());
-        }
+        boolean fishCatchActive = consumedCatch.isPresent();
+        consumedCatch.ifPresent(snapshot ->
+                instance.registerBeginFailureCleanup(() ->
+                        BrokenTridentCatchTracker.restore(
+                                context.player(),
+                                snapshot,
+                                context.nowTick()
+                        )
+                )
+        );
 
         boolean hasFish = BrokenTridentCatchTracker.hasFishInInventory(context.player());
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                weaponId,
-                skillId,
-                context.nowTick(),
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 appliedCooldownTicks(
                         context.skillData().getCooldown() * 20,
                         hasFish
                 )
         );
-        WeaponSkillDamage.apply(
-                context.player(),
-                target,
-                createHitContext(context.skillData(), fishCatchActive),
-                context.weaponSnapshot(),
-                context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS
+        instance.initializeExecutionState(
+                new State(target.getUUID(), fishCatchActive)
         );
-
-        if (fishCatchActive) {
-            target.addEffect(new MobEffectInstance(
-                    MobEffects.MOVEMENT_SLOWDOWN,
-                    FISH_CATCH_SLOW_TICKS,
-                    FISH_CATCH_SLOW_AMPLIFIER,
-                    false,
-                    true,
-                    true
-            ));
-        }
-        pullTarget(context, target, fishCatchActive);
-        sendLegacyImpactEffects(context.player().serverLevel(), target);
-
-        // Preserve the old notification order.
-        WeaponSkillAnimationLock.setLock(
-                context.player(),
-                context.nowTick(),
-                ANIMATION_TICKS
-        );
-        WeaponSkillAnimationDispatcher.sendSkillAnim(
-                context.player(),
-                weaponId,
-                skillId,
-                ANIMATION_TICKS
-        );
+        instance.registerCommittedEffect(() -> {
+            WeaponSkillDamage.apply(
+                    context.player(),
+                    target,
+                    createHitContext(context.skillData(), fishCatchActive),
+                    context.weaponSnapshot(),
+                    context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS,
+                    WeaponSkillDamage.AttackGatePolicy.RESPECT_AT_IMPACT,
+                    WeaponSkillDamage.HitCooldownPolicy.RESPECT_VANILLA
+            );
+            sendLegacyImpactEffects(context.player().serverLevel(), target);
+            WeaponSkillAnimationLock.setLock(
+                    context.player(),
+                    context.nowTick(),
+                    ANIMATION_TICKS
+            );
+            WeaponSkillAnimationDispatcher.sendSkillAnim(
+                    context.player(),
+                    weaponId,
+                    skillId,
+                    ANIMATION_TICKS
+            );
+        });
     }
 
     static SkillContext createHitContext(
@@ -180,6 +189,22 @@ public final class TideReelSkillHandler implements RuntimeWeaponSkillHandler {
         return fishCatchActive ? FISH_CATCH_PULL_LIFT : NORMAL_PULL_LIFT;
     }
 
+    /** Applies the reel only after this cast's exact root hit dealt health damage. */
+    public static boolean onAppliedHit(
+            ServerPlayer player,
+            LivingEntity target
+    ) {
+        if (player == null || target == null) {
+            return false;
+        }
+        return WeaponSkillRuntime.activeExecutionState(
+                player.getUUID(),
+                BuiltinWeaponSkillHandlers.TIDE_REEL,
+                State.class
+        ).map(state -> state.onAppliedHit(player, target))
+                .orElse(false);
+    }
+
     private static boolean canPayEnergy(SkillExecutionContext context) {
         return canPayEnergy(
                 PlayerStardewDataAPI.getEnergy(context.player()),
@@ -196,23 +221,72 @@ public final class TideReelSkillHandler implements RuntimeWeaponSkillHandler {
     }
 
     private static void pullTarget(
-            SkillExecutionContext context,
+            ServerPlayer player,
             LivingEntity target,
             boolean fishCatchActive
     ) {
-        Vec3 toPlayer = context.player().position().subtract(target.position());
+        Vec3 toPlayer = player.position().subtract(target.position());
         Vec3 horizontalDirection = new Vec3(toPlayer.x, 0.0, toPlayer.z);
         if (horizontalDirection.lengthSqr() <= MINIMUM_PULL_DISTANCE_SQUARED) {
             return;
         }
 
         Vec3 pull = horizontalDirection.normalize().scale(pullStrength(fishCatchActive));
+        WeaponSkillMovementArbiter.revokeCurrentIfPlayer(target);
         target.setDeltaMovement(target.getDeltaMovement().add(
                 pull.x,
                 pullLift(fishCatchActive),
                 pull.z
         ));
         target.hurtMarked = true;
+    }
+
+    private static final class State implements SkillInstance.ExecutionState {
+        private final UUID targetId;
+        private final boolean fishCatchActive;
+        private boolean consumed;
+
+        private State(UUID targetId, boolean fishCatchActive) {
+            this.targetId = targetId;
+            this.fishCatchActive = fishCatchActive;
+        }
+
+        private synchronized boolean onAppliedHit(
+                ServerPlayer player,
+                LivingEntity target
+        ) {
+            if (consumed || !targetId.equals(target.getUUID())) {
+                return false;
+            }
+            consumed = true;
+
+            int protectionDuration = fishCatchActive
+                    ? FISH_CATCH_SLOW_TICKS
+                    : 1;
+            EquipmentNegativeStatusProtection.Decision protection =
+                    EquipmentNegativeStatusProtection.decide(
+                            target,
+                            protectionDuration
+                    );
+            if (protection.resisted()) {
+                return false;
+            }
+            if (fishCatchActive) {
+                EquipmentMobEffectHandler.addPreAdjustedEffect(
+                        target,
+                        new MobEffectInstance(
+                                MobEffects.MOVEMENT_SLOWDOWN,
+                                protection.durationTicks(),
+                                FISH_CATCH_SLOW_AMPLIFIER,
+                                false,
+                                true,
+                                true
+                        )
+                );
+            }
+            pullTarget(player, target, fishCatchActive);
+            return true;
+        }
     }
 
     private static void sendLegacyImpactEffects(

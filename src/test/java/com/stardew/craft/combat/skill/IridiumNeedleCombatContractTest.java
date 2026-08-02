@@ -8,14 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class IridiumNeedleCombatContractTest {
     @Test
-    void tripleSlashKeepsItsThreeTickCadenceAndFinalGuaranteedCrit() {
-        assertEquals(103L, IridiumNeedleThrustTracker.nextStrikeTick(100L));
-        assertFalse(IridiumNeedleThrustTracker.isGuaranteedCritStrike(3));
-        assertFalse(IridiumNeedleThrustTracker.isGuaranteedCritStrike(2));
-        assertTrue(IridiumNeedleThrustTracker.isGuaranteedCritStrike(1));
-    }
-
-    @Test
     void successfulDamageCyclesThePassiveBeforeTheNextGuaranteedCrit() {
         assertFalse(IridiumNeedleCritTracker.guaranteesCritAtStacks(0));
         assertEquals(1, IridiumNeedleCritTracker.nextStacks(0));

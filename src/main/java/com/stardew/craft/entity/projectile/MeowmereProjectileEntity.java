@@ -1,5 +1,6 @@
 package com.stardew.craft.entity.projectile;
 
+import com.stardew.craft.combat.skill.HitCooldownDamageSource;
 import com.stardew.craft.combat.skill.SkillContext;
 import com.stardew.craft.combat.skill.WeaponDamageSnapshot;
 import com.stardew.craft.combat.skill.WeaponSkillContextStore;
@@ -215,51 +216,40 @@ public class MeowmereProjectileEntity extends ThrowableProjectile {
         Entity owner = this.getOwner();
 
         if (target == owner) return; // 不伤害自己
-        if (target instanceof LivingEntity livingTarget) {
-            livingTarget.invulnerableTime = 0;
-        }
-
-        if (!(owner instanceof LivingEntity livingOwner)) {
+        if (!(target instanceof LivingEntity livingTarget)
+                || !(owner instanceof net.minecraft.world.entity.player.Player
+                skillPlayer)
+                || skillId == null
+                || releaseWeaponSnapshot == null) {
             this.discard();
             return;
         }
 
-        DamageSource source = this.damageSources().mobProjectile(this, livingOwner);
-        net.minecraft.world.entity.player.Player skillPlayer =
-                owner instanceof net.minecraft.world.entity.player.Player player
-                        && skillId != null
-                        ? player
-                        : null;
+        DamageSource source = HitCooldownDamageSource.bypassVanillaCooldown(
+                this.damageSources().mobProjectile(
+                        this,
+                        skillPlayer
+                )
+        );
         long nowTick = this.level().getGameTime();
-        if (skillPlayer != null) {
-            SkillContext hitContext = createHitContext(
-                    skillId,
-                    skillTier,
-                    damageMultiplier
-            );
-            if (releaseWeaponSnapshot != null) {
-                WeaponSkillContextStore.setPending(
-                        skillPlayer,
-                        hitContext,
-                        releaseWeaponSnapshot,
-                        nowTick + HIT_CONTEXT_LIFETIME_TICKS
-                );
-            } else {
-                WeaponSkillContextStore.setPending(
-                        skillPlayer,
-                        hitContext,
-                        nowTick + HIT_CONTEXT_LIFETIME_TICKS
-                );
-            }
-        }
+        SkillContext hitContext = createHitContext(
+                skillId,
+                skillTier,
+                damageMultiplier
+        );
+        WeaponSkillContextStore.setPending(
+                skillPlayer,
+                hitContext,
+                releaseWeaponSnapshot,
+                nowTick + HIT_CONTEXT_LIFETIME_TICKS
+        );
         try {
-            target.hurt(source, this.damage);
+            livingTarget.hurt(source, this.damage);
         } finally {
-            if (skillPlayer != null
-                    && WeaponSkillContextStore.hasPending(
-                            skillPlayer,
-                            nowTick
-                    )) {
+            if (WeaponSkillContextStore.hasPending(
+                    skillPlayer,
+                    nowTick
+            )) {
                 WeaponSkillContextStore.consume(skillPlayer, nowTick);
             }
         }

@@ -4,12 +4,12 @@ import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.shape.ModelVoxelShapeCache;
 import com.stardew.craft.blockentity.DailyStatueBlockEntity;
 import com.stardew.craft.blockentity.ModBlockEntities;
+import com.stardew.craft.blockentity.UtilityDropHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
-import net.minecraft.world.Containers;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -24,8 +24,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -137,30 +135,16 @@ public final class DailyStatueBlock extends Block implements EntityBlock {
         if (!(level.getBlockEntity(pos) instanceof DailyStatueBlockEntity statue)) {
             return false;
         }
-        if (!statue.isReady()) {
-            return false;
-        }
-        ItemStack reward = statue.harvestOne();
-        if (reward.isEmpty()) {
-            return false;
-        }
-        if (!player.addItem(reward) && !reward.isEmpty()) {
-            player.drop(reward, false);
-        }
-        level.playSound(null, pos, SoundEvents.ITEM_PICKUP,
-                SoundSource.BLOCKS, 0.6F, 1.0F);
-        return true;
+        return UtilityDropHelper.tryHarvest(
+                level, pos, player, statue::isReady, statue::harvestOne, 0);
     }
 
     @Override
     public void onRemove(BlockState state, Level level, BlockPos pos,
                          BlockState newState, boolean movedByPiston) {
         if (!level.isClientSide && !state.is(newState.getBlock()) && !movedByPiston
-                && level.getBlockEntity(pos) instanceof DailyStatueBlockEntity statue) {
-            ItemStack stored = statue.harvestOne();
-            if (!stored.isEmpty()) {
-                Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), stored);
-            }
+                && level.getBlockEntity(pos) instanceof DailyStatueBlockEntity) {
+            UtilityDropHelper.dropAutomationContents(level, pos);
         }
         super.onRemove(state, level, pos, newState, movedByPiston);
     }

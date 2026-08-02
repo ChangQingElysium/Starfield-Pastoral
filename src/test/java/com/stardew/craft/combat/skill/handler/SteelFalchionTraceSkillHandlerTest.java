@@ -1,6 +1,5 @@
 package com.stardew.craft.combat.skill.handler;
 
-import com.stardew.craft.combat.skill.SteelFalchionLineTracker;
 import com.stardew.craft.item.weapon.WeaponData;
 import com.stardew.craft.item.weapon.WeaponRegistry;
 import com.stardew.craft.item.weapon.WeaponSkillData;
@@ -32,7 +31,7 @@ class SteelFalchionTraceSkillHandlerTest {
                 SteelFalchionTraceSkillHandler
                         .TRACE_DOT_DAMAGE_MULTIPLIER
         );
-        assertEquals(2, SteelFalchionLineTracker.TRACE_SPEED_AMPLIFIER);
+        assertEquals(2, SteelFalchionTraceSkillHandler.TRACE_SPEED_AMPLIFIER);
         assertFalse(
                 new SteelFalchionTraceSkillHandler().completesImmediately()
         );

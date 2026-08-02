@@ -56,6 +56,19 @@ public final class DamagePipeline {
             damage = apply(adjustment, damage, resolvedBaseDamage);
             stages.add(adjustmentStage(DamageOutcome.Phase.PRE_DEFENSE, adjustment, before, damage));
         }
+        if (critical) {
+            for (DamageAdjustment adjustment
+                    : request.criticalOnlyAdjustments()) {
+                float before = damage;
+                damage = apply(adjustment, damage, resolvedBaseDamage);
+                stages.add(adjustmentStage(
+                        DamageOutcome.Phase.PRE_DEFENSE,
+                        adjustment,
+                        before,
+                        damage
+                ));
+            }
+        }
 
         float variance = range(
                 request.varianceMinimum(),

@@ -39,6 +39,12 @@
     "background": 0
   },
   {
+    "id": "spring_11_1",
+    "text": "stardewcraft.mail.spring_11_1",
+    "background": 0,
+    "questId": "100"
+  },
+  {
     "id": "spring_12",
     "text": "stardewcraft.mail.spring_12",
     "background": 0
@@ -47,6 +53,12 @@
     "id": "spring_15_1",
     "text": "stardewcraft.mail.spring_15_1",
     "background": 0
+  },
+  {
+    "id": "spring_19_1",
+    "text": "stardewcraft.mail.spring_19_1",
+    "background": 0,
+    "questId": "101"
   },
   {
     "id": "spring_20_1",
@@ -62,5 +74,23 @@
     "id": "spring_25_1",
     "text": "stardewcraft.mail.spring_25_1",
     "background": 0
+  },
+  {
+    "id": "spring_6_2",
+    "text": "stardewcraft.mail.spring_6_2",
+    "background": 0,
+    "questId": "115"
+  },
+  {
+    "id": "spring_15_2",
+    "text": "stardewcraft.mail.spring_15_2",
+    "background": 0,
+    "questId": "116"
+  },
+  {
+    "id": "spring_21_2",
+    "text": "stardewcraft.mail.spring_21_2",
+    "background": 0,
+    "questId": "117"
   }
 ]

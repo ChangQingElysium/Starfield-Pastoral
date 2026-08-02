@@ -4,12 +4,17 @@ import com.stardew.craft.combat.skill.DashMovementTracker;
 import com.stardew.craft.combat.skill.SilverSaberFoldbackState;
 import com.stardew.craft.combat.skill.SilverSaberSkillHelper;
 import com.stardew.craft.combat.skill.WeaponSkillCooldowns;
+import com.stardew.craft.combat.skill.runtime.DeferredSkillCooldown;
 import com.stardew.craft.combat.skill.runtime.RuntimeWeaponSkillHandler;
 import com.stardew.craft.combat.skill.runtime.SkillExecutionContext;
 import com.stardew.craft.combat.skill.runtime.SkillInstance;
 import com.stardew.craft.combat.skill.runtime.SkillTargeting;
 import com.stardew.craft.combat.skill.runtime.SkillValidation;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillMovementArbiter;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillMovementControl;
 import java.util.List;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
@@ -34,6 +39,14 @@ public final class SilverFoldbackSkillHandler implements RuntimeWeaponSkillHandl
                 context.player(),
                 context.nowTick()
         );
+        if (WeaponSkillMovementControl.isLocked(
+                context.player(),
+                context.nowTick()
+        )) {
+            return SkillValidation.reject(
+                    SkillValidation.RejectionReason.INVALID_STATE
+            );
+        }
         if (WeaponSkillCooldowns.isOnCooldown(
                 context.player(),
                 context.weaponId().getPath(),
@@ -51,6 +64,14 @@ public final class SilverFoldbackSkillHandler implements RuntimeWeaponSkillHandl
 
     @Override
     public void begin(SkillExecutionContext context, SkillInstance instance) {
+        if (WeaponSkillMovementControl.isLocked(
+                context.player(),
+                context.nowTick()
+        )) {
+            throw new IllegalStateException(
+                    "Validated Silver Foldback movement is now locked"
+            );
+        }
         CastPlan plan = resolvePlan(context);
         if (plan == null) {
             throw new IllegalStateException(
@@ -66,15 +87,17 @@ public final class SilverFoldbackSkillHandler implements RuntimeWeaponSkillHandl
                             List.of(plan.target.getId())
                     );
                 }
-                SilverSaberSkillHelper.executeReturnStrike(
-                        context.player(),
-                        plan.target,
-                        plan.destination,
-                        weaponId,
-                        context.skillData(),
-                        context.nowTick(),
-                        SilverFoldbackSkillHandler::teleport,
-                        context.weaponSnapshot()
+                instance.registerCommittedEffect(() ->
+                        SilverSaberSkillHelper.executeReturnStrike(
+                                context.player(),
+                                plan.target,
+                                plan.destination,
+                                weaponId,
+                                context.skillData(),
+                                context.nowTick(),
+                                SilverFoldbackSkillHandler::teleport,
+                                context.weaponSnapshot()
+                        )
                 );
             }
             case TARGET -> {
@@ -82,30 +105,72 @@ public final class SilverFoldbackSkillHandler implements RuntimeWeaponSkillHandl
                         List.of(plan.target.getId())
                 );
                 Vec3 origin = context.player().position();
-                teleport(context.player(), plan.destination);
-                faceTarget(context.player(), plan.target);
-                SilverSaberSkillHelper.executeInitialDashAfterTeleport(
-                        context.player(),
-                        plan.target,
-                        origin,
-                        weaponId,
-                        context.skillData(),
-                        context.nowTick(),
-                        context.weaponSnapshot()
+                DeferredSkillCooldown cooldown =
+                        WeaponSkillRuntime.deferCooldown(
+                                context,
+                                instance,
+                                context.skillData().getCooldown() * 20
+                );
+                instance.registerCommittedEffect(() -> {
+                    try {
+                        SilverSaberSkillHelper.enterFoldbackState(
+                                context.player(),
+                                context.nowTick(),
+                                origin,
+                                context.weaponSnapshot(),
+                                cooldown
+                        );
+                        teleport(context.player(), plan.destination);
+                        faceTarget(context.player(), plan.target);
+                        SilverSaberSkillHelper.attackWithSkillContext(
+                                context.player(),
+                                plan.target,
+                                context.skillData(),
+                                context.nowTick(),
+                                context.weaponSnapshot()
+                        );
+                        SilverSaberSkillHelper.sendCooldownAnimation(
+                                context.player(),
+                                weaponId,
+                                context.skillData(),
+                                context.nowTick()
+                        );
+                    } catch (RuntimeException exception) {
+                        SilverSaberSkillHelper.cancelFoldback(
+                                context.player(),
+                                context.nowTick()
+                        );
+                        WeaponSkillRuntime.commitDeferredCooldown(
+                                context.player(),
+                                cooldown,
+                                context.nowTick()
+                        );
+                        throw exception;
+                    }
+                });
+            }
+            case EMPTY -> {
+                WeaponSkillRuntime.commitCooldown(
+                        context,
+                        instance,
+                        context.skillData().getCooldown() * 20
+                );
+                instance.registerCommittedEffect(() ->
+                        SilverSaberSkillHelper.executeEmptyDash(
+                                context.player(),
+                                weaponId,
+                                context.skillData(),
+                                context.nowTick(),
+                                (player, distance) ->
+                                        DashMovementTracker.start(
+                                                context.player(),
+                                                context.nowTick(),
+                                                plan.destination,
+                                                EMPTY_DASH_DURATION_TICKS
+                                        )
+                        )
                 );
             }
-            case EMPTY -> SilverSaberSkillHelper.executeEmptyDash(
-                    context.player(),
-                    weaponId,
-                    context.skillData(),
-                    context.nowTick(),
-                    (player, distance) -> DashMovementTracker.start(
-                            context.player(),
-                            context.nowTick(),
-                            plan.destination,
-                            EMPTY_DASH_DURATION_TICKS
-                    )
-            );
         }
     }
 
@@ -330,6 +395,9 @@ public final class SilverFoldbackSkillHandler implements RuntimeWeaponSkillHandl
     }
 
     private static void teleport(Player player, Vec3 destination) {
+        if (player instanceof ServerPlayer serverPlayer) {
+            WeaponSkillMovementArbiter.revokeCurrent(serverPlayer);
+        }
         player.teleportTo(
                 destination.x,
                 destination.y,

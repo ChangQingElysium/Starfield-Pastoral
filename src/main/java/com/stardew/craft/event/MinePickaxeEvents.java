@@ -7,6 +7,7 @@ import com.stardew.craft.core.ModMiningDimensions;
 import com.stardew.craft.book.BookPowerEffects;
 import com.stardew.craft.enchantment.StardewEnchantments;
 import com.stardew.craft.item.tool.StardewPickaxeItem;
+import com.stardew.craft.mining.MineGenerationBalance;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import com.stardew.craft.player.PlayerDataManager;
@@ -44,30 +45,12 @@ import net.neoforged.neoforge.event.level.BlockEvent;
  */
 @SuppressWarnings("null")
 public final class MinePickaxeEvents {
-	// SDV parity: Pickaxe.DoFunction → Stamina -= 2*(power+1) - MiningLevel*0.1
-	// MC 没有蓄力，power 固定=0，所以基础=2。镐子越好越省力。
-	private static final float[] TIER_ENERGY_COSTS = {
-		2.0f,   // tier0: 基础镐
-		1.8f,   // tier1: 铜镐
-		1.5f,   // tier2: 钢镐
-		1.2f,   // tier3: 金镐
-		1.0f    // tier4: 铱镐
-	};
-	private static final float MINING_LEVEL_ENERGY_REDUCTION = 0.05f; // 每级采矿减免
-	private static final float MIN_ENERGY_COST = 0.5f; // 下限
 	private static final double GEODE_BASE_CHANCE = 0.013; // 低于原版 0.022
 	private static final double OMNI_GEODE_EXTRA_CHANCE = 0.0025; // 低于原版 0.005
+	// 3D 球形炸弹一次覆盖约为原版 2D 圆形的 5 倍方块；附带奖励按概率折算。
+	private static final double BOMB_INCIDENTAL_DROP_SCALE = 0.20;
 
-	// 星露谷风格挖掘速度：tier0很慢，每升一级明显加快
-	private static final float[] STARDEW_TIER_SPEEDS = {
-		4.0F,   // tier0: 基础镐（慢）
-		10.0F,  // tier1: 铜镐（中等）
-		18.0F,  // tier2: 钢镐（快）
-		28.0F,  // tier3: 金镐（很快）
-		45.0F   // tier4: 铱镐（极快，配合石头加成可秒破地页岩）
-	};
-	private static final float TIER0_BASE_SPEED = 4.0F; // 非模组镐子使用这个速度
-	private static final float STONE_BONUS_MULTIPLIER = 1.4F; // 挖石头额外加成
+	private static final float SDV_PICKAXE_SWING_TICKS = 8.0F;
 
 	private MinePickaxeEvents() {
 	}
@@ -115,24 +98,19 @@ public final class MinePickaxeEvents {
 			return;
 		}
 
-		float baseToolSpeed;
 		boolean isPickaxeLike = isPickaxeLike(tool);
-		if (stardewTier >= 0 && stardewTier < STARDEW_TIER_SPEEDS.length) {
-			// 使用我们定义的tier速度，让升级感更明显
-			baseToolSpeed = STARDEW_TIER_SPEEDS[stardewTier];
-		} else if (isPickaxeLike) {
-			// Any non-mod pickaxe is treated like our tier0 pickaxe on mod mine blocks.
-			baseToolSpeed = TIER0_BASE_SPEED;
-		} else {
-			baseToolSpeed = 1.0F;
-		}
-
+		int speedTier = stardewTier >= 0 ? stardewTier : (isPickaxeLike ? 0 : -1);
+		int strikes = MineGenerationBalance.pickaxeStrikes(
+				getSdvStoneHealth(state), speedTier);
+		float hardness = event.getPosition()
+				.map(pos -> state.getDestroySpeed(player.level(), pos))
+				.orElse(1.0F);
+		float baseToolSpeed = hardness > 0.0F
+				? 30.0F * hardness / (strikes * SDV_PICKAXE_SWING_TICKS)
+				: 0.0F;
 		float speed = computeDigSpeed(player, tool, baseToolSpeed);
-		if (stardewTier >= 0 && state.is(ModTags.Blocks.STARDEW_STONES)) {
-			speed *= STONE_BONUS_MULTIPLIER;
-		}
 		if (isMineralBlock(state)) {
-			speed *= 4.0F; // 挖掘时间约为之前的1/4
+			speed *= 4.0F; // Loose surface items are normally picked up directly.
 		}
 
 		// Do not cap to originalSpeed here: originalSpeed depends on vanilla tags/tool-components and may be
@@ -212,7 +190,7 @@ public final class MinePickaxeEvents {
 		com.stardew.craft.player.PlayerDataManager.getPlayerData(player)
 				.recordMineBlockBroken(isStardewOre(state), isGemOre(state), isMineralBlock(state));
 
-		consumeMiningEnergy(player, level);
+		consumeMiningEnergy(player, state);
 	}
 
 	/**
@@ -382,19 +360,46 @@ public final class MinePickaxeEvents {
 	}
 
 	/**
-	 * SDV parity: 每挖一块消耗体力，按镐子等级和采矿等级计算。
-	 * 公式: cost = TIER_ENERGY_COSTS[tier] - miningLevel × 0.05, 下限 0.5
+	 * SDV parity: 体力按实际需要的原版挥镐次数结算。
+	 * 每次挥镐消耗 2 - MiningLevel×0.1；石头生命值除以镐子伤害决定次数。
 	 */
-	private static void consumeMiningEnergy(ServerPlayer player, ServerLevel level) {
+	private static void consumeMiningEnergy(ServerPlayer player, BlockState state) {
 		if (StardewEnchantments.has(player.getMainHandItem(), StardewEnchantments.EFFICIENT)) {
 			return;
 		}
-		int tier = getStardewPickaxeTier(player.getMainHandItem());
-		float baseCost = (tier >= 0 && tier < TIER_ENERGY_COSTS.length)
-				? TIER_ENERGY_COSTS[tier] : TIER_ENERGY_COSTS[0];
+		int tier = getEffectiveStardewPickaxeTier(player.getMainHandItem());
+		if (tier < 0) {
+			tier = 0;
+		}
 		int miningLevel = PlayerStardewDataAPI.getSkillLevel(player, SkillType.MINING);
-		float cost = Math.max(MIN_ENERGY_COST, baseCost - miningLevel * MINING_LEVEL_ENERGY_REDUCTION);
+		float cost = MineGenerationBalance.miningEnergyCost(
+				getSdvStoneHealth(state), tier, miningLevel);
 		PlayerStardewDataAPI.consumeEnergy(player, cost);
+	}
+
+	private static int getSdvStoneHealth(BlockState state) {
+		@SuppressWarnings("null")
+		String path = net.minecraft.core.registries.BuiltInRegistries.BLOCK
+				.getKey(state.getBlock()).getPath();
+		if (path.contains("iridium_ore")) return 16;
+		if (path.equals("diamond_ore")) return 10;
+		if (path.contains("gold_ore")) return 8;
+		if (getGemOreDropItem(path) != null) return 5;
+		if (path.contains("iron_ore")) return 4;
+		if (path.contains("copper_ore")) return 3;
+		if (path.contains("coal_ore")) return 2;
+		if (path.contains("desert_bedrock")) return 5;
+		if (path.contains("lava_basalt")) return 4;
+		if (path.contains("frost_gneiss")) return 3;
+		if (path.contains("earth_shale")) return 1;
+		if (path.equals("sulfur_rock") || path.equals("weathered_stone")) return 5;
+		if (path.equals("scoria")) return 4;
+		if (path.equals("banded_marble")
+				|| path.equals("cracked_slate")
+				|| path.equals("salt_rock")) return 3;
+		if (path.equals("limestone") || path.equals("mossy_sandstone")) return 1;
+		if (isMineralBlock(state)) return 1;
+		return 3;
 	}
 
 	private static Item getOreDropItem(BlockState state) {
@@ -571,7 +576,8 @@ public final class MinePickaxeEvents {
 			return;
 		}
 		ItemStack secretNote = com.stardew.craft.secretnote.SecretNoteService
-				.tryCreateFromSource(player, level.getRandom(), 0.0075F);
+				.tryCreateFromSource(player, level.getRandom(),
+						(float) (0.0075F * BOMB_INCIDENTAL_DROP_SCALE));
 		if (!secretNote.isEmpty()) {
 			net.minecraft.world.level.block.Block.popResource(level, pos, secretNote);
 		}
@@ -592,19 +598,21 @@ public final class MinePickaxeEvents {
 
 		// 主晶洞
 		double dwarfGeodeMultiplier = player.hasEffect(com.stardew.craft.effect.ModMobEffects.DWARF_STATUE_4) ? 1.25 : 1.0;
-		if (r.nextDouble() < GEODE_BASE_CHANCE * (1.0 + chanceMod) * excavatorMul * dwarfGeodeMultiplier) {
+		if (r.nextDouble() < GEODE_BASE_CHANCE * (1.0 + chanceMod) * excavatorMul
+				* dwarfGeodeMultiplier * BOMB_INCIDENTAL_DROP_SCALE) {
 			Item geode = pickGeodeItemForFloor(floorNumber);
 			if (geode != null) {
 				net.minecraft.world.level.block.Block.popResource(level, pos, new ItemStack(geode, 1));
 			}
 		}
 		// 万能晶洞
-		if (floorNumber >= 20 && r.nextDouble() < OMNI_GEODE_EXTRA_CHANCE * (1.0 + chanceMod) * excavatorMul * dwarfGeodeMultiplier) {
+		if (floorNumber >= 20 && r.nextDouble() < OMNI_GEODE_EXTRA_CHANCE * (1.0 + chanceMod)
+				* excavatorMul * dwarfGeodeMultiplier * BOMB_INCIDENTAL_DROP_SCALE) {
 			net.minecraft.world.level.block.Block.popResource(level, pos, new ItemStack(ModItems.OMNI_GEODE.get(), 1));
 		}
 		// 5% 矿石额外掉落 → 25% 内出煤（Prospector x2）
 		double oreDropChance = 0.05 * (1.0 + (dailyLuck / 2.0 + miningLevel * 0.005 + luckBuff * 0.001));
-		if (r.nextDouble() < oreDropChance) {
+		if (r.nextDouble() < oreDropChance * BOMB_INCIDENTAL_DROP_SCALE) {
 			int burrowerMul = PlayerStardewDataAPI.hasProfession(player, ProfessionType.PROSPECTOR) ? 2 : 1;
 			double dwarfCoalBonus = player.hasEffect(com.stardew.craft.effect.ModMobEffects.DWARF_STATUE_2) ? 0.10 : 0.0;
 			if (r.nextDouble() < 0.25 * burrowerMul + dwarfCoalBonus) {
@@ -617,7 +625,7 @@ public final class MinePickaxeEvents {
 		if (maxReached >= 120) {
 			double base = 0.00005;
 			double shardChance = base + base * miningLevel * 0.008 + base * (dailyLuck / 2.0) + base * luckBuff * 0.05;
-			if (r.nextDouble() < shardChance) {
+			if (r.nextDouble() < shardChance * BOMB_INCIDENTAL_DROP_SCALE) {
 				net.minecraft.world.level.block.Block.popResource(level, pos,
 					new ItemStack(ModItems.PRISMATIC_SHARD.get(), 1));
 			}
@@ -671,7 +679,7 @@ public final class MinePickaxeEvents {
 	private static int getEffectiveStardewPickaxeTier(ItemStack tool) {
 		int tier = getStardewPickaxeTier(tool);
 		if (tier >= 0 && StardewEnchantments.has(tool, StardewEnchantments.POWERFUL)) {
-			return Math.min(4, tier + 1);
+			return tier + 1;
 		}
 		return tier;
 	}
@@ -701,10 +709,6 @@ public final class MinePickaxeEvents {
 
 	private static float computeDigSpeed(Player player, ItemStack tool, float baseToolSpeed) {
 		float speed = baseToolSpeed;
-		if (StardewEnchantments.has(tool, StardewEnchantments.POWERFUL)) {
-			speed *= 1.25F;
-		}
-
 		if (speed > 1.0F) {
 			int efficiency = getItemEnchantmentLevel(player, tool, Enchantments.EFFICIENCY);
 			if (efficiency > 0) {

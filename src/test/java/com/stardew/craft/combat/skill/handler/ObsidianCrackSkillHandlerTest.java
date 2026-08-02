@@ -1,6 +1,5 @@
 package com.stardew.craft.combat.skill.handler;
 
-import com.stardew.craft.combat.skill.ObsidianCrackTracker;
 import com.stardew.craft.item.weapon.WeaponData;
 import com.stardew.craft.item.weapon.WeaponRegistry;
 import com.stardew.craft.item.weapon.WeaponSkillData;
@@ -27,7 +26,16 @@ class ObsidianCrackSkillHandlerTest {
         assertEquals(6.0F, ObsidianCrackSkillHandler.LINE_LENGTH);
         assertEquals(3.0D, ObsidianCrackSkillHandler.FORWARD_OFFSET);
         assertEquals(12, ObsidianCrackSkillHandler.ANIMATION_TICKS);
-        assertEquals(8, ObsidianCrackTracker.EXPLODE_DELAY_TICKS);
+        assertEquals(20, ObsidianCrackSkillHandler.EFFECT_DURATION_TICKS);
+        assertEquals(8, ObsidianCrackSkillHandler.EXPLODE_DELAY_TICKS);
+        assertEquals(3.0D, ObsidianCrackSkillHandler.PULL_RADIUS);
+        assertEquals(40, ObsidianCrackSkillHandler.SLOW_DURATION_TICKS);
+        assertEquals(0, ObsidianCrackSkillHandler.SLOW_AMPLIFIER);
+        assertEquals(1.6F, ObsidianCrackSkillHandler.DAMAGE_MULTIPLIER);
+        assertEquals(
+                5,
+                ObsidianCrackSkillHandler.HIT_CONTEXT_LIFETIME_TICKS
+        );
         assertFalse(new ObsidianCrackSkillHandler().completesImmediately());
     }
 

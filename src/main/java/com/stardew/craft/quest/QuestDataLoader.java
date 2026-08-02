@@ -246,6 +246,13 @@ public final class QuestDataLoader {
                 data.addProperty("count", tokens.length >= 3 ? parsePositive(tokens[2], 1) : 1);
                 return objectiveId("item_delivery");
             }
+            case "LostItem" -> {
+                requireTokens(type, tokens, 2);
+                data.addProperty("target_npc", tokens[0]);
+                data.addProperty("item", tokens[1]);
+                data.addProperty("friendship", 250);
+                return objectiveId("lost_item");
+            }
             case "SecretLostItem" -> {
                 requireTokens(type, tokens, 4);
                 data.addProperty("target_npc", tokens[0]);

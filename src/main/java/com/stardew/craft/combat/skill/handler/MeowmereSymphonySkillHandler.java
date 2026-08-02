@@ -1,6 +1,5 @@
 package com.stardew.craft.combat.skill.handler;
 
-import com.stardew.craft.combat.skill.MeowmereSymphonyTracker;
 import com.stardew.craft.combat.skill.SkillContext;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationDispatcher;
 import com.stardew.craft.combat.skill.WeaponSkillCooldowns;
@@ -83,67 +82,46 @@ public final class MeowmereSymphonySkillHandler
         List<MeowmereProjectileEntity> projectiles =
                 createProjectiles(context, damage);
         ServerLevel level = context.player().serverLevel();
-        List<MeowmereProjectileEntity> spawned =
-                new ArrayList<>(PROJECTILE_COUNT);
-        try {
+        instance.initializeExecutionState(
+                new State(
+                        projectiles,
+                        context.nowTick() + PROJECTILE_RUNTIME_TICKS
+                )
+        );
+        if (!WeaponSkillRuntime.consumeEnergyDuringBegin(
+                context,
+                instance,
+                ENERGY_COST
+        )) {
+            throw new IllegalStateException(
+                    "Validated Meowmere Symphony energy payment failed"
+            );
+        }
+
+        String weaponId = context.weaponId().getPath();
+        String skillId = context.skillData().getId();
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
+                context.skillData().getCooldown() * 20
+        );
+        instance.registerCommittedEffect(() -> {
             for (MeowmereProjectileEntity projectile : projectiles) {
                 if (!level.addFreshEntity(projectile)) {
                     throw new IllegalStateException(
                             "Failed to add every Meowmere Symphony projectile"
                     );
                 }
-                spawned.add(projectile);
             }
-        } catch (RuntimeException exception) {
-            spawned.forEach(MeowmereProjectileEntity::discard);
-            throw exception;
-        }
+        });
 
-        try {
-            if (!context.player().getAbilities().instabuild
-                    && !PlayerStardewDataAPI.consumeEnergy(
-                            context.player(),
-                            ENERGY_COST
-                    )) {
-                throw new IllegalStateException(
-                        "Validated Meowmere Symphony energy payment failed"
-                );
-            }
-        } catch (RuntimeException exception) {
-            spawned.forEach(MeowmereProjectileEntity::discard);
-            throw exception;
-        }
-
-        MeowmereSymphonyTracker.start(
-                instance.instanceId(),
-                context.player().getUUID(),
-                level.dimension(),
-                spawned,
-                context.nowTick() + PROJECTILE_RUNTIME_TICKS
+        // Preserve the authored presentation-only notification.
+        WeaponSkillAnimationDispatcher.sendSkillAnim(
+                context.player(),
+                weaponId,
+                skillId,
+                ANIMATION_TICKS
         );
-
-        try {
-            String weaponId = context.weaponId().getPath();
-            String skillId = context.skillData().getId();
-            WeaponSkillCooldowns.setCooldown(
-                    context.player(),
-                    weaponId,
-                    skillId,
-                    context.nowTick(),
-                    context.skillData().getCooldown() * 20
-            );
-
-            // Preserve the authored presentation-only notification.
-            WeaponSkillAnimationDispatcher.sendSkillAnim(
-                    context.player(),
-                    weaponId,
-                    skillId,
-                    ANIMATION_TICKS
-            );
-        } catch (RuntimeException exception) {
-            MeowmereSymphonyTracker.stop(instance.instanceId());
-            throw exception;
-        }
     }
 
     @Override
@@ -156,10 +134,22 @@ public final class MeowmereSymphonySkillHandler
             SkillExecutionContext context,
             SkillInstance instance
     ) {
-        return MeowmereSymphonyTracker.tick(
-                instance.instanceId(),
-                context.player().level().dimension(),
-                context.nowTick()
+        State state = instance.requireExecutionState(State.class);
+        boolean projectilesInCastDimension =
+                state.projectiles.stream().allMatch(projectile ->
+                        projectile.level().dimension().equals(
+                                context.player().level().dimension()
+                        )
+                );
+        boolean allProjectilesRemoved =
+                state.projectiles.stream().allMatch(
+                        MeowmereProjectileEntity::isRemoved
+                );
+        return status(
+                projectilesInCastDimension,
+                allProjectilesRemoved,
+                context.nowTick(),
+                state.endTick
         );
     }
 
@@ -169,7 +159,23 @@ public final class MeowmereSymphonySkillHandler
             SkillInstance instance,
             SkillInstance.EndReason reason
     ) {
-        MeowmereSymphonyTracker.stop(instance.instanceId());
+        instance.executionState(State.class)
+                .ifPresent(state -> discard(state.projectiles));
+    }
+
+    static SkillTickResult status(
+            boolean projectilesInCastDimension,
+            boolean allProjectilesRemoved,
+            long nowTick,
+            long endTick
+    ) {
+        if (!projectilesInCastDimension) {
+            return SkillTickResult.CANCEL;
+        }
+        if (allProjectilesRemoved || nowTick >= endTick) {
+            return SkillTickResult.COMPLETE;
+        }
+        return SkillTickResult.CONTINUE;
     }
 
     static float projectileDamage(
@@ -253,5 +259,24 @@ public final class MeowmereSymphonySkillHandler
             projectiles.add(projectile);
         }
         return projectiles;
+    }
+
+    private static void discard(List<MeowmereProjectileEntity> projectiles) {
+        projectiles.stream()
+                .filter(projectile -> !projectile.isRemoved())
+                .forEach(MeowmereProjectileEntity::discard);
+    }
+
+    private static final class State implements SkillInstance.ExecutionState {
+        private final List<MeowmereProjectileEntity> projectiles;
+        private final long endTick;
+
+        private State(
+                List<MeowmereProjectileEntity> projectiles,
+                long endTick
+        ) {
+            this.projectiles = List.copyOf(projectiles);
+            this.endTick = endTick;
+        }
     }
 }

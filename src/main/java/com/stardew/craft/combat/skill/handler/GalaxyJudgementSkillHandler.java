@@ -1,8 +1,8 @@
 package com.stardew.craft.combat.skill.handler;
 
 import com.stardew.craft.combat.skill.SkillContext;
-import com.stardew.craft.combat.skill.StarfallTracker;
 import com.stardew.craft.combat.skill.StartrailTracker;
+import com.stardew.craft.combat.skill.WeaponDamageSnapshot;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationDispatcher;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationLock;
 import com.stardew.craft.combat.skill.WeaponSkillCooldowns;
@@ -25,6 +25,11 @@ import net.minecraft.world.phys.Vec3;
 public final class GalaxyJudgementSkillHandler
         implements RuntimeWeaponSkillHandler {
     public static final double MAIN_SLASH_RADIUS = 4.0D;
+    public static final int STARFALL_STRIKE_INTERVAL_TICKS = 10;
+    public static final int STARFALL_STRIKE_COUNT = 3;
+    public static final int MAX_STARFALL_EXTRA_HITS = 3;
+    public static final double STARFALL_RADIUS = 4.0D;
+    public static final float STARFALL_DAMAGE_MULTIPLIER = 0.70F;
     public static final int HIT_CONTEXT_LIFETIME_TICKS = 5;
     public static final int ANIMATION_TICKS = 12;
 
@@ -33,7 +38,7 @@ public final class GalaxyJudgementSkillHandler
         if (WeaponSkillRuntime.hasActive(
                 context.player().getUUID(),
                 context.skillId()
-        ) || StarfallTracker.hasState(context.player().getUUID())) {
+        )) {
             return SkillValidation.reject(
                     SkillValidation.RejectionReason.INVALID_STATE
             );
@@ -62,17 +67,23 @@ public final class GalaxyJudgementSkillHandler
 
         int consumedStacks =
                 StartrailTracker.consumeAll(context.player());
+        instance.registerBeginFailureCleanup(() ->
+                StartrailTracker.setStacks(
+                        context.player(),
+                        consumedStacks
+                )
+        );
         boolean guaranteedCritical =
                 consumedStacks >= StartrailTracker.MAX_STACKS;
         int extraHits = extraHitsForStacks(consumedStacks);
 
         String weaponId = context.weaponId().getPath();
         String skillId = context.skillData().getId();
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                weaponId,
-                skillId,
-                context.nowTick(),
+        WeaponDamageSnapshot releaseSnapshot =
+                context.weaponSnapshot();
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 context.skillData().getCooldown() * 20
         );
 
@@ -80,38 +91,43 @@ public final class GalaxyJudgementSkillHandler
                 context.skillData(),
                 guaranteedCritical
         );
-        for (LivingEntity target : targets) {
-            WeaponSkillDamage.apply(
+        instance.initializeExecutionState(
+                new GalaxyJudgementExecutionState(
+                        context.nowTick(),
+                        STARFALL_STRIKE_COUNT,
+                        extraHits,
+                        STARFALL_RADIUS,
+                        STARFALL_DAMAGE_MULTIPLIER,
+                        skillId,
+                        context.player().level().dimension(),
+                        releaseSnapshot
+                )
+        );
+        instance.registerCommittedEffect(() -> {
+            for (LivingEntity target : targets) {
+                WeaponSkillDamage.apply(
+                        context.player(),
+                        target,
+                        mainSlashContext,
+                        releaseSnapshot,
+                        context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS,
+                        WeaponSkillDamage.AttackGatePolicy
+                                .RESPECT_AT_IMPACT,
+                        WeaponSkillDamage.HitCooldownPolicy.RESPECT_VANILLA
+                );
+            }
+            WeaponSkillAnimationDispatcher.sendSkillAnim(
                     context.player(),
-                    target,
-                    mainSlashContext,
-                    context.weaponSnapshot(),
-                    context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS
+                    weaponId,
+                    skillId,
+                    ANIMATION_TICKS
             );
-        }
-
-        StarfallTracker.start(
-                context.player(),
-                context.nowTick(),
-                StarfallTracker.DEFAULT_STRIKES,
-                extraHits,
-                StarfallTracker.DEFAULT_RADIUS,
-                StarfallTracker.DEFAULT_DAMAGE_MULTIPLIER,
-                skillId,
-                context.weaponSnapshot()
-        );
-
-        WeaponSkillAnimationDispatcher.sendSkillAnim(
-                context.player(),
-                weaponId,
-                skillId,
-                ANIMATION_TICKS
-        );
-        WeaponSkillAnimationLock.setLock(
-                context.player(),
-                context.nowTick(),
-                ANIMATION_TICKS
-        );
+            WeaponSkillAnimationLock.setLock(
+                    context.player(),
+                    context.nowTick(),
+                    ANIMATION_TICKS
+            );
+        });
     }
 
     @Override
@@ -124,28 +140,14 @@ public final class GalaxyJudgementSkillHandler
             SkillExecutionContext context,
             SkillInstance instance
     ) {
-        return switch (StarfallTracker.tick(
-                context.player(),
-                context.nowTick()
-        )) {
-            case ACTIVE -> SkillTickResult.CONTINUE;
-            case COMPLETED -> SkillTickResult.COMPLETE;
-            case INVALIDATED -> SkillTickResult.CANCEL;
-        };
-    }
-
-    @Override
-    public void finish(
-            SkillExecutionContext context,
-            SkillInstance instance,
-            SkillInstance.EndReason reason
-    ) {
-        StarfallTracker.cancel(context.player());
+        return instance.requireExecutionState(
+                GalaxyJudgementExecutionState.class
+        ).advance(context);
     }
 
     static int extraHitsForStacks(int stacks) {
         return Math.min(
-                StarfallTracker.MAX_EXTRA_HITS,
+                MAX_STARFALL_EXTRA_HITS,
                 Math.max(0, stacks) / 4
         );
     }

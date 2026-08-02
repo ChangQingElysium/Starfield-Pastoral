@@ -1,6 +1,5 @@
 package com.stardew.craft.combat.skill.handler;
 
-import com.stardew.craft.combat.skill.CarvingKnifeThrustTracker;
 import com.stardew.craft.item.weapon.WeaponData;
 import com.stardew.craft.item.weapon.WeaponRegistry;
 import com.stardew.craft.item.weapon.WeaponSkillData;
@@ -25,13 +24,13 @@ class CarvingThrustSkillHandlerTest {
         assertEquals(5, CarvingThrustSkillHandler.DAMAGE_RESISTANCE_TICKS);
         assertEquals(0, CarvingThrustSkillHandler.DAMAGE_RESISTANCE_AMPLIFIER);
         assertEquals(18, CarvingThrustSkillHandler.ANIMATION_TICKS);
-        assertEquals(3, CarvingKnifeThrustTracker.DEFAULT_STRIKES);
-        assertEquals(3, CarvingKnifeThrustTracker.DEFAULT_INTERVAL_TICKS);
-        assertEquals(0.45F, CarvingKnifeThrustTracker.BASE_DAMAGE_MULTIPLIER);
-        assertEquals(0.60F, CarvingKnifeThrustTracker.BONUS_DAMAGE_MULTIPLIER);
-        assertEquals(2, CarvingKnifeThrustTracker.BONUS_DELAY_TICKS);
-        assertEquals(5, CarvingKnifeThrustTracker.HIT_CONTEXT_LIFETIME_TICKS);
-        assertEquals(2.5, CarvingKnifeThrustTracker.REACQUIRE_RANGE);
+        assertEquals(3, CarvingThrustSkillHandler.STRIKE_COUNT);
+        assertEquals(3, CarvingThrustSkillHandler.STRIKE_INTERVAL_TICKS);
+        assertEquals(0.45F, CarvingThrustSkillHandler.BASE_DAMAGE_MULTIPLIER);
+        assertEquals(0.60F, CarvingThrustSkillHandler.BONUS_DAMAGE_MULTIPLIER);
+        assertEquals(2, CarvingThrustSkillHandler.BONUS_DELAY_TICKS);
+        assertEquals(5, CarvingThrustSkillHandler.HIT_CONTEXT_LIFETIME_TICKS);
+        assertEquals(2.5, CarvingThrustSkillHandler.REACQUIRE_RANGE);
         assertFalse(new CarvingThrustSkillHandler().completesImmediately());
     }
 }

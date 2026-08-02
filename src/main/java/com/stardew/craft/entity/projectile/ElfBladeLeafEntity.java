@@ -1,6 +1,5 @@
 package com.stardew.craft.entity.projectile;
 
-import com.stardew.craft.combat.skill.ElfBladeMarkTracker;
 import com.stardew.craft.combat.skill.SkillContext;
 import com.stardew.craft.combat.skill.WeaponDamageSnapshot;
 import com.stardew.craft.combat.skill.WeaponSkillDamage;
@@ -13,7 +12,6 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
@@ -46,7 +44,6 @@ public class ElfBladeLeafEntity extends ThrowableProjectile {
     private static final double HOMING_SPEED = 1.15;
     private static final double TURN_RATE = 0.22;
     private static final int MAX_HOMING_TICKS = 60;
-    private static final int MARK_DURATION_TICKS = 140;
 
     private static final double TRAIL_MIN_DIST = 0.006;
     private static final int TRAIL_MAX_AGE_ORBIT = 30;
@@ -331,9 +328,6 @@ public class ElfBladeLeafEntity extends ThrowableProjectile {
         }
 
         if (target instanceof LivingEntity livingTarget) {
-            livingTarget.invulnerableTime = 0;
-            livingTarget.hurtTime = 0;
-
             long nowTick = this.level().getGameTime();
             SkillContext context = SkillContext.builder()
                 .skillId(skillId)
@@ -345,7 +339,10 @@ public class ElfBladeLeafEntity extends ThrowableProjectile {
                     player,
                     livingTarget,
                     context,
-                    nowTick + 5
+                    nowTick + 5,
+                    WeaponSkillDamage.AttackGatePolicy.SKILL_DAMAGE,
+                    WeaponSkillDamage.HitCooldownPolicy
+                            .BYPASS_FOR_AUTHORED_SEQUENCE
                 );
             } else {
                 WeaponSkillDamage.apply(
@@ -353,12 +350,11 @@ public class ElfBladeLeafEntity extends ThrowableProjectile {
                     livingTarget,
                     context,
                     releaseWeaponSnapshot,
-                    nowTick + 5
+                    nowTick + 5,
+                    WeaponSkillDamage.AttackGatePolicy.SKILL_DAMAGE,
+                    WeaponSkillDamage.HitCooldownPolicy
+                            .BYPASS_FOR_AUTHORED_SEQUENCE
                 );
-            }
-
-            if (player instanceof ServerPlayer serverPlayer) {
-                ElfBladeMarkTracker.apply(livingTarget, serverPlayer, nowTick, MARK_DURATION_TICKS, 1);
             }
 
             if (this.level() instanceof ServerLevel serverLevel) {

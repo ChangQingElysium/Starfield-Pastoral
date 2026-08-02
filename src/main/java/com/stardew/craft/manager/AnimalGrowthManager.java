@@ -91,6 +91,7 @@ public class AnimalGrowthManager extends SavedData {
             new HashMap<>();
     private BuildingUtilityContext activeBuildingUtilityContext =
             BuildingUtilityContext.EMPTY;
+    private Integer activeOvernightTimeMinutes;
 
     private record BuildingUtilityContext(
             AnimalBuildingDailyContext dailyContext,
@@ -159,7 +160,42 @@ public class AnimalGrowthManager extends SavedData {
     }
 
     public void growDaily(ServerLevel level) {
-        continueCatchUp(level, INITIAL_CATCH_UP_BUDGET);
+        growDaily(level, StardewTimeManager.get().getCurrentTime());
+    }
+
+    /** Runs the source overnight transition using the time at which the player went to sleep. */
+    public void growDaily(ServerLevel level, int timeWentToSleepMinutes) {
+        Integer previousOvernightTime = activeOvernightTimeMinutes;
+        activeOvernightTimeMinutes = timeWentToSleepMinutes;
+        try {
+            growDailyAtActiveOvernightTime(level);
+        } finally {
+            activeOvernightTimeMinutes = previousOvernightTime;
+        }
+    }
+
+    private void growDailyAtActiveOvernightTime(ServerLevel level) {
+        AnimalWorldData worldData = AnimalWorldData.get(level);
+        int currentAbsDay = currentAbsoluteDay();
+        int dueAnimalCount = 0;
+        for (FarmAnimalRecord record : worldData.getAnimals()) {
+            AnimalBuildingRecord building = worldData.getBuildingIncludingInactive(
+                    record.buildingId()).orElse(null);
+            if (building != null && (!building.isGameplayEnabled()
+                    || !shouldProcessBuildingToday(level, building))) {
+                continue;
+            }
+            if (record.lastProcessedAbsDay() < currentAbsDay) {
+                dueAnimalCount++;
+            }
+        }
+        continueCatchUp(
+                level,
+                AnimalCatchUpRules.initialSettlementBudget(
+                        INITIAL_CATCH_UP_BUDGET,
+                        dueAnimalCount
+                )
+        );
     }
 
     /**
@@ -712,13 +748,23 @@ public class AnimalGrowthManager extends SavedData {
                         definition,
                         reducerState(record),
                         homeSituation,
-                        toSourceClockTime(StardewTimeManager.get().getCurrentTime())
+                        activeSourceClockTime()
                 )
         );
         applyReducerState(record, begin.state());
         if (begin.returnedHomeEarly()) {
             teleportAnimalInsideBuilding(level, record, building);
-            return false;
+            // Source parity: FarmAnimal.dayUpdate(Farm) returns here, but Farm.DayUpdate then
+            // calls Building.dayUpdate -> AnimalHouse.DayUpdate, which processes this animal a
+            // second time. Treating the first return as a completed animal-day left its pet/feed,
+            // mood, growth and produce state unchanged while still advancing the checkpoint.
+            begin = AnimalDayReducer.continueAfterOpenDoorReturn(
+                    definition,
+                    begin,
+                    activeSourceClockTime()
+            );
+            applyReducerState(record, begin.state());
+            animalOutdoors = false;
         }
 
         // Preserve the established extension point after cooldown/home processing and before
@@ -1166,6 +1212,13 @@ public class AnimalGrowthManager extends SavedData {
         int hours = Math.max(0, minutesSinceMidnight) / 60;
         int minutes = Math.max(0, minutesSinceMidnight) % 60;
         return hours * 100 + minutes;
+    }
+
+    private int activeSourceClockTime() {
+        int minutes = activeOvernightTimeMinutes == null
+                ? StardewTimeManager.get().getCurrentTime()
+                : activeOvernightTimeMinutes;
+        return toSourceClockTime(minutes);
     }
 
     private RandomSource reproductionRandom(UUID farmOwner, int absoluteDaysPlayed) {

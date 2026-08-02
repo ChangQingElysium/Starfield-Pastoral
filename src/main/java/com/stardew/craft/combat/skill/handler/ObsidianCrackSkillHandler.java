@@ -1,6 +1,5 @@
 package com.stardew.craft.combat.skill.handler;
 
-import com.stardew.craft.combat.skill.ObsidianCrackTracker;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationDispatcher;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationLock;
 import com.stardew.craft.combat.skill.WeaponSkillCooldowns;
@@ -24,6 +23,13 @@ public final class ObsidianCrackSkillHandler
     public static final float LINE_LENGTH = 6.0F;
     public static final double FORWARD_OFFSET = 3.0D;
     public static final int ANIMATION_TICKS = 12;
+    public static final int EFFECT_DURATION_TICKS = 20;
+    public static final int EXPLODE_DELAY_TICKS = 8;
+    public static final double PULL_RADIUS = 3.0D;
+    public static final int SLOW_DURATION_TICKS = 40;
+    public static final int SLOW_AMPLIFIER = 0;
+    public static final float DAMAGE_MULTIPLIER = 1.6F;
+    public static final int HIT_CONTEXT_LIFETIME_TICKS = 5;
 
     record CrackLine(Vec3 start, Vec3 end, float yaw, float length) {}
 
@@ -42,7 +48,7 @@ public final class ObsidianCrackSkillHandler
         if (WeaponSkillRuntime.hasActive(
                 context.player().getUUID(),
                 context.skillId()
-        ) || ObsidianCrackTracker.hasState(context.player().getUUID())) {
+        )) {
             return SkillValidation.reject(
                     SkillValidation.RejectionReason.INVALID_STATE
             );
@@ -65,11 +71,11 @@ public final class ObsidianCrackSkillHandler
                     "Validated Obsidian Crack energy is no longer available"
             );
         }
-        if (!context.player().getAbilities().instabuild
-                && !PlayerStardewDataAPI.consumeEnergy(
-                        context.player(),
-                        ENERGY_COST
-                )) {
+        if (!WeaponSkillRuntime.consumeEnergyDuringBegin(
+                context,
+                instance,
+                ENERGY_COST
+        )) {
             throw new IllegalStateException(
                     "Validated Obsidian Crack energy payment failed"
             );
@@ -77,22 +83,24 @@ public final class ObsidianCrackSkillHandler
 
         String weaponId = context.weaponId().getPath();
         String skillId = context.skillData().getId();
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                weaponId,
-                skillId,
-                context.nowTick(),
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 context.skillData().getCooldown() * 20
         );
-        ObsidianCrackTracker.start(
-                context.player(),
-                context.nowTick(),
-                line.start(),
-                line.end(),
-                line.yaw(),
-                line.length(),
-                weaponId,
-                skillId
+        ObsidianCrackExecutionState executionState =
+                new ObsidianCrackExecutionState(
+                        context.nowTick(),
+                        line.start(),
+                        line.end()
+        );
+        instance.initializeExecutionState(executionState);
+        instance.registerCommittedEffect(() ->
+                executionState.startPresentation(
+                        context,
+                        line.yaw(),
+                        line.length()
+                )
         );
         WeaponSkillAnimationLock.setLock(
                 context.player(),
@@ -117,24 +125,9 @@ public final class ObsidianCrackSkillHandler
             SkillExecutionContext context,
             SkillInstance instance
     ) {
-        if (!ObsidianCrackTracker.isBoundToCurrentDimension(
-                context.player()
-        )) {
-            return SkillTickResult.CANCEL;
-        }
-        ObsidianCrackTracker.tick(context.player(), context.nowTick());
-        return ObsidianCrackTracker.hasState(context.player().getUUID())
-                ? SkillTickResult.CONTINUE
-                : SkillTickResult.COMPLETE;
-    }
-
-    @Override
-    public void finish(
-            SkillExecutionContext context,
-            SkillInstance instance,
-            SkillInstance.EndReason reason
-    ) {
-        ObsidianCrackTracker.removePlayer(context.player().getUUID());
+        return instance.requireExecutionState(
+                ObsidianCrackExecutionState.class
+        ).advance(context);
     }
 
     static CrackLine createCrackLine(

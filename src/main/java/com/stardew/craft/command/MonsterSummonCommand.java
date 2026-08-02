@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.stardew.craft.event.MineMonsterSpawnHandler;
+import com.stardew.craft.mining.MineMonsterNames;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -75,9 +76,9 @@ public final class MonsterSummonCommand {
         Mob resultMob = lastMob;
         int resultCount = spawned;
         int resultFloor = floor;
-        Component monsterName = resultMob != null && resultMob.getCustomName() != null
-                ? resultMob.getCustomName()
-                : Component.literal(monsterId);
+        Component monsterName = resultMob != null
+                ? resultMob.getDisplayName()
+                : MineMonsterNames.displayName(monsterId);
         source.sendSuccess(() -> Component.translatable(
                 "stardewcraft.command.summon.success", resultCount, monsterName, resultFloor), true);
         return spawned;

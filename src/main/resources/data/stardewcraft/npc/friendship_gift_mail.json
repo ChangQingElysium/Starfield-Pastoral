@@ -1,0 +1,150 @@
+[
+  {
+    "npc": "caroline",
+    "mail": "Caroline",
+    "object_choices": [
+      { "object": "190", "count": 1 },
+      { "object": "192", "count": 1 },
+      { "object": "24", "count": 1 }
+    ]
+  },
+  {
+    "npc": "lewis",
+    "mail": "Lewis",
+    "money_min": 500,
+    "money_max_exclusive": 501
+  },
+  {
+    "npc": "clint",
+    "mail": "Clint",
+    "object_choices": [
+      { "object": "334", "count": 1 },
+      { "object": "335", "count": 1 },
+      { "object": "336", "count": 1 }
+    ]
+  },
+  {
+    "npc": "demetrius",
+    "mail": "Demetrius",
+    "object_choices": [
+      { "object": "392", "count": 1 },
+      { "object": "394", "count": 1 },
+      { "object": "132", "count": 1 },
+      { "object": "66", "count": 1 }
+    ]
+  },
+  {
+    "npc": "evelyn",
+    "mail": "Evelyn",
+    "object_choices": [
+      { "object": "216", "count": 1 },
+      { "object": "220", "count": 1 },
+      { "object": "223", "count": 1 }
+    ]
+  },
+  {
+    "npc": "emily",
+    "mail": "Emily",
+    "object_choices": [
+      { "object": "397", "count": 1 },
+      { "object": "428", "count": 1 },
+      { "object": "440", "count": 1 }
+    ]
+  },
+  {
+    "npc": "george",
+    "mail": "George",
+    "object_choices": [
+      { "object": "390", "count": 35 }
+    ]
+  },
+  {
+    "npc": "gus",
+    "mail": "Gus",
+    "object_choices": [
+      { "object": "224", "count": 1 },
+      { "object": "213", "count": 1 },
+      { "object": "211", "count": 1 },
+      { "object": "207", "count": 1 },
+      { "object": "200", "count": 1 },
+      { "object": "195", "count": 1 },
+      { "object": "198", "count": 1 }
+    ]
+  },
+  {
+    "npc": "jodi",
+    "mail": "Jodi",
+    "object_choices": [
+      { "object": "368", "count": 5 },
+      { "object": "369", "count": 5 },
+      { "object": "370", "count": 5 }
+    ]
+  },
+  {
+    "npc": "linus",
+    "mail": "Linus",
+    "object_choices": [
+      { "object": "136", "count": 1 },
+      { "object": "143", "count": 1 },
+      { "object": "202", "count": 1 },
+      { "object": "227", "count": 1 },
+      { "object": "228", "count": 1 }
+    ]
+  },
+  {
+    "npc": "marnie",
+    "mail": "Marnie",
+    "object_choices": [
+      { "object": "178", "count": 30 }
+    ]
+  },
+  {
+    "npc": "pam",
+    "mail": "Pam",
+    "object_choices": [
+      { "object": "346", "count": 1 },
+      { "object": "349", "count": 1 },
+      { "object": "787", "count": 1 }
+    ]
+  },
+  {
+    "npc": "pierre",
+    "mail": "Pierre",
+    "money_min": 250,
+    "money_max_exclusive": 601
+  },
+  {
+    "npc": "robin",
+    "mail": "Robin",
+    "object_choices": [
+      { "object": "388", "count": 50 }
+    ]
+  },
+  {
+    "npc": "shane",
+    "mail": "Shane",
+    "object_choices": [
+      { "object": "215", "count": 1 },
+      { "object": "206", "count": 1 }
+    ]
+  },
+  {
+    "npc": "wizard",
+    "mail": "Wizard",
+    "object_choices": [
+      { "object": "422", "count": 1 },
+      { "object": "82", "count": 1 },
+      { "object": "84", "count": 1 },
+      { "object": "70", "count": 1 }
+    ]
+  },
+  {
+    "npc": "sandy",
+    "mail": "Sandy",
+    "object_choices": [
+      { "object": "88", "count": 1 },
+      { "object": "90", "count": 1 },
+      { "object": "218", "count": 1 }
+    ]
+  }
+]

@@ -714,6 +714,28 @@
       ]
     },
     {
+      "id": "wild_bait",
+      "unlockCondition": "null",
+      "output": {
+        "item": "stardewcraft:wild_bait",
+        "count": 5
+      },
+      "ingredients": [
+        {
+          "item": "stardewcraft:fiber",
+          "count": 10
+        },
+        {
+          "item": "stardewcraft:bug_meat",
+          "count": 5
+        },
+        {
+          "item": "stardewcraft:slime_item",
+          "count": 5
+        }
+      ]
+    },
+    {
       "id": "deluxe_bait",
       "unlockCondition": "s Fishing 4",
       "output": {
@@ -1177,7 +1199,7 @@
     {
       "id": "fish_smoker",
       "bigCraftable": true,
-      "unlockCondition": "default",
+      "unlockCondition": "null",
       "output": {
         "item": "stardewcraft:fish_smoker",
         "count": 1

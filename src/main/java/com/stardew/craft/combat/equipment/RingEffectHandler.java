@@ -3,6 +3,8 @@ package com.stardew.craft.combat.equipment;
 import com.stardew.craft.item.equipment.RingType;
 import com.stardew.craft.item.equipment.CombinedRingData;
 import com.stardew.craft.item.equipment.StardewRingItem;
+import com.stardew.craft.combat.CombatHealing;
+import com.stardew.craft.combat.CombatTargetRules;
 import com.stardew.craft.player.PlayerDataManager;
 import com.stardew.craft.player.PlayerStardewData;
 import com.stardew.craft.player.PlayerDataEventHandler;
@@ -12,11 +14,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 
 import java.util.ArrayList;
@@ -30,15 +32,19 @@ import java.util.List;
 @SuppressWarnings("null")
 public class RingEffectHandler {
 
-    @SubscribeEvent
+    @SubscribeEvent(
+            priority = EventPriority.LOWEST,
+            receiveCanceled = true
+    )
     public static void onMobKilled(LivingDeathEvent event) {
-        if (event.getSource() == null || !(event.getSource().getEntity() instanceof ServerPlayer player)) {
+        if (event.isCanceled()
+                || event.getSource() == null
+                || !(event.getSource().getEntity()
+                instanceof ServerPlayer player)) {
             return;
         }
         LivingEntity killed = event.getEntity();
-        boolean isStardewMonster = killed.getTags().stream()
-                .anyMatch(tag -> tag.startsWith("sd_mob_"));
-        if (!(killed instanceof Enemy) && !isStardewMonster) {
+        if (!CombatTargetRules.isCombatMonster(killed)) {
             return;
         }
 
@@ -54,15 +60,13 @@ public class RingEffectHandler {
         switch (ring) {
             case VAMPIRE_RING -> {
                 // +2 HP on monster kill
-                int newHealth = Math.min(data.getHealth() + 2, data.getMaxHealth());
-                data.setHealth(newHealth);
-                PlayerDataEventHandler.syncPlayerData(player, data);
+                CombatHealing.heal(player, 2.0F);
             }
             case SOUL_SAPPER_RING -> {
                 // +4 stamina (energy) on monster kill
                 float newEnergy = Math.min(data.getEnergy() + 4.0f, data.getMaxEnergy());
                 data.setEnergy(newEnergy);
-                PlayerDataEventHandler.syncPlayerData(player, data);
+                PlayerDataEventHandler.syncPlayerVitals(player, data);
             }
             case SAVAGE_RING -> {
                 // +2 speed buff for 3 seconds on monster kill (use MC speed effect)

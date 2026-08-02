@@ -11,36 +11,60 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class WeaponReleaseSnapshotContractTest {
     @Test
-    void centralDamageConsumesPendingSnapshotBeforeCheckingCurrentHand()
+    void centralDamageRequiresTheAdmissionReleaseSnapshot()
             throws IOException {
-        String source = readSource("WeaponCombatEvents.java");
-        int method = source.indexOf(
+        String events = readSource("WeaponCombatEvents.java");
+        String evaluated = readSource("CommonWeaponEvaluatedHitRules.java");
+        String resolver = between(
+                events,
+                "private static IncomingWeaponResolution evaluateWeaponHit(",
                 "public static void onLivingHurt(LivingDamageEvent.Pre event)"
         );
-        int consume = source.indexOf(
-                "WeaponSkillContextStore.consumePending(player, nowTick)",
-                method
+        String incoming = between(
+                events,
+                "public static void onLivingIncomingDamage(",
+                "public static void onLivingIncomingDamageFinal("
         );
-        int currentHand = source.indexOf(
-                "player.getMainHandItem()",
-                method
+        String pre = between(
+                events,
+                "public static void onLivingHurt(LivingDamageEvent.Pre event)",
+                "public static CustomHealthWeaponResolution "
+                        + "evaluateCustomHealthWeaponHit("
         );
-        int weaponGate = source.indexOf(
-                "if (!(weapon.getItem() instanceof IStardewWeapon)) return;",
-                method
+        assertOrdered(
+                resolver,
+                "WeaponSkillContextStore.consumePending(",
+                "WeaponDamageSnapshot releaseWeapon = pendingHit == null",
+                "if (releaseWeapon == null) return null;",
+                "ItemStack weapon = releaseWeapon.weapon();",
+                "WeaponCombatIdentity.resolve(weapon).orElse(null)",
+                "WeaponDamageSnapshot damageWeaponSnapshot = releaseWeapon;",
+                "EvaluatedWeaponHit hit = new EvaluatedWeaponHit(",
+                "damageWeaponSnapshot,"
         );
-
-        assertTrue(method >= 0);
-        assertTrue(consume > method);
-        assertTrue(currentHand > consume);
-        assertTrue(weaponGate > currentHand);
-        assertTrue(source.contains(
-                "DamageNumberContextStore.set(\n"
-                        + "                player,\n"
-                        + "                skillId,\n"
-                        + "                displayCrit,\n"
-                        + "                damageWeaponSnapshot,"
-        ));
+        assertFalse(resolver.contains("player.getMainHandItem()"));
+        assertFalse(resolver.contains("WeaponDamageSnapshot.capture("));
+        assertOrdered(
+                incoming,
+                "evaluateWeaponHit(",
+                "WeaponIncomingHitStore.bind(",
+                "resolution.hit(),"
+        );
+        assertOrdered(
+                pre,
+                "WeaponIncomingHitStore.consume(",
+                "WeaponEvaluatedHitCoordinator.apply(hit)"
+        );
+        assertFalse(pre.contains("player.getMainHandItem()"));
+        assertFalse(pre.contains("WeaponDamageSnapshot.capture("));
+        assertOrdered(
+                evaluated,
+                "DamageNumberContextStore.bind(",
+                "hit.attacker(),",
+                "hit.target(),",
+                "hit.source(),",
+                "hit.weaponSnapshot(),"
+        );
     }
 
     @Test
@@ -55,96 +79,103 @@ class WeaponReleaseSnapshotContractTest {
     @Test
     void nestedChildHitsInheritTheCurrentDamageWeaponSnapshot()
             throws IOException {
-        String source = readSource("WeaponCombatEvents.java");
+        String passives = readSource(
+                "BuiltinWeaponPassiveAppliedHitRules.java"
+        );
 
-        assertChildContextUsesCentralDamage(
-                source,
+        assertChildContextUsesSharedAppliedRule(
+                passives,
                 ".skillId(\"crystal_dagger_burst\")"
         );
-        assertChildContextUsesCentralDamage(
-                source,
+        assertChildContextUsesSharedAppliedRule(
+                passives,
                 ".skillId(\"singularity_followup\")"
         );
-        assertChildContextUsesCentralDamage(
-                source,
+        assertChildContextUsesSharedAppliedRule(
+                passives,
                 ".skillId(\"ossified_mark_bonus\")"
         );
-        assertChildContextUsesCentralDamage(
-                source,
+        assertChildContextUsesSharedAppliedRule(
+                passives,
                 ".skillId(\"galaxy_dagger_mark_bonus\")"
         );
-        assertChildContextUsesCentralDamage(
-                source,
+        assertChildContextUsesSharedAppliedRule(
+                passives,
                 ".skillId(\"infinity_dagger_mark_bonus\")"
         );
 
-        int tideContext = source.indexOf(
+        int tideContext = passives.indexOf(
                 "TideMarkTracker.createBonusContext()"
         );
-        assertChildContextUsesCentralDamage(source, tideContext);
+        assertChildContextUsesSharedAppliedRule(passives, tideContext);
         assertEquals(
-                6,
+                1,
                 occurrences(
-                        source,
+                        passives,
                         "WeaponSkillDamage.apply("
                 )
         );
-        assertFalse(source.contains("player.attack(target)"));
-        assertFalse(source.contains("WeaponSkillContextStore.setPending("));
-        assertFalse(source.contains("clearUnconsumedSkillContext("));
-        assertFalse(source.contains("AttackGatePolicy"));
+        assertFalse(passives.contains("player.attack(target)"));
+        assertFalse(passives.contains("WeaponSkillContextStore.setPending("));
+        assertFalse(passives.contains("clearUnconsumedSkillContext("));
+        assertTrue(passives.contains(
+                "WeaponSkillDamage.AttackGatePolicy.SKILL_DAMAGE"
+        ));
+        assertTrue(passives.contains(
+                ".BYPASS_FOR_AUTHORED_SEQUENCE"
+        ));
 
-        int burst = source.indexOf(".skillId(\"crystal_dagger_burst\")");
-        int burstDamage = source.indexOf("WeaponSkillDamage.apply(", burst);
-        int burstPayload = source.indexOf(
-                "new CrystalDaggerBurstPayload()",
+        assertTrue(passives.contains(
+                "WeaponDamageSnapshot snapshot = "
+                        + "hit.weaponSnapshot().orElseThrow();"
+        ));
+        assertFalse(passives.contains("target.invulnerableTime = 0;"));
+        assertFalse(passives.contains("target.hurtTime = 0;"));
+
+        int burst = passives.indexOf(".skillId(\"crystal_dagger_burst\")");
+        int burstDamage = passives.lastIndexOf(
+                "applyChildDamage(",
                 burst
         );
-        assertTrue(burstDamage > burst && burstPayload > burstDamage);
+        assertTrue(burstDamage >= 0 && burstDamage < burst);
+        String trigger = method(
+                passives,
+                "static void triggerCrystalBurst(ResolvedWeaponHit hit)"
+        );
+        assertFalse(trigger.contains("new CrystalDaggerBurstPayload()"));
+        String presentation = method(
+                passives,
+                "static void emitCrystalDaggerBurstPresentation("
+                        + "ResolvedWeaponHit hit)"
+        );
+        assertOrdered(
+                presentation,
+                "\"crystal_dagger_burst\".equals(hit.skillId())",
+                "hit.dealtPositiveDamage()",
+                "new CrystalDaggerBurstPayload()"
+        );
     }
 
-    private static void assertChildContextUsesCentralDamage(
+    private static void assertChildContextUsesSharedAppliedRule(
             String source,
             String contextMarker
     ) {
-        int context = source.indexOf(contextMarker);
-        assertTrue(context >= 0, contextMarker);
-        assertChildContextUsesCentralDamage(source, context);
+        assertChildContextUsesSharedAppliedRule(
+                source,
+                source.indexOf(contextMarker)
+        );
     }
 
-    private static void assertChildContextUsesCentralDamage(
-        String source,
-        int context
+    private static void assertChildContextUsesSharedAppliedRule(
+            String source,
+            int context
     ) {
         assertTrue(context >= 0);
-        int damageBefore = source.lastIndexOf(
-                "WeaponSkillDamage.apply(",
-                context
-        );
-        int damageAfter = source.indexOf(
-                "WeaponSkillDamage.apply(",
-                context
-        );
-        int damage = damageBefore >= 0 && context - damageBefore < 300
-                ? damageBefore
-                : damageAfter;
-        int snapshot = source.indexOf("damageWeaponSnapshot", context);
-        int resetInvulnerability = source.lastIndexOf(
-                "target.invulnerableTime = 0;",
-                damage
-        );
-        int resetHurt = source.lastIndexOf(
-                "target.hurtTime = 0;",
-                damage
-        );
-
-        assertTrue(damage >= context - 300 && damage - context < 800);
-        assertTrue(snapshot > damage && snapshot - context < 800);
-        assertTrue(
-                resetInvulnerability >= context - 300
-                        && resetInvulnerability < damage
-        );
-        assertTrue(resetHurt > resetInvulnerability && resetHurt < damage);
+        int before = source.lastIndexOf("applyChildDamage(", context);
+        int after = source.indexOf("applyChildDamage(", context);
+        boolean nearbyBefore = before >= 0 && context - before < 800;
+        boolean nearbyAfter = after > context && after - context < 800;
+        assertTrue(nearbyBefore || nearbyAfter);
     }
 
     private static int occurrences(String source, String needle) {
@@ -155,6 +186,38 @@ class WeaponReleaseSnapshotContractTest {
             index += needle.length();
         }
         return count;
+    }
+
+    private static String method(String source, String signature) {
+        int start = source.indexOf(signature);
+        assertTrue(start >= 0, signature);
+        int next = source.indexOf(
+                "\n    static void ",
+                start + signature.length()
+        );
+        int end = next >= 0 ? next : source.lastIndexOf('}');
+        assertTrue(end > start, signature);
+        return source.substring(start, end);
+    }
+
+    private static String between(
+            String source,
+            String startToken,
+            String endToken
+    ) {
+        int start = source.indexOf(startToken);
+        int end = source.indexOf(endToken, start);
+        assertTrue(start >= 0 && end > start, startToken);
+        return source.substring(start, end);
+    }
+
+    private static void assertOrdered(String source, String... needles) {
+        int previous = -1;
+        for (String needle : needles) {
+            int current = source.indexOf(needle, previous + 1);
+            assertTrue(current > previous, "Missing or unordered: " + needle);
+            previous = current;
+        }
     }
 
     private static String readSource(String fileName) throws IOException {

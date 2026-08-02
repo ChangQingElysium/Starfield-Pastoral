@@ -11,11 +11,18 @@ import java.util.Set;
 public record StardewMineMonsterProfile(
         ResourceLocation id,
         EntityType<? extends Mob> entityType,
+        String translationKey,
         Set<String> progressTags
 ) {
     public StardewMineMonsterProfile {
         id = Objects.requireNonNull(id, "id");
         entityType = Objects.requireNonNull(entityType, "entityType");
+        translationKey = Objects.requireNonNull(
+                translationKey, "translationKey").trim();
+        if (translationKey.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "translationKey must not be blank");
+        }
         progressTags = Set.copyOf(
                 Objects.requireNonNull(progressTags, "progressTags"));
         if (progressTags.stream().anyMatch(tag ->
@@ -23,5 +30,14 @@ public record StardewMineMonsterProfile(
             throw new IllegalArgumentException(
                     "progressTags must not contain blank values");
         }
+    }
+
+    /** Source-compatible default for profiles that use their entity type name. */
+    public StardewMineMonsterProfile(
+            ResourceLocation id,
+            EntityType<? extends Mob> entityType,
+            Set<String> progressTags
+    ) {
+        this(id, entityType, entityType.getDescriptionId(), progressTags);
     }
 }

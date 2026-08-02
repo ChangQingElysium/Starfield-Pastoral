@@ -90,6 +90,22 @@
     "winter_Sat": "stardewcraft.npc.emily.winter_sat",
     "winter_Sun": "stardewcraft.npc.emily.winter_sun",
     "winter_Sun6": "stardewcraft.npc.emily.winter_sun6",
-    "winter_Sun6_inlaw_Haley": "stardewcraft.npc.emily.winter_sun6_inlaw_haley"
+    "winter_Sun6_inlaw_Haley": "stardewcraft.npc.emily.winter_sun6_inlaw_haley",
+    "eventSeen_471942": "stardewcraft.npc.emily.eventseen_471942",
+    "eventSeen_463391": "stardewcraft.npc.emily.eventseen_463391",
+    "purchasedAnimal_Sheep": "stardewcraft.npc.emily.purchasedanimal_sheep",
+    "eventSeen_11_memory_oneweek": "stardewcraft.npc.emily.eventseen_11_memory_oneweek",
+    "eventSeen_101_memory_oneweek": "stardewcraft.npc.emily.eventseen_101_memory_oneweek",
+    "eventSeen_4081148": "stardewcraft.npc.emily.eventseen_4081148",
+    "eventSeen_2123343_memory_oneday": "stardewcraft.npc.emily.eventseen_2123343_memory_oneday",
+    "Resort_Entering": "stardewcraft.npc.emily.resort_entering",
+    "Resort_Leaving": "stardewcraft.npc.emily.resort_leaving",
+    "Resort_Shore": "stardewcraft.npc.emily.resort_shore",
+    "Resort_Chair": "stardewcraft.npc.emily.resort_chair",
+    "Resort_Bar": "stardewcraft.npc.emily.resort_bar",
+    "Resort": "stardewcraft.npc.emily.resort",
+    "Resort_Dance": "stardewcraft.npc.emily.resort_dance",
+    "reject_866": "stardewcraft.npc.emily.reject_866",
+    "fall_15": "stardewcraft.npc.emily.fall_15"
   }
 }

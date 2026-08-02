@@ -82,8 +82,8 @@ class WeaponSkillPendingContextCleanupContractTest {
 
         assertTrue(source.contains(
                 "createExecuteBonusContext(), "
-                        + "context.weaponSnapshot(), "
-                        + "context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS"
+                        + "weaponSnapshot, "
+                        + "nowTick + HIT_CONTEXT_LIFETIME_TICKS"
         ));
     }
 

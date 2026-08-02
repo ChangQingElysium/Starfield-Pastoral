@@ -630,7 +630,11 @@ public final class NpcInteractionService {
         }
 
         // NPC smoothly turns to face the player, then opens dialogue
-        String dialogueText = loadCurrentDialogue(serverLevel, npcId, state, dayContext);
+        String dialogueText = loadCurrentDialogue(serverPlayer, npcId, state, dayContext);
+        String scheduleDialogue = resolveScheduleDialogue(serverLevel, npcId);
+        if (!scheduleDialogue.isBlank()) {
+            dialogueText = scheduleDialogue;
+        }
         String nightMarketDialogue = com.stardew.craft.festival.nightmarket.NightMarketNpcVisitService
             .resolveDialogueKey(npcId);
         if (!nightMarketDialogue.isBlank()) {
@@ -895,9 +899,20 @@ public final class NpcInteractionService {
         com.stardew.craft.quest.QuestManager mgr = com.stardew.craft.quest.QuestManager.of(player);
         if (mgr == null) return null;
         for (com.stardew.craft.quest.StardewQuest q : mgr.getQuestLog()) {
-            if (q.matchesItemDelivery(npcId, itemId)) return q;
+            if (q.matchesItemDelivery(npcId, itemId)
+                    && held.getCount() >= requiredDeliveryCount(q)) {
+                return q;
+            }
         }
         return null;
+    }
+
+    static int requiredDeliveryCount(com.stardew.craft.quest.StardewQuest quest) {
+        int total = quest.getTotalObjectiveCount();
+        if (total <= 1) {
+            return 1;
+        }
+        return Math.max(1, total - Math.max(0, quest.getCurrentObjectiveCount()));
     }
 
     /**
@@ -919,14 +934,15 @@ public final class NpcInteractionService {
         }
 
         String itemId = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(held.getItem()).toString();
-        // 消耗 1 个（SDV parity: 交付任务每次 1 个）
+        int deliveryCount = requiredDeliveryCount(matching);
         if (!player.getAbilities().instabuild) {
-            held.shrink(1);
+            held.shrink(deliveryCount);
         }
         boolean desertFestivalWillyQuest = matching instanceof com.stardew.craft.quest.ItemDeliveryQuest delivery
             && com.stardew.craft.festival.desert.DesertFestivalWillyFishingService.isWillyChallengeQuest(delivery);
         // 走 onItemOfferedToNpc → questComplete（带友好度加成）
-        com.stardew.craft.quest.StardewQuestEvents.fireItemOfferedToNpc(player, npcId, itemId);
+        com.stardew.craft.quest.StardewQuestEvents.fireItemOfferedToNpc(
+                player, npcId, itemId, deliveryCount);
 
         // SDV parity: "questComplete" — QuestCompletePayload.handleClient 会广播给
         // 完成任务的玩家自己（在 QuestManager.cleanupDestroyed 发包时触发），
@@ -982,12 +998,14 @@ public final class NpcInteractionService {
         // In SDV NPC.tryToReceiveActiveObject, OnItemOfferedToNpc is checked first.
         // If a delivery quest matches, the item is consumed by the quest; no gift processing.
         com.stardew.craft.quest.StardewQuest matchingQuest = findMatchingDeliveryQuest(player, npcId, held);
+        int deliveryCount = matchingQuest == null ? 1 : requiredDeliveryCount(matchingQuest);
         boolean questConsumed = matchingQuest != null
-            && com.stardew.craft.quest.StardewQuestEvents.fireItemOfferedToNpc(player, npcId, giftItemId);
+            && com.stardew.craft.quest.StardewQuestEvents.fireItemOfferedToNpc(
+                player, npcId, giftItemId, deliveryCount);
         if (questConsumed) {
             // Quest consumed the item — shrink held stack and send quest-specific dialogue
             if (!player.getAbilities().instabuild) {
-                held.shrink(1);
+                held.shrink(deliveryCount);
             }
             boolean garbleGift = npcId.equals("dwarf") && !com.stardew.craft.shop.DwarfService.canUnderstandDwarves(player);
             sendDialoguePacket(player, npcId, questDeliveryDialogueText(matchingQuest), 0, garbleGift);
@@ -1589,7 +1607,19 @@ public final class NpcInteractionService {
         return null;
     }
 
-    private static String loadCurrentDialogue(ServerLevel level,
+    private static String resolveScheduleDialogue(ServerLevel level, String npcId) {
+        NpcRuntimeState runtimeState = NpcRuntimeDataManager.get(level).states().get(npcId);
+        if (runtimeState == null) {
+            return "";
+        }
+        String behavior = runtimeState.routeBehaviorToken();
+        String prefix = "dialogue:";
+        return behavior != null && behavior.startsWith(prefix)
+                ? behavior.substring(prefix.length()).trim()
+                : "";
+    }
+
+    private static String loadCurrentDialogue(ServerPlayer player,
                                               String npcId,
                                               NpcFriendshipDataManager.FriendshipState state,
                                               DayContext dayContext) {
@@ -1597,54 +1627,81 @@ public final class NpcInteractionService {
         if (dialogueRoot == null) {
             return "...";
         }
-
         int hearts = Math.max(0, Math.min(14, state.points() / POINTS_PER_HEART));
-        List<String> trace = new ArrayList<>();
-        String selectedText = null;
-
+        NpcRuntimeState runtimeState = NpcRuntimeDataManager.get(player.serverLevel())
+                .states().get(npcId);
+        String locationName = runtimeState == null ? "" : runtimeState.locationName();
+        int tileX = runtimeState == null ? 0 : runtimeState.tileX();
+        int tileY = runtimeState == null ? 0 : runtimeState.tileY();
+        String weather = dayContext.weatherLower();
+        boolean greenRain = weather.equals("greenrain") || weather.equals("green_rain");
+        boolean raining = weather.equals("rain") || weather.equals("storm");
+        com.stardew.craft.util.StardewDeterministicRandom dailyRandom = vanillaDialogueRandom(
+                player.serverLevel(), dayContext.dayKey(), tileX, tileY);
+        // NPC.loadCurrentDialogue always consumes the gossip roll before its rain roll.
+        dailyRandom.nextDouble();
+        var playerData = com.stardew.craft.player.PlayerDataManager.getPlayerData(player);
+        boolean useRainDialogue = raining
+                && dailyRandom.nextDouble() < 0.5D
+                && !(npcId.equals("krobus") && dayContext.weekdayShort().equals("Fri"))
+                && !(npcId.equals("penny") && playerData.hasMailFlag("pamHouseUpgrade"))
+                && !(npcId.equals("emily")
+                        && dayContext.seasonLower().equals("fall")
+                        && dayContext.dayInSeason() == 15);
+        boolean communityCenterAccessible = playerData
+                .hasMailFlag(com.stardew.craft.communitycenter.state.CCStoryFlags.CC_DOOR_UNLOCKED);
         boolean isFirstMeeting = state.lastTalkDayKey() == Integer.MIN_VALUE;
-        for (String prefix : buildDialoguePrefixes(dayContext, isFirstMeeting)) {
-            String heartKey = findBestHeartVariantKey(dialogueRoot, prefix, hearts);
-            if (heartKey != null) {
-                selectedText = resolveDialogueTextByKey(dialogueRoot, heartKey, dayContext.dayKey());
-                trace.add(traceEntry(heartKey, selectedText));
-                if (selectedText != null && !selectedText.isBlank()) {
-                    break;
-                }
-            } else {
-                trace.add(prefix + "<heart>:no-matching-threshold");
-            }
-
-            selectedText = resolveDialogueTextByKey(dialogueRoot, prefix, dayContext.dayKey());
-            trace.add(traceEntry(prefix, selectedText));
-            if (selectedText != null && !selectedText.isBlank()) {
-                break;
-            }
+        NpcDialogueEventData dialogueEvents = NpcDialogueEventData.get(player.getServer());
+        // Save migration: events watched before this vanilla dialogue-event
+        // ledger existed must still produce their NPC reactions exactly once.
+        for (String seenEvent : com.stardew.craft.cutscene.server.EventSeenData
+                .get(player.serverLevel())
+                .getSeenEvents(player.getUUID())) {
+            dialogueEvents.activateEventSeen(player.getUUID(), seenEvent);
         }
-
-        if (selectedText == null || selectedText.isBlank()) {
-            String fallback = findFirstPrimitiveDialogue(dialogueRoot, dayContext.dayKey());
-            if (fallback != null && !fallback.isBlank()) {
-                selectedText = fallback;
-            }
+        NpcDialogueResolver.Context context = new NpcDialogueResolver.Context(
+                npcId,
+                dayContext.dayInSeason(),
+                dayContext.dayKey(),
+                StardewTimeManager.get().getCurrentYear(),
+                dayContext.seasonLower(),
+                dayContext.weekdayShort(),
+                hearts,
+                isFirstMeeting,
+                greenRain,
+                raining,
+                useRainDialogue,
+                locationName,
+                tileX,
+                tileY,
+                playerData.hasMailFlag("pamHouseUpgrade"),
+                communityCenterAccessible,
+                dialogueEvents.activeKeys(player.getUUID(), npcId));
+        NpcDialogueResolver.Selection selection = NpcDialogueResolver.select(
+                dialogueRoot,
+                NpcDataRegistry.dialogues().get("rainy"),
+                context);
+        if (selection.source() == NpcDialogueResolver.Source.ACTIVE_EVENT) {
+            dialogueEvents.markConsumed(player.getUUID(), npcId, selection.key());
         }
-
-        if (selectedText == null || selectedText.isBlank()) {
-            selectedText = "...";
-        }
-
-
-        return selectedText;
+        return selection.present() ? selection.text() : "...";
     }
 
-    private static String traceEntry(String key, String text) {
-        if (text == null) {
-            return key + ":missing";
-        }
-        if (text.isBlank()) {
-            return key + ":blank";
-        }
-        return key + ":hit";
+    private static com.stardew.craft.util.StardewDeterministicRandom vanillaDialogueRandom(
+            ServerLevel level,
+            int dayKey,
+            int tileX,
+            int tileY
+    ) {
+        long daysPlayed = Math.max(0L, dayKey - 1L);
+        // Utility.CreateDaySaveRandom(DaysPlayed * 77,
+        //     2 + defaultPosition.X * 77, defaultPosition.Y * 777)
+        return com.stardew.craft.util.StardewDeterministicRandom.create(
+                daysPlayed,
+                level.getSeed() / 2L,
+                daysPlayed * 77L,
+                2L + (long) tileX * 77L,
+                (long) tileY * 777L);
     }
 
     private static String buildGiftResponseText(String npcId,
@@ -1810,80 +1867,6 @@ public final class NpcInteractionService {
         return 1f;
     }
 
-    private static List<String> buildDialoguePrefixes(DayContext dayContext, boolean isFirstMeeting) {
-        List<String> out = new ArrayList<>();
-        // SDV parity: Introduction dialogue takes absolute priority on first meeting
-        if (isFirstMeeting) {
-            out.add("Introduction");
-        }
-        String weatherToken = normalizedWeatherToken(dayContext.weatherLower());
-        if (!weatherToken.isBlank()) {
-            out.add(weatherToken);
-        }
-        if (dayContext.weatherLower().contains("rain") || dayContext.weatherLower().contains("storm")) {
-            out.add("rain");
-            out.add("Rain");
-        }
-        out.add(dayContext.seasonLower() + "_" + dayContext.dayInSeason());
-        out.add(dayContext.seasonLower() + "_" + dayContext.weekdayShort());
-        out.add(dayContext.weekdayShort());
-        out.add(String.valueOf(dayContext.dayInSeason()));
-        out.add(dayContext.seasonLower());
-        out.add("default");
-        return out;
-    }
-
-    private static String normalizedWeatherToken(String weatherLower) {
-        if (weatherLower == null || weatherLower.isBlank()) {
-            return "";
-        }
-        String[] parts = weatherLower.replace('-', '_').split("_");
-        StringBuilder sb = new StringBuilder();
-        for (String part : parts) {
-            if (part == null || part.isBlank()) {
-                continue;
-            }
-            sb.append(Character.toUpperCase(part.charAt(0)));
-            if (part.length() > 1) {
-                sb.append(part.substring(1));
-            }
-        }
-        return sb.toString();
-    }
-
-    private static String findBestHeartVariantKey(JsonObject root, String prefix, int hearts) {
-        JsonObject scope = dialogueScope(root);
-        String winner = null;
-        int winnerHeart = -1;
-
-        for (String key : scope.keySet()) {
-            if (!key.regionMatches(true, 0, prefix, 0, prefix.length())) {
-                continue;
-            }
-            if (key.length() <= prefix.length()) {
-                continue;
-            }
-
-            String suffix = key.substring(prefix.length());
-            if (!allDigits(suffix)) {
-                continue;
-            }
-
-            int threshold;
-            try {
-                threshold = Integer.parseInt(suffix);
-            } catch (NumberFormatException ignored) {
-                continue;
-            }
-
-            if (threshold <= hearts && threshold > winnerHeart) {
-                winnerHeart = threshold;
-                winner = key;
-            }
-        }
-        return winner;
-    }
-
     private static String resolveDialogueTextByKey(JsonObject root, String key, int dayKey) {
         if (root == null || key == null || key.isBlank()) {
             return null;
@@ -1894,17 +1877,6 @@ public final class NpcInteractionService {
             return null;
         }
         return pickTextFromEntry(scope.get(actual), dayKey);
-    }
-
-    private static String findFirstPrimitiveDialogue(JsonObject root, int dayKey) {
-        JsonObject scope = dialogueScope(root);
-        for (Map.Entry<String, JsonElement> entry : scope.entrySet()) {
-            String text = pickTextFromEntry(entry.getValue(), dayKey);
-            if (text != null && !text.isBlank()) {
-                return text;
-            }
-        }
-        return null;
     }
 
     private static JsonObject dialogueScope(JsonObject root) {
@@ -1960,11 +1932,29 @@ public final class NpcInteractionService {
         }
         beginDialogueSession(player, npcId);
         PacketDistributor.sendToPlayer(player,
-                new OpenNpcDialogueScreenPayload(npcId, translateKey, points, "", garbleDwarvish));
+                new OpenNpcDialogueScreenPayload(
+                        npcId,
+                        translateKey,
+                        points,
+                        "",
+                        garbleDwarvish,
+                        List.copyOf(NpcDialogueEventData.get(player.getServer())
+                                .answeredDialogueIds(player.getUUID()))));
     }
 
-    public static void handleClientQuestionAnswer(ServerPlayer player, String npcId, String nextDialogueNode, int friendshipDelta) {
+    public static void handleClientQuestionAnswer(
+            ServerPlayer player,
+            String npcId,
+            String nextDialogueNode,
+            int friendshipDelta,
+            String answerId
+    ) {
         if (npcId == null || npcId.isBlank()) return;
+
+        if (answerId != null && answerId.matches("[A-Za-z0-9_-]{1,64}")) {
+            NpcDialogueEventData.get(player.getServer())
+                    .markDialogueAnswer(player.getUUID(), answerId);
+        }
 
         // Wizard tower hub: intercept wizard-specific answer nodes (teleport commands)
         if ("wizard".equals(npcId) && com.stardew.craft.interior.WizardQuestHandler.handleWizardQuestionAnswer(player, nextDialogueNode)) {
@@ -2029,18 +2019,6 @@ public final class NpcInteractionService {
             }
         }
         return null;
-    }
-
-    private static boolean allDigits(String value) {
-        if (value == null || value.isBlank()) {
-            return false;
-        }
-        for (int i = 0; i < value.length(); i++) {
-            if (!Character.isDigit(value.charAt(i))) {
-                return false;
-            }
-        }
-        return true;
     }
 
     private static boolean isNpcBirthday(String npcId, DayContext dayContext) {

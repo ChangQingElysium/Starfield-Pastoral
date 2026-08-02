@@ -5,6 +5,7 @@ import com.stardew.craft.client.NpcFriendshipClientCache;
 import com.stardew.craft.client.hud.StardewTimeHud;
 import com.stardew.craft.cutscene.data.EventPrecondition;
 import com.stardew.craft.cutscene.network.ClientEventSeenCache;
+import com.stardew.craft.entity.npc.StardewNpcEntity;
 import com.stardew.craft.player.SkillType;
 import com.stardew.craft.time.StardewTimeManager;
 import com.stardew.craft.weather.ClientWeatherCache;
@@ -44,6 +45,7 @@ public final class PreconditionEvaluator {
     private static boolean evaluateSingle(EventPrecondition p) {
         return switch (p.type()) {
             case "friendship" -> checkFriendship(p);
+            case "npc_present" -> checkNpcPresent(p);
             case "saw_event" -> ClientEventSeenCache.hasSeen(p.getString("id"));
             case "not_saw_event" -> !ClientEventSeenCache.hasSeen(p.getString("id"));
             case "time" -> checkTime(p);
@@ -76,6 +78,29 @@ public final class PreconditionEvaluator {
         if (npcId == null) return false;
         NpcFriendshipClientCache.Entry entry = NpcFriendshipClientCache.findByNpcId(npcId.toLowerCase(Locale.ROOT));
         return entry != null && entry.points() >= minPoints;
+    }
+
+    private static boolean checkNpcPresent(EventPrecondition p) {
+        String npcId = p.getString("npc");
+        Minecraft mc = Minecraft.getInstance();
+        if (npcId == null || mc.level == null) return false;
+        for (var entity : mc.level.entitiesForRendering()) {
+            if (entity instanceof StardewNpcEntity npc
+                    && npcId.equalsIgnoreCase(npc.getNpcId())
+                    && insideOptionalArea(npc.getX(), npc.getY(), npc.getZ(), p)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean insideOptionalArea(double x, double y, double z, EventPrecondition p) {
+        if (!p.raw().has("area_min") || !p.raw().has("area_max")) return true;
+        var min = p.raw().getAsJsonArray("area_min");
+        var max = p.raw().getAsJsonArray("area_max");
+        return x >= min.get(0).getAsDouble() && x <= max.get(0).getAsDouble() + 1.0
+                && y >= min.get(1).getAsDouble() && y <= max.get(1).getAsDouble() + 1.0
+                && z >= min.get(2).getAsDouble() && z <= max.get(2).getAsDouble() + 1.0;
     }
 
     private static boolean checkTime(EventPrecondition p) {

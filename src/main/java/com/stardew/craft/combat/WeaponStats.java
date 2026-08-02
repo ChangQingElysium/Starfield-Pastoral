@@ -22,21 +22,24 @@ public class WeaponStats {
     public static final String TAG_CRIT_CHANCE = "CritChance";
     public static final String TAG_CRIT_POWER = "CritPower";
     public static final String TAG_SPEED = "Speed";
+    public static final String TAG_RAW_SPEED = "RawSpeed";
     public static final String TAG_DEFENSE = "Defense";
     public static final String TAG_PRECISION = "Precision";
     public static final String TAG_KNOCKBACK = "Knockback";
-    public static final int CURRENT_DATA_VERSION = 1;
+    public static final int CURRENT_DATA_VERSION = 3;
     
     private final WeaponType weaponType;
     private final float minDamage;
     private final float maxDamage;
     private final float critChance;      // 基础暴击率 (0.02 = 2%)
     private final float bonusCritChance; // 额外暴击率
-    private final float bonusCritPower;  // 额外暴击伤害 (以百分比计，10 = +10%)
-    private final int speed;             // 速度修正
+    private final float bonusCritPower;  // Stardew Crit. Power stat points (+5 => +0.1 base multiplier)
+    private final float critPowerMultiplierBonus; // Innate/API relative bonus (0.5 = +50%)
+    private final int rawSpeed;          // Stardew MeleeWeapon runtime Speed
     private final int defense;           // 防御值
     private final float precision;       // 精确度 (降低敌人闪避)
     private final float knockback;       // 击退力度
+    private final float weaponSpeedMultiplier;
     
     private WeaponStats(Builder builder) {
         this.weaponType = builder.weaponType;
@@ -45,10 +48,17 @@ public class WeaponStats {
         this.critChance = builder.critChance;
         this.bonusCritChance = builder.bonusCritChance;
         this.bonusCritPower = builder.bonusCritPower;
-        this.speed = builder.speed;
+        this.critPowerMultiplierBonus = builder.critPowerMultiplierBonus;
+        this.rawSpeed = builder.rawSpeed != null
+                ? builder.rawSpeed
+                : StardewWeaponSpeedRules.rawSpeed(
+                        builder.weaponType,
+                        builder.speed
+                );
         this.defense = builder.defense;
         this.precision = builder.precision;
         this.knockback = builder.knockback;
+        this.weaponSpeedMultiplier = builder.weaponSpeedMultiplier;
     }
     
     /**
@@ -79,6 +89,12 @@ public class WeaponStats {
             .critChance(weaponTag.contains(TAG_CRIT_CHANCE) ? weaponTag.getFloat(TAG_CRIT_CHANCE) : 0.02f)
             .bonusCritPower(weaponTag.getFloat(TAG_CRIT_POWER))
             .speed(weaponTag.getInt(TAG_SPEED))
+            .rawSpeed(weaponTag.contains(TAG_RAW_SPEED)
+                    ? weaponTag.getInt(TAG_RAW_SPEED)
+                    : StardewWeaponSpeedRules.rawSpeed(
+                            WeaponType.fromId(weaponTag.getInt(TAG_WEAPON_TYPE)),
+                            weaponTag.getInt(TAG_SPEED)
+                    ))
             .defense(weaponTag.getInt(TAG_DEFENSE))
             .precision(weaponTag.getFloat(TAG_PRECISION))
             .knockback(weaponTag.getFloat(TAG_KNOCKBACK))
@@ -107,19 +123,36 @@ public class WeaponStats {
         StardewEquipmentData data = StardewEquipmentDataApi.get(stack);
         if (data == null || data.weapon().isEmpty()) return empty();
         StardewEquipmentData.Weapon weapon = data.weapon().get();
+        WeaponType weaponType = WeaponType.fromName(weapon.type());
+        float baseKnockback = Float.isFinite(weapon.knockback())
+                && weapon.knockback() >= 0.0F
+                ? weapon.knockback()
+                : StardewWeaponKnockbackRules.defaultRawKnockback(
+                        weaponType
+                );
         WeaponStats base = builder()
-                .weaponType(WeaponType.fromName(weapon.type()))
+                .weaponType(weaponType)
                 .minDamage(weapon.minDamage())
                 .maxDamage(weapon.maxDamage())
                 .critChance(weapon.baseCritChance())
                 .bonusCritChance(data.critChance())
-                .bonusCritPower(data.critPower())
+                .critPowerMultiplierBonus(data.critPower())
                 .speed(weapon.speed())
+                .rawSpeed(weapon.rawSpeed().orElseGet(
+                        () -> StardewWeaponSpeedRules.rawSpeed(
+                                weaponType,
+                                weapon.speed()
+                        )
+                ))
+                .weaponSpeedMultiplier(data.weaponSpeedMultiplier())
                 .defense(weapon.defense() + data.defense())
                 .precision(weapon.precision())
-                .knockback(weapon.knockback() + data.knockbackBonus())
+                .knockback(baseKnockback + data.knockbackBonus())
                 .build();
-        return applyForgeData(base, WeaponForgeData.read(stack));
+        // Public API weapons are data-owned and are not valid Mini-Forge
+        // targets. Ignore stray built-in forge state instead of applying only
+        // half of the forge contract.
+        return base;
     }
 
     public static WeaponStats applyForgeData(WeaponStats baseStats, WeaponForgeData.State forgeState) {
@@ -127,9 +160,11 @@ public class WeaponStats {
         float maxDamage = baseStats.maxDamage;
         float critChance = baseStats.critChance;
         float bonusCritPower = baseStats.bonusCritPower;
-        int speed = baseStats.speed;
+        float critPowerMultiplierBonus = baseStats.critPowerMultiplierBonus;
+        int rawSpeed = baseStats.rawSpeed;
         int defense = baseStats.defense;
         float knockback = baseStats.knockback;
+        float weaponSpeedMultiplier = baseStats.weaponSpeedMultiplier;
 
         for (WeaponForgeData.GemForge forge : forgeState.gemForges()) {
             int level = Math.max(0, forge.level());
@@ -137,7 +172,7 @@ public class WeaponStats {
                 continue;
             }
             switch (normalizeGemId(forge.itemId())) {
-                case "emerald" -> speed += 5 * level;
+                case "emerald" -> rawSpeed += 5 * level;
                 case "aquamarine" -> critChance += 0.046f * level;
                 case "ruby" -> {
                     minDamage += Math.max(1, (int) (baseStats.minDamage * 0.1f)) * level;
@@ -145,7 +180,9 @@ public class WeaponStats {
                 }
                 case "amethyst" -> knockback += level;
                 case "topaz" -> defense += level;
-                case "jade" -> bonusCritPower += 10.0f * level;
+                // One Jade forge adds +5 Crit. Power, which contributes
+                // +0.1 to the base critical multiplier (5 / 50).
+                case "jade" -> bonusCritPower += 5.0f * level;
                 default -> {
                 }
             }
@@ -158,9 +195,14 @@ public class WeaponStats {
                     maxDamage += dragonToothBonus.level();
                 }
                 case "defense" -> defense += dragonToothBonus.level();
-                case "speed" -> speed += dragonToothBonus.level();
+                // Stardew's innate WeaponSpeedEnchantment contributes to the
+                // farmer multiplier; it does not mutate MeleeWeapon.speed.
+                case "speed" -> weaponSpeedMultiplier +=
+                        0.1F * dragonToothBonus.level();
                 case "crit" -> critChance += 0.02f * dragonToothBonus.level();
-                case "crit_power" -> bonusCritPower += 25.0f * dragonToothBonus.level();
+                // Stardew's innate Crit. Power enchantment is a relative
+                // +50% per level, not another +25 Crit. Power stat points.
+                case "crit_power" -> critPowerMultiplierBonus += 0.5f * dragonToothBonus.level();
                 case "lightweight" -> knockback = Math.max(0.0f, knockback - dragonToothBonus.level());
                 default -> {
                 }
@@ -174,10 +216,12 @@ public class WeaponStats {
             .critChance(critChance)
             .bonusCritChance(baseStats.bonusCritChance)
             .bonusCritPower(bonusCritPower)
-            .speed(speed)
+            .critPowerMultiplierBonus(critPowerMultiplierBonus)
+            .rawSpeed(rawSpeed)
             .defense(defense)
             .precision(baseStats.precision)
             .knockback(knockback)
+            .weaponSpeedMultiplier(weaponSpeedMultiplier)
             .build();
     }
 
@@ -217,7 +261,8 @@ public class WeaponStats {
         weaponTag.putFloat(TAG_MAX_DAMAGE, maxDamage);
         weaponTag.putFloat(TAG_CRIT_CHANCE, critChance);
         weaponTag.putFloat(TAG_CRIT_POWER, bonusCritPower);
-        weaponTag.putInt(TAG_SPEED, speed);
+        weaponTag.putInt(TAG_SPEED, getSpeed());
+        weaponTag.putInt(TAG_RAW_SPEED, rawSpeed);
         weaponTag.putInt(TAG_DEFENSE, defense);
         weaponTag.putFloat(TAG_PRECISION, precision);
         weaponTag.putFloat(TAG_KNOCKBACK, knockback);
@@ -245,10 +290,16 @@ public class WeaponStats {
     public float getCritChance() { return critChance; }
     public float getBonusCritChance() { return bonusCritChance; }
     public float getBonusCritPower() { return bonusCritPower; }
-    public int getSpeed() { return speed; }
+    public float getCritPowerMultiplierBonus() { return critPowerMultiplierBonus; }
+    /** Stardew Tooltip speed after its integer division. */
+    public int getSpeed() {
+        return StardewWeaponSpeedRules.displayedSpeed(weaponType, rawSpeed);
+    }
+    public int getRawSpeed() { return rawSpeed; }
     public int getDefense() { return defense; }
     public float getPrecision() { return precision; }
     public float getKnockback() { return knockback; }
+    public float getWeaponSpeedMultiplier() { return weaponSpeedMultiplier; }
     
     /**
      * 获取平均伤害
@@ -268,10 +319,13 @@ public class WeaponStats {
         private float critChance = 0.02f;
         private float bonusCritChance = 0;
         private float bonusCritPower = 0;
+        private float critPowerMultiplierBonus = 0;
         private int speed = 0;
+        private Integer rawSpeed;
         private int defense = 0;
         private float precision = 0;
         private float knockback = 0;
+        private float weaponSpeedMultiplier;
         
         public Builder weaponType(WeaponType val) { this.weaponType = val; return this; }
         public Builder minDamage(float val) { this.minDamage = val; return this; }
@@ -279,10 +333,19 @@ public class WeaponStats {
         public Builder critChance(float val) { this.critChance = val; return this; }
         public Builder bonusCritChance(float val) { this.bonusCritChance = val; return this; }
         public Builder bonusCritPower(float val) { this.bonusCritPower = val; return this; }
+        public Builder critPowerMultiplierBonus(float val) {
+            this.critPowerMultiplierBonus = val;
+            return this;
+        }
         public Builder speed(int val) { this.speed = val; return this; }
+        public Builder rawSpeed(int val) { this.rawSpeed = val; return this; }
         public Builder defense(int val) { this.defense = val; return this; }
         public Builder precision(float val) { this.precision = val; return this; }
         public Builder knockback(float val) { this.knockback = val; return this; }
+        public Builder weaponSpeedMultiplier(float val) {
+            this.weaponSpeedMultiplier = val;
+            return this;
+        }
         
         public WeaponStats build() {
             return new WeaponStats(this);

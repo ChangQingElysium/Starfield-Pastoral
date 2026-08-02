@@ -1,6 +1,5 @@
 package com.stardew.craft.combat.skill.handler;
 
-import com.stardew.craft.combat.skill.InsectEyeStanceTracker;
 import com.stardew.craft.item.weapon.WeaponData;
 import com.stardew.craft.item.weapon.WeaponRegistry;
 import com.stardew.craft.item.weapon.WeaponSkillData;
@@ -21,7 +20,10 @@ class InsectEyeStanceSkillHandlerTest {
         assertEquals("insect_eye_stance", skill.getId());
         assertEquals(105, skill.getDamagePercent());
         assertEquals(8, skill.getCooldown());
-        assertEquals(1.05F, InsectEyeStanceTracker.DAMAGE_MULTIPLIER);
+        assertEquals(
+                1.05F,
+                InsectEyeStanceSkillHandler.DAMAGE_MULTIPLIER
+        );
         assertEquals(30, InsectEyeStanceSkillHandler.ACTIVE_DURATION_TICKS);
         assertEquals(1, InsectEyeStanceSkillHandler.ANIMATION_TICKS);
         assertFalse(new InsectEyeStanceSkillHandler().completesImmediately());

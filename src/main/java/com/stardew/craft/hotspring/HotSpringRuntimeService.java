@@ -128,7 +128,7 @@ public final class HotSpringRuntimeService {
         }
 
         if (changed) {
-            PlayerDataEventHandler.syncPlayerData(player, data);
+            PlayerDataEventHandler.syncPlayerVitals(player, data);
         }
     }
 

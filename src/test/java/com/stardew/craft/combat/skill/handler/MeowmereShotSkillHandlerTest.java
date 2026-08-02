@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MeowmereShotSkillHandlerTest {
     @Test
@@ -37,5 +38,16 @@ class MeowmereShotSkillHandlerTest {
         );
         assertEquals(10, MeowmereShotSkillHandler.ANIMATION_TICKS);
         assertFalse(new MeowmereShotSkillHandler().completesImmediately());
+    }
+
+    @Test
+    void runtimeTimeoutUsesTheAuthoredInclusiveEndBoundary() {
+        long endTick = 301L;
+
+        assertFalse(MeowmereShotSkillHandler.hasTimedOut(
+                endTick - 1L,
+                endTick
+        ));
+        assertTrue(MeowmereShotSkillHandler.hasTimedOut(endTick, endTick));
     }
 }

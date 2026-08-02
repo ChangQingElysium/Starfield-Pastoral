@@ -118,6 +118,14 @@
     "winter_Sun": "stardewcraft.npc.sebastian.winter_sun",
     "winter_Sun6": "stardewcraft.npc.sebastian.winter_sun6",
     "winter_24": "stardewcraft.npc.sebastian.winter_24",
-    "default": "stardewcraft.npc.sebastian.default"
+    "default": "stardewcraft.npc.sebastian.default",
+    "Resort_Entering": "stardewcraft.npc.sebastian.resort_entering",
+    "Resort_Leaving": "stardewcraft.npc.sebastian.resort_leaving",
+    "Resort": "stardewcraft.npc.sebastian.resort",
+    "Resort_Shore": "stardewcraft.npc.sebastian.resort_shore",
+    "Resort_Wander": "stardewcraft.npc.sebastian.resort_wander",
+    "Resort_Wander_2": "stardewcraft.npc.sebastian.resort_wander_2",
+    "Resort_Towel": "stardewcraft.npc.sebastian.resort_towel",
+    "Resort_Bar": "stardewcraft.npc.sebastian.resort_bar"
   }
 }

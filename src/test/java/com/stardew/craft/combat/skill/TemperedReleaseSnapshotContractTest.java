@@ -11,26 +11,27 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class TemperedReleaseSnapshotContractTest {
     @Test
     void quenchBlastRetainsTheParentHitWeapon() throws IOException {
-        String combat = normalizedSource(
-                "combat/WeaponCombatEvents.java"
+        String appliedRule = normalizedSource(
+                "combat/BuiltinSkillAppliedHitRules.java"
         );
-        String tracker = normalizedSource(
-                "combat/skill/TemperedQuenchTracker.java"
+        String state = normalizedSource(
+                "combat/skill/handler/TemperedQuenchExecutionState.java"
         );
 
-        assertTrue(combat.contains(
-                "TemperedQuenchSkillHandler.BLAST_DELAY_TICKS, "
-                        + "damageWeaponSnapshot"
+        assertTrue(appliedRule.contains(
+                "TemperedQuenchSkillHandler.armBlast( player, hit.target(), "
+                        + "hit.gameTick(), "
+                        + "TemperedQuenchSkillHandler.BLAST_DELAY_TICKS, "
+                        + "hit.weaponSnapshot().orElseThrow() )"
         ));
-        assertEquals(2, occurrences(
-                tracker,
-                "public static void start("
+        assertTrue(state.contains(
+                "record PendingBlast("
         ));
-        assertTrue(tracker.contains(
-                "private final WeaponDamageSnapshot weaponSnapshot;"
+        assertTrue(state.contains(
+                "WeaponDamageSnapshot weaponSnapshot"
         ));
-        assertTrue(tracker.contains(
-                "WeaponSkillDamage.apply( player, target, "
+        assertTrue(state.contains(
+                "WeaponSkillDamage.apply( context.player(), target, "
                         + "createBlastContext(), weaponSnapshot,"
         ));
     }
@@ -43,6 +44,9 @@ class TemperedReleaseSnapshotContractTest {
         );
         String projectile = normalizedSource(
                 "entity/projectile/TemperedBilletProjectileEntity.java"
+        );
+        String appliedRules = normalizedSource(
+                "combat/BuiltinSkillAppliedHitRules.java"
         );
 
         assertTrue(handler.contains(
@@ -74,8 +78,13 @@ class TemperedReleaseSnapshotContractTest {
         assertTrue(projectile.contains(
                 "tag.put(\"ReleaseWeapon\""
         ));
-        assertTrue(projectile.contains(
-                "10, this.releaseWeaponSnapshot"
+        assertTrue(appliedRules.contains(
+                "TemperedBilletSkillHandler.startFireRing( player, "
+                        + "hit.target(), hit.gameTick(), "
+                        + "hit.weaponSnapshot().orElse(null) )"
+        ));
+        assertTrue(handler.contains(
+                "FIRE_RING_DURATION_TICKS, weaponSnapshot"
         ));
         assertCentralizedSnapshotBinding(projectile);
     }

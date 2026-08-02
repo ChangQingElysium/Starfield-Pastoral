@@ -7,6 +7,7 @@ import com.stardew.craft.combat.skill.runtime.SkillExecutionContext;
 import com.stardew.craft.combat.skill.runtime.SkillInstance;
 import com.stardew.craft.combat.skill.runtime.SkillTargeting;
 import com.stardew.craft.combat.skill.runtime.SkillValidation;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
 import java.util.List;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -52,18 +53,14 @@ public final class OssifiedMarkSkillHandler implements RuntimeWeaponSkillHandler
         }
         instance.setTargetEntityIds(List.of(target.getId()));
 
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                context.weaponId().getPath(),
-                context.skillData().getId(),
-                context.nowTick(),
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 context.skillData().getCooldown() * 20
         );
-        OssifiedMarkTracker.apply(
-                target,
-                context.player(),
-                context.nowTick(),
+        instance.registerCommittedEffect(() -> OssifiedMarkTracker.apply(
+                target, context.player(), context.nowTick(),
                 MARK_DURATION_TICKS
-        );
+        ));
     }
 }

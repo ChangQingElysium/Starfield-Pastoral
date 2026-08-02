@@ -1,11 +1,10 @@
 package com.stardew.craft.combat.skill;
 
-import com.stardew.craft.combat.network.YetiFreezePayload;
+import com.stardew.craft.combat.equipment.EquipmentMobEffectHandler;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 public final class YetiToothEffects {
 
@@ -17,14 +16,36 @@ public final class YetiToothEffects {
             return;
         }
 
-        target.setDeltaMovement(0, 0, 0);
-        YetiFreezeTracker.apply(target, level.getGameTime(), durationTicks);
-        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, durationTicks, 255, false, true, true));
-        target.addEffect(new MobEffectInstance(MobEffects.JUMP, durationTicks, 255, false, false, false));
-
-        PacketDistributor.sendToPlayersTrackingEntityAndSelf(
-            target,
-            new YetiFreezePayload(target.getId(), durationTicks)
+        int appliedDuration = YetiFreezeTracker.applyWithEquipmentProtection(
+                target,
+                level.getGameTime(),
+                durationTicks,
+                YetiFreezeTracker.PresentationPolicy.SYNC_FREEZE_OVERLAY
+        );
+        if (appliedDuration <= 0) {
+            return;
+        }
+        EquipmentMobEffectHandler.addPreAdjustedEffect(
+                target,
+                new MobEffectInstance(
+                        MobEffects.MOVEMENT_SLOWDOWN,
+                        appliedDuration,
+                        255,
+                        false,
+                        true,
+                        true
+                )
+        );
+        EquipmentMobEffectHandler.addPreAdjustedEffect(
+                target,
+                new MobEffectInstance(
+                        MobEffects.JUMP,
+                        appliedDuration,
+                        255,
+                        false,
+                        false,
+                        false
+                )
         );
 
         double x = target.getX();
@@ -44,5 +65,26 @@ public final class YetiToothEffects {
             return;
         }
         target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, durationTicks, amplifier, false, true, true));
+    }
+
+    public static void applyPreAdjustedSlow(
+            LivingEntity target,
+            int durationTicks,
+            int amplifier
+    ) {
+        if (target == null || durationTicks <= 0) {
+            return;
+        }
+        EquipmentMobEffectHandler.addPreAdjustedEffect(
+                target,
+                new MobEffectInstance(
+                        MobEffects.MOVEMENT_SLOWDOWN,
+                        durationTicks,
+                        amplifier,
+                        false,
+                        true,
+                        true
+                )
+        );
     }
 }

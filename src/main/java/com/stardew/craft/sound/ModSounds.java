@@ -77,6 +77,9 @@ public final class ModSounds {
 	public static final DeferredHolder<SoundEvent, SoundEvent> CAVEDRIP = register("cavedrip");
 	public static final DeferredHolder<SoundEvent, SoundEvent> CACKLING_WITCH = register("cackling_witch");
 	public static final DeferredHolder<SoundEvent, SoundEvent> THUD_STEP = register("thud_step");
+	public static final DeferredHolder<SoundEvent, SoundEvent> GRASSY_STEP = register("grassy_step");
+	public static final DeferredHolder<SoundEvent, SoundEvent> DIRTY_HIT = register("dirty_hit");
+	public static final DeferredHolder<SoundEvent, SoundEvent> WOOD_WHACK = register("wood_whack");
 	public static final DeferredHolder<SoundEvent, SoundEvent> STONE_STEP = register("stone_step");
 	public static final DeferredHolder<SoundEvent, SoundEvent> CUT = register("cut");
 	public static final DeferredHolder<SoundEvent, SoundEvent> HARVEST = register("harvest");
@@ -193,6 +196,10 @@ public final class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_RAIN = register("music_rain");
     // Night ambient
     public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_SPRING_NIGHT_AMBIENT = register("music_spring_night_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_NIGHT_TIME = register("music_night_time");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_ECHOS = register("music_echos");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_SWEET = register("music_sweet");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_SADPIANO = register("music_sadpiano");
     // Day ambient (4)
     public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_SPRING_DAY_AMBIENT = register("music_spring_day_ambient");
     public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_SUMMER_DAY_AMBIENT = register("music_summer_day_ambient");

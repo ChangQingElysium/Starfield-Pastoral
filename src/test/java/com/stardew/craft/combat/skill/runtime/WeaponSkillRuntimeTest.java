@@ -83,6 +83,64 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class WeaponSkillRuntimeTest {
     @Test
+    void beginFailureCleanupsRollbackInReverseOrderExactlyOnce() {
+        SkillInstance instance = new SkillInstance(
+                UUID.fromString("00000000-0000-0000-0000-000000000041"),
+                UUID.fromString("00000000-0000-0000-0000-000000000042"),
+                47,
+                id("insect_head"),
+                id("insect_dash"),
+                180L,
+                Vec3.ZERO,
+                new Vec3(0.0, 0.0, 1.0),
+                105L
+        );
+        List<String> cleanupOrder = new java.util.ArrayList<>();
+        RuntimeException beginFailure = new RuntimeException("begin");
+
+        instance.activate();
+        instance.registerBeginFailureCleanup(() -> cleanupOrder.add("first"));
+        instance.registerBeginFailureCleanup(() -> {
+            cleanupOrder.add("second");
+            throw new IllegalStateException("cleanup");
+        });
+
+        instance.rollbackBeginFailure(beginFailure);
+        instance.rollbackBeginFailure(beginFailure);
+
+        assertEquals(List.of("second", "first"), cleanupOrder);
+        assertEquals(1, beginFailure.getSuppressed().length);
+        assertEquals("cleanup", beginFailure.getSuppressed()[0].getMessage());
+        assertThrows(
+                IllegalStateException.class,
+                () -> instance.registerBeginFailureCleanup(() -> {})
+        );
+    }
+
+    @Test
+    void successfulBeginDiscardsFailureCleanupsWithoutRunningThem() {
+        SkillInstance instance = new SkillInstance(
+                UUID.fromString("00000000-0000-0000-0000-000000000043"),
+                UUID.fromString("00000000-0000-0000-0000-000000000044"),
+                48,
+                id("galaxy_sword"),
+                id("startrail_rift"),
+                181L,
+                Vec3.ZERO,
+                new Vec3(0.0, 0.0, 1.0),
+                106L
+        );
+        List<String> cleanupOrder = new java.util.ArrayList<>();
+
+        instance.activate();
+        instance.registerBeginFailureCleanup(() -> cleanupOrder.add("dash"));
+        instance.commitBegin();
+        instance.rollbackBeginFailure(new RuntimeException("late"));
+
+        assertTrue(cleanupOrder.isEmpty());
+    }
+
+    @Test
     void skillInstanceEnforcesLifecycleAndCopiesTargets() {
         SkillInstance instance = new SkillInstance(
                 UUID.fromString("00000000-0000-0000-0000-000000000001"),
@@ -97,6 +155,10 @@ class WeaponSkillRuntimeTest {
         );
 
         instance.activate();
+        assertFalse(instance.cooldownCommitted());
+        assertTrue(instance.tryCommitCooldown());
+        assertFalse(instance.tryCommitCooldown());
+        assertTrue(instance.cooldownCommitted());
         instance.setTargetEntityIds(List.of(7, 9));
         assertEquals(SkillInstance.Phase.ACTIVE, instance.phase());
         assertEquals(List.of(7, 9), instance.targetEntityIds());
@@ -115,6 +177,7 @@ class WeaponSkillRuntimeTest {
                 IllegalStateException.class,
                 () -> instance.setTargetEntityIds(List.of(12))
         );
+        assertThrows(IllegalStateException.class, instance::tryCommitCooldown);
     }
 
     @Test
@@ -133,6 +196,131 @@ class WeaponSkillRuntimeTest {
                 skillId,
                 "lava_katana_finisher"
         ));
+    }
+
+    @Test
+    void deferredCooldownCanSettleAfterTheExecutionEnds() {
+        SkillInstance instance = new SkillInstance(
+                UUID.fromString("00000000-0000-0000-0000-000000000011"),
+                UUID.fromString("00000000-0000-0000-0000-000000000012"),
+                43,
+                id("elf_blade"),
+                id("elf_blade_leaf"),
+                120L,
+                Vec3.ZERO,
+                new Vec3(0.0, 0.0, 1.0),
+                101L
+        );
+
+        instance.activate();
+        assertTrue(instance.tryDeferCooldown());
+        assertTrue(instance.cooldownDeferred());
+        assertFalse(instance.cooldownCommitted());
+        assertFalse(instance.tryCommitCooldown());
+
+        instance.finish(SkillInstance.EndReason.COMPLETED);
+        instance.completeDeferredCooldown();
+        assertFalse(instance.cooldownDeferred());
+        assertTrue(instance.cooldownCommitted());
+        assertThrows(
+                IllegalStateException.class,
+                instance::completeDeferredCooldown
+        );
+    }
+
+    @Test
+    void executionStateHasOneTypedOwnerAndRuntimeClearPath() {
+        SkillInstance instance = new SkillInstance(
+                UUID.fromString("00000000-0000-0000-0000-000000000031"),
+                UUID.fromString("00000000-0000-0000-0000-000000000032"),
+                45,
+                id("cutlass"),
+                id("crescent_slash"),
+                160L,
+                Vec3.ZERO,
+                new Vec3(0.0, 0.0, 1.0),
+                103L
+        );
+        SkillInstance otherInstance = new SkillInstance(
+                UUID.fromString("00000000-0000-0000-0000-000000000033"),
+                UUID.fromString("00000000-0000-0000-0000-000000000034"),
+                46,
+                id("cutlass"),
+                id("crescent_slash"),
+                160L,
+                Vec3.ZERO,
+                new Vec3(0.0, 0.0, 1.0),
+                104L
+        );
+
+        assertTrue(instance.executionState(TestExecutionState.class).isEmpty());
+        assertThrows(
+                IllegalStateException.class,
+                () -> instance.initializeExecutionState(new TestExecutionState(6))
+        );
+        instance.activate();
+        otherInstance.activate();
+        TestExecutionState state = new TestExecutionState(7);
+        TestExecutionState otherState = new TestExecutionState(9);
+        instance.initializeExecutionState(state);
+        otherInstance.initializeExecutionState(otherState);
+
+        assertEquals(
+                state,
+                instance.requireExecutionState(TestExecutionState.class)
+        );
+        assertEquals(
+                otherState,
+                otherInstance.requireExecutionState(TestExecutionState.class)
+        );
+        assertThrows(
+                IllegalStateException.class,
+                () -> instance.initializeExecutionState(new TestExecutionState(8))
+        );
+        assertThrows(
+                IllegalStateException.class,
+                () -> instance.executionState(OtherExecutionState.class)
+        );
+
+        instance.clearExecutionState();
+        assertTrue(instance.executionState(TestExecutionState.class).isEmpty());
+        assertEquals(
+                otherState,
+                otherInstance.requireExecutionState(TestExecutionState.class)
+        );
+        assertThrows(
+                IllegalStateException.class,
+                () -> instance.requireExecutionState(TestExecutionState.class)
+        );
+    }
+
+    @Test
+    void deferredCooldownCanBeExplicitlyAbandonedAfterExecutionEnds() {
+        SkillInstance instance = new SkillInstance(
+                UUID.fromString("00000000-0000-0000-0000-000000000021"),
+                UUID.fromString("00000000-0000-0000-0000-000000000022"),
+                44,
+                id("femur"),
+                id("femur_slam"),
+                140L,
+                Vec3.ZERO,
+                new Vec3(0.0, 0.0, 1.0),
+                102L
+        );
+
+        instance.activate();
+        assertTrue(instance.tryDeferCooldown());
+        instance.finish(SkillInstance.EndReason.INVALIDATED);
+
+        assertTrue(instance.abandonDeferredCooldown());
+        assertFalse(instance.abandonDeferredCooldown());
+        assertFalse(instance.cooldownDeferred());
+        assertFalse(instance.cooldownCommitted());
+        assertTrue(instance.cooldownAbandoned());
+        assertThrows(
+                IllegalStateException.class,
+                instance::completeDeferredCooldown
+        );
     }
 
     @Test
@@ -517,6 +705,14 @@ class WeaponSkillRuntimeTest {
         assertTrue(new StartrailRiftSkillHandler().completesImmediately());
         assertFalse(new EternalCollapseSkillHandler().completesImmediately());
         assertFalse(new FemurSlamSkillHandler().completesImmediately());
+    }
+
+    private record TestExecutionState(int value)
+            implements SkillInstance.ExecutionState {
+    }
+
+    private record OtherExecutionState()
+            implements SkillInstance.ExecutionState {
     }
 
     private static ResourceLocation id(String path) {

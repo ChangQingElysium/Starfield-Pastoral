@@ -13,7 +13,7 @@ import net.minecraft.world.item.Items;
 /** Quest 23/24 hooks shared by every museum-item acquisition path. */
 public final class MuseumQuestService {
 
-    public static final String INTRO_EVENT_ID = "0";
+    public static final String INTRO_EVENT_ID = "museum_archaeology_intro";
     public static final String FIRST_ARTIFACT_FLAG = "artifactFound";
     private static final String LOST_BOOK_ID = "stardewcraft:lost_book";
 

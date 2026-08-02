@@ -1,7 +1,6 @@
 package com.stardew.craft.combat.skill.handler;
 
 import com.stardew.craft.combat.skill.SkillContext;
-import com.stardew.craft.combat.skill.TemperedQuenchTracker;
 import com.stardew.craft.item.weapon.WeaponData;
 import com.stardew.craft.item.weapon.WeaponRegistry;
 import com.stardew.craft.item.weapon.WeaponSkillData;
@@ -56,9 +55,22 @@ class TemperedQuenchSkillHandlerTest {
 
     @Test
     void delayedBlastKeepsTheOriginalDamageAndDebuffValues() {
-        assertEquals(0.45F, TemperedQuenchTracker.BLAST_DAMAGE_MULTIPLIER);
-        assertEquals(5, TemperedQuenchTracker.HIT_CONTEXT_LIFETIME_TICKS);
-        assertEquals(60, TemperedQuenchTracker.VULNERABLE_DURATION_TICKS);
-        assertEquals(1, TemperedQuenchTracker.VULNERABLE_AMPLIFIER);
+        assertEquals(
+                0.45F,
+                TemperedQuenchSkillHandler.BLAST_DAMAGE_MULTIPLIER
+        );
+        assertEquals(
+                5,
+                TemperedQuenchSkillHandler
+                        .BLAST_HIT_CONTEXT_LIFETIME_TICKS
+        );
+        assertEquals(
+                60,
+                TemperedQuenchSkillHandler.VULNERABLE_DURATION_TICKS
+        );
+        assertEquals(
+                1,
+                TemperedQuenchSkillHandler.VULNERABLE_AMPLIFIER
+        );
     }
 }

@@ -1,6 +1,5 @@
 package com.stardew.craft.combat.skill.handler;
 
-import com.stardew.craft.combat.skill.BrokenTridentThrustTracker;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationDispatcher;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationLock;
 import com.stardew.craft.combat.skill.WeaponSkillCooldowns;
@@ -12,6 +11,7 @@ import com.stardew.craft.combat.skill.runtime.SkillTickResult;
 import com.stardew.craft.combat.skill.runtime.SkillValidation;
 import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
 import java.util.List;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
@@ -19,19 +19,28 @@ import net.minecraft.world.entity.LivingEntity;
 /**
  * Server-authoritative lifecycle for Broken Trident's original Fish Catch Thrust.
  *
- * <p>The existing tracker retains the authored three-strike cadence and per-hit
- * Fish Catch outcome. This handler owns activation and cancellation cleanup.</p>
+ * <p>The execution state retains the authored three-strike cadence and per-hit
+ * Fish Catch outcome.</p>
  */
 public final class FishcatchThrustSkillHandler implements RuntimeWeaponSkillHandler {
     public static final double INITIAL_TARGET_RANGE = 2.5;
     public static final int DAMAGE_RESISTANCE_TICKS = 5;
     public static final int DAMAGE_RESISTANCE_AMPLIFIER = 0;
     public static final int ANIMATION_TICKS = 18;
+    public static final int STRIKE_COUNT = 3;
+    public static final int STRIKE_INTERVAL_TICKS = 3;
+    public static final int FISH_CATCH_DURATION_TICKS = 100;
+    public static final float FISH_CATCH_DAMAGE_BONUS = 0.10F;
+    public static final int FISH_CATCH_SLOW_AMPLIFIER = 0;
+    public static final int HIT_CONTEXT_LIFETIME_TICKS = 5;
+    public static final double REACQUIRE_RANGE = 2.5;
 
     @Override
     public SkillValidation validate(SkillExecutionContext context) {
-        if (WeaponSkillRuntime.hasActive(context.player().getUUID(), context.skillId())
-                || BrokenTridentThrustTracker.isActive(context.player().getUUID())) {
+        if (WeaponSkillRuntime.hasActive(
+                context.player().getUUID(),
+                context.skillId()
+        )) {
             return SkillValidation.reject(SkillValidation.RejectionReason.INVALID_STATE);
         }
         if (WeaponSkillCooldowns.isOnCooldown(
@@ -59,31 +68,28 @@ public final class FishcatchThrustSkillHandler implements RuntimeWeaponSkillHand
         String weaponId = context.weaponId().getPath();
         String skillId = context.skillData().getId();
         instance.setTargetEntityIds(List.of(target.getId()));
+        instance.initializeExecutionState(
+                new FishcatchThrustExecutionState(
+                        context.nowTick(),
+                        target.getUUID()
+                )
+        );
 
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                weaponId,
-                skillId,
-                context.nowTick(),
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 context.skillData().getCooldown() * 20
         );
-        context.player().addEffect(new MobEffectInstance(
-                MobEffects.DAMAGE_RESISTANCE,
-                DAMAGE_RESISTANCE_TICKS,
-                DAMAGE_RESISTANCE_AMPLIFIER,
-                false,
-                false,
-                true
-        ));
-        BrokenTridentThrustTracker.start(
-                context.player(),
-                context.nowTick(),
-                target,
-                weaponId,
-                skillId,
-                context.skillData().getDamagePercent() / 100.0f
+        instance.registerCommittedEffect(() ->
+                context.player().addEffect(new MobEffectInstance(
+                        MobEffects.DAMAGE_RESISTANCE,
+                        DAMAGE_RESISTANCE_TICKS,
+                        DAMAGE_RESISTANCE_AMPLIFIER,
+                        false,
+                        false,
+                        true
+                ))
         );
-
         // Preserve the old server notification order.
         WeaponSkillAnimationDispatcher.sendSkillAnim(
                 context.player(),
@@ -105,18 +111,26 @@ public final class FishcatchThrustSkillHandler implements RuntimeWeaponSkillHand
 
     @Override
     public SkillTickResult tick(SkillExecutionContext context, SkillInstance instance) {
-        return BrokenTridentThrustTracker.isActive(context.player().getUUID())
-                ? SkillTickResult.CONTINUE
-                : SkillTickResult.COMPLETE;
+        return instance.requireExecutionState(
+                FishcatchThrustExecutionState.class
+        ).advance(context);
     }
 
-    @Override
-    public void finish(
-            SkillExecutionContext context,
-            SkillInstance instance,
-            SkillInstance.EndReason reason
+    /** Settles one exact positive strike while its execution is active. */
+    public static boolean onAppliedHit(
+            ServerPlayer player,
+            LivingEntity target,
+            long nowTick
     ) {
-        BrokenTridentThrustTracker.removePlayer(context.player().getUUID());
+        if (player == null || target == null) {
+            return false;
+        }
+        return WeaponSkillRuntime.activeExecutionState(
+                player.getUUID(),
+                BuiltinWeaponSkillHandlers.FISHCATCH_THRUST,
+                FishcatchThrustExecutionState.class
+        ).map(state -> state.recordAppliedHit(player, target, nowTick))
+                .orElse(false);
     }
 
     private static LivingEntity findInitialTarget(SkillExecutionContext context) {

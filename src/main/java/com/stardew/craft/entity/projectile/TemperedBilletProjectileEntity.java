@@ -1,7 +1,6 @@
 package com.stardew.craft.entity.projectile;
 
 import com.stardew.craft.combat.skill.SkillContext;
-import com.stardew.craft.combat.skill.TemperedFireRingTracker;
 import com.stardew.craft.combat.skill.WeaponDamageSnapshot;
 import com.stardew.craft.combat.skill.WeaponSkillDamage;
 import com.stardew.craft.entity.ModEntities;
@@ -174,9 +173,6 @@ public class TemperedBilletProjectileEntity extends ThrowableProjectile {
         }
 
         if (target instanceof LivingEntity livingTarget) {
-            livingTarget.invulnerableTime = 0;
-            livingTarget.hurtTime = 0;
-
             SkillContext context = SkillContext.builder()
                 .skillId(skillId)
                 .tier(SkillContext.SkillTier.MAJOR)
@@ -188,7 +184,10 @@ public class TemperedBilletProjectileEntity extends ThrowableProjectile {
                         player,
                         livingTarget,
                         context,
-                        nowTick + 5
+                        nowTick + 5,
+                        WeaponSkillDamage.AttackGatePolicy.SKILL_DAMAGE,
+                        WeaponSkillDamage.HitCooldownPolicy
+                                .BYPASS_FOR_AUTHORED_SEQUENCE
                 );
             } else {
                 WeaponSkillDamage.apply(
@@ -196,30 +195,13 @@ public class TemperedBilletProjectileEntity extends ThrowableProjectile {
                         livingTarget,
                         context,
                         this.releaseWeaponSnapshot,
-                        nowTick + 5
+                        nowTick + 5,
+                        WeaponSkillDamage.AttackGatePolicy.SKILL_DAMAGE,
+                        WeaponSkillDamage.HitCooldownPolicy
+                                .BYPASS_FOR_AUTHORED_SEQUENCE
                 );
             }
 
-            if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
-                if (this.releaseWeaponSnapshot == null) {
-                    TemperedFireRingTracker.start(
-                            serverPlayer,
-                            livingTarget.position(),
-                            nowTick,
-                            2.5f,
-                            10
-                    );
-                } else {
-                    TemperedFireRingTracker.start(
-                            serverPlayer,
-                            livingTarget.position(),
-                            nowTick,
-                            2.5f,
-                            10,
-                            this.releaseWeaponSnapshot
-                    );
-                }
-            }
         }
 
         if (this.level() instanceof ServerLevel serverLevel) {

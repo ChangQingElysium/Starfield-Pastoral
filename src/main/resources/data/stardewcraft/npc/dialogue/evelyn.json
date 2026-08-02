@@ -36,6 +36,19 @@
     "winter_Wed": "stardewcraft.npc.evelyn.winter_wed",
     "winter_Thu": "stardewcraft.npc.evelyn.winter_thu",
     "winter_Sat": "stardewcraft.npc.evelyn.winter_sat",
-    "winter_Sun": "stardewcraft.npc.evelyn.winter_sun"
+    "winter_Sun": "stardewcraft.npc.evelyn.winter_sun",
+    "reject_867": "stardewcraft.npc.evelyn.reject_867",
+    "cropMatured_591": "stardewcraft.npc.evelyn.cropmatured_591",
+    "reject_866": "stardewcraft.npc.evelyn.reject_866",
+    "pamHouseUpgrade": "stardewcraft.npc.evelyn.pamhouseupgrade",
+    "pamHouseUpgradeAnonymous": "stardewcraft.npc.evelyn.pamhouseupgradeanonymous",
+    "MovieInvitation": "stardewcraft.npc.evelyn.movieinvitation",
+    "Event_cookies1": "stardewcraft.npc.evelyn.event_cookies1",
+    "Event_cookies2": "stardewcraft.npc.evelyn.event_cookies2",
+    "summer_Mon_inlaw_Alex": "stardewcraft.npc.evelyn.summer_mon_inlaw_alex",
+    "summer_Thu4": "stardewcraft.npc.evelyn.summer_thu4",
+    "fall_Sat_inlaw_Alex": "stardewcraft.npc.evelyn.fall_sat_inlaw_alex",
+    "winter_Sat6": "stardewcraft.npc.evelyn.winter_sat6",
+    "winter_Sat8": "stardewcraft.npc.evelyn.winter_sat8"
   }
 }

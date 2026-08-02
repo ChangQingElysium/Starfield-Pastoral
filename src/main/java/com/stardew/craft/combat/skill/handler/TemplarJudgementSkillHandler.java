@@ -1,6 +1,5 @@
 package com.stardew.craft.combat.skill.handler;
 
-import com.stardew.craft.combat.skill.TemplarJudgementTracker;
 import com.stardew.craft.combat.skill.WeaponSkillCooldowns;
 import com.stardew.craft.combat.skill.runtime.RuntimeWeaponSkillHandler;
 import com.stardew.craft.combat.skill.runtime.SkillExecutionContext;
@@ -11,6 +10,7 @@ import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
 import com.stardew.craft.effect.ModMobEffects;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import java.util.List;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -22,6 +22,11 @@ public final class TemplarJudgementSkillHandler
         implements RuntimeWeaponSkillHandler {
     public static final double TARGET_RADIUS = 6.0D;
     public static final float ENERGY_COST = 10.0F;
+    public static final int DURATION_TICKS = 100;
+    public static final float SHARE_RATIO = 0.35F;
+    public static final float MAX_HEALTH_DAMAGE_CAP_RATIO = 0.25F;
+    public static final float SETTLEMENT_DAMAGE_MULTIPLIER = 1.6F;
+    public static final int HIT_CONTEXT_LIFETIME_TICKS = 5;
 
     @Override
     public SkillValidation validate(SkillExecutionContext context) {
@@ -38,7 +43,7 @@ public final class TemplarJudgementSkillHandler
         if (WeaponSkillRuntime.hasActive(
                 context.player().getUUID(),
                 context.skillId()
-        ) || TemplarJudgementTracker.hasState(context.player().getUUID())) {
+        )) {
             return SkillValidation.reject(
                     SkillValidation.RejectionReason.INVALID_STATE
             );
@@ -64,8 +69,9 @@ public final class TemplarJudgementSkillHandler
                     "Validated Templar Judgement energy is no longer available"
             );
         }
-        if (!PlayerStardewDataAPI.consumeEnergy(
-                context.player(),
+        if (!WeaponSkillRuntime.consumeEnergyDuringBegin(
+                context,
+                instance,
                 ENERGY_COST
         )) {
             throw new IllegalStateException(
@@ -76,18 +82,26 @@ public final class TemplarJudgementSkillHandler
         instance.setTargetEntityIds(
                 targets.stream().map(LivingEntity::getId).toList()
         );
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                context.weaponId().getPath(),
-                context.skillData().getId(),
-                context.nowTick(),
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 context.skillData().getCooldown() * 20
         );
-        TemplarJudgementTracker.start(
-                context.player(),
-                context.nowTick(),
-                TemplarJudgementTracker.DURATION_TICKS,
-                targets
+        TemplarJudgementExecutionState executionState =
+                new TemplarJudgementExecutionState(
+                        context.player().level().dimension(),
+                        context.nowTick(),
+                        DURATION_TICKS,
+                        targets,
+                        context.weaponSnapshot()
+        );
+        instance.initializeExecutionState(executionState);
+        instance.registerCommittedEffect(() ->
+                executionState.startPresentation(
+                        context.player(),
+                        targets,
+                        DURATION_TICKS
+                )
         );
     }
 
@@ -101,10 +115,9 @@ public final class TemplarJudgementSkillHandler
             SkillExecutionContext context,
             SkillInstance instance
     ) {
-        TemplarJudgementTracker.tick(context.player(), context.nowTick());
-        return TemplarJudgementTracker.hasState(context.player().getUUID())
-                ? SkillTickResult.CONTINUE
-                : SkillTickResult.COMPLETE;
+        return instance.requireExecutionState(
+                TemplarJudgementExecutionState.class
+        ).advance(context);
     }
 
     @Override
@@ -113,19 +126,61 @@ public final class TemplarJudgementSkillHandler
             SkillInstance instance,
             SkillInstance.EndReason reason
     ) {
-        TemplarJudgementTracker.removePlayer(context.player().getUUID());
+        instance.executionState(TemplarJudgementExecutionState.class)
+                .ifPresent(TemplarJudgementExecutionState::cancel);
+    }
+
+    public static boolean isActive(
+            ServerPlayer player,
+            long nowTick
+    ) {
+        if (player == null) {
+            return false;
+        }
+        return WeaponSkillRuntime.activeExecutionState(
+                player.getUUID(),
+                BuiltinWeaponSkillHandlers.TEMPLAR_JUDGEMENT,
+                TemplarJudgementExecutionState.class
+        ).filter(state -> state.isActive(player, nowTick)).isPresent();
+    }
+
+    public static List<LivingEntity> getMarkedTargets(
+            ServerPlayer player
+    ) {
+        if (player == null) {
+            return List.of();
+        }
+        return WeaponSkillRuntime.activeExecutionState(
+                player.getUUID(),
+                BuiltinWeaponSkillHandlers.TEMPLAR_JUDGEMENT,
+                TemplarJudgementExecutionState.class
+        ).map(state -> state.getMarkedTargets(player))
+                .orElseGet(List::of);
+    }
+
+    public static float cappedSharedDamage(
+            float incomingDamage,
+            float maximumHealth
+    ) {
+        float total = incomingDamage * SHARE_RATIO;
+        float cap = maximumHealth * MAX_HEALTH_DAMAGE_CAP_RATIO;
+        return cap > 0.0F ? Math.min(total, cap) : total;
     }
 
     static boolean canPayEnergy(
             float currentEnergy,
+            boolean creativeMode,
             boolean freeEnergyBlessing
     ) {
-        return freeEnergyBlessing || currentEnergy >= ENERGY_COST;
+        return creativeMode
+                || freeEnergyBlessing
+                || currentEnergy >= ENERGY_COST;
     }
 
     private static boolean canPayEnergy(SkillExecutionContext context) {
         return canPayEnergy(
                 PlayerStardewDataAPI.getEnergy(context.player()),
+                context.player().getAbilities().instabuild,
                 context.player().hasEffect(
                         ModMobEffects.STATUE_OF_BLESSINGS_2
                 )

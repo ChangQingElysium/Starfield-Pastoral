@@ -3,126 +3,189 @@
     "id": "book_0",
     "unlock_at": 0,
     "text": "stardewcraft.lost_book.text.0",
-    "interactions": [{ "x": 170, "y": 40, "z": 50 }]
+    "interactions": [
+      { "x": 117, "y": 38, "z": 42 },
+      { "x": 117, "y": 39, "z": 42 }
+    ]
   },
   {
     "id": "book_1",
     "unlock_at": 1,
     "text": "stardewcraft.lost_book.text.1",
-    "interactions": [{ "x": 155, "y": 38, "z": 45 }]
+    "interactions": [
+      { "x": 117, "y": 38, "z": 41 },
+      { "x": 117, "y": 39, "z": 41 }
+    ]
   },
   {
     "id": "book_2",
     "unlock_at": 2,
     "text": "stardewcraft.lost_book.text.2",
-    "interactions": [{ "x": 155, "y": 38, "z": 47 }]
+    "interactions": [
+      { "x": 117, "y": 38, "z": 40 },
+      { "x": 117, "y": 39, "z": 40 }
+    ]
   },
   {
     "id": "book_3",
     "unlock_at": 3,
     "text": "stardewcraft.lost_book.text.3",
-    "interactions": [{ "x": 156, "y": 38, "z": 54 }]
+    "interactions": [
+      { "x": 117, "y": 38, "z": 39 },
+      { "x": 117, "y": 39, "z": 39 }
+    ]
   },
   {
     "id": "book_4",
     "unlock_at": 4,
     "text": "stardewcraft.lost_book.text.4",
-    "interactions": [{ "x": 157, "y": 38, "z": 48 }]
+    "interactions": [
+      { "x": 117, "y": 38, "z": 38 },
+      { "x": 117, "y": 39, "z": 38 }
+    ]
   },
   {
     "id": "book_5",
     "unlock_at": 5,
     "text": "stardewcraft.lost_book.text.5",
-    "interactions": [{ "x": 158, "y": 38, "z": 54 }]
+    "interactions": [
+      { "x": 117, "y": 38, "z": 37 },
+      { "x": 117, "y": 39, "z": 37 }
+    ]
   },
   {
     "id": "book_6",
     "unlock_at": 6,
     "text": "stardewcraft.lost_book.text.6",
-    "interactions": [{ "x": 159, "y": 38, "z": 48 }]
+    "interactions": [
+      { "x": 118, "y": 38, "z": 30 },
+      { "x": 118, "y": 39, "z": 30 }
+    ]
   },
   {
     "id": "book_7",
     "unlock_at": 7,
     "text": "stardewcraft.lost_book.text.7",
-    "interactions": [{ "x": 159, "y": 40, "z": 54 }]
+    "interactions": [
+      { "x": 119, "y": 38, "z": 30 },
+      { "x": 119, "y": 39, "z": 30 }
+    ]
   },
   {
     "id": "book_8",
     "unlock_at": 8,
     "text": "stardewcraft.lost_book.text.8",
-    "interactions": [{ "x": 160, "y": 38, "z": 54 }]
+    "interactions": [
+      { "x": 120, "y": 38, "z": 30 },
+      { "x": 120, "y": 39, "z": 30 }
+    ]
   },
   {
     "id": "book_9",
     "unlock_at": 9,
     "text": "stardewcraft.lost_book.text.9",
-    "interactions": [{ "x": 161, "y": 38, "z": 48 }]
+    "interactions": [
+      { "x": 121, "y": 38, "z": 30 },
+      { "x": 121, "y": 39, "z": 30 }
+    ]
   },
   {
     "id": "book_10",
     "unlock_at": 10,
     "text": "stardewcraft.lost_book.text.10",
-    "interactions": [{ "x": 165, "y": 38, "z": 48 }]
+    "interactions": [
+      { "x": 118, "y": 38, "z": 36 },
+      { "x": 118, "y": 39, "z": 36 }
+    ]
   },
   {
     "id": "book_11",
     "unlock_at": 11,
     "text": "stardewcraft.lost_book.text.11",
-    "interactions": [{ "x": 165, "y": 38, "z": 54 }]
+    "interactions": [
+      { "x": 119, "y": 38, "z": 36 },
+      { "x": 119, "y": 39, "z": 36 }
+    ]
   },
   {
     "id": "book_12",
     "unlock_at": 12,
     "text": "stardewcraft.lost_book.text.12",
-    "interactions": [{ "x": 165, "y": 40, "z": 54 }]
+    "interactions": [
+      { "x": 120, "y": 38, "z": 36 },
+      { "x": 120, "y": 39, "z": 36 }
+    ]
   },
   {
     "id": "book_13",
     "unlock_at": 13,
     "text": "stardewcraft.lost_book.text.13",
-    "interactions": [{ "x": 167, "y": 38, "z": 48 }]
+    "interactions": [
+      { "x": 121, "y": 38, "z": 36 },
+      { "x": 121, "y": 39, "z": 36 }
+    ]
   },
   {
     "id": "book_14",
     "unlock_at": 14,
     "text": "stardewcraft.lost_book.text.14",
-    "interactions": [{ "x": 167, "y": 38, "z": 54 }]
+    "interactions": [
+      { "x": 124, "y": 38, "z": 36 },
+      { "x": 124, "y": 39, "z": 36 }
+    ]
   },
   {
     "id": "book_15",
     "unlock_at": 15,
     "text": "stardewcraft.lost_book.text.15",
-    "interactions": [{ "x": 168, "y": 38, "z": 42 }]
+    "interactions": [
+      { "x": 125, "y": 38, "z": 36 },
+      { "x": 125, "y": 39, "z": 36 }
+    ]
   },
   {
     "id": "book_16",
     "unlock_at": 16,
     "text": "stardewcraft.lost_book.text.16",
-    "interactions": [{ "x": 168, "y": 38, "z": 44 }]
+    "interactions": [
+      { "x": 126, "y": 38, "z": 36 },
+      { "x": 126, "y": 39, "z": 36 }
+    ]
   },
   {
     "id": "book_17",
     "unlock_at": 17,
     "text": "stardewcraft.lost_book.text.17",
-    "interactions": [{ "x": 168, "y": 38, "z": 46 }]
+    "interactions": [
+      { "x": 127, "y": 38, "z": 36 },
+      { "x": 127, "y": 39, "z": 36 }
+    ]
   },
   {
     "id": "book_18",
     "unlock_at": 18,
     "text": "stardewcraft.lost_book.text.18",
-    "interactions": [{ "x": 173, "y": 38, "z": 46 }]
+    "interactions": [
+      { "x": 128, "y": 38, "z": 36 },
+      { "x": 128, "y": 39, "z": 36 }
+    ]
   },
   {
     "id": "book_19",
     "unlock_at": 19,
     "text": "stardewcraft.lost_book.text.19",
-    "interactions": [{ "x": 173, "y": 38, "z": 50 }]
+    "interactions": [
+      { "x": 129, "y": 38, "z": 36 },
+      { "x": 129, "y": 39, "z": 36 }
+    ]
   },
   {
     "id": "book_20",
     "unlock_at": 20,
     "text": "stardewcraft.lost_book.text.20",
-    "interactions": [{ "x": 175, "y": 38, "z": 50 }]
+    "interactions": [
+      { "x": 130, "y": 38, "z": 37 },
+      { "x": 130, "y": 39, "z": 37 }
+    ]
   }
 ]

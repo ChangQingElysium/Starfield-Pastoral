@@ -12,7 +12,8 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 public record AnswerNpcQuestionPayload(
         String npcId,
         String nextDialogueNode,
-        int friendshipDelta
+        int friendshipDelta,
+        String answerId
 ) implements CustomPacketPayload {
 
     @SuppressWarnings("null")
@@ -25,11 +26,13 @@ public record AnswerNpcQuestionPayload(
                 buf.writeUtf(payload.npcId(), 64);
                 buf.writeUtf(payload.nextDialogueNode() == null ? "" : payload.nextDialogueNode(), 128);
                 buf.writeInt(payload.friendshipDelta());
+                buf.writeUtf(payload.answerId() == null ? "" : payload.answerId(), 64);
             },
             buf -> new AnswerNpcQuestionPayload(
                     buf.readUtf(64),
                     buf.readUtf(128),
-                    buf.readInt()
+                    buf.readInt(),
+                    buf.readUtf(64)
             )
     );
 
@@ -41,7 +44,12 @@ public record AnswerNpcQuestionPayload(
     public static void handle(AnswerNpcQuestionPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
             if (context.player() instanceof ServerPlayer serverPlayer) {
-                NpcInteractionService.handleClientQuestionAnswer(serverPlayer, payload.npcId(), payload.nextDialogueNode(), payload.friendshipDelta());
+                NpcInteractionService.handleClientQuestionAnswer(
+                        serverPlayer,
+                        payload.npcId(),
+                        payload.nextDialogueNode(),
+                        payload.friendshipDelta(),
+                        payload.answerId());
             }
         });
     }

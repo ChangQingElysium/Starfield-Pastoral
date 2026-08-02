@@ -29,4 +29,10 @@ class AnimalCatchUpRulesTest {
         assertFalse(finalStep.offlineCatchUp());
         assertTrue(AnimalCatchUpRules.nextStep(50, 50).isEmpty());
     }
+
+    @Test
+    void initialOvernightBudgetVisitsEveryDueAnimalAtLeastOnce() {
+        assertEquals(64, AnimalCatchUpRules.initialSettlementBudget(64, 12));
+        assertEquals(96, AnimalCatchUpRules.initialSettlementBudget(64, 96));
+    }
 }

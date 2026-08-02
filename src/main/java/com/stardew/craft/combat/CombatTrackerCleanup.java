@@ -1,71 +1,45 @@
 package com.stardew.craft.combat;
 
+import com.stardew.craft.StardewCraft;
 import com.stardew.craft.combat.skill.BrokenTridentCatchTracker;
-import com.stardew.craft.combat.skill.BrokenTridentThrustTracker;
-import com.stardew.craft.combat.skill.CarvingKnifeThrustTracker;
-import com.stardew.craft.combat.skill.ClaymoreFoldbackTracker;
 import com.stardew.craft.combat.skill.CrystalDaggerLayerTracker;
-import com.stardew.craft.combat.skill.DarkSwordBloodDebtTracker;
-import com.stardew.craft.combat.skill.DarkSwordBloodMoonTracker;
 import com.stardew.craft.combat.skill.DashMovementTracker;
 import com.stardew.craft.combat.skill.DragonBreathTracker;
-import com.stardew.craft.combat.skill.DragontoothShivBreathTracker;
-import com.stardew.craft.combat.skill.DwarfDaggerRushTracker;
-import com.stardew.craft.combat.skill.DwarfDaggerThrustTracker;
-import com.stardew.craft.combat.skill.DwarfFortressTracker;
-import com.stardew.craft.combat.skill.ElfBladeTracker;
-import com.stardew.craft.combat.skill.EternalCollapseTracker;
-import com.stardew.craft.combat.skill.FemurSlamTracker;
-import com.stardew.craft.combat.skill.GalaxyDaggerThrustTracker;
 import com.stardew.craft.combat.skill.HolyBladeDodgeTracker;
-import com.stardew.craft.combat.skill.HolyBladeSanctuaryTracker;
-import com.stardew.craft.combat.skill.InfinityDaggerThrustTracker;
 import com.stardew.craft.combat.skill.InsectDashChainState;
-import com.stardew.craft.combat.skill.InsectEyeStanceTracker;
 import com.stardew.craft.combat.skill.IridiumNeedleCritTracker;
-import com.stardew.craft.combat.skill.IridiumNeedleFrenzyTracker;
-import com.stardew.craft.combat.skill.IridiumNeedleThrustTracker;
 import com.stardew.craft.combat.skill.LavaKatanaMarkTracker;
-import com.stardew.craft.combat.skill.LavaKatanaReverbTracker;
-import com.stardew.craft.combat.skill.ObsidianCrackTracker;
 import com.stardew.craft.combat.skill.ObsidianResonanceTracker;
-import com.stardew.craft.combat.skill.OssifiedExecutionTracker;
 import com.stardew.craft.combat.skill.RiftPathDamageTracker;
-import com.stardew.craft.combat.skill.SingularityEvolveTracker;
 import com.stardew.craft.combat.skill.SingularityTracker;
 import com.stardew.craft.combat.skill.SilverSaberFoldbackState;
 import com.stardew.craft.combat.skill.SilverSaberSkillHelper;
-import com.stardew.craft.combat.skill.StarfallTracker;
 import com.stardew.craft.combat.skill.StartrailTracker;
-import com.stardew.craft.combat.skill.SteelFalchionLineTracker;
-import com.stardew.craft.combat.skill.SteelSpineFuryState;
+import com.stardew.craft.combat.skill.handler.SteelFalchionDotTracker;
 import com.stardew.craft.combat.skill.TemperedFireRingTracker;
-import com.stardew.craft.combat.skill.TemperedQuenchTracker;
-import com.stardew.craft.combat.skill.TemplarJudgementTracker;
-import com.stardew.craft.combat.skill.TemplarVowTracker;
+import com.stardew.craft.combat.skill.TideAnchorRootTracker;
 import com.stardew.craft.combat.skill.WickedKrisPoisonTracker;
 import com.stardew.craft.combat.skill.WindSpireTracker;
-import com.stardew.craft.combat.skill.YetiToothSpineTracker;
+import com.stardew.craft.combat.skill.WeaponSkillAnimationLock;
+import com.stardew.craft.combat.skill.WeaponSkillContextStore;
+import com.stardew.craft.combat.skill.YetiFreezeTracker;
 import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillMovementArbiter;
+import com.stardew.craft.combat.equipment.YobaProtectionState;
 
 import java.util.UUID;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * Centralized cleanup for all combat tracker static maps on player logout.
- * Prevents memory leaks from UUID-keyed maps accumulating entries for disconnected players.
+ * Centralized cleanup for all player-backed transient combat state.
  */
 public final class CombatTrackerCleanup {
 
     private CombatTrackerCleanup() {}
 
-    /**
-     * Called from PlayerDataEventHandler.onPlayerLogout().
-     * Removes entries for the given player from every combat tracker.
-     */
-    public static void onPlayerLogout(UUID playerId) {
-        WeaponSkillRuntime.removePlayer(playerId);
-        clearTrackers(playerId);
+    /** Releases short-lived damage frames that never reached their Pre event. */
+    public static void tickTransientFrames(long nowTick) {
+        WeaponIncomingHitStore.discardExpired(nowTick);
     }
 
     /**
@@ -77,63 +51,70 @@ public final class CombatTrackerCleanup {
             return;
         }
         UUID playerId = player.getUUID();
-        WeaponSkillRuntime.removePlayer(playerId);
-        SilverSaberSkillHelper.cancelFoldback(
-                player,
-                player.level().getGameTime()
+        runAll(
+                () -> InsectDashChainState.cancel(
+                        player,
+                        player.level().getGameTime()
+                ),
+                () -> WeaponSkillRuntime.removePlayer(playerId),
+                () -> WeaponSkillContextStore.clear(player),
+                () -> WeaponSkillAnimationLock.clear(player),
+                () -> YetiFreezeTracker.clear(player),
+                () -> TideAnchorRootTracker.clear(player),
+                () -> DamageNumberContextStore.clear(player),
+                () -> WeaponIncomingHitStore.clear(player),
+                () -> com.stardew.craft.combat.equipment
+                        .CrossDimensionCombatHandler.clear(player),
+                () -> AuthoredDirectDamageContextStore.clear(player),
+                () -> YobaProtectionState.clear(player),
+                () -> SilverSaberSkillHelper.cancelFoldback(
+                        player,
+                        player.level().getGameTime()
+                ),
+                () -> SilverSaberFoldbackState.clear(player),
+                () -> DashMovementTracker.clear(player),
+                () -> DragonBreathTracker.clear(player),
+                () -> clearTrackers(playerId),
+                () -> WeaponSkillMovementArbiter.removePlayer(playerId)
         );
-        SilverSaberFoldbackState.clear(player);
-        clearTrackers(playerId);
     }
 
     private static void clearTrackers(UUID playerId) {
-        BrokenTridentCatchTracker.removePlayer(playerId);
-        BrokenTridentThrustTracker.removePlayer(playerId);
-        CarvingKnifeThrustTracker.removePlayer(playerId);
-        ClaymoreFoldbackTracker.removePlayer(playerId);
-        CrystalDaggerLayerTracker.removePlayer(playerId);
-        DarkSwordBloodDebtTracker.removePlayer(playerId);
-        DarkSwordBloodMoonTracker.removePlayer(playerId);
-        DashMovementTracker.removePlayer(playerId);
-        DragonBreathTracker.removePlayer(playerId);
-        DragontoothShivBreathTracker.removePlayer(playerId);
-        DwarfDaggerRushTracker.removePlayer(playerId);
-        DwarfDaggerThrustTracker.removePlayer(playerId);
-        DwarfFortressTracker.removePlayer(playerId);
-        EternalCollapseTracker.removePlayer(playerId);
-        FemurSlamTracker.removePlayer(playerId);
-        ElfBladeTracker.removePlayer(playerId);
-        GalaxyDaggerThrustTracker.removePlayer(playerId);
-        HolyBladeDodgeTracker.removePlayer(playerId);
-        HolyBladeSanctuaryTracker.removePlayer(playerId);
-        InfinityDaggerThrustTracker.removePlayer(playerId);
-        InsectDashChainState.removePlayer(playerId);
-        InsectEyeStanceTracker.removePlayer(playerId);
-        IridiumNeedleCritTracker.removePlayer(playerId);
-        IridiumNeedleFrenzyTracker.removePlayer(playerId);
-        IridiumNeedleThrustTracker.removePlayer(playerId);
-        LavaKatanaMarkTracker.removePlayer(playerId);
-        LavaKatanaReverbTracker.removePlayer(playerId);
-        ObsidianCrackTracker.removePlayer(playerId);
-        ObsidianResonanceTracker.removePlayer(playerId);
-        OssifiedExecutionTracker.removePlayer(playerId);
-        RiftPathDamageTracker.removePlayer(playerId);
-        SingularityEvolveTracker.removePlayer(playerId);
-        SingularityTracker.removePlayer(playerId);
-        StarfallTracker.removePlayer(playerId);
-        StartrailTracker.removePlayer(playerId);
-        SteelFalchionLineTracker.removePlayer(playerId);
-        SteelSpineFuryState.removePlayer(playerId);
-        TemperedFireRingTracker.removePlayer(playerId);
-        TemperedQuenchTracker.removePlayer(playerId);
-        TemplarJudgementTracker.removePlayer(playerId);
-        TemplarVowTracker.removePlayer(playerId);
-        WickedKrisPoisonTracker.removePlayer(playerId);
-        WindSpireTracker.removePlayer(playerId);
-        YetiToothSpineTracker.removePlayer(playerId);
-        AttackTargetTracker.removePlayer(playerId);
-        DamageNumberContextStore.removePlayer(playerId);
-        WeaponCombatEvents.removePlayer(playerId);
-        com.stardew.craft.combat.equipment.EquipmentFireProtection.clear(playerId);
+        runAll(
+                () -> BrokenTridentCatchTracker.removePlayer(playerId),
+                () -> CrystalDaggerLayerTracker.removePlayer(playerId),
+                () -> HolyBladeDodgeTracker.removePlayer(playerId),
+                () -> InsectDashChainState.removePlayer(playerId),
+                () -> IridiumNeedleCritTracker.removePlayer(playerId),
+                () -> LavaKatanaMarkTracker.removePlayer(playerId),
+                () -> ObsidianResonanceTracker.removePlayer(playerId),
+                () -> RiftPathDamageTracker.removePlayer(playerId),
+                () -> SingularityTracker.removePlayer(playerId),
+                () -> StartrailTracker.removePlayer(playerId),
+                () -> SteelFalchionDotTracker.removePlayer(playerId),
+                () -> TemperedFireRingTracker.removePlayer(playerId),
+                () -> WickedKrisPoisonTracker.removePlayer(playerId),
+                () -> WindSpireTracker.removePlayer(playerId),
+                () -> OrdinaryWeaponAttackFrameStore.clear(playerId),
+                () -> StardewWeaponAttackRecovery.clear(playerId),
+                () -> CombatDamageHistory.remove(playerId),
+                () -> com.stardew.craft.combat.equipment
+                        .EquipmentFireProtection.clear(playerId),
+                () -> com.stardew.craft.combat.equipment
+                        .CrossDimensionNativeAttackHandler.clear(playerId)
+        );
+    }
+
+    private static void runAll(Runnable... cleanupSteps) {
+        for (Runnable cleanupStep : cleanupSteps) {
+            try {
+                cleanupStep.run();
+            } catch (RuntimeException exception) {
+                StardewCraft.LOGGER.error(
+                        "Transient combat cleanup step failed",
+                        exception
+                );
+            }
+        }
     }
 }

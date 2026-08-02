@@ -332,7 +332,9 @@ public class PlayerStardewDataAPI {
         }
         PlayerStardewData data = getData(player);
         boolean success = data.consumeEnergy(amount);
-        PlayerDataEventHandler.syncPlayerData(player, data);
+        if (success) {
+            PlayerDataEventHandler.syncPlayerVitals(player, data);
+        }
         return success;
     }
 
@@ -364,7 +366,17 @@ public class PlayerStardewDataAPI {
     public static void restoreEnergy(ServerPlayer player, float amount) {
         PlayerStardewData data = getData(player);
         data.restoreEnergy(amount);
-        PlayerDataEventHandler.syncPlayerData(player, data);
+        PlayerDataEventHandler.syncPlayerVitals(player, data);
+    }
+
+    public static void rollbackEnergyPayment(
+            ServerPlayer player,
+            float amount,
+            boolean exhaustedBefore
+    ) {
+        PlayerStardewData data = getData(player);
+        data.rollbackEnergyPayment(amount, exhaustedBefore);
+        PlayerDataEventHandler.syncPlayerVitals(player, data);
     }
     
     /**
@@ -404,7 +416,7 @@ public class PlayerStardewDataAPI {
     public static void setHealth(ServerPlayer player, int health) {
         PlayerStardewData data = getData(player);
         data.setHealth(health);
-        PlayerDataEventHandler.syncPlayerData(player, data);
+        PlayerDataEventHandler.syncPlayerVitals(player, data);
     }
     
     /**
@@ -590,7 +602,7 @@ public class PlayerStardewDataAPI {
     public static void setMaxHealth(ServerPlayer player, int maxHealth) {
         PlayerStardewData data = getData(player);
         data.setMaxHealth(maxHealth);
-        PlayerDataEventHandler.syncPlayerData(player, data);
+        PlayerDataEventHandler.syncPlayerVitals(player, data);
     }
     
     // ============ 金币相关 ============

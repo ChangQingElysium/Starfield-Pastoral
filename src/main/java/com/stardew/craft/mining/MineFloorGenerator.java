@@ -32,7 +32,9 @@ import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.phys.AABB;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 矿井楼层生成器
@@ -54,14 +56,7 @@ import java.util.List;
 @SuppressWarnings({"null", "unused"})
 public class MineFloorGenerator {
 
-    private static final int GENERATION_VERSION = 20;
-    private static final double ORE_RATE_MULTIPLIER = 0.15;
-    // A类矿（直接采集）在洞窟表面的概率
-    private static final double SURFACE_MINERAL_RATE = 0.012;
-    // B类矿（宝石矿石节点）生成概率倍率
-    private static final double GEM_NODE_RATE_MULTIPLIER = 0.14;
-    // B类矿更偏向洞窟表面
-    private static final double GEM_SURFACE_BIAS = 0.7;
+    private static final int GENERATION_VERSION = 22;
 
     // Perlin 噪声频率 — 控制地质带宽度（越小越宽）
     private static final double PERLIN_FREQ = 0.08;
@@ -152,6 +147,8 @@ public class MineFloorGenerator {
         // 2. 确定主题
         FloorTheme theme = getThemeForFloor(floorNumber);
         boolean isDark = random.nextDouble() < (theme == FloorTheme.SKULL_CAVERN ? 0.30 : 0.15); // 骷髅矿30% dark，常规15%
+        double stonePlacementChance = MineGenerationBalance.stonePlacementChance(random.nextInt(20));
+        double originalMonsterRoll = random.nextDouble();
         
     // 3. 计算中心坐标
     int centerX = 0;
@@ -189,7 +186,9 @@ public class MineFloorGenerator {
     generateFishingPool(level, random, centerX, centerZ, size, theme, floorNumber);
 
     // 6.4 P2 特殊房间（蘑菇房/矿石密集区/骨骸房）
-    generateSpecialRoom(level, random, centerX, centerZ, size, theme, isDark, floorNumber);
+    generateSpecialRoom(
+            level, random, centerX, centerZ, size, theme, isDark,
+            floorNumber, stonePlacementChance);
 
     // 6.45 P2 环境装饰（骨头/轨道/篝火）
     generateEnvironmentDecor(level, random, centerX, centerZ, size, theme, isDark, floorNumber);
@@ -197,24 +196,44 @@ public class MineFloorGenerator {
     // 6.5 生成光照（P0 智能间距 + 墙壁偏好）
     generateLighting(level, random, centerX, centerZ, size, theme, isDark);
 
+    // 原版在每层抽取 10%-29% 的 stoneChance。3D 转换以可行走表面为概率分母，
+    // 再把命中的资源均匀分布到实际暴露岩壁，避免实心体积放大。
+    // 原版 1 层虽禁用稀有节点，但仍铺有大量独立石头；本实现以洞壁代替独立石头，
+    // 因此 1 层必须参与低阶资源抽取，否则会成为完全没有可见资源的空洞。
+    List<BlockPos> traversableSurface = collectSurfaceStonePositions(level, centerX, centerZ, size);
+    List<BlockPos> exposedStones = collectExposedStonePositions(level, centerX, centerZ, size);
+
     // 6.6 生成木桶（SDV BreakableContainer，洞窟地面散落）
+    int barrelsPlaced = 0;
     if (floorNumber > 0 && (floorNumber % 5 != 0 || floorNumber >= 121)) {
-        generateBarrels(level, random, centerX, centerZ, size, floorNumber);
+        barrelsPlaced = generateBarrels(
+                level, random, centerX, centerZ, floorNumber, traversableSurface);
     }
 
     // 7. 生成矿石（避免被洞窟挖空）
-    generateOres(level, random, centerX, centerZ, size, floorNumber, theme);
+    int metalNodesPlaced = generateOres(
+            level, random, floorNumber, theme, stonePlacementChance,
+            traversableSurface.size(), exposedStones);
         
         // 8. 生成中心安全区（清空玩家出生点周围）
         generateSafeZone(level, centerX, centerZ, floorNumber);
         // 注意：楼梯不再预放置，改为挖掘石头时动态生成（见 MiningBlockBreakHandler）
 
-        // 9. 生成A类矿（洞窟表面）与B类矿（宝石矿石节点）
-        generateSurfaceMinerals(level, random, centerX, centerZ, size, floorNumber);
-        generateGemOreNodes(level, random, centerX, centerZ, size, floorNumber);
+        // 9. 生成地表拾取物、独立钻石节点与普通宝石节点
+        int surfaceItemsPlaced = generateSurfaceItems(
+                level, random, floorNumber, stonePlacementChance,
+                originalMonsterRoll, traversableSurface);
+        int diamondNodesPlaced = generateDiamondOreNodes(
+                level, random, floorNumber, stonePlacementChance,
+                traversableSurface.size(), exposedStones);
+        int gemNodesPlaced = generateGemOreNodes(
+                level, random, floorNumber, stonePlacementChance,
+                traversableSurface.size(), exposedStones,
+                hasPlayerReachedMineBottom(level));
         
-    // 10. 统计可计数石头数量并初始化楼层数据
-        int stonesLeft = countStones(level, centerX, centerZ, size);
+    // 10. 原版 stonesLeft 是散布在可行走地图上的石头节点数，不是整层实心方块体积。
+        int stonesLeft = MineGenerationBalance.ladderStoneBudget(
+                traversableSurface.size(), stonePlacementChance);
         MineFloorData floorData = manager.getOrCreateFloorData(floorNumber, stonesLeft);
         floorData.setStonesLeft(stonesLeft);
     floorData.setGenerationVersion(GENERATION_VERSION);
@@ -223,10 +242,20 @@ public class MineFloorGenerator {
     // 记录当日已生成
     manager.markGenerated(floorNumber);
 
-        // 11. 预放置怪物（所有类型，不依赖原生刷怪）
-        spawnMonsters(level, random, centerX, centerZ, size, floorNumber, isDark);
+    // 11. 预放置怪物（所有类型，不依赖原生刷怪）
+        int monstersSpawned = spawnMonsters(
+                level, random, centerX, centerZ, floorNumber, isDark,
+                stonePlacementChance, originalMonsterRoll, traversableSurface);
+        floorData.setEnemyCount(monstersSpawned);
+        manager.setFloorData(floorNumber, floorData);
         
-        StardewCraft.LOGGER.info("[MINE] Floor {} generation complete, stonesLeft: {}", floorNumber, stonesLeft);
+        StardewCraft.LOGGER.info(
+                "[MINE] Floor {} generation complete: traversable={}, exposed={}, stoneChance={}, "
+                        + "metals={}, diamonds={}, gems={}, surfaceItems={}, barrels={}, monsters={}, ladderStones={}",
+                floorNumber, traversableSurface.size(), exposedStones.size(),
+                String.format(java.util.Locale.ROOT, "%.2f", stonePlacementChance),
+                metalNodesPlaced, diamondNodesPlaced, gemNodesPlaced, surfaceItemsPlaced,
+                barrelsPlaced, monstersSpawned, stonesLeft);
     }
 
     private static void clearExistingFloorMobs(ServerLevel level, int floorNumber) {
@@ -291,40 +320,6 @@ public class MineFloorGenerator {
                 }
             }
         }
-    }
-
-    /**
-     * 统计楼层中可计数的石头数量
-     */
-    private static int countStones(ServerLevel level, int centerX, int centerZ, int size) {
-        int halfSize = size / 2;
-        int count = 0;
-        BlockPos.MutableBlockPos mpos = new BlockPos.MutableBlockPos();
-        
-        for (int x = centerX - halfSize + 1; x < centerX + halfSize; x++) {
-            for (int z = centerZ - halfSize + 1; z < centerZ + halfSize; z++) {
-                for (int y = FLOOR_Y_START; y <= FLOOR_Y_END; y++) {
-                    Block block = level.getBlockState(mpos.set(x, y, z)).getBlock();
-                    
-                    // 检查是否是可计数的主石头
-                    if (isCountableStone(block)) {
-                        count++;
-                    }
-                }
-            }
-        }
-        
-        return count;
-    }
-    
-    /**
-     * 检查方块是否是可计数的主石头
-     */
-    private static boolean isCountableStone(Block block) {
-        // 主石头（6种）+ 装饰石头也计数
-        return block == EARTH_SHALE || block == FROST_GNEISS || block == LAVA_BASALT
-            || block == BANDED_MARBLE || block == LIMESTONE || block == MOSSY_SANDSTONE
-            || block == CRACKED_SLATE || block == SCORIA || block == SALT_ROCK;
     }
 
     /**
@@ -437,38 +432,51 @@ public class MineFloorGenerator {
      * 预放置怪物 — 按 SDV 原版瀑布概率（cascading probability）生成怪物
      * MineMonsterSpawnHandler 会在 EntityJoinLevel 事件中注入 SDV 属性和 tag
      *
-     * 数量已按面积比例缩减：SDV 40×30 房间约 8-15 只；我们 80-120 格房间按 area/900
+     * 先保留原版“石头抽取失败后才抽怪物”的串联概率，再按 Minecraft
+     * 实体的控制范围与战斗耗时折算密度；总量始终随实际可行走表面变化。
      */
-    private static void spawnMonsters(ServerLevel level, RandomSource random,
-                                      int centerX, int centerZ, int size, int floorNumber,
-                                      boolean isDark) {
-        if (floorNumber <= 0) return; // 大厅不刷怪
-        if (floorNumber % 5 == 0) return; // boss 层 / 电梯层不刷普通怪
+    private static int spawnMonsters(ServerLevel level, RandomSource random,
+                                     int centerX, int centerZ, int floorNumber,
+                                     boolean isDark, double stonePlacementChance,
+                                     double originalMonsterRoll,
+                                     List<BlockPos> traversableSurface) {
+        if (floorNumber <= 0
+                || (floorNumber < 121 && floorNumber % 10 == 0)
+                || traversableSurface.isEmpty()) {
+            return 0;
+        }
 
-        int area = size * size;
-        int baseCount = Math.max(6, area / (floorNumber > 120 ? 500 : 600)); // 骷髅矿怪物密度更高
-        int maxCount = floorNumber > 120 ? 35 : 30; // 骷髅矿上限 35
-        int totalCount = Math.min(baseCount + random.nextInt(baseCount / 2 + 1), maxCount);
+        double monsterChance = MineGenerationBalance.monsterChancePerTile(
+                floorNumber, stonePlacementChance, originalMonsterRoll);
+        int totalCount = 0;
+        for (BlockPos ignored : traversableSurface) {
+            if (random.nextDouble() < monsterChance) {
+                totalCount++;
+            }
+        }
         if (hasMonsterMuskPlayer(level, floorNumber)) {
-            totalCount = Math.min(maxCount * 2, totalCount * 2);
+            totalCount *= 2;
         }
         if (floorNumber > 120) {
             totalCount = com.stardew.craft.festival.desert.DesertFestivalMineService.adjustMonsterCountForCalicoStatues(level, totalCount);
         }
+        if (totalCount <= 0) {
+            return 0;
+        }
 
         boolean ghostSpawned = false; // SDV ghostAdded 标记：每层最多 1 只 Ghost
 
-        int halfSize = size / 2;
         int spawned = 0;
-        int maxAttempts = totalCount * 30;
+        int maxAttempts = totalCount * 12;
 
         for (int attempt = 0; attempt < maxAttempts && spawned < totalCount; attempt++) {
-            int x = centerX - halfSize + 4 + random.nextInt(Math.max(1, size - 8));
-            int z = centerZ - halfSize + 4 + random.nextInt(Math.max(1, size - 8));
-
-            // 避开安全区
-            if (Math.abs(x - centerX) <= SAFE_ZONE_RADIUS + SAFE_ZONE_BUFFER + 2
-                    && Math.abs(z - centerZ) <= SAFE_ZONE_RADIUS + SAFE_ZONE_BUFFER + 2) continue;
+            BlockPos spawnPos = traversableSurface.get(random.nextInt(traversableSurface.size()));
+            int x = spawnPos.getX();
+            int z = spawnPos.getZ();
+            if (!level.getBlockState(spawnPos).isAir()
+                    || !level.getBlockState(spawnPos.above()).isAir()) {
+                continue;
+            }
 
             // SDV 瀑布概率选择怪物类型
             // 骷髅矿：isDark 时必出 Carbon Ghost，飞行怪须远离出生点
@@ -502,8 +510,8 @@ public class MineFloorGenerator {
             boolean isFlying = type == EntityType.PHANTOM || type == EntityType.BLAZE;
 
             if (isFlying) {
-                int y = FLOOR_Y_START + 3 + random.nextInt(Math.max(1, FLOOR_HEIGHT - 6));
-                BlockPos pos = new BlockPos(x, y, z);
+                int y = spawnPos.getY() + 1;
+                BlockPos pos = spawnPos.above();
                 if (!level.getBlockState(pos).isAir()) continue;
 
                 net.minecraft.world.entity.Mob mob = (net.minecraft.world.entity.Mob) type.create(level);
@@ -515,21 +523,15 @@ public class MineFloorGenerator {
                     spawned++;
                 }
             } else {
-                // 地面怪：从顶部向下找地面
-                for (int y = FLOOR_Y_END - 1; y >= FLOOR_Y_START + 1; y--) {
-                    BlockPos pos = new BlockPos(x, y, z);
-                    BlockPos below = pos.below();
-                    if (level.getBlockState(pos).isAir() && !level.getBlockState(below).isAir()
-                            && level.getBlockState(pos.above()).isAir()) {
-                        net.minecraft.world.entity.Mob mob = (net.minecraft.world.entity.Mob) type.create(level);
-                        if (mob != null) {
-                            mob.moveTo(x + 0.5, y, z + 0.5, random.nextFloat() * 360, 0);
-                            mob.setPersistenceRequired();
-                            markSelectedProfile(mob, selection);
-                            level.addFreshEntity(mob);
-                            spawned++;
-                        }
-                        break;
+                BlockPos below = spawnPos.below();
+                if (!level.getBlockState(below).isAir()) {
+                    net.minecraft.world.entity.Mob mob = (net.minecraft.world.entity.Mob) type.create(level);
+                    if (mob != null) {
+                        mob.moveTo(x + 0.5, spawnPos.getY(), z + 0.5, random.nextFloat() * 360, 0);
+                        mob.setPersistenceRequired();
+                        markSelectedProfile(mob, selection);
+                        level.addFreshEntity(mob);
+                        spawned++;
                     }
                 }
             }
@@ -542,6 +544,7 @@ public class MineFloorGenerator {
             StardewCraft.LOGGER.warn("[MINE] FAILED to spawn any monsters on floor {} (target={}, attempts={})", 
                     floorNumber, totalCount, maxAttempts);
         }
+        return spawned;
     }
 
     private static void markSelectedProfile(
@@ -992,68 +995,51 @@ public class MineFloorGenerator {
     }
     
     /**
-     * 生成矿石（精确按照 MINING_IMPLEMENTATION_PLAN.md 的概率）
+     * 生成矿石（使用二维可探索节点预算，避免按 3D 实心体积放大产量）
      * 
      * 核心概率：
-     * - 主矿（铜/铁/金）：0.17% 每个石头
-     * - 铱矿：0.03% (80-99层) → 0.05% (100-119层)
-     * - 煤矿：0.06% 全层通用
+     * - 普通矿井 1-119 层不直接生成铱矿脉，与原版一致
+     * - 骷髅矿洞保留原版随深度上升的出矿与铱矿权重
+     * - 矿脉数只随横向面积扩展，不随实心层高扩展
      * 
      * 跨段规则：
      * - 铜矿：1-39正常(0.17%)，40-119减半(0.085%)
      * - 铁矿：40-79正常(0.17%)，80-119减半(0.085%)
      * - 金矿：80-119正常(0.17%)
-     * - 铱矿：80-99低(0.03%)，100-119高(0.05%)
      */
-    private static void generateOres(ServerLevel level, RandomSource random,
-                                     int centerX, int centerZ, int size,
-                                     int floorNumber, FloorTheme theme) {
-        int halfSize = size / 2;
-        int totalPlaced = 0;
-
-        // 使用矿脉生成（原版风格）
-        int veinCount = getOreVeinCount(floorNumber, size);
-        if (veinCount <= 0) {
-            return;
+    private static int generateOres(ServerLevel level, RandomSource random,
+                                    int floorNumber, FloorTheme theme,
+                                    double stonePlacementChance,
+                                    int traversableTileCount,
+                                    List<BlockPos> exposedStones) {
+        double nodeChance = MineGenerationBalance.metalChancePerExposedStone(
+                floorNumber, stonePlacementChance, traversableTileCount, exposedStones.size());
+        if (nodeChance <= 0.0) {
+            return 0;
         }
 
-        for (int i = 0; i < veinCount; i++) {
-            int x = centerX + random.nextInt(size - 10) - (size - 10) / 2;
-            int z = centerZ + random.nextInt(size - 10) - (size - 10) / 2;
-            int y = FLOOR_Y_START + random.nextInt(FLOOR_HEIGHT);
-
-            if (Math.abs(x - centerX) <= SAFE_ZONE_RADIUS && Math.abs(z - centerZ) <= SAFE_ZONE_RADIUS) {
+        int placed = 0;
+        for (BlockPos pos : exposedStones) {
+            if (random.nextDouble() >= nodeChance
+                    || !isStoneForMineral(level.getBlockState(pos))) {
                 continue;
             }
 
-            String oreKey = pickOreKeyForFloor(random, floorNumber);
-
+            Block oreBlock;
             if (theme == FloorTheme.SKULL_CAVERN
-                    && com.stardew.craft.festival.desert.DesertFestivalMineService.shouldUseCalicoEggStone(level, floorNumber, random)) {
-                Block calicoStone = com.stardew.craft.festival.desert.DesertFestivalMineService.pickCalicoEggStone(random);
-                int veinSize = getOreVeinSize(random, "calico_egg_stone", floorNumber);
-                totalPlaced += generateOreVein(level, random, x, y, z, veinSize, calicoStone, centerX, centerZ, halfSize);
-                continue;
+                    && com.stardew.craft.festival.desert.DesertFestivalMineService
+                    .shouldUseCalicoEggStone(level, floorNumber, random)) {
+                oreBlock = com.stardew.craft.festival.desert.DesertFestivalMineService
+                        .pickCalicoEggStone(random);
+            } else {
+                oreBlock = getOreBlock(theme, pickOreKeyForFloor(random, floorNumber));
             }
-
-            Block oreBlock = getOreBlock(theme, oreKey);
-            if (oreBlock == null) {
-                continue;
-            }
-
-            int veinSize = getOreVeinSize(random, oreKey, floorNumber);
-
-            totalPlaced += generateOreVein(level, random, x, y, z, veinSize, oreBlock, centerX, centerZ, halfSize);
-        }
-
-        // 兜底：如果本层没有生成任何矿石，强制放置一小簇主矿
-        if (totalPlaced == 0) {
-            String primaryOreKey = getPrimaryOreKeyForFloor(floorNumber);
-            Block primaryOre = getOreBlock(theme, primaryOreKey);
-            if (primaryOre != null) {
-                placeFallbackOreCluster(level, centerX, centerZ, size, primaryOre, halfSize);
+            if (oreBlock != null) {
+                level.setBlock(pos, oreBlock.defaultBlockState(), 2);
+                placed++;
             }
         }
+        return placed;
     }
 
     /**
@@ -1096,89 +1082,10 @@ public class MineFloorGenerator {
         }
     }
 
-    private static int getOreVeinCount(int floor, int size) {
-        double stoneEstimate = size * size * FLOOR_HEIGHT * 0.8; // 估算每层石头数量（体积）
-        double totalProbability = getTotalOreProbabilityForFloor(floor);
-        double expectedOreBlocks = stoneEstimate * totalProbability;
-        double averageVeinSize = 4.5 + getThemeProgress(floor) * 1.0;
-
-        int count = (int)Math.round(expectedOreBlocks / averageVeinSize);
-        return Math.max(6, count);
-    }
-
-    private static double getTotalOreProbabilityForFloor(int floor) {
-        if (floor >= 1 && floor <= 39) {
-            double depthFactor = getThemeDepthFactor(floor);
-            return (0.0164 + 0.0060) * depthFactor * ORE_RATE_MULTIPLIER; // copper + coal
-        }
-        if (floor >= 40 && floor <= 79) {
-            double depthFactor = getThemeDepthFactor(floor);
-            return (0.0140 + 0.0090 + 0.0066) * depthFactor * ORE_RATE_MULTIPLIER; // iron + copper + coal
-        }
-        if (floor >= 80 && floor <= 119) {
-            double depthFactor = getThemeDepthFactor(floor);
-            double iridium = (floor >= 100) ? 0.004 : 0.0024;
-            return (iridium + 0.0136 + 0.0084 + 0.0084 + 0.0078) * depthFactor * ORE_RATE_MULTIPLIER; // iridium + gold + iron + copper + coal
-        }
-        // ── 骷髅矿洞 (121+)：接近原版，先提升出矿密度，再让铱矿随深度变得更常见 ──
-        if (floor > 120) {
-            return getSkullCavernOreChance(floor) * ORE_RATE_MULTIPLIER;
-        }
-        return 0.0;
-    }
-
     private static String pickOreKeyForFloor(RandomSource random, int floor) {
-        double progress = getThemeProgress(floor);
-        double commonFactor = 1.0 + progress * 0.5;
-        double rareFactor = 1.0 + progress * 1.4;
-        double cumulative = 0.0;
-
-        // 基于 MINING_IMPLEMENTATION_PLAN.md 概率 * 4（作为权重），并随深度提升
-        if (floor >= 1 && floor <= 39) {
-            double copper = 0.0164 * commonFactor * ORE_RATE_MULTIPLIER;
-            double coal = 0.0060 * commonFactor * ORE_RATE_MULTIPLIER;
-            double total = copper + coal;
-            double roll = random.nextDouble() * total;
-            cumulative += copper;
-            if (roll < cumulative) return "copper";
-            return "coal";
-        }
-
-        if (floor >= 40 && floor <= 79) {
-            double iron = 0.0140 * rareFactor * ORE_RATE_MULTIPLIER;
-            double copper = 0.0090 * commonFactor * ORE_RATE_MULTIPLIER;
-            double coal = 0.0066 * commonFactor * ORE_RATE_MULTIPLIER;
-            double total = iron + copper + coal;
-            double roll = random.nextDouble() * total;
-            cumulative += iron;
-            if (roll < cumulative) return "iron";
-            cumulative += copper;
-            if (roll < cumulative) return "copper";
-            return "coal";
-        }
-
-        if (floor >= 80 && floor <= 119) {
-            double iridium = (floor >= 100) ? 0.004 : 0.0024;
-            double gold = 0.0136;
-            double iron = 0.0084;
-            double copper = 0.0084;
-            double coal = 0.0078;
-            iridium *= rareFactor * ORE_RATE_MULTIPLIER;
-            gold *= rareFactor * ORE_RATE_MULTIPLIER;
-            iron *= commonFactor * ORE_RATE_MULTIPLIER;
-            copper *= commonFactor * ORE_RATE_MULTIPLIER;
-            coal *= commonFactor * ORE_RATE_MULTIPLIER;
-            double total = iridium + gold + iron + copper + coal;
-            double roll = random.nextDouble() * total;
-            cumulative += iridium;
-            if (roll < cumulative) return "iridium";
-            cumulative += gold;
-            if (roll < cumulative) return "gold";
-            cumulative += iron;
-            if (roll < cumulative) return "iron";
-            cumulative += copper;
-            if (roll < cumulative) return "copper";
-            return "coal";
+        if (floor >= 1 && floor <= 119) {
+            return MineGenerationBalance.pickRegularOreKey(
+                    floor, random.nextDouble(), random.nextDouble());
         }
 
         // ── 骷髅矿洞 Skull Cavern (121+) — 贴近原版的逐层升级节奏 ──
@@ -1196,29 +1103,8 @@ public class MineFloorGenerator {
         return "coal";
     }
 
-    private static double getSkullCavernOreChance(int floor) {
-        int skullLevel = floor - 120;
-        double chanceForOre = 0.02 + skullLevel * 0.0005;
-        if (floor >= 130) {
-            chanceForOre += 0.01 * ((Math.min(100, skullLevel) - 10) / 10.0);
-        }
-        return chanceForOre;
-    }
-
     private static double getSkullCavernIridiumChance(int floor) {
-        int skullLevel = floor - 120;
-        double iridiumBoost = 0.0;
-        if (floor >= 130) {
-            iridiumBoost += 0.001 * ((skullLevel - 10) / 10.0);
-        }
-        iridiumBoost = Math.min(iridiumBoost, 0.004);
-        if (skullLevel > 100) {
-            iridiumBoost += skullLevel / 1000000.0;
-        }
-
-        double vanillaChance = Math.min(100, skullLevel) * (0.0003 + iridiumBoost);
-        double floorBonus = 0.003 + Math.min(skullLevel, 80) * 0.00005;
-        return Math.min(0.32, vanillaChance * 1.35 + floorBonus);
+        return MineGenerationBalance.skullCavernIridiumChance(floor);
     }
 
     private static double getSkullCavernGoldChance(int floor) {
@@ -1229,199 +1115,6 @@ public class MineFloorGenerator {
     private static double getSkullCavernIronChance(int floor) {
         int skullLevel = floor - 120;
         return Math.min(0.5, 0.1 + (floor - Math.min(200, skullLevel)) * 0.005);
-    }
-
-    private static double getThemeDepthFactor(int floor) {
-        double progress = getThemeProgress(floor);
-        if (floor >= 1 && floor <= 39) {
-            return 1.0 + progress * 0.7; // 1.0 -> 1.7
-        }
-        if (floor >= 40 && floor <= 79) {
-            return 1.0 + progress * 0.9; // 1.0 -> 1.9
-        }
-        if (floor >= 80 && floor <= 119) {
-            return 1.0 + progress * 1.1; // 1.0 -> 2.1
-        }
-        if (floor > 120) {
-            // 骷髅矿：每层 +1% 矿石产出，100 层后封顶为 2.0x
-            int skullLevel = floor - 120;
-            return 1.0 + Math.min(skullLevel, 100) * 0.01;
-        }
-        return 1.0;
-    }
-
-    private static double getThemeProgress(int floor) {
-        if (floor >= 1 && floor <= 39) {
-            return (floor - 1) / 38.0;
-        }
-        if (floor >= 40 && floor <= 79) {
-            return (floor - 40) / 39.0;
-        }
-        if (floor >= 80 && floor <= 119) {
-            return (floor - 80) / 39.0;
-        }
-        if (floor > 120) {
-            // 骷髅矿无限深，progress 以 100 层为满进度，之后 clamp 在 1.0
-            return Math.min(1.0, (floor - 120) / 100.0);
-        }
-        return 0.0;
-    }
-
-    private static int getOreVeinSize(RandomSource random, String oreKey, int floor) {
-        double progress = getThemeProgress(floor);
-        int commonBonus = (int)Math.floor(progress * 2.0); // 0-2
-        int rareBonus = (int)Math.floor(progress * 1.0);   // 0-1
-        return switch (oreKey) {
-            case "copper" -> 4 + random.nextInt(4) + commonBonus; // 4-9
-            case "iron" -> 4 + random.nextInt(3) + commonBonus; // 4-8
-            case "gold" -> 3 + random.nextInt(3) + rareBonus; // 3-6
-            case "iridium" -> 2 + random.nextInt(3) + rareBonus; // 2-5
-            case "coal" -> 3 + random.nextInt(4) + commonBonus; // 3-8
-            default -> 3 + random.nextInt(3) + commonBonus; // 3-7
-        };
-    }
-
-    private static int generateOreVein(ServerLevel level, RandomSource random,
-                                        int startX, int startY, int startZ, int size,
-                                        Block oreBlock, int centerX, int centerZ, int halfSize) {
-        double angle = random.nextDouble() * Math.PI;
-        double spread = size / 8.0;
-
-        double ax = startX + Math.sin(angle) * spread;
-        double bx = startX - Math.sin(angle) * spread;
-        double az = startZ + Math.cos(angle) * spread;
-        double bz = startZ - Math.cos(angle) * spread;
-        double ay = startY + random.nextInt(3) - 1;
-        double by = startY + random.nextInt(3) - 1;
-
-        double radiusBase = random.nextDouble() * size / 16.0;
-
-        int placed = 0;
-        for (int i = 0; i <= size; i++) {
-            double t = (double)i / size;
-            double x = lerp(t, ax, bx);
-            double y = lerp(t, ay, by);
-            double z = lerp(t, az, bz);
-
-            double scale = (Math.sin(Math.PI * t) + 1.0) * 0.5; // 0..1
-            double radius = (scale * radiusBase + 1.0);
-
-            double rx = radius * (0.85 + random.nextDouble() * 0.3);
-            double ry = radius * 0.6;
-            double rz = radius * (0.85 + random.nextDouble() * 0.3);
-
-            placed += replaceOreEllipsoid(level, x, y, z, rx, ry, rz, oreBlock, centerX, centerZ, halfSize);
-        }
-
-        return placed;
-    }
-
-    private static double lerp(double t, double a, double b) {
-        return a + (b - a) * t;
-    }
-
-    @SuppressWarnings("null")
-    private static int replaceOreEllipsoid(ServerLevel level,
-                                                  double centerX, double centerY, double centerZ,
-                                                  double radiusX, double radiusY, double radiusZ,
-                                                  Block replacement,
-                                                  int roomCenterX, int roomCenterZ, int halfSize) {
-        if (radiusX <= 0.0 || radiusY <= 0.0 || radiusZ <= 0.0) {
-            return 0;
-        }
-
-        int placed = 0;
-
-        int minX = (int)Math.floor(centerX - radiusX - 1.0);
-        int maxX = (int)Math.floor(centerX + radiusX + 1.0);
-        int minY = Math.max(FLOOR_Y_START, (int)Math.floor(centerY - radiusY - 1.0));
-        int maxY = Math.min(FLOOR_Y_END, (int)Math.floor(centerY + radiusY + 1.0));
-        int minZ = (int)Math.floor(centerZ - radiusZ - 1.0);
-        int maxZ = (int)Math.floor(centerZ + radiusZ + 1.0);
-
-        for (int x = minX; x <= maxX; x++) {
-            if (Math.abs(x - roomCenterX) >= halfSize - 1) continue;
-            double dx = (x + 0.5 - centerX) / radiusX;
-
-            for (int z = minZ; z <= maxZ; z++) {
-                if (Math.abs(z - roomCenterZ) >= halfSize - 1) continue;
-                double dz = (z + 0.5 - centerZ) / radiusZ;
-
-                for (int y = minY; y <= maxY; y++) {
-                    double dy = (y + 0.5 - centerY) / radiusY;
-                    double distanceSq = dx * dx + dy * dy + dz * dz;
-
-                    if (distanceSq < 1.0) {
-                        BlockPos pos = new BlockPos(x, y, z);
-                        BlockState currentState = level.getBlockState(pos);
-                        if (isOreReplaceable(currentState)) {
-                            level.setBlock(pos, replacement.defaultBlockState(), 2);
-                            placed++;
-                        }
-                    }
-                }
-            }
-        }
-
-        return placed;
-    }
-
-    private static boolean isOreReplaceable(BlockState state) {
-        Block block = state.getBlock();
-        return isMainStone(state)
-            || block == ModBlocks.BANDED_MARBLE.get()
-            || block == ModBlocks.LIMESTONE.get()
-            || block == ModBlocks.MOSSY_SANDSTONE.get()
-            || block == ModBlocks.CRACKED_SLATE.get()
-            || block == ModBlocks.SCORIA.get()
-            || block == ModBlocks.SALT_ROCK.get()
-            || block == Blocks.ANDESITE
-            || block == Blocks.DIRT
-                        || block == Blocks.BLUE_ICE
-            || block == Blocks.PACKED_ICE
-            || block == Blocks.PRISMARINE_BRICKS
-            || block == Blocks.MAGMA_BLOCK
-            || block == Blocks.NETHERRACK
-            || block == Blocks.SANDSTONE
-            || block == Blocks.RED_SANDSTONE;
-    }
-
-    private static String getPrimaryOreKeyForFloor(int floor) {
-        if (floor > 180) return "iridium";
-        if (floor > 120) return "gold";
-        if (floor >= 80) return "gold";
-        if (floor >= 40) return "iron";
-        return "copper";
-    }
-
-    @SuppressWarnings("null")
-    private static void placeFallbackOreCluster(ServerLevel level,
-                                                int centerX, int centerZ, int size,
-                                                Block oreBlock, int halfSize) {
-        int startX = centerX + 3;
-        int startZ = centerZ + 3;
-        int placed = 0;
-
-        for (int dx = 0; dx <= 4; dx++) {
-            for (int dz = 0; dz <= 4; dz++) {
-                int x = startX + dx;
-                int z = startZ + dz;
-                if (Math.abs(x - centerX) >= halfSize - 1 || Math.abs(z - centerZ) >= halfSize - 1) {
-                    continue;
-                }
-                for (int y = FLOOR_Y_START; y <= FLOOR_Y_END; y++) {
-                    BlockPos pos = new BlockPos(x, y, z);
-                    BlockState currentState = level.getBlockState(pos);
-                    if (isOreReplaceable(currentState)) {
-                        level.setBlock(pos, oreBlock.defaultBlockState(), 2);
-                        placed++;
-                        if (placed >= 6) {
-                            return;
-                        }
-                    }
-                }
-            }
-        }
     }
 
     @SuppressWarnings("null")
@@ -1491,7 +1184,11 @@ public class MineFloorGenerator {
                 || block == Blocks.SANDSTONE || block == Blocks.RED_SANDSTONE;
     }
 
-    private static List<BlockPos> collectStonePositions(ServerLevel level, int centerX, int centerZ, int size) {
+    /**
+     * Collect only stone that touches cave air. Reward generation must use the
+     * explored cave surface, not every hidden block in the solid 3D volume.
+     */
+    private static List<BlockPos> collectExposedStonePositions(ServerLevel level, int centerX, int centerZ, int size) {
         int halfSize = size / 2;
         List<BlockPos> positions = new ArrayList<>();
         BlockPos.MutableBlockPos mpos = new BlockPos.MutableBlockPos();
@@ -1503,8 +1200,14 @@ public class MineFloorGenerator {
                         continue;
                     }
                     mpos.set(x, y, z);
-                    if (isStoneForMineral(level.getBlockState(mpos))) {
-                        positions.add(mpos.immutable());
+                    if (!isStoneForMineral(level.getBlockState(mpos))) {
+                        continue;
+                    }
+                    for (Direction direction : Direction.values()) {
+                        if (level.getBlockState(mpos.relative(direction)).isAir()) {
+                            positions.add(mpos.immutable());
+                            break;
+                        }
                     }
                 }
             }
@@ -1601,18 +1304,18 @@ public class MineFloorGenerator {
     }
 
     @SuppressWarnings("null")
-    private static void generateSurfaceMinerals(ServerLevel level, RandomSource random, int centerX, int centerZ, int size, int floorNumber) {
-        List<BlockPos> surfaceAirPositions = collectSurfaceStonePositions(level, centerX, centerZ, size);
-        if (surfaceAirPositions.isEmpty()) {
-            return;
-        }
-
-        int targetCount = (int)Math.round(surfaceAirPositions.size() * SURFACE_MINERAL_RATE);
-        int attempts = Math.max(10, targetCount * 4);
+    private static int generateSurfaceItems(ServerLevel level, RandomSource random,
+                                            int floorNumber,
+                                            double stonePlacementChance,
+                                            double originalMonsterRoll,
+                                            List<BlockPos> surfaceAirPositions) {
+        double chance = MineGenerationBalance.surfaceItemChancePerTile(
+                floorNumber, stonePlacementChance, originalMonsterRoll);
         int placed = 0;
-
-        while (placed < targetCount && attempts-- > 0) {
-            BlockPos pos = surfaceAirPositions.get(random.nextInt(surfaceAirPositions.size()));
+        for (BlockPos pos : surfaceAirPositions) {
+            if (random.nextDouble() >= chance) {
+                continue;
+            }
             BlockState state = level.getBlockState(pos);
             if (!state.isAir()) continue;
 
@@ -1622,115 +1325,121 @@ public class MineFloorGenerator {
                 placed++;
             }
         }
+        return placed;
     }
 
     private static Block pickSurfaceMineralBlock(RandomSource random, int floorNumber) {
-        float quartzWeight = 0.6f;
-        float roll = random.nextFloat();
-        // 骷髅矿洞 (121+)：A类矿石混合 — Fire Quartz 40%, Earth Crystal 30%, Frozen Tear 30%
+        // MineShaft.getRandomItemForThisLevel：三个连续且独立的概率判断。
+        if (floorNumber > 80 && random.nextDouble() < 0.05) {
+            return ModBlocks.FORAGE_PURPLE_MUSHROOM.get();
+        }
+        boolean frostArea = floorNumber >= 40 && floorNumber < 80;
+        if (floorNumber > 20 && !frostArea && random.nextDouble() < 0.10) {
+            return ModBlocks.FORAGE_RED_MUSHROOM.get();
+        }
+        if (random.nextDouble() >= 0.25) {
+            return ModBlocks.QUARTZ.get();
+        }
+
+        // 骷髅矿洞的阶段矿物分支：Earth 30%，余下再抽 Frozen 30%，否则 Fire。
         if (floorNumber > 120) {
-            if (roll < quartzWeight) return ModBlocks.QUARTZ.get();
-            float gemRoll = random.nextFloat();
-            if (gemRoll < 0.4f) return ModBlocks.FIRE_QUARTZ.get();
-            if (gemRoll < 0.7f) return ModBlocks.EARTH_CRYSTAL.get();
-            return ModBlocks.FROZEN_TEAR.get();
+            if (random.nextDouble() < 0.30) return ModBlocks.EARTH_CRYSTAL.get();
+            return random.nextDouble() < 0.30
+                    ? ModBlocks.FROZEN_TEAR.get()
+                    : ModBlocks.FIRE_QUARTZ.get();
         }
         if (floorNumber >= 80) {
-            return roll < quartzWeight ? ModBlocks.QUARTZ.get() : ModBlocks.FIRE_QUARTZ.get();
+            return ModBlocks.FIRE_QUARTZ.get();
         }
         if (floorNumber >= 40) {
-            return roll < quartzWeight ? ModBlocks.QUARTZ.get() : ModBlocks.FROZEN_TEAR.get();
+            return ModBlocks.FROZEN_TEAR.get();
         }
         if (floorNumber >= 1) {
-            return roll < quartzWeight ? ModBlocks.QUARTZ.get() : ModBlocks.EARTH_CRYSTAL.get();
+            return ModBlocks.EARTH_CRYSTAL.get();
         }
         return ModBlocks.QUARTZ.get();
     }
 
     @SuppressWarnings("null")
-    private static void generateGemOreNodes(ServerLevel level, RandomSource random,
-                                            int centerX, int centerZ, int size, int floorNumber) {
-        List<BlockPos> stonePositions = collectStonePositions(level, centerX, centerZ, size);
-        if (stonePositions.isEmpty()) {
-            return;
-        }
-
-        List<BlockPos> surfaceStones = collectSurfaceStonePositions(level, centerX, centerZ, size);
-        double baseRate = 0.003 * GEM_NODE_RATE_MULTIPLIER;
-        // 骷髅矿：略高于常规层，但不再把铱矿团块当作常态供给
-        if (floorNumber > 120) {
-            int skullLevel = floorNumber - 120;
-            baseRate *= 1.15 + Math.min(skullLevel * 0.003, 0.35);
-        }
-        int targetCount = (int)Math.round(stonePositions.size() * baseRate);
-        if (targetCount <= 0) {
-            targetCount = random.nextFloat() < 0.35f ? 1 : 0;
-        }
-
-        int attempts = Math.max(10, targetCount * 4);
+    private static int generateDiamondOreNodes(ServerLevel level, RandomSource random,
+                                               int floorNumber, double stonePlacementChance,
+                                               int traversableTileCount,
+                                               List<BlockPos> exposedStones) {
+        double chance = MineGenerationBalance.diamondChancePerExposedStone(
+                floorNumber, stonePlacementChance, traversableTileCount, exposedStones.size());
         int placed = 0;
-        while (placed < targetCount && attempts-- > 0) {
-            boolean preferSurface = !surfaceStones.isEmpty() && random.nextDouble() < GEM_SURFACE_BIAS;
-            BlockPos pos = (preferSurface ? surfaceStones : stonePositions).get(
-                    random.nextInt((preferSurface ? surfaceStones : stonePositions).size()));
+        for (BlockPos pos : exposedStones) {
+            if (random.nextDouble() < chance
+                    && isStoneForMineral(level.getBlockState(pos))) {
+                level.setBlock(pos, ModBlocks.DIAMOND_ORE.get().defaultBlockState(), 2);
+                placed++;
+            }
+        }
+        return placed;
+    }
+
+    @SuppressWarnings("null")
+    private static int generateGemOreNodes(ServerLevel level, RandomSource random,
+                                           int floorNumber, double stonePlacementChance,
+                                           int traversableTileCount,
+                                           List<BlockPos> exposedStones,
+                                           boolean reachedMineBottom) {
+        double chance = MineGenerationBalance.gemChancePerExposedStone(
+                floorNumber, stonePlacementChance, traversableTileCount, exposedStones.size());
+        int placed = 0;
+        for (BlockPos pos : exposedStones) {
+            if (random.nextDouble() >= chance) {
+                continue;
+            }
             @SuppressWarnings("null")
             BlockState state = level.getBlockState(pos);
             if (!isStoneForMineral(state)) {
                 continue;
             }
 
-            Block gemOre = pickGemOreBlockForFloor(random, floorNumber);
+            Block gemOre = pickGemOreBlockForFloor(random, floorNumber, reachedMineBottom);
             if (gemOre != null) {
                 level.setBlock(pos, gemOre.defaultBlockState(), 2);
                 placed++;
             }
         }
+        return placed;
     }
 
-    private static Block pickGemOreBlockForFloor(RandomSource random, int floorNumber) {
-        List<Block> candidates = new ArrayList<>();
-        candidates.add(ModBlocks.AMETHYST_ORE.get());
-        candidates.add(ModBlocks.TOPAZ_ORE.get());
-
-        if (floorNumber >= 40) {
-            candidates.add(ModBlocks.AQUAMARINE_ORE.get());
-            candidates.add(ModBlocks.JADE_ORE.get());
+    private static Block pickGemOreBlockForFloor(
+            RandomSource random,
+            int floorNumber,
+            boolean reachedMineBottom
+    ) {
+        int gemObjectId = 59 + random.nextInt(11);
+        gemObjectId += gemObjectId % 2;
+        if (!reachedMineBottom) {
+            if (floorNumber < 40 && gemObjectId != 66 && gemObjectId != 68) {
+                gemObjectId = random.nextBoolean() ? 66 : 68;
+            } else if (floorNumber < 80 && (gemObjectId == 60 || gemObjectId == 64)) {
+                int[] earlyGems = {66, 70, 68, 62};
+                gemObjectId = earlyGems[random.nextInt(earlyGems.length)];
+            }
         }
-
-        if (floorNumber >= 80) {
-            candidates.add(ModBlocks.RUBY_ORE.get());
-            candidates.add(ModBlocks.EMERALD_ORE.get());
-        }
-
-        if (floorNumber >= 100) {
-            candidates.add(ModBlocks.DIAMOND_ORE.get());
-        }
-
-        // 骷髅矿洞 B 类矿：仍然偏高端，但不再额外堆叠大块铱矿节点
-        if (floorNumber > 120) {
-            candidates.add(ModBlocks.RUBY_ORE.get());
-            candidates.add(ModBlocks.EMERALD_ORE.get());
-            for (int i = 0; i < 2; i++) candidates.add(ModBlocks.DIAMOND_ORE.get());
-        }
-
-        if (candidates.isEmpty()) {
-            return null;
-        }
-        return candidates.get(random.nextInt(candidates.size()));
+        return switch (gemObjectId) {
+            case 60 -> ModBlocks.EMERALD_ORE.get();
+            case 62 -> ModBlocks.AQUAMARINE_ORE.get();
+            case 64 -> ModBlocks.RUBY_ORE.get();
+            case 66 -> ModBlocks.AMETHYST_ORE.get();
+            case 68 -> ModBlocks.TOPAZ_ORE.get();
+            case 70 -> ModBlocks.JADE_ORE.get();
+            default -> ModBlocks.AMETHYST_ORE.get();
+        };
     }
-    
-    /**
-     * 根据楼层和概率选择矿石类型
-     * 
-     * 概率表（按 MINING_IMPLEMENTATION_PLAN.md）：
-     * - 铜矿：1-39层(0.17%), 40-119层(0.085%)
-     * - 铁矿：40-79层(0.17%), 80-119层(0.085%)
-     * - 金矿：80-119层(0.17%)
-     * - 铱矿：80-99层(0.03%), 100-119层(0.05%)
-     * - 煤矿：1-119层(0.06%)
-     * 
-     * @param roll 0-100之间的随机数
-     */
+
+    private static boolean hasPlayerReachedMineBottom(ServerLevel level) {
+        for (ServerPlayer player : level.players()) {
+            if (MiningDataManager.getPlayerData(player).getMaxFloorReached() >= 120) {
+                return true;
+            }
+        }
+        return false;
+    }
     
     /**
      * 生成洞窟 — 真正还原 MC 原版 CaveWorldCarver + CanyonWorldCarver 规模
@@ -3630,8 +3339,11 @@ public class MineFloorGenerator {
     @SuppressWarnings("null")
     private static void generateSpecialRoom(ServerLevel level, RandomSource random,
                                              int centerX, int centerZ, int size,
-                                             FloorTheme theme, boolean isDark, int floorNumber) {
-        if (floorNumber == 0 || floorNumber % 5 == 0) return; // boss 层不生成
+                                             FloorTheme theme, boolean isDark, int floorNumber,
+                                             double stonePlacementChance) {
+        if (floorNumber == 0 || (floorNumber < 121 && floorNumber % 5 == 0)) {
+            return; // 普通矿井 boss/elevator 层不生成；骷髅矿洞没有此规则
+        }
 
         int halfSize = size / 2;
         float roll = random.nextFloat();
@@ -3641,10 +3353,14 @@ public class MineFloorGenerator {
             // 骷髅矿专属特殊房间
             if (roll < iridiumRoomChance) {
                 // 铱矿密集洞：深层后才稳定出现
-                generateIridiumTreasureRoom(level, random, centerX, centerZ, halfSize, floorNumber);
+                generateIridiumTreasureRoom(
+                        level, random, centerX, centerZ, halfSize,
+                        floorNumber, stonePlacementChance);
             } else if (roll < iridiumRoomChance + 0.08f) {
                 // 岩浆湖洞穴（8%）
-                generateLavaChamber(level, random, centerX, centerZ, halfSize, floorNumber);
+                generateLavaChamber(
+                        level, random, centerX, centerZ, halfSize,
+                        floorNumber, stonePlacementChance);
             } else if (roll < iridiumRoomChance + 0.11f && floorNumber >= 146) {
                 // Dino 巢穴（3%，≥146层）
                 generateDinoNest(level, random, centerX, centerZ, halfSize);
@@ -3657,7 +3373,9 @@ public class MineFloorGenerator {
 
         if (roll < 0.10f) {
             // 矿石密集区（10%） — 全段
-            generateRichVeinChamber(level, random, centerX, centerZ, halfSize, theme, floorNumber);
+            generateRichVeinChamber(
+                    level, random, centerX, centerZ, halfSize,
+                    theme, floorNumber, stonePlacementChance);
         } else if (roll < 0.18f && (theme == FloorTheme.EARTH || theme == FloorTheme.FROST)) {
             // 蘑菇房（8%） — Earth + Frost
             generateMushroomRoom(level, random, centerX, centerZ, halfSize, theme);
@@ -3738,11 +3456,12 @@ public class MineFloorGenerator {
 
     }
 
-    /** 矿石密集区：小型洞穴，墙壁 30-50% 替换为该楼层主矿石 */
+    /** 矿石密集区：小型洞穴，墙壁按普通楼层六倍概率独立生成矿石。 */
     @SuppressWarnings("null")
     private static void generateRichVeinChamber(ServerLevel level, RandomSource random,
                                                  int centerX, int centerZ, int halfSize,
-                                                 FloorTheme theme, int floorNumber) {
+                                                 FloorTheme theme, int floorNumber,
+                                                 double stonePlacementChance) {
         int roomSize = 6 + random.nextInt(3); // 6-8
         int rx = centerX + random.nextInt(halfSize) - halfSize / 2;
         int rz = centerZ + random.nextInt(halfSize) - halfSize / 2;
@@ -3779,11 +3498,9 @@ public class MineFloorGenerator {
             }
         }
 
-        // 扫描空气方块的邻居，将 30-50% 的石头墙替换为矿石
-        String oreKey = pickPrimaryOreForFloor(floorNumber);
-        Block oreBlock = getOreBlock(theme, oreKey);
-        float oreChance = 0.30f + random.nextFloat() * 0.20f; // 30-50%
-
+        // 先去重暴露墙面，再对每个候选块只抽一次；旧实现会让同一块被多个
+        // 空气邻居重复抽取，并用 30%-50% 直接替换，产量远超普通层概率。
+        Set<BlockPos> exposedRoomWalls = new HashSet<>();
         for (int dx = -(roomSize / 2 + 2); dx <= roomSize / 2 + 2; dx++) {
             for (int dz = -(roomSize / 2 + 2); dz <= roomSize / 2 + 2; dz++) {
                 for (int dy = 0; dy < roomH + 2; dy++) {
@@ -3794,11 +3511,20 @@ public class MineFloorGenerator {
                     for (Direction dir : Direction.values()) {
                         BlockPos neighbor = pos.relative(dir);
                         BlockState ns = level.getBlockState(neighbor);
-                        if ((isMainStone(ns) || isDecorStone(ns)) && random.nextFloat() < oreChance) {
-                            level.setBlock(neighbor, oreBlock.defaultBlockState(), 2);
+                        if (isMainStone(ns) || isDecorStone(ns)) {
+                            exposedRoomWalls.add(neighbor.immutable());
                         }
                     }
                 }
+            }
+        }
+        double oreChance = MineGenerationBalance.richRoomMetalChance(
+                floorNumber, stonePlacementChance, 6.0);
+        for (BlockPos wall : exposedRoomWalls) {
+            if (random.nextDouble() < oreChance) {
+                Block oreBlock = getOreBlock(
+                        theme, pickOreKeyForFloor(random, floorNumber));
+                level.setBlock(wall, oreBlock.defaultBlockState(), 2);
             }
         }
 
@@ -3897,7 +3623,9 @@ public class MineFloorGenerator {
     /** 铱矿密集洞：小型洞穴，墙壁少量高密铱矿石 */
     @SuppressWarnings("null")
     private static void generateIridiumTreasureRoom(ServerLevel level, RandomSource random,
-                                                      int centerX, int centerZ, int halfSize, int floorNumber) {
+                                                      int centerX, int centerZ, int halfSize,
+                                                      int floorNumber,
+                                                      double stonePlacementChance) {
         int roomW = 6 + random.nextInt(4); // 6-9
         int roomD = 6 + random.nextInt(4);
         int roomH = 4 + random.nextInt(3); // 4-6
@@ -3911,6 +3639,8 @@ public class MineFloorGenerator {
         int baseY = FLOOR_Y_START + 2;
         Block iridiumOre = ModBlocks.DESERT_IRIDIUM_ORE.get();
         Block mainStone = LAVA_BASALT;
+        double iridiumChance = MineGenerationBalance.richRoomIridiumChance(
+                floorNumber, stonePlacementChance, 12.0);
 
         // 挖空房间，墙壁替换为铱矿 + 主石头混合
         for (int dx = -roomW / 2; dx <= roomW / 2; dx++) {
@@ -3922,8 +3652,9 @@ public class MineFloorGenerator {
                     if (current.getBlock() == ModBlocks.MINE_BARRIER.get()) continue;
 
                     if (isWall && dy > 0 && dy < roomH - 1) {
-                        // 墙壁保留“深层奖励”感，但不再是半个房间都刷铱矿
-                        level.setBlock(pos, random.nextFloat() < 0.32f ? iridiumOre.defaultBlockState() : mainStone.defaultBlockState(), 2);
+                        // 深层奖励用原版骷髅矿出矿曲线的局部倍率表达，不用固定占比。
+                        boolean placeIridium = random.nextDouble() < iridiumChance;
+                        level.setBlock(pos, placeIridium ? iridiumOre.defaultBlockState() : mainStone.defaultBlockState(), 2);
                     } else if (!isWall) {
                         level.setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
                     }
@@ -3931,13 +3662,15 @@ public class MineFloorGenerator {
             }
         }
 
-        // 地面放几颗铱矿碎块
-        for (int i = 0; i < 2 + random.nextInt(2); i++) {
-            int ix = rx - roomW / 2 + 2 + random.nextInt(Math.max(1, roomW - 4));
-            int iz = rz - roomD / 2 + 2 + random.nextInt(Math.max(1, roomD - 4));
-            BlockPos orePos = new BlockPos(ix, baseY, iz);
-            if (level.getBlockState(orePos).isAir() && !level.getBlockState(orePos.below()).isAir()) {
-                level.setBlock(orePos, iridiumOre.defaultBlockState(), 2);
+        // 地面候选也逐格独立抽取，房间大小自然决定候选数。
+        for (int dx = -roomW / 2 + 2; dx <= roomW / 2 - 2; dx++) {
+            for (int dz = -roomD / 2 + 2; dz <= roomD / 2 - 2; dz++) {
+                BlockPos orePos = new BlockPos(rx + dx, baseY, rz + dz);
+                if (level.getBlockState(orePos).isAir()
+                        && !level.getBlockState(orePos.below()).isAir()
+                        && random.nextDouble() < iridiumChance * 2.0) {
+                    level.setBlock(orePos, iridiumOre.defaultBlockState(), 2);
+                }
             }
         }
 
@@ -3952,7 +3685,9 @@ public class MineFloorGenerator {
     /** 岩浆湖洞穴：大型开阔洞穴，中央是巨大熔岩湖，周围有矿石环 */
     @SuppressWarnings("null")
     private static void generateLavaChamber(ServerLevel level, RandomSource random,
-                                             int centerX, int centerZ, int halfSize, int floorNumber) {
+                                             int centerX, int centerZ, int halfSize,
+                                             int floorNumber,
+                                             double stonePlacementChance) {
         int roomR = 8 + random.nextInt(5); // 半径 8-12
         int roomH = 6 + random.nextInt(3); // 6-8
 
@@ -3964,6 +3699,8 @@ public class MineFloorGenerator {
 
         int baseY = FLOOR_Y_START + 2;
         int lavaR = roomR - 3; // 熔岩湖比房间小 3 格
+        double ringOreChance = MineGenerationBalance.richRoomMetalChance(
+                floorNumber, stonePlacementChance, 4.0);
 
         // 挖空椭圆房间
         for (int dx = -roomR; dx <= roomR; dx++) {
@@ -3987,10 +3724,10 @@ public class MineFloorGenerator {
                     }
                 } else if (dx * dx + dz * dz > (lavaR + 1) * (lavaR + 1)) {
                     // 外围矿石环
-                    if (random.nextFloat() < 0.25f) {
+                    if (random.nextDouble() < ringOreChance) {
                         BlockPos orePos = new BlockPos(rx + dx, baseY + 1 + random.nextInt(2), rz + dz);
                         if (level.getBlockState(orePos).isAir()) {
-                            String oreKey = random.nextFloat() < 0.4f ? "iridium" : "gold";
+                            String oreKey = pickOreKeyForFloor(random, floorNumber);
                             level.setBlock(orePos, getOreBlock(FloorTheme.SKULL_CAVERN, oreKey).defaultBlockState(), 2);
                         }
                     }
@@ -4055,13 +3792,6 @@ public class MineFloorGenerator {
             }
         }
 
-    }
-
-    /** 根据楼层返回该层主要矿石类型 */
-    private static String pickPrimaryOreForFloor(int floor) {
-        if (floor >= 80) return "gold";
-        if (floor >= 40) return "iron";
-        return "copper";
     }
 
     // ======================== P2-2: 环境装饰 ========================
@@ -4505,63 +4235,41 @@ public class MineFloorGenerator {
      * 在洞窟空间中生成木桶（SDV BreakableContainer）
      *
      * 生成规则（仿 SDV MineShaft.populateLevel）：
-     * - 基础数量：0-4 个
+     * - 按原版地图平均每 1200 个可行走格约 1 个的密度独立抽取
      * - 仅在洞窟地面（脚下是实体方块、当前是空气、上方也是空气）放置
      * - 避开中心安全区
      * - 普通矿井不在 boss 层（floorNumber % 5 == 0）生成，骷髅矿洞按原版仍可生成
      * - 沙漠节骷髅矿洞中，Calico Statue 会替换一个符合条件的木桶候选点
      */
     @SuppressWarnings("null")
-    private static void generateBarrels(ServerLevel level, RandomSource random,
-                                        int centerX, int centerZ, int size, int floorNumber) {
-        int halfSize = size / 2;
-        // SDV 原版: mineRandom.Next(5) + (int)(AverageDailyLuck * 20)
-        // SDV 房间约 40×30=1200 格；我们房间 80~120 边长，面积 6400~14400 格
-        // 按面积比例放大：base = SDV_base * (size*size) / 1200
-        // SDV base 平均 2 → 我们 base = 2 * area/1200，再加随机浮动
-        int area = size * size;
-        int scaledBase = Math.max(3, area / 600);         // 80×80→10, 100×100→16, 120×120→24
-        int barrelCount = scaledBase + random.nextInt(scaledBase / 2 + 1); // 10~15, 16~24, 24~36
-
+    private static int generateBarrels(ServerLevel level, RandomSource random,
+                                       int centerX, int centerZ, int floorNumber,
+                                       List<BlockPos> surfaceAirPositions) {
+        double chance = MineGenerationBalance.barrelChancePerTile(floorNumber);
         int placed = 0;
-        int maxAttempts = barrelCount * 40; // 防止无限循环
         boolean shouldPlaceCalicoStatue = shouldPlaceCalicoStatueOnThisFloor(level, random, floorNumber);
 
-        for (int attempt = 0; attempt < maxAttempts && placed < barrelCount; attempt++) {
-            int x = centerX - halfSize + 2 + random.nextInt(size - 4);
-            int z = centerZ - halfSize + 2 + random.nextInt(size - 4);
-
-            // 避开中心安全区
-            if (Math.abs(x - centerX) <= SAFE_ZONE_RADIUS + SAFE_ZONE_BUFFER + 1
-                && Math.abs(z - centerZ) <= SAFE_ZONE_RADIUS + SAFE_ZONE_BUFFER + 1) {
+        for (BlockPos pos : surfaceAirPositions) {
+            if (random.nextDouble() >= chance
+                    || Math.abs(pos.getX() - centerX) <= SAFE_ZONE_RADIUS + SAFE_ZONE_BUFFER + 1
+                    && Math.abs(pos.getZ() - centerZ) <= SAFE_ZONE_RADIUS + SAFE_ZONE_BUFFER + 1) {
                 continue;
             }
-
-            // 从洞窟高度向下扫描找到地面
-            for (int y = FLOOR_Y_END - 1; y >= FLOOR_Y_START + 1; y--) {
-                BlockPos pos = new BlockPos(x, y, z);
-                BlockPos below = pos.below();
-                BlockPos above = pos.above();
-
-                // 需要：当前是空气、下方是实心石材（非装饰块）、上方是空气
-                BlockState belowState = level.getBlockState(below);
-                if (level.getBlockState(pos).isAir()
-                    && !belowState.isAir()
-                    && belowState.isSolidRender(level, below)
-                    && level.getBlockState(above).isAir()) {
-
-                    if (shouldPlaceCalicoStatue && canPlaceCalicoStatue(level, pos)) {
-                        placeCalicoStatue(level, pos);
-                        shouldPlaceCalicoStatue = false;
-                    } else {
-                        level.setBlock(pos, com.stardew.craft.block.ModBlocks.MINE_BARREL.get().defaultBlockState(), 2);
-                    }
-                    placed++;
-                    break;
-                }
+            BlockPos below = pos.below();
+            if (!level.getBlockState(pos).isAir()
+                    || !level.getBlockState(pos.above()).isAir()
+                    || !level.getBlockState(below).isSolidRender(level, below)) {
+                continue;
             }
+            if (shouldPlaceCalicoStatue && canPlaceCalicoStatue(level, pos)) {
+                placeCalicoStatue(level, pos);
+                shouldPlaceCalicoStatue = false;
+            } else {
+                level.setBlock(pos, com.stardew.craft.block.ModBlocks.MINE_BARREL.get().defaultBlockState(), 2);
+            }
+            placed++;
         }
-
+        return placed;
     }
 
     private static boolean shouldPlaceCalicoStatueOnThisFloor(ServerLevel level, RandomSource random, int floorNumber) {

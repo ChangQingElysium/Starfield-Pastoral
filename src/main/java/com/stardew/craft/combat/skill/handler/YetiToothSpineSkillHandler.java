@@ -1,9 +1,9 @@
 package com.stardew.craft.combat.skill.handler;
 
+import com.stardew.craft.combat.skill.YetiToothEffects;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationDispatcher;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationLock;
 import com.stardew.craft.combat.skill.WeaponSkillCooldowns;
-import com.stardew.craft.combat.skill.YetiToothSpineTracker;
 import com.stardew.craft.combat.skill.runtime.RuntimeWeaponSkillHandler;
 import com.stardew.craft.combat.skill.runtime.SkillExecutionContext;
 import com.stardew.craft.combat.skill.runtime.SkillInstance;
@@ -12,6 +12,9 @@ import com.stardew.craft.combat.skill.runtime.SkillValidation;
 import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
 import com.stardew.craft.effect.ModMobEffects;
 import com.stardew.craft.player.PlayerStardewDataAPI;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.LivingEntity;
 
 /**
  * Server-authoritative lifecycle for Yeti Tooth's original ice-spine fan.
@@ -19,13 +22,20 @@ import com.stardew.craft.player.PlayerStardewDataAPI;
 public final class YetiToothSpineSkillHandler implements RuntimeWeaponSkillHandler {
     public static final float ENERGY_COST = 10.0F;
     public static final int ANIMATION_TICKS = 8;
+    public static final int SPINE_COUNT = 5;
+    public static final float ARC_DEGREES = 120.0F;
+    public static final float ANGLE_STEP_DEGREES = 30.0F;
+    public static final double SPAWN_RADIUS = 2.5D;
+    public static final int HIT_SLOW_DURATION_TICKS = 40;
+    public static final int HIT_SLOW_AMPLIFIER = 1;
+    public static final int HIT_FREEZE_DURATION_TICKS = 60;
 
     @Override
     public SkillValidation validate(SkillExecutionContext context) {
         if (WeaponSkillRuntime.hasActive(
                 context.player().getUUID(),
                 context.skillId()
-        ) || YetiToothSpineTracker.isActive(context.player())) {
+        )) {
             return SkillValidation.reject(
                     SkillValidation.RejectionReason.INVALID_STATE
             );
@@ -54,11 +64,11 @@ public final class YetiToothSpineSkillHandler implements RuntimeWeaponSkillHandl
                     "Validated Yeti Tooth Spine energy is no longer available"
             );
         }
-        if (!context.player().getAbilities().instabuild
-                && !PlayerStardewDataAPI.consumeEnergy(
-                        context.player(),
-                        ENERGY_COST
-                )) {
+        if (!WeaponSkillRuntime.consumeEnergyDuringBegin(
+                context,
+                instance,
+                ENERGY_COST
+        )) {
             throw new IllegalStateException(
                     "Validated Yeti Tooth Spine energy payment failed"
             );
@@ -66,18 +76,18 @@ public final class YetiToothSpineSkillHandler implements RuntimeWeaponSkillHandl
 
         String weaponId = context.weaponId().getPath();
         String skillId = context.skillData().getId();
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                weaponId,
-                skillId,
-                context.nowTick(),
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 context.skillData().getCooldown() * 20
         );
-        YetiToothSpineTracker.start(
-                context.player(),
-                context.skillData().getDamagePercent() / 100.0F,
-                skillId,
-                context.weaponSnapshot()
+        YetiToothSpineExecutionState executionState =
+                new YetiToothSpineExecutionState(
+                        context.player().level().dimension()
+                );
+        instance.initializeExecutionState(executionState);
+        instance.registerCommittedEffect(() ->
+                executionState.spawnSpines(context)
         );
 
         // Preserve the authored server notification order.
@@ -104,7 +114,9 @@ public final class YetiToothSpineSkillHandler implements RuntimeWeaponSkillHandl
             SkillExecutionContext context,
             SkillInstance instance
     ) {
-        return YetiToothSpineTracker.isActive(context.player())
+        return instance.requireExecutionState(
+                YetiToothSpineExecutionState.class
+        ).isActive(context.player())
                 ? SkillTickResult.CONTINUE
                 : SkillTickResult.COMPLETE;
     }
@@ -115,7 +127,10 @@ public final class YetiToothSpineSkillHandler implements RuntimeWeaponSkillHandl
             SkillInstance instance,
             SkillInstance.EndReason reason
     ) {
-        YetiToothSpineTracker.stop(context.player());
+        instance.executionState(YetiToothSpineExecutionState.class)
+                .ifPresent(state -> state.discardSpines(
+                        context.player().server
+                ));
     }
 
     static boolean canPayEnergy(
@@ -135,6 +150,30 @@ public final class YetiToothSpineSkillHandler implements RuntimeWeaponSkillHandl
                 context.player().hasEffect(
                         ModMobEffects.STATUE_OF_BLESSINGS_2
                 )
+        );
+    }
+
+    /** Applies the spine's authored control after exact positive damage. */
+    public static void applySpineControl(LivingEntity target) {
+        if (target == null) {
+            return;
+        }
+        boolean alreadySlowed = target.hasEffect(
+                MobEffects.MOVEMENT_SLOWDOWN
+        );
+        if (alreadySlowed
+                && target.level() instanceof ServerLevel serverLevel) {
+            YetiToothEffects.applyFreeze(
+                    serverLevel,
+                    target,
+                    HIT_FREEZE_DURATION_TICKS
+            );
+            return;
+        }
+        YetiToothEffects.applySlow(
+                target,
+                HIT_SLOW_DURATION_TICKS,
+                HIT_SLOW_AMPLIFIER
         );
     }
 }

@@ -64,4 +64,23 @@ class IncomingDamageResolverTest {
         assertEquals(7.0f, range.minimum());
         assertEquals(8.0f, range.maximum());
     }
+
+    @Test
+    void authoredHealthDamageRoundTripsThroughTheEnvironmentBoundary() {
+        float minecraftDamage = DimensionDamageMapper
+                .toMinecraftHealthDamage(2.0F, 125.0F, 25.0F);
+        IncomingDamageResolver.DamageRange range =
+                IncomingDamageResolver.resolveRange(
+                        minecraftDamage,
+                        minecraftDamage,
+                        DamageRequest.SourceKind.ENVIRONMENT,
+                        0.0F,
+                        125.0F,
+                        25.0F
+                );
+
+        assertEquals(0.4F, minecraftDamage, 0.00001F);
+        assertEquals(2.0F, range.minimum(), 0.00001F);
+        assertEquals(2.0F, range.maximum(), 0.00001F);
+    }
 }

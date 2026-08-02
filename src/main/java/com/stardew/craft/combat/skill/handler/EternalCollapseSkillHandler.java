@@ -1,6 +1,5 @@
 package com.stardew.craft.combat.skill.handler;
 
-import com.stardew.craft.combat.skill.EternalCollapseTracker;
 import com.stardew.craft.combat.skill.SingularityTracker;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationDispatcher;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationLock;
@@ -46,8 +45,6 @@ public final class EternalCollapseSkillHandler
         if (WeaponSkillRuntime.hasActive(
                 context.player().getUUID(),
                 context.skillId()
-        ) || EternalCollapseTracker.hasState(
-                context.player().getUUID()
         )) {
             return SkillValidation.reject(
                     SkillValidation.RejectionReason.INVALID_STATE
@@ -60,6 +57,12 @@ public final class EternalCollapseSkillHandler
     public void begin(SkillExecutionContext context, SkillInstance instance) {
         int consumedStacks =
                 SingularityTracker.consumeAll(context.player());
+        instance.registerBeginFailureCleanup(() ->
+                SingularityTracker.setStacks(
+                        context.player(),
+                        consumedStacks
+                )
+        );
         int extraStrikes = extraStrikesForStacks(consumedStacks);
         float critBonus =
                 criticalChanceBonusForStacks(consumedStacks);
@@ -68,11 +71,9 @@ public final class EternalCollapseSkillHandler
 
         String weaponId = context.weaponId().getPath();
         String skillId = context.skillData().getId();
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                weaponId,
-                skillId,
-                context.nowTick(),
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 context.skillData().getCooldown() * 20
         );
 
@@ -89,33 +90,38 @@ public final class EternalCollapseSkillHandler
                 context.player().position(),
                 initialTargets
         );
-        EternalCollapseTracker.start(
-                context.player(),
-                center,
-                context.nowTick(),
-                ACTIVE_DURATION_TICKS,
-                BASE_STRIKE_COUNT + extraStrikes,
-                EFFECT_RADIUS,
-                context.skillData().getDamagePercent() / 100.0F,
-                critBonus,
-                finalStrike,
-                FINAL_STRIKE_DAMAGE_MULTIPLIER,
-                skillId,
-                context.weaponSnapshot()
-        );
-
-        // Preserve the original order after resource commitment and field VFX.
-        WeaponSkillAnimationDispatcher.sendSkillAnim(
-                context.player(),
-                weaponId,
-                skillId,
-                ANIMATION_TICKS
-        );
-        WeaponSkillAnimationLock.setLock(
-                context.player(),
-                context.nowTick(),
-                ANIMATION_TICKS
-        );
+        EternalCollapseExecutionState executionState =
+                new EternalCollapseExecutionState(
+                        center,
+                        context.nowTick(),
+                        ACTIVE_DURATION_TICKS,
+                        BASE_STRIKE_COUNT + extraStrikes,
+                        EFFECT_RADIUS,
+                        context.skillData().getDamagePercent() / 100.0F,
+                        critBonus,
+                        finalStrike,
+                        FINAL_STRIKE_DAMAGE_MULTIPLIER,
+                        skillId,
+                        context.player().level().dimension()
+                );
+        instance.initializeExecutionState(executionState);
+        instance.registerCommittedEffect(() -> {
+            executionState.startPresentation(
+                    context.player(),
+                    ACTIVE_DURATION_TICKS
+            );
+            WeaponSkillAnimationDispatcher.sendSkillAnim(
+                    context.player(),
+                    weaponId,
+                    skillId,
+                    ANIMATION_TICKS
+            );
+            WeaponSkillAnimationLock.setLock(
+                    context.player(),
+                    context.nowTick(),
+                    ANIMATION_TICKS
+            );
+        });
     }
 
     @Override
@@ -128,21 +134,9 @@ public final class EternalCollapseSkillHandler
             SkillExecutionContext context,
             SkillInstance instance
     ) {
-        if (!EternalCollapseTracker.hasState(
-                context.player().getUUID()
-        )) {
-            return SkillTickResult.COMPLETE;
-        }
-        EternalCollapseTracker.Status status =
-                EternalCollapseTracker.tick(
-                        context.player(),
-                        context.nowTick()
-                );
-        return switch (status) {
-            case ACTIVE -> SkillTickResult.CONTINUE;
-            case COMPLETED -> SkillTickResult.COMPLETE;
-            case INVALIDATED -> SkillTickResult.CANCEL;
-        };
+        return instance.requireExecutionState(
+                EternalCollapseExecutionState.class
+        ).advance(context);
     }
 
     @Override
@@ -151,7 +145,8 @@ public final class EternalCollapseSkillHandler
             SkillInstance instance,
             SkillInstance.EndReason reason
     ) {
-        EternalCollapseTracker.cancel(context.player());
+        instance.executionState(EternalCollapseExecutionState.class)
+                .ifPresent(EternalCollapseExecutionState::cancel);
     }
 
     static int extraStrikesForStacks(int stacks) {

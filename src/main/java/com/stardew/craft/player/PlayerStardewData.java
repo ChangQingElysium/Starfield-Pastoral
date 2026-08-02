@@ -33,6 +33,7 @@ import com.stardew.craft.quest.QuestManager;
 @SuppressWarnings("null")
 public class PlayerStardewData {
     private static final float MIN_ENERGY = -16.0F;
+    private static final int CURRENT_RECIPE_UNLOCK_MIGRATION_VERSION = 1;
     
     // 玩家UUID
     private UUID playerUUID;
@@ -89,6 +90,8 @@ public class PlayerStardewData {
     // ============ 其他数据 ============
     private long lastSyncTime;       // 最后一次同步时间
     private boolean dirty;           // 数据是否需要保存
+    private boolean fullSyncDirty;   // 客户端是否需要完整玩家数据
+    private boolean vitalsSyncDirty; // 客户端是否只需要生命/能量快速同步
 
     // ============ 运气系统 ============
     // 每日运气（per-player），按星露谷日期刷新（由 PlayerStardewDataAPI 惰性刷新）
@@ -131,6 +134,7 @@ public class PlayerStardewData {
     // ============ 配方解锁 ============
     private final Set<String> unlockedRecipes = new HashSet<>();
     private final Map<String, Integer> recipeCraftCounts = new HashMap<>();
+    private int recipeUnlockMigrationVersion;
     private int queenOfSauceWatchDay = -1;
     private String queenOfSauceRecipeId = "";
 
@@ -294,6 +298,8 @@ public class PlayerStardewData {
         this.totalMoneyEarned = 500L;
         this.lastSyncTime = System.currentTimeMillis();
         this.dirty = false;
+        this.fullSyncDirty = false;
+        this.vitalsSyncDirty = false;
 
         this.dailyLuck = 0.0;
         this.dailyLuckDateKey = -1;
@@ -518,6 +524,9 @@ public class PlayerStardewData {
                 }
             }
         }
+        data.recipeUnlockMigrationVersion = tag.contains("RecipeUnlockMigrationVersion")
+                ? Math.max(0, tag.getInt("RecipeUnlockMigrationVersion"))
+                : 0;
         data.queenOfSauceWatchDay = tag.contains("QueenOfSauceWatchDay") ? tag.getInt("QueenOfSauceWatchDay") : -1;
         data.queenOfSauceRecipeId = tag.contains("QueenOfSauceRecipeId") ? tag.getString("QueenOfSauceRecipeId") : "";
         data.unlockedWallpaperStyles.add(DecorationStyleRegistry.getDefaultStyleId(DecorationType.WALLPAPER));
@@ -966,6 +975,7 @@ public class PlayerStardewData {
             recipeCraftCountsTag.add(recipeTag);
         }
         tag.put("RecipeCraftCounts", recipeCraftCountsTag);
+        tag.putInt("RecipeUnlockMigrationVersion", recipeUnlockMigrationVersion);
         tag.putInt("QueenOfSauceWatchDay", queenOfSauceWatchDay);
         tag.putString("QueenOfSauceRecipeId", queenOfSauceRecipeId == null ? "" : queenOfSauceRecipeId);
 
@@ -1328,7 +1338,22 @@ public class PlayerStardewData {
      * 此方法只处理职业选择提示并返回列表供升级动画使用。
      */
     public List<SkillLevelUp> applyPendingSkillLevelUps() {
-        List<SkillLevelUp> applied = new ArrayList<>(pendingNewLevels);
+        // SDV has one Farmer.newLevels queue for both ordinary level-up pages
+        // and missed/respec profession choices. Keep already-pending profession
+        // prompts in the presentation queue too, otherwise an empty shipping
+        // night can skip straight to SaveGameMenu with no way to answer them.
+        List<SkillLevelUp> applied = new ArrayList<>();
+        for (ProfessionChoicePrompt prompt : pendingProfessionChoices) {
+            addPresentedLevel(applied, prompt.skill(), prompt.level());
+        }
+        for (SkillLevelUp levelUp : pendingNewLevels) {
+            if (levelUp.newLevel() == 10
+                    && !hasLevel5Profession(levelUp.skill())
+                    && !containsLevelUp(applied, levelUp.skill(), 5)) {
+                addPresentedLevel(applied, levelUp.skill(), 5);
+            }
+            addPresentedLevel(applied, levelUp.skill(), levelUp.newLevel());
+        }
 
         for (SkillLevelUp levelUp : applied) {
             SkillType skill = levelUp.skill();
@@ -1336,9 +1361,17 @@ public class PlayerStardewData {
             if (level == 5 && !hasLevel5Profession(skill) && !hasPendingProfessionChoice(skill, 5)) {
                 pendingProfessionChoices.add(new ProfessionChoicePrompt(skill, 5));
             }
-            if (level == 10 && hasLevel5Profession(skill) && !hasLevel10Profession(skill) && !hasPendingProfessionChoice(skill, 10)) {
+            if (level == 10 && !hasLevel10Profession(skill) && !hasPendingProfessionChoice(skill, 10)) {
                 pendingProfessionChoices.add(new ProfessionChoicePrompt(skill, 10));
             }
+        }
+
+        // Equivalent to LevelUpMenu.AddMissedProfessionChoices. This also
+        // repairs old saves where a profession prompt survived but its
+        // presentation entry was lost.
+        repairMissingProfessionChoices();
+        for (ProfessionChoicePrompt prompt : pendingProfessionChoices) {
+            addPresentedLevel(applied, prompt.skill(), prompt.level());
         }
 
         pendingNewLevels.clear();
@@ -1346,6 +1379,21 @@ public class PlayerStardewData {
             markDirty();
         }
         return applied;
+    }
+
+    private static void addPresentedLevel(List<SkillLevelUp> levels, SkillType skill, int level) {
+        if (!containsLevelUp(levels, skill, level)) {
+            levels.add(new SkillLevelUp(skill, level));
+        }
+    }
+
+    private static boolean containsLevelUp(List<SkillLevelUp> levels, SkillType skill, int level) {
+        for (SkillLevelUp levelUp : levels) {
+            if (levelUp.skill() == skill && levelUp.newLevel() == level) {
+                return true;
+            }
+        }
+        return false;
     }
     
     /**
@@ -1608,14 +1656,17 @@ public class PlayerStardewData {
     }
 
     public void repairMissingProfessionChoices() {
-        pendingProfessionChoices.removeIf(prompt -> getRawSkillLevel(prompt.skill()) < prompt.level());
+        pendingProfessionChoices.removeIf(prompt ->
+                getRawSkillLevel(prompt.skill()) < prompt.level()
+                        || (prompt.level() == 5 && hasLevel5Profession(prompt.skill()))
+                        || (prompt.level() == 10 && hasLevel10Profession(prompt.skill())));
 
         for (SkillType skill : SkillType.values()) {
             int rawLevel = getRawSkillLevel(skill);
             if (rawLevel >= 5 && !hasLevel5Profession(skill) && !hasPendingProfessionChoice(skill, 5)) {
                 pendingProfessionChoices.add(new ProfessionChoicePrompt(skill, 5));
             }
-            if (rawLevel >= 10 && hasLevel5Profession(skill) && !hasLevel10Profession(skill) && !hasPendingProfessionChoice(skill, 10)) {
+            if (rawLevel >= 10 && !hasLevel10Profession(skill) && !hasPendingProfessionChoice(skill, 10)) {
                 pendingProfessionChoices.add(new ProfessionChoicePrompt(skill, 10));
             }
         }
@@ -1638,15 +1689,17 @@ public class PlayerStardewData {
     public boolean consumeEnergy(float amount) {
         if (amount <= 0) return true;
 
-        boolean enough = energy >= amount;
+        if (energy < amount) {
+            return false;
+        }
         energy = clampEnergy(energy - amount);
 
         if (energy <= 0) {
             exhausted = true;
         }
 
-        markDirty();
-        return enough;
+        markVitalsDirty();
+        return true;
     }
     
     /**
@@ -1658,7 +1711,17 @@ public class PlayerStardewData {
         // 恢复到0以上时解除疲惫（需要其他方式治愈）
         // 注意：星露谷中疲惫状态不会自动解除
         
-        markDirty();
+        markVitalsDirty();
+    }
+
+    /** Restores both values changed by a failed begin-time energy payment. */
+    public void rollbackEnergyPayment(
+            float amount,
+            boolean exhaustedBefore
+    ) {
+        energy = clampEnergy(energy + Math.max(0.0F, amount));
+        exhausted = exhaustedBefore;
+        markVitalsDirty();
     }
     
     /**
@@ -1666,7 +1729,7 @@ public class PlayerStardewData {
      */
     public void cureExhaustion() {
         exhausted = false;
-        markDirty();
+        markVitalsDirty();
     }
     
     /**
@@ -1768,27 +1831,28 @@ public class PlayerStardewData {
     public int getHealth() { return health; }
     public void setHealth(int health) { 
         this.health = Math.max(0, Math.min(health, maxHealth));
-        markDirty();
+        markVitalsDirty();
     }
     
     public int getMaxHealth() { return maxHealth; }
     public void setMaxHealth(int maxHealth) {
         this.maxHealth = Math.max(100, maxHealth);
         this.health = Math.min(this.health, this.maxHealth);
-        markDirty();
+        markVitalsDirty();
     }
     
     public float getEnergy() { return energy; }
     public void setEnergy(float energy) {
         this.energy = clampEnergy(energy);
-        markDirty();
+        markVitalsDirty();
     }
     
     public int getMaxEnergy() { return getEffectiveMaxEnergy(); }
+    public int getBaseMaxEnergy() { return maxEnergy; }
     public void setMaxEnergy(int maxEnergy) {
         this.maxEnergy = Math.max(270, maxEnergy);
         this.energy = Math.min(this.energy, getEffectiveMaxEnergy());
-        markDirty();
+        markVitalsDirty();
     }
 
     public int getStardropsConsumed() { return stardropsConsumed; }
@@ -2033,6 +2097,20 @@ public class PlayerStardewData {
             markDirty();
         }
         return changed;
+    }
+
+    /**
+     * Repairs recipe grants made by older StardewCraft data without touching later purchases.
+     */
+    public boolean applyRecipeUnlockMigrations() {
+        if (recipeUnlockMigrationVersion >= CURRENT_RECIPE_UNLOCK_MIGRATION_VERSION) {
+            return false;
+        }
+        // Source Data/CraftingRecipes marks Fish Smoker as null (shop-only), not default.
+        unlockedRecipes.remove(RecipeIdNormalizer.storageId("fish_smoker"));
+        recipeUnlockMigrationVersion = CURRENT_RECIPE_UNLOCK_MIGRATION_VERSION;
+        markDirty();
+        return true;
     }
 
     public boolean hasWatchedQueenOfSauceOnDay(int dayKey) {
@@ -2496,6 +2574,12 @@ public class PlayerStardewData {
             mailbox.add(mailId);
             markDirty();
         }
+    }
+
+    /** Vanilla's daily friendship-letter path appends directly and may repeat unread mail. */
+    public void addRecurringFriendshipMailToMailbox(String mailId) {
+        mailbox.add(mailId);
+        markDirty();
     }
 
     // ──── Mail For Tomorrow (SDV Farmer.mailForTomorrow parity) ────
@@ -3088,9 +3172,36 @@ public class PlayerStardewData {
     }
     
     public void markDirty() {
+        markPersistentDirty();
+        this.fullSyncDirty = true;
+        com.stardew.craft.leaderboard.LeaderboardService.invalidateCache();
+    }
+
+    private void markVitalsDirty() {
+        markPersistentDirty();
+        this.vitalsSyncDirty = true;
+    }
+
+    private void markPersistentDirty() {
         this.dirty = true;
         this.lastSyncTime = System.currentTimeMillis();
-        com.stardew.craft.leaderboard.LeaderboardService.invalidateCache();
+    }
+
+    public boolean isFullSyncDirty() {
+        return fullSyncDirty;
+    }
+
+    public boolean isVitalsSyncDirty() {
+        return vitalsSyncDirty;
+    }
+
+    public void markFullSyncClean() {
+        this.fullSyncDirty = false;
+        this.vitalsSyncDirty = false;
+    }
+
+    public void markVitalsSyncClean() {
+        this.vitalsSyncDirty = false;
     }
     
     public void markClean() {

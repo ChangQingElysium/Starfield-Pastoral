@@ -1,6 +1,6 @@
 package com.stardew.craft.combat.skill.handler;
 
-import com.stardew.craft.combat.skill.LightCounterParryState;
+import com.stardew.craft.combat.skill.WeaponDamageSnapshot;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationDispatcher;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationLock;
 import com.stardew.craft.combat.skill.WeaponSkillCooldowns;
@@ -10,6 +10,8 @@ import com.stardew.craft.combat.skill.runtime.SkillInstance;
 import com.stardew.craft.combat.skill.runtime.SkillTickResult;
 import com.stardew.craft.combat.skill.runtime.SkillValidation;
 import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
+import java.util.Optional;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 
@@ -21,7 +23,8 @@ import net.minecraft.world.effect.MobEffects;
  * expiry, animation lock and cancellation cleanup.</p>
  */
 public final class LightCounterSkillHandler implements RuntimeWeaponSkillHandler {
-    public static final int WINDOW_TICKS = LightCounterParryState.DEFAULT_WINDOW_TICKS;
+    public static final int WINDOW_TICKS = 20;
+    public static final int COUNTER_ANIM_TICKS = 8;
     public static final int INITIAL_RESISTANCE_TICKS = 7;
     public static final int INITIAL_RESISTANCE_AMPLIFIER = 0;
     public static final int ANIMATION_TICKS = WINDOW_TICKS;
@@ -47,27 +50,29 @@ public final class LightCounterSkillHandler implements RuntimeWeaponSkillHandler
         String weaponId = context.weaponId().getPath();
         String skillId = context.skillData().getId();
 
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                weaponId,
-                skillId,
-                context.nowTick(),
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 context.skillData().getCooldown() * 20
         );
-        context.player().addEffect(new MobEffectInstance(
-                MobEffects.DAMAGE_RESISTANCE,
-                INITIAL_RESISTANCE_TICKS,
-                INITIAL_RESISTANCE_AMPLIFIER,
-                false,
-                false,
-                true
-        ));
-        LightCounterParryState.start(
-                context.player(),
-                context.nowTick(),
-                WINDOW_TICKS,
-                weaponId,
-                context.weaponSnapshot()
+        instance.registerCommittedEffect(() ->
+                context.player().addEffect(new MobEffectInstance(
+                        MobEffects.DAMAGE_RESISTANCE,
+                        INITIAL_RESISTANCE_TICKS,
+                        INITIAL_RESISTANCE_AMPLIFIER,
+                        false,
+                        false,
+                        true
+                ))
+        );
+        instance.initializeExecutionState(
+                new LightCounterExecutionState(
+                        context.player().level().dimension(),
+                        context.nowTick(),
+                        WINDOW_TICKS,
+                        weaponId,
+                        context.weaponSnapshot()
+                )
         );
         WeaponSkillAnimationLock.setLock(
                 context.player(),
@@ -87,11 +92,35 @@ public final class LightCounterSkillHandler implements RuntimeWeaponSkillHandler
         return false;
     }
 
+    /**
+     * Atomically consumes only this caster's exact active Light Counter.
+     * Cooldown and runtime termination remain owned by the skill runtime.
+     */
+    public static Optional<CounterActivation> consumeParry(
+            ServerPlayer player,
+            long nowTick
+    ) {
+        if (player == null) {
+            return Optional.empty();
+        }
+        return WeaponSkillRuntime.activeExecutionState(
+                player.getUUID(),
+                BuiltinWeaponSkillHandlers.LIGHT_COUNTER,
+                LightCounterExecutionState.class
+        ).flatMap(state -> state.consume(
+                nowTick,
+                player.level().dimension()
+        ));
+    }
+
     @Override
     public SkillTickResult tick(SkillExecutionContext context, SkillInstance instance) {
-        return LightCounterParryState.isActive(context.player(), context.nowTick())
-                ? SkillTickResult.CONTINUE
-                : SkillTickResult.COMPLETE;
+        return instance.requireExecutionState(
+                LightCounterExecutionState.class
+        ).advance(
+                context.nowTick(),
+                context.player().level().dimension()
+        );
     }
 
     @Override
@@ -100,9 +129,12 @@ public final class LightCounterSkillHandler implements RuntimeWeaponSkillHandler
             SkillInstance instance,
             SkillInstance.EndReason reason
     ) {
-        String activeWeaponId = LightCounterParryState.getWeaponId(context.player());
-        if (context.weaponId().getPath().equals(activeWeaponId)) {
-            LightCounterParryState.clear(context.player());
-        }
+        instance.executionState(LightCounterExecutionState.class)
+                .ifPresent(LightCounterExecutionState::cancel);
     }
+
+    public record CounterActivation(
+            String weaponId,
+            WeaponDamageSnapshot weaponSnapshot
+    ) {}
 }

@@ -1,5 +1,6 @@
 package com.stardew.craft.combat.skill;
 
+import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 
@@ -22,7 +23,18 @@ public final class WeaponSkillAnimationLock {
     }
 
     public static void setLock(Player player, long nowTick, int durationTicks) {
+        if (WeaponSkillRuntime.deferIfPreparing(() ->
+                setLock(player, nowTick, durationTicks)
+        )) {
+            return;
+        }
         CompoundTag root = player.getPersistentData();
         root.putLong(TAG_ROOT, nowTick + Math.max(1, durationTicks));
+    }
+
+    public static void clear(Player player) {
+        if (player != null) {
+            player.getPersistentData().remove(TAG_ROOT);
+        }
     }
 }

@@ -10,6 +10,7 @@ import com.stardew.craft.combat.skill.runtime.SkillExecutionContext;
 import com.stardew.craft.combat.skill.runtime.SkillInstance;
 import com.stardew.craft.combat.skill.runtime.SkillTargeting;
 import com.stardew.craft.combat.skill.runtime.SkillValidation;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
 import com.stardew.craft.effect.ModMobEffects;
 import com.stardew.craft.item.weapon.WeaponSkillData;
 import java.util.List;
@@ -44,11 +45,9 @@ public final class TreeBlessingSkillHandler implements RuntimeWeaponSkillHandler
         String weaponId = context.weaponId().getPath();
         String skillId = context.skillData().getId();
 
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                weaponId,
-                skillId,
-                context.nowTick(),
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 context.skillData().getCooldown() * 20
         );
 
@@ -60,25 +59,28 @@ public final class TreeBlessingSkillHandler implements RuntimeWeaponSkillHandler
             instance.setTargetEntityIds(List.of(target.getId()));
         }
 
-        // The authored defensive effect is granted even when no target exists.
-        context.player().addEffect(new MobEffectInstance(
-                ModMobEffects.SHELTER,
-                SHELTER_DURATION_TICKS,
-                SHELTER_AMPLIFIER,
-                false,
-                false,
-                true
-        ));
-
-        if (target != null) {
-            WeaponSkillDamage.apply(
-                    context.player(),
-                    target,
-                    createHitContext(context.skillData()),
-                    context.weaponSnapshot(),
-                    context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS
-            );
-        }
+        instance.registerCommittedEffect(() -> {
+            context.player().addEffect(new MobEffectInstance(
+                    ModMobEffects.SHELTER,
+                    SHELTER_DURATION_TICKS,
+                    SHELTER_AMPLIFIER,
+                    false,
+                    false,
+                    true
+            ));
+            if (target != null) {
+                WeaponSkillDamage.apply(
+                        context.player(),
+                        target,
+                        createHitContext(context.skillData()),
+                        context.weaponSnapshot(),
+                        context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS,
+                        WeaponSkillDamage.AttackGatePolicy
+                                .RESPECT_AT_IMPACT,
+                        WeaponSkillDamage.HitCooldownPolicy.RESPECT_VANILLA
+                );
+            }
+        });
 
         WeaponSkillAnimationLock.setLock(
                 context.player(),

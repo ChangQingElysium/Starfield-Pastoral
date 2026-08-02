@@ -1,6 +1,5 @@
 package com.stardew.craft.combat.skill.handler;
 
-import com.stardew.craft.combat.skill.BrokenTridentThrustTracker;
 import com.stardew.craft.item.weapon.WeaponData;
 import com.stardew.craft.item.weapon.WeaponRegistry;
 import com.stardew.craft.item.weapon.WeaponSkillData;
@@ -25,13 +24,31 @@ class FishcatchThrustSkillHandlerTest {
         assertEquals(5, FishcatchThrustSkillHandler.DAMAGE_RESISTANCE_TICKS);
         assertEquals(0, FishcatchThrustSkillHandler.DAMAGE_RESISTANCE_AMPLIFIER);
         assertEquals(18, FishcatchThrustSkillHandler.ANIMATION_TICKS);
-        assertEquals(3, BrokenTridentThrustTracker.DEFAULT_STRIKES);
-        assertEquals(3, BrokenTridentThrustTracker.DEFAULT_INTERVAL_TICKS);
-        assertEquals(100, BrokenTridentThrustTracker.FISH_CATCH_DURATION_TICKS);
-        assertEquals(0.10F, BrokenTridentThrustTracker.FISH_CATCH_DAMAGE_BONUS);
-        assertEquals(0, BrokenTridentThrustTracker.FISH_CATCH_SLOW_AMPLIFIER);
-        assertEquals(5, BrokenTridentThrustTracker.HIT_CONTEXT_LIFETIME_TICKS);
-        assertEquals(2.5, BrokenTridentThrustTracker.REACQUIRE_RANGE);
+        assertEquals(3, FishcatchThrustSkillHandler.STRIKE_COUNT);
+        assertEquals(3, FishcatchThrustSkillHandler.STRIKE_INTERVAL_TICKS);
+        assertEquals(100, FishcatchThrustSkillHandler.FISH_CATCH_DURATION_TICKS);
+        assertEquals(0.10F, FishcatchThrustSkillHandler.FISH_CATCH_DAMAGE_BONUS);
+        assertEquals(0, FishcatchThrustSkillHandler.FISH_CATCH_SLOW_AMPLIFIER);
+        assertEquals(5, FishcatchThrustSkillHandler.HIT_CONTEXT_LIFETIME_TICKS);
+        assertEquals(2.5, FishcatchThrustSkillHandler.REACQUIRE_RANGE);
         assertFalse(new FishcatchThrustSkillHandler().completesImmediately());
+    }
+
+    @Test
+    void activeFishCatchAddsTenPercentagePointsPerStrike() {
+        assertEquals(
+                0.40F,
+                FishcatchThrustExecutionState.damageMultiplier(
+                        0.40F,
+                        false
+                )
+        );
+        assertEquals(
+                0.50F,
+                FishcatchThrustExecutionState.damageMultiplier(
+                        0.40F,
+                        true
+                )
+        );
     }
 }

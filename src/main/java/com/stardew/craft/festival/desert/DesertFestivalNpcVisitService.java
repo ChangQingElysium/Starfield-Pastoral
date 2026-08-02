@@ -34,7 +34,7 @@ public final class DesertFestivalNpcVisitService {
         Map.entry("demetrius", visit("DesertFestival_2", 910, "desert_festival_visit_demetrius", 2, "")),
         Map.entry("haley", visit("DesertFestival_2", 900, "desert_festival_visit_haley", 2, "haley_desert_festival")),
         Map.entry("lewis", visit("DesertFestival_2", 800, "desert_festival_visit_lewis_day2", 2, "")),
-        Map.entry("linus", visit("DesertFestival_2", 700, "desert_festival_visit_linus", 1, "")),
+        Map.entry("linus", visit("DesertFestival_2", 700, "desert_festival_visit_linus", 1, "dialogue")),
         Map.entry("maru", visit("DesertFestival_2", 1000, "desert_festival_visit_maru", 1, "square_1_5_1")),
         Map.entry("pam", visit("DesertFestival_2", 900, "desert_festival_visit_pam", 2, "")),
         Map.entry("penny", visit("DesertFestival_2", 1000, "desert_festival_visit_penny", 2, "")),
@@ -61,6 +61,12 @@ public final class DesertFestivalNpcVisitService {
             return null;
         }
         VisitEntry daySpecific = daySpecificVisit(npcId);
+        if (daySpecific != null
+            && "george".equals(normalize(npcId))
+            && "DesertFestival_3".equals(daySpecific.scheduleKey())
+            && scheduleClock >= 2250) {
+            return null;
+        }
         if (daySpecific != null && scheduleClock >= daySpecific.arrivalTime()) {
             return daySpecific;
         }

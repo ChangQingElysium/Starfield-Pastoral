@@ -7,7 +7,14 @@
   {
     "id": "winter_2_1",
     "text": "stardewcraft.mail.winter_2_1",
-    "background": 0
+    "background": 0,
+    "questId": "109"
+  },
+  {
+    "id": "winter_6_1",
+    "text": "stardewcraft.mail.winter_6_1",
+    "background": 0,
+    "questId": "110"
   },
   {
     "id": "winter_7",
@@ -22,7 +29,8 @@
   {
     "id": "winter_12_1",
     "text": "stardewcraft.mail.winter_12_1",
-    "background": 0
+    "background": 0,
+    "questId": "111"
   },
   {
     "id": "winter_14_1",
@@ -35,9 +43,21 @@
     "background": 0
   },
   {
+    "id": "winter_17_1",
+    "text": "stardewcraft.mail.winter_17_1",
+    "background": 0,
+    "questId": "112"
+  },
+  {
     "id": "winter_18",
     "text": "stardewcraft.mail.winter_18",
     "background": 0
+  },
+  {
+    "id": "winter_21_1",
+    "text": "stardewcraft.mail.winter_21_1",
+    "background": 0,
+    "questId": "113"
   },
   {
     "id": "winter_24",
@@ -45,8 +65,32 @@
     "background": 0
   },
   {
+    "id": "winter_26_1",
+    "text": "stardewcraft.mail.winter_26_1",
+    "background": 0,
+    "questId": "114"
+  },
+  {
     "id": "winter_27_1",
     "text": "stardewcraft.mail.winter_27_1",
     "background": 0
+  },
+  {
+    "id": "winter_5_2",
+    "text": "stardewcraft.mail.winter_5_2",
+    "background": 0,
+    "questId": "123"
+  },
+  {
+    "id": "winter_13_2",
+    "text": "stardewcraft.mail.winter_13_2",
+    "background": 0,
+    "questId": "124"
+  },
+  {
+    "id": "winter_19_2",
+    "text": "stardewcraft.mail.winter_19_2",
+    "background": 0,
+    "questId": "125"
   }
 ]

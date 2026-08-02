@@ -1,6 +1,5 @@
 package com.stardew.craft.combat.skill.handler;
 
-import com.stardew.craft.combat.skill.YetiToothSpineTracker;
 import com.stardew.craft.item.weapon.WeaponData;
 import com.stardew.craft.item.weapon.WeaponRegistry;
 import com.stardew.craft.item.weapon.WeaponSkillData;
@@ -24,10 +23,13 @@ class YetiToothSpineSkillHandlerTest {
         assertEquals(20, skill.getCooldown());
         assertEquals(10.0F, YetiToothSpineSkillHandler.ENERGY_COST);
         assertEquals(8, YetiToothSpineSkillHandler.ANIMATION_TICKS);
-        assertEquals(5, YetiToothSpineTracker.SPINE_COUNT);
-        assertEquals(120.0F, YetiToothSpineTracker.ARC_DEGREES);
-        assertEquals(30.0F, YetiToothSpineTracker.ANGLE_STEP_DEGREES);
-        assertEquals(2.5, YetiToothSpineTracker.SPAWN_RADIUS);
+        assertEquals(5, YetiToothSpineSkillHandler.SPINE_COUNT);
+        assertEquals(120.0F, YetiToothSpineSkillHandler.ARC_DEGREES);
+        assertEquals(
+                30.0F,
+                YetiToothSpineSkillHandler.ANGLE_STEP_DEGREES
+        );
+        assertEquals(2.5D, YetiToothSpineSkillHandler.SPAWN_RADIUS);
         assertFalse(new YetiToothSpineSkillHandler().completesImmediately());
     }
 

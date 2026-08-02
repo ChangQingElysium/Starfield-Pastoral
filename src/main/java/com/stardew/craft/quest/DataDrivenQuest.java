@@ -98,8 +98,13 @@ public final class DataDrivenQuest extends StardewQuest {
 
     @Override
     public boolean onItemOfferedToNpc(ServerPlayer player, String npcId, String itemId) {
+        return onItemOfferedToNpc(player, npcId, itemId, 1);
+    }
+
+    @Override
+    public boolean onItemOfferedToNpc(ServerPlayer player, String npcId, String itemId, int count) {
         return progress(player, new QuestProgressEvent(
-                QuestProgressEvents.ITEM_OFFERED_TO_NPC, itemId, npcId, 1)).consumed();
+                QuestProgressEvents.ITEM_OFFERED_TO_NPC, itemId, npcId, Math.max(1, count))).consumed();
     }
 
     @Override

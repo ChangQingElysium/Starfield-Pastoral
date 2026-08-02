@@ -1,5 +1,7 @@
 package com.stardew.craft.cutscene.network;
 
+import com.stardew.craft.cutscene.data.EventRegistry;
+
 import java.util.Set;
 
 /**
@@ -14,7 +16,7 @@ public final class ClientEventSeenCache {
     private ClientEventSeenCache() {}
 
     public static boolean hasSeen(String eventId) {
-        return state.seenEvents().contains(eventId);
+        return EventRegistry.equivalentIds(eventId).stream().anyMatch(state.seenEvents()::contains);
     }
 
     public static Set<String> all() {

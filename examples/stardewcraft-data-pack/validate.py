@@ -64,6 +64,11 @@ def main() -> None:
     require(sword["slot"] == "stardewcraft:weapon", "equipment probe must use the public weapon slot")
     require(sword["weapon"]["primary_skill"] == f"{NAMESPACE}:apple_dash",
             "equipment probe must target the addon skill handler")
+    require(
+        sword["weapon"]["speed"] == 1
+        and sword["weapon"]["raw_speed"] == 3,
+        "equipment probe must preserve odd raw weapon speed",
+    )
 
     food_effects = load("data/stardewcraft/data_maps/item/stardew_food_effects.json")
     pumpkin_effect = food_effects["values"]["minecraft:pumpkin_pie"]["effects"][

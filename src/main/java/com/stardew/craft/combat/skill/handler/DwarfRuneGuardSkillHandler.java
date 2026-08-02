@@ -1,6 +1,5 @@
 package com.stardew.craft.combat.skill.handler;
 
-import com.stardew.craft.combat.skill.DwarfRuneGuardTracker;
 import com.stardew.craft.combat.skill.SkillContext;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationDispatcher;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationLock;
@@ -15,10 +14,9 @@ import com.stardew.craft.combat.skill.runtime.SkillValidation;
 import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
 import com.stardew.craft.effect.ModMobEffects;
 import com.stardew.craft.item.weapon.WeaponSkillData;
-import com.stardew.craft.player.PlayerStardewDataAPI;
 import java.util.List;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
@@ -41,7 +39,7 @@ public final class DwarfRuneGuardSkillHandler
         if (WeaponSkillRuntime.hasActive(
                 context.player().getUUID(),
                 context.skillId()
-        ) || DwarfRuneGuardTracker.hasState(context.player())) {
+        )) {
             return SkillValidation.reject(
                     SkillValidation.RejectionReason.INVALID_STATE
             );
@@ -71,51 +69,46 @@ public final class DwarfRuneGuardSkillHandler
             instance.setTargetEntityIds(List.of(target.getId()));
         }
 
-        context.player().addEffect(new MobEffectInstance(
-                ModMobEffects.SHELTER,
-                SHELTER_DURATION_TICKS,
-                SHELTER_AMPLIFIER,
-                false,
-                true,
-                true
-        ));
-        DwarfRuneGuardTracker.start(
-                context.player(),
-                context.nowTick(),
-                SHELTER_DURATION_TICKS
-        );
-
         String weaponId = context.weaponId().getPath();
         String skillId = context.skillData().getId();
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                weaponId,
-                skillId,
-                context.nowTick(),
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 context.skillData().getCooldown() * 20
         );
+        instance.initializeExecutionState(
+                new DwarfRuneGuardExecutionState(
+                        target == null ? null : target.getUUID()
+                )
+        );
 
-        if (target != null) {
-            WeaponSkillDamage.apply(
-                    context.player(),
-                    target,
-                    createHitContext(context.skillData()),
-                    context.weaponSnapshot(),
-                    context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS
-            );
-            target.addEffect(new MobEffectInstance(
-                    MobEffects.MOVEMENT_SLOWDOWN,
-                    SLOW_DURATION_TICKS,
-                    SLOW_AMPLIFIER,
+        instance.registerCommittedEffect(() -> {
+            DwarfRuneGuardExecutionState state =
+                    instance.requireExecutionState(
+                            DwarfRuneGuardExecutionState.class
+                    );
+            context.player().addEffect(new MobEffectInstance(
+                    ModMobEffects.SHELTER,
+                    SHELTER_DURATION_TICKS,
+                    SHELTER_AMPLIFIER,
                     false,
                     true,
                     true
             ));
-        }
-        PlayerStardewDataAPI.restoreEnergy(
-                context.player(),
-                energyRestoreForTarget(target != null)
-        );
+            if (target != null) {
+                WeaponSkillDamage.apply(
+                        context.player(),
+                        target,
+                        createHitContext(context.skillData()),
+                        context.weaponSnapshot(),
+                        context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS,
+                        WeaponSkillDamage.AttackGatePolicy
+                                .RESPECT_AT_IMPACT,
+                        WeaponSkillDamage.HitCooldownPolicy.RESPECT_VANILLA
+                );
+            }
+            state.settleMiss(context.player());
+        });
 
         // Preserve the authored notification and action-lock order.
         WeaponSkillAnimationDispatcher.sendSkillAnim(
@@ -141,27 +134,32 @@ public final class DwarfRuneGuardSkillHandler
             SkillExecutionContext context,
             SkillInstance instance
     ) {
-        return switch (DwarfRuneGuardTracker.tick(
-                context.player(),
+        return isGuardWindowComplete(
+                instance.startGameTick(),
                 context.nowTick()
-        )) {
-            case ACTIVE -> SkillTickResult.CONTINUE;
-            case EXPIRED -> SkillTickResult.COMPLETE;
-            case INVALIDATED -> SkillTickResult.CANCEL;
-        };
+        )
+                ? SkillTickResult.COMPLETE
+                : SkillTickResult.CONTINUE;
     }
 
-    @Override
-    public void finish(
-            SkillExecutionContext context,
-            SkillInstance instance,
-            SkillInstance.EndReason reason
+    /** Records this execution's exact positive strike result once. */
+    public static boolean onAppliedHit(
+            ServerPlayer player,
+            LivingEntity target
     ) {
-        DwarfRuneGuardTracker.stop(context.player());
+        if (player == null || target == null) {
+            return false;
+        }
+        return WeaponSkillRuntime.activeExecutionState(
+                player.getUUID(),
+                BuiltinWeaponSkillHandlers.DWARF_RUNE_GUARD,
+                DwarfRuneGuardExecutionState.class
+        ).map(state -> state.onAppliedHit(player, target))
+                .orElse(false);
     }
 
-    static float energyRestoreForTarget(boolean hasTarget) {
-        return hasTarget ? HIT_ENERGY_RESTORE : MISS_ENERGY_RESTORE;
+    static boolean isGuardWindowComplete(long startTick, long nowTick) {
+        return nowTick >= startTick + SHELTER_DURATION_TICKS;
     }
 
     static SkillContext createHitContext(WeaponSkillData skillData) {

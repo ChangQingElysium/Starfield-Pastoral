@@ -21,6 +21,7 @@ public final class WeaponSkillContextStore {
     private static final String TAG_IGNORE_DEF = "IgnoreDefense";
     private static final String TAG_GUARANTEED_CRIT = "GuaranteedCrit";
     private static final String TAG_CRIT_CHANCE_BONUS = "CritChanceBonus";
+    private static final String TAG_DEFAULT_KNOCKBACK = "DefaultKnockback";
     private static final String TAG_EXPIRE_TICK = "ExpireTick";
     private static final Map<UUID, BoundWeaponSnapshot> BOUND_WEAPONS =
             new HashMap<>();
@@ -168,11 +169,15 @@ public final class WeaponSkillContextStore {
         }
     }
 
-    /**
-     * Clears in-memory release snapshots when the caster leaves the server.
-     * The legacy NBT context has a short absolute expiry and is discarded by
-     * the next has/consume call.
-     */
+    public static synchronized void clear(Player player) {
+        if (player == null) {
+            return;
+        }
+        player.getPersistentData().remove(TAG_ROOT);
+        BOUND_WEAPONS.remove(player.getUUID());
+    }
+
+    /** Clears the in-memory portion when no concrete player is available. */
     public static synchronized void removePlayer(UUID playerId) {
         if (playerId != null) {
             BOUND_WEAPONS.remove(playerId);
@@ -187,6 +192,7 @@ public final class WeaponSkillContextStore {
         tag.putBoolean(TAG_IGNORE_DEF, context.isIgnoreDefense());
         tag.putBoolean(TAG_GUARANTEED_CRIT, context.isGuaranteedCrit());
         tag.putFloat(TAG_CRIT_CHANCE_BONUS, context.getCritChanceBonus());
+        tag.putBoolean(TAG_DEFAULT_KNOCKBACK, context.usesDefaultKnockback());
         tag.putLong(TAG_EXPIRE_TICK, expireTick);
         return tag;
     }
@@ -204,6 +210,10 @@ public final class WeaponSkillContextStore {
                 .ignoreDefense(tag.getBoolean(TAG_IGNORE_DEF))
                 .guaranteedCrit(tag.getBoolean(TAG_GUARANTEED_CRIT))
                 .critChanceBonus(tag.getFloat(TAG_CRIT_CHANCE_BONUS))
+                .defaultKnockback(
+                        !tag.contains(TAG_DEFAULT_KNOCKBACK)
+                                || tag.getBoolean(TAG_DEFAULT_KNOCKBACK)
+                )
                 .build();
     }
 

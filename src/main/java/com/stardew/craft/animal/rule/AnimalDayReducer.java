@@ -78,6 +78,31 @@ public final class AnimalDayReducer {
         return new BeginResult(state, false, leftOut);
     }
 
+    /**
+     * Completes the second source pass for an animal moved indoors by an open door.
+     *
+     * <p>{@code FarmAnimal.dayUpdate(Farm)} returns immediately after moving the animal into its
+     * home. Later in the same {@code Farm.DayUpdate}, {@code Building.dayUpdate} invokes the
+     * animal-house update and the animal receives the rest of its daily transition there.
+     */
+    public static BeginResult continueAfterOpenDoorReturn(
+            FarmAnimalDefinition definition,
+            BeginResult returnedHome,
+            int timeOfDay
+    ) {
+        Objects.requireNonNull(definition, "definition");
+        Objects.requireNonNull(returnedHome, "returnedHome");
+        if (!returnedHome.returnedHomeEarly()) {
+            return returnedHome;
+        }
+        return begin(new BeginInput(
+                definition,
+                returnedHome.state(),
+                HomeSituation.INSIDE_DOOR_OPEN,
+                timeOfDay
+        ));
+    }
+
     public static FinishResult finish(FinishInput input, RandomPort random) {
         return finish(input, random, null);
     }

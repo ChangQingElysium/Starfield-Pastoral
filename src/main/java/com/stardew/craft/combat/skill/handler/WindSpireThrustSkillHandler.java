@@ -12,10 +12,14 @@ import com.stardew.craft.combat.skill.runtime.RuntimeWeaponSkillHandler;
 import com.stardew.craft.combat.skill.runtime.SkillExecutionContext;
 import com.stardew.craft.combat.skill.runtime.SkillInstance;
 import com.stardew.craft.combat.skill.runtime.SkillValidation;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillMovementArbiter;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillMovementControl;
 import com.stardew.craft.effect.ModMobEffects;
 import com.stardew.craft.item.weapon.WeaponSkillData;
 import java.util.List;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
@@ -38,6 +42,14 @@ public final class WindSpireThrustSkillHandler implements RuntimeWeaponSkillHand
 
     @Override
     public SkillValidation validate(SkillExecutionContext context) {
+        if (WeaponSkillMovementControl.isLocked(
+                context.player(),
+                context.nowTick()
+        )) {
+            return SkillValidation.reject(
+                    SkillValidation.RejectionReason.INVALID_STATE
+            );
+        }
         boolean coolingDown = WeaponSkillCooldowns.isOnCooldown(
                 context.player(),
                 context.weaponId().getPath(),
@@ -51,14 +63,20 @@ public final class WindSpireThrustSkillHandler implements RuntimeWeaponSkillHand
 
     @Override
     public void begin(SkillExecutionContext context, SkillInstance instance) {
+        if (WeaponSkillMovementControl.isLocked(
+                context.player(),
+                context.nowTick()
+        )) {
+            throw new IllegalStateException(
+                    "Validated Wind Spire movement is now locked"
+            );
+        }
         String weaponId = context.weaponId().getPath();
         String skillId = context.skillData().getId();
 
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                weaponId,
-                skillId,
-                context.nowTick(),
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 context.skillData().getCooldown() * 20
         );
 
@@ -66,44 +84,35 @@ public final class WindSpireThrustSkillHandler implements RuntimeWeaponSkillHand
                 context.player(),
                 TARGET_RANGE
         );
-        if (target == null) {
-            DashMovementTracker.start(
-                    context.player(),
-                    context.nowTick(),
-                    computeDashEnd(context.player(), NO_TARGET_DASH_DISTANCE),
-                    DASH_DURATION_TICKS
-            );
-        } else {
+        if (target != null) {
             instance.setTargetEntityIds(List.of(target.getId()));
-            teleportToTargetFront(context.player(), target);
-            faceTarget(context.player(), target);
-
-            WeaponSkillDamage.apply(
-                    context.player(),
-                    target,
-                    createHitContext(context.skillData()),
-                    context.weaponSnapshot(),
-                    context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS
-            );
-
-            context.player().addEffect(new MobEffectInstance(
-                    ModMobEffects.SPEED,
-                    GALE_DURATION_TICKS,
-                    SPEED_AMPLIFIER,
-                    false,
-                    true,
-                    true
-            ));
-            WindSpireTracker.start(
-                    context.player(),
-                    context.nowTick(),
-                    GALE_DURATION_TICKS
-            );
-            PacketDistributor.sendToPlayer(
-                    context.player(),
-                    new WindSpirePayload(true, GALE_DURATION_TICKS)
-            );
         }
+        instance.registerCommittedEffect(() -> {
+            if (target == null) {
+                DashMovementTracker.start(
+                        context.player(),
+                        context.nowTick(),
+                        computeDashEnd(
+                                context.player(),
+                                NO_TARGET_DASH_DISTANCE
+                        ),
+                        DASH_DURATION_TICKS
+                );
+            } else {
+                teleportToTargetFront(context.player(), target);
+                faceTarget(context.player(), target);
+                WeaponSkillDamage.apply(
+                        context.player(),
+                        target,
+                        createHitContext(context.skillData()),
+                        context.weaponSnapshot(),
+                        context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS,
+                        WeaponSkillDamage.AttackGatePolicy
+                                .RESPECT_AT_IMPACT,
+                        WeaponSkillDamage.HitCooldownPolicy.RESPECT_VANILLA
+                );
+            }
+        });
 
         WeaponSkillAnimationLock.setLock(
                 context.player(),
@@ -115,6 +124,26 @@ public final class WindSpireThrustSkillHandler implements RuntimeWeaponSkillHand
                 weaponId,
                 skillId,
                 ANIMATION_TICKS
+        );
+    }
+
+    /** Grants Gale only after the exact thrust deals positive damage. */
+    public static void grantGale(ServerPlayer player, long nowTick) {
+        if (player == null) {
+            return;
+        }
+        player.addEffect(new MobEffectInstance(
+                ModMobEffects.SPEED,
+                GALE_DURATION_TICKS,
+                SPEED_AMPLIFIER,
+                false,
+                true,
+                true
+        ));
+        WindSpireTracker.start(player, nowTick, GALE_DURATION_TICKS);
+        PacketDistributor.sendToPlayer(
+                player,
+                new WindSpirePayload(true, GALE_DURATION_TICKS)
         );
     }
 
@@ -184,6 +213,9 @@ public final class WindSpireThrustSkillHandler implements RuntimeWeaponSkillHand
         }
 
         Vec3 destination = safe != null ? safe : desired;
+        if (player instanceof ServerPlayer serverPlayer) {
+            WeaponSkillMovementArbiter.revokeCurrent(serverPlayer);
+        }
         player.teleportTo(destination.x, destination.y, destination.z);
         player.setDeltaMovement(0.0, player.getDeltaMovement().y, 0.0);
     }

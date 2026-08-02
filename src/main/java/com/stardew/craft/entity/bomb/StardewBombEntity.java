@@ -12,6 +12,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.util.Mth;
@@ -30,6 +31,7 @@ import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * SDV 炸弹实体 — 放置在地面上，引信倒数后爆炸。
@@ -56,8 +58,13 @@ public class StardewBombEntity extends Entity {
     /** 引信循环音效的播放间隔（ticks）。fuse.ogg ≈ 0.16s，每 3 tick 播放一次保持连续 */
     private static final int FUSE_SOUND_INTERVAL = 3;
 
+    private static final String OWNER_TAG = "Owner";
+
     @Nullable
-    private Player owner;
+    private LivingEntity owner;
+
+    @Nullable
+    private UUID ownerUuid;
 
     public StardewBombEntity(EntityType<?> type, Level level) {
         super(type, level);
@@ -86,8 +93,38 @@ public class StardewBombEntity extends Entity {
         return this.entityData.get(DATA_FUSE);
     }
 
-    public void setOwner(@Nullable Player player) {
-        this.owner = player;
+    public void setOwner(@Nullable LivingEntity owner) {
+        this.owner = owner;
+        this.ownerUuid = owner == null ? null : owner.getUUID();
+    }
+
+    @Nullable
+    public LivingEntity getOwner() {
+        if (this.owner != null && !this.owner.isRemoved()) {
+            return this.owner;
+        }
+        if (this.ownerUuid == null
+                || !(this.level() instanceof ServerLevel serverLevel)) {
+            this.owner = null;
+            return null;
+        }
+
+        ServerPlayer player = serverLevel.getServer()
+                .getPlayerList()
+                .getPlayer(this.ownerUuid);
+        if (player != null) {
+            this.owner = player;
+            return player;
+        }
+
+        Entity entity = serverLevel.getEntity(this.ownerUuid);
+        if (entity instanceof LivingEntity livingOwner) {
+            this.owner = livingOwner;
+            return livingOwner;
+        }
+
+        this.owner = null;
+        return null;
     }
 
     /* ── tick ────────────────────────────────────────────── */
@@ -178,16 +215,22 @@ public class StardewBombEntity extends Entity {
         BombType type = getBombType();
         BlockPos center = this.blockPosition();
         float scaledRadius = type.getScaledRadius();
+        LivingEntity resolvedOwner = getOwner();
 
         // 1. SDV: 停止 fuse 音效 → 播放 explosion
         serverLevel.playSound(null, center, ModSounds.EXPLOSION.get(),
             SoundSource.BLOCKS, 1.5f, 0.9f + random.nextFloat() * 0.2f);
 
         // 2. MC 3D 球形破坏方块，半径由炸弹类型单独平衡
-        destroyBlocksInCircle(serverLevel, center, scaledRadius);
+        destroyBlocksInCircle(
+                serverLevel,
+                center,
+                scaledRadius,
+                resolvedOwner
+        );
 
         // 3. 伤害范围内实体（SDV 伤害数值 + MC 3D 空间判定）
-        damageEntitiesInRadius(serverLevel, type);
+        damageEntitiesInRadius(serverLevel, type, resolvedOwner);
 
         // 4. SDV 爆炸粒子（按炸弹类型区分规模）
         spawnExplosionParticles(serverLevel, center, type, scaledRadius);
@@ -200,7 +243,12 @@ public class StardewBombEntity extends Entity {
      * SDV 使用 getCircleOutlineGrid(radius) 生成填充圆形图案。
      * 本实现在 XZ 平面上做 2D 圆形检测，Y 方向扩展 ±scaledRadius（球形）。
      */
-    private void destroyBlocksInCircle(ServerLevel level, BlockPos center, float radius) {
+    private void destroyBlocksInCircle(
+            ServerLevel level,
+            BlockPos center,
+            float radius,
+            @Nullable LivingEntity resolvedOwner
+    ) {
         int r = (int) Math.ceil(radius);
         float radiusSq = radius * radius;
 
@@ -217,14 +265,24 @@ public class StardewBombEntity extends Entity {
                     BlockState state = level.getBlockState(pos);
 
                     if (state.isAir()) continue;
-                    if (!canBombDestroy(level, pos, state)) continue;
+                    if (!canBombDestroy(
+                            level,
+                            pos,
+                            state,
+                            resolvedOwner
+                    )) continue;
 
                     // SDV 炸弹掉落逻辑：矿石掉产物，其余掉自身
-                    dropBlockForBomb(level, pos, state);
+                    dropBlockForBomb(
+                            level,
+                            pos,
+                            state,
+                            resolvedOwner
+                    );
                     level.removeBlock(pos, false);
 
                     // 炸弹炸石头会递减 stonesLeft，但梯子概率低于手挖。
-                    if (owner instanceof net.minecraft.server.level.ServerPlayer sp
+                    if (resolvedOwner instanceof net.minecraft.server.level.ServerPlayer sp
                             && level.dimension() == com.stardew.craft.core.ModMiningDimensions.STARDEW_MINING) {
                         com.stardew.craft.event.MiningBlockBreakHandler.handleStoneBreakFromBomb(level, sp, pos, state);
                     }
@@ -233,7 +291,12 @@ public class StardewBombEntity extends Entity {
         }
     }
 
-    private boolean canBombDestroy(ServerLevel level, BlockPos pos, BlockState state) {
+    private boolean canBombDestroy(
+            ServerLevel level,
+            BlockPos pos,
+            BlockState state,
+            @Nullable LivingEntity resolvedOwner
+    ) {
         // 不破坏不可破坏方块（基岩 / 屏障 / 命令方块 / 末地传送门框 / 强化深板岩 等）
         if (isIndestructible(level, pos, state)) return false;
         // 不破坏矿井梯子和 portal trigger 这类功能方块。
@@ -251,7 +314,7 @@ public class StardewBombEntity extends Entity {
         }
         // 不破坏小镇区域和非权限农场的方块。
         if (level.dimension() == com.stardew.craft.core.ModDimensions.STARDEW_VALLEY
-                && owner instanceof net.minecraft.server.level.ServerPlayer sp
+                && resolvedOwner instanceof net.minecraft.server.level.ServerPlayer sp
                 && !sp.isCreative()
                 && !com.stardew.craft.event.FarmAreaProtectionEvents.canModifyAt(sp, pos)) {
             return false;
@@ -337,7 +400,12 @@ public class StardewBombEntity extends Entity {
      * SDV 原版炸弹会清理草丛、杂草、枯萎作物等，但**不会**让玩家拿到完整的草/作物方块物品；
      * 同时 SDV 原版炸弹也不会破坏成长中的作物变成种子（默认无掉落）。
      */
-    private void dropBlockForBomb(ServerLevel level, BlockPos pos, BlockState state) {
+    private void dropBlockForBomb(
+            ServerLevel level,
+            BlockPos pos,
+            BlockState state,
+            @Nullable LivingEntity resolvedOwner
+    ) {
         Block block = state.getBlock();
 
         if (isExtensionPart(state)) {
@@ -353,7 +421,8 @@ public class StardewBombEntity extends Entity {
         // 1. SDV parity：让炸弹完全等价于"玩家挖矿"——吃 Miner / Geologist / Excavator /
         //    Prospector 职业、采矿等级、每日幸运、铱矿 3.5% 五彩碎片、120 层后普通石头 0.005% 五彩碎片、
         //    并给予挖矿经验。当 owner 是 ServerPlayer 时走这条路径。
-        if (owner instanceof net.minecraft.server.level.ServerPlayer sp && !sp.isCreative()) {
+        if (resolvedOwner instanceof net.minecraft.server.level.ServerPlayer sp
+                && !sp.isCreative()) {
             net.minecraft.world.item.Item oreProduct =
                 com.stardew.craft.event.MinePickaxeEvents.applyPlayerStyleBombDrops(level, sp, pos, state);
             if (oreProduct != null) {
@@ -454,7 +523,11 @@ public class StardewBombEntity extends Entity {
      * SDV 伤害公式：怪物 r*6 ~ r*8，玩家自伤 r*3。
      * 范围判定改为 MC 3D 友好的水平圆柱：水平半径跟随可见爆炸半径，垂直半径随炸弹等级增长但保持克制。
      */
-    private void damageEntitiesInRadius(ServerLevel level, BombType type) {
+    private void damageEntitiesInRadius(
+            ServerLevel level,
+            BombType type,
+            @Nullable LivingEntity resolvedOwner
+    ) {
         double horizontalRadius = type.getScaledRadius();
         double verticalRadius = Math.max(1.25D, type.getRadius() * 0.75D);
         Vec3 center = new Vec3(this.getX(), this.getY() + 0.5D, this.getZ());
@@ -466,7 +539,10 @@ public class StardewBombEntity extends Entity {
                 continue;
             }
 
-            DamageSource source = level.damageSources().explosion(this, owner);
+            DamageSource source = level.damageSources().explosion(
+                    this,
+                    resolvedOwner
+            );
 
             if (entity instanceof Player) {
                 if (entity.hasEffect(ModMobEffects.DWARF_STATUE_3)) {
@@ -581,12 +657,29 @@ public class StardewBombEntity extends Entity {
         if (tag.contains("Fuse")) {
             entityData.set(DATA_FUSE, tag.getInt("Fuse"));
         }
+        this.owner = null;
+        this.ownerUuid = readOwnerUuid(tag);
     }
 
     @Override
     protected void addAdditionalSaveData(CompoundTag tag) {
         tag.putInt("BombType", getBombType().ordinal());
         tag.putInt("Fuse", getFuse());
+        if (this.owner != null) {
+            this.ownerUuid = this.owner.getUUID();
+        }
+        writeOwnerUuid(tag, this.ownerUuid);
+    }
+
+    @Nullable
+    static UUID readOwnerUuid(CompoundTag tag) {
+        return tag.hasUUID(OWNER_TAG) ? tag.getUUID(OWNER_TAG) : null;
+    }
+
+    static void writeOwnerUuid(CompoundTag tag, @Nullable UUID ownerUuid) {
+        if (ownerUuid != null) {
+            tag.putUUID(OWNER_TAG, ownerUuid);
+        }
     }
 
     /* ── 杂项 ──────────────────────────────────────────── */

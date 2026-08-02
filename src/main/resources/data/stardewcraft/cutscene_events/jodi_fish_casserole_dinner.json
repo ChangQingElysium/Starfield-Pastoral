@@ -1,5 +1,6 @@
 {
-  "id": "94",
+  "id": "jodi_fish_casserole_dinner",
+  "legacy_ids": ["94"],
   "skippable": true,
   "trigger": {
     "type": "enter_area",
@@ -8,7 +9,7 @@
     "area_max": [-6, 42, 44]
   },
   "preconditions": [
-    { "type": "not_saw_event", "id": "94" },
+    { "type": "not_saw_event", "id": "jodi_fish_casserole_dinner" },
     { "type": "saw_event", "id": "jodi_fish_casserole_invite_wake_up" },
     { "type": "has_item", "item": "stardewcraft:largemouth_bass", "count": 1 },
     { "type": "time", "min": 1800, "max": 1950 }

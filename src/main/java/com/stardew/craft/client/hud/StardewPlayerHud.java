@@ -157,7 +157,7 @@ public class StardewPlayerHud {
         }
         
         // 是否疲惫
-        boolean exhausted = currentEnergy <= 0;
+        boolean exhausted = ClientPlayerDataCache.isExhausted();
         
         graphics.pose().pushPose();
         graphics.pose().translate(placement.x(), placement.y(), 0.0F);

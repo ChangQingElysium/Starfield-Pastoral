@@ -22,4 +22,5 @@ class YetiToothStateContractTest {
         assertTrue(YetiToothMarkTracker.isEligibleFollowupSkill("normal"));
         assertTrue(YetiToothMarkTracker.isEligibleFollowupSkill(null));
     }
+
 }

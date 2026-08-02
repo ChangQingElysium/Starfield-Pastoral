@@ -1,7 +1,6 @@
 package com.stardew.craft.combat.skill.handler;
 
 import com.stardew.craft.combat.skill.LavaKatanaMarkTracker;
-import com.stardew.craft.combat.skill.LavaKatanaReverbTracker;
 import com.stardew.craft.combat.skill.runtime.SkillInstance;
 import com.stardew.craft.item.weapon.WeaponData;
 import com.stardew.craft.item.weapon.WeaponRegistry;
@@ -25,11 +24,11 @@ class LavaKatanaReverbSkillHandlerTest {
         assertEquals(0, skill.getDamagePercent());
         assertEquals(20, skill.getCooldown());
         assertEquals(12.0F, LavaKatanaReverbSkillHandler.ENERGY_COST);
-        assertEquals(8.0D, LavaKatanaReverbTracker.TARGET_RANGE);
-        assertEquals(5, LavaKatanaReverbTracker.MINIMUM_HEAT);
+        assertEquals(8.0D, LavaKatanaReverbSkillHandler.TARGET_RANGE);
+        assertEquals(5, LavaKatanaReverbSkillHandler.MINIMUM_HEAT);
         assertEquals(
             80,
-            LavaKatanaReverbTracker.ACTIVE_DURATION_TICKS
+            LavaKatanaReverbSkillHandler.ACTIVE_DURATION_TICKS
         );
         assertEquals(120, LavaKatanaMarkTracker.MARK_DURATION_TICKS);
         assertFalse(

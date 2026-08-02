@@ -852,7 +852,7 @@
         },
         {
           "mode": "walk",
-          "point": "george_joshhouse_tv"
+          "point": "george_schedule_01"
         }
       ],
       "saloon": [
@@ -866,7 +866,7 @@
         },
         {
           "mode": "walk",
-          "point": "george_saloon_visit"
+          "point": "george_schedule_10"
         }
       ],
       "seedshop": [
@@ -880,19 +880,39 @@
         },
         {
           "mode": "walk",
-          "point": "george_seedshop_visit"
+          "point": "george_schedule_09"
         }
       ],
       "town": [
         {
           "mode": "walk",
-          "point": "george_town_bench"
+          "point": "george_schedule_08"
         }
       ],
       "beach": [
         {
           "mode": "walk",
-          "point": "george_beach_spot"
+          "point": "george_schedule_07"
+        }
+      ],
+      "hospital": [
+        {
+          "mode": "walk",
+          "point": "clinic_outdoor_door"
+        },
+        {
+          "mode": "warp",
+          "point": "clinic_indoor_entry"
+        },
+        {
+          "mode": "walk",
+          "point": "george_schedule_05"
+        }
+      ],
+      "desert": [
+        {
+          "mode": "walk",
+          "point": "desert_festival_visit_george"
         }
       ]
     },
@@ -1304,25 +1324,37 @@
       "mountain": [
         {
           "mode": "walk",
-          "point": "linus_tent_fire"
+          "point": "linus_schedule_05"
         }
       ],
       "tent": [
         {
           "mode": "walk",
-          "point": "linus_tent_fire"
+          "point": "linus_schedule_11"
         }
       ],
       "beach": [
         {
           "mode": "walk",
-          "point": "linus_beach_fish"
+          "point": "linus_schedule_17"
         }
       ],
-      "town": [
+      "railroad": [
         {
           "mode": "walk",
-          "point": "linus_town_dumpster"
+          "point": "linus_schedule_15"
+        }
+      ],
+      "bathhouse_entry": [
+        {
+          "mode": "walk",
+          "point": "linus_schedule_16"
+        }
+      ],
+      "desert": [
+        {
+          "mode": "walk",
+          "point": "linus_schedule_18"
         }
       ]
     },

@@ -15,24 +15,18 @@ class DelayedChildWeaponSnapshotContractTest {
         String handler = normalizedSource(
                 "handler/YetiToothSpineSkillHandler.java"
         );
-        String tracker = normalizedSource(
-                "YetiToothSpineTracker.java"
+        String state = normalizedSource(
+                "handler/YetiToothSpineExecutionState.java"
         );
         String entity = normalizedMainSource(
                 "entity/effect/IceSpineEffectEntity.java"
         );
 
         assertTrue(handler.contains(
-                "YetiToothSpineTracker.start("
+                "new YetiToothSpineExecutionState("
         ));
-        assertTrue(handler.contains("context.weaponSnapshot()"));
-        assertEquals(2, occurrences(
-                tracker,
-                "public static void start("
-        ));
-        assertTrue(tracker.contains(
-                "skillId, weaponSnapshot"
-        ));
+        assertTrue(state.contains("context.weaponSnapshot()"));
+        assertTrue(state.contains("new IceSpineEffectEntity("));
         assertTrue(entity.contains(
                 "private WeaponDamageSnapshot releaseWeaponSnapshot;"
         ));
@@ -49,23 +43,19 @@ class DelayedChildWeaponSnapshotContractTest {
         String handler = normalizedSource(
                 "handler/ElfBladeLeafSkillHandler.java"
         );
-        String tracker = normalizedSource(
-                "ElfBladeTracker.java"
+        String state = normalizedSource(
+                "handler/ElfBladeLeafExecutionState.java"
         );
         String entity = normalizedMainSource(
                 "entity/projectile/ElfBladeLeafEntity.java"
         );
 
         assertTrue(handler.contains(
-                "ElfBladeTracker.start("
+                "new ElfBladeLeafExecutionState("
         ));
-        assertTrue(handler.contains("context.weaponSnapshot()"));
-        assertEquals(2, occurrences(
-                tracker,
-                "public static void start("
-        ));
-        assertTrue(tracker.contains(
-                "endTick, weaponSnapshot"
+        assertTrue(state.contains("context.weaponSnapshot()"));
+        assertTrue(state.contains(
+                "new ElfBladeLeafEntity("
         ));
         assertTrue(entity.contains(
                 "private WeaponDamageSnapshot releaseWeaponSnapshot;"
@@ -103,8 +93,11 @@ class DelayedChildWeaponSnapshotContractTest {
                 "LavaKatanaMarkTracker.discardPreparedRelease("
         ));
         assertTrue(reverbHandler.contains(
+                "instance.registerCommittedEffect("
+        ));
+        assertTrue(reverbHandler.contains(
                 "LavaKatanaMarkTracker.apply( "
-                        + "target, context.player(), "
+                        + "plan.fallbackTarget(), context.player(), "
                         + "context.nowTick(), "
                         + "LavaKatanaMarkTracker.MARK_DURATION_TICKS, "
                         + "context.weaponSnapshot()"
@@ -130,33 +123,65 @@ class DelayedChildWeaponSnapshotContractTest {
         String tracker = normalizedSource(
                 "WickedKrisPoisonTracker.java"
         );
+        String appliedRules = normalizedMainSource(
+                "combat/BuiltinSkillAppliedHitRules.java"
+        );
 
         assertEquals(2, occurrences(
                 tracker,
                 "public static void applyPoison("
         ));
-        assertTrue(rippleHandler.contains(
+        assertTrue(!rippleHandler.contains(
                 "WickedKrisPoisonTracker.applyPoison("
         ));
         assertTrue(rippleHandler.contains("context.weaponSnapshot()"));
-        assertTrue(burstHandler.contains(
+        assertTrue(!burstHandler.contains(
                 "WickedKrisPoisonTracker.applyPoison("
         ));
         assertTrue(burstHandler.contains("context.weaponSnapshot()"));
         assertHandlerSnapshotBinding(rippleHandler);
         assertHandlerSnapshotBinding(burstHandler);
+        assertTrue(appliedRules.contains(
+                "static void applyWickedVenomRipple("
+        ));
+        assertTrue(appliedRules.contains(
+                "static void applyWickedNestBurst("
+        ));
+        assertEquals(2, occurrences(
+                appliedRules,
+                "WickedKrisPoisonTracker.applyPoison("
+        ));
+        assertTrue(occurrences(
+                appliedRules,
+                "hit.weaponSnapshot().orElseThrow()"
+        ) >= 2);
         assertReleaseSnapshotPersistence(tracker);
         assertTrue(tracker.contains(
-                "private WeaponDamageSnapshot weaponSnapshot;"
+                "private final WeaponDamageSnapshot dotSnapshot;"
         ));
         assertTrue(tracker.contains(
-                "state.weaponSnapshot = readWeaponSnapshot(target, tag);"
+                "private WeaponDamageSnapshot detonationSnapshot;"
         ));
         assertTrue(tracker.contains(
-                "state.weaponSnapshot, nowTick + 5"
+                "entry.dotSnapshot, nowTick + 5"
         ));
         assertTrue(tracker.contains(
-                "weaponSnapshot, nowTick + 5"
+                "entry.detonationSnapshot, nowTick + 5"
+        ));
+        assertTrue(tracker.contains(
+                "previous == null ? null : previous.detonationSnapshot"
+        ));
+        assertTrue(tracker.contains(
+                "replacement.detonationSnapshot = weaponSnapshot;"
+        ));
+        assertTrue(tracker.contains(
+                "ENTRY_DOT_WEAPON_ID"
+        ));
+        assertTrue(tracker.contains(
+                "ENTRY_DETONATION_WEAPON_ID"
+        ));
+        assertTrue(!tracker.contains(
+                "getMainHandItem("
         ));
         assertExplicitSnapshotBinding(tracker);
         assertCentralizedDamageBinding(tracker);
@@ -168,27 +193,22 @@ class DelayedChildWeaponSnapshotContractTest {
         String handler = normalizedSource(
                 "handler/DarkSwordBloodMoonSkillHandler.java"
         );
-        String tracker = normalizedSource(
-                "DarkSwordBloodMoonTracker.java"
+        String state = normalizedSource(
+                "handler/DarkSwordBloodMoonExecutionState.java"
         );
 
         assertTrue(handler.contains(
-                "DarkSwordBloodMoonTracker.start("
+                "new DarkSwordBloodMoonExecutionState("
         ));
         assertTrue(handler.contains("context.weaponSnapshot()"));
-        assertEquals(2, occurrences(
-                tracker,
-                "public static void start("
-        ));
-        assertTrue(tracker.contains(
+        assertTrue(state.contains(
                 "private final WeaponDamageSnapshot weaponSnapshot;"
         ));
-        assertTrue(tracker.contains(
-                "createBurstContext(damageMultiplier), "
-                        + "state.weaponSnapshot,"
+        assertTrue(state.contains(
+                "createBurstContext(damageMultiplier), weaponSnapshot,"
         ));
-        assertExplicitSnapshotBinding(tracker);
-        assertRejectedHitCleanup(tracker);
+        assertExplicitSnapshotBinding(state);
+        assertRejectedHitCleanup(state);
     }
 
     @Test
@@ -197,23 +217,38 @@ class DelayedChildWeaponSnapshotContractTest {
         String handler = normalizedSource(
                 "handler/OssifiedExecutionSkillHandler.java"
         );
-        String tracker = normalizedSource(
-                "OssifiedExecutionTracker.java"
+        String state = normalizedSource(
+                "handler/OssifiedExecutionState.java"
         );
 
         assertTrue(handler.contains(
-                "OssifiedExecutionTracker.start("
+                "new OssifiedExecutionState("
         ));
-        assertTrue(handler.contains("context.weaponSnapshot()"));
-        assertEquals(2, occurrences(
-                tracker,
-                "public static void start("
+        assertTrue(state.contains(
+                "context.weaponSnapshot()"
         ));
-        assertTrue(tracker.contains(
-                "createPulseContext(), state.weaponSnapshot,"
+        assertExplicitSnapshotBinding(state);
+        assertRejectedHitCleanup(state);
+    }
+
+    @Test
+    void holyDomainPulsesRetainAndBindTheirReleaseWeapon()
+            throws IOException {
+        String handler = normalizedSource(
+                "handler/HolyDomainSkillHandler.java"
+        );
+        String state = normalizedSource(
+                "handler/HolyDomainExecutionState.java"
+        );
+
+        assertTrue(handler.contains(
+                "new HolyDomainExecutionState("
         ));
-        assertExplicitSnapshotBinding(tracker);
-        assertRejectedHitCleanup(tracker);
+        assertTrue(state.contains(
+                "executionContext.weaponSnapshot()"
+        ));
+        assertExplicitSnapshotBinding(state);
+        assertRejectedHitCleanup(state);
     }
 
     @Test
@@ -225,42 +260,45 @@ class DelayedChildWeaponSnapshotContractTest {
         String traceHandler = normalizedSource(
                 "handler/SteelFalchionTraceSkillHandler.java"
         );
-        String tracker = normalizedSource(
-                "SteelFalchionLineTracker.java"
+        String lineState = normalizedSource(
+                "handler/SteelFalchionLineExecutionState.java"
+        );
+        String traceState = normalizedSource(
+                "handler/SteelFalchionTraceExecutionState.java"
+        );
+        String dots = normalizedSource(
+                "handler/SteelFalchionDotTracker.java"
         );
 
         assertTrue(lineHandler.contains(
-                "SteelFalchionLineTracker.startMinorLine("
+                "new SteelFalchionLineExecutionState("
         ));
         assertTrue(lineHandler.contains("context.weaponSnapshot()"));
         assertTrue(traceHandler.contains(
-                "SteelFalchionLineTracker.startTrace("
+                "new SteelFalchionTraceExecutionState("
         ));
         assertTrue(traceHandler.contains("context.weaponSnapshot()"));
-        assertEquals(2, occurrences(
-                tracker,
-                "public static void startMinorLine("
-        ));
-        assertEquals(2, occurrences(
-                tracker,
-                "public static void startTrace("
-        ));
         assertTrue(occurrences(
-                tracker,
+                lineState + traceState + dots,
                 "private final WeaponDamageSnapshot weaponSnapshot;"
-        ) >= 2);
-        assertTrue(tracker.contains(
-                "line.weaponSnapshot"
-        ));
-        assertTrue(tracker.contains(
+        ) >= 3);
+        assertTrue(dots.contains(
                 "dot.weaponSnapshot"
         ));
-        assertTrue(tracker.contains(
+        assertTrue(dots.contains(
                 "finalSnapshot = weaponSnapshot == null "
                         + "? existing.weaponSnapshot : weaponSnapshot;"
         ));
-        assertExplicitSnapshotBinding(tracker);
-        assertRejectedHitCleanup(tracker);
+        assertTrue(lineState.contains(
+                "SteelFalchionDotTracker.apply("
+        ));
+        assertTrue(traceState.contains(
+                "SteelFalchionDotTracker.apply("
+        ));
+        assertExplicitSnapshotBinding(dots);
+        assertRejectedHitCleanup(dots);
+        assertExplicitSnapshotBinding(traceState);
+        assertRejectedHitCleanup(traceState);
     }
 
     private static void assertExplicitSnapshotBinding(String tracker) {
@@ -301,8 +339,10 @@ class DelayedChildWeaponSnapshotContractTest {
 
     private static void assertReleaseSnapshotPersistence(String tracker) {
         assertTrue(tracker.contains("TAG_RELEASE_WEAPON_ID")
+                || tracker.contains("ENTRY_DOT_WEAPON_ID")
                 || tracker.contains("\"ReleaseWeaponId\""));
         assertTrue(tracker.contains("TAG_RELEASE_WEAPON")
+                || tracker.contains("ENTRY_DOT_WEAPON")
                 || tracker.contains("\"ReleaseWeapon\""));
         assertTrue(tracker.contains(".saveOptional("));
         assertTrue(tracker.contains("ItemStack.parse"));

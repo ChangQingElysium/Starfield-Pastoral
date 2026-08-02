@@ -1,8 +1,10 @@
 package com.stardew.craft.combat.skill;
 
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -18,29 +20,38 @@ import java.util.UUID;
  * 进化态裂隙轨迹：踏入伤害 + 结束爆裂。
  */
 public final class RiftPathDamageTracker {
+    /** Identifies one exact detached rift without exposing mutable damage state. */
+    public record Handle(UUID playerId, UUID pathId) {}
+
     private static final class State {
+        private final UUID pathId;
         private final Vec3 start;
         private final float yaw;
         private final float length;
         private final int durationTicks;
         private final String skillId;
+        private final ResourceKey<Level> dimension;
         private final WeaponDamageSnapshot weaponSnapshot;
         private int age = 0;
         private final Set<UUID> hit = new HashSet<>();
 
         private State(
+                UUID pathId,
                 Vec3 start,
                 float yaw,
                 float length,
                 int durationTicks,
                 String skillId,
+                ResourceKey<Level> dimension,
                 WeaponDamageSnapshot weaponSnapshot
         ) {
+            this.pathId = pathId;
             this.start = start;
             this.yaw = yaw;
             this.length = length;
             this.durationTicks = durationTicks;
             this.skillId = skillId;
+            this.dimension = dimension;
             this.weaponSnapshot = weaponSnapshot;
         }
     }
@@ -84,7 +95,28 @@ public final class RiftPathDamageTracker {
         );
     }
 
-    private static void startInternal(
+    /** Starts a rift and returns ownership of that exact detached path. */
+    public static Handle startExact(
+            ServerPlayer player,
+            Vec3 start,
+            float yaw,
+            float length,
+            int durationTicks,
+            String skillId,
+            WeaponDamageSnapshot weaponSnapshot
+    ) {
+        return startInternal(
+                player,
+                start,
+                yaw,
+                length,
+                durationTicks,
+                skillId,
+                weaponSnapshot
+        );
+    }
+
+    private static Handle startInternal(
             ServerPlayer player,
             Vec3 start,
             float yaw,
@@ -94,24 +126,35 @@ public final class RiftPathDamageTracker {
             WeaponDamageSnapshot weaponSnapshot
     ) {
         if (player == null || durationTicks <= 0 || length <= 0.0f) {
-            return;
+            return null;
         }
+        UUID pathId = UUID.randomUUID();
         ACTIVE.put(
                 player.getUUID(),
                 new State(
+                        pathId,
                         start,
                         yaw,
                         length,
                         durationTicks,
                         skillId,
+                        player.level().dimension(),
                         weaponSnapshot
                 )
         );
+        return new Handle(player.getUUID(), pathId);
     }
 
     public static void tick(ServerPlayer player, long nowTick) {
         State state = ACTIVE.get(player.getUUID());
         if (state == null) {
+            return;
+        }
+        if (!isSameDimension(
+                state.dimension,
+                player.level().dimension()
+        )) {
+            ACTIVE.remove(player.getUUID(), state);
             return;
         }
         ServerLevel level = player.serverLevel();
@@ -120,8 +163,11 @@ public final class RiftPathDamageTracker {
         applyStepDamage(player, level, state);
 
         if (state.age >= state.durationTicks) {
-            applyFinalBurst(player, level, state);
-            ACTIVE.remove(player.getUUID());
+            try {
+                applyFinalBurst(player, level, state);
+            } finally {
+                ACTIVE.remove(player.getUUID(), state);
+            }
         }
     }
 
@@ -147,8 +193,6 @@ public final class RiftPathDamageTracker {
                 .tier(SkillContext.SkillTier.MINOR)
                 .damageMultiplier(0.60f)
                 .build();
-            target.invulnerableTime = 0;
-            target.hurtTime = 0;
             if (state.weaponSnapshot == null) {
                 WeaponSkillDamage.apply(
                         player,
@@ -156,7 +200,9 @@ public final class RiftPathDamageTracker {
                         context,
                         level.getGameTime() + 5,
                         WeaponSkillDamage.AttackGatePolicy
-                                .RESPECT_AT_IMPACT
+                                .SKILL_DAMAGE,
+                        WeaponSkillDamage.HitCooldownPolicy
+                                .BYPASS_FOR_AUTHORED_SEQUENCE
                 );
             } else {
                 WeaponSkillDamage.apply(
@@ -166,7 +212,9 @@ public final class RiftPathDamageTracker {
                         state.weaponSnapshot,
                         level.getGameTime() + 5,
                         WeaponSkillDamage.AttackGatePolicy
-                                .RESPECT_AT_IMPACT
+                                .SKILL_DAMAGE,
+                        WeaponSkillDamage.HitCooldownPolicy
+                                .BYPASS_FOR_AUTHORED_SEQUENCE
                 );
             }
         }
@@ -190,8 +238,6 @@ public final class RiftPathDamageTracker {
                 .tier(SkillContext.SkillTier.MINOR)
                 .damageMultiplier(1.00f)
                 .build();
-            target.invulnerableTime = 0;
-            target.hurtTime = 0;
             if (state.weaponSnapshot == null) {
                 WeaponSkillDamage.apply(
                         player,
@@ -199,7 +245,9 @@ public final class RiftPathDamageTracker {
                         context,
                         level.getGameTime() + 5,
                         WeaponSkillDamage.AttackGatePolicy
-                                .RESPECT_AT_IMPACT
+                                .SKILL_DAMAGE,
+                        WeaponSkillDamage.HitCooldownPolicy
+                                .BYPASS_FOR_AUTHORED_SEQUENCE
                 );
             } else {
                 WeaponSkillDamage.apply(
@@ -209,7 +257,9 @@ public final class RiftPathDamageTracker {
                         state.weaponSnapshot,
                         level.getGameTime() + 5,
                         WeaponSkillDamage.AttackGatePolicy
-                                .RESPECT_AT_IMPACT
+                                .SKILL_DAMAGE,
+                        WeaponSkillDamage.HitCooldownPolicy
+                                .BYPASS_FOR_AUTHORED_SEQUENCE
                 );
             }
         }
@@ -242,6 +292,26 @@ public final class RiftPathDamageTracker {
         double x = -Math.sin(rad);
         double z = Math.cos(rad);
         return new Vec3(x, 0.0, z).normalize();
+    }
+
+    static boolean isSameDimension(
+            ResourceKey<Level> expected,
+            ResourceKey<Level> actual
+    ) {
+        return expected.equals(actual);
+    }
+
+    /** Cancels only the represented rift, never a newer replacement path. */
+    public static boolean cancel(ServerPlayer player, Handle handle) {
+        if (player == null || handle == null
+                || !player.getUUID().equals(handle.playerId())) {
+            return false;
+        }
+        State state = ACTIVE.get(handle.playerId());
+        if (state == null || !state.pathId.equals(handle.pathId())) {
+            return false;
+        }
+        return ACTIVE.remove(handle.playerId(), state);
     }
 
     /** Clean up state when a player logs out to prevent memory leaks. */

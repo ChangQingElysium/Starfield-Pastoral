@@ -297,7 +297,8 @@ public class TreasureLootManager extends SimplePreparableReloadListener<Treasure
 
 	/**
 	 * SDV case 2: 文物和晶洞
-	 * Lost Book 是世界进度而非背包物品；其余分支保持原版顺序。
+	 * Lost Book enters the treasure container as object 102, then converts to
+	 * shared museum progress when the player receives it.
 	 */
 	private boolean rollArtifactsAndGeodes(List<ItemStack> treasures, int fishingLevel, RandomSource random,
 			@Nullable ServerPlayer player) {
@@ -308,7 +309,8 @@ public class TreasureLootManager extends SimplePreparableReloadListener<Treasure
 				&& (playerData.hasMailFlag(com.stardew.craft.museum.LostBookService.FIRST_BOOK_FLAG)
 						|| playerData.hasMailFlagForTomorrow(
 								com.stardew.craft.museum.LostBookService.FIRST_BOOK_FLAG))
-				&& com.stardew.craft.museum.LostBookService.find(player)) {
+				&& com.stardew.craft.museum.LostBookService.canFindAnother(player)) {
+			treasures.add(new ItemStack(com.stardew.craft.item.ModItems.LOST_BOOK.get()));
 			return true;
 		}
 		if (random.nextDouble() < 0.5 && fishingLevel > 1) {

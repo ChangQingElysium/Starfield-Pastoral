@@ -1,6 +1,7 @@
 package com.stardew.craft.combat.skill.handler;
 
 import com.stardew.craft.combat.skill.SkillContext;
+import com.stardew.craft.combat.skill.WeaponDamageSnapshot;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationDispatcher;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationLock;
 import com.stardew.craft.combat.skill.WeaponSkillDamage;
@@ -10,8 +11,11 @@ import com.stardew.craft.combat.skill.runtime.SkillExecutionContext;
 import com.stardew.craft.combat.skill.runtime.SkillInstance;
 import com.stardew.craft.combat.skill.runtime.SkillTargeting;
 import com.stardew.craft.combat.skill.runtime.SkillValidation;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
 import com.stardew.craft.item.weapon.WeaponSkillData;
 import java.util.List;
+import java.util.UUID;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
@@ -59,33 +63,24 @@ public final class ShadowDaggerExecuteSkillHandler implements RuntimeWeaponSkill
         boolean execute = target.getHealth() <= target.getMaxHealth() * EXECUTE_HEALTH_RATIO;
         int baseCooldown = context.skillData().getCooldown() * 20;
         int appliedCooldown = execute ? baseCooldown : Math.max(1, baseCooldown / 2);
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                weaponId,
-                skillId,
-                context.nowTick(),
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 appliedCooldown
         );
+        instance.initializeExecutionState(new State(target.getUUID(), execute));
 
-        WeaponSkillDamage.apply(
-                context.player(),
-                target,
-                createHitContext(context.skillData()),
-                context.weaponSnapshot(),
-                context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS
-        );
-
-        if (execute) {
-            target.invulnerableTime = 0;
-            target.hurtTime = 0;
+        instance.registerCommittedEffect(() -> {
             WeaponSkillDamage.apply(
                     context.player(),
                     target,
-                    createExecuteBonusContext(),
+                    createHitContext(context.skillData()),
                     context.weaponSnapshot(),
-                    context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS
+                    context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS,
+                    WeaponSkillDamage.AttackGatePolicy.RESPECT_AT_IMPACT,
+                    WeaponSkillDamage.HitCooldownPolicy.RESPECT_VANILLA
             );
-        }
+        });
 
         WeaponSkillAnimationDispatcher.sendSkillAnim(
                 context.player(),
@@ -114,6 +109,58 @@ public final class ShadowDaggerExecuteSkillHandler implements RuntimeWeaponSkill
                 .tier(SkillContext.SkillTier.MINOR)
                 .damageMultiplier(1.0F)
                 .build();
+    }
+
+    /** Emits the derived execute damage only after the root slash applied. */
+    public static boolean onAppliedRootHit(
+            ServerPlayer player,
+            LivingEntity target,
+            long nowTick,
+            WeaponDamageSnapshot weaponSnapshot
+    ) {
+        if (player == null || target == null || weaponSnapshot == null) {
+            return false;
+        }
+        State state = WeaponSkillRuntime.activeExecutionState(
+                player.getUUID(),
+                BuiltinWeaponSkillHandlers.SHADOW_DAGGER_EXECUTE,
+                State.class
+        ).orElse(null);
+        if (state == null || !state.consumeBonus(target.getUUID())) {
+            return false;
+        }
+        WeaponSkillDamage.apply(
+                player,
+                target,
+                createExecuteBonusContext(),
+                weaponSnapshot,
+                nowTick + HIT_CONTEXT_LIFETIME_TICKS,
+                WeaponSkillDamage.AttackGatePolicy.SKILL_DAMAGE,
+                WeaponSkillDamage.HitCooldownPolicy
+                        .BYPASS_FOR_AUTHORED_SEQUENCE
+        );
+        return true;
+    }
+
+    private static final class State implements SkillInstance.ExecutionState {
+        private final UUID targetId;
+        private final boolean executeArmed;
+        private boolean bonusConsumed;
+
+        private State(UUID targetId, boolean executeArmed) {
+            this.targetId = targetId;
+            this.executeArmed = executeArmed;
+        }
+
+        private boolean consumeBonus(UUID appliedTargetId) {
+            if (!executeArmed
+                    || bonusConsumed
+                    || !targetId.equals(appliedTargetId)) {
+                return false;
+            }
+            bonusConsumed = true;
+            return true;
+        }
     }
 
 }

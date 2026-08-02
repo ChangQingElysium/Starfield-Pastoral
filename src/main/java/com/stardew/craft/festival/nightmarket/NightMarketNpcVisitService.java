@@ -38,7 +38,7 @@ public final class NightMarketNpcVisitService {
         entry(3, "jodi", 1630, 2330, "night_market_day3_jodi", 2),
         entry(3, "alex", 1500, 2400, "night_market_day3_alex", 1),
         entry(3, "sam", 1700, 2400, "night_market_day3_sam", 3),
-        entry(3, "george", 1620, 2340, "night_market_day3_george", 2),
+        entry(3, "george", 1620, 2340, "george_schedule_07", 2),
         entry(3, "evelyn", 1630, 2340, "night_market_day3_evelyn", 2),
         entry(3, "elliott", 1650, 2500, "night_market_day3_elliott", 2)
     );

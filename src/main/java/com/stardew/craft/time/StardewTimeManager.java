@@ -32,25 +32,47 @@ public class StardewTimeManager extends SavedData {
     private static final Set<String> IMPLEMENTED_DATE_TRIGGERED_MAIL = Set.of(
         "spring_2_1",
         "spring_5_1",
+        "spring_11_1",
+        "spring_19_1",
         "spring_20_1",
         "spring_25_1",
+        "spring_6_2",
+        "spring_15_2",
+        "spring_21_2",
         "summer_1",
         "summer_3_1",
         "summer_6_1",
         "summer_13_1",
+        "summer_14_1",
         "summer_19_1",
         "summer_20_1",
+        "summer_25_1",
+        "summer_6_2",
+        "summer_15_2",
+        "summer_21_2",
         "fall_1",
         "fall_2_1",
+        "fall_3_1",
         "fall_6_1",
+        "fall_8_1",
         "fall_18_1",
+        "fall_19_1",
         "fall_27_1",
+        "fall_6_2",
+        "fall_19_2",
         "winter_1",
         "winter_2_1",
+        "winter_6_1",
         "winter_12_1",
         "winter_14_1",
+        "winter_17_1",
         "winter_18",
+        "winter_21_1",
+        "winter_26_1",
         "winter_27_1",
+        "winter_5_2",
+        "winter_13_2",
+        "winter_19_2",
         "spring_1_2",
         "summer_1_2",
         "winter_1_2"
@@ -303,7 +325,16 @@ public class StardewTimeManager extends SavedData {
         // 触发每日作物生长
         if (server != null) {
             int absDay = (currentYear - 1) * (28 * 4) + currentSeason * 28 + currentDay;
+            int previousAbsDay = (previousYear - 1) * (28 * 4) + previousSeason * 28 + previousDay;
             int totalDaysPlayed = absDay;
+
+            // SDV Farmer.dayupdate -> resetFriendshipsForNewDay. This settles
+            // every persisted farmer, including farmhands who are offline tonight.
+            com.stardew.craft.npc.runtime.NpcFriendshipDailyService.onNewDay(
+                    server.overworld(), previousAbsDay, absDay);
+            // SDV Farmer.dayupdate: age active NPC dialogue events and create
+            // their one-day/week/month/year memory variants.
+            com.stardew.craft.npc.runtime.NpcDialogueEventData.get(server).onNewDay();
             
             // 需要在星露谷维度触发，而不是主世界
             @SuppressWarnings("null")
@@ -332,7 +363,7 @@ public class StardewTimeManager extends SavedData {
                     runWorldDailyStep("farm_debris", () -> com.stardew.craft.farm.FarmDebrisDailyService.onNewDay(stardewLevel));
                     runWorldDailyStep("sprinklers", () -> com.stardew.craft.manager.SprinklerManager.get(stardewLevel).waterDaily(stardewLevel));
                     runWorldDailyStep("pasture_grass", () -> com.stardew.craft.manager.PastureGrassGrowthManager.get(stardewLevel).growDaily(stardewLevel));
-                    runWorldDailyStep("animals", () -> com.stardew.craft.manager.AnimalGrowthManager.get(stardewLevel).growDaily(stardewLevel));
+                    runWorldDailyStep("animals", () -> com.stardew.craft.manager.AnimalGrowthManager.get(stardewLevel).growDaily(stardewLevel, timeWentToSleepMinutes));
                     runWorldDailyStep("fish_ponds", () -> com.stardew.craft.fishpond.service.FishPondDailyUpdateService.onNewDay(stardewLevel));
                     runWorldDailyStep("forage", () -> com.stardew.craft.manager.ForageSpawnService.onNewDay(stardewLevel, currentSeason));
                     runWorldDailyStep("forest_farm_forage", () -> com.stardew.craft.manager.ForageSpawnService.onNewDayForestFarms(stardewLevel, currentSeason));
@@ -487,9 +518,12 @@ public class StardewTimeManager extends SavedData {
         if (server != null) {
             com.stardew.craft.mail.MailService.deliverAllTomorrowMail(server);
 
-            // SDV 日期触发邮件
+            // SDV _newDayAfterFade: first pick at most one random friendship
+            // gift letter, then process the remaining morning mail sources.
             for (net.minecraft.server.level.ServerPlayer sp : server.getPlayerList().getPlayers()) {
+                com.stardew.craft.npc.runtime.NpcFriendshipMailService.onNewDay(sp);
                 scheduleMailByDate(sp, currentSeason, currentDay);
+                com.stardew.craft.npc.runtime.NpcFriendshipRecipeMailService.onNewDay(sp);
             }
         }
 
@@ -573,8 +607,9 @@ public class StardewTimeManager extends SavedData {
             com.stardew.craft.mail.MailService.addMail(player, keyWithYear);
         }
 
-        // 父母信件 — 按玩家个人天数里程碑触发
-        scheduleParentMail(player, personalDays);
+        // 1.6 TriggerActions: parent letters are lifetime-earnings and
+        // player-gender gated, not day milestones.
+        scheduleParentMail(player);
     }
 
     private void scheduleGlobalCalendarMail(net.minecraft.server.level.ServerPlayer player, int season, int day) {
@@ -640,52 +675,22 @@ public class StardewTimeManager extends SavedData {
         scheduleGlobalCalendarMail(player, currentSeason, currentDay);
     }
 
-    /**
-     * 父母来信 — 按玩家个人天数里程碑触发。
-     * mom1/dad1: 15天, mom2/dad2: 50天, mom3/dad3: 80天, mom4/dad4: 120天
-     */
-    private void scheduleParentMail(net.minecraft.server.level.ServerPlayer player, int personalDays) {
-        String[][] parentMails = {
-            {"mom1", "dad1"},  // 15 days
-            {"mom2", "dad2"},  // 50 days
-            {"mom3", "dad3"},  // 80 days
-            {"mom4", "dad4"},  // 120 days
-        };
-        int[] dayThresholds = {15, 50, 80, 120};
-        for (int i = 0; i < parentMails.length; i++) {
-            if (personalDays >= dayThresholds[i]) {
-                // SDV: randomly pick mom or dad
-                String mailId = parentMails[i][new java.util.Random(player.getUUID().hashCode() + i).nextInt(2)];
-                com.stardew.craft.mail.MailService.addMail(player, mailId);
+    /** Exact Data/TriggerActions parent-mail thresholds and gender branch. */
+    private void scheduleParentMail(
+            net.minecraft.server.level.ServerPlayer player
+    ) {
+        com.stardew.craft.player.PlayerStardewData data =
+                com.stardew.craft.player.PlayerDataManager
+                        .getPlayerData(player);
+        long earnings = data.getTotalMoneyEarned();
+        String prefix = data.isMale() ? "mom" : "dad";
+        int[] thresholds = {5_000, 15_000, 32_000, 120_000};
+        for (int index = 0; index < thresholds.length; index++) {
+            if (earnings >= thresholds[index]) {
+                com.stardew.craft.mail.MailService.addMail(
+                        player, prefix + (index + 1));
             }
         }
-
-        // 里程碑提示邮件 — NPC 在特定天数给出建议
-        scheduleMilestoneMail(player, personalDays);
-    }
-
-    /**
-     * 里程碑邮件 — NPC 在特定天数自动发送提示/建议信。
-     * 使用玩家个人天数（从首次加入起算），而非服务器全局天数。
-     */
-    private void scheduleMilestoneMail(net.minecraft.server.level.ServerPlayer player, int personalDays) {
-        // 罗宾：建筑建议
-        if (personalDays >= 7) com.stardew.craft.mail.MailService.addMail(player, "robinWell");
-        if (personalDays >= 20) com.stardew.craft.mail.MailService.addMail(player, "robinCoop");
-        if (personalDays >= 40) com.stardew.craft.mail.MailService.addMail(player, "robinBarn");
-        // 德米特里厄斯：山洞
-        if (personalDays >= 10) com.stardew.craft.mail.MailService.addMail(player, "demetriusCave");
-        // 皮埃尔：一般提示
-        if (personalDays >= 14) com.stardew.craft.mail.MailService.addMail(player, "pierreGeneral");
-        // 莱纳斯
-        if (personalDays >= 12) com.stardew.craft.mail.MailService.addMail(player, "linusTip");
-        if (personalDays >= 30) com.stardew.craft.mail.MailService.addMail(player, "linusTrash");
-        // 玛妮：动物
-        if (personalDays >= 25) com.stardew.craft.mail.MailService.addMail(player, "marnieAnimal");
-        // 格斯：烹饪
-        if (personalDays >= 35) com.stardew.craft.mail.MailService.addMail(player, "gusRecipe");
-        // 艾利奥特
-        if (personalDays >= 45) com.stardew.craft.mail.MailService.addMail(player, "elliottBook");
     }
 
     /**

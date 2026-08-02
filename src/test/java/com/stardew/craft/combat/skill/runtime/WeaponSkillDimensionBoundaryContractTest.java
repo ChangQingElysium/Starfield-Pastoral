@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class WeaponSkillDimensionBoundaryContractTest {
@@ -49,13 +50,25 @@ class WeaponSkillDimensionBoundaryContractTest {
     }
 
     @Test
-    void auditedLongLivedHandlersClearTheirOwnedStateOnInvalidation()
+    void runtimeOwnsExecutionStateCleanupForLongLivedHandlers()
             throws IOException {
+        String runtime = normalizedSource(
+                "combat/skill/runtime/WeaponSkillRuntime.java"
+        );
         String crescent = normalizedSource(
                 "combat/skill/handler/CrescentSlashSkillHandler.java"
         );
         String forest = normalizedSource(
                 "combat/skill/handler/ForestBlessingSkillHandler.java"
+        );
+        String tideAnchor = normalizedSource(
+                "combat/skill/handler/TideAnchorSkillHandler.java"
+        );
+        String meowmereShot = normalizedSource(
+                "combat/skill/handler/MeowmereShotSkillHandler.java"
+        );
+        String meowmereSymphony = normalizedSource(
+                "combat/skill/handler/MeowmereSymphonySkillHandler.java"
         );
         String lightCounter = normalizedSource(
                 "combat/skill/handler/LightCounterSkillHandler.java"
@@ -64,21 +77,47 @@ class WeaponSkillDimensionBoundaryContractTest {
                 "combat/skill/handler/ElfBladeLeafSkillHandler.java"
         );
 
-        assertTrue(crescent.contains(
-                "states.remove(instance.instanceId());"
+        assertTrue(runtime.contains("instance.clearExecutionState();"));
+        int handlerFinish = runtime.indexOf(
+                "execution.handler().finish(context, instance, reason);"
+        );
+        int stateClear = runtime.indexOf(
+                "instance.clearExecutionState();",
+                handlerFinish
+        );
+        int activeRemove = runtime.indexOf(
+                "ACTIVE.remove(instance.instanceId());",
+                stateClear
+        );
+        assertTrue(handlerFinish >= 0);
+        assertTrue(stateClear > handlerFinish);
+        assertTrue(activeRemove > stateClear);
+
+        assertTrue(crescent.contains("instance.requireExecutionState(State.class)"));
+        assertTrue(forest.contains("instance.requireExecutionState(State.class)"));
+        assertTrue(tideAnchor.contains("instance.requireExecutionState(State.class)"));
+        assertTrue(meowmereShot.contains(
+                "instance.requireExecutionState(State.class)"
         ));
-        assertTrue(forest.contains(
-                "State state = states.remove(instance.instanceId());"
+        assertTrue(meowmereSymphony.contains(
+                "instance.requireExecutionState(State.class)"
         ));
+        assertFalse(crescent.contains("Map<UUID"));
+        assertFalse(forest.contains("Map<UUID"));
+        assertFalse(tideAnchor.contains("Map<UUID"));
+        assertFalse(meowmereShot.contains("MeowmereShotTracker"));
+        assertFalse(meowmereSymphony.contains("MeowmereSymphonyTracker"));
         assertTrue(forest.contains(
                 "new ForestBlessingPayload("
         ));
         assertTrue(lightCounter.contains(
-                "LightCounterParryState.clear(context.player());"
+                "instance.executionState(LightCounterExecutionState.class) "
+                        + ".ifPresent(LightCounterExecutionState::cancel);"
         ));
         assertTrue(elfBlade.contains(
-                "if (reason != SkillInstance.EndReason.COMPLETED) "
-                        + "{ ElfBladeTracker.cancel("
+                "if (shouldDiscardLeaves(reason)) { "
+                        + "instance.executionState("
+                        + "ElfBladeLeafExecutionState.class)"
         ));
     }
 

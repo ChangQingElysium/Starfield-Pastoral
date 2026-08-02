@@ -4,6 +4,7 @@ import net.minecraft.nbt.CompoundTag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class WeaponSkillContextStoreTest {
@@ -16,6 +17,7 @@ class WeaponSkillContextStoreTest {
                 .ignoreDefense(true)
                 .guaranteedCrit(true)
                 .critChanceBonus(0.35F)
+                .defaultKnockback(false)
                 .build();
 
         CompoundTag tag =
@@ -29,6 +31,7 @@ class WeaponSkillContextStoreTest {
         assertEquals(source.getCritChanceBonus(), restored.getCritChanceBonus());
         assertTrue(restored.isIgnoreDefense());
         assertTrue(restored.isGuaranteedCrit());
+        assertFalse(restored.usesDefaultKnockback());
     }
 
     @Test
@@ -42,5 +45,19 @@ class WeaponSkillContextStoreTest {
                 WeaponSkillContextStore.readContextTag(legacyTag);
 
         assertEquals(0.0F, restored.getCritChanceBonus());
+    }
+
+    @Test
+    void legacyTagWithoutKnockbackPolicyKeepsDefaultWeaponKnockback() {
+        CompoundTag legacyTag = WeaponSkillContextStore.writeContextTag(
+                SkillContext.normalAttack(),
+                10L
+        );
+        legacyTag.remove("DefaultKnockback");
+
+        SkillContext restored =
+                WeaponSkillContextStore.readContextTag(legacyTag);
+
+        assertTrue(restored.usesDefaultKnockback());
     }
 }

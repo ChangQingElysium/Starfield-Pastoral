@@ -4,13 +4,16 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.core.ModDimensions;
 import com.stardew.craft.core.ModMiningDimensions;
 import com.stardew.craft.book.BookPowerEffects;
+import com.stardew.craft.combat.AuthoredDirectDamageEvents;
 import com.stardew.craft.combat.CombatDamageHistory;
 import com.stardew.craft.combat.DamageAdjustment;
 import com.stardew.craft.combat.DamageOutcome;
 import com.stardew.craft.combat.DamagePipeline;
 import com.stardew.craft.combat.DamageRequest;
+import com.stardew.craft.combat.EvaluatedWeaponHit;
 import com.stardew.craft.combat.IncomingDamageResolver;
 import com.stardew.craft.combat.MonsterStats;
+import com.stardew.craft.combat.WeaponCombatEvents;
 import com.stardew.craft.combat.WeaponStats;
 import com.stardew.craft.combat.equipment.CombatRingRules;
 import com.stardew.craft.combat.equipment.YobaProtectionState;
@@ -20,6 +23,8 @@ import com.stardew.craft.mining.MineRewardClaimManager;
 import com.stardew.craft.mining.MiningDataManager;
 import com.stardew.craft.mining.MiningPlayerData;
 import com.stardew.craft.network.PlayerDataSyncPacket;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -73,6 +78,7 @@ public class PlayerDataEventHandler {
                         .updateOwnerName(player.getUUID(), data.getPreferredName());
             }
             handlePregenRelocationIfNeeded(player, data);
+            data.applyRecipeUnlockMigrations();
             PlayerStardewDataAPI.applyStardewCraftingConditionUnlocks(player);
             backfillMine100StardropReward(player, data);
             com.stardew.craft.festival.desert.DesertFestivalService.cleanupExpiredEggsOnLogin(player);
@@ -94,6 +100,7 @@ public class PlayerDataEventHandler {
             
             // 同步数据到客户端
             syncPlayerData(player, data);
+            com.stardew.craft.combat.skill.DragonBreathTracker.sync(player);
             // 旧存档没有性别/称呼/喜好字段：登录后单独补录，不伪造默认值。
             if (!data.isProfileComplete()
                     && com.stardew.craft.farm.FarmInstanceRegistry.get().getFarmForPlayer(player.getUUID()) != null) {
@@ -455,12 +462,20 @@ public class PlayerDataEventHandler {
 
         if (player.level().dimension() != ModDimensions.STARDEW_VALLEY
             && player.level().dimension() != ModMiningDimensions.STARDEW_MINING) {
+            com.stardew.craft.combat.equipment.EquipmentPlayerAttributes
+                    .sync(player);
             if (com.stardew.craft.combat.equipment.CrossDimensionCombatHandler
                     .tryBlockIncoming(player, event)) {
                 return;
             }
-            com.stardew.craft.item.trinket.TrinketEffectHandler.onReceiveDamage(player,
-                    Math.max(1, (int) Math.ceil(amount * com.stardew.craft.combat.DimensionDamageMapper.getHealthRatio())));
+            com.stardew.craft.combat.skill.TemplarVowHandler
+                    .onPlayerHurt(event);
+            if (event.getAmount() <= 0.0F) {
+                return;
+            }
+            com.stardew.craft.combat.skill.LightCounterParryHandler
+                    .onPlayerHurt(event);
+            amount = event.getAmount() * shelterMultiplier;
             event.setAmount(amount);
             return;
         }
@@ -479,6 +494,7 @@ public class PlayerDataEventHandler {
 
         // 取消 MC 原版扣血（我们用星露谷血条承载伤害）。
         event.setAmount(0.0f);
+        long nowTick = player.level().getGameTime();
 
         // 虚空坠落：直接触发击倒，无需慢慢扣血。
         // 原版虚空伤害有 bypasses_invulnerability 标签每 tick 命中，
@@ -493,13 +509,15 @@ public class PlayerDataEventHandler {
         }
 
         // 原版伤害被设为 0 后不会建立受击无敌帧，由星露谷战斗层统一维护。
-        if (player.invulnerableTime > 0) {
+        if (player.invulnerableTime > 0
+                && !event.getSource().is(
+                        net.minecraft.tags.DamageTypeTags.BYPASSES_COOLDOWN
+                )) {
             player.setHealth(player.getMaxHealth());
             return;
         }
 
         PlayerStardewData data = PlayerDataManager.getPlayerData(player);
-        long nowTick = player.level().getGameTime();
         if (YobaProtectionState.isActive(player, nowTick)) {
             player.setHealth(player.getMaxHealth());
             player.getFoodData().setFoodLevel(20);
@@ -549,10 +567,13 @@ public class PlayerDataEventHandler {
         }
 
         float afterShelter = incomingRange.maximum() * shelterMultiplier;
+        float bombMultiplier = 1.0f;
         if (event.getSource().is(net.minecraft.world.damagesource.DamageTypes.EXPLOSION)
                 || event.getSource().is(net.minecraft.world.damagesource.DamageTypes.PLAYER_EXPLOSION)) {
             float reducedBombDamage = BookPowerEffects.applyBombDamageReduction(data, afterShelter);
-            float bombMultiplier = afterShelter > 0.0f ? reducedBombDamage / afterShelter : 1.0f;
+            bombMultiplier = afterShelter > 0.0f
+                    ? reducedBombDamage / afterShelter
+                    : 1.0f;
             incomingDamage.addPreDefenseAdjustment(
                     DamageAdjustment.multiply("book_bomb_resistance", bombMultiplier)
             );
@@ -570,12 +591,16 @@ public class PlayerDataEventHandler {
         incomingDamage
                 .defense(totalDefense, false)
                 .defenseRule(DamageRequest.DefenseRule.STARDEW_PLAYER_DEFENSE);
+        float difficultyMultiplier = 1.0f;
         if (dmgSourceEntity != null
                 && player.level() instanceof net.minecraft.server.level.ServerLevel serverLevel
                 && com.stardew.craft.festival.desert.DesertFestivalMineService.isInFestivalSkullCavern(player)) {
+            difficultyMultiplier = com.stardew.craft.festival.desert
+                    .DesertFestivalMineService
+                    .monsterDamageMultiplier(serverLevel);
             incomingDamage.addPreDefenseAdjustment(DamageAdjustment.multiply(
                     "desert_festival_difficulty",
-                    com.stardew.craft.festival.desert.DesertFestivalMineService.monsterDamageMultiplier(serverLevel)
+                    difficultyMultiplier
             ));
         }
 
@@ -615,8 +640,46 @@ public class PlayerDataEventHandler {
             }
         }
 
-        DamageOutcome incomingOutcome = DamagePipeline.evaluate(incomingDamage.build());
-        CombatDamageHistory.record(player, player.level().getGameTime(), incomingOutcome);
+        // Reactive weapon defenses consume their one-shot state only after
+        // recovery/i-frame/equipment rejection gates have accepted this hit.
+        event.setAmount(rawAmount);
+        com.stardew.craft.combat.skill.TemplarVowHandler.onPlayerHurt(event);
+        if (event.getAmount() <= 0.0F) {
+            return;
+        }
+        com.stardew.craft.combat.skill.LightCounterParryHandler
+                .onPlayerHurt(event);
+        rawAmount = event.getAmount();
+        event.setAmount(0.0F);
+
+        float originalAmount = event.getOriginalAmount();
+        float incomingEventMultiplier = originalAmount > 0.0f
+                ? Math.max(0.0f, rawAmount / originalAmount)
+                : 1.0f;
+        WeaponCombatEvents.CustomHealthWeaponResolution weaponResolution =
+                WeaponCombatEvents.evaluateCustomHealthWeaponHit(
+                        player,
+                        event.getSource(),
+                        nowTick,
+                        new WeaponCombatEvents.CustomHealthProtection(
+                                incomingEventMultiplier,
+                                shelterMultiplier,
+                                bombMultiplier,
+                                difficultyMultiplier,
+                                totalDefense
+                        )
+                );
+        if (weaponResolution.suppressed()) {
+            player.setHealth(player.getMaxHealth());
+            player.getFoodData().setFoodLevel(20);
+            player.getFoodData().setSaturation(5.0f);
+            return;
+        }
+        EvaluatedWeaponHit weaponHit = weaponResolution.hit();
+        DamageOutcome incomingOutcome = weaponHit != null
+                ? weaponHit.outcome()
+                : DamagePipeline.evaluate(incomingDamage.build());
+        CombatDamageHistory.record(player, nowTick, incomingOutcome);
         float sdDamageFloat = incomingOutcome.getFinalDamage();
         int sdDamage = (int) Math.ceil(sdDamageFloat);
         if (sdDamage < 1) {
@@ -625,9 +688,15 @@ public class PlayerDataEventHandler {
         com.stardew.craft.item.trinket.TrinketEffectHandler.onReceiveDamage(player, sdDamage);
 
         // 钢脊之怒：4秒内首次受击充能
-        com.stardew.craft.combat.skill.SteelSpineFuryState.onDamageTaken(player, nowTick, sdDamage);
+        com.stardew.craft.combat.skill.handler
+                .SteelSpineFurySkillHandler.onDamageTaken(
+                        player,
+                        nowTick,
+                        sdDamage
+                );
         // 矮人剑：堡垒态受击触发地脉震波
-        com.stardew.craft.combat.skill.DwarfFortressTracker.onDamageTaken(player, nowTick);
+        com.stardew.craft.combat.skill.handler
+                .DwarfFortressSkillHandler.onDamageTaken(player, nowTick);
 
         // 荆棘戒指：受伤时反射伤害给攻击者
         if (eqStats.hasThorns() && sourceEntity instanceof net.minecraft.world.entity.Mob attacker) {
@@ -650,6 +719,17 @@ public class PlayerDataEventHandler {
         int oldSdHealth = data.getHealth();
         int newSdHealth = Math.max(0, oldSdHealth - sdDamage);
         data.setHealth(newSdHealth);
+        WeaponCombatEvents.applyCustomHealthWeaponHit(
+                weaponHit,
+                oldSdHealth - newSdHealth,
+                nowTick
+        );
+        AuthoredDirectDamageEvents.onAppliedDamage(
+                player,
+                event.getSource(),
+                oldSdHealth - newSdHealth,
+                nowTick
+        );
 
         // 凤凰戒指：生命值归零时复活（每天一次）
         if (newSdHealth == 0 && eqStats.hasPhoenix()) {
@@ -663,9 +743,10 @@ public class PlayerDataEventHandler {
                 );
                 data.setHealth(reviveHealth);
                 syncPlayerVitals(player, data);
-                player.invulnerableTime = Math.max(
-                        player.invulnerableTime,
-                        CombatRingRules.invulnerabilityTicks(eqStats.getProtectionCount())
+                event.setInvulnerabilityTicks(
+                        CombatRingRules.invulnerabilityTicks(
+                                eqStats.getProtectionCount()
+                        )
                 );
                 player.setHealth(player.getMaxHealth());
                 player.getFoodData().setFoodLevel(20);
@@ -683,11 +764,13 @@ public class PlayerDataEventHandler {
             StardewDamageHooks.onHealthDepleted(player, source);
         }
 
-        // setAmount(0) 不会触发 MC 无敌帧。保护戒指延长的是受击后的无敌时间，
-        // 不是随机减伤；每枚戒指在原版 1200ms 基础上增加 400ms。
-        player.invulnerableTime = Math.max(
-                player.invulnerableTime,
-                CombatRingRules.invulnerabilityTicks(eqStats.getProtectionCount())
+        // 自定义生命已完成结算；让本次 DamageContainer 在 hurt 返回路径
+        // 安装受击帧，避免 Incoming 内提前写 player.invulnerableTime 导致
+        // 外层错误早退。保护戒指只延长受击帧，不提供随机减伤。
+        event.setInvulnerabilityTicks(
+                CombatRingRules.invulnerabilityTicks(
+                        eqStats.getProtectionCount()
+                )
         );
 
         // 维持原版血/饱食度满，避免被其他机制"补刀"。
@@ -710,6 +793,10 @@ public class PlayerDataEventHandler {
         if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
         }
+
+        com.stardew.craft.combat.CombatTrackerCleanup.tickTransientFrames(
+                player.level().getGameTime()
+        );
 
         // AFK 检测：每 20 tick（1秒）检查一次玩家是否移动/旋转
         if (player.tickCount % 20 == 0
@@ -830,9 +917,10 @@ public class PlayerDataEventHandler {
             changed |= data.tickTimedBuffs(now);
             BookPowerEffects.tickMovement(player, data);
 
-            if (changed || data.isDirty()) {
-                data.markClean();
+            if (changed || data.isFullSyncDirty()) {
                 syncPlayerData(player, data);
+            } else if (data.isVitalsSyncDirty()) {
+                syncPlayerVitals(player, data);
             }
         } catch (Exception e) {
             StardewCraft.LOGGER.error("Error ticking player buffs", e);
@@ -842,30 +930,6 @@ public class PlayerDataEventHandler {
         com.stardew.craft.item.trinket.TrinketEffectHandler.tick(player);
         com.stardew.craft.mastery.PrismaticButterflyService.tickPlayer(player);
         com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime.tickPlayer(player, gameTime);
-        // 刻刀：刻痕连刺
-        com.stardew.craft.combat.skill.CarvingKnifeThrustTracker.tick(player, gameTime);
-        // 铱针：三针连斩
-        com.stardew.craft.combat.skill.IridiumNeedleThrustTracker.tick(player, gameTime);
-        // 残破的三叉戟：鱼获试刺 + 鱼获状态
-        com.stardew.craft.combat.skill.BrokenTridentThrustTracker.tick(player, gameTime);
-        com.stardew.craft.combat.skill.BrokenTridentCatchTracker.tick(player, gameTime);
-        // 水晶匕首：晶层持续
-        com.stardew.craft.combat.skill.CrystalDaggerLayerTracker.tick(player, gameTime);
-        // 黑曜石之刃：玄刃共鸣 + 裂界一线
-        com.stardew.craft.combat.skill.ObsidianResonanceTracker.tick(player, gameTime);
-        // 骨化剑：白骨行刑
-        com.stardew.craft.combat.skill.OssifiedExecutionTracker.tick(player, gameTime);
-        // 圣剑：晨曦圣域
-        com.stardew.craft.combat.skill.HolyBladeSanctuaryTracker.tick(player, gameTime);
-        // 淬火阔剑：回炉淬火延迟爆鸣 + 熔锻飞坯火环
-        com.stardew.craft.combat.skill.TemperedQuenchTracker.tick(player, gameTime);
-        com.stardew.craft.combat.skill.TemperedFireRingTracker.tick(player, gameTime);
-        // 钢刀：疾锋刻线 / 斩迹回响
-        com.stardew.craft.combat.skill.SteelFalchionLineTracker.tick(player, gameTime);
-        // 黑暗剑：祭血斩 / 血月收割
-        // 熔岩武士刀：熔潮回鸣
-        // 矮人剑与熔岩武士刀的持续技能由 WeaponSkillRuntime 驱动。
-            com.stardew.craft.combat.skill.RiftPathDamageTracker.tick(player, gameTime);
 
         // 温泉运行时：静止时恢复 energy/health，移动时按节奏播放水声，
         // 进出温泉播放 pullItemFromWater。维度判断在 Registry 内完成。
@@ -998,6 +1062,32 @@ public class PlayerDataEventHandler {
         packet.data().putInt("MaxMineFloorReached", miningData != null ? miningData.getMaxFloorReached() : 0);
         packet.data().putString("WinterStarRecipient",
             com.stardew.craft.festival.WinterStarFestivalService.getSecretFriendId(player));
+        packet.data().putInt("LostBooksFound",
+                com.stardew.craft.museum.LostBookService.foundCount(player));
+        ListTag lostBookInteractions = new ListTag();
+        record LostBookColumn(net.minecraft.resources.ResourceLocation dimension, int x, int z) {}
+        for (var book : com.stardew.craft.museum.LostBookRegistry.orderedBooks()) {
+            String readFlag = com.stardew.craft.museum.LostBookService.readFlag(book.getKey());
+            java.util.Map<LostBookColumn, Integer> indicatorHeights = new java.util.LinkedHashMap<>();
+            for (var interaction : book.getValue().interactions()) {
+                LostBookColumn column = new LostBookColumn(
+                        interaction.dimension(), interaction.x(), interaction.z());
+                indicatorHeights.merge(column, interaction.y() + 1, Math::max);
+            }
+            for (var indicator : indicatorHeights.entrySet()) {
+                LostBookColumn column = indicator.getKey();
+                CompoundTag marker = new CompoundTag();
+                marker.putString("BookId", book.getKey().toString());
+                marker.putString("ReadFlag", readFlag);
+                marker.putString("Dimension", column.dimension().toString());
+                marker.putInt("UnlockAt", book.getValue().unlockAt());
+                marker.putInt("X", column.x());
+                marker.putInt("Y", indicator.getValue());
+                marker.putInt("Z", column.z());
+                lostBookInteractions.add(marker);
+            }
+        }
+        packet.data().put("LostBookInteractions", lostBookInteractions);
         PacketDistributor.sendToPlayer(player, packet);
         // sync equipment slots
         PacketDistributor.sendToPlayer(player, new com.stardew.craft.network.payload.EquipmentSyncPayload(
@@ -1009,20 +1099,26 @@ public class PlayerDataEventHandler {
                 data.getEquippedShirt(),
                 data.getEquippedPants()
         ));
+        data.markFullSyncClean();
     }
 
     /**
      * Combat hot path: synchronize only the values needed to redraw the health
-     * bar. Persistent/full state remains covered by the normal dirty-data sync.
+     * and energy bars. This consumes only the network vitals marker; the
+     * persistence marker remains set until PlayerDataManager schedules a save.
      */
     public static void syncPlayerVitals(ServerPlayer player, PlayerStardewData data) {
         PacketDistributor.sendToPlayer(
                 player,
                 new com.stardew.craft.network.payload.PlayerVitalsSyncPayload(
                         data.getHealth(),
-                        data.getMaxHealth()
+                        data.getMaxHealth(),
+                        data.getEnergy(),
+                        data.getBaseMaxEnergy(),
+                        data.isExhausted()
                 )
         );
+        data.markVitalsSyncClean();
     }
 
     /**

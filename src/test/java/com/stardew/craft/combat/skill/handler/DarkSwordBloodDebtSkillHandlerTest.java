@@ -1,6 +1,5 @@
 package com.stardew.craft.combat.skill.handler;
 
-import com.stardew.craft.combat.skill.DarkSwordBloodDebtTracker;
 import com.stardew.craft.combat.skill.SkillContext;
 import com.stardew.craft.combat.skill.runtime.SkillInstance;
 import com.stardew.craft.item.weapon.WeaponData;
@@ -30,8 +29,14 @@ class DarkSwordBloodDebtSkillHandlerTest {
         assertEquals(SkillContext.SkillTier.MINOR, hitContext.getTier());
         assertEquals(1.40F, hitContext.getDamageMultiplier());
         assertFalse(hitContext.isIgnoreDefense());
-        assertEquals(100, DarkSwordBloodDebtTracker.ACTIVE_DURATION_TICKS);
-        assertEquals(0.20F, DarkSwordBloodDebtTracker.LIFESTEAL_RATIO);
+        assertEquals(
+                100,
+                DarkSwordBloodDebtSkillHandler.ACTIVE_DURATION_TICKS
+        );
+        assertEquals(
+                0.20F,
+                DarkSwordBloodDebtSkillHandler.LIFESTEAL_RATIO
+        );
         assertEquals(4.0, DarkSwordBloodDebtSkillHandler.TARGET_RANGE);
         assertEquals(8, DarkSwordBloodDebtSkillHandler.ANIMATION_TICKS);
         assertFalse(new DarkSwordBloodDebtSkillHandler().completesImmediately());

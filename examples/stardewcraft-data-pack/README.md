@@ -90,6 +90,8 @@ python3 examples/stardewcraft-data-pack/validate.py
 ```
 
 该检查会解析两个数据包中的全部 JSON，并验证配方商店行、邮件解锁源、主动节日对照、晶球、装备技能和 Java Provider 之间的跨文件关系。它是快速失败检查，不代替服务端 Codec 加载和真实客户端验收。
+示例钻石剑同时声明 `speed: 1` 和 `raw_speed: 3`，用于验证无法只靠
+Tooltip 整数速度表达的奇数原始攻速；旧数据包仍可只声明 `speed`。
 
 ## 登录与 `/reload` 验收
 

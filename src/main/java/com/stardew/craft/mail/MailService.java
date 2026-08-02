@@ -82,6 +82,32 @@ public class MailService {
     }
 
     /**
+     * Vanilla daily NPC gift letters bypass {@code hasOrWillReceiveMail} and
+     * are removed from {@code mailReceived} again during the morning update.
+     */
+    public static void addRecurringFriendshipMail(
+            ServerPlayer player, String mailId
+    ) {
+        if (!canQueueReadableMail(
+                player, mailId, "friendshipMailbox")) return;
+        PlayerStardewData data = PlayerDataManager.getPlayerData(player);
+        StardewProgressSnapshot before =
+                currentMailSnapshot(player, mailId);
+        data.addRecurringFriendshipMailToMailbox(mailId);
+        data.removeMailFlag(mailId);
+        executeActions(
+                player, MailRegistry.get(mailId), MailPhase.DELIVERY);
+        dispatchMail(
+                StardewProgressEventType.MADE_AVAILABLE,
+                player,
+                before,
+                StardewProgressRegistry.mailSnapshot(
+                        mailId, StardewProgressPhase.AVAILABLE),
+                StardewProgressCauses.MAIL_DELIVERY);
+        syncPlayerData(player, data);
+    }
+
+    /**
      * 安排邮件于次日投递。如果已收过或已安排，则忽略。
      */
     public static void addMailForTomorrow(ServerPlayer player, String mailId) {
@@ -199,8 +225,25 @@ public class MailService {
             }
         }
 
+        var dynamicFriendshipReward =
+                com.stardew.craft.npc.runtime.NpcFriendshipMailService
+                        .rollReward(mailId, player.getRandom());
+        if (!dynamicFriendshipReward.item().isEmpty()) {
+            net.minecraft.world.item.ItemStack stack =
+                    dynamicFriendshipReward.item().copy();
+            net.minecraft.resources.ResourceLocation itemId =
+                    net.minecraft.core.registries.BuiltInRegistries.ITEM
+                            .getKey(stack.getItem());
+            items.add(new OpenMailPayload.ItemAttachment(
+                    itemId.toString(), stack.getCount()));
+            if (!player.getInventory().add(stack)) {
+                player.drop(stack, false);
+            }
+        }
+
         // 处理金钱附件（服务端直接加钱 + 同步客户端）
-        int money = entry.getMoney();
+        int money = entry.getMoney()
+                + dynamicFriendshipReward.money();
         if (money > 0) {
             com.stardew.craft.player.PlayerStardewDataAPI.addMoney(player, money);
         }

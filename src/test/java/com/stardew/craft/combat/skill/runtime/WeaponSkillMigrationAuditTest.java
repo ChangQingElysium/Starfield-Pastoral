@@ -40,6 +40,18 @@ class WeaponSkillMigrationAuditTest {
 
         assertFalse(snapshot.definitions().isEmpty());
         assertFalse(snapshot.runtimeSkills().isEmpty());
+        assertEquals(64, snapshot.definedSkillCount());
+        assertEquals(64, snapshot.definedSlotCount());
+        assertEquals(Set.of(), snapshot.legacySkills());
+        assertEquals(snapshot.definitions().keySet(), snapshot.runtimeSkills());
+        snapshot.definitions().forEach((skillId, uses) ->
+                assertEquals(
+                        1,
+                        uses.size(),
+                        () -> "Built-in skill id must belong to one slot: "
+                                + skillId + " -> " + uses
+                )
+        );
         assertEquals(snapshot.definitions().keySet(), classified);
 
         Set<ResourceLocation> overlap = new LinkedHashSet<>(snapshot.runtimeSkills());

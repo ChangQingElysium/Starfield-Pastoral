@@ -1,23 +1,19 @@
 package com.stardew.craft.combat.skill.handler;
 
-import com.stardew.craft.combat.skill.DashMovementTracker;
-import com.stardew.craft.combat.skill.DragonBreathTracker;
 import com.stardew.craft.combat.skill.SkillContext;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationDispatcher;
 import com.stardew.craft.combat.skill.WeaponSkillCooldowns;
 import com.stardew.craft.combat.skill.WeaponSkillDamage;
-import com.stardew.craft.combat.skill.YetiFreezeTracker;
 import com.stardew.craft.combat.skill.runtime.RuntimeWeaponSkillHandler;
 import com.stardew.craft.combat.skill.runtime.SkillExecutionContext;
 import com.stardew.craft.combat.skill.runtime.SkillInstance;
 import com.stardew.craft.combat.skill.runtime.SkillTickResult;
 import com.stardew.craft.combat.skill.runtime.SkillValidation;
 import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
-import com.stardew.craft.effect.ModMobEffects;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillMovementControl;
 import com.stardew.craft.item.weapon.WeaponSkillData;
 import java.util.List;
 import net.minecraft.util.Mth;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
@@ -45,10 +41,14 @@ public final class DragonBreathThrustSkillHandler
 
     @Override
     public SkillValidation validate(SkillExecutionContext context) {
-        DragonBreathTracker.tickThrust(
+        if (WeaponSkillMovementControl.isLocked(
                 context.player(),
                 context.nowTick()
-        );
+        )) {
+            return SkillValidation.reject(
+                    SkillValidation.RejectionReason.INVALID_STATE
+            );
+        }
         if (WeaponSkillCooldowns.isOnCooldown(
                 context.player(),
                 context.weaponId().getPath(),
@@ -62,8 +62,6 @@ public final class DragonBreathThrustSkillHandler
         if (WeaponSkillRuntime.hasActive(
                 context.player().getUUID(),
                 context.skillId()
-        ) || DragonBreathTracker.hasThrustState(
-                context.player().getUUID()
         )) {
             return SkillValidation.reject(
                     SkillValidation.RejectionReason.INVALID_STATE
@@ -81,6 +79,14 @@ public final class DragonBreathThrustSkillHandler
 
     @Override
     public void begin(SkillExecutionContext context, SkillInstance instance) {
+        if (WeaponSkillMovementControl.isLocked(
+                context.player(),
+                context.nowTick()
+        )) {
+            throw new IllegalStateException(
+                    "Validated Dragon Breath Thrust movement is now locked"
+            );
+        }
         Vec3 start = context.player().position();
         Vec3 end = resolveSafeDashEnd(
                 context.player(),
@@ -102,43 +108,31 @@ public final class DragonBreathThrustSkillHandler
                 targets.stream().map(LivingEntity::getId).toList()
         );
 
+        DragonBreathThrustExecutionState executionState =
+                new DragonBreathThrustExecutionState(
+                        context.nowTick(),
+                        DASH_DURATION_TICKS
+                );
+        instance.initializeExecutionState(executionState);
+
         String weaponId = context.weaponId().getPath();
         String skillId = context.skillData().getId();
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                weaponId,
-                skillId,
-                context.nowTick(),
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 context.skillData().getCooldown() * 20
         );
-        DashMovementTracker.start(
-                context.player(),
-                context.nowTick(),
-                end,
-                DASH_DURATION_TICKS
-        );
-        DragonBreathTracker.beginThrust(
-                context.player(),
-                context.nowTick(),
-                DASH_DURATION_TICKS
-        );
-
-        for (LivingEntity target : targets) {
-            attackTarget(context, target);
-            target.addEffect(new MobEffectInstance(
-                    ModMobEffects.VULNERABLE,
-                    VULNERABLE_DURATION_TICKS,
-                    VULNERABLE_AMPLIFIER,
-                    false,
-                    true,
-                    true
-            ));
-            YetiFreezeTracker.apply(
-                    target,
+        instance.registerCommittedEffect(() -> {
+            executionState.start(
+                    context.player(),
                     context.nowTick(),
-                    STAGGER_DURATION_TICKS
+                    end,
+                    DASH_DURATION_TICKS
             );
-        }
+            for (LivingEntity target : targets) {
+                attackTarget(context, target);
+            }
+        });
 
         // Preserve the original order: movement and hits precede presentation.
         // This thrust never imposed a server-side attack lock.
@@ -160,20 +154,9 @@ public final class DragonBreathThrustSkillHandler
             SkillExecutionContext context,
             SkillInstance instance
     ) {
-        if (!DragonBreathTracker.isThrustBoundToCurrentContext(
-                context.player()
-        )) {
-            return SkillTickResult.CANCEL;
-        }
-        DragonBreathTracker.tickThrust(
-                context.player(),
-                context.nowTick()
-        );
-        return DragonBreathTracker.hasThrustState(
-                context.player().getUUID()
-        )
-                ? SkillTickResult.CONTINUE
-                : SkillTickResult.COMPLETE;
+        return instance.requireExecutionState(
+                DragonBreathThrustExecutionState.class
+        ).result(context.nowTick());
     }
 
     @Override
@@ -182,15 +165,12 @@ public final class DragonBreathThrustSkillHandler
             SkillInstance instance,
             SkillInstance.EndReason reason
     ) {
-        DragonBreathTracker.clearThrust(context.player());
-        if (shouldCancelMovement(reason)) {
-            DashMovementTracker.removePlayer(context.player().getUUID());
-        }
+        instance.executionState(DragonBreathThrustExecutionState.class)
+                .ifPresent(state -> state.finish(context.player(), reason));
     }
 
     static boolean shouldCancelMovement(SkillInstance.EndReason reason) {
-        return reason == SkillInstance.EndReason.INTERRUPTED
-                || reason == SkillInstance.EndReason.INVALIDATED;
+        return reason != SkillInstance.EndReason.COMPLETED;
     }
 
     static SkillContext createHitContext(WeaponSkillData skillData) {
@@ -247,7 +227,9 @@ public final class DragonBreathThrustSkillHandler
                 target,
                 createHitContext(context.skillData()),
                 context.weaponSnapshot(),
-                context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS
+                context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS,
+                WeaponSkillDamage.AttackGatePolicy.RESPECT_AT_IMPACT,
+                WeaponSkillDamage.HitCooldownPolicy.RESPECT_VANILLA
         );
     }
 

@@ -1,6 +1,7 @@
 package com.stardew.craft.item.trinket;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.combat.CombatTargetRules;
 import com.stardew.craft.combat.DimensionDamageMapper;
 import com.stardew.craft.entity.effect.IceSpineEffectEntity;
 import com.stardew.craft.entity.trinket.FairyCompanionEntity;
@@ -33,7 +34,10 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.common.Tags;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 
 import java.util.ArrayList;
@@ -50,7 +54,10 @@ public final class TrinketEffectHandler {
     private static final String TAG_QUIVER_TIMER = "QuiverTimerMs";
     private static final String TAG_ICE_TIMER = "IceTimerMs";
     private static final String TAG_FAIRY_TIMER = "FairyTimerMs";
-    private static final String TAG_FAIRY_DAMAGE = "FairyDamageSinceLastHeal";
+    private static final String TAG_FAIRY_COMBAT_DAMAGE =
+            "FairyDamageSinceLastHeal";
+    private static final String TAG_MAGIC_QUIVER_DAMAGE =
+            "StardewMagicQuiverDamage";
     private static final String TAG_PARROT_UUID = "ParrotUuid";
     private static final String TAG_TRINKET_PARROT = "StardewTrinketParrot";
     private static final String TAG_FROG_NEXT_CHECK_TICK = "FrogNextCheckTick";
@@ -99,8 +106,7 @@ public final class TrinketEffectHandler {
         if (stardewDamage <= 0 || equippedType(player) != TrinketType.FAIRY_BOX) {
             return;
         }
-        CompoundTag state = getState(player);
-        state.putInt(TAG_FAIRY_DAMAGE, state.getInt(TAG_FAIRY_DAMAGE) + stardewDamage);
+        recordFairyCombatDamage(player, stardewDamage);
     }
 
     public static boolean cancelBasiliskDamage(ServerPlayer player, DamageSource source) {
@@ -108,14 +114,14 @@ public final class TrinketEffectHandler {
             return false;
         }
         tickBasiliskPaw(player);
-        if (source.is(DamageTypes.IN_FIRE)
-                || source.is(DamageTypes.ON_FIRE)
-                || source.is(DamageTypes.LAVA)
-                || source.is(DamageTypes.HOT_FLOOR)
+        if (source.is(DamageTypes.ON_FIRE)
                 || source.is(DamageTypes.FREEZE)
                 || source.is(DamageTypes.WITHER)
-                || source.is(DamageTypes.MAGIC)) {
+                || source.is(Tags.DamageTypes.IS_POISON)) {
             player.clearFire();
+            if (source.is(DamageTypes.FREEZE)) {
+                player.setTicksFrozen(0);
+            }
             return true;
         }
         return false;
@@ -123,13 +129,15 @@ public final class TrinketEffectHandler {
 
     public static void onDamageMonster(ServerPlayer player, LivingEntity target, int stardewDamage, boolean criticalHit) {
         TrinketType type = equippedType(player);
-        if (type == null || target == null || target instanceof ServerPlayer) {
+        if (type == null
+                || target == null
+                || target instanceof ServerPlayer
+                || !CombatTargetRules.isCombatMonster(target)) {
             return;
         }
 
         if (type == TrinketType.FAIRY_BOX && stardewDamage > 0) {
-            CompoundTag state = getState(player);
-            state.putInt(TAG_FAIRY_DAMAGE, state.getInt(TAG_FAIRY_DAMAGE) + stardewDamage);
+            recordFairyCombatDamage(player, stardewDamage);
         }
 
         if (type == TrinketType.IRIDIUM_SPUR && criticalHit) {
@@ -145,9 +153,29 @@ public final class TrinketEffectHandler {
         state.remove(TAG_LAST_TYPE);
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void onMagicQuiverIncomingDamage(
+            LivingIncomingDamageEvent event
+    ) {
+        if (!(event.getSource().getDirectEntity()
+                instanceof AbstractArrow arrow)) {
+            return;
+        }
+        CompoundTag projectileData = arrow.getPersistentData();
+        if (!projectileData.contains(TAG_MAGIC_QUIVER_DAMAGE)) {
+            return;
+        }
+        event.setAmount(projectileData.getFloat(TAG_MAGIC_QUIVER_DAMAGE));
+    }
+
+    @SubscribeEvent(
+            priority = EventPriority.LOWEST,
+            receiveCanceled = true
+    )
     public static void onMobKilled(LivingDeathEvent event) {
-        if (!(event.getSource().getEntity() instanceof ServerPlayer player)) {
+        if (event.isCanceled()
+                || !(event.getSource().getEntity()
+                instanceof ServerPlayer player)) {
             return;
         }
         LivingEntity killed = event.getEntity();
@@ -208,7 +236,14 @@ public final class TrinketEffectHandler {
 
         Arrow arrow = new Arrow(level, player, new ItemStack(Items.ARROW), null);
         arrow.setPos(from.x, from.y, from.z);
-        arrow.setBaseDamage(actualDamage);
+        // AbstractArrow multiplies base damage by its current velocity. Keep a
+        // small positive trigger value here and restore the authored damage at
+        // LivingIncomingDamageEvent, before armor and other reductions.
+        arrow.setBaseDamage(1.0D);
+        arrow.getPersistentData().putFloat(
+                TAG_MAGIC_QUIVER_DAMAGE,
+                actualDamage
+        );
         arrow.pickup = AbstractArrow.Pickup.DISALLOWED;
         arrow.setNoGravity(true);
         arrow.shoot(to.x, to.y, to.z, 2.0F, 0.0F);
@@ -249,7 +284,7 @@ public final class TrinketEffectHandler {
         }
         state.putInt(TAG_FAIRY_TIMER, 0);
 
-        int damageSinceLastHeal = state.getInt(TAG_FAIRY_DAMAGE);
+        int damageSinceLastHeal = state.getInt(TAG_FAIRY_COMBAT_DAMAGE);
         if (damageSinceLastHeal < 0) {
             return;
         }
@@ -273,11 +308,11 @@ public final class TrinketEffectHandler {
 
         if (inStardewDimension) {
             data.setHealth(Math.min(maxHealth, currentHealth + healAmount));
-            PlayerDataEventHandler.syncPlayerData(player, data);
+            PlayerDataEventHandler.syncPlayerVitals(player, data);
         } else {
             player.heal(Math.max(1.0F, healAmount / DimensionDamageMapper.getHealthRatio()));
         }
-        state.putInt(TAG_FAIRY_DAMAGE, 0);
+        state.putInt(TAG_FAIRY_COMBAT_DAMAGE, 0);
         player.level().playSound(null, player.getX(), player.getY(), player.getZ(), ModSounds.FAIRY_HEAL.get(), SoundSource.PLAYERS, 0.75F, 1.0F);
     }
 
@@ -298,6 +333,8 @@ public final class TrinketEffectHandler {
         }
 
         LivingEntity eaten = target.get();
+        // Stardew's frog consumes the monster without a kill, loot, XP, or
+        // eradication credit. Do not route this through LivingDeathEvent.
         eaten.setHealth(0.0F);
         eaten.remove(Entity.RemovalReason.KILLED);
         state.putLong(TAG_FROG_NEXT_CHECK_TICK, now + FROG_FULLNESS_TICKS);
@@ -452,8 +489,35 @@ public final class TrinketEffectHandler {
         state.putInt(TAG_QUIVER_TIMER, 0);
         state.putInt(TAG_ICE_TIMER, 0);
         state.putInt(TAG_FAIRY_TIMER, 0);
-        state.putInt(TAG_FAIRY_DAMAGE, 0);
+        state.putInt(TAG_FAIRY_COMBAT_DAMAGE, 0);
         state.remove(TAG_FROG_NEXT_CHECK_TICK);
+    }
+
+    private static void recordFairyCombatDamage(
+            ServerPlayer player,
+            int stardewDamage
+    ) {
+        CompoundTag state = getState(player);
+        state.putInt(
+                TAG_FAIRY_COMBAT_DAMAGE,
+                accumulateFairyCombatDamage(
+                        state.getInt(TAG_FAIRY_COMBAT_DAMAGE),
+                        stardewDamage
+                )
+        );
+    }
+
+    static int accumulateFairyCombatDamage(
+            int accumulatedDamage,
+            int newDamage
+    ) {
+        if (newDamage <= 0) {
+            return Math.max(0, accumulatedDamage);
+        }
+        return (int) Math.min(
+                Integer.MAX_VALUE,
+                Math.max(0L, accumulatedDamage) + (long) newDamage
+        );
     }
 
     private static CompoundTag getState(ServerPlayer player) {

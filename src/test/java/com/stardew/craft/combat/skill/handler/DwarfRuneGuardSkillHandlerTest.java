@@ -48,14 +48,22 @@ class DwarfRuneGuardSkillHandlerTest {
     }
 
     @Test
-    void targetSelectionKeepsTheHitAndMissEnergyRewards() {
-        assertEquals(
-                6.0F,
-                DwarfRuneGuardSkillHandler.energyRestoreForTarget(true)
-        );
-        assertEquals(
-                3.0F,
-                DwarfRuneGuardSkillHandler.energyRestoreForTarget(false)
+    void authoredHitAndMissEnergyRewardsRemainDistinct() {
+        assertEquals(6.0F, DwarfRuneGuardSkillHandler.HIT_ENERGY_RESTORE);
+        assertEquals(3.0F, DwarfRuneGuardSkillHandler.MISS_ENERGY_RESTORE);
+    }
+
+    @Test
+    void runtimeInstanceOwnsTheGuardWindow() {
+        assertFalse(DwarfRuneGuardSkillHandler.isGuardWindowComplete(
+                100L,
+                149L
+        ));
+        org.junit.jupiter.api.Assertions.assertTrue(
+                DwarfRuneGuardSkillHandler.isGuardWindowComplete(
+                        100L,
+                        150L
+                )
         );
     }
 }

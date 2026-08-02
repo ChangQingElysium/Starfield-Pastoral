@@ -12,53 +12,48 @@ class CrossDimensionSkillPostHitContractTest {
     @Test
     void nonStardewTargetsStillReachWeaponSkillPostHitRules()
             throws IOException {
-        String method = postHitMethodSource();
+        String coordinator = readCombatSource(
+                "WeaponAppliedHitCoordinator.java"
+        );
+        String skills = readCombatSource(
+                "BuiltinSkillAppliedHitRules.java"
+        );
+        String passives = readCombatSource(
+                "BuiltinWeaponPassiveAppliedHitRules.java"
+        );
 
-        assertFalse(
-                method.contains(
+        assertFalse(coordinator.contains(
                         "if (!DimensionDamageMapper"
                                 + ".isInStardewDimension(target)) return;"
-                )
-        );
-        assertTrue(method.contains(
-                "boolean inStardewDimension ="
+                ));
+        assertTrue(coordinator.contains(
+                "BuiltinSkillAppliedHitRules.applyLavaBrand(hit);"
         ));
-        assertTrue(method.contains(
-                "if (inStardewDimension) {"
+        assertTrue(coordinator.contains(
+                "BuiltinWeaponPassiveAppliedHitRules.applyTideMark(hit);"
         ));
-        assertTrue(method.indexOf(
-                "LavaKatanaMarkTracker.apply("
-        ) > method.indexOf(
-                "boolean inStardewDimension ="
+        assertTrue(skills.contains("LavaKatanaMarkTracker.apply("));
+        int lavaBrand = skills.indexOf("static void applyLavaBrand(");
+        assertTrue(lavaBrand >= 0);
+        assertFalse(skills.substring(lavaBrand).contains(
+                "hit.inStardewDimension()"
         ));
-        assertTrue(method.indexOf(
-                "TideMarkTracker.createBonusContext()"
-        ) > method.indexOf(
-                "boolean inStardewDimension ="
-        ));
+        assertTrue(passives.contains("TideMarkTracker.createBonusContext()"));
+        assertFalse(passives.contains("inStardewDimension()"));
     }
 
     @Test
     void postHitWeaponRulesUseTheDamageSnapshotInsteadOfCurrentHand()
             throws IOException {
-        String method = postHitMethodSource();
-        int heatRule = method.indexOf(
-                "// === 熔岩武士刀：命中叠加"
+        String passives = readCombatSource(
+                "BuiltinWeaponPassiveAppliedHitRules.java"
         );
-        int nextRule = method.indexOf(
-                "boolean isGalaxyBonus",
-                heatRule
-        );
-
-        assertTrue(heatRule >= 0 && nextRule > heatRule);
-        String heatBlock = method.substring(heatRule, nextRule);
-        assertTrue(heatBlock.contains(
-                "ItemStack weapon = damageWeapon;"
-        ));
-        assertFalse(heatBlock.contains("getMainHandItem()"));
+        assertTrue(passives.contains("hit.weapon().getItem()"));
+        assertTrue(passives.contains("hit.weaponSnapshot().orElseThrow()"));
+        assertFalse(passives.contains("getMainHandItem()"));
     }
 
-    private static String postHitMethodSource() throws IOException {
+    private static String readCombatSource(String fileName) throws IOException {
         Path relative = Path.of(
                 "src",
                 "main",
@@ -67,19 +62,10 @@ class CrossDimensionSkillPostHitContractTest {
                 "stardew",
                 "craft",
                 "combat",
-                "WeaponCombatEvents.java"
+                fileName
         );
         Path source = locate(relative);
-        String contents = Files.readString(source);
-        int start = contents.indexOf(
-                "public static void onLivingDamagePost("
-        );
-        int end = contents.indexOf(
-                "private static int getCombatExperienceOnKill(",
-                start
-        );
-        assertTrue(start >= 0 && end > start);
-        return contents.substring(start, end);
+        return Files.readString(source);
     }
 
     private static Path locate(Path relative) throws IOException {

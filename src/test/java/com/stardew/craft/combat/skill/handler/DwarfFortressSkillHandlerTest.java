@@ -1,6 +1,5 @@
 package com.stardew.craft.combat.skill.handler;
 
-import com.stardew.craft.combat.skill.DwarfFortressTracker;
 import com.stardew.craft.item.weapon.WeaponData;
 import com.stardew.craft.item.weapon.WeaponRegistry;
 import com.stardew.craft.item.weapon.WeaponSkillData;
@@ -24,25 +23,35 @@ class DwarfFortressSkillHandlerTest {
         assertEquals(2.2F, skill.getDamagePercent() / 100.0F);
         assertEquals(20, skill.getCooldown());
         assertEquals(10.0F, DwarfFortressSkillHandler.ENERGY_COST);
-        assertEquals(80, DwarfFortressTracker.ACTIVE_DURATION_TICKS);
-        assertEquals(4, DwarfFortressTracker.MAX_REACTIVE_SHOCKS);
-        assertEquals(1, DwarfFortressTracker.SHELTER_AMPLIFIER);
+        assertEquals(80, DwarfFortressSkillHandler.ACTIVE_DURATION_TICKS);
+        assertEquals(4, DwarfFortressSkillHandler.MAX_REACTIVE_SHOCKS);
+        assertEquals(1, DwarfFortressSkillHandler.SHELTER_AMPLIFIER);
         assertEquals(
                 1.0D,
-                DwarfFortressTracker.KNOCKBACK_RESISTANCE_BONUS
+                DwarfFortressSkillHandler.KNOCKBACK_RESISTANCE_BONUS
         );
-        assertEquals(3.5F, DwarfFortressTracker.INITIAL_SHOCK_RADIUS);
-        assertEquals(3.0F, DwarfFortressTracker.REACTIVE_SHOCK_RADIUS);
+        assertEquals(
+                3.5F,
+                DwarfFortressSkillHandler.INITIAL_SHOCK_RADIUS
+        );
+        assertEquals(
+                3.0F,
+                DwarfFortressSkillHandler.REACTIVE_SHOCK_RADIUS
+        );
         assertEquals(
                 1.0F,
-                DwarfFortressTracker.REACTIVE_DAMAGE_MULTIPLIER
+                DwarfFortressSkillHandler.REACTIVE_DAMAGE_MULTIPLIER
         );
-        assertEquals(4.0F, DwarfFortressTracker.ECHO_RADIUS);
+        assertEquals(4.0F, DwarfFortressSkillHandler.ECHO_RADIUS);
         assertEquals(
                 1.2F,
-                DwarfFortressTracker.ECHO_DAMAGE_MULTIPLIER
+                DwarfFortressSkillHandler.ECHO_DAMAGE_MULTIPLIER
         );
-        assertEquals(12, DwarfFortressTracker.RING_DURATION_TICKS);
+        assertEquals(
+                5,
+                DwarfFortressSkillHandler.HIT_CONTEXT_LIFETIME_TICKS
+        );
+        assertEquals(12, DwarfFortressSkillHandler.RING_DURATION_TICKS);
         assertFalse(
                 new DwarfFortressSkillHandler().completesImmediately()
         );

@@ -16,8 +16,8 @@ import net.minecraft.world.phys.AABB;
 
 import com.stardew.craft.player.PlayerDataManager;
 import com.stardew.craft.player.PlayerStardewData;
-import com.stardew.craft.player.PlayerDataEventHandler;
-import com.stardew.craft.player.StardewDamageHooks;
+import com.stardew.craft.combat.DimensionDamageMapper;
+import com.stardew.craft.combat.skill.HitCooldownDamageSource;
 
 import java.util.List;
 
@@ -25,8 +25,8 @@ import java.util.List;
  * 毒气孢子方块 — 骷髅矿洞区域危害。
  * <p>
  * 方块上方 3 格持续释放绿色毒雾粒子。
- * 进入范围的玩家直接扣减星露谷生命值（绕过原版伤害系统的 invulnerableTime 限制）。
- * 同时施加 Poison（绿色视觉）+ Nausea（屏幕扭曲）效果。
+ * 进入范围的玩家通过统一 hurt 生命周期承受等比例环境伤害。
+ * 非玩家生物承受 Poison；玩家承受 Nausea，并由方块粒子表达毒雾。
  * 使用 scheduleTick 每 20 tick 检测一次上方实体，保证可靠触发。
  */
 @SuppressWarnings("null")
@@ -126,7 +126,8 @@ public class ToxicSporeBlock extends Block {
     }
 
     private static void applyEffects(LivingEntity living) {
-        // 对星露谷玩家：直接扣 SD 生命值（绕过被 invulnerableTime 阻挡的原版伤害系统）
+        // 玩家伤害统一进入 Incoming / Pre / Post；本方块自己的 1 秒冷却
+        // 取代 vanilla cooldown，但不再绕过防御、戒指、受击技能与 Applied Post。
         if (living instanceof ServerPlayer player) {
             // 无敌帧：1 秒内最多被毒一次
             long now = player.serverLevel().getGameTime();
@@ -137,15 +138,19 @@ public class ToxicSporeBlock extends Block {
             player.getPersistentData().putLong(NBT_LAST_TOXIC_TICK, now);
 
             PlayerStardewData data = PlayerDataManager.getPlayerData(player);
-            int oldHealth = data.getHealth();
-            if (oldHealth > 0) {
-                int newHealth = Math.max(0, oldHealth - SD_DAMAGE_PER_TICK);
-                data.setHealth(newHealth);
-                PlayerDataEventHandler.syncPlayerData(player, data);
-
-                if (newHealth == 0) {
-                    StardewDamageHooks.onHealthDepleted(player, player.damageSources().magic());
-                }
+            if (data.getHealth() > 0) {
+                float minecraftDamage = DimensionDamageMapper
+                        .toMinecraftHealthDamage(
+                                SD_DAMAGE_PER_TICK,
+                                data.getMaxHealth(),
+                                player.getMaxHealth()
+                        );
+                player.hurt(
+                        HitCooldownDamageSource.bypassVanillaCooldown(
+                                player.damageSources().magic()
+                        ),
+                        minecraftDamage
+                );
             }
         } else {
             // 非玩家实体：用原版 Poison II
@@ -155,14 +160,6 @@ public class ToxicSporeBlock extends Block {
                         MobEffects.POISON, POISON_DURATION, 1,
                         false, true, true));
             }
-        }
-
-        // Poison 视觉效果（绿色心跳粒子，amplifier 0 仅做视觉）
-        MobEffectInstance existingPoison = living.getEffect(MobEffects.POISON);
-        if (existingPoison == null || existingPoison.getDuration() < POISON_DURATION / 2) {
-            living.addEffect(new MobEffectInstance(
-                    MobEffects.POISON, POISON_DURATION, 0,
-                    false, true, true));
         }
 
         // Nausea（恶心）— 屏幕扭曲效果

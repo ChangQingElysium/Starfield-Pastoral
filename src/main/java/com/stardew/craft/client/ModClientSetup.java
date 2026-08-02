@@ -16,6 +16,7 @@ import com.stardew.craft.client.render.BookshelfGeoBlockEntityRenderer;
 import com.stardew.craft.client.render.CharcoalKilnBlockEntityRenderer;
 import com.stardew.craft.client.render.CheesePressBlockEntityRenderer;
 import com.stardew.craft.client.render.CoffeeMakerBlockEntityRenderer;
+import com.stardew.craft.client.render.DailyStatueBlockEntityRenderer;
 import com.stardew.craft.client.render.CookingPlacedFoodBlockEntityRenderer;
 import com.stardew.craft.client.render.FurnaceBlockEntityRenderer;
 import com.stardew.craft.client.render.GeodeCrusherBlockEntityRenderer;
@@ -156,6 +157,7 @@ public final class ModClientSetup {
 		event.registerBlockEntityRenderer(ModBlockEntities.SOLAR_PANEL.get(), SolarPanelBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.GEODE_CRUSHER.get(), GeodeCrusherBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.COFFEE_MAKER.get(), CoffeeMakerBlockEntityRenderer::new);
+		event.registerBlockEntityRenderer(ModBlockEntities.DAILY_STATUE.get(), DailyStatueBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.BONE_MILL.get(), BoneMillBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.MAYONNAISE_MACHINE.get(), MayonnaiseMachineBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.INCUBATOR.get(), IncubatorBlockEntityRenderer::new);

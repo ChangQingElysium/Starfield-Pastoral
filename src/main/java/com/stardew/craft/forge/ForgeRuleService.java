@@ -2,6 +2,7 @@ package com.stardew.craft.forge;
 
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.combat.ForgeEnchantmentGuard;
+import com.stardew.craft.combat.StardewWeaponSpeedRules;
 import com.stardew.craft.combat.WeaponForgeData;
 import com.stardew.craft.combat.WeaponStats;
 import com.stardew.craft.enchantment.StardewEnchantments;
@@ -697,7 +698,11 @@ public final class ForgeRuleService {
         ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
         String modifierId = "weapon." + itemId.getPath();
         float avgDamage = (stats.getMinDamage() + stats.getMaxDamage()) / 2.0f - 1.0f;
-        float attackSpeed = stats.getWeaponType().getAttackSpeed() + stats.getSpeed() * 0.1f - 4.0f;
+        float attackSpeed = (float) StardewWeaponSpeedRules.attacksPerSecondFromRawSpeed(
+                stats.getWeaponType(),
+                stats.getRawSpeed(),
+                stats.getWeaponSpeedMultiplier()
+        ) - 4.0F;
         float attackRangeBonus = stats.getWeaponType().getAttackRange() - BASE_ATTACK_RANGE;
 
         stack.set(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.builder()
@@ -719,7 +724,8 @@ public final class ForgeRuleService {
                                 attackRangeBonus,
                                 AttributeModifier.Operation.ADD_VALUE),
                         EquipmentSlotGroup.MAINHAND)
-                .build());
+                .build()
+                .withTooltip(false));
     }
 
     private static String selectDragonToothEnchantment(ItemStack stack, String previous, RandomSource random) {
@@ -758,7 +764,7 @@ public final class ForgeRuleService {
             case 1 -> bonuses.add(new WeaponForgeData.DragonToothBonus("crit",
                     Math.max(1, Math.min(3, random.nextInt(Math.max(1, weaponLevel)) / 3))));
             case 2 -> {
-                int speedCap = Math.max(1, 4 - weapon.getWeaponData().getSpeed());
+                int speedCap = Math.max(1, 4 - weapon.getWeaponData().getRawSpeed());
                 bonuses.add(new WeaponForgeData.DragonToothBonus("speed",
                         Math.max(1, Math.min(speedCap, random.nextInt(Math.max(1, weaponLevel))))));
             }

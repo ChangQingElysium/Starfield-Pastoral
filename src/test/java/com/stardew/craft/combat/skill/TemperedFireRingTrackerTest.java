@@ -29,7 +29,10 @@ class TemperedFireRingTrackerTest {
                 TemperedFireRingTracker.createDamageContext(
                         TemperedFireRingTracker.DAMAGE_MULTIPLIER
                 );
-        assertEquals("tempered_billet", damageContext.getSkillId());
+        assertEquals(
+                "tempered_billet_fire_ring",
+                damageContext.getSkillId()
+        );
         assertEquals(SkillContext.SkillTier.MAJOR, damageContext.getTier());
         assertEquals(0.6F, damageContext.getDamageMultiplier());
         assertTrue(TemperedFireRingTracker.isWithinRadius(1.0, 1.0F));

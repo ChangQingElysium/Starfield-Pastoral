@@ -14,6 +14,7 @@ import com.stardew.craft.api.v1.content.StardewContentReference;
 import com.stardew.craft.api.v1.content.StardewContentReferenceRoles;
 import com.stardew.craft.api.v1.content.StardewContentTypes;
 import com.stardew.craft.book.BookPowerEffects;
+import com.stardew.craft.network.ObjectDialogueService;
 import com.stardew.craft.npc.data.NpcCapabilityProfile;
 import com.stardew.craft.npc.data.NpcDataRegistry;
 import com.stardew.craft.npc.data.NpcSocialRules;
@@ -21,6 +22,7 @@ import com.stardew.craft.npc.runtime.NpcFriendshipDataManager;
 import com.stardew.craft.npc.runtime.NpcInteractionService;
 import com.stardew.craft.player.PlayerDataManager;
 import com.stardew.craft.quest.QuestManager;
+import com.stardew.craft.sound.ModSounds;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -28,6 +30,7 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundSource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,6 +74,12 @@ public final class BuiltinQuestObjectiveTypes {
         StardewQuestObjectives.register(
                 id("item_delivery"), DeliveryData.CODEC,
                 DeliveryRuntime::new,
+                (owner, data) -> combine(
+                        List.of(itemReference(data.item())),
+                        npcReference(owner, data.targetNpc())));
+        StardewQuestObjectives.register(
+                id("lost_item"), LostItemData.CODEC,
+                LostItemRuntime::new,
                 (owner, data) -> combine(
                         List.of(itemReference(data.item())),
                         npcReference(owner, data.targetNpc())));
@@ -216,6 +225,21 @@ public final class BuiltinQuestObjectiveTypes {
                 Codec.STRING.optionalFieldOf("target_message", "").forGetter(DeliveryData::targetMessage),
                 Codec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("friendship", 255).forGetter(DeliveryData::friendship)
         ).apply(instance, DeliveryData::new));
+    }
+
+    public record LostItemData(
+            String targetNpc,
+            ResourceLocation item,
+            int friendship,
+            String targetMessage
+    ) {
+        public static final Codec<LostItemData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                Codec.STRING.fieldOf("target_npc").forGetter(LostItemData::targetNpc),
+                ResourceLocation.CODEC.fieldOf("item").forGetter(LostItemData::item),
+                Codec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("friendship", 250)
+                        .forGetter(LostItemData::friendship),
+                Codec.STRING.optionalFieldOf("target_message", "").forGetter(LostItemData::targetMessage)
+        ).apply(instance, LostItemData::new));
     }
 
     public record SecretLostItemData(
@@ -385,6 +409,100 @@ public final class BuiltinQuestObjectiveTypes {
         @Override
         public String deliveryTargetMessage() {
             return data.targetMessage();
+        }
+    }
+
+    /** SDV {@code LostItemQuest}: find a world item, then return it to its owner. */
+    private static final class LostItemRuntime implements QuestObjectiveRuntime {
+        private final LostItemData data;
+        private boolean itemFound;
+
+        private LostItemRuntime(LostItemData data) {
+            this.data = data;
+        }
+
+        @Override
+        public void onAccepted(QuestObjectiveContext context) {
+            if (BuiltInRegistries.ITEM.containsKey(data.item())) {
+                itemFound = context.player().getInventory()
+                        .countItem(BuiltInRegistries.ITEM.get(data.item())) > 0;
+            }
+        }
+
+        @Override
+        public QuestObjectiveResult onProgress(QuestObjectiveContext context, QuestProgressEvent event) {
+            if (QuestProgressEvents.ITEM_RECEIVED.equals(event.type())
+                    && data.item().toString().equals(event.subject())) {
+                if (itemFound) {
+                    return QuestObjectiveResult.NONE;
+                }
+                itemFound = true;
+                Component itemName = BuiltInRegistries.ITEM.containsKey(data.item())
+                        ? BuiltInRegistries.ITEM.get(data.item()).getDescription()
+                        : Component.literal(data.item().toString());
+                Component npcName = Component.translatable(
+                        "entity.stardewcraft.npc." + data.targetNpc().toLowerCase(Locale.ROOT));
+                ObjectDialogueService.show(context.player(), Component.translatable(
+                        "stardewcraft.quest.lost_item.found", itemName, npcName));
+                context.player().playNotifySound(
+                        ModSounds.JINGLE1.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
+                return QuestObjectiveResult.progress(false);
+            }
+            if (QuestProgressEvents.ITEM_OFFERED_TO_NPC.equals(event.type())
+                    && data.item().toString().equals(event.subject())
+                    && data.targetNpc().equalsIgnoreCase(event.target())) {
+                itemFound = true;
+                return QuestObjectiveResult.consumed(true);
+            }
+            return QuestObjectiveResult.NONE;
+        }
+
+        @Override
+        public void onCompleted(QuestObjectiveContext context) {
+            if (data.friendship() <= 0 || data.targetNpc().isBlank()) {
+                return;
+            }
+            NpcFriendshipDataManager manager = NpcFriendshipDataManager.get(context.player().serverLevel());
+            NpcFriendshipDataManager.FriendshipState state = manager.getOrCreate(
+                    context.player().getUUID(), data.targetNpc());
+            int gain = BookPowerEffects.applyFriendshipGain(
+                    PlayerDataManager.getPlayerData(context.player()), data.friendship());
+            state.addPoints(gain, NpcInteractionService.getMaxFriendshipPointsFor(data.targetNpc()));
+            manager.setDirty();
+        }
+
+        @Override
+        public CompoundTag saveState() {
+            CompoundTag tag = new CompoundTag();
+            tag.putBoolean("ItemFound", itemFound);
+            return tag;
+        }
+
+        @Override
+        public void loadState(CompoundTag state) {
+            itemFound = state.getBoolean("ItemFound");
+        }
+
+        @Override
+        public boolean matchesItemDelivery(String npcId, String itemId) {
+            return data.targetNpc().equalsIgnoreCase(npcId)
+                    && data.item().toString().equalsIgnoreCase(itemId);
+        }
+
+        @Override
+        public String deliveryTargetMessage() {
+            return data.targetMessage();
+        }
+
+        @Override
+        public List<Component> objectiveComponents(Component fallback) {
+            if (!itemFound) {
+                return QuestObjectiveRuntime.super.objectiveComponents(fallback);
+            }
+            return List.of(Component.translatable(
+                    "stardewcraft.quest.lost_item.return_to_npc",
+                    Component.translatable(
+                            "entity.stardewcraft.npc." + data.targetNpc().toLowerCase(Locale.ROOT))));
         }
     }
 

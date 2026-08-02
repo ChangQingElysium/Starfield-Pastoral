@@ -1,6 +1,5 @@
 package com.stardew.craft.combat.skill.handler;
 
-import com.stardew.craft.combat.skill.SingularityEvolveTracker;
 import com.stardew.craft.combat.skill.SingularityTracker;
 import com.stardew.craft.item.weapon.WeaponData;
 import com.stardew.craft.item.weapon.WeaponRegistry;
@@ -44,19 +43,6 @@ class SingularityEvolveSkillHandlerTest {
     }
 
     @Test
-    void rewardUsesOneAtomicCastTargetSnapshot() {
-        assertFalse(
-                SingularityEvolveSkillHandler.grantsHitRewards(0)
-        );
-        assertTrue(
-                SingularityEvolveSkillHandler.grantsHitRewards(1)
-        );
-        assertTrue(
-                SingularityEvolveSkillHandler.grantsHitRewards(5)
-        );
-    }
-
-    @Test
     void evolvedStateIsSnapshottedBeforeThisCastsStackReward() {
         assertFalse(
                 SingularityEvolveSkillHandler.evolvedForStacks(
@@ -70,7 +56,7 @@ class SingularityEvolveSkillHandlerTest {
         );
         assertEquals(
                 20,
-                SingularityEvolveTracker.ACTIVE_DURATION_TICKS
+                SingularityEvolveSkillHandler.ACTIVE_DURATION_TICKS
         );
     }
 }

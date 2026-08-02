@@ -11,27 +11,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class WeaponSentinelDamageAuditTest {
     private static final Set<String> RUNTIME_BOUND_IMPLICIT_SNAPSHOTS =
             Set.of(
-                    "combat/skill/BrokenTridentThrustTracker.java",
-                    "combat/skill/CarvingKnifeThrustTracker.java",
-                    "combat/skill/ClaymoreFoldbackTracker.java",
-                    "combat/skill/DwarfDaggerThrustTracker.java",
-                    "combat/skill/DwarfFortressTracker.java",
-                    "combat/skill/GalaxyDaggerThrustTracker.java",
-                    "combat/skill/HolyBladeSanctuaryTracker.java",
-                    "combat/skill/InfinityDaggerThrustTracker.java",
-                    "combat/skill/IridiumNeedleThrustTracker.java",
-                    "combat/skill/ObsidianCrackTracker.java",
-                    "combat/skill/TemplarJudgementTracker.java"
+                    "combat/skill/handler/DwarfFortressExecutionState.java",
+                    "combat/skill/handler/ObsidianCrackExecutionState.java"
             );
 
     private static final Set<String> NON_SKILL_SENTINELS = Set.of(
-            "gametest/ApiContractGameTests.java",
-            "mixin/PlayerClubSweepAttackMixin.java"
+            "gametest/ApiContractGameTests.java"
     );
 
     private static final Set<String> FINAL_STAGE_C_MIGRATIONS = Set.of(
             "combat/skill/TemperedFireRingTracker.java",
-            "combat/skill/TemplarJudgementTracker.java",
+            "combat/skill/handler/TemplarJudgementExecutionState.java",
             "combat/skill/WickedKrisPoisonTracker.java",
             "entity/effect/IceSpineEffectEntity.java",
             "entity/projectile/ElfBladeLeafEntity.java",
@@ -79,6 +69,10 @@ class WeaponSentinelDamageAuditTest {
                                 || source.contains(
                                         "context.weaponSnapshot()"
                                 )
+                                || source.contains(
+                                        "executionContext.weaponSnapshot()"
+                                )
+                                || source.contains("hit.weaponSnapshot()")
                                 || RUNTIME_BOUND_IMPLICIT_SNAPSHOTS
                                         .contains(relative),
                         relative + " must own a release snapshot or remain "
@@ -155,6 +149,10 @@ class WeaponSentinelDamageAuditTest {
                                 || source.contains(
                                         "context.weaponSnapshot()"
                                 )
+                                || source.contains(
+                                        "executionContext.weaponSnapshot()"
+                                )
+                                || source.contains("hit.weaponSnapshot()")
                                 || RUNTIME_BOUND_IMPLICIT_SNAPSHOTS
                                         .contains(relative),
                         relative + " must own a release snapshot or remain "
@@ -190,15 +188,34 @@ class WeaponSentinelDamageAuditTest {
     @Test
     void centralCombatEventDoesNotOwnNestedPlayerAttackSentinels()
             throws IOException {
+        Path combatRoot = locateMainSourceRoot().resolve("combat");
         String source = Files.readString(
-                locateMainSourceRoot()
-                        .resolve("combat")
-                        .resolve("WeaponCombatEvents.java")
+                combatRoot.resolve("WeaponCombatEvents.java")
+        );
+        String appliedRules = Files.readString(
+                combatRoot.resolve(
+                        "BuiltinWeaponPassiveAppliedHitRules.java"
+                )
         );
 
         assertTrue(
-                occurrences(source, "WeaponSkillDamage.apply(") == 6,
-                "all six reactive child hits must use the centralized entry"
+                occurrences(source, "WeaponSkillDamage.apply(") == 0,
+                "central combat events must delegate reactive child hits"
+        );
+        assertTrue(
+                occurrences(appliedRules, "applyChildDamage(") == 8,
+                "all seven gameplay child paths must share one "
+                        + "snapshot-bound helper"
+        );
+        assertTrue(
+                occurrences(appliedRules, "WeaponSkillDamage.apply(") == 1,
+                "the applied-hit helper must own the only damage entry"
+        );
+        assertTrue(
+                appliedRules.contains(
+                        "hit.weaponSnapshot().orElseThrow()"
+                ),
+                "all reactive paths must retain the release weapon"
         );
         assertTrue(
                 !source.contains("player.attack(target)"),

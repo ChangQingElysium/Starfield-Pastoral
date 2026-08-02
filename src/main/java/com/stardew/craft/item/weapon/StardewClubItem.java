@@ -101,12 +101,12 @@ public class StardewClubItem extends Item implements IStardewItem, IStardewWeapo
 
     @Override
     public boolean isEnchantable(@SuppressWarnings("null") ItemStack stack) {
-        return stack.getMaxStackSize() == 1;
+        return false;
     }
 
     @Override
     public int getEnchantmentValue() {
-        return weaponData == null ? 10 : Math.max(1, weaponData.getLevel() * 2);
+        return 0;
     }
 
     @Override

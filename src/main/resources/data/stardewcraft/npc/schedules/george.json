@@ -3,47 +3,64 @@
   "override_vanilla": true,
   "_format": "time -> \"location @namedPointId facing [behavior]\" | {_goto: key} | {_condition: expr}",
 
-  "GreenRain": {
-    "800": "joshhouse @george_joshhouse_stove 0"
-  },
-
   "rain": {
-    "630":  "joshhouse @george_joshhouse_tv 0",
-    "1200": "joshhouse @george_joshhouse_kitchen 3",
-    "1500": "joshhouse @george_joshhouse_tv 0",
-    "2000": "joshhouse @george_joshhouse_sleep 2 george_sleep"
+    "630": "joshhouse @george_schedule_01 0",
+    "1200": "joshhouse @george_schedule_02 3",
+    "1500": "joshhouse @george_schedule_01 0",
+    "2000": "joshhouse @george_schedule_03 2 george_sleep"
   },
 
-  "spring": {
-    "630":  "joshhouse @george_joshhouse_tv 0",
-    "1200": "joshhouse @george_joshhouse_kitchen 3",
-    "1500": "joshhouse @george_joshhouse_tv 0",
-    "2000": "joshhouse @george_joshhouse_sleep 2 george_sleep"
+  "GreenRain": {
+    "0": "joshhouse @george_schedule_04 0"
   },
 
-  "summer": {
-    "_goto": "spring"
+  "DesertFestival_3": {
+    "610": "joshhouse @george_schedule_01 0",
+    "1000": "desert @desert_festival_visit_george 0 dialogue:stardewcraft.npc.schedule.george.desert_festival",
+    "2250": "joshhouse @george_schedule_03 2 george_sleep"
+  },
+
+  "23": {
+    "630": "joshhouse @george_schedule_02 3 dialogue:stardewcraft.npc.schedule.george.23.000",
+    "1030": "hospital @george_schedule_05 2 dialogue:stardewcraft.npc.schedule.george.23.001",
+    "1330": "hospital @george_schedule_06 2 dialogue:stardewcraft.npc.schedule.george.23.002",
+    "1600": "joshhouse @george_schedule_01 0",
+    "2000": "joshhouse @george_schedule_03 2 george_sleep"
+  },
+
+  "winter_17": {
+    "630": "joshhouse @george_schedule_01 0",
+    "1200": "joshhouse @george_schedule_02 3",
+    "1620": "beach @george_schedule_07 2 dialogue:stardewcraft.npc.schedule.george.winter_17.000",
+    "2340": "joshhouse @george_schedule_03 2 george_sleep"
   },
 
   "summer_friday": {
-    "630":  "joshhouse @george_joshhouse_tv 0",
-    "1200": "town @george_town_bench 2",
-    "1500": "joshhouse @george_joshhouse_tv 0",
-    "2000": "joshhouse @george_joshhouse_sleep 2 george_sleep"
+    "630": "joshhouse @george_schedule_01 0",
+    "1200": "town @george_schedule_08 2",
+    "1500": "joshhouse @george_schedule_01 0",
+    "2000": "joshhouse @george_schedule_03 2 george_sleep"
   },
 
   "sunday": {
-    "630":  "joshhouse @george_joshhouse_tv 0",
-    "1000": "seedshop @george_seedshop_visit 1",
-    "1400": "joshhouse @george_joshhouse_tv 0",
-    "2000": "joshhouse @george_joshhouse_sleep 2 george_sleep"
+    "_condition": "MAIL saloonSportsRoom",
+    "630": "joshhouse @george_schedule_01 0",
+    "1100": "saloon @george_schedule_10 0 dialogue:stardewcraft.npc.schedule.george.sun.001",
+    "1500": "joshhouse @george_schedule_01 0",
+    "2000": "joshhouse @george_schedule_03 2 george_sleep"
   },
 
-  "fall": {
-    "_goto": "spring"
+  "sun": {
+    "630": "joshhouse @george_schedule_01 0",
+    "1000": "seedshop @george_schedule_09 0 dialogue:stardewcraft.npc.schedule.george.sun.000",
+    "1400": "joshhouse @george_schedule_01 0",
+    "2000": "joshhouse @george_schedule_03 2 george_sleep"
   },
 
-  "winter": {
-    "_goto": "spring"
+  "spring": {
+    "630": "joshhouse @george_schedule_01 0",
+    "1200": "joshhouse @george_schedule_02 3",
+    "1500": "joshhouse @george_schedule_01 0",
+    "2000": "joshhouse @george_schedule_03 2 george_sleep"
   }
 }

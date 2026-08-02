@@ -28,4 +28,10 @@ public final class YobaProtectionState {
                 nowTick + CombatRingRules.YOBA_PROTECTION_DURATION_TICKS
         );
     }
+
+    public static void clear(ServerPlayer player) {
+        if (player != null) {
+            player.getPersistentData().remove(END_TICK_TAG);
+        }
+    }
 }

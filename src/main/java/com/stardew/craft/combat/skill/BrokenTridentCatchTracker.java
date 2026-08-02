@@ -11,6 +11,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 public final class BrokenTridentCatchTracker {
@@ -18,6 +19,8 @@ public final class BrokenTridentCatchTracker {
     private static final Map<UUID, Long> ACTIVE = new HashMap<>();
 
     private BrokenTridentCatchTracker() {}
+
+    public record CatchSnapshot(long endTick) {}
 
     @SuppressWarnings("null")
     public static void start(ServerPlayer player, long nowTick, int durationTicks) {
@@ -65,6 +68,41 @@ public final class BrokenTridentCatchTracker {
         }
         clear(player);
         return true;
+    }
+
+    public static Optional<CatchSnapshot> consumeForBegin(
+            ServerPlayer player,
+            long nowTick
+    ) {
+        if (!isActive(player, nowTick)) {
+            return Optional.empty();
+        }
+        Long endTick = ACTIVE.get(player.getUUID());
+        if (endTick == null) {
+            return Optional.empty();
+        }
+        clear(player);
+        return Optional.of(new CatchSnapshot(endTick));
+    }
+
+    public static void restore(
+            ServerPlayer player,
+            CatchSnapshot snapshot,
+            long nowTick
+    ) {
+        if (player == null || snapshot == null
+                || snapshot.endTick() <= nowTick) {
+            return;
+        }
+        ACTIVE.put(player.getUUID(), snapshot.endTick());
+        int remainingTicks = (int) Math.min(
+                Integer.MAX_VALUE,
+                snapshot.endTick() - nowTick
+        );
+        PacketDistributor.sendToPlayer(
+                player,
+                new BrokenTridentCatchPayload(true, remainingTicks)
+        );
     }
 
     public static void tick(ServerPlayer player, long nowTick) {

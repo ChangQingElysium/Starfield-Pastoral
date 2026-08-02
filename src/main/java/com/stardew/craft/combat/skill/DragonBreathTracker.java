@@ -4,10 +4,8 @@ import com.stardew.craft.combat.network.DragonBreathPayload;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
@@ -20,15 +18,8 @@ public final class DragonBreathTracker {
     public static final int MAJOR_THRESHOLD = 15;
 
     // Stacks are a player combat resource and intentionally survive dimension
-    // travel. Only the spatially active thrust below is dimension-bound.
+    // travel. Spatial thrust execution belongs to WeaponSkillRuntime.
     private static final Map<UUID, Integer> STACKS = new HashMap<>();
-    private static final Map<UUID, ThrustState> ACTIVE_THRUSTS =
-            new HashMap<>();
-
-    private record ThrustState(
-            long endTick,
-            ResourceKey<Level> originDimension
-    ) {}
 
     private DragonBreathTracker() {}
 
@@ -50,6 +41,23 @@ public final class DragonBreathTracker {
             STACKS.put(player.getUUID(), clamped);
         }
         PacketDistributor.sendToPlayer(player, new DragonBreathPayload(clamped));
+    }
+
+    /** Reconciles the client with this non-persistent combat resource. */
+    public static void sync(ServerPlayer player) {
+        if (player != null) {
+            PacketDistributor.sendToPlayer(
+                    player,
+                    new DragonBreathPayload(getStacks(player))
+            );
+        }
+    }
+
+    /** Clears the resource while the concrete player can still receive sync. */
+    public static void clear(ServerPlayer player) {
+        if (player != null) {
+            setStacks(player, 0);
+        }
     }
 
     public static void addStacks(ServerPlayer player, int delta) {
@@ -80,63 +88,6 @@ public final class DragonBreathTracker {
         return canCastMajor(getStacks(player));
     }
 
-    public static void beginThrust(
-            ServerPlayer player,
-            long nowTick,
-            int durationTicks
-    ) {
-        if (player == null || durationTicks <= 0) {
-            return;
-        }
-        ACTIVE_THRUSTS.put(
-                player.getUUID(),
-                new ThrustState(
-                        nowTick + durationTicks,
-                        player.level().dimension()
-                )
-        );
-    }
-
-    public static void tickThrust(ServerPlayer player, long nowTick) {
-        if (player == null) {
-            return;
-        }
-        ThrustState state = ACTIVE_THRUSTS.get(player.getUUID());
-        if (state == null) {
-            return;
-        }
-        if (!shouldRemainThrustActive(
-                state.endTick,
-                nowTick,
-                player.isAlive() && !player.isRemoved(),
-                state.originDimension.equals(player.level().dimension())
-        )) {
-            ACTIVE_THRUSTS.remove(player.getUUID());
-        }
-    }
-
-    public static boolean hasThrustState(UUID playerId) {
-        return ACTIVE_THRUSTS.containsKey(playerId);
-    }
-
-    public static boolean isThrustBoundToCurrentContext(
-            ServerPlayer player
-    ) {
-        ThrustState state = ACTIVE_THRUSTS.get(player.getUUID());
-        return state != null
-                && player.isAlive()
-                && !player.isRemoved()
-                && state.originDimension.equals(
-                        player.level().dimension()
-                );
-    }
-
-    public static void clearThrust(ServerPlayer player) {
-        if (player != null) {
-            ACTIVE_THRUSTS.remove(player.getUUID());
-        }
-    }
-
     static int clampStacks(int stacks) {
         return Mth.clamp(stacks, 0, MAX_STACKS);
     }
@@ -154,20 +105,4 @@ public final class DragonBreathTracker {
         return clamped >= MAJOR_THRESHOLD ? clamped : 0;
     }
 
-    static boolean shouldRemainThrustActive(
-            long endTick,
-            long nowTick,
-            boolean casterAvailable,
-            boolean sameDimension
-    ) {
-        return casterAvailable
-                && sameDimension
-                && nowTick <= endTick;
-    }
-
-    /** Clean up state when a player logs out to prevent memory leaks. */
-    public static void removePlayer(UUID playerId) {
-        STACKS.remove(playerId);
-        ACTIVE_THRUSTS.remove(playerId);
-    }
 }

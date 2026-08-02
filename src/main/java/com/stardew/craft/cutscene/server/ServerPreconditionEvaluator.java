@@ -6,6 +6,7 @@ import com.stardew.craft.cutscene.data.EventRegistry;
 import com.stardew.craft.api.v1.condition.StardewConditionContext;
 import com.stardew.craft.api.v1.condition.StardewConditions;
 import com.stardew.craft.npc.runtime.NpcFriendshipDataManager;
+import com.stardew.craft.npc.runtime.NpcSpawnManager;
 import com.stardew.craft.player.PlayerDataManager;
 import com.stardew.craft.player.PlayerStardewData;
 import com.stardew.craft.player.SkillType;
@@ -63,6 +64,7 @@ public final class ServerPreconditionEvaluator {
     private static boolean evaluateSingle(ServerPlayer player, ServerLevel level, EventPrecondition p) {
         return switch (p.type()) {
             case "friendship" -> checkFriendship(player, level, p);
+            case "npc_present" -> checkNpcPresent(level, p);
             case "saw_event" -> {
                 EventSeenData seen = EventSeenData.get(level);
                 yield seen.hasSeen(player.getUUID(), p.getString("id"));
@@ -118,6 +120,19 @@ public final class ServerPreconditionEvaluator {
         // NPC interaction and would otherwise create empty entries that bloat the save.
         NpcFriendshipDataManager fm = NpcFriendshipDataManager.get(level);
         return fm.getPointsForNpc(player.getUUID(), npcId.toLowerCase(Locale.ROOT)) >= minPoints;
+    }
+
+    private static boolean checkNpcPresent(ServerLevel level, EventPrecondition p) {
+        String npcId = p.getString("npc");
+        if (npcId == null) return false;
+        var npc = NpcSpawnManager.getTrackedNpc(level, npcId);
+        if (npc == null || !npc.isAlive()) return false;
+        if (!p.raw().has("area_min") || !p.raw().has("area_max")) return true;
+        var min = p.raw().getAsJsonArray("area_min");
+        var max = p.raw().getAsJsonArray("area_max");
+        return npc.getX() >= min.get(0).getAsDouble() && npc.getX() <= max.get(0).getAsDouble() + 1.0
+                && npc.getY() >= min.get(1).getAsDouble() && npc.getY() <= max.get(1).getAsDouble() + 1.0
+                && npc.getZ() >= min.get(2).getAsDouble() && npc.getZ() <= max.get(2).getAsDouble() + 1.0;
     }
 
     private static boolean checkTime(ServerLevel level, EventPrecondition p) {

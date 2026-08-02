@@ -2,6 +2,7 @@ package com.stardew.craft.combat.skill.handler;
 
 import com.stardew.craft.combat.skill.SkillContext;
 import com.stardew.craft.combat.skill.runtime.SkillInstance;
+import com.stardew.craft.combat.skill.runtime.SkillTickResult;
 import com.stardew.craft.item.weapon.WeaponData;
 import com.stardew.craft.item.weapon.WeaponRegistry;
 import com.stardew.craft.item.weapon.WeaponSkillData;
@@ -97,7 +98,7 @@ class DragonBreathThrustSkillHandlerTest {
     }
 
     @Test
-    void invalidatedThrustStopsMovementWithoutDeletingLaterDashesOnCompletion() {
+    void everyAbnormalEndStopsOnlyItsOwnedMovement() {
         assertTrue(DragonBreathThrustSkillHandler.shouldCancelMovement(
                 SkillInstance.EndReason.INVALIDATED
         ));
@@ -107,8 +108,33 @@ class DragonBreathThrustSkillHandlerTest {
         assertFalse(DragonBreathThrustSkillHandler.shouldCancelMovement(
                 SkillInstance.EndReason.COMPLETED
         ));
-        assertFalse(DragonBreathThrustSkillHandler.shouldCancelMovement(
+        assertTrue(DragonBreathThrustSkillHandler.shouldCancelMovement(
                 SkillInstance.EndReason.CASTER_UNAVAILABLE
         ));
+    }
+
+    @Test
+    void executionWindowIsInclusiveAndIndependentOfSharedDash() {
+        assertEquals(
+                SkillTickResult.CONTINUE,
+                DragonBreathThrustExecutionState.resultFor(
+                        105L,
+                        105L
+                )
+        );
+        assertEquals(
+                SkillTickResult.COMPLETE,
+                DragonBreathThrustExecutionState.resultFor(
+                        106L,
+                        105L
+                )
+        );
+        assertEquals(
+                SkillTickResult.CONTINUE,
+                DragonBreathThrustExecutionState.resultFor(
+                        104L,
+                        105L
+                )
+        );
     }
 }

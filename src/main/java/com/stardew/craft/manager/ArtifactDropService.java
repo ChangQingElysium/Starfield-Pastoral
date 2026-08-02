@@ -667,7 +667,8 @@ public final class ArtifactDropService {
 
             if (drop.id.startsWith("LOST_BOOK_OR_ITEM")
                     && player != null
-                    && com.stardew.craft.museum.LostBookService.find(player)) {
+                    && com.stardew.craft.museum.LostBookService.canFindAnother(player)) {
+                results.add(new ItemStack(ModItems.LOST_BOOK.get()));
                 if (!drop.continueOnDrop) break;
                 continue;
             }

@@ -12,10 +12,16 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
  * Small, combat-critical player vitals update.
  *
  * <p>The complete player-data packet contains progression, collections, mail,
- * equipment and other persistent state. Sending all of it for every accepted
- * hit delays the one value the HUD needs immediately.</p>
+ * equipment and other persistent state. Health and energy updates use this
+ * payload so the HUD never waits behind that unrelated state.</p>
  */
-public record PlayerVitalsSyncPayload(int health, int maxHealth)
+public record PlayerVitalsSyncPayload(
+        int health,
+        int maxHealth,
+        float energy,
+        int baseMaxEnergy,
+        boolean exhausted
+)
         implements CustomPacketPayload {
 
     public static final Type<PlayerVitalsSyncPayload> TYPE = new Type<>(
@@ -28,6 +34,12 @@ public record PlayerVitalsSyncPayload(int health, int maxHealth)
                     PlayerVitalsSyncPayload::health,
                     ByteBufCodecs.VAR_INT,
                     PlayerVitalsSyncPayload::maxHealth,
+                    ByteBufCodecs.FLOAT,
+                    PlayerVitalsSyncPayload::energy,
+                    ByteBufCodecs.VAR_INT,
+                    PlayerVitalsSyncPayload::baseMaxEnergy,
+                    ByteBufCodecs.BOOL,
+                    PlayerVitalsSyncPayload::exhausted,
                     PlayerVitalsSyncPayload::new
             );
 
@@ -40,7 +52,10 @@ public record PlayerVitalsSyncPayload(int health, int maxHealth)
         context.enqueueWork(() ->
                 com.stardew.craft.client.ClientPlayerDataCache.updateVitals(
                         payload.health(),
-                        payload.maxHealth()
+                        payload.maxHealth(),
+                        payload.energy(),
+                        payload.baseMaxEnergy(),
+                        payload.exhausted()
                 )
         );
     }

@@ -5,12 +5,12 @@ import com.stardew.craft.combat.skill.WeaponSkillAnimationDispatcher;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationLock;
 import com.stardew.craft.combat.skill.WeaponSkillCooldowns;
 import com.stardew.craft.combat.skill.WeaponSkillDamage;
-import com.stardew.craft.combat.skill.YetiFreezeTracker;
 import com.stardew.craft.combat.skill.runtime.RuntimeWeaponSkillHandler;
 import com.stardew.craft.combat.skill.runtime.SkillExecutionContext;
 import com.stardew.craft.combat.skill.runtime.SkillInstance;
 import com.stardew.craft.combat.skill.runtime.SkillTargeting;
 import com.stardew.craft.combat.skill.runtime.SkillValidation;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
 import com.stardew.craft.item.weapon.WeaponSkillData;
 import java.util.List;
 import net.minecraft.world.entity.LivingEntity;
@@ -56,25 +56,22 @@ public final class DragontoothShivStabSkillHandler
 
         String weaponId = context.weaponId().getPath();
         String skillId = context.skillData().getId();
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                weaponId,
-                skillId,
-                context.nowTick(),
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 context.skillData().getCooldown() * 20
         );
-        WeaponSkillDamage.apply(
-                context.player(),
-                target,
-                createHitContext(context.skillData()),
-                context.weaponSnapshot(),
-                context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS
-        );
-        YetiFreezeTracker.apply(
-                target,
-                context.nowTick(),
-                FREEZE_DURATION_TICKS
-        );
+        instance.registerCommittedEffect(() -> {
+            WeaponSkillDamage.apply(
+                    context.player(),
+                    target,
+                    createHitContext(context.skillData()),
+                    context.weaponSnapshot(),
+                    context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS,
+                    WeaponSkillDamage.AttackGatePolicy.RESPECT_AT_IMPACT,
+                    WeaponSkillDamage.HitCooldownPolicy.RESPECT_VANILLA
+            );
+        });
 
         WeaponSkillAnimationLock.setLock(
                 context.player(),

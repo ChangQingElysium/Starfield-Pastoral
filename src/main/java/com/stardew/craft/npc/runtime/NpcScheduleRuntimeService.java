@@ -7,6 +7,7 @@ import com.stardew.craft.communitycenter.state.CCStoryFlags;
 import com.stardew.craft.npc.data.NpcCapabilityProfile;
 import com.stardew.craft.npc.data.NpcLocationAnchor;
 import com.stardew.craft.npc.data.NpcDataRegistry;
+import com.stardew.craft.player.PlayerDataManager;
 import com.stardew.craft.festival.FestivalDefinition;
 import com.stardew.craft.festival.FestivalService;
 import com.stardew.craft.festival.desert.DesertFestivalNpcVisitService;
@@ -572,12 +573,12 @@ public final class NpcScheduleRuntimeService {
             return evaluateFriendshipCondition(level, parts, false, schedulePlayerId);
         }
         if (parts.length >= 2 && "MAIL".equalsIgnoreCase(parts[0])) {
-            boolean allowed = mailConditionAllowed(level, false);
+            boolean allowed = evaluateMailCondition(parts[1], schedulePlayerId, false);
             logMailPolicyDecision(raw, allowed);
             return allowed;
         }
         if (parts.length >= 3 && "NOT".equalsIgnoreCase(parts[0]) && "MAIL".equalsIgnoreCase(parts[1])) {
-            boolean allowed = mailConditionAllowed(level, true);
+            boolean allowed = evaluateMailCondition(parts[2], schedulePlayerId, true);
             logMailPolicyDecision(raw, allowed);
             return allowed;
         }
@@ -601,26 +602,12 @@ public final class NpcScheduleRuntimeService {
         }
     }
 
-    private static boolean mailConditionAllowed(ServerLevel level, boolean negated) {
-        String policy = resolveMailConditionPolicyRaw(NpcDataRegistry.events().get("npc_schedule_policy"));
-        return switch (policy) {
-            case "allow_all" -> true;
-            case "block_all" -> false;
-            case "strict_block" -> false;
-            case "block_mail_allow_not_mail" -> negated;
-            default -> negated;
-        };
-    }
-
-    private static String resolveMailConditionPolicyRaw(JsonObject policyRoot) {
-        if (policyRoot == null || !policyRoot.has("mail_condition_policy") || !policyRoot.get("mail_condition_policy").isJsonPrimitive()) {
-            return "block_mail_allow_not_mail";
+    private static boolean evaluateMailCondition(String mailId, UUID schedulePlayerId, boolean negated) {
+        if (mailId == null || mailId.isBlank() || schedulePlayerId == null) {
+            return negated;
         }
-        String raw = policyRoot.get("mail_condition_policy").getAsString();
-        if (raw == null || raw.isBlank()) {
-            return "block_mail_allow_not_mail";
-        }
-        return raw.trim().toLowerCase(Locale.ROOT);
+        boolean received = PlayerDataManager.getPlayerData(schedulePlayerId).hasMailFlag(mailId);
+        return negated ? !received : received;
     }
 
     private static boolean evaluateFriendshipCondition(ServerLevel level, String[] parts, boolean negate, UUID schedulePlayerId) {

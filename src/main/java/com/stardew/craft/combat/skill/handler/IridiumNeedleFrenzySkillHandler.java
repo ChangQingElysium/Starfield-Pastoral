@@ -1,6 +1,6 @@
 package com.stardew.craft.combat.skill.handler;
 
-import com.stardew.craft.combat.skill.IridiumNeedleFrenzyTracker;
+import com.stardew.craft.combat.network.IridiumNeedleFrenzyPayload;
 import com.stardew.craft.combat.skill.WeaponSkillCooldowns;
 import com.stardew.craft.combat.skill.runtime.RuntimeWeaponSkillHandler;
 import com.stardew.craft.combat.skill.runtime.SkillExecutionContext;
@@ -12,8 +12,10 @@ import com.stardew.craft.effect.ModMobEffects;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import java.util.Objects;
 import net.minecraft.core.Holder;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * Server-authoritative lifecycle for Iridium Needle's original Iridium Frenzy.
@@ -22,6 +24,11 @@ public final class IridiumNeedleFrenzySkillHandler implements RuntimeWeaponSkill
     public static final float ENERGY_COST = 10.0F;
     public static final int DURATION_TICKS = 120;
     public static final int SPEED_AMPLIFIER = 0;
+    public static final float CRIT_CHANCE_BONUS = 0.30F;
+    public static final int CRITICAL_HEAL_AMOUNT = 5;
+    public static final float CRITICAL_ENERGY_RESTORE = 10.0F;
+    public static final int CRITICAL_VULNERABLE_DURATION_TICKS = 40;
+    public static final int CRITICAL_VULNERABLE_AMPLIFIER = 1;
 
     @Override
     public SkillValidation validate(SkillExecutionContext context) {
@@ -36,9 +43,6 @@ public final class IridiumNeedleFrenzySkillHandler implements RuntimeWeaponSkill
         if (WeaponSkillRuntime.hasActive(
                 context.player().getUUID(),
                 context.skillId()
-        ) || IridiumNeedleFrenzyTracker.isActive(
-                context.player(),
-                context.nowTick()
         )) {
             return SkillValidation.reject(
                     SkillValidation.RejectionReason.INVALID_STATE
@@ -64,39 +68,42 @@ public final class IridiumNeedleFrenzySkillHandler implements RuntimeWeaponSkill
         );
         Holder<MobEffect> speed = Holder.direct(speedEffect);
 
-        if (!context.player().getAbilities().instabuild
-                && !PlayerStardewDataAPI.consumeEnergy(
-                        context.player(),
-                        ENERGY_COST
-                )) {
+        if (!WeaponSkillRuntime.consumeEnergyDuringBegin(
+                context,
+                instance,
+                ENERGY_COST
+        )) {
             throw new IllegalStateException(
                     "Validated Iridium Frenzy energy payment failed"
             );
         }
 
-        String weaponId = context.weaponId().getPath();
-        String skillId = context.skillData().getId();
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                weaponId,
-                skillId,
-                context.nowTick(),
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 context.skillData().getCooldown() * 20
         );
-        IridiumNeedleFrenzyTracker.start(
-                context.player(),
-                context.nowTick(),
-                DURATION_TICKS
+        instance.initializeExecutionState(
+                new IridiumNeedleFrenzyExecutionState(
+                        context.player().level().dimension(),
+                        context.nowTick(),
+                        DURATION_TICKS
+                )
         );
-
-        context.player().addEffect(new MobEffectInstance(
-                speed,
-                DURATION_TICKS,
-                SPEED_AMPLIFIER,
-                false,
-                true,
-                true
-        ));
+        instance.registerCommittedEffect(() -> {
+            PacketDistributor.sendToPlayer(
+                    context.player(),
+                    new IridiumNeedleFrenzyPayload(true, DURATION_TICKS)
+            );
+            context.player().addEffect(new MobEffectInstance(
+                    speed,
+                    DURATION_TICKS,
+                    SPEED_AMPLIFIER,
+                    false,
+                    true,
+                    true
+            ));
+        });
     }
 
     @Override
@@ -109,12 +116,9 @@ public final class IridiumNeedleFrenzySkillHandler implements RuntimeWeaponSkill
             SkillExecutionContext context,
             SkillInstance instance
     ) {
-        return IridiumNeedleFrenzyTracker.isActive(
-                context.player(),
-                context.nowTick()
-        )
-                ? SkillTickResult.CONTINUE
-                : SkillTickResult.COMPLETE;
+        return instance.requireExecutionState(
+                IridiumNeedleFrenzyExecutionState.class
+        ).advance(context);
     }
 
     @Override
@@ -123,13 +127,33 @@ public final class IridiumNeedleFrenzySkillHandler implements RuntimeWeaponSkill
             SkillInstance instance,
             SkillInstance.EndReason reason
     ) {
-        if (!shouldNotifyOnFinish(reason)) {
-            IridiumNeedleFrenzyTracker.removePlayer(
-                    context.player().getUUID()
-            );
-            return;
+        instance.executionState(IridiumNeedleFrenzyExecutionState.class)
+                .ifPresent(state -> {
+                    state.cancel();
+                    if (shouldNotifyOnFinish(reason)) {
+                        PacketDistributor.sendToPlayer(
+                                context.player(),
+                                new IridiumNeedleFrenzyPayload(false, 0)
+                        );
+                    }
+                });
+    }
+
+    public static boolean isActive(
+            ServerPlayer player,
+            long nowTick
+    ) {
+        if (player == null) {
+            return false;
         }
-        IridiumNeedleFrenzyTracker.clear(context.player());
+        return WeaponSkillRuntime.activeExecutionState(
+                player.getUUID(),
+                BuiltinWeaponSkillHandlers.IRIDIUM_NEEDLE_FRENZY,
+                IridiumNeedleFrenzyExecutionState.class
+        ).filter(state -> state.isActive(
+                nowTick,
+                player.level().dimension()
+        )).isPresent();
     }
 
     static boolean shouldNotifyOnFinish(SkillInstance.EndReason reason) {

@@ -4,6 +4,8 @@ import com.stardew.craft.combat.skill.SkillContext;
 import com.stardew.craft.item.weapon.WeaponData;
 import com.stardew.craft.item.weapon.WeaponRegistry;
 import com.stardew.craft.item.weapon.WeaponSkillData;
+import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -84,5 +86,24 @@ class InsectDashSkillHandlerTest {
                 true,
                 3
         ));
+    }
+
+    @Test
+    void executionStateCountsOnlyUniqueEligibleAppliedTargets() {
+        UUID first = UUID.randomUUID();
+        UUID second = UUID.randomUUID();
+        InsectDashExecutionState state = new InsectDashExecutionState(
+                3,
+                List.of(first, second),
+                null
+        );
+
+        assertFalse(state.recordAppliedHit(UUID.randomUUID()));
+        assertTrue(state.recordAppliedHit(first));
+        assertFalse(state.recordAppliedHit(first));
+        assertEquals(1, state.appliedHitCount());
+        assertTrue(state.earnedFinishSpeed());
+        assertTrue(state.recordAppliedHit(second));
+        assertEquals(2, state.appliedHitCount());
     }
 }

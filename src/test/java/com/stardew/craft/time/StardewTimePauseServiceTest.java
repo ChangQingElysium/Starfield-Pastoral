@@ -56,6 +56,14 @@ class StardewTimePauseServiceTest {
     }
 
     @Test
+    void fullscreenFeedbackWaitsForEveryGuiToClose() {
+        assertFalse(StardewTimePauseService.gameplayFeedbackAllowed(true, true, true));
+        assertFalse(StardewTimePauseService.gameplayFeedbackAllowed(false, true, false));
+        assertFalse(StardewTimePauseService.gameplayFeedbackAllowed(true, false, false));
+        assertTrue(StardewTimePauseService.gameplayFeedbackAllowed(true, true, false));
+    }
+
+    @Test
     void simulationClockAdvancesOnlyWhenExplicitlyRequested() {
         StardewTimeManager time = new StardewTimeManager();
 

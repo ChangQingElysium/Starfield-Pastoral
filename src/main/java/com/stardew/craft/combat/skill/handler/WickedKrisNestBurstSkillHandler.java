@@ -5,12 +5,12 @@ import com.stardew.craft.combat.skill.WeaponSkillAnimationDispatcher;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationLock;
 import com.stardew.craft.combat.skill.WeaponSkillCooldowns;
 import com.stardew.craft.combat.skill.WeaponSkillDamage;
-import com.stardew.craft.combat.skill.WickedKrisPoisonTracker;
 import com.stardew.craft.combat.skill.runtime.RuntimeWeaponSkillHandler;
 import com.stardew.craft.combat.skill.runtime.SkillExecutionContext;
 import com.stardew.craft.combat.skill.runtime.SkillInstance;
 import com.stardew.craft.combat.skill.runtime.SkillTargeting;
 import com.stardew.craft.combat.skill.runtime.SkillValidation;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
 import com.stardew.craft.effect.ModMobEffects;
 import com.stardew.craft.item.weapon.WeaponSkillData;
 import com.stardew.craft.player.PlayerStardewDataAPI;
@@ -62,8 +62,11 @@ public final class WickedKrisNestBurstSkillHandler implements RuntimeWeaponSkill
         }
         instance.setTargetEntityIds(List.of(target.getId()));
 
-        if (!context.player().getAbilities().instabuild
-                && !PlayerStardewDataAPI.consumeEnergy(context.player(), ENERGY_COST)) {
+        if (!WeaponSkillRuntime.consumeEnergyDuringBegin(
+                context,
+                instance,
+                ENERGY_COST
+        )) {
             throw new IllegalStateException(
                     "Validated Nest Burst energy payment is no longer available"
             );
@@ -71,32 +74,23 @@ public final class WickedKrisNestBurstSkillHandler implements RuntimeWeaponSkill
 
         String weaponId = context.weaponId().getPath();
         String skillId = context.skillData().getId();
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                weaponId,
-                skillId,
-                context.nowTick(),
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 context.skillData().getCooldown() * 20
         );
-        WeaponSkillDamage.apply(
-                context.player(),
-                target,
-                createHitContext(context.skillData()),
-                context.weaponSnapshot(),
-                context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS
-        );
-
-        // Authored behavior injects a fresh full poison state after the attack
-        // attempt; it does not require or consume pre-existing poison here.
-        WickedKrisPoisonTracker.applyPoison(
-                target,
-                context.player(),
-                context.nowTick(),
-                POISON_DURATION_TICKS,
-                POISON_STACKS,
-                SCHEDULE_DETONATION,
-                context.weaponSnapshot()
-        );
+        instance.registerCommittedEffect(() -> {
+            WeaponSkillDamage.apply(
+                    context.player(),
+                    target,
+                    createHitContext(context.skillData()),
+                    context.weaponSnapshot(),
+                    context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS,
+                    WeaponSkillDamage.AttackGatePolicy
+                            .RESPECT_AT_IMPACT,
+                    WeaponSkillDamage.HitCooldownPolicy.RESPECT_VANILLA
+            );
+        });
 
         // Preserve the old server notification order.
         WeaponSkillAnimationDispatcher.sendSkillAnim(

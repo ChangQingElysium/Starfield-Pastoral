@@ -1,6 +1,7 @@
 package com.stardew.craft.combat.skill;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.combat.equipment.EquipmentNegativeStatusProtection;
 import com.stardew.craft.combat.network.YetiToothMarkPayload;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -8,6 +9,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
@@ -29,18 +31,36 @@ public final class YetiToothMarkTracker {
 
     @SuppressWarnings("null")
     public static void apply(LivingEntity target, ServerPlayer owner, long nowTick, int durationTicks) {
-        if (target == null || owner == null) {
-            return;
+        applyWithEquipmentProtection(target, owner, nowTick, durationTicks);
+    }
+
+    public static int applyWithEquipmentProtection(
+            LivingEntity target,
+            ServerPlayer owner,
+            long nowTick,
+            int durationTicks
+    ) {
+        if (target == null || owner == null || durationTicks <= 0) {
+            return 0;
         }
+        EquipmentNegativeStatusProtection.Decision protection =
+                EquipmentNegativeStatusProtection.decide(
+                        target,
+                        durationTicks
+                );
+        if (protection.resisted()) {
+            return 0;
+        }
+        int appliedDuration = protection.durationTicks();
         CompoundTag tag = target.getPersistentData();
-        tag.putLong(TAG_END_TICK, nowTick + durationTicks);
+        tag.putLong(TAG_END_TICK, nowTick + appliedDuration);
         tag.putUUID(TAG_OWNER, owner.getUUID());
         tag.putBoolean(TAG_USED, false);
 
         if (!target.level().isClientSide) {
             PacketDistributor.sendToPlayersTrackingEntityAndSelf(
                 target,
-                new YetiToothMarkPayload(target.getId(), durationTicks)
+                new YetiToothMarkPayload(target.getId(), appliedDuration)
             );
 
             if (target.level() instanceof ServerLevel serverLevel) {
@@ -58,6 +78,7 @@ public final class YetiToothMarkTracker {
                     net.minecraft.sounds.SoundSource.PLAYERS, 0.6f, 1.2f);
             }
         }
+        return appliedDuration;
     }
 
     public static boolean isMarked(LivingEntity target, long nowTick) {
@@ -130,6 +151,35 @@ public final class YetiToothMarkTracker {
         if (!isWithinMarkWindow(nowTick, endTick)) {
             clear(tag);
         }
+    }
+
+    @SubscribeEvent
+    public static void onStartTracking(PlayerEvent.StartTracking event) {
+        if (!(event.getEntity() instanceof ServerPlayer observer)
+                || !(event.getTarget() instanceof LivingEntity target)) {
+            return;
+        }
+        long nowTick = target.level().getGameTime();
+        if (!isMarked(target, nowTick)) {
+            return;
+        }
+        PacketDistributor.sendToPlayer(
+                observer,
+                new YetiToothMarkPayload(
+                        target.getId(),
+                        remainingDurationTicks(
+                                nowTick,
+                                target.getPersistentData().getLong(TAG_END_TICK)
+                        )
+                )
+        );
+    }
+
+    static int remainingDurationTicks(long nowTick, long endTick) {
+        return (int) Math.min(
+                Integer.MAX_VALUE,
+                Math.max(0L, endTick - nowTick)
+        );
     }
 
     private static void clear(CompoundTag tag) {

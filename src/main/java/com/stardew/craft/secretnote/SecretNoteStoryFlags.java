@@ -2,7 +2,7 @@ package com.stardew.craft.secretnote;
 
 /** Player-scoped flags used by the vanilla secret-note story branches. */
 public final class SecretNoteStoryFlags {
-    public static final String BEAR_KNOWLEDGE_EVENT = "2120303";
+    public static final String BEAR_KNOWLEDGE_EVENT = "secret_note23_bear_knowledge";
     public static final String BEAR_KNOWLEDGE = "HasBearKnowledge";
     public static final String QI_CAVE = "qiCave";
     public static final String QI_CAVE_SCENE_PENDING = "stardewcraft.secret_note_10_scene_pending";

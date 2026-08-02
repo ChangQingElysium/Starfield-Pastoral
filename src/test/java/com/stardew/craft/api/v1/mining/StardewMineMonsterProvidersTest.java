@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class StardewMineMonsterProvidersTest {
     @Test
@@ -48,9 +49,40 @@ class StardewMineMonsterProvidersTest {
 
         assertEquals(profileId, selected.id());
         assertSame(EntityType.ZOMBIE, selected.entityType());
+        assertEquals(EntityType.ZOMBIE.getDescriptionId(),
+                selected.translationKey());
         assertEquals(
                 Set.of("stardewcraft_test:clockwork"),
                 selected.progressTags());
+    }
+
+    @Test
+    void profileTranslationKeyIsRequiredAndLegacyConstructorUsesEntityName() {
+        StardewMineMonsterProfile legacy = new StardewMineMonsterProfile(
+                id("legacy_name"),
+                EntityType.ZOMBIE,
+                Set.of()
+        );
+        assertEquals(EntityType.ZOMBIE.getDescriptionId(),
+                legacy.translationKey());
+
+        StardewMineMonsterProfile explicit = new StardewMineMonsterProfile(
+                id("explicit_name"),
+                EntityType.ZOMBIE,
+                "entity.stardewcraft.mine_monster.green_slime",
+                Set.of()
+        );
+        assertEquals("entity.stardewcraft.mine_monster.green_slime",
+                explicit.translationKey());
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new StardewMineMonsterProfile(
+                        id("blank_name"),
+                        EntityType.ZOMBIE,
+                        "   ",
+                        Set.of()
+                )
+        );
     }
 
     private static ResourceLocation id(String path) {

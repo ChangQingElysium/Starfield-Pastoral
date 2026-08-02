@@ -9,7 +9,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class PlayerVitalsSyncPayloadTest {
     @Test
     void roundTripsCombatVitals() {
-        PlayerVitalsSyncPayload expected = new PlayerVitalsSyncPayload(73, 140);
+        PlayerVitalsSyncPayload expected = new PlayerVitalsSyncPayload(
+                73,
+                140,
+                182.5F,
+                304,
+                true
+        );
         ByteBuf buffer = Unpooled.buffer();
         try {
             PlayerVitalsSyncPayload.STREAM_CODEC.encode(buffer, expected);

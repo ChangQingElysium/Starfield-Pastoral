@@ -1,6 +1,5 @@
 package com.stardew.craft.combat.skill.handler;
 
-import com.stardew.craft.combat.skill.MeowmereShotTracker;
 import com.stardew.craft.combat.skill.SkillContext;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationDispatcher;
 import com.stardew.craft.combat.skill.WeaponSkillCooldowns;
@@ -86,42 +85,34 @@ public final class MeowmereShotSkillHandler
                 PROJECTILE_SPEED,
                 PROJECTILE_INACCURACY
         );
-        if (!level.addFreshEntity(projectile)) {
-            throw new IllegalStateException(
-                    "Failed to add a Meowmere Rainbow Bolt projectile"
-            );
-        }
+        instance.initializeExecutionState(
+                new State(
+                        projectile,
+                        context.nowTick() + PROJECTILE_RUNTIME_TICKS
+                )
+        );
+        String weaponId = context.weaponId().getPath();
+        String skillId = context.skillData().getId();
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
+                context.skillData().getCooldown() * 20
+        );
+        instance.registerCommittedEffect(() -> {
+            if (!level.addFreshEntity(projectile)) {
+                throw new IllegalStateException(
+                        "Failed to add a Meowmere Rainbow Bolt projectile"
+                );
+            }
+        });
 
-        try {
-            MeowmereShotTracker.start(
-                    instance.instanceId(),
-                    context.player().getUUID(),
-                    level.dimension(),
-                    projectile,
-                    context.nowTick() + PROJECTILE_RUNTIME_TICKS
-            );
-
-            String weaponId = context.weaponId().getPath();
-            String skillId = context.skillData().getId();
-            WeaponSkillCooldowns.setCooldown(
-                    context.player(),
-                    weaponId,
-                    skillId,
-                    context.nowTick(),
-                    context.skillData().getCooldown() * 20
-            );
-
-            // Preserve the authored presentation-only notification.
-            WeaponSkillAnimationDispatcher.sendSkillAnim(
-                    context.player(),
-                    weaponId,
-                    skillId,
-                    ANIMATION_TICKS
-            );
-        } catch (RuntimeException exception) {
-            MeowmereShotTracker.stop(instance.instanceId());
-            throw exception;
-        }
+        // Preserve the authored presentation-only notification.
+        WeaponSkillAnimationDispatcher.sendSkillAnim(
+                context.player(),
+                weaponId,
+                skillId,
+                ANIMATION_TICKS
+        );
     }
 
     @Override
@@ -134,11 +125,17 @@ public final class MeowmereShotSkillHandler
             SkillExecutionContext context,
             SkillInstance instance
     ) {
-        return MeowmereShotTracker.tick(
-                instance.instanceId(),
-                context.player().level().dimension(),
-                context.nowTick()
-        );
+        State state = instance.requireExecutionState(State.class);
+        if (!state.projectile.level().dimension().equals(
+                context.player().level().dimension()
+        )) {
+            return SkillTickResult.CANCEL;
+        }
+        if (state.projectile.isRemoved()
+                || hasTimedOut(context.nowTick(), state.endTick)) {
+            return SkillTickResult.COMPLETE;
+        }
+        return SkillTickResult.CONTINUE;
     }
 
     @Override
@@ -147,7 +144,12 @@ public final class MeowmereShotSkillHandler
             SkillInstance instance,
             SkillInstance.EndReason reason
     ) {
-        MeowmereShotTracker.stop(instance.instanceId());
+        instance.executionState(State.class)
+                .ifPresent(state -> discard(state.projectile));
+    }
+
+    static boolean hasTimedOut(long nowTick, long endTick) {
+        return nowTick >= endTick;
     }
 
     static float projectileDamage(WeaponData weaponData) {
@@ -161,5 +163,24 @@ public final class MeowmereShotSkillHandler
             return 0.0F;
         }
         return projectileDamage(weapon.getWeaponData());
+    }
+
+    private static void discard(MeowmereProjectileEntity projectile) {
+        if (!projectile.isRemoved()) {
+            projectile.discard();
+        }
+    }
+
+    private static final class State implements SkillInstance.ExecutionState {
+        private final MeowmereProjectileEntity projectile;
+        private final long endTick;
+
+        private State(
+                MeowmereProjectileEntity projectile,
+                long endTick
+        ) {
+            this.projectile = projectile;
+            this.endTick = endTick;
+        }
     }
 }

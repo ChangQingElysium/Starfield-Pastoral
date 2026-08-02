@@ -1,6 +1,6 @@
 package com.stardew.craft.combat.skill.handler;
 
-import com.stardew.craft.combat.skill.InfinityDaggerThrustTracker;
+import com.stardew.craft.combat.skill.InfinityDaggerMarkTracker;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationDispatcher;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationLock;
 import com.stardew.craft.combat.skill.WeaponSkillCooldowns;
@@ -12,6 +12,7 @@ import com.stardew.craft.combat.skill.runtime.SkillTickResult;
 import com.stardew.craft.combat.skill.runtime.SkillValidation;
 import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
 import java.util.List;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
@@ -21,6 +22,12 @@ public final class InfinityDaggerSingularityStabSkillHandler
         implements RuntimeWeaponSkillHandler {
     public static final double INITIAL_TARGET_RANGE = 3.5D;
     public static final int INITIAL_ANIMATION_TICKS = 6;
+    public static final int STRIKE_COUNT = 4;
+    public static final int STRIKE_INTERVAL_TICKS = 2;
+    public static final int MARK_DURATION_TICKS = 60;
+    public static final int STRIKE_ANIMATION_TICKS = 4;
+    public static final int HIT_CONTEXT_LIFETIME_TICKS = 5;
+    public static final double RETARGET_RANGE = 3.5D;
 
     @Override
     public SkillValidation validate(SkillExecutionContext context) {
@@ -37,8 +44,6 @@ public final class InfinityDaggerSingularityStabSkillHandler
         if (WeaponSkillRuntime.hasActive(
                 context.player().getUUID(),
                 context.skillId()
-        ) || InfinityDaggerThrustTracker.isActive(
-                context.player().getUUID()
         )) {
             return SkillValidation.reject(
                     SkillValidation.RejectionReason.INVALID_STATE
@@ -63,25 +68,20 @@ public final class InfinityDaggerSingularityStabSkillHandler
         String weaponId = context.weaponId().getPath();
         String skillId = context.skillData().getId();
         instance.setTargetEntityIds(List.of(target.getId()));
+        instance.initializeExecutionState(
+                new InfinityDaggerThrustExecutionState(
+                        context.nowTick(),
+                        target.getUUID()
+                )
+        );
 
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                weaponId,
-                skillId,
-                context.nowTick(),
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 context.skillData().getCooldown() * 20
         );
-        InfinityDaggerThrustTracker.start(
-                context.player(),
-                context.nowTick(),
-                target,
-                weaponId,
-                skillId,
-                context.skillData().getDamagePercent() / 100.0F
-        );
-
         // Preserve the original activation notification order. Each strike
-        // sends its own four-tick animation from the thrust tracker.
+        // sends its own four-tick animation from the execution state.
         WeaponSkillAnimationLock.setLock(
                 context.player(),
                 context.nowTick(),
@@ -105,39 +105,38 @@ public final class InfinityDaggerSingularityStabSkillHandler
             SkillExecutionContext context,
             SkillInstance instance
     ) {
-        if (!InfinityDaggerThrustTracker.isActive(
-                context.player().getUUID()
-        )) {
-            return SkillTickResult.COMPLETE;
-        }
-        if (!context.player().isAlive()
-                || context.player().isRemoved()
-                || !InfinityDaggerThrustTracker.isBoundToCurrentDimension(
-                        context.player()
-                )) {
-            return SkillTickResult.CANCEL;
-        }
-
-        InfinityDaggerThrustTracker.tick(
-                context.player(),
-                context.nowTick()
-        );
-        return InfinityDaggerThrustTracker.isActive(
-                context.player().getUUID()
-        )
-                ? SkillTickResult.CONTINUE
-                : SkillTickResult.COMPLETE;
+        return instance.requireExecutionState(
+                InfinityDaggerThrustExecutionState.class
+        ).advance(context);
     }
 
-    @Override
-    public void finish(
-            SkillExecutionContext context,
-            SkillInstance instance,
-            SkillInstance.EndReason reason
+    /** Applies the mark only for this cast's exact positive final strike. */
+    public static boolean applyFinalStrikeMark(
+            ServerPlayer player,
+            LivingEntity target,
+            long nowTick
     ) {
-        InfinityDaggerThrustTracker.removePlayer(
-                context.player().getUUID()
+        if (player == null || target == null) {
+            return false;
+        }
+        boolean claimed = WeaponSkillRuntime.activeExecutionState(
+                player.getUUID(),
+                BuiltinWeaponSkillHandlers.INFINITY_DAGGER_SINGULARITY_STAB,
+                InfinityDaggerThrustExecutionState.class
+        ).map(state -> state.consumeFinalStrikeCandidate(
+                target.getUUID(),
+                target.isAlive()
+        )).orElse(false);
+        if (!claimed) {
+            return false;
+        }
+        InfinityDaggerMarkTracker.apply(
+                target,
+                player,
+                nowTick,
+                MARK_DURATION_TICKS
         );
+        return true;
     }
 
     private static LivingEntity findInitialTarget(

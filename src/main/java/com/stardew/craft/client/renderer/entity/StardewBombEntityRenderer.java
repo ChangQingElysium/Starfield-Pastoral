@@ -115,10 +115,12 @@ public class StardewBombEntityRenderer extends EntityRenderer<StardewBombEntity>
     }
 
     private ModelResourceLocation getModelLocation(BombType type) {
-        return switch (type) {
-            case CHERRY_BOMB -> CHERRY_BOMB_MODEL;
-            case BOMB -> BOMB_MODEL;
-            case MEGA_BOMB -> MEGA_BOMB_MODEL;
-        };
+        if (type == BombType.CHERRY_BOMB) {
+            return CHERRY_BOMB_MODEL;
+        }
+        if (type == BombType.MEGA_BOMB) {
+            return MEGA_BOMB_MODEL;
+        }
+        return BOMB_MODEL;
     }
 }

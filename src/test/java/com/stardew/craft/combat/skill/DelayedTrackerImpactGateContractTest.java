@@ -6,23 +6,23 @@ import java.nio.file.Path;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DelayedTrackerImpactGateContractTest {
-    private static final List<String> TRACKERS = List.of(
-            "EternalCollapseTracker.java",
+    private static final List<String> DIRECT_ATTACKS = List.of(
+            "handler/FemurSlamExecutionState.java"
+    );
+    private static final List<String> SKILL_EFFECTS = List.of(
+            "handler/EternalCollapseExecutionState.java",
             "RiftPathDamageTracker.java",
-            "FemurSlamTracker.java",
-            "SingularityEvolveTracker.java",
-            "StarfallTracker.java"
+            "handler/GalaxyJudgementExecutionState.java"
     );
 
     @Test
     void actualTickHitsUseTheCentralizedImpactGate()
             throws IOException {
-        for (String tracker : TRACKERS) {
+        for (String tracker : DIRECT_ATTACKS) {
             String source = readSkillSource(tracker);
             assertTrue(
                     source.contains("WeaponSkillDamage.apply("),
@@ -34,46 +34,116 @@ class DelayedTrackerImpactGateContractTest {
                     ) && source.contains(".RESPECT_AT_IMPACT"),
                     tracker + " must recheck AttackEntityEvent at impact"
             );
-            assertFalse(source.contains("player.attack("), tracker);
-            assertFalse(
-                    source.contains(
-                            "WeaponSkillContextStore.setPending("
-                    ),
-                    tracker
-            );
-            assertFalse(
-                    source.contains("clearUnconsumedContext("),
-                    tracker
-            );
-            assertFalse(
-                    source.contains("boolean hit = WeaponSkillDamage.apply(")
-                            || source.contains(
-                                    "if (WeaponSkillDamage.apply("
-                            ),
-                    tracker + " must not change authored follow-up logic"
-            );
-            assertFalse(
-                    source.contains("getMainHandItem("),
-                    tracker + " must not recapture the current hand"
-            );
+            assertCentralizedEntryOnly(source, tracker);
         }
+    }
+
+    @Test
+    void delayedFieldsAndBurstsRemainSkillOwnedDamage()
+            throws IOException {
+        for (String tracker : SKILL_EFFECTS) {
+            String source = readSkillSource(tracker);
+            assertTrue(
+                    source.contains("WeaponSkillDamage.apply("),
+                    tracker
+            );
+            assertTrue(
+                    source.contains(
+                            "WeaponSkillDamage.AttackGatePolicy"
+                    ) && source.contains(".SKILL_DAMAGE"),
+                    tracker + " must not replay AttackEntityEvent"
+            );
+            assertFalse(source.contains(".RESPECT_AT_IMPACT"), tracker);
+            assertCentralizedEntryOnly(source, tracker);
+        }
+
+        String singularity = readSkillSource(
+                "handler/SingularityEvolveExecutionState.java"
+        );
+        assertTrue(singularity.contains(
+                ".EXPLOSION_DAMAGE_MULTIPLIER,"
+        ));
+        assertTrue(singularity.contains(
+                "WeaponSkillDamage.AttackGatePolicy.SKILL_DAMAGE"
+        ));
+        assertTrue(singularity.contains(
+                ".SLASH_DAMAGE_MULTIPLIER,"
+        ));
+        assertTrue(singularity.contains(
+                "WeaponSkillDamage.AttackGatePolicy.RESPECT_AT_IMPACT"
+        ));
+        assertCentralizedEntryOnly(
+                singularity,
+                "handler/SingularityEvolveExecutionState.java"
+        );
+    }
+
+    private static void assertCentralizedEntryOnly(
+            String source,
+            String tracker
+    ) {
+        assertFalse(source.contains("player.attack("), tracker);
+        assertFalse(
+                source.contains(
+                        "WeaponSkillContextStore.setPending("
+                ),
+                tracker
+        );
+        assertFalse(
+                source.contains("clearUnconsumedContext("),
+                tracker
+        );
+        assertFalse(
+                source.contains("boolean hit = WeaponSkillDamage.apply(")
+                        || source.contains(
+                                "if (WeaponSkillDamage.apply("
+                        ),
+                tracker + " must not change authored follow-up logic"
+        );
+        assertFalse(
+                source.contains("getMainHandItem("),
+                tracker + " must not recapture the current hand"
+        );
     }
 
     @Test
     void missingSnapshotsAreThreadedFromTheirRuntimeHandlers()
             throws IOException {
-        assertSnapshotThreading(
-                "handler/EternalCollapseSkillHandler.java",
-                "EternalCollapseTracker.java"
+        String eternalHandler = readSkillSource(
+                "handler/EternalCollapseSkillHandler.java"
         );
-        assertSnapshotThreading(
-                "handler/FemurSlamSkillHandler.java",
-                "FemurSlamTracker.java"
+        String eternalState = readSkillSource(
+                "handler/EternalCollapseExecutionState.java"
         );
-        assertSnapshotThreading(
-                "handler/GalaxyJudgementSkillHandler.java",
-                "StarfallTracker.java"
+        assertTrue(eternalHandler.contains(
+                "new EternalCollapseExecutionState("
+        ));
+        assertTrue(eternalState.contains(
+                "executionContext.weaponSnapshot()"
+        ));
+        assertTrue(eternalState.contains("weaponSnapshot,"));
+        String femurHandler = readSkillSource(
+                "handler/FemurSlamSkillHandler.java"
         );
+        String femurState = readSkillSource(
+                "handler/FemurSlamExecutionState.java"
+        );
+        assertTrue(femurHandler.contains(
+                "new FemurSlamExecutionState("
+        ));
+        assertTrue(femurState.contains("context.weaponSnapshot()"));
+        assertTrue(femurState.contains("weaponSnapshot,"));
+        String galaxyHandler = readSkillSource(
+                "handler/GalaxyJudgementSkillHandler.java"
+        );
+        String starfall = readSkillSource(
+                "handler/GalaxyJudgementExecutionState.java"
+        );
+        assertTrue(galaxyHandler.contains("context.weaponSnapshot()"));
+        assertTrue(starfall.contains(
+                "WeaponDamageSnapshot weaponSnapshot"
+        ));
+        assertTrue(starfall.contains("weaponSnapshot,"));
     }
 
     @Test
@@ -83,55 +153,66 @@ class DelayedTrackerImpactGateContractTest {
                 "RiftPathDamageTracker.java"
         );
         String singularity = readSkillSource(
-                "SingularityEvolveTracker.java"
+                "handler/SingularityEvolveExecutionState.java"
         );
 
         assertTrue(occurrences(
                 rift,
                 "state.weaponSnapshot,"
         ) >= 2);
-        assertTrue(occurrences(
-                singularity,
-                "state.weaponSnapshot,"
-        ) >= 2);
+        assertTrue(singularity.contains("weaponSnapshot,"));
+        assertTrue(singularity.contains(
+                ".EXPLOSION_DAMAGE_MULTIPLIER"
+        ));
+        assertTrue(singularity.contains(
+                ".SLASH_DAMAGE_MULTIPLIER"
+        ));
         assertTrue(occurrences(
                 rift,
-                ".RESPECT_AT_IMPACT"
+                ".SKILL_DAMAGE"
         ) >= 2);
+        assertFalse(rift.contains(".RESPECT_AT_IMPACT"));
         assertTrue(occurrences(
                 singularity,
                 ".RESPECT_AT_IMPACT"
-        ) >= 2);
+        ) >= 1);
+        assertTrue(occurrences(
+                singularity,
+                ".SKILL_DAMAGE"
+        ) >= 1);
     }
 
     @Test
-    void authoredMultiHitAndIFrameStructureRemainsPresent()
+    void authoredMultiHitUsesExplicitCooldownBypassPolicy()
             throws IOException {
         String eternal = readSkillSource(
-                "EternalCollapseTracker.java"
+                "handler/EternalCollapseExecutionState.java"
         );
         String rift = readSkillSource(
                 "RiftPathDamageTracker.java"
         );
         String singularity = readSkillSource(
-                "SingularityEvolveTracker.java"
+                "handler/SingularityEvolveExecutionState.java"
         );
         String starfall = readSkillSource(
-                "StarfallTracker.java"
+                "handler/GalaxyJudgementExecutionState.java"
         );
 
-        assertIFrameResetBeforeDamage(eternal);
-        assertIFrameResetBeforeDamage(rift);
-        assertIFrameResetBeforeDamage(singularity);
-        assertIFrameResetBeforeDamage(starfall);
+        assertExplicitCooldownBypassWithoutDirectReset(eternal);
+        assertExplicitCooldownBypassWithoutDirectReset(rift);
+        assertExplicitCooldownBypassWithoutDirectReset(singularity);
+        assertExplicitCooldownBypassWithoutDirectReset(starfall);
         assertTrue(starfall.contains(
-                "for (int i = 0; i < hits; i++)"
+                "for (int index = 0; index < hits; index++)"
         ));
         assertTrue(rift.contains(
                 "state.hit.add(target.getUUID())"
         ));
         assertTrue(singularity.contains(
-                "for (LivingEntity target : slashTargets)"
+                "private void applySlashAfterDash("
+        ));
+        assertTrue(singularity.contains(
+                "for (LivingEntity target : targets)"
         ));
     }
 
@@ -142,10 +223,10 @@ class DelayedTrackerImpactGateContractTest {
         String handler = readSkillSource(handlerFile);
         String tracker = readSkillSource(trackerFile);
         assertTrue(handler.contains("context.weaponSnapshot()"));
-        assertEquals(2, occurrences(
+        assertTrue(occurrences(
                 tracker,
                 "public static void start("
-        ));
+        ) >= 1);
         assertTrue(tracker.contains(
                 "WeaponDamageSnapshot weaponSnapshot"
         ));
@@ -154,21 +235,18 @@ class DelayedTrackerImpactGateContractTest {
         ));
     }
 
-    private static void assertIFrameResetBeforeDamage(String source) {
-        int invulnerable = source.indexOf(
-                "target.invulnerableTime = 0;"
+    private static void assertExplicitCooldownBypassWithoutDirectReset(
+            String source
+    ) {
+        int damage = source.indexOf("WeaponSkillDamage.apply(");
+        int bypass = source.indexOf(
+                ".BYPASS_FOR_AUTHORED_SEQUENCE",
+                damage
         );
-        int hurtTime = source.indexOf(
-                "target.hurtTime = 0;",
-                invulnerable
-        );
-        int damage = source.indexOf(
-                "WeaponSkillDamage.apply(",
-                hurtTime
-        );
-        assertTrue(invulnerable >= 0);
-        assertTrue(hurtTime > invulnerable);
-        assertTrue(damage > hurtTime);
+        assertFalse(source.contains("target.invulnerableTime = 0;"));
+        assertFalse(source.contains("target.hurtTime = 0;"));
+        assertTrue(damage >= 0);
+        assertTrue(bypass > damage);
     }
 
     private static int occurrences(String source, String token) {

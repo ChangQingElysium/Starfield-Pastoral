@@ -285,11 +285,15 @@ public class QuestManager {
      * @return true if any quest consumed the offered item (SDV: intercepts before gift processing)
      */
     public boolean onItemOfferedToNpc(ServerPlayer player, String npcId, String itemId) {
+        return onItemOfferedToNpc(player, npcId, itemId, 1);
+    }
+
+    public boolean onItemOfferedToNpc(ServerPlayer player, String npcId, String itemId, int count) {
         Map<StardewProgressKey, StardewProgressSnapshot> before =
                 captureQuestSnapshots();
         boolean consumed = false;
         for (StardewQuest q : List.copyOf(questLog)) {
-            if (q.onItemOfferedToNpc(player, npcId, itemId)) {
+            if (q.onItemOfferedToNpc(player, npcId, itemId, Math.max(1, count))) {
                 consumed = true;
                 break; // SDV: onlyOneQuest=true — stop after first match
             }

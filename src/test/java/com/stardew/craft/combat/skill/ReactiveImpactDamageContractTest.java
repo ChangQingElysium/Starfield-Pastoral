@@ -28,7 +28,7 @@ class ReactiveImpactDamageContractTest {
                 stayStateExit
         );
         int stayCooldown = source.indexOf(
-                "enterCooldownWithAnim(",
+                "sendCooldownAnimation(",
                 stayStrike
         );
         int returnMethod = source.indexOf(
@@ -51,7 +51,7 @@ class ReactiveImpactDamageContractTest {
                 returnStrike
         );
         int cooldown = source.indexOf(
-                "enterCooldownWithAnim(",
+                "sendCooldownAnimation(",
                 returnTeleport
         );
 
@@ -76,16 +76,16 @@ class ReactiveImpactDamageContractTest {
         String source = normalizedSource(
                 "combat/skill/LightCounterParryHandler.java"
         );
-        int snapshotRead = source.indexOf(
-                "LightCounterParryState.getWeaponSnapshot(player)"
+        int stateConsume = source.indexOf(
+                "LightCounterSkillHandler.consumeParry("
         );
-        int stateClear = source.indexOf(
-                "LightCounterParryState.clear(player)",
-                snapshotRead
+        int snapshotRead = source.indexOf(
+                "activation.weaponSnapshot()",
+                stateConsume
         );
         int mitigation = source.indexOf(
                 "event.setAmount(event.getAmount() * 0.4f)",
-                stateClear
+                snapshotRead
         );
         int attacker = source.indexOf(
                 "src instanceof LivingEntity attacker",
@@ -101,9 +101,9 @@ class ReactiveImpactDamageContractTest {
         );
 
         assertTrue(
-                snapshotRead >= 0
-                        && stateClear > snapshotRead
-                        && mitigation > stateClear
+                stateConsume >= 0
+                        && snapshotRead > stateConsume
+                        && mitigation > snapshotRead
                         && attacker > mitigation
                         && counter > attacker
                         && animation > counter
@@ -124,26 +124,22 @@ class ReactiveImpactDamageContractTest {
         String handler = normalizedSource(
                 "combat/skill/TemplarVowHandler.java"
         );
-        String tracker = normalizedSource(
-                "combat/skill/TemplarVowTracker.java"
+        String state = normalizedSource(
+                "combat/skill/handler/TemplarVowExecutionState.java"
         );
 
         assertTrue(runtime.contains(
-                "context.skillData().getCooldown() * 20, "
-                        + "context.weaponSnapshot()"
+                "context.weaponSnapshot(), cooldown"
         ));
-        assertTrue(tracker.contains(
+        assertTrue(state.contains(
                 "private final WeaponDamageSnapshot weaponSnapshot;"
         ));
-        assertEquals(2, occurrences(
-                tracker,
-                "public static void start("
-        ));
         assertTrue(handler.contains(
-                "TemplarVowTracker.getWeaponSnapshot(player)"
+                "WeaponDamageSnapshot weaponSnapshot = "
+                        + "activation.weaponSnapshot();"
         ));
-        assertTrue(tracker.contains(
-                "applyLightSlash(player, nowTick, state.weaponSnapshot)"
+        assertTrue(state.contains(
+                "applyExpirySlash(context)"
         ));
 
         int negateDamage = handler.indexOf("event.setAmount(0.0f)");
@@ -156,7 +152,7 @@ class ReactiveImpactDamageContractTest {
                 swing
         );
         int endVow = handler.indexOf(
-                "TemplarVowTracker.endNow(player, nowTick)",
+                "TemplarVowSkillHandler.finishCounter(player, nowTick)",
                 counter
         );
         assertTrue(
@@ -166,12 +162,13 @@ class ReactiveImpactDamageContractTest {
                         && endVow > counter
         );
 
-        int shelter = tracker.indexOf("player.addEffect(");
-        int expiryTarget = tracker.indexOf(
-                "findTargetEntity(player, COUNTER_TARGET_RANGE)",
+        int shelter = state.indexOf("player.addEffect(");
+        int expiryTarget = state.indexOf(
+                "findTargetEntity( player, "
+                        + "TemplarVowSkillHandler.COUNTER_TARGET_RANGE )",
                 shelter
         );
-        int expirySlash = tracker.indexOf(
+        int expirySlash = state.indexOf(
                 "WeaponSkillDamage.apply(",
                 expiryTarget
         );
@@ -181,9 +178,9 @@ class ReactiveImpactDamageContractTest {
                         && expirySlash > expiryTarget
         );
         assertCompatibilityAndExplicitSnapshotPaths(handler);
-        assertCompatibilityAndExplicitSnapshotPaths(tracker);
+        assertCompatibilityAndExplicitSnapshotPaths(state);
         assertImpactGatedOnly(handler);
-        assertImpactGatedOnly(tracker);
+        assertImpactGatedOnly(state);
     }
 
     private static void assertCompatibilityAndExplicitSnapshotPaths(

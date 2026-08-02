@@ -99,6 +99,26 @@
     "winter_Sun": "stardewcraft.npc.sam.winter_sun",
     "winter_7": "stardewcraft.npc.sam.winter_7",
     "winter_24": "stardewcraft.npc.sam.winter_24",
-    "default": "stardewcraft.npc.sam.default"
+    "default": "stardewcraft.npc.sam.default",
+    "Resort_Entering": "stardewcraft.npc.sam.resort_entering",
+    "Resort": "stardewcraft.npc.sam.resort",
+    "Resort_Leaving": "stardewcraft.npc.sam.resort_leaving",
+    "Resort_Shore": "stardewcraft.npc.sam.resort_shore",
+    "Resort_Towel": "stardewcraft.npc.sam.resort_towel",
+    "Resort_Towel_2": "stardewcraft.npc.sam.resort_towel_2",
+    "Resort_Bar": "stardewcraft.npc.sam.resort_bar",
+    "FlowerDance_Accept_Spouse": "stardewcraft.npc.sam.flowerdance_accept_spouse",
+    "Wed_old": "stardewcraft.npc.sam.wed_old",
+    "Wed_19": "stardewcraft.npc.sam.wed_19",
+    "Wed_20": "stardewcraft.npc.sam.wed_20",
+    "Event_band1": "stardewcraft.npc.sam.event_band1",
+    "Event_band2": "stardewcraft.npc.sam.event_band2",
+    "Event_band3": "stardewcraft.npc.sam.event_band3",
+    "Event_band4": "stardewcraft.npc.sam.event_band4",
+    "event_room1": "stardewcraft.npc.sam.event_room1",
+    "event_room2": "stardewcraft.npc.sam.event_room2",
+    "event_snack1": "stardewcraft.npc.sam.event_snack1",
+    "event_snack2": "stardewcraft.npc.sam.event_snack2",
+    "event_snack3": "stardewcraft.npc.sam.event_snack3"
   }
 }

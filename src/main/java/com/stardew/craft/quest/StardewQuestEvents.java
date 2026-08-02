@@ -30,8 +30,13 @@ public final class StardewQuestEvents {
      *         Caller should skip gift taste processing when true.
      */
     public static boolean fireItemOfferedToNpc(ServerPlayer player, String npcId, String itemId) {
+        return fireItemOfferedToNpc(player, npcId, itemId, 1);
+    }
+
+    public static boolean fireItemOfferedToNpc(
+            ServerPlayer player, String npcId, String itemId, int count) {
         QuestManager qm = QuestManager.of(player);
-        if (qm != null) return qm.onItemOfferedToNpc(player, npcId, itemId);
+        if (qm != null) return qm.onItemOfferedToNpc(player, npcId, itemId, Math.max(1, count));
         return false;
     }
 

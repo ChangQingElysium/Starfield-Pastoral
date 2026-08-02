@@ -18,26 +18,33 @@ class SemanticImmediateHandlerMigrationContractTest {
         String begin = method(source, "public void begin(");
 
         int healthCost = begin.indexOf(
-                "setHealth(healthAfterCost("
+                "WeaponSkillRuntime.spendHealthDuringBegin("
+        );
+        int committed = begin.indexOf(
+                "instance.registerCommittedEffect(",
+                healthCost
         );
         int damageAttempt = begin.indexOf(
                 "WeaponSkillDamage.apply("
         );
-        int deathCheck = begin.indexOf(
-                "if (target.isDeadOrDying()"
+        int settlement = begin.indexOf(
+                "executionState.settleKilledByThisHit()"
         );
         int healing = begin.indexOf(
                 "healAfterKill(context);",
-                deathCheck
+                settlement
         );
         int fury = begin.indexOf(
                 "grantFury(context);",
-                deathCheck
+                settlement
         );
 
-        assertTrue(healthCost >= 0 && damageAttempt > healthCost);
-        assertTrue(deathCheck > damageAttempt);
-        assertTrue(healing > deathCheck && fury > deathCheck);
+        assertTrue(healthCost >= 0 && committed > healthCost);
+        assertTrue(damageAttempt > committed);
+        assertTrue(settlement > damageAttempt);
+        assertTrue(healing > settlement && fury > settlement);
+        assertFalse(begin.contains("target.isDeadOrDying()"));
+        assertFalse(begin.contains("target.getHealth()"));
         assertTrue(begin.contains("context.weaponSnapshot()"));
         assertFalse(begin.contains(
                 "boolean hit = WeaponSkillDamage.apply("
@@ -45,70 +52,135 @@ class SemanticImmediateHandlerMigrationContractTest {
         assertFalse(begin.contains(
                 "if (WeaponSkillDamage.apply("
         ));
+        assertFalse(begin.contains(
+                "context.player().setHealth("
+        ));
+        assertTrue(source.contains(
+                "CombatHealing.heal(context.player(), KILL_HEALING);"
+        ));
         assertCentralizedOnly(source);
     }
 
     @Test
-    void nestBurstPoisonsAfterEveryDamageAttempt()
+    void nestBurstPoisonsOnlyFromPositiveAppliedPost()
             throws IOException {
         String source = readHandler(
                 "WickedKrisNestBurstSkillHandler.java"
         );
+        String rules = readMain(
+                "combat/BuiltinSkillAppliedHitRules.java"
+        );
+        String coordinator = readMain(
+                "combat/WeaponAppliedHitCoordinator.java"
+        );
         String begin = method(source, "public void begin(");
+        String applied = method(
+                rules,
+                "static void applyWickedNestBurst("
+        );
 
         int damageAttempt = begin.indexOf(
                 "WeaponSkillDamage.apply("
         );
-        int poison = begin.indexOf(
-                "WickedKrisPoisonTracker.applyPoison("
-        );
-        assertTrue(damageAttempt >= 0 && poison > damageAttempt);
-        assertFalse(begin.substring(damageAttempt, poison).contains(
-                "if ("
+        assertTrue(damageAttempt >= 0);
+        assertTrue(begin.contains("context.weaponSnapshot()"));
+        assertTrue(begin.contains(
+                "WeaponSkillDamage.AttackGatePolicy"
         ));
-        assertTrue(begin.substring(damageAttempt, poison).contains(
-                "context.weaponSnapshot()"
+        assertTrue(begin.contains(".RESPECT_AT_IMPACT"));
+        assertFalse(begin.contains(
+                "WickedKrisPoisonTracker.applyPoison("
+        ));
+
+        assertTrue(applied.contains(
+                "\"wicked_kris_nest_burst\".equals(hit.skillId())"
+        ));
+        assertTrue(applied.contains("hit.dealtPositiveDamage()"));
+        assertTrue(applied.contains(
+                "WickedKrisPoisonTracker.applyPoison("
+        ));
+        assertTrue(applied.contains(
+                "hit.weaponSnapshot().orElseThrow()"
+        ));
+        assertTrue(coordinator.contains(
+                "BuiltinSkillAppliedHitRules.applyWickedNestBurst(hit)"
         ));
         assertCentralizedOnly(source);
     }
 
     @Test
-    void venomRippleClearsIFramesThenAttemptsAndPoisonsEveryTarget()
+    void venomRipplePoisonsPerPositiveHitAndRewardsTheCastOnce()
             throws IOException {
         String source = readHandler(
                 "WickedKrisVenomRippleSkillHandler.java"
         );
+        String rules = readMain(
+                "combat/BuiltinSkillAppliedHitRules.java"
+        );
+        String coordinator = readMain(
+                "combat/WeaponAppliedHitCoordinator.java"
+        );
         String begin = method(source, "public void begin(");
+        String applied = method(
+                rules,
+                "static void applyWickedVenomRipple("
+        );
 
         int loop = begin.indexOf(
                 "for (LivingEntity target : targets)"
         );
-        int invulnerable = begin.indexOf(
-                "target.invulnerableTime = 0;",
-                loop
-        );
-        int hurtTime = begin.indexOf(
-                "target.hurtTime = 0;",
-                invulnerable
-        );
         int damageAttempt = begin.indexOf(
                 "WeaponSkillDamage.apply(",
-                hurtTime
+                loop
         );
-        int poison = begin.indexOf(
-                "WickedKrisPoisonTracker.applyPoison(",
+        int bypass = begin.indexOf(
+                ".BYPASS_FOR_AUTHORED_SEQUENCE",
                 damageAttempt
         );
 
-        assertTrue(loop >= 0 && invulnerable > loop);
-        assertTrue(hurtTime > invulnerable);
-        assertTrue(damageAttempt > hurtTime && poison > damageAttempt);
-        assertFalse(begin.substring(damageAttempt, poison).contains(
-                "if ("
+        assertTrue(loop >= 0 && damageAttempt > loop);
+        assertTrue(bypass > damageAttempt);
+        assertFalse(begin.contains("target.invulnerableTime = 0;"));
+        assertFalse(begin.contains("target.hurtTime = 0;"));
+        assertTrue(begin.contains("context.weaponSnapshot()"));
+        assertTrue(begin.contains(
+                "instance.initializeExecutionState(new State())"
         ));
-        assertTrue(begin.substring(damageAttempt, poison).contains(
-                "context.weaponSnapshot()"
+        assertFalse(begin.contains(
+                "WickedKrisPoisonTracker.applyPoison("
         ));
+        assertFalse(begin.contains("player.addEffect("));
+
+        assertTrue(applied.contains(
+                "\"wicked_kris_venom_ripple\".equals(hit.skillId())"
+        ));
+        assertTrue(applied.contains("hit.dealtPositiveDamage()"));
+        assertTrue(applied.contains(
+                "WickedKrisPoisonTracker.applyPoison("
+        ));
+        assertTrue(applied.contains(
+                "hit.weaponSnapshot().orElseThrow()"
+        ));
+        assertTrue(applied.contains(
+                "WickedKrisVenomRippleSkillHandler.recordAppliedHit(player)"
+        ));
+        assertTrue(coordinator.contains(
+                "BuiltinSkillAppliedHitRules.applyWickedVenomRipple(hit)"
+        ));
+
+        String reward = method(
+                source,
+                "public static boolean recordAppliedHit("
+        );
+        assertTrue(reward.contains(
+                "WeaponSkillRuntime.activeExecutionState("
+        ));
+        assertTrue(reward.contains(
+                "BuiltinWeaponSkillHandlers.WICKED_KRIS_VENOM_RIPPLE"
+        ));
+        assertTrue(source.contains("private boolean speedGranted;"));
+        assertTrue(source.contains("if (speedGranted)"));
+        assertTrue(source.contains("speedGranted = true;"));
         assertCentralizedOnly(source);
     }
 
@@ -141,18 +213,20 @@ class SemanticImmediateHandlerMigrationContractTest {
     }
 
     private static String readHandler(String fileName) throws IOException {
+        return readMain(Path.of(
+                "combat", "skill", "handler", fileName
+        ).toString());
+    }
+
+    private static String readMain(String relativeFile) throws IOException {
         Path relative = Path.of(
                 "src",
                 "main",
                 "java",
                 "com",
                 "stardew",
-                "craft",
-                "combat",
-                "skill",
-                "handler",
-                fileName
-        );
+                "craft"
+        ).resolve(relativeFile);
         Path current = Path.of("").toAbsolutePath();
         while (current != null) {
             Path candidate = current.resolve(relative);

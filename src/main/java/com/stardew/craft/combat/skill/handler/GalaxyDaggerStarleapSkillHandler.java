@@ -6,12 +6,14 @@ import com.stardew.craft.combat.skill.WeaponSkillAnimationDispatcher;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationLock;
 import com.stardew.craft.combat.skill.WeaponSkillCooldowns;
 import com.stardew.craft.combat.skill.WeaponSkillDamage;
-import com.stardew.craft.combat.skill.YetiFreezeTracker;
 import com.stardew.craft.combat.skill.runtime.RuntimeWeaponSkillHandler;
 import com.stardew.craft.combat.skill.runtime.SkillExecutionContext;
 import com.stardew.craft.combat.skill.runtime.SkillInstance;
 import com.stardew.craft.combat.skill.runtime.SkillTargeting;
 import com.stardew.craft.combat.skill.runtime.SkillValidation;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillMovementArbiter;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillMovementControl;
 import com.stardew.craft.effect.ModMobEffects;
 import com.stardew.craft.item.weapon.WeaponSkillData;
 import com.stardew.craft.player.PlayerStardewDataAPI;
@@ -20,6 +22,7 @@ import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
@@ -46,6 +49,14 @@ public final class GalaxyDaggerStarleapSkillHandler
 
     @Override
     public SkillValidation validate(SkillExecutionContext context) {
+        if (WeaponSkillMovementControl.isLocked(
+                context.player(),
+                context.nowTick()
+        )) {
+            return SkillValidation.reject(
+                    SkillValidation.RejectionReason.INVALID_STATE
+            );
+        }
         if (WeaponSkillCooldowns.isOnCooldown(
                 context.player(),
                 context.weaponId().getPath(),
@@ -73,6 +84,14 @@ public final class GalaxyDaggerStarleapSkillHandler
             SkillExecutionContext context,
             SkillInstance instance
     ) {
+        if (WeaponSkillMovementControl.isLocked(
+                context.player(),
+                context.nowTick()
+        )) {
+            throw new IllegalStateException(
+                    "Validated Star Leap movement is now locked"
+            );
+        }
         CastPlan plan = resolveCast(context.player());
         if (plan == null || !canPayEnergy(context)) {
             throw new IllegalStateException(
@@ -83,11 +102,11 @@ public final class GalaxyDaggerStarleapSkillHandler
         LivingEntity target = plan.target();
         instance.setTargetEntityIds(List.of(target.getId()));
 
-        if (!context.player().getAbilities().instabuild
-                && !PlayerStardewDataAPI.consumeEnergy(
-                        context.player(),
-                        ENERGY_COST
-                )) {
+        if (!WeaponSkillRuntime.consumeEnergyDuringBegin(
+                context,
+                instance,
+                ENERGY_COST
+        )) {
             throw new IllegalStateException(
                     "Validated Star Leap energy payment failed"
             );
@@ -95,38 +114,34 @@ public final class GalaxyDaggerStarleapSkillHandler
 
         String weaponId = context.weaponId().getPath();
         String skillId = context.skillData().getId();
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                weaponId,
-                skillId,
-                context.nowTick(),
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 context.skillData().getCooldown() * 20
         );
 
-        teleportPlayer(context.player(), plan.destination());
-        faceTarget(context.player(), target);
-
-        boolean marked = GalaxyDaggerMarkTracker.consumeIfEligible(
+        boolean marked = GalaxyDaggerMarkTracker.consumeDuringBegin(
+                instance,
                 target,
                 context.player(),
                 context.nowTick()
         );
-        WeaponSkillDamage.apply(
-                context.player(),
-                target,
-                createHitContext(context.skillData(), marked),
-                context.weaponSnapshot(),
-                context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS
-        );
-
-        YetiFreezeTracker.apply(
-                target,
-                context.nowTick(),
-                FREEZE_DURATION_TICKS
-        );
-        if (marked) {
-            playConsumedMarkEffects(target);
-        }
+        instance.registerCommittedEffect(() -> {
+            teleportPlayer(context.player(), plan.destination());
+            faceTarget(context.player(), target);
+            WeaponSkillDamage.apply(
+                    context.player(),
+                    target,
+                    createHitContext(context.skillData(), marked),
+                    context.weaponSnapshot(),
+                    context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS,
+                    WeaponSkillDamage.AttackGatePolicy.RESPECT_AT_IMPACT,
+                    WeaponSkillDamage.HitCooldownPolicy.RESPECT_VANILLA
+            );
+            if (marked) {
+                playConsumedMarkEffects(target);
+            }
+        });
 
         // Preserve the authored action notification order.
         WeaponSkillAnimationLock.setLock(
@@ -336,6 +351,9 @@ public final class GalaxyDaggerStarleapSkillHandler
             Player player,
             Vec3 destination
     ) {
+        if (player instanceof ServerPlayer serverPlayer) {
+            WeaponSkillMovementArbiter.revokeCurrent(serverPlayer);
+        }
         player.teleportTo(
                 destination.x,
                 destination.y,

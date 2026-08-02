@@ -35,8 +35,8 @@ public final class QuestDebugCommand {
     private static final String MARNIE_REQUEST_EVENT = "marnie_cave_carrot_request_wake_up";
     private static final String JODI_INVITE_EVENT = "jodi_fish_casserole_invite_wake_up";
     private static final String MARNIE_COMPLETE_EVENT = "marnie_cave_carrot_delivery";
-    private static final String JODI_COMPLETE_EVENT = "94";
-    private static final String MUSEUM_INTRO_EVENT = "0";
+    private static final String JODI_COMPLETE_EVENT = "jodi_fish_casserole_dinner";
+    private static final String MUSEUM_INTRO_EVENT = "museum_archaeology_intro";
 
     private QuestDebugCommand() {}
 

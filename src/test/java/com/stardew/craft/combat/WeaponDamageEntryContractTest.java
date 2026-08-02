@@ -32,23 +32,36 @@ class WeaponDamageEntryContractTest {
     }
 
     @Test
-    void clubSweepUsesTheSameSnapshotAwareDamageEntry()
+    void stardewSweepHasNoVanillaSecondaryDamageEntry()
             throws IOException {
-        String source = Files.readString(
-                mainSourceRoot()
-                        .resolve("mixin")
-                        .resolve("PlayerClubSweepAttackMixin.java")
+        Path sourceRoot = mainSourceRoot();
+        String club = Files.readString(
+                sourceRoot.resolve("item/weapon/StardewClubItem.java")
         );
-        assertTrue(source.contains(
-                "WeaponDamageSnapshot.capture("
+        String sharedSweep = Files.readString(
+                sourceRoot.resolve("mixin/PlayerSweepAttackMixin.java")
+        );
+        String events = Files.readString(
+                sourceRoot.resolve("combat/WeaponCombatEvents.java")
+        );
+        assertTrue(club.contains(
+                "ItemAbilities.DEFAULT_SWORD_ACTIONS.contains(ability)"
         ));
-        assertTrue(source.contains(
-                "WeaponSkillDamage.apply("
+        assertTrue(sharedSweep.contains(
+                "stardewcraft$suppressNativeSweepHurt"
         ));
-        assertTrue(source.contains(
-                "SkillContext.normalAttack()"
+        assertTrue(sharedSweep.contains(
+                "if (WeaponCombatIdentity.isWeapon("
+                        + "player.getMainHandItem()))"
         ));
-        assertFalse(source.contains(".hurt("));
+        assertTrue(sharedSweep.contains(
+                "return false;"
+        ));
+        assertTrue(events.contains("event.setSweeping(false);"));
+        assertTrue(events.contains("event.setCanceled(true);"));
+        assertFalse(Files.exists(
+                sourceRoot.resolve("mixin/PlayerClubSweepAttackMixin.java")
+        ));
     }
 
     private static Path mainSourceRoot() throws IOException {

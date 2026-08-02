@@ -10,6 +10,10 @@ Examples:
   python3 scripts/render_festival_actor_map.py --wizard-dark-talisman
   python3 scripts/render_festival_actor_map.py --wizard-magic-ink
   python3 scripts/render_festival_actor_map.py --dark-talisman-hunt
+  python3 scripts/render_festival_actor_map.py --museum-lost-books
+  python3 scripts/render_festival_actor_map.py --linus-heart-events
+  python3 scripts/render_festival_actor_map.py --linus-schedule
+  python3 scripts/render_festival_actor_map.py --george-heart-events
 """
 
 from __future__ import annotations
@@ -526,10 +530,18 @@ def draw_numbered_source_points(
     scale: int,
     title: str,
     route: bool = False,
+    start_index: int = 1,
 ) -> Image.Image:
     map_image = base.convert("RGBA")
     sidebar_width = 520 if len(points) <= 12 else 0
-    image = Image.new("RGBA", (map_image.width + sidebar_width, map_image.height), (232, 240, 247, 255))
+    canvas_height = map_image.height
+    if sidebar_width:
+        canvas_height = max(canvas_height, 112 + len(points) * 52)
+    image = Image.new(
+        "RGBA",
+        (map_image.width + sidebar_width, canvas_height),
+        (232, 240, 247, 255),
+    )
     image.alpha_composite(map_image, (0, 0))
     overlay = Image.new("RGBA", image.size, (0, 0, 0, 0))
     draw = ImageDraw.Draw(overlay)
@@ -540,7 +552,7 @@ def draw_numbered_source_points(
     anchors = [((x - origin_x) * step, (y - origin_y) * step) for _, x, y in points]
     if route and len(anchors) > 1:
         draw.line(anchors, fill=(255, 210, 55, 210), width=max(3, scale * 2), joint="curve")
-    for index, ((label, _x, _y), (px, py)) in enumerate(zip(points, anchors), start=1):
+    for index, ((label, _x, _y), (px, py)) in enumerate(zip(points, anchors), start=start_index):
         radius = 11
         draw.ellipse((px - radius, py - radius, px + radius, py + radius),
                      fill=(18, 22, 30, 235), outline=(255, 210, 55, 255), width=3)
@@ -553,8 +565,9 @@ def draw_numbered_source_points(
         draw.rectangle((left, 0, image.width, image.height), fill=(237, 243, 248, 255))
         draw.line((left, 0, left, image.height), fill=(89, 111, 132, 255), width=2)
         draw.text((left + 24, 24), "Source point legend", fill=(28, 42, 57, 255), font=load_font(24))
-        for index, (label, _x, _y) in enumerate(points, start=1):
-            y = 72 + (index - 1) * 52
+        for row, (label, _x, _y) in enumerate(points):
+            index = start_index + row
+            y = 72 + row * 52
             draw.ellipse((left + 24, y, left + 54, y + 30), fill=(255, 210, 55, 255),
                          outline=(132, 94, 13, 255), width=2)
             number = str(index)
@@ -564,6 +577,272 @@ def draw_numbered_source_points(
             draw.text((left + 66, y + 5), label, fill=(36, 50, 64, 255), font=label_font)
     draw_title(draw, title, image.width)
     return Image.alpha_composite(image, overlay)
+
+
+def load_vanilla_event(event_file: str, event_id: str) -> tuple[str, str, dict[str, str]]:
+    """Load one exact vanilla event entry and its file-local fork scripts."""
+    event_path = DATA_DIR / "Events" / event_file
+    data = json.loads(event_path.read_text(encoding="utf-8-sig"))
+    matches = [
+        (key, value)
+        for key, value in data.items()
+        if key.split("/", 1)[0] == event_id and isinstance(value, str)
+    ]
+    if len(matches) != 1:
+        raise ValueError(
+            f"Expected one event {event_id!r} in {event_path.name}, found {len(matches)}.")
+    key, script = matches[0]
+    forks = {
+        fork_key: fork_script
+        for fork_key, fork_script in data.items()
+        if "/" not in fork_key and isinstance(fork_script, str)
+    }
+    return key, script, forks
+
+
+def draw_source_routes(
+    base: Image.Image,
+    crop_origin: tuple[int, int],
+    scale: int,
+    routes: list[tuple[tuple[int, int, int, int], list[tuple[float, float]]]],
+) -> Image.Image:
+    overlay = Image.new("RGBA", base.size, (0, 0, 0, 0))
+    draw = ImageDraw.Draw(overlay)
+    step = TILE_SIZE * scale
+    origin_x, origin_y = crop_origin
+    for color, points in routes:
+        anchors = [
+            ((x - origin_x) * step, (y - origin_y) * step)
+            for x, y in points
+        ]
+        if len(anchors) > 1:
+            draw.line(
+                anchors,
+                fill=color,
+                width=max(4, scale * 2),
+                joint="curve",
+            )
+    return Image.alpha_composite(base.convert("RGBA"), overlay)
+
+
+def render_linus_heart_event_source_maps(output_dir: Path, scale: int) -> list[Path]:
+    """Render source-only Linus heart-event choreography; never map it to Minecraft."""
+    town_key, town_script, _town_forks = load_vanilla_event("Town.json", "502969")
+    campfire_key, campfire_script, _mountain_forks = load_vanilla_event("Mountain.json", "26")
+    eight_key, eight_script, mountain_forks = load_vanilla_event("Mountain.json", "371652")
+    required_fragments = (
+        (town_script, "farmer 72 64 1 Linus 51 58 2"),
+        (town_script, "warp Gus 45 71"),
+        (campfire_script, "farmer 18 8 1 Linus 29 8 2"),
+        (campfire_script, "specificTemporarySprite linusCampfire"),
+        (eight_script, "farmer -1000 -1000 2 Robin -1000 -1000 2 Linus 23 33 1"),
+        (eight_script, "question fork0"),
+        (mountain_forks.get("linusWell", ""), "friendship Linus 250"),
+    )
+    for script, fragment in required_fragments:
+        if fragment not in script:
+            raise ValueError(f"Vanilla Linus event source changed; missing {fragment!r}.")
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    outputs: list[Path] = []
+    step = TILE_SIZE * scale
+
+    town = render_tmx(MAPS_DIR / "Town.tmx", scale=scale)
+    first_crop = (48, 55, 76, 67)
+    first = town.crop(tuple(value * step for value in first_crop))
+    first = draw_tile_grid(first, scale, first_crop[0], first_crop[1])
+    first = draw_source_routes(first, (first_crop[0], first_crop[1]), scale, [
+        ((82, 148, 255, 230), [(72.5, 64.5), (58.5, 64.5), (53.5, 64.5)]),
+        ((255, 196, 55, 230), [
+            (51.5, 58.5), (51.5, 63.5), (53.5, 62.5),
+            (52.5, 62.5), (51.5, 64.5),
+        ]),
+    ])
+    first_points = [
+        ("P01 Player start (72,64), facing E", 72.5, 64.5),
+        ("C01 Initial viewport anchor (55,64)", 55.5, 64.5),
+        ("L01 Linus start (51,58), facing S", 51.5, 58.5),
+        ("L02 Linus first-can position (51,63)", 51.5, 63.5),
+        ("FX01 linusLights first-can anchor (52,63)", 52.5, 63.5),
+        ("G01 George doorway warp (57,64)", 57.5, 64.5),
+        ("P02 Player stop for George (58,64)", 58.5, 64.5),
+        ("L03 Linus startled stop (53,62)", 53.5, 62.5),
+        ("L04 Linus confession position (51,64)", 51.5, 64.5),
+        ("P03 Player stop for Linus (53,64)", 53.5, 64.5),
+    ]
+    first_annotated = draw_numbered_source_points(
+        first,
+        first_points,
+        (first_crop[0], first_crop[1]),
+        scale,
+        "Linus 50-point event / Town 502969 / first garbage can",
+    )
+    first_path = output_dir / "linus_50point_town_first_can_vanilla_source_points.png"
+    first_annotated.save(first_path)
+    outputs.append(first_path)
+
+    second_crop = (42, 60, 55, 75)
+    second = town.crop(tuple(value * step for value in second_crop))
+    second = draw_tile_grid(second, scale, second_crop[0], second_crop[1])
+    second = draw_source_routes(second, (second_crop[0], second_crop[1]), scale, [
+        ((82, 148, 255, 230), [(53.5, 64.5), (44.5, 64.5)]),
+        ((255, 196, 55, 230), [(51.5, 64.5), (48.5, 70.5), (48.5, 68.5)]),
+        ((80, 208, 142, 230), [
+            (45.5, 71.5), (45.5, 72.5), (48.5, 72.5), (48.5, 71.5),
+        ]),
+    ])
+    second_points = [
+        ("L05 Linus second-can position (48,70)", 48.5, 70.5),
+        ("FX02 linusLights second-can anchor (47,70)", 47.5, 70.5),
+        ("U01 Gus doorway warp (45,71)", 45.5, 71.5),
+        ("U02 Gus approach corner (45,72)", 45.5, 72.5),
+        ("U03 Gus route corner (48,72)", 48.5, 72.5),
+        ("U04 Gus dialogue stop (48,71)", 48.5, 71.5),
+        ("L06 Linus reaction stop (48,68)", 48.5, 68.5),
+        ("C02 Camera pan source end: viewport -1,+1", 54.5, 65.5),
+        ("P04 Player leaves scene toward (44,64)", 44.5, 64.5),
+    ]
+    second_annotated = draw_numbered_source_points(
+        second,
+        second_points,
+        (second_crop[0], second_crop[1]),
+        scale,
+        "Linus 50-point event / Town 502969 / Gus encounter",
+    )
+    second_path = output_dir / "linus_50point_town_gus_vanilla_source_points.png"
+    second_annotated.save(second_path)
+    outputs.append(second_path)
+
+    mountain = render_tmx(MAPS_DIR / "Mountain.tmx", scale=scale)
+    campfire_crop = (15, 4, 34, 13)
+    campfire = mountain.crop(tuple(value * step for value in campfire_crop))
+    campfire = draw_tile_grid(campfire, scale, campfire_crop[0], campfire_crop[1])
+    campfire = draw_source_routes(campfire, (campfire_crop[0], campfire_crop[1]), scale, [
+        ((82, 148, 255, 230), [
+            (18.5, 8.5), (26.5, 8.5), (28.5, 8.5), (28.5, 9.5),
+            (28.5, 8.5), (29.5, 8.5), (29.5, 7.5), (29.5, 8.5),
+        ]),
+        ((255, 196, 55, 230), [
+            (29.5, 8.5), (30.5, 8.5), (30.5, 9.5),
+            (30.5, 8.5), (29.5, 8.5),
+        ]),
+    ])
+    campfire_points = [
+        ("P01 Player start (18,8), facing E", 18.5, 8.5),
+        ("P02 Player invitation stop (26,8)", 26.5, 8.5),
+        ("P03 Player fireside stop (28,9)", 28.5, 9.5),
+        ("P04 Tent entry route (28,8) -> (29,8) -> (29,7)", 29.5, 8.5),
+        ("P05 Reward return warp (29,7)", 29.5, 7.5),
+        ("L01 Linus start (29,8), facing S", 29.5, 8.5),
+        ("L02 Linus fireside stop (30,9)", 30.5, 9.5),
+        ("L03 Linus tent entry (29,8)", 29.5, 8.5),
+        ("FX01 Campfire sprite anchor (29,9)", 29.5, 9.5),
+        ("C01 Viewport anchor (29,7)", 29.5, 7.5),
+    ]
+    campfire_annotated = draw_numbered_source_points(
+        campfire,
+        campfire_points,
+        (campfire_crop[0], campfire_crop[1]),
+        scale,
+        "Linus 4-heart / vanilla Mountain event 26 / campfire and tent",
+    )
+    campfire_path = output_dir / "linus_4heart_mountain_vanilla_source_points.png"
+    campfire_annotated.save(campfire_path)
+    outputs.append(campfire_path)
+
+    eight_crop = (3, 16, 27, 36)
+    eight = mountain.crop(tuple(value * step for value in eight_crop))
+    eight = draw_tile_grid(eight, scale, eight_crop[0], eight_crop[1])
+    eight = draw_source_routes(eight, (eight_crop[0], eight_crop[1]), scale, [
+        ((255, 196, 55, 230), [
+            (23.5, 33.5), (21.5, 33.5), (21.5, 32.5),
+            (15.5, 32.5), (15.5, 27.5), (13.5, 27.5),
+            (13.5, 28.5), (11.5, 28.5), (9.5, 28.5),
+            (5.5, 28.5), (5.5, 18.5),
+        ]),
+        ((80, 208, 142, 230), [(12.5, 26.5), (12.5, 27.5)]),
+        ((82, 148, 255, 230), [(11.5, 26.5), (11.5, 27.5)]),
+    ])
+    eight_points = [
+        ("C01 Initial viewport anchor (18,32)", 18.5, 32.5),
+        ("C02 Four-second camera pan end (18,31)", 18.5, 31.5),
+        ("L01 Linus start (23,33), facing E", 23.5, 33.5),
+        ("FX01 First chopping/action tile (24,33)", 24.5, 33.5),
+        ("L02 Linus second work position (21,32)", 21.5, 32.5),
+        ("FX02 Second chopping/action tile (22,32)", 22.5, 32.5),
+        ("L03 Linus cabin-side dialogue stop (13,27)", 13.5, 27.5),
+        ("R01 Robin doorway warp (12,26)", 12.5, 26.5),
+        ("R02 Robin dialogue stop (12,27)", 12.5, 27.5),
+        ("P01 Player doorway warp (11,26)", 11.5, 26.5),
+        ("P02 Player dialogue stop (11,27)", 11.5, 27.5),
+        ("L04 Linus berry-exit destination (5,18)", 5.5, 18.5),
+    ]
+    eight_annotated = draw_numbered_source_points(
+        eight,
+        eight_points,
+        (eight_crop[0], eight_crop[1]),
+        scale,
+        "Linus 8-heart / vanilla Mountain event 371652 / both answer branches",
+    )
+    eight_path = output_dir / "linus_8heart_mountain_vanilla_source_points.png"
+    eight_annotated.save(eight_path)
+    outputs.append(eight_path)
+    return outputs
+
+
+def render_george_heart_event_source_map(output_dir: Path, scale: int) -> Path:
+    """Render source-only George 6-heart choreography; never map it to Minecraft."""
+    event_key, event_script, _forks = load_vanilla_event("JoshHouse.json", "18")
+    required_fragments = (
+        "sadpiano/17 17/farmer 10 19 1 George 18 17 0",
+        "move farmer 4 0 0/move farmer 0 -2 0/move farmer 3 0 0",
+        "move George 0 1 2",
+        "move farmer 0 1 1",
+    )
+    for fragment in required_fragments:
+        if fragment not in event_script:
+            raise ValueError(
+                f"Vanilla George event source changed; missing {fragment!r} in {event_key!r}.")
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    step = TILE_SIZE * scale
+    crop = (8, 13, 22, 22)
+    josh_house = render_tmx(MAPS_DIR / "JoshHouse.tmx", scale=scale)
+    base = josh_house.crop(tuple(value * step for value in crop))
+    base = draw_tile_grid(base, scale, crop[0], crop[1])
+    base = draw_source_routes(base, (crop[0], crop[1]), scale, [
+        ((82, 148, 255, 230), [
+            (10.5, 19.5),
+            (14.5, 19.5),
+            (14.5, 17.5),
+            (17.5, 17.5),
+            (17.5, 18.5),
+        ]),
+        ((255, 196, 55, 230), [
+            (18.5, 17.5),
+            (18.5, 18.5),
+        ]),
+    ])
+    points = [
+        ("C01 Vanilla viewport anchor (17,17)", 17.5, 17.5),
+        ("P01 Player start (10,19), facing E", 10.5, 19.5),
+        ("P02 Player first route corner (14,19)", 14.5, 19.5),
+        ("P03 Player second route corner (14,17)", 14.5, 17.5),
+        ("P04 Player reaches shelf (17,17), facing E", 17.5, 17.5),
+        ("P05 Player final dialogue step (17,18), facing E", 17.5, 18.5),
+        ("G01 George start (18,17), facing N", 18.5, 17.5),
+        ("G02 George story position (18,18), facing S", 18.5, 18.5),
+    ]
+    annotated = draw_numbered_source_points(
+        base,
+        points,
+        (crop[0], crop[1]),
+        scale,
+        "George 6-heart / vanilla JoshHouse event 18",
+    )
+    output_path = output_dir / "george_6heart_joshhouse_vanilla_source_points.png"
+    annotated.save(output_path)
+    return output_path
 
 
 def render_secret_note31_source_maps(output_dir: Path, scale: int) -> list[Path]:
@@ -984,6 +1263,406 @@ def render_minecraft_capture_workbook(
     return output_path
 
 
+def render_museum_lost_books_source_map(output_dir: Path, scale: int) -> Path:
+    """Render the 21 vanilla ArchaeologyHouse `Notes N` action tiles."""
+    map_path = MAPS_DIR / "ArchaeologyHouse.tmx"
+    root = ET.parse(map_path).getroot()
+    source_points: dict[int, set[tuple[int, int]]] = {}
+    for group in root.findall("objectgroup"):
+        for obj in group.findall("object"):
+            properties = obj.find("properties")
+            if properties is None:
+                continue
+            action = next((
+                prop.get("value", "")
+                for prop in properties.findall("property")
+                if prop.get("name") == "Action"
+            ), "")
+            match = re.fullmatch(r"Notes (\d+)", action)
+            if match is None:
+                continue
+            note = int(match.group(1))
+            tile = (
+                int(float(obj.get("x", "0")) // TILE_SIZE),
+                int(float(obj.get("y", "0")) // TILE_SIZE),
+            )
+            source_points.setdefault(note, set()).add(tile)
+    if set(source_points) != set(range(21)):
+        raise ValueError(
+            f"ArchaeologyHouse expected Notes 0-20, found {sorted(source_points)}")
+    duplicates = {
+        note: sorted(tiles)
+        for note, tiles in source_points.items()
+        if len(tiles) != 1
+    }
+    if duplicates:
+        raise ValueError(f"Notes actions have conflicting source tiles: {duplicates}")
+    points = [
+        (f"Book {note}", *next(iter(source_points[note])))
+        for note in range(21)
+    ]
+    crop_x0, crop_y0, crop_x1, crop_y1 = 6, 2, 24, 16
+    full = render_tmx(map_path, scale=scale)
+    step = TILE_SIZE * scale
+    cropped = full.crop((
+        crop_x0 * step,
+        crop_y0 * step,
+        crop_x1 * step,
+        crop_y1 * step,
+    ))
+    annotated = draw_numbered_source_points(
+        cropped,
+        points,
+        (crop_x0, crop_y0),
+        scale,
+        "Museum Lost Books / vanilla Notes 0-20 action tiles",
+        start_index=0,
+    )
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_path = output_dir / "museum_lost_books_vanilla_source_points.png"
+    annotated.save(output_path)
+    return output_path
+
+
+def render_museum_lost_books_capture_workbook(output_dir: Path) -> Path:
+    entries = [
+        (str(index), f"Book {index} shelf interaction", "block x/y/z")
+        for index in range(21)
+    ]
+    return render_minecraft_capture_workbook(
+        output_dir / "museum_lost_books_minecraft_capture_workbook.png",
+        "Museum Lost Books - Minecraft capture workbook",
+        "Match each numbered vanilla Notes tile; do not infer coordinates from the source map.",
+        entries,
+    )
+
+
+def render_linus_heart_event_capture_workbooks(output_dir: Path) -> list[Path]:
+    common_subtitle = (
+        "Fill only from the in-game planning tool. Minecraft coordinates/cameras are never "
+        "derived from vanilla tile coordinates."
+    )
+    early_event_entries = [
+        ("B01", "Town event trigger region corner 1", "block x/y/z + dimension"),
+        ("B02", "Town event trigger region corner 2", "block x/y/z"),
+        ("P01", "Player start, facing east", "x/y/z + direction"),
+        ("P02", "Player stop for George", "x/y/z + direction"),
+        ("P03", "Player stop for Linus conversation", "x/y/z + direction"),
+        ("P04", "Player exit/path endpoint", "x/y/z + direction"),
+        ("L01", "Linus initial position", "x/y/z + direction"),
+        ("L02", "Linus first garbage-can position", "x/y/z + direction"),
+        ("L03", "Linus startled/path stop", "x/y/z + direction"),
+        ("L04", "Linus confession position", "x/y/z + direction"),
+        ("L05", "Linus second garbage-can position", "x/y/z + direction"),
+        ("L06", "Linus reaction position near Gus", "x/y/z + direction"),
+        ("G01", "George doorway/appearance position", "x/y/z + direction"),
+        ("U01", "Gus doorway/appearance position", "x/y/z + direction"),
+        ("U02", "Gus route corner", "x/y/z + direction"),
+        ("U03", "Gus dialogue stop", "x/y/z + direction"),
+        ("FX1", "First garbage-can sound/light effect anchor", "x/y/z"),
+        ("FX2", "Second garbage-can sound/light effect anchor", "x/y/z"),
+        ("C01", "Initial fixed camera", "camera command"),
+        ("C02", "Second-can camera pan endpoint", "camera command"),
+    ]
+    four_heart_entries = [
+        ("B01", "Mountain event trigger region corner 1", "block x/y/z + dimension"),
+        ("B02", "Mountain event trigger region corner 2", "block x/y/z"),
+        ("P01", "Player start, facing east", "x/y/z + direction"),
+        ("P02", "Player invitation stop", "x/y/z + direction"),
+        ("P03", "Player fireside stop", "x/y/z + direction"),
+        ("P04", "Player tent-entry path endpoint", "x/y/z + direction"),
+        ("P05", "Player reward return position", "x/y/z + direction"),
+        ("L01", "Linus initial position", "x/y/z + direction"),
+        ("L02", "Linus fireside stop", "x/y/z + direction"),
+        ("L03", "Linus tent-entry endpoint", "x/y/z + direction"),
+        ("FX1", "Campfire center/effect anchor", "x/y/z"),
+        ("C01", "Fixed event camera", "camera command"),
+    ]
+    eight_heart_entries = [
+        ("B01", "Mountain event trigger region corner 1", "block x/y/z + dimension"),
+        ("B02", "Mountain event trigger region corner 2", "block x/y/z"),
+        ("L01", "Linus initial work position", "x/y/z + direction"),
+        ("FX1", "First chopping/action anchor", "x/y/z"),
+        ("L02", "Linus second work position", "x/y/z + direction"),
+        ("FX2", "Second chopping/action anchor", "x/y/z"),
+        ("L03", "Linus cabin-side dialogue stop", "x/y/z + direction"),
+        ("L04", "Linus first answer-branch stop", "x/y/z + direction"),
+        ("L05", "Linus second answer-branch stop", "x/y/z + direction"),
+        ("L06", "Linus berry-exit endpoint", "x/y/z + direction"),
+        ("R01", "Robin doorway/appearance position", "x/y/z + direction"),
+        ("R02", "Robin dialogue stop", "x/y/z + direction"),
+        ("P01", "Player doorway/appearance position", "x/y/z + direction"),
+        ("P02", "Player dialogue stop", "x/y/z + direction"),
+        ("C01", "Initial fixed camera", "camera command"),
+        ("C02", "Four-second camera pan endpoint", "camera command"),
+    ]
+    return [
+        render_minecraft_capture_workbook(
+            output_dir / "linus_50point_minecraft_capture_workbook.png",
+            "Linus 50-point event - Minecraft capture workbook",
+            common_subtitle,
+            early_event_entries,
+        ),
+        render_minecraft_capture_workbook(
+            output_dir / "linus_4heart_minecraft_capture_workbook.png",
+            "Linus 4-heart - Minecraft capture workbook",
+            common_subtitle,
+            four_heart_entries,
+        ),
+        render_minecraft_capture_workbook(
+            output_dir / "linus_8heart_minecraft_capture_workbook.png",
+            "Linus 8-heart - Minecraft capture workbook",
+            common_subtitle,
+            eight_heart_entries,
+        ),
+    ]
+
+
+def render_george_heart_event_capture_workbook(output_dir: Path) -> Path:
+    entries = [
+        ("B01", "JoshHouse event trigger region corner 1", "block x/y/z + dimension"),
+        ("B02", "JoshHouse event trigger region corner 2", "block x/y/z"),
+        ("P01", "Player start, facing east", "x/y/z + direction"),
+        ("P02", "Player first route corner", "x/y/z + direction"),
+        ("P03", "Player second route corner", "x/y/z + direction"),
+        ("P04", "Player reaches shelf", "x/y/z + direction"),
+        ("P05", "Player final dialogue step", "x/y/z + direction"),
+        ("G01", "George initial position", "x/y/z + direction"),
+        ("G02", "George story position", "x/y/z + direction"),
+        ("C01", "Fixed event camera", "camera command"),
+    ]
+    return render_minecraft_capture_workbook(
+        output_dir / "george_6heart_minecraft_capture_workbook.png",
+        "George 6-heart - Minecraft capture workbook",
+        "Fill only from the in-game planning tool; never derive Minecraft coordinates from vanilla tiles.",
+        entries,
+    )
+
+
+def render_linus_schedule_source_maps(output_dir: Path, scale: int) -> list[Path]:
+    """Render every unique vanilla Linus schedule tile without mapping it to Minecraft."""
+    schedule_path = SCHEDULES_DIR / "Linus.json"
+    schedules = json.loads(schedule_path.read_text(encoding="utf-8-sig"))
+    expected_fragments = {
+        "rain": "700 Tent 2 2 0/930 Mountain 25 5 1/1010 Tent 3 2 2/1500 Mountain 17 8 2/1900 Tent 2 2 2",
+        "GreenRain": "610 Mountain 34 15 2/1200 Mountain 39 5 1/1700 Mountain 30 9 3/2200 bed",
+        "DesertFestival_2": "610 Tent 2 2 0/700 Desert 32 8 1",
+        "winter_15": "1100 Mountain 28 9 1/1600 Beach 19 4 2",
+        "summer": "630 Mountain 39 5 1/940 Mountain 44 27 1",
+        "fall": "700 Mountain 25 5 1/740 Mountain 28 9 1/900 Railroad 20 57 2",
+        "winter": "1100 Mountain 28 9 1/1400 BathHouse_Entry 8 6 3",
+        "spring": "630 Mountain 25 5 1/700 Mountain 28 9 1/930 Mountain 45 19 1",
+    }
+    for key, fragment in expected_fragments.items():
+        if fragment not in schedules.get(key, ""):
+            raise ValueError(
+                f"Vanilla Linus schedule source changed for {key!r}; "
+                f"missing {fragment!r}."
+            )
+
+    map_points: dict[str, list[tuple[str, float, float]]] = {
+        "Mountain": [
+            ("M01 (25,5) rain/spring/summer/fall", 25.5, 5.5),
+            ("M02 (17,8) rain afternoon", 17.5, 8.5),
+            ("M03 (34,15) Green Rain morning", 34.5, 15.5),
+            ("M04 (39,5) Green Rain/summer", 39.5, 5.5),
+            ("M05 (30,9) Green Rain evening", 30.5, 9.5),
+            ("M06 (28,9) seasonal camp position", 28.5, 9.5),
+            ("M07 (44,27) summer wandering", 44.5, 27.5),
+            ("M08 (48,35) summer wandering", 48.5, 35.5),
+            ("M09 (44,18) fall afternoon", 44.5, 18.5),
+            ("M10 (45,19) spring morning", 45.5, 19.5),
+        ],
+        "Tent": [
+            ("T01 (2,2) default tent position", 2.5, 2.5),
+            ("T02 (3,2) tent standing position", 3.5, 2.5),
+            ("T03 (1,3) spring late-evening position", 1.5, 3.5),
+            ("T04 (4,4) sleep position", 4.5, 4.5),
+        ],
+        "Railroad": [
+            ("R01 (20,57) fall forage area", 20.5, 57.5),
+        ],
+        "BathHouse_Entry": [
+            ("B01 (8,6) winter warming position", 8.5, 6.5),
+        ],
+        "Beach": [
+            ("S01 (19,4) Night Market fishing position", 19.5, 4.5),
+        ],
+        "Desert": [
+            ("D01 (32,8) Desert Festival day 2", 32.5, 8.5),
+        ],
+    }
+    crops = {
+        "Mountain": (13, 2, 52, 39),
+        "Tent": (0, 0, 8, 8),
+        "Railroad": (14, 51, 27, 63),
+        "BathHouse_Entry": (0, 0, 16, 13),
+        "Beach": (13, 0, 27, 12),
+        "Desert": (25, 2, 40, 16),
+    }
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    outputs: list[Path] = []
+    step = TILE_SIZE * scale
+    next_point_number = 1
+    for map_name, points in map_points.items():
+        crop = crops[map_name]
+        base = render_tmx(MAPS_DIR / f"{map_name}.tmx", scale=scale)
+        base = base.crop(tuple(value * step for value in crop))
+        base = draw_tile_grid(base, scale, crop[0], crop[1])
+        annotated = draw_numbered_source_points(
+            base,
+            points,
+            (crop[0], crop[1]),
+            scale,
+            f"Linus vanilla schedule / {map_name} / unique stop tiles",
+            start_index=next_point_number,
+        )
+        next_point_number += len(points)
+        output_path = output_dir / (
+            f"linus_schedule_{map_name.lower()}_vanilla_source_points.png"
+        )
+        annotated.save(output_path)
+        outputs.append(output_path)
+    return outputs
+
+
+def render_linus_schedule_capture_workbook(output_dir: Path) -> Path:
+    entries = [
+        ("1", "Mountain (25,5): rain/spring/summer/fall", "x/y/z + east"),
+        ("2", "Mountain (17,8): rain afternoon", "x/y/z + south"),
+        ("3", "Mountain (34,15): Green Rain morning", "x/y/z + south"),
+        ("4", "Mountain (39,5): Green Rain/summer", "x/y/z + east"),
+        ("5", "Mountain (30,9): Green Rain evening", "x/y/z + west"),
+        ("6", "Mountain (28,9): seasonal camp position", "x/y/z + east"),
+        ("7", "Mountain (44,27): summer wandering", "x/y/z + east"),
+        ("8", "Mountain (48,35): summer wandering", "x/y/z + south"),
+        ("9", "Mountain (44,18): fall afternoon", "x/y/z + east"),
+        ("10", "Mountain (45,19): spring morning", "x/y/z + east"),
+        ("11", "Tent (2,2): default tent position", "x/y/z + north/south"),
+        ("12", "Tent (3,2): tent standing position", "x/y/z + east/south"),
+        ("13", "Tent (1,3): spring late-evening position", "x/y/z + south"),
+        ("14", "Tent (4,4): sleep position", "x/y/z + south + sleep"),
+        ("15", "Railroad (20,57): fall forage area", "x/y/z + south"),
+        ("16", "BathHouse Entry (8,6): winter warming position", "x/y/z + west"),
+        ("17", "Beach (19,4): Night Market fishing position", "x/y/z + south"),
+        ("18", "Desert (32,8): Desert Festival day 2", "x/y/z + east"),
+    ]
+    return render_minecraft_capture_workbook(
+        output_dir / "linus_schedule_minecraft_capture_workbook.png",
+        "Linus schedule - Minecraft capture workbook",
+        "Numbering is continuous across every map; fill only from the in-game planning tool.",
+        entries,
+    )
+
+
+def render_george_schedule_source_maps(output_dir: Path, scale: int) -> list[Path]:
+    """Render every unique vanilla George schedule tile without Minecraft mapping."""
+    schedule_path = SCHEDULES_DIR / "George.json"
+    schedules = json.loads(schedule_path.read_text(encoding="utf-8-sig"))
+    expected_fragments = {
+        "rain": "630 JoshHouse 16 22 0/1200 JoshHouse 5 21 3/1500 JoshHouse 16 22 0/2000 JoshHouse 3 5 0 george_sleep",
+        "GreenRain": "0 JoshHouse 3 18 1",
+        "DesertFestival_3": "610 JoshHouse 16 22 0/a1000 Desert 28 31 0 \"Strings\\1_6_Strings:DesertFestival_George\"/2250 bed",
+        "23": "630 JoshHouse 5 21 3 \"Strings\\schedules\\George:23.000\"/1030 Hospital 10 15 0 \"Strings\\schedules\\George:23.001\"/1330 Hospital 4 6 1 \"Strings\\schedules\\George:23.002\"/1600 JoshHouse 16 22 0/2000 JoshHouse 3 5 0 george_sleep",
+        "winter_17": "630 JoshHouse 16 22 0/1200 JoshHouse 5 21 3/1620 Beach 11 39 2 \"Strings\\schedules\\George:winter_17.000\"/2340 JoshHouse 3 5 0 george_sleep",
+        "summer_Fri": "630 JoshHouse 16 22 0/1200 Town 52 61 2/1500 JoshHouse 16 22 0/2000 JoshHouse 3 5 0 george_sleep",
+        "Sun": "MAIL saloonSportsRoom/GOTO Sun_normal/630 JoshHouse 16 22 0/1100 Saloon 36 7 0 \"Strings\\schedules\\George:Sun.001\"/1500 JoshHouse 16 22 0/2000 JoshHouse 3 5 0 george_sleep",
+        "Sun_normal": "630 JoshHouse 16 22 0/1000 SeedShop 36 22 0 \"Strings\\schedules\\George:Sun.000\"/1400 JoshHouse 16 22 0/2000 JoshHouse 3 5 0 george_sleep",
+        "spring": "630 JoshHouse 16 22 0/1200 JoshHouse 5 21 3/1500 JoshHouse 16 22 0/2000 JoshHouse 3 5 0 george_sleep",
+    }
+    for key, fragment in expected_fragments.items():
+        if fragment not in schedules.get(key, ""):
+            raise ValueError(
+                f"Vanilla George schedule source changed for {key!r}; "
+                f"missing {fragment!r}."
+            )
+
+    map_points: dict[str, list[tuple[str, float, float]]] = {
+        "JoshHouse": [
+            ("1 (16,22) TV/default, north", 16.5, 22.5),
+            ("2 (5,21) kitchen, west", 5.5, 21.5),
+            ("3 (3,5) bed, north", 3.5, 5.5),
+            ("4 (3,18) Green Rain, east", 3.5, 18.5),
+        ],
+        "Hospital": [
+            ("5 (10,15) appointment waiting, north", 10.5, 15.5),
+            ("6 (4,6) exam room, east", 4.5, 6.5),
+        ],
+        "Beach": [
+            ("7 (11,39) Night Market, south", 11.5, 39.5),
+        ],
+        "Town": [
+            ("8 (52,61) summer Friday, south", 52.5, 61.5),
+        ],
+        "SeedShop": [
+            ("9 (36,22) normal Sunday, north", 36.5, 22.5),
+        ],
+        "Saloon": [
+            ("10 (36,7) sports-room Sunday, north", 36.5, 7.5),
+        ],
+        "Desert": [
+            ("11 (28,31) Desert Festival day 3, north", 28.5, 31.5),
+        ],
+    }
+    crops = {
+        "JoshHouse": (0, 2, 22, 25),
+        "Hospital": (0, 2, 15, 19),
+        "Beach": (4, 32, 19, 47),
+        "Town": (45, 55, 60, 69),
+        "SeedShop": (29, 16, 44, 29),
+        "Saloon": (29, 1, 44, 14),
+        "Desert": (21, 24, 36, 38),
+    }
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    outputs: list[Path] = []
+    step = TILE_SIZE * scale
+    next_point_number = 1
+    for map_name, points in map_points.items():
+        crop = crops[map_name]
+        base = render_tmx(MAPS_DIR / f"{map_name}.tmx", scale=scale)
+        base = base.crop(tuple(value * step for value in crop))
+        base = draw_tile_grid(base, scale, crop[0], crop[1])
+        annotated = draw_numbered_source_points(
+            base,
+            points,
+            (crop[0], crop[1]),
+            scale,
+            f"George vanilla schedule / {map_name} / unique stop tiles",
+            start_index=next_point_number,
+        )
+        next_point_number += len(points)
+        output_path = output_dir / (
+            f"george_schedule_{map_name.lower()}_vanilla_source_points.png"
+        )
+        annotated.save(output_path)
+        outputs.append(output_path)
+    return outputs
+
+
+def render_george_schedule_capture_workbook(output_dir: Path) -> Path:
+    entries = [
+        ("1", "JoshHouse (16,22): TV/default", "x/y/z + north"),
+        ("2", "JoshHouse (5,21): kitchen", "x/y/z + west"),
+        ("3", "JoshHouse (3,5): bed", "x/y/z + north + sleep"),
+        ("4", "JoshHouse (3,18): Green Rain", "x/y/z + east"),
+        ("5", "Hospital (10,15): appointment waiting", "x/y/z + north"),
+        ("6", "Hospital (4,6): exam room", "x/y/z + east"),
+        ("7", "Beach (11,39): Night Market", "x/y/z + south"),
+        ("8", "Town (52,61): summer Friday", "x/y/z + south"),
+        ("9", "SeedShop (36,22): normal Sunday", "x/y/z + north"),
+        ("10", "Saloon (36,7): sports-room Sunday", "x/y/z + north"),
+        ("11", "Desert (28,31): Desert Festival day 3", "x/y/z + north"),
+    ]
+    return render_minecraft_capture_workbook(
+        output_dir / "george_schedule_minecraft_capture_workbook.png",
+        "George schedule - Minecraft capture workbook",
+        "Numbering is continuous across every map; fill only from the in-game planning tool.",
+        entries,
+    )
+
+
 def render_secret_note10_capture_workbook(output_dir: Path) -> Path:
     entries = [
         ("Q01", "Floor-100 scene area corner 1", "block x/y/z"),
@@ -1249,6 +1928,16 @@ def parse_args() -> argparse.Namespace:
                         help="Render vanilla Magic Ink return anchors and a blank Minecraft capture workbook.")
     parser.add_argument("--dark-talisman-hunt", action="store_true",
                         help="Render vanilla Sewer/BugLand hunt anchors and a blank Minecraft capture workbook.")
+    parser.add_argument("--museum-lost-books", action="store_true",
+                        help="Render all 21 vanilla museum Notes tiles and a blank Minecraft capture workbook.")
+    parser.add_argument("--linus-heart-events", action="store_true",
+                        help="Render vanilla Linus 50-point/4/8-heart source maps and blank Minecraft capture workbooks.")
+    parser.add_argument("--linus-schedule", action="store_true",
+                        help="Render every unique vanilla Linus schedule stop and a blank Minecraft capture workbook.")
+    parser.add_argument("--george-heart-events", action="store_true",
+                        help="Render the vanilla George 6-heart source map and a blank Minecraft capture workbook.")
+    parser.add_argument("--george-schedule", action="store_true",
+                        help="Render every unique vanilla George schedule stop and a blank Minecraft capture workbook.")
     return parser.parse_args()
 
 
@@ -1289,6 +1978,30 @@ def main() -> None:
         for output_path in render_dark_talisman_hunt_source_maps(args.out, args.scale):
             print(output_path.relative_to(ROOT))
         print(render_dark_talisman_hunt_capture_workbook(args.out).relative_to(ROOT))
+        return
+    if args.museum_lost_books:
+        print(render_museum_lost_books_source_map(args.out, args.scale).relative_to(ROOT))
+        print(render_museum_lost_books_capture_workbook(args.out).relative_to(ROOT))
+        return
+    if args.linus_heart_events:
+        for output_path in render_linus_heart_event_source_maps(args.out, args.scale):
+            print(output_path.relative_to(ROOT))
+        for output_path in render_linus_heart_event_capture_workbooks(args.out):
+            print(output_path.relative_to(ROOT))
+        return
+    if args.linus_schedule:
+        for output_path in render_linus_schedule_source_maps(args.out, args.scale):
+            print(output_path.relative_to(ROOT))
+        print(render_linus_schedule_capture_workbook(args.out).relative_to(ROOT))
+        return
+    if args.george_heart_events:
+        print(render_george_heart_event_source_map(args.out, args.scale).relative_to(ROOT))
+        print(render_george_heart_event_capture_workbook(args.out).relative_to(ROOT))
+        return
+    if args.george_schedule:
+        for output_path in render_george_schedule_source_maps(args.out, args.scale):
+            print(output_path.relative_to(ROOT))
+        print(render_george_schedule_capture_workbook(args.out).relative_to(ROOT))
         return
     if args.preset == "night_market":
         for output_path in render_night_market_maps(args.out, args.scale, args.portrait_size):

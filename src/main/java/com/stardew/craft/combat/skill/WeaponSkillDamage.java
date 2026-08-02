@@ -1,15 +1,13 @@
 package com.stardew.craft.combat.skill;
 
-import com.stardew.craft.StardewCraft;
 import com.stardew.craft.combat.WeaponStats;
+import com.stardew.craft.combat.WeaponCombatIdentity;
 import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
-import com.stardew.craft.item.weapon.IStardewWeapon;
 import java.util.Objects;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.CommonHooks;
 
 /**
@@ -37,26 +35,37 @@ public final class WeaponSkillDamage {
         RESPECT_AT_IMPACT
     }
 
+    public enum HitCooldownPolicy {
+        /** Keeps vanilla's shared post-hit cooldown behavior. */
+        RESPECT_VANILLA,
+        /**
+         * Lets this authored sequence hit pass vanilla's shared cooldown
+         * check without clearing the target's global combat state.
+         */
+        BYPASS_FOR_AUTHORED_SEQUENCE
+    }
+
     private WeaponSkillDamage() {}
 
     /**
      * Preferred overload for runtime and delayed hits that own an immutable
      * release-time weapon snapshot.
      */
-    public static boolean apply(
+    public static void apply(
             Player attacker,
             LivingEntity target,
             SkillContext skillContext,
             WeaponDamageSnapshot weaponSnapshot,
             long expireTick
     ) {
-        return apply(
+        apply(
                 attacker,
                 target,
                 skillContext,
                 weaponSnapshot,
                 expireTick,
-                AttackGatePolicy.SKILL_DAMAGE
+                AttackGatePolicy.SKILL_DAMAGE,
+                HitCooldownPolicy.RESPECT_VANILLA
         );
     }
 
@@ -64,7 +73,7 @@ public final class WeaponSkillDamage {
      * Explicit-snapshot overload for delayed hits that must recheck the
      * cancellable player attack hook at impact.
      */
-    public static boolean apply(
+    public static void apply(
             Player attacker,
             LivingEntity target,
             SkillContext skillContext,
@@ -72,76 +81,125 @@ public final class WeaponSkillDamage {
             long expireTick,
             AttackGatePolicy attackGatePolicy
     ) {
-        Objects.requireNonNull(weaponSnapshot, "weaponSnapshot");
-        if (!(weaponSnapshot.weapon().getItem() instanceof IStardewWeapon)) {
-            throw new IllegalArgumentException(
-                    "weaponSnapshot must contain a Stardew weapon"
-            );
-        }
-        return applyInternal(
+        apply(
                 attacker,
                 target,
                 skillContext,
                 weaponSnapshot,
                 expireTick,
-                attackGatePolicy
+                attackGatePolicy,
+                HitCooldownPolicy.RESPECT_VANILLA
+        );
+    }
+
+    /**
+     * Fully explicit emission policy for an immutable release snapshot.
+     */
+    public static void apply(
+            Player attacker,
+            LivingEntity target,
+            SkillContext skillContext,
+            WeaponDamageSnapshot weaponSnapshot,
+            long expireTick,
+            AttackGatePolicy attackGatePolicy,
+            HitCooldownPolicy hitCooldownPolicy
+    ) {
+        Objects.requireNonNull(weaponSnapshot, "weaponSnapshot");
+        if (!WeaponCombatIdentity.isWeapon(weaponSnapshot.weapon())) {
+            throw new IllegalArgumentException(
+                    "weaponSnapshot must contain a Stardew weapon"
+            );
+        }
+        applyInternal(
+                attacker,
+                target,
+                skillContext,
+                weaponSnapshot,
+                expireTick,
+                attackGatePolicy,
+                hitCooldownPolicy
         );
     }
 
     /**
      * Compatibility overload for callers that still rely on the active
-     * runtime context or the attacker's current Stardew weapon.
+     * runtime context. Missing release identity cancels the hit.
      */
-    public static boolean apply(
+    public static void apply(
             Player attacker,
             LivingEntity target,
             SkillContext skillContext,
             long expireTick
     ) {
-        return apply(
+        apply(
                 attacker,
                 target,
                 skillContext,
                 expireTick,
-                AttackGatePolicy.SKILL_DAMAGE
+                AttackGatePolicy.SKILL_DAMAGE,
+                HitCooldownPolicy.RESPECT_VANILLA
         );
     }
 
     /**
      * Compatibility overload with an explicit impact permission policy.
      */
-    public static boolean apply(
+    public static void apply(
             Player attacker,
             LivingEntity target,
             SkillContext skillContext,
             long expireTick,
             AttackGatePolicy attackGatePolicy
     ) {
-        return applyInternal(
+        apply(
+                attacker,
+                target,
+                skillContext,
+                expireTick,
+                attackGatePolicy,
+                HitCooldownPolicy.RESPECT_VANILLA
+        );
+    }
+
+    /**
+     * Fully explicit emission policy for a compatibility snapshot lookup.
+     */
+    public static void apply(
+            Player attacker,
+            LivingEntity target,
+            SkillContext skillContext,
+            long expireTick,
+            AttackGatePolicy attackGatePolicy,
+            HitCooldownPolicy hitCooldownPolicy
+    ) {
+        applyInternal(
                 attacker,
                 target,
                 skillContext,
                 null,
                 expireTick,
-                attackGatePolicy
+                attackGatePolicy,
+                hitCooldownPolicy
         );
     }
 
-    private static boolean applyInternal(
+    private static void applyInternal(
             Player attacker,
             LivingEntity target,
             SkillContext skillContext,
             WeaponDamageSnapshot weaponSnapshot,
             long expireTick,
-            AttackGatePolicy attackGatePolicy
+            AttackGatePolicy attackGatePolicy,
+            HitCooldownPolicy hitCooldownPolicy
     ) {
         Objects.requireNonNull(attacker, "attacker");
         Objects.requireNonNull(target, "target");
         Objects.requireNonNull(skillContext, "skillContext");
         Objects.requireNonNull(attackGatePolicy, "attackGatePolicy");
+        Objects.requireNonNull(hitCooldownPolicy, "hitCooldownPolicy");
         if (!(attacker instanceof ServerPlayer serverPlayer)
                 || target.level() != serverPlayer.level()) {
-            return false;
+            return;
         }
 
         long nowTick = serverPlayer.level().getGameTime();
@@ -157,7 +215,7 @@ public final class WeaponSkillDamage {
                 weaponSnapshot
         );
         if (resolvedSnapshot == null) {
-            return false;
+            return;
         }
         WeaponSkillContextStore.setPending(
                 serverPlayer,
@@ -172,15 +230,30 @@ public final class WeaponSkillDamage {
                             serverPlayer,
                             target
                     )) {
-                return false;
+                return;
             }
-            return target.hurt(
+            DamageSource source = applyHitCooldownPolicy(
                     serverPlayer.damageSources().playerAttack(serverPlayer),
+                    hitCooldownPolicy
+            );
+            target.hurt(
+                    source,
                     pipelineInputDamage(resolvedSnapshot, skillContext)
             );
         } finally {
             clearUnconsumedContext(serverPlayer, nowTick);
         }
+    }
+
+    static DamageSource applyHitCooldownPolicy(
+            DamageSource source,
+            HitCooldownPolicy policy
+    ) {
+        Objects.requireNonNull(source, "source");
+        Objects.requireNonNull(policy, "policy");
+        return policy == HitCooldownPolicy.BYPASS_FOR_AUTHORED_SEQUENCE
+                ? HitCooldownDamageSource.bypassVanillaCooldown(source)
+                : source;
     }
 
     private static WeaponDamageSnapshot resolveSnapshot(
@@ -199,17 +272,7 @@ public final class WeaponSkillDamage {
         if (runtimeSnapshot != null) {
             return runtimeSnapshot;
         }
-        ItemStack currentWeapon = player.getMainHandItem();
-        if (!(currentWeapon.getItem() instanceof IStardewWeapon weaponItem)) {
-            return null;
-        }
-        return WeaponDamageSnapshot.capture(
-                ResourceLocation.fromNamespaceAndPath(
-                        StardewCraft.MODID,
-                        weaponItem.getWeaponId()
-                ),
-                currentWeapon
-        );
+        return null;
     }
 
     /**

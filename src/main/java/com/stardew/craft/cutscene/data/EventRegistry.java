@@ -23,8 +23,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /** Atomic, versioned registry for datapack cutscene definitions. */
 public final class EventRegistry {
@@ -38,7 +40,30 @@ public final class EventRegistry {
     }
 
     public static EventData getById(String id) {
-        return catalog.state().byId().get(id);
+        if (id == null) {
+            return null;
+        }
+        RegistryState state = catalog.state();
+        String canonical = state.canonicalByAlias().getOrDefault(id, id);
+        return state.byId().get(canonical);
+    }
+
+    /** Resolve a former numeric/legacy event ID to the current semantic ID. */
+    public static String canonicalId(String id) {
+        if (id == null) {
+            return null;
+        }
+        return catalog.state().canonicalByAlias().getOrDefault(id, id);
+    }
+
+    /** All IDs which represent the same event, including legacy save keys. */
+    public static Set<String> equivalentIds(String id) {
+        if (id == null) {
+            return Set.of();
+        }
+        RegistryState state = catalog.state();
+        String canonical = state.canonicalByAlias().getOrDefault(id, id);
+        return state.equivalentIdsByCanonical().getOrDefault(canonical, Set.of(canonical));
     }
 
     public static List<EventData> getByLocation(String location) {
@@ -167,7 +192,36 @@ public final class EventRegistry {
                         source, null, "Failed to parse cutscene: " + exception.getMessage()));
             }
         }
+        validateLegacyIds(definitions.values(), sourceByDefinition, diagnostics);
         return new Candidate(definitions, canonicalSources, rawJsonById, diagnostics);
+    }
+
+    private static void validateLegacyIds(
+            Collection<EventData> definitions,
+            Map<ResourceLocation, ResourceLocation> sourceByDefinition,
+            List<DefinitionDiagnostic> diagnostics
+    ) {
+        Map<String, String> ownerById = new HashMap<>();
+        for (EventData data : definitions) {
+            ownerById.put(data.id(), data.id());
+        }
+        for (EventData data : definitions) {
+            ResourceLocation definitionId = definitionId(data.id());
+            ResourceLocation source = sourceByDefinition.get(definitionId);
+            for (String legacyId : data.legacyIds()) {
+                if (legacyId == null || legacyId.isBlank() || definitionId(legacyId) == null) {
+                    diagnostics.add(DefinitionDiagnostic.error(
+                            source, definitionId, "Invalid legacy cutscene ID: " + legacyId));
+                    continue;
+                }
+                String previousOwner = ownerById.putIfAbsent(legacyId, data.id());
+                if (previousOwner != null) {
+                    diagnostics.add(DefinitionDiagnostic.error(
+                            source, definitionId,
+                            "Legacy cutscene ID '" + legacyId + "' is already owned by " + previousOwner));
+                }
+            }
+        }
     }
 
     private static void validateTrigger(
@@ -355,10 +409,13 @@ public final class EventRegistry {
             Map<String, List<EventData>> byLocation,
             Map<String, List<EventData>> byNpc,
             List<EventData> timeCheckEvents,
-            Map<String, String> rawJsonById
+            Map<String, String> rawJsonById,
+            Map<String, String> canonicalByAlias,
+            Map<String, Set<String>> equivalentIdsByCanonical
     ) {
         private static RegistryState empty() {
-            return new RegistryState(Map.of(), Map.of(), Map.of(), List.of(), Map.of());
+            return new RegistryState(
+                    Map.of(), Map.of(), Map.of(), List.of(), Map.of(), Map.of(), Map.of());
         }
 
         private static RegistryState build(
@@ -369,9 +426,19 @@ public final class EventRegistry {
             Map<String, List<EventData>> byLocation = new HashMap<>();
             Map<String, List<EventData>> byNpc = new HashMap<>();
             List<EventData> timeChecks = new ArrayList<>();
+            Map<String, String> canonicalByAlias = new HashMap<>();
+            Map<String, Set<String>> equivalentIdsByCanonical = new HashMap<>();
 
             for (EventData data : definitions.values()) {
                 byId.put(data.id(), data);
+                canonicalByAlias.put(data.id(), data.id());
+                LinkedHashSet<String> equivalentIds = new LinkedHashSet<>();
+                equivalentIds.add(data.id());
+                for (String legacyId : data.legacyIds()) {
+                    canonicalByAlias.put(legacyId, data.id());
+                    equivalentIds.add(legacyId);
+                }
+                equivalentIdsByCanonical.put(data.id(), Set.copyOf(equivalentIds));
                 switch (data.trigger().type()) {
                     case "enter_area" -> byLocation
                             .computeIfAbsent(data.trigger().location(), ignored -> new ArrayList<>())
@@ -386,7 +453,8 @@ public final class EventRegistry {
             }
             return new RegistryState(
                     Map.copyOf(byId), immutableLists(byLocation), immutableLists(byNpc),
-                    List.copyOf(timeChecks), Map.copyOf(rawJsonById));
+                    List.copyOf(timeChecks), Map.copyOf(rawJsonById),
+                    Map.copyOf(canonicalByAlias), Map.copyOf(equivalentIdsByCanonical));
         }
 
         private static Map<String, List<EventData>> immutableLists(

@@ -1,5 +1,81 @@
 # Changelog
 
+## 0.5.4fix1 - 2026-08-02
+
+### Update Log (English)
+
+#### Combat Correctness And Weapon Skills
+
+- Reworked weapon-hit settlement into explicit preparation, evaluation and application phases. Ordinary attacks, authored skill damage, delayed projectiles and cross-dimension hits now share one authoritative result without duplicated damage, effects or rewards.
+- Moved the remaining built-in weapon skills onto runtime-owned execution state. Multi-stage thrusts, rushes, counters, marks, damage-over-time effects and finishers now commit cooldowns only after a valid start and clean up correctly when interrupted.
+- Added deterministic arbitration for attack recovery, movement, displacement, knockback and per-target hit cooldowns, preventing competing skills or stale trackers from moving players and applying late hits after their context is gone.
+- Corrected source-style weapon speed, critical-hit, knockback, forge and passive-effect boundaries. Equipment protection, negative-status resistance, rings and cross-dimension native attacks now resolve at the intended phase instead of being applied twice.
+- Hardened projectiles, bombs, poison, fire, freeze and long-lived skill effects so ownership, weapon snapshots, target validity and presentation remain consistent across death, logout and dimension changes.
+- Removed superseded tracker implementations after their behavior was migrated, and expanded combat contract coverage around skill lifecycle, exact hit counts, damage assembly, presentation and server authority.
+
+#### NPC Dialogue, Friendship And Events
+
+- Rebuilt daily NPC dialogue selection around the original source priority: active event reactions, location-specific lines, rain, green rain, season/date/year, friendship thresholds and weekday dialogue are now evaluated in the same order.
+- Fixed the `Sun` key collision that treated sunny weather as Sunday and caused villagers such as Haley to repeat the same line every day. Daily alternatives now use deterministic source-style selection and one-time branches remain consumed per player.
+- Added persistent dialogue-event memory and response state, including recent-event reactions, weekly alternatives, question answers, mail flags and world-state branches. Multiplayer players retain independent dialogue history.
+- Restored 216 missing vanilla dialogue entries and synchronized every affected line across all 12 shipped languages, including the shared rainy-dialogue table.
+- Added source-aligned daily friendship processing, gift-mail and recipe-mail rewards, with migration-safe player data and server-authoritative delivery.
+- Completed Linus's 50-point, 4-heart and 8-heart events and George's 6-heart event with the authored cameras, route points, music and English event IDs. Their regular schedules were rebuilt from the supplied world coordinates while retaining existing festival routes.
+
+#### Story Quests, Museum And World Content
+
+- Completed the non-marriage story-quest pass through the current task range, including persistent quest objectives, source-style mail and item delivery, and per-player completion checks.
+- Added Robin's Lost Axe and Linus's Blackberry Basket as real quest items with world-ground displays that are hidden from players without the matching quest and can only be collected once per player.
+- Implemented the Museum Lost Books system with a permanent Lost Book item, all 21 library positions, compact hovering indicators, per-player discovery state and deferred item consumption so collection feedback never plays over another GUI.
+- Aligned the archaeology introduction, Secret Note story flags, event-seen aliases and cutscene preconditions so old numeric event IDs migrate to readable English IDs without breaking existing saves.
+- Brought the Statue of Perfection and Statue of Endless Fortune onto the same utility-facility contract as other machines, including output bubbles, automation capabilities, pipe extraction and time-skip behavior.
+- Corrected mine generation balance, monster profiles and naming, artifact and treasure rewards, fish-shop data, recipe unlock migration, animal catch-up processing and several fixed-map interaction edge cases.
+
+#### Runtime, Multiplayer And Compatibility
+
+- Tightened shared pause and overnight state synchronization so menu transitions, client acknowledgements and player vital updates do not leave the server clock or another player stuck.
+- Reduced unnecessary persistent-data writes and hot-path work across combat, friendship, animals, mining and player state while preserving the original gameplay results.
+- Expanded source-parity and regression tests for combat, NPC dialogue, schedules, friendship mail, quests, museum books, mining, animals, utilities, networking and time handling.
+- Updated affected assets, sounds, quest/event data, schedules, mail, shops and translations for German, English, Spanish, French, Hungarian, Italian, Japanese, Korean, Brazilian Portuguese, Russian, Turkish and Simplified Chinese.
+- Updated the public mod version to `0.5.4fix1`.
+
+### 更新日志（中文）
+
+#### 战斗正确性与武器技能
+
+- 将武器命中结算进一步拆分为明确的准备、求值与应用阶段。普通攻击、技能伤害、延迟弹射物和跨维度命中现在共用唯一的服务端权威结果，不再重复造成伤害、状态或奖励。
+- 将剩余内置武器技能迁移到由统一运行时持有的执行状态。多阶段突刺、冲刺、反击、标记、持续伤害与终结技只会在成功启动后提交冷却，并能在中断后正确清理。
+- 新增攻击后摇、移动、位移、击退与单目标命中冷却的确定性仲裁，避免多个技能相互争抢位移，或已失效的旧 Tracker 在上下文结束后继续命中。
+- 修正武器攻速、暴击、击退、锻造与被动效果的原版结算边界；装备防护、负面状态抵抗、戒指和跨维度原生攻击不再在错误阶段重复生效。
+- 加固弹射物、炸弹、中毒、燃烧、冻结和长效技能状态，在死亡、退出与切换维度后仍能正确处理所有者、武器快照、目标有效性和客户端表现。
+- 删除行为已迁移完成的旧技能 Tracker，并为技能生命周期、精确命中次数、伤害组装、视觉表现和服务端权威补充大量契约测试。
+
+#### NPC 对话、好感与事件
+
+- 按原版源代码优先级重做 NPC 每日对话选择：事件反应、地点专属、雨天、绿雨、季节/日期/年份、好感阈值和星期对话现在按正确顺序判定。
+- 修复 `Sun` 同时被当作晴天与星期日造成的键冲突；海莉等 NPC 不再无论哪天都重复同一句话，每日候选会按原版方式确定性选择，一次性分支也会按玩家独立消耗。
+- 新增持久化的对话事件记忆与回答状态，涵盖近期剧情反应、每周替换台词、问题答案、邮件标记和世界状态分支；多人玩家的对话历史彼此独立。
+- 补回 216 条缺失的原版 NPC 对话，并将所有受影响文本和共用雨天对话表同步到项目现有的 12 种语言。
+- 接入按原版规则执行的每日好感处理、礼物来信和配方来信奖励，同时保证旧存档迁移与服务端权威发放。
+- 完成莱纳斯 50 点、4 心、8 心剧情和乔治 6 心剧情，接入已提供的摄像机、点位、音乐与英文事件 ID；两人的普通日程也按世界坐标重做，并保留已有节日日程。
+
+#### 剧情任务、博物馆与世界内容
+
+- 完成本轮非婚后剧情任务的连续补全，补齐持久化任务目标、原版式邮件与物品交付，以及按玩家独立保存的完成状态。
+- 将罗宾丢失的斧头与莱纳斯的黑莓篮子注册为真正的任务物品和地面展示：无对应任务的玩家不可见，并且每名玩家只能领取一次。
+- 实装博物馆遗失之书系统，加入正式的遗失之书物品、21 个藏书点、缩小后的悬浮提示、玩家独立发现状态和延后扣除逻辑，避免在其他 GUI 上叠加播放获得反馈。
+- 对齐考古学入门、秘密纸条剧情标记、事件 ID 别名和过场前置条件；旧的数字事件 ID 会兼容迁移到可读的英文 ID，不破坏已有存档。
+- 将完美之雕像与无尽财富之雕像接入和其他实用设施一致的规格，包括产物气泡、自动化能力、管道提取与时间快进行为。
+- 修正矿井生成平衡、怪物配置与名称、古物和宝箱奖励、鱼店数据、配方解锁迁移、动物离线追赶及若干固定地图交互边界问题。
+
+#### 运行时、多人兼容与质量保障
+
+- 加固共享暂停和过夜状态同步，避免菜单切换、客户端确认或玩家生命数据同步异常导致服务端时间或其他玩家永久卡住。
+- 减少战斗、好感、动物、采矿与玩家状态中的无效持久化写入和热路径工作，同时保持原有玩法结算结果。
+- 为战斗、NPC 对话、日程、好感邮件、任务、博物馆藏书、采矿、动物、实用设施、网络和时间系统扩充原版一致性与回归测试。
+- 将受影响的资产、声音、任务/剧情数据、日程、邮件、商店和翻译同步到项目现有全部 12 种语言：德语、英语、西班牙语、法语、匈牙利语、意大利语、日语、韩语、巴西葡萄牙语、俄语、土耳其语与简体中文。
+- 将公开模组版本号更新为 `0.5.4fix1`。
+
 ## 0.5.4 - 2026-07-30
 
 ### Update Log (English)

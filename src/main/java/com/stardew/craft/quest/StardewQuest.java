@@ -91,6 +91,19 @@ public class StardewQuest {
     /** @return true if this quest consumed the offered item (SDV: intercepts before gift processing) */
     public boolean onItemOfferedToNpc(ServerPlayer player, String npcId, String itemId) { return false; }
 
+    /**
+     * Multi-item delivery hook. Legacy quest implementations only override the
+     * single-item form, so the default preserves their behavior while allowing
+     * data-driven objectives to consume the whole delivery in one event.
+     */
+    public boolean onItemOfferedToNpc(ServerPlayer player, String npcId, String itemId, int count) {
+        boolean consumed = false;
+        for (int delivered = 0; delivered < Math.max(1, count) && !completed; delivered++) {
+            consumed |= onItemOfferedToNpc(player, npcId, itemId);
+        }
+        return consumed;
+    }
+
     public void onRecipeCrafted(ServerPlayer player, String recipeId) {}
 
     public void onNpcSocialized(ServerPlayer player, String npcId) {}

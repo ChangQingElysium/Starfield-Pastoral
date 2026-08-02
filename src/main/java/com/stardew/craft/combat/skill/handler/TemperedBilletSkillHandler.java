@@ -8,6 +8,7 @@ import com.stardew.craft.combat.skill.runtime.RuntimeWeaponSkillHandler;
 import com.stardew.craft.combat.skill.runtime.SkillExecutionContext;
 import com.stardew.craft.combat.skill.runtime.SkillInstance;
 import com.stardew.craft.combat.skill.runtime.SkillValidation;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
 import com.stardew.craft.effect.ModMobEffects;
 import com.stardew.craft.entity.projectile.TemperedBilletProjectileEntity;
 import com.stardew.craft.item.weapon.IStardewWeapon;
@@ -17,6 +18,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -34,6 +36,8 @@ public final class TemperedBilletSkillHandler implements RuntimeWeaponSkillHandl
     public static final float PITCH_SPREAD_DEGREES = 10.0F;
     public static final int PROJECTILE_STATE_TICKS = 65;
     public static final int ANIMATION_TICKS = 12;
+    public static final float FIRE_RING_RADIUS = 2.5F;
+    public static final int FIRE_RING_DURATION_TICKS = 10;
 
     @Override
     public SkillValidation validate(SkillExecutionContext context) {
@@ -90,51 +94,39 @@ public final class TemperedBilletSkillHandler implements RuntimeWeaponSkillHandl
                         releaseWeaponSnapshot
                 );
         ServerLevel level = context.player().serverLevel();
-        List<TemperedBilletProjectileEntity> spawned = new ArrayList<>();
-        try {
+        if (!WeaponSkillRuntime.consumeEnergyDuringBegin(
+                context,
+                instance,
+                ENERGY_COST
+        )) {
+            throw new IllegalStateException(
+                    "Validated Forged Billets energy payment is no longer available"
+            );
+        }
+
+        String weaponId = context.weaponId().getPath();
+        String skillId = context.skillData().getId();
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
+                context.skillData().getCooldown() * 20
+        );
+        TemperedFireRingTracker.beginBilletCastDuringBegin(
+                instance,
+                context.player(),
+                context.nowTick(),
+                PROJECTILE_STATE_TICKS,
+                releaseWeaponSnapshot
+        );
+        instance.registerCommittedEffect(() -> {
             for (TemperedBilletProjectileEntity projectile : projectiles) {
                 if (!level.addFreshEntity(projectile)) {
                     throw new IllegalStateException(
                             "Failed to add a Forged Billet projectile"
                     );
                 }
-                spawned.add(projectile);
             }
-        } catch (RuntimeException exception) {
-            spawned.forEach(TemperedBilletProjectileEntity::discard);
-            throw exception;
-        }
-
-        try {
-            if (!context.player().getAbilities().instabuild
-                    && !PlayerStardewDataAPI.consumeEnergy(
-                            context.player(),
-                            ENERGY_COST
-                    )) {
-                throw new IllegalStateException(
-                        "Validated Forged Billets energy payment is no longer available"
-                );
-            }
-        } catch (RuntimeException exception) {
-            spawned.forEach(TemperedBilletProjectileEntity::discard);
-            throw exception;
-        }
-
-        String weaponId = context.weaponId().getPath();
-        String skillId = context.skillData().getId();
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                weaponId,
-                skillId,
-                context.nowTick(),
-                context.skillData().getCooldown() * 20
-        );
-        TemperedFireRingTracker.beginBilletCast(
-                context.player(),
-                context.nowTick(),
-                PROJECTILE_STATE_TICKS,
-                releaseWeaponSnapshot
-        );
+        });
 
         // The authored cast has no attack lock; only notify presentation.
         WeaponSkillAnimationDispatcher.sendSkillAnim(
@@ -160,6 +152,36 @@ public final class TemperedBilletSkillHandler implements RuntimeWeaponSkillHandl
             return -1;
         }
         return projectileIndex < targetCount ? projectileIndex : 0;
+    }
+
+    /** Starts the billet fire ring after exact positive projectile damage. */
+    public static void startFireRing(
+            ServerPlayer player,
+            LivingEntity target,
+            long nowTick,
+            WeaponDamageSnapshot weaponSnapshot
+    ) {
+        if (player == null || target == null) {
+            return;
+        }
+        if (weaponSnapshot == null) {
+            TemperedFireRingTracker.start(
+                    player,
+                    target.position(),
+                    nowTick,
+                    FIRE_RING_RADIUS,
+                    FIRE_RING_DURATION_TICKS
+            );
+            return;
+        }
+        TemperedFireRingTracker.start(
+                player,
+                target.position(),
+                nowTick,
+                FIRE_RING_RADIUS,
+                FIRE_RING_DURATION_TICKS,
+                weaponSnapshot
+        );
     }
 
     private static boolean canPayEnergy(SkillExecutionContext context) {

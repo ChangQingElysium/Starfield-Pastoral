@@ -30,17 +30,21 @@ class AuthoredMultiHitDamageContractTest {
                 "if (shouldStrikeSecond(target.isAlive()))",
                 continuationGuard
         );
-        int clearInvulnerability = source.indexOf(
-                "target.invulnerableTime = 0;",
-                targetAliveGuard
-        );
-        int clearHurtTime = source.indexOf(
-                "target.hurtTime = 0;",
-                clearInvulnerability
-        );
         int secondHit = source.indexOf(
                 "attack( context, target, createHitContext(",
                 firstHit + 1
+        );
+        int bypass = source.indexOf(
+                ".BYPASS_FOR_AUTHORED_SEQUENCE",
+                secondHit
+        );
+        int controlGate = source.indexOf(
+                "if (executionState.settleControl())",
+                secondHit
+        );
+        int control = source.indexOf(
+                "YetiFreezeTracker.applyWithEquipmentProtection(",
+                controlGate
         );
 
         assertTrue(
@@ -48,9 +52,10 @@ class AuthoredMultiHitDamageContractTest {
                         && firstHit > safeTeleport
                         && continuationGuard > firstHit
                         && targetAliveGuard > continuationGuard
-                        && clearInvulnerability > targetAliveGuard
-                        && clearHurtTime > clearInvulnerability
-                        && secondHit > clearHurtTime
+                        && secondHit > targetAliveGuard
+                        && bypass > secondHit
+                        && controlGate > bypass
+                        && control > controlGate
         );
         assertEquals(2, occurrences(
                 source,
@@ -64,6 +69,9 @@ class AuthoredMultiHitDamageContractTest {
                 "WeaponSkillDamage.apply( context.player(), target, "
                         + "hitContext, context.weaponSnapshot(), "
         ));
+        assertTrue(source.contains(".RESPECT_VANILLA"));
+        assertFalse(source.contains("target.invulnerableTime = 0;"));
+        assertFalse(source.contains("target.hurtTime = 0;"));
         assertCentralizedOnly(source);
     }
 
@@ -80,46 +88,43 @@ class AuthoredMultiHitDamageContractTest {
                 "WeaponSkillDamage.apply(",
                 executeLock
         );
-        int executeBranch = source.indexOf("if (execute) {", firstHit);
-        int clearInvulnerability = source.indexOf(
-                "target.invulnerableTime = 0;",
-                executeBranch
+        int animation = source.indexOf(
+                "WeaponSkillAnimationDispatcher.sendSkillAnim(",
+                firstHit
         );
-        int clearHurtTime = source.indexOf(
-                "target.hurtTime = 0;",
-                clearInvulnerability
+        int appliedRoot = source.indexOf(
+                "public static boolean onAppliedRootHit(",
+                animation
         );
         int secondHit = source.indexOf(
                 "WeaponSkillDamage.apply(",
-                firstHit + 1
+                appliedRoot
         );
-        int animation = source.indexOf(
-                "WeaponSkillAnimationDispatcher.sendSkillAnim(",
+        int bypass = source.indexOf(
+                ".BYPASS_FOR_AUTHORED_SEQUENCE",
                 secondHit
         );
 
         assertTrue(
                 executeLock >= 0
                         && firstHit > executeLock
-                        && executeBranch > firstHit
-                        && clearInvulnerability > executeBranch
-                        && clearHurtTime > clearInvulnerability
-                        && secondHit > clearHurtTime
-                        && animation > secondHit
+                        && animation > firstHit
+                        && appliedRoot > animation
+                        && secondHit > appliedRoot
+                        && bypass > secondHit
         );
         assertEquals(2, occurrences(
                 source,
                 "WeaponSkillDamage.apply("
         ));
-        assertEquals(2, occurrences(
-                source,
-                "context.weaponSnapshot()"
-        ));
+        assertTrue(source.contains("context.weaponSnapshot()"));
         assertTrue(source.contains(
                 "createExecuteBonusContext(), "
-                        + "context.weaponSnapshot(), "
+                        + "weaponSnapshot, "
         ));
         assertFalse(source.contains("target.isAlive()"));
+        assertFalse(source.contains("target.invulnerableTime = 0;"));
+        assertFalse(source.contains("target.hurtTime = 0;"));
         assertCentralizedOnly(source);
     }
 

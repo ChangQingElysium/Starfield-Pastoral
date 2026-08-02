@@ -1,15 +1,17 @@
 package com.stardew.craft.combat.skill.handler;
 
-import com.stardew.craft.combat.skill.DwarfDaggerThrustTracker;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationDispatcher;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationLock;
 import com.stardew.craft.combat.skill.WeaponSkillCooldowns;
-import com.stardew.craft.combat.skill.runtime.RuntimeWeaponSkillHandler;
+import com.stardew.craft.combat.skill.runtime.PostServerRuntimeWeaponSkillHandler;
 import com.stardew.craft.combat.skill.runtime.SkillExecutionContext;
 import com.stardew.craft.combat.skill.runtime.SkillInstance;
 import com.stardew.craft.combat.skill.runtime.SkillTickResult;
 import com.stardew.craft.combat.skill.runtime.SkillValidation;
 import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillMovementControl;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
@@ -19,19 +21,32 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Server-authoritative lifecycle for Dwarf Dagger's original Rune Thrust.
  */
-public final class DwarfDaggerThrustSkillHandler implements RuntimeWeaponSkillHandler {
+public final class DwarfDaggerThrustSkillHandler
+        implements PostServerRuntimeWeaponSkillHandler {
     public static final double THRUST_DISTANCE = 8.0;
     public static final int THRUST_DURATION_TICKS = 5;
     public static final int ANIMATION_TICKS = 8;
+    public static final double HIT_RADIUS = 1.2;
+    public static final int HIT_CONTEXT_LIFETIME_TICKS = 5;
+    public static final int WEAK_POINT_DURATION_TICKS = 100;
+    public static final int WEAK_POINT_AMPLIFIER = 3;
+    public static final int RESISTANCE_DURATION_TICKS = 50;
+    public static final int RESISTANCE_AMPLIFIER = 2;
+    public static final float ENERGY_RESTORE = 2.0F;
 
     @Override
     public SkillValidation validate(SkillExecutionContext context) {
+        if (WeaponSkillMovementControl.isLocked(
+                context.player(),
+                context.nowTick()
+        )) {
+            return SkillValidation.reject(
+                    SkillValidation.RejectionReason.INVALID_STATE
+            );
+        }
         if (WeaponSkillRuntime.hasActive(
                 context.player().getUUID(),
                 context.skillId()
-        ) || DwarfDaggerThrustTracker.isThrusting(
-                context.player(),
-                context.nowTick()
         )) {
             return SkillValidation.reject(
                     SkillValidation.RejectionReason.INVALID_STATE
@@ -50,25 +65,29 @@ public final class DwarfDaggerThrustSkillHandler implements RuntimeWeaponSkillHa
 
     @Override
     public void begin(SkillExecutionContext context, SkillInstance instance) {
+        requireMovementUnlocked(context, "Rune Thrust");
         String weaponId = context.weaponId().getPath();
         String skillId = context.skillData().getId();
 
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                weaponId,
-                skillId,
-                context.nowTick(),
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 context.skillData().getCooldown() * 20
         );
 
-        DwarfDaggerThrustTracker.start(
+        DwarfDaggerThrustExecutionState executionState =
+                new DwarfDaggerThrustExecutionState(
                 context.player(),
                 context.nowTick(),
                 computeDashEnd(context.player(), THRUST_DISTANCE),
-                THRUST_DURATION_TICKS,
-                weaponId,
-                skillId,
-                context.skillData().getDamagePercent() / 100.0F
+                THRUST_DURATION_TICKS
+        );
+        instance.initializeExecutionState(executionState);
+        instance.registerCommittedEffect(() ->
+                executionState.start(
+                        context.player(),
+                        THRUST_DURATION_TICKS
+                )
         );
 
         WeaponSkillAnimationLock.setLock(
@@ -84,6 +103,20 @@ public final class DwarfDaggerThrustSkillHandler implements RuntimeWeaponSkillHa
         );
     }
 
+    private static void requireMovementUnlocked(
+            SkillExecutionContext context,
+            String skillName
+    ) {
+        if (WeaponSkillMovementControl.isLocked(
+                context.player(),
+                context.nowTick()
+        )) {
+            throw new IllegalStateException(
+                    "Validated " + skillName + " movement is now locked"
+            );
+        }
+    }
+
     @Override
     public boolean completesImmediately() {
         return false;
@@ -94,12 +127,43 @@ public final class DwarfDaggerThrustSkillHandler implements RuntimeWeaponSkillHa
             SkillExecutionContext context,
             SkillInstance instance
     ) {
-        return DwarfDaggerThrustTracker.isThrusting(
-                context.player(),
-                context.nowTick()
-        )
-                ? SkillTickResult.CONTINUE
-                : SkillTickResult.COMPLETE;
+        return instance.requireExecutionState(
+                DwarfDaggerThrustExecutionState.class
+        ).result(context.nowTick());
+    }
+
+    @Override
+    public SkillTickResult postServerTick(
+            SkillExecutionContext context,
+            SkillInstance instance
+    ) {
+        return instance.requireExecutionState(
+                DwarfDaggerThrustExecutionState.class
+        ).advance(context);
+    }
+
+    /** Settles weak point and the cast bonus from one exact applied hit. */
+    public static boolean onAppliedHit(
+            ServerPlayer player,
+            LivingEntity target,
+            long nowTick,
+            String weaponId,
+            String skillId
+    ) {
+        if (player == null || target == null) {
+            return false;
+        }
+        return WeaponSkillRuntime.activeExecutionState(
+                player.getUUID(),
+                BuiltinWeaponSkillHandlers.DWARF_DAGGER_THRUST,
+                DwarfDaggerThrustExecutionState.class
+        ).map(state -> state.recordAppliedHit(
+                player,
+                target,
+                nowTick,
+                weaponId,
+                skillId
+        )).orElse(false);
     }
 
     @Override
@@ -108,7 +172,8 @@ public final class DwarfDaggerThrustSkillHandler implements RuntimeWeaponSkillHa
             SkillInstance instance,
             SkillInstance.EndReason reason
     ) {
-        DwarfDaggerThrustTracker.stop(context.player());
+        instance.executionState(DwarfDaggerThrustExecutionState.class)
+                .ifPresent(state -> state.finish(context.player()));
     }
 
     private static Vec3 computeDashEnd(Player player, double distance) {

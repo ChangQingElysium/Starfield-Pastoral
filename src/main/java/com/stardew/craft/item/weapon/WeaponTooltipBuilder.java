@@ -1,6 +1,8 @@
 package com.stardew.craft.item.weapon;
 
 import com.stardew.craft.combat.WeaponForgeData;
+import com.stardew.craft.combat.StardewWeaponKnockbackRules;
+import com.stardew.craft.combat.StardewWeaponCriticalRules;
 import com.stardew.craft.combat.WeaponStats;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.ChatFormatting;
@@ -86,7 +88,7 @@ public class WeaponTooltipBuilder {
      * 格式: ⚔ 2-5 伤害
      */
     @SuppressWarnings("null")
-    private MutableComponent buildDamage(WeaponStats stats) {
+    private static MutableComponent buildDamage(WeaponStats stats) {
         MutableComponent line = Component.empty();
         line.append(WeaponIcons.icon(WeaponIcons.ICON_DAMAGE));
         line.append(Component.translatable("stardewcraft.weapon.tooltip.damage_range", formatNumber(stats.getMinDamage()), formatNumber(stats.getMaxDamage()))
@@ -105,29 +107,31 @@ public class WeaponTooltipBuilder {
         MutableComponent speedLine = buildAttribute(WeaponIcons.ICON_SPEED, "stardewcraft.weapon.tooltip.speed", stats.getSpeed(), true);
         lines.add(buildPairLine(damageLine, speedLine));
 
-        double critChance = stats.getCritChance();
-        MutableComponent critLine = Component.empty();
-        critLine.append(WeaponIcons.icon(WeaponIcons.ICON_CRIT_CHANCE));
-        critLine.append(Component.translatable("stardewcraft.weapon.tooltip.attr_value", formatPercent(critChance))
-                .withStyle(ChatFormatting.YELLOW));
-        critLine.append(Component.translatable("stardewcraft.weapon.tooltip.crit_chance").withStyle(ChatFormatting.GRAY));
+        MutableComponent critLine = buildCriticalChance(stats);
 
         int critPowerBonus = (int) Math.round(stats.getBonusCritPower());
         MutableComponent critPowerLine = Component.empty();
         critPowerLine.append(WeaponIcons.icon(WeaponIcons.ICON_CRIT_POWER));
         critPowerLine.append(Component.translatable("stardewcraft.weapon.tooltip.crit_damage_value", critPowerBonus)
                 .withStyle(ChatFormatting.GOLD));
-        critPowerLine.append(Component.translatable("stardewcraft.weapon.tooltip.crit_damage").withStyle(ChatFormatting.GRAY));
+        critPowerLine.append(Component.translatable("stardewcraft.tooltip.crit_power").withStyle(ChatFormatting.GRAY));
 
         lines.add(buildPairLine(critLine, critPowerLine));
+
+        if (stats.getCritPowerMultiplierBonus() != 0.0f) {
+            lines.add(buildPairLine(buildRelativeCritPower(stats), null));
+        }
 
         java.util.List<MutableComponent> extras = new java.util.ArrayList<>();
         if (stats.getDefense() != 0) {
             extras.add(buildAttribute(WeaponIcons.ICON_DEFENSE, "stardewcraft.weapon.tooltip.defense", stats.getDefense(), true));
         }
-        int knockback = Math.round(stats.getKnockback());
-        if (knockback != 0) {
-            extras.add(buildAttribute(WeaponIcons.ICON_WEIGHT, "stardewcraft.weapon.tooltip.weight", knockback, true));
+        int weightPoints = StardewWeaponKnockbackRules.tooltipWeightPoints(
+                stats.getWeaponType(),
+                stats.getKnockback()
+        );
+        if (weightPoints != 0) {
+            extras.add(buildAttribute(WeaponIcons.ICON_WEIGHT, "stardewcraft.weapon.tooltip.weight", weightPoints, true));
         }
         for (int i = 0; i < extras.size(); i += 2) {
             MutableComponent left = extras.get(i);
@@ -182,17 +186,115 @@ public class WeaponTooltipBuilder {
         return appearanceStack.isEmpty() ? Component.literal(itemId) : appearanceStack.getHoverName();
     }
 
-    private static Component formatDragonTooth(WeaponForgeData.DragonToothBonus bonus) {
-        return Component.translatable("stardewcraft.weapon.tooltip.dragon_tooth." + bonus.kind(), bonus.level());
+    static Component formatDragonTooth(WeaponForgeData.DragonToothBonus bonus) {
+        Object value = switch (bonus.kind()) {
+            case "crit" -> formatUnsignedPercent(0.02f * bonus.level());
+            case "crit_power" -> formatUnsignedPercent(0.5f * bonus.level());
+            default -> bonus.level();
+        };
+        return Component.translatable(
+                "stardewcraft.weapon.tooltip.dragon_tooth." + bonus.kind(),
+                value
+        );
+    }
+
+    /** Complete combat-stat presentation for public API weapons. */
+    public static List<Component> buildPublicApiCombatAttributes(ItemStack stack) {
+        WeaponStats stats = WeaponStats.fromItemStack(stack);
+        List<Component> attributes = new ArrayList<>();
+        attributes.add(buildDamage(stats));
+        attributes.add(buildAttribute(
+                WeaponIcons.ICON_SPEED,
+                "stardewcraft.weapon.tooltip.speed",
+                stats.getSpeed(),
+                true
+        ));
+        attributes.add(buildCriticalChance(stats));
+        if (stats.getBonusCritPower() != 0.0F) {
+            attributes.add(buildAttribute(
+                    WeaponIcons.ICON_CRIT_POWER,
+                    "stardewcraft.tooltip.crit_power",
+                    stats.getBonusCritPower(),
+                    true
+            ));
+        }
+        if (stats.getCritPowerMultiplierBonus() != 0.0f) {
+            attributes.add(buildRelativeCritPower(stats));
+        }
+        if (stats.getDefense() != 0) {
+            attributes.add(buildAttribute(
+                    WeaponIcons.ICON_DEFENSE,
+                    "stardewcraft.weapon.tooltip.defense",
+                    stats.getDefense(),
+                    true
+            ));
+        }
+        int weightPoints = StardewWeaponKnockbackRules.tooltipWeightPoints(
+                stats.getWeaponType(),
+                stats.getKnockback()
+        );
+        if (weightPoints != 0) {
+            attributes.add(buildAttribute(
+                    WeaponIcons.ICON_WEIGHT,
+                    "stardewcraft.weapon.tooltip.weight",
+                    weightPoints,
+                    true
+            ));
+        }
+        return List.copyOf(attributes);
+    }
+
+    /** @deprecated use the complete public weapon combat attribute list. */
+    @Deprecated
+    public static List<Component> buildPublicApiCriticalAttributes(ItemStack stack) {
+        WeaponStats stats = WeaponStats.fromItemStack(stack);
+        List<Component> attributes = new ArrayList<>();
+        attributes.add(buildCriticalChance(stats));
+        if (stats.getCritPowerMultiplierBonus() != 0.0F) {
+            attributes.add(buildRelativeCritPower(stats));
+        }
+        return List.copyOf(attributes);
+    }
+
+    private static MutableComponent buildCriticalChance(WeaponStats stats) {
+        MutableComponent line = Component.empty();
+        line.append(WeaponIcons.icon(WeaponIcons.ICON_CRIT_CHANCE));
+        line.append(Component.translatable(
+                        "stardewcraft.weapon.tooltip.attr_value",
+                        formatPercent(StardewWeaponCriticalRules.displayedChance(stats))
+                )
+                .withStyle(ChatFormatting.YELLOW));
+        line.append(Component.translatable("stardewcraft.weapon.tooltip.crit_chance")
+                .withStyle(ChatFormatting.GRAY));
+        return line;
+    }
+
+    static float effectiveWeaponCriticalChance(WeaponStats stats) {
+        return StardewWeaponCriticalRules.intrinsicChance(stats);
+    }
+
+    private static MutableComponent buildRelativeCritPower(WeaponStats stats) {
+        MutableComponent line = Component.empty();
+        line.append(WeaponIcons.icon(WeaponIcons.ICON_CRIT_POWER));
+        line.append(Component.translatable(
+                        "stardewcraft.weapon.tooltip.attr_value",
+                        formatSignedPercent(stats.getCritPowerMultiplierBonus())
+                )
+                .withStyle(ChatFormatting.GOLD));
+        line.append(Component.translatable("stardewcraft.weapon.tooltip.crit_damage")
+                .withStyle(ChatFormatting.GRAY));
+        return line;
     }
     
     @SuppressWarnings("null")
-    private MutableComponent buildAttribute(String icon, String nameKey, int value, boolean showSign) {
+    private static MutableComponent buildAttribute(String icon, String nameKey, float value, boolean showSign) {
         MutableComponent line = Component.empty();
         ChatFormatting color = value > 0 ? ChatFormatting.GREEN : ChatFormatting.RED;
         line.append(WeaponIcons.icon(icon));
 
-        String valueStr = showSign ? (value > 0 ? "+" + value : String.valueOf(value)) : String.valueOf(value);
+        String valueStr = showSign
+                ? formatSignedNumber(value)
+                : formatNumber(value);
         line.append(Component.translatable("stardewcraft.weapon.tooltip.attr_value", valueStr).withStyle(color));
         line.append(Component.translatable(nameKey).withStyle(ChatFormatting.GRAY));
         return line;
@@ -401,11 +503,25 @@ public class WeaponTooltipBuilder {
     /**
      * 格式化百分比
      */
-    private String formatPercent(double value) {
-        return (int)(value * 100) + "%";
+    private static String formatPercent(double value) {
+        return Math.round(value * 100.0) + "%";
     }
 
-    private String formatNumber(float value) {
+    private static String formatSignedPercent(double value) {
+        int percent = (int) Math.round(value * 100.0);
+        return (percent > 0 ? "+" : "") + percent + "%";
+    }
+
+    private static String formatUnsignedPercent(double value) {
+        return Math.round(value * 100.0) + "%";
+    }
+
+    static String formatSignedNumber(float value) {
+        String formatted = formatNumber(value);
+        return value > 0.0F ? "+" + formatted : formatted;
+    }
+
+    private static String formatNumber(float value) {
         if (Math.abs(value - Math.round(value)) < 0.001f) {
             return Integer.toString(Math.round(value));
         }

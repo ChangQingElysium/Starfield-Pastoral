@@ -2,12 +2,15 @@ package com.stardew.craft.combat.equipment;
 
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.combat.DimensionDamageMapper;
+import com.stardew.craft.combat.skill.handler.DwarfFortressSkillHandler;
+import com.stardew.craft.combat.skill.handler.SteelSpineFurySkillHandler;
 import com.stardew.craft.player.PlayerDataEventHandler;
 import com.stardew.craft.player.PlayerDataManager;
 import com.stardew.craft.player.PlayerStardewData;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import com.stardew.craft.sound.ModSounds;
 import com.stardew.craft.time.StardewTimeManager;
+import com.stardew.craft.item.trinket.TrinketEffectHandler;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
@@ -78,9 +81,40 @@ public final class CrossDimensionCombatHandler {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onDamagePre(LivingDamageEvent.Pre event) {
         if (!(event.getEntity() instanceof ServerPlayer player)
-                || DimensionDamageMapper.isInStardewDimension(player)
-                || event.getNewDamage() < player.getHealth()
-                || event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+                || DimensionDamageMapper.isInStardewDimension(player)) {
+            return;
+        }
+
+        long nowTick = player.level().getGameTime();
+        NativeIncomingDamageStore.bind(
+                player,
+                event.getSource(),
+                damageEnteringNativeProtection(
+                        event.getNewDamage(),
+                        event.getContainer().getReduction(
+                                net.neoforged.neoforge.common.damagesource
+                                        .DamageContainer.Reduction.ARMOR
+                        ),
+                        event.getContainer().getReduction(
+                                net.neoforged.neoforge.common.damagesource
+                                        .DamageContainer.Reduction.ENCHANTMENTS
+                        ),
+                        event.getContainer().getReduction(
+                                net.neoforged.neoforge.common.damagesource
+                                        .DamageContainer.Reduction.MOB_EFFECTS
+                        )
+                ),
+                nowTick + 2L
+        );
+
+        if (!isLethalAfterAbsorption(
+                        event.getNewDamage(),
+                        player.getHealth(),
+                        player.getAbsorptionAmount()
+                )
+                || event.getSource().is(
+                        DamageTypeTags.BYPASSES_INVULNERABILITY
+                )) {
             return;
         }
 
@@ -121,12 +155,30 @@ public final class CrossDimensionCombatHandler {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onDamagePost(LivingDamageEvent.Post event) {
         if (!(event.getEntity() instanceof ServerPlayer player)
-                || DimensionDamageMapper.isInStardewDimension(player)
-                || event.getNewDamage() <= 0.0f) {
+                || DimensionDamageMapper.isInStardewDimension(player)) {
             return;
         }
 
+        Float damageEnteringProtection = NativeIncomingDamageStore.consume(
+                player,
+                event.getSource(),
+                player.level().getGameTime()
+        );
+        if (event.getNewDamage() <= 0.0f) return;
+
         EquipmentStats equipment = EquipmentResolver.getMergedStats(player);
+        TrinketEffectHandler.onReceiveDamage(
+                player,
+                fairyDamageOnStardewScale(event.getNewDamage())
+        );
+        int reactiveDamage = reactiveSkillDamage(event.getNewDamage());
+        long nowTick = player.level().getGameTime();
+        SteelSpineFurySkillHandler.onDamageTaken(
+                player,
+                nowTick,
+                reactiveDamage
+        );
+        DwarfFortressSkillHandler.onDamageTaken(player, nowTick);
         player.invulnerableTime = Math.max(
                 player.invulnerableTime,
                 CombatRingRules.minecraftInvulnerabilityTicks(
@@ -138,12 +190,81 @@ public final class CrossDimensionCombatHandler {
         if (equipment.hasThorns()
                 && event.getSource().getEntity() instanceof Mob attacker) {
             int reflectedDamage = CombatRingRules.thornsDamage(
-                    (int) Math.ceil(event.getOriginalDamage()),
+                    (int) Math.ceil(damageEnteringProtection != null
+                            ? damageEnteringProtection
+                            : event.getNewDamage()),
                     (int) Math.ceil(event.getNewDamage()),
                     equipment.getThornsCount()
             );
             attacker.hurt(player.damageSources().thorns(player), reflectedDamage);
         }
+    }
+
+    static int fairyDamageOnStardewScale(float finalMinecraftDamage) {
+        if (finalMinecraftDamage <= 0.0F) {
+            return 0;
+        }
+        return Math.max(
+                1,
+                (int) Math.ceil(
+                        finalMinecraftDamage
+                                * DimensionDamageMapper.getHealthRatio()
+                )
+        );
+    }
+
+    /**
+     * Reactive weapon skills use the actual native health loss at a 1:1
+     * boundary; the Stardew 100:20 health-display ratio is not weapon damage.
+     */
+    static int reactiveSkillDamage(float finalMinecraftDamage) {
+        if (finalMinecraftDamage <= 0.0F) {
+            return 0;
+        }
+        return Math.max(1, (int) Math.ceil(finalMinecraftDamage));
+    }
+
+    static boolean isLethalAfterAbsorption(
+            float damageBeforeAbsorption,
+            float currentHealth,
+            float absorptionHealth
+    ) {
+        if (!Float.isFinite(damageBeforeAbsorption)
+                || !Float.isFinite(currentHealth)
+                || !Float.isFinite(absorptionHealth)
+                || damageBeforeAbsorption <= 0.0F
+                || currentHealth <= 0.0F) {
+            return false;
+        }
+        float healthDamage = Math.max(
+                0.0F,
+                damageBeforeAbsorption - Math.max(0.0F, absorptionHealth)
+        );
+        return healthDamage >= currentHealth;
+    }
+
+    static float damageEnteringNativeProtection(
+            float damageAfterProtection,
+            float armorReduction,
+            float enchantmentReduction,
+            float mobEffectReduction
+    ) {
+        if (!Float.isFinite(damageAfterProtection)
+                || !Float.isFinite(armorReduction)
+                || !Float.isFinite(enchantmentReduction)
+                || !Float.isFinite(mobEffectReduction)) {
+            throw new IllegalArgumentException(
+                    "Native damage breakdown values must be finite"
+            );
+        }
+        return Math.max(0.0F, damageAfterProtection)
+                + Math.max(0.0F, armorReduction)
+                + Math.max(0.0F, enchantmentReduction)
+                + Math.max(0.0F, mobEffectReduction);
+    }
+
+    public static void clear(ServerPlayer player) {
+        NativeIncomingDamageStore.clear(player);
     }
 
     private static boolean isSlime(Entity entity) {

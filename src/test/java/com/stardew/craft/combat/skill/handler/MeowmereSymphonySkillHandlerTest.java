@@ -1,5 +1,6 @@
 package com.stardew.craft.combat.skill.handler;
 
+import com.stardew.craft.combat.skill.runtime.SkillTickResult;
 import com.stardew.craft.entity.projectile.MeowmereProjectileEntity;
 import com.stardew.craft.item.weapon.WeaponData;
 import com.stardew.craft.item.weapon.WeaponRegistry;
@@ -96,5 +97,49 @@ class MeowmereSymphonySkillHandlerTest {
                 false,
                 true
         ));
+    }
+
+    @Test
+    void volleyContinuesUntilEveryProjectileIsGoneOrItTimesOut() {
+        assertEquals(
+                SkillTickResult.CONTINUE,
+                MeowmereSymphonySkillHandler.status(
+                        true,
+                        false,
+                        300L,
+                        301L
+                )
+        );
+        assertEquals(
+                SkillTickResult.COMPLETE,
+                MeowmereSymphonySkillHandler.status(
+                        true,
+                        true,
+                        250L,
+                        301L
+                )
+        );
+        assertEquals(
+                SkillTickResult.COMPLETE,
+                MeowmereSymphonySkillHandler.status(
+                        true,
+                        false,
+                        301L,
+                        301L
+                )
+        );
+    }
+
+    @Test
+    void projectileLeavingTheCastDimensionCancelsTheVolley() {
+        assertEquals(
+                SkillTickResult.CANCEL,
+                MeowmereSymphonySkillHandler.status(
+                        false,
+                        false,
+                        250L,
+                        301L
+                )
+        );
     }
 }

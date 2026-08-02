@@ -338,5 +338,90 @@
     "background": 0,
     "learnedRecipe": "lobster_bisque",
     "recipeIsCooking": true
+  },
+  {
+    "id": "Caroline",
+    "text": "stardewcraft.mail.friendship_gift.caroline",
+    "background": 0
+  },
+  {
+    "id": "Lewis",
+    "text": "stardewcraft.mail.friendship_gift.lewis",
+    "background": 0
+  },
+  {
+    "id": "Clint",
+    "text": "stardewcraft.mail.friendship_gift.clint",
+    "background": 0
+  },
+  {
+    "id": "Demetrius",
+    "text": "stardewcraft.mail.friendship_gift.demetrius",
+    "background": 0
+  },
+  {
+    "id": "Evelyn",
+    "text": "stardewcraft.mail.friendship_gift.evelyn",
+    "background": 0
+  },
+  {
+    "id": "Emily",
+    "text": "stardewcraft.mail.friendship_gift.emily",
+    "background": 0
+  },
+  {
+    "id": "George",
+    "text": "stardewcraft.mail.friendship_gift.george",
+    "background": 0
+  },
+  {
+    "id": "Gus",
+    "text": "stardewcraft.mail.friendship_gift.gus",
+    "background": 0
+  },
+  {
+    "id": "Jodi",
+    "text": "stardewcraft.mail.friendship_gift.jodi",
+    "background": 0
+  },
+  {
+    "id": "Linus",
+    "text": "stardewcraft.mail.friendship_gift.linus",
+    "background": 0
+  },
+  {
+    "id": "Marnie",
+    "text": "stardewcraft.mail.friendship_gift.marnie",
+    "background": 0
+  },
+  {
+    "id": "Pam",
+    "text": "stardewcraft.mail.friendship_gift.pam",
+    "background": 0
+  },
+  {
+    "id": "Pierre",
+    "text": "stardewcraft.mail.friendship_gift.pierre",
+    "background": 0
+  },
+  {
+    "id": "Robin",
+    "text": "stardewcraft.mail.friendship_gift.robin",
+    "background": 0
+  },
+  {
+    "id": "Shane",
+    "text": "stardewcraft.mail.friendship_gift.shane",
+    "background": 0
+  },
+  {
+    "id": "Wizard",
+    "text": "stardewcraft.mail.friendship_gift.wizard",
+    "background": 0
+  },
+  {
+    "id": "Sandy",
+    "text": "stardewcraft.mail.friendship_gift.sandy",
+    "background": 0
   }
 ]

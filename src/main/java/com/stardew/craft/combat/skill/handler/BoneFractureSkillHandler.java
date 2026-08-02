@@ -1,6 +1,5 @@
 package com.stardew.craft.combat.skill.handler;
 
-import com.stardew.craft.combat.skill.BoneFractureTracker;
 import com.stardew.craft.combat.skill.SkillContext;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationDispatcher;
 import com.stardew.craft.combat.skill.WeaponSkillCooldowns;
@@ -10,11 +9,9 @@ import com.stardew.craft.combat.skill.runtime.SkillExecutionContext;
 import com.stardew.craft.combat.skill.runtime.SkillInstance;
 import com.stardew.craft.combat.skill.runtime.SkillTargeting;
 import com.stardew.craft.combat.skill.runtime.SkillValidation;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
 import com.stardew.craft.item.weapon.WeaponSkillData;
 import java.util.List;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
@@ -46,11 +43,9 @@ public final class BoneFractureSkillHandler implements RuntimeWeaponSkillHandler
         String weaponId = context.weaponId().getPath();
         String skillId = context.skillData().getId();
 
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                weaponId,
-                skillId,
-                context.nowTick(),
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 context.skillData().getCooldown() * 20
         );
 
@@ -60,38 +55,16 @@ public final class BoneFractureSkillHandler implements RuntimeWeaponSkillHandler
         );
         if (target != null) {
             instance.setTargetEntityIds(List.of(target.getId()));
-            WeaponSkillDamage.apply(
+            instance.registerCommittedEffect(() -> WeaponSkillDamage.apply(
                     context.player(),
                     target,
                     createHitContext(context.skillData()),
                     context.weaponSnapshot(),
-                    context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS
-            );
-
-            target.addEffect(new MobEffectInstance(
-                    MobEffects.WEAKNESS,
-                    DEBUFF_DURATION_TICKS,
-                    WEAKNESS_AMPLIFIER,
-                    false,
-                    true,
-                    true
+                    context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS,
+                    WeaponSkillDamage.AttackGatePolicy
+                            .RESPECT_AT_IMPACT,
+                    WeaponSkillDamage.HitCooldownPolicy.RESPECT_VANILLA
             ));
-            target.addEffect(new MobEffectInstance(
-                    MobEffects.MOVEMENT_SLOWDOWN,
-                    DEBUFF_DURATION_TICKS,
-                    SLOWNESS_AMPLIFIER,
-                    false,
-                    true,
-                    true
-            ));
-            if (context.player().level() instanceof ServerLevel serverLevel) {
-                BoneFractureTracker.apply(
-                        serverLevel,
-                        target,
-                        context.nowTick(),
-                        DEBUFF_DURATION_TICKS
-                );
-            }
         }
 
         WeaponSkillAnimationDispatcher.sendSkillAnim(

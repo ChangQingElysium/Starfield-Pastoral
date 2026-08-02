@@ -25,13 +25,18 @@ class CombatLifecycleCleanupContractTest {
                 "exception.addSuppressed(cleanupFailure);"
         ));
         assertTrue(runtime.contains(
-                "} finally { synchronized (WeaponSkillRuntime.class) "
-                        + "{ ACTIVE.remove(instance.instanceId());"
+                "} finally { instance.clearExecutionState(); synchronized "
+                        + "(WeaponSkillRuntime.class) { ACTIVE.remove("
+                        + "instance.instanceId());"
         ));
         assertTrue(runtime.contains(
                 "for (ActiveExecution execution : executions) "
                         + "{ logTerminationFailure("
         ));
+        assertTrue(occurrences(
+                runtime,
+                "!player.isAlive() || player.isRemoved()"
+        ) >= 2);
     }
 
     @Test
@@ -70,12 +75,108 @@ class CombatLifecycleCleanupContractTest {
                 "void onPlayerUnavailable(ServerPlayer player)"
         ));
         assertTrue(cleanup.contains(
-                "WeaponSkillRuntime.removePlayer(playerId); "
-                        + "SilverSaberSkillHelper.cancelFoldback("
+                "WeaponSkillRuntime.removePlayer(playerId)"
         ));
         assertTrue(cleanup.contains(
-                "SilverSaberFoldbackState.clear(player);"
+                "WeaponSkillContextStore.clear(player)"
         ));
+        assertTrue(cleanup.contains(
+                "WeaponSkillAnimationLock.clear(player)"
+        ));
+        assertTrue(cleanup.contains(
+                "DamageNumberContextStore.clear(player)"
+        ));
+        assertTrue(cleanup.contains(
+                "AuthoredDirectDamageContextStore.clear(player)"
+        ));
+        assertTrue(cleanup.contains(
+                "YobaProtectionState.clear(player)"
+        ));
+        assertTrue(cleanup.contains(
+                "SilverSaberSkillHelper.cancelFoldback("
+        ));
+        assertTrue(cleanup.contains(
+                "SilverSaberFoldbackState.clear(player)"
+        ));
+        assertTrue(cleanup.contains(
+                "DragonBreathTracker.clear(player)"
+        ));
+        assertTrue(cleanup.contains(
+                "DashMovementTracker.clear(player)"
+        ));
+        assertTrue(cleanup.contains(
+                "WeaponSkillMovementArbiter.removePlayer(playerId)"
+        ));
+        assertTrue(cleanup.contains(
+                "for (Runnable cleanupStep : cleanupSteps)"
+        ));
+        assertTrue(cleanup.contains(
+                "catch (RuntimeException exception)"
+        ));
+        assertTrue(!cleanup.contains("MeowmereShotTracker"));
+        assertTrue(!cleanup.contains("MeowmereSymphonyTracker"));
+        assertTrue(!cleanup.contains("DwarfDaggerThrustTracker"));
+        assertTrue(!cleanup.contains("DwarfDaggerRushTracker"));
+        assertTrue(!cleanup.contains("CarvingKnifeThrustTracker"));
+        assertTrue(!cleanup.contains("IridiumNeedleThrustTracker"));
+        assertTrue(!cleanup.contains("BrokenTridentThrustTracker"));
+        assertTrue(!cleanup.contains("GalaxyDaggerThrustTracker"));
+        assertTrue(!cleanup.contains("InfinityDaggerThrustTracker"));
+        assertTrue(!cleanup.contains("ClaymoreFoldbackTracker"));
+        assertTrue(!cleanup.contains("LightCounterParryState"));
+        assertTrue(!cleanup.contains("InsectEyeStanceTracker"));
+        assertTrue(!cleanup.contains("ElfBladeTracker"));
+        assertTrue(!cleanup.contains("OssifiedExecutionTracker"));
+        assertTrue(cleanup.contains(
+                "CombatDamageHistory.remove(playerId)"
+        ));
+        assertTrue(cleanup.contains(
+                "StardewWeaponAttackRecovery.clear(playerId)"
+        ));
+        assertTrue(cleanup.contains(
+                "OrdinaryWeaponAttackFrameStore.clear(playerId)"
+        ));
+        assertTrue(cleanup.contains(
+                "CrossDimensionNativeAttackHandler.clear(playerId)"
+        ));
+        assertTrue(!cleanup.contains("WeaponCombatEvents.removePlayer("));
+        assertTrue(!cleanup.contains("onPlayerLogout(UUID"));
+    }
+
+    @Test
+    void dragonBreathResourceClearsAndResynchronizesWithConcretePlayer()
+            throws IOException {
+        String tracker = normalizedSource(
+                "combat/skill/DragonBreathTracker.java"
+        );
+        String events = normalizedSource(
+                "player/PlayerDataEventHandler.java"
+        );
+
+        assertTrue(tracker.contains(
+                "void clear(ServerPlayer player)"
+        ));
+        assertTrue(tracker.contains("setStacks(player, 0);"));
+        assertTrue(tracker.contains(
+                "void sync(ServerPlayer player)"
+        ));
+        assertTrue(events.contains(
+                "DragonBreathTracker.sync(player);"
+        ));
+    }
+
+    @Test
+    void persistedSkillStatesDoNotDuplicateLogoutOwnership()
+            throws IOException {
+        String insectDash = normalizedSource(
+                "combat/skill/InsectDashChainState.java"
+        );
+        String silverFoldback = normalizedSource(
+                "combat/skill/SilverSaberFoldbackState.java"
+        );
+
+        assertTrue(!insectDash.contains("PlayerLoggedOutEvent"));
+        assertTrue(!silverFoldback.contains("PlayerLoggedOutEvent"));
     }
 
     private static int occurrences(String source, String token) {

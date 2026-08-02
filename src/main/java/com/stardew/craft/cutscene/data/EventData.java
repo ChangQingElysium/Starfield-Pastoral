@@ -15,14 +15,16 @@ import java.util.List;
 public final class EventData {
 
     private final String id;
+    private final List<String> legacyIds;
     private final boolean skippable;
     private final EventTrigger trigger;
     private final List<EventPrecondition> preconditions;
     private final List<JsonObject> rawCommands;
 
-    private EventData(String id, boolean skippable, EventTrigger trigger,
+    private EventData(String id, List<String> legacyIds, boolean skippable, EventTrigger trigger,
                       List<EventPrecondition> preconditions, List<JsonObject> rawCommands) {
         this.id = id;
+        this.legacyIds = List.copyOf(legacyIds);
         this.skippable = skippable;
         this.trigger = trigger;
         this.preconditions = Collections.unmodifiableList(preconditions);
@@ -30,6 +32,7 @@ public final class EventData {
     }
 
     public String id() { return id; }
+    public List<String> legacyIds() { return legacyIds; }
     public boolean skippable() { return skippable; }
 
     /** A command-level gate delays skipping even when the event metadata allows it. */
@@ -46,6 +49,13 @@ public final class EventData {
 
     public static EventData fromJson(JsonObject root) {
         String id = root.get("id").getAsString();
+        List<String> legacyIds = new ArrayList<>();
+        if (root.has("legacy_ids")) {
+            JsonArray arr = root.getAsJsonArray("legacy_ids");
+            for (JsonElement element : arr) {
+                legacyIds.add(element.getAsString());
+            }
+        }
         boolean skippable = root.has("skippable") && root.get("skippable").getAsBoolean();
 
         EventTrigger trigger = EventTrigger.fromJson(root.getAsJsonObject("trigger"));
@@ -66,6 +76,6 @@ public final class EventData {
             }
         }
 
-        return new EventData(id, skippable, trigger, preconditions, rawCommands);
+        return new EventData(id, legacyIds, skippable, trigger, preconditions, rawCommands);
     }
 }

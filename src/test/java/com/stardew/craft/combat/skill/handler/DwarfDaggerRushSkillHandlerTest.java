@@ -1,6 +1,5 @@
 package com.stardew.craft.combat.skill.handler;
 
-import com.stardew.craft.combat.skill.DwarfDaggerRushTracker;
 import com.stardew.craft.item.weapon.WeaponData;
 import com.stardew.craft.item.weapon.WeaponRegistry;
 import com.stardew.craft.item.weapon.WeaponSkillData;
@@ -24,7 +23,10 @@ class DwarfDaggerRushSkillHandlerTest {
         assertEquals(100, DwarfDaggerRushSkillHandler.ACTIVE_DURATION_TICKS);
         assertEquals(0, DwarfDaggerRushSkillHandler.SPEED_AMPLIFIER);
         assertEquals(8, DwarfDaggerRushSkillHandler.ANIMATION_TICKS);
-        assertEquals(0, DwarfDaggerRushTracker.THRUST_COOLDOWN_REFRESH_TICKS);
+        assertEquals(
+                0,
+                DwarfDaggerRushSkillHandler.THRUST_COOLDOWN_REFRESH_TICKS
+        );
         assertFalse(new DwarfDaggerRushSkillHandler().completesImmediately());
     }
 }

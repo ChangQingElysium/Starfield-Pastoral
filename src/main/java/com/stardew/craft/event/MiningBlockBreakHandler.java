@@ -28,7 +28,6 @@ import net.neoforged.neoforge.network.PacketDistributor;
  */
 @EventBusSubscriber(modid = StardewCraft.MODID)
 public class MiningBlockBreakHandler {
-    private static final double NORMAL_LADDER_CHANCE_MULTIPLIER = 1.0D;
     private static final double BOMB_LADDER_CHANCE_MULTIPLIER = 0.2D;
     
     /**
@@ -130,20 +129,25 @@ public class MiningBlockBreakHandler {
         handleStoneBreak(serverLevel, player, pos, state);
     }
 
-    /**
-     * 用于可取消破坏的兼容入口（例如自定义挖掘逻辑）。
-     */
-    @SuppressWarnings("null")
-    public static void handleStoneBreak(ServerLevel serverLevel, ServerPlayer player, BlockPos pos, BlockState state) {
-        handleStoneBreak(serverLevel, player, pos, state, NORMAL_LADDER_CHANCE_MULTIPLIER);
-    }
-
+    /** 炸弹破坏入口：按 3D/2D 覆盖体积比归一化整次石头事件。 */
     @SuppressWarnings("null")
     public static void handleStoneBreakFromBomb(ServerLevel serverLevel, ServerPlayer player, BlockPos pos, BlockState state) {
-        handleStoneBreak(serverLevel, player, pos, state, BOMB_LADDER_CHANCE_MULTIPLIER);
+        // A 3D bomb reaches roughly five times as many blocks as the original 2D
+        // blast. Sample the whole stone event so both stonesLeft and ladder rolls
+        // use the same normalized probability; scaling only the ladder roll made
+        // bombs exhaust stonesLeft five times too quickly and force a ladder.
+        if (serverLevel.getRandom().nextDouble() < BOMB_LADDER_CHANCE_MULTIPLIER) {
+            handleStoneBreak(serverLevel, player, pos, state);
+        }
     }
 
-    private static void handleStoneBreak(ServerLevel serverLevel, ServerPlayer player, BlockPos pos, BlockState state, double ladderChanceMultiplier) {
+    @SuppressWarnings("null")
+    public static void handleStoneBreak(
+            ServerLevel serverLevel,
+            ServerPlayer player,
+            BlockPos pos,
+            BlockState state
+    ) {
         Block block = state.getBlock();
 
         // 检查是否是可计数的主石头
@@ -173,9 +177,6 @@ public class MiningBlockBreakHandler {
                     PlayerStardewDataAPI.getDailyLuck(player),
                     floorData.getEnemyCount(),
                     player.hasEffect(com.stardew.craft.effect.ModMobEffects.DWARF_STATUE_1));
-            if (floorData.getStonesLeft() > 0) {
-                ladderChance *= ladderChanceMultiplier;
-            }
             boolean shouldSpawn = serverLevel.getRandom().nextDouble() < ladderChance;
             if (shouldSpawn) {
                 // 先标记数据，避免重复生成
@@ -221,8 +222,13 @@ public class MiningBlockBreakHandler {
             return;
         }
 
+        floorData.decrementEnemy();
+        manager.setFloorData(floorNumber, floorData);
+
+        boolean clearedMonsterArea = floorData.isMonsterArea() && floorData.getEnemyCount() <= 0;
         double extraLadderChance = player.hasEffect(com.stardew.craft.effect.ModMobEffects.DWARF_STATUE_1) ? 0.07D : 0.0D;
-        if (serverLevel.getRandom().nextDouble() >= 0.15D + extraLadderChance) {
+        if (!clearedMonsterArea
+                && serverLevel.getRandom().nextDouble() >= 0.15D + extraLadderChance) {
             return;
         }
 

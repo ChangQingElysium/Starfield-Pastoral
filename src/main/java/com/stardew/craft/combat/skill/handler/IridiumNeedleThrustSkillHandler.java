@@ -1,6 +1,5 @@
 package com.stardew.craft.combat.skill.handler;
 
-import com.stardew.craft.combat.skill.IridiumNeedleThrustTracker;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationDispatcher;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationLock;
 import com.stardew.craft.combat.skill.WeaponSkillCooldowns;
@@ -20,6 +19,10 @@ import net.minecraft.world.entity.LivingEntity;
 public final class IridiumNeedleThrustSkillHandler implements RuntimeWeaponSkillHandler {
     public static final double INITIAL_TARGET_RANGE = 2.5;
     public static final int ANIMATION_TICKS = 18;
+    public static final int STRIKE_COUNT = 3;
+    public static final int STRIKE_INTERVAL_TICKS = 3;
+    public static final double RETARGET_RANGE = 2.5;
+    public static final int HIT_CONTEXT_LIFETIME_TICKS = 5;
 
     @Override
     public SkillValidation validate(SkillExecutionContext context) {
@@ -34,8 +37,6 @@ public final class IridiumNeedleThrustSkillHandler implements RuntimeWeaponSkill
         if (WeaponSkillRuntime.hasActive(
                 context.player().getUUID(),
                 context.skillId()
-        ) || IridiumNeedleThrustTracker.isActive(
-                context.player().getUUID()
         )) {
             return SkillValidation.reject(
                     SkillValidation.RejectionReason.INVALID_STATE
@@ -58,23 +59,18 @@ public final class IridiumNeedleThrustSkillHandler implements RuntimeWeaponSkill
         String weaponId = context.weaponId().getPath();
         String skillId = context.skillData().getId();
         instance.setTargetEntityIds(List.of(target.getId()));
+        instance.initializeExecutionState(
+                new IridiumNeedleThrustExecutionState(
+                        context.nowTick(),
+                        target.getUUID()
+                )
+        );
 
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                weaponId,
-                skillId,
-                context.nowTick(),
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 context.skillData().getCooldown() * 20
         );
-        IridiumNeedleThrustTracker.start(
-                context.player(),
-                context.nowTick(),
-                target,
-                weaponId,
-                skillId,
-                context.skillData().getDamagePercent() / 100.0F
-        );
-
         WeaponSkillAnimationLock.setLock(
                 context.player(),
                 context.nowTick(),
@@ -98,22 +94,9 @@ public final class IridiumNeedleThrustSkillHandler implements RuntimeWeaponSkill
             SkillExecutionContext context,
             SkillInstance instance
     ) {
-        return IridiumNeedleThrustTracker.isActive(
-                context.player().getUUID()
-        )
-                ? SkillTickResult.CONTINUE
-                : SkillTickResult.COMPLETE;
-    }
-
-    @Override
-    public void finish(
-            SkillExecutionContext context,
-            SkillInstance instance,
-            SkillInstance.EndReason reason
-    ) {
-        IridiumNeedleThrustTracker.removePlayer(
-                context.player().getUUID()
-        );
+        return instance.requireExecutionState(
+                IridiumNeedleThrustExecutionState.class
+        ).advance(context);
     }
 
     private static LivingEntity findInitialTarget(SkillExecutionContext context) {

@@ -1,6 +1,7 @@
 package com.stardew.craft.combat.skill;
 
 import com.stardew.craft.combat.network.FireRingEffectPayload;
+import com.stardew.craft.combat.skill.runtime.SkillInstance;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -21,6 +22,8 @@ import java.util.Set;
 import java.util.UUID;
 
 public final class TemperedFireRingTracker {
+    public static final String DAMAGE_SKILL_ID =
+            "tempered_billet_fire_ring";
     public static final float DAMAGE_MULTIPLIER = 0.6F;
     public static final float MINIMUM_RADIUS = 0.25F;
     public static final int HIT_CONTEXT_LIFETIME_TICKS = 5;
@@ -88,6 +91,37 @@ public final class TemperedFireRingTracker {
                 java.util.Objects.requireNonNull(
                         weaponSnapshot,
                         "weaponSnapshot"
+                )
+        );
+    }
+
+    /** Starts a detached billet cast owned by the current begin transaction. */
+    public static void beginBilletCastDuringBegin(
+            SkillInstance instance,
+            ServerPlayer player,
+            long nowTick,
+            int durationTicks,
+            WeaponDamageSnapshot weaponSnapshot
+    ) {
+        java.util.Objects.requireNonNull(instance, "instance");
+        java.util.Objects.requireNonNull(player, "player");
+        java.util.Objects.requireNonNull(weaponSnapshot, "weaponSnapshot");
+        if (durationTicks <= 0) {
+            return;
+        }
+        UUID playerId = player.getUUID();
+        BilletCastState replacement = new BilletCastState(
+                player.level().dimension(),
+                nowTick + durationTicks,
+                weaponSnapshot
+        );
+        BilletCastState previous = BILLET_CASTS.put(playerId, replacement);
+        instance.registerBeginFailureCleanup(() ->
+                BILLET_CASTS.compute(
+                        playerId,
+                        (ignored, current) -> current == replacement
+                                ? previous
+                                : current
                 )
         );
     }
@@ -254,8 +288,6 @@ public final class TemperedFireRingTracker {
             }
 
             long nowTick = level.getGameTime();
-            target.invulnerableTime = 0;
-            target.hurtTime = 0;
             SkillContext context = createDamageContext(
                     ring.damageMultiplier
             );
@@ -264,7 +296,10 @@ public final class TemperedFireRingTracker {
                         owner,
                         target,
                         context,
-                        nowTick + HIT_CONTEXT_LIFETIME_TICKS
+                        nowTick + HIT_CONTEXT_LIFETIME_TICKS,
+                        WeaponSkillDamage.AttackGatePolicy.SKILL_DAMAGE,
+                        WeaponSkillDamage.HitCooldownPolicy
+                                .BYPASS_FOR_AUTHORED_SEQUENCE
                 );
             } else {
                 WeaponSkillDamage.apply(
@@ -272,7 +307,10 @@ public final class TemperedFireRingTracker {
                         target,
                         context,
                         ring.weaponSnapshot,
-                        nowTick + HIT_CONTEXT_LIFETIME_TICKS
+                        nowTick + HIT_CONTEXT_LIFETIME_TICKS,
+                        WeaponSkillDamage.AttackGatePolicy.SKILL_DAMAGE,
+                        WeaponSkillDamage.HitCooldownPolicy
+                                .BYPASS_FOR_AUTHORED_SEQUENCE
                 );
             }
         }
@@ -292,7 +330,7 @@ public final class TemperedFireRingTracker {
 
     static SkillContext createDamageContext(float damageMultiplier) {
         return SkillContext.builder()
-                .skillId("tempered_billet")
+                .skillId(DAMAGE_SKILL_ID)
                 .tier(SkillContext.SkillTier.MAJOR)
                 .damageMultiplier(damageMultiplier)
                 .build();

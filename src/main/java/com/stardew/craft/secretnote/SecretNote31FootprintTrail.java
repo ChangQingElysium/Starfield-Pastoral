@@ -6,9 +6,9 @@ import net.minecraft.core.Direction;
 
 import java.util.List;
 
-/** The authored Shadow Guy footprint trail for event 520702. */
+/** The authored Shadow Guy footprint trail for the Winter Mystery bus-stop event. */
 public final class SecretNote31FootprintTrail {
-    public static final String BUS_STOP_EVENT_ID = "520702";
+    public static final String BUS_STOP_EVENT_ID = "secret_note31_bus_stop";
 
     public static final List<Footprint> FOOTPRINTS = List.of(
             footprint(-8, 64, -18, Direction.NORTH, ShadowFootprintBlock.Foot.RIGHT),

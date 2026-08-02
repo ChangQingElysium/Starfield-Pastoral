@@ -7,13 +7,17 @@ import com.stardew.craft.combat.skill.WeaponSkillAnimationDispatcher;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationLock;
 import com.stardew.craft.combat.skill.WeaponSkillDamage;
 import com.stardew.craft.combat.skill.WeaponSkillCooldowns;
+import com.stardew.craft.combat.skill.runtime.DeferredSkillCooldown;
 import com.stardew.craft.combat.skill.runtime.RuntimeWeaponSkillHandler;
 import com.stardew.craft.combat.skill.runtime.SkillExecutionContext;
 import com.stardew.craft.combat.skill.runtime.SkillInstance;
 import com.stardew.craft.combat.skill.runtime.SkillValidation;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillMovementControl;
 import com.stardew.craft.effect.ModMobEffects;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import java.util.List;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -41,6 +45,14 @@ public final class InsectDashSkillHandler implements RuntimeWeaponSkillHandler {
 
     @Override
     public SkillValidation validate(SkillExecutionContext context) {
+        if (WeaponSkillMovementControl.isLocked(
+                context.player(),
+                context.nowTick()
+        )) {
+            return SkillValidation.reject(
+                    SkillValidation.RejectionReason.INVALID_STATE
+            );
+        }
         int stage = InsectDashChainState.getNextStage(
                 context.player(),
                 context.nowTick()
@@ -67,6 +79,14 @@ public final class InsectDashSkillHandler implements RuntimeWeaponSkillHandler {
 
     @Override
     public void begin(SkillExecutionContext context, SkillInstance instance) {
+        if (WeaponSkillMovementControl.isLocked(
+                context.player(),
+                context.nowTick()
+        )) {
+            throw new IllegalStateException(
+                    "Validated Wing Dash movement is now locked"
+            );
+        }
         int stage = InsectDashChainState.getNextStage(
                 context.player(),
                 context.nowTick()
@@ -90,11 +110,11 @@ public final class InsectDashSkillHandler implements RuntimeWeaponSkillHandler {
         );
 
         float energyCost = energyCostForStage(stage);
-        if (!context.player().getAbilities().instabuild
-                && !PlayerStardewDataAPI.consumeEnergy(
-                        context.player(),
-                        energyCost
-                )) {
+        if (!WeaponSkillRuntime.consumeEnergyDuringBegin(
+                context,
+                instance,
+                energyCost
+        )) {
             throw new IllegalStateException(
                     "Validated Wing Dash energy payment is no longer available"
             );
@@ -102,60 +122,80 @@ public final class InsectDashSkillHandler implements RuntimeWeaponSkillHandler {
 
         String weaponId = context.weaponId().getPath();
         String skillId = context.skillData().getId();
-        for (LivingEntity target : targets) {
-            WeaponSkillDamage.apply(
-                    context.player(),
-                    target,
-                    createHitContext(skillId, stage),
-                    context.weaponSnapshot(),
-                    context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS
-            );
-        }
-
-        DashMovementTracker.start(
-                context.player(),
-                context.nowTick(),
-                end,
-                DASH_DURATION_TICKS
-        );
-
-        if (stage >= MAX_STAGE) {
-            InsectDashChainState.clear(context.player());
-            startCooldown(context);
-            context.player().addEffect(new MobEffectInstance(
-                    ModMobEffects.SPEED,
-                    FINISH_SPEED_DURATION_TICKS,
-                    FINISH_SPEED_AMPLIFIER,
-                    false,
-                    true,
-                    true
-            ));
-        } else if (continuesChain(stage, targets.size())) {
-            InsectDashChainState.setStage(
-                    context.player(),
-                    context.nowTick(),
-                    stage,
-                    weaponId,
-                    skillId,
+        DeferredSkillCooldown deferredCooldown = null;
+        if (stage < MAX_STAGE) {
+            deferredCooldown = WeaponSkillRuntime.deferCooldown(
+                    context,
+                    instance,
                     context.skillData().getCooldown() * 20
             );
         } else {
-            InsectDashChainState.clear(context.player());
-            startCooldown(context);
+            startCooldown(context, instance);
         }
-
-        // Preserve the authored notification order after damage and movement start.
-        WeaponSkillAnimationLock.setLock(
-                context.player(),
-                context.nowTick(),
-                ANIMATION_TICKS
-        );
-        WeaponSkillAnimationDispatcher.sendSkillAnim(
-                context.player(),
-                weaponId,
-                skillId,
-                ANIMATION_TICKS
-        );
+        InsectDashExecutionState executionState =
+                new InsectDashExecutionState(
+                        stage,
+                        targets.stream()
+                                .map(LivingEntity::getUUID)
+                                .toList(),
+                        deferredCooldown
+                );
+        instance.initializeExecutionState(executionState);
+        instance.registerCommittedEffect(() -> {
+            try {
+                for (LivingEntity target : targets) {
+                    WeaponSkillDamage.apply(
+                            context.player(),
+                            target,
+                            createHitContext(skillId, stage),
+                            context.weaponSnapshot(),
+                            context.nowTick()
+                                    + HIT_CONTEXT_LIFETIME_TICKS,
+                            WeaponSkillDamage.AttackGatePolicy
+                                    .RESPECT_AT_IMPACT,
+                            WeaponSkillDamage.HitCooldownPolicy
+                                    .RESPECT_VANILLA
+                    );
+                }
+                executionState.settle(
+                        context.player(),
+                        context.nowTick()
+                );
+                DashMovementTracker.start(
+                        context.player(),
+                        context.nowTick(),
+                        end,
+                        DASH_DURATION_TICKS
+                );
+                if (executionState.earnedFinishSpeed()) {
+                    context.player().addEffect(new MobEffectInstance(
+                            ModMobEffects.SPEED,
+                            FINISH_SPEED_DURATION_TICKS,
+                            FINISH_SPEED_AMPLIFIER,
+                            false,
+                            true,
+                            true
+                    ));
+                }
+                WeaponSkillAnimationLock.setLock(
+                        context.player(),
+                        context.nowTick(),
+                        ANIMATION_TICKS
+                );
+                WeaponSkillAnimationDispatcher.sendSkillAnim(
+                        context.player(),
+                        weaponId,
+                        skillId,
+                        ANIMATION_TICKS
+                );
+            } catch (RuntimeException exception) {
+                executionState.cancel(
+                        context.player(),
+                        context.nowTick()
+                );
+                throw exception;
+            }
+        });
     }
 
     static float energyCostForStage(int stage) {
@@ -176,6 +216,22 @@ public final class InsectDashSkillHandler implements RuntimeWeaponSkillHandler {
 
     static boolean continuesChain(int stage, int hitCount) {
         return stage < MAX_STAGE && hitCount >= REQUIRED_HITS_TO_CONTINUE;
+    }
+
+    /** Records one exact positive applied hit for the active dash cast. */
+    public static boolean recordAppliedHit(
+            ServerPlayer player,
+            LivingEntity target
+    ) {
+        if (player == null || target == null) {
+            return false;
+        }
+        return WeaponSkillRuntime.activeExecutionState(
+                player.getUUID(),
+                BuiltinWeaponSkillHandlers.INSECT_DASH,
+                InsectDashExecutionState.class
+        ).map(state -> state.recordAppliedHit(target.getUUID()))
+                .orElse(false);
     }
 
     static boolean canPayEnergy(
@@ -203,12 +259,13 @@ public final class InsectDashSkillHandler implements RuntimeWeaponSkillHandler {
         );
     }
 
-    private static void startCooldown(SkillExecutionContext context) {
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                context.weaponId().getPath(),
-                context.skillData().getId(),
-                context.nowTick(),
+    private static void startCooldown(
+            SkillExecutionContext context,
+            SkillInstance instance
+    ) {
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 context.skillData().getCooldown() * 20
         );
     }

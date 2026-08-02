@@ -16,7 +16,9 @@ class WeaponSkillCooldownContractTest {
         String source = readSkillSource("WeaponSkillCooldowns.java");
         String relativeSetter = method(
                 source,
-                "public static void setCooldown("
+                "public static void setCooldown(\n"
+                        + "            Player player,\n"
+                        + "            ItemStack releaseWeapon,"
         );
         String absoluteSetter = method(
                 source,
@@ -24,11 +26,17 @@ class WeaponSkillCooldownContractTest {
         );
         String adjustment = method(
                 source,
-                "static int adjustedDuration("
+                "static int adjustedDuration(\n"
+                        + "            Player player,\n"
+                        + "            ItemStack releaseWeapon,"
         );
 
         assertTrue(relativeSetter.contains(
-                "int appliedDuration = adjustedDuration(player, durationTicks);"
+                "int appliedDuration = adjustedDuration(\n"
+                        + "                player,\n"
+                        + "                releaseWeapon,\n"
+                        + "                durationTicks\n"
+                        + "        );"
         ));
         assertTrue(relativeSetter.contains("nowTick + appliedDuration"));
         assertTrue(relativeSetter.contains("setCooldownUntil("));

@@ -30,22 +30,10 @@ class DesperatePlunderSkillHandlerTest {
     }
 
     @Test
-    void healthCostPreservesHalfAHitPointInsteadOfKillingTheCaster() {
-        assertEquals(8.0F, DesperatePlunderSkillHandler.healthAfterCost(10.0F));
-        assertEquals(0.5F, DesperatePlunderSkillHandler.healthAfterCost(2.5F));
-        assertEquals(0.5F, DesperatePlunderSkillHandler.healthAfterCost(1.0F));
-    }
-
-    @Test
-    void killHealingIsFourHitPointsAndCannotExceedMaximumHealth() {
-        assertEquals(
-                12.0F,
-                DesperatePlunderSkillHandler.healthAfterKillHealing(8.0F, 20.0F)
-        );
-        assertEquals(
-                20.0F,
-                DesperatePlunderSkillHandler.healthAfterKillHealing(18.0F, 20.0F)
-        );
+    void authoredHealthCostAndKillHealingRemainUnchanged() {
+        assertEquals(2.0F, DesperatePlunderSkillHandler.HEALTH_COST);
+        assertEquals(0.5F, DesperatePlunderSkillHandler.MINIMUM_REMAINING_HEALTH);
+        assertEquals(4.0F, DesperatePlunderSkillHandler.KILL_HEALING);
     }
 
     @Test

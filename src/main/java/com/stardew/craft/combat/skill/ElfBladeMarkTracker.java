@@ -1,6 +1,7 @@
 package com.stardew.craft.combat.skill;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.combat.equipment.EquipmentNegativeStatusProtection;
 import com.stardew.craft.combat.network.ElfBladeMarkPayload;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -11,6 +12,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
@@ -31,6 +33,15 @@ public final class ElfBladeMarkTracker {
         if (target == null || owner == null || durationTicks <= 0 || stacksAdded <= 0) {
             return;
         }
+        EquipmentNegativeStatusProtection.Decision protection =
+                EquipmentNegativeStatusProtection.decide(
+                        target,
+                        durationTicks
+                );
+        if (protection.resisted()) {
+            return;
+        }
+        int appliedDuration = protection.durationTicks();
 
         CompoundTag tag = target.getPersistentData();
         if (!tag.hasUUID(TAG_OWNER) || !owner.getUUID().equals(tag.getUUID(TAG_OWNER))) {
@@ -40,14 +51,14 @@ public final class ElfBladeMarkTracker {
         int stacks = Math.max(0, tag.getInt(TAG_STACKS));
         stacks = Math.min(MAX_STACKS, stacks + stacksAdded);
         tag.putInt(TAG_STACKS, stacks);
-        tag.putLong(TAG_END_TICK, nowTick + durationTicks);
+        tag.putLong(TAG_END_TICK, nowTick + appliedDuration);
         tag.putUUID(TAG_OWNER, owner.getUUID());
         target.setGlowingTag(true);
 
         if (!target.level().isClientSide) {
             PacketDistributor.sendToPlayersTrackingEntityAndSelf(
                 target,
-                new ElfBladeMarkPayload(target.getId(), durationTicks, stacks)
+                new ElfBladeMarkPayload(target.getId(), appliedDuration, stacks)
             );
 
             if (target.level() instanceof ServerLevel serverLevel) {
@@ -118,6 +129,34 @@ public final class ElfBladeMarkTracker {
         if (nowTick >= endTick) {
             clear(entity);
         }
+    }
+
+    @SubscribeEvent
+    public static void onStartTracking(PlayerEvent.StartTracking event) {
+        if (!(event.getEntity() instanceof ServerPlayer observer)
+                || !(event.getTarget() instanceof LivingEntity target)) {
+            return;
+        }
+        long nowTick = target.level().getGameTime();
+        if (!isMarked(target, nowTick)) {
+            return;
+        }
+        CompoundTag tag = target.getPersistentData();
+        PacketDistributor.sendToPlayer(
+                observer,
+                new ElfBladeMarkPayload(
+                        target.getId(),
+                        remainingDurationTicks(nowTick, tag.getLong(TAG_END_TICK)),
+                        Math.max(0, tag.getInt(TAG_STACKS))
+                )
+        );
+    }
+
+    static int remainingDurationTicks(long nowTick, long endTick) {
+        return (int) Math.min(
+                Integer.MAX_VALUE,
+                Math.max(0L, endTick - nowTick)
+        );
     }
 
     private static void clear(LivingEntity entity) {

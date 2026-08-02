@@ -95,7 +95,7 @@ public class PacketHandler {
         // separates overnight collapse presentation from the final multiplayer settlement,
         // including the pre-2AM multiplayer return-to-bed acknowledgement.
         // Reject mixed old/new clients explicitly.
-        final PayloadRegistrar registrar = event.registrar("9");
+        final PayloadRegistrar registrar = event.registrar("11");
 
         final PayloadRegistrar capabilityRegistrar = registrar.optional();
         capabilityRegistrar.configurationToClient(
@@ -215,6 +215,12 @@ public class PacketHandler {
             PlayerDataSyncPacket.TYPE,
             PlayerDataSyncPacket.STREAM_CODEC,
             PlayerDataSyncPacket::handle
+        );
+
+        registrar.playToClient(
+            com.stardew.craft.network.payload.RequestClientGuiStatePayload.TYPE,
+            com.stardew.craft.network.payload.RequestClientGuiStatePayload.STREAM_CODEC,
+            com.stardew.craft.network.payload.RequestClientGuiStatePayload::handle
         );
 
         registrar.playToClient(
@@ -1223,6 +1229,12 @@ public class PacketHandler {
             com.stardew.craft.network.payload.OpenNpcDialogueScreenPayload.TYPE,
             com.stardew.craft.network.payload.OpenNpcDialogueScreenPayload.STREAM_CODEC,
             com.stardew.craft.network.payload.OpenNpcDialogueScreenPayload::handle
+        );
+
+        registrar.playToServer(
+            com.stardew.craft.network.payload.MarkNpcDialogueFlagPayload.TYPE,
+            com.stardew.craft.network.payload.MarkNpcDialogueFlagPayload.STREAM_CODEC,
+            com.stardew.craft.network.payload.MarkNpcDialogueFlagPayload::handle
         );
 
         registrar.playToClient(

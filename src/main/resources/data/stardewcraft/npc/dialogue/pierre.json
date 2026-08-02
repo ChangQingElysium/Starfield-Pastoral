@@ -57,6 +57,7 @@
     "Event_naga2": "stardewcraft.npc.pierre.event_naga2",
     "Fair_Judging": "stardewcraft.npc.pierre.fair_judging",
     "Fair_Judged_PlayerLost": "stardewcraft.npc.pierre.fair_judged_playerlost",
-    "Fair_Judged_PlayerWon": "stardewcraft.npc.pierre.fair_judged_playerwon"
+    "Fair_Judged_PlayerWon": "stardewcraft.npc.pierre.fair_judged_playerwon",
+    "AcceptGift_(O)Book_PriceCatalogue": "stardewcraft.npc.pierre.acceptgift_(o)book_pricecatalogue"
   }
 }

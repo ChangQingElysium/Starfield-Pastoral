@@ -9,8 +9,12 @@ import com.stardew.craft.combat.skill.runtime.RuntimeWeaponSkillHandler;
 import com.stardew.craft.combat.skill.runtime.SkillExecutionContext;
 import com.stardew.craft.combat.skill.runtime.SkillInstance;
 import com.stardew.craft.combat.skill.runtime.SkillValidation;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillMovementArbiter;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillMovementControl;
 import com.stardew.craft.item.weapon.WeaponSkillData;
 import java.util.List;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
@@ -32,6 +36,14 @@ public final class IronDirkThrustSkillHandler implements RuntimeWeaponSkillHandl
 
     @Override
     public SkillValidation validate(SkillExecutionContext context) {
+        if (WeaponSkillMovementControl.isLocked(
+                context.player(),
+                context.nowTick()
+        )) {
+            return SkillValidation.reject(
+                    SkillValidation.RejectionReason.INVALID_STATE
+            );
+        }
         boolean coolingDown = WeaponSkillCooldowns.isOnCooldown(
                 context.player(),
                 context.weaponId().getPath(),
@@ -48,6 +60,14 @@ public final class IronDirkThrustSkillHandler implements RuntimeWeaponSkillHandl
 
     @Override
     public void begin(SkillExecutionContext context, SkillInstance instance) {
+        if (WeaponSkillMovementControl.isLocked(
+                context.player(),
+                context.nowTick()
+        )) {
+            throw new IllegalStateException(
+                    "Validated Shadow Thrust movement is now locked"
+            );
+        }
         String weaponId = context.weaponId().getPath();
         String skillId = context.skillData().getId();
         LivingEntity target = findNearestTargetEntityInFront(
@@ -59,41 +79,40 @@ public final class IronDirkThrustSkillHandler implements RuntimeWeaponSkillHandl
         }
         instance.setTargetEntityIds(List.of(target.getId()));
 
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                weaponId,
-                skillId,
-                context.nowTick(),
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 context.skillData().getCooldown() * 20
         );
-        context.player().addEffect(new MobEffectInstance(
-                MobEffects.DAMAGE_RESISTANCE,
-                RESISTANCE_DURATION_TICKS,
-                RESISTANCE_AMPLIFIER,
-                false,
-                false,
-                true
-        ));
-
         Vec3 frontPosition = getFrontPosition(target, context.player());
-        teleportPlayer(context.player(), frontPosition);
-        faceTarget(context.player(), target);
-
-        WeaponSkillDamage.apply(
-                context.player(),
-                target,
-                createHitContext(context.skillData()),
-                context.weaponSnapshot(),
-                context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS
-        );
-
         Vec3 behindPosition = getBehindPosition(
                 target,
                 context.player(),
                 BEHIND_DISTANCE
         );
-        teleportPlayer(context.player(), behindPosition);
-        faceTarget(context.player(), target);
+        instance.registerCommittedEffect(() -> {
+            context.player().addEffect(new MobEffectInstance(
+                    MobEffects.DAMAGE_RESISTANCE,
+                    RESISTANCE_DURATION_TICKS,
+                    RESISTANCE_AMPLIFIER,
+                    false,
+                    false,
+                    true
+            ));
+            teleportPlayer(context.player(), frontPosition);
+            faceTarget(context.player(), target);
+            WeaponSkillDamage.apply(
+                    context.player(),
+                    target,
+                    createHitContext(context.skillData()),
+                    context.weaponSnapshot(),
+                    context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS,
+                    WeaponSkillDamage.AttackGatePolicy.RESPECT_AT_IMPACT,
+                    WeaponSkillDamage.HitCooldownPolicy.RESPECT_VANILLA
+            );
+            teleportPlayer(context.player(), behindPosition);
+            faceTarget(context.player(), target);
+        });
 
         // Preserve legacy synchronization order: animation packet precedes lock.
         WeaponSkillAnimationDispatcher.sendSkillAnim(
@@ -283,6 +302,9 @@ public final class IronDirkThrustSkillHandler implements RuntimeWeaponSkillHandl
     }
 
     private static void teleportPlayer(Player player, Vec3 position) {
+        if (player instanceof ServerPlayer serverPlayer) {
+            WeaponSkillMovementArbiter.revokeCurrent(serverPlayer);
+        }
         player.teleportTo(position.x, position.y, position.z);
         player.setDeltaMovement(0, player.getDeltaMovement().y, 0);
     }

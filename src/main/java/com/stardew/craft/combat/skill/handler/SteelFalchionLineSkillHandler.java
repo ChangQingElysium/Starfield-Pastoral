@@ -1,6 +1,5 @@
 package com.stardew.craft.combat.skill.handler;
 
-import com.stardew.craft.combat.skill.SteelFalchionLineTracker;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationDispatcher;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationLock;
 import com.stardew.craft.combat.skill.WeaponSkillCooldowns;
@@ -23,6 +22,12 @@ public final class SteelFalchionLineSkillHandler
     public static final double TARGET_RANGE = 7.0D;
     public static final float DOT_DAMAGE_MULTIPLIER = 0.30F;
     public static final int ANIMATION_TICKS = 8;
+    public static final int LINE_DURATION_TICKS =
+            SteelFalchionExecutionSupport.LINE_DURATION_TICKS;
+    public static final float LINE_LENGTH =
+            SteelFalchionExecutionSupport.LINE_LENGTH;
+    public static final int LINE_SPEED_AMPLIFIER =
+            SteelFalchionExecutionSupport.LINE_SPEED_AMPLIFIER;
 
     @Override
     public SkillValidation validate(SkillExecutionContext context) {
@@ -39,8 +44,6 @@ public final class SteelFalchionLineSkillHandler
         if (WeaponSkillRuntime.hasActive(
                 context.player().getUUID(),
                 context.skillId()
-        ) || SteelFalchionLineTracker.hasMinorLine(
-                context.player().getUUID()
         )) {
             return SkillValidation.reject(
                     SkillValidation.RejectionReason.INVALID_STATE
@@ -65,11 +68,9 @@ public final class SteelFalchionLineSkillHandler
 
         String weaponId = context.weaponId().getPath();
         String skillId = context.skillData().getId();
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                weaponId,
-                skillId,
-                context.nowTick(),
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 context.skillData().getCooldown() * 20
         );
         Vec3 center = new Vec3(
@@ -77,13 +78,18 @@ public final class SteelFalchionLineSkillHandler
                 target.getY() + 0.02D,
                 target.getZ()
         );
-        SteelFalchionLineTracker.startMinorLine(
-                context.player(),
-                context.nowTick(),
-                center,
-                context.player().getYRot(),
-                DOT_DAMAGE_MULTIPLIER,
-                context.weaponSnapshot()
+        SteelFalchionLineExecutionState executionState =
+                new SteelFalchionLineExecutionState(
+                        context.player().level().dimension(),
+                        context.nowTick(),
+                        center,
+                        context.player().getYRot(),
+                        DOT_DAMAGE_MULTIPLIER,
+                        context.weaponSnapshot()
+                );
+        instance.initializeExecutionState(executionState);
+        instance.registerCommittedEffect(() ->
+                executionState.start(context.player())
         );
         WeaponSkillAnimationLock.setLock(
                 context.player(),
@@ -108,33 +114,9 @@ public final class SteelFalchionLineSkillHandler
             SkillExecutionContext context,
             SkillInstance instance
     ) {
-        if (!SteelFalchionLineTracker.isMinorLineBoundToCurrentDimension(
-                context.player()
-        )) {
-            SteelFalchionLineTracker.tick(
-                    context.player(),
-                    context.nowTick()
-            );
-            return context.nowTick()
-                    >= instance.startGameTick()
-                            + SteelFalchionLineTracker.LINE_DURATION_TICKS
-                    ? SkillTickResult.COMPLETE
-                    : SkillTickResult.CANCEL;
-        }
-        SteelFalchionLineTracker.tick(
-                context.player(),
-                context.nowTick()
-        );
-        if (SteelFalchionLineTracker.hasMinorLine(
-                context.player().getUUID()
-        )) {
-            return SkillTickResult.CONTINUE;
-        }
-        return context.nowTick()
-                >= instance.startGameTick()
-                        + SteelFalchionLineTracker.LINE_DURATION_TICKS
-                ? SkillTickResult.COMPLETE
-                : SkillTickResult.CANCEL;
+        return instance.requireExecutionState(
+                SteelFalchionLineExecutionState.class
+        ).advance(context);
     }
 
     @Override
@@ -143,16 +125,8 @@ public final class SteelFalchionLineSkillHandler
             SkillInstance instance,
             SkillInstance.EndReason reason
     ) {
-        if (reason == SkillInstance.EndReason.COMPLETED) {
-            return;
-        }
-        if (reason == SkillInstance.EndReason.CASTER_UNAVAILABLE) {
-            SteelFalchionLineTracker.removePlayer(
-                    context.player().getUUID()
-            );
-            return;
-        }
-        SteelFalchionLineTracker.cancelMinorLines(context.player());
+        instance.executionState(SteelFalchionLineExecutionState.class)
+                .ifPresent(SteelFalchionLineExecutionState::cancel);
     }
 
     private static LivingEntity findTarget(SkillExecutionContext context) {

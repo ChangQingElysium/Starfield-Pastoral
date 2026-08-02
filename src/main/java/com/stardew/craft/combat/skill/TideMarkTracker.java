@@ -1,6 +1,7 @@
 package com.stardew.craft.combat.skill;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.combat.equipment.EquipmentNegativeStatusProtection;
 import com.stardew.craft.combat.network.TideMarkPayload;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
@@ -40,15 +41,24 @@ public final class TideMarkTracker {
         if (target == null || owner == null || durationTicks <= 0) {
             return;
         }
+        EquipmentNegativeStatusProtection.Decision protection =
+                EquipmentNegativeStatusProtection.decide(
+                        target,
+                        durationTicks
+                );
+        if (protection.resisted()) {
+            return;
+        }
+        int appliedDuration = protection.durationTicks();
         CompoundTag tag = target.getPersistentData();
-        tag.putLong(TAG_END_TICK, nowTick + durationTicks);
+        tag.putLong(TAG_END_TICK, nowTick + appliedDuration);
         tag.putUUID(TAG_OWNER, owner.getUUID());
         tag.putString(
                 TAG_DIMENSION,
                 target.level().dimension().location().toString()
         );
 
-        sendMarkApplied(target, durationTicks);
+        sendMarkApplied(target, appliedDuration);
     }
 
     public static boolean isMarked(LivingEntity target, long nowTick) {

@@ -1,7 +1,9 @@
 package com.stardew.craft.combat.skill;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.combat.equipment.EquipmentNegativeStatusProtection;
 import com.stardew.craft.combat.network.LavaKatanaMarkPayload;
+import com.stardew.craft.combat.skill.handler.LavaKatanaReverbSkillHandler;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
@@ -16,6 +18,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
@@ -105,6 +108,15 @@ public final class LavaKatanaMarkTracker {
         if (target == null || owner == null || durationTicks <= 0) {
             return;
         }
+        EquipmentNegativeStatusProtection.Decision protection =
+                EquipmentNegativeStatusProtection.decide(
+                        target,
+                        durationTicks
+                );
+        if (protection.resisted()) {
+            return;
+        }
+        int appliedDuration = protection.durationTicks();
 
         CompoundTag tag = target.getPersistentData();
         detachPreviousOwner(target, tag);
@@ -113,7 +125,7 @@ public final class LavaKatanaMarkTracker {
             ownerId,
             ignored -> UUID.randomUUID()
         );
-        tag.putLong(TAG_END_TICK, nowTick + durationTicks);
+        tag.putLong(TAG_END_TICK, nowTick + appliedDuration);
         tag.putUUID(TAG_OWNER, ownerId);
         tag.putUUID(TAG_OWNER_SESSION, ownerSession);
         tag.putString(
@@ -237,7 +249,10 @@ public final class LavaKatanaMarkTracker {
         }
         CompoundTag tag = target.getPersistentData();
         int current = Math.max(0, tag.getInt(TAG_HEAT));
-        boolean ignoreCap = LavaKatanaReverbTracker.isActive(owner, nowTick);
+        boolean ignoreCap = LavaKatanaReverbSkillHandler.isActive(
+            owner,
+            nowTick
+        );
         int maxHeat = ignoreCap ? Integer.MAX_VALUE : HEAT_CAP;
         long nextHeat = (long) current + Math.max(0, amount);
         int clamped = (int) Math.min(maxHeat, Math.min(Integer.MAX_VALUE, nextHeat));
@@ -360,6 +375,26 @@ public final class LavaKatanaMarkTracker {
         }
     }
 
+    @SubscribeEvent
+    public static void onStartTracking(PlayerEvent.StartTracking event) {
+        if (!(event.getEntity() instanceof ServerPlayer observer)
+                || !(event.getTarget() instanceof LivingEntity target)) {
+            return;
+        }
+        long nowTick = target.level().getGameTime();
+        if (!isMarked(target, nowTick)) {
+            return;
+        }
+        PacketDistributor.sendToPlayer(
+                observer,
+                new LavaKatanaMarkPayload(
+                        target.getId(),
+                        getRemainingTicks(target, nowTick),
+                        getHeat(target)
+                )
+        );
+    }
+
     @SuppressWarnings("null")
     private static void applyBurnTick(
         LivingEntity target,
@@ -372,9 +407,10 @@ public final class LavaKatanaMarkTracker {
         }
 
         int heat = Math.max(0, tag.getInt(TAG_HEAT));
-        boolean reverbActive = LavaKatanaReverbTracker.isActive(owner, nowTick);
-        target.invulnerableTime = 0;
-        target.hurtTime = 0;
+        boolean reverbActive = LavaKatanaReverbSkillHandler.isActive(
+            owner,
+            nowTick
+        );
         applyDamage(
             owner,
             target,
@@ -474,7 +510,10 @@ public final class LavaKatanaMarkTracker {
                 owner,
                 target,
                 context,
-                expireTick
+                expireTick,
+                WeaponSkillDamage.AttackGatePolicy.SKILL_DAMAGE,
+                WeaponSkillDamage.HitCooldownPolicy
+                        .BYPASS_FOR_AUTHORED_SEQUENCE
             );
             return;
         }
@@ -483,7 +522,10 @@ public final class LavaKatanaMarkTracker {
             target,
             context,
             weaponSnapshot,
-            expireTick
+            expireTick,
+            WeaponSkillDamage.AttackGatePolicy.SKILL_DAMAGE,
+            WeaponSkillDamage.HitCooldownPolicy
+                    .BYPASS_FOR_AUTHORED_SEQUENCE
         );
     }
 

@@ -56,6 +56,49 @@ class AnimalDayReducerTest {
     }
 
     @Test
+    void openDoorReturnContinuesThroughAnimalHouseDailyPass() {
+        FarmAnimalDefinition chicken = FarmAnimalDefinitions.require("white_chicken");
+        AnimalDayReducer.State original = state(
+                chicken.daysToMature(), 500, 200, 255, 4, true, false);
+
+        AnimalDayReducer.BeginResult farmPass = AnimalDayReducer.begin(
+                new AnimalDayReducer.BeginInput(
+                        chicken,
+                        original,
+                        AnimalDayReducer.HomeSituation.OUTSIDE_DOOR_OPEN,
+                        1810
+                )
+        );
+        AnimalDayReducer.BeginResult housePass =
+                AnimalDayReducer.continueAfterOpenDoorReturn(
+                        chicken,
+                        farmPass,
+                        1810
+                );
+
+        assertTrue(farmPass.returnedHomeEarly());
+        assertFalse(housePass.returnedHomeEarly());
+        assertEquals(100, housePass.state().happiness());
+        assertEquals(5, housePass.state().daysSinceLastProduce());
+
+        AnimalDayReducer.FinishResult finish = AnimalDayReducer.finish(
+                finishInput(
+                        chicken,
+                        housePass,
+                        true,
+                        false,
+                        0.0D,
+                        List.of(),
+                        List.of()
+                ),
+                new ScriptedRandom(List.of(0.5D, 0.5D, 0.99D), List.of())
+        );
+        assertEquals(1, finish.state().daysOwned());
+        assertFalse(finish.state().wasPetToday());
+        assertTrue(finish.state().wasFedToday());
+    }
+
+    @Test
     void closedDoorOutsideAppliesLeftOutMoodAndContinuesAllOtherRules() {
         FarmAnimalDefinition chicken = FarmAnimalDefinitions.require("white_chicken");
         AnimalDayReducer.BeginResult begin = AnimalDayReducer.begin(

@@ -44,10 +44,26 @@ public final class StardewMineMonsterProfiles {
             Set<String> progressTags,
             StardewMineMonsterConfigurator configurator
     ) {
+        register(
+                id,
+                entityType,
+                entityType.getDescriptionId(),
+                progressTags,
+                configurator
+        );
+    }
+
+    public static synchronized void register(
+            ResourceLocation id,
+            net.minecraft.world.entity.EntityType<? extends Mob> entityType,
+            String translationKey,
+            Set<String> progressTags,
+            StardewMineMonsterConfigurator configurator
+    ) {
         Objects.requireNonNull(configurator, "configurator");
         StardewMineMonsterProfile profile =
                 new StardewMineMonsterProfile(
-                        id, entityType, progressTags);
+                        id, entityType, translationKey, progressTags);
         if (PROFILES.putIfAbsent(
                 id, new Registered(profile, configurator)) != null) {
             throw new IllegalStateException(
@@ -158,6 +174,12 @@ public final class StardewMineMonsterProfiles {
             registered.configurator().configure(
                     mob,
                     new StardewMineMonsterProfileContext(level, floor));
+            if (mob.getCustomName() == null) {
+                mob.setCustomName(net.minecraft.network.chat.Component.translatable(
+                        registered.profile().translationKey()
+                ));
+                mob.setCustomNameVisible(false);
+            }
             return true;
         } catch (RuntimeException exception) {
             StardewCraft.LOGGER.error(

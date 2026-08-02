@@ -50,6 +50,12 @@ public record MarkEventSeenPayload(String eventId, long sessionId) implements Cu
                     .onCutsceneCompleted(player, payload.eventId);
             if (!winterStarRuntimeEvent) {
                 data.markSeen(player.getUUID(), payload.eventId);
+                // SDV GameLocation cleanup: eventSeen_<event id> becomes an
+                // active dialogue topic so every NPC with a matching entry can
+                // react once, followed by the vanilla memory topics.
+                com.stardew.craft.npc.runtime.NpcDialogueEventData
+                        .get(player.getServer())
+                        .activateEventSeen(player.getUUID(), payload.eventId);
             }
 
             // Sync back full list to confirm

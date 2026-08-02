@@ -1,6 +1,5 @@
 package com.stardew.craft.combat.skill.handler;
 
-import com.stardew.craft.combat.skill.SteelFalchionLineTracker;
 import com.stardew.craft.combat.skill.WeaponSkillCooldowns;
 import com.stardew.craft.combat.skill.runtime.RuntimeWeaponSkillHandler;
 import com.stardew.craft.combat.skill.runtime.SkillExecutionContext;
@@ -10,6 +9,7 @@ import com.stardew.craft.combat.skill.runtime.SkillValidation;
 import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
 import com.stardew.craft.effect.ModMobEffects;
 import com.stardew.craft.player.PlayerStardewDataAPI;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * Server-authoritative lifecycle for Steel Falchion's original slash trace.
@@ -19,6 +19,8 @@ public final class SteelFalchionTraceSkillHandler
     public static final float ENERGY_COST = 12.0F;
     public static final int TRACE_DURATION_TICKS = 100;
     public static final float TRACE_DOT_DAMAGE_MULTIPLIER = 0.50F;
+    public static final int TRACE_SPEED_AMPLIFIER =
+            SteelFalchionExecutionSupport.TRACE_SPEED_AMPLIFIER;
 
     @Override
     public SkillValidation validate(SkillExecutionContext context) {
@@ -35,8 +37,6 @@ public final class SteelFalchionTraceSkillHandler
         if (WeaponSkillRuntime.hasActive(
                 context.player().getUUID(),
                 context.skillId()
-        ) || SteelFalchionLineTracker.hasTrace(
-                context.player().getUUID()
         )) {
             return SkillValidation.reject(
                     SkillValidation.RejectionReason.INVALID_STATE
@@ -56,29 +56,41 @@ public final class SteelFalchionTraceSkillHandler
                     "Validated Slash Trace energy is no longer available"
             );
         }
-        if (!context.player().getAbilities().instabuild
-                && !PlayerStardewDataAPI.consumeEnergy(
-                        context.player(),
-                        ENERGY_COST
-                )) {
+        if (!WeaponSkillRuntime.consumeEnergyDuringBegin(
+                context,
+                instance,
+                ENERGY_COST
+        )) {
             throw new IllegalStateException(
                     "Validated Slash Trace energy payment failed"
             );
         }
 
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                context.weaponId().getPath(),
-                context.skillData().getId(),
-                context.nowTick(),
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 context.skillData().getCooldown() * 20
         );
-        SteelFalchionLineTracker.startTrace(
-                context.player(),
-                context.nowTick(),
-                TRACE_DURATION_TICKS,
-                TRACE_DOT_DAMAGE_MULTIPLIER,
-                context.weaponSnapshot()
+        Vec3 start = new Vec3(
+                context.player().getX(),
+                context.player().getY() + 0.02D,
+                context.player().getZ()
+        );
+        SteelFalchionTraceExecutionState executionState =
+                new SteelFalchionTraceExecutionState(
+                        context.player().level().dimension(),
+                        context.nowTick(),
+                        TRACE_DURATION_TICKS,
+                        start,
+                        TRACE_DOT_DAMAGE_MULTIPLIER,
+                        context.weaponSnapshot()
+                );
+        instance.initializeExecutionState(executionState);
+        instance.registerCommittedEffect(() ->
+                executionState.start(
+                        context.player(),
+                        TRACE_DURATION_TICKS
+                )
         );
     }
 
@@ -92,31 +104,9 @@ public final class SteelFalchionTraceSkillHandler
             SkillExecutionContext context,
             SkillInstance instance
     ) {
-        if (!SteelFalchionLineTracker.isTraceBoundToCurrentDimension(
-                context.player()
-        )) {
-            SteelFalchionLineTracker.tick(
-                    context.player(),
-                    context.nowTick()
-            );
-            return context.nowTick()
-                    >= instance.startGameTick() + TRACE_DURATION_TICKS
-                    ? SkillTickResult.COMPLETE
-                    : SkillTickResult.CANCEL;
-        }
-        SteelFalchionLineTracker.tick(
-                context.player(),
-                context.nowTick()
-        );
-        if (SteelFalchionLineTracker.hasTrace(
-                context.player().getUUID()
-        )) {
-            return SkillTickResult.CONTINUE;
-        }
-        return context.nowTick()
-                >= instance.startGameTick() + TRACE_DURATION_TICKS
-                ? SkillTickResult.COMPLETE
-                : SkillTickResult.CANCEL;
+        return instance.requireExecutionState(
+                SteelFalchionTraceExecutionState.class
+        ).advance(context);
     }
 
     @Override
@@ -125,16 +115,13 @@ public final class SteelFalchionTraceSkillHandler
             SkillInstance instance,
             SkillInstance.EndReason reason
     ) {
-        if (reason == SkillInstance.EndReason.COMPLETED) {
-            return;
-        }
-        if (reason == SkillInstance.EndReason.CASTER_UNAVAILABLE) {
-            SteelFalchionLineTracker.removePlayer(
-                    context.player().getUUID()
-            );
-            return;
-        }
-        SteelFalchionLineTracker.cancelTrace(context.player(), true);
+        instance.executionState(SteelFalchionTraceExecutionState.class)
+                .ifPresent(state -> state.cancel(
+                        context.player(),
+                        reason != SkillInstance.EndReason.COMPLETED
+                                && reason != SkillInstance.EndReason
+                                .CASTER_UNAVAILABLE
+                ));
     }
 
     static boolean canPayEnergy(

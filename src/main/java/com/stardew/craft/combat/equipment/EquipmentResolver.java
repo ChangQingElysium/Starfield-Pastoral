@@ -58,14 +58,20 @@ public final class EquipmentResolver {
     private static void mergeApiData(ItemStack stack, EquipmentStats.Builder builder) {
         StardewEquipmentData data = StardewEquipmentDataApi.get(stack);
         if (data == null) return;
+        builder.merge(fromApiData(data));
+    }
+
+    static EquipmentStats fromApiData(StardewEquipmentData data) {
         EquipmentStats.Builder resolved = EquipmentStats.builder()
                 .defense(data.defense())
                 .immunity(data.immunity())
                 .attack(data.attack())
+                .attackMultiplier(data.attackMultiplier())
                 .critChance(data.critChance())
                 .critPower(data.critPower())
                 .magneticRadius(data.magneticRadius())
                 .knockbackBonus(data.knockbackBonus())
+                .weaponSpeedMultiplier(data.weaponSpeedMultiplier())
                 .luck(data.luck())
                 .lightLevel(data.lightLevel());
         for (ResourceLocation effect : data.effects()) {
@@ -82,6 +88,6 @@ public final class EquipmentResolver {
                 }
             }
         }
-        builder.merge(resolved.build());
+        return resolved.build();
     }
 }

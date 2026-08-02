@@ -14,6 +14,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BundledCutsceneDefinitionTest {
     @Test
+    void everyBundledEventUsesItsReadableFileNameAsItsRegisteredId() throws Exception {
+        for (Path path : bundledEvents()) {
+            String fileName = path.getFileName().toString();
+            String expectedId = fileName.substring(0, fileName.length() - ".json".length());
+            EventData event = read(path);
+            assertEquals(expectedId, event.id(),
+                    () -> path + " must use its readable file name as the registered ID");
+            assertFalse(event.id().matches("\\d+"),
+                    () -> path + " exposes an unreadable numeric registered ID");
+        }
+    }
+
+    @Test
     void everyBundledEnterAreaEventUsesAKnownLocationAndValidBounds() throws Exception {
         for (Path path : bundledEvents()) {
             EventData event = read(path);

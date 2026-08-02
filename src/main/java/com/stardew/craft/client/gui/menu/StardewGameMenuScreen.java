@@ -11,6 +11,7 @@ import com.stardew.craft.client.ModKeyMappings;
 import com.stardew.craft.client.NpcDisplayNames;
 import com.stardew.craft.client.NpcFriendshipClientCache;
 import com.stardew.craft.client.PlayerGenderText;
+import com.stardew.craft.client.gui.StardewCollectivePauseScreen;
 import com.stardew.craft.client.gui.common.CommonGuiTextures;
 import com.stardew.craft.client.gui.common.StardewRenderMapping;
 import com.stardew.craft.client.gui.overnight.LevelUpMenuTextures;
@@ -82,7 +83,8 @@ import java.util.Set;
 import java.util.Comparator;
 
 @SuppressWarnings({"null", "unused"})
-public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMenu> {
+public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMenu>
+        implements StardewCollectivePauseScreen {
     public interface QuickCraftStateAccess {
         int stardewcraft$quickCraftingType();
 
@@ -5901,6 +5903,8 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
 
     @Override
     public boolean isPauseScreen() {
+        // StardewPauseClientState handles this menu without pausing Minecraft's whole integrated
+        // server, which would also freeze dimensions outside the Stardew clock domain.
         return false;
     }
 }

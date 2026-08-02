@@ -8,6 +8,22 @@
     "Thu": "stardewcraft.npc.dwarf.thu",
     "Fri": "stardewcraft.npc.dwarf.fri",
     "Sat": "stardewcraft.npc.dwarf.sat",
-    "Sun": "stardewcraft.npc.dwarf.sun"
+    "Sun": "stardewcraft.npc.dwarf.sun",
+    "Introduction": "stardewcraft.npc.dwarf.introduction",
+    "AcceptBirthdayGift_Positive": "stardewcraft.npc.dwarf.acceptbirthdaygift_positive",
+    "AcceptBirthdayGift_Negative": "stardewcraft.npc.dwarf.acceptbirthdaygift_negative",
+    "GreenRain": "stardewcraft.npc.dwarf.greenrain",
+    "AcceptGift_(O)StardropTea": "stardewcraft.npc.dwarf.acceptgift_(o)stardroptea",
+    "AcceptGift_Neutral_milk_item": "stardewcraft.npc.dwarf.acceptgift_neutral_milk_item",
+    "firstVisit_IslandNorth": "stardewcraft.npc.dwarf.firstvisit_islandnorth",
+    "mineArea_121": "stardewcraft.npc.dwarf.minearea_121",
+    "fishCaught_158": "stardewcraft.npc.dwarf.fishcaught_158",
+    "fishCaught_161": "stardewcraft.npc.dwarf.fishcaught_161",
+    "fishCaught_162": "stardewcraft.npc.dwarf.fishcaught_162",
+    "firstVisit_Caldera": "stardewcraft.npc.dwarf.firstvisit_caldera",
+    "Wed_6": "stardewcraft.npc.dwarf.wed_6",
+    "Thu_4": "stardewcraft.npc.dwarf.thu_4",
+    "Sat_8": "stardewcraft.npc.dwarf.sat_8",
+    "Fri_2": "stardewcraft.npc.dwarf.fri_2"
   }
 }

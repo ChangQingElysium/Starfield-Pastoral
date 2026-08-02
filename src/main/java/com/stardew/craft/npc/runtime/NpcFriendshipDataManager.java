@@ -8,6 +8,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Predicate;
+import java.util.function.ToIntFunction;
 
 /**
  * Per-player NPC friendship and gift state persistence.
@@ -90,6 +92,50 @@ public final class NpcFriendshipDataManager extends SavedData {
             }
         }
         return Map.copyOf(result);
+    }
+
+    boolean settleNewDay(
+            int previousDayKey,
+            int newWeekKey,
+            Predicate<String> knownNpc,
+            Predicate<String> datableNpc,
+            ToIntFunction<String> maxPoints
+    ) {
+        boolean changed = false;
+        for (Map<String, FriendshipState> npcMap : playerState.values()) {
+            for (Map.Entry<String, FriendshipState> entry : npcMap.entrySet()) {
+                String npcId = entry.getKey();
+                FriendshipState state = entry.getValue();
+                boolean known = knownNpc.test(npcId);
+
+                int beforePoints = state.points();
+                if (known) {
+                    int delta = NpcFriendshipDailyService.calculateDailyFriendshipDelta(
+                            beforePoints,
+                            state.lastTalkDayKey() == previousDayKey,
+                            datableNpc.test(npcId)
+                    );
+                    if (delta != 0) {
+                        state.addPoints(delta, maxPoints.applyAsInt(npcId));
+                    }
+                }
+
+                if (state.lastGiftWeekKey() != newWeekKey) {
+                    // Farmer.updateFriendshipGifts: giving both weekly gifts grants
+                    // +10 friendship when the next Sunday begins.
+                    if (known && state.giftsThisWeek() >= 2) {
+                        state.addPoints(10, maxPoints.applyAsInt(npcId));
+                    }
+                    state.normalizeGiftWeek(newWeekKey);
+                    changed = true;
+                }
+                changed |= state.points() != beforePoints;
+            }
+        }
+        if (changed) {
+            setDirty();
+        }
+        return changed;
     }
 
     public static NpcFriendshipDataManager load(CompoundTag tag, HolderLookup.Provider provider) {

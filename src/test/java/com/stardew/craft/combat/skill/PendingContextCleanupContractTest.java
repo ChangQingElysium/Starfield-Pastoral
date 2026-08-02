@@ -11,26 +11,26 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PendingContextCleanupContractTest {
     private static final List<String> CENTRALIZED_TRACKER_SOURCES = List.of(
-            "combat/skill/BrokenTridentThrustTracker.java",
-            "combat/skill/CarvingKnifeThrustTracker.java",
-            "combat/skill/DwarfDaggerThrustTracker.java",
-            "combat/skill/IridiumNeedleThrustTracker.java",
-            "combat/skill/GalaxyDaggerThrustTracker.java",
-            "combat/skill/InfinityDaggerThrustTracker.java",
-            "combat/skill/ClaymoreFoldbackTracker.java",
-            "combat/skill/ObsidianCrackTracker.java",
-            "combat/skill/DarkSwordBloodMoonTracker.java",
-            "combat/skill/DwarfFortressTracker.java",
-            "combat/skill/HolyBladeSanctuaryTracker.java",
+            "combat/skill/handler/FishcatchThrustExecutionState.java",
+            "combat/skill/handler/CarvingThrustExecutionState.java",
+            "combat/skill/handler/DwarfDaggerThrustExecutionState.java",
+            "combat/skill/handler/IridiumNeedleThrustExecutionState.java",
+            "combat/skill/handler/GalaxyDaggerThrustExecutionState.java",
+            "combat/skill/handler/InfinityDaggerThrustExecutionState.java",
+            "combat/skill/handler/ClaymoreFoldbackExecutionState.java",
+            "combat/skill/handler/ObsidianCrackExecutionState.java",
+            "combat/skill/handler/DarkSwordBloodMoonExecutionState.java",
+            "combat/skill/handler/DwarfFortressExecutionState.java",
+            "combat/skill/handler/HolyDomainExecutionState.java",
             "combat/skill/LavaKatanaMarkTracker.java",
-            "combat/skill/LavaKatanaReverbTracker.java",
-            "combat/skill/ObsidianResonanceTracker.java",
-            "combat/skill/OssifiedExecutionTracker.java",
-            "combat/skill/SteelFalchionLineTracker.java",
+            "combat/skill/handler/LavaKatanaReverbExecutionState.java",
+            "combat/skill/handler/OssifiedExecutionState.java",
+            "combat/skill/handler/SteelFalchionDotTracker.java",
+            "combat/skill/handler/SteelFalchionTraceExecutionState.java",
             "combat/skill/TemperedFireRingTracker.java",
-            "combat/skill/TemplarJudgementTracker.java",
+            "combat/skill/handler/TemplarJudgementExecutionState.java",
             "combat/skill/TemplarVowHandler.java",
-            "combat/skill/TemplarVowTracker.java",
+            "combat/skill/handler/TemplarVowExecutionState.java",
             "combat/skill/WickedKrisPoisonTracker.java",
             "entity/effect/IceSpineEffectEntity.java",
             "entity/projectile/ElfBladeLeafEntity.java",
@@ -45,7 +45,7 @@ class PendingContextCleanupContractTest {
         for (String relative : CENTRALIZED_TRACKER_SOURCES) {
             String source = Files.readString(sourceRoot.resolve(relative));
             assertTrue(
-                    source.contains("WeaponSkillDamage.apply("),
+                    source.contains("WeaponSkillDamage.apply"),
                     relative + " must use the centralized damage entry"
             );
             assertFalse(
@@ -65,25 +65,48 @@ class PendingContextCleanupContractTest {
     @Test
     void steelFalchionDotAndBurstKeepTheirReleaseSnapshotOwnership()
             throws IOException {
-        Path source = findJavaSourceRoot().resolve(
-                "combat/skill/SteelFalchionLineTracker.java"
+        Path dotSource = findJavaSourceRoot().resolve(
+                "combat/skill/handler/SteelFalchionDotTracker.java"
         );
-        String contents = Files.readString(source);
+        Path traceSource = findJavaSourceRoot().resolve(
+                "combat/skill/handler/SteelFalchionTraceExecutionState.java"
+        );
+        String dots = Files.readString(dotSource);
+        String trace = Files.readString(traceSource);
         assertTrue(
-                contents.contains("dot.weaponSnapshot"),
-                source.toString()
+                dots.contains("dot.weaponSnapshot"),
+                dotSource.toString()
         );
         assertTrue(
-                contents.contains("line.weaponSnapshot"),
-                source.toString()
+                trace.contains("weaponSnapshot"),
+                traceSource.toString()
         );
         assertTrue(
                 occurrences(
-                        contents,
+                        dots + trace,
                         "WeaponSkillDamage.apply("
-                ) >= 2,
-                source.toString()
+                ) >= 4,
+                "Steel Falchion DOT and burst must use centralized damage"
         );
+    }
+
+    @Test
+    void obsidianResourceTrackerDoesNotOwnChildDamageDispatch()
+            throws IOException {
+        String tracker = Files.readString(findJavaSourceRoot().resolve(
+                "combat/skill/ObsidianResonanceTracker.java"
+        ));
+        String appliedRules = Files.readString(findJavaSourceRoot().resolve(
+                "combat/BuiltinWeaponPassiveAppliedHitRules.java"
+        ));
+
+        assertFalse(tracker.contains("WeaponSkillDamage.apply"));
+        assertTrue(appliedRules.contains(
+                "ObsidianResonanceTracker.consumeCharge("
+        ));
+        assertTrue(appliedRules.contains(
+                "ObsidianResonanceTracker.createBonusContext("
+        ));
     }
 
     private static int occurrences(String source, String token) {

@@ -26,6 +26,13 @@
     "Tue10": "stardewcraft.npc.george.tue10",
     "Thu10": "stardewcraft.npc.george.thu10",
     "winter_1": "stardewcraft.npc.george.winter_1",
-    "WinterStar_GiveGift_After": "stardewcraft.npc.george.winterstar_givegift_after"
+    "WinterStar_GiveGift_After": "stardewcraft.npc.george.winterstar_givegift_after",
+    "accept_867": "stardewcraft.npc.george.accept_867",
+    "pamHouseUpgrade": "stardewcraft.npc.george.pamhouseupgrade",
+    "pamHouseUpgradeAnonymous": "stardewcraft.npc.george.pamhouseupgradeanonymous",
+    "MovieInvitation": "stardewcraft.npc.george.movieinvitation",
+    "eventSeen_502969_memory_oneweek": "stardewcraft.npc.george.eventseen_502969_memory_oneweek",
+    "eventSeen_18_memory_oneweek": "stardewcraft.npc.george.eventseen_18_memory_oneweek",
+    "joja_Begin": "stardewcraft.npc.george.joja_begin"
   }
 }

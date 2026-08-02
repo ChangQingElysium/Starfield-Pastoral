@@ -2,11 +2,7 @@ package com.stardew.craft.combat.skill;
 
 import com.stardew.craft.combat.network.ObsidianResonanceSyncPayload;
 import com.stardew.craft.item.weapon.IStardewWeapon;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 
@@ -76,62 +72,28 @@ public final class ObsidianResonanceTracker {
         return state.charged;
     }
 
-    @SuppressWarnings("null")
-    public static void consumeAndStrike(ServerPlayer player, LivingEntity target, long nowTick, boolean firstCrit) {
-        consumeAndStrike(player, target, nowTick, firstCrit, null);
-    }
-
-    @SuppressWarnings("null")
-    public static void consumeAndStrike(
+    public static boolean consumeCharge(
             ServerPlayer player,
-            LivingEntity target,
-            long nowTick,
-            boolean firstCrit,
-            WeaponDamageSnapshot weaponSnapshot
+            long nowTick
     ) {
-        if (!hasObsidianEdge(player)) {
+        if (player == null || !hasObsidianEdge(player)) {
+            if (player == null) {
+                return false;
+            }
             ACTIVE.remove(player.getUUID());
-            return;
+            return false;
         }
         State state = ACTIVE.get(player.getUUID());
         if (state == null || !state.charged) {
-            return;
+            return false;
         }
         state.charged = false;
         state.nextReadyTick = nowTick + CHARGE_TICKS;
         PacketDistributor.sendToPlayer(player, new ObsidianResonanceSyncPayload(true, CHARGE_TICKS, CHARGE_TICKS));
-
-        SkillContext context = createBonusContext(firstCrit);
-        long expireTick = nowTick + HIT_CONTEXT_LIFETIME_TICKS;
-        target.invulnerableTime = 0;
-        target.hurtTime = 0;
-        if (weaponSnapshot == null) {
-            WeaponSkillDamage.apply(
-                    player,
-                    target,
-                    context,
-                    expireTick
-            );
-        } else {
-            WeaponSkillDamage.apply(
-                    player,
-                    target,
-                    context,
-                    weaponSnapshot,
-                    expireTick
-            );
-        }
-
-        if (player.level() != null) {
-            player.level().playSound(null, target.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME,
-                SoundSource.PLAYERS, 0.5f, 1.6f);
-            player.level().addParticle(ParticleTypes.CRIT,
-                target.getX(), target.getY() + target.getBbHeight() * 0.6, target.getZ(),
-                0.0, 0.05, 0.0);
-        }
+        return true;
     }
 
-    static SkillContext createBonusContext(boolean guaranteedCrit) {
+    public static SkillContext createBonusContext(boolean guaranteedCrit) {
         return SkillContext.builder()
                 .skillId("obsidian_resonance")
                 .tier(SkillContext.SkillTier.MINOR)

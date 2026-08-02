@@ -288,7 +288,7 @@ public class MineLadderBlock extends Block {
         int newHealth = Math.max(1, sdData.getHealth() - damage);
         sdData.setHealth(newHealth);
         com.stardew.craft.player.PlayerDataManager.get().setDirty();
-        com.stardew.craft.player.PlayerDataEventHandler.syncPlayerData(serverPlayer, sdData);
+        com.stardew.craft.player.PlayerDataEventHandler.syncPlayerVitals(serverPlayer, sdData);
 
         // 落地消息
         String msgKey = levelsDown > 7

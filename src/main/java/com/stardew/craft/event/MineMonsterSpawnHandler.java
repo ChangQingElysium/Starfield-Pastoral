@@ -110,6 +110,7 @@ public class MineMonsterSpawnHandler {
                     ResourceLocation.fromNamespaceAndPath(
                             StardewCraft.MODID, monsterId),
                     entityType,
+                    MineMonsterNames.translationKey(monsterId),
                     builtinProgressTags(monsterId),
                     (mob, context) -> {
                         if (!applySummonProfile(
@@ -246,14 +247,23 @@ public class MineMonsterSpawnHandler {
     @SubscribeEvent
     public static void onEntityJoinLevel(EntityJoinLevelEvent event) {
         if (!(event.getLevel() instanceof ServerLevel serverLevel)) return;
-        if (!serverLevel.dimension().equals(ModMiningDimensions.STARDEW_MINING)) return;
         if (!(event.getEntity() instanceof Mob mob)) return;
 
         // StardewNpcEntity (e.g. Dwarf) is a Mob subclass — never filter it
         if (mob instanceof com.stardew.craft.entity.npc.StardewNpcEntity) return;
 
-        // 已经标记过的不再处理
-        if (mob.getTags().stream().anyMatch(t -> t.startsWith("sd_mob_"))) return;
+        // 已经标记过的不再重复配置；仅升级旧版写入的英文 literal 名称。
+        // 迁移不限于矿井维度，因为神秘森林、变异虫穴与松露蟹也使用同一标记。
+        if (mob.getTags().stream().anyMatch(t -> t.startsWith("sd_mob_"))) {
+            MineMonsterNames.migrateLegacyDisplayName(
+                    mob.getCustomName(), mob.getTags()
+            ).ifPresent(name -> {
+                mob.setCustomName(name);
+                mob.setCustomNameVisible(false);
+            });
+            return;
+        }
+        if (!serverLevel.dimension().equals(ModMiningDimensions.STARDEW_MINING)) return;
 
         // 怪物数量上限检查：使用缓存计数而非每次 AABB 扫描
         int floor = getFloorFromPos(mob);

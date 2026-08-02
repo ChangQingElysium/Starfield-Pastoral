@@ -1,127 +1,234 @@
 package com.stardew.craft.client.weapon;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 
+/** Client projection of all target-scoped Wicked Kris states owned by us. */
 public final class WickedKrisPoisonClientState {
+    private static final Map<UUID, Status> STATUSES = new HashMap<>();
 
-    private static int stacks = 0;
-    private static long endTick = 0L;
-    private static int totalTicks = 0;
+    private WickedKrisPoisonClientState() {
+    }
 
-    private static boolean detonationActive = false;
-    private static long detonateEndTick = 0L;
-    private static int detonateTotalTicks = 0;
-
-    private WickedKrisPoisonClientState() {}
-
-    public static void updatePoison(long nowTick, int durationTicks, int stackCount) {
-        if (durationTicks <= 0 || stackCount <= 0) {
-            clearPoison();
+    public static void upsert(
+            UUID targetId,
+            long nowTick,
+            int stacks,
+            int poisonRemainingTicks,
+            int poisonTotalTicks,
+            int detonateRemainingTicks,
+            int detonateTotalTicks
+    ) {
+        if (targetId == null) {
             return;
         }
-        stacks = Math.max(0, stackCount);
-        totalTicks = Math.max(1, durationTicks);
-        endTick = nowTick + totalTicks;
-    }
-
-    public static void updateDetonation(long nowTick, int remainingTicks, int totalTicksOverride) {
-        if (remainingTicks <= 0) {
-            clearDetonation();
-            return;
+        Status previous = STATUSES.get(targetId);
+        long poisonEndTick = stacks > 0 && poisonRemainingTicks > 0
+                ? nowTick + poisonRemainingTicks
+                : 0L;
+        long detonateEndTick;
+        int resolvedDetonateTotal;
+        if (detonateRemainingTicks < 0 && previous != null) {
+            detonateEndTick = previous.detonateEndTick();
+            resolvedDetonateTotal = previous.detonateTotalTicks();
+        } else if (detonateRemainingTicks > 0) {
+            detonateEndTick = nowTick + detonateRemainingTicks;
+            resolvedDetonateTotal = Math.max(
+                    1,
+                    detonateTotalTicks > 0
+                            ? detonateTotalTicks
+                            : detonateRemainingTicks
+            );
+        } else {
+            detonateEndTick = 0L;
+            resolvedDetonateTotal = 0;
         }
-        detonationActive = true;
-        detonateTotalTicks = Math.max(1, totalTicksOverride > 0 ? totalTicksOverride : remainingTicks);
-        detonateEndTick = nowTick + remainingTicks;
+        Status status = new Status(
+                Math.max(0, stacks),
+                poisonEndTick,
+                Math.max(0, poisonTotalTicks),
+                detonateEndTick,
+                resolvedDetonateTotal
+        );
+        if (!status.hasPoison(nowTick) && !status.hasDetonation(nowTick)) {
+            STATUSES.remove(targetId);
+        } else {
+            STATUSES.put(targetId, status);
+        }
     }
 
-    public static void clearPoison() {
-        stacks = 0;
-        endTick = 0L;
-        totalTicks = 0;
+    public static void remove(UUID targetId) {
+        if (targetId != null) {
+            STATUSES.remove(targetId);
+        }
     }
 
-    public static void clearDetonation() {
-        detonationActive = false;
-        detonateEndTick = 0L;
-        detonateTotalTicks = 0;
+    public static void clearAll() {
+        STATUSES.clear();
     }
 
     public static boolean hasPoison(Player player) {
-        if (stacks <= 0 || player == null || player.level() == null) {
-            return false;
-        }
-        long nowTick = player.level().getGameTime();
-        if (nowTick > endTick) {
-            clearPoison();
-            return false;
-        }
-        return true;
+        return hasPoisonAt(nowTick(player));
     }
 
     public static int getStacks(Player player) {
-        if (!hasPoison(player)) {
-            return 0;
-        }
-        return stacks;
+        return getStacksAt(nowTick(player));
+    }
+
+    static boolean hasPoisonAt(long nowTick) {
+        return strongestPoison(nowTick) != null;
+    }
+
+    static int getStacksAt(long nowTick) {
+        Status status = strongestPoison(nowTick);
+        return status == null ? 0 : status.stacks();
     }
 
     public static int getRemainingTicks(Player player) {
-        if (!hasPoison(player)) {
-            return 0;
-        }
-        long nowTick = player.level().getGameTime();
-        return (int) Math.max(0, endTick - nowTick);
+        return getRemainingTicksAt(nowTick(player));
+    }
+
+    static int getRemainingTicksAt(long nowTick) {
+        Status status = strongestPoison(nowTick);
+        return status == null
+                ? 0
+                : remainingTicks(status.poisonEndTick(), nowTick);
     }
 
     public static int getTotalTicks() {
-        return Math.max(1, totalTicks);
+        return getTotalTicksAt(clientNowTick());
+    }
+
+    static int getTotalTicksAt(long nowTick) {
+        Status status = strongestPoison(nowTick);
+        return status == null ? 1 : Math.max(1, status.poisonTotalTicks());
     }
 
     public static boolean hasDetonation(Player player) {
-        if (!detonationActive || player == null || player.level() == null) {
-            return false;
-        }
-        long nowTick = player.level().getGameTime();
-        if (nowTick > detonateEndTick) {
-            clearDetonation();
-            return false;
-        }
-        return true;
+        return hasDetonationAt(nowTick(player));
     }
 
     public static int getDetonationRemainingTicks(Player player) {
-        if (!hasDetonation(player)) {
-            return 0;
-        }
-        long nowTick = player.level().getGameTime();
-        return (int) Math.max(0, detonateEndTick - nowTick);
+        return getDetonationRemainingTicksAt(nowTick(player));
+    }
+
+    static boolean hasDetonationAt(long nowTick) {
+        return earliestDetonation(nowTick) != null;
+    }
+
+    static int getDetonationRemainingTicksAt(long nowTick) {
+        Status status = earliestDetonation(nowTick);
+        return status == null
+                ? 0
+                : remainingTicks(status.detonateEndTick(), nowTick);
     }
 
     public static int getDetonationTotalTicks() {
-        return Math.max(1, detonateTotalTicks);
+        return getDetonationTotalTicksAt(clientNowTick());
+    }
+
+    static int getDetonationTotalTicksAt(long nowTick) {
+        Status status = earliestDetonation(nowTick);
+        return status == null ? 1 : Math.max(1, status.detonateTotalTicks());
     }
 
     public static void onClientTick(ClientTickEvent.Post event) {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.level == null) {
-            clearPoison();
-            clearDetonation();
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.player == null || minecraft.level == null) {
+            clearAll();
             return;
         }
-        var level = mc.level;
-        if (level == null) {
-            clearPoison();
-            clearDetonation();
-            return;
+        pruneExpired(minecraft.level.getGameTime());
+    }
+
+    static int trackedTargetCount() {
+        return STATUSES.size();
+    }
+
+    private static Status strongestPoison(long nowTick) {
+        pruneExpired(nowTick);
+        Status best = null;
+        for (Status status : STATUSES.values()) {
+            if (!status.hasPoison(nowTick)) {
+                continue;
+            }
+            if (best == null
+                    || status.stacks() > best.stacks()
+                    || status.stacks() == best.stacks()
+                    && status.poisonEndTick() > best.poisonEndTick()) {
+                best = status;
+            }
         }
-        long nowTick = level.getGameTime();
-        if (stacks > 0 && nowTick > endTick) {
-            clearPoison();
+        return best;
+    }
+
+    private static Status earliestDetonation(long nowTick) {
+        pruneExpired(nowTick);
+        Status best = null;
+        for (Status status : STATUSES.values()) {
+            if (!status.hasDetonation(nowTick)) {
+                continue;
+            }
+            if (best == null
+                    || status.detonateEndTick() < best.detonateEndTick()) {
+                best = status;
+            }
         }
-        if (detonationActive && nowTick > detonateEndTick) {
-            clearDetonation();
+        return best;
+    }
+
+    private static void pruneExpired(long nowTick) {
+        STATUSES.replaceAll((ignored, status) -> status.expire(nowTick));
+        STATUSES.values().removeIf(status ->
+                !status.hasPoison(nowTick)
+                        && !status.hasDetonation(nowTick)
+        );
+    }
+
+    private static int remainingTicks(long endTick, long nowTick) {
+        return (int) Math.max(0L, endTick - nowTick);
+    }
+
+    private static long nowTick(Player player) {
+        return player == null || player.level() == null
+                ? Long.MAX_VALUE
+                : player.level().getGameTime();
+    }
+
+    private static long clientNowTick() {
+        Minecraft minecraft = Minecraft.getInstance();
+        return minecraft.level == null
+                ? Long.MAX_VALUE
+                : minecraft.level.getGameTime();
+    }
+
+    private record Status(
+            int stacks,
+            long poisonEndTick,
+            int poisonTotalTicks,
+            long detonateEndTick,
+            int detonateTotalTicks
+    ) {
+        private boolean hasPoison(long nowTick) {
+            return stacks > 0 && nowTick <= poisonEndTick;
+        }
+
+        private boolean hasDetonation(long nowTick) {
+            return detonateEndTick > 0L && nowTick <= detonateEndTick;
+        }
+
+        private Status expire(long nowTick) {
+            return new Status(
+                    hasPoison(nowTick) ? stacks : 0,
+                    hasPoison(nowTick) ? poisonEndTick : 0L,
+                    hasPoison(nowTick) ? poisonTotalTicks : 0,
+                    hasDetonation(nowTick) ? detonateEndTick : 0L,
+                    hasDetonation(nowTick) ? detonateTotalTicks : 0
+            );
         }
     }
 }

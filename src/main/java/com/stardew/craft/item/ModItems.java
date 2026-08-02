@@ -1804,7 +1804,15 @@ public class ModItems {
                         () -> new BearKnowledgeItem(new Item.Properties().stacksTo(1).fireResistant()));
         public static final DeferredItem<Item> SECRET_NOTE = ITEMS.register("secret_note",
                         () -> new SecretNoteItem(new Item.Properties().stacksTo(999)));
+        public static final DeferredItem<Item> LOST_BOOK = ITEMS.register("lost_book",
+                        () -> new LostBookItem(new Item.Properties().stacksTo(1)));
         public static final DeferredItem<Item> ORNATE_NECKLACE = ITEMS.register("ornate_necklace",
+                        () -> new SimpleStardewItem("stardewcraft.type.quest", 0,
+                                        new Item.Properties().stacksTo(1)));
+        public static final DeferredItem<Item> LOST_AXE = ITEMS.register("lost_axe",
+                        () -> new SimpleStardewItem("stardewcraft.type.quest", 0,
+                                        new Item.Properties().stacksTo(1)));
+        public static final DeferredItem<Item> BLACKBERRY_BASKET = ITEMS.register("blackberry_basket",
                         () -> new SimpleStardewItem("stardewcraft.type.quest", 0,
                                         new Item.Properties().stacksTo(1)));
         public static final DeferredItem<Item> RUSTY_KEY = ITEMS.register("rusty_key",

@@ -26,6 +26,18 @@
     "Fri": "stardewcraft.npc.gus.fri",
     "Fri4": "stardewcraft.npc.gus.fri4",
     "Sat": "stardewcraft.npc.gus.sat",
-    "Sun": "stardewcraft.npc.gus.sun"
+    "Sun": "stardewcraft.npc.gus.sun",
+    "accept_865": "stardewcraft.npc.gus.accept_865",
+    "cropMatured_256": "stardewcraft.npc.gus.cropmatured_256",
+    "eventSeen_502969": "stardewcraft.npc.gus.eventseen_502969",
+    "eventSeen_3206194": "stardewcraft.npc.gus.eventseen_3206194",
+    "Resort_Entering": "stardewcraft.npc.gus.resort_entering",
+    "Resort_Leaving": "stardewcraft.npc.gus.resort_leaving",
+    "Resort": "stardewcraft.npc.gus.resort",
+    "IslandSouth_14_21": "stardewcraft.npc.gus.islandsouth_14_21",
+    "willyCrabs": "stardewcraft.npc.gus.willycrabs",
+    "pamHouseUpgrade": "stardewcraft.npc.gus.pamhouseupgrade",
+    "pamHouseUpgradeAnonymous": "stardewcraft.npc.gus.pamhouseupgradeanonymous",
+    "SeedShop_Entry": "stardewcraft.npc.gus.seedshop_entry"
   }
 }

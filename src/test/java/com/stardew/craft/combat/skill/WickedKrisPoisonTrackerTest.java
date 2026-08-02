@@ -32,4 +32,32 @@ class WickedKrisPoisonTrackerTest {
                 WickedKrisPoisonTracker.detonationDamageMultiplier(200L, 60L, 5)
         );
     }
+
+    @Test
+    void authoredDurationsIncludeTheirTerminalDotApplication() {
+        assertEquals(
+                5,
+                WickedKrisPoisonTracker.scheduledDotApplications(100L, 20L)
+        );
+        assertEquals(
+                10,
+                WickedKrisPoisonTracker.scheduledDotApplications(200L, 20L)
+        );
+        assertEquals(
+                7,
+                WickedKrisPoisonTracker.scheduledDotApplications(200L, 80L)
+        );
+        assertEquals(
+                3,
+                WickedKrisPoisonTracker.scheduledDotApplications(110L, 70L)
+        );
+        assertEquals(
+                1,
+                WickedKrisPoisonTracker.scheduledDotApplications(200L, 200L)
+        );
+        assertEquals(
+                0,
+                WickedKrisPoisonTracker.scheduledDotApplications(200L, 201L)
+        );
+    }
 }

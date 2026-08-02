@@ -18,6 +18,7 @@ public record DamageRequest(
         float criticalMultiplier,
         boolean guaranteedCritical,
         List<DamageAdjustment> preDefenseAdjustments,
+        List<DamageAdjustment> criticalOnlyAdjustments,
         float varianceMinimum,
         float varianceMaximum,
         float defense,
@@ -52,6 +53,7 @@ public record DamageRequest(
         }
         baseAdjustments = List.copyOf(baseAdjustments);
         preDefenseAdjustments = List.copyOf(preDefenseAdjustments);
+        criticalOnlyAdjustments = List.copyOf(criticalOnlyAdjustments);
         postDefenseAdjustments = List.copyOf(postDefenseAdjustments);
     }
 
@@ -105,6 +107,7 @@ public record DamageRequest(
         private float criticalMultiplier = 1.0f;
         private boolean guaranteedCritical;
         private final List<DamageAdjustment> preDefenseAdjustments = new ArrayList<>();
+        private final List<DamageAdjustment> criticalOnlyAdjustments = new ArrayList<>();
         private float varianceMinimum = 1.0f;
         private float varianceMaximum = 1.0f;
         private float defense;
@@ -131,6 +134,9 @@ public record DamageRequest(
             this.criticalMultiplier = request.criticalMultiplier;
             this.guaranteedCritical = request.guaranteedCritical;
             this.preDefenseAdjustments.addAll(request.preDefenseAdjustments);
+            this.criticalOnlyAdjustments.addAll(
+                    request.criticalOnlyAdjustments
+            );
             this.varianceMinimum = request.varianceMinimum;
             this.varianceMaximum = request.varianceMaximum;
             this.defense = request.defense;
@@ -173,6 +179,19 @@ public record DamageRequest(
 
         public Builder addPreDefenseAdjustment(DamageAdjustment adjustment) {
             this.preDefenseAdjustments.add(Objects.requireNonNull(adjustment, "adjustment"));
+            return this;
+        }
+
+        /**
+         * Adds an adjustment after ordinary attack/profession bonuses, but
+         * only when this hit actually rolled or guaranteed a critical hit.
+         */
+        public Builder addCriticalOnlyAdjustment(
+                DamageAdjustment adjustment
+        ) {
+            this.criticalOnlyAdjustments.add(
+                    Objects.requireNonNull(adjustment, "adjustment")
+            );
             return this;
         }
 
@@ -226,6 +245,7 @@ public record DamageRequest(
                     criticalMultiplier,
                     guaranteedCritical,
                     preDefenseAdjustments,
+                    criticalOnlyAdjustments,
                     varianceMinimum,
                     varianceMaximum,
                     defense,

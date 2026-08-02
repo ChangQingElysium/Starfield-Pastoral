@@ -65,6 +65,13 @@
     "event_apologize3": "stardewcraft.npc.shane.event_apologize3",
     "event_stadium1": "stardewcraft.npc.shane.event_stadium1",
     "event_stadium2": "stardewcraft.npc.shane.event_stadium2",
-    "default": "stardewcraft.npc.shane.default"
+    "default": "stardewcraft.npc.shane.default",
+    "Resort_Entering": "stardewcraft.npc.shane.resort_entering",
+    "Resort_Leaving": "stardewcraft.npc.shane.resort_leaving",
+    "Resort_Shore": "stardewcraft.npc.shane.resort_shore",
+    "Resort_Chair": "stardewcraft.npc.shane.resort_chair",
+    "Resort_Bar": "stardewcraft.npc.shane.resort_bar",
+    "Resort": "stardewcraft.npc.shane.resort",
+    "FlowerDance_Accept_Spouse": "stardewcraft.npc.shane.flowerdance_accept_spouse"
   }
 }

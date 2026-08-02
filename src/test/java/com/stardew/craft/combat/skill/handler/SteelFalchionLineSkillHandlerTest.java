@@ -1,6 +1,5 @@
 package com.stardew.craft.combat.skill.handler;
 
-import com.stardew.craft.combat.skill.SteelFalchionLineTracker;
 import com.stardew.craft.item.weapon.WeaponData;
 import com.stardew.craft.item.weapon.WeaponRegistry;
 import com.stardew.craft.item.weapon.WeaponSkillData;
@@ -27,9 +26,9 @@ class SteelFalchionLineSkillHandlerTest {
                 SteelFalchionLineSkillHandler.DOT_DAMAGE_MULTIPLIER
         );
         assertEquals(8, SteelFalchionLineSkillHandler.ANIMATION_TICKS);
-        assertEquals(7.0F, SteelFalchionLineTracker.LINE_LENGTH);
-        assertEquals(100, SteelFalchionLineTracker.LINE_DURATION_TICKS);
-        assertEquals(1, SteelFalchionLineTracker.LINE_SPEED_AMPLIFIER);
+        assertEquals(7.0F, SteelFalchionLineSkillHandler.LINE_LENGTH);
+        assertEquals(100, SteelFalchionLineSkillHandler.LINE_DURATION_TICKS);
+        assertEquals(1, SteelFalchionLineSkillHandler.LINE_SPEED_AMPLIFIER);
         assertFalse(
                 new SteelFalchionLineSkillHandler().completesImmediately()
         );

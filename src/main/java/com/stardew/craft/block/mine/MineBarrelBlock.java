@@ -95,30 +95,35 @@ public class MineBarrelBlock extends Block {
         com.stardew.craft.player.PlayerStardewData playerData = nearestPlayer instanceof net.minecraft.server.level.ServerPlayer serverPlayer
             ? PlayerDataManager.getPlayerData(serverPlayer)
             : null;
+        boolean reachedMineBottom = nearestPlayer instanceof net.minecraft.server.level.ServerPlayer serverPlayer
+                && com.stardew.craft.mining.MiningDataManager.getPlayerData(serverPlayer)
+                .getMaxFloorReached() >= 120;
 
         // SDV: 0.81% mystery_box, routed through Utility.tryRollMysteryBox multiplier.
         if (r.nextDouble() < BookPowerEffects.applyMysteryBoxChance(playerData, 0.0081)) {
             drop(level, pos, item("mystery_box"), 1);
-            return;
         }
 
         // 按区段分配掉落
         switch (area) {
-            case 0  -> dropStandard(level, pos, r, floor);
-            case 40 -> dropFrost(level, pos, r, floor);
-            default -> dropDarkDesert(level, pos, r, floor);
+            case 0  -> dropStandard(level, pos, r, floor, reachedMineBottom);
+            case 40 -> dropFrost(level, pos, r, floor, reachedMineBottom);
+            default -> dropDarkDesert(level, pos, r, floor, reachedMineBottom);
         }
 
         com.stardew.craft.festival.desert.DesertFestivalMineService.tryAddBarrelEggDrop(level, pos, r);
-
-        // SDV parity: 装备掉落（靴子/戒指），独立概率
-        dropEquipment(level, pos, r, floor);
     }
 
     // ======================== Standard Barrel (area 0, ItemId "118", floor 1-39) ========================
     // SDV BreakableContainer.cs::releaseContents case "118"
 
-    private static void dropStandard(ServerLevel level, BlockPos pos, RandomSource r, int floor) {
+    private static void dropStandard(
+            ServerLevel level,
+            BlockPos pos,
+            RandomSource r,
+            int floor,
+            boolean reachedMineBottom
+    ) {
         // 65% 普通掉落 ELSE 40% 稀有掉落（SDV 是 if/else if，互斥）
         if (r.nextFloat() < 0.65f) {
             if (r.nextFloat() < 0.80f) {
@@ -129,7 +134,11 @@ public class MineBarrelBlock extends Block {
                     case 2 -> { /* empty */ }
                     case 3 -> drop(level, pos, item("stone"), 2 + r.nextInt(4));       // (O)390
                     case 4 -> drop(level, pos, item("wood_normal"), 2);                 // (O)388 r.Next(2,3)==2
-                    case 5 -> drop(level, pos, item("sap"), 2 + r.nextInt(2));         // (O)92 / parsnip 替代（无 player ctx）
+                    case 5 -> drop(level, pos,
+                            item(reachedMineBottom
+                                    ? "quartz"
+                                    : (r.nextBoolean() ? "sap" : "basic_retaining_soil")),
+                            2 + r.nextInt(2));
                     case 6 -> drop(level, pos, item("wood_normal"), 2 + r.nextInt(4)); // (O)388
                     case 7 -> drop(level, pos, item("stone"), 2 + r.nextInt(4));       // (O)390
                     case 8 -> drop(level, pos, item("mixed_seeds"), 1);                 // (O)770
@@ -146,7 +155,7 @@ public class MineBarrelBlock extends Block {
             switch (r.nextInt(5)) {
                 case 0 -> drop(level, pos, item("amethyst"), 1);              // (O)66
                 case 1 -> drop(level, pos, item("topaz"), 1);                 // (O)68
-                case 2 -> drop(level, pos, item("wood_normal"), 4);           // (O)709 hardwood 替代（mod 暂无 hardwood）
+                case 2 -> drop(level, pos, item("wood_hard"), 1);             // (O)709
                 case 3 -> drop(level, pos, item("geode"), 1);                 // (O)535
                 case 4 -> dropSpecialItem(level, pos, r, floor);              // getSpecialItemForThisMineLevel
             }
@@ -156,7 +165,13 @@ public class MineBarrelBlock extends Block {
     // ======================== Frost Barrel (area 40, ItemId "120", floor 40-79) ========================
     // SDV BreakableContainer.cs::releaseContents case "120"
 
-    private static void dropFrost(ServerLevel level, BlockPos pos, RandomSource r, int floor) {
+    private static void dropFrost(
+            ServerLevel level,
+            BlockPos pos,
+            RandomSource r,
+            int floor,
+            boolean reachedMineBottom
+    ) {
         if (r.nextFloat() < 0.65f) {
             if (r.nextFloat() < 0.80f) {
                 switch (r.nextInt(9)) {
@@ -165,7 +180,11 @@ public class MineBarrelBlock extends Block {
                     case 2 -> { /* empty */ }
                     case 3 -> drop(level, pos, item("copper_ore"), 2 + r.nextInt(4));  // (O)378
                     case 4 -> drop(level, pos, item("wood_normal"), 2 + r.nextInt(4)); // (O)388
-                    case 5 -> drop(level, pos, item("sap"), 2 + r.nextInt(2));         // 替代（不区分是否到底）
+                    case 5 -> drop(level, pos,
+                            item(reachedMineBottom
+                                    ? "frozen_tear"
+                                    : (r.nextBoolean() ? "sap" : "quality_retaining_soil")),
+                            2 + r.nextInt(2));
                     case 6 -> drop(level, pos, item("stone"), 2 + r.nextInt(2));       // (O)390 r.Next(2,4)
                     case 7 -> drop(level, pos, item("stone"), 2 + r.nextInt(4));       // (O)390
                     case 8 -> drop(level, pos, item("mixed_seeds"), 1);                 // (O)770
@@ -180,7 +199,7 @@ public class MineBarrelBlock extends Block {
             switch (r.nextInt(5)) {
                 case 0 -> drop(level, pos, item("aquamarine"), 1);              // (O)62
                 case 1 -> drop(level, pos, item("jade"), 1);                    // (O)70
-                case 2 -> drop(level, pos, item("wood_normal"), 4 + r.nextInt(4)); // (O)709 hardwood 替代 r.Next(1,4)
+                case 2 -> drop(level, pos, item("wood_hard"), 1 + r.nextInt(3)); // (O)709
                 case 3 -> drop(level, pos, item("frozen_geode"), 1);            // (O)536
                 case 4 -> dropSpecialItem(level, pos, r, floor);
             }
@@ -190,7 +209,13 @@ public class MineBarrelBlock extends Block {
     // ======================== Dark/Desert Barrel (area 80+, ItemId "122"/"124") ========================
     // SDV BreakableContainer.cs::releaseContents case "122"/case "124"（共用）
 
-    private static void dropDarkDesert(ServerLevel level, BlockPos pos, RandomSource r, int floor) {
+    private static void dropDarkDesert(
+            ServerLevel level,
+            BlockPos pos,
+            RandomSource r,
+            int floor,
+            boolean reachedMineBottom
+    ) {
         if (r.nextFloat() < 0.65f) {
             if (r.nextFloat() < 0.80f) {
                 // r.Next(8) — case 2 为空
@@ -207,8 +232,10 @@ public class MineBarrelBlock extends Block {
             } else {
                 switch (r.nextInt(4)) {
                     case 0 -> drop(level, pos, item("cave_carrot"), 1 + r.nextInt(2));   // (O)78
-                    case 1 -> drop(level, pos, item("cactus_fruit"), 1 + r.nextInt(2));  // (O)537 - SDV 实际是 (O)537 仙人掌果
-                    case 2 -> drop(level, pos, item("cave_carrot"), 1 + r.nextInt(2));   // (O)78（不区分是否到底，省略 (O)82）
+                    case 1 -> drop(level, pos, item("magma_geode"), 1 + r.nextInt(2));   // (O)537
+                    case 2 -> drop(level, pos,
+                            item(reachedMineBottom ? "fire_quartz" : "cave_carrot"),
+                            1 + r.nextInt(2));
                     case 3 -> drop(level, pos, item("cave_carrot"), 1 + r.nextInt(2));   // (O)78
                 }
             }
@@ -217,8 +244,8 @@ public class MineBarrelBlock extends Block {
             switch (r.nextInt(6)) {
                 case 0 -> drop(level, pos, item("emerald"), 1);                  // (O)60
                 case 1 -> drop(level, pos, item("ruby"), 1);                     // (O)64
-                case 2 -> drop(level, pos, item("wood_normal"), 4 + r.nextInt(4));  // (O)709 hardwood 替代 r.Next(1,4)
-                case 3 -> drop(level, pos, item("golden_relic"), 1);              // (O)749
+                case 2 -> drop(level, pos, item("wood_hard"), 1 + r.nextInt(3)); // (O)709
+                case 3 -> drop(level, pos, item("omni_geode"), 1);                // (O)749
                 case 4 -> dropSpecialItem(level, pos, r, floor);                  // getSpecialItemForThisMineLevel
                 case 5 -> drop(level, pos, item("warp_totem_desert"), 1);         // (O)688
             }
@@ -228,155 +255,36 @@ public class MineBarrelBlock extends Block {
     // ======================== Special Item (仿 getSpecialItemForThisMineLevel) ========================
 
     private static void dropSpecialItem(ServerLevel level, BlockPos pos, RandomSource r, int floor) {
+        // Preserve the original slot count and order. The five unported club IDs
+        // use the closest registered weapon by original damage range.
+        String[] pool;
         if (floor < 20) {
-            switch (r.nextInt(4)) {
-                case 0 -> drop(level, pos, item("copper_bar"), 1 + r.nextInt(2));
-                case 1 -> drop(level, pos, item("amethyst"), 1);
-                case 2 -> drop(level, pos, item("earth_crystal"), 1);
-                case 3 -> drop(level, pos, item("cherry_bomb"), 2 + r.nextInt(2));
-            }
+            pool = new String[]{"carving_knife", "pirate_sword", "sneakers",
+                    "rubber_boots", "small_glow_ring", "small_magnet_ring"};
         } else if (floor < 40) {
-            switch (r.nextInt(5)) {
-                case 0 -> drop(level, pos, item("iron_bar"), 1 + r.nextInt(2));
-                case 1 -> drop(level, pos, item("topaz"), 1);
-                case 2 -> drop(level, pos, item("aquamarine"), 1);
-                case 3 -> drop(level, pos, item("bomb"), 1 + r.nextInt(2));
-                case 4 -> drop(level, pos, item("copper_bar"), 2);
-            }
+            pool = new String[]{"wind_spire", "pirate_sword", "sneakers",
+                    "rubber_boots", "small_glow_ring", "small_magnet_ring", "forest_sword"};
         } else if (floor < 60) {
-            switch (r.nextInt(5)) {
-                case 0 -> drop(level, pos, item("iron_bar"), 1 + r.nextInt(2));
-                case 1 -> drop(level, pos, item("emerald"), 1);
-                case 2 -> drop(level, pos, item("frozen_tear"), 1 + r.nextInt(2));
-                case 3 -> drop(level, pos, item("bomb"), 1 + r.nextInt(2));
-                case 4 -> drop(level, pos, item("gold_bar"), 1);
-            }
+            pool = new String[]{"iron_edge", "bone_sword", "forest_sword",
+                    "thermal_boots", "glow_ring", "magnet_ring", "iron_edge"};
         } else if (floor < 80) {
-            switch (r.nextInt(5)) {
-                case 0 -> drop(level, pos, item("gold_bar"), 1 + r.nextInt(2));
-                case 1 -> drop(level, pos, item("ruby"), 1);
-                case 2 -> drop(level, pos, item("frozen_tear"), 1 + r.nextInt(2));
-                case 3 -> drop(level, pos, item("mega_bomb"), 1);
-                case 4 -> drop(level, pos, item("diamond"), 1);
-            }
+            pool = new String[]{"bone_sword", "iron_edge", "combat_boots",
+                    "thermal_boots", "glow_ring", "magnet_ring", "shadow_dagger"};
         } else if (floor < 100) {
-            switch (r.nextInt(6)) {
-                case 0 -> drop(level, pos, item("gold_bar"), 1 + r.nextInt(2));
-                case 1 -> drop(level, pos, item("iridium_bar"), 1);
-                case 2 -> drop(level, pos, item("fire_quartz"), 1 + r.nextInt(2));
-                case 3 -> drop(level, pos, item("mega_bomb"), 1 + r.nextInt(2));
-                case 4 -> drop(level, pos, item("void_essence"), 2 + r.nextInt(3));
-                case 5 -> drop(level, pos, item("diamond"), 1);
-            }
+            pool = new String[]{"yeti_tooth", "yeti_tooth", "dark_boots",
+                    "genie_shoes", "burglars_shank", "dark_sword",
+                    "tempered_broadsword", "holy_blade"};
         } else if (floor < 120) {
-            switch (r.nextInt(6)) {
-                case 0 -> drop(level, pos, item("iridium_bar"), 1 + r.nextInt(2));
-                case 1 -> drop(level, pos, item("prismatic_shard"), 1);
-                case 2 -> drop(level, pos, item("fire_quartz"), 1 + r.nextInt(2));
-                case 3 -> drop(level, pos, item("mega_bomb"), 1 + r.nextInt(2));
-                case 4 -> drop(level, pos, item("void_essence"), 3 + r.nextInt(3));
-                case 5 -> drop(level, pos, item("solar_essence"), 2 + r.nextInt(3));
-            }
+            pool = new String[]{"shadow_dagger", "steel_falchion", "dark_boots",
+                    "genie_shoes", "burglars_shank", "tempered_broadsword",
+                    "immunity_band", "holy_blade"};
         } else {
-            // 120+
-            switch (r.nextInt(8)) {
-                case 0 -> drop(level, pos, item("iridium_bar"), 1 + r.nextInt(3));
-                case 1 -> drop(level, pos, item("prismatic_shard"), 1);
-                case 2 -> drop(level, pos, item("diamond"), 1 + r.nextInt(2));
-                case 3 -> drop(level, pos, item("mega_bomb"), 2 + r.nextInt(2));
-                case 4 -> drop(level, pos, item("void_essence"), 3 + r.nextInt(5));
-                case 5 -> drop(level, pos, item("solar_essence"), 3 + r.nextInt(5));
-                case 6 -> drop(level, pos, item("omni_geode"), 2 + r.nextInt(3));
-                case 7 -> drop(level, pos, item("iridium_ore"), 3 + r.nextInt(5));
-            }
+            pool = new String[]{"wicked_kris", "steel_falchion", "dark_boots",
+                    "genie_shoes", "burglars_shank", "dark_sword",
+                    "tempered_broadsword", "battery_pack", "crystal_shoes",
+                    "curiosity_lure", "lucky_ring", "immunity_band"};
         }
-    }
-
-    // ======================== 装备掉落 (SDV parity) ========================
-
-    /**
-     * 靴子/戒指掉落 — 独立于主掉落表。
-     * SDV 原版靴子主要通过矿井宝箱/怪物掉落获取，这里用木桶低概率模拟。
-     * 靴子：~3% 概率，按层级决定品质
-     * 戒指：~2% 概率，按层级决定类型
-     */
-    private static void dropEquipment(ServerLevel level, BlockPos pos, RandomSource r, int floor) {
-        // ── 靴子 (~3%) ──
-        if (r.nextFloat() < 0.03f) {
-            if (floor < 20) {
-                drop(level, pos, item("leather_boots"), 1);
-            } else if (floor < 40) {
-                drop(level, pos, r.nextBoolean()
-                        ? item("work_boots") : item("leather_boots"), 1);
-            } else if (floor < 60) {
-                switch (r.nextInt(3)) {
-                    case 0 -> drop(level, pos, item("combat_boots"), 1);
-                    case 1 -> drop(level, pos, item("tundra_boots"), 1);
-                    case 2 -> drop(level, pos, item("thermal_boots"), 1);
-                }
-            } else if (floor < 80) {
-                drop(level, pos, r.nextBoolean()
-                        ? item("combat_boots") : item("tundra_boots"), 1);
-            } else if (floor < 100) {
-                drop(level, pos, r.nextBoolean()
-                        ? item("dark_boots") : item("firewalker_boots"), 1);
-            } else if (floor < 120) {
-                switch (r.nextInt(3)) {
-                    case 0 -> drop(level, pos, item("space_boots"), 1);
-                    case 1 -> drop(level, pos, item("genie_shoes"), 1);
-                    case 2 -> drop(level, pos, item("dark_boots"), 1);
-                }
-            } else {
-                // 120+ 深层：稀有靴子
-                switch (r.nextInt(5)) {
-                    case 0 -> drop(level, pos, item("cinderclown_shoes"), 1);
-                    case 1 -> drop(level, pos, item("mermaid_boots"), 1);
-                    case 2 -> drop(level, pos, item("dragonscale_boots"), 1);
-                    case 3 -> drop(level, pos, item("crystal_shoes"), 1);
-                    case 4 -> drop(level, pos, item("space_boots"), 1);
-                }
-            }
-        }
-
-        // ── 戒指 (~2%) ──
-        if (r.nextFloat() < 0.02f) {
-            if (floor < 40) {
-                switch (r.nextInt(4)) {
-                    case 0 -> drop(level, pos, item("small_glow_ring"), 1);
-                    case 1 -> drop(level, pos, item("small_magnet_ring"), 1);
-                    case 2 -> drop(level, pos, item("amethyst_ring"), 1);
-                    case 3 -> drop(level, pos, item("topaz_ring"), 1);
-                }
-            } else if (floor < 80) {
-                switch (r.nextInt(6)) {
-                    case 0 -> drop(level, pos, item("glow_ring"), 1);
-                    case 1 -> drop(level, pos, item("magnet_ring"), 1);
-                    case 2 -> drop(level, pos, item("aquamarine_ring"), 1);
-                    case 3 -> drop(level, pos, item("jade_ring"), 1);
-                    case 4 -> drop(level, pos, item("amethyst_ring"), 1);
-                    case 5 -> drop(level, pos, item("topaz_ring"), 1);
-                }
-            } else if (floor < 120) {
-                switch (r.nextInt(6)) {
-                    case 0 -> drop(level, pos, item("emerald_ring"), 1);
-                    case 1 -> drop(level, pos, item("ruby_ring"), 1);
-                    case 2 -> drop(level, pos, item("jade_ring"), 1);
-                    case 3 -> drop(level, pos, item("aquamarine_ring"), 1);
-                    case 4 -> drop(level, pos, item("crabshell_ring"), 1);
-                    case 5 -> drop(level, pos, item("immunity_band"), 1);
-                }
-            } else {
-                // 120+ 深层：高级戒指
-                switch (r.nextInt(6)) {
-                    case 0 -> drop(level, pos, item("ruby_ring"), 1);
-                    case 1 -> drop(level, pos, item("emerald_ring"), 1);
-                    case 2 -> drop(level, pos, item("crabshell_ring"), 1);
-                    case 3 -> drop(level, pos, item("napalm_ring"), 1);
-                    case 4 -> drop(level, pos, item("lucky_ring"), 1);
-                    case 5 -> drop(level, pos, item("immunity_band"), 1);
-                }
-            }
-        }
+        drop(level, pos, item(pool[r.nextInt(pool.length)]), 1);
     }
 
     // ======================== helpers ========================

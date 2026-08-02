@@ -20,4 +20,11 @@ class CombatHealingTest {
         assertEquals(0.0F, CombatHealing.nonlethalReduction(1.0F, 6.0F, 1.0F));
         assertEquals(0.0F, CombatHealing.nonlethalReduction(50.0F, -1.0F, 1.0F));
     }
+
+    @Test
+    void healthCostsSupportDesperatePlundersHalfHeartFloor() {
+        assertEquals(2.0F, CombatHealing.nonlethalReduction(10.0F, 2.0F, 0.5F));
+        assertEquals(2.0F, CombatHealing.nonlethalReduction(2.5F, 2.0F, 0.5F));
+        assertEquals(0.5F, CombatHealing.nonlethalReduction(1.0F, 2.0F, 0.5F));
+    }
 }

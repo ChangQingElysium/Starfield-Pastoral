@@ -34,6 +34,15 @@
     "Sat8": "stardewcraft.npc.willy.sat8",
     "Sun": "stardewcraft.npc.willy.sun",
     "Sun10": "stardewcraft.npc.willy.sun10",
-    "default": "stardewcraft.npc.willy.default"
+    "default": "stardewcraft.npc.willy.default",
+    "AcceptGift_(O)Book_Crabbing": "stardewcraft.npc.willy.acceptgift_(o)book_crabbing",
+    "AcceptGift_(O)Book_Roe": "stardewcraft.npc.willy.acceptgift_(o)book_roe",
+    "AcceptGift_(O)SkillBook_1": "stardewcraft.npc.willy.acceptgift_(o)skillbook_1",
+    "AcceptGift_Positive_coffee_item": "stardewcraft.npc.willy.acceptgift_positive_coffee_item",
+    "accept_869": "stardewcraft.npc.willy.accept_869",
+    "FullCrabPond": "stardewcraft.npc.willy.fullcrabpond",
+    "MovieInvitation": "stardewcraft.npc.willy.movieinvitation",
+    "Fair_Judging": "stardewcraft.npc.willy.fair_judging",
+    "Fair_Judged": "stardewcraft.npc.willy.fair_judged"
   }
 }

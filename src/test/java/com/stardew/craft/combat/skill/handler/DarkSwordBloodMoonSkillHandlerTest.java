@@ -36,6 +36,43 @@ class DarkSwordBloodMoonSkillHandlerTest {
                 DarkSwordBloodMoonSkillHandler
                         .PRESENTATION_NOTIFICATION_TICKS
         );
+        assertEquals(
+                0.30F,
+                DarkSwordBloodMoonSkillHandler.LIFESTEAL_RATIO
+        );
+        assertEquals(
+                1.35F,
+                DarkSwordBloodMoonSkillHandler
+                        .DAMAGE_BONUS_MULTIPLIER
+        );
+        assertEquals(
+                0.01F,
+                DarkSwordBloodMoonSkillHandler
+                        .BURN_MAXIMUM_HEALTH_RATIO
+        );
+        assertEquals(
+                1.0F,
+                DarkSwordBloodMoonSkillHandler.MINIMUM_BURN_AMOUNT
+        );
+        assertEquals(
+                1.0F,
+                DarkSwordBloodMoonSkillHandler
+                        .MINIMUM_REMAINING_HEALTH
+        );
+        assertEquals(
+                3.5F,
+                DarkSwordBloodMoonSkillHandler.BURST_RADIUS
+        );
+        assertEquals(
+                0.1F,
+                DarkSwordBloodMoonSkillHandler
+                        .MINIMUM_BURST_DAMAGE_MULTIPLIER
+        );
+        assertEquals(
+                5,
+                DarkSwordBloodMoonSkillHandler
+                        .HIT_CONTEXT_LIFETIME_TICKS
+        );
         assertFalse(
                 new DarkSwordBloodMoonSkillHandler()
                         .completesImmediately()

@@ -18,6 +18,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.items.IItemHandler;
 
 import javax.annotation.Nullable;
 import java.io.InputStream;
@@ -28,7 +29,8 @@ import java.util.Map;
 import java.util.Random;
 
 /** Persistent output state for the two daily production statues. */
-public final class DailyStatueBlockEntity extends BlockEntity {
+public final class DailyStatueBlockEntity extends BlockEntity
+        implements UtilityAutomationAccess, AdvanceableUtility, UtilityMachineInfo {
     private static final String BIRTHDAYS =
             "data/stardewcraft/npc/events/npc_birthdays.json";
     private static final String GIFT_TASTES =
@@ -40,6 +42,7 @@ public final class DailyStatueBlockEntity extends BlockEntity {
 
     private ItemStack product = ItemStack.EMPTY;
     private long lastDayIndex = -1L;
+    private final UtilityItemHandler automationItemHandler = new UtilityItemHandler(this);
 
     public DailyStatueBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.DAILY_STATUE.get(), pos, state);
@@ -69,8 +72,9 @@ public final class DailyStatueBlockEntity extends BlockEntity {
         // output overnight; Perfection keeps its existing ore until collected.
         if (statue.product.isEmpty() || kind == Kind.ENDLESS_FORTUNE) {
             statue.product = statue.createDailyOutput(today);
+            statue.syncToClient();
+        } else {
             statue.setChanged();
-            level.sendBlockUpdated(pos, state, state, 3);
         }
     }
 
@@ -84,11 +88,95 @@ public final class DailyStatueBlockEntity extends BlockEntity {
         }
         ItemStack result = product.copy();
         product = ItemStack.EMPTY;
-        setChanged();
-        if (level != null) {
-            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
-        }
+        syncToClient();
         return result;
+    }
+
+    public ItemStack getProduct() {
+        return product;
+    }
+
+    @Override
+    public void advanceDays(int days) {
+        if (days <= 0 || level == null || level.isClientSide) {
+            return;
+        }
+        long today = dayIndex();
+        Kind kind = getBlockState().getBlock() instanceof DailyStatueBlock dailyStatue
+                ? dailyStatue.kind()
+                : Kind.PERFECTION;
+        lastDayIndex = today;
+        if (product.isEmpty() || kind == Kind.ENDLESS_FORTUNE) {
+            product = createDailyOutput(today + days);
+        }
+        syncToClient();
+    }
+
+    @Override
+    public ItemStack getAutomationInput() {
+        return ItemStack.EMPTY;
+    }
+
+    @Override
+    public ItemStack getAutomationOutput() {
+        return isReady() ? product : ItemStack.EMPTY;
+    }
+
+    @Override
+    public ItemStack insertAutomation(ItemStack stack, boolean simulate) {
+        return stack;
+    }
+
+    @Override
+    public ItemStack extractAutomation(int amount, boolean simulate) {
+        if (amount <= 0 || product.isEmpty()) {
+            return ItemStack.EMPTY;
+        }
+        ItemStack extracted = AutomationStackHelper.extractUpTo(product, amount);
+        if (simulate) {
+            return extracted;
+        }
+        if (extracted.getCount() >= product.getCount()) {
+            return harvestOne();
+        }
+        product.shrink(extracted.getCount());
+        syncToClient();
+        return extracted;
+    }
+
+    @Override
+    public IItemHandler getAutomationItemHandler() {
+        return automationItemHandler;
+    }
+
+    @Override
+    public String getUtilityTooltipKey() {
+        return "daily_statue";
+    }
+
+    @Override
+    public boolean isReadyForDisplay() {
+        return isReady();
+    }
+
+    @Override
+    public boolean isWorkingForDisplay() {
+        return false;
+    }
+
+    @Override
+    public boolean shouldShowInputInDisplay() {
+        return false;
+    }
+
+    @Override
+    public ItemStack getDisplayOutput() {
+        return product;
+    }
+
+    @Override
+    public String getIdleTooltipKey() {
+        return "stardewcraft.tooltip.daily_statue.waiting";
     }
 
     private ItemStack createDailyOutput(long today) {
@@ -188,6 +276,13 @@ public final class DailyStatueBlockEntity extends BlockEntity {
         return (long) (time.getCurrentYear() - 1) * 112L
                 + (long) time.getCurrentSeason() * 28L
                 + time.getCurrentDay();
+    }
+
+    private void syncToClient() {
+        setChanged();
+        if (level != null && !level.isClientSide) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        }
     }
 
     @Override

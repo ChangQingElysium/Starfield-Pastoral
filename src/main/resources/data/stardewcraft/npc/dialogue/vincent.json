@@ -21,6 +21,13 @@
     "Sat8": "stardewcraft.npc.vincent.sat8",
     "Sun": "stardewcraft.npc.vincent.sun",
     "Sun10": "stardewcraft.npc.vincent.sun10",
-    "default": "stardewcraft.npc.vincent.default"
+    "default": "stardewcraft.npc.vincent.default",
+    "AcceptGift_Negative_alcohol_item": "stardewcraft.npc.vincent.acceptgift_negative_alcohol_item",
+    "Resort_Entering": "stardewcraft.npc.vincent.resort_entering",
+    "Resort_Leaving": "stardewcraft.npc.vincent.resort_leaving",
+    "Resort_Shore": "stardewcraft.npc.vincent.resort_shore",
+    "Resort": "stardewcraft.npc.vincent.resort",
+    "reject_869": "stardewcraft.npc.vincent.reject_869",
+    "Sat_1": "stardewcraft.npc.vincent.sat_1"
   }
 }

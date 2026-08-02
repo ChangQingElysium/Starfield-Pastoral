@@ -17,6 +17,10 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
@@ -59,7 +63,13 @@ public class MineMonsterDropHandler {
         if (!(entity.level() instanceof ServerLevel serverLevel)) return;
 
         Set<String> tags = entity.getTags();
-        if (tags.stream().noneMatch(t -> t.startsWith("sd_mob_"))) return;
+        boolean stardewMonster = tags.stream().anyMatch(
+                tag -> tag.startsWith("sd_mob_")
+        );
+        if (!stardewMonster) {
+            addExternalBurglarReroll(event, serverLevel);
+            return;
+        }
 
         // 清除原版掉落
         Collection<ItemEntity> drops = event.getDrops();
@@ -120,6 +130,39 @@ public class MineMonsterDropHandler {
             com.stardew.craft.festival.desert.DesertFestivalMineService.tryAddMonsterEggDrop(drops, entity, player, random);
             MiningBlockBreakHandler.tryCreateLadderFromMonsterDrop(serverLevel, player, entity.blockPosition());
         }
+    }
+
+    private static void addExternalBurglarReroll(
+            LivingDropsEvent event,
+            ServerLevel level
+    ) {
+        if (!(event.getSource().getEntity() instanceof ServerPlayer player)
+                || !com.stardew.craft.combat.equipment.RingEffectHandler
+                        .hasBurglar(player)) {
+            return;
+        }
+
+        LivingEntity entity = event.getEntity();
+        LootParams params = new LootParams.Builder(level)
+                .withParameter(LootContextParams.THIS_ENTITY, entity)
+                .withParameter(LootContextParams.ORIGIN, entity.position())
+                .withParameter(LootContextParams.DAMAGE_SOURCE, event.getSource())
+                .withOptionalParameter(
+                        LootContextParams.ATTACKING_ENTITY,
+                        event.getSource().getEntity()
+                )
+                .withOptionalParameter(
+                        LootContextParams.DIRECT_ATTACKING_ENTITY,
+                        event.getSource().getDirectEntity()
+                )
+                .withParameter(LootContextParams.LAST_DAMAGE_PLAYER, player)
+                .withLuck(player.getLuck())
+                .create(LootContextParamSets.ENTITY);
+        LootTable lootTable = level.getServer()
+                .reloadableRegistries()
+                .getLootTable(entity.getLootTable());
+        lootTable.getRandomItems(params)
+                .forEach(stack -> addDrop(event.getDrops(), entity, stack));
     }
 
     private static void addBaseMonsterDrops(

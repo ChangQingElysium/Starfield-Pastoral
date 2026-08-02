@@ -1,6 +1,5 @@
 package com.stardew.craft.combat.skill.handler;
 
-import com.stardew.craft.combat.skill.CarvingKnifeThrustTracker;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationDispatcher;
 import com.stardew.craft.combat.skill.WeaponSkillAnimationLock;
 import com.stardew.craft.combat.skill.WeaponSkillCooldowns;
@@ -11,6 +10,7 @@ import com.stardew.craft.combat.skill.runtime.SkillTickResult;
 import com.stardew.craft.combat.skill.runtime.SkillValidation;
 import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
 import java.util.List;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
@@ -25,6 +25,13 @@ public final class CarvingThrustSkillHandler implements RuntimeWeaponSkillHandle
     public static final int DAMAGE_RESISTANCE_TICKS = 5;
     public static final int DAMAGE_RESISTANCE_AMPLIFIER = 0;
     public static final int ANIMATION_TICKS = 18;
+    public static final int STRIKE_COUNT = 3;
+    public static final int STRIKE_INTERVAL_TICKS = 3;
+    public static final float BASE_DAMAGE_MULTIPLIER = 0.45F;
+    public static final float BONUS_DAMAGE_MULTIPLIER = 0.60F;
+    public static final int BONUS_DELAY_TICKS = 2;
+    public static final int HIT_CONTEXT_LIFETIME_TICKS = 5;
+    public static final double REACQUIRE_RANGE = 2.5;
 
     @Override
     public SkillValidation validate(SkillExecutionContext context) {
@@ -54,30 +61,28 @@ public final class CarvingThrustSkillHandler implements RuntimeWeaponSkillHandle
         String weaponId = context.weaponId().getPath();
         String skillId = context.skillData().getId();
         instance.setTargetEntityIds(List.of(target.getId()));
+        instance.initializeExecutionState(
+                new CarvingThrustExecutionState(
+                        context.nowTick(),
+                        target.getUUID()
+                )
+        );
 
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                weaponId,
-                skillId,
-                context.nowTick(),
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 context.skillData().getCooldown() * 20
         );
-        context.player().addEffect(new MobEffectInstance(
-                MobEffects.DAMAGE_RESISTANCE,
-                DAMAGE_RESISTANCE_TICKS,
-                DAMAGE_RESISTANCE_AMPLIFIER,
-                false,
-                false,
-                true
-        ));
-        CarvingKnifeThrustTracker.start(
-                context.player(),
-                context.nowTick(),
-                target,
-                weaponId,
-                skillId
+        instance.registerCommittedEffect(() ->
+                context.player().addEffect(new MobEffectInstance(
+                        MobEffects.DAMAGE_RESISTANCE,
+                        DAMAGE_RESISTANCE_TICKS,
+                        DAMAGE_RESISTANCE_AMPLIFIER,
+                        false,
+                        false,
+                        true
+                ))
         );
-
         WeaponSkillAnimationDispatcher.sendSkillAnim(
                 context.player(),
                 weaponId,
@@ -98,18 +103,25 @@ public final class CarvingThrustSkillHandler implements RuntimeWeaponSkillHandle
 
     @Override
     public SkillTickResult tick(SkillExecutionContext context, SkillInstance instance) {
-        return CarvingKnifeThrustTracker.isActive(context.player().getUUID())
-                ? SkillTickResult.CONTINUE
-                : SkillTickResult.COMPLETE;
+        return instance.requireExecutionState(
+                CarvingThrustExecutionState.class
+        ).advance(context);
     }
 
-    @Override
-    public void finish(
-            SkillExecutionContext context,
-            SkillInstance instance,
-            SkillInstance.EndReason reason
+    /** Arms this cast's bonus strike from an exact positive critical hit. */
+    public static boolean recordCriticalHit(
+            ServerPlayer player,
+            LivingEntity target
     ) {
-        CarvingKnifeThrustTracker.removePlayer(context.player().getUUID());
+        if (player == null || target == null) {
+            return false;
+        }
+        return WeaponSkillRuntime.activeExecutionState(
+                player.getUUID(),
+                BuiltinWeaponSkillHandlers.CARVING_THRUST,
+                CarvingThrustExecutionState.class
+        ).map(state -> state.recordCriticalHit(target))
+                .orElse(false);
     }
 
     private static LivingEntity findInitialTarget(SkillExecutionContext context) {

@@ -1,6 +1,6 @@
 package com.stardew.craft.combat.skill.handler;
 
-import com.stardew.craft.combat.skill.HolyBladeSanctuaryTracker;
+import com.stardew.craft.combat.skill.HolyBladeEffects;
 import com.stardew.craft.combat.skill.WeaponSkillCooldowns;
 import com.stardew.craft.combat.skill.runtime.RuntimeWeaponSkillHandler;
 import com.stardew.craft.combat.skill.runtime.SkillExecutionContext;
@@ -18,15 +18,17 @@ public final class HolyDomainSkillHandler implements RuntimeWeaponSkillHandler {
     public static final float ENERGY_COST = 10.0F;
     public static final int DURATION_TICKS = 80;
     public static final float MAX_RADIUS = 4.0F;
+    public static final int PULSE_INTERVAL_TICKS = 20;
+    public static final float PULSE_DAMAGE_MULTIPLIER = 0.75F;
+    public static final int HIT_CONTEXT_LIFETIME_TICKS = 5;
+    public static final int HEAL_AMOUNT = 4;
+    public static final int RING_DURATION_TICKS = 12;
 
     @Override
     public SkillValidation validate(SkillExecutionContext context) {
         if (WeaponSkillRuntime.hasActive(
                 context.player().getUUID(),
                 context.skillId()
-        ) || HolyBladeSanctuaryTracker.isActive(
-                context.player(),
-                context.nowTick()
         )) {
             return SkillValidation.reject(
                     SkillValidation.RejectionReason.INVALID_STATE
@@ -56,28 +58,30 @@ public final class HolyDomainSkillHandler implements RuntimeWeaponSkillHandler {
                     "Validated Dawn Sanctuary energy is no longer available"
             );
         }
-        if (!context.player().getAbilities().instabuild
-                && !PlayerStardewDataAPI.consumeEnergy(
-                        context.player(),
-                        ENERGY_COST
-                )) {
+        if (!WeaponSkillRuntime.consumeEnergyDuringBegin(
+                context,
+                instance,
+                ENERGY_COST
+        )) {
             throw new IllegalStateException(
                     "Validated Dawn Sanctuary energy payment failed"
             );
         }
 
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                context.weaponId().getPath(),
-                context.skillData().getId(),
-                context.nowTick(),
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 context.skillData().getCooldown() * 20
         );
-        HolyBladeSanctuaryTracker.start(
-                context.player(),
-                context.nowTick(),
-                DURATION_TICKS,
-                MAX_RADIUS
+        HolyDomainExecutionState executionState =
+                new HolyDomainExecutionState(
+                        context.nowTick(),
+                        DURATION_TICKS,
+                        MAX_RADIUS
+                );
+        instance.initializeExecutionState(executionState);
+        instance.registerCommittedEffect(() ->
+                HolyBladeEffects.playDomainActivate(context.player())
         );
     }
 
@@ -91,15 +95,9 @@ public final class HolyDomainSkillHandler implements RuntimeWeaponSkillHandler {
             SkillExecutionContext context,
             SkillInstance instance
     ) {
-        if (context.nowTick() >= instance.startGameTick() + DURATION_TICKS) {
-            return SkillTickResult.COMPLETE;
-        }
-        return HolyBladeSanctuaryTracker.isActive(
-                context.player(),
-                context.nowTick()
-        )
-                ? SkillTickResult.CONTINUE
-                : SkillTickResult.CANCEL;
+        return instance.requireExecutionState(
+                HolyDomainExecutionState.class
+        ).advance(context);
     }
 
     @Override
@@ -108,7 +106,8 @@ public final class HolyDomainSkillHandler implements RuntimeWeaponSkillHandler {
             SkillInstance instance,
             SkillInstance.EndReason reason
     ) {
-        HolyBladeSanctuaryTracker.stop(context.player());
+        instance.executionState(HolyDomainExecutionState.class)
+                .ifPresent(HolyDomainExecutionState::cancel);
     }
 
     static boolean canPayEnergy(

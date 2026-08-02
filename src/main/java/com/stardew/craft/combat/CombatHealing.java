@@ -103,6 +103,26 @@ public final class CombatHealing {
         return consumed;
     }
 
+    /** Restores a synchronous pre-commit health payment without heal hooks. */
+    public static void rollbackHealthPayment(
+            ServerPlayer player,
+            float spent
+    ) {
+        if (player == null || spent <= 0.0F) {
+            return;
+        }
+        if (DimensionDamageMapper.isInStardewDimension(player)) {
+            int current = PlayerStardewDataAPI.getHealth(player);
+            int maximum = PlayerStardewDataAPI.getMaxHealth(player);
+            PlayerStardewDataAPI.setHealth(
+                    player,
+                    Math.min(maximum, current + Math.round(spent))
+            );
+            return;
+        }
+        player.setHealth(Math.min(player.getMaxHealth(), player.getHealth() + spent));
+    }
+
     static float cappedIncrease(float current, float maximum, float requested) {
         if (requested <= 0.0F || current >= maximum) {
             return 0.0F;

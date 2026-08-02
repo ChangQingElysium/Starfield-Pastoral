@@ -11,9 +11,6 @@ import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
 import com.stardew.craft.effect.ModMobEffects;
 import com.stardew.craft.entity.projectile.TideAnchorProjectileEntity;
 import com.stardew.craft.player.PlayerStardewDataAPI;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -28,8 +25,6 @@ public final class TideAnchorSkillHandler implements RuntimeWeaponSkillHandler {
     public static final int PROJECTILE_RUNTIME_TICKS =
             TideAnchorProjectileEntity.MAX_LIFETIME_TICKS + 1;
     public static final int ANIMATION_TICKS = 12;
-
-    private final Map<UUID, State> states = new HashMap<>();
 
     @Override
     public SkillValidation validate(SkillExecutionContext context) {
@@ -83,29 +78,7 @@ public final class TideAnchorSkillHandler implements RuntimeWeaponSkillHandler {
                 PROJECTILE_SPEED,
                 PROJECTILE_INACCURACY
         );
-        if (!level.addFreshEntity(projectile)) {
-            throw new IllegalStateException(
-                    "Failed to add a Tide Anchor projectile"
-            );
-        }
-
-        try {
-            if (!context.player().getAbilities().instabuild
-                    && !PlayerStardewDataAPI.consumeEnergy(
-                            context.player(),
-                            ENERGY_COST
-                    )) {
-                throw new IllegalStateException(
-                        "Validated Tide Anchor energy payment failed"
-                );
-            }
-        } catch (RuntimeException exception) {
-            projectile.discard();
-            throw exception;
-        }
-
-        states.put(
-                instance.instanceId(),
+        instance.initializeExecutionState(
                 new State(
                         level.dimension(),
                         projectile,
@@ -113,15 +86,30 @@ public final class TideAnchorSkillHandler implements RuntimeWeaponSkillHandler {
                 )
         );
 
+        if (!WeaponSkillRuntime.consumeEnergyDuringBegin(
+                context,
+                instance,
+                ENERGY_COST
+        )) {
+            throw new IllegalStateException(
+                    "Validated Tide Anchor energy payment failed"
+            );
+        }
+
         String weaponId = context.weaponId().getPath();
         String skillId = context.skillData().getId();
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                weaponId,
-                skillId,
-                context.nowTick(),
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 context.skillData().getCooldown() * 20
         );
+        instance.registerCommittedEffect(() -> {
+            if (!level.addFreshEntity(projectile)) {
+                throw new IllegalStateException(
+                        "Failed to add a Tide Anchor projectile"
+                );
+            }
+        });
 
         // Preserve the authored presentation-only notification.
         WeaponSkillAnimationDispatcher.sendSkillAnim(
@@ -142,10 +130,7 @@ public final class TideAnchorSkillHandler implements RuntimeWeaponSkillHandler {
             SkillExecutionContext context,
             SkillInstance instance
     ) {
-        State state = states.get(instance.instanceId());
-        if (state == null) {
-            return SkillTickResult.CANCEL;
-        }
+        State state = instance.requireExecutionState(State.class);
         if (!isSameDimension(
                 state.dimension,
                 context.player().level().dimension()
@@ -169,7 +154,7 @@ public final class TideAnchorSkillHandler implements RuntimeWeaponSkillHandler {
             SkillInstance instance,
             SkillInstance.EndReason reason
     ) {
-        State state = states.remove(instance.instanceId());
+        State state = instance.executionState(State.class).orElse(null);
         if (state != null && !state.projectile.isRemoved()) {
             state.projectile.discard();
         }
@@ -202,7 +187,7 @@ public final class TideAnchorSkillHandler implements RuntimeWeaponSkillHandler {
         );
     }
 
-    private static final class State {
+    private static final class State implements SkillInstance.ExecutionState {
         private final ResourceKey<Level> dimension;
         private final TideAnchorProjectileEntity projectile;
         private final long endTick;

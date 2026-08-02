@@ -8,6 +8,20 @@
     "Fri": "stardewcraft.npc.sandy.fri",
     "Sat": "stardewcraft.npc.sandy.sat",
     "Sun": "stardewcraft.npc.sandy.sun",
-    "default": "stardewcraft.npc.sandy.default"
+    "default": "stardewcraft.npc.sandy.default",
+    "accept_866": "stardewcraft.npc.sandy.accept_866",
+    "AcceptGift_(O)18": "stardewcraft.npc.sandy.acceptgift_(o)18",
+    "AcceptGift_(O)StardropTea": "stardewcraft.npc.sandy.acceptgift_(o)stardroptea",
+    "AcceptGift_(O)418": "stardewcraft.npc.sandy.acceptgift_(o)418",
+    "GreenRain": "stardewcraft.npc.sandy.greenrain",
+    "married_Emily": "stardewcraft.npc.sandy.married_emily",
+    "AcceptGift_(O)402": "stardewcraft.npc.sandy.acceptgift_(o)402",
+    "Thu2": "stardewcraft.npc.sandy.thu2",
+    "Thu4": "stardewcraft.npc.sandy.thu4",
+    "Fri4": "stardewcraft.npc.sandy.fri4",
+    "Wed8": "stardewcraft.npc.sandy.wed8",
+    "Sun8": "stardewcraft.npc.sandy.sun8",
+    "Wed10": "stardewcraft.npc.sandy.wed10",
+    "Tue10": "stardewcraft.npc.sandy.tue10"
   }
 }

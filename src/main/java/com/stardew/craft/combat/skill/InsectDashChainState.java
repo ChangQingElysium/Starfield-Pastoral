@@ -1,6 +1,8 @@
 package com.stardew.craft.combat.skill;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.combat.skill.runtime.DeferredSkillCooldown;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
@@ -8,7 +10,6 @@ import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,32 +22,22 @@ import java.util.UUID;
 public final class InsectDashChainState {
 
     public static final int CHAIN_WINDOW_TICKS = 40; // 2s 内可继续连段
-    private static final String DEFAULT_WEAPON_ID = "insect_head";
-    private static final String DEFAULT_SKILL_ID = "insect_dash";
-    private static final int DEFAULT_COOLDOWN_TICKS = 400;
-
     private static final class State {
         private final int stage;
         private final long expireTick;
         private final ResourceKey<Level> dimension;
-        private final String weaponId;
-        private final String skillId;
-        private final int cooldownTicks;
+        private final DeferredSkillCooldown cooldown;
 
         private State(
                 int stage,
                 long expireTick,
                 ResourceKey<Level> dimension,
-                String weaponId,
-                String skillId,
-                int cooldownTicks
+                DeferredSkillCooldown cooldown
         ) {
             this.stage = stage;
             this.expireTick = expireTick;
             this.dimension = dimension;
-            this.weaponId = weaponId;
-            this.skillId = skillId;
-            this.cooldownTicks = cooldownTicks;
+            this.cooldown = cooldown;
         }
     }
 
@@ -72,43 +63,34 @@ public final class InsectDashChainState {
         return nextStageFor(getCurrentStage(player, nowTick));
     }
 
-    public static void setStage(ServerPlayer player, long nowTick, int stage) {
-        setStage(
-                player,
-                nowTick,
-                stage,
-                DEFAULT_WEAPON_ID,
-                DEFAULT_SKILL_ID,
-                DEFAULT_COOLDOWN_TICKS
-        );
-    }
-
     public static void setStage(
             ServerPlayer player,
             long nowTick,
             int stage,
-            String weaponId,
-            String skillId,
-            int cooldownTicks
+            DeferredSkillCooldown cooldown
     ) {
-        if (player == null) return;
+        if (player == null || cooldown == null) return;
         if (stage <= 0 || stage >= 3) {
-            ACTIVE.remove(player.getUUID());
+            clear(player);
             return;
         }
-        ACTIVE.put(player.getUUID(), new State(
+        State previous = ACTIVE.put(player.getUUID(), new State(
                 stage,
                 nowTick + CHAIN_WINDOW_TICKS,
                 player.level().dimension(),
-                weaponId,
-                skillId,
-                cooldownTicks
+                cooldown
         ));
+        if (previous != null && previous.cooldown != cooldown) {
+            WeaponSkillRuntime.abandonDeferredCooldown(previous.cooldown);
+        }
     }
 
     public static void clear(ServerPlayer player) {
         if (player == null) return;
-        ACTIVE.remove(player.getUUID());
+        State state = ACTIVE.remove(player.getUUID());
+        if (state != null) {
+            WeaponSkillRuntime.abandonDeferredCooldown(state.cooldown);
+        }
     }
 
     public static void cancel(ServerPlayer player, long nowTick) {
@@ -119,24 +101,14 @@ public final class InsectDashChainState {
         }
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void onPlayerTick(PlayerTickEvent.Post event) {
-        if (event.getEntity() instanceof ServerPlayer player) {
-            getCurrentStage(player, player.level().getGameTime());
-        }
+    public static void tick(ServerPlayer player, long nowTick) {
+        getCurrentStage(player, nowTick);
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onPlayerChangedDimension(
             PlayerEvent.PlayerChangedDimensionEvent event
     ) {
-        if (event.getEntity() instanceof ServerPlayer player) {
-            cancel(player, player.level().getGameTime());
-        }
-    }
-
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             cancel(player, player.level().getGameTime());
         }
@@ -160,17 +132,18 @@ public final class InsectDashChainState {
             long nowTick
     ) {
         ACTIVE.remove(player.getUUID());
-        WeaponSkillCooldowns.setCooldown(
+        WeaponSkillRuntime.commitDeferredCooldown(
                 player,
-                state.weaponId,
-                state.skillId,
-                nowTick,
-                state.cooldownTicks
+                state.cooldown,
+                nowTick
         );
     }
 
     /** Clean up state when a player logs out to prevent memory leaks. */
     public static void removePlayer(UUID playerId) {
-        ACTIVE.remove(playerId);
+        State state = ACTIVE.remove(playerId);
+        if (state != null) {
+            WeaponSkillRuntime.abandonDeferredCooldown(state.cooldown);
+        }
     }
 }

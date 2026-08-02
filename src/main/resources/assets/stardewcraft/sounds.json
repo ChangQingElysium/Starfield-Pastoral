@@ -458,7 +458,47 @@
   "slimedead": {
     "sounds": [
       {
-        "name": "stardewcraft:slime",
+        "name": "stardewcraft:event/linus/slimedead_1",
+        "stream": false
+      },
+      {
+        "name": "stardewcraft:event/linus/slimedead_2",
+        "stream": false
+      },
+      {
+        "name": "stardewcraft:event/linus/slimedead_3",
+        "stream": false
+      }
+    ]
+  },
+  "grassy_step": {
+    "sounds": [
+      {
+        "name": "stardewcraft:event/linus/grassy_step",
+        "stream": false
+      }
+    ]
+  },
+  "dirty_hit": {
+    "sounds": [
+      {
+        "name": "stardewcraft:event/linus/dirty_hit_1",
+        "stream": false
+      },
+      {
+        "name": "stardewcraft:event/linus/dirty_hit_2",
+        "stream": false
+      }
+    ]
+  },
+  "wood_whack": {
+    "sounds": [
+      {
+        "name": "stardewcraft:event/linus/wood_whack_1",
+        "stream": false
+      },
+      {
+        "name": "stardewcraft:event/linus/wood_whack_2",
         "stream": false
       }
     ]
@@ -1278,6 +1318,38 @@
       }
     ]
   },
+  "music_night_time": {
+    "sounds": [
+      {
+        "name": "stardewcraft:music/night_time",
+        "stream": true
+      }
+    ]
+  },
+  "music_echos": {
+    "sounds": [
+      {
+        "name": "stardewcraft:music/echos",
+        "stream": true
+      }
+    ]
+  },
+  "music_sweet": {
+    "sounds": [
+      {
+        "name": "stardewcraft:music/sweet",
+        "stream": true
+      }
+    ]
+  },
+  "music_sadpiano": {
+    "sounds": [
+      {
+        "name": "stardewcraft:music/sadpiano",
+        "stream": true
+      }
+    ]
+  },
   "music_spring_day_ambient": {
     "sounds": [
       {
@@ -1638,7 +1710,7 @@
   "reward": {
     "sounds": [
       {
-        "name": "stardewcraft:new_artifact",
+        "name": "stardewcraft:reward",
         "stream": false
       }
     ]

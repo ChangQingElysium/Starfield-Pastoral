@@ -1,6 +1,5 @@
 package com.stardew.craft.combat.skill.handler;
 
-import com.stardew.craft.combat.skill.DragontoothShivBreathTracker;
 import com.stardew.craft.item.weapon.WeaponData;
 import com.stardew.craft.item.weapon.WeaponRegistry;
 import com.stardew.craft.item.weapon.WeaponSkillData;
@@ -25,7 +24,7 @@ class DragontoothShivBreathSkillHandlerTest {
         assertEquals(10.0F, DragontoothShivBreathSkillHandler.ENERGY_COST);
         assertEquals(
                 120,
-                DragontoothShivBreathTracker.ACTIVE_DURATION_TICKS
+                DragontoothShivBreathSkillHandler.ACTIVE_DURATION_TICKS
         );
         assertEquals(
                 0,

@@ -3,13 +3,14 @@ package com.stardew.craft.combat.skill.handler;
 import com.stardew.craft.combat.skill.SkillContext;
 import com.stardew.craft.combat.skill.WeaponSkillCooldowns;
 import com.stardew.craft.combat.skill.WeaponSkillDamage;
-import com.stardew.craft.combat.skill.WickedKrisPoisonTracker;
 import com.stardew.craft.combat.skill.runtime.RuntimeWeaponSkillHandler;
 import com.stardew.craft.combat.skill.runtime.SkillExecutionContext;
 import com.stardew.craft.combat.skill.runtime.SkillInstance;
 import com.stardew.craft.combat.skill.runtime.SkillValidation;
+import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
 import com.stardew.craft.item.weapon.WeaponSkillData;
 import java.util.List;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
@@ -56,49 +57,43 @@ public final class WickedKrisVenomRippleSkillHandler implements RuntimeWeaponSki
 
         String weaponId = context.weaponId().getPath();
         String skillId = context.skillData().getId();
-        WeaponSkillCooldowns.setCooldown(
-                context.player(),
-                weaponId,
-                skillId,
-                context.nowTick(),
+        WeaponSkillRuntime.commitCooldown(
+                context,
+                instance,
                 context.skillData().getCooldown() * 20
         );
+        instance.initializeExecutionState(new State());
 
-        for (LivingEntity target : targets) {
-            target.invulnerableTime = 0;
-            target.hurtTime = 0;
-            WeaponSkillDamage.apply(
-                    context.player(),
-                    target,
-                    createHitContext(context.skillData()),
-                    context.weaponSnapshot(),
-                    context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS
-            );
-
-            // Authored behavior applies/refreshes poison after the attack attempt,
-            // regardless of whether the damage pipeline accepts that hit.
-            WickedKrisPoisonTracker.applyPoison(
-                    target,
-                    context.player(),
-                    context.nowTick(),
-                    POISON_DURATION_TICKS,
-                    POISON_STACKS,
-                    SCHEDULE_DETONATION,
-                    context.weaponSnapshot()
-            );
-        }
-
-        context.player().addEffect(new MobEffectInstance(
-                MobEffects.MOVEMENT_SPEED,
-                SPEED_DURATION_TICKS,
-                SPEED_AMPLIFIER,
-                false,
-                true,
-                true
-        ));
+        instance.registerCommittedEffect(() -> {
+            for (LivingEntity target : targets) {
+                WeaponSkillDamage.apply(
+                        context.player(),
+                        target,
+                        createHitContext(context.skillData()),
+                        context.weaponSnapshot(),
+                        context.nowTick() + HIT_CONTEXT_LIFETIME_TICKS,
+                        WeaponSkillDamage.AttackGatePolicy.SKILL_DAMAGE,
+                        WeaponSkillDamage.HitCooldownPolicy
+                                .BYPASS_FOR_AUTHORED_SEQUENCE
+                );
+            }
+        });
 
         // The legacy server branch intentionally sent no action/animation packet.
         // Its client-only visual call remains outside this server action contract.
+    }
+
+    /** Grants this cast's speed reward once after its first positive hit. */
+    public static boolean recordAppliedHit(ServerPlayer player) {
+        if (player == null) {
+            return false;
+        }
+        return WeaponSkillRuntime.activeExecutionState(
+                player.getUUID(),
+                BuiltinWeaponSkillHandlers.WICKED_KRIS_VENOM_RIPPLE,
+                State.class
+        ).map(state -> state.grantSpeedOnce(player))
+                .orElse(false);
     }
 
     static SkillContext createHitContext(WeaponSkillData skillData) {
@@ -124,5 +119,25 @@ public final class WickedKrisVenomRippleSkillHandler implements RuntimeWeaponSki
                         && entity.distanceToSqr(origin.x, origin.y, origin.z)
                                 <= TARGET_RADIUS * TARGET_RADIUS
         );
+    }
+
+    private static final class State implements SkillInstance.ExecutionState {
+        private boolean speedGranted;
+
+        private boolean grantSpeedOnce(ServerPlayer player) {
+            if (speedGranted) {
+                return false;
+            }
+            speedGranted = true;
+            player.addEffect(new MobEffectInstance(
+                    MobEffects.MOVEMENT_SPEED,
+                    SPEED_DURATION_TICKS,
+                    SPEED_AMPLIFIER,
+                    false,
+                    true,
+                    true
+            ));
+            return true;
+        }
     }
 }

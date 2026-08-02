@@ -51,10 +51,27 @@ public class GroundItemCommand implements EventCommand {
             return;
         }
 
+        Display.ItemDisplay display = createClientDisplay(
+                level, id, itemId, x, y, z, scale, yaw);
+        if (display != null) {
+            ACTIVE_DISPLAYS.add(display);
+        }
+    }
+
+    public static Display.ItemDisplay createClientDisplay(
+            ClientLevel level,
+            String id,
+            String itemId,
+            double x,
+            double y,
+            double z,
+            float scale,
+            float yaw
+    ) {
         ResourceLocation loc = ResourceLocation.parse(itemId);
         Item item = BuiltInRegistries.ITEM.get(loc);
         if (item == net.minecraft.world.item.Items.AIR) {
-            return;
+            return null;
         }
 
         CompoundTag tag = new CompoundTag();
@@ -79,13 +96,13 @@ public class GroundItemCommand implements EventCommand {
 
         Entity entity = EntityType.loadEntityRecursive(tag, level, e -> e);
         if (!(entity instanceof Display.ItemDisplay display)) {
-            return;
+            return null;
         }
 
         int fakeId = -(("grounditem_" + id).hashCode() & 0x7FFFFFFF) - 1;
         display.setId(fakeId);
         level.addEntity(display);
-        ACTIVE_DISPLAYS.add(display);
+        return display;
     }
 
     @Override

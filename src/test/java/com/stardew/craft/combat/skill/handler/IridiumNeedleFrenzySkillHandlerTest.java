@@ -1,6 +1,5 @@
 package com.stardew.craft.combat.skill.handler;
 
-import com.stardew.craft.combat.skill.IridiumNeedleFrenzyTracker;
 import com.stardew.craft.combat.skill.runtime.SkillInstance;
 import com.stardew.craft.item.weapon.WeaponData;
 import com.stardew.craft.item.weapon.WeaponRegistry;
@@ -26,16 +25,28 @@ class IridiumNeedleFrenzySkillHandlerTest {
         assertEquals(10.0F, IridiumNeedleFrenzySkillHandler.ENERGY_COST);
         assertEquals(120, IridiumNeedleFrenzySkillHandler.DURATION_TICKS);
         assertEquals(0, IridiumNeedleFrenzySkillHandler.SPEED_AMPLIFIER);
-        assertEquals(0.30F, IridiumNeedleFrenzyTracker.CRIT_CHANCE_BONUS);
-        assertEquals(5, IridiumNeedleFrenzyTracker.CRITICAL_HEAL_AMOUNT);
-        assertEquals(10.0F, IridiumNeedleFrenzyTracker.CRITICAL_ENERGY_RESTORE);
+        assertEquals(
+                0.30F,
+                IridiumNeedleFrenzySkillHandler.CRIT_CHANCE_BONUS
+        );
+        assertEquals(
+                5,
+                IridiumNeedleFrenzySkillHandler.CRITICAL_HEAL_AMOUNT
+        );
+        assertEquals(
+                10.0F,
+                IridiumNeedleFrenzySkillHandler
+                        .CRITICAL_ENERGY_RESTORE
+        );
         assertEquals(
                 40,
-                IridiumNeedleFrenzyTracker.CRITICAL_VULNERABLE_DURATION_TICKS
+                IridiumNeedleFrenzySkillHandler
+                        .CRITICAL_VULNERABLE_DURATION_TICKS
         );
         assertEquals(
                 1,
-                IridiumNeedleFrenzyTracker.CRITICAL_VULNERABLE_AMPLIFIER
+                IridiumNeedleFrenzySkillHandler
+                        .CRITICAL_VULNERABLE_AMPLIFIER
         );
         assertFalse(
                 new IridiumNeedleFrenzySkillHandler().completesImmediately()

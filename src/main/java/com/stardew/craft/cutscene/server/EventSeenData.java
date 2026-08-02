@@ -1,5 +1,6 @@
 package com.stardew.craft.cutscene.server;
 
+import com.stardew.craft.cutscene.data.EventRegistry;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -26,20 +27,33 @@ public class EventSeenData extends SavedData {
     // ─── public API ───
 
     public Set<String> getSeenEvents(UUID playerId) {
-        return playerEvents.getOrDefault(playerId, Set.of());
+        Set<String> seen = playerEvents.get(playerId);
+        if (seen == null || seen.isEmpty()) {
+            return Set.of();
+        }
+        Set<String> canonical = new HashSet<>();
+        for (String eventId : seen) {
+            canonical.add(EventRegistry.canonicalId(eventId));
+        }
+        return Set.copyOf(canonical);
     }
 
     public boolean hasSeen(UUID playerId, String eventId) {
         Set<String> seen = playerEvents.get(playerId);
-        return seen != null && seen.contains(eventId);
+        return seen != null && EventRegistry.equivalentIds(eventId).stream().anyMatch(seen::contains);
     }
 
     public boolean hasAnyPlayerSeen(String eventId) {
-        return playerEvents.values().stream().anyMatch(events -> events.contains(eventId));
+        Set<String> equivalentIds = EventRegistry.equivalentIds(eventId);
+        return playerEvents.values().stream()
+                .anyMatch(events -> equivalentIds.stream().anyMatch(events::contains));
     }
 
     public void markSeen(UUID playerId, String eventId) {
-        playerEvents.computeIfAbsent(playerId, k -> new HashSet<>()).add(eventId);
+        String canonicalId = EventRegistry.canonicalId(eventId);
+        Set<String> events = playerEvents.computeIfAbsent(playerId, k -> new HashSet<>());
+        events.removeAll(EventRegistry.equivalentIds(canonicalId));
+        events.add(canonicalId);
         setDirty();
     }
 
@@ -51,7 +65,7 @@ public class EventSeenData extends SavedData {
     public boolean clearSeen(UUID playerId, String eventId) {
         Set<String> seen = playerEvents.get(playerId);
         if (seen == null) return false;
-        boolean removed = seen.remove(eventId);
+        boolean removed = seen.removeAll(EventRegistry.equivalentIds(eventId));
         if (seen.isEmpty()) {
             playerEvents.remove(playerId);
         }
@@ -71,7 +85,11 @@ public class EventSeenData extends SavedData {
             CompoundTag playerTag = new CompoundTag();
             playerTag.putUUID("UUID", entry.getKey());
             ListTag eventList = new ListTag();
+            Set<String> canonicalIds = new HashSet<>();
             for (String eventId : entry.getValue()) {
+                canonicalIds.add(EventRegistry.canonicalId(eventId));
+            }
+            for (String eventId : canonicalIds) {
                 eventList.add(StringTag.valueOf(eventId));
             }
             playerTag.put("Events", eventList);

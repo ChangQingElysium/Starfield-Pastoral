@@ -32,6 +32,12 @@
     "money": 500
   },
   {
+    "id": "summer_14_1",
+    "text": "stardewcraft.mail.summer_14_1",
+    "background": 0,
+    "questId": "103"
+  },
+  {
     "id": "summer_19_1",
     "text": "stardewcraft.mail.summer_19_1",
     "background": 0
@@ -39,12 +45,19 @@
   {
     "id": "summer_20_1",
     "text": "stardewcraft.mail.summer_20_1",
-    "background": 0
+    "background": 0,
+    "questId": "104"
   },
   {
     "id": "summer_22_1",
     "text": "stardewcraft.mail.summer_22_1",
     "background": 0
+  },
+  {
+    "id": "summer_25_1",
+    "text": "stardewcraft.mail.summer_25_1",
+    "background": 0,
+    "questId": "105"
   },
   {
     "id": "summer_27",
@@ -55,5 +68,23 @@
     "id": "summer_28",
     "text": "stardewcraft.mail.summer_28",
     "background": 0
+  },
+  {
+    "id": "summer_6_2",
+    "text": "stardewcraft.mail.summer_6_2",
+    "background": 0,
+    "questId": "118"
+  },
+  {
+    "id": "summer_15_2",
+    "text": "stardewcraft.mail.summer_15_2",
+    "background": 0,
+    "questId": "119"
+  },
+  {
+    "id": "summer_21_2",
+    "text": "stardewcraft.mail.summer_21_2",
+    "background": 0,
+    "questId": "120"
   }
 ]

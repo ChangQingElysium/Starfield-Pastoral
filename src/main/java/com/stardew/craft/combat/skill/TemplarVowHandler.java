@@ -1,24 +1,19 @@
 package com.stardew.craft.combat.skill;
 
-import com.stardew.craft.StardewCraft;
+import com.stardew.craft.combat.skill.handler.TemplarVowSkillHandler;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
-@EventBusSubscriber(modid = StardewCraft.MODID)
 public final class TemplarVowHandler {
 
     private TemplarVowHandler() {}
 
     @SuppressWarnings("null")
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onPlayerHurt(LivingIncomingDamageEvent event) {
         if (!(event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player)) {
             return;
@@ -33,7 +28,12 @@ public final class TemplarVowHandler {
         }
 
         long nowTick = level.getGameTime();
-        if (!TemplarVowTracker.isActive(player, nowTick)) {
+        TemplarVowSkillHandler.CounterActivation activation =
+                TemplarVowSkillHandler.consumeCounter(
+                        player,
+                        nowTick
+                ).orElse(null);
+        if (activation == null) {
             return;
         }
 
@@ -44,20 +44,21 @@ public final class TemplarVowHandler {
 
         Entity src = event.getSource().getEntity();
         if (src instanceof LivingEntity attacker && attacker.isAlive()) {
-            SkillContext context = TemplarVowTracker.createStrikeContext(
-                    TemplarVowTracker.COUNTER_DAMAGE_MULTIPLIER
+            SkillContext context = TemplarVowSkillHandler.createStrikeContext(
+                    TemplarVowSkillHandler.COUNTER_DAMAGE_MULTIPLIER
             );
             WeaponDamageSnapshot weaponSnapshot =
-                    TemplarVowTracker.getWeaponSnapshot(player).orElse(null);
+                    activation.weaponSnapshot();
             long expireTick = nowTick
-                    + TemplarVowTracker.HIT_CONTEXT_LIFETIME_TICKS;
+                    + TemplarVowSkillHandler.HIT_CONTEXT_LIFETIME_TICKS;
             if (weaponSnapshot == null) {
                 WeaponSkillDamage.apply(
                         player,
                         attacker,
                         context,
                         expireTick,
-                        WeaponSkillDamage.AttackGatePolicy.RESPECT_AT_IMPACT
+                        WeaponSkillDamage.AttackGatePolicy.RESPECT_AT_IMPACT,
+                        WeaponSkillDamage.HitCooldownPolicy.RESPECT_VANILLA
                 );
             } else {
                 WeaponSkillDamage.apply(
@@ -66,11 +67,12 @@ public final class TemplarVowHandler {
                         context,
                         weaponSnapshot,
                         expireTick,
-                        WeaponSkillDamage.AttackGatePolicy.RESPECT_AT_IMPACT
+                        WeaponSkillDamage.AttackGatePolicy.RESPECT_AT_IMPACT,
+                        WeaponSkillDamage.HitCooldownPolicy.RESPECT_VANILLA
                 );
             }
         }
 
-        TemplarVowTracker.endNow(player, nowTick);
+        TemplarVowSkillHandler.finishCounter(player, nowTick);
     }
 }

@@ -118,10 +118,10 @@ public record FarmSelectionSubmitPayload(
         context.enqueueWork(() -> {
             if (!(context.player() instanceof ServerPlayer player)) return;
 
-            // This payload is sent immediately before the profile screen closes. Clear the cached
-            // menu state now so the next server tick cannot keep the Stardew world paused while
-            // the farm initialization task is running.
-            com.stardew.craft.time.StardewTimePauseService.updateClientState(player, false);
+            // This payload is sent immediately before the profile screen closes. Clear only its
+            // pause classification so farm initialization can run, but keep guiOpen true until
+            // the client actually reports that the screen has closed.
+            com.stardew.craft.time.StardewTimePauseService.updateClientState(player, false, true);
 
             String preferredName = sanitizeProfileText(payload.preferredName(), 48);
             String favoriteThing = sanitizeProfileText(payload.favoriteThing(), 64);

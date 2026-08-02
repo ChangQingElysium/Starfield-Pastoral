@@ -1,7 +1,6 @@
 package com.stardew.craft.combat.skill.handler;
 
 import com.stardew.craft.combat.skill.SkillContext;
-import com.stardew.craft.combat.skill.StarfallTracker;
 import com.stardew.craft.combat.skill.StartrailTracker;
 import com.stardew.craft.item.weapon.WeaponData;
 import com.stardew.craft.item.weapon.WeaponRegistry;
@@ -84,7 +83,7 @@ class GalaxyJudgementSkillHandlerTest {
         );
         assertEquals(
                 12,
-                StarfallTracker.DEFAULT_STRIKES
+                GalaxyJudgementSkillHandler.STARFALL_STRIKE_COUNT
                         * (1 + GalaxyJudgementSkillHandler
                                 .extraHitsForStacks(12))
         );

@@ -11,7 +11,10 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
-public record StardewPauseStatePayload(boolean nonGameplay) implements CustomPacketPayload {
+public record StardewPauseStatePayload(
+        boolean nonGameplay,
+        boolean guiOpen
+) implements CustomPacketPayload {
 
     public static final Type<StardewPauseStatePayload> TYPE = new Type<>(
         ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "pause_state")
@@ -20,6 +23,8 @@ public record StardewPauseStatePayload(boolean nonGameplay) implements CustomPac
     public static final StreamCodec<ByteBuf, StardewPauseStatePayload> STREAM_CODEC = StreamCodec.composite(
         ByteBufCodecs.BOOL,
         StardewPauseStatePayload::nonGameplay,
+        ByteBufCodecs.BOOL,
+        StardewPauseStatePayload::guiOpen,
         StardewPauseStatePayload::new
     );
 
@@ -31,7 +36,8 @@ public record StardewPauseStatePayload(boolean nonGameplay) implements CustomPac
     public static void handle(StardewPauseStatePayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
             if (context.player() instanceof ServerPlayer player) {
-                StardewTimePauseService.updateClientState(player, payload.nonGameplay());
+                StardewTimePauseService.updateClientState(
+                        player, payload.nonGameplay(), payload.guiOpen());
             }
         });
     }

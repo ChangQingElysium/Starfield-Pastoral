@@ -183,27 +183,45 @@ class DamagePipelineTest {
     }
 
     @Test
-    void stardewProfessionRoundingIsExplicitAndOrderedAfterAttackBonus() {
-        DamageRequest request = DamageRequest.builder("profession_test")
+    void desperadoOnlyDoublesCriticalDamageAfterAttackBonus() {
+        DamageRequest request = DamageRequest.builder(
+                        "profession_test"
+                )
                 .sourceKind(DamageRequest.SourceKind.PLAYER_WEAPON)
                 .baseDamage(5.0f, 5.0f)
                 .critical(1.0f, 3.0f, true)
                 .addPreDefenseAdjustment(DamageAdjustment.add("temporary_attack", 3.0f))
                 .addPreDefenseAdjustment(DamageAdjustment.multiplyCeil("profession_fighter", 1.10f))
-                .addPreDefenseAdjustment(DamageAdjustment.multiplyFloor("profession_desperado", 2.0f))
+                .addCriticalOnlyAdjustment(
+                        DamageAdjustment.multiplyFloor(
+                                "profession_desperado",
+                                2.0f
+                        )
+                )
                 .variance(1.0f, 1.0f)
                 .defense(0.0f, false)
                 .accuracy(0.0f, 0.0f)
                 .build();
 
-        DamageOutcome outcome = DamagePipeline.evaluate(
+        DamageOutcome critical = DamagePipeline.evaluate(
                 request,
                 sequence(0.0f, 0.0f, 0.99f)
         );
+        DamageOutcome ordinary = DamagePipeline.evaluate(
+                request.toBuilder()
+                        .critical(0.0f, 3.0f, false)
+                        .build(),
+                sequence(0.0f, 0.99f, 0.0f, 0.99f)
+        );
 
-        assertEquals(40.0f, outcome.getFinalDamage());
-        assertTrue(outcome.toExplainLines().stream()
+        assertEquals(40.0f, critical.getFinalDamage());
+        assertEquals(9.0f, ordinary.getFinalDamage());
+        assertTrue(critical.toExplainLines().stream()
                 .anyMatch(line -> line.contains("profession_fighter") && line.contains("ceiling")));
+        assertTrue(critical.toExplainLines().stream()
+                .anyMatch(line -> line.contains("profession_desperado")));
+        assertFalse(ordinary.toExplainLines().stream()
+                .anyMatch(line -> line.contains("profession_desperado")));
     }
 
     @Test

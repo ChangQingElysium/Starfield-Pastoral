@@ -367,9 +367,9 @@ public final class Config {
             LADDER_BASE_CHANCE = builder
                     .comment("Base chance for a mine ladder to appear after breaking a countable mine stone.",
                             "The final chance also includes stones-left, luck, enemy-clear, and buff modifiers.",
-                            "Value is a decimal chance: 0.012 means 1.2%.")
+                            "The Stardew Valley base value is 0.02 (2%).")
                     .translation("config.stardewcraft.mining.ladder_base_chance")
-                    .defineInRange("ladderBaseChance", 0.012D, 0.0D, 1.0D);
+                    .defineInRange("ladderBaseChance", 0.02D, 0.0D, 1.0D);
             builder.pop();
         }
     }

@@ -34,6 +34,10 @@ public class ItemPickupEventHandler {
 
         ItemStack original = event.getOriginalStack();
         if (original.isEmpty()) return;
+        // Object 102 presents the original pickup/hold-up feedback when used
+        // to advance the library, so the physical debug-friendly item doesn't
+        // produce a duplicate generic pickup message.
+        if (original.is(com.stardew.craft.item.ModItems.LOST_BOOK.get())) return;
 
         int count = original.getCount();
         boolean expensive = StardewItemDataApi.getSellPrice(original) > EXPENSIVE_THRESHOLD;

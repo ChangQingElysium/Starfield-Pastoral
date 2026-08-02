@@ -1,6 +1,5 @@
 package com.stardew.craft.combat.skill.handler;
 
-import com.stardew.craft.combat.skill.HolyBladeSanctuaryTracker;
 import com.stardew.craft.item.weapon.WeaponData;
 import com.stardew.craft.item.weapon.WeaponRegistry;
 import com.stardew.craft.item.weapon.WeaponSkillData;
@@ -25,27 +24,27 @@ class HolyDomainSkillHandlerTest {
         assertEquals(10.0F, HolyDomainSkillHandler.ENERGY_COST);
         assertEquals(80, HolyDomainSkillHandler.DURATION_TICKS);
         assertEquals(4.0F, HolyDomainSkillHandler.MAX_RADIUS);
-        assertEquals(20, HolyBladeSanctuaryTracker.PULSE_INTERVAL_TICKS);
+        assertEquals(20, HolyDomainSkillHandler.PULSE_INTERVAL_TICKS);
         assertEquals(
                 0.75F,
-                HolyBladeSanctuaryTracker.PULSE_DAMAGE_MULTIPLIER
+                HolyDomainSkillHandler.PULSE_DAMAGE_MULTIPLIER
         );
         assertEquals(
                 5,
-                HolyBladeSanctuaryTracker.HIT_CONTEXT_LIFETIME_TICKS
+                HolyDomainSkillHandler.HIT_CONTEXT_LIFETIME_TICKS
         );
-        assertEquals(4, HolyBladeSanctuaryTracker.HEAL_AMOUNT);
-        assertEquals(12, HolyBladeSanctuaryTracker.RING_DURATION_TICKS);
+        assertEquals(4, HolyDomainSkillHandler.HEAL_AMOUNT);
+        assertEquals(12, HolyDomainSkillHandler.RING_DURATION_TICKS);
         assertEquals(
                 4,
                 HolyDomainSkillHandler.DURATION_TICKS
-                        / HolyBladeSanctuaryTracker.PULSE_INTERVAL_TICKS
+                        / HolyDomainSkillHandler.PULSE_INTERVAL_TICKS
         );
         assertEquals(
                 16,
-                HolyBladeSanctuaryTracker.HEAL_AMOUNT
+                HolyDomainSkillHandler.HEAL_AMOUNT
                         * (HolyDomainSkillHandler.DURATION_TICKS
-                        / HolyBladeSanctuaryTracker.PULSE_INTERVAL_TICKS)
+                        / HolyDomainSkillHandler.PULSE_INTERVAL_TICKS)
         );
         assertFalse(new HolyDomainSkillHandler().completesImmediately());
     }

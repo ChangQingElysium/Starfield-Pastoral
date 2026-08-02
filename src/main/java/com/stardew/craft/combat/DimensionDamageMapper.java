@@ -68,6 +68,36 @@ public class DimensionDamageMapper {
             return stardewHealth / HEALTH_RATIO;
         }
     }
+
+    /**
+     * Converts authored Stardew health loss into the equivalent Minecraft
+     * health loss for the player's current pair of health pools.
+     *
+     * <p>This is the inverse of the environment-damage boundary in
+     * {@link IncomingDamageResolver}. It lets an authored hazard enter the
+     * normal {@code hurt} lifecycle in either dimension without changing its
+     * share of the player's health bar.</p>
+     */
+    public static float toMinecraftHealthDamage(
+            float stardewDamage,
+            float stardewMaximumHealth,
+            float minecraftMaximumHealth
+    ) {
+        if (!Float.isFinite(stardewDamage)
+                || !Float.isFinite(stardewMaximumHealth)
+                || !Float.isFinite(minecraftMaximumHealth)) {
+            throw new IllegalArgumentException(
+                    "Health damage boundary values must be finite"
+            );
+        }
+        if (stardewDamage <= 0.0F) {
+            return 0.0F;
+        }
+        float safeStardewMaximum = Math.max(1.0F, stardewMaximumHealth);
+        float safeMinecraftMaximum = Math.max(1.0F, minecraftMaximumHealth);
+        return stardewDamage
+                * (safeMinecraftMaximum / safeStardewMaximum);
+    }
     
     /** 伤害不再进行反向维度换算；保留入口以兼容现有调用。 */
     public static float reverseMapDamage(float mcDamage, boolean isInStardewDimension) {

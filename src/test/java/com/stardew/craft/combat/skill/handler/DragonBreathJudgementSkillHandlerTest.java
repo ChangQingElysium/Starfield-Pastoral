@@ -87,7 +87,7 @@ class DragonBreathJudgementSkillHandlerTest {
     }
 
     @Test
-    void refundUsesTargetsInTheArcAndCapsAtFive() {
+    void refundUsesUniquePositiveAppliedTargetsAndCapsAtFive() {
         assertEquals(
                 0,
                 DragonBreathJudgementSkillHandler
