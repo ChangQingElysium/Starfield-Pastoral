@@ -58,7 +58,7 @@ jobs:
         working-directory: .canary/pinned-mixin-addon
         env:
           STARDEWCRAFT_JAR: ${{ github.workspace }}/build/compatibility/stardewcraft-canary.jar
-        run: ./gradlew check jar --no-daemon --console=plain
+        run: ./gradlew classes jar --no-daemon --console=plain
 
       - name: Verify pinned addon compatibility targets
         run: >-

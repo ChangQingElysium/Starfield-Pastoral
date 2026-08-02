@@ -14,6 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 public class WeaponData {
     
     private final String id;
+    private final String legacyName;
     private final WeaponType weaponType;
     private final int level;
     private final int damageMin;
@@ -27,9 +28,11 @@ public class WeaponData {
     private final double knockback;
     private final WeaponSkillData skill1;
     private final WeaponSkillData skill2;
+    private final String legacyLoreKey;
     
     private WeaponData(Builder builder) {
         this.id = builder.id;
+        this.legacyName = builder.legacyName;
         this.weaponType = Objects.requireNonNull(builder.weaponType, "weaponType");
         this.level = builder.level;
         this.damageMin = builder.damageMin;
@@ -47,23 +50,36 @@ public class WeaponData {
                 : StardewWeaponKnockbackRules.defaultRawKnockback(weaponType);
         this.skill1 = builder.skill1;
         this.skill2 = builder.skill2;
+        this.legacyLoreKey = builder.legacyLoreKey;
     }
     
     // Getters
     public String getId() { return id; }
+    /** @deprecated Display names are translation-driven; retained for API compatibility. */
+    @Deprecated(forRemoval = false)
+    public String getName() { return legacyName; }
     public WeaponType getWeaponType() { return weaponType; }
     public int getLevel() { return level; }
     public int getDamageMin() { return damageMin; }
     public int getDamageMax() { return damageMax; }
     public double getCritChance() { return critChance; }
     public double getCritMultiplier() { return critMultiplier; }
+    /** @deprecated Use {@link #getCritMultiplier()}. */
+    @Deprecated(forRemoval = false)
+    public double getCritPower() { return critMultiplier; }
     public int getSpeed() { return speed; }
     public int getRawSpeed() { return rawSpeed; }
     public int getDefense() { return defense; }
     public int getPrecision() { return precision; }
     public double getKnockback() { return knockback; }
+    /** @deprecated Use {@link #getKnockback()}. */
+    @Deprecated(forRemoval = false)
+    public double getWeight() { return knockback; }
     public WeaponSkillData getSkill1() { return skill1; }
     public WeaponSkillData getSkill2() { return skill2; }
+    /** @deprecated Lore is translation-driven; retained for API compatibility. */
+    @Deprecated(forRemoval = false)
+    public String getLoreKey() { return legacyLoreKey; }
 
     public WeaponSkillData getSkill(boolean majorSkill) {
         return majorSkill ? skill2 : skill1;
@@ -89,6 +105,7 @@ public class WeaponData {
     
     public static class Builder {
         private final String id;
+        private String legacyName = "";
         private WeaponType weaponType = WeaponType.SWORD;
         private int level = 1;
         private int damageMin = 1;
@@ -102,9 +119,17 @@ public class WeaponData {
         private Double knockback;
         private WeaponSkillData skill1 = null;
         private WeaponSkillData skill2 = null;
+        private String legacyLoreKey = "";
         
         public Builder(String id) {
             this.id = id;
+        }
+
+        /** @deprecated Display names are translation-driven; retained for API compatibility. */
+        @Deprecated(forRemoval = false)
+        public Builder name(String name) {
+            this.legacyName = name == null ? "" : name;
+            return this;
         }
         
         public Builder type(WeaponType type) {
@@ -133,6 +158,12 @@ public class WeaponData {
             this.critMultiplier = multiplier;
             return this;
         }
+
+        /** @deprecated Use {@link #critMultiplier(double)}. */
+        @Deprecated(forRemoval = false)
+        public Builder critPower(double power) {
+            return critMultiplier(power);
+        }
         
         public Builder speed(int speed) {
             this.speed = speed;
@@ -160,6 +191,12 @@ public class WeaponData {
             this.knockback = knockback;
             return this;
         }
+
+        /** @deprecated Use {@link #knockback(double)}. */
+        @Deprecated(forRemoval = false)
+        public Builder weight(double weight) {
+            return knockback(weight);
+        }
         
         public Builder skill1(WeaponSkillData skill) {
             this.skill1 = skill;
@@ -168,6 +205,13 @@ public class WeaponData {
         
         public Builder skill2(WeaponSkillData skill) {
             this.skill2 = skill;
+            return this;
+        }
+
+        /** @deprecated Lore is translation-driven; retained for API compatibility. */
+        @Deprecated(forRemoval = false)
+        public Builder loreKey(String loreKey) {
+            this.legacyLoreKey = loreKey == null ? "" : loreKey;
             return this;
         }
         
