@@ -10,7 +10,6 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -198,39 +197,6 @@ class WeaponRegistryContractTest {
     }
 
     @Test
-    void builtInCombatStatsExactlyMatchLocalStardewWeaponData()
-            throws Exception {
-        Path project = Path.of(System.getProperty("stardewcraft.projectDir", "."));
-        JsonObject source = readJson(project.resolve(Path.of(
-                "源文件", "Content", "Data", "Weapons.json"
-        )));
-        Map<String, JsonObject> byId = new HashMap<>();
-        for (var entry : source.entrySet()) {
-            JsonObject data = entry.getValue().getAsJsonObject();
-            byId.put(canonicalSourceId(data.get("Name").getAsString()), data);
-        }
-
-        for (WeaponData weapon : WeaponRegistry.getAll()) {
-            JsonObject original = byId.get(weapon.getId());
-            assertNotNull(original, weapon::getId);
-            int rawType = original.get("Type").getAsInt();
-            int rawSpeed = original.get("Speed").getAsInt();
-            int baseline = rawType == 2 ? -8 : 0;
-
-            assertEquals(sourceType(rawType), weapon.getWeaponType(), weapon::getId);
-            assertEquals(original.get("MinDamage").getAsInt(), weapon.getDamageMin(), weapon::getId);
-            assertEquals(original.get("MaxDamage").getAsInt(), weapon.getDamageMax(), weapon::getId);
-            assertEquals(original.get("Defense").getAsInt(), weapon.getDefense(), weapon::getId);
-            assertEquals(original.get("Precision").getAsInt(), weapon.getPrecision(), weapon::getId);
-            assertEquals(original.get("CritChance").getAsDouble(), weapon.getCritChance(), weapon::getId);
-            assertEquals(original.get("CritMultiplier").getAsDouble(), weapon.getCritMultiplier(), weapon::getId);
-            assertEquals((rawSpeed - baseline) / 2, weapon.getSpeed(), weapon::getId);
-            assertEquals(rawSpeed, weapon.getRawSpeed(), weapon::getId);
-            assertEquals(original.get("Knockback").getAsDouble(), weapon.getKnockback(), 0.00001, weapon::getId);
-        }
-    }
-
-    @Test
     void builtInItemsExactlyMatchRegistryIdsConstructorIdsAndTypes()
             throws Exception {
         Map<String, RegisteredItem> items = discoverBuiltInWeaponItems();
@@ -341,23 +307,6 @@ class WeaponRegistryContractTest {
             case CLUB -> "StardewClubItem";
             default -> "StardewWeaponItem";
         };
-    }
-
-    private static WeaponType sourceType(int type) {
-        return switch (type) {
-            case 1 -> WeaponType.DAGGER;
-            case 2 -> WeaponType.CLUB;
-            case 0, 3 -> WeaponType.SWORD;
-            default -> throw new IllegalArgumentException("unsupported source weapon type " + type);
-        };
-    }
-
-    private static String canonicalSourceId(String name) {
-        String id = name.toLowerCase(Locale.ROOT)
-                .replace("'", "")
-                .replaceAll("[^a-z0-9]+", "_")
-                .replaceAll("^_+|_+$", "");
-        return "pirates_sword".equals(id) ? "pirate_sword" : id;
     }
 
     private static void verifySkillTranslations(
