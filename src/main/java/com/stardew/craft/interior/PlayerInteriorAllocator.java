@@ -97,7 +97,6 @@ public class PlayerInteriorAllocator extends SavedData {
             if (ok) {
                 ccPlaced.add(playerUUID);
                 setDirty();
-                spawnCCExitPortals(level, origin);
                 // 放置 JunimoNote
                 com.stardew.craft.communitycenter.JunimoNotePlacer.ensureJunimoNotes(level, playerUUID, origin);
                 // 强制加载区块
@@ -106,6 +105,11 @@ public class PlayerInteriorAllocator extends SavedData {
             } else {
                 StardewCraft.LOGGER.error("[INTERIOR-ALLOC] Failed to load CC for player {} at {}", playerUUID, origin);
             }
+        }
+        // This is deliberately outside the first-placement branch: old saves may already have a
+        // CC allocation whose exit was erased by the final refurbished structure restore.
+        if (ccPlaced.contains(playerUUID)) {
+            InteriorSubspaceManager.ensureCommunityCenterExitPortal(level, origin);
         }
         return origin;
     }
@@ -174,7 +178,7 @@ public class PlayerInteriorAllocator extends SavedData {
             if (ccData.areAllAreasComplete(uuid)) {
                 com.stardew.craft.communitycenter.restore.AreaRestoreHandler.restoreAllRemaining(level, origin);
             }
-            spawnCCExitPortals(level, origin);
+            InteriorSubspaceManager.ensureCommunityCenterExitPortal(level, origin);
             com.stardew.craft.communitycenter.JunimoNotePlacer.ensureJunimoNotes(level, uuid, origin);
             forceChunksForCC(level, origin, true);
         }
@@ -326,15 +330,6 @@ public class PlayerInteriorAllocator extends SavedData {
     }
 
     // ── 交互实体生成 ──
-
-    private void spawnCCExitPortals(ServerLevel level, BlockPos origin) {
-        BlockPos exitPortal = origin.offset(InteriorSubspaceManager.CC_INDOOR_EXIT_PORTAL_OFFSET);
-        InteriorSubspaceManager.spawnInteractionArea(
-            level, exitPortal, 2, 1, 2,
-            "sdv_portal_marker:cc_inside",
-            "sdv_portal_target:community_center_exit"
-        );
-    }
 
     private void spawnGHExitPortals(ServerLevel level, BlockPos origin) {
         BlockPos exitPortal = origin.offset(InteriorSubspaceManager.GREENHOUSE_INDOOR_EXIT_PORTAL_OFFSET);

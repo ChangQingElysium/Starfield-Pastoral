@@ -6,6 +6,7 @@ import com.stardew.craft.communitycenter.cutscene.GoodbyeDanceCutscene;
 import com.stardew.craft.communitycenter.data.BundleDataManager;
 import com.stardew.craft.communitycenter.junimo.JunimoSpawner;
 import com.stardew.craft.communitycenter.state.CCStoryFlags;
+import com.stardew.craft.interior.InteriorSubspaceManager;
 import com.stardew.craft.interior.PlayerInteriorAllocator;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -61,13 +62,16 @@ public final class CommunityCenterSystem {
         if (insideNow && !wasInside) {
             // Player just entered CC — spawn idle Junimos (SDV resetSharedState parity)
             playersInsideCC.add(sp.getUUID());
+            net.minecraft.core.BlockPos ccOrigin = alloc.getCCOrigin(sp.getUUID());
+            // Also runs when a save is loaded while the player is already inside the CC. Register
+            // and restore the exit before any story-specific early return can run.
+            InteriorSubspaceManager.ensureCommunityCenterExitPortal(serverLevel, ccOrigin);
             // SDV parity (CommunityCenter.cs:540): Joja 会员进入 CC 不再生成 Junimo / JunimoNote —
             // 仓库外观、Junimo 已撤走的语义。
             if (CCStoryFlags.isJojaMember(sp)) {
                 return;
             }
             boolean friendly = CCStoryFlags.canReadJunimoText(sp);
-            net.minecraft.core.BlockPos ccOrigin = alloc.getCCOrigin(sp.getUUID());
             JunimoSpawner.spawnIdleJunimos(serverLevel, friendly, sp.getUUID(), ccOrigin);
             // Also ensure JunimoNotes are placed for this player's CC
             JunimoNotePlacer.ensureJunimoNotes(serverLevel, sp.getUUID(), ccOrigin);

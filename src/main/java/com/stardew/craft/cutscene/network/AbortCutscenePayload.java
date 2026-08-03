@@ -23,8 +23,12 @@ public record AbortCutscenePayload(String eventId, long sessionId) implements Cu
     public static void handle(AbortCutscenePayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
             ServerPlayer player = (ServerPlayer) context.player();
-            com.stardew.craft.cutscene.server.ServerCutsceneTracker.abortSession(
+            boolean aborted = com.stardew.craft.cutscene.server.ServerCutsceneTracker.abortSession(
                     player, payload.sessionId, payload.eventId);
+            if (aborted) {
+                com.stardew.craft.festival.ActiveFestivalHandlers
+                        .onCutsceneUnavailable(player, payload.eventId);
+            }
         });
     }
 

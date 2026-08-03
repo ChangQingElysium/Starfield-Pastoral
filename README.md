@@ -1,5 +1,5 @@
 <p align="center">
-  <img src=".github/assets/starfield-pastoral-hero.png" alt="A farm, river, and mine under a starry sky" width="100%">
+  <img src="https://raw.githubusercontent.com/ChangQingElysium/Starfield-Pastoral/main/.github/assets/starfield-pastoral-hero.png" alt="A farm, river, and mine under a starry sky" width="100%">
 </p>
 
 <h1 align="center">Starfield Pastoral · 星野牧歌</h1>
@@ -12,6 +12,7 @@
 
 <p align="center">
   <a href="https://www.curseforge.com/minecraft/mc-mods/starfield-pastoral"><img src="https://img.shields.io/curseforge/dt/1525680?style=flat-square&logo=curseforge&label=Downloads&color=F16436" alt="CurseForge downloads"></a>
+  <a href="https://modrinth.com/mod/starfield-pastoral"><img src="https://img.shields.io/modrinth/dt/starfield-pastoral?style=flat-square&logo=modrinth&label=Downloads&color=00AF5C" alt="Modrinth downloads"></a>
   <a href="https://github.com/ChangQingElysium/Starfield-Pastoral/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/ChangQingElysium/Starfield-Pastoral/build.yml?branch=main&style=flat-square&logo=github&label=Build" alt="Build status"></a>
   <img src="https://img.shields.io/badge/Minecraft-1.21.1-62B47A?style=flat-square" alt="Minecraft 1.21.1">
   <img src="https://img.shields.io/badge/NeoForge-21.1.217-E78A2F?style=flat-square" alt="NeoForge 21.1.217">
@@ -20,6 +21,8 @@
 
 <p align="center">
   <a href="https://www.curseforge.com/minecraft/mc-mods/starfield-pastoral">Download on CurseForge</a>
+  ·
+  <a href="https://modrinth.com/mod/starfield-pastoral">Download on Modrinth</a>
   ·
   <a href="https://discord.gg/cnG3eE58Au">Join Discord</a>
   ·
@@ -63,8 +66,8 @@ Current builds include farming, animals, fishing, NPC schedules, dialogue, mail,
 | Mod loader | NeoForge 21.1.217 or a compatible newer build |
 | Java | 21 |
 | Environment | Client and server |
-| Source version | 0.5.4fix1 |
-| Official download | [CurseForge](https://www.curseforge.com/minecraft/mc-mods/starfield-pastoral) |
+| Source version | 0.5.4fix2 |
+| Official downloads | [CurseForge](https://www.curseforge.com/minecraft/mc-mods/starfield-pastoral) · [Modrinth](https://modrinth.com/mod/starfield-pastoral) |
 
 JEI is optional and adds information for fishing and other content. Read the release notes before updating an existing world.
 
@@ -79,9 +82,9 @@ JEI is optional and adds information for fishing and other content. Read the rel
 
 Data packs and NeoForge add-ons can use the 0.5 API to extend supported farm layouts, buildings, locations, and other content.
 
-- Read the [0.5 add-on and data-pack API guide](docs/0.5-addon-api.md).
-- Review the [example data pack](examples/stardewcraft-data-pack) and [example NeoForge add-on](examples/stardewcraft-addon).
-- Check player-facing changes in the [changelog](CHANGELOG.md).
+- Read the [0.5 add-on and data-pack API guide](https://github.com/ChangQingElysium/Starfield-Pastoral/blob/main/docs/0.5-addon-api.md).
+- Review the [example data pack](https://github.com/ChangQingElysium/Starfield-Pastoral/tree/main/examples/stardewcraft-data-pack) and [example NeoForge add-on](https://github.com/ChangQingElysium/Starfield-Pastoral/tree/main/examples/stardewcraft-addon).
+- Check player-facing changes in the [changelog](https://github.com/ChangQingElysium/Starfield-Pastoral/blob/main/CHANGELOG.md).
 
 Common local validation commands:
 
@@ -110,7 +113,7 @@ The mod blocks entry to the Stardew Valley dimension when these files are missin
 
 Russian localization includes work by Annelo and contributors to [annel0/Starfield-Pastoral](https://github.com/annel0/Starfield-Pastoral). Existing official localization text takes priority.
 
-Starfield Pastoral uses a [custom non-commercial fan project license](LICENSE.md). Original project code and content belong to the project team and contributors. Third-party and game-derived materials remain the property of their respective rightsholders. The project license does not cover those materials.
+Starfield Pastoral uses a [custom non-commercial fan project license](https://github.com/ChangQingElysium/Starfield-Pastoral/blob/main/LICENSE.md). Original project code and content belong to the project team and contributors. Third-party and game-derived materials remain the property of their respective rightsholders. The project license does not cover those materials.
 
 Starfield Pastoral has no affiliation with ConcernedApe, Mojang, or Microsoft.
 
@@ -121,7 +124,7 @@ Starfield Pastoral has no affiliation with ConcernedApe, Mojang, or Microsoft.
 
 目前可体验种植、养殖、钓鱼、居民互动、矿洞、商店、社区中心和多人联机等内容。项目仍处于 Alpha 开发阶段，更新前请备份存档。
 
-- [前往 CurseForge 下载](https://www.curseforge.com/minecraft/mc-mods/starfield-pastoral)
+- [前往 CurseForge 下载](https://www.curseforge.com/minecraft/mc-mods/starfield-pastoral) · [前往 Modrinth 下载](https://modrinth.com/mod/starfield-pastoral)
 - [加入 Discord](https://discord.gg/cnG3eE58Au)
 - QQ 群：`961767762`
 

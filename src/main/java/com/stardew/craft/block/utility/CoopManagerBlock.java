@@ -175,6 +175,14 @@ public class CoopManagerBlock extends Block {
             rejectStaleRelocation(level, pos, serverPlayer);
             return;
         }
+        java.util.UUID destinationOwner = com.stardew.craft.farm.FarmResourceOwnership
+                .resolveManageableOwner(serverLevel, pos, serverPlayer);
+        if (destinationOwner == null
+                || !destinationOwner.toString().equals(existing.ownerPlayerUuid())) {
+            rejectRelocation(level, pos, serverPlayer,
+                    "message.stardew_craft.manager.relocate_owner_mismatch");
+            return;
+        }
         CoopManagerValidationService.ValidationResult validation =
                 CoopManagerValidationService.validateForTier(
                         serverLevel,
@@ -273,10 +281,16 @@ public class CoopManagerBlock extends Block {
         if (!(player instanceof ServerPlayer serverPlayer)) {
             return false;
         }
+        java.util.UUID farmOwner = com.stardew.craft.farm.FarmResourceOwnership
+                .resolveManageableOwner(level, managerPos, serverPlayer);
+        if (farmOwner == null) {
+            return false;
+        }
         AnimalWorldData data = AnimalWorldData.get(level);
+        data.reconcileFarmOwnership(level);
         Optional<AnimalBuildingRecord> existingOpt = data.findBuildingByManager(
             level.dimension().location().toString(),
-            player.getUUID(),
+            farmOwner,
             "coop",
             managerPos
         );
@@ -319,7 +333,7 @@ public class CoopManagerBlock extends Block {
                 data.createOrUpdateBuildingAtManager(
                         level,
                         targetType,
-                        player.getUUID(),
+                        farmOwner,
                         managerPos,
                         defaultName,
                         validation.scan().interiorMinX(),
@@ -372,10 +386,16 @@ public class CoopManagerBlock extends Block {
     }
 
     public static boolean tryDemolishBuilding(ServerLevel level, BlockPos managerPos, ServerPlayer player) {
+        java.util.UUID farmOwner = com.stardew.craft.farm.FarmResourceOwnership
+                .resolveManageableOwner(level, managerPos, player);
+        if (farmOwner == null) {
+            return false;
+        }
         AnimalWorldData data = AnimalWorldData.get(level);
+        data.reconcileFarmOwnership(level);
         Optional<AnimalBuildingRecord> existingOpt = data.findBuildingByManager(
             level.dimension().location().toString(),
-            player.getUUID(),
+            farmOwner,
             "coop",
             managerPos
         );
@@ -400,10 +420,16 @@ public class CoopManagerBlock extends Block {
     }
 
     public static boolean tryRelocateManager(ServerLevel level, BlockPos managerPos, ServerPlayer player) {
+        java.util.UUID farmOwner = com.stardew.craft.farm.FarmResourceOwnership
+                .resolveManageableOwner(level, managerPos, player);
+        if (farmOwner == null) {
+            return false;
+        }
         AnimalWorldData data = AnimalWorldData.get(level);
+        data.reconcileFarmOwnership(level);
         Optional<AnimalBuildingRecord> existingOpt = data.findBuildingByManager(
             level.dimension().location().toString(),
-            player.getUUID(),
+            farmOwner,
             "coop",
             managerPos
         );

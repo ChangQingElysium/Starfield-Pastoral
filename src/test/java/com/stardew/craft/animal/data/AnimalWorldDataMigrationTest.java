@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -13,6 +14,22 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AnimalWorldDataMigrationTest {
+    @Test
+    void repairsClickingPlayerOwnershipFromBuildingLocation() {
+        AnimalWorldData loaded = AnimalWorldData.load(legacyFixture(), null);
+        UUID farmOwner = UUID.fromString(
+                "00000000-0000-0000-0000-000000000099");
+
+        assertEquals(1, loaded.reconcileFarmOwnership(
+                "stardewcraft:farm", ignored -> farmOwner));
+        assertEquals(farmOwner.toString(), loaded.getBuilding("coop_9")
+                .orElseThrow().ownerPlayerUuid());
+        assertEquals(farmOwner.toString(), loaded.getAnimal(42L)
+                .orElseThrow().ownerPlayerUuid());
+        assertEquals(0, loaded.reconcileFarmOwnership(
+                "stardewcraft:farm", ignored -> farmOwner));
+    }
+
     @Test
     void legacyFixtureMigratesIdempotentlyWithoutIdReuse() {
         CompoundTag legacy = legacyFixture();

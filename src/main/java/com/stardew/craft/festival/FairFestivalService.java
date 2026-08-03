@@ -366,7 +366,7 @@ public final class FairFestivalService {
         if (player == null) {
             return;
         }
-        CONFIRM_STATE.clearPlayerDialogs(player.getUUID());
+        CONFIRM_STATE.clearPlayer(player.getUUID());
         LAST_OUTSIDE_ENTRY.remove(player.getUUID());
         LAST_INSIDE_ENTRY.remove(player.getUUID());
         if (!EXIT_VOTE_PARTICIPANTS.isEmpty()) {

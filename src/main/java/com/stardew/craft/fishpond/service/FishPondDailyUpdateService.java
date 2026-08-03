@@ -50,6 +50,7 @@ public final class FishPondDailyUpdateService {
         }
 
         FishPondWorldData worldData = FishPondWorldData.get(level);
+        worldData.reconcileFarmOwnership(level);
         String dimensionId = level.dimension().location().toString();
         boolean anyColorChanged = false;
 

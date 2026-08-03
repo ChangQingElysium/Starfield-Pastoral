@@ -358,20 +358,38 @@ public class MineMonsterSpawnHandler {
         if (prismaticSlimeFloors.contains(key)) {
             return;
         }
-        boolean activeForFloor = serverLevel.getPlayers(player ->
-            getFloorFromPlayer(player) == floor
-                && com.stardew.craft.specialorder.SpecialOrderManager.hasActiveIncompleteOrder(player, "Wizard2")
-                && !com.stardew.craft.specialorder.SpecialOrderManager.hasSpecialDropFlag(player, "prismaticJellyDrop")
-        ).size() > 0;
-        if (!activeForFloor) {
+        if (!com.stardew.craft.specialorder.SpecialOrderManager.hasActiveIncompleteOrder(serverLevel, "Wizard2")) {
             return;
         }
-        if (mob.getRandom().nextDouble() > 0.012D) {
+        double chance = prismaticSlimeChance(averageDailyLuckForMineArea(serverLevel, floor));
+        if (mob.getRandom().nextDouble() > chance) {
             return;
         }
         prismaticSlimeFloors.add(key);
         mob.addTag("sd_mob_prismatic_slime");
+        applyCombatProfile(mob, "prismatic_slime", 1.0F);
         setSDVName(mob, "prismatic_slime");
+    }
+
+    static double prismaticSlimeChance(double averageDailyLuck) {
+        return Math.max(0.01D, 0.012D + averageDailyLuck / 10.0D);
+    }
+
+    private static double averageDailyLuckForMineArea(ServerLevel level, int floor) {
+        boolean skullCavern = floor > 120;
+        double total = 0.0D;
+        int count = 0;
+        for (ServerPlayer player : level.getServer().getPlayerList().getPlayers()) {
+            if (!player.serverLevel().dimension().equals(ModMiningDimensions.STARDEW_MINING)) {
+                continue;
+            }
+            if ((getFloorFromPlayer(player) > 120) != skullCavern) {
+                continue;
+            }
+            total += com.stardew.craft.player.PlayerStardewDataAPI.getDailyLuck(player);
+            count++;
+        }
+        return count == 0 ? 0.0D : total / count;
     }
 
     private static void assignBat(Mob mob, int floor) {

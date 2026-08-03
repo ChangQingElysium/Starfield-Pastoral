@@ -413,6 +413,65 @@ public class AnimalWorldData extends SavedData {
                 new ArrayList<>(buildings.values()));
     }
 
+    /** Repairs legacy buildings that were assigned to the player who clicked Build. */
+    public int reconcileFarmOwnership(ServerLevel level) {
+        return reconcileFarmOwnership(
+                level.dimension().location().toString(),
+                pos -> com.stardew.craft.core.FarmAreaResolver.getOwnerAt(pos));
+    }
+
+    int reconcileFarmOwnership(
+            String dimensionId,
+            java.util.function.Function<BlockPos, UUID> ownerAt
+    ) {
+        int repaired = 0;
+        Set<String> affectedOwners = new LinkedHashSet<>();
+        Map<String, String> repairedBuildingOwners = new LinkedHashMap<>();
+
+        for (AnimalBuildingRecord building : buildings.values()) {
+            if (!dimensionId.equals(building.dimensionId())) continue;
+            UUID farmOwner = ownerAt.apply(building.managerPos());
+            if (farmOwner == null) continue;
+
+            String resolvedOwner = farmOwner.toString();
+            String previousOwner = building.ownerPlayerUuid();
+            if (resolvedOwner.equals(previousOwner)) continue;
+
+            building.setOwnerPlayerUuid(resolvedOwner);
+            repairedBuildingOwners.put(building.buildingId(), resolvedOwner);
+            affectedOwners.add(previousOwner);
+            affectedOwners.add(resolvedOwner);
+            hayByOwner.putIfAbsent(resolvedOwner, 0);
+            for (Long animalId : building.memberAnimalIds()) {
+                FarmAnimalRecord animal = animals.get(animalId);
+                if (animal != null) {
+                    animal.setOwnerPlayerUuid(resolvedOwner);
+                }
+            }
+            repaired++;
+        }
+
+        if (repaired == 0) return 0;
+
+        for (Map.Entry<Long, AnimalPendingBirth> entry
+                : new ArrayList<>(pendingBirths.entrySet())) {
+            AnimalPendingBirth event = entry.getValue();
+            String owner = repairedBuildingOwners.get(event.buildingId());
+            if (owner == null || owner.equals(event.ownerPlayerUuid())) continue;
+            pendingBirths.put(entry.getKey(), new AnimalPendingBirth(
+                    event.eventId(), owner, event.buildingId(),
+                    event.parentAnimalId(), event.animalTypeId(),
+                    event.createdAbsDay()));
+        }
+        for (String owner : affectedOwners) {
+            if (owner != null && !owner.isBlank()) {
+                clampHayToCapacity(owner);
+            }
+        }
+        setDirty();
+        return repaired;
+    }
+
     public Optional<AnimalBuildingRecord> findBuildingByManager(String dimensionId,
                                                                 UUID ownerPlayerId,
                                                                 String family,

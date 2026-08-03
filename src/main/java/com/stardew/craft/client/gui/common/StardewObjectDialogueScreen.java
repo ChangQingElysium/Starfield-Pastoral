@@ -1,5 +1,6 @@
 package com.stardew.craft.client.gui.common;
 
+import com.stardew.craft.client.gui.StardewCollectivePauseScreen;
 import com.stardew.craft.sound.ModSounds;
 import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
@@ -15,7 +16,7 @@ import java.util.List;
 
 @OnlyIn(Dist.CLIENT)
 @SuppressWarnings("null")
-public class StardewObjectDialogueScreen extends Screen {
+public class StardewObjectDialogueScreen extends Screen implements StardewCollectivePauseScreen {
     private static final int TEXT_COLOR = 0x221122;
 
     private final List<Component> rawMessages;

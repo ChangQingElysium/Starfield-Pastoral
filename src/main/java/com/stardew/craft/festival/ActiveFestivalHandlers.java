@@ -41,7 +41,7 @@ public final class ActiveFestivalHandlers {
             EggFestivalNpcService::controlsNpc,
             EggFestivalService::isParticipant,
             ActiveFestivalHandlers::noopPlayer,
-            ActiveFestivalHandlers::noopPlayer,
+            EggFestivalService::onPlayerLogout,
             ActiveFestivalHandlers::noopDialogueSeen,
             EggFestivalService::tryOpenPierreFestivalShop,
             () -> EggFestivalService.isEggHuntActive() || EggFestivalService.isMainEventCutsceneActive(),
@@ -321,6 +321,29 @@ public final class ActiveFestivalHandlers {
             data.remove(TAG_FESTIVAL_HUD_KNOWN);
             data.remove(TAG_FESTIVAL_HUD_HIDDEN);
         }
+    }
+
+    /**
+     * A client could not begin an authorized festival cutscene. Treat that
+     * participant as finished so the shared festival phase cannot deadlock.
+     */
+    public static void onCutsceneUnavailable(ServerPlayer player, String eventId) {
+        EggFestivalService.onCutsceneCompleted(player, eventId);
+        FlowerDanceService.onCutsceneCompleted(player, eventId);
+        LuauFestivalService.onCutsceneCompleted(player, eventId);
+        MoonlightJelliesFestivalService.onCutsceneCompleted(player, eventId);
+        FestivalOfIceService.onCutsceneCompleted(player, eventId);
+        WinterStarFestivalService.onCutsceneCompleted(player, eventId);
+    }
+
+    /** Starts a festival cutscene, or advances its state machine if launch was rejected. */
+    public static boolean startCutsceneOrRecover(ServerPlayer player, String eventId) {
+        boolean started = com.stardew.craft.cutscene.server.ServerCutsceneTracker
+                .startEvent(player, eventId);
+        if (!started) {
+            onCutsceneUnavailable(player, eventId);
+        }
+        return started;
     }
 
     public static boolean tryOpenPierreFestivalShop(ServerPlayer player) {

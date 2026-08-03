@@ -123,6 +123,8 @@ public final class EggFestivalService {
     private static final ActiveFestivalConfirmState CONFIRM_STATE = new ActiveFestivalConfirmState();
     private static final Map<UUID, Vec3> LAST_OUTSIDE = new LinkedHashMap<>();
     private static final Map<UUID, Vec3> LAST_INSIDE = new LinkedHashMap<>();
+    private static final Set<UUID> START_VOTES = CONFIRM_STATE.votes(OpenFestivalConfirmPayload.Action.START_CONTEST);
+    private static final Set<UUID> START_VOTE_PARTICIPANTS = CONFIRM_STATE.voteParticipants(OpenFestivalConfirmPayload.Action.START_CONTEST);
     private static final Set<UUID> EXIT_VOTES = CONFIRM_STATE.votes(OpenFestivalConfirmPayload.Action.EXIT);
     private static final Set<UUID> EXIT_VOTE_PARTICIPANTS = CONFIRM_STATE.voteParticipants(OpenFestivalConfirmPayload.Action.EXIT);
     private static final Map<UUID, PlayerPose> DEBUG_RETURN_POSES = new LinkedHashMap<>();
@@ -209,8 +211,9 @@ public final class EggFestivalService {
                 return;
             }
             if (confirmed) {
-                startMainEventAfterConfirmation(player);
+                castStartVote(player);
             } else {
+                START_VOTES.remove(player.getUUID());
                 player.displayClientMessage(Component.translatable("message.stardewcraft.festival.egg.start_vote_cancelled"), true);
             }
             return;
@@ -229,6 +232,19 @@ public final class EggFestivalService {
         } else {
             EXIT_VOTES.remove(player.getUUID());
             player.displayClientMessage(Component.translatable("message.stardewcraft.festival.exit_vote_cancelled"), true);
+        }
+    }
+
+    public static void onPlayerLogout(ServerPlayer player) {
+        if (player == null) {
+            return;
+        }
+        CONFIRM_STATE.clearPlayer(player.getUUID());
+        if (!START_VOTE_PARTICIPANTS.isEmpty()) {
+            checkStartVote(player.serverLevel());
+        }
+        if (!EXIT_VOTE_PARTICIPANTS.isEmpty()) {
+            checkExitVote(player.serverLevel());
         }
     }
 
@@ -446,14 +462,53 @@ public final class EggFestivalService {
     }
 
     private static void promptStartContest(ServerPlayer player) {
-        CONFIRM_STATE.prompt(player, OpenFestivalConfirmPayload.Action.START_CONTEST);
+        if (START_VOTES.contains(player.getUUID())) {
+            List<ServerPlayer> voters = onlineSnapshotParticipants(
+                    player.serverLevel(), START_VOTE_PARTICIPANTS);
+            player.displayClientMessage(Component.translatable(
+                    "message.stardewcraft.festival.egg.start_vote_waiting",
+                    voteCount(voters, START_VOTES), voters.size()), true);
+            return;
+        }
+        CONFIRM_STATE.reprompt(player, OpenFestivalConfirmPayload.Action.START_CONTEST);
     }
 
-    private static void startMainEventAfterConfirmation(ServerPlayer player) {
+    private static void castStartVote(ServerPlayer player) {
         if (player == null || !isParticipant(player) || mainEventPhase != MainEventPhase.FREE) {
             return;
         }
-        startMainEventCutscene(player.serverLevel());
+        List<ServerPlayer> online = onlineParticipants(player.serverLevel());
+        ActiveFestivalConfirmState.VoteProgress progress = CONFIRM_STATE.castVote(
+                OpenFestivalConfirmPayload.Action.START_CONTEST,
+                player.getUUID(),
+                online.stream().map(ServerPlayer::getUUID).toList());
+        if (progress.complete()) {
+            startMainEventCutscene(player.serverLevel());
+            return;
+        }
+        List<ServerPlayer> voters = onlineSnapshotParticipants(
+                player.serverLevel(), START_VOTE_PARTICIPANTS);
+        for (ServerPlayer participant : voters) {
+            if (!START_VOTES.contains(participant.getUUID())) {
+                CONFIRM_STATE.prompt(participant,
+                        OpenFestivalConfirmPayload.Action.START_CONTEST);
+            }
+            participant.displayClientMessage(Component.translatable(
+                    "message.stardewcraft.festival.egg.start_vote_waiting",
+                    progress.votes(), progress.participants()), true);
+        }
+    }
+
+    private static void checkStartVote(ServerLevel level) {
+        List<ServerPlayer> voters = onlineSnapshotParticipants(
+                level, START_VOTE_PARTICIPANTS);
+        if (voters.isEmpty()) {
+            return;
+        }
+        int voteCount = voteCount(voters, START_VOTES);
+        if (voteCount >= voters.size()) {
+            startMainEventCutscene(level);
+        }
     }
 
     private static void enterFestival(ServerPlayer player) {
@@ -481,10 +536,17 @@ public final class EggFestivalService {
         }
         EXIT_VOTES.retainAll(EXIT_VOTE_PARTICIPANTS);
         EXIT_VOTES.add(player.getUUID());
-        List<ServerPlayer> voters = onlineSnapshotParticipants(player.serverLevel(), EXIT_VOTE_PARTICIPANTS);
+        checkExitVote(player.serverLevel());
+    }
+
+    private static void checkExitVote(ServerLevel level) {
+        List<ServerPlayer> voters = onlineSnapshotParticipants(level, EXIT_VOTE_PARTICIPANTS);
+        if (voters.isEmpty()) {
+            return;
+        }
         int voteCount = voteCount(voters, EXIT_VOTES);
-        if (voters.isEmpty() || voteCount >= voters.size()) {
-            finishFestival(player.serverLevel());
+        if (voteCount >= voters.size()) {
+            finishFestival(level);
             return;
         }
         for (ServerPlayer participant : voters) {
@@ -501,18 +563,36 @@ public final class EggFestivalService {
         if (participants.isEmpty()) {
             return;
         }
+        if (!canStartCutscene(participants, MAIN_EVENT_CUTSCENE_ID)) {
+            CONFIRM_STATE.clearDialog(OpenFestivalConfirmPayload.Action.START_CONTEST);
+            CONFIRM_STATE.clearVote(OpenFestivalConfirmPayload.Action.START_CONTEST);
+            for (ServerPlayer participant : participants) {
+                participant.displayClientMessage(Component.translatable(
+                        "message.stardewcraft.festival.egg.unavailable"), true);
+            }
+            return;
+        }
         mainEventPhase = MainEventPhase.MAIN_EVENT_INTRO;
         MAIN_EVENT_CUTSCENE_PARTICIPANTS.clear();
         MAIN_EVENT_CUTSCENE_PARTICIPANTS.addAll(participants.stream().map(ServerPlayer::getUUID).toList());
         MAIN_EVENT_CUTSCENE_DONE.clear();
+        CONFIRM_STATE.clearDialog(OpenFestivalConfirmPayload.Action.START_CONTEST);
+        CONFIRM_STATE.clearVote(OpenFestivalConfirmPayload.Action.START_CONTEST);
         mainEventBlackoutPrepared = false;
         EGG_HUNT_COUNTS.clear();
         setSessionPhase(level, FestivalSessionPhase.MAIN_EVENT);
         broadcastFestivalMusic(level, FestivalMusicStatePayload.NONE);
         sendCutsceneState(participants, 0);
         for (ServerPlayer participant : participants) {
-            ServerCutsceneTracker.startEvent(participant, MAIN_EVENT_CUTSCENE_ID);
+            ActiveFestivalHandlers.startCutsceneOrRecover(
+                    participant, MAIN_EVENT_CUTSCENE_ID);
         }
+    }
+
+    private static boolean canStartCutscene(List<ServerPlayer> participants,
+                                            String eventId) {
+        return participants.stream().allMatch(participant ->
+                ServerCutsceneTracker.canStartEvent(participant, eventId));
     }
 
     private static void startAwardCutscene(ServerLevel level) {
@@ -530,7 +610,8 @@ public final class EggFestivalService {
         playWhistle(level);
         sendCutsceneState(participants, awardWinnerMask(participants));
         for (ServerPlayer participant : participants) {
-            ServerCutsceneTracker.startEvent(participant, AWARD_CUTSCENE_ID);
+            ActiveFestivalHandlers.startCutsceneOrRecover(
+                    participant, AWARD_CUTSCENE_ID);
         }
     }
 

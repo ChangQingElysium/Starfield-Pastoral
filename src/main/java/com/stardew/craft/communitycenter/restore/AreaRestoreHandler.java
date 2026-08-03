@@ -72,7 +72,12 @@ public final class AreaRestoreHandler {
 
         BlockPos min = origin;
         BlockPos max = origin.offset(cache.getWidth() - 1, cache.getHeight() - 1, cache.getLength() - 1);
-        return restoreRegion(level, min, max, origin);
+        int restored = restoreRegion(level, min, max, origin);
+        // The exit trigger is runtime infrastructure, not part of the refurbished schematic.
+        // Full-volume restoration replaces it with air, so reinstall it before the player regains
+        // control. This also refreshes the portal self-repair registration.
+        InteriorSubspaceManager.ensureCommunityCenterExitPortal(level, origin);
+        return restored;
     }
 
     private static int restoreRegion(ServerLevel level, @Nullable BlockPos worldMin, @Nullable BlockPos worldMax, BlockPos origin) {

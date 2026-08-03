@@ -199,7 +199,7 @@ public final class WinterStarFestivalService {
         if (player == null) {
             return;
         }
-        CONFIRM_STATE.clearPlayerDialogs(player.getUUID());
+        CONFIRM_STATE.clearPlayer(player.getUUID());
         LAST_OUTSIDE_ENTRY.remove(player.getUUID());
         LAST_INSIDE_ENTRY.remove(player.getUUID());
         RETURN_GIFT_CUTSCENES.remove(player.getUUID());
@@ -641,7 +641,7 @@ public final class WinterStarFestivalService {
             pending.getCount()
         ));
         RETURN_GIFT_CUTSCENES.add(player.getUUID());
-        com.stardew.craft.cutscene.server.ServerCutsceneTracker.startEvent(player, RETURN_GIFT_CUTSCENE_ID);
+        ActiveFestivalHandlers.startCutsceneOrRecover(player, RETURN_GIFT_CUTSCENE_ID);
         return true;
     }
 

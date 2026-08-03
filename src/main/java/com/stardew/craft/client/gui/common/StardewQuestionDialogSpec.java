@@ -11,7 +11,6 @@ public record StardewQuestionDialogSpec(
     List<Component> responses,
     IntConsumer onAnswer,
     int defaultSelectedIndex,
-    SoundTheme soundTheme,
     int dialogWidth,
     int dialogBaseHeight,
     int dialogBottomMargin
@@ -24,7 +23,6 @@ public record StardewQuestionDialogSpec(
         Objects.requireNonNull(question, "question");
         Objects.requireNonNull(responses, "responses");
         Objects.requireNonNull(onAnswer, "onAnswer");
-        Objects.requireNonNull(soundTheme, "soundTheme");
         if (responses.isEmpty()) {
             throw new IllegalArgumentException("responses must not be empty");
         }
@@ -42,28 +40,9 @@ public record StardewQuestionDialogSpec(
             responses,
             onAnswer,
             defaultSelectedIndex,
-            SoundTheme.DEFAULT,
             DEFAULT_DIALOG_WIDTH,
             DEFAULT_DIALOG_BASE_HEIGHT,
             DEFAULT_DIALOG_BOTTOM_MARGIN
         );
-    }
-
-    public StardewQuestionDialogSpec withSoundTheme(SoundTheme soundTheme) {
-        return new StardewQuestionDialogSpec(
-            question,
-            responses,
-            onAnswer,
-            defaultSelectedIndex,
-            soundTheme,
-            dialogWidth,
-            dialogBaseHeight,
-            dialogBottomMargin
-        );
-    }
-
-    public enum SoundTheme {
-        DEFAULT,
-        MONEY_CONTRACT
     }
 }

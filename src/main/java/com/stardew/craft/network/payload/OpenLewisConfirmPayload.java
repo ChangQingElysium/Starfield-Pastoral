@@ -72,14 +72,7 @@ public record OpenLewisConfirmPayload(UUID requestId, int kind, String questionK
                 List.of(Component.translatable(payload.acceptKey()), Component.translatable(payload.rejectKey())),
                 index -> PacketDistributor.sendToServer(new LewisConfirmResponsePayload(payload.requestId(), payload.kind(), index == 0)),
                 1
-            ).withSoundTheme(soundTheme(payload.kind()))
+            )
         ));
-    }
-
-    @OnlyIn(Dist.CLIENT)
-    private static com.stardew.craft.client.gui.common.StardewQuestionDialogSpec.SoundTheme soundTheme(int kind) {
-        return kind == KIND_MONEY_SHARE || kind == KIND_MONEY_CONTRACT_CLAIM
-            ? com.stardew.craft.client.gui.common.StardewQuestionDialogSpec.SoundTheme.MONEY_CONTRACT
-            : com.stardew.craft.client.gui.common.StardewQuestionDialogSpec.SoundTheme.DEFAULT;
     }
 }

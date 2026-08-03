@@ -521,7 +521,11 @@ public final class SpecialOrderManager {
     }
 
     public static boolean hasActiveIncompleteOrder(ServerPlayer player, String orderId) {
-        SpecialOrderWorldData data = SpecialOrderWorldData.get(player.serverLevel());
+        return hasActiveIncompleteOrder(player.serverLevel(), orderId);
+    }
+
+    public static boolean hasActiveIncompleteOrder(ServerLevel level, String orderId) {
+        SpecialOrderWorldData data = SpecialOrderWorldData.get(level);
         return data.active().stream().anyMatch(order ->
             order.orderId().equals(orderId) && order.accepted() && !order.complete() && !order.failed());
     }

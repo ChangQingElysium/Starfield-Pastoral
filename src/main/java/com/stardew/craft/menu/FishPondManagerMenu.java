@@ -137,6 +137,7 @@ public class FishPondManagerMenu extends AbstractContainerMenu {
         }
 
         FishPondWorldData worldData = FishPondWorldData.get(level);
+        worldData.reconcileFarmOwnership(level);
         Optional<FishPondRecord> anyOwner = worldData.findPondByManagerAnyOwner(level.dimension().location().toString(), managerPos);
         if (anyOwner.isEmpty()) {
             FishPondManagerValidationService.ValidationResult validation = FishPondManagerValidationService.validate(level, managerPos);
@@ -153,7 +154,8 @@ public class FishPondManagerMenu extends AbstractContainerMenu {
 
         FishPondRecord pond = anyOwner.get();
         formed = 1;
-        ownerMismatch = serverPlayer.getUUID().toString().equals(pond.ownerPlayerUuid()) ? 0 : 1;
+        ownerMismatch = com.stardew.craft.farm.FarmInstanceRegistry.get()
+                .canOperateBuilding(serverPlayer.getUUID(), pond.ownerPlayerUuid()) ? 0 : 1;
         currentPopulation = pond.currentPopulation();
         maxPopulation = pond.maxPopulation();
         waterCellCount = pond.waterCells().size();
@@ -202,7 +204,14 @@ public class FishPondManagerMenu extends AbstractContainerMenu {
 
     private boolean clearOwnedPond(ServerLevel level, ServerPlayer player) {
         FishPondWorldData worldData = FishPondWorldData.get(level);
-        Optional<FishPondRecord> pondOpt = worldData.findPondByManager(level.dimension().location().toString(), player.getUUID(), managerPos);
+        worldData.reconcileFarmOwnership(level);
+        java.util.UUID farmOwner = com.stardew.craft.farm.FarmResourceOwnership
+                .resolveManageableOwner(level, managerPos, player);
+        if (farmOwner == null) {
+            return false;
+        }
+        Optional<FishPondRecord> pondOpt = worldData.findPondByManager(
+                level.dimension().location().toString(), farmOwner, managerPos);
         if (pondOpt.isEmpty()) {
             return false;
         }

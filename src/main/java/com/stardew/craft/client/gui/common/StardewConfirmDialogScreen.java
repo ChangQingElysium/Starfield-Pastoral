@@ -1,5 +1,6 @@
 package com.stardew.craft.client.gui.common;
 
+import com.stardew.craft.client.gui.StardewCollectivePauseScreen;
 import com.stardew.craft.network.payload.SleepConfirmChoicePayload;
 import com.stardew.craft.sound.ModSounds;
 import net.minecraft.Util;
@@ -17,8 +18,9 @@ import java.util.List;
 
 @OnlyIn(Dist.CLIENT)
 @SuppressWarnings("null")
-public class StardewConfirmDialogScreen extends Screen {
+public class StardewConfirmDialogScreen extends Screen implements StardewCollectivePauseScreen {
     private final StardewQuestionDialogSpec spec;
+    private final boolean dialogueContinuation;
     private StardewRenderMapping mapping;
 
     private int selected = -1;
@@ -40,21 +42,25 @@ public class StardewConfirmDialogScreen extends Screen {
     private long lastUpdateMs;
     private long lastRenderMs;
     private boolean openingSoundPlayed;
-    private int characterIndexInDialogue;
-    private int characterAdvanceTimer;
     private int safetyTimer = 750;
 
     private record WrappedResponse(Component original, List<net.minecraft.util.FormattedCharSequence> lines, int lineHeight) {
     }
 
-    private StardewConfirmDialogScreen(StardewQuestionDialogSpec spec) {
+    private StardewConfirmDialogScreen(StardewQuestionDialogSpec spec, boolean dialogueContinuation) {
         super(spec.question());
         this.spec = spec;
+        this.dialogueContinuation = dialogueContinuation;
         this.selected = spec.defaultSelectedIndex();
     }
 
     public static StardewConfirmDialogScreen createQuestionDialog(StardewQuestionDialogSpec spec) {
-        return new StardewConfirmDialogScreen(spec);
+        return new StardewConfirmDialogScreen(spec, false);
+    }
+
+    /** Continues an NPC dialogue question without replaying DialogueBox's opening cue. */
+    static StardewConfirmDialogScreen createDialogueContinuation(StardewQuestionDialogSpec spec) {
+        return new StardewConfirmDialogScreen(spec, true);
     }
 
     public static StardewConfirmDialogScreen createSleepConfirm(int currentMinute) {
@@ -84,47 +90,17 @@ public class StardewConfirmDialogScreen extends Screen {
         }
     }
 
-    private boolean moneyContractSounds() {
-        return spec.soundTheme() == StardewQuestionDialogSpec.SoundTheme.MONEY_CONTRACT;
-    }
-
     private void playOpeningSound() {
-        if (moneyContractSounds()) {
-            playUiSound(ModSounds.BOOK_READ.get(), 0.58f, 1.08f);
-        } else {
-            playUiSound(ModSounds.BREATHIN.get(), 1.0f, 1.0f);
-        }
+        playUiSound(ModSounds.BREATHIN.get(), 1.0f, 1.0f);
     }
 
     private void playHoverSound() {
-        if (moneyContractSounds()) {
-            playUiSound(ModSounds.BUTTON_TAP.get(), 0.42f, 1.16f);
-        } else {
-            // Match the rest of the UI: option hover uses the soft SDV "small select" tick, not the loud gunshot.
-            playUiSound(ModSounds.SMALL_SELECT.get(), 0.5f, 1.0f);
-        }
+        playUiSound(ModSounds.COWBOY_GUNSHOT.get(), 1.0f, 1.0f);
     }
 
-    private void playSkipSound() {
-        if (moneyContractSounds()) {
-            playUiSound(ModSounds.BUTTON_TAP.get(), 0.48f, 1.10f);
-        } else {
-            playUiSound(ModSounds.SMALL_SELECT.get(), 1.0f, 1.0f);
-        }
-    }
-
-    private void playDecisionSound(int index) {
-        if (!moneyContractSounds()) {
-            playUiSound(ModSounds.SMALL_SELECT.get(), 1.0f, 1.0f);
-            playUiSound(ModSounds.BREATHOUT.get(), 1.0f, 1.0f);
-            return;
-        }
-        if (index == spec.responses().size() - 1) {
-            playUiSound(ModSounds.CANCEL.get(), 0.46f, 0.94f);
-        } else {
-            playUiSound(ModSounds.BOOK_READ.get(), 0.52f, 1.18f);
-            playUiSound(ModSounds.COIN.get(), 0.36f, 1.20f);
-        }
+    private void playDecisionSound() {
+        playUiSound(ModSounds.SMALL_SELECT.get(), 1.0f, 1.0f);
+        playUiSound(ModSounds.BREATHOUT.get(), 1.0f, 1.0f);
     }
 
     private float guiScale() {
@@ -226,9 +202,14 @@ public class StardewConfirmDialogScreen extends Screen {
         recomputeLayout();
         lastUpdateMs = Util.getMillis();
         lastRenderMs = Util.getMillis();
-        characterIndexInDialogue = isQuestionBlank() ? getCurrentString().length() : 0;
-        characterAdvanceTimer = 90;
-        safetyTimer = 750;
+        if (dialogueContinuation) {
+            transitioning = false;
+            transitionInitialized = true;
+            openingSoundPlayed = true;
+            safetyTimer = 0;
+        } else {
+            safetyTimer = 750;
+        }
     }
 
     private void updateTransition(long elapsedMs) {
@@ -306,26 +287,6 @@ public class StardewConfirmDialogScreen extends Screen {
             safetyTimer -= (int) elapsed;
         }
 
-        if (!transitioning && pendingAnswerIndex < 0 && characterIndexInDialogue < getCurrentString().length()) {
-            characterAdvanceTimer -= (int) elapsed;
-            if (characterAdvanceTimer <= 0) {
-                characterAdvanceTimer = 30;
-                int oldIndex = characterIndexInDialogue;
-                characterIndexInDialogue = Math.min(characterIndexInDialogue + 1, getCurrentString().length());
-                if (characterIndexInDialogue != oldIndex && characterIndexInDialogue == getCurrentString().length()) {
-                    playUiSound(ModSounds.DIALOGUE_CHARACTER_CLOSE.get(), 1.0f, 1.0f);
-                }
-                if (characterIndexInDialogue > 1 && characterIndexInDialogue < getCurrentString().length()) {
-                    playUiSound(ModSounds.DIALOGUE_CHARACTER.get(), 1.0f, 1.0f);
-                }
-            }
-        }
-    }
-
-    private String getVisibleQuestionText() {
-        String text = getCurrentString();
-        int end = Math.max(0, Math.min(characterIndexInDialogue, text.length()));
-        return text.substring(0, end);
     }
 
     @Override
@@ -343,8 +304,7 @@ public class StardewConfirmDialogScreen extends Screen {
             return;
         }
 
-        boolean showOptions = characterIndexInDialogue >= getCurrentString().length();
-        int hoverIndex = showOptions ? optionAt(mouseX, mouseY) : -1;
+        int hoverIndex = optionAt(mouseX, mouseY);
         if (hoverIndex >= 0) {
             if (hoverIndex != selected) {
                 playHoverSound();
@@ -360,30 +320,28 @@ public class StardewConfirmDialogScreen extends Screen {
 
         int textX = boxX + px(8);
         if (!isQuestionBlank()) {
-            List<net.minecraft.util.FormattedCharSequence> questionLines = this.font.split(Component.literal(getVisibleQuestionText()), getQuestionWrapWidth());
+            List<net.minecraft.util.FormattedCharSequence> questionLines = this.font.split(spec.question(), getQuestionWrapWidth());
             drawWrappedLeftAligned(graphics, questionLines, textX, boxDrawY + px(12), 0x3A2A1A);
         }
 
-        if (showOptions) {
-            int responseY = optionStartY();
-            for (int i = 0; i < wrappedResponses.size(); i++) {
-                WrappedResponse response = wrappedResponses.get(i);
-                if (i == selected) {
-                    CommonGuiTextures.drawOptionHighlightBox(
-                        graphics,
-                        boxX + px(4),
-                        responseY - px(8),
-                        boxWidth - px(8),
-                        response.lineHeight() + px(16),
-                        s4);
-                }
-
-                float alpha = (selected == i) ? 1.0f : 0.6f;
-                graphics.setColor(alpha, alpha, alpha, 1.0f);
-                drawWrappedLeftAligned(graphics, response.lines(), textX, responseY, 0x3A2A1A);
-                graphics.setColor(1.0f, 1.0f, 1.0f, 1.0f);
-                responseY += response.lineHeight() + px(16);
+        int responseY = optionStartY();
+        for (int i = 0; i < wrappedResponses.size(); i++) {
+            WrappedResponse response = wrappedResponses.get(i);
+            if (i == selected) {
+                CommonGuiTextures.drawOptionHighlightBox(
+                    graphics,
+                    boxX + px(4),
+                    responseY - px(8),
+                    boxWidth - px(8),
+                    response.lineHeight() + px(16),
+                    s4);
             }
+
+            float alpha = (selected == i) ? 1.0f : 0.6f;
+            graphics.setColor(alpha, alpha, alpha, 1.0f);
+            drawWrappedLeftAligned(graphics, response.lines(), textX, responseY, 0x3A2A1A);
+            graphics.setColor(1.0f, 1.0f, 1.0f, 1.0f);
+            responseY += response.lineHeight() + px(16);
         }
     }
 
@@ -392,7 +350,7 @@ public class StardewConfirmDialogScreen extends Screen {
             return;
         }
         pendingAnswerIndex = index;
-        playDecisionSound(index);
+        playDecisionSound();
         transitioning = true;
         transitioningBigger = false;
         transitionInitialized = false;
@@ -404,11 +362,6 @@ public class StardewConfirmDialogScreen extends Screen {
             return true;
         }
         if (button == 0) {
-            if (characterIndexInDialogue < getCurrentString().length()) {
-                characterIndexInDialogue = getCurrentString().length();
-                playSkipSound();
-                return true;
-            }
             if (safetyTimer > 0) {
                 return true;
             }
@@ -426,20 +379,19 @@ public class StardewConfirmDialogScreen extends Screen {
         if (transitioning || pendingAnswerIndex >= 0) {
             return true;
         }
-        if (characterIndexInDialogue < getCurrentString().length()) {
-            characterIndexInDialogue = getCurrentString().length();
-            playSkipSound();
-            return true;
-        }
         if (safetyTimer > 0) {
             return true;
         }
         if (keyCode == 265 || keyCode == 264 || keyCode == 263 || keyCode == 262) {
+            int previous = selected;
             if (selected < 0) {
                 selected = 0;
             } else {
                 int delta = (keyCode == 265 || keyCode == 263) ? -1 : 1;
                 selected = Math.floorMod(selected + delta, spec.responses().size());
+            }
+            if (selected != previous) {
+                playUiSound(ModSounds.SHINY4.get(), 1.0f, 1.0f);
             }
             return true;
         }

@@ -83,6 +83,11 @@ public class FarmChunkManager {
      */
     public void onPlayerEnterFarm(ServerLevel level, ServerPlayer player, FarmInstance farm) {
         FarmOccupancyTracker.Transition transition = occupancy.enter(player.getUUID(), farm.getSlotIndex());
+        int absoluteDay = com.stardew.craft.farm.OfflineFarmCatchUp.computeAbsoluteDay();
+        if (!farm.wasActiveOnDay(absoluteDay)) {
+            farm.markActiveOnDay(absoluteDay);
+            FarmInstanceRegistry.get().setDirty();
+        }
         if (!transition.changed()) return;
 
         transition.previous().ifPresent(previous -> StardewCraft.LOGGER.debug(

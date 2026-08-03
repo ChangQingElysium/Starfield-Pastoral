@@ -212,7 +212,7 @@ public final class FestivalOfIceService {
         if (player == null) {
             return;
         }
-        CONFIRM_STATE.clearPlayerDialogs(player.getUUID());
+        CONFIRM_STATE.clearPlayer(player.getUUID());
         if (!EXIT_VOTE_PARTICIPANTS.isEmpty()) {
             checkExitVote(player.serverLevel());
         }
@@ -315,7 +315,7 @@ public final class FestivalOfIceService {
             player.displayClientMessage(Component.translatable("message.stardewcraft.festival.ice_fishing.start_vote_waiting", voteCount, voters.size()), true);
             return true;
         }
-        CONFIRM_STATE.prompt(player, OpenFestivalConfirmPayload.Action.FESTIVAL_OF_ICE_START);
+        CONFIRM_STATE.reprompt(player, OpenFestivalConfirmPayload.Action.FESTIVAL_OF_ICE_START);
         return true;
     }
 
@@ -449,11 +449,11 @@ public final class FestivalOfIceService {
         if (player == null || !isParticipant(player) || mainEventPhase != MainEventPhase.FREE) {
             return;
         }
-        if (START_VOTE_PARTICIPANTS.isEmpty()) {
-            START_VOTE_PARTICIPANTS.addAll(onlineParticipants(player.serverLevel()).stream().map(ServerPlayer::getUUID).toList());
-        }
-        START_VOTES.retainAll(START_VOTE_PARTICIPANTS);
-        START_VOTES.add(player.getUUID());
+        List<ServerPlayer> online = onlineParticipants(player.serverLevel());
+        CONFIRM_STATE.castVote(
+                OpenFestivalConfirmPayload.Action.FESTIVAL_OF_ICE_START,
+                player.getUUID(),
+                online.stream().map(ServerPlayer::getUUID).toList());
         checkStartVote(player.serverLevel());
     }
 
@@ -462,6 +462,16 @@ public final class FestivalOfIceService {
         int voteCount = voteCount(voters, START_VOTES);
         if (voters.isEmpty() || voteCount >= voters.size()) {
             startOpeningCutscene(level);
+            return;
+        }
+        for (ServerPlayer participant : voters) {
+            if (!START_VOTES.contains(participant.getUUID())) {
+                CONFIRM_STATE.prompt(participant,
+                        OpenFestivalConfirmPayload.Action.FESTIVAL_OF_ICE_START);
+            }
+            participant.displayClientMessage(Component.translatable(
+                    "message.stardewcraft.festival.ice_fishing.start_vote_waiting",
+                    voteCount, voters.size()), true);
         }
     }
 
@@ -469,6 +479,17 @@ public final class FestivalOfIceService {
         List<ServerPlayer> participants = onlineParticipants(level);
         if (level == null || participants.isEmpty()) {
             finishFestival(level);
+            return;
+        }
+        if (!participants.stream().allMatch(participant ->
+                ServerCutsceneTracker.canStartEvent(
+                        participant, MAIN_EVENT_CUTSCENE_ID))) {
+            START_VOTES.clear();
+            START_VOTE_PARTICIPANTS.clear();
+            for (ServerPlayer participant : participants) {
+                participant.displayClientMessage(Component.translatable(
+                        "message.stardewcraft.festival.ice.unavailable"), true);
+            }
             return;
         }
         setSessionPhase(level, FestivalSessionPhase.MAIN_EVENT);
@@ -484,7 +505,8 @@ public final class FestivalOfIceService {
         for (ServerPlayer participant : participants) {
             ModTeleport.to(participant, level, PLAYER_CONTEST_POS, SOUTH_YAW, 0.0F);
             participant.setDeltaMovement(Vec3.ZERO);
-            ServerCutsceneTracker.startEvent(participant, MAIN_EVENT_CUTSCENE_ID);
+            ActiveFestivalHandlers.startCutsceneOrRecover(
+                    participant, MAIN_EVENT_CUTSCENE_ID);
         }
     }
 
@@ -574,7 +596,8 @@ public final class FestivalOfIceService {
             sendCutsceneState(participant);
             ModTeleport.to(participant, level, PLAYER_CONTEST_POS, SOUTH_YAW, 0.0F);
             participant.setDeltaMovement(Vec3.ZERO);
-            ServerCutsceneTracker.startEvent(participant, END_CUTSCENE_ID);
+            ActiveFestivalHandlers.startCutsceneOrRecover(
+                    participant, END_CUTSCENE_ID);
         }
     }
 

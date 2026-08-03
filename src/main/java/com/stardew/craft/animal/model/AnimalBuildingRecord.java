@@ -12,7 +12,7 @@ import java.util.Set;
 
 public class AnimalBuildingRecord {
     private final String buildingId;
-    private final String ownerPlayerUuid;
+    private String ownerPlayerUuid;
     private final AnimalBuildingType buildingType;
     private String customName;
     private final String dimensionId;
@@ -88,6 +88,13 @@ public class AnimalBuildingRecord {
 
     public String ownerPlayerUuid() {
         return ownerPlayerUuid;
+    }
+
+    public void setOwnerPlayerUuid(String ownerPlayerUuid) {
+        if (ownerPlayerUuid == null || ownerPlayerUuid.isBlank()) {
+            throw new IllegalArgumentException("ownerPlayerUuid must not be blank");
+        }
+        this.ownerPlayerUuid = ownerPlayerUuid;
     }
 
     public AnimalBuildingType buildingType() {

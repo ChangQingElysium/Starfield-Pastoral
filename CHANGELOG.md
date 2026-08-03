@@ -1,5 +1,33 @@
 # Changelog
 
+## 0.5.4fix2 - 2026-08-04
+
+### Update Log (English)
+
+#### Bug Fixes
+
+- Repaired farm-resource ownership for coops, barns, silos and fish ponds. Team members now manage the farm that contains the building, legacy records are migrated to the correct owner, and relocations cannot cross farm ownership boundaries.
+- Persisted same-day farm activity and included farms visited by teammates in daily settlement, so crops, animals, hay and ponds continue updating when the farm owner is offline.
+- Restored the Community Center exit portal after final refurbishment and repaired missing exits when entering the building or loading an older save inside it.
+- Hardened shared festival confirmation and cutscene recovery. Late joiners no longer expand an active vote, disconnected participants are removed, and timeout or client playback failures no longer leave a festival permanently blocked.
+- Corrected question-dialogue transitions, collective menu pausing and Stardew-style interface sounds, including removal of unintended sound overrides from Mayor Lewis's menus.
+- Allowed birthday gifts to bypass the normal weekly gift limit, matching the original game's special birthday behavior.
+- Restored the original daily-luck formula for Prismatic Slime spawns and corrected its combat profile.
+- Added regression coverage for farm ownership and settlement, fish ponds, Community Center restoration, festivals, dialogue menus, birthday gifts and mine monsters, and updated the public mod version to `0.5.4fix2`.
+
+### 更新日志（中文）
+
+#### Bug 修复
+
+- 修复鸡舍、畜棚、筒仓和鱼塘的农场资源归属。队友现在会管理建筑所在的农场，旧存档中的错误归属会迁移到正确主人，搬迁时也不会跨越农场归属边界。
+- 持久化当天的农场活跃状态，并让队友访问过的农场参与每日结算；即使农场主人离线，作物、动物、干草和鱼塘也会正常更新。
+- 修复社区中心完成最终翻新后出口传送门被覆盖的问题；进入社区中心或在其中载入旧存档时，也会自动补回缺失的出口。
+- 加固多人节日确认与过场恢复流程：迟到玩家不会扩大已开始的投票，掉线玩家会被移出等待列表，超时或客户端播放失败也不会再让节日永久卡死。
+- 修正问题对话的切换时机、菜单集体暂停和星露谷风格界面音效，并移除刘易斯菜单中非预期的音效覆盖。
+- 生日礼物现在可以绕过通常的每周送礼次数上限，与原版的生日特殊规则一致。
+- 恢复五彩史莱姆按每日运气计算的原版生成公式，并修正其战斗属性。
+- 为农场归属与每日结算、鱼塘、社区中心修复、节日、对话菜单、生日礼物和矿井怪物补充回归测试，并将公开模组版本号更新为 `0.5.4fix2`。
+
 ## 0.5.4fix1 - 2026-08-02
 
 ### Update Log (English)

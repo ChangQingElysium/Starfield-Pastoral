@@ -51,6 +51,8 @@ public class FarmInstance {
     private long createdTimestamp;
     private int lastOnlineDay;
     private int lastOnlineSeason;
+    /** Last absolute day when any player visited this farm. */
+    private int lastActiveDay;
     /** 跨季宽限剩余天数。>0 时该农场的过季作物不会枯死。 */
     private int graceDaysLeft;
     /** 洞穴类型选择（对齐 SDV Farmer.caveChoice） */
@@ -132,6 +134,7 @@ public class FarmInstance {
         this.createdTimestamp = System.currentTimeMillis();
         this.lastOnlineDay = 1;
         this.lastOnlineSeason = 0;
+        this.lastActiveDay = 1;
         this.graceDaysLeft = 0;
     }
 
@@ -175,6 +178,7 @@ public class FarmInstance {
     public long getCreatedTimestamp() { return createdTimestamp; }
     public int getLastOnlineDay() { return lastOnlineDay; }
     public int getLastOnlineSeason() { return lastOnlineSeason; }
+    public int getLastActiveDay() { return lastActiveDay; }
     public int getGraceDaysLeft() { return graceDaysLeft; }
     public FarmCaveChoice getCaveChoice() { return caveChoice; }
     public boolean hasActiveGoldClock() { return goldClockPresent && goldClockEnabled; }
@@ -207,6 +211,13 @@ public class FarmInstance {
     public void markInitialized() { this.initialized = true; }
     public void setLastOnlineDay(int day) { this.lastOnlineDay = day; }
     public void setLastOnlineSeason(int season) { this.lastOnlineSeason = season; }
+    public void markActiveOnDay(int absoluteDay) {
+        lastActiveDay = Math.max(lastActiveDay, absoluteDay);
+    }
+
+    public boolean wasActiveOnDay(int absoluteDay) {
+        return lastActiveDay >= absoluteDay;
+    }
     public void setGraceDaysLeft(int days) { this.graceDaysLeft = days; }
     public void setCreatedTimestamp(long ts) { this.createdTimestamp = ts; }
     public void setCaveChoice(FarmCaveChoice choice) { this.caveChoice = (choice == null ? FarmCaveChoice.NONE : choice); }
@@ -264,6 +275,7 @@ public class FarmInstance {
         createdTimestamp = source.createdTimestamp;
         lastOnlineDay = source.lastOnlineDay;
         lastOnlineSeason = source.lastOnlineSeason;
+        lastActiveDay = source.lastActiveDay;
         graceDaysLeft = source.graceDaysLeft;
         caveChoice = source.caveChoice;
         goldClockPresent = source.goldClockPresent;
@@ -479,6 +491,7 @@ public class FarmInstance {
         tag.putLong("CreatedTimestamp", createdTimestamp);
         tag.putInt("LastOnlineDay", lastOnlineDay);
         tag.putInt("LastOnlineSeason", lastOnlineSeason);
+        tag.putInt("LastActiveDay", lastActiveDay);
         tag.putInt("GraceDaysLeft", graceDaysLeft);
         tag.putString("CaveChoice", caveChoice.getName());
         tag.putBoolean("GoldClockPresent", goldClockPresent);
@@ -553,6 +566,9 @@ public class FarmInstance {
         instance.createdTimestamp = tag.getLong("CreatedTimestamp");
         instance.lastOnlineDay = tag.getInt("LastOnlineDay");
         instance.lastOnlineSeason = tag.getInt("LastOnlineSeason");
+        instance.lastActiveDay = tag.contains("LastActiveDay", Tag.TAG_INT)
+                ? tag.getInt("LastActiveDay")
+                : instance.lastOnlineDay;
         instance.graceDaysLeft = tag.getInt("GraceDaysLeft");
         if (tag.contains("CaveChoice", Tag.TAG_STRING)) {
             FarmCaveChoice parsed = FarmCaveChoice.fromName(tag.getString("CaveChoice"));

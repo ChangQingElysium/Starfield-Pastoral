@@ -145,6 +145,34 @@ public class FishPondWorldData extends SavedData {
         return Collections.unmodifiableCollection(new ArrayList<>(ponds.values()));
     }
 
+    /** Repairs legacy ponds that were assigned to the player who clicked Build. */
+    public int reconcileFarmOwnership(ServerLevel level) {
+        return reconcileFarmOwnership(
+                level.dimension().location().toString(),
+                pos -> com.stardew.craft.core.FarmAreaResolver.getOwnerAt(pos));
+    }
+
+    int reconcileFarmOwnership(
+            String dimensionId,
+            java.util.function.Function<BlockPos, UUID> ownerAt
+    ) {
+        int repaired = 0;
+        for (FishPondRecord pond : ponds.values()) {
+            if (!dimensionId.equals(pond.dimensionId())) continue;
+            UUID farmOwner = ownerAt.apply(pond.managerPos());
+            if (farmOwner == null
+                    || farmOwner.toString().equals(pond.ownerPlayerUuid())) {
+                continue;
+            }
+            pond.setOwnerPlayerUuid(farmOwner.toString());
+            repaired++;
+        }
+        if (repaired > 0) {
+            setDirty();
+        }
+        return repaired;
+    }
+
     public Optional<FishPondRecord> findPondByManager(String dimensionId, UUID ownerPlayerId, BlockPos managerPos) {
         String owner = ownerPlayerId.toString();
         for (FishPondRecord record : ponds.values()) {

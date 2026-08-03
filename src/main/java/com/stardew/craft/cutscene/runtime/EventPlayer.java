@@ -110,6 +110,11 @@ public final class EventPlayer {
         }
         commands = parsed;
         commandTokens = parsedTokens;
+        if (commands.isEmpty()) {
+            LOGGER.error("Cutscene {} has no playable commands", event.id());
+            reset();
+            return false;
+        }
         commandIndex = 0;
         running = true;
 
@@ -132,8 +137,12 @@ public final class EventPlayer {
         mc.options.hideGui = true;
 
         // Start first command
-        if (!commands.isEmpty()) {
+        try {
             commands.get(0).start(this);
+        } catch (RuntimeException exception) {
+            LOGGER.error("Cutscene {} failed while starting", event.id(), exception);
+            reset();
+            return false;
         }
         return true;
     }
@@ -163,14 +172,30 @@ public final class EventPlayer {
             return;
         }
 
-        EventCommand current = commands.get(commandIndex);
-        current.tick(this);
+        try {
+            EventCommand current = commands.get(commandIndex);
+            current.tick(this);
 
-        if (current.isComplete()) {
-            commandIndex++;
-            if (commandIndex < commands.size()) {
-                commands.get(commandIndex).start(this);
+            if (current.isComplete()) {
+                commandIndex++;
+                if (commandIndex < commands.size()) {
+                    commands.get(commandIndex).start(this);
+                }
             }
+        } catch (RuntimeException exception) {
+            abortFailedPlayback(exception);
+        }
+    }
+
+    private void abortFailedPlayback(RuntimeException exception) {
+        String eventId = currentEvent == null ? "" : currentEvent.id();
+        long failedSessionId = sessionId;
+        LOGGER.error("Cutscene {} failed during playback", eventId, exception);
+        reset();
+        Minecraft mc = Minecraft.getInstance();
+        if (!eventId.isBlank() && failedSessionId != 0L && mc.getConnection() != null) {
+            PacketDistributor.sendToServer(new com.stardew.craft.cutscene.network.AbortCutscenePayload(
+                    eventId, failedSessionId));
         }
     }
 
@@ -380,7 +405,13 @@ public final class EventPlayer {
         if (running) {
             setPlayerFrozen(false);
             restorePlayerSnapshotIfNeeded();
-            Minecraft.getInstance().options.hideGui = previousHideGui;
+            Minecraft minecraft = Minecraft.getInstance();
+            if (minecraft.screen instanceof com.stardew.craft.client.gui.common.StardewNpcDialogueScreen
+                    || minecraft.screen instanceof com.stardew.craft.client.gui.common.StardewObjectDialogueScreen
+                    || minecraft.screen instanceof com.stardew.craft.client.gui.common.StardewConfirmDialogScreen) {
+                minecraft.setScreen(null);
+            }
+            minecraft.options.hideGui = previousHideGui;
             for (Mob actor : actors.values()) {
                 actor.discard();
             }

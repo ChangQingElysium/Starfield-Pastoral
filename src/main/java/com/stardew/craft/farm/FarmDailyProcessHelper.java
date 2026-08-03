@@ -16,7 +16,7 @@ import java.util.UUID;
 
 /**
  * 农场相关 SavedData 日处理工具。
- * 核心原则：「只处理在线玩家的农场 + 公共区域」。
+ * 核心原则：「只处理当天活跃的农场 + 公共区域」。
  *
  * 位置数据天然按坐标区分（因为每个农场在不同的网格槽位），
  * 不需要将 Map 改为 per-UUID 嵌套结构。
@@ -28,6 +28,8 @@ public final class FarmDailyProcessHelper {
 
     /** 日结算期间缓存的在线玩家 UUID 集合，避免对每个位置线性搜索玩家列表 */
     private static Set<UUID> cachedOnlinePlayers;
+    /** Owners whose farms must settle tonight, including farms visited by guests today. */
+    private static Set<UUID> cachedActiveFarmOwners;
     /** 已在本次结算中确认加载的区块。 */
     private static Set<Long> cachedEnsuredChunks;
     /** 本次结算新增的强加载票据；结束时只释放这些票据。 */
@@ -40,10 +42,19 @@ public final class FarmDailyProcessHelper {
     public static void beginDailyProcess(ServerLevel level) {
         dailyProcessStartedAt = ServerPerformanceRecorder.startTiming();
         cachedOnlinePlayers = new HashSet<>();
+        cachedActiveFarmOwners = new HashSet<>();
         cachedEnsuredChunks = new HashSet<>();
         cachedNewlyForcedChunks = new HashSet<>();
         for (ServerPlayer player : level.getServer().getPlayerList().getPlayers()) {
             cachedOnlinePlayers.add(player.getUUID());
+        }
+
+        FarmInstanceRegistry registry = FarmInstanceRegistry.get();
+        int dayBeingSettled = Math.max(1, OfflineFarmCatchUp.computeAbsoluteDay() - 1);
+        for (FarmInstance farm : registry.getAllFarms()) {
+            if (shouldSettleFarm(farm, cachedOnlinePlayers, dayBeingSettled)) {
+                cachedActiveFarmOwners.add(farm.getOwnerUUID());
+            }
         }
 
         try {
@@ -63,6 +74,7 @@ public final class FarmDailyProcessHelper {
         dailyProcessStartedAt = 0L;
         RuntimeException releaseFailure = null;
         try {
+            settleActiveFarmDates();
             if (cachedNewlyForcedChunks != null) {
                 for (ChunkPos chunk : cachedNewlyForcedChunks) {
                     try {
@@ -79,6 +91,7 @@ public final class FarmDailyProcessHelper {
         } finally {
             cachedNewlyForcedChunks = null;
             cachedEnsuredChunks = null;
+            cachedActiveFarmOwners = null;
             cachedOnlinePlayers = null;
             ServerPerformanceRecorder.finishTiming(PerformanceTiming.FARM_DAILY_PROCESS, startedAt);
         }
@@ -88,7 +101,7 @@ public final class FarmDailyProcessHelper {
     /**
      * 判断某个位置是否应该在本次日处理中被处理。
      * - 公共区域位置 → 始终处理
-     * - 玩家农场位置 → 仅当该玩家在线时处理
+     * - 玩家农场位置 → 农场成员在线或当天有访客进入时处理
      *
      * @return true 表示应该处理
      */
@@ -99,9 +112,16 @@ public final class FarmDailyProcessHelper {
         UUID owner = FarmAreaResolver.getOwnerAt(pos);
         if (owner == null) return false; // 在实例区域但无人拥有
 
-        // 检查 owner 或任一成员是否在线
+        // 检查农场是否进入本次活跃结算集合
         FarmInstance farm = FarmInstanceRegistry.get().getFarm(owner);
         if (farm == null) return false;
+        if (cachedActiveFarmOwners != null) {
+            if (cachedActiveFarmOwners.contains(owner)) {
+                ensurePositionNeighborhoodLoaded(level, pos, 8);
+                return true;
+            }
+            return false;
+        }
         if (cachedOnlinePlayers != null) {
             for (UUID farmer : farm.getAllFarmers()) {
                 if (cachedOnlinePlayers.contains(farmer)) {
@@ -121,6 +141,9 @@ public final class FarmDailyProcessHelper {
     public static boolean shouldProcessFarmForPlayer(ServerLevel level, UUID playerId) {
         FarmInstance farm = FarmInstanceRegistry.get().getFarmForPlayer(playerId);
         if (farm == null) return false;
+        if (cachedActiveFarmOwners != null) {
+            return cachedActiveFarmOwners.contains(farm.getOwnerUUID());
+        }
         for (UUID farmer : farm.getAllFarmers()) {
             if (cachedOnlinePlayers != null
                     ? cachedOnlinePlayers.contains(farmer)
@@ -178,9 +201,12 @@ public final class FarmDailyProcessHelper {
     }
 
     /**
-     * 获取当前所有有在线成员的农场 owner UUID 集合。
+     * 获取当前所有需要参与日结算的农场 owner UUID 集合。
      */
     public static Set<UUID> getOnlineFarmOwners(ServerLevel level) {
+        if (cachedActiveFarmOwners != null) {
+            return Set.copyOf(cachedActiveFarmOwners);
+        }
         Set<UUID> owners = new HashSet<>();
         for (ServerPlayer player : level.getServer().getPlayerList().getPlayers()) {
             UUID ownerUUID = FarmInstanceRegistry.get().getOwnerForPlayer(player.getUUID());
@@ -189,6 +215,39 @@ public final class FarmDailyProcessHelper {
             }
         }
         return owners;
+    }
+
+    static boolean shouldSettleFarm(FarmInstance farm, Set<UUID> onlinePlayers,
+                                    int dayBeingSettled) {
+        if (farm.wasActiveOnDay(dayBeingSettled)) {
+            return true;
+        }
+        for (UUID farmer : farm.getAllFarmers()) {
+            if (onlinePlayers.contains(farmer)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static void settleActiveFarmDates() {
+        if (cachedActiveFarmOwners == null || cachedActiveFarmOwners.isEmpty()) {
+            return;
+        }
+        FarmInstanceRegistry registry = FarmInstanceRegistry.get();
+        int absoluteDay = OfflineFarmCatchUp.computeAbsoluteDay();
+        int season = com.stardew.craft.time.StardewTimeManager.get().getCurrentSeason();
+        boolean changed = false;
+        for (UUID owner : cachedActiveFarmOwners) {
+            FarmInstance farm = registry.getFarm(owner);
+            if (farm == null) continue;
+            farm.setLastOnlineDay(absoluteDay);
+            farm.setLastOnlineSeason(season);
+            changed = true;
+        }
+        if (changed) {
+            registry.setDirty();
+        }
     }
 
     /**
@@ -213,16 +272,9 @@ public final class FarmDailyProcessHelper {
             int remaining = farm.getGraceDaysLeft();
             if (remaining <= 0) continue;
 
-            // 检查是否有任一成员在线
-            boolean anyOnline = false;
-            for (UUID farmer : farm.getAllFarmers()) {
-                if (cachedOnlinePlayers != null ? cachedOnlinePlayers.contains(farmer)
-                        : level.getServer().getPlayerList().getPlayer(farmer) != null) {
-                    anyOnline = true;
-                    break;
-                }
-            }
-            if (!anyOnline) continue;
+            boolean active = cachedActiveFarmOwners != null
+                    && cachedActiveFarmOwners.contains(farm.getOwnerUUID());
+            if (!active) continue;
 
             remaining--;
             farm.setGraceDaysLeft(remaining);

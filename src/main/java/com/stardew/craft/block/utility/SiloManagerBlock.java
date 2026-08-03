@@ -168,6 +168,16 @@ public class SiloManagerBlock extends Block {
                     "message.stardew_craft.manager.relocate_owner_mismatch");
             return;
         }
+        java.util.UUID destinationOwner = com.stardew.craft.farm.FarmResourceOwnership
+                .resolveManageableOwner(serverLevel, pos, serverPlayer);
+        if (destinationOwner == null || !destinationOwner.toString().equals(owner)) {
+            refundRelocationItem(stack, serverLevel, pos, serverPlayer);
+            serverLevel.removeBlock(pos, false);
+            com.stardew.craft.network.ObjectDialogueService.show(
+                    serverPlayer,
+                    "message.stardew_craft.manager.relocate_owner_mismatch");
+            return;
+        }
 
         SiloManagerValidationService.ValidationResult validation = SiloManagerValidationService.validate(serverLevel, pos);
         if (!validation.success()) {
@@ -223,11 +233,16 @@ public class SiloManagerBlock extends Block {
     }
 
     public static boolean tryBuild(ServerLevel level, BlockPos managerPos, Player player) {
-        AnimalWorldData data = AnimalWorldData.get(level);
-        java.util.UUID owner = com.stardew.craft.core.FarmAreaResolver.getOwnerAt(managerPos);
-        if (owner == null) {
-            owner = player.getUUID();
+        if (!(player instanceof ServerPlayer serverPlayer)) {
+            return false;
         }
+        java.util.UUID owner = com.stardew.craft.farm.FarmResourceOwnership
+                .resolveManageableOwner(level, managerPos, serverPlayer);
+        if (owner == null) {
+            return false;
+        }
+        AnimalWorldData data = AnimalWorldData.get(level);
+        data.reconcileFarmOwnership(level);
         Optional<AnimalBuildingRecord> existingOpt = data.findBuildingByManagerAnyOwner(
             level.dimension().location().toString(),
             "silo",
@@ -292,6 +307,7 @@ public class SiloManagerBlock extends Block {
 
     public static boolean tryDemolishBuilding(ServerLevel level, BlockPos managerPos, ServerPlayer player) {
         AnimalWorldData data = AnimalWorldData.get(level);
+        data.reconcileFarmOwnership(level);
         Optional<AnimalBuildingRecord> existingOpt = data.findBuildingByManagerAnyOwner(
             level.dimension().location().toString(),
             "silo",
@@ -323,6 +339,7 @@ public class SiloManagerBlock extends Block {
 
     public static boolean tryRelocateManager(ServerLevel level, BlockPos managerPos, ServerPlayer player) {
         AnimalWorldData data = AnimalWorldData.get(level);
+        data.reconcileFarmOwnership(level);
         Optional<AnimalBuildingRecord> existingOpt = data.findBuildingByManagerAnyOwner(
             level.dimension().location().toString(),
             "silo",

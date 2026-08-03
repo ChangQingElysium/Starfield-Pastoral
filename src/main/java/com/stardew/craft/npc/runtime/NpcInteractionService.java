@@ -1386,6 +1386,7 @@ public final class NpcInteractionService {
     ) {
         ItemStack giftSnapshot = held.copy();
         boolean stardropTea = isStardropTea(held);
+        boolean birthday = isNpcBirthday(npcId, dayContext);
 
         // StardropTea bypasses daily & weekly limits (vanilla parity)
         if (!stardropTea) {
@@ -1397,7 +1398,7 @@ public final class NpcInteractionService {
                                 .REJECTED_DAILY_LIMIT,
                         state.points());
             }
-            if (state.giftsThisWeek() >= 2) {
+            if (weeklyGiftLimitBlocks(state.giftsThisWeek(), birthday)) {
                 return GiftProcessResult.rejected(
                         "stardewcraft.npc.generic.gift.already_week_limit",
                         giftSnapshot,
@@ -1407,7 +1408,6 @@ public final class NpcInteractionService {
             }
         }
 
-        boolean birthday = isNpcBirthday(npcId, dayContext);
         float birthdayMul = birthday ? 8f : 1f;
 
         int finalDelta;
@@ -1472,6 +1472,12 @@ public final class NpcInteractionService {
                 birthday,
                 finalDelta,
                 Math.max(0, state.points()));
+    }
+
+    static boolean weeklyGiftLimitBlocks(int giftsThisWeek, boolean birthday) {
+        // NPC.tryToReceiveActiveObject: birthdays bypass GiftsThisWeek < 2,
+        // while the separate GiftsToday check still applies.
+        return giftsThisWeek >= 2 && !birthday;
     }
 
     private static com.stardew.craft.api.v1.npc.StardewNpcFriendshipSnapshot

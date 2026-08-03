@@ -29,15 +29,73 @@ public final class ActiveFestivalConfirmState {
         return voteParticipants.computeIfAbsent(action, ignored -> new LinkedHashSet<>());
     }
 
+    /**
+     * Casts a vote against the participant snapshot captured by the first voter.
+     * Players who join the festival after voting starts do not expand an in-flight vote.
+     */
+    public VoteProgress castVote(OpenFestivalConfirmPayload.Action action,
+                                 UUID voter,
+                                 Collection<UUID> onlineParticipants) {
+        Set<UUID> participantSnapshot = voteParticipants(action);
+        Set<UUID> currentParticipants = onlineParticipants == null
+                ? Set.of()
+                : new LinkedHashSet<>(onlineParticipants);
+        if (participantSnapshot.isEmpty()) {
+            participantSnapshot.addAll(currentParticipants);
+        }
+
+        Set<UUID> currentVotes = votes(action);
+        currentVotes.retainAll(participantSnapshot);
+        if (voter != null && participantSnapshot.contains(voter)) {
+            currentVotes.add(voter);
+        }
+
+        int eligible = 0;
+        int accepted = 0;
+        for (UUID participant : currentParticipants) {
+            if (!participantSnapshot.contains(participant)) {
+                continue;
+            }
+            eligible++;
+            if (currentVotes.contains(participant)) {
+                accepted++;
+            }
+        }
+        return new VoteProgress(accepted, eligible);
+    }
+
+    public record VoteProgress(int votes, int participants) {
+        public boolean complete() {
+            return participants == 0 || votes >= participants;
+        }
+    }
+
     public boolean prompt(ServerPlayer player, OpenFestivalConfirmPayload.Action action) {
         if (player == null || action == null) {
             return false;
         }
         if (dialogs(action).add(player.getUUID())) {
-            PacketDistributor.sendToPlayer(player, new OpenFestivalConfirmPayload(action));
+            sendPrompt(player, action);
             return true;
         }
         return false;
+    }
+
+    /**
+     * Re-sends a prompt after an explicit player interaction. The original
+     * packet may have been replaced by another server-opened screen while the
+     * server still remembers the dialog as open.
+     */
+    public void reprompt(ServerPlayer player, OpenFestivalConfirmPayload.Action action) {
+        if (player == null || action == null) {
+            return;
+        }
+        dialogs(action).add(player.getUUID());
+        sendPrompt(player, action);
+    }
+
+    private static void sendPrompt(ServerPlayer player, OpenFestivalConfirmPayload.Action action) {
+        PacketDistributor.sendToPlayer(player, new OpenFestivalConfirmPayload(action));
     }
 
     public void closeDialog(ServerPlayer player, OpenFestivalConfirmPayload.Action action) {
@@ -67,6 +125,9 @@ public final class ActiveFestivalConfirmState {
         }
         clearPlayerDialogs(playerId);
         for (Set<UUID> set : votes.values()) {
+            set.remove(playerId);
+        }
+        for (Set<UUID> set : voteParticipants.values()) {
             set.remove(playerId);
         }
     }

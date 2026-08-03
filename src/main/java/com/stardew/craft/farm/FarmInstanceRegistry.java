@@ -111,10 +111,13 @@ public class FarmInstanceRegistry extends SavedData {
      */
     public boolean canOperateBuilding(UUID playerUUID, String buildingOwnerUuid) {
         if (buildingOwnerUuid == null || buildingOwnerUuid.isBlank()) return false;
-        if (playerUUID.toString().equals(buildingOwnerUuid)) return true;
         try {
             UUID buildingOwner = UUID.fromString(buildingOwnerUuid);
-            return areFarmmates(playerUUID, buildingOwner);
+            UUID farmOwner = getOwnerForPlayer(buildingOwner);
+            if (farmOwner == null) {
+                farmOwner = buildingOwner;
+            }
+            return FarmPermissionManager.get().canModify(farmOwner, playerUUID);
         } catch (IllegalArgumentException e) {
             return false;
         }
@@ -411,6 +414,7 @@ public class FarmInstanceRegistry extends SavedData {
                 registration.attachments());
         instance.setLastOnlineDay(absoluteDay);
         instance.setLastOnlineSeason(season);
+        instance.markActiveOnDay(absoluteDay);
 
         instances.put(playerUUID, instance);
         slotToOwner.put(slotIndex, playerUUID);

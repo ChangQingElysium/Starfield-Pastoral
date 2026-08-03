@@ -55,7 +55,7 @@ public record OpenLewisMenuPayload() implements CustomPacketPayload {
                     }
                 },
                 -1
-            ).withSoundTheme(com.stardew.craft.client.gui.common.StardewQuestionDialogSpec.SoundTheme.MONEY_CONTRACT)
+            )
         ));
     }
 }

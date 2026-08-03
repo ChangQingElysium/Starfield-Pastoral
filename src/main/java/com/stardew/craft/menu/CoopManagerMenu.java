@@ -112,9 +112,19 @@ public class CoopManagerMenu extends AbstractContainerMenu implements IBuildingM
         }
 
         AnimalWorldData data = AnimalWorldData.get(level);
+        data.reconcileFarmOwnership(level);
+        java.util.UUID farmOwner = com.stardew.craft.farm.FarmResourceOwnership
+                .resolveManageableOwner(level, managerPos, serverPlayer);
+        if (farmOwner == null) {
+            currentTier = 0;
+            targetTier = 0;
+            canBuildOrUpgrade = 0;
+            resetRequirementSnapshot();
+            return;
+        }
         Optional<AnimalBuildingRecord> existing = data.findBuildingByManager(
             level.dimension().location().toString(),
-            serverPlayer.getUUID(),
+            farmOwner,
             "coop",
             managerPos
         );

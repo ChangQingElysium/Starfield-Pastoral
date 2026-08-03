@@ -55,7 +55,7 @@ public record OpenMoneyContractActionPayload(UUID targetId, String targetName) i
                     }
                 },
                 -1
-            ).withSoundTheme(com.stardew.craft.client.gui.common.StardewQuestionDialogSpec.SoundTheme.MONEY_CONTRACT)
+            )
         ));
     }
 }

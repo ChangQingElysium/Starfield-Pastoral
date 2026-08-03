@@ -176,6 +176,7 @@ public class AnimalGrowthManager extends SavedData {
 
     private void growDailyAtActiveOvernightTime(ServerLevel level) {
         AnimalWorldData worldData = AnimalWorldData.get(level);
+        worldData.reconcileFarmOwnership(level);
         int currentAbsDay = currentAbsoluteDay();
         int dueAnimalCount = 0;
         for (FarmAnimalRecord record : worldData.getAnimals()) {

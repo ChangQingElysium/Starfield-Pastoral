@@ -1691,6 +1691,22 @@ public final class InteriorSubspaceManager {
     }
 
     /**
+     * Installs the per-player Community Center exit after structure placement or restoration.
+     * The refurbished schematic contains air at these positions, so a full restore must call this
+     * again after replacing the structure volume.
+     */
+    public static void ensureCommunityCenterExitPortal(ServerLevel level, BlockPos ccOrigin) {
+        placePortalTriggerArea(
+                level,
+                ccOrigin.offset(CC_INDOOR_EXIT_PORTAL_OFFSET),
+                2,
+                1,
+                2,
+                "sdv_portal_marker:cc_inside",
+                "sdv_portal_target:community_center_exit");
+    }
+
+    /**
      * 仅替换 <b>非空气</b> 方块位置的 PortalTriggerBlock（专用于沙漠公交站）。
      * <p>此区域内的空气方块保持不变，只有已存在的实体方块（站牌、地砖等）被替换成触发方块，
      * 玩家只会在踩到/撞到这些非空气方块时触发，而不会把整个体积都填成触发方块。

@@ -77,6 +77,14 @@ public final class ServerCutsceneTracker {
         return beginAuthorized(player, event);
     }
 
+    /** Non-mutating preflight used before a shared festival changes its global phase. */
+    public static boolean canStartEvent(ServerPlayer player, String eventId) {
+        return player != null
+                && eventId != null
+                && EventRegistry.getById(eventId) != null
+                && !ACTIVE.containsKey(player.getUUID());
+    }
+
     /** Validate a client-detected enter-area trigger and start it only when server state agrees. */
     public static boolean requestEnterAreaEvent(ServerPlayer player, String eventId) {
         if (ACTIVE.containsKey(player.getUUID())) {
@@ -154,7 +162,7 @@ public final class ServerCutsceneTracker {
             return null;
         }
         if (player.server.getTickCount() - state.startedAtServerTick > SESSION_TIMEOUT_TICKS) {
-            clear(player);
+            failActiveEvent(player, "authorization timeout");
             return null;
         }
         return state;
@@ -201,11 +209,32 @@ public final class ServerCutsceneTracker {
             return;
         }
         if (player.server.getTickCount() - state.startedAtServerTick > SESSION_TIMEOUT_TICKS) {
-            LOGGER.warn("Expired cutscene session '{}' for {}", state.eventId, player.getName().getString());
-            clear(player);
+            failActiveEvent(player, "playback timeout");
             return;
         }
         protectPlayer(player);
+    }
+
+    /**
+     * Releases a cutscene that cannot complete and advances any shared festival
+     * waiting for that participant. Clearing only the tracker would leave the
+     * festival's global interaction lock active forever.
+     */
+    public static boolean failActiveEvent(ServerPlayer player, String reason) {
+        if (player == null) {
+            return false;
+        }
+        State state = ACTIVE.get(player.getUUID());
+        if (state == null) {
+            return false;
+        }
+        String eventId = state.eventId;
+        LOGGER.warn("Aborting cutscene session '{}' for {}: {}",
+                eventId, player.getName().getString(), reason == null ? "unavailable" : reason);
+        clear(player);
+        com.stardew.craft.festival.ActiveFestivalHandlers
+                .onCutsceneUnavailable(player, eventId);
+        return true;
     }
 
     /** 判断玩家当前是否处于 cutscene 中。 */

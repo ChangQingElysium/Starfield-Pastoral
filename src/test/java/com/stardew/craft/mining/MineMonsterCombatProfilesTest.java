@@ -3,7 +3,6 @@ package com.stardew.craft.mining;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class MineMonsterCombatProfilesTest {
     @Test
@@ -29,10 +28,12 @@ class MineMonsterCombatProfilesTest {
     }
 
     @Test
-    void inheritedVariantCannotAccidentallyOverwriteItsBaseSlimeStats() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> MineMonsterCombatProfiles.resolve("prismatic_slime", 1.0f)
-        );
+    void prismaticSlimeUsesOriginalFixedCombatStats() {
+        MineMonsterCombatProfiles.ResolvedProfile prismatic =
+                MineMonsterCombatProfiles.resolve("prismatic_slime", 0.8f);
+
+        assertEquals(1000.0, prismatic.health(), 0.0001);
+        assertEquals(35.0, prismatic.damage(), 0.0001);
+        assertEquals(0.25, prismatic.movementSpeed(), 0.0001);
     }
 }

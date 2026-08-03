@@ -86,7 +86,7 @@ public final class CutsceneInteractionLock {
     @SubscribeEvent
     public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
-            ServerCutsceneTracker.clear(player);
+            ServerCutsceneTracker.failActiveEvent(player, "player disconnected");
         } else {
             ServerCutsceneTracker.clear(event.getEntity().getUUID());
         }

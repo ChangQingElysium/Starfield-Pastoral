@@ -15,7 +15,7 @@ public final class MineMonsterCombatProfiles {
             entry("green_slime", scaled(24, 5, 0, 0.25)),
             entry("frost_jelly", scaled(106, 7, 0, 0.25)),
             entry("sludge", scaled(205, 16, 0, 0.25)),
-            entry("prismatic_slime", inherited()),
+            entry("prismatic_slime", fixed(1000, 35, 0, 0.25)),
             entry("bat", scaled(24, 6, 0, 0.30)),
             entry("frost_bat", scaled(36, 7, 0, 0.30)),
             entry("lava_bat", scaled(80, 15, 0, 0.35)),

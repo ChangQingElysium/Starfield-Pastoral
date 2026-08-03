@@ -58,6 +58,7 @@ public class SiloManagerMenu extends AbstractContainerMenu {
         }
 
         AnimalWorldData data = AnimalWorldData.get(level);
+        data.reconcileFarmOwnership(level);
         Optional<AnimalBuildingRecord> existing = data.findBuildingByManagerAnyOwner(
             level.dimension().location().toString(),
             "silo",
@@ -76,7 +77,10 @@ public class SiloManagerMenu extends AbstractContainerMenu {
             hayCapacity = 0;
             // 检查是否可以建造
             var validation = com.stardew.craft.animal.service.SiloManagerValidationService.validate(level, managerPos);
-            canBuild = validation.success() ? 1 : 0;
+            canBuild = validation.success()
+                    && com.stardew.craft.farm.FarmResourceOwnership
+                            .resolveManageableOwner(level, managerPos, serverPlayer) != null
+                    ? 1 : 0;
         }
     }
 

@@ -220,9 +220,15 @@ public final class MoonlightJelliesFestivalService {
         if (player == null) {
             return;
         }
-        CONFIRM_STATE.clearPlayerDialogs(player.getUUID());
+        CONFIRM_STATE.clearPlayer(player.getUUID());
         LAST_OUTSIDE_ENTRY.remove(player.getUUID());
         LAST_INSIDE_ENTRY.remove(player.getUUID());
+        if (!START_VOTE_PARTICIPANTS.isEmpty()) {
+            checkStartVote(player.serverLevel());
+        }
+        if (!EXIT_VOTE_PARTICIPANTS.isEmpty()) {
+            checkExitVote(player.serverLevel());
+        }
     }
 
     public static boolean handlesConfirmation(ServerPlayer player, OpenFestivalConfirmPayload.Action action) {
@@ -271,6 +277,14 @@ public final class MoonlightJelliesFestivalService {
         }
     }
 
+    private static void checkStartVote(ServerLevel level) {
+        List<ServerPlayer> voters = onlineVoteParticipants(
+                level, START_VOTE_PARTICIPANTS);
+        if (!voters.isEmpty() && voteCount(voters, START_VOTES) >= voters.size()) {
+            startMainEvent(level);
+        }
+    }
+
     public static boolean tryOpenPierreFestivalShop(ServerPlayer player) {
         if (player == null || !PIERRE_SHOP_ZONE.contains(player.position()) || !isParticipant(player)) {
             return false;
@@ -307,7 +321,7 @@ public final class MoonlightJelliesFestivalService {
             player.displayClientMessage(Component.translatable("message.stardewcraft.festival.moonlight_jellies.start_vote_waiting", voteCount, voters.size()), true);
             return true;
         }
-        CONFIRM_STATE.prompt(player, OpenFestivalConfirmPayload.Action.MOONLIGHT_JELLIES_START);
+        CONFIRM_STATE.reprompt(player, OpenFestivalConfirmPayload.Action.MOONLIGHT_JELLIES_START);
         return true;
     }
 
@@ -533,8 +547,11 @@ public final class MoonlightJelliesFestivalService {
 
     private static void checkExitVote(ServerLevel level) {
         List<ServerPlayer> voters = onlineExitVoteParticipants(level);
+        if (voters.isEmpty()) {
+            return;
+        }
         int voteCount = exitVoteCount(voters);
-        if (voters.isEmpty() || voteCount >= voters.size()) {
+        if (voteCount >= voters.size()) {
             finishFestival(level);
             return;
         }
@@ -551,14 +568,13 @@ public final class MoonlightJelliesFestivalService {
         if (player == null || !isParticipant(player) || mainEventPhase != MainEventPhase.FREE) {
             return;
         }
-        if (START_VOTE_PARTICIPANTS.isEmpty()) {
-            START_VOTE_PARTICIPANTS.addAll(onlineParticipants(player.serverLevel()).stream().map(ServerPlayer::getUUID).toList());
-        }
-        START_VOTES.retainAll(START_VOTE_PARTICIPANTS);
-        START_VOTES.add(player.getUUID());
+        List<ServerPlayer> online = onlineParticipants(player.serverLevel());
+        ActiveFestivalConfirmState.VoteProgress progress = CONFIRM_STATE.castVote(
+                OpenFestivalConfirmPayload.Action.MOONLIGHT_JELLIES_START,
+                player.getUUID(),
+                online.stream().map(ServerPlayer::getUUID).toList());
         List<ServerPlayer> voters = onlineVoteParticipants(player.serverLevel(), START_VOTE_PARTICIPANTS);
-        int voteCount = voteCount(voters, START_VOTES);
-        if (voters.isEmpty() || voteCount >= voters.size()) {
+        if (progress.complete()) {
             startMainEvent(player.serverLevel());
             return;
         }
@@ -567,13 +583,27 @@ public final class MoonlightJelliesFestivalService {
                 CONFIRM_STATE.prompt(participant, OpenFestivalConfirmPayload.Action.MOONLIGHT_JELLIES_START);
             }
             participant.displayClientMessage(Component.translatable(
-                "message.stardewcraft.festival.moonlight_jellies.start_vote_waiting", voteCount, voters.size()), true);
+                "message.stardewcraft.festival.moonlight_jellies.start_vote_waiting",
+                progress.votes(), progress.participants()), true);
         }
     }
 
     private static void startMainEvent(ServerLevel level) {
         List<ServerPlayer> participants = onlineParticipants(level);
         if (level == null || participants.isEmpty() || mainEventPhase != MainEventPhase.FREE) {
+            return;
+        }
+        if (!participants.stream().allMatch(participant ->
+                ServerCutsceneTracker.canStartEvent(
+                        participant, MAIN_EVENT_CUTSCENE_ID))) {
+            CONFIRM_STATE.clearDialog(
+                    OpenFestivalConfirmPayload.Action.MOONLIGHT_JELLIES_START);
+            CONFIRM_STATE.clearVote(
+                    OpenFestivalConfirmPayload.Action.MOONLIGHT_JELLIES_START);
+            for (ServerPlayer participant : participants) {
+                participant.displayClientMessage(Component.translatable(
+                        "message.stardewcraft.festival.moonlight_jellies.unavailable"), true);
+            }
             return;
         }
         mainEventPhase = MainEventPhase.READY;
@@ -588,7 +618,8 @@ public final class MoonlightJelliesFestivalService {
         cleanupMainEventEntities(level);
         ensureLanternBoatAt(level, BOAT_START);
         for (ServerPlayer participant : participants) {
-            ServerCutsceneTracker.startEvent(participant, MAIN_EVENT_CUTSCENE_ID);
+            ActiveFestivalHandlers.startCutsceneOrRecover(
+                    participant, MAIN_EVENT_CUTSCENE_ID);
         }
     }
 
