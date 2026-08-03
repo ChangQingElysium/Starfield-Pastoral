@@ -1723,14 +1723,19 @@ public final class NpcInteractionService {
                         ? profile.manners()
                         : NpcCapabilityProfile.MANNERS_NEUTRAL);
 
-        if (birthday) {
-            if (taste == GiftTaste.LOVED) {
-                String loved = resolveDialogueTextByKey(dialogueRoot, "AcceptBirthdayGift_Loved", currentDayKey());
-                if (loved != null && !loved.isBlank()) {
-                    return loved;
-                }
-            }
+        String dialoguePrefix = birthday ? "AcceptBirthdayGift" : "AcceptGift";
+        String specificDialogue = resolveGiftDialogueText(
+                dialogueRoot,
+                dialoguePrefix,
+                stardewObjectToken(held),
+                VanillaGiftTasteResolver.contextTags(held),
+                taste,
+                currentDayKey());
+        if (specificDialogue != null && !specificDialogue.isBlank()) {
+            return specificDialogue;
+        }
 
+        if (birthday) {
             // Personality-branched birthday responses (vanilla NPC.cs parity)
             boolean positive = (taste == GiftTaste.LOVED || taste == GiftTaste.LIKED || taste == GiftTaste.NEUTRAL);
             boolean negative = (taste == GiftTaste.DISLIKED || taste == GiftTaste.HATED);
@@ -1766,13 +1771,6 @@ public final class NpcInteractionService {
             return "stardewcraft.npc.generic.birthday.neutral";
         }
 
-        // Item-specific dialogue (e.g. AcceptGift_(O)StardropTea, AcceptGift_(O)66 for Amethyst)
-        String itemSpecificKey = "AcceptGift_(O)" + stardewObjectToken(held);
-        String itemSpecificText = resolveDialogueTextByKey(dialogueRoot, itemSpecificKey, currentDayKey());
-        if (itemSpecificText != null && !itemSpecificText.isBlank()) {
-            return itemSpecificText;
-        }
-
         // NPC-specific taste response messages from taste data (vanilla parity)
         String tasteMsg = findNpcTasteMessage(npcId, taste);
         if (tasteMsg != null && !tasteMsg.isBlank()) {
@@ -1791,6 +1789,65 @@ public final class NpcInteractionService {
             case NEUTRAL -> "stardewcraft.npc.generic.gift.neutral";
             case DISLIKED -> "$s" + "stardewcraft.npc.generic.gift.disliked";
             case HATED -> "$s" + "stardewcraft.npc.generic.gift.hated";
+        };
+    }
+
+    /** Mirrors NPC.GetGiftReaction's item, taste/context-tag, tag, and taste key priority. */
+    static String resolveGiftDialogueText(
+            JsonObject dialogueRoot,
+            String prefix,
+            String objectToken,
+            Set<String> contextTags,
+            GiftTaste taste,
+            int dayKey
+    ) {
+        if (dialogueRoot == null || prefix == null || prefix.isBlank()) {
+            return null;
+        }
+        if (objectToken != null && !objectToken.isBlank()) {
+            String exact = resolveDialogueTextByKey(
+                    dialogueRoot, prefix + "_(O)" + objectToken, dayKey);
+            if (exact != null && !exact.isBlank()) {
+                return exact;
+            }
+        }
+
+        Set<String> tags = contextTags == null ? Set.of() : contextTags;
+        for (String tag : tags) {
+            for (String tasteLabel : giftTasteDialogueLabels(taste)) {
+                String taggedTaste = resolveDialogueTextByKey(
+                        dialogueRoot, prefix + "_" + tasteLabel + "_" + tag, dayKey);
+                if (taggedTaste != null && !taggedTaste.isBlank()) {
+                    return taggedTaste;
+                }
+            }
+        }
+        for (String tag : tags) {
+            String tagged = resolveDialogueTextByKey(dialogueRoot, prefix + "_" + tag, dayKey);
+            if (tagged != null && !tagged.isBlank()) {
+                return tagged;
+            }
+        }
+        for (String tasteLabel : giftTasteDialogueLabels(taste)) {
+            String tasteDialogue = resolveDialogueTextByKey(
+                    dialogueRoot, prefix + "_" + tasteLabel, dayKey);
+            if (tasteDialogue != null && !tasteDialogue.isBlank()) {
+                return tasteDialogue;
+            }
+        }
+        return resolveDialogueTextByKey(dialogueRoot, prefix, dayKey);
+    }
+
+    private static List<String> giftTasteDialogueLabels(GiftTaste taste) {
+        if (taste == null) {
+            return List.of("Neutral", "Positive");
+        }
+        return switch (taste) {
+            case LOVED -> List.of("Loved", "Positive");
+            case LIKED -> List.of("Liked", "Positive");
+            case NEUTRAL -> List.of("Neutral", "Positive");
+            case DISLIKED -> List.of("Disliked", "Negative");
+            case HATED -> List.of("Hated", "Negative");
         };
     }
 
@@ -2114,7 +2171,7 @@ public final class NpcInteractionService {
         }
     }
 
-    private enum GiftTaste {
+    enum GiftTaste {
         LOVED,
         LIKED,
         NEUTRAL,

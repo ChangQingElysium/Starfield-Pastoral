@@ -45,6 +45,10 @@ public final class AreaCompletionService {
 
         // 2) 核心奖励派发（鱼塘淘金 / 公告板人缘 等）
         AreaRewardDispatcher.onAreaComplete(player, areaId, level);
+        if (areaId == 2) {
+            com.stardew.craft.npc.runtime.NpcDialogueTopicService
+                    .onCommunityBoulderRemoved(player);
+        }
 
         // 3) Pantry 完成 → 修好温室（两个路径都一样）
         if (areaId == 0) {

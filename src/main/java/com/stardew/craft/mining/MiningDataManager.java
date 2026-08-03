@@ -55,6 +55,8 @@ public class MiningDataManager extends SavedData {
     public static void savePlayerData(ServerPlayer player, MiningPlayerData data) {
         MiningDataManager manager = get(player);
         manager.playerDataMap.put(player.getUUID(), data);
+        com.stardew.craft.npc.runtime.NpcDialogueTopicService
+                .onMineFloorReached(player, data.getCurrentFloor());
         com.stardew.craft.leaderboard.LeaderboardService.invalidateCache();
         manager.setDirty();
     }

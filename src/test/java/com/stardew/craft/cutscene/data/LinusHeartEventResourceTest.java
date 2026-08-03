@@ -27,6 +27,7 @@ class LinusHeartEventResourceTest {
         JsonObject early = event("linus_50point");
         JsonObject four = event("linus_4heart");
         JsonObject eight = event("linus_8heart");
+        JsonObject trashCleanup = event("special_order_linus_trash_cleanup");
 
         assertEquals("linus_50point", early.get("id").getAsString());
         assertLegacyId(early, "502969");
@@ -57,6 +58,8 @@ class LinusHeartEventResourceTest {
                 .map(JsonElement::getAsJsonObject)
                 .anyMatch(entry -> "saw_event".equals(entry.get("type").getAsString())),
                 "Vanilla /a 12 26 is a tile condition, not a saw-event condition");
+
+        assertLegacyId(trashCleanup, "8357109");
     }
 
     @Test

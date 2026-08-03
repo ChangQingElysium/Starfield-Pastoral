@@ -335,6 +335,8 @@ public class StardewTimeManager extends SavedData {
             // SDV Farmer.dayupdate: age active NPC dialogue events and create
             // their one-day/week/month/year memory variants.
             com.stardew.craft.npc.runtime.NpcDialogueEventData.get(server).onNewDay();
+            com.stardew.craft.npc.runtime.NpcDialogueTopicService.onNewDay(
+                    server, previousWeather, previousYear);
             
             // 需要在星露谷维度触发，而不是主世界
             @SuppressWarnings("null")

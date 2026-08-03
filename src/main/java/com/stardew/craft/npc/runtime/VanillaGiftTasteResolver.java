@@ -66,6 +66,16 @@ public final class VanillaGiftTasteResolver {
         return fallbackObjectToken(held);
     }
 
+    /** Returns the original object's ordered context tags used by NPC gift dialogue lookup. */
+    public static Set<String> contextTags(ItemStack held) {
+        VanillaData data = data();
+        if (held == null || held.isEmpty()) {
+            return Set.of();
+        }
+        ItemProfile item = profile(held, data);
+        return Collections.unmodifiableSet(new LinkedHashSet<>(item.contextTags()));
+    }
+
     private static TasteDecision resolveTaste(VanillaData data, ItemProfile item, String npcId) {
         Taste taste = Taste.NEUTRAL;
         boolean wasIndividualUniversal = false;

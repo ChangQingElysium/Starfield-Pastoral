@@ -71,6 +71,45 @@ class MineGenerationBalanceTest {
     }
 
     @Test
+    void coalIsAnIndependentAreaScaledResourceOnEveryMiningFloor() {
+        assertEquals(0.20 * 0.0060,
+                MineGenerationBalance.coalChancePerTraversableTile(1, 0.20),
+                0.000_001);
+        assertEquals(0.20 * 0.0060,
+                MineGenerationBalance.coalChancePerTraversableTile(35, 0.20),
+                0.000_001);
+        assertEquals(0.20 * 0.0066,
+                MineGenerationBalance.coalChancePerTraversableTile(40, 0.20),
+                0.000_001);
+        assertEquals(0.20 * 0.0078,
+                MineGenerationBalance.coalChancePerTraversableTile(80, 0.20),
+                0.000_001);
+        assertEquals(0.20 * 0.0078,
+                MineGenerationBalance.coalChancePerTraversableTile(122, 0.20),
+                0.000_001);
+
+        for (int floor = 1; floor < 120; floor++) {
+            assertTrue(MineGenerationBalance.coalChancePerTraversableTile(floor, 0.20) > 0.0,
+                    "coal must be available on regular mine floor " + floor);
+        }
+        assertEquals(0.0,
+                MineGenerationBalance.coalChancePerTraversableTile(120, 0.20),
+                0.000_001);
+        assertEquals(0.0,
+                MineGenerationBalance.coalChancePerTraversableTile(121, 0.20),
+                0.000_001);
+
+        double compactProbability = MineGenerationBalance.coalChancePerExposedStone(
+                45, 0.20, 1_200, 4_000);
+        double complexProbability = MineGenerationBalance.coalChancePerExposedStone(
+                45, 0.20, 1_200, 12_000);
+        assertEquals(1_200 * 0.20 * 0.0066,
+                compactProbability * 4_000, 0.000_001);
+        assertEquals(1_200 * 0.20 * 0.0066,
+                complexProbability * 12_000, 0.000_001);
+    }
+
+    @Test
     void skullCavernDepthCurveMatchesOriginalProbabilities() {
         assertEquals(0.0205, MineGenerationBalance.skullCavernOreChance(121), 0.000_001);
         assertEquals(0.085, MineGenerationBalance.skullCavernOreChance(170), 0.000_001);

@@ -7,11 +7,13 @@ import org.junit.jupiter.api.Test;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class LinusScheduleDataTest {
     @Test
@@ -54,7 +56,7 @@ class LinusScheduleDataTest {
                 "2200", "tent @linus_schedule_14 2 linus_sleep"));
         expected.put("DesertFestival_2", Map.of(
                 "610", "tent @linus_schedule_11 0",
-                "700", "desert @linus_schedule_18 1 dialogue",
+                "700", "desert @linus_schedule_18 1 dialogue:stardewcraft.npc.schedule.linus.desert_festival",
                 "2540", "tent @linus_schedule_14 2 linus_sleep"));
         expected.put("winter_15", Map.of(
                 "1100", "mountain @linus_schedule_06 1",
@@ -75,7 +77,7 @@ class LinusScheduleDataTest {
                 "1800", "tent @linus_schedule_11 2"));
         expected.put("winter", Map.of(
                 "1100", "mountain @linus_schedule_06 1",
-                "1400", "bathhouse_entry @linus_schedule_16 3 dialogue",
+                "1400", "bathhouse_entry @linus_schedule_16 3 dialogue:stardewcraft.npc.schedule.linus.winter.000",
                 "1800", "tent @linus_schedule_11 2"));
         expected.put("spring", Map.of(
                 "630", "mountain @linus_schedule_01 1",
@@ -96,6 +98,24 @@ class LinusScheduleDataTest {
             entries.forEach((time, value) -> assertEquals(value, actual.get(time).getAsString(),
                     scheduleKey + " at " + time));
         });
+    }
+
+    @Test
+    void everySupportedLanguageContainsEveryVanillaScheduleLine() throws Exception {
+        List<String> languages = List.of(
+                "de_de", "en_us", "es_es", "fr_fr", "hu_hu", "it_it",
+                "ja_jp", "ko_kr", "pt_br", "ru_ru", "tr_tr", "zh_cn");
+        List<String> keys = List.of(
+                "stardewcraft.npc.schedule.linus.desert_festival",
+                "stardewcraft.npc.schedule.linus.winter.000");
+        for (String language : languages) {
+            JsonObject lang = load("assets/stardewcraft/lang/" + language + ".json");
+            for (String key : keys) {
+                assertTrue(lang.has(key), language + " is missing " + key);
+                assertFalse(lang.get(key).getAsString().isBlank(),
+                        language + " has blank " + key);
+            }
+        }
     }
 
     private static JsonObject load(String path) throws Exception {

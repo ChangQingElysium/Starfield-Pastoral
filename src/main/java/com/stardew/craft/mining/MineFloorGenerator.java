@@ -56,7 +56,7 @@ import java.util.Set;
 @SuppressWarnings({"null", "unused"})
 public class MineFloorGenerator {
 
-    private static final int GENERATION_VERSION = 22;
+    private static final int GENERATION_VERSION = 23;
 
     // Perlin 噪声频率 — 控制地质带宽度（越小越宽）
     private static final double PERLIN_FREQ = 0.08;
@@ -214,6 +214,9 @@ public class MineFloorGenerator {
     int metalNodesPlaced = generateOres(
             level, random, floorNumber, theme, stonePlacementChance,
             traversableSurface.size(), exposedStones);
+    int coalNodesPlaced = generateCoalOres(
+            level, random, centerX, centerZ, floorNumber, theme, stonePlacementChance,
+            traversableSurface.size(), exposedStones);
         
         // 8. 生成中心安全区（清空玩家出生点周围）
         generateSafeZone(level, centerX, centerZ, floorNumber);
@@ -251,10 +254,10 @@ public class MineFloorGenerator {
         
         StardewCraft.LOGGER.info(
                 "[MINE] Floor {} generation complete: traversable={}, exposed={}, stoneChance={}, "
-                        + "metals={}, diamonds={}, gems={}, surfaceItems={}, barrels={}, monsters={}, ladderStones={}",
+                        + "metals={}, coal={}, diamonds={}, gems={}, surfaceItems={}, barrels={}, monsters={}, ladderStones={}",
                 floorNumber, traversableSurface.size(), exposedStones.size(),
                 String.format(java.util.Locale.ROOT, "%.2f", stonePlacementChance),
-                metalNodesPlaced, diamondNodesPlaced, gemNodesPlaced, surfaceItemsPlaced,
+                metalNodesPlaced, coalNodesPlaced, diamondNodesPlaced, gemNodesPlaced, surfaceItemsPlaced,
                 barrelsPlaced, monstersSpawned, stonesLeft);
     }
 
@@ -1043,6 +1046,47 @@ public class MineFloorGenerator {
     }
 
     /**
+     * Generate StardewCraft coal nodes independently from metal nodes. This
+     * preserves copper/iron/gold/iridium probabilities and scales coal by the
+     * floor's traversable area rather than the cave's full solid volume.
+     */
+    private static int generateCoalOres(ServerLevel level, RandomSource random,
+                                        int centerX, int centerZ,
+                                        int floorNumber, FloorTheme theme,
+                                        double stonePlacementChance,
+                                        int traversableTileCount,
+                                        List<BlockPos> exposedStones) {
+        List<BlockPos> candidates = exposedStones.stream()
+                .filter(pos -> !isNearSafeZone(pos.getX(), pos.getZ(), centerX, centerZ))
+                .filter(pos -> isStoneForMineral(level.getBlockState(pos)))
+                .toList();
+        double nodeChance = MineGenerationBalance.coalChancePerExposedStone(
+                floorNumber, stonePlacementChance, traversableTileCount, candidates.size());
+        if (nodeChance <= 0.0) {
+            return 0;
+        }
+
+        Block coalBlock = getOreBlock(theme, "coal");
+        int placed = 0;
+        for (BlockPos pos : candidates) {
+            if (random.nextDouble() >= nodeChance) {
+                continue;
+            }
+            level.setBlock(pos, coalBlock.defaultBlockState(), 2);
+            placed++;
+        }
+
+        // A non-zero probability can still roll zero. Coal is a baseline
+        // resource on every actual mining floor, so retain one uncapped minimum.
+        if (placed == 0 && !candidates.isEmpty()) {
+            BlockPos pos = candidates.get(random.nextInt(candidates.size()));
+            level.setBlock(pos, coalBlock.defaultBlockState(), 2);
+            placed = 1;
+        }
+        return placed;
+    }
+
+    /**
      * 生成装饰石头斑块（类似原版石头变种分布）
      */
     private static void generateDecorPatches(ServerLevel level, RandomSource random,
@@ -1097,10 +1141,10 @@ public class MineFloorGenerator {
             if (random.nextDouble() < iridiumChance) return "iridium";
             if (random.nextDouble() < goldChance) return "gold";
             if (random.nextDouble() < ironChance) return "iron";
-            return "coal";
+            return "copper";
         }
 
-        return "coal";
+        return "copper";
     }
 
     private static double getSkullCavernIridiumChance(int floor) {

@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.5.4fix3 - 2026-08-04
+
+### Update Log (English)
+
+#### Bug Fixes
+
+- Restored StardewCraft's custom coal ore as an independent resource on every actual mining floor, including regular elevator floors and Skull Cavern mining floors. Coal now scales with traversable area, no longer replaces metal-node rolls, and keeps a one-node minimum without imposing a production cap. Mine generation version 23 refreshes affected floors.
+- Restored source-style active dialogue topics after the Community Center boulder is removed, the Joja development form is viewed, new mine regions are reached, and the first-year Green Rain ends. Topic state remains isolated per player in multiplayer.
+- Corrected gift-reaction dialogue priority so exact items, ordered context tags, positive/negative groupings and taste-specific lines resolve before generic reactions, including birthday variants.
+- Restored Linus's winter and Desert Festival schedule dialogue, George's Desert Festival visitor dialogue, and the original legacy event ID for Linus's trash-cleanup special-order cutscene across all supported languages.
+- Added regression coverage for coal distribution, active dialogue topics, gift-reaction priority, festival visitor dialogue, Linus schedules and legacy cutscene compatibility, and updated the public mod version to `0.5.4fix3`.
+
+### 更新日志（中文）
+
+#### Bug 修复
+
+- 恢复 StardewCraft 自有煤矿石在所有实际采矿层的独立生成，包括普通矿井电梯层和骷髅矿洞采矿层。煤矿现在按可探索面积换算概率，不再占用金属矿节点名额；随机为零时保底一个，但不设产量上限。矿层生成版本升至 23，会刷新受影响的旧矿层。
+- 恢复原版式世界变化对话话题：移除社区中心巨石、查看 Joja 发展申请、首次到达新矿区，以及第一年绿雨结束后，NPC 会在正确时间内做出反应；多人模式下话题状态按玩家独立保存。
+- 修正送礼反应台词的原版优先级：精确物品、有序上下文标签、正面/负面分组和喜好等级专属台词会在通用反应前解析，并覆盖生日送礼变体。
+- 恢复莱纳斯冬季与沙漠节日日程台词、乔治的沙漠节日访客台词，以及莱纳斯垃圾清理特别订单过场的原版旧事件 ID，并同步到全部受支持语言。
+- 为煤矿分布、世界变化对话话题、送礼台词优先级、节日访客台词、莱纳斯日程和旧过场兼容性补充回归测试，并将公开模组版本更新为 `0.5.4fix3`。
+
 ## 0.5.4fix2 - 2026-08-04
 
 ### Update Log (English)

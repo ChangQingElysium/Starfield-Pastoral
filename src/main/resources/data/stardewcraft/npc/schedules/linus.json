@@ -17,7 +17,7 @@
   },
   "DesertFestival_2": {
     "610": "tent @linus_schedule_11 0",
-    "700": "desert @linus_schedule_18 1 dialogue",
+    "700": "desert @linus_schedule_18 1 dialogue:stardewcraft.npc.schedule.linus.desert_festival",
     "2540": "tent @linus_schedule_14 2 linus_sleep"
   },
   "winter_15": {
@@ -42,7 +42,7 @@
   },
   "winter": {
     "1100": "mountain @linus_schedule_06 1",
-    "1400": "bathhouse_entry @linus_schedule_16 3 dialogue",
+    "1400": "bathhouse_entry @linus_schedule_16 3 dialogue:stardewcraft.npc.schedule.linus.winter.000",
     "1800": "tent @linus_schedule_11 2"
   },
   "spring": {

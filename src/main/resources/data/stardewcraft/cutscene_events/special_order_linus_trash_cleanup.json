@@ -1,5 +1,6 @@
 {
   "id": "special_order_linus_trash_cleanup",
+  "legacy_ids": ["8357109"],
   "skippable": true,
   "trigger": {
     "type": "enter_area",

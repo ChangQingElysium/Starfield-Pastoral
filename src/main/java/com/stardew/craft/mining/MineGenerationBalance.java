@@ -11,6 +11,9 @@ package com.stardew.craft.mining;
  */
 public final class MineGenerationBalance {
     private static final double NORMAL_ORE_CHANCE_PER_STONE = 0.029;
+    private static final double EARTH_COAL_CHANCE_PER_STONE = 0.0060;
+    private static final double FROST_COAL_CHANCE_PER_STONE = 0.0066;
+    private static final double LAVA_COAL_CHANCE_PER_STONE = 0.0078;
     private static final double BASE_GEM_CHANCE_PER_STONE = 0.003;
     private static final double BASE_DIAMOND_CHANCE_PER_STONE = 0.00025;
     private static final double SURFACE_ITEM_CHANCE = 0.0025;
@@ -72,6 +75,39 @@ public final class MineGenerationBalance {
     ) {
         return distributeTileProbability(
                 metalChancePerTraversableTile(floor, stonePlacementChance),
+                traversableTileCount,
+                exposedStoneCount);
+    }
+
+    /**
+     * Coal is a standalone StardewCraft node, not a fallback metal type. Keep
+     * the custom per-area rates that existed before the surface-density rewrite
+     * and make them available on elevator floors as well. Floors 120 and 121
+     * are non-mining transition areas and intentionally contain no nodes.
+     */
+    static double coalChancePerTraversableTile(int floor, double stonePlacementChance) {
+        if (floor <= 0 || floor == 120 || floor == 121) {
+            return 0.0;
+        }
+        double conditionalChance;
+        if (floor < 40) {
+            conditionalChance = EARTH_COAL_CHANCE_PER_STONE;
+        } else if (floor < 80) {
+            conditionalChance = FROST_COAL_CHANCE_PER_STONE;
+        } else {
+            conditionalChance = LAVA_COAL_CHANCE_PER_STONE;
+        }
+        return clampProbability(stonePlacementChance) * conditionalChance;
+    }
+
+    static double coalChancePerExposedStone(
+            int floor,
+            double stonePlacementChance,
+            int traversableTileCount,
+            int exposedStoneCount
+    ) {
+        return distributeTileProbability(
+                coalChancePerTraversableTile(floor, stonePlacementChance),
                 traversableTileCount,
                 exposedStoneCount);
     }
@@ -223,7 +259,7 @@ public final class MineGenerationBalance {
             }
             return secondRoll < 0.75 ? "iron" : "copper";
         }
-        return "coal";
+        return "copper";
     }
 
     static double distributeTileProbability(

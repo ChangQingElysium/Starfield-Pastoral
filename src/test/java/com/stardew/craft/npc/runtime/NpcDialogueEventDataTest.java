@@ -2,11 +2,24 @@ package com.stardew.craft.npc.runtime;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class NpcDialogueEventDataTest {
+    @Test
+    void activeTopicsRemainIsolatedPerPlayer() {
+        NpcDialogueEventData data = new NpcDialogueEventData();
+        UUID first = UUID.randomUUID();
+        UUID second = UUID.randomUUID();
+
+        assertTrue(data.activate(first, "cc_Boulder", 7));
+        assertEquals("cc_Boulder", data.activeKeys(first, "linus").getFirst());
+        assertTrue(data.activeKeys(second, "linus").isEmpty());
+    }
+
     @Test
     void activeEventAndMemoryTimingMatchesFarmerDayUpdate() {
         NpcDialogueEventData.PlayerState state = new NpcDialogueEventData.PlayerState();

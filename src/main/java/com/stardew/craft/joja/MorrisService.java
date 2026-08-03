@@ -120,6 +120,8 @@ public final class MorrisService {
             }
             case NODE_CD_YES -> {
                 // 打开 CD form
+                com.stardew.craft.npc.runtime.NpcDialogueTopicService
+                        .onJojaDevelopmentFormViewed(player);
                 JojaCDService.openMenu(player);
                 yield true;
             }

@@ -34,7 +34,8 @@ public final class DesertFestivalNpcVisitService {
         Map.entry("demetrius", visit("DesertFestival_2", 910, "desert_festival_visit_demetrius", 2, "")),
         Map.entry("haley", visit("DesertFestival_2", 900, "desert_festival_visit_haley", 2, "haley_desert_festival")),
         Map.entry("lewis", visit("DesertFestival_2", 800, "desert_festival_visit_lewis_day2", 2, "")),
-        Map.entry("linus", visit("DesertFestival_2", 700, "desert_festival_visit_linus", 1, "dialogue")),
+        Map.entry("linus", visit("DesertFestival_2", 700, "desert_festival_visit_linus", 1,
+            "dialogue:stardewcraft.npc.schedule.linus.desert_festival")),
         Map.entry("maru", visit("DesertFestival_2", 1000, "desert_festival_visit_maru", 1, "square_1_5_1")),
         Map.entry("pam", visit("DesertFestival_2", 900, "desert_festival_visit_pam", 2, "")),
         Map.entry("penny", visit("DesertFestival_2", 1000, "desert_festival_visit_penny", 2, "")),
@@ -43,7 +44,8 @@ public final class DesertFestivalNpcVisitService {
 
     private static final Map<String, VisitEntry> DAY_3_VISITS = Map.ofEntries(
         Map.entry("evelyn", visit("DesertFestival_3", 1000, "desert_festival_visit_evelyn", 0, "")),
-        Map.entry("george", visit("DesertFestival_3", 1000, "desert_festival_visit_george", 0, "")),
+        Map.entry("george", visit("DesertFestival_3", 1000, "desert_festival_visit_george", 0,
+            "dialogue:stardewcraft.npc.schedule.george.desert_festival")),
         Map.entry("jas", visit("DesertFestival_3", 900, "desert_festival_visit_jas", 2, "")),
         Map.entry("jodi", visit("DesertFestival_3", 900, "desert_festival_visit_jodi", 2, "")),
         Map.entry("kent", visit("DesertFestival_3", 900, "desert_festival_visit_kent", 2, "")),
@@ -83,6 +85,10 @@ public final class DesertFestivalNpcVisitService {
 
     private static VisitEntry daySpecificVisit(String npcId) {
         int day = Math.max(1, FestivalService.getDayOfPassiveFestival(DesertFestivalService.FESTIVAL_ID));
+        return daySpecificVisit(day, npcId);
+    }
+
+    static VisitEntry daySpecificVisit(int day, String npcId) {
         String normalized = normalize(npcId);
         return switch (day) {
             case 1 -> DAY_1_VISITS.get(normalized);
