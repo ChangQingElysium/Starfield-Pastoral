@@ -1,0 +1,71 @@
+{
+  "id": "evelyn_garden_pot_wake_up",
+  "legacy_ids": ["900553"],
+  "skippable": true,
+  "trigger": { "type": "wake_up" },
+  "preconditions": [
+    { "type": "not_saw_event", "id": "evelyn_garden_pot_wake_up" },
+    { "type": "time", "min": 600, "max": 1130 },
+    { "type": "farm_owner_flag", "id": "ccPantry" },
+    { "type": "not_active_dialogue_event", "id": "cc_Greenhouse" },
+    { "type": "weather", "weather": "sunny" }
+  ],
+  "commands": [
+    { "cmd": "comment", "text": "=== SDV Farm Event 900553: Evelyn gives Garden Pot ===" },
+
+    { "cmd": "lock_player" },
+    { "cmd": "fade", "mode": "out", "ticks": 10 },
+
+    { "cmd": "warp", "actor": "player", "x": 0, "y": 0, "z": 0, "anchor": "farm_spawn" },
+    { "cmd": "face_actor", "actor": "player", "yaw": 90 },
+    { "cmd": "spawn_actor", "actor": "fake_player", "npc_id": "player",
+      "x": 0, "y": 0, "z": 0, "facing": 90, "anchor": "farm_spawn" },
+    { "cmd": "spawn_actor", "actor": "evelyn", "npc_id": "evelyn",
+      "x": -2, "y": 0, "z": 0, "facing": -90, "anchor": "farm_spawn" },
+
+    { "cmd": "camera", "x": -2.432, "y": 0.378, "z": 2.928,
+      "yaw": -141.4, "pitch": 13.5, "anchor": "farm_spawn" },
+    { "cmd": "skippable" },
+    { "cmd": "fade", "mode": "in", "ticks": 20 },
+    { "cmd": "pause", "ticks": 30 },
+
+    { "cmd": "speak", "npc_id": "evelyn", "text": "event.evelyn_garden_pot.greeting" },
+    { "cmd": "pause", "ticks": 10 },
+    { "cmd": "face_actor", "actor": "evelyn", "yaw": 90 },
+    { "cmd": "pause", "ticks": 10 },
+    { "cmd": "face_actor", "actor": "evelyn", "yaw": 0 },
+    { "cmd": "speak", "npc_id": "evelyn", "text": "event.evelyn_garden_pot.farm" },
+    { "cmd": "pause", "ticks": 10 },
+    { "cmd": "face_actor", "actor": "evelyn", "yaw": 90 },
+    { "cmd": "face_actor", "actor": "evelyn", "yaw": 180 },
+    { "cmd": "pause", "ticks": 10 },
+    { "cmd": "speak", "npc_id": "evelyn", "text": "event.evelyn_garden_pot.gift" },
+    { "cmd": "pause", "ticks": 16 },
+
+    { "cmd": "simultaneous", "commands": [
+      { "cmd": "hold_item", "actor": "evelyn", "item": "stardewcraft:garden_pot", "ticks": 66 },
+      { "cmd": "play_sound", "sound": "stardewcraft:reward", "volume": 1.0, "pitch": 1.0 }
+    ] },
+    { "cmd": "add_item_if_missing", "item": "stardewcraft:garden_pot", "count": 1 },
+    { "cmd": "pause", "ticks": 4 },
+    { "cmd": "message", "text": "event.evelyn_garden_pot.received" },
+    { "cmd": "pause", "ticks": 16 },
+
+    { "cmd": "speak", "npc_id": "evelyn", "text": "event.evelyn_garden_pot.usage" },
+    { "cmd": "pause", "ticks": 10 },
+    { "cmd": "speak", "npc_id": "evelyn", "text": "event.evelyn_garden_pot.recipe" },
+    { "cmd": "pause", "ticks": 4 },
+    { "cmd": "play_sound", "sound": "stardewcraft:reward", "volume": 1.0, "pitch": 1.0 },
+    { "cmd": "add_recipe", "recipe": "garden_pot" },
+    { "cmd": "pause", "ticks": 10 },
+    { "cmd": "message", "text": "event.evelyn_garden_pot.learned" },
+    { "cmd": "pause", "ticks": 16 },
+    { "cmd": "speak", "npc_id": "evelyn", "text": "event.evelyn_garden_pot.goodbye" },
+    { "cmd": "pause", "ticks": 10 },
+
+    { "cmd": "remove_actor", "actor": "evelyn" },
+    { "cmd": "remove_actor", "actor": "fake_player" },
+    { "cmd": "unlock_player" },
+    { "cmd": "end" }
+  ]
+}

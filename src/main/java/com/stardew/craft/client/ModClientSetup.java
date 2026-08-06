@@ -158,6 +158,7 @@ public final class ModClientSetup {
 		event.registerBlockEntityRenderer(ModBlockEntities.GEODE_CRUSHER.get(), GeodeCrusherBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.COFFEE_MAKER.get(), CoffeeMakerBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.DAILY_STATUE.get(), DailyStatueBlockEntityRenderer::new);
+		event.registerBlockEntityRenderer(ModBlockEntities.GARDEN_POT.get(), com.stardew.craft.client.render.GardenPotBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.BONE_MILL.get(), BoneMillBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.MAYONNAISE_MACHINE.get(), MayonnaiseMachineBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.INCUBATOR.get(), IncubatorBlockEntityRenderer::new);

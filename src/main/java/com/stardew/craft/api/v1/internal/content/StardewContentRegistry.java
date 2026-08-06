@@ -1404,7 +1404,7 @@ public final class StardewContentRegistry {
                     issues.add("invalid_command_item:" + rawItem);
                 }
             }
-            case "hold_item", "ground_item" -> {
+            case "hold_item", "ground_item", "eat_item" -> {
                 String rawItem = jsonString(command, "item");
                 if (!addItemReference(
                         output,

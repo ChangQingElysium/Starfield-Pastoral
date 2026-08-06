@@ -15,6 +15,9 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -37,6 +40,21 @@ public final class CommunityCenterSystem {
     public static void onServerTick(ServerTickEvent.Post event) {
         AreaRestoreCutscene.tick();
         GoodbyeDanceCutscene.tick();
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            PacketDistributor.sendToPlayer(player,
+                    com.stardew.craft.communitycenter.cutscene.CutscenePayload.clearScreen());
+        }
+    }
+
+    @SubscribeEvent
+    public static void onServerStopped(ServerStoppedEvent event) {
+        AreaRestoreCutscene.reset();
+        GoodbyeDanceCutscene.reset();
+        playersInsideCC.clear();
     }
 
     /**

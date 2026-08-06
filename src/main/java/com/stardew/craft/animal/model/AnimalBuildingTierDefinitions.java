@@ -19,8 +19,8 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Atomic data-pack registry for animal-building capabilities, source costs and
- * construction durations.
+ * Atomic data-pack registry for animal-building capabilities, source costs,
+ * construction durations and spatial validation rules.
  */
 public final class AnimalBuildingTierDefinitions {
     public static final String DATA_DIRECTORY =
@@ -162,6 +162,8 @@ public final class AnimalBuildingTierDefinitions {
             ResourceLocation dataId,
             JsonObject value
     ) {
+        String family = requiredString(value, "family");
+        int tier = requiredInt(value, "tier");
         ArrayList<AnimalBuildingTierDefinition.Material> materials =
                 new ArrayList<>();
         if (value.has("materials")) {
@@ -180,18 +182,52 @@ public final class AnimalBuildingTierDefinitions {
                                 material.get("count").getAsInt()));
             }
         }
+        AnimalBuildingTierDefinition.Validation defaults = defaultValidation(family, tier);
+        JsonObject validation = value.has("validation")
+                ? value.getAsJsonObject("validation")
+                : new JsonObject();
         return new AnimalBuildingTierDefinition(
                 dataId,
                 bool(value, "replace", false),
-                requiredString(value, "family"),
-                requiredInt(value, "tier"),
+                family,
+                tier,
                 requiredInt(value, "capacity"),
                 integer(value, "hay_capacity", 0),
                 bool(value, "allows_pregnancy", false),
                 bool(value, "automatic_feed", false),
-                requiredInt(value, "build_days"),
                 requiredInt(value, "money"),
-                materials);
+                materials,
+                new AnimalBuildingTierDefinition.Validation(
+                        integer(validation, "scan_range_xz", defaults.scanRangeXZ()),
+                        integer(validation, "scan_range_up", defaults.scanRangeUp()),
+                        integer(validation, "scan_range_down", defaults.scanRangeDown()),
+                        integer(validation, "feed_troughs", defaults.feedTroughs()),
+                        integer(validation, "auto_feed_troughs", defaults.autoFeedTroughs()),
+                        integer(validation, "hay_hoppers", defaults.hayHoppers()),
+                        integer(validation, "incubators", defaults.incubators()),
+                        integer(validation, "min_interior_blocks", defaults.minInteriorBlocks()),
+                        bool(validation, "require_enclosed", defaults.requireEnclosed()),
+                        bool(validation, "require_door", defaults.requireDoor()),
+                        integer(validation, "min_door_count", defaults.minDoorCount())));
+    }
+
+    private static AnimalBuildingTierDefinition.Validation defaultValidation(String family, int tier) {
+        int[] facilities = switch (family + ":" + tier) {
+            case "coop:1" -> new int[]{4, 0, 1, 0, 216};
+            case "coop:2" -> new int[]{8, 0, 1, 1, 288};
+            case "coop:3" -> new int[]{0, 12, 1, 1, 360};
+            case "barn:1" -> new int[]{4, 0, 1, 0, 252};
+            case "barn:2" -> new int[]{8, 0, 1, 0, 336};
+            case "barn:3" -> new int[]{0, 12, 1, 0, 420};
+            default -> new int[]{0, 0, 0, 0, 0};
+        };
+        boolean validatesInterior = family.equals("coop") || family.equals("barn");
+        return new AnimalBuildingTierDefinition.Validation(
+                validatesInterior ? 12 : 0,
+                validatesInterior ? 12 : 0,
+                validatesInterior ? 12 : 0,
+                facilities[0], facilities[1], facilities[2], facilities[3], facilities[4],
+                validatesInterior, validatesInterior, validatesInterior ? 1 : 0);
     }
 
     private static String requiredString(

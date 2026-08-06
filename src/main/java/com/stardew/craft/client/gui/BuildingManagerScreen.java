@@ -411,7 +411,10 @@ public class BuildingManagerScreen extends AbstractContainerScreen<AbstractConta
         }
 
         // Section title
-        Component header = mgr.getCurrentTier() <= 0
+        Component header = mgr.isRevalidating()
+                ? Component.translatable(
+                        "gui.stardew_craft.animal_manager.revalidate")
+                : mgr.getCurrentTier() <= 0
                 ? Component.translatable("gui.stardew_craft." + family + "_manager.build")
                 : Component.translatable("gui.stardew_craft." + family + "_manager.upgrade");
         ry = GuiText.drawWrapped(
@@ -920,6 +923,10 @@ public class BuildingManagerScreen extends AbstractContainerScreen<AbstractConta
     }
 
     private Component getActionLabel() {
+        if (mgr.isRevalidating()) {
+            return Component.translatable(
+                    "gui.stardew_craft.animal_manager.revalidate");
+        }
         if (mgr.isAtMaxTier()) return Component.translatable("gui.stardew_craft." + family + "_manager.max");
         if (mgr.getCurrentTier() <= 0) return Component.translatable("gui.stardew_craft." + family + "_manager.build");
         return Component.translatable("gui.stardew_craft." + family + "_manager.upgrade");

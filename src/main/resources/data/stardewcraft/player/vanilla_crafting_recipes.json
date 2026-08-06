@@ -2042,6 +2042,29 @@
       "unlockCondition": "default"
     },
     {
+      "id": "garden_pot",
+      "output": {
+        "item": "stardewcraft:garden_pot",
+        "count": 1
+      },
+      "ingredients": [
+        {
+          "item": "stardewcraft:clay",
+          "count": 1
+        },
+        {
+          "item": "stardewcraft:stone",
+          "count": 10
+        },
+        {
+          "item": "stardewcraft:refined_quartz",
+          "count": 1
+        }
+      ],
+      "bigCraftable": true,
+      "unlockCondition": "null"
+    },
+    {
       "id": "stone_from_any_stone",
       "output": {
         "item": "stardewcraft:stone",

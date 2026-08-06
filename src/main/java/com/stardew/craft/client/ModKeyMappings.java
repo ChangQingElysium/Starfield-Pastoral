@@ -6,6 +6,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import com.mojang.blaze3d.platform.InputConstants;
 import org.lwjgl.glfw.GLFW;
 
@@ -17,13 +18,15 @@ public final class ModKeyMappings {
 
     public static final KeyMapping SKILL_MINOR = new KeyMapping(
             "key.stardewcraft.skill_minor",
-            InputConstants.Type.MOUSE,
-            GLFW.GLFW_MOUSE_BUTTON_RIGHT,
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_R,
             CATEGORY
     );
 
     public static final KeyMapping SKILL_MAJOR = new KeyMapping(
             "key.stardewcraft.skill_major",
+            KeyConflictContext.IN_GAME,
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_Z,
             CATEGORY
@@ -31,13 +34,15 @@ public final class ModKeyMappings {
 
     public static final KeyMapping EMOTE_WHEEL = new KeyMapping(
             "key.stardewcraft.emote_wheel",
+            KeyConflictContext.IN_GAME,
             InputConstants.Type.KEYSYM,
-            GLFW.GLFW_KEY_TAB,
+            GLFW.GLFW_KEY_Y,
             CATEGORY
     );
 
     public static final KeyMapping GAME_MENU = new KeyMapping(
             "key.stardewcraft.game_menu",
+            KeyConflictContext.IN_GAME,
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_V,
             CATEGORY
@@ -45,6 +50,7 @@ public final class ModKeyMappings {
 
     public static final KeyMapping QUEST_LOG = new KeyMapping(
             "key.stardewcraft.quest_log",
+            KeyConflictContext.IN_GAME,
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_U,
             CATEGORY
@@ -52,6 +58,7 @@ public final class ModKeyMappings {
 
     public static final KeyMapping CUTSCENE_SKIP = new KeyMapping(
             "key.stardewcraft.cutscene_skip",
+            KeyConflictContext.UNIVERSAL,
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_C,
             CATEGORY

@@ -296,12 +296,6 @@ public class CoopManagerBlock extends Block {
         );
 
         int currentTier = existingOpt.map(record -> record.buildingType().tier()).orElse(0);
-        if (existingOpt.filter(AnimalBuildingRecord::hasPendingConstruction)
-                .filter(record -> record.validationState()
-                        == AnimalBuildingRecord.ValidationState.CONSTRUCTING)
-                .isPresent()) {
-            return false;
-        }
         boolean revalidating = existingOpt
                 .map(record -> !record.isGameplayEnabled())
                 .orElse(false);
@@ -357,14 +351,13 @@ public class CoopManagerBlock extends Block {
             return true;
         }
 
-        AnimalBuildingConstructionService.StartResult construction =
+        AnimalBuildingConstructionService.StartResult buildResult =
                 AnimalBuildingConstructionService.start(
-                        level,
                         serverPlayer,
                         targetType,
                         currentTier == 0,
                         applyStructure);
-        if (!construction.started()) {
+        if (!buildResult.started()) {
             com.stardew.craft.network.payload.HudHintPayload.send(
                     serverPlayer,
                     "stardewcraft.manager.construction.missing_cost");
@@ -375,11 +368,12 @@ public class CoopManagerBlock extends Block {
         com.stardew.craft.network.GlobalHudMessagePayload.sendTo(
                 serverPlayer,
                 Component.translatable(
-                        "stardewcraft.manager.construction.started",
+                        "stardewcraft.manager.construction.completed",
                         Component.translatable(
                                 "stardewcraft.manager.building.coop"),
-                        targetTier,
-                        targetType.definition().buildDays()));
+                        targetTier));
+        com.stardew.craft.quest.StardewQuestEvents.fireBuildingExists(
+                serverPlayer, "Coop");
         level.playSound(null, managerPos, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 0.6f, 1.1f);
 
         return true;
@@ -439,9 +433,6 @@ public class CoopManagerBlock extends Block {
         }
 
         AnimalBuildingRecord existing = existingOpt.get();
-        if (existing.hasPendingConstruction()) {
-            return false;
-        }
         ItemStack managerItem = new ItemStack(ModBlocks.COOP_MANAGER.get().asItem());
         CompoundTag rootTag = managerItem.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
         CompoundTag relocateTag = new CompoundTag();

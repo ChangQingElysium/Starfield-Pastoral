@@ -1,5 +1,6 @@
 package com.stardew.craft.player;
 
+import com.stardew.craft.Config;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
@@ -19,7 +20,15 @@ public final class JoinAnnouncementService {
     private JoinAnnouncementService() {}
 
     public static void schedule(ServerPlayer player) {
-        var updateCheck = ModUpdateChecker.checkAsync();
+        boolean checkUpdates = Config.ENABLE_UPDATE_CHECKS.get();
+        boolean showAnnouncement = Config.SHOW_COMMUNITY_ANNOUNCEMENT.get();
+        if (!checkUpdates && !showAnnouncement) {
+            return;
+        }
+        var updateCheck = checkUpdates
+                ? ModUpdateChecker.checkAsync()
+                : java.util.concurrent.CompletableFuture.completedFuture(
+                        ModUpdateChecker.unavailableStatus());
         player.server.tell(new TickTask(player.server.getTickCount() + ANNOUNCEMENT_DELAY_TICKS, () -> {
             if (player.isRemoved()) {
                 return;
@@ -30,9 +39,9 @@ public final class JoinAnnouncementService {
                 }
                 boolean dismissed = PlayerDataManager.getPlayerData(player)
                         .isJoinAnnouncementDismissed();
-                if (!dismissed) {
+                if (showAnnouncement && !dismissed) {
                     send(player, status);
-                } else if (shouldSendUpdateNotice(dismissed, status)) {
+                } else if (checkUpdates && status.isOutdated()) {
                     sendUpdateNotice(player, status);
                 }
             }));

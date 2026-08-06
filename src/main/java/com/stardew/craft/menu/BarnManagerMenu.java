@@ -1,6 +1,5 @@
 package com.stardew.craft.menu;
 
-import com.stardew.craft.Config;
 import com.stardew.craft.animal.data.AnimalWorldData;
 import com.stardew.craft.animal.model.AnimalBuildingRecord;
 import com.stardew.craft.animal.service.BarnManagerValidationService;
@@ -133,9 +132,13 @@ public class BarnManagerMenu extends AbstractContainerMenu implements IBuildingM
                 .orElse(0);
 
         currentTier = existing.map(record -> record.buildingType().tier()).orElse(0);
-        targetTier = Math.min(currentTier + 1, 3);
+        AnimalBuildingMenuFlow.Decision flow = AnimalBuildingMenuFlow.resolve(
+                currentTier,
+                existing.map(AnimalBuildingRecord::validationState)
+                        .orElse(AnimalBuildingRecord.ValidationState.VALID));
+        targetTier = flow.targetTier();
 
-        if (currentTier >= 3) {
+        if (!flow.shouldScan()) {
             canBuildOrUpgrade = 0;
             resetRequirementSnapshot();
             return;
@@ -160,10 +163,10 @@ public class BarnManagerMenu extends AbstractContainerMenu implements IBuildingM
         curLength = scan.length();
         curHeight = scan.height();
 
-        reqEnclosed = Config.BARN_REQUIRE_ENCLOSED.get() ? 1 : 0;
+        reqEnclosed = requirement.requireEnclosed() ? 1 : 0;
         curEnclosed = scan.enclosed() ? 1 : 0;
-        reqDoor = Config.BARN_REQUIRE_DOOR.get() ? 1 : 0;
-        reqDoorCount = Config.BARN_MIN_DOOR_COUNT.get();
+        reqDoor = requirement.requireDoor() ? 1 : 0;
+        reqDoorCount = requirement.minDoorCount();
         curDoorCount = scan.doorCount();
         hasInteriorSpace = scan.hasInteriorSpace() ? 1 : 0;
 
@@ -325,7 +328,7 @@ public class BarnManagerMenu extends AbstractContainerMenu implements IBuildingM
     }
 
     public boolean isAtMaxTier() {
-        return currentTier >= 3;
+        return currentTier >= 3 && targetTier == 0;
     }
 
     public boolean hasExistingBuilding() {

@@ -148,9 +148,9 @@ public class DimensionEventHandler {
     }
 
     @SuppressWarnings("null")
-    public static void requestSleepAdvance(ServerPlayer player, int sleepMinute) {
+    public static boolean requestSleepAdvance(ServerPlayer player, int sleepMinute) {
         BlockPos bedPos = SleepInteractionHandler.consumePendingBedPos(player);
-        requestSleepAdvance(player, sleepMinute, bedPos);
+        return requestSleepAdvance(player, sleepMinute, bedPos);
     }
 
     @SuppressWarnings("null")
@@ -225,24 +225,28 @@ public class DimensionEventHandler {
     }
 
     @SuppressWarnings("null")
-    public static void requestSleepAdvance(ServerPlayer player, int sleepMinute, BlockPos bedPos) {
+    public static boolean requestSleepAdvance(
+            ServerPlayer player,
+            int sleepMinute,
+            BlockPos bedPos
+    ) {
         if (player == null) {
-            return;
+            return false;
         }
         if (player.level().dimension() != ModDimensions.STARDEW_VALLEY
             && player.level().dimension() != ModMiningDimensions.STARDEW_MINING) {
-            return;
+            return false;
         }
         ServerLevel stardewLevel = player.server.getLevel(ModDimensions.STARDEW_VALLEY);
         if (stardewLevel == null) {
-            return;
+            return false;
         }
 
         if (bedPos == null || !isSleepAnchor(player, bedPos)) {
-            return;
+            return false;
         }
         if (!player.isSleeping()) {
-            return;
+            return false;
         }
 
         // 多人投票：只有所有 Stardew 维度玩家都投票后才推进
@@ -260,12 +264,13 @@ public class DimensionEventHandler {
                         effectiveSleepMinute,
                         "sleep_confirm_after_pass_out",
                         votedPlayers);
-                return;
+                return true;
             }
             SleepVoteTracker.clearVotes();
             advanceToNextMorning(stardewLevel, effectiveSleepMinute, "sleep_confirm");
             teleportPlayersToFarmSpawn(player.server, pendingPassOutPlayers);
         }
+        return true;
     }
 
     static boolean shouldReturnEarlyPassOutToBed(

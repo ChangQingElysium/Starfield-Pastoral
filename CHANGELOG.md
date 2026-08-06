@@ -1,5 +1,69 @@
 # Changelog
 
+## 0.5.5 - 2026-08-07
+
+### Update Log (English)
+
+#### Garden Pot And Evelyn
+
+- Added the Garden Pot as a complete utility facility with its original item, block model, watered appearance, description and crafting unlock. It accepts Stardew and compatible Minecraft crops and allows crops from every season wherever the pot is placed.
+- Rendered potted plants as a single uniformly scaled crop rooted on the pot's soil surface, including two-block-tall crops, while keeping the actual crop blocks available for normal growth and interaction. Fertilizer and watering overlays now align with the pot's raised soil instead of a full block.
+- Preserved mature crops in the world until a player harvests them or connected automation extracts them. Garden Pots no longer replace mature plants with output bubbles, and automation harvests regrowing crops without destroying their next growth cycle.
+- Added direct and piped seed, fertilizer, bone meal, water and harvest support. Each pot exposes a 100 mB water input, accepts bone meal only for compatible non-Stardew crops, supports the F8 day-advance path, and reports the contained crop through Jade.
+- Completed Evelyn's four-heart cookie event and source-aligned daily schedule. Completing the Pantry now unlocks her wake-up visit, which safely grants one Garden Pot and its crafting recipe even when the cutscene is skipped; a full inventory drops the gift at the player's feet instead of losing it.
+
+#### Farming, Fertilizer And World Assets
+
+- Rebuilt fertilizer application, persistence and networking around one authoritative service. Stardew farmland and Garden Pots now share the same placement rules, client rendering and Jade information, while chunk-scoped synchronization avoids stale cross-dimension entries and unnecessary full-cache scans.
+- Corrected creative-mode farmland breaking so it no longer drops Yellow Dirt, and excluded Garden Pots from terrain conversion and farmland cleanup paths.
+- Reworked pasture-grass models into four directional visual variants with split texture assets, preserving growth behavior while improving in-world presentation. Added the missing cowboy-hat model and texture set used by existing wearable content.
+
+#### Animal Buildings And Configuration
+
+- Moved coop and barn structural requirements into the data-driven building definitions, including scan ranges, enclosure and doorway checks, interior size and tier-specific facility counts. Existing invalid structures can now be revalidated through the building-manager interface.
+- Removed the abandoned construction-delay state: valid purchases and upgrades activate atomically after payment, old constructing records migrate to usable buildings, and animal-shop availability is synchronized against the player's actual building state before purchase checks.
+- Reorganized settings by ownership into client options and per-world server options, with one-time migration from the legacy common config. Added an in-game Starfield Pastoral settings page for visual effects, monster health bars, HUD layout, key bindings, fishing, clock speed, update checks and the community announcement.
+- Fixed the normal stack-size policy at the project's intended 999 and moved internal building-balance values out of the player-facing configuration screen.
+
+#### Community Center, Festivals And Runtime Fixes
+
+- Added the original Junimo Star restoration cue, a silent refurbished Community Center interior and explicit cutscene cleanup. Interrupted restoration or goodbye effects now clear on completion, login and server shutdown instead of leaving stale screen fades or process-local state behind.
+- Blocked ordinary fishing while attending an active festival while preserving the Fair fishing game and Festival of Ice contest. Active hooks and server fishing sessions are cleaned up when a festival takes control.
+- Made the Fair slingshot game honor the player's configured movement keys, and moved development-only key handlers behind the non-production runtime check.
+- Restored the original fixed mine-ladder base chance, repaired rejected or cancelled sleep transitions so their fade is released, and synchronized the affected interface, schedule, event and configuration text across all 12 supported languages.
+- Updated the public mod version to `0.5.5`.
+
+### 更新日志（中文）
+
+#### 花盆与伊芙琳
+
+- 将花盆完整注册为实用设施，补齐原版物品、方块模型、浇水后外观、描述与配方解锁。花盆可种植星露谷作物及兼容的 Minecraft 作物，并且无论放在哪里都允许种植任意季节的作物。
+- 重新实现盆栽作物渲染：作物会以统一比例整体缩小，只渲染一次并准确落在花盆土壤表面；两格高作物同样按整体处理。肥料与喷壶提示也会贴合抬高后的盆土，而不是浮在整格方块顶部。
+- 成熟作物会继续保留在花盆中，直到玩家收获或外接自动化主动提取；不再提前清空作物并冒出产物气泡。可重复收获作物经管道采收后也会保留下一轮生长状态。
+- 接入种子、肥料、骨粉、水与产物的手动和管道交互。每个花盆提供 100 mB 水槽；骨粉只催熟兼容的非星露谷作物，同时支持 F8 天数快进，并由 Jade 统一显示内部作物信息。
+- 完成伊芙琳四心饼干剧情及其原版日程。完成茶水间后会解锁她清晨拜访农场的剧情；正常播放或跳过剧情都会安全发放 1 个花盆并解锁配方，背包已满时花盆会掉在玩家脚边而不会丢失。
+
+#### 农业、肥料与世界资源
+
+- 将肥料施用、存档与网络同步收束到同一套权威逻辑。星露谷耕地和花盆共用正确的施肥规则、客户端渲染与 Jade 信息；按区块同步可避免跨维度残留数据及无意义的全缓存扫描。
+- 修复创造模式破坏星露谷耕地仍掉落黄土的问题，并让花盆绕开地形转换与耕地清理逻辑。
+- 将牧草模型重制为四种带方向变化的外观，并拆分对应纹理资源，在保留生长逻辑的同时改善场景表现；同时补齐现有牛仔帽内容所需的模型与纹理。
+
+#### 动物建筑与设置系统
+
+- 将鸡舍和畜棚的结构要求迁入数据驱动的建筑定义，包括扫描范围、封闭性、门、内部空间和各等级设施数量；失效建筑现在可以在建筑管理界面重新验证。
+- 移除已废弃的施工等待状态：结构验证与付款成功后建筑或升级会原子化生效，旧存档中的施工中记录会迁移为可用建筑；购买动物前也会先同步玩家真实的建筑状态。
+- 按配置归属重新拆分客户端设置和世界服务端设置，并提供旧 common 配置的一次性迁移。新增游戏内“星田牧歌设置”界面，可调整视觉效果、怪物血条、HUD 布局、按键、钓鱼小游戏、时间速度、更新检查与社区公告。
+- 将普通物品堆叠上限固定为项目预期的 999，并从玩家设置界面移除内部建筑平衡参数。
+
+#### 社区中心、节日与运行时修复
+
+- 接入原版祝尼魔之星修复音乐，并让彻底翻新后的社区中心室内保持安静；修复和告别过场现在会在结束、重新登录或服务端关闭时明确清理，不再残留全屏淡入淡出或跨存档运行状态。
+- 参加节日期间禁止普通钓鱼，但保留秋季展览会钓鱼小游戏与冰雪节钓鱼比赛；节日接管时会清理已有鱼钩和服务端钓鱼会话。
+- 秋季展览会弹弓小游戏现在遵循玩家自定义移动按键，开发专用按键处理也只会在非正式运行环境注册。
+- 恢复原版固定的矿井梯子基础概率，修复睡眠请求被拒绝或取消后淡出效果不恢复的问题，并将相关界面、日程、剧情与配置文本同步到项目现有全部 12 种语言。
+- 将公开模组版本更新为 `0.5.5`。
+
 ## 0.5.4fix3 - 2026-08-04
 
 ### Update Log (English)

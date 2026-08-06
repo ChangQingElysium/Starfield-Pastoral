@@ -23,6 +23,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.function.Supplier;
 
@@ -70,6 +72,18 @@ public class ForageBlock extends BushBlock {
         }
         this.allowedSeasonMask = mask;
         return this;
+    }
+
+    public ItemStack getAutomationDrop() {
+        return dropSupplier == null ? ItemStack.EMPTY : dropSupplier.get();
+    }
+
+    @Override
+    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        if (com.stardew.craft.block.utility.GardenPotBlock.isPottedPlant(level, pos, state)) {
+            return net.minecraft.world.phys.shapes.Shapes.empty();
+        }
+        return super.getShape(state, level, pos, context);
     }
 
     @SuppressWarnings("null")

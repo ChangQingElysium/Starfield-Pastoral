@@ -97,6 +97,10 @@ public final class UtilityAutomationCapabilities {
             (be, ctx) -> be.getAutomationItemHandler());
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.DAILY_STATUE.get(),
             (be, ctx) -> be.getAutomationItemHandler());
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.GARDEN_POT.get(),
+            (be, ctx) -> be.getAutomationItemHandler());
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.GARDEN_POT.get(),
+            (be, ctx) -> be.getAutomationFluidHandler());
 
         event.registerBlock(Capabilities.ItemHandler.BLOCK, UtilityAutomationCapabilities::getAutomationFromMultiblock,
             ModBlocks.BEE_HOUSE.get(),

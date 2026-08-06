@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "moisture=0": {"model": "stardewcraft:block/utility/garden_pot"},
+    "moisture=1": {"model": "stardewcraft:block/utility/garden_pot_watered"},
+    "moisture=2": {"model": "stardewcraft:block/utility/garden_pot_watered"},
+    "moisture=3": {"model": "stardewcraft:block/utility/garden_pot_watered"},
+    "moisture=4": {"model": "stardewcraft:block/utility/garden_pot_watered"},
+    "moisture=5": {"model": "stardewcraft:block/utility/garden_pot_watered"},
+    "moisture=6": {"model": "stardewcraft:block/utility/garden_pot_watered"},
+    "moisture=7": {"model": "stardewcraft:block/utility/garden_pot_watered"}
+  }
+}

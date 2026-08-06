@@ -245,8 +245,6 @@ public class ModItems {
         public static final DeferredItem<Item> WILD_WEEDS_WINTER_0 = ITEMS.register("wild_weeds_winter_0",
                         () -> new WildWeedsBlockItem(ModBlocks.WILD_WEEDS.get(), 3, 0, new Item.Properties().stacksTo(999)));
 
-        public static final DeferredItem<Item> PASTURE_GRASS = blockItem("pasture_grass", ModBlocks.PASTURE_GRASS);
-        public static final DeferredItem<Item> BLUE_PASTURE_GRASS = blockItem("blue_pasture_grass", ModBlocks.BLUE_PASTURE_GRASS);
         public static final DeferredItem<Item> SMALL_BUSH = blockItem("small_bush", ModBlocks.SMALL_BUSH);
         public static final DeferredItem<Item> BERRY_BUSH = blockItem("berry_bush", ModBlocks.BERRY_BUSH);
         public static final DeferredItem<Item> SHADOW_FOOTPRINT = ITEMS.register("shadow_footprint",
@@ -612,6 +610,9 @@ public class ModItems {
 
         public static final DeferredItem<Item> IRIDIUM_SPRINKLER = ITEMS.register("iridium_sprinkler",
                         () -> new StardewBlockItem(ModBlocks.IRIDIUM_SPRINKLER.get(), "stardewcraft.type.utility", -1, new Item.Properties().stacksTo(999)));
+
+        public static final DeferredItem<Item> GARDEN_POT = ITEMS.register("garden_pot",
+                        () -> new StardewBlockItem(ModBlocks.GARDEN_POT.get(), "stardewcraft.type.utility", -1, new Item.Properties().stacksTo(999)));
 
                 public static final DeferredItem<Item> CASK = ITEMS.register("cask",
                                                 () -> new StardewBlockItem(ModBlocks.CASK.get(), "stardewcraft.type.utility", -1, new Item.Properties().stacksTo(999)));
@@ -3099,6 +3100,12 @@ public class ModItems {
     public static final DeferredItem<Item> ABIGAILS_BOW = registerHat("abigails_bow", "AbigailsBow");
     public static final DeferredItem<Item> MOUSE_EARS = registerHat("mouse_ears", "31");
     public static final DeferredItem<Item> CAT_EARS = registerHat("cat_ears", "32");
+    public static final DeferredItem<Item> COWBOY_HAT = registerHat("cowboy_hat", "0");
+    public static final DeferredItem<Item> COWGAL_HAT = registerHat("cowgal_hat", "33");
+    public static final DeferredItem<Item> COWPOKE_HAT = registerHat("cowpoke_hat", "34");
+    public static final DeferredItem<Item> BLUE_COWBOY_HAT = registerHat("blue_cowboy_hat", "37");
+    public static final DeferredItem<Item> RED_COWBOY_HAT = registerHat("red_cowboy_hat", "38");
+    public static final DeferredItem<Item> DARK_COWBOY_HAT = registerHat("dark_cowboy_hat", "83");
 
     // ============ 靴子 (Boots) ============
     public static final DeferredItem<Item> SNEAKERS = ITEMS.register("sneakers",

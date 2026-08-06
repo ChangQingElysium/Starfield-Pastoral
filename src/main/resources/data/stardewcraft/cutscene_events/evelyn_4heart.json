@@ -1,0 +1,86 @@
+{
+  "id": "evelyn_4heart",
+  "legacy_ids": ["19"],
+  "skippable": true,
+  "trigger": {
+    "type": "enter_area",
+    "location": "joshhouse",
+    "area_min": [37, 22, -19],
+    "area_max": [64, 26, 5]
+  },
+  "preconditions": [
+    { "type": "not_saw_event", "id": "evelyn_4heart" },
+    { "type": "friendship", "npc": "evelyn", "min": 1000 },
+    { "type": "npc_present", "npc": "evelyn",
+      "area_min": [37, 22, -19], "area_max": [64, 26, 5] }
+  ],
+  "commands": [
+    { "cmd": "comment", "text": "=== SDV JoshHouse event 19: Evelyn teaches Cookies ===" },
+    { "cmd": "lock_player" },
+    { "cmd": "fade", "mode": "out", "ticks": 10 },
+    { "cmd": "hide_npc", "npc_id": "evelyn" },
+    { "cmd": "spawn_actor", "actor": "fake_player", "npc_id": "player",
+      "x": 45.5, "y": 22, "z": -0.5, "relative": false, "facing": 90 },
+    { "cmd": "spawn_actor", "actor": "evelyn", "npc_id": "evelyn",
+      "x": 40.5, "y": 22, "z": -2.5, "relative": false, "facing": 180 },
+    { "cmd": "camera", "x": 38.746, "y": 22.944, "z": -3.571,
+      "yaw": -45.9, "pitch": 33.0, "relative": false },
+    { "cmd": "music", "track": "MUSIC_JAUNTY" },
+    { "cmd": "fade", "mode": "in", "ticks": 20 },
+    { "cmd": "skippable" },
+
+    { "cmd": "navigate_actor", "actor": "fake_player",
+      "x": 40.5, "y": 22, "z": -0.5, "speed": 0.11, "relative": false },
+    { "cmd": "navigate_actor", "actor": "fake_player",
+      "x": 40.5, "y": 22, "z": -1.5, "speed": 0.11, "relative": false },
+    { "cmd": "emote", "actor": "fake_player", "emote": "question" },
+    { "cmd": "face_actor", "actor": "evelyn", "yaw": 0 },
+    { "cmd": "speak", "npc_id": "evelyn", "text": "event.evelyn.19.smell" },
+    { "cmd": "emote", "actor": "fake_player", "emote": "exclamation" },
+    { "cmd": "speak", "npc_id": "evelyn", "text": "event.evelyn.19.try_one" },
+    { "cmd": "face_actor", "actor": "evelyn", "yaw": 180 },
+    { "cmd": "pause", "ticks": 12 },
+    { "cmd": "play_sound", "sound": "stardewcraft:clank" },
+    { "cmd": "pause", "ticks": 12 },
+    { "cmd": "face_actor", "actor": "evelyn", "yaw": 0 },
+    { "cmd": "pause", "ticks": 18 },
+    { "cmd": "play_sound", "sound": "stardewcraft:eat" },
+    { "cmd": "eat_item", "actor": "fake_player", "item": "stardewcraft:cookie", "ticks": 40 },
+    { "cmd": "face_actor", "actor": "fake_player", "yaw": 180 },
+    {
+      "cmd": "question",
+      "text": "event.evelyn.19.question",
+      "choices": [
+        {
+          "text": "event.evelyn.19.choice.delicious",
+          "commands": [
+            { "cmd": "add_friendship", "npc": "evelyn", "points": 100 },
+            { "cmd": "speak", "npc_id": "evelyn",
+              "text": "stardewcraft.npc.evelyn.event_cookies1" }
+          ]
+        },
+        {
+          "text": "event.evelyn.19.choice.hockey_puck",
+          "commands": [
+            { "cmd": "add_friendship", "npc": "evelyn", "points": -100 },
+            { "cmd": "speak", "npc_id": "evelyn",
+              "text": "stardewcraft.npc.evelyn.event_cookies2" }
+          ]
+        }
+      ]
+    },
+    { "cmd": "stop_music" },
+    { "cmd": "speak", "npc_id": "evelyn", "text": "event.evelyn.19.recipe_offer" },
+    { "cmd": "play_sound", "sound": "stardewcraft:reward" },
+    { "cmd": "message", "text": "event.evelyn.19.recipe_learned" },
+    { "cmd": "add_recipe", "recipe": "cookie" },
+
+    { "cmd": "fade", "mode": "out", "ticks": 20 },
+    { "cmd": "remove_actor", "actor": "fake_player" },
+    { "cmd": "remove_actor", "actor": "evelyn" },
+    { "cmd": "show_npc", "npc_id": "evelyn" },
+    { "cmd": "camera", "action": "reset" },
+    { "cmd": "unlock_player" },
+    { "cmd": "end" }
+  ]
+}

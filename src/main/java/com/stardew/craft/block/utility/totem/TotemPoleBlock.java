@@ -1,6 +1,5 @@
 package com.stardew.craft.block.utility.totem;
 
-import com.stardew.craft.Config;
 import com.stardew.craft.blockentity.TotemPoleBlockEntity;
 import com.stardew.craft.block.utility.MapUtilityStaticBlock;
 import com.stardew.craft.core.ModDimensions;
@@ -112,7 +111,7 @@ public class TotemPoleBlock extends MapUtilityStaticBlock implements EntityBlock
     public BlockState getStateForPlacement(@SuppressWarnings("null") BlockPlaceContext context) {
         Level level = context.getLevel();
         BlockPos pos = context.getClickedPos();
-        if (Config.TOTEM_POLE_ENFORCE_PLACEMENT_RULES.get() && !canPlaceTotemHere(level, pos)) {
+        if (!canPlaceTotemHere(level, pos)) {
             Player player = context.getPlayer();
             if (player != null && level.isClientSide) {
                 player.displayClientMessage(getPlacementDeniedMessage(level), true);

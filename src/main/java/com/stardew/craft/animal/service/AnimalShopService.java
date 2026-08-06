@@ -84,6 +84,7 @@ public final class AnimalShopService {
     }
 
     public static void openForPlayer(ServerPlayer player) {
+        synchronizeBuildingState(player);
         AnimalWorldData data = AnimalWorldData.get(player.serverLevel());
         String ownerUuid = player.getUUID().toString();
 
@@ -142,6 +143,12 @@ public final class AnimalShopService {
         @SuppressWarnings("null")
         OpenAnimalPurchaseScreenPayload payload = OpenAnimalPurchaseScreenPayload.normal(PlayerStardewDataAPI.getMoney(player), animals, buildings);
         PacketDistributor.sendToPlayer(player, payload);
+    }
+
+    /** Repairs legacy ownership before shop availability is read. */
+    public static void synchronizeBuildingState(ServerPlayer player) {
+        AnimalWorldData.get(player.serverLevel())
+                .reconcileFarmOwnership(player.serverLevel());
     }
 
     public static ShopAnimalRule getRule(String animalTypeId) {
@@ -276,6 +283,9 @@ public final class AnimalShopService {
             return false;
         }
         if (!rule.family().equalsIgnoreCase(building.buildingType().family())) {
+            return false;
+        }
+        if (building.buildingType().tier() < rule.requiredTier()) {
             return false;
         }
         return building.memberAnimalIds().size() < building.capacity();

@@ -43,9 +43,9 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.client.event.TextureAtlasStitchedEvent;
-import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
@@ -65,16 +65,16 @@ public class StardewCraftClient {
     private static final int STARDEW_YELLOW_DIRT_WINTER = 0xF8FCFF;
 
     public StardewCraftClient(IEventBus modEventBus, ModContainer container) {
-        // Allows NeoForge to create a config screen for this mod's configs.
-        // The config screen is accessed by going to the Mods screen > clicking on your mod > clicking on config.
-        // Do not forget to add translations for your config options to the en_us.json file.
-        container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
+        container.registerExtensionPoint(IConfigScreenFactory.class,
+                (minecraft, parent) -> new com.stardew.craft.client.gui.StardewSettingsScreen(parent));
         // Weapon shader registration — client only (moved from StardewCraft main class)
         modEventBus.addListener(com.stardew.craft.client.weapon.WeaponShaderRegistry::onRegisterShadersSafe);
     NeoForge.EVENT_BUS.register(FertilizerOverlayRenderer.class);
     NeoForge.EVENT_BUS.register(TVScreenOverlayRenderer.class);
     NeoForge.EVENT_BUS.register(SprinklerOverlayRenderer.class);
-    NeoForge.EVENT_BUS.register(DebugKeybindsTick.class);
+    if (!FMLLoader.isProduction()) {
+        NeoForge.EVENT_BUS.register(DebugKeybindsTick.class);
+    }
     }
 
     @SubscribeEvent

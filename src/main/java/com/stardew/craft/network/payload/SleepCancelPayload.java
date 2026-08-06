@@ -8,6 +8,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * 客户端 → 服务端：玩家取消睡眠投票（按 ESC 退出等待界面）。
@@ -39,6 +40,8 @@ public record SleepCancelPayload() implements CustomPacketPayload {
                 player.stopSleeping();
             }
             SleepVoteTracker.revokeVoteAndBroadcast(player);
+            PacketDistributor.sendToPlayer(
+                    player, new SleepFadeRestorePayload());
         });
     }
 }

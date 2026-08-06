@@ -126,7 +126,7 @@ final class CutsceneActionManifest {
                     "add_friendship",
                     string(command, "npc", "") + ":" + integer(command, "points", 250),
                     branch);
-            case "add_item", "remove_item" -> action(
+            case "add_item", "add_item_if_missing", "remove_item" -> action(
                     type,
                     string(command, "item", "") + ":" + integer(command, "count", 1),
                     branch);

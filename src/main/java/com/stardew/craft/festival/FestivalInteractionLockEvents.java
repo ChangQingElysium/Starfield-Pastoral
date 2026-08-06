@@ -12,6 +12,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 @EventBusSubscriber(modid = StardewCraft.MODID)
 public final class FestivalInteractionLockEvents {
@@ -39,7 +40,11 @@ public final class FestivalInteractionLockEvents {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
-        if (isFestivalFishingRodUse(event.getEntity(), event.getItemStack())) {
+        if (rejectBlockedFestivalFishing(event.getEntity(), event.getItemStack())) {
+            event.setCanceled(true);
+            return;
+        }
+        if (isAuthorizedFestivalFishingRodUse(event.getEntity(), event.getItemStack())) {
             return;
         }
         if (fairWorldLocked(event.getEntity())
@@ -61,7 +66,11 @@ public final class FestivalInteractionLockEvents {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onRightClickItem(PlayerInteractEvent.RightClickItem event) {
-        if (isFestivalFishingRodUse(event.getEntity(), event.getItemStack())) {
+        if (rejectBlockedFestivalFishing(event.getEntity(), event.getItemStack())) {
+            event.setCanceled(true);
+            return;
+        }
+        if (isAuthorizedFestivalFishingRodUse(event.getEntity(), event.getItemStack())) {
             return;
         }
         if (locked(event.getEntity())) {
@@ -104,10 +113,41 @@ public final class FestivalInteractionLockEvents {
         }
     }
 
-    private static boolean isFestivalFishingRodUse(Player player, net.minecraft.world.item.ItemStack stack) {
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer serverPlayer)
+                || !ActiveFestivalHandlers.blocksFishingDuringActiveFestival(serverPlayer)) {
+            return;
+        }
+        com.stardew.craft.fishing.server.FishingSessionManager.get(serverPlayer.server).cancel(serverPlayer);
+        if (serverPlayer.fishing != null && serverPlayer.fishing.isAlive()) {
+            serverPlayer.fishing.discard();
+        }
+    }
+
+    private static boolean rejectBlockedFestivalFishing(Player player, net.minecraft.world.item.ItemStack stack) {
+        if (!(player instanceof ServerPlayer serverPlayer)
+                || stack == null
+                || !(stack.getItem() instanceof net.minecraft.world.item.FishingRodItem)
+                || !ActiveFestivalHandlers.isParticipant(serverPlayer)
+                || isAuthorizedFestivalFishingRodUse(serverPlayer, stack)) {
+            return false;
+        }
+        serverPlayer.displayClientMessage(
+            net.minecraft.network.chat.Component.translatable("stardewcraft.fishing.blocked_during_festival"),
+            true
+        );
+        return true;
+    }
+
+    private static boolean isAuthorizedFestivalFishingRodUse(Player player, net.minecraft.world.item.ItemStack stack) {
         return player instanceof ServerPlayer serverPlayer
-            && FestivalOfIceService.isFishingContestActive(serverPlayer)
             && stack != null
-            && stack.getItem() instanceof com.stardew.craft.item.tool.FishingRodItem;
+            && stack.getItem() instanceof com.stardew.craft.item.tool.FishingRodItem
+            && ((FestivalOfIceService.isFishingContestActive(serverPlayer)
+                    && FestivalOfIceService.canStartFishingCast(serverPlayer)
+                    && FestivalOfIceService.isUsableFishingContestRod(serverPlayer, stack))
+                || (com.stardew.craft.festival.fair.FairFishingGameService.isFishingGameActive(serverPlayer)
+                    && com.stardew.craft.festival.fair.FairFishingGameService.isUsableFishingGameRod(serverPlayer, stack)));
     }
 }

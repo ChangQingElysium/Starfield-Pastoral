@@ -24,6 +24,8 @@ public final class ScreenFade {
     private static float targetAlpha = 0f;
     private static float speed = 0f;   // alpha per tick
     private static boolean active = false;
+    private static int ticksSincePacket = 0;
+    private static final int STALE_EFFECT_TIMEOUT_TICKS = 20 * 15;
 
     // 当前过场状态 (供外部查询)
     @SuppressWarnings("unused")
@@ -35,9 +37,15 @@ public final class ScreenFade {
      * 收到服务端过场 packet 后的处理。
      */
     public static void onCutscenePacket(CutscenePayload payload) {
+        if (payload.phase() == CutscenePayload.PHASE_END) {
+            clear();
+            return;
+        }
+
         currentCutsceneType = payload.cutsceneType();
         currentPhase = payload.phase();
         currentAreaId = payload.areaId();
+        ticksSincePacket = 0;
 
         if (payload.cutsceneType() == CutscenePayload.TYPE_AREA_RESTORE) {
             switch (payload.phase()) {
@@ -56,6 +64,12 @@ public final class ScreenFade {
                 case CutscenePayload.PHASE_RESTORE -> {
                     // Phase 3: 全屏闪白 → 淡出
                     startEffect(Mode.FLASH_WHITE, 1.0f, 0.0f);
+                    // Vanilla starts junimoStarSong at the same instant the restored
+                    // room is applied and the white flash begins.
+                    com.stardew.craft.communitycenter.network.BundleClientData.INSTANCE
+                            .markInteriorRefurbishedIfComplete();
+                    com.stardew.craft.client.sound.StardewMusicManager.playOneShotForCutscene(
+                            com.stardew.craft.sound.ModSounds.MUSIC_JUNIMO_STAR_SONG.get());
                 }
             }
         }
@@ -99,6 +113,12 @@ public final class ScreenFade {
      */
     public static void tick() {
         if (!active) return;
+
+        ticksSincePacket++;
+        if (ticksSincePacket > STALE_EFFECT_TIMEOUT_TICKS) {
+            clear();
+            return;
+        }
 
         if (currentMode == Mode.FLASH_WHITE) {
             // 闪白：alpha 从 1.0 递减到 0
@@ -162,6 +182,7 @@ public final class ScreenFade {
         currentCutsceneType = -1;
         currentPhase = -1;
         currentAreaId = -1;
+        ticksSincePacket = 0;
     }
 
     public static boolean isActive() {

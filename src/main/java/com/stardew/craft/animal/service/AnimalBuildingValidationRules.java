@@ -1,6 +1,7 @@
 package com.stardew.craft.animal.service;
 
-import com.stardew.craft.Config;
+import com.stardew.craft.animal.model.AnimalBuildingTierDefinition;
+import com.stardew.craft.animal.model.AnimalBuildingTierDefinitions;
 import com.stardew.craft.block.utility.AutoFeedTroughBlock;
 import com.stardew.craft.block.utility.FeedTroughBlock;
 import com.stardew.craft.block.utility.HayHopperBlock;
@@ -44,17 +45,27 @@ final class AnimalBuildingValidationRules {
             throw new IllegalArgumentException(
                     "Invalid " + normalized + " tier: " + tier);
         }
-        return switch (normalized) {
-            case "coop" -> coopRequirements(tier);
-            case "barn" -> barnRequirements(tier);
-            default -> throw new IllegalArgumentException(
+        if (!"coop".equals(normalized) && !"barn".equals(normalized)) {
+            throw new IllegalArgumentException(
                     "Unsupported animal-building family: " + family);
-        };
+        }
+        AnimalBuildingTierDefinition.Validation validation =
+                AnimalBuildingTierDefinitions.require(normalized, tier).validation();
+        return new Requirements(
+                validation.feedTroughs(),
+                validation.autoFeedTroughs(),
+                validation.hayHoppers(),
+                validation.incubators(),
+                validation.minInteriorBlocks(),
+                validation.requireEnclosed(),
+                validation.requireDoor(),
+                validation.minDoorCount());
     }
 
     static Bounds boundsFor(
             BlockPos managerPos,
             String family,
+            int tier,
             int minInteriorBlocks
     ) {
         String normalized = normalizeFamily(family);
@@ -62,24 +73,15 @@ final class AnimalBuildingValidationRules {
                 8,
                 (int) Math.ceil(Math.cbrt(
                         Math.max(1, minInteriorBlocks))) + 2);
-        int configuredRangeXZ;
-        int configuredRangeUp;
-        int configuredRangeDown;
-        if ("coop".equals(normalized)) {
-            configuredRangeXZ = Config.COOP_SCAN_RANGE_XZ.get();
-            configuredRangeUp = Config.COOP_SCAN_RANGE_UP.get();
-            configuredRangeDown = Config.COOP_SCAN_RANGE_DOWN.get();
-        } else if ("barn".equals(normalized)) {
-            configuredRangeXZ = Config.BARN_SCAN_RANGE_XZ.get();
-            configuredRangeUp = Config.BARN_SCAN_RANGE_UP.get();
-            configuredRangeDown = Config.BARN_SCAN_RANGE_DOWN.get();
-        } else {
+        if (!"coop".equals(normalized) && !"barn".equals(normalized)) {
             throw new IllegalArgumentException(
                     "Unsupported animal-building family: " + family);
         }
-        int rangeXZ = Math.max(configuredRangeXZ, inferredExtent);
-        int rangeUp = Math.max(configuredRangeUp, inferredExtent);
-        int rangeDown = Math.max(configuredRangeDown, inferredExtent);
+        AnimalBuildingTierDefinition.Validation validation =
+                AnimalBuildingTierDefinitions.require(normalized, tier).validation();
+        int rangeXZ = Math.max(validation.scanRangeXZ(), inferredExtent);
+        int rangeUp = Math.max(validation.scanRangeUp(), inferredExtent);
+        int rangeDown = Math.max(validation.scanRangeDown(), inferredExtent);
         return new Bounds(
                 managerPos.getX() - rangeXZ,
                 managerPos.getX() + rangeXZ,
@@ -334,96 +336,6 @@ final class AnimalBuildingValidationRules {
                 failures.isEmpty(),
                 messageFor(family, failures),
                 List.copyOf(failures)
-        );
-    }
-
-    private static Requirements coopRequirements(int tier) {
-        return switch (tier) {
-            case 1 -> requirements(
-                    Config.COOP_T1_FEED_TROUGH.get(),
-                    Config.COOP_T1_AUTOFEED_TROUGH.get(),
-                    Config.COOP_T1_HAY_HOPPER.get(),
-                    Config.COOP_T1_INCUBATOR.get(),
-                    Config.COOP_T1_MIN_INTERIOR_BLOCKS.get(),
-                    Config.COOP_REQUIRE_ENCLOSED.get(),
-                    Config.COOP_REQUIRE_DOOR.get(),
-                    Config.COOP_MIN_DOOR_COUNT.get());
-            case 2 -> requirements(
-                    Config.COOP_T2_FEED_TROUGH.get(),
-                    Config.COOP_T2_AUTOFEED_TROUGH.get(),
-                    Config.COOP_T2_HAY_HOPPER.get(),
-                    Config.COOP_T2_INCUBATOR.get(),
-                    Config.COOP_T2_MIN_INTERIOR_BLOCKS.get(),
-                    Config.COOP_REQUIRE_ENCLOSED.get(),
-                    Config.COOP_REQUIRE_DOOR.get(),
-                    Config.COOP_MIN_DOOR_COUNT.get());
-            case 3 -> requirements(
-                    Config.COOP_T3_FEED_TROUGH.get(),
-                    Config.COOP_T3_AUTOFEED_TROUGH.get(),
-                    Config.COOP_T3_HAY_HOPPER.get(),
-                    Config.COOP_T3_INCUBATOR.get(),
-                    Config.COOP_T3_MIN_INTERIOR_BLOCKS.get(),
-                    Config.COOP_REQUIRE_ENCLOSED.get(),
-                    Config.COOP_REQUIRE_DOOR.get(),
-                    Config.COOP_MIN_DOOR_COUNT.get());
-            default -> throw new IllegalArgumentException(
-                    "Invalid coop tier: " + tier);
-        };
-    }
-
-    private static Requirements barnRequirements(int tier) {
-        return switch (tier) {
-            case 1 -> requirements(
-                    Config.BARN_T1_FEED_TROUGH.get(),
-                    Config.BARN_T1_AUTOFEED_TROUGH.get(),
-                    Config.BARN_T1_HAY_HOPPER.get(),
-                    Config.BARN_T1_INCUBATOR.get(),
-                    Config.BARN_T1_MIN_INTERIOR_BLOCKS.get(),
-                    Config.BARN_REQUIRE_ENCLOSED.get(),
-                    Config.BARN_REQUIRE_DOOR.get(),
-                    Config.BARN_MIN_DOOR_COUNT.get());
-            case 2 -> requirements(
-                    Config.BARN_T2_FEED_TROUGH.get(),
-                    Config.BARN_T2_AUTOFEED_TROUGH.get(),
-                    Config.BARN_T2_HAY_HOPPER.get(),
-                    Config.BARN_T2_INCUBATOR.get(),
-                    Config.BARN_T2_MIN_INTERIOR_BLOCKS.get(),
-                    Config.BARN_REQUIRE_ENCLOSED.get(),
-                    Config.BARN_REQUIRE_DOOR.get(),
-                    Config.BARN_MIN_DOOR_COUNT.get());
-            case 3 -> requirements(
-                    Config.BARN_T3_FEED_TROUGH.get(),
-                    Config.BARN_T3_AUTOFEED_TROUGH.get(),
-                    Config.BARN_T3_HAY_HOPPER.get(),
-                    Config.BARN_T3_INCUBATOR.get(),
-                    Config.BARN_T3_MIN_INTERIOR_BLOCKS.get(),
-                    Config.BARN_REQUIRE_ENCLOSED.get(),
-                    Config.BARN_REQUIRE_DOOR.get(),
-                    Config.BARN_MIN_DOOR_COUNT.get());
-            default -> throw new IllegalArgumentException(
-                    "Invalid barn tier: " + tier);
-        };
-    }
-
-    private static Requirements requirements(
-            int feedTroughCount,
-            int autoFeedTroughCount,
-            int hayHopperCount,
-            int incubatorCount,
-            int minInteriorBlocks,
-            boolean requireEnclosed,
-            boolean requireDoor,
-            int minDoorCount
-    ) {
-        return new Requirements(
-                feedTroughCount,
-                autoFeedTroughCount,
-                hayHopperCount,
-                incubatorCount,
-                minInteriorBlocks,
-                requireEnclosed,
-                requireDoor,
-                minDoorCount
         );
     }
 

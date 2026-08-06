@@ -139,14 +139,8 @@ public class StardewCraft {
         // Register our mod's ModConfigSpecs so that FML can create and load the config files for us
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.COMMON_SPEC);
         modContainer.registerConfig(ModConfig.Type.CLIENT, Config.CLIENT_SPEC);
-
-        // Sync max stack size from config → StackSizeHolder whenever config loads/reloads
-        modContainer.getEventBus().addListener((net.neoforged.fml.event.config.ModConfigEvent event) -> {
-            if (event.getConfig().getSpec() == Config.SPEC) {
-                com.stardew.craft.config.StackSizeHolder.set(Config.MAX_STACK_SIZE.get());
-                LOGGER.info("Max stack size set to {}", com.stardew.craft.config.StackSizeHolder.get());
-            }
-        });
+        modContainer.registerConfig(ModConfig.Type.SERVER, Config.SERVER_SPEC);
+        modContainer.getEventBus().addListener(com.stardew.craft.config.ConfigMigration::onConfigEvent);
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
@@ -203,6 +197,8 @@ public class StardewCraft {
 
         // 注册跨季宽限期季节豁免规则
         com.stardew.craft.farming.SeasonLocationRules.registerGracePeriodRule();
+
+        com.stardew.craft.block.utility.GardenPotBlock.registerSeasonRule();
 
         var server = event.getServer();
         // 预烘焙 region 已在 level 加载前安装；这里只记录轻量版本状态，不再解析巨型 schematic。

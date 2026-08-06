@@ -39,7 +39,9 @@ public class GrassStarterItem extends SimpleStardewItem {
             return InteractionResult.PASS;
         }
 
-        BlockState grassState = pastureGrass.defaultBlockState().setValue(PastureGrassBlock.VARIANT, level.getRandom().nextInt(3));
+        BlockState grassState = pastureGrass.defaultBlockState().setValue(
+                PastureGrassBlock.VARIANT,
+                level.getRandom().nextInt(PastureGrassBlock.VISUAL_VARIANT_COUNT));
         if (!grassState.canSurvive(level, placePos)) {
             return InteractionResult.PASS;
         }

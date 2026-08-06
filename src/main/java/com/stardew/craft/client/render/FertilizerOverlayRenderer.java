@@ -1,172 +1,192 @@
 package com.stardew.craft.client.render;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.block.FertilizerType;
+import com.stardew.craft.block.utility.GardenPotBlock;
 import com.stardew.craft.client.ClientFertilizerCache;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderStateShard;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.FarmBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
-import java.util.HashSet;
+import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * 肥料叠加层渲染器 - 使用原始纹理渲染
- */
-public class FertilizerOverlayRenderer {
+/** Renders fertilizer textures as depth-tested, non-depth-writing farmland decals. */
+public final class FertilizerOverlayRenderer {
+    private static final float FARMLAND_TOP = 15.0F / 16.0F;
+    private static final float GARDEN_POT_SOIL_TOP = 11.0F / 16.0F;
+    private static final float GARDEN_POT_SOIL_MIN = 1.5F / 16.0F;
+    private static final float GARDEN_POT_SOIL_MAX = 14.5F / 16.0F;
+    private static final float SURFACE_OFFSET = 1.0F / 256.0F;
+    private static final int ALPHA = 220;
+    private static final Map<FertilizerType, RenderType> RENDER_TYPES = createRenderTypes();
 
-    // 耕地顶部高度是 15/16 = 0.9375
-    private static final float FARMLAND_TOP = 0.9375f;
-    private static final float OFFSET = 0.001f; // 小偏移避免z-fighting
+    private FertilizerOverlayRenderer() {
+    }
 
-    // entity RenderType 必须按 texture 缓存；否则 endBatch flush 不到同一个实例
-    private static final Map<ResourceLocation, RenderType> OVERLAY_RENDER_TYPES = new ConcurrentHashMap<>();
-
-    @SuppressWarnings("null")
     @SubscribeEvent
     public static void onRenderLevelStage(RenderLevelStageEvent event) {
-        // 作为“贴在方块表面”的覆盖层：在 cutout 阶段之后渲染，能被正常遮挡
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS) {
             return;
         }
 
-        Minecraft mc = Minecraft.getInstance();
-        Level level = mc.level;
-        if (level == null || mc.player == null) {
+        Minecraft minecraft = Minecraft.getInstance();
+        Level level = minecraft.level;
+        if (level == null || minecraft.player == null) {
             return;
         }
 
-        PoseStack poseStack = event.getPoseStack();
         Vec3 cameraPos = event.getCamera().getPosition();
-        
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.disableCull();
-        // 不写深度，避免覆盖层反过来遮挡作物/其它透明物
-        RenderSystem.depthMask(false);
+        ChunkPos cameraChunk = new ChunkPos(BlockPos.containing(cameraPos));
+        int chunkRadius = Math.max(2, minecraft.options.getEffectiveRenderDistance()) + 1;
+        PoseStack poseStack = event.getPoseStack();
+        MultiBufferSource.BufferSource buffers = minecraft.renderBuffers().bufferSource();
+        EnumSet<FertilizerType> usedTypes = EnumSet.noneOf(FertilizerType.class);
 
         poseStack.pushPose();
-        poseStack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
+        ClientFertilizerCache.forEachInChunkRange(
+                level.dimension(),
+                cameraChunk,
+                chunkRadius,
+                (chunkX, chunkZ) -> isChunkVisible(event, level, chunkX, chunkZ),
+                (pos, type) -> {
+                    if (!level.hasChunkAt(pos)) {
+                        return;
+                    }
+                    BlockState state = level.getBlockState(pos);
+                    if (!(state.getBlock() instanceof FarmBlock)) {
+                        return;
+                    }
 
-        MultiBufferSource.BufferSource buffers = mc.renderBuffers().bufferSource();
-        Set<RenderType> usedTypes = new HashSet<>();
-
-        @SuppressWarnings("null")
-        BlockPos playerPos = mc.player.blockPosition();
-        // 跟随客户端视距，避免固定16格导致“远处突然消失”。
-        int renderDistance = Math.max(8, mc.options.getEffectiveRenderDistance());
-        int maxBlockDistance = renderDistance * 16;
-        int maxBlockDistanceSq = maxBlockDistance * maxBlockDistance;
-
-        // 仅遍历有肥料的位置，避免每帧体积扫描带来的性能波动。
-        for (Map.Entry<BlockPos, FertilizerType> entry : ClientFertilizerCache.snapshot(level).entrySet()) {
-            BlockPos pos = entry.getKey();
-            FertilizerType type = entry.getValue();
-
-            int dx = pos.getX() - playerPos.getX();
-            int dz = pos.getZ() - playerPos.getZ();
-            if (dx * dx + dz * dz > maxBlockDistanceSq) {
-                continue;
-            }
-
-            @SuppressWarnings("null")
-            BlockState state = level.getBlockState(pos);
-            if (!(state.getBlock() instanceof FarmBlock)) {
-                continue;
-            }
-
-            ResourceLocation textureLoc = getTexture(type);
-            RenderType rt = getOverlayRenderType(textureLoc);
-            usedTypes.add(rt);
-
-            @SuppressWarnings("null")
-            VertexConsumer vc = buffers.getBuffer(rt);
-            renderFertilizerOverlay(poseStack, vc, level, pos);
-        }
-
+                    usedTypes.add(type);
+                    renderFertilizerOverlay(
+                            poseStack,
+                            buffers.getBuffer(RENDER_TYPES.get(type)),
+                            level,
+                            pos,
+                            cameraPos);
+                });
         poseStack.popPose();
 
-        // 只 flush 我们用到的 RenderType，避免干扰其它管线
-        for (RenderType rt : usedTypes) {
-            buffers.endBatch(rt);
+        // Deterministic, targeted flushes avoid disturbing unrelated render buffers.
+        for (FertilizerType type : FertilizerType.values()) {
+            if (usedTypes.contains(type)) {
+                buffers.endBatch(RENDER_TYPES.get(type));
+            }
         }
-        
-
-        RenderSystem.depthMask(true);
-        RenderSystem.enableCull();
-        RenderSystem.disableBlend();
     }
 
-    @SuppressWarnings("null")
-    private static void renderFertilizerOverlay(PoseStack poseStack, VertexConsumer consumer, Level level, BlockPos pos) {
-        float x = pos.getX();
-        float y = pos.getY() + FARMLAND_TOP + OFFSET;
-        float z = pos.getZ();
-
-        float minU = 0.0f;
-        float maxU = 1.0f;
-        float minV = 0.0f;
-        float maxV = 1.0f;
-
-        int r = 255;
-        int g = 255;
-        int b = 255;
-        int a = 220;
-
-        @SuppressWarnings("null")
-        int packedLight = LevelRenderer.getLightColor(level, pos);
-        int lightU = packedLight & 0xFFFF;
-        int lightV = (packedLight >> 16) & 0xFFFF;
-
-        PoseStack.Pose last = poseStack.last();
-        consumer.addVertex(last, x, y, z)
-            .setUv(minU, minV)
-            .setColor(r, g, b, a)
-            .setUv1(0, 0)
-            .setUv2(lightU, lightV)
-            .setNormal(0, 1, 0);
-
-        consumer.addVertex(last, x, y, z + 1)
-            .setUv(minU, maxV)
-            .setColor(r, g, b, a)
-            .setUv1(0, 0)
-            .setUv2(lightU, lightV)
-            .setNormal(0, 1, 0);
-
-        consumer.addVertex(last, x + 1, y, z + 1)
-            .setUv(maxU, maxV)
-            .setColor(r, g, b, a)
-            .setUv1(0, 0)
-            .setUv2(lightU, lightV)
-            .setNormal(0, 1, 0);
-
-        consumer.addVertex(last, x + 1, y, z)
-            .setUv(maxU, minV)
-            .setColor(r, g, b, a)
-            .setUv1(0, 0)
-            .setUv2(lightU, lightV)
-            .setNormal(0, 1, 0);
+    private static boolean isChunkVisible(
+            RenderLevelStageEvent event,
+            Level level,
+            int chunkX,
+            int chunkZ
+    ) {
+        int minX = chunkX << 4;
+        int minZ = chunkZ << 4;
+        return event.getFrustum().isVisible(new AABB(
+                minX,
+                level.getMinBuildHeight(),
+                minZ,
+                minX + 16,
+                level.getMaxBuildHeight(),
+                minZ + 16));
     }
 
-    private static RenderType getOverlayRenderType(ResourceLocation texture) {
-        return OVERLAY_RENDER_TYPES.computeIfAbsent(texture, RenderType::entityTranslucent);
+    private static void renderFertilizerOverlay(
+            PoseStack poseStack,
+            VertexConsumer consumer,
+            Level level,
+            BlockPos pos,
+            Vec3 cameraPos
+    ) {
+        boolean gardenPot = level.getBlockState(pos).getBlock() instanceof GardenPotBlock;
+        float min = gardenPot ? GARDEN_POT_SOIL_MIN : 0.0F;
+        float max = gardenPot ? GARDEN_POT_SOIL_MAX : 1.0F;
+        float x = (float) (pos.getX() + min - cameraPos.x);
+        float y = (float) (pos.getY()
+                + (gardenPot ? GARDEN_POT_SOIL_TOP : FARMLAND_TOP)
+                + SURFACE_OFFSET - cameraPos.y);
+        float z = (float) (pos.getZ() + min - cameraPos.z);
+        float size = max - min;
+        int packedLight = LevelRenderer.getLightColor(level, pos.above());
+        PoseStack.Pose pose = poseStack.last();
+
+        addVertex(consumer, pose, x, y, z, 0.0F, 0.0F, packedLight);
+        addVertex(consumer, pose, x, y, z + size, 0.0F, 1.0F, packedLight);
+        addVertex(consumer, pose, x + size, y, z + size, 1.0F, 1.0F, packedLight);
+        addVertex(consumer, pose, x + size, y, z, 1.0F, 0.0F, packedLight);
     }
 
-    private static ResourceLocation getTexture(FertilizerType type) {
-        return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,
-                "textures/block/fertilizer/" + type.getSerializedName() + ".png");
+    private static void addVertex(
+            VertexConsumer consumer,
+            PoseStack.Pose pose,
+            float x,
+            float y,
+            float z,
+            float u,
+            float v,
+            int packedLight
+    ) {
+        consumer.addVertex(pose, x, y, z)
+                .setColor(255, 255, 255, ALPHA)
+                .setUv(u, v)
+                .setOverlay(OverlayTexture.NO_OVERLAY)
+                .setLight(packedLight)
+                .setNormal(pose, 0.0F, 1.0F, 0.0F);
+    }
+
+    private static Map<FertilizerType, RenderType> createRenderTypes() {
+        EnumMap<FertilizerType, RenderType> renderTypes = new EnumMap<>(FertilizerType.class);
+        for (FertilizerType type : FertilizerType.values()) {
+            ResourceLocation texture = ResourceLocation.fromNamespaceAndPath(
+                    StardewCraft.MODID,
+                    "textures/block/fertilizer/" + type.getSerializedName() + ".png");
+            renderTypes.put(type, createRenderType(type, texture));
+        }
+        return Map.copyOf(renderTypes);
+    }
+
+    private static RenderType createRenderType(
+            FertilizerType type,
+            ResourceLocation texture
+    ) {
+        return RenderType.create(
+                "stardewcraft_fertilizer_" + type.getSerializedName(),
+                DefaultVertexFormat.NEW_ENTITY,
+                VertexFormat.Mode.QUADS,
+                1536,
+                false,
+                true,
+                RenderType.CompositeState.builder()
+                        .setShaderState(new RenderType.ShaderStateShard(
+                                GameRenderer::getRendertypeEntityTranslucentShader))
+                        .setTextureState(new RenderType.TextureStateShard(texture, false, false))
+                        .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
+                        .setCullState(RenderStateShard.NO_CULL)
+                        .setDepthTestState(RenderStateShard.LEQUAL_DEPTH_TEST)
+                        .setWriteMaskState(RenderStateShard.COLOR_WRITE)
+                        .setLightmapState(RenderStateShard.LIGHTMAP)
+                        .setOverlayState(RenderStateShard.OVERLAY)
+                        .createCompositeState(false));
     }
 }

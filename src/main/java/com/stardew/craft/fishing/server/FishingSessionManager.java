@@ -60,7 +60,13 @@ public final class FishingSessionManager {
 	}
 
 	public boolean start(ServerPlayer player, float castPower01) {
+		if (festivalBlocksFishing(player)) {
+			return false;
+		}
 		if (!com.stardew.craft.festival.fair.FairFishingGameService.canStartFishingCast(player)) {
+			return false;
+		}
+		if (!com.stardew.craft.festival.FestivalOfIceService.canStartFishingCast(player)) {
 			return false;
 		}
 		if (!isHoldingStardewFishingRod(player)) {
@@ -150,6 +156,10 @@ public final class FishingSessionManager {
 
 	@SuppressWarnings("null")
 	public boolean tryStartMinigame(ServerPlayer player) {
+		if (festivalBlocksFishing(player)) {
+			cancel(player);
+			return false;
+		}
 		FishingSession session = sessionsByPlayer.get(player.getUUID());
 		if (session == null) {
 			return false;
@@ -186,6 +196,10 @@ public final class FishingSessionManager {
 
 	@SuppressWarnings("null")
 	public boolean tryPullFishPondCatch(ServerPlayer player) {
+		if (festivalBlocksFishing(player)) {
+			cancel(player);
+			return false;
+		}
 		FishingSession session = sessionsByPlayer.get(player.getUUID());
 		if (session == null || session.state() != FishingSession.State.WAITING_BITE) {
 			return false;
@@ -418,6 +432,10 @@ public final class FishingSessionManager {
 	@SuppressWarnings("null")
 	public void handleResult(ServerPlayer player, UUID sessionId, boolean success, float catchProgress,
 							 boolean treasureCaught, int numCaught, boolean perfect, int caughtFishSize) {
+		if (festivalBlocksFishing(player)) {
+			cancel(player);
+			return;
+		}
 		if (!isHoldingStardewFishingRod(player)) {
 			// 只允许手持本模组钓竿的玩家结算小游戏，防止伪包/换手作弊。
 			success = false;
@@ -627,6 +645,12 @@ public final class FishingSessionManager {
 				continue;
 			}
 			ServerLevel level = player.serverLevel();
+			if (festivalBlocksFishing(player)) {
+				cleanupHook(level, session);
+				clearAllRodCastFlags(player);
+				it.remove();
+				continue;
+			}
 			if (com.stardew.craft.time.StardewTimePauseService.shouldPauseLevel(level)) {
 				continue;
 			}
@@ -671,6 +695,10 @@ public final class FishingSessionManager {
 				it.remove();
 			}
 		}
+	}
+
+	private static boolean festivalBlocksFishing(ServerPlayer player) {
+		return com.stardew.craft.festival.ActiveFestivalHandlers.blocksFishingDuringActiveFestival(player);
 	}
 
 	private static void clearAllRodCastFlags(ServerPlayer player) {

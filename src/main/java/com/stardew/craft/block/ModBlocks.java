@@ -1703,6 +1703,17 @@ public static final DeferredBlock<Block> DEAD_CROP = BLOCKS.register("dead_crop"
                                                                 .noOcclusion()
                                                                 .strength(1.0F, 3.0F)));
 
+                public static final DeferredBlock<Block> GARDEN_POT = BLOCKS.register("garden_pot",
+                                () -> new com.stardew.craft.block.utility.GardenPotBlock(
+                                                Block.Properties.of()
+                                                                .mapColor(MapColor.TERRACOTTA_ORANGE)
+                                                                .sound(SoundType.DECORATED_POT)
+                                                                .randomTicks()
+                                                                .noOcclusion()
+                                                                .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK)
+                                                                .requiresCorrectToolForDrops()
+                                                                .strength(1.5F, 3.0F)));
+
                 @SuppressWarnings("null")
                 public static final DeferredBlock<Block> SOLAR_PANEL = BLOCKS.register("solar_panel",
                                                 () -> new com.stardew.craft.block.utility.SolarPanelBlock(Block.Properties.of()

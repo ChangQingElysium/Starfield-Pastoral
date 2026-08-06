@@ -3,6 +3,8 @@ package com.stardew.craft.event;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.manager.FertilizerManager;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.FarmBlock;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.level.BlockEvent;
@@ -19,16 +21,44 @@ public final class FertilizerCleanupEvents {
 	private FertilizerCleanupEvents() {
 	}
 
-	@SubscribeEvent
+	@SubscribeEvent(priority = EventPriority.LOWEST)
 	public static void onBlockBreak(BlockEvent.BreakEvent event) {
 		if (!(event.getLevel() instanceof ServerLevel serverLevel)) {
 			return;
 		}
 		var pos = event.getPos();
-		var manager = FertilizerManager.get(serverLevel);
-		if (manager.hasFertilizer(serverLevel, pos)) {
-			manager.removeFertilizer(serverLevel, pos);
+		// Some valid farmland breaks are completed manually by another handler and then canceled.
+		// A protected/canceled break leaves the farmland in place and must keep its fertilizer.
+		if (event.isCanceled()
+				&& serverLevel.getBlockState(pos).getBlock() instanceof FarmBlock) {
+			return;
 		}
+		var manager = FertilizerManager.get(serverLevel);
+		manager.removeFertilizer(serverLevel, pos);
+	}
+
+	@SubscribeEvent(priority = EventPriority.LOWEST)
+	public static void onFarmlandTrample(BlockEvent.FarmlandTrampleEvent event) {
+		if (event.isCanceled() || !(event.getLevel() instanceof ServerLevel serverLevel)) {
+			return;
+		}
+		FertilizerManager.get(serverLevel).removeFertilizer(serverLevel, event.getPos());
+	}
+
+	@SubscribeEvent(priority = EventPriority.LOWEST)
+	public static void onRetill(BlockEvent.BlockToolModificationEvent event) {
+		var finalState = event.getFinalState();
+		if (event.isCanceled()
+				|| event.isSimulated()
+				|| event.getState().getBlock() instanceof FarmBlock
+				|| finalState == null
+				|| !(finalState.getBlock() instanceof FarmBlock)
+				|| !(event.getLevel() instanceof ServerLevel serverLevel)) {
+			return;
+		}
+		// A newly created farmland tile must never inherit fertilizer from an older tile at the
+		// same coordinates, even if it was re-tilled before the periodic cleanup ran.
+		FertilizerManager.get(serverLevel).removeFertilizer(serverLevel, event.getPos());
 	}
 
 	@SubscribeEvent

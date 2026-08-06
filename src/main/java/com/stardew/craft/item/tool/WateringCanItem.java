@@ -495,6 +495,10 @@ public class WateringCanItem extends Item implements IStardewItem {
         // 规则：如果耕地上方有方块且有碰撞体积（如石头、栅栏），则不能浇水
         // 排除：作物（stardew crop）和空气没有碰撞体积，可以浇水
         list.removeIf(pos -> {
+             if (level.getBlockState(pos).getBlock()
+                     instanceof com.stardew.craft.block.utility.GardenPotBlock) {
+                 return false;
+             }
              BlockPos abovePos = pos.above();
              BlockState aboveState = level.getBlockState(abovePos);
                // 作物长在耕地上时不应当阻挡洒水/预览

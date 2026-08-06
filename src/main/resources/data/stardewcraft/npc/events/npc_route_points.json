@@ -927,61 +927,103 @@
       "note": "Elliott 森林散步",
       "indoor": false
     },
-    "evelyn_joshhouse_stove": {
+    "evelyn_schedule_01": {
       "x": 40,
       "y": 22,
       "z": -3,
       "indoor": true,
-      "note": "Evelyn 灶台做饭（朝东）"
+      "note": "Evelyn 原版日程 01：灶台做饭"
     },
-    "evelyn_joshhouse_fridge": {
-      "x": 42,
+    "evelyn_schedule_02": {
+      "x": 57,
+      "y": 22,
+      "z": 2,
+      "indoor": true,
+      "note": "Evelyn 原版日程 02：客厅沙发"
+    },
+    "evelyn_schedule_03": {
+      "x": 40,
+      "y": 22,
+      "z": -1,
+      "indoor": true,
+      "note": "Evelyn 原版日程 03：厨房"
+    },
+    "evelyn_schedule_04": {
+      "x": 41,
       "y": 22,
       "z": -3,
       "indoor": true,
-      "note": "Evelyn 冰箱旁（朝东）"
+      "note": "Evelyn 原版日程 04：傍晚做饭"
     },
-    "evelyn_joshhouse_table": {
-      "x": 41,
+    "evelyn_schedule_05": {
+      "x": 58,
       "y": 22,
-      "z": 0,
+      "z": -3,
       "indoor": true,
-      "note": "Evelyn 餐桌（朝北）"
+      "note": "Evelyn 原版日程 05：餐桌"
     },
-    "evelyn_joshhouse_sofa": {
-      "x": 60,
-      "y": 22,
-      "z": 3,
-      "indoor": true,
-      "note": "Evelyn 客厅沙发（朝北）"
-    },
-    "evelyn_joshhouse_sleep": {
+    "evelyn_schedule_06": {
       "x": 39,
       "y": 22,
-      "z": -18,
+      "z": -17,
       "indoor": true,
-      "note": "Evelyn 睡觉位（朝西）"
+      "note": "Evelyn 原版日程 06：睡觉"
     },
-    "evelyn_town_bench": {
-      "x": 25,
+    "evelyn_schedule_07": {
+      "x": 41,
+      "y": 22,
+      "z": -2,
+      "indoor": true,
+      "note": "Evelyn 原版日程 07：绿雨"
+    },
+    "evelyn_schedule_09": {
+      "x": 14,
+      "y": 43,
+      "z": -14,
+      "indoor": true,
+      "note": "Evelyn 原版日程 09：春 2 日诊所候诊"
+    },
+    "evelyn_schedule_10": {
+      "x": 2,
+      "y": 43,
+      "z": -24,
+      "indoor": true,
+      "note": "Evelyn 原版日程 10：春 2 日诊室"
+    },
+    "evelyn_schedule_11": {
+      "x": 9,
+      "y": 43,
+      "z": -14,
+      "indoor": true,
+      "note": "Evelyn 原版日程 11：春 23 日诊所候诊"
+    },
+    "evelyn_schedule_12": {
+      "x": 2,
+      "y": 43,
+      "z": -23,
+      "indoor": true,
+      "note": "Evelyn 原版日程 12：春 23 日诊室"
+    },
+    "evelyn_schedule_13": {
+      "x": 120,
+      "y": 60,
+      "z": 160,
+      "indoor": false,
+      "note": "Evelyn 原版日程 13：冬日夜市"
+    },
+    "evelyn_schedule_15": {
+      "x": 10,
       "y": 64,
-      "z": 24,
-      "note": "Evelyn 镇上长椅（朝东）",
-      "indoor": false
+      "z": 22,
+      "indoor": false,
+      "note": "Evelyn 原版日程 15：春季花园"
     },
-    "evelyn_town_garden": {
-      "x": 61,
+    "evelyn_schedule_16": {
+      "x": -8,
       "y": 64,
-      "z": 2,
-      "note": "Evelyn 花园浇花（朝南）",
-      "indoor": false
-    },
-    "evelyn_communitycenter_visit": {
-      "x": 42,
-      "y": 66,
-      "z": -33,
-      "note": "Evelyn 社区中心（朝北）",
-      "indoor": false
+      "z": 0,
+      "indoor": false,
+      "note": "Evelyn 原版日程 16：夏季花园"
     },
     "_comment_emily": "=== Emily (HaleyHouse / Saloon / SeedShop / Town / Beach) ===",
     "emily_haleyhouse_room": {

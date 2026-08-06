@@ -5,6 +5,7 @@ import com.mojang.math.Axis;
 import com.stardew.craft.cutscene.runtime.EventPlayerActorEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidArmorModel;
+import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -67,6 +68,9 @@ public class EventPlayerActorRenderer extends MobRenderer<EventPlayerActorEntity
     public void render(@javax.annotation.Nonnull EventPlayerActorEntity entity, float entityYaw, float partialTicks,
                        @javax.annotation.Nonnull PoseStack poseStack, @javax.annotation.Nonnull MultiBufferSource buffer, int packedLight) {
         this.model = entity.isSlimSkinModel() ? slimModel : wideModel;
+        this.model.rightArmPose = entity.isEatingItem()
+                ? HumanoidModel.ArmPose.ITEM
+                : HumanoidModel.ArmPose.EMPTY;
         poseStack.pushPose();
         if (entity.isCollapsed()) {
             // SDV's PlayerKilled event uses showFrame 5 while the farmer is

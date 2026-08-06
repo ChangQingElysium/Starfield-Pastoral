@@ -325,7 +325,8 @@ public class FarmInstanceInitializer {
                 cumulative += GRASS_PROB;
                 if (roll < cumulative) {
                     BlockState state = ModBlocks.PASTURE_GRASS.get().defaultBlockState()
-                            .setValue(PastureGrassBlock.VARIANT, random.nextInt(3));
+                            .setValue(PastureGrassBlock.VARIANT,
+                                    random.nextInt(PastureGrassBlock.VISUAL_VARIANT_COUNT));
                     level.setBlock(placePos, state, 3);
                     grass++;
                     continue;

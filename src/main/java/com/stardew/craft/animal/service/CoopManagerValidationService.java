@@ -21,7 +21,7 @@ public final class CoopManagerValidationService {
 
     public static ValidationResult validateForTier(ServerLevel level, BlockPos managerPos, int targetTier) {
         TierRequirement requirement = TierRequirement.fromTier(targetTier);
-        ScanResult scan = scan(level, managerPos, requirement.minInteriorBlocks());
+        ScanResult scan = scan(level, managerPos, targetTier, requirement.minInteriorBlocks());
         AnimalBuildingValidationRules.ValidationOutcome outcome =
                 AnimalBuildingValidationRules.evaluate(
                         "coop",
@@ -35,10 +35,10 @@ public final class CoopManagerValidationService {
                 outcome.message());
     }
 
-    private static ScanResult scan(ServerLevel level, BlockPos managerPos, int minInteriorBlocks) {
+    private static ScanResult scan(ServerLevel level, BlockPos managerPos, int tier, int minInteriorBlocks) {
         AnimalBuildingValidationRules.Bounds bounds =
                 AnimalBuildingValidationRules.boundsFor(
-                        managerPos, "coop", minInteriorBlocks);
+                        managerPos, "coop", tier, minInteriorBlocks);
         int scanMinX = bounds.minX();
         int scanMaxX = bounds.maxX();
         int scanMinY = bounds.minY();

@@ -26,10 +26,9 @@ import com.stardew.craft.block.utility.SeedMakerBlock;
 import com.stardew.craft.block.utility.SolarPanelBlock;
 import com.stardew.craft.block.utility.TapperBlock;
 import com.stardew.craft.block.utility.WormBinBlock;
-import com.stardew.craft.integration.jade.CropFertilizerJadeProvider;
-import com.stardew.craft.integration.jade.FarmlandFertilizerJadeProvider;
+import com.stardew.craft.block.utility.GardenPotBlock;
+import com.stardew.craft.integration.jade.FertilizerJadeProvider;
 import com.stardew.craft.integration.jade.AnimalProduceSpotJadeProvider;
-import com.stardew.craft.integration.jade.StardewCropFertilizerJadeProvider;
 import com.stardew.craft.manager.CropGrowthManager;
 import com.stardew.craft.block.tree.WildTreeSaplingBlock;
 import com.stardew.craft.manager.TreeGrowthManager;
@@ -38,7 +37,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.IBlockComponentProvider;
@@ -54,6 +52,7 @@ import snownee.jade.api.IServerDataProvider;
 
 import net.minecraft.world.level.block.FarmBlock;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -81,15 +80,17 @@ public class JadePlugin implements IWailaPlugin {
     private static final String NBT_CROP_MAX_STAGE = "Stardew_CropMaxStage";
     private static final String NBT_CROP_WATERED = "Stardew_CropWatered";
     private static final String NBT_CROP_SCYTHE = "Stardew_CropScythe";
+    private static final String NBT_POTTED_CROP = "Stardew_PottedCrop";
+    private static final String NBT_VANILLA_CROP = "Stardew_VanillaCrop";
+    private static final String NBT_VANILLA_CROP_AGE = "Stardew_VanillaCropAge";
+    private static final String NBT_VANILLA_CROP_MAX_AGE = "Stardew_VanillaCropMaxAge";
 
     @Override
     public void register(IWailaCommonRegistration registration) {
         registration.registerBlockDataProvider(new CropComponentProvider(), Block.class);
 		registration.registerBlockDataProvider(new TreeSaplingComponentProvider(), WildTreeSaplingBlock.class);
         registration.registerBlockDataProvider(AnimalProduceSpotJadeProvider.INSTANCE, AnimalProduceSpotBlock.class);
-        registration.registerBlockDataProvider(FarmlandFertilizerJadeProvider.INSTANCE, FarmBlock.class);
-        registration.registerBlockDataProvider(CropFertilizerJadeProvider.INSTANCE, CropBlock.class);
-        registration.registerBlockDataProvider(StardewCropFertilizerJadeProvider.INSTANCE, StardewCropBlock.class);
+        registration.registerBlockDataProvider(FertilizerJadeProvider.INSTANCE, Block.class);
     }
 
     @Override
@@ -97,11 +98,7 @@ public class JadePlugin implements IWailaPlugin {
         registration.registerBlockComponent(new CropComponentProvider(), Block.class);
         registration.registerBlockComponent(new TreeSaplingComponentProvider(), WildTreeSaplingBlock.class);
         registration.registerBlockComponent(AnimalProduceSpotJadeProvider.INSTANCE, AnimalProduceSpotBlock.class);
-        // 注册耕地肥料显示
-        registration.registerBlockComponent(FarmlandFertilizerJadeProvider.INSTANCE, FarmBlock.class);
-        // 注册作物肥料显示（原版作物 + 本模组作物）
-        registration.registerBlockComponent(CropFertilizerJadeProvider.INSTANCE, CropBlock.class);
-        registration.registerBlockComponent(StardewCropFertilizerJadeProvider.INSTANCE, StardewCropBlock.class);
+        registration.registerBlockComponent(FertilizerJadeProvider.INSTANCE, Block.class);
         registration.addTooltipCollectedCallback((box, accessor) -> {
             if (accessor instanceof BlockAccessor blockAccessor) {
                 if (shouldHideItemStorage(blockAccessor.getBlockState().getBlock())) {
@@ -132,7 +129,8 @@ public class JadePlugin implements IWailaPlugin {
             || block instanceof SeedMakerBlock
             || block instanceof SolarPanelBlock
             || block instanceof TapperBlock
-            || block instanceof WormBinBlock;
+            || block instanceof WormBinBlock
+            || block instanceof GardenPotBlock;
     }
 
     public static class TreeSaplingComponentProvider implements IBlockComponentProvider, IServerDataProvider<BlockAccessor> {
@@ -214,6 +212,9 @@ public class JadePlugin implements IWailaPlugin {
 
         private static BlockPos resolveCropRootPos(BlockAccessor accessor) {
             BlockPos pos = Objects.requireNonNull(accessor.getPosition(), "position");
+            if (accessor.getBlockState().getBlock() instanceof GardenPotBlock) {
+                return pos.above();
+            }
             StardewCropState runtime =
                     StardewCropRuntime.inspect(accessor.getLevel(), pos);
             if (runtime != null) {
@@ -242,13 +243,23 @@ public class JadePlugin implements IWailaPlugin {
             if (!(accessor.getLevel() instanceof ServerLevel serverLevel)) {
                 return;
             }
-            if (!StardewCropRuntime.isRegisteredBlock(
-                    accessor.getBlockState())) {
-                return;
-            }
-
             BlockPos rootPos = resolveCropRootPos(accessor);
             BlockState state = accessor.getLevel().getBlockState(rootPos);
+            boolean potted = accessor.getBlockState().getBlock() instanceof GardenPotBlock;
+            if (potted) {
+                tag.putBoolean(NBT_POTTED_CROP, true);
+            }
+            if (!StardewCropRuntime.isRegisteredBlock(state)) {
+                if (potted && state.getBlock() instanceof CropBlock vanillaCrop) {
+                    tag.putBoolean(NBT_VANILLA_CROP, true);
+                    tag.putInt(NBT_VANILLA_CROP_AGE, vanillaCrop.getAge(state));
+                    tag.putInt(NBT_VANILLA_CROP_MAX_AGE, vanillaCrop.getMaxAge());
+                    tag.putBoolean(NBT_CROP_WATERED,
+                            accessor.getBlockState().getValue(FarmBlock.MOISTURE) > 0);
+                    tag.putBoolean(NBT_MATURE, vanillaCrop.isMaxAge(state));
+                }
+                return;
+            }
             StardewCropState runtime =
                     StardewCropRuntime.inspect(serverLevel, rootPos);
             if (runtime == null) {
@@ -344,6 +355,27 @@ public class JadePlugin implements IWailaPlugin {
         @Override
         public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
             CompoundTag serverData = accessor.getServerData();
+            BlockPos rootPos = resolveCropRootPos(accessor);
+            BlockState state = accessor.getLevel().getBlockState(rootPos);
+            if (serverData != null && serverData.getBoolean(NBT_VANILLA_CROP)) {
+                tooltip.add(state.getBlock().getName().copy().withStyle(net.minecraft.ChatFormatting.GRAY));
+                int age = serverData.getInt(NBT_VANILLA_CROP_AGE);
+                int maxAge = Math.max(1, serverData.getInt(NBT_VANILLA_CROP_MAX_AGE));
+                tooltip.add(Component.translatable(
+                        "stardewcraft.tooltip.growth_stage", Math.min(age, maxAge) + "/" + maxAge));
+                if (serverData.getBoolean(NBT_MATURE)) {
+                    tooltip.add(Component.translatable("stardewcraft.tooltip.mature"));
+                } else {
+                    boolean watered = serverData.getBoolean(NBT_CROP_WATERED);
+                    tooltip.add(Component.translatable(watered
+                                    ? "stardewcraft.tooltip.watered.yes"
+                                    : "stardewcraft.tooltip.watered.no")
+                            .withStyle(watered
+                                    ? net.minecraft.ChatFormatting.AQUA
+                                    : net.minecraft.ChatFormatting.RED));
+                }
+                return;
+            }
             if (serverData != null
                     && serverData.getBoolean(NBT_RUNTIME_CROP)) {
                 String translation =
@@ -376,9 +408,11 @@ public class JadePlugin implements IWailaPlugin {
                 }
                 return;
             }
-            BlockPos rootPos = resolveCropRootPos(accessor);
-            BlockState state = accessor.getLevel().getBlockState(rootPos);
             if (state.getBlock() instanceof StardewCropBlock cropBlock) {
+                if (serverData != null && serverData.getBoolean(NBT_POTTED_CROP)) {
+                    tooltip.add(state.getBlock().getName().copy()
+                            .withStyle(net.minecraft.ChatFormatting.GRAY));
+                }
                 int age = state.getValue(Objects.requireNonNull(StardewCropBlock.AGE, "AGE"));
 
                 if (serverData != null && serverData.getBoolean(NBT_DECORATIVE)) {

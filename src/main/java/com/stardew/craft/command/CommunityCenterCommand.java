@@ -106,6 +106,9 @@ public class CommunityCenterCommand {
         ServerPlayer player = ctx.getSource().getPlayer();
         java.util.UUID uuid = player != null ? player.getUUID() : new java.util.UUID(0L, 0L);
         CommunityCenterSavedData.get().resetAll(uuid);
+        if (player != null) {
+            BundleSyncPayload.sendFullSync(player);
+        }
         ctx.getSource().sendSuccess(
                 () -> Component.literal("Community Center progress reset."), false);
         return 1;
@@ -126,6 +129,7 @@ public class CommunityCenterCommand {
             for (int areaId = 0; areaId <= 5; areaId++) {
                 applyAreaSideEffects(player, areaId);
             }
+            BundleSyncPayload.sendFullSync(player);
         }
 
         ctx.getSource().sendSuccess(
@@ -154,6 +158,7 @@ public class CommunityCenterCommand {
         // Side effects
         if (player != null) {
             applyAreaSideEffects(player, areaId);
+            BundleSyncPayload.sendFullSync(player);
         }
 
         String areaName = BundleDataManager.getAreaName(areaId);
@@ -175,6 +180,9 @@ public class CommunityCenterCommand {
         ServerPlayer player = ctx.getSource().getPlayer();
         java.util.UUID uuid = player != null ? player.getUUID() : new java.util.UUID(0L, 0L);
         data.markBundleAllSlotsComplete(uuid, bundleId);
+        if (player != null) {
+            BundleSyncPayload.sendFullSync(player);
+        }
 
         ctx.getSource().sendSuccess(
                 () -> Component.literal("Bundle " + bundleId + " (" + def.internalName() + ") completed."), false);

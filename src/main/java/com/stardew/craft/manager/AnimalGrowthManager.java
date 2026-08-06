@@ -215,8 +215,6 @@ public class AnimalGrowthManager extends SavedData {
         int currentAbsDay = (time.getCurrentYear() - 1) * (28 * 4)
                 + time.getCurrentSeason() * 28
                 + time.getCurrentDay();
-        completeDueBuildingConstruction(
-                level, worldData, currentAbsDay);
         Map<String, BuildingUtilityContext> utilityContexts = new HashMap<>();
         int processed = 0;
         boolean progressed;
@@ -331,41 +329,6 @@ public class AnimalGrowthManager extends SavedData {
         }
         promptPendingBirths(level, worldData);
         return processed;
-    }
-
-    private void completeDueBuildingConstruction(
-            ServerLevel level,
-            AnimalWorldData worldData,
-            int currentAbsDay
-    ) {
-        for (AnimalBuildingRecord building :
-                worldData.completeDueConstructions(currentAbsDay)) {
-            invalidateBuildingUtilityCache(building.buildingId());
-            UUID owner = parseUuid(building.ownerPlayerUuid());
-            ServerPlayer player = owner == null
-                    ? null
-                    : level.getServer().getPlayerList()
-                            .getPlayer(owner);
-            if (player == null) {
-                continue;
-            }
-            com.stardew.craft.network.GlobalHudMessagePayload.sendTo(
-                    player,
-                    Component.translatable(
-                            "stardewcraft.manager.construction.completed",
-                            Component.translatable(
-                                    "stardewcraft.manager.building."
-                                            + building.buildingType()
-                                                    .family()),
-                            building.buildingType().tier()));
-            String sourceName =
-                    building.buildingType().family()
-                            .equalsIgnoreCase("coop")
-                            ? "Coop"
-                            : "Barn";
-            com.stardew.craft.quest.StardewQuestEvents
-                    .fireBuildingExists(player, sourceName);
-        }
     }
 
     public void allowBirthPromptRetry(long eventId) {

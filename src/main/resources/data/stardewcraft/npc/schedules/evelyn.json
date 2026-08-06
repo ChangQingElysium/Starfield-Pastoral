@@ -3,52 +3,63 @@
   "override_vanilla": true,
   "_format": "time -> \"location @namedPointId facing [behavior]\" | {_goto: key} | {_condition: expr}",
 
-  "GreenRain": {
-    "800": "joshhouse @evelyn_joshhouse_stove 0"
-  },
-
   "rain": {
-    "800":  "joshhouse @evelyn_joshhouse_stove 0",
-    "1040": "joshhouse @evelyn_joshhouse_sofa 0",
-    "1300": "joshhouse @evelyn_joshhouse_fridge 0",
-    "1630": "joshhouse @evelyn_joshhouse_table 2",
-    "2130": "joshhouse @evelyn_joshhouse_sleep 2 evelyn_sleep"
+    "800": "joshhouse @evelyn_schedule_01 0 square_3_1_0",
+    "1040": "joshhouse @evelyn_schedule_02 3",
+    "1210": "joshhouse @evelyn_schedule_03 2",
+    "1630": "joshhouse @evelyn_schedule_04 0 square_3_1_0",
+    "1900": "joshhouse @evelyn_schedule_05 0",
+    "2130": "joshhouse @evelyn_schedule_06 1 evelyn_sleep"
   },
 
-  "spring": {
-    "800":  "joshhouse @evelyn_joshhouse_stove 0",
-    "1040": "joshhouse @evelyn_joshhouse_sofa 0",
-    "1300": "town @evelyn_town_bench 2",
-    "1630": "joshhouse @evelyn_joshhouse_table 2",
-    "2130": "joshhouse @evelyn_joshhouse_sleep 2 evelyn_sleep"
+  "GreenRain": {
+    "0": "joshhouse @evelyn_schedule_07 2"
   },
 
-  "summer": {
-    "800":  "joshhouse @evelyn_joshhouse_stove 0",
-    "1040": "joshhouse @evelyn_joshhouse_sofa 0",
-    "1300": "town @evelyn_town_garden 0",
-    "1630": "joshhouse @evelyn_joshhouse_table 2",
-    "2130": "joshhouse @evelyn_joshhouse_sleep 2 evelyn_sleep"
+  "2": {
+    "800": "joshhouse @evelyn_schedule_01 0 square_3_1_0",
+    "1030": "hospital @evelyn_schedule_09 3 dialogue:stardewcraft.npc.schedule.evelyn.2.000 evelyn_sit_left",
+    "1330": "hospital @evelyn_schedule_10 1 dialogue:stardewcraft.npc.schedule.evelyn.2.001",
+    "1600": "joshhouse @evelyn_schedule_04 0 square_3_1_0",
+    "1900": "joshhouse @evelyn_schedule_05 0",
+    "2130": "joshhouse @evelyn_schedule_06 1 evelyn_sleep"
   },
 
-  "fall": {
-    "_goto": "spring"
+  "23": {
+    "800": "joshhouse @evelyn_schedule_01 0 square_3_1_0",
+    "1040": "hospital @evelyn_schedule_11 0 dialogue:stardewcraft.npc.schedule.evelyn.23.000",
+    "1330": "hospital @evelyn_schedule_12 0 dialogue:stardewcraft.npc.schedule.evelyn.23.001",
+    "1610": "joshhouse @evelyn_schedule_04 0 square_3_1_0",
+    "1900": "joshhouse @evelyn_schedule_05 0",
+    "2130": "joshhouse @evelyn_schedule_06 1 evelyn_sleep"
+  },
+
+  "winter_17": {
+    "800": "joshhouse @evelyn_schedule_01 0 square_3_1_0",
+    "1040": "joshhouse @evelyn_schedule_02 3",
+    "1210": "joshhouse @evelyn_schedule_03 2",
+    "1300": "joshhouse @evelyn_schedule_02 3 evelyn_sit_left",
+    "1630": "beach @evelyn_schedule_13 2 dialogue:stardewcraft.npc.schedule.evelyn.winter_17.000",
+    "2340": "joshhouse @evelyn_schedule_06 1 evelyn_sleep"
   },
 
   "winter": {
-    "800":  "joshhouse @evelyn_joshhouse_stove 0",
-    "1040": "joshhouse @evelyn_joshhouse_sofa 0",
-    "1300": "joshhouse @evelyn_joshhouse_table 2",
-    "1630": "joshhouse @evelyn_joshhouse_fridge 0",
-    "2130": "joshhouse @evelyn_joshhouse_sleep 2 evelyn_sleep"
+    "800": "joshhouse @evelyn_schedule_01 0 square_3_1_0",
+    "1040": "joshhouse @evelyn_schedule_02 3",
+    "1210": "joshhouse @evelyn_schedule_03 2",
+    "1300": "joshhouse @evelyn_schedule_02 3 evelyn_sit_left",
+    "1630": "joshhouse @evelyn_schedule_04 0 square_3_1_0",
+    "1900": "joshhouse @evelyn_schedule_05 0",
+    "2130": "joshhouse @evelyn_schedule_06 1 evelyn_sleep"
   },
 
   "thursday": {
-    "800":  "joshhouse @evelyn_joshhouse_stove 0",
-    "1040": "joshhouse @evelyn_joshhouse_sofa 0",
-    "1210": "communitycenter @evelyn_communitycenter_visit 0",
-    "1630": "joshhouse @evelyn_joshhouse_table 2",
-    "2130": "joshhouse @evelyn_joshhouse_sleep 2 evelyn_sleep"
+    "800": "joshhouse @evelyn_schedule_01 0 square_3_1_0",
+    "1040": "joshhouse @evelyn_schedule_02 3",
+    "1210": "joshhouse @evelyn_schedule_03 2",
+    "1630": "joshhouse @evelyn_schedule_04 0 square_3_1_0",
+    "1900": "joshhouse @evelyn_schedule_05 0",
+    "2130": "joshhouse @evelyn_schedule_06 1 evelyn_sleep"
   },
 
   "monday": {
@@ -57,5 +68,29 @@
 
   "saturday": {
     "_goto": "thursday"
+  },
+
+  "spring": {
+    "800": "joshhouse @evelyn_schedule_01 0 square_3_1_0",
+    "1040": "joshhouse @evelyn_schedule_02 3",
+    "1210": "joshhouse @evelyn_schedule_03 2",
+    "1300": "town @evelyn_schedule_15 3",
+    "1630": "joshhouse @evelyn_schedule_04 0 square_3_1_0",
+    "1900": "joshhouse @evelyn_schedule_05 0",
+    "2130": "joshhouse @evelyn_schedule_06 1 evelyn_sleep"
+  },
+
+  "summer": {
+    "800": "joshhouse @evelyn_schedule_01 0 square_3_1_0",
+    "1040": "joshhouse @evelyn_schedule_02 3",
+    "1210": "joshhouse @evelyn_schedule_03 2",
+    "1300": "town @evelyn_schedule_16 3 evelyn_garden",
+    "1630": "joshhouse @evelyn_schedule_04 0 square_3_1_0",
+    "1900": "joshhouse @evelyn_schedule_05 0",
+    "2130": "joshhouse @evelyn_schedule_06 1 evelyn_sleep"
+  },
+
+  "fall": {
+    "_goto": "spring"
   }
 }

@@ -129,6 +129,10 @@ public final class ModUpdateChecker {
                 .orElse("unknown");
     }
 
+    static VersionStatus unavailableStatus() {
+        return VersionStatus.unavailable(installedVersion());
+    }
+
     public enum State {
         UP_TO_DATE,
         OUTDATED,

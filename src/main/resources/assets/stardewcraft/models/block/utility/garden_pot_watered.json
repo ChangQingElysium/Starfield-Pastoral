@@ -1,0 +1,7 @@
+{
+  "parent": "stardewcraft:block/utility/garden_pot",
+  "textures": {
+    "2": "stardewcraft:block/utility/garden_pot_watered",
+    "particle": "stardewcraft:block/utility/garden_pot_watered"
+  }
+}

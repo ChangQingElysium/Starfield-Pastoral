@@ -93,10 +93,13 @@ public final class ServerPreconditionEvaluator {
                 PlayerStardewData data = PlayerDataManager.getPlayerData(player);
                 yield data.hasMailFlag(p.getString("id"));
             }
+            case "farm_owner_flag" -> checkFarmOwnerFlag(player, p);
             case "not_mail", "not_flag" -> {
                 PlayerStardewData data = PlayerDataManager.getPlayerData(player);
                 yield !data.hasMailFlag(p.getString("id"));
             }
+            case "not_active_dialogue_event" -> !com.stardew.craft.npc.runtime.NpcDialogueEventData
+                    .get(player.getServer()).isActive(player.getUUID(), p.getString("id"));
             case "is_host" -> isStoryHost(player);
             default -> StardewConditions.decodeLegacy(p.type(), p.raw())
                     .flatMap(condition -> StardewConditions.test(
@@ -110,6 +113,15 @@ public final class ServerPreconditionEvaluator {
     private static boolean isStoryHost(ServerPlayer player) {
         java.util.UUID ownerUuid = com.stardew.craft.farm.FarmInstanceRegistry.get().getOwnerForPlayer(player.getUUID());
         return ownerUuid == null || ownerUuid.equals(player.getUUID());
+    }
+
+    private static boolean checkFarmOwnerFlag(ServerPlayer player, EventPrecondition p) {
+        String flag = p.getString("id");
+        if (flag == null || flag.isBlank()) return false;
+        java.util.UUID ownerUuid = com.stardew.craft.farm.FarmInstanceRegistry.get()
+                .getOwnerForPlayer(player.getUUID());
+        if (ownerUuid == null) ownerUuid = player.getUUID();
+        return PlayerDataManager.getPlayerData(ownerUuid).hasMailFlag(flag);
     }
 
     private static boolean checkFriendship(ServerPlayer player, ServerLevel level, EventPrecondition p) {

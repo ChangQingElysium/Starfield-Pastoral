@@ -8,8 +8,12 @@
       "hay_capacity": 0,
       "allows_pregnancy": false,
       "automatic_feed": false,
-      "build_days": 3,
       "money": 4000,
+      "validation": {
+        "scan_range_xz": 12, "scan_range_up": 12, "scan_range_down": 12,
+        "feed_troughs": 4, "auto_feed_troughs": 0, "hay_hoppers": 1, "incubators": 0,
+        "min_interior_blocks": 216, "require_enclosed": true, "require_door": true, "min_door_count": 1
+      },
       "materials": [
         { "item": "stardewcraft:wood_normal", "count": 300 },
         { "item": "stardewcraft:stone", "count": 100 }
@@ -22,8 +26,12 @@
       "hay_capacity": 0,
       "allows_pregnancy": false,
       "automatic_feed": false,
-      "build_days": 2,
       "money": 10000,
+      "validation": {
+        "scan_range_xz": 12, "scan_range_up": 12, "scan_range_down": 12,
+        "feed_troughs": 8, "auto_feed_troughs": 0, "hay_hoppers": 1, "incubators": 1,
+        "min_interior_blocks": 288, "require_enclosed": true, "require_door": true, "min_door_count": 1
+      },
       "materials": [
         { "item": "stardewcraft:wood_normal", "count": 400 },
         { "item": "stardewcraft:stone", "count": 150 }
@@ -36,8 +44,12 @@
       "hay_capacity": 0,
       "allows_pregnancy": false,
       "automatic_feed": true,
-      "build_days": 2,
       "money": 20000,
+      "validation": {
+        "scan_range_xz": 12, "scan_range_up": 12, "scan_range_down": 12,
+        "feed_troughs": 0, "auto_feed_troughs": 12, "hay_hoppers": 1, "incubators": 1,
+        "min_interior_blocks": 360, "require_enclosed": true, "require_door": true, "min_door_count": 1
+      },
       "materials": [
         { "item": "stardewcraft:wood_normal", "count": 500 },
         { "item": "stardewcraft:stone", "count": 200 }
@@ -50,8 +62,12 @@
       "hay_capacity": 0,
       "allows_pregnancy": false,
       "automatic_feed": false,
-      "build_days": 3,
       "money": 6000,
+      "validation": {
+        "scan_range_xz": 12, "scan_range_up": 12, "scan_range_down": 12,
+        "feed_troughs": 4, "auto_feed_troughs": 0, "hay_hoppers": 1, "incubators": 0,
+        "min_interior_blocks": 252, "require_enclosed": true, "require_door": true, "min_door_count": 1
+      },
       "materials": [
         { "item": "stardewcraft:wood_normal", "count": 350 },
         { "item": "stardewcraft:stone", "count": 150 }
@@ -64,8 +80,12 @@
       "hay_capacity": 0,
       "allows_pregnancy": true,
       "automatic_feed": false,
-      "build_days": 2,
       "money": 12000,
+      "validation": {
+        "scan_range_xz": 12, "scan_range_up": 12, "scan_range_down": 12,
+        "feed_troughs": 8, "auto_feed_troughs": 0, "hay_hoppers": 1, "incubators": 0,
+        "min_interior_blocks": 336, "require_enclosed": true, "require_door": true, "min_door_count": 1
+      },
       "materials": [
         { "item": "stardewcraft:wood_normal", "count": 450 },
         { "item": "stardewcraft:stone", "count": 200 }
@@ -78,8 +98,12 @@
       "hay_capacity": 0,
       "allows_pregnancy": true,
       "automatic_feed": true,
-      "build_days": 2,
       "money": 25000,
+      "validation": {
+        "scan_range_xz": 12, "scan_range_up": 12, "scan_range_down": 12,
+        "feed_troughs": 0, "auto_feed_troughs": 12, "hay_hoppers": 1, "incubators": 0,
+        "min_interior_blocks": 420, "require_enclosed": true, "require_door": true, "min_door_count": 1
+      },
       "materials": [
         { "item": "stardewcraft:wood_normal", "count": 550 },
         { "item": "stardewcraft:stone", "count": 300 }
@@ -92,7 +116,6 @@
       "hay_capacity": 240,
       "allows_pregnancy": false,
       "automatic_feed": false,
-      "build_days": 2,
       "money": 100,
       "materials": [
         { "item": "stardewcraft:stone", "count": 100 },

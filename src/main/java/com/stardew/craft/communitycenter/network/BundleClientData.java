@@ -28,6 +28,7 @@ public final class BundleClientData {
     private int displayStarCount = 0;
     private boolean displayStarsInitialized = false;
     private final boolean[] displayedStarAreas = new boolean[6];
+    private boolean refurbishedInterior = false;
 
     private BundleClientData() {}
 
@@ -37,6 +38,7 @@ public final class BundleClientData {
     }
 
     public void update(Map<Integer, boolean[]> newSlots, boolean[] newAreas, Map<Integer, Boolean> newRewards, boolean canRead) {
+        boolean firstProgressSync = !displayStarsInitialized;
         bundleSlots.clear();
         bundleSlots.putAll(newSlots);
 
@@ -54,6 +56,12 @@ public final class BundleClientData {
                 displayedStarAreas[i] = areasComplete[i];
             }
             displayStarCount = completedAreaCount;
+        }
+        boolean allMainAreasComplete = areAllMainAreasComplete();
+        if (firstProgressSync || !allMainAreasComplete) {
+            // Existing completed saves start refurbished immediately. During live final-area
+            // completion, wait for the restore flash before changing location ambience.
+            refurbishedInterior = allMainAreasComplete;
         }
 
         bundleRewards.clear();
@@ -81,6 +89,27 @@ public final class BundleClientData {
     public boolean isAreaComplete(int areaId) {
         if (areaId < 0 || areaId >= 7) return false;
         return areasComplete[areaId];
+    }
+
+    /** The six vanilla Community Center areas which control the refurbished interior state. */
+    public boolean areAllMainAreasComplete() {
+        for (int areaId = 0; areaId <= 5; areaId++) {
+            if (!areasComplete[areaId]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean isInteriorRefurbished() {
+        return refurbishedInterior;
+    }
+
+    /** Called when the server's restore phase reaches the actual schematic replacement. */
+    public void markInteriorRefurbishedIfComplete() {
+        if (areAllMainAreasComplete()) {
+            refurbishedInterior = true;
+        }
     }
 
     public boolean isRewardAvailable(int bundleId) {
@@ -150,6 +179,7 @@ public final class BundleClientData {
         for (int i = 0; i < displayedStarAreas.length; i++) displayedStarAreas[i] = false;
         displayStarCount = 0;
         displayStarsInitialized = false;
+        refurbishedInterior = false;
         ccOrigin = com.stardew.craft.interior.InteriorSubspaceManager.CC_ORIGIN;
         version++;
     }

@@ -236,6 +236,10 @@ public final class EventCommandFactory {
                     obj.get("item").getAsString(),
                     getInt(obj, "count", 1)
             );
+            case "add_item_if_missing" -> new AddItemIfMissingCommand(
+                    obj.get("item").getAsString(),
+                    getInt(obj, "count", 1)
+            );
             case "remove_item"   -> new RemoveItemCommand(
                     obj.get("item").getAsString(),
                     getInt(obj, "count", 1)
@@ -311,6 +315,11 @@ public final class EventCommandFactory {
                     obj.get("item").getAsString(),
                     getInt(obj, "ticks", 60),
                     getFloat(obj, "offset_y", 0)
+            );
+            case "eat_item"      -> new EatItemCommand(
+                    obj.get("actor").getAsString(),
+                    obj.get("item").getAsString(),
+                    getInt(obj, "ticks", 40)
             );
             case "ground_item"    -> new GroundItemCommand(
                     getString(obj, "id", obj.get("item").getAsString() + "@" + getDouble(obj, "x", 0) + "," + getDouble(obj, "z", 0)),

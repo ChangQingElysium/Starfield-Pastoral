@@ -53,6 +53,7 @@ public final class AreaCompletionService {
         // 3) Pantry 完成 → 修好温室（两个路径都一样）
         if (areaId == 0) {
             GreenhouseManager.get(level).repairForPlayer(level, player.getUUID());
+            com.stardew.craft.npc.runtime.NpcDialogueTopicService.onGreenhouseRepaired(player);
         }
 
         // 4) Junimo 内饰修复过场 —— 只给 CC 路径玩家用；Joja 玩家看到的是仓库外观

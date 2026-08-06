@@ -2,6 +2,7 @@ package com.stardew.craft.client.renderer;
 
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.item.tool.WateringCanItem;
+import com.stardew.craft.block.utility.GardenPotBlock;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
@@ -117,7 +118,7 @@ public class WateringCanOverlayRenderer {
 
         for (BlockPos pos : positions) {
             if (pos.getY() == baseY) {
-                renderTexturedOverlay(poseStack, consumer, pos);
+                renderTexturedOverlay(poseStack, consumer, mc.level, pos);
             }
         }
         
@@ -128,10 +129,14 @@ public class WateringCanOverlayRenderer {
     }
 
     @SuppressWarnings("null")
-    private static void renderTexturedOverlay(PoseStack poseStack, VertexConsumer consumer, BlockPos pos) {
-        float x = pos.getX();
-        float y = pos.getY() + 1.05f; // 抬高到 1.05 防止与 1.0 (Full Block) 或 0.9375 (Farm) z-fighting
-        float z = pos.getZ();
+    private static void renderTexturedOverlay(
+            PoseStack poseStack, VertexConsumer consumer, net.minecraft.world.level.Level level, BlockPos pos) {
+        boolean gardenPot = level.getBlockState(pos).getBlock() instanceof GardenPotBlock;
+        float inset = gardenPot ? 1.5F / 16.0F : 0.0F;
+        float size = gardenPot ? 13.0F / 16.0F : 1.0F;
+        float x = pos.getX() + inset;
+        float y = pos.getY() + (gardenPot ? 11.0F / 16.0F + 0.01F : 1.05F);
+        float z = pos.getZ() + inset;
         
         // 简单的平铺贴图
         // 假设贴图是完整的 1x1 覆盖
@@ -150,8 +155,8 @@ public class WateringCanOverlayRenderer {
         PoseStack.Pose last = poseStack.last();
         
         consumer.addVertex(last, x, y, z).setUv(minU, minV).setColor(r, g, b, a);
-        consumer.addVertex(last, x, y, z + 1).setUv(minU, maxV).setColor(r, g, b, a);
-        consumer.addVertex(last, x + 1, y, z + 1).setUv(maxU, maxV).setColor(r, g, b, a);
-        consumer.addVertex(last, x + 1, y, z).setUv(maxU, minV).setColor(r, g, b, a);
+        consumer.addVertex(last, x, y, z + size).setUv(minU, maxV).setColor(r, g, b, a);
+        consumer.addVertex(last, x + size, y, z + size).setUv(maxU, maxV).setColor(r, g, b, a);
+        consumer.addVertex(last, x + size, y, z).setUv(maxU, minV).setColor(r, g, b, a);
     }
 }

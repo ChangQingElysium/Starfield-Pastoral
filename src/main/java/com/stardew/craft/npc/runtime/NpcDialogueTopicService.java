@@ -31,6 +31,11 @@ public final class NpcDialogueTopicService {
         activate(player, "cc_Boulder", WORLD_CHANGE_DURATION);
     }
 
+    /** SDV WorldChangeEvent: greenhouse restoration activates cc_Greenhouse for 3 days. */
+    public static void onGreenhouseRepaired(ServerPlayer player) {
+        activate(player, "cc_Greenhouse", 3);
+    }
+
     public static void onJojaDevelopmentFormViewed(ServerPlayer player) {
         activate(player, "joja_Begin", WORLD_CHANGE_DURATION);
     }

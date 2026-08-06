@@ -31,7 +31,8 @@ import java.util.List;
 
 public class PastureGrassBlock extends BushBlock {
     public static final MapCodec<PastureGrassBlock> CODEC = simpleCodec(PastureGrassBlock::new);
-    public static final IntegerProperty VARIANT = IntegerProperty.create("variant", 0, 2);
+    public static final int VISUAL_VARIANT_COUNT = 4;
+    public static final IntegerProperty VARIANT = IntegerProperty.create("variant", 0, VISUAL_VARIANT_COUNT - 1);
     /** SDV Grass.numberOfWeeds: clump density stored in one farm tile. */
     public static final IntegerProperty CLUMPS = IntegerProperty.create("clumps", 1, 4);
 
@@ -72,7 +73,7 @@ public class PastureGrassBlock extends BushBlock {
     @SuppressWarnings("null")
     @Override
     public BlockState getStateForPlacement(@SuppressWarnings("null") net.minecraft.world.item.context.BlockPlaceContext context) {
-        int variant = context.getLevel().getRandom().nextInt(3);
+        int variant = context.getLevel().getRandom().nextInt(VISUAL_VARIANT_COUNT);
         return defaultBlockState().setValue(VARIANT, variant).setValue(CLUMPS, 4);
     }
 

@@ -36,6 +36,7 @@ public final class StardewTimeCommand {
 
     private static int setMultiplier(CommandSourceStack source, double multiplier) {
         Config.TIME_SPEED_MULTIPLIER.set(multiplier);
+        Config.SERVER_SPEC.save();
         source.sendSuccess(
             () -> Component.translatable(
                 "stardewcraft.command.timespeed.set",

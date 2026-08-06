@@ -748,33 +748,33 @@
         },
         {
           "mode": "walk",
-          "point": "evelyn_joshhouse_stove"
+          "point": "evelyn_schedule_01"
         }
       ],
-      "saloon": [
+      "hospital": [
         {
           "mode": "walk",
-          "point": "saloon_outdoor_door"
+          "point": "clinic_outdoor_door"
         },
         {
           "mode": "warp",
-          "point": "saloon_indoor_entry"
+          "point": "clinic_indoor_entry"
         },
         {
           "mode": "walk",
-          "point": "evelyn_joshhouse_stove"
+          "point": "evelyn_schedule_09"
         }
       ],
       "town": [
         {
           "mode": "walk",
-          "point": "evelyn_town_bench"
+          "point": "evelyn_schedule_15"
         }
       ],
-      "communitycenter": [
+      "beach": [
         {
           "mode": "walk",
-          "point": "evelyn_communitycenter_visit"
+          "point": "evelyn_schedule_13"
         }
       ]
     },

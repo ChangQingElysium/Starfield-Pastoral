@@ -57,6 +57,10 @@ public record AnimalPurchaseSubmitPayload(String animalTypeId, String buildingId
                 return;
             }
 
+            // The screen may be stale after a farm-membership or building change. Reconcile
+            // ownership before trusting the building option sent to the client earlier.
+            AnimalShopService.synchronizeBuildingState(serverPlayer);
+
             String normalizedName =
                     AnimalNameRules.normalize(payload.customName);
             if (!AnimalNameRules.isValidOptionalName(

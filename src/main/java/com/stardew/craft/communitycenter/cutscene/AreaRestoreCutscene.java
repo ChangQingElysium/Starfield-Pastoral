@@ -195,6 +195,15 @@ public final class AreaRestoreCutscene {
                 if (data.areAllAreasComplete(uid)) {
                     int remaining = AreaRestoreHandler.restoreAllRemaining(activeLevel, getCCOrigin());
                     StardewCraft.LOGGER.info("[CC-CUTSCENE] All areas complete; restored {} remaining blocks", remaining);
+                    int queuedBefore = pendingRestores.size();
+                    pendingRestores.removeIf(queued -> queued.level() == activeLevel
+                            && java.util.Objects.equals(queued.ownerUUID(), ownerUUID));
+                    int removed = queuedBefore - pendingRestores.size();
+                    if (removed > 0) {
+                        StardewCraft.LOGGER.info(
+                                "[CC-CUTSCENE] Dropped {} redundant queued restores after full restoration",
+                                removed);
+                    }
                 }
 
                 // SDV: localSound("wand") + localSound("woodyHit") + Game1.flashAlpha = 1f
@@ -217,6 +226,10 @@ public final class AreaRestoreCutscene {
                                 level, 80, () -> GoodbyeDanceCutscene.start(level, ccOrig));
                     }
                 }
+                broadcastToCC(new CutscenePayload(
+                        CutscenePayload.TYPE_AREA_RESTORE,
+                        CutscenePayload.PHASE_END,
+                        currentAreaId, center));
                 stop();
             }
         }
@@ -317,5 +330,22 @@ public final class AreaRestoreCutscene {
 
     public static boolean isRunning() {
         return running;
+    }
+
+    /** Clears process-local state when a server closes so it cannot leak into another save. */
+    public static void reset() {
+        running = false;
+        currentAreaId = -1;
+        phase = -1;
+        phaseTicksRemaining = 0;
+        activeLevel = null;
+        ownerUUID = null;
+        for (JunimoEntity junimo : spawnedJunimos) {
+            if (junimo.isAlive() && !junimo.isRemoved()) {
+                junimo.discard();
+            }
+        }
+        spawnedJunimos.clear();
+        pendingRestores.clear();
     }
 }

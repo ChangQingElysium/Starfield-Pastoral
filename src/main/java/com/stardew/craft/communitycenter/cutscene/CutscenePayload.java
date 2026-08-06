@@ -28,10 +28,16 @@ public record CutscenePayload(
     public static final byte PHASE_APPEAR  = 1;
     public static final byte PHASE_GLOW    = 2;
     public static final byte PHASE_RESTORE = 3;
+    /** Explicitly clears any client overlay left by an interrupted cutscene. */
+    public static final byte PHASE_END     = 4;
 
     public static final Type<CutscenePayload> TYPE = new Type<>(
             ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "cc_cutscene")
     );
+
+    public static CutscenePayload clearScreen() {
+        return new CutscenePayload(TYPE_AREA_RESTORE, PHASE_END, -1, BlockPos.ZERO);
+    }
 
     public static final StreamCodec<ByteBuf, CutscenePayload> STREAM_CODEC = new StreamCodec<>() {
         @Override

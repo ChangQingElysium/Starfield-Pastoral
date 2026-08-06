@@ -13,7 +13,7 @@ import net.minecraft.nbt.Tag;
 public final class AnimalWorldDataMigrations {
     public static final String VERSION_FIELD =
             "animalSchemaVersion";
-    public static final int CURRENT_VERSION = 3;
+    public static final int CURRENT_VERSION = 4;
 
     private AnimalWorldDataMigrations() {
     }
@@ -44,6 +44,7 @@ public final class AnimalWorldDataMigrations {
                 case 0 -> migrateLegacyRecordsToV1(migrated);
                 case 1 -> migrateLifecycleCollectionsToV2(migrated);
                 case 2 -> migrateProjectionAndAddonStateToV3(migrated);
+                case 3 -> migrateImmediateBuildingActivationToV4(migrated);
                 default -> throw new IllegalStateException(
                         "Missing animal migration from schema "
                                 + version);
@@ -117,6 +118,24 @@ public final class AnimalWorldDataMigrations {
         // version boundary records that their absence means "not projected"
         // and "no addon state", rather than an incomplete migration.
         ensureList(root, "animals");
+    }
+
+    private static void migrateImmediateBuildingActivationToV4(
+            CompoundTag root
+    ) {
+        ListTag buildings = ensureList(root, "buildings");
+        for (int i = 0; i < buildings.size(); i++) {
+            CompoundTag building = buildings.getCompound(i);
+            if ("CONSTRUCTING".equals(
+                    building.getString("validationState"))) {
+                boolean active = !building.contains("active")
+                        || building.getBoolean("active");
+                building.putString(
+                        "validationState",
+                        active ? "VALID" : "RELOCATING");
+            }
+            building.remove("constructionCompletesAbsDay");
+        }
     }
 
     private static ListTag ensureList(

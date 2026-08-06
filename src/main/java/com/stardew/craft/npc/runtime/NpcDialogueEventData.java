@@ -70,6 +70,11 @@ public final class NpcDialogueEventData extends SavedData {
         return state == null ? List.of() : state.activeKeys(npcId);
     }
 
+    public boolean isActive(UUID playerId, String key) {
+        PlayerState state = players.get(playerId);
+        return state != null && state.active.containsKey(key);
+    }
+
     public void markConsumed(UUID playerId, String npcId, String key) {
         if (playerId == null || npcId == null || key == null || key.isBlank()) {
             return;

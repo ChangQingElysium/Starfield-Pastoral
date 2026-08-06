@@ -12,6 +12,7 @@ import com.stardew.craft.client.NpcDisplayNames;
 import com.stardew.craft.client.NpcFriendshipClientCache;
 import com.stardew.craft.client.PlayerGenderText;
 import com.stardew.craft.client.gui.StardewCollectivePauseScreen;
+import com.stardew.craft.client.gui.StardewSettingsScreen;
 import com.stardew.craft.client.gui.common.CommonGuiTextures;
 import com.stardew.craft.client.gui.common.StardewRenderMapping;
 import com.stardew.craft.client.gui.overnight.LevelUpMenuTextures;
@@ -927,8 +928,12 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         int rowX = optionsRowX();
         int rowWidth = optionsRowWidth();
         int rowHeight = optionsRowHeight();
-        int editorY = optionsRowY(0);
-        int leaderboardY = optionsRowY(1);
+        int settingsY = optionsRowY(0);
+        int editorY = optionsRowY(1);
+        int leaderboardY = optionsRowY(2);
+        drawOptionsButton(graphics, rowX, settingsY, rowWidth, rowHeight,
+                Component.translatable("stardewcraft.game_menu.options.client_settings"),
+                optionContains(mouseX, mouseY, rowX, settingsY, rowWidth, rowHeight));
         drawOptionsButton(graphics, rowX, editorY, rowWidth, rowHeight,
                 Component.translatable("stardewcraft.game_menu.options.hud_position"),
                 optionContains(mouseX, mouseY, rowX, editorY, rowWidth, rowHeight));
@@ -1019,14 +1024,21 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         int rowX = optionsRowX();
         int rowWidth = optionsRowWidth();
         int rowHeight = optionsRowHeight();
-        int editorY = optionsRowY(0);
+        int settingsY = optionsRowY(0);
+        if (optionContains(mouseX, mouseY, rowX, settingsY, rowWidth, rowHeight)) {
+            playUiSound(ModSounds.BIG_SELECT.get(), 1.0F, 1.0F);
+            this.minecraft.setScreen(new StardewSettingsScreen(this));
+            return true;
+        }
+
+        int editorY = optionsRowY(1);
         if (optionContains(mouseX, mouseY, rowX, editorY, rowWidth, rowHeight)) {
             playUiSound(ModSounds.BIG_SELECT.get(), 1.0F, 1.0F);
             this.minecraft.setScreen(new StardewHudLayoutEditorScreen(this));
             return true;
         }
 
-        int leaderboardY = optionsRowY(1);
+        int leaderboardY = optionsRowY(2);
         if (optionContains(mouseX, mouseY, rowX, leaderboardY, rowWidth, rowHeight)) {
             currentOptionsPage = OPTIONS_PAGE_LEADERBOARD;
             leaderboardScroll = 0;

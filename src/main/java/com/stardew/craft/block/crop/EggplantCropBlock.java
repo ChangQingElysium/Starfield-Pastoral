@@ -102,6 +102,7 @@ public class EggplantCropBlock extends StardewCropBlock {
 
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        if (com.stardew.craft.block.utility.GardenPotBlock.isPottedPlant(level, pos, state)) return net.minecraft.world.phys.shapes.Shapes.empty();
         return getHalfShape(state);
     }
 

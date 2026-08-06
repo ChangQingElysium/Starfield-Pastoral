@@ -73,7 +73,7 @@ public class MixedSeedsItem extends Item implements IStardewItem {
 		return InteractionResult.sidedSuccess(level.isClientSide);
 	}
 
-	private static BlockState pickCropStateForSeason(int season, net.minecraft.util.RandomSource random) {
+	public static BlockState pickCropStateForSeason(int season, net.minecraft.util.RandomSource random) {
 		// 参考 Stardew: Crop.getRandomLowGradeCropForThisSeason
 		// Spring: Parsnip / Cauliflower / Potato
 		// Summer: Corn / Hot Pepper / Radish / Wheat

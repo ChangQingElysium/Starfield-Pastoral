@@ -822,7 +822,7 @@ public class FairSlingshotGameScreen extends Screen implements com.stardew.craft
             clearMovement();
             return true;
         }
-        if (!aiming && setMovement(keyCode, true)) {
+        if (!aiming && setMovement(keyCode, scanCode, true)) {
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
@@ -830,26 +830,27 @@ public class FairSlingshotGameScreen extends Screen implements com.stardew.craft
 
     @Override
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-        if (setMovement(keyCode, false)) {
+        if (setMovement(keyCode, scanCode, false)) {
             return true;
         }
         return super.keyReleased(keyCode, scanCode, modifiers);
     }
 
-    private boolean setMovement(int keyCode, boolean value) {
-        if (keyCode == GLFW.GLFW_KEY_W || keyCode == GLFW.GLFW_KEY_UP) {
+    private boolean setMovement(int keyCode, int scanCode, boolean value) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.options.keyUp.matches(keyCode, scanCode) || keyCode == GLFW.GLFW_KEY_UP) {
             up = value;
             return true;
         }
-        if (keyCode == GLFW.GLFW_KEY_S || keyCode == GLFW.GLFW_KEY_DOWN) {
+        if (minecraft.options.keyDown.matches(keyCode, scanCode) || keyCode == GLFW.GLFW_KEY_DOWN) {
             down = value;
             return true;
         }
-        if (keyCode == GLFW.GLFW_KEY_A || keyCode == GLFW.GLFW_KEY_LEFT) {
+        if (minecraft.options.keyLeft.matches(keyCode, scanCode) || keyCode == GLFW.GLFW_KEY_LEFT) {
             left = value;
             return true;
         }
-        if (keyCode == GLFW.GLFW_KEY_D || keyCode == GLFW.GLFW_KEY_RIGHT) {
+        if (minecraft.options.keyRight.matches(keyCode, scanCode) || keyCode == GLFW.GLFW_KEY_RIGHT) {
             right = value;
             return true;
         }

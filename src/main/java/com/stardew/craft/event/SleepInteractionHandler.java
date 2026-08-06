@@ -6,6 +6,7 @@ import com.stardew.craft.block.decor.MapDecorStaticBlock;
 import com.stardew.craft.core.ModDimensions;
 import com.stardew.craft.core.ModMiningDimensions;
 import com.stardew.craft.network.payload.OpenSleepConfirmScreenPayload;
+import com.stardew.craft.network.payload.SleepFadeRestorePayload;
 import com.stardew.craft.time.StardewTimeManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -82,6 +83,9 @@ public final class SleepInteractionHandler {
         consumePendingBedPos(player);
         if (SleepVoteTracker.hasVoted(player)) {
             SleepVoteTracker.revokeVoteAndBroadcast(player);
+            PacketDistributor.sendToPlayer(
+                    player,
+                    new SleepFadeRestorePayload());
         }
     }
 

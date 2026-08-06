@@ -31,6 +31,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
@@ -121,6 +122,8 @@ public abstract class StardewCropBlock extends Block {
     
     // 作物生长阶段 (0-3, 4个阶段)
     public static final IntegerProperty AGE = IntegerProperty.create("age", 0, 3);
+    /** Server-synced render marker: the real crop block is a hidden carrier above a Garden Pot. */
+    public static final BooleanProperty POTTED = BooleanProperty.create("potted");
     /**
      * 历史属性名保留为 placed_by_player；实际语义是“成品花装饰放置”。
      * 它不等同于作物的播种者，播种者记录在 CropGrowthState.planterUuid。
@@ -158,7 +161,7 @@ public abstract class StardewCropBlock extends Block {
         super(configureProperties(properties, solidCollision));
         this.solidCollision = solidCollision;
         this.outlineShapeByAge = buildOutlineShapes(getOutlineHeightsPxByAge(), getOutlineWidthsPxByAge(), solidCollision);
-        this.registerDefaultState(this.stateDefinition.any().setValue(AGE, 0));
+        this.registerDefaultState(this.stateDefinition.any().setValue(AGE, 0).setValue(POTTED, false));
     }
 
     private static Properties configureProperties(Properties properties, boolean solidCollision) {
@@ -374,8 +377,13 @@ public abstract class StardewCropBlock extends Block {
     
     @Override
     protected void createBlockStateDefinition(@SuppressWarnings("null") StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(AGE);
+        builder.add(AGE, POTTED);
         addExtraProperties(builder);
+    }
+
+    @Override
+    public RenderShape getRenderShape(BlockState state) {
+        return state.getValue(POTTED) ? RenderShape.INVISIBLE : RenderShape.MODEL;
     }
 
     /**
@@ -472,6 +480,9 @@ public abstract class StardewCropBlock extends Block {
     @SuppressWarnings("null")
     @Override
     protected VoxelShape getShape(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") BlockGetter level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") CollisionContext context) {
+        if (com.stardew.craft.block.utility.GardenPotBlock.isPottedPlant(level, pos, state)) {
+            return net.minecraft.world.phys.shapes.Shapes.empty();
+        }
         VoxelShape[] shapes = getResolvedShapeByAge(state);
         return shapes[state.getValue(AGE)];
     }
@@ -479,6 +490,9 @@ public abstract class StardewCropBlock extends Block {
     @SuppressWarnings("null")
     @Override
     protected VoxelShape getCollisionShape(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") BlockGetter level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") CollisionContext context) {
+        if (com.stardew.craft.block.utility.GardenPotBlock.isPottedPlant(level, pos, state)) {
+            return net.minecraft.world.phys.shapes.Shapes.empty();
+        }
         // 普通作物：无碰撞；藤架/作物架：给满格碰撞，避免穿帮与可穿过。
         if (!solidCollision) {
             return net.minecraft.world.phys.shapes.Shapes.empty();
@@ -827,6 +841,17 @@ public abstract class StardewCropBlock extends Block {
         return harvested;
     }
 
+    /** Read-only output hint used by pull-based automation before it performs a real harvest. */
+    public final ItemStack getAutomationHarvestPreview(BlockState state) {
+        ItemStack preview = getHarvestItem(QualityHelper.NORMAL);
+        if (preview.isEmpty()) {
+            return ItemStack.EMPTY;
+        }
+        preview = applyHarvestItemCustomization(preview, state);
+        preview.setCount(Math.max(1, getHarvestMinStack()));
+        return preview;
+    }
+
     /** Side products routed to a Junimo Hut instead of the world/player silo. */
     protected void collectJunimoHarvestSideProducts(ServerLevel level, BlockPos pos, BlockState state,
                                                      RandomSource random, int fertilizerLevel,
@@ -990,6 +1015,14 @@ public abstract class StardewCropBlock extends Block {
      * 获取作物种子物品
      */
     protected abstract Supplier<Item> getSeedsItem();
+
+    public final boolean isSeedItem(ItemStack stack) {
+        return stack != null && !stack.isEmpty() && stack.is(getSeedsItem().get());
+    }
+
+    public final boolean canPlantAt(Level level, BlockPos pos) {
+        return SeasonLocationRules.seedsIgnoreSeasonsHere(level, pos) || isInSeason(level);
+    }
     
     /**
      * 获取作物产物物品
@@ -1239,6 +1272,23 @@ public abstract class StardewCropBlock extends Block {
     @SuppressWarnings("null")
     @Override
     protected void onPlace(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") BlockState oldState, boolean isMoving) {
+        boolean pottedHere = com.stardew.craft.block.utility.GardenPotBlock.isPottedPlant(level, pos, state);
+        if (!level.isClientSide && state.getValue(POTTED) != pottedHere) {
+            state = state.setValue(POTTED, pottedHere);
+            level.setBlock(pos, state, Block.UPDATE_ALL);
+
+            // Double-height crop subclasses create their upper part before delegating here.
+            // Mark that carrier invisible in the same update so both halves change atomically.
+            if (pottedHere
+                    && state.hasProperty(BlockStateProperties.DOUBLE_BLOCK_HALF)
+                    && state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER) {
+                BlockPos upperPos = pos.above();
+                BlockState upper = level.getBlockState(upperPos);
+                if (upper.getBlock() == state.getBlock() && upper.hasProperty(POTTED)) {
+                    level.setBlock(upperPos, upper.setValue(POTTED, true), Block.UPDATE_ALL);
+                }
+            }
+        }
         if (!state.is(oldState.getBlock())) {
             // 新放置 (或者方块类型改变)，注册到管理器；玩家手放成品花只是装饰，不进入生长表。
             if (level instanceof ServerLevel serverLevel) {

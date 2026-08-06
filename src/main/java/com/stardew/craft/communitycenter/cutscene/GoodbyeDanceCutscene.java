@@ -159,6 +159,10 @@ public final class GoodbyeDanceCutscene {
                         30, 3.0, 2.0, 3.0, 0.05);
             }
             default -> {
+                broadcastToCC(new CutscenePayload(
+                        CutscenePayload.TYPE_GOODBYE_DANCE,
+                        CutscenePayload.PHASE_END,
+                        -1, center));
                 stop();
             }
         }
@@ -220,5 +224,21 @@ public final class GoodbyeDanceCutscene {
 
     public static boolean isRunning() {
         return running;
+    }
+
+    /** Clears process-local state when a server closes so it cannot leak into another save. */
+    public static void reset() {
+        running = false;
+        phase = -1;
+        phaseTicksRemaining = 0;
+        activeLevel = null;
+        activeCcOrigin = null;
+        for (JunimoEntity junimo : dancingJunimos) {
+            if (junimo.isAlive() && !junimo.isRemoved()) {
+                junimo.discard();
+            }
+        }
+        dancingJunimos.clear();
+        pendingDances.clear();
     }
 }

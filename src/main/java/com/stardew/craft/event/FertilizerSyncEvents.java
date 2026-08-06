@@ -30,7 +30,6 @@ public class FertilizerSyncEvents {
                 () -> {
                     FertilizerManager manager = FertilizerManager.get(player.serverLevel());
                     manager.syncAllFertilizersToPlayer(player);
-                    StardewCraft.LOGGER.info("Player {} logged in, syncing fertilizers (delayed)", player.getName().getString());
                 }
             ));
         }
@@ -45,7 +44,6 @@ public class FertilizerSyncEvents {
             ServerLevel level = player.serverLevel();
             FertilizerManager manager = FertilizerManager.get(level);
             manager.syncAllFertilizersToPlayer(player);
-            StardewCraft.LOGGER.info("Player {} changed dimension, syncing fertilizers", player.getName().getString());
         }
     }
 
@@ -58,6 +56,12 @@ public class FertilizerSyncEvents {
         }
         FertilizerManager.get(level).syncFertilizersInChunkToPlayer(player, level, event.getPos());
     }
+
+    @SubscribeEvent
+    public static void onChunkUnwatched(ChunkWatchEvent.UnWatch event) {
+        FertilizerManager.get(event.getLevel()).clearFertilizersInChunkForPlayer(
+                event.getPlayer(), event.getLevel(), event.getPos());
+    }
     
     /**
      * 客户端事件处理器
@@ -69,9 +73,10 @@ public class FertilizerSyncEvents {
          * 客户端断开连接时清空肥料缓存
          */
         @SubscribeEvent
-        public static void onClientDisconnect(PlayerEvent.PlayerLoggedOutEvent event) {
+        public static void onClientDisconnect(
+                net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent.LoggingOut event
+        ) {
             com.stardew.craft.client.ClientFertilizerCache.clear();
-            StardewCraft.LOGGER.info("Client disconnected, clearing fertilizer cache");
         }
     }
 }

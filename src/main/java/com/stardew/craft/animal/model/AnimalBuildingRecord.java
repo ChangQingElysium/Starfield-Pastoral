@@ -32,7 +32,6 @@ public class AnimalBuildingRecord {
     private long structureRevision = 1L;
     private ValidationState validationState;
     private String validationIssue = "";
-    private int constructionCompletesAbsDay = -1;
     private final Set<Long> interiorAirCells;
     private final Set<Long> boundaryDoorCells;
     private final Set<Long> memberAnimalIds;
@@ -175,32 +174,6 @@ public class AnimalBuildingRecord {
 
     public String validationIssue() {
         return validationIssue;
-    }
-
-    public int constructionCompletesAbsDay() {
-        return constructionCompletesAbsDay;
-    }
-
-    public boolean hasPendingConstruction() {
-        return constructionCompletesAbsDay >= 0;
-    }
-
-    public void beginConstruction(int completionAbsDay) {
-        constructionCompletesAbsDay = Math.max(0, completionAbsDay);
-        validationState = ValidationState.CONSTRUCTING;
-        validationIssue = "";
-    }
-
-    public boolean completeConstruction(int currentAbsDay) {
-        if (validationState != ValidationState.CONSTRUCTING
-                || constructionCompletesAbsDay < 0
-                || currentAbsDay < constructionCompletesAbsDay) {
-            return false;
-        }
-        constructionCompletesAbsDay = -1;
-        validationState = ValidationState.VALID;
-        validationIssue = "";
-        return true;
     }
 
     public void markStructureValidated(long revision) {
@@ -361,12 +334,6 @@ public class AnimalBuildingRecord {
         if (!validationIssue.isBlank()) {
             tag.putString("validationIssue", validationIssue);
         }
-        if (constructionCompletesAbsDay >= 0) {
-            tag.putInt(
-                    "constructionCompletesAbsDay",
-                    constructionCompletesAbsDay);
-        }
-
         ListTag interiorTag = new ListTag();
         for (Long cell : interiorAirCells) {
             CompoundTag cellTag = new CompoundTag();
@@ -447,9 +414,15 @@ public class AnimalBuildingRecord {
                 ? Math.max(1L, tag.getLong("structureRevision"))
                 : 1L;
         if (tag.contains("validationState")) {
+            String savedState = tag.getString("validationState");
             try {
-                record.validationState = ValidationState.valueOf(
-                        tag.getString("validationState"));
+                // Compatibility with saves produced while construction delays existed. A
+                // physically validated building is immediately usable in the current rules.
+                record.validationState = "CONSTRUCTING".equals(savedState)
+                        ? (record.active
+                                ? ValidationState.VALID
+                                : ValidationState.RELOCATING)
+                        : ValidationState.valueOf(savedState);
             } catch (IllegalArgumentException ignored) {
                 record.validationState = record.active
                         ? ValidationState.VALID
@@ -457,20 +430,12 @@ public class AnimalBuildingRecord {
             }
         }
         record.validationIssue = tag.getString("validationIssue");
-        record.constructionCompletesAbsDay =
-                tag.contains("constructionCompletesAbsDay")
-                        ? Math.max(
-                                0,
-                                tag.getInt(
-                                        "constructionCompletesAbsDay"))
-                        : -1;
         return record;
     }
 
     public enum ValidationState {
         VALID,
         INVALID,
-        RELOCATING,
-        CONSTRUCTING
+        RELOCATING
     }
 }

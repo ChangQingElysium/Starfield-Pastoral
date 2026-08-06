@@ -26,6 +26,8 @@ public class EventPlayerActorEntity extends Mob {
     private boolean holdingItemAboveHead = false;
     /** Client-authored unconscious pose used by combat rescue scenes. */
     private boolean collapsed = false;
+    /** Client-authored vanilla-style item-use pose used by farmerEat scenes. */
+    private boolean eatingItem = false;
     private UUID skinSourcePlayerId;
     private boolean slimSkinModel;
 
@@ -91,6 +93,14 @@ public class EventPlayerActorEntity extends Mob {
         if (collapsed) {
             setWalking(false);
         }
+    }
+
+    public boolean isEatingItem() {
+        return eatingItem;
+    }
+
+    public void setEatingItem(boolean eatingItem) {
+        this.eatingItem = eatingItem;
     }
 
     public UUID getSkinSourcePlayerId() {

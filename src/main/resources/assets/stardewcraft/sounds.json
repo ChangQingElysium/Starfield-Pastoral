@@ -1510,6 +1510,14 @@
       }
     ]
   },
+  "music_junimo_star_song": {
+    "sounds": [
+      {
+        "name": "stardewcraft:music/junimo_star_song",
+        "stream": true
+      }
+    ]
+  },
   "music_50s": {
     "sounds": [
       {

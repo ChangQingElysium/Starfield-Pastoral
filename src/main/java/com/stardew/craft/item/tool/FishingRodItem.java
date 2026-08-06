@@ -457,6 +457,12 @@ public class FishingRodItem extends net.minecraft.world.item.FishingRodItem impl
 		if (player.getCooldowns().isOnCooldown(this)) {
 			return InteractionResultHolder.fail(stack);
 		}
+		if (!level.isClientSide
+				&& player instanceof ServerPlayer serverPlayer
+				&& com.stardew.craft.festival.ActiveFestivalHandlers.blocksFishingDuringActiveFestival(serverPlayer)) {
+			serverPlayer.displayClientMessage(Component.translatable("stardewcraft.fishing.blocked_during_festival"), true);
+			return InteractionResultHolder.fail(stack);
+		}
 
 		// 对齐原版：体力 <= 1 时不允许开始抛竿（beginUsing 检查）。
 		if (!level.isClientSide
@@ -574,7 +580,19 @@ public class FishingRodItem extends net.minecraft.world.item.FishingRodItem impl
 		// Vanilla-like: always throw the hook. The server session will only begin bite logic once the hook lands in water.
 		boolean started = FishingSessionManager.get(serverPlayer.server).start(serverPlayer, castPower01);
 		if (!started) {
-			serverPlayer.displayClientMessage(Component.translatable("stardewcraft.fishing.already_fishing"), true);
+			boolean festivalBlocked = com.stardew.craft.festival.ActiveFestivalHandlers
+					.blocksFishingDuringActiveFestival(serverPlayer);
+			serverPlayer.displayClientMessage(Component.translatable(festivalBlocked
+					? "stardewcraft.fishing.blocked_during_festival"
+					: "stardewcraft.fishing.already_fishing"), true);
+			if (festivalBlocked) {
+				setCastActive(player.getMainHandItem(), false);
+				setCastActive(player.getOffhandItem(), false);
+				net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
+					serverPlayer,
+					new com.stardew.craft.fishing.network.FishingRodCastStatePayload(false)
+				);
+			}
 			return;
 		}
 

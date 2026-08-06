@@ -297,6 +297,26 @@ public final class ActiveFestivalHandlers {
         return getParticipating(player).isPresent();
     }
 
+    /**
+     * Active festivals normally disable tool use in Stardew Valley. StardewCraft keeps its
+     * broader item interactions available, but ordinary fishing must still be blocked while a
+     * player is attending. Festival-owned fishing games are the only exceptions.
+     */
+    public static boolean blocksFishingDuringActiveFestival(ServerPlayer player) {
+        if (player == null) {
+            return false;
+        }
+        return shouldBlockFestivalFishing(
+            isParticipant(player),
+            com.stardew.craft.festival.fair.FairFishingGameService.isFishingGameActive(player),
+            FestivalOfIceService.isFishingContestActive(player)
+        );
+    }
+
+    static boolean shouldBlockFestivalFishing(boolean participant, boolean fairFishingGame, boolean iceFishingContest) {
+        return participant && !fairFishingGame && !iceFishingContest;
+    }
+
     public static Optional<ActiveFestivalHandler> getParticipating(ServerPlayer player) {
         if (player == null) {
             return Optional.empty();

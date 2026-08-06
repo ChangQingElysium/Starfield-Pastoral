@@ -181,6 +181,25 @@ public record CutsceneServerActionPayload(
                         }
                     }
                 }
+                case "add_item_if_missing" -> {
+                    int sep = payload.value.lastIndexOf(':');
+                    if (sep > 0 && sep < payload.value.length() - 1) {
+                        try {
+                            var rl = ResourceLocation.parse(payload.value.substring(0, sep));
+                            int count = Integer.parseInt(payload.value.substring(sep + 1));
+                            var item = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(rl);
+                            if (item != net.minecraft.world.item.Items.AIR
+                                    && player.getInventory().countItem(item) == 0) {
+                                var stack = new net.minecraft.world.item.ItemStack(item, count);
+                                if (!player.getInventory().add(stack)) {
+                                    player.drop(stack, false);
+                                }
+                            }
+                        } catch (Exception e) {
+                            LOGGER.warn("Cutscene add_item_if_missing failed: {}", e.getMessage());
+                        }
+                    }
+                }
                 case "remove_item" -> {
                     // value format: "item_id:count"，item_id 自身含 ':'，按最后一个 ':' 切分
                     int sep = payload.value.lastIndexOf(':');

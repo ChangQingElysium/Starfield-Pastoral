@@ -21,9 +21,10 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 肥料管理器
@@ -32,8 +33,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class FertilizerManager extends SavedData {
     private static final String DATA_NAME = "stardew_fertilizer_manager";
 
-    // 存储每个位置的肥料类型
-    private final Map<GlobalPos, FertilizerType> fertilizerMap = new ConcurrentHashMap<>();
+    // SavedData and crop simulation are both owned by the server thread.
+    private final Map<GlobalPos, FertilizerType> fertilizerMap = new HashMap<>();
 
     public FertilizerManager() {}
 
@@ -53,31 +54,18 @@ public class FertilizerManager extends SavedData {
                 );
     }
 
-    /**
-     * 设置某个位置的肥料
-     */
-    @SuppressWarnings("null")
-    public void setFertilizer(ServerLevel level, BlockPos pos, FertilizerType type) {
-        // 只允许对耕地施肥；如果不再是耕地，立刻拒绝并确保清理
+    /** Adds fertilizer without replacing an existing type. */
+    public boolean tryApplyFertilizer(ServerLevel level, BlockPos pos, FertilizerType type) {
         if (!(level.getBlockState(pos).getBlock() instanceof FarmBlock)) {
-            if (hasFertilizer(level, pos)) {
-                removeFertilizer(level, pos);
-            }
-            return;
+            return false;
         }
-        ResourceKey<Level> dimKey = level.dimension();
-        @SuppressWarnings("null")
-        GlobalPos globalPos = GlobalPos.of(dimKey, pos);
-        fertilizerMap.put(globalPos, type);
+        GlobalPos globalPos = GlobalPos.of(level.dimension(), pos.immutable());
+        if (fertilizerMap.putIfAbsent(globalPos, type) != null) {
+            return false;
+        }
         setDirty();
-        
-        // 同步到附近的客户端
-        FertilizerSyncPacket packet = new FertilizerSyncPacket(pos, type.getSerializedName());
-        for (ServerPlayer player : level.players()) {
-            if (player.blockPosition().distSqr(pos) < 64 * 64) { // 64格内的玩家
-                PacketDistributor.sendToPlayer(player, packet);
-            }
-        }
+        syncChangeToTrackingPlayers(level, pos, type);
+        return true;
     }
 
     /**
@@ -89,49 +77,21 @@ public class FertilizerManager extends SavedData {
         if (!(level instanceof ServerLevel serverLevel)) {
             return null;
         }
-        ResourceKey<Level> dimKey = serverLevel.dimension();
-        @SuppressWarnings("null")
-        GlobalPos globalPos = GlobalPos.of(dimKey, pos);
-
-        FertilizerType type = fertilizerMap.get(globalPos);
-        if (type == null) {
-            return null;
-        }
-
-        // 如果该位置已经不再是耕地：立即清理数据 + 同步客户端，并视为“没有肥料”
-        if (!(serverLevel.getBlockState(pos).getBlock() instanceof FarmBlock)) {
-            removeFertilizer(serverLevel, pos);
-            return null;
-        }
-
-        return type;
+        return fertilizerMap.get(GlobalPos.of(serverLevel.dimension(), pos));
     }
 
     /**
      * 移除某个位置的肥料记录
      */
     @SuppressWarnings("null")
-    public void removeFertilizer(ServerLevel level, BlockPos pos) {
-        ResourceKey<Level> dimKey = level.dimension();
-        @SuppressWarnings("null")
-        GlobalPos globalPos = GlobalPos.of(dimKey, pos);
-        
-        // 先检查是否真的存在肥料
-        if (!fertilizerMap.containsKey(globalPos)) {
-            return;
+    public boolean removeFertilizer(ServerLevel level, BlockPos pos) {
+        GlobalPos globalPos = GlobalPos.of(level.dimension(), pos);
+        if (fertilizerMap.remove(globalPos) == null) {
+            return false;
         }
-        
-        fertilizerMap.remove(globalPos);
         setDirty();
-        
-        // 同步到附近的客户端
-        FertilizerSyncPacket packet = new FertilizerSyncPacket(pos, null);
-        for (ServerPlayer player : level.players()) {
-            if (player.blockPosition().distSqr(pos) < 128 * 128) { // 增大同步范围到128
-                PacketDistributor.sendToPlayer(player, packet);
-            }
-        }
-        
+        syncChangeToTrackingPlayers(level, pos, null);
+        return true;
     }
 
     /**
@@ -141,50 +101,79 @@ public class FertilizerManager extends SavedData {
         return getFertilizer(level, pos) != null;
     }
     
-    /**
-     * 同步玩家附近所有肥料（玩家登录/维度切换时调用）
-     */
-    @SuppressWarnings("null")
+    /** Syncs fertilizer within the player's configured chunk view distance. */
     public void syncAllFertilizersToPlayer(ServerPlayer player) {
         ServerLevel level = player.serverLevel();
         ResourceKey<Level> dimKey = level.dimension();
-        BlockPos playerPos = player.blockPosition();
-        int syncRadius = 256; // 增加同步范围到256格
-        
+        ChunkPos playerChunk = player.chunkPosition();
+        int viewDistance = level.getServer().getPlayerList().getViewDistance() + 1;
+
+        Map<Long, List<FertilizerSyncPacket.Entry>> entriesByChunk = new HashMap<>();
         for (Map.Entry<GlobalPos, FertilizerType> entry : fertilizerMap.entrySet()) {
             GlobalPos gpos = entry.getKey();
-            // 只同步相同维度的肥料
             if (!gpos.dimension().equals(dimKey)) {
                 continue;
             }
-            
-            // 只同步范围内的肥料
-            if (playerPos.distSqr(gpos.pos()) > syncRadius * syncRadius) {
+            ChunkPos fertilizerChunk = new ChunkPos(gpos.pos());
+            if (Math.abs((long) fertilizerChunk.x - playerChunk.x) > viewDistance
+                    || Math.abs((long) fertilizerChunk.z - playerChunk.z) > viewDistance) {
                 continue;
             }
-            
-            // 直接同步，不检查区块是否加载（玩家登录时区块可能还没加载）
-            FertilizerSyncPacket packet = new FertilizerSyncPacket(gpos.pos(), entry.getValue().getSerializedName());
-            PacketDistributor.sendToPlayer(player, packet);
+            entriesByChunk
+                    .computeIfAbsent(fertilizerChunk.toLong(), ignored -> new ArrayList<>())
+                    .add(syncEntry(gpos.pos(), entry.getValue()));
+        }
+        for (Map.Entry<Long, List<FertilizerSyncPacket.Entry>> chunk : entriesByChunk.entrySet()) {
+            sortSyncEntries(chunk.getValue());
+            PacketDistributor.sendToPlayer(
+                    player,
+                    FertilizerSyncPacket.chunkSnapshot(
+                            dimKey.location(),
+                            new ChunkPos(chunk.getKey()),
+                            chunk.getValue()));
         }
     }
 
     /**
      * Sync fertilizer data for a chunk after Minecraft has sent that chunk to the client.
      */
-    public void syncFertilizersInChunkToPlayer(ServerPlayer player, ServerLevel level, ChunkPos chunkPos) {
+    public void syncFertilizersInChunkToPlayer(
+            ServerPlayer player,
+            ServerLevel level,
+            ChunkPos chunkPos
+    ) {
         ResourceKey<Level> dimKey = level.dimension();
-        for (Map.Entry<GlobalPos, FertilizerType> entry : fertilizerMap.entrySet()) {
+        List<BlockPos> invalidPositions = new ArrayList<>();
+        List<FertilizerSyncPacket.Entry> snapshot = new ArrayList<>();
+        for (Map.Entry<GlobalPos, FertilizerType> entry
+                : new ArrayList<>(fertilizerMap.entrySet())) {
             GlobalPos gpos = entry.getKey();
             if (!gpos.dimension().equals(dimKey) || !new ChunkPos(gpos.pos()).equals(chunkPos)) {
                 continue;
             }
             if (level.isLoaded(gpos.pos()) && !(level.getBlockState(gpos.pos()).getBlock() instanceof FarmBlock)) {
-                removeFertilizer(level, gpos.pos());
+                invalidPositions.add(gpos.pos());
                 continue;
             }
-            PacketDistributor.sendToPlayer(player, new FertilizerSyncPacket(gpos.pos(), entry.getValue().getSerializedName()));
+            snapshot.add(syncEntry(gpos.pos(), entry.getValue()));
         }
+        invalidPositions.forEach(pos -> removeFertilizer(level, pos));
+        sortSyncEntries(snapshot);
+        PacketDistributor.sendToPlayer(
+                player,
+                FertilizerSyncPacket.chunkSnapshot(dimKey.location(), chunkPos, snapshot));
+    }
+
+    /** Releases client cache for a chunk which is no longer tracked. */
+    public void clearFertilizersInChunkForPlayer(
+            ServerPlayer player,
+            ServerLevel level,
+            ChunkPos chunkPos
+    ) {
+        PacketDistributor.sendToPlayer(
+                player,
+                FertilizerSyncPacket.chunkSnapshot(
+                        level.dimension().location(), chunkPos, List.of()));
     }
 
     /**
@@ -244,12 +233,45 @@ public class FertilizerManager extends SavedData {
         return type != null ? type.getQualityLevel() : 0;
     }
 
+    private static void syncChangeToTrackingPlayers(
+            ServerLevel level,
+            BlockPos pos,
+            @Nullable FertilizerType type
+    ) {
+        PacketDistributor.sendToPlayersTrackingChunk(
+                level,
+                new ChunkPos(pos),
+                FertilizerSyncPacket.update(level.dimension().location(), pos, type));
+    }
+
+    private static FertilizerSyncPacket.Entry syncEntry(
+            BlockPos pos,
+            FertilizerType type
+    ) {
+        return new FertilizerSyncPacket.Entry(pos, type.getSerializedName());
+    }
+
+    private static void sortSyncEntries(List<FertilizerSyncPacket.Entry> entries) {
+        entries.sort(Comparator
+                .comparingInt((FertilizerSyncPacket.Entry entry) -> entry.pos().getX())
+                .thenComparingInt(entry -> entry.pos().getY())
+                .thenComparingInt(entry -> entry.pos().getZ()));
+    }
+
     @SuppressWarnings("null")
     @Override
     public CompoundTag save(@SuppressWarnings("null") CompoundTag tag, @SuppressWarnings("null") net.minecraft.core.HolderLookup.Provider provider) {
         ListTag listTag = new ListTag();
         
-        for (Map.Entry<GlobalPos, FertilizerType> entry : fertilizerMap.entrySet()) {
+        List<Map.Entry<GlobalPos, FertilizerType>> entries =
+                new ArrayList<>(fertilizerMap.entrySet());
+        entries.sort(Comparator
+                .comparing((Map.Entry<GlobalPos, FertilizerType> entry) ->
+                        entry.getKey().dimension().location().toString())
+                .thenComparingInt(entry -> entry.getKey().pos().getX())
+                .thenComparingInt(entry -> entry.getKey().pos().getY())
+                .thenComparingInt(entry -> entry.getKey().pos().getZ()));
+        for (Map.Entry<GlobalPos, FertilizerType> entry : entries) {
             CompoundTag entryTag = new CompoundTag();
             
             GlobalPos gPos = entry.getKey();
@@ -284,9 +306,10 @@ public class FertilizerManager extends SavedData {
                     BlockPos pos = NbtUtils.readBlockPos(entryTag, "pos").orElseThrow();
                     String typeName = entryTag.getString("type");
                     
-                    FertilizerType type = FertilizerType.valueOf(
-                            typeName.toUpperCase()
-                    );
+                    FertilizerType type = FertilizerType.bySerializedName(typeName);
+                    if (type == null) {
+                        continue;
+                    }
                     
                     @SuppressWarnings("null")
                     GlobalPos globalPos = GlobalPos.of(dimKey, pos);

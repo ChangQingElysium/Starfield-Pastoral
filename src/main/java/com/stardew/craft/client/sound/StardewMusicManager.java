@@ -137,6 +137,8 @@ public final class StardewMusicManager {
 
     /** When true, the cutscene system owns the music — skip evaluateAndPlay(). */
     private static boolean cutsceneOverride = false;
+    private static boolean oneShotCutsceneMusic = false;
+    private static int oneShotCutsceneTicks = 0;
 
     /**
      * Play a track for a cutscene event. Registers as currentMusic so stopAll() works,
@@ -145,8 +147,22 @@ public final class StardewMusicManager {
     public static void playForCutscene(SoundEvent event) {
         stopAll();
         cutsceneOverride = true;
+        oneShotCutsceneMusic = false;
         Minecraft mc = Minecraft.getInstance();
         StardewMusicInstance instance = new StardewMusicInstance(event);
+        currentMusic = instance;
+        currentTrackEvent = event;
+        mc.getSoundManager().play(instance);
+    }
+
+    /** Plays a non-looping cutscene track, then returns music control to the location manager. */
+    public static void playOneShotForCutscene(SoundEvent event) {
+        stopAll();
+        cutsceneOverride = true;
+        oneShotCutsceneMusic = true;
+        oneShotCutsceneTicks = 0;
+        Minecraft mc = Minecraft.getInstance();
+        StardewMusicInstance instance = new StardewMusicInstance(event, false);
         currentMusic = instance;
         currentTrackEvent = event;
         mc.getSoundManager().play(instance);
@@ -155,10 +171,13 @@ public final class StardewMusicManager {
     public static void stopForCutsceneSilence() {
         stopCurrentMusicInstances();
         cutsceneOverride = true;
+        oneShotCutsceneMusic = false;
     }
 
     public static void releaseCutsceneOverride() {
         cutsceneOverride = false;
+        oneShotCutsceneMusic = false;
+        oneShotCutsceneTicks = 0;
         tickCounter = CHECK_INTERVAL - 1;
     }
 
@@ -258,8 +277,22 @@ public final class StardewMusicManager {
         tickFadeOut();
         tickFadeIn();
 
-        // Don't override cutscene music
-        if (cutsceneOverride) return;
+        // Don't override cutscene music. A one-shot cue releases ownership as soon as
+        // Minecraft's sound engine reports that its channel has naturally ended.
+        if (cutsceneOverride) {
+            if (oneShotCutsceneMusic) {
+                oneShotCutsceneTicks++;
+                if (oneShotCutsceneTicks > 2
+                        && (currentMusic == null || !mc.getSoundManager().isActive(currentMusic))) {
+                    currentMusic = null;
+                    currentTrackEvent = null;
+                    releaseCutsceneOverride();
+                }
+            }
+            if (cutsceneOverride) {
+                return;
+            }
+        }
 
         tickSewerAmbient(mc);
         tickCasinoAmbient(mc);
@@ -277,6 +310,8 @@ public final class StardewMusicManager {
      */
     public static void stopAll() {
         cutsceneOverride = false;
+        oneShotCutsceneMusic = false;
+        oneShotCutsceneTicks = 0;
         musicDuckTicks = 0;
         stopCurrentMusicInstances();
         // 清除所有唱片机播放
@@ -669,7 +704,13 @@ public final class StardewMusicManager {
                 COMMUNITY_CENTER_LENGTH,
                 COMMUNITY_CENTER_Z_STRIDE
         )) {
-            return new InteriorTrackChoice(ModSounds.MUSIC_COMMUNITY_CENTER.get());
+            // Vanilla CommunityCenter.resetLocalState only starts the ruined-building
+            // ambient cue while at least one area remains incomplete. Once refurbished,
+            // the interior is silent instead of continuing the wind/creaking loop.
+            boolean refurbished = com.stardew.craft.communitycenter.network.BundleClientData
+                    .INSTANCE.isInteriorRefurbished();
+            return new InteriorTrackChoice(
+                    refurbished ? null : ModSounds.MUSIC_COMMUNITY_CENTER.get());
         }
         if (isInsideRepeatedZSlot(
                 x,
@@ -786,8 +827,13 @@ public final class StardewMusicManager {
 
         /** 背景音乐模式（跟随玩家）。 */
         public StardewMusicInstance(SoundEvent sound) {
+            this(sound, true);
+        }
+
+        /** Background music loops; restoration cues use the non-looping variant. */
+        private StardewMusicInstance(SoundEvent sound, boolean looping) {
             super(sound, SoundSource.MUSIC, SoundInstance.createUnseededRandom());
-            this.looping = true;
+            this.looping = looping;
             this.delay = 0;
             this.volume = 1.0f;
             this.pitch = 1.0f;

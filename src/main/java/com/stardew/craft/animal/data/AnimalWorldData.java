@@ -310,37 +310,6 @@ public class AnimalWorldData extends SavedData {
         return true;
     }
 
-    public boolean beginBuildingConstruction(
-            String buildingId,
-            int completionAbsDay
-    ) {
-        AnimalBuildingRecord record = buildings.get(buildingId);
-        if (record == null || !record.active()) {
-            return false;
-        }
-        record.beginConstruction(completionAbsDay);
-        setDirty();
-        return true;
-    }
-
-    public List<AnimalBuildingRecord> completeDueConstructions(
-            int currentAbsDay
-    ) {
-        ArrayList<AnimalBuildingRecord> completed =
-                new ArrayList<>();
-        for (AnimalBuildingRecord record : buildings.values()) {
-            if (record.completeConstruction(currentAbsDay)) {
-                checkpointPausedAnimals(
-                        record, currentAbsDay);
-                completed.add(record);
-            }
-        }
-        if (!completed.isEmpty()) {
-            setDirty();
-        }
-        return List.copyOf(completed);
-    }
-
     public boolean checkpointPausedAnimalsAt(
             String buildingId,
             int currentAbsDay
@@ -377,10 +346,8 @@ public class AnimalWorldData extends SavedData {
         for (AnimalBuildingRecord record : buildings.values()) {
             if (!record.dimensionId().equals(dimensionId)
                     || !record.active()
-                    || (record.validationState()
+                    || record.validationState()
                             != AnimalBuildingRecord.ValidationState.VALID
-                        && record.validationState()
-                            != AnimalBuildingRecord.ValidationState.CONSTRUCTING)
                     || !record.isStructuralCell(changedPos)) {
                 continue;
             }
@@ -596,10 +563,6 @@ public class AnimalWorldData extends SavedData {
         moved.setLastAutoFeedProcessedAbsDay(
                 existing.lastAutoFeedProcessedAbsDay());
         moved.markStructureValidated(existing.structureRevision());
-        if (existing.hasPendingConstruction()) {
-            moved.beginConstruction(
-                    existing.constructionCompletesAbsDay());
-        }
         moved.markRelocating();
 
         buildings.put(buildingId, moved);
@@ -712,10 +675,6 @@ public class AnimalWorldData extends SavedData {
         inactive.setLastAutoFeedProcessedAbsDay(
                 existing.lastAutoFeedProcessedAbsDay());
         inactive.markStructureValidated(existing.structureRevision());
-        if (existing.hasPendingConstruction()) {
-            inactive.beginConstruction(
-                    existing.constructionCompletesAbsDay());
-        }
         inactive.markRelocating();
         buildings.put(buildingId, inactive);
         setDirty();
@@ -822,11 +781,6 @@ public class AnimalWorldData extends SavedData {
             updated.setLastAutoFeedProcessedAbsDay(
                     existing.lastAutoFeedProcessedAbsDay());
             updated.markStructureValidated(existing.structureRevision() + 1L);
-            if (existing.hasPendingConstruction()) {
-                updated.beginConstruction(
-                        existing.constructionCompletesAbsDay());
-            }
-
             buildings.put(existing.buildingId(), updated);
             hayByOwner.putIfAbsent(owner, 0);
             clampHayToCapacity(owner);

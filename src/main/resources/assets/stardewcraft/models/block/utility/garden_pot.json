@@ -1,0 +1,34 @@
+{
+  "credit": "Made with Blockbench",
+  "texture_size": [64, 64],
+  "textures": {
+    "2": "stardewcraft:block/utility/garden_pot",
+    "particle": "stardewcraft:block/utility/garden_pot"
+  },
+  "elements": [
+    {
+      "from": [1.5, 0, 1.5],
+      "to": [14.5, 8, 14.5],
+      "faces": {
+        "north": {"uv": [4, 7, 7.25, 9], "texture": "#2"},
+        "east": {"uv": [7.5, 0, 10.75, 2], "texture": "#2"},
+        "south": {"uv": [7.5, 2.25, 10.75, 4.25], "texture": "#2"},
+        "west": {"uv": [7.5, 4.5, 10.75, 6.5], "texture": "#2"},
+        "up": {"uv": [7.25, 3.25, 4, 0], "texture": "#2"},
+        "down": {"uv": [7.25, 3.5, 4, 6.75], "texture": "#2"}
+      }
+    },
+    {
+      "from": [0.5, 8, 0.5],
+      "to": [15.5, 11, 15.5],
+      "faces": {
+        "north": {"uv": [7.5, 6.75, 11.25, 7.5], "texture": "#2"},
+        "east": {"uv": [7.5, 7.75, 11.25, 8.5], "texture": "#2"},
+        "south": {"uv": [0, 8, 3.75, 8.75], "texture": "#2"},
+        "west": {"uv": [7.5, 8.75, 11.25, 9.5], "texture": "#2"},
+        "up": {"uv": [3.75, 3.75, 0, 0], "texture": "#2"},
+        "down": {"uv": [3.75, 4, 0, 7.75], "texture": "#2"}
+      }
+    }
+  ]
+}

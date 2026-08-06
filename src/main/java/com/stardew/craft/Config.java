@@ -8,81 +8,26 @@ import java.util.Map;
 public final class Config {
     private static final ModConfigSpec.Builder COMMON_BUILDER = new ModConfigSpec.Builder();
     private static final ModConfigSpec.Builder CLIENT_BUILDER = new ModConfigSpec.Builder();
+    private static final ModConfigSpec.Builder SERVER_BUILDER = new ModConfigSpec.Builder();
 
     public static final Client CLIENT = new Client(CLIENT_BUILDER);
+    public static final Server SERVER = new Server(SERVER_BUILDER);
     public static final General GENERAL = new General(COMMON_BUILDER);
-    public static final TotemPole TOTEM_POLE = new TotemPole(COMMON_BUILDER);
-    public static final BuildingManager COOP_MANAGER = new BuildingManager(COMMON_BUILDER, "coopManager", "coop_manager",
-            new TierDefaults(4, 0, 1, 0, 216),
-            new TierDefaults(8, 0, 1, 1, 288),
-            new TierDefaults(0, 12, 1, 1, 360));
-    public static final BuildingManager BARN_MANAGER = new BuildingManager(COMMON_BUILDER, "barnManager", "barn_manager",
-            new TierDefaults(4, 0, 1, 0, 252),
-            new TierDefaults(8, 0, 1, 0, 336),
-            new TierDefaults(0, 12, 1, 0, 420));
     public static final Mining MINING = new Mining(COMMON_BUILDER);
     public static final Fishing FISHING = new Fishing(COMMON_BUILDER);
 
     public static final ModConfigSpec COMMON_SPEC = COMMON_BUILDER.build();
     public static final ModConfigSpec CLIENT_SPEC = CLIENT_BUILDER.build();
-    static final ModConfigSpec SPEC = COMMON_SPEC;
+    public static final ModConfigSpec SERVER_SPEC = SERVER_BUILDER.build();
 
     public static final ModConfigSpec.BooleanValue ENABLE_WEAPON_SPECIAL_EFFECTS = CLIENT.ENABLE_WEAPON_SPECIAL_EFFECTS;
     public static final ModConfigSpec.BooleanValue ENABLE_WEAPON_POST_EFFECTS = CLIENT.ENABLE_WEAPON_POST_EFFECTS;
-    public static final ModConfigSpec.BooleanValue ENABLE_UI_INFO_SUITE = CLIENT.ENABLE_UI_INFO_SUITE;
+    public static final ModConfigSpec.BooleanValue SHOW_MONSTER_HP_BAR = CLIENT.SHOW_MONSTER_HP_BAR;
 
-    public static final ModConfigSpec.IntValue MAX_STACK_SIZE = GENERAL.MAX_STACK_SIZE;
-    public static final ModConfigSpec.DoubleValue TIME_SPEED_MULTIPLIER = GENERAL.TIME_SPEED_MULTIPLIER;
-
-    public static final ModConfigSpec.BooleanValue TOTEM_POLE_ENFORCE_PLACEMENT_RULES = TOTEM_POLE.ENFORCE_PLACEMENT_RULES;
-
-    public static final ModConfigSpec.IntValue COOP_SCAN_RANGE_XZ = COOP_MANAGER.SCAN_RANGE_XZ;
-    public static final ModConfigSpec.IntValue COOP_SCAN_RANGE_UP = COOP_MANAGER.SCAN_RANGE_UP;
-    public static final ModConfigSpec.IntValue COOP_SCAN_RANGE_DOWN = COOP_MANAGER.SCAN_RANGE_DOWN;
-    public static final ModConfigSpec.BooleanValue COOP_REQUIRE_ENCLOSED = COOP_MANAGER.REQUIRE_ENCLOSED;
-    public static final ModConfigSpec.BooleanValue COOP_REQUIRE_DOOR = COOP_MANAGER.REQUIRE_DOOR;
-    public static final ModConfigSpec.IntValue COOP_MIN_DOOR_COUNT = COOP_MANAGER.MIN_DOOR_COUNT;
-    public static final ModConfigSpec.IntValue COOP_T1_FEED_TROUGH = COOP_MANAGER.TIER1.FEED_TROUGH;
-    public static final ModConfigSpec.IntValue COOP_T1_AUTOFEED_TROUGH = COOP_MANAGER.TIER1.AUTOFEED_TROUGH;
-    public static final ModConfigSpec.IntValue COOP_T1_HAY_HOPPER = COOP_MANAGER.TIER1.HAY_HOPPER;
-    public static final ModConfigSpec.IntValue COOP_T1_INCUBATOR = COOP_MANAGER.TIER1.INCUBATOR;
-    public static final ModConfigSpec.IntValue COOP_T1_MIN_INTERIOR_BLOCKS = COOP_MANAGER.TIER1.MIN_INTERIOR_BLOCKS;
-    public static final ModConfigSpec.IntValue COOP_T2_FEED_TROUGH = COOP_MANAGER.TIER2.FEED_TROUGH;
-    public static final ModConfigSpec.IntValue COOP_T2_AUTOFEED_TROUGH = COOP_MANAGER.TIER2.AUTOFEED_TROUGH;
-    public static final ModConfigSpec.IntValue COOP_T2_HAY_HOPPER = COOP_MANAGER.TIER2.HAY_HOPPER;
-    public static final ModConfigSpec.IntValue COOP_T2_INCUBATOR = COOP_MANAGER.TIER2.INCUBATOR;
-    public static final ModConfigSpec.IntValue COOP_T2_MIN_INTERIOR_BLOCKS = COOP_MANAGER.TIER2.MIN_INTERIOR_BLOCKS;
-    public static final ModConfigSpec.IntValue COOP_T3_FEED_TROUGH = COOP_MANAGER.TIER3.FEED_TROUGH;
-    public static final ModConfigSpec.IntValue COOP_T3_AUTOFEED_TROUGH = COOP_MANAGER.TIER3.AUTOFEED_TROUGH;
-    public static final ModConfigSpec.IntValue COOP_T3_HAY_HOPPER = COOP_MANAGER.TIER3.HAY_HOPPER;
-    public static final ModConfigSpec.IntValue COOP_T3_INCUBATOR = COOP_MANAGER.TIER3.INCUBATOR;
-    public static final ModConfigSpec.IntValue COOP_T3_MIN_INTERIOR_BLOCKS = COOP_MANAGER.TIER3.MIN_INTERIOR_BLOCKS;
-
-    public static final ModConfigSpec.IntValue BARN_SCAN_RANGE_XZ = BARN_MANAGER.SCAN_RANGE_XZ;
-    public static final ModConfigSpec.IntValue BARN_SCAN_RANGE_UP = BARN_MANAGER.SCAN_RANGE_UP;
-    public static final ModConfigSpec.IntValue BARN_SCAN_RANGE_DOWN = BARN_MANAGER.SCAN_RANGE_DOWN;
-    public static final ModConfigSpec.BooleanValue BARN_REQUIRE_ENCLOSED = BARN_MANAGER.REQUIRE_ENCLOSED;
-    public static final ModConfigSpec.BooleanValue BARN_REQUIRE_DOOR = BARN_MANAGER.REQUIRE_DOOR;
-    public static final ModConfigSpec.IntValue BARN_MIN_DOOR_COUNT = BARN_MANAGER.MIN_DOOR_COUNT;
-    public static final ModConfigSpec.IntValue BARN_T1_FEED_TROUGH = BARN_MANAGER.TIER1.FEED_TROUGH;
-    public static final ModConfigSpec.IntValue BARN_T1_AUTOFEED_TROUGH = BARN_MANAGER.TIER1.AUTOFEED_TROUGH;
-    public static final ModConfigSpec.IntValue BARN_T1_HAY_HOPPER = BARN_MANAGER.TIER1.HAY_HOPPER;
-    public static final ModConfigSpec.IntValue BARN_T1_INCUBATOR = BARN_MANAGER.TIER1.INCUBATOR;
-    public static final ModConfigSpec.IntValue BARN_T1_MIN_INTERIOR_BLOCKS = BARN_MANAGER.TIER1.MIN_INTERIOR_BLOCKS;
-    public static final ModConfigSpec.IntValue BARN_T2_FEED_TROUGH = BARN_MANAGER.TIER2.FEED_TROUGH;
-    public static final ModConfigSpec.IntValue BARN_T2_AUTOFEED_TROUGH = BARN_MANAGER.TIER2.AUTOFEED_TROUGH;
-    public static final ModConfigSpec.IntValue BARN_T2_HAY_HOPPER = BARN_MANAGER.TIER2.HAY_HOPPER;
-    public static final ModConfigSpec.IntValue BARN_T2_INCUBATOR = BARN_MANAGER.TIER2.INCUBATOR;
-    public static final ModConfigSpec.IntValue BARN_T2_MIN_INTERIOR_BLOCKS = BARN_MANAGER.TIER2.MIN_INTERIOR_BLOCKS;
-    public static final ModConfigSpec.IntValue BARN_T3_FEED_TROUGH = BARN_MANAGER.TIER3.FEED_TROUGH;
-    public static final ModConfigSpec.IntValue BARN_T3_AUTOFEED_TROUGH = BARN_MANAGER.TIER3.AUTOFEED_TROUGH;
-    public static final ModConfigSpec.IntValue BARN_T3_HAY_HOPPER = BARN_MANAGER.TIER3.HAY_HOPPER;
-    public static final ModConfigSpec.IntValue BARN_T3_INCUBATOR = BARN_MANAGER.TIER3.INCUBATOR;
-    public static final ModConfigSpec.IntValue BARN_T3_MIN_INTERIOR_BLOCKS = BARN_MANAGER.TIER3.MIN_INTERIOR_BLOCKS;
-
-    public static final ModConfigSpec.BooleanValue SHOW_MONSTER_HP_BAR = MINING.SHOW_MONSTER_HP_BAR;
-    public static final ModConfigSpec.DoubleValue MINE_LADDER_BASE_CHANCE = MINING.LADDER_BASE_CHANCE;
-    public static final ModConfigSpec.BooleanValue ENABLE_FISHING_MINIGAME = FISHING.ENABLE_MINIGAME;
+    public static final ModConfigSpec.DoubleValue TIME_SPEED_MULTIPLIER = SERVER.TIME_SPEED_MULTIPLIER;
+    public static final ModConfigSpec.BooleanValue ENABLE_FISHING_MINIGAME = SERVER.ENABLE_FISHING_MINIGAME;
+    public static final ModConfigSpec.BooleanValue ENABLE_UPDATE_CHECKS = SERVER.ENABLE_UPDATE_CHECKS;
+    public static final ModConfigSpec.BooleanValue SHOW_COMMUNITY_ANNOUNCEMENT = SERVER.SHOW_COMMUNITY_ANNOUNCEMENT;
 
     private Config() {
     }
@@ -90,7 +35,8 @@ public final class Config {
     public static final class Client {
         public final ModConfigSpec.BooleanValue ENABLE_WEAPON_SPECIAL_EFFECTS;
         public final ModConfigSpec.BooleanValue ENABLE_WEAPON_POST_EFFECTS;
-        public final ModConfigSpec.BooleanValue ENABLE_UI_INFO_SUITE;
+        public final ModConfigSpec.BooleanValue SHOW_MONSTER_HP_BAR;
+        public final ModConfigSpec.BooleanValue LEGACY_COMMON_IMPORTED;
         public final ModConfigSpec.IntValue HUD_SCALE_PERCENT;
         public final ModConfigSpec.EnumValue<HudHorizontalAnchor> HUD_HORIZONTAL_ANCHOR;
         public final ModConfigSpec.EnumValue<HudVerticalAnchor> HUD_VERTICAL_ANCHOR;
@@ -110,11 +56,15 @@ public final class Config {
                     .translation("config.stardewcraft.client.weapon_post_effects")
                     .define("weaponPostEffects", true);
 
-            builder.push("uiInfoSuite");
-            ENABLE_UI_INFO_SUITE = builder
-                    .comment("Enable UI Info Suite features (Experience bars, tooltips, luck, NPC locations, etc.)")
-                    .translation("config.stardewcraft.client.ui_info_suite")
-                    .define("enabled", true);
+            SHOW_MONSTER_HP_BAR = builder
+                    .comment("Show monster name and HP bar above their heads in the mine")
+                    .translation("config.stardewcraft.client.show_monster_hp_bar")
+                    .define("showMonsterHpBar", true);
+
+            builder.push("migration");
+            LEGACY_COMMON_IMPORTED = builder
+                    .comment("Internal marker: player-facing values were imported from the legacy common config")
+                    .define("legacyCommonImported", false);
             builder.pop();
 
             builder.push("hud");
@@ -163,6 +113,48 @@ public final class Config {
                 builder.pop();
             }
             builder.pop();
+            builder.pop();
+        }
+    }
+
+    /** Settings owned by the logical server and stored with each world. */
+    public static final class Server {
+        public final ModConfigSpec.DoubleValue TIME_SPEED_MULTIPLIER;
+        public final ModConfigSpec.BooleanValue ENABLE_FISHING_MINIGAME;
+        public final ModConfigSpec.BooleanValue ENABLE_UPDATE_CHECKS;
+        public final ModConfigSpec.BooleanValue SHOW_COMMUNITY_ANNOUNCEMENT;
+        public final ModConfigSpec.BooleanValue LEGACY_COMMON_IMPORTED;
+
+        private Server(ModConfigSpec.Builder builder) {
+            builder.push("gameplay");
+            TIME_SPEED_MULTIPLIER = builder
+                    .comment("Stardew Valley clock speed multiplier.",
+                            "1.0 is the normal speed; fractional values are accumulated exactly.")
+                    .translation("config.stardewcraft.server.time_speed_multiplier")
+                    .defineInRange("timeSpeedMultiplier", 1.0D, 0.1D, 100.0D);
+            ENABLE_FISHING_MINIGAME = builder
+                    .comment("Enable the fishing minigame for fish catches.",
+                            "If disabled, fish are caught immediately after biting; non-fish catchables remain instant catches.")
+                    .translation("config.stardewcraft.server.enable_fishing_minigame")
+                    .define("enableFishingMinigame", true);
+            builder.pop();
+
+            builder.push("communications");
+            ENABLE_UPDATE_CHECKS = builder
+                    .comment("Check Modrinth asynchronously for newer Starfield Pastoral versions.")
+                    .translation("config.stardewcraft.server.enable_update_checks")
+                    .define("enableUpdateChecks", true);
+            SHOW_COMMUNITY_ANNOUNCEMENT = builder
+                    .comment("Show the community links announcement until each player dismisses it.",
+                            "Outdated-version warnings remain visible when update checks are enabled.")
+                    .translation("config.stardewcraft.server.show_community_announcement")
+                    .define("showCommunityAnnouncement", true);
+            builder.pop();
+
+            builder.push("migration");
+            LEGACY_COMMON_IMPORTED = builder
+                    .comment("Internal marker: gameplay values were imported from the legacy common config")
+                    .define("legacyCommonImported", false);
             builder.pop();
         }
     }
@@ -235,154 +227,37 @@ public final class Config {
     }
 
     public static final class General {
-        public final ModConfigSpec.IntValue MAX_STACK_SIZE;
-        public final ModConfigSpec.DoubleValue TIME_SPEED_MULTIPLIER;
+        public final ModConfigSpec.DoubleValue LEGACY_TIME_SPEED_MULTIPLIER;
 
         private General(ModConfigSpec.Builder builder) {
             builder.push("general");
-            MAX_STACK_SIZE = builder
-                    .comment("Maximum stack size for stackable items.",
-                            "Set to 64 to use vanilla behavior, or up to 999 for Stardew Valley parity.",
-                            "Requires restart to take full effect.")
-                    .translation("config.stardewcraft.general.max_stack_size")
-                    .defineInRange("maxStackSize", 999, 64, 999);
-            TIME_SPEED_MULTIPLIER = builder
-                    .comment("Stardew Valley clock speed multiplier.",
-                            "1.0 is the normal speed; fractional values are accumulated exactly.")
-                    .translation("config.stardewcraft.general.time_speed_multiplier")
+            LEGACY_TIME_SPEED_MULTIPLIER = builder
+                    .comment("Legacy value imported once into each world's server config.")
                     .defineInRange("timeSpeedMultiplier", 1.0D, 0.1D, 100.0D);
             builder.pop();
         }
     }
 
-    public static final class TotemPole {
-        public final ModConfigSpec.BooleanValue ENFORCE_PLACEMENT_RULES;
-
-        private TotemPole(ModConfigSpec.Builder builder) {
-            builder.push("totemPole");
-            ENFORCE_PLACEMENT_RULES = builder
-                    .comment("Restrict totem poles to Stardew Valley and their configured placement areas")
-                    .translation("config.stardewcraft.totem_pole.enforce_placement_rules")
-                    .define("enforcePlacementRules", true);
-            builder.pop();
-        }
-    }
-
-    public static final class BuildingManager {
-        public final ModConfigSpec.IntValue SCAN_RANGE_XZ;
-        public final ModConfigSpec.IntValue SCAN_RANGE_UP;
-        public final ModConfigSpec.IntValue SCAN_RANGE_DOWN;
-        public final ModConfigSpec.BooleanValue REQUIRE_ENCLOSED;
-        public final ModConfigSpec.BooleanValue REQUIRE_DOOR;
-        public final ModConfigSpec.IntValue MIN_DOOR_COUNT;
-        public final Tier TIER1;
-        public final Tier TIER2;
-        public final Tier TIER3;
-
-        private BuildingManager(ModConfigSpec.Builder builder, String path, String translationSection,
-                                TierDefaults tier1, TierDefaults tier2, TierDefaults tier3) {
-            builder.push(path);
-            String prefix = "config.stardewcraft." + translationSection;
-
-            SCAN_RANGE_XZ = builder
-                    .comment("Horizontal scan range for building manager validation")
-                    .translation(prefix + ".scan_range_xz")
-                    .defineInRange("scanRangeXZ", 12, 4, 64);
-
-            SCAN_RANGE_UP = builder
-                    .comment("Vertical scan range above building manager")
-                    .translation(prefix + ".scan_range_up")
-                    .defineInRange("scanRangeUp", 12, 1, 32);
-
-            SCAN_RANGE_DOWN = builder
-                    .comment("Vertical scan range below building manager")
-                    .translation(prefix + ".scan_range_down")
-                    .defineInRange("scanRangeDown", 12, 0, 32);
-
-            REQUIRE_ENCLOSED = builder
-                    .comment("Whether building shell must be enclosed (walls + roof + floor)")
-                    .translation(prefix + ".require_enclosed")
-                    .define("requireEnclosed", true);
-
-            REQUIRE_DOOR = builder
-                    .comment("Whether building shell must contain door/fence gate on boundary")
-                    .translation(prefix + ".require_door")
-                    .define("requireDoor", true);
-
-            MIN_DOOR_COUNT = builder
-                    .comment("Minimum number of doors/fence gates required on building boundary")
-                    .translation(prefix + ".min_door_count")
-                    .defineInRange("minDoorCount", 1, 0, 8);
-
-            TIER1 = new Tier(builder, prefix, "tier1", tier1);
-            TIER2 = new Tier(builder, prefix, "tier2", tier2);
-            TIER3 = new Tier(builder, prefix, "tier3", tier3);
-            builder.pop();
-        }
-    }
-
-    public static final class Tier {
-        public final ModConfigSpec.IntValue FEED_TROUGH;
-        public final ModConfigSpec.IntValue AUTOFEED_TROUGH;
-        public final ModConfigSpec.IntValue HAY_HOPPER;
-        public final ModConfigSpec.IntValue INCUBATOR;
-        public final ModConfigSpec.IntValue MIN_INTERIOR_BLOCKS;
-
-        private Tier(ModConfigSpec.Builder builder, String prefix, String path, TierDefaults defaults) {
-            builder.push(path);
-            FEED_TROUGH = builder
-                    .translation(prefix + "." + path + ".feed_trough")
-                    .defineInRange("feedTrough", defaults.feedTrough(), 0, 64);
-            AUTOFEED_TROUGH = builder
-                    .translation(prefix + "." + path + ".autofeed_trough")
-                    .defineInRange("autofeedTrough", defaults.autofeedTrough(), 0, 64);
-            HAY_HOPPER = builder
-                    .translation(prefix + "." + path + ".hay_hopper")
-                    .defineInRange("hayHopper", defaults.hayHopper(), 0, 16);
-            INCUBATOR = builder
-                    .translation(prefix + "." + path + ".incubator")
-                    .defineInRange("incubator", defaults.incubator(), 0, 16);
-            MIN_INTERIOR_BLOCKS = builder
-                    .translation(prefix + "." + path + ".min_interior_blocks")
-                    .defineInRange("minInteriorBlocks", defaults.minInteriorBlocks(), 1, 4096);
-            builder.pop();
-        }
-    }
-
-    private record TierDefaults(int feedTrough, int autofeedTrough, int hayHopper, int incubator,
-                                int minInteriorBlocks) {
-    }
-
     public static final class Mining {
-        public final ModConfigSpec.BooleanValue SHOW_MONSTER_HP_BAR;
-        public final ModConfigSpec.DoubleValue LADDER_BASE_CHANCE;
+        public final ModConfigSpec.BooleanValue LEGACY_SHOW_MONSTER_HP_BAR;
 
         private Mining(ModConfigSpec.Builder builder) {
             builder.push("mining");
-            SHOW_MONSTER_HP_BAR = builder
-                    .comment("Show monster name and HP bar above their heads in the mine")
-                    .translation("config.stardewcraft.mining.show_monster_hp_bar")
+            LEGACY_SHOW_MONSTER_HP_BAR = builder
+                    .comment("Legacy value imported once into the client config.")
                     .define("showMonsterHpBar", true);
 
-            LADDER_BASE_CHANCE = builder
-                    .comment("Base chance for a mine ladder to appear after breaking a countable mine stone.",
-                            "The final chance also includes stones-left, luck, enemy-clear, and buff modifiers.",
-                            "The Stardew Valley base value is 0.02 (2%).")
-                    .translation("config.stardewcraft.mining.ladder_base_chance")
-                    .defineInRange("ladderBaseChance", 0.02D, 0.0D, 1.0D);
             builder.pop();
         }
     }
 
     public static final class Fishing {
-        public final ModConfigSpec.BooleanValue ENABLE_MINIGAME;
+        public final ModConfigSpec.BooleanValue LEGACY_ENABLE_MINIGAME;
 
         private Fishing(ModConfigSpec.Builder builder) {
             builder.push("fishing");
-            ENABLE_MINIGAME = builder
-                    .comment("Enable the fishing minigame for fish catches.",
-                            "If disabled, fish are caught immediately after biting; non-fish catchables still behave as instant catches.")
-                    .translation("config.stardewcraft.fishing.enable_minigame")
+            LEGACY_ENABLE_MINIGAME = builder
+                    .comment("Legacy value imported once into each world's server config.")
                     .define("enableMinigame", true);
             builder.pop();
         }

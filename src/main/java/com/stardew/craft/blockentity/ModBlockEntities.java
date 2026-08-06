@@ -47,6 +47,9 @@ public final class ModBlockEntities {
 	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MushroomBoxBlockEntity>> MUSHROOM_BOX =
 			BLOCK_ENTITIES.register("mushroom_box", () -> BlockEntityType.Builder.of(MushroomBoxBlockEntity::new, ModBlocks.MUSHROOM_BOX.get()).build(null));
 
+	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<GardenPotBlockEntity>> GARDEN_POT =
+			BLOCK_ENTITIES.register("garden_pot", () -> BlockEntityType.Builder.of(GardenPotBlockEntity::new, ModBlocks.GARDEN_POT.get()).build(null));
+
 	@SuppressWarnings("null")
 	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<KegBlockEntity>> KEG =
 			BLOCK_ENTITIES.register("keg", () -> BlockEntityType.Builder.of(KegBlockEntity::new, ModBlocks.KEG.get()).build(null));

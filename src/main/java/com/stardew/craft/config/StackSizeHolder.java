@@ -1,20 +1,16 @@
 package com.stardew.craft.config;
 
 /**
- * Runtime holder for the effective max stack size.
+ * Shared fixed stack-size policy used by regular code and mixins.
  *
  * <p>This lives outside the mixin package so regular mod code and mixins can
  * both reference it safely on NeoForge and hybrid servers such as Mohist.</p>
  */
 public final class StackSizeHolder {
-    private static volatile int maxStackSize = 999;
+    private static final int MAX_STACK_SIZE = 999;
 
     public static int get() {
-        return maxStackSize;
-    }
-
-    public static void set(int value) {
-        maxStackSize = Math.max(1, Math.min(999, value));
+        return MAX_STACK_SIZE;
     }
 
     private StackSizeHolder() {

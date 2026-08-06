@@ -43,6 +43,9 @@ public class DeadCropBlock extends BushBlock {
     @SuppressWarnings("null")
     @Override
     public VoxelShape getShape(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") BlockGetter level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") CollisionContext context) {
+        if (com.stardew.craft.block.utility.GardenPotBlock.isPottedPlant(level, pos, state)) {
+            return net.minecraft.world.phys.shapes.Shapes.empty();
+        }
         VoxelShape[] shapes = getVariantShapes(state);
         int variant = state.getValue(VARIANT);
         variant = Math.max(0, Math.min(3, variant));

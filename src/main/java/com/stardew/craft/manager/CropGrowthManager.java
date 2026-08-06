@@ -409,7 +409,10 @@ public class CropGrowthManager extends SavedData {
                                 // SDV parity: 非农场区域的耕地过夜恢复为泥土
                                 // 仅当上方没有作物 / forage 时才恢复（有作物或采集物说明是合法种植区，可保土）
                                 // 温室内部豁免 — 温室是合法种植区域
-                                if (com.stardew.craft.core.FarmAreaResolver.isInStardewButNotFarm(level, realPos)
+                                boolean permanentContainer = state.getBlock()
+                                        instanceof com.stardew.craft.block.utility.GardenPotBlock;
+                                if (!permanentContainer
+                                    && com.stardew.craft.core.FarmAreaResolver.isInStardewButNotFarm(level, realPos)
                                     && !com.stardew.craft.greenhouse.GreenhouseManager.isInGreenhouseInterior(level, realPos)) {
                                     BlockState above = level.getBlockState(realPos.above());
                                     if (!isSoilProtectingBlock(level, realPos.above(), above)) {
@@ -424,7 +427,8 @@ public class CropGrowthManager extends SavedData {
                                 // SDV parity: 农场区域的空耕地每日 10% 概率回退为黄土
                                 // SDV GameLocation.GetDirtDecayChance: Farm/IslandWest → 0.1
                                 // 温室 0%（已在上面豁免），有作物 / forage 不衰退
-                                if (!com.stardew.craft.core.FarmAreaResolver.isInStardewButNotFarm(level, realPos)
+                                if (!permanentContainer
+                                    && !com.stardew.craft.core.FarmAreaResolver.isInStardewButNotFarm(level, realPos)
                                     && !com.stardew.craft.greenhouse.GreenhouseManager.isInGreenhouseInterior(level, realPos)) {
                                     BlockState above = level.getBlockState(realPos.above());
                                     if (!isSoilProtectingBlock(level, realPos.above(), above)

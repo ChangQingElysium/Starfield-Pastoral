@@ -40,6 +40,12 @@ public interface IBuildingManagerMenu {
     boolean hasExistingBuilding();
     int getBoundAnimalCount();
 
+    default boolean isRevalidating() {
+        return hasExistingBuilding()
+                && getTargetTier() > 0
+                && getTargetTier() == getCurrentTier();
+    }
+
     /** Returns "coop" or "barn". */
     String buildingFamily();
 }

@@ -1,13 +1,11 @@
 package com.stardew.craft.animal.service;
 
 import com.stardew.craft.StardewCraft;
-import com.stardew.craft.animal.data.AnimalWorldData;
 import com.stardew.craft.animal.model.AnimalBuildingTierDefinition;
 import com.stardew.craft.animal.model.AnimalBuildingType;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import com.stardew.craft.time.StardewTimeManager;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -17,18 +15,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-/** Atomic payment and persistent scheduling for Coop/Barn construction. */
+/** Atomic payment and immediate activation for Coop/Barn construction. */
 public final class AnimalBuildingConstructionService {
     private AnimalBuildingConstructionService() {
     }
 
     public record StartResult(
             boolean started,
-            String buildingId,
-            int completionAbsDay
+            String buildingId
     ) {
         private static StartResult failed() {
-            return new StartResult(false, "", -1);
+            return new StartResult(false, "");
         }
     }
 
@@ -37,7 +34,6 @@ public final class AnimalBuildingConstructionService {
      * blueprint transaction. Upgrades charge their own source-defined cost.
      */
     public static StartResult start(
-            ServerLevel level,
             ServerPlayer player,
             AnimalBuildingType targetType,
             boolean paymentAlreadyHandled,
@@ -62,18 +58,11 @@ public final class AnimalBuildingConstructionService {
                     exception);
             return StartResult.failed();
         }
-        int completionAbsDay =
-                currentAbsoluteDay() + definition.buildDays();
-        if (buildingId == null || buildingId.isBlank()
-                || !AnimalWorldData.get(level)
-                        .beginBuildingConstruction(
-                                buildingId,
-                                completionAbsDay)) {
+        if (buildingId == null || buildingId.isBlank()) {
             refund(player, receipt);
             return StartResult.failed();
         }
-        return new StartResult(
-                true, buildingId, completionAbsDay);
+        return new StartResult(true, buildingId);
     }
 
     private static Receipt charge(

@@ -2,6 +2,7 @@ package com.stardew.craft.event;
 
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.block.ModBlocks;
+import com.stardew.craft.block.utility.GardenPotBlock;
 import com.stardew.craft.core.ModDimensions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
@@ -39,8 +40,13 @@ public class FarmlandEventHandler {
         if (event.isCanceled()) return;
         if (event.getLevel().isClientSide()) return;
         if (!(event.getState().getBlock() instanceof FarmBlock)) return;
+        // The Garden Pot inherits FarmBlock for moisture support, but it is not terrain.
+        if (event.getState().getBlock() instanceof GardenPotBlock) return;
         if (!(event.getLevel() instanceof net.minecraft.world.level.Level level)) return;
         if (level.dimension() != ModDimensions.STARDEW_VALLEY) return;
+
+        // Creative breaking must follow vanilla semantics: remove the block without any drop.
+        if (event.getPlayer().isCreative()) return;
 
         BlockPos pos = event.getPos();
 

@@ -1,6 +1,5 @@
 package com.stardew.craft.mining;
 
-import com.stardew.craft.Config;
 import com.stardew.craft.effect.ModMobEffects;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import net.minecraft.server.level.ServerPlayer;
@@ -41,9 +40,9 @@ public class LadderProbabilityCalculator {
             return 1.0;
         }
         
-    // 基础概率：config + 1/max(1, stonesLeft) + luckLevel/100 + dailyLuck/5
-    double baseProbability = Config.MINE_LADDER_BASE_CHANCE.get();
-    baseProbability += 1.0 / Math.max(1, stonesLeft);
+        // SDV MineShaft base chance: 0.02 + remaining-stone and luck modifiers.
+        double baseProbability = 0.02D;
+        baseProbability += 1.0 / Math.max(1, stonesLeft);
         baseProbability += luckLevel / 100.0;
         baseProbability += dailyLuck / 5.0;
         

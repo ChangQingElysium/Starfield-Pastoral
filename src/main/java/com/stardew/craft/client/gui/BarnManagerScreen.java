@@ -113,6 +113,10 @@ public class BarnManagerScreen extends AbstractContainerScreen<BarnManagerMenu> 
     }
 
     private Component getActionLabel() {
+        if (menu.isRevalidating()) {
+            return Component.translatable(
+                    "gui.stardew_craft.animal_manager.revalidate");
+        }
         if (menu.isAtMaxTier()) {
             return Component.translatable("gui.stardew_craft.barn_manager.max");
         }

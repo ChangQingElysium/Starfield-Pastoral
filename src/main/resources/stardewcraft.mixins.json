@@ -47,7 +47,9 @@
     "ClientWeatherPacketMixin",
     "MultiPlayerGameModeInteractionMixin",
     "AbstractContainerScreenSlotHitMixin",
-    "DoorBlockMasteryCollisionClientMixin"
+    "DoorBlockMasteryCollisionClientMixin",
+    "GardenPotCropRenderMixin",
+    "GardenPotVanillaCropShapeMixin"
   ],
   "injectors": {
     "defaultRequire": 1
