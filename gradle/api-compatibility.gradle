@@ -267,7 +267,6 @@ def checkApiMaturityReview = tasks.register(
     inputs.file(layout.projectDirectory.file(
         'compatibility/verify_api_maturity_review.py'))
     inputs.dir(layout.projectDirectory.dir('src/main/java'))
-    inputs.dir(layout.projectDirectory.dir('src/test'))
     inputs.dir(layout.projectDirectory.dir('docs'))
     inputs.dir(layout.projectDirectory.dir('examples'))
     commandLine(

@@ -20,9 +20,11 @@ break and must not be used to bypass the check.
 `api-maturity-review-v1.tsv` records one decision for every type in the
 experimental manifest. Its evidence columns are deliberately narrow: they
 show direct symbol references from core runtime code, the independent sample,
-tests and documentation. Missing evidence keeps that type experimental. Even
-when all four columns are present, promotion still requires the release-grade
-runtime and second-consumer evidence described by the roadmap.
+published tests and documentation. Java tests under `src/test` are local-only,
+so they do not count as published maturity evidence. Missing evidence keeps a
+type experimental. Even when all four columns are present, promotion still
+requires the release-grade runtime and second-consumer evidence described by
+the roadmap.
 
 The normal `check` lifecycle runs:
 

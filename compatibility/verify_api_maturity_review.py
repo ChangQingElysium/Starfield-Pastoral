@@ -54,14 +54,16 @@ def collect_evidence(project_root: Path, types: list[str]) -> dict[str, Evidence
     sample_paths = list(
         (project_root / "examples/stardewcraft-addon").rglob("*.java")
     )
-    test_paths = list((project_root / "src/test").rglob("*.java"))
     doc_paths = list((project_root / "docs").rglob("*.md"))
     doc_paths.extend((project_root / "examples").rglob("README.md"))
 
     areas = {
         "core": _read_symbols(core_paths),
         "sample": _read_symbols(sample_paths),
-        "test": _read_symbols(test_paths),
+        # Java tests are intentionally local-only and are not part of the
+        # reproducible release tree, so they cannot count as published API
+        # maturity evidence.
+        "test": set(),
         "doc": _read_symbols(doc_paths),
     }
     evidence: dict[str, Evidence] = {}

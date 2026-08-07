@@ -53,6 +53,7 @@ docs/*
 
 # local reference and scratch work
 源文件/
+/src/test/
 net/
 .claude/settings.local.json
 .vscode/
