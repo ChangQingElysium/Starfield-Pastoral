@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.stardew.craft.client.gui.common.StardewConfirmDialogScreen;
 import com.stardew.craft.client.gui.common.StardewQuestionDialogSpec;
 import com.stardew.craft.cutscene.runtime.EventPlayer;
+import com.stardew.craft.network.payload.OpenNpcDialogueScreenPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.neoforged.api.distmarker.Dist;
@@ -53,19 +54,33 @@ public class QuestionCommand implements EventCommand {
         chosenCommands = null;
         subIndex = 0;
 
+        Minecraft minecraft = Minecraft.getInstance();
+        String playerName = minecraft.player == null
+                ? "player"
+                : minecraft.player.getName().getString();
         List<Component> responses = new ArrayList<>(branches.size());
         for (ChoiceBranch b : branches) {
-            responses.add(Component.translatable(b.text()));
+            responses.add(resolveText(b.text(), playerName));
         }
 
         StardewQuestionDialogSpec spec = StardewQuestionDialogSpec.of(
-                Component.translatable(questionText),
+                resolveText(questionText, playerName),
                 responses,
                 index -> onChoiceSelected(index, player),
                 -1
         );
 
-        Minecraft.getInstance().setScreen(StardewConfirmDialogScreen.createQuestionDialog(spec));
+        minecraft.setScreen(StardewConfirmDialogScreen.createQuestionDialog(spec));
+    }
+
+    private static Component resolveText(String text, String playerName) {
+        String translated = text.startsWith("stardewcraft.")
+                || text.startsWith("event.")
+                || text.startsWith("message.")
+                ? OpenNpcDialogueScreenPayload.rawTranslation(text)
+                : text;
+        return Component.literal(OpenNpcDialogueScreenPayload.resolvePlayerDialogueText(
+                translated, playerName));
     }
 
     private void onChoiceSelected(int choiceIndex, EventPlayer player) {

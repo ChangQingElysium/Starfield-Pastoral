@@ -73,7 +73,8 @@ public final class FertilizerOverlayRenderer {
                         return;
                     }
                     BlockState state = level.getBlockState(pos);
-                    if (!(state.getBlock() instanceof FarmBlock)) {
+                    if (!(state.getBlock() instanceof FarmBlock)
+                            || state.getBlock() instanceof GardenPotBlock) {
                         return;
                     }
 
@@ -93,6 +94,28 @@ public final class FertilizerOverlayRenderer {
                 buffers.endBatch(RENDER_TYPES.get(type));
             }
         }
+    }
+
+    /** Garden pots render as block entities, so their fertilizer decal must share that pass. */
+    public static void renderGardenPotOverlay(
+            PoseStack poseStack,
+            MultiBufferSource buffer,
+            FertilizerType type,
+            int packedLight
+    ) {
+        if (type == null) {
+            return;
+        }
+        VertexConsumer consumer = buffer.getBuffer(RENDER_TYPES.get(type));
+        PoseStack.Pose pose = poseStack.last();
+        float min = GARDEN_POT_SOIL_MIN;
+        float max = GARDEN_POT_SOIL_MAX;
+        float y = GARDEN_POT_SOIL_TOP + SURFACE_OFFSET;
+
+        addVertex(consumer, pose, min, y, min, 0.0F, 0.0F, packedLight);
+        addVertex(consumer, pose, min, y, max, 0.0F, 1.0F, packedLight);
+        addVertex(consumer, pose, max, y, max, 1.0F, 1.0F, packedLight);
+        addVertex(consumer, pose, max, y, min, 1.0F, 0.0F, packedLight);
     }
 
     private static boolean isChunkVisible(
@@ -119,22 +142,16 @@ public final class FertilizerOverlayRenderer {
             BlockPos pos,
             Vec3 cameraPos
     ) {
-        boolean gardenPot = level.getBlockState(pos).getBlock() instanceof GardenPotBlock;
-        float min = gardenPot ? GARDEN_POT_SOIL_MIN : 0.0F;
-        float max = gardenPot ? GARDEN_POT_SOIL_MAX : 1.0F;
-        float x = (float) (pos.getX() + min - cameraPos.x);
-        float y = (float) (pos.getY()
-                + (gardenPot ? GARDEN_POT_SOIL_TOP : FARMLAND_TOP)
-                + SURFACE_OFFSET - cameraPos.y);
-        float z = (float) (pos.getZ() + min - cameraPos.z);
-        float size = max - min;
+        float x = (float) (pos.getX() - cameraPos.x);
+        float y = (float) (pos.getY() + FARMLAND_TOP + SURFACE_OFFSET - cameraPos.y);
+        float z = (float) (pos.getZ() - cameraPos.z);
         int packedLight = LevelRenderer.getLightColor(level, pos.above());
         PoseStack.Pose pose = poseStack.last();
 
         addVertex(consumer, pose, x, y, z, 0.0F, 0.0F, packedLight);
-        addVertex(consumer, pose, x, y, z + size, 0.0F, 1.0F, packedLight);
-        addVertex(consumer, pose, x + size, y, z + size, 1.0F, 1.0F, packedLight);
-        addVertex(consumer, pose, x + size, y, z, 1.0F, 0.0F, packedLight);
+        addVertex(consumer, pose, x, y, z + 1.0F, 0.0F, 1.0F, packedLight);
+        addVertex(consumer, pose, x + 1.0F, y, z + 1.0F, 1.0F, 1.0F, packedLight);
+        addVertex(consumer, pose, x + 1.0F, y, z, 1.0F, 0.0F, packedLight);
     }
 
     private static void addVertex(

@@ -8,12 +8,12 @@
   },
 
   "GreenRain": {
-    "0": "saloon @pam_saloon_seat 2"
+    "0": "saloon @pam_saloon_green_rain 2"
   },
 
   "SquidFest": {
     "800": "trailer @pam_trailer_couch 2 pam_sit_down",
-    "1100": "beach @willy_beach_evening 2",
+    "1100": "beach @pam_beach_squidfest 2 dialogue:stardewcraft.npc.schedule.pam.squidfest",
     "2200": "trailer @pam_trailer_sleep 2 pam_sleep"
   },
 
@@ -31,8 +31,8 @@
 
   "spring_25": {
     "800": "trailer @pam_trailer_couch 2 pam_sit_down",
-    "1130": "hospital @abigail_clinic_indoor_stay 2 pam_sit_down",
-    "1330": "hospital @harvey_clinic_lobby 1",
+    "1130": "hospital @pam_hospital_waiting 2 dialogue:stardewcraft.npc.schedule.pam.spring_25.000 pam_sit_down",
+    "1330": "hospital @pam_hospital_exam 1 dialogue:stardewcraft.npc.schedule.pam.spring_25.001",
     "1600": "saloon @pam_saloon_seat 1",
     "2400": "trailer @pam_trailer_sleep 2 pam_sleep"
   },
@@ -46,13 +46,13 @@
 
   "spring": {
     "800": "trailer @pam_trailer_couch 2 pam_sit_down",
-    "1200": "jojamart @joja_mart_indoor_entry 1",
+    "1200": "jojamart @pam_jojamart_visit 1",
     "1600": "saloon @pam_saloon_seat 1",
     "2400": "trailer @pam_trailer_sleep 2 pam_sleep"
   },
 
   "JojaMart_Replacement": {
-    "800": "seedshop @seedshop_indoor_entry 3"
+    "800": "seedshop @pam_seedshop_replacement 3"
   },
 
   "default": {

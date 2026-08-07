@@ -1191,6 +1191,12 @@ public class PacketHandler {
             com.stardew.craft.network.payload.RequestNpcFriendshipOverviewPayload::handle
         );
 
+        registrar.playToServer(
+            com.stardew.craft.network.payload.RequestAnimalOverviewPayload.TYPE,
+            com.stardew.craft.network.payload.RequestAnimalOverviewPayload.STREAM_CODEC,
+            com.stardew.craft.network.payload.RequestAnimalOverviewPayload::handle
+        );
+
         registrar.playToClient(
             com.stardew.craft.network.payload.OpenSleepConfirmScreenPayload.TYPE,
             com.stardew.craft.network.payload.OpenSleepConfirmScreenPayload.STREAM_CODEC,
@@ -1334,6 +1340,12 @@ public class PacketHandler {
             com.stardew.craft.network.payload.SyncNpcFriendshipOverviewPayload.TYPE,
             com.stardew.craft.network.payload.SyncNpcFriendshipOverviewPayload.STREAM_CODEC,
             com.stardew.craft.network.payload.SyncNpcFriendshipOverviewPayload::handle
+        );
+
+        registrar.playToClient(
+            com.stardew.craft.network.payload.SyncAnimalOverviewPayload.TYPE,
+            com.stardew.craft.network.payload.SyncAnimalOverviewPayload.STREAM_CODEC,
+            com.stardew.craft.network.payload.SyncAnimalOverviewPayload::handle
         );
 
         registrar.playToClient(

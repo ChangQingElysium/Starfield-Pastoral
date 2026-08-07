@@ -285,7 +285,7 @@ public final class FestivalOfIceService {
         }
         ShopRegistry.ShopDefinition shop = ShopRegistry.get(SHOP_ID);
         if (shop == null) {
-            player.displayClientMessage(Component.literal("Unknown shopId: " + SHOP_ID), true);
+            com.stardew.craft.StardewCraft.LOGGER.warn("Unknown festival shop id: {}", SHOP_ID);
             return false;
         }
         List<ShopItemEntry> items = ShopRegistry.getFilteredItemsForPlayer(SHOP_ID, shop, player);

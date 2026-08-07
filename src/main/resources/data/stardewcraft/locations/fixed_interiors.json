@@ -3,7 +3,7 @@
     { "id": "pierre_house", "ledger_id": "music_region_pierre_house", "min": [16, 35, -44], "max": [60, 40, -7], "aliases": ["seedshop", "pierre_house", "pierreshop", "shop", "sunroom"], "properties": {"stardewcraft:music_profile": "stardewcraft:music_springtown"} },
     { "id": "museum", "ledger_id": "music_region_museum", "min": [108, 37, 29], "max": [178, 41, 56], "aliases": ["museum", "archaeologyhouse"], "properties": {"stardewcraft:music_profile": "stardewcraft:music_library"} },
     { "id": "blacksmith", "ledger_id": "music_region_blacksmith", "min": [100, 45, 11], "max": [115, 50, 31], "aliases": ["blacksmith"] },
-    { "id": "saloon", "ledger_id": "music_region_saloon", "min": [15, 35, -2], "max": [58, 40, 19], "aliases": ["saloon"], "properties": {"stardewcraft:music_profile": "stardewcraft:music_saloon", "stardewcraft:music_start_time": "1700"} },
+    { "id": "saloon", "ledger_id": "music_region_saloon", "min": [15, 35, -3], "max": [58, 40, 19], "aliases": ["saloon"], "properties": {"stardewcraft:music_profile": "stardewcraft:music_saloon", "stardewcraft:music_start_time": "1700"} },
     { "id": "auction_hall", "ledger_id": "music_region_auction_hall", "min": [56, 48, -9], "max": [78, 54, 9], "aliases": ["auction_hall", "lewis_auction"], "properties": {"stardewcraft:music_profile": "stardewcraft:music_jaunty"} },
     { "id": "mayor_house", "ledger_id": "music_region_mayor_house", "min": [48, 50, 20], "max": [74, 57, 32], "aliases": ["mayor_house", "manorhouse", "manor"] },
     { "id": "clinic", "ledger_id": "music_region_clinic", "min": [0, 43, -37], "max": [28, 51, -10], "aliases": ["clinic", "hospital"], "properties": {"stardewcraft:music_profile": "stardewcraft:music_distant_banjo"} },

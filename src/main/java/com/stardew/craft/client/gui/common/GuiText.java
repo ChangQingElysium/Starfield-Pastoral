@@ -20,12 +20,14 @@ public final class GuiText {
         if (font.width(text) <= maxWidth) {
             return text;
         }
-        String ellipsis = "…";
+        Component ellipsis = Component.literal("…").withStyle(text.getStyle());
         if (font.width(ellipsis) > maxWidth) {
             return Component.empty();
         }
         int contentWidth = Math.max(0, maxWidth - font.width(ellipsis));
-        return Component.literal(font.plainSubstrByWidth(text.getString(), contentWidth) + ellipsis);
+        String clipped = font.getSplitter().plainHeadByWidth(
+                text.getString(), contentWidth, text.getStyle());
+        return Component.literal(clipped + "…").withStyle(text.getStyle());
     }
 
     public static void drawCenteredClamped(GuiGraphics graphics, Font font, Component text,

@@ -3,6 +3,7 @@ package com.stardew.craft.client.gui;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.api.v1.agriculture.StardewAnimalPurchaseDisplay;
 import com.stardew.craft.api.v1.agriculture.StardewAnimalPurchaseDisplays;
+import com.stardew.craft.client.TemporaryGuiVisibility;
 import com.stardew.craft.client.gui.common.CommonGuiTextures;
 import com.stardew.craft.client.gui.common.SdvFontAdapter;
 import com.stardew.craft.client.gui.common.SdvTexture;
@@ -11,6 +12,7 @@ import com.stardew.craft.client.gui.overnight.StardewGuiUtil;
 import com.stardew.craft.client.hud.StardewHudMessageManager;
 import com.stardew.craft.network.payload.OpenAnimalPurchaseScreenPayload;
 import com.stardew.craft.sound.ModSounds;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -75,8 +77,6 @@ public final class AnimalPurchaseScreen extends Screen {
     private float closeScale = 1.0F;
     private OpenAnimalPurchaseScreenPayload.AnimalOption pendingAnimal;
     private long transitionStartedAtMs;
-    private boolean previousHideGui;
-    private boolean hudVisibilityCaptured;
 
     public AnimalPurchaseScreen(OpenAnimalPurchaseScreenPayload payload) {
         super(Component.translatable("container.stardew_craft.animal_purchase"));
@@ -292,19 +292,22 @@ public final class AnimalPurchaseScreen extends Screen {
         float textScale = SdvFontAdapter.scale(this.font,
             this.minecraft.getLanguageManager().getSelected(), effectiveScale,
             SdvFontAdapter.Style.SPRITE_TEXT);
-        int middleW = Math.max(1, Math.round(this.font.width(placeholder) * textScale));
+        Font spriteFont = SdvFontAdapter.font(SdvFontAdapter.Style.SPRITE_TEXT);
+        int middleW = Math.max(1, Math.round(spriteFont.width(placeholder) * textScale));
         int textX = centerX - middleW / 2;
         int bannerY = sourceTextY - Math.round(3 * s4());
         graphics.setColor(1.0F, 1.0F, 1.0F, alpha);
         CommonGuiTextures.drawScrollBanner(graphics, textX, bannerY, middleW, s4());
         graphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 
-        int shownWidth = SdvFontAdapter.width(this.font, text, textScale);
+        int shownWidth = SdvFontAdapter.width(this.font, text, textScale,
+            SdvFontAdapter.Style.SPRITE_TEXT);
         int shownX = centerX - shownWidth / 2;
         int renderedHeight = Math.max(1, Math.round(this.font.lineHeight * textScale));
         int textY = bannerY + (Math.round(18 * s4()) - renderedHeight) / 2;
         int color = ((Math.round(alpha * 255.0F) & 0xFF) << 24) | (TEXT_COLOR & 0xFFFFFF);
-        SdvFontAdapter.draw(graphics, this.font, text, shownX, textY, textScale, color);
+        SdvFontAdapter.draw(graphics, this.font, text, shownX, textY, textScale, color,
+            SdvFontAdapter.Style.SPRITE_TEXT);
     }
 
     private float effectiveGuiScale() {
@@ -441,19 +444,15 @@ public final class AnimalPurchaseScreen extends Screen {
     }
 
     private void captureHudVisibility() {
-        if (!this.hudVisibilityCaptured) {
-            this.previousHideGui = this.minecraft.options.hideGui;
-            this.hudVisibilityCaptured = true;
-        }
-        this.minecraft.options.hideGui = true;
+        TemporaryGuiVisibility.acquire(TemporaryGuiVisibility.Owner.ANIMAL_PURCHASE);
     }
 
     @Override
     public void removed() {
-        super.removed();
-        if (this.hudVisibilityCaptured) {
-            this.minecraft.options.hideGui = this.previousHideGui;
-            this.hudVisibilityCaptured = false;
+        try {
+            super.removed();
+        } finally {
+            TemporaryGuiVisibility.release(TemporaryGuiVisibility.Owner.ANIMAL_PURCHASE);
         }
     }
 

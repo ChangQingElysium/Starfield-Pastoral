@@ -3,6 +3,7 @@ package com.stardew.craft.client.gui;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.ClientPlayerDataCache;
 import com.stardew.craft.client.PlayerGenderText;
+import com.stardew.craft.client.font.StardewFonts;
 import com.stardew.craft.client.gui.common.CommonGuiTextures;
 import com.stardew.craft.client.gui.common.StardewRenderMapping;
 import com.stardew.craft.cooking.service.VanillaCookingRecipeData;
@@ -11,7 +12,9 @@ import com.stardew.craft.network.payload.CheckMailboxPayload;
 import com.stardew.craft.network.payload.OpenMailPayload;
 import com.stardew.craft.sound.ModSounds;
 import com.stardew.craft.player.StardewCraftingRecipeData;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -150,7 +153,7 @@ public class LetterViewerScreen extends Screen {
 
     /**
      * 将邮件文本按页面高度分割。
-     * 使用 MC font 按行高分页，模拟 SDV SpriteText 的分段。
+     * 使用 SDV SpriteText 的实际宽度和行高分页。
      */
     private void paginateText() {
         pages.clear();
@@ -196,7 +199,7 @@ public class LetterViewerScreen extends Screen {
 
             // 进一步按高度分割
             List<String> lines = wrapText(section, textW);
-            int linesPerPage = Math.max(1, textH / (font.lineHeight + 2));
+            int linesPerPage = Math.max(1, textH / letterLineStep(0.75F));
             StringBuilder page = new StringBuilder();
             int count = 0;
             for (String line : lines) {
@@ -289,8 +292,7 @@ public class LetterViewerScreen extends Screen {
     }
 
     private List<String> wrapText(String text, int maxWidth) {
-        // 用 MC 自带的 font.split —— 支持 CJK 字符逐字断行，空格断词，宽度溢出强制切。
-        // 之前手写按 " " 切的版本对中文整段无空格文本完全无效，会越界画出边框。
+        // StardewFont.split 使用从原版字体导出的 glyph advance，同时保留 CJK 逐字断行。
         List<String> result = new ArrayList<>();
         for (String rawLine : text.split("\n")) {
             if (rawLine.isEmpty()) {
@@ -298,7 +300,8 @@ public class LetterViewerScreen extends Screen {
                 continue;
             }
             for (net.minecraft.util.FormattedCharSequence seq :
-                    font.split(net.minecraft.network.chat.Component.literal(rawLine), maxWidth)) {
+                    letterFont().split(net.minecraft.network.chat.Component.literal(rawLine),
+                            Math.max(1, Math.round(maxWidth / spriteTextScale(0.75F))))) {
                 StringBuilder sb = new StringBuilder();
                 seq.accept((idx, style, codePoint) -> {
                     sb.appendCodePoint(codePoint);
@@ -379,9 +382,36 @@ public class LetterViewerScreen extends Screen {
         int textColor = getTextColor();
         int y = textY;
         for (String line : pageText.split("\n")) {
-            graphics.drawString(font, line, textX, y, textColor, false);
-            y += font.lineHeight + 2;
+            drawSpriteText(graphics, Component.literal(line), textX, y, 0.75F, textColor);
+            y += letterLineStep(0.75F);
         }
+    }
+
+    private Font letterFont() {
+        return StardewFonts.spriteTextColored();
+    }
+
+    private float spriteTextScale(float sourceScale) {
+        return mapping.textScale() * sourceScale;
+    }
+
+    private int letterLineStep(float sourceScale) {
+        return Math.max(1, Math.round(
+                StardewFonts.lineHeight(StardewFonts.Role.SPRITE_TEXT_COLORED)
+                        * spriteTextScale(sourceScale)));
+    }
+
+    private int spriteTextWidth(Component text, float sourceScale) {
+        return Math.round(letterFont().width(text) * spriteTextScale(sourceScale));
+    }
+
+    private void drawSpriteText(GuiGraphics graphics, Component text, int x, int y,
+                                float sourceScale, int color) {
+        graphics.pose().pushPose();
+        graphics.pose().translate(x, y, 0.0F);
+        graphics.pose().scale(spriteTextScale(sourceScale), spriteTextScale(sourceScale), 1.0F);
+        graphics.drawString(letterFont(), text, 0, 0, color, false);
+        graphics.pose().popPose();
     }
 
     private int getTextColor() {
@@ -421,7 +451,7 @@ public class LetterViewerScreen extends Screen {
         if (payload.money() > 0) {
             String moneyText = Component.translatable("stardewcraft.letter.money_included",
                     payload.money()).getString();
-            int tw = font.width(moneyText);
+            int tw = spriteTextWidth(Component.literal(moneyText), 0.75F);
             float iconScale = mapping.s4() * 0.6f;
             int iconW = (int)(GOLD_ICON_SIZE * iconScale);
             int totalW = tw + iconW + 4;
@@ -436,8 +466,8 @@ public class LetterViewerScreen extends Screen {
             graphics.pose().popPose();
 
             // 金额文字
-            graphics.drawString(font, moneyText, mx + iconW + 4, my, getTextColor(), false);
-            cursorY += Math.max(font.lineHeight, iconW) + 4;
+            drawSpriteText(graphics, Component.literal(moneyText), mx + iconW + 4, my, 0.75F, getTextColor());
+            cursorY += Math.max(letterLineStep(0.75F), iconW) + 4;
         }
 
         // 配方学习
@@ -447,8 +477,8 @@ public class LetterViewerScreen extends Screen {
                     : "stardewcraft.letter.learned_recipe_crafting";
             String line1 = Component.translatable(recipeTypeKey).getString();
             int centerX = letterX + letterW / 2;
-            drawCenteredNoShadow(graphics, Component.literal(line1), centerX, cursorY, getTextColor());
-            cursorY += font.lineHeight + 4;
+            drawCenteredNoShadow(graphics, Component.literal(line1), centerX, cursorY, 0.65F, getTextColor());
+            cursorY += letterLineStep(0.65F) + 4;
 
             ItemStack recipeOutput = getLearnedRecipeOutput();
             if (!recipeOutput.isEmpty()) {
@@ -456,11 +486,11 @@ public class LetterViewerScreen extends Screen {
                 int iconSize = Math.round(16 * iconScale);
                 CommonGuiTextures.drawItem(graphics, recipeOutput, centerX - iconSize / 2, cursorY, iconScale);
                 cursorY += iconSize + 3;
-                drawCenteredNoShadow(graphics, recipeOutput.getHoverName(), centerX, cursorY, getTextColor());
+                drawCenteredNoShadow(graphics, recipeOutput.getHoverName(), centerX, cursorY, 0.9F, getTextColor());
             } else {
-                drawCenteredNoShadow(graphics, Component.literal(payload.learnedRecipe()), centerX, cursorY, getTextColor());
+                drawCenteredNoShadow(graphics, Component.literal(payload.learnedRecipe()), centerX, cursorY, 0.9F, getTextColor());
             }
-            cursorY += font.lineHeight + 4;
+            cursorY += letterLineStep(0.9F) + 4;
         }
 
         // 物品附件 — SDV parity: 底部居中显示物品图标 + 数量
@@ -496,7 +526,7 @@ public class LetterViewerScreen extends Screen {
                     int iconY = slotY + (int)(4 * bgScale);
                     CommonGuiTextures.drawItem(graphics, stack, iconX, iconY, bgScale);
                     if (att.count() > 1) {
-                        CommonGuiTextures.drawItemDecorations(graphics, font, stack, iconX, iconY, bgScale);
+                        CommonGuiTextures.drawItemDecorations(graphics, StardewFonts.small(), stack, iconX, iconY, bgScale);
                     }
                 }
             }
@@ -522,12 +552,12 @@ public class LetterViewerScreen extends Screen {
         int totalHeight = 0;
         if (payload.money() > 0) {
             float iconScale = mapping.s4() * 0.6f;
-            totalHeight += Math.max(font.lineHeight, Math.round(GOLD_ICON_SIZE * iconScale)) + 4;
+            totalHeight += Math.max(letterLineStep(0.75F), Math.round(GOLD_ICON_SIZE * iconScale)) + 4;
         }
         if (!payload.learnedRecipe().isEmpty()) {
             ItemStack recipeOutput = getLearnedRecipeOutput();
             int iconSize = recipeOutput.isEmpty() ? 0 : Math.round(16 * Math.max(1.0f, mapping.s4()));
-            totalHeight += font.lineHeight + 4 + iconSize + 3 + font.lineHeight + 4;
+            totalHeight += letterLineStep(0.65F) + 4 + iconSize + 3 + letterLineStep(0.9F) + 4;
         }
         if (!payload.items().isEmpty()) {
             totalHeight += Math.round(24 * mapping.s4());
@@ -535,8 +565,10 @@ public class LetterViewerScreen extends Screen {
         return letterY + letterH - mapping.ui(48) - totalHeight;
     }
 
-    private void drawCenteredNoShadow(GuiGraphics graphics, Component text, int centerX, int y, int color) {
-        graphics.drawString(font, text, centerX - font.width(text) / 2, y, color, false);
+    private void drawCenteredNoShadow(GuiGraphics graphics, Component text, int centerX, int y,
+                                      float sourceScale, int color) {
+        int x = centerX - spriteTextWidth(text, sourceScale) / 2;
+        drawSpriteText(graphics, text, x, y, sourceScale, color);
     }
 
     private void drawAttachmentTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
@@ -546,12 +578,12 @@ public class LetterViewerScreen extends Screen {
         int attachY = attachmentStartY();
         if (payload.money() > 0) {
             float iconScale = mapping.s4() * 0.6f;
-            attachY += Math.max(font.lineHeight, Math.round(GOLD_ICON_SIZE * iconScale)) + 4;
+            attachY += Math.max(letterLineStep(0.75F), Math.round(GOLD_ICON_SIZE * iconScale)) + 4;
         }
         if (!payload.learnedRecipe().isEmpty()) {
             ItemStack recipeOutput = getLearnedRecipeOutput();
             int iconSize = recipeOutput.isEmpty() ? 0 : Math.round(16 * Math.max(1.0f, mapping.s4()));
-            attachY += font.lineHeight + 4 + iconSize + 3 + font.lineHeight + 4;
+            attachY += letterLineStep(0.65F) + 4 + iconSize + 3 + letterLineStep(0.9F) + 4;
         }
         float bgScale = mapping.s4();
         int slotSize = Math.round(24 * bgScale);
@@ -569,7 +601,8 @@ public class LetterViewerScreen extends Screen {
             net.minecraft.world.item.Item item = BuiltInRegistries.ITEM.get(
                     ResourceLocation.parse(attachment.itemId()));
             if (item != Items.AIR) {
-                graphics.renderTooltip(font, new ItemStack(item, attachment.count()), mouseX, mouseY);
+                graphics.renderTooltip(Minecraft.getInstance().font,
+                        new ItemStack(item, attachment.count()), mouseX, mouseY);
             }
             return;
         }

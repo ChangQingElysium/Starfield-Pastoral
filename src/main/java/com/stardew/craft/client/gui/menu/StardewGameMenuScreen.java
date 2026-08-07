@@ -6,14 +6,17 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.ClientPlayerDataCache;
 import com.stardew.craft.client.ClientMailIndex;
 import com.stardew.craft.client.ClientMuseumDonationCache;
+import com.stardew.craft.client.AnimalOverviewClientCache;
 import com.stardew.craft.client.LeaderboardClientCache;
 import com.stardew.craft.client.ModKeyMappings;
 import com.stardew.craft.client.NpcDisplayNames;
 import com.stardew.craft.client.NpcFriendshipClientCache;
 import com.stardew.craft.client.PlayerGenderText;
+import com.stardew.craft.client.font.StardewFonts;
 import com.stardew.craft.client.gui.StardewCollectivePauseScreen;
 import com.stardew.craft.client.gui.StardewSettingsScreen;
 import com.stardew.craft.client.gui.common.CommonGuiTextures;
+import com.stardew.craft.client.gui.common.SdvTexture;
 import com.stardew.craft.client.gui.common.StardewRenderMapping;
 import com.stardew.craft.client.gui.overnight.LevelUpMenuTextures;
 import com.stardew.craft.client.gui.overnight.StardewGuiUtil;
@@ -37,6 +40,7 @@ import com.stardew.craft.player.ProfessionType;
 import com.stardew.craft.player.SkillType;
 import com.stardew.craft.network.payload.LeaderboardSyncPayload;
 import com.stardew.craft.network.payload.RequestNpcFriendshipOverviewPayload;
+import com.stardew.craft.network.payload.RequestAnimalOverviewPayload;
 import com.stardew.craft.network.payload.RequestLeaderboardPayload;
 import com.stardew.craft.network.payload.CraftingMenuCraftSubmitPayload;
 import com.stardew.craft.network.payload.CraftingMenuInventoryActionPayload;
@@ -52,6 +56,7 @@ import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -86,6 +91,9 @@ import java.util.Comparator;
 @SuppressWarnings({"null", "unused"})
 public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMenu>
         implements StardewCollectivePauseScreen {
+    /** Core GameMenu pages use Game1.smallFont unless their source page says otherwise. */
+    private final Font font = StardewFonts.small();
+
     public interface QuickCraftStateAccess {
         int stardewcraft$quickCraftingType();
 
@@ -178,6 +186,19 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
     private static final int BORDER_WIDTH = 32;
     private static final int MENU_WIDTH_SDV = 800 + BORDER_WIDTH * 2;
     private static final int MENU_HEIGHT_SDV = 700 + BORDER_WIDTH * 2;
+    // Stardew Valley 1.6's IClickableMenu.borderWidth is 40. Keep the port's
+    // existing 32px canvas for the other pages, but use the source value for
+    // SocialPage and the GameMenu bounds which own it.
+    private static final int SOCIAL_BORDER_WIDTH_SDV = 40;
+    private static final int SOCIAL_GAME_MENU_WIDTH_SDV = 800 + SOCIAL_BORDER_WIDTH_SDV * 2;
+    private static final int SOCIAL_PAGE_WIDTH_SDV = SOCIAL_GAME_MENU_WIDTH_SDV + 36;
+    private static final int SOCIAL_PAGE_HEIGHT_SDV = 600 + SOCIAL_BORDER_WIDTH_SDV * 2;
+    private static final int ANIMAL_PAGE_WIDTH_SDV = SOCIAL_GAME_MENU_WIDTH_SDV - 64 - 16;
+    private static final int ANIMAL_PAGE_HEIGHT_SDV = SOCIAL_PAGE_HEIGHT_SDV;
+    // GameMenuScreen's frame origin already includes the source menu border.
+    // SocialPage/AnimalPage coordinates are authored against IClickableMenu's
+    // outer origin, so remove that border once when mapping their list content.
+    private static final int LIST_CONTENT_TOP_TRIM_SDV = SOCIAL_BORDER_WIDTH_SDV;
     private static final int SKILLS_PAGE_HEIGHT_SDV = 600 + BORDER_WIDTH * 2;
     private static final int TAB_Y_OFFSET_SDV = -56;
     private static final int TAB_START_X_SDV = 64;
@@ -190,6 +211,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
 
     private static final int TAB_COUNT = 10;
     private static final int TAB_SOCIAL = 2;
+    private static final int TAB_ANIMALS = 5;
     private static final int TAB_POWERS = 6;
     private static final int TAB_COLLECTIONS = 7;
     private static final int TAB_OPTIONS = 8;
@@ -222,12 +244,8 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
 
     private static final int SOCIAL_ROW_HEIGHT_SDV = 112;
     private static final int SOCIAL_MAX_VISIBLE = 5;
-    private static final int[][] SOCIAL_HEART_FILL_PATTERN = new int[][] {
-        {1, 1, 0, 1, 1},
-        {1, 1, 1, 1, 1},
-        {0, 1, 1, 1, 0},
-        {0, 0, 1, 0, 0}
-    };
+    private static final int ANIMAL_ROW_HEIGHT_SDV = 112;
+    private static final int ANIMAL_MAX_VISIBLE = 5;
     private static final Set<String> DATEABLE_NPCS = Set.of(
         "abigail", "alex", "elliott", "emily", "haley", "harvey", "leah", "maru", "penny", "sam", "sebastian", "shane"
     );
@@ -280,6 +298,8 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
     private boolean trashCanLidSoundPlayed;
     private int socialScroll;
     private boolean socialScrolling;
+    private int animalScroll;
+    private boolean animalScrolling;
     private LeaderboardMetric leaderboardMetric = LeaderboardMetric.MONEY;
     private LeaderboardPeriod leaderboardPeriod = LeaderboardPeriod.TOTAL;
     private int leaderboardPage;
@@ -380,14 +400,24 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         return this.minecraft == null ? 1.0f : (float) this.minecraft.getWindow().getGuiScale();
     }
 
+    private Font tooltipFont() {
+        return Minecraft.getInstance().font;
+    }
+
     private int ui(int stardewPixels) {
         return mapping == null ? Math.round(stardewPixels / guiScale()) : mapping.ui(stardewPixels);
     }
 
     private void recalcLayout() {
         this.mapping = new StardewRenderMapping(this.width, this.height, guiScale());
-        this.menuWidth = ui(MENU_WIDTH_SDV);
-        this.menuHeight = ui(MENU_HEIGHT_SDV);
+        this.menuWidth = ui(currentTab == TAB_SOCIAL || currentTab == TAB_ANIMALS
+                ? SOCIAL_GAME_MENU_WIDTH_SDV
+                : MENU_WIDTH_SDV);
+        // Vanilla GameMenu constructs SocialPage with a 600px content height.
+        // Inventory/crafting keep this port's taller canvas independently.
+        this.menuHeight = ui(currentTab == TAB_SOCIAL || currentTab == TAB_ANIMALS
+                ? ANIMAL_PAGE_HEIGHT_SDV
+                : MENU_HEIGHT_SDV);
         this.menuX = mapping.centerX(this.menuWidth);
         this.menuY = this.height / 2 - this.menuHeight / 2;
         this.leftPos = this.menuX;
@@ -459,7 +489,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
     }
 
     private boolean closeContains(double mouseX, double mouseY) {
-        int x = menuX + activeMenuWidth() - ui(CLOSE_X_OFFSET_SDV);
+        int x = menuX + closeButtonAnchorWidth() - ui(CLOSE_X_OFFSET_SDV);
         int y = menuY - ui(CLOSE_Y_OFFSET_SDV);
         int s = ui(CLOSE_SIZE_SDV);
         return mouseX >= x && mouseX < x + s && mouseY >= y && mouseY < y + s;
@@ -472,10 +502,21 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         if (currentTab == TAB_SOCIAL) {
             return socialPageWidth();
         }
+        if (currentTab == TAB_ANIMALS) {
+            return animalPageWidth();
+        }
         if (showingLeaderboardPage()) {
             return leaderboardPageWidth();
         }
         return menuWidth;
+    }
+
+    private int closeButtonAnchorWidth() {
+        // GameMenu owns the close button. SocialPage is 36 source pixels wider,
+        // but vanilla keeps the button anchored to GameMenu's base width.
+        return currentTab == TAB_SOCIAL || currentTab == TAB_ANIMALS
+                ? menuWidth
+                : activeMenuWidth();
     }
 
     @Override
@@ -526,7 +567,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
 
         int hoveredTab = hoveredTab(mouseX, mouseY);
         if (hoveredTab >= 0) {
-            graphics.renderTooltip(this.font, Component.translatable(TAB_KEYS[hoveredTab]), mouseX, mouseY);
+            graphics.renderTooltip(tooltipFont(), Component.translatable(TAB_KEYS[hoveredTab]), mouseX, mouseY);
         }
 
         if (currentTab == TAB_SOCIAL && socialTuneMode) {
@@ -558,7 +599,8 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
 
     private int socialTuneHorizontalLineY(int lineIndex) {
         int target = SOCIAL_TUNE_TARGET_HLINE_1 + lineIndex;
-        return socialVerticalStartY() + ui(lineIndex * SOCIAL_ROW_HEIGHT_SDV) + socialTuneUiY(target);
+        return menuY + ui(172 - LIST_CONTENT_TOP_TRIM_SDV
+                + lineIndex * SOCIAL_ROW_HEIGHT_SDV) + socialTuneUiY(target);
     }
 
     private int socialTuneHorizontalLineX(int lineIndex) {
@@ -566,7 +608,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
     }
 
     private int socialPageWidth() {
-        return menuWidth + ui(36);
+        return ui(SOCIAL_PAGE_WIDTH_SDV);
     }
 
     private int leaderboardPageWidth() {
@@ -587,8 +629,8 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
     }
 
     private int socialTuneVerticalLineStartY(int target) {
-        // Align social columns with the first content row to avoid excess top blank space.
-        return menuY + ui(64);
+        // SocialPage.rowPosition(-1) when no multiplayer farmer rows precede NPCs.
+        return menuY + ui(92 - LIST_CONTENT_TOP_TRIM_SDV);
     }
 
     private int socialTuneTargetAt(double mouseX, double mouseY) {
@@ -829,6 +871,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
                 drawSkillsTabFace(graphics, x, y);
             }
         }
+
     }
 
     /** Vanilla overlays the current farmer portrait on the otherwise blank skills tab. */
@@ -845,7 +888,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
     }
 
     private void drawCloseButton(GuiGraphics graphics) {
-        int x = menuX + activeMenuWidth() - ui(CLOSE_X_OFFSET_SDV);
+        int x = menuX + closeButtonAnchorWidth() - ui(CLOSE_X_OFFSET_SDV);
         int y = menuY - ui(CLOSE_Y_OFFSET_SDV);
         CommonGuiTextures.drawCloseButton(graphics, x, y, mapping.s4());
     }
@@ -853,6 +896,11 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
     private void drawCurrentPage(GuiGraphics graphics, int mouseX, int mouseY) {
         if (currentTab == TAB_SOCIAL) {
             drawSocialPage(graphics, mouseX, mouseY);
+            return;
+        }
+
+        if (currentTab == TAB_ANIMALS) {
+            drawAnimalPage(graphics);
             return;
         }
 
@@ -921,9 +969,8 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         }
 
         Component title = Component.translatable("stardewcraft.game_menu.options.title");
-        graphics.drawString(this.font, title,
-                menuX + menuWidth / 2 - this.font.width(title) / 2,
-                menuY + ui(88), 0xFF5B2F18, false);
+        drawScaledCenteredSpriteText(graphics, title.getString(), menuX + menuWidth / 2,
+                menuY + ui(88), menuWidth - ui(128));
 
         int rowX = optionsRowX();
         int rowWidth = optionsRowWidth();
@@ -965,7 +1012,9 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         int arrowWidth = 12;
         int arrowHeight = 11;
         CommonGuiTextures.drawBackArrow(graphics, x + ui(12), y + (height - arrowHeight) / 2, 1.0F);
-        graphics.drawString(this.font, label, x + ui(12) + arrowWidth + ui(10),
+        int textX = x + ui(12) + arrowWidth + ui(10);
+        String shown = ellipsize(label.getString(), Math.max(1, x + width - ui(10) - textX));
+        graphics.drawString(this.font, Component.literal(shown), textX,
                 y + (height - this.font.lineHeight) / 2, 0xFF4A2815, false);
     }
 
@@ -1007,7 +1056,9 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
 
     private int optionsLeaderboardBackWidth() {
         Component label = Component.translatable("stardewcraft.game_menu.options.settings");
-        return Math.max(ui(150), this.font.width(label) + ui(44));
+        LeaderboardLayout layout = leaderboardLayout();
+        return Math.min(layout.contentW() / 3,
+                Math.max(ui(150), this.font.width(label) + ui(44)));
     }
 
     private boolean handleOptionsClick(double mouseX, double mouseY) {
@@ -1063,13 +1114,15 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         int controlY = titleY + titleH + ui(14);
         int controlH = Math.max(ui(36), this.font.lineHeight + ui(12));
         int metricY = menuY + ui(78);
-        int headerY = controlY + controlH + ui(26);
+        int metaY = controlY + controlH + ui(10);
+        int headerY = metaY + this.font.lineHeight + ui(16);
         int listY = headerY + this.font.lineHeight + ui(16);
         int selfY = contentBottom - rowH;
         int listBottom = selfY - ui(18);
         int visibleRows = Math.max(1, (listBottom - listY) / rowH);
         Component refresh = Component.translatable("stardewcraft.leaderboard.refresh");
-        int refreshW = Math.max(ui(78), this.font.width(refresh) + ui(24));
+        int refreshW = Mth.clamp(this.font.width(refresh) + ui(24),
+                ui(64), Math.max(ui(64), contentW / 5));
         int refreshH = controlH;
         int refreshX = contentX + contentW - refreshW;
         int refreshY = controlY;
@@ -1096,9 +1149,15 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         int nameX = leaderboardNameX(layout);
         int valueRightX = leaderboardValueRightX(layout);
         graphics.drawString(this.font, Component.literal("#"), rankX, layout.headerY(), 0x8D6E63, false);
-        graphics.drawString(this.font, Component.translatable("stardewcraft.leaderboard.player"), nameX, layout.headerY(), 0x8D6E63, false);
-        Component valueHeader = Component.translatable("stardewcraft.leaderboard.value");
-        graphics.drawString(this.font, valueHeader, valueRightX - this.font.width(valueHeader), layout.headerY(), 0x8D6E63, false);
+        int valueHeaderMaxW = Math.max(ui(48), layout.contentW() / 4);
+        String valueHeaderText = ellipsize(Component.translatable("stardewcraft.leaderboard.value").getString(), valueHeaderMaxW);
+        int valueHeaderW = this.font.width(valueHeaderText);
+        String playerHeaderText = ellipsize(
+                Component.translatable("stardewcraft.leaderboard.player").getString(),
+                Math.max(ui(48), valueRightX - valueHeaderW - ui(24) - nameX));
+        graphics.drawString(this.font, Component.literal(playerHeaderText), nameX, layout.headerY(), 0x8D6E63, false);
+        graphics.drawString(this.font, Component.literal(valueHeaderText), valueRightX - valueHeaderW,
+                layout.headerY(), 0x8D6E63, false);
         drawLeaderboardTableRule(graphics, layout, leaderboardHeaderRuleY(layout));
 
         if (LeaderboardClientCache.isLoading(leaderboardMetric.id(), leaderboardPeriod.id(), leaderboardPage)) {
@@ -1137,15 +1196,19 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         int bandX = layout.contentX() + ui(2);
         int bandY = layout.titleY() - ui(8);
         int bandW = layout.contentW() - ui(4);
-        int bandH = layout.refreshY() + layout.refreshH() - bandY + ui(10);
+        int bandH = layout.headerY() - bandY - ui(8);
         graphics.fill(bandX, bandY, bandX + bandW, bandY + bandH, 0x18B08830);
         graphics.fill(bandX, bandY, bandX + bandW, bandY + Math.max(1, ui(2)), 0x66B08830);
         graphics.fill(bandX, bandY + bandH - Math.max(1, ui(2)), bandX + bandW, bandY + bandH, 0x66B08830);
 
-        int titleCenterX = layout.contentX() + layout.contentW() / 2;
-        Component title = Component.translatable(leaderboardMetric.titleKey()).withStyle(ChatFormatting.BOLD);
-        drawScaledCenteredSdvText(graphics, title.getString(), titleCenterX,
-            layout.titleY(), 1.7f, layout.contentW() - ui(72), 0xFF582A11);
+        int backW = Math.min(layout.contentW() / 3, Math.max(ui(150),
+                this.font.width(Component.translatable("stardewcraft.game_menu.options.settings")) + ui(44)));
+        int titleLeft = layout.contentX() + ui(8) + backW + ui(16);
+        int titleRight = layout.contentX() + layout.contentW() - ui(8);
+        int titleCenterX = (titleLeft + titleRight) / 2;
+        Component title = Component.translatable(leaderboardMetric.titleKey());
+        drawScaledCenteredSpriteText(graphics, title.getString(), titleCenterX,
+            layout.titleY(), Math.max(ui(80), titleRight - titleLeft));
     }
 
     private void drawLeaderboardListPanel(GuiGraphics graphics, LeaderboardLayout layout) {
@@ -1239,19 +1302,19 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         }
         long ageSeconds = Math.max(0L, (System.currentTimeMillis() - LeaderboardClientCache.getGeneratedAtMillis()) / 1000L);
         Component meta = Component.translatable("stardewcraft.leaderboard.meta", LeaderboardClientCache.getTotalPlayers(), ageSeconds);
-        LeaderboardPageControls controls = leaderboardPageControls(layout);
-        List<LeaderboardPeriodButtonBounds> periodBounds = leaderboardPeriodButtonBounds(layout);
-        int metaX = periodBounds.isEmpty() ? layout.contentX() : periodBounds.get(periodBounds.size() - 1).x() + periodBounds.get(periodBounds.size() - 1).w() + ui(12);
-        int maxW = Math.max(ui(80), controls.prevX() - metaX - ui(12));
+        int metaX = layout.contentX() + ui(8);
+        int maxW = layout.contentW() - ui(16);
         graphics.drawString(this.font, Component.literal(ellipsize(meta.getString(), maxW)), metaX,
-            layout.refreshY() + (layout.refreshH() - this.font.lineHeight) / 2, 0x8D6E63, false);
+            layout.refreshY() + layout.refreshH() + ui(10), 0x8D6E63, false);
     }
 
     private void drawLeaderboardRefreshButton(GuiGraphics graphics, LeaderboardLayout layout, int mouseX, int mouseY) {
         Component label = Component.translatable("stardewcraft.leaderboard.refresh");
         boolean hovered = inside(mouseX, mouseY, layout.refreshX(), layout.refreshY(), layout.refreshW(), layout.refreshH());
         drawLeaderboardButtonBg(graphics, layout.refreshX(), layout.refreshY(), layout.refreshW(), layout.refreshH(), hovered, true);
-        graphics.drawString(this.font, label, layout.refreshX() + (layout.refreshW() - this.font.width(label)) / 2,
+        String shownLabel = ellipsize(label.getString(), Math.max(1, layout.refreshW() - ui(12)));
+        graphics.drawString(this.font, Component.literal(shownLabel),
+                layout.refreshX() + (layout.refreshW() - this.font.width(shownLabel)) / 2,
                 layout.refreshY() + (layout.refreshH() - this.font.lineHeight) / 2, 0xFF582A11, false);
     }
 
@@ -1263,7 +1326,9 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         drawLeaderboardPageButton(graphics, controls.prevX(), controls.y(), controls.buttonW(), controls.h(), Component.literal("<"), canPrev,
                 inside(mouseX, mouseY, controls.prevX(), controls.y(), controls.buttonW(), controls.h()));
         Component page = Component.translatable("stardewcraft.leaderboard.page", leaderboardPage + 1, pageCount);
-        graphics.drawString(this.font, page, controls.labelX() + (controls.labelW() - this.font.width(page)) / 2,
+        String pageText = ellipsize(page.getString(), Math.max(1, controls.labelW() - ui(6)));
+        graphics.drawString(this.font, Component.literal(pageText),
+                controls.labelX() + (controls.labelW() - this.font.width(pageText)) / 2,
                 controls.y() + (controls.h() - this.font.lineHeight) / 2, 0xFF582A11, false);
         drawLeaderboardPageButton(graphics, controls.nextX(), controls.y(), controls.buttonW(), controls.h(), Component.literal(">"), canNext,
                 inside(mouseX, mouseY, controls.nextX(), controls.y(), controls.buttonW(), controls.h()));
@@ -1302,7 +1367,9 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         drawLeaderboardTableRule(graphics, layout, leaderboardSelfRuleY(layout));
         if (selfEntry == null) {
             Component text = Component.translatable("stardewcraft.leaderboard.no_self");
-            graphics.drawString(this.font, text, layout.contentX() + ui(18), layout.selfY() + (layout.rowH() - this.font.lineHeight) / 2, 0x8D6E63, false);
+            String shown = ellipsize(text.getString(), layout.contentW() - ui(36));
+            graphics.drawString(this.font, Component.literal(shown), layout.contentX() + ui(18),
+                    layout.selfY() + (layout.rowH() - this.font.lineHeight) / 2, 0x8D6E63, false);
             return;
         }
         drawLeaderboardRow(graphics, layout, selfEntry, layout.selfY(), selfEntry.rank() - 1, -1, -1, true);
@@ -1349,14 +1416,17 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         int dotSize = Math.max(2, ui(7));
         graphics.fill(dotX, textY + ui(2), dotX + dotSize, textY + ui(2) + dotSize, dotColor);
 
-        int nameMaxW = Math.max(ui(80), leaderboardValueRightX(layout) - leaderboardNameX(layout) - ui(120));
+        Component fullValue = Component.translatable(leaderboardMetric.valueKey(), row.value());
+        int valueMaxW = Math.max(ui(64), layout.contentW() / 3);
+        String valueText = ellipsize(fullValue.getString(), valueMaxW);
+        int valueWidth = this.font.width(valueText);
+        int valueX = leaderboardValueRightX(layout) - valueWidth;
+        int nameMaxW = Math.max(ui(40), valueX - ui(24) - leaderboardNameX(layout));
         String name = ellipsize(row.playerName(), nameMaxW);
         int nameColor = medal ? 0xFF3C2410 : row.self() ? 0xFF2E7D32 : 0xFF582A11;
-        graphics.drawString(this.font, row.self() ? Component.literal(name).withStyle(ChatFormatting.BOLD) : Component.literal(name),
+        graphics.drawString(this.font, Component.literal(name),
                 leaderboardNameX(layout), textY, nameColor, false);
 
-        Component value = Component.translatable(leaderboardMetric.valueKey(), row.value());
-        int valueX = leaderboardValueRightX(layout) - this.font.width(value);
         int pillPad = ui(10);
         int pillX = valueX - pillPad;
         int pillY = textY - ui(4);
@@ -1364,7 +1434,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         int pillFill = medal ? medalPillColor(row.rank()) : 0x22B08830;
         graphics.fill(pillX + 1, pillY, leaderboardValueRightX(layout) + pillPad - 1, pillY + pillH, pillFill);
         graphics.fill(pillX, pillY + 1, leaderboardValueRightX(layout) + pillPad, pillY + pillH - 1, pillFill);
-        graphics.drawString(this.font, value, valueX, textY, nameColor, false);
+        graphics.drawString(this.font, Component.literal(valueText), valueX, textY, nameColor, false);
     }
 
     private int medalRowFill(int rank) {
@@ -1444,31 +1514,31 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         LeaderboardMetric hoveredMetric = hoveredLeaderboardMetric(layout, mouseX, mouseY);
         if (hoveredMetric != null) {
             List<Component> lines = List.of(
-                    Component.translatable(hoveredMetric.titleKey()).withStyle(ChatFormatting.BOLD),
+                    Component.translatable(hoveredMetric.titleKey()),
                     Component.translatable(hoveredMetric.descriptionKey()).withStyle(ChatFormatting.GRAY));
-            graphics.renderTooltip(this.font, lines, java.util.Optional.empty(), mouseX, mouseY);
+            graphics.renderTooltip(tooltipFont(), lines, java.util.Optional.empty(), mouseX, mouseY);
             return;
         }
         for (LeaderboardPeriodButtonBounds bounds : leaderboardPeriodButtonBounds(layout)) {
             if (inside(mouseX, mouseY, bounds.x(), bounds.y(), bounds.w(), bounds.h())) {
                 List<Component> lines = List.of(
-                        Component.translatable(bounds.period().titleKey()).withStyle(ChatFormatting.BOLD),
+                        Component.translatable(bounds.period().titleKey()),
                         Component.translatable(bounds.period().descriptionKey()).withStyle(ChatFormatting.GRAY));
-                graphics.renderTooltip(this.font, lines, java.util.Optional.empty(), mouseX, mouseY);
+                graphics.renderTooltip(tooltipFont(), lines, java.util.Optional.empty(), mouseX, mouseY);
                 return;
             }
         }
         if (inside(mouseX, mouseY, layout.refreshX(), layout.refreshY(), layout.refreshW(), layout.refreshH())) {
-            graphics.renderTooltip(this.font, Component.translatable("stardewcraft.leaderboard.refresh.tooltip"), mouseX, mouseY);
+            graphics.renderTooltip(tooltipFont(), Component.translatable("stardewcraft.leaderboard.refresh.tooltip"), mouseX, mouseY);
             return;
         }
         LeaderboardPageControls controls = leaderboardPageControls(layout);
         if (inside(mouseX, mouseY, controls.prevX(), controls.y(), controls.buttonW(), controls.h())) {
-            graphics.renderTooltip(this.font, Component.translatable("stardewcraft.leaderboard.previous_page"), mouseX, mouseY);
+            graphics.renderTooltip(tooltipFont(), Component.translatable("stardewcraft.leaderboard.previous_page"), mouseX, mouseY);
             return;
         }
         if (inside(mouseX, mouseY, controls.nextX(), controls.y(), controls.buttonW(), controls.h())) {
-            graphics.renderTooltip(this.font, Component.translatable("stardewcraft.leaderboard.next_page"), mouseX, mouseY);
+            graphics.renderTooltip(tooltipFont(), Component.translatable("stardewcraft.leaderboard.next_page"), mouseX, mouseY);
         }
     }
 
@@ -1482,9 +1552,10 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
     }
 
     private void drawLeaderboardCenteredMessage(GuiGraphics graphics, LeaderboardLayout layout, Component message) {
-        int x = layout.contentX() + layout.contentW() / 2 - this.font.width(message) / 2;
+        String shown = ellipsize(message.getString(), layout.contentW() - ui(36));
+        int x = layout.contentX() + layout.contentW() / 2 - this.font.width(shown) / 2;
         int y = layout.listY() + (layout.listBottom() - layout.listY()) / 2 - this.font.lineHeight / 2;
-        graphics.drawString(this.font, message, x, y, 0x8D6E63, false);
+        graphics.drawString(this.font, Component.literal(shown), x, y, 0x8D6E63, false);
     }
 
     private boolean handleLeaderboardClick(int mouseX, int mouseY) {
@@ -1575,14 +1646,22 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
     }
 
     private LeaderboardPageControls leaderboardPageControls(LeaderboardLayout layout) {
-        int buttonW = ui(48);
         int h = layout.refreshH();
         int gap = ui(8);
+        List<LeaderboardPeriodButtonBounds> periods = leaderboardPeriodButtonBounds(layout);
+        int availableLeft = periods.isEmpty()
+                ? layout.contentX()
+                : periods.get(periods.size() - 1).x() + periods.get(periods.size() - 1).w() + ui(12);
+        int availableRight = layout.refreshX() - ui(12);
+        int availableW = Math.max(1, availableRight - availableLeft);
+        int buttonW = Math.min(ui(48), Math.max(ui(20), availableW / 5));
         Component label = Component.translatable("stardewcraft.leaderboard.page", leaderboardPage + 1, leaderboardPageCount());
-        int labelW = Math.max(ui(78), this.font.width(label) + ui(16));
-        int nextX = layout.refreshX() - ui(14) - buttonW;
-        int labelX = nextX - gap - labelW;
-        int prevX = labelX - gap - buttonW;
+        int labelRoom = Math.max(1, availableW - buttonW * 2 - gap * 2);
+        int labelW = Math.min(this.font.width(label) + ui(16), labelRoom);
+        int groupW = buttonW * 2 + labelW + gap * 2;
+        int prevX = availableLeft + Math.max(0, (availableW - groupW) / 2);
+        int labelX = prevX + buttonW + gap;
+        int nextX = labelX + labelW + gap;
         return new LeaderboardPageControls(prevX, labelX, nextX, layout.refreshY(), buttonW, labelW, h);
     }
 
@@ -1854,10 +1933,9 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         int rowHGui = ui(FARM_MGMT_ROW_HEIGHT_SDV);
 
         // 标题
-        Component title = Component.translatable("gui.stardewcraft.farm_mgmt.title")
-                .withStyle(ChatFormatting.BOLD);
-        int titleX = menuX + menuWidth / 2 - this.font.width(title) / 2;
-        graphics.drawString(this.font, title, titleX, y, 0x582A11, false);
+        Component title = Component.translatable("gui.stardewcraft.farm_mgmt.title");
+        drawScaledCenteredSpriteText(graphics, title.getString(), menuX + menuWidth / 2,
+                y, menuWidth - ui(96));
         y += this.font.lineHeight + ui(12);
 
         // 默认权限标签
@@ -1903,8 +1981,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         y += ui(36);
 
         // 在线玩家列表标题
-        Component playerTitle = Component.translatable("gui.stardewcraft.farm_mgmt.online_players")
-                .withStyle(ChatFormatting.BOLD);
+        Component playerTitle = Component.translatable("gui.stardewcraft.farm_mgmt.online_players");
         graphics.drawString(this.font, playerTitle, contentX, y, 0x582A11, false);
         y += this.font.lineHeight + ui(8);
 
@@ -2275,7 +2352,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
 
             // Player name (centered under the panel)
             String playerName = ClientPlayerDataCache.getPlayerDisplayName(mc.player.getName().getString());
-            Component boldPlayerName = Component.literal(playerName).withStyle(ChatFormatting.BOLD);
+            Component boldPlayerName = Component.literal(playerName);
             float nameScale = sdvTextScale();
             int nameRawW = this.font.width(boldPlayerName);
             float nameEffScale = nameScale;
@@ -2295,7 +2372,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
             // Player title (centered below name)
             String playerTitle = getFarmerTitle();
             float titleScale = sdvTextScale() * 0.85f;
-            Component boldTitle = Component.literal(playerTitle).withStyle(ChatFormatting.BOLD);
+            Component boldTitle = Component.literal(playerTitle);
             int titleRawW = this.font.width(boldTitle);
             float titleEffScale = titleScale;
             if (titleRawW * titleEffScale > namePanelW) {
@@ -2339,7 +2416,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
                 // Draw skill name + icon on the first column only
                 if (i == 0) {
                     String skillName = Component.translatable(SKILL_NAME_KEYS[j]).getString();
-                    Component boldSkillName = Component.literal(skillName).withStyle(ChatFormatting.BOLD);
+                    Component boldSkillName = Component.literal(skillName);
                     float skillNameScale = sdvTextScale() * (usesWideSkillsLayout() ? 1.0f : 0.9f);
                     int skillNameRawW = this.font.width(boldSkillName);
                     // Vanilla gives Russian and Italian an extra 64 px page column and draws
@@ -2745,13 +2822,13 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         }
 
         if (hoveredEntry != null && !hoveredUnlocked) {
-            graphics.renderTooltip(this.font, Component.literal("???").withStyle(ChatFormatting.BOLD), mouseX, mouseY);
+            graphics.renderTooltip(tooltipFont(), Component.literal("???"), mouseX, mouseY);
             return;
         }
         if (hoveredEntry != null) {
             ItemStack tooltipStack = powerTooltipStack(hoveredEntry.tooltipItemId());
             if (!tooltipStack.isEmpty()) {
-                graphics.renderTooltip(this.font, tooltipStack, mouseX, mouseY);
+                graphics.renderTooltip(tooltipFont(), tooltipStack, mouseX, mouseY);
             }
         }
     }
@@ -2809,9 +2886,9 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         if (hovered >= 0) {
             CollectionEntry entry = entries.get(hovered);
             if (entry.discovered() || entry.known()) {
-                graphics.renderTooltip(this.font, entry.stack(), mouseX, mouseY);
+                graphics.renderTooltip(tooltipFont(), entry.stack(), mouseX, mouseY);
             } else {
-                graphics.renderTooltip(this.font, Component.literal("???"), mouseX, mouseY);
+                graphics.renderTooltip(tooltipFont(), Component.literal("???"), mouseX, mouseY);
             }
         }
     }
@@ -2837,7 +2914,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
 
         drawCollectionPageArrows(graphics, pageCount);
         if (hovered >= 0) {
-            graphics.renderTooltip(this.font, Component.literal(entries.get(hovered).title()), mouseX, mouseY);
+            graphics.renderTooltip(tooltipFont(), Component.literal(entries.get(hovered).title()), mouseX, mouseY);
         }
     }
 
@@ -2878,7 +2955,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
             graphics.blit(StardewGuiUtil.CURSORS, x, y, ui(64), ui(64),
                     sourceX, sourceY, 16, 16, 704, 2256);
             if (tab == COLLECTION_SECRET_NOTES && contains(mouseX, mouseY, x, y, ui(64), ui(64))) {
-                graphics.renderTooltip(this.font,
+                graphics.renderTooltip(tooltipFont(),
                         Component.translatable("stardewcraft.collections.secret_notes"), mouseX, mouseY);
             }
         }
@@ -2920,7 +2997,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
             if (hasSeenSecretNote(hovered)) {
                 drawSecretNoteTooltip(graphics, mouseX, mouseY, hovered);
             } else {
-                graphics.renderTooltip(this.font, Component.literal("???"), mouseX, mouseY);
+                graphics.renderTooltip(tooltipFont(), Component.literal("???"), mouseX, mouseY);
             }
         }
     }
@@ -2930,11 +3007,11 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         StardewSecretNoteDefinition definition = id == null ? null : SecretNoteRegistry.get(id);
         String title = Component.translatable("stardewcraft.secret_note.title", noteNumber).getString();
         if (definition == null) {
-            graphics.renderTooltip(this.font, Component.literal(title), mouseX, mouseY);
+            graphics.renderTooltip(tooltipFont(), Component.literal(title), mouseX, mouseY);
             return;
         }
         if (definition.imageIndex() >= 0) {
-            graphics.renderTooltip(this.font, Component.literal(title), mouseX, mouseY);
+            graphics.renderTooltip(tooltipFont(), Component.literal(title), mouseX, mouseY);
             drawSecretNoteImagePreview(graphics, mouseX, mouseY, definition.imageIndex());
             return;
         }
@@ -2989,7 +3066,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         graphics.pose().pushPose();
         graphics.pose().translate(drawX, drawY, 0);
         graphics.pose().scale(textScale, textScale, 1.0F);
-        graphics.drawString(this.font, Component.literal(title).withStyle(ChatFormatting.BOLD),
+        graphics.drawString(this.font, Component.literal(title),
                 0, 0, 0xFF5B3A1A, false);
         graphics.pose().popPose();
         drawY += lineHeight + ui(4);
@@ -3295,7 +3372,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
             graphics.pose().pushPose();
             graphics.pose().translate(contentX, contentY, 0);
             graphics.pose().scale(ttScale, ttScale, 1.0f);
-            graphics.drawString(this.font, Component.literal(title).withStyle(ChatFormatting.BOLD), 0, 0, 0xFF5B3A1A, false);
+            graphics.drawString(this.font, Component.literal(title), 0, 0, 0xFF5B3A1A, false);
             graphics.pose().popPose();
             contentY += scaledLineH + 4;
         }
@@ -3304,7 +3381,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
             graphics.pose().pushPose();
             graphics.pose().translate(contentX, contentY, 0);
             graphics.pose().scale(ttScale, ttScale, 1.0f);
-            graphics.drawString(this.font, Component.literal(line).withStyle(ChatFormatting.BOLD), 0, 0, 0xFF5B3A1A, false);
+            graphics.drawString(this.font, Component.literal(line), 0, 0, 0xFF5B3A1A, false);
             graphics.pose().popPose();
             contentY += scaledLineH + 2;
         }
@@ -3336,6 +3413,9 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
     // Empty-slot placeholder tiles (from menu_tiles.png, SDV: getSourceRectForStandardTileSheet)
     private static final int EMPTY_RING_TILE = 41;
     private static final int EMPTY_BOOTS_TILE = 40;
+    private static final int EMPTY_HAT_TILE = 42;
+    private static final int EMPTY_SHIRT_TILE = 69;
+    private static final int EMPTY_PANTS_TILE = 68;
     private static final int EMPTY_TRINKET_TILE = 70;
 
     // --- Player model area (lower-center, SDV: x=120, y=296 from menu origin) ---
@@ -3634,9 +3714,13 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
                 CommonGuiTextures.drawItemCenteredInBox(graphics, stack, x, y, size, size, mapping.s4());
             }
         } else {
-            // This project's extracted menu_tiles atlas doesn't contain SDV's
-            // clothing placeholder tiles 42/68/69. Tile 70 is the safe local slot.
-            CommonGuiTextures.drawMenuTile(graphics, x, y, size, size, EMPTY_TRINKET_TILE);
+            int placeholderTile = switch (slotType) {
+                case 4 -> EMPTY_HAT_TILE;
+                case 5 -> EMPTY_SHIRT_TILE;
+                case 6 -> EMPTY_PANTS_TILE;
+                default -> EMPTY_TRINKET_TILE;
+            };
+            CommonGuiTextures.drawMenuTile(graphics, x, y, size, size, placeholderTile);
         }
 
         if (hovered) {
@@ -3704,28 +3788,16 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
 
         // SDV: player name centered below
         String playerName = ClientPlayerDataCache.getPlayerDisplayName(mc.player.getName().getString());
-        Component name = Component.literal(playerName);
-        float nameScale = sdvTextScale();
-        int nameRawW = this.font.width(name);
-        float nameEffScale = nameScale;
-        if (nameRawW * nameEffScale > bgW) {
-            nameEffScale = (float) bgW / nameRawW;
-        }
-        int nameScaledW = Math.round(nameRawW * nameEffScale);
-        int nameX = bgX + (bgW - nameScaledW) / 2;
         int nameY = menuY + ui(INV_PAGE_PLAYER_NAME_Y);
-        graphics.pose().pushPose();
-        graphics.pose().translate(nameX, nameY, 0);
-        graphics.pose().scale(nameEffScale, nameEffScale, 1.0f);
-        graphics.drawString(this.font, name, 0, 0, SDV_TEXT_COLOR, false);
-        graphics.pose().popPose();
+        drawScaledCenteredDialogueText(graphics, playerName, bgX + bgW / 2, nameY,
+                sdvTextScale(), bgW, SDV_TEXT_COLOR);
     }
 
     // ------------- Right info panel (lower-right) -------------
 
     /** Compute text scale that makes MC font (9px) match SDV SpriteText proportions. */
     private float sdvTextScale() {
-        return Math.max(1.0f, (float) ui(24) / 9.0f);
+        return mapping.textScale();
     }
 
     private void drawInfoPanel(GuiGraphics graphics) {
@@ -3744,7 +3816,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
             rawFarmName = ClientPlayerDataCache.getPlayerDisplayName(mc.player.getName().getString());
         }
         String farmName = formatFarmName(rawFarmName);
-        drawScaledCenteredSdvText(graphics, farmName, centerX,
+        drawScaledCenteredDialogueText(graphics, farmName, centerX,
                 menuY + ui(INV_PAGE_INFO_Y0), textScale, maxWidth, SDV_TEXT_COLOR);
 
         // SDV: "Current Funds: {amount}g"
@@ -3752,7 +3824,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         String fundsStr = net.minecraft.client.resources.language.I18n.get(
                 "stardewcraft.game_menu.inventory.current_funds",
                 String.format("%,d", money));
-        drawScaledCenteredSdvText(graphics, fundsStr, centerX,
+        drawScaledCenteredDialogueText(graphics, fundsStr, centerX,
                 menuY + ui(INV_PAGE_INFO_Y1), textScale, maxWidth, SDV_TEXT_COLOR);
 
         // SDV: date string
@@ -3767,7 +3839,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         String dateStr = net.minecraft.client.resources.language.I18n.get(
                 "stardewcraft.game_menu.inventory.date",
                 localizedSeasonName, time.getCurrentDay(), time.getCurrentYear());
-        drawScaledCenteredSdvText(graphics, dateStr, centerX,
+        drawScaledCenteredDialogueText(graphics, dateStr, centerX,
                 menuY + ui(INV_PAGE_INFO_Y2), textScale, maxWidth, SDV_TEXT_COLOR_DIM);
     }
 
@@ -3789,8 +3861,27 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
     private void drawScaledCenteredSdvText(GuiGraphics graphics, String text,
                                             int centerX, int y, float scale,
                                             int maxWidth, int color) {
+        drawScaledCenteredText(graphics, this.font, text, centerX, y, scale, maxWidth, color);
+    }
+
+    private void drawScaledCenteredDialogueText(GuiGraphics graphics, String text,
+                                                 int centerX, int y, float scale,
+                                                 int maxWidth, int color) {
+        drawScaledCenteredText(graphics, StardewFonts.dialogue(), text, centerX, y, scale, maxWidth, color);
+    }
+
+    private void drawScaledCenteredSpriteText(GuiGraphics graphics, String text,
+                                               int centerX, int y, int maxWidth) {
+        drawScaledCenteredText(graphics, StardewFonts.spriteText(), text, centerX, y,
+                mapping.textScale(), maxWidth,
+                0xFF000000 | StardewFonts.spriteTextDefaultRgb());
+    }
+
+    private void drawScaledCenteredText(GuiGraphics graphics, Font drawFont, String text,
+                                        int centerX, int y, float scale,
+                                        int maxWidth, int color) {
         Component line = Component.literal(text);
-        int rawWidth = this.font.width(line);
+        int rawWidth = drawFont.width(line);
         float effectiveScale = scale;
         if (rawWidth * effectiveScale > maxWidth) {
             effectiveScale = (float) maxWidth / rawWidth;
@@ -3800,7 +3891,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         graphics.pose().pushPose();
         graphics.pose().translate(x, y, 0);
         graphics.pose().scale(effectiveScale, effectiveScale, 1.0f);
-        graphics.drawString(this.font, line, 0, 0, color, false);
+        graphics.drawString(drawFont, line, 0, 0, color, false);
         graphics.pose().popPose();
     }
 
@@ -3834,7 +3925,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
     private void drawInventoryPageTooltips(GuiGraphics graphics, int mouseX, int mouseY) {
         // Junimo Note icon tooltip (SDV: Strings\UI:GameMenu_JunimoNote_Hover — "Community Center")
         if (shouldShowJunimoNoteIcon() && junimoIconContains(mouseX, mouseY)) {
-            graphics.renderTooltip(this.font,
+            graphics.renderTooltip(tooltipFont(),
                     Component.translatable("stardewcraft.game_menu.junimo_note.hover"),
                     mouseX, mouseY);
             return;
@@ -3845,10 +3936,10 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
             if (equipSlot == 3) {
                 ItemStack trinket = ClientPlayerDataCache.getEquippedTrinket();
                 if (!trinket.isEmpty()) {
-                    graphics.renderTooltip(this.font, trinket, mouseX, mouseY);
+                    graphics.renderTooltip(tooltipFont(), trinket, mouseX, mouseY);
                     return;
                 }
-                graphics.renderTooltip(this.font,
+                graphics.renderTooltip(tooltipFont(),
                         Component.translatable("stardewcraft.equipment.slot.trinket"),
                         mouseX, mouseY);
                 return;
@@ -3860,7 +3951,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
                 default -> ItemStack.EMPTY;
             };
             if (!equippedStack.isEmpty()) {
-                graphics.renderTooltip(this.font, equippedStack, mouseX, mouseY);
+                graphics.renderTooltip(tooltipFont(), equippedStack, mouseX, mouseY);
                 return;
             }
             String itemId = switch (equipSlot) {
@@ -3872,7 +3963,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
             if (!itemId.isEmpty()) {
                 ItemStack stack = stackFromEquipmentId(itemId);
                 if (!stack.isEmpty()) {
-                    graphics.renderTooltip(this.font, stack, mouseX, mouseY);
+                    graphics.renderTooltip(tooltipFont(), stack, mouseX, mouseY);
                     return;
                 }
             }
@@ -3885,7 +3976,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
                 case 6 -> Component.translatable("stardewcraft.equipment.slot.pants");
                 default -> Component.empty();
             };
-            graphics.renderTooltip(this.font, label, mouseX, mouseY);
+            graphics.renderTooltip(tooltipFont(), label, mouseX, mouseY);
             return;
         }
 
@@ -3894,14 +3985,14 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         if (invSlot >= 0 && this.minecraft != null && this.minecraft.player != null) {
             ItemStack stack = this.minecraft.player.getInventory().getItem(invSlot);
             if (!stack.isEmpty()) {
-                graphics.renderTooltip(this.font, stack, mouseX, mouseY);
+                graphics.renderTooltip(tooltipFont(), stack, mouseX, mouseY);
                 return;
             }
         }
 
         // Organize button tooltip
         if (organizeButtonContains(mouseX, mouseY)) {
-            graphics.renderTooltip(this.font,
+            graphics.renderTooltip(tooltipFont(),
                     Component.translatable("stardewcraft.game_menu.inventory.organize"),
                     mouseX, mouseY);
             return;
@@ -3914,10 +4005,10 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
                 List<Component> lines = new ArrayList<>();
                 lines.add(Component.translatable("stardewcraft.game_menu.crafting.trash_can").withStyle(ChatFormatting.WHITE));
                 lines.add(carried.getHoverName().copy().withStyle(ChatFormatting.GRAY));
-                graphics.renderTooltip(this.font, lines, java.util.Optional.empty(), mouseX, mouseY);
+                graphics.renderTooltip(tooltipFont(), lines, java.util.Optional.empty(), mouseX, mouseY);
                 return;
             }
-            graphics.renderTooltip(this.font,
+            graphics.renderTooltip(tooltipFont(),
                     Component.translatable("stardewcraft.game_menu.crafting.trash_can"),
                     mouseX, mouseY);
         }
@@ -3952,26 +4043,18 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         drawSocialScrollControls(graphics, total);
     }
 
-    private int socialVerticalPartitionClipTopY() {
-        // Vanilla rowPosition(numFarmers - 1) resolves to y + 92 when no farmers are listed.
-        return Math.max(0, menuY + ui(92));
-    }
-
     private void drawSocialVerticalPartitions(GuiGraphics graphics) {
-        int clipTop = socialVerticalPartitionClipTopY();
-        int clipBottom = Math.min(this.height, menuY + menuHeight);
-        if (clipBottom <= clipTop) {
-            return;
-        }
-
-        graphics.enableScissor(0, clipTop, this.width, clipBottom);
-        try {
-            StardewGuiUtil.drawVerticalPartitionSmall(graphics, socialVerticalLeftX(), menuY, menuHeight, mapping.s4());
-            StardewGuiUtil.drawVerticalPartitionSmall(graphics, socialVerticalMiddleX(), menuY, menuHeight, mapping.s4());
-            StardewGuiUtil.drawVerticalPartitionSmall(graphics, socialVerticalRightX(), menuY, menuHeight, mapping.s4());
-        } finally {
-            graphics.disableScissor();
-        }
+        // Game1.drawDialogueBox fills from y + 28 through y + height - 36.
+        // This port has no farmer rows above the NPC list, so SocialPage's
+        // multiplayer-only scissor must not shorten either endpoint.
+        int startY = menuY + ui(28);
+        int endY = menuY + menuHeight - ui(36);
+        StardewGuiUtil.drawVerticalPartitionSmallSpan(
+                graphics, socialVerticalLeftX(), startY, endY, mapping.s4());
+        StardewGuiUtil.drawVerticalPartitionSmallSpan(
+                graphics, socialVerticalMiddleX(), startY, endY, mapping.s4());
+        StardewGuiUtil.drawVerticalPartitionSmallSpan(
+                graphics, socialVerticalRightX(), startY, endY, mapping.s4());
     }
 
     private void drawSocialRow(GuiGraphics graphics,
@@ -3982,17 +4065,26 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
 
         String name = socialDisplayName(entry);
         drawSocialPortrait(graphics, entry.npcId(), socialPortraitX(), y);
-        // Name centered horizontally between portrait right edge and left partition line
-        int nameX = socialNameCenterX() - this.font.width(name) / 2;
-        int nameY = y + ui(datable ? 24 : 28);
-        graphics.drawString(this.font, name, nameX, nameY, 0xFF7B5A2F, false);
+        int nameY = y + ui(datable ? 24 : 28) + socialLocalizedNameOffsetY();
+        drawScaledCenteredDialogueText(graphics, name, socialNameCenterX(), nameY,
+                sdvTextScale(), socialLeftColumnEndX() - socialLeftColumnStartX(), 0xFF56160C);
+
+        if (datable) {
+            int gender = socialNpcGender(entry.npcId());
+            String key = gender == 0
+                    ? "stardewcraft.game_menu.social.single_male"
+                    : "stardewcraft.game_menu.social.single_female";
+            drawScaledCenteredText(graphics, StardewFonts.small(),
+                    Component.translatable(key).getString(), menuX + ui(200), y + ui(64),
+                    sdvTextScale(), ui(180), 0xFF56160C);
+        }
 
         drawSocialHearts(graphics, entry, y);
         drawSocialGiftAndTalkMarkers(graphics, entry, y);
     }
 
     private int socialLeftColumnStartX() {
-        return menuX + ui(BORDER_WIDTH);
+        return menuX + ui(SOCIAL_BORDER_WIDTH_SDV);
     }
 
     private int socialLeftColumnEndX() {
@@ -4020,11 +4112,19 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
     }
 
     private int socialTalkColumnEndX() {
-        return socialPageRightX() - ui(BORDER_WIDTH);
+        return socialPageRightX() - ui(SOCIAL_BORDER_WIDTH_SDV);
     }
 
     private int socialRowPosition(int index) {
-        return menuY + ui(64 + index * SOCIAL_ROW_HEIGHT_SDV);
+        return menuY + ui(104 - LIST_CONTENT_TOP_TRIM_SDV
+                + index * SOCIAL_ROW_HEIGHT_SDV);
+    }
+
+    private int socialClickableRowPosition(int index) {
+        // SocialPage characterSlots use rowPosition(i - 1), 12px above the
+        // portrait sprite bounds, with an exact 112px hit area.
+        return menuY + ui(92 - LIST_CONTENT_TOP_TRIM_SDV
+                + index * SOCIAL_ROW_HEIGHT_SDV);
     }
 
     private int socialContentTopY() {
@@ -4032,8 +4132,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
     }
 
     private void drawSocialHearts(GuiGraphics graphics, NpcFriendshipClientCache.Entry entry, int rowY) {
-        int points = Math.max(0, entry.points());
-        int fullHearts = Math.max(0, Math.min(14, points / 250));
+        int fullHearts = Math.max(0, Math.min(14, entry.hearts()));
         int maxHearts = Math.max(10, fullHearts);
         boolean datableLocked = isDatableHeartLocked(entry);
         for (int hearts = 0; hearts < maxHearts; hearts++) {
@@ -4051,61 +4150,38 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
             if (isLockedHeart && hearts < 10) {
                 CommonGuiTextures.drawSocialHeartTint(graphics, drawX, drawY, filled, mapping.s4(), 0.0f, 0.0f, 0.0f, 0.35f);
             } else {
-                CommonGuiTextures.drawSocialHeartTint(graphics, drawX, drawY, filled, mapping.s4(), 1.0f, 1.0f, 1.0f, 0.88f);
+                CommonGuiTextures.drawSocialHeartTint(graphics, drawX, drawY, filled, mapping.s4(), 1.0f, 1.0f, 1.0f, 1.0f);
             }
         }
-
-        drawSocialHeartPartialFill(graphics, rowY, points, fullHearts, maxHearts);
+        drawSocialHeartPartialFill(graphics, rowY, Math.max(0, entry.points()), fullHearts, maxHearts);
     }
 
-    private void drawSocialHeartPartialFill(GuiGraphics graphics, int rowY, int points, int fullHearts, int maxHearts) {
+    /** Mod extension: show progress inside the next heart without changing unlock rules. */
+    private void drawSocialHeartPartialFill(GuiGraphics graphics, int rowY, int points,
+                                            int fullHearts, int maxHearts) {
         if (points <= 0 || fullHearts >= maxHearts) {
             return;
         }
-
         int pointsToNextHeart = points % 250;
         if (pointsToNextHeart <= 0) {
             return;
         }
 
         int activeHeart = fullHearts;
-        int drawX;
-        int drawY;
-        if (activeHeart < 10) {
-            drawX = socialHeartsBaseX() + ui(activeHeart * 32);
-            drawY = rowY + socialHeartsTopRowOffsetY();
-        } else {
-            drawX = socialHeartsBaseX() + ui((activeHeart - 10) * 32);
-            drawY = rowY + socialHeartsBottomRowOffsetY();
-        }
-
-        int filledCells = Math.max(0, Math.min(20, (int) (pointsToNextHeart / 12.5f)));
-        if (filledCells <= 0) {
-            return;
-        }
-
-        int cell = Math.max(1, ui(4));
-        int offsetX = ui(2);
-        int offsetY = ui(2);
-        int remaining = filledCells;
-
-        for (int row = 3; row >= 0 && remaining > 0; row--) {
-            for (int col = 0; col < 5 && remaining > 0; col++) {
-                if (SOCIAL_HEART_FILL_PATTERN[row][col] != 1) {
-                    continue;
-                }
-                int x = drawX + offsetX + col * cell;
-                int y = drawY + offsetY + row * cell;
-                graphics.fill(x, y, x + cell, y + cell, 0xFFDC143C);
-                remaining--;
-            }
-        }
+        int drawX = socialHeartsBaseX() + ui((activeHeart < 10 ? activeHeart : activeHeart - 10) * 32);
+        int drawY = rowY + (activeHeart < 10
+                ? socialHeartsTopRowOffsetY()
+                : socialHeartsBottomRowOffsetY());
+        CommonGuiTextures.drawSocialHeartPartial(
+                graphics, drawX, drawY, pointsToNextHeart / 250.0F,
+                mapping.s4(), 1.0F);
     }
 
     private void drawSocialGiftAndTalkMarkers(GuiGraphics graphics, NpcFriendshipClientCache.Entry entry, int rowY) {
         CommonGuiTextures.drawSocialGiftIcon(graphics, socialGiftIconX(), rowY + socialGiftIconOffsetY(), mapping.s4(), 0.88f);
-        CommonGuiTextures.drawSocialBox(graphics, socialGiftSecondBoxX(), rowY + socialGiftBoxesOffsetY(), entry.giftsThisWeek() >= 2, mapping.s4(), 0.88f);
-        CommonGuiTextures.drawSocialBox(graphics, socialGiftFirstBoxX(), rowY + socialGiftBoxesOffsetY(), entry.giftsThisWeek() >= 1, mapping.s4(), 0.88f);
+        // Original intentionally fills the left box second, then the right box first.
+        CommonGuiTextures.drawSocialBox(graphics, socialGiftFirstBoxX(), rowY + socialGiftBoxesOffsetY(), entry.giftsThisWeek() >= 2, mapping.s4(), 0.88f);
+        CommonGuiTextures.drawSocialBox(graphics, socialGiftSecondBoxX(), rowY + socialGiftBoxesOffsetY(), entry.giftsThisWeek() >= 1, mapping.s4(), 0.88f);
 
         CommonGuiTextures.drawSocialTalkIcon(graphics, socialTalkIconX(), rowY + socialTalkIconOffsetY(), mapping.s4(), 0.88f);
         CommonGuiTextures.drawSocialBox(graphics, socialTalkBoxX(), rowY + socialTalkBoxOffsetY(), entry.talkedToday(), mapping.s4(), 0.88f);
@@ -4113,9 +4189,9 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
 
     // ─── Vanilla-derived absolute positions (relative to menuX/menuY) ───
     // Match original SocialPage column cuts directly: 268, 620, 752.
-    private int socialPortraitX() { return menuX + ui(BORDER_WIDTH + 4); }
+    private int socialPortraitX() { return menuX + ui(SOCIAL_BORDER_WIDTH_SDV + 4); }
 
-    private int socialNameCenterX() { return menuX + ui(188); }
+    private int socialNameCenterX() { return menuX + ui(200); }
 
     private int socialVerticalLeftX() { return socialTuneVerticalLineX(SOCIAL_TUNE_TARGET_VLINE_LEFT); }
     private int socialVerticalMiddleX() { return socialTuneVerticalLineX(SOCIAL_TUNE_TARGET_VLINE_MIDDLE); }
@@ -4144,14 +4220,16 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
 
     private int socialTalkBoxOffsetY() { return ui(52); }
 
-    private int socialVerticalStartY() { return menuY + ui(BORDER_WIDTH + 100); }
+    private int socialVerticalStartY() {
+        return menuY + ui(172 - LIST_CONTENT_TOP_TRIM_SDV);
+    }
 
     private int socialContentLeftX() {
-        return menuX + ui(BORDER_WIDTH);
+        return menuX + ui(SOCIAL_BORDER_WIDTH_SDV);
     }
 
     private int socialContentRightX() {
-        return socialPageRightX() - ui(BORDER_WIDTH);
+        return socialPageRightX() - ui(SOCIAL_BORDER_WIDTH_SDV);
     }
 
     private int socialContentWidth() {
@@ -4163,16 +4241,13 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         int upY = socialUpButtonY();
         int downX = socialDownButtonX();
         int downY = socialDownButtonY();
-        int maxScroll = socialMaxScroll(total);
 
-        if (socialScroll > 0) {
-            drawArrowFromCursors(graphics, upX, upY,
-                    socialArrowBoundWidth(), socialArrowBoundHeight(), 12, 0.8f);
-        }
-        if (socialScroll < maxScroll) {
-            drawArrowFromCursors(graphics, downX, downY,
-                    socialArrowBoundWidth(), socialArrowBoundHeight(), 11, 0.8f);
-        }
+        // SocialPage always draws both 4x ClickableTextureComponents; their
+        // enabled state only affects input, not visibility.
+        drawArrowFromCursors(graphics, upX, upY,
+                socialArrowBoundWidth(), socialArrowBoundHeight(), 12, 1.0f);
+        drawArrowFromCursors(graphics, downX, downY,
+                socialArrowBoundWidth(), socialArrowBoundHeight(), 11, 1.0f);
 
         CommonGuiTextures.drawScrollTrackBox(
             graphics,
@@ -4365,6 +4440,256 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
                         npcId);
         return DATEABLE_NPCS.contains(normalizeNpcId(npcId))
                 || display != null && display.datable();
+    }
+
+    private int socialNpcGender(String npcId) {
+        var definition = com.stardew.craft.api.v1.npc.StardewNpcProfiles.resolve(npcId)
+                .orElse(null);
+        return definition == null ? 0 : definition.profile().gender();
+    }
+
+    private int socialLocalizedNameOffsetY() {
+        String language = this.minecraft == null || this.minecraft.getLanguageManager() == null
+                ? "en_us"
+                : this.minecraft.getLanguageManager().getSelected().toLowerCase(Locale.ROOT);
+        if (!language.startsWith("ru") && !language.startsWith("ko")) {
+            return 0;
+        }
+        return -Math.round(StardewFonts.lineHeight(StardewFonts.Role.SMALL)
+                * mapping.textScale() / 2.0F);
+    }
+
+    // ============ Tab 5: Animal Page ============
+
+    private void drawAnimalPage(GuiGraphics graphics) {
+        List<AnimalOverviewClientCache.Entry> animals = AnimalOverviewClientCache.entries();
+        int total = animals.size();
+        animalScroll = Mth.clamp(animalScroll, 0, animalMaxScroll(total));
+
+        for (int i = 0; i < 4 && total > i; i++) {
+            StardewGuiUtil.drawHorizontalPartitionSmall(
+                    graphics,
+                    menuX,
+                    menuY + ui(172 - LIST_CONTENT_TOP_TRIM_SDV
+                            + i * ANIMAL_ROW_HEIGHT_SDV),
+                    animalPageWidth(),
+                    mapping.s4());
+        }
+
+        if (total > 0) {
+            int partitionStartY = menuY + ui(28);
+            int partitionEndY = total >= ANIMAL_MAX_VISIBLE
+                    ? menuY + menuHeight - ui(36)
+                    : partitionStartY + ui((108 + total) * total);
+            StardewGuiUtil.drawVerticalPartitionSmallSpan(
+                    graphics, menuX + ui(460), partitionStartY, partitionEndY, mapping.s4());
+            StardewGuiUtil.drawVerticalPartitionSmallSpan(
+                    graphics, menuX + ui(644), partitionStartY, partitionEndY, mapping.s4());
+
+            int toIndex = Math.min(total, animalScroll + ANIMAL_MAX_VISIBLE);
+            for (int index = animalScroll; index < toIndex; index++) {
+                drawAnimalRow(graphics, animals.get(index), index - animalScroll);
+            }
+        }
+
+        drawAnimalScrollControls(graphics, total);
+    }
+
+    private void drawAnimalRow(GuiGraphics graphics,
+                               AnimalOverviewClientCache.Entry entry,
+                               int visibleRow) {
+        int rowOffset = visibleRow * ANIMAL_ROW_HEIGHT_SDV;
+        drawAnimalPageSprite(graphics, entry, rowOffset);
+
+        String name = animalDisplayName(entry);
+        drawScaledCenteredDialogueText(
+                graphics,
+                name,
+                menuX + ui(328),
+                menuY + ui(124 - LIST_CONTENT_TOP_TRIM_SDV + rowOffset)
+                        + socialLocalizedNameOffsetY(),
+                sdvTextScale(),
+                ui(248),
+                0xFF56160C);
+
+        int heartsY = menuY + ui((entry.receivedAnimalCracker() ? 112 : 136)
+                - LIST_CONTENT_TOP_TRIM_SDV + rowOffset);
+        drawAnimalFriendshipHearts(graphics, entry.friendship(), heartsY);
+
+        int petX = menuX + ui(700);
+        CommonGuiTextures.drawAnimalPagePetIcon(
+                graphics, petX, menuY + ui(108 - LIST_CONTENT_TOP_TRIM_SDV + rowOffset),
+                mapping.s4(), 0.8F);
+        CommonGuiTextures.drawAnimalPagePetStatus(
+                graphics, petX, menuY + ui(152 - LIST_CONTENT_TOP_TRIM_SDV + rowOffset),
+                entry.petStatus(), mapping.s4(), 0.8F);
+
+        if (entry.receivedAnimalCracker()) {
+            int crackerX = menuX + ui(556);
+            int crackerY = menuY + ui(144 - LIST_CONTENT_TOP_TRIM_SDV + rowOffset);
+            CommonGuiTextures.drawAnimalPageCracker(
+                    graphics, crackerX + ui(2), crackerY + ui(2), mapping.s4(), 0.35F);
+            CommonGuiTextures.drawAnimalPageCracker(
+                    graphics, crackerX, crackerY, mapping.s4(), 0.8F);
+        }
+    }
+
+    private void drawAnimalPageSprite(GuiGraphics graphics,
+                                      AnimalOverviewClientCache.Entry entry,
+                                      int rowOffset) {
+        ResourceLocation textureId = ResourceLocation.tryParse(entry.textureId());
+        int textureWidth = entry.textureWidth();
+        int textureHeight = entry.textureHeight();
+        if (textureId == null || textureWidth <= 0 || textureHeight <= 0) {
+            com.stardew.craft.api.v1.agriculture.StardewAnimalPurchaseDisplay display =
+                    com.stardew.craft.api.v1.agriculture.StardewAnimalPurchaseDisplays
+                            .display(entry.animalTypeId());
+            if (display == null) {
+                return;
+            }
+            textureId = display.texture();
+            textureWidth = display.textureWidth();
+            textureHeight = display.textureHeight();
+        }
+
+        boolean compactSprite = textureHeight <= 16;
+        int x = menuX + ui(44 + (compactSprite ? 24 : 0));
+        int y = menuY + ui(88 - LIST_CONTENT_TOP_TRIM_SDV
+                + rowOffset + (compactSprite ? 48 : 0));
+        SdvTexture.full(textureId, textureWidth, textureHeight)
+                .drawPixelZoom(graphics, x, y, mapping.s4());
+    }
+
+    private void drawAnimalFriendshipHearts(GuiGraphics graphics, int friendship, int y) {
+        int clampedFriendship = Mth.clamp(friendship, 0, 1000);
+        int halfHeart = clampedFriendship % 200 >= 100
+                ? clampedFriendship / 200
+                : -1;
+        for (int heart = 0; heart < 5; heart++) {
+            int x = menuX + ui(508 + heart * 32);
+            boolean filled = clampedFriendship > (heart + 1) * 195;
+            CommonGuiTextures.drawSocialHeartTint(
+                    graphics, x, y, filled, mapping.s4(),
+                    1.0F, 1.0F, 1.0F, 0.89F);
+            if (halfHeart == heart) {
+                CommonGuiTextures.drawSocialHeartPartial(
+                        graphics, x, y, 4.0F / 7.0F, mapping.s4(), 0.891F);
+            }
+        }
+    }
+
+    private String animalDisplayName(AnimalOverviewClientCache.Entry entry) {
+        if (entry.customName() != null && !entry.customName().isBlank()) {
+            return entry.customName();
+        }
+        if (entry.displayNameKey() != null && !entry.displayNameKey().isBlank()) {
+            return Component.translatable(entry.displayNameKey()).getString();
+        }
+        return entry.animalTypeId();
+    }
+
+    private int animalPageWidth() {
+        return ui(ANIMAL_PAGE_WIDTH_SDV);
+    }
+
+    private int animalPageRightX() {
+        return menuX + animalPageWidth();
+    }
+
+    private int animalMaxScroll(int total) {
+        return Math.max(0, total - ANIMAL_MAX_VISIBLE);
+    }
+
+    private int animalUpButtonX() {
+        return animalPageRightX() + ui(16);
+    }
+
+    private int animalUpButtonY() {
+        return menuY + ui(64);
+    }
+
+    private int animalDownButtonY() {
+        return menuY + menuHeight - ui(64);
+    }
+
+    private int animalScrollBarX() {
+        return animalUpButtonX() + ui(12);
+    }
+
+    private int animalScrollRunnerY() {
+        return animalUpButtonY() + ui(48 + 4);
+    }
+
+    private int animalScrollRunnerHeight() {
+        return menuHeight - ui(128 + 48 + 8);
+    }
+
+    private int currentAnimalScrollBarY(int total) {
+        if (total <= 0) {
+            return animalScrollRunnerY();
+        }
+        int maxScroll = animalMaxScroll(total);
+        int y = animalScrollRunnerHeight()
+                / Math.max(1, total - ANIMAL_MAX_VISIBLE + 1)
+                * animalScroll
+                + animalScrollRunnerY();
+        if (maxScroll > 0 && animalScroll == maxScroll) {
+            y = animalDownButtonY() - ui(40 + 4);
+        }
+        return y;
+    }
+
+    private void drawAnimalScrollControls(GuiGraphics graphics, int total) {
+        drawArrowFromCursors(
+                graphics, animalUpButtonX(), animalUpButtonY(),
+                ui(44), ui(48), 12, 1.0F);
+        drawArrowFromCursors(
+                graphics, animalUpButtonX(), animalDownButtonY(),
+                ui(44), ui(48), 11, 1.0F);
+        CommonGuiTextures.drawScrollTrackBox(
+                graphics,
+                animalScrollBarX(),
+                animalScrollRunnerY(),
+                ui(24),
+                animalScrollRunnerHeight(),
+                mapping.s4());
+        CommonGuiTextures.drawScrollBarThumb(
+                graphics,
+                animalScrollBarX(),
+                currentAnimalScrollBarY(total),
+                mapping.s4());
+    }
+
+    private boolean animalUpButtonContains(double mouseX, double mouseY) {
+        return contains(mouseX, mouseY, animalUpButtonX(), animalUpButtonY(), ui(44), ui(48));
+    }
+
+    private boolean animalDownButtonContains(double mouseX, double mouseY) {
+        return contains(mouseX, mouseY, animalUpButtonX(), animalDownButtonY(), ui(44), ui(48));
+    }
+
+    private boolean animalScrollBarContains(double mouseX, double mouseY, int total) {
+        return contains(mouseX, mouseY, animalScrollBarX(), currentAnimalScrollBarY(total), ui(24), ui(40));
+    }
+
+    private boolean animalScrollRunnerContains(double mouseX, double mouseY) {
+        return mouseX > animalPageRightX() && mouseX < animalPageRightX() + ui(128)
+                && mouseY > menuY && mouseY < menuY + menuHeight
+                && !animalDownButtonContains(mouseX, mouseY);
+    }
+
+    private void setAnimalScrollFromMouse(double mouseY, int total) {
+        int maxScroll = animalMaxScroll(total);
+        if (maxScroll <= 0) {
+            animalScroll = 0;
+            return;
+        }
+        int minY = menuY + ui(68);
+        int maxY = menuY + menuHeight - ui(64 + 12 + 40);
+        int clampedY = Mth.clamp((int) Math.round(mouseY), minY, maxY);
+        float percentage = (clampedY - animalScrollRunnerY())
+                / (float) Math.max(1, animalScrollRunnerHeight());
+        animalScroll = Mth.clamp((int) (total * percentage), 0, maxScroll);
     }
 
     private String normalizeNpcId(String npcId) {
@@ -4930,7 +5255,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         int tabsRight = tabX(TAB_COUNT - 1) + tabSize();
         areas.add(new Rect2i(firstTabX, tabY(), tabsRight - firstTabX, tabSize()));
 
-        int closeX = menuX + activeMenuWidth() - ui(CLOSE_X_OFFSET_SDV);
+        int closeX = menuX + closeButtonAnchorWidth() - ui(CLOSE_X_OFFSET_SDV);
         int closeY = menuY - ui(CLOSE_Y_OFFSET_SDV);
         areas.add(new Rect2i(closeX, closeY, ui(CLOSE_SIZE_SDV), ui(CLOSE_SIZE_SDV)));
 
@@ -5199,7 +5524,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         if (invSlot >= 0 && this.minecraft != null && this.minecraft.player != null) {
             ItemStack stack = this.minecraft.player.getInventory().getItem(invSlot);
             if (!stack.isEmpty()) {
-                graphics.renderTooltip(this.font, stack, mouseX, mouseY);
+                graphics.renderTooltip(tooltipFont(), stack, mouseX, mouseY);
                 return;
             }
         }
@@ -5209,8 +5534,9 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
 
             ItemStack output = craftingRecipeStacks.get(hoveredCraftingIndex);
             List<RecipeRequirement> requirements = getRecipeRequirements(recipeId);
+            Font vanillaFont = tooltipFont();
 
-            // Build tooltip lines using MC's native renderTooltip
+            // Build tooltip lines using MC's native renderTooltip.
             List<Component> lines = new ArrayList<>();
             // Item tooltip lines (name, category, description, etc.)
             if (this.minecraft != null && this.minecraft.player != null) {
@@ -5220,7 +5546,6 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
             } else {
                 lines.add(output.getHoverName().copy());
             }
-            // Separator + Ingredients section
             lines.add(Component.empty());
             lines.add(Component.translatable("stardewcraft.crafting.ingredients").withStyle(ChatFormatting.GOLD));
             int ingredientStartLine = lines.size();
@@ -5229,7 +5554,6 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
                 int need = requirement.need();
                 boolean enough = have >= need;
                 ChatFormatting color = enough ? ChatFormatting.WHITE : ChatFormatting.RED;
-                // "  " prefix = space for icon overlay (about 10px)
                 Component line = Component.literal("  ")
                         .append(Component.literal(" " + need + "× ").withStyle(color))
                         .append(requirement.name().copy().withStyle(color));
@@ -5239,36 +5563,26 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
             lines.add(Component.translatable("stardewcraft.game_menu.crafting.shortcut_stack")
                     .withStyle(ChatFormatting.GRAY));
 
-            // Render tooltip using MC's native method
-            graphics.renderTooltip(this.font, lines, java.util.Optional.empty(), mouseX, mouseY);
+            graphics.renderTooltip(vanillaFont, lines, java.util.Optional.empty(), mouseX, mouseY);
 
-            // --- Overlay ingredient icons ---
-            // MC tooltip positioning: starts at (mouseX+12, mouseY-12), then clamped
             int tooltipWidth = 0;
             for (Component line : lines) {
-                int w = this.font.width(line);
-                if (w > tooltipWidth) tooltipWidth = w;
+                tooltipWidth = Math.max(tooltipWidth, vanillaFont.width(line));
             }
-            // MC adds 4px padding on each side inside the tooltip
             int frameWidth = tooltipWidth + 8;
-            // Height: first line is 10px tall (lineH + 2px gap), rest are lineH(9) each.
-            // But empty lines are only 2px + lineH. MC uses: if line index == 0, height += 2 extra.
-            // Actually MC tooltip: first line adds (lineH+2), subsequent lines add lineH each,
-            // except if a line is empty it adds lineH/2 instead.
-            int tooltipHeight = 8; // top+bottom padding
+            int tooltipHeight = 8;
             for (int i = 0; i < lines.size(); i++) {
                 if (i == 0) {
-                    tooltipHeight += this.font.lineHeight + 2;
+                    tooltipHeight += vanillaFont.lineHeight + 2;
                 } else if (lines.get(i).getString().isEmpty()) {
-                    tooltipHeight += this.font.lineHeight / 2;
+                    tooltipHeight += vanillaFont.lineHeight / 2;
                 } else {
-                    tooltipHeight += this.font.lineHeight + 1;
+                    tooltipHeight += vanillaFont.lineHeight + 1;
                 }
             }
 
             int boxX = mouseX + 12;
             int boxY = mouseY - 12;
-            // MC clamping logic
             if (boxX + frameWidth > this.width) {
                 boxX -= 28 + frameWidth;
             }
@@ -5279,33 +5593,25 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
                 boxY = 4;
             }
 
-            // Calculate text start position (4px padding inside box)
             int textX = boxX + 4;
             int textY = boxY + 4;
-            // Advance past rendered lines to reach ingredient lines
             for (int i = 0; i < ingredientStartLine; i++) {
                 if (i == 0) {
-                    textY += this.font.lineHeight + 2;
+                    textY += vanillaFont.lineHeight + 2;
                 } else if (lines.get(i).getString().isEmpty()) {
-                    textY += this.font.lineHeight / 2;
+                    textY += vanillaFont.lineHeight / 2;
                 } else {
-                    textY += this.font.lineHeight + 1;
+                    textY += vanillaFont.lineHeight + 1;
                 }
             }
 
-            // Draw icons at each ingredient line
             for (int i = 0; i < requirements.size(); i++) {
-                RecipeRequirement req = requirements.get(i);
-                int lineY = textY;
-                // Advance for previous ingredient lines
-                for (int j = 0; j < i; j++) {
-                    lineY += this.font.lineHeight + 1;
-                }
-                float s = 0.5f; // 16*0.5=8px, fits in line height of 9
-                int iconDrawY = lineY + (this.font.lineHeight - 8) / 2;
+                RecipeRequirement requirement = requirements.get(i);
+                int lineY = textY + i * (vanillaFont.lineHeight + 1);
+                int iconDrawY = lineY + (vanillaFont.lineHeight - 8) / 2;
                 graphics.pose().pushPose();
-                graphics.pose().translate(0, 0, 400.0f);
-                CommonGuiTextures.drawItem(graphics, req.icon(), textX, iconDrawY, s);
+                graphics.pose().translate(0, 0, 400.0F);
+                CommonGuiTextures.drawItem(graphics, requirement.icon(), textX, iconDrawY, 0.5F);
                 graphics.pose().popPose();
             }
 
@@ -5318,10 +5624,10 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
                 List<Component> lines = new ArrayList<>();
                 lines.add(Component.translatable("stardewcraft.game_menu.crafting.trash_can").withStyle(ChatFormatting.WHITE));
                 lines.add(carried.getHoverName().copy().withStyle(ChatFormatting.GRAY));
-                graphics.renderTooltip(this.font, lines, java.util.Optional.empty(), mouseX, mouseY);
+                graphics.renderTooltip(tooltipFont(), lines, java.util.Optional.empty(), mouseX, mouseY);
                 return;
             }
-            graphics.renderTooltip(this.font, Component.translatable("stardewcraft.game_menu.crafting.trash_can"), mouseX, mouseY);
+            graphics.renderTooltip(tooltipFont(), Component.translatable("stardewcraft.game_menu.crafting.trash_can"), mouseX, mouseY);
         }
     }
 
@@ -5463,6 +5769,10 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
                             socialScroll = 0;
                             PacketDistributor.sendToServer(new RequestNpcFriendshipOverviewPayload());
                         }
+                        if (currentTab == TAB_ANIMALS) {
+                            animalScroll = 0;
+                            PacketDistributor.sendToServer(new RequestAnimalOverviewPayload());
+                        }
                         if (currentTab == 3) {
                             farmMgmtScroll = 0;
                             PacketDistributor.sendToServer(new com.stardew.craft.network.payload.RequestFarmPermPayload());
@@ -5506,12 +5816,39 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
                 for (int visibleRow = 0; visibleRow < SOCIAL_MAX_VISIBLE; visibleRow++) {
                     int index = socialScroll + visibleRow;
                     if (index >= socialEntries.size()) break;
-                    int rowY = socialRowPosition(visibleRow);
+                    int rowY = socialClickableRowPosition(visibleRow);
                     if (contains(mouseX, mouseY, menuX, rowY, socialPageWidth(), ui(SOCIAL_ROW_HEIGHT_SDV))) {
                         this.minecraft.setScreen(new StardewNpcProfileScreen(this, socialEntries.get(index), socialEntries));
                         playUiSound(ModSounds.BIG_SELECT.get(), 1.0F, 1.0F);
                         return true;
                     }
+                }
+            }
+
+            if (currentTab == TAB_ANIMALS) {
+                int total = AnimalOverviewClientCache.entries().size();
+                int maxScroll = animalMaxScroll(total);
+                if (animalUpButtonContains(mouseX, mouseY) && animalScroll > 0) {
+                    animalScroll--;
+                    playUiSound(ModSounds.SHWIP.get(), 1.0F, 1.0F);
+                    return true;
+                }
+                if (animalDownButtonContains(mouseX, mouseY) && animalScroll < maxScroll) {
+                    animalScroll++;
+                    playUiSound(ModSounds.SHWIP.get(), 1.0F, 1.0F);
+                    return true;
+                }
+                if (animalScrollBarContains(mouseX, mouseY, total)) {
+                    animalScrolling = true;
+                    return true;
+                }
+                if (animalScrollRunnerContains(mouseX, mouseY)) {
+                    int before = animalScroll;
+                    setAnimalScrollFromMouse(mouseY, total);
+                    if (before != animalScroll) {
+                        playUiSound(ModSounds.SHWIP.get(), 1.0F, 1.0F);
+                    }
+                    return true;
                 }
             }
 
@@ -5717,6 +6054,20 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
             return true;
         }
 
+        if (currentTab == TAB_ANIMALS) {
+            int maxScroll = animalMaxScroll(AnimalOverviewClientCache.entries().size());
+            int before = animalScroll;
+            if (scrollY > 0) {
+                animalScroll = Math.max(0, animalScroll - 1);
+            } else if (scrollY < 0) {
+                animalScroll = Math.min(maxScroll, animalScroll + 1);
+            }
+            if (before != animalScroll) {
+                playUiSound(ModSounds.SHWIP.get(), 1.0F, 1.0F);
+            }
+            return true;
+        }
+
         if (currentTab == 3) {
             var players = com.stardew.craft.client.gui.FarmPermissionClientCache.getPlayers();
             int maxScroll = Math.max(0, players.size() - farmMgmtVisibleRows);
@@ -5787,6 +6138,15 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
             return true;
         }
 
+        if (currentTab == TAB_ANIMALS && animalScrolling && button == 0) {
+            int before = animalScroll;
+            setAnimalScrollFromMouse(mouseY, AnimalOverviewClientCache.entries().size());
+            if (before != animalScroll) {
+                playUiSound(ModSounds.SHWIP.get(), 1.0F, 1.0F);
+            }
+            return true;
+        }
+
         if (currentTab == 0 || currentTab == 4) {
             Slot slot = activeMenuSlotAt(mouseX, mouseY);
             return super.mouseDragged(mappedSlotMouseX(slot, mouseX), mappedSlotMouseY(slot, mouseY),
@@ -5799,6 +6159,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (button == 0) {
             socialScrolling = false;
+            animalScrolling = false;
             socialTuneDragging = false;
         }
 
@@ -5836,6 +6197,25 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
                 socialScroll = Math.min(maxScroll, socialScroll + 1);
                 if (before != socialScroll) {
                     playUiSound(ModSounds.SHWIP.get(), 1.0f, 1.0f);
+                }
+                return true;
+            }
+        }
+        if (currentTab == TAB_ANIMALS) {
+            int maxScroll = animalMaxScroll(AnimalOverviewClientCache.entries().size());
+            if (keyCode == GLFW.GLFW_KEY_UP) {
+                int before = animalScroll;
+                animalScroll = Math.max(0, animalScroll - 1);
+                if (before != animalScroll) {
+                    playUiSound(ModSounds.SHWIP.get(), 1.0F, 1.0F);
+                }
+                return true;
+            }
+            if (keyCode == GLFW.GLFW_KEY_DOWN) {
+                int before = animalScroll;
+                animalScroll = Math.min(maxScroll, animalScroll + 1);
+                if (before != animalScroll) {
+                    playUiSound(ModSounds.SHWIP.get(), 1.0F, 1.0F);
                 }
                 return true;
             }

@@ -24,6 +24,10 @@
     "DoorBlockMasteryCollisionMixin"
   ],
   "client": [
+    "FontFontSetAccessor",
+    "FontSetProvidersAccessor",
+    "StardewFontManagerMixin",
+    "StardewFontTextureFilterMixin",
     "GuiGraphicsStackCountScaleMixin",
     "FishingHookRendererLineOriginMixin",
     "FishingHookRendererBiteDipMixin",

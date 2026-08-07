@@ -92,7 +92,7 @@ public class FairWheelGameScreen extends Screen implements com.stardew.craft.cli
         guiScale = (float) Minecraft.getInstance().getWindow().getGuiScale();
         s4 = 4.0F / guiScale;
         computeLayout();
-        wagerInput = new EditBox(font,
+        wagerInput = new EditBox(com.stardew.craft.client.font.StardewFonts.small(),
             numberBox.x() + ui(16),
             numberBox.y() + (numberBox.height() - font.lineHeight) / 2,
             Math.max(12, numberBox.width() - ui(32)),

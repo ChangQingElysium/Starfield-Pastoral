@@ -338,6 +338,24 @@ public class PlayerStardewDataAPI {
         return success;
     }
 
+    /** Returns whether the complete cost can be paid without mutating player data. */
+    public static boolean canConsumeEnergy(ServerPlayer player, float amount) {
+        if (amount <= 0.0F || player.hasEffect(ModMobEffects.STATUE_OF_BLESSINGS_2)) {
+            return true;
+        }
+        return getData(player).getEnergy() >= amount;
+    }
+
+    /** Pays an all-or-nothing action cost and shows the Stardew HUD error on failure. */
+    public static boolean consumeEnergyOrNotify(ServerPlayer player, float amount) {
+        if (consumeEnergy(player, amount)) {
+            return true;
+        }
+        com.stardew.craft.network.payload.HudHintPayload.send(
+                player, "stardewcraft.message.player.exhausted");
+        return false;
+    }
+
     public static int getBlessingOfWatersRemaining(ServerPlayer player) {
         return getData(player).getBlessingOfWatersRemaining();
     }

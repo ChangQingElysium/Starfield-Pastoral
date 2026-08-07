@@ -1174,62 +1174,76 @@
       "indoor": true,
       "note": "George schedule 10: Saloon sports room, north"
     },
-    "_comment_gus": "=== Gus (Saloon / SeedShop / Town / Beach) ===",
-    "gus_saloon_counter": {
-      "x": 25,
+    "_comment_gus": "=== Gus schedule (Saloon / SeedShop / Hospital) ===",
+    "gus_schedule_01": {
+      "x": 32,
+      "y": 36,
+      "z": -2,
+      "indoor": true,
+      "note": "Gus schedule 1: Saloon morning chair, south"
+    },
+    "gus_schedule_02": {
+      "x": 24,
       "y": 36,
       "z": 11,
       "indoor": true,
-      "note": "Gus 吧台工作位（朝西）"
+      "note": "Gus schedule 2: Saloon main work position, south"
     },
-    "gus_saloon_kitchen": {
-      "x": 30,
-      "y": 36,
-      "z": 9,
-      "indoor": true,
-      "note": "Gus 厨房备餐（朝东）"
-    },
-    "gus_saloon_clean": {
-      "x": 38,
-      "y": 36,
-      "z": 14,
-      "indoor": true,
-      "note": "Gus 清洁打扫（朝东）"
-    },
-    "gus_saloon_sit": {
+    "gus_schedule_03": {
       "x": 26,
       "y": 36,
-      "z": 10,
+      "z": 11,
       "indoor": true,
-      "note": "Gus 坐下休息（朝南）"
+      "note": "Gus schedule 3: Saloon kitchen rotation stop, north"
     },
-    "gus_seedshop_visit": {
+    "gus_schedule_04": {
+      "x": 28,
+      "y": 36,
+      "z": 11,
+      "indoor": true,
+      "note": "Gus schedule 4: Saloon cleaning position, south"
+    },
+    "gus_schedule_05": {
       "x": 38,
       "y": 36,
-      "z": -12,
-      "indoor": true,
-      "note": "Gus 杂货店购物（朝南）"
-    },
-    "gus_communitycenter_visit": {
-      "x": 58,
-      "y": 66,
-      "z": -36,
-      "note": "Gus 社区中心室外（朝南）",
-      "indoor": false
-    },
-    "gus_town_walk": {
-      "x": 74,
-      "y": 64,
       "z": -3,
-      "note": "Gus 镇上散步（朝北）",
-      "indoor": false
+      "indoor": true,
+      "note": "Gus schedule 5: Saloon bed, east"
     },
-    "gus_beach_spot": {
-      "x": 86,
-      "y": 60,
-      "z": 119,
-      "note": "Gus 海滩散步（朝西）",
-      "indoor": false
+    "gus_schedule_06": {
+      "x": 30,
+      "y": 36,
+      "z": 13,
+      "indoor": true,
+      "note": "Gus schedule 6: Saloon Green Rain position, south"
+    },
+    "gus_schedule_07": {
+      "x": 49,
+      "y": 36,
+      "z": 1,
+      "indoor": true,
+      "note": "Gus schedule 7: Saloon Sunday sports room, north"
+    },
+    "gus_schedule_08": {
+      "x": 30,
+      "y": 36,
+      "z": -19,
+      "indoor": true,
+      "note": "Gus schedule 8: SeedShop Monday visit, north"
+    },
+    "gus_schedule_09": {
+      "x": 11,
+      "y": 43,
+      "z": -16,
+      "indoor": true,
+      "note": "Gus schedule 9: Hospital waiting room, north"
+    },
+    "gus_schedule_10": {
+      "x": 2,
+      "y": 43,
+      "z": -24,
+      "indoor": true,
+      "note": "Gus schedule 10: Hospital exam room, east"
     },
     "_comment_animalshop": {
       "note": "=== AnimalShop (Marnie Ranch) 建筑点 ==="
@@ -1832,7 +1846,7 @@
       "x": 75,
       "y": 35,
       "z": 0,
-      "note": "Pam 拖车客厅/沙发（朝南）— 暂用室外门坐标",
+      "note": "Pam 日程点 1：拖车沙发/睡觉位（原版朝南）",
       "indoor": true
     },
     "pam_trailer_kitchen": {
@@ -1843,25 +1857,67 @@
       "indoor": true
     },
     "pam_trailer_sleep": {
-      "x": 73,
+      "x": 75,
       "y": 35,
-      "z": 1,
-      "note": "Pam 拖车睡觉位（朝南）— 暂用室外门坐标",
+      "z": 0,
+      "note": "Pam 日程点 1：拖车睡觉位（与沙发共用原版格，朝南）",
+      "indoor": true
+    },
+    "pam_beach_squidfest": {
+      "x": 44,
+      "y": 60,
+      "z": 133,
+      "note": "Pam 日程点 2：鱿鱼节海滩停留点（原版朝南）",
+      "indoor": false
+    },
+    "pam_saloon_green_rain": {
+      "x": 20,
+      "y": 36,
+      "z": 18,
+      "note": "Pam 日程点 3：绿雨酒吧停留点（原版朝南）",
       "indoor": true
     },
     "pam_saloon_seat": {
-      "x": 34,
+      "x": 21,
       "y": 36,
-      "z": 15,
+      "z": 11,
       "indoor": true,
-      "note": "Pam 酒吧常驻座位"
+      "note": "Pam 日程点 4：酒吧常驻座位（原版朝东）"
+    },
+    "pam_hospital_waiting": {
+      "x": 4,
+      "y": 43,
+      "z": -13,
+      "indoor": true,
+      "note": "Pam 日程点 5：春 25 日诊所候诊位（原版朝南）"
+    },
+    "pam_hospital_exam": {
+      "x": 2,
+      "y": 43,
+      "z": -23,
+      "indoor": true,
+      "note": "Pam 日程点 6：春 25 日诊室位（原版朝东）"
     },
     "pam_busstop_bench": {
-      "x": -62,
+      "x": -64,
       "y": 64,
-      "z": -61,
-      "note": "Pam 公交站等车点（朝北）",
+      "z": -59,
+      "note": "Pam 日程点 7：公交站值班位（原版朝南）",
       "indoor": false
+    },
+    "pam_jojamart_visit": {
+      "x": 105,
+      "y": 45,
+      "z": -30,
+      "note": "Pam 日程点 8：Joja 超市停留点（原版朝东）",
+      "indoor": true
+    },
+    "pam_seedshop_replacement": {
+      "x": 17,
+      "y": 36,
+      "z": -15,
+      "note": "Pam 日程点 9：Joja 关闭后的皮埃尔商店替代点（原版朝西）",
+      "indoor": true
     },
     "pam_town_walk": {
       "x": 52,

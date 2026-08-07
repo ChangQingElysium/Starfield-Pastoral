@@ -23,6 +23,7 @@ public final class CommonGuiTextures {
     private static final SdvTexture QI_COIN = SdvTexture.full(common("qi_coin"), 9, 10);
     private static final SdvTexture FAIR_STAR_TOKEN = SdvTexture.full(fairTargetGame("star_token"), 8, 8);
     private static final SdvTexture SHOP_PORTRAIT_FRAME = SdvTexture.full(common("shop_portrait_frame"), 74, 74);
+    private static final SdvTexture DAY_TIME_MONEY_BOX = SdvTexture.full(common("day_time_money_box"), 71, 43);
     private static final SdvTexture MONEY_BOX = SdvTexture.full(common("money_box"), 65, 17);
     private static final SdvTexture[] MONEY_DIGITS = frames("money_digit_", 10, 5, 8);
     private static final SdvTexture[] NUMBER_DIGITS = frames("number_digit_", 10, 8, 8);
@@ -54,6 +55,13 @@ public final class CommonGuiTextures {
     private static final SdvTexture SOCIAL_TALK_ICON = SdvTexture.full(common("social_talk_icon"), 13, 11);
     private static final SdvTexture SOCIAL_BOX_EMPTY = SdvTexture.full(common("social_box_empty"), 9, 9);
     private static final SdvTexture SOCIAL_BOX_FILLED = SdvTexture.full(common("social_box_filled"), 9, 9);
+    private static final SdvTexture ANIMAL_PAGE_PET_ICON = SdvTexture.full(common("animal_page_pet_icon"), 10, 10);
+    private static final SdvTexture[] ANIMAL_PAGE_PET_STATUS = new SdvTexture[] {
+        SdvTexture.full(common("animal_page_pet_none"), 9, 9),
+        SdvTexture.full(common("animal_page_pet_auto"), 9, 9),
+        SdvTexture.full(common("animal_page_pet_hand"), 9, 9)
+    };
+    private static final SdvTexture ANIMAL_PAGE_CRACKER = SdvTexture.full(common("animal_page_cracker"), 15, 11);
     private static final SdvTexture CATEGORY_FRAME_LEFT = SdvTexture.full(common("category_frame_left"), 16, 16);
     private static final SdvTexture CATEGORY_FRAME_RIGHT = SdvTexture.full(common("category_frame_right"), 16, 16);
     private static final SdvTexture CATALOGUE_STAR = SdvTexture.full(common("catalogue_star"), 16, 16);
@@ -248,6 +256,10 @@ public final class CommonGuiTextures {
         MONEY_BOX.drawPixelZoom(graphics, x, y, scale);
     }
 
+    public static void drawDayTimeMoneyBox(GuiGraphics graphics, int x, int y) {
+        DAY_TIME_MONEY_BOX.drawAtCurrentPose(graphics, x, y);
+    }
+
     public static void drawMoneyDigitTint(GuiGraphics graphics, int x, int y, int digit, float scale, float red, float green, float blue, float alpha) {
         MONEY_DIGITS[clampFrame(digit, MONEY_DIGITS.length)].drawPixelZoomTint(graphics, x, y, scale, red, green, blue, alpha);
     }
@@ -414,6 +426,20 @@ public final class CommonGuiTextures {
     public static void drawSocialBox(GuiGraphics graphics, int x, int y, boolean filled, float scale, float alpha) {
         SdvTexture texture = filled ? SOCIAL_BOX_FILLED : SOCIAL_BOX_EMPTY;
         texture.drawPixelZoomTint(graphics, x, y, scale, 1.0f, 1.0f, 1.0f, alpha);
+    }
+
+    public static void drawAnimalPagePetIcon(GuiGraphics graphics, int x, int y, float scale, float alpha) {
+        ANIMAL_PAGE_PET_ICON.drawPixelZoomTint(graphics, x, y, scale, 1.0f, 1.0f, 1.0f, alpha);
+    }
+
+    public static void drawAnimalPagePetStatus(GuiGraphics graphics, int x, int y,
+                                               int status, float scale, float alpha) {
+        ANIMAL_PAGE_PET_STATUS[clampFrame(status, ANIMAL_PAGE_PET_STATUS.length)]
+                .drawPixelZoomTint(graphics, x, y, scale, 1.0f, 1.0f, 1.0f, alpha);
+    }
+
+    public static void drawAnimalPageCracker(GuiGraphics graphics, int x, int y, float scale, float alpha) {
+        ANIMAL_PAGE_CRACKER.drawPixelZoomTint(graphics, x, y, scale, 1.0f, 1.0f, 1.0f, alpha);
     }
 
     public static void drawCatalogueStarTint(GuiGraphics graphics, int x, int y, float scale, float red, float green, float blue, float alpha) {
@@ -611,6 +637,25 @@ public final class CommonGuiTextures {
     public static void drawSocialHeartTint(GuiGraphics graphics, int x, int y, boolean filled, float scale, float red, float green, float blue, float alpha) {
         SdvTexture texture = filled ? SOCIAL_HEART_FILLED : SOCIAL_HEART_EMPTY;
         texture.drawPixelZoomTint(graphics, x, y, scale, red, green, blue, alpha);
+    }
+
+    /** Draws whole source pixels of the filled 7×6 heart over an empty heart. */
+    public static void drawSocialHeartPartial(GuiGraphics graphics, int x, int y,
+                                              float progress, float scale, float alpha) {
+        int sourceColumns = net.minecraft.util.Mth.clamp(
+                (int) Math.floor(progress * 7.0F), 0, 7);
+        if (sourceColumns <= 0) {
+            return;
+        }
+        int clippedWidth = Math.max(1, Math.round(sourceColumns * scale));
+        int heartHeight = Math.max(1, Math.round(6.0F * scale));
+        graphics.enableScissor(x, y, x + clippedWidth, y + heartHeight);
+        try {
+            SOCIAL_HEART_FILLED.drawPixelZoomTint(
+                    graphics, x, y, scale, 1.0F, 1.0F, 1.0F, alpha);
+        } finally {
+            graphics.disableScissor();
+        }
     }
 
     public static void drawPowerIconTint(GuiGraphics graphics, int x, int y, int powerIndex, float scale, float red, float green, float blue, float alpha) {

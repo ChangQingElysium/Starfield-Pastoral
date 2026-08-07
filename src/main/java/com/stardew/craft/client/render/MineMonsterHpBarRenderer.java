@@ -1,5 +1,7 @@
 package com.stardew.craft.client.render;
 
+import com.stardew.craft.client.font.StardewFonts;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.stardew.craft.Config;
 import com.stardew.craft.core.ModMiningDimensions;
@@ -46,7 +48,7 @@ public class MineMonsterHpBarRenderer {
 
         if (mobs.isEmpty()) return;
 
-        Font font = mc.font;
+        Font font = StardewFonts.small();
         MultiBufferSource.BufferSource buffer = mc.renderBuffers().bufferSource();
 
         RenderSystem.enableBlend();

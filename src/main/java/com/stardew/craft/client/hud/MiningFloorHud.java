@@ -1,5 +1,7 @@
 package com.stardew.craft.client.hud;
 
+import com.stardew.craft.client.font.StardewFonts;
+
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.stardew.craft.Config;
 import com.stardew.craft.mining.MiningCoordinates;
@@ -67,7 +69,7 @@ public class MiningFloorHud {
 
         
         GuiGraphics guiGraphics = event.getGuiGraphics();
-        Font font = mc.font;
+        Font font = StardewFonts.small();
         
         StardewHudLayout.Placement placement = StardewHudLayout.current(
                 Config.HudElement.MINING_FLOOR, guiGraphics.guiWidth(), guiGraphics.guiHeight());

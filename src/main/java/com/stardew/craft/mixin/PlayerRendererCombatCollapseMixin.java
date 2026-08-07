@@ -37,6 +37,6 @@ public class PlayerRendererCombatCollapseMixin {
             0.0F,
             CombatCollapseClientState.bodyJitterZ(player, partialTick)
         );
-        poseStack.rotateAround(Axis.ZP.rotationDegrees(degrees), 0.0F, PIVOT_Y / scale, 0.0F);
+        poseStack.rotateAround(Axis.XP.rotationDegrees(degrees), 0.0F, PIVOT_Y / scale, 0.0F);
     }
 }

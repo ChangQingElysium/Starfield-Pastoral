@@ -6,6 +6,7 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.api.v1.internal.network.StardewNetworkCapabilityRegistry;
 import com.stardew.craft.client.gui.common.CommonGuiTextures;
 import com.stardew.craft.client.gui.common.GuiText;
+import com.stardew.craft.client.font.StardewFonts;
 import com.stardew.craft.client.gui.overnight.StardewGuiUtil;
 import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.api.v1.network.StardewNetworkCapabilities;
@@ -24,6 +25,7 @@ import com.stardew.craft.sound.ModSounds;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -400,9 +402,14 @@ public class ShopScreen extends Screen {
                 }
                 // SDV pre-wraps text to 304 screen px width
                 int wrapWidth = ui(304);
+                Font dialogueFont = StardewFonts.dialogue();
+                float dialogueScale = sourceTextScale();
                 List<net.minecraft.util.FormattedCharSequence> wrappedLines =
-                    font.split(Component.literal(dialogueText), wrapWidth);
-                int textH = wrappedLines.size() * font.lineHeight;
+                    dialogueFont.split(Component.literal(dialogueText),
+                            Math.max(1, Math.round(wrapWidth / dialogueScale)));
+                int lineStep = Math.max(1, Math.round(
+                        StardewFonts.lineHeight(StardewFonts.Role.DIALOGUE) * dialogueScale));
+                int textH = wrappedLines.size() * lineStep;
                 int boxPad = ui(16);  // padding inside the tooltip box
                 int boxW = wrapWidth + boxPad * 2;
                 int boxH = textH + boxPad * 2;
@@ -418,8 +425,8 @@ public class ShopScreen extends Screen {
                 int textX = dlgX + boxPad;
                 int textY = dlgY + boxPad;
                 for (var line : wrappedLines) {
-                    g.drawString(font, line, textX, textY, 0x5C2B00, false);
-                    textY += font.lineHeight;
+                    drawSourceText(g, dialogueFont, line, textX, textY, dialogueScale, 0x5C2B00);
+                    textY += lineStep;
                 }
             }
         }
@@ -660,10 +667,13 @@ public class ShopScreen extends Screen {
             rowWGui - ui(customCost != null
                 || item.price() > 0 || item.requiresTrade()
                     ? 360 : 180));
-        Component name = GuiText.ellipsize(font, Component.literal(resolveItemName(item)), nameMaxWidth);
+        Font rowFont = StardewFonts.spriteText();
+        float rowTextScale = sourceTextScale();
+        Component name = GuiText.ellipsize(rowFont, Component.literal(resolveItemName(item)),
+                Math.max(1, Math.round(nameMaxWidth / rowTextScale)));
         // SDV SpriteText ItemRowTextColor = Color.Black (0x000000), we approximate with 0x1a1a1a
-        g.drawString(font, name, nameX, rowY + ui(28),
-            canBuy ? 0x1a1a1a : 0x888888, false);
+        drawSourceText(g, rowFont, name, nameX, rowY + ui(28), rowTextScale,
+                canBuy ? 0xFF1A1A1A : 0xFF888888);
 
         // Price + coin + trade (SDV ShopMenu.cs L1932-1961)
         // SDV approach: draw price first, then shift 'right' leftward, then draw trade items.
@@ -677,11 +687,11 @@ public class ShopScreen extends Screen {
         } else {
         if (item.price() > 0) {
             String prStr = item.price() + " ";
-            int prW   = font.width(prStr);
+            int prW   = sourceWidth(rowFont, prStr, rowTextScale);
             int prX   = rowX + rowWGui - ui(60) - prW;
             int prY   = rowY + ui(28);
-            g.drawString(font, prStr, prX, prY,
-                canAfford ? 0x404040 : 0x992222, false);
+            drawSourceText(g, rowFont, Component.literal(prStr), prX, prY, rowTextScale,
+                    canAfford ? 0xFF404040 : 0xFF992222);
 
             float coinA = canBuy ? 1.0f : 0.25f;
             if (isFairStarTokenShop()) {
@@ -715,7 +725,7 @@ public class ShopScreen extends Screen {
             int req = Math.max(1, item.tradeItemCount());
             boolean enough = hasTrade;
             String reqText = "x" + req;
-            int reqTextW = font.width(reqText);
+            int reqTextW = sourceWidth(rowFont, reqText, rowTextScale);
             // SDV: icon at (right - 88 - textWidth, tradeIconDrawY)
             int tx = tradeRight - ui(88) - reqTextW;
             int ty = tradeIconY;
@@ -727,8 +737,9 @@ public class ShopScreen extends Screen {
             }
 
             // SDV: text at (right - textWidth - 16, tradeTextDrawY)
-            g.drawString(font, reqText, tradeRight - reqTextW - ui(16), tradeTextY,
-                enough ? 0x404040 : 0x992222, false);
+            drawSourceText(g, rowFont, Component.literal(reqText),
+                    tradeRight - reqTextW - ui(16), tradeTextY, rowTextScale,
+                    enough ? 0xFF404040 : 0xFF992222);
         }
         }
 
@@ -771,16 +782,14 @@ public class ShopScreen extends Screen {
             summary = text;
         }
         int maximumWidth = ui(300);
-        Component visible = GuiText.ellipsize(
-                font, summary, maximumWidth);
-        graphics.drawString(
-                font,
-                visible,
-                rowX + rowWidth - ui(20)
-                        - font.width(visible),
-                rowY + ui(28),
-                affordable ? 0x404040 : 0x992222,
-                false);
+        Font rowFont = StardewFonts.spriteText();
+        float textScale = sourceTextScale();
+        Component visible = GuiText.ellipsize(rowFont, summary,
+                Math.max(1, Math.round(maximumWidth / textScale)));
+        drawSourceText(graphics, rowFont, visible,
+                rowX + rowWidth - ui(20) - sourceWidth(rowFont, visible, textScale),
+                rowY + ui(28), textScale,
+                affordable ? 0xFF404040 : 0xFF992222);
     }
 
     private void drawTinyDigits(GuiGraphics g, int value, int x, int y, float sdvScale, float alpha) {
@@ -1499,6 +1508,34 @@ public class ShopScreen extends Screen {
 
     private int ui(int sdvPx) { return Math.round(sdvPx/guiScale); }
     private float s4()        { return 4.0f/guiScale; }
+    private float sourceTextScale() { return 3.0F / guiScale; }
+
+    private static int sourceWidth(Font drawFont, String text, float scale) {
+        return Math.round(drawFont.width(text) * scale);
+    }
+
+    private static int sourceWidth(Font drawFont, Component text, float scale) {
+        return Math.round(drawFont.width(text) * scale);
+    }
+
+    private static void drawSourceText(GuiGraphics graphics, Font drawFont, Component text,
+                                       int x, int y, float scale, int color) {
+        graphics.pose().pushPose();
+        graphics.pose().translate(x, y, 0.0F);
+        graphics.pose().scale(scale, scale, 1.0F);
+        graphics.drawString(drawFont, text, 0, 0, color, false);
+        graphics.pose().popPose();
+    }
+
+    private static void drawSourceText(GuiGraphics graphics, Font drawFont,
+                                       net.minecraft.util.FormattedCharSequence text,
+                                       int x, int y, float scale, int color) {
+        graphics.pose().pushPose();
+        graphics.pose().translate(x, y, 0.0F);
+        graphics.pose().scale(scale, scale, 1.0F);
+        graphics.drawString(drawFont, text, 0, 0, color, false);
+        graphics.pose().popPose();
+    }
     private static boolean isIn(int mx,int my,int x,int y,int w,int h){
         return mx>=x&&mx<x+w&&my>=y&&my<y+h;
     }

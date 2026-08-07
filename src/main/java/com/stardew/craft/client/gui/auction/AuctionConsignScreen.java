@@ -123,7 +123,7 @@ public class AuctionConsignScreen extends Screen {
         nextY = itemY + itemH + 9;
         priceBoxY = submitY - fieldH - 28;
 
-        priceField = new EditBox(font, priceBoxX + 31, priceBoxY + (fieldH - font.lineHeight) / 2,
+        priceField = new EditBox(com.stardew.craft.client.font.StardewFonts.small(), priceBoxX + 31, priceBoxY + (fieldH - font.lineHeight) / 2,
             priceBoxW - 43, font.lineHeight, Component.translatable("stardewcraft.auction.consign.price_hint"));
         priceField.setBordered(false);
         priceField.setTextShadow(false);

@@ -3,6 +3,7 @@ package com.stardew.craft.client.gui.mastery;
 import com.mojang.math.Axis;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.ClientPlayerDataCache;
+import com.stardew.craft.client.font.StardewFonts;
 import com.stardew.craft.client.gui.overnight.StardewGuiUtil;
 import com.stardew.craft.mastery.MasteryProgress;
 import com.stardew.craft.mastery.MasteryRewardRegistry;
@@ -189,7 +190,8 @@ public final class MasteryTrackerMenuScreen extends Screen {
     }
 
     private void drawOverview(GuiGraphics graphics) {
-        String title = Component.translatable("stardewcraft.mastery.menu.overview").getString();
+        Component title = StardewFonts.title(
+                Component.translatable("stardewcraft.mastery.menu.overview"));
         graphics.drawString(this.font, title, panelX + panelW / 2 - this.font.width(title) / 2, panelY + ui(48), 0x000000, false);
 
         StardewGuiUtil.drawTextureBox(graphics, EXP_BOX, EXP_SRC, EXP_SRC,
@@ -271,7 +273,7 @@ public final class MasteryTrackerMenuScreen extends Screen {
     }
 
     private void drawSkillPage(GuiGraphics graphics, int mouseX, int mouseY, float scale) {
-        String title = this.title.getString();
+        Component title = StardewFonts.title(this.title);
         graphics.drawString(this.font, title, panelX + panelW / 2 - this.font.width(title) / 2, panelY + ui(48), 0x000000, false);
 
         graphics.enableScissor(panelX + ui(24), contentTop, panelX + panelW - ui(24), contentBottom);

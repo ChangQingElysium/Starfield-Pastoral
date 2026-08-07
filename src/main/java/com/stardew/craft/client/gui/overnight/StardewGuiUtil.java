@@ -134,10 +134,23 @@ public class StardewGuiUtil {
 
     // Equivalent to IClickableMenu.drawVerticalPartition(..., small=true)
     public static void drawVerticalPartitionSmall(GuiGraphics graphics, int x, int menuY, int menuHeight, float scale) {
+        drawVerticalPartitionSmall(graphics, x, menuY, menuHeight, scale, -1);
+    }
+
+    /** Equivalent to Stardew's small partition with AnimalPage's optional heightOverride. */
+    public static void drawVerticalPartitionSmall(GuiGraphics graphics, int x, int menuY,
+                                                  int menuHeight, float scale, int heightOverride) {
         int unit = Math.max(1, Math.round(16.0f * scale));
         int y = menuY + unit + unit / 2;
-        int height = Math.max(0, menuHeight - unit * 2);
+        int height = Math.max(0, heightOverride >= 0 ? heightOverride : menuHeight - unit * 2);
         drawMenuTile(graphics, x, y, unit, height, 26);
+    }
+
+    /** Draw tile 26 over an explicit interval when the surrounding frame owns the endpoints. */
+    public static void drawVerticalPartitionSmallSpan(GuiGraphics graphics, int x,
+                                                       int startY, int endY, float scale) {
+        int unit = Math.max(1, Math.round(16.0f * scale));
+        drawMenuTile(graphics, x, startY, unit, Math.max(0, endY - startY), 26);
     }
 
     // Equivalent to IClickableMenu.drawVerticalIntersectingPartition

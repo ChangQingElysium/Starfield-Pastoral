@@ -1,5 +1,7 @@
 package com.stardew.craft.client.deco;
 
+import com.stardew.craft.client.font.StardewFonts;
+
 import com.stardew.craft.Config;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.deco.PaintbrushSelectionManager.Mode;
@@ -50,7 +52,7 @@ public final class PaintbrushModeIndicator {
 
         PaintbrushSelectionManager mgr = PaintbrushSelectionManager.get();
         GuiGraphics g = event.getGuiGraphics();
-        Font font = mc.font;
+        Font font = StardewFonts.small();
 
         // Build display text
         Component modeText;

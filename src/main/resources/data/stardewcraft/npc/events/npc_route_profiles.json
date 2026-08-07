@@ -928,7 +928,7 @@
         },
         {
           "mode": "walk",
-          "point": "gus_saloon_counter"
+          "point": "gus_schedule_02"
         }
       ],
       "seedshop": [
@@ -942,25 +942,21 @@
         },
         {
           "mode": "walk",
-          "point": "gus_seedshop_visit"
+          "point": "gus_schedule_08"
         }
       ],
-      "communitycenter": [
+      "hospital": [
         {
           "mode": "walk",
-          "point": "gus_communitycenter_visit"
-        }
-      ],
-      "town": [
+          "point": "clinic_outdoor_door"
+        },
+        {
+          "mode": "warp",
+          "point": "clinic_indoor_entry"
+        },
         {
           "mode": "walk",
-          "point": "gus_town_walk"
-        }
-      ],
-      "beach": [
-        {
-          "mode": "walk",
-          "point": "gus_beach_spot"
+          "point": "gus_schedule_09"
         }
       ]
     },

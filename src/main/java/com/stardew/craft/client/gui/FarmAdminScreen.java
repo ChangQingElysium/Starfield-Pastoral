@@ -1,5 +1,6 @@
 package com.stardew.craft.client.gui;
 
+import com.stardew.craft.client.font.StardewFonts;
 import com.stardew.craft.network.payload.FarmAdminPayload;
 import com.stardew.craft.network.payload.FarmAdminSyncPayload;
 import com.stardew.craft.network.payload.FarmAdminSyncPayload.FarmEntry;
@@ -116,7 +117,7 @@ public class FarmAdminScreen extends Screen {
             int inputW = Math.min(220, panelW / 2);
             int inputX = panelX + PANEL_PAD + 100;
             int inputY = listBottom + (BOTTOM_BAR_H - 20) / 2;
-            inputBox = new EditBox(this.font, inputX, inputY, inputW, 18,
+            inputBox = new EditBox(StardewFonts.small(), inputX, inputY, inputW, 18,
                     Component.translatable(currentAction == Action.RENAME
                             ? "stardewcraft.farm.admin.new_name"
                             : "stardewcraft.farm.admin.target_player"));
@@ -155,7 +156,7 @@ public class FarmAdminScreen extends Screen {
         // ── 表头 ──
         g.fill(panelX, panelY, panelX + panelW, panelY + HEADER_H, HEADER_BG);
         // 标题
-        g.drawString(font, Component.translatable("stardewcraft.farm.admin.title").withStyle(style -> style.withBold(true)),
+        g.drawString(font, StardewFonts.title(Component.translatable("stardewcraft.farm.admin.title")),
                 panelX + PANEL_PAD, panelY + 6, COL_TITLE, false);
         // 农场数
         Component countStr = Component.translatable("stardewcraft.farm.admin.count", farms.size());

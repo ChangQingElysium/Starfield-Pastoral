@@ -67,7 +67,9 @@ public final class AnimalToolHarvestService {
             return Result.CATCHING_UP;
         }
 
-        PlayerStardewDataAPI.consumeEnergy(player, TOOL_ENERGY_COST);
+        if (!PlayerStardewDataAPI.consumeEnergyOrNotify(player, TOOL_ENERGY_COST)) {
+            return Result.INSUFFICIENT_ENERGY;
+        }
         if (record.isBaby() || record.currentProduceId().isBlank()) {
             return Result.NO_PRODUCE;
         }
@@ -163,6 +165,7 @@ public final class AnimalToolHarvestService {
     public enum Result {
         NOT_HANDLED,
         CATCHING_UP,
+        INSUFFICIENT_ENERGY,
         NO_PRODUCE,
         INVENTORY_FULL,
         HARVESTED

@@ -420,7 +420,7 @@ public final class FairFestivalService {
         }
         ShopRegistry.ShopDefinition shop = ShopRegistry.get(STAR_TOKEN_SHOP_ID);
         if (shop == null) {
-            player.displayClientMessage(Component.literal("Unknown shopId: " + STAR_TOKEN_SHOP_ID), true);
+            com.stardew.craft.StardewCraft.LOGGER.warn("Unknown festival shop id: {}", STAR_TOKEN_SHOP_ID);
             return false;
         }
         List<ShopItemEntry> items = ShopRegistry.getFilteredItemsForPlayer(STAR_TOKEN_SHOP_ID, shop, player);

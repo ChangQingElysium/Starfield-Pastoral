@@ -353,11 +353,12 @@ public final class SlotsScreen extends Screen {
                 font,
                 Minecraft.getInstance().getLanguageManager().getSelected(),
                 viewport.effectiveGuiScale(),
-                SdvFontAdapter.Style.SPRITE_TEXT) * multiplier;
+                SdvFontAdapter.Style.SPRITE_TEXT_COLORED) * multiplier;
     }
 
     private int textWidth(Component text, float multiplier) {
-        return SdvFontAdapter.width(font, text, textScale(multiplier));
+        return SdvFontAdapter.width(font, text, textScale(multiplier),
+                SdvFontAdapter.Style.SPRITE_TEXT_COLORED);
     }
 
     private int renderedTextHeight(float multiplier) {
@@ -368,7 +369,8 @@ public final class SlotsScreen extends Screen {
             GuiGraphics graphics, Component text, int x, int y, int color, float multiplier
     ) {
         SdvFontAdapter.draw(
-                graphics, font, text, x, y, textScale(multiplier), color);
+                graphics, font, text, x, y, textScale(multiplier), color,
+                SdvFontAdapter.Style.SPRITE_TEXT_COLORED);
     }
 
     @Override

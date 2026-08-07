@@ -328,23 +328,25 @@ public final class CrossDimensionTeleporter {
      * 冬季新玩家到达时的温室符文公告。
      */
     private static void sendRuneAnnouncement(ServerPlayer player) {
-        player.sendSystemMessage(Component.literal(""));
-        player.sendSystemMessage(Component.translatable("stardewcraft.welcome.rune.title"));
-        player.sendSystemMessage(Component.literal(""));
-        player.sendSystemMessage(Component.translatable("stardewcraft.welcome.rune.line1"));
-        player.sendSystemMessage(Component.literal(""));
-        player.sendSystemMessage(Component.translatable("stardewcraft.welcome.rune.line2"));
-        player.sendSystemMessage(Component.translatable("stardewcraft.welcome.rune.line3"));
-        player.sendSystemMessage(Component.translatable("stardewcraft.welcome.rune.line4"));
-        player.sendSystemMessage(Component.literal(""));
-        player.sendSystemMessage(Component.translatable("stardewcraft.welcome.rune.line5"));
-        player.sendSystemMessage(Component.translatable("stardewcraft.welcome.rune.line6"));
-        player.sendSystemMessage(Component.translatable("stardewcraft.welcome.rune.line7"));
-        player.sendSystemMessage(Component.literal(""));
-        player.sendSystemMessage(Component.translatable("stardewcraft.welcome.rune.closing"));
-        player.sendSystemMessage(Component.literal(""));
-        player.sendSystemMessage(Component.literal("§a═══════════════════════════════════"));
-        player.sendSystemMessage(Component.literal(""));
+        ObjectDialogueService.show(player, java.util.List.of(
+                Component.empty()
+                        .append(Component.translatable("stardewcraft.welcome.rune.title"))
+                        .append("\n\n")
+                        .append(Component.translatable("stardewcraft.welcome.rune.line1")),
+                Component.empty()
+                        .append(Component.translatable("stardewcraft.welcome.rune.line2"))
+                        .append("\n")
+                        .append(Component.translatable("stardewcraft.welcome.rune.line3"))
+                        .append("\n")
+                        .append(Component.translatable("stardewcraft.welcome.rune.line4")),
+                Component.empty()
+                        .append(Component.translatable("stardewcraft.welcome.rune.line5"))
+                        .append("\n")
+                        .append(Component.translatable("stardewcraft.welcome.rune.line6"))
+                        .append("\n")
+                        .append(Component.translatable("stardewcraft.welcome.rune.line7")),
+                Component.translatable("stardewcraft.welcome.rune.closing")
+        ));
     }
 
     private static boolean checkCooldown(ServerPlayer player) {

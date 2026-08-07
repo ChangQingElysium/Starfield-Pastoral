@@ -359,7 +359,7 @@ public final class WinterStarFestivalService {
         }
         ShopRegistry.ShopDefinition shop = ShopRegistry.get(SHOP_ID);
         if (shop == null) {
-            player.displayClientMessage(Component.literal("Unknown shopId: " + SHOP_ID), true);
+            com.stardew.craft.StardewCraft.LOGGER.warn("Unknown festival shop id: {}", SHOP_ID);
             return true;
         }
         List<ShopItemEntry> items = ShopRegistry.getFilteredItemsForPlayer(SHOP_ID, shop, player);
@@ -445,9 +445,10 @@ public final class WinterStarFestivalService {
             return;
         }
         if (!FestivalService.isActiveFestivalEntryOpen(level, FESTIVAL_ID)) {
-            if (FestivalService.isActiveFestivalEntryClosedForToday(level, FESTIVAL_ID)) {
-                player.displayClientMessage(Component.translatable("message.stardewcraft.festival.ended"), true);
-            }
+            String key = FestivalService.isActiveFestivalEntryClosedForToday(level, FESTIVAL_ID)
+                ? "message.stardewcraft.festival.ended"
+                : "message.stardewcraft.festival.winter_star.setup";
+            com.stardew.craft.network.payload.HudHintPayload.send(player, key);
             moveToLastOutsideEntry(level, player);
             return;
         }
@@ -558,7 +559,8 @@ public final class WinterStarFestivalService {
         FarmInstance farm = FarmInstanceRegistry.get().getFarmForPlayer(player.getUUID());
         ServerLevel stardewLevel = player.server.getLevel(ModDimensions.STARDEW_VALLEY);
         if (farm == null || stardewLevel == null) {
-            player.displayClientMessage(Component.translatable("stardewcraft.warp.farm.unavailable"), true);
+            com.stardew.craft.network.payload.HudHintPayload.send(
+                    player, "stardewcraft.warp.farm.unavailable");
             return;
         }
         ModTeleport.to(player, stardewLevel, farm.getSpawnPoint(), farm.getSpawnYaw(), 0.0F);

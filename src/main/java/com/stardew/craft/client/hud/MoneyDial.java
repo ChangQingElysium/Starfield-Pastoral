@@ -1,11 +1,12 @@
 package com.stardew.craft.client.hud;
 
-import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.particle.GoldStarParticle;
+import com.stardew.craft.client.gui.common.CommonGuiTextures;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.resources.ResourceLocation;
+import com.stardew.craft.StardewCraft;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -16,11 +17,8 @@ import java.util.Random;
  */
 public class MoneyDial {
     
-    private static final ResourceLocation DIGIT_TEXTURE = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/money_dial_digits.png");
     private static final int DIGIT_WIDTH = 5;
     private static final int DIGIT_HEIGHT = 8;
-    private static final int DIGIT_TEXTURE_WIDTH = 5;
-    private static final int DIGIT_TEXTURE_HEIGHT = 80;
     private static final int DIGIT_SPACING = 6;
     
     private final int numDigits;
@@ -68,8 +66,9 @@ public class MoneyDial {
         }
         
         // 更新闪光计时器 - 原版每帧减少
+        int elapsedMillis = Math.max(1, Math.round(mc.getTimer().getRealtimeDeltaTicks() * 50.0F));
         if (moneyShineTimer > 0 && currentValue == targetMoney) {
-            moneyShineTimer--;
+            moneyShineTimer = Math.max(0, moneyShineTimer - elapsedMillis);
         }
         
         // 累积金币变化
@@ -146,8 +145,6 @@ public class MoneyDial {
             int currentDigit = Character.getNumericValue(moneyStr.charAt(i));
             int slotIndex = startSlot + i;
             float digitX = x + slotIndex * DIGIT_SPACING; // 每个槽位6px间距
-            int digitY = 72 - currentDigit * DIGIT_HEIGHT; // 材质Y坐标（与原版 MoneyDial 一致）
-            
             // 计算缩放 - 闪光动画（从右到左依次闪光）
             float scale = 1.0f;
             if (moneyShineTimer > 0) {
@@ -166,17 +163,14 @@ public class MoneyDial {
                 graphics.pose().scale(scale, scale, 1.0f);
                 graphics.pose().translate(-DIGIT_WIDTH * 0.5f, -DIGIT_HEIGHT * 0.5f, 0);
                 
-                // 渲染数字
-                com.mojang.blaze3d.systems.RenderSystem.setShaderColor(0.502f, 0.0f, 0.0f, 1.0f);
-                graphics.blit(DIGIT_TEXTURE, 0, 0, 0, digitY, DIGIT_WIDTH, DIGIT_HEIGHT, DIGIT_TEXTURE_WIDTH, DIGIT_TEXTURE_HEIGHT);
-                com.mojang.blaze3d.systems.RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+                CommonGuiTextures.drawMoneyDigitTint(graphics, 0, 0, currentDigit, 1.0F,
+                        0.502F, 0.0F, 0.0F, 1.0F);
                 
                 graphics.pose().popPose();
             } else {
                 // 无缩放直接渲染
-                com.mojang.blaze3d.systems.RenderSystem.setShaderColor(0.502f, 0.0f, 0.0f, 1.0f);
-                graphics.blit(DIGIT_TEXTURE, (int)digitX, (int)y, 0, digitY, DIGIT_WIDTH, DIGIT_HEIGHT, DIGIT_TEXTURE_WIDTH, DIGIT_TEXTURE_HEIGHT);
-                com.mojang.blaze3d.systems.RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+                CommonGuiTextures.drawMoneyDigitTint(graphics, (int) digitX, (int) y, currentDigit, 1.0F,
+                        0.502F, 0.0F, 0.0F, 1.0F);
             }
         }
     }

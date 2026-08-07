@@ -6,6 +6,7 @@ import com.stardew.craft.cutscene.command.EventCommand;
 import com.stardew.craft.cutscene.command.EventCommandFactory;
 import com.stardew.craft.cutscene.data.EventData;
 import com.stardew.craft.cutscene.network.MarkEventSeenPayload;
+import com.stardew.craft.client.TemporaryGuiVisibility;
 import com.stardew.craft.client.sound.StardewMusicManager;
 import com.stardew.craft.network.payload.ClientNpcVisibilityState;
 import net.minecraft.client.Minecraft;
@@ -41,7 +42,6 @@ public final class EventPlayer {
     private boolean running = false;
     private boolean skippable = false;
     private boolean playerFrozen = false;
-    private boolean previousHideGui = false;
     private boolean realPlayerMovedByServer = false;
     private PlayerSnapshot playerSnapshot = null;
 
@@ -118,6 +118,8 @@ public final class EventPlayer {
         commandIndex = 0;
         running = true;
 
+        TemporaryGuiVisibility.acquire(TemporaryGuiVisibility.Owner.CUTSCENE);
+
         // Combat rescue arrives under an opaque collapse overlay. Transfer
         // that black frame only after this player has taken ownership, so the
         // destination never flashes between ready ACK and event start.
@@ -130,11 +132,6 @@ public final class EventPlayer {
         } else {
             startDimension = null;
         }
-
-        // Hide all GUI (like spectator)
-        Minecraft mc = Minecraft.getInstance();
-        previousHideGui = mc.options.hideGui;
-        mc.options.hideGui = true;
 
         // Start first command
         try {
@@ -152,6 +149,8 @@ public final class EventPlayer {
      */
     public void tick() {
         if (!running || commands.isEmpty()) return;
+
+        TemporaryGuiVisibility.acquire(TemporaryGuiVisibility.Owner.CUTSCENE);
 
         // Abort if the player has changed dimension since the cutscene started.
         // Otherwise camera/actor commands keep playing in a world the player is
@@ -207,20 +206,25 @@ public final class EventPlayer {
 
         LOGGER.info("Skipping event: {}", currentEvent.id());
 
-        if (commandIndex >= 0 && commandIndex < commands.size()) {
-            EventCommand active = commands.get(commandIndex);
-            if (!active.isStateCommand()) {
-                active.onSkip(this);
+        try {
+            if (commandIndex >= 0 && commandIndex < commands.size()) {
+                EventCommand active = commands.get(commandIndex);
+                if (!active.isStateCommand()) {
+                    active.onSkip(this);
+                }
             }
-        }
 
-        // Execute all remaining state commands
-        for (int i = commandIndex; i < commands.size(); i++) {
-            commandIndex = i;
-            EventCommand cmd = commands.get(i);
-            if (cmd.isStateCommand()) {
-                cmd.onSkip(this);
+            // Execute all remaining state commands
+            for (int i = commandIndex; i < commands.size(); i++) {
+                commandIndex = i;
+                EventCommand cmd = commands.get(i);
+                if (cmd.isStateCommand()) {
+                    cmd.onSkip(this);
+                }
             }
+        } catch (RuntimeException exception) {
+            abortFailedPlayback(exception);
+            return;
         }
 
         endEvent();
@@ -248,7 +252,6 @@ public final class EventPlayer {
                 || mc.screen instanceof com.stardew.craft.client.gui.common.StardewConfirmDialogScreen) {
             mc.setScreen(null);
         }
-        mc.options.hideGui = previousHideGui;
 
         // Remove all actors
         for (Mob actor : actors.values()) {
@@ -267,6 +270,7 @@ public final class EventPlayer {
 
         // Clear fade
         EventScreenFade.clear();
+        TemporaryGuiVisibility.release(TemporaryGuiVisibility.Owner.CUTSCENE);
         com.stardew.craft.cutscene.command.TemporaryBlockCommand.restoreAll();
         com.stardew.craft.cutscene.command.GroundItemCommand.clearAll();
         com.stardew.craft.client.render.CutsceneTextAboveHeadRenderer.clear();
@@ -411,7 +415,6 @@ public final class EventPlayer {
                     || minecraft.screen instanceof com.stardew.craft.client.gui.common.StardewConfirmDialogScreen) {
                 minecraft.setScreen(null);
             }
-            minecraft.options.hideGui = previousHideGui;
             for (Mob actor : actors.values()) {
                 actor.discard();
             }
@@ -422,6 +425,7 @@ public final class EventPlayer {
             hiddenNpcs.clear();
             EventCameraController.release();
             EventScreenFade.clear();
+            TemporaryGuiVisibility.release(TemporaryGuiVisibility.Owner.CUTSCENE);
             com.stardew.craft.cutscene.command.TemporaryBlockCommand.restoreAll();
             com.stardew.craft.cutscene.command.GroundItemCommand.clearAll();
             com.stardew.craft.client.render.CutsceneTextAboveHeadRenderer.clear();

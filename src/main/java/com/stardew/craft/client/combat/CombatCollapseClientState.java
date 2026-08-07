@@ -26,7 +26,7 @@ import java.util.UUID;
  * Client-only presentation and input lock for combat HP=0.
  *
  * <p>The server remains authoritative for penalties, teleportation and rescue selection. This
- * state only sends the transaction ACK after the complete eight-second collapse, then holds full
+ * state only sends the transaction ACK after the complete three-second collapse, then holds full
  * black until the destination-load handshake confirms that the rescue location is ready.</p>
  */
 @EventBusSubscriber(modid = StardewCraft.MODID, value = Dist.CLIENT)
@@ -165,10 +165,11 @@ public final class CombatCollapseClientState {
 
     /**
      * Hands the already-black combat overlay to the cutscene fade layer after
-     * EventPlayer has successfully taken ownership.
+     * EventPlayer has successfully taken ownership. The authoritative server fallback may start
+     * the event just before the local ACK tick, so an active transaction is sufficient here.
      */
     public static void handoffToCutscene() {
-        if (!TRANSACTIONS.isAcknowledged()) {
+        if (!TRANSACTIONS.isActive()) {
             return;
         }
         com.stardew.craft.cutscene.runtime.EventScreenFade.holdBlack();

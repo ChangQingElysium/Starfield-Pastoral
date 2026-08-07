@@ -460,18 +460,21 @@ public class FishingRodItem extends net.minecraft.world.item.FishingRodItem impl
 		if (!level.isClientSide
 				&& player instanceof ServerPlayer serverPlayer
 				&& com.stardew.craft.festival.ActiveFestivalHandlers.blocksFishingDuringActiveFestival(serverPlayer)) {
-			serverPlayer.displayClientMessage(Component.translatable("stardewcraft.fishing.blocked_during_festival"), true);
+			com.stardew.craft.network.payload.HudHintPayload.send(
+					serverPlayer, "stardewcraft.fishing.blocked_during_festival");
 			return InteractionResultHolder.fail(stack);
 		}
 
-		// 对齐原版：体力 <= 1 时不允许开始抛竿（beginUsing 检查）。
+		// The complete cast cost must be affordable; checking only for zero energy allows
+		// low-energy players to cast forever because the later all-or-nothing payment fails.
 		if (!level.isClientSide
 				&& player instanceof ServerPlayer serverPlayer
 				&& !player.isCreative()
 				&& !player.isSpectator()
 				&& player.level().dimension() == ModDimensions.STARDEW_VALLEY) {
-			if (PlayerStardewDataAPI.getEnergy(serverPlayer) <= 1.0f) {
-				player.displayClientMessage(Component.translatable("stardewcraft.message.player.exhausted"), true);
+			if (!PlayerStardewDataAPI.canConsumeEnergy(serverPlayer, castStaminaCost(serverPlayer, stack))) {
+				com.stardew.craft.network.payload.HudHintPayload.send(
+						serverPlayer, "stardewcraft.message.player.exhausted");
 				return InteractionResultHolder.fail(stack);
 			}
 		}
@@ -576,15 +579,34 @@ public class FishingRodItem extends net.minecraft.world.item.FishingRodItem impl
 
 		int usedTicks = getUseDuration(stack, livingEntity) - timeLeft;
 		float castPower01 = FishingCastPower.getCastPower01FromUsedTicks(usedTicks);
+		float staminaCost = player.isCreative()
+				|| player.level().dimension() != ModDimensions.STARDEW_VALLEY
+			? 0.0F
+			: castStaminaCost(serverPlayer, stack);
+		float energyBefore = PlayerStardewDataAPI.getEnergy(serverPlayer);
+		boolean exhaustedBefore = PlayerStardewDataAPI.isExhausted(serverPlayer);
+		if (staminaCost > 0.0F
+				&& !PlayerStardewDataAPI.consumeEnergyOrNotify(serverPlayer, staminaCost)) {
+			setCastActive(player.getMainHandItem(), false);
+			setCastActive(player.getOffhandItem(), false);
+			net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
+					serverPlayer,
+					new com.stardew.craft.fishing.network.FishingRodCastStatePayload(false));
+			return;
+		}
 
 		// Vanilla-like: always throw the hook. The server session will only begin bite logic once the hook lands in water.
 		boolean started = FishingSessionManager.get(serverPlayer.server).start(serverPlayer, castPower01);
 		if (!started) {
+			float spent = Math.max(0.0F, energyBefore - PlayerStardewDataAPI.getEnergy(serverPlayer));
+			if (spent > 0.0F) {
+				PlayerStardewDataAPI.rollbackEnergyPayment(serverPlayer, spent, exhaustedBefore);
+			}
 			boolean festivalBlocked = com.stardew.craft.festival.ActiveFestivalHandlers
 					.blocksFishingDuringActiveFestival(serverPlayer);
-			serverPlayer.displayClientMessage(Component.translatable(festivalBlocked
+			com.stardew.craft.network.payload.HudHintPayload.send(serverPlayer, festivalBlocked
 					? "stardewcraft.fishing.blocked_during_festival"
-					: "stardewcraft.fishing.already_fishing"), true);
+					: "stardewcraft.fishing.already_fishing");
 			if (festivalBlocked) {
 				setCastActive(player.getMainHandItem(), false);
 				setCastActive(player.getOffhandItem(), false);
@@ -596,15 +618,6 @@ public class FishingRodItem extends net.minecraft.world.item.FishingRodItem impl
 			return;
 		}
 
-		// 对齐原版 SV FishingRod.DoFunction：抛竿开始时扣体力
-		// who.Stamina -= 8f - who.FishingLevel * 0.1f;
-		if (!player.isCreative() && player.level().dimension() == ModDimensions.STARDEW_VALLEY) {
-			int fishingLevel = com.stardew.craft.enchantment.StardewEnchantments.effectiveFishingLevel(serverPlayer, stack);
-			float staminaCost = 8.0f - (fishingLevel * 0.1f);
-			if (staminaCost > 0.0f) {
-				PlayerStardewDataAPI.consumeEnergy(serverPlayer, staminaCost);
-			}
-		}
 		// Server writes to BOTH hands
 		setCastActive(player.getMainHandItem(), true);
 		setCastActive(player.getOffhandItem(), true);
@@ -612,6 +625,12 @@ public class FishingRodItem extends net.minecraft.world.item.FishingRodItem impl
 		level.playSound(null, player.blockPosition(), ModSounds.CAST.get(), net.minecraft.sounds.SoundSource.PLAYERS, 1.0f, 1.0f);
 
 		player.getCooldowns().addCooldown(this, CAST_COOLDOWN_TICKS);
+	}
+
+	private static float castStaminaCost(ServerPlayer player, ItemStack stack) {
+		int fishingLevel = com.stardew.craft.enchantment.StardewEnchantments
+				.effectiveFishingLevel(player, stack);
+		return Math.max(0.0F, 8.0F - fishingLevel * 0.1F);
 	}
 
 	public static boolean isCastActive(ItemStack rodStack) {

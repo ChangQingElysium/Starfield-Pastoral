@@ -1,8 +1,10 @@
 package com.stardew.craft.client.gui.common;
 
+import com.stardew.craft.client.font.StardewFonts;
 import com.stardew.craft.client.gui.StardewCollectivePauseScreen;
 import com.stardew.craft.sound.ModSounds;
 import net.minecraft.Util;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -17,8 +19,6 @@ import java.util.List;
 @OnlyIn(Dist.CLIENT)
 @SuppressWarnings("null")
 public class StardewObjectDialogueScreen extends Screen implements StardewCollectivePauseScreen {
-    private static final int TEXT_COLOR = 0x221122;
-
     private final List<Component> rawMessages;
     private final List<String> messages = new ArrayList<>();
     private StardewRenderMapping mapping;
@@ -272,8 +272,9 @@ public class StardewObjectDialogueScreen extends Screen implements StardewCollec
         int wrapWidth = Math.max(1, Math.round((maxWidth - mapping.ui(16)) / textScale()));
         List<String> lines = splitLines(Component.literal(text), wrapWidth);
         int maxLineWidth = 1;
+        Font textFont = dialogueTextFont();
         for (String line : lines) {
-            maxLineWidth = Math.max(maxLineWidth, this.font.width(line));
+            maxLineWidth = Math.max(maxLineWidth, textFont.width(line));
         }
         int textWidth = Math.round(maxLineWidth * textScale());
         int textHeight = lines.size() * scaledLineHeight();
@@ -289,8 +290,9 @@ public class StardewObjectDialogueScreen extends Screen implements StardewCollec
         int wrapWidth = Math.max(1, Math.round((boxWidth - mapping.ui(16)) / textScale()));
         List<String> lines = splitLines(visible, wrapWidth);
         int maxLineWidth = 0;
+        Font textFont = dialogueTextFont();
         for (String line : lines) {
-            maxLineWidth = Math.max(maxLineWidth, this.font.width(line));
+            maxLineWidth = Math.max(maxLineWidth, textFont.width(line));
         }
 
         float scale = textScale();
@@ -300,15 +302,17 @@ public class StardewObjectDialogueScreen extends Screen implements StardewCollec
         graphics.pose().pushPose();
         graphics.pose().scale(scale, scale, 1.0f);
         int drawY = y;
+        int unscaledLineStep = unscaledLineStep(scale);
         for (String line : lines) {
-            graphics.drawString(this.font, line, x, drawY, TEXT_COLOR, false);
-            drawY += this.font.lineHeight;
+            graphics.drawString(textFont, line, x, drawY,
+                    0xFF000000 | StardewFonts.spriteTextDefaultRgb(), false);
+            drawY += unscaledLineStep;
         }
         graphics.pose().popPose();
     }
 
     private List<String> splitLines(Component text, int wrapWidth) {
-        return DialogueTextWrapper.wrap(this.font, text.getString(), wrapWidth);
+        return DialogueTextWrapper.wrap(dialogueTextFont(), text.getString(), wrapWidth);
     }
 
     private void drawContinueOrCloseIcon(GuiGraphics graphics) {
@@ -360,11 +364,30 @@ public class StardewObjectDialogueScreen extends Screen implements StardewCollec
     }
 
     private float textScale() {
-        return Math.max(1.0f, mapping == null ? 1.0f : mapping.s4());
+        return SdvFontAdapter.scale(
+                dialogueTextFont(), languageCode(), guiScale(), SdvFontAdapter.Style.SPRITE_TEXT);
     }
 
     private int scaledLineHeight() {
-        return Math.max(1, Math.round(this.font.lineHeight * textScale()));
+        return SdvFontAdapter.lineStep(languageCode(), guiScale(), SdvFontAdapter.Style.SPRITE_TEXT);
+    }
+
+    private int unscaledLineStep(float scale) {
+        return Math.max(1, Math.round(scaledLineHeight() / Math.max(0.01F, scale)));
+    }
+
+    private Font dialogueTextFont() {
+        return StardewFonts.spriteText();
+    }
+
+    private String languageCode() {
+        return this.minecraft == null
+                ? "en_us"
+                : this.minecraft.getLanguageManager().getSelected();
+    }
+
+    private float guiScale() {
+        return this.minecraft == null ? 1.0F : (float) this.minecraft.getWindow().getGuiScale();
     }
 
     private void playUiSound(SoundEvent sound, float volume, float pitch) {

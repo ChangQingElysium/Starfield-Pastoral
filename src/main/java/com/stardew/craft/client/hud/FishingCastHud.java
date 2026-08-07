@@ -1,5 +1,7 @@
 package com.stardew.craft.client.hud;
 
+import com.stardew.craft.client.font.StardewFonts;
+
 import com.stardew.craft.Config;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.gui.LocalizedGuiAssets;
@@ -118,7 +120,7 @@ public final class FishingCastHud {
 			return;
 		}
 
-		renderTimingCast(event.getGuiGraphics(), mc.font, progress, usingRod);
+		renderTimingCast(event.getGuiGraphics(), StardewFonts.small(), progress, usingRod);
 	}
 
 	@SuppressWarnings("null")

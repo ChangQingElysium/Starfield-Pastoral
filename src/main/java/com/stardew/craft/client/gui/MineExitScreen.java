@@ -1,5 +1,6 @@
 package com.stardew.craft.client.gui;
 
+import com.stardew.craft.client.font.StardewFonts;
 import com.stardew.craft.menu.MineExitMenu;
 import com.stardew.craft.network.payload.MineExitActionPayload;
 import net.minecraft.client.gui.GuiGraphics;
@@ -95,7 +96,8 @@ public class MineExitScreen extends AbstractContainerScreen<MineExitMenu> {
 	@Override
 	protected void renderLabels(@SuppressWarnings("null") GuiGraphics graphics, int mouseX, int mouseY) {
 		// 绘制标题
-		Component title = Component.translatable("container.stardew_craft.mine_exit");
+		Component title = StardewFonts.title(
+				Component.translatable("container.stardew_craft.mine_exit"));
 		@SuppressWarnings("null")
 		int titleWidth = this.font.width(title);
 		graphics.drawString(this.font, title, (this.imageWidth - titleWidth) / 2, 10, 0xFFD700, false);

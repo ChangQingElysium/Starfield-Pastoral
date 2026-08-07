@@ -179,7 +179,7 @@ public class AuctionBidScreen extends Screen implements StardewRealtimeScreen {
             fieldBoxY = submitY - fieldBoxH - 22;
         }
 
-        bidField = new EditBox(font, fieldBoxX + 31, fieldBoxY + (fieldBoxH - font.lineHeight) / 2,
+        bidField = new EditBox(com.stardew.craft.client.font.StardewFonts.small(), fieldBoxX + 31, fieldBoxY + (fieldBoxH - font.lineHeight) / 2,
             Math.max(10, fieldBoxW - 43), font.lineHeight, Component.translatable("stardewcraft.auction.bid.input_hint"));
         bidField.setBordered(false);
         bidField.setTextShadow(false);

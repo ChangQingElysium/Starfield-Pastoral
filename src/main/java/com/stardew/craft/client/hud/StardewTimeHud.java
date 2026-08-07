@@ -1,8 +1,11 @@
 package com.stardew.craft.client.hud;
 
+import com.stardew.craft.client.font.StardewFonts;
+
 import com.stardew.craft.Config;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.ClientPlayerDataCache;
+import com.stardew.craft.client.gui.common.CommonGuiTextures;
 import com.stardew.craft.core.ModDimensions;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.time.StardewTimeManager;
@@ -25,8 +28,6 @@ import net.neoforged.neoforge.client.event.RenderGuiEvent;
 public class StardewTimeHud {
     
     // 纹理资源
-    @SuppressWarnings("null")
-    private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/background.png");
     @SuppressWarnings("null")
     private static final ResourceLocation POINTER = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/cursor.png");
     @SuppressWarnings("null")
@@ -64,14 +65,17 @@ public class StardewTimeHud {
     private static final int CALICO_RATING_ICON_HEIGHT = 21;
     
     // 指针旋转中心（在背景图内的坐标）
-    private static final int POINTER_PIVOT_X = 22;  // 右移3格
-    private static final int POINTER_PIVOT_Y = 21;  // 下移1格
+    private static final int POINTER_PIVOT_X = 22;
+    private static final int POINTER_PIVOT_Y = 22;
     
     // 图标位置（在背景图内的坐标）
     private static final int WEATHER_X = 29;
-    private static final int WEATHER_Y = 16;
+    private static final int WEATHER_Y = 17;
     private static final int SEASON_X = 53;
-    private static final int SEASON_Y = 16;
+    private static final int SEASON_Y = 17;
+    private static final float HUD_FONT_SCALE = 0.75F;
+    private static final int SDV_TEXT_COLOR = 0xFF56160C;
+    private static final int SDV_TEXT_SHADOW = 0xFFDD9454;
     
     private static StardewTimeManager clientTimeCache = new StardewTimeManager();
     private static volatile boolean timeSyncedFromServer = false;
@@ -228,8 +232,8 @@ public class StardewTimeHud {
         graphics.pose().translate(x, y, 0.0F);
         graphics.pose().scale(renderScale, renderScale, 1.0F);
         try {
-            // 1. 渲染背景
-            graphics.blit(BACKGROUND, 0, 0, 0, 0, BG_WIDTH, BG_HEIGHT, BG_WIDTH, BG_HEIGHT);
+            // DayTimeMoneyBox.draw: Cursors (333,431,71,43), pixelZoom 4.
+            CommonGuiTextures.drawDayTimeMoneyBox(graphics, 0, 0);
 
             // 2. 渲染天气图标（位置29,16）
             Minecraft mc = Minecraft.getInstance();
@@ -247,7 +251,7 @@ public class StardewTimeHud {
             renderPointer(graphics, 0, 0);
 
             // 5. 渲染文字信息
-            renderText(graphics, 0, 0, mc.font);
+            renderText(graphics);
         } finally {
             graphics.pose().popPose();
         }
@@ -276,7 +280,7 @@ public class StardewTimeHud {
         
         // 绘制指针（底部中心对齐）
         graphics.blit(POINTER, 
-            -POINTER_WIDTH / 2, -POINTER_HEIGHT,  // 底部中心对齐
+            -3, -17,
             0, 0, 
             POINTER_WIDTH, POINTER_HEIGHT, 
             POINTER_WIDTH, POINTER_HEIGHT);
@@ -304,35 +308,25 @@ public class StardewTimeHud {
     /**
      * 渲染文字信息：日期、时间、金钱
      */
-    private static void renderText(GuiGraphics graphics, int hudX, int hudY, Font font) {
-        // 获取时间数据
+    private static void renderText(GuiGraphics graphics) {
         int currentTime = clientTimeCache.getCurrentTime();
         int currentDay = clientTimeCache.getCurrentDay();
-        
-        // 1. 日期显示 "X日 星期X" (27,5 到 65,12) 黑色细体，缩小0.7倍居中
+
+        String language = Minecraft.getInstance().getLanguageManager().getSelected().toLowerCase(java.util.Locale.ROOT);
+        boolean korean = language.startsWith("ko");
+        Font clockFont = korean ? StardewFonts.small() : StardewFonts.dialogue();
+        StardewFonts.Role clockRole = korean ? StardewFonts.Role.SMALL : StardewFonts.Role.DIALOGUE;
+
         String weekdayName = getWeekdayName(currentDay);
-        String dateStr = net.minecraft.client.resources.language.I18n.get("stardewcraft.hud.date_format", currentDay, weekdayName);
-        graphics.pose().pushPose();
-        graphics.pose().scale(0.7f, 0.7f, 1.0f);
-        @SuppressWarnings("null")
-        int dateWidth = font.width(dateStr);
-        int dateAreaLeft = (int)((hudX + 27) / 0.7f);
-        int dateAreaWidth = (int)(38 / 0.7f);  // 区域宽度 65-27=38
-        int dateCenterX = dateAreaLeft + (dateAreaWidth - dateWidth) / 2;
-        int dateY = (int)((hudY + 8) / 0.7f);  // 区域高度8像素，从5到12，中心约8
-        graphics.drawString(font, dateStr, dateCenterX, dateY, 0xFF000000, false);
-        graphics.pose().popPose();
-        
-        // 2. 时间显示 "XX:XX" (27,28 到 65,34) 居中，整10分钟显示
-        // 对标 SDV: timeOfDay >= 2400 时时钟文字变红 + 抖动
-        int hours = (currentTime / 60) % 24;
-        int minutes = currentTime % 60;
-        int displayMinutes = minutes - (minutes % 10);  // 向下取整到10的倍数
-        String timeStr = String.format("%02d:%02d", hours, displayMinutes);
-        
-        // 午夜(0:00)后时间文字变红，对标 SDV: (Game1.timeOfDay >= 2400) ? Color.Red : textColor
-        boolean isLateNight = currentTime >= 1440; // 1440分钟 = 24:00 = 0:00 AM
-        int timeColor = isLateNight ? 0xFFFF0000 : 0xFF000000;
+        String dateStr = I18n.get("stardewcraft.hud.date_format", currentDay, weekdayName);
+        float clockLineHeight = StardewFonts.lineHeight(clockRole);
+        float dateX = 333.0F * 0.5625F / 4.0F - clockFont.width(dateStr) * HUD_FONT_SCALE / 2.0F;
+        float dateY = 431.0F * 0.1F / 4.0F - clockLineHeight * HUD_FONT_SCALE / 2.0F;
+        drawHudTextWithShadow(graphics, clockFont, dateStr, dateX, dateY, SDV_TEXT_COLOR, korean || isLongWordLanguage(language));
+
+        String timeStr = formatClockTime(currentTime, language);
+        boolean isLateNight = currentTime >= 1440;
+        int timeColor = isLateNight ? 0xFFFF0000 : SDV_TEXT_COLOR;
         // SDV DayTimeMoneyBox.draw parity: while shouldTimePass() is false, the time text spends
         // one second at full brightness and one second at 50% intensity. A black screen fade is
         // explicitly excluded by the original nofade condition.
@@ -344,46 +338,78 @@ public class StardewTimeHud {
             Util.getMillis()
         );
         
-        // 更新抖动计时器
         if (timeShakeTimer > 0) {
             timeShakeTimer -= (int)(Minecraft.getInstance().getTimer().getRealtimeDeltaTicks() * 50);
         }
-        
-        // 计算时钟抖动偏移（对标 SDV: random ±2px）
-        int timeShakeX = (timeShakeTimer > 0) ? (int)(Math.random() * 5 - 2) : 0;
-        int timeShakeY = (timeShakeTimer > 0) ? (int)(Math.random() * 5 - 2) : 0;
-        
-        graphics.pose().pushPose();
-        graphics.pose().scale(0.7f, 0.7f, 1.0f);
-        @SuppressWarnings("null")
-        int timeWidth = font.width(timeStr);
-        int timeAreaLeft = (int)((hudX + 27) / 0.7f);
-        int timeAreaWidth = (int)(38 / 0.7f);  // 区域宽度 65-27=38
-        int timeCenterX = timeAreaLeft + (timeAreaWidth - timeWidth) / 2 + timeShakeX;
-        int timeY = (int)((hudY + 31) / 0.7f) + timeShakeY;  // 区域高度6像素，从28到34，中心约31
-        graphics.drawString(font, timeStr, timeCenterX, timeY, timeColor, false);
-        graphics.pose().popPose();
-        
-        // 3. 金钱显示 - 使用 MoneyDial 实现滚动和抖动效果
-        // MoneyDial 的值由 ClientPlayerDataCache.updateFromNBT 直接设置
-        
-        // 更新抖动计时器
+        float timeShakeX = timeShakeTimer > 0 ? (float)(Math.random() * 5.0D - 2.0D) / 4.0F : 0.0F;
+        float timeShakeY = timeShakeTimer > 0 ? (float)(Math.random() * 5.0D - 2.0D) / 4.0F : 0.0F;
+        float timeX = 333.0F * 0.55F / 4.0F - clockFont.width(timeStr) * HUD_FONT_SCALE / 2.0F + timeShakeX;
+        float timeY = 431.0F * 0.31F / 4.0F - clockLineHeight * HUD_FONT_SCALE / 2.0F + timeShakeY;
+        drawHudTextWithShadow(graphics, clockFont, timeStr, timeX, timeY, timeColor, korean || isLongWordLanguage(language));
+
         if (moneyShakeTimer > 0) {
             moneyShakeTimer -= (int)(Minecraft.getInstance().getTimer().getRealtimeDeltaTicks() * 50);
         }
-        
-        // 计算抖动偏移
-        int shakeX = (moneyShakeTimer > 0) ? (int)(Math.random() * 7 - 3) : 0;
-        int shakeY = (moneyShakeTimer > 0) ? (int)(Math.random() * 7 - 3) : 0;
-        
-        // 使用你给的坐标：金币框从(17, 46)开始
-        float moneyX = hudX + 17 + shakeX;
-        float moneyY = hudY + 46 + shakeY;
-        
-        // 从缓存中获取金币值并传递给MoneyDial
-        int currentMoney = ClientPlayerDataCache.getMoney();
-        moneyDial.draw(graphics, moneyX, moneyY, currentMoney);
+        float shakeX = moneyShakeTimer > 0 ? (float)(Math.random() * 7.0D - 3.0D) / 4.0F : 0.0F;
+        float shakeY = moneyShakeTimer > 0 ? (float)(Math.random() * 7.0D - 3.0D) / 4.0F : 0.0F;
+        graphics.pose().pushPose();
+        graphics.pose().translate(shakeX, shakeY, 0.0F);
+        CommonGuiTextures.drawMoneyBox(graphics, 7, 43, 1.0F);
+        moneyDial.draw(graphics, 17, 49, ClientPlayerDataCache.getMoney());
+        graphics.pose().popPose();
+    }
 
+    private static String formatClockTime(int totalMinutes, String language) {
+        int hour24 = Math.floorMod(totalMinutes / 60, 24);
+        int minute = Math.floorMod(totalMinutes, 60) / 10 * 10;
+        boolean twentyFourHour = language.startsWith("ru") || language.startsWith("zh")
+                || language.startsWith("pt") || language.startsWith("es") || language.startsWith("de")
+                || language.startsWith("th") || language.startsWith("fr") || language.startsWith("tr")
+                || language.startsWith("hu");
+        if (twentyFourHour) {
+            return String.format(java.util.Locale.ROOT, "%02d:%02d", hour24, minute);
+        }
+        int hour12 = hour24 % 12;
+        if (hour12 == 0) {
+            hour12 = language.startsWith("ja") ? 0 : 12;
+        }
+        String base = String.format(java.util.Locale.ROOT, "%d:%02d", hour12, minute);
+        String marker = I18n.get(hour24 < 12 || totalMinutes >= 1440
+                ? "stardewcraft.shop.hours.am"
+                : "stardewcraft.shop.hours.pm");
+        if (language.startsWith("ja")) {
+            return marker + " " + base;
+        }
+        if (language.startsWith("ko")) {
+            return base + marker;
+        }
+        return language.startsWith("en") || language.startsWith("it") ? base + " " + marker : base;
+    }
+
+    private static boolean isLongWordLanguage(String language) {
+        return language.startsWith("ru") || language.startsWith("de");
+    }
+
+    private static void drawHudTextWithShadow(GuiGraphics graphics, Font font, String text,
+                                              float x, float y, int color, boolean compactShadow) {
+        float shadowX = compactShadow ? -2.0F / 3.0F : -1.0F;
+        float shadowY = compactShadow ? 2.0F / 3.0F : 1.0F;
+        graphics.pose().pushPose();
+        graphics.pose().translate(x, y, 0.0F);
+        graphics.pose().scale(HUD_FONT_SCALE, HUD_FONT_SCALE, 1.0F);
+        drawHudTextAt(graphics, font, text, shadowX, shadowY, SDV_TEXT_SHADOW);
+        drawHudTextAt(graphics, font, text, shadowX, 0.0F, SDV_TEXT_SHADOW);
+        drawHudTextAt(graphics, font, text, 0.0F, shadowY, SDV_TEXT_SHADOW);
+        graphics.drawString(font, text, 0, 0, color, false);
+        graphics.pose().popPose();
+    }
+
+    private static void drawHudTextAt(GuiGraphics graphics, Font font, String text,
+                                      float x, float y, int color) {
+        graphics.pose().pushPose();
+        graphics.pose().translate(x, y, 0.0F);
+        graphics.drawString(font, text, 0, 0, color, false);
+        graphics.pose().popPose();
     }
 
     static int pausedTimeTextColor(int baseColor, boolean timeFrozen, boolean blackFadeActive, long elapsedMillis) {
@@ -421,8 +447,8 @@ public class StardewTimeHud {
         graphics.pose().pushPose();
         graphics.pose().translate(placement.x(), placement.y(), 0.0F);
         graphics.pose().scale(placement.scale(), placement.scale(), 1.0F);
-        drawBorderedText(graphics, mc.font, I18n.get("stardewcraft.fair.fishing.score", fairFishingScore), 0, 0, 0xFFFFFFFF, 0xFF000000);
-        drawBorderedText(graphics, mc.font, I18n.get("stardewcraft.fair.fishing.time", time), 0, 32, 0xFFFFFFFF, 0xFF000000);
+        drawBorderedText(graphics, StardewFonts.dialogue(), I18n.get("stardewcraft.fair.fishing.score", fairFishingScore), 0, 0, 0xFFFFFFFF, 0xFF000000);
+        drawBorderedText(graphics, StardewFonts.dialogue(), I18n.get("stardewcraft.fair.fishing.time", time), 0, 32, 0xFFFFFFFF, 0xFF000000);
         graphics.pose().popPose();
     }
 
@@ -438,8 +464,8 @@ public class StardewTimeHud {
         graphics.pose().pushPose();
         graphics.pose().translate(placement.x(), placement.y(), 0.0F);
         graphics.pose().scale(placement.scale(), placement.scale(), 1.0F);
-        drawBorderedText(graphics, mc.font, I18n.get("stardewcraft.festival.ice_fishing.fish_count", iceFishingFishCaught), 0, 0, 0xFFFFFFFF, 0xFF000000);
-        drawBorderedText(graphics, mc.font, I18n.get("stardewcraft.festival.ice_fishing.time", time), 0, 32, 0xFFFFFFFF, 0xFF000000);
+        drawBorderedText(graphics, StardewFonts.dialogue(), I18n.get("stardewcraft.festival.ice_fishing.fish_count", iceFishingFishCaught), 0, 0, 0xFFFFFFFF, 0xFF000000);
+        drawBorderedText(graphics, StardewFonts.dialogue(), I18n.get("stardewcraft.festival.ice_fishing.time", time), 0, 32, 0xFFFFFFFF, 0xFF000000);
         graphics.pose().popPose();
     }
 
@@ -461,11 +487,11 @@ public class StardewTimeHud {
                 ? player.getInventory().countItem(ModItems.CALICO_EGG.get())
                 : ClientPlayerDataCache.getFairStarTokens();
         String text = String.valueOf(count);
-        int boxWidth = Math.max(42, 24 + mc.font.width(text));
+        int boxWidth = Math.max(42, 24 + StardewFonts.dialogue().width(text));
         int boxHeight = 16;
-        int questButtonX = BG_WIDTH - 11;
+        int questButtonX = 53;
         int boxX = questButtonX - 3 - boxWidth;
-        int boxY = BG_HEIGHT + 2;
+        int boxY = 60;
         graphics.pose().pushPose();
         graphics.pose().translate(placement.x(), placement.y(), 0.0F);
         graphics.pose().scale(placement.scale(), placement.scale(), 1.0F);
@@ -484,7 +510,7 @@ public class StardewTimeHud {
             graphics.renderItem(new net.minecraft.world.item.ItemStack(ModItems.CALICO_EGG.get()), 0, 0);
             graphics.pose().popPose();
         }
-        drawBorderedText(graphics, mc.font, text, boxX + 18, boxY + 4, 0xFFFFFFFF, 0xB0000000);
+        drawBorderedText(graphics, StardewFonts.dialogue(), text, boxX + 18, boxY + 4, 0xFFFFFFFF, 0xB0000000);
         graphics.pose().popPose();
     }
 
@@ -538,13 +564,13 @@ public class StardewTimeHud {
         if (desertFestivalMineRatingShakeTimer > 0) {
             x += (int)(Math.random() * 7 - 3);
             y += (int)(Math.random() * 7 - 3);
-            drawCenteredScaledText(graphics, mc.font, "+1", x + iconW / 2, y - 10, 0xFFFFFFFF, 0.75F, true);
+            drawCenteredScaledText(graphics, StardewFonts.dialogue(), "+1", x + iconW / 2, y - 10, 0xFFFFFFFF, 0.75F, true);
         }
         graphics.blit(CALICO_RATING_ICON, x, y, iconW, iconH, 0, 0,
             CALICO_RATING_ICON_WIDTH, CALICO_RATING_ICON_HEIGHT,
             CALICO_RATING_ICON_WIDTH, CALICO_RATING_ICON_HEIGHT);
         String rating = String.valueOf(desertFestivalMineRating);
-        drawCenteredScaledText(graphics, mc.font, rating, x + iconW / 2, y + iconH / 2 - 1, 0xFF3F2A13, 0.75F, true);
+        drawCenteredScaledText(graphics, StardewFonts.dialogue(), rating, x + iconW / 2, y + iconH / 2 - 1, 0xFF3F2A13, 0.75F, true);
         graphics.pose().popPose();
     }
 

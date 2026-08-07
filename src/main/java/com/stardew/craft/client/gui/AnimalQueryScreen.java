@@ -3,6 +3,7 @@ package com.stardew.craft.client.gui;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.AnimalQueryClientDetails;
+import com.stardew.craft.client.TemporaryGuiVisibility;
 import com.stardew.craft.client.gui.common.SdvEditBoxRenderer;
 import com.stardew.craft.client.gui.common.SdvFontAdapter;
 import com.stardew.craft.client.gui.common.SdvTexture;
@@ -12,6 +13,7 @@ import com.stardew.craft.menu.AnimalQueryMenu;
 import com.stardew.craft.network.payload.AnimalQueryActionPayload;
 import com.stardew.craft.network.payload.AnimalRenamePayload;
 import com.stardew.craft.sound.ModSounds;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
@@ -81,8 +83,6 @@ public final class AnimalQueryScreen extends Screen implements MenuAccess<Animal
     private String submittedName;
     private boolean confirmingSell;
     private boolean animalSoundPlayed;
-    private boolean previousHideGui;
-    private boolean hudVisibilityCaptured;
     private float okScale = 1.0F;
     private float sellScale = 4.0F;
     private float moveScale = 4.0F;
@@ -108,7 +108,7 @@ public final class AnimalQueryScreen extends Screen implements MenuAccess<Animal
         computeLayout();
 
         this.nameField = new EditBox(
-            this.font,
+            com.stardew.craft.client.font.StardewFonts.dialogue(),
             this.nameX,
             this.nameY,
             this.nameW,
@@ -203,9 +203,11 @@ public final class AnimalQueryScreen extends Screen implements MenuAccess<Animal
         }
         float scale = smallTextScale();
         int maxWidth = ui(this.sourceWidth - 96);
-        scale = Math.min(scale, maxWidth / (float) Math.max(1, this.font.width(age)));
+        Font smallFont = SdvFontAdapter.font(SdvFontAdapter.Style.SMALL);
+        scale = Math.min(scale, maxWidth / (float) Math.max(1, smallFont.width(age)));
         SdvFontAdapter.draw(graphics, this.font, age,
-            this.panelX + ui(SDV_BORDER + 32), this.panelY + ui(240), scale, TEXT_COLOR);
+            this.panelX + ui(SDV_BORDER + 32), this.panelY + ui(240), scale, TEXT_COLOR,
+            SdvFontAdapter.Style.SMALL);
     }
 
     private void drawFriendship(GuiGraphics graphics) {
@@ -232,13 +234,15 @@ public final class AnimalQueryScreen extends Screen implements MenuAccess<Animal
         int maxWidth = ui(this.sourceWidth - 96);
         float scale = smallTextScale();
         int wrapWidth = Math.max(1, (int) Math.floor(maxWidth / scale));
-        List<FormattedCharSequence> lines = this.font.split(mood, wrapWidth);
+        Font smallFont = SdvFontAdapter.font(SdvFontAdapter.Style.SMALL);
+        List<FormattedCharSequence> lines = smallFont.split(mood, wrapWidth);
         int lineStep = SdvFontAdapter.lineStep(
             this.minecraft.getLanguageManager().getSelected(), this.guiScale,
             SdvFontAdapter.Style.SMALL);
         lineStep = Math.max(lineStep, Math.round(this.font.lineHeight * scale + ui(6)));
         for (FormattedCharSequence line : lines) {
-            SdvFontAdapter.draw(graphics, this.font, line, x, y, scale, TEXT_COLOR);
+            SdvFontAdapter.draw(graphics, this.font, line, x, y, scale, TEXT_COLOR,
+                SdvFontAdapter.Style.SMALL);
             y += lineStep;
         }
     }
@@ -281,9 +285,10 @@ public final class AnimalQueryScreen extends Screen implements MenuAccess<Animal
             scale = Math.min(
                     scale,
                     maxWidth / (float) Math.max(
-                            1, this.font.width(parent)));
+                            1, SdvFontAdapter.font(SdvFontAdapter.Style.SMALL).width(parent)));
             SdvFontAdapter.draw(
-                    graphics, this.font, parent, x, y, scale, TEXT_COLOR);
+                    graphics, this.font, parent, x, y, scale, TEXT_COLOR,
+                    SdvFontAdapter.Style.SMALL);
             devicesY += ui(30);
         }
 
@@ -296,10 +301,10 @@ public final class AnimalQueryScreen extends Screen implements MenuAccess<Animal
         float deviceScale = Math.min(
                 smallTextScale() * 0.72F,
                 maxWidth / (float) Math.max(
-                        1, this.font.width(devices)));
+                        1, SdvFontAdapter.font(SdvFontAdapter.Style.SMALL).width(devices)));
         SdvFontAdapter.draw(
                 graphics, this.font, devices, x,
-                devicesY, deviceScale, TEXT_COLOR);
+                devicesY, deviceScale, TEXT_COLOR, SdvFontAdapter.Style.SMALL);
     }
 
     private static Component statusText(boolean available) {
@@ -341,9 +346,11 @@ public final class AnimalQueryScreen extends Screen implements MenuAccess<Animal
         float scale = dialogueTextScale();
         int maxTextWidth = boxW - ui(64);
         scale = Math.min(scale, maxTextWidth / (float) Math.max(1, this.font.width(text)));
-        int textX = this.width / 2 - SdvFontAdapter.width(this.font, text, scale) / 2;
+        int textX = this.width / 2 - SdvFontAdapter.width(this.font, text, scale,
+            SdvFontAdapter.Style.DIALOGUE) / 2;
         SdvFontAdapter.draw(graphics, this.font, text,
-            textX, this.height / 2 - ui(88), scale, TEXT_COLOR);
+            textX, this.height / 2 - ui(88), scale, TEXT_COLOR,
+            SdvFontAdapter.Style.DIALOGUE);
 
         int yesX = this.width / 2 - ui(68);
         int noX = this.width / 2 + ui(4);
@@ -579,21 +586,17 @@ public final class AnimalQueryScreen extends Screen implements MenuAccess<Animal
     }
 
     private void captureHudVisibility() {
-        if (!this.hudVisibilityCaptured) {
-            this.previousHideGui = this.minecraft.options.hideGui;
-            this.hudVisibilityCaptured = true;
-        }
-        this.minecraft.options.hideGui = true;
+        TemporaryGuiVisibility.acquire(TemporaryGuiVisibility.Owner.ANIMAL_QUERY);
     }
 
     @Override
     public void removed() {
-        submitRenameIfChanged();
-        AnimalQueryClientDetails.remove(this.menu.getAnimalId());
-        super.removed();
-        if (this.hudVisibilityCaptured) {
-            this.minecraft.options.hideGui = this.previousHideGui;
-            this.hudVisibilityCaptured = false;
+        try {
+            submitRenameIfChanged();
+            AnimalQueryClientDetails.remove(this.menu.getAnimalId());
+            super.removed();
+        } finally {
+            TemporaryGuiVisibility.release(TemporaryGuiVisibility.Owner.ANIMAL_QUERY);
         }
     }
 

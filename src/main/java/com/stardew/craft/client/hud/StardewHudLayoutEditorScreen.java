@@ -157,9 +157,10 @@ public final class StardewHudLayoutEditorScreen extends Screen {
         } else {
             nextScale = dragMode.hasHorizontal() ? scaleX : scaleY;
         }
+        float visualScale = StardewHudLayout.visualScaleFactor(selected);
         nextScale = Mth.clamp(nextScale,
-                StardewHudLayout.MIN_SCALE_PERCENT / 100.0F,
-                StardewHudLayout.MAX_SCALE_PERCENT / 100.0F);
+                StardewHudLayout.MIN_SCALE_PERCENT / 100.0F * visualScale,
+                StardewHudLayout.MAX_SCALE_PERCENT / 100.0F * visualScale);
 
         int nextWidth = Math.max(1, Math.round(baseWidth * nextScale));
         int nextHeight = Math.max(1, Math.round(baseHeight * nextScale));
@@ -190,7 +191,8 @@ public final class StardewHudLayoutEditorScreen extends Screen {
     private void saveSelected() {
         if (selected == null) return;
         HudBox box = boxes.get(selected);
-        StardewHudLayout.setScalePercent(selected, Math.round(box.scale * 100.0F));
+        float visualScale = StardewHudLayout.visualScaleFactor(selected);
+        StardewHudLayout.setScalePercent(selected, Math.round(box.scale / visualScale * 100.0F));
         StardewHudLayout.saveDraggedPosition(selected, width, height,
                 box.x, box.y, box.width, box.height);
     }
@@ -269,7 +271,7 @@ public final class StardewHudLayoutEditorScreen extends Screen {
             case MAIN -> StardewTimeHud.renderPreview(graphics, box.x, box.y, box.scale);
             case PLAYER_BARS -> StardewPlayerHud.renderPreview(graphics, box.x, box.y, box.scale);
             case NOTIFICATIONS -> StardewHudMessageManager.renderNotificationPreview(
-                    graphics, font, box.x, box.y, box.scale);
+                    graphics, box.x, box.y, box.scale);
             case WEAPON_SKILLS -> ModClientEvents.renderWeaponSkillPreview(
                     graphics, box.x, box.y, box.scale);
             case SKILL_XP -> SkillExperienceHud.renderPreview(graphics, box.x, box.y, box.scale);

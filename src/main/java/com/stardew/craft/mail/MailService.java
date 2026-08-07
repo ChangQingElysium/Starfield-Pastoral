@@ -203,7 +203,7 @@ public class MailService {
         }
 
         String text = entry.getText();
-        String secretFriendId = "winter_18".equals(mailId)
+        String secretFriendId = isSecretSantaLetter(mailId)
             ? com.stardew.craft.festival.WinterStarFestivalService.getSecretFriendId(player)
             : "";
         String secretSantaNameKey = secretFriendId.isBlank()
@@ -295,7 +295,7 @@ public class MailService {
         MailEntry entry = MailRegistry.get(mailId);
         if (entry == null) return;
 
-        String secretFriendId = "winter_18".equals(mailId)
+        String secretFriendId = isSecretSantaLetter(mailId)
                 ? com.stardew.craft.festival.WinterStarFestivalService.getSecretFriendId(player)
                 : "";
         String secretSantaNameKey = secretFriendId.isBlank()
@@ -314,6 +314,10 @@ public class MailService {
                 false,
                 0
         ));
+    }
+
+    private static boolean isSecretSantaLetter(String mailId) {
+        return "winter_18".equals(mailId) || "winter_24".equals(mailId);
     }
 
     private static boolean canQueueReadableMail(ServerPlayer player, String mailId, String queueName) {

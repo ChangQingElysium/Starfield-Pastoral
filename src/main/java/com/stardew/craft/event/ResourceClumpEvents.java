@@ -5,7 +5,6 @@ import com.stardew.craft.core.ModDimensions;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import com.stardew.craft.player.SkillType;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -46,7 +45,7 @@ public final class ResourceClumpEvents {
         if (!player.level().isClientSide
                 && player instanceof ServerPlayer serverPlayer
                 && player.level().dimension() == ModDimensions.STARDEW_VALLEY
-                && PlayerStardewDataAPI.getEnergy(serverPlayer) <= 0.0F) {
+                && !PlayerStardewDataAPI.canConsumeEnergy(serverPlayer, Float.MIN_NORMAL)) {
             event.setNewSpeed(0.0F);
             return;
         }
@@ -84,14 +83,8 @@ public final class ResourceClumpEvents {
         ItemStack tool = player.getMainHandItem();
         BlockPos pos = event.getPos();
         if (!player.isCreative() && clump.getRequiredPower(tool) <= 0.0F) {
-            player.displayClientMessage(Component.translatable(clump.getRequirementTranslationKey()), true);
-            return;
-        }
-
-        if (!player.isCreative()
-                && player.level().dimension() == ModDimensions.STARDEW_VALLEY
-                && PlayerStardewDataAPI.getEnergy(player) <= 0.0F) {
-            player.displayClientMessage(Component.translatable("stardewcraft.message.player.exhausted"), true);
+            com.stardew.craft.network.payload.HudHintPayload.send(
+                    player, clump.getRequirementTranslationKey());
             return;
         }
 
@@ -100,8 +93,10 @@ public final class ResourceClumpEvents {
             if (!(currentState.getBlock() instanceof ResourceClumpBlock currentClump)) {
                 return;
             }
+            if (!consumeEnergyForClumpBreak(player, currentClump, pos)) {
+                return;
+            }
             currentClump.breakClump(player.serverLevel(), pos, currentState, player);
-            consumeEnergyForClumpBreak(player, currentClump, pos);
         });
     }
 
@@ -110,15 +105,15 @@ public final class ResourceClumpEvents {
         MINING.remove(event.getEntity().getUUID());
     }
 
-    private static void consumeEnergyForClumpBreak(ServerPlayer player, ResourceClumpBlock clump, BlockPos pos) {
+    private static boolean consumeEnergyForClumpBreak(ServerPlayer player, ResourceClumpBlock clump, BlockPos pos) {
         if (player.isCreative() || player.level().dimension() != ModDimensions.STARDEW_VALLEY) {
             MINING.remove(player.getUUID());
-            return;
+            return true;
         }
 
         MiningState mining = MINING.remove(player.getUUID());
         if (mining == null || !mining.pos.equals(pos)) {
-            return;
+            return true;
         }
 
         long durationTicks = Math.max(1L, player.serverLevel().getGameTime() - mining.startTick);
@@ -129,8 +124,6 @@ public final class ResourceClumpEvents {
         float perSwing = Math.max(0.5F, 2.0F - skillLevel * 0.1F);
         float swings = (float) durationTicks / (float) TOOL_SWING_TICKS;
         float cost = perSwing * swings;
-        if (cost > 0.0F) {
-            PlayerStardewDataAPI.consumeEnergy(player, cost);
-        }
+        return cost <= 0.0F || PlayerStardewDataAPI.consumeEnergyOrNotify(player, cost);
     }
 }

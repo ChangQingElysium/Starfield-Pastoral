@@ -353,14 +353,11 @@ public class CoopManagerBlock extends Block {
 
         AnimalBuildingConstructionService.StartResult buildResult =
                 AnimalBuildingConstructionService.start(
-                        serverPlayer,
-                        targetType,
-                        currentTier == 0,
                         applyStructure);
         if (!buildResult.started()) {
             com.stardew.craft.network.payload.HudHintPayload.send(
                     serverPlayer,
-                    "stardewcraft.manager.construction.missing_cost");
+                    "stardewcraft.manager.construction.failed");
             level.playSound(null, managerPos, SoundEvents.VILLAGER_NO,
                     SoundSource.BLOCKS, 0.8f, 1.0f);
             return false;

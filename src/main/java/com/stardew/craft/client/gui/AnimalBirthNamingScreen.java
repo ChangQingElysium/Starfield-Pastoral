@@ -34,7 +34,7 @@ public final class AnimalBirthNamingScreen extends Screen {
         int left = (width - panelWidth) / 2;
         int top = height / 2 - 45;
         nameField = new EditBox(
-                font,
+                com.stardew.craft.client.font.StardewFonts.dialogue(),
                 left,
                 top + 34,
                 panelWidth,

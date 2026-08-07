@@ -1,8 +1,10 @@
 package com.stardew.craft.client.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.stardew.craft.block.FertilizerType;
 import com.stardew.craft.block.utility.GardenPotBlock;
 import com.stardew.craft.blockentity.GardenPotBlockEntity;
+import com.stardew.craft.client.ClientFertilizerCache;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -40,6 +42,15 @@ public final class GardenPotBlockEntityRenderer
             int packedOverlay
     ) {
         super.renderBlockModel(be, state, level, poseStack, buffer, packedOverlay);
+
+        FertilizerType fertilizer = ClientFertilizerCache.getFertilizer(level, be.getBlockPos());
+        if (fertilizer != null) {
+            FertilizerOverlayRenderer.renderGardenPotOverlay(
+                    poseStack,
+                    buffer,
+                    fertilizer,
+                    LevelRenderer.getLightColor(level, be.getBlockPos().above()));
+        }
 
         BlockState crop = level.getBlockState(be.getBlockPos().above());
         if (!GardenPotBlock.isSupportedPlant(crop)) {

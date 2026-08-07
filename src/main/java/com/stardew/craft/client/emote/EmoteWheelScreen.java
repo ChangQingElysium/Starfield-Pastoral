@@ -1,5 +1,7 @@
 package com.stardew.craft.client.emote;
 
+import com.stardew.craft.client.font.StardewFonts;
+
 import java.util.List;
 
 import com.stardew.craft.emote.EmoteCatalog;
@@ -89,8 +91,8 @@ public final class EmoteWheelScreen extends Screen implements com.stardew.craft.
 		if (selectedIndex >= 0 && selectedIndex < count && minecraft != null) {
 			EmoteType selected = wheelItems.get(selectedIndex);
 			Component label = Component.translatable("stardewcraft.emote." + selected.id());
-			int labelW = minecraft.font.width(label);
-			guiGraphics.drawString(minecraft.font, label, centerX - labelW / 2, centerY - 8, 0xFFF4EED0, false);
+			int labelW = StardewFonts.dialogue().width(label);
+			guiGraphics.drawString(StardewFonts.dialogue(), label, centerX - labelW / 2, centerY - 8, 0xFFF4EED0, false);
 		}
 
 		for (int i = 0; i < count; i++) {

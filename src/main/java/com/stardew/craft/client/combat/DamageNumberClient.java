@@ -1,5 +1,7 @@
 package com.stardew.craft.client.combat;
 
+import com.stardew.craft.client.font.StardewFonts;
+
 import com.stardew.craft.combat.DimensionDamageMapper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -78,7 +80,7 @@ public final class DamageNumberClient {
 
         if (ACTIVE.isEmpty()) return;
 
-        Font font = mc.font;
+        Font font = StardewFonts.spriteTextColored();
         MultiBufferSource.BufferSource buffer = mc.renderBuffers().bufferSource();
 
         Vec3 camPos = event.getCamera().getPosition();

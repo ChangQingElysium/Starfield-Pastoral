@@ -480,11 +480,12 @@ public final class CalicoJackScreen extends Screen {
                 font,
                 Minecraft.getInstance().getLanguageManager().getSelected(),
                 viewport.effectiveGuiScale(),
-                SdvFontAdapter.Style.SPRITE_TEXT);
+                SdvFontAdapter.Style.SPRITE_TEXT_COLORED);
     }
 
     private int textWidth(Component text) {
-        return SdvFontAdapter.width(font, text, textScale());
+        return SdvFontAdapter.width(font, text, textScale(),
+            SdvFontAdapter.Style.SPRITE_TEXT_COLORED);
     }
 
     private int renderedTextHeight() {
@@ -494,7 +495,8 @@ public final class CalicoJackScreen extends Screen {
     private void drawText(
             GuiGraphics graphics, Component text, int x, int y, int color
     ) {
-        SdvFontAdapter.draw(graphics, font, text, x, y, textScale(), color);
+        SdvFontAdapter.draw(graphics, font, text, x, y, textScale(), color,
+            SdvFontAdapter.Style.SPRITE_TEXT_COLORED);
     }
 
     private void drawCenteredText(

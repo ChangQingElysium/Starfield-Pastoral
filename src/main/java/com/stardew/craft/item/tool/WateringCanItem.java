@@ -122,9 +122,9 @@ public class WateringCanItem extends Item implements IStardewItem {
 
             // 其他情况：开始蓄力洒水
             if (getWater(stack) <= 0 && !player.isCreative()) {
-                if (!level.isClientSide) {
-                    @Nonnull Component message = Component.translatable("stardewcraft.message.tool.empty");
-                    player.displayClientMessage(message, true);
+                if (!level.isClientSide && player instanceof ServerPlayer serverPlayer) {
+                    com.stardew.craft.network.payload.HudHintPayload.send(
+                            serverPlayer, "stardewcraft.message.tool.empty");
                 }
                 return InteractionResult.FAIL;
             }
@@ -194,9 +194,9 @@ public class WateringCanItem extends Item implements IStardewItem {
         // 2) 没水不能洒水
 
         if (getWater(stack) <= 0 && !player.isCreative()) {
-            if (!level.isClientSide) {
-                @Nonnull Component message = Component.translatable("stardewcraft.message.tool.empty");
-                player.displayClientMessage(message, true);
+            if (!level.isClientSide && player instanceof ServerPlayer serverPlayer) {
+                com.stardew.craft.network.payload.HudHintPayload.send(
+                        serverPlayer, "stardewcraft.message.tool.empty");
             }
             return InteractionResultHolder.fail(stack);
         }
@@ -222,18 +222,6 @@ public class WateringCanItem extends Item implements IStardewItem {
         int useDuration = this.getUseDuration(stack, entity) - timeCharged;
         int chargeLevel = getChargeLevel(stack, useDuration);
 
-        // 能量为 0 时：拦截耗能动作（仅星露谷维度）。
-        if (!level.isClientSide
-            && player instanceof ServerPlayer serverPlayer
-            && !player.isCreative()
-            && player.level().dimension() == ModDimensions.STARDEW_VALLEY) {
-            if (PlayerStardewDataAPI.getEnergy(serverPlayer) <= 0.0f) {
-                @Nonnull Component message = Component.translatable("stardewcraft.message.player.exhausted");
-                player.displayClientMessage(message, true);
-                return;
-            }
-        }
-
         // 获取作用范围
         BlockHitResult hitResult = getPlayerPOVHitResult(level, player, ClipContext.Fluid.NONE);
         if (hitResult.getType() == HitResult.Type.BLOCK) {
@@ -258,8 +246,9 @@ public class WateringCanItem extends Item implements IStardewItem {
                     return !com.stardew.craft.event.FarmAreaProtectionEvents.canModifyAt(sp, pos);
                 });
                 if (targetPositions.isEmpty() && before > 0) {
-                    sp.displayClientMessage(
-                            Component.translatable("stardewcraft.farm.build_farm_only"), true);
+                    com.stardew.craft.network.payload.HudHintPayload.send(
+                            sp, "stardewcraft.farm.build_farm_only");
+                    clearAction(stack);
                     return;
                 }
             }
@@ -270,6 +259,13 @@ public class WateringCanItem extends Item implements IStardewItem {
             // 如果水不够，则只浇前面的若干格（而不是一次性扣一大段）。
             boolean bottomless = isBottomless(stack);
             int waterLeft = (player.isCreative() || bottomless) ? Integer.MAX_VALUE : getWater(stack);
+            if (!level.isClientSide
+                    && player instanceof ServerPlayer serverPlayer
+                    && canWaterAny(level, targetPositions, waterLeft)
+                    && !payStamina(serverPlayer, stack, chargeLevel, bottomless)) {
+                clearAction(stack);
+                return;
+            }
             for (BlockPos pos : targetPositions) {
                 if (!player.isCreative() && !bottomless && waterLeft <= 0) {
                     break;
@@ -296,14 +292,6 @@ public class WateringCanItem extends Item implements IStardewItem {
                 if (!player.isCreative() && !bottomless) {
                     setWater(stack, Math.max(0, waterLeft));
                     
-                    // 扣除能量 (Stamina)
-                    if (!level.isClientSide && player instanceof ServerPlayer serverPlayer
-                            && !StardewEnchantments.has(stack, StardewEnchantments.EFFICIENT)) {
-                        int farmingLevel = PlayerStardewDataAPI.getSkillLevel(serverPlayer, SkillType.FARMING);
-                        // 原版公式: Stamina -= (2 * (power + 1)) - (FarmingLevel * 0.1)
-                        float staminaCost = (2.0f * (chargeLevel + 1)) - (farmingLevel * 0.1f);
-                        PlayerStardewDataAPI.consumeEnergy(serverPlayer, staminaCost);
-                    }
                 }
                 
                 // 播放浇水音效
@@ -396,6 +384,35 @@ public class WateringCanItem extends Item implements IStardewItem {
             maxChargeLevel = Math.min(5, maxChargeLevel + 1);
         }
         return maxChargeLevel;
+    }
+
+    private static boolean canWaterAny(Level level, List<BlockPos> positions, int waterLeft) {
+        if (waterLeft <= 0) {
+            return false;
+        }
+        for (BlockPos pos : positions) {
+            if (level.getBlockState(pos).getBlock() instanceof FarmBlock) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean payStamina(
+            ServerPlayer player,
+            ItemStack stack,
+            int chargeLevel,
+            boolean bottomless
+    ) {
+        if (player.isCreative()
+                || bottomless
+                || player.level().dimension() != ModDimensions.STARDEW_VALLEY
+                || StardewEnchantments.has(stack, StardewEnchantments.EFFICIENT)) {
+            return true;
+        }
+        int farmingLevel = PlayerStardewDataAPI.getSkillLevel(player, SkillType.FARMING);
+        float cost = Math.max(0.0F, 2.0F * (chargeLevel + 1) - farmingLevel * 0.1F);
+        return PlayerStardewDataAPI.consumeEnergyOrNotify(player, cost);
     }
 
 

@@ -1,5 +1,7 @@
 package com.stardew.craft.client.render;
 
+import com.stardew.craft.client.font.StardewFonts;
+
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -106,7 +108,7 @@ public final class LadderHighlightRenderer {
         ps.translate(-cam.x, -cam.y, -cam.z);
 
         renderGlowOutline(buf, ps, cam, ladderPos, breath, isShaft);
-        renderBubble(ps, buf, cam, ladderPos, breath, mc.font, isShaft);
+        renderBubble(ps, buf, cam, ladderPos, breath, StardewFonts.spriteTextColored(), isShaft);
 
         ps.popPose();
     }

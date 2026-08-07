@@ -1,5 +1,6 @@
 package com.stardew.craft.client.gui;
 
+import com.stardew.craft.client.font.StardewFonts;
 import com.stardew.craft.client.gui.common.CommonGuiTextures;
 import com.stardew.craft.client.gui.common.GuiText;
 import com.stardew.craft.client.gui.common.StardewRenderMapping;
@@ -182,7 +183,8 @@ public class JukeboxScreen extends Screen {
      * 使用 Cursors (325,318,12,18) / (337,318,1,18) / (338,318,12,18)
      */
     private void drawScrollTitle(GuiGraphics graphics) {
-        Component title = GuiText.ellipsize(font, Component.translatable("stardewcraft.jukebox.title"), Math.max(1, menuW - px(64)));
+        Component title = GuiText.ellipsize(font, StardewFonts.bannerTitle(
+                Component.translatable("stardewcraft.jukebox.title")), Math.max(1, menuW - px(64)));
         int textWidth = font.width(title);
 
         int centerX = menuX + menuW / 2;
@@ -194,8 +196,8 @@ public class JukeboxScreen extends Screen {
 
         CommonGuiTextures.drawScrollBanner(graphics, textX, titleY - (int)(3 * s4), textWidth, s4);
 
-        // Text on top — SDV uses dark brown (Game1.textColor ≈ 0xFF5B5045)
-        graphics.drawString(font, title, centerX - font.width(title) / 2, titleY, 0xFF5B5045, false);
+        // Default SpriteText uses Stardew's baked gold/orange title sheet.
+        graphics.drawString(font, title, centerX - font.width(title) / 2, titleY, 0xFFFFFFFF, false);
     }
 
     /**

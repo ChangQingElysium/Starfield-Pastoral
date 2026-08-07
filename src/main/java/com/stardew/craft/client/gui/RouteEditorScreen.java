@@ -32,7 +32,7 @@ public class RouteEditorScreen extends Screen {
     protected void init() {
         panelX = (width - PANEL_W) / 2;
         panelY = (height - PANEL_H) / 2;
-        routeIdBox = new EditBox(font, panelX + 74, panelY + 28, PANEL_W - 92, 18, Component.translatable("gui.stardewcraft.route_editor.route_id"));
+        routeIdBox = new EditBox(com.stardew.craft.client.font.StardewFonts.small(), panelX + 74, panelY + 28, PANEL_W - 92, 18, Component.translatable("gui.stardewcraft.route_editor.route_id"));
         routeIdBox.setTextShadow(false);
         routeIdBox.setMaxLength(96);
         routeIdBox.setValue(RouteEditorClientState.routeId());

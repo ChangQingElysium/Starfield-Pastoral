@@ -1,14 +1,15 @@
 package com.stardew.craft.client.hud;
 
 import com.stardew.craft.Config;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
 
 /** Responsive, persisted layout shared by every movable Stardew HUD element. */
 public final class StardewHudLayout {
-    public static final int TIME_BG_WIDTH = 72;
-    public static final int TIME_BG_HEIGHT = 57;
-    public static final int GROUP_WIDTH = TIME_BG_WIDTH;
-    public static final int GROUP_HEIGHT = 84;
+    public static final int TIME_BG_WIDTH = 71;
+    public static final int TIME_BG_HEIGHT = 43;
+    public static final int GROUP_WIDTH = 72;
+    public static final int GROUP_HEIGHT = 104;
 
     public static final int MIN_SCALE_PERCENT = 25;
     public static final int MAX_SCALE_PERCENT = 200;
@@ -29,17 +30,30 @@ public final class StardewHudLayout {
     public static Placement current(Config.HudElement element, int screenWidth, int screenHeight,
                                     int baseWidth, int baseHeight) {
         Config.HudElementSettings settings = settings(element);
-        return calculate(
+        int configuredPercent = Mth.clamp(settings.scalePercent().get(), MIN_SCALE_PERCENT, MAX_SCALE_PERCENT);
+        return calculateAtScale(
                 screenWidth,
                 screenHeight,
                 baseWidth,
                 baseHeight,
-                settings.scalePercent().get(),
+                configuredPercent / 100.0F * visualScaleFactor(element),
                 settings.horizontalAnchor().get(),
                 settings.verticalAnchor().get(),
                 settings.offsetX().get(),
                 settings.offsetY().get()
         );
+    }
+
+    /** SDV HUD sprites are authored for pixelZoom=4; convert that framebuffer scale into MC GUI units. */
+    public static float visualScaleFactor(Config.HudElement element) {
+        if (element != Config.HudElement.MAIN) {
+            return 1.0F;
+        }
+        Minecraft minecraft = Minecraft.getInstance();
+        double guiScale = minecraft == null || minecraft.getWindow() == null
+                ? 1.0D
+                : minecraft.getWindow().getGuiScale();
+        return 4.0F / (float) Math.max(1.0D, guiScale);
     }
 
     static Placement calculate(int screenWidth, int screenHeight, int scalePercent,
@@ -56,6 +70,15 @@ public final class StardewHudLayout {
                                int offsetX, int offsetY) {
         int safeScale = Mth.clamp(scalePercent, MIN_SCALE_PERCENT, MAX_SCALE_PERCENT);
         float scale = safeScale / 100.0F;
+        return calculateAtScale(screenWidth, screenHeight, baseWidth, baseHeight, scale,
+                horizontalAnchor, verticalAnchor, offsetX, offsetY);
+    }
+
+    private static Placement calculateAtScale(int screenWidth, int screenHeight, int baseWidth, int baseHeight,
+                                              float scale,
+                                              Config.HudHorizontalAnchor horizontalAnchor,
+                                              Config.HudVerticalAnchor verticalAnchor,
+                                              int offsetX, int offsetY) {
         int width = Math.max(1, Math.round(baseWidth * scale));
         int height = Math.max(1, Math.round(baseHeight * scale));
 

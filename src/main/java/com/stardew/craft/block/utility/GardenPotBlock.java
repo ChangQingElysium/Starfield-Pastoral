@@ -12,6 +12,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BoneMealItem;
 import net.minecraft.world.item.ItemStack;
@@ -129,6 +130,21 @@ public final class GardenPotBlock extends FarmBlock implements EntityBlock {
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new GardenPotBlockEntity(pos, state);
+    }
+
+    @Override
+    public void setPlacedBy(
+            Level level,
+            BlockPos pos,
+            BlockState state,
+            @Nullable LivingEntity placer,
+            ItemStack stack) {
+        super.setPlacedBy(level, pos, state, placer, stack);
+        if (!level.isClientSide
+                && state.getValue(MOISTURE) < 7
+                && level.isRainingAt(pos.above())) {
+            level.setBlock(pos, state.setValue(MOISTURE, 7), Block.UPDATE_ALL);
+        }
     }
 
     @Nullable

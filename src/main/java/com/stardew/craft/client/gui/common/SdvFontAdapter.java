@@ -1,85 +1,48 @@
 package com.stardew.craft.client.gui.common;
 
+import com.stardew.craft.client.font.StardewFonts;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
-
-import java.util.Locale;
 
 /** Maps Minecraft font metrics onto SDV's dialogueFont and smallFont metrics. */
 public final class SdvFontAdapter {
     public enum Style {
         DIALOGUE,
         SMALL,
-        SPRITE_TEXT
+        SPRITE_TEXT,
+        SPRITE_TEXT_COLORED
     }
 
     private SdvFontAdapter() {
     }
 
     public static float scale(Font font, String languageCode, float guiScale, Style style) {
-        String language = languageCode.toLowerCase(Locale.ROOT).replace('-', '_');
-        String probe;
-        float sourceAdvance;
-        if (language.startsWith("zh")) {
-            probe = "年龄阿豆鸭子家畜名字";
-            sourceAdvance = switch (style) {
-                case SMALL -> 18.0F;
-                case DIALOGUE -> 25.0F;
-                case SPRITE_TEXT -> 32.59F;
-            };
-        } else if (language.startsWith("ja")) {
-            probe = "あいうえおカキクケコ";
-            sourceAdvance = switch (style) {
-                case SMALL -> 23.0F;
-                case DIALOGUE -> 29.0F;
-                case SPRITE_TEXT -> 41.20F;
-            };
-        } else if (language.startsWith("ko")) {
-            probe = "가나다라마바사아자차";
-            sourceAdvance = switch (style) {
-                case SMALL -> 30.9F;
-                case DIALOGUE -> 35.9F;
-                case SPRITE_TEXT -> 44.09F;
-            };
-        } else if (language.startsWith("ru")) {
-            probe = "АБВГДЕабвгде";
-            sourceAdvance = style == Style.SPRITE_TEXT ? 24.09F : 15.47F;
-        } else {
-            probe = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-            sourceAdvance = switch (style) {
-                case SMALL -> 14.7F;
-                case DIALOGUE -> 21.5F;
-                case SPRITE_TEXT -> 24.0F;
-            };
-        }
-
-        int minecraftWidth = Math.max(1, font.width(probe));
-        int codePoints = Math.max(1, probe.codePointCount(0, probe.length()));
-        float targetGuiWidth = sourceAdvance * codePoints / Math.max(1.0F, guiScale);
-        return Math.max(0.35F, Math.min(6.0F, targetGuiWidth / minecraftWidth));
+        // Providers are normalized so SmallFont's 28px runtime line spacing
+        // occupies MC's 9–10px text row. Undo that normalization when drawing
+        // a source-sized Stardew screen. SpriteText's FontPixelZoom is already
+        // part of the provider scale.
+        return 3.0F / Math.max(1.0F, guiScale);
     }
 
     public static int lineStep(String languageCode, float guiScale, Style style) {
-        String language = languageCode.toLowerCase(Locale.ROOT).replace('-', '_');
-        float sourceLineSpacing;
-        if (language.startsWith("zh")) {
-            sourceLineSpacing = style == Style.SMALL ? 28.0F : 38.0F;
-        } else if (language.startsWith("ja")) {
-            sourceLineSpacing = style == Style.SMALL ? 24.0F : 30.0F;
-        } else if (language.startsWith("ko")) {
-            sourceLineSpacing = style == Style.SMALL ? 44.0F : 58.0F;
-        } else if (language.startsWith("ru")) {
-            sourceLineSpacing = 33.0F;
-        } else {
-            sourceLineSpacing = style == Style.SMALL ? 33.0F : 50.0F;
-        }
-        return Math.max(1, Math.round(sourceLineSpacing / Math.max(1.0F, guiScale)));
+        StardewFonts.Role role = switch (style) {
+            case DIALOGUE -> StardewFonts.Role.DIALOGUE;
+            case SMALL -> StardewFonts.Role.SMALL;
+            case SPRITE_TEXT -> StardewFonts.Role.SPRITE_TEXT;
+            case SPRITE_TEXT_COLORED -> StardewFonts.Role.SPRITE_TEXT_COLORED;
+        };
+        return Math.max(1, Math.round(
+                StardewFonts.lineHeight(role) * 3.0F / Math.max(1.0F, guiScale)));
     }
 
     public static int width(Font font, Component text, float scale) {
         return Math.round(font.width(text) * scale);
+    }
+
+    public static int width(Font ignored, Component text, float scale, Style style) {
+        return Math.round(font(style).width(text) * scale);
     }
 
     public static void draw(GuiGraphics graphics, Font font, Component text,
@@ -91,6 +54,14 @@ public final class SdvFontAdapter {
         graphics.pose().popPose();
     }
 
+    public static void draw(GuiGraphics graphics, Font ignored, Component text,
+                            int x, int y, float scale, int color, Style style) {
+        if (style == Style.SPRITE_TEXT) {
+            color = (color & 0xFF000000) | StardewFonts.spriteTextDefaultRgb();
+        }
+        draw(graphics, font(style), text, x, y, scale, color);
+    }
+
     public static void draw(GuiGraphics graphics, Font font, FormattedCharSequence text,
                             int x, int y, float scale, int color) {
         graphics.pose().pushPose();
@@ -98,5 +69,22 @@ public final class SdvFontAdapter {
         graphics.pose().scale(scale, scale, 1.0F);
         graphics.drawString(font, text, 0, 0, color, false);
         graphics.pose().popPose();
+    }
+
+    public static void draw(GuiGraphics graphics, Font ignored, FormattedCharSequence text,
+                            int x, int y, float scale, int color, Style style) {
+        if (style == Style.SPRITE_TEXT) {
+            color = (color & 0xFF000000) | StardewFonts.spriteTextDefaultRgb();
+        }
+        draw(graphics, font(style), text, x, y, scale, color);
+    }
+
+    public static Font font(Style style) {
+        return switch (style) {
+            case DIALOGUE -> StardewFonts.dialogue();
+            case SMALL -> StardewFonts.small();
+            case SPRITE_TEXT -> StardewFonts.spriteText();
+            case SPRITE_TEXT_COLORED -> StardewFonts.spriteTextColored();
+        };
     }
 }

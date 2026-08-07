@@ -27,6 +27,40 @@ animal_query/heart_filled,cursors,211,428,7,6
 animal_query/heart_empty,cursors,218,428,7,6
 animal_query/heart_half_fill,cursors,211,428,4,6
 animal_query/golden_animal_cracker,objects_2,16,240,16,16
+common/animal_page_pet_icon,cursors,32,0,10,10
+common/animal_page_pet_none,cursors_1_6,273,253,9,9
+common/animal_page_pet_auto,cursors_1_6,282,253,9,9
+common/animal_page_pet_hand,cursors_1_6,291,253,9,9
+common/animal_page_cracker,objects_2,16,242,15,11
+# AnimalPage uses the live animal sprite sheet, not the 32x32 query/incubator icons.
+# Small animals use (0,16,16,16); large animals use (0,36,32,28), except ostriches use y=32.
+common/animal_page_sprite_white_chicken,animal_white_chicken,0,16,16,16
+common/animal_page_sprite_white_chicken_baby,animal_baby_white_chicken,0,16,16,16
+common/animal_page_sprite_brown_chicken,animal_brown_chicken,0,16,16,16
+common/animal_page_sprite_brown_chicken_baby,animal_baby_brown_chicken,0,16,16,16
+common/animal_page_sprite_blue_chicken,animal_blue_chicken,0,16,16,16
+common/animal_page_sprite_blue_chicken_baby,animal_baby_blue_chicken,0,16,16,16
+common/animal_page_sprite_void_chicken,animal_void_chicken,0,16,16,16
+common/animal_page_sprite_void_chicken_baby,animal_baby_void_chicken,0,16,16,16
+common/animal_page_sprite_golden_chicken,animal_golden_chicken,0,16,16,16
+common/animal_page_sprite_golden_chicken_baby,animal_baby_golden_chicken,0,16,16,16
+common/animal_page_sprite_duck,animal_duck,0,16,16,16
+common/animal_page_sprite_duck_baby,animal_baby_white_chicken,0,16,16,16
+common/animal_page_sprite_rabbit,animal_rabbit,0,16,16,16
+common/animal_page_sprite_rabbit_baby,animal_baby_rabbit,0,16,16,16
+common/animal_page_sprite_dinosaur,animal_dinosaur,0,16,16,16
+common/animal_page_sprite_cow,animal_white_cow,0,36,32,28
+common/animal_page_sprite_cow_baby,animal_baby_white_cow,0,36,32,28
+common/animal_page_sprite_brown_cow,animal_brown_cow,0,36,32,28
+common/animal_page_sprite_brown_cow_baby,animal_baby_brown_cow,0,36,32,28
+common/animal_page_sprite_goat,animal_goat,0,36,32,28
+common/animal_page_sprite_goat_baby,animal_baby_goat,0,36,32,28
+common/animal_page_sprite_sheep,animal_sheep,0,36,32,28
+common/animal_page_sprite_sheep_baby,animal_baby_sheep,0,36,32,28
+common/animal_page_sprite_pig,animal_pig,0,36,32,28
+common/animal_page_sprite_pig_baby,animal_baby_pig,0,36,32,28
+common/animal_page_sprite_ostrich,animal_ostrich,0,32,32,28
+common/animal_page_sprite_ostrich_baby,animal_baby_ostrich,0,32,32,28
 animal_query/menu_tile_0,menu_tiles,0,0,64,64
 animal_query/menu_tile_2,menu_tiles,128,0,64,64
 animal_query/menu_tile_3,menu_tiles,192,0,64,64
@@ -45,10 +79,13 @@ animal_query/menu_tile_26,menu_tiles,128,384,64,64
 animal_query/menu_tile_39,menu_tiles,192,576,64,64
 animal_query/menu_tile_40,menu_tiles,0,640,64,64
 animal_query/menu_tile_41,menu_tiles,64,640,64,64
+animal_query/menu_tile_42,menu_tiles,128,640,64,64
 animal_query/menu_tile_44,menu_tiles,0,704,64,64
 animal_query/menu_tile_59,menu_tiles,192,896,64,64
 animal_query/menu_tile_62,menu_tiles,128,960,64,64
 animal_query/menu_tile_63,menu_tiles,192,960,64,64
+animal_query/menu_tile_68,menu_tiles,0,1088,64,64
+animal_query/menu_tile_69,menu_tiles,64,1088,64,64
 animal_query/menu_tile_70,menu_tiles,128,1088,64,64
 common/scroll_banner_box_11,cursors,325,318,11,18
 common/option_highlight_box_3,cursors,375,357,3,3
@@ -64,6 +101,7 @@ common/dialogue_question_right,cursors,293,324,7,1
 # English-only copy here.
 billboard/quest_done_star,billboard,140,397,10,11
 common/shop_coin,cursors,193,373,9,10
+common/day_time_money_box,cursors,333,431,71,43
 common/money_box,cursors,340,472,65,17
 common/shop_portrait_frame,cursors,603,414,74,74
 common/money_digit_0,cursors,286,502,5,8

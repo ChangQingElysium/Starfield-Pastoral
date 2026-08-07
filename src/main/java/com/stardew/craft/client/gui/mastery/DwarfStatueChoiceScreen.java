@@ -1,6 +1,7 @@
 package com.stardew.craft.client.gui.mastery;
 
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.client.font.StardewFonts;
 import com.stardew.craft.client.gui.overnight.StardewGuiUtil;
 import com.stardew.craft.network.payload.ChooseDwarfStatueBuffPayload;
 import com.stardew.craft.sound.ModSounds;
@@ -128,7 +129,8 @@ public final class DwarfStatueChoiceScreen extends Screen {
             panelX, panelY, panelW, panelH, s4, true);
 
         // 标题 — 居中
-        Component title = Component.translatable("stardewcraft.mastery.dwarf_statue.choose");
+        Component title = StardewFonts.title(
+                Component.translatable("stardewcraft.mastery.dwarf_statue.choose"));
         Component source = Component.translatable("stardewcraft.mastery.dwarf_statue.source");
         int tw = this.font.width(title);
         g.drawString(this.font, title, panelX + panelW / 2 - tw / 2, panelY + ui(24), 0x000000, false);

@@ -34,6 +34,6 @@ public class PlayerRendererOvernightCollapseMixin {
         if (degrees <= 0.0F) {
             return;
         }
-        poseStack.rotateAround(Axis.ZP.rotationDegrees(degrees), 0.0F, PIVOT_Y / scale, 0.0F);
+        poseStack.rotateAround(Axis.XP.rotationDegrees(degrees), 0.0F, PIVOT_Y / scale, 0.0F);
     }
 }

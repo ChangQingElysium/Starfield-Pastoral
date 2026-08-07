@@ -1,5 +1,7 @@
 package com.stardew.craft.client.auction;
 
+import com.stardew.craft.client.font.StardewFonts;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -48,7 +50,7 @@ public final class AuctionTooltipBoardRenderer {
         float scale = 0.0175F;
         ps.scale(scale, -scale, scale);
 
-        Font font = mc.font;
+        Font font = StardewFonts.small();
         drawBoard(ps, buffers);
         drawCentered(font, ps, buffers, fit(font, board.auctionName(), 154), -76, 0xFFF4C975);
         drawCentered(font, ps, buffers, ComponentText.lotMeta(board), -61, 0xFFD19A57);

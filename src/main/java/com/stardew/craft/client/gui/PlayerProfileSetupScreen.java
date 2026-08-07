@@ -148,7 +148,7 @@ public final class PlayerProfileSetupScreen extends Screen {
     }
 
     private EditBox createField(int y, int height, Component narration, int maxLength, String value) {
-        EditBox field = new EditBox(font, formX, y, formW, height, narration);
+        EditBox field = new EditBox(com.stardew.craft.client.font.StardewFonts.small(), formX, y, formW, height, narration);
         field.setBordered(false);
         field.setTextShadow(false);
         field.setTextColor(TEXT_DARK);
@@ -273,17 +273,9 @@ public final class PlayerProfileSetupScreen extends Screen {
 
     private void drawUnderlineField(GuiGraphics graphics, EditBox field,
                                     int mouseX, int mouseY, float partialTick) {
-        field.render(graphics, mouseX, mouseY, partialTick);
-        int lineY = field.getY() + field.getHeight() + 1;
-        boolean focused = field.isFocused();
-        int lineColor = focused ? 0xFFEADB8C : 0xAA8B7D63;
-        graphics.fill(field.getX(), lineY, field.getX() + field.getWidth(),
-                lineY + (focused ? 2 : 1), lineColor);
-        if (focused) {
-            graphics.fillGradient(field.getX(), lineY + 2,
-                    field.getX() + field.getWidth(), lineY + 5,
-                    0x44EADB8C, 0x00EADB8C);
-        }
+        com.stardew.craft.client.gui.common.SdvEditBoxRenderer.drawTextured(
+                graphics, com.stardew.craft.client.font.StardewFonts.small(), field,
+                field.getX(), field.getY(), field.getWidth(), field.getHeight(), guiScale, TEXT_DARK);
     }
 
     private void drawGenderChoice(GuiGraphics graphics, int mouseX, int mouseY,

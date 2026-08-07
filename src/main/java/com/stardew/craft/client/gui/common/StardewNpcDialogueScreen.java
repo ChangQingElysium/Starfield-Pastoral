@@ -2,10 +2,12 @@ package com.stardew.craft.client.gui.common;
 
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.NpcDisplayNames;
+import com.stardew.craft.client.font.StardewFonts;
 import com.stardew.craft.client.gui.StardewCollectivePauseScreen;
 import com.stardew.craft.sound.ModSounds;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.Util;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -523,7 +525,7 @@ public class StardewNpcDialogueScreen extends Screen implements StardewCollectiv
         StringBuilder pageBuilder = new StringBuilder();
         for (String word : words) {
             String candidate = pageBuilder.length() == 0 ? word : pageBuilder + " " + word;
-            int lineCount = DialogueTextWrapper.wrap(this.font, candidate, wrapWidth).size();
+            int lineCount = DialogueTextWrapper.wrap(dialogueTextFont(), candidate, wrapWidth).size();
             if (lineCount > maxLines && pageBuilder.length() > 0) {
                 out.add(new DialoguePage(pageBuilder.toString().trim(), chunk.showPortrait(), chunk.portraitIndex()));
                 pageBuilder.setLength(0);
@@ -562,15 +564,17 @@ public class StardewNpcDialogueScreen extends Screen implements StardewCollectiv
         Component visible = Component.literal(all.substring(0, end));
         float scale = textScale();
         int unscaledWrap = Math.max(1, Math.round(wrap / scale));
-        List<String> lines = DialogueTextWrapper.wrap(this.font, visible.getString(), unscaledWrap);
+        Font textFont = dialogueTextFont();
+        List<String> lines = DialogueTextWrapper.wrap(textFont, visible.getString(), unscaledWrap);
 
         graphics.pose().pushPose();
         graphics.pose().translate(textX, textY, 0.0f);
         graphics.pose().scale(scale, scale, 1.0f);
         int drawY = 0;
+        int unscaledLineStep = unscaledLineStep(scale);
         for (String line : lines) {
-            graphics.drawString(this.font, line, 0, drawY, 0x2E251A, false);
-            drawY += this.font.lineHeight;
+            graphics.drawString(textFont, line, 0, drawY, spriteTextColor(), false);
+            drawY += unscaledLineStep;
         }
         graphics.pose().popPose();
     }
@@ -615,8 +619,9 @@ public class StardewNpcDialogueScreen extends Screen implements StardewCollectiv
         String hover = hearts + "/14<";
 
         float scale = textScale();
-        int textWidth = Math.round(this.font.width(hover) * scale);
-        int textHeight = Math.round(this.font.lineHeight * scale);
+        Font textFont = dialogueTextFont();
+        int textWidth = Math.round(textFont.width(hover) * scale);
+        int textHeight = scaledLineHeight();
         int hoverX = jewelX + jewelSize / 2 - textWidth / 2;
         int hoverY = jewelY - mapping.ui(64);
         CommonGuiTextures.drawTextureBoxNoShadow(graphics, hoverX - mapping.ui(8), hoverY - mapping.ui(8), textWidth + mapping.ui(16), textHeight + mapping.ui(16), mapping.s4());
@@ -624,7 +629,7 @@ public class StardewNpcDialogueScreen extends Screen implements StardewCollectiv
         graphics.pose().pushPose();
         graphics.pose().translate(hoverX, hoverY, 0.0f);
         graphics.pose().scale(scale, scale, 1.0f);
-        graphics.drawString(this.font, hover, 0, 0, 0x2E251A, false);
+        graphics.drawString(textFont, hover, 0, 0, spriteTextColor(), false);
         graphics.pose().popPose();
     }
 
@@ -748,22 +753,46 @@ public class StardewNpcDialogueScreen extends Screen implements StardewCollectiv
     }
 
     private float textScale() {
-        return Math.max(1.0f, mapping == null ? 1.0f : mapping.s4());
+        return SdvFontAdapter.scale(
+                dialogueTextFont(), languageCode(), guiScale(), SdvFontAdapter.Style.SPRITE_TEXT);
     }
 
     private int scaledLineHeight() {
-        return Math.max(1, Math.round(this.font.lineHeight * textScale()));
+        return SdvFontAdapter.lineStep(languageCode(), guiScale(), SdvFontAdapter.Style.SPRITE_TEXT);
+    }
+
+    private int unscaledLineStep(float scale) {
+        return Math.max(1, Math.round(scaledLineHeight() / Math.max(0.01F, scale)));
+    }
+
+    private Font dialogueTextFont() {
+        return StardewFonts.spriteText();
+    }
+
+    private int spriteTextColor() {
+        return 0xFF000000 | StardewFonts.spriteTextDefaultRgb();
+    }
+
+    private String languageCode() {
+        return this.minecraft == null
+                ? "en_us"
+                : this.minecraft.getLanguageManager().getSelected();
+    }
+
+    private float guiScale() {
+        return this.minecraft == null ? 1.0F : (float) this.minecraft.getWindow().getGuiScale();
     }
 
     private void drawScaledCenteredText(GuiGraphics graphics, String text, int centerX, int y, int color) {
         float scale = textScale();
         int unscaledCenterX = Math.round(centerX / scale);
         int unscaledY = Math.round(y / scale);
-        int unscaledTextWidth = this.font.width(text);
+        Font textFont = dialogueTextFont();
+        int unscaledTextWidth = textFont.width(text);
 
         graphics.pose().pushPose();
         graphics.pose().scale(scale, scale, 1.0f);
-        graphics.drawString(this.font, text, unscaledCenterX - unscaledTextWidth / 2, unscaledY, color, false);
+        graphics.drawString(textFont, text, unscaledCenterX - unscaledTextWidth / 2, unscaledY, spriteTextColor(), false);
         graphics.pose().popPose();
     }
 

@@ -1,9 +1,11 @@
 package com.stardew.craft.client.gui.common;
 
+import com.stardew.craft.client.font.StardewFonts;
 import com.stardew.craft.client.gui.StardewCollectivePauseScreen;
 import com.stardew.craft.network.payload.SleepConfirmChoicePayload;
 import com.stardew.craft.sound.ModSounds;
 import net.minecraft.Util;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -113,7 +115,7 @@ public class StardewConfirmDialogScreen extends Screen implements StardewCollect
 
     private int measureWrappedHeight(List<net.minecraft.util.FormattedCharSequence> lines) {
         int lineCount = Math.max(1, lines.size());
-        return lineCount * this.font.lineHeight;
+        return lineCount * scaledLineHeight();
     }
 
     private String getCurrentString() {
@@ -128,16 +130,24 @@ public class StardewConfirmDialogScreen extends Screen implements StardewCollect
         return Math.max(1, boxWidth - px(16));
     }
 
+    private int unscaledWrapWidth(int guiWidth) {
+        return Math.max(1, Math.round(guiWidth / textScale()));
+    }
+
+    private List<net.minecraft.util.FormattedCharSequence> wrap(Component text, int guiWidth) {
+        return dialogueTextFont().split(text, unscaledWrapWidth(guiWidth));
+    }
+
     private void recomputeLayout() {
         mapping = new StardewRenderMapping(this.width, this.height, guiScale());
         boxWidth = px(spec.dialogWidth());
         int questionWrapWidth = getQuestionWrapWidth();
-        questionHeight = isQuestionBlank() ? 0 : measureWrappedHeight(this.font.split(spec.question(), questionWrapWidth));
+        questionHeight = isQuestionBlank() ? 0 : measureWrappedHeight(wrap(spec.question(), questionWrapWidth));
 
         wrappedResponses.clear();
         int totalHeight = questionHeight;
         for (Component response : spec.responses()) {
-            List<net.minecraft.util.FormattedCharSequence> lines = this.font.split(response, boxWidth);
+            List<net.minecraft.util.FormattedCharSequence> lines = wrap(response, boxWidth);
             int responseHeight = measureWrappedHeight(lines);
             wrappedResponses.add(new WrappedResponse(response, lines, responseHeight));
             totalHeight += responseHeight + px(16);
@@ -174,9 +184,12 @@ public class StardewConfirmDialogScreen extends Screen implements StardewCollect
 
     private void drawWrappedLeftAligned(GuiGraphics graphics, List<net.minecraft.util.FormattedCharSequence> lines, int x, int y, int color) {
         int drawY = y;
+        Font textFont = dialogueTextFont();
+        float scale = textScale();
         for (net.minecraft.util.FormattedCharSequence line : lines) {
-            graphics.drawString(this.font, line, x, drawY, color, false);
-            drawY += this.font.lineHeight;
+            SdvFontAdapter.draw(
+                    graphics, textFont, line, x, drawY, scale, color, SdvFontAdapter.Style.SPRITE_TEXT);
+            drawY += scaledLineHeight();
         }
     }
 
@@ -320,8 +333,8 @@ public class StardewConfirmDialogScreen extends Screen implements StardewCollect
 
         int textX = boxX + px(8);
         if (!isQuestionBlank()) {
-            List<net.minecraft.util.FormattedCharSequence> questionLines = this.font.split(spec.question(), getQuestionWrapWidth());
-            drawWrappedLeftAligned(graphics, questionLines, textX, boxDrawY + px(12), 0x3A2A1A);
+            List<net.minecraft.util.FormattedCharSequence> questionLines = wrap(spec.question(), getQuestionWrapWidth());
+            drawWrappedLeftAligned(graphics, questionLines, textX, boxDrawY + px(12), 0xFFFFFFFF);
         }
 
         int responseY = optionStartY();
@@ -339,10 +352,29 @@ public class StardewConfirmDialogScreen extends Screen implements StardewCollect
 
             float alpha = (selected == i) ? 1.0f : 0.6f;
             graphics.setColor(alpha, alpha, alpha, 1.0f);
-            drawWrappedLeftAligned(graphics, response.lines(), textX, responseY, 0x3A2A1A);
+            drawWrappedLeftAligned(graphics, response.lines(), textX, responseY, 0xFFFFFFFF);
             graphics.setColor(1.0f, 1.0f, 1.0f, 1.0f);
             responseY += response.lineHeight() + px(16);
         }
+    }
+
+    private Font dialogueTextFont() {
+        return StardewFonts.spriteText();
+    }
+
+    private String languageCode() {
+        return this.minecraft == null
+                ? "en_us"
+                : this.minecraft.getLanguageManager().getSelected();
+    }
+
+    private float textScale() {
+        return SdvFontAdapter.scale(
+                dialogueTextFont(), languageCode(), guiScale(), SdvFontAdapter.Style.SPRITE_TEXT);
+    }
+
+    private int scaledLineHeight() {
+        return SdvFontAdapter.lineStep(languageCode(), guiScale(), SdvFontAdapter.Style.SPRITE_TEXT);
     }
 
     private void submitDecision(int index) {

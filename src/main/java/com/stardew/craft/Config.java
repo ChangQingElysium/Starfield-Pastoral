@@ -23,6 +23,8 @@ public final class Config {
     public static final ModConfigSpec.BooleanValue ENABLE_WEAPON_SPECIAL_EFFECTS = CLIENT.ENABLE_WEAPON_SPECIAL_EFFECTS;
     public static final ModConfigSpec.BooleanValue ENABLE_WEAPON_POST_EFFECTS = CLIENT.ENABLE_WEAPON_POST_EFFECTS;
     public static final ModConfigSpec.BooleanValue SHOW_MONSTER_HP_BAR = CLIENT.SHOW_MONSTER_HP_BAR;
+    public static final ModConfigSpec.BooleanValue ENABLE_STARDEW_FONTS = CLIENT.ENABLE_STARDEW_FONTS;
+    public static final ModConfigSpec.BooleanValue USE_CHINESE_SMOOTH_FONT = CLIENT.USE_CHINESE_SMOOTH_FONT;
 
     public static final ModConfigSpec.DoubleValue TIME_SPEED_MULTIPLIER = SERVER.TIME_SPEED_MULTIPLIER;
     public static final ModConfigSpec.BooleanValue ENABLE_FISHING_MINIGAME = SERVER.ENABLE_FISHING_MINIGAME;
@@ -36,6 +38,8 @@ public final class Config {
         public final ModConfigSpec.BooleanValue ENABLE_WEAPON_SPECIAL_EFFECTS;
         public final ModConfigSpec.BooleanValue ENABLE_WEAPON_POST_EFFECTS;
         public final ModConfigSpec.BooleanValue SHOW_MONSTER_HP_BAR;
+        public final ModConfigSpec.BooleanValue ENABLE_STARDEW_FONTS;
+        public final ModConfigSpec.BooleanValue USE_CHINESE_SMOOTH_FONT;
         public final ModConfigSpec.BooleanValue LEGACY_COMMON_IMPORTED;
         public final ModConfigSpec.IntValue HUD_SCALE_PERCENT;
         public final ModConfigSpec.EnumValue<HudHorizontalAnchor> HUD_HORIZONTAL_ANCHOR;
@@ -60,6 +64,16 @@ public final class Config {
                     .comment("Show monster name and HP bar above their heads in the mine")
                     .translation("config.stardewcraft.client.show_monster_hp_bar")
                     .define("showMonsterHpBar", true);
+
+            ENABLE_STARDEW_FONTS = builder
+                    .comment("Use Stardew Valley fonts in StardewCraft interfaces and overlays.")
+                    .translation("config.stardewcraft.client.enable_stardew_fonts")
+                    .define("enableStardewFonts", true);
+
+            USE_CHINESE_SMOOTH_FONT = builder
+                    .comment("Use Stardew Valley's optional rounded Chinese font.",
+                            "A resource reload or game restart is required after changing this value.")
+                    .define("useChineseSmoothFont", false);
 
             builder.push("migration");
             LEGACY_COMMON_IMPORTED = builder
@@ -167,7 +181,7 @@ public final class Config {
     }
 
     public enum HudElement {
-        MAIN("main", 72, 84, 100, HudHorizontalAnchor.RIGHT, HudVerticalAnchor.TOP, 10, 10),
+        MAIN("main", 72, 90, 100, HudHorizontalAnchor.RIGHT, HudVerticalAnchor.TOP, 10, 10),
         PLAYER_BARS("playerBars", 278, 18, 100, HudHorizontalAnchor.CENTER, HudVerticalAnchor.BOTTOM, 0, 31),
         MINING_FLOOR("miningFloor", 32, 32, 100, HudHorizontalAnchor.CENTER, HudVerticalAnchor.BOTTOM, -143, 1),
         FESTIVAL_SCORE("festivalScore", 220, 48, 100, HudHorizontalAnchor.LEFT, HudVerticalAnchor.TOP, 16, 32),

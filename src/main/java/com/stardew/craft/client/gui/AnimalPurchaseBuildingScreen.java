@@ -2,6 +2,7 @@ package com.stardew.craft.client.gui;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.client.TemporaryGuiVisibility;
 import com.stardew.craft.client.gui.common.CommonGuiTextures;
 import com.stardew.craft.client.gui.common.GuiText;
 import com.stardew.craft.client.gui.common.SdvEditBoxRenderer;
@@ -13,6 +14,7 @@ import com.stardew.craft.network.payload.AnimalPurchaseSubmitPayload;
 import com.stardew.craft.network.payload.IncubatorClaimSubmitPayload;
 import com.stardew.craft.network.payload.OpenAnimalPurchaseScreenPayload;
 import com.stardew.craft.sound.ModSounds;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
@@ -114,8 +116,6 @@ public final class AnimalPurchaseBuildingScreen extends Screen {
     private long exitTransitionStartedAtMs;
     private ExitTransition exitTransition = ExitTransition.NONE;
     private String purchasedAnimalName = "";
-    private boolean previousHideGui;
-    private boolean hudVisibilityCaptured;
 
     public AnimalPurchaseBuildingScreen(OpenAnimalPurchaseScreenPayload payload,
                                         OpenAnimalPurchaseScreenPayload.AnimalOption animal) {
@@ -180,7 +180,7 @@ public final class AnimalPurchaseBuildingScreen extends Screen {
         int textBoxW = this.nameFieldBoxW - ui(64);
         int renderedTextHeight = Math.max(1, Math.round(this.font.lineHeight * dialogueTextScale()));
         int textBoxY = this.nameFieldBoxY + (this.nameFieldBoxH - renderedTextHeight) / 2;
-        this.nameField = new EditBox(this.font,
+        this.nameField = new EditBox(com.stardew.craft.client.font.StardewFonts.dialogue(),
             textBoxX, textBoxY, textBoxW, this.font.lineHeight + 6,
             Component.translatable("stardewcraft.animal.purchase.name_hint"));
         this.nameField.setMaxLength(128);
@@ -268,8 +268,10 @@ public final class AnimalPurchaseBuildingScreen extends Screen {
             this.minecraft.getLanguageManager().getSelected(), this.guiScale / NAMING_HEADER_SCALE,
             SdvFontAdapter.Style.SPRITE_TEXT);
         int maxFontWidth = Math.max(1, (int) Math.floor((this.width - ui(128)) / textScale));
-        Component title = GuiText.ellipsize(this.font, placementTitle(), maxFontWidth);
-        int textWidth = SdvFontAdapter.width(this.font, title, textScale);
+        Font spriteFont = SdvFontAdapter.font(SdvFontAdapter.Style.SPRITE_TEXT);
+        Component title = GuiText.ellipsize(spriteFont, placementTitle(), maxFontWidth);
+        int textWidth = SdvFontAdapter.width(this.font, title, textScale,
+            SdvFontAdapter.Style.SPRITE_TEXT);
         int textX = this.width / 2 - textWidth / 2;
         float bannerScale = s4() * NAMING_HEADER_SCALE;
         int bannerY = ui(16) - Math.round(3 * bannerScale);
@@ -277,7 +279,8 @@ public final class AnimalPurchaseBuildingScreen extends Screen {
             graphics, textX, bannerY, Math.max(1, textWidth), bannerScale);
         int renderedHeight = Math.max(1, Math.round(this.font.lineHeight * textScale));
         int textY = bannerY + (Math.round(18 * bannerScale) - renderedHeight) / 2;
-        SdvFontAdapter.draw(graphics, this.font, title, textX, textY, textScale, TEXT_COLOR);
+        SdvFontAdapter.draw(graphics, this.font, title, textX, textY, textScale, TEXT_COLOR,
+            SdvFontAdapter.Style.SPRITE_TEXT);
     }
 
     private void drawBuildingList(GuiGraphics graphics, int mouseX, int mouseY) {
@@ -681,19 +684,15 @@ public final class AnimalPurchaseBuildingScreen extends Screen {
     }
 
     private void captureHudVisibility() {
-        if (!this.hudVisibilityCaptured) {
-            this.previousHideGui = this.minecraft.options.hideGui;
-            this.hudVisibilityCaptured = true;
-        }
-        this.minecraft.options.hideGui = true;
+        TemporaryGuiVisibility.acquire(TemporaryGuiVisibility.Owner.ANIMAL_PURCHASE_BUILDING);
     }
 
     @Override
     public void removed() {
-        super.removed();
-        if (this.hudVisibilityCaptured) {
-            this.minecraft.options.hideGui = this.previousHideGui;
-            this.hudVisibilityCaptured = false;
+        try {
+            super.removed();
+        } finally {
+            TemporaryGuiVisibility.release(TemporaryGuiVisibility.Owner.ANIMAL_PURCHASE_BUILDING);
         }
     }
 

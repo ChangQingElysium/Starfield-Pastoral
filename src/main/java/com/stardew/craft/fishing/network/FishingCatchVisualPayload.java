@@ -79,7 +79,8 @@ public record FishingCatchVisualPayload(ResourceLocation itemId, int count) impl
 		}
 		// Stardew FishingRod.cs: on pullFishFromWater it plays pullItemFromWater + dwop.
 		// Use playLocalSound for reliable client playback (mirrors SV's location.playSound semantics).
-		player.displayClientMessage(Component.translatable("stardewcraft.fishing.caught", stack.getHoverName()), true);
+		com.stardew.craft.client.hud.StardewHudMessageManager.showGlobalMessage(
+				Component.translatable("stardewcraft.fishing.caught", stack.getHoverName()));
 		com.stardew.craft.client.fishing.FishingCatchVisuals.start(stack);
 	}
 }

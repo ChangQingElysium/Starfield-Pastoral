@@ -14,6 +14,32 @@ atlas_path() {
         menu_tiles) printf '%s\n' "$GUI_DIR/animal_query/menu_tiles.png" ;;
         objects_2) printf '%s\n' "$ROOT_DIR/源文件/Content/TileSheets/Objects_2.png" ;;
         billboard) printf '%s\n' "$GUI_DIR/billboard.png" ;;
+        animal_white_chicken) printf '%s\n' "$ROOT_DIR/源文件/Content/Animals/White Chicken.png" ;;
+        animal_baby_white_chicken) printf '%s\n' "$ROOT_DIR/源文件/Content/Animals/BabyWhite Chicken.png" ;;
+        animal_brown_chicken) printf '%s\n' "$ROOT_DIR/源文件/Content/Animals/Brown Chicken.png" ;;
+        animal_baby_brown_chicken) printf '%s\n' "$ROOT_DIR/源文件/Content/Animals/BabyBrown Chicken.png" ;;
+        animal_blue_chicken) printf '%s\n' "$ROOT_DIR/源文件/Content/Animals/Blue Chicken.png" ;;
+        animal_baby_blue_chicken) printf '%s\n' "$ROOT_DIR/源文件/Content/Animals/BabyBlue Chicken.png" ;;
+        animal_void_chicken) printf '%s\n' "$ROOT_DIR/源文件/Content/Animals/Void Chicken.png" ;;
+        animal_baby_void_chicken) printf '%s\n' "$ROOT_DIR/源文件/Content/Animals/BabyVoid Chicken.png" ;;
+        animal_golden_chicken) printf '%s\n' "$ROOT_DIR/源文件/Content/Animals/Golden Chicken.png" ;;
+        animal_baby_golden_chicken) printf '%s\n' "$ROOT_DIR/源文件/Content/Animals/BabyGolden Chicken.png" ;;
+        animal_duck) printf '%s\n' "$ROOT_DIR/源文件/Content/Animals/Duck.png" ;;
+        animal_rabbit) printf '%s\n' "$ROOT_DIR/源文件/Content/Animals/Rabbit.png" ;;
+        animal_baby_rabbit) printf '%s\n' "$ROOT_DIR/源文件/Content/Animals/BabyRabbit.png" ;;
+        animal_dinosaur) printf '%s\n' "$ROOT_DIR/源文件/Content/Animals/Dinosaur.png" ;;
+        animal_white_cow) printf '%s\n' "$ROOT_DIR/源文件/Content/Animals/White Cow.png" ;;
+        animal_baby_white_cow) printf '%s\n' "$ROOT_DIR/源文件/Content/Animals/BabyWhite Cow.png" ;;
+        animal_brown_cow) printf '%s\n' "$ROOT_DIR/源文件/Content/Animals/Brown Cow.png" ;;
+        animal_baby_brown_cow) printf '%s\n' "$ROOT_DIR/源文件/Content/Animals/BabyBrown Cow.png" ;;
+        animal_goat) printf '%s\n' "$ROOT_DIR/源文件/Content/Animals/Goat.png" ;;
+        animal_baby_goat) printf '%s\n' "$ROOT_DIR/源文件/Content/Animals/BabyGoat.png" ;;
+        animal_sheep) printf '%s\n' "$ROOT_DIR/源文件/Content/Animals/Sheep.png" ;;
+        animal_baby_sheep) printf '%s\n' "$ROOT_DIR/源文件/Content/Animals/BabySheep.png" ;;
+        animal_pig) printf '%s\n' "$ROOT_DIR/源文件/Content/Animals/Pig.png" ;;
+        animal_baby_pig) printf '%s\n' "$ROOT_DIR/源文件/Content/Animals/BabyPig.png" ;;
+        animal_ostrich) printf '%s\n' "$ROOT_DIR/源文件/Content/Animals/Ostrich.png" ;;
+        animal_baby_ostrich) printf '%s\n' "$ROOT_DIR/源文件/Content/Animals/BabyOstrich.png" ;;
         *)
             printf 'Unknown atlas alias: %s\n' "$1" >&2
             return 1

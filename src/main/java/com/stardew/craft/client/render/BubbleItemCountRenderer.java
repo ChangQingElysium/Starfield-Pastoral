@@ -1,5 +1,7 @@
 package com.stardew.craft.client.render;
 
+import com.stardew.craft.client.font.StardewFonts;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -37,7 +39,7 @@ public final class BubbleItemCountRenderer {
 
 	@SuppressWarnings("null")
 	private static void renderCountInternal(PoseStack poseStack, MultiBufferSource buffer, int packedLight, int count, float iconLeft, float iconTop, float px) {
-		Font font = Minecraft.getInstance().font;
+		Font font = StardewFonts.tiny();
 		@Nonnull String label = String.valueOf(count);
 		int textWidth = font.width(label);
 

@@ -118,13 +118,14 @@ public final class WildTreeChopEvents {
 		if (!level.isClientSide
 			&& player instanceof ServerPlayer serverPlayer
 			&& player.level().dimension() == ModDimensions.STARDEW_VALLEY) {
-			if (PlayerStardewDataAPI.getEnergy(serverPlayer) <= 0.0f) {
+			if (!PlayerStardewDataAPI.canConsumeEnergy(serverPlayer, Float.MIN_NORMAL)) {
 				// Stop mining progress and show message (rate-limited).
 				event.setNewSpeed(0.0f);
 				long now = level.getGameTime();
 				long last = LAST_EXHAUST_WARN_TICK.getOrDefault(serverPlayer.getUUID(), 0L);
 				if (now - last >= 20) {
-					serverPlayer.displayClientMessage(net.minecraft.network.chat.Component.translatable("stardewcraft.message.player.exhausted"), true);
+					com.stardew.craft.network.payload.HudHintPayload.send(
+							serverPlayer, "stardewcraft.message.player.exhausted");
 					LAST_EXHAUST_WARN_TICK.put(serverPlayer.getUUID(), now);
 				}
 				return;
@@ -262,8 +263,8 @@ public final class WildTreeChopEvents {
 				&& !CoalForestArea.containsColumn(pos)
 				&& !canChopAt(player, level, pos)) {
 			event.setCanceled(true);
-			player.displayClientMessage(
-					net.minecraft.network.chat.Component.translatable("stardewcraft.farm.build_farm_only"), true);
+			com.stardew.craft.network.payload.HudHintPayload.send(
+					player, "stardewcraft.farm.build_farm_only");
 			return;
 		}
 
@@ -334,13 +335,6 @@ public final class WildTreeChopEvents {
 			return;
 		}
 
-		if (level.dimension() == ModDimensions.STARDEW_VALLEY
-				&& PlayerStardewDataAPI.getEnergy(player) <= 0.0f) {
-			player.displayClientMessage(net.minecraft.network.chat.Component.translatable("stardewcraft.message.player.exhausted"), true);
-			event.setCanceled(true);
-			return;
-		}
-
 		if (!choppableBase) {
 			return;
 		}
@@ -358,7 +352,10 @@ public final class WildTreeChopEvents {
 			int experience = snapshot.modern
 					? countGeneratedModernWoodParts(level, snapshot, def, marker) * XP_MODERN_NATURAL_WOOD_PART
 					: XP_FELL_TREE;
-			consumeEnergyForTreeChop(player, level, pos);
+			if (!consumeEnergyForTreeChop(player, level, pos)) {
+				event.setCanceled(true);
+				return;
+			}
 			java.util.ArrayList<ItemStack> fallDrops = new java.util.ArrayList<>();
 			ItemStack seeds = rollSeedsOnChop(level, def, player);
 			if (!seeds.isEmpty()) {
@@ -396,7 +393,10 @@ public final class WildTreeChopEvents {
 			if (modernRoot && marker == null) {
 				return;
 			}
-			consumeEnergyForTreeChop(player, level, pos);
+			if (!consumeEnergyForTreeChop(player, level, pos)) {
+				event.setCanceled(true);
+				return;
+			}
 			level.removeBlock(pivotPos, false);
 			playStumpEffects(level, pivotPos, def);
 			int dropCount = getStumpWoodDropCount(level, def, player);
@@ -490,33 +490,31 @@ public final class WildTreeChopEvents {
 		return tool.canPerformAction(ItemAbilities.AXE_DIG);
 	}
 
-	private static void consumeEnergyForTreeChop(ServerPlayer player, ServerLevel level, BlockPos pos) {
+	private static boolean consumeEnergyForTreeChop(ServerPlayer player, ServerLevel level, BlockPos pos) {
 		if (player.isCreative()) {
-			return;
+			return true;
 		}
 		if (StardewEnchantments.has(player.getMainHandItem(), StardewEnchantments.EFFICIENT)) {
 			MINING.remove(player.getUUID());
-			return;
+			return true;
 		}
 		if (player.level().dimension() != ModDimensions.STARDEW_VALLEY) {
-			return;
+			return true;
 		}
 		MiningState mining = MINING.remove(player.getUUID());
 		if (mining == null || !mining.pos.equals(pos)) {
-			return;
+			return true;
 		}
 		long durationTicks = Math.max(1L, level.getGameTime() - mining.startTick);
 
 		int foraging = PlayerStardewDataAPI.getSkillLevel(player, SkillType.FORAGING);
 		float perSwing = 2.0f - (foraging * 0.1f);
 		if (perSwing <= 0.0f) {
-			return;
+			return true;
 		}
 		float swings = (float) durationTicks / (float) AXE_SWING_TICKS;
 		float cost = perSwing * swings;
-		if (cost > 0.0f) {
-			PlayerStardewDataAPI.consumeEnergy(player, cost);
-		}
+		return cost <= 0.0F || PlayerStardewDataAPI.consumeEnergyOrNotify(player, cost);
 	}
 
 	private static boolean isModernWood(WildTrees.Def def, BlockState state) {

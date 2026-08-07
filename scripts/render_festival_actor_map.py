@@ -14,6 +14,12 @@ Examples:
   python3 scripts/render_festival_actor_map.py --linus-heart-events
   python3 scripts/render_festival_actor_map.py --linus-schedule
   python3 scripts/render_festival_actor_map.py --george-heart-events
+  python3 scripts/render_festival_actor_map.py --evelyn-events
+  python3 scripts/render_festival_actor_map.py --evelyn-schedule
+  python3 scripts/render_festival_actor_map.py --gus-events
+  python3 scripts/render_festival_actor_map.py --gus-schedule
+  python3 scripts/render_festival_actor_map.py --pam-events
+  python3 scripts/render_festival_actor_map.py --pam-schedule
 """
 
 from __future__ import annotations
@@ -845,6 +851,445 @@ def render_george_heart_event_source_map(output_dir: Path, scale: int) -> Path:
     return output_path
 
 
+def render_evelyn_event_source_maps(output_dir: Path, scale: int) -> list[Path]:
+    """Render source-only Evelyn event choreography; never map it to Minecraft."""
+    heart_key, heart_script, _heart_forks = load_vanilla_event("JoshHouse.json", "19")
+    garden_key, garden_script, _garden_forks = load_vanilla_event("Farm.json", "900553")
+    required_fragments = (
+        (heart_script, "jaunty/3 17/farmer 8 19 3 Evelyn 3 17 0"),
+        (heart_script, "move farmer -5 0 0/move farmer 0 -1 0"),
+        (heart_script, "addCookingRecipe Cookies"),
+        (garden_script, "continue/64 15/farmer 64 16 2 Evelyn 64 18 0"),
+        (garden_script, "awardFestivalPrize pot"),
+        (garden_script, "addCraftingRecipe Garden Pot"),
+    )
+    for script, fragment in required_fragments:
+        if fragment not in script:
+            raise ValueError(
+                f"Vanilla Evelyn event source changed; missing {fragment!r} "
+                f"in {heart_key!r}/{garden_key!r}.")
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    outputs: list[Path] = []
+    step = TILE_SIZE * scale
+
+    heart_crop = (0, 13, 12, 23)
+    heart = render_tmx(MAPS_DIR / "JoshHouse.tmx", scale=scale)
+    heart = heart.crop(tuple(value * step for value in heart_crop))
+    heart = draw_tile_grid(heart, scale, heart_crop[0], heart_crop[1])
+    heart = draw_source_routes(heart, (heart_crop[0], heart_crop[1]), scale, [
+        ((82, 148, 255, 230), [
+            (8.5, 19.5),
+            (3.5, 19.5),
+            (3.5, 18.5),
+        ]),
+    ])
+    heart_points = [
+        ("C01 Vanilla viewport anchor (3,17)", 3.5, 17.5),
+        ("P01 Player start (8,19), facing W", 8.5, 19.5),
+        ("P02 Player route corner (3,19)", 3.5, 19.5),
+        ("P03 Player dialogue/cookie position (3,18), facing N", 3.5, 18.5),
+        ("E01 Evelyn position (3,17), facing N", 3.5, 17.5),
+    ]
+    heart_annotated = draw_numbered_source_points(
+        heart,
+        heart_points,
+        (heart_crop[0], heart_crop[1]),
+        scale,
+        "Evelyn 4-heart / vanilla JoshHouse event 19",
+    )
+    heart_path = output_dir / "evelyn_4heart_joshhouse_vanilla_source_points.png"
+    heart_annotated.save(heart_path)
+    outputs.append(heart_path)
+
+    garden_crop = (58, 10, 71, 23)
+    garden = render_tmx(MAPS_DIR / "Farm.tmx", scale=scale)
+    garden = garden.crop(tuple(value * step for value in garden_crop))
+    garden = draw_tile_grid(garden, scale, garden_crop[0], garden_crop[1])
+    garden_points = [
+        ("C01 Vanilla viewport anchor (64,15)", 64.5, 15.5),
+        ("P01 Player position (64,16), facing S", 64.5, 16.5),
+        ("E01 Evelyn position (64,18), facing N", 64.5, 18.5),
+    ]
+    garden_annotated = draw_numbered_source_points(
+        garden,
+        garden_points,
+        (garden_crop[0], garden_crop[1]),
+        scale,
+        "Evelyn greenhouse reward / vanilla Farm event 900553",
+    )
+    garden_path = output_dir / "evelyn_garden_pot_farm_vanilla_source_points.png"
+    garden_annotated.save(garden_path)
+    outputs.append(garden_path)
+    return outputs
+
+
+def render_gus_event_source_map(output_dir: Path, scale: int) -> Path:
+    """Render source-only Gus 4-heart choreography; never map it to Minecraft."""
+    event_key, event_script, _forks = load_vanilla_event("Saloon.json", "96")
+    required_fragments = (
+        "jaunty/10 21/farmer -100 -100 0 Gus 10 21 2 Pam -101 -101 0",
+        "warp farmer 14 24",
+        "move farmer 0 -3 3",
+        "move farmer -3 0 2",
+        "warp Pam 14 24",
+        "move Pam 0 -3 3",
+        "move Pam -2 0 0/move Pam 0 -1 3/move Pam -2 0 2",
+        "friendship Gus 50",
+    )
+    for fragment in required_fragments:
+        if fragment not in event_script:
+            raise ValueError(
+                f"Vanilla Gus event source changed; missing {fragment!r} in {event_key!r}.")
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    step = TILE_SIZE * scale
+    crop = (7, 15, 18, 27)
+    saloon = render_tmx(MAPS_DIR / "Saloon.tmx", scale=scale)
+    base = saloon.crop(tuple(value * step for value in crop))
+    base = draw_tile_grid(base, scale, crop[0], crop[1])
+    base = draw_source_routes(base, (crop[0], crop[1]), scale, [
+        ((82, 148, 255, 230), [
+            (14.5, 24.5),
+            (14.5, 21.5),
+            (11.5, 21.5),
+        ]),
+        ((226, 93, 103, 230), [
+            (14.5, 24.5),
+            (14.5, 21.5),
+            (12.5, 21.5),
+            (12.5, 20.5),
+            (10.5, 20.5),
+        ]),
+    ])
+    points = [
+        ("C01 Vanilla viewport anchor (10,21)", 10.5, 21.5),
+        ("P01 Player doorway warp (14,24), facing N", 14.5, 24.5),
+        ("P02 Player route corner (14,21)", 14.5, 21.5),
+        ("P03 Player dialogue stop (11,21), facing W", 11.5, 21.5),
+        ("G01 Gus position (10,21), starts S", 10.5, 21.5),
+        ("M01 Pam doorway warp (14,24), facing N", 14.5, 24.5),
+        ("M02 Pam first stop (14,21), facing E", 14.5, 21.5),
+        ("M03 Pam payment route corner (12,21)", 12.5, 21.5),
+        ("M04 Pam payment route corner (12,20)", 12.5, 20.5),
+        ("M05 Pam payment stop (10,20), facing N", 10.5, 20.5),
+    ]
+    annotated = draw_numbered_source_points(
+        base,
+        points,
+        (crop[0], crop[1]),
+        scale,
+        "Gus 4-heart / vanilla Saloon event 96",
+    )
+    output_path = output_dir / "gus_4heart_saloon_vanilla_source_points.png"
+    annotated.save(output_path)
+    return output_path
+
+
+def render_gus_event_capture_workbook(output_dir: Path) -> Path:
+    entries = [
+        ("H01", "4-heart Saloon event trigger area corner 1", "block x/y/z"),
+        ("H02", "4-heart Saloon event trigger area corner 2", "block x/y/z"),
+        ("P01", "Player doorway/start", "x/y/z"),
+        ("P02", "Player route corner", "x/y/z"),
+        ("P03", "Player dialogue stop", "x/y/z"),
+        ("G01", "Gus position", "x/y/z"),
+        ("M01", "Pam doorway/start", "x/y/z"),
+        ("M02", "Pam first stop", "x/y/z"),
+        ("M03", "Pam payment route corner 1", "x/y/z"),
+        ("M04", "Pam payment route corner 2", "x/y/z"),
+        ("M05", "Pam payment stop", "x/y/z"),
+        ("C01", "Camera rig", "exact x/y/z + yaw + pitch"),
+    ]
+    return render_minecraft_capture_workbook(
+        output_dir / "gus_4heart_minecraft_capture_workbook.png",
+        "Gus 4-heart event - Minecraft capture workbook",
+        "Fill only from the in-game planning tool; source facings remain authoritative.",
+        entries,
+    )
+
+
+def render_gus_schedule_source_maps(output_dir: Path, scale: int) -> list[Path]:
+    """Render unique non-festival Gus schedule tiles which need Minecraft positions."""
+    schedule_path = SCHEDULES_DIR / "Gus.json"
+    schedules = json.loads(schedule_path.read_text(encoding="utf-8-sig"))
+    expected_fragments = {
+        "GreenRain": "610 Saloon 17 20 2",
+        "Mon": "800 SeedShop 13 23 0",
+        "Tue": "830 CommunityCenter 5 5 0 square_5_1_0",
+        "fall_4": "1030 Hospital 12 14 0",
+        "spring": "800 Saloon 16 4 2 gus_sit_down/1200 Saloon 14 18 2 gus_clean",
+        "Sun": "MAIL saloonSportsRoom/GOTO spring/800 Saloon 16 4 2 gus_sit_down/1140 Saloon 34 8 0",
+    }
+    for key, fragment in expected_fragments.items():
+        if fragment not in schedules.get(key, ""):
+            raise ValueError(
+                f"Vanilla Gus schedule source changed for {key!r}; missing {fragment!r}.")
+
+    map_points: dict[str, list[tuple[str, float, float]]] = {
+        "Saloon": [
+            ("1 (16,4) morning chair, south", 16.5, 4.5),
+            ("2 (10,18) main work position, south", 10.5, 18.5),
+            ("3 (12,18) kitchen rotation stop, north", 12.5, 18.5),
+            ("4 (14,18) cleaning position, south", 14.5, 18.5),
+            ("5 (23,4) bed, east", 23.5, 4.5),
+            ("6 (17,20) Green Rain position, south", 17.5, 20.5),
+            ("7 (34,8) Sunday sports room, north", 34.5, 8.5),
+        ],
+        "SeedShop": [
+            ("8 (13,23) Monday visit, north", 13.5, 23.5),
+        ],
+        "Hospital": [
+            ("9 (12,14) fall 4 waiting room, north", 12.5, 14.5),
+            ("10 (4,6) fall 4 exam room, east", 4.5, 6.5),
+        ],
+    }
+    crops = {
+        "Saloon": (7, 1, 39, 23),
+        "SeedShop": (7, 16, 21, 29),
+        "Hospital": (0, 2, 18, 20),
+    }
+    starts = {"Saloon": 1, "SeedShop": 8, "Hospital": 9}
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    outputs: list[Path] = []
+    step = TILE_SIZE * scale
+    for map_name, points in map_points.items():
+        crop = crops[map_name]
+        base = render_tmx(MAPS_DIR / f"{map_name}.tmx", scale=scale)
+        base = base.crop(tuple(value * step for value in crop))
+        base = draw_tile_grid(base, scale, crop[0], crop[1])
+        annotated = draw_numbered_source_points(
+            base,
+            points,
+            (crop[0], crop[1]),
+            scale,
+            f"Gus vanilla schedule / {map_name} / unique stop tiles",
+            start_index=starts[map_name],
+        )
+        output_path = output_dir / f"gus_schedule_{map_name.lower()}_vanilla_source_points.png"
+        annotated.save(output_path)
+        outputs.append(output_path)
+    return outputs
+
+
+def render_gus_schedule_capture_workbook(output_dir: Path) -> Path:
+    entries = [
+        ("1", "Saloon (16,4): morning chair", "x/y/z + south + sit"),
+        ("2", "Saloon (10,18): main work position", "x/y/z + south"),
+        ("3", "Saloon (12,18): kitchen rotation stop", "x/y/z + north"),
+        ("4", "Saloon (14,18): cleaning position", "x/y/z + south + clean"),
+        ("5", "Saloon (23,4): bed", "x/y/z + east + sleep"),
+        ("6", "Saloon (17,20): Green Rain position", "x/y/z + south"),
+        ("7", "Saloon (34,8): Sunday sports room", "x/y/z + north"),
+        ("8", "SeedShop (13,23): Monday visit", "x/y/z + north"),
+        ("9", "Hospital (12,14): fall 4 waiting room", "x/y/z + north"),
+        ("10", "Hospital (4,6): fall 4 exam room", "x/y/z + east"),
+    ]
+    return render_minecraft_capture_workbook(
+        output_dir / "gus_schedule_minecraft_capture_workbook.png",
+        "Gus schedule - Minecraft capture workbook",
+        "Community Center is omitted by project policy; Desert Festival keeps its existing route.",
+        entries,
+    )
+
+
+def render_pam_event_source_map(output_dir: Path, scale: int) -> Path:
+    """Render source-only Pam 9-heart choreography; never map it to Minecraft."""
+    event_key, event_script, forks = load_vanilla_event("Trailer_Big.json", "503180")
+    required_fragments = (
+        "shaneTheme/-1000 -1000/farmer 18 11 1 Pam 25 9 1",
+        "specificTemporarySprite pamYobaStatue/viewport 25 9 true",
+        "move farmer 6 0 1/move farmer 0 -1 1",
+        "move farmer 3 0 0/move farmer 0 -1 3",
+        "question fork0",
+        "friendship Pam -1000",
+        "move farmer 0 1 3/move farmer -6 0 3 true",
+    )
+    for fragment in required_fragments:
+        if fragment not in event_script:
+            raise ValueError(
+                f"Vanilla Pam event source changed; missing {fragment!r} in {event_key!r}.")
+    positive = forks.get("positive", "")
+    if "move Pam 0 1 1/move Pam 2 0 0/faceDirection farmer 2" not in positive:
+        raise ValueError("Vanilla Pam event positive fork changed.")
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    step = TILE_SIZE * scale
+    crop = (14, 4, 31, 15)
+    trailer = render_tmx(MAPS_DIR / "Trailer_Big.tmx", scale=scale)
+    base = trailer.crop(tuple(value * step for value in crop))
+    base = draw_tile_grid(base, scale, crop[0], crop[1])
+    base = draw_source_routes(base, (crop[0], crop[1]), scale, [
+        ((82, 148, 255, 230), [
+            (18.5, 11.5),
+            (24.5, 11.5),
+            (24.5, 10.5),
+            (27.5, 10.5),
+            (27.5, 9.5),
+        ]),
+        ((80, 208, 142, 230), [
+            (25.5, 9.5),
+            (25.5, 10.5),
+            (27.5, 10.5),
+        ]),
+        ((226, 93, 103, 230), [
+            (27.5, 9.5),
+            (27.5, 10.5),
+            (21.5, 10.5),
+        ]),
+    ])
+    points = [
+        ("C01 Vanilla viewport/Yoba statue anchor (25,9)", 25.5, 9.5),
+        ("P01 Player start (18,11), facing E", 18.5, 11.5),
+        ("P02 Player route corner (24,11)", 24.5, 11.5),
+        ("P03 Player first dialogue stop (24,10)", 24.5, 10.5),
+        ("P04 Player question position (27,9), facing W", 27.5, 9.5),
+        ("P05 Negative-answer route corner (27,10)", 27.5, 10.5),
+        ("P06 Negative-answer exit (21,10), facing W", 21.5, 10.5),
+        ("M01 Pam start/prayer position (25,9), facing E", 25.5, 9.5),
+        ("M02 Pam positive-answer route corner (25,10)", 25.5, 10.5),
+        ("M03 Pam positive-answer stop (27,10), facing N", 27.5, 10.5),
+    ]
+    annotated = draw_numbered_source_points(
+        base,
+        points,
+        (crop[0], crop[1]),
+        scale,
+        "Pam 9-heart / vanilla upgraded house event 503180",
+    )
+    output_path = output_dir / "pam_9heart_trailer_big_vanilla_source_points.png"
+    annotated.save(output_path)
+    return output_path
+
+
+def render_pam_event_capture_workbook(output_dir: Path) -> Path:
+    entries = [
+        ("H01", "Upgraded Pam house event trigger area corner 1", "block x/y/z"),
+        ("H02", "Upgraded Pam house event trigger area corner 2", "block x/y/z"),
+        ("P01", "Player start", "x/y/z"),
+        ("P02", "Player route corner", "x/y/z"),
+        ("P03", "Player first dialogue stop", "x/y/z"),
+        ("P04", "Player question position", "x/y/z"),
+        ("P05", "Negative-answer route corner", "x/y/z"),
+        ("P06", "Negative-answer exit", "x/y/z"),
+        ("M01", "Pam start/prayer position and statue anchor", "x/y/z"),
+        ("M02", "Pam positive-answer route corner", "x/y/z"),
+        ("M03", "Pam positive-answer stop", "x/y/z"),
+        ("C01", "Camera rig", "exact x/y/z + yaw + pitch"),
+    ]
+    return render_minecraft_capture_workbook(
+        output_dir / "pam_9heart_minecraft_capture_workbook.png",
+        "Pam 9-heart event - Minecraft capture workbook",
+        "This event requires the per-player Pam house upgrade flag; source facings remain authoritative.",
+        entries,
+    )
+
+
+def render_pam_schedule_source_maps(output_dir: Path, scale: int) -> list[Path]:
+    """Render every unique non-Desert-Festival Pam schedule stop needing a Minecraft position."""
+    schedules = json.loads((SCHEDULES_DIR / "Pam.json").read_text(encoding="utf-8-sig"))
+    expected_fragments = {
+        "GreenRain": "0 Saloon 6 23 2",
+        "SquidFest": "800 Trailer 15 4 2 pam_sit_down/1100 Beach 20 24 2",
+        "spring_25": "1130 Hospital 4 17 2 pam_sit_down",
+        "bus": "830 BusStop 21 10 2/1700 Saloon 7 18 1",
+        "spring": "1200 JojaMart 6 19 1/1600 Saloon 7 18 1",
+        "JojaMart_Replacement": "SeedShop 2 24 3",
+    }
+    for key, fragment in expected_fragments.items():
+        if fragment not in schedules.get(key, ""):
+            raise ValueError(
+                f"Vanilla Pam schedule source changed for {key!r}; missing {fragment!r}.")
+    if "1330 Hospital 4 6 1" not in schedules.get("spring_25", ""):
+        raise ValueError("Vanilla Pam schedule source changed for 'spring_25' exam stop.")
+
+    map_points: dict[str, list[tuple[str, float, float]]] = {
+        "Trailer": [
+            ("1 (15,4) couch and bed, south", 15.5, 4.5),
+        ],
+        "Beach": [
+            ("2 (20,24) SquidFest visit, south", 20.5, 24.5),
+        ],
+        "Saloon": [
+            ("3 (6,23) Green Rain position, south", 6.5, 23.5),
+            ("4 (7,18) regular seat, east", 7.5, 18.5),
+        ],
+        "Hospital": [
+            ("5 (4,17) spring 25 waiting room, south", 4.5, 17.5),
+            ("6 (4,6) spring 25 exam room, east", 4.5, 6.5),
+        ],
+        "BusStop": [
+            ("7 (21,10) bus duty, south", 21.5, 10.5),
+        ],
+        "JojaMart": [
+            ("8 (6,19) pre-bus Joja visit, east", 6.5, 19.5),
+        ],
+        "SeedShop": [
+            ("9 (2,24) Joja replacement fallback, west", 2.5, 24.5),
+        ],
+    }
+    crops = {
+        "Trailer": (10, 0, 20, 10),
+        "Beach": (14, 18, 27, 31),
+        "Saloon": (2, 14, 13, 27),
+        "Hospital": (0, 2, 10, 22),
+        "BusStop": (15, 5, 28, 17),
+        "JojaMart": (0, 13, 14, 26),
+        "SeedShop": (0, 18, 9, 30),
+    }
+    starts = {
+        "Trailer": 1,
+        "Beach": 2,
+        "Saloon": 3,
+        "Hospital": 5,
+        "BusStop": 7,
+        "JojaMart": 8,
+        "SeedShop": 9,
+    }
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    outputs: list[Path] = []
+    step = TILE_SIZE * scale
+    for map_name, points in map_points.items():
+        crop = crops[map_name]
+        base = render_tmx(MAPS_DIR / f"{map_name}.tmx", scale=scale)
+        base = base.crop(tuple(value * step for value in crop))
+        base = draw_tile_grid(base, scale, crop[0], crop[1])
+        annotated = draw_numbered_source_points(
+            base,
+            points,
+            (crop[0], crop[1]),
+            scale,
+            f"Pam vanilla schedule / {map_name} / unique stop tiles",
+            start_index=starts[map_name],
+        )
+        output_path = output_dir / f"pam_schedule_{map_name.lower()}_vanilla_source_points.png"
+        annotated.save(output_path)
+        outputs.append(output_path)
+    return outputs
+
+
+def render_pam_schedule_capture_workbook(output_dir: Path) -> Path:
+    entries = [
+        ("1", "Trailer (15,4): couch and sleep position", "x/y/z + south + sit/sleep"),
+        ("2", "Beach (20,24): SquidFest visit", "x/y/z + south"),
+        ("3", "Saloon (6,23): Green Rain position", "x/y/z + south"),
+        ("4", "Saloon (7,18): regular seat", "x/y/z + east"),
+        ("5", "Hospital (4,17): spring 25 waiting room", "x/y/z + south + sit"),
+        ("6", "Hospital (4,6): spring 25 exam room", "x/y/z + east"),
+        ("7", "BusStop (21,10): bus duty", "x/y/z + south"),
+        ("8", "JojaMart (6,19): pre-bus visit", "x/y/z + east"),
+        ("9", "SeedShop (2,24): Joja replacement fallback", "x/y/z + west"),
+    ]
+    return render_minecraft_capture_workbook(
+        output_dir / "pam_schedule_minecraft_capture_workbook.png",
+        "Pam schedule - Minecraft capture workbook",
+        "Desert Festival keeps its existing route; source facings remain authoritative.",
+        entries,
+    )
+
+
 def render_secret_note31_source_maps(output_dir: Path, scale: int) -> list[Path]:
     """Render only vanilla TMX/source points; no Minecraft-coordinate mapping."""
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -1663,6 +2108,140 @@ def render_george_schedule_capture_workbook(output_dir: Path) -> Path:
     )
 
 
+def render_evelyn_schedule_source_maps(output_dir: Path, scale: int) -> list[Path]:
+    """Render every unique vanilla Evelyn schedule tile without Minecraft mapping."""
+    schedule_path = SCHEDULES_DIR / "Evelyn.json"
+    schedules = json.loads(schedule_path.read_text(encoding="utf-8-sig"))
+    expected_fragments = {
+        "rain": "800 JoshHouse 3 17 0 square_3_1_0/1040 JoshHouse 17 22 3/1210 JoshHouse 3 19 2/1630 JoshHouse 4 17 0 square_3_1_0/1900 JoshHouse 17 17 0/2130 JoshHouse 2 5 1",
+        "GreenRain": "0 JoshHouse 4 18 2",
+        "DesertFestival_3": "610 JoshHouse 3 17 0 square_3_1_0/a1000 Desert 27 31 0 \"Strings\\1_6_Strings:DesertFestival_Evelyn\"/2250 bed",
+        "2": "800 JoshHouse 3 17 0 square_3_1_0/1030 Hospital 15 15 3 evelyn_sit_left \"Strings\\schedules\\Evelyn:2.000\"/1330 Hospital 4 6 1 \"Strings\\schedules\\Evelyn:2.001\"/1600 JoshHouse 4 17 0 square_3_1_0/1900 JoshHouse 17 17 0/2130 JoshHouse 2 5 1",
+        "23": "800 JoshHouse 3 17 0 square_3_1_0/1040 Hospital 10 16 0 \"Strings\\schedules\\Evelyn:23.000\"/1330 Hospital 4 7 0 \"Strings\\schedules\\Evelyn:23.001\"/1610 JoshHouse 4 17 0 square_3_1_0/1900 JoshHouse 17 17 0/2130 JoshHouse 2 5 1",
+        "winter_17": "800 JoshHouse 3 17 0 square_3_1_0/1040 JoshHouse 17 22 3/1210 JoshHouse 3 19 2/1300 JoshHouse 20 20 3 evelyn_sit_left/1630 Beach 12 39 2 \"Strings\\schedules\\Evelyn:winter_17.000\"/2340 JoshHouse 2 5 1",
+        "winter": "800 JoshHouse 3 17 0 square_3_1_0/1040 JoshHouse 17 22 3/1210 JoshHouse 3 19 2/1300 JoshHouse 20 20 3 evelyn_sit_left/1630 JoshHouse 4 17 0 square_3_1_0/1900 JoshHouse 17 17 0/2130 JoshHouse 2 5 1",
+        "Thu": "800 JoshHouse 3 17 0 square_3_1_0/1040 JoshHouse 17 22 3/1210 CommunityCenter 18 25 3 evelyn_sit_left \"Strings\\schedules\\Evelyn:Thu.000\"/1630 JoshHouse 4 17 0 square_3_1_0/1900 JoshHouse 17 17 0/2130 JoshHouse 2 5 1",
+        "spring": "800 JoshHouse 3 17 0 square_3_1_0/1040 JoshHouse 17 22 3/1210 JoshHouse 3 19 2/1300 Town 36 78 3/1630 JoshHouse 4 17 0 square_3_1_0/1900 JoshHouse 17 17 0/2130 JoshHouse 2 5 1",
+        "summer": "800 JoshHouse 3 17 0 square_3_1_0/1040 JoshHouse 17 22 3/1210 JoshHouse 3 19 2/1300 Town 20 62 3 evelyn_garden/1630 JoshHouse 4 17 0 square_3_1_0/1900 JoshHouse 17 17 0/2130 JoshHouse 2 5 1",
+    }
+    for key, fragment in expected_fragments.items():
+        if fragment not in schedules.get(key, ""):
+            raise ValueError(
+                f"Vanilla Evelyn schedule source changed for {key!r}; "
+                f"missing {fragment!r}."
+            )
+
+    map_points: dict[str, list[tuple[str, float, float]]] = {
+        "JoshHouse": [
+            ("1 (3,17) stove/cooking, north", 3.5, 17.5),
+            ("2 (17,22) sofa, west", 17.5, 22.5),
+            ("3 (3,19) fridge/kitchen, south", 3.5, 19.5),
+            ("4 (4,17) evening cooking, north", 4.5, 17.5),
+            ("5 (17,17) table, north", 17.5, 17.5),
+            ("6 (2,5) bed, east", 2.5, 5.5),
+            ("7 (4,18) Green Rain, south", 4.5, 18.5),
+            ("8 (20,20) winter chair, west", 20.5, 20.5),
+        ],
+        "Hospital": [
+            ("9 (15,15) checkup day 2 waiting, west", 15.5, 15.5),
+            ("10 (4,6) checkup day 2 exam, east", 4.5, 6.5),
+            ("11 (10,16) checkup day 23 waiting, north", 10.5, 16.5),
+            ("12 (4,7) checkup day 23 exam, north", 4.5, 7.5),
+        ],
+        "Beach": [
+            ("13 (12,39) Night Market, south", 12.5, 39.5),
+        ],
+        "Town": [
+            ("15 (36,78) spring garden, west", 36.5, 78.5),
+            ("16 (20,62) summer garden, west", 20.5, 62.5),
+        ],
+    }
+    crops = {
+        "JoshHouse": (0, 2, 22, 25),
+        "Hospital": (0, 2, 20, 21),
+        "Beach": (5, 32, 20, 47),
+        "Town": (14, 56, 43, 85),
+    }
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    outputs: list[Path] = []
+    step = TILE_SIZE * scale
+    map_start_indices = {
+        "JoshHouse": 1,
+        "Hospital": 9,
+        "Beach": 13,
+        "Town": 15,
+    }
+    for map_name, points in map_points.items():
+        crop = crops[map_name]
+        base = render_tmx(MAPS_DIR / f"{map_name}.tmx", scale=scale)
+        base = base.crop(tuple(value * step for value in crop))
+        base = draw_tile_grid(base, scale, crop[0], crop[1])
+        annotated = draw_numbered_source_points(
+            base,
+            points,
+            (crop[0], crop[1]),
+            scale,
+            f"Evelyn vanilla schedule / {map_name} / unique stop tiles",
+            start_index=map_start_indices[map_name],
+        )
+        output_path = output_dir / (
+            f"evelyn_schedule_{map_name.lower()}_vanilla_source_points.png"
+        )
+        annotated.save(output_path)
+        outputs.append(output_path)
+    return outputs
+
+
+def render_evelyn_schedule_capture_workbook(output_dir: Path) -> Path:
+    entries = [
+        ("1", "JoshHouse (3,17): stove/cooking", "x/y/z + north + cooking"),
+        ("2", "JoshHouse (17,22): sofa", "x/y/z + west"),
+        ("3", "JoshHouse (3,19): fridge/kitchen", "x/y/z + south"),
+        ("4", "JoshHouse (4,17): evening cooking", "x/y/z + north + cooking"),
+        ("5", "JoshHouse (17,17): table", "x/y/z + north"),
+        ("6", "JoshHouse (2,5): bed", "x/y/z + east + sleep"),
+        ("7", "JoshHouse (4,18): Green Rain", "x/y/z + south"),
+        ("8", "JoshHouse (20,20): winter chair", "x/y/z + west + sit"),
+        ("9", "Hospital (15,15): day 2 waiting", "x/y/z + west + sit"),
+        ("10", "Hospital (4,6): day 2 exam", "x/y/z + east"),
+        ("11", "Hospital (10,16): day 23 waiting", "x/y/z + north"),
+        ("12", "Hospital (4,7): day 23 exam", "x/y/z + north"),
+        ("13", "Beach (12,39): Night Market", "x/y/z + south"),
+        ("15", "Town (36,78): spring garden", "x/y/z + west"),
+        ("16", "Town (20,62): summer garden", "x/y/z + west + garden"),
+    ]
+    return render_minecraft_capture_workbook(
+        output_dir / "evelyn_schedule_minecraft_capture_workbook.png",
+        "Evelyn schedule - Minecraft capture workbook",
+        "Numbering is continuous across every map; fill only from the in-game planning tool.",
+        entries,
+    )
+
+
+def render_evelyn_event_capture_workbook(output_dir: Path) -> Path:
+    entries = [
+        ("H01", "4-heart JoshHouse event trigger area corner 1", "block x/y/z"),
+        ("H02", "4-heart JoshHouse event trigger area corner 2", "block x/y/z"),
+        ("H03", "Player start", "x/y/z + facing"),
+        ("H04", "Player route corner", "x/y/z"),
+        ("H05", "Player dialogue/cookie position", "x/y/z + facing"),
+        ("H06", "Evelyn position", "x/y/z + facing"),
+        ("H07", "Camera rig", "exact x/y/z + yaw + pitch"),
+        ("G01", "Greenhouse reward Farm event trigger area corner 1", "block x/y/z"),
+        ("G02", "Greenhouse reward Farm event trigger area corner 2", "block x/y/z"),
+        ("G03", "Player position", "x/y/z + facing"),
+        ("G04", "Evelyn position", "x/y/z + facing"),
+        ("G05", "Camera rig", "exact x/y/z + yaw + pitch"),
+    ]
+    return render_minecraft_capture_workbook(
+        output_dir / "evelyn_events_minecraft_capture_workbook.png",
+        "Evelyn events - Minecraft capture workbook",
+        "Every value is intentionally blank. Supply only coordinates captured from the in-game planning tool.",
+        entries,
+    )
+
+
 def render_secret_note10_capture_workbook(output_dir: Path) -> Path:
     entries = [
         ("Q01", "Floor-100 scene area corner 1", "block x/y/z"),
@@ -1938,6 +2517,18 @@ def parse_args() -> argparse.Namespace:
                         help="Render the vanilla George 6-heart source map and a blank Minecraft capture workbook.")
     parser.add_argument("--george-schedule", action="store_true",
                         help="Render every unique vanilla George schedule stop and a blank Minecraft capture workbook.")
+    parser.add_argument("--evelyn-events", action="store_true",
+                        help="Render the vanilla Evelyn 4-heart and greenhouse-reward events with a blank workbook.")
+    parser.add_argument("--evelyn-schedule", action="store_true",
+                        help="Render every unique vanilla Evelyn schedule stop and a blank Minecraft capture workbook.")
+    parser.add_argument("--gus-events", action="store_true",
+                        help="Render the vanilla Gus 4-heart event and a blank Minecraft capture workbook.")
+    parser.add_argument("--gus-schedule", action="store_true",
+                        help="Render every non-festival Gus schedule stop which needs a Minecraft position.")
+    parser.add_argument("--pam-events", action="store_true",
+                        help="Render the vanilla Pam 9-heart event and a blank Minecraft capture workbook.")
+    parser.add_argument("--pam-schedule", action="store_true",
+                        help="Render every non-Desert-Festival Pam schedule stop needing a Minecraft position.")
     return parser.parse_args()
 
 
@@ -2002,6 +2593,34 @@ def main() -> None:
         for output_path in render_george_schedule_source_maps(args.out, args.scale):
             print(output_path.relative_to(ROOT))
         print(render_george_schedule_capture_workbook(args.out).relative_to(ROOT))
+        return
+    if args.evelyn_events:
+        for output_path in render_evelyn_event_source_maps(args.out, args.scale):
+            print(output_path.relative_to(ROOT))
+        print(render_evelyn_event_capture_workbook(args.out).relative_to(ROOT))
+        return
+    if args.evelyn_schedule:
+        for output_path in render_evelyn_schedule_source_maps(args.out, args.scale):
+            print(output_path.relative_to(ROOT))
+        print(render_evelyn_schedule_capture_workbook(args.out).relative_to(ROOT))
+        return
+    if args.gus_events:
+        print(render_gus_event_source_map(args.out, args.scale).relative_to(ROOT))
+        print(render_gus_event_capture_workbook(args.out).relative_to(ROOT))
+        return
+    if args.gus_schedule:
+        for output_path in render_gus_schedule_source_maps(args.out, args.scale):
+            print(output_path.relative_to(ROOT))
+        print(render_gus_schedule_capture_workbook(args.out).relative_to(ROOT))
+        return
+    if args.pam_events:
+        print(render_pam_event_source_map(args.out, args.scale).relative_to(ROOT))
+        print(render_pam_event_capture_workbook(args.out).relative_to(ROOT))
+        return
+    if args.pam_schedule:
+        for output_path in render_pam_schedule_source_maps(args.out, args.scale):
+            print(output_path.relative_to(ROOT))
+        print(render_pam_schedule_capture_workbook(args.out).relative_to(ROOT))
         return
     if args.preset == "night_market":
         for output_path in render_night_market_maps(args.out, args.scale, args.portrait_size):

@@ -836,7 +836,7 @@ public final class EggFestivalService {
     private static void openFestivalShop(ServerPlayer player) {
         ShopRegistry.ShopDefinition shop = ShopRegistry.get(SHOP_ID);
         if (shop == null) {
-            player.displayClientMessage(Component.literal("Unknown shopId: " + SHOP_ID), true);
+            com.stardew.craft.StardewCraft.LOGGER.warn("Unknown festival shop id: {}", SHOP_ID);
             return;
         }
         int money = PlayerStardewDataAPI.getMoney(player);

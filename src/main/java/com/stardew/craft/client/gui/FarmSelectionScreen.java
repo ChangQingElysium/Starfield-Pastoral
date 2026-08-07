@@ -9,6 +9,7 @@ import com.stardew.craft.api.v1.farm.StardewFarmSelectionOptions;
 import com.stardew.craft.api.v1.internal.farm.StardewFarmSelectionOptionRegistry;
 import com.stardew.craft.client.farm.FarmJoinClientState;
 import com.stardew.craft.client.farm.FarmLayoutClientCatalog;
+import com.stardew.craft.client.font.StardewFonts;
 import com.stardew.craft.client.gui.common.GuiText;
 import com.stardew.craft.client.gui.overnight.StardewGuiUtil;
 import com.stardew.craft.sound.ModSounds;
@@ -166,7 +167,7 @@ public class FarmSelectionScreen extends Screen {
         // 保留旧输入内容
         String currentName = (nameField != null) ? nameField.getValue() : savedName;
 
-        nameField = new EditBox(this.font, fieldX, fieldY, fieldW, fieldH,
+        nameField = new EditBox(StardewFonts.small(), fieldX, fieldY, fieldW, fieldH,
                 Component.translatable("gui.stardewcraft.farm_selection.farm_name"));
         nameField.setMaxLength(48);
         nameField.setBordered(false);
@@ -404,8 +405,8 @@ public class FarmSelectionScreen extends Screen {
         StardewGuiUtil.drawDialogueBoxFrame(graphics, panelX, panelY, panelW, panelH);
 
         // 标题
-        Component title = Component.translatable("gui.stardewcraft.farm_selection.title")
-                .withStyle(ChatFormatting.BOLD);
+        Component title = StardewFonts.title(
+                Component.translatable("gui.stardewcraft.farm_selection.title"));
         GuiText.drawCenteredClamped(graphics, this.font, title,
                 panelX + panelW / 2,
                 contentY + (partY - contentY - this.font.lineHeight) / 2,
@@ -423,8 +424,10 @@ public class FarmSelectionScreen extends Screen {
         // 右栏：描述 + 名称编辑
         drawRightPanel(graphics);
 
-        // EditBox 手动渲染
-        nameField.render(graphics, mouseX, mouseY, partialTick);
+        com.stardew.craft.client.gui.common.SdvEditBoxRenderer.drawTextured(
+                graphics, StardewFonts.small(), nameField,
+                nameField.getX(), nameField.getY(), nameField.getWidth(), nameField.getHeight(),
+                guiScale, 0xFF3E2723);
 
         // 骰子按钮
         drawIconButton(graphics, DICE_ICON, diceCx, diceCy, diceScale);

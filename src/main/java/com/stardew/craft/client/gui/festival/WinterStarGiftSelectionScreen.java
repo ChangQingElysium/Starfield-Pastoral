@@ -1,5 +1,6 @@
 package com.stardew.craft.client.gui.festival;
 
+import com.stardew.craft.client.font.StardewFonts;
 import com.stardew.craft.network.payload.WinterStarGiftSelectionPayload;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -41,7 +42,8 @@ public final class WinterStarGiftSelectionScreen extends Screen {
         graphics.fill(0, 0, width, height, 0x88000000);
         graphics.blit(INVENTORY_TEXTURE, leftPos, topPos,
             0, INVENTORY_TEXTURE_Y, PANEL_WIDTH, PANEL_HEIGHT, 256, 256);
-        graphics.drawString(font, title, width / 2 - font.width(title) / 2, topPos - 18, 0xFFFFFFFF, false);
+        Component heading = StardewFonts.bannerTitle(title);
+        graphics.drawString(font, heading, width / 2 - font.width(heading) / 2, topPos - 18, 0xFFFFFFFF, false);
 
         ItemStack hovered = ItemStack.EMPTY;
         for (int row = 0; row < 3; row++) {

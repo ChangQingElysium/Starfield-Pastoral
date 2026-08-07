@@ -148,15 +148,8 @@ public class HoeItem extends Item implements IStardewItem {
                 return InteractionResult.PASS;
             }
 
-            // 能量为 0 时：拦截耗能动作（仅星露谷维度）。
-            if (!level.isClientSide
-                && player instanceof ServerPlayer serverPlayer
-                && !player.isCreative()
-                && player.level().dimension() == ModDimensions.STARDEW_VALLEY) {
-                if (PlayerStardewDataAPI.getEnergy(serverPlayer) <= 0.0f) {
-                    player.displayClientMessage(Component.translatable("stardewcraft.message.player.exhausted"), true);
-                    return InteractionResult.FAIL;
-                }
+            if (!level.isClientSide && !payStamina(player, stackFromContext(context), 0)) {
+                return InteractionResult.FAIL;
             }
 
             if (level.isClientSide) {
@@ -178,7 +171,7 @@ public class HoeItem extends Item implements IStardewItem {
                         rollBuriedDrops(serverLevel, pos, preTillState,
                                 player instanceof ServerPlayer sp ? sp : null, stackFromContext(context));
                     }
-                    applyStaminaAndCooldown(player, stackFromContext(context), 0);
+                    applyCooldown(player);
                 }
             }
             return InteractionResult.SUCCESS;
@@ -281,21 +274,15 @@ public class HoeItem extends Item implements IStardewItem {
                 return !com.stardew.craft.event.FarmAreaProtectionEvents.canModifyAt(sp, pos);
             });
             if (targets.isEmpty() && before > 0) {
-                sp.displayClientMessage(
-                        Component.translatable("stardewcraft.farm.build_farm_only"), true);
+                com.stardew.craft.network.payload.HudHintPayload.send(
+                        sp, "stardewcraft.farm.build_farm_only");
                 return;
             }
         }
 
-        // 能量为 0 时：拦截耗能动作（仅星露谷维度）。
-        if (!level.isClientSide
-            && player instanceof ServerPlayer serverPlayer
-            && !player.isCreative()
-            && player.level().dimension() == ModDimensions.STARDEW_VALLEY) {
-            if (PlayerStardewDataAPI.getEnergy(serverPlayer) <= 0.0f) {
-                player.displayClientMessage(Component.translatable("stardewcraft.message.player.exhausted"), true);
-                return;
-            }
+        boolean willTill = targets.stream().anyMatch(pos -> canTill(level, player, usedHand, pos));
+        if (!level.isClientSide && willTill && !payStamina(player, stack, chargeLevel)) {
+            return;
         }
 
         if (level.isClientSide) {
@@ -331,7 +318,7 @@ public class HoeItem extends Item implements IStardewItem {
                     com.stardew.craft.player.PlayerDataManager.getPlayerData(serverPlayer)
                             .incrementStat("dirtHoed", tilledCount);
                 }
-                applyStaminaAndCooldown(player, stack, chargeLevel);
+                applyCooldown(player);
             }
         } else {
             // 客户端仅做一点粒子反馈（避免完全无反馈）
@@ -378,17 +365,24 @@ public class HoeItem extends Item implements IStardewItem {
         stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
     }
 
-    private void applyStaminaAndCooldown(Player player, ItemStack stack, int chargeLevel) {
-        // 扣除能量 (Stamina)
-        if (!player.isCreative() && player instanceof ServerPlayer serverPlayer
-                && !StardewEnchantments.has(stack, StardewEnchantments.EFFICIENT)) {
-            int farmingLevel = PlayerStardewDataAPI.getSkillLevel(serverPlayer, SkillType.FARMING);
-            float staminaCost = (2.0f * (chargeLevel + 1)) - (farmingLevel * 0.1f);
-            PlayerStardewDataAPI.consumeEnergy(serverPlayer, staminaCost);
-        }
-
-        // 冷却
+    private void applyCooldown(Player player) {
         player.getCooldowns().addCooldown(this, HOE_COOLDOWN_TICKS);
+    }
+
+    private boolean payStamina(Player player, ItemStack stack, int chargeLevel) {
+        if (player.isCreative()
+                || !(player instanceof ServerPlayer serverPlayer)
+                || player.level().dimension() != ModDimensions.STARDEW_VALLEY
+                || StardewEnchantments.has(stack, StardewEnchantments.EFFICIENT)) {
+            return true;
+        }
+        return PlayerStardewDataAPI.consumeEnergyOrNotify(
+                serverPlayer, staminaCost(serverPlayer, chargeLevel));
+    }
+
+    private static float staminaCost(ServerPlayer player, int chargeLevel) {
+        int farmingLevel = PlayerStardewDataAPI.getSkillLevel(player, SkillType.FARMING);
+        return Math.max(0.0F, 2.0F * (chargeLevel + 1) - farmingLevel * 0.1F);
     }
 
     /**

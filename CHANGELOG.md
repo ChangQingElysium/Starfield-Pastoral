@@ -1,5 +1,71 @@
 # Changelog
 
+## 0.5.5fix1 - 2026-08-08
+
+### Update Log (English)
+
+#### Stardew Fonts, Menus And HUD
+
+- Added a source-driven Stardew font system with original glyph atlases, metrics and distinct dialogue, small-text and sprite-text roles. It supports every one of the project's 12 languages and includes an optional smoother Simplified Chinese font mode.
+- Migrated the affected menus, dialogue boxes, letters, shops, quest log, casino games, mastery screen, HUD elements and world indicators to the correct font role and source scale. Text measurement, wrapping, truncation and input-box rendering now use the same active font instead of language-specific width guesses.
+- Rebuilt the player menu's animal page with server-authoritative farm-animal data, original-style animal sprites and per-animal friendship, petting, auto-petting and Animal Cracker status. Multiplayer clients only receive animals they are allowed to manage.
+- Corrected HUD anchoring and layering for the time/money box, quest icon, messages and several scaled screens, and added the missing original interface slices used by the updated layouts.
+
+#### Tools, Energy And Farming Fixes
+
+- Made stamina costs atomic and server-authoritative across the hoe, watering can, pickaxe, fishing rod, trees, resource clumps and animal tools. Actions now verify the full cost before changing the world or granting rewards, and insufficient stamina is reported through the Stardew HUD.
+- Fixed fishing casts so rejected, duplicate and festival-controlled casts cannot consume energy incorrectly or start without paying their cost.
+- Garden Pots placed in rain now begin watered, and their fertilizer overlay is rendered from the pot block entity at the raised soil surface so it remains visible and correctly aligned.
+- Removed duplicate payment from coop and barn construction/upgrade application. The manager blocks now apply only a previously validated, already-paid transaction, preventing a second charge or inconsistent construction state.
+
+#### NPC Events, Schedules And Mail
+
+- Added Gus's original four-heart event with the supplied Stardrop Saloon camera and actor route, including the correctly substituted player-name prompt and safe cutscene cleanup.
+- Rebuilt Gus's regular schedule and Pam's available regular routes from the supplied world coordinates while retaining their existing Desert Festival behavior. Pam's nine-heart house event remains intentionally deferred until the house-upgrade system is implemented.
+- Restored the original Gus and Pam cooking letters and recipe delivery at their source friendship thresholds. Mail content and player-name substitutions now come from the original localized data instead of rewritten text.
+- Updated the affected event, schedule, dialogue, mail and interface text across German, English, Spanish, French, Hungarian, Italian, Japanese, Korean, Brazilian Portuguese, Russian, Turkish and Simplified Chinese.
+
+#### Runtime And Presentation Reliability
+
+- Added a shared temporary-GUI visibility coordinator for cutscenes, fades and animal-management screens, preventing overlapping screens from restoring or hiding the HUD out of order. State is cleaned up on completion, interruption, logout and world changes.
+- Hardened cutscene playback and skipping so command failures abort safely, release fades and GUI ownership, and do not strand players in a hidden-HUD state.
+- Shortened the combat-collapse presentation, moved several system notices from chat/action-bar text into the proper Stardew dialogue or HUD presentation, and prevented internal festival shop identifiers from being exposed to players.
+- Corrected Winter Star availability notices, Secret Santa name replacement, decoration-style payload validation and several font, tooltip and scaled-screen presentation edge cases.
+- Added tracked asset-generation tooling for the Stardew font atlas and pasture-grass model pipeline while keeping local tests, raw source material and Gradle caches outside the release repository.
+- Updated the public mod version to `0.5.5fix1`.
+
+### 更新日志（中文）
+
+#### 星露谷字体、菜单与 HUD
+
+- 新增由原版数据驱动的星露谷字体系统，接入原始字形图集与度量，并区分对话、小字和 Sprite Text 等字体规格；覆盖项目现有全部 12 种语言，同时提供可选的简体中文圆润字体模式。
+- 将受影响的菜单、对话框、信件、商店、任务日志、赌场小游戏、精通界面、HUD 和世界提示迁移到正确的字体规格与原版缩放。文字测量、换行、截断和输入框渲染现在统一使用实际字体，不再依赖按语言猜测宽度。
+- 重做玩家菜单中的动物总览页，使用服务端权威的农场动物数据与原版风格动物图像，显示每只动物的好感、抚摸、自动抚摸和动物饼干状态；多人客户端只会收到自己有权管理的动物。
+- 修正时间/金钱框、任务图标、HUD 消息及多个缩放界面的锚点和层级，并补齐新版布局所需的原版界面切片资源。
+
+#### 工具、体力与农业修复
+
+- 将锄头、喷壶、镐、鱼竿、树木、资源障碍和动物工具的体力消耗改为原子化、服务端权威结算；执行动作前必须能够完整支付体力，体力不足时通过星露谷 HUD 正确提示。
+- 修复钓鱼抛竿结算，被拒绝、重复或被节日接管的抛竿不再错误扣除体力，也无法绕过体力消耗启动钓鱼。
+- 雨天放置的花盆现在会自动润湿；肥料覆盖层改由花盆方块实体在抬高后的土壤表面渲染，保证可见并与盆土正确对齐。
+- 移除鸡舍和畜棚建造/升级应用阶段的二次付款；管理方块只应用已经验证且已经付款的事务，避免重复扣款或建筑状态不一致。
+
+#### NPC 剧情、日程与信件
+
+- 加入格斯原版四心剧情，接入已提供的星之果实餐吧摄像机与演员路线，并修正选择提示中的玩家名称替换和过场清理。
+- 按提供的世界坐标重做格斯普通日程和潘姆目前可接入的普通路线，同时保留既有沙漠节逻辑；潘姆九心房屋剧情会等房屋修缮系统完成后再接入。
+- 恢复格斯和潘姆在原版好感阈值寄出的料理信件与配方发放；信件内容和玩家名称替换直接使用原版本地化数据，不再自写文案。
+- 将相关剧情、日程、对话、信件与界面文本同步到德语、英语、西班牙语、法语、匈牙利语、意大利语、日语、韩语、巴西葡萄牙语、俄语、土耳其语与简体中文。
+
+#### 运行时与表现稳定性
+
+- 为过场、淡入淡出和动物管理界面增加统一的临时 GUI 可见性协调器，避免多个界面重叠时错误恢复或隐藏 HUD；结束、中断、退出和切换世界时都会清理状态。
+- 加固剧情播放与跳过流程：指令异常时会安全终止、释放淡出和 GUI 所有权，不再把玩家留在永久隐藏 HUD 的状态。
+- 缩短战斗倒地表现，将多项系统通知从聊天栏/动作栏迁移到正确的星露谷对话或 HUD，并阻止内部节日商店标识直接暴露给玩家。
+- 修正冬日星盛宴可用性提示、神秘好友姓名替换、装饰风格网络请求校验，以及若干字体、Tooltip 和不同界面缩放下的表现问题。
+- 加入可追踪的星露谷字体图集与牧草模型资源生成工具，同时继续把本地测试、原始素材和 Gradle 缓存排除在发布仓库之外。
+- 将公开模组版本更新为 `0.5.5fix1`。
+
 ## 0.5.5 - 2026-08-07
 
 ### Update Log (English)

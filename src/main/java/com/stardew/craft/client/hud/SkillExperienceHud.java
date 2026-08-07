@@ -1,5 +1,7 @@
 package com.stardew.craft.client.hud;
 
+import com.stardew.craft.client.font.StardewFonts;
+
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.stardew.craft.Config;
 import com.stardew.craft.StardewCraft;
@@ -132,7 +134,7 @@ public final class SkillExperienceHud {
                 g.pose().pushPose();
                 g.pose().translate(placement.x(), placement.y(), 0.0F);
                 g.pose().scale(placement.scale(), placement.scale(), 1.0F);
-                renderXpPanel(g, mc.font, currentXpSkill, currentXpLevel, lastXpBarFillPct);
+                renderXpPanel(g, StardewFonts.small(), currentXpSkill, currentXpLevel, lastXpBarFillPct);
                 g.pose().popPose();
             }
         }
@@ -143,7 +145,7 @@ public final class SkillExperienceHud {
         g.pose().pushPose();
         g.pose().translate(x, y, 0.0F);
         g.pose().scale(scale, scale, 1.0F);
-        renderXpPanel(g, mc.font, SkillType.FARMING, 6, 0.62F);
+        renderXpPanel(g, StardewFonts.small(), SkillType.FARMING, 6, 0.62F);
         g.pose().popPose();
     }
 
@@ -223,8 +225,8 @@ public final class SkillExperienceHud {
         String message = I18n.get("ui.stardewcraft.skillhud.levelup", I18n.get("stardewcraft.skill." + skillKey));
         String line2 = I18n.get("ui.stardewcraft.skillhud.level", activeLocal.level());
 
-        int textW = mc.font.width(message);
-        int line2W = mc.font.width(line2);
+        int textW = StardewFonts.small().width(message);
+        int line2W = StardewFonts.small().width(line2);
         int boxW = Math.max(textW, line2W) + 40;
         int boxH = 40;
 
@@ -266,8 +268,8 @@ public final class SkillExperienceHud {
         int textX = boxX + (boxW / 2) - (textW / 2);
         int textX2 = boxX + (boxW / 2) - (line2W / 2);
 
-        g.drawString(mc.font, message, textX, boxY + 8, withAlpha(0x50281F, a), false);
-        g.drawString(mc.font, line2, textX2, boxY + 22, withAlpha(0x1B5A24, a), false);
+        g.drawString(StardewFonts.small(), message, textX, boxY + 8, withAlpha(0x50281F, a), false);
+        g.drawString(StardewFonts.small(), line2, textX2, boxY + 22, withAlpha(0x1B5A24, a), false);
         g.pose().popPose();
     }
 

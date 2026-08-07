@@ -12,7 +12,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import javax.annotation.Nullable;
@@ -79,28 +78,28 @@ public record ApplyDecorationStylePayload(
             try {
                 type = DecorationType.valueOf(payload.decorationType());
             } catch (IllegalArgumentException ex) {
-                player.sendSystemMessage(Component.literal("Decoration apply failed: invalid decoration type."));
+                HudHintPayload.send(player, "stardewcraft.decoration.error.invalid_type");
                 return;
             }
 
             if (DecorationStyleRegistry.getStyle(type, payload.styleId()) == null) {
-                player.sendSystemMessage(Component.literal("Decoration apply failed: unknown style id " + payload.styleId()));
+                HudHintPayload.send(player, "stardewcraft.decoration.error.unknown_style");
                 return;
             }
 
             if (!PlayerStardewDataAPI.getData(player).isDecorationUnlocked(type, payload.styleId())) {
-                player.sendSystemMessage(Component.literal("Decoration apply failed: style is locked on server."));
+                HudHintPayload.send(player, "stardewcraft.decoration.error.locked");
                 return;
             }
 
             boolean holdingPaintbrush = player.getMainHandItem().is(ModItems.PAINTBRUSH.get()) || player.getOffhandItem().is(ModItems.PAINTBRUSH.get());
             if (!holdingPaintbrush) {
-                player.sendSystemMessage(Component.literal("Decoration apply failed: hold paintbrush in main/off hand."));
+                HudHintPayload.send(player, "stardewcraft.decoration.error.paintbrush_required");
                 return;
             }
 
             if (player.distanceToSqr(payload.targetPos().getX() + 0.5, payload.targetPos().getY() + 0.5, payload.targetPos().getZ() + 0.5) > 4096.0) {
-                player.sendSystemMessage(Component.literal("Decoration apply failed: target is too far away."));
+                HudHintPayload.send(player, "stardewcraft.decoration.error.target_too_far");
                 return;
             }
 
@@ -111,13 +110,13 @@ public record ApplyDecorationStylePayload(
                 int dy = Math.abs(payload.cornerA().getY() - payload.cornerB().getY()) + 1;
                 int dz = Math.abs(payload.cornerA().getZ() - payload.cornerB().getZ()) + 1;
                 if ((long) dx * dy * dz > 125000) {
-                    player.sendSystemMessage(Component.literal("Decoration apply failed: region too large."));
+                    HudHintPayload.send(player, "stardewcraft.decoration.error.region_too_large");
                     return;
                 }
                 // Validate corner distance
                 if (player.distanceToSqr(payload.cornerA().getX() + 0.5, payload.cornerA().getY() + 0.5, payload.cornerA().getZ() + 0.5) > 4096.0
                     || player.distanceToSqr(payload.cornerB().getX() + 0.5, payload.cornerB().getY() + 0.5, payload.cornerB().getZ() + 0.5) > 4096.0) {
-                    player.sendSystemMessage(Component.literal("Decoration apply failed: region corners too far away."));
+                    HudHintPayload.send(player, "stardewcraft.decoration.error.corners_too_far");
                     return;
                 }
                 changed = DecorationService.applyToRegion(player.level(), payload.cornerA(), payload.cornerB(), type, payload.styleId());
@@ -125,7 +124,7 @@ public record ApplyDecorationStylePayload(
                 changed = DecorationService.applyToConnected(player.level(), payload.targetPos(), type, payload.styleId());
             }
             if (changed <= 0) {
-                player.sendSystemMessage(Component.literal("Decoration apply failed: no decor block entities found in connected area."));
+                HudHintPayload.send(player, "stardewcraft.decoration.error.nothing_found");
                 StardewCraft.LOGGER.warn("Decoration apply produced 0 changes. Player={}, pos={}, type={}, style={}",
                     player.getGameProfile().getName(), payload.targetPos(), payload.decorationType(), payload.styleId());
             }

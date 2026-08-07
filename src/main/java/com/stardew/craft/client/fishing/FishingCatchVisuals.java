@@ -1,5 +1,7 @@
 package com.stardew.craft.client.fishing;
 
+import com.stardew.craft.client.font.StardewFonts;
+
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.gui.LocalizedGuiAssets;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -234,7 +236,7 @@ public final class FishingCatchVisuals {
 			int iconY = y + h / 2 - 8;
 			if (!pendingStack.isEmpty()) {
 				g.renderItem(pendingStack, iconX, iconY);
-				g.renderItemDecorations(mc.font, pendingStack, iconX, iconY);
+				g.renderItemDecorations(StardewFonts.small(), pendingStack, iconX, iconY);
 			}
 		}
 	}

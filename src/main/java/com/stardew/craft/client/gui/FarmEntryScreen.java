@@ -3,6 +3,7 @@ package com.stardew.craft.client.gui;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.api.v1.farm.StardewFarmLayout;
 import com.stardew.craft.api.v1.farm.StardewFarmLayouts;
+import com.stardew.craft.client.font.StardewFonts;
 import com.stardew.craft.client.gui.common.GuiText;
 import com.stardew.craft.client.gui.overnight.StardewGuiUtil;
 import com.stardew.craft.farm.FarmPermissionManager;
@@ -203,7 +204,7 @@ public class FarmEntryScreen extends Screen {
         StardewGuiUtil.drawDialogueBoxFrame(graphics, panelX, panelY, panelW, panelH);
 
         // 标题
-        Component title = this.getTitle().copy().withStyle(ChatFormatting.BOLD);
+        Component title = StardewFonts.title(this.getTitle());
         GuiText.drawCenteredClamped(graphics, this.font, title, panelX + panelW / 2,
             contentY + ui(12), panelW - ui(96), 0x582A11, false);
 

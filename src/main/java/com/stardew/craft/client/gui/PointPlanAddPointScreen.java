@@ -42,7 +42,7 @@ public class PointPlanAddPointScreen extends Screen {
                 ? "gui.stardewcraft.point_plan.name"
                 : "gui.stardewcraft.point_plan.npc");
         npcBox = new EditBox(
-            font, panelX + 70, panelY + 52,
+            com.stardew.craft.client.font.StardewFonts.small(), panelX + 70, panelY + 52,
             PANEL_W - 92, 18, entryLabel);
         npcBox.setTextShadow(false);
         npcBox.setMaxLength(64);

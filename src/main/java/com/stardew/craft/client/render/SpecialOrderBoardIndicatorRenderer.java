@@ -1,5 +1,7 @@
 package com.stardew.craft.client.render;
 
+import com.stardew.craft.client.font.StardewFonts;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.client.gui.specialorder.ClientSpecialOrderBoardData;
@@ -58,7 +60,7 @@ public final class SpecialOrderBoardIndicatorRenderer {
         ps.mulPose(event.getCamera().rotation());
         float baseScale = 0.025F * scalePulse;
         ps.scale(baseScale, -baseScale, baseScale);
-        drawGlyph(mc.font, ps, buf, "!", EXCLAM_R, EXCLAM_G, EXCLAM_B);
+        drawGlyph(StardewFonts.spriteTextColored(), ps, buf, "!", EXCLAM_R, EXCLAM_G, EXCLAM_B);
         ps.popPose();
 
         buf.endBatch();

@@ -1,5 +1,7 @@
 package com.stardew.craft.client.hud;
 
+import com.stardew.craft.client.font.StardewFonts;
+
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.stardew.craft.Config;
 import com.stardew.craft.StardewCraft;
@@ -10,6 +12,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.ItemLike;
@@ -18,6 +21,7 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.ClientChatReceivedEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 
 import java.util.ArrayList;
@@ -133,6 +137,70 @@ public final class StardewHudMessageManager {
 		addMessage(message);
 	}
 
+	/**
+	 * Routes StardewCraft's ordinary system/actionbar feedback through the SDV HUD. Stateful
+	 * counters remain in the vanilla overlay because replacing them with timed messages would
+	 * create a growing stack instead of one continuously updated value.
+	 */
+	@SubscribeEvent
+	public static void onSystemMessage(ClientChatReceivedEvent.System event) {
+		Component message = event.getMessage();
+		if (!(message.getContents() instanceof TranslatableContents contents)) {
+			return;
+		}
+		String key = contents.getKey();
+		if (!isStardewFeedbackKey(key) || isExplicitChatOrLiveStatus(key)) {
+			return;
+		}
+		event.setCanceled(true);
+		if (isErrorFeedback(key)) {
+			showError(message);
+		} else {
+			showGlobalMessage(message);
+		}
+	}
+
+	private static boolean isStardewFeedbackKey(String key) {
+		return key.startsWith("stardewcraft.")
+			|| key.startsWith("message.stardewcraft.")
+			|| key.startsWith("message.stardew_craft.");
+	}
+
+	private static boolean isExplicitChatOrLiveStatus(String key) {
+		return key.contains(".command.")
+			|| key.contains(".debug.")
+			|| key.startsWith("stardewcraft.join_announcement.")
+			|| key.contains(".actionbar.")
+			|| key.endsWith(".actionbar")
+			|| key.endsWith(".score")
+			|| key.endsWith("_waiting")
+			|| key.contains(".vote.progress")
+			|| key.contains(".waiting.progress");
+	}
+
+	private static boolean isErrorFeedback(String key) {
+		return key.contains("blocked")
+			|| key.contains("cannot")
+			|| key.contains("denied")
+			|| key.contains("unavailable")
+			|| key.contains("wrong")
+			|| key.contains("empty")
+			|| key.contains("exhausted")
+			|| key.contains("requirement")
+			|| key.contains("requires")
+			|| key.contains("not_owner")
+			|| key.contains("no_access")
+			|| key.contains("no_farm")
+			|| key.contains("fail")
+			|| key.contains("closed")
+			|| key.contains("inventory_full")
+			|| key.contains("invalid")
+			|| key.contains("protected")
+			|| key.contains("not_found")
+			|| key.endsWith(".setup")
+			|| key.endsWith(".ended");
+	}
+
 	@SubscribeEvent
 	public static void onRenderGui(RenderGuiEvent.Post event) {
 		if (MESSAGES.isEmpty()) {
@@ -144,9 +212,8 @@ public final class StardewHudMessageManager {
 				|| (mc.player != null && mc.player.isSpectator())) {
 			return;
 		}
-		Font font = mc.font;
 		GuiGraphics graphics = event.getGuiGraphics();
-		renderNotifications(graphics, font);
+		renderNotifications(graphics, StardewFonts.tooltip(), StardewFonts.dialogue());
 	}
 
 	/**
@@ -154,7 +221,7 @@ public final class StardewHudMessageManager {
 	 * The individual visual styles stay intact, but they can no longer overlap each
 	 * other because each message contributes its real height to the shared stack.
 	 */
-	private static void renderNotifications(GuiGraphics graphics, Font font) {
+	private static void renderNotifications(GuiGraphics graphics, Font toastFont, Font cornerFont) {
 		StardewHudLayout.Placement placement = StardewHudLayout.current(
 			Config.HudElement.NOTIFICATIONS, graphics.guiWidth(), graphics.guiHeight());
 		graphics.pose().pushPose();
@@ -164,23 +231,23 @@ public final class StardewHudMessageManager {
 		for (int i = MESSAGES.size() - 1; i >= 0; i--) {
 			HudMessage message = MESSAGES.get(i);
 			if (message.kind == MessageKind.CORNER_TEXTBOX) {
-				drawCornerTextbox(graphics, font, message, heightUsed);
+				drawCornerTextbox(graphics, cornerFont, message, heightUsed);
 			} else {
-				drawToastMessage(graphics, font, message, heightUsed);
+				drawToastMessage(graphics, toastFont, message, heightUsed);
 			}
-			heightUsed += stackStepFor(font, message);
+			heightUsed += stackStepFor(cornerFont, message);
 		}
 		graphics.pose().popPose();
 	}
 
-	private static int stackStepFor(Font font, HudMessage message) {
+	private static int stackStepFor(Font cornerFont, HudMessage message) {
 		if (message.kind == MessageKind.CORNER_TEXTBOX) {
-			return cornerBoxLayout(font, message.messageText).height() + CORNER_STACK_GAP;
+			return cornerBoxLayout(cornerFont, message.messageText).height() + CORNER_STACK_GAP;
 		}
 		return BOX_HEIGHT + TOAST_STACK_GAP;
 	}
 
-	public static void renderNotificationPreview(GuiGraphics graphics, Font font, int x, int y, float scale) {
+	public static void renderNotificationPreview(GuiGraphics graphics, int x, int y, float scale) {
 		ItemStack stack = new ItemStack(ModItems.HAY.get());
 		HudMessage message = new HudMessage(stack.getHoverName(), MessageKind.ITEM_PICKUP);
 		message.messageSubject = stack;
@@ -190,7 +257,7 @@ public final class StardewHudMessageManager {
 		graphics.pose().pushPose();
 		graphics.pose().translate(x, y, 0.0F);
 		graphics.pose().scale(scale, scale, 1.0F);
-		drawToastMessage(graphics, font, message, 0);
+		drawToastMessage(graphics, StardewFonts.tooltip(), message, 0);
 		graphics.pose().popPose();
 	}
 
@@ -253,10 +320,11 @@ public final class StardewHudMessageManager {
 
 		int textColor = (alphaInt << 24) | (TEXT_COLOR & 0xFFFFFF);
 		int drawY = boxY + (layout.height() - layout.textHeight()) / 2;
+		int lineHeight = cornerLineHeight();
 		for (FormattedCharSequence line : layout.lines()) {
 			int drawX = (layout.width() - font.width(line)) / 2;
 			graphics.drawString(font, line, drawX, drawY, textColor, false);
-			drawY += font.lineHeight + CORNER_LINE_GAP;
+			drawY += lineHeight + CORNER_LINE_GAP;
 		}
 		RenderSystem.disableBlend();
 	}
@@ -270,10 +338,15 @@ public final class StardewHudMessageManager {
 		for (FormattedCharSequence line : lines) {
 			textWidth = Math.max(textWidth, font.width(line));
 		}
-		int textHeight = lines.size() * font.lineHeight + Math.max(0, lines.size() - 1) * CORNER_LINE_GAP;
+		int textHeight = lines.size() * cornerLineHeight()
+			+ Math.max(0, lines.size() - 1) * CORNER_LINE_GAP;
 		int width = Math.max(CORNER_MIN_WIDTH, textWidth + CORNER_HORIZONTAL_PADDING * 2);
 		int height = Math.max(CORNER_MIN_HEIGHT, textHeight + CORNER_VERTICAL_PADDING * 2);
 		return new CornerBoxLayout(lines, width, height, textHeight);
+	}
+
+	private static int cornerLineHeight() {
+		return Math.max(1, (int) Math.ceil(StardewFonts.lineHeight(StardewFonts.Role.DIALOGUE)));
 	}
 
 	private static void drawToastMessage(GuiGraphics graphics, Font font, HudMessage message, int heightUsed) {

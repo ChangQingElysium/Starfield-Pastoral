@@ -30,6 +30,11 @@ public final class StardewSettingsScreen extends OptionsSubScreen {
             Config.SHOW_MONSTER_HP_BAR.get(),
             Config.SHOW_MONSTER_HP_BAR::set,
             Config.CLIENT_SPEC::save);
+    private final OptionInstance<Boolean> stardewFonts = booleanOption(
+            "config.stardewcraft.client.enable_stardew_fonts",
+            Config.ENABLE_STARDEW_FONTS.get(),
+            Config.ENABLE_STARDEW_FONTS::set,
+            Config.CLIENT_SPEC::save);
 
     public StardewSettingsScreen(Screen parent) {
         super(parent, net.minecraft.client.Minecraft.getInstance().options,
@@ -38,7 +43,7 @@ public final class StardewSettingsScreen extends OptionsSubScreen {
 
     @Override
     protected void addOptions() {
-        list.addSmall(weaponSpecialEffects, weaponPostEffects, monsterHpBars);
+        list.addSmall(weaponSpecialEffects, weaponPostEffects, monsterHpBars, stardewFonts);
         list.addSmall(List.of(
                 Button.builder(Component.translatable("stardewcraft.settings.hud_layout"),
                                 button -> minecraft.setScreen(new StardewHudLayoutEditorScreen(this)))
@@ -58,7 +63,7 @@ public final class StardewSettingsScreen extends OptionsSubScreen {
                     booleanOption("config.stardewcraft.server.show_community_announcement",
                             Config.SHOW_COMMUNITY_ANNOUNCEMENT.get(), Config.SHOW_COMMUNITY_ANNOUNCEMENT::set,
                             Config.SERVER_SPEC::save));
-            EditBox clockSpeed = new EditBox(font, 150, 20,
+            EditBox clockSpeed = new EditBox(com.stardew.craft.client.font.StardewFonts.small(), 150, 20,
                     Component.translatable("config.stardewcraft.server.time_speed_multiplier"));
             clockSpeed.setValue(Double.toString(Config.TIME_SPEED_MULTIPLIER.get()));
             clockSpeed.setResponder(value -> updateClockSpeed(clockSpeed, value));

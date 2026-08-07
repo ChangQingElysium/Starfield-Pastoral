@@ -1,5 +1,7 @@
 package com.stardew.craft.client.render;
 
+import com.stardew.craft.client.font.StardewFonts;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.stardew.craft.StardewCraft;
@@ -98,7 +100,7 @@ public final class CutsceneTextAboveHeadRenderer {
             poseStack.translate(x - cameraPos.x, y - cameraPos.y, z - cameraPos.z);
             poseStack.mulPose(event.getCamera().rotation());
             poseStack.scale(WORLD_SCALE, -WORLD_SCALE, WORLD_SCALE);
-            renderBubble(mc.font, poseStack, buffer, bubble);
+            renderBubble(StardewFonts.dialogue(), poseStack, buffer, bubble);
             poseStack.popPose();
         }
 

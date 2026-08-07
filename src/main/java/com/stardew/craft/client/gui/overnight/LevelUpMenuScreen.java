@@ -2,6 +2,7 @@ package com.stardew.craft.client.gui.overnight;
 
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.ClientPlayerDataCache;
+import com.stardew.craft.client.font.StardewFonts;
 import com.stardew.craft.client.gui.common.CommonGuiTextures;
 import com.stardew.craft.client.gui.common.GuiText;
 import com.stardew.craft.cooking.service.VanillaCookingRecipeData;
@@ -188,7 +189,8 @@ public class LevelUpMenuScreen extends Screen {
             drawSkillIcon(graphics, currentSkill, xPos + px(SPACE_SIDE + BORDER_WIDTH), yPos + px(SPACE_TOP + 16));
             drawSkillIcon(graphics, currentSkill, xPos + guiWidth - px(SPACE_SIDE + BORDER_WIDTH + 64), yPos + px(SPACE_TOP + 16));
 
-            Component title = Component.translatable("stardewcraft.levelup.title.level_skill", currentLevel, getSkillName(currentSkill));
+            Component title = StardewFonts.title(Component.translatable(
+                    "stardewcraft.levelup.title.level_skill", currentLevel, getSkillName(currentSkill)));
             GuiText.drawCenteredClamped(graphics, this.font, title, xPos + guiWidth / 2,
                 yPos + px(SPACE_TOP + 16), guiWidth - px(240), 0x3A2A1A, false);
 
@@ -229,7 +231,8 @@ public class LevelUpMenuScreen extends Screen {
             drawSkillIcon(graphics, currentSkill, xPos + px(SPACE_SIDE + BORDER_WIDTH), yPos + px(SPACE_TOP + 16));
             drawSkillIcon(graphics, currentSkill, xPos + guiWidth - px(SPACE_SIDE + BORDER_WIDTH + 64), yPos + px(SPACE_TOP + 16));
 
-            Component title = Component.translatable("stardewcraft.levelup.title.level_skill", currentLevel, getSkillName(currentSkill));
+            Component title = StardewFonts.title(Component.translatable(
+                    "stardewcraft.levelup.title.level_skill", currentLevel, getSkillName(currentSkill)));
             GuiText.drawCenteredClamped(graphics, this.font, title, xPos + guiWidth / 2,
                 yPos + px(SPACE_TOP + 16), guiWidth - px(240), 0x3A2A1A, false);
 

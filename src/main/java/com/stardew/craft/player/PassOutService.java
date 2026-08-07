@@ -54,7 +54,7 @@ public final class PassOutService {
      * 再次触发同一条死亡链。
      */
     private static final long COMBAT_DEATH_RECOVERY_TICKS = 20L * 20L;
-    private static final int COMBAT_COLLAPSE_TICKS = 20 * 8;
+    private static final int COMBAT_COLLAPSE_TICKS = 20 * 3;
     private static final java.util.Map<java.util.UUID, Long> combatDeathRecoveryUntilTick = new java.util.concurrent.ConcurrentHashMap<>();
     private static final java.util.Map<java.util.UUID, Integer> combatCollapseNotBeforeTick =
             new java.util.concurrent.ConcurrentHashMap<>();
@@ -754,7 +754,7 @@ public final class PassOutService {
     }
 
     /**
-     * The client ACK aligns the rescue with its eight-second presentation, but
+     * The client ACK aligns the rescue with its three-second presentation, but
      * cannot be allowed to own server progress. Lost packets, reconnect races,
      * or a broken client therefore fall through to the same idempotent
      * transition at the authoritative deadline.

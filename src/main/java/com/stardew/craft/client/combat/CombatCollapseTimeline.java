@@ -4,18 +4,18 @@ package com.stardew.craft.client.combat;
  * Deterministic presentation timing for a Stardew-style combat knockout.
  *
  * <p>The original sets the farmer's collapse frame, starts a held red glow, applies jitter,
- * freezes the farmer for eight seconds, and stops the music. Minecraft uses a short animated
- * transition into a prone pose while retaining the same eight-second total freeze.</p>
+ * pauses for three seconds before the rescue transition, and stops the music. Minecraft uses a
+ * short animated transition into the same prone pose during that three-second presentation.</p>
  */
 public final class CombatCollapseTimeline {
-    public static final int TOTAL_TICKS = 160;
+    public static final int TOTAL_TICKS = 60;
     public static final int BODY_FALL_TICKS = 12;
     public static final int JITTER_TICKS = 30;
     public static final int RED_RAMP_TICKS = 8;
-    public static final int RED_HOLD_TICKS = 60;
-    public static final int RED_END_TICK = 100;
-    public static final int BLACK_FADE_START_TICK = 120;
-    public static final int BLACK_FULL_TICK = 150;
+    public static final int RED_HOLD_TICKS = 28;
+    public static final int RED_END_TICK = 45;
+    public static final int BLACK_FADE_START_TICK = 40;
+    public static final int BLACK_FULL_TICK = 60;
     public static final float MAX_RED_ALPHA = 0.35F;
 
     private CombatCollapseTimeline() {

@@ -1,6 +1,7 @@
 package com.stardew.craft.cutscene.runtime;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.stardew.craft.client.TemporaryGuiVisibility;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.neoforged.api.distmarker.Dist;
@@ -23,13 +24,7 @@ public final class EventScreenFade {
 
     /** 屏幕基本变黑时强制隐藏 HUD（含 hotbar 物品、状态栏、自定义任务 HUD 等）。 */
     private static final float HIDE_HUD_THRESHOLD = 0.5f;
-    /**
-     * 是否由本系统主动 force 了 hideGui。
-     * 不缓存 "上次 hideGui 的值" — 那样会和 {@link com.stardew.craft.cutscene.runtime.EventPlayer}
-     * 这种同时管理 hideGui 的系统打架：剧情中途 force 了 true，剧情结束后我们再"还原"成 true，
-     * 会让 GUI 永远隐不掉。
-     */
-    private static boolean hideGuiForced = false;
+    private static boolean hidingGui = false;
 
     public static void startFadeToBlack(int ticks) {
         alpha = 0f;
@@ -77,21 +72,16 @@ public final class EventScreenFade {
      * （hotbar 物品、生命/经验/食物条）和已正确尊重 hideGui 的自定义 HUD（如 QuestIconHud）
      * 一并隐藏。
      *
-     * 关键策略：只有在 hideGui 尚未被别人（玩家 F1 / EventPlayer 剧情）置为 true 时才 force；
-     * 结束时只在我们 force 过的情况下置回 false。这样不会和其他系统的 hideGui 控制互相覆盖。
+     * 通过共享所有权协调器与剧情播放器共存，最后一个临时隐藏者退出时才恢复玩家原始设置。
      */
     private static void updateHideGui() {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.options == null) return;
         boolean wantHide = active && alpha >= HIDE_HUD_THRESHOLD;
-        if (wantHide && !hideGuiForced) {
-            if (!mc.options.hideGui) {
-                mc.options.hideGui = true;
-                hideGuiForced = true;
-            }
-        } else if (!wantHide && hideGuiForced) {
-            mc.options.hideGui = false;
-            hideGuiForced = false;
+        if (wantHide) {
+            hidingGui = true;
+            TemporaryGuiVisibility.acquire(TemporaryGuiVisibility.Owner.SCREEN_FADE);
+        } else if (hidingGui) {
+            hidingGui = false;
+            TemporaryGuiVisibility.release(TemporaryGuiVisibility.Owner.SCREEN_FADE);
         }
     }
 
@@ -112,16 +102,17 @@ public final class EventScreenFade {
     public static void clear() {
         alpha = 0f;
         active = false;
-        if (hideGuiForced) {
-            Minecraft mc = Minecraft.getInstance();
-            if (mc.options != null) {
-                mc.options.hideGui = false;
-            }
-            hideGuiForced = false;
+        if (hidingGui) {
+            hidingGui = false;
+            TemporaryGuiVisibility.release(TemporaryGuiVisibility.Owner.SCREEN_FADE);
         }
     }
 
     public static boolean isActive() {
         return active;
+    }
+
+    public static boolean isHidingGui() {
+        return hidingGui;
     }
 }

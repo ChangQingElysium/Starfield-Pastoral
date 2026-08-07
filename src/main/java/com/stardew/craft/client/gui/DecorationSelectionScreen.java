@@ -147,9 +147,8 @@ public class DecorationSelectionScreen extends Screen {
     private void onConfirm(int index) {
         OpenDecorationScreenPayload.DecorationOption option = options.get(index);
         if (!option.unlocked()) {
-            if (minecraft != null && minecraft.player != null) {
-                minecraft.player.displayClientMessage(Component.translatable(option.unlockHintKey()), true);
-            }
+            com.stardew.craft.client.hud.StardewHudMessageManager.showError(
+                    Component.translatable(option.unlockHintKey()));
             return;
         }
         PacketDistributor.sendToServer(buildApplyPayload(option.styleId()));

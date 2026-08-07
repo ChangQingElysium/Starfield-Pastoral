@@ -1,5 +1,7 @@
 package com.stardew.craft.client.render;
 
+import com.stardew.craft.client.font.StardewFonts;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.client.ClientPlayerDataCache;
@@ -97,9 +99,9 @@ public final class BillboardQuestIndicatorRenderer {
             // 实际场景里"从没看过公告栏"几乎立刻就会被点一次，平时只会看到 "!"。
             // 我们先只画优先级最高的那一个。
             if (showExclam) {
-                drawGlyph(mc.font, ps, buf, "!", EXCLAM_R, EXCLAM_G, EXCLAM_B);
+                drawGlyph(StardewFonts.spriteTextColored(), ps, buf, "!", EXCLAM_R, EXCLAM_G, EXCLAM_B);
             } else {
-                drawGlyph(mc.font, ps, buf, "?", QUESTION_R, QUESTION_G, QUESTION_B);
+                drawGlyph(StardewFonts.spriteTextColored(), ps, buf, "?", QUESTION_R, QUESTION_G, QUESTION_B);
             }
 
             ps.popPose();

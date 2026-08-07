@@ -139,8 +139,8 @@ public final class MinePickaxeEvents {
 			if (sl.dimension() == ModDimensions.STARDEW_VALLEY) {
 				if (!FarmAreaProtectionEvents.canModifyAt(player, event.getPos())) {
 					event.setCanceled(true);
-					player.displayClientMessage(
-							Component.translatable("stardewcraft.farm.build_farm_only"), true);
+					com.stardew.craft.network.payload.HudHintPayload.send(
+							player, "stardewcraft.farm.build_farm_only");
 					return;
 				}
 			} else if (sl.dimension() != ModMiningDimensions.STARDEW_MINING) {
@@ -173,9 +173,8 @@ public final class MinePickaxeEvents {
 			return;
 		}
 
-		// 能量不足时，禁止继续挖矿
-		if (PlayerStardewDataAPI.getEnergy(player) <= 0.0f) {
-			player.displayClientMessage(Component.translatable("stardewcraft.message.player.exhausted"), true);
+		// Pay the complete block cost before XP, stats, drops, or world mutation can occur.
+		if (!consumeMiningEnergy(player, state)) {
 			event.setCanceled(true);
 			return;
 		}
@@ -189,8 +188,6 @@ public final class MinePickaxeEvents {
 		}
 		com.stardew.craft.player.PlayerDataManager.getPlayerData(player)
 				.recordMineBlockBroken(isStardewOre(state), isGemOre(state), isMineralBlock(state));
-
-		consumeMiningEnergy(player, state);
 	}
 
 	/**
@@ -363,9 +360,9 @@ public final class MinePickaxeEvents {
 	 * SDV parity: 体力按实际需要的原版挥镐次数结算。
 	 * 每次挥镐消耗 2 - MiningLevel×0.1；石头生命值除以镐子伤害决定次数。
 	 */
-	private static void consumeMiningEnergy(ServerPlayer player, BlockState state) {
+	private static boolean consumeMiningEnergy(ServerPlayer player, BlockState state) {
 		if (StardewEnchantments.has(player.getMainHandItem(), StardewEnchantments.EFFICIENT)) {
-			return;
+			return true;
 		}
 		int tier = getEffectiveStardewPickaxeTier(player.getMainHandItem());
 		if (tier < 0) {
@@ -374,7 +371,7 @@ public final class MinePickaxeEvents {
 		int miningLevel = PlayerStardewDataAPI.getSkillLevel(player, SkillType.MINING);
 		float cost = MineGenerationBalance.miningEnergyCost(
 				getSdvStoneHealth(state), tier, miningLevel);
-		PlayerStardewDataAPI.consumeEnergy(player, cost);
+		return PlayerStardewDataAPI.consumeEnergyOrNotify(player, cost);
 	}
 
 	private static int getSdvStoneHealth(BlockState state) {

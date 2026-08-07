@@ -90,7 +90,7 @@ public class MoneyContractTransferScreen extends Screen {
         fieldW = contentW - Math.max(12, contentW / 14) * 2;
         fieldX = contentX + Math.max(6, contentW / 28);
         fieldY = sendY - fieldH - Math.max(22, contentH / 9);
-        amountField = new EditBox(this.font, fieldX + 28, fieldY + (fieldH - font.lineHeight) / 2,
+        amountField = new EditBox(com.stardew.craft.client.font.StardewFonts.small(), fieldX + 28, fieldY + (fieldH - font.lineHeight) / 2,
             Math.max(1, fieldW - 40), font.lineHeight,
             Component.translatable("stardewcraft.money_contract.transfer.amount"));
         amountField.setMaxLength(9);

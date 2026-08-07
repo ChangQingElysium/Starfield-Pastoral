@@ -1,5 +1,7 @@
 package com.stardew.craft.client.render;
 
+import com.stardew.craft.client.font.StardewFonts;
+
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -220,7 +222,7 @@ public final class PortalHintRenderer {
         Component destination = isSingleLineHint(hint.targetId)
                 ? Component.empty()
                 : Component.translatable("stardewcraft.location." + hint.destinationKey);
-        InteractionHintHud.render(graphics, mc.font, action, destination,
+        InteractionHintHud.render(graphics, StardewFonts.small(), action, destination,
                 accentRgb(hint), textHintAlpha);
     }
 

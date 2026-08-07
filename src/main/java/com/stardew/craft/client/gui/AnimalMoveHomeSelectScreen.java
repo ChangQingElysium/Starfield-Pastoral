@@ -2,6 +2,7 @@ package com.stardew.craft.client.gui;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.client.TemporaryGuiVisibility;
 import com.stardew.craft.client.gui.common.CommonGuiTextures;
 import com.stardew.craft.client.gui.common.GuiText;
 import com.stardew.craft.client.gui.common.SdvTexture;
@@ -66,8 +67,6 @@ public final class AnimalMoveHomeSelectScreen extends Screen {
     private int buttonSize;
     private float okScale = 1.0F;
     private float cancelScale = 1.0F;
-    private boolean previousHideGui;
-    private boolean hudVisibilityCaptured;
 
     public AnimalMoveHomeSelectScreen(OpenAnimalMoveHomeScreenPayload payload) {
         super(Component.translatable("container.stardew_craft.animal_move_home"));
@@ -78,11 +77,7 @@ public final class AnimalMoveHomeSelectScreen extends Screen {
     @Override
     protected void init() {
         super.init();
-        if (!this.hudVisibilityCaptured) {
-            this.previousHideGui = this.minecraft.options.hideGui;
-            this.hudVisibilityCaptured = true;
-        }
-        this.minecraft.options.hideGui = true;
+        TemporaryGuiVisibility.acquire(TemporaryGuiVisibility.Owner.ANIMAL_MOVE_HOME);
         this.guiScale = (float) Math.max(1, this.minecraft.getWindow().getGuiScale());
         this.buttonSize = ui(64);
         int buttonGap = ui(4);
@@ -403,10 +398,10 @@ public final class AnimalMoveHomeSelectScreen extends Screen {
 
     @Override
     public void removed() {
-        super.removed();
-        if (this.hudVisibilityCaptured) {
-            this.minecraft.options.hideGui = this.previousHideGui;
-            this.hudVisibilityCaptured = false;
+        try {
+            super.removed();
+        } finally {
+            TemporaryGuiVisibility.release(TemporaryGuiVisibility.Owner.ANIMAL_MOVE_HOME);
         }
     }
 

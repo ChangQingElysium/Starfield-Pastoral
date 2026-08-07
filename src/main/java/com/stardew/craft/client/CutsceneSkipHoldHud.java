@@ -1,5 +1,7 @@
 package com.stardew.craft.client;
 
+import com.stardew.craft.client.font.StardewFonts;
+
 import com.mojang.blaze3d.platform.InputConstants;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.gui.overnight.StardewGuiUtil;
@@ -123,7 +125,7 @@ public final class CutsceneSkipHoldHud {
 
     private static void render(GuiGraphics graphics) {
         Minecraft mc = Minecraft.getInstance();
-        Font font = mc.font;
+        Font font = StardewFonts.small();
         int cx = skipCenterX(graphics.guiWidth());
         int cy = SDV_SKIP_MARGIN_TOP + BUTTON_SIZE / 2;
         float progress = Mth.clamp(heldTicks / (float) HOLD_TICKS, 0.0F, 1.0F);

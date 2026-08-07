@@ -5,6 +5,7 @@ import com.stardew.craft.client.gui.common.GuiText;
 import com.stardew.craft.client.gui.common.StardewRenderMapping;
 import com.stardew.craft.client.gui.specialorder.ClientSpecialOrderBoardData;
 import com.stardew.craft.client.gui.specialorder.SpecialOrderQuestView;
+import com.stardew.craft.client.font.StardewFonts;
 import com.stardew.craft.client.hud.QuestIconHud;
 import com.stardew.craft.network.payload.SpecialOrderRewardClaimPayload;
 import com.stardew.craft.quest.StardewQuest;
@@ -14,6 +15,7 @@ import com.stardew.craft.quest.network.ClaimRewardPayload;
 import com.stardew.craft.quest.network.MarkQuestViewedPayload;
 import com.stardew.craft.sound.ModSounds;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
@@ -210,13 +212,14 @@ public class QuestLogScreen extends Screen {
 
         // SDV: SpriteText.drawStringWithScrollCenteredAt at (xPos+w/2, yPos-64)
         Component title = Component.translatable("gui.stardewcraft.quest_log");
-        GuiText.drawCenteredClamped(g, font, title, winX + winW / 2,
-                winY - mapping.ui(64), winW - mapping.ui(64), 0xFFFFFFFF, false);
+        drawCenteredSourceText(g, StardewFonts.spriteText(), title, winX + winW / 2,
+                winY - mapping.ui(64), winW - mapping.ui(64),
+                0xFF000000 | StardewFonts.spriteTextDefaultRgb());
 
         if (pages.get(currentPage).isEmpty()) {
             Component empty = Component.translatable("gui.stardewcraft.quest_log.empty");
-            GuiText.drawCenteredClamped(g, font, empty, winX + winW / 2,
-                    winY + winH / 2, winW - mapping.ui(96), 0xFFAAAAAA, false);
+            drawCenteredSourceText(g, StardewFonts.dialogue(), empty, winX + winW / 2,
+                    winY + winH / 2, winW - mapping.ui(96), 0xFFAAAAAA);
             return;
         }
 
@@ -255,8 +258,12 @@ public class QuestLogScreen extends Screen {
             }
 
             // SDV: SpriteText.drawString at (bounds.X+132, bounds.Y+20)
-                g.drawString(font, GuiText.ellipsize(font, q.getTitleComponent(), entryW - mapping.ui(164)),
-                    ex + mapping.ui(132), ey + mapping.ui(20), TEXT_COLOR, false);
+            Font spriteFont = StardewFonts.spriteTextColored();
+            float textScale = mapping.textScale();
+            Component visibleTitle = GuiText.ellipsize(spriteFont, q.getTitleComponent(),
+                    Math.max(1, Math.round((entryW - mapping.ui(164)) / textScale)));
+            drawSourceText(g, spriteFont, visibleTitle,
+                    ex + mapping.ui(132), ey + mapping.ui(20), TEXT_COLOR);
         }
     }
 
@@ -269,13 +276,13 @@ public class QuestLogScreen extends Screen {
         // SDV: 标题居中 at (xPos+w/2, yPos+32)
         Component questTitleComp = shownQuest.getTitleComponent();
         String questTitle = questTitleComp.getString();
-        GuiText.drawCenteredClamped(g, font, questTitleComp,
-            winX + winW / 2, winY + mapping.ui(32), winW - mapping.ui(128), TEXT_COLOR, false);
+        drawCenteredSourceText(g, StardewFonts.spriteTextColored(), questTitleComp,
+                winX + winW / 2, winY + mapping.ui(32), winW - mapping.ui(128), TEXT_COLOR);
 
         // SDV: 计时任务时钟图标 + 剩余天数
         int extraYOffset = 0;
         if (shownQuest.isTimedQuest() && shownQuest.getDaysLeft() > 0) {
-            int titleWidth = font.width(questTitle);
+            int titleWidth = sourceWidth(StardewFonts.spriteTextColored(), questTitleComp);
             int xOffset = 0;
             if (titleWidth > winW / 2) {
                 xOffset = mapping.ui(28);
@@ -288,7 +295,8 @@ public class QuestLogScreen extends Screen {
             // SDV: text at (xPos+xOffset+80, yPos+40+extraY)
             String daysText = Component.translatable("gui.stardewcraft.quest_log.days_left",
                     shownQuest.getDaysLeft()).getString();
-            g.drawString(font, daysText, winX + xOffset + mapping.ui(80), clockY, TEXT_COLOR, false);
+            drawSourceText(g, StardewFonts.dialogue(), Component.literal(daysText),
+                    winX + xOffset + mapping.ui(80), clockY, TEXT_COLOR);
         }
 
         // ─── Scissor 区域 ───
@@ -307,11 +315,13 @@ public class QuestLogScreen extends Screen {
         int descWidth = winW - mapping.ui(128);
         float yPos = scissorY - scrollAmount + mapping.ui(4);
 
-        List<FormattedCharSequence> descLines = font.split(
-                shownQuest.getDescriptionComponent(), descWidth);
+        Font dialogueFont = StardewFonts.dialogue();
+        List<FormattedCharSequence> descLines = dialogueFont.split(
+                shownQuest.getDescriptionComponent(), sourceWrapWidth(descWidth));
+        int dialogueLineStep = sourceLineStep(StardewFonts.Role.DIALOGUE);
         for (FormattedCharSequence line : descLines) {
-            g.drawString(font, line, contentX, (int) yPos, TEXT_COLOR, false);
-            yPos += font.lineHeight + 1;
+            drawSourceText(g, dialogueFont, line, contentX, (int) yPos, TEXT_COLOR);
+            yPos += dialogueLineStep + 1;
         }
 
         yPos += mapping.ui(32);
@@ -328,10 +338,12 @@ public class QuestLogScreen extends Screen {
                 int rboxSz = mapping.ui(96);
 
                 // SDV: "Reward" label at (xPos+36, rewardBox.Y+25) — 加粗 Component 代替阴影
-                Component rewardLabel = Component.translatable("gui.stardewcraft.quest_log.reward")
-                    .withStyle(net.minecraft.ChatFormatting.BOLD);
-                g.drawString(font, GuiText.ellipsize(font, rewardLabel, mapping.ui(220)),
-                        winX + mapping.ui(36), rboxY + mapping.ui(25), TEXT_COLOR, false);
+                Component rewardLabel = Component.translatable("gui.stardewcraft.quest_log.reward");
+                Font spriteFont = StardewFonts.spriteTextColored();
+                Component visibleReward = GuiText.ellipsize(spriteFont, rewardLabel,
+                        sourceWrapWidth(mapping.ui(220)));
+                drawSourceText(g, spriteFont, visibleReward,
+                        winX + mapping.ui(36), rboxY + mapping.ui(25), TEXT_COLOR);
 
                 // SDV QuestLog.update: rewardBox.scale = baseScale + dialogueButtonScale / 20.
                 float dialogueButtonScale = (float) (16.0D
@@ -346,8 +358,9 @@ public class QuestLogScreen extends Screen {
                 CommonGuiTextures.drawQuestCoin(g, rboxX + mapping.ui(16),
                         rboxY + mapping.ui(16) - coinBob, s4);
                 // SDV: money text at (xPos+448, rewardBox.Y+25)
-                g.drawString(font, shownQuest.getMoneyReward() + "g",
-                        winX + mapping.ui(448), rboxY + mapping.ui(25), 0xFF2C6E0F, false);
+                drawSourceText(g, StardewFonts.spriteTextColored(),
+                        Component.literal(shownQuest.getMoneyReward() + "g"),
+                        winX + mapping.ui(448), rboxY + mapping.ui(25), 0xFF2C6E0F);
             }
         } else {
             // SDV: Objectives — 每帧重新获取，反映最新 N/M 进度
@@ -358,8 +371,8 @@ public class QuestLogScreen extends Screen {
                 for (int j = 0; j < liveObjectives.size(); j++) {
                     Component objComp = liveObjectives.get(j);
                     int objTextWidth = descWidth - mapping.ui(64);
-                    List<FormattedCharSequence> objLines = font.split(
-                            objComp, objTextWidth);
+                    List<FormattedCharSequence> objLines = dialogueFont.split(
+                            objComp, sourceWrapWidth(objTextWidth));
                     boolean specialComplete = shownQuest instanceof SpecialOrderQuestView specialOrder
                             && specialOrder.isObjectiveComplete(j);
                     int objectiveColor = specialComplete ? 0xFF7B6A58 : DARK_BLUE;
@@ -379,8 +392,8 @@ public class QuestLogScreen extends Screen {
                     // SDV: text at (xPos+128, yPos-8)
                     int objTextX = winX + mapping.ui(128);
                     for (FormattedCharSequence objLine : objLines) {
-                        g.drawString(font, objLine, objTextX, (int) yPos, objectiveColor, false);
-                        yPos += font.lineHeight + 1;
+                        drawSourceText(g, dialogueFont, objLine, objTextX, (int) yPos, objectiveColor);
+                        yPos += dialogueLineStep + 1;
                     }
                     if (shownQuest instanceof SpecialOrderQuestView specialOrder
                             && specialOrder.shouldShowProgress(j)) {
@@ -395,9 +408,9 @@ public class QuestLogScreen extends Screen {
             int totalCount = shownQuest.getTotalObjectiveCount();
             if (!(shownQuest instanceof SpecialOrderQuestView) && totalCount > 0 && curCount >= 0) {
                 String countStr = curCount + "/" + totalCount;
-                int countX = winX + winW - mapping.ui(64) - font.width(countStr);
-                g.drawString(font, countStr, countX, (int) yPos, DARK_BLUE, false);
-                yPos += font.lineHeight + mapping.ui(8);
+                int countX = winX + winW - mapping.ui(64) - sourceWidth(dialogueFont, Component.literal(countStr));
+                drawSourceText(g, dialogueFont, Component.literal(countStr), countX, (int) yPos, DARK_BLUE);
+                yPos += dialogueLineStep + mapping.ui(8);
             }
 
             contentHeight = yPos + scrollAmount - scissorY;
@@ -427,11 +440,12 @@ public class QuestLogScreen extends Screen {
         String maxText = max + "/" + max;
         int inset = mapping.ui(64);
         int countDrawWidth = mapping.ui(160);
-        int countWidth = font.width(countText);
-        int maxTextWidth = font.width(maxText);
+        Font dialogueFont = StardewFonts.dialogue();
+        int countWidth = sourceWidth(dialogueFont, Component.literal(countText));
+        int maxTextWidth = sourceWidth(dialogueFont, Component.literal(maxText));
         int countX = winX + winW - inset - countWidth;
         int maxTextX = winX + winW - inset - maxTextWidth;
-        g.drawString(font, countText, countX, (int) yPos, DARK_BLUE, false);
+        drawSourceText(g, dialogueFont, Component.literal(countText), countX, (int) yPos, DARK_BLUE);
 
         int barX = winX + inset;
         int barY = (int) yPos;
@@ -467,6 +481,52 @@ public class QuestLogScreen extends Screen {
             g.fill(innerX + fillW, innerY, innerX + fillW + stripW, innerY + innerH, darkBarColor);
         }
         return yPos + Math.round((12 + 4) * s4);
+    }
+
+    private int sourceWrapWidth(int guiWidth) {
+        return Math.max(1, Math.round(guiWidth / mapping.textScale()));
+    }
+
+    private int sourceLineStep(StardewFonts.Role role) {
+        return Math.max(1, Math.round(StardewFonts.lineHeight(role) * mapping.textScale()));
+    }
+
+    private int sourceWidth(Font drawFont, Component text) {
+        return Math.round(drawFont.width(text) * mapping.textScale());
+    }
+
+    private void drawCenteredSourceText(GuiGraphics graphics, Font drawFont, Component text,
+                                        int centerX, int y, int maxWidth, int color) {
+        float scale = mapping.textScale();
+        int rawWidth = drawFont.width(text);
+        float effectiveScale = rawWidth * scale > maxWidth && rawWidth > 0
+                ? maxWidth / (float) rawWidth
+                : scale;
+        int x = centerX - Math.round(rawWidth * effectiveScale) / 2;
+        drawSourceText(graphics, drawFont, text, x, y, effectiveScale, color);
+    }
+
+    private void drawSourceText(GuiGraphics graphics, Font drawFont, Component text,
+                                int x, int y, int color) {
+        drawSourceText(graphics, drawFont, text, x, y, mapping.textScale(), color);
+    }
+
+    private static void drawSourceText(GuiGraphics graphics, Font drawFont, Component text,
+                                       int x, int y, float scale, int color) {
+        graphics.pose().pushPose();
+        graphics.pose().translate(x, y, 0.0F);
+        graphics.pose().scale(scale, scale, 1.0F);
+        graphics.drawString(drawFont, text, 0, 0, color, false);
+        graphics.pose().popPose();
+    }
+
+    private void drawSourceText(GuiGraphics graphics, Font drawFont, FormattedCharSequence text,
+                                int x, int y, int color) {
+        graphics.pose().pushPose();
+        graphics.pose().translate(x, y, 0.0F);
+        graphics.pose().scale(mapping.textScale(), mapping.textScale(), 1.0F);
+        graphics.drawString(drawFont, text, 0, 0, color, false);
+        graphics.pose().popPose();
     }
 
     private boolean needsScroll() {

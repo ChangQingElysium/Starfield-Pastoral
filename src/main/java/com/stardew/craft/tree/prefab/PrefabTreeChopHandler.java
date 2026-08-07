@@ -93,12 +93,6 @@ public final class PrefabTreeChopHandler {
 			event.setCanceled(true);
 			return true;
 		}
-		if (level.dimension() == ModDimensions.STARDEW_VALLEY && PlayerStardewDataAPI.getEnergy(player) <= 0.0F) {
-			player.displayClientMessage(Component.translatable("stardewcraft.message.player.exhausted"), true);
-			event.setCanceled(true);
-			return true;
-		}
-
 		if (inst.felled()) {
 			removeStump(level, reg, inst, player, pos, tool);
 		} else {
@@ -147,6 +141,9 @@ public final class PrefabTreeChopHandler {
 		WildTrees.Def def = PrefabTrees.defById(inst.species());
 		if (def == null) {
 			clearAll(level, reg, inst);
+			return;
+		}
+		if (!consumeChopEnergy(player, level, tool, hitsToFell(tool))) {
 			return;
 		}
 		Block logBlock = def.modernLog().get();
@@ -210,7 +207,6 @@ public final class PrefabTreeChopHandler {
 		FallenPrefabTreeEntity.spawn(level, root, dir, pieces, FALL_ANIM_TICKS, drops, logBlock.defaultBlockState());
 
 		WildTreeSeedManager.get(level).untrackTree(level, root);
-		consumeChopEnergy(player, level, tool, hitsToFell(tool));
 		// 每个木质方块给 1 采集经验。
 		if (logCount > 0) {
 			PlayerStardewDataAPI.addExperience(player, SkillType.FORAGING, logCount);
@@ -219,6 +215,9 @@ public final class PrefabTreeChopHandler {
 
 	private static void removeStump(ServerLevel level, PrefabTreeRegistry reg, PrefabTreeInstance inst, ServerPlayer player, BlockPos root, ItemStack tool) {
 		WildTrees.Def def = PrefabTrees.defById(inst.species());
+		if (!consumeChopEnergy(player, level, tool, Math.max(1, hitsToFell(tool) / 2))) {
+			return;
+		}
 		BlockState rootState = level.getBlockState(root);
 		level.removeBlock(root, false);
 		playStumpEffects(level, root, def, rootState);
@@ -235,7 +234,6 @@ public final class PrefabTreeChopHandler {
 		}
 		reg.unregister(inst);
 		WildTreeSeedManager.get(level).untrackTree(level, root);
-		consumeChopEnergy(player, level, tool, Math.max(1, hitsToFell(tool) / 2));
 		PlayerStardewDataAPI.addExperience(player, SkillType.FORAGING, XP_REMOVE_STUMP);
 	}
 
@@ -270,19 +268,19 @@ public final class PrefabTreeChopHandler {
 	}
 
 	/** SV: 每下能量 {@code 2 - 采集*0.1}（与工具档位无关）；总能量 = 下数 × 每下。 */
-	private static void consumeChopEnergy(ServerPlayer player, ServerLevel level, ItemStack tool, int hits) {
+	private static boolean consumeChopEnergy(ServerPlayer player, ServerLevel level, ItemStack tool, int hits) {
 		if (player.isCreative()) {
-			return;
+			return true;
 		}
 		if (level.dimension() != ModDimensions.STARDEW_VALLEY) {
-			return;
+			return true;
 		}
 		if (StardewEnchantments.has(tool, StardewEnchantments.EFFICIENT)) {
-			return;
+			return true;
 		}
 		int foraging = PlayerStardewDataAPI.getSkillLevel(player, SkillType.FORAGING);
 		float perSwing = Math.max(0.1F, 2.0F - foraging * 0.1F);
-		PlayerStardewDataAPI.consumeEnergy(player, hits * perSwing);
+		return PlayerStardewDataAPI.consumeEnergyOrNotify(player, hits * perSwing);
 	}
 
 	/** 在原木基数上叠加 SV 修正：Forester +25%（非硬木）、Shaving 加成、伐木书 5% 翻倍。 */

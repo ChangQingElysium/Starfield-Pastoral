@@ -41,6 +41,11 @@ public final class StardewRenderMapping {
         return 4.0f * unitScale;
     }
 
+    /** Source-sized Stardew SpriteFont text; providers are normalized by 3 for normal MC UI. */
+    public float textScale() {
+        return 3.0F * unitScale;
+    }
+
     public int centerX(int width) {
         return screenWidth / 2 - width / 2;
     }
