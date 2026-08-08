@@ -9,8 +9,13 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -27,6 +32,7 @@ import java.util.Set;
  */
 public class NavigateActorCommand implements EventCommand {
     private static final int MAX_SEARCH_NODES = 4096;
+    private static final int DOOR_CLOSE_TIMEOUT_TICKS = 30;
     private static final int[][] DIRS = {
             {1, 0}, {-1, 0}, {0, 1}, {0, -1}
     };
@@ -46,6 +52,9 @@ public class NavigateActorCommand implements EventCommand {
     private Vec3 segmentEnd;
     private double segmentProgress;
     private boolean done;
+    private ClientLevel level;
+    private int ticksElapsed;
+    private final Map<BlockPos, Integer> openedDoors = new HashMap<>();
 
     public NavigateActorCommand(String actorTag, double x, double y, double z,
                                 boolean relative, double speedBlocksPerTick, String anchor) {
@@ -61,11 +70,14 @@ public class NavigateActorCommand implements EventCommand {
     @Override
     public void start(EventPlayer player) {
         actor = player.getActor(actorTag);
-        ClientLevel level = Minecraft.getInstance().level;
+        level = Minecraft.getInstance().level;
         if (actor == null || level == null) {
             done = true;
             return;
         }
+
+        openedDoors.clear();
+        ticksElapsed = 0;
 
         double endX;
         double endY;
@@ -93,12 +105,15 @@ public class NavigateActorCommand implements EventCommand {
         segmentProgress = 0.0D;
         setWalking(true);
         faceSegment();
+        updateDoors(actor.position());
         done = false;
     }
 
     @Override
     public void tick(EventPlayer player) {
         if (done || actor == null) return;
+
+        ticksElapsed++;
 
         double length = segmentStart.distanceTo(segmentEnd);
         if (length < 1.0E-5D) {
@@ -110,7 +125,9 @@ public class NavigateActorCommand implements EventCommand {
         double x = Mth.lerp(segmentProgress, segmentStart.x, segmentEnd.x);
         double y = Mth.lerp(segmentProgress, segmentStart.y, segmentEnd.y);
         double z = Mth.lerp(segmentProgress, segmentStart.z, segmentEnd.z);
+        updateDoors(new Vec3(x, y, z));
         actor.setPos(x, y, z);
+        closePassedDoors(false);
 
         if (segmentProgress >= 1.0D) {
             advanceSegment();
@@ -129,6 +146,7 @@ public class NavigateActorCommand implements EventCommand {
             Vec3 end = path.get(path.size() - 1);
             actor.setPos(end.x, end.y, end.z);
         }
+        closePassedDoors(true);
         done = true;
     }
 
@@ -138,6 +156,7 @@ public class NavigateActorCommand implements EventCommand {
             Vec3 end = path.get(path.size() - 1);
             actor.setPos(end.x, end.y, end.z);
             setWalking(false);
+            closePassedDoors(true);
             done = true;
             return;
         }
@@ -163,6 +182,88 @@ public class NavigateActorCommand implements EventCommand {
         } else if (actor instanceof EventPlayerActorEntity playerActor) {
             playerActor.setWalking(walking);
         }
+    }
+
+    /**
+     * Cutscene actors are client-only, so their door animation must also be
+     * client-local. This preserves private multiplayer cutscenes without
+     * opening the shared server door for unrelated players.
+     */
+    private void updateDoors(Vec3 nextPosition) {
+        if (level == null || actor == null) {
+            return;
+        }
+        openDoorsAround(actor.blockPosition());
+        openDoorsAround(BlockPos.containing(nextPosition));
+    }
+
+    private void openDoorsAround(BlockPos center) {
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                BlockPos base = center.offset(dx, 0, dz);
+                openDoorAt(base.below());
+                openDoorAt(base);
+                openDoorAt(base.above());
+            }
+        }
+    }
+
+    private void openDoorAt(BlockPos probePos) {
+        BlockState state = level.getBlockState(probePos);
+        if (!(state.getBlock() instanceof DoorBlock door)) {
+            return;
+        }
+
+        BlockPos lowerPos = probePos;
+        if (state.hasProperty(DoorBlock.HALF)
+                && state.getValue(DoorBlock.HALF) == DoubleBlockHalf.UPPER) {
+            lowerPos = probePos.below();
+            state = level.getBlockState(lowerPos);
+            if (!(state.getBlock() instanceof DoorBlock lowerDoor)) {
+                return;
+            }
+            door = lowerDoor;
+        }
+
+        if (state.getBlock() == Blocks.IRON_DOOR
+                || !state.hasProperty(DoorBlock.OPEN)
+                || state.getValue(DoorBlock.OPEN)) {
+            return;
+        }
+
+        door.setOpen(actor, level, state, lowerPos, true);
+        openedDoors.put(lowerPos.immutable(), ticksElapsed);
+    }
+
+    private void closePassedDoors(boolean force) {
+        if (level == null || actor == null || openedDoors.isEmpty()) {
+            return;
+        }
+
+        List<BlockPos> closed = new ArrayList<>();
+        for (Map.Entry<BlockPos, Integer> entry : openedDoors.entrySet()) {
+            BlockPos pos = entry.getKey();
+            if (!force && (ticksElapsed - entry.getValue() < DOOR_CLOSE_TIMEOUT_TICKS
+                    || actor.blockPosition().distSqr(pos) <= 4.0D)) {
+                continue;
+            }
+
+            BlockState state = level.getBlockState(pos);
+            if (!(state.getBlock() instanceof DoorBlock door)
+                    || !state.hasProperty(DoorBlock.OPEN)
+                    || !state.getValue(DoorBlock.OPEN)) {
+                closed.add(pos);
+                continue;
+            }
+            if (!force && new AABB(pos).inflate(0.2D, 0.0D, 0.2D)
+                    .expandTowards(0.0D, 1.0D, 0.0D).intersects(actor.getBoundingBox())) {
+                continue;
+            }
+
+            door.setOpen(actor, level, state, pos, false);
+            closed.add(pos);
+        }
+        closed.forEach(openedDoors::remove);
     }
 
     private static List<Vec3> buildPath(ClientLevel level, Mob actor, Vec3 start, Vec3 end) {
@@ -231,7 +332,35 @@ public class NavigateActorCommand implements EventCommand {
                 y - actor.getY(),
                 z - actor.getZ()
         ).deflate(1.0E-7D);
-        return level.noCollision(actor, moved);
+        if (level.noCollision(actor, moved)) {
+            return true;
+        }
+
+        // Closed wooden doors are valid route cells: updateDoors opens them
+        // before the actor reaches the collision plane. Every other collision
+        // still blocks the A* search.
+        for (BlockPos pos : BlockPos.betweenClosed(
+                Mth.floor(moved.minX), Mth.floor(moved.minY), Mth.floor(moved.minZ),
+                Mth.floor(moved.maxX), Mth.floor(moved.maxY), Mth.floor(moved.maxZ))) {
+            BlockState state = level.getBlockState(pos);
+            VoxelShape shape = state.getCollisionShape(level, pos);
+            if (shape.isEmpty() || !intersects(moved, shape, pos)) {
+                continue;
+            }
+            if (!(state.getBlock() instanceof DoorBlock) || state.getBlock() == Blocks.IRON_DOOR) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean intersects(AABB box, VoxelShape shape, BlockPos pos) {
+        for (AABB localBox : shape.toAabbs()) {
+            if (box.intersects(localBox.move(pos))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static double heuristic(GridKey a, GridKey b) {

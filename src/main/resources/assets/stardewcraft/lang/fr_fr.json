@@ -9879,7 +9879,7 @@
   "stardewcraft.npc.schedule.pam.spring_25.000": "*Marmonne*... Le docteur je-sais-tout... *Marmonne*$4",
   "stardewcraft.npc.schedule.pam.spring_25.001": "Combien de verres je bois chaque jour ? C'est quoi cette question ?$u",
   "stardewcraft.npc.schedule.pam.squidfest": "Je n’ai pas les épaules pour attraper des calamars, mais ce n’est pas grave. Je t’encouragerais à partir de maintenant.",
-  "stardewcraft.mail.friendshipRecipePierreBlueberryTart": "Bonjour @,\n\nJe t’envoie ma recette de Tarte aux myrtilles. J’espère qu’elle te plaira.\n\n—Pierre",
+  "stardewcraft.mail.friendshipRecipePierreBlueberryTart": "TOP SECRET :\nVoici la recette de ma fameuse tarte aux myrtilles. Ne la donne à personne ! Je te la donne parce que nous sommes proches maintenant. \n   -Pierre",
   "stardewcraft.mail.friendshipRecipeRobinPumpkinSoup": "Bonjour @,\n\nJe t’envoie ma recette de Soupe à la citrouille. J’espère qu’elle te plaira.\n\n—Robin",
   "stardewcraft.mail.friendshipRecipeSandyTomKhaSoup": "Bonjour @,\n\nJe t’envoie ma recette de Soupe tom-kha. J’espère qu’elle te plaira.\n\n—Sandy",
   "stardewcraft.mail.friendshipRecipeShaneFriedChickenFries": "Bonjour @,\n\nJe t’envoie ma recette de poulet frit accompagné de frites. J’espère qu’elle te plaira.\n\n—Shane",
@@ -11629,5 +11629,15 @@
   "event.evelyn_garden_pot.learned": "Compétence de fabrication \"Pot de jardin\" apprise",
   "event.evelyn_garden_pot.goodbye": "Bien, je ferais mieux de partir. George devient grincheux s’il n’a pas ses flocons d’avoine en temps et en heure...#$b#Passe une bonne journée !$h",
   "block.stardewcraft.garden_pot": "Pot de jardin",
-  "item.stardewcraft.garden_pot.desc": "Fait pousser des récoltes de toutes les saisons, où qu’il soit placé."
+  "item.stardewcraft.garden_pot.desc": "Fait pousser des récoltes de toutes les saisons, où qu’il soit placé.",
+  "event.pierre.16.stash_found": "\\\"Réserve secrète\\\" de Pierre trouvée.",
+  "event.pierre.16.whos_bedroom": "Hé ! Qui est dans la chambre ?$4",
+  "event.pierre.16.found_it": "Quoiiii...? Comment as-tu trouvé ça ?!$4",
+  "event.pierre.16.give_it": "Vite, donne-moi ça !$u",
+  "event.pierre.16.question": "Promets-moi que tu n’en parleras à personne.",
+  "event.pierre.16.choice.secret_safe": "Ton secret est en sécurité avec moi.",
+  "event.pierre.16.choice.tell_wife": "Ta femme mérite de connaître la vérité à ce sujet.",
+  "event.pierre.16.new_hiding_spot": "*Marmmone*... Maintenant je dois trouver une nouvelle cachette... *Marmmone*$u ",
+  "stardewcraft.npc.schedule.pierre.fri.000": "J'ai travaillé dur toute la semaine. Je mérite bien un moment de détente le vendredi soir.",
+  "stardewcraft.npc.schedule.pierre.desert_festival": "En tant que commerçant, je trouve intéressant de voir comment les autres gèrent leurs magasins...#$e#*chuchote* Ne le dis pas à Sandy, mais ma sélection de produits d’épicerie surpasse la sienne !"
 }

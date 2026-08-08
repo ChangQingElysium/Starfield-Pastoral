@@ -1526,6 +1526,14 @@
       }
     ]
   },
+  "music_ragtime": {
+    "sounds": [
+      {
+        "name": "stardewcraft:music/ragtime",
+        "stream": true
+      }
+    ]
+  },
   "music_distant_banjo": {
     "sounds": [
       {

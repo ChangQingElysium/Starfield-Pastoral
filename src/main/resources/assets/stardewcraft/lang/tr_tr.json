@@ -9879,7 +9879,7 @@
   "stardewcraft.npc.schedule.pam.spring_25.000": "*homurdanır*... Çok bilmiş doktor... *homurdanır*$4",
   "stardewcraft.npc.schedule.pam.spring_25.001": "Günde ne kadar mı içiyorum? Bu nasıl bir soru böyle?$u",
   "stardewcraft.npc.schedule.pam.squidfest": "Mürekkepbalığı yakalamak için gerekli yeteneğe sahip değilim ama sorun yok. Buradan sana destek olurum evlat.",
-  "stardewcraft.mail.friendshipRecipePierreBlueberryTart": "Sevgili @,\n\nBlueberry Tart için tarifimi kapattım. Umarım tadını çıkarın.\n\n—Pierre",
+  "stardewcraft.mail.friendshipRecipePierreBlueberryTart": "ÇOK GİZLİ:\nİşte ünlü yaban mersinli turtamın tarifi.\nKimseye gösterme! Bunu, çok iyi arkadaş olduğumuz için sana veriyorum. \n   -Pierre",
   "stardewcraft.mail.friendshipRecipeRobinPumpkinSoup": "Sevgili @,\n\nKylie Soup için tarifimi kapattım. Umarım tadını çıkarın.\n\n—Robin",
   "stardewcraft.mail.friendshipRecipeSandyTomKhaSoup": "Sevgili @,\n\nTom Kha Soup için tarifimi kapattım. Umarım tadını çıkarın.\n\n—Sandy",
   "stardewcraft.mail.friendshipRecipeShaneFriedChickenFries": "Sevgili @,\n\nFried Chicken Fries için tarifimi kapattım. Umarım tadını çıkarın.\n\n—Shane",
@@ -11629,5 +11629,15 @@
   "event.evelyn_garden_pot.learned": "Bahçe Saksısı tarifi öğrenildi.",
   "event.evelyn_garden_pot.goodbye": "Pekâlâ, gitsem iyi olacak. George zamanında yulaf ezmesini yemezse huysuzlanır...#$b#İyi günler dilerim, tatlım!$h",
   "block.stardewcraft.garden_pot": "Saksı",
-  "item.stardewcraft.garden_pot.desc": "Nereye yerleştirilirse yerleştirilsin her mevsimin ürünlerini yetiştirir."
+  "item.stardewcraft.garden_pot.desc": "Nereye yerleştirilirse yerleştirilsin her mevsimin ürünlerini yetiştirir.",
+  "event.pierre.16.stash_found": "Pierre'in gizli zulasını buldum.",
+  "event.pierre.16.whos_bedroom": "Hey! Yatak odamda kim var?$4",
+  "event.pierre.16.found_it": "Ne...? Onu nasıl buldun?!$4",
+  "event.pierre.16.give_it": "Çabuk, bana geri ver!$u",
+  "event.pierre.16.question": "Bana söz ver, kimseye bunun hakkında bir şey demeyeceksin.",
+  "event.pierre.16.choice.secret_safe": "Sırrın benimle güvende.",
+  "event.pierre.16.choice.tell_wife": "Karın bunu bilmeyi hak ediyor.",
+  "event.pierre.16.new_hiding_spot": "*homurdanır* ...Şimdi yeni bir saklama yeri bulmam gerekecek...*homurdanır*$u ",
+  "stardewcraft.npc.schedule.pierre.fri.000": "Hafta boyunca sıkı çalıştım. Cuma gecesi dinlenmeyi hak ediyorum.",
+  "stardewcraft.npc.schedule.pierre.desert_festival": "Bir satıcı olarak diğer satıcıların mekânlarını nasıl işlettiğini görmek hoşuma gidiyor.#$e#*fısıldar* Sandy'ye söyleme ama benim reyonlarım onunkinden çok daha iyi!"
 }

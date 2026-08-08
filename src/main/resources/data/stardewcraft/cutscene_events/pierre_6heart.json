@@ -1,0 +1,115 @@
+{
+  "id": "pierre_6heart",
+  "legacy_ids": ["16"],
+  "skippable": true,
+  "trigger": {
+    "type": "enter_area",
+    "location": "seedshop",
+    "area_min": [39, 37, -32],
+    "area_max": [39, 38, -32]
+  },
+  "preconditions": [
+    { "type": "not_saw_event", "id": "pierre_6heart" },
+    { "type": "friendship", "npc": "pierre", "min": 1500 },
+    { "type": "npc_present", "npc": "pierre",
+      "area_min": [16, 35, -44], "area_max": [60, 40, -7] }
+  ],
+  "commands": [
+    { "cmd": "comment", "text": "=== SDV SeedShop event 16: Pierre's secret stash ===" },
+    { "cmd": "lock_player" },
+    { "cmd": "fade", "mode": "out", "ticks": 10 },
+    { "cmd": "hide_npc", "npc_id": "pierre" },
+    { "cmd": "spawn_actor", "actor": "fake_player", "npc_id": "player",
+      "x": 39.5, "y": 37, "z": -30.5, "relative": false, "facing": 180 },
+    { "cmd": "camera", "x": 42.953, "y": 38.126, "z": -41.449,
+      "yaw": 52.6, "pitch": 27.1, "relative": false },
+    { "cmd": "music", "track": "MUSIC_HOSPITAL_AMBIENT" },
+    { "cmd": "fade", "mode": "in", "ticks": 20 },
+    { "cmd": "skippable" },
+
+    { "cmd": "navigate_actor", "actor": "fake_player",
+      "x": 39.5, "y": 37, "z": -40.5, "speed": 0.11, "relative": false },
+    { "cmd": "navigate_actor", "actor": "fake_player",
+      "x": 37.5, "y": 37, "z": -40.5, "speed": 0.11, "relative": false },
+    { "cmd": "navigate_actor", "actor": "fake_player",
+      "x": 37.5, "y": 37, "z": -41.5, "speed": 0.11, "relative": false },
+    { "cmd": "pause", "ticks": 12 },
+    { "cmd": "face_actor", "actor": "fake_player", "yaw": -90 },
+    { "cmd": "pause", "ticks": 20 },
+    { "cmd": "emote", "actor": "fake_player", "emote": "question" },
+    { "cmd": "pause", "ticks": 20 },
+    { "cmd": "play_sound", "sound": "stardewcraft:secret1" },
+    { "cmd": "message", "text": "event.pierre.16.stash_found" },
+    { "cmd": "pause", "ticks": 20 },
+
+    { "cmd": "camera", "x": 31.740, "y": 37.744, "z": -30.219,
+      "yaw": -48.4, "pitch": 25.6, "relative": false },
+    { "cmd": "spawn_actor", "actor": "pierre", "npc_id": "pierre",
+      "x": 32.5, "y": 37, "z": -28.5, "relative": false, "facing": 180 },
+    { "cmd": "speak", "npc_id": "pierre", "text": "event.pierre.16.whos_bedroom" },
+    { "cmd": "navigate_actor", "actor": "pierre",
+      "x": 39.5, "y": 37, "z": -30.5, "speed": 0.11, "relative": false },
+    { "cmd": "music", "track": "MUSIC_RAGTIME" },
+    { "cmd": "camera", "x": 37.390, "y": 39.200, "z": -36.258,
+      "yaw": -134.2, "pitch": 39.4, "relative": false },
+    { "cmd": "navigate_actor", "actor": "pierre",
+      "x": 39.5, "y": 37, "z": -33.5, "speed": 0.11, "relative": false },
+    { "cmd": "face_actor", "actor": "fake_player", "yaw": 0 },
+    { "cmd": "jump", "actor": "fake_player", "strength": 0.5 },
+    { "cmd": "pause", "ticks": 20 },
+    { "cmd": "emote", "actor": "pierre", "emote": "exclamation" },
+    { "cmd": "navigate_actor", "actor": "pierre",
+      "x": 39.5, "y": 37, "z": -40.5, "speed": 0.22, "relative": false },
+    { "cmd": "navigate_actor", "actor": "pierre",
+      "x": 37.5, "y": 37, "z": -40.5, "speed": 0.22, "relative": false },
+    { "cmd": "face_actor", "actor": "fake_player", "yaw": 0 },
+    { "cmd": "speak", "npc_id": "pierre", "text": "event.pierre.16.found_it" },
+    { "cmd": "face_actor", "actor": "pierre", "yaw": 0 },
+    { "cmd": "pause", "ticks": 4 },
+    { "cmd": "face_actor", "actor": "pierre", "yaw": 180 },
+    { "cmd": "speak", "npc_id": "pierre", "text": "event.pierre.16.give_it" },
+    { "cmd": "pause", "ticks": 6 },
+    { "cmd": "play_sound", "sound": "stardewcraft:coin" },
+    { "cmd": "pause", "ticks": 22 },
+    {
+      "cmd": "question",
+      "text": "event.pierre.16.question",
+      "choices": [
+        {
+          "text": "event.pierre.16.choice.secret_safe",
+          "commands": [
+            { "cmd": "add_friendship", "npc": "pierre", "points": 70 },
+            { "cmd": "speak", "npc_id": "pierre",
+              "text": "stardewcraft.npc.pierre.event_naga1" }
+          ]
+        },
+        {
+          "text": "event.pierre.16.choice.tell_wife",
+          "commands": [
+            { "cmd": "add_friendship", "npc": "pierre", "points": -500 },
+            { "cmd": "speak", "npc_id": "pierre",
+              "text": "stardewcraft.npc.pierre.event_naga2" }
+          ]
+        }
+      ]
+    },
+    { "cmd": "pause", "ticks": 10 },
+    { "cmd": "navigate_actor", "actor": "pierre",
+      "x": 39.5, "y": 37, "z": -40.5, "speed": 0.11, "relative": false },
+    { "cmd": "emote", "actor": "pierre", "emote": "angry" },
+    { "cmd": "speak", "npc_id": "pierre", "text": "event.pierre.16.new_hiding_spot" },
+    { "cmd": "navigate_actor", "actor": "pierre",
+      "x": 39.5, "y": 37, "z": -33.5, "speed": 0.11, "relative": false },
+    { "cmd": "navigate_actor", "actor": "pierre",
+      "x": 39.5, "y": 37, "z": -30.5, "speed": 0.11, "relative": false },
+
+    { "cmd": "fade", "mode": "out", "ticks": 20 },
+    { "cmd": "remove_actor", "actor": "fake_player" },
+    { "cmd": "remove_actor", "actor": "pierre" },
+    { "cmd": "show_npc", "npc_id": "pierre" },
+    { "cmd": "stop_music" },
+    { "cmd": "camera", "action": "reset" },
+    { "cmd": "unlock_player" },
+    { "cmd": "end" }
+  ]
+}

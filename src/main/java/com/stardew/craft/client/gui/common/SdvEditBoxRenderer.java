@@ -10,7 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 /** Visual half of SDV's null-texture TextBox; the EditBox still owns input and focus. */
 public final class SdvEditBoxRenderer {
     private static final ResourceLocation TEXT_BOX = ResourceLocation.fromNamespaceAndPath(
-            StardewCraft.MODID, "textures/gui/textBox.png");
+            StardewCraft.MODID, "textures/gui/textbox_frame.png");
     private static final int TEXT_BOX_WIDTH = 192;
     private static final int TEXT_BOX_HEIGHT = 48;
     private static final int TEXT_SHADOW = 0xFFDD9454;

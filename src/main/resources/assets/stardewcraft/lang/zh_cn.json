@@ -9940,7 +9940,7 @@
   "stardewcraft.npc.schedule.pam.spring_25.000": "*嘟囔*……自以为无所不知的医生……*嘟囔*$4",
   "stardewcraft.npc.schedule.pam.spring_25.001": "我每天喝了多少酒？这算哪门子问题？$u",
   "stardewcraft.npc.schedule.pam.squidfest": "我没有钓鱿鱼的本事，不过没关系，我会在这里为你加油的。",
-  "stardewcraft.mail.friendshipRecipePierreBlueberryTart": "@你好：\n\n蓝莓挞能让新鲜水果卖出更好的味道。作为本地商人，我强烈推荐你试试。\n\n——皮埃尔",
+  "stardewcraft.mail.friendshipRecipePierreBlueberryTart": "最高机密：\n这是我著名的蓝莓挞配方。\n别告诉任何人哦！我之所以把它给你，是因为你是我的好朋友。 \n——皮埃尔",
   "stardewcraft.mail.friendshipRecipeRobinPumpkinSoup": "@你好：\n\n秋天干完木工活以后，一碗南瓜汤正合适。我把家里的做法抄给你。\n\n——罗宾",
   "stardewcraft.mail.friendshipRecipeSandyTomKhaSoup": "亲爱的@：\n\n沙漠里偶尔也需要一点异国风味。这份冬阴功汤做起来很香，记得趁热喝。\n\n——桑迪",
   "stardewcraft.mail.friendshipRecipeShaneFriedChickenFries": "@：\n\n炸鸡薯条不难，重点是油温和别把厨房弄得太糟。拿去吧，别到处说是我教你的。\n\n——谢恩",
@@ -11728,5 +11728,15 @@
   "event.evelyn_garden_pot.learned": "学会如何制作“花盆”",
   "event.evelyn_garden_pot.goodbye": "好吧，我要走了。如果乔治没有按时吃燕麦片，他就会变得脾气暴躁。#$b#甜心，祝你今天过得愉快！$h",
   "block.stardewcraft.garden_pot": "花盆",
-  "item.stardewcraft.garden_pot.desc": "无论放在哪里，都可以种植任何季节的作物。"
+  "item.stardewcraft.garden_pot.desc": "无论放在哪里，都可以种植任何季节的作物。",
+  "event.pierre.16.stash_found": "你找到了皮埃尔的“秘密收藏”。",
+  "event.pierre.16.whos_bedroom": "嘿！谁在卧室里？$4",
+  "event.pierre.16.found_it": "你……你是怎么发现的？！$4",
+  "event.pierre.16.give_it": "快给我！$u",
+  "event.pierre.16.question": "发誓你不会把这事儿告诉任何人。",
+  "event.pierre.16.choice.secret_safe": "我会为你保守秘密的。",
+  "event.pierre.16.choice.tell_wife": "这事儿应该让你太太知道。",
+  "event.pierre.16.new_hiding_spot": "*嘟囔*……这下又得找个新的藏匿点了……*嘟囔*$u",
+  "stardewcraft.npc.schedule.pierre.fri.000": "我整周都很卖力。周五晚上放松一下有何不可。",
+  "stardewcraft.npc.schedule.pierre.desert_festival": "我觉得观察其他人开店很有意思，毕竟我也是店主。#$e#（悄悄地）我店里的货比桑迪的强太多了！别告诉她啊。"
 }

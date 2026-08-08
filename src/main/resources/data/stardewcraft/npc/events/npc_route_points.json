@@ -1974,6 +1974,62 @@
     "_comment_pierre": {
       "note": "=== Pierre 专属停留点 ==="
     },
+    "pierre_schedule_01": {
+      "x": 42,
+      "y": 36,
+      "z": -20,
+      "indoor": true,
+      "note": "Pierre 绿雨日程：SeedShop (25,18)，朝南"
+    },
+    "pierre_schedule_02": {
+      "x": 28,
+      "y": 36,
+      "z": -22,
+      "indoor": true,
+      "note": "Pierre 普通日程早晨：SeedShop (10,20)，朝北"
+    },
+    "pierre_schedule_03": {
+      "x": 22,
+      "y": 36,
+      "z": -25,
+      "indoor": true,
+      "note": "Pierre 商店柜台：SeedShop (4,17)，朝南"
+    },
+    "pierre_schedule_04": {
+      "x": 30,
+      "y": 36,
+      "z": -22,
+      "indoor": true,
+      "note": "Pierre 普通日程傍晚：SeedShop (11,20)，朝北"
+    },
+    "pierre_schedule_05": {
+      "x": 56,
+      "y": 37,
+      "z": -43,
+      "indoor": true,
+      "note": "Pierre 厨房：SeedShop (37,5)，朝北"
+    },
+    "pierre_schedule_06": {
+      "x": 38,
+      "y": 37,
+      "z": -41,
+      "indoor": true,
+      "note": "Pierre 深夜起居位：SeedShop (20,5)，朝北"
+    },
+    "pierre_schedule_07": {
+      "x": 41,
+      "y": 37,
+      "z": -41,
+      "indoor": true,
+      "note": "Pierre 睡眠位：SeedShop (24,4)，朝东"
+    },
+    "pierre_schedule_08": {
+      "x": 28,
+      "y": 36,
+      "z": 13,
+      "indoor": true,
+      "note": "Pierre 周五酒吧：Saloon (16,20)，朝北"
+    },
     "pierre_seedshop_counter": {
       "x": 22,
       "y": 36,

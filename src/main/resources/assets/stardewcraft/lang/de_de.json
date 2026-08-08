@@ -9879,7 +9879,7 @@
   "stardewcraft.npc.schedule.pam.spring_25.000": "*grummel*... Doktor Besserwisser... *grummel*$4",
   "stardewcraft.npc.schedule.pam.spring_25.001": "Wie viel ich jeden Tag trinke? Was für 'ne Frage soll das sein?$u",
   "stardewcraft.npc.schedule.pam.squidfest": "Ich habe nicht das Zeug dazu, Tintenfische zu fangen, aber das ist okay. Ich werde dich einfach von hier aus anfeuern.",
-  "stardewcraft.mail.friendshipRecipePierreBlueberryTart": "Lieber Herr @,\n\nIch habe mein Rezept für Blueberry Tart beigelegt..\n\n—Pierre",
+  "stardewcraft.mail.friendshipRecipePierreBlueberryTart": "STRENG GEHEIM:\nHier das Rezept für mein berühmtes Blaubeertörtchen.\nVerrate es niemandem! Ich geb's nur dir, weil wir so gute Freunde sind. \n -Pierre",
   "stardewcraft.mail.friendshipRecipeRobinPumpkinSoup": "Lieber Herr @,\n\nIch habe mein Rezept für Kürbissuppe beigelegt..\n\n—Robinie",
   "stardewcraft.mail.friendshipRecipeSandyTomKhaSoup": "Lieber Herr @,\n\nIch habe mein Rezept für Tom Kha Suppe beigelegt..\n\n—Sandy",
   "stardewcraft.mail.friendshipRecipeShaneFriedChickenFries": "Lieber Herr @,\n\nIch habe mein Rezept für Fried Chicken Fries beigelegt..\n\n—Shane",
@@ -11629,5 +11629,15 @@
   "event.evelyn_garden_pot.learned": "Du hast gelernt, wie man einen 'Gartentopf' herstellt",
   "event.evelyn_garden_pot.goodbye": "Ich gehe dann mal lieber. George wird mürrisch, wenn er seinen Haferbrei nicht rechtzeitig kriegt ...#$b#Hab noch einen schönen Tag!$h",
   "block.stardewcraft.garden_pot": "Gartentopf",
-  "item.stardewcraft.garden_pot.desc": "Lässt überall Pflanzen aus jeder Saison wachsen."
+  "item.stardewcraft.garden_pot.desc": "Lässt überall Pflanzen aus jeder Saison wachsen.",
+  "event.pierre.16.stash_found": "Du hast Pierres \\\"geheime Sammlung\\\" gefunden.",
+  "event.pierre.16.whos_bedroom": "Hey! Wer ist im Schlafzimmer?$4",
+  "event.pierre.16.found_it": "Wa...? Wie hast du das gefunden?!$4",
+  "event.pierre.16.give_it": "Schnell, gib her!$u",
+  "event.pierre.16.question": "Versprich mir, dass du niemandem etwas darüber erzählst.",
+  "event.pierre.16.choice.secret_safe": "Dein Geheimnis ist bei mir sicher.",
+  "event.pierre.16.choice.tell_wife": "Deine Frau verdient es, darüber Bescheid zu wissen.",
+  "event.pierre.16.new_hiding_spot": "*grummel*... Jetzt muss ich ein neues Versteck finden... *grummel*$u",
+  "stardewcraft.npc.schedule.pierre.fri.000": "Ich habe die ganze Woche hart gearbeitet. Ich habe mir etwas Entspannung an einem Freitag Abend verdient.",
+  "stardewcraft.npc.schedule.pierre.desert_festival": "Als Ladenbesitzer finde ich es interessant zu sehen, wie andere Leute ihre Läden führen.#$e#*flüster* Erzähl es nicht Sandy, aber meine Auswahl an Lebensmitteln übertrifft die ihre bei weitem!"
 }

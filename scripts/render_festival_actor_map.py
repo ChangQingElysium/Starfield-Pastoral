@@ -20,6 +20,8 @@ Examples:
   python3 scripts/render_festival_actor_map.py --gus-schedule
   python3 scripts/render_festival_actor_map.py --pam-events
   python3 scripts/render_festival_actor_map.py --pam-schedule
+  python3 scripts/render_festival_actor_map.py --pierre-events
+  python3 scripts/render_festival_actor_map.py --pierre-schedule
 """
 
 from __future__ import annotations
@@ -1290,6 +1292,169 @@ def render_pam_schedule_capture_workbook(output_dir: Path) -> Path:
     )
 
 
+def render_pierre_event_source_map(output_dir: Path, scale: int) -> Path:
+    """Render source-only Pierre 6-heart choreography; never map it to Minecraft."""
+    event_key, event_script, _forks = load_vanilla_event("SeedShop.json", "16")
+    required_fragments = (
+        "Hospital_Ambient/20 5/farmer 20 12 0 Pierre 14 15 0",
+        "doAction 20 11/move farmer 0 -7 1/move farmer -1 0 0/move farmer 0 -1 0",
+        "message \"Found Pierre's 'secret stash'.\"",
+        "warp Pierre 20 12 true",
+        "move Pierre 0 -4 0 true",
+        "speed Pierre 4/move Pierre 0 -3 1 false/move Pierre -1 0 0",
+        "$r 50 70 Event_naga1",
+        "$r 50 -500 Event_naga2",
+    )
+    for fragment in required_fragments:
+        if fragment not in event_script:
+            raise ValueError(
+                f"Vanilla Pierre event source changed; missing {fragment!r} in {event_key!r}.")
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    step = TILE_SIZE * scale
+    crop = (12, 2, 23, 18)
+    seed_shop = render_tmx(MAPS_DIR / "SeedShop.tmx", scale=scale)
+    base = seed_shop.crop(tuple(value * step for value in crop))
+    base = draw_tile_grid(base, scale, crop[0], crop[1])
+    base = draw_source_routes(base, (crop[0], crop[1]), scale, [
+        ((82, 148, 255, 230), [
+            (20.5, 12.5),
+            (20.5, 5.5),
+            (19.5, 5.5),
+            (19.5, 4.5),
+        ]),
+        ((226, 93, 103, 230), [
+            (20.5, 12.5),
+            (20.5, 8.5),
+            (20.5, 5.5),
+            (19.5, 5.5),
+        ]),
+    ])
+    points = [
+        ("C01 Vanilla viewport anchor (20,5)", 20.5, 5.5),
+        ("A01 Source doAction tile (20,11)", 20.5, 11.5),
+        ("P01 Player start (20,12), facing N", 20.5, 12.5),
+        ("P02 Player first route stop (20,5)", 20.5, 5.5),
+        ("P03 Player route corner (19,5)", 19.5, 5.5),
+        ("P04 Player stash position (19,4), faces E then S", 19.5, 4.5),
+        ("R01 Pierre hidden source start (14,15), facing N", 14.5, 15.5),
+        ("R02 Pierre entrance warp (20,12), facing N", 20.5, 12.5),
+        ("R03 Pierre first dialogue stop (20,8)", 20.5, 8.5),
+        ("R04 Pierre hurried approach (20,5)", 20.5, 5.5),
+        ("R05 Pierre final stop (19,5)", 19.5, 5.5),
+    ]
+    annotated = draw_numbered_source_points(
+        base,
+        points,
+        (crop[0], crop[1]),
+        scale,
+        "Pierre 6-heart / vanilla SeedShop event 16",
+    )
+    output_path = output_dir / "pierre_6heart_seedshop_vanilla_source_points.png"
+    annotated.save(output_path)
+    return output_path
+
+
+def render_pierre_event_capture_workbook(output_dir: Path) -> Path:
+    entries = [
+        ("H01", "6-heart SeedShop event trigger area corner 1", "block x/y/z"),
+        ("H02", "6-heart SeedShop event trigger area corner 2", "block x/y/z"),
+        ("P01", "Player start", "x/y/z"),
+        ("P02", "Player first route stop", "x/y/z"),
+        ("P03", "Player route corner", "x/y/z"),
+        ("P04", "Player secret-stash position", "x/y/z"),
+        ("R02", "Pierre entrance/start", "x/y/z"),
+        ("R03", "Pierre first dialogue stop", "x/y/z"),
+        ("R04", "Pierre hurried approach", "x/y/z"),
+        ("R05", "Pierre final dialogue stop", "x/y/z"),
+        ("C01", "Camera rig", "exact x/y/z + yaw + pitch"),
+    ]
+    return render_minecraft_capture_workbook(
+        output_dir / "pierre_6heart_minecraft_capture_workbook.png",
+        "Pierre 6-heart event - Minecraft capture workbook",
+        "Fill only from the in-game planning tool; source facings remain authoritative.",
+        entries,
+    )
+
+
+def render_pierre_schedule_source_maps(output_dir: Path, scale: int) -> list[Path]:
+    """Render every unique non-Desert-Festival Pierre schedule stop."""
+    schedules = json.loads((SCHEDULES_DIR / "Pierre.json").read_text(encoding="utf-8-sig"))
+    expected_fragments = {
+        "rain": "GOTO spring",
+        "GreenRain": "610 SeedShop 25 18 2 square_9_1",
+        "Fri": "700 SeedShop 10 20 0/830 SeedShop 4 17 2/1700 Saloon 16 20 0",
+        "spring": (
+            "700 SeedShop 10 20 0/830 SeedShop 4 17 2/1700 SeedShop 11 20 0/"
+            "1900 SeedShop 37 5 0/2100 SeedShop 20 5 0/2300 SeedShop 24 4 1 pierre_sleep"
+        ),
+    }
+    for key, fragment in expected_fragments.items():
+        if fragment not in schedules.get(key, ""):
+            raise ValueError(
+                f"Vanilla Pierre schedule source changed for {key!r}; missing {fragment!r}.")
+
+    map_points: dict[str, list[tuple[str, float, float]]] = {
+        "SeedShop": [
+            ("1 (25,18) Green Rain position, south", 25.5, 18.5),
+            ("2 (10,20) morning position, north", 10.5, 20.5),
+            ("3 (4,17) shop counter, south", 4.5, 17.5),
+            ("4 (11,20) evening position, north", 11.5, 20.5),
+            ("5 (37,5) kitchen position, north", 37.5, 5.5),
+            ("6 (20,5) late-evening position, north", 20.5, 5.5),
+            ("7 (24,4) bed, east", 24.5, 4.5),
+        ],
+        "Saloon": [
+            ("8 (16,20) Friday evening, north", 16.5, 20.5),
+        ],
+    }
+    crops = {
+        "SeedShop": (0, 2, 41, 26),
+        "Saloon": (10, 14, 23, 26),
+    }
+    starts = {"SeedShop": 1, "Saloon": 8}
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    outputs: list[Path] = []
+    step = TILE_SIZE * scale
+    for map_name, points in map_points.items():
+        crop = crops[map_name]
+        base = render_tmx(MAPS_DIR / f"{map_name}.tmx", scale=scale)
+        base = base.crop(tuple(value * step for value in crop))
+        base = draw_tile_grid(base, scale, crop[0], crop[1])
+        annotated = draw_numbered_source_points(
+            base,
+            points,
+            (crop[0], crop[1]),
+            scale,
+            f"Pierre vanilla schedule / {map_name} / unique stop tiles",
+            start_index=starts[map_name],
+        )
+        output_path = output_dir / f"pierre_schedule_{map_name.lower()}_vanilla_source_points.png"
+        annotated.save(output_path)
+        outputs.append(output_path)
+    return outputs
+
+
+def render_pierre_schedule_capture_workbook(output_dir: Path) -> Path:
+    entries = [
+        ("1", "SeedShop (25,18): Green Rain position", "x/y/z + south + square_9_1"),
+        ("2", "SeedShop (10,20): morning position", "x/y/z + north"),
+        ("3", "SeedShop (4,17): shop counter", "x/y/z + south"),
+        ("4", "SeedShop (11,20): evening position", "x/y/z + north"),
+        ("5", "SeedShop (37,5): kitchen position", "x/y/z + north"),
+        ("6", "SeedShop (20,5): late-evening position", "x/y/z + north"),
+        ("7", "SeedShop (24,4): bed", "x/y/z + east + sleep"),
+        ("8", "Saloon (16,20): Friday evening", "x/y/z + north"),
+    ]
+    return render_minecraft_capture_workbook(
+        output_dir / "pierre_schedule_minecraft_capture_workbook.png",
+        "Pierre schedule - Minecraft capture workbook",
+        "Rain reuses the normal route; Desert Festival keeps its existing route.",
+        entries,
+    )
+
+
 def render_secret_note31_source_maps(output_dir: Path, scale: int) -> list[Path]:
     """Render only vanilla TMX/source points; no Minecraft-coordinate mapping."""
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -2529,6 +2694,10 @@ def parse_args() -> argparse.Namespace:
                         help="Render the vanilla Pam 9-heart event and a blank Minecraft capture workbook.")
     parser.add_argument("--pam-schedule", action="store_true",
                         help="Render every non-Desert-Festival Pam schedule stop needing a Minecraft position.")
+    parser.add_argument("--pierre-events", action="store_true",
+                        help="Render the vanilla Pierre 6-heart event and a blank Minecraft capture workbook.")
+    parser.add_argument("--pierre-schedule", action="store_true",
+                        help="Render every non-Desert-Festival Pierre schedule stop needing a Minecraft position.")
     return parser.parse_args()
 
 
@@ -2621,6 +2790,15 @@ def main() -> None:
         for output_path in render_pam_schedule_source_maps(args.out, args.scale):
             print(output_path.relative_to(ROOT))
         print(render_pam_schedule_capture_workbook(args.out).relative_to(ROOT))
+        return
+    if args.pierre_events:
+        print(render_pierre_event_source_map(args.out, args.scale).relative_to(ROOT))
+        print(render_pierre_event_capture_workbook(args.out).relative_to(ROOT))
+        return
+    if args.pierre_schedule:
+        for output_path in render_pierre_schedule_source_maps(args.out, args.scale):
+            print(output_path.relative_to(ROOT))
+        print(render_pierre_schedule_capture_workbook(args.out).relative_to(ROOT))
         return
     if args.preset == "night_market":
         for output_path in render_night_market_maps(args.out, args.scale, args.portrait_size):

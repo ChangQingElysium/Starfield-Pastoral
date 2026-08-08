@@ -1,47 +1,36 @@
 {
   "npc_id": "pierre",
   "override_vanilla": true,
-  "_format": "time -> \"location @namedPointId facing [behavior]\"",
+  "_format": "time -> \"location @namedPointId facing [behavior]\" | {_goto: key}",
 
   "GreenRain": {
-    "600": "seedshop @pierre_seedshop_counter 2",
-    "2200": "seedshop @pierre_seedshop_sleep 2"
+    "610": "seedshop @pierre_schedule_01 2 square_9_1"
   },
 
   "rain": {
-    "600": "seedshop @pierre_seedshop_counter 2",
-    "2000": "seedshop @pierre_seedshop_living 0",
-    "2200": "seedshop @pierre_seedshop_sleep 2"
+    "_goto": "spring"
+  },
+
+  "DesertFestival_1": {
+    "700": "seedshop @pierre_schedule_02 0",
+    "830": "seedshop @pierre_schedule_03 2",
+    "1700": "desert @desert_festival_visit_pierre 2 dialogue:stardewcraft.npc.schedule.pierre.desert_festival",
+    "2510": "seedshop @pierre_schedule_07 1 pierre_sleep"
+  },
+
+  "friday": {
+    "700": "seedshop @pierre_schedule_02 0",
+    "830": "seedshop @pierre_schedule_03 2",
+    "1700": "saloon @pierre_schedule_08 0 dialogue:stardewcraft.npc.schedule.pierre.fri.000",
+    "2250": "seedshop @pierre_schedule_07 1 pierre_sleep"
   },
 
   "spring": {
-    "600": "seedshop @pierre_seedshop_counter 2",
-    "1700": "saloon @pierre_saloon_seat 2",
-    "2200": "seedshop @pierre_seedshop_sleep 2"
-  },
-
-  "summer": {
-    "600": "seedshop @pierre_seedshop_counter 2",
-    "1700": "saloon @pierre_saloon_seat 2",
-    "2200": "seedshop @pierre_seedshop_sleep 2"
-  },
-
-  "fall": {
-    "600": "seedshop @pierre_seedshop_counter 2",
-    "1700": "saloon @pierre_saloon_seat 2",
-    "2200": "seedshop @pierre_seedshop_sleep 2"
-  },
-
-  "winter": {
-    "600": "seedshop @pierre_seedshop_counter 2",
-    "1700": "saloon @pierre_saloon_seat 2",
-    "2200": "seedshop @pierre_seedshop_sleep 2"
-  },
-
-  "wednesday": {
-    "600": "seedshop @pierre_seedshop_sleep 2",
-    "900": "town @pierre_town_walk 1",
-    "1400": "saloon @pierre_saloon_seat 2",
-    "2200": "seedshop @pierre_seedshop_sleep 2"
+    "700": "seedshop @pierre_schedule_02 0",
+    "830": "seedshop @pierre_schedule_03 2",
+    "1700": "seedshop @pierre_schedule_04 0",
+    "1900": "seedshop @pierre_schedule_05 0",
+    "2100": "seedshop @pierre_schedule_06 0",
+    "2300": "seedshop @pierre_schedule_07 1 pierre_sleep"
   }
 }

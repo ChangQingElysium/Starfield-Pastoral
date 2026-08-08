@@ -9879,7 +9879,7 @@
   "stardewcraft.npc.schedule.pam.spring_25.000": "*궁시렁*... 의사라면 다 아는 줄 아나... *궁시렁*$4",
   "stardewcraft.npc.schedule.pam.spring_25.001": "내가 하루에 얼마나 마시냐고? 무슨 질문이 그래?$u",
   "stardewcraft.npc.schedule.pam.squidfest": "난 오징어를 잡을만한 실력은 없지만, 나쁜 일은 아니지. 그냥 여기서 널 응원하마, 꼬맹아.",
-  "stardewcraft.mail.friendshipRecipePierreBlueberryTart": "@에게,\n\n블루베리 타르트 조리법을 동봉했어. 맛있게 먹길 바라.\n\n—피에르",
+  "stardewcraft.mail.friendshipRecipePierreBlueberryTart": "최고 기밀:\n여기 내 유명한 블루베리 타트 레시피야.\n다른 사람한테는 알려주지 마! 우리가 워낙 친한 사이라 너만 알려주는 거야. \n   -피에르",
   "stardewcraft.mail.friendshipRecipeRobinPumpkinSoup": "@에게,\n\n호박죽 조리법을 동봉했어. 맛있게 먹길 바라.\n\n—로빈",
   "stardewcraft.mail.friendshipRecipeSandyTomKhaSoup": "@에게,\n\n똠카 스프 조리법을 동봉했어. 맛있게 먹길 바라.\n\n—샌디",
   "stardewcraft.mail.friendshipRecipeShaneFriedChickenFries": "@에게,\n\n프라이드치킨과 감자튀김 조리법을 동봉했어. 맛있게 먹길 바라.\n\n—셰인",
@@ -11629,5 +11629,15 @@
   "event.evelyn_garden_pot.learned": "’정원용 화분’ 제작법을 배웠습니다",
   "event.evelyn_garden_pot.goodbye": "그럼, 난 가봐야겠구나. 오트밀을 제때 못 먹으면 조지가 마음이 상하거든...#$b#멋진 하루 되렴, 아가야!$h",
   "block.stardewcraft.garden_pot": "정원용 화분",
-  "item.stardewcraft.garden_pot.desc": "어디에 놓아도 계절에 제약받지 않고 작물을 기를 수 있습니다."
+  "item.stardewcraft.garden_pot.desc": "어디에 놓아도 계절에 제약받지 않고 작물을 기를 수 있습니다.",
+  "event.pierre.16.stash_found": "피에르의 ‘숨겨둔 것’을 찾았습니다.",
+  "event.pierre.16.whos_bedroom": "이봐! 침실에 누구야?$4",
+  "event.pierre.16.found_it": "뭐...? 어떻게 찾은 거야?!$4",
+  "event.pierre.16.give_it": "빨리, 내놔!$u",
+  "event.pierre.16.question": "아무에게도 말하지 않겠다고 약속해.",
+  "event.pierre.16.choice.secret_safe": "비밀을 지킬게요.",
+  "event.pierre.16.choice.tell_wife": "당신 아내는 알 권리가 있어요.",
+  "event.pierre.16.new_hiding_spot": "*궁시렁*...이제 숨길 곳을 새로 찾아야겠네...*궁시렁*$u ",
+  "stardewcraft.npc.schedule.pierre.fri.000": "이번 주 내내 열심히 일했어. 금요일 밤은 좀 마음 놓고 쉬어야지.",
+  "stardewcraft.npc.schedule.pierre.desert_festival": "상점을 운영하는 입장에선 다른 사람들의 운영법이 흥미롭네.#$e#*소곤* 샌디한테는 말하지 마, 하지만 내 식료품이 훨씬 더 다양하네!"
 }

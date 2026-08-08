@@ -9879,7 +9879,7 @@
   "stardewcraft.npc.schedule.pam.spring_25.000": "*Grrr...* Matasanos sabelotodo... *Grrr*$4",
   "stardewcraft.npc.schedule.pam.spring_25.001": "¿Que cuánto bebo al día? ¿Qué clase de pregunta es esa?$u",
   "stardewcraft.npc.schedule.pam.squidfest": "No tengo habilidad para pescar calamares, pero está bien. Te animaré desde aquí, joven.",
-  "stardewcraft.mail.friendshipRecipePierreBlueberryTart": "Querido @,\n\nHe adjuntado mi receta para Blueberry Tart. Espero que lo disfrutes.\n\n—Pierre",
+  "stardewcraft.mail.friendshipRecipePierreBlueberryTart": "TOP SECRET:\nEsta es la receta de mi famosa tarta de arándanos.\n\n¡No se la digas a nadie! Te la doy porque nos llevamos muy bien.\n\n-Pierre",
   "stardewcraft.mail.friendshipRecipeRobinPumpkinSoup": "Querido @,\n\nHe encerrado mi receta para la sopa de calabaza..\n\n—Robin",
   "stardewcraft.mail.friendshipRecipeSandyTomKhaSoup": "Querido @,\n\nHe encerrado mi receta para Tom Kha Soup..\n\n—Sandy",
   "stardewcraft.mail.friendshipRecipeShaneFriedChickenFries": "Querido @,\n\nHe encerrado mi receta para Fried Chicken Fries..\n\n—Shane",
@@ -11629,5 +11629,15 @@
   "event.evelyn_garden_pot.learned": "Has aprendido a fabricar una 'maceta'.",
   "event.evelyn_garden_pot.goodbye": "Bueno, tengo que irme. George se pone muy gruñón si no toma las gachas a su hora...#$b#¡Que tengas un buen día, cielo!$h",
   "block.stardewcraft.garden_pot": "Maceta",
-  "item.stardewcraft.garden_pot.desc": "Permite cultivar productos de cualquier temporada, sin importar dónde se coloque."
+  "item.stardewcraft.garden_pot.desc": "Permite cultivar productos de cualquier temporada, sin importar dónde se coloque.",
+  "event.pierre.16.stash_found": "Has encontrado la colección secreta de Pierre.",
+  "event.pierre.16.whos_bedroom": "¡Ey! ¿Quién está en la habitación?$4",
+  "event.pierre.16.found_it": "¿Qué...? ¡¿Cómo has encontrado eso?!$4",
+  "event.pierre.16.give_it": "¡Dámelo ahora mismo!$u",
+  "event.pierre.16.question": "Prométeme que no se lo vas a decir a nadie.",
+  "event.pierre.16.choice.secret_safe": "Tu secreto está a salvo conmigo.",
+  "event.pierre.16.choice.tell_wife": "Tu mujer debería saber esto.",
+  "event.pierre.16.new_hiding_spot": "*Grrr...* Ahora tendré que buscar otro escondite... *Grrr*$u",
+  "stardewcraft.npc.schedule.pierre.fri.000": "He trabajado duro toda la semana. Me merezco un pequeño descanso el viernes por la noche.",
+  "stardewcraft.npc.schedule.pierre.desert_festival": "Como tendero, veo interesante como otra gente lleva sus tiendas.#$e#*susurrando* No se lo digas a Sandy, ¡pero mi selección de comestibles es mucho mejor que la suya!"
 }

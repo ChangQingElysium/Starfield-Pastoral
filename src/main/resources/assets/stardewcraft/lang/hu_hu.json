@@ -9879,7 +9879,7 @@
   "stardewcraft.npc.schedule.pam.spring_25.000": "*morog*... Mindentudó doktor... *morog*$4",
   "stardewcraft.npc.schedule.pam.spring_25.001": "Hogy mennyit iszok egy nap? Mégis miféle kérdés ez?$u",
   "stardewcraft.npc.schedule.pam.squidfest": "Én nem vagyok elég rátermett ahhoz, hogy tintahalat fogjak ki, de nem is baj. Majd innen drukkolok neked, kölyök.",
-  "stardewcraft.mail.friendshipRecipePierreBlueberryTart": "Kedves @,\n\nElhoztam az áfonyás torta receptjét..\n\n—Pierre",
+  "stardewcraft.mail.friendshipRecipePierreBlueberryTart": "SZUPERTITKOS:\nItt a híres kék áfonyás lepényem receptje.\nSenkinek se áruld el! Azért adom neked, mert ilyen jó barátok vagyunk. \n -Pierre",
   "stardewcraft.mail.friendshipRecipeRobinPumpkinSoup": "Kedves @,\n\nElhoztam a Pumpkin Leves receptjét..\n\n—Robin.",
   "stardewcraft.mail.friendshipRecipeSandyTomKhaSoup": "Kedves @,\n\nElhoztam a receptemet Tom Kha Levesnek..\n\n—Sandy",
   "stardewcraft.mail.friendshipRecipeShaneFriedChickenFries": "Kedves @,\n\nElhoztam a sült csirke receptjét..\n\n—Shane",
@@ -11629,5 +11629,15 @@
   "event.evelyn_garden_pot.learned": "Megtanultál 'Kerti cserepet' készíteni",
   "event.evelyn_garden_pot.goodbye": "Nos, jobb lesz, ha megyek. George goromba lesz, ha nem kapja meg időben a zabpelyhét...#$b#Legyen szép napod, kedveském!$h",
   "block.stardewcraft.garden_pot": "Kerti cserép",
-  "item.stardewcraft.garden_pot.desc": "Bárhová helyezve bármelyik évszak növényeit megtermeszti."
+  "item.stardewcraft.garden_pot.desc": "Bárhová helyezve bármelyik évszak növényeit megtermeszti.",
+  "event.pierre.16.stash_found": "Megtaláltad Pierre 'titkos holmiját'.",
+  "event.pierre.16.whos_bedroom": "Hé! Ki van a hálószobában?$4",
+  "event.pierre.16.found_it": "Mi...? Ezt meg hogy találtad meg?!$4",
+  "event.pierre.16.give_it": "Gyorsan, add csak ide!$u",
+  "event.pierre.16.question": "Ígérd meg, hogy erről senkinek se beszélsz.",
+  "event.pierre.16.choice.secret_safe": "A titkod biztonságban van nálam.",
+  "event.pierre.16.choice.tell_wife": "A feleségednek tudnia kell erről.",
+  "event.pierre.16.new_hiding_spot": "*morog*...most találhatok neki új rejtekhelyet...*morog*$u ",
+  "stardewcraft.npc.schedule.pierre.fri.000": "Egész héten keményen dolgoztam. Megérdemlek egy kis pihenést egy péntek éjszakán.",
+  "stardewcraft.npc.schedule.pierre.desert_festival": "Boltosként érdekesnek találom azt, ahogyan mások a boltjaikat vezetik.#$e#*suttogva* Ne mondd meg Sandynek, de az én bolti választékom kenterbe veri az övét!"
 }

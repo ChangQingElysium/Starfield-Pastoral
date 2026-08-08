@@ -9879,7 +9879,7 @@
   "stardewcraft.npc.schedule.pam.spring_25.000": "*brontola*... Dottor so-tutto-io... *brontola*$4",
   "stardewcraft.npc.schedule.pam.spring_25.001": "Quanto bevo al giorno? Che razza di domanda è?$u",
   "stardewcraft.npc.schedule.pam.squidfest": "Non sono capace di prendere un calamaro, ma non fa niente. Mi limito a farti il tifo da qui, giovane.",
-  "stardewcraft.mail.friendshipRecipePierreBlueberryTart": "Caro @,\n\nTi allego la mia ricetta per Crostatina ai mirtilli. Spero che ti piaccia.\n\n—Pierre",
+  "stardewcraft.mail.friendshipRecipePierreBlueberryTart": "TOP SECRET:\nEcco la ricetta per le mie famose crostatine ai mirtilli.\nNon parlarne a nessuno! La sto dando a te perché siamo grandi amici. \n   -Pierre",
   "stardewcraft.mail.friendshipRecipeRobinPumpkinSoup": "Caro @,\n\nTi allego la mia ricetta per Zuppa di zucca. Spero che ti piaccia.\n\n—Robin",
   "stardewcraft.mail.friendshipRecipeSandyTomKhaSoup": "Caro @,\n\nTi allego la mia ricetta per Tom Kha Gai. Spero che ti piaccia.\n\n—Sandy",
   "stardewcraft.mail.friendshipRecipeShaneFriedChickenFries": "Caro @,\n\nTi allego la mia ricetta per Pollo fritto con patatine. Spero che ti piaccia.\n\n—Shane",
@@ -11629,5 +11629,15 @@
   "event.evelyn_garden_pot.learned": "Hai appreso come creare un 'Vaso da giardino'",
   "event.evelyn_garden_pot.goodbye": "Bene, sarà meglio che vada. George diventa scorbutico se i suoi fiocchi d'avena ritardano...#$b#Passa una buona giornata, tesoro!$h",
   "block.stardewcraft.garden_pot": "Vaso da giardino",
-  "item.stardewcraft.garden_pot.desc": "Fa crescere colture di qualunque stagione, ovunque venga collocato."
+  "item.stardewcraft.garden_pot.desc": "Fa crescere colture di qualunque stagione, ovunque venga collocato.",
+  "event.pierre.16.stash_found": "Hai trovato la 'scorta segreta' di Pierre.",
+  "event.pierre.16.whos_bedroom": "Ehi! Chi c'è in camera da letto?$4",
+  "event.pierre.16.found_it": "Cos...? Quella come l'hai trovata?!$4",
+  "event.pierre.16.give_it": "Dammela subito!$u",
+  "event.pierre.16.question": "Promettimi che non lo dirai a nessuno.",
+  "event.pierre.16.choice.secret_safe": "Il tuo segreto è al sicuro con me.",
+  "event.pierre.16.choice.tell_wife": "Tua moglie merita di saperlo.",
+  "event.pierre.16.new_hiding_spot": "*brontola*...ora devo trovare un altro nascondiglio...*brontola*$u ",
+  "stardewcraft.npc.schedule.pierre.fri.000": "Ho lavorato sodo per tutta la settimana. Mi merito di rilassarmi un po', il venerdì sera.",
+  "stardewcraft.npc.schedule.pierre.desert_festival": "Essendo un negoziante, è interessante per me vedere come gli altri gestiscono i loro negozi.#$e#*sussurra* Non dirlo a Sandy, ma la sua selezione di prodotti gli fa un baffo, alla mia!"
 }

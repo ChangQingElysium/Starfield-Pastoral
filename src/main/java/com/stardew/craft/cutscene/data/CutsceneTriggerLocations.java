@@ -66,8 +66,10 @@ public final class CutsceneTriggerLocations {
         if (min.length < 3 || max.length < 3) {
             return false;
         }
-        return player.getX() >= min[0] && player.getX() <= max[0]
-                && player.getY() >= min[1] && player.getY() <= max[1]
-                && player.getZ() >= min[2] && player.getZ() <= max[2];
+        // Event JSON uses inclusive block-coordinate corners, matching the
+        // npc_present precondition and the in-game point capture tool.
+        return player.getX() >= min[0] && player.getX() <= max[0] + 1.0D
+                && player.getY() >= min[1] && player.getY() <= max[1] + 1.0D
+                && player.getZ() >= min[2] && player.getZ() <= max[2] + 1.0D;
     }
 }

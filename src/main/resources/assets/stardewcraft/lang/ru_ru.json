@@ -9879,7 +9879,7 @@
   "stardewcraft.npc.schedule.pam.spring_25.000": "*ворчит*... Врач-всезнайка... *ворчит*$4",
   "stardewcraft.npc.schedule.pam.spring_25.001": "Сколько я выпиваю в день? Что за вопросы такие?$u",
   "stardewcraft.npc.schedule.pam.squidfest": "Я-то уж кальмара не поймаю, но ничего страшного. Я тебя отсюда подбодрю, молодежь.",
-  "stardewcraft.mail.friendshipRecipePierreBlueberryTart": "Здравствуй, @!\n\nЧерничный тарт помогает продать свежие ягоды повыгоднее. Как местный торговец, настоятельно советую попробовать.\n\n— Пьер",
+  "stardewcraft.mail.friendshipRecipePierreBlueberryTart": "СОВЕРШЕННО СЕКРЕТНО:\nВот рецепт моего любимого черничного пирога.\nНикому его не рассказывай! Я делюсь им с тобой, потому что мы с тобой хорошие друзья. \n   -Пьер",
   "stardewcraft.mail.friendshipRecipeRobinPumpkinSoup": "Здравствуй, @!\n\nОсенью после плотницкой работы тыквенный суп — самое то. Перепишу тебе наш домашний рецепт.\n\n— Робин",
   "stardewcraft.mail.friendshipRecipeSandyTomKhaSoup": "Дорогой @!\n\nВ пустыне порой хочется чего-нибудь экзотического. Суп том-кха выходит очень ароматным — не забудь есть горячим.\n\n— Сэнди",
   "stardewcraft.mail.friendshipRecipeShaneFriedChickenFries": "@!\n\nКурица с картошкой фри — дело нехитрое, главное — температура масла и не разнести кухню. Держи, только не рассказывай, что это я научил.\n\n— Шейн",
@@ -11629,5 +11629,15 @@
   "event.evelyn_garden_pot.learned": "Вы научились делать «Садовый горшок»",
   "event.evelyn_garden_pot.goodbye": "Ну, мне пора. Джордж ворчит, если ему не сделать овсянку вовремя...#$b#Хорошего тебе дня, дружочек!$h",
   "block.stardewcraft.garden_pot": "Садовый горшок",
-  "item.stardewcraft.garden_pot.desc": "Позволяет растить культуры любого времени года, где бы он ни стоял."
+  "item.stardewcraft.garden_pot.desc": "Позволяет растить культуры любого времени года, где бы он ни стоял.",
+  "event.pierre.16.stash_found": "Вы нашли тайник Пьера.",
+  "event.pierre.16.whos_bedroom": "Эй! Кто там в спальне?$4",
+  "event.pierre.16.found_it": "Что... Откуда это у тебя?!$4",
+  "event.pierre.16.give_it": "Отдай мне, сейчас же!$u",
+  "event.pierre.16.question": "Обещай, что никому не расскажешь.",
+  "event.pierre.16.choice.secret_safe": "Я сохраню твой секрет.",
+  "event.pierre.16.choice.tell_wife": "Твоя жена должна об этом узнать.",
+  "event.pierre.16.new_hiding_spot": "*Ворчит*... Теперь придется перепрятывать...*Ворчит*$u",
+  "stardewcraft.npc.schedule.pierre.fri.000": "Я работал всю неделю. Я заслужил немного отдыха в этот пятничный вечер.",
+  "stardewcraft.npc.schedule.pierre.desert_festival": "Мне как владельцу магазина всегда интересно узнать, как ведут свои дела конкуренты.#$e#*шепчет* Не говори Сэнди, но мой ассортимент все еще уложит ее на лопатки!"
 }

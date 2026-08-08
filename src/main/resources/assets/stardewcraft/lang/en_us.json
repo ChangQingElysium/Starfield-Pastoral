@@ -9940,7 +9940,7 @@
   "stardewcraft.npc.schedule.pam.spring_25.000": "*grumble*... Doctor know-it-all... *grumble*$4",
   "stardewcraft.npc.schedule.pam.spring_25.001": "How much do I drink every day? What kind of a question is that?$u",
   "stardewcraft.npc.schedule.pam.squidfest": "I don't have the chops to catch squid, but that's fine. I'll just cheer you on from here, kid.",
-  "stardewcraft.mail.friendshipRecipePierreBlueberryTart": "Dear @,\n\nI've enclosed my recipe for Blueberry Tart. I hope you enjoy it.\n\n—Pierre",
+  "stardewcraft.mail.friendshipRecipePierreBlueberryTart": "TOP SECRET:\nHere's the recipe for my famous blueberry tart.\nDon't tell anyone! I'm giving it to you because we are such good friends. \n   -Pierre",
   "stardewcraft.mail.friendshipRecipeRobinPumpkinSoup": "Dear @,\n\nI've enclosed my recipe for Pumpkin Soup. I hope you enjoy it.\n\n—Robin",
   "stardewcraft.mail.friendshipRecipeSandyTomKhaSoup": "Dear @,\n\nI've enclosed my recipe for Tom Kha Soup. I hope you enjoy it.\n\n—Sandy",
   "stardewcraft.mail.friendshipRecipeShaneFriedChickenFries": "Dear @,\n\nI've enclosed my recipe for Fried Chicken Fries. I hope you enjoy it.\n\n—Shane",
@@ -11728,5 +11728,15 @@
   "event.evelyn_garden_pot.learned": "Learned how to craft a 'Garden Pot'",
   "event.evelyn_garden_pot.goodbye": "Well, I'd better go. George gets grumpy if he doesn't have his oatmeal on time...#$b#You have a great day, honey!$h",
   "block.stardewcraft.garden_pot": "Garden Pot",
-  "item.stardewcraft.garden_pot.desc": "Grows crops from any season, wherever it is placed."
+  "item.stardewcraft.garden_pot.desc": "Grows crops from any season, wherever it is placed.",
+  "event.pierre.16.stash_found": "Found Pierre's 'secret stash'.",
+  "event.pierre.16.whos_bedroom": "Hey! Who's in the bedroom?$4",
+  "event.pierre.16.found_it": "Wha...? How did you find that?!$4",
+  "event.pierre.16.give_it": "Quick, give it to me!$u",
+  "event.pierre.16.question": "Promise me you won't tell anyone about this.",
+  "event.pierre.16.choice.secret_safe": "Your secret is safe with me.",
+  "event.pierre.16.choice.tell_wife": "Your wife deserves to know about this.",
+  "event.pierre.16.new_hiding_spot": "*grumble*...now I have to find a new hiding spot...*grumble*$u ",
+  "stardewcraft.npc.schedule.pierre.fri.000": "I've been working hard all week. I deserve a little relaxation on a Friday night.",
+  "stardewcraft.npc.schedule.pierre.desert_festival": "As a shopkeeper, I find it interesting to see how other people run their shops.#$e#*whisper* Don't tell Sandy, but my grocery selection blows hers out of the water!"
 }

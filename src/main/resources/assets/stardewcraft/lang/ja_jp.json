@@ -9879,7 +9879,7 @@
   "stardewcraft.npc.schedule.pam.spring_25.000": "ブツブツ…センセはなんでもお見とおし、ってか…ブツブツ…$4",
   "stardewcraft.npc.schedule.pam.spring_25.001": "あたしが1日どれだけ飲んでるか、わかるかい？そもそもこれってなんの質問なんだい？$u",
   "stardewcraft.npc.schedule.pam.squidfest": "あたしはイカを釣るのはうまくないけど、まあいいさ。ここから応援してるよ、若いの。",
-  "stardewcraft.mail.friendshipRecipePierreBlueberryTart": "デアー @,\n\nブルーベリータルトのレシピを囲みました。ぜひお楽しみ下さい。.\n\n—ピエール",
+  "stardewcraft.mail.friendshipRecipePierreBlueberryTart": "！トップシークレット！\nこれぞ門外不出、絶品ブルーベリータルトのレシピです。\nあなたを良き友人と見こんで教えます。ほかの誰にも教えないでくださいね！\n -ピエールより",
   "stardewcraft.mail.friendshipRecipeRobinPumpkinSoup": "デアー @,\n\n私はパンプキンスープのレシピを囲みました. 私はあなたがそれを楽しむことを願っています.\n\n—ロビン",
   "stardewcraft.mail.friendshipRecipeSandyTomKhaSoup": "デアー @,\n\nトム・カー・スープのレシピを囲みました。ぜひお楽しみ下さい。.\n\n—サンディ",
   "stardewcraft.mail.friendshipRecipeShaneFriedChickenFries": "デアー @,\n\nフライドチキンフライドのレシピを囲みました。ぜひお楽しみ下さい。.\n\n—シャイン",
@@ -11629,5 +11629,15 @@
   "event.evelyn_garden_pot.learned": "「植木鉢」のレシピを覚えた",
   "event.evelyn_garden_pot.goodbye": "さてと、 もう行くね。決まった時間に オートミールを 作ってあげないと ジョージったら 不機嫌になるからねえ…#$b#それじゃあ、 素敵な 一日をね！$h",
   "block.stardewcraft.garden_pot": "植木鉢",
-  "item.stardewcraft.garden_pot.desc": "どこに置いても、季節を問わず作物を育てられる。"
+  "item.stardewcraft.garden_pot.desc": "どこに置いても、季節を問わず作物を育てられる。",
+  "event.pierre.16.stash_found": "ピエールのへそくりを見つけました。",
+  "event.pierre.16.whos_bedroom": "あれっ？だれかわたしの寝室にいるのかい？$4",
+  "event.pierre.16.found_it": "えっ…？ちょっと、どうやって見つけたんです？！$4",
+  "event.pierre.16.give_it": "はやく、こっちに渡して！$u",
+  "event.pierre.16.question": "これのことはだれにも言わないでくださいね。",
+  "event.pierre.16.choice.secret_safe": "口がさけても言わないよ。",
+  "event.pierre.16.choice.tell_wife": "奥さんには知る権利があるんじゃない？",
+  "event.pierre.16.new_hiding_spot": "（ブツブツ）…あたらしいかくし場所を見つけなきゃ…（ブツブツ）$u",
+  "stardewcraft.npc.schedule.pierre.fri.000": "今週も、いっしょうけんめいはたらいたからね。金曜の夜くらいはくつろいだっていいでしょう。",
+  "stardewcraft.npc.schedule.pierre.desert_festival": "商売をしていると、ほかの人たちがどうやってお店を経営しているのかが気になりますね。#$e#（小声）サンディには内緒ですが、私のお店の方が品揃えは充実していますよ！"
 }

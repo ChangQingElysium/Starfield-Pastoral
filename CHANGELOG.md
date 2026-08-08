@@ -1,5 +1,37 @@
 # Changelog
 
+## 0.5.5fix2 - 2026-08-08
+
+### Update Log (English)
+
+#### Pierre Event, Schedule And Mail
+
+- Added Pierre's original six-heart event with the supplied exterior and interior cameras, mapped actor routes, original dialogue pacing, source friendship requirements and the original `+70` / `-500` choice consequences.
+- Extracted and registered the original `ragtime` music used by the event instead of substituting another track. Pierre's three-heart Blueberry Tart letter and all new event and schedule text use the original localized source across all 12 supported languages.
+- Rebuilt Pierre's regular, Friday, rain and Green Rain schedules from the original schedule data while preserving the existing Desert Festival route and supplied festival coordinates.
+
+#### Cutscene And Asset Reliability
+
+- Cutscene actors using authored navigation now recognize closed wooden doors as valid route cells, open them while approaching and close them after passing. The presentation remains local to the player watching the private cutscene, so multiplayer players do not alter one another's doors.
+- Corrected inclusive block-corner handling for cutscene trigger regions, allowing single-block and narrow doorway triggers to detect the player's actual block-centered position reliably.
+- Renamed the mixed-case `textBox.png` GUI resource and its reference to a consistently lowercase path, preventing crashes on case-sensitive filesystems.
+- Extended the actor-map generation data for Pierre's event and schedule, and updated the public mod version to `0.5.5fix2`.
+
+### 更新日志（中文）
+
+#### 皮埃尔剧情、日程与信件
+
+- 加入皮埃尔原版六心剧情，接入已提供的门外与门内镜头、演员路线、原版对话节奏、好感触发条件，以及选项对应的 `+70` / `-500` 好感变化。
+- 从本地原版音频库提取并注册剧情实际使用的 `ragtime` 音乐，不再使用替代曲目。皮埃尔三心蓝莓千层酥配方信，以及新增剧情和日程文本，均使用全部 12 种语言的原版本地化源文本。
+- 依据原版日程数据重做皮埃尔普通日、周五、雨天和绿雨日程，同时保留已有的沙漠节路线与已提供点位。
+
+#### 剧情与资源稳定性
+
+- 使用剧情寻路的演员现在会将关闭的木门识别为可通行路径，靠近时自动开门，通过后自动关门。该表现仅对正在观看私人剧情的玩家生效，多人游戏中不会相互改变门状态。
+- 修正剧情触发区域对方块边界的包含规则，让单格与狭窄门口触发区可以稳定识别位于方块中心的玩家。
+- 将大小写混用的 `textBox.png` GUI 资源及其引用改为统一的小写路径，避免在大小写敏感文件系统上崩溃。
+- 扩展皮埃尔剧情与日程的点位图生成数据，并将公开模组版本更新为 `0.5.5fix2`。
+
 ## 0.5.5fix1 - 2026-08-08
 
 ### Update Log (English)
