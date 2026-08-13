@@ -227,6 +227,7 @@ public final class EventCommandFactory {
 
             case "music"         -> new MusicCommand(obj.get("track").getAsString());
             case "stop_music"    -> new StopMusicCommand();
+            case "green_tea_vision" -> new GreenTeaVisionCommand();
 
             case "add_friendship" -> new AddFriendshipCommand(
                     obj.get("npc").getAsString(),

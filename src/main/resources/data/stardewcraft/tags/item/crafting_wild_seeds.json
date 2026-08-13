@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "stardewcraft:spring_seeds",
+    "stardewcraft:summer_seeds",
+    "stardewcraft:fall_seeds",
+    "stardewcraft:winter_seeds"
+  ]
+}

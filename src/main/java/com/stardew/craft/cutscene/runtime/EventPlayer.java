@@ -270,6 +270,7 @@ public final class EventPlayer {
 
         // Clear fade
         EventScreenFade.clear();
+        com.stardew.craft.client.cutscene.GreenTeaVisionClientState.clear();
         TemporaryGuiVisibility.release(TemporaryGuiVisibility.Owner.CUTSCENE);
         com.stardew.craft.cutscene.command.TemporaryBlockCommand.restoreAll();
         com.stardew.craft.cutscene.command.GroundItemCommand.clearAll();
@@ -425,6 +426,7 @@ public final class EventPlayer {
             hiddenNpcs.clear();
             EventCameraController.release();
             EventScreenFade.clear();
+            com.stardew.craft.client.cutscene.GreenTeaVisionClientState.clear();
             TemporaryGuiVisibility.release(TemporaryGuiVisibility.Owner.CUTSCENE);
             com.stardew.craft.cutscene.command.TemporaryBlockCommand.restoreAll();
             com.stardew.craft.cutscene.command.GroundItemCommand.clearAll();

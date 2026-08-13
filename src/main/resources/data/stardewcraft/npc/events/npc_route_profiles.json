@@ -498,7 +498,7 @@
         },
         {
           "mode": "walk",
-          "point": "caroline_seedshop_kitchen"
+          "point": "caroline_schedule_01"
         }
       ],
       "pierreshop": [
@@ -512,13 +512,13 @@
         },
         {
           "mode": "walk",
-          "point": "caroline_seedshop_kitchen"
+          "point": "caroline_schedule_01"
         }
       ],
       "town": [
         {
           "mode": "walk",
-          "point": "caroline_town_walk"
+          "point": "caroline_schedule_19"
         }
       ],
       "archaeologyhouse": [
@@ -532,7 +532,7 @@
         },
         {
           "mode": "walk",
-          "point": "caroline_museum_read"
+          "point": "caroline_schedule_16"
         }
       ],
       "museum": [
@@ -546,7 +546,7 @@
         },
         {
           "mode": "walk",
-          "point": "caroline_museum_read"
+          "point": "caroline_schedule_16"
         }
       ],
       "hospital": [
@@ -572,7 +572,7 @@
       "beach": [
         {
           "mode": "walk",
-          "point": "caroline_beach_stay"
+          "point": "caroline_schedule_20"
         }
       ]
     },

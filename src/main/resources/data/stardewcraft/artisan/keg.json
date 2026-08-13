@@ -5,6 +5,7 @@
     { "input": "stardewcraft:hops", "output": "stardewcraft:pale_ale", "minutes": 1260 },
     { "input": "stardewcraft:honey", "output": "stardewcraft:mead", "minutes": 600 },
     { "input": "stardewcraft:coffee_bean", "output": "stardewcraft:coffee", "minutes": 120, "consume": 5 },
+    { "input": "stardewcraft:tea_leaves", "output": "stardewcraft:green_tea", "minutes": 180 },
     {
       "tag": "stardewcraft:keg_juice_inputs",
       "output": "stardewcraft:juice",

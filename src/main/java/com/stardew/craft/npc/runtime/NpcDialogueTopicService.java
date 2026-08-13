@@ -47,6 +47,18 @@ public final class NpcDialogueTopicService {
         }
     }
 
+    /** SDV Farmer.autoGenerateActiveDialogueEvent for a crop first maturing on any farm. */
+    public static void onCropMatured(MinecraftServer server, String vanillaObjectId) {
+        if (server == null || vanillaObjectId == null || vanillaObjectId.isBlank()) {
+            return;
+        }
+        NpcDialogueEventData events = NpcDialogueEventData.get(server);
+        String topic = "cropMatured_" + vanillaObjectId;
+        for (var playerId : PlayerDataManager.get().getAllPlayerData().keySet()) {
+            events.activate(playerId, topic);
+        }
+    }
+
     static boolean isYearOneGreenRain(String weather, int year) {
         if (year != 1 || weather == null) {
             return false;

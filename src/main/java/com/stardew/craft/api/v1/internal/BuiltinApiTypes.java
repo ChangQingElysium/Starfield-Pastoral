@@ -258,6 +258,9 @@ public final class BuiltinApiTypes {
         StardewActions.register(id("set_flag"), SetFlagAction.CODEC, (context, data) -> {
             PlayerStardewData playerData = PlayerDataManager.getPlayerData(context.player());
             playerData.addMailFlag(data.id());
+            if ("wizardFirstMet".equals(data.id())) {
+                playerData.setWizardFirstMet(true);
+            }
             PlayerDataEventHandler.syncPlayerData(context.player(), playerData);
             if ("canReadJunimoText".equals(data.id())) {
                 com.stardew.craft.communitycenter.network.BundleSyncPayload.sendFullSync(context.player());

@@ -54,6 +54,7 @@
   "spring_onion": { "price": 8, "edibility": 5, "color": "#FFFFFF" },
   "summer_squash": { "price": 45, "edibility": 25, "color": "#FFE600" },
   "taro_root": { "price": 100, "edibility": 15, "color": "#824925" },
+  "tea_leaves": { "price": 50, "edibility": -300, "color": "#0A8F00" },
   "tomato": { "price": 60, "edibility": 8, "color": "#DC0000" },
   "unmilled_rice": { "price": 30, "edibility": 1, "color": "#824925" },
   "wild_horseradish": { "price": 50, "edibility": 5, "color": "#824925" },

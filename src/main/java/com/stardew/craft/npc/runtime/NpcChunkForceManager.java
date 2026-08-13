@@ -4,6 +4,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -19,35 +20,29 @@ public final class NpcChunkForceManager {
 
     private static final int MAX_FORCED_CORRIDOR_CHUNK_DELTA = 16;
 
-    private static final Map<String, Long> FORCED_TARGET_CHUNK_BY_NPC = new HashMap<>();
-    private static final Map<String, Set<Long>> FORCED_ROUTE_CHUNKS_BY_NPC = new HashMap<>();
-    /** Cache: packed (startChunk, endChunk) for corridor diff skip */
-    private static final Map<String, Long> CORRIDOR_ENDPOINT_CACHE = new HashMap<>();
+    private static final Map<ServerLevel, LevelChunkState> LEVEL_STATES = new IdentityHashMap<>();
 
     private NpcChunkForceManager() {
     }
 
     /** Clear all state (call on server context change). */
     public static void resetState() {
-        FORCED_TARGET_CHUNK_BY_NPC.clear();
-        FORCED_ROUTE_CHUNKS_BY_NPC.clear();
-        CORRIDOR_ENDPOINT_CACHE.clear();
+        LEVEL_STATES.clear();
     }
 
     /** Release ALL forced chunks (call when no player is in dimension). */
     public static void releaseAllForcedChunks(ServerLevel level) {
         if (level == null) return;
-        for (Long key : FORCED_TARGET_CHUNK_BY_NPC.values()) {
+        LevelChunkState state = LEVEL_STATES.remove(level);
+        if (state == null) return;
+        for (Long key : state.forcedTargetChunkByNpc.values()) {
             level.setChunkForced((int)(key >> 32), (int)(long)key, false);
         }
-        FORCED_TARGET_CHUNK_BY_NPC.clear();
-        for (Set<Long> chunks : FORCED_ROUTE_CHUNKS_BY_NPC.values()) {
+        for (Set<Long> chunks : state.forcedRouteChunksByNpc.values()) {
             for (Long key : chunks) {
                 level.setChunkForced((int)(key >> 32), (int)(long)key, false);
             }
         }
-        FORCED_ROUTE_CHUNKS_BY_NPC.clear();
-        CORRIDOR_ENDPOINT_CACHE.clear();
     }
 
     public static void ensureRouteTargetChunkForced(ServerLevel level, String rawNpcId, Vec3 target) {
@@ -58,24 +53,26 @@ public final class NpcChunkForceManager {
         int chunkX = ((int) Math.floor(target.x)) >> 4;
         int chunkZ = ((int) Math.floor(target.z)) >> 4;
         long newKey = (((long) chunkX) << 32) | (((long) chunkZ) & 0xFFFFFFFFL);
+        LevelChunkState state = state(level);
 
-        Long oldKey = FORCED_TARGET_CHUNK_BY_NPC.get(npcId);
+        Long oldKey = state.forcedTargetChunkByNpc.get(npcId);
         if (oldKey != null && oldKey == newKey) {
             return;
         }
 
-        FORCED_TARGET_CHUNK_BY_NPC.put(npcId, newKey);
+        state.forcedTargetChunkByNpc.put(npcId, newKey);
         level.setChunkForced(chunkX, chunkZ, true);
         if (oldKey != null) {
-            releaseChunkIfUnused(level, oldKey);
+            releaseChunkIfUnused(level, state, oldKey);
         }
     }
 
-    public static String currentForcedTargetChunk(String rawNpcId) {
-        if (rawNpcId == null || rawNpcId.isBlank()) {
+    public static String currentForcedTargetChunk(ServerLevel level, String rawNpcId) {
+        if (level == null || rawNpcId == null || rawNpcId.isBlank()) {
             return "<none>";
         }
-        Long key = FORCED_TARGET_CHUNK_BY_NPC.get(rawNpcId.toLowerCase(Locale.ROOT));
+        LevelChunkState state = LEVEL_STATES.get(level);
+        Long key = state == null ? null : state.forcedTargetChunkByNpc.get(rawNpcId.toLowerCase(Locale.ROOT));
         if (key == null) {
             return "<none>";
         }
@@ -98,28 +95,29 @@ public final class NpcChunkForceManager {
         // 快速跳过：NPC 仍在同一 chunk 端点对中
         long compositeKey = (((long)(startX & 0xFFFF)) << 48) | (((long)(startZ & 0xFFFF)) << 32)
                           | (((long)(endX & 0xFFFF)) << 16) | ((long)(endZ & 0xFFFF));
-        Long cachedKey = CORRIDOR_ENDPOINT_CACHE.get(npcId);
+        LevelChunkState state = state(level);
+        Long cachedKey = state.corridorEndpointCache.get(npcId);
         if (cachedKey != null && cachedKey == compositeKey) {
             return;
         }
 
         if (Math.abs(endX - startX) > MAX_FORCED_CORRIDOR_CHUNK_DELTA
             || Math.abs(endZ - startZ) > MAX_FORCED_CORRIDOR_CHUNK_DELTA) {
-            Set<Long> prev = FORCED_ROUTE_CHUNKS_BY_NPC.remove(npcId);
-            CORRIDOR_ENDPOINT_CACHE.remove(npcId);
+            Set<Long> prev = state.forcedRouteChunksByNpc.remove(npcId);
+            state.corridorEndpointCache.remove(npcId);
             if (prev != null) {
                 for (Long oldKey : prev) {
-                    releaseChunkIfUnused(level, oldKey);
+                    releaseChunkIfUnused(level, state, oldKey);
                 }
             }
             return;
         }
 
         Set<Long> next = chunkLine(startX, startZ, endX, endZ);
-        Set<Long> prev = FORCED_ROUTE_CHUNKS_BY_NPC.getOrDefault(npcId, Set.of());
+        Set<Long> prev = state.forcedRouteChunksByNpc.getOrDefault(npcId, Set.of());
 
-        FORCED_ROUTE_CHUNKS_BY_NPC.put(npcId, next);
-        CORRIDOR_ENDPOINT_CACHE.put(npcId, compositeKey);
+        state.forcedRouteChunksByNpc.put(npcId, next);
+        state.corridorEndpointCache.put(npcId, compositeKey);
         for (Long key : next) {
             int chunkX = (int) (key >> 32);
             int chunkZ = (int) (long) key;
@@ -127,7 +125,7 @@ public final class NpcChunkForceManager {
         }
         for (Long oldKey : prev) {
             if (!next.contains(oldKey)) {
-                releaseChunkIfUnused(level, oldKey);
+                releaseChunkIfUnused(level, state, oldKey);
             }
         }
     }
@@ -136,35 +134,39 @@ public final class NpcChunkForceManager {
         if (level == null) {
             return;
         }
+        LevelChunkState state = LEVEL_STATES.get(level);
+        if (state == null) {
+            return;
+        }
 
         List<String> staleTargets = new java.util.ArrayList<>();
-        for (String npcId : FORCED_TARGET_CHUNK_BY_NPC.keySet()) {
+        for (String npcId : state.forcedTargetChunkByNpc.keySet()) {
             if (!activeNpcIds.contains(npcId)) {
                 staleTargets.add(npcId);
             }
         }
         for (String npcId : staleTargets) {
-            Long key = FORCED_TARGET_CHUNK_BY_NPC.remove(npcId);
+            Long key = state.forcedTargetChunkByNpc.remove(npcId);
             if (key == null) {
                 continue;
             }
-            releaseChunkIfUnused(level, key);
+            releaseChunkIfUnused(level, state, key);
         }
 
         List<String> staleCorridors = new java.util.ArrayList<>();
-        for (String npcId : FORCED_ROUTE_CHUNKS_BY_NPC.keySet()) {
+        for (String npcId : state.forcedRouteChunksByNpc.keySet()) {
             if (!activeNpcIds.contains(npcId)) {
                 staleCorridors.add(npcId);
             }
         }
         for (String npcId : staleCorridors) {
-            Set<Long> chunks = FORCED_ROUTE_CHUNKS_BY_NPC.remove(npcId);
-            CORRIDOR_ENDPOINT_CACHE.remove(npcId);
+            Set<Long> chunks = state.forcedRouteChunksByNpc.remove(npcId);
+            state.corridorEndpointCache.remove(npcId);
             if (chunks == null) {
                 continue;
             }
             for (Long key : chunks) {
-                releaseChunkIfUnused(level, key);
+                releaseChunkIfUnused(level, state, key);
             }
         }
     }
@@ -174,29 +176,43 @@ public final class NpcChunkForceManager {
             return;
         }
         String npcId = rawNpcId.toLowerCase(Locale.ROOT);
-        Long target = FORCED_TARGET_CHUNK_BY_NPC.remove(npcId);
-        Set<Long> corridor = FORCED_ROUTE_CHUNKS_BY_NPC.remove(npcId);
-        CORRIDOR_ENDPOINT_CACHE.remove(npcId);
+        LevelChunkState state = LEVEL_STATES.get(level);
+        if (state == null) {
+            return;
+        }
+        Long target = state.forcedTargetChunkByNpc.remove(npcId);
+        Set<Long> corridor = state.forcedRouteChunksByNpc.remove(npcId);
+        state.corridorEndpointCache.remove(npcId);
         if (target != null) {
-            releaseChunkIfUnused(level, target);
+            releaseChunkIfUnused(level, state, target);
         }
         if (corridor != null) {
             for (Long key : corridor) {
-                releaseChunkIfUnused(level, key);
+                releaseChunkIfUnused(level, state, key);
             }
         }
     }
 
-    private static void releaseChunkIfUnused(ServerLevel level, long key) {
-        if (FORCED_TARGET_CHUNK_BY_NPC.containsValue(key)) {
+    private static void releaseChunkIfUnused(ServerLevel level, LevelChunkState state, long key) {
+        if (state.forcedTargetChunkByNpc.containsValue(key)) {
             return;
         }
-        for (Set<Long> chunks : FORCED_ROUTE_CHUNKS_BY_NPC.values()) {
+        for (Set<Long> chunks : state.forcedRouteChunksByNpc.values()) {
             if (chunks.contains(key)) {
                 return;
             }
         }
         level.setChunkForced((int) (key >> 32), (int) key, false);
+    }
+
+    private static LevelChunkState state(ServerLevel level) {
+        return LEVEL_STATES.computeIfAbsent(level, ignored -> new LevelChunkState());
+    }
+
+    private static final class LevelChunkState {
+        private final Map<String, Long> forcedTargetChunkByNpc = new HashMap<>();
+        private final Map<String, Set<Long>> forcedRouteChunksByNpc = new HashMap<>();
+        private final Map<String, Long> corridorEndpointCache = new HashMap<>();
     }
 
     private static Set<Long> chunkLine(int x0, int z0, int x1, int z1) {

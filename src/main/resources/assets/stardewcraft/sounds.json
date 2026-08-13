@@ -1550,6 +1550,22 @@
       }
     ]
   },
+  "music_sunroom": {
+    "sounds": [
+      {
+        "name": "stardewcraft:music/sunroom",
+        "stream": true
+      }
+    ]
+  },
+  "babbling_brook": {
+    "sounds": [
+      {
+        "name": "stardewcraft:ambient/babbling_brook",
+        "stream": false
+      }
+    ]
+  },
   "boop": {
     "sounds": [
       "stardewcraft:boop"

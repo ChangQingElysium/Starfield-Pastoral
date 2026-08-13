@@ -24,6 +24,7 @@ public final class CutsceneTriggerLocations {
             Map.entry("wizard_tower", ModDimensions.STARDEW_VALLEY),
             Map.entry("trailer", ModDimensions.STARDEW_VALLEY),
             Map.entry("seedshop", ModDimensions.STARDEW_VALLEY),
+            Map.entry("sunroom", ModDimensions.STARDEW_VALLEY),
             Map.entry("saloon", ModDimensions.STARDEW_VALLEY),
             Map.entry("sciencehouse", ModDimensions.STARDEW_VALLEY),
             Map.entry("haleyhouse", ModDimensions.STARDEW_VALLEY),

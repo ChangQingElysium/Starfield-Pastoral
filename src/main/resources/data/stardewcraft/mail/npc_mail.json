@@ -95,6 +95,13 @@
     "recipeIsCooking": true
   },
   {
+    "id": "CarolineTea",
+    "text": "stardewcraft.mail.CarolineTea",
+    "background": 0,
+    "learnedRecipe": "tea_sapling",
+    "recipeIsCooking": false
+  },
+  {
     "id": "friendshipRecipeClintAlgaeSoup",
     "text": "stardewcraft.mail.friendshipRecipeClintAlgaeSoup",
     "background": 0,

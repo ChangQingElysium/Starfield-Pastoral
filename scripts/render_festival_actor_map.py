@@ -22,6 +22,10 @@ Examples:
   python3 scripts/render_festival_actor_map.py --pam-schedule
   python3 scripts/render_festival_actor_map.py --pierre-events
   python3 scripts/render_festival_actor_map.py --pierre-schedule
+  python3 scripts/render_festival_actor_map.py --caroline-events
+  python3 scripts/render_festival_actor_map.py --caroline-schedule
+  python3 scripts/render_festival_actor_map.py --clint-events
+  python3 scripts/render_festival_actor_map.py --clint-schedule
 """
 
 from __future__ import annotations
@@ -1455,6 +1459,500 @@ def render_pierre_schedule_capture_workbook(output_dir: Path) -> Path:
     )
 
 
+def render_caroline_event_source_maps(output_dir: Path, scale: int) -> list[Path]:
+    """Render source-only Caroline event choreography; never map it to Minecraft."""
+    family_key, family_script, _family_forks = load_vanilla_event("SeedShop.json", "17")
+    tea_key, tea_script, _tea_forks = load_vanilla_event("Sunroom.json", "719926")
+    required_fragments = (
+        (family_script, "farmer 31 13 0 Abigail 34 9 1 Caroline 35 9 3"),
+        (family_script, "move farmer 0 1 3/speed farmer 4/move farmer -4 0 2 true"),
+        (family_script, "move Abigail -3 0 2 false"),
+        (tea_script, "farmer -500 -500 0 Caroline 5 7 1"),
+        (tea_script, "specificTemporarySprite sunroom/viewport 5 8 true"),
+        (tea_script, "warp farmer 5 13/playSound doorClose/move farmer 0 -4 0"),
+        (tea_script, "cutscene greenTea"),
+        (tea_script, "move farmer 0 4 2 true"),
+    )
+    for script, fragment in required_fragments:
+        if fragment not in script:
+            raise ValueError(
+                f"Vanilla Caroline event source changed; missing {fragment!r} "
+                f"in {family_key!r} or {tea_key!r}.")
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    outputs: list[Path] = []
+    step = TILE_SIZE * scale
+
+    family_crop = (25, 6, 39, 16)
+    family = render_tmx(MAPS_DIR / "SeedShop.tmx", scale=scale)
+    family = family.crop(tuple(value * step for value in family_crop))
+    family = draw_tile_grid(family, scale, family_crop[0], family_crop[1])
+    family = draw_source_routes(family, (family_crop[0], family_crop[1]), scale, [
+        ((82, 148, 255, 230), [
+            (31.5, 13.5), (31.5, 12.5), (31.5, 13.5), (27.5, 13.5),
+        ]),
+        ((226, 93, 103, 230), [(34.5, 9.5), (31.5, 9.5)]),
+    ])
+    family_points = [
+        ("C01 Viewport anchor (35,9)", 35.5, 9.5),
+        ("P01 Player start (31,13), facing N", 31.5, 13.5),
+        ("P02 Player listening stop (31,12)", 31.5, 12.5),
+        ("P03 Player retreat stop (27,13)", 27.5, 13.5),
+        ("A01 Abigail start (34,9), facing E", 34.5, 9.5),
+        ("A02 Abigail final stop (31,9)", 31.5, 9.5),
+        ("R01 Caroline position (35,9), facing W", 35.5, 9.5),
+    ]
+    family = draw_numbered_source_points(
+        family,
+        family_points,
+        (family_crop[0], family_crop[1]),
+        scale,
+        "Caroline 6-heart / vanilla SeedShop event 17",
+    )
+    family_output = output_dir / "caroline_6heart_seedshop_vanilla_source_points.png"
+    family.save(family_output)
+    outputs.append(family_output)
+
+    tea_crop = (0, 0, 12, 15)
+    tea = render_tmx(MAPS_DIR / "Sunroom.tmx", scale=scale)
+    tea = tea.crop(tuple(value * step for value in tea_crop))
+    tea = draw_tile_grid(tea, scale, tea_crop[0], tea_crop[1])
+    tea = draw_source_routes(tea, (tea_crop[0], tea_crop[1]), scale, [
+        ((82, 148, 255, 230), [(5.5, 13.5), (5.5, 9.5), (5.5, 13.5)]),
+    ])
+    tea_points = [
+        ("C01 Viewport anchor (5,8)", 5.5, 8.5),
+        ("P01 Player entrance warp (5,13), facing N", 5.5, 13.5),
+        ("P02 Player tea position (5,9)", 5.5, 9.5),
+        ("R01 Caroline position (5,7), facing E", 5.5, 7.5),
+        ("A01 Sunroom action anchor (6,7)", 6.5, 7.5),
+    ]
+    tea = draw_numbered_source_points(
+        tea,
+        tea_points,
+        (tea_crop[0], tea_crop[1]),
+        scale,
+        "Caroline 2-heart / Sunroom event 719926",
+    )
+    tea_output = output_dir / "caroline_2heart_sunroom_vanilla_source_points.png"
+    tea.save(tea_output)
+    outputs.append(tea_output)
+    return outputs
+
+
+def render_caroline_event_capture_workbooks(output_dir: Path) -> list[Path]:
+    family_entries = [
+        ("H01", "6-heart SeedShop trigger area corner 1", "block x/y/z"),
+        ("H02", "6-heart SeedShop trigger area corner 2", "block x/y/z"),
+        ("P01", "Player start", "x/y/z"),
+        ("P02", "Player listening stop", "x/y/z"),
+        ("P03", "Player retreat stop", "x/y/z"),
+        ("A01", "Abigail start", "x/y/z"),
+        ("A02", "Abigail final stop", "x/y/z"),
+        ("R01", "Caroline position", "x/y/z"),
+        ("C01", "Camera rig", "exact x/y/z + yaw + pitch"),
+    ]
+    tea_entries = [
+        ("H01", "2-heart Sunroom trigger area corner 1", "block x/y/z"),
+        ("H02", "2-heart Sunroom trigger area corner 2", "block x/y/z"),
+        ("P01", "Player entrance/start", "x/y/z"),
+        ("P02", "Player tea position", "x/y/z"),
+        ("R01", "Caroline position", "x/y/z"),
+        ("A01", "Sunroom action/tea visual anchor", "x/y/z"),
+        ("C01", "Camera rig before the tea vision", "exact x/y/z + yaw + pitch"),
+    ]
+    return [
+        render_minecraft_capture_workbook(
+            output_dir / "caroline_6heart_minecraft_capture_workbook.png",
+            "Caroline 6-heart event - Minecraft capture workbook",
+            "Fill only from the in-game planning tool; vanilla commands define all facings.",
+            family_entries,
+        ),
+        render_minecraft_capture_workbook(
+            output_dir / "caroline_2heart_minecraft_capture_workbook.png",
+            "Caroline 2-heart event - Minecraft capture workbook",
+            "The green-tea vision is a separate special presentation; this sheet captures world points only.",
+            tea_entries,
+        ),
+    ]
+
+
+def render_caroline_schedule_source_maps(output_dir: Path, scale: int) -> list[Path]:
+    """Render unique Caroline schedule stops, excluding Desert Festival and Community Center."""
+    schedules = json.loads((SCHEDULES_DIR / "Caroline.json").read_text(encoding="utf-8-sig"))
+    expected_fragments = {
+        "rain": "800 SeedShop 37 6 3/1200 SeedShop 15 23 0/1330 SeedShop 21 5 2 caroline_read",
+        "GreenRain": "610 SeedShop 22 14 1",
+        "fall_25": "1200 Hospital 13 14 0",
+        "winter_16": "1330 Town 23 71 2/1600 Beach 24 32 3",
+        "Tue": "1030 SeedShop 24 17 3/1300 SeedShop 24 21 0 caroline_exercise",
+        "Fri": "1000 Sunroom 5 7 1/1200 ArchaeologyHouse 14 4 2 caroline_read",
+        "Wed": "1200 Town 23 27 1",
+        "Sat": "1100 CommunityCenter 26 9 0",
+        "Sun": "1440 Town 48 33 2",
+        "spring": "1330 Town 23 71 2",
+    }
+    for key, fragment in expected_fragments.items():
+        if fragment not in schedules.get(key, ""):
+            raise ValueError(
+                f"Vanilla Caroline schedule source changed for {key!r}; missing {fragment!r}.")
+
+    groups = [
+        ("seedshop", "SeedShop", (12, 2, 41, 27), 1, [
+            ("(37,6) morning position, W", 37.5, 6.5),
+            ("(15,23) midday position, N", 15.5, 23.5),
+            ("(21,5) reading/Sunday position", 21.5, 5.5),
+            ("(25,18) evening position, S", 25.5, 18.5),
+            ("(25,4) bed, E", 25.5, 4.5),
+            ("(22,14) Green Rain/Tuesday position", 22.5, 14.5),
+            ("(27,7) kitchen position, W/E by route", 27.5, 7.5),
+            ("(24,17) exercise approach, W", 24.5, 17.5),
+            ("(24,21) exercise position, N", 24.5, 21.5),
+            ("(23,15) Tuesday position, E", 23.5, 15.5),
+            ("(34,5) Tuesday evening, N", 34.5, 5.5),
+            ("(22,5) Sunday morning, S", 22.5, 5.5),
+        ]),
+        ("hospital", "Hospital", (0, 2, 18, 18), 13, [
+            ("(13,14) fall 25 waiting position, N", 13.5, 14.5),
+            ("(4,6) fall 25 exam position, E", 4.5, 6.5),
+        ]),
+        ("sunroom", "Sunroom", (0, 0, 12, 15), 15, [
+            ("(5,7) sunroom position, E", 5.5, 7.5),
+        ]),
+        ("museum", "ArchaeologyHouse", (8, 0, 21, 12), 16, [
+            ("(14,4) Friday reading position, S", 14.5, 4.5),
+        ]),
+        ("town_north", "Town", (18, 20, 55, 40), 17, [
+            ("(23,27) Wednesday position, E", 23.5, 27.5),
+            ("(48,33) Sunday position, S", 48.5, 33.5),
+        ]),
+        ("town_south", "Town", (16, 64, 31, 79), 19, [
+            ("(23,71) seasonal position, S", 23.5, 71.5),
+        ]),
+        ("beach", "Beach", (17, 25, 32, 41), 20, [
+            ("(24,32) Night Market visit, W", 24.5, 32.5),
+        ]),
+    ]
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    outputs: list[Path] = []
+    step = TILE_SIZE * scale
+    for slug, map_name, crop, start_index, points in groups:
+        base = render_tmx(MAPS_DIR / f"{map_name}.tmx", scale=scale)
+        base = base.crop(tuple(value * step for value in crop))
+        base = draw_tile_grid(base, scale, crop[0], crop[1])
+        annotated = draw_numbered_source_points(
+            base,
+            points,
+            (crop[0], crop[1]),
+            scale,
+            f"Caroline vanilla schedule / {map_name} / unique stop tiles",
+            start_index=start_index,
+        )
+        output_path = output_dir / f"caroline_schedule_{slug}_vanilla_source_points.png"
+        annotated.save(output_path)
+        outputs.append(output_path)
+    return outputs
+
+
+def render_caroline_schedule_capture_workbook(output_dir: Path) -> Path:
+    entries = [
+        ("1", "SeedShop (37,6): morning position", "x/y/z"),
+        ("2", "SeedShop (15,23): midday position", "x/y/z"),
+        ("3", "SeedShop (21,5): reading/Sunday position", "x/y/z"),
+        ("4", "SeedShop (25,18): evening position", "x/y/z"),
+        ("5", "SeedShop (25,4): bed", "x/y/z"),
+        ("6", "SeedShop (22,14): Green Rain/Tuesday position", "x/y/z"),
+        ("7", "SeedShop (27,7): kitchen position", "x/y/z"),
+        ("8", "SeedShop (24,17): exercise approach", "x/y/z"),
+        ("9", "SeedShop (24,21): exercise position", "x/y/z"),
+        ("10", "SeedShop (23,15): Tuesday position", "x/y/z"),
+        ("11", "SeedShop (34,5): Tuesday evening", "x/y/z"),
+        ("12", "SeedShop (22,5): Sunday morning", "x/y/z"),
+        ("13", "Hospital (13,14): fall 25 waiting position", "x/y/z"),
+        ("14", "Hospital (4,6): fall 25 exam position", "x/y/z"),
+        ("15", "Sunroom (5,7): sunroom position", "x/y/z"),
+        ("16", "ArchaeologyHouse (14,4): Friday reading", "x/y/z"),
+        ("17", "Town (23,27): Wednesday position", "x/y/z"),
+        ("18", "Town (48,33): Sunday position", "x/y/z"),
+        ("19", "Town (23,71): seasonal position", "x/y/z"),
+        ("20", "Beach (24,32): Night Market visit", "x/y/z"),
+    ]
+    return render_minecraft_capture_workbook(
+        output_dir / "caroline_schedule_minecraft_capture_workbook.png",
+        "Caroline schedule - Minecraft capture workbook",
+        "Numbering is continuous; Desert Festival stays unchanged and Community Center is intentionally omitted.",
+        entries,
+    )
+
+
+def render_clint_event_source_maps(output_dir: Path, scale: int) -> list[Path]:
+    """Render source-only Clint event choreography; never map it to Minecraft."""
+    saloon_key, saloon_script, _saloon_forks = load_vanilla_event("Saloon.json", "97")
+    town_key, town_script, _town_forks = load_vanilla_event("Town.json", "101")
+    required_fragments = (
+        (saloon_script, "farmer 14 24 0 Clint 4 19 2 Emily 10 11 0 Gus 15 18 1 Shane 7 18 1"),
+        (saloon_script, "move Clint 0 -1 3/move Clint -3 0 0"),
+        (saloon_script, "speed Emily 4/move Emily -6 0 2/speed Emily 2/move Emily 0 4 2"),
+        (saloon_script, "addObject 8 17 346 1"),
+        (town_script, "farmer 5 90 1 Clint 6 92 1 Emily 15 90 1 Caroline 16 90 3"),
+        (town_script, "move Clint 0 -2 1"),
+        (town_script, "move Clint 8 0 1"),
+        (town_script, "move Caroline 7 0 0"),
+        (town_script, "move Emily 7 0 1"),
+        (town_script, "speed Clint 4/move Clint -7 0 2"),
+    )
+    for script, fragment in required_fragments:
+        if fragment not in script:
+            raise ValueError(
+                f"Vanilla Clint event source changed; missing {fragment!r} "
+                f"in {saloon_key!r} or {town_key!r}.")
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    outputs: list[Path] = []
+    step = TILE_SIZE * scale
+
+    saloon_crop = (0, 9, 18, 25)
+    saloon_base = render_tmx(MAPS_DIR / "Saloon.tmx", scale=scale)
+    saloon_base = saloon_base.crop(tuple(value * step for value in saloon_crop))
+    saloon_base = draw_tile_grid(saloon_base, scale, saloon_crop[0], saloon_crop[1])
+
+    primary = draw_source_routes(saloon_base, (saloon_crop[0], saloon_crop[1]), scale, [
+        ((82, 148, 255, 230), [
+            (14.5, 24.5), (14.5, 21.5), (11.5, 21.5),
+            (11.5, 20.5), (8.5, 20.5), (5.5, 20.5),
+        ]),
+        ((255, 196, 55, 230), [
+            (4.5, 19.5), (4.5, 18.5), (1.5, 18.5), (4.5, 18.5), (4.5, 19.5),
+        ]),
+    ])
+    primary_points = [
+        ("C01 Viewport anchor (4,18)", 4.5, 18.5),
+        ("P01 Player start (14,24), facing N", 14.5, 24.5),
+        ("P02 Player first stop (14,21)", 14.5, 21.5),
+        ("P03 Player route corner (11,21)", 11.5, 21.5),
+        ("P04 Player route corner (11,20)", 11.5, 20.5),
+        ("P05 Player route corner (8,20)", 8.5, 20.5),
+        ("P06 Player conversation stop (5,20)", 5.5, 20.5),
+        ("R01 Clint start/final (4,19), facing S", 4.5, 19.5),
+        ("R02 Clint bar position (4,18)", 4.5, 18.5),
+        ("R03 Clint box position (1,18)", 1.5, 18.5),
+    ]
+    primary = draw_numbered_source_points(
+        primary,
+        primary_points,
+        (saloon_crop[0], saloon_crop[1]),
+        scale,
+        "Clint 3-heart / vanilla Saloon event 97 / player and Clint",
+    )
+    primary_output = output_dir / "clint_3heart_saloon_player_clint_vanilla_source_points.png"
+    primary.save(primary_output)
+    outputs.append(primary_output)
+
+    supporting = draw_source_routes(saloon_base, (saloon_crop[0], saloon_crop[1]), scale, [
+        ((226, 93, 103, 230), [
+            (10.5, 11.5), (4.5, 11.5), (4.5, 15.5),
+            (4.5, 18.5), (5.5, 18.5), (5.5, 19.5),
+            (5.5, 18.5), (6.5, 18.5),
+        ]),
+    ])
+    supporting_points = [
+        ("E01 Emily start (10,11), facing N", 10.5, 11.5),
+        ("E02 Emily route corner (4,11)", 4.5, 11.5),
+        ("E03 Emily door/action approach (4,15)", 4.5, 15.5),
+        ("E04 Door action tile (4,16)", 4.5, 16.5),
+        ("E05 Emily counter corner (4,18)", 4.5, 18.5),
+        ("E06 Emily service stop (5,19)", 5.5, 19.5),
+        ("E07 Emily Shane-service stop (6,18)", 6.5, 18.5),
+        ("S01 Shane position (7,18), facing E", 7.5, 18.5),
+        ("G01 Gus position (15,18), facing E", 15.5, 18.5),
+        ("O01 Beverage object anchor (8,17)", 8.5, 17.5),
+    ]
+    supporting = draw_numbered_source_points(
+        supporting,
+        supporting_points,
+        (saloon_crop[0], saloon_crop[1]),
+        scale,
+        "Clint 3-heart / Saloon event 97 / supporting",
+    )
+    supporting_output = output_dir / "clint_3heart_saloon_supporting_vanilla_source_points.png"
+    supporting.save(supporting_output)
+    outputs.append(supporting_output)
+
+    town_crop = (0, 84, 30, 98)
+    town = render_tmx(MAPS_DIR / "Town.tmx", scale=scale)
+    town = town.crop(tuple(value * step for value in town_crop))
+    town = draw_tile_grid(town, scale, town_crop[0], town_crop[1])
+    town = draw_source_routes(town, (town_crop[0], town_crop[1]), scale, [
+        ((82, 148, 255, 230), [(5.5, 90.5), (6.5, 90.5), (6.5, 91.5), (7.5, 91.5)]),
+        ((255, 196, 55, 230), [(6.5, 92.5), (6.5, 90.5), (14.5, 90.5), (7.5, 90.5)]),
+        ((226, 93, 103, 230), [(15.5, 90.5), (22.5, 90.5)]),
+        ((110, 214, 138, 230), [(16.5, 90.5), (23.5, 90.5)]),
+    ])
+    town_points = [
+        ("C01 Viewport anchor (11,90)", 11.5, 90.5),
+        ("P01 Player start (5,90), facing E", 5.5, 90.5),
+        ("P02 Player reveal stop (6,90)", 6.5, 90.5),
+        ("P03 Player lower stop (6,91)", 6.5, 91.5),
+        ("P04 Player final stop (7,91)", 7.5, 91.5),
+        ("R01 Clint bush start (6,92), facing E", 6.5, 92.5),
+        ("R02 Clint asks Emily (14,90)", 14.5, 90.5),
+        ("R03 Clint returns to player (7,90)", 7.5, 90.5),
+        ("E01 Emily start (15,90), facing E", 15.5, 90.5),
+        ("E02 Emily exit stop (22,90)", 22.5, 90.5),
+        ("A01 Caroline start (16,90), facing W", 16.5, 90.5),
+        ("A02 Caroline exit stop (23,90)", 23.5, 90.5),
+    ]
+    town = draw_numbered_source_points(
+        town,
+        town_points,
+        (town_crop[0], town_crop[1]),
+        scale,
+        "Clint 6-heart / vanilla Town event 101",
+    )
+    town_output = output_dir / "clint_6heart_town_vanilla_source_points.png"
+    town.save(town_output)
+    outputs.append(town_output)
+    return outputs
+
+
+def render_clint_event_capture_workbooks(output_dir: Path) -> list[Path]:
+    saloon_entries = [
+        ("H01", "3-heart Saloon trigger area corner 1", "block x/y/z"),
+        ("H02", "3-heart Saloon trigger area corner 2", "block x/y/z"),
+        ("P01", "Player start", "x/y/z"),
+        ("P02", "Player first stop", "x/y/z"),
+        ("P03", "Player route corner", "x/y/z"),
+        ("P04", "Player route corner", "x/y/z"),
+        ("P05", "Player route corner", "x/y/z"),
+        ("P06", "Player conversation stop", "x/y/z"),
+        ("R01", "Clint start/final position", "x/y/z"),
+        ("R02", "Clint bar position", "x/y/z"),
+        ("R03", "Clint box position", "x/y/z"),
+        ("E01", "Emily start", "x/y/z"),
+        ("E02", "Emily route corner", "x/y/z"),
+        ("E03", "Emily door approach", "x/y/z"),
+        ("E04", "Door action block", "block x/y/z"),
+        ("E05", "Emily counter corner", "x/y/z"),
+        ("E06", "Emily Clint-service stop", "x/y/z"),
+        ("E07", "Emily Shane-service stop", "x/y/z"),
+        ("S01", "Shane position", "x/y/z"),
+        ("G01", "Gus position", "x/y/z"),
+        ("O01", "Beverage visual anchor", "x/y/z"),
+        ("C01", "Camera rig", "exact x/y/z + yaw + pitch"),
+    ]
+    town_entries = [
+        ("H01", "6-heart Town trigger area corner 1", "block x/y/z"),
+        ("H02", "6-heart Town trigger area corner 2", "block x/y/z"),
+        ("P01", "Player start", "x/y/z"),
+        ("P02", "Player reveal stop", "x/y/z"),
+        ("P03", "Player lower stop", "x/y/z"),
+        ("P04", "Player final stop", "x/y/z"),
+        ("R01", "Clint bush start", "x/y/z"),
+        ("R02", "Clint asks Emily", "x/y/z"),
+        ("R03", "Clint returns to player", "x/y/z"),
+        ("E01", "Emily start", "x/y/z"),
+        ("E02", "Emily exit stop", "x/y/z"),
+        ("A01", "Caroline start", "x/y/z"),
+        ("A02", "Caroline exit stop", "x/y/z"),
+        ("C01", "Camera rig", "exact x/y/z + yaw + pitch"),
+    ]
+    return [
+        render_minecraft_capture_workbook(
+            output_dir / "clint_3heart_minecraft_capture_workbook.png",
+            "Clint 3-heart event - Minecraft capture workbook",
+            "Fill only from the in-game planning tool; vanilla commands define all facings.",
+            saloon_entries,
+        ),
+        render_minecraft_capture_workbook(
+            output_dir / "clint_6heart_minecraft_capture_workbook.png",
+            "Clint 6-heart event - Minecraft capture workbook",
+            "Fill only from the in-game planning tool; vanilla commands define all facings.",
+            town_entries,
+        ),
+    ]
+
+
+def render_clint_schedule_source_maps(output_dir: Path, scale: int) -> list[Path]:
+    """Render unique Clint schedule stops, excluding Desert Festival and Community Center."""
+    schedules = json.loads((SCHEDULES_DIR / "Clint.json").read_text(encoding="utf-8-sig"))
+    expected_fragments = {
+        "rain": "GOTO spring",
+        "GreenRain": "610 Saloon 23 21 3 square_3_3",
+        "winter_16": "900 Blacksmith 3 13 2",
+        "Fri": "850 CommunityCenter 62 14 0 square_3_1_0/1700 Saloon 19 23 3",
+        "CommunityCenter_Replacement": "JojaMart 27 5 0",
+        "winter_15": "1700 Beach 37 33 1",
+        "spring": "1700 Blacksmith 8 12 1 clint_hammer/1900 Saloon 19 23 3",
+    }
+    for key, fragment in expected_fragments.items():
+        if fragment not in schedules.get(key, ""):
+            raise ValueError(
+                f"Vanilla Clint schedule source changed for {key!r}; missing {fragment!r}.")
+
+    groups = [
+        ("saloon", "Saloon", (14, 15, 29, 25), 1, [
+            ("(23,21) Green Rain position, W", 23.5, 21.5),
+            ("(19,23) regular evening position, W", 19.5, 23.5),
+        ]),
+        ("blacksmith", "Blacksmith", (0, 1, 15, 20), 3, [
+            ("(3,13) daytime position, S", 3.5, 13.5),
+            ("(10,4) bed, E", 10.5, 4.5),
+            ("(8,12) hammering position, E", 8.5, 12.5),
+        ]),
+        ("hospital", "Hospital", (0, 2, 18, 18), 6, [
+            ("(12,14) winter 16 waiting position, N", 12.5, 14.5),
+            ("(4,6) winter 16 exam position, E", 4.5, 6.5),
+        ]),
+        ("beach", "Beach", (29, 25, 45, 42), 8, [
+            ("(37,33) Night Market visit, E", 37.5, 33.5),
+        ]),
+        ("jojamart", "JojaMart", (20, 0, 30, 13), 9, [
+            ("(27,5) Community Center replacement, N", 27.5, 5.5),
+        ]),
+    ]
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    outputs: list[Path] = []
+    step = TILE_SIZE * scale
+    for slug, map_name, crop, start_index, points in groups:
+        base = render_tmx(MAPS_DIR / f"{map_name}.tmx", scale=scale)
+        base = base.crop(tuple(value * step for value in crop))
+        base = draw_tile_grid(base, scale, crop[0], crop[1])
+        annotated = draw_numbered_source_points(
+            base,
+            points,
+            (crop[0], crop[1]),
+            scale,
+            f"Clint vanilla schedule / {map_name} / unique stop tiles",
+            start_index=start_index,
+        )
+        output_path = output_dir / f"clint_schedule_{slug}_vanilla_source_points.png"
+        annotated.save(output_path)
+        outputs.append(output_path)
+    return outputs
+
+
+def render_clint_schedule_capture_workbook(output_dir: Path) -> Path:
+    entries = [
+        ("1", "Saloon (23,21): Green Rain position", "x/y/z"),
+        ("2", "Saloon (19,23): regular evening position", "x/y/z"),
+        ("3", "Blacksmith (3,13): daytime position", "x/y/z"),
+        ("4", "Blacksmith (10,4): bed", "x/y/z"),
+        ("5", "Blacksmith (8,12): hammering position", "x/y/z"),
+        ("6", "Hospital (12,14): winter 16 waiting position", "x/y/z"),
+        ("7", "Hospital (4,6): winter 16 exam position", "x/y/z"),
+        ("8", "Beach (37,33): Night Market visit", "x/y/z"),
+        ("9", "JojaMart (27,5): Community Center replacement", "x/y/z"),
+    ]
+    return render_minecraft_capture_workbook(
+        output_dir / "clint_schedule_minecraft_capture_workbook.png",
+        "Clint schedule - Minecraft capture workbook",
+        "Numbering is continuous; Desert Festival stays unchanged and Community Center is intentionally omitted.",
+        entries,
+    )
+
+
 def render_secret_note31_source_maps(output_dir: Path, scale: int) -> list[Path]:
     """Render only vanilla TMX/source points; no Minecraft-coordinate mapping."""
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -2698,6 +3196,14 @@ def parse_args() -> argparse.Namespace:
                         help="Render the vanilla Pierre 6-heart event and a blank Minecraft capture workbook.")
     parser.add_argument("--pierre-schedule", action="store_true",
                         help="Render every non-Desert-Festival Pierre schedule stop needing a Minecraft position.")
+    parser.add_argument("--caroline-events", action="store_true",
+                        help="Render the vanilla Caroline 2/6-heart events and blank Minecraft capture workbooks.")
+    parser.add_argument("--caroline-schedule", action="store_true",
+                        help="Render Caroline schedule stops excluding Desert Festival and Community Center.")
+    parser.add_argument("--clint-events", action="store_true",
+                        help="Render the vanilla Clint 3/6-heart events and blank Minecraft capture workbooks.")
+    parser.add_argument("--clint-schedule", action="store_true",
+                        help="Render Clint schedule stops excluding Desert Festival and Community Center.")
     return parser.parse_args()
 
 
@@ -2799,6 +3305,28 @@ def main() -> None:
         for output_path in render_pierre_schedule_source_maps(args.out, args.scale):
             print(output_path.relative_to(ROOT))
         print(render_pierre_schedule_capture_workbook(args.out).relative_to(ROOT))
+        return
+    if args.caroline_events:
+        for output_path in render_caroline_event_source_maps(args.out, args.scale):
+            print(output_path.relative_to(ROOT))
+        for output_path in render_caroline_event_capture_workbooks(args.out):
+            print(output_path.relative_to(ROOT))
+        return
+    if args.caroline_schedule:
+        for output_path in render_caroline_schedule_source_maps(args.out, args.scale):
+            print(output_path.relative_to(ROOT))
+        print(render_caroline_schedule_capture_workbook(args.out).relative_to(ROOT))
+        return
+    if args.clint_events:
+        for output_path in render_clint_event_source_maps(args.out, args.scale):
+            print(output_path.relative_to(ROOT))
+        for output_path in render_clint_event_capture_workbooks(args.out):
+            print(output_path.relative_to(ROOT))
+        return
+    if args.clint_schedule:
+        for output_path in render_clint_schedule_source_maps(args.out, args.scale):
+            print(output_path.relative_to(ROOT))
+        print(render_clint_schedule_capture_workbook(args.out).relative_to(ROOT))
         return
     if args.preset == "night_market":
         for output_path in render_night_market_maps(args.out, args.scale, args.portrait_size):

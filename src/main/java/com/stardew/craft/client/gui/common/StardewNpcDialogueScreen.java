@@ -276,6 +276,11 @@ public class StardewNpcDialogueScreen extends Screen implements StardewCollectiv
             (answerIndex) -> {
                 if (answerIndex >= 0 && answerIndex < questionResponses.size()) {
                     NpcResponseAction picked = questionResponses.get(answerIndex);
+                    if (com.stardew.craft.network.payload.OpenNpcDialogueScreenPayload.isDirectText(
+                            picked.nextNodeId())) {
+                        openClientSideResponse(picked.nextNodeId());
+                        return;
+                    }
                     net.neoforged.neoforge.network.PacketDistributor.sendToServer(
                         new com.stardew.craft.network.payload.AnswerNpcQuestionPayload(
                             npcId, picked.nextNodeId(), picked.scoreDelta(), picked.answerId()
@@ -286,6 +291,27 @@ public class StardewNpcDialogueScreen extends Screen implements StardewCollectiv
             -1
         );
         minecraft.setScreen(StardewConfirmDialogScreen.createDialogueContinuation(spec));
+    }
+
+    /**
+     * SDV {@code $y} quick responses are local dialogue continuations. Their text must never be
+     * sent through AnswerNpcQuestionPayload, whose next-node field is intentionally a short id.
+     */
+    private void openClientSideResponse(String source) {
+        net.minecraft.client.Minecraft minecraft = net.minecraft.client.Minecraft.getInstance();
+        String response = com.stardew.craft.network.payload.OpenNpcDialogueScreenPayload
+                .resolveClientTextSource(source);
+        String accountName = minecraft.player != null && minecraft.player.getGameProfile() != null
+                ? minecraft.player.getGameProfile().getName()
+                : "player";
+        response = com.stardew.craft.network.payload.OpenNpcDialogueScreenPayload
+                .resolvePercentTokens(response, accountName);
+
+        StardewNpcDialogueScreen continuation =
+                new StardewNpcDialogueScreen(npcId, response, friendshipPoints);
+        continuation.afterCloseAction = this.afterCloseAction;
+        this.afterCloseAction = null;
+        minecraft.setScreen(continuation);
     }
 
     private void beginOutro() {

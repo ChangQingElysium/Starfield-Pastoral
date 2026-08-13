@@ -1,0 +1,136 @@
+{
+  "id": "caroline_2heart",
+  "legacy_ids": ["719926"],
+  "skippable": true,
+  "trigger": {
+    "type": "enter_area",
+    "location": "sunroom",
+    "area_min": [45, 36, -57],
+    "area_max": [61, 44, -46]
+  },
+  "preconditions": [
+    { "type": "not_saw_event", "id": "caroline_2heart" },
+    { "type": "friendship", "npc": "caroline", "min": 500 },
+    { "type": "time", "min": 900, "max": 1700 },
+    { "type": "weather", "weather": "sunny" }
+  ],
+  "commands": [
+    { "cmd": "comment", "text": "=== SDV Sunroom event 719926: Caroline's tea room ===" },
+    { "cmd": "lock_player" },
+    { "cmd": "fade", "mode": "out", "ticks": 10 },
+    { "cmd": "hide_npc", "npc_id": "caroline" },
+    { "cmd": "spawn_actor", "actor": "caroline", "npc_id": "caroline",
+      "x": 51.5, "y": 37, "z": -51.5, "relative": false, "facing": -90 },
+    { "cmd": "camera", "x": 54.117, "y": 37.380, "z": -52.645,
+      "yaw": 58.1, "pitch": 14.5, "relative": false },
+    { "cmd": "music", "track": "MUSIC_SPRING_DAY_AMBIENT" },
+    { "cmd": "fade", "mode": "in", "ticks": 20 },
+    { "cmd": "skippable" },
+    { "cmd": "add_mail_for_tomorrow", "id": "CarolineTea" },
+
+    { "cmd": "pause", "ticks": 20 },
+    { "cmd": "play_sound", "sound": "stardewcraft:leafrustle" },
+    { "cmd": "pause", "ticks": 10 },
+    { "cmd": "play_sound", "sound": "stardewcraft:leafrustle" },
+    { "cmd": "pause", "ticks": 20 },
+    { "cmd": "spawn_actor", "actor": "fake_player", "npc_id": "player",
+      "x": 51.5, "y": 37, "z": -45.5, "relative": false, "facing": 180 },
+    { "cmd": "play_sound", "sound": "stardewcraft:door_close" },
+    { "cmd": "navigate_actor", "actor": "fake_player",
+      "x": 51.5, "y": 37, "z": -50.5, "speed": 0.11, "relative": false },
+    { "cmd": "face_actor", "actor": "caroline", "yaw": 0 },
+    { "cmd": "pause", "ticks": 2 },
+    { "cmd": "speak", "npc_id": "caroline", "text": "event.caroline.719926.greeting" },
+    { "cmd": "pause", "ticks": 10 },
+    { "cmd": "speak", "npc_id": "caroline", "text": "event.caroline.719926.what_think" },
+    {
+      "cmd": "question",
+      "text": "",
+      "choices": [
+        {
+          "text": "event.caroline.719926.choice.beautiful",
+          "commands": [
+            { "cmd": "speak", "npc_id": "caroline", "text": "event.caroline.719926.response.beautiful" }
+          ]
+        },
+        {
+          "text": "event.caroline.719926.choice.relaxing",
+          "commands": [
+            { "cmd": "speak", "npc_id": "caroline", "text": "event.caroline.719926.response.relaxing" }
+          ]
+        },
+        {
+          "text": "event.caroline.719926.choice.hot",
+          "commands": [
+            { "cmd": "speak", "npc_id": "caroline", "text": "event.caroline.719926.response.hot" }
+          ]
+        },
+        {
+          "text": "event.caroline.719926.choice.farm",
+          "commands": [
+            { "cmd": "emote", "actor": "caroline", "emote": "exclamation" },
+            { "cmd": "speak", "npc_id": "caroline", "text": "event.caroline.719926.response.farm" }
+          ]
+        }
+      ]
+    },
+    { "cmd": "face_actor", "actor": "caroline", "yaw": -90 },
+    { "cmd": "speak", "npc_id": "caroline", "text": "event.caroline.719926.sanctuary" },
+    { "cmd": "face_actor", "actor": "caroline", "yaw": 0 },
+    { "cmd": "speak", "npc_id": "caroline", "text": "event.caroline.719926.tea_offer" },
+    { "cmd": "play_sound", "sound": "stardewcraft:coin" },
+    { "cmd": "pause", "ticks": 20 },
+    { "cmd": "play_sound", "sound": "stardewcraft:siptea" },
+    { "cmd": "pause", "ticks": 10 },
+    { "cmd": "play_sound", "sound": "stardewcraft:siptea" },
+    { "cmd": "pause", "ticks": 10 },
+    { "cmd": "play_sound", "sound": "stardewcraft:gulp" },
+    { "cmd": "pause", "ticks": 20 },
+    {
+      "cmd": "question",
+      "text": "event.caroline.719926.have_cup",
+      "choices": [
+        {
+          "text": "event.caroline.719926.choice.yes",
+          "commands": [
+            { "cmd": "eat_item", "actor": "fake_player", "item": "stardewcraft:green_tea", "ticks": 40 },
+            { "cmd": "pause", "ticks": 20 }
+          ]
+        },
+        {
+          "text": "event.caroline.719926.choice.no",
+          "commands": [
+            { "cmd": "speak", "npc_id": "caroline", "text": "event.caroline.719926.no_problem" }
+          ]
+        }
+      ]
+    },
+    { "cmd": "face_actor", "actor": "fake_player", "yaw": 180 },
+    { "cmd": "play_sound", "sound": "stardewcraft:siptea" },
+    { "cmd": "pause", "ticks": 10 },
+    { "cmd": "text_above_head", "actor": "caroline",
+      "text": "event.caroline.719926.delicious", "ticks": 30 },
+    { "cmd": "music", "track": "MUSIC_SUNROOM" },
+    { "cmd": "pause", "ticks": 30 },
+    { "cmd": "speak", "npc_id": "caroline", "text": "event.caroline.719926.ritual" },
+    { "cmd": "fade", "mode": "out", "ticks": 20 },
+    { "cmd": "green_tea_vision" },
+    { "cmd": "fade", "mode": "in", "ticks": 20 },
+    { "cmd": "pause", "ticks": 20 },
+    { "cmd": "speak", "npc_id": "caroline", "text": "event.caroline.719926.after_vision" },
+    { "cmd": "pause", "ticks": 3 },
+    { "cmd": "speak", "npc_id": "caroline", "text": "event.caroline.719926.welcome" },
+    { "cmd": "emote", "actor": "fake_player", "emote": "happy" },
+    { "cmd": "pause", "ticks": 20 },
+    { "cmd": "navigate_actor", "actor": "fake_player",
+      "x": 51.5, "y": 37, "z": -45.5, "speed": 0.11, "relative": false },
+    { "cmd": "fade", "mode": "out", "ticks": 20 },
+    { "cmd": "remove_actor", "actor": "fake_player" },
+    { "cmd": "remove_actor", "actor": "caroline" },
+    { "cmd": "show_npc", "npc_id": "caroline" },
+    { "cmd": "stop_music" },
+    { "cmd": "camera", "action": "reset" },
+    { "cmd": "unlock_player" },
+    { "cmd": "end" }
+  ]
+}

@@ -230,6 +230,8 @@ public final class ModSounds {
 	public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_RAGTIME = register("music_ragtime");
 	public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_DISTANT_BANJO = register("music_distant_banjo");
 	public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_CLUBLOOP = register("music_clubloop");
+	public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_SUNROOM = register("music_sunroom");
+	public static final DeferredHolder<SoundEvent, SoundEvent> BABBLING_BROOK = register("babbling_brook");
 	public static final DeferredHolder<SoundEvent, SoundEvent> BOOP = register("boop");
     public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_OCEAN_AMBIENCE = register("music_ocean_ambience");
 	public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_GRANDPAS_THEME = register("music_grandpas_theme");

@@ -63,6 +63,15 @@
       "indoor_entry_point": "seedshop_indoor_entry",
       "indoor_exit_point": "seedshop_indoor_exit"
     },
+    "sunroom": {
+      "indoor": true,
+      "portal_target": "pierre_house_enter",
+      "use_ground_height": false,
+      "use_schedule_tile_offset": false,
+      "outdoor_door_point": "seedshop_outdoor_door",
+      "indoor_entry_point": "caroline_schedule_15",
+      "indoor_exit_point": "caroline_schedule_15"
+    },
     "manorhouse": {
       "indoor": true,
       "portal_target": "mayor_house_enter",

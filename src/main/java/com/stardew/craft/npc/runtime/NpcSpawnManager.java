@@ -14,6 +14,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.LinkedHashMap;
 import java.util.ArrayList;
@@ -65,8 +66,9 @@ public final class NpcSpawnManager {
     private static final Map<String, FestivalSpawnTarget> FESTIVAL_SPAWN_TARGETS = new LinkedHashMap<>();
 
     // ── Tick-scoped caches to avoid redundant world entity scans ──
-    private static long cachedScanGameTime = Long.MIN_VALUE;
-    private static List<StardewNpcEntity> cachedAllNpcs = List.of();
+    // Valley and mining levels share the same game clock, so they cannot share
+    // one entity list without occasionally reading entities from the wrong level.
+    private static final Map<ServerLevel, EntityScanCache> ENTITY_SCAN_CACHES = new IdentityHashMap<>();
     private static Set<String> cachedImplementedIds = Set.of();
     private static Map<String, NpcCapabilityProfile> cachedImplementedCapabilities = Map.of();
 
@@ -102,11 +104,14 @@ public final class NpcSpawnManager {
      */
     private static List<StardewNpcEntity> getCachedAllNpcs(ServerLevel level) {
         long gameTime = level.getGameTime();
-        if (gameTime - cachedScanGameTime >= 10) {
-            cachedAllNpcs = level.getEntitiesOfClass(StardewNpcEntity.class, GLOBAL_NPC_SCAN);
-            cachedScanGameTime = gameTime;
+        EntityScanCache cache = ENTITY_SCAN_CACHES.computeIfAbsent(level, ignored -> new EntityScanCache());
+        if (cache.gameTime == Long.MIN_VALUE
+                || gameTime < cache.gameTime
+                || gameTime - cache.gameTime >= 10) {
+            cache.entities = level.getEntitiesOfClass(StardewNpcEntity.class, GLOBAL_NPC_SCAN);
+            cache.gameTime = gameTime;
         }
-        return cachedAllNpcs;
+        return cache.entities;
     }
 
     /**
@@ -273,8 +278,28 @@ public final class NpcSpawnManager {
      * Forces an immediate full sweep to clean up duplicates and snap NPCs.
      */
     public static void onPlayerEntered(ServerLevel level) {
+        ENTITY_SCAN_CACHES.remove(level);
         Set<String> implementedIds = getCachedImplementedIds();
-        cleanupUnknownAndDuplicated(level, implementedIds);
+        Map<String, StardewNpcEntity> loadedByNpcId = collectAndDeduplicateLoaded(level, implementedIds);
+        for (NpcCapabilityProfile profile : NpcDataRegistry.capabilities().values()) {
+            if (profile == null || !profile.implemented()) {
+                continue;
+            }
+            String npcId = canonicalNpcId(profile.npcId());
+            if (npcId == null || npcId.isBlank()
+                    || MINING_DIM_NPC_IDS.contains(npcId)
+                    || SUPPRESSED_SPAWN_IDS.contains(npcId)
+                    || com.stardew.craft.joja.JojaNpcEvents.isJojaMartNpc(npcId)
+                    || loadedByNpcId.containsKey(npcId)) {
+                continue;
+            }
+            // Ordinary NPCs are intentionally not serialized. Once their chunk unloads
+            // there is no old entity to wait for, so recover immediately on re-entry.
+            TRACKED_NPC_UUIDS.remove(npcId);
+            TRACKED_MISS_COUNTS.remove(npcId);
+            LAST_SPAWN_GAME_TIME.remove(npcId);
+            FORCE_SPAWN_IDS.add(npcId);
+        }
         initialSweepDone = true;
     }
 
@@ -1180,9 +1205,31 @@ public final class NpcSpawnManager {
         SUPPRESSED_SPAWN_IDS.clear();
         FORCE_SPAWN_IDS.clear();
         FESTIVAL_SPAWN_TARGETS.clear();
-        cachedScanGameTime = Long.MIN_VALUE;
-        cachedAllNpcs = List.of();
+        ENTITY_SCAN_CACHES.clear();
         cachedImplementedCapabilities = Map.of();
+    }
+
+    public static void onServerStopped(MinecraftServer server) {
+        if (activeServer != server) {
+            return;
+        }
+        activeServer = null;
+        tickCounter = 0;
+        initialSweepDone = false;
+        TRACKED_NPC_UUIDS.clear();
+        TRACKED_MISS_COUNTS.clear();
+        LAST_SPAWN_GAME_TIME.clear();
+        SUPPRESSED_SPAWN_IDS.clear();
+        FORCE_SPAWN_IDS.clear();
+        FESTIVAL_SPAWN_TARGETS.clear();
+        ENTITY_SCAN_CACHES.clear();
+        cachedImplementedIds = Set.of();
+        cachedImplementedCapabilities = Map.of();
+    }
+
+    private static final class EntityScanCache {
+        private long gameTime = Long.MIN_VALUE;
+        private List<StardewNpcEntity> entities = List.of();
     }
 
     private record FestivalSpawnTarget(String owner, Vec3 position, float yaw) {
@@ -1246,7 +1293,7 @@ public final class NpcSpawnManager {
             }
         }
 
-        String chunk = NpcChunkForceManager.currentForcedTargetChunk(canonicalId);
+        String chunk = NpcChunkForceManager.currentForcedTargetChunk(level, canonicalId);
 
         boolean trackedAlive = false;
         if (trackedUuid != null) {

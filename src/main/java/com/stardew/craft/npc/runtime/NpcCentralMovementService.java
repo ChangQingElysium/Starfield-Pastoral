@@ -406,7 +406,7 @@ public final class NpcCentralMovementService {
                     plan.debugNextWaypoint,
                     plan.debugRepathReason,
                     level.getGameTime() - plan.lastProgressTick,
-                    NpcChunkForceManager.currentForcedTargetChunk(npcId),
+                    NpcChunkForceManager.currentForcedTargetChunk(level, npcId),
                     route,
                     plan
                 );
@@ -475,6 +475,18 @@ public final class NpcCentralMovementService {
         }
 
         activeServer = level.getServer();
+        resetState();
+    }
+
+    public static void onServerStopped(MinecraftServer server) {
+        if (activeServer != server) {
+            return;
+        }
+        activeServer = null;
+        resetState();
+    }
+
+    private static void resetState() {
         ACTIVE_PLANS.clear();
         AUTHORED_PLANS.clear();
         AUTHORED_DEBUG_SNAPSHOTS.clear();

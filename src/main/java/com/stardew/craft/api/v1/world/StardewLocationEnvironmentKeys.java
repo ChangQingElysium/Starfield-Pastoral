@@ -21,6 +21,8 @@ public final class StardewLocationEnvironmentKeys {
             core("music_start_time");
     public static final ResourceLocation MUSIC_END_TIME =
             core("music_end_time");
+    public static final ResourceLocation MUSIC_IGNORED_IN_RAIN =
+            core("music_ignored_in_rain");
     /** A music profile value that deliberately suppresses fallback music. */
     public static final String MUSIC_SILENT =
             "stardewcraft:silent";

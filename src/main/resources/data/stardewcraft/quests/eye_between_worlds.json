@@ -1,0 +1,10 @@
+{
+  "title": "stardewcraft.quest.eye_between_worlds.title",
+  "description": "stardewcraft.quest.eye_between_worlds.description",
+  "objective_text": "stardewcraft.quest.eye_between_worlds.objective",
+  "objective": {
+    "type": "stardewcraft:basic",
+    "data": {}
+  },
+  "can_cancel": false
+}

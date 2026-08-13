@@ -60,8 +60,10 @@ public class ModClientEvents {
 
     @SubscribeEvent
     public static void onClientLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
+        com.stardew.craft.cutscene.CutsceneSystem.ClientEvents.resetClientState();
         com.stardew.craft.communitycenter.cutscene.ScreenFade.clear();
         com.stardew.craft.client.AnimalOverviewClientCache.reset();
+        clearClientSessionCaches();
     }
 
     @SubscribeEvent
@@ -1364,11 +1366,7 @@ public class ModClientEvents {
         return ClientMuseumDonationCache.isDonated(id.toString());
     }
 
-    /**
-     * 客户端断开连接时清理 per-player NPC visibility 状态
-     */
-    @SubscribeEvent
-    public static void onPlayerLogout(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent event) {
+    private static void clearClientSessionCaches() {
         com.stardew.craft.network.payload.ClientNpcVisibilityState.clear();
         com.stardew.craft.client.render.ClientStarterChestState.clear();
 

@@ -1,5 +1,53 @@
 # Changelog
 
+## 0.5.6 - 2026-08-14
+
+### Update Log (English)
+
+#### Caroline, The Sunroom And Tea Bushes
+
+- Added Caroline's original two-heart Sunroom event and six-heart Seed Shop event, including the green-tea vision sequence, original event timing and choices, localized dialogue for all 12 supported languages, Sunroom music and brook ambience, and the next-day Tea Sapling recipe letter.
+- Added the complete Tea Bush lifecycle: Tea Saplings can be crafted and planted outdoors, in the greenhouse or in Garden Pots; bushes mature over 20 days, produce Tea Leaves during the final week of each season, remain productive through winter when sheltered, and work with automation, Jade and the crop-growth key.
+- Added the original Tea Leaf processing route for the Keg and its artisan ingredient metadata, source-style Tea Sapling ingredients and tags, stage-specific two-block models, collision geometry and axe behavior. The permanent Sunroom bush can be harvested normally and removed for its sapling only after sustained chopping.
+- Rebuilt Caroline's rain, Green Rain, clinic, Night Market, weekday and seasonal schedules from the original data using the supplied Minecraft coordinates and facings, with explicit Sunroom, Seed Shop, town, clinic, museum and beach routing.
+
+#### Wizard Quest And NPC Reliability
+
+- Repaired the Wizard Tower introduction so entering the tower or interacting with the Wizard can retry a failed start, commits the first-meeting flag only when the event reaches that command, and adds the new "An Eye Between Worlds" quest asking the player to bring an Eye of Ender.
+- Made Wizard Tower entry recover the Wizard immediately at his active schedule position, and made NPC existence maintenance continue while Stardew time is paused. Ordinary NPCs whose unloaded entities disappeared are now recreated when a player re-enters the Valley.
+- Isolated NPC entity-scan and forced-chunk caches per server level, and clear spawn, movement, dialogue-lock, event and client visibility state when leaving a world or stopping a server. This prevents NPCs from disappearing because another dimension or previous save reused process-local state.
+- Corrected Pam's bus-driver check to use the actual data-defined driver point instead of a stale hard-coded coordinate, so reaching the scheduled bus stop position now enables boarding.
+
+#### Dialogue, Resources And Runtime Fixes
+
+- Fixed source-style direct dialogue responses such as the Feast of the Winter Star story: local response text is no longer sent as a server dialogue-node id, avoiding the overlong-payload crash while preserving paragraph breaks and player-name substitutions.
+- Allowed authoritative resource snapshots from a newly joined server to replace same-version data retained from a previous session, preventing false resource-reload rejection when switching worlds or servers.
+- Cleaned cutscene, fade, NPC visibility and cached client state on disconnect, and refreshed the bundled prebuilt Valley regions and manifest for the completed Sunroom content.
+- Updated the public mod version to `0.5.6`.
+
+### 更新日志（中文）
+
+#### 卡罗琳、日光室与茶树
+
+- 加入卡罗琳原版两心日光室剧情和六心杂货店剧情，接入绿茶幻视段落、原版节奏与选项、12 种语言对话、日光室音乐与溪流环境音，以及次日寄送的茶苗配方信件。
+- 完整实现茶树生长周期：茶苗可制作并种在室外、温室或花盆中；20 天长成，每季最后一周产出茶叶，受庇护时冬季仍可生产，并接入自动化、Jade 和作物催熟按键。
+- 加入原版茶叶的酿酒桶加工路线与工匠物品元数据、茶苗配方材料与标签、分阶段双格模型、碰撞箱和斧头交互。日光室的常驻茶树可正常采收，持续砍伐后才会移除并给予茶苗。
+- 按原版数据和已提供的 Minecraft 坐标与朝向，重做卡罗琳的雨天、绿雨、诊所、夜市、工作日与季节日程，并补全日光室、杂货店、小镇、诊所、博物馆和海滩路线。
+
+#### 法师任务与 NPC 稳定性
+
+- 修复法师塔首次见面流程：进入法师塔或与法师交互时可重试启动失败的剧情，只在剧情真正执行到标记指令时才记录首次见面，并新增“世界之间的眼”任务，要求玩家为法师带回一枚末影之眼。
+- 进入法师塔时会立即在当前日程位置恢复法师；NPC 存在性维护不再被星露谷时间暂停阻断。普通 NPC 因区块卸载而消失后，玩家重新进入星露谷时会自动重建。
+- 将 NPC 实体扫描与强制加载区块缓存按服务端维度隔离，并在退出世界或停止服务端时清理生成、移动、对话锁、剧情与客户端可见性状态，避免其他维度或前一个存档的进程缓存造成 NPC 消失。
+- 修正潘姆的巴士司机判定，改为使用数据中真实的司机点位，不再与过时的硬编码坐标比较；潘姆走到日程中的巴士站位置后即可上车。
+
+#### 对话、资源与运行时修复
+
+- 修复冬日星宴会节日故事等原版快速回复对话：客户端本地回复文本不再被当成服务端对话节点 ID 发送，避免超长网络载荷崩溃，同时保留分段和玩家姓名替换。
+- 允许新连入服务端的权威资源快照覆盖客户端从上一个会话保留的同版本数据，避免切换世界或服务器时误报资源重载失败。
+- 断开连接时会清理剧情、淡入淡出、NPC 可见性和客户端缓存，并刷新内置星露谷区域与清单以包含完整的日光室内容。
+- 将公开模组版本更新为 `0.5.6`。
+
 ## 0.5.5fix2 - 2026-08-08
 
 ### Update Log (English)

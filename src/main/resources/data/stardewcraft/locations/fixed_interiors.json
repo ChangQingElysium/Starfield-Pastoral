@@ -1,6 +1,7 @@
 {
   "regions": [
-    { "id": "pierre_house", "ledger_id": "music_region_pierre_house", "min": [16, 35, -44], "max": [60, 40, -7], "aliases": ["seedshop", "pierre_house", "pierreshop", "shop", "sunroom"], "properties": {"stardewcraft:music_profile": "stardewcraft:music_springtown"} },
+    { "id": "pierre_house", "ledger_id": "music_region_pierre_house", "min": [16, 35, -44], "max": [60, 40, -7], "aliases": ["seedshop", "pierre_house", "pierreshop", "shop"], "properties": {"stardewcraft:music_profile": "stardewcraft:music_springtown"} },
+    { "id": "sunroom", "ledger_id": "music_region_sunroom", "min": [45, 36, -57], "max": [61, 44, -46], "aliases": ["sunroom"], "properties": {"stardewcraft:music_profile": "stardewcraft:music_sunroom", "stardewcraft:music_ignored_in_rain": "true"} },
     { "id": "museum", "ledger_id": "music_region_museum", "min": [108, 37, 29], "max": [178, 41, 56], "aliases": ["museum", "archaeologyhouse"], "properties": {"stardewcraft:music_profile": "stardewcraft:music_library"} },
     { "id": "blacksmith", "ledger_id": "music_region_blacksmith", "min": [100, 45, 11], "max": [115, 50, 31], "aliases": ["blacksmith"] },
     { "id": "saloon", "ledger_id": "music_region_saloon", "min": [15, 35, -3], "max": [58, 40, 19], "aliases": ["saloon"], "properties": {"stardewcraft:music_profile": "stardewcraft:music_saloon", "stardewcraft:music_start_time": "1700"} },

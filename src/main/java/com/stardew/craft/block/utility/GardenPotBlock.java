@@ -75,6 +75,7 @@ public final class GardenPotBlock extends FarmBlock implements EntityBlock {
                 || state.getBlock() instanceof CropBlock
                 || state.getBlock() instanceof com.stardew.craft.block.crop.DeadCropBlock
                 || state.getBlock() instanceof com.stardew.craft.block.nature.ForageBlock
+                || state.getBlock() instanceof com.stardew.craft.block.nature.TeaBushBlock
                 || StardewCropRuntime.isRegisteredBlock(state);
     }
 

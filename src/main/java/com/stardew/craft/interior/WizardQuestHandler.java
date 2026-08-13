@@ -31,6 +31,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public final class WizardQuestHandler {
 
     private static final String NPC_ID = "wizard";
+    private static final String EYE_QUEST_ID = "stardewcraft:eye_between_worlds";
 
     // 巫师在巫师塔内部的位置（与 default_spawns.json 一致）
     private static final BlockPos WIZARD_POS = new BlockPos(-179, 34, 55);
@@ -111,13 +112,15 @@ public final class WizardQuestHandler {
 
         // 冷却检测：进入范围后只触发一次
         if (player.getPersistentData().contains(PROXIMITY_COOLDOWN_TAG)) return;
-        player.getPersistentData().putBoolean(PROXIMITY_COOLDOWN_TAG, true);
 
         if (needsIntro) {
-            // 首次见面 → 触发 wizard_intro cutscene
-            data.setWizardFirstMet(true);
+            // Commit wizardFirstMet through the cutscene's set_flag command. If the
+            // event cannot start, leave it unset so a manual interaction can retry.
+            // Mark this proximity visit before starting to avoid retrying every 10 ticks.
+            player.getPersistentData().putBoolean(PROXIMITY_COOLDOWN_TAG, true);
             triggerCutscene(player, "wizard_intro");
         } else {
+            player.getPersistentData().putBoolean(PROXIMITY_COOLDOWN_TAG, true);
             // 看过 JunimoNote 但未解锁文字 → 自动触发 wizard_e112
             completeMeetWizardQuest(player);
             CCStoryFlags.addFlag(player, CCStoryFlags.CAN_READ_JUNIMO);
@@ -158,10 +161,10 @@ public final class WizardQuestHandler {
 
         if (!data.isWizardFirstMet()) {
             // 首次见面 → 触发 wizard_intro cutscene
-            data.setWizardFirstMet(true);
-            triggerCutscene(player, "wizard_intro");
-            return true;
+            return triggerCutscene(player, "wizard_intro");
         }
+
+        ensureEyeQuestActive(player);
 
         // 已见过但未完成任务：检查背包是否有末影之眼
         ItemStack eyeSlot = findEyeOfEnder(player);
@@ -170,6 +173,7 @@ public final class WizardQuestHandler {
                     player.getName().getString(), player.getStringUUID());
             eyeSlot.shrink(1);
             data.setWizardQuestComplete(true);
+            data.getQuestManager().completeActiveQuest(EYE_QUEST_ID, player);
             sendDialogue(player, "stardewcraft.npc.wizard.has_eye", 0);
             StardewCraft.LOGGER.info("[WIZARD] {} completed wizard quest (Eye of Ender)", player.getName().getString());
 
@@ -191,6 +195,16 @@ public final class WizardQuestHandler {
 
     private static void completeMeetWizardQuest(ServerPlayer player) {
         com.stardew.craft.quest.QuestManager.of(player).completeActiveQuest("1", player);
+    }
+
+    private static void ensureEyeQuestActive(ServerPlayer player) {
+        com.stardew.craft.quest.QuestManager quests =
+                com.stardew.craft.quest.QuestManager.of(player);
+        if (quests != null
+                && !quests.hasQuest(EYE_QUEST_ID)
+                && !quests.isQuestCompleted(EYE_QUEST_ID)) {
+            quests.acceptQuest(EYE_QUEST_ID, player);
+        }
     }
 
     /**
@@ -309,8 +323,14 @@ public final class WizardQuestHandler {
     }
 
     /** 触发 cutscene 事件 (发送 TriggerEventPayload 到客户端) */
-    private static void triggerCutscene(ServerPlayer player, String eventId) {
-        com.stardew.craft.cutscene.server.ServerCutsceneTracker.startEvent(player, eventId);
-        StardewCraft.LOGGER.info("[WIZARD] Triggered cutscene '{}' for {}", eventId, player.getName().getString());
+    private static boolean triggerCutscene(ServerPlayer player, String eventId) {
+        boolean started = com.stardew.craft.cutscene.server.ServerCutsceneTracker.startEvent(player, eventId);
+        if (started) {
+            StardewCraft.LOGGER.info("[WIZARD] Triggered cutscene '{}' for {}", eventId, player.getName().getString());
+        } else {
+            StardewCraft.LOGGER.warn("[WIZARD] Could not start cutscene '{}' for {}; it remains retryable",
+                    eventId, player.getName().getString());
+        }
+        return started;
     }
 }

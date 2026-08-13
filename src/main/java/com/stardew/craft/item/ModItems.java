@@ -1918,6 +1918,12 @@ public class ModItems {
         public static final DeferredItem<Item> BLUE_GRASS_STARTER = ITEMS.register("blue_grass_starter",
                                                 () -> new GrassStarterItem(ModBlocks.BLUE_PASTURE_GRASS, 50, new Item.Properties().stacksTo(999)));
 
+        public static final DeferredItem<Item> TEA_SAPLING = ITEMS.register("tea_sapling",
+                        () -> new TeaSaplingItem(ModBlocks.TEA_BUSH, new Item.Properties().stacksTo(999)));
+        public static final DeferredItem<Item> TEA_LEAVES = ITEMS.register("tea_leaves",
+                        () -> new SimpleStardewItem("stardewcraft.type.crop", 50,
+                                        new Item.Properties().stacksTo(999)));
+
         // 鏍戠瀛愶紙鏉ヨ嚜鏄熼湶璋凤細姗″瓙/鏋爲绉嶅瓙/鏉炬灉/妗冭姳蹇冩湪绉嶅瓙/绁炵鏍戠锛?
         public static final DeferredItem<Item> ACORN = ITEMS.register("acorn",
                         () -> new TreeSeedItem(ModBlocks.WILD_OAK_SAPLING0, 20, new Item.Properties().stacksTo(999)));

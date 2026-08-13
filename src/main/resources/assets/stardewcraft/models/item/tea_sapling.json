@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/crops/tea_sapling",
+    "particle": "stardewcraft:item/crops/tea_sapling"
+  }
+}

@@ -152,6 +152,9 @@ public final class GardenPotBlockEntity extends BlockEntity
             BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(cropPos), Direction.UP, cropPos, false);
             return crop.useWithoutItem(level, player, hit).consumesAction();
         }
+        if (crop.getBlock() instanceof com.stardew.craft.block.nature.TeaBushBlock teaBush) {
+            return teaBush.interact(player, player.serverLevel(), cropPos);
+        }
         if (!(crop.getBlock() instanceof CropBlock vanillaCrop) || !vanillaCrop.isMaxAge(crop)) {
             return false;
         }
@@ -199,6 +202,11 @@ public final class GardenPotBlockEntity extends BlockEntity
         if (stardew != null) {
             return stardew.mature();
         }
+        if (crop.getBlock() instanceof com.stardew.craft.block.nature.TeaBushBlock
+                && level instanceof ServerLevel serverLevel) {
+            return com.stardew.craft.manager.TeaBushManager.get(serverLevel)
+                    .isReadyForHarvest(serverLevel, cropPos());
+        }
         return crop.getBlock() instanceof CropBlock vanillaCrop && vanillaCrop.isMaxAge(crop)
                 || crop.getBlock() instanceof com.stardew.craft.block.nature.ForageBlock;
     }
@@ -213,6 +221,10 @@ public final class GardenPotBlockEntity extends BlockEntity
         if (stardew != null) {
             // The crop runtime owns removal/regrowth. Clearing it again here destroys regrowing crops.
             StardewCropRuntime.harvestForAutomation(serverLevel, cropPos, 0, this::addOutput);
+        } else if (crop.getBlock() instanceof com.stardew.craft.block.nature.TeaBushBlock) {
+            if (com.stardew.craft.manager.TeaBushManager.get(serverLevel).harvest(serverLevel, cropPos)) {
+                addOutput(new ItemStack(com.stardew.craft.item.ModItems.TEA_LEAVES.get()));
+            }
         } else if (crop.getBlock() instanceof com.stardew.craft.block.nature.ForageBlock forage) {
             ItemStack output = forage.getAutomationDrop();
             if (!output.isEmpty()) {
@@ -319,6 +331,10 @@ public final class GardenPotBlockEntity extends BlockEntity
             return com.stardew.craft.item.MixedSeedsItem.pickCropStateForSeason(
                     StardewTimeManager.get().getCurrentSeason(), level.getRandom());
         }
+        if (seed.is(com.stardew.craft.item.ModItems.TEA_SAPLING.get())
+                && com.stardew.craft.block.nature.TeaBushBlock.canPlantAt(level, cropPos())) {
+            return com.stardew.craft.block.ModBlocks.TEA_BUSH.get().defaultBlockState();
+        }
         for (Block block : BuiltInRegistries.BLOCK) {
             if (block instanceof StardewCropBlock crop && crop.isSeedItem(seed)
                     && crop.canPlantAt(level, cropPos())) {
@@ -420,6 +436,9 @@ public final class GardenPotBlockEntity extends BlockEntity
         }
         if (crop.getBlock() instanceof com.stardew.craft.block.nature.ForageBlock forage) {
             return forage.getAutomationDrop();
+        }
+        if (crop.getBlock() instanceof com.stardew.craft.block.nature.TeaBushBlock) {
+            return new ItemStack(com.stardew.craft.item.ModItems.TEA_LEAVES.get());
         }
         if (crop.getBlock() instanceof CropBlock) {
             List<ItemStack> drops = Block.getDrops(crop, serverLevel, cropPos(), null);

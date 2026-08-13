@@ -91,10 +91,6 @@ public final class NpcSystem {
             return;
         }
 
-        if (com.stardew.craft.time.StardewTimePauseService.isPaused(event.getServer())) {
-            return;
-        }
-
         if (!previouslyHadPlayers) {
             // Player just entered — invalidate caches & snap NPCs into position.
             NpcScheduleRuntimeService.invalidateCache();
@@ -102,24 +98,34 @@ public final class NpcSystem {
             previouslyHadPlayers = true;
         }
 
+        // Existence and schedule target resolution are lifecycle maintenance, not
+        // passage-of-time simulation. They must continue while dialogue/cutscenes
+        // pause Stardew time, otherwise a newly entered area can remain NPC-free.
         NpcScheduleRuntimeService.tick(level);
         com.stardew.craft.festival.ActiveFestivalHandlers.tickNpcActors(level);
         NpcSpawnManager.tick(level);
-        NpcCentralMovementService.tick(level);
 
         // Tick mining-dimension NPCs (e.g. Dwarf) when any player is in the mine
         if (anyPlayerInMining) {
             ServerLevel mineLevel = event.getServer().getLevel(ModMiningDimensions.STARDEW_MINING);
             if (mineLevel != null) {
                 NpcSpawnManager.tickMiningDimension(mineLevel);
-            } else {
             }
         }
+
+        if (com.stardew.craft.time.StardewTimePauseService.isPaused(event.getServer())) {
+            return;
+        }
+        NpcCentralMovementService.tick(level);
     }
 
     @SubscribeEvent
     public static void onServerStopped(ServerStoppedEvent event) {
         NpcRuntimeManager.onServerStopped(event.getServer());
+        NpcSpawnManager.onServerStopped(event.getServer());
+        NpcCentralMovementService.onServerStopped(event.getServer());
+        com.stardew.craft.npc.runtime.NpcInteractionService.onServerStopped();
+        NpcScheduleRuntimeService.invalidateCache();
         previouslyHadPlayers = false;
     }
 
@@ -133,13 +139,17 @@ public final class NpcSystem {
             NpcSpawnManager.onPlayerEntered(level);
             previouslyHadPlayers = true;
         }
-        NpcScheduleRuntimeService.tick(level);
-        // Only force-spawn wizard if not already tracked, to avoid
-        // creating duplicates when the tower chunk loads serialised entities.
-        if (NpcSpawnManager.getTrackedNpc(level, "wizard") == null) {
+        boolean recovered = NpcSpawnManager.forceNpcToCurrentSchedule(level, "wizard");
+        if (!recovered) {
+            // A malformed/missing schedule must not make the overworld tower portal
+            // unusable. Fall back to the default spawn data and verify the result.
             NpcSpawnManager.forceSpawnNpc("wizard");
+            NpcSpawnManager.tick(level);
+            recovered = NpcSpawnManager.getTrackedNpc(level, "wizard") != null;
         }
-        NpcSpawnManager.tick(level);
+        if (!recovered) {
+            StardewCraft.LOGGER.warn("[NPC_SPAWN] Wizard was still unavailable after forced tower-entry recovery");
+        }
     }
 
     @SubscribeEvent

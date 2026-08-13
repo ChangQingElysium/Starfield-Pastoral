@@ -17,6 +17,7 @@ import com.stardew.craft.world.MutantBugLairArea;
 import com.stardew.craft.world.WitchArea;
 import com.stardew.craft.world.LocationMusicEnvironment;
 import com.stardew.craft.api.v1.world.StardewLocations;
+import com.stardew.craft.api.v1.world.StardewLocationEnvironmentKeys;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.AbstractSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
@@ -83,6 +84,7 @@ public final class StardewMusicManager {
 
     private static final Map<String, InteriorMusicDefinition> FIXED_INTERIOR_MUSIC = Map.ofEntries(
         Map.entry("pierre_house",     music(ModSounds.MUSIC_SPRINGTOWN)),
+        Map.entry("sunroom",          music(ModSounds.MUSIC_SUNROOM)),
         Map.entry("museum",           music(ModSounds.MUSIC_LIBRARY)),
         Map.entry("blacksmith",       music(null)),
         Map.entry("saloon",           music(ModSounds.MUSIC_SALOON, 1700)),
@@ -656,6 +658,15 @@ public final class StardewMusicManager {
             var location = StardewLocations.find(
                     mc.level.dimension().location(),
                     new BlockPos(px, py, pz)).orElse(null);
+            if (location != null
+                    && location.property(StardewLocationEnvironmentKeys.MUSIC_IGNORED_IN_RAIN)
+                            .map(Boolean::parseBoolean)
+                            .orElse(false)) {
+                String weather = ClientWeatherCache.getCurrentWeather(ModDimensions.STARDEW_VALLEY);
+                if ("Rain".equals(weather) || "Storm".equals(weather)) {
+                    return new InteriorTrackChoice(null);
+                }
+            }
             StardewTimeManager clock =
                     StardewTimeHud.getClientTimeCache();
             var environment = LocationMusicEnvironment.resolve(

@@ -53,6 +53,7 @@
     { "cmd": "camera", "action": "reset" },
     { "cmd": "unlock_player" },
     { "cmd": "fade", "mode": "in", "ticks": 15 },
+    { "cmd": "add_quest", "quest_id": "stardewcraft:eye_between_worlds" },
     { "cmd": "end" }
   ]
 }

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "stardewcraft:block/nature/tea_bush/tea_stage3_bottom",
+    "particle": "stardewcraft:block/nature/tea_bush/tea_stage3_bottom"
+  }
+}

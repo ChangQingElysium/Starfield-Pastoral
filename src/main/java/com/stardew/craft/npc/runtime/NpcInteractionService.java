@@ -275,6 +275,11 @@ public final class NpcInteractionService {
         endDialogueSession(player.getUUID(), null);
     }
 
+    public static void onServerStopped() {
+        ACTIVE_DIALOGUE_NPC_BY_PLAYER.clear();
+        ACTIVE_DIALOGUE_LOCK_COUNTS.clear();
+    }
+
     private static void beginDialogueSession(ServerPlayer player, String npcId) {
         if (player == null || npcId == null || npcId.isBlank()) {
             return;

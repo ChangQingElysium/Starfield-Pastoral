@@ -33,7 +33,7 @@ public final class AtomicDefinitionStore<T> {
             Map<ResourceLocation, String> canonicalSources,
             List<DefinitionDiagnostic> diagnostics
     ) {
-        return apply(snapshot.version() + 1L, null, definitions, canonicalSources, diagnostics, false);
+        return apply(snapshot.version() + 1L, null, definitions, canonicalSources, diagnostics, false, false);
     }
 
     public synchronized ApplyResult<T> applyRemote(
@@ -48,7 +48,22 @@ public final class AtomicDefinitionStore<T> {
                     null, null, "Received stale definition snapshot version " + version
                             + "; current version is " + snapshot.version())));
         }
-        return apply(version, expectedHash, definitions, canonicalSources, diagnostics, true);
+        return apply(version, expectedHash, definitions, canonicalSources, diagnostics, true, false);
+    }
+
+    /**
+     * Replace the local snapshot with a snapshot supplied by the current authority.
+     * Server versions belong to that server and cannot be compared with a snapshot
+     * retained from another client session.
+     */
+    public synchronized ApplyResult<T> replaceRemote(
+            long version,
+            String expectedHash,
+            Map<ResourceLocation, T> definitions,
+            Map<ResourceLocation, String> canonicalSources,
+            List<DefinitionDiagnostic> diagnostics
+    ) {
+        return apply(version, expectedHash, definitions, canonicalSources, diagnostics, true, true);
     }
 
     private ApplyResult<T> apply(
@@ -57,7 +72,8 @@ public final class AtomicDefinitionStore<T> {
             Map<ResourceLocation, T> definitions,
             Map<ResourceLocation, String> canonicalSources,
             List<DefinitionDiagnostic> diagnostics,
-            boolean remote
+            boolean remote,
+            boolean authoritativeReplacement
     ) {
         List<DefinitionDiagnostic> allDiagnostics = new ArrayList<>(diagnostics);
         if (allDiagnostics.stream().anyMatch(d -> d.severity() == DefinitionDiagnostic.Severity.ERROR)) {
@@ -75,7 +91,7 @@ public final class AtomicDefinitionStore<T> {
         if (version == snapshot.version() && actualHash.equals(snapshot.contentHash())) {
             return ApplyResult.accepted(snapshot, false);
         }
-        if (remote && version == snapshot.version()) {
+        if (remote && !authoritativeReplacement && version == snapshot.version()) {
             allDiagnostics.add(DefinitionDiagnostic.error(
                     null, null, "Definition snapshot version " + version + " changed content hash"));
             return ApplyResult.rejected(snapshot, allDiagnostics);

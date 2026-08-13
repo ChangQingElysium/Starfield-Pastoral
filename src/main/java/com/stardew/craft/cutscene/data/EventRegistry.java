@@ -295,7 +295,7 @@ public final class EventRegistry {
             Candidate candidate,
             String operation
     ) {
-        var result = STORE.applyRemote(
+        var result = STORE.replaceRemote(
                 version,
                 hash,
                 candidate.definitions(),

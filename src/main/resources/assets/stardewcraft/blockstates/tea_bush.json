@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "half=lower,stage=0": { "model": "stardewcraft:block/nature/tea_bush/tea_stage0_bottom" },
+    "half=upper,stage=0": { "model": "stardewcraft:block/nature/tea_bush/tea_stage0_top" },
+    "half=lower,stage=1": { "model": "stardewcraft:block/nature/tea_bush/tea_stage1_bottom" },
+    "half=upper,stage=1": { "model": "stardewcraft:block/nature/tea_bush/tea_stage1_top" },
+    "half=lower,stage=2": { "model": "stardewcraft:block/nature/tea_bush/tea_stage2_bottom" },
+    "half=upper,stage=2": { "model": "stardewcraft:block/nature/tea_bush/tea_stage2_top" },
+    "half=lower,stage=3": { "model": "stardewcraft:block/nature/tea_bush/tea_stage3_bottom" },
+    "half=upper,stage=3": { "model": "stardewcraft:block/nature/tea_bush/tea_stage3_top" }
+  }
+}

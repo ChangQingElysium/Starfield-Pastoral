@@ -1663,6 +1663,29 @@
       ]
     },
     {
+      "id": "tea_sapling",
+      "unlockCondition": "null",
+      "output": {
+        "item": "stardewcraft:tea_sapling",
+        "count": 1
+      },
+      "ingredients": [
+        {
+          "tag": "stardewcraft:crafting_wild_seeds",
+          "displayItem": "stardewcraft:spring_seeds",
+          "count": 2
+        },
+        {
+          "item": "stardewcraft:fiber",
+          "count": 5
+        },
+        {
+          "item": "stardewcraft:wood_normal",
+          "count": 5
+        }
+      ]
+    },
+    {
       "id": "wild_seeds_spring",
       "unlockCondition": "s Foraging 1",
       "output": {

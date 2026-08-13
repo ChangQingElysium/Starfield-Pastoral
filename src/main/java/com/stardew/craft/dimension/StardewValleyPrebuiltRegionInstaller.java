@@ -54,7 +54,7 @@ public final class StardewValleyPrebuiltRegionInstaller {
      * 注意：覆盖会抹掉玩家在 pregen 区域内放的方块（比如摆了椅子、铺了地板之类）。
      * 所以每次 +1 都是"强制小镇重置"的操作，要和版本发布节奏绑定。
      */
-    public static final int CURRENT_PREGEN_VERSION = 12;
+    public static final int CURRENT_PREGEN_VERSION = 13;
 
     private static final String MARKER_VERSION_PREFIX = "version=";
     private static final String MARKER_MANIFEST_PREFIX = "manifest=";

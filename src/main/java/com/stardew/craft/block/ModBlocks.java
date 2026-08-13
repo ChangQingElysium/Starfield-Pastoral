@@ -1193,6 +1193,15 @@ public static final DeferredBlock<Block> DEAD_CROP = BLOCKS.register("dead_crop"
         public static final Map<FruitTreeType, DeferredBlock<Block>> FRUIT_TREES = registerFruitTrees();
         public static final Map<FruitTreeType, DeferredBlock<Block>> FRUIT_TREE_EXTENSIONS = registerFruitTreeExtensions();
 
+        public static final DeferredBlock<Block> TEA_BUSH = BLOCKS.register("tea_bush",
+                        () -> new com.stardew.craft.block.nature.TeaBushBlock(
+                                        Block.Properties.of()
+                                                        .mapColor(net.minecraft.world.level.material.MapColor.PLANT)
+                                                        .sound(net.minecraft.world.level.block.SoundType.GRASS)
+                                                        .noOcclusion()
+                                                        .strength(2.0F, 3.0F)
+                                                        .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK)));
+
         public static final DeferredBlock<Block> CHERRY_SAPLING = FRUIT_TREE_SAPLINGS.get(FruitTreeType.CHERRY);
         public static final DeferredBlock<Block> APRICOT_SAPLING = FRUIT_TREE_SAPLINGS.get(FruitTreeType.APRICOT);
         public static final DeferredBlock<Block> ORANGE_SAPLING = FRUIT_TREE_SAPLINGS.get(FruitTreeType.ORANGE);

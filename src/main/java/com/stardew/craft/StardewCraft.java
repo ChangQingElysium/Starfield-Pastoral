@@ -200,6 +200,9 @@ public class StardewCraft {
 
         com.stardew.craft.block.utility.GardenPotBlock.registerSeasonRule();
 
+        // Caroline's Sunroom is greenhouse-like in the original game.
+        com.stardew.craft.interior.SunroomService.registerSeasonRule();
+
         var server = event.getServer();
         // 预烘焙 region 已在 level 加载前安装；这里只记录轻量版本状态，不再解析巨型 schematic。
         if (com.stardew.craft.dimension.StardewValleyPrebuiltRegionInstaller.hasInstalledPrebuilt(server)) {

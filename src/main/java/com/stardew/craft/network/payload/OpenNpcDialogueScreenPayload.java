@@ -40,6 +40,11 @@ public record OpenNpcDialogueScreenPayload(
         return DIRECT_DIALOGUE_PREFIX + encodeDirectDialogue(text);
     }
 
+    /** Returns whether the source contains client-local dialogue text rather than a dialogue node id. */
+    public static boolean isDirectText(String source) {
+        return source != null && source.startsWith(DIRECT_DIALOGUE_PREFIX);
+    }
+
     /** Convenience: no afterClose action, no garble. */
     public OpenNpcDialogueScreenPayload(String npcId, String translateKey, int friendshipPoints) {
         this(npcId, translateKey, friendshipPoints, "", false, List.of());
@@ -549,9 +554,15 @@ public record OpenNpcDialogueScreenPayload(
         sb.append(before);
         sb.append("$q 0 null #").append(parts[0]);
         for (int i = 1; i + 1 < parts.length; i += 2) {
+            String response = parts[i + 1];
+            if (response.contains("*")) {
+                response = response.replace("**", "<<<<asterisk>>>>")
+                        .replace("*", "#$b#")
+                        .replace("<<<<asterisk>>>>", "*");
+            }
             sb.append("#$r 0 0 ")
                 .append(DIRECT_DIALOGUE_PREFIX)
-                .append(encodeDirectDialogue(parts[i + 1]))
+                .append(encodeDirectDialogue(response))
                 .append("#")
                 .append(parts[i]);
         }
@@ -662,7 +673,7 @@ public record OpenNpcDialogueScreenPayload(
         if (key == null || key.isBlank()) {
             return "";
         }
-        if (key.startsWith(DIRECT_DIALOGUE_PREFIX)) {
+        if (isDirectText(key)) {
             try {
                 byte[] decoded = java.util.Base64.getUrlDecoder().decode(key.substring(DIRECT_DIALOGUE_PREFIX.length()));
                 return new String(decoded, java.nio.charset.StandardCharsets.UTF_8);
@@ -676,7 +687,7 @@ public record OpenNpcDialogueScreenPayload(
     /** Resolve either a serialized Component or a normal translation key on the client. */
     public static String resolveClientTextSource(String source) {
         if (source == null || source.isBlank()) return "";
-        if (source.startsWith(DIRECT_DIALOGUE_PREFIX)) {
+        if (isDirectText(source)) {
             return rawTranslation(source);
         }
         String trimmed = source.trim();

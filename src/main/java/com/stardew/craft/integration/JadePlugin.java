@@ -4,6 +4,7 @@ import com.stardew.craft.api.v1.agriculture.StardewCropRuntime;
 import com.stardew.craft.api.v1.agriculture.StardewCropState;
 import com.stardew.craft.api.v1.agriculture.StardewCropTypes;
 import com.stardew.craft.block.crop.StardewCropBlock;
+import com.stardew.craft.block.nature.TeaBushBlock;
 import com.stardew.craft.block.animal.AnimalProduceSpotBlock;
 import com.stardew.craft.block.utility.AbstractTwoBlockUtilityBlock;
 import com.stardew.craft.block.utility.BeeHouseBlock;
@@ -30,6 +31,7 @@ import com.stardew.craft.block.utility.GardenPotBlock;
 import com.stardew.craft.integration.jade.FertilizerJadeProvider;
 import com.stardew.craft.integration.jade.AnimalProduceSpotJadeProvider;
 import com.stardew.craft.manager.CropGrowthManager;
+import com.stardew.craft.manager.TeaBushManager;
 import com.stardew.craft.block.tree.WildTreeSaplingBlock;
 import com.stardew.craft.manager.TreeGrowthManager;
 import com.stardew.craft.tree.WildTrees;
@@ -84,6 +86,8 @@ public class JadePlugin implements IWailaPlugin {
     private static final String NBT_VANILLA_CROP = "Stardew_VanillaCrop";
     private static final String NBT_VANILLA_CROP_AGE = "Stardew_VanillaCropAge";
     private static final String NBT_VANILLA_CROP_MAX_AGE = "Stardew_VanillaCropMaxAge";
+    private static final String NBT_TEA_BUSH = "Stardew_TeaBush";
+    private static final String NBT_TEA_READY = "Stardew_TeaReady";
 
     @Override
     public void register(IWailaCommonRegistration registration) {
@@ -249,6 +253,18 @@ public class JadePlugin implements IWailaPlugin {
             if (potted) {
                 tag.putBoolean(NBT_POTTED_CROP, true);
             }
+            if (state.getBlock() instanceof TeaBushBlock) {
+                TeaBushManager manager = TeaBushManager.get(serverLevel);
+                tag.putBoolean(NBT_TEA_BUSH, true);
+                tag.putInt(NBT_DAYS_GROWN,
+                        Math.min(TeaBushManager.DAYS_TO_MATURE,
+                                manager.getAgeDays(serverLevel, rootPos)));
+                tag.putInt(NBT_TOTAL_DAYS, TeaBushManager.DAYS_TO_MATURE);
+                tag.putBoolean(NBT_MATURE,
+                        manager.getAgeDays(serverLevel, rootPos) >= TeaBushManager.DAYS_TO_MATURE);
+                tag.putBoolean(NBT_TEA_READY, manager.isReadyForHarvest(serverLevel, rootPos));
+                return;
+            }
             if (!StardewCropRuntime.isRegisteredBlock(state)) {
                 if (potted && state.getBlock() instanceof CropBlock vanillaCrop) {
                     tag.putBoolean(NBT_VANILLA_CROP, true);
@@ -357,6 +373,24 @@ public class JadePlugin implements IWailaPlugin {
             CompoundTag serverData = accessor.getServerData();
             BlockPos rootPos = resolveCropRootPos(accessor);
             BlockState state = accessor.getLevel().getBlockState(rootPos);
+            if (serverData != null && serverData.getBoolean(NBT_TEA_BUSH)) {
+                if (serverData.getBoolean(NBT_POTTED_CROP)) {
+                    tooltip.add(state.getBlock().getName().copy()
+                            .withStyle(net.minecraft.ChatFormatting.GRAY));
+                }
+                tooltip.add(Component.translatable(
+                        "stardewcraft.tooltip.growth_stage",
+                        serverData.getInt(NBT_DAYS_GROWN) + "/" + serverData.getInt(NBT_TOTAL_DAYS)));
+                tooltip.add(Component.translatable("stardewcraft.tooltip.watered.not_required")
+                        .withStyle(net.minecraft.ChatFormatting.GRAY));
+                if (serverData.getBoolean(NBT_TEA_READY)) {
+                    tooltip.add(Component.translatable("stardewcraft.tooltip.mature"));
+                } else if (serverData.getBoolean(NBT_MATURE)) {
+                    tooltip.add(Component.translatable("stardewcraft.tooltip.tea_bush.no_leaves_today")
+                            .withStyle(net.minecraft.ChatFormatting.GRAY));
+                }
+                return;
+            }
             if (serverData != null && serverData.getBoolean(NBT_VANILLA_CROP)) {
                 tooltip.add(state.getBlock().getName().copy().withStyle(net.minecraft.ChatFormatting.GRAY));
                 int age = serverData.getInt(NBT_VANILLA_CROP_AGE);

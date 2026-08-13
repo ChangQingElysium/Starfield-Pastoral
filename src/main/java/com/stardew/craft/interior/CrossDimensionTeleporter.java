@@ -4,6 +4,7 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.blockentity.WoodenChestBlockEntity;
 import com.stardew.craft.network.payload.StarterChestHintPayload;
+import com.stardew.craft.network.payload.NpcVisibilityPayload;
 import com.stardew.craft.core.ModDimensions;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.network.ObjectDialogueService;
@@ -109,6 +110,10 @@ public final class CrossDimensionTeleporter {
 
         // 强制触发 NPC 系统初始化，确保巫师立刻出现
         com.stardew.craft.npc.NpcSystem.forceTickNow(stardewLevel);
+        // A previous wizard cutscene may have been interrupted while its client-only
+        // hide flag was active. Entering the tower is an authoritative recovery point:
+        // reveal the real wizard before any new intro cutscene decides to hide it again.
+        PacketDistributor.sendToPlayer(player, new NpcVisibilityPayload("wizard", false));
 
         StardewCraft.LOGGER.info("[WIZARD] {} teleported from overworld to wizard tower interior", player.getName().getString());
     }

@@ -98,6 +98,7 @@ public class StardewCraftClient {
                 ModBlocks.APPLE_SAPLING.get(),
                 ModBlocks.BANANA_SAPLING.get(),
                 ModBlocks.MANGO_SAPLING.get(),
+                ModBlocks.TEA_BUSH.get(),
                 ModBlocks.EGG_FESTIVAL_EGG.get(),
                 ModBlocks.WATER_LANTERN.get(),
                 // Forage blocks (cross model, cutout render)

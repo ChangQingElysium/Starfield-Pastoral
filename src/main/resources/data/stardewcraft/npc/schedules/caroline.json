@@ -1,95 +1,78 @@
 {
   "npc_id": "caroline",
   "override_vanilla": true,
-  "_format": "time -> \"location @namedPointId facing [behavior]\"",
+  "_format": "time -> \"location @caroline_schedule_NN facing [behavior]\"",
   "GreenRain": {
-    "610": "seedshop @caroline_seedshop_aerobics 2"
+    "610": "seedshop @caroline_schedule_06 0"
   },
   "rain": {
-    "800": "seedshop @caroline_seedshop_kitchen 0",
-    "1200": "seedshop @caroline_seedshop_living 2",
-    "1330": "seedshop @caroline_seedshop_read 0 caroline_read",
-    "1600": "seedshop @caroline_seedshop_display 0",
-    "2100": "seedshop @caroline_seedshop_bedroom 2 caroline_sleep"
-  },
-  "tuesday": {
-    "_note": "Tuesday: aerobics and exercise day",
-    "800": "seedshop @caroline_seedshop_aerobics 2",
-    "1030": "seedshop @caroline_seedshop_display 0",
-    "1300": "seedshop @caroline_seedshop_exercise 2 caroline_exercise",
-    "1600": "seedshop @caroline_seedshop_aerobics 2",
-    "1810": "seedshop @caroline_seedshop_diary 1",
-    "2100": "seedshop @caroline_seedshop_bedroom 2 caroline_sleep"
-  },
-  "wednesday": {
-    "_note": "Wednesday: morning kitchen, town walk, back home",
-    "800": "seedshop @caroline_seedshop_kitchen 0",
-    "1000": "seedshop @caroline_seedshop_read 0",
-    "1200": "town @caroline_town_walk 1",
-    "1700": "seedshop @caroline_seedshop_display 0",
-    "2100": "seedshop @caroline_seedshop_bedroom 2 caroline_sleep"
-  },
-  "friday": {
-    "_note": "Friday: museum reading, then home",
-    "800": "seedshop @caroline_seedshop_kitchen 0",
-    "1000": "seedshop @caroline_seedshop_read 0",
-    "1200": "archaeologyhouse @caroline_museum_read 0 caroline_read",
-    "1700": "seedshop @caroline_seedshop_display 0",
-    "2100": "seedshop @caroline_seedshop_bedroom 2 caroline_sleep"
-  },
-  "saturday": {
-    "_note": "Saturday: community center visit",
-    "800": "seedshop @caroline_seedshop_kitchen 0",
-    "1100": "communitycenter @communitycenter_outer 1",
-    "1700": "seedshop @caroline_seedshop_display 0",
-    "2100": "seedshop @caroline_seedshop_bedroom 2 caroline_sleep"
-  },
-  "sunday": {
-    "_note": "Sunday: relaxed day, mirror, town square",
-    "900": "seedshop @caroline_seedshop_read 0",
-    "1040": "seedshop @caroline_seedshop_read 0",
-    "1330": "seedshop @caroline_seedshop_living 2",
-    "1440": "town @caroline_town_square 2",
-    "1830": "seedshop @caroline_seedshop_mirror 1",
-    "2100": "seedshop @caroline_seedshop_bedroom 2 caroline_sleep"
-  },
-  "spring": {
-    "_note": "Spring default: kitchen, read, town walk, home",
-    "800": "seedshop @caroline_seedshop_kitchen 0",
-    "1000": "seedshop @caroline_seedshop_read 0",
-    "1200": "seedshop @caroline_seedshop_living 2",
-    "1330": "town @caroline_town_walk 1",
-    "1600": "seedshop @caroline_seedshop_display 0",
-    "2100": "seedshop @caroline_seedshop_bedroom 2 caroline_sleep"
-  },
-  "summer": {
-    "_goto": "spring"
-  },
-  "fall": {
-    "_goto": "spring"
+    "800": "seedshop @caroline_schedule_01 3",
+    "1200": "seedshop @caroline_schedule_02 0",
+    "1330": "seedshop @caroline_schedule_03 0 caroline_read",
+    "1600": "seedshop @caroline_schedule_04 0 square_9_9",
+    "2100": "seedshop @caroline_schedule_05 2 caroline_sleep"
   },
   "fall_25": {
-    "_note": "Fall 25: visit hospital",
-    "800": "seedshop @caroline_seedshop_kitchen 0",
-    "1000": "seedshop @caroline_seedshop_mirror 1",
-    "1200": "hospital @clinic_indoor_entry 1",
-    "1600": "seedshop @caroline_seedshop_display 0",
-    "2100": "seedshop @caroline_seedshop_bedroom 2 caroline_sleep"
-  },
-  "winter": {
-    "_note": "Winter: stays more indoors",
-    "800": "seedshop @caroline_seedshop_kitchen 0",
-    "1200": "seedshop @caroline_seedshop_living 2",
-    "1330": "seedshop @caroline_seedshop_read 0 caroline_read",
-    "1600": "seedshop @caroline_seedshop_display 0",
-    "2100": "seedshop @caroline_seedshop_bedroom 2 caroline_sleep"
+    "800": "seedshop @caroline_schedule_01 3",
+    "1000": "seedshop @caroline_schedule_07 1",
+    "1200": "hospital @caroline_schedule_13 0",
+    "1330": "hospital @caroline_schedule_14 0",
+    "1600": "seedshop @caroline_schedule_04 0 square_9_9",
+    "2100": "seedshop @caroline_schedule_05 2 caroline_sleep"
   },
   "winter_16": {
-    "_note": "Winter 16: beach trip",
-    "800": "seedshop @caroline_seedshop_kitchen 0",
-    "1200": "seedshop @caroline_seedshop_living 2",
-    "1330": "town @caroline_town_walk 1",
-    "1600": "beach @caroline_beach_stay 2",
-    "2330": "seedshop @caroline_seedshop_bedroom 2 caroline_sleep"
-  }
+    "800": "seedshop @caroline_schedule_01 3",
+    "1200": "seedshop @caroline_schedule_02 0",
+    "1330": "town @caroline_schedule_19 0",
+    "1600": "beach @caroline_schedule_20 3",
+    "2330": "seedshop @caroline_schedule_05 2 caroline_sleep"
+  },
+  "tuesday": {
+    "800": "seedshop @caroline_schedule_06 0",
+    "1030": "seedshop @caroline_schedule_08 0",
+    "1300": "seedshop @caroline_schedule_09 0 caroline_exercise",
+    "1600": "seedshop @caroline_schedule_10 0",
+    "1810": "seedshop @caroline_schedule_11 0",
+    "2100": "seedshop @caroline_schedule_05 2 caroline_sleep"
+  },
+  "friday": {
+    "800": "seedshop @caroline_schedule_01 3",
+    "1000": "sunroom @caroline_schedule_15 1",
+    "1200": "archaeologyhouse @caroline_schedule_16 0 caroline_read",
+    "1700": "seedshop @caroline_schedule_04 0 square_9_9",
+    "2100": "seedshop @caroline_schedule_05 2 caroline_sleep"
+  },
+  "wednesday": {
+    "800": "seedshop @caroline_schedule_01 3",
+    "1000": "sunroom @caroline_schedule_15 1",
+    "1200": "town @caroline_schedule_17 1",
+    "1700": "seedshop @caroline_schedule_04 0 square_9_9",
+    "2100": "seedshop @caroline_schedule_05 2 caroline_sleep"
+  },
+  "saturday": {
+    "800": "seedshop @caroline_schedule_01 3",
+    "1100": "communitycenter @communitycenter_outer 0",
+    "1700": "seedshop @caroline_schedule_04 0 square_9_9",
+    "2100": "seedshop @caroline_schedule_05 2 caroline_sleep"
+  },
+  "sunday": {
+    "900": "seedshop @caroline_schedule_12 0",
+    "1040": "seedshop @caroline_schedule_03 0",
+    "1330": "seedshop @caroline_schedule_02 0",
+    "1440": "town @caroline_schedule_18 0",
+    "1830": "seedshop @caroline_schedule_07 1",
+    "2100": "seedshop @caroline_schedule_05 2 caroline_sleep"
+  },
+  "spring": {
+    "800": "seedshop @caroline_schedule_01 3",
+    "1000": "sunroom @caroline_schedule_15 1",
+    "1200": "seedshop @caroline_schedule_02 0",
+    "1330": "town @caroline_schedule_19 0",
+    "1600": "seedshop @caroline_schedule_04 0 square_9_9",
+    "2100": "seedshop @caroline_schedule_05 2 caroline_sleep"
+  },
+  "summer": { "_goto": "spring" },
+  "fall": { "_goto": "spring" },
+  "winter": { "_goto": "spring" },
+  "default": { "_goto": "spring" }
 }

@@ -583,95 +583,144 @@
       "indoor": false
     },
     "_comment_caroline": "=== Caroline 专属停留点 ===",
-    "caroline_seedshop_kitchen": {
+    "caroline_schedule_01": {
       "x": 57,
       "y": 37,
-      "z": -43,
+      "z": -41,
       "indoor": true,
-      "note": "Caroline 种子店厨房（早上做事）"
+      "note": "Caroline 01 / SeedShop (37,6) / morning / west"
     },
-    "caroline_seedshop_living": {
+    "caroline_schedule_02": {
       "x": 39,
       "y": 36,
       "z": -26,
       "indoor": true,
-      "note": "Caroline 种子店客厅区"
+      "note": "Caroline 02 / SeedShop (15,23) / midday / awaiting recapture"
     },
-    "caroline_seedshop_read": {
-      "x": 38,
+    "caroline_schedule_03": {
+      "x": 39,
       "y": 37,
       "z": -41,
       "indoor": true,
-      "note": "Caroline 种子店看书位"
+      "note": "Caroline 03 / SeedShop (21,5) / reading / north"
     },
-    "caroline_seedshop_exercise": {
-      "x": 42,
+    "caroline_schedule_04": {
+      "x": 43,
       "y": 36,
-      "z": -23,
+      "z": -18,
       "indoor": true,
-      "note": "Caroline 种子店锻炼区（朝东）"
+      "note": "Caroline 04 / SeedShop (25,18) / evening / north"
     },
-    "caroline_seedshop_display": {
-      "x": 36,
-      "y": 36,
-      "z": -7,
-      "indoor": true,
-      "note": "Caroline 种子店展示区"
-    },
-    "caroline_seedshop_bedroom": {
+    "caroline_schedule_05": {
       "x": 44,
       "y": 37,
       "z": -41,
       "indoor": true,
-      "note": "Caroline 种子店卧室/睡觉"
+      "note": "Caroline 05 / SeedShop (25,4) / bed / south"
     },
-    "caroline_seedshop_aerobics": {
-      "x": 42,
+    "caroline_schedule_06": {
+      "x": 39,
       "y": 36,
-      "z": -23,
+      "z": -25,
       "indoor": true,
-      "note": "Caroline 有氧运动区（同锻炼区）"
+      "note": "Caroline 06 / SeedShop (22,14) / Green Rain or Tuesday / north"
     },
-    "caroline_seedshop_diary": {
-      "x": 41,
-      "y": 37,
-      "z": -38,
-      "indoor": true,
-      "note": "Caroline 日记区"
-    },
-    "caroline_seedshop_mirror": {
+    "caroline_schedule_07": {
       "x": 46,
       "y": 37,
       "z": -39,
       "indoor": true,
-      "note": "Caroline 镜子位"
+      "note": "Caroline 07 / SeedShop (27,7) / kitchen or mirror / east"
     },
-    "caroline_town_walk": {
-      "x": 77,
-      "y": 64,
-      "z": 14,
-      "note": "Caroline 镇上散步点",
-      "indoor": false
+    "caroline_schedule_08": {
+      "x": 42,
+      "y": 36,
+      "z": -20,
+      "indoor": true,
+      "note": "Caroline 08 / SeedShop (24,17) / exercise approach / north"
     },
-    "caroline_town_square": {
-      "x": 27,
-      "y": 64,
-      "z": 1,
-      "note": "Caroline 镇广场（周日下午）",
-      "indoor": false
+    "caroline_schedule_09": {
+      "x": 42,
+      "y": 36,
+      "z": -23,
+      "indoor": true,
+      "note": "Caroline 09 / SeedShop (24,21) / exercise / awaiting recapture"
     },
-    "caroline_museum_read": {
+    "caroline_schedule_10": {
+      "x": 40,
+      "y": 36,
+      "z": -23,
+      "indoor": true,
+      "note": "Caroline 10 / SeedShop (23,15) / Tuesday / north"
+    },
+    "caroline_schedule_11": {
+      "x": 53,
+      "y": 37,
+      "z": -43,
+      "indoor": true,
+      "note": "Caroline 11 / SeedShop (34,5) / Tuesday evening / north"
+    },
+    "caroline_schedule_12": {
+      "x": 40,
+      "y": 37,
+      "z": -41,
+      "indoor": true,
+      "note": "Caroline 12 / SeedShop (22,5) / Sunday morning / north"
+    },
+    "caroline_schedule_13": {
+      "x": 12,
+      "y": 43,
+      "z": -16,
+      "indoor": true,
+      "note": "Caroline 13 / Hospital (13,14) / fall 25 waiting / north"
+    },
+    "caroline_schedule_14": {
+      "x": 2,
+      "y": 43,
+      "z": -24,
+      "indoor": true,
+      "note": "Caroline 14 / Hospital (4,6) / fall 25 exam / north"
+    },
+    "caroline_schedule_15": {
+      "x": 51,
+      "y": 37,
+      "z": -52,
+      "indoor": true,
+      "note": "Caroline 15 / Sunroom (5,7) / east"
+    },
+    "caroline_schedule_16": {
       "x": 123,
       "y": 38,
-      "z": 48,
+      "z": 30,
       "indoor": true,
-      "note": "Caroline 博物馆看书"
+      "note": "Caroline 16 / ArchaeologyHouse (14,4) / Friday reading / north"
     },
-    "caroline_beach_stay": {
-      "x": 83,
+    "caroline_schedule_17": {
+      "x": -7,
+      "y": 66,
+      "z": -46,
+      "note": "Caroline 17 / Town (23,27) / Wednesday / east",
+      "indoor": false
+    },
+    "caroline_schedule_18": {
+      "x": 38,
+      "y": 66,
+      "z": -34,
+      "note": "Caroline 18 / Town (48,33) / Sunday / north",
+      "indoor": false
+    },
+    "caroline_schedule_19": {
+      "x": -2,
+      "y": 64,
+      "z": 16,
+      "note": "Caroline 19 / Town (23,71) / seasonal / north",
+      "indoor": false
+    },
+    "caroline_schedule_20": {
+      "x": 54,
       "y": 60,
-      "z": 129,
-      "note": "Caroline 海滩",
+      "z": 150,
+      "note": "Caroline 20 / Beach (24,32) / Night Market / west",
       "indoor": false
     },
     "_comment_lewis": "=== Lewis 专属停留点 ===",

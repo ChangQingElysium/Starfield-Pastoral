@@ -11,7 +11,6 @@ import com.stardew.craft.cutscene.server.EventSeenData;
 import com.stardew.craft.server.performance.PerformanceTiming;
 import com.stardew.craft.server.performance.ServerPerformanceRecorder;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
@@ -95,14 +94,12 @@ public final class CutsceneSystem {
      * world/server lingers in memory; reconnecting to a different save would incorrectly
      * treat same-id events as already seen until the new SyncEventSeenPayload arrives.
      */
-    @EventBusSubscriber(modid = StardewCraft.MODID, value = Dist.CLIENT)
     public static final class ClientEvents {
         private ClientEvents() {}
 
-        @SubscribeEvent
-        public static void onClientDisconnect(PlayerEvent.PlayerLoggedOutEvent event) {
+        public static void resetClientState() {
             EventPlayer.get().reset();
-            EventRegistry.reset();
+            com.stardew.craft.network.payload.ClientNpcVisibilityState.clear();
             ClientEventSeenCache.reset();
             EventTriggerChecker.reset();
         }

@@ -4,7 +4,9 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.api.v1.agriculture.StardewCropRuntime;
 import com.stardew.craft.api.v1.agriculture.StardewCropState;
 import com.stardew.craft.block.crop.StardewCropBlock;
+import com.stardew.craft.block.nature.TeaBushBlock;
 import com.stardew.craft.manager.CropGrowthManager;
+import com.stardew.craft.manager.TeaBushManager;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.codec.StreamCodec;
@@ -39,6 +41,9 @@ public record GrowCropsPayload() implements CustomPacketPayload {
             if (!(level instanceof ServerLevel serverLevel)) {
                 return;
             }
+
+            TeaBushManager teaBushManager = TeaBushManager.get(serverLevel);
+            java.util.Set<BlockPos> advancedTeaBushes = new java.util.HashSet<>();
             
             // 遍历周围5格范围内的所有方块 (服务器端逻辑)
             for (int x = -5; x <= 5; x++) {
@@ -47,6 +52,14 @@ public record GrowCropsPayload() implements CustomPacketPayload {
                         BlockPos pos = playerPos.offset(x, y, z);
                         @SuppressWarnings("null")
                         BlockState state = level.getBlockState(pos);
+
+                        if (state.getBlock() instanceof TeaBushBlock) {
+                            BlockPos lowerPos = TeaBushBlock.lowerPos(state, pos);
+                            if (advancedTeaBushes.add(lowerPos.immutable())) {
+                                teaBushManager.growOneDay(serverLevel, lowerPos);
+                            }
+                            continue;
+                        }
                         
                         StardewCropState runtimeCrop =
                                 StardewCropRuntime.inspect(serverLevel, pos);

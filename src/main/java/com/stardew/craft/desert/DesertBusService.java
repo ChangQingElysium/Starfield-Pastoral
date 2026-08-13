@@ -12,6 +12,7 @@ import com.stardew.craft.network.payload.OpenDesertBusConfirmPayload;
 import com.stardew.craft.npc.data.NpcDataRegistry;
 import com.stardew.craft.npc.runtime.NpcRuntimeDataManager;
 import com.stardew.craft.npc.runtime.NpcRuntimeState;
+import com.stardew.craft.npc.runtime.NpcScheduleRuntimeService;
 import com.stardew.craft.npc.runtime.NpcSpawnManager;
 import com.stardew.craft.player.PlayerStardewData;
 import com.stardew.craft.player.PlayerStardewDataAPI;
@@ -67,7 +68,7 @@ public final class DesertBusService {
     private static final int FADE_IN_AT = 60;
     private static final int FADE_IN_TICKS = 20;
     private static final int RIDE_TOTAL = 90; // 清理 tag
-    private static final Vec3 PAM_BUS_STOP = new Vec3(-61.5D, 64.0D, -60.5D);
+    private static final String PAM_DRIVER_POINT = "pam_busstop_bench";
     private static final double PAM_READY_DISTANCE_SQR = 4.0D;
 
     /**
@@ -146,12 +147,26 @@ public final class DesertBusService {
 
     private static boolean isPamReadyToDrive(ServerLevel level) {
         NpcRuntimeState schedule = NpcRuntimeDataManager.get(level).states().get("pam");
-        if (schedule == null || !"pam_busstop_bench".equals(schedule.namedPointId())) {
+        if (schedule == null || !PAM_DRIVER_POINT.equals(schedule.namedPointId())) {
+            return false;
+        }
+        NpcScheduleRuntimeService.TargetPoint driverPoint =
+                NpcScheduleRuntimeService.resolveWorldTarget(level, schedule, null);
+        if (driverPoint == null) {
             return false;
         }
         StardewNpcEntity pam = NpcSpawnManager.getTrackedNpc(level, "pam");
         return pam != null && pam.isAlive() && !pam.isRemoved()
-                && pam.position().distanceToSqr(PAM_BUS_STOP) <= PAM_READY_DISTANCE_SQR;
+                && isAtDriverPoint(pam.position(), driverPoint.position());
+    }
+
+    static boolean isAtDriverPoint(Vec3 position, Vec3 driverPoint) {
+        if (position == null || driverPoint == null) {
+            return false;
+        }
+        double dx = position.x - driverPoint.x;
+        double dz = position.z - driverPoint.z;
+        return dx * dx + dz * dz <= PAM_READY_DISTANCE_SQR;
     }
 
     /**
