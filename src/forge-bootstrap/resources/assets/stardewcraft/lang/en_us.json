@@ -181,5 +181,21 @@
   "block.stardewcraft.brick_red_roof_tiles": "Brick-Red Roof Tiles",
   "block.stardewcraft.blue_gray_timber": "Blue-Gray Timber",
   "block.stardewcraft.pale_blue_siding": "Pale Blue Planks",
-  "block.stardewcraft.blue_painted_planks": "Blue Painted Planks"
+  "block.stardewcraft.blue_painted_planks": "Blue Painted Planks",
+  "block.stardewcraft.mine_earth_loose_soil": "Earth Mine Loose Soil",
+  "block.stardewcraft.mine_earth_wall": "Earth Mine Wall",
+  "block.stardewcraft.mine_earth_dark_loose_soil": "Gloomy Earth Mine Loose Soil",
+  "block.stardewcraft.mine_earth_dark_wall": "Gloomy Earth Mine Wall",
+  "block.stardewcraft.mine_frost_dark_loose_soil": "Gloomy Frost Mine Loose Soil",
+  "block.stardewcraft.mine_frost_dark_wall": "Gloomy Frost Mine Wall",
+  "block.stardewcraft.mine_lava_dark_loose_soil": "Gloomy Lava Mine Loose Soil",
+  "block.stardewcraft.mine_lava_dark_wall": "Gloomy Lava Mine Wall",
+  "block.stardewcraft.mine_desert_dark_loose_soil": "Gloomy Desert Mine Loose Soil",
+  "block.stardewcraft.mine_desert_dark_wall": "Gloomy Desert Mine Wall",
+  "block.stardewcraft.mine_frost_loose_soil": "Frost Mine Loose Soil",
+  "block.stardewcraft.mine_frost_wall": "Frost Mine Wall",
+  "block.stardewcraft.mine_lava_loose_soil": "Lava Mine Loose Soil",
+  "block.stardewcraft.mine_lava_wall": "Lava Mine Wall",
+  "block.stardewcraft.mine_desert_loose_soil": "Desert Mine Loose Soil",
+  "block.stardewcraft.mine_desert_wall": "Desert Mine Wall"
 }

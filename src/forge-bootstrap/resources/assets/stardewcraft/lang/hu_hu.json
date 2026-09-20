@@ -181,5 +181,21 @@
   "block.stardewcraft.brick_red_roof_tiles": "Téglavörös tetőcserép",
   "block.stardewcraft.blue_gray_timber": "Kékesszürke faanyag",
   "block.stardewcraft.pale_blue_siding": "Halványkék deszkák",
-  "block.stardewcraft.blue_painted_planks": "Kékre festett deszkák"
+  "block.stardewcraft.blue_painted_planks": "Kékre festett deszkák",
+  "block.stardewcraft.mine_earth_loose_soil": "Földbánya laza talaja",
+  "block.stardewcraft.mine_earth_wall": "Földbánya sziklafala",
+  "block.stardewcraft.mine_earth_dark_loose_soil": "Komor földbánya laza talaja",
+  "block.stardewcraft.mine_earth_dark_wall": "Komor földbánya fala",
+  "block.stardewcraft.mine_frost_dark_loose_soil": "Komor fagybánya laza talaja",
+  "block.stardewcraft.mine_frost_dark_wall": "Komor fagybánya fala",
+  "block.stardewcraft.mine_lava_dark_loose_soil": "Komor lávabánya laza talaja",
+  "block.stardewcraft.mine_lava_dark_wall": "Komor lávabánya fala",
+  "block.stardewcraft.mine_desert_dark_loose_soil": "Komor sivatagi bánya laza talaja",
+  "block.stardewcraft.mine_desert_dark_wall": "Komor sivatagi bánya fala",
+  "block.stardewcraft.mine_frost_loose_soil": "Fagyos bánya laza talaja",
+  "block.stardewcraft.mine_frost_wall": "Fagyos bánya sziklafala",
+  "block.stardewcraft.mine_lava_loose_soil": "Lávabánya laza talaja",
+  "block.stardewcraft.mine_lava_wall": "Lávabánya sziklafala",
+  "block.stardewcraft.mine_desert_loose_soil": "Sivatagi bánya laza talaja",
+  "block.stardewcraft.mine_desert_wall": "Sivatagi bánya sziklafala"
 }

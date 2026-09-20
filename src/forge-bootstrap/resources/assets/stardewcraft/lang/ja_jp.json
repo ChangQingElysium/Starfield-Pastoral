@@ -181,5 +181,21 @@
   "block.stardewcraft.brick_red_roof_tiles": "赤レンガ色の屋根瓦",
   "block.stardewcraft.blue_gray_timber": "青灰色の木材",
   "block.stardewcraft.pale_blue_siding": "淡青色の板材",
-  "block.stardewcraft.blue_painted_planks": "青く塗った板材"
+  "block.stardewcraft.blue_painted_planks": "青く塗った板材",
+  "block.stardewcraft.mine_earth_loose_soil": "大地の坑道の柔らかい土",
+  "block.stardewcraft.mine_earth_wall": "大地の坑道の岩壁",
+  "block.stardewcraft.mine_earth_dark_loose_soil": "暗い大地の鉱山の柔らかい土",
+  "block.stardewcraft.mine_earth_dark_wall": "暗い大地の鉱山岩壁",
+  "block.stardewcraft.mine_frost_dark_loose_soil": "暗い氷霜の鉱山の柔らかい土",
+  "block.stardewcraft.mine_frost_dark_wall": "暗い氷霜の鉱山岩壁",
+  "block.stardewcraft.mine_lava_dark_loose_soil": "暗い溶岩の鉱山の柔らかい土",
+  "block.stardewcraft.mine_lava_dark_wall": "暗い溶岩の鉱山岩壁",
+  "block.stardewcraft.mine_desert_dark_loose_soil": "暗い砂漠の鉱山の柔らかい土",
+  "block.stardewcraft.mine_desert_dark_wall": "暗い砂漠の鉱山岩壁",
+  "block.stardewcraft.mine_frost_loose_soil": "氷霜の坑道の柔らかい土",
+  "block.stardewcraft.mine_frost_wall": "氷霜の坑道の岩壁",
+  "block.stardewcraft.mine_lava_loose_soil": "溶岩の坑道の柔らかい土",
+  "block.stardewcraft.mine_lava_wall": "溶岩の坑道の岩壁",
+  "block.stardewcraft.mine_desert_loose_soil": "砂漠の坑道の柔らかい土",
+  "block.stardewcraft.mine_desert_wall": "砂漠の坑道の岩壁"
 }

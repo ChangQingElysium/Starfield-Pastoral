@@ -23,6 +23,22 @@ public final class ModBlocks {
     public static final RegistryObject<RotatedPillarBlock> BLUE_GRAY_TIMBER = ForgeBlocks.BLUE_GRAY_TIMBER;
     public static final RegistryObject<Block> PALE_BLUE_SIDING = ForgeBlocks.PALE_BLUE_SIDING;
     public static final RegistryObject<Block> BLUE_PAINTED_PLANKS = ForgeBlocks.BLUE_PAINTED_PLANKS;
+    public static final RegistryObject<Block> MINE_EARTH_LOOSE_SOIL = ForgeBlocks.MINE_EARTH_LOOSE_SOIL;
+    public static final RegistryObject<Block> MINE_EARTH_WALL = ForgeBlocks.MINE_EARTH_WALL;
+    public static final RegistryObject<Block> MINE_EARTH_DARK_LOOSE_SOIL = ForgeBlocks.MINE_EARTH_DARK_LOOSE_SOIL;
+    public static final RegistryObject<Block> MINE_EARTH_DARK_WALL = ForgeBlocks.MINE_EARTH_DARK_WALL;
+    public static final RegistryObject<Block> MINE_FROST_DARK_LOOSE_SOIL = ForgeBlocks.MINE_FROST_DARK_LOOSE_SOIL;
+    public static final RegistryObject<Block> MINE_FROST_DARK_WALL = ForgeBlocks.MINE_FROST_DARK_WALL;
+    public static final RegistryObject<Block> MINE_LAVA_DARK_LOOSE_SOIL = ForgeBlocks.MINE_LAVA_DARK_LOOSE_SOIL;
+    public static final RegistryObject<Block> MINE_LAVA_DARK_WALL = ForgeBlocks.MINE_LAVA_DARK_WALL;
+    public static final RegistryObject<Block> MINE_DESERT_DARK_LOOSE_SOIL = ForgeBlocks.MINE_DESERT_DARK_LOOSE_SOIL;
+    public static final RegistryObject<Block> MINE_DESERT_DARK_WALL = ForgeBlocks.MINE_DESERT_DARK_WALL;
+    public static final RegistryObject<Block> MINE_FROST_LOOSE_SOIL = ForgeBlocks.MINE_FROST_LOOSE_SOIL;
+    public static final RegistryObject<Block> MINE_FROST_WALL = ForgeBlocks.MINE_FROST_WALL;
+    public static final RegistryObject<Block> MINE_LAVA_LOOSE_SOIL = ForgeBlocks.MINE_LAVA_LOOSE_SOIL;
+    public static final RegistryObject<Block> MINE_LAVA_WALL = ForgeBlocks.MINE_LAVA_WALL;
+    public static final RegistryObject<Block> MINE_DESERT_LOOSE_SOIL = ForgeBlocks.MINE_DESERT_LOOSE_SOIL;
+    public static final RegistryObject<Block> MINE_DESERT_WALL = ForgeBlocks.MINE_DESERT_WALL;
 
     private ModBlocks() {
     }

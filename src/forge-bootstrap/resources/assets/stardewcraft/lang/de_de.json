@@ -181,5 +181,21 @@
   "block.stardewcraft.brick_red_roof_tiles": "Ziegelrote Dachziegel",
   "block.stardewcraft.blue_gray_timber": "Blaugraues Holz",
   "block.stardewcraft.pale_blue_siding": "Hellblaue Bretter",
-  "block.stardewcraft.blue_painted_planks": "Blau gestrichene Bretter"
+  "block.stardewcraft.blue_painted_planks": "Blau gestrichene Bretter",
+  "block.stardewcraft.mine_earth_loose_soil": "Lockerer Erdminenboden",
+  "block.stardewcraft.mine_earth_wall": "Erdminenwand",
+  "block.stardewcraft.mine_earth_dark_loose_soil": "Lockerer dunkler Erdminenboden",
+  "block.stardewcraft.mine_earth_dark_wall": "Dunkle Erdminenwand",
+  "block.stardewcraft.mine_frost_dark_loose_soil": "Lockerer dunkler Frostminenboden",
+  "block.stardewcraft.mine_frost_dark_wall": "Dunkle Frostminenwand",
+  "block.stardewcraft.mine_lava_dark_loose_soil": "Lockerer dunkler Lavaminenboden",
+  "block.stardewcraft.mine_lava_dark_wall": "Dunkle Lavaminenwand",
+  "block.stardewcraft.mine_desert_dark_loose_soil": "Lockerer dunkler Wüstenminenboden",
+  "block.stardewcraft.mine_desert_dark_wall": "Dunkle Wüstenminenwand",
+  "block.stardewcraft.mine_frost_loose_soil": "Lockerer Frostminenboden",
+  "block.stardewcraft.mine_frost_wall": "Frostminenwand",
+  "block.stardewcraft.mine_lava_loose_soil": "Lockerer Lavaminenboden",
+  "block.stardewcraft.mine_lava_wall": "Lavaminenwand",
+  "block.stardewcraft.mine_desert_loose_soil": "Lockerer Wüstenminenboden",
+  "block.stardewcraft.mine_desert_wall": "Wüstenminenwand"
 }

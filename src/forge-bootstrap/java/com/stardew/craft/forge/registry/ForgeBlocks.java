@@ -5,6 +5,7 @@ import com.stardew.craft.forge.ForgeBootstrap;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RotatedPillarBlock;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraftforge.registries.DeferredRegister;
@@ -12,7 +13,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
 /**
- * Forge 1.20.1 registrations for the first complete building-material slice.
+ * Forge 1.20.1 registrations for the completed plain-block slices.
  *
  * <p>The source line uses {@code Block.Properties.ofFullCopy} (the 1.21 API).
  * Forge 1.20.1 exposes the equivalent operation as
@@ -94,6 +95,100 @@ public final class ForgeBlocks {
             () -> new Block(BlockBehaviour.Properties.copy(Blocks.OAK_PLANKS)
                     .mapColor(MapColor.COLOR_BLUE))
     );
+
+    public static final RegistryObject<Block> MINE_EARTH_LOOSE_SOIL = BLOCKS.register(
+            "mine_earth_loose_soil",
+            () -> new Block(BlockBehaviour.Properties.copy(Blocks.DIRT))
+    );
+
+    public static final RegistryObject<Block> MINE_EARTH_WALL = BLOCKS.register(
+            "mine_earth_wall",
+            () -> new Block(stoneProps(MapColor.TERRACOTTA_BROWN, SoundType.STONE, 5.0F))
+    );
+
+    public static final RegistryObject<Block> MINE_EARTH_DARK_LOOSE_SOIL = BLOCKS.register(
+            "mine_earth_dark_loose_soil",
+            () -> new Block(BlockBehaviour.Properties.copy(Blocks.DIRT)
+                    .mapColor(MapColor.DEEPSLATE))
+    );
+
+    public static final RegistryObject<Block> MINE_EARTH_DARK_WALL = BLOCKS.register(
+            "mine_earth_dark_wall",
+            () -> new Block(stoneProps(MapColor.DEEPSLATE, SoundType.STONE, 5.0F))
+    );
+
+    public static final RegistryObject<Block> MINE_FROST_DARK_LOOSE_SOIL = BLOCKS.register(
+            "mine_frost_dark_loose_soil",
+            () -> new Block(BlockBehaviour.Properties.copy(Blocks.DIRT)
+                    .mapColor(MapColor.DEEPSLATE))
+    );
+
+    public static final RegistryObject<Block> MINE_FROST_DARK_WALL = BLOCKS.register(
+            "mine_frost_dark_wall",
+            () -> new Block(stoneProps(MapColor.DEEPSLATE, SoundType.STONE, 5.0F))
+    );
+
+    public static final RegistryObject<Block> MINE_LAVA_DARK_LOOSE_SOIL = BLOCKS.register(
+            "mine_lava_dark_loose_soil",
+            () -> new Block(BlockBehaviour.Properties.copy(Blocks.DIRT)
+                    .mapColor(MapColor.DEEPSLATE))
+    );
+
+    public static final RegistryObject<Block> MINE_LAVA_DARK_WALL = BLOCKS.register(
+            "mine_lava_dark_wall",
+            () -> new Block(stoneProps(MapColor.DEEPSLATE, SoundType.STONE, 5.0F))
+    );
+
+    public static final RegistryObject<Block> MINE_DESERT_DARK_LOOSE_SOIL = BLOCKS.register(
+            "mine_desert_dark_loose_soil",
+            () -> new Block(BlockBehaviour.Properties.copy(Blocks.DIRT)
+                    .mapColor(MapColor.DEEPSLATE))
+    );
+
+    public static final RegistryObject<Block> MINE_DESERT_DARK_WALL = BLOCKS.register(
+            "mine_desert_dark_wall",
+            () -> new Block(stoneProps(MapColor.DEEPSLATE, SoundType.STONE, 5.0F))
+    );
+
+    public static final RegistryObject<Block> MINE_FROST_LOOSE_SOIL = BLOCKS.register(
+            "mine_frost_loose_soil",
+            () -> new Block(BlockBehaviour.Properties.copy(Blocks.DIRT)
+                    .mapColor(MapColor.ICE))
+    );
+
+    public static final RegistryObject<Block> MINE_FROST_WALL = BLOCKS.register(
+            "mine_frost_wall",
+            () -> new Block(stoneProps(MapColor.ICE, SoundType.STONE, 5.0F))
+    );
+
+    public static final RegistryObject<Block> MINE_LAVA_LOOSE_SOIL = BLOCKS.register(
+            "mine_lava_loose_soil",
+            () -> new Block(BlockBehaviour.Properties.copy(Blocks.DIRT)
+                    .mapColor(MapColor.COLOR_PURPLE))
+    );
+
+    public static final RegistryObject<Block> MINE_LAVA_WALL = BLOCKS.register(
+            "mine_lava_wall",
+            () -> new Block(stoneProps(MapColor.COLOR_PURPLE, SoundType.STONE, 5.0F))
+    );
+
+    public static final RegistryObject<Block> MINE_DESERT_LOOSE_SOIL = BLOCKS.register(
+            "mine_desert_loose_soil",
+            () -> new Block(BlockBehaviour.Properties.copy(Blocks.DIRT)
+                    .mapColor(MapColor.SAND))
+    );
+
+    public static final RegistryObject<Block> MINE_DESERT_WALL = BLOCKS.register(
+            "mine_desert_wall",
+            () -> new Block(stoneProps(MapColor.SAND, SoundType.STONE, 5.0F))
+    );
+
+    private static BlockBehaviour.Properties stoneProps(MapColor color, SoundType sound, float hardness) {
+        return BlockBehaviour.Properties.of()
+                .mapColor(color)
+                .sound(sound)
+                .strength(hardness, 6.0F);
+    }
 
     private ForgeBlocks() {
     }

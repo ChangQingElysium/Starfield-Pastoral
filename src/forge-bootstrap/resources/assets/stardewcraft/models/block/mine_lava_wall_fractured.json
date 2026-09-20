@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "stardewcraft:block/mine/mine_lava_wall_fractured",
+    "particle": "stardewcraft:block/mine/mine_lava_wall_fractured"
+  }
+}

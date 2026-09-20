@@ -181,5 +181,21 @@
   "block.stardewcraft.brick_red_roof_tiles": "Tegole rosso mattone",
   "block.stardewcraft.blue_gray_timber": "Legno grigio blu",
   "block.stardewcraft.pale_blue_siding": "Assi azzurre",
-  "block.stardewcraft.blue_painted_planks": "Assi dipinte di blu"
+  "block.stardewcraft.blue_painted_planks": "Assi dipinte di blu",
+  "block.stardewcraft.mine_earth_loose_soil": "Terra smossa della miniera di terra",
+  "block.stardewcraft.mine_earth_wall": "Parete della miniera di terra",
+  "block.stardewcraft.mine_earth_dark_loose_soil": "Terreno sciolto della miniera di terra oscura",
+  "block.stardewcraft.mine_earth_dark_wall": "Parete della miniera di terra oscura",
+  "block.stardewcraft.mine_frost_dark_loose_soil": "Terreno sciolto della miniera di gelo oscura",
+  "block.stardewcraft.mine_frost_dark_wall": "Parete della miniera di gelo oscura",
+  "block.stardewcraft.mine_lava_dark_loose_soil": "Terreno sciolto della miniera di lava oscura",
+  "block.stardewcraft.mine_lava_dark_wall": "Parete della miniera di lava oscura",
+  "block.stardewcraft.mine_desert_dark_loose_soil": "Terreno sciolto della miniera di deserto oscura",
+  "block.stardewcraft.mine_desert_dark_wall": "Parete della miniera di deserto oscura",
+  "block.stardewcraft.mine_frost_loose_soil": "Terra smossa della miniera gelata",
+  "block.stardewcraft.mine_frost_wall": "Parete della miniera gelata",
+  "block.stardewcraft.mine_lava_loose_soil": "Terra smossa della miniera di lava",
+  "block.stardewcraft.mine_lava_wall": "Parete della miniera di lava",
+  "block.stardewcraft.mine_desert_loose_soil": "Terra smossa della miniera del deserto",
+  "block.stardewcraft.mine_desert_wall": "Parete della miniera del deserto"
 }

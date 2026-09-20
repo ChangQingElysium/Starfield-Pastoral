@@ -181,5 +181,21 @@
   "block.stardewcraft.brick_red_roof_tiles": "벽돌빛 붉은 지붕 타일",
   "block.stardewcraft.blue_gray_timber": "청회색 목재",
   "block.stardewcraft.pale_blue_siding": "연한 파란 판자",
-  "block.stardewcraft.blue_painted_planks": "파랗게 칠한 판자"
+  "block.stardewcraft.blue_painted_planks": "파랗게 칠한 판자",
+  "block.stardewcraft.mine_earth_loose_soil": "대지 광산 부드러운 흙",
+  "block.stardewcraft.mine_earth_wall": "대지 광산 암벽",
+  "block.stardewcraft.mine_earth_dark_loose_soil": "어두운 대지 광산 부드러운 흙",
+  "block.stardewcraft.mine_earth_dark_wall": "어두운 대지 광산 암벽",
+  "block.stardewcraft.mine_frost_dark_loose_soil": "어두운 서리 광산 부드러운 흙",
+  "block.stardewcraft.mine_frost_dark_wall": "어두운 서리 광산 암벽",
+  "block.stardewcraft.mine_lava_dark_loose_soil": "어두운 용암 광산 부드러운 흙",
+  "block.stardewcraft.mine_lava_dark_wall": "어두운 용암 광산 암벽",
+  "block.stardewcraft.mine_desert_dark_loose_soil": "어두운 사막 광산 부드러운 흙",
+  "block.stardewcraft.mine_desert_dark_wall": "어두운 사막 광산 암벽",
+  "block.stardewcraft.mine_frost_loose_soil": "서리 광산 부드러운 흙",
+  "block.stardewcraft.mine_frost_wall": "서리 광산 암벽",
+  "block.stardewcraft.mine_lava_loose_soil": "용암 광산 부드러운 흙",
+  "block.stardewcraft.mine_lava_wall": "용암 광산 암벽",
+  "block.stardewcraft.mine_desert_loose_soil": "사막 광산 부드러운 흙",
+  "block.stardewcraft.mine_desert_wall": "사막 광산 암벽"
 }

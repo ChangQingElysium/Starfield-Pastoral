@@ -1,0 +1,18 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "stardewcraft:block/mine_frost_wall",
+        "weight": 2
+      },
+      {
+        "model": "stardewcraft:block/mine_frost_wall_broad",
+        "weight": 2
+      },
+      {
+        "model": "stardewcraft:block/mine_frost_wall_fractured",
+        "weight": 1
+      }
+    ]
+  }
+}

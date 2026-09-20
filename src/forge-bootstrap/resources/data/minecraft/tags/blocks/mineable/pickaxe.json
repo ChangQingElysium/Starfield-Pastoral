@@ -6,6 +6,14 @@
     "stardewcraft:dark_brown_roof_tiles",
     "stardewcraft:gray_green_masonry",
     "stardewcraft:gray_violet_roof_tiles",
-    "stardewcraft:brick_red_roof_tiles"
+    "stardewcraft:brick_red_roof_tiles",
+    "stardewcraft:mine_earth_wall",
+    "stardewcraft:mine_earth_dark_wall",
+    "stardewcraft:mine_frost_dark_wall",
+    "stardewcraft:mine_lava_dark_wall",
+    "stardewcraft:mine_desert_dark_wall",
+    "stardewcraft:mine_frost_wall",
+    "stardewcraft:mine_lava_wall",
+    "stardewcraft:mine_desert_wall"
   ]
 }

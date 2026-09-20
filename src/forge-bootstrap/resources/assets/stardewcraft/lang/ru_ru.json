@@ -181,5 +181,21 @@
   "block.stardewcraft.brick_red_roof_tiles": "Кирпично-красная черепица",
   "block.stardewcraft.blue_gray_timber": "Серо-синяя древесина",
   "block.stardewcraft.pale_blue_siding": "Светло-голубые доски",
-  "block.stardewcraft.blue_painted_planks": "Доски, окрашенные в синий"
+  "block.stardewcraft.blue_painted_planks": "Доски, окрашенные в синий",
+  "block.stardewcraft.mine_earth_loose_soil": "Рыхлая почва земляной шахты",
+  "block.stardewcraft.mine_earth_wall": "Стена земляной шахты",
+  "block.stardewcraft.mine_earth_dark_loose_soil": "Рыхлый грунт мрачной земляной шахты",
+  "block.stardewcraft.mine_earth_dark_wall": "Стена мрачной земляной шахты",
+  "block.stardewcraft.mine_frost_dark_loose_soil": "Рыхлый грунт мрачной ледяной шахты",
+  "block.stardewcraft.mine_frost_dark_wall": "Стена мрачной ледяной шахты",
+  "block.stardewcraft.mine_lava_dark_loose_soil": "Рыхлый грунт мрачной лавовой шахты",
+  "block.stardewcraft.mine_lava_dark_wall": "Стена мрачной лавовой шахты",
+  "block.stardewcraft.mine_desert_dark_loose_soil": "Рыхлый грунт мрачной пустынной шахты",
+  "block.stardewcraft.mine_desert_dark_wall": "Стена мрачной пустынной шахты",
+  "block.stardewcraft.mine_frost_loose_soil": "Рыхлая почва ледяной шахты",
+  "block.stardewcraft.mine_frost_wall": "Стена ледяной шахты",
+  "block.stardewcraft.mine_lava_loose_soil": "Рыхлая почва лавовой шахты",
+  "block.stardewcraft.mine_lava_wall": "Стена лавовой шахты",
+  "block.stardewcraft.mine_desert_loose_soil": "Рыхлая почва пустынной шахты",
+  "block.stardewcraft.mine_desert_wall": "Стена пустынной шахты"
 }

@@ -181,5 +181,21 @@
   "block.stardewcraft.brick_red_roof_tiles": "Tuiles rouge brique",
   "block.stardewcraft.blue_gray_timber": "Bois bleu-gris",
   "block.stardewcraft.pale_blue_siding": "Planches bleu pâle",
-  "block.stardewcraft.blue_painted_planks": "Planches peintes en bleu"
+  "block.stardewcraft.blue_painted_planks": "Planches peintes en bleu",
+  "block.stardewcraft.mine_earth_loose_soil": "Terre meuble de mine de terre",
+  "block.stardewcraft.mine_earth_wall": "Paroi de mine de terre",
+  "block.stardewcraft.mine_earth_dark_loose_soil": "Terre meuble de mine de terre sombre",
+  "block.stardewcraft.mine_earth_dark_wall": "Paroi de mine de terre sombre",
+  "block.stardewcraft.mine_frost_dark_loose_soil": "Terre meuble de mine de givre sombre",
+  "block.stardewcraft.mine_frost_dark_wall": "Paroi de mine de givre sombre",
+  "block.stardewcraft.mine_lava_dark_loose_soil": "Terre meuble de mine de lave sombre",
+  "block.stardewcraft.mine_lava_dark_wall": "Paroi de mine de lave sombre",
+  "block.stardewcraft.mine_desert_dark_loose_soil": "Terre meuble de mine de désert sombre",
+  "block.stardewcraft.mine_desert_dark_wall": "Paroi de mine de désert sombre",
+  "block.stardewcraft.mine_frost_loose_soil": "Terre meuble de mine de givre",
+  "block.stardewcraft.mine_frost_wall": "Paroi de mine de givre",
+  "block.stardewcraft.mine_lava_loose_soil": "Terre meuble de mine de lave",
+  "block.stardewcraft.mine_lava_wall": "Paroi de mine de lave",
+  "block.stardewcraft.mine_desert_loose_soil": "Terre meuble de mine du désert",
+  "block.stardewcraft.mine_desert_wall": "Paroi de mine du désert"
 }

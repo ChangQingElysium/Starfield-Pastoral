@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "stardewcraft:block/mine/mine_desert_loose_soil",
+    "side": "stardewcraft:block/mine/mine_desert_loose_soil_side",
+    "bottom": "stardewcraft:block/mine/mine_desert_loose_soil_side",
+    "particle": "stardewcraft:block/mine/mine_desert_loose_soil"
+  }
+}

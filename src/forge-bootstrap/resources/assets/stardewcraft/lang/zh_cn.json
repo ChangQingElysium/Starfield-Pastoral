@@ -181,5 +181,21 @@
   "block.stardewcraft.brick_red_roof_tiles": "砖红瓦块",
   "block.stardewcraft.blue_gray_timber": "蓝灰木料",
   "block.stardewcraft.pale_blue_siding": "浅蓝木板",
-  "block.stardewcraft.blue_painted_planks": "蓝漆木板"
+  "block.stardewcraft.blue_painted_planks": "蓝漆木板",
+  "block.stardewcraft.mine_earth_loose_soil": "矿井大地松土",
+  "block.stardewcraft.mine_earth_wall": "矿井大地岩壁",
+  "block.stardewcraft.mine_earth_dark_loose_soil": "矿井幽暗大地松土",
+  "block.stardewcraft.mine_earth_dark_wall": "矿井幽暗大地岩壁",
+  "block.stardewcraft.mine_frost_dark_loose_soil": "矿井幽暗冰霜松土",
+  "block.stardewcraft.mine_frost_dark_wall": "矿井幽暗冰霜岩壁",
+  "block.stardewcraft.mine_lava_dark_loose_soil": "矿井幽暗熔岩松土",
+  "block.stardewcraft.mine_lava_dark_wall": "矿井幽暗熔岩岩壁",
+  "block.stardewcraft.mine_desert_dark_loose_soil": "矿井幽暗沙漠松土",
+  "block.stardewcraft.mine_desert_dark_wall": "矿井幽暗沙漠岩壁",
+  "block.stardewcraft.mine_frost_loose_soil": "矿井冰霜松土",
+  "block.stardewcraft.mine_frost_wall": "矿井冰霜岩壁",
+  "block.stardewcraft.mine_lava_loose_soil": "矿井熔岩松土",
+  "block.stardewcraft.mine_lava_wall": "矿井熔岩岩壁",
+  "block.stardewcraft.mine_desert_loose_soil": "矿井沙漠松土",
+  "block.stardewcraft.mine_desert_wall": "矿井沙漠岩壁"
 }

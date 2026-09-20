@@ -32,6 +32,39 @@ public final class ForgeItems {
     public static final RegistryObject<Item> PALE_BLUE_SIDING = registerBuildingBlock(ForgeBlocks.PALE_BLUE_SIDING);
     public static final RegistryObject<Item> BLUE_PAINTED_PLANKS = registerBuildingBlock(ForgeBlocks.BLUE_PAINTED_PLANKS);
 
+    public static final RegistryObject<Item> MINE_EARTH_LOOSE_SOIL = registerNaturalBlock(
+            ForgeBlocks.MINE_EARTH_LOOSE_SOIL, "stardewcraft.type.natural_ground");
+    public static final RegistryObject<Item> MINE_EARTH_WALL = registerNaturalBlock(
+            ForgeBlocks.MINE_EARTH_WALL, "stardewcraft.type.natural_rock");
+    public static final RegistryObject<Item> MINE_EARTH_DARK_LOOSE_SOIL = registerNaturalBlock(
+            ForgeBlocks.MINE_EARTH_DARK_LOOSE_SOIL, "stardewcraft.type.natural_ground");
+    public static final RegistryObject<Item> MINE_EARTH_DARK_WALL = registerNaturalBlock(
+            ForgeBlocks.MINE_EARTH_DARK_WALL, "stardewcraft.type.natural_rock");
+    public static final RegistryObject<Item> MINE_FROST_DARK_LOOSE_SOIL = registerNaturalBlock(
+            ForgeBlocks.MINE_FROST_DARK_LOOSE_SOIL, "stardewcraft.type.natural_ground");
+    public static final RegistryObject<Item> MINE_FROST_DARK_WALL = registerNaturalBlock(
+            ForgeBlocks.MINE_FROST_DARK_WALL, "stardewcraft.type.natural_rock");
+    public static final RegistryObject<Item> MINE_LAVA_DARK_LOOSE_SOIL = registerNaturalBlock(
+            ForgeBlocks.MINE_LAVA_DARK_LOOSE_SOIL, "stardewcraft.type.natural_ground");
+    public static final RegistryObject<Item> MINE_LAVA_DARK_WALL = registerNaturalBlock(
+            ForgeBlocks.MINE_LAVA_DARK_WALL, "stardewcraft.type.natural_rock");
+    public static final RegistryObject<Item> MINE_DESERT_DARK_LOOSE_SOIL = registerNaturalBlock(
+            ForgeBlocks.MINE_DESERT_DARK_LOOSE_SOIL, "stardewcraft.type.natural_ground");
+    public static final RegistryObject<Item> MINE_DESERT_DARK_WALL = registerNaturalBlock(
+            ForgeBlocks.MINE_DESERT_DARK_WALL, "stardewcraft.type.natural_rock");
+    public static final RegistryObject<Item> MINE_FROST_LOOSE_SOIL = registerNaturalBlock(
+            ForgeBlocks.MINE_FROST_LOOSE_SOIL, "stardewcraft.type.natural_ground");
+    public static final RegistryObject<Item> MINE_FROST_WALL = registerNaturalBlock(
+            ForgeBlocks.MINE_FROST_WALL, "stardewcraft.type.natural_rock");
+    public static final RegistryObject<Item> MINE_LAVA_LOOSE_SOIL = registerNaturalBlock(
+            ForgeBlocks.MINE_LAVA_LOOSE_SOIL, "stardewcraft.type.natural_ground");
+    public static final RegistryObject<Item> MINE_LAVA_WALL = registerNaturalBlock(
+            ForgeBlocks.MINE_LAVA_WALL, "stardewcraft.type.natural_rock");
+    public static final RegistryObject<Item> MINE_DESERT_LOOSE_SOIL = registerNaturalBlock(
+            ForgeBlocks.MINE_DESERT_LOOSE_SOIL, "stardewcraft.type.natural_ground");
+    public static final RegistryObject<Item> MINE_DESERT_WALL = registerNaturalBlock(
+            ForgeBlocks.MINE_DESERT_WALL, "stardewcraft.type.natural_rock");
+
     public static final RegistryObject<Item> ECTOPLASM = registerSimple("ectoplasm", "stardewcraft.type.quest", -1);
     public static final RegistryObject<Item> PRISMATIC_JELLY = registerSimple("prismatic_jelly", "stardewcraft.type.quest", -1);
     public static final RegistryObject<Item> EXPLOSIVE_AMMO = registerSimple("explosive_ammo", "stardewcraft.type.resource", 20);
@@ -859,6 +892,18 @@ public final class ForgeItems {
         String id = block.getId().getPath();
         return ITEMS.register(id, () -> new StardewSimpleBlockItem(block.get(),
                 "stardewcraft.type.building", -1, new Item.Properties().stacksTo(999)));
+    }
+
+    private static RegistryObject<Item> registerNaturalBlock(
+            RegistryObject<? extends net.minecraft.world.level.block.Block> block, String typeKey) {
+        return registerBlockItem(block, typeKey);
+    }
+
+    private static RegistryObject<Item> registerBlockItem(
+            RegistryObject<? extends net.minecraft.world.level.block.Block> block, String typeKey) {
+        String id = block.getId().getPath();
+        return ITEMS.register(id, () -> new StardewSimpleBlockItem(block.get(),
+                typeKey, -1, new Item.Properties().stacksTo(999)));
     }
 
     private ForgeItems() {

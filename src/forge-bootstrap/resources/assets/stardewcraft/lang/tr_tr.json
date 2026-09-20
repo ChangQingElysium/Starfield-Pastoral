@@ -181,5 +181,21 @@
   "block.stardewcraft.brick_red_roof_tiles": "Tuğla Kırmızısı Kiremitler",
   "block.stardewcraft.blue_gray_timber": "Mavi Gri Kereste",
   "block.stardewcraft.pale_blue_siding": "Açık Mavi Tahtalar",
-  "block.stardewcraft.blue_painted_planks": "Mavi Boyalı Tahtalar"
+  "block.stardewcraft.blue_painted_planks": "Mavi Boyalı Tahtalar",
+  "block.stardewcraft.mine_earth_loose_soil": "Toprak madeninin gevşek toprağı",
+  "block.stardewcraft.mine_earth_wall": "Toprak madeni duvarı",
+  "block.stardewcraft.mine_earth_dark_loose_soil": "Kasvetli Toprak Madeni Gevşek Toprağı",
+  "block.stardewcraft.mine_earth_dark_wall": "Kasvetli Toprak Madeni Duvarı",
+  "block.stardewcraft.mine_frost_dark_loose_soil": "Kasvetli Buz Madeni Gevşek Toprağı",
+  "block.stardewcraft.mine_frost_dark_wall": "Kasvetli Buz Madeni Duvarı",
+  "block.stardewcraft.mine_lava_dark_loose_soil": "Kasvetli Lav Madeni Gevşek Toprağı",
+  "block.stardewcraft.mine_lava_dark_wall": "Kasvetli Lav Madeni Duvarı",
+  "block.stardewcraft.mine_desert_dark_loose_soil": "Kasvetli Çöl Madeni Gevşek Toprağı",
+  "block.stardewcraft.mine_desert_dark_wall": "Kasvetli Çöl Madeni Duvarı",
+  "block.stardewcraft.mine_frost_loose_soil": "Buz madeninin gevşek toprağı",
+  "block.stardewcraft.mine_frost_wall": "Buz madeni duvarı",
+  "block.stardewcraft.mine_lava_loose_soil": "Lav madeninin gevşek toprağı",
+  "block.stardewcraft.mine_lava_wall": "Lav madeni duvarı",
+  "block.stardewcraft.mine_desert_loose_soil": "Çöl madeninin gevşek toprağı",
+  "block.stardewcraft.mine_desert_wall": "Çöl madeni duvarı"
 }

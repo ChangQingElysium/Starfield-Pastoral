@@ -181,5 +181,21 @@
   "block.stardewcraft.brick_red_roof_tiles": "Tejas rojo ladrillo",
   "block.stardewcraft.blue_gray_timber": "Madera gris azulada",
   "block.stardewcraft.pale_blue_siding": "Tablones azul claro",
-  "block.stardewcraft.blue_painted_planks": "Tablones pintados de azul"
+  "block.stardewcraft.blue_painted_planks": "Tablones pintados de azul",
+  "block.stardewcraft.mine_earth_loose_soil": "Tierra suelta de mina de tierra",
+  "block.stardewcraft.mine_earth_wall": "Pared de mina de tierra",
+  "block.stardewcraft.mine_earth_dark_loose_soil": "Tierra suelta de mina de tierra sombría",
+  "block.stardewcraft.mine_earth_dark_wall": "Pared de mina de tierra sombría",
+  "block.stardewcraft.mine_frost_dark_loose_soil": "Tierra suelta de mina de escarcha sombría",
+  "block.stardewcraft.mine_frost_dark_wall": "Pared de mina de escarcha sombría",
+  "block.stardewcraft.mine_lava_dark_loose_soil": "Tierra suelta de mina de lava sombría",
+  "block.stardewcraft.mine_lava_dark_wall": "Pared de mina de lava sombría",
+  "block.stardewcraft.mine_desert_dark_loose_soil": "Tierra suelta de mina de desierto sombría",
+  "block.stardewcraft.mine_desert_dark_wall": "Pared de mina de desierto sombría",
+  "block.stardewcraft.mine_frost_loose_soil": "Tierra suelta de mina helada",
+  "block.stardewcraft.mine_frost_wall": "Pared de mina helada",
+  "block.stardewcraft.mine_lava_loose_soil": "Tierra suelta de mina de lava",
+  "block.stardewcraft.mine_lava_wall": "Pared de mina de lava",
+  "block.stardewcraft.mine_desert_loose_soil": "Tierra suelta de mina del desierto",
+  "block.stardewcraft.mine_desert_wall": "Pared de mina del desierto"
 }
