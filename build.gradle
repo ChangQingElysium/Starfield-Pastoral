@@ -156,6 +156,7 @@ def checkForgeItemParity = tasks.register('checkForgeItemParity', Exec) {
     description = 'Checks Forge SimpleStardewItem registrations and resources against the 1.21.1 source contract.'
     inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/item/ModItems.java'))
     inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeItems.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/item/ModItems.java'))
     inputs.dir(layout.projectDirectory.dir('src/main/resources/assets/stardewcraft'))
     inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/assets/stardewcraft'))
     inputs.file(layout.projectDirectory.file('compatibility/verify_forge_simple_items.py'))

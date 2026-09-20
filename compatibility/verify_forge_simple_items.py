@@ -12,6 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE_ITEMS = ROOT / "src/main/java/com/stardew/craft/item/ModItems.java"
 FORGE_ITEMS = ROOT / "src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeItems.java"
+FORGE_ITEM_ALIASES = ROOT / "src/forge-bootstrap/java/com/stardew/craft/item/ModItems.java"
 SOURCE_ASSETS = ROOT / "src/main/resources/assets/stardewcraft"
 FORGE_ASSETS = ROOT / "src/forge-bootstrap/resources/assets/stardewcraft"
 
@@ -106,6 +107,20 @@ def main() -> int:
     except (OSError, ValueError) as exc:
         print(f"Forge simple-item parity parser failed: {exc}", file=sys.stderr)
         return 1
+
+    alias_text = FORGE_ITEM_ALIASES.read_text(encoding="utf-8")
+    aliases = set(
+        re.findall(
+            r"public static final RegistryObject<Item>\s+([A-Z0-9_]+)\s*=\s*ForgeItems\.([A-Z0-9_]+);",
+            alias_text,
+        )
+    )
+    expected_aliases = {(name.upper(), name.upper()) for name in actual}
+    expected_aliases.add(("BUTTERFLY_POWDER", "BUTTERFLY_POWDER"))
+    if aliases != expected_aliases:
+        errors.append(
+            f"ModItems compatibility aliases differ: expected {len(expected_aliases)}, got {len(aliases)}"
+        )
 
     for item_id in sorted(expected.keys() | actual.keys()):
         if item_id not in actual:
