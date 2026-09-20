@@ -200,5 +200,20 @@
   "block.stardewcraft.mine_desert_wall": "Çöl madeni duvarı",
   "block.stardewcraft.mine_barrier": "Mine",
   "block.stardewcraft.mine_barrier.desc": "Madenlerde bulunan bir bariyer.",
-  "block.stardewcraft.pale_blue_window_glass": "Açık Mavi Cam"
+  "block.stardewcraft.pale_blue_window_glass": "Açık Mavi Cam",
+  "block.stardewcraft.oak_root": "Oak kökü",
+  "block.stardewcraft.oak_log": "Meşe Kütüğü",
+  "block.stardewcraft.oak_branch": "Oak şubesi",
+  "block.stardewcraft.maple_root": "Maple kök",
+  "block.stardewcraft.maple_log": "Akçaağaç Kütüğü",
+  "block.stardewcraft.maple_branch": "Maple şube",
+  "block.stardewcraft.pine_root": "Çam kökü",
+  "block.stardewcraft.pine_log": "Ayı",
+  "block.stardewcraft.pine_branch": "Ayık",
+  "block.stardewcraft.mahogany_root": "Maogany kök",
+  "block.stardewcraft.mahogany_log": "Maun Kütüğü",
+  "block.stardewcraft.mahogany_branch": "Mahogany şube",
+  "block.stardewcraft.mystic_tree_root": "Mistik ağaç kökü",
+  "block.stardewcraft.mystic_tree_log": "Mistik ağaç girişi",
+  "block.stardewcraft.mystic_tree_branch": "Mistik ağaç kolu"
 }

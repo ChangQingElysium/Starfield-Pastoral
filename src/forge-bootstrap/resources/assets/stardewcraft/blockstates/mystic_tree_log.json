@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "stardewcraft:block/tree/mystic_tree/log",
+      "x": 90,
+      "y": 90
+    },
+    "axis=y": {
+      "model": "stardewcraft:block/tree/mystic_tree/log"
+    },
+    "axis=z": {
+      "model": "stardewcraft:block/tree/mystic_tree/log",
+      "x": 90
+    }
+  }
+}

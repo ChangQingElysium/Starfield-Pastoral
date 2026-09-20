@@ -214,10 +214,38 @@ def checkForgeSpecialBlockParity = tasks.register('checkForgeSpecialBlockParity'
     commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_special_blocks.py').asFile.absolutePath
 }
 
+def checkForgeTreeCoreParity = tasks.register('checkForgeTreeCoreParity', Exec) {
+    group = 'verification'
+    description = 'Checks the Forge generated-tree core block slice and marker storage against the 1.21.1 source contract.'
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/block/ModBlocks.java'))
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/item/ModItems.java'))
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/block/tree/NewTreePartBlock.java'))
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/block/tree/NewTreeLogBlock.java'))
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/blockentity/NewTreePartBlockEntity.java'))
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/blockentity/ModBlockEntities.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeBlocks.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeItems.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeBlockEntities.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/client/ForgeClientSetup.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/blockentity/ModBlockEntities.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/block/ModBlocks.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/item/ModItems.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/block/tree/NewTreePartBlock.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/block/tree/NewTreeLogBlock.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/blockentity/NewTreePartBlockEntity.java'))
+    inputs.dir(layout.projectDirectory.dir('src/main/resources/assets/stardewcraft'))
+    inputs.dir(layout.projectDirectory.dir('src/main/resources/data'))
+    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/assets/stardewcraft'))
+    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/data'))
+    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_tree_core.py'))
+    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_tree_core.py').asFile.absolutePath
+}
+
 tasks.named('check').configure {
     dependsOn checkTranslations
     dependsOn checkForgeItemParity
     dependsOn checkForgeBuildingBlockParity
     dependsOn checkForgeMineBlockParity
     dependsOn checkForgeSpecialBlockParity
+    dependsOn checkForgeTreeCoreParity
 }

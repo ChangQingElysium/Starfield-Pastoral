@@ -200,5 +200,20 @@
   "block.stardewcraft.mine_desert_wall": "Sivatagi bánya sziklafala",
   "block.stardewcraft.mine_barrier": "Aknamező",
   "block.stardewcraft.mine_barrier.desc": "A bányákban talált akadály.",
-  "block.stardewcraft.pale_blue_window_glass": "Halványkék üveg"
+  "block.stardewcraft.pale_blue_window_glass": "Halványkék üveg",
+  "block.stardewcraft.oak_root": "Tölgyfa",
+  "block.stardewcraft.oak_log": "Tölgyfa-napló",
+  "block.stardewcraft.oak_branch": "Tölgyfaágak",
+  "block.stardewcraft.maple_root": "Juhargyökér",
+  "block.stardewcraft.maple_log": "Juharfa",
+  "block.stardewcraft.maple_branch": "Juharfa",
+  "block.stardewcraft.pine_root": "Fenyőgyökér",
+  "block.stardewcraft.pine_log": "Fenyőnapló",
+  "block.stardewcraft.pine_branch": "Fenyőág",
+  "block.stardewcraft.mahogany_root": "Mahagóni gyökér",
+  "block.stardewcraft.mahogany_log": "Mahagóni napló",
+  "block.stardewcraft.mahogany_branch": "Mahagóni ág",
+  "block.stardewcraft.mystic_tree_root": "Misztikus fa gyökere",
+  "block.stardewcraft.mystic_tree_log": "Misztikus farönk",
+  "block.stardewcraft.mystic_tree_branch": "Misztikus faág"
 }

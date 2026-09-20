@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "stardewcraft:block/tree/mystic_tree/log_top",
+    "side": "stardewcraft:block/tree/mystic_tree/log_side",
+    "particle": "stardewcraft:block/tree/mystic_tree/log_side"
+  }
+}

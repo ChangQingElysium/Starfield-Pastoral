@@ -1,6 +1,6 @@
 # Forge 1.20.1 方块切片对照账
 
-本账记录已经进入 Forge source set 的三批纯方块。目标不是注册“看起来像”的替代物，而是逐项保留 1.21.1 NeoForge 源树的稳定 ID、方块类型、基础属性、方块物品属性、掉落表、挖掘标签和资源键。
+本账记录已经进入 Forge source set 的三批纯方块和一批生成树核心方块。目标不是注册“看起来像”的替代物，而是逐项保留 1.21.1 NeoForge 源树的稳定 ID、方块类型、基础属性、方块物品属性、掉落表、挖掘标签和资源键。
 
 ## 建筑材质切片：12 个
 
@@ -47,6 +47,14 @@
 
 两者的方块物品都保持建筑类型、`-1` 售价和 `stacksTo(999)`；矿井屏障纹理的 `.mcmeta` 动画侧车文件也一并保留。
 
+## 生成树核心切片：15 个
+
+五种树 `oak`、`maple`、`pine`、`mahogany`、`mystic_tree` 各迁移 `root`、`log`、`branch` 三个核心部件。root/branch 仍使用 `NewTreePartBlock(newTreeWoodProps().noOcclusion(), true)`，保留放置前检查水平八邻格、完整碰撞/轮廓、被替换时清除本部件生成树 marker 的行为；log 仍是带方块实体的 `NewTreeLogBlock`，不是 vanilla 原木替代物。所有部件保持 `MapColor.WOOD`、`SoundType.WOOD` 和 `strength(2.0F, 3.0F)`。
+
+`new_tree_part` 方块实体的 15 个 valid block、UUID/species/root 三字段、NBT key、无效参数处理和 `setChanged()` 时机均与源合同一致。1.20.1 只把 `saveAdditional(CompoundTag, HolderLookup.Provider)` / `loadAdditional(...)` 回退为 `saveAdditional(CompoundTag)` / `load(CompoundTag)`，并使用该版本的 `NbtUtils.readBlockPos(CompoundTag)`；没有新增扫描整棵树或清除其它部件 marker 的逻辑。
+
+资源包括 15 个 blockstate、15 个 item model、15 个原始 Blockbench 方块模型、28 张被引用纹理和 15 个掉落表。`logs`、`mineable/axe`、`wild_tree_parts`、`crafting_logs` 与 `crafting_hardwood_logs` 只加入当前已注册成员。源 `wild_tree_parts` 中尚未注册的叶子和树苗不会提前写入 Forge 标签；它们必须随各自完整逻辑切片补回。root/branch 的 10 个客户端 cutout 注册已通过 Forge `FMLClientSetupEvent.enqueueWork` 恢复；这只覆盖当前已迁入的透明树部件，不替代后续叶子渲染和客户端视觉验收。
+
 ## 资源路径适配
 
 - `blockstates/`、`models/block/`、`models/item/` 和全部被引用的建筑/矿井纹理已进入 Forge 资源源集。
@@ -61,10 +69,11 @@
 python3 compatibility/verify_forge_building_blocks.py
 python3 compatibility/verify_forge_mine_blocks.py
 python3 compatibility/verify_forge_special_blocks.py
+python3 compatibility/verify_forge_tree_core.py
 ```
 
-三个脚本从 1.21.1 `ModBlocks.java`/`ModItems.java` 读取对应批次合同，并验证 Forge 注册、兼容别名、模型与纹理引用（含墙体 weighted 变体闭包与动画侧车）、blockstate、掉落表、挖掘/免疫标签和全部 12 个语言文件。它们已挂入 `./gradlew check` 的 `checkForgeBuildingBlockParity`、`checkForgeMineBlockParity` 与 `checkForgeSpecialBlockParity`。
+四个脚本从 1.21.1 源树读取对应批次合同，并验证 Forge 注册、兼容别名、模型与纹理引用（含墙体 weighted 变体闭包与动画侧车）、blockstate、掉落表、标签和全部 12 个语言文件。树核心检查还覆盖方块实体 valid-block 顺序、放置/拆除行为、marker NBT 合同和 root/branch 客户端 cutout 注册。它们已挂入 `./gradlew check` 的 `checkForgeBuildingBlockParity`、`checkForgeMineBlockParity`、`checkForgeSpecialBlockParity` 与 `checkForgeTreeCoreParity`。
 
 ## 尚未宣称的范围
 
-本切片不注册其它自定义方块类，也不把 NeoForge 的 `src/main/java` 整体编进 Forge。方块实体、作物、地形行为、交互家具、矿井方块和地毯实体仍按各自完整行为边界迁移；在这些类和依赖服务进入 Forge source set 之前，不得用同名空壳方块掩盖缺失逻辑。
+本切片不把 NeoForge 的 `src/main/java` 整体编进 Forge。除 `new_tree_part` 外的方块实体、作物、地形行为、交互家具、矿井方块和地毯实体仍按各自完整行为边界迁移；树叶、树苗、树生成/砍伐运行时与 85 个木制建筑件也尚未迁入。在这些类和依赖服务进入 Forge source set 之前，不得用同名空壳方块掩盖缺失逻辑。

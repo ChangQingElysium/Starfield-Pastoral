@@ -68,6 +68,22 @@ public final class ForgeItems {
     public static final RegistryObject<Item> MINE_BARRIER = registerBuildingBlock(ForgeBlocks.MINE_BARRIER);
     public static final RegistryObject<Item> PALE_BLUE_WINDOW_GLASS = registerBuildingBlock(ForgeBlocks.PALE_BLUE_WINDOW_GLASS);
 
+    public static final RegistryObject<Item> OAK_ROOT = registerBuildingBlock(ForgeBlocks.OAK_ROOT);
+    public static final RegistryObject<Item> OAK_LOG = registerBuildingBlock(ForgeBlocks.OAK_LOG);
+    public static final RegistryObject<Item> OAK_BRANCH = registerBuildingBlock(ForgeBlocks.OAK_BRANCH);
+    public static final RegistryObject<Item> MAPLE_ROOT = registerBuildingBlock(ForgeBlocks.MAPLE_ROOT);
+    public static final RegistryObject<Item> MAPLE_LOG = registerBuildingBlock(ForgeBlocks.MAPLE_LOG);
+    public static final RegistryObject<Item> MAPLE_BRANCH = registerBuildingBlock(ForgeBlocks.MAPLE_BRANCH);
+    public static final RegistryObject<Item> PINE_ROOT = registerBuildingBlock(ForgeBlocks.PINE_ROOT);
+    public static final RegistryObject<Item> PINE_LOG = registerBuildingBlock(ForgeBlocks.PINE_LOG);
+    public static final RegistryObject<Item> PINE_BRANCH = registerBuildingBlock(ForgeBlocks.PINE_BRANCH);
+    public static final RegistryObject<Item> MAHOGANY_ROOT = registerBuildingBlock(ForgeBlocks.MAHOGANY_ROOT);
+    public static final RegistryObject<Item> MAHOGANY_LOG = registerBuildingBlock(ForgeBlocks.MAHOGANY_LOG);
+    public static final RegistryObject<Item> MAHOGANY_BRANCH = registerBuildingBlock(ForgeBlocks.MAHOGANY_BRANCH);
+    public static final RegistryObject<Item> MYSTIC_TREE_ROOT = registerBuildingBlock(ForgeBlocks.MYSTIC_TREE_ROOT);
+    public static final RegistryObject<Item> MYSTIC_TREE_LOG = registerBuildingBlock(ForgeBlocks.MYSTIC_TREE_LOG);
+    public static final RegistryObject<Item> MYSTIC_TREE_BRANCH = registerBuildingBlock(ForgeBlocks.MYSTIC_TREE_BRANCH);
+
     public static final RegistryObject<Item> ECTOPLASM = registerSimple("ectoplasm", "stardewcraft.type.quest", -1);
     public static final RegistryObject<Item> PRISMATIC_JELLY = registerSimple("prismatic_jelly", "stardewcraft.type.quest", -1);
     public static final RegistryObject<Item> EXPLOSIVE_AMMO = registerSimple("explosive_ammo", "stardewcraft.type.resource", 20);

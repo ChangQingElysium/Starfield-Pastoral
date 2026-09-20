@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "stardewcraft:oak_log",
+    "stardewcraft:maple_log",
+    "stardewcraft:pine_log"
+  ]
+}

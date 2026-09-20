@@ -200,5 +200,20 @@
   "block.stardewcraft.mine_desert_wall": "Parete della miniera del deserto",
   "block.stardewcraft.mine_barrier": "Barriera miniera",
   "block.stardewcraft.mine_barrier.desc": "Una barriera trovata nelle miniere.",
-  "block.stardewcraft.pale_blue_window_glass": "Vetro azzurro"
+  "block.stardewcraft.pale_blue_window_glass": "Vetro azzurro",
+  "block.stardewcraft.oak_root": "Radice di quercia",
+  "block.stardewcraft.oak_log": "Tronchi di quercia",
+  "block.stardewcraft.oak_branch": "Branch di quercia",
+  "block.stardewcraft.maple_root": "Radice viola",
+  "block.stardewcraft.maple_log": "Tronco d’acero",
+  "block.stardewcraft.maple_branch": "Branch viola",
+  "block.stardewcraft.pine_root": "Radice di pino",
+  "block.stardewcraft.pine_log": "Tronchi di pino",
+  "block.stardewcraft.pine_branch": "Branch di pino",
+  "block.stardewcraft.mahogany_root": "Radice di mogano",
+  "block.stardewcraft.mahogany_log": "Tronco di mogano",
+  "block.stardewcraft.mahogany_branch": "Branch di mogano",
+  "block.stardewcraft.mystic_tree_root": "Radice albero mistico",
+  "block.stardewcraft.mystic_tree_log": "Tronco di albero mistico",
+  "block.stardewcraft.mystic_tree_branch": "Ramo albero mistico"
 }

@@ -200,5 +200,20 @@
   "block.stardewcraft.mine_desert_wall": "矿井沙漠岩壁",
   "block.stardewcraft.mine_barrier": "矿洞封印石",
   "block.stardewcraft.mine_barrier.desc": "用于封锁矿洞边界的封印石。\\n生存模式无法破坏（创造模式可破坏）。",
-  "block.stardewcraft.pale_blue_window_glass": "浅蓝玻璃"
+  "block.stardewcraft.pale_blue_window_glass": "浅蓝玻璃",
+  "block.stardewcraft.oak_root": "橡树树根",
+  "block.stardewcraft.oak_log": "橡树原木",
+  "block.stardewcraft.oak_branch": "橡树树枝",
+  "block.stardewcraft.maple_root": "枫树树根",
+  "block.stardewcraft.maple_log": "枫树原木",
+  "block.stardewcraft.maple_branch": "枫树树枝",
+  "block.stardewcraft.pine_root": "松树树根",
+  "block.stardewcraft.pine_log": "松树原木",
+  "block.stardewcraft.pine_branch": "松树树枝",
+  "block.stardewcraft.mahogany_root": "桃花心木树根",
+  "block.stardewcraft.mahogany_log": "桃花心木原木",
+  "block.stardewcraft.mahogany_branch": "桃花心木树枝",
+  "block.stardewcraft.mystic_tree_root": "神秘树树根",
+  "block.stardewcraft.mystic_tree_log": "神秘树原木",
+  "block.stardewcraft.mystic_tree_branch": "神秘树树枝"
 }

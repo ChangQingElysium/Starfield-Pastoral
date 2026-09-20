@@ -200,5 +200,20 @@
   "block.stardewcraft.mine_desert_wall": "사막 광산 암벽",
   "block.stardewcraft.mine_barrier": "광산 장벽",
   "block.stardewcraft.mine_barrier.desc": "광산에서 발견 된 장벽.",
-  "block.stardewcraft.pale_blue_window_glass": "연한 파란 유리"
+  "block.stardewcraft.pale_blue_window_glass": "연한 파란 유리",
+  "block.stardewcraft.oak_root": "오크 루트",
+  "block.stardewcraft.oak_log": "오크 로그",
+  "block.stardewcraft.oak_branch": "오크 지점",
+  "block.stardewcraft.maple_root": "메이플 루트",
+  "block.stardewcraft.maple_log": "단풍나무 통나무",
+  "block.stardewcraft.maple_branch": "메이플 지점",
+  "block.stardewcraft.pine_root": "소나무 뿌리",
+  "block.stardewcraft.pine_log": "파인 로그",
+  "block.stardewcraft.pine_branch": "파인 지점",
+  "block.stardewcraft.mahogany_root": "Mahogany 뿌리",
+  "block.stardewcraft.mahogany_log": "마호가니 통나무",
+  "block.stardewcraft.mahogany_branch": "Mahogany 지점",
+  "block.stardewcraft.mystic_tree_root": "Mystic 나무 뿌리",
+  "block.stardewcraft.mystic_tree_log": "신비한 나무 통나무",
+  "block.stardewcraft.mystic_tree_branch": "Mystic Tree 지점"
 }

@@ -200,5 +200,20 @@
   "block.stardewcraft.mine_desert_wall": "Desert Mine Wall",
   "block.stardewcraft.mine_barrier": "Mine Barrier",
   "block.stardewcraft.mine_barrier.desc": "A barrier found in the mines.",
-  "block.stardewcraft.pale_blue_window_glass": "Pale Blue Glass"
+  "block.stardewcraft.pale_blue_window_glass": "Pale Blue Glass",
+  "block.stardewcraft.oak_root": "Oak Root",
+  "block.stardewcraft.oak_log": "Oak Log",
+  "block.stardewcraft.oak_branch": "Oak Branch",
+  "block.stardewcraft.maple_root": "Maple Root",
+  "block.stardewcraft.maple_log": "Maple Log",
+  "block.stardewcraft.maple_branch": "Maple Branch",
+  "block.stardewcraft.pine_root": "Pine Root",
+  "block.stardewcraft.pine_log": "Pine Log",
+  "block.stardewcraft.pine_branch": "Pine Branch",
+  "block.stardewcraft.mahogany_root": "Mahogany Root",
+  "block.stardewcraft.mahogany_log": "Mahogany Log",
+  "block.stardewcraft.mahogany_branch": "Mahogany Branch",
+  "block.stardewcraft.mystic_tree_root": "Mystic Tree Root",
+  "block.stardewcraft.mystic_tree_log": "Mystic Tree Log",
+  "block.stardewcraft.mystic_tree_branch": "Mystic Tree Branch"
 }

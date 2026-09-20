@@ -41,6 +41,21 @@ public final class ModBlocks {
     public static final RegistryObject<Block> MINE_DESERT_WALL = ForgeBlocks.MINE_DESERT_WALL;
     public static final RegistryObject<Block> MINE_BARRIER = ForgeBlocks.MINE_BARRIER;
     public static final RegistryObject<Block> PALE_BLUE_WINDOW_GLASS = ForgeBlocks.PALE_BLUE_WINDOW_GLASS;
+    public static final RegistryObject<Block> OAK_ROOT = ForgeBlocks.OAK_ROOT;
+    public static final RegistryObject<Block> OAK_LOG = ForgeBlocks.OAK_LOG;
+    public static final RegistryObject<Block> OAK_BRANCH = ForgeBlocks.OAK_BRANCH;
+    public static final RegistryObject<Block> MAPLE_ROOT = ForgeBlocks.MAPLE_ROOT;
+    public static final RegistryObject<Block> MAPLE_LOG = ForgeBlocks.MAPLE_LOG;
+    public static final RegistryObject<Block> MAPLE_BRANCH = ForgeBlocks.MAPLE_BRANCH;
+    public static final RegistryObject<Block> PINE_ROOT = ForgeBlocks.PINE_ROOT;
+    public static final RegistryObject<Block> PINE_LOG = ForgeBlocks.PINE_LOG;
+    public static final RegistryObject<Block> PINE_BRANCH = ForgeBlocks.PINE_BRANCH;
+    public static final RegistryObject<Block> MAHOGANY_ROOT = ForgeBlocks.MAHOGANY_ROOT;
+    public static final RegistryObject<Block> MAHOGANY_LOG = ForgeBlocks.MAHOGANY_LOG;
+    public static final RegistryObject<Block> MAHOGANY_BRANCH = ForgeBlocks.MAHOGANY_BRANCH;
+    public static final RegistryObject<Block> MYSTIC_TREE_ROOT = ForgeBlocks.MYSTIC_TREE_ROOT;
+    public static final RegistryObject<Block> MYSTIC_TREE_LOG = ForgeBlocks.MYSTIC_TREE_LOG;
+    public static final RegistryObject<Block> MYSTIC_TREE_BRANCH = ForgeBlocks.MYSTIC_TREE_BRANCH;
 
     private ModBlocks() {
     }

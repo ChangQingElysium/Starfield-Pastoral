@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "stardewcraft:block/tree/mahogany/log",
+      "x": 90,
+      "y": 90
+    },
+    "axis=y": {
+      "model": "stardewcraft:block/tree/mahogany/log"
+    },
+    "axis=z": {
+      "model": "stardewcraft:block/tree/mahogany/log",
+      "x": 90
+    }
+  }
+}

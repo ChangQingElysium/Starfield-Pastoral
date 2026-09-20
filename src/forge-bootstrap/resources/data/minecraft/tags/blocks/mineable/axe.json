@@ -6,6 +6,21 @@
     "stardewcraft:ivory_siding",
     "stardewcraft:blue_gray_timber",
     "stardewcraft:pale_blue_siding",
-    "stardewcraft:blue_painted_planks"
+    "stardewcraft:blue_painted_planks",
+    "stardewcraft:oak_root",
+    "stardewcraft:oak_log",
+    "stardewcraft:oak_branch",
+    "stardewcraft:maple_root",
+    "stardewcraft:maple_log",
+    "stardewcraft:maple_branch",
+    "stardewcraft:pine_root",
+    "stardewcraft:pine_log",
+    "stardewcraft:pine_branch",
+    "stardewcraft:mahogany_root",
+    "stardewcraft:mahogany_log",
+    "stardewcraft:mahogany_branch",
+    "stardewcraft:mystic_tree_root",
+    "stardewcraft:mystic_tree_log",
+    "stardewcraft:mystic_tree_branch"
   ]
 }

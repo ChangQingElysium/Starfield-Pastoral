@@ -4,6 +4,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 import com.stardew.craft.forge.registry.ForgeBlocks;
+import com.stardew.craft.forge.registry.ForgeBlockEntities;
 import com.stardew.craft.forge.registry.ForgeItems;
 
 /**
@@ -17,5 +18,6 @@ public final class ForgeBootstrap {
     public ForgeBootstrap() {
         ForgeBlocks.BLOCKS.register(FMLJavaModLoadingContext.get().getModEventBus());
         ForgeItems.ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
+        ForgeBlockEntities.BLOCK_ENTITIES.register(FMLJavaModLoadingContext.get().getModEventBus());
     }
 }

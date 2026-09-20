@@ -200,5 +200,20 @@
   "block.stardewcraft.mine_desert_wall": "Стена пустынной шахты",
   "block.stardewcraft.mine_barrier": "Барьер шахты",
   "block.stardewcraft.mine_barrier.desc": "Барьер, встречающийся в шахтах.",
-  "block.stardewcraft.pale_blue_window_glass": "Светло-голубое стекло"
+  "block.stardewcraft.pale_blue_window_glass": "Светло-голубое стекло",
+  "block.stardewcraft.oak_root": "Корень дуба",
+  "block.stardewcraft.oak_log": "Дубовое бревно",
+  "block.stardewcraft.oak_branch": "Дубовая ветка",
+  "block.stardewcraft.maple_root": "Корень клёна",
+  "block.stardewcraft.maple_log": "Кленовое бревно",
+  "block.stardewcraft.maple_branch": "Кленовая ветка",
+  "block.stardewcraft.pine_root": "Корень сосны",
+  "block.stardewcraft.pine_log": "Сосновое бревно",
+  "block.stardewcraft.pine_branch": "Сосновая ветка",
+  "block.stardewcraft.mahogany_root": "Корень красного дерева",
+  "block.stardewcraft.mahogany_log": "Бревно красного дерева",
+  "block.stardewcraft.mahogany_branch": "Ветка красного дерева",
+  "block.stardewcraft.mystic_tree_root": "Корень мистического дерева",
+  "block.stardewcraft.mystic_tree_log": "Бревно мистического дерева",
+  "block.stardewcraft.mystic_tree_branch": "Ветка мистического дерева"
 }

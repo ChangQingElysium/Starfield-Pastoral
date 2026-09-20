@@ -200,5 +200,20 @@
   "block.stardewcraft.mine_desert_wall": "Paroi de mine du désert",
   "block.stardewcraft.mine_barrier": "Barrière de mines",
   "block.stardewcraft.mine_barrier.desc": "Une barrière trouvée dans les mines.",
-  "block.stardewcraft.pale_blue_window_glass": "Verre bleu pâle"
+  "block.stardewcraft.pale_blue_window_glass": "Verre bleu pâle",
+  "block.stardewcraft.oak_root": "Racine de chêne",
+  "block.stardewcraft.oak_log": "Tronc de chêne",
+  "block.stardewcraft.oak_branch": "Branche de chêne",
+  "block.stardewcraft.maple_root": "Racine d’érable",
+  "block.stardewcraft.maple_log": "Tronc d’érable",
+  "block.stardewcraft.maple_branch": "Branche Maple",
+  "block.stardewcraft.pine_root": "Racine de pin",
+  "block.stardewcraft.pine_log": "Tronc de pin",
+  "block.stardewcraft.pine_branch": "Branche de pin",
+  "block.stardewcraft.mahogany_root": "Racine d’acajou",
+  "block.stardewcraft.mahogany_log": "Rondins en acajou",
+  "block.stardewcraft.mahogany_branch": "Branche Mahogany",
+  "block.stardewcraft.mystic_tree_root": "Racine de l’Arbre Mystique",
+  "block.stardewcraft.mystic_tree_log": "Tronc d’arbre mystique",
+  "block.stardewcraft.mystic_tree_branch": "Branche de l’Arbre Mystique"
 }

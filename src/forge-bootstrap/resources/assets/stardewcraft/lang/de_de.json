@@ -200,5 +200,20 @@
   "block.stardewcraft.mine_desert_wall": "Wüstenminenwand",
   "block.stardewcraft.mine_barrier": "Minensperre",
   "block.stardewcraft.mine_barrier.desc": "Eine Barriere in den Minen gefunden.",
-  "block.stardewcraft.pale_blue_window_glass": "Hellblaues Glas"
+  "block.stardewcraft.pale_blue_window_glass": "Hellblaues Glas",
+  "block.stardewcraft.oak_root": "Eichenwurzel",
+  "block.stardewcraft.oak_log": "Eichenholz",
+  "block.stardewcraft.oak_branch": "Zweigstelle Eichen",
+  "block.stardewcraft.maple_root": "Ahornwurzel",
+  "block.stardewcraft.maple_log": "Ahornprotokoll",
+  "block.stardewcraft.maple_branch": "Ahornzweig",
+  "block.stardewcraft.pine_root": "Pinienwurzel",
+  "block.stardewcraft.pine_log": "Pinienholz",
+  "block.stardewcraft.pine_branch": "Kieferzweig",
+  "block.stardewcraft.mahogany_root": "Mahogany Wurzel",
+  "block.stardewcraft.mahogany_log": "Mahogany-Log",
+  "block.stardewcraft.mahogany_branch": "Zweigstelle Mahogany",
+  "block.stardewcraft.mystic_tree_root": "Mystische Baumwurzel",
+  "block.stardewcraft.mystic_tree_log": "Mystischer Baumstamm",
+  "block.stardewcraft.mystic_tree_branch": "Mystischer Baumzweig"
 }

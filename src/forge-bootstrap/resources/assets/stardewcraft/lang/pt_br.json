@@ -200,5 +200,20 @@
   "block.stardewcraft.mine_desert_wall": "Parede de mina do deserto",
   "block.stardewcraft.mine_barrier": "Barreira de Minas",
   "block.stardewcraft.mine_barrier.desc": "Uma barreira encontrada nas minas.",
-  "block.stardewcraft.pale_blue_window_glass": "Vidro azul-claro"
+  "block.stardewcraft.pale_blue_window_glass": "Vidro azul-claro",
+  "block.stardewcraft.oak_root": "Raíz de carvalho",
+  "block.stardewcraft.oak_log": "Diário de Carvalho",
+  "block.stardewcraft.oak_branch": "Ramo de carvalho",
+  "block.stardewcraft.maple_root": "Raiz de Maple",
+  "block.stardewcraft.maple_log": "Registo de bordo",
+  "block.stardewcraft.maple_branch": "Ramo de bordo",
+  "block.stardewcraft.pine_root": "Raiz de pinheiro",
+  "block.stardewcraft.pine_log": "Registo de pinheiros",
+  "block.stardewcraft.pine_branch": "Ramo de pinheiros",
+  "block.stardewcraft.mahogany_root": "Raiz de mogno",
+  "block.stardewcraft.mahogany_log": "Diário de Mogno",
+  "block.stardewcraft.mahogany_branch": "Ramo de mogno",
+  "block.stardewcraft.mystic_tree_root": "Raiz da Árvore Mística",
+  "block.stardewcraft.mystic_tree_log": "Diário de Árvore Mística",
+  "block.stardewcraft.mystic_tree_branch": "Ramo de Árvore Mística"
 }

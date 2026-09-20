@@ -8,9 +8,9 @@
 
 - ForgeGradle 6.x + Forge `47.4.10`。
 - Java 17 工具链，匹配 Minecraft 1.20.1 的运行时。
-- `src/forge-bootstrap/java` 保存 Forge 入口和注册桥。
-- `src/forge-common/java` 保存已经验证可在 1.20.1 使用的公共物品逻辑；当前切片包括 `IStardewItem`、`ButterflyPowderItem`、`SimpleStardewItem` 和普通建筑材质使用的 `StardewSimpleBlockItem`。
-- `src/forge-bootstrap/resources` 是当前唯一打包的资源目录，包含 Forge 元数据、201 个物品（170 个普通物品、1 个蝴蝶粉末物品、12 个建筑材质方块物品、16 个矿井背景方块物品和 2 个特殊纯方块物品）、30 个方块的 blockstate/模型/纹理/掉落表和 12 个语言文件。
+- `src/forge-bootstrap/java` 保存 Forge 入口、注册桥和客户端加载器适配；当前树核心的 root/branch cutout 注册也在这里。
+- `src/forge-common/java` 保存已经验证可在 1.20.1 使用的公共逻辑；当前切片包括物品元数据基础类，以及原样迁移的 `NewTreePartBlock`、`NewTreeLogBlock` 与 `NewTreePartBlockEntity`。
+- `src/forge-bootstrap/resources` 是当前唯一打包的资源目录，包含 Forge 元数据、216 个物品（170 个普通物品、1 个蝴蝶粉末物品、30 个先前方块物品和 15 个生成树核心方块物品）、45 个方块的 blockstate/模型/纹理/掉落表和 12 个语言文件。
 - 原 `src/main/java` NeoForge 源树保留为迁移参考，暂不参与 Forge 编译。
 - `mods.toml` 已切换到 Forge 元数据；NeoForge 模板和 Mixin manifest 暂不加载。
 
@@ -21,9 +21,9 @@
 ./gradlew runServer -PforgeRunDir=/tmp/stardewcraft-forge-bootstrap-run --no-daemon --console=plain
 ```
 
-第一条命令证明构建链、资源处理、语言资源和 1.21.1 对照账可用；第二条命令使用全新临时目录，证明 Forge 能够创建开发服务器并加载 `stardewcraft`，同时完成当前 231 个注册对象的生命周期：30 个方块、201 个方块/普通物品，其中包含 1 个 `ButterflyPowderItem`、170 个 `SimpleStardewItem`、12 个建筑材质方块物品、16 个矿井背景方块物品和 2 个特殊纯方块物品。不要复用包含旧 NeoForge 世界的 `run/` 目录做空壳验收。当前不要求旧 NeoForge GameTest 在这个阶段运行，因为生产 Java 源尚未整体进入 Forge source set。
+第一条命令证明构建链、资源处理、语言资源和 1.21.1 对照账可用；第二条命令使用全新临时目录，证明 Forge 能够创建开发服务器并加载 `stardewcraft`，同时完成当前 261 个注册对象的生命周期：45 个方块、216 个方块/普通物品，以及 `new_tree_part` 方块实体类型。不要复用包含旧 NeoForge 世界的 `run/` 目录做空壳验收。当前不要求旧 NeoForge GameTest 在这个阶段运行，因为生产 Java 源尚未整体进入 Forge source set。
 
-方块切片的逐项合同和资源路径转换见 [`forge-building-block-parity.md`](forge-building-block-parity.md)；`./gradlew check` 会同时运行建筑材质与矿井背景两个专用对照任务。
+方块切片的逐项合同和资源路径转换见 [`forge-building-block-parity.md`](forge-building-block-parity.md)；`./gradlew check` 会运行建筑材质、矿井背景、特殊纯方块和生成树核心四个专用对照任务。
 
 本切片还记录了一个不能靠机械替换解决的 Forge 差异：Forge 1.20.1 的 `@Mod` 类需要无参构造器，再从 `FMLJavaModLoadingContext.get().getModEventBus()` 取得模组事件总线；不能直接照搬 NeoForge 的构造器注入写法。
 

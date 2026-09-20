@@ -1,5 +1,7 @@
 package com.stardew.craft.forge.registry;
 
+import com.stardew.craft.block.tree.NewTreeLogBlock;
+import com.stardew.craft.block.tree.NewTreePartBlock;
 import com.stardew.craft.forge.ForgeBootstrap;
 
 import net.minecraft.world.level.block.Block;
@@ -198,6 +200,47 @@ public final class ForgeBlocks {
             "pale_blue_window_glass",
             () -> new GlassBlock(BlockBehaviour.Properties.copy(Blocks.GLASS))
     );
+
+    public static final RegistryObject<Block> OAK_ROOT = newTreeRoot("oak");
+    public static final RegistryObject<Block> OAK_LOG = newTreeLog("oak");
+    public static final RegistryObject<Block> OAK_BRANCH = newTreeBranch("oak");
+
+    public static final RegistryObject<Block> MAPLE_ROOT = newTreeRoot("maple");
+    public static final RegistryObject<Block> MAPLE_LOG = newTreeLog("maple");
+    public static final RegistryObject<Block> MAPLE_BRANCH = newTreeBranch("maple");
+
+    public static final RegistryObject<Block> PINE_ROOT = newTreeRoot("pine");
+    public static final RegistryObject<Block> PINE_LOG = newTreeLog("pine");
+    public static final RegistryObject<Block> PINE_BRANCH = newTreeBranch("pine");
+
+    public static final RegistryObject<Block> MAHOGANY_ROOT = newTreeRoot("mahogany");
+    public static final RegistryObject<Block> MAHOGANY_LOG = newTreeLog("mahogany");
+    public static final RegistryObject<Block> MAHOGANY_BRANCH = newTreeBranch("mahogany");
+
+    public static final RegistryObject<Block> MYSTIC_TREE_ROOT = newTreeRoot("mystic_tree");
+    public static final RegistryObject<Block> MYSTIC_TREE_LOG = newTreeLog("mystic_tree");
+    public static final RegistryObject<Block> MYSTIC_TREE_BRANCH = newTreeBranch("mystic_tree");
+
+    private static BlockBehaviour.Properties newTreeWoodProps() {
+        return BlockBehaviour.Properties.of()
+                .mapColor(MapColor.WOOD)
+                .sound(SoundType.WOOD)
+                .strength(2.0F, 3.0F);
+    }
+
+    private static RegistryObject<Block> newTreeRoot(String species) {
+        return BLOCKS.register(species + "_root",
+                () -> new NewTreePartBlock(newTreeWoodProps().noOcclusion(), true));
+    }
+
+    private static RegistryObject<Block> newTreeLog(String species) {
+        return BLOCKS.register(species + "_log", () -> new NewTreeLogBlock(newTreeWoodProps()));
+    }
+
+    private static RegistryObject<Block> newTreeBranch(String species) {
+        return BLOCKS.register(species + "_branch",
+                () -> new NewTreePartBlock(newTreeWoodProps().noOcclusion(), true));
+    }
 
     private static BlockBehaviour.Properties stoneProps(MapColor color, SoundType sound, float hardness) {
         return BlockBehaviour.Properties.of()
