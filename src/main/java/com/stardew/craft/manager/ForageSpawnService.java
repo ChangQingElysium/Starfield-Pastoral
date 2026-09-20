@@ -423,6 +423,9 @@ public final class ForageSpawnService {
             List.of(ModBlocks.FORAGE_CHANTERELLE, ModBlocks.FORAGE_RED_MUSHROOM,
                     ModBlocks.FORAGE_PURPLE_MUSHROOM, ModBlocks.FORAGE_COMMON_MUSHROOM)
     );
+    // Farm_Foraging.tmx candidates after Farm.DayUpdate's AlwaysFront check.
+    private static final double FOREST_STRIP_TILE_CHANCE = 395.0D / (18 * 65);
+    private static final double FOREST_GRASS_TILE_CHANCE = 1325.0D / (80 * 65);
 
     /**
      * Spawns seasonal forage on all forest-type farms (public area + each player's farm instance).
@@ -434,43 +437,43 @@ public final class ForageSpawnService {
         List<DeferredBlock<Block>> possibleForage = FOREST_FARM_FORAGE.get(season);
         if (possibleForage.isEmpty()) return;
 
-        com.stardew.craft.farm.FarmInstanceRegistry registry = com.stardew.craft.farm.FarmInstanceRegistry.get();
+        com.stardew.craft.farm.FarmInstanceRegistry registry =
+                com.stardew.craft.farm.FarmInstanceRegistry.get(level.getServer());
+        java.util.Set<java.util.UUID> activeOwners =
+                com.stardew.craft.farm.FarmDailyProcessHelper.getOnlineFarmOwners(level);
+        var spawnLayout = com.stardew.craft.farm.FarmSpawnLayoutData
+                .forType(com.stardew.craft.farm.FarmType.FOREST);
+        List<BlockPos> generalCandidates = spawnLayout.positions("general");
+        List<BlockPos> forestStripCandidates = spawnLayout.positions("forest_strip");
         int totalSpawned = 0;
 
         for (com.stardew.craft.farm.FarmInstance farm : registry.getAllFarms()) {
-            com.stardew.craft.api.v1.farm.StardewFarmLayout layout =
-                    farm.getFarmLayout();
-            if (!farm.getFarmLayoutId().equals(
+            java.util.UUID registryKey = registry.getRegistryKey(farm);
+            if (!farm.isInitialized() || registryKey == null
+                    || (!activeOwners.contains(farm.getOwnerUUID())
+                    && !activeOwners.contains(registryKey))
+                    || !farm.getFarmLayoutId().equals(
                     com.stardew.craft.api.v1.internal.farm.StardewFarmLayoutRegistry
-                            .builtinId(com.stardew.craft.farm.FarmType.FOREST))
-                    || layout == null || layout.forageZoneMin() == null
-                    || layout.forageZoneMax() == null) continue;
-
-            BlockPos origin = farm.getOrigin();
-            BlockPos zoneMin = origin.offset(layout.forageZoneMin());
-            BlockPos zoneMax = origin.offset(layout.forageZoneMax());
-
-            int minX = Math.min(zoneMin.getX(), zoneMax.getX());
-            int maxX = Math.max(zoneMin.getX(), zoneMax.getX());
-            int minZ = Math.min(zoneMin.getZ(), zoneMax.getZ());
-            int maxZ = Math.max(zoneMin.getZ(), zoneMax.getZ());
+                            .builtinId(com.stardew.craft.farm.FarmType.FOREST))) continue;
 
             RandomSource random = level.getRandom();
             int spawned = 0;
             int safety = 0;
             while (random.nextDouble() < 0.75D && safety++ < 64) {
-                // Farm.DayUpdate chooses the dedicated x<18 forest strip half
-                // the time.  Otherwise it samples the complete farm and accepts
-                // every Back-layer Grass tile.  On the enlarged authored map the
-                // layout forage rectangle is that playable projection; its first
-                // ~40 blocks are the scaled west strip.
-                boolean westStrip = random.nextBoolean();
-                int westMax = Math.min(maxX, minX + 39);
-                int x = westStrip
-                        ? minX + random.nextInt(westMax - minX + 1)
-                        : minX + random.nextInt(maxX - minX + 1);
-                int z = minZ + random.nextInt(maxZ - minZ + 1);
-                if (!level.hasChunk(x >> 4, z >> 4)) continue;
+                // Half the original rolls target its dedicated forest strip;
+                // the other half target any Grass tile. The larger MC map uses
+                // schematic-derived candidate columns rather than a rectangle,
+                // so every authored patch participates without loading the farm.
+                boolean forestStrip = random.nextBoolean();
+                double candidateChance = forestStrip
+                        ? FOREST_STRIP_TILE_CHANCE : FOREST_GRASS_TILE_CHANCE;
+                if (random.nextDouble() >= candidateChance) continue;
+                List<BlockPos> candidates = forestStrip ? forestStripCandidates : generalCandidates;
+                BlockPos local = candidates.get(random.nextInt(candidates.size()));
+                BlockPos column = farm.getOrigin().offset(local.getX(), 0, local.getZ());
+                com.stardew.craft.farm.FarmDailyProcessHelper.ensurePositionLoaded(level, column);
+                int x = column.getX();
+                int z = column.getZ();
 
                 int surfaceY = level.getHeight(
                         Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1;
@@ -485,27 +488,24 @@ public final class ForageSpawnService {
 
                 com.stardew.craft.farm.FarmDebrisPlacementRules.GroundKind ground =
                         com.stardew.craft.farm.FarmDebrisPlacementRules.groundKind(surfaceState);
-                if (!westStrip
+                if (!forestStrip
                         && ground != com.stardew.craft.farm.FarmDebrisPlacementRules.GroundKind.GRASS
                         && ground != com.stardew.craft.farm.FarmDebrisPlacementRules.GroundKind.DARK_GRASS) {
                     continue;
                 }
                 if (!com.stardew.craft.farm.FarmDebrisPlacementRules.isNaturalFarmGround(surfaceState)
+                        || !level.getBlockState(placePos).isAir()
                         || !canPlaceForage(level, surfacePos, placePos, SurfaceType.NATURAL)) {
                     continue;
                 }
 
                 DeferredBlock<Block> chosen = possibleForage.get(
                         random.nextInt(possibleForage.size()));
-                BlockState existingState = level.getBlockState(placePos);
-                if (!existingState.isAir() && isReplaceablePlant(existingState)) {
-                    level.destroyBlock(placePos, false);
-                }
                 level.setBlock(placePos, chosen.get().defaultBlockState(), Block.UPDATE_ALL);
                 spawned++;
             }
             totalSpawned += spawned;
-            StardewCraft.LOGGER.info("[ForageSpawn] Forest farm ({}): spawned {} forage in zone",
+            StardewCraft.LOGGER.info("[ForageSpawn] Forest farm ({}): spawned {} forage on authored terrain",
                     farm.getOwnerName(), spawned);
         }
 

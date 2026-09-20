@@ -92,7 +92,7 @@ public class PacketHandler {
         // Adds per-player daily-info and Robin construction snapshots for HUD addons.
         // Fishing now carries use identities and complete catch stacks plus their world origins.
         // Pet selection now carries namespaced breed IDs and validates the addon catalog before login.
-        final PayloadRegistrar registrar = event.registrar("29");
+        final PayloadRegistrar registrar = event.registrar("30");
 
         registrar.configurationToClient(com.stardew.craft.pet.PetCatalogHandshake.Offer.TYPE, com.stardew.craft.pet.PetCatalogHandshake.Offer.CODEC, com.stardew.craft.pet.PetCatalogHandshake.Offer::handle);
         registrar.configurationToServer(com.stardew.craft.pet.PetCatalogHandshake.Ack.TYPE, com.stardew.craft.pet.PetCatalogHandshake.Ack.CODEC, com.stardew.craft.pet.PetCatalogHandshake.Ack::handle);
@@ -129,6 +129,7 @@ public class PacketHandler {
         registrar.playToServer(com.stardew.craft.network.payload.BuildingPreviewRequestPayload.TYPE, com.stardew.craft.network.payload.BuildingPreviewRequestPayload.STREAM_CODEC, com.stardew.craft.network.payload.BuildingPreviewRequestPayload::handle);
         registrar.playToClient(com.stardew.craft.network.payload.BuildingManagerReadyPayload.TYPE, com.stardew.craft.network.payload.BuildingManagerReadyPayload.STREAM_CODEC, com.stardew.craft.network.payload.BuildingManagerReadyPayload::handle);
         registrar.playToClient(com.stardew.craft.network.payload.BuildingPreviewPayload.TYPE, com.stardew.craft.network.payload.BuildingPreviewPayload.STREAM_CODEC, com.stardew.craft.network.payload.BuildingPreviewPayload::handle);
+        registrar.playToClient(com.stardew.craft.network.payload.BuildingObstructionFlashPayload.TYPE, com.stardew.craft.network.payload.BuildingObstructionFlashPayload.STREAM_CODEC, com.stardew.craft.network.payload.BuildingObstructionFlashPayload::handle);
 
         // 客户端 -> 服务端
         registrar.playToServer(

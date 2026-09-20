@@ -52,8 +52,8 @@ public class KegBlock extends MapUtilityStaticBlock implements EntityBlock {
 
 	@Override
 	public RenderShape getRenderShape(@SuppressWarnings("null") BlockState state) {
-		// 用 BE renderer 渲染本体 + 工作态浮动 + 就绪气泡
-		return RenderShape.ENTITYBLOCK_ANIMATED;
+		return UtilityMachineRenderState.forWorkingState(
+			state.getValue(WORKING), state.getValue(PART) == Part.EXTENSION);
 	}
 
 	@SuppressWarnings("null")

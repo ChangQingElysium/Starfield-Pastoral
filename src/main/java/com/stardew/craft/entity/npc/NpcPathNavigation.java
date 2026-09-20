@@ -10,6 +10,7 @@ import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.Collections;
 import java.util.Set;
 
 /**
@@ -18,12 +19,16 @@ import java.util.Set;
  * surfaces when planning paths.
  */
 public class NpcPathNavigation extends GroundPathNavigation {
+    private String lastStopDiagnostic = "";
+    public String lastStopDiagnostic() { return lastStopDiagnostic; }
     private int initialNodeBudget;
     private BlockPos watchedNode;
     private double bestNodeDistance;
     private long lastNodeProgressTick;
     private boolean recoveryRequested;
     private boolean allowIncompleteRecomputation;
+    private boolean preserveAuthoredTargetHeight;
+    private int authoredTargetAccuracy = 1;
 
 
     public NpcPathNavigation(Mob mob, Level level) {
@@ -89,7 +94,36 @@ public class NpcPathNavigation extends GroundPathNavigation {
     public boolean moveTo(double x,double y,double z,double speed) {
         ((NpcNodeEvaluator)nodeEvaluator).squareArea=null;
         allowIncompleteRecomputation=false;
+        preserveAuthoredTargetHeight=false;
         return super.moveTo(x,y,z,speed);
+    }
+
+    /**
+     * Route to an authored portal marker without GroundPathNavigation rewriting a
+     * solid marker to the first air block above its entire column. Indoor exit
+     * markers commonly live in a door frame; the route only needs to reach the
+     * closest node inside the movement service's portal approach radius.
+     */
+    public boolean moveToAuthoredPortalApproach(Vec3 target, double speed) {
+        return moveToAuthoredTarget(target, speed, 1);
+    }
+
+    public boolean moveToAuthoredTarget(Vec3 target, double speed, int accuracy) {
+        ((NpcNodeEvaluator)nodeEvaluator).squareArea=null;
+        allowIncompleteRecomputation=false;
+        preserveAuthoredTargetHeight=true;
+        authoredTargetAccuracy=accuracy;
+        Path candidate=createAuthoredHeightPath(BlockPos.containing(target));
+        boolean started=candidate!=null&&super.moveTo(candidate,speed);
+        if(!started)preserveAuthoredTargetHeight=false;
+        return started;
+    }
+
+    private Path createAuthoredHeightPath(BlockPos target) {
+        // The Set overload is implemented by PathNavigation and therefore skips
+        // GroundPathNavigation#createPath(BlockPos), whose solid-column scan is
+        // incorrect for an interaction marker embedded in a doorway.
+        return super.createPath(Collections.singleton(target),authoredTargetAccuracy);
     }
 
     /**
@@ -103,6 +137,17 @@ public class NpcPathNavigation extends GroundPathNavigation {
 
     @Override
     public void recomputePath() {
+        if(preserveAuthoredTargetHeight&&getTargetPos()!=null) {
+            if(level.getGameTime()-timeLastRecompute>20L) {
+                path=null;
+                path=createAuthoredHeightPath(getTargetPos());
+                timeLastRecompute=level.getGameTime();
+                hasDelayedRecomputation=false;
+            } else {
+                hasDelayedRecomputation=true;
+            }
+            return;
+        }
         super.recomputePath();
         if (!allowIncompleteRecomputation && path != null && !path.canReach()) {
             // PathNavigation keeps targetPos after stop(). A delayed recomputation can
@@ -183,9 +228,14 @@ public class NpcPathNavigation extends GroundPathNavigation {
 
     @Override
     public void stop() {
+        if (Boolean.getBoolean("stardewcraft.npcScheduleAudit")) {
+            lastStopDiagnostic = StackWalker.getInstance().walk(frames -> frames.skip(1).limit(4)
+                    .map(StackWalker.StackFrame::toString).collect(java.util.stream.Collectors.joining(" <- ")));
+        }
         super.stop();
         ((NpcNodeEvaluator)nodeEvaluator).squareArea=null;
         allowIncompleteRecomputation=false;
+        preserveAuthoredTargetHeight=false;
         watchedNode = null;
         recoveryRequested = false;
     }

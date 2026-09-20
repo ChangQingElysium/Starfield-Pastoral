@@ -75,8 +75,7 @@ public class CrabPotBlock extends Block implements EntityBlock, SimpleWaterlogge
 
 	@Override
 	public RenderShape getRenderShape(@SuppressWarnings("null") BlockState state) {
-		// 关键：用 BE renderer 统一渲染“方块本体 + 工作态漂浮 + 就绪气泡”，避免双模型。
-		return RenderShape.ENTITYBLOCK_ANIMATED;
+		return UtilityMachineRenderState.forWorkingState(state.getValue(WORKING));
 	}
 
 	@SuppressWarnings("null")

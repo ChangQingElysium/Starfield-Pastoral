@@ -12822,5 +12822,7 @@
   "entity.stardewcraft.wilderness_golem": "야생 골렘",
   "entity.stardewcraft.iridium_golem": "이리듐 골렘",
   "entity.stardewcraft.mine_monster.wilderness_golem": "야생 골렘",
-  "entity.stardewcraft.mine_monster.iridium_golem": "이리듐 골렘"
+  "entity.stardewcraft.mine_monster.iridium_golem": "이리듐 골렘",
+  "block.stardewcraft.ochre_bricks": "황토색 벽돌",
+  "block.stardewcraft.blue_flowerpot": "청유 화분"
 }

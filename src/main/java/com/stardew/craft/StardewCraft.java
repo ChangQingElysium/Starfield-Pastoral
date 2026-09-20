@@ -241,6 +241,7 @@ public class StardewCraft {
                     com.stardew.craft.mastery.MasterySiteInstaller.get(stardewLevel).resetForMigration();
                     com.stardew.craft.statue.UncertaintyStatueInstaller.get(stardewLevel).resetForMigration();
                     com.stardew.craft.specialorder.SpecialOrderBoardInstaller.get(stardewLevel).resetForMigration();
+                    com.stardew.craft.fishing.server.BobberMachineInstaller.get(stardewLevel).resetForMigration();
                     LOGGER.info("[VALLEY_PREGEN] Pregen just installed — portal replacement done (startup path)");
                 }
             } else {

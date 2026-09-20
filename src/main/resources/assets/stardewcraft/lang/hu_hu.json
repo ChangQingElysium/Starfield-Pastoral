@@ -12822,5 +12822,7 @@
   "entity.stardewcraft.wilderness_golem": "Vad gólem",
   "entity.stardewcraft.iridium_golem": "Irídiumgólem",
   "entity.stardewcraft.mine_monster.wilderness_golem": "Vad gólem",
-  "entity.stardewcraft.mine_monster.iridium_golem": "Irídiumgólem"
+  "entity.stardewcraft.mine_monster.iridium_golem": "Irídiumgólem",
+  "block.stardewcraft.ochre_bricks": "Okker téglák",
+  "block.stardewcraft.blue_flowerpot": "Kék mázas virágcserép"
 }

@@ -111,9 +111,15 @@ public class GreenhouseManager extends SavedData {
     public void repairForPlayer(ServerLevel farmLevel, UUID ownerUUID) {
         var farm = com.stardew.craft.farm.FarmInstanceRegistry.get().getFarm(ownerUUID);
         if (farm == null) return;
-        if (Boolean.TRUE.equals(repairedByOwner.get(ownerUUID))
-                && GreenhouseBuildings.findForFarm(farmLevel,
-                        farm.getInstanceId()) != null) return;
+        if (Boolean.TRUE.equals(repairedByOwner.get(ownerUUID))) {
+            var existing = GreenhouseBuildings.findForFarm(farmLevel, farm.getInstanceId());
+            if (existing != null) {
+                // Repair completion is also the recovery path for old saves and moved
+                // greenhouses whose outdoor trigger was lost. Reassert it every time.
+                GreenhouseBuildings.ensurePortal(farmLevel, existing);
+                return;
+            }
+        }
         GreenhouseBuildings.repair(farmLevel, ownerUUID);
         repairedByOwner.put(ownerUUID, true);
         ruinsPlacedByOwner.put(ownerUUID, true);
@@ -283,10 +289,14 @@ public class GreenhouseManager extends SavedData {
         com.stardew.craft.farm.FarmInstanceRegistry registry =
                 com.stardew.craft.farm.FarmInstanceRegistry.get();
         for (com.stardew.craft.farm.FarmInstance farm : registry.getAllFarms()) {
-            BlockPos ghPos = farm.getGreenhousePos();
-            if ((!(level instanceof ServerLevel server)
-                    || GreenhouseBuildings.findForFarm(server, farm.getInstanceId()) == null)
-                    && isInGreenhouseExteriorRange(pos, ghPos)) return true;
+            if (level instanceof ServerLevel server) {
+                var record = GreenhouseBuildings.findForFarm(server, farm.getInstanceId());
+                if (record != null) {
+                    if (record.claim().contains(pos)) return true;
+                    continue;
+                }
+            }
+            if (isInGreenhouseExteriorRange(pos, farm.getGreenhousePos())) return true;
         }
         return false;
     }

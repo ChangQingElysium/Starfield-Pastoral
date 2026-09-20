@@ -79,6 +79,15 @@ public final class NpcCentralMovementService {
     private NpcCentralMovementService() {
     }
 
+    /** Traffic influences route cost; two scheduled travellers must not deadlock by mutually pushing. */
+    public static boolean isScheduleTravelling(StardewNpcEntity npc) {
+        var plan = ACTIVE_PLANS.get(npc.getNpcId());
+        return plan != null && plan.boundEntityUuid.equals(npc.getUUID())
+                && plan.allowNearestReachableFinal && plan.currentStepIndex < plan.steps.size()
+                && !"destination_wait".equals(plan.debugStage)
+                && !npc.isNativeActivityMovementLocked() && !npc.isFacingOverrideActive();
+    }
+
     public static DebugSnapshot getDebugSnapshot(String npcId) {
         return DEBUG_SNAPSHOTS.get(npcId == null ? "" : npcId.toLowerCase());
     }
@@ -420,7 +429,10 @@ public final class NpcCentralMovementService {
                     && !plan.settledAtNearestReachable
                     && (plan.square==null || !plan.square.area.contains(npc.position(),npc.getBbWidth()/2.))) {
                 Vec3 goal=plan.steps.getLast().target;
-                if (!arrivedAt(npc,goal,NpcNavigationPolicy.current().arrivalRadius()))
+                boolean holdWorkpoint = plan.exactWorkpoint && npc.position().distanceToSqr(goal) <= 9
+                        && InteriorRegionRegistry.fixedInteriorIdAt(npc.blockPosition()).equals(
+                            InteriorRegionRegistry.fixedInteriorIdAt(BlockPos.containing(goal)));
+                if (!holdWorkpoint && !arrivedAt(npc,goal,NpcNavigationPolicy.current().arrivalRadius()))
                     needNewPlan=true;
             }
             if (needNewPlan || nodeChanged) {
@@ -446,6 +458,8 @@ public final class NpcCentralMovementService {
             }
 
             if(plan.currentStepIndex<plan.steps.size())executePlanTick(level, npc, plan);
+            if (plan.currentStepIndex >= plan.steps.size() && plan.arrivalPosition == null)
+                plan.arrivalPosition = npc.position();
             if(plan.currentStepIndex>=plan.steps.size()&&!tickSquare(level,npc,state,plan))executePlanTick(level,npc,plan);
             if ("done".equals(plan.debugStage)) {
                 applyFacing(npc, state);
@@ -629,7 +643,7 @@ public final class NpcCentralMovementService {
         if (npcIndoors && destIndoors) {
             boolean sameFixedInterior = npcInFixedInterior && destInFixedInterior && npcFixedInterior.equals(destFixedInterior);
             if (sameFixedInterior) {
-                expanded.add(NpcRoutePlanner.NpcRouteStep.walk("indoor_direct", finalTarget));
+                expanded.add(NpcRoutePlanner.NpcRouteStep.walk(route.destinationSteps.getLast().pointId, finalTarget));
             } else {
                 Vec3 exitIndoor = NpcRoutePlanner.indoorExitForLocation(level,npcInteriorLocation);
                 Vec3 exitOutdoor = NpcRoutePlanner.outdoorExitForLocation(level,npcInteriorLocation);
@@ -664,11 +678,12 @@ public final class NpcCentralMovementService {
             expanded.addAll(route.destinationSteps);
         }
         NpcRoutePlan plan = new NpcRoutePlan(signature, npc.getUUID(), expanded, gameTime);
-        // A schedule point is a contract position.  Only a point explicitly bound
-        // to furniture has a valid "stand beside the support" completion rule; an
-        // ordinary authored tile must never be completed from the customer side of
-        // a counter just because A* returned its nearest cell.
-        plan.allowNearestReachableFinal = allowsNearestReachableFinal(expanded);
+        // Schedule completion has one contract, shared by routing, activities and
+        // the cursor. Authored scenes keep their stricter exact-walk semantics.
+        plan.allowNearestReachableFinal = true;
+        var finalPoint = expanded.isEmpty() ? null : NpcSupportTarget.point(expanded.getLast().pointId);
+        plan.exactWorkpoint = finalPoint != null && finalPoint.has("arrival")
+                && "exact_work".equals(finalPoint.get("arrival").getAsString());
         plan.progressCheckX = npc.getX();
         plan.progressCheckZ = npc.getZ();
         plan.routeStatus = routeStatus;
@@ -708,12 +723,6 @@ public final class NpcCentralMovementService {
         return plan;
     }
 
-    private static boolean allowsNearestReachableFinal(List<NpcRoutePlanner.NpcRouteStep> steps) {
-        if (steps == null || steps.isEmpty()) return false;
-        var point = NpcSupportTarget.point(steps.getLast().pointId);
-        return point != null && point.has("furniture");
-    }
-
     private static String fmt(Vec3 v) {
         return v == null ? "null" : String.format(java.util.Locale.ROOT, "(%.1f,%.1f,%.1f)", v.x, v.y, v.z);
     }
@@ -748,10 +757,15 @@ public final class NpcCentralMovementService {
                                            StardewNpcEntity npc,
                                            NpcRoutePlan plan) {
         if (plan.currentStepIndex >= plan.steps.size()) {
+            if (plan.exactWorkpoint && !plan.steps.isEmpty()) {
+                npc.setPos(plan.steps.getLast().target);
+                npc.setDeltaMovement(Vec3.ZERO);
+            }
             closeOpenedDoors(level, npc, plan, true);
             npc.getNavigation().stop();
             stopHorizontalMotionPreserveGravity(npc);
             NpcChunkForceManager.releaseRouteCorridor(level,npc.getNpcId());
+            if (plan.arrivalPosition == null) plan.arrivalPosition = npc.position();
             plan.debugStage = plan.settledAtNearestReachable ? "done_nearest_reachable" : "done";
             return false;
         }
@@ -803,6 +817,30 @@ public final class NpcCentralMovementService {
             restoreGroundContact(level, npc);
         }
 
+        // A saved position, furniture activity, or exact workpoint can leave the
+        // body embedded in a collision shape. A* cannot walk out of that shape.
+        // Repair only the starting overlap, within the same room and nearby floor.
+        boolean aligningWorkpoint = finalStep && plan.exactWorkpoint
+                && (target.subtract(npc.position()).horizontalDistanceSqr() <= 9
+                    || plan.fallbackStep == plan.currentStepIndex);
+        if (plan.allowNearestReachableFinal && !aligningWorkpoint
+                && now - plan.lastCollisionRecoveryTick >= 20
+                && now - plan.lastProgressTick >= 40
+                && !level.noBlockCollision(npc, npc.getBoundingBox().deflate(1.0E-5D))) {
+            plan.lastCollisionRecoveryTick = now;
+            Vec3 clearStart = nearestClearStart(level, npc);
+            if (clearStart != null) {
+                npc.getNavigation().stop();
+                npc.setPos(clearStart);
+                npc.setDeltaMovement(Vec3.ZERO);
+                npc.setOnGround(true);
+                plan.stagedPath = null;
+                plan.fallbackEndpoint = null;
+                plan.fallbackStep = -1;
+                plan.debugRepathReason = "recovered_embedded_start";
+            }
+        }
+
         Vec3 nextPathNode = nextPathNodeTarget(npc);
         plan.debugNextWaypoint = nextPathNode == null ? target : nextPathNode;
         closeOpenedDoors(level, npc, plan, false);
@@ -822,6 +860,42 @@ public final class NpcCentralMovementService {
                 ? distSqr<=radius*radius && Math.abs(target.y-npc.getY())<=2.0D
                 : arrivedAt(npc,target,radius);
 
+        if (finalStep && plan.exactWorkpoint && sameRegion
+                && (distSqr <= 9 || plan.fallbackStep == plan.currentStepIndex)) {
+            // Workpoints explicitly request exact placement, including collision bypass.
+            // Advance smoothly on the destination side of the portal; never cross
+            // floors/rooms by pretending an outdoor endpoint is an indoor arrival.
+            Vec3 delta = target.subtract(npc.position());
+            npc.getNavigation().stop();
+            npc.setDeltaMovement(Vec3.ZERO);
+            if (delta.lengthSqr() <= .000001) {
+                npc.setPos(target);
+                plan.currentStepIndex++;
+                plan.fallbackEndpoint = null;
+                plan.fallbackStep = -1;
+                plan.debugStage = "workpoint_exact";
+            } else {
+                npc.setPos(npc.position().add(delta.scale(Math.min(1, .15 / delta.length()))));
+                plan.debugStage = "workpoint_align";
+            }
+            plan.lastProgressTick = now;
+            return false;
+        }
+        if (plan.fallbackStep == plan.currentStepIndex && plan.fallbackEndpoint != null
+                && npc.position().distanceToSqr(plan.fallbackEndpoint) <= .64
+                && npc.onGround() && sameRegion && level.noBlockCollision(npc, npc.getBoundingBox())) {
+            npc.getNavigation().stop();
+            stopHorizontalMotionPreserveGravity(npc);
+            plan.currentStepIndex++;
+            plan.stagedPath = null;
+            plan.fallbackEndpoint = null;
+            plan.fallbackStep = -1;
+            plan.lastProgressTick = now;
+            plan.settledAtNearestReachable = finalStep;
+            plan.debugStage = finalStep ? "nearest_reachable" : "nearest_portal_approach";
+            return false;
+        }
+
         // Detect a reserved final position before accepting geometric arrival. Entity
         // pushes can move a waiting actor just inside the arrival radius while another
         // NPC still owns the target; that remains a wait, not an overlap.
@@ -839,7 +913,7 @@ public final class NpcCentralMovementService {
             plan.debugStage = "destination_wait";
             plan.debugRepathReason = "occupied_by_" + stableNpcOrder(destinationBlocker);
             plan.debugNextWaypoint = target;
-            boolean safelyWaitingBesideTarget = plan.allowNearestReachableFinal
+            boolean safelyWaitingBesideTarget = plan.allowNearestReachableFinal && !plan.exactWorkpoint
                     && sameRegion
                     && now - plan.destinationWaitStartTick >= DESTINATION_WAIT_TICKS
                     && npc.onGround()
@@ -908,12 +982,16 @@ public final class NpcCentralMovementService {
                 && (plan.stuckCheckCount >= STUCK_REPATH_CHECKS || now - plan.localProgressTick >= 100);
         boolean completedNearestPath = completedPath != null && completedPath.isDone()
                 && completedAtPathEnd;
-        boolean nearestReachableFinal = plan.allowNearestReachableFinal
+        boolean finishedAtUnsupportedEdge = completedNearestPath
+                && now - plan.localProgressTick >= 100 && npc.onGround()
+                && level.noBlockCollision(npc, npc.getBoundingBox())
+                && !hasSupportedApproach(level, npc, target);
+        boolean nearestReachableFinal = plan.allowNearestReachableFinal && !plan.exactWorkpoint
                 && finalStep && sameRegion
-                && targetStandingCellUnavailable
+                && (targetStandingCellUnavailable || finishedAtUnsupportedEdge)
                 && distSqr <= BLOCKED_FINAL_APPROACH_DISTANCE_SQR
                 && Math.abs(target.y - npc.getY()) <= BLOCKED_FINAL_VERTICAL_TOLERANCE
-                && (completedNearestPath || stalledBesideBlockedTarget);
+                && (completedNearestPath || stalledBesideBlockedTarget || finishedAtUnsupportedEdge);
         if (nearestReachableFinal) {
             npc.getNavigation().stop();
             stopHorizontalMotionPreserveGravity(npc);
@@ -985,7 +1063,7 @@ public final class NpcCentralMovementService {
             issuedSearch = true;
             // moveTo() returns true if a path was successfully created
             double speed = movementSpeedForStep(tightStep, distSqr);
-            boolean pathFound = moveTo(npc,plan,target,speed);
+            boolean pathFound = moveTo(npc,plan,target,speed,portalApproach);
             boolean shouldLogMove = movementDebugEnabled()
                 && (plan.lastMoveCommandLoggedStep != plan.currentStepIndex
                     || !pathFound
@@ -1082,7 +1160,7 @@ public final class NpcCentralMovementService {
             else npc.getNavigation().stop();
             stopHorizontalMotionPreserveGravity(npc);
             double speed = movementSpeedForStep(tightStep, distSqr);
-            boolean pathFound = moveTo(npc,plan,target,speed);
+            boolean pathFound = moveTo(npc,plan,target,speed,portalApproach);
             plan.debugStage = "stuck_repath";
             boolean stagedPathPending = plan.stagedPath != null;
             if (!stagedPathPending) {
@@ -1130,7 +1208,18 @@ public final class NpcCentralMovementService {
         npc.setDeltaMovement(0.0D, movement.y, 0.0D);
     }
 
+    // Kept as the single-step/test entry point. Runtime callers already know the
+    // step role, while direct callers derive the same portal-approach contract
+    // from the plan so both paths exercise identical validation.
     private static boolean moveTo(StardewNpcEntity npc,NpcRoutePlan plan,Vec3 target,double speed) {
+        boolean finalStep=plan.currentStepIndex==plan.steps.size()-1;
+        boolean portalApproach=!finalStep
+                && plan.steps.get(plan.currentStepIndex+1).mode==NpcRoutePlanner.RouteStepMode.WARP;
+        return moveTo(npc,plan,target,speed,portalApproach);
+    }
+
+    private static boolean moveTo(StardewNpcEntity npc,NpcRoutePlan plan,Vec3 target,double speed,
+                                  boolean portalApproach) {
         if(plan.squareBounds!=null)return npc.getNavigation() instanceof NpcPathNavigation navigation
                 && navigation.moveWithin(target,speed,plan.squareBounds);
         if (plan.stagedPath != null) {
@@ -1141,12 +1230,21 @@ public final class NpcCentralMovementService {
                 plan.debugRepathReason = "validated_staged_path";
                 return npc.getNavigation().moveTo(stitched, speed);
             }
+            if (plan.failedStagedPath != null) {
+                var partial = plan.failedStagedPath;
+                plan.failedStagedPath = null;
+                return followReachableEndpoint(npc, plan, partial, target, speed);
+            }
             if (plan.stagedPath != null) {
                 plan.debugRepathReason = "staged_path_pending";
             }
             return false;
         }
-        boolean started = npc.getNavigation().moveTo(target.x,target.y,target.z,speed);
+        boolean started = portalApproach && npc.getNavigation() instanceof NpcPathNavigation navigation
+                ? navigation.moveToAuthoredPortalApproach(target,speed)
+                : plan.allowNearestReachableFinal && npc.getNavigation() instanceof NpcPathNavigation navigation
+                    ? navigation.moveToAuthoredTarget(target, speed, 0)
+                    : npc.getNavigation().moveTo(target.x,target.y,target.z,speed);
         var path = npc.getNavigation().getPath();
         boolean nearbyDailyEndpoint = false;
         boolean finalStep = plan.currentStepIndex == plan.steps.size() - 1;
@@ -1182,18 +1280,41 @@ public final class NpcCentralMovementService {
                 plan.debugRepathReason = "staged_path_pending";
                 return false;
             }
-            // Vanilla is willing to walk an incomplete path toward the geometrically
-            // closest explored cell. On a long trip this can put the actor behind a
-            // building or in a courtyard with no route to the authored portal. Keep the
-            // actor at the last safe point and retry a complete route instead. A daily
-            // furniture target may still use a partial path when its own standing cell
-            // is unusable and the concrete endpoint is already beside it.
+            // Exhaust continuation first, then physically walk the verified endpoint.
+            // Scripted routes retain their exact-target contract.
+            if (plan.allowNearestReachableFinal) return followReachableEndpoint(npc, plan, path, target, speed);
             npc.getNavigation().stop();
             return false;
         }
         if (npc.getNavigation() instanceof NpcPathNavigation navigation) {
             navigation.allowIncompleteRecomputation(nearbyDailyEndpoint);
         }
+        return started;
+    }
+
+    private static boolean followReachableEndpoint(StardewNpcEntity npc, NpcRoutePlan plan,
+                                                    net.minecraft.world.level.pathfinder.Path path,
+                                                    Vec3 target, double speed) {
+        if (!plan.allowNearestReachableFinal || path == null || path.getNodeCount() == 0
+                || !(npc.level() instanceof ServerLevel level)) return false;
+        Vec3 endpoint = path.getEntityPosAtNode(npc, path.getNodeCount() - 1);
+        String expected = InteriorRegionRegistry.fixedInteriorIdAt(BlockPos.containing(target));
+        if (!expected.equals(InteriorRegionRegistry.fixedInteriorIdAt(BlockPos.containing(endpoint)))
+                || !expected.equals(InteriorRegionRegistry.fixedInteriorIdAt(npc.blockPosition()))) return false;
+        // Preserve the actual floor height (slabs/stairs), rather than rounding it up.
+        var support = level.getBlockState(BlockPos.containing(endpoint).below())
+                .getCollisionShape(level, BlockPos.containing(endpoint).below());
+        if (!support.isEmpty()) endpoint = new Vec3(endpoint.x,
+                BlockPos.containing(endpoint).getY() - 1 + support.max(net.minecraft.core.Direction.Axis.Y), endpoint.z);
+        if (!hasUsableStandingCellAt(level, npc, endpoint)) return false;
+        plan.fallbackEndpoint = endpoint;
+        plan.fallbackStep = plan.currentStepIndex;
+        npc.getNavigation().stop();
+        List<net.minecraft.world.level.pathfinder.Node> endpointNodes = new ArrayList<>();
+        appendPathNodes(endpointNodes, path);
+        boolean started = npc.getNavigation().moveTo(new net.minecraft.world.level.pathfinder.Path(
+                endpointNodes, BlockPos.containing(endpoint), true), speed);
+        plan.debugRepathReason = "verified_nearest_endpoint";
         return started;
     }
 
@@ -1223,14 +1344,14 @@ public final class NpcCentralMovementService {
     private static net.minecraft.world.level.pathfinder.Path continueStagedPartialPath(
             ServerLevel level, StardewNpcEntity npc, NpcRoutePlan plan, Vec3 target) {
         StagedPath staged = plan.stagedPath;
-        if (staged == null || staged.continuationSegments >= MAX_STAGED_CONTINUATION_SEGMENTS
-                || staged.target.distanceToSqr(target) > 1.0E-6D) {
+        if (staged == null || staged.target.distanceToSqr(target) > 1.0E-6D) {
             plan.stagedPath = null;
             return null;
         }
         BlockPos endpointPos = BlockPos.containing(staged.endpoint);
-        if (!staged.tryVanilla && !staged.visitedEndpoints.add(endpointPos)) {
-            plan.stagedPath = null;
+        if (staged.continuationSegments >= MAX_STAGED_CONTINUATION_SEGMENTS
+                || !staged.tryVanilla && !staged.visitedEndpoints.add(endpointPos)) {
+            retainReachableStagedPath(plan, staged);
             return null;
         }
 
@@ -1274,9 +1395,15 @@ public final class NpcCentralMovementService {
         if (!staged.tryVanilla) {
             staged.tryVanilla = true;
         } else {
-            plan.stagedPath = null;
+            retainReachableStagedPath(plan, staged);
         }
         return null;
+    }
+
+    private static void retainReachableStagedPath(NpcRoutePlan plan, StagedPath staged) {
+        plan.failedStagedPath = new net.minecraft.world.level.pathfinder.Path(
+                new ArrayList<>(staged.nodes), BlockPos.containing(staged.endpoint), false);
+        plan.stagedPath = null;
     }
 
     private static boolean validContinuationSeam(net.minecraft.world.level.pathfinder.Path continuation,
@@ -1312,6 +1439,32 @@ public final class NpcCentralMovementService {
     private static boolean hasBodyClearanceAt(ServerLevel level, StardewNpcEntity npc, Vec3 target) {
         Vec3 delta = target.subtract(npc.position());
         return level.noBlockCollision(npc, npc.getBoundingBox().move(delta));
+    }
+
+    /** Recover only an embedded start, on a supported cell within the same room. */
+    private static Vec3 nearestClearStart(ServerLevel level, StardewNpcEntity npc) {
+        String room = InteriorRegionRegistry.fixedInteriorIdAt(npc.blockPosition());
+        Vec3 best = null;
+        double bestDistance = Double.MAX_VALUE;
+        BlockPos origin = npc.blockPosition();
+        for (int x = -3; x <= 3; x++) for (int z = -3; z <= 3; z++) {
+            for (int y = -4; y <= 8; y++) {
+                BlockPos supportPos = origin.offset(x, y, z);
+                if (!level.hasChunkAt(supportPos)) continue;
+                var shape = level.getBlockState(supportPos).getCollisionShape(level, supportPos,
+                        net.minecraft.world.phys.shapes.CollisionContext.of(npc));
+                if (shape.isEmpty()) continue;
+                Vec3 candidate = new Vec3(supportPos.getX() + .5,
+                        supportPos.getY() + shape.max(net.minecraft.core.Direction.Axis.Y), supportPos.getZ() + .5);
+                double distance = candidate.distanceToSqr(npc.position());
+                if (distance >= bestDistance || Math.abs(candidate.y - npc.getY()) > 8
+                        || !room.equals(InteriorRegionRegistry.fixedInteriorIdAt(BlockPos.containing(candidate)))
+                        || !hasUsableStandingCellAt(level, npc, candidate)) continue;
+                best = candidate;
+                bestDistance = distance;
+            }
+        }
+        return best;
     }
 
     /**
@@ -1418,10 +1571,17 @@ public final class NpcCentralMovementService {
 
     static boolean hasReachedScheduleTarget(ServerLevel level, StardewNpcEntity npc, NpcRuntimeState state) {
         var plan=ACTIVE_PLANS.get(npc.getNpcId());
+        if (plan != null && plan.exactWorkpoint && plan.boundEntityUuid.equals(npc.getUUID())
+                && !plan.steps.isEmpty() && plan.steps.getLast().pointId.equals(state.namedPointId())) {
+            return plan.currentStepIndex >= plan.steps.size()
+                    && npc.position().distanceToSqr(plan.steps.getLast().target) <= 1.0E-6D;
+        }
         if (plan != null && plan.boundEntityUuid.equals(npc.getUUID())
-                && plan.allowNearestReachableFinal && plan.settledAtNearestReachable
                 && plan.currentStepIndex >= plan.steps.size() && !plan.steps.isEmpty()
-                && plan.steps.getLast().pointId.equals(state.namedPointId())) {
+                && plan.arrivalPosition != null && npc.position().distanceToSqr(plan.arrivalPosition) <= 1
+                && plan.steps.getLast().pointId.equals(state.namedPointId())
+                && InteriorRegionRegistry.fixedInteriorIdAt(npc.blockPosition()).equals(
+                    InteriorRegionRegistry.fixedInteriorIdAt(BlockPos.containing(plan.steps.getLast().target)))) {
             return true;
         }
         if(plan!=null&&plan.boundEntityUuid.equals(npc.getUUID())&&plan.square!=null
@@ -1482,7 +1642,9 @@ public final class NpcCentralMovementService {
         return state.activeScheduleKey() + "#" + state.scheduleCheckpoint() + "#" + state.scheduleNodeIndex()
             + "#" + state.namedPointId() + "#" + state.routeBehaviorToken() + "#" + NpcDataRegistry.revision()
             + "#" + route.canonicalLocation + "#" + route.status + "#" + route.diagnosticReason + "#" + route.missingPointId + "#" + route.missingPortalLinkId
-            + "#" + route.destinationSteps.stream().map(step->step.mode+":"+step.pointId+":"+step.target).toList();
+            // Intermediate portal steps depend on the actor's current position.
+            // Crossing a cell/door must not replace an in-flight plan or restart roaming.
+            + "#" + (route.destinationSteps.isEmpty() ? "" : route.destinationSteps.getLast().target);
     }
 
     private static String pathSummary(StardewNpcEntity npc) {
@@ -1742,6 +1904,12 @@ public final class NpcCentralMovementService {
     }
 
     private static final class NpcRoutePlan {
+        private boolean exactWorkpoint;
+        private long lastCollisionRecoveryTick = Long.MIN_VALUE / 2;
+        private Vec3 fallbackEndpoint;
+        private Vec3 arrivalPosition;
+        private int fallbackStep = -1;
+        private net.minecraft.world.level.pathfinder.Path failedStagedPath;
         private final String signature;
         private UUID boundEntityUuid;
         private final List<NpcRoutePlanner.NpcRouteStep> steps;
@@ -1830,6 +1998,8 @@ public final class NpcCentralMovementService {
     }
 
     public static final class DebugSnapshot {
+        public long destinationWaitSince;
+        public String arrivalPolicy = "", planIdentity = "";
         public String stage;
         public String location;
         public String pointId;
@@ -1884,6 +2054,10 @@ public final class NpcCentralMovementService {
         }
 
         private void updatePlan(NpcRoutePlan plan) {
+            destinationWaitSince = plan == null ? Long.MIN_VALUE : plan.destinationWaitStartTick;
+            arrivalPolicy = plan == null ? "" : plan.exactWorkpoint ? "exact_work"
+                    : plan.allowNearestReachableFinal ? "nearest_reachable" : "exact_script";
+            planIdentity = plan == null ? "" : plan.signature;
             if (plan == null || NpcRoutePlanner.RouteStatus.READY.name().equals(plan.routeStatus)) {
                 return;
             }

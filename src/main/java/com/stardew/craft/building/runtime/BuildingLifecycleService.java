@@ -137,7 +137,11 @@ public final class BuildingLifecycleService {
                 || !BuildingService.canManage(player, record) || !record.dimension().equals(player.serverLevel().dimension().location())) return false;
         var level = player.serverLevel(); var data = BuildingWorldData.get(level.getServer());
         var probe = BuildingPlacementService.probe(level, player, anchor, facing, record.mode() == BuildingRecord.Mode.SELF_BUILT, record.family(), record);
-        if (!probe.valid()) { BuildingPlacementService.message(player, probe.issue()); return false; }
+        if (!probe.valid()) {
+            BuildingPlacementService.flashProblems(player, probe.problems());
+            BuildingPlacementService.message(player, probe.issue());
+            return false;
+        }
         if (!level.hasChunksAt(record.claim().min(), record.claim().maxInclusive())) { BuildingPlacementService.message(player, "unloaded"); return false; }
         if (anchor.equals(record.anchor()) && facing == record.facing()) return false;
         var lift=data.moveLift(record.id());

@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "variant=0": { "model": "stardewcraft:block/ochre_bricks/variant_0" },
+    "variant=1": { "model": "stardewcraft:block/ochre_bricks/variant_1" },
+    "variant=2": { "model": "stardewcraft:block/ochre_bricks/variant_2" }
+  }
+}

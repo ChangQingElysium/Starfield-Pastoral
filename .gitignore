@@ -61,6 +61,9 @@ docs/*
 !docs/pet-addon-api.md
 !docs/legacy-livestock-migration.md
 !docs/ci-release-postmortems.md
+!docs/forge-1.20.1-migration-plan.md
+!docs/porting/
+!docs/porting/*.md
 !docs/schemas/
 !docs/schemas/*.schema.json
 
@@ -122,6 +125,7 @@ scripts/*
 !scripts/import_forest_farm.py
 !scripts/import_remaining_farms.py
 !scripts/generate_farm_ecology_templates.py
+!scripts/generate_farm_special_spawn_layouts.py
 !scripts/check_model_atlas.py
 !scripts/setup_valley_pregen.ps1
 !scripts/extract_ui_atlas_slices.sh
@@ -209,6 +213,8 @@ CLAUDE.md
 tools/npc/*
 !tools/npc/NpcSystemAuditProbe.java
 !tools/npc/audit.init.gradle
+!tools/npc/run_schedule_audit.py
+!docs/npc-schedule-map-audit.md
 !tools/art/NativeConstructionChecks.java
 !tools/art/preview_native_npc.js
 !tools/art/preview_npc_joints.js

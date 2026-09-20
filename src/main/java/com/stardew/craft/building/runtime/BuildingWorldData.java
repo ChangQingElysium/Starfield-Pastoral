@@ -148,6 +148,23 @@ public final class BuildingWorldData extends SavedData {
         return farmId.equals(permits.get(permit)) && family.equals(permitFamilies.get(permit)) && permitTiers.getOrDefault(permit, 0) == 0;
     }
 
+    /**
+     * A paid blueprint may be placed on another farm that the same player currently manages.
+     * This matters for the debug multi-farm workflow, where the selected farm can change between
+     * Robin's shop and the physical placement site. The permit is still family-specific and cannot
+     * cross to an unrelated player's farm.
+     */
+    public synchronized boolean permitsPlacement(UUID permit, UUID targetFarmId, ResourceLocation family,
+                                                     UUID actor, FarmInstanceRegistry registry) {
+        if (permit == null || targetFarmId == null || actor == null
+                || !family.equals(permitFamilies.get(permit)) || permitTiers.getOrDefault(permit, 0) != 0) return false;
+        UUID sourceFarmId = permits.get(permit);
+        if (targetFarmId.equals(sourceFarmId)) return true;
+        var source = registry.getFarmByInstanceId(sourceFarmId);
+        var target = registry.getFarmByInstanceId(targetFarmId);
+        return source != null && target != null && source.isFarmer(actor) && target.isFarmer(actor);
+    }
+
     public synchronized void recordUpgradePurchase(UUID requestId, UUID farmId, ResourceLocation family, int tier) {
         if (tier < 2 || tier > PrefabDefinitions.maxTier(family)) throw new IllegalArgumentException("Invalid permit tier");
         recordPurchase(requestId, farmId, true, family); permitTiers.put(requestId, tier); setDirty();
@@ -181,6 +198,17 @@ public final class BuildingWorldData extends SavedData {
 
     public synchronized Result beginPrefab(BuildingRecord record, UUID permit, int absoluteDay) {
         if (record.mode() != BuildingRecord.Mode.PREFAB || !permits(permit, record.farmId(), record.family())) return Result.INVALID_STATE;
+        return beginPrefabValidated(record, permit, absoluteDay);
+    }
+
+    public synchronized Result beginPrefab(BuildingRecord record, UUID permit, int absoluteDay,
+                                           UUID actor, FarmInstanceRegistry registry) {
+        if (record.mode() != BuildingRecord.Mode.PREFAB
+                || !permitsPlacement(permit, record.farmId(), record.family(), actor, registry)) return Result.INVALID_STATE;
+        return beginPrefabValidated(record, permit, absoluteDay);
+    }
+
+    private Result beginPrefabValidated(BuildingRecord record, UUID permit, int absoluteDay) {
         if (hasActiveConstruction(record.farmId())) return Result.INVALID_STATE;
         ConstructionOrder order = new ConstructionOrder(3, absoluteDay, false);
         Result result = register(record);

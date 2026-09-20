@@ -44,7 +44,7 @@ public class LoomBlockEntityRenderer implements BlockEntityRenderer<LoomBlockEnt
 
         BlockState state = be.getBlockState();
         Level level = be.getLevel();
-        if (level != null) {
+        if (level != null && com.stardew.craft.block.utility.UtilityMachineRenderState.rendersDynamicBody(state)) {
             poseStack.pushPose();
             Minecraft mc = Minecraft.getInstance();
             ModelBlockRenderer renderer = mc.getBlockRenderer().getModelRenderer();

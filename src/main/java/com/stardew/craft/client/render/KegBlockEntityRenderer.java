@@ -43,10 +43,10 @@ public class KegBlockEntityRenderer implements BlockEntityRenderer<KegBlockEntit
 		boolean ready = be.isReady();
 		ItemStack product = be.getProduct();
 
-		// 渲染方块本体（RenderShape=ENTITYBLOCK_ANIMATED）
+		// Idle bodies live in the chunk mesh; only the working body is rendered here.
 		BlockState state = be.getBlockState();
 		Level level = be.getLevel();
-		if (level != null) {
+		if (level != null && com.stardew.craft.block.utility.UtilityMachineRenderState.rendersDynamicBody(state)) {
 			poseStack.pushPose();
             if (be.isWorking() && !ready) {
                 UtilityWorkingAnimation.applyGroundedWorkingPose(poseStack, level, be.getBlockPos(), partialTick);

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "stardewcraft:item/fish/crabpot/oyster",
+    "particle": "stardewcraft:item/fish/crabpot/oyster"
+  },
+  "render_type": "minecraft:cutout"
+}

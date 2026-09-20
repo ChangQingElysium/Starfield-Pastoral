@@ -222,6 +222,12 @@ public class PlayerDataEventHandler {
                                 stardewLevel, ownFarm.getOwnerUUID());
                         com.stardew.craft.api.v1.farm.StardewFarmInitializationSteps.runPending(
                                 stardewLevel, ownFarm.getOwnerUUID());
+                        // Reassert the greenhouse entrance after all farm/building
+                        // data has loaded. This also repairs saves whose one-shot
+                        // recovery step was persisted before the building registry
+                        // or Community Center state became available.
+                        com.stardew.craft.greenhouse.GreenhouseBuildings.ensureCurrent(
+                                stardewLevel, ownFarm.getOwnerUUID());
                     }
                 }
             }

@@ -12,6 +12,7 @@ import com.stardew.craft.npc.data.NpcDataManager;
 import com.stardew.craft.npc.runtime.NpcCentralMovementService;
 import com.stardew.craft.npc.runtime.NpcChunkForceManager;
 import com.stardew.craft.npc.runtime.NpcRuntimeManager;
+import com.stardew.craft.npc.runtime.NpcScheduleAuditService;
 import com.stardew.craft.npc.runtime.NpcScheduleRuntimeService;
 import com.stardew.craft.npc.runtime.NpcSpawnManager;
 import com.stardew.craft.server.performance.PerformanceTiming;
@@ -46,6 +47,7 @@ public final class NpcSystem {
         long startedAt = ServerPerformanceRecorder.startTiming();
         try {
             NpcRuntimeManager.tickServer(event.getServer());
+            NpcScheduleAuditService.tick(event.getServer());
         } finally {
             ServerPerformanceRecorder.finishTiming(PerformanceTiming.NPC_TICK, startedAt);
         }
@@ -64,6 +66,7 @@ public final class NpcSystem {
     @SubscribeEvent
     public static void onServerStopped(ServerStoppedEvent event) {
         NpcRuntimeManager.onServerStopped(event.getServer());
+        NpcScheduleAuditService.onServerStopped(event.getServer());
         NpcSpawnManager.onServerStopped(event.getServer());
         NpcCentralMovementService.onServerStopped(event.getServer());
         com.stardew.craft.npc.runtime.NpcInteractionService.onServerStopped();

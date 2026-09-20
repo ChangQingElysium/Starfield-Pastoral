@@ -1,58 +1,170 @@
 {
-  "variants": {
-    "facing=north,part=main,ready=false": {
-      "model": "stardewcraft:block/utility/loom"
+  "multipart": [
+    {
+      "when": {
+        "facing": "north",
+        "part": "main",
+        "ready": "false"
+      },
+      "apply": {
+        "model": "stardewcraft:block/utility/loom"
+      }
     },
-    "facing=north,part=extension,ready=false": {
-      "model": "stardewcraft:block/utility/loom_extension_empty"
+    {
+      "when": {
+        "facing": "north",
+        "part": "extension",
+        "ready": "false"
+      },
+      "apply": {
+        "model": "stardewcraft:block/utility/loom_extension_empty"
+      }
     },
-    "facing=north,part=main,ready=true": {
-      "model": "stardewcraft:block/utility/loom_full"
+    {
+      "when": {
+        "facing": "north",
+        "part": "main",
+        "ready": "true"
+      },
+      "apply": {
+        "model": "stardewcraft:block/utility/loom_full"
+      }
     },
-    "facing=north,part=extension,ready=true": {
-      "model": "stardewcraft:block/utility/loom_extension_empty"
+    {
+      "when": {
+        "facing": "north",
+        "part": "extension",
+        "ready": "true"
+      },
+      "apply": {
+        "model": "stardewcraft:block/utility/loom_extension_empty"
+      }
     },
-    "facing=east,part=main,ready=false": {
-      "model": "stardewcraft:block/utility/loom",
-      "y": 90
+    {
+      "when": {
+        "facing": "east",
+        "part": "main",
+        "ready": "false"
+      },
+      "apply": {
+        "model": "stardewcraft:block/utility/loom",
+        "y": 90
+      }
     },
-    "facing=east,part=extension,ready=false": {
-      "model": "stardewcraft:block/utility/loom_extension_empty"
+    {
+      "when": {
+        "facing": "east",
+        "part": "extension",
+        "ready": "false"
+      },
+      "apply": {
+        "model": "stardewcraft:block/utility/loom_extension_empty"
+      }
     },
-    "facing=east,part=main,ready=true": {
-      "model": "stardewcraft:block/utility/loom_full",
-      "y": 90
+    {
+      "when": {
+        "facing": "east",
+        "part": "main",
+        "ready": "true"
+      },
+      "apply": {
+        "model": "stardewcraft:block/utility/loom_full",
+        "y": 90
+      }
     },
-    "facing=east,part=extension,ready=true": {
-      "model": "stardewcraft:block/utility/loom_extension_empty"
+    {
+      "when": {
+        "facing": "east",
+        "part": "extension",
+        "ready": "true"
+      },
+      "apply": {
+        "model": "stardewcraft:block/utility/loom_extension_empty"
+      }
     },
-    "facing=south,part=main,ready=false": {
-      "model": "stardewcraft:block/utility/loom",
-      "y": 180
+    {
+      "when": {
+        "facing": "south",
+        "part": "main",
+        "ready": "false"
+      },
+      "apply": {
+        "model": "stardewcraft:block/utility/loom",
+        "y": 180
+      }
     },
-    "facing=south,part=extension,ready=false": {
-      "model": "stardewcraft:block/utility/loom_extension_empty"
+    {
+      "when": {
+        "facing": "south",
+        "part": "extension",
+        "ready": "false"
+      },
+      "apply": {
+        "model": "stardewcraft:block/utility/loom_extension_empty"
+      }
     },
-    "facing=south,part=main,ready=true": {
-      "model": "stardewcraft:block/utility/loom_full",
-      "y": 180
+    {
+      "when": {
+        "facing": "south",
+        "part": "main",
+        "ready": "true"
+      },
+      "apply": {
+        "model": "stardewcraft:block/utility/loom_full",
+        "y": 180
+      }
     },
-    "facing=south,part=extension,ready=true": {
-      "model": "stardewcraft:block/utility/loom_extension_empty"
+    {
+      "when": {
+        "facing": "south",
+        "part": "extension",
+        "ready": "true"
+      },
+      "apply": {
+        "model": "stardewcraft:block/utility/loom_extension_empty"
+      }
     },
-    "facing=west,part=main,ready=false": {
-      "model": "stardewcraft:block/utility/loom",
-      "y": 270
+    {
+      "when": {
+        "facing": "west",
+        "part": "main",
+        "ready": "false"
+      },
+      "apply": {
+        "model": "stardewcraft:block/utility/loom",
+        "y": 270
+      }
     },
-    "facing=west,part=extension,ready=false": {
-      "model": "stardewcraft:block/utility/loom_extension_empty"
+    {
+      "when": {
+        "facing": "west",
+        "part": "extension",
+        "ready": "false"
+      },
+      "apply": {
+        "model": "stardewcraft:block/utility/loom_extension_empty"
+      }
     },
-    "facing=west,part=main,ready=true": {
-      "model": "stardewcraft:block/utility/loom_full",
-      "y": 270
+    {
+      "when": {
+        "facing": "west",
+        "part": "main",
+        "ready": "true"
+      },
+      "apply": {
+        "model": "stardewcraft:block/utility/loom_full",
+        "y": 270
+      }
     },
-    "facing=west,part=extension,ready=true": {
-      "model": "stardewcraft:block/utility/loom_extension_empty"
+    {
+      "when": {
+        "facing": "west",
+        "part": "extension",
+        "ready": "true"
+      },
+      "apply": {
+        "model": "stardewcraft:block/utility/loom_extension_empty"
+      }
     }
-  }
+  ]
 }

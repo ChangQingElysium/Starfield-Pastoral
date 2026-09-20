@@ -34,24 +34,27 @@ import java.util.List;
  */
 public class LoomBlock extends MapUtilityStaticBlock implements EntityBlock {
     public static final BooleanProperty READY = BooleanProperty.create("ready");
+    public static final BooleanProperty WORKING = BooleanProperty.create("working");
 
     @SuppressWarnings("null")
     public LoomBlock(Properties properties) {
         super(properties, "stardewcraft:block/utility/loom");
         registerDefaultState(defaultBlockState()
             .setValue(FACING, Direction.NORTH)
-            .setValue(READY, false));
+            .setValue(READY, false)
+            .setValue(WORKING, false));
     }
 
     @Override
     protected void createBlockStateDefinition(@SuppressWarnings("null") StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
-        builder.add(READY);
+        builder.add(READY, WORKING);
     }
 
     @Override
     public RenderShape getRenderShape(@SuppressWarnings("null") BlockState state) {
-        return RenderShape.ENTITYBLOCK_ANIMATED;
+        return UtilityMachineRenderState.forWorkingState(
+            state.getValue(WORKING), state.getValue(PART) == Part.EXTENSION);
     }
 
     @SuppressWarnings("null")

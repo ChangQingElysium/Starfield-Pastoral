@@ -84,7 +84,8 @@ public class FurnaceBlock extends Block implements EntityBlock {
 
     @Override
     public RenderShape getRenderShape(@SuppressWarnings("null") BlockState state) {
-        return RenderShape.ENTITYBLOCK_ANIMATED;
+        return UtilityMachineRenderState.forWorkingState(
+            state.getValue(WORKING), state.getValue(PART) == Part.EXTENSION);
     }
 
     @SuppressWarnings("null")

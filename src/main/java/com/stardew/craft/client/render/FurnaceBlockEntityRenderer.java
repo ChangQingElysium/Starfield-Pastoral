@@ -43,7 +43,7 @@ public class FurnaceBlockEntityRenderer implements BlockEntityRenderer<FurnaceBl
 
         BlockState state = be.getBlockState();
         Level level = be.getLevel();
-        if (level != null) {
+        if (level != null && com.stardew.craft.block.utility.UtilityMachineRenderState.rendersDynamicBody(state)) {
             poseStack.pushPose();
 
             Minecraft mc = Minecraft.getInstance();

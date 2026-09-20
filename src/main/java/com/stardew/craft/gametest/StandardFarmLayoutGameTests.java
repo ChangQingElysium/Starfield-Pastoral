@@ -6,12 +6,14 @@ import com.stardew.craft.api.v1.farm.StardewFarmLayout;
 import com.stardew.craft.api.v1.internal.farm.StardewFarmLayoutRegistry;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.decor.MapDecorStaticBlock;
+import com.stardew.craft.farm.BeachFarmDailyService;
 import com.stardew.craft.farm.FarmInstanceRegistry;
 import com.stardew.craft.farm.FarmInstance;
 import com.stardew.craft.farm.FarmInstanceInitializer;
 import com.stardew.craft.farm.FarmDebrisPlacementRules;
 import com.stardew.craft.farm.FarmType;
 import com.stardew.craft.farm.FarmOreDailyService;
+import com.stardew.craft.farm.FarmSpawnLayoutData;
 import com.stardew.craft.fishing.WaterFeatureSpawnRules;
 import com.stardew.craft.fishing.data.FishingDataManager;
 import com.stardew.craft.mining.StructureLoader;
@@ -320,6 +322,51 @@ public final class StandardFarmLayoutGameTests {
                         && fall.contains(ModBlocks.FORAGE_PURPLE_MUSHROOM)
                         && !fall.contains(ModBlocks.FORAGE_WILD_PLUM),
                 "Forest seasonal forage no longer matches Farm.DayUpdate");
+        helper.succeed();
+    }
+
+    @GameTest(templateNamespace = "stardewcraft_farm_debris", template = "ring_utilities")
+    public static void specialFarmSpawnMasksFollowAuthoredMaps(GameTestHelper helper)
+            throws ReflectiveOperationException {
+        var forest = FarmSpawnLayoutData.forType(FarmType.FOREST);
+        var forestGeneral = forest.positions("general");
+        var forestStrip = forest.positions("forest_strip");
+        helper.assertTrue(forestGeneral.size() == 9367 && forestStrip.size() == 5106,
+                "Forest forage masks no longer match farm_3's authored natural ground");
+        helper.assertTrue(forestGeneral.stream().anyMatch(pos -> pos.getX() > 190)
+                        && forestGeneral.stream().anyMatch(pos -> pos.getX() < 85)
+                        && forestGeneral.stream().allMatch(pos -> pos.getX() >= 65
+                        && pos.getX() <= 216 && pos.getZ() >= 72 && pos.getZ() <= 202),
+                "Forest forage was clipped to one grass patch or escaped the playable basin");
+
+        var beach = FarmSpawnLayoutData.forType(FarmType.BEACH);
+        var shore = beach.positions("shore_water");
+        helper.assertTrue(shore.size() == 1380
+                        && beach.positions("beach_spawn").size() == 1597
+                        && beach.positions("seasonal_grass").size() == 1108,
+                "Beach Farm spawn masks no longer match farm_7's coast and forage patch");
+        helper.assertTrue(shore.stream().allMatch(pos -> pos.getY() == 25)
+                        && shore.stream().noneMatch(pos -> pos.getX() >= 115 && pos.getX() <= 181
+                        && pos.getZ() >= 34 && pos.getZ() <= 79)
+                        && shore.stream().anyMatch(pos -> pos.getX() < 20)
+                        && shore.stream().anyMatch(pos -> pos.getZ() > 200),
+                "Supply crates are not constrained to the broad ocean shoreline or leaked into freshwater");
+
+        var beachChance = BeachFarmDailyService.class.getDeclaredField("BEACH_SPAWN_TILE_CHANCE");
+        var grassChance = BeachFarmDailyService.class.getDeclaredField("SEASONAL_GRASS_TILE_CHANCE");
+        var beachPool = BeachFarmDailyService.class.getDeclaredField("BEACH_BASE_FORAGE");
+        beachChance.setAccessible(true);
+        grassChance.setAccessible(true);
+        beachPool.setAccessible(true);
+        var pool = (java.util.List<?>) beachPool.get(null);
+        helper.assertTrue(Math.abs(beachChance.getDouble(null) - 802.0D / 12100.0D) < 1.0E-12
+                        && Math.abs(grassChance.getDouble(null) - 337.0D / 12100.0D) < 1.0E-12
+                        && pool.contains(ModBlocks.FORAGE_CORAL)
+                        && pool.contains(ModBlocks.FORAGE_MUSSEL)
+                        && pool.contains(ModBlocks.FORAGE_COCKLE)
+                        && pool.contains(ModBlocks.FORAGE_OYSTER)
+                        && java.util.Collections.frequency(pool, ModBlocks.FORAGE_SEAWEED) == 2,
+                "Beach Farm daily rolls no longer match Farm.DayUpdate's source weights and pool");
         helper.succeed();
     }
 

@@ -49,7 +49,9 @@ public final class BuildingPreviewService {
         String issue = probe.issue();
         if (probe.valid() && !request.self() && moving == null) {
             var permit = BuildingBlueprintItem.permit(stack);
-            if (permit == null || !BuildingWorldData.get(player.serverLevel().getServer()).permits(permit, probe.farm().getInstanceId(), family)) issue = "permit";
+            var farms = com.stardew.craft.farm.FarmInstanceRegistry.get(player.serverLevel().getServer());
+            if (permit == null || !BuildingWorldData.get(player.serverLevel().getServer())
+                    .permitsPlacement(permit, probe.farm().getInstanceId(), family, player.getUUID(), farms)) issue = "permit";
         }
         var outline=PrefabDefinitions.maxTier(family)==1?probe.claim():probe.structure();
         PacketDistributor.sendToPlayer(player, new BuildingPreviewPayload(request.anchor(), request.facing(), request.self(), request.sequence(),

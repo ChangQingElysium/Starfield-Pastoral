@@ -12822,5 +12822,7 @@
   "entity.stardewcraft.wilderness_golem": "Yaban Golemi",
   "entity.stardewcraft.iridium_golem": "İridyum Golemi",
   "entity.stardewcraft.mine_monster.wilderness_golem": "Yaban Golemi",
-  "entity.stardewcraft.mine_monster.iridium_golem": "İridyum Golemi"
+  "entity.stardewcraft.mine_monster.iridium_golem": "İridyum Golemi",
+  "block.stardewcraft.ochre_bricks": "Aşı boyası tuğlalar",
+  "block.stardewcraft.blue_flowerpot": "Mavi sırlı saksı"
 }

@@ -12822,5 +12822,7 @@
   "entity.stardewcraft.wilderness_golem": "荒野石魔",
   "entity.stardewcraft.iridium_golem": "铱石魔",
   "entity.stardewcraft.mine_monster.wilderness_golem": "荒野石魔",
-  "entity.stardewcraft.mine_monster.iridium_golem": "铱石魔"
+  "entity.stardewcraft.mine_monster.iridium_golem": "铱石魔",
+  "block.stardewcraft.ochre_bricks": "酒吧赭色砖",
+  "block.stardewcraft.blue_flowerpot": "蓝釉花盆"
 }

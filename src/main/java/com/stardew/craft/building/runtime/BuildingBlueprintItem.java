@@ -225,16 +225,28 @@ public final class BuildingBlueprintItem extends com.stardew.craft.item.SimpleSt
         } else placed = BuildingPlacementService.placePrefab(serverPlayer, anchor, facing(stack), permit(stack), family);
         if (placed) {
             if (movedId != null) consumeMoveDocuments(serverPlayer, movedId);
-            else consumePlacedBlueprint(serverPlayer, stack);
+            else consumePlacedBlueprint(serverPlayer, hand, stack);
         }
         return placed ? InteractionResult.CONSUME : InteractionResult.FAIL;
     }
 
     /** Construction has started server-side; consume the document in every game mode. */
-    private static void consumePlacedBlueprint(ServerPlayer player, ItemStack stack) {
-        BuildingDrafts.get(player.server).consume(stack);
-        stack.shrink(1);
+    static void consumePlacedBlueprint(ServerPlayer player, InteractionHand hand, ItemStack attempted) {
+        // Use the authoritative hand slot instead of trusting UseOnContext's stack reference.
+        // Some interaction paths pass a copy; shrinking that copy leaves the real blueprint in
+        // the inventory even though the server has already registered the construction.
+        UUID document = BuildingDrafts.id(attempted);
+        ItemStack held = player.getItemInHand(hand);
+        if (held.getItem() instanceof BuildingBlueprintItem && document != null
+                && document.equals(BuildingDrafts.id(held))) {
+            BuildingDrafts.get(player.server).consume(held);
+            player.setItemInHand(hand, ItemStack.EMPTY);
+        } else {
+            BuildingDrafts.get(player.server).consume(attempted);
+            attempted.setCount(0);
+        }
         player.getInventory().setChanged();
+        player.inventoryMenu.broadcastFullState();
         player.containerMenu.broadcastChanges();
     }
 }

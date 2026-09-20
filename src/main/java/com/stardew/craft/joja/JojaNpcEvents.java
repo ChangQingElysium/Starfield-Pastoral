@@ -61,7 +61,7 @@ public final class JojaNpcEvents {
 
         ServerLevel level = event.getServer().getLevel(ModDimensions.STARDEW_VALLEY);
         if (level == null) return;
-        if (level.players().isEmpty()) return;
+        if (level.players().isEmpty() && !Boolean.getBoolean("stardewcraft.npcHeadlessScheduleTest")) return;
         if (com.stardew.craft.time.StardewTimePauseService.isPaused(event.getServer())) return;
 
         for (Spawn s : SPAWNS) {

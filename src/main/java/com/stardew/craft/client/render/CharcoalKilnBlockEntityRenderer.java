@@ -38,7 +38,7 @@ public class CharcoalKilnBlockEntityRenderer implements BlockEntityRenderer<Char
 
         BlockState state = be.getBlockState();
         Level level = be.getLevel();
-        if (level != null) {
+        if (level != null && com.stardew.craft.block.utility.UtilityMachineRenderState.rendersDynamicBody(state)) {
             poseStack.pushPose();
             if (be.isWorking() && !ready) {
                 UtilityWorkingAnimation.applyKegWorkingPose(poseStack, level, be.getBlockPos(), partialTick);

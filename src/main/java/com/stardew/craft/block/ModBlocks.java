@@ -122,6 +122,13 @@ public class ModBlocks {
                                         Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS).noOcclusion()
                                                 .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK)));
 
+        public static final DeferredBlock<com.stardew.craft.block.decor.MapDecorStaticBlock> BLUE_FLOWERPOT =
+                        BLOCKS.register("blue_flowerpot", () -> new com.stardew.craft.block.decor.MapDecorStaticBlock(
+                                        Block.Properties.of().mapColor(MapColor.COLOR_CYAN).strength(0.8F, 1.0F)
+                                                .sound(SoundType.STONE).noOcclusion()
+                                                .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK),
+                                        "stardewcraft:block/decor/house/blue_flowerpot"));
+
         public static final DeferredBlock<com.stardew.craft.block.decor.DogHouseBlock> DOG_HOUSE =
                         BLOCKS.register("dog_house", () -> new com.stardew.craft.block.decor.DogHouseBlock(
                                         Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS).noOcclusion()
@@ -267,6 +274,11 @@ public class ModBlocks {
         public static final DeferredBlock<com.stardew.craft.block.terrain.TownPavingBlock> PLAZA_RED_BRICKS =
                         BLOCKS.register("plaza_red_bricks", () -> new com.stardew.craft.block.terrain.TownPavingBlock(
                                         Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.BRICKS)));
+
+        public static final DeferredBlock<com.stardew.craft.block.terrain.OchreBricksBlock> OCHRE_BRICKS =
+                        BLOCKS.register("ochre_bricks", () -> new com.stardew.craft.block.terrain.OchreBricksBlock(
+                                        Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.BRICKS)
+                                                .mapColor(MapColor.TERRACOTTA_ORANGE)));
 
         public static final DeferredBlock<com.stardew.craft.block.terrain.TerrainGrassBlock> DARK_GRASS_BLOCK =
                         BLOCKS.register("dark_grass_block", () -> new com.stardew.craft.block.terrain.TerrainGrassBlock(
@@ -606,6 +618,10 @@ public class ModBlocks {
         public static final DeferredBlock<Block> FORAGE_CORAL             = forage("coral");
         public static final DeferredBlock<Block> FORAGE_RAINBOW_SHELL     = forage("rainbow_shell", SUMMER);
         public static final DeferredBlock<Block> FORAGE_SEA_URCHIN        = forage("sea_urchin");
+        public static final DeferredBlock<Block> FORAGE_MUSSEL            = forage("mussel");
+        public static final DeferredBlock<Block> FORAGE_COCKLE            = forage("cockle");
+        public static final DeferredBlock<Block> FORAGE_OYSTER            = forage("oyster");
+        public static final DeferredBlock<Block> FORAGE_SEAWEED           = forage("seaweed");
         // Desert / tropical
         public static final DeferredBlock<Block> FORAGE_COCONUT           = forage("coconut");
         public static final DeferredBlock<Block> FORAGE_CACTUS_FRUIT      = forage("cactus_fruit", SUMMER, FALL);

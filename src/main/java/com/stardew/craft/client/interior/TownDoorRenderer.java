@@ -1,5 +1,6 @@
 package com.stardew.craft.client.interior;
 
+import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
@@ -27,6 +28,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.util.Mth;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL32;
 
 import java.lang.reflect.Field;
@@ -322,6 +324,7 @@ final class TownDoorRenderer implements AutoCloseable {
         boolean oldSmartCull = mc.smartCull;
         HitResult oldHit = mc.hitResult;
         var oldCrosshairEntity = mc.crosshairPickEntity;
+        Matrix4f oldProjection = new Matrix4f(RenderSystem.getProjectionMatrix());
         SodiumContext.Token sodium = SodiumContext.Token.NONE;
         IrisContext.Token iris = IrisContext.Token.NONE;
         boolean contextStarted = false;
@@ -393,6 +396,7 @@ final class TownDoorRenderer implements AutoCloseable {
             mc.levelRenderer.getSectionRenderDispatcher().setCamera(oldCamera.getPosition());
             mc.getEntityRenderDispatcher().prepare(mc.level, oldCamera, oldCrosshairEntity);
             mc.getBlockEntityRenderDispatcher().prepare(mc.level, oldCamera, oldHit);
+            gameRenderer.stardewcraft$resetProjectionMatrix(oldProjection);
             restoreWorldRenderState();
             restoreOuterFog(delta, oldCamera);
             if (rendererRestoreFailure != null) throw rendererRestoreFailure;
@@ -410,6 +414,9 @@ final class TownDoorRenderer implements AutoCloseable {
         RenderSystem.viewport(0, 0, target.viewWidth, target.viewHeight);
         RenderSystem.disableScissor();
         TownDoorClipping.disable();
+        // Sodium/Iris may leave their terrain shader bound after the nested view.  Reset the
+        // actual uniform as well as the Java-side flag so the outer terrain cannot remain clipped.
+        TownDoorClipping.resetActiveShaderUniform();
         GL11.glDisable(GL32.GL_DEPTH_CLAMP);
         GL11.glDepthRange(0, 1);
         GL11.glEnable(GL11.GL_STENCIL_TEST);
@@ -423,6 +430,16 @@ final class TownDoorRenderer implements AutoCloseable {
         RenderSystem.enableCull();
         RenderSystem.disableBlend();
         RenderSystem.setShaderColor(1, 1, 1, 1);
+        // LevelRenderer changes both fixed-function diffuse lights and texture unit 2 while it
+        // renders a world.  Immersive Portals restores these explicitly before resuming the
+        // caller's view; otherwise the outer side can become black after looking through a door.
+        if (mc.level != null && mc.level.effects().constantAmbientLight()) {
+            Lighting.setupNetherLevel();
+        } else {
+            Lighting.setupLevel();
+        }
+        mc.gameRenderer.lightTexture().turnOffLightLayer();
+        RenderSystem.activeTexture(GL13.GL_TEXTURE0);
     }
 
     private static void restoreOuterFog(DeltaTracker delta, Camera camera) {
@@ -431,12 +448,14 @@ final class TownDoorRenderer implements AutoCloseable {
         float partial = delta.getGameTimeDeltaPartialTick(false);
         FogRenderer.setupColor(camera, partial, mc.level, mc.options.getEffectiveRenderDistance(),
                 mc.gameRenderer.getDarkenWorldAmount(partial));
-        FogRenderer.levelFogColor();
         Vec3 pos = camera.getPosition();
         boolean foggy = mc.level.effects().isFoggyAt(Mth.floor(pos.x), Mth.floor(pos.y))
                 || mc.gui.getBossOverlay().shouldCreateWorldFog();
         FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_TERRAIN,
-                mc.gameRenderer.getRenderDistance(), foggy, partial);
+                Math.max(mc.gameRenderer.getRenderDistance(), 32.0F), foggy, partial);
+        // This is the post-portal order used by Immersive Portals: setup the outer fog range,
+        // then restore the world fog color that the nested camera replaced.
+        FogRenderer.levelFogColor();
     }
 
     private void fail(Throwable error) {

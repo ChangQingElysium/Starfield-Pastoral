@@ -191,9 +191,9 @@ public final class BuildingDocumentGameTests {
         h.assertTrue(BuildingTransfer.destination(before,after,GreenhouseBuildings.portal(before))
                         .equals(GreenhouseBuildings.portal(after)),
                 "A rotated greenhouse move separates its portal from the registered entrance");
-        h.assertTrue(GreenhouseBuildings.portal(before).equals(new BlockPos(7,1,11))
+        h.assertTrue(GreenhouseBuildings.portal(before).equals(new BlockPos(7,1,12))
                         && GreenhouseBuildings.exit(before).equals(new BlockPos(7,1,12)),
-                "Greenhouse entrance trigger is not in the authored door or its exit is inside the wall");
+                "Greenhouse entrance trigger is not in front of the authored oak door");
         h.succeed();
     }
 
@@ -329,6 +329,46 @@ public final class BuildingDocumentGameTests {
             com.stardew.craft.network.payload.BuildingWorkRequestPayload.STREAM_CODEC.encode(buffer,work);
             h.assertTrue(com.stardew.craft.network.payload.BuildingWorkRequestPayload.STREAM_CODEC.decode(buffer).equals(work),"Work request lost its identity");
         } finally {buffer.release();}h.succeed();
+    }
+
+    @GameTest(templateNamespace="stardewcraft_buildings",template="empty")
+    public static void paidBlueprintFollowsItsControllerAcrossDebugFarms(GameTestHelper h) {
+        var registry=new com.stardew.craft.farm.FarmInstanceRegistry();
+        var actor=UUID.randomUUID();
+        var source=registry.createDebugFarm(actor,"Builder","Source",com.stardew.craft.farm.FarmType.STANDARD);
+        var target=registry.createDebugFarm(actor,"Builder","Target",com.stardew.craft.farm.FarmType.FOREST);
+        var stranger=registry.createFarm(UUID.randomUUID(),"Other","Other",com.stardew.craft.farm.FarmType.STANDARD);
+        var data=new BuildingWorldData();var permit=UUID.randomUUID();
+        data.recordPurchase(permit,source.getInstanceId(),true,PrefabDefinitions.COOP);
+        h.assertTrue(data.permitsPlacement(permit,target.getInstanceId(),PrefabDefinitions.COOP,actor,registry),
+                "A controller's blueprint stayed trapped on the farm selected at purchase time");
+        h.assertTrue(!data.permitsPlacement(permit,stranger.getInstanceId(),PrefabDefinitions.COOP,actor,registry),
+                "A blueprint crossed into an unrelated farm");
+        var family=PrefabDefinitions.get(PrefabDefinitions.COOP);var anchor=new BlockPos(0,64,0);
+        var record=BuildingRecord.waiting(target.getInstanceId(),target.getSlotIndex(),PrefabDefinitions.COOP,
+                BuildingRecord.Mode.PREFAB,h.getLevel().dimension().location(),anchor,
+                PrefabDefinitions.world(family.tier(1).manager(),family.tier(1).anchor(),anchor,Rotation.NONE),Direction.SOUTH,
+                PrefabDefinitions.transform(family.reservation(),anchor,Rotation.NONE));
+        h.assertTrue(data.beginPrefab(record,permit,1,actor,registry)==BuildingWorldData.Result.SUCCESS,
+                "Cross-debug-farm placement did not atomically consume the valid permit");
+        h.assertTrue(!data.permitsPlacement(permit,target.getInstanceId(),PrefabDefinitions.COOP,actor,registry),
+                "Placed blueprint remained reusable");
+        h.succeed();
+    }
+
+    @GameTest(templateNamespace="stardewcraft_buildings",template="empty")
+    public static void obstructionFlashPayloadKeepsEveryReportedCell(GameTestHelper h) {
+        var buffer=new net.minecraft.network.RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer(),h.getLevel().registryAccess());
+        var expected=List.of(new BlockPos(1,2,3),new BlockPos(-4,5,-6),new BlockPos(7,8,9));
+        try {
+            var payload=new com.stardew.craft.network.payload.BuildingObstructionFlashPayload(
+                    h.getLevel().dimension().location(),expected);
+            com.stardew.craft.network.payload.BuildingObstructionFlashPayload.STREAM_CODEC.encode(buffer,payload);
+            var restored=com.stardew.craft.network.payload.BuildingObstructionFlashPayload.STREAM_CODEC.decode(buffer);
+            h.assertTrue(restored.dimension().equals(payload.dimension()) && restored.positions().equals(expected),
+                    "Obstruction flash lost cells in transit");
+        } finally {buffer.release();}
+        h.succeed();
     }
 
 }

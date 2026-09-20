@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "stardewcraft:item/fish/misc/seaweed",
+    "particle": "stardewcraft:item/fish/misc/seaweed"
+  },
+  "render_type": "minecraft:cutout"
+}

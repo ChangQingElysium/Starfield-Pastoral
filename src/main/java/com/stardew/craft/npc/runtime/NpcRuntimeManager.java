@@ -61,7 +61,7 @@ public final class NpcRuntimeManager {
         NpcSpawnManager.prepareServerContext(level);
 
         boolean anyPlayerInStardew = HEADLESS_SCHEDULE_TEST;
-        boolean anyPlayerInMining = false;
+        boolean anyPlayerInMining = HEADLESS_SCHEDULE_TEST;
         for (var player : server.getPlayerList().getPlayers()) {
             if (ModDimensions.STARDEW_VALLEY.equals(player.level().dimension())) {
                 anyPlayerInStardew = true;
@@ -120,7 +120,7 @@ public final class NpcRuntimeManager {
             return;
         }
         if (HEADLESS_SCHEDULE_TEST) {
-            tickHeadlessNpcEntities(level);
+            tickHeadlessNpcEntities(level, snapshot);
         }
         stageStarted=System.nanoTime();
         NpcCentralMovementService.tick(level);
@@ -132,7 +132,7 @@ public final class NpcRuntimeManager {
      * The opt-in audit harness advances its loaded NPCs once before the normal movement
      * coordinator, allowing real schedule routes to be exercised without a game client.
      */
-    private static void tickHeadlessNpcEntities(ServerLevel level) {
+    private static void tickHeadlessNpcEntities(ServerLevel level, RuntimeSnapshot snapshot) {
         var actors = new ArrayList<com.stardew.craft.entity.npc.StardewNpcEntity>();
         for (var entity : level.getAllEntities()) {
             if (entity instanceof com.stardew.craft.entity.npc.StardewNpcEntity npc && npc.isAlive()) {
@@ -140,7 +140,11 @@ public final class NpcRuntimeManager {
             }
         }
         for (var actor : actors) {
-            level.tickNonPassenger(actor);
+            Integer previous = snapshot.headlessTickCounts.get(actor.getUUID());
+            // Forced chunks can already tick actors. Only supply the missing tick;
+            // double-ticking would make the audit faster than actual gameplay.
+            if (previous != null && actor.tickCount == previous) level.tickNonPassenger(actor);
+            snapshot.headlessTickCounts.put(actor.getUUID(), actor.tickCount);
         }
     }
 
@@ -201,6 +205,7 @@ public final class NpcRuntimeManager {
     }
 
     private static final class RuntimeSnapshot {
+        private final Map<java.util.UUID, Integer> headlessTickCounts = new java.util.HashMap<>();
         private long nextSlowLogNanos,scheduleNanos,residencyNanos,movementNanos;
         private final Set<String> implementedNpcIds = ConcurrentHashMap.newKeySet();
         private final Set<String> pathingNpcIds = ConcurrentHashMap.newKeySet();

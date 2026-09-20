@@ -44,7 +44,7 @@ public class MayonnaiseMachineBlockEntityRenderer implements BlockEntityRenderer
 
         BlockState state = be.getBlockState();
         Level level = be.getLevel();
-        if (level != null) {
+        if (level != null && com.stardew.craft.block.utility.UtilityMachineRenderState.rendersDynamicBody(state)) {
             poseStack.pushPose();
             if (be.isWorking() && !ready) {
                 UtilityWorkingAnimation.applyGroundedWorkingPose(poseStack, level, be.getBlockPos(), partialTick);

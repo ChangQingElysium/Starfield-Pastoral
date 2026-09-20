@@ -447,6 +447,7 @@
     },
     "_comment_seedshop": "=== Pierre's House / SeedShop ===",
     "seedshop_counter": {
+      "arrival": "exact_work",
       "x": 22,
       "y": 36,
       "z": -25,
@@ -603,6 +604,7 @@
     },
     "_comment_clint": "=== Clint 专属停留点 ===",
     "clint_blacksmith_anvil": {
+      "arrival": "exact_work",
       "x": 104,
       "y": 46,
       "z": 22,
@@ -667,6 +669,7 @@
       "note": "Caroline 03 / SeedShop (21,5) / reading / north"
     },
     "caroline_schedule_04": {
+      "square_area": {"min": [39, 36, -26], "max": [44, 36, -17]},
       "x": 43,
       "y": 36,
       "z": -18,
@@ -1343,6 +1346,7 @@
       "note": "Gus schedule 1: user-confirmed midpoint of black sofas (31,36,-3) and (32,36,-3); facing from furniture"
     },
     "gus_schedule_02": {
+      "arrival": "exact_work",
       "x": 24,
       "y": 36,
       "z": 11,
@@ -1472,6 +1476,7 @@
       "note": "=== Harvey 专属点位 ==="
     },
     "harvey_clinic_desk": {
+      "arrival": "exact_work",
       "x": 6,
       "y": 43,
       "z": -13,
@@ -1869,6 +1874,7 @@
       "note": "=== Marnie 专属停留点 ==="
     },
     "marnie_animalshop_counter": {
+      "arrival": "exact_work",
       "x": -87,
       "y": 34,
       "z": 21,
@@ -1980,6 +1986,7 @@
       "note": "Maru ScienceHouse 卧室/睡觉位（朝西）"
     },
     "maru_clinic_work": {
+      "arrival": "exact_work",
       "x": 2,
       "y": 43,
       "z": -15,
@@ -2150,6 +2157,7 @@
       "note": "Pierre 普通日程早晨：SeedShop (10,20)，朝北"
     },
     "pierre_schedule_03": {
+      "arrival": "exact_work",
       "x": 22,
       "y": 36,
       "z": -25,
@@ -2192,6 +2200,7 @@
       "note": "Pierre 周五酒吧：Saloon (16,20)，朝北"
     },
     "pierre_seedshop_counter": {
+      "arrival": "exact_work",
       "x": 22,
       "y": 36,
       "z": -25,
@@ -2230,6 +2239,7 @@
       "note": "=== Robin 专属停留点 ==="
     },
     "robin_sciencehouse_counter": {
+      "arrival": "exact_work",
       "x": 32,
       "y": 51,
       "z": -122,
@@ -2529,6 +2539,7 @@
       "note": "鱼店室内传送落点"
     },
     "willy_fishshop_counter": {
+      "arrival": "exact_work",
       "x": 65,
       "y": 31,
       "z": 143,
@@ -2602,6 +2613,7 @@
       "note": "=== Gunther 专属停留点 ==="
     },
     "gunther_counter": {
+      "arrival": "exact_work",
       "x": 111,
       "y": 38,
       "z": 39,
@@ -2612,6 +2624,7 @@
       "note": "=== Marlon 专属停留点 ==="
     },
     "marlon_counter": {
+      "arrival": "exact_work",
       "x": 105,
       "y": 60,
       "z": -149,
@@ -2632,6 +2645,7 @@
       "note": "=== Sandy 专属停留点 ==="
     },
     "sandy_oasis_counter": {
+      "arrival": "exact_work",
       "x": -254,
       "y": 30,
       "z": -150,

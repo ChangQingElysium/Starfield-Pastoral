@@ -64,7 +64,16 @@ public final class BuildingPlacementPreview {
     private static ResourceLocation world;
     private static ResourceLocation family;
     private static int sequence, ticks;
+    private static List<BlockPos> flashingObstructions = List.of();
+    private static ResourceLocation flashingDimension;
+    private static int flashStarted, flashUntil;
     private static net.minecraft.nbt.CompoundTag pins=new net.minecraft.nbt.CompoundTag();
+    public static void flashObstructions(ResourceLocation dimension, List<BlockPos> positions) {
+        flashingDimension = dimension;
+        flashingObstructions = List.copyOf(new java.util.LinkedHashSet<>(positions));
+        flashStarted = ticks;
+        flashUntil = ticks + 40;
+    }
     public static void acceptPins(net.minecraft.nbt.CompoundTag tag){
         pins=tag.copy();var selected=com.stardew.craft.building.runtime.BuildingDrafts.id(document);
         if(!pinned || target==null || selected==null)return;
@@ -106,9 +115,13 @@ public final class BuildingPlacementPreview {
         Minecraft mc = Minecraft.getInstance(); ticks++;
         if (mc.player == null || mc.level == null) {
             preview = null; target = null; managerRange = null; upgradePreview = null; pinned = false; held = false;
-            document = ItemStack.EMPTY; pins=new net.minecraft.nbt.CompoundTag(); world = null; BuildingTemplatePreview.clear(); return;
+            document = ItemStack.EMPTY; pins=new net.minecraft.nbt.CompoundTag(); world = null;
+            flashingObstructions=List.of();flashingDimension=null;BuildingTemplatePreview.clear(); return;
         }
-        if (!mc.level.dimension().location().equals(world)) { preview = null; target = null; pinned = false; document = ItemStack.EMPTY; closeRanges(); world = mc.level.dimension().location(); }
+        if (!mc.level.dimension().location().equals(world)) {
+            preview = null; target = null; pinned = false; document = ItemStack.EMPTY; closeRanges();
+            flashingObstructions=List.of();flashingDimension=null;world = mc.level.dimension().location();
+        }
         if (mc.screen != null) {
             held = false;
             while (com.stardew.craft.client.ModKeyMappings.BUILDING_ROTATE.consumeClick()) {}
@@ -217,6 +230,16 @@ public final class BuildingPlacementPreview {
                 drawEdges(pose,buffers,camera,com.stardew.craft.building.runtime.BuildingOutline.excluding(inner,outer),valid?0xFF94C5A1:0xFFE56F62);
             }
         }
+        if (!flashingObstructions.isEmpty() && ticks < flashUntil
+                && mc.level.dimension().location().equals(flashingDimension)
+                && (ticks - flashStarted) / 4 % 2 == 0) {
+            for (BlockPos pos : flashingObstructions) {
+                drawEdges(pose, buffers, camera,
+                        com.stardew.craft.building.runtime.BuildingOutline.edges(new AABB(pos).inflate(.012)),
+                        0xFFFF3B30);
+            }
+        }
+        if (ticks >= flashUntil) flashingObstructions = List.of();
         if (managerRange != null && mc.level.getGameTime() < managerUntil && mc.level.dimension().location().equals(managerDimension)) {
             drawEdges(pose,buffers,camera,com.stardew.craft.building.runtime.BuildingOutline.edges(managerRange),0xFF94C5A1);
         }

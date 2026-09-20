@@ -41,6 +41,10 @@ public final class NpcRoutePoints {
                     int axes=0;
                     for(String axis:java.util.List.of("x","y","z")) if(p.has(axis)) {finite(p,axis);axes++;}
                     if(axes!=0 && axes!=3) throw new IllegalArgumentException("Coordinates require x/y/z together");
+                    if (p.has("arrival") && (!p.get("arrival").isJsonPrimitive()
+                            || !p.getAsJsonPrimitive("arrival").isString()
+                            || !java.util.Set.of("nearest_reachable", "exact_work").contains(p.get("arrival").getAsString())))
+                        throw new IllegalArgumentException("Invalid arrival policy");
                     if(p.has("yaw")) finite(p,"yaw");
                     if(p.has("square_area"))com.stardew.craft.npc.runtime.NpcSquareArea.decode(p.getAsJsonObject("square_area"));
                     if(p.has("approach_yaw_offset")) finite(p,"approach_yaw_offset");

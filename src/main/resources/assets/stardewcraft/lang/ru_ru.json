@@ -12822,5 +12822,7 @@
   "entity.stardewcraft.wilderness_golem": "Голем из глуши",
   "entity.stardewcraft.iridium_golem": "Иридиевый голем",
   "entity.stardewcraft.mine_monster.wilderness_golem": "Голем из глуши",
-  "entity.stardewcraft.mine_monster.iridium_golem": "Иридиевый голем"
+  "entity.stardewcraft.mine_monster.iridium_golem": "Иридиевый голем",
+  "block.stardewcraft.ochre_bricks": "Охристые кирпичи",
+  "block.stardewcraft.blue_flowerpot": "Синий глазурованный цветочный горшок"
 }

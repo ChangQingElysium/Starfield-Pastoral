@@ -45,13 +45,13 @@ public class CrabPotBlockEntityRenderer implements BlockEntityRenderer<CrabPotBl
 		boolean ready = be.isReady();
 		ItemStack product = be.getProduct();
 
-		// 1) Render the crab pot block model (RenderShape=ENTITYBLOCK_ANIMATED)
+		// 1) Render the animated working body; idle and ready bodies live in the chunk mesh.
 		BlockState state = be.getBlockState();
 		@SuppressWarnings("null")
 		boolean working = state.hasProperty(com.stardew.craft.block.utility.CrabPotBlock.WORKING)
 				&& state.getValue(com.stardew.craft.block.utility.CrabPotBlock.WORKING);
 		Level level = be.getLevel();
-		if (level != null) {
+		if (level != null && com.stardew.craft.block.utility.UtilityMachineRenderState.rendersDynamicBody(state)) {
 			poseStack.pushPose();
 			if (working && !ready) {
 				// Bobbing amplitude ~0.1
@@ -142,7 +142,6 @@ public class CrabPotBlockEntityRenderer implements BlockEntityRenderer<CrabPotBl
 		poseStack.popPose();
 	}
 }
-
 
 
 

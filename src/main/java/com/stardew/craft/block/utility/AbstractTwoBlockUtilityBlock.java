@@ -105,7 +105,8 @@ public abstract class AbstractTwoBlockUtilityBlock<T extends BlockEntity> extend
 
     @Override
     public RenderShape getRenderShape(@SuppressWarnings("null") BlockState state) {
-        return RenderShape.ENTITYBLOCK_ANIMATED;
+        return UtilityMachineRenderState.forWorkingState(
+            state.getValue(WORKING), state.getValue(PART) == Part.EXTENSION);
     }
 
     @Override

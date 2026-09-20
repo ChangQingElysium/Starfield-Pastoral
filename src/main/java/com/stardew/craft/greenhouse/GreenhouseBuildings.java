@@ -28,6 +28,8 @@ public final class GreenhouseBuildings {
             ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "greenhouse");
     private static final ResourceLocation MIGRATION =
             ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "greenhouse_building");
+    private static final ResourceLocation PORTAL_RECOVERY =
+            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "greenhouse_portal_recovery");
     private static final ResourceLocation RUINS_STRUCTURE =
             ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "farm_buildings/greenhouse_ruins");
     private static final ResourceLocation LEGACY_REPAIRED_STRUCTURE =
@@ -35,8 +37,11 @@ public final class GreenhouseBuildings {
                     "farm_buildings/greenhouse_legacy_refurbished");
     private static final int EXTERIOR_VERSION = 1;
     private static final BlockPos MANAGER = new BlockPos(12, 1, 11);
-    private static final BlockPos PORTAL = new BlockPos(7, 1, 11);
-    private static final BlockPos EXIT = new BlockPos(7, 1, 12);
+    /** Authored oak door lower half. The trigger must never replace this block. */
+    private static final BlockPos DOOR = new BlockPos(7, 1, 11);
+    /** One block in front of the authored door, where the player enters. */
+    private static final BlockPos PORTAL = new BlockPos(7, 1, 12);
+    private static final BlockPos EXIT = PORTAL;
     private static final BlockPos BUILT_SIZE = new BlockPos(15, 11, 13);
     private static final BlockPos RUINS_SIZE = new BlockPos(15, 10, 13);
     private static final BlockPos LEGACY_REPAIRED_SIZE = new BlockPos(15, 9, 17);
@@ -51,6 +56,10 @@ public final class GreenhouseBuildings {
                 MIGRATION, EXTERIOR_VERSION, 100,
                 StardewFarmInitializationSteps.FailurePolicy.STOP,
                 context -> ensureCurrent(context.level(), context.farm().ownerUuid()));
+        StardewFarmInitializationSteps.register(
+                PORTAL_RECOVERY, 3, 101,
+                StardewFarmInitializationSteps.FailurePolicy.CONTINUE,
+                context -> recoverPortal(context.level(), context.farm().ownerUuid()));
     }
 
     /** New farms and old saves share the same authoritative installation path. */
@@ -61,10 +70,20 @@ public final class GreenhouseBuildings {
         boolean repaired = manager.isRepairedForPlayer(owner)
                 || com.stardew.craft.communitycenter.state.CommunityCenterSavedData
                         .get(level).isAreaComplete(owner, 0);
+        BuildingRecord existing = findForFarm(level, farm.getInstanceId());
+        if (existing != null && existing.phase() == BuildingRecord.Phase.READY) {
+            // A completed prefab is stronger evidence than the historical per-player
+            // flags. This handles UUID changes and saves loaded before CC state.
+            ensurePortal(level, existing);
+            migrateInteriorSoil(level, owner);
+            return;
+        }
         if (manager.exteriorVersion(owner) >= EXTERIOR_VERSION) {
-            BuildingRecord record = findForFarm(level, farm.getInstanceId());
-            if (repaired && record == null) installRepaired(level, farm, true);
-            else if (repaired) ensurePortal(level, record);
+            BuildingRecord record = existing;
+            // A READY building record is authoritative even when an older save
+            // has a stale/mismatched greenhouse-manager owner UUID.
+            if (record != null) ensurePortal(level, record);
+            else if (repaired) installRepaired(level, farm, true);
             migrateInteriorSoil(level, owner);
             return;
         }
@@ -78,6 +97,25 @@ public final class GreenhouseBuildings {
     }
 
     public static void ensurePlaced(ServerLevel level, UUID owner) {
+        ensureCurrent(level, owner);
+    }
+
+    /** Reassert only the outdoor trigger for repaired greenhouses in existing farms. */
+    private static void recoverPortal(ServerLevel level, UUID owner) {
+        FarmInstance farm = FarmInstanceRegistry.get(level.getServer()).getFarm(owner);
+        if (farm == null) return;
+        BuildingRecord record = findForFarm(level, farm.getInstanceId());
+        // Do not gate recovery on the manager's repaired map: old saves can
+        // contain a valid READY building under a different historical UUID.
+        if (record != null) {
+            ensurePortal(level, record);
+            return;
+        }
+        GreenhouseManager manager = GreenhouseManager.get(level);
+        boolean repaired = manager.isRepairedForPlayer(owner)
+                || com.stardew.craft.communitycenter.state.CommunityCenterSavedData
+                        .get(level).isAreaComplete(owner, 0);
+        if (!repaired) return;
         ensureCurrent(level, owner);
     }
 
@@ -254,8 +292,33 @@ public final class GreenhouseBuildings {
 
     public static void ensurePortal(ServerLevel level, BuildingRecord record) {
         if (record != null && record.phase() == BuildingRecord.Phase.READY) {
+            restoreDoorIfLegacyPortal(level, record);
             InteriorSubspaceManager.spawnGreenhouseOutdoorPortalAt(level, portal(record));
         }
+    }
+
+    /**
+     * The first prefab integration mistakenly put the trigger on the authored door. Restore
+     * that door when upgrading an existing save, then place the trigger in front of it.
+     */
+    private static void restoreDoorIfLegacyPortal(ServerLevel level, BuildingRecord record) {
+        BlockPos door = PrefabDefinitions.world(
+                DOOR, PrefabDefinitions.get(FAMILY).tier(1).anchor(), record.anchor(),
+                PrefabDefinitions.rotation(record.facing()));
+        if (!level.getBlockState(door).is(ModBlocks.PORTAL_TRIGGER.get())) return;
+        InteriorSubspaceManager.removeGreenhouseOutdoorPortalAt(level, door);
+        var tier = PrefabDefinitions.get(FAMILY).tier(1);
+        var template = PrefabDefinitions.template(level, tier);
+        BuildingProtection.internal(() -> {
+            for (var cell : template.cells()) {
+                if (!cell.pos().equals(DOOR) && !cell.pos().equals(DOOR.above())) continue;
+                BlockPos pos = PrefabDefinitions.world(
+                        cell.pos(), tier.anchor(), record.anchor(),
+                        PrefabDefinitions.rotation(record.facing()));
+                level.setBlock(pos, cell.state().rotate(PrefabDefinitions.rotation(record.facing())),
+                        Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
+            }
+        });
     }
 
     private static void migrateInteriorSoil(ServerLevel level, UUID owner) {

@@ -20,6 +20,9 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -34,6 +37,17 @@ import java.util.UUID;
 @GameTestHolder("stardewcraft_b008")
 @PrefixGameTestTemplate(false)
 public final class B008MachineModelGameTests {
+    private static final List<Block> ANIMATED_UTILITY_MACHINES = List.of(
+        ModBlocks.KEG.get(), ModBlocks.PRESERVES_JAR.get(), ModBlocks.CASK.get(),
+        ModBlocks.CHEESE_PRESS.get(), ModBlocks.MAYONNAISE_MACHINE.get(), ModBlocks.OIL_MAKER.get(),
+        ModBlocks.FURNACE.get(), ModBlocks.HEAVY_FURNACE.get(), ModBlocks.CHARCOAL_KILN.get(),
+        ModBlocks.BAIT_MAKER.get(), ModBlocks.CRAB_POT.get(), ModBlocks.CRYSTALARIUM.get(),
+        ModBlocks.DEHYDRATOR.get(), ModBlocks.FISH_SMOKER.get(), ModBlocks.HEATER.get(),
+        ModBlocks.LIGHTNING_ROD.get(), ModBlocks.RECYCLING_MACHINE.get(), ModBlocks.SEED_MAKER.get(),
+        ModBlocks.BONE_MILL.get(), ModBlocks.COFFEE_MAKER.get(), ModBlocks.GEODE_CRUSHER.get(),
+        ModBlocks.LOOM.get()
+    );
+
     private static FakePlayer prepare(GameTestHelper h) {
         var level=h.getLevel();
         for(int x=0;x<16;x++)for(int z=0;z<16;z++)for(int y=0;y<=5;y++)
@@ -50,6 +64,39 @@ public final class B008MachineModelGameTests {
         return BlockPos.betweenClosedStream(origin.offset(-2,0,-2),origin.offset(2,2,2))
             .filter(p->h.getLevel().getBlockState(p).is(block)).map(BlockPos::immutable).toList();
     }
+
+    @GameTest(batch="b008",templateNamespace="stardewcraft_b008",template="machine_test",timeoutTicks=20)
+    public static void idleMachineBodiesUseChunkMeshes(GameTestHelper h) {
+        for (Block block : ANIMATED_UTILITY_MACHINES) {
+            BlockState idle = block.defaultBlockState();
+            Property<?> working = property(idle, "working");
+            h.assertTrue(idle.getRenderShape() == RenderShape.MODEL,
+                "Idle machine still uses per-frame block-entity rendering: " + block);
+            BlockState active = setProperty(idle, working, true);
+            h.assertTrue(active.getRenderShape() == RenderShape.ENTITYBLOCK_ANIMATED,
+                "Working machine lost its animation renderer: " + block);
+
+            idle.getProperties().stream().filter(property -> property.getName().equals("part")).findFirst()
+                .flatMap(property -> property.getValue("extension").map(value -> new PropertyValue(property, value)))
+                .ifPresent(extension -> h.assertTrue(
+                    setProperty(idle, extension.property(), extension.value()).getRenderShape() == RenderShape.INVISIBLE,
+                    "Machine extension unexpectedly renders a duplicate model: " + block));
+        }
+        h.succeed();
+    }
+
+    private static Property<?> property(BlockState state, String name) {
+        return state.getProperties().stream().filter(property -> property.getName().equals(name)).findFirst()
+            .orElseThrow(() -> new IllegalStateException("Missing " + name + " property on " + state));
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private static BlockState setProperty(BlockState state, Property property, Comparable value) {
+        return state.setValue(property, value);
+    }
+
+    private record PropertyValue(Property<?> property, Comparable<?> value) {}
+
     @GameTest(batch="b008",templateNamespace="stardewcraft_b008",template="machine_test",timeoutTicks=100)
     public static void fourFacingsFootprintAndSingleDrop(GameTestHelper h) {
         var player=prepare(h);var level=h.getLevel();var origin=h.absolutePos(new BlockPos(8,1,8));

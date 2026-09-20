@@ -1,4 +1,5 @@
 {
+  "ambientocclusion": false,
   "credit": "StardewCraft B008 furnace revision 02: integrated original-source shell",
   "texture_size": [
     128,

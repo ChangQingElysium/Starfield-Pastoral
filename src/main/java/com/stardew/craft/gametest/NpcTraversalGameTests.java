@@ -393,6 +393,43 @@ public final class NpcTraversalGameTests {
         com.stardew.craft.npc.runtime.NpcChunkForceManager.releaseNpcForcedChunks(level,npc.getNpcId());
         h.succeed();
     }
+
+    @GameTest(templateNamespace="stardewcraft_npc_runtime",template="ring_utilities",timeoutTicks=360)
+    public static void solidIndoorExitsCompleteCrossBuildingRoute(GameTestHelper h) throws ReflectiveOperationException {
+        var base=floor(h);var level=h.getLevel();var npc=new Npc(h);npc.setNpcId("robin");
+        npc.addTag(com.stardew.craft.auction.AuctionService.AUCTION_HOST_TAG);
+        var saloonExit=base.offset(4,0,1);
+        var scienceHouseDoor=base.offset(4,0,5);
+        for(int y=0;y<5;y++) {
+            level.setBlock(saloonExit.above(y),Blocks.STONE.defaultBlockState(),2);
+            level.setBlock(scienceHouseDoor.above(y),Blocks.STONE.defaultBlockState(),2);
+        }
+        var saloonOutside=Vec3.atBottomCenterOf(base.offset(1,0,5));
+        var scienceHouseInside=Vec3.atBottomCenterOf(base.offset(7,0,5));
+        var counter=Vec3.atBottomCenterOf(base.offset(9,0,5));
+        npc.setPos(Vec3.atBottomCenterOf(base.offset(0,0,1)));npc.setOnGround(true);
+        var route=plan(npc,new String[]{"walk","warp","walk","warp","walk"},
+                Vec3.atBottomCenterOf(saloonExit),saloonOutside,
+                Vec3.atBottomCenterOf(scienceHouseDoor),scienceHouseInside,counter);
+        var stepIndex=route.getClass().getDeclaredField("currentStepIndex");stepIndex.setAccessible(true);
+
+        h.onEachTick(()->{
+            try {
+                level.tickNonPassenger(npc);execute(h,npc,route);
+                if(stepIndex.getInt(route)>=5) {
+                    h.assertTrue(npc.position().distanceToSqr(counter)<.3,
+                            "Cross-building route completed away from the final counter: "+npc.position());
+                    com.stardew.craft.npc.runtime.NpcChunkForceManager.releaseNpcForcedChunks(level,npc.getNpcId());
+                    npc.discard();h.succeed();
+                }
+                if(npc.tickCount>=350) {
+                    h.fail("Robin-style route stalled at step "+stepIndex.getInt(route)
+                            +" pos="+npc.position()+" navTarget="+npc.getNavigation().getTargetPos());
+                }
+            } catch(ReflectiveOperationException e) {throw new RuntimeException(e);}
+        });
+    }
+
     @GameTest(templateNamespace="stardewcraft_npc_runtime",template="ring_utilities")
     public static void warpUsesExactAuthoredPositionBesidePartialBlocks(GameTestHelper h) throws ReflectiveOperationException {
         var base=floor(h);var npc=new Npc(h);npc.setPos(Vec3.atBottomCenterOf(base));var dest=base.offset(6,0,0);
@@ -1216,8 +1253,8 @@ public final class NpcTraversalGameTests {
         });
     }
 
-    @GameTest(templateNamespace="stardewcraft_npc_runtime", template="ring_utilities")
-    public static void distantDailyTargetRejectsIncompletePath(GameTestHelper h) throws ReflectiveOperationException {
+    @GameTest(templateNamespace="stardewcraft_npc_runtime", template="ring_utilities", timeoutTicks=240)
+    public static void distantDailyTargetWalksToVerifiedNearestEndpoint(GameTestHelper h) throws ReflectiveOperationException {
         var base = floor(h);
         var level = h.getLevel();
         var npc = new Npc(h);
@@ -1229,19 +1266,36 @@ public final class NpcTraversalGameTests {
                 level.setBlockAndUpdate(base.offset(4, y, z), Blocks.STONE.defaultBlockState());
             }
         }
+        // Enclose the start so an adjacent test platform cannot provide a detour.
+        for (int y = 0; y < 3; y++) {
+            for (int z = -1; z <= 7; z++) level.setBlockAndUpdate(base.offset(-1, y, z), Blocks.STONE.defaultBlockState());
+            for (int x = -1; x <= 4; x++) {
+                level.setBlockAndUpdate(base.offset(x, y, -1), Blocks.STONE.defaultBlockState());
+                level.setBlockAndUpdate(base.offset(x, y, 7), Blocks.STONE.defaultBlockState());
+            }
+        }
         Vec3 target = Vec3.atBottomCenterOf(base.offset(8, 0, 3));
         Object plan = plan(npc, new String[]{"walk"}, target);
         var allowFallback = plan.getClass().getDeclaredField("allowNearestReachableFinal");
         allowFallback.setAccessible(true);
         allowFallback.setBoolean(plan, true);
-        var moveTo = NpcCentralMovementService.class.getDeclaredMethod(
-                "moveTo", StardewNpcEntity.class, plan.getClass(), Vec3.class, double.class);
-        moveTo.setAccessible(true);
-
-        boolean started = (boolean) moveTo.invoke(null, npc, plan, target, 1.0D);
-        h.assertTrue(!started, "Distant daily target accepted a far incomplete path as furniture approach");
-        h.assertTrue(npc.getNavigation().isDone(), "Rejected distant daily partial path kept moving");
-        h.succeed();
+        var stepIndex = plan.getClass().getDeclaredField("currentStepIndex");
+        stepIndex.setAccessible(true);
+        var settled = plan.getClass().getDeclaredField("settledAtNearestReachable");
+        settled.setAccessible(true);
+        h.onEachTick(() -> {
+            try {
+                level.tickNonPassenger(npc);
+                execute(h, npc, plan);
+                if (stepIndex.getInt(plan) >= 1) {
+                    h.assertTrue(settled.getBoolean(plan), "Unreachable target reported exact arrival");
+                    h.assertTrue(npc.getX() > base.getX() + 2.5 && npc.getX() < base.getX() + 4,
+                            "NPC did not walk to the reachable side of the wall: " + npc.position() + " base=" + base + " target=" + target);
+                    h.assertTrue(level.noBlockCollision(npc, npc.getBoundingBox()), "Nearest endpoint is obstructed");
+                    h.succeed();
+                }
+            } catch (ReflectiveOperationException exception) { throw new RuntimeException(exception); }
+        });
     }
 
     @GameTest(templateNamespace="stardewcraft_npc_runtime", template="ring_utilities")
@@ -1282,4 +1336,106 @@ public final class NpcTraversalGameTests {
                 "Stitched route did not finish at the authored target");
         h.succeed();
     }
+    @GameTest(templateNamespace="stardewcraft_npc_runtime", template="ring_utilities", timeoutTicks=180)
+    public static void exactWorkpointCrossesCollisionAndHoldsAuthoredPosition(GameTestHelper h) throws ReflectiveOperationException {
+        var base = floor(h);
+        var npc = new Npc(h);
+        npc.setNpcId("marnie");
+        npc.setPos(Vec3.atBottomCenterOf(base.offset(3, 0, 3)));
+        npc.setOnGround(true);
+        Vec3 target = Vec3.atBottomCenterOf(base.offset(5, 0, 3));
+        h.getLevel().setBlockAndUpdate(base.offset(5, 0, 3), Blocks.STONE.defaultBlockState());
+        Object plan = plan(npc, new String[]{"walk"}, target);
+        for (String field : new String[]{"allowNearestReachableFinal", "exactWorkpoint"}) {
+            var flag = plan.getClass().getDeclaredField(field);
+            flag.setAccessible(true);
+            flag.setBoolean(plan, true);
+        }
+        var index = plan.getClass().getDeclaredField("currentStepIndex");
+        index.setAccessible(true);
+        int[] held = {0};
+        h.onEachTick(() -> {
+            try {
+                h.getLevel().tickNonPassenger(npc);
+                if (held[0] > 0) npc.setPos(npc.position().add(.25, 0, 0));
+                execute(h, npc, plan);
+                if (index.getInt(plan) >= 1) {
+                    h.assertTrue(npc.position().distanceToSqr(target) < 1.0E-6,
+                            "Counter job drifted from the authored position: " + npc.position());
+                    if (++held[0] >= 30) h.succeed();
+                }
+            } catch (ReflectiveOperationException exception) { throw new RuntimeException(exception); }
+        });
+    }
+
+    @GameTest(templateNamespace="stardewcraft_npc_runtime", template="ring_utilities")
+    public static void dailyFurniturePathPreservesAuthoredHeight(GameTestHelper h) {
+        var base = floor(h);
+        var npc = new Npc(h);
+        npc.setNpcId("sam");
+        npc.setPos(Vec3.atBottomCenterOf(base.offset(1, 0, 3)));
+        npc.setOnGround(true);
+        BlockPos target = base.offset(5, 0, 3);
+        for (int y = 0; y < 4; y++) h.getLevel().setBlockAndUpdate(target.above(y), Blocks.STONE.defaultBlockState());
+        var navigation = (com.stardew.craft.entity.npc.NpcPathNavigation) npc.getNavigation();
+        navigation.moveToAuthoredTarget(Vec3.atBottomCenterOf(target), 1, 0);
+        h.assertTrue(target.equals(navigation.getTargetPos()), "Furniture target was rewritten above its solid column");
+        h.succeed();
+    }
+
+    @GameTest(templateNamespace="stardewcraft_npc_runtime", template="ring_utilities")
+    public static void completedScheduleRemainsArrivedBeforeGroundFlagRepair(GameTestHelper h) throws ReflectiveOperationException {
+        var base = floor(h);
+        var npc = new Npc(h);
+        npc.setNpcId("penny");
+        Vec3 target = Vec3.atBottomCenterOf(base.offset(2, 0, 3));
+        npc.setPos(target);
+        npc.setOnGround(true);
+        Object plan = plan(npc, new String[]{"walk"}, target);
+        execute(h, npc, plan);
+        execute(h, npc, plan);
+        var field = NpcCentralMovementService.class.getDeclaredField("ACTIVE_PLANS");
+        field.setAccessible(true);
+        @SuppressWarnings("unchecked") var plans = (java.util.Map<String, Object>) field.get(null);
+        Object previous = plans.put(npc.getNpcId(), plan);
+        var state = new com.stardew.craft.npc.runtime.NpcRuntimeState(npc.getNpcId());
+        state.setNamedPointId("regression_0");
+        var reached = NpcCentralMovementService.class.getDeclaredMethod("hasReachedScheduleTarget",
+                net.minecraft.server.level.ServerLevel.class, StardewNpcEntity.class, state.getClass());
+        reached.setAccessible(true);
+        try {
+            npc.setOnGround(false);
+            h.assertTrue((boolean) reached.invoke(null, h.getLevel(), npc, state),
+                    "The next schedule stop is blocked by a transient false onGround flag after confirmed arrival");
+            npc.setPos(target.add(10, 0, 0));
+            h.assertTrue(!(boolean) reached.invoke(null, h.getLevel(), npc, state),
+                    "An old arrival certificate survived external displacement");
+        } finally {
+            if (previous == null) plans.remove(npc.getNpcId()); else plans.put(npc.getNpcId(), previous);
+        }
+        h.succeed();
+    }
+
+    @GameTest(templateNamespace="stardewcraft_npc_runtime", template="ring_utilities")
+    public static void changingPortalApproachDoesNotRestartSameSchedulePlan(GameTestHelper h) throws ReflectiveOperationException {
+        var npc = new Npc(h);
+        var target = Vec3.atBottomCenterOf(floor(h).offset(5, 0, 3));
+        Object near = plan(npc, new String[]{"walk"}, target);
+        Object far = plan(npc, new String[]{"walk", "warp", "walk"}, target.add(20, 0, 0), target.add(2, 0, 0), target);
+        var steps = near.getClass().getDeclaredField("steps");
+        steps.setAccessible(true);
+        var context = Class.forName("com.stardew.craft.npc.runtime.NpcRoutePlanner$NpcRouteContext");
+        var ready = context.getDeclaredMethod("ready", String.class, List.class);
+        ready.setAccessible(true);
+        var signature = NpcCentralMovementService.class.getDeclaredMethod("buildPlanSignature",
+                com.stardew.craft.npc.runtime.NpcRuntimeState.class, context);
+        signature.setAccessible(true);
+        var state = new com.stardew.craft.npc.runtime.NpcRuntimeState("sam");
+        state.setNamedPointId("same_job");
+        Object nearSignature = signature.invoke(null, state, ready.invoke(null, "town", steps.get(near)));
+        Object farSignature = signature.invoke(null, state, ready.invoke(null, "town", steps.get(far)));
+        h.assertTrue(nearSignature.equals(farSignature), "Crossing the destination cell rebuilds the same day's route");
+        h.succeed();
+    }
+
 }

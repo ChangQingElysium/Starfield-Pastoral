@@ -74,7 +74,7 @@ final class NpcRoutePlanner {
         if (!state.namedPointId().isBlank() && npcPos != null && target != null && target.position() != null
                 && npcPos.equals(BlockPos.containing(target.position()))) {
             return NpcRouteContext.ready(canonicalLocation(state.locationName()),
-                    List.of(NpcRouteStep.walk("schedule_anchor", target.position())));
+                    List.of(NpcRouteStep.walk(state.namedPointId(), target.position())));
         }
         if (shouldPreferRemoteOutdoorGraphRoute(state, npcPos)) {
             NpcRouteContext graphRoute = resolveGraphRoute(level, canonicalNpcId, state, npcPos);
@@ -477,7 +477,7 @@ final class NpcRoutePlanner {
 
         List<NpcRouteStep> destination = new ArrayList<>();
         if (!target.indoorTarget()) {
-            destination.add(NpcRouteStep.walk("schedule_anchor", target.position()));
+            destination.add(NpcRouteStep.walk(state.namedPointId().isBlank() ? "schedule_anchor" : state.namedPointId(), target.position()));
             return NpcRouteContext.ready(canonicalLocation, destination);
         }
 
@@ -505,7 +505,7 @@ final class NpcRoutePlanner {
             return NpcRouteContext.waitingForCoordinates(canonicalLocation, "missing_indoor_entry_landing", anchor.indoorEntryPoint(), canonicalLocation);
         }
         destination.add(NpcRouteStep.warp("indoor_entry", indoorEntry));
-        destination.add(NpcRouteStep.walk("indoor_target", target.position()));
+        destination.add(NpcRouteStep.walk(state.namedPointId().isBlank() ? "indoor_target" : state.namedPointId(), target.position()));
         return NpcRouteContext.ready(canonicalLocation, destination);
     }
 
@@ -552,6 +552,10 @@ final class NpcRoutePlanner {
         List<NpcRouteStep> graphSteps = NpcLocationGraph.toRouteSteps(level,graphRoute, target.position());
         if (graphSteps.isEmpty()) {
             return NpcRouteContext.waitingForCoordinates(destinationLocation,"incomplete_location_connection","",sourceLocation+"->"+destinationLocation);
+        }
+        if (!state.namedPointId().isBlank()) {
+            graphSteps = new ArrayList<>(graphSteps);
+            graphSteps.set(graphSteps.size() - 1, NpcRouteStep.walk(state.namedPointId(), target.position()));
         }
         return NpcRouteContext.ready(destinationLocation, graphSteps);
     }

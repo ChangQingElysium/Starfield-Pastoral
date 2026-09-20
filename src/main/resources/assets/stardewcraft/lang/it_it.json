@@ -12822,5 +12822,7 @@
   "entity.stardewcraft.wilderness_golem": "Golem selvatico",
   "entity.stardewcraft.iridium_golem": "Golem di iridio",
   "entity.stardewcraft.mine_monster.wilderness_golem": "Golem selvatico",
-  "entity.stardewcraft.mine_monster.iridium_golem": "Golem di iridio"
+  "entity.stardewcraft.mine_monster.iridium_golem": "Golem di iridio",
+  "block.stardewcraft.ochre_bricks": "Mattoni ocra",
+  "block.stardewcraft.blue_flowerpot": "Vaso da fiori smaltato blu"
 }

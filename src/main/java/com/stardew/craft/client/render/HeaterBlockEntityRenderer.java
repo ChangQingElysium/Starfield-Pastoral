@@ -26,7 +26,7 @@ public class HeaterBlockEntityRenderer implements BlockEntityRenderer<HeaterBloc
     public void render(@Nonnull HeaterBlockEntity be, float partialTick, @Nonnull PoseStack poseStack, @Nonnull MultiBufferSource buffer, int packedLight, int packedOverlay) {
         BlockState state = be.getBlockState();
         Level level = be.getLevel();
-        if (level == null) {
+        if (level == null || !com.stardew.craft.block.utility.UtilityMachineRenderState.rendersDynamicBody(state)) {
             return;
         }
 

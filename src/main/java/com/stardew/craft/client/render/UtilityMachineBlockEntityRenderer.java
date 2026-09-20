@@ -36,7 +36,7 @@ public class UtilityMachineBlockEntityRenderer<T extends BlockEntity & UtilityMa
     public void render(@Nonnull T be, float partialTick, @Nonnull PoseStack poseStack, @Nonnull MultiBufferSource buffer, int packedLight, int packedOverlay) {
         Level level = be.getLevel();
         BlockState state = be.getBlockState();
-        if (level != null) {
+        if (level != null && com.stardew.craft.block.utility.UtilityMachineRenderState.rendersDynamicBody(state)) {
             poseStack.pushPose();
             if (shouldApplyWorkingAnimation(be)) {
                 applyWorkingAnimation(be, partialTick, poseStack);

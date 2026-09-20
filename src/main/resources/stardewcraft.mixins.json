@@ -52,6 +52,7 @@
     "TownDoorSodiumShaderMixin",
     "TownDoorSodiumOcclusionCullerMixin",
     "TownDoorSodiumViewportMixin",
+    "TownDoorIrisPipelineManagerMixin",
     "TownDoorIrisTransformMixin",
     "TownDoorIrisSodiumShaderMixin",
     "TownDoorMinecraftAccessor",

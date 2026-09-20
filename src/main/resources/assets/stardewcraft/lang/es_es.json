@@ -12822,5 +12822,7 @@
   "entity.stardewcraft.wilderness_golem": "Gólem salvaje",
   "entity.stardewcraft.iridium_golem": "Gólem de iridio",
   "entity.stardewcraft.mine_monster.wilderness_golem": "Gólem salvaje",
-  "entity.stardewcraft.mine_monster.iridium_golem": "Gólem de iridio"
+  "entity.stardewcraft.mine_monster.iridium_golem": "Gólem de iridio",
+  "block.stardewcraft.ochre_bricks": "Ladrillos ocres",
+  "block.stardewcraft.blue_flowerpot": "Maceta esmaltada azul"
 }

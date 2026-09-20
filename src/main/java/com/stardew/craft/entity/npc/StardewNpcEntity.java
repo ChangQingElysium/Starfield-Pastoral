@@ -735,6 +735,9 @@ public class StardewNpcEntity extends PathfinderMob implements GeoEntity {
         if ("henchman".equals(npcId) || "bouncer".equals(npcId)) {
             return;
         }
+        if (entity instanceof StardewNpcEntity other
+                && com.stardew.craft.npc.runtime.NpcCentralMovementService.isScheduleTravelling(this)
+                && com.stardew.craft.npc.runtime.NpcCentralMovementService.isScheduleTravelling(other)) return;
         super.doPush(entity);
     }
 

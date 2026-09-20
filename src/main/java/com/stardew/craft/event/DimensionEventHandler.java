@@ -460,6 +460,8 @@ public class DimensionEventHandler {
             com.stardew.craft.minecart.MinecartStationManager.get(stardewLevel).resetForMigration();
             com.stardew.craft.mastery.MasterySiteInstaller.get(stardewLevel).resetForMigration();
             com.stardew.craft.statue.UncertaintyStatueInstaller.get(stardewLevel).resetForMigration();
+            com.stardew.craft.specialorder.SpecialOrderBoardInstaller.get(stardewLevel).resetForMigration();
+            com.stardew.craft.fishing.server.BobberMachineInstaller.get(stardewLevel).resetForMigration();
             // 采石场初始石头也在 pregen region 范围内，覆盖后需重新铺
             com.stardew.craft.manager.QuarrySpawnService.resetInitialSpawn(stardewLevel);
 

@@ -35,9 +35,14 @@ public final class PrefabGroundGameTests {
             level.removeBlock(passableCover, false);
             var obstacle = claim.min().above();
             level.setBlock(obstacle, Blocks.STONE.defaultBlockState(), 3);
+            var secondObstacle = obstacle.east();
+            level.setBlock(secondObstacle, Blocks.OAK_LOG.defaultBlockState(), 3);
             var issue = BuildingPlacementService.checkSpace(level, claim);
-            h.assertTrue(issue != null && issue.issue().equals("air") && issue.pos().equals(obstacle), "Above-ground obstruction was not located");
+            h.assertTrue(issue != null && issue.issue().equals("air") && issue.pos().equals(obstacle)
+                            && issue.positions().contains(obstacle) && issue.positions().contains(secondObstacle),
+                    "Above-ground obstructions were not all located");
             level.removeBlock(obstacle, false);
+            level.removeBlock(secondObstacle, false);
             level.removeBlock(claim.min(), false);
             issue = BuildingPlacementService.checkSpace(level, claim);
             h.assertTrue(issue != null && issue.issue().equals("ground"), "Missing support accepted");

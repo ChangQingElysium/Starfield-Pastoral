@@ -49,7 +49,7 @@ public class LoomBlockEntity extends TimedProductionBlockEntity {
             be.setChanged();
             be.syncToClient();
         }
-        be.updateReadyState(level, pos, state);
+        be.updateRenderState(level, pos, state);
     }
 
 
@@ -77,7 +77,7 @@ public class LoomBlockEntity extends TimedProductionBlockEntity {
         ready = true;
         setChanged();
         syncToClient();
-        updateReadyState(currentLevel, worldPosition, getBlockState());
+        updateRenderState(currentLevel, worldPosition, getBlockState());
         return true;
     }
 
@@ -168,7 +168,7 @@ public class LoomBlockEntity extends TimedProductionBlockEntity {
     ) {
         commitProduction(inputStack, plan, 1, player);
         if (level != null) {
-            updateReadyState(level, worldPosition, getBlockState());
+            updateRenderState(level, worldPosition, getBlockState());
         }
     }
 
@@ -178,7 +178,7 @@ public class LoomBlockEntity extends TimedProductionBlockEntity {
             return ItemStack.EMPTY;
         }
         if (level != null) {
-            updateReadyState(level, worldPosition, getBlockState());
+            updateRenderState(level, worldPosition, getBlockState());
         }
         return out;
     }
@@ -242,7 +242,7 @@ public class LoomBlockEntity extends TimedProductionBlockEntity {
         setChanged();
         syncToClient();
         if (level != null) {
-            updateReadyState(level, worldPosition, getBlockState());
+            updateRenderState(level, worldPosition, getBlockState());
         }
         return out;
     }
@@ -255,17 +255,38 @@ public class LoomBlockEntity extends TimedProductionBlockEntity {
         super.advanceDays(days);
         Level currentLevel = level;
         if (currentLevel != null && !currentLevel.isClientSide) {
-            updateReadyState(currentLevel, worldPosition, getBlockState());
+            updateRenderState(currentLevel, worldPosition, getBlockState());
         }
     }
 
     @SuppressWarnings("null")
-    private void updateReadyState(Level level, BlockPos pos, BlockState state) {
-        if (!state.hasProperty(LoomBlock.READY)) {
+    private void updateRenderState(Level level, BlockPos pos, BlockState state) {
+        BlockPos mainPos = state.hasProperty(LoomBlock.PART)
+            && state.getValue(LoomBlock.PART) == LoomBlock.Part.EXTENSION ? pos.below() : pos;
+        BlockState mainState = level.getBlockState(mainPos);
+        if (!mainState.hasProperty(LoomBlock.READY) || !mainState.hasProperty(LoomBlock.WORKING)) {
             return;
         }
-        if (state.getValue(LoomBlock.READY) != ready) {
-            level.setBlock(pos, state.setValue(LoomBlock.READY, ready), 3);
+
+        boolean working = isWorking();
+        BlockState updatedMain = mainState
+            .setValue(LoomBlock.READY, ready)
+            .setValue(LoomBlock.WORKING, working);
+        if (updatedMain != mainState) {
+            level.setBlock(mainPos, updatedMain, 3);
+        }
+
+        BlockPos extensionPos = mainPos.above();
+        BlockState extensionState = level.getBlockState(extensionPos);
+        if (extensionState.is(mainState.getBlock())
+                && extensionState.hasProperty(LoomBlock.READY)
+                && extensionState.hasProperty(LoomBlock.WORKING)) {
+            BlockState updatedExtension = extensionState
+                .setValue(LoomBlock.READY, ready)
+                .setValue(LoomBlock.WORKING, working);
+            if (updatedExtension != extensionState) {
+                level.setBlock(extensionPos, updatedExtension, 3);
+            }
         }
     }
 

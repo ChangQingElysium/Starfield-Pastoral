@@ -240,7 +240,9 @@ public class NpcNodeEvaluator extends WalkNodeEvaluator {
         if (this.mob == null || from.x == to.x || from.z == to.z) return true;
         double fromFloor = getFloorLevel(new BlockPos(from.x, from.y, from.z));
         double toFloor = getFloorLevel(new BlockPos(to.x, to.y, to.z));
-        if (Math.abs(fromFloor - toFloor) > 0.05D) return true;
+        // A diagonal rise can clip both a stair/furniture edge and its neighbour.
+        // Use the cardinal riser nodes so physical stepping follows the same edges.
+        if (Math.abs(fromFloor - toFloor) > 0.05D) return false;
 
         double halfWidth = this.mob.getBbWidth() * 0.5D;
         AABB body = new AABB(

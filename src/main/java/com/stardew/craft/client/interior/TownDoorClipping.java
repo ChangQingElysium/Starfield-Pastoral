@@ -18,6 +18,8 @@ public final class TownDoorClipping {
     private static final float[] BEFORE_MODEL_VIEW = {0, 0, 0, 1};
     private static final float[] AFTER_MODEL_VIEW = {0, 0, 0, 1};
     private static boolean enabled;
+    private static int cachedProgram;
+    private static int cachedLocation = -1;
 
     private TownDoorClipping() {}
 
@@ -43,6 +45,20 @@ public final class TownDoorClipping {
         enabled = false;
     }
 
+    /**
+     * A renderer backend can keep the currently bound shader program alive across the nested
+     * world render.  Upload the disabled equation immediately when we return to the outer view;
+     * waiting for the next backend state bind leaves the outer terrain clipped by the doorway.
+     */
+    static void resetActiveShaderUniform() {
+        if (!RenderSystem.isOnRenderThread()) return;
+        // Do not issue a uniform-location query on every portal frame.  Sodium's state hook
+        // populates this pair when it binds a new program; only touch it if that same program is
+        // still active after the nested pass.
+        int program = GL11.glGetInteger(GL20.GL_CURRENT_PROGRAM);
+        if (program == cachedProgram) uploadRendererModUniform(cachedLocation);
+    }
+
     public static void updateVanillaUniform(Uniform uniform) {
         float[] equation = enabled ? BEFORE_MODEL_VIEW : DISABLED;
         uniform.set(equation[0], equation[1], equation[2], equation[3]);
@@ -56,7 +72,12 @@ public final class TownDoorClipping {
     public static int findInActiveProgram() {
         if (!RenderSystem.isOnRenderThread()) return Integer.MIN_VALUE;
         int program = activeProgram();
-        return program == 0 ? -1 : GL20.glGetUniformLocation(program, UNIFORM);
+        if (program == 0) return -1;
+        if (program != cachedProgram) {
+            cachedProgram = program;
+            cachedLocation = GL20.glGetUniformLocation(program, UNIFORM);
+        }
+        return cachedLocation;
     }
 
     public static void uploadRendererModUniform(int location) {

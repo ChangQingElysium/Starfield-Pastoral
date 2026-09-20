@@ -12822,5 +12822,7 @@
   "entity.stardewcraft.wilderness_golem": "荒地ゴーレム",
   "entity.stardewcraft.iridium_golem": "イリジウムゴーレム",
   "entity.stardewcraft.mine_monster.wilderness_golem": "荒地ゴーレム",
-  "entity.stardewcraft.mine_monster.iridium_golem": "イリジウムゴーレム"
+  "entity.stardewcraft.mine_monster.iridium_golem": "イリジウムゴーレム",
+  "block.stardewcraft.ochre_bricks": "黄土色のレンガ",
+  "block.stardewcraft.blue_flowerpot": "青釉の花鉢"
 }

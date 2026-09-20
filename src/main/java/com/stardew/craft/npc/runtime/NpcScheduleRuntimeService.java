@@ -565,6 +565,14 @@ public final class NpcScheduleRuntimeService {
         return NpcRoutePlanner.canonicalNpcId(npcId);
     }
 
+    static List<com.stardew.craft.npc.data.NpcScheduleCompiler.Node> auditDayPlan(
+            ServerLevel level, String npcId, String scheduleKey) {
+        var root = NpcDataRegistry.schedules().get(npcId);
+        if (root == null) return List.of();
+        var resolved = resolveScheduleObjectWithGoto(level, npcId, root, scheduleKey);
+        return resolved == null ? List.of() : NpcSchedulePlans.nodes(resolved);
+    }
+
     private static JsonObject resolveScheduleObjectWithGoto(ServerLevel level, String npcId, JsonObject scheduleRoot, String scheduleKey) {
         String current = scheduleKey;
         UUID schedulePlayerId = resolveScheduleContextPlayer(level, npcId);

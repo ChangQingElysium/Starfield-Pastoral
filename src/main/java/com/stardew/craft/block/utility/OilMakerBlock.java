@@ -65,7 +65,7 @@ public class OilMakerBlock extends Block implements EntityBlock {
     @SuppressWarnings("null")
     @Override
     public RenderShape getRenderShape(@SuppressWarnings("null") BlockState state) {
-        return RenderShape.ENTITYBLOCK_ANIMATED;
+        return UtilityMachineRenderState.forWorkingState(state.getValue(WORKING));
     }
 
     @SuppressWarnings("null")

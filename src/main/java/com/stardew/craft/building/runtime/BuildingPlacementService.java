@@ -24,7 +24,11 @@ import java.util.UUID;
 
 public final class BuildingPlacementService {
     private BuildingPlacementService() {}
-    public record Probe(String issue, BlockPos problem, BuildingBounds claim, BuildingBounds structure, BlockPos manager, FarmInstance farm) {
+    public record Probe(String issue, BlockPos problem, java.util.List<BlockPos> problems,
+                        BuildingBounds claim, BuildingBounds structure, BlockPos manager, FarmInstance farm) {
+        public Probe {
+            problems = java.util.List.copyOf(problems);
+        }
         public boolean valid() { return issue.equals("valid"); }
     }
 
@@ -53,23 +57,26 @@ public final class BuildingPlacementService {
             else if(!level.hasChunksAt(claim.min().below(),claim.maxInclusive()))failure="unloaded";
         }
         if (self && FishPondPrefabs.isPond(familyId)) failure="prefab_only";
-        if (failure != null) return new Probe(failure, anchor, claim, structure, manager, farm);
-        if (self && moving == null && !level.getBlockState(anchor).canBeReplaced()) return new Probe("manager_space", anchor, claim, structure, manager, farm);
+        if (failure != null) return new Probe(failure, anchor, java.util.List.of(), claim, structure, manager, farm);
+        if (self && moving == null && !level.getBlockState(anchor).canBeReplaced())
+            return new Probe("manager_space", anchor, java.util.List.of(anchor), claim, structure, manager, farm);
         if (!self || moving != null) {
             SpaceIssue space = FishPondPrefabs.isPond(familyId)
                     ? FishPondPrefabs.checkSite(level, claim, anchor, facing, moving)
-                    : checkSpace(level, claim, moving == null ? null : BuildingTransfer.contentBounds(moving), !self);
-            if (space != null) return new Probe(space.issue(), space.pos(), claim, structure, manager, farm);
+                    : checkSpace(level, structure, moving == null ? null : BuildingTransfer.contentBounds(moving), !self);
+            if (space != null) return new Probe(space.issue(), space.pos(), space.positions(), claim, structure, manager, farm);
         }
         if (!self || moving != null) {
             var animals = com.stardew.craft.animal.runtime.LivestockWorldData.get(level.getServer());
+            var occupied = new java.util.ArrayList<BlockPos>();
             for (var entity : level.getEntitiesOfClass(LivingEntity.class, aabb(structure))) {
                 var animal = animals.find(entity.getUUID());
                 boolean following = moving != null && animal != null && animal.home().equals(moving.id()) && BuildingTransfer.contentBounds(moving).contains(entity.blockPosition());
-                if (!following) return new Probe("occupied", entity.blockPosition(), claim, structure, manager, farm);
+                if (!following && occupied.size() < 256) occupied.add(entity.blockPosition().immutable());
             }
+            if (!occupied.isEmpty()) return new Probe("occupied", occupied.getFirst(), occupied, claim, structure, manager, farm);
         }
-        return new Probe("valid", anchor, claim, structure, manager, farm);
+        return new Probe("valid", anchor, java.util.List.of(), claim, structure, manager, farm);
     }
 
     public static FarmInstance placementFarm(FarmInstanceRegistry registry,BuildingBounds claim,BuildingRecord moving) {
@@ -90,8 +97,13 @@ public final class BuildingPlacementService {
                 && claim.maxInclusive().getX()<=max.getX() && claim.maxInclusive().getZ()<=max.getZ();
     }
 
-    public record SpaceIssue(String issue, BlockPos pos) {}
-    /** Whether a block in the future building volume is passable empty cover. */
+    public record SpaceIssue(String issue, BlockPos pos, java.util.List<BlockPos> positions) {
+        public SpaceIssue(String issue, BlockPos pos) { this(issue, pos, java.util.List.of(pos.immutable())); }
+        public SpaceIssue {
+            positions = java.util.List.copyOf(positions);
+        }
+    }
+    /** Whether a block in the current building volume is passable empty cover. */
     static boolean isClearAirVolume(ServerLevel level, BlockPos pos,
                                     com.stardew.craft.floor.SurfaceFloorData floors) {
         var state = level.getBlockState(pos);
@@ -106,6 +118,8 @@ public final class BuildingPlacementService {
     }
     public static SpaceIssue checkSpace(ServerLevel level,BuildingBounds claim,BuildingBounds vacated,boolean replacesGround) {
         var floors=com.stardew.craft.floor.SurfaceFloorData.get(level);
+        String issue = null;
+        var problems = new java.util.ArrayList<BlockPos>();
         // Prefabs include an embedded floor. Validate support separately so it can never
         // enter the air-volume scan. Self-built moves start above their support instead.
         int groundY = claim.min().getY() - (replacesGround ? 0 : 1);
@@ -117,12 +131,18 @@ public final class BuildingPlacementService {
             var state = level.getBlockState(pos);
             if (!state.getFluidState().isEmpty() || (replacesGround
                     ? !state.isCollisionShapeFullBlock(level, pos)
-                    : own || !state.isFaceSturdy(level, pos, Direction.UP)))
-                return new SpaceIssue("ground", pos.immutable());
-            if (replacesGround && (level.getBlockEntity(pos) != null || floors.at(pos) != null))
-                return new SpaceIssue("ground_contents", pos.immutable());
-            if (!replacesGround && floors.at(pos) != null && (vacated == null || !vacated.contains(pos.above())))
-                return new SpaceIssue("air", pos.immutable());
+                    : own || !state.isFaceSturdy(level, pos, Direction.UP))) {
+                if (issue == null) issue = "ground";
+                if (problems.size() < 256) problems.add(pos.immutable());
+            }
+            if (replacesGround && (level.getBlockEntity(pos) != null || floors.at(pos) != null)) {
+                if (issue == null || issue.equals("ground")) issue = "ground_contents";
+                if (problems.size() < 256 && !problems.contains(pos)) problems.add(pos.immutable());
+            }
+            if (!replacesGround && floors.at(pos) != null && (vacated == null || !vacated.contains(pos.above()))) {
+                if (issue == null) issue = "air";
+                if (problems.size() < 256) problems.add(pos.immutable());
+            }
         }
         BlockPos airMin = new BlockPos(claim.min().getX(), groundY + 1, claim.min().getZ());
         if (airMin.getY() < claim.maxExclusive().getY()) {
@@ -132,19 +152,24 @@ public final class BuildingPlacementService {
                 // pasture grass) in the reserved volume. It is not an obstacle
                 // in SDV's placement rules; solid debris, containers and floor
                 // covers still are.
-                if (!isClearAirVolume(level, pos, floors))
-                    return new SpaceIssue("air", pos.immutable());
+                if (!isClearAirVolume(level, pos, floors)) {
+                    if (issue == null) issue = "air";
+                    if (problems.size() < 256) problems.add(pos.immutable());
+                }
             }
         }
-        return null;
+        return problems.isEmpty() ? null : new SpaceIssue(issue, problems.getFirst(), problems);
     }
 
     public static boolean placePrefab(ServerPlayer player, BlockPos anchor, Direction facing, UUID permit, net.minecraft.resources.ResourceLocation familyId) {
         ServerLevel level = player.serverLevel();
         Probe probe = probe(level, player, anchor, facing, false, familyId);
-        if (!probe.valid()) { message(player, probe.issue()); return false; }
+        if (!probe.valid()) { flashProblems(player, probe.problems()); message(player, probe.issue()); return false; }
         var data = BuildingWorldData.get(level.getServer());
-        if (permit == null || !data.permits(permit, probe.farm().getInstanceId(), familyId)) { message(player, "permit"); return false; }
+        var farms = FarmInstanceRegistry.get(level.getServer());
+        if (permit == null || !data.permitsPlacement(permit, probe.farm().getInstanceId(), familyId, player.getUUID(), farms)) {
+            message(player, "permit"); return false;
+        }
         if (data.hasActiveConstruction(probe.farm().getInstanceId())) { message(player, "robin_busy"); return false; }
         // Resolve every template block before consuming the blueprint or claiming space.
         try {
@@ -155,7 +180,7 @@ public final class BuildingPlacementService {
         }
         BuildingRecord record = BuildingRecord.waiting(probe.farm().getInstanceId(), probe.farm().getSlotIndex(), familyId,
                 BuildingRecord.Mode.PREFAB, level.dimension().location(), anchor, probe.manager(), facing, probe.claim());
-        if (data.beginPrefab(record, permit, StardewTimeManager.get().getAbsoluteDay()) != BuildingWorldData.Result.SUCCESS) {
+        if (data.beginPrefab(record, permit, StardewTimeManager.get().getAbsoluteDay(), player.getUUID(), farms) != BuildingWorldData.Result.SUCCESS) {
             message(player, "permit"); return false;
         }
         // The persisted order owns unfinished work too; a reload retries this exact site's projection.
@@ -163,6 +188,13 @@ public final class BuildingPlacementService {
         catch (RuntimeException exception) { StardewCraft.LOGGER.error("Construction site {} awaits retry", record.id(), exception); }
         message(player, "started");
         return true;
+    }
+
+    static void flashProblems(ServerPlayer player, java.util.List<BlockPos> problems) {
+        if (problems.isEmpty()) return;
+        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
+                new com.stardew.craft.network.payload.BuildingObstructionFlashPayload(
+                        player.level().dimension().location(), problems));
     }
 
     public static void scaffold(ServerLevel level, BuildingRecord record) {

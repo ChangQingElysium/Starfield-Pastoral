@@ -12822,5 +12822,7 @@
   "entity.stardewcraft.wilderness_golem": "Golem sauvage",
   "entity.stardewcraft.iridium_golem": "Golem d’iridium",
   "entity.stardewcraft.mine_monster.wilderness_golem": "Golem sauvage",
-  "entity.stardewcraft.mine_monster.iridium_golem": "Golem d’iridium"
+  "entity.stardewcraft.mine_monster.iridium_golem": "Golem d’iridium",
+  "block.stardewcraft.ochre_bricks": "Briques ocres",
+  "block.stardewcraft.blue_flowerpot": "Pot de fleurs émaillé bleu"
 }

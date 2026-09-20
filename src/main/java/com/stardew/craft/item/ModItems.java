@@ -214,6 +214,9 @@ public class ModItems {
         public static final DeferredItem<Item> GARDEN_PLANTER = ITEMS.register("garden_planter",
                         () -> new StardewBlockItem(ModBlocks.GARDEN_PLANTER.get(), "stardewcraft.type.building", -1,
                                         new Item.Properties().stacksTo(999)));
+        public static final DeferredItem<Item> BLUE_FLOWERPOT = ITEMS.register("blue_flowerpot",
+                        () -> new StardewBlockItem(ModBlocks.BLUE_FLOWERPOT.get(), "stardewcraft.type.building", -1,
+                                        new Item.Properties().stacksTo(999)));
         public static final DeferredItem<Item> PLAYGROUND_SLIDE = ITEMS.register("playground_slide",
                         () -> new StardewBlockItem(ModBlocks.PLAYGROUND_SLIDE.get(), "stardewcraft.type.building", -1,
                                         new Item.Properties().stacksTo(999)));
@@ -318,6 +321,9 @@ public class ModItems {
                                         new Item.Properties().stacksTo(999)));
         public static final DeferredItem<Item> PLAZA_RED_BRICKS = ITEMS.register("plaza_red_bricks",
                         () -> new StardewBlockItem(ModBlocks.PLAZA_RED_BRICKS.get(), "stardewcraft.type.building", -1,
+                                        new Item.Properties().stacksTo(999)));
+        public static final DeferredItem<Item> OCHRE_BRICKS = ITEMS.register("ochre_bricks",
+                        () -> new StardewBlockItem(ModBlocks.OCHRE_BRICKS.get(), "stardewcraft.type.building", -1,
                                         new Item.Properties().stacksTo(999)));
         public static final DeferredItem<Item> DARK_GRASS_BLOCK = ITEMS.register("dark_grass_block",
                         () -> new StardewBlockItem(ModBlocks.DARK_GRASS_BLOCK.get(), "stardewcraft.type.natural_ground", -1,

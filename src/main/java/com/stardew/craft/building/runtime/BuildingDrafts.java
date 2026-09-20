@@ -50,7 +50,9 @@ public final class BuildingDrafts extends SavedData {
             int tier=moving==null?1:moving.tier();
             if(moving==null)BuildingPreviewService.sendTemplate(player,item.family(),tier);else BuildingMovePreview.send(player,moving);
             var facing=BuildingBlueprintItem.facing(stack);var probe=BuildingPlacementService.probe(player.serverLevel(),player,anchor,facing,moving!=null && moving.mode()==BuildingRecord.Mode.SELF_BUILT,item.family(),moving);
-            String issue=probe.issue();if(probe.valid() && moving==null && !BuildingWorldData.get(player.server).permits(BuildingBlueprintItem.permit(stack),probe.farm().getInstanceId(),item.family()))issue="permit";
+            String issue=probe.issue();if(probe.valid() && moving==null && !BuildingWorldData.get(player.server).permitsPlacement(
+                    BuildingBlueprintItem.permit(stack),probe.farm().getInstanceId(),item.family(),player.getUUID(),
+                    com.stardew.craft.farm.FarmInstanceRegistry.get(player.server)))issue="permit";
             var outline=PrefabDefinitions.maxTier(item.family())==1?probe.claim():probe.structure();
             var row=new CompoundTag();row.putUUID("Id",identity);row.putString("Family",item.family().toString());row.putInt("Tier",tier);row.putString("Facing",facing.getName());row.putString("Issue",issue);
             row.putLong("Anchor",anchor.asLong());row.putLong("Min",probe.claim().min().asLong());row.putLong("Max",probe.claim().maxExclusive().asLong());row.putLong("InnerMin",outline.min().asLong());row.putLong("InnerMax",outline.maxExclusive().asLong());row.putLong("Manager",probe.manager().asLong());

@@ -16,63 +16,136 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.neoforged.neoforge.registries.DeferredBlock;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
-/** Beach Farm's geometric daily beach-spawn loop, projected onto floating
- * source-water crates beside the authored sand shoreline. */
+/** Beach Farm's original daily beach-spawn loop, adapted to the authored MC shoreline. */
 public final class BeachFarmDailyService {
-    private static final Map<UUID, List<BlockPos>> SHORE_CACHE = new HashMap<>();
+    private static final int SOURCE_MAP_CELLS = 110 * 110;
+    // Property tiles which also pass Farm.DayUpdate's AlwaysFront rejection.
+    private static final double BEACH_SPAWN_TILE_CHANCE = 802.0D / SOURCE_MAP_CELLS;
+    private static final double SEASONAL_GRASS_TILE_CHANCE = 337.0D / SOURCE_MAP_CELLS;
+    private static final int WINTER = 3;
+
+    /** Farm.DayUpdate's six-way starting pool; seaweed occupies cases four and five. */
+    private static final List<DeferredBlock<Block>> BEACH_BASE_FORAGE = List.of(
+            ModBlocks.FORAGE_CORAL,
+            ModBlocks.FORAGE_MUSSEL,
+            ModBlocks.FORAGE_COCKLE,
+            ModBlocks.FORAGE_OYSTER,
+            ModBlocks.FORAGE_SEAWEED,
+            ModBlocks.FORAGE_SEAWEED
+    );
+
+    private static final List<List<DeferredBlock<Block>>> BASIC_SEASONAL_FORAGE = List.of(
+            List.of(ModBlocks.FORAGE_WILD_HORSERADISH, ModBlocks.FORAGE_DAFFODIL,
+                    ModBlocks.FORAGE_LEEK, ModBlocks.FORAGE_DANDELION),
+            List.of(ModBlocks.FORAGE_SPICE_BERRY, ModBlocks.FORAGE_SWEET_PEA,
+                    ModBlocks.FORAGE_GRAPE),
+            List.of(ModBlocks.FORAGE_COMMON_MUSHROOM, ModBlocks.FORAGE_WILD_PLUM,
+                    ModBlocks.FORAGE_HAZELNUT, ModBlocks.FORAGE_BLACKBERRY)
+    );
 
     private BeachFarmDailyService() {}
 
     public static void onNewDay(ServerLevel level) {
-        if (StardewTimeManager.get().getAbsoluteDay() <= 1) return;
         RandomSource random = level.getRandom();
         CounterData counter = CounterData.get(level);
-        int placed = 0;
-        for (FarmInstance farm : FarmInstanceRegistry.get(level.getServer()).getAllFarms()) {
-            if (!farm.isInitialized() || !farm.getFarmLayoutId().equals(
+        int absoluteDay = StardewTimeManager.get().getAbsoluteDay();
+        int season = StardewTimeManager.get().getCurrentSeason();
+        FarmInstanceRegistry registry = FarmInstanceRegistry.get(level.getServer());
+        Set<UUID> activeOwners = FarmDailyProcessHelper.getOnlineFarmOwners(level);
+        FarmSpawnLayoutData.Layout layout = FarmSpawnLayoutData.forType(FarmType.BEACH);
+        List<BlockPos> shoreWater = layout.positions("shore_water");
+        List<BlockPos> beachSpawn = layout.positions("beach_spawn");
+        List<BlockPos> seasonalGrass = layout.positions("seasonal_grass");
+        int crates = 0;
+        int forage = 0;
+
+        for (FarmInstance farm : registry.getAllFarms()) {
+            UUID registryKey = registry.getRegistryKey(farm);
+            if (!farm.isInitialized() || registryKey == null
+                    || (!activeOwners.contains(farm.getOwnerUUID())
+                    && !activeOwners.contains(registryKey))
+                    || !farm.getFarmLayoutId().equals(
                     StardewFarmLayoutRegistry.builtinId(FarmType.BEACH))) continue;
-            List<BlockPos> shore = SHORE_CACHE.computeIfAbsent(
-                    farm.getInstanceId(), ignored -> collectShore(level, farm));
-            // Farm.DayUpdate: one eligible beach-spawn attempt for every
-            // successful 90% continuation roll (mean nine per day).
-            while (random.nextDouble() < 0.90D) {
-                if (shore.isEmpty()) break;
-                int spawnNumber = counter.next();
-                boolean crate = random.nextDouble() < 0.15D || spawnNumber % 4 == 0;
-                if (!crate) continue;
-                BlockPos pos = shore.get(random.nextInt(shore.size()));
-                if (!validShoreWater(level, farm, pos)) continue;
-                var state = ModBlocks.SUPPLY_CRATE.get().defaultBlockState()
-                        .setValue(SupplyCrateBlock.VARIANT, random.nextInt(3));
-                if (state.canSurvive(level, pos) && level.setBlock(pos, state, Block.UPDATE_ALL)) {
-                    placed++;
+
+            int safety = 0;
+            // Farm.DayUpdate: one map-tile roll for every successful 90%
+            // continuation roll (mean nine rolls per active Beach Farm day).
+            while (random.nextDouble() < 0.90D && safety++ < 128) {
+                double tileRoll = random.nextDouble();
+                if (tileRoll < BEACH_SPAWN_TILE_CHANCE) {
+                    DeferredBlock<Block> chosen = BEACH_BASE_FORAGE.get(
+                            random.nextInt(BEACH_BASE_FORAGE.size()));
+                    int spawnNumber = counter.next();
+                    boolean crate = absoluteDay > 1
+                            && (random.nextDouble() < 0.15D || spawnNumber % 4 == 0);
+                    if (crate) {
+                        if (placeCrate(level, farm, shoreWater, random)) crates++;
+                        continue;
+                    }
+                    if (absoluteDay > 1) {
+                        if (random.nextDouble() < 0.10D) {
+                            chosen = ModBlocks.FORAGE_SEA_URCHIN;
+                        } else if (random.nextDouble() < 0.05D) {
+                            chosen = ModBlocks.FORAGE_NAUTILUS_SHELL;
+                        } else if (random.nextDouble() < 0.02D) {
+                            chosen = ModBlocks.FORAGE_RAINBOW_SHELL;
+                        }
+                    }
+                    if (placeForage(level, farm, beachSpawn, chosen,
+                            FarmDebrisPlacementRules.GroundKind.SAND, random)) forage++;
+                } else if (season != WINTER
+                        && tileRoll < BEACH_SPAWN_TILE_CHANCE + SEASONAL_GRASS_TILE_CHANCE) {
+                    List<DeferredBlock<Block>> pool = BASIC_SEASONAL_FORAGE.get(season);
+                    DeferredBlock<Block> chosen = pool.get(random.nextInt(pool.size()));
+                    if (placeForage(level, farm, seasonalGrass, chosen, null, random)) forage++;
                 }
             }
         }
-        if (placed > 0) StardewCraft.LOGGER.info(
-                "[FARM_DAILY] Floated {} supply crates onto Beach Farm shorelines", placed);
+        if (crates > 0 || forage > 0) {
+            StardewCraft.LOGGER.info(
+                    "[FARM_DAILY] Beach Farms spawned {} shoreline forage and floated {} supply crates",
+                    forage, crates);
+        }
     }
 
-    private static List<BlockPos> collectShore(ServerLevel level, FarmInstance farm) {
-        List<BlockPos> result = new ArrayList<>();
-        BlockPos origin = farm.getOrigin();
-        for (int x = 1; x <= 244; x++) {
-            for (int z = 34; z <= 222; z++) {
-                // The large north-east lagoon is the farm's freshwater pond,
-                // not the supply-crate ocean component.
-                if (x >= 115 && x <= 181 && z <= 79) continue;
-                BlockPos pos = origin.offset(x, 25, z);
-                if (validShoreWater(level, farm, pos)) result.add(pos);
-            }
+    private static boolean placeCrate(ServerLevel level, FarmInstance farm,
+                                      List<BlockPos> candidates, RandomSource random) {
+        BlockPos local = candidates.get(random.nextInt(candidates.size()));
+        BlockPos pos = farm.getOrigin().offset(local);
+        FarmDailyProcessHelper.ensurePositionLoaded(level, pos);
+        if (!validShoreWater(level, farm, pos)) return false;
+        var state = ModBlocks.SUPPLY_CRATE.get().defaultBlockState()
+                .setValue(SupplyCrateBlock.VARIANT, random.nextInt(3));
+        return state.canSurvive(level, pos) && level.setBlock(pos, state, Block.UPDATE_ALL);
+    }
+
+    private static boolean placeForage(ServerLevel level, FarmInstance farm,
+                                       List<BlockPos> candidates, DeferredBlock<Block> forage,
+                                       FarmDebrisPlacementRules.GroundKind requiredGround,
+                                       RandomSource random) {
+        BlockPos local = candidates.get(random.nextInt(candidates.size()));
+        BlockPos column = farm.getOrigin().offset(local.getX(), 0, local.getZ());
+        FarmDailyProcessHelper.ensurePositionLoaded(level, column);
+        FarmDebrisPlacementRules.Surface surface = FarmDebrisPlacementRules.findBareSurface(
+                level, farm, column.getX(), column.getZ());
+        if (surface == null || requiredGround != null && surface.groundKind() != requiredGround) {
+            return false;
         }
-        return List.copyOf(result);
+        if (requiredGround == null
+                && surface.groundKind() != FarmDebrisPlacementRules.GroundKind.GRASS
+                && surface.groundKind() != FarmDebrisPlacementRules.GroundKind.DARK_GRASS) {
+            return false;
+        }
+        BlockPos place = surface.place();
+        var state = forage.get().defaultBlockState();
+        if (!level.canSeeSky(place) || !state.canSurvive(level, place)) return false;
+        return level.setBlock(place, state, Block.UPDATE_ALL);
     }
 
     private static boolean validShoreWater(ServerLevel level, FarmInstance farm, BlockPos pos) {

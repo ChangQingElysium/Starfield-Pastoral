@@ -194,6 +194,12 @@ public final class StardewTimePauseService {
             players.size(), simulationNonGameplayPlayers);
         boolean nextClockPaused = shouldPauseForCounts(
             players.size(), clockNonGameplayPlayers);
+        // Explicit isolated server audit: no client is present, but the real
+        // dimension clock, entity ticks and navigation retry timers must advance.
+        if (players.isEmpty() && Boolean.getBoolean("stardewcraft.npcHeadlessScheduleTest")) {
+            nextSimulationPaused = false;
+            nextClockPaused = false;
+        }
         StardewTimeManager timeManager = StardewTimeManager.get();
         timeManager.initializeSimulationGameTime(timeManager.getIndependentDayTime());
 

@@ -44,6 +44,8 @@ public final class StardewValleyPrebuiltRegionInstaller {
     private static final String STAGING_DIRECTORY = ".stardew_valley_pregen_stage";
     private static final Pattern REGION_FILE_PATTERN = Pattern.compile("^r\\.(-?\\d+)\\.(-?\\d+)\\.mca$", Pattern.CASE_INSENSITIVE);
     private static final Pattern SHA256_PATTERN = Pattern.compile("^[0-9a-f]{64}$");
+    private static final Pattern MANIFEST_VERSION_PATTERN = Pattern.compile(
+            "^#\\s*pregen-version\\s+(\\d+)\\s*$", Pattern.CASE_INSENSITIVE);
     private static final int REGION_BLOCK_SIZE = 512;
     private static final int PROTECTED_PLAYER_REGION_MIN = 36;
 
@@ -54,7 +56,7 @@ public final class StardewValleyPrebuiltRegionInstaller {
      * 注意：覆盖会抹掉玩家在 pregen 区域内放的方块（比如摆了椅子、铺了地板之类）。
      * 所以每次 +1 都是"强制小镇重置"的操作，要和版本发布节奏绑定。
      */
-    public static final int CURRENT_PREGEN_VERSION = 15;
+    public static final int CURRENT_PREGEN_VERSION = 17;
 
     private static final String MARKER_VERSION_PREFIX = "version=";
     private static final String MARKER_MANIFEST_PREFIX = "manifest=";
@@ -413,6 +415,7 @@ public final class StardewValleyPrebuiltRegionInstaller {
     static List<ManifestEntry> readManifest(InputStream in) throws IOException {
         List<ManifestEntry> entries = new ArrayList<>();
         Set<String> fileNames = new HashSet<>();
+        Integer manifestVersion = null;
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
             String line;
             boolean firstLine = true;
@@ -427,7 +430,21 @@ public final class StardewValleyPrebuiltRegionInstaller {
                 }
 
                 String trimmed = line.trim();
-                if (trimmed.isEmpty() || trimmed.startsWith("#")) {
+                if (trimmed.isEmpty()) {
+                    continue;
+                }
+                if (trimmed.startsWith("#")) {
+                    Matcher versionMatcher = MANIFEST_VERSION_PATTERN.matcher(trimmed);
+                    if (versionMatcher.matches()) {
+                        if (manifestVersion != null) {
+                            throw new IOException("Duplicate pregen version at manifest line " + lineNumber);
+                        }
+                        try {
+                            manifestVersion = Integer.parseInt(versionMatcher.group(1));
+                        } catch (NumberFormatException e) {
+                            throw new IOException("Invalid pregen version at manifest line " + lineNumber, e);
+                        }
+                    }
                     continue;
                 }
 
@@ -454,6 +471,10 @@ public final class StardewValleyPrebuiltRegionInstaller {
                 }
                 entries.add(entry);
             }
+        }
+        if (manifestVersion != null && manifestVersion != CURRENT_PREGEN_VERSION) {
+            throw new IOException("Pregen manifest version " + manifestVersion
+                    + " does not match installer version " + CURRENT_PREGEN_VERSION);
         }
         return List.copyOf(entries);
     }
