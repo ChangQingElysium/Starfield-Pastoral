@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "stardewcraft:block/building/pale_cyan_plaster",
+    "particle": "stardewcraft:block/building/pale_cyan_plaster"
+  }
+}

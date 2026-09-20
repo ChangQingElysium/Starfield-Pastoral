@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "side": "stardewcraft:block/building/pale_blue_siding",
+    "top": "stardewcraft:block/building/pale_blue_siding_end",
+    "bottom": "stardewcraft:block/building/pale_blue_siding_end",
+    "particle": "stardewcraft:block/building/pale_blue_siding"
+  }
+}

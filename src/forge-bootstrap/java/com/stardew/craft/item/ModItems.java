@@ -1,13 +1,28 @@
 package com.stardew.craft.item;
 
 import net.minecraft.world.item.Item;
+import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 
 import com.stardew.craft.forge.registry.ForgeItems;
 
 /** Compatibility names for ported code; all registration behavior remains in ForgeItems. */
 public final class ModItems {
+    public static final DeferredRegister<Item> ITEMS = ForgeItems.ITEMS;
+
     public static final RegistryObject<Item> BUTTERFLY_POWDER = ForgeItems.BUTTERFLY_POWDER;
+    public static final RegistryObject<Item> PALE_CYAN_PLASTER = ForgeItems.PALE_CYAN_PLASTER;
+    public static final RegistryObject<Item> TEAL_PAINTED_TIMBER = ForgeItems.TEAL_PAINTED_TIMBER;
+    public static final RegistryObject<Item> CREAM_SIDING = ForgeItems.CREAM_SIDING;
+    public static final RegistryObject<Item> TERRACOTTA_ROOF_TILES = ForgeItems.TERRACOTTA_ROOF_TILES;
+    public static final RegistryObject<Item> DARK_BROWN_ROOF_TILES = ForgeItems.DARK_BROWN_ROOF_TILES;
+    public static final RegistryObject<Item> IVORY_SIDING = ForgeItems.IVORY_SIDING;
+    public static final RegistryObject<Item> GRAY_GREEN_MASONRY = ForgeItems.GRAY_GREEN_MASONRY;
+    public static final RegistryObject<Item> GRAY_VIOLET_ROOF_TILES = ForgeItems.GRAY_VIOLET_ROOF_TILES;
+    public static final RegistryObject<Item> BRICK_RED_ROOF_TILES = ForgeItems.BRICK_RED_ROOF_TILES;
+    public static final RegistryObject<Item> BLUE_GRAY_TIMBER = ForgeItems.BLUE_GRAY_TIMBER;
+    public static final RegistryObject<Item> PALE_BLUE_SIDING = ForgeItems.PALE_BLUE_SIDING;
+    public static final RegistryObject<Item> BLUE_PAINTED_PLANKS = ForgeItems.BLUE_PAINTED_PLANKS;
     public static final RegistryObject<Item> ECTOPLASM = ForgeItems.ECTOPLASM;
     public static final RegistryObject<Item> PRISMATIC_JELLY = ForgeItems.PRISMATIC_JELLY;
     public static final RegistryObject<Item> EXPLOSIVE_AMMO = ForgeItems.EXPLOSIVE_AMMO;

@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "stardewcraft:pale_cyan_plaster",
+    "stardewcraft:terracotta_roof_tiles",
+    "stardewcraft:dark_brown_roof_tiles",
+    "stardewcraft:gray_green_masonry",
+    "stardewcraft:gray_violet_roof_tiles",
+    "stardewcraft:brick_red_roof_tiles"
+  ]
+}

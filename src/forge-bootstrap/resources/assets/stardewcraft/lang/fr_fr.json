@@ -169,5 +169,17 @@
   "item.stardewcraft.bug_meat": "Viande d’insecte",
   "item.stardewcraft.moss": "Mousse",
   "item.stardewcraft.junimo_bundle": "Paquet Junimo",
-  "item.stardewcraft.junimo_star": "Étoile de Junimo"
+  "item.stardewcraft.junimo_star": "Étoile de Junimo",
+  "block.stardewcraft.pale_cyan_plaster": "Enduit cyan pâle",
+  "block.stardewcraft.teal_painted_timber": "Bois peint bleu-vert",
+  "block.stardewcraft.cream_siding": "Bardage crème",
+  "block.stardewcraft.terracotta_roof_tiles": "Tuiles en terre cuite",
+  "block.stardewcraft.dark_brown_roof_tiles": "Tuiles brun foncé",
+  "block.stardewcraft.ivory_siding": "Bardage ivoire",
+  "block.stardewcraft.gray_green_masonry": "Briques gris-vert",
+  "block.stardewcraft.gray_violet_roof_tiles": "Tuiles gris-violet",
+  "block.stardewcraft.brick_red_roof_tiles": "Tuiles rouge brique",
+  "block.stardewcraft.blue_gray_timber": "Bois bleu-gris",
+  "block.stardewcraft.pale_blue_siding": "Planches bleu pâle",
+  "block.stardewcraft.blue_painted_planks": "Planches peintes en bleu"
 }

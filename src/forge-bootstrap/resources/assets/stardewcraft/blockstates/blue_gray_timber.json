@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=y": {
+      "model": "stardewcraft:block/blue_gray_timber"
+    },
+    "axis=z": {
+      "model": "stardewcraft:block/blue_gray_timber",
+      "x": 90
+    },
+    "axis=x": {
+      "model": "stardewcraft:block/blue_gray_timber",
+      "x": 90,
+      "y": 90
+    }
+  }
+}

@@ -3,6 +3,7 @@ package com.stardew.craft.forge.registry;
 import com.stardew.craft.forge.ForgeBootstrap;
 import com.stardew.craft.item.ButterflyPowderItem;
 import com.stardew.craft.item.SimpleStardewItem;
+import com.stardew.craft.item.StardewSimpleBlockItem;
 
 import net.minecraft.world.item.Item;
 import net.minecraftforge.registries.DeferredRegister;
@@ -17,6 +18,19 @@ public final class ForgeItems {
             "butterfly_powder",
             () -> new ButterflyPowderItem(new Item.Properties().stacksTo(999))
     );
+
+    public static final RegistryObject<Item> PALE_CYAN_PLASTER = registerBuildingBlock(ForgeBlocks.PALE_CYAN_PLASTER);
+    public static final RegistryObject<Item> TEAL_PAINTED_TIMBER = registerBuildingBlock(ForgeBlocks.TEAL_PAINTED_TIMBER);
+    public static final RegistryObject<Item> CREAM_SIDING = registerBuildingBlock(ForgeBlocks.CREAM_SIDING);
+    public static final RegistryObject<Item> TERRACOTTA_ROOF_TILES = registerBuildingBlock(ForgeBlocks.TERRACOTTA_ROOF_TILES);
+    public static final RegistryObject<Item> DARK_BROWN_ROOF_TILES = registerBuildingBlock(ForgeBlocks.DARK_BROWN_ROOF_TILES);
+    public static final RegistryObject<Item> IVORY_SIDING = registerBuildingBlock(ForgeBlocks.IVORY_SIDING);
+    public static final RegistryObject<Item> GRAY_GREEN_MASONRY = registerBuildingBlock(ForgeBlocks.GRAY_GREEN_MASONRY);
+    public static final RegistryObject<Item> GRAY_VIOLET_ROOF_TILES = registerBuildingBlock(ForgeBlocks.GRAY_VIOLET_ROOF_TILES);
+    public static final RegistryObject<Item> BRICK_RED_ROOF_TILES = registerBuildingBlock(ForgeBlocks.BRICK_RED_ROOF_TILES);
+    public static final RegistryObject<Item> BLUE_GRAY_TIMBER = registerBuildingBlock(ForgeBlocks.BLUE_GRAY_TIMBER);
+    public static final RegistryObject<Item> PALE_BLUE_SIDING = registerBuildingBlock(ForgeBlocks.PALE_BLUE_SIDING);
+    public static final RegistryObject<Item> BLUE_PAINTED_PLANKS = registerBuildingBlock(ForgeBlocks.BLUE_PAINTED_PLANKS);
 
     public static final RegistryObject<Item> ECTOPLASM = registerSimple("ectoplasm", "stardewcraft.type.quest", -1);
     public static final RegistryObject<Item> PRISMATIC_JELLY = registerSimple("prismatic_jelly", "stardewcraft.type.quest", -1);
@@ -839,6 +853,12 @@ public final class ForgeItems {
 
     private static RegistryObject<Item> registerSimple(String id, String typeKey, int sellPrice) {
         return ITEMS.register(id, () -> new SimpleStardewItem(typeKey, sellPrice, new Item.Properties().stacksTo(999)));
+    }
+
+    private static RegistryObject<Item> registerBuildingBlock(RegistryObject<? extends net.minecraft.world.level.block.Block> block) {
+        String id = block.getId().getPath();
+        return ITEMS.register(id, () -> new StardewSimpleBlockItem(block.get(),
+                "stardewcraft.type.building", -1, new Item.Properties().stacksTo(999)));
     }
 
     private ForgeItems() {

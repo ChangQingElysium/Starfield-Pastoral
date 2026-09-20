@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=y": {
+      "model": "stardewcraft:block/teal_painted_timber"
+    },
+    "axis=z": {
+      "model": "stardewcraft:block/teal_painted_timber",
+      "x": 90
+    },
+    "axis=x": {
+      "model": "stardewcraft:block/teal_painted_timber",
+      "x": 90,
+      "y": 90
+    }
+  }
+}

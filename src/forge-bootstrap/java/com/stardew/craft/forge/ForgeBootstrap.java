@@ -3,6 +3,7 @@ package com.stardew.craft.forge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
+import com.stardew.craft.forge.registry.ForgeBlocks;
 import com.stardew.craft.forge.registry.ForgeItems;
 
 /**
@@ -14,6 +15,7 @@ public final class ForgeBootstrap {
     public static final String MOD_ID = "stardewcraft";
 
     public ForgeBootstrap() {
+        ForgeBlocks.BLOCKS.register(FMLJavaModLoadingContext.get().getModEventBus());
         ForgeItems.ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
     }
 }

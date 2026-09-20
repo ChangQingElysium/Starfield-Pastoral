@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "side": "stardewcraft:block/building/gray_green_masonry",
+    "top": "stardewcraft:block/building/gray_green_masonry_top",
+    "bottom": "stardewcraft:block/building/gray_green_masonry_top",
+    "particle": "stardewcraft:block/building/gray_green_masonry"
+  }
+}

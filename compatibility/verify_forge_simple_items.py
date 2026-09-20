@@ -109,18 +109,22 @@ def main() -> int:
         return 1
 
     alias_text = FORGE_ITEM_ALIASES.read_text(encoding="utf-8")
-    aliases = set(
+    aliases = dict(
         re.findall(
             r"public static final RegistryObject<Item>\s+([A-Z0-9_]+)\s*=\s*ForgeItems\.([A-Z0-9_]+);",
             alias_text,
         )
     )
-    expected_aliases = {(name.upper(), name.upper()) for name in actual}
-    expected_aliases.add(("BUTTERFLY_POWDER", "BUTTERFLY_POWDER"))
-    if aliases != expected_aliases:
-        errors.append(
-            f"ModItems compatibility aliases differ: expected {len(expected_aliases)}, got {len(aliases)}"
-        )
+    # Later Forge slices extend this compatibility class with block items and
+    # other registry families. Require every item in this slice to remain
+    # aliased, while allowing those additive aliases to coexist.
+    expected_aliases = {name.upper(): name.upper() for name in actual}
+    expected_aliases["BUTTERFLY_POWDER"] = "BUTTERFLY_POWDER"
+    for alias_name, target_name in expected_aliases.items():
+        if aliases.get(alias_name) != target_name:
+            errors.append(
+                f"missing or mismatched ModItems compatibility alias: {alias_name} -> {target_name}"
+            )
 
     for item_id in sorted(expected.keys() | actual.keys()):
         if item_id not in actual:

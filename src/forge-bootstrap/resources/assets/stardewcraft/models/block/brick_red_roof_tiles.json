@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "stardewcraft:block/building/brick_red_roof_tiles",
+    "particle": "stardewcraft:block/building/brick_red_roof_tiles"
+  }
+}

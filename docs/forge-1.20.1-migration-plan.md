@@ -1,9 +1,11 @@
 # StardewCraft 1.20.1 Forge 迁移与双版本维护规划
 
-状态：规划稿 1.0
+状态：规划稿 1.1（已进入分层实施）
 目标版本：Minecraft 1.21.1 + NeoForge、Minecraft 1.20.1 + Forge
 主开发线：`main`（1.21.1 NeoForge）
 长期支持线：`1.20.1-forge`
+
+当前实施状态（2026-09-20）：Forge worktree 已建立，已完成入口/构建骨架、171 个物品注册对照，以及 12 个纯建筑材质方块的首个完整资源切片。当前 Forge HEAD 为 `29077e2ad` 之后的进行中提交；这些数字只表示已经进入 Forge source set 的范围，不代表全模组功能已迁移。
 
 ## 1. 结论
 

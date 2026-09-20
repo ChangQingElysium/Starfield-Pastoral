@@ -169,5 +169,17 @@
   "item.stardewcraft.bug_meat": "虫の肉",
   "item.stardewcraft.moss": "コケ",
   "item.stardewcraft.junimo_bundle": "ジュニモの荷物",
-  "item.stardewcraft.junimo_star": "ジュニモの星"
+  "item.stardewcraft.junimo_star": "ジュニモの星",
+  "block.stardewcraft.pale_cyan_plaster": "淡い青緑色の漆喰",
+  "block.stardewcraft.teal_painted_timber": "青緑に塗った木材",
+  "block.stardewcraft.cream_siding": "クリーム色の板壁",
+  "block.stardewcraft.terracotta_roof_tiles": "赤茶色の屋根瓦",
+  "block.stardewcraft.dark_brown_roof_tiles": "こげ茶色の屋根瓦",
+  "block.stardewcraft.ivory_siding": "アイボリーの縦板",
+  "block.stardewcraft.gray_green_masonry": "灰緑色のレンガ",
+  "block.stardewcraft.gray_violet_roof_tiles": "灰紫色の屋根瓦",
+  "block.stardewcraft.brick_red_roof_tiles": "赤レンガ色の屋根瓦",
+  "block.stardewcraft.blue_gray_timber": "青灰色の木材",
+  "block.stardewcraft.pale_blue_siding": "淡青色の板材",
+  "block.stardewcraft.blue_painted_planks": "青く塗った板材"
 }

@@ -81,4 +81,6 @@ Mixin 不是 Forge 核心 API。Town Door、Sodium、Iris 相关代码最后迁�
 5. 网络、持久化和 GameTest。
 6. 客户端模型、渲染、GUI 和 Mixin。
 
+当前已完成的第一批真实实现是：170 个 `SimpleStardewItem`、1 个 `ButterflyPowderItem`，以及 12 个无自定义运行时依赖的建筑材质方块。该方块批次将 1.21.1 的 `Block.Properties.ofFullCopy` 机械映射为 Forge 1.20.1 的 `BlockBehaviour.Properties.copy`，并单独验证 blockstate、掉落表、挖掘标签和语言资源；详见 [`forge-building-block-parity.md`](forge-building-block-parity.md)。
+
 每个切片都要同时更新三项证据：编译结果、专用服务器/资源加载结果、以及该切片的 API 差异记录。
