@@ -197,5 +197,8 @@
   "block.stardewcraft.mine_lava_loose_soil": "矿井熔岩松土",
   "block.stardewcraft.mine_lava_wall": "矿井熔岩岩壁",
   "block.stardewcraft.mine_desert_loose_soil": "矿井沙漠松土",
-  "block.stardewcraft.mine_desert_wall": "矿井沙漠岩壁"
+  "block.stardewcraft.mine_desert_wall": "矿井沙漠岩壁",
+  "block.stardewcraft.mine_barrier": "矿洞封印石",
+  "block.stardewcraft.mine_barrier.desc": "用于封锁矿洞边界的封印石。\\n生存模式无法破坏（创造模式可破坏）。",
+  "block.stardewcraft.pale_blue_window_glass": "浅蓝玻璃"
 }

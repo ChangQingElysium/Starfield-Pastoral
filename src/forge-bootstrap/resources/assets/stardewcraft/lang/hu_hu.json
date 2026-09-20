@@ -197,5 +197,8 @@
   "block.stardewcraft.mine_lava_loose_soil": "Lávabánya laza talaja",
   "block.stardewcraft.mine_lava_wall": "Lávabánya sziklafala",
   "block.stardewcraft.mine_desert_loose_soil": "Sivatagi bánya laza talaja",
-  "block.stardewcraft.mine_desert_wall": "Sivatagi bánya sziklafala"
+  "block.stardewcraft.mine_desert_wall": "Sivatagi bánya sziklafala",
+  "block.stardewcraft.mine_barrier": "Aknamező",
+  "block.stardewcraft.mine_barrier.desc": "A bányákban talált akadály.",
+  "block.stardewcraft.pale_blue_window_glass": "Halványkék üveg"
 }

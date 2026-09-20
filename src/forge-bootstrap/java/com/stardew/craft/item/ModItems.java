@@ -39,6 +39,8 @@ public final class ModItems {
     public static final RegistryObject<Item> MINE_LAVA_WALL = ForgeItems.MINE_LAVA_WALL;
     public static final RegistryObject<Item> MINE_DESERT_LOOSE_SOIL = ForgeItems.MINE_DESERT_LOOSE_SOIL;
     public static final RegistryObject<Item> MINE_DESERT_WALL = ForgeItems.MINE_DESERT_WALL;
+    public static final RegistryObject<Item> MINE_BARRIER = ForgeItems.MINE_BARRIER;
+    public static final RegistryObject<Item> PALE_BLUE_WINDOW_GLASS = ForgeItems.PALE_BLUE_WINDOW_GLASS;
     public static final RegistryObject<Item> ECTOPLASM = ForgeItems.ECTOPLASM;
     public static final RegistryObject<Item> PRISMATIC_JELLY = ForgeItems.PRISMATIC_JELLY;
     public static final RegistryObject<Item> EXPLOSIVE_AMMO = ForgeItems.EXPLOSIVE_AMMO;

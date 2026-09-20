@@ -197,5 +197,8 @@
   "block.stardewcraft.mine_lava_loose_soil": "Tierra suelta de mina de lava",
   "block.stardewcraft.mine_lava_wall": "Pared de mina de lava",
   "block.stardewcraft.mine_desert_loose_soil": "Tierra suelta de mina del desierto",
-  "block.stardewcraft.mine_desert_wall": "Pared de mina del desierto"
+  "block.stardewcraft.mine_desert_wall": "Pared de mina del desierto",
+  "block.stardewcraft.mine_barrier": "Barrera de minas",
+  "block.stardewcraft.mine_barrier.desc": "Una barrera encontrada en las minas.",
+  "block.stardewcraft.pale_blue_window_glass": "Vidrio azul claro"
 }

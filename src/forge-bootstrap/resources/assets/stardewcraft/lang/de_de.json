@@ -197,5 +197,8 @@
   "block.stardewcraft.mine_lava_loose_soil": "Lockerer Lavaminenboden",
   "block.stardewcraft.mine_lava_wall": "Lavaminenwand",
   "block.stardewcraft.mine_desert_loose_soil": "Lockerer Wüstenminenboden",
-  "block.stardewcraft.mine_desert_wall": "Wüstenminenwand"
+  "block.stardewcraft.mine_desert_wall": "Wüstenminenwand",
+  "block.stardewcraft.mine_barrier": "Minensperre",
+  "block.stardewcraft.mine_barrier.desc": "Eine Barriere in den Minen gefunden.",
+  "block.stardewcraft.pale_blue_window_glass": "Hellblaues Glas"
 }

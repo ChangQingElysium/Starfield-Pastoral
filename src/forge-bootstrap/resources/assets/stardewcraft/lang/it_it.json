@@ -197,5 +197,8 @@
   "block.stardewcraft.mine_lava_loose_soil": "Terra smossa della miniera di lava",
   "block.stardewcraft.mine_lava_wall": "Parete della miniera di lava",
   "block.stardewcraft.mine_desert_loose_soil": "Terra smossa della miniera del deserto",
-  "block.stardewcraft.mine_desert_wall": "Parete della miniera del deserto"
+  "block.stardewcraft.mine_desert_wall": "Parete della miniera del deserto",
+  "block.stardewcraft.mine_barrier": "Barriera miniera",
+  "block.stardewcraft.mine_barrier.desc": "Una barriera trovata nelle miniere.",
+  "block.stardewcraft.pale_blue_window_glass": "Vetro azzurro"
 }

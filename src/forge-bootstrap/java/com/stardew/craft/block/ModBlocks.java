@@ -39,6 +39,8 @@ public final class ModBlocks {
     public static final RegistryObject<Block> MINE_LAVA_WALL = ForgeBlocks.MINE_LAVA_WALL;
     public static final RegistryObject<Block> MINE_DESERT_LOOSE_SOIL = ForgeBlocks.MINE_DESERT_LOOSE_SOIL;
     public static final RegistryObject<Block> MINE_DESERT_WALL = ForgeBlocks.MINE_DESERT_WALL;
+    public static final RegistryObject<Block> MINE_BARRIER = ForgeBlocks.MINE_BARRIER;
+    public static final RegistryObject<Block> PALE_BLUE_WINDOW_GLASS = ForgeBlocks.PALE_BLUE_WINDOW_GLASS;
 
     private ModBlocks() {
     }

@@ -197,5 +197,8 @@
   "block.stardewcraft.mine_lava_loose_soil": "Рыхлая почва лавовой шахты",
   "block.stardewcraft.mine_lava_wall": "Стена лавовой шахты",
   "block.stardewcraft.mine_desert_loose_soil": "Рыхлая почва пустынной шахты",
-  "block.stardewcraft.mine_desert_wall": "Стена пустынной шахты"
+  "block.stardewcraft.mine_desert_wall": "Стена пустынной шахты",
+  "block.stardewcraft.mine_barrier": "Барьер шахты",
+  "block.stardewcraft.mine_barrier.desc": "Барьер, встречающийся в шахтах.",
+  "block.stardewcraft.pale_blue_window_glass": "Светло-голубое стекло"
 }

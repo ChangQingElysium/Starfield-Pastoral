@@ -197,5 +197,8 @@
   "block.stardewcraft.mine_lava_loose_soil": "용암 광산 부드러운 흙",
   "block.stardewcraft.mine_lava_wall": "용암 광산 암벽",
   "block.stardewcraft.mine_desert_loose_soil": "사막 광산 부드러운 흙",
-  "block.stardewcraft.mine_desert_wall": "사막 광산 암벽"
+  "block.stardewcraft.mine_desert_wall": "사막 광산 암벽",
+  "block.stardewcraft.mine_barrier": "광산 장벽",
+  "block.stardewcraft.mine_barrier.desc": "광산에서 발견 된 장벽.",
+  "block.stardewcraft.pale_blue_window_glass": "연한 파란 유리"
 }

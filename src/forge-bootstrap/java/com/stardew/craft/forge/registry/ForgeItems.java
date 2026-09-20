@@ -65,6 +65,9 @@ public final class ForgeItems {
     public static final RegistryObject<Item> MINE_DESERT_WALL = registerNaturalBlock(
             ForgeBlocks.MINE_DESERT_WALL, "stardewcraft.type.natural_rock");
 
+    public static final RegistryObject<Item> MINE_BARRIER = registerBuildingBlock(ForgeBlocks.MINE_BARRIER);
+    public static final RegistryObject<Item> PALE_BLUE_WINDOW_GLASS = registerBuildingBlock(ForgeBlocks.PALE_BLUE_WINDOW_GLASS);
+
     public static final RegistryObject<Item> ECTOPLASM = registerSimple("ectoplasm", "stardewcraft.type.quest", -1);
     public static final RegistryObject<Item> PRISMATIC_JELLY = registerSimple("prismatic_jelly", "stardewcraft.type.quest", -1);
     public static final RegistryObject<Item> EXPLOSIVE_AMMO = registerSimple("explosive_ammo", "stardewcraft.type.resource", 20);

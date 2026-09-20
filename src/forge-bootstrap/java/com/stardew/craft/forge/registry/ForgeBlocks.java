@@ -4,9 +4,11 @@ import com.stardew.craft.forge.ForgeBootstrap;
 
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.GlassBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -181,6 +183,20 @@ public final class ForgeBlocks {
     public static final RegistryObject<Block> MINE_DESERT_WALL = BLOCKS.register(
             "mine_desert_wall",
             () -> new Block(stoneProps(MapColor.SAND, SoundType.STONE, 5.0F))
+    );
+
+    public static final RegistryObject<Block> MINE_BARRIER = BLOCKS.register(
+            "mine_barrier",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLACK)
+                    .pushReaction(PushReaction.BLOCK)
+                    .sound(SoundType.STONE)
+                    .strength(-1.0F, 3600000.0F))
+    );
+
+    public static final RegistryObject<Block> PALE_BLUE_WINDOW_GLASS = BLOCKS.register(
+            "pale_blue_window_glass",
+            () -> new GlassBlock(BlockBehaviour.Properties.copy(Blocks.GLASS))
     );
 
     private static BlockBehaviour.Properties stoneProps(MapColor color, SoundType sound, float hardness) {

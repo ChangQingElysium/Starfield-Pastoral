@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "render_type": "minecraft:translucent",
+  "textures": {
+    "all": "stardewcraft:block/building/pale_blue_window_glass",
+    "particle": "stardewcraft:block/building/pale_blue_window_glass_particle"
+  }
+}

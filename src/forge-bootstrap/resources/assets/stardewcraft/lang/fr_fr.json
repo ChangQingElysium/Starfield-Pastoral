@@ -197,5 +197,8 @@
   "block.stardewcraft.mine_lava_loose_soil": "Terre meuble de mine de lave",
   "block.stardewcraft.mine_lava_wall": "Paroi de mine de lave",
   "block.stardewcraft.mine_desert_loose_soil": "Terre meuble de mine du désert",
-  "block.stardewcraft.mine_desert_wall": "Paroi de mine du désert"
+  "block.stardewcraft.mine_desert_wall": "Paroi de mine du désert",
+  "block.stardewcraft.mine_barrier": "Barrière de mines",
+  "block.stardewcraft.mine_barrier.desc": "Une barrière trouvée dans les mines.",
+  "block.stardewcraft.pale_blue_window_glass": "Verre bleu pâle"
 }

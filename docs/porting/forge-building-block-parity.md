@@ -1,6 +1,6 @@
 # Forge 1.20.1 方块切片对照账
 
-本账记录已经进入 Forge source set 的两批纯方块。目标不是注册“看起来像”的替代物，而是逐项保留 1.21.1 NeoForge 源树的稳定 ID、方块类型、基础属性、方块物品属性、掉落表、挖掘标签和资源键。
+本账记录已经进入 Forge source set 的三批纯方块。目标不是注册“看起来像”的替代物，而是逐项保留 1.21.1 NeoForge 源树的稳定 ID、方块类型、基础属性、方块物品属性、掉落表、挖掘标签和资源键。
 
 ## 建筑材质切片：12 个
 
@@ -40,6 +40,13 @@
 
 这批方块物品使用 `StardewSimpleBlockItem` 的可配置类型键，保留 `-1` 售价和 `stacksTo(999)`；它没有替换或简化源 `StardewBlockItem` 的任何本批可观察逻辑，因为这些 16 个源方块没有额外放置钩子。
 
+## 特殊纯方块切片：2 个
+
+- `pale_blue_window_glass`：源类型是 1.21.1 `TransparentBlock`，Forge 1.20.1 没有这个类，使用继承 `AbstractGlassBlock` 的 `GlassBlock`，保留透视、天空光传播和透明渲染属性；`ofFullCopy(Blocks.GLASS)` 只做 `Properties.copy(Blocks.GLASS)` 的 API 适配。
+- `mine_barrier`：保留黑色地图颜色、石头声音、`strength(-1.0F, 3600000.0F)` 和 `PushReaction.BLOCK`，并恢复 pickaxe、dragon immune、wither immune 三组标签。它仍是普通 `Block`，没有把尚未迁移的矿井入口行为混进来。
+
+两者的方块物品都保持建筑类型、`-1` 售价和 `stacksTo(999)`；矿井屏障纹理的 `.mcmeta` 动画侧车文件也一并保留。
+
 ## 资源路径适配
 
 - `blockstates/`、`models/block/`、`models/item/` 和全部被引用的建筑/矿井纹理已进入 Forge 资源源集。
@@ -53,9 +60,10 @@
 ```bash
 python3 compatibility/verify_forge_building_blocks.py
 python3 compatibility/verify_forge_mine_blocks.py
+python3 compatibility/verify_forge_special_blocks.py
 ```
 
-两个脚本从 1.21.1 `ModBlocks.java`/`ModItems.java` 读取对应批次合同，并验证 Forge 注册、兼容别名、模型与纹理引用（含墙体 weighted 变体闭包）、blockstate、掉落表、挖掘标签和全部 12 个语言文件。它们已挂入 `./gradlew check` 的 `checkForgeBuildingBlockParity` 与 `checkForgeMineBlockParity`。
+三个脚本从 1.21.1 `ModBlocks.java`/`ModItems.java` 读取对应批次合同，并验证 Forge 注册、兼容别名、模型与纹理引用（含墙体 weighted 变体闭包与动画侧车）、blockstate、掉落表、挖掘/免疫标签和全部 12 个语言文件。它们已挂入 `./gradlew check` 的 `checkForgeBuildingBlockParity`、`checkForgeMineBlockParity` 与 `checkForgeSpecialBlockParity`。
 
 ## 尚未宣称的范围
 

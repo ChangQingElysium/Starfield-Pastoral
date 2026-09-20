@@ -197,5 +197,8 @@
   "block.stardewcraft.mine_lava_loose_soil": "溶岩の坑道の柔らかい土",
   "block.stardewcraft.mine_lava_wall": "溶岩の坑道の岩壁",
   "block.stardewcraft.mine_desert_loose_soil": "砂漠の坑道の柔らかい土",
-  "block.stardewcraft.mine_desert_wall": "砂漠の坑道の岩壁"
+  "block.stardewcraft.mine_desert_wall": "砂漠の坑道の岩壁",
+  "block.stardewcraft.mine_barrier": "鉱山の障壁",
+  "block.stardewcraft.mine_barrier.desc": "鉱山で見つかった障壁.",
+  "block.stardewcraft.pale_blue_window_glass": "淡青色のガラス"
 }

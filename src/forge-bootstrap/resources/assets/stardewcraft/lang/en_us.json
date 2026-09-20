@@ -197,5 +197,8 @@
   "block.stardewcraft.mine_lava_loose_soil": "Lava Mine Loose Soil",
   "block.stardewcraft.mine_lava_wall": "Lava Mine Wall",
   "block.stardewcraft.mine_desert_loose_soil": "Desert Mine Loose Soil",
-  "block.stardewcraft.mine_desert_wall": "Desert Mine Wall"
+  "block.stardewcraft.mine_desert_wall": "Desert Mine Wall",
+  "block.stardewcraft.mine_barrier": "Mine Barrier",
+  "block.stardewcraft.mine_barrier.desc": "A barrier found in the mines.",
+  "block.stardewcraft.pale_blue_window_glass": "Pale Blue Glass"
 }
