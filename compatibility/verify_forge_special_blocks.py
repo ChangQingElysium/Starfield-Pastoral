@@ -29,6 +29,7 @@ SPECIAL_BLOCKS = {
         "source_class": "Block",
         "forge_class": "Block",
         "tags": ("mineable/pickaxe", "dragon_immune", "wither_immune"),
+        "mod_tags": (("block", "blocks", "world_gen_only"), ("item", "items", "hidden")),
         "language_keys": ("block.stardewcraft.mine_barrier", "block.stardewcraft.mine_barrier.desc"),
     },
     "pale_blue_window_glass": {
@@ -37,6 +38,7 @@ SPECIAL_BLOCKS = {
         "source_class": "TransparentBlock",
         "forge_class": "GlassBlock",
         "tags": (),
+        "mod_tags": (),
         "language_keys": ("block.stardewcraft.pale_blue_window_glass",),
     },
 }
@@ -312,6 +314,16 @@ def main() -> int:
                 errors.append(f"missing Forge tag: {tag_path.relative_to(ROOT)}")
             elif f"stardewcraft:{block_id}" not in load_json(tag_path).get("values", []):
                 errors.append(f"{block_id} missing from blocks/{tag_name}")
+
+        for source_kind, forge_kind, tag_name in contract["mod_tags"]:
+            source_tag = SOURCE_DATA / "stardewcraft/tags" / source_kind / f"{tag_name}.json"
+            forge_tag = FORGE_DATA / "stardewcraft/tags" / forge_kind / f"{tag_name}.json"
+            if f"stardewcraft:{block_id}" not in load_json(source_tag).get("values", []):
+                errors.append(f"source contract drift: {block_id} missing from {source_kind}/{tag_name}")
+            if not forge_tag.is_file():
+                errors.append(f"missing Forge tag: {forge_tag.relative_to(ROOT)}")
+            elif f"stardewcraft:{block_id}" not in load_json(forge_tag).get("values", []):
+                errors.append(f"{block_id} missing from {forge_kind}/{tag_name}")
 
     for source_language in sorted((SOURCE_ASSETS / "lang").glob("*.json")):
         target_language = FORGE_ASSETS / "lang" / source_language.name
