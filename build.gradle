@@ -16,11 +16,12 @@ base {
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 // The NeoForge source tree remains in src/main/java as a porting reference.
-// The bootstrap line is intentionally the only source set compiled in this first phase.
+// Forge-specific wiring stays in forge-bootstrap; API-compatible gameplay classes
+// move into forge-common one slice at a time.
 sourceSets {
     main {
         java {
-            srcDirs = ['src/forge-bootstrap/java']
+            srcDirs = ['src/forge-bootstrap/java', 'src/forge-common/java']
         }
         resources {
             srcDirs = ['src/forge-bootstrap/resources']
