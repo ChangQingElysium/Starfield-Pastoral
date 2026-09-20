@@ -4,12 +4,21 @@ import com.stardew.craft.block.tree.NewTreeLogBlock;
 import com.stardew.craft.block.tree.NewTreePartBlock;
 import com.stardew.craft.forge.ForgeBootstrap;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.FenceBlock;
+import net.minecraft.world.level.block.FenceGateBlock;
 import net.minecraft.world.level.block.GlassBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
+import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraftforge.registries.DeferredRegister;
@@ -221,6 +230,23 @@ public final class ForgeBlocks {
     public static final RegistryObject<Block> MYSTIC_TREE_LOG = newTreeLog("mystic_tree");
     public static final RegistryObject<Block> MYSTIC_TREE_BRANCH = newTreeBranch("mystic_tree");
 
+    private static final String[] NEW_TREE_WOOD_SPECIES = {
+            "oak",
+            "maple",
+            "pine",
+            "mahogany",
+            "mystic_tree"
+    };
+
+    private static final String[] NEW_TREE_PLANK_PATTERNS = {
+            "",
+            "checkerboard_",
+            "fishscale_"
+    };
+
+    public static final Map<String, RegistryObject<? extends Block>> NEW_TREE_BUILDING_BLOCKS =
+            registerNewTreeBuildingBlocks();
+
     private static BlockBehaviour.Properties newTreeWoodProps() {
         return BlockBehaviour.Properties.of()
                 .mapColor(MapColor.WOOD)
@@ -240,6 +266,60 @@ public final class ForgeBlocks {
     private static RegistryObject<Block> newTreeBranch(String species) {
         return BLOCKS.register(species + "_branch",
                 () -> new NewTreePartBlock(newTreeWoodProps().noOcclusion(), true));
+    }
+
+    private static RegistryObject<? extends Block> newTreeLogBlock(String species) {
+        return switch (species) {
+            case "oak" -> OAK_LOG;
+            case "maple" -> MAPLE_LOG;
+            case "pine" -> PINE_LOG;
+            case "mahogany" -> MAHOGANY_LOG;
+            case "mystic_tree" -> MYSTIC_TREE_LOG;
+            default -> throw new IllegalArgumentException("Unknown new tree species: " + species);
+        };
+    }
+
+    private static Map<String, RegistryObject<? extends Block>> registerNewTreeBuildingBlocks() {
+        LinkedHashMap<String, RegistryObject<? extends Block>> blocks = new LinkedHashMap<>();
+
+        for (String species : NEW_TREE_WOOD_SPECIES) {
+            for (String pattern : NEW_TREE_PLANK_PATTERNS) {
+                String baseName = species + "_" + pattern + "planks";
+                RegistryObject<Block> planks = BLOCKS.register(baseName, () -> new Block(newTreeWoodProps()));
+                blocks.put(baseName, planks);
+                blocks.put(baseName + "_stairs",
+                        stairsFromAnyBlock(baseName + "_stairs", planks, newTreeWoodProps()));
+                blocks.put(baseName + "_slab", slab(baseName + "_slab", newTreeWoodProps()));
+                blocks.put(baseName + "_fence", fence(baseName + "_fence", newTreeWoodProps()));
+                blocks.put(baseName + "_fence_gate",
+                        fenceGate(baseName + "_fence_gate", newTreeWoodProps()));
+            }
+
+            String logBaseName = species + "_log";
+            RegistryObject<? extends Block> log = newTreeLogBlock(species);
+            blocks.put(logBaseName + "_stairs",
+                    stairsFromAnyBlock(logBaseName + "_stairs", log, newTreeWoodProps()));
+            blocks.put(logBaseName + "_slab", slab(logBaseName + "_slab", newTreeWoodProps()));
+        }
+
+        return Collections.unmodifiableMap(blocks);
+    }
+
+    private static RegistryObject<StairBlock> stairsFromAnyBlock(
+            String name, RegistryObject<? extends Block> base, BlockBehaviour.Properties props) {
+        return BLOCKS.register(name, () -> new StairBlock(base.get().defaultBlockState(), props));
+    }
+
+    private static RegistryObject<SlabBlock> slab(String name, BlockBehaviour.Properties props) {
+        return BLOCKS.register(name, () -> new SlabBlock(props));
+    }
+
+    private static RegistryObject<FenceBlock> fence(String name, BlockBehaviour.Properties props) {
+        return BLOCKS.register(name, () -> new FenceBlock(props));
+    }
+
+    private static RegistryObject<FenceGateBlock> fenceGate(String name, BlockBehaviour.Properties props) {
+        return BLOCKS.register(name, () -> new FenceGateBlock(props, WoodType.OAK));
     }
 
     private static BlockBehaviour.Properties stoneProps(MapColor color, SoundType sound, float hardness) {

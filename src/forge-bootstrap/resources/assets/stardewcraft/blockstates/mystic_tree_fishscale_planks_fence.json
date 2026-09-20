@@ -1,0 +1,48 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "stardewcraft:block/wood/mystic_tree_fishscale_planks_fence_post"
+      }
+    },
+    {
+      "when": {
+        "north": "true"
+      },
+      "apply": {
+        "model": "stardewcraft:block/wood/mystic_tree_fishscale_planks_fence_side",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "east": "true"
+      },
+      "apply": {
+        "model": "stardewcraft:block/wood/mystic_tree_fishscale_planks_fence_side",
+        "uvlock": true,
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "south": "true"
+      },
+      "apply": {
+        "model": "stardewcraft:block/wood/mystic_tree_fishscale_planks_fence_side",
+        "uvlock": true,
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "west": "true"
+      },
+      "apply": {
+        "model": "stardewcraft:block/wood/mystic_tree_fishscale_planks_fence_side",
+        "uvlock": true,
+        "y": 270
+      }
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab_top",
+  "textures": {
+    "bottom": "stardewcraft:block/wood/mahogany_planks",
+    "side": "stardewcraft:block/wood/mahogany_planks",
+    "top": "stardewcraft:block/wood/mahogany_planks"
+  }
+}

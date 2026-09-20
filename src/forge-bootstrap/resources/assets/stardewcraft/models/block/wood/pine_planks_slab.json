@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "bottom": "stardewcraft:block/wood/pine_planks",
+    "side": "stardewcraft:block/wood/pine_planks",
+    "top": "stardewcraft:block/wood/pine_planks"
+  }
+}

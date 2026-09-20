@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "group": "stardew_log_slab",
+  "key": {
+    "#": {
+      "item": "stardewcraft:mystic_tree_log"
+    }
+  },
+  "pattern": [
+    "###"
+  ],
+  "result": {
+    "count": 6,
+    "item": "stardewcraft:mystic_tree_log_slab"
+  }
+}

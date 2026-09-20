@@ -5,7 +5,7 @@
 主开发线：`main`（1.21.1 NeoForge）
 长期支持线：`1.20.1-forge`
 
-当前实施状态（2026-09-21）：Forge worktree 已建立，已完成入口/构建骨架、216 个物品注册对照，以及 12 个纯建筑材质方块、16 个矿井背景纯方块、2 个特殊纯方块和 15 个生成树 root/log/branch 核心方块。树核心已带回原 `NewTreePartBlock` / `NewTreeLogBlock` 行为、`new_tree_part` 方块实体和原 NBT marker 合同；树叶、树苗、生成服务与 85 个木制建筑件仍是后续切片。这些数字只表示已经进入 Forge source set 的范围，不代表全模组功能已迁移。
+当前实施状态（2026-09-21）：Forge worktree 已建立，已完成入口/构建骨架、301 个物品注册对照，以及 12 个纯建筑材质方块、16 个矿井背景纯方块、2 个特殊纯方块、15 个生成树 root/log/branch 核心方块和完整 85 个生成树木制建筑件。树核心已带回原 `NewTreePartBlock` / `NewTreeLogBlock` 行为、`new_tree_part` 方块实体和原 NBT marker 合同；木制建筑件保留源注册顺序、方块类型、属性、配方、掉落、标签和资源闭包。树叶、树苗与树生成/砍伐运行时仍是后续切片。这些数字只表示已经进入 Forge source set 的范围，不代表全模组功能已迁移。
 
 ## 1. 结论
 

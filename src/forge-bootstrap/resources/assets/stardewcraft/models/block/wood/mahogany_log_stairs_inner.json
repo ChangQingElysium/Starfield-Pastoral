@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/inner_stairs",
+  "textures": {
+    "bottom": "stardewcraft:block/tree/mahogany/log_side",
+    "side": "stardewcraft:block/tree/mahogany/log_side",
+    "top": "stardewcraft:block/tree/mahogany/log_side"
+  }
+}

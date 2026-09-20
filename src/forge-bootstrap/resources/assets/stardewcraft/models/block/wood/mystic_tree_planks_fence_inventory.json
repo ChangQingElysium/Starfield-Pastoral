@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/fence_inventory",
+  "textures": {
+    "texture": "stardewcraft:block/wood/mystic_tree_planks"
+  }
+}

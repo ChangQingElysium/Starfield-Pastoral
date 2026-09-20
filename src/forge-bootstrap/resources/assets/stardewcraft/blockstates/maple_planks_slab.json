@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "stardewcraft:block/wood/maple_planks_slab"
+    },
+    "type=top": {
+      "model": "stardewcraft:block/wood/maple_planks_slab_top"
+    },
+    "type=double": {
+      "model": "stardewcraft:block/wood/maple_planks"
+    }
+  }
+}

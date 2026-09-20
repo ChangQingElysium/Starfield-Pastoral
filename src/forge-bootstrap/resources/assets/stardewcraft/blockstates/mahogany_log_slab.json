@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "stardewcraft:block/wood/mahogany_log_slab"
+    },
+    "type=top": {
+      "model": "stardewcraft:block/wood/mahogany_log_slab_top"
+    },
+    "type=double": {
+      "model": "stardewcraft:block/tree/mahogany/log"
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "replace": false,
+  "values": [
+    "stardewcraft:oak_planks_stairs",
+    "stardewcraft:oak_checkerboard_planks_stairs",
+    "stardewcraft:oak_fishscale_planks_stairs",
+    "stardewcraft:maple_planks_stairs",
+    "stardewcraft:maple_checkerboard_planks_stairs",
+    "stardewcraft:maple_fishscale_planks_stairs",
+    "stardewcraft:pine_planks_stairs",
+    "stardewcraft:pine_checkerboard_planks_stairs",
+    "stardewcraft:pine_fishscale_planks_stairs",
+    "stardewcraft:mahogany_planks_stairs",
+    "stardewcraft:mahogany_checkerboard_planks_stairs",
+    "stardewcraft:mahogany_fishscale_planks_stairs",
+    "stardewcraft:mystic_tree_planks_stairs",
+    "stardewcraft:mystic_tree_checkerboard_planks_stairs",
+    "stardewcraft:mystic_tree_fishscale_planks_stairs",
+    "stardewcraft:oak_log_stairs",
+    "stardewcraft:maple_log_stairs",
+    "stardewcraft:pine_log_stairs",
+    "stardewcraft:mahogany_log_stairs",
+    "stardewcraft:mystic_tree_log_stairs"
+  ]
+}

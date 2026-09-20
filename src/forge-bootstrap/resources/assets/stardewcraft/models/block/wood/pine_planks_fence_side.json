@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/fence_side",
+  "textures": {
+    "texture": "stardewcraft:block/wood/pine_planks"
+  }
+}

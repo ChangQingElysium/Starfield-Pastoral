@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "bottom": "stardewcraft:block/wood/oak_fishscale_planks",
+    "side": "stardewcraft:block/wood/oak_fishscale_planks",
+    "top": "stardewcraft:block/wood/oak_fishscale_planks"
+  }
+}

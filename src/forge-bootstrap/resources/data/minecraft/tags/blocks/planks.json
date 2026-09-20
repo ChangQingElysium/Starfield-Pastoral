@@ -1,0 +1,20 @@
+{
+  "replace": false,
+  "values": [
+    "stardewcraft:oak_planks",
+    "stardewcraft:oak_checkerboard_planks",
+    "stardewcraft:oak_fishscale_planks",
+    "stardewcraft:maple_planks",
+    "stardewcraft:maple_checkerboard_planks",
+    "stardewcraft:maple_fishscale_planks",
+    "stardewcraft:pine_planks",
+    "stardewcraft:pine_checkerboard_planks",
+    "stardewcraft:pine_fishscale_planks",
+    "stardewcraft:mahogany_planks",
+    "stardewcraft:mahogany_checkerboard_planks",
+    "stardewcraft:mahogany_fishscale_planks",
+    "stardewcraft:mystic_tree_planks",
+    "stardewcraft:mystic_tree_checkerboard_planks",
+    "stardewcraft:mystic_tree_fishscale_planks"
+  ]
+}

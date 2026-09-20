@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/fence_inventory",
+  "textures": {
+    "texture": "stardewcraft:block/wood/pine_checkerboard_planks"
+  }
+}

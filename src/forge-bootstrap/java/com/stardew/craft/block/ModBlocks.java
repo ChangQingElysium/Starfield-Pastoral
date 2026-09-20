@@ -2,6 +2,8 @@ package com.stardew.craft.block;
 
 import com.stardew.craft.forge.registry.ForgeBlocks;
 
+import java.util.Map;
+
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraftforge.registries.DeferredRegister;
@@ -56,6 +58,8 @@ public final class ModBlocks {
     public static final RegistryObject<Block> MYSTIC_TREE_ROOT = ForgeBlocks.MYSTIC_TREE_ROOT;
     public static final RegistryObject<Block> MYSTIC_TREE_LOG = ForgeBlocks.MYSTIC_TREE_LOG;
     public static final RegistryObject<Block> MYSTIC_TREE_BRANCH = ForgeBlocks.MYSTIC_TREE_BRANCH;
+    public static final Map<String, RegistryObject<? extends Block>> NEW_TREE_BUILDING_BLOCKS =
+            ForgeBlocks.NEW_TREE_BUILDING_BLOCKS;
 
     private ModBlocks() {
     }

@@ -1,5 +1,7 @@
 package com.stardew.craft.item;
 
+import java.util.Map;
+
 import net.minecraft.world.item.Item;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
@@ -56,6 +58,8 @@ public final class ModItems {
     public static final RegistryObject<Item> MYSTIC_TREE_ROOT = ForgeItems.MYSTIC_TREE_ROOT;
     public static final RegistryObject<Item> MYSTIC_TREE_LOG = ForgeItems.MYSTIC_TREE_LOG;
     public static final RegistryObject<Item> MYSTIC_TREE_BRANCH = ForgeItems.MYSTIC_TREE_BRANCH;
+    public static final Map<String, RegistryObject<Item>> NEW_TREE_BUILDING_ITEMS =
+            ForgeItems.NEW_TREE_BUILDING_ITEMS;
     public static final RegistryObject<Item> ECTOPLASM = ForgeItems.ECTOPLASM;
     public static final RegistryObject<Item> PRISMATIC_JELLY = ForgeItems.PRISMATIC_JELLY;
     public static final RegistryObject<Item> EXPLOSIVE_AMMO = ForgeItems.EXPLOSIVE_AMMO;

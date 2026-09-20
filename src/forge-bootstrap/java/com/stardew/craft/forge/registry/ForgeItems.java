@@ -5,6 +5,10 @@ import com.stardew.craft.item.ButterflyPowderItem;
 import com.stardew.craft.item.SimpleStardewItem;
 import com.stardew.craft.item.StardewSimpleBlockItem;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import net.minecraft.world.item.Item;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -83,6 +87,9 @@ public final class ForgeItems {
     public static final RegistryObject<Item> MYSTIC_TREE_ROOT = registerBuildingBlock(ForgeBlocks.MYSTIC_TREE_ROOT);
     public static final RegistryObject<Item> MYSTIC_TREE_LOG = registerBuildingBlock(ForgeBlocks.MYSTIC_TREE_LOG);
     public static final RegistryObject<Item> MYSTIC_TREE_BRANCH = registerBuildingBlock(ForgeBlocks.MYSTIC_TREE_BRANCH);
+
+    public static final Map<String, RegistryObject<Item>> NEW_TREE_BUILDING_ITEMS =
+            registerNewTreeBuildingItems();
 
     public static final RegistryObject<Item> ECTOPLASM = registerSimple("ectoplasm", "stardewcraft.type.quest", -1);
     public static final RegistryObject<Item> PRISMATIC_JELLY = registerSimple("prismatic_jelly", "stardewcraft.type.quest", -1);
@@ -911,6 +918,15 @@ public final class ForgeItems {
         String id = block.getId().getPath();
         return ITEMS.register(id, () -> new StardewSimpleBlockItem(block.get(),
                 "stardewcraft.type.building", -1, new Item.Properties().stacksTo(999)));
+    }
+
+    private static Map<String, RegistryObject<Item>> registerNewTreeBuildingItems() {
+        LinkedHashMap<String, RegistryObject<Item>> items = new LinkedHashMap<>();
+        for (Map.Entry<String, RegistryObject<? extends net.minecraft.world.level.block.Block>> entry
+                : ForgeBlocks.NEW_TREE_BUILDING_BLOCKS.entrySet()) {
+            items.put(entry.getKey(), registerBuildingBlock(entry.getValue()));
+        }
+        return Collections.unmodifiableMap(items);
     }
 
     private static RegistryObject<Item> registerNaturalBlock(

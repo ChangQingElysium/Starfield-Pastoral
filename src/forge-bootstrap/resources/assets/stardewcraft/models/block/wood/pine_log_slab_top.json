@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab_top",
+  "textures": {
+    "bottom": "stardewcraft:block/tree/pine/log_side",
+    "side": "stardewcraft:block/tree/pine/log_side",
+    "top": "stardewcraft:block/tree/pine/log_side"
+  }
+}

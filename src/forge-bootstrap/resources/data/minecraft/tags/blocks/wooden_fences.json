@@ -1,0 +1,20 @@
+{
+  "replace": false,
+  "values": [
+    "stardewcraft:oak_planks_fence",
+    "stardewcraft:oak_checkerboard_planks_fence",
+    "stardewcraft:oak_fishscale_planks_fence",
+    "stardewcraft:maple_planks_fence",
+    "stardewcraft:maple_checkerboard_planks_fence",
+    "stardewcraft:maple_fishscale_planks_fence",
+    "stardewcraft:pine_planks_fence",
+    "stardewcraft:pine_checkerboard_planks_fence",
+    "stardewcraft:pine_fishscale_planks_fence",
+    "stardewcraft:mahogany_planks_fence",
+    "stardewcraft:mahogany_checkerboard_planks_fence",
+    "stardewcraft:mahogany_fishscale_planks_fence",
+    "stardewcraft:mystic_tree_planks_fence",
+    "stardewcraft:mystic_tree_checkerboard_planks_fence",
+    "stardewcraft:mystic_tree_fishscale_planks_fence"
+  ]
+}

@@ -241,6 +241,25 @@ def checkForgeTreeCoreParity = tasks.register('checkForgeTreeCoreParity', Exec) 
     commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_tree_core.py').asFile.absolutePath
 }
 
+def checkForgeTreeBuildingParity = tasks.register('checkForgeTreeBuildingParity', Exec) {
+    group = 'verification'
+    description = 'Checks the complete 85-block generated-tree building slice and Forge 1.20.1 resource conversions.'
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/block/ModBlocks.java'))
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/item/ModItems.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeBlocks.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeItems.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/block/ModBlocks.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/item/ModItems.java'))
+    inputs.dir(layout.projectDirectory.dir('src/main/resources/assets/stardewcraft'))
+    inputs.dir(layout.projectDirectory.dir('src/main/resources/data/stardewcraft'))
+    inputs.dir(layout.projectDirectory.dir('src/main/resources/data/minecraft/tags'))
+    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/assets/stardewcraft'))
+    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/data/stardewcraft'))
+    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/data/minecraft/tags'))
+    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_tree_building.py'))
+    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_tree_building.py').asFile.absolutePath
+}
+
 tasks.named('check').configure {
     dependsOn checkTranslations
     dependsOn checkForgeItemParity
@@ -248,4 +267,5 @@ tasks.named('check').configure {
     dependsOn checkForgeMineBlockParity
     dependsOn checkForgeSpecialBlockParity
     dependsOn checkForgeTreeCoreParity
+    dependsOn checkForgeTreeBuildingParity
 }

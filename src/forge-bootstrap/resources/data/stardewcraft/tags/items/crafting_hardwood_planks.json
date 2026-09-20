@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "stardewcraft:mahogany_planks",
+    "stardewcraft:mahogany_checkerboard_planks",
+    "stardewcraft:mahogany_fishscale_planks",
+    "stardewcraft:mystic_tree_planks",
+    "stardewcraft:mystic_tree_checkerboard_planks",
+    "stardewcraft:mystic_tree_fishscale_planks"
+  ]
+}
