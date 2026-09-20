@@ -81,6 +81,6 @@ Mixin 不是 Forge 核心 API。Town Door、Sodium、Iris 相关代码最后迁�
 5. 网络、持久化和 GameTest。
 6. 客户端模型、渲染、GUI 和 Mixin。
 
-当前已完成的真实实现是：170 个 `SimpleStardewItem`、1 个 `ButterflyPowderItem`、12 个无自定义运行时依赖的建筑材质方块、16 个矿井背景纯 `Block`、2 个特殊纯方块、15 个生成树 root/log/branch 核心方块，以及完整 85 个生成树木制建筑件。树核心额外迁入 `NewTreePartBlock`、`NewTreeLogBlock`、`NewTreePartBlockEntity` 和 `new_tree_part` 注册；只做 1.20.1 方法签名适配，水平八邻格放置限制、拆除 marker、NBT 字段和 valid-block 顺序保持不变。木制建筑件按源顺序注册普通/棋盘/鱼鳞板材及 stairs、slab、fence、fence gate，并追加五种原木 stairs/slab；只把 `RegistryObject`、`FenceGateBlock` 构造参数顺序、资源目录复数形式和配方 `result.id` 字段回退到 Forge 1.20.1 API。方块切片均单独验证 blockstate、掉落表、配方、标签、模型、纹理和语言资源；详见 [`forge-building-block-parity.md`](forge-building-block-parity.md)。
+当前已完成的真实实现是：170 个 `SimpleStardewItem`、1 个 `ButterflyPowderItem`、12 个无自定义运行时依赖的建筑材质方块、16 个矿井背景纯 `Block`、2 个特殊纯方块、15 个生成树 root/log/branch 核心方块、完整 85 个生成树木制建筑件、稳定维度键，以及树预制登记基础 `PrefabTreeInstance` / `PrefabTreeRegistry`。树核心额外迁入 `NewTreePartBlock`、`NewTreeLogBlock`、`NewTreePartBlockEntity` 和 `new_tree_part` 注册；只做 1.20.1 方法签名适配，水平八邻格放置限制、拆除 marker、NBT 字段和 valid-block 顺序保持不变。木制建筑件按源顺序注册普通/棋盘/鱼鳞板材及 stairs、slab、fence、fence gate，并追加五种原木 stairs/slab；只把 `RegistryObject`、`FenceGateBlock` 构造参数顺序、资源目录复数形式和配方 `result.id` 字段回退到 Forge 1.20.1 API。维度键只回退 `ResourceLocation` 构造器，不注册动态维度；预制登记保留双索引、砍伐/炸弹状态与 NBT 键，只把 `SavedData` 回退为 `save(CompoundTag)` 和 `computeIfAbsent(loader, supplier, id)`；树叶、树苗、树生成/砍伐服务及其他 prefab manager 不在本切片。方块切片均单独验证 blockstate、掉落表、配方、标签、模型、纹理和语言资源；详见 [`forge-building-block-parity.md`](forge-building-block-parity.md)。
 
 每个切片都要同时更新三项证据：编译结果、专用服务器/资源加载结果、以及该切片的 API 差异记录。

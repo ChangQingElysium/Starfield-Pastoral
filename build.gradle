@@ -260,6 +260,28 @@ def checkForgeTreeBuildingParity = tasks.register('checkForgeTreeBuildingParity'
     commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_tree_building.py').asFile.absolutePath
 }
 
+def checkForgePrefabRegistryParity = tasks.register('checkForgePrefabRegistryParity', Exec) {
+    group = 'verification'
+    description = 'Checks the Forge prefab-tree registry and SavedData API adaptation against the 1.21.1 source contract.'
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/tree/prefab/PrefabTreeInstance.java'))
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/tree/prefab/PrefabTreeRegistry.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/tree/prefab/PrefabTreeInstance.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/tree/prefab/PrefabTreeRegistry.java'))
+    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_prefab_registry.py'))
+    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_prefab_registry.py').asFile.absolutePath
+}
+
+def checkForgeDimensionParity = tasks.register('checkForgeDimensionParity', Exec) {
+    group = 'verification'
+    description = 'Checks the Forge dimension-key slice and 1.20.1 ResourceLocation API adaptation.'
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/core/ModDimensions.java'))
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/StardewCraft.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/core/ModDimensions.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/ForgeBootstrap.java'))
+    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_dimensions.py'))
+    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_dimensions.py').asFile.absolutePath
+}
+
 tasks.named('check').configure {
     dependsOn checkTranslations
     dependsOn checkForgeItemParity
@@ -268,4 +290,6 @@ tasks.named('check').configure {
     dependsOn checkForgeSpecialBlockParity
     dependsOn checkForgeTreeCoreParity
     dependsOn checkForgeTreeBuildingParity
+    dependsOn checkForgePrefabRegistryParity
+    dependsOn checkForgeDimensionParity
 }
