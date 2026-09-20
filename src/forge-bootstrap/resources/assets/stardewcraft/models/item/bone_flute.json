@@ -1,0 +1,7 @@
+{
+    "parent":  "item/generated",
+    "textures":  {
+                     "layer0":  "stardewcraft:item/artifact/bone_flute",
+                     "particle":  "stardewcraft:item/artifact/bone_flute"
+                 }
+}

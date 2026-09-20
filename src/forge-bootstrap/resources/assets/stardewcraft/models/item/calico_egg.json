@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/calico_egg",
+    "particle": "stardewcraft:item/calico_egg"
+  }
+}

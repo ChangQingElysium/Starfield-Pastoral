@@ -1,0 +1,7 @@
+{
+    "parent":  "item/generated",
+    "textures":  {
+                     "layer0":  "stardewcraft:item/artifact/strange_doll_green",
+                     "particle":  "stardewcraft:item/artifact/strange_doll_green"
+                 }
+}

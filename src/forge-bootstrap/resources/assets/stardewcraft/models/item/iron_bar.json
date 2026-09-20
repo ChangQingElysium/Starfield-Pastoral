@@ -1,0 +1,7 @@
+{
+    "parent":  "minecraft:item/generated",
+    "textures":  {
+                     "layer0":  "stardewcraft:item/resource/iron_bar",
+                     "particle":  "stardewcraft:item/resource/iron_bar"
+                 }
+}

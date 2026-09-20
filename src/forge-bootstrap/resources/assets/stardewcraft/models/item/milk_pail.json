@@ -1,0 +1,7 @@
+{
+    "parent":  "minecraft:item/generated",
+    "textures":  {
+                     "layer0":  "stardewcraft:item/tool/misc/milk_pail",
+                     "particle":  "stardewcraft:item/tool/misc/milk_pail"
+                 }
+}

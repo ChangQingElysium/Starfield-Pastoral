@@ -1,0 +1,7 @@
+{
+    "parent":  "minecraft:item/generated",
+    "textures":  {
+                     "layer0":  "stardewcraft:item/resource/copper_ore",
+                     "particle":  "stardewcraft:item/resource/copper_ore"
+                 }
+}

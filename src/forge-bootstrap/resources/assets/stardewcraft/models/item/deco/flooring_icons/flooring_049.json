@@ -1,0 +1,7 @@
+﻿{
+    "parent":  "minecraft:item/generated",
+    "textures":  {
+                     "layer0":  "stardewcraft:item/deco/flooring_icons/flooring_049",
+                     "particle":  "stardewcraft:item/deco/flooring_icons/flooring_049"
+                 }
+}

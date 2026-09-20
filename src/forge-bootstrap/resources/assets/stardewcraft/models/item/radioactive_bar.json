@@ -1,0 +1,7 @@
+{
+    "parent":  "minecraft:item/generated",
+    "textures":  {
+                     "layer0":  "stardewcraft:item/resource/radioactive_bar",
+                     "particle":  "stardewcraft:item/resource/radioactive_bar"
+                 }
+}

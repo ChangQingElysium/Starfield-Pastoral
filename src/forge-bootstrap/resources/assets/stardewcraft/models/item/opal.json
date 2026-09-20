@@ -1,0 +1,7 @@
+{
+    "parent":  "item/generated",
+    "textures":  {
+                     "layer0":  "stardewcraft:item/mineral/opal",
+                     "particle":  "stardewcraft:item/mineral/opal"
+                 }
+}

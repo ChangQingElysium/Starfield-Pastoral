@@ -1,0 +1,7 @@
+﻿{
+    "parent":  "minecraft:item/generated",
+    "textures":  {
+                     "layer0":  "stardewcraft:item/deco/wallpaper_icons/wallpaper_078",
+                     "particle":  "stardewcraft:item/deco/wallpaper_icons/wallpaper_078"
+                 }
+}

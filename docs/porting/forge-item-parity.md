@@ -1,6 +1,6 @@
 # Forge 1.20.1 物品逻辑对照账
 
-本账只记录已经进入 Forge source set 的物品。表中的“原版注册”以 `src/main/java/com/stardew/craft/item/ModItems.java` 为准；Forge 侧必须保留相同的注册 ID、构造参数、物品属性和资源键，不能用占位物品代替。
+本账只记录已经进入 Forge source set 的物品。表中的“原版注册”以 `src/main/java/com/stardew/craft/item/ModItems.java` 为准；Forge 侧必须保留相同的注册 ID、构造参数、物品属性和资源键，不能用占位物品代替。当前已恢复 1 个 `ButterflyPowderItem` 和 170 个 `SimpleStardewItem`，完整 170 项由 `compatibility/verify_forge_simple_items.py` 自动逐项对照；下表列出首批手写切片和代表性条目。
 
 | 注册 ID | Forge 实现 | 类型键 | 售价 | 属性 | 状态 |
 | --- | --- | --- | ---: | --- | --- |
@@ -13,6 +13,12 @@
 | `hay` | `SimpleStardewItem` | `stardewcraft.type.resource` | 0（不可出售） | `stacksTo(999)` | 已对照 |
 | `wood_normal` | `SimpleStardewItem` | `stardewcraft.type.resource` | 2 | `stacksTo(999)` | 已对照 |
 | `wood_hard` | `SimpleStardewItem` | `stardewcraft.type.resource` | 15 | `stacksTo(999)` | 已对照 |
+
+自动对照命令：
+
+```bash
+python3 compatibility/verify_forge_simple_items.py
+```
 
 ## 迁移规则
 

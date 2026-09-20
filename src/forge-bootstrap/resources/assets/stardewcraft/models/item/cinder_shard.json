@@ -1,0 +1,7 @@
+{
+    "parent": "item/generated",
+    "textures": {
+        "layer0": "stardewcraft:item/misc/cinder_shard",
+        "particle": "stardewcraft:item/misc/cinder_shard"
+    }
+}

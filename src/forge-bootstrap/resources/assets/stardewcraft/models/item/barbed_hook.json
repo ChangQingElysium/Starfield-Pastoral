@@ -1,0 +1,7 @@
+{
+    "parent":  "minecraft:item/generated",
+    "textures":  {
+                     "layer0":  "stardewcraft:item/tool/tackle/barbed_hook",
+                     "particle":  "stardewcraft:item/tool/tackle/barbed_hook"
+                 }
+}

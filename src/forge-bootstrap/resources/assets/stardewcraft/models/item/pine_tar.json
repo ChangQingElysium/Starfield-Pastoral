@@ -1,0 +1,7 @@
+{
+    "parent":  "minecraft:item/generated",
+    "textures":  {
+                     "layer0":  "stardewcraft:item/resource/pine_tar",
+                     "particle":  "stardewcraft:item/resource/pine_tar"
+                 }
+}
