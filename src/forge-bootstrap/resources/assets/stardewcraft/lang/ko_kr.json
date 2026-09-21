@@ -304,5 +304,8 @@
   "block.stardewcraft.wallpaper_block": "벽지 블록",
   "block.stardewcraft.wallpaper_block.desc": "방 벽을 꾸미기 위하여 사용하는.",
   "block.stardewcraft.flooring_block": "바닥 블록",
-  "block.stardewcraft.flooring_block.desc": "객실 바닥을 장식하는 데 사용."
+  "block.stardewcraft.flooring_block.desc": "객실 바닥을 장식하는 데 사용.",
+  "block.stardewcraft.asphalt_road": "아스팔트 도로",
+  "block.stardewcraft.road_dash": "도로 점선",
+  "block.stardewcraft.road_double_line": "도로 이중 실선"
 }

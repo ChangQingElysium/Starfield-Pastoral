@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "variant=0": {
+      "model": "stardewcraft:block/asphalt_road/spring_isolated"
+    },
+    "variant=1": {
+      "model": "stardewcraft:block/asphalt_road/spring_isolated"
+    },
+    "variant=2": {
+      "model": "stardewcraft:block/asphalt_road/spring_isolated"
+    }
+  }
+}

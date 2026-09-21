@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:block/block",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "line": "stardewcraft:block/asphalt_road/spring/markings",
+    "particle": "stardewcraft:block/asphalt_road/spring/asphalt"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0.015625,
+        0
+      ],
+      "to": [
+        16,
+        0.015625,
+        16
+      ],
+      "shade": false,
+      "faces": {
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#line"
+        }
+      }
+    }
+  ]
+}

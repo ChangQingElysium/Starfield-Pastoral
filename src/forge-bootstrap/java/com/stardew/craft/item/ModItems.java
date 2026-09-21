@@ -26,6 +26,9 @@ public final class ModItems {
     public static final RegistryObject<Item> BLUE_GRAY_TIMBER = ForgeItems.BLUE_GRAY_TIMBER;
     public static final RegistryObject<Item> PALE_BLUE_SIDING = ForgeItems.PALE_BLUE_SIDING;
     public static final RegistryObject<Item> BLUE_PAINTED_PLANKS = ForgeItems.BLUE_PAINTED_PLANKS;
+    public static final RegistryObject<Item> ASPHALT_ROAD = ForgeItems.ASPHALT_ROAD;
+    public static final RegistryObject<Item> ROAD_DASH = ForgeItems.ROAD_DASH;
+    public static final RegistryObject<Item> ROAD_DOUBLE_LINE = ForgeItems.ROAD_DOUBLE_LINE;
     public static final RegistryObject<Item> MINE_EARTH_LOOSE_SOIL = ForgeItems.MINE_EARTH_LOOSE_SOIL;
     public static final RegistryObject<Item> MINE_EARTH_WALL = ForgeItems.MINE_EARTH_WALL;
     public static final RegistryObject<Item> MINE_EARTH_DARK_LOOSE_SOIL = ForgeItems.MINE_EARTH_DARK_LOOSE_SOIL;

@@ -304,5 +304,8 @@
   "block.stardewcraft.wallpaper_block": "Bloco de Papel de Parede",
   "block.stardewcraft.wallpaper_block.desc": "Usado para decorar paredes de quarto.",
   "block.stardewcraft.flooring_block": "Bloco de Pisos",
-  "block.stardewcraft.flooring_block.desc": "Usado para decorar pisos de sala."
+  "block.stardewcraft.flooring_block.desc": "Usado para decorar pisos de sala.",
+  "block.stardewcraft.asphalt_road": "Estrada de asfalto",
+  "block.stardewcraft.road_dash": "Faixa tracejada de pista",
+  "block.stardewcraft.road_double_line": "Faixa dupla contínua de pista"
 }

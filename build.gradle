@@ -492,6 +492,37 @@ def checkForgeCropSliceAudit = tasks.register('checkForgeCropSliceAudit', Exec) 
     commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_parsnip_crop_rules.py').asFile.absolutePath
 }
 
+def checkForgeRoadSliceParity = tasks.register('checkForgeRoadSliceParity', Exec) {
+    group = 'verification'
+    description = 'Checks the complete asphalt-road block, item, NBT placement and seasonal model slice.'
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/block/ModBlocks.java'))
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/item/ModItems.java'))
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/block/terrain/TerrainVariants.java'))
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/block/terrain/AsphaltRoadBlock.java'))
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/block/terrain/RoadMarkingBlock.java'))
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/client/model/terrain/AsphaltRoadModels.java'))
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/block/terrain/TownPavingConnections.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeBlocks.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeItems.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/block/ModBlocks.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/item/ModItems.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/block/terrain/TerrainVariants.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/block/terrain/AsphaltRoadBlock.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/block/terrain/RoadMarkingBlock.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/block/terrain/AsphaltRoadConnections.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/client/AsphaltRoadModels.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/client/TerrainSeasonTextures.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/client/ForgeClientSetup.java'))
+    inputs.dir(layout.projectDirectory.dir('src/main/resources/assets/stardewcraft'))
+    inputs.dir(layout.projectDirectory.dir('src/main/resources/data/stardewcraft/loot_table/blocks'))
+    inputs.file(layout.projectDirectory.file('src/main/resources/data/minecraft/tags/block/mineable/pickaxe.json'))
+    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/assets/stardewcraft'))
+    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/data/stardewcraft/loot_tables/blocks'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/resources/data/minecraft/tags/blocks/mineable/pickaxe.json'))
+    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_road_slice.py'))
+    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_road_slice.py').asFile.absolutePath
+}
+
 tasks.named('check').configure {
     dependsOn checkTranslations
     dependsOn checkForgePureSourceParity
@@ -517,4 +548,5 @@ tasks.named('check').configure {
     dependsOn checkForgeFarmSpawnLayoutParity
     dependsOn checkForgePureRulesParity
     dependsOn checkForgeCropSliceAudit
+    dependsOn checkForgeRoadSliceParity
 }

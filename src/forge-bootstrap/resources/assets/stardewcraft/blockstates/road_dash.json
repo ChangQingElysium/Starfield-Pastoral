@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "stardewcraft:block/asphalt_road/spring_markings"
+    },
+    "facing=east": {
+      "model": "stardewcraft:block/asphalt_road/spring_markings"
+    },
+    "facing=south": {
+      "model": "stardewcraft:block/asphalt_road/spring_markings"
+    },
+    "facing=west": {
+      "model": "stardewcraft:block/asphalt_road/spring_markings"
+    }
+  }
+}

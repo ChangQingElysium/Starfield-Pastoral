@@ -35,6 +35,8 @@ public final class ForgeClientSetup {
             ItemBlockRenderTypes.setRenderLayer(ForgeBlocks.MYSTIC_TREE_ROOT.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ForgeBlocks.MYSTIC_TREE_BRANCH.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ForgeBlocks.MYSTIC_TREE_LEAVES.get(), RenderType.cutoutMipped());
+            ItemBlockRenderTypes.setRenderLayer(ForgeBlocks.ROAD_DASH.get(), RenderType.cutout());
+            ItemBlockRenderTypes.setRenderLayer(ForgeBlocks.ROAD_DOUBLE_LINE.get(), RenderType.cutout());
         });
     }
 }

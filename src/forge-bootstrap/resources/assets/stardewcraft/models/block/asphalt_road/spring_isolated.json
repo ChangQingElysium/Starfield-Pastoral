@@ -1,0 +1,6 @@
+{
+  "parent": "stardewcraft:block/asphalt_road/spring",
+  "textures": {
+    "top": "stardewcraft:block/asphalt_road/spring/isolated"
+  }
+}

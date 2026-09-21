@@ -3,6 +3,8 @@ package com.stardew.craft.forge.registry;
 import com.stardew.craft.block.tree.NewTreeLogBlock;
 import com.stardew.craft.block.tree.NewTreePartBlock;
 import com.stardew.craft.block.tree.StardewLeavesBlock;
+import com.stardew.craft.block.terrain.AsphaltRoadBlock;
+import com.stardew.craft.block.terrain.RoadMarkingBlock;
 import com.stardew.craft.forge.ForgeBootstrap;
 
 import java.util.Collections;
@@ -108,6 +110,21 @@ public final class ForgeBlocks {
             "blue_painted_planks",
             () -> new Block(BlockBehaviour.Properties.copy(Blocks.OAK_PLANKS)
                     .mapColor(MapColor.COLOR_BLUE))
+    );
+
+    public static final RegistryObject<AsphaltRoadBlock> ASPHALT_ROAD = BLOCKS.register(
+            "asphalt_road",
+            () -> new AsphaltRoadBlock(BlockBehaviour.Properties.copy(Blocks.STONE))
+    );
+
+    public static final RegistryObject<RoadMarkingBlock> ROAD_DASH = BLOCKS.register(
+            "road_dash",
+            () -> new RoadMarkingBlock(roadMarkingProperties())
+    );
+
+    public static final RegistryObject<RoadMarkingBlock> ROAD_DOUBLE_LINE = BLOCKS.register(
+            "road_double_line",
+            () -> new RoadMarkingBlock(roadMarkingProperties())
     );
 
     public static final RegistryObject<Block> MINE_EARTH_LOOSE_SOIL = BLOCKS.register(
@@ -350,6 +367,15 @@ public final class ForgeBlocks {
                 .mapColor(color)
                 .sound(sound)
                 .strength(hardness, 6.0F);
+    }
+
+    private static BlockBehaviour.Properties roadMarkingProperties() {
+        return BlockBehaviour.Properties.of()
+                .noCollission()
+                .noOcclusion()
+                .instabreak()
+                .sound(SoundType.STONE)
+                .pushReaction(PushReaction.DESTROY);
     }
 
     private ForgeBlocks() {

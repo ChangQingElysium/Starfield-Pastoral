@@ -304,5 +304,8 @@
   "block.stardewcraft.wallpaper_block": "Duvar kağıdı",
   "block.stardewcraft.wallpaper_block.desc": "Oda duvarları dekore etmek için kullanılır.",
   "block.stardewcraft.flooring_block": "Zemin Blok",
-  "block.stardewcraft.flooring_block.desc": "Oda zeminlerini dekore etmek için kullanılır."
+  "block.stardewcraft.flooring_block.desc": "Oda zeminlerini dekore etmek için kullanılır.",
+  "block.stardewcraft.asphalt_road": "Asfalt yol",
+  "block.stardewcraft.road_dash": "Kesik yol çizgisi",
+  "block.stardewcraft.road_double_line": "Çift düz yol çizgisi"
 }

@@ -304,5 +304,8 @@
   "block.stardewcraft.wallpaper_block": "壁紙ブロック",
   "block.stardewcraft.wallpaper_block.desc": "部屋の壁を飾るのに使用される.",
   "block.stardewcraft.flooring_block": "フローリングブロック",
-  "block.stardewcraft.flooring_block.desc": "部屋の床を飾るのに使用される."
+  "block.stardewcraft.flooring_block.desc": "部屋の床を飾るのに使用される.",
+  "block.stardewcraft.asphalt_road": "アスファルト道路",
+  "block.stardewcraft.road_dash": "道路の破線",
+  "block.stardewcraft.road_double_line": "道路の二重実線"
 }

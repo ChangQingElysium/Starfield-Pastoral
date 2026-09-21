@@ -304,5 +304,8 @@
   "block.stardewcraft.wallpaper_block": "Bloc de papier peint",
   "block.stardewcraft.wallpaper_block.desc": "Ça décorait les murs des pièces.",
   "block.stardewcraft.flooring_block": "Bloc de sols",
-  "block.stardewcraft.flooring_block.desc": "Ça décorait les sols des pièces."
+  "block.stardewcraft.flooring_block.desc": "Ça décorait les sols des pièces.",
+  "block.stardewcraft.asphalt_road": "Route asphaltée",
+  "block.stardewcraft.road_dash": "Marquage routier discontinu",
+  "block.stardewcraft.road_double_line": "Double ligne routière continue"
 }
