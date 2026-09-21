@@ -153,7 +153,7 @@ def checkTranslations = tasks.register('checkTranslations', Exec) {
 
 def checkForgePureSourceParity = tasks.register('checkForgePureSourceParity', Exec) {
     group = 'verification'
-    description = 'Checks byte-for-byte parity for loader-independent Forge source classes.'
+    description = 'Checks byte-for-byte parity and the loader-independent API closure for Forge source classes.'
     inputs.dir(layout.projectDirectory.dir('src/main/java/com/stardew/craft'))
     inputs.dir(layout.projectDirectory.dir('src/forge-common/java/com/stardew/craft'))
     inputs.file(layout.projectDirectory.file('compatibility/verify_forge_pure_source_parity.py'))
@@ -425,6 +425,24 @@ def checkForgeDimensionParity = tasks.register('checkForgeDimensionParity', Exec
     commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_dimensions.py').asFile.absolutePath
 }
 
+def checkForgeMiningPlayerStateParity = tasks.register('checkForgeMiningPlayerStateParity', Exec) {
+    group = 'verification'
+    description = 'Checks the Forge mining player-state NBT contract.'
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/mining/MiningPlayerData.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/mining/MiningPlayerData.java'))
+    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_mining_player_state.py'))
+    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_mining_player_state.py').asFile.absolutePath
+}
+
+def checkForgeCombatRulesParity = tasks.register('checkForgeCombatRulesParity', Exec) {
+    group = 'verification'
+    description = 'Checks exact parity and pure-Java dependency closure for Forge combat rules.'
+    inputs.dir(layout.projectDirectory.dir('src/main/java/com/stardew/craft/combat'))
+    inputs.dir(layout.projectDirectory.dir('src/forge-common/java/com/stardew/craft/combat'))
+    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_combat_rules.py'))
+    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_combat_rules.py').asFile.absolutePath
+}
+
 tasks.named('check').configure {
     dependsOn checkTranslations
     dependsOn checkForgePureSourceParity
@@ -444,4 +462,6 @@ tasks.named('check').configure {
     dependsOn checkForgePrefabRegistryParity
     dependsOn checkForgeTreeStructureReaderParity
     dependsOn checkForgeDimensionParity
+    dependsOn checkForgeMiningPlayerStateParity
+    dependsOn checkForgeCombatRulesParity
 }
