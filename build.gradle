@@ -271,6 +271,17 @@ def checkForgePrefabRegistryParity = tasks.register('checkForgePrefabRegistryPar
     commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_prefab_registry.py').asFile.absolutePath
 }
 
+def checkForgeTreeStructureReaderParity = tasks.register('checkForgeTreeStructureReaderParity', Exec) {
+    group = 'verification'
+    description = 'Checks the standalone Forge prefab-tree NBT structure reader against the 1.21.1 source contract.'
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/mining/StructureLoader.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/tree/prefab/ForgeTreeStructureReader.java'))
+    inputs.dir(layout.projectDirectory.dir('src/main/resources/data/stardewcraft/structures/tree'))
+    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/data/stardewcraft/structures/tree'))
+    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_tree_structure_reader.py'))
+    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_tree_structure_reader.py').asFile.absolutePath
+}
+
 def checkForgeDimensionParity = tasks.register('checkForgeDimensionParity', Exec) {
     group = 'verification'
     description = 'Checks the Forge dimension-key slice and 1.20.1 ResourceLocation API adaptation.'
@@ -291,5 +302,6 @@ tasks.named('check').configure {
     dependsOn checkForgeTreeCoreParity
     dependsOn checkForgeTreeBuildingParity
     dependsOn checkForgePrefabRegistryParity
+    dependsOn checkForgeTreeStructureReaderParity
     dependsOn checkForgeDimensionParity
 }
