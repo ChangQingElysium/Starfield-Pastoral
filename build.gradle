@@ -443,6 +443,55 @@ def checkForgeCombatRulesParity = tasks.register('checkForgeCombatRulesParity', 
     commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_combat_rules.py').asFile.absolutePath
 }
 
+def checkForgeDomainModelsParity = tasks.register('checkForgeDomainModelsParity', Exec) {
+    group = 'verification'
+    description = 'Checks exact parity for loader-independent economy, weather and farm domain models.'
+    inputs.dir(layout.projectDirectory.dir('src/main/java/com/stardew/craft/economy/sell'))
+    inputs.dir(layout.projectDirectory.dir('src/main/java/com/stardew/craft/weather'))
+    inputs.dir(layout.projectDirectory.dir('src/main/java/com/stardew/craft/farm'))
+    inputs.dir(layout.projectDirectory.dir('src/forge-common/java/com/stardew/craft/economy/sell'))
+    inputs.dir(layout.projectDirectory.dir('src/forge-common/java/com/stardew/craft/weather'))
+    inputs.dir(layout.projectDirectory.dir('src/forge-common/java/com/stardew/craft/farm'))
+    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_domain_models.py'))
+    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_domain_models.py').asFile.absolutePath
+}
+
+def checkForgeFarmSpawnLayoutParity = tasks.register('checkForgeFarmSpawnLayoutParity', Exec) {
+    group = 'verification'
+    description = 'Checks the loader-independent farm spawn-layout run contract and authoritative mask data.'
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/farm/FarmSpawnLayoutData.java'))
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/farm/FarmSpawnLayoutRules.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/farm/FarmSpawnLayoutRules.java'))
+    inputs.dir(layout.projectDirectory.dir('src/main/resources/data/stardewcraft/farm_spawn_layouts'))
+    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_farm_spawn_layout.py'))
+    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_farm_spawn_layout.py').asFile.absolutePath
+}
+
+def checkForgePureRulesParity = tasks.register('checkForgePureRulesParity', Exec) {
+    group = 'verification'
+    description = 'Checks exact parity for loader-independent gameplay rules, enums and geometry models.'
+    inputs.dir(layout.projectDirectory.dir('src/main/java/com/stardew/craft'))
+    inputs.dir(layout.projectDirectory.dir('src/forge-common/java/com/stardew/craft'))
+    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_pure_rules.py'))
+    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_pure_rules.py').asFile.absolutePath
+}
+
+def checkForgeCropSliceAudit = tasks.register('checkForgeCropSliceAudit', Exec) {
+    group = 'verification'
+    description = 'Checks the source crop contract and ensures no partial Forge crop runtime is claimed.'
+    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_parsnip_crop_rules.py'))
+    inputs.file(layout.projectDirectory.file('compatibility/forge-crop-slice-audit.md'))
+    inputs.dir(layout.projectDirectory.dir('src/main/resources/assets/stardewcraft/lang'))
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/block/crop/ParsnipCropBlock.java'))
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/item/crop/spring/ParsnipSeedItem.java'))
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/item/crop/spring/ParsnipItem.java'))
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/block/crop/StardewCropBlock.java'))
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/manager/CropGrowthManager.java'))
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/item/quality/QualityHelper.java'))
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/farming/SeasonLocationRules.java'))
+    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_parsnip_crop_rules.py').asFile.absolutePath
+}
+
 tasks.named('check').configure {
     dependsOn checkTranslations
     dependsOn checkForgePureSourceParity
@@ -464,4 +513,8 @@ tasks.named('check').configure {
     dependsOn checkForgeDimensionParity
     dependsOn checkForgeMiningPlayerStateParity
     dependsOn checkForgeCombatRulesParity
+    dependsOn checkForgeDomainModelsParity
+    dependsOn checkForgeFarmSpawnLayoutParity
+    dependsOn checkForgePureRulesParity
+    dependsOn checkForgeCropSliceAudit
 }

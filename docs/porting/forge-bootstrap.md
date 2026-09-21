@@ -9,7 +9,7 @@
 - ForgeGradle 6.x + Forge `47.4.10`。
 - Java 17 工具链，匹配 Minecraft 1.20.1 的运行时。
 - `src/forge-bootstrap/java` 保存 Forge 入口、注册桥和客户端加载器适配；当前树核心的 root/branch cutout 注册也在这里。
-- `src/forge-common/java` 保存已经验证可在 1.20.1 使用的公共逻辑；当前切片包括 107 个严格纯源码/规则类、12 个纯战斗规则类、只做 `ResourceLocation` API 适配的 `ModDimensions`、原样迁移的树核心方块与方块实体、只做 SavedData 签名适配的 `PrefabTreeInstance` / `PrefabTreeRegistry`、只读预制树 NBT 的 `ForgeTreeStructureReader`，以及保持字段和 NBT 键完全一致的 `MiningPlayerData` 纯玩家状态模型。
+- `src/forge-common/java` 保存已经验证可在 1.20.1 使用的公共逻辑；当前切片包括 107 个严格纯源码/API 类、12 个纯战斗规则类、6 个经济/天气/农场域模型、32 个纯规则/枚举/几何模型类、只做 `ResourceLocation` API 适配的 `ModDimensions`、原样迁移的树核心方块与方块实体、只做 SavedData 签名适配的 `PrefabTreeInstance` / `PrefabTreeRegistry`、只读预制树 NBT 的 `ForgeTreeStructureReader`、农场出生布局 run 解码规则，以及保持字段和 NBT 键完全一致的 `MiningPlayerData` 纯玩家状态模型。作物当前只有源契约审计，没有注册半套运行时。
 - `src/forge-bootstrap/resources` 是当前唯一打包的资源目录，包含 Forge 元数据、301 个物品（170 个普通物品、1 个蝴蝶粉末物品、30 个先前方块物品、15 个生成树核心方块物品和 85 个木制建筑方块物品）、130 个方块的 blockstate/模型/纹理/掉落表、当前木制建筑件的 85 个配方和 12 个语言文件。
 - 原 `src/main/java` NeoForge 源树保留为迁移参考，暂不参与 Forge 编译。
 - `mods.toml` 已切换到 Forge 元数据；NeoForge 模板和 Mixin manifest 暂不加载。
@@ -23,7 +23,7 @@
 
 第一条命令证明构建链、资源处理、语言资源、纯规则闭包和 1.21.1 对照账可用；第二条命令使用全新临时目录，证明 Forge 能够创建开发服务器并加载 `stardewcraft`，完成当前注册对象和 `new_tree_part` 方块实体类型的生命周期。不要复用包含旧 NeoForge 世界的 `run/` 目录做空壳验收。当前不要求旧 NeoForge GameTest 在这个阶段运行，因为生产 Java 源尚未整体进入 Forge source set。
 
-方块切片的逐项合同和资源路径转换见 [`forge-building-block-parity.md`](forge-building-block-parity.md)；`./gradlew check` 会运行普通物品、建筑材质、矿井背景、特殊纯方块、装饰数据与旧存档闭包、树核心/树叶/树规则、树建筑、维度、预制登记、结构读取、纯源码/API 闭包、纯战斗规则和矿井玩家状态对照任务，并检查 12 个语言文件。维度检查锁定稳定 key 且明确不注册动态维度；预制登记检查锁定双索引、NBT 字段、炸弹/砍伐状态和不迁移其他 prefab manager 的边界；结构读取检查锁定 25 个 NBT 原字节、palette/尺寸/非空气过滤行为以及不迁移完整 StructureLoader 的边界；矿井玩家状态检查锁定 `currentFloor`、`maxFloorReached`、`receivedMineTotem` 三个字段的默认值、单调最高层更新和 NBT 往返合同，暂不把尚未闭合的矿井维度、菜单或网络桥伪装成已迁移。
+方块切片的逐项合同和资源路径转换见 [`forge-building-block-parity.md`](forge-building-block-parity.md)；`./gradlew check` 会运行普通物品、建筑材质、矿井背景、特殊纯方块、装饰数据与旧存档闭包、树核心/树叶/树规则、树建筑、维度、预制登记、结构读取、纯源码/API 闭包、纯战斗规则、域模型、农场布局、作物边界审计和矿井玩家状态对照任务，并检查 12 个语言文件。维度检查锁定稳定 key 且明确不注册动态维度；预制登记检查锁定双索引、NBT 字段、炸弹/砍伐状态和不迁移其他 prefab manager 的边界；结构读取检查锁定 25 个 NBT 原字节、palette/尺寸/非空气过滤行为以及不迁移完整 StructureLoader 的边界；农场布局检查锁定原 run 的异常顺序、边界和权威掩码计数；作物审计明确依赖 `CropGrowthManager`、品质/数据组件和注册闭包尚未迁移；矿井玩家状态检查锁定 `currentFloor`、`maxFloorReached`、`receivedMineTotem` 三个字段的默认值、单调最高层更新和 NBT 往返合同，暂不把尚未闭合的矿井维度、菜单或网络桥伪装成已迁移。
 
 本切片还记录了一个不能靠机械替换解决的 Forge 差异：Forge 1.20.1 的 `@Mod` 类需要无参构造器，再从 `FMLJavaModLoadingContext.get().getModEventBus()` 取得模组事件总线；不能直接照搬 NeoForge 的构造器注入写法。
 
