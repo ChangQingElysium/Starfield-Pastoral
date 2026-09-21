@@ -244,6 +244,23 @@ def checkForgeWallpaperParity = tasks.register('checkForgeWallpaperParity', Exec
     commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_wallpaper.py').asFile.absolutePath
 }
 
+def checkForgeDecorationDataParity = tasks.register('checkForgeDecorationDataParity', Exec) {
+    group = 'verification'
+    description = 'Checks the Forge pure-Java decoration data classes against the 1.21.1 source contract.'
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/deco/DecorationType.java'))
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/deco/WallpaperStyles.java'))
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/deco/DecorationStyle.java'))
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/deco/DecorationStyleRegistry.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/deco/DecorationType.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/deco/WallpaperStyles.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/deco/DecorationStyle.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/deco/DecorationStyleRegistry.java'))
+    inputs.dir(layout.projectDirectory.dir('src/main/resources/assets/stardewcraft/textures/deco'))
+    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/assets/stardewcraft/textures/deco'))
+    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_deco_data.py'))
+    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_deco_data.py').asFile.absolutePath
+}
+
 def checkForgeTreeCoreParity = tasks.register('checkForgeTreeCoreParity', Exec) {
     group = 'verification'
     description = 'Checks the Forge generated-tree core block slice and marker storage against the 1.21.1 source contract.'
@@ -363,6 +380,7 @@ tasks.named('check').configure {
     dependsOn checkForgeMineBlockParity
     dependsOn checkForgeSpecialBlockParity
     dependsOn checkForgeWallpaperParity
+    dependsOn checkForgeDecorationDataParity
     dependsOn checkForgeTreeCoreParity
     dependsOn checkForgeTreeLeavesParity
     dependsOn checkForgeTreeGrowthRulesParity
