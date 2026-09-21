@@ -2,9 +2,11 @@
 """Verify the Forge prefab-tree structure-reader slice.
 
 The Forge port intentionally contains only the vanilla NBT block-reader part
-of ``StructureLoader``.  This checker compares that method's source contract,
-allows the two documented 1.20.1 NBT API differences, and rejects accidental
-copying of the rest of ``StructureLoader`` or the not-yet-ported manager.
+of ``StructureLoader``.  This checker compares that method's source contract.
+The only accepted implementation differences are the hosting class/package,
+the Forge-common logger binding, and the old 1.20.1 compressed-NBT overload;
+it rejects accidental copying of the rest of ``StructureLoader`` or the
+not-yet-ported manager.
 """
 
 from __future__ import annotations
@@ -36,6 +38,18 @@ FORBIDDEN_READER_REFERENCES = (
     "loadAndPlaceCW90",
     "parseBlockState",
     "decodeVarIntArray",
+)
+
+FORBIDDEN_PLACEMENT_TOKENS = (
+    "ServerLevel",
+    "BlockPos",
+    "StructureTemplate",
+    "StructurePlaceSettings",
+    "LevelChunk",
+    "placeInWorld",
+    "setBlock",
+    "ensureChunksLoaded",
+    "applySchematicBlockEntities",
 )
 
 
@@ -197,6 +211,8 @@ def check_type_contract(errors: list[str]) -> None:
         fail(errors, "Forge reader must use a Forge-common logger")
     if "private static final Logger LOGGER = LogUtils.getLogger();" not in forge_text:
         fail(errors, "Forge reader logger declaration drifted")
+    if "import org.slf4j.Logger;" not in forge_text:
+        fail(errors, "Forge reader must declare its logger with the Forge runtime API")
 
 
 def check_boundary(errors: list[str]) -> None:
@@ -205,6 +221,16 @@ def check_boundary(errors: list[str]) -> None:
     for forbidden in FORBIDDEN_READER_REFERENCES:
         if forbidden in executable_text:
             fail(errors, f"Forge tree reader crossed the standalone-slice boundary: {forbidden}")
+    for forbidden in FORBIDDEN_PLACEMENT_TOKENS:
+        if re.search(rf"\b{re.escape(forbidden)}\b", executable_text):
+            fail(errors, f"Forge tree reader must not contain placement API: {forbidden}")
+
+    public_methods = re.findall(
+        r"\bpublic\s+(?!record\b)(?:static\s+)?(?:[\w<>,.?]+\s+)+([A-Za-z_$][\w$]*)\s*\(",
+        executable_text,
+    )
+    if public_methods != ["readStructureNbtBlocks"]:
+        fail(errors, f"Forge tree reader public method boundary drifted: {public_methods}")
 
     for forbidden_name in (
         "StructureLoader.java",
