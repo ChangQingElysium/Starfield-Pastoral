@@ -300,5 +300,7 @@
   "block.stardewcraft.mystic_tree_fishscale_planks_fence": "Забор из досок из мистического дерева «рыбья чешуя»",
   "block.stardewcraft.mystic_tree_fishscale_planks_fence_gate": "Калитка из досок из мистического дерева «рыбья чешуя»",
   "block.stardewcraft.mystic_tree_log_stairs": "Ступени из бревна мистического дерева",
-  "block.stardewcraft.mystic_tree_log_slab": "Плита из бревна мистического дерева"
+  "block.stardewcraft.mystic_tree_log_slab": "Плита из бревна мистического дерева",
+  "block.stardewcraft.wallpaper_block": "Блок обоев",
+  "block.stardewcraft.wallpaper_block.desc": "Используется для украшения стен комнаты."
 }

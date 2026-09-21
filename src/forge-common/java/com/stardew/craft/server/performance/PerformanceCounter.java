@@ -1,0 +1,13 @@
+package com.stardew.craft.server.performance;
+
+public enum PerformanceCounter {
+    CONTENT_SYNC_RECIPIENTS,
+    CONTENT_SYNC_PACKETS,
+    CONTENT_CACHE_HITS,
+    CONTENT_CACHE_REBUILDS,
+    JEI_CATALOG_ENTRIES,
+    FARM_SYNC_CHUNK_LOADS,
+    DAILY_SYNC_CHUNK_LOADS,
+    FARM_CATCH_UP_CHUNKS,
+    FARM_CATCH_UP_OBJECTS
+}

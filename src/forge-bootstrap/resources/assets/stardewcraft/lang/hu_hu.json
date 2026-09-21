@@ -300,5 +300,7 @@
   "block.stardewcraft.mystic_tree_fishscale_planks_fence": "Mystic Tree Fish- scale Platks Kerítés",
   "block.stardewcraft.mystic_tree_fishscale_planks_fence_gate": "Mystic Tree Fish- scale Planks kerítés kapu",
   "block.stardewcraft.mystic_tree_log_stairs": "Mystic Tree Log Lépcsők",
-  "block.stardewcraft.mystic_tree_log_slab": "Misztikus farönk-lap"
+  "block.stardewcraft.mystic_tree_log_slab": "Misztikus farönk-lap",
+  "block.stardewcraft.wallpaper_block": "Tapéta blokk",
+  "block.stardewcraft.wallpaper_block.desc": "Szobafalak díszítésére használt."
 }

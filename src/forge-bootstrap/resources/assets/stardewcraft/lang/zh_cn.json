@@ -300,5 +300,7 @@
   "block.stardewcraft.mystic_tree_fishscale_planks_fence": "神秘树鱼鳞木板栅栏",
   "block.stardewcraft.mystic_tree_fishscale_planks_fence_gate": "神秘树鱼鳞木板栅栏门",
   "block.stardewcraft.mystic_tree_log_stairs": "神秘树原木楼梯",
-  "block.stardewcraft.mystic_tree_log_slab": "神秘树原木台阶"
+  "block.stardewcraft.mystic_tree_log_slab": "神秘树原木台阶",
+  "block.stardewcraft.wallpaper_block": "墙纸方块",
+  "block.stardewcraft.wallpaper_block.desc": "用于装饰房间的墙面。"
 }

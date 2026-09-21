@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "stardewcraft:block/tree/oak/leaves"
+      }
+    }
+  ]
+}

@@ -300,5 +300,7 @@
   "block.stardewcraft.mystic_tree_fishscale_planks_fence": "Cerca de tábuas em escamas de peixe de árvore mística",
   "block.stardewcraft.mystic_tree_fishscale_planks_fence_gate": "Portão de cerca de tábuas em escamas de peixe de árvore mística",
   "block.stardewcraft.mystic_tree_log_stairs": "Escadas de Registo de Árvore Mística",
-  "block.stardewcraft.mystic_tree_log_slab": "Laje de tronco de árvore mística"
+  "block.stardewcraft.mystic_tree_log_slab": "Laje de tronco de árvore mística",
+  "block.stardewcraft.wallpaper_block": "Bloco de Papel de Parede",
+  "block.stardewcraft.wallpaper_block.desc": "Usado para decorar paredes de quarto."
 }

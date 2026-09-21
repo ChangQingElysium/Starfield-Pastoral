@@ -300,5 +300,7 @@
   "block.stardewcraft.mystic_tree_fishscale_planks_fence": "Zaun aus mystischen Fischschuppenbrettern",
   "block.stardewcraft.mystic_tree_fishscale_planks_fence_gate": "Zauntor aus mystischen Fischschuppenbrettern",
   "block.stardewcraft.mystic_tree_log_stairs": "Mystic Tree Log Treppen",
-  "block.stardewcraft.mystic_tree_log_slab": "Mystische Baum Log Slab"
+  "block.stardewcraft.mystic_tree_log_slab": "Mystische Baum Log Slab",
+  "block.stardewcraft.wallpaper_block": "Tapetenblock",
+  "block.stardewcraft.wallpaper_block.desc": "Verwendet, um Raumwände zu dekorieren."
 }

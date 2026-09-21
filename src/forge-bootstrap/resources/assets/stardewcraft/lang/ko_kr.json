@@ -300,5 +300,7 @@
   "block.stardewcraft.mystic_tree_fishscale_planks_fence": "신비한 나무 물고기 가늠자 판자 담",
   "block.stardewcraft.mystic_tree_fishscale_planks_fence_gate": "신비한 나무 물고기 가늠자 판자 담 문",
   "block.stardewcraft.mystic_tree_log_stairs": "Mystic Tree 로그 층계",
-  "block.stardewcraft.mystic_tree_log_slab": "Mystic 트리 로그 슬랩"
+  "block.stardewcraft.mystic_tree_log_slab": "Mystic 트리 로그 슬랩",
+  "block.stardewcraft.wallpaper_block": "벽지 블록",
+  "block.stardewcraft.wallpaper_block.desc": "방 벽을 꾸미기 위하여 사용하는."
 }

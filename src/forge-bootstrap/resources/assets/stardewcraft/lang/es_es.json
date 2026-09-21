@@ -300,5 +300,7 @@
   "block.stardewcraft.mystic_tree_fishscale_planks_fence": "Árboles místicos peces escala cerca",
   "block.stardewcraft.mystic_tree_fishscale_planks_fence_gate": "Árbol místico Planks a escala de peces Fence Gate",
   "block.stardewcraft.mystic_tree_log_stairs": "Escaleras de tronco de árbol místico",
-  "block.stardewcraft.mystic_tree_log_slab": "Lámina de registro de árboles místicos"
+  "block.stardewcraft.mystic_tree_log_slab": "Lámina de registro de árboles místicos",
+  "block.stardewcraft.wallpaper_block": "Bloque de papel pintado",
+  "block.stardewcraft.wallpaper_block.desc": "Solía decorar paredes de la habitación."
 }

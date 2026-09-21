@@ -2,6 +2,7 @@ package com.stardew.craft.forge.registry;
 
 import com.stardew.craft.block.tree.NewTreeLogBlock;
 import com.stardew.craft.block.tree.NewTreePartBlock;
+import com.stardew.craft.block.tree.StardewLeavesBlock;
 import com.stardew.craft.forge.ForgeBootstrap;
 
 import java.util.Collections;
@@ -212,22 +213,28 @@ public final class ForgeBlocks {
 
     public static final RegistryObject<Block> OAK_ROOT = newTreeRoot("oak");
     public static final RegistryObject<Block> OAK_LOG = newTreeLog("oak");
+    public static final RegistryObject<Block> OAK_LEAVES = newTreeLeaves("oak");
+    public static final RegistryObject<Block> OAK_LEAVES_QUESTION = newPersistentLeaves("oak_leaves_question");
     public static final RegistryObject<Block> OAK_BRANCH = newTreeBranch("oak");
 
     public static final RegistryObject<Block> MAPLE_ROOT = newTreeRoot("maple");
     public static final RegistryObject<Block> MAPLE_LOG = newTreeLog("maple");
+    public static final RegistryObject<Block> MAPLE_LEAVES = newTreeLeaves("maple");
     public static final RegistryObject<Block> MAPLE_BRANCH = newTreeBranch("maple");
 
     public static final RegistryObject<Block> PINE_ROOT = newTreeRoot("pine");
     public static final RegistryObject<Block> PINE_LOG = newTreeLog("pine");
+    public static final RegistryObject<Block> PINE_LEAVES = newTreeLeaves("pine");
     public static final RegistryObject<Block> PINE_BRANCH = newTreeBranch("pine");
 
     public static final RegistryObject<Block> MAHOGANY_ROOT = newTreeRoot("mahogany");
     public static final RegistryObject<Block> MAHOGANY_LOG = newTreeLog("mahogany");
+    public static final RegistryObject<Block> MAHOGANY_LEAVES = newTreeLeaves("mahogany");
     public static final RegistryObject<Block> MAHOGANY_BRANCH = newTreeBranch("mahogany");
 
     public static final RegistryObject<Block> MYSTIC_TREE_ROOT = newTreeRoot("mystic_tree");
     public static final RegistryObject<Block> MYSTIC_TREE_LOG = newTreeLog("mystic_tree");
+    public static final RegistryObject<Block> MYSTIC_TREE_LEAVES = newTreeLeaves("mystic_tree");
     public static final RegistryObject<Block> MYSTIC_TREE_BRANCH = newTreeBranch("mystic_tree");
 
     private static final String[] NEW_TREE_WOOD_SPECIES = {
@@ -266,6 +273,22 @@ public final class ForgeBlocks {
     private static RegistryObject<Block> newTreeBranch(String species) {
         return BLOCKS.register(species + "_branch",
                 () -> new NewTreePartBlock(newTreeWoodProps().noOcclusion(), true));
+    }
+
+    private static RegistryObject<Block> newTreeLeaves(String species) {
+        return BLOCKS.register(species + "_leaves", () -> new StardewLeavesBlock(
+                BlockBehaviour.Properties.copy(Blocks.OAK_LEAVES).dynamicShape()));
+    }
+
+    private static RegistryObject<Block> newPersistentLeaves(String name) {
+        return BLOCKS.register(name, () -> new StardewLeavesBlock(
+                BlockBehaviour.Properties.of()
+                        .mapColor(MapColor.PLANT)
+                        .sound(SoundType.GRASS)
+                        .strength(0.2F)
+                        .noCollission()
+                        .noOcclusion()
+                        .dynamicShape(), true));
     }
 
     private static RegistryObject<? extends Block> newTreeLogBlock(String species) {

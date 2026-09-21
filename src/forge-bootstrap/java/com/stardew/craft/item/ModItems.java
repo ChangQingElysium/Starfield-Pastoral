@@ -7,6 +7,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 
 import com.stardew.craft.forge.registry.ForgeItems;
+import com.stardew.craft.forge.registry.ForgeWallpaperRegistry;
 
 /** Compatibility names for ported code; all registration behavior remains in ForgeItems. */
 public final class ModItems {
@@ -45,21 +46,29 @@ public final class ModItems {
     public static final RegistryObject<Item> PALE_BLUE_WINDOW_GLASS = ForgeItems.PALE_BLUE_WINDOW_GLASS;
     public static final RegistryObject<Item> OAK_ROOT = ForgeItems.OAK_ROOT;
     public static final RegistryObject<Item> OAK_LOG = ForgeItems.OAK_LOG;
+    public static final RegistryObject<Item> OAK_LEAVES = ForgeItems.OAK_LEAVES;
+    public static final RegistryObject<Item> OAK_LEAVES_QUESTION = ForgeItems.OAK_LEAVES_QUESTION;
     public static final RegistryObject<Item> OAK_BRANCH = ForgeItems.OAK_BRANCH;
     public static final RegistryObject<Item> MAPLE_ROOT = ForgeItems.MAPLE_ROOT;
     public static final RegistryObject<Item> MAPLE_LOG = ForgeItems.MAPLE_LOG;
+    public static final RegistryObject<Item> MAPLE_LEAVES = ForgeItems.MAPLE_LEAVES;
     public static final RegistryObject<Item> MAPLE_BRANCH = ForgeItems.MAPLE_BRANCH;
     public static final RegistryObject<Item> PINE_ROOT = ForgeItems.PINE_ROOT;
     public static final RegistryObject<Item> PINE_LOG = ForgeItems.PINE_LOG;
+    public static final RegistryObject<Item> PINE_LEAVES = ForgeItems.PINE_LEAVES;
     public static final RegistryObject<Item> PINE_BRANCH = ForgeItems.PINE_BRANCH;
     public static final RegistryObject<Item> MAHOGANY_ROOT = ForgeItems.MAHOGANY_ROOT;
     public static final RegistryObject<Item> MAHOGANY_LOG = ForgeItems.MAHOGANY_LOG;
+    public static final RegistryObject<Item> MAHOGANY_LEAVES = ForgeItems.MAHOGANY_LEAVES;
     public static final RegistryObject<Item> MAHOGANY_BRANCH = ForgeItems.MAHOGANY_BRANCH;
     public static final RegistryObject<Item> MYSTIC_TREE_ROOT = ForgeItems.MYSTIC_TREE_ROOT;
     public static final RegistryObject<Item> MYSTIC_TREE_LOG = ForgeItems.MYSTIC_TREE_LOG;
+    public static final RegistryObject<Item> MYSTIC_TREE_LEAVES = ForgeItems.MYSTIC_TREE_LEAVES;
     public static final RegistryObject<Item> MYSTIC_TREE_BRANCH = ForgeItems.MYSTIC_TREE_BRANCH;
     public static final Map<String, RegistryObject<Item>> NEW_TREE_BUILDING_ITEMS =
             ForgeItems.NEW_TREE_BUILDING_ITEMS;
+    public static final Map<String, RegistryObject<Item>> WALLPAPER_STYLE_ITEMS =
+            ForgeWallpaperRegistry.ITEM_STYLES;
     public static final RegistryObject<Item> ECTOPLASM = ForgeItems.ECTOPLASM;
     public static final RegistryObject<Item> PRISMATIC_JELLY = ForgeItems.PRISMATIC_JELLY;
     public static final RegistryObject<Item> EXPLOSIVE_AMMO = ForgeItems.EXPLOSIVE_AMMO;

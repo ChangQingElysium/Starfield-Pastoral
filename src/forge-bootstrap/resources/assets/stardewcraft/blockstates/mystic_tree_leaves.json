@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+      "model": "stardewcraft:block/tree/mystic_tree/leaves"
+      }
+    }
+  ]
+}

@@ -300,5 +300,7 @@
   "block.stardewcraft.mystic_tree_fishscale_planks_fence": "Mystic Tree Fish-scale Planks Fence",
   "block.stardewcraft.mystic_tree_fishscale_planks_fence_gate": "Mystic Tree Fish-scale Planks Fence Gate",
   "block.stardewcraft.mystic_tree_log_stairs": "Mystic Tree Log Stairs",
-  "block.stardewcraft.mystic_tree_log_slab": "Mystic Tree Log Slab"
+  "block.stardewcraft.mystic_tree_log_slab": "Mystic Tree Log Slab",
+  "block.stardewcraft.wallpaper_block": "Wallpaper Block",
+  "block.stardewcraft.wallpaper_block.desc": "Used to decorate room walls."
 }

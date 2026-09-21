@@ -6,6 +6,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import com.stardew.craft.forge.registry.ForgeBlocks;
 import com.stardew.craft.forge.registry.ForgeBlockEntities;
 import com.stardew.craft.forge.registry.ForgeItems;
+import com.stardew.craft.forge.registry.ForgeWallpaperRegistry;
 
 /**
  * Minimal Forge entrypoint used while the NeoForge runtime is being ported in layers.
@@ -18,6 +19,8 @@ public final class ForgeBootstrap {
     public ForgeBootstrap() {
         ForgeBlocks.BLOCKS.register(FMLJavaModLoadingContext.get().getModEventBus());
         ForgeItems.ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
+        ForgeWallpaperRegistry.BLOCKS.register(FMLJavaModLoadingContext.get().getModEventBus());
+        ForgeWallpaperRegistry.ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
         ForgeBlockEntities.BLOCK_ENTITIES.register(FMLJavaModLoadingContext.get().getModEventBus());
     }
 }

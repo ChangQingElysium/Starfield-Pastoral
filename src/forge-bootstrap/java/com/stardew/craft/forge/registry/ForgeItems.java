@@ -74,18 +74,24 @@ public final class ForgeItems {
 
     public static final RegistryObject<Item> OAK_ROOT = registerBuildingBlock(ForgeBlocks.OAK_ROOT);
     public static final RegistryObject<Item> OAK_LOG = registerBuildingBlock(ForgeBlocks.OAK_LOG);
+    public static final RegistryObject<Item> OAK_LEAVES = registerBuildingBlock(ForgeBlocks.OAK_LEAVES);
+    public static final RegistryObject<Item> OAK_LEAVES_QUESTION = registerBuildingBlock(ForgeBlocks.OAK_LEAVES_QUESTION);
     public static final RegistryObject<Item> OAK_BRANCH = registerBuildingBlock(ForgeBlocks.OAK_BRANCH);
     public static final RegistryObject<Item> MAPLE_ROOT = registerBuildingBlock(ForgeBlocks.MAPLE_ROOT);
     public static final RegistryObject<Item> MAPLE_LOG = registerBuildingBlock(ForgeBlocks.MAPLE_LOG);
+    public static final RegistryObject<Item> MAPLE_LEAVES = registerBuildingBlock(ForgeBlocks.MAPLE_LEAVES);
     public static final RegistryObject<Item> MAPLE_BRANCH = registerBuildingBlock(ForgeBlocks.MAPLE_BRANCH);
     public static final RegistryObject<Item> PINE_ROOT = registerBuildingBlock(ForgeBlocks.PINE_ROOT);
     public static final RegistryObject<Item> PINE_LOG = registerBuildingBlock(ForgeBlocks.PINE_LOG);
+    public static final RegistryObject<Item> PINE_LEAVES = registerBuildingBlock(ForgeBlocks.PINE_LEAVES);
     public static final RegistryObject<Item> PINE_BRANCH = registerBuildingBlock(ForgeBlocks.PINE_BRANCH);
     public static final RegistryObject<Item> MAHOGANY_ROOT = registerBuildingBlock(ForgeBlocks.MAHOGANY_ROOT);
     public static final RegistryObject<Item> MAHOGANY_LOG = registerBuildingBlock(ForgeBlocks.MAHOGANY_LOG);
+    public static final RegistryObject<Item> MAHOGANY_LEAVES = registerBuildingBlock(ForgeBlocks.MAHOGANY_LEAVES);
     public static final RegistryObject<Item> MAHOGANY_BRANCH = registerBuildingBlock(ForgeBlocks.MAHOGANY_BRANCH);
     public static final RegistryObject<Item> MYSTIC_TREE_ROOT = registerBuildingBlock(ForgeBlocks.MYSTIC_TREE_ROOT);
     public static final RegistryObject<Item> MYSTIC_TREE_LOG = registerBuildingBlock(ForgeBlocks.MYSTIC_TREE_LOG);
+    public static final RegistryObject<Item> MYSTIC_TREE_LEAVES = registerBuildingBlock(ForgeBlocks.MYSTIC_TREE_LEAVES);
     public static final RegistryObject<Item> MYSTIC_TREE_BRANCH = registerBuildingBlock(ForgeBlocks.MYSTIC_TREE_BRANCH);
 
     public static final Map<String, RegistryObject<Item>> NEW_TREE_BUILDING_ITEMS =

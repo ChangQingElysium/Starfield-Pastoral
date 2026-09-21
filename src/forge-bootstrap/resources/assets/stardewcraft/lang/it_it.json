@@ -300,5 +300,7 @@
   "block.stardewcraft.mystic_tree_fishscale_planks_fence": "Recinzione di assi a squame di pesce di albero mistico",
   "block.stardewcraft.mystic_tree_fishscale_planks_fence_gate": "Cancello di recinzione di assi a squame di pesce di albero mistico",
   "block.stardewcraft.mystic_tree_log_stairs": "Scale di tronchi albero mistico",
-  "block.stardewcraft.mystic_tree_log_slab": "Lastra di legno mistico"
+  "block.stardewcraft.mystic_tree_log_slab": "Lastra di legno mistico",
+  "block.stardewcraft.wallpaper_block": "blocco carta da parati",
+  "block.stardewcraft.wallpaper_block.desc": "Usato per decorare pareti della stanza."
 }

@@ -300,5 +300,7 @@
   "block.stardewcraft.mystic_tree_fishscale_planks_fence": "Clôture en planches d’écailles de poisson Arbre Mystique",
   "block.stardewcraft.mystic_tree_fishscale_planks_fence_gate": "Arbre mystique, planches à écailles de poisson, clôture",
   "block.stardewcraft.mystic_tree_log_stairs": "Escaliers en rondins de l’arbre mystique",
-  "block.stardewcraft.mystic_tree_log_slab": "Dalle de troncs de l’arbre mystique"
+  "block.stardewcraft.mystic_tree_log_slab": "Dalle de troncs de l’arbre mystique",
+  "block.stardewcraft.wallpaper_block": "Bloc de papier peint",
+  "block.stardewcraft.wallpaper_block.desc": "Ça décorait les murs des pièces."
 }

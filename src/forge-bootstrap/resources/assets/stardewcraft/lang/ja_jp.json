@@ -300,5 +300,7 @@
   "block.stardewcraft.mystic_tree_fishscale_planks_fence": "神秘的な木魚スケールの板の塀",
   "block.stardewcraft.mystic_tree_fishscale_planks_fence_gate": "うろこ模様のミスティックツリー板材のフェンスゲート",
   "block.stardewcraft.mystic_tree_log_stairs": "マイスティックツリーログ階段",
-  "block.stardewcraft.mystic_tree_log_slab": "マイスティックツリーログスラブ"
+  "block.stardewcraft.mystic_tree_log_slab": "マイスティックツリーログスラブ",
+  "block.stardewcraft.wallpaper_block": "壁紙ブロック",
+  "block.stardewcraft.wallpaper_block.desc": "部屋の壁を飾るのに使用される."
 }

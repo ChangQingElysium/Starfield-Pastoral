@@ -193,7 +193,18 @@ def check_text_contracts(errors: list[str]) -> None:
         for species in SPECIES
         for part in ("ROOT", "BRANCH")
     ]
-    actual_cutout = re.findall(r"ItemBlockRenderTypes\.setRenderLayer\(\s*(ForgeBlocks\.[A-Z0-9_]+\.get\(\))", forge_client)
+    # The leaves slice registers its own cutout-mipped layers in the same
+    # client hook.  Keep this core check scoped to the root/branch contract;
+    # otherwise adding the separately verified leaves resources would look
+    # like a core-order regression.
+    actual_cutout = [
+        expression
+        for expression in re.findall(
+            r"ItemBlockRenderTypes\.setRenderLayer\(\s*(ForgeBlocks\.[A-Z0-9_]+\.get\(\))",
+            forge_client,
+        )
+        if re.search(r"_(?:ROOT|BRANCH)\.get\(\)$", expression)
+    ]
     if actual_cutout != expected_cutout:
         fail(errors, f"Forge tree-core cutout registration order drifted: {actual_cutout}")
 

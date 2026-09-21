@@ -21,14 +21,20 @@ public final class ForgeClientSetup {
         event.enqueueWork(() -> {
             ItemBlockRenderTypes.setRenderLayer(ForgeBlocks.OAK_ROOT.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ForgeBlocks.OAK_BRANCH.get(), RenderType.cutout());
+            ItemBlockRenderTypes.setRenderLayer(ForgeBlocks.OAK_LEAVES.get(), RenderType.cutoutMipped());
+            ItemBlockRenderTypes.setRenderLayer(ForgeBlocks.OAK_LEAVES_QUESTION.get(), RenderType.cutoutMipped());
             ItemBlockRenderTypes.setRenderLayer(ForgeBlocks.MAPLE_ROOT.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ForgeBlocks.MAPLE_BRANCH.get(), RenderType.cutout());
+            ItemBlockRenderTypes.setRenderLayer(ForgeBlocks.MAPLE_LEAVES.get(), RenderType.cutoutMipped());
             ItemBlockRenderTypes.setRenderLayer(ForgeBlocks.PINE_ROOT.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ForgeBlocks.PINE_BRANCH.get(), RenderType.cutout());
+            ItemBlockRenderTypes.setRenderLayer(ForgeBlocks.PINE_LEAVES.get(), RenderType.cutoutMipped());
             ItemBlockRenderTypes.setRenderLayer(ForgeBlocks.MAHOGANY_ROOT.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ForgeBlocks.MAHOGANY_BRANCH.get(), RenderType.cutout());
+            ItemBlockRenderTypes.setRenderLayer(ForgeBlocks.MAHOGANY_LEAVES.get(), RenderType.cutoutMipped());
             ItemBlockRenderTypes.setRenderLayer(ForgeBlocks.MYSTIC_TREE_ROOT.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(ForgeBlocks.MYSTIC_TREE_BRANCH.get(), RenderType.cutout());
+            ItemBlockRenderTypes.setRenderLayer(ForgeBlocks.MYSTIC_TREE_LEAVES.get(), RenderType.cutoutMipped());
         });
     }
 }

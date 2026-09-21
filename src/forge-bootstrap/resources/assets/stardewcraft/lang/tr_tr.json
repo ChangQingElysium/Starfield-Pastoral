@@ -300,5 +300,7 @@
   "block.stardewcraft.mystic_tree_fishscale_planks_fence": "Mystic Tree Fish-scale Planks Tel",
   "block.stardewcraft.mystic_tree_fishscale_planks_fence_gate": "Mystic Tree Fish-scale Planks Tel Kapı",
   "block.stardewcraft.mystic_tree_log_stairs": "Mystic Tree Log Merdivenleri",
-  "block.stardewcraft.mystic_tree_log_slab": "Mistik ağaç girişi"
+  "block.stardewcraft.mystic_tree_log_slab": "Mistik ağaç girişi",
+  "block.stardewcraft.wallpaper_block": "Duvar kağıdı",
+  "block.stardewcraft.wallpaper_block.desc": "Oda duvarları dekore etmek için kullanılır."
 }
