@@ -1,9 +1,5 @@
 package com.stardew.craft.block.utility;
 
-import java.util.List;
-
-import javax.annotation.Nullable;
-
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.block.Block;
@@ -13,13 +9,10 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.storage.loot.LootParams;
 
-/**
- * Forge 1.20.1 port of the stable-ID wallpaper block.
- *
- * <p>This static-content slice intentionally handles only adjacent stable-ID
- * wallpaper blocks. Legacy {@code wallpaper_block} fallback is not present
- * until its block-entity and migration dependency closure is ported.</p>
- */
+import javax.annotation.Nullable;
+import java.util.List;
+
+@SuppressWarnings("null")
 public class WallpaperBlock extends Block {
     public static final IntegerProperty SEGMENT = IntegerProperty.create("segment", 0, 2);
     private final String styleId;
@@ -40,7 +33,7 @@ public class WallpaperBlock extends Block {
     }
 
     @Override
-    public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+    public List<ItemStack> getDrops(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") LootParams.Builder params) {
         return List.of(new ItemStack(this));
     }
 
@@ -51,6 +44,8 @@ public class WallpaperBlock extends Block {
         int segment = 0;
         if (below.getBlock() instanceof WallpaperBlock && below.hasProperty(SEGMENT)) {
             segment = Math.floorMod(below.getValue(SEGMENT) + 1, 3);
+        } else if (below.getBlock() instanceof LegacyWallpaperBlock && below.hasProperty(LegacyWallpaperBlock.SEGMENT)) {
+            segment = Math.floorMod(below.getValue(LegacyWallpaperBlock.SEGMENT) + 1, 3);
         }
         return defaultBlockState().setValue(SEGMENT, segment);
     }

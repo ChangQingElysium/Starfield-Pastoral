@@ -126,6 +126,9 @@ public final class ForgeItems {
             () -> new SimpleStardewItem("stardewcraft.type.hidden", -1, new Item.Properties().stacksTo(1))
     );
 
+    public static final RegistryObject<Item> WALLPAPER_BLOCK = ForgeWallpaperRegistry.WALLPAPER_ITEM;
+    public static final RegistryObject<Item> FLOORING_BLOCK = ForgeWallpaperRegistry.FLOORING_ITEM;
+
     public static final RegistryObject<Item> BAIT = ITEMS.register(
             "bait",
             () -> new SimpleStardewItem("stardewcraft.type.fishing", 1, new Item.Properties().stacksTo(999))

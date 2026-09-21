@@ -160,6 +160,27 @@ def checkForgePureSourceParity = tasks.register('checkForgePureSourceParity', Ex
     commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_pure_source_parity.py').asFile.absolutePath
 }
 
+def checkForgeMachineModelParity = tasks.register('checkForgeMachineModelParity', Exec) {
+    group = 'verification'
+    description = 'Checks exact parity and loader-independent closure for machine, production and recipe model classes.'
+    inputs.dir(layout.projectDirectory.dir('src/main/java/com/stardew/craft/api/v1/machine'))
+    inputs.dir(layout.projectDirectory.dir('src/main/java/com/stardew/craft/api/v1/production'))
+    inputs.dir(layout.projectDirectory.dir('src/main/java/com/stardew/craft/blockentity'))
+    inputs.dir(layout.projectDirectory.dir('src/main/java/com/stardew/craft/block/utility'))
+    inputs.dir(layout.projectDirectory.dir('src/main/java/com/stardew/craft/workbench'))
+    inputs.dir(layout.projectDirectory.dir('src/main/java/com/stardew/craft/model'))
+    inputs.dir(layout.projectDirectory.dir('src/main/java/com/stardew/craft/item/artisan'))
+    inputs.dir(layout.projectDirectory.dir('src/forge-common/java/com/stardew/craft/api/v1/machine'))
+    inputs.dir(layout.projectDirectory.dir('src/forge-common/java/com/stardew/craft/api/v1/production'))
+    inputs.dir(layout.projectDirectory.dir('src/forge-common/java/com/stardew/craft/blockentity'))
+    inputs.dir(layout.projectDirectory.dir('src/forge-common/java/com/stardew/craft/block/utility'))
+    inputs.dir(layout.projectDirectory.dir('src/forge-common/java/com/stardew/craft/workbench'))
+    inputs.dir(layout.projectDirectory.dir('src/forge-common/java/com/stardew/craft/model'))
+    inputs.dir(layout.projectDirectory.dir('src/forge-common/java/com/stardew/craft/item/artisan'))
+    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_machine_models.py'))
+    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_machine_models.py').asFile.absolutePath
+}
+
 def checkForgeItemParity = tasks.register('checkForgeItemParity', Exec) {
     group = 'verification'
     description = 'Checks Forge SimpleStardewItem registrations and resources against the 1.21.1 source contract.'
@@ -229,7 +250,7 @@ def checkForgeSpecialBlockParity = tasks.register('checkForgeSpecialBlockParity'
 
 def checkForgeWallpaperParity = tasks.register('checkForgeWallpaperParity', Exec) {
     group = 'verification'
-    description = 'Checks the Forge MoreWalls wallpaper block/item slice and resources against the 1.21.1 source contract.'
+    description = 'Checks the complete Forge stable-ID wallpaper block/item slice and resources against the 1.21.1 source contract.'
     inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/block/ModBlocks.java'))
     inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/item/ModItems.java'))
     inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeWallpaperRegistry.java'))
@@ -259,6 +280,27 @@ def checkForgeDecorationDataParity = tasks.register('checkForgeDecorationDataPar
     inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/assets/stardewcraft/textures/deco'))
     inputs.file(layout.projectDirectory.file('compatibility/verify_forge_deco_data.py'))
     commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_deco_data.py').asFile.absolutePath
+}
+
+def checkForgeLegacyDecorationParity = tasks.register('checkForgeLegacyDecorationParity', Exec) {
+    group = 'verification'
+    description = 'Checks the Forge legacy wallpaper/flooring runtime closure and source-identical decoration assets.'
+    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/block/utility/LegacyWallpaperBlock.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/block/utility/WallpaperBlock.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/block/utility/FlooringBlock.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/blockentity/DecorBlockEntity.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/deco/LegacyWallpaperMigration.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeWallpaperRegistry.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/block/ModBlocks.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/item/ModItems.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeItems.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeBlockEntities.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/blockentity/ModBlockEntities.java'))
+    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/assets/stardewcraft'))
+    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/data/stardewcraft'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/resources/data/minecraft/tags/blocks/mineable/axe.json'))
+    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_deco_runtime.py'))
+    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_deco_runtime.py').asFile.absolutePath
 }
 
 def checkForgeTreeCoreParity = tasks.register('checkForgeTreeCoreParity', Exec) {
@@ -320,6 +362,17 @@ def checkForgeTreeGrowthRulesParity = tasks.register('checkForgeTreeGrowthRulesP
     commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_tree_growth_rules.py').asFile.absolutePath
 }
 
+def checkForgeOvernightRulesParity = tasks.register('checkForgeOvernightRulesParity', Exec) {
+    group = 'verification'
+    description = 'Checks loader-independent overnight timing and screen-order rules against the 1.21.1 source contract.'
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/network/overnight/OvernightCollapseTimeline.java'))
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/network/overnight/OvernightSequencePlanner.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/network/overnight/OvernightCollapseTimeline.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/network/overnight/OvernightSequencePlanner.java'))
+    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_overnight_rules.py'))
+    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_overnight_rules.py').asFile.absolutePath
+}
+
 def checkForgeTreeBuildingParity = tasks.register('checkForgeTreeBuildingParity', Exec) {
     group = 'verification'
     description = 'Checks the complete 85-block generated-tree building slice and Forge 1.20.1 resource conversions.'
@@ -375,15 +428,18 @@ def checkForgeDimensionParity = tasks.register('checkForgeDimensionParity', Exec
 tasks.named('check').configure {
     dependsOn checkTranslations
     dependsOn checkForgePureSourceParity
+    dependsOn checkForgeMachineModelParity
     dependsOn checkForgeItemParity
     dependsOn checkForgeBuildingBlockParity
     dependsOn checkForgeMineBlockParity
     dependsOn checkForgeSpecialBlockParity
     dependsOn checkForgeWallpaperParity
     dependsOn checkForgeDecorationDataParity
+    dependsOn checkForgeLegacyDecorationParity
     dependsOn checkForgeTreeCoreParity
     dependsOn checkForgeTreeLeavesParity
     dependsOn checkForgeTreeGrowthRulesParity
+    dependsOn checkForgeOvernightRulesParity
     dependsOn checkForgeTreeBuildingParity
     dependsOn checkForgePrefabRegistryParity
     dependsOn checkForgeTreeStructureReaderParity

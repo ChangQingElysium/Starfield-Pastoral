@@ -302,5 +302,7 @@
   "block.stardewcraft.mystic_tree_log_stairs": "マイスティックツリーログ階段",
   "block.stardewcraft.mystic_tree_log_slab": "マイスティックツリーログスラブ",
   "block.stardewcraft.wallpaper_block": "壁紙ブロック",
-  "block.stardewcraft.wallpaper_block.desc": "部屋の壁を飾るのに使用される."
+  "block.stardewcraft.wallpaper_block.desc": "部屋の壁を飾るのに使用される.",
+  "block.stardewcraft.flooring_block": "フローリングブロック",
+  "block.stardewcraft.flooring_block.desc": "部屋の床を飾るのに使用される."
 }

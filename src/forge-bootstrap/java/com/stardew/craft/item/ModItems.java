@@ -69,6 +69,8 @@ public final class ModItems {
             ForgeItems.NEW_TREE_BUILDING_ITEMS;
     public static final Map<String, RegistryObject<Item>> WALLPAPER_STYLE_ITEMS =
             ForgeWallpaperRegistry.ITEM_STYLES;
+    public static final RegistryObject<Item> WALLPAPER_BLOCK = ForgeWallpaperRegistry.WALLPAPER_ITEM;
+    public static final RegistryObject<Item> FLOORING_BLOCK = ForgeWallpaperRegistry.FLOORING_ITEM;
     public static final RegistryObject<Item> ECTOPLASM = ForgeItems.ECTOPLASM;
     public static final RegistryObject<Item> PRISMATIC_JELLY = ForgeItems.PRISMATIC_JELLY;
     public static final RegistryObject<Item> EXPLOSIVE_AMMO = ForgeItems.EXPLOSIVE_AMMO;

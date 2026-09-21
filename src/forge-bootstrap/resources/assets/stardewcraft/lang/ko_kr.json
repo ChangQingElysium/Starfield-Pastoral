@@ -302,5 +302,7 @@
   "block.stardewcraft.mystic_tree_log_stairs": "Mystic Tree 로그 층계",
   "block.stardewcraft.mystic_tree_log_slab": "Mystic 트리 로그 슬랩",
   "block.stardewcraft.wallpaper_block": "벽지 블록",
-  "block.stardewcraft.wallpaper_block.desc": "방 벽을 꾸미기 위하여 사용하는."
+  "block.stardewcraft.wallpaper_block.desc": "방 벽을 꾸미기 위하여 사용하는.",
+  "block.stardewcraft.flooring_block": "바닥 블록",
+  "block.stardewcraft.flooring_block.desc": "객실 바닥을 장식하는 데 사용."
 }

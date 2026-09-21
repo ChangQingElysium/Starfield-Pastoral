@@ -1,0 +1,7 @@
+﻿{
+    "textures":  {
+                     "all":  "stardewcraft:block/deco/flooring/style_56_part_2",
+                     "particle":  "stardewcraft:block/deco/flooring/style_56_part_2"
+                 },
+    "parent":  "minecraft:block/cube_all"
+}

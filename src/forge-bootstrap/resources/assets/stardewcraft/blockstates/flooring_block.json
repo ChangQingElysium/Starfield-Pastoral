@@ -1,0 +1,784 @@
+{
+    "variants":  {
+                     "part=2,style=51":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_51_part_2"
+                                         },
+                     "part=2,style=14":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_14_part_2"
+                                         },
+                     "part=1,style=12":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_12_part_1"
+                                         },
+                     "part=1,style=8":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_8_part_1"
+                                        },
+                     "part=3,style=1":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_1_part_3"
+                                        },
+                     "part=1,style=39":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_39_part_1"
+                                         },
+                     "part=0,style=43":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_43_part_0"
+                                         },
+                     "part=3,style=56":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_56_part_3"
+                                         },
+                     "part=0,style=34":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_34_part_0"
+                                         },
+                     "part=0,style=53":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_53_part_0"
+                                         },
+                     "part=2,style=54":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_54_part_2"
+                                         },
+                     "part=1,style=51":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_51_part_1"
+                                         },
+                     "part=0,style=28":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_28_part_0"
+                                         },
+                     "part=3,style=14":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_14_part_3"
+                                         },
+                     "part=0,style=5":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_5_part_0"
+                                        },
+                     "part=1,style=55":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_55_part_1"
+                                         },
+                     "part=3,style=27":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_27_part_3"
+                                         },
+                     "part=1,style=27":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_27_part_1"
+                                         },
+                     "part=3,style=22":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_22_part_3"
+                                         },
+                     "part=2,style=0":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_0_part_2"
+                                        },
+                     "part=0,style=54":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_54_part_0"
+                                         },
+                     "part=3,style=8":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_8_part_3"
+                                        },
+                     "part=0,style=10":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_10_part_0"
+                                         },
+                     "part=0,style=38":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_38_part_0"
+                                         },
+                     "part=2,style=43":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_43_part_2"
+                                         },
+                     "part=0,style=26":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_26_part_0"
+                                         },
+                     "part=0,style=25":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_25_part_0"
+                                         },
+                     "part=0,style=60":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_60_part_0"
+                                         },
+                     "part=2,style=61":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_61_part_2"
+                                         },
+                     "part=1,style=34":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_34_part_1"
+                                         },
+                     "part=3,style=29":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_29_part_3"
+                                         },
+                     "part=1,style=31":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_31_part_1"
+                                         },
+                     "part=1,style=4":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_4_part_1"
+                                        },
+                     "part=0,style=39":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_39_part_0"
+                                         },
+                     "part=2,style=12":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_12_part_2"
+                                         },
+                     "part=1,style=20":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_20_part_1"
+                                         },
+                     "part=0,style=56":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_56_part_0"
+                                         },
+                     "part=3,style=30":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_30_part_3"
+                                         },
+                     "part=1,style=50":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_50_part_1"
+                                         },
+                     "part=0,style=61":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_61_part_0"
+                                         },
+                     "part=3,style=57":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_57_part_3"
+                                         },
+                     "part=0,style=21":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_21_part_0"
+                                         },
+                     "part=2,style=30":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_30_part_2"
+                                         },
+                     "part=2,style=40":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_40_part_2"
+                                         },
+                     "part=1,style=47":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_47_part_1"
+                                         },
+                     "part=2,style=64":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_64_part_2"
+                                         },
+                     "part=0,style=4":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_4_part_0"
+                                        },
+                     "part=1,style=3":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_3_part_1"
+                                        },
+                     "part=2,style=6":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_6_part_2"
+                                        },
+                     "part=1,style=11":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_11_part_1"
+                                         },
+                     "part=2,style=60":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_60_part_2"
+                                         },
+                     "part=3,style=55":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_55_part_3"
+                                         },
+                     "part=2,style=26":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_26_part_2"
+                                         },
+                     "part=1,style=15":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_15_part_1"
+                                         },
+                     "part=2,style=24":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_24_part_2"
+                                         },
+                     "part=3,style=51":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_51_part_3"
+                                         },
+                     "part=3,style=41":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_41_part_3"
+                                         },
+                     "part=2,style=39":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_39_part_2"
+                                         },
+                     "part=0,style=44":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_44_part_0"
+                                         },
+                     "part=2,style=55":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_55_part_2"
+                                         },
+                     "part=0,style=29":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_29_part_0"
+                                         },
+                     "part=3,style=50":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_50_part_3"
+                                         },
+                     "part=1,style=38":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_38_part_1"
+                                         },
+                     "part=0,style=6":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_6_part_0"
+                                        },
+                     "part=2,style=25":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_25_part_2"
+                                         },
+                     "part=2,style=4":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_4_part_2"
+                                        },
+                     "part=2,style=53":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_53_part_2"
+                                         },
+                     "part=2,style=50":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_50_part_2"
+                                         },
+                     "part=1,style=32":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_32_part_1"
+                                         },
+                     "part=3,style=23":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_23_part_3"
+                                         },
+                     "part=0,style=30":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_30_part_0"
+                                         },
+                     "part=0,style=12":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_12_part_0"
+                                         },
+                     "part=2,style=52":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_52_part_2"
+                                         },
+                     "part=2,style=34":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_34_part_2"
+                                         },
+                     "part=3,style=9":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_9_part_3"
+                                        },
+                     "part=0,style=46":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_46_part_0"
+                                         },
+                     "part=2,style=42":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_42_part_2"
+                                         },
+                     "part=1,style=52":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_52_part_1"
+                                         },
+                     "part=0,style=27":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_27_part_0"
+                                         },
+                     "part=3,style=19":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_19_part_3"
+                                         },
+                     "part=3,style=38":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_38_part_3"
+                                         },
+                     "part=0,style=8":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_8_part_0"
+                                        },
+                     "part=0,style=13":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_13_part_0"
+                                         },
+                     "part=1,style=58":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_58_part_1"
+                                         },
+                     "part=0,style=19":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_19_part_0"
+                                         },
+                     "part=2,style=19":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_19_part_2"
+                                         },
+                     "part=1,style=24":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_24_part_1"
+                                         },
+                     "part=3,style=34":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_34_part_3"
+                                         },
+                     "part=1,style=53":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_53_part_1"
+                                         },
+                     "part=2,style=13":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_13_part_2"
+                                         },
+                     "part=0,style=59":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_59_part_0"
+                                         },
+                     "part=2,style=36":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_36_part_2"
+                                         },
+                     "part=3,style=7":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_7_part_3"
+                                        },
+                     "part=1,style=23":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_23_part_1"
+                                         },
+                     "part=0,style=57":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_57_part_0"
+                                         },
+                     "part=1,style=59":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_59_part_1"
+                                         },
+                     "part=3,style=47":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_47_part_3"
+                                         },
+                     "part=0,style=0":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_0_part_0"
+                                        },
+                     "part=2,style=5":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_5_part_2"
+                                        },
+                     "part=3,style=12":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_12_part_3"
+                                         },
+                     "part=0,style=15":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_15_part_0"
+                                         },
+                     "part=3,style=11":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_11_part_3"
+                                         },
+                     "part=1,style=28":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_28_part_1"
+                                         },
+                     "part=1,style=7":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_7_part_1"
+                                        },
+                     "part=0,style=40":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_40_part_0"
+                                         },
+                     "part=2,style=11":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_11_part_2"
+                                         },
+                     "part=1,style=22":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_22_part_1"
+                                         },
+                     "part=3,style=3":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_3_part_3"
+                                        },
+                     "part=0,style=49":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_49_part_0"
+                                         },
+                     "part=2,style=17":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_17_part_2"
+                                         },
+                     "part=3,style=54":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_54_part_3"
+                                         },
+                     "part=0,style=45":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_45_part_0"
+                                         },
+                     "part=2,style=28":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_28_part_2"
+                                         },
+                     "part=0,style=51":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_51_part_0"
+                                         },
+                     "part=3,style=37":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_37_part_3"
+                                         },
+                     "part=1,style=43":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_43_part_1"
+                                         },
+                     "part=2,style=48":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_48_part_2"
+                                         },
+                     "part=1,style=42":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_42_part_1"
+                                         },
+                     "part=0,style=7":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_7_part_0"
+                                        },
+                     "part=3,style=40":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_40_part_3"
+                                         },
+                     "part=1,style=48":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_48_part_1"
+                                         },
+                     "part=3,style=35":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_35_part_3"
+                                         },
+                     "part=1,style=16":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_16_part_1"
+                                         },
+                     "part=0,style=17":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_17_part_0"
+                                         },
+                     "part=3,style=49":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_49_part_3"
+                                         },
+                     "part=2,style=8":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_8_part_2"
+                                        },
+                     "part=2,style=21":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_21_part_2"
+                                         },
+                     "part=3,style=6":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_6_part_3"
+                                        },
+                     "part=2,style=38":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_38_part_2"
+                                         },
+                     "part=1,style=35":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_35_part_1"
+                                         },
+                     "part=2,style=41":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_41_part_2"
+                                         },
+                     "part=0,style=24":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_24_part_0"
+                                         },
+                     "part=3,style=18":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_18_part_3"
+                                         },
+                     "part=0,style=9":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_9_part_0"
+                                        },
+                     "part=3,style=48":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_48_part_3"
+                                         },
+                     "part=1,style=60":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_60_part_1"
+                                         },
+                     "part=1,style=6":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_6_part_1"
+                                        },
+                     "part=2,style=63":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_63_part_2"
+                                         },
+                     "part=3,style=10":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_10_part_3"
+                                         },
+                     "part=0,style=58":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_58_part_0"
+                                         },
+                     "part=2,style=23":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_23_part_2"
+                                         },
+                     "part=3,style=4":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_4_part_3"
+                                        },
+                     "part=2,style=18":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_18_part_2"
+                                         },
+                     "part=2,style=10":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_10_part_2"
+                                         },
+                     "part=1,style=33":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_33_part_1"
+                                         },
+                     "part=3,style=44":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_44_part_3"
+                                         },
+                     "part=0,style=33":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_33_part_0"
+                                         },
+                     "part=3,style=63":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_63_part_3"
+                                         },
+                     "part=2,style=49":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_49_part_2"
+                                         },
+                     "part=1,style=41":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_41_part_1"
+                                         },
+                     "part=2,style=58":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_58_part_2"
+                                         },
+                     "part=1,style=29":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_29_part_1"
+                                         },
+                     "part=1,style=5":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_5_part_1"
+                                        },
+                     "part=3,style=39":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_39_part_3"
+                                         },
+                     "part=1,style=40":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_40_part_1"
+                                         },
+                     "part=1,style=17":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_17_part_1"
+                                         },
+                     "part=2,style=16":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_16_part_2"
+                                         },
+                     "part=1,style=30":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_30_part_1"
+                                         },
+                     "part=2,style=35":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_35_part_2"
+                                         },
+                     "part=3,style=32":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_32_part_3"
+                                         },
+                     "part=1,style=57":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_57_part_1"
+                                         },
+                     "part=3,style=53":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_53_part_3"
+                                         },
+                     "part=0,style=62":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_62_part_0"
+                                         },
+                     "part=0,style=31":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_31_part_0"
+                                         },
+                     "part=2,style=20":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_20_part_2"
+                                         },
+                     "part=3,style=58":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_58_part_3"
+                                         },
+                     "part=2,style=47":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_47_part_2"
+                                         },
+                     "part=2,style=33":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_33_part_2"
+                                         },
+                     "part=0,style=14":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_14_part_0"
+                                         },
+                     "part=3,style=45":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_45_part_3"
+                                         },
+                     "part=3,style=62":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_62_part_3"
+                                         },
+                     "part=2,style=2":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_2_part_2"
+                                        },
+                     "part=1,style=49":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_49_part_1"
+                                         },
+                     "part=2,style=57":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_57_part_2"
+                                         },
+                     "part=1,style=19":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_19_part_1"
+                                         },
+                     "part=0,style=35":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_35_part_0"
+                                         },
+                     "part=3,style=31":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_31_part_3"
+                                         },
+                     "part=1,style=54":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_54_part_1"
+                                         },
+                     "part=3,style=59":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_59_part_3"
+                                         },
+                     "part=1,style=0":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_0_part_1"
+                                        },
+                     "part=0,style=20":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_20_part_0"
+                                         },
+                     "part=2,style=31":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_31_part_2"
+                                         },
+                     "part=1,style=14":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_14_part_1"
+                                         },
+                     "part=3,style=61":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_61_part_3"
+                                         },
+                     "part=2,style=45":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_45_part_2"
+                                         },
+                     "part=1,style=62":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_62_part_1"
+                                         },
+                     "part=0,style=16":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_16_part_0"
+                                         },
+                     "part=3,style=64":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_64_part_3"
+                                         },
+                     "part=0,style=37":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_37_part_0"
+                                         },
+                     "part=3,style=36":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_36_part_3"
+                                         },
+                     "part=1,style=36":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_36_part_1"
+                                         },
+                     "part=2,style=22":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_22_part_2"
+                                         },
+                     "part=3,style=5":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_5_part_3"
+                                        },
+                     "part=0,style=11":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_11_part_0"
+                                         },
+                     "part=0,style=32":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_32_part_0"
+                                         },
+                     "part=3,style=13":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_13_part_3"
+                                         },
+                     "part=3,style=0":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_0_part_3"
+                                        },
+                     "part=0,style=23":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_23_part_0"
+                                         },
+                     "part=2,style=29":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_29_part_2"
+                                         },
+                     "part=2,style=59":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_59_part_2"
+                                         },
+                     "part=1,style=45":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_45_part_1"
+                                         },
+                     "part=3,style=17":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_17_part_3"
+                                         },
+                     "part=2,style=3":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_3_part_2"
+                                        },
+                     "part=0,style=2":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_2_part_0"
+                                        },
+                     "part=1,style=1":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_1_part_1"
+                                        },
+                     "part=0,style=48":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_48_part_0"
+                                         },
+                     "part=3,style=24":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_24_part_3"
+                                         },
+                     "part=1,style=13":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_13_part_1"
+                                         },
+                     "part=0,style=18":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_18_part_0"
+                                         },
+                     "part=3,style=52":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_52_part_3"
+                                         },
+                     "part=0,style=42":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_42_part_0"
+                                         },
+                     "part=3,style=43":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_43_part_3"
+                                         },
+                     "part=1,style=64":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_64_part_1"
+                                         },
+                     "part=2,style=46":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_46_part_2"
+                                         },
+                     "part=1,style=56":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_56_part_1"
+                                         },
+                     "part=0,style=47":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_47_part_0"
+                                         },
+                     "part=0,style=52":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_52_part_0"
+                                         },
+                     "part=3,style=21":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_21_part_3"
+                                         },
+                     "part=3,style=15":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_15_part_3"
+                                         },
+                     "part=2,style=1":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_1_part_2"
+                                        },
+                     "part=2,style=27":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_27_part_2"
+                                         },
+                     "part=3,style=25":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_25_part_3"
+                                         },
+                     "part=1,style=18":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_18_part_1"
+                                         },
+                     "part=0,style=50":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_50_part_0"
+                                         },
+                     "part=3,style=26":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_26_part_3"
+                                         },
+                     "part=1,style=26":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_26_part_1"
+                                         },
+                     "part=0,style=41":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_41_part_0"
+                                         },
+                     "part=1,style=9":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_9_part_1"
+                                        },
+                     "part=2,style=37":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_37_part_2"
+                                         },
+                     "part=2,style=32":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_32_part_2"
+                                         },
+                     "part=1,style=37":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_37_part_1"
+                                         },
+                     "part=0,style=55":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_55_part_0"
+                                         },
+                     "part=0,style=63":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_63_part_0"
+                                         },
+                     "part=1,style=10":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_10_part_1"
+                                         },
+                     "part=2,style=44":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_44_part_2"
+                                         },
+                     "part=1,style=63":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_63_part_1"
+                                         },
+                     "part=0,style=22":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_22_part_0"
+                                         },
+                     "part=3,style=60":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_60_part_3"
+                                         },
+                     "part=3,style=46":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_46_part_3"
+                                         },
+                     "part=1,style=44":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_44_part_1"
+                                         },
+                     "part=1,style=21":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_21_part_1"
+                                         },
+                     "part=0,style=1":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_1_part_0"
+                                        },
+                     "part=3,style=28":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_28_part_3"
+                                         },
+                     "part=2,style=9":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_9_part_2"
+                                        },
+                     "part=1,style=25":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_25_part_1"
+                                         },
+                     "part=0,style=64":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_64_part_0"
+                                         },
+                     "part=3,style=20":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_20_part_3"
+                                         },
+                     "part=3,style=2":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_2_part_3"
+                                        },
+                     "part=3,style=42":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_42_part_3"
+                                         },
+                     "part=1,style=61":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_61_part_1"
+                                         },
+                     "part=0,style=36":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_36_part_0"
+                                         },
+                     "part=3,style=33":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_33_part_3"
+                                         },
+                     "part=2,style=62":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_62_part_2"
+                                         },
+                     "part=2,style=56":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_56_part_2"
+                                         },
+                     "part=1,style=46":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_46_part_1"
+                                         },
+                     "part=2,style=15":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_15_part_2"
+                                         },
+                     "part=3,style=16":  {
+                                             "model":  "stardewcraft:block/deco/flooring/style_16_part_3"
+                                         },
+                     "part=0,style=3":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_3_part_0"
+                                        },
+                     "part=1,style=2":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_2_part_1"
+                                        },
+                     "part=2,style=7":  {
+                                            "model":  "stardewcraft:block/deco/flooring/style_7_part_2"
+                                        }
+                 }
+}

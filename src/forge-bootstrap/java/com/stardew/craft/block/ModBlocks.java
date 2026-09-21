@@ -3,6 +3,7 @@ package com.stardew.craft.block;
 import com.stardew.craft.forge.registry.ForgeBlocks;
 import com.stardew.craft.forge.registry.ForgeWallpaperRegistry;
 import com.stardew.craft.block.utility.WallpaperBlock;
+import com.stardew.craft.block.utility.LegacyWallpaperBlock;
 
 import java.util.Map;
 
@@ -70,6 +71,12 @@ public final class ModBlocks {
             ForgeBlocks.NEW_TREE_BUILDING_BLOCKS;
     public static final Map<String, RegistryObject<WallpaperBlock>> WALLPAPER_STYLES =
             ForgeWallpaperRegistry.BLOCK_STYLES;
+    public static final RegistryObject<LegacyWallpaperBlock> WALLPAPER_BLOCK = ForgeWallpaperRegistry.WALLPAPER_BLOCK;
+    public static final RegistryObject<Block> FLOORING_BLOCK = ForgeWallpaperRegistry.FLOORING_BLOCK;
+
+    public static RegistryObject<WallpaperBlock> getWallpaperStyleBlock(String styleId) {
+        return WALLPAPER_STYLES.getOrDefault(styleId, WALLPAPER_STYLES.get("0"));
+    }
 
     private ModBlocks() {
     }

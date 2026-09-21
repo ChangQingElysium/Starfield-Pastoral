@@ -1,6 +1,7 @@
 package com.stardew.craft.forge.registry;
 
 import com.stardew.craft.blockentity.NewTreePartBlockEntity;
+import com.stardew.craft.blockentity.DecorBlockEntity;
 import com.stardew.craft.forge.ForgeBootstrap;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.registries.DeferredRegister;
@@ -25,6 +26,12 @@ public final class ForgeBlockEntities {
                     ForgeBlocks.PINE_ROOT.get(), ForgeBlocks.PINE_LOG.get(), ForgeBlocks.PINE_BRANCH.get(),
                     ForgeBlocks.MAHOGANY_ROOT.get(), ForgeBlocks.MAHOGANY_LOG.get(), ForgeBlocks.MAHOGANY_BRANCH.get(),
                     ForgeBlocks.MYSTIC_TREE_ROOT.get(), ForgeBlocks.MYSTIC_TREE_LOG.get(), ForgeBlocks.MYSTIC_TREE_BRANCH.get()
+            ).build(null));
+
+    public static final RegistryObject<BlockEntityType<DecorBlockEntity>> DECOR_BLOCK =
+            BLOCK_ENTITIES.register("decor_block", () -> BlockEntityType.Builder.of(
+                    DecorBlockEntity::new,
+                    ForgeWallpaperRegistry.WALLPAPER_BLOCK.get(), ForgeWallpaperRegistry.FLOORING_BLOCK.get()
             ).build(null));
 
     private ForgeBlockEntities() {

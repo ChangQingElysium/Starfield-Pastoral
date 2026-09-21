@@ -302,5 +302,7 @@
   "block.stardewcraft.mystic_tree_log_stairs": "Mystic Tree Log Lépcsők",
   "block.stardewcraft.mystic_tree_log_slab": "Misztikus farönk-lap",
   "block.stardewcraft.wallpaper_block": "Tapéta blokk",
-  "block.stardewcraft.wallpaper_block.desc": "Szobafalak díszítésére használt."
+  "block.stardewcraft.wallpaper_block.desc": "Szobafalak díszítésére használt.",
+  "block.stardewcraft.flooring_block": "Flooring blokk",
+  "block.stardewcraft.flooring_block.desc": "Szobaemeletek díszítésére használják."
 }

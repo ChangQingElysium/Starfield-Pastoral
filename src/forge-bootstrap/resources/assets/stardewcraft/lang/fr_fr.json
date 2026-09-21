@@ -302,5 +302,7 @@
   "block.stardewcraft.mystic_tree_log_stairs": "Escaliers en rondins de l’arbre mystique",
   "block.stardewcraft.mystic_tree_log_slab": "Dalle de troncs de l’arbre mystique",
   "block.stardewcraft.wallpaper_block": "Bloc de papier peint",
-  "block.stardewcraft.wallpaper_block.desc": "Ça décorait les murs des pièces."
+  "block.stardewcraft.wallpaper_block.desc": "Ça décorait les murs des pièces.",
+  "block.stardewcraft.flooring_block": "Bloc de sols",
+  "block.stardewcraft.flooring_block.desc": "Ça décorait les sols des pièces."
 }

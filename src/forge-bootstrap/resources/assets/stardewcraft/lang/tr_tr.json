@@ -302,5 +302,7 @@
   "block.stardewcraft.mystic_tree_log_stairs": "Mystic Tree Log Merdivenleri",
   "block.stardewcraft.mystic_tree_log_slab": "Mistik ağaç girişi",
   "block.stardewcraft.wallpaper_block": "Duvar kağıdı",
-  "block.stardewcraft.wallpaper_block.desc": "Oda duvarları dekore etmek için kullanılır."
+  "block.stardewcraft.wallpaper_block.desc": "Oda duvarları dekore etmek için kullanılır.",
+  "block.stardewcraft.flooring_block": "Zemin Blok",
+  "block.stardewcraft.flooring_block.desc": "Oda zeminlerini dekore etmek için kullanılır."
 }

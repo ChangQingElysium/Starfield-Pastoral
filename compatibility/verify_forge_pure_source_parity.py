@@ -40,6 +40,25 @@ EXPLICIT_RELATIVE_PATHS = (
     Path("fishing/FishingCastPower.java"),
     Path("fishing/FishingPresentationPhase.java"),
     Path("fishing/PlacedFishLayout.java"),
+    *(Path("blockentity") / name for name in (
+        "AdvanceableUtility.java",
+        "AutomationStackHelper.java",
+        "InsertResult.java",
+        "MissingItemRequirement.java",
+        "UtilityMachineInfo.java",
+    )),
+    Path("block/utility/UtilityMachineRenderState.java"),
+    *(Path("workbench") / name for name in (
+        "WorkbenchEntry.java",
+        "WorkbenchType.java",
+    )),
+    Path("model/ShippingBinLidMotion.java"),
+    Path("model/OilMakerAnimation.java"),
+    *(Path("item/artisan") / name for name in (
+        "DehydratorIngredientHelper.java",
+        "PreserveType.java",
+        "PreservesCropTypeHelper.java",
+    )),
 )
 
 

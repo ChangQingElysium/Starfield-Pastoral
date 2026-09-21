@@ -1,0 +1,14 @@
+[
+  {
+    "Id": "MoreWalls",
+    "Texture": "Maps/wallpapers_2",
+    "IsFlooring": false,
+    "Count": 26
+  },
+  {
+    "Id": "MoreFloors",
+    "Texture": "Maps/floors_2",
+    "IsFlooring": true,
+    "Count": 9
+  }
+]

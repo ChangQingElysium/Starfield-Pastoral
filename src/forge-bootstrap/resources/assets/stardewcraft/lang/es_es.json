@@ -302,5 +302,7 @@
   "block.stardewcraft.mystic_tree_log_stairs": "Escaleras de tronco de árbol místico",
   "block.stardewcraft.mystic_tree_log_slab": "Lámina de registro de árboles místicos",
   "block.stardewcraft.wallpaper_block": "Bloque de papel pintado",
-  "block.stardewcraft.wallpaper_block.desc": "Solía decorar paredes de la habitación."
+  "block.stardewcraft.wallpaper_block.desc": "Solía decorar paredes de la habitación.",
+  "block.stardewcraft.flooring_block": "Bloque de suelo",
+  "block.stardewcraft.flooring_block.desc": "Se utiliza para decorar los pisos de la habitación."
 }

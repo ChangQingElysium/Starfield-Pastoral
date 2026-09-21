@@ -302,5 +302,7 @@
   "block.stardewcraft.mystic_tree_log_stairs": "Ступени из бревна мистического дерева",
   "block.stardewcraft.mystic_tree_log_slab": "Плита из бревна мистического дерева",
   "block.stardewcraft.wallpaper_block": "Блок обоев",
-  "block.stardewcraft.wallpaper_block.desc": "Используется для украшения стен комнаты."
+  "block.stardewcraft.wallpaper_block.desc": "Используется для украшения стен комнаты.",
+  "block.stardewcraft.flooring_block": "Блок напольного покрытия",
+  "block.stardewcraft.flooring_block.desc": "Используется для украшения полов в комнатах."
 }

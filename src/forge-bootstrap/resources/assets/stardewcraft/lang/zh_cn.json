@@ -302,5 +302,7 @@
   "block.stardewcraft.mystic_tree_log_stairs": "神秘树原木楼梯",
   "block.stardewcraft.mystic_tree_log_slab": "神秘树原木台阶",
   "block.stardewcraft.wallpaper_block": "墙纸方块",
-  "block.stardewcraft.wallpaper_block.desc": "用于装饰房间的墙面。"
+  "block.stardewcraft.wallpaper_block.desc": "用于装饰房间的墙面。",
+  "block.stardewcraft.flooring_block": "地板方块",
+  "block.stardewcraft.flooring_block.desc": "用于装饰房间的地板。"
 }

@@ -1,0 +1,7 @@
+﻿{
+    "textures":  {
+                     "all":  "stardewcraft:block/deco/wallpaper/style_24_segment_2",
+                     "particle":  "stardewcraft:block/deco/wallpaper/style_24_segment_2"
+                 },
+    "parent":  "minecraft:block/cube_all"
+}

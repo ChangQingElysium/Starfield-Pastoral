@@ -302,5 +302,7 @@
   "block.stardewcraft.mystic_tree_log_stairs": "Mystic Tree Log Stairs",
   "block.stardewcraft.mystic_tree_log_slab": "Mystic Tree Log Slab",
   "block.stardewcraft.wallpaper_block": "Wallpaper Block",
-  "block.stardewcraft.wallpaper_block.desc": "Used to decorate room walls."
+  "block.stardewcraft.wallpaper_block.desc": "Used to decorate room walls.",
+  "block.stardewcraft.flooring_block": "Flooring Block",
+  "block.stardewcraft.flooring_block.desc": "Used to decorate room floors."
 }

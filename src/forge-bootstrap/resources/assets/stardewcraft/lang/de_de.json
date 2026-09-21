@@ -302,5 +302,7 @@
   "block.stardewcraft.mystic_tree_log_stairs": "Mystic Tree Log Treppen",
   "block.stardewcraft.mystic_tree_log_slab": "Mystische Baum Log Slab",
   "block.stardewcraft.wallpaper_block": "Tapetenblock",
-  "block.stardewcraft.wallpaper_block.desc": "Verwendet, um Raumwände zu dekorieren."
+  "block.stardewcraft.wallpaper_block.desc": "Verwendet, um Raumwände zu dekorieren.",
+  "block.stardewcraft.flooring_block": "Bodenstein",
+  "block.stardewcraft.flooring_block.desc": "Verwendet, um Zimmerböden zu dekorieren."
 }

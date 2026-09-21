@@ -1,0 +1,6 @@
+{
+    "parent":  "stardewcraft:block/flooring_block",
+    "textures":  {
+                     "particle":  "stardewcraft:block/deco/flooring_0"
+                 }
+}

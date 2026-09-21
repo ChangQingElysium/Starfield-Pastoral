@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "segment=0": {
+      "model": "stardewcraft:block/deco/wallpaper/style_110_segment_0"
+    },
+    "segment=1": {
+      "model": "stardewcraft:block/deco/wallpaper/style_110_segment_1"
+    },
+    "segment=2": {
+      "model": "stardewcraft:block/deco/wallpaper/style_110_segment_2"
+    }
+  }
+}

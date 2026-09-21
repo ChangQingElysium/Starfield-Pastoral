@@ -302,5 +302,7 @@
   "block.stardewcraft.mystic_tree_log_stairs": "Scale di tronchi albero mistico",
   "block.stardewcraft.mystic_tree_log_slab": "Lastra di legno mistico",
   "block.stardewcraft.wallpaper_block": "blocco carta da parati",
-  "block.stardewcraft.wallpaper_block.desc": "Usato per decorare pareti della stanza."
+  "block.stardewcraft.wallpaper_block.desc": "Usato per decorare pareti della stanza.",
+  "block.stardewcraft.flooring_block": "Blocco di pavimentazione",
+  "block.stardewcraft.flooring_block.desc": "Utilizzato per decorare pavimenti in camera."
 }
