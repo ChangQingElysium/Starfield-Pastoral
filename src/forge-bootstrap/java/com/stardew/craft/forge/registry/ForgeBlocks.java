@@ -4,6 +4,7 @@ import com.stardew.craft.block.tree.NewTreeLogBlock;
 import com.stardew.craft.block.tree.NewTreePartBlock;
 import com.stardew.craft.block.tree.StardewLeavesBlock;
 import com.stardew.craft.block.terrain.AsphaltRoadBlock;
+import com.stardew.craft.block.terrain.PlaygroundSandBlock;
 import com.stardew.craft.block.terrain.RoadMarkingBlock;
 import com.stardew.craft.forge.ForgeBootstrap;
 
@@ -110,6 +111,11 @@ public final class ForgeBlocks {
             "blue_painted_planks",
             () -> new Block(BlockBehaviour.Properties.copy(Blocks.OAK_PLANKS)
                     .mapColor(MapColor.COLOR_BLUE))
+    );
+
+    public static final RegistryObject<PlaygroundSandBlock> PLAYGROUND_SAND = BLOCKS.register(
+            "playground_sand",
+            () -> new PlaygroundSandBlock(BlockBehaviour.Properties.copy(Blocks.SAND))
     );
 
     public static final RegistryObject<AsphaltRoadBlock> ASPHALT_ROAD = BLOCKS.register(

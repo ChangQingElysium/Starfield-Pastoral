@@ -3,6 +3,7 @@ package com.stardew.craft.block;
 import com.stardew.craft.forge.registry.ForgeBlocks;
 import com.stardew.craft.forge.registry.ForgeWallpaperRegistry;
 import com.stardew.craft.block.terrain.AsphaltRoadBlock;
+import com.stardew.craft.block.terrain.PlaygroundSandBlock;
 import com.stardew.craft.block.terrain.RoadMarkingBlock;
 import com.stardew.craft.block.utility.WallpaperBlock;
 import com.stardew.craft.block.utility.LegacyWallpaperBlock;
@@ -30,6 +31,7 @@ public final class ModBlocks {
     public static final RegistryObject<RotatedPillarBlock> BLUE_GRAY_TIMBER = ForgeBlocks.BLUE_GRAY_TIMBER;
     public static final RegistryObject<Block> PALE_BLUE_SIDING = ForgeBlocks.PALE_BLUE_SIDING;
     public static final RegistryObject<Block> BLUE_PAINTED_PLANKS = ForgeBlocks.BLUE_PAINTED_PLANKS;
+    public static final RegistryObject<PlaygroundSandBlock> PLAYGROUND_SAND = ForgeBlocks.PLAYGROUND_SAND;
     public static final RegistryObject<AsphaltRoadBlock> ASPHALT_ROAD = ForgeBlocks.ASPHALT_ROAD;
     public static final RegistryObject<RoadMarkingBlock> ROAD_DASH = ForgeBlocks.ROAD_DASH;
     public static final RegistryObject<RoadMarkingBlock> ROAD_DOUBLE_LINE = ForgeBlocks.ROAD_DOUBLE_LINE;

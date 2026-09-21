@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "variant=0": {
+      "model": "stardewcraft:block/playground_sand/spring_0"
+    },
+    "variant=1": {
+      "model": "stardewcraft:block/playground_sand/spring_1"
+    },
+    "variant=2": {
+      "model": "stardewcraft:block/playground_sand/spring_2"
+    },
+    "variant=3": {
+      "model": "stardewcraft:block/playground_sand/spring_3"
+    }
+  }
+}

@@ -35,6 +35,7 @@ public final class ForgeItems {
     public static final RegistryObject<Item> BLUE_GRAY_TIMBER = registerBuildingBlock(ForgeBlocks.BLUE_GRAY_TIMBER);
     public static final RegistryObject<Item> PALE_BLUE_SIDING = registerBuildingBlock(ForgeBlocks.PALE_BLUE_SIDING);
     public static final RegistryObject<Item> BLUE_PAINTED_PLANKS = registerBuildingBlock(ForgeBlocks.BLUE_PAINTED_PLANKS);
+    public static final RegistryObject<Item> PLAYGROUND_SAND = registerBuildingBlock(ForgeBlocks.PLAYGROUND_SAND);
     public static final RegistryObject<Item> ASPHALT_ROAD = registerBuildingBlock(ForgeBlocks.ASPHALT_ROAD);
     public static final RegistryObject<Item> ROAD_DASH = registerBuildingBlock(ForgeBlocks.ROAD_DASH);
     public static final RegistryObject<Item> ROAD_DOUBLE_LINE = registerBuildingBlock(ForgeBlocks.ROAD_DOUBLE_LINE);

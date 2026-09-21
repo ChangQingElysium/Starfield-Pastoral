@@ -523,6 +523,39 @@ def checkForgeRoadSliceParity = tasks.register('checkForgeRoadSliceParity', Exec
     commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_road_slice.py').asFile.absolutePath
 }
 
+def checkForgePlaygroundSandSliceParity = tasks.register('checkForgePlaygroundSandSliceParity', Exec) {
+    group = 'verification'
+    description = 'Checks the complete playground-sand block, item, NBT placement and seasonal model slice.'
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/block/ModBlocks.java'))
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/item/ModItems.java'))
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/block/terrain/TerrainVariants.java'))
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/block/terrain/PlaygroundSandBlock.java'))
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/block/terrain/PlaygroundSandConnections.java'))
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/client/model/terrain/PlaygroundSandModels.java'))
+    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/gametest/SandBirdGameTests.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeBlocks.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeItems.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/block/ModBlocks.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/item/ModItems.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/block/terrain/TerrainVariants.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/block/terrain/PlaygroundSandBlock.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/block/terrain/PlaygroundSandConnections.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/client/PlaygroundSandModels.java'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/client/TerrainSeasonTextures.java'))
+    inputs.dir(layout.projectDirectory.dir('src/main/resources/assets/stardewcraft'))
+    inputs.file(layout.projectDirectory.file('src/main/resources/data/stardewcraft/loot_table/blocks/playground_sand.json'))
+    inputs.file(layout.projectDirectory.file('src/main/resources/data/minecraft/tags/block/mineable/shovel.json'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/resources/assets/stardewcraft/blockstates/playground_sand.json'))
+    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/assets/stardewcraft/models/block/playground_sand'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/resources/assets/stardewcraft/models/item/playground_sand.json'))
+    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/assets/stardewcraft/textures/block/playground_sand'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/resources/data/stardewcraft/loot_tables/blocks/playground_sand.json'))
+    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/resources/data/minecraft/tags/blocks/mineable/shovel.json'))
+    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/assets/stardewcraft/lang'))
+    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_playground_sand_slice.py'))
+    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_playground_sand_slice.py').asFile.absolutePath
+}
+
 tasks.named('check').configure {
     dependsOn checkTranslations
     dependsOn checkForgePureSourceParity
@@ -549,4 +582,5 @@ tasks.named('check').configure {
     dependsOn checkForgePureRulesParity
     dependsOn checkForgeCropSliceAudit
     dependsOn checkForgeRoadSliceParity
+    dependsOn checkForgePlaygroundSandSliceParity
 }

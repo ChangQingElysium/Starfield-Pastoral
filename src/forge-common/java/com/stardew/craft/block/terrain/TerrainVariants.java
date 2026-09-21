@@ -18,11 +18,12 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
  * it after placement, and picked-up/preconfigured block items therefore keep
  * the same round-trip semantics.</p>
  *
- * <p>This first Forge terrain slice owns the asphalt path only.  The other
- * properties are added with their owning block families, rather than being
- * represented by a partial or inert compatibility class.</p>
+ * <p>The Forge terrain slices currently own the playground-sand and asphalt
+ * paths. Other properties are added with their owning block families, rather
+ * than being represented by a partial or inert compatibility class.</p>
  */
 public final class TerrainVariants {
+    public static final IntegerProperty SAND = IntegerProperty.create("variant", 0, 3);
     public static final IntegerProperty ASPHALT = IntegerProperty.create("variant", 0, 2);
 
     private TerrainVariants() {
@@ -30,6 +31,9 @@ public final class TerrainVariants {
 
     @Nullable
     public static IntegerProperty property(BlockState state) {
+        if (state.getBlock() instanceof PlaygroundSandBlock) {
+            return SAND;
+        }
         return state.getBlock() instanceof AsphaltRoadBlock ? ASPHALT : null;
     }
 
@@ -49,7 +53,13 @@ public final class TerrainVariants {
         if (context.getLevel().isClientSide) {
             return state;
         }
-        return state.setValue(property, context.getLevel().getRandom().nextInt(3));
+        if (property == SAND) {
+            return state.setValue(property, context.getLevel().getRandom().nextInt(4));
+        }
+        if (property == ASPHALT) {
+            return state.setValue(property, context.getLevel().getRandom().nextInt(3));
+        }
+        return state;
     }
 
     @Nullable
@@ -68,7 +78,7 @@ public final class TerrainVariants {
         return property.getValue(raw.getAsString()).orElse(null);
     }
 
-    /** Copies the selected asphalt variant into a vanilla BlockStateTag. */
+    /** Copies the selected terrain variant into a vanilla BlockStateTag. */
     public static ItemStack fixedCopy(ItemStack original, BlockState state) {
         IntegerProperty property = property(state);
         if (property == null || original.isEmpty()) {

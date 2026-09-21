@@ -1,0 +1,13 @@
+{
+  "parent": "minecraft:block/cube",
+  "render_type": "minecraft:solid",
+  "textures": {
+    "particle": "stardewcraft:block/playground_sand/sand_particle",
+    "north": "stardewcraft:block/playground_sand/sand_side",
+    "south": "stardewcraft:block/playground_sand/sand_side",
+    "east": "stardewcraft:block/playground_sand/sand_side",
+    "west": "stardewcraft:block/playground_sand/sand_side",
+    "down": "stardewcraft:block/playground_sand/sand_side",
+    "up": "stardewcraft:block/playground_sand/connected_1"
+  }
+}
