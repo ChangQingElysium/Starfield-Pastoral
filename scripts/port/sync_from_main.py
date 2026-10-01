@@ -36,6 +36,8 @@ PORT_OWNED_RESOURCES = {
     "pack.mcmeta",
 }
 MERGED_RESOURCES = {"stardewcraft.mixins.json"}
+# Version-independent build inputs mirrored verbatim (compiled into resources by build.gradle).
+MIRRORED_PATHS = ["assets-src/npc", "assets-src/furniture/sebastian_computer", "tools/art", "tools/npc"]
 
 
 def git(*args, env=None, cwd=ROOT, check=True, binary=False) -> str | bytes:
@@ -139,6 +141,28 @@ def sync_resources(main: Path, old: str, new: str, dry: bool) -> list[str]:
     return conflicts
 
 
+def mirror_paths(main: Path, new: str, dry: bool) -> int:
+    count = 0
+    for prefix in MIRRORED_PATHS:
+        wanted = set(git("ls-tree", "-r", "--name-only", new, "--", prefix).splitlines())
+        here = ROOT / prefix
+        existing = {str(p.relative_to(ROOT)) for p in here.rglob("*") if p.is_file()} if here.exists() else set()
+        if dry:
+            count += len(wanted ^ existing)
+            continue
+        for rel in existing - wanted:
+            (ROOT / rel).unlink()
+            count += 1
+        for rel in wanted:
+            data = git("show", f"{new}:{rel}", binary=True)
+            target = ROOT / rel
+            if not target.exists() or target.read_bytes() != data:
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(data)
+                count += 1
+    return count
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--main", default=str(ROOT.parent / "StardewCraft"))
@@ -153,6 +177,7 @@ def main() -> int:
         return 0
     touched, conflicts = merge_java(old, new, args.dry_run)
     conflicts += sync_resources(main_dir, old, new, args.dry_run)
+    print(f"mirrored build-input files changed: {mirror_paths(main_dir, new, args.dry_run)}")
     print(f"snapshot {new}: {len(touched)} java paths changed")
     for line in touched:
         print("  ", line)

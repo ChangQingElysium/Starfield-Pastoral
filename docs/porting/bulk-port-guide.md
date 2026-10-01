@@ -49,6 +49,10 @@ grep -A3 ': error:' build/pj-<你的名字>.log | less
 - 无法等价的地方必须写入 `docs/porting/bulk-port-gaps.md`（现象、原因、影响、建议方案），交由用户决定；禁止静默删减。
 - 完成后由全量 GameTest（1.21.1 通过的 794 项必须在 1.20.1 通过）与内容导出比对验证。
 
+## 运行 GameTest（运行期验证阶段）
+
+`scripts/port/run_gametests.sh <命名空间,逗号分隔|ALL> <你的名字>`：加锁串行运行（多个代理共用工作区时会排队），每次用全新世界目录 `build/gt-run-<名字>`，日志 `build/gt-<名字>.log`。按测试的模板命名空间（`@GameTest(templateNamespace=…)` 或 `@GameTestHolder` 值）只跑自己负责的部分；1.21.1 基准结果见 `docs/porting/gametest-baseline.md`，基准日志在 `build/port-parity/baseline-d453632-gametest*.log`，1.21.1 基线 worktree `../StardewCraft-1.21.1-baseline` 可用于对照（只读，不要在那里运行 Gradle）。修复必须让 1.20.1 行为与 1.21.1 一致；不得修改测试断言来“通过”。
+
 ## 协作规则
 
 - 不提交、不推送；由协调者统一提交检查点。

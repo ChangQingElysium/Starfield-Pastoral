@@ -1,0 +1,42 @@
+// Same generated resources as main's gradle/native-npc.gradle and gradle/native-furniture.gradle.
+// The compilers are version-independent (JSON + PNG); only the resource generation is mirrored here,
+// main's art verification tasks run on the 1.21.1 line where the sources are authored.
+def compileNativeNpcModels = tasks.register('compileNativeNpcModels', Exec) {
+    group = 'build'
+    description = 'Validates and compiles the registered Generic Blockbench NPC models.'
+    inputs.files(fileTree('assets-src/npc') {
+        include 'models.json', '**/*.bbmodel', '**/motion.json', '**/*.motion.json'
+    })
+    inputs.files('tools/art/compile_native_npc.py', 'tools/art/npc_texture_atlas.py', 'tools/art/npc_joint_skin.py')
+    outputs.dir(layout.buildDirectory.dir('generated/resources/nativeNpc'))
+    commandLine 'python3', file('tools/art/compile_native_npc.py').absolutePath,
+            file('assets-src/npc').absolutePath,
+            layout.buildDirectory.dir('generated/resources/nativeNpc').get().asFile.absolutePath
+}
+sourceSets.main.resources.srcDir(compileNativeNpcModels)
+
+// Replaced resources must never be packaged, including stale copies from earlier development runs.
+def nativeNpcIds = new groovy.json.JsonSlurper().parseText(
+        providers.fileContents(layout.projectDirectory.file('assets-src/npc/models.json')).asText.get()).keySet()
+def retiredNpcPaths = nativeNpcIds.collectMany { id -> [
+        "assets/stardewcraft/geo/entity/npc/${id}.geo.json".toString(),
+        "assets/stardewcraft/animations/entity/npc/${id}.animation.json".toString(),
+        "assets/stardewcraft/textures/entity/npc/${id}.png".toString()] }
+def processedNpcResources = layout.buildDirectory.dir('resources/main').get().asFile.absolutePath
+tasks.named('processResources') {
+    exclude retiredNpcPaths
+    doLast {
+        retiredNpcPaths.each { path -> java.nio.file.Files.deleteIfExists(java.nio.file.Path.of(processedNpcResources, path)) }
+    }
+}
+
+def compileNativeFurnitureModels = tasks.register('compileNativeFurnitureModels', Exec) {
+    group = 'build'
+    description = 'Compile Sebastian computer Generic geometry, animation and item resources'
+    inputs.file('assets-src/furniture/sebastian_computer/sebastian_computer.bbmodel')
+    inputs.files('tools/art/compile_sebastian_computer.py', 'tools/art/compile_native_npc.py', 'tools/art/npc_texture_atlas.py', 'tools/art/npc_joint_skin.py')
+    outputs.dir(layout.buildDirectory.dir('generated/native-furniture'))
+    commandLine 'python3', file('tools/art/compile_sebastian_computer.py').absolutePath,
+            layout.buildDirectory.dir('generated/native-furniture').get().asFile.absolutePath
+}
+sourceSets.main.resources.srcDir(compileNativeFurnitureModels)

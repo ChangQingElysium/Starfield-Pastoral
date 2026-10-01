@@ -67,7 +67,7 @@ minecraft {
         }
 
         gameTestServer {
-            workingDirectory project.file('run-game-test')
+            workingDirectory project.file(providers.gradleProperty('gameTestRunDir').getOrElse('run-game-test'))
             // Same semantics as 1.21.1's neoforge.enabledGameTestNamespaces: Forge 47 filters on the
             // template namespace (@GameTestHolder value / GameTest#templateNamespace) exactly like NeoForge,
             // and an empty value (-PgameTestNamespaces=) enables every registered test.
@@ -190,3 +190,4 @@ tasks.register('printCompileClasspath') {
     def cp = sourceSets.main.compileClasspath
     doLast { file("${buildDir}/port-classpath.txt").text = cp.files.join(File.pathSeparator) }
 }
+apply from: 'gradle/port-generated-resources.gradle'
