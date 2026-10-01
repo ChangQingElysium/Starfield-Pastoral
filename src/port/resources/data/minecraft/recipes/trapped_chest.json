@@ -3,7 +3,7 @@
   "category": "redstone",
   "ingredients": [
     {
-      "type": "neoforge:difference",
+      "type": "forge:difference",
       "base": {
         "tag": "c:chests/wooden"
       },

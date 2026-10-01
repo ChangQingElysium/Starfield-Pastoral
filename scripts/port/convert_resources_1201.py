@@ -62,7 +62,27 @@ def rename_dirs() -> None:
                     merge_move(tags / old, tags / new)
 
 
+# NeoForge 1.21.1 custom ingredient types and their Forge 1.20.1 equivalents (same JSON keys).
+INGREDIENT_TYPES = {"neoforge:difference": "forge:difference", "neoforge:intersection": "forge:intersection"}
+
+
+def convert_ingredient_types(o):
+    if isinstance(o, dict):
+        t = o.get("type")
+        if isinstance(t, str) and t.startswith("neoforge:"):
+            if t not in INGREDIENT_TYPES:
+                raise SystemExit(f"unmapped NeoForge ingredient type {t}")
+            o["type"] = INGREDIENT_TYPES[t]
+        for v in o.values():
+            convert_ingredient_types(v)
+    elif isinstance(o, list):
+        for v in o:
+            convert_ingredient_types(v)
+    return o
+
+
 def convert_recipe(d: dict) -> dict:
+    convert_ingredient_types(d)
     result = d.get("result")
     kind = d.get("type", "")
     if isinstance(result, dict) and "id" in result:

@@ -1,1 +1,33 @@
-# Approved 1.21.1 vs 1.20.1 content-dump differences: section<TAB>key (trailing * = prefix)<TAB>reason / user approval
+# Approved 1.21.1 vs 1.20.1 content-dump differences: section<TAB>key (trailing * = prefix)<TAB>category: reason
+# version-fact = vanilla/loader content that exists in only one Minecraft/loader version (cannot be equal).
+# port-mechanism = an implementation detail of the port with identical gameplay effect; listed for review.
+tag/block	minecraft:armadillo_spawnable_on	version-fact: armadillo (1.20.5) tag; mod blocks reach it only via vanilla composition
+tag/block	minecraft:camel_sand_step_sound_blocks	version-fact: 1.20.5 vanilla tag
+tag/block	minecraft:incorrect_for_*	version-fact: 1.20.5 data-driven tool tiers; 1.20.1 uses the same needs_*_tool tags the mod fills
+tag/block	minecraft:mob_interactable_doors	version-fact: 1.20.5 vanilla tag
+tag/block	minecraft:wolves_spawnable_on	version-fact: 1.20.5 vanilla added coarse_dirt/podzol; the mod's own entries are identical
+tag/block	forge:*	version-fact: Forge's own tags (do not exist under NeoForge 1.21.1); not read by the mod
+tag/item	forge:*	version-fact: Forge's own tags (do not exist under NeoForge 1.21.1); not read by the mod
+tag/item	minecraft:tools	version-fact: vanilla 1.20.1 tag removed in 1.20.5; not read by the mod
+tag/item	c:animal_foods	version-fact: vanilla 1.20.1 #minecraft:flowers lacks chorus_flower/spore_blossom (bee_food); not read by the mod
+recipe	minecraft:bolt_armor_trim_smithing_template	version-fact: 1.21 item
+recipe	minecraft:flow_armor_trim_smithing_template	version-fact: 1.21 item
+recipe	minecraft:copper_door	version-fact: 1.20.3 item
+recipe	minecraft:copper_trapdoor	version-fact: 1.20.3 item
+recipe	minecraft:crafter	version-fact: 1.20.3 item
+registry	forge:fluid_type	version-fact: loader registry (NeoForge: neoforge:fluid_type)
+dynamic_registry	forge:fluid_type	version-fact: loader registry (NeoForge: neoforge:fluid_type)
+registry	neoforge:fluid_type	version-fact: loader registry (Forge: forge:fluid_type)
+dynamic_registry	neoforge:fluid_type	version-fact: loader registry (Forge: forge:fluid_type)
+registry	neoforge:attachment_types	port-mechanism: the attachment type registry lives inside the port layer (PortAttachments), same ids
+dynamic_registry	neoforge:attachment_types	port-mechanism: as above
+registry	minecraft:enchantment	port-mechanism: 1.21 data-driven enchantments are code-registered under the same ids (PortEnchantments)
+registry	minecraft:attribute	port-mechanism: 1.21-only step_height/scale emulated as stardewcraft:generic.* attributes (see bulk-port-gaps.md)
+dynamic_registry	minecraft:attribute	port-mechanism: as above
+registry	minecraft:particle_type	port-mechanism: stardewcraft:port_entity_effect carries the 1.21 entity_effect colour
+dynamic_registry	minecraft:particle_type	port-mechanism: as above
+gametest	anviluses1211rulesforstardewitems	port-mechanism: port-only verification test
+gametest	enchantcommanduses1211rulesforstardewitems	port-mechanism: port-only verification test
+gametest	enchantingtablecandidatesmatch1211	port-mechanism: port-only verification test
+gametest	vanillaenchantmentapplicabilitymatches1211	port-mechanism: port-only verification test
+gametest	enchantmentcompatibilitymatches1211	port-mechanism: port-only verification test
