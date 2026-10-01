@@ -34,6 +34,6 @@ public record LoomWheelAnimation(double x, double y, double z, double length, Li
             if (time <= b.time()) return (float) (a.degrees()
                 + (b.degrees() - a.degrees()) * (time - a.time()) / (b.time() - a.time()));
         }
-        return (float) keys.getLast().degrees();
+        return (float) com.stardew.craft.port.PortJava.getLast(keys).degrees();
     }
 }

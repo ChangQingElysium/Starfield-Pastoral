@@ -18,10 +18,10 @@ public final class IceSpineGrounding {
     }
     @Nullable
     static Vec3 step(BlockGetter level, CollisionContext collision, Vec3 from, Vec3 to) {
-        var wall = level.clip(new ClipContext(from.add(0, 0.65, 0),
+        var wall = level.clip(new com.stardew.craft.port.PortClipContext(from.add(0, 0.65, 0),
                 new Vec3(to.x, from.y + 0.65, to.z), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, collision));
         if (wall.getType() != HitResult.Type.MISS) return null;
-        var ground = level.clip(new ClipContext(new Vec3(to.x, from.y + 0.6, to.z),
+        var ground = level.clip(new com.stardew.craft.port.PortClipContext(new Vec3(to.x, from.y + 0.6, to.z),
                 new Vec3(to.x, from.y - 0.8, to.z), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, collision));
         return ground.getType() == HitResult.Type.BLOCK && ground.getDirection() == Direction.UP
                 ? ground.getLocation().add(0, 0.025, 0) : null;

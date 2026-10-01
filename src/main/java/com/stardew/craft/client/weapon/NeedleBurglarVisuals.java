@@ -47,7 +47,7 @@ public final class NeedleBurglarVisuals {
         if (CASTS.putIfAbsent(key, level.getGameTime()) != null) return;
         while (CASTS.size() > 64) CASTS.remove(CASTS.keySet().iterator().next());
         var sound = NEEDLE_FRENZY.equals(p.skillId()) ? SoundEvents.AMETHYST_BLOCK_CHIME
-                : BURGLAR_STRIKE.equals(p.skillId()) ? SoundEvents.PLAYER_ATTACK_SWEEP : SoundEvents.TRIDENT_THROW.value();
+                : BURGLAR_STRIKE.equals(p.skillId()) ? SoundEvents.PLAYER_ATTACK_SWEEP : SoundEvents.TRIDENT_THROW;
         level.playLocalSound(origin.x, origin.y + 1, origin.z, sound, SoundSource.PLAYERS,
                 NEEDLE_FRENZY.equals(p.skillId()) ? .35f : .22f, NEEDLE_FINAL.equals(p.skillId()) ? 1.4f : 1.75f, false);
     }

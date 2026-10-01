@@ -102,7 +102,7 @@ final class LegacyWeaponHitPresentation {
             serverLevel.sendParticles(net.minecraft.core.particles.ParticleTypes.CRIT,
                     x, y, z, 8, 0.35, 0.2, 0.35, 0.06);
             serverLevel.playSound(null, target.blockPosition(),
-                    net.minecraft.sounds.SoundEvents.TRIDENT_RIPTIDE_1.value(),
+                    net.minecraft.sounds.SoundEvents.TRIDENT_RIPTIDE_1,
                     net.minecraft.sounds.SoundSource.PLAYERS, 0.55f, 1.1f);
         }
 

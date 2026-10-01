@@ -627,7 +627,7 @@ public final class StateMaintenanceCommand {
         Path output = directory.resolve(fileName);
         try {
             Files.createDirectories(directory);
-            NbtIo.writeCompressed(export, output);
+            com.stardew.craft.port.PortNbtIo.writeCompressed(export, output);
         } catch (IOException exception) {
             source.sendFailure(Component.literal(
                     "Failed to export namespaced state: "

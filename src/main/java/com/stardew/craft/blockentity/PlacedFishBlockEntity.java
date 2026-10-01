@@ -40,6 +40,6 @@ public final class PlacedFishBlockEntity extends BlockEntity {
     @Override public void onDataPacket(Connection connection, ClientboundBlockEntityDataPacket packet) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         // This is a full snapshot: an empty tag must clear the last displayed fish.
         // MinecraftForge's default handler skips empty tags.
-        loadWithComponents(packet.getTag(), provider);
+        load(packet.getTag());
     }
 }

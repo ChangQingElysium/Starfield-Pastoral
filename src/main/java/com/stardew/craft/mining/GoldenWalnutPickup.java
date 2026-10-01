@@ -23,7 +23,7 @@ public final class GoldenWalnutPickup {
         if (!(event.getPlayer() instanceof ServerPlayer player) || !entity.isAlive()
                 || !entity.getItem().is(ModItems.GOLDEN_WALNUT.get()) || event.canPickup() == TriState.FALSE
                 || player.isSpectator() || entity.hasPickUpDelay()
-                || (entity.getTarget() != null && !entity.getTarget().equals(player.getUUID()))) return;
+                || (com.stardew.craft.port.PortEntities.getTarget(entity) != null && !com.stardew.craft.port.PortEntities.getTarget(entity).equals(player.getUUID()))) return;
         var data = GoldenWalnutData.get(player.server);
         data.discover(entity.getItem().getCount());
         event.setCanPickup(TriState.FALSE);

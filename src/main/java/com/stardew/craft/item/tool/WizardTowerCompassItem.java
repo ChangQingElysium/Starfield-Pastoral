@@ -92,7 +92,7 @@ public class WizardTowerCompassItem extends Item implements IStardewItem {
 
         // 查找最近法师塔结构
         var registry = serverLevel.registryAccess().registryOrThrow(Registries.STRUCTURE);
-        var structureHolder = registry.getHolder(STRUCTURE_ID).orElse(null);
+        var structureHolder = registry.getHolder(net.minecraft.resources.ResourceKey.create(Registries.STRUCTURE, STRUCTURE_ID)).orElse(null);
         if (structureHolder == null) {
             PacketDistributor.sendToPlayer(player, new CompassTargetPayload(false, 0, 0));
             return;

@@ -19,6 +19,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemDisplayContext;
 
+import com.stardew.craft.port.PortVertex;
 public class SmokedFishItemRenderer extends BlockEntityWithoutLevelRenderer {
     private static final ResourceLocation PUFF_TEXTURE = new ResourceLocation(
             StardewCraft.MODID, "textures/item/artisan/smoke_puff.png");
@@ -143,30 +144,30 @@ public class SmokedFishItemRenderer extends BlockEntityWithoutLevelRenderer {
                      int r, int g, int b, int a, int packedLight, int packedOverlay,
                      float u0, float v0, float u1, float v1) {
         var pose = poseStack.last().pose();
-        vc.addVertex(pose, x, y + h, 0.0F)
+        PortVertex.of(vc).addVertex(pose, x, y + h, 0.0F)
             .setColor(r, g, b, a)
             .setUv(u0, v0)
                 .setOverlay(packedOverlay)
                 .setLight(packedLight)
-                .setNormal(0.0F, 0.0F, 1.0F);
-        vc.addVertex(pose, x + w, y + h, 0.0F)
+                .setNormal(0.0F, 0.0F, 1.0F).endVertex();
+        PortVertex.of(vc).addVertex(pose, x + w, y + h, 0.0F)
             .setColor(r, g, b, a)
             .setUv(u1, v0)
                 .setOverlay(packedOverlay)
                 .setLight(packedLight)
-                .setNormal(0.0F, 0.0F, 1.0F);
-        vc.addVertex(pose, x + w, y, 0.0F)
+                .setNormal(0.0F, 0.0F, 1.0F).endVertex();
+        PortVertex.of(vc).addVertex(pose, x + w, y, 0.0F)
             .setColor(r, g, b, a)
             .setUv(u1, v1)
                 .setOverlay(packedOverlay)
                 .setLight(packedLight)
-                .setNormal(0.0F, 0.0F, 1.0F);
-        vc.addVertex(pose, x, y, 0.0F)
+                .setNormal(0.0F, 0.0F, 1.0F).endVertex();
+        PortVertex.of(vc).addVertex(pose, x, y, 0.0F)
             .setColor(r, g, b, a)
             .setUv(u0, v1)
                 .setOverlay(packedOverlay)
                 .setLight(packedLight)
-                .setNormal(0.0F, 0.0F, 1.0F);
+                .setNormal(0.0F, 0.0F, 1.0F).endVertex();
     }
 
     private static final class TintingVertexConsumer implements VertexConsumer {
@@ -184,44 +185,61 @@ public class SmokedFishItemRenderer extends BlockEntityWithoutLevelRenderer {
             this.a = a;
         }
 
+        // PORT(1.20.1): 1.20.1 VertexConsumer API. Like the 1.21 wrapper, every call is forwarded to the delegate
+        // and returns the delegate; only the color is replaced by the tint.
         @Override
-        public VertexConsumer addVertex(float x, float y, float z) {
-            return delegate.addVertex(x, y, z);
+        public VertexConsumer vertex(double x, double y, double z) {
+            return delegate.vertex(x, y, z);
         }
 
         @Override
-        public VertexConsumer setColor(int r, int g, int b, int a) {
-            return delegate.setColor(this.r, this.g, this.b, (int) (this.a * (a / 255.0f)));
+        public VertexConsumer color(int r, int g, int b, int a) {
+            return delegate.color(this.r, this.g, this.b, (int) (this.a * (a / 255.0f)));
         }
 
         @Override
-        public VertexConsumer setUv(float u, float v) {
-            return delegate.setUv(u, v);
+        public VertexConsumer uv(float u, float v) {
+            return delegate.uv(u, v);
         }
 
         @Override
-        public VertexConsumer setUv1(int u, int v) {
-            return delegate.setUv1(u, v);
+        public VertexConsumer overlayCoords(int u, int v) {
+            return delegate.overlayCoords(u, v);
         }
 
         @Override
-        public VertexConsumer setUv2(int u, int v) {
-            return delegate.setUv2(u, v);
+        public VertexConsumer uv2(int u, int v) {
+            return delegate.uv2(u, v);
         }
 
         @Override
-        public VertexConsumer setOverlay(int overlay) {
-            return delegate.setOverlay(overlay);
+        public VertexConsumer overlayCoords(int overlay) {
+            return delegate.overlayCoords(overlay);
         }
 
         @Override
-        public VertexConsumer setLight(int light) {
-            return delegate.setLight(light);
+        public VertexConsumer uv2(int light) {
+            return delegate.uv2(light);
         }
 
         @Override
-        public VertexConsumer setNormal(float x, float y, float z) {
-            return delegate.setNormal(x, y, z);
+        public VertexConsumer normal(float x, float y, float z) {
+            return delegate.normal(x, y, z);
+        }
+
+        @Override
+        public void endVertex() {
+            delegate.endVertex();
+        }
+
+        @Override
+        public void defaultColor(int r, int g, int b, int a) {
+            delegate.defaultColor(r, g, b, a);
+        }
+
+        @Override
+        public void unsetDefaultColor() {
+            delegate.unsetDefaultColor();
         }
     }
 }

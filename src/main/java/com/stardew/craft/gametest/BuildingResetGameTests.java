@@ -26,7 +26,7 @@ public final class BuildingResetGameTests {
         data.register(record);data.acceptSelf(record.id(),0,3);data.rename(record.id(),1,"南边的小鸡之家");
         data.detachSelf(record.id());var detached=data.find(record.id());
         h.assertTrue(detached.phase()==BuildingRecord.Phase.MISSING && data.occupying(record.dimension(),pos)==null,"Removed manager erased identity or kept its claim");
-        var reloaded=BuildingWorldData.load(data.save(new CompoundTag(),h.getLevel().registryAccess()),h.getLevel().registryAccess());
+        var reloaded=BuildingWorldData.load(data.save(new CompoundTag()),h.getLevel().registryAccess());
         var target=pos.east(22);h.assertTrue(reloaded.restoreSelf(reloaded.find(record.id()),target,Direction.WEST,PrefabDefinitions.get(family).selfBounds(target))==BuildingWorldData.Result.SUCCESS,"Bound manager failed to restore");
         var restored=reloaded.find(record.id());h.assertTrue(restored.displayName().equals("南边的小鸡之家") && restored.id().equals(record.id()) && restored.tier()==1,"Restore lost name or skipped tiers");
         h.assertTrue(reloaded.restoreSelf(restored,target,Direction.WEST,restored.claim())!=BuildingWorldData.Result.SUCCESS,"Copied manager restored a second house");h.succeed();
@@ -38,7 +38,7 @@ public final class BuildingResetGameTests {
         data.register(old);data.detachSelf(old.id());
         var next=BuildingRecord.waiting(old.farmId(),0,family,BuildingRecord.Mode.SELF_BUILT,old.dimension(),center,center,Direction.SOUTH,old.claim());
         data.register(next);
-        var saved=data.save(new CompoundTag(),h.getLevel().registryAccess());var rows=saved.getList("Buildings",10);
+        var saved=data.save(new CompoundTag());var rows=saved.getList("Buildings",10);
         var first=rows.remove(0);rows.add(first); // Active record before the old missing record.
         var loaded=BuildingWorldData.load(saved,h.getLevel().registryAccess());
         h.assertTrue(loaded.find(old.id()).phase()==BuildingRecord.Phase.MISSING && next.id().equals(loaded.occupying(old.dimension(),center)),"Missing residence incorrectly blocked another house on reload");h.succeed();
@@ -57,7 +57,7 @@ public final class BuildingResetGameTests {
         var data=new BuildingDrafts();var stack=new ItemStack(ModItems.COOP_BLUEPRINT.get());BuildingBlueprintItem.bind(stack,UUID.randomUUID());
         var tag=BuildingBlueprintItem.draft(stack);tag.putLong("DraftAnchor",new BlockPos(4,5,6).asLong());tag.putString("DraftDimension",h.getLevel().dimension().location().toString());tag.putString("DraftFacing","west");
         PortItemData.set(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,com.stardew.craft.port.net.minecraft.world.item.component.CustomData.of(tag));data.write(stack);var copy=stack.copy();
-        data=BuildingDrafts.load(data.save(new CompoundTag(),h.getLevel().registryAccess()),h.getLevel().registryAccess());
+        data=BuildingDrafts.load(data.save(new CompoundTag()),h.getLevel().registryAccess());
         tag=BuildingBlueprintItem.draft(stack);tag.remove("DraftAnchor");PortItemData.set(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,com.stardew.craft.port.net.minecraft.world.item.component.CustomData.of(tag));data.write(stack);data.apply(copy);
         h.assertTrue(BuildingBlueprintItem.pinned(copy,h.getLevel())==null && BuildingBlueprintItem.facing(copy)==Direction.WEST,"Copied item retained a conflicting pin after cancellation/reload");h.succeed();
     }

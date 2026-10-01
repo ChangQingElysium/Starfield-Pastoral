@@ -5,6 +5,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 
+import com.stardew.craft.port.PortVertex;
 /** Shared additive shapes for the three melee samples. */
 public final class WeaponGlowGeometry {
     private WeaponGlowGeometry() {}
@@ -31,7 +32,7 @@ public final class WeaponGlowGeometry {
     }
 
     public static void vertex(VertexConsumer out, Matrix4f pose, Vec3 p, int r, int g, int b, int alpha) {
-        out.addVertex(pose, (float) p.x, (float) p.y, (float) p.z).setColor(r, g, b, Mth.clamp(alpha, 0, 255));
+        PortVertex.of(out).addVertex(pose, (float) p.x, (float) p.y, (float) p.z).setColor(r, g, b, Mth.clamp(alpha, 0, 255)).endVertex();
     }
 
 }

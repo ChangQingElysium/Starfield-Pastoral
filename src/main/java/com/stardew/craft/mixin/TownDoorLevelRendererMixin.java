@@ -2,6 +2,7 @@ package com.stardew.craft.mixin;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.stardew.craft.client.interior.TownDoorClient;
 import com.stardew.craft.client.interior.TownDoorRenderContext;
 import com.stardew.craft.client.interior.TownDoorVanillaVisibility;
@@ -35,8 +36,9 @@ public abstract class TownDoorLevelRendererMixin {
     @Shadow private RenderTarget translucentTarget;
     @Shadow @Nullable private ClientLevel level;
     @Shadow @Nullable private ViewArea viewArea;
-    @Shadow @Nullable private ChunkRenderDispatcher sectionRenderDispatcher;
-    @Shadow @Final private ObjectArrayList<ChunkRenderDispatcher.RenderChunk> visibleSections;
+    @Shadow @Nullable private ChunkRenderDispatcher chunkRenderDispatcher;
+    // PORT(1.20.1): 1.21 visibleSections is renderChunksInFrustum here, a list of package-private RenderChunkInfo.
+    @Shadow @Final private ObjectArrayList<Object> renderChunksInFrustum;
 
     /** Immersive Portals skips the nested world's full framebuffer clear. */
     @Redirect(method = "renderLevel", at = @At(value = "INVOKE",
@@ -48,11 +50,13 @@ public abstract class TownDoorLevelRendererMixin {
     /** Render after opaque blocks/entities and before translucent buffers, matching the upstream hook. */
     @Inject(method = "renderLevel", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/client/renderer/Sheets;translucentCullBlockSheet()Lnet/minecraft/client/renderer/RenderType;"))
-    private void stardewcraft$renderTownDoor(DeltaTracker delta, boolean outline, Camera camera,
-                                                GameRenderer gameRenderer, LightTexture lightTexture,
-                                                Matrix4f view, Matrix4f projection, CallbackInfo ci) {
+    private void stardewcraft$renderTownDoor(PoseStack viewStack, float partialTick, long finishNanoTime,
+                                                boolean outline, Camera camera, GameRenderer gameRenderer,
+                                                LightTexture lightTexture, Matrix4f projection, CallbackInfo ci) {
         if (!TownDoorRenderContext.isRendering()) {
-            TownDoorClient.renderPortal(delta, camera, view, projection);
+            // PORT(1.20.1): the view rotation is the PoseStack's base pose (1.21 passes it as frustumMatrix).
+            TownDoorClient.renderPortal(DeltaTracker.of(partialTick), finishNanoTime, camera, viewStack.last(),
+                    projection);
         }
     }
 
@@ -90,9 +94,9 @@ public abstract class TownDoorLevelRendererMixin {
                                                        boolean hasCapturedFrustum, boolean spectator,
                                                        CallbackInfo ci) {
         if (!TownDoorRenderContext.shouldOverrideVanillaTerrainSetup()
-                || level == null || viewArea == null || sectionRenderDispatcher == null) return;
-        sectionRenderDispatcher.setCamera(camera.getPosition());
-        TownDoorVanillaVisibility.discover(level, viewArea, camera, frustum, visibleSections);
+                || level == null || viewArea == null || chunkRenderDispatcher == null) return;
+        chunkRenderDispatcher.setCamera(camera.getPosition());
+        TownDoorVanillaVisibility.discover(level, viewArea, camera, frustum, renderChunksInFrustum);
         ci.cancel();
     }
 }

@@ -94,7 +94,7 @@ public final class LivestockWorldData extends SavedData {
     }
     public static LivestockWorldData get(MinecraftServer server) {
         if (!server.isSameThread()) throw new IllegalStateException("Livestock access requires server thread");
-        return server.overworld().getDataStorage().computeIfAbsent(com.stardew.craft.port.PortSavedData.loader(new Factory<>(LivestockWorldData::new, LivestockWorldData::load)), com.stardew.craft.port.PortSavedData.constructor(new Factory<>(LivestockWorldData::new, LivestockWorldData::load)), "stardew_livestock");
+        return server.overworld().getDataStorage().computeIfAbsent(com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(LivestockWorldData::new, LivestockWorldData::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(LivestockWorldData::new, LivestockWorldData::load)), "stardew_livestock");
     }
     public void removeFarm(UUID farm, Set<UUID> homes) {
         var removed = animals.values().stream().filter(a -> a.farm().equals(farm)).map(LivestockRecord::id).collect(java.util.stream.Collectors.toSet());

@@ -127,7 +127,7 @@ public final class GilService {
 
     private static ItemStack directItem(com.stardew.craft.api.v1.action.StardewAction action) {
         if (!action.type().equals(new ResourceLocation("stardewcraft:add_item"))) return ItemStack.EMPTY;
-        var encoded = StardewActions.CODEC.encodeStart(JsonOps.INSTANCE, action).getOrThrow().getAsJsonObject().getAsJsonObject("data");
+        var encoded = com.stardew.craft.port.PortDataResults.getOrThrow(StardewActions.CODEC.encodeStart(JsonOps.INSTANCE, action)).getAsJsonObject().getAsJsonObject("data");
         return new ItemStack(BuiltInRegistries.ITEM.get(new ResourceLocation(encoded.get("item").getAsString())),
                 encoded.has("count") ? encoded.get("count").getAsInt() : 1);
     }
@@ -139,8 +139,8 @@ public final class GilService {
         for (var key : journal.getAllKeys()) {
             try {
                 var entry = journal.getCompound(key);
-                var actions = StardewActions.CODEC.listOf().parse(JsonOps.INSTANCE,
-                        com.google.gson.JsonParser.parseString(entry.getString("Actions"))).getOrThrow();
+                var actions = com.stardew.craft.port.PortDataResults.getOrThrow(StardewActions.CODEC.listOf().parse(JsonOps.INSTANCE,
+                        com.google.gson.JsonParser.parseString(entry.getString("Actions"))));
                 goals.put(key, new MonsterSlayerGoalRegistry.SlayerGoal(key, entry.getString("Translation"), 1, java.util.List.of(), actions));
             } catch (RuntimeException ex) { StardewCraft.LOGGER.error("[Gil] Cannot decode pending reward {}", key, ex); }
         }
@@ -157,12 +157,12 @@ public final class GilService {
             var entry = journal.getCompound(expected.goalKey());
             java.util.List<com.stardew.craft.api.v1.action.StardewAction> actions;
             if (journal.contains(expected.goalKey())) {
-                actions = StardewActions.CODEC.listOf().parse(JsonOps.INSTANCE,
-                        com.google.gson.JsonParser.parseString(entry.getString("Actions"))).getOrThrow();
+                actions = com.stardew.craft.port.PortDataResults.getOrThrow(StardewActions.CODEC.listOf().parse(JsonOps.INSTANCE,
+                        com.google.gson.JsonParser.parseString(entry.getString("Actions"))));
             } else {
                 if (!expected.equals(MonsterSlayerGoalRegistry.getGoal(expected.goalKey()))) return false;
                 actions = expected.rewards();
-                entry.putString("Actions", StardewActions.CODEC.listOf().encodeStart(JsonOps.INSTANCE, actions).getOrThrow().toString());
+                entry.putString("Actions", com.stardew.craft.port.PortDataResults.getOrThrow(StardewActions.CODEC.listOf().encodeStart(JsonOps.INSTANCE, actions)).toString());
                 entry.putString("Translation", expected.translationKey());
             }
             if (actions.isEmpty()) return false;

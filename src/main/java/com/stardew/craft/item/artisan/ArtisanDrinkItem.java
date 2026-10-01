@@ -37,8 +37,8 @@ public class ArtisanDrinkItem extends Item implements IStardewItem {
     public ArtisanDrinkItem(int sellPrice, int energy, int health, int speedBonus, int speedDurationTicks, boolean supportsQuality, Item.Properties properties) {
         super(properties.food(new FoodProperties.Builder()
                 .nutrition(1)
-                .saturationModifier(0.1f)
-                .alwaysEdible()
+                .saturationMod(0.1f)
+                .alwaysEat()
                 .build()));
         this.sellPrice = sellPrice;
         this.energy = energy;

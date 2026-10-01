@@ -57,7 +57,7 @@ public record OpenQuestDeliveryConfirmPayload(
         Component questTitle;
         try {
             questTitle = Component.Serializer.fromJson(
-                payload.questTitleJson(), mc.level.registryAccess());
+                payload.questTitleJson());
             if (questTitle == null) questTitle = Component.literal(payload.questTitleJson());
         } catch (Exception e) {
             questTitle = Component.literal(payload.questTitleJson());

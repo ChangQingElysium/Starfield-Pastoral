@@ -37,7 +37,7 @@ public record DailyQuestPoolDefinition(
             MonsterEntry.CODEC.listOf().fieldOf("monsters").forGetter(DailyQuestPoolDefinition::monsters)
     ).apply(instance, DailyQuestPoolDefinition::new));
 
-    public static final Codec<DailyQuestPoolDefinition> CODEC = BASE_CODEC.validate(DailyQuestPoolDefinition::validate);
+    public static final Codec<DailyQuestPoolDefinition> CODEC = com.stardew.craft.port.PortCodecs.validate(BASE_CODEC, DailyQuestPoolDefinition::validate);
 
     public DailyQuestPoolDefinition {
         deliveryNpcs = List.copyOf(deliveryNpcs);

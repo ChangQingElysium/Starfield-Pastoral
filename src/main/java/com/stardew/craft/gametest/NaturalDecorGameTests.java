@@ -99,8 +99,8 @@ public final class NaturalDecorGameTests {
             helper.assertTrue(state.getValue(NaturalPlantBlock.VARIANT)==1,"Fixed variant rerolled");
             helper.assertTrue(state.getValue(NaturalPlantBlock.IN_PLANTER),"Plant was not lowered to soil");
             helper.assertTrue(state.getShape(level,pos).min(Direction.Axis.Y)==-.25,"Planter plant floats above soil");
-            var encoded=BlockState.CODEC.encodeStart(JsonOps.INSTANCE,state).getOrThrow();
-            helper.assertTrue(BlockState.CODEC.parse(JsonOps.INSTANCE,encoded).getOrThrow().equals(state),"Plant state failed save round-trip");
+            var encoded=com.stardew.craft.port.PortDataResults.getOrThrow(BlockState.CODEC.encodeStart(JsonOps.INSTANCE,state));
+            helper.assertTrue(com.stardew.craft.port.PortDataResults.getOrThrow(BlockState.CODEC.parse(JsonOps.INSTANCE,encoded)).equals(state),"Plant state failed save round-trip");
         }
         helper.assertTrue(PortItemData.get(fixed, DataComponents.BLOCK_STATE).get(NaturalPlantBlock.VARIANT)==1,"Fixed item changed");
         level.setBlock(pos.below(),Blocks.STONE.defaultBlockState(),3);

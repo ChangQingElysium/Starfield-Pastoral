@@ -11,7 +11,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.world.phys.AABB;
 
-public final class FishMarketCrateBlockEntityRenderer implements BlockEntityRenderer<FishMarketCrateBlockEntity> {
+public final class FishMarketCrateBlockEntityRenderer implements BlockEntityRenderer<FishMarketCrateBlockEntity>, com.stardew.craft.port.net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension<FishMarketCrateBlockEntity> {
     public FishMarketCrateBlockEntityRenderer(BlockEntityRendererProvider.Context context) {}
 
     @Override public void render(FishMarketCrateBlockEntity crate, float partialTick, PoseStack pose,

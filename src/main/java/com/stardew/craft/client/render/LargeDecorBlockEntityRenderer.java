@@ -6,7 +6,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
 
 /** Large scenery follows the loaded view distance instead of the default four-chunk cutoff. */
-public interface LargeDecorBlockEntityRenderer<T extends BlockEntity> extends BlockEntityRenderer<T> {
+public interface LargeDecorBlockEntityRenderer<T extends BlockEntity> extends BlockEntityRenderer<T>,
+        com.stardew.craft.port.net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension<T> {
     @Override
     default int getViewDistance() {
         return Minecraft.getInstance().options.getEffectiveRenderDistance() * 16;

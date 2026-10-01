@@ -714,7 +714,7 @@ public final class SpiritEveFestivalService {
             QUESTION_CONTEXT_SHORTCUT,
             0,
             "",
-            Component.Serializer.toJson(Component.translatable("stardewcraft.festival.spirit_eve.shortcut.question"), player.registryAccess()),
+            Component.Serializer.toJson(Component.translatable("stardewcraft.festival.spirit_eve.shortcut.question")),
             List.of(
                 response("yes", Component.translatable("stardewcraft.dialog.yes"), player),
                 response("no", Component.translatable("stardewcraft.dialog.no"), player)
@@ -725,7 +725,7 @@ public final class SpiritEveFestivalService {
     private static OpenDesertFestivalQuestionPayload.ResponseOption response(String id, Component label, ServerPlayer player) {
         return new OpenDesertFestivalQuestionPayload.ResponseOption(
             id,
-            Component.Serializer.toJson(label, player.registryAccess())
+            Component.Serializer.toJson(label)
         );
     }
 

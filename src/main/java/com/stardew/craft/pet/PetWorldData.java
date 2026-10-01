@@ -23,10 +23,10 @@ public final class PetWorldData extends SavedData {
 
     public static PetWorldData get(MinecraftServer server) {
         if (!server.isSameThread()) throw new IllegalStateException("Pet state requires server thread");
-        return server.overworld().getDataStorage().computeIfAbsent(com.stardew.craft.port.PortSavedData.loader(new Factory<>(PetWorldData::new, PetWorldData::load)), com.stardew.craft.port.PortSavedData.constructor(new Factory<>(PetWorldData::new, PetWorldData::load)), "stardew_pets");
+        return server.overworld().getDataStorage().computeIfAbsent(com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(PetWorldData::new, PetWorldData::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(PetWorldData::new, PetWorldData::load)), "stardew_pets");
     }
     public static PetWorldData peek(MinecraftServer server) {
-        return server.overworld() == null ? null : server.overworld().getDataStorage().get(com.stardew.craft.port.PortSavedData.loader(new Factory<>(PetWorldData::new, PetWorldData::load)), "stardew_pets");
+        return server.overworld() == null ? null : server.overworld().getDataStorage().get(com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(PetWorldData::new, PetWorldData::load)), "stardew_pets");
     }
     public Collection<PetRecord> all() { return Collections.unmodifiableCollection(pets.values()); }
     public List<PetRecord> forFarm(UUID farm) { return byFarm.getOrDefault(farm, Set.of()).stream().map(pets::get).toList(); }

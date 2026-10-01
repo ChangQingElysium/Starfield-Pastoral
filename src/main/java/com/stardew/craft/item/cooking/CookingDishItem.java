@@ -69,7 +69,7 @@ public class CookingDishItem extends Item implements IStardewItem {
 
     @SuppressWarnings("null")
     public CookingDishItem(String typeKey, int sellPrice, int edibility, List<DishBuff> buffs, Item.Properties properties, boolean drinkAnimation) {
-        super(properties.food(new FoodProperties.Builder().nutrition(1).saturationModifier(0.1f).alwaysEdible().build()));
+        super(properties.food(new FoodProperties.Builder().nutrition(1).saturationMod(0.1f).alwaysEat().build()));
         this.typeKey = typeKey == null || typeKey.isBlank() ? DEFAULT_TYPE_KEY : typeKey;
         this.sellPrice = sellPrice;
         this.edibility = edibility;

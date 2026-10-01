@@ -34,7 +34,7 @@ public final class FarmCaveData extends SavedData {
     }
     public static FarmCaveData get(ServerLevel level) {
         return level.getServer().overworld().getDataStorage().computeIfAbsent(
-                com.stardew.craft.port.PortSavedData.loader(new Factory<>(FarmCaveData::new,FarmCaveData::load)), com.stardew.craft.port.PortSavedData.constructor(new Factory<>(FarmCaveData::new,FarmCaveData::load)),"stardew_farm_caves");
+                com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(FarmCaveData::new,FarmCaveData::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(FarmCaveData::new,FarmCaveData::load)),"stardew_farm_caves");
     }
     public Entry find(UUID id) { return entries.get(id); }
     public Collection<Entry> entries() { return Collections.unmodifiableCollection(entries.values()); }

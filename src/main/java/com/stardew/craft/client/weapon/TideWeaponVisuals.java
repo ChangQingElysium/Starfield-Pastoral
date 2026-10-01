@@ -40,7 +40,7 @@ public final class TideWeaponVisuals {
         Vec3 point = new Vec3(p.originX(), p.originY() + 0.8, p.originZ());
         if (mc.player.distanceToSqr(point) > 48 * 48) return;
         mc.level.playLocalSound(point.x, point.y, point.z,
-                TIDE_MARK.equals(p.skillId()) ? SoundEvents.AMETHYST_BLOCK_CHIME : SoundEvents.TRIDENT_THROW.value(),
+                TIDE_MARK.equals(p.skillId()) ? SoundEvents.AMETHYST_BLOCK_CHIME : SoundEvents.TRIDENT_THROW,
                 SoundSource.PLAYERS, TIDE_STAB.equals(p.skillId()) ? 0.26f : 0.4f,
                 TIDE_STAB.equals(p.skillId()) ? 1.7f : TIDE_ANCHOR.equals(p.skillId()) ? 0.75f : 1.1f, false);
     }
@@ -71,7 +71,7 @@ public final class TideWeaponVisuals {
         BURSTS.add(new Burst(p, boundary));
         Vec3 point = p.to();
         mc.level.playLocalSound(point.x, point.y, point.z,
-                p.phase() == Phase.ANCHOR ? SoundEvents.TRIDENT_RIPTIDE_1.value() : SoundEvents.FISHING_BOBBER_RETRIEVE,
+                p.phase() == Phase.ANCHOR ? SoundEvents.TRIDENT_RIPTIDE_1 : SoundEvents.FISHING_BOBBER_RETRIEVE,
                 SoundSource.PLAYERS, p.phase() == Phase.ANCHOR ? 0.65f : 0.4f, p.phase() == Phase.ANCHOR ? 0.8f : 1.0f, false);
         if (p.phase() == Phase.ANCHOR) mc.level.playLocalSound(point.x, point.y, point.z,
                 SoundEvents.FISHING_BOBBER_SPLASH, SoundSource.PLAYERS, 0.65f, 0.8f, false);

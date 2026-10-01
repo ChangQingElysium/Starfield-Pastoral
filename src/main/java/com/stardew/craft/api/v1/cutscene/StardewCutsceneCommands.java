@@ -103,6 +103,6 @@ public final class StardewCutsceneCommands {
     }
 
     private static <T> T decode(Codec<T> codec, JsonObject data) {
-        return codec.parse(JsonOps.INSTANCE, data).getOrThrow();
+        return com.stardew.craft.port.PortDataResults.getOrThrow(codec.parse(JsonOps.INSTANCE, data));
     }
 }

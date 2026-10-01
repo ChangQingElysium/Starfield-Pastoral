@@ -450,9 +450,8 @@ public final class FarmLayoutDataRegistry {
             throw new IllegalArgumentException("missing " + field);
         }
         try {
-            return ComponentSerialization.CODEC
-                    .parse(JsonOps.INSTANCE, raw)
-                    .getOrThrow(IllegalArgumentException::new);
+            return com.stardew.craft.port.PortDataResults.getOrThrow(ComponentSerialization.CODEC
+                    .parse(JsonOps.INSTANCE, raw), IllegalArgumentException::new);
         } catch (RuntimeException exception) {
             throw new IllegalArgumentException(
                     "invalid " + field + ": "

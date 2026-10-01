@@ -1892,8 +1892,7 @@ public final class InteriorSubspaceManager {
         }
 
         @Override
-        public @Nonnull net.minecraft.nbt.CompoundTag save(@Nonnull net.minecraft.nbt.CompoundTag tag,
-                                                           @Nonnull HolderLookup.Provider provider) {
+        public @Nonnull net.minecraft.nbt.CompoundTag save(@Nonnull net.minecraft.nbt.CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
             tag.putInt("layoutVersion", layoutVersion);
             tag.putInt("portalTriggerVersion", portalTriggerVersion);
             tag.putBoolean("initialized", initialized);

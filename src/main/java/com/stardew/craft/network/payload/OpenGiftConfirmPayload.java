@@ -74,7 +74,7 @@ public record OpenGiftConfirmPayload(
     @net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
     private static Component parseComponent(String json, net.minecraft.client.Minecraft mc) {
         try {
-            Component component = Component.Serializer.fromJson(json, mc.level.registryAccess());
+            Component component = Component.Serializer.fromJson(json);
             if (component != null) {
                 return component;
             }

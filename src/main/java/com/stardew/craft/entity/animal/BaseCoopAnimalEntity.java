@@ -111,7 +111,7 @@ public abstract class BaseCoopAnimalEntity extends Animal implements AnimatedMod
 	public static AttributeSupplier.Builder createAttributes() {
 		return Animal.createLivingAttributes()
 				.add(Attributes.MAX_HEALTH, 10.0D)
-				.add(Attributes.STEP_HEIGHT, 1.0D)
+				.add(com.stardew.craft.port.PortAttributes.STEP_HEIGHT.get(), 1.0D)
 				.add(Attributes.MOVEMENT_SPEED, 0.176D)
 				.add(Attributes.FOLLOW_RANGE, 16.0D);
 	}

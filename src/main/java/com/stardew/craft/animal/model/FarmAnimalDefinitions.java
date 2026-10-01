@@ -361,8 +361,7 @@ public final class FarmAnimalDefinitions {
         if (!root.has(field) || root.get(field).isJsonNull()) {
             return null;
         }
-        return StardewConditions.CODEC.parse(JsonOps.INSTANCE, root.get(field))
-                .getOrThrow(message -> new IllegalArgumentException(field + ": " + message));
+        return com.stardew.craft.port.PortDataResults.getOrThrow(StardewConditions.CODEC.parse(JsonOps.INSTANCE, root.get(field)), message -> new IllegalArgumentException(field + ": " + message));
     }
 
     private static FarmAnimalDefinition.HarvestType parseHarvestType(String raw) {

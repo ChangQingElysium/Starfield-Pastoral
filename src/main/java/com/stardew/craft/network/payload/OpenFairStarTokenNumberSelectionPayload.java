@@ -63,7 +63,7 @@ public record OpenFairStarTokenNumberSelectionPayload(
         }
         Component question;
         try {
-            Component parsed = Component.Serializer.fromJson(payload.questionJson(), mc.level.registryAccess());
+            Component parsed = Component.Serializer.fromJson(payload.questionJson());
             question = parsed == null ? Component.literal(payload.questionJson()) : parsed;
         } catch (Exception ignored) {
             question = Component.literal(payload.questionJson() == null ? "" : payload.questionJson());

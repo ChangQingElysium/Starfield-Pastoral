@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import com.stardew.craft.client.model.nativebb.BlockbenchEntityRenderer;
 
+import com.stardew.craft.port.PortVertex;
 @SuppressWarnings("null")
 public class CoopAnimalGeoRenderer<T extends BaseCoopAnimalEntity> extends BlockbenchEntityRenderer<T> {
 	private static final ResourceLocation EMOTES_TEX = new ResourceLocation(StardewCraft.MODID, "textures/gui/emotes.png");
@@ -48,10 +49,10 @@ public class CoopAnimalGeoRenderer<T extends BaseCoopAnimalEntity> extends Block
 
 		float half = EMOTE_SIZE * 0.5F;
 		VertexConsumer vc = bufferSource.getBuffer(RenderType.entityTranslucent(EMOTES_TEX));
-		vc.addVertex(poseStack.last().pose(), -half, half, 0.0F).setColor(255, 255, 255, 255).setUv(u0, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(0, 0, 1);
-		vc.addVertex(poseStack.last().pose(), half, half, 0.0F).setColor(255, 255, 255, 255).setUv(u1, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(0, 0, 1);
-		vc.addVertex(poseStack.last().pose(), half, -half, 0.0F).setColor(255, 255, 255, 255).setUv(u1, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(0, 0, 1);
-		vc.addVertex(poseStack.last().pose(), -half, -half, 0.0F).setColor(255, 255, 255, 255).setUv(u0, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(0, 0, 1);
+		PortVertex.of(vc).addVertex(poseStack.last().pose(), -half, half, 0.0F).setColor(255, 255, 255, 255).setUv(u0, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(0, 0, 1).endVertex();
+		PortVertex.of(vc).addVertex(poseStack.last().pose(), half, half, 0.0F).setColor(255, 255, 255, 255).setUv(u1, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(0, 0, 1).endVertex();
+		PortVertex.of(vc).addVertex(poseStack.last().pose(), half, -half, 0.0F).setColor(255, 255, 255, 255).setUv(u1, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(0, 0, 1).endVertex();
+		PortVertex.of(vc).addVertex(poseStack.last().pose(), -half, -half, 0.0F).setColor(255, 255, 255, 255).setUv(u0, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(0, 0, 1).endVertex();
 		poseStack.popPose();
 	}
 }

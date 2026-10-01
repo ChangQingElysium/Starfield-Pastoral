@@ -213,7 +213,7 @@ public class CrabPotItem extends StardewBlockItem {
 		Vec3 start = player.getEyePosition();
 		Vec3 look = player.getViewVector(1.0F);
 		Vec3 end = start.add(look.x * reach, look.y * reach, look.z * reach);
-		return level.clip(new ClipContext(start, end, ClipContext.Block.OUTLINE, fluidMode, CollisionContext.of(player)));
+		return level.clip(new ClipContext(start, end, ClipContext.Block.OUTLINE, fluidMode, player));
 	}
 
 	private InteractionResult placeAt(UseOnContext context, BlockPos targetPos) {

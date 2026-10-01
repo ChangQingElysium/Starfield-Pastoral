@@ -67,7 +67,7 @@ public class NewTreePartBlockEntity extends BlockEntity {
 		if (hasGeneratedTreeMarker()) {
 			tag.put(TAG_TREE_ID, NbtUtils.createUUID(generatedTreeId));
 			tag.putString(TAG_TREE_SPECIES, generatedTreeSpecies);
-			tag.put(TAG_TREE_ROOT, NbtUtils.writeBlockPos(generatedTreeRoot));
+			tag.put(TAG_TREE_ROOT, com.stardew.craft.port.PortNbtUtils.writeBlockPos(generatedTreeRoot));
 		}
 	}
 
@@ -77,7 +77,7 @@ public class NewTreePartBlockEntity extends BlockEntity {
 		generatedTreeId = tag.contains(TAG_TREE_ID, Tag.TAG_INT_ARRAY) ? NbtUtils.loadUUID(tag.get(TAG_TREE_ID)) : null;
 		generatedTreeSpecies = tag.contains(TAG_TREE_SPECIES, Tag.TAG_STRING) ? tag.getString(TAG_TREE_SPECIES) : null;
 		generatedTreeRoot = tag.contains(TAG_TREE_ROOT, Tag.TAG_COMPOUND)
-				? NbtUtils.readBlockPos(tag, TAG_TREE_ROOT).orElse(null)
+				? com.stardew.craft.port.PortNbtUtils.readBlockPos(tag, TAG_TREE_ROOT).orElse(null)
 				: null;
 	}
 }

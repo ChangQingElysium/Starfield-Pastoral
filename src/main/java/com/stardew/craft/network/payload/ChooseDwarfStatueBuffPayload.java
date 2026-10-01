@@ -57,10 +57,10 @@ public record ChooseDwarfStatueBuffPayload(int chosenIcon) implements CustomPack
 
             // 已有任意 dwarf_statue_N 时禁止再领
             for (Holder<MobEffect> b : DWARF_BUFFS) {
-                if (sp.hasEffect(b)) return;
+                if (sp.hasEffect(b.value())) return;
             }
 
-            sp.addEffect(new MobEffectInstance(DWARF_BUFFS.get(i), -1, 0, false, false, true));
+            sp.addEffect(new MobEffectInstance(DWARF_BUFFS.get(i).value(), -1, 0, false, false, true));
         });
     }
 }

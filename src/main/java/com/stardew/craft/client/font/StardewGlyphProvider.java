@@ -109,13 +109,15 @@ final class StardewGlyphProvider implements GlyphProvider {
                 }
 
                 @Override
-                public float getBearingLeft() {
+                public float getBearingX() { // PORT(1.20.1): 1.21 getBearingLeft
                     return data.visualLeft(glyph);
                 }
 
                 @Override
-                public float getBearingTop() {
-                    return 7.0F - data.visualTop(glyph);
+                public float getBearingY() {
+                    // PORT(1.20.1): 1.21 getBearingTop() = 7 - visualTop and getTop() = 7 - getBearingTop();
+                    // 1.20.1 getUp() = getBearingY(), so the glyph top stays at visualTop.
+                    return data.visualTop(glyph);
                 }
             });
         }

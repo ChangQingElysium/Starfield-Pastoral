@@ -144,10 +144,10 @@ public class FishPondWorldData extends SavedData {
         if(existing==null)return; // A durable transfer replay may already have moved the record.
         var tag=existing.save();
         java.util.function.Function<BlockPos,BlockPos> move=pos->com.stardew.craft.building.runtime.BuildingTransfer.destination(before,after,pos);
-        tag.put("managerPos",net.minecraft.nbt.NbtUtils.writeBlockPos(after.manager()));
-        tag.put("bucketPos",net.minecraft.nbt.NbtUtils.writeBlockPos(move.apply(existing.bucketPos())));
+        tag.put("managerPos",com.stardew.craft.port.PortNbtUtils.writeBlockPos(after.manager()));
+        tag.put("bucketPos",com.stardew.craft.port.PortNbtUtils.writeBlockPos(move.apply(existing.bucketPos())));
         var nets=new net.minecraft.nbt.ListTag();
-        for(var pos:existing.netPositions()){var cell=new net.minecraft.nbt.CompoundTag();cell.put("Pos",net.minecraft.nbt.NbtUtils.writeBlockPos(move.apply(pos)));nets.add(cell);}
+        for(var pos:existing.netPositions()){var cell=new net.minecraft.nbt.CompoundTag();cell.put("Pos",com.stardew.craft.port.PortNbtUtils.writeBlockPos(move.apply(pos)));nets.add(cell);}
         tag.put("netPositions",nets);
         var water=new net.minecraft.nbt.ListTag();
         int minX=Integer.MAX_VALUE,minY=Integer.MAX_VALUE,minZ=Integer.MAX_VALUE,maxX=Integer.MIN_VALUE,maxY=Integer.MIN_VALUE,maxZ=Integer.MIN_VALUE;

@@ -21,7 +21,7 @@ public record StardewForageZoneDefinition(
         int priority,
         List<StardewCondition> availableWhen
 ) {
-    public static final Codec<StardewForageZoneDefinition> CODEC = RecordCodecBuilder.<StardewForageZoneDefinition>create(instance -> instance.group(
+    public static final Codec<StardewForageZoneDefinition> CODEC = com.stardew.craft.port.PortCodecs.validate(RecordCodecBuilder.<StardewForageZoneDefinition>create(instance -> instance.group(
             Rect.CODEC.listOf().fieldOf("areas").forGetter(StardewForageZoneDefinition::areas),
             Entry.CODEC.listOf().fieldOf("entries").forGetter(StardewForageZoneDefinition::entries),
             Codec.intRange(0, Integer.MAX_VALUE).fieldOf("min_daily_spawn")
@@ -35,7 +35,7 @@ public record StardewForageZoneDefinition(
             Codec.INT.optionalFieldOf("priority", 0).forGetter(StardewForageZoneDefinition::priority),
             StardewConditions.CODEC.listOf().optionalFieldOf("available_when", List.of())
                     .forGetter(StardewForageZoneDefinition::availableWhen)
-    ).apply(instance, StardewForageZoneDefinition::new)).validate(StardewForageZoneDefinition::validate);
+    ).apply(instance, StardewForageZoneDefinition::new)), StardewForageZoneDefinition::validate);
 
     public StardewForageZoneDefinition {
         areas = List.copyOf(areas == null ? List.of() : areas);
@@ -56,7 +56,7 @@ public record StardewForageZoneDefinition(
     }
 
     public record Rect(int minX, int minY, int minZ, int maxX, int maxY, int maxZ, int weight) {
-        public static final Codec<Rect> CODEC = RecordCodecBuilder.<Rect>create(instance -> instance.group(
+        public static final Codec<Rect> CODEC = com.stardew.craft.port.PortCodecs.validate(RecordCodecBuilder.<Rect>create(instance -> instance.group(
                 Codec.INT.fieldOf("min_x").forGetter(Rect::minX),
                 Codec.INT.fieldOf("min_y").forGetter(Rect::minY),
                 Codec.INT.fieldOf("min_z").forGetter(Rect::minZ),
@@ -64,7 +64,7 @@ public record StardewForageZoneDefinition(
                 Codec.INT.fieldOf("max_y").forGetter(Rect::maxY),
                 Codec.INT.fieldOf("max_z").forGetter(Rect::maxZ),
                 Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("weight", 1).forGetter(Rect::weight)
-        ).apply(instance, Rect::new)).validate(rect ->
+        ).apply(instance, Rect::new)), rect ->
                 rect.maxX() < rect.minX() || rect.maxY() < rect.minY() || rect.maxZ() < rect.minZ()
                         ? DataResult.error(() -> "forage area max values must be >= min values")
                         : DataResult.success(rect));
@@ -72,11 +72,11 @@ public record StardewForageZoneDefinition(
 
     public record Entry(ResourceLocation block, List<String> seasons, double chance) {
         private static final List<String> VALID_SEASONS = List.of("spring", "summer", "fall", "winter");
-        public static final Codec<Entry> CODEC = RecordCodecBuilder.<Entry>create(instance -> instance.group(
+        public static final Codec<Entry> CODEC = com.stardew.craft.port.PortCodecs.validate(RecordCodecBuilder.<Entry>create(instance -> instance.group(
                 ResourceLocation.CODEC.fieldOf("block").forGetter(Entry::block),
                 Codec.STRING.listOf().optionalFieldOf("seasons", VALID_SEASONS).forGetter(Entry::seasons),
                 Codec.doubleRange(0.0, 1.0).optionalFieldOf("chance", 1.0).forGetter(Entry::chance)
-        ).apply(instance, Entry::new)).validate(Entry::validate);
+        ).apply(instance, Entry::new)), Entry::validate);
 
         public Entry {
             seasons = (seasons == null ? VALID_SEASONS : seasons).stream()

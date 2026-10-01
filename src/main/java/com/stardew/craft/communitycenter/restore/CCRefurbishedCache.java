@@ -98,7 +98,7 @@ public final class CCRefurbishedCache {
                 return empty();
             }
 
-            CompoundTag root = NbtIo.readCompressed(stream, NbtAccounter.unlimitedHeap());
+            CompoundTag root = com.stardew.craft.port.PortNbtIo.readCompressed(stream, NbtAccounter.UNLIMITED);
             CompoundTag schematic = root;
             if ((readDim(root, "Width") == 0 || readDim(root, "Height") == 0 || readDim(root, "Length") == 0)
                     && root.contains("Schematic", Tag.TAG_COMPOUND)) {

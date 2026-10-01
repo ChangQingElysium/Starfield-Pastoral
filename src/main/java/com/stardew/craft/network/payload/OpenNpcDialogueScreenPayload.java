@@ -695,7 +695,7 @@ public record OpenNpcDialogueScreenPayload(
             net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
             if (mc.level != null) {
                 try {
-                    Component component = Component.Serializer.fromJson(trimmed, mc.level.registryAccess());
+                    Component component = Component.Serializer.fromJson(trimmed);
                     if (component != null) return component.getString();
                 } catch (Exception ignored) {
                     // Fall through for legacy plain strings.

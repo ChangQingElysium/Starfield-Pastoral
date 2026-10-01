@@ -132,7 +132,7 @@ public class MineFloorDataManager extends SavedData {
      */
     @SuppressWarnings("null")
     @Override
-    public @NotNull CompoundTag save(@SuppressWarnings("null") @NotNull CompoundTag tag, @SuppressWarnings("null") @NotNull HolderLookup.Provider provider) {
+    public @NotNull CompoundTag save(@SuppressWarnings("null") @NotNull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         // 保存生成日期
         CompoundTag floorsTag = new CompoundTag();
         for (Map.Entry<Integer, Integer> entry : floorGenerationDays.entrySet()) {

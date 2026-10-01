@@ -74,7 +74,7 @@ public final class FarmCaveRuntimeGameTests {
                 FarmPermissionManager.get().setPermission(owner,visitor,FarmPermissionManager.PERM_FULL);
                 h.assertTrue(com.stardew.craft.event.FarmAreaProtectionEvents.canBuildAt(player,origin.offset(7,3,8)),"Full-access visitor cannot build");
                 h.assertTrue(!com.stardew.craft.event.FarmAreaProtectionEvents.canBuildAt(player,origin.offset(7,2,8)),"Fixed cave floor can be broken");
-                var snapshot=FarmCaveData.get(level).save(new CompoundTag(),level.registryAccess());
+                var snapshot=FarmCaveData.get(level).save(new CompoundTag());
                 h.assertTrue(FarmCaveData.load(snapshot,level.registryAccess()).find(farm.getInstanceId()).origin().equals(origin),"Cave identity not persisted");
                 UUID next=UUID.randomUUID();h.assertTrue(reg.transferFarm(owner,next,"Next owner"),"Farm transfer failed");
                 h.assertTrue(FarmCaveRuntime.origin(level,reg.getFarm(next)).equals(origin),"Transfer allocated a different cave");
@@ -101,7 +101,7 @@ public final class FarmCaveRuntimeGameTests {
                 reg.deleteFarm(FarmCaveRuntime.farm(farm.getInstanceId()).getOwnerUUID());
                 FarmInstance fresh=reg.createFarm(owner,"New farm","New cave",FarmType.STANDARD);
                 h.assertTrue(!FarmCaveRuntime.origin(level,fresh).equals(origin),"Deleted farm reused its cave room");
-                CompoundTag persisted=FarmCaveData.get(level).save(new CompoundTag(),level.registryAccess());
+                CompoundTag persisted=FarmCaveData.get(level).save(new CompoundTag());
                 var caves=persisted.getList("Caves",Tag.TAG_COMPOUND);
                 for(int i=0;i<caves.size();i++)if(caves.getCompound(i).getUUID("Farm").equals(fresh.getInstanceId()))
                     h.assertTrue(!caves.getCompound(i).contains("Legacy"),"New farm reimported a retired legacy inventory");
@@ -135,8 +135,8 @@ public final class FarmCaveRuntimeGameTests {
     }
     private static BlockPos legacyOrigin(ServerLevel level,UUID owner) {
         var alloc=PlayerInteriorAllocator.get(level);alloc.getLegacyCaveOrigin(owner);
-        CompoundTag saved=alloc.save(new CompoundTag(),level.registryAccess());int index=saved.getInt("nextIndex");
-        var previous=FarmCaveData.get(level).save(new CompoundTag(),level.registryAccess()).getList("Caves",Tag.TAG_COMPOUND);
+        CompoundTag saved=alloc.save(new CompoundTag());int index=saved.getInt("nextIndex");
+        var previous=FarmCaveData.get(level).save(new CompoundTag()).getList("Caves",Tag.TAG_COMPOUND);
         for(int i=0;i<previous.size();i++)if(previous.getCompound(i).contains("Legacy")) {
             BlockPos origin=BlockPos.of(previous.getCompound(i).getLong("Legacy"));
             index=Math.max(index,(origin.getZ()-InteriorSubspaceManager.LEGACY_FARM_CAVE_INTERIOR_ORIGIN.getZ())/32+1);

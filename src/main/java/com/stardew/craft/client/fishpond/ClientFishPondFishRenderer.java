@@ -22,6 +22,7 @@ import org.joml.Matrix3f;
 import org.joml.Vector3f;
 import java.util.Map;
 
+import com.stardew.craft.port.PortVertex;
 /** Rigid authored Cube models; swimming and jumps move the whole fish without deforming it. */
 @EventBusSubscriber(modid=StardewCraft.MODID,bus=EventBusSubscriber.Bus.MOD,value=Dist.CLIENT)
 public final class ClientFishPondFishRenderer {
@@ -126,8 +127,8 @@ public final class ClientFishPondFishRenderer {
                 normal.set(q.normal());if(q.bone()>=0)matrices[q.bone()].normal(normalMatrix).transform(normal).normalize();
                 for(var v:q.vertices()) {
                     vertex.set(v[0],v[1],v[2]);if(q.bone()>=0)matrices[q.bone()].transformPosition(vertex);
-                    consumer.addVertex(stack.last().pose(),vertex.x,vertex.y,vertex.z).setColor(255,255,255,255)
-                        .setUv(v[3],v[4]).setOverlay(OverlayTexture.NO_OVERLAY).setLight(q.sourcePart().equals("lure_bulb")?net.minecraft.client.renderer.LightTexture.FULL_BRIGHT:light).setNormal(stack.last(),normal.x,normal.y,normal.z);
+                    PortVertex.of(consumer).addVertex(stack.last().pose(),vertex.x,vertex.y,vertex.z).setColor(255,255,255,255)
+                        .setUv(v[3],v[4]).setOverlay(OverlayTexture.NO_OVERLAY).setLight(q.sourcePart().equals("lure_bulb")?net.minecraft.client.renderer.LightTexture.FULL_BRIGHT:light).setNormal(stack.last(),normal.x,normal.y,normal.z).endVertex();
                 }
             }
         }

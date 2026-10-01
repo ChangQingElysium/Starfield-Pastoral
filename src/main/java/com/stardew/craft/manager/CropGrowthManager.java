@@ -507,7 +507,7 @@ public class CropGrowthManager extends SavedData {
             // GlobalPos 没有内置codec直接转tag的方法比较方便，我们手动存一下或者用NbtUtils存BlockPos
             CompoundTag posTag = new CompoundTag();
             posTag.putString("Dimension", pos.dimension().location().toString());
-            posTag.put("Pos", NbtUtils.writeBlockPos(pos.pos()));
+            posTag.put("Pos", com.stardew.craft.port.PortNbtUtils.writeBlockPos(pos.pos()));
 
             CropGrowthState state = cropStates.get(pos);
             if (state != null) {
@@ -545,7 +545,7 @@ public class CropGrowthManager extends SavedData {
                 @SuppressWarnings("null")
                 ResourceKey<Level> dim = ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION, 
                         new net.minecraft.resources.ResourceLocation(posTag.getString("Dimension")));
-                BlockPos pos = NbtUtils.readBlockPos(posTag, "Pos").orElse(BlockPos.ZERO);
+                BlockPos pos = com.stardew.craft.port.PortNbtUtils.readBlockPos(posTag, "Pos").orElse(BlockPos.ZERO);
                 @SuppressWarnings("null")
                 GlobalPos gp = GlobalPos.of(dim, pos);
                 manager.cropPositions.add(gp);

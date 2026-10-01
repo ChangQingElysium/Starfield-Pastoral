@@ -126,7 +126,7 @@ public class ElfBladeLeafEntity extends ThrowableProjectile {
         this.entityData.set(STATE, STATE_HOMING);
         this.homingTicks = 0;
         if (this.level() instanceof ServerLevel level) level.playSound(null, getX(), getY(), getZ(),
-                SoundEvents.TRIDENT_THROW.value(), SoundSource.PLAYERS, 0.28f, 1.75f);
+                SoundEvents.TRIDENT_THROW, SoundSource.PLAYERS, 0.28f, 1.75f);
     }
 
     @SuppressWarnings("null")

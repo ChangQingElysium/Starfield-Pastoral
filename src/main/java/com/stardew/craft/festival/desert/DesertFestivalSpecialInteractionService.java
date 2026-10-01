@@ -386,7 +386,7 @@ public final class DesertFestivalSpecialInteractionService {
             context,
             questionIndex,
             preDialogueKey == null ? "" : preDialogueKey,
-            Component.Serializer.toJson(question, player.registryAccess()),
+            Component.Serializer.toJson(question),
             responses
         ));
     }
@@ -394,7 +394,7 @@ public final class DesertFestivalSpecialInteractionService {
     private static OpenDesertFestivalQuestionPayload.ResponseOption response(String id, Component label, ServerPlayer player) {
         return new OpenDesertFestivalQuestionPayload.ResponseOption(
             id,
-            Component.Serializer.toJson(label, player.registryAccess())
+            Component.Serializer.toJson(label)
         );
     }
 

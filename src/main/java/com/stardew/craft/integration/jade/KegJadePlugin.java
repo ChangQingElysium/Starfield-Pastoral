@@ -11,7 +11,7 @@ import snownee.jade.api.WailaPlugin;
 public class KegJadePlugin implements IWailaPlugin {
 	@Override
 	public void register(IWailaCommonRegistration registration) {
-		registration.registerBlockDataProvider(KegJadeProvider.INSTANCE, KegBlock.class);
+		JadeBlockDataProviders.register(registration, KegJadeProvider.INSTANCE, KegBlock.class);
 	}
 
 	@Override

@@ -29,7 +29,7 @@ public final class MineCleanupGameTests {
         var players=new CompoundTag();players.put(id.toString(),player);players.put(other.toString(),second);
         var original=new CompoundTag();original.put("players",players);
         var manager=MiningDataManager.load(original,h.getLevel().registryAccess());
-        var saved=manager.save(new CompoundTag(),h.getLevel().registryAccess()).getCompound("players");
+        var saved=manager.save(new CompoundTag()).getCompound("players");
         var progress=MiningPlayerData.fromNBT(saved.getCompound(id.toString()));
         progress.setCurrentFloor(0);
         h.assertTrue(progress.getMaxFloorReached()==115 && progress.hasReceivedMineTotem(),"Returning to lobby reset depth/totem");
@@ -73,7 +73,7 @@ public final class MineCleanupGameTests {
                     h.assertTrue(level.noCollision(null,new AABB(eye,eye).inflate(.15)),"Camera clips architecture: "+eye);
                     for(var target:actors.values()) {
                         var face=target.add(0,1.2,0);
-                        var hit=level.clip(new ClipContext(eye,face,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,net.minecraft.world.phys.shapes.CollisionContext.empty()));
+                        var hit=level.clip(new ClipContext(eye,face,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,(net.minecraft.world.entity.Entity) null));
                         h.assertTrue(hit.getType()==HitResult.Type.MISS,"Camera cannot see actor: "+eye+" -> "+face+" hits "+hit.getBlockPos());
                     }
                     cameras++;

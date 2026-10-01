@@ -12,7 +12,8 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(targets = "team.chisel.ctm.client.util.TextureMetadataHandler", remap = false)
 public abstract class CtmModelInitializationMixin {
     @ModifyExpressionValue(
-            method = "onModelBake(Lnet/neoforged/neoforge/client/event/ModelEvent$BakingCompleted;)V",
+            // PORT(1.20.1): CTM for Forge 1.20.1 receives Forge's ModelEvent.BakingCompleted (same handler shape as CTM 1.21).
+            method = "onModelBake(Lnet/minecraftforge/client/event/ModelEvent$BakingCompleted;)V",
             at = @At(value = "INVOKE", target = "Ljava/util/Map$Entry;getValue()Ljava/lang/Object;")
     )
     private Object stardewcraft$initializeSurfaceHost(Object model) {

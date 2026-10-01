@@ -25,7 +25,7 @@ public final class MinePepperRexEntity extends StardewMonsterEntity {
  private static final EntityDataAccessor<Long> HIT=SynchedEntityData.defineId(MinePepperRexEntity.class,EntityDataSerializers.LONG);
  private final PepperRexBehavior behavior=new PepperRexBehavior();private final SourceGroundMovement movement=new SourceGroundMovement(this,2,2);private final java.util.UUID[] slots=new java.util.UUID[15];private int nextSlot,stunMilliseconds;private double fallSpeed;
  public MinePepperRexEntity(EntityType<? extends MinePepperRexEntity> t,Level l){super(t,l);addTag("sd_mob_dino");}
- public static AttributeSupplier.Builder createAttributes(){return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,300).add(Attributes.ATTACK_DAMAGE,15).add(Attributes.MOVEMENT_SPEED,.25).add(Attributes.FOLLOW_RANGE,64).add(Attributes.STEP_HEIGHT,0);}
+ public static AttributeSupplier.Builder createAttributes(){return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,300).add(Attributes.ATTACK_DAMAGE,15).add(Attributes.MOVEMENT_SPEED,.25).add(Attributes.FOLLOW_RANGE,64).add(com.stardew.craft.port.PortAttributes.STEP_HEIGHT.get(),0);}
  @Override protected void registerGoals(){}
  @Override protected ResourceLocation definitionId(){return new ResourceLocation("stardewcraft:pepper_rex");}
  @Override protected void configureSpawn(MonsterDefinition d,MonsterSpawnContext c){var r=MonsterStatResolver.base(d,c,random);setInitialHealth(r.initialHealth());replaceCombatStats(r.combat());behavior.initialize(random);movement.face(2);}

@@ -122,7 +122,7 @@ public class StatueOfBlessingsBlock extends TallMasteryBlock implements EntityBl
         // 已被祝福过 / 已有 buff 时不再触发
         if (data.isBlessedByStatueToday()) return InteractionResult.SUCCESS;
         for (Holder<MobEffect> b : BUFFS) {
-            if (sp.hasEffect(b)) return InteractionResult.SUCCESS;
+            if (sp.hasEffect(b.value())) return InteractionResult.SUCCESS;
         }
 
         // 抽 buff：原版雨天/节日时排除 _6 (Butterfly)；这里以 isRaining 近似（Stardew 雨/节日检测略复杂，先用雨）
@@ -133,7 +133,7 @@ public class StatueOfBlessingsBlock extends TallMasteryBlock implements EntityBl
 
         // SDV Duration=-2 -> 持续到次日；MC 里用无限时长，PlayerStardewDataAPI.sleep 会清掉。
         // ambient=false, visible=false（关粒子）, showIcon=true（HUD 仍显示）。
-        sp.addEffect(new MobEffectInstance(chosen, -1, 0, false, false, true));
+        sp.addEffect(new MobEffectInstance(chosen.value(), -1, 0, false, false, true));
         data.setBlessedByStatueToday(true);
         data.setBlessingOfWatersRemaining(idx == 3 ? 3 : 0);
         PlayerDataEventHandler.syncPlayerData(sp, data);

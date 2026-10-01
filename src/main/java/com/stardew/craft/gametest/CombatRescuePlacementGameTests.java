@@ -32,7 +32,7 @@ public final class CombatRescuePlacementGameTests {
         h.assertTrue(level.noCollision(new AABB(camera.subtract(.15,.15,.15),camera.add(.15,.15,.15))),"Clinic camera is inside architecture");
         for(var local:new Vec3[]{new Vec3(2.5,2.95,2.55),new Vec3(4.8,3.6,2.35),new Vec3(3.65,3.5,3.375)}) {
             Vec3 target=h.absoluteVec(local);
-            h.assertTrue(level.clip(new ClipContext(camera,target,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,net.minecraft.world.phys.shapes.CollisionContext.empty())).getType()==HitResult.Type.MISS,"Clinic camera cannot see a character");
+            h.assertTrue(level.clip(new ClipContext(camera,target,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,(net.minecraft.world.entity.Entity) null)).getType()==HitResult.Type.MISS,"Clinic camera cannot see a character");
         }
         h.succeed();
     }
@@ -54,7 +54,7 @@ public final class CombatRescuePlacementGameTests {
         var c=CombatRescuePoints.M04;var camera=new Vec3(c.x(),c.y(),c.z());
         h.assertTrue(level.noCollision(new AABB(camera.subtract(.15,.15,.15),camera.add(.15,.15,.15))),"Camera inside architecture");
         for(var target:new Vec3[]{new Vec3(p.x(),p.y()+.3,p.z()),new Vec3(.5,67.4,-1.5)})
-            h.assertTrue(level.clip(new ClipContext(camera,target,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,net.minecraft.world.phys.shapes.CollisionContext.empty())).getType()==HitResult.Type.MISS,"Camera view is blocked");
+            h.assertTrue(level.clip(new ClipContext(camera,target,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,(net.minecraft.world.entity.Entity) null)).getType()==HitResult.Type.MISS,"Camera view is blocked");
         h.succeed();
     }
 }

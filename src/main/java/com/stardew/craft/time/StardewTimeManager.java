@@ -813,7 +813,7 @@ public class StardewTimeManager extends SavedData {
     
     // SavedData 实现
     @Override
-    public @javax.annotation.Nonnull CompoundTag save(@javax.annotation.Nonnull CompoundTag tag, @javax.annotation.Nonnull net.minecraft.core.HolderLookup.Provider provider) {
+    public @javax.annotation.Nonnull CompoundTag save(@javax.annotation.Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         tag.putInt("currentTime", currentTime);
         tag.putInt("currentDay", currentDay);
         tag.putInt("currentSeason", currentSeason);

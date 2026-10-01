@@ -287,8 +287,7 @@ public class PastureGrassGrowthManager extends SavedData {
     }
 
     @Override
-    public net.minecraft.nbt.CompoundTag save(@Nonnull net.minecraft.nbt.CompoundTag tag,
-                                               @Nonnull net.minecraft.core.HolderLookup.Provider provider) {
+    public net.minecraft.nbt.CompoundTag save(@Nonnull net.minecraft.nbt.CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         return tag;
     }
 }

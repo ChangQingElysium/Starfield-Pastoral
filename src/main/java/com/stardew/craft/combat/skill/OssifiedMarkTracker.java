@@ -79,7 +79,7 @@ public final class OssifiedMarkTracker {
                     SoundEvents.BONE_BLOCK_PLACE,
                     SoundSource.PLAYERS, 0.9f, 1.05f);
                 serverLevel.playSound(null, target.blockPosition(),
-                    SoundEvents.SOUL_ESCAPE.value(),
+                    SoundEvents.SOUL_ESCAPE,
                     SoundSource.PLAYERS, 0.8f, 0.9f);
             }
         }

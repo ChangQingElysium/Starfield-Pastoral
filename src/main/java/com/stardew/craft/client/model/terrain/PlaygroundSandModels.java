@@ -75,8 +75,8 @@ public final class PlaygroundSandModels {
             int j = i * stride;
             float x = Float.intBitsToFloat(vertices[j]) > .5f ? 15.999f : .001f;
             float z = Float.intBitsToFloat(vertices[j + 2]) > .5f ? 15.999f : .001f;
-            vertices[j + 4] = Float.floatToRawIntBits(sprite.getU((row % 8 * 16 + x) / 128f));
-            vertices[j + 5] = Float.floatToRawIntBits(sprite.getV((row / 8 * 16 + z) / 96f));
+            vertices[j + 4] = Float.floatToRawIntBits(com.stardew.craft.port.PortSprites.getU(sprite, (row % 8 * 16 + x) / 128f));
+            vertices[j + 5] = Float.floatToRawIntBits(com.stardew.craft.port.PortSprites.getV(sprite, (row / 8 * 16 + z) / 96f));
         }
         return new BakedQuad(vertices, source.getTintIndex(), source.getDirection(), sprite, source.isShade(), source.hasAmbientOcclusion());
     }

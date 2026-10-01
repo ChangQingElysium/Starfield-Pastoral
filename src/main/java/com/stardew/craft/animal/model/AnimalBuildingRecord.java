@@ -316,7 +316,7 @@ public class AnimalBuildingRecord {
         tag.putString("buildingType", buildingType.id());
         tag.putString("customName", customName);
         tag.putString("dimensionId", dimensionId);
-        tag.put("managerPos", NbtUtils.writeBlockPos(managerPos));
+        tag.put("managerPos", com.stardew.craft.port.PortNbtUtils.writeBlockPos(managerPos));
         tag.putInt("range", range);
         tag.putInt("minX", minX);
         tag.putInt("minY", minY);
@@ -389,7 +389,7 @@ public class AnimalBuildingRecord {
             AnimalBuildingType.fromId(tag.getString("buildingType")),
             tag.getString("customName"),
             tag.getString("dimensionId"),
-            NbtUtils.readBlockPos(tag, "managerPos").orElse(BlockPos.ZERO),
+            com.stardew.craft.port.PortNbtUtils.readBlockPos(tag, "managerPos").orElse(BlockPos.ZERO),
             tag.getInt("range"),
             tag.getInt("minX"),
             tag.getInt("minY"),

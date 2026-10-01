@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.stardew.craft.port.PortVertex;
 @EventBusSubscriber(modid = StardewCraft.MODID, value = Dist.CLIENT)
 public class SprinklerOverlayRenderer {
     private static final ResourceLocation RANGE_TEXTURE = new ResourceLocation(
@@ -231,9 +232,9 @@ public class SprinklerOverlayRenderer {
 
         PoseStack.Pose last = poseStack.last();
 
-        consumer.addVertex(last, x, y, z).setUv(minU, minV).setColor(r, g, b, a);
-        consumer.addVertex(last, x, y, z + 1).setUv(minU, maxV).setColor(r, g, b, a);
-        consumer.addVertex(last, x + 1, y, z + 1).setUv(maxU, maxV).setColor(r, g, b, a);
-        consumer.addVertex(last, x + 1, y, z).setUv(maxU, minV).setColor(r, g, b, a);
+        PortVertex.of(consumer).addVertex(last, x, y, z).setUv(minU, minV).setColor(r, g, b, a).endVertex();
+        PortVertex.of(consumer).addVertex(last, x, y, z + 1).setUv(minU, maxV).setColor(r, g, b, a).endVertex();
+        PortVertex.of(consumer).addVertex(last, x + 1, y, z + 1).setUv(maxU, maxV).setColor(r, g, b, a).endVertex();
+        PortVertex.of(consumer).addVertex(last, x + 1, y, z).setUv(maxU, minV).setColor(r, g, b, a).endVertex();
     }
 }

@@ -92,4 +92,24 @@ public final class PortItemStacks {
         mutable.upgrade(enchantment, level);
         PortItemData.set(stack, type, mutable.toImmutable());
     }
+
+    /**
+     * 1.21 {@code target.applyComponents(source.getComponentsPatch())}: every component the source customises
+     * replaces the target's. In 1.20.1 the customised data is the stack tag, one root key per component
+     * ({@code PortItemNbt}), so each root key of the source tag replaces the target's (defaults the target got at
+     * construction stay unless overridden). 1.21 "removed component" patch entries have no 1.20.1 counterpart.
+     */
+    public static void applyComponentsPatch(ItemStack target, ItemStack source) {
+        net.minecraft.nbt.CompoundTag patch = source.getTag();
+        if (target.isEmpty() || patch == null || patch.isEmpty()) {
+            return;
+        }
+        net.minecraft.nbt.CompoundTag tag = target.getOrCreateTag();
+        for (String key : patch.getAllKeys()) {
+            net.minecraft.nbt.Tag value = patch.get(key);
+            if (value != null) {
+                tag.put(key, value.copy());
+            }
+        }
+    }
 }

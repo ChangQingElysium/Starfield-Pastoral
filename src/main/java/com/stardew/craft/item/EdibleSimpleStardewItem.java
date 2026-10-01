@@ -16,8 +16,8 @@ public class EdibleSimpleStardewItem extends SimpleStardewItem {
 	public EdibleSimpleStardewItem(String typeKey, int sellPrice, int energy, int health, boolean drink, Properties properties) {
 		super(typeKey, sellPrice, properties.food(new FoodProperties.Builder()
 				.nutrition(1)
-				.saturationModifier(0.1f)
-				.alwaysEdible()
+				.saturationMod(0.1f)
+				.alwaysEat()
 				.build()));
 		this.energy = energy;
 		this.health = health;

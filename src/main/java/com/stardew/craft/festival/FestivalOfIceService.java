@@ -645,7 +645,7 @@ public final class FestivalOfIceService {
     private static void sendCutsceneState(ServerPlayer participant) {
         PacketDistributor.sendToPlayer(participant, new IceFishingCutsceneStatePayload(
             WINNERS.contains(participant.getUUID()),
-            Component.Serializer.toJson(winnerDialogue, participant.registryAccess())
+            Component.Serializer.toJson(winnerDialogue)
         ));
     }
 

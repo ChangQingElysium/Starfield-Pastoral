@@ -870,7 +870,7 @@ public class PlayerStardewData {
         if (lastSleepPoint != null) {
             tag.putLong("LastSleepPoint", lastSleepPoint.asLong());
         }
-        if (registries != null && !marlonRecoveredItem.isEmpty()) tag.put("MarlonRecoveredItem", marlonRecoveredItem.save(registries));
+        if (registries != null && !marlonRecoveredItem.isEmpty()) tag.put("MarlonRecoveredItem", PortItemStacks.save(marlonRecoveredItem, registries));
         if (!itemsLostLastDeath.isEmpty()) {
             ListTag lostItemsTag = new ListTag();
             for (net.minecraft.world.item.ItemStack stack : itemsLostLastDeath) {

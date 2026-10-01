@@ -31,7 +31,7 @@ public record StardewLocationDefinition(
         List<ResourceLocation> tags,
         Map<ResourceLocation, String> properties
 ) {
-    public static final Codec<StardewLocationDefinition> CODEC = RecordCodecBuilder.<StardewLocationDefinition>create(instance -> instance.group(
+    public static final Codec<StardewLocationDefinition> CODEC = com.stardew.craft.port.PortCodecs.validate(RecordCodecBuilder.<StardewLocationDefinition>create(instance -> instance.group(
             ResourceLocation.CODEC.optionalFieldOf("dimension",
                     new ResourceLocation("stardewcraft", "stardew_valley"))
                     .forGetter(StardewLocationDefinition::dimension),
@@ -66,8 +66,7 @@ public record StardewLocationDefinition(
                     dimension, ledgerId, min, max, aliases,
                     priority, indoor, parent.orElse(null),
                     displayName, description, icon.orElse(null),
-                    tags, properties)))
-            .validate(StardewLocationDefinition::validate);
+                    tags, properties))), StardewLocationDefinition::validate);
 
     /** Backward-compatible constructor for definitions without hierarchy metadata. */
     public StardewLocationDefinition(

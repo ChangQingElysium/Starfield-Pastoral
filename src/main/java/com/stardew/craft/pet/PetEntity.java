@@ -43,7 +43,7 @@ public final class PetEntity extends PathfinderMob {
             }
         };
     }
-    public static AttributeSupplier.Builder attributes() { return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 10).add(Attributes.MOVEMENT_SPEED, .2).add(Attributes.STEP_HEIGHT, 1).add(Attributes.FOLLOW_RANGE, 16); }
+    public static AttributeSupplier.Builder attributes() { return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 10).add(Attributes.MOVEMENT_SPEED, .2).add(com.stardew.craft.port.PortAttributes.STEP_HEIGHT.get(), 1).add(Attributes.FOLLOW_RANGE, 16); }
     @Override protected void defineSynchedData() {
         super.defineSynchedData(); this.entityData.define(VARIANT, "stardewcraft:cat0"); this.entityData.define(CLIP, "idle"); this.entityData.define(START, 0L); this.entityData.define(HAT, ItemStack.EMPTY);
     }

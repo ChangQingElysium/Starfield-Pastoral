@@ -15,8 +15,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-PROVIDER = r"(?:@\w+(?:\([^)]*\))?\s+)*(?:net\.minecraft\.core\.)?HolderLookup\.Provider\s+(\w+)"
-ANN = r"(?:@\w+(?:\([^)]*\))?\s+)*"
+PROVIDER = r"(?:@[\w.]+(?:\([^)]*\))?\s+)*(?:net\.minecraft\.core\.)?HolderLookup\.(?:@[\w.]+\s+)?Provider\s+(\w+)"
+ANN = r"(?:@[\w.]+(?:\([^)]*\))?\s+)*"
 ARG = r"(?:\w+(?:\(\))?)(?:\.\w+(?:\(\))?)*"  # e.g. level.registryAccess()
 LOCAL = "net.minecraft.core.HolderLookup.Provider {name} = com.stardew.craft.port.PortRegistries.lookup();"
 
@@ -35,7 +35,8 @@ DECLS = [
     (re.compile(r"public\s+CompoundTag\s+getUpdateTag\(\s*()" + PROVIDER + r"\s*\)(\s*)\{"),
      "public CompoundTag getUpdateTag(){2}{{"),
     # SavedData
-    (re.compile(r"(public\s+(?:synchronized\s+)?)CompoundTag\s+save\(\s*(" + ANN + r"CompoundTag\s+\w+)\s*,\s*" + PROVIDER + r"\s*\)(\s*)\{"),
+    (re.compile(r"(public\s+(?:synchronized\s+)?" + ANN + r"(?:net\.minecraft\.nbt\.)?)CompoundTag\s+save\(\s*(" + ANN
+                + r"(?:net\.minecraft\.nbt\.)?CompoundTag\s+\w+)\s*,\s*" + PROVIDER + r"\s*\)(\s*)\{"),
      None),
 ]
 
@@ -158,7 +159,17 @@ def adapt(text: str) -> str:
     for pattern, rep in CALLS:
         text = pattern.sub(rep, text)
     text = drop_third_arg(text, "onDataPacket")
+    text = qualify_inherited_factory(text)
     return adapt_storage_calls(text)
+
+
+def qualify_inherited_factory(text: str) -> str:
+    """Unqualified `Factory<...>` inside SavedData subclasses (inherited nested class in 1.21)."""
+    if not re.search(r"\bextends\s+(?:net\.minecraft\.world\.level\.saveddata\.)?SavedData\b", text):
+        return text
+    if re.search(r"import\s+[\w.]+\.Factory\s*;", text) or re.search(r"\b(?:class|record|interface)\s+Factory\b", text):
+        return text
+    return re.sub(r"(?<![\w.])Factory<", "com.stardew.craft.port.PortSavedData.Factory<", text)
 
 
 def main(argv) -> int:

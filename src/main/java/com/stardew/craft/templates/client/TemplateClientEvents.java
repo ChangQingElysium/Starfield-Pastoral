@@ -40,7 +40,7 @@ public final class TemplateClientEvents {
             }
 
             var blockId = BuiltInRegistries.BLOCK.getKey(block);
-            ModelResourceLocation itemLocation = ModelResourceLocation.inventory(blockId);
+            ModelResourceLocation itemLocation = new ModelResourceLocation(blockId, "inventory"); // PORT(1.20.1): no inventory() factory
             BakedModel itemModel = models.get(itemLocation);
             if (itemModel != null) {
                 models.put(itemLocation, new TemplateBakedModel(itemModel, shape, block.defaultBlockState(), true));

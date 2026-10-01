@@ -179,7 +179,7 @@ public final class MeleeWeaponVisuals {
             if (!yieldToSwing && entity == mc.player && WeaponSkillAnimationClient.getProgress(partialTick) >= 0) return null;
             float swing = entity.getAttackAnim(partialTick);
             if (swing <= 0 || entity.swingingArm != InteractionHand.MAIN_HAND) return null;
-            if (!WeaponMeleeProfile.isSample(id)) swing = normalProgress(swing, entity.getCurrentSwingDuration());
+            if (!WeaponMeleeProfile.isSample(id)) swing = normalProgress(swing, ((com.stardew.craft.mixin.LivingEntitySwingAccessor) entity).stardewcraft$getCurrentSwingDuration());
             result = new Action("dragontooth_shiv".equals(id)
                     ? DragontoothShivBreathClientState.isActive(entity) ? SHIV_EMPOWERED : SHIV_SWING
                     : "dragontooth_club".equals(id) ? "dragontooth_club_swing" : "rapier".equals(id) ? "rapier_swing"
@@ -397,7 +397,7 @@ public final class MeleeWeaponVisuals {
         boolean charge = FEMUR_CHARGE.equals(skill);
         boolean sword = "rapier_swing".equals(skill) || CUTLASS_SWING.equals(skill) || FALCHION_SWING.equals(skill) || RUST_SWING.equals(skill) || WOOD_SWING.equals(skill) || LIGHT_SWING.equals(skill) || SPINE_SWING.equals(skill) || PIRATE_SWING.equals(skill) || SILVER_SWING.equals(skill) || BONE_SWORD_SWING.equals(skill) || CLAYMORE_SWING.equals(skill) || DWARF_SWORD_SWING.equals(skill) || INSECT_SWING.equals(skill) || VENOM_SWING.equals(skill) || DARK_SWING.equals(skill) || FORGE_SWING.equals(skill) || OBSIDIAN_SWING.equals(skill) || OSSIFIED_SWING.equals(skill) || MEOW_SWING.equals(skill) || SWORD_SWING.equals(skill) || HOLY_SWING.equals(skill) || TEMPLAR_SWING.equals(skill);
         mc.level.playLocalSound(point.x, point.y, point.z,
-                charge ? SoundEvents.BONE_BLOCK_STEP : (bone || sword) ? SoundEvents.PLAYER_ATTACK_SWEEP : SoundEvents.TRIDENT_THROW.value(),
+                charge ? SoundEvents.BONE_BLOCK_STEP : (bone || sword) ? SoundEvents.PLAYER_ATTACK_SWEEP : SoundEvents.TRIDENT_THROW,
                 SoundSource.PLAYERS, charge ? 0.42f : bone ? 0.48f : sword ? 0.32f : 0.22f,
                 charge ? 0.55f : bone ? 0.58f : CLAYMORE_SWING.equals(skill) ? .78f : sword ? 1.05f : CARVING_BONUS.equals(skill) ? 1.45f : 1.85f, false);
     }
@@ -731,7 +731,7 @@ public final class MeleeWeaponVisuals {
                 || YETI_MARK.equals(current.skillId) || YETI_SPINE.equals(current.skillId);
         float contact = CRESCENT_SLASH.equals(current.skillId) ? .375f : FEMUR_SLAM.equals(current.skillId) ? 0.082f : 0.185f;
         float duration = FEMUR_SLAM.equals(current.skillId) ? 8 : CARVING_STRIKE.equals(current.skillId) ? 3
-                : CARVING_BONUS.equals(current.skillId) ? 4 : mc.player.getCurrentSwingDuration();
+                : CARVING_BONUS.equals(current.skillId) ? 4 : ((com.stardew.craft.mixin.LivingEntitySwingAccessor) mc.player).stardewcraft$getCurrentSwingDuration();
         if (dragon) duration = GALAXY_JUDGEMENT.equals(current.skillId) ? 12 : (GALAXY_STAB.equals(current.skillId) || INFINITY_STAB.equals(current.skillId)) ? 4 : 8;
         if (NEEDLE_STRIKE.equals(current.skillId) || NEEDLE_FINAL.equals(current.skillId)) duration = 3;
         if (FORGE_QUENCH.equals(current.skillId)) duration = 10;

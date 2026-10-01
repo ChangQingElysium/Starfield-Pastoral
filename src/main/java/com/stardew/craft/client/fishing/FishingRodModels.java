@@ -14,6 +14,7 @@ import org.joml.Vector3f;
 import java.io.IOException;
 import java.util.*;
 
+import com.stardew.craft.port.PortVertex;
 /** Authored tier geometry, in the existing animated rod bones' local coordinates. */
 public final class FishingRodModels {
     public static final List<String> IDS=List.of("bamboo_pole","training_rod","fiberglass_rod","iridium_rod","advanced_iridium_rod");
@@ -60,14 +61,14 @@ public final class FishingRodModels {
             var matrix=new Matrix4f(actor).mul(rig.world[rig.index(part.bone())]);boolean reflected=matrix.determinant()<0;
             pose.pushPose();
             try {
-                pose.mulPose(matrix);
+                PortVertex.mulPose(pose, matrix);
                 for(var face:part.faces()) {
                     var n=normal(face).normalize();
                     for(int k=0;k<4;k++) {
                         var v=face.vertices().get(reflected?3-k:k);var p=v.point();
-                        out.addVertex(pose.last().pose(),p[0],p[1],p[2]).setColor(255,255,255,255)
+                        PortVertex.of(out).addVertex(pose.last().pose(),p[0],p[1],p[2]).setColor(255,255,255,255)
                                 .setUv(v.uv()[0],v.uv()[1]).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light)
-                                .setNormal(pose.last(),n.x,n.y,n.z);
+                                .setNormal(pose.last(),n.x,n.y,n.z).endVertex();
                     }
                 }
             }finally{pose.popPose();}

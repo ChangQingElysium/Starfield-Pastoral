@@ -64,7 +64,8 @@ public final class CropModelGeometry extends SimpleUnbakedGeometry<CropModelGeom
 
     @Override
     protected void addQuads(IGeometryBakingContext context, IModelBuilder<?> builder, ModelBaker baker,
-                            Function<Material, TextureAtlasSprite> sprites, ModelState state) {
+                            Function<Material, TextureAtlasSprite> sprites, ModelState state,
+                            net.minecraft.resources.ResourceLocation modelLocation) {
         TextureAtlasSprite sprite = sprites.apply(context.getMaterial("crop"));
         var transform = state.getRotation().compose(context.getRootTransform()).blockCenterToCorner().getMatrix();
         for (float[] face : faces) {
@@ -77,8 +78,8 @@ public final class CropModelGeometry extends SimpleUnbakedGeometry<CropModelGeom
                 data[v + 1] = Float.floatToRawIntBits(points[i].y);
                 data[v + 2] = Float.floatToRawIntBits(points[i].z);
                 data[v + 3] = -1;
-                data[v + 4] = Float.floatToRawIntBits(sprite.getU(face[f + 3]));
-                data[v + 5] = Float.floatToRawIntBits(sprite.getV(face[f + 4]));
+                data[v + 4] = Float.floatToRawIntBits(com.stardew.craft.port.PortSprites.getU(sprite, face[f + 3]));
+                data[v + 5] = Float.floatToRawIntBits(com.stardew.craft.port.PortSprites.getV(sprite, face[f + 4]));
             }
             Vector3f normal = new Vector3f(points[1]).sub(points[0])
                     .cross(new Vector3f(points[2]).sub(points[0])).normalize();
@@ -93,16 +94,18 @@ public final class CropModelGeometry extends SimpleUnbakedGeometry<CropModelGeom
 
     @Override
     public BakedModel bake(IGeometryBakingContext context, ModelBaker baker,
-                           Function<Material, TextureAtlasSprite> sprites, ModelState state, ItemOverrides overrides) {
+                           Function<Material, TextureAtlasSprite> sprites, ModelState state, ItemOverrides overrides,
+                           net.minecraft.resources.ResourceLocation modelLocation) {
         Map<BlockPos, BakedModel> parts = new java.util.HashMap<>();
         giantParts.forEach((cell, geometry) -> parts.put(cell,
-                geometry.bakeRaw(context, baker, sprites, state, overrides)));
-        return new OnSoil(bakeRaw(context, baker, sprites, state, overrides), Map.copyOf(parts));
+                geometry.bakeRaw(context, baker, sprites, state, overrides, modelLocation)));
+        return new OnSoil(bakeRaw(context, baker, sprites, state, overrides, modelLocation), Map.copyOf(parts));
     }
 
     private BakedModel bakeRaw(IGeometryBakingContext context, ModelBaker baker,
-                               Function<Material, TextureAtlasSprite> sprites, ModelState state, ItemOverrides overrides) {
-        return super.bake(context, baker, sprites, state, overrides);
+                               Function<Material, TextureAtlasSprite> sprites, ModelState state, ItemOverrides overrides,
+                               net.minecraft.resources.ResourceLocation modelLocation) {
+        return super.bake(context, baker, sprites, state, overrides, modelLocation);
     }
 
     private static final class OnSoil extends BakedModelWrapper<BakedModel> implements IDynamicBakedModel {

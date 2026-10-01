@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Matrix4f;
 
+import com.stardew.craft.port.PortVertex;
 public class FairyCompanionRenderer extends EntityRenderer<FairyCompanionEntity> {
     private static final ResourceLocation TEXTURE = new ResourceLocation(
         StardewCraft.MODID,
@@ -68,11 +69,11 @@ public class FairyCompanionRenderer extends EntityRenderer<FairyCompanionEntity>
 
     private static void vertex(VertexConsumer consumer, Matrix4f pose, float x, float y, float u, float v,
                                int red, int green, int blue, int alpha) {
-        consumer.addVertex(pose, x, y, 0.0f)
+        PortVertex.of(consumer).addVertex(pose, x, y, 0.0f)
             .setColor(red, green, blue, alpha)
             .setUv(u, v)
             .setOverlay(OverlayTexture.NO_OVERLAY)
             .setLight(0xF000F0)
-            .setNormal(0.0f, 1.0f, 0.0f);
+            .setNormal(0.0f, 1.0f, 0.0f).endVertex();
     }
 }

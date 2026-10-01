@@ -35,6 +35,7 @@ public final class PortBootstrap {
     public static synchronized void install(IEventBus modBus) {
         if (!INSTALLED.add(modBus)) return;
         PortParticles.register(modBus); // vanilla-API owner: 1.21-only particle types (coloured entity_effect)
+        PortAttributes.register(modBus); // 1.21-only entity attributes (step_height, scale)
         // Run before the mod's own common-setup listeners, mirroring NeoForge firing these events earlier.
         modBus.addListener(EventPriority.HIGHEST, (FMLCommonSetupEvent event) -> {
             modBus.post(new RegisterDataMapTypesEvent());

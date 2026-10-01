@@ -114,8 +114,8 @@ public final class RuralFenceGameTests {
             int variant = state.getValue(RuralFenceBlock.VARIANT); seen.add(variant);
             helper.assertTrue(upper.is(block) && upper.getValue(MapDecorStaticBlock.PART) == MapDecorStaticBlock.Part.EXTENSION
                     && upper.getValue(RuralFenceBlock.VARIANT) == variant, "Upper cell lost grain or owner");
-            var encoded = BlockState.CODEC.encodeStart(JsonOps.INSTANCE, state).getOrThrow();
-            helper.assertTrue(BlockState.CODEC.parse(JsonOps.INSTANCE, encoded).getOrThrow().equals(state), "State did not persist");
+            var encoded = com.stardew.craft.port.PortDataResults.getOrThrow(BlockState.CODEC.encodeStart(JsonOps.INSTANCE, state));
+            helper.assertTrue(com.stardew.craft.port.PortDataResults.getOrThrow(BlockState.CODEC.parse(JsonOps.INSTANCE, encoded)).equals(state), "State did not persist");
             var shape = state.getShape(level, pos);
             helper.assertTrue(Math.abs(shape.bounds().maxY - 31.0 / 16) < 1E-8, "Wrong fence height");
             helper.assertTrue(!Shapes.joinIsNotEmpty(shape, upper.getShape(level, pos.above()).move(0, 1, 0), BooleanOp.NOT_SAME), "Upper outline diverges");

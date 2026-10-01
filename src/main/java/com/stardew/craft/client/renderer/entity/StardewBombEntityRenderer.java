@@ -18,6 +18,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.Mth;
 
+import com.stardew.craft.port.PortVertex;
 /** Native bomb models with a small, frame-rate-independent fuse tremor and 100 ms flicker. */
 @SuppressWarnings("null")
 public class StardewBombEntityRenderer extends EntityRenderer<StardewBombEntity> {
@@ -84,13 +85,13 @@ public class StardewBombEntityRenderer extends EntityRenderer<StardewBombEntity>
             net.minecraftforge.client.model.data.ModelData.EMPTY, null);
         PoseStack.Pose pose = poseStack.last();
         for (net.minecraft.client.renderer.block.model.BakedQuad quad : quads) {
-            consumer.putBulkData(pose, quad, red, green, blue, 1.0f, packedLight, OverlayTexture.NO_OVERLAY);
+            PortVertex.putBulkData(consumer, pose, quad, red, green, blue, 1.0f, packedLight, OverlayTexture.NO_OVERLAY);
         }
         for (net.minecraft.core.Direction dir : net.minecraft.core.Direction.values()) {
             java.util.List<net.minecraft.client.renderer.block.model.BakedQuad> dirQuads = model.getQuads(null, dir, renderRand,
                 net.minecraftforge.client.model.data.ModelData.EMPTY, null);
             for (net.minecraft.client.renderer.block.model.BakedQuad quad : dirQuads) {
-                consumer.putBulkData(pose, quad, red, green, blue, 1.0f, packedLight, OverlayTexture.NO_OVERLAY);
+                PortVertex.putBulkData(consumer, pose, quad, red, green, blue, 1.0f, packedLight, OverlayTexture.NO_OVERLAY);
             }
         }
     }

@@ -69,7 +69,7 @@ public final class PetInitialAdoptionGameTests {
                 var pets = data.forFarm(farm.getInstanceId());
                 h.assertTrue(pets.size() == 1 && com.stardew.craft.port.PortJava.getFirst(pets).variant == PetVariant.DOG2 && com.stardew.craft.port.PortJava.getFirst(pets).name.equals("豆包"), "Initial claim lost breed/name or duplicated");
                 h.assertTrue(profile.getMoney() == 0 && com.stardew.craft.port.PortJava.getLast(offers).getString("Kind").equals("initial_done"), "Free initial claim charged money or failed to close");
-                var restored = PetWorldData.load(data.save(new CompoundTag(), h.getLevel().registryAccess()), h.getLevel().registryAccess());
+                var restored = PetWorldData.load(data.save(new CompoundTag()), h.getLevel().registryAccess());
                 h.assertTrue(!restored.needsInitialChoice(farm.getInstanceId()) && restored.find(com.stardew.craft.port.PortJava.getFirst(pets).id).name.equals("豆包"), "Save roundtrip lost claim receipt or pet");
                 int sent = offers.size(); PetInitialAdoption.login(new PlayerEvent.PlayerLoggedInEvent(player)); PetInitialAdoption.poll(player);
                 h.assertTrue(offers.size() == sent, "Claimed farm got another login questionnaire");
@@ -93,11 +93,11 @@ public final class PetInitialAdoptionGameTests {
             PetService.selectInitial(owner, farm, "", "");
             h.assertTrue(!PetInitialAdoption.needed(owner), "Explicit no-pet choice from new-farm setup was treated as an old save");
             var oldPets = new PetWorldData(); var pet = new PetRecord(UUID.randomUUID(), migrated.getInstanceId(), PetVariant.CAT0, "Existing", 1);
-            oldPets.put(pet); var tag = oldPets.save(new CompoundTag(), h.getLevel().registryAccess()); tag.remove("InitialChoices");
+            oldPets.put(pet); var tag = oldPets.save(new CompoundTag()); tag.remove("InitialChoices");
             var loaded = PetWorldData.load(tag, h.getLevel().registryAccess());
             h.assertTrue(!loaded.needsInitialChoice(pet.farm), "Existing legacy pet without receipt got a free duplicate");
             loaded.remove(pet.id);
-            var afterRemoval = PetWorldData.load(loaded.save(new CompoundTag(), h.getLevel().registryAccess()), h.getLevel().registryAccess());
+            var afterRemoval = PetWorldData.load(loaded.save(new CompoundTag()), h.getLevel().registryAccess());
             h.assertTrue(!afterRemoval.needsInitialChoice(pet.farm), "Removing an existing pet reset initial entitlement");
             h.succeed();
         } finally { cleanup(owner); cleanup(member); registry.deleteFarm(owner.getUUID()); }

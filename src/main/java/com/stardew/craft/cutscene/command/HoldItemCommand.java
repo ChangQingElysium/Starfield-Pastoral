@@ -73,7 +73,7 @@ public class HoldItemCommand implements EventCommand {
         int fakeId = -(("holditem_" + actorTag).hashCode() & 0x7FFFFFFF) - 1;
         displayEntity.setId(fakeId);
 
-        level.addEntity(displayEntity);
+        level.putNonPlayerEntity(displayEntity.getId(), displayEntity); // PORT(1.20.1): 1.21 ClientLevel#addEntity(entity)
     }
 
     @Override

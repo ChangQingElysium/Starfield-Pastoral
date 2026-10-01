@@ -91,7 +91,7 @@ public final class BuildingWorldData extends SavedData {
     public static BuildingWorldData get(MinecraftServer server) {
         if (!server.isSameThread()) throw new IllegalStateException("Building access requires the server thread");
         BuildingWorldData data = server.overworld().getDataStorage().computeIfAbsent(
-                com.stardew.craft.port.PortSavedData.loader(new Factory<>(BuildingWorldData::new, BuildingWorldData::load)), com.stardew.craft.port.PortSavedData.constructor(new Factory<>(BuildingWorldData::new, BuildingWorldData::load)), DATA_NAME);
+                com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(BuildingWorldData::new, BuildingWorldData::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(BuildingWorldData::new, BuildingWorldData::load)), DATA_NAME);
         // Reconcile deletion even if a shutdown saved farms before the building file.
         Set<UUID> liveFarms = FarmInstanceRegistry.get(server).getAllFarms().stream()
                 .map(farm -> farm.getInstanceId()).collect(Collectors.toSet());

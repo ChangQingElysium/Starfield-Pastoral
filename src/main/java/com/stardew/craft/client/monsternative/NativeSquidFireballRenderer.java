@@ -17,6 +17,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.client.event.*;
 import net.minecraft.world.phys.Vec3;
+import com.stardew.craft.port.PortVertex;
 /** Small native cuboid core, six-sided inverted cyan hull and four source tail samples. */
 @SuppressWarnings({"null","removal"})
 @EventBusSubscriber(modid=StardewCraft.MODID,bus=EventBusSubscriber.Bus.MOD,value=Dist.CLIENT)
@@ -33,7 +34,7 @@ public final class NativeSquidFireballRenderer extends EntityRenderer<SquidFireb
         var m=model;if(m==null)return;
         // Both surfaces use alpha and back-face culling; the reversed hull is behind the opaque core.
         var c=buffers.getBuffer(NativeGhostRenderTypes.SQUID_FIREBALL);
-        for(var q:m.quads())for(var v:q.vertices())c.addVertex(stack.last().pose(),v[0],v[1],v[2]).setColor(255,255,255,(int)(255*alpha)).setUv(v[3],v[4]).setOverlay(OverlayTexture.NO_OVERLAY).setLight(LightTexture.FULL_BRIGHT).setNormal(stack.last(),q.normal()[0],q.normal()[1],q.normal()[2]);
+        for(var q:m.quads())for(var v:q.vertices())PortVertex.of(c).addVertex(stack.last().pose(),v[0],v[1],v[2]).setColor(255,255,255,(int)(255*alpha)).setUv(v[3],v[4]).setOverlay(OverlayTexture.NO_OVERLAY).setLight(LightTexture.FULL_BRIGHT).setNormal(stack.last(),q.normal()[0],q.normal()[1],q.normal()[2]).endVertex();
     }
     @Override public void render(SquidFireballEntity e,float yaw,float p,PoseStack stack,MultiBufferSource buffers,int light){
         record Dot(Vec3 pos,float alpha){}var dots=new java.util.ArrayList<Dot>();dots.add(new Dot(e.position(),1));int index=0;for(var at:e.tail())dots.add(new Dot(at,Math.max(.1F,.65F-index++*.15F)));

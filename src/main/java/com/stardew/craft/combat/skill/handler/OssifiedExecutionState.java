@@ -62,7 +62,7 @@ final class OssifiedExecutionState
         casterId = context.player().getId();
         sendPhase(OssifiedExecutionCirclePayload.START);
         level.playSound(null, center.x, center.y, center.z, SoundEvents.BONE_BLOCK_PLACE, SoundSource.PLAYERS, 0.65f, 0.7f);
-        level.playSound(null, center.x, center.y, center.z, SoundEvents.SOUL_ESCAPE.value(), SoundSource.PLAYERS, 0.3f, 1.2f);
+        level.playSound(null, center.x, center.y, center.z, SoundEvents.SOUL_ESCAPE, SoundSource.PLAYERS, 0.3f, 1.2f);
     }
 
     private void sendPhase(int phase) {

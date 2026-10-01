@@ -16,7 +16,7 @@ public record QuestText(String translate, String literal, List<String> args) {
     ).apply(instance, QuestText::new));
 
     public static final Codec<QuestText> CODEC = Codec.withAlternative(
-            OBJECT_CODEC.validate(QuestText::validate),
+            com.stardew.craft.port.PortCodecs.validate(OBJECT_CODEC, QuestText::validate),
             Codec.STRING.xmap(QuestText::translated, QuestText::translate)
     );
 

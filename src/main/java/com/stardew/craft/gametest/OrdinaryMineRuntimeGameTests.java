@@ -87,7 +87,7 @@ public final class OrdinaryMineRuntimeGameTests {
         h.assertTrue(manager.hasOpened(a,20) && !manager.hasOpened(b,20),"Lid leaks between players");
         h.assertTrue(!manager.hasClaimed(a,20),"Opening consumed reward");
         manager.markClaimed(a,20);
-        var reloaded=MineRewardClaimManager.load(manager.save(new net.minecraft.nbt.CompoundTag(),h.getLevel().registryAccess()),h.getLevel().registryAccess());
+        var reloaded=MineRewardClaimManager.load(manager.save(new net.minecraft.nbt.CompoundTag()),h.getLevel().registryAccess());
         h.assertTrue(reloaded.hasOpened(a,20) && reloaded.hasClaimed(a,20) && !reloaded.hasClaimed(b,20),"Persistent claims leak/lost");
         var motion=new MineChestLidMotion();motion.snap(true);
         h.assertTrue(motion.angle(0)==90,"Re-entering an opened chest replays opening");h.succeed();
@@ -125,7 +125,7 @@ public final class OrdinaryMineRuntimeGameTests {
         p.initializePlatforms(45,5);p.breakPlatform(45);p.initializePlatforms(45,99);
         p.emptyCache(OrdinaryMineRuntime.cacheKey(42,new BlockPos(1,66,8400)));
         p.disconnect(player,43,5);
-        var copy=OrdinaryMineProgress.load(p.save(new net.minecraft.nbt.CompoundTag(),h.getLevel().registryAccess()),h.getLevel().registryAccess());
+        var copy=OrdinaryMineProgress.load(p.save(new net.minecraft.nbt.CompoundTag()),h.getLevel().registryAccess());
         h.assertTrue(copy.platformLimit(45)==4,"Regeneration reset platform container budget");
         h.assertTrue(copy.cacheEmpty(OrdinaryMineRuntime.cacheKey(42,new BlockPos(1,66,8400))),"Coal cache refilled after reload");
         h.assertTrue(copy.deepestDisconnected(5)==43,"Disconnected floor not retained");

@@ -40,7 +40,7 @@ public class LuckyPurpleShortsMonsterEntity extends Monster {
                 .add(Attributes.MOVEMENT_SPEED, 0.32D)
                 .add(Attributes.FOLLOW_RANGE, 64.0D)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0D)
-                .add(Attributes.STEP_HEIGHT, 1.0D);
+                .add(com.stardew.craft.port.PortAttributes.STEP_HEIGHT.get(), 1.0D);
     }
 
     public static LuckyPurpleShortsMonsterEntity create(Level level, ServerPlayer target) {

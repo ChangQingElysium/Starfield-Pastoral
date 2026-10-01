@@ -101,7 +101,7 @@ public class GroundItemCommand implements EventCommand {
 
         int fakeId = -(("grounditem_" + id).hashCode() & 0x7FFFFFFF) - 1;
         display.setId(fakeId);
-        level.addEntity(display);
+        level.putNonPlayerEntity(display.getId(), display); // PORT(1.20.1): 1.21 ClientLevel#addEntity(entity)
         return display;
     }
 

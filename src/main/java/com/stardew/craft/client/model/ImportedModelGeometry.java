@@ -77,14 +77,17 @@ public final class ImportedModelGeometry extends SimpleUnbakedGeometry<ImportedM
 
     @Override
     protected void addQuads(IGeometryBakingContext context, IModelBuilder<?> builder, ModelBaker baker,
-                            Function<Material, TextureAtlasSprite> sprites, ModelState state) {
+                            Function<Material, TextureAtlasSprite> sprites, ModelState state,
+                            net.minecraft.resources.ResourceLocation modelLocation) {
         Matrix4f outer = state.getRotation().compose(context.getRootTransform()).blockCenterToCorner().getMatrix();
         for (Part part : parts) {
             var transformer = QuadTransformers.applying(new Transformation(new Matrix4f(outer).mul(part.transform())));
             for (var entry : part.element().faces.entrySet()) {
                 var face = entry.getValue();
-                BakedQuad quad = BlockModel.bakeFace(part.element(), face, sprites.apply(context.getMaterial(face.texture())),
-                    entry.getKey(), new SimpleModelState(Transformation.identity()));
+                // PORT(1.20.1): 1.21/NeoForge face baking (no UV inset, NeoForge winding and geometric normals).
+                BakedQuad quad = com.stardew.craft.port.PortFaceBakery.bakeFace(part.element(), face,
+                    sprites.apply(context.getMaterial(face.texture)), entry.getKey(),
+                    new SimpleModelState(Transformation.identity()));
                 transformer.processInPlace(quad);
                 // Recalculate the lighting direction after arbitrary bone/cube rotations.
                 builder.addUnculledFace(new BakedQuad(quad.getVertices(), quad.getTintIndex(),
@@ -111,8 +114,8 @@ public final class ImportedModelGeometry extends SimpleUnbakedGeometry<ImportedM
                 data[v + 1] = Float.floatToRawIntBits(points[i].y);
                 data[v + 2] = Float.floatToRawIntBits(points[i].z);
                 data[v + 3] = -1;
-                data[v + 4] = Float.floatToRawIntBits(sprite.getU(vertices[f + 3]));
-                data[v + 5] = Float.floatToRawIntBits(sprite.getV(vertices[f + 4]));
+                data[v + 4] = Float.floatToRawIntBits(com.stardew.craft.port.PortSprites.getU(sprite, vertices[f + 3]));
+                data[v + 5] = Float.floatToRawIntBits(com.stardew.craft.port.PortSprites.getV(sprite, vertices[f + 4]));
             }
             Vector3f normal = new Vector3f(points[1]).sub(points[0])
                 .cross(new Vector3f(points[2]).sub(points[0])).normalize();

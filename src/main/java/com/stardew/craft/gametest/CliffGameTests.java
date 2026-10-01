@@ -60,8 +60,8 @@ public final class CliffGameTests {
                         new BlockHitResult(Vec3.atCenterOf(pos),Direction.UP,pos,false)));
                 helper.assertTrue(((BlockItem)fixed.getItem()).place(context).consumesAction(),"Cliff placement failed");
                 helper.assertTrue(level.getBlockState(pos).equals(state),"Copied cliff rerolled");
-                var nbt = BlockState.CODEC.encodeStart(NbtOps.INSTANCE,state).getOrThrow();
-                helper.assertTrue(BlockState.CODEC.parse(NbtOps.INSTANCE,nbt).getOrThrow().equals(state),"Lost saved cliff variant");
+                var nbt = com.stardew.craft.port.PortDataResults.getOrThrow(BlockState.CODEC.encodeStart(NbtOps.INSTANCE,state));
+                helper.assertTrue(com.stardew.craft.port.PortDataResults.getOrThrow(BlockState.CODEC.parse(NbtOps.INSTANCE,nbt)).equals(state),"Lost saved cliff variant");
                 helper.assertTrue(TerrainWorldUpgrade.varied(state,123,pos).equals(state),"Terrain repair rerolled cliff");
             }
         }

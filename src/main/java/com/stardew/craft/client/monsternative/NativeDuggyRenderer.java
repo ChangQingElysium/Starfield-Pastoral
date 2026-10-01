@@ -24,6 +24,7 @@ import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import org.joml.Matrix3f;
 import org.joml.Vector3f;
 
+import com.stardew.craft.port.PortVertex;
 /** Emerging Generic Duggy. Clip below the floor; retain original body proportions and face UVs. */
 @SuppressWarnings({"null", "removal"})
 @EventBusSubscriber(modid = StardewCraft.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
@@ -122,8 +123,8 @@ public final class NativeDuggyRenderer extends EntityRenderer<MineDuggyEntity> {
             }
             var clipped=NativeGroundClip.clip(face,quad.sourcePart().endsWith("_outline")?.3F:.05F);
             for(int i=1;i+1<clipped.size();i++)for(var v:java.util.List.of(com.stardew.craft.port.PortJava.getFirst(clipped),clipped.get(i),clipped.get(i+1),clipped.get(i+1))){
-                consumer.addVertex(stack.last().pose(),v.x(),v.y(),v.z()).setColor(255,255,255,255).setUv(v.u(),v.v())
-                        .setOverlay(overlay).setLight(light).setNormal(stack.last(),normal.x,normal.y,normal.z);
+                PortVertex.of(consumer).addVertex(stack.last().pose(),v.x(),v.y(),v.z()).setColor(255,255,255,255).setUv(v.u(),v.v())
+                        .setOverlay(overlay).setLight(light).setNormal(stack.last(),normal.x,normal.y,normal.z).endVertex();
             }
         }
         stack.popPose();

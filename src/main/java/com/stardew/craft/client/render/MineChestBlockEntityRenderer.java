@@ -24,7 +24,7 @@ import net.minecraftforge.client.model.data.ModelData;
 /** The native lid model rotates as one assembly: no swapped open-state geometry or UVs. */
 @SuppressWarnings("removal")
 @EventBusSubscriber(modid = StardewCraft.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-public final class MineChestBlockEntityRenderer implements BlockEntityRenderer<MineChestBlockEntity> {
+public final class MineChestBlockEntityRenderer implements BlockEntityRenderer<MineChestBlockEntity>, com.stardew.craft.port.net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension<MineChestBlockEntity> {
     private static final ModelResourceLocation BODY = model("body");
     private static final ModelResourceLocation LID = model("lid");
 

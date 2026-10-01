@@ -34,7 +34,7 @@ public final class EquipmentMobEffectHandler {
 
         MobEffectInstance effect = event.getEffectInstance();
         if (!isNegativeCategory(
-                effect.getEffect().value().getCategory()
+                effect.getEffect().getCategory()
         )) {
             return;
         }

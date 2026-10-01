@@ -12,8 +12,8 @@ import snownee.jade.api.WailaPlugin;
 public class MasteryStatueJadePlugin implements IWailaPlugin {
     @Override
     public void register(IWailaCommonRegistration registration) {
-        registration.registerBlockDataProvider(MasteryStatueJadeProvider.INSTANCE, StatueOfBlessingsBlock.class);
-        registration.registerBlockDataProvider(MasteryStatueJadeProvider.INSTANCE, StatueOfDwarfKingBlock.class);
+        JadeBlockDataProviders.register(registration, MasteryStatueJadeProvider.INSTANCE, StatueOfBlessingsBlock.class);
+        JadeBlockDataProviders.register(registration, MasteryStatueJadeProvider.INSTANCE, StatueOfDwarfKingBlock.class);
     }
 
     @Override

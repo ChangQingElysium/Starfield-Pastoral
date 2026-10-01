@@ -21,7 +21,7 @@ public final class WeaponGroundContact {
 
     @Nullable
     static BlockHitResult find(BlockGetter level, CollisionContext collision, Vec3 feet) {
-        BlockHitResult hit = level.clip(new ClipContext(feet.add(0, 0.3, 0), feet.add(0, -0.65, 0),
+        BlockHitResult hit = level.clip(new com.stardew.craft.port.PortClipContext(feet.add(0, 0.3, 0), feet.add(0, -0.65, 0),
                 ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, collision));
         return hit.getType() == HitResult.Type.BLOCK && hit.getDirection() == Direction.UP ? hit : null;
     }

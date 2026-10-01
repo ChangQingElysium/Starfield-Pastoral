@@ -11,6 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 
 
+import com.stardew.craft.port.PortVertex;
 public class MeowmereProjectileRenderer extends EntityRenderer<MeowmereProjectileEntity> {
     private static final ResourceLocation TEXTURE = new ResourceLocation("stardewcraft", "textures/gui/weapon_skill/meowmere_head.png");
 
@@ -40,9 +41,9 @@ public class MeowmereProjectileRenderer extends EntityRenderer<MeowmereProjectil
         PoseStack.Pose pose = poseStack.last();
         for (float[] corner : new float[][]{{-0.5f, -0.5f, 0, 1}, {0.5f, -0.5f, 1, 1},
                 {0.5f, 0.5f, 1, 0}, {-0.5f, 0.5f, 0, 0}}) {
-            out.addVertex(pose.pose(), corner[0], corner[1], 0).setColor(255, 255, 255, 255)
+            PortVertex.of(out).addVertex(pose.pose(), corner[0], corner[1], 0).setColor(255, 255, 255, 255)
                     .setUv(corner[2], corner[3]).setOverlay(net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY)
-                    .setLight(0xF000F0).setNormal(pose, 0, 0, 1);
+                    .setLight(0xF000F0).setNormal(pose, 0, 0, 1).endVertex();
         }
 
         poseStack.popPose();

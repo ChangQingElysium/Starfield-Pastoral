@@ -89,7 +89,7 @@ public final class HardSoilGameTests {
         var manager = new FertilizerManager();
         for (FertilizerType type : FertilizerType.values()) {
             h.assertTrue(manager.tryApplyFertilizer(level, infertile, type), "Fertilizer rejected " + type);
-            var loaded = FertilizerManager.load(manager.save(new CompoundTag(), level.registryAccess()), level.registryAccess());
+            var loaded = FertilizerManager.load(manager.save(new CompoundTag()), level.registryAccess());
             h.assertTrue(loaded.getFertilizer(level, infertile) == type, "Saved fertilizer changed");
             h.assertTrue(level.getBlockState(infertile).is(ModBlocks.INFERTILE_FARMLAND.get()), "Fertilizer changed block identity");
             manager.removeFertilizer(level, infertile);
@@ -166,7 +166,7 @@ public final class HardSoilGameTests {
         manager.addCrop(level,pos);
         var state=manager.getOrCreateState(level,pos);
         h.assertTrue(!state.advanceOnSoil(true),"First poor-soil day should accumulate progress");
-        var loaded=CropGrowthManager.load(manager.save(new CompoundTag(),level.registryAccess()),level.registryAccess());
+        var loaded=CropGrowthManager.load(manager.save(new CompoundTag()),level.registryAccess());
         state=loaded.getState(level,pos);
         h.assertTrue(state!=null && state.infertileProgress==2,"Fractional progress lost during save");
         int advances=0;
@@ -226,9 +226,9 @@ public final class HardSoilGameTests {
         var manager=new com.stardew.craft.manager.FruitTreeGrowthManager();
         manager.growOneDay(level,pos);
         h.assertTrue(manager.getDaysGrown(level,pos)==0,"First tree day should retain 4/5 progress");
-        manager=com.stardew.craft.manager.FruitTreeGrowthManager.load(manager.save(new CompoundTag(),level.registryAccess()),level.registryAccess());
+        manager=com.stardew.craft.manager.FruitTreeGrowthManager.load(manager.save(new CompoundTag()),level.registryAccess());
         for(int day=2;day<=5;day++) manager.growOneDay(level,pos);
-        h.assertTrue(manager.getDaysGrown(level,pos)==4,"Tree failed to retain progress across save: grown="+manager.getDaysGrown(level,pos)+" state="+level.getBlockState(pos)+" blocked="+manager.isBlockedNow(level,pos)+" data="+manager.save(new CompoundTag(),level.registryAccess()));
+        h.assertTrue(manager.getDaysGrown(level,pos)==4,"Tree failed to retain progress across save: grown="+manager.getDaysGrown(level,pos)+" state="+level.getBlockState(pos)+" blocked="+manager.isBlockedNow(level,pos)+" data="+manager.save(new CompoundTag()));
         for(int day=6;day<=34;day++) manager.growOneDay(level,pos);
         h.assertTrue(manager.getDaysGrown(level,pos)==27 && level.getBlockState(pos).is(ModBlocks.APPLE_SAPLING.get()),"Fruit tree matured before 35 days");
         // Replacing only the planted soil restores ordinary growth, independent of deeper hard soil.

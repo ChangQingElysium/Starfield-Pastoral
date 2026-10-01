@@ -215,7 +215,7 @@ public final class StandardFarmLayoutGameTests {
                             && registry.getFarmForPlayer(player).getInstanceId().equals(beach.getInstanceId()),
                     "Explicit debug farm selection did not change the active farm");
 
-            CompoundTag saved = registry.save(new CompoundTag(), helper.getLevel().registryAccess());
+            CompoundTag saved = registry.save(new CompoundTag());
             var load = FarmInstanceRegistry.class.getDeclaredMethod(
                     "load", CompoundTag.class, net.minecraft.core.HolderLookup.Provider.class);
             load.setAccessible(true);

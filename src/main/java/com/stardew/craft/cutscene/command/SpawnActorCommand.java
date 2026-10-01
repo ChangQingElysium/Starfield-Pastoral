@@ -85,7 +85,7 @@ public class SpawnActorCommand implements EventCommand {
         int fakeId = -(actorTag.hashCode() & 0x7FFFFFFF) - 1;
         actor.setId(fakeId);
 
-        level.addEntity(actor);
+        level.putNonPlayerEntity(actor.getId(), actor); // PORT(1.20.1): 1.21 ClientLevel#addEntity(entity)
         player.registerActor(actorTag, actor);
     }
 

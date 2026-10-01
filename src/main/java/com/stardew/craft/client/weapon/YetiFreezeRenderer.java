@@ -19,6 +19,7 @@ import org.joml.Matrix4f;
 
 import java.util.List;
 
+import com.stardew.craft.port.PortVertex;
 public final class YetiFreezeRenderer {
 
     private static final ResourceLocation ICE_TEXTURE = new ResourceLocation(
@@ -122,11 +123,11 @@ public final class YetiFreezeRenderer {
     @SuppressWarnings("null")
     private static void vertex(VertexConsumer consumer, Matrix4f pose, int light,
                                float x, float y, float u, float v, int alpha) {
-        consumer.addVertex(pose, x, y, 0.0f)
+        PortVertex.of(consumer).addVertex(pose, x, y, 0.0f)
             .setColor(200, 220, 255, alpha)
             .setUv(u, v)
             .setOverlay(net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY)
             .setLight(light)
-            .setNormal(0.0f, 1.0f, 0.0f);
+            .setNormal(0.0f, 1.0f, 0.0f).endVertex();
     }
 }

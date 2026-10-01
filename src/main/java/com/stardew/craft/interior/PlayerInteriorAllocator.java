@@ -46,7 +46,7 @@ public class PlayerInteriorAllocator extends SavedData {
     public static PlayerInteriorAllocator get(ServerLevel level) {
         ServerLevel overworld = level.getServer().overworld();
         return overworld.getDataStorage().computeIfAbsent(
-            com.stardew.craft.port.PortSavedData.loader(new Factory<>(PlayerInteriorAllocator::new, PlayerInteriorAllocator::load)), com.stardew.craft.port.PortSavedData.constructor(new Factory<>(PlayerInteriorAllocator::new, PlayerInteriorAllocator::load)),
+            com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(PlayerInteriorAllocator::new, PlayerInteriorAllocator::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(PlayerInteriorAllocator::new, PlayerInteriorAllocator::load)),
             DATA_NAME
         );
     }
@@ -426,7 +426,7 @@ public class PlayerInteriorAllocator extends SavedData {
     }
 
     @Override
-    public @Nonnull CompoundTag save(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider provider) {
+    public @Nonnull CompoundTag save(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         tag.putInt("nextIndex", nextIndex);
 
         ListTag players = new ListTag();

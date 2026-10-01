@@ -11,7 +11,7 @@ import snownee.jade.api.WailaPlugin;
 public class OilMakerJadePlugin implements IWailaPlugin {
     @Override
     public void register(IWailaCommonRegistration registration) {
-        registration.registerBlockDataProvider(OilMakerJadeProvider.INSTANCE, OilMakerBlock.class);
+        JadeBlockDataProviders.register(registration, OilMakerJadeProvider.INSTANCE, OilMakerBlock.class);
     }
 
     @Override

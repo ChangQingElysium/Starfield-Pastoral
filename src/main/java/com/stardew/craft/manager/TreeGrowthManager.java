@@ -367,13 +367,13 @@ public class TreeGrowthManager extends SavedData {
 	}
 
 	@Override
-	public @Nonnull CompoundTag save(@Nonnull CompoundTag tag, @Nonnull net.minecraft.core.HolderLookup.Provider provider) {
+	public @Nonnull CompoundTag save(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
 		ListTag list = new ListTag();
 		for (GlobalPos globalPos : saplingPositions) {
 			CompoundTag entryTag = new CompoundTag();
 			String dimensionId = Objects.requireNonNull(globalPos.dimension().location().toString(), "dimension");
 			Tag posTag = Objects.requireNonNull(
-				NbtUtils.writeBlockPos(Objects.requireNonNull(globalPos.pos(), "pos")),
+				com.stardew.craft.port.PortNbtUtils.writeBlockPos(Objects.requireNonNull(globalPos.pos(), "pos")),
 				"posTag"
 			);
 			int growthStage = growthStages.getOrDefault(globalPos, 0);
@@ -402,7 +402,7 @@ public class TreeGrowthManager extends SavedData {
 						"dimensionId"
 					)
 				);
-				BlockPos pos = NbtUtils.readBlockPos(entryTag, "Pos").orElse(BlockPos.ZERO);
+				BlockPos pos = com.stardew.craft.port.PortNbtUtils.readBlockPos(entryTag, "Pos").orElse(BlockPos.ZERO);
 				GlobalPos globalPos = GlobalPos.of(
 					Objects.requireNonNull(dimension, "dimension"),
 					Objects.requireNonNull(pos, "pos")

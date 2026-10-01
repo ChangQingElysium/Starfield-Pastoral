@@ -24,7 +24,7 @@ public final class MineSerpentEntity extends StardewMonsterEntity {
  private final SerpentFlightMotion steering=new SerpentFlightMotion();
  private Vec3 idleAnchor,idleTarget;private int idleWait,idleTravel;private double deathX,deathZ,deathOriginX,deathOriginZ;private int stunMilliseconds;private boolean deathEffects;
  public MineSerpentEntity(EntityType<? extends MineSerpentEntity> t,Level l){super(t,l);setNoGravity(true);noPhysics=false;addTag("sd_mob_serpent");}
- public static AttributeSupplier.Builder createAttributes(){return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,150).add(Attributes.ATTACK_DAMAGE,23).add(Attributes.MOVEMENT_SPEED,.25).add(Attributes.FOLLOW_RANGE,128).add(Attributes.STEP_HEIGHT,0);}
+ public static AttributeSupplier.Builder createAttributes(){return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,150).add(Attributes.ATTACK_DAMAGE,23).add(Attributes.MOVEMENT_SPEED,.25).add(Attributes.FOLLOW_RANGE,128).add(com.stardew.craft.port.PortAttributes.STEP_HEIGHT.get(),0);}
  @Override protected void registerGoals(){}
  @Override protected net.minecraft.world.entity.ai.navigation.PathNavigation createNavigation(Level level){return new MonsterFlightRoute(this,level);}
  private MonsterFlightRoute flightRoute(){return (MonsterFlightRoute)getNavigation();}

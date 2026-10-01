@@ -293,9 +293,8 @@ public final class MapInteractionRegistry {
                         "branch " + id + " has more than 16 conditions");
             }
             for (JsonElement value : values) {
-                StardewCondition condition = StardewConditions.CODEC
-                        .parse(JsonOps.INSTANCE, value)
-                        .getOrThrow(message ->
+                StardewCondition condition = com.stardew.craft.port.PortDataResults.getOrThrow(StardewConditions.CODEC
+                        .parse(JsonOps.INSTANCE, value), message ->
                                 new IllegalArgumentException(
                                         "branch " + id
                                                 + " condition: "
@@ -312,9 +311,8 @@ public final class MapInteractionRegistry {
                         "branch " + id + " has more than 16 effects");
             }
             for (JsonElement value : values) {
-                StardewAction effect = StardewActions.CODEC
-                        .parse(JsonOps.INSTANCE, value)
-                        .getOrThrow(message ->
+                StardewAction effect = com.stardew.craft.port.PortDataResults.getOrThrow(StardewActions.CODEC
+                        .parse(JsonOps.INSTANCE, value), message ->
                                 new IllegalArgumentException(
                                         "branch " + id
                                                 + " effect: "
@@ -384,8 +382,7 @@ public final class MapInteractionRegistry {
         ResourceLocation type = requiredId(object, "type");
         JsonElement data = object.has("data")
                 ? object.get("data") : new JsonObject();
-        return StardewMapInteractionActions.decode(type, data)
-                .getOrThrow(message -> new IllegalArgumentException(
+        return com.stardew.craft.port.PortDataResults.getOrThrow(StardewMapInteractionActions.decode(type, data), message -> new IllegalArgumentException(
                         "branch " + branchId + " action: " + message));
     }
 

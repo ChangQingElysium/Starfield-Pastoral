@@ -30,6 +30,7 @@ import com.stardew.craft.block.utility.TapperBlock;
 import com.stardew.craft.block.utility.WormBinBlock;
 import com.stardew.craft.block.utility.GardenPotBlock;
 import com.stardew.craft.integration.jade.FertilizerJadeProvider;
+import com.stardew.craft.integration.jade.JadeBlockDataProviders;
 import com.stardew.craft.integration.jade.AnimalProduceSpotJadeProvider;
 import com.stardew.craft.manager.CropGrowthManager;
 import com.stardew.craft.manager.TeaBushManager;
@@ -46,7 +47,7 @@ import snownee.jade.api.IBlockComponentProvider;
 import snownee.jade.api.IWailaCommonRegistration;
 import snownee.jade.api.ITooltip;
 import snownee.jade.api.IWailaClientRegistration;
-import snownee.jade.api.JadeIds;
+import snownee.jade.api.Identifiers;
 import snownee.jade.api.IWailaPlugin;
 import snownee.jade.api.WailaPlugin;
 import snownee.jade.api.config.IPluginConfig;
@@ -93,10 +94,10 @@ public class JadePlugin implements IWailaPlugin {
 
     @Override
     public void register(IWailaCommonRegistration registration) {
-        registration.registerBlockDataProvider(new CropComponentProvider(), Block.class);
-		registration.registerBlockDataProvider(new TreeSaplingComponentProvider(), WildTreeSaplingBlock.class);
-        registration.registerBlockDataProvider(AnimalProduceSpotJadeProvider.INSTANCE, AnimalProduceSpotBlock.class);
-        registration.registerBlockDataProvider(FertilizerJadeProvider.INSTANCE, Block.class);
+        JadeBlockDataProviders.register(registration, new CropComponentProvider(), Block.class);
+		JadeBlockDataProviders.register(registration, new TreeSaplingComponentProvider(), WildTreeSaplingBlock.class);
+        JadeBlockDataProviders.register(registration, AnimalProduceSpotJadeProvider.INSTANCE, AnimalProduceSpotBlock.class);
+        JadeBlockDataProviders.register(registration, FertilizerJadeProvider.INSTANCE, Block.class);
     }
 
     @Override
@@ -108,7 +109,7 @@ public class JadePlugin implements IWailaPlugin {
         registration.addTooltipCollectedCallback((box, accessor) -> {
             if (accessor instanceof BlockAccessor blockAccessor) {
                 if (shouldHideItemStorage(blockAccessor.getBlockState().getBlock())) {
-                    box.getTooltip().remove(JadeIds.UNIVERSAL_ITEM_STORAGE);
+                    box.remove(Identifiers.UNIVERSAL_ITEM_STORAGE);
                 }
             }
         });

@@ -12,8 +12,8 @@ import snownee.jade.api.WailaPlugin;
 public class GenericUtilityMachineJadePlugin implements IWailaPlugin {
     @Override
     public void register(IWailaCommonRegistration registration) {
-        registration.registerBlockDataProvider(GenericUtilityMachineJadeProvider.INSTANCE, AbstractTwoBlockUtilityBlock.class);
-        registration.registerBlockDataProvider(GenericUtilityMachineJadeProvider.INSTANCE, DailyStatueBlock.class);
+        JadeBlockDataProviders.register(registration, GenericUtilityMachineJadeProvider.INSTANCE, AbstractTwoBlockUtilityBlock.class);
+        JadeBlockDataProviders.register(registration, GenericUtilityMachineJadeProvider.INSTANCE, DailyStatueBlock.class);
     }
 
     @Override

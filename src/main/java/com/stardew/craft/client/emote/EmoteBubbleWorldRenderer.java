@@ -17,6 +17,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 
+import com.stardew.craft.port.PortVertex;
 @SuppressWarnings("null")
 public final class EmoteBubbleWorldRenderer {
 
@@ -77,9 +78,9 @@ public final class EmoteBubbleWorldRenderer {
 		Matrix4f matrix = poseStack.last().pose();
 		float half = 0.5F;
 
-		consumer.addVertex(matrix, -half, half, 0.0F).setColor(255, 255, 255, 255).setUv(u0, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(0x00F000F0).setNormal(0, 0, 1);
-		consumer.addVertex(matrix, half, half, 0.0F).setColor(255, 255, 255, 255).setUv(u1, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(0x00F000F0).setNormal(0, 0, 1);
-		consumer.addVertex(matrix, half, -half, 0.0F).setColor(255, 255, 255, 255).setUv(u1, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(0x00F000F0).setNormal(0, 0, 1);
-		consumer.addVertex(matrix, -half, -half, 0.0F).setColor(255, 255, 255, 255).setUv(u0, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(0x00F000F0).setNormal(0, 0, 1);
+		PortVertex.of(consumer).addVertex(matrix, -half, half, 0.0F).setColor(255, 255, 255, 255).setUv(u0, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(0x00F000F0).setNormal(0, 0, 1).endVertex();
+		PortVertex.of(consumer).addVertex(matrix, half, half, 0.0F).setColor(255, 255, 255, 255).setUv(u1, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(0x00F000F0).setNormal(0, 0, 1).endVertex();
+		PortVertex.of(consumer).addVertex(matrix, half, -half, 0.0F).setColor(255, 255, 255, 255).setUv(u1, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(0x00F000F0).setNormal(0, 0, 1).endVertex();
+		PortVertex.of(consumer).addVertex(matrix, -half, -half, 0.0F).setColor(255, 255, 255, 255).setUv(u0, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(0x00F000F0).setNormal(0, 0, 1).endVertex();
 	}
 }

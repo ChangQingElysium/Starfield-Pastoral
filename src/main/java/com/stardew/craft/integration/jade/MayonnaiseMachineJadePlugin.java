@@ -11,7 +11,7 @@ import snownee.jade.api.WailaPlugin;
 public class MayonnaiseMachineJadePlugin implements IWailaPlugin {
     @Override
     public void register(IWailaCommonRegistration registration) {
-        registration.registerBlockDataProvider(MayonnaiseMachineJadeProvider.INSTANCE, MayonnaiseMachineBlock.class);
+        JadeBlockDataProviders.register(registration, MayonnaiseMachineJadeProvider.INSTANCE, MayonnaiseMachineBlock.class);
     }
 
     @Override

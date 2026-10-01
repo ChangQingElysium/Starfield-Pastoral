@@ -54,7 +54,7 @@ public final class GreenSlimeEntity extends StardewMonsterEntity {
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH, 1)
                 .add(Attributes.ATTACK_DAMAGE, 0).add(Attributes.MOVEMENT_SPEED, .25)
-                .add(Attributes.FOLLOW_RANGE, 64).add(Attributes.STEP_HEIGHT, .5);
+                .add(Attributes.FOLLOW_RANGE, 64).add(com.stardew.craft.port.PortAttributes.STEP_HEIGHT.get(), .5);
     }
     @Override protected void defineSynchedData() {
         super.defineSynchedData();
@@ -88,7 +88,7 @@ public final class GreenSlimeEntity extends StardewMonsterEntity {
         // after movement has already resolved collision using the previous orientation.
         if (getAttributes() != null && Float.isFinite(yaw)) {
             var box = collisionBoxAtYaw(yaw);
-            if (!level().isClientSide && isAddedToLevel() && !level().noCollision(this, box)) return;
+            if (!level().isClientSide && isAddedToWorld() && !level().noCollision(this, box)) return;
             super.setYRot(yaw);
             setBoundingBox(box);
         } else super.setYRot(yaw);

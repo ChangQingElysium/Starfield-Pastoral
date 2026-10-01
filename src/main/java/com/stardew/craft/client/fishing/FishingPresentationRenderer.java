@@ -26,6 +26,7 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import java.util.List;
 
+import com.stardew.craft.port.PortVertex;
 /** First-person fishing rig. Hand meshes use the player's live skin. */
 @EventBusSubscriber(modid=StardewCraft.MODID,value=Dist.CLIENT)
 public final class FishingPresentationRenderer {
@@ -129,7 +130,7 @@ public final class FishingPresentationRenderer {
         Vec3 mainLine=FishingBobberModels.anchor(bobberMatrix,bobber.mainLine());
         Vec3 leader=FishingBobberModels.anchor(bobberMatrix,bobber.leader());
         boolean slim=com.stardew.craft.port.net.minecraft.client.resources.PlayerSkin.of(player).model()==com.stardew.craft.port.net.minecraft.client.resources.PlayerSkin.Model.SLIM;
-        stack.pushPose();stack.mulPose(actor);
+        stack.pushPose();PortVertex.mulPose(stack, actor);
         for(var face:pose.rig.faces()) {
             if(face.part().startsWith("rod_bobber"))continue;
             if(face.texture()==1&&!face.part().startsWith("rod_hook"))continue;
@@ -149,29 +150,29 @@ public final class FishingPresentationRenderer {
             Vector3f[] points=new Vector3f[4];for(int i=0;i<4;i++)points[i]=arm?pose.skinVertex(face.vertices().get(i),new Vector3f(),0,slim?.75f:1,shift):pose.vertex(face.vertices().get(i),new Vector3f());
             var normal=new Vector3f(points[1]).sub(points[0]).cross(new Vector3f(points[2]).sub(points[0])).normalize();
             // Reflection reverses winding. Reverse once, including the UVs; never duplicate hull faces.
-            for(int k=0;k<4;k++){int i=left?3-k:k;var v=face.vertices().get(i);var p=points[i];consumer.addVertex(stack.last().pose(),p.x,p.y,p.z).setColor(255,255,255,255).setUv(arm?skinU(v.uv()[0],v.uv()[1],face.part().endsWith("right"),slim,left):v.uv()[0],arm?skinV(v.uv()[1],face.part().endsWith("right"),left):v.uv()[1]).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(stack.last(),normal.x,normal.y,normal.z);}
+            for(int k=0;k<4;k++){int i=left?3-k:k;var v=face.vertices().get(i);var p=points[i];PortVertex.of(consumer).addVertex(stack.last().pose(),p.x,p.y,p.z).setColor(255,255,255,255).setUv(arm?skinU(v.uv()[0],v.uv()[1],face.part().endsWith("right"),slim,left):v.uv()[0],arm?skinV(v.uv()[1],face.part().endsWith("right"),left):v.uv()[1]).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(stack.last(),normal.x,normal.y,normal.z).endVertex();}
             if(arm&&player.isModelPartShown((face.part().endsWith("right")!=left)?PlayerModelPart.RIGHT_SLEEVE:PlayerModelPart.LEFT_SLEEVE)) {
                 // Inflate the shared bind surface before skinning; adjacent sleeve faces stay connected.
                 // A skin overlay is an opaque cutout layer.  Alpha blending the
                 // sleeve over the base arm makes the two layers flicker and lets
                 // transparent texels darken the hand during the fishing pose.
                 var layer=buffers.getBuffer(RenderType.entityCutoutNoCull(texture));
-                for(int k=0;k<4;k++){int i=left?3-k:k;var v=face.vertices().get(i);var p=pose.skinVertex(v,new Vector3f(),.18f,slim?.75f:1,shift);boolean right=face.part().endsWith("right");float u=skinU(v.uv()[0],v.uv()[1],right,slim,left),vv=skinV(v.uv()[1],right,left);if(right!=left)vv+=.25f;else u+=.25f;layer.addVertex(stack.last().pose(),p.x,p.y,p.z).setColor(255,255,255,255).setUv(u,vv).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(stack.last(),normal.x,normal.y,normal.z);}
+                for(int k=0;k<4;k++){int i=left?3-k:k;var v=face.vertices().get(i);var p=pose.skinVertex(v,new Vector3f(),.18f,slim?.75f:1,shift);boolean right=face.part().endsWith("right");float u=skinU(v.uv()[0],v.uv()[1],right,slim,left),vv=skinV(v.uv()[1],right,left);if(right!=left)vv+=.25f;else u+=.25f;PortVertex.of(layer).addVertex(stack.last().pose(),p.x,p.y,p.z).setColor(255,255,255,255).setUv(u,vv).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(stack.last(),normal.x,normal.y,normal.z).endVertex();}
             }
             if(arm) {
                 var chest=player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.CHEST);
                 if(chest.getItem() instanceof net.minecraft.world.item.ArmorItem armor&&!FishingArmorVisibility.shouldHide(player,chest)) {
-                    var extensions=net.minecraftforge.client.extensions.common.IClientItemExtensions.of(chest);
-                    var layers=armor.getMaterial().value().layers();
-                    for(int layerIndex=0;layerIndex<layers.size();layerIndex++) {
-                        var material=layers.get(layerIndex);int color=extensions.getArmorLayerTintColor(chest,player,material,layerIndex,extensions.getDefaultDyeColor(chest));
-                        if(color==0)continue;
-                        var armorTexture=net.minecraftforge.client.ForgeHooksClient.getArmorTexture(player,chest,material,false,net.minecraft.world.entity.EquipmentSlot.CHEST);
-                        var armorConsumer=buffers.getBuffer(RenderType.armorCutoutNoCull(armorTexture));
-                        armorFace(pose,face,stack,armorConsumer,light,normal,left,color);
+                    // PORT(1.20.1): no ArmorMaterial layers / tint hooks. 1.21 leather = dyeable base layer tinted with the
+                    // opaque dye colour (default LEATHER_COLOR) + white "_overlay" layer; other materials = one white layer.
+                    // 1.20.1 HumanoidArmorLayer renders the same layers via DyeableLeatherItem and getArmorResource.
+                    if(armor instanceof net.minecraft.world.item.DyeableLeatherItem dyeable) {
+                        armorFace(pose,face,stack,buffers.getBuffer(RenderType.armorCutoutNoCull(armorTexture(player,chest,null))),light,normal,left,0xFF000000|dyeable.getColor(chest));
+                        armorFace(pose,face,stack,buffers.getBuffer(RenderType.armorCutoutNoCull(armorTexture(player,chest,"overlay"))),light,normal,left,-1);
+                    } else {
+                        armorFace(pose,face,stack,buffers.getBuffer(RenderType.armorCutoutNoCull(armorTexture(player,chest,null))),light,normal,left,-1);
                     }
                     var trim=PortItemData.get(chest, com.stardew.craft.port.net.minecraft.core.component.DataComponents.TRIM);
-                    if(trim!=null){var atlas=Minecraft.getInstance().getModelManager().getAtlas(net.minecraft.client.renderer.Sheets.ARMOR_TRIMS_SHEET);var sprite=atlas.getSprite(trim.outerTexture(armor.getMaterial()));armorFace(pose,face,stack,sprite.wrap(buffers.getBuffer(net.minecraft.client.renderer.Sheets.armorTrimsSheet(trim.pattern().value().decal()))),light,normal,left,-1);}
+                    if(trim!=null){var atlas=Minecraft.getInstance().getModelManager().getAtlas(net.minecraft.client.renderer.Sheets.ARMOR_TRIMS_SHEET);var sprite=atlas.getSprite(trim.outerTexture(armor.getMaterial()));armorFace(pose,face,stack,sprite.wrap(buffers.getBuffer(net.minecraft.client.renderer.Sheets.armorTrimsSheet() /* PORT(1.20.1): no decal trim patterns */)),light,normal,left,-1);}
                     if(chest.hasFoil())armorFace(pose,face,stack,buffers.getBuffer(RenderType.armorEntityGlint()),light,normal,left,-1);
                 }
             }
@@ -212,9 +213,16 @@ public final class FishingPresentationRenderer {
             stack.popPose();
         }
     }
+    /** PORT(1.20.1): Forge 1.20.1 HumanoidArmorLayer#getArmorResource for the chest slot (outer model, layer 1). */
+    private static net.minecraft.resources.ResourceLocation armorTexture(net.minecraft.world.entity.Entity entity,net.minecraft.world.item.ItemStack stack,String type){
+        var item=(net.minecraft.world.item.ArmorItem)stack.getItem();String texture=item.getMaterial().getName();String domain="minecraft";int idx=texture.indexOf(':');
+        if(idx!=-1){domain=texture.substring(0,idx);texture=texture.substring(idx+1);}
+        String path=String.format(java.util.Locale.ROOT,"%s:textures/models/armor/%s_layer_%d%s.png",domain,texture,1,type==null?"":String.format(java.util.Locale.ROOT,"_%s",type));
+        return new net.minecraft.resources.ResourceLocation(net.minecraftforge.client.ForgeHooksClient.getArmorTexture(entity,stack,path,net.minecraft.world.entity.EquipmentSlot.CHEST,type));
+    }
     private static void armorFace(FishingRigPose pose,FishingRigAssets.Face face,PoseStack stack,com.mojang.blaze3d.vertex.VertexConsumer consumer,int light,Vector3f normal,boolean mirror,int color) {
         for(int k=0;k<4;k++){int i=mirror?3-k:k;var v=face.vertices().get(i);var p=pose.skinVertex(v,new Vector3f(),.65f,1,0);boolean right=face.part().endsWith("right");float u=v.uv()[0]+(right?0:.125f),vv=(v.uv()[1]-(right?0:.5f))*2;
-            consumer.addVertex(stack.last().pose(),p.x,p.y,p.z).setColor(color).setUv(u,vv).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(stack.last(),normal.x,normal.y,normal.z);}
+            PortVertex.of(consumer).addVertex(stack.last().pose(),p.x,p.y,p.z).setColor(color).setUv(u,vv).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(stack.last(),normal.x,normal.y,normal.z).endVertex();}
     }
     private static float skinU(float u,float v,boolean right,boolean slim,boolean mirror) {
         float x=u*64-(right?40:32),y=v*64-(right?16:48);
@@ -225,6 +233,6 @@ public final class FishingPresentationRenderer {
     static void line(PoseStack stack,MultiBufferSource buffers,int light,Vec3 a,Vec3 b,float radius,int color) {
         Vec3 axis=b.subtract(a);if(axis.lengthSqr()<1e-10)return;Vec3 side=axis.cross(new Vec3(0,1,0));if(side.lengthSqr()<1e-8)side=axis.cross(new Vec3(1,0,0));side=side.normalize().scale(radius);Vec3 cross=axis.normalize().cross(side);
         var consumer=buffers.getBuffer(RenderType.entityCutoutNoCull(FishingRigAssets.resource("textures/entity/fishing_native/2.png")));
-        for(Vec3 offset:new Vec3[]{side,cross})for(Vec3 p:new Vec3[]{a.add(offset),a.subtract(offset),b.subtract(offset),b.add(offset)})consumer.addVertex(stack.last().pose(),(float)p.x,(float)p.y,(float)p.z).setColor((color>>16)&255,(color>>8)&255,color&255,255).setUv(.5f,.5f).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(stack.last(),0,1,0);
+        for(Vec3 offset:new Vec3[]{side,cross})for(Vec3 p:new Vec3[]{a.add(offset),a.subtract(offset),b.subtract(offset),b.add(offset)})PortVertex.of(consumer).addVertex(stack.last().pose(),(float)p.x,(float)p.y,(float)p.z).setColor((color>>16)&255,(color>>8)&255,color&255,255).setUv(.5f,.5f).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(stack.last(),0,1,0).endVertex();
     }
 }

@@ -66,12 +66,12 @@ public final class AquariumBlockEntity extends BlockEntity implements Container,
     }
     @Override protected void saveAdditional(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         super.saveAdditional(tag);
-        ContainerHelper.saveAllItems(tag, items, provider);
+        ContainerHelper.saveAllItems(tag, items);
         tag.putLong("LayoutSeed", layoutSeed);
     }
     @Override public void load(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         super.load(tag);
-        items.clear(); ContainerHelper.loadAllItems(tag, items, provider);
+        items.clear(); ContainerHelper.loadAllItems(tag, items);
         if (tag.contains("LayoutSeed")) layoutSeed = tag.getLong("LayoutSeed");
     }
     @Override public CompoundTag getUpdateTag() { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
@@ -79,6 +79,6 @@ public final class AquariumBlockEntity extends BlockEntity implements Container,
     }
     @Override public ClientboundBlockEntityDataPacket getUpdatePacket() { return ClientboundBlockEntityDataPacket.create(this); }
     @Override public void onDataPacket(Connection connection, ClientboundBlockEntityDataPacket packet) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
-        loadWithComponents(packet.getTag(), provider);
+        load(packet.getTag());
     }
 }

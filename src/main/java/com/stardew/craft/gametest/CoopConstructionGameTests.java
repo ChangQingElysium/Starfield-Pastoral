@@ -147,7 +147,7 @@ public final class CoopConstructionGameTests {
         data.constructionDay(11, true);
         data.constructionDay(12, false);
         helper.assertTrue(data.order(record.id()).remainingDays() == 2, "Duplicate day or holiday advanced clock");
-        var loaded = BuildingWorldData.load(data.save(new CompoundTag(), helper.getLevel().registryAccess()), helper.getLevel().registryAccess());
+        var loaded = BuildingWorldData.load(data.save(new CompoundTag()), helper.getLevel().registryAccess());
         helper.assertTrue(loaded.hasPurchase(permit) && !loaded.permits(permit, record.farmId(), PrefabDefinitions.COOP), "Reload forgot receipt or permit consumption");
         loaded.constructionDay(13, true);
         loaded.constructionDay(14, true);

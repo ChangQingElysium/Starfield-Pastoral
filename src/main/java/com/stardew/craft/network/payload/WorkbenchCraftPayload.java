@@ -101,7 +101,7 @@ public record WorkbenchCraftPayload(
             // Check inventory space
             int outputPerCraft = entry.outputCount();
             int totalOutput = actualCount * outputPerCraft;
-            int maxStack = targetItem.getDefaultMaxStackSize();
+            int maxStack = targetItem.getMaxStackSize();
             totalOutput = Math.min(totalOutput, maxStack * 36); // sanity cap
 
             // Deduct materials: prefer bonus first (hardwood is worth more)

@@ -148,7 +148,7 @@ public final class PetRefinementGameTests {
                 }
                 var targets = tool.getAffectedBlocks(level, pos.below(), player, 3);
                 h.assertTrue(targets.contains(pos), "Charged watering filtered the thin bowl above its support");
-                var data = PetWorldData.get(level.getServer()); var saved = PetWorldData.load(data.save(new CompoundTag(),level.registryAccess()),level.registryAccess());
+                var data = PetWorldData.get(level.getServer()); var saved = PetWorldData.load(data.save(new CompoundTag()),level.registryAccess());
                 h.assertTrue(saved.bowl(pos).wateredDay() == com.stardew.craft.time.StardewTimeManager.get().getAbsoluteDay(), "Watering receipt did not persist");
                 var update = PetService.class.getDeclaredMethod("updateBowls",ServerLevel.class); update.setAccessible(true); update.invoke(null,level);
                 h.assertTrue(level.getBlockState(pos).getValue(PetBowlBlock.FULL), "Reconciliation emptied a watered bowl");
@@ -316,7 +316,7 @@ public final class PetRefinementGameTests {
                 int count = 0;
                 for (int x = -1; x <= 1; x++) for (int z = -1; z <= 1; z++) if (floors.at(source.offset(x, -1, z)) != null) count++;
                 h.assertTrue(count == (kind == 2 ? 9 : 4) && data.squareBowlFloor(farm.getInstanceId()), "Pad migration changed a custom floor or failed to make 2x2");
-                var saved = PetWorldData.load(data.save(new CompoundTag(), level.registryAccess()), level.registryAccess());
+                var saved = PetWorldData.load(data.save(new CompoundTag()), level.registryAccess());
                 h.assertTrue(saved.squareBowlFloor(farm.getInstanceId()), "Pad migration receipt not persisted");
                 var player = FakePlayerFactory.get(level, new GameProfile(owner, "PadRemove")); player.moveTo(Vec3.atBottomCenterOf(source.north(2)));
                 try (var online = onlineLookup(player)) { PetManagement.openBowl(player, source); PetManagement.submit(player, new PetActionPayload(nonce(player), new UUID(0,0), "bowl_demolish", "", BlockPos.ZERO)); }

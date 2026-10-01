@@ -45,7 +45,11 @@ public class YetiFreezeLayer<T extends LivingEntity, M extends EntityModel<T>> e
             buffer.getBuffer(renderType),
             packedLight,
             OverlayTexture.NO_OVERLAY,
-            color
+            // PORT(1.20.1): float RGBA; c / 255F round-trips to the same vertex color bytes as the 1.21 ARGB int.
+            FastColor.ARGB32.red(color) / 255.0F,
+            FastColor.ARGB32.green(color) / 255.0F,
+            FastColor.ARGB32.blue(color) / 255.0F,
+            FastColor.ARGB32.alpha(color) / 255.0F
         );
     }
 }

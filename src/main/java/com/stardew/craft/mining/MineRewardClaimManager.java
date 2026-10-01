@@ -103,7 +103,7 @@ public class MineRewardClaimManager extends SavedData {
     }
 
     @Override
-    public @NotNull CompoundTag save(@SuppressWarnings("null") @NotNull CompoundTag tag, @SuppressWarnings("null") @NotNull HolderLookup.Provider provider) {
+    public @NotNull CompoundTag save(@SuppressWarnings("null") @NotNull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         tag.putInt("nextTemporaryKey",nextTemporaryKey);
         ListTag playersList = new ListTag();
         for (Map.Entry<UUID, Set<Integer>> entry : claimedFloorsByPlayer.entrySet()) {

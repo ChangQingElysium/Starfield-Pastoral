@@ -24,6 +24,7 @@ import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import org.joml.Matrix3f;
 import org.joml.Vector3f;
 
+import com.stardew.craft.port.PortVertex;
 /** Generic cuboids, native keyframe sampling, per-part tint, and culled inverted hulls. */
 @SuppressWarnings({"null", "removal"})
 @EventBusSubscriber(modid = StardewCraft.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
@@ -115,7 +116,7 @@ public final class NativeSlimeRenderer extends EntityRenderer<GreenSlimeEntity> 
         var death = NativeMonsterPresentation.deathTransform(entity.deathTime > 0 ? entity.deathTime + partialTick : 0, 4);
         stack.translate(0, (lift + NativeMonsterPresentation.groundLift(model, matrices, death, growthScale, entity.antenna())) * entity.getScale(), 0);
         stack.scale(scale, scale, scale);
-        stack.mulPose(death);
+        PortVertex.mulPose(stack, death);
         int bodyColor = NativeMonsterPresentation.slimeTint(entity.color(), false);
         int outlineColor = NativeMonsterPresentation.slimeTint(entity.color(), true);
         if (entity.frostRush()) {
@@ -145,10 +146,10 @@ public final class NativeSlimeRenderer extends EntityRenderer<GreenSlimeEntity> 
                 matrices[quad.bone()].normal(normalMatrix).transform(normal).normalize();
                 for (var v : quad.vertices()) {
                     matrices[quad.bone()].transformPosition(vertex.set(v[0], v[1], v[2]));
-                    consumer.addVertex(stack.last().pose(), vertex.x, vertex.y, vertex.z)
+                    PortVertex.of(consumer).addVertex(stack.last().pose(), vertex.x, vertex.y, vertex.z)
                             .setColor(tint ? c >> 16 & 255 : 255, tint ? c >> 8 & 255 : 255, tint ? c & 255 : 255, 255)
                             .setUv(v[3], v[4]).setOverlay(overlay).setLight(partLight)
-                            .setNormal(stack.last(), normal.x, normal.y, normal.z);
+                            .setNormal(stack.last(), normal.x, normal.y, normal.z).endVertex();
                 }
             }
         }

@@ -2,6 +2,7 @@ package com.stardew.craft.mixin;
 
 import net.minecraftforge.fml.loading.LoadingModList;
 import org.objectweb.asm.tree.ClassNode;
+import org.spongepowered.asm.service.MixinService;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
@@ -23,6 +24,12 @@ public final class StardewCraftMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
+        // PORT(1.20.1): the Sodium/Iris hooks target the NeoForge 1.21 packages (net.caffeinemc.mods.sodium,
+        // net.irisshaders.iris). Forge 1.20.1 only has Embeddium/Oculus, whose classes and mod ids differ; skip
+        // these optional mixins whenever their target class is not on the classpath (see bulk-port-gaps.md).
+        if (isRendererModMixin(mixinClassName) && !targetClassPresent(targetClassName)) {
+            return false;
+        }
         if (mixinClassName.equals("com.stardew.craft.mixin.OptionalAnimatedArmorFishingMixin")) {
             return hasRendererVersion("geckolib", "4.8.2");
         }
@@ -41,6 +48,10 @@ public final class StardewCraftMixinPlugin implements IMixinConfigPlugin {
         if (mixinClassName.equals("com.stardew.craft.mixin.Ae2FacadeItemMixin")) {
             LoadingModList modList = LoadingModList.get();
             return modList != null && modList.getModFileById("ae2") != null;
+        }
+        // PORT(1.20.1): Jade 11 internals (verified against 11.13.3) for Jade 15-style block-keyed server data.
+        if (mixinClassName.startsWith("com.stardew.craft.mixin.PortJade")) {
+            return hasModVersionPrefix("jade", "11.");
         }
         if (PURPLE_SHORTS_BOBBER_MIXIN.equals(mixinClassName) && isHybridAquaticLoaded()) {
             return false;
@@ -66,12 +77,33 @@ public final class StardewCraftMixinPlugin implements IMixinConfigPlugin {
         return true;
     }
 
+    private static boolean isRendererModMixin(String mixinClassName) {
+        String simpleName = mixinClassName.substring(mixinClassName.lastIndexOf('.') + 1);
+        return simpleName.startsWith("Sodium") || simpleName.startsWith("Iris")
+                || simpleName.startsWith("TownDoorSodium") || simpleName.startsWith("TownDoorIris");
+    }
+
+    private static boolean targetClassPresent(String targetClassName) {
+        try {
+            return MixinService.getService().getBytecodeProvider().getClassNode(targetClassName.replace('.', '/')) != null;
+        } catch (Throwable ignored) {
+            return false;
+        }
+    }
+
     private static boolean hasRendererVersion(String id, String version) {
         LoadingModList list = LoadingModList.get();
         var file = list == null ? null : list.getModFileById(id);
         return file != null && file.getMods().stream().anyMatch(mod -> mod.getModId().equals(id)
                 && (mod.getVersion().toString().equals(version) || mod.getVersion().toString().startsWith(version + "+")
                 || mod.getVersion().toString().startsWith(version + "-snapshot+")));
+    }
+
+    private static boolean hasModVersionPrefix(String id, String prefix) {
+        LoadingModList list = LoadingModList.get();
+        var file = list == null ? null : list.getModFileById(id);
+        return file != null && file.getMods().stream().anyMatch(mod -> mod.getModId().equals(id)
+                && mod.getVersion().toString().startsWith(prefix));
     }
 
     private static boolean isHybridAquaticLoaded() {

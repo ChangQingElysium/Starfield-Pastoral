@@ -20,10 +20,11 @@ public abstract class XaeroMinimapWriterMixin {
     @Unique private int stardewcraft$colourSeason = -1;
     @Shadow public abstract void setClearBlockColours(boolean clear);
 
+    // PORT(1.20.1): Forge 1.20.1 production runs SRG names; the vanilla call target must go through the refmap.
     // Minimap skips unpackFramedBlocks entirely unless FramedBlocks is installed.
     // Resolve immediately after its primary sample, independently of that optional mod.
     @ModifyExpressionValue(method = "findBlock", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/level/chunk/LevelChunk;getBlockState(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/block/state/BlockState;", ordinal = 0))
+            target = "Lnet/minecraft/world/level/chunk/LevelChunk;getBlockState(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/block/state/BlockState;", ordinal = 0, remap = true))
     private BlockState stardewcraft$resolveTemplate(BlockState state,
             @Local(argsOnly = true) Level level,
             @Local(argsOnly = true, ordinal = 1) BlockPos.MutableBlockPos globalPos) {

@@ -16,7 +16,7 @@ public record StardewMuseumRewardDefinition(
         List<ResourceLocation> requiredItems,
         List<StardewAction> rewards
 ) {
-    private static final Codec<String> CONDITION_CODEC = Codec.STRING.validate(value -> switch (value) {
+    private static final Codec<String> CONDITION_CODEC = com.stardew.craft.port.PortCodecs.validate(Codec.STRING, value -> switch (value) {
         case "total_count", "mineral_count", "artifact_count", "specific_items" -> DataResult.success(value);
         default -> DataResult.error(() -> "unknown museum condition " + value);
     });

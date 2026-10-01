@@ -1883,8 +1883,7 @@ public final class ApiContractGameTests {
                 "registered addon animal entity projection changed"
         );
 
-        CompoundTag saved = worldData.save(
-                new CompoundTag(), helper.getLevel().registryAccess());
+        CompoundTag saved = worldData.save(new CompoundTag());
         AnimalWorldData loaded = AnimalWorldData.load(
                 saved, helper.getLevel().registryAccess());
         var restored = loaded.getAnimal(animal.animalId()).orElse(null);
@@ -2692,8 +2691,7 @@ public final class ApiContractGameTests {
                 "Community Center addon state leaked its source tag");
         CommunityCenterSavedData liveData =
                 CommunityCenterSavedData.get(helper.getLevel());
-        CompoundTag serialized = liveData.save(
-                new CompoundTag(), helper.getLevel().registryAccess());
+        CompoundTag serialized = liveData.save(new CompoundTag());
         CommunityCenterSavedData restored = CommunityCenterSavedData.load(
                 serialized, helper.getLevel().registryAccess());
         PortGameTests.assertValueEqual(helper, 

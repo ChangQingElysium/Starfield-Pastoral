@@ -24,6 +24,7 @@ import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import org.joml.Matrix3f;
 import org.joml.Vector3f;
 
+import com.stardew.craft.port.PortVertex;
 /** Translucent native ghosts with culled signed shells and sorted color-only writes. */
 @SuppressWarnings({"null", "removal"})
 @EventBusSubscriber(modid = StardewCraft.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
@@ -120,8 +121,8 @@ public final class NativeGhostRenderer extends EntityRenderer<MineGhostEntity> {
             normal.set(quad.normal());matrices[quad.bone()].normal(normalMatrix).transform(normal).normalize();
             for(var v:quad.vertices()){
                 matrices[quad.bone()].transformPosition(vertex.set(v[0],v[1],v[2]));
-                consumer.addVertex(stack.last().pose(),vertex.x,vertex.y,vertex.z).setColor(255,255,255,alpha).setUv(v[3],v[4])
-                        .setOverlay(overlay).setLight(light).setNormal(stack.last(),normal.x,normal.y,normal.z);
+                PortVertex.of(consumer).addVertex(stack.last().pose(),vertex.x,vertex.y,vertex.z).setColor(255,255,255,alpha).setUv(v[3],v[4])
+                        .setOverlay(overlay).setLight(light).setNormal(stack.last(),normal.x,normal.y,normal.z).endVertex();
             }
         }
         stack.popPose();

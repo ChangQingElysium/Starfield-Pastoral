@@ -183,7 +183,7 @@ public final class PetManagement {
         if (request.action().equals("remove")) {
             if (!session.kind().equals("remove") || !pet.id.equals(session.removal()) || !player.getMainHandItem().is(ModItems.BUTTERFLY_POWDER.get())
                     || player.level().dimension() != ModDimensions.STARDEW_VALLEY || pet.position == null || player.position().distanceToSqr(pet.position) > 64) return "expired";
-            ItemStack hat = PortItemStacks.parseOptional(player.registryAccess(), pet.hat);
+            ItemStack hat = PortItemStacks.parseOptional(player.level().registryAccess(), pet.hat);
             var departing = player.serverLevel().getEntity(pet.id);
             if (departing instanceof PetEntity entity) entity.feedback.content();
             player.serverLevel().playSound(null, BlockPos.containing(pet.position), com.stardew.craft.sound.ModSounds.FIREBALL.get(), net.minecraft.sounds.SoundSource.PLAYERS, .7f, 1);
@@ -203,7 +203,7 @@ public final class PetManagement {
                 if (bowl == null || !bowl.farm().equals(pet.farm) || occupant != null && !occupant.id.equals(pet.id)) return "bowl_occupied";
                 pet.bowl = bowl.position();
             }
-            case "unhat" -> { var hat = PortItemStacks.parseOptional(player.registryAccess(), pet.hat); pet.hat = new CompoundTag(); if (!hat.isEmpty() && !player.getInventory().add(hat)) player.drop(hat, false); }
+            case "unhat" -> { var hat = PortItemStacks.parseOptional(player.level().registryAccess(), pet.hat); pet.hat = new CompoundTag(); if (!hat.isEmpty() && !player.getInventory().add(hat)) player.drop(hat, false); }
             default -> { return "expired"; }
         }
         data.setDirty(); var level = player.server.getLevel(ModDimensions.STARDEW_VALLEY);

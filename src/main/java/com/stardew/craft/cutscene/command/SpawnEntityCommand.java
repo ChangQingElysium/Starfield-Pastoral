@@ -66,7 +66,7 @@ public class SpawnEntityCommand implements EventCommand {
         }
         int fakeId = -(tag.hashCode() & 0x7FFFFFFF) - 1;
         entity.setId(fakeId);
-        level.addEntity(entity);
+        level.putNonPlayerEntity(entity.getId(), entity); // PORT(1.20.1): 1.21 ClientLevel#addEntity(entity)
         // Track as a generic entity using the actor system (Mob cast if possible)
         if (entity instanceof net.minecraft.world.entity.Mob mob) {
             player.registerActor(tag, mob);

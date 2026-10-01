@@ -11,7 +11,7 @@ import snownee.jade.api.WailaPlugin;
 public class CrabPotJadePlugin implements IWailaPlugin {
 	@Override
 	public void register(IWailaCommonRegistration registration) {
-		registration.registerBlockDataProvider(CrabPotJadeProvider.INSTANCE, CrabPotBlock.class);
+		JadeBlockDataProviders.register(registration, CrabPotJadeProvider.INSTANCE, CrabPotBlock.class);
 	}
 
 	@Override

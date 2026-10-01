@@ -68,7 +68,7 @@ public final class BuildingFoundationGameTests {
         var record = waiting(BuildingRecord.Mode.PREFAB, 10, DIMENSION);
         data.register(record);
         data.advance(record.id(), 0, START_CONSTRUCTION);
-        var loaded = BuildingWorldData.load(data.save(new CompoundTag(), helper.getLevel().registryAccess()),
+        var loaded = BuildingWorldData.load(data.save(new CompoundTag()),
                 helper.getLevel().registryAccess());
         helper.assertTrue(loaded.find(record.id()).equals(data.find(record.id())), "Reload changed identity or phase");
         helper.assertTrue(loaded.occupying(DIMENSION, record.manager()).equals(record.id()), "Reload lost the claim");
@@ -134,7 +134,7 @@ public final class BuildingFoundationGameTests {
         var data = new BuildingWorldData();
         var record = waiting(BuildingRecord.Mode.PREFAB, 0, DIMENSION);
         data.register(record);
-        var tag = data.save(new CompoundTag(), helper.getLevel().registryAccess());
+        var tag = data.save(new CompoundTag());
         ListTag list = tag.getList("Buildings", 10);
         list.add(waiting(BuildingRecord.Mode.PREFAB, 1, DIMENSION).save());
         boolean rejected = false;

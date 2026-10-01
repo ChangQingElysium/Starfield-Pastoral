@@ -92,7 +92,7 @@ public final class DashMovementClientState {
         }
         if (elapsed == windupTicks && !IronWindVisuals.ownsWindDash(player) && !PirateSilverVisuals.ownsDash(player)) {
             player.playSound(SoundEvents.PLAYER_ATTACK_SWEEP, 0.7f, 1.35f);
-            player.playSound(SoundEvents.TRIDENT_THROW.value(), 0.5f, 1.2f);
+            player.playSound(SoundEvents.TRIDENT_THROW, 0.5f, 1.2f);
         }
 
         Vec3 current = player.position();

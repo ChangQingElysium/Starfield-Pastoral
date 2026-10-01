@@ -90,8 +90,8 @@ public final class AsphaltRoadGameTests {
                 helper.assertTrue(((BlockItem)fixed.getItem()).place(context).consumesAction(),"Fixed road placement failed");
                 var placed=level.getBlockState(pos);
                 helper.assertTrue(placed.equals(source),"Road rerolled a fixed copy");
-                var nbt=BlockState.CODEC.encodeStart(NbtOps.INSTANCE,placed).getOrThrow();
-                helper.assertTrue(BlockState.CODEC.parse(NbtOps.INSTANCE,nbt).getOrThrow().equals(source),"Road variant was not saved");
+                var nbt=com.stardew.craft.port.PortDataResults.getOrThrow(BlockState.CODEC.encodeStart(NbtOps.INSTANCE,placed));
+                helper.assertTrue(com.stardew.craft.port.PortDataResults.getOrThrow(BlockState.CODEC.parse(NbtOps.INSTANCE,nbt)).equals(source),"Road variant was not saved");
                 helper.assertTrue(TerrainWorldUpgrade.varied(source,987,pos).equals(source),"Terrain repair changed road variant");
             }
         }

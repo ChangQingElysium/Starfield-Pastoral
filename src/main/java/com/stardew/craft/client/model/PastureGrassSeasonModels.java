@@ -40,8 +40,7 @@ public final class PastureGrassSeasonModels {
     private PastureGrassSeasonModels() {}
 
     private static ModelResourceLocation seasonModel(String family, int season, int variant) {
-        return ModelResourceLocation.standalone(new ResourceLocation(StardewCraft.MODID,
-                "block/grass/seasonal/" + family + "/" + SEASONS[season] + "/" + variant));
+        return new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID, "block/grass/seasonal/" + family + "/" + SEASONS[season] + "/" + variant), "standalone");
     }
 
     @SubscribeEvent

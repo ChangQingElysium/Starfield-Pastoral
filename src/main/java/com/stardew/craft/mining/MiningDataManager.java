@@ -123,7 +123,7 @@ public class MiningDataManager extends SavedData {
      */
     @SuppressWarnings("null")
     @Override
-    public @NotNull CompoundTag save(@SuppressWarnings("null") @NotNull CompoundTag tag, @SuppressWarnings("null") HolderLookup.@NotNull Provider provider) {
+    public @NotNull CompoundTag save(@SuppressWarnings("null") @NotNull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         CompoundTag playersTag = new CompoundTag();
         
         for (Map.Entry<UUID, MiningPlayerData> entry : playerDataMap.entrySet()) {

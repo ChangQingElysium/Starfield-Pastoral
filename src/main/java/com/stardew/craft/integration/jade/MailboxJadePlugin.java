@@ -11,7 +11,7 @@ import snownee.jade.api.WailaPlugin;
 public class MailboxJadePlugin implements IWailaPlugin {
 	@Override
 	public void register(IWailaCommonRegistration registration) {
-		registration.registerBlockDataProvider(MailboxJadeProvider.INSTANCE, MailboxBlock.class);
+		JadeBlockDataProviders.register(registration, MailboxJadeProvider.INSTANCE, MailboxBlock.class);
 	}
 
 	@Override

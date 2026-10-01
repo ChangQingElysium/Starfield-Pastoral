@@ -727,7 +727,7 @@ public final class EggFestivalService {
 
     private static void sendCutsceneState(List<ServerPlayer> participants, int winnerMask) {
         for (ServerPlayer participant : participants) {
-            String winnerJson = Component.Serializer.toJson(awardWinnerText, participant.registryAccess());
+            String winnerJson = Component.Serializer.toJson(awardWinnerText);
             PacketDistributor.sendToPlayer(participant, new EggFestivalCutsceneStatePayload(
                 participants.size(),
                 awardPlayerWon,

@@ -11,7 +11,7 @@ import snownee.jade.api.WailaPlugin;
 public class CrystalariumJadePlugin implements IWailaPlugin {
     @Override
     public void register(IWailaCommonRegistration registration) {
-        registration.registerBlockDataProvider(CrystalariumJadeProvider.INSTANCE, CrystalariumBlock.class);
+        JadeBlockDataProviders.register(registration, CrystalariumJadeProvider.INSTANCE, CrystalariumBlock.class);
     }
 
     @Override

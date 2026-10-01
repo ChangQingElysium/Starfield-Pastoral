@@ -68,8 +68,8 @@ public final class TownPavingStairModels {
             int at = i * stride;
             float u = (Float.intBitsToFloat(vertices[at + 4]) - from.getU0()) / (from.getU1() - from.getU0());
             float v = (Float.intBitsToFloat(vertices[at + 5]) - from.getV0()) / (from.getV1() - from.getV0());
-            vertices[at + 4] = Float.floatToRawIntBits(target.getU(u));
-            vertices[at + 5] = Float.floatToRawIntBits(target.getV(v));
+            vertices[at + 4] = Float.floatToRawIntBits(com.stardew.craft.port.PortSprites.getU(target, u));
+            vertices[at + 5] = Float.floatToRawIntBits(com.stardew.craft.port.PortSprites.getV(target, v));
         }
         return new BakedQuad(vertices, source.getTintIndex(), source.getDirection(), target, source.isShade(), source.hasAmbientOcclusion());
     }

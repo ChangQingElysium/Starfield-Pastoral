@@ -18,7 +18,7 @@ public final class JunimoChestData extends SavedData {
     private final Map<UUID, UUID> viewers = new HashMap<>();
     public static JunimoChestData get(MinecraftServer server) {
         return server.overworld().getDataStorage().computeIfAbsent(
-                com.stardew.craft.port.PortSavedData.loader(new Factory<>(JunimoChestData::new, JunimoChestData::load)), com.stardew.craft.port.PortSavedData.constructor(new Factory<>(JunimoChestData::new, JunimoChestData::load)), "stardewcraft_junimo_chests");
+                com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(JunimoChestData::new, JunimoChestData::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(JunimoChestData::new, JunimoChestData::load)), "stardewcraft_junimo_chests");
     }
     public NonNullList<ItemStack> items(UUID owner) {
         return inventories.computeIfAbsent(owner, ignored -> NonNullList.withSize(9, ItemStack.EMPTY));

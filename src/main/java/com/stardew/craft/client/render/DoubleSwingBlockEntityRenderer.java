@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.world.phys.AABB;
 
+import com.stardew.craft.port.PortVertex;
 public final class DoubleSwingBlockEntityRenderer implements LargeDecorBlockEntityRenderer<DoubleSwingBlockEntity> {
     public DoubleSwingBlockEntityRenderer(BlockEntityRendererProvider.Context context) {}
     @Override public AABB getRenderBoundingBox(DoubleSwingBlockEntity entity) { return entity.getRenderBoundingBox(); }
@@ -32,7 +33,7 @@ public final class DoubleSwingBlockEntityRenderer implements LargeDecorBlockEnti
                 pose.mulPose(Axis.XP.rotationDegrees((float) DoubleSwingMotion.angle(part.seat(), seconds, season == 3)));
                 pose.translate((part.x() - pivot) / 16, (part.y() - 72) / 16, (part.z() - 24) / 16);
             } else pose.translate((part.x() - 32) / 16, part.y() / 16, (part.z() - 16) / 16);
-            for (var quad : part.quads()) consumer.putBulkData(pose.last(), quad, 1, 1, 1, 1, light, overlay);
+            for (var quad : part.quads()) PortVertex.putBulkData(consumer, pose.last(), quad, 1, 1, 1, 1, light, overlay);
             pose.popPose();
         }
         pose.popPose();

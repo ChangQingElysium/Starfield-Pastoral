@@ -127,7 +127,7 @@ public final class WorldEventSavedData extends SavedData {
         tag.putString("EventType", event.eventType().toString());
         tag.putString(
                 "Dimension", event.dimension().location().toString());
-        tag.put("Origin", NbtUtils.writeBlockPos(event.origin()));
+        tag.put("Origin", com.stardew.craft.port.PortNbtUtils.writeBlockPos(event.origin()));
         tag.putLong("CommittedGameTime", event.committedGameTime());
         tag.putBoolean(
                 "RecoveryRequired", event.recoveryRequired());
@@ -138,7 +138,7 @@ public final class WorldEventSavedData extends SavedData {
             CompoundTag changeTag = new CompoundTag();
             changeTag.put(
                     "Position",
-                    NbtUtils.writeBlockPos(change.position()));
+                    com.stardew.craft.port.PortNbtUtils.writeBlockPos(change.position()));
             changeTag.put(
                     "Expected",
                     NbtUtils.writeBlockState(change.expected()));
@@ -164,7 +164,7 @@ public final class WorldEventSavedData extends SavedData {
         ResourceKey<Level> dimension = ResourceKey.create(
                 Registries.DIMENSION, dimensionId);
         net.minecraft.core.BlockPos origin =
-                NbtUtils.readBlockPos(tag, "Origin")
+                com.stardew.craft.port.PortNbtUtils.readBlockPos(tag, "Origin")
                         .orElseThrow(() -> new IllegalArgumentException(
                                 "missing origin"))
                         .immutable();
@@ -175,7 +175,7 @@ public final class WorldEventSavedData extends SavedData {
         for (int index = 0; index < changeTags.size(); index++) {
             CompoundTag changeTag = changeTags.getCompound(index);
             net.minecraft.core.BlockPos position =
-                    NbtUtils.readBlockPos(changeTag, "Position")
+                    com.stardew.craft.port.PortNbtUtils.readBlockPos(changeTag, "Position")
                             .orElseThrow(() ->
                                     new IllegalArgumentException(
                                             "missing position"))

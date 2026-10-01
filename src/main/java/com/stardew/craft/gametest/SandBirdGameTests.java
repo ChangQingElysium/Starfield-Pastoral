@@ -70,8 +70,8 @@ public final class SandBirdGameTests {
                 level.setBlock(pos,Blocks.AIR.defaultBlockState(),2);
                 h.assertTrue(((BlockItem)fixed.getItem()).place(context(player,pos)).consumesAction(),"Sand placement failed");
                 var placed=level.getBlockState(pos);h.assertTrue(placed.equals(source),"Fixed sand rerolled");
-                var saved=BlockState.CODEC.encodeStart(NbtOps.INSTANCE,placed).getOrThrow();
-                h.assertTrue(BlockState.CODEC.parse(NbtOps.INSTANCE,saved).getOrThrow().equals(source),"Variant lost on save");
+                var saved=com.stardew.craft.port.PortDataResults.getOrThrow(BlockState.CODEC.encodeStart(NbtOps.INSTANCE,placed));
+                h.assertTrue(com.stardew.craft.port.PortDataResults.getOrThrow(BlockState.CODEC.parse(NbtOps.INSTANCE,saved)).equals(source),"Variant lost on save");
                 h.assertTrue(TerrainWorldUpgrade.varied(source,33,pos).equals(source),"Terrain migration changes sand");
             }
         }

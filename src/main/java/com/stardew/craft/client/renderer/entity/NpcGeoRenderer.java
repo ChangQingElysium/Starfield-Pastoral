@@ -18,6 +18,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import org.joml.Matrix4f;
 import com.stardew.craft.client.model.nativebb.BlockbenchEntityRenderer;
 
+import com.stardew.craft.port.PortVertex;
 @SuppressWarnings("null")
 public class NpcGeoRenderer extends BlockbenchEntityRenderer<StardewNpcEntity> {
     public NpcGeoRenderer(EntityRendererProvider.Context context) {
@@ -89,30 +90,30 @@ public class NpcGeoRenderer extends BlockbenchEntityRenderer<StardewNpcEntity> {
         PoseStack.Pose pose = poseStack.last();
         Matrix4f matrix4f = pose.pose();
 
-        vertexConsumer.addVertex(matrix4f, -halfW, -halfH, 0.0f)
+        PortVertex.of(vertexConsumer).addVertex(matrix4f, -halfW, -halfH, 0.0f)
             .setColor(255, 255, 255, 255)
             .setUv(u0, v1)
             .setOverlay(OverlayTexture.NO_OVERLAY)
             .setLight(packedLight)
-            .setNormal(pose, 0.0f, 1.0f, 0.0f);
-        vertexConsumer.addVertex(matrix4f, halfW, -halfH, 0.0f)
+            .setNormal(pose, 0.0f, 1.0f, 0.0f).endVertex();
+        PortVertex.of(vertexConsumer).addVertex(matrix4f, halfW, -halfH, 0.0f)
             .setColor(255, 255, 255, 255)
             .setUv(u1, v1)
             .setOverlay(OverlayTexture.NO_OVERLAY)
             .setLight(packedLight)
-            .setNormal(pose, 0.0f, 1.0f, 0.0f);
-        vertexConsumer.addVertex(matrix4f, halfW, halfH, 0.0f)
+            .setNormal(pose, 0.0f, 1.0f, 0.0f).endVertex();
+        PortVertex.of(vertexConsumer).addVertex(matrix4f, halfW, halfH, 0.0f)
             .setColor(255, 255, 255, 255)
             .setUv(u1, v0)
             .setOverlay(OverlayTexture.NO_OVERLAY)
             .setLight(packedLight)
-            .setNormal(pose, 0.0f, 1.0f, 0.0f);
-        vertexConsumer.addVertex(matrix4f, -halfW, halfH, 0.0f)
+            .setNormal(pose, 0.0f, 1.0f, 0.0f).endVertex();
+        PortVertex.of(vertexConsumer).addVertex(matrix4f, -halfW, halfH, 0.0f)
             .setColor(255, 255, 255, 255)
             .setUv(u0, v0)
             .setOverlay(OverlayTexture.NO_OVERLAY)
             .setLight(packedLight)
-            .setNormal(pose, 0.0f, 1.0f, 0.0f);
+            .setNormal(pose, 0.0f, 1.0f, 0.0f).endVertex();
 
         poseStack.popPose();
     }

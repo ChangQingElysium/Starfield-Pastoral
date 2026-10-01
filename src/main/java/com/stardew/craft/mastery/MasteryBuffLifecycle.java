@@ -37,7 +37,7 @@ public final class MasteryBuffLifecycle {
     public static void clearAllDailyMasteryBuffs(ServerPlayer player) {
         if (player == null) return;
         for (Holder<MobEffect> b : DAILY_MASTERY_BUFFS) {
-            player.removeEffect(b);
+            player.removeEffect(b.value());
         }
         PrismaticButterflyService.clearFor(player);
         PlayerStardewData data = PlayerDataManager.getPlayerData(player);
@@ -52,7 +52,7 @@ public final class MasteryBuffLifecycle {
     public static boolean hasAnyMasteryBuff(ServerPlayer player) {
         if (player == null) return false;
         for (Holder<MobEffect> b : DAILY_MASTERY_BUFFS) {
-            if (player.hasEffect(b)) return true;
+            if (player.hasEffect(b.value())) return true;
         }
         return false;
     }

@@ -20,7 +20,7 @@ public final class OrdinaryMineProgress extends SavedData {
         return disconnected.values().stream().mapToInt(DisconnectedFloor::floor).max().orElse(0);
     }
     public static OrdinaryMineProgress get(ServerLevel level) {
-        var data = level.getDataStorage().computeIfAbsent(com.stardew.craft.port.PortSavedData.loader(new Factory<>(OrdinaryMineProgress::new, OrdinaryMineProgress::load)), com.stardew.craft.port.PortSavedData.constructor(new Factory<>(OrdinaryMineProgress::new, OrdinaryMineProgress::load)), "stardew_ordinary_mine_progress");
+        var data = level.getDataStorage().computeIfAbsent(com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(OrdinaryMineProgress::new, OrdinaryMineProgress::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(OrdinaryMineProgress::new, OrdinaryMineProgress::load)), "stardew_ordinary_mine_progress");
         int current = com.stardew.craft.time.StardewTimeManager.get().getCurrentYear();
         if (data.year != current) {
             data.platforms.keySet().removeIf(f -> f % 5 != 0);

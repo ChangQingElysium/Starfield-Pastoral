@@ -118,7 +118,7 @@ public final class SecretNote21ClientEvent {
         actor.setNpcId(npcId);
         actor.setId(nextEntityId--);
         place(actor, x, y, z, yaw, true);
-        level.addEntity(actor);
+        level.putNonPlayerEntity(actor.getId(), actor); // PORT(1.20.1): 1.21 ClientLevel#addEntity(Entity)
         return actor;
     }
 

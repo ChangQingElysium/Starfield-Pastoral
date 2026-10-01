@@ -42,7 +42,7 @@ public final class MineRockGolemEntity extends StardewMonsterEntity {
     public int farmCombatLevel(){return farmCombatLevel;}
     private void setSourceSpeed(int speed){getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(.25*speed/2.);}
 
-    public static AttributeSupplier.Builder createAttributes(){return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,45).add(Attributes.ATTACK_DAMAGE,5).add(Attributes.MOVEMENT_SPEED,.25).add(Attributes.FOLLOW_RANGE,64).add(Attributes.STEP_HEIGHT,0);}
+    public static AttributeSupplier.Builder createAttributes(){return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,45).add(Attributes.ATTACK_DAMAGE,5).add(Attributes.MOVEMENT_SPEED,.25).add(Attributes.FOLLOW_RANGE,64).add(com.stardew.craft.port.PortAttributes.STEP_HEIGHT.get(),0);}
     @Override protected void registerGoals(){}
     @Override protected ResourceLocation definitionId(){return new ResourceLocation("stardewcraft",visualVariant());}
     @Override protected void configureSpawn(MonsterDefinition d,MonsterSpawnContext c){

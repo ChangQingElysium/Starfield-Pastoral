@@ -37,11 +37,13 @@ public final class ModMobEffects {
         private SpeedEffect(int color) {
             super(MobEffectCategory.BENEFICIAL, color);
             // 与原版 Speed 类似：每级 +20% 移速（乘算，随 amplifier 递增）。
+            // PORT(1.20.1): NeoForge curve amplifier -> 0.2 * (amplifier + 1) is exactly the 1.20.1 linear scaling
+            // (MobEffect#getAttributeModifierValue = amount * (amplifier + 1)) with amount 0.2.
             this.addAttributeModifier(
                 Attributes.MOVEMENT_SPEED,
-                new ResourceLocation(StardewCraft.MODID, "effect.speed"),
-                AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL,
-                amplifier -> 0.2D * (amplifier + 1)
+                com.stardew.craft.port.PortAttributeModifiers.uuidString(new ResourceLocation(StardewCraft.MODID, "effect.speed")),
+                0.2D,
+                AttributeModifier.Operation.MULTIPLY_TOTAL
             );
         }
     }
@@ -56,10 +58,23 @@ public final class ModMobEffects {
             super(MobEffectCategory.BENEFICIAL, color);
             this.addAttributeModifier(
                 Attributes.MOVEMENT_SPEED,
-                new ResourceLocation(StardewCraft.MODID, "effect.statue_of_blessings_0"),
-                AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL,
-                amplifier -> 0.25D
+                com.stardew.craft.port.PortAttributeModifiers.uuidString(STATUE_SPEED_ID),
+                0.25D,
+                AttributeModifier.Operation.MULTIPLY_TOTAL
             );
+        }
+
+        private static final ResourceLocation STATUE_SPEED_ID =
+                new ResourceLocation(StardewCraft.MODID, "effect.statue_of_blessings_0");
+
+        // PORT(1.20.1): NeoForge curve amplifier -> 0.25 (constant). 1.20.1 has no curve; the amount for every
+        // amplifier comes from getAttributeModifierValue (also used by the potion tooltip).
+        @Override
+        public double getAttributeModifierValue(int amplifier, AttributeModifier modifier) {
+            if (modifier.getId().equals(com.stardew.craft.port.PortAttributeModifiers.uuid(STATUE_SPEED_ID))) {
+                return 0.25D;
+            }
+            return super.getAttributeModifierValue(amplifier, modifier);
         }
     }
 
@@ -73,8 +88,8 @@ public final class ModMobEffects {
     public static final DeferredHolder<MobEffect, MobEffect> SLIMED = MOB_EFFECTS.register(
             "slimed", () -> new SimpleHarmfulEffect(0x64BD43).addAttributeModifier(
                     Attributes.MOVEMENT_SPEED,
-                    new ResourceLocation(StardewCraft.MODID, "effect.slimed"),
-                    -.8D, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+                    com.stardew.craft.port.PortAttributeModifiers.uuidString(new ResourceLocation(StardewCraft.MODID, "effect.slimed")),
+                    -.8D, AttributeModifier.Operation.MULTIPLY_TOTAL));
 
     /**
      * 活力充沛：用于“最大能量”类增益（每级 +30 Max Energy，持续时间由食物决定）。
@@ -235,11 +250,12 @@ public final class ModMobEffects {
             "fury",
             () -> {
                 MobEffect effect = new SimpleBeneficialEffect(0xD4AF37); // 金色
+                // PORT(1.20.1): curve 0.10 * (amplifier + 1) == 1.20.1 linear scaling of amount 0.10.
                 effect.addAttributeModifier(
                     Attributes.ATTACK_DAMAGE,
-                    new ResourceLocation(StardewCraft.MODID, "effect.fury"),
-                    AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL,
-                    amplifier -> 0.10D * (amplifier + 1)
+                    com.stardew.craft.port.PortAttributeModifiers.uuidString(new ResourceLocation(StardewCraft.MODID, "effect.fury")),
+                    0.10D,
+                    AttributeModifier.Operation.MULTIPLY_TOTAL
                 );
                 return effect;
             }

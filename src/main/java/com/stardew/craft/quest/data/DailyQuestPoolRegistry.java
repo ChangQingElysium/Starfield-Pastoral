@@ -58,8 +58,8 @@ public final class DailyQuestPoolRegistry {
             }
             try (var reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
                 JsonElement root = JsonParser.parseReader(reader);
-                DailyQuestPoolDefinition definition = DailyQuestPoolDefinition.CODEC
-                        .parse(JsonOps.INSTANCE, root).getOrThrow(IllegalArgumentException::new);
+                DailyQuestPoolDefinition definition = com.stardew.craft.port.PortDataResults.getOrThrow(DailyQuestPoolDefinition.CODEC
+                        .parse(JsonOps.INSTANCE, root), IllegalArgumentException::new);
                 STORE.applyLocal(Map.of(DEFAULT_ID, definition), Map.of(DEFAULT_ID, GSON.toJson(root)), List.of());
             }
         } catch (Exception exception) {

@@ -11,7 +11,7 @@ import snownee.jade.api.WailaPlugin;
 public class CheesePressJadePlugin implements IWailaPlugin {
 	@Override
 	public void register(IWailaCommonRegistration registration) {
-		registration.registerBlockDataProvider(CheesePressJadeProvider.INSTANCE, CheesePressBlock.class);
+		JadeBlockDataProviders.register(registration, CheesePressJadeProvider.INSTANCE, CheesePressBlock.class);
 	}
 
 	@Override

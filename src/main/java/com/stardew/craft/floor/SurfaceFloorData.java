@@ -25,7 +25,7 @@ public final class SurfaceFloorData extends SavedData {
         public Cover { variant = Math.floorMod(variant, 16); }
     }
     private static final String ID = "stardew_surface_floors";
-    private static final Factory<SurfaceFloorData> FACTORY = new Factory<>(SurfaceFloorData::new, SurfaceFloorData::load);
+    private static final com.stardew.craft.port.PortSavedData.Factory<SurfaceFloorData> FACTORY = new com.stardew.craft.port.PortSavedData.Factory<>(SurfaceFloorData::new, SurfaceFloorData::load);
     private final Map<Long, Map<Long, Cover>> chunks = new HashMap<>();
 
     public static SurfaceFloorData get(ServerLevel level) {

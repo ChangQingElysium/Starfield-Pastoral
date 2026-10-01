@@ -137,7 +137,7 @@ public class JunimoGreenhouseRuneManager extends SavedData {
         ListTag list = new ListTag();
         for (var entry : runes.entrySet()) {
             CompoundTag runeTag = new CompoundTag();
-            runeTag.put("Pos", NbtUtils.writeBlockPos(entry.getKey()));
+            runeTag.put("Pos", com.stardew.craft.port.PortNbtUtils.writeBlockPos(entry.getKey()));
             runeTag.putInt("Season", entry.getValue());
             list.add(runeTag);
         }
@@ -151,7 +151,7 @@ public class JunimoGreenhouseRuneManager extends SavedData {
             ListTag list = tag.getList("Runes", Tag.TAG_COMPOUND);
             for (int i = 0; i < list.size(); i++) {
                 CompoundTag runeTag = list.getCompound(i);
-                BlockPos pos = NbtUtils.readBlockPos(runeTag, "Pos").orElse(BlockPos.ZERO);
+                BlockPos pos = com.stardew.craft.port.PortNbtUtils.readBlockPos(runeTag, "Pos").orElse(BlockPos.ZERO);
                 int season = runeTag.getInt("Season");
                 manager.runes.put(pos, season);
             }

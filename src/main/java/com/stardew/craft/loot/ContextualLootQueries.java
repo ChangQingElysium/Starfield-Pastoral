@@ -15,7 +15,7 @@ public final class ContextualLootQueries {
     private ContextualLootQueries() {}
     private static ResourceLocation id(String path) { return new ResourceLocation("stardewcraft", path); }
     private static List<ItemStack> resolve(StardewItemQuery query, StardewItemQueryContext context) {
-        return StardewItemQueries.resolve(query, context).getOrThrow();
+        return com.stardew.craft.port.PortDataResults.getOrThrow(StardewItemQueries.resolve(query, context));
     }
     public static void register() {
         StardewItemQueries.register(id("qualified_item"), Qualified.CODEC, (ctx, value) -> {
@@ -25,16 +25,16 @@ public final class ContextualLootQueries {
         StardewItemQueries.register(id("conditional"), Branch.CODEC, (ctx, rule) -> {
             boolean pass = rule.minimum().entrySet().stream().allMatch(e -> metric(ctx, e.getKey()) >= e.getValue())
                     && rule.maximum().entrySet().stream().allMatch(e -> metric(ctx, e.getKey()) <= e.getValue())
-                    && rule.when().stream().allMatch(c -> StardewConditions.test(c,
-                        new StardewConditionContext(ctx.level(), ctx.player())).getOrThrow());
+                    && rule.when().stream().allMatch(c -> com.stardew.craft.port.PortDataResults.getOrThrow(StardewConditions.test(c,
+                        new StardewConditionContext(ctx.level(), ctx.player()))));
             double chance = rule.chance() + rule.chanceAdd().entrySet().stream()
                     .mapToDouble(e -> metric(ctx, e.getKey()) * e.getValue()).sum();
             for (String factor : rule.chanceScale()) chance *= metric(ctx, factor);
             if (pass && (chance >= 1 || chance > 0 && ctx.random().nextDouble() < chance)) return resolve(rule.query(), ctx);
             return rule.otherwise().map(q -> resolve(q, ctx)).orElse(List.of());
         }, (owner, rule) -> {
-            var refs = new ArrayList<>(StardewItemQueries.contentReferences(owner, rule.query()).getOrThrow());
-            rule.otherwise().ifPresent(q -> refs.addAll(StardewItemQueries.contentReferences(owner, q).getOrThrow()));
+            var refs = new ArrayList<>(com.stardew.craft.port.PortDataResults.getOrThrow(StardewItemQueries.contentReferences(owner, rule.query())));
+            rule.otherwise().ifPresent(q -> refs.addAll(com.stardew.craft.port.PortDataResults.getOrThrow(StardewItemQueries.contentReferences(owner, q))));
             return refs;
         });
         for (String mode : List.of("all", "first_success", "eligible_choice")) {
@@ -63,7 +63,7 @@ public final class ContextualLootQueries {
                 }
                 return mode.equals("eligible_choice")
                         ? choices.isEmpty() ? List.of() : choices.get(ctx.random().nextInt(choices.size())) : result;
-            }, (owner, queries) -> queries.stream().flatMap(q -> StardewItemQueries.contentReferences(owner, q).getOrThrow().stream()).toList());
+            }, (owner, queries) -> queries.stream().flatMap(q -> com.stardew.craft.port.PortDataResults.getOrThrow(StardewItemQueries.contentReferences(owner, q)).stream()).toList());
         }
         StardewItemQueries.register(id("repeat"), Repeat.CODEC, (ctx, rule) -> {
             List<ItemStack> result = new ArrayList<>();
@@ -77,13 +77,13 @@ public final class ContextualLootQueries {
                 if (!stacks.isEmpty()) { effects.forEach(ctx.deferredActions()); rememberVirtualEffects(ctx, parameters, effects); }
             }
             return result;
-        }, (owner, rule) -> StardewItemQueries.contentReferences(owner, rule.query()).getOrThrow());
+        }, (owner, rule) -> com.stardew.craft.port.PortDataResults.getOrThrow(StardewItemQueries.contentReferences(owner, rule.query())));
         StardewItemQueries.register(id("multiply_count"), Multiply.CODEC, (ctx, rule) -> {
             var result = new ArrayList<>(resolve(rule.query(), ctx));
             for (int i = rule.lastOnly() ? Math.max(0, result.size() - 1) : 0; i < result.size(); i++)
                 result.get(i).setCount(Math.multiplyExact(result.get(i).getCount(), rule.factor()));
             return result;
-        }, (owner, rule) -> StardewItemQueries.contentReferences(owner, rule.query()).getOrThrow());
+        }, (owner, rule) -> com.stardew.craft.port.PortDataResults.getOrThrow(StardewItemQueries.contentReferences(owner, rule.query())));
         StardewItemQueries.register(id("with_actions"), WithActions.CODEC, (ctx, rule) -> {
             var actions = new ArrayList<StardewAction>();
             var nested = new StardewItemQueryContext(ctx.level(), ctx.player(), ctx.random(), ctx.parameters(), actions::add);
@@ -94,8 +94,8 @@ public final class ContextualLootQueries {
             }
             return result;
         }, (owner, rule) -> {
-            var refs = new ArrayList<>(StardewItemQueries.contentReferences(owner, rule.query()).getOrThrow());
-            rule.actions().forEach(a -> refs.addAll(StardewActions.contentReferences(owner, a).getOrThrow()));
+            var refs = new ArrayList<>(com.stardew.craft.port.PortDataResults.getOrThrow(StardewItemQueries.contentReferences(owner, rule.query())));
+            rule.actions().forEach(a -> refs.addAll(com.stardew.craft.port.PortDataResults.getOrThrow(StardewActions.contentReferences(owner, a))));
             return refs;
         });
         StardewActions.register(id("increment_stat"), StatChange.CODEC, (ctx, value) -> {
@@ -117,16 +117,16 @@ public final class ContextualLootQueries {
             return stack.isEmpty() ? List.of() : List.of(stack);
         });
         StardewItemQueries.<Branch>registerPreview(id("conditional"), (ctx, d) -> {
-            var result = new ArrayList<>(StardewItemQueries.preview(d.query(), ctx).getOrThrow());
-            d.otherwise().ifPresent(q -> result.addAll(StardewItemQueries.preview(q, ctx).getOrThrow()));
+            var result = new ArrayList<>(com.stardew.craft.port.PortDataResults.getOrThrow(StardewItemQueries.preview(d.query(), ctx)));
+            d.otherwise().ifPresent(q -> result.addAll(com.stardew.craft.port.PortDataResults.getOrThrow(StardewItemQueries.preview(q, ctx))));
             return result;
         });
         for (String mode : List.of("all", "first_success", "eligible_choice"))
             StardewItemQueries.<List<StardewItemQuery>>registerPreview(id(mode), (ctx, queries) -> queries.stream()
-                    .flatMap(q -> StardewItemQueries.preview(q, ctx).getOrThrow().stream()).toList());
-        StardewItemQueries.<Repeat>registerPreview(id("repeat"), (ctx, d) -> StardewItemQueries.preview(d.query(), ctx).getOrThrow());
-        StardewItemQueries.<WithActions>registerPreview(id("with_actions"), (ctx, d) -> StardewItemQueries.preview(d.query(), ctx).getOrThrow());
-        StardewItemQueries.<Multiply>registerPreview(id("multiply_count"), (ctx, d) -> StardewItemQueries.preview(d.query(), ctx).getOrThrow().stream()
+                    .flatMap(q -> com.stardew.craft.port.PortDataResults.getOrThrow(StardewItemQueries.preview(q, ctx)).stream()).toList());
+        StardewItemQueries.<Repeat>registerPreview(id("repeat"), (ctx, d) -> com.stardew.craft.port.PortDataResults.getOrThrow(StardewItemQueries.preview(d.query(), ctx)));
+        StardewItemQueries.<WithActions>registerPreview(id("with_actions"), (ctx, d) -> com.stardew.craft.port.PortDataResults.getOrThrow(StardewItemQueries.preview(d.query(), ctx)));
+        StardewItemQueries.<Multiply>registerPreview(id("multiply_count"), (ctx, d) -> com.stardew.craft.port.PortDataResults.getOrThrow(StardewItemQueries.preview(d.query(), ctx)).stream()
                 .map(stack -> stack.copyWithCount(Math.multiplyExact(stack.getCount(), d.factor()))).toList());
     }
 
@@ -134,7 +134,7 @@ public final class ContextualLootQueries {
     private static void rememberVirtualEffects(StardewItemQueryContext context, Map<String, Double> values, List<StardewAction> effects) {
         for (var action : effects) {
             if (!Set.of(id("remember_special_item"), id("increment_stat"), id("set_flag")).contains(action.type())) continue;
-            var encoded = StardewActions.CODEC.encodeStart(com.mojang.serialization.JsonOps.INSTANCE, action).getOrThrow();
+            var encoded = com.stardew.craft.port.PortDataResults.getOrThrow(StardewActions.CODEC.encodeStart(com.mojang.serialization.JsonOps.INSTANCE, action));
             var data = encoded.getAsJsonObject().getAsJsonObject("data");
             if (action.type().equals(id("remember_special_item"))) {
                 values.put("special_item:" + data.get("item").getAsString(), 1d);
@@ -170,7 +170,7 @@ public final class ContextualLootQueries {
         }
         throw new IllegalArgumentException("Unknown loot context value: " + key);
     }
-    private static final Codec<Double> FINITE = Codec.DOUBLE.validate(value -> Double.isFinite(value)
+    private static final Codec<Double> FINITE = com.stardew.craft.port.PortCodecs.validate(Codec.DOUBLE, value -> Double.isFinite(value)
             ? com.mojang.serialization.DataResult.success(value)
             : com.mojang.serialization.DataResult.error(() -> "Loot numbers must be finite"));
     private static final Codec<Map<String, Double>> NUMBERS = Codec.unboundedMap(Codec.STRING, FINITE);

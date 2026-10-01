@@ -325,7 +325,7 @@ public class FarmInstanceInitializer {
                 chunks.size());
         for (LevelChunk chunk : chunks) {
             ChunkPos position = chunk.getPos();
-            pending.add(engine.waitForPendingTasks(
+            pending.add(com.stardew.craft.port.PortLevels.waitForPendingTasks(engine,
                     position.x, position.z));
         }
         engine.tryScheduleUpdate();

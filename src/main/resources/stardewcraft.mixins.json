@@ -46,9 +46,15 @@
     "PortPlayerSweepEventMixin",
     "PortServerPlayerSleepMixin",
     "PortEnchantedItemTriggerMixin",
-    "PortLivingEntityEffectSourceMixin"
+    "PortLivingEntityEffectSourceMixin",
+    "PortJadeBlockAccessorImplMixin",
+    "PortLivingEntityAttributesMixin",
+    "PortServerPlayerKnownMovementMixin",
+    "PortServerGamePacketListenerKnownMovementMixin",
+    "PortItemEntityAccessor"
   ],
   "client": [
+    "PortIntegratedServerAccessor",
     "TownDoorCameraMixin",
     "TownDoorCorrectionMixin",
     "TownDoorScreenEffectMixin",
@@ -143,7 +149,10 @@
     "PortFluidTypeRenderPropertiesAccessor",
     "PortMobEffectRenderPropertiesAccessor",
     "PortModelBakeryStandaloneMixin",
-    "OptionalAnimatedArmorFishingMixin"
+    "TemplateModelAmbientOcclusionMixin",
+    "PortLevelRendererBlockEntityBoundsMixin",
+    "OptionalAnimatedArmorFishingMixin",
+    "PortJadeBlockAccessorClientHandlerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

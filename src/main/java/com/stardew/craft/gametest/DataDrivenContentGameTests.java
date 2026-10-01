@@ -56,8 +56,8 @@ public final class DataDrivenContentGameTests {
                     "Query preview changed player progression");
             h.assertTrue(effects.size() == 2, "Book and opening effects were not deferred");
             var definition = GeodeDropData.snapshot().definitions().get(id("stardewcraft:mystery_box"));
-            var preview = StardewItemQueries.preview(com.stardew.craft.port.PortJava.getFirst(definition.entries()).query(),
-                    StardewItemQueryContext.forPlayer(p,new Random(0))).getOrThrow();
+            var preview = com.stardew.craft.port.PortDataResults.getOrThrow(StardewItemQueries.preview(com.stardew.craft.port.PortJava.getFirst(definition.entries()).query(),
+                    StardewItemQueryContext.forPlayer(p,new Random(0))));
             h.assertTrue(preview.stream().anyMatch(s -> s.is(com.stardew.craft.item.ModItems.PRISMATIC_SHARD.get()))
                     && preview.stream().anyMatch(s -> s.is(com.stardew.craft.item.ModItems.COFFEE_BEAN.get()))
                     && preview.stream().anyMatch(s -> s.is(com.stardew.craft.item.ModItems.BOOK_MYSTERY.get()))
@@ -71,8 +71,8 @@ public final class DataDrivenContentGameTests {
             var sequence = new JsonObject(); sequence.addProperty("type","stardewcraft:all");
             var sequenceData = new JsonObject(); var queries = new JsonArray(); queries.add(unique); queries.add(unique.deepCopy());
             sequenceData.add("queries",queries);sequence.add("data",sequenceData);
-            var uniqueQuery = StardewItemQueries.CODEC.parse(JsonOps.INSTANCE,sequence).getOrThrow();
-            var uniqueResult = StardewItemQueries.resolve(uniqueQuery,StardewItemQueryContext.forPlayer(p,new Random(0))).getOrThrow();
+            var uniqueQuery = com.stardew.craft.port.PortDataResults.getOrThrow(StardewItemQueries.CODEC.parse(JsonOps.INSTANCE,sequence));
+            var uniqueResult = com.stardew.craft.port.PortDataResults.getOrThrow(StardewItemQueries.resolve(uniqueQuery,StardewItemQueryContext.forPlayer(p,new Random(0))));
             h.assertTrue(uniqueResult.size()==1 && !data.hasSpecialItem("test_addon:unique"),
                     "Deferred progress allowed duplicate unique loot in one query or changed real preview state");
             for (String kind : List.of("mystery_box", "golden_mystery_box")) for (int seed = 0; seed < 200; seed++)
@@ -93,7 +93,7 @@ public final class DataDrivenContentGameTests {
         var originals = new LinkedHashMap<ResourceLocation, JsonElement>();
         FishingTreasurePoolData.snapshot().definitions().forEach((key, d) -> originals.put(
                 new ResourceLocation(key.getNamespace(), "treasure_pools/"+key.getPath()),
-                StardewFishingTreasurePoolDefinition.CODEC.encodeStart(JsonOps.INSTANCE, d).getOrThrow()));
+                com.stardew.craft.port.PortDataResults.getOrThrow(StardewFishingTreasurePoolDefinition.CODEC.encodeStart(JsonOps.INSTANCE, d))));
         var listener = new FishingTreasurePoolData.ReloadListener();
         try {
             var manager = new TreasureLootManager(); manager.loadFromBundledData();
@@ -132,7 +132,7 @@ public final class DataDrivenContentGameTests {
     public static void skullSpecialAndBasePoolsCanBothBeOverridden(GameTestHelper h) throws Exception {
         var p = player(h,"DataSkull");
         var original = new LinkedHashMap<ResourceLocation,JsonElement>();
-        WorldLootPoolData.snapshot().definitions().forEach((key,d)->original.put(key,StardewWorldLootPoolDefinition.CODEC.encodeStart(JsonOps.INSTANCE,d).getOrThrow()));
+        WorldLootPoolData.snapshot().definitions().forEach((key,d)->original.put(key,com.stardew.craft.port.PortDataResults.getOrThrow(StardewWorldLootPoolDefinition.CODEC.encodeStart(JsonOps.INSTANCE,d))));
         var listener = new WorldLootPoolData.ReloadListener();
         try {
             var changed = new LinkedHashMap<>(original);
@@ -155,7 +155,7 @@ public final class DataDrivenContentGameTests {
     public static void addonToolUpgradePreservesComponentsAndPersistsOrder(GameTestHelper h) throws Exception {
         var p=player(h,"DataTools");
         var original=new LinkedHashMap<ResourceLocation,JsonElement>();
-        ToolUpgradeData.snapshot().forEach((key,d)->original.put(key,ToolUpgradeData.Definition.CODEC.encodeStart(JsonOps.INSTANCE,d).getOrThrow()));
+        ToolUpgradeData.snapshot().forEach((key,d)->original.put(key,com.stardew.craft.port.PortDataResults.getOrThrow(ToolUpgradeData.Definition.CODEC.encodeStart(JsonOps.INSTANCE,d))));
         var listener=new ToolUpgradeData.ReloadListener();
         try {
             var changed=new LinkedHashMap<>(original);
@@ -176,8 +176,8 @@ public final class DataDrivenContentGameTests {
             h.assertTrue(data.getDaysLeftForToolUpgrade()==3 && data.getToolBeingUpgraded().equals("minecraft:diamond_axe")
                     && p.getInventory().countItem(Items.WOODEN_AXE)==0 && p.getInventory().countItem(Items.IRON_INGOT)==0
                     && PlayerStardewDataAPI.getMoney(p)==83,"Upgrade ignored data cost/input/duration");
-            var restored=PlayerStardewData.fromNBT(data.toNBT(p.registryAccess()),p.getUUID(),p.registryAccess());
-            var stack=restored.getToolUpgradeStack(p.registryAccess());
+            var restored=PlayerStardewData.fromNBT(data.toNBT(p.level().registryAccess()),p.getUUID(),p.level().registryAccess());
+            var stack=restored.getToolUpgradeStack(p.level().registryAccess());
             h.assertTrue(stack.is(Items.DIAMOND_AXE)&&stack.getDamageValue()==0&&stack.getHoverName().getString().equals("Addon tool"),"Upgrade lost components or its persisted result");
             BlacksmithService.handleToolUpgradePurchaseFromShop(p,index,1);
             h.assertTrue(PlayerStardewDataAPI.getMoney(p)==83,"Duplicate upgrade request charged again");
@@ -185,7 +185,7 @@ public final class DataDrivenContentGameTests {
             changed.get(id("test_addon:axe")).getAsJsonObject().addProperty("price",-1);
             reload(listener,changed,h);
             h.assertTrue(valid.equals(ToolUpgradeData.snapshot().get(id("test_addon:axe")))
-                    && data.getToolUpgradeStack(p.registryAccess()).is(Items.DIAMOND_AXE), "Invalid reload damaged catalog or pending order");
+                    && data.getToolUpgradeStack(p.level().registryAccess()).is(Items.DIAMOND_AXE), "Invalid reload damaged catalog or pending order");
             data.setToolBeingUpgraded("");
             p.getInventory().setItem(0,new ItemStack(Items.WOODEN_AXE));p.getInventory().setItem(1,new ItemStack(Items.IRON_INGOT,2));
             PlayerStardewDataAPI.setMoney(p,100);build.invoke(null,p);
@@ -215,11 +215,11 @@ public final class DataDrivenContentGameTests {
         var apply=MonsterSlayerGoalRegistry.class.getDeclaredMethod("applyCandidate",Map.class,List.class);apply.setAccessible(true);
         try {
             dimension.set(level,ModDimensions.STARDEW_VALLEY);
-            var actions=StardewActions.CODEC.listOf().parse(JsonOps.INSTANCE,json("""
+            var actions=com.stardew.craft.port.PortDataResults.getOrThrow(StardewActions.CODEC.listOf().parse(JsonOps.INSTANCE,json("""
                     [{"type":"stardewcraft:add_money","data":{"amount":10}},
                      {"type":"test_addon:reward_retry"},
                      {"type":"stardewcraft:add_item","data":{"item":"minecraft:emerald","count":2}}]
-                    """)).getOrThrow();
+                    """)));
             var goal=new MonsterSlayerGoalRegistry.SlayerGoal("test_addon:goal","test_addon.goal",1,List.of("test_addon"),actions,Optional.of(id("minecraft:diamond")));
             var goals=new LinkedHashMap<>(originals);goals.put(goal.goalKey(),goal);apply.invoke(null,goals,List.of());
             var data=PlayerDataManager.getPlayerData(p);data.addMonsterKills(goal.goalKey(),1);PlayerStardewDataAPI.setMoney(p,100);
@@ -227,7 +227,7 @@ public final class DataDrivenContentGameTests {
             h.assertTrue(GilService.rewardItem(goal).is(Items.DIAMOND)&&PlayerStardewDataAPI.getMoney(p)==100,"Preview executed actions or ignored explicit icon");
             failReward=true;
             h.assertTrue(!GilService.claim(p,goal)&&PlayerStardewDataAPI.getMoney(p)==110&&!data.hasClaimedSlayerReward(goal.goalKey()),"Failed composite claim was lost or prematurely marked complete");
-            var restored=PlayerStardewData.fromNBT(data.toNBT(p.registryAccess()),p.getUUID(),p.registryAccess());
+            var restored=PlayerStardewData.fromNBT(data.toNBT(p.level().registryAccess()),p.getUUID(),p.level().registryAccess());
             h.assertTrue(restored.getGuildRewardClaims().getCompound(goal.goalKey()).getInt("Next")==1,"Reward continuation was not persisted");
             goals.put(goal.goalKey(), new MonsterSlayerGoalRegistry.SlayerGoal(goal.goalKey(), goal.translationKey(), 1,
                     goal.monsterTags(), actions.subList(0,1)));

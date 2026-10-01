@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.stardew.craft.port.PortVertex;
 @EventBusSubscriber(modid = StardewCraft.MODID, value = Dist.CLIENT)
 public final class ReadingBookClientEffect {
     private static final ResourceLocation BOOK_TEXTURE = new ResourceLocation(
@@ -150,7 +151,7 @@ public final class ReadingBookClientEffect {
             poseStack.mulPose(Axis.XP.rotationDegrees(16.0F));
             poseStack.scale(0.86F, 0.86F, 0.86F);
             model.setupAnim(age * 0.18F, rightFlip, leftFlip, open);
-            model.renderToBuffer(poseStack, consumer, FULL_LIGHT, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
+            model.renderToBuffer(poseStack, consumer, FULL_LIGHT, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F); // PORT(1.20.1): float RGBA
             poseStack.popPose();
         }
 
@@ -229,12 +230,12 @@ public final class ReadingBookClientEffect {
     }
 
     private static void vertex(VertexConsumer consumer, Matrix4f matrix, float x, float y, float u, float v, int alpha) {
-        consumer.addVertex(matrix, x, y, 0.0F)
+        PortVertex.of(consumer).addVertex(matrix, x, y, 0.0F)
                 .setColor(255, 255, 255, alpha)
                 .setUv(u, v)
                 .setOverlay(OverlayTexture.NO_OVERLAY)
                 .setLight(FULL_LIGHT)
-                .setNormal(0.0F, 1.0F, 0.0F);
+                .setNormal(0.0F, 1.0F, 0.0F).endVertex();
     }
 
     private static Vec3 forward(float yRot) {

@@ -136,21 +136,21 @@ public record FarmAnimalDefinition(
     @Nullable
     public String produceStatKey() {
         return produceStats.size() == 1
-                && produceStats.getFirst().requiredItems().isEmpty()
-                && produceStats.getFirst().requiredTags().isEmpty()
-                ? produceStats.getFirst().statName()
+                && com.stardew.craft.port.PortJava.getFirst(produceStats).requiredItems().isEmpty()
+                && com.stardew.craft.port.PortJava.getFirst(produceStats).requiredTags().isEmpty()
+                ? com.stardew.craft.port.PortJava.getFirst(produceStats).statName()
                 : null;
     }
 
     /** Compatibility accessor for consumers which currently use the first eligible source entry. */
     public ResourceLocation produceItemId() {
-        return produce.getFirst().itemId();
+        return com.stardew.craft.port.PortJava.getFirst(produce).itemId();
     }
 
     /** Compatibility accessor for existing deluxe-production logic. */
     @Nullable
     public ResourceLocation deluxeProduceItemId() {
-        return deluxeProduce.isEmpty() ? null : deluxeProduce.getFirst().itemId();
+        return deluxeProduce.isEmpty() ? null : com.stardew.craft.port.PortJava.getFirst(deluxeProduce).itemId();
     }
 
     /**

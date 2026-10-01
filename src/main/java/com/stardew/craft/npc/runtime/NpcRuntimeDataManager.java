@@ -57,7 +57,7 @@ public final class NpcRuntimeDataManager extends SavedData {
 
     @Override
     @SuppressWarnings("null")
-    public @NotNull CompoundTag save(@NotNull CompoundTag tag, @NotNull HolderLookup.Provider provider) {
+    public @NotNull CompoundTag save(@NotNull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         if (scheduleContextPlayer!=null) tag.putUUID("ScheduleContextPlayer",scheduleContextPlayer);
         tag.putInt("Count", states.size());
         int index = 0;

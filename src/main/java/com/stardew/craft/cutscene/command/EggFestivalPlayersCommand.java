@@ -122,7 +122,7 @@ public class EggFestivalPlayersCommand implements EventCommand {
             actor.setYHeadRot(NORTH_YAW);
             actor.setYBodyRot(NORTH_YAW);
             actor.setId(-((actorTag(index).hashCode() & 0x7FFFFFFF) + 2000));
-            level.addEntity(actor);
+            level.putNonPlayerEntity(actor.getId(), actor); // PORT(1.20.1): 1.21 ClientLevel#addEntity(entity)
             player.registerActor(actorTag(index), actor);
         }
     }

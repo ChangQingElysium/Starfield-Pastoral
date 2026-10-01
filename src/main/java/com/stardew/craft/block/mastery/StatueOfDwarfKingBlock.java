@@ -98,7 +98,7 @@ public class StatueOfDwarfKingBlock extends TallMasteryBlock implements EntityBl
 
         // 已有任意 dwarf_statue_* buff → cancel
         for (Holder<MobEffect> b : DWARF_BUFFS) {
-            if (sp.hasEffect(b)) {
+            if (sp.hasEffect(b.value())) {
                 level.playSound(null, pos, ModSounds.CANCEL.get(), SoundSource.BLOCKS, 1.0f, 1.0f);
                 return InteractionResult.SUCCESS;
             }

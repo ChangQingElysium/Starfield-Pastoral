@@ -60,7 +60,7 @@ public final class MineStoneGameTests {
         }
         var foreign = new ItemStack(Items.NETHERITE_PICKAXE);
         var enchantments = level.registryAccess().registryOrThrow(Registries.ENCHANTMENT);
-        foreign.enchant(enchantments.getHolderOrThrow(Enchantments.EFFICIENCY), 5);
+        com.stardew.craft.port.PortItemStacks.enchant(foreign, enchantments.wrapAsHolder(Enchantments.BLOCK_EFFICIENCY), 5);
         com.stardew.craft.port.PortItemStacks.enchant(foreign, enchantments.getHolderOrThrow(StardewEnchantments.SWIFT), 1);
         h.assertTrue(MineStoneMining.pickaxePower(foreign) == 1 && MineStoneMining.breakTicks(1, foreign) == 12,
                 "External enchantments bypass normalization");
@@ -921,7 +921,7 @@ public final class MineStoneGameTests {
                     "849 outside VolcanoDungeon must use default dangerous-mine6HP");
             h.assertTrue(!com.stardew.craft.mining.IslandStoneRewards.isVolcano(
                     com.stardew.craft.api.v1.world.StardewLocations.find(level,pos).orElseThrow()),"Caldera is not VolcanoDungeon");
-            var tag=walnuts.save(new net.minecraft.nbt.CompoundTag(),level.registryAccess());
+            var tag=walnuts.save(new net.minecraft.nbt.CompoundTag());
             var restored=com.stardew.craft.mining.GoldenWalnutData.load(tag,level.registryAccess());
             h.assertTrue(!restored.reserveMusselDrop() && !restored.reserveVolcanoDrop() && restored.found()==0,"Reload reset quota or credited drops");
             var player=FakePlayerFactory.get(level,new GameProfile(UUID.randomUUID(),"Walnut pickup"));
@@ -941,7 +941,7 @@ public final class MineStoneGameTests {
             h.assertTrue(walnuts.balance()==2 && walnuts.found()==2 && !entity.isAlive()
                     && !player.getInventory().contains(new ItemStack(ModItems.GOLDEN_WALNUT.get())),
                     "Currency pickup must bypass full inventory and credit once");
-            restored=com.stardew.craft.mining.GoldenWalnutData.load(walnuts.save(new net.minecraft.nbt.CompoundTag(),level.registryAccess()),level.registryAccess());
+            restored=com.stardew.craft.mining.GoldenWalnutData.load(walnuts.save(new net.minecraft.nbt.CompoundTag()),level.registryAccess());
             h.assertTrue(restored.balance()==2 && restored.found()==2 && !restored.reserveMusselDrop() && !restored.reserveVolcanoDrop(),"Shared reward state did not persist");
         } finally {
             com.stardew.craft.interior.InteriorRegionRegistry.applyFromJson(previous);

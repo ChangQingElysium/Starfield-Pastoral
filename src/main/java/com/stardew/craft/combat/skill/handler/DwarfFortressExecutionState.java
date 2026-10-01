@@ -78,7 +78,7 @@ final class DwarfFortressExecutionState
                 "shelter"
         );
         player.addEffect(new MobEffectInstance(
-                Holder.direct(shelter),
+                shelter,
                 durationTicks,
                 DwarfFortressSkillHandler.SHELTER_AMPLIFIER,
                 false,
@@ -208,12 +208,12 @@ final class DwarfFortressExecutionState
         if (knockbackResistance == null) {
             return;
         }
-        knockbackResistance.addOrUpdateTransientModifier(
-                new AttributeModifier(
+        com.stardew.craft.port.PortAttributeModifiers.addOrUpdateTransientModifier(knockbackResistance,
+                com.stardew.craft.port.PortAttributeModifiers.create(
                         KNOCKBACK_RESISTANCE_ID,
                         DwarfFortressSkillHandler
                                 .KNOCKBACK_RESISTANCE_BONUS,
-                        AttributeModifier.Operation.ADD_VALUE
+                        AttributeModifier.Operation.ADDITION
                 )
         );
     }
@@ -222,10 +222,10 @@ final class DwarfFortressExecutionState
         AttributeInstance knockbackResistance =
                 player.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
         if (knockbackResistance != null
-                && knockbackResistance.hasModifier(
+                && com.stardew.craft.port.PortAttributeModifiers.hasModifier(knockbackResistance,
                         KNOCKBACK_RESISTANCE_ID
                 )) {
-            knockbackResistance.removeModifier(
+            com.stardew.craft.port.PortAttributeModifiers.removeModifier(knockbackResistance,
                     KNOCKBACK_RESISTANCE_ID
             );
         }

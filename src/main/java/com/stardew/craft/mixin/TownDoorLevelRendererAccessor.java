@@ -4,7 +4,6 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.PostChain;
 import net.minecraft.client.renderer.RenderBuffers;
-import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
 import net.minecraft.client.renderer.culling.Frustum;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -19,11 +18,13 @@ public interface TownDoorLevelRendererAccessor {
     @Accessor("renderBuffers") @Mutable
     void stardewcraft$setRenderBuffers(RenderBuffers buffers);
 
-    @Accessor("visibleSections")
-    ObjectArrayList<ChunkRenderDispatcher.RenderChunk> stardewcraft$getVisibleSections();
+    // PORT(1.20.1): 1.21 visibleSections (RenderSection list) is renderChunksInFrustum, a list of
+    // LevelRenderer.RenderChunkInfo (package-private, hence Object elements).
+    @Accessor("renderChunksInFrustum")
+    ObjectArrayList<Object> stardewcraft$getVisibleSections();
 
-    @Accessor("visibleSections") @Mutable
-    void stardewcraft$setVisibleSections(ObjectArrayList<ChunkRenderDispatcher.RenderChunk> sections);
+    @Accessor("renderChunksInFrustum") @Mutable
+    void stardewcraft$setVisibleSections(ObjectArrayList<Object> sections);
 
     @Accessor("cullingFrustum")
     Frustum stardewcraft$getCullingFrustum();

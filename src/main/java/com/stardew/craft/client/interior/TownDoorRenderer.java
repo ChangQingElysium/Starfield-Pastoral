@@ -5,6 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.stardew.craft.StardewCraft;
@@ -21,11 +22,11 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.client.renderer.ShaderInstance;
-import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.util.Mth;
+import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
@@ -50,7 +51,8 @@ final class TownDoorRenderer implements AutoCloseable {
     private static final double PREPARE_RANGE = 32.0;
     private static final double NEAR_PLANE_FRUSTUM_BYPASS = 0.1;
     private RenderBuffers portalBuffers;
-    private final Map<Integer, ObjectArrayList<ChunkRenderDispatcher.RenderChunk>> portalVisibleSections = new HashMap<>();
+    // PORT(1.20.1): LevelRenderer keeps LevelRenderer.RenderChunkInfo entries (package-private) instead of sections.
+    private final Map<Integer, ObjectArrayList<Object>> portalVisibleSections = new HashMap<>();
     private final ViewCamera virtualCamera = new ViewCamera();
     private final SodiumContext sodiumContext = new SodiumContext();
     private final IrisContext irisContext = new IrisContext();
@@ -71,7 +73,7 @@ final class TownDoorRenderer implements AutoCloseable {
         boolean promoted = false;
         try {
             var levelRenderer = (TownDoorLevelRendererAccessor) mc.levelRenderer;
-            ObjectArrayList<ChunkRenderDispatcher.RenderChunk> cached = portalVisibleSections.get(doorId);
+            ObjectArrayList<Object> cached = portalVisibleSections.get(doorId);
             if (cached != null && !cached.isEmpty()) {
                 var mainVisibleSections = levelRenderer.stardewcraft$getVisibleSections();
                 levelRenderer.stardewcraft$setVisibleSections(cached);
@@ -138,8 +140,15 @@ final class TownDoorRenderer implements AutoCloseable {
         }
     }
 
-    /** Called at the same pre-translucent point used by Immersive Portals. */
-    void render(DeltaTracker delta, Camera camera, Matrix4f view, Matrix4f projection) {
+    /**
+     * Called at the same pre-translucent point used by Immersive Portals.
+     *
+     * <p>PORT(1.20.1): the outer view rotation arrives as the LevelRenderer pose (matrix + normal matrix)
+     * and the frame's {@code finishNanoTime} is forwarded to the nested {@code renderLevel}.</p>
+     */
+    void render(DeltaTracker delta, long finishNanoTime, Camera camera, PoseStack.Pose viewPose, Matrix4f projection) {
+        Matrix4f view = new Matrix4f(viewPose.pose());
+        Matrix3f viewNormal = new Matrix3f(viewPose.normal());
         if (TownDoorRenderContext.isRendering() || failed || !framePrepared || frameDoor == null) return;
         framePrepared = false;
         TownDoorNetwork.DoorState state = frameDoor;
@@ -163,7 +172,7 @@ final class TownDoorRenderer implements AutoCloseable {
                 if (planeDistance > NEAR_PLANE_FRUSTUM_BYPASS
                         && frustum != null && !frustum.isVisible(aperture)) continue;
                 long start = PROFILE ? System.nanoTime() : 0;
-                draw(delta, camera, state, entering, view, projection);
+                draw(delta, finishNanoTime, camera, state, entering, view, viewNormal, projection);
                 if (PROFILE) {
                     cpuNanos += System.nanoTime() - start;
                     frames++;
@@ -189,8 +198,8 @@ final class TownDoorRenderer implements AutoCloseable {
         return Math.min(camera.distanceToSqr(door.connection().outside()), camera.distanceToSqr(door.connection().inside()));
     }
 
-    private void draw(DeltaTracker delta, Camera camera, TownDoorNetwork.DoorState state, boolean entering,
-                      Matrix4f view, Matrix4f projection) throws Exception {
+    private void draw(DeltaTracker delta, long finishNanoTime, Camera camera, TownDoorNetwork.DoorState state,
+                      boolean entering, Matrix4f view, Matrix3f viewNormal, Matrix4f projection) throws Exception {
         try {
             renderDoorArea(state, entering, camera.getPosition(), view, projection, true);
 
@@ -200,7 +209,7 @@ final class TownDoorRenderer implements AutoCloseable {
 
             GL11.glStencilFunc(GL11.GL_EQUAL, 1, 0xFF);
             GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
-            renderContent(delta, camera, state, entering, view, projection);
+            renderContent(delta, finishNanoTime, camera, state, entering, view, viewNormal, projection);
 
             GL11.glStencilFunc(GL11.GL_EQUAL, 1, 0xFF);
             GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
@@ -211,7 +220,7 @@ final class TownDoorRenderer implements AutoCloseable {
                 RenderSystem.depthFunc(GL11.GL_LEQUAL);
             }
         } finally {
-            restoreWorldRenderState();
+            restoreWorldRenderState(view);
         }
     }
 
@@ -241,15 +250,15 @@ final class TownDoorRenderer implements AutoCloseable {
             try {
                 Vec3 point = state.connection().origin(entering).subtract(camera);
                 float half = (float) state.connection().width() * .5f;
-                BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES,
-                        DefaultVertexFormat.POSITION_COLOR);
+                BufferBuilder builder = Tesselator.getInstance().getBuilder();
+                builder.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR);
                 add(builder, point.x - half, point.y + 1, point.z);
                 add(builder, point.x - half, point.y - 1, point.z);
                 add(builder, point.x + half, point.y - 1, point.z);
                 add(builder, point.x + half, point.y - 1, point.z);
                 add(builder, point.x + half, point.y + 1, point.z);
                 add(builder, point.x - half, point.y + 1, point.z);
-                BufferUploader.draw(builder.buildOrThrow());
+                BufferUploader.draw(builder.end());
             } finally {
                 shader.clear();
             }
@@ -263,7 +272,7 @@ final class TownDoorRenderer implements AutoCloseable {
     }
 
     private static void add(BufferBuilder builder, double x, double y, double z) {
-        builder.addVertex((float) x, (float) y, (float) z).setColor(255, 255, 255, 255);
+        builder.vertex((float) x, (float) y, (float) z).color(255, 255, 255, 255).endVertex();
     }
 
     private static void clearPortalDepth() {
@@ -290,29 +299,30 @@ final class TownDoorRenderer implements AutoCloseable {
         shader.PROJECTION_MATRIX.set(identity);
         shader.apply();
         try {
-            BufferBuilder builder = RenderSystem.renderThreadTesselator().begin(VertexFormat.Mode.TRIANGLES,
-                    DefaultVertexFormat.POSITION_COLOR);
+            BufferBuilder builder = RenderSystem.renderThreadTesselator().getBuilder();
+            builder.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR);
             add(builder, 1, -1, 0); add(builder, 1, 1, 0); add(builder, -1, 1, 0);
             add(builder, -1, 1, 0); add(builder, -1, -1, 0); add(builder, 1, -1, 0);
-            BufferUploader.draw(builder.buildOrThrow());
+            BufferUploader.draw(builder.end());
         } finally {
             shader.clear();
         }
     }
 
-    private void renderContent(DeltaTracker delta, Camera camera, TownDoorNetwork.DoorState state, boolean entering,
-                               Matrix4f view, Matrix4f projection) throws Exception {
+    private void renderContent(DeltaTracker delta, long finishNanoTime, Camera camera, TownDoorNetwork.DoorState state,
+                               boolean entering, Matrix4f view, Matrix3f viewNormal, Matrix4f projection)
+            throws Exception {
         Minecraft mc = Minecraft.getInstance();
         Vec3 remoteCamera = camera.getPosition().add(state.connection().translation(entering));
         Vec3 destination = state.connection().destination(entering);
         Vec3 normal = state.connection().direction(entering);
-        if (portalBuffers == null) portalBuffers = new RenderBuffers(0);
+        if (portalBuffers == null) portalBuffers = new RenderBuffers(); // PORT(1.20.1): no section buffer pool
         virtualCamera.copy(camera, remoteCamera, delta.getGameTimeDeltaPartialTick(false));
 
         var minecraft = (TownDoorMinecraftAccessor) mc;
         var gameRenderer = (TownDoorGameRendererAccessor) mc.gameRenderer;
         var levelRenderer = (TownDoorLevelRendererAccessor) mc.levelRenderer;
-        var dispatcher = (TownDoorSectionRenderDispatcherAccessor) mc.levelRenderer.getSectionRenderDispatcher();
+        var dispatcher = (TownDoorSectionRenderDispatcherAccessor) mc.levelRenderer.getChunkRenderDispatcher();
         RenderBuffers oldClientBuffers = mc.renderBuffers();
         RenderBuffers oldLevelBuffers = levelRenderer.stardewcraft$getRenderBuffers();
         var oldFixedBuffers = dispatcher.stardewcraft$getFixedBuffers();
@@ -353,18 +363,22 @@ final class TownDoorRenderer implements AutoCloseable {
             GL11.glStencilFunc(GL11.GL_EQUAL, 1, 0xFF);
             GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
             GL11.glStencilMask(0);
-            mc.levelRenderer.prepareCullFrustum(remoteCamera, view, projection);
+            // PORT(1.20.1): 1.20.1 LevelRenderer takes the view rotation as a PoseStack instead of a matrix.
+            PoseStack viewStack = new PoseStack();
+            viewStack.last().pose().set(view);
+            viewStack.last().normal().set(viewNormal);
+            mc.levelRenderer.prepareCullFrustum(viewStack, remoteCamera, projection);
             var modelViewStack = RenderSystem.getModelViewStack();
-            modelViewStack.pushMatrix();
-            modelViewStack.identity();
+            modelViewStack.pushPose();
+            modelViewStack.setIdentity();
             RenderSystem.applyModelViewMatrix();
             mc.getProfiler().push("town_door_content");
             try {
-                mc.levelRenderer.renderLevel(delta, false, virtualCamera, mc.gameRenderer,
-                        mc.gameRenderer.lightTexture(), view, projection);
+                mc.levelRenderer.renderLevel(viewStack, delta.getGameTimeDeltaPartialTick(false), finishNanoTime,
+                        false, virtualCamera, mc.gameRenderer, mc.gameRenderer.lightTexture(), projection);
             } finally {
                 mc.getProfiler().pop();
-                modelViewStack.popMatrix();
+                modelViewStack.popPose();
                 RenderSystem.applyModelViewMatrix();
             }
             portalVisibleSections.put(state.id(), levelRenderer.stardewcraft$getVisibleSections());
@@ -393,11 +407,11 @@ final class TownDoorRenderer implements AutoCloseable {
             mc.gameRenderer.setRenderHand(oldRenderHand);
             mc.smartCull = oldSmartCull;
             mc.hitResult = oldHit;
-            mc.levelRenderer.getSectionRenderDispatcher().setCamera(oldCamera.getPosition());
+            mc.levelRenderer.getChunkRenderDispatcher().setCamera(oldCamera.getPosition());
             mc.getEntityRenderDispatcher().prepare(mc.level, oldCamera, oldCrosshairEntity);
             mc.getBlockEntityRenderDispatcher().prepare(mc.level, oldCamera, oldHit);
             gameRenderer.stardewcraft$resetProjectionMatrix(oldProjection);
-            restoreWorldRenderState();
+            restoreWorldRenderState(view);
             restoreOuterFog(delta, oldCamera);
             if (rendererRestoreFailure != null) throw rendererRestoreFailure;
         }
@@ -407,7 +421,7 @@ final class TownDoorRenderer implements AutoCloseable {
      * Nested level rendering has a known exit state at this hook. Restoring it explicitly avoids the
      * synchronous OpenGL state reads which previously stalled the render thread every portal frame.
      */
-    private static void restoreWorldRenderState() {
+    private static void restoreWorldRenderState(Matrix4f view) {
         Minecraft mc = Minecraft.getInstance();
         var target = mc.getMainRenderTarget();
         target.bindWrite(true);
@@ -433,10 +447,11 @@ final class TownDoorRenderer implements AutoCloseable {
         // LevelRenderer changes both fixed-function diffuse lights and texture unit 2 while it
         // renders a world.  Immersive Portals restores these explicitly before resuming the
         // caller's view; otherwise the outer side can become black after looking through a door.
+        // PORT(1.20.1): 1.20.1 transforms the diffuse light directions by the view rotation, as LevelRenderer does.
         if (mc.level != null && mc.level.effects().constantAmbientLight()) {
-            Lighting.setupNetherLevel();
+            Lighting.setupNetherLevel(view);
         } else {
-            Lighting.setupLevel();
+            Lighting.setupLevel(view);
         }
         mc.gameRenderer.lightTexture().turnOffLightLayer();
         RenderSystem.activeTexture(GL13.GL_TEXTURE0);

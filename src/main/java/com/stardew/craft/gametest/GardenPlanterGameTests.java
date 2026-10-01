@@ -65,8 +65,8 @@ public final class GardenPlanterGameTests {
             for (int i = 0; i < 4; i++) helper.assertTrue(rotated.getValue(GardenPlanterBlock.DIAGONALS[diagonalRotation[i]])
                     .equals(state.getValue(GardenPlanterBlock.DIAGONALS[i])), "Rotation lost diagonal connection");
             helper.assertTrue(state.mirror(Mirror.LEFT_RIGHT).mirror(Mirror.LEFT_RIGHT).equals(state), "Mirror did not round trip");
-            var encoded = BlockState.CODEC.encodeStart(JsonOps.INSTANCE,state).getOrThrow();
-            helper.assertTrue(BlockState.CODEC.parse(JsonOps.INSTANCE,encoded).getOrThrow().equals(state), "Planter state did not persist");
+            var encoded = com.stardew.craft.port.PortDataResults.getOrThrow(BlockState.CODEC.encodeStart(JsonOps.INSTANCE,state));
+            helper.assertTrue(com.stardew.craft.port.PortDataResults.getOrThrow(BlockState.CODEC.parse(JsonOps.INSTANCE,encoded)).equals(state), "Planter state did not persist");
         }
         // Removing only the diagonal of a filled 2x2 restores its concave corner.
         level.setBlock(pos.north().west(), Blocks.AIR.defaultBlockState(), 3);
@@ -143,10 +143,12 @@ public final class GardenPlanterGameTests {
                 Blocks.BROWN_MUSHROOM,Blocks.DEAD_BUSH,Blocks.FERN,Blocks.WHEAT,Blocks.NETHER_WART}) {
             var plant=block.defaultBlockState();
             helper.assertTrue(plant.canSurvive(level,pos.above()),"Standard plant hook was not used: "+block);
-            // PORT(1.20.1): Forge has no TriState; "not forced" means a side answer equals the planter's default-rule answer.
+            // PORT(1.20.1): Forge returns a boolean, not a TriState. TriState.DEFAULT ("use the default soil rules") is
+            // checked as: the planter's side answer equals Block#canSustainPlant's default rules evaluated for the same
+            // planter state (STONE does not override the default and is none of its block-identity special cases).
             var plantable=(net.minecraftforge.common.IPlantable)block;
             helper.assertTrue(planter.defaultBlockState().canSustainPlant(level,pos,Direction.NORTH,plantable)
-                    ==planter.defaultBlockState().canSustainPlant(level,pos,Direction.DOWN,plantable),"Planter forced side planting");
+                    ==Blocks.STONE.canSustainPlant(planter.defaultBlockState(),level,pos,Direction.NORTH,plantable),"Planter forced side planting");
         }
         level.setBlock(pos,Blocks.STONE.defaultBlockState(),3);
         helper.assertTrue(!Blocks.OAK_SAPLING.defaultBlockState().canSurvive(level,pos.above()),"Plant support leaked outside planters");

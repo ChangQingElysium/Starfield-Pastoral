@@ -17,6 +17,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Matrix4f;
 
+import com.stardew.craft.port.PortVertex;
 @SuppressWarnings("null")
 public class DecorBlockEntityRenderer implements BlockEntityRenderer<DecorBlockEntity> {
     public DecorBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
@@ -116,30 +117,30 @@ public class DecorBlockEntityRenderer implements BlockEntityRenderer<DecorBlockE
     }
 
     private static void quad(VertexConsumer vc, Matrix4f m, float x0, float y0, float z, float x1, float y1, float z1, float u0, float v0, float u1, float v1, int light, float nx, float ny, float nz) {
-        vc.addVertex(m, x0, y0, z).setColor(255, 255, 255, 255).setUv(u0, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(nx, ny, nz);
-        vc.addVertex(m, x0, y1, z1).setColor(255, 255, 255, 255).setUv(u0, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(nx, ny, nz);
-        vc.addVertex(m, x1, y1, z1).setColor(255, 255, 255, 255).setUv(u1, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(nx, ny, nz);
-        vc.addVertex(m, x1, y0, z).setColor(255, 255, 255, 255).setUv(u1, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(nx, ny, nz);
+        PortVertex.of(vc).addVertex(m, x0, y0, z).setColor(255, 255, 255, 255).setUv(u0, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(nx, ny, nz).endVertex();
+        PortVertex.of(vc).addVertex(m, x0, y1, z1).setColor(255, 255, 255, 255).setUv(u0, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(nx, ny, nz).endVertex();
+        PortVertex.of(vc).addVertex(m, x1, y1, z1).setColor(255, 255, 255, 255).setUv(u1, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(nx, ny, nz).endVertex();
+        PortVertex.of(vc).addVertex(m, x1, y0, z).setColor(255, 255, 255, 255).setUv(u1, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(nx, ny, nz).endVertex();
     }
 
     private static void quadZ(VertexConsumer vc, Matrix4f m, float x, float y0, float z0, float x1, float y1, float z1, float u0, float v0, float u1, float v1, int light, float nx, float ny, float nz) {
-        vc.addVertex(m, x, y0, z0).setColor(255, 255, 255, 255).setUv(u0, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(nx, ny, nz);
-        vc.addVertex(m, x1, y1, z0).setColor(255, 255, 255, 255).setUv(u0, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(nx, ny, nz);
-        vc.addVertex(m, x1, y1, z1).setColor(255, 255, 255, 255).setUv(u1, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(nx, ny, nz);
-        vc.addVertex(m, x, y0, z1).setColor(255, 255, 255, 255).setUv(u1, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(nx, ny, nz);
+        PortVertex.of(vc).addVertex(m, x, y0, z0).setColor(255, 255, 255, 255).setUv(u0, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(nx, ny, nz).endVertex();
+        PortVertex.of(vc).addVertex(m, x1, y1, z0).setColor(255, 255, 255, 255).setUv(u0, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(nx, ny, nz).endVertex();
+        PortVertex.of(vc).addVertex(m, x1, y1, z1).setColor(255, 255, 255, 255).setUv(u1, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(nx, ny, nz).endVertex();
+        PortVertex.of(vc).addVertex(m, x, y0, z1).setColor(255, 255, 255, 255).setUv(u1, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(nx, ny, nz).endVertex();
     }
 
     private static void topQuad(VertexConsumer vc, Matrix4f m, float x0, float y, float z0, float x1, float y1, float z1, float u0, float v0, float u1, float v1, int light) {
-        vc.addVertex(m, x0, y, z0).setColor(255, 255, 255, 255).setUv(u0, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(0, 1, 0);
-        vc.addVertex(m, x0, y1, z1).setColor(255, 255, 255, 255).setUv(u0, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(0, 1, 0);
-        vc.addVertex(m, x1, y1, z1).setColor(255, 255, 255, 255).setUv(u1, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(0, 1, 0);
-        vc.addVertex(m, x1, y, z0).setColor(255, 255, 255, 255).setUv(u1, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(0, 1, 0);
+        PortVertex.of(vc).addVertex(m, x0, y, z0).setColor(255, 255, 255, 255).setUv(u0, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(0, 1, 0).endVertex();
+        PortVertex.of(vc).addVertex(m, x0, y1, z1).setColor(255, 255, 255, 255).setUv(u0, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(0, 1, 0).endVertex();
+        PortVertex.of(vc).addVertex(m, x1, y1, z1).setColor(255, 255, 255, 255).setUv(u1, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(0, 1, 0).endVertex();
+        PortVertex.of(vc).addVertex(m, x1, y, z0).setColor(255, 255, 255, 255).setUv(u1, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(0, 1, 0).endVertex();
     }
 
     private static void bottomQuad(VertexConsumer vc, Matrix4f m, float x0, float y, float z0, float x1, float y1, float z1, float u0, float v0, float u1, float v1, int light) {
-        vc.addVertex(m, x0, y, z0).setColor(255, 255, 255, 255).setUv(u0, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(0, -1, 0);
-        vc.addVertex(m, x0, y1, z1).setColor(255, 255, 255, 255).setUv(u0, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(0, -1, 0);
-        vc.addVertex(m, x1, y1, z1).setColor(255, 255, 255, 255).setUv(u1, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(0, -1, 0);
-        vc.addVertex(m, x1, y, z0).setColor(255, 255, 255, 255).setUv(u1, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(0, -1, 0);
+        PortVertex.of(vc).addVertex(m, x0, y, z0).setColor(255, 255, 255, 255).setUv(u0, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(0, -1, 0).endVertex();
+        PortVertex.of(vc).addVertex(m, x0, y1, z1).setColor(255, 255, 255, 255).setUv(u0, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(0, -1, 0).endVertex();
+        PortVertex.of(vc).addVertex(m, x1, y1, z1).setColor(255, 255, 255, 255).setUv(u1, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(0, -1, 0).endVertex();
+        PortVertex.of(vc).addVertex(m, x1, y, z0).setColor(255, 255, 255, 255).setUv(u1, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(0, -1, 0).endVertex();
     }
 }

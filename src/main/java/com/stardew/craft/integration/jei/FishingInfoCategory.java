@@ -64,7 +64,7 @@ public final class FishingInfoCategory implements IRecipeCategory<FishingInfoCat
         }
 
         SpawnFishRule primaryRule() {
-            return rules.getFirst();
+            return com.stardew.craft.port.PortJava.getFirst(rules);
         }
 
         public String contentSignature() {

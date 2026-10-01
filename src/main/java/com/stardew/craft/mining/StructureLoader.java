@@ -135,8 +135,8 @@ public final class StructureLoader {
                     level, stream, structurePath, pos, farmBulk);
         }
         try {
-            CompoundTag nbt = NbtIo.readCompressed(
-                    stream, NbtAccounter.unlimitedHeap());
+            CompoundTag nbt = com.stardew.craft.port.PortNbtIo.readCompressed(
+                    stream, NbtAccounter.UNLIMITED);
             StructureTemplate template = new StructureTemplate();
             template.load(
                     level.holderLookup(
@@ -202,7 +202,7 @@ public final class StructureLoader {
             boolean farmBulk
     ) {
         try {
-            CompoundTag root = NbtIo.readCompressed(stream, NbtAccounter.unlimitedHeap());
+            CompoundTag root = com.stardew.craft.port.PortNbtIo.readCompressed(stream, NbtAccounter.UNLIMITED);
             CompoundTag schematic = root;
             if ((readDimension(root, "Width") == 0 || readDimension(root, "Height") == 0 || readDimension(root, "Length") == 0)
                 && root.contains("Schematic", Tag.TAG_COMPOUND)) {
@@ -298,7 +298,7 @@ public final class StructureLoader {
             if (stream == null) {
                 return null;
             }
-            CompoundTag root = NbtIo.readCompressed(stream, NbtAccounter.unlimitedHeap());
+            CompoundTag root = com.stardew.craft.port.PortNbtIo.readCompressed(stream, NbtAccounter.UNLIMITED);
 
             // size: [x, y, z]
             ListTag sizeTag = root.getList("size", Tag.TAG_INT);
@@ -739,7 +739,7 @@ public final class StructureLoader {
                 return false;
             }
 
-            CompoundTag root = NbtIo.readCompressed(stream, NbtAccounter.unlimitedHeap());
+            CompoundTag root = com.stardew.craft.port.PortNbtIo.readCompressed(stream, NbtAccounter.UNLIMITED);
             CompoundTag schematic = root;
             if ((readDimension(root, "Width") == 0 || readDimension(root, "Height") == 0 || readDimension(root, "Length") == 0)
                 && root.contains("Schematic", Tag.TAG_COMPOUND)) {

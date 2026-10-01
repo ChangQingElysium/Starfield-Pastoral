@@ -44,8 +44,8 @@ public class PreservesItem extends Item implements IStardewItem {
     public PreservesItem(PreserveType preserveType, Properties properties) {
         super(properties.food(new FoodProperties.Builder()
                 .nutrition(2)
-                .saturationModifier(0.3f)
-                .alwaysEdible()
+                .saturationMod(0.3f)
+                .alwaysEat()
                 .build()));
         this.preserveType = preserveType;
     }

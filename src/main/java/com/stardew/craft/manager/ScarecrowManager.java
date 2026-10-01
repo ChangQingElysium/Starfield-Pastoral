@@ -29,7 +29,7 @@ public class ScarecrowManager extends SavedData {
 
     public static ScarecrowManager get(ServerLevel level) {
         return level.getDataStorage().computeIfAbsent(
-                com.stardew.craft.port.PortSavedData.loader(new Factory<>(ScarecrowManager::new, ScarecrowManager::load)), com.stardew.craft.port.PortSavedData.constructor(new Factory<>(ScarecrowManager::new, ScarecrowManager::load)),
+                com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(ScarecrowManager::new, ScarecrowManager::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(ScarecrowManager::new, ScarecrowManager::load)),
                 DATA_NAME);
     }
 

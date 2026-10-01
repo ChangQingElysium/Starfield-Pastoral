@@ -15,7 +15,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 
 @SuppressWarnings("null")
-public final class WoodSignBlockEntityRenderer implements BlockEntityRenderer<WoodSignBlockEntity> {
+public final class WoodSignBlockEntityRenderer implements BlockEntityRenderer<WoodSignBlockEntity>, com.stardew.craft.port.net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension<WoodSignBlockEntity> {
     public WoodSignBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
     }
 

@@ -43,8 +43,7 @@ public final class DataDrivenQuest extends StardewQuest {
         this.id = QuestDataLoader.displayId(id);
         this.definition = definition;
         this.objective = definition.objective();
-        this.runtime = StardewQuestObjectives.createRuntime(objective)
-                .getOrThrow(message -> new IllegalArgumentException("Quest " + id + ": " + message));
+        this.runtime = com.stardew.craft.port.PortDataResults.getOrThrow(StardewQuestObjectives.createRuntime(objective), message -> new IllegalArgumentException("Quest " + id + ": " + message));
         applyText(definition.title(), TextSlot.TITLE);
         applyText(definition.description(), TextSlot.DESCRIPTION);
         applyText(definition.objectiveText(), TextSlot.OBJECTIVE);

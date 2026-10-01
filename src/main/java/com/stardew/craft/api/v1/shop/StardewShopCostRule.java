@@ -93,7 +93,7 @@ public record StardewShopCostRule(
                                         .fieldOf("id")
                                         .forGetter(
                                                 CurrencyEntry::id),
-                                Codec.LONG.validate(value ->
+                                com.stardew.craft.port.PortCodecs.validate(Codec.LONG, value ->
                                                 value > 0L
                                                         ? com.mojang.serialization
                                                                 .DataResult
@@ -119,7 +119,7 @@ public record StardewShopCostRule(
                                 ResourceLocation.CODEC
                                         .fieldOf("id")
                                         .forGetter(ItemEntry::id),
-                                Codec.LONG.validate(value ->
+                                com.stardew.craft.port.PortCodecs.validate(Codec.LONG, value ->
                                                 value > 0L
                                                         && value
                                                         <= Integer.MAX_VALUE

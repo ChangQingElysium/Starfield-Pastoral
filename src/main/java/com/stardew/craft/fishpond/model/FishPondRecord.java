@@ -320,8 +320,8 @@ public class FishPondRecord {
         tag.putString("pondId", pondId);
         tag.putString("ownerPlayerUuid", ownerPlayerUuid);
         tag.putString("dimensionId", dimensionId);
-        tag.put("managerPos", NbtUtils.writeBlockPos(managerPos));
-        tag.put("bucketPos", NbtUtils.writeBlockPos(bucketPos));
+        tag.put("managerPos", com.stardew.craft.port.PortNbtUtils.writeBlockPos(managerPos));
+        tag.put("bucketPos", com.stardew.craft.port.PortNbtUtils.writeBlockPos(bucketPos));
         tag.putInt("minX", minX);
         tag.putInt("minY", minY);
         tag.putInt("minZ", minZ);
@@ -348,7 +348,7 @@ public class FishPondRecord {
         ListTag netsTag = new ListTag();
         for (BlockPos netPos : netPositions) {
             CompoundTag netTag = new CompoundTag();
-            netTag.put("Pos", NbtUtils.writeBlockPos(netPos));
+            netTag.put("Pos", com.stardew.craft.port.PortNbtUtils.writeBlockPos(netPos));
             netsTag.add(netTag);
         }
         tag.put("netPositions", netsTag);
@@ -367,7 +367,7 @@ public class FishPondRecord {
         Set<BlockPos> netPositions = new LinkedHashSet<>();
         ListTag netsTag = tag.getList("netPositions", Tag.TAG_COMPOUND);
         for (int i = 0; i < netsTag.size(); i++) {
-            netPositions.add(NbtUtils.readBlockPos(netsTag.getCompound(i), "Pos").orElse(BlockPos.ZERO).immutable());
+            netPositions.add(com.stardew.craft.port.PortNbtUtils.readBlockPos(netsTag.getCompound(i), "Pos").orElse(BlockPos.ZERO).immutable());
         }
 
         Set<Long> waterCells = new LinkedHashSet<>();
@@ -380,8 +380,8 @@ public class FishPondRecord {
             tag.getString("pondId"),
             tag.getString("ownerPlayerUuid"),
             tag.getString("dimensionId"),
-            NbtUtils.readBlockPos(tag, "managerPos").orElse(BlockPos.ZERO).immutable(),
-            NbtUtils.readBlockPos(tag, "bucketPos").orElse(BlockPos.ZERO).immutable(),
+            com.stardew.craft.port.PortNbtUtils.readBlockPos(tag, "managerPos").orElse(BlockPos.ZERO).immutable(),
+            com.stardew.craft.port.PortNbtUtils.readBlockPos(tag, "bucketPos").orElse(BlockPos.ZERO).immutable(),
             netPositions,
             waterCells,
             tag.getInt("minX"),

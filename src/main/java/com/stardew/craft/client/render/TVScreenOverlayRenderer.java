@@ -21,6 +21,7 @@ import net.minecraftforge.client.event.RenderLevelStageEvent;
 
 import javax.annotation.Nullable;
 
+import com.stardew.craft.port.PortVertex;
 /**
  * Renders animated channel sprites on the TV screen in the 3D world.
  * Mirrors original TV.cs TemporaryAnimatedSprite rendering:
@@ -329,14 +330,14 @@ public class TVScreenOverlayRenderer {
                 break;
         }
 
-        vc.addVertex(last, bx0, by0, bz0).setUv(u0, v1).setColor(255, 255, 255, 255)
-                .setUv1(0, 10).setUv2(lightU, lightV).setNormal(nx, ny, nz);
-        vc.addVertex(last, bx1, by1, bz1).setUv(u1, v1).setColor(255, 255, 255, 255)
-                .setUv1(0, 10).setUv2(lightU, lightV).setNormal(nx, ny, nz);
-        vc.addVertex(last, bx2, by2, bz2).setUv(u1, v0).setColor(255, 255, 255, 255)
-                .setUv1(0, 10).setUv2(lightU, lightV).setNormal(nx, ny, nz);
-        vc.addVertex(last, bx3, by3, bz3).setUv(u0, v0).setColor(255, 255, 255, 255)
-                .setUv1(0, 10).setUv2(lightU, lightV).setNormal(nx, ny, nz);
+        PortVertex.of(vc).addVertex(last, bx0, by0, bz0).setUv(u0, v1).setColor(255, 255, 255, 255)
+                .setUv1(0, 10).setUv2(lightU, lightV).setNormal(nx, ny, nz).endVertex();
+        PortVertex.of(vc).addVertex(last, bx1, by1, bz1).setUv(u1, v1).setColor(255, 255, 255, 255)
+                .setUv1(0, 10).setUv2(lightU, lightV).setNormal(nx, ny, nz).endVertex();
+        PortVertex.of(vc).addVertex(last, bx2, by2, bz2).setUv(u1, v0).setColor(255, 255, 255, 255)
+                .setUv1(0, 10).setUv2(lightU, lightV).setNormal(nx, ny, nz).endVertex();
+        PortVertex.of(vc).addVertex(last, bx3, by3, bz3).setUv(u0, v0).setColor(255, 255, 255, 255)
+                .setUv1(0, 10).setUv2(lightU, lightV).setNormal(nx, ny, nz).endVertex();
     }
 
     // ==================== Sprite Data ====================

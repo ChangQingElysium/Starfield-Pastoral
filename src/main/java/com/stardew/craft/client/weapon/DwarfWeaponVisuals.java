@@ -49,7 +49,7 @@ public final class DwarfWeaponVisuals {
         if (CASTS.putIfAbsent(key, new Cast(key, level.getGameTime())) != null) return;
         while (CASTS.size() > 64) CASTS.remove(CASTS.keySet().iterator().next());
         if (DWARF_THRUST.equals(p.skillId())) PREVIOUS.put(p.casterEntityId(), origin);
-        var sound = DWARF_THRUST.equals(p.skillId()) ? SoundEvents.TRIDENT_THROW.value()
+        var sound = DWARF_THRUST.equals(p.skillId()) ? SoundEvents.TRIDENT_THROW
                 : DWARF_GUARD.equals(p.skillId()) ? SoundEvents.SHIELD_BLOCK : SoundEvents.AMETHYST_BLOCK_CHIME;
         level.playLocalSound(origin.x, origin.y + .8, origin.z, sound, SoundSource.PLAYERS, .32f,
                 DWARF_THRUST.equals(p.skillId()) ? 1.35f : .9f, false);

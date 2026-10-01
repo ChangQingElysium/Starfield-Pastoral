@@ -124,7 +124,7 @@ public class StardewNpcEntity extends PathfinderMob implements AnimatedModel {
             .add(Attributes.MAX_HEALTH, 20.0D)
             .add(Attributes.MOVEMENT_SPEED, 0.20D * com.stardew.craft.npc.runtime.NpcMotionProfile.TRAVEL_SPEED_MULTIPLIER)
             .add(Attributes.FOLLOW_RANGE, 96.0D)
-            .add(Attributes.STEP_HEIGHT, 0.6D);
+            .add(com.stardew.craft.port.PortAttributes.STEP_HEIGHT.get(), 0.6D);
     }
 
     @Override
@@ -610,7 +610,7 @@ public class StardewNpcEntity extends PathfinderMob implements AnimatedModel {
             this.entityData.set(DATA_MOTION_PROFILE,tag);
             var speed=getAttribute(Attributes.MOVEMENT_SPEED);
             if (speed!=null) speed.setBaseValue(motion.travelSpeed());
-            var step=getAttribute(Attributes.STEP_HEIGHT);
+            var step=getAttribute(com.stardew.craft.port.PortAttributes.STEP_HEIGHT.get());
             if (step!=null) step.setBaseValue(motion.stepHeight());
             if (getNavigation() instanceof NpcPathNavigation navigation) navigation.refreshSearchBudget();
             var range=getAttribute(Attributes.FOLLOW_RANGE);

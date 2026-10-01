@@ -51,7 +51,7 @@ public record ShopPickupPayload(
         if (item == null || item == Items.AIR) return;
 
         int remaining = quantity;
-        int maxStackSize = Math.max(1, item.getDefaultMaxStackSize());
+        int maxStackSize = Math.max(1, item.getMaxStackSize());
         ShopPendingPickupData data = ShopPendingPickupData.get(player.server);
         while (remaining > 0) {
             int count = Math.min(remaining, maxStackSize);

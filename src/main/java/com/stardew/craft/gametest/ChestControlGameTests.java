@@ -136,7 +136,7 @@ public final class ChestControlGameTests {
                 });
                 helper.assertTrue(client.canChangeColor() == (!reward && colorable), "Incorrect client color capability");
                 helper.assertTrue(client.canOrganize() == !reward, "Incorrect client organize capability");
-                helper.assertTrue(client.slots.getFirst().mayPlace(new ItemStack(Items.DIRT)) == !reward,
+                helper.assertTrue(com.stardew.craft.port.PortJava.getFirst(client.slots).mayPlace(new ItemStack(Items.DIRT)) == !reward,
                         "Client slot retained the constructor's stale reward flag");
                 server.setColorSelectionFromClient(5);
                 helper.assertTrue(changes.get() == (!reward && colorable ? 1 : 0), "Color handler ignored reward restriction");
@@ -233,7 +233,7 @@ public final class ChestControlGameTests {
         second.removeItem(8, 3);
         h.assertTrue(first.getItem(8).getCount() == 20, "Two Junimo chests have different inventories");
         var store = com.stardew.craft.inventory.JunimoChestData.get(level.getServer());
-        var restored = com.stardew.craft.inventory.JunimoChestData.load(store.save(new net.minecraft.nbt.CompoundTag(), level.registryAccess()), level.registryAccess());
+        var restored = com.stardew.craft.inventory.JunimoChestData.load(store.save(new net.minecraft.nbt.CompoundTag()), level.registryAccess());
         h.assertTrue(restored.items(owner).get(8).getCount() == 20 && restored.items(otherOwner).get(8).isEmpty(),
                 "Saved shared storage lost items or crossed farm ownership");
         first.dropAllContents(level, net.minecraft.core.BlockPos.ZERO);

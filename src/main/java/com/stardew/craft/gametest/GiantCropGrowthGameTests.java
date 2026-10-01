@@ -159,7 +159,7 @@ public final class GiantCropGrowthGameTests {
         manager.settleCrops(h.getLevel(), positions, 100, 3, false);
         manager.settleCrops(h.getLevel(), com.stardew.craft.port.PortJava.reversed(positions), 100, 3, false);
         h.assertTrue(f.dates.size() == 9, "A repeated day grew the same plants twice");
-        var loaded = CropGrowthManager.load(manager.save(new CompoundTag(), h.getLevel().registryAccess()), h.getLevel().registryAccess());
+        var loaded = CropGrowthManager.load(manager.save(new CompoundTag()), h.getLevel().registryAccess());
         h.assertTrue(loaded.getState(h.getLevel(), f.anchor).lastDailyDay == 100 && loaded.getState(h.getLevel(), f.anchor).lastGiantDay == 100, "Daily stamp lost on save");
         manager.settleCrops(h.getLevel(), positions, 101, 3, false);
         h.assertTrue(f.dates.size() == 18, "Next day did not advance");

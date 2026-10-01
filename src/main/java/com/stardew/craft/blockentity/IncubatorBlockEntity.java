@@ -173,7 +173,7 @@ public class IncubatorBlockEntity extends TimedProductionBlockEntity {
         return AutomationStackHelper.remainderAfterInsert(stack, 1);
     }
     @Override public ClientboundBlockEntityDataPacket getUpdatePacket() { return ClientboundBlockEntityDataPacket.create(this); }
-    @Override public CompoundTag getUpdateTag() { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup(); return saveCustomOnly(registries); }
+    @Override public CompoundTag getUpdateTag() { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup(); return saveWithoutMetadata(); }
     @Override protected void saveAdditional(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
         super.saveAdditional(tag);
         if (!input.isEmpty()) tag.put("Input", PortItemStacks.save(input, registries)); tag.putLong("ReadyAt", readyAtAbsMinute); tag.putBoolean("Ready", ready);

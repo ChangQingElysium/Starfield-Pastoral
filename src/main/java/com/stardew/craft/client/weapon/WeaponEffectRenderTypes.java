@@ -1,5 +1,6 @@
 package com.stardew.craft.client.weapon;
 
+import com.stardew.craft.port.PortRenderStateShards;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
@@ -23,8 +24,8 @@ public final class WeaponEffectRenderTypes {
                         com.mojang.blaze3d.systems.RenderSystem.defaultBlendFunc();
                         com.mojang.blaze3d.systems.RenderSystem.disableBlend();
                     }))
-                    .setCullState(RenderStateShard.NO_CULL)
-                    .setWriteMaskState(RenderStateShard.COLOR_WRITE)
+                    .setCullState(PortRenderStateShards.NO_CULL)
+                    .setWriteMaskState(PortRenderStateShards.COLOR_WRITE)
                     .createCompositeState(false));
 
     /** Dark/translucent edge preserves hit silhouettes against bright sky and pale targets. */
@@ -34,9 +35,9 @@ public final class WeaponEffectRenderTypes {
             RenderType.CompositeState.builder()
                     .setShaderState(new RenderStateShard.ShaderStateShard(
                             net.minecraft.client.renderer.GameRenderer::getPositionColorShader))
-                    .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
-                    .setCullState(RenderStateShard.NO_CULL)
-                    .setWriteMaskState(RenderStateShard.COLOR_WRITE)
+                    .setTransparencyState(PortRenderStateShards.TRANSLUCENT_TRANSPARENCY)
+                    .setCullState(PortRenderStateShards.NO_CULL)
+                    .setWriteMaskState(PortRenderStateShards.COLOR_WRITE)
                     .createCompositeState(false));
 
     /** Opaque projectile bodies keep their silhouette; their separate wakes supply the glow. */
@@ -46,8 +47,8 @@ public final class WeaponEffectRenderTypes {
             RenderType.CompositeState.builder()
                     .setShaderState(new RenderStateShard.ShaderStateShard(
                             net.minecraft.client.renderer.GameRenderer::getPositionColorShader))
-                    .setCullState(RenderStateShard.NO_CULL)
-                    .setWriteMaskState(RenderStateShard.COLOR_DEPTH_WRITE)
+                    .setCullState(PortRenderStateShards.NO_CULL)
+                    .setWriteMaskState(PortRenderStateShards.COLOR_DEPTH_WRITE)
                     .createCompositeState(false));
 
     private WeaponEffectRenderTypes() {}

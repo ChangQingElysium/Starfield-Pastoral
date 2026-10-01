@@ -24,8 +24,8 @@ public class PotatoItem extends Item implements IStardewItem {
         super(properties
                 .food(new FoodProperties.Builder()
                         .nutrition(2)
-                        .saturationModifier(0.3f)
-                        .alwaysEdible()
+                        .saturationMod(0.3f)
+                        .alwaysEat()
                         .build())
         );
     }

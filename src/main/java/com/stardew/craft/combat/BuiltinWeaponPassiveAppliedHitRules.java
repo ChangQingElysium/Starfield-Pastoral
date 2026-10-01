@@ -67,7 +67,7 @@ final class BuiltinWeaponPassiveAppliedHitRules {
         );
         Holder<MobEffect> vulnerableHolder = Holder.direct(vulnerable);
         hit.target().addEffect(new MobEffectInstance(
-                vulnerableHolder,
+                vulnerableHolder.value(),
                 IridiumNeedleFrenzySkillHandler
                         .CRITICAL_VULNERABLE_DURATION_TICKS,
                 IridiumNeedleFrenzySkillHandler

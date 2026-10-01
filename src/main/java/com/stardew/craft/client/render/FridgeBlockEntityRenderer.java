@@ -17,7 +17,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraftforge.client.model.data.ModelData;
 
 /** Only the lower door moves; the cabinet is a normal baked block model. */
-public final class FridgeBlockEntityRenderer implements BlockEntityRenderer<FridgeBlockEntity> {
+public final class FridgeBlockEntityRenderer implements BlockEntityRenderer<FridgeBlockEntity>, com.stardew.craft.port.net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension<FridgeBlockEntity> {
     private static final ModelResourceLocation DOOR = new ModelResourceLocation(
             new ResourceLocation(StardewCraft.MODID, "block/utility/fridge_door"), "standalone");
 

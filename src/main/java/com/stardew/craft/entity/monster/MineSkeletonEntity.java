@@ -36,7 +36,7 @@ public final class MineSkeletonEntity extends StardewMonsterEntity {
     private double fallSpeed;
     private boolean spotted;
     public MineSkeletonEntity(EntityType<? extends MineSkeletonEntity> type,Level level){super(type,level);addTag("sd_mob_skeleton");}
-    public static AttributeSupplier.Builder createAttributes(){return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,140).add(Attributes.ATTACK_DAMAGE,10).add(Attributes.MOVEMENT_SPEED,.25).add(Attributes.FOLLOW_RANGE,64).add(Attributes.STEP_HEIGHT,0);}
+    public static AttributeSupplier.Builder createAttributes(){return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,140).add(Attributes.ATTACK_DAMAGE,10).add(Attributes.MOVEMENT_SPEED,.25).add(Attributes.FOLLOW_RANGE,64).add(com.stardew.craft.port.PortAttributes.STEP_HEIGHT.get(),0);}
     @Override protected void registerGoals(){}
     @Override protected ResourceLocation definitionId(){return new ResourceLocation("stardewcraft:skeleton");}
     @Override protected void configureSpawn(MonsterDefinition d,MonsterSpawnContext c){var r=MonsterStatResolver.base(d,c,random);setInitialHealth(r.initialHealth());replaceCombatStats(r.combat());movement.face(random.nextInt(4));}

@@ -82,7 +82,7 @@ public final class TravelingCartManager extends SavedData {
     }
 
     @Override
-    public @Nonnull CompoundTag save(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider provider) {
+    public @Nonnull CompoundTag save(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         if (entityUuid != null) {
             tag.putUUID("EntityUUID", entityUuid);
         }

@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.world.phys.AABB;
 
+import com.stardew.craft.port.PortVertex;
 public final class PlaygroundBlockEntityRenderer implements LargeDecorBlockEntityRenderer<PlaygroundBlockEntity> {
     public PlaygroundBlockEntityRenderer(BlockEntityRendererProvider.Context context) {}
     @Override public AABB getRenderBoundingBox(PlaygroundBlockEntity entity) { return entity.getRenderBoundingBox(); }
@@ -32,13 +33,13 @@ public final class PlaygroundBlockEntityRenderer implements LargeDecorBlockEntit
                     pose.translate(-.5, -.5, -15.0 / 16);
                 }
                 pose.translate(part.x() / 16, part.y() / 16, part.z() / 16);
-                for (var quad : part.quads()) consumer.putBulkData(pose.last(), quad, 1, 1, 1, 1, light, overlay);
+                for (var quad : part.quads()) PortVertex.putBulkData(consumer, pose.last(), quad, 1, 1, 1, 1, light, overlay);
                 pose.popPose();
             }
         }
         for (var part : PlaygroundModels.parts(block.modelName())) {
             pose.pushPose(); pose.translate(part.x() / 16, part.y() / 16, part.z() / 16);
-            for (var quad : part.quads()) consumer.putBulkData(pose.last(), quad, 1, 1, 1, 1, light, overlay);
+            for (var quad : part.quads()) PortVertex.putBulkData(consumer, pose.last(), quad, 1, 1, 1, 1, light, overlay);
             pose.popPose();
         }
         pose.popPose();

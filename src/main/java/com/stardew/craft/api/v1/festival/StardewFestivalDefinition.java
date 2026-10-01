@@ -63,7 +63,7 @@ public record StardewFestivalDefinition(
                             .forGetter(StardewFestivalDefinition::world)
             ).apply(instance, StardewFestivalDefinition::new));
 
-    public static final Codec<StardewFestivalDefinition> CODEC = RAW_CODEC.validate(definition -> {
+    public static final Codec<StardewFestivalDefinition> CODEC = com.stardew.craft.port.PortCodecs.validate(RAW_CODEC, definition -> {
         if (definition.displayName().isBlank()) {
             return DataResult.error(() -> "festival display_name must not be blank");
         }

@@ -51,7 +51,7 @@ public final class MineRockClumpGameTests {
             h.assertTrue(MineRockClumpMining.requiredSwings(752, tool) == swings[i], "Powerful incorrectly affects ResourceClump");
         }
         var foreign = new ItemStack(Items.NETHERITE_PICKAXE);
-        foreign.enchant(registry.getHolderOrThrow(Enchantments.EFFICIENCY), 5);
+        com.stardew.craft.port.PortItemStacks.enchant(foreign, registry.wrapAsHolder(Enchantments.BLOCK_EFFICIENCY), 5);
         com.stardew.craft.port.PortItemStacks.enchant(foreign, registry.getHolderOrThrow(StardewEnchantments.SWIFT), 1);
         com.stardew.craft.port.PortItemStacks.enchant(foreign, registry.getHolderOrThrow(StardewEnchantments.EFFICIENT), 1);
         h.assertTrue(MineRockClumpMining.breakTicks(752, foreign) == 96

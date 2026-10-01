@@ -15,6 +15,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import org.joml.Matrix4f;
 
+import com.stardew.craft.port.PortVertex;
 /**
  * 社区中心星盘渲染器 — 根据已完成区域数切换 0-6 星纹理。
  * 单张纹理渲染, 不做 quad 叠加。
@@ -42,7 +43,7 @@ public final class StarPlaqueRenderer {
                         RenderSystem::disableBlend))
                     .setWriteMaskState(new RenderType.WriteMaskStateShard(true, false))
                     .setCullState(new RenderType.CullStateShard(false))
-                    .setDepthTestState(RenderType.LEQUAL_DEPTH_TEST)
+                    .setDepthTestState(com.stardew.craft.port.PortRenderStateShards.LEQUAL_DEPTH_TEST)
                     .createCompositeState(false));
         }
     }
@@ -89,10 +90,10 @@ public final class StarPlaqueRenderer {
 
         VertexConsumer vc = buf.getBuffer(rt);
         // YZ 平面 quad, 面朝 +X (东)
-        vc.addVertex(mat, 0, -HALF_Y,  HALF_Z).setUv(0, 1).setColor(255, 255, 255, 255);
-        vc.addVertex(mat, 0, -HALF_Y, -HALF_Z).setUv(1, 1).setColor(255, 255, 255, 255);
-        vc.addVertex(mat, 0,  HALF_Y, -HALF_Z).setUv(1, 0).setColor(255, 255, 255, 255);
-        vc.addVertex(mat, 0,  HALF_Y,  HALF_Z).setUv(0, 0).setColor(255, 255, 255, 255);
+        PortVertex.of(vc).addVertex(mat, 0, -HALF_Y,  HALF_Z).setUv(0, 1).setColor(255, 255, 255, 255).endVertex();
+        PortVertex.of(vc).addVertex(mat, 0, -HALF_Y, -HALF_Z).setUv(1, 1).setColor(255, 255, 255, 255).endVertex();
+        PortVertex.of(vc).addVertex(mat, 0,  HALF_Y, -HALF_Z).setUv(1, 0).setColor(255, 255, 255, 255).endVertex();
+        PortVertex.of(vc).addVertex(mat, 0,  HALF_Y,  HALF_Z).setUv(0, 0).setColor(255, 255, 255, 255).endVertex();
 
         ps.popPose();
         buf.endBatch(rt);

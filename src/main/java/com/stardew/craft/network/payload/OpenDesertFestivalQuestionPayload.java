@@ -119,7 +119,7 @@ public record OpenDesertFestivalQuestionPayload(
     @OnlyIn(Dist.CLIENT)
     private static Component parseComponent(String json, net.minecraft.client.Minecraft mc) {
         try {
-            Component component = Component.Serializer.fromJson(json, mc.level.registryAccess());
+            Component component = Component.Serializer.fromJson(json);
             return component == null ? Component.literal(json) : component;
         } catch (Exception ignored) {
             return Component.literal(json == null ? "" : json);

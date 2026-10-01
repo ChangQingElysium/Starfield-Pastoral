@@ -24,7 +24,7 @@ public final class LivestockEntity extends PathfinderMob implements AnimatedMode
     private static final EntityDataAccessor<Boolean> SHEARED = SynchedEntityData.defineId(LivestockEntity.class, EntityDataSerializers.BOOLEAN);
     public LivestockEntity(EntityType<? extends LivestockEntity> type, Level level) { super(type, level); setPersistenceRequired(); }
     public static AttributeSupplier.Builder attributes() {
-        return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 10).add(Attributes.MOVEMENT_SPEED, .176).add(Attributes.STEP_HEIGHT, 1).add(Attributes.FOLLOW_RANGE, 16);
+        return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 10).add(Attributes.MOVEMENT_SPEED, .176).add(com.stardew.craft.port.PortAttributes.STEP_HEIGHT.get(), 1).add(Attributes.FOLLOW_RANGE, 16);
     }
     @Override protected void defineSynchedData() { super.defineSynchedData(); this.entityData.define(BABY, true); this.entityData.define(EATING, false); this.entityData.define(SPECIES, "white_chicken"); this.entityData.define(SHEARED, false); }
     @Override public boolean isBaby() { return entityData.get(BABY); }

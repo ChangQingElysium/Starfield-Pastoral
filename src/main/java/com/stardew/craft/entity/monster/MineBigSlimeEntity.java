@@ -29,7 +29,7 @@ public final class MineBigSlimeEntity extends StardewMonsterEntity {
     private int slipperiness=2,stunMilliseconds;private double fallSpeed,lastTrajectoryX,lastTrajectoryZ;
     private boolean splitPrepared;private double localGelPhase;
     public MineBigSlimeEntity(EntityType<? extends MineBigSlimeEntity> type,Level level){super(type,level);addTag("sd_mob_big_slime");}
-    public static AttributeSupplier.Builder createAttributes(){return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,60).add(Attributes.ATTACK_DAMAGE,5).add(Attributes.MOVEMENT_SPEED,.25).add(Attributes.STEP_HEIGHT,0).add(Attributes.FOLLOW_RANGE,128);}
+    public static AttributeSupplier.Builder createAttributes(){return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,60).add(Attributes.ATTACK_DAMAGE,5).add(Attributes.MOVEMENT_SPEED,.25).add(com.stardew.craft.port.PortAttributes.STEP_HEIGHT.get(),0).add(Attributes.FOLLOW_RANGE,128);}
     @Override public void tick(){super.tick();if(level().isClientSide&&isAlive()){double before=localGelPhase;localGelPhase+=moving()?1/16.:1/32.;if((int)localGelPhase>(int)before)level().playLocalSound(getX(),getY(),getZ(),ModSounds.MONSTER_SLIME_HIT.get(),getSoundSource(),1,1,false);}}
     @Override protected net.minecraft.world.phys.AABB makeBoundingBox() {
         if (getAttributes() == null) return super.makeBoundingBox();
@@ -41,7 +41,7 @@ public final class MineBigSlimeEntity extends StardewMonsterEntity {
     @Override public void setYRot(float yaw) {
         if (getAttributes() != null && Float.isFinite(yaw)) {
             var box = collisionBoxAtYaw(yaw);
-            if (!level().isClientSide && isAddedToLevel() && !level().noCollision(this, box)) return;
+            if (!level().isClientSide && isAddedToWorld() && !level().noCollision(this, box)) return;
             super.setYRot(yaw);
             setBoundingBox(box);
         } else super.setYRot(yaw);

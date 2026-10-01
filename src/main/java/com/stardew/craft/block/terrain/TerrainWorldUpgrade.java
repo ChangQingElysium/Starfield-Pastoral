@@ -54,15 +54,15 @@ public final class TerrainWorldUpgrade {
                         || name.equals("stardewcraft:dirt") || name.equals("stardewcraft:grass_block");
             }
             if (!eligible) continue;
-            var states = STATES.parse(NbtOps.INSTANCE, raw)
-                    .promotePartial(error -> com.stardew.craft.StardewCraft.LOGGER.warn("[Terrain upgrade] {}", error)).getOrThrow();
+            var states = com.stardew.craft.port.PortDataResults.getOrThrow(STATES.parse(NbtOps.INSTANCE, raw)
+                    .promotePartial(error -> com.stardew.craft.StardewCraft.LOGGER.warn("[Terrain upgrade] {}", error)));
             int baseY = section.getByte("Y") << 4;
             for (int y = 0; y < 16; y++) for (int z = 0; z < 16; z++) for (int x = 0; x < 16; x++) {
                 var current = states.get(x, y, z);
                 var next = varied(current, seed, new BlockPos(baseX + x, baseY + y, baseZ + z));
                 if (next != current) states.set(x, y, z, next);
             }
-            section.put("block_states", STATES.encodeStart(NbtOps.INSTANCE, states).getOrThrow());
+            section.put("block_states", com.stardew.craft.port.PortDataResults.getOrThrow(STATES.encodeStart(NbtOps.INSTANCE, states)));
         }
         chunk.putInt(VERSION_KEY, VERSION);
         chunk.putBoolean("shouldSave", true);

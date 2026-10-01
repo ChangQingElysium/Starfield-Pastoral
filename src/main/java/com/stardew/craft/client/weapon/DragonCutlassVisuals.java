@@ -39,7 +39,7 @@ public final class DragonCutlassVisuals {
         if (mc.player == null || mc.player.distanceToSqr(origin(payload)) > 48 * 48) return;
         boolean major = MeleeWeaponVisuals.DRAGON_JUDGEMENT.equals(payload.skillId());
         Vec3 p = origin(payload);
-        mc.level.playLocalSound(p.x, p.y, p.z, major ? SoundEvents.PLAYER_ATTACK_SWEEP : SoundEvents.TRIDENT_THROW.value(),
+        mc.level.playLocalSound(p.x, p.y, p.z, major ? SoundEvents.PLAYER_ATTACK_SWEEP : SoundEvents.TRIDENT_THROW,
                 SoundSource.PLAYERS, major ? 0.7f : 0.45f, major ? 0.65f : 0.85f, false);
         mc.level.playLocalSound(p.x, p.y, p.z, SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS,
                 major ? 0.4f : 0.25f, major ? 0.6f : 1.0f, false);

@@ -24,7 +24,7 @@ public final class MineMummyEntity extends StardewMonsterEntity {
  private final MummyLifecycle lifecycle=new MummyLifecycle();private final SourceGroundMovement movement=new SourceGroundMovement(this,2,2);
  private DamageSource incoming;private boolean finishing,collapsedThisHit;private int contactDamage,stunMilliseconds;private double fallSpeed;
  public MineMummyEntity(EntityType<? extends MineMummyEntity> type,Level level){super(type,level);addTag("sd_mob_mummy");}
- public static AttributeSupplier.Builder createAttributes(){return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,260).add(Attributes.ATTACK_DAMAGE,30).add(Attributes.MOVEMENT_SPEED,.25).add(Attributes.FOLLOW_RANGE,128).add(Attributes.STEP_HEIGHT,0);}
+ public static AttributeSupplier.Builder createAttributes(){return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,260).add(Attributes.ATTACK_DAMAGE,30).add(Attributes.MOVEMENT_SPEED,.25).add(Attributes.FOLLOW_RANGE,128).add(com.stardew.craft.port.PortAttributes.STEP_HEIGHT.get(),0);}
  @Override public void tick(){super.tick();setBoundingBox(MummyLifecycle.collisionBox(getX(),getY(),getZ(),getYRot(),getScale(),phase()));}
  @Override public net.minecraft.world.phys.AABB getBoundingBoxForCulling(){return super.getBoundingBoxForCulling().inflate(.5);}
  @Override protected void registerGoals(){}

@@ -16,6 +16,7 @@ import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import org.joml.Matrix4f;
 
+import com.stardew.craft.port.PortVertex;
 /**
  * Per-player museum indicator matching LibraryMuseum.resetLocalState:
  * Cursors (144,447,15,15), scale 4, 4-second vertical bob.
@@ -79,18 +80,18 @@ public final class LostBookIndicatorRenderer {
             poseStack.mulPose(event.getCamera().rotation());
             Matrix4f pose = poseStack.last().pose();
             float half = SIZE * 0.5F;
-            consumer.addVertex(pose, -half, half, 0.0F)
+            PortVertex.of(consumer).addVertex(pose, -half, half, 0.0F)
                     .setColor(255, 255, 255, 255).setUv(0.0F, 0.0F)
-                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULL_LIGHT).setNormal(0.0F, 0.0F, 1.0F);
-            consumer.addVertex(pose, half, half, 0.0F)
+                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULL_LIGHT).setNormal(0.0F, 0.0F, 1.0F).endVertex();
+            PortVertex.of(consumer).addVertex(pose, half, half, 0.0F)
                     .setColor(255, 255, 255, 255).setUv(1.0F, 0.0F)
-                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULL_LIGHT).setNormal(0.0F, 0.0F, 1.0F);
-            consumer.addVertex(pose, half, -half, 0.0F)
+                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULL_LIGHT).setNormal(0.0F, 0.0F, 1.0F).endVertex();
+            PortVertex.of(consumer).addVertex(pose, half, -half, 0.0F)
                     .setColor(255, 255, 255, 255).setUv(1.0F, 1.0F)
-                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULL_LIGHT).setNormal(0.0F, 0.0F, 1.0F);
-            consumer.addVertex(pose, -half, -half, 0.0F)
+                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULL_LIGHT).setNormal(0.0F, 0.0F, 1.0F).endVertex();
+            PortVertex.of(consumer).addVertex(pose, -half, -half, 0.0F)
                     .setColor(255, 255, 255, 255).setUv(0.0F, 1.0F)
-                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULL_LIGHT).setNormal(0.0F, 0.0F, 1.0F);
+                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULL_LIGHT).setNormal(0.0F, 0.0F, 1.0F).endVertex();
             poseStack.popPose();
             rendered = true;
         }

@@ -164,7 +164,7 @@ final class TemplarVowExecutionState
                 "shelter"
         );
         player.addEffect(new MobEffectInstance(
-                Holder.direct(shelter),
+                shelter,
                 TemplarVowSkillHandler.EXPIRE_SHELTER_DURATION_TICKS,
                 TemplarVowSkillHandler.EXPIRE_SHELTER_AMPLIFIER,
                 false,

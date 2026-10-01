@@ -203,7 +203,7 @@ public final class OrdinaryMineRuntime {
         var pending=new ArrayList<java.util.concurrent.CompletableFuture<?>>();
         for(int x=origin.getX()>>4;x<=(origin.getX()+layout.size.getX()-1)>>4;x++)
             for(int z=origin.getZ()>>4;z<=(origin.getZ()+layout.size.getZ()-1)>>4;z++) {
-                chunks.add(level.getChunk(x,z));pending.add(engine.waitForPendingTasks(x,z));
+                chunks.add(level.getChunk(x,z));pending.add(com.stardew.craft.port.PortLevels.waitForPendingTasks(engine,x,z));
             }
         engine.tryScheduleUpdate();
         return java.util.concurrent.CompletableFuture.allOf(pending.toArray(java.util.concurrent.CompletableFuture[]::new)).thenRunAsync(()->{

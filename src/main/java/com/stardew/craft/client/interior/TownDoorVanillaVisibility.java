@@ -6,11 +6,15 @@ import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.ViewArea;
 import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import net.minecraft.core.SectionPos;
 
 /**
@@ -24,11 +28,16 @@ import net.minecraft.core.SectionPos;
 public final class TownDoorVanillaVisibility {
     private static final LongArrayFIFOQueue QUEUE = new LongArrayFIFOQueue();
     private static final LongOpenHashSet VISITED = new LongOpenHashSet();
+    /**
+     * PORT(1.20.1): LevelRenderer's visible list holds package-private {@code LevelRenderer.RenderChunkInfo}
+     * wrappers instead of bare sections. Only {@code chunk} is read from entries outside the occlusion walk.
+     */
+    private static final MethodHandle NEW_RENDER_CHUNK_INFO = renderChunkInfoConstructor();
 
     private TownDoorVanillaVisibility() {}
 
     public static void discover(ClientLevel level, ViewArea viewArea, Camera camera, Frustum sourceFrustum,
-                                ObjectArrayList<ChunkRenderDispatcher.RenderChunk> result) {
+                                ObjectArrayList<Object> result) {
         result.clear();
         QUEUE.clear();
         VISITED.clear();
@@ -37,8 +46,9 @@ public final class TownDoorVanillaVisibility {
         int cameraX = SectionPos.blockToSectionCoord(cameraBlock.getX());
         int cameraY = SectionPos.blockToSectionCoord(cameraBlock.getY());
         int cameraZ = SectionPos.blockToSectionCoord(cameraBlock.getZ());
-        int viewDistance = viewArea.getViewDistance();
-        Frustum frustum = LevelRenderer.offsetFrustum(sourceFrustum);
+        int viewDistance = (((TownDoorViewAreaAccessor) viewArea).stardewcraft$getChunkGridSizeX() - 1) / 2;
+        // 1.21 LevelRenderer.offsetFrustum(frustum)
+        Frustum frustum = new Frustum(sourceFrustum).offsetToFullyIncludeCameraCube(8);
         var position = camera.getPosition();
         frustum.prepare(position.x, position.y, position.z);
 
@@ -61,13 +71,35 @@ public final class TownDoorVanillaVisibility {
             boolean cameraSection = sectionX == cameraX && sectionY == cameraY && sectionZ == cameraZ;
             if (!cameraSection && !frustum.isVisible(section.getBoundingBox())) continue;
 
-            result.add(section);
+            result.add(newRenderChunkInfo(section));
             enqueue(sectionX + 1, sectionY, sectionZ);
             enqueue(sectionX - 1, sectionY, sectionZ);
             enqueue(sectionX, sectionY + 1, sectionZ);
             enqueue(sectionX, sectionY - 1, sectionZ);
             enqueue(sectionX, sectionY, sectionZ + 1);
             enqueue(sectionX, sectionY, sectionZ - 1);
+        }
+    }
+
+    private static Object newRenderChunkInfo(ChunkRenderDispatcher.RenderChunk section) {
+        try {
+            return NEW_RENDER_CHUNK_INFO.invoke(section, (Direction) null, 0);
+        } catch (Throwable error) {
+            throw new IllegalStateException("Could not create LevelRenderer.RenderChunkInfo", error);
+        }
+    }
+
+    private static MethodHandle renderChunkInfoConstructor() {
+        try {
+            Class<?> type = Class.forName("net.minecraft.client.renderer.LevelRenderer$RenderChunkInfo", false,
+                    TownDoorVanillaVisibility.class.getClassLoader());
+            var constructor = type.getDeclaredConstructor(ChunkRenderDispatcher.RenderChunk.class, Direction.class, int.class);
+            constructor.setAccessible(true);
+            return MethodHandles.lookup().unreflectConstructor(constructor)
+                    .asType(MethodType.methodType(Object.class, ChunkRenderDispatcher.RenderChunk.class,
+                            Direction.class, int.class));
+        } catch (ReflectiveOperationException error) {
+            throw new ExceptionInInitializerError(error);
         }
     }
 

@@ -11,7 +11,7 @@ import snownee.jade.api.WailaPlugin;
 public class RecyclingMachineJadePlugin implements IWailaPlugin {
 	@Override
 	public void register(IWailaCommonRegistration registration) {
-		registration.registerBlockDataProvider(RecyclingMachineJadeProvider.INSTANCE, RecyclingMachineBlock.class);
+		JadeBlockDataProviders.register(registration, RecyclingMachineJadeProvider.INSTANCE, RecyclingMachineBlock.class);
 	}
 
 	@Override

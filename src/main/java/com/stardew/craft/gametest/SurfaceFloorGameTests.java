@@ -152,7 +152,7 @@ public final class SurfaceFloorGameTests {
         var level = helper.getLevel(); var pos = helper.absolutePos(new BlockPos(5,1,5));
         level.setBlock(pos, Blocks.STONE.defaultBlockState(),3);
         var data = SurfaceFloorData.get(level); data.place(level,pos,SurfaceFloorType.STEPPING_STONE_PATH,player(helper));
-        var saved = data.save(new CompoundTag(),level.registryAccess());
+        var saved = data.save(new CompoundTag());
         var loaded = SurfaceFloorData.load(saved,level.registryAccess());
         helper.assertTrue(data.at(pos).equals(loaded.at(pos)), "Save changed type/variant");
         var packet = new SurfaceFloorPacket(level.dimension().location(),new ChunkPos(pos).toLong(),true,

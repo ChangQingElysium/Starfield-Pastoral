@@ -89,7 +89,7 @@ public final class MiniShippingBinGameTests {
         return player;
     }
     private static void assertLedger(GameTestHelper h, ServerPlayer player, int expected) {
-        var ledger = OvernightSettlementTracker.get(h.getLevel().getServer()).save(new CompoundTag(), h.getLevel().registryAccess());
+        var ledger = OvernightSettlementTracker.get(h.getLevel().getServer()).save(new CompoundTag());
         int count = 0;
         for (Tag entry : ledger.getList("Players", 10)) {
             var data = (CompoundTag) entry;

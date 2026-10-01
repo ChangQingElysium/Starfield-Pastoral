@@ -650,7 +650,7 @@ public final class FishingMinigameScreen extends Screen implements com.stardew.c
 		long now = Util.getMillis();
 		long dt = now - lastUpdateMs;
 		lastUpdateMs = now;
-		dt = Mth.clamp(dt, 0L, 250L);
+		dt = com.stardew.craft.port.PortJava.clamp(dt, 0L, 250L);
 		accumulatedMs += dt;
 		while (accumulatedMs >= 16L) {
 			svUpdateStep(16);

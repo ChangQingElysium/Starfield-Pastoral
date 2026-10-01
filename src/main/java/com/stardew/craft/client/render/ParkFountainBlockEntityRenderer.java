@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 
+import com.stardew.craft.port.PortVertex;
 public final class ParkFountainBlockEntityRenderer implements LargeDecorBlockEntityRenderer<ParkFountainBlockEntity> {
     public ParkFountainBlockEntityRenderer(BlockEntityRendererProvider.Context context) {}
 
@@ -48,7 +49,7 @@ public final class ParkFountainBlockEntityRenderer implements LargeDecorBlockEnt
                 pose.scale(motion.sx(), motion.sy(), motion.sz());
                 alpha = motion.alpha();
             }
-            for (var quad : part.quads()) consumer.putBulkData(pose.last(), quad, 1, 1, 1, alpha, light, overlay);
+            for (var quad : part.quads()) PortVertex.putBulkData(consumer, pose.last(), quad, 1, 1, 1, alpha, light, overlay);
             pose.popPose();
         }
         pose.popPose();

@@ -243,10 +243,7 @@ public final class ShopStockTracker extends SavedData {
     }
 
     @Override
-    public @Nonnull CompoundTag save(
-            @Nonnull CompoundTag tag,
-            @Nonnull HolderLookup.Provider provider
-    ) {
+    public @Nonnull CompoundTag save(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         ListTag entries = new ListTag();
         for (var row : purchased.entrySet()) {
             CompoundTag entry = new CompoundTag();

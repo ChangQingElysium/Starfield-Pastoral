@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.world.phys.AABB;
 
+import com.stardew.craft.port.PortVertex;
 public final class ParkedVehicleBlockEntityRenderer implements LargeDecorBlockEntityRenderer<ParkedVehicleBlockEntity> {
     public ParkedVehicleBlockEntityRenderer(BlockEntityRendererProvider.Context context) {}
     @Override public AABB getRenderBoundingBox(ParkedVehicleBlockEntity entity) { return entity.getRenderBoundingBox(); }
@@ -33,7 +34,7 @@ public final class ParkedVehicleBlockEntityRenderer implements LargeDecorBlockEn
             for (var part : parts) {
                 if (part.glass() != glass) continue;
                 pose.pushPose(); pose.translate(part.x() / 16, part.y() / 16, part.z() / 16);
-                for (var quad : part.quads()) consumer.putBulkData(pose.last(), quad, 1, 1, 1, 1, light, overlay);
+                for (var quad : part.quads()) PortVertex.putBulkData(consumer, pose.last(), quad, 1, 1, 1, 1, light, overlay);
                 pose.popPose();
             }
         }

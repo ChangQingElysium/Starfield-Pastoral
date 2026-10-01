@@ -12,8 +12,8 @@ import snownee.jade.api.WailaPlugin;
 public class WormBinJadePlugin implements IWailaPlugin {
     @Override
     public void register(IWailaCommonRegistration registration) {
-        registration.registerBlockDataProvider(WormBinJadeProvider.INSTANCE, WormBinBlock.class);
-        registration.registerBlockDataProvider(WormBinJadeProvider.INSTANCE, DeluxeWormBinBlock.class);
+        JadeBlockDataProviders.register(registration, WormBinJadeProvider.INSTANCE, WormBinBlock.class);
+        JadeBlockDataProviders.register(registration, WormBinJadeProvider.INSTANCE, DeluxeWormBinBlock.class);
     }
 
     @Override

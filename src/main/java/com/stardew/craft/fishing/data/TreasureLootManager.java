@@ -59,7 +59,7 @@ public class TreasureLootManager extends SimplePreparableReloadListener<Treasure
     }
     private static TreasureData decode(JsonElement json) {
         var value = GSON.fromJson(json, TreasureData.class);
-        if (value.query != null) value.compiled = StardewItemQueries.CODEC.parse(JsonOps.INSTANCE, value.query).getOrThrow();
+        if (value.query != null) value.compiled = com.stardew.craft.port.PortDataResults.getOrThrow(StardewItemQueries.CODEC.parse(JsonOps.INSTANCE, value.query));
         else {
             for (var pool : List.of(value.commonLoot, value.rareLoot, value.goldenLoot, value.fallbackLoot))
                 for (var entry : pool) {

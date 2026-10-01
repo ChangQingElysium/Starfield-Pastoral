@@ -29,7 +29,7 @@ public class JukeboxData extends SavedData {
     /** 获取当前 ServerLevel 的唱片机数据。 */
     public static JukeboxData get(ServerLevel level) {
         return level.getDataStorage().computeIfAbsent(
-                com.stardew.craft.port.PortSavedData.loader(new Factory<>(JukeboxData::new, JukeboxData::load)), com.stardew.craft.port.PortSavedData.constructor(new Factory<>(JukeboxData::new, JukeboxData::load)),
+                com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(JukeboxData::new, JukeboxData::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(JukeboxData::new, JukeboxData::load)),
                 DATA_ID
         );
     }
@@ -50,7 +50,7 @@ public class JukeboxData extends SavedData {
     // ── 序列化 ──
 
     @Override
-    public CompoundTag save(@javax.annotation.Nonnull CompoundTag tag, @javax.annotation.Nonnull HolderLookup.Provider registries) {
+    public CompoundTag save(@javax.annotation.Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
         ListTag list = new ListTag();
         for (var entry : tracks.entrySet()) {
             CompoundTag e = new CompoundTag();

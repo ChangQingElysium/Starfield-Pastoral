@@ -33,14 +33,14 @@ public final class PetGameTests {
             data.bowl(new PetWorldData.Bowl(farm, pet.bowl, "stone", 9, false)); data.put(pet);
         }
         data.markLoved(farm); data.markPrepared(farm);
-        var restored = PetWorldData.load(data.save(new CompoundTag(), h.getLevel().registryAccess()), h.getLevel().registryAccess());
+        var restored = PetWorldData.load(data.save(new CompoundTag()), h.getLevel().registryAccess());
         h.assertTrue(restored.forFarm(farm).size() == 12 && restored.loved(farm) && restored.prepared(farm) && !restored.chooseInitial(farm), "Save lost index or receipts");
         for (var pet : data.all()) {
             var copy = restored.find(pet.id);
             h.assertTrue(copy.save().equals(pet.save()) && restored.occupant(copy.bowl).id.equals(copy.id), "Pet identity/care/precise position changed");
             h.assertTrue(!restored.bowl(copy.bowl).outdoors(), "Indoor bowl became rain-filled after reload");
         }
-        var removed = restored.forFarm(farm).getFirst(); var pos = removed.bowl; restored.removeBowl(pos);
+        var removed = com.stardew.craft.port.PortJava.getFirst(restored.forFarm(farm)); var pos = removed.bowl; restored.removeBowl(pos);
         h.assertTrue(removed.bowl == null && restored.bowl(pos) == null, "Removed bowl retained pet assignment");
         restored.removeFarm(farm); h.assertTrue(restored.all().isEmpty() && restored.bowls().isEmpty(), "Deleted farm retained pet state"); h.succeed();
     }

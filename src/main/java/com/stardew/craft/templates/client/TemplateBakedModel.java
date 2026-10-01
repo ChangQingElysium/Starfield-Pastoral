@@ -36,7 +36,8 @@ import net.minecraftforge.client.model.pipeline.QuadBakingVertexConsumer;
 import com.stardew.craft.port.net.neoforged.neoforge.common.util.TriState;
 import org.joml.Vector3f;
 
-final class TemplateBakedModel extends BakedModelWrapper<BakedModel> implements IDynamicBakedModel {
+import com.stardew.craft.port.PortVertex;
+final class TemplateBakedModel extends BakedModelWrapper<BakedModel> implements IDynamicBakedModel, ModelDataAmbientOcclusion {
     private static final net.minecraftforge.client.model.data.ModelProperty<Integer> ROOF_PHASE =
             new net.minecraftforge.client.model.data.ModelProperty<>();
     private static final net.minecraftforge.client.model.data.ModelProperty<Integer> ROOF_EDGES =
@@ -233,11 +234,22 @@ final class TemplateBakedModel extends BakedModelWrapper<BakedModel> implements 
         return (usesStudy(data) ? originalModel : Minecraft.getInstance().getBlockRenderer().getBlockModel(material)).getParticleIcon(ModelData.EMPTY);
     }
 
+    /**
+     * 1.21 {@code useAmbientOcclusion(state, data, renderType)}. PORT(1.20.1): Forge's ModelBlockRenderer asks
+     * {@code useAmbientOcclusion(state, renderType)} without model data; {@code TemplateModelAmbientOcclusionMixin}
+     * routes block tesselation here with the block's ModelData. The 1.20.1 material model answers a boolean
+     * (1.21 DEFAULT/FALSE), and Forge keeps the light-emission check that 1.21 applies to DEFAULT.
+     */
     @Override
-    public TriState useAmbientOcclusion(BlockState state, ModelData data, RenderType renderType) {
+    public boolean stardewcraft$useAmbientOcclusion(BlockState state, ModelData data, RenderType renderType) {
         BlockState material = material(data);
         return Minecraft.getInstance().getBlockRenderer().getBlockModel(material)
-                .useAmbientOcclusion(material, ModelData.EMPTY, renderType);
+                .useAmbientOcclusion(material, renderType);
+    }
+
+    @Override
+    public boolean useAmbientOcclusion(BlockState state, RenderType renderType) {
+        return stardewcraft$useAmbientOcclusion(state, ModelData.EMPTY, renderType);
     }
 
     private List<BakedQuad> buildMaterialQuads(BlockState material, BakedModel materialModel,
@@ -471,7 +483,8 @@ final class TemplateBakedModel extends BakedModelWrapper<BakedModel> implements 
 
     private static BakedQuad bakeFallback(TemplateMesh.MeshQuad quad, TextureAtlasSprite sprite, int tintIndex,
                                           boolean shade, boolean ambientOcclusion) {
-        QuadBakingVertexConsumer baker = new QuadBakingVertexConsumer();
+        // PORT(1.20.1): Forge's Buffered baker emits the quad on the fourth endVertex() (NeoForge: bakeQuad()).
+        QuadBakingVertexConsumer.Buffered baker = new QuadBakingVertexConsumer.Buffered();
         Vector3f normal = normal(quad);
         baker.setDirection(Direction.getNearest(normal.x, normal.y, normal.z));
         baker.setSprite(sprite);
@@ -485,12 +498,12 @@ final class TemplateBakedModel extends BakedModelWrapper<BakedModel> implements 
             float[] uv = texturePoint == null
                     ? fallbackUv(quad.direction(), vertex, sprite)
                     : spriteUv(sprite, texturePoint.u(), texturePoint.v());
-            baker.addVertex(vertex.x, vertex.y, vertex.z)
+            PortVertex.of(baker).addVertex(vertex.x, vertex.y, vertex.z)
                     .setUv(uv[0], uv[1])
                     .setColor(-1)
-                    .setNormal(normal.x, normal.y, normal.z);
+                    .setNormal(normal.x, normal.y, normal.z).endVertex();
         }
-        return baker.bakeQuad();
+        return baker.getQuad();
     }
 
     private static float[] faceCoordinates(Direction direction, Vector3f vertex) {
@@ -520,9 +533,9 @@ final class TemplateBakedModel extends BakedModelWrapper<BakedModel> implements 
                     Float.intBitsToFloat(data[offset + IQuadTransformer.POSITION + 1]),
                     Float.intBitsToFloat(data[offset + IQuadTransformer.POSITION + 2]));
             points[vertex] = faceCoordinates(source.getDirection(), position);
-            texture[vertex][0] = source.getSprite().getUOffset(
+            texture[vertex][0] = com.stardew.craft.port.PortSprites.getUOffset(source.getSprite(), 
                     Float.intBitsToFloat(data[offset + IQuadTransformer.UV0]));
-            texture[vertex][1] = source.getSprite().getVOffset(
+            texture[vertex][1] = com.stardew.craft.port.PortSprites.getVOffset(source.getSprite(), 
                     Float.intBitsToFloat(data[offset + IQuadTransformer.UV0 + 1]));
         }
 
@@ -544,8 +557,8 @@ final class TemplateBakedModel extends BakedModelWrapper<BakedModel> implements 
         float v = weights[0] * texture[triangle[0]][1] + weights[1] * texture[triangle[1]][1]
                 + weights[2] * texture[triangle[2]][1];
         return contained
-                ? new float[]{source.getSprite().getU(Mth.clamp(u, 0F, 1F)),
-                        source.getSprite().getV(Mth.clamp(v, 0F, 1F))}
+                ? new float[]{com.stardew.craft.port.PortSprites.getU(source.getSprite(), Mth.clamp(u, 0F, 1F)),
+                        com.stardew.craft.port.PortSprites.getV(source.getSprite(), Mth.clamp(v, 0F, 1F))}
                 : spriteUv(source.getSprite(), u, v);
     }
 
@@ -553,7 +566,7 @@ final class TemplateBakedModel extends BakedModelWrapper<BakedModel> implements 
         float shrink = sprite.uvShrinkRatio();
         float safeU = Mth.lerp(shrink, Mth.clamp(u, 0F, 1F), 0.5F);
         float safeV = Mth.lerp(shrink, Mth.clamp(v, 0F, 1F), 0.5F);
-        return new float[]{sprite.getU(safeU), sprite.getV(safeV)};
+        return new float[]{com.stardew.craft.port.PortSprites.getU(sprite, safeU), com.stardew.craft.port.PortSprites.getV(sprite, safeV)};
     }
 
     private static float[] faceBounds(BakedQuad quad) {

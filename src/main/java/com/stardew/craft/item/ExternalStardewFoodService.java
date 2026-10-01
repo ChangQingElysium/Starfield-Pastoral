@@ -148,7 +148,7 @@ public final class ExternalStardewFoodService {
             if (!shouldApply(configured.chance(), roll)) {
                 return;
             }
-            BuiltInRegistries.MOB_EFFECT.getHolder(configured.effect()).ifPresentOrElse(
+            BuiltInRegistries.MOB_EFFECT.getHolder(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.MOB_EFFECT, configured.effect())).ifPresentOrElse(
                     effect -> player.addEffect(toInstance(effect, configured)),
                     () -> reportMissingEffect(entryId, configured.effect()));
         }));
@@ -159,7 +159,7 @@ public final class ExternalStardewFoodService {
             StardewFoodEffect configured
     ) {
         return new MobEffectInstance(
-                effect,
+                effect.value(),
                 configured.durationTicks(),
                 configured.amplifier(),
                 configured.ambient(),

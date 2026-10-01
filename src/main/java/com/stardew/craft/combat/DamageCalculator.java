@@ -186,7 +186,7 @@ public final class DamageCalculator {
         criticalChance += ElfBladeMarkTracker.getCritChanceBonus(target, attacker, nowTick);
 
         MobEffect weakPointEffect = ModMobEffects.WEAK_POINT.get();
-        MobEffectInstance weakPoint = target.getEffect(Holder.direct(weakPointEffect));
+        MobEffectInstance weakPoint = target.getEffect(weakPointEffect);
         if (weakPoint != null) {
             criticalChance += 0.05f * (weakPoint.getAmplifier() + 1);
         }

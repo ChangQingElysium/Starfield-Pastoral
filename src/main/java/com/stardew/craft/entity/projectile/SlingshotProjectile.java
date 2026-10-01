@@ -115,6 +115,6 @@ public final class SlingshotProjectile extends net.minecraft.world.entity.projec
                 (random.nextDouble()-.5)*.08,random.nextDouble()*.08,(random.nextDouble()-.5)*.08);
         else super.handleEntityEvent(event);
     }
-    @Override public void addAdditionalSaveData(CompoundTag tag){super.addAdditionalSaveData(tag);tag.putInt("SlingshotDamage",damage);tag.putFloat("SlingshotSpin",spinDegreesPerTick());if(!getItem().isEmpty())tag.put("Ammo",com.stardew.craft.port.PortItemStacks.save(getItem(),registryAccess()));MeowmereProjectileEntity.writeReleaseWeaponSnapshot(tag,weapon,registryAccess());}
-    @Override public void readAdditionalSaveData(CompoundTag tag){super.readAdditionalSaveData(tag);damage=tag.getInt("SlingshotDamage");entityData.set(SPIN,tag.getFloat("SlingshotSpin"));setItem(PortItemStacks.parseOptional(registryAccess(),tag.getCompound("Ammo")));weapon=MeowmereProjectileEntity.readReleaseWeaponSnapshot(tag,registryAccess());setNoGravity(true);}
+    @Override public void addAdditionalSaveData(CompoundTag tag){super.addAdditionalSaveData(tag);tag.putInt("SlingshotDamage",damage);tag.putFloat("SlingshotSpin",spinDegreesPerTick());if(!getItem().isEmpty())tag.put("Ammo",com.stardew.craft.port.PortItemStacks.save(getItem(),level().registryAccess()));MeowmereProjectileEntity.writeReleaseWeaponSnapshot(tag,weapon,level().registryAccess());}
+    @Override public void readAdditionalSaveData(CompoundTag tag){super.readAdditionalSaveData(tag);damage=tag.getInt("SlingshotDamage");entityData.set(SPIN,tag.getFloat("SlingshotSpin"));setItem(PortItemStacks.parseOptional(level().registryAccess(),tag.getCompound("Ammo")));weapon=MeowmereProjectileEntity.readReleaseWeaponSnapshot(tag,level().registryAccess());setNoGravity(true);}
 }

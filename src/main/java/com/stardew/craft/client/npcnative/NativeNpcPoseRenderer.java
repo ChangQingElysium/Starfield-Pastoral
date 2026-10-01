@@ -9,6 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.joml.Matrix3f;
 import org.joml.Vector3f;
 
+import com.stardew.craft.port.PortVertex;
 /** Shared native geometry, UV, normal and material passes for NPCs and construction actors. */
 public final class NativeNpcPoseRenderer {
     private final Vector3f vertex = new Vector3f();
@@ -56,10 +57,10 @@ public final class NativeNpcPoseRenderer {
                     vertex.set(v[0], v[1], v[2]);
                     if(deformed!=null)vertex.set(deformed[vi]);
                     else if (quad.bone() >= 0) matrices[quad.bone()].transformPosition(vertex);
-                    consumer.addVertex(stack.last().pose(), vertex.x, vertex.y, vertex.z)
+                    PortVertex.of(consumer).addVertex(stack.last().pose(), vertex.x, vertex.y, vertex.z)
                             .setColor(255,255,255,Math.round(255*alpha)).setUv(v[3],v[4])
                             .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light)
-                            .setNormal(stack.last(), normal.x, normal.y, normal.z);
+                            .setNormal(stack.last(), normal.x, normal.y, normal.z).endVertex();
                 }
             }
         }

@@ -232,15 +232,15 @@ public final class BuiltinApiTypes {
                         return copy;
                     })
                     .toList();
-        }, (owner, data) -> StardewItemQueries.contentReferences(
-                owner, data.query()).getOrThrow());
+        }, (owner, data) -> com.stardew.craft.port.PortDataResults.getOrThrow(StardewItemQueries.contentReferences(
+                owner, data.query())));
 
         StardewItemQueries.register(id("one_of_queries"), OneOfQueriesItemQuery.CODEC, (context, data) -> {
             StardewItemQuery selected = data.queries().get(context.random().nextInt(data.queries().size()));
             return StardewItemQueries.resolve(selected, context).result().orElse(List.of());
         }, (owner, data) -> data.queries().stream()
-                .flatMap(query -> StardewItemQueries.contentReferences(
-                        owner, query).getOrThrow().stream())
+                .flatMap(query -> com.stardew.craft.port.PortDataResults.getOrThrow(StardewItemQueries.contentReferences(
+                        owner, query)).stream())
                 .toList());
 
         StardewItemQueries.register(id("weighted"), WeightedItemQuery.CODEC, (context, data) -> {
@@ -254,8 +254,8 @@ public final class BuiltinApiTypes {
             }
             return List.of();
         }, (owner, data) -> data.entries().stream()
-                .flatMap(entry -> StardewItemQueries.contentReferences(
-                        owner, entry.query()).getOrThrow().stream())
+                .flatMap(entry -> com.stardew.craft.port.PortDataResults.getOrThrow(StardewItemQueries.contentReferences(
+                        owner, entry.query())).stream())
                 .toList());
         StardewItemQueries.<DirectItemQuery>registerPreview(id("item"), (ctx, d) ->
                 BuiltInRegistries.ITEM.containsKey(d.item()) ? List.of(new ItemStack(BuiltInRegistries.ITEM.get(d.item()), d.count())) : List.of());
@@ -267,16 +267,16 @@ public final class BuiltinApiTypes {
         });
         StardewItemQueries.<RandomCountItemQuery>registerPreview(id("random_count"), (ctx, d) -> {
             var result = new ArrayList<ItemStack>();
-            for (var stack : StardewItemQueries.preview(d.query(), ctx).getOrThrow()) {
+            for (var stack : com.stardew.craft.port.PortDataResults.getOrThrow(StardewItemQueries.preview(d.query(), ctx))) {
                 result.add(stack.copyWithCount(d.minCount()));
                 if (d.minCount() != d.maxCount()) result.add(stack.copyWithCount(d.maxCount()));
             }
             return result;
         });
         StardewItemQueries.<OneOfQueriesItemQuery>registerPreview(id("one_of_queries"), (ctx, d) -> d.queries().stream()
-                .flatMap(query -> StardewItemQueries.preview(query, ctx).getOrThrow().stream()).toList());
+                .flatMap(query -> com.stardew.craft.port.PortDataResults.getOrThrow(StardewItemQueries.preview(query, ctx)).stream()).toList());
         StardewItemQueries.<WeightedItemQuery>registerPreview(id("weighted"), (ctx, d) -> d.entries().stream()
-                .flatMap(entry -> StardewItemQueries.preview(entry.query(), ctx).getOrThrow().stream()).toList());
+                .flatMap(entry -> com.stardew.craft.port.PortDataResults.getOrThrow(StardewItemQueries.preview(entry.query(), ctx)).stream()).toList());
     }
 
     private static void registerActions() {
@@ -438,7 +438,7 @@ public final class BuiltinApiTypes {
                 Codec.INT.optionalFieldOf("min", Integer.MIN_VALUE).forGetter(MoneyCondition::min),
                 Codec.INT.optionalFieldOf("max", Integer.MAX_VALUE).forGetter(MoneyCondition::max)
         ).apply(instance, MoneyCondition::new));
-        private static final Codec<MoneyCondition> CODEC = BASE_CODEC.validate(data -> data.max() < data.min()
+        private static final Codec<MoneyCondition> CODEC = com.stardew.craft.port.PortCodecs.validate(BASE_CODEC, data -> data.max() < data.min()
                 ? com.mojang.serialization.DataResult.error(() -> "money.max must be >= money.min")
                 : com.mojang.serialization.DataResult.success(data));
     }
@@ -461,7 +461,7 @@ public final class BuiltinApiTypes {
         private static final Codec<SeasonCondition> BASE_CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 Codec.STRING.listOf().fieldOf("seasons").forGetter(SeasonCondition::seasons)
         ).apply(instance, SeasonCondition::new));
-        private static final Codec<SeasonCondition> CODEC = BASE_CODEC.validate(data -> {
+        private static final Codec<SeasonCondition> CODEC = com.stardew.craft.port.PortCodecs.validate(BASE_CODEC, data -> {
             if (data.seasons().isEmpty()) {
                 return com.mojang.serialization.DataResult.error(() -> "season.seasons must not be empty");
             }
@@ -476,7 +476,7 @@ public final class BuiltinApiTypes {
 
     private record TimeCondition(int start, int end) {
         private static final Codec<TimeCondition> CODEC =
-                RecordCodecBuilder.<TimeCondition>create(
+                com.stardew.craft.port.PortCodecs.validate(RecordCodecBuilder.<TimeCondition>create(
                         instance -> instance.group(
                         Codec.intRange(0, 2600).optionalFieldOf(
                                         "start", 0)
@@ -484,8 +484,7 @@ public final class BuiltinApiTypes {
                         Codec.intRange(0, 2600).optionalFieldOf(
                                         "end", 2600)
                                 .forGetter(TimeCondition::end)
-                ).apply(instance, TimeCondition::new))
-                        .validate(value -> validHhmm(value.start())
+                ).apply(instance, TimeCondition::new)), value -> validHhmm(value.start())
                                         && validHhmm(value.end())
                                 ? com.mojang.serialization.DataResult
                                         .success(value)
@@ -517,12 +516,11 @@ public final class BuiltinApiTypes {
 
     private record SeenEventCondition(String id, String scope) {
         private static final Codec<SeenEventCondition> CODEC =
-                RecordCodecBuilder.<SeenEventCondition>create(instance -> instance.group(
+                com.stardew.craft.port.PortCodecs.validate(RecordCodecBuilder.<SeenEventCondition>create(instance -> instance.group(
                         Codec.STRING.fieldOf("id").forGetter(SeenEventCondition::id),
                         Codec.STRING.optionalFieldOf("scope", "current")
                                 .forGetter(SeenEventCondition::scope)
-                ).apply(instance, SeenEventCondition::new))
-                        .validate(value -> List.of("current", "host")
+                ).apply(instance, SeenEventCondition::new)), value -> List.of("current", "host")
                                         .contains(value.scope())
                                 ? com.mojang.serialization.DataResult.success(value)
                                 : com.mojang.serialization.DataResult.error(
@@ -559,7 +557,7 @@ public final class BuiltinApiTypes {
                                 .forGetter(LocationCondition::properties)
                 ).apply(instance, LocationCondition::new));
         private static final Codec<LocationCondition> CODEC =
-                BASE_CODEC.validate(data -> {
+                com.stardew.craft.port.PortCodecs.validate(BASE_CODEC, data -> {
                     if (data.locations().isEmpty()
                             && data.requiredTags().isEmpty()
                             && data.excludedTags().isEmpty()
@@ -618,7 +616,7 @@ public final class BuiltinApiTypes {
                 ResourceLocation.CODEC.listOf().fieldOf("items").forGetter(OneOfItemQuery::items),
                 Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("count", 1).forGetter(OneOfItemQuery::count)
         ).apply(instance, OneOfItemQuery::new));
-        private static final Codec<OneOfItemQuery> CODEC = BASE_CODEC.validate(data -> data.items().isEmpty()
+        private static final Codec<OneOfItemQuery> CODEC = com.stardew.craft.port.PortCodecs.validate(BASE_CODEC, data -> data.items().isEmpty()
                 ? com.mojang.serialization.DataResult.error(() -> "one_of.items must not be empty")
                 : com.mojang.serialization.DataResult.success(data));
     }
@@ -629,7 +627,7 @@ public final class BuiltinApiTypes {
                 Codec.intRange(1, Integer.MAX_VALUE).fieldOf("min_count").forGetter(RandomCountItemQuery::minCount),
                 Codec.intRange(1, Integer.MAX_VALUE).fieldOf("max_count").forGetter(RandomCountItemQuery::maxCount)
         ).apply(instance, RandomCountItemQuery::new));
-        private static final Codec<RandomCountItemQuery> CODEC = BASE_CODEC.validate(data ->
+        private static final Codec<RandomCountItemQuery> CODEC = com.stardew.craft.port.PortCodecs.validate(BASE_CODEC, data ->
                 data.maxCount() < data.minCount()
                         ? com.mojang.serialization.DataResult.error(() ->
                                 "random_count.max_count must be >= min_count")
@@ -640,7 +638,7 @@ public final class BuiltinApiTypes {
         private static final Codec<OneOfQueriesItemQuery> BASE_CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 StardewItemQueries.CODEC.listOf().fieldOf("queries").forGetter(OneOfQueriesItemQuery::queries)
         ).apply(instance, OneOfQueriesItemQuery::new));
-        private static final Codec<OneOfQueriesItemQuery> CODEC = BASE_CODEC.validate(data ->
+        private static final Codec<OneOfQueriesItemQuery> CODEC = com.stardew.craft.port.PortCodecs.validate(BASE_CODEC, data ->
                 data.queries().isEmpty()
                         ? com.mojang.serialization.DataResult.error(() ->
                                 "one_of_queries.queries must not be empty")
@@ -659,7 +657,7 @@ public final class BuiltinApiTypes {
         private static final Codec<WeightedItemQuery> BASE_CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 WeightedQueryEntry.CODEC.listOf().fieldOf("entries").forGetter(WeightedItemQuery::entries)
         ).apply(instance, WeightedItemQuery::new));
-        private static final Codec<WeightedItemQuery> CODEC = BASE_CODEC.validate(data ->
+        private static final Codec<WeightedItemQuery> CODEC = com.stardew.craft.port.PortCodecs.validate(BASE_CODEC, data ->
                 data.entries().isEmpty()
                         ? com.mojang.serialization.DataResult.error(() ->
                                 "weighted.entries must not be empty")

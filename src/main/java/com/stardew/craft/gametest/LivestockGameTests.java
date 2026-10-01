@@ -78,7 +78,7 @@ public final class LivestockGameTests {
         var animal = new LivestockRecord(id, id, UUID.randomUUID(), home, "Pebble", 2, 8, LivestockCare.purchased());
         data.put(animal); var egg = new LivestockWorldData.Product(UUID.randomUUID(), id, home, true, 4);
         data.prepare(new LivestockWorldData.Batch(home, List.of(animal.withCare(9, animal.care())), List.of(egg), List.of(new BlockPos(1, 2, 3))));
-        var restored = LivestockWorldData.load(data.save(new CompoundTag(), h.getLevel().registryAccess()), h.getLevel().registryAccess());
+        var restored = LivestockWorldData.load(data.save(new CompoundTag()), h.getLevel().registryAccess());
         h.assertTrue(restored.pending().consumed().equals(List.of(new BlockPos(1, 2, 3))), "Journal lost physical feed receipt");
         restored.finish(); restored.finish();
         h.assertTrue(restored.find(id).settledDay() == 9 && restored.eggs().equals(List.of(egg)), "Replay duplicated settlement");
@@ -188,7 +188,7 @@ public final class LivestockGameTests {
             LivestockService.project(server); var moved = buildings.find(home.id());
             h.assertTrue(data.find(nonce).home().equals(moved.id()) && moved.claim().contains(level.getEntity(nonce).blockPosition()), "Moved animal lost stable home or spawned at old coordinates");
             h.assertTrue(data.egg(egg.id()).home().equals(moved.id()) && moved.claim().contains(level.getEntity(egg.id()).blockPosition()), "Pending egg did not follow moved home");
-            var restored = LivestockWorldData.load(data.save(new CompoundTag(), level.registryAccess()), level.registryAccess());
+            var restored = LivestockWorldData.load(data.save(new CompoundTag()), level.registryAccess());
             h.assertTrue(restored.find(nonce).equals(data.find(nonce)) && restored.find(nonce).care().equals(animal.care()) && restored.find(nonce).id().equals(animal.id()) && restored.egg(egg.id()).equals(data.egg(egg.id())), "Reload changed animal/product identity");
         } finally { farms.deleteFarm(owner); }
         h.succeed();
@@ -414,7 +414,7 @@ public final class LivestockGameTests {
             for(int i=0;i<3;i++)data.put(new LivestockRecord(UUID.randomUUID(),owner,farm.getInstanceId(),home.id(),"Adult",data.allocateRandomId(),1,LivestockCare.purchased()));
             var baby=new LivestockRecord(id,owner,farm.getInstanceId(),home.id(),"",data.allocateRandomId(),1,LivestockCare.purchased());data.put(baby);data.newborn(id,true);
             h.assertTrue(data.occupancy(home.id())==4,"Pending newborn did not reserve a bed");
-            var restored=LivestockWorldData.load(data.save(new CompoundTag(),level.registryAccess()),level.registryAccess());
+            var restored=LivestockWorldData.load(data.save(new CompoundTag()),level.registryAccess());
             h.assertTrue(restored.newborn(id) && restored.occupancy(home.id())==4,"Reload lost pending newborn reservation");
             var player=FakePlayerFactory.get(level,new GameProfile(owner,"Birth"));
             h.assertTrue(LivestockBirths.name(player,id,"Juniper").isEmpty() && !data.newborn(id) && data.find(id).name().equals("Juniper"),"Newborn naming failed");

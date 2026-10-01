@@ -104,7 +104,7 @@ public final class BlacksmithService {
             ResourceLocation rl = new ResourceLocation(upgradedToolId);
             Item toolItem = BuiltInRegistries.ITEM.get(rl);
             if (toolItem != null && toolItem != Items.AIR) {
-                ItemStack stack = data.getToolUpgradeStack(player.registryAccess());
+                ItemStack stack = data.getToolUpgradeStack(player.level().registryAccess());
                 if (stack.isEmpty()) stack = new ItemStack(toolItem);
                 player.getInventory().add(stack);
 
@@ -314,7 +314,7 @@ public final class BlacksmithService {
         if (slot >= 0) player.getInventory().getItem(slot).shrink(1);
         var data = PlayerDataManager.getPlayerData(player);
         data.setToolBeingUpgraded(definition.output().toString());
-        data.setToolUpgradeStack(result, player.registryAccess());
+        data.setToolUpgradeStack(result, player.level().registryAccess());
         data.setDaysLeftForToolUpgrade(definition.days());
         data.setToolUpgradeNotified(false);
         PlayerDataManager.get().setDirty();

@@ -20,7 +20,7 @@ public record StardewWorldLootPoolDefinition(
         List<StardewCondition> availableWhen,
         List<Entry> entries
 ) {
-    public static final Codec<StardewWorldLootPoolDefinition> CODEC = RecordCodecBuilder.<StardewWorldLootPoolDefinition>create(instance -> instance.group(
+    public static final Codec<StardewWorldLootPoolDefinition> CODEC = com.stardew.craft.port.PortCodecs.validate(RecordCodecBuilder.<StardewWorldLootPoolDefinition>create(instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("source").forGetter(StardewWorldLootPoolDefinition::source),
             Codec.STRING.optionalFieldOf("group", "default").forGetter(StardewWorldLootPoolDefinition::group),
             Mode.CODEC.optionalFieldOf("mode", Mode.WEIGHTED).forGetter(StardewWorldLootPoolDefinition::mode),
@@ -28,7 +28,7 @@ public record StardewWorldLootPoolDefinition(
             StardewConditions.CODEC.listOf().optionalFieldOf("available_when", List.of())
                     .forGetter(StardewWorldLootPoolDefinition::availableWhen),
             Entry.CODEC.listOf().fieldOf("entries").forGetter(StardewWorldLootPoolDefinition::entries)
-    ).apply(instance, StardewWorldLootPoolDefinition::new)).validate(StardewWorldLootPoolDefinition::validate);
+    ).apply(instance, StardewWorldLootPoolDefinition::new)), StardewWorldLootPoolDefinition::validate);
 
     public StardewWorldLootPoolDefinition {
         group = group == null ? "default" : group.trim();

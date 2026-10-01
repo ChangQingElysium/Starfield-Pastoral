@@ -24,7 +24,6 @@ import net.minecraft.network.protocol.PacketFlow;
 import com.stardew.craft.port.net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import com.stardew.craft.port.net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
@@ -146,10 +145,9 @@ public final class DesertTravelGameTests {
 
     private static ServerPlayer player(ServerLevel level, List<OpenDesertBusConfirmPayload> packets) {
         var player = new ServerPlayer(level.getServer(), level, new GameProfile(UUID.randomUUID(), "BusReader"));
-        player.connection = new ServerGamePacketListenerImpl(level.getServer(), new Connection(PacketFlow.SERVERBOUND), player,
-                CommonListenerCookie.createInitial(player.getGameProfile(), false)) {
+        player.connection = new ServerGamePacketListenerImpl(level.getServer(), new Connection(PacketFlow.SERVERBOUND), player) {
             @Override public void send(Packet<?> packet) {
-                if (packet instanceof ClientboundCustomPayloadPacket custom && custom.payload() instanceof OpenDesertBusConfirmPayload confirm)
+                if (ClientboundCustomPayloadPacket.unwrap(packet) instanceof ClientboundCustomPayloadPacket custom && custom.payload() instanceof OpenDesertBusConfirmPayload confirm)
                     packets.add(confirm);
             }
         };

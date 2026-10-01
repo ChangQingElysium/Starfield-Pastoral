@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.stardew.craft.port.PortVertex;
 /** One removable, editor-authored portion of the rod's real bait stack. Local zero is the hook tip. */
 public final class FishingBaitModels {
     public static final List<String> IDS=List.of("bait","magnet","wild_bait","magic_bait","deluxe_bait","challenge_bait","targeted_bait");
@@ -82,15 +83,15 @@ public final class FishingBaitModels {
         var model=models.get(selected.model());if(model==null)return;
         pose.pushPose();
         try {
-            pose.mulPose(matrix);boolean reflected=matrix.determinant()<0;
+            PortVertex.mulPose(pose, matrix);boolean reflected=matrix.determinant()<0;
             var out=buffers.getBuffer(RenderType.entityCutout(texture(model.id())));
             for(var face:model.faces()) {
                 var n=normal(face).normalize();int color=faceColor(face,selected);
                 for(int k=0;k<4;k++) {
                     var v=face.vertices().get(reflected?3-k:k);var p=v.point();
-                    out.addVertex(pose.last().pose(),p[0],p[1],p[2]).setColor(0xff000000|color)
+                    PortVertex.of(out).addVertex(pose.last().pose(),p[0],p[1],p[2]).setColor(0xff000000|color)
                             .setUv(v.uv()[0],v.uv()[1]).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light)
-                            .setNormal(pose.last(),n.x,n.y,n.z);
+                            .setNormal(pose.last(),n.x,n.y,n.z).endVertex();
                 }
             }
         }finally{pose.popPose();}

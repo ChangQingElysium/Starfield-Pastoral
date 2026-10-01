@@ -429,7 +429,7 @@ public final class StardewValleyMapBootstrap {
                 }
 
                 String hash = sha256Hex(bytes);
-                CompoundTag root = NbtIo.readCompressed(new ByteArrayInputStream(bytes), NbtAccounter.unlimitedHeap());
+                CompoundTag root = com.stardew.craft.port.PortNbtIo.readCompressed(new ByteArrayInputStream(bytes), NbtAccounter.UNLIMITED);
                 if (root == null) {
                     StardewCraft.LOGGER.error("[VALLEY_MAP] Failed to read schem NBT: {}", candidate);
                     continue;
@@ -929,7 +929,7 @@ public final class StardewValleyMapBootstrap {
         }
 
         @Override
-        public @Nonnull CompoundTag save(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider provider) {
+        public @Nonnull CompoundTag save(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
             tag.putBoolean("applied", applied);
             tag.putString("appliedHash", appliedHash == null ? "" : appliedHash);
             tag.putString("pendingHash", pendingHash == null ? "" : pendingHash);

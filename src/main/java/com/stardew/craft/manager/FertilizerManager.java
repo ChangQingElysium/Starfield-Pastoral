@@ -279,7 +279,7 @@ public class FertilizerManager extends SavedData {
             
             GlobalPos gPos = entry.getKey();
             entryTag.putString("dimension", gPos.dimension().location().toString());
-            entryTag.put("pos", NbtUtils.writeBlockPos(gPos.pos()));
+            entryTag.put("pos", com.stardew.craft.port.PortNbtUtils.writeBlockPos(gPos.pos()));
             entryTag.putString("type", entry.getValue().getSerializedName());
             
             listTag.add(entryTag);
@@ -306,7 +306,7 @@ public class FertilizerManager extends SavedData {
                             net.minecraft.core.registries.Registries.DIMENSION,
                             dimLoc
                     );
-                    BlockPos pos = NbtUtils.readBlockPos(entryTag, "pos").orElseThrow();
+                    BlockPos pos = com.stardew.craft.port.PortNbtUtils.readBlockPos(entryTag, "pos").orElseThrow();
                     String typeName = entryTag.getString("type");
                     
                     FertilizerType type = FertilizerType.bySerializedName(typeName);

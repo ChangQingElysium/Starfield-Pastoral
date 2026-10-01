@@ -34,7 +34,7 @@ public record StardewMasteryRewardDefinition(
             String descKey,
             Optional<ResourceLocation> statBonus
     ) {
-        public static final Codec<Entry> CODEC = RecordCodecBuilder.<Entry>create(instance -> instance.group(
+        public static final Codec<Entry> CODEC = com.stardew.craft.port.PortCodecs.validate(RecordCodecBuilder.<Entry>create(instance -> instance.group(
                 Kind.CODEC.fieldOf("kind").forGetter(Entry::kind),
                 ResourceLocation.CODEC.optionalFieldOf("item").forGetter(Entry::item),
                 Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("count", 1).forGetter(Entry::count),
@@ -42,7 +42,7 @@ public record StardewMasteryRewardDefinition(
                 Codec.STRING.fieldOf("name_key").forGetter(Entry::nameKey),
                 Codec.STRING.fieldOf("desc_key").forGetter(Entry::descKey),
                 ResourceLocation.CODEC.optionalFieldOf("stat_bonus").forGetter(Entry::statBonus)
-        ).apply(instance, Entry::new)).validate(Entry::validate);
+        ).apply(instance, Entry::new)), Entry::validate);
 
         public Entry {
             item = item == null ? Optional.empty() : item;

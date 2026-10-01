@@ -25,6 +25,7 @@ import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import org.joml.Matrix3f;
 import org.joml.Vector3f;
 
+import com.stardew.craft.port.PortVertex;
 /** Approved Generic bat, cutout wing membranes and a backface-culled signed head hull. */
 @SuppressWarnings({"null", "removal"})
 @EventBusSubscriber(modid = StardewCraft.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
@@ -120,7 +121,7 @@ public final class NativeBatRenderer extends EntityRenderer<MineBatEntity> {
         stack.translate(0, lift * entity.getScale(), 0);
         float scale = entity.getScale() / 16;
         stack.scale(scale, scale, scale);
-        stack.mulPose(death);
+        PortVertex.mulPose(stack, death);
         int overlay = OverlayTexture.pack(0, OverlayTexture.v(entity.hurtTime > 0 || entity.deathTime > 0));
         var consumer = buffers.getBuffer(RenderType.entityCutout(getTextureLocation(entity)));
         for (var quad : model.quads()) {
@@ -128,9 +129,9 @@ public final class NativeBatRenderer extends EntityRenderer<MineBatEntity> {
             matrices[quad.bone()].normal(normalMatrix).transform(normal).normalize();
             for (var v : quad.vertices()) {
                 matrices[quad.bone()].transformPosition(vertex.set(v[0], v[1], v[2]));
-                consumer.addVertex(stack.last().pose(), vertex.x, vertex.y, vertex.z)
+                PortVertex.of(consumer).addVertex(stack.last().pose(), vertex.x, vertex.y, vertex.z)
                         .setColor(255, entity.deepRed() ? 0 : 255, entity.deepRed() ? 0 : 255, 255).setUv(v[3], v[4]).setOverlay(overlay).setLight(light)
-                        .setNormal(stack.last(), normal.x, normal.y, normal.z);
+                        .setNormal(stack.last(), normal.x, normal.y, normal.z).endVertex();
             }
         }
         stack.popPose();

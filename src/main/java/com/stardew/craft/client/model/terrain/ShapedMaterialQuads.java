@@ -140,6 +140,6 @@ public final class ShapedMaterialQuads {
     private static float[] uv(BakedQuad source,double u,double v){
         List<Vertex> p=vertices(source,TerrainFaceConnections.frame(source.getDirection()));int[] data=source.getVertices();int stride=data.length/4;
         for(int i=1;i<p.size()-1;i++){Vertex a=com.stardew.craft.port.PortJava.getFirst(p),b=p.get(i),c=p.get(i+1);double det=(b.u-a.u)*(c.v-a.v)-(c.u-a.u)*(b.v-a.v);if(Math.abs(det)<EPS)continue;double s=((u-a.u)*(c.v-a.v)-(c.u-a.u)*(v-a.v))/det,t=((b.u-a.u)*(v-a.v)-(u-a.u)*(b.v-a.v))/det;float[] out=new float[2];for(int j=0;j<2;j++){float av=Float.intBitsToFloat(data[4+j]),bv=Float.intBitsToFloat(data[i*stride+4+j]),cv=Float.intBitsToFloat(data[(i+1)*stride+4+j]);out[j]=(float)(av+(bv-av)*s+(cv-av)*t);}return out;}
-        return new float[]{source.getSprite().getU((float)u),source.getSprite().getV((float)v)};
+        return new float[]{com.stardew.craft.port.PortSprites.getU(source.getSprite(), (float)u),com.stardew.craft.port.PortSprites.getV(source.getSprite(), (float)v)};
     }
 }

@@ -98,7 +98,7 @@ public final class IridiumNeedleFrenzySkillHandler implements RuntimeWeaponSkill
                     new IridiumNeedleFrenzyPayload(true, DURATION_TICKS)
             );
             context.player().addEffect(new MobEffectInstance(
-                    speed,
+                    speed.value(),
                     DURATION_TICKS,
                     SPEED_AMPLIFIER,
                     false,

@@ -17,6 +17,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraftforge.client.RenderTypeHelper;
 import net.minecraftforge.client.model.data.ModelData;
 
+import com.stardew.craft.port.PortVertex;
 public final class FloatingPlantBlockEntityRenderer implements BlockEntityRenderer<FloatingPlantBlockEntity> {
     public FloatingPlantBlockEntityRenderer(BlockEntityRendererProvider.Context context) {}
 
@@ -53,7 +54,7 @@ public final class FloatingPlantBlockEntityRenderer implements BlockEntityRender
             pose.translate(-.5, ring * .0002, -.5);
             for (var quad : parts.ripples())
                 if (quad.getDirection() == Direction.UP)
-                    water.putBulkData(pose.last(), quad, 1, 1, 1, alpha, light, overlay);
+                    PortVertex.putBulkData(water, pose.last(), quad, 1, 1, 1, alpha, light, overlay);
             pose.popPose();
         }
         pose.popPose();

@@ -11,14 +11,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /** Pre-render traversal and stencil preparation hooks adapted from Immersive Portals (Apache-2.0). */
 @Mixin(GameRenderer.class)
 public abstract class TownDoorCameraMixin {
+    // PORT(1.20.1): GameRenderer#render(float partialTick, long nanoTime, boolean renderLevel) and
+    // renderLevel(float, long, PoseStack) replace the 1.21 DeltaTracker signatures.
     @Inject(method = "render", at = @At("HEAD"))
-    private void stardewcraft$crossDoorBeforeCamera(DeltaTracker delta, boolean renderWorld, CallbackInfo ci) {
-        if (renderWorld) TownDoorClient.beforeRender(delta);
+    private void stardewcraft$crossDoorBeforeCamera(float partialTick, long nanoTime, boolean renderWorld,
+                                                     CallbackInfo ci) {
+        if (renderWorld) TownDoorClient.beforeRender(DeltaTracker.of(partialTick));
     }
 
     @Inject(method = "render", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/client/renderer/GameRenderer;renderLevel(Lnet/minecraft/client/DeltaTracker;)V"))
-    private void stardewcraft$prepareDoorBeforeWorld(DeltaTracker delta, boolean renderWorld, CallbackInfo ci) {
+            target = "Lnet/minecraft/client/renderer/GameRenderer;renderLevel(FJLcom/mojang/blaze3d/vertex/PoseStack;)V"))
+    private void stardewcraft$prepareDoorBeforeWorld(float partialTick, long nanoTime, boolean renderWorld,
+                                                      CallbackInfo ci) {
         TownDoorClient.prepareFrame();
     }
 }

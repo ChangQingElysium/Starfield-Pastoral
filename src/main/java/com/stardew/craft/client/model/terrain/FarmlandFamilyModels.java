@@ -44,8 +44,8 @@ final class FarmlandFamilyModels {
         for(int v=0;v<vertices.length;v+=stride) {
             float x=Float.intBitsToFloat(vertices[v])>.5f?15.999f:.001f;
             float z=Float.intBitsToFloat(vertices[v+2])>.5f?15.999f:.001f;
-            vertices[v+4]=Float.floatToRawIntBits(sprite.getU((column*16+x)/160f));
-            vertices[v+5]=Float.floatToRawIntBits(sprite.getV((row*16+z)/144f));
+            vertices[v+4]=Float.floatToRawIntBits(com.stardew.craft.port.PortSprites.getU(sprite, (column*16+x)/160f));
+            vertices[v+5]=Float.floatToRawIntBits(com.stardew.craft.port.PortSprites.getV(sprite, (row*16+z)/144f));
         }
         return new BakedQuad(vertices,source.getTintIndex(),source.getDirection(),sprite,source.isShade(),source.hasAmbientOcclusion());
     }

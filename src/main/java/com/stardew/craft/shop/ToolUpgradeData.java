@@ -51,7 +51,7 @@ public final class ToolUpgradeData {
         }
         public ItemStack result(ItemStack old) {
             ItemStack result = new ItemStack(BuiltInRegistries.ITEM.get(output));
-            if (copyComponents && !old.isEmpty()) result.applyComponents(old.getComponentsPatch());
+            if (copyComponents && !old.isEmpty()) com.stardew.craft.port.PortItemStacks.applyComponentsPatch(result, old);
             if (resetDamage && result.isDamageableItem()) result.setDamageValue(0);
             return result;
         }
@@ -82,7 +82,7 @@ public final class ToolUpgradeData {
             try {
                 var outputs = new HashSet<ResourceLocation>();
                 for (var e : json.entrySet().stream().sorted(Map.Entry.comparingByKey(Comparator.comparing(ResourceLocation::toString))).toList()) {
-                    var d = Definition.CODEC.parse(JsonOps.INSTANCE, e.getValue()).getOrThrow();
+                    var d = com.stardew.craft.port.PortDataResults.getOrThrow(Definition.CODEC.parse(JsonOps.INSTANCE, e.getValue()));
                     if (d.input().isEmpty() && d.trashCanLevel() == 0) throw new IllegalArgumentException("Missing upgrade input: " + e.getKey());
                     if (d.input().isPresent() && !BuiltInRegistries.ITEM.containsKey(d.input().get())
                             || !BuiltInRegistries.ITEM.containsKey(d.output()) || !BuiltInRegistries.ITEM.containsKey(d.material()))

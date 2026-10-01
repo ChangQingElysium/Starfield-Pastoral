@@ -141,7 +141,7 @@ public final class CasinoContentService {
         Component question = Component.translatable(questionKey);
         PacketDistributor.sendToPlayer(player, new OpenDesertFestivalQuestionPayload(
                 context, 0, "",
-                Component.Serializer.toJson(question, player.registryAccess()),
+                Component.Serializer.toJson(question),
                 List.of(responses)));
     }
 
@@ -150,7 +150,7 @@ public final class CasinoContentService {
         return new OpenDesertFestivalQuestionPayload.ResponseOption(
                 id,
                 Component.Serializer.toJson(
-                        Component.translatable(translationKey), player.registryAccess()));
+                        Component.translatable(translationKey)));
     }
 
     private static void saveAndSync(ServerPlayer player, PlayerStardewData data) {

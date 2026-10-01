@@ -18,8 +18,8 @@ public class GreenAlgaeItem extends Item implements IStardewItem {
     public GreenAlgaeItem(Item.Properties properties) {
         super(properties.food(new FoodProperties.Builder()
                 .nutrition(1)
-                .saturationModifier(0.1f)
-                .alwaysEdible()
+                .saturationMod(0.1f)
+                .alwaysEat()
                 .build()));
     }
 

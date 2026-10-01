@@ -32,7 +32,7 @@ public final class MineGrubEntity extends StardewMonsterEntity {
     private double slideX,slideZ,fallSpeed,skipHorizontal,lastX,lastZ;
     public MineGrubEntity(EntityType<? extends MineGrubEntity> type,Level level){super(type,level);addTag("sd_mob_grub");}
     public static AttributeSupplier.Builder createAttributes(){return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,20)
-            .add(Attributes.ATTACK_DAMAGE,4).add(Attributes.MOVEMENT_SPEED,.25).add(Attributes.FOLLOW_RANGE,64).add(Attributes.STEP_HEIGHT,.5);}
+            .add(Attributes.ATTACK_DAMAGE,4).add(Attributes.MOVEMENT_SPEED,.25).add(Attributes.FOLLOW_RANGE,64).add(com.stardew.craft.port.PortAttributes.STEP_HEIGHT.get(),.5);}
     @Override protected void registerGoals(){}
     @Override protected ResourceLocation definitionId(){return new ResourceLocation("stardewcraft:grub");}
     @Override protected void configureSpawn(MonsterDefinition d,MonsterSpawnContext c){var r=MonsterStatResolver.base(d,c,random);setInitialHealth(r.initialHealth());replaceCombatStats(r.combat());facing=random.nextInt(4);face(facing);lastX=getX();lastZ=getZ();}

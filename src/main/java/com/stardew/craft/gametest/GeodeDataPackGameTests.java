@@ -37,7 +37,7 @@ public final class GeodeDataPackGameTests {
         var originals = new LinkedHashMap<ResourceLocation, JsonElement>();
         GeodeDropData.snapshot().definitions().forEach((id, value) -> originals.put(
                 new ResourceLocation(id.getNamespace(), "drops/" + id.getPath()),
-                StardewGeodeDropDefinition.CODEC.encodeStart(JsonOps.INSTANCE, value).getOrThrow()));
+                com.stardew.craft.port.PortDataResults.getOrThrow(StardewGeodeDropDefinition.CODEC.encodeStart(JsonOps.INSTANCE, value))));
         var reload = GeodeDropData.ReloadListener.class.getDeclaredMethod("apply", Map.class, ResourceManager.class, ProfilerFiller.class);
         reload.setAccessible(true);
         var listener = new GeodeDropData.ReloadListener();

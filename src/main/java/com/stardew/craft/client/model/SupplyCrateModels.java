@@ -23,8 +23,7 @@ public final class SupplyCrateModels {
     public static Vec3 center(int variant, int part) { return CENTERS[variant][part]; }
 
     public static ModelResourceLocation id(int variant, int part) {
-        return ModelResourceLocation.standalone(new ResourceLocation(StardewCraft.MODID,
-                "block/farm_debris/beach_supply_crates/" + MODELS[variant] + "/" + PARTS[part]));
+        return new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID, "block/farm_debris/beach_supply_crates/" + MODELS[variant] + "/" + PARTS[part]), "standalone");
     }
 
     @SubscribeEvent public static void register(ModelEvent.RegisterAdditional event) {

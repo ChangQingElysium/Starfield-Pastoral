@@ -12,6 +12,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 
+import com.stardew.craft.port.PortVertex;
 /**
  * Renders this player's active ore-pan point as a golden glowing column +
  * occasional enchant/end-rod sparkle particles.
@@ -84,8 +85,9 @@ public final class PanPointRenderer {
         RenderSystem.depthMask(false);
 
         Tesselator tess = Tesselator.getInstance();
-        com.mojang.blaze3d.vertex.BufferBuilder bb = tess.begin(
-            VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        // PORT(1.20.1): the Tesselator's shared BufferBuilder is begun explicitly.
+        com.mojang.blaze3d.vertex.BufferBuilder bb = tess.getBuilder();
+        bb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 
         float r = R / 255f, g = G / 255f, b = B / 255f;
         float aCore = 0.65f * alphaScale;
@@ -96,9 +98,12 @@ public final class PanPointRenderer {
         // Outer halo — 0.45 wide, 1.8 tall
         quadColumn(bb, ps, 0.45f, 1.8f, r, g, b, aEdge);
 
-        com.mojang.blaze3d.vertex.BufferBuilder.RenderedBuffer mesh = bb.build();
-        if (mesh != null) {
+        com.mojang.blaze3d.vertex.BufferBuilder.RenderedBuffer mesh = bb.end();
+        // PORT(1.20.1): 1.21 build() returns null (nothing drawn) for an empty buffer.
+        if (!mesh.isEmpty()) {
             com.mojang.blaze3d.vertex.BufferUploader.drawWithShader(mesh);
+        } else {
+            mesh.release();
         }
 
         RenderSystem.depthMask(true);
@@ -114,14 +119,14 @@ public final class PanPointRenderer {
         float y1 = height;
 
         // Two crossed billboards for a soft beam
-        bb.addVertex(pose, -h, y0, 0).setColor(r, g, b, a);
-        bb.addVertex(pose,  h, y0, 0).setColor(r, g, b, a);
-        bb.addVertex(pose,  h, y1, 0).setColor(r, g, b, 0f);
-        bb.addVertex(pose, -h, y1, 0).setColor(r, g, b, 0f);
+        PortVertex.of(bb).addVertex(pose, -h, y0, 0).setColor(r, g, b, a).endVertex();
+        PortVertex.of(bb).addVertex(pose,  h, y0, 0).setColor(r, g, b, a).endVertex();
+        PortVertex.of(bb).addVertex(pose,  h, y1, 0).setColor(r, g, b, 0f).endVertex();
+        PortVertex.of(bb).addVertex(pose, -h, y1, 0).setColor(r, g, b, 0f).endVertex();
 
-        bb.addVertex(pose, 0, y0, -h).setColor(r, g, b, a);
-        bb.addVertex(pose, 0, y0,  h).setColor(r, g, b, a);
-        bb.addVertex(pose, 0, y1,  h).setColor(r, g, b, 0f);
-        bb.addVertex(pose, 0, y1, -h).setColor(r, g, b, 0f);
+        PortVertex.of(bb).addVertex(pose, 0, y0, -h).setColor(r, g, b, a).endVertex();
+        PortVertex.of(bb).addVertex(pose, 0, y0,  h).setColor(r, g, b, a).endVertex();
+        PortVertex.of(bb).addVertex(pose, 0, y1,  h).setColor(r, g, b, 0f).endVertex();
+        PortVertex.of(bb).addVertex(pose, 0, y1, -h).setColor(r, g, b, 0f).endVertex();
     }
 }

@@ -16,6 +16,7 @@ import org.joml.Vector3f;
 import java.io.IOException;
 import java.util.*;
 
+import com.stardew.craft.port.PortVertex;
 /** Two independent physical slots; the existing hook/line and shorts bobber retain their identities. */
 public final class FishingTackleModels {
     public static final List<String> IDS=List.of("spinner","dressed_spinner","barbed_hook","lead_bobber","treasure_hunter","trap_bobber","cork_bobber","curiosity_lure","quality_bobber","sonar_bobber");
@@ -123,7 +124,7 @@ public final class FishingTackleModels {
         var mounted=layout(selected,bobber);if(mounted.isEmpty())return;
         pose.pushPose();
         try {
-            pose.mulPose(matrix);boolean reflected=matrix.determinant()<0;
+            PortVertex.mulPose(pose, matrix);boolean reflected=matrix.determinant()<0;
             var previous=new Vector3f(bobber.leader());
             for(var mount:mounted) {
                 link(pose,buffers,previous,new Vector3f(mount.x(),mount.y()-.08f,mount.z()),light,reflected);
@@ -134,13 +135,13 @@ public final class FishingTackleModels {
             var transform=transform(mount,matrix,rotation,time);boolean reflected=transform.determinant()<0;
             pose.pushPose();
             try {
-                pose.mulPose(transform);var out=buffers.getBuffer(RenderType.entityCutout(texture(mount.model().id())));
+                PortVertex.mulPose(pose, transform);var out=buffers.getBuffer(RenderType.entityCutout(texture(mount.model().id())));
                 for(var face:mount.model().faces()) {
                     var n=normal(face).normalize();
                     for(int k=0;k<4;k++) {
                         var v=face.vertices().get(reflected?3-k:k);var p=v.point();
-                        out.addVertex(pose.last().pose(),p[0],p[1],p[2]).setColor(255,255,255,255).setUv(v.uv()[0],v.uv()[1])
-                                .setOverlay(OverlayTexture.NO_OVERLAY).setLight(face.lamp()&&signal?LightTexture.FULL_BRIGHT:light).setNormal(pose.last(),n.x,n.y,n.z);
+                        PortVertex.of(out).addVertex(pose.last().pose(),p[0],p[1],p[2]).setColor(255,255,255,255).setUv(v.uv()[0],v.uv()[1])
+                                .setOverlay(OverlayTexture.NO_OVERLAY).setLight(face.lamp()&&signal?LightTexture.FULL_BRIGHT:light).setNormal(pose.last(),n.x,n.y,n.z).endVertex();
                     }
                 }
             }finally{pose.popPose();}
@@ -157,7 +158,7 @@ public final class FishingTackleModels {
         for(var face:faces) {
             var n=new Vector3f(p[face[1]]).sub(p[face[0]]).cross(new Vector3f(p[face[2]]).sub(p[face[0]])).normalize();
             int color=n.y>.4?0xffc5d5d4:n.z<-.4?0xff91a6b1:0xff687f95;
-            for(int k=0;k<4;k++){var v=p[face[reflected?3-k:k]];out.addVertex(pose.last().pose(),v.x,v.y,v.z).setColor(color).setUv(.5f,.5f).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose.last(),n.x,n.y,n.z);}
+            for(int k=0;k<4;k++){var v=p[face[reflected?3-k:k]];PortVertex.of(out).addVertex(pose.last().pose(),v.x,v.y,v.z).setColor(color).setUv(.5f,.5f).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose.last(),n.x,n.y,n.z).endVertex();}
         }
     }
 }

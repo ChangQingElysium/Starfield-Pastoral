@@ -210,12 +210,12 @@ public final class BookPowerEffects {
         if (attribute == null) {
             return;
         }
-        attribute.removeModifier(id);
+        com.stardew.craft.port.PortAttributeModifiers.removeModifier(attribute, id);
         if (amount > 0.0D) {
-            attribute.addTransientModifier(new AttributeModifier(
+            attribute.addTransientModifier(com.stardew.craft.port.PortAttributeModifiers.create(
                     id,
                     amount,
-                    AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
+                    AttributeModifier.Operation.MULTIPLY_TOTAL
             ));
         }
     }

@@ -23,6 +23,7 @@ import org.joml.Matrix4f;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.stardew.craft.port.PortVertex;
 public final class CutsceneTextAboveHeadRenderer {
     private static final ResourceLocation LEFT = new ResourceLocation(StardewCraft.MODID, "textures/gui/cutscene/text_above_head_left.png");
     private static final ResourceLocation MID = new ResourceLocation(StardewCraft.MODID, "textures/gui/cutscene/text_above_head_mid.png");
@@ -145,10 +146,10 @@ public final class CutsceneTextAboveHeadRenderer {
         }
         VertexConsumer consumer = buffer.getBuffer(RenderType.entityTranslucent(texture));
         Matrix4f matrix = poseStack.last().pose();
-        consumer.addVertex(matrix, x, y, 0.0F).setColor(255, 255, 255, alpha).setUv(0.0F, 0.0F).setOverlay(OverlayTexture.NO_OVERLAY).setLight(0x00F000F0).setNormal(0, 0, 1);
-        consumer.addVertex(matrix, x, y + height, 0.0F).setColor(255, 255, 255, alpha).setUv(0.0F, 1.0F).setOverlay(OverlayTexture.NO_OVERLAY).setLight(0x00F000F0).setNormal(0, 0, 1);
-        consumer.addVertex(matrix, x + width, y + height, 0.0F).setColor(255, 255, 255, alpha).setUv(1.0F, 1.0F).setOverlay(OverlayTexture.NO_OVERLAY).setLight(0x00F000F0).setNormal(0, 0, 1);
-        consumer.addVertex(matrix, x + width, y, 0.0F).setColor(255, 255, 255, alpha).setUv(1.0F, 0.0F).setOverlay(OverlayTexture.NO_OVERLAY).setLight(0x00F000F0).setNormal(0, 0, 1);
+        PortVertex.of(consumer).addVertex(matrix, x, y, 0.0F).setColor(255, 255, 255, alpha).setUv(0.0F, 0.0F).setOverlay(OverlayTexture.NO_OVERLAY).setLight(0x00F000F0).setNormal(0, 0, 1).endVertex();
+        PortVertex.of(consumer).addVertex(matrix, x, y + height, 0.0F).setColor(255, 255, 255, alpha).setUv(0.0F, 1.0F).setOverlay(OverlayTexture.NO_OVERLAY).setLight(0x00F000F0).setNormal(0, 0, 1).endVertex();
+        PortVertex.of(consumer).addVertex(matrix, x + width, y + height, 0.0F).setColor(255, 255, 255, alpha).setUv(1.0F, 1.0F).setOverlay(OverlayTexture.NO_OVERLAY).setLight(0x00F000F0).setNormal(0, 0, 1).endVertex();
+        PortVertex.of(consumer).addVertex(matrix, x + width, y, 0.0F).setColor(255, 255, 255, alpha).setUv(1.0F, 0.0F).setOverlay(OverlayTexture.NO_OVERLAY).setLight(0x00F000F0).setNormal(0, 0, 1).endVertex();
     }
 
     private static final class Bubble {

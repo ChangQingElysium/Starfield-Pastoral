@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.world.phys.AABB;
 
+import com.stardew.craft.port.PortVertex;
 public final class PlazaDisplayBlockEntityRenderer implements LargeDecorBlockEntityRenderer<PlazaDisplayBlockEntity> {
     public PlazaDisplayBlockEntityRenderer(BlockEntityRendererProvider.Context context) {}
     @Override public AABB getRenderBoundingBox(PlazaDisplayBlockEntity entity) { return entity.getRenderBoundingBox(); }
@@ -26,7 +27,7 @@ public final class PlazaDisplayBlockEntityRenderer implements LargeDecorBlockEnt
         var consumer = buffer.getBuffer(RenderType.entityCutout(TextureAtlas.LOCATION_BLOCKS));
         for (var part : PlazaDisplayModels.parts(TerrainSeasonTextures.currentTextureSet())) {
             pose.pushPose(); pose.translate(part.x() / 16, part.y() / 16, part.z() / 16);
-            for (var quad : part.quads()) consumer.putBulkData(pose.last(), quad, 1, 1, 1, 1, light, overlay);
+            for (var quad : part.quads()) PortVertex.putBulkData(consumer, pose.last(), quad, 1, 1, 1, 1, light, overlay);
             pose.popPose();
         }
         pose.popPose();

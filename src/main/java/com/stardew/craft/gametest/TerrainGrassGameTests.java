@@ -66,7 +66,7 @@ public final class TerrainGrassGameTests {
         var normal = Block.getDrops(grass, level, pos, null, null, new ItemStack(Items.IRON_SHOVEL));
         helper.assertTrue(normal.size() == 1 && com.stardew.craft.port.PortJava.getFirst(normal).is(grassBlock.asItem()), "Ordinary mining must drop the grass itself without Silk Touch");
         var silk = new ItemStack(Items.DIAMOND_SHOVEL);
-        silk.enchant(level.registryAccess().registryOrThrow(Registries.ENCHANTMENT).getHolderOrThrow(Enchantments.SILK_TOUCH), 1);
+        com.stardew.craft.port.PortItemStacks.enchant(silk, level.registryAccess().registryOrThrow(Registries.ENCHANTMENT).wrapAsHolder(Enchantments.SILK_TOUCH), 1);
         var silkDrops = Block.getDrops(grass, level, pos, null, null, silk);
         helper.assertTrue(silkDrops.size() == 1 && com.stardew.craft.port.PortJava.getFirst(silkDrops).is(grassBlock.asItem()),
                 "Silk Touch lost the terrain texture variant");
@@ -356,10 +356,10 @@ public final class TerrainGrassGameTests {
                     var placed = level.getBlockState(pos);
                     helper.assertTrue(placed.is(block) && placed.getValue(property) == variant,
                             "Fixed copy rerolled variant " + variant);
-                    var encoded = net.minecraft.world.level.block.state.BlockState.CODEC
-                            .encodeStart(net.minecraft.nbt.NbtOps.INSTANCE, placed).getOrThrow();
-                    var decoded = net.minecraft.world.level.block.state.BlockState.CODEC
-                            .parse(net.minecraft.nbt.NbtOps.INSTANCE, encoded).getOrThrow();
+                    var encoded = com.stardew.craft.port.PortDataResults.getOrThrow(net.minecraft.world.level.block.state.BlockState.CODEC
+                            .encodeStart(net.minecraft.nbt.NbtOps.INSTANCE, placed));
+                    var decoded = com.stardew.craft.port.PortDataResults.getOrThrow(net.minecraft.world.level.block.state.BlockState.CODEC
+                            .parse(net.minecraft.nbt.NbtOps.INSTANCE, encoded));
                     helper.assertTrue(decoded.equals(placed), "Serialized terrain lost the variant");
                 }
             }

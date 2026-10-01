@@ -63,8 +63,7 @@ public class WakeUpEventQueueData extends SavedData {
     // ─── persistence ───
 
     @Override
-    public CompoundTag save(@javax.annotation.Nonnull CompoundTag tag,
-                            @javax.annotation.Nonnull HolderLookup.Provider provider) {
+    public CompoundTag save(@javax.annotation.Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         tag.putInt("PlayerCount", queues.size());
         int i = 0;
         for (var entry : queues.entrySet()) {

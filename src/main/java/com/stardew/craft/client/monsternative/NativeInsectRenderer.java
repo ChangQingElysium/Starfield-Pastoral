@@ -27,6 +27,7 @@ import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import org.joml.Matrix3f;
 import org.joml.Vector3f;
 
+import com.stardew.craft.port.PortVertex;
 /** Generic Grub/Fly playback; signed opaque hulls and separately blended membrane wings. */
 @SuppressWarnings({"null", "removal"})
 @EventBusSubscriber(modid = StardewCraft.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
@@ -135,9 +136,9 @@ public final class NativeInsectRenderer extends EntityRenderer<StardewMonsterEnt
                 matrices[quad.bone()].normal(normalMatrix).transform(normal).normalize();
                 for (var v : quad.vertices()) {
                     matrices[quad.bone()].transformPosition(vertex.set(v[0], v[1], v[2]));
-                    consumer.addVertex(stack.last().pose(), vertex.x, vertex.y, vertex.z)
+                    PortVertex.of(consumer).addVertex(stack.last().pose(), vertex.x, vertex.y, vertex.z)
                             .setColor(255,255,255,255).setUv(v[3], v[4]).setOverlay(overlay).setLight(light)
-                            .setNormal(stack.last(), normal.x, normal.y, normal.z);
+                            .setNormal(stack.last(), normal.x, normal.y, normal.z).endVertex();
                 }
             }
         }

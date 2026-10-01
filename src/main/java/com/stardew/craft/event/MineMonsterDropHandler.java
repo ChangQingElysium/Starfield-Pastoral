@@ -122,18 +122,18 @@ public class MineMonsterDropHandler {
                 .withParameter(LootContextParams.ORIGIN, entity.position())
                 .withParameter(LootContextParams.DAMAGE_SOURCE, event.getSource())
                 .withOptionalParameter(
-                        LootContextParams.ATTACKING_ENTITY,
+                        LootContextParams.KILLER_ENTITY,
                         event.getSource().getEntity()
                 )
                 .withOptionalParameter(
-                        LootContextParams.DIRECT_ATTACKING_ENTITY,
+                        LootContextParams.DIRECT_KILLER_ENTITY,
                         event.getSource().getDirectEntity()
                 )
                 .withParameter(LootContextParams.LAST_DAMAGE_PLAYER, player)
                 .withLuck(player.getLuck())
                 .create(LootContextParamSets.ENTITY);
         LootTable lootTable = level.getServer()
-                .reloadableRegistries()
+                .getLootData()
                 .getLootTable(entity.getLootTable());
         lootTable.getRandomItems(params)
                 .forEach(stack -> addDrop(event.getDrops(), entity, stack));

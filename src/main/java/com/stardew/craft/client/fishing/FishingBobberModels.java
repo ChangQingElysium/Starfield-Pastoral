@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.stardew.craft.port.PortVertex;
 /** Editor-rendered cuboid faces, including the original inward-facing outline geometry. */
 public final class FishingBobberModels {
     public record Vertex(float[] point,float[] uv) {}
@@ -88,15 +89,15 @@ public final class FishingBobberModels {
     public static void render(Model model,Matrix4f matrix,PoseStack pose,MultiBufferSource buffers,int light) {
         pose.pushPose();
         try {
-            pose.mulPose(matrix);boolean reflected=matrix.determinant()<0;
+            PortVertex.mulPose(pose, matrix);boolean reflected=matrix.determinant()<0;
             var out=buffers.getBuffer(RenderType.entityCutout(texture(model.style())));
             for(var face:model.faces()) {
                 var normal=normal(face).normalize();
                 for(int k=0;k<4;k++) {
                     var v=face.vertices().get(reflected?3-k:k);var p=v.point();
-                    out.addVertex(pose.last().pose(),p[0],p[1],p[2]).setColor(255,255,255,255)
+                    PortVertex.of(out).addVertex(pose.last().pose(),p[0],p[1],p[2]).setColor(255,255,255,255)
                             .setUv(v.uv()[0],v.uv()[1]).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light)
-                            .setNormal(pose.last(),normal.x,normal.y,normal.z);
+                            .setNormal(pose.last(),normal.x,normal.y,normal.z).endVertex();
                 }
             }
         } finally {pose.popPose();}

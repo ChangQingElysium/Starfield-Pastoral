@@ -49,7 +49,7 @@ public final class BuildingLifecycleGameTests {
         h.assertTrue(data.beginUpgrade(record.id(), ready.revision(), 13) == BuildingWorldData.Result.SUCCESS, "Upgrade did not start");
         h.assertTrue(data.beginUpgrade(record.id(), ready.revision(), 13) != BuildingWorldData.Result.SUCCESS, "Duplicate upgrade accepted");
         data.constructionDay(14, false); data.constructionDay(15, true);
-        var loaded = BuildingWorldData.load(data.save(new CompoundTag(), h.getLevel().registryAccess()), h.getLevel().registryAccess());
+        var loaded = BuildingWorldData.load(data.save(new CompoundTag()), h.getLevel().registryAccess());
         h.assertTrue(loaded.find(record.id()).tier() == 1 && loaded.find(record.id()).phase() == BuildingRecord.Phase.UPGRADING && loaded.order(record.id()).remainingDays() == 1, "Upgrade lost old tier or progress on reload");
         h.succeed();
     }
@@ -166,7 +166,7 @@ public final class BuildingLifecycleGameTests {
                 var transfer = BuildingTransfer.move(level, record, destination);
                 h.assertTrue(BuildingPlacementService.checkSpace(level, transfer.after().claim(), record.claim()) == null, "Overlapping translation rejected");
                 h.assertTrue(data.beginTransfer(transfer) == BuildingWorldData.Result.SUCCESS, "Transfer rejected");
-                var restored = BuildingWorldData.load(data.save(new CompoundTag(), level.registryAccess()), level.registryAccess()).transfer(record.id());
+                var restored = BuildingWorldData.load(data.save(new CompoundTag()), level.registryAccess()).transfer(record.id());
                 h.assertTrue(restored != null && restored.after().id().equals(record.id()), "Pending transfer lost identity");
                 // Replaying an interrupted projection must not duplicate inventory or leave the old manager.
                 restored.project(level); restored.project(level); data.finishTransfer(record.id());

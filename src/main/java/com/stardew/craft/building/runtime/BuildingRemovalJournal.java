@@ -16,7 +16,7 @@ import java.util.*;
 /** Write-ahead demolition and manager refund; a reload retries only the exact original component list. */
 public final class BuildingRemovalJournal extends SavedData {
     private final Map<UUID,CompoundTag> pending=new LinkedHashMap<>();
-    public static BuildingRemovalJournal get(MinecraftServer server){return server.overworld().getDataStorage().computeIfAbsent(com.stardew.craft.port.PortSavedData.loader(new Factory<>(BuildingRemovalJournal::new,BuildingRemovalJournal::load)), com.stardew.craft.port.PortSavedData.constructor(new Factory<>(BuildingRemovalJournal::new,BuildingRemovalJournal::load)),"stardew_building_removals");}
+    public static BuildingRemovalJournal get(MinecraftServer server){return server.overworld().getDataStorage().computeIfAbsent(com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(BuildingRemovalJournal::new,BuildingRemovalJournal::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(BuildingRemovalJournal::new,BuildingRemovalJournal::load)),"stardew_building_removals");}
     public boolean contains(UUID id){return pending.containsKey(id);}
     public void prepare(ServerPlayer player,BuildingRecord record,Collection<BlockPos> positions){
         if(pending.containsKey(record.id()))return;

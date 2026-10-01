@@ -39,10 +39,9 @@ public final class SkullCavernTreasurePool {
         if (server == null) return ItemStack.EMPTY;
         RESOLVING_LEGACY_SLOT.set(true);
         try {
-            var result = StardewItemQueries.resolve(definition.entries().get(slot).query(),
-                    new StardewItemQueryContext(player == null ? server.overworld() : player.serverLevel(), player, random::nextLong))
-                    .getOrThrow();
-            return result.isEmpty() ? ItemStack.EMPTY : result.getFirst();
+            var result = com.stardew.craft.port.PortDataResults.getOrThrow(StardewItemQueries.resolve(definition.entries().get(slot).query(),
+                    new StardewItemQueryContext(player == null ? server.overworld() : player.serverLevel(), player, random::nextLong)));
+            return result.isEmpty() ? ItemStack.EMPTY : com.stardew.craft.port.PortJava.getFirst(result);
         } finally { RESOLVING_LEGACY_SLOT.remove(); }
     }
 }

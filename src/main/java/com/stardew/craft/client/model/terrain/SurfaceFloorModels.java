@@ -90,7 +90,9 @@ public final class SurfaceFloorModels {
         var compositor = new ConnectedTopQuads();
         event.getModels().replaceAll((key, original) -> {
             // Only world blockstate models. Inventory and additional material models retain native transforms.
-            if (key.getVariant().equals("inventory") || key.getVariant().equals("standalone")) return original;
+            // PORT(1.20.1): Forge keys are ResourceLocations; plain keys are additional models (1.21 "standalone").
+            if (!(key instanceof net.minecraft.client.resources.model.ModelResourceLocation variant)
+                    || variant.getVariant().equals("inventory") || variant.getVariant().equals("standalone")) return original;
             return new Surface(original, tiles, particles, hay, town, townParticles, compositor);
         });
     }
@@ -103,8 +105,8 @@ public final class SurfaceFloorModels {
             int[] vertices = source.getVertices().clone(); int stride = vertices.length / 4;
             for (int v = 0; v < vertices.length; v += stride) {
                 float x = Float.intBitsToFloat(vertices[v]), z = Float.intBitsToFloat(vertices[v + 2]);
-                vertices[v + 4] = Float.floatToRawIntBits(sprite.getU((index % columns * 16 + x * 16) / sprite.contents().width()));
-                vertices[v + 5] = Float.floatToRawIntBits(sprite.getV((index / columns * 16 + z * 16) / sprite.contents().height()));
+                vertices[v + 4] = Float.floatToRawIntBits(com.stardew.craft.port.PortSprites.getU(sprite, (index % columns * 16 + x * 16) / sprite.contents().width()));
+                vertices[v + 5] = Float.floatToRawIntBits(com.stardew.craft.port.PortSprites.getV(sprite, (index / columns * 16 + z * 16) / sprite.contents().height()));
             }
             result[index] = new BakedQuad(vertices, -1, Direction.UP, sprite, true, true);
         }

@@ -11,7 +11,7 @@ import snownee.jade.api.WailaPlugin;
 public class FishSmokerJadePlugin implements IWailaPlugin {
     @Override
     public void register(IWailaCommonRegistration registration) {
-        registration.registerBlockDataProvider(FishSmokerJadeProvider.INSTANCE, FishSmokerBlock.class);
+        JadeBlockDataProviders.register(registration, FishSmokerJadeProvider.INSTANCE, FishSmokerBlock.class);
     }
 
     @Override

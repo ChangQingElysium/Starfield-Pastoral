@@ -17,6 +17,7 @@ import net.minecraftforge.client.event.*;
 import org.joml.*;
 import java.lang.Math;
 
+import com.stardew.craft.port.PortVertex;
 /** Animates only native Java item parts, inside Minecraft's ordinary held-item transform. */
 @EventBusSubscriber(modid=StardewCraft.MODID,value=Dist.CLIENT)
 public final class SlingshotRenderer {
@@ -60,7 +61,7 @@ public final class SlingshotRenderer {
         stack.popPose();
     }
     private static void baked(ItemStack item,String weaponId,String part,Matrix4f matrix,PoseStack stack,MultiBufferSource buffers,int light){
-        var mc=Minecraft.getInstance();stack.pushPose();stack.mulPose(matrix);stack.scale(16,16,16);
+        var mc=Minecraft.getInstance();stack.pushPose();PortVertex.mulPose(stack, matrix);stack.scale(16,16,16);
         var model=mc.getModelManager().getModel(new ModelResourceLocation(id("item/"+weaponId+"_"+part),"standalone"));
         mc.getItemRenderer().renderModelLists(model,item,light,OverlayTexture.NO_OVERLAY,stack,
                 buffers.getBuffer(RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS)));stack.popPose();
@@ -72,7 +73,7 @@ public final class SlingshotRenderer {
     }
     private static void quad(PoseStack stack,VertexConsumer out,int light,Vector3f[] points,float u,float v,float u1,float v1){
         var normal=new Vector3f(points[1]).sub(points[0]).cross(new Vector3f(points[2]).sub(points[0])).normalize();float[][] uv={{u,v},{u1,v},{u1,v1},{u,v1}};
-        for(int i=0;i<4;i++)out.addVertex(stack.last().pose(),points[i].x,points[i].y,points[i].z).setColor(-1).setUv(uv[i][0],uv[i][1]).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(stack.last(),normal.x,normal.y,normal.z);
+        for(int i=0;i<4;i++)PortVertex.of(out).addVertex(stack.last().pose(),points[i].x,points[i].y,points[i].z).setColor(-1).setUv(uv[i][0],uv[i][1]).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(stack.last(),normal.x,normal.y,normal.z).endVertex();
     }
     @EventBusSubscriber(modid=StardewCraft.MODID,value=Dist.CLIENT,bus=EventBusSubscriber.Bus.MOD)
     public static class Registration {

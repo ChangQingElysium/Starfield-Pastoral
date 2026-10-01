@@ -135,7 +135,7 @@ public class TotemPoleTracker extends SavedData {
 
     public static TotemPoleTracker get(ServerLevel level) {
         return level.getDataStorage().computeIfAbsent(
-                com.stardew.craft.port.PortSavedData.loader(new Factory<>(TotemPoleTracker::new, TotemPoleTracker::load)), com.stardew.craft.port.PortSavedData.constructor(new Factory<>(TotemPoleTracker::new, TotemPoleTracker::load)),
+                com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(TotemPoleTracker::new, TotemPoleTracker::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(TotemPoleTracker::new, TotemPoleTracker::load)),
                 DATA_NAME
         );
     }

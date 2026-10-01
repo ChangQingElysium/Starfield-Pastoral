@@ -40,8 +40,8 @@ public final class MineCoalBackpackBlock extends MapDecorStaticBlock {
     public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
     public static final BooleanProperty DESERT = BooleanProperty.create("desert");
     public static final BooleanProperty DARK = BooleanProperty.create("dark");
-    private static final ResourceKey<LootTable> LOOT = ResourceKey.create(Registries.LOOT_TABLE,
-            new ResourceLocation(StardewCraft.MODID, "gameplay/mine_coal_backpack"));
+    // PORT(1.20.1): loot tables are not a registry in 1.20.1; addressed by id through LootDataManager.
+    private static final ResourceLocation LOOT = new ResourceLocation(StardewCraft.MODID, "gameplay/mine_coal_backpack");
 
     public MineCoalBackpackBlock(Properties properties) {
         super(properties, "block/mine/backpack/frost_full");
@@ -90,7 +90,7 @@ public final class MineCoalBackpackBlock extends MapDecorStaticBlock {
                 .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(anchor))
                 .withParameter(LootContextParams.THIS_ENTITY, player)
                 .withLuck(player.getLuck()).create(LootContextParamSets.CHEST);
-        var drops = server.getServer().reloadableRegistries().getLootTable(LOOT).getRandomItems(params);
+        var drops = server.getServer().getLootData().getLootTable(LOOT).getRandomItems(params);
         BlockState empty = current.setValue(OPEN, true);
         if (!level.setBlock(anchor, empty, Block.UPDATE_ALL)) return InteractionResult.PASS;
         BlockPos strap = anchor.relative(current.getValue(FACING).getClockWise());

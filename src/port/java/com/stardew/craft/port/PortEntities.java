@@ -49,4 +49,42 @@ public final class PortEntities {
         double range = player.getEntityReach() + distance;
         return entity.getBoundingBox().distanceToSqr(player.getEyePosition()) < range * range;
     }
+
+    /**
+     * 1.21 {@code Entity#getKnownMovement()} with the {@code ServerPlayer} override: a server player reports the
+     * last accepted client movement (recorded by {@code PortServerGamePacketListenerKnownMovementMixin}), or its
+     * vehicle's known movement when it does not control the vehicle; an entity controlled by a player reports the
+     * player's; everything else its delta movement.
+     */
+    public static Vec3 getKnownMovement(Entity entity) {
+        if (entity instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+            Entity vehicle = serverPlayer.getVehicle();
+            return vehicle != null && vehicle.getControllingPassenger() != serverPlayer
+                    ? getKnownMovement(vehicle)
+                    : ((PortKnownMovementHolder) serverPlayer).stardewcraft$getLastKnownClientMovement();
+        }
+        if (entity.getControllingPassenger() instanceof Player player && entity.isAlive()) {
+            return getKnownMovement(player);
+        }
+        return entity.getDeltaMovement();
+    }
+
+    /** 1.21 {@code ServerPlayer#setKnownMovement(Vec3)}. */
+    public static void setKnownMovement(net.minecraft.server.level.ServerPlayer player, Vec3 movement) {
+        ((PortKnownMovementHolder) player).stardewcraft$setLastKnownClientMovement(movement);
+    }
+
+    /** 1.21 {@code ItemEntity#getTarget()}. */
+    @javax.annotation.Nullable
+    public static java.util.UUID getTarget(net.minecraft.world.entity.item.ItemEntity item) {
+        return ((com.stardew.craft.mixin.PortItemEntityAccessor) item).stardewcraft$getTarget();
+    }
+
+    /**
+     * 1.21 {@code Entity#getGravity()} for an item entity: {@code isNoGravity() ? 0 : getDefaultGravity()} with the
+     * item default 0.04 (the constant 1.20.1 {@code ItemEntity#tick} applies).
+     */
+    public static double getGravity(net.minecraft.world.entity.item.ItemEntity item) {
+        return item.isNoGravity() ? 0.0 : 0.04;
+    }
 }

@@ -37,7 +37,7 @@ public record StardewNpcGiftTastePatchDefinition(
                     ResourceLocation.CODEC.listOf());
 
     public static final Codec<StardewNpcGiftTastePatchDefinition> CODEC =
-            RecordCodecBuilder
+            com.stardew.craft.port.PortCodecs.validate(RecordCodecBuilder
                     .<StardewNpcGiftTastePatchDefinition>create(instance ->
                             instance.group(
                                     ResourceLocation.CODEC.fieldOf("npc")
@@ -64,9 +64,7 @@ public record StardewNpcGiftTastePatchDefinition(
                                                     StardewNpcGiftTastePatchDefinition
                                                             ::remove)
                             ).apply(instance,
-                                    StardewNpcGiftTastePatchDefinition::new))
-                    .validate(
-                            StardewNpcGiftTastePatchDefinition::validate);
+                                    StardewNpcGiftTastePatchDefinition::new)), StardewNpcGiftTastePatchDefinition::validate);
 
     public StardewNpcGiftTastePatchDefinition {
         add = freeze(add);

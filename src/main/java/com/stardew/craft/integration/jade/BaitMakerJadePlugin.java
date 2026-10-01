@@ -11,7 +11,7 @@ import snownee.jade.api.WailaPlugin;
 public class BaitMakerJadePlugin implements IWailaPlugin {
     @Override
     public void register(IWailaCommonRegistration registration) {
-        registration.registerBlockDataProvider(BaitMakerJadeProvider.INSTANCE, BaitMakerBlock.class);
+        JadeBlockDataProviders.register(registration, BaitMakerJadeProvider.INSTANCE, BaitMakerBlock.class);
     }
 
     @Override

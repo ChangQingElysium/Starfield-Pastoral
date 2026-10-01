@@ -60,7 +60,9 @@ public final class TownDoorClipping {
     }
 
     public static void updateVanillaUniform(Uniform uniform) {
-        float[] equation = enabled ? BEFORE_MODEL_VIEW : DISABLED;
+        // PORT(1.20.1): entity/block-entity vertices already include the camera rotation on 1.20.1, so the
+        // patched vanilla shaders clip in view space (ModelViewMat * Position) with the transformed plane.
+        float[] equation = enabled ? AFTER_MODEL_VIEW : DISABLED;
         uniform.set(equation[0], equation[1], equation[2], equation[3]);
     }
 

@@ -18,8 +18,8 @@ public class WhiteAlgaeItem extends Item implements IStardewItem {
     public WhiteAlgaeItem(Item.Properties properties) {
         super(properties.food(new FoodProperties.Builder()
                 .nutrition(1)
-                .saturationModifier(0.1f)
-                .alwaysEdible()
+                .saturationMod(0.1f)
+                .alwaysEat()
                 .build()));
     }
 

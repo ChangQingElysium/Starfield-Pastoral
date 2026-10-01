@@ -34,7 +34,7 @@ public final class FertilizedSoilGameTests {
                         "Applying fertilizer changed soil identity or occupied the crop cell");
                 helper.assertTrue(!manager.tryApplyFertilizer(level, pos, type), "Applied fertilizer twice");
                 level.setBlock(pos, dry.setValue(FarmBlock.MOISTURE, 7), 3);
-                var restored = FertilizerManager.load(manager.save(new CompoundTag(), level.registryAccess()), level.registryAccess());
+                var restored = FertilizerManager.load(manager.save(new CompoundTag()), level.registryAccess());
                 helper.assertTrue(restored.getFertilizer(level, pos) == type, "Watering/save lost fertilizer " + type);
                 helper.assertTrue(restored.removeFertilizer(level, pos) && restored.getFertilizer(level, pos) == null, "Removal left fertilizer data");
                 manager.removeFertilizer(level, pos);

@@ -11,7 +11,7 @@ import snownee.jade.api.WailaPlugin;
 public class TapperJadePlugin implements IWailaPlugin {
 	@Override
 	public void register(IWailaCommonRegistration registration) {
-		registration.registerBlockDataProvider(TapperJadeProvider.INSTANCE, TapperBlock.class);
+		JadeBlockDataProviders.register(registration, TapperJadeProvider.INSTANCE, TapperBlock.class);
 	}
 
 	@Override

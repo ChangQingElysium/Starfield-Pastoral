@@ -283,13 +283,13 @@ public final class DesertFestivalWillyFishingService {
             CONTEXT,
             currentFestivalDay(),
             "",
-            Component.Serializer.toJson(question, player.registryAccess()),
+            Component.Serializer.toJson(question),
             responses
         ));
     }
 
     private static OpenDesertFestivalQuestionPayload.ResponseOption response(String id, Component label, ServerPlayer player) {
-        return new OpenDesertFestivalQuestionPayload.ResponseOption(id, Component.Serializer.toJson(label, player.registryAccess()));
+        return new OpenDesertFestivalQuestionPayload.ResponseOption(id, Component.Serializer.toJson(label));
     }
 
     private static void sendDialogue(ServerPlayer player, String npcId, String key) {

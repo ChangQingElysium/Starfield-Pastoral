@@ -220,7 +220,7 @@ public final class TideMarkTracker {
                 serverLevel.playSound(
                     null,
                     target.blockPosition(),
-                    net.minecraft.sounds.SoundEvents.TRIDENT_THROW.value(),
+                    net.minecraft.sounds.SoundEvents.TRIDENT_THROW,
                     net.minecraft.sounds.SoundSource.PLAYERS,
                     0.5F,
                     1.2F

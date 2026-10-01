@@ -19,7 +19,7 @@ import net.minecraftforge.client.model.data.ModelData;
 import javax.annotation.Nonnull;
 
 @SuppressWarnings("null")
-public class BushBlockEntityRenderer implements BlockEntityRenderer<BushBlockEntity> {
+public class BushBlockEntityRenderer implements BlockEntityRenderer<BushBlockEntity>, com.stardew.craft.port.net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension<BushBlockEntity> {
     private final BlockRenderDispatcher blockRenderer;
 
     public BushBlockEntityRenderer(BlockEntityRendererProvider.Context context) {

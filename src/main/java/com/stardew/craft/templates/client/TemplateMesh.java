@@ -769,7 +769,7 @@ final class TemplateMesh {
             }
             return new MeshQuad(transformedDirection, transformedTextureDirection, List.copyOf(result),
                     transformedTexturePoints == null ? null : List.copyOf(transformedTexturePoints), part,
-                    studyPoints == null ? null : flipped ? studyPoints.reversed() : studyPoints);
+                    studyPoints == null ? null : flipped ? com.stardew.craft.port.PortJava.reversed(studyPoints) : studyPoints);
         }
 
         private static Direction transformDirection(Direction input, int turns, boolean flipped) {

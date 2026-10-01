@@ -91,7 +91,7 @@ public final class SkullCavernRuntimeGameTests {
         var m=new MineRewardClaimManager();var a=UUID.randomUUID();var b=UUID.randomUUID();
         int first=m.allocateTemporaryKey(),second=m.allocateTemporaryKey();
         m.markOpened(a,first);m.markClaimed(a,first);
-        var copy=MineRewardClaimManager.load(m.save(new net.minecraft.nbt.CompoundTag(),h.getLevel().registryAccess()),h.getLevel().registryAccess());
+        var copy=MineRewardClaimManager.load(m.save(new net.minecraft.nbt.CompoundTag()),h.getLevel().registryAccess());
         int next=copy.allocateTemporaryKey();
         h.assertTrue(first<0 && second<0 && next<second,"Claim IDs collided after restart");
         h.assertTrue(copy.hasOpened(a,first) && !copy.hasOpened(b,first) && !copy.hasOpened(a,second),"Treasure lid/claim leaked");

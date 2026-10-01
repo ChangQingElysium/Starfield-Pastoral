@@ -18,6 +18,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 
+import com.stardew.craft.port.PortVertex;
 /**
  * 为 JunimoNote 方块渲染隔墙可见的描边高光。
  * <p>
@@ -161,10 +162,10 @@ public final class JunimoNoteOutlineRenderer {
                           float ax, float ay, float az, float bx, float by, float bz,
                           float cx, float cy, float cz, float dx, float dy, float dz,
                           int r, int g, int b, int a) {
-        v.addVertex(p, ax, ay, az).setColor(r, g, b, a);
-        v.addVertex(p, bx, by, bz).setColor(r, g, b, a);
-        v.addVertex(p, cx, cy, cz).setColor(r, g, b, a);
-        v.addVertex(p, dx, dy, dz).setColor(r, g, b, a);
+        PortVertex.of(v).addVertex(p, ax, ay, az).setColor(r, g, b, a).endVertex();
+        PortVertex.of(v).addVertex(p, bx, by, bz).setColor(r, g, b, a).endVertex();
+        PortVertex.of(v).addVertex(p, cx, cy, cz).setColor(r, g, b, a).endVertex();
+        PortVertex.of(v).addVertex(p, dx, dy, dz).setColor(r, g, b, a).endVertex();
     }
 
     @SuppressWarnings("null")
@@ -221,10 +222,10 @@ public final class JunimoNoteOutlineRenderer {
         pz = pz / pl * halfW;
 
         PoseStack.Pose pose = ps.last();
-        vc.addVertex(pose, ax - px, ay - py, az - pz).setColor(r, g, b, a);
-        vc.addVertex(pose, ax + px, ay + py, az + pz).setColor(r, g, b, a);
-        vc.addVertex(pose, bx + px, by + py, bz + pz).setColor(r, g, b, a);
-        vc.addVertex(pose, bx - px, by - py, bz - pz).setColor(r, g, b, a);
+        PortVertex.of(vc).addVertex(pose, ax - px, ay - py, az - pz).setColor(r, g, b, a).endVertex();
+        PortVertex.of(vc).addVertex(pose, ax + px, ay + py, az + pz).setColor(r, g, b, a).endVertex();
+        PortVertex.of(vc).addVertex(pose, bx + px, by + py, bz + pz).setColor(r, g, b, a).endVertex();
+        PortVertex.of(vc).addVertex(pose, bx - px, by - py, bz - pz).setColor(r, g, b, a).endVertex();
     }
 
     // ======================== RenderType ========================
@@ -243,7 +244,7 @@ public final class JunimoNoteOutlineRenderer {
                 .setCullState(new RenderType.CullStateShard(false))
                 .setDepthTestState(xray
                     ? new RenderType.DepthTestStateShard("always", 519)
-                    : RenderType.LEQUAL_DEPTH_TEST)
+                    : com.stardew.craft.port.PortRenderStateShards.LEQUAL_DEPTH_TEST)
                 .createCompositeState(false));
     }
 }

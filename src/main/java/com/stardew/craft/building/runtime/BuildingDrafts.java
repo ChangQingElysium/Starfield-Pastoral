@@ -14,7 +14,7 @@ import java.util.*;
 /** The physical document identifies one durable draft, including across copies and transfers. */
 public final class BuildingDrafts extends SavedData {
     private final Map<UUID,CompoundTag> drafts=new HashMap<>();
-    public static BuildingDrafts get(MinecraftServer server){return server.overworld().getDataStorage().computeIfAbsent(com.stardew.craft.port.PortSavedData.loader(new Factory<>(BuildingDrafts::new,BuildingDrafts::load)), com.stardew.craft.port.PortSavedData.constructor(new Factory<>(BuildingDrafts::new,BuildingDrafts::load)),"stardew_building_drafts");}
+    public static BuildingDrafts get(MinecraftServer server){return server.overworld().getDataStorage().computeIfAbsent(com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(BuildingDrafts::new,BuildingDrafts::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(BuildingDrafts::new,BuildingDrafts::load)),"stardew_building_drafts");}
     public static UUID id(ItemStack stack){var tag=BuildingBlueprintItem.draft(stack);return tag.hasUUID("DraftId")?tag.getUUID("DraftId"):BuildingBlueprintItem.permit(stack)!=null?BuildingBlueprintItem.permit(stack):tag.hasUUID("MoveBuilding")?tag.getUUID("MoveBuilding"):null;}
     public void apply(ItemStack stack){
         var id=id(stack); if(id==null)return;

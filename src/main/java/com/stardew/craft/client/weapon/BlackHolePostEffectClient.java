@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.stardew.craft.port.PortVertex;
 public final class BlackHolePostEffectClient {
 
     private static final ResourceLocation SHADER_ID = new ResourceLocation(
@@ -93,7 +94,10 @@ public final class BlackHolePostEffectClient {
         }
 
         Vec3 camPos = event.getCamera().getPosition();
-        Matrix4f view = event.getPoseStack().last().pose();
+        // PORT(1.20.1): NeoForge 1.21.1 fires AFTER_WEATHER with renderLevel's local entity PoseStack, which is
+        // identity there (the camera rotation lives in the model-view stack); Forge 1.20.1 passes the PoseStack
+        // that carries the view rotation. Keep the 1.21 identity so the effect centre is computed identically.
+        Matrix4f view = new Matrix4f();
         Matrix4f projection = RenderSystem.getProjectionMatrix();
 
         Vector4f screen = worldToScreen(effect.pos, camPos, view, projection);
@@ -113,12 +117,13 @@ public final class BlackHolePostEffectClient {
         RenderSystem.defaultBlendFunc();
 
         Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder buffer = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        buffer.addVertex(-1.0f, -1.0f, 0.0f).setUv(0.0f, 1.0f);
-        buffer.addVertex(1.0f, -1.0f, 0.0f).setUv(1.0f, 1.0f);
-        buffer.addVertex(1.0f, 1.0f, 0.0f).setUv(1.0f, 0.0f);
-        buffer.addVertex(-1.0f, 1.0f, 0.0f).setUv(0.0f, 0.0f);
-        BufferUploader.drawWithShader(buffer.build());
+        BufferBuilder buffer = tesselator.getBuilder();
+        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        PortVertex.of(buffer).addVertex(-1.0f, -1.0f, 0.0f).setUv(0.0f, 1.0f).endVertex();
+        PortVertex.of(buffer).addVertex(1.0f, -1.0f, 0.0f).setUv(1.0f, 1.0f).endVertex();
+        PortVertex.of(buffer).addVertex(1.0f, 1.0f, 0.0f).setUv(1.0f, 0.0f).endVertex();
+        PortVertex.of(buffer).addVertex(-1.0f, 1.0f, 0.0f).setUv(0.0f, 0.0f).endVertex();
+        BufferUploader.drawWithShader(buffer.end());
 
         RenderSystem.disableBlend();
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);

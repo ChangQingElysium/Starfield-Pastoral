@@ -246,7 +246,7 @@ public final class BuiltinMapInteractionActions {
                                         NpcMessageAction::announceSnooping)
                 ).apply(instance, NpcMessageAction::new));
         public static final Codec<NpcMessageAction> CODEC =
-                RAW_CODEC.validate(NpcMessageAction::validate);
+                com.stardew.craft.port.PortCodecs.validate(RAW_CODEC, NpcMessageAction::validate);
 
         private static DataResult<NpcMessageAction> validate(
                 NpcMessageAction value
@@ -291,7 +291,7 @@ public final class BuiltinMapInteractionActions {
                                 fallback.orElse(null),
                                 literal.orElse(null))));
         public static final Codec<LocalizedText> CODEC =
-                RAW_CODEC.validate(LocalizedText::validate);
+                com.stardew.craft.port.PortCodecs.validate(RAW_CODEC, LocalizedText::validate);
 
         private static DataResult<LocalizedText> validate(
                 LocalizedText value
@@ -331,7 +331,7 @@ public final class BuiltinMapInteractionActions {
 
         public String npcPayloadText(ServerLevel level) {
             return Component.Serializer.toJson(
-                    component(), level.registryAccess());
+                    component());
         }
     }
 }

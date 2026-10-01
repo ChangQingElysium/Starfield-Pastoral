@@ -115,7 +115,7 @@ public final class ServerStallDiagnostics {
                 }
                 if (active != this || samples >= 3) return;
                 long since = current.nanos();
-                if (!stopping && server.isPaused()) {
+                if (!stopping && com.stardew.craft.port.PortLevels.isPaused(server)) {
                     // Paused integrated servers skip tick events but still drain their task queue.
                     // Probe that queue once, so a normal pause stays quiet while a stuck pause-save is captured.
                     if (!pauseProbePending) {
@@ -133,7 +133,7 @@ public final class ServerStallDiagnostics {
                 if (elapsed < SAMPLE_INTERVAL * (samples + 1)) return;
                 // No chunk queries, player-list iteration, blocking server calls or world locks here.
                 ThreadInfo info = ManagementFactory.getThreadMXBean()
-                        .getThreadInfo(server.getRunningThread().threadId(), 128);
+                        .getThreadInfo(server.getRunningThread().getId(), 128);
                 if (info == null || heartbeat != current) return;
                 samples++;
                 StringBuilder stack = new StringBuilder();

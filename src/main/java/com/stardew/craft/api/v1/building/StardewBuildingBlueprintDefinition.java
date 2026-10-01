@@ -38,7 +38,7 @@ public record StardewBuildingBlueprintDefinition(
         Map<ResourceLocation, String> properties
 ) {
     public static final Codec<StardewBuildingBlueprintDefinition> CODEC =
-            RecordCodecBuilder.<StardewBuildingBlueprintDefinition>create(
+            com.stardew.craft.port.PortCodecs.validate(RecordCodecBuilder.<StardewBuildingBlueprintDefinition>create(
                     instance -> instance.group(
                             ResourceLocation.CODEC.fieldOf("builder")
                                     .forGetter(StardewBuildingBlueprintDefinition::builder),
@@ -75,8 +75,7 @@ public record StardewBuildingBlueprintDefinition(
                             Codec.unboundedMap(ResourceLocation.CODEC, Codec.STRING)
                                     .optionalFieldOf("properties", Map.of())
                                     .forGetter(StardewBuildingBlueprintDefinition::properties)
-                    ).apply(instance, StardewBuildingBlueprintDefinition::new))
-                    .validate(StardewBuildingBlueprintDefinition::validate);
+                    ).apply(instance, StardewBuildingBlueprintDefinition::new)), StardewBuildingBlueprintDefinition::validate);
 
     public StardewBuildingBlueprintDefinition {
         builder = Objects.requireNonNull(builder, "builder");

@@ -180,9 +180,8 @@ public final class BuildingBlueprintRegistry {
             }
         }
         StardewBuildingBlueprintDefinition definition =
-                StardewBuildingBlueprintDefinition.CODEC
-                        .parse(JsonOps.INSTANCE, object)
-                        .getOrThrow(message ->
+                com.stardew.craft.port.PortDataResults.getOrThrow(StardewBuildingBlueprintDefinition.CODEC
+                        .parse(JsonOps.INSTANCE, object), message ->
                                 new IllegalArgumentException(message));
         validateReferences(id, definition);
         return definition;

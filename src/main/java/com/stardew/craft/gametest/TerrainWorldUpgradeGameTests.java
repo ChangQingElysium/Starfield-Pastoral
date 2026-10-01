@@ -32,7 +32,7 @@ public final class TerrainWorldUpgradeGameTests {
         ListTag sections = new ListTag(); sections.add(section); root.put("sections", sections); return root;
     }
     private static PalettedContainer<BlockState> states(CompoundTag root) {
-        return STATES.parse(NbtOps.INSTANCE, root.getList("sections", 10).getCompound(0).getCompound("block_states")).getOrThrow();
+        return com.stardew.craft.port.PortDataResults.getOrThrow(STATES.parse(NbtOps.INSTANCE, root.getList("sections", 10).getCompound(0).getCompound("block_states")));
     }
 
     @GameTest(templateNamespace = StardewCraft.MODID, template = "ring_utilities")

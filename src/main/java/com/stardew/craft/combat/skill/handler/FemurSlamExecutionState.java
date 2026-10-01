@@ -212,7 +212,7 @@ final class FemurSlamExecutionState
         level.playSound(
                 null,
                 player.blockPosition(),
-                SoundEvents.GENERIC_EXPLODE.value(),
+                SoundEvents.GENERIC_EXPLODE,
                 SoundSource.PLAYERS,
                 0.55F,
                 0.85F

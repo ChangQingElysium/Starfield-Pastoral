@@ -31,8 +31,8 @@ import net.minecraft.world.phys.Vec3;
 public final class CoalMinecartEntity extends Entity {
     private static final EntityDataAccessor<Boolean> LOADED =
             SynchedEntityData.defineId(CoalMinecartEntity.class, EntityDataSerializers.BOOLEAN);
-    public static final ResourceKey<LootTable> COAL_LOOT = ResourceKey.create(Registries.LOOT_TABLE,
-            new ResourceLocation(StardewCraft.MODID, "gameplay/mine_coal_cart"));
+    // PORT(1.20.1): loot tables are not a registry in 1.20.1; addressed by id through LootDataManager.
+    public static final ResourceLocation COAL_LOOT = new ResourceLocation(StardewCraft.MODID, "gameplay/mine_coal_cart");
 
     public CoalMinecartEntity(EntityType<? extends CoalMinecartEntity> type, Level level) {
         super(type, level);
@@ -76,7 +76,7 @@ public final class CoalMinecartEntity extends Entity {
         LootParams params = new LootParams.Builder(level).withParameter(LootContextParams.ORIGIN, position())
                 .withOptionalParameter(LootContextParams.THIS_ENTITY, player).withLuck(player.getLuck())
                 .create(LootContextParamSets.CHEST);
-        var drops = level.getServer().reloadableRegistries().getLootTable(COAL_LOOT).getRandomItems(params);
+        var drops = level.getServer().getLootData().getLootTable(COAL_LOOT).getRandomItems(params);
         setLoaded(false);
         com.stardew.craft.mining.OrdinaryMineRuntime.coalCacheOpened(level, blockPosition());
         drops.forEach(stack -> spawnAtLocation(stack, 1.2F));

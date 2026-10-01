@@ -1,5 +1,6 @@
 package com.stardew.craft.client.pet;
 
+import com.stardew.craft.port.PortVertex;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import com.stardew.craft.StardewCraft;
@@ -55,7 +56,7 @@ public final class PetRenderer extends EntityRenderer<PetEntity> {
         stack.scale(1 / 16f, 1 / 16f, 1 / 16f);
         motion.pose.render(stack, buffers.getBuffer(RenderType.entityCutout(getTextureLocation(pet))), light);
         if (!pet.hat().isEmpty() && asset.hat() != null) {
-            var hat = asset.hat(); stack.pushPose(); stack.mulPose(motion.pose.pose.world[hat.bone()]);
+            var hat = asset.hat(); stack.pushPose(); PortVertex.mulPose(stack, motion.pose.pose.world[hat.bone()]);
             stack.translate(hat.position()[0], hat.position()[1], hat.position()[2]);
             com.stardew.craft.client.render.PetHatRenderer.render(pet.hat(), stack, buffers, light, hat.scale());
             stack.popPose();

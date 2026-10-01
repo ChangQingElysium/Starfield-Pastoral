@@ -88,8 +88,8 @@ public final class RedPavingGameTests {
                 helper.assertTrue(((BlockItem) fixed.getItem()).place(context).consumesAction(), "Paving placement failed");
                 var placed = level.getBlockState(pos);
                 helper.assertTrue(placed.equals(source), "Copied structure rerolled on placement");
-                var nbt = BlockState.CODEC.encodeStart(NbtOps.INSTANCE, placed).getOrThrow();
-                helper.assertTrue(BlockState.CODEC.parse(NbtOps.INSTANCE, nbt).getOrThrow().equals(source), "Lost structure in save");
+                var nbt = com.stardew.craft.port.PortDataResults.getOrThrow(BlockState.CODEC.encodeStart(NbtOps.INSTANCE, placed));
+                helper.assertTrue(com.stardew.craft.port.PortDataResults.getOrThrow(BlockState.CODEC.parse(NbtOps.INSTANCE, nbt)).equals(source), "Lost structure in save");
                 helper.assertTrue(TerrainWorldUpgrade.varied(source, 123, pos).equals(source), "Terrain migration changed paving");
             }
         }

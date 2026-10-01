@@ -11,7 +11,7 @@ import snownee.jade.api.WailaPlugin;
 public class DehydratorJadePlugin implements IWailaPlugin {
 	@Override
 	public void register(IWailaCommonRegistration registration) {
-		registration.registerBlockDataProvider(DehydratorJadeProvider.INSTANCE, DehydratorBlock.class);
+		JadeBlockDataProviders.register(registration, DehydratorJadeProvider.INSTANCE, DehydratorBlock.class);
 	}
 
 	@Override

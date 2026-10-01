@@ -9,7 +9,6 @@ import com.stardew.craft.item.ModItems;
 import com.stardew.craft.manager.FertilizerManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -53,7 +52,7 @@ public enum FertilizerJadeProvider
 
         BlockPos soilPos = target.soilPos();
         tag.putBoolean(DATA_CHECKED, true);
-        tag.put(DATA_SOIL_POS, NbtUtils.writeBlockPos(soilPos));
+        tag.put(DATA_SOIL_POS, com.stardew.craft.port.PortNbtUtils.writeBlockPos(soilPos));
         FertilizerType type = FertilizerManager.get(level).getFertilizer(level, soilPos);
         if (type != null) {
             tag.putString(DATA_TYPE, type.getSerializedName());
@@ -68,7 +67,7 @@ public enum FertilizerJadeProvider
         CompoundTag serverData = accessor.getServerData();
         boolean checked = serverData != null && serverData.getBoolean(DATA_CHECKED);
         BlockPos soilPos = checked
-                ? NbtUtils.readBlockPos(serverData, DATA_SOIL_POS).orElse(null)
+                ? com.stardew.craft.port.PortNbtUtils.readBlockPos(serverData, DATA_SOIL_POS).orElse(null)
                 : resolveClientSoil(accessor);
         if (soilPos == null) {
             return;

@@ -40,7 +40,7 @@ public final class SpecialOrderDropBoxGameTests {
         helper.assertTrue(region[chunkOffset + 4] == 2, "Expected zlib map chunk compression");
         CompoundTag chunk;
         try (var input = new DataInputStream(new InflaterInputStream(new ByteArrayInputStream(region, chunkOffset + 5, length - 1)))) {
-            chunk = NbtIo.read(input, NbtAccounter.unlimitedHeap());
+            chunk = NbtIo.read(input, NbtAccounter.UNLIMITED);
         }
         for (Tag entry : chunk.getList("sections", Tag.TAG_COMPOUND)) {
             CompoundTag section = (CompoundTag) entry;

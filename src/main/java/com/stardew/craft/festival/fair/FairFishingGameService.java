@@ -62,7 +62,7 @@ public final class FairFishingGameService {
             QUESTION_CONTEXT,
             0,
             "",
-            Component.Serializer.toJson(Component.translatable("stardewcraft.fair.fishing.question"), player.registryAccess()),
+            Component.Serializer.toJson(Component.translatable("stardewcraft.fair.fishing.question")),
             List.of(
                 response(YES_ID, Component.translatable("stardewcraft.fair.fishing.play"), player),
                 response("no", Component.translatable("stardewcraft.fair.fishing.leave"), player)
@@ -386,7 +386,7 @@ public final class FairFishingGameService {
     private static OpenDesertFestivalQuestionPayload.ResponseOption response(String id, Component label, ServerPlayer player) {
         return new OpenDesertFestivalQuestionPayload.ResponseOption(
             id,
-            Component.Serializer.toJson(label, player.registryAccess())
+            Component.Serializer.toJson(label)
         );
     }
 }

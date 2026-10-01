@@ -146,7 +146,7 @@ public final class RingUtilityGameTests {
         item.setNoGravity(false);
         try {
             for (int tick = 0; tick < 25; tick++) {
-                player.setKnownMovement(new Vec3(0.28, 0, 0));
+                com.stardew.craft.port.PortEntities.setKnownMovement(player, new Vec3(0.28, 0, 0));
                 player.setPos(player.getX() + 0.28, player.getY(), player.getZ());
                 PlayerMagnetHandler.tick(player);
                 item.tick();

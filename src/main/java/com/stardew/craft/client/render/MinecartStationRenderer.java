@@ -17,6 +17,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraftforge.client.model.data.ModelData;
 
+import com.stardew.craft.port.PortVertex;
 @SuppressWarnings("null")
 public final class MinecartStationRenderer extends EntityRenderer<MinecartStationEntity> {
     private static final ModelResourceLocation EMPTY = model("empty");
@@ -38,7 +39,7 @@ public final class MinecartStationRenderer extends EntityRenderer<MinecartStatio
         for (int side = 0; side <= 6; side++) {
             Direction direction = side == 6 ? null : Direction.values()[side];
             for (var quad : baked.getQuads(null, direction, random, ModelData.EMPTY, null)) {
-                vertices.putBulkData(pose.last(), quad, 1, 1, 1, 1, light, OverlayTexture.NO_OVERLAY);
+                PortVertex.putBulkData(vertices, pose.last(), quad, 1, 1, 1, 1, light, OverlayTexture.NO_OVERLAY);
             }
         }
         pose.popPose();

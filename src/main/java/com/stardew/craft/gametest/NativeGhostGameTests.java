@@ -32,7 +32,7 @@ public final class NativeGhostGameTests {
         try{
             com.stardew.craft.specialorder.SpecialOrderManager.markSpecialDropFlag(a,"ectoplasmDrop");
             h.assertTrue(com.stardew.craft.specialorder.SpecialOrderManager.hasSpecialDropFlag(b,"ectoplasmDrop"),"Other player still eligible after a team pickup");
-            var saved=world.save(new net.minecraft.nbt.CompoundTag(),level.registryAccess());h.assertTrue(saved.getList("SharedSpecialDropFlags",8).contains(net.minecraft.nbt.StringTag.valueOf("ectoplasmDrop")),"Shared flag is not persisted");
+            var saved=world.save(new net.minecraft.nbt.CompoundTag());h.assertTrue(saved.getList("SharedSpecialDropFlags",8).contains(net.minecraft.nbt.StringTag.valueOf("ectoplasmDrop")),"Shared flag is not persisted");
         }finally{if(!before){world.sharedSpecialDropFlags().remove("ectoplasmDrop");world.setDirty();}for(var p:newMail)com.stardew.craft.player.PlayerDataManager.getPlayerData(p).removeMailFlagForTomorrow("ectoplasmDrop");}
         h.succeed();
     }

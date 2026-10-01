@@ -3,6 +3,7 @@ package com.stardew.craft.client.weapon;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import org.joml.Matrix4f;
 
+import com.stardew.craft.port.PortVertex;
 public final class WeaponEffectMesh {
 
     private WeaponEffectMesh() {}
@@ -193,12 +194,12 @@ public final class WeaponEffectMesh {
                                int r, int g, int b, int alpha,
                                float x, float y, float z, float u, float v,
                                float nx, float ny, float nz) {
-        consumer.addVertex(pose, x, y, z)
+        PortVertex.of(consumer).addVertex(pose, x, y, z)
             .setColor(r, g, b, alpha)
             .setUv(wrapUv(u), wrapUv(v))
             .setOverlay(net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY)
             .setLight(light)
-            .setNormal(nx, ny, nz);
+            .setNormal(nx, ny, nz).endVertex();
     }
 
     private static float wrapUv(float uv) {

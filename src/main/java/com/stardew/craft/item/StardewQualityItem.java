@@ -37,7 +37,7 @@ public class StardewQualityItem extends Item implements IStardewItem {
 	@SuppressWarnings("null")
 	public StardewQualityItem(String typeKey, int basePrice, int edibility, boolean supportsQuality, Properties properties, boolean drinkAnimation) {
 		super(isEdible(edibility)
-				? properties.food(new FoodProperties.Builder().nutrition(2).saturationModifier(0.3f).alwaysEdible().build())
+				? properties.food(new FoodProperties.Builder().nutrition(2).saturationMod(0.3f).alwaysEat().build())
 				: properties);
 		this.typeKey = typeKey;
 		this.basePrice = basePrice;

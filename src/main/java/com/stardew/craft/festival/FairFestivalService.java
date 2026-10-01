@@ -1832,7 +1832,7 @@ public final class FairFestivalService {
         }
         Component question = Component.translatable("stardewcraft.fair.star_tokens.amount_question");
         PacketDistributor.sendToPlayer(player, new OpenFairStarTokenNumberSelectionPayload(
-            Component.Serializer.toJson(question, player.registryAccess()),
+            Component.Serializer.toJson(question),
             STAR_TOKEN_PURCHASE_PRICE,
             0,
             MAX_STAR_TOKEN_PURCHASE,
@@ -1860,7 +1860,7 @@ public final class FairFestivalService {
         data.addMailFlag(flag);
         PlayerDataEventHandler.syncPlayerData(player, data);
         PacketDistributor.sendToPlayer(player, new OpenFairFortunePayload(createFortunePages(player).stream()
-            .map(component -> Component.Serializer.toJson(component, player.registryAccess()))
+            .map(component -> Component.Serializer.toJson(component))
             .toList()));
     }
 
@@ -2030,7 +2030,7 @@ public final class FairFestivalService {
             context,
             questionIndex,
             "",
-            Component.Serializer.toJson(question, player.registryAccess()),
+            Component.Serializer.toJson(question),
             responses
         ));
     }
@@ -2038,7 +2038,7 @@ public final class FairFestivalService {
     private static OpenDesertFestivalQuestionPayload.ResponseOption response(String id, Component label, ServerPlayer player) {
         return new OpenDesertFestivalQuestionPayload.ResponseOption(
             id,
-            Component.Serializer.toJson(label, player.registryAccess())
+            Component.Serializer.toJson(label)
         );
     }
 

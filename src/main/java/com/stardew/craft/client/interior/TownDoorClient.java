@@ -258,12 +258,13 @@ public final class TownDoorClient {
                 && Math.abs(point.y - center.y) <= 1 ? fraction : Double.NaN;
     }
 
-    public static void renderPortal(DeltaTracker delta, Camera camera, Matrix4f view, Matrix4f projection) {
+    public static void renderPortal(DeltaTracker delta, long finishNanoTime, Camera camera,
+                                    com.mojang.blaze3d.vertex.PoseStack.Pose view, Matrix4f projection) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level != level) resetLevel(mc.level);
         if (!doors.isEmpty() && mc.player != null && mc.level != null
                 && mc.level.dimension().equals(ModDimensions.STARDEW_VALLEY)) {
-            RENDERER.render(delta, camera, view, projection);
+            RENDERER.render(delta, finishNanoTime, camera, view, projection);
         }
     }
 

@@ -237,7 +237,7 @@ public final class TeaBushManager extends SavedData {
     }
 
     @Override
-    public @Nonnull CompoundTag save(@Nonnull CompoundTag tag, @Nonnull net.minecraft.core.HolderLookup.Provider provider) {
+    public @Nonnull CompoundTag save(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         ListTag list = new ListTag();
         for (Map.Entry<GlobalPos, Entry> mapEntry : bushes.entrySet()) {
             CompoundTag entryTag = writeGlobalPos(mapEntry.getKey());
@@ -277,7 +277,7 @@ public final class TeaBushManager extends SavedData {
     private static CompoundTag writeGlobalPos(GlobalPos globalPos) {
         CompoundTag tag = new CompoundTag();
         tag.putString("Dimension", globalPos.dimension().location().toString());
-        tag.put("Pos", NbtUtils.writeBlockPos(globalPos.pos()));
+        tag.put("Pos", com.stardew.craft.port.PortNbtUtils.writeBlockPos(globalPos.pos()));
         return tag;
     }
 
@@ -288,7 +288,7 @@ public final class TeaBushManager extends SavedData {
         ResourceKey<Level> dimension = ResourceKey.create(
                 net.minecraft.core.registries.Registries.DIMENSION,
                 new net.minecraft.resources.ResourceLocation(tag.getString("Dimension")));
-        BlockPos pos = NbtUtils.readBlockPos(tag, "Pos").orElse(null);
+        BlockPos pos = com.stardew.craft.port.PortNbtUtils.readBlockPos(tag, "Pos").orElse(null);
         return pos == null ? null : GlobalPos.of(dimension, pos);
     }
 

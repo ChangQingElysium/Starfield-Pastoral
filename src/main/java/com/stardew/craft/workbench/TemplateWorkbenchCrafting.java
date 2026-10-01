@@ -49,7 +49,7 @@ public final class TemplateWorkbenchCrafting {
         if (material == Items.AIR || item == Items.AIR) return 0;
         int batches = Math.min(Math.min(requested, 999), count(inventory, material) / recipe.cost());
         // Cap batches before charging, so no paid output is discarded by the delivery limit.
-        batches = Math.min(batches, item.getDefaultMaxStackSize() * 36 / recipe.outputCount());
+        batches = Math.min(batches, item.getMaxStackSize() * 36 / recipe.outputCount());
         if (batches <= 0) return 0;
         int remaining = batches * recipe.cost();
         for (int i = 0; i < inventory.getContainerSize() && remaining > 0; i++) {
@@ -61,7 +61,7 @@ public final class TemplateWorkbenchCrafting {
         }
         int output = batches * recipe.outputCount();
         for (int left = output; left > 0;) {
-            int size = Math.min(left, item.getDefaultMaxStackSize());
+            int size = Math.min(left, item.getMaxStackSize());
             ItemStack stack = new ItemStack(item, size);
             deliver.accept(stack);
             left -= size;

@@ -40,7 +40,7 @@ public final class CrystalVenomVisuals {
         CastKey key=new CastKey(p.casterEntityId(),p.startGameTick());
         if(CASTS.containsKey(key)) return;
         CASTS.put(key,new Cast(p,level.getGameTime()));while(CASTS.size()>32) CASTS.remove(CASTS.keySet().iterator().next());
-        level.playLocalSound(origin.x,origin.y+1,origin.z,CRYSTAL_LAYER.equals(p.skillId())?SoundEvents.TRIDENT_THROW.value():SoundEvents.PLAYER_ATTACK_SWEEP,
+        level.playLocalSound(origin.x,origin.y+1,origin.z,CRYSTAL_LAYER.equals(p.skillId())?SoundEvents.TRIDENT_THROW:SoundEvents.PLAYER_ATTACK_SWEEP,
                 SoundSource.PLAYERS,.3f,CRYSTAL_LAYER.equals(p.skillId())?1.6f:1.15f,false);
     }
     @SubscribeEvent public static void tick(ClientTickEvent.Post e) {

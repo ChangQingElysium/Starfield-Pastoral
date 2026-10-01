@@ -83,7 +83,7 @@ public record BuildingTransfer(BuildingRecord before, BuildingRecord after, List
                 var baseline = block.newBlockEntity(entry.getKey(), entry.getValue().state());
                 if (baseline != null) {
                     baseline.setLevel(level);
-                    if (entry.getValue().data() != null) baseline.loadWithComponents(entry.getValue().data().copy(), level.registryAccess());
+                    if (entry.getValue().data() != null) baseline.load(entry.getValue().data().copy());
                     if (actual.data().equals(baseline.saveWithFullMetadata())) continue;
                 }
             }

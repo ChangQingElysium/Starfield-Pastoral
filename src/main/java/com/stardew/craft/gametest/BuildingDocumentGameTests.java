@@ -49,7 +49,7 @@ public final class BuildingDocumentGameTests {
     public static void upgradePermissionsAreFarmFamilyAndTierBoundAfterReload(GameTestHelper h) {
         var data = new BuildingWorldData(); var farm = UUID.randomUUID(); var permit = UUID.randomUUID();
         data.recordUpgradePurchase(permit, farm, PrefabDefinitions.COOP, 2);
-        data = BuildingWorldData.load(data.save(new CompoundTag(), h.getLevel().registryAccess()), h.getLevel().registryAccess());
+        data = BuildingWorldData.load(data.save(new CompoundTag()), h.getLevel().registryAccess());
         h.assertTrue(data.permitsUpgrade(permit, farm, PrefabDefinitions.COOP, 2), "Permit lost its target on reload");
         h.assertTrue(!data.permits(permit, farm, PrefabDefinitions.COOP), "Upgrade permit can buy a new building");
         h.assertTrue(!data.permitsUpgrade(permit, farm, PrefabDefinitions.COOP, 3), "Permit skips an upgrade tier");

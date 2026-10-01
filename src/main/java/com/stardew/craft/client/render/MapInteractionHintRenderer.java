@@ -137,7 +137,7 @@ public final class MapInteractionHintRenderer {
                 1.0F, 1.0F, 1.0F,
                 fadeAlpha * stateOpacity);
         // GUI sprites are loaded together on resource reload, not lazily from disk on first hover.
-        graphics.blitSprite(
+        com.stardew.craft.port.PortGuiSprites.blitSprite(graphics,
                 icon.texture(),
                 x, y,
                 icon.width(), icon.height());

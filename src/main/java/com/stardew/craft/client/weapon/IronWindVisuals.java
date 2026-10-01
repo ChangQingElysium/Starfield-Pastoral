@@ -44,7 +44,7 @@ public final class IronWindVisuals {
         if(level==null || mc.player==null || mc.player.distanceToSqr(point)>48*48) return;
         if(CASTS.putIfAbsent(new Cast(p.casterEntityId(),p.skillId(),p.startGameTick()),level.getGameTime())!=null) return;
         while(CASTS.size()>64) CASTS.remove(CASTS.keySet().iterator().next());
-        level.playLocalSound(point.x,point.y,point.z,SoundEvents.TRIDENT_THROW.value(),SoundSource.PLAYERS,.3f,WIND_THRUST.equals(p.skillId())?1.7f:1.35f,false);
+        level.playLocalSound(point.x,point.y,point.z,SoundEvents.TRIDENT_THROW,SoundSource.PLAYERS,.3f,WIND_THRUST.equals(p.skillId())?1.7f:1.35f,false);
     }
     static boolean validMove(IronWindMovePayload p) {
         return finite(p.from()) && finite(p.to()) && p.from().distanceToSqr(p.to())<=144;

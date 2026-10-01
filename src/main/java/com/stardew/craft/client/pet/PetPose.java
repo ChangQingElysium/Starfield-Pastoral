@@ -8,6 +8,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.joml.Vector3f;
 
+import com.stardew.craft.port.PortVertex;
 /** Reuses native ZYX channel sampling; pet vertices have no fishing-arm shape corrections. */
 @OnlyIn(Dist.CLIENT)
 public final class PetPose {
@@ -96,9 +97,9 @@ public final class PetPose {
             for (int c = 0; c < 4; c++) {
                 var v = points[c];
                 var uv = face.vertices().get(c).uv();
-                consumer.addVertex(stack.last().pose(), v.x, v.y, v.z).setColor(255, 255, 255, 255)
+                PortVertex.of(consumer).addVertex(stack.last().pose(), v.x, v.y, v.z).setColor(255, 255, 255, 255)
                         .setUv(uv[0], uv[1]).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light)
-                        .setNormal(stack.last(), normal.x, normal.y, normal.z);
+                        .setNormal(stack.last(), normal.x, normal.y, normal.z).endVertex();
             }
         }
     }

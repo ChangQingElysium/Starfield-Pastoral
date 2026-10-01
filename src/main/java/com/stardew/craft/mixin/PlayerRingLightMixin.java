@@ -18,8 +18,9 @@ public abstract class PlayerRingLightMixin implements PlayerGlowState {
             SynchedEntityData.defineId(Player.class, EntityDataSerializers.INT);
 
     @Inject(method = "defineSynchedData", at = @At("TAIL"))
-    private void stardewcraft$defineRingLight(SynchedEntityData.Builder builder, CallbackInfo ci) {
-        builder.define(STARDEWCRAFT_RING_LIGHT, 0);
+    private void stardewcraft$defineRingLight(CallbackInfo ci) {
+        // PORT(1.20.1): defineSynchedData() takes no builder; entries are defined on the entity data directly.
+        ((Player) (Object) this).getEntityData().define(STARDEWCRAFT_RING_LIGHT, 0);
     }
 
     @Override

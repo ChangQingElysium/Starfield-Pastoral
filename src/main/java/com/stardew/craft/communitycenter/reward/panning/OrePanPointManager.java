@@ -218,7 +218,7 @@ public final class OrePanPointManager extends SavedData {
 
     @Override
     @SuppressWarnings("null")
-    public @NotNull CompoundTag save(@NotNull CompoundTag tag, @NotNull HolderLookup.Provider provider) {
+    public @NotNull CompoundTag save(@NotNull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         ListTag playersList = new ListTag();
         java.util.Set<UUID> allPlayers = new java.util.HashSet<>();
         allPlayers.addAll(points.keySet());

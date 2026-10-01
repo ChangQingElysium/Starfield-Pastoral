@@ -378,7 +378,7 @@ public final class BuildingPlacementService {
                 if (level.getBlockState(pos).getBlock() == expected.getBlock()) continue;
                 level.setBlock(pos, expected, Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
                 if (cell.blockEntity() != null && level.getBlockEntity(pos) != null) {
-                    level.getBlockEntity(pos).loadWithComponents(cell.blockEntity().copy(), level.registryAccess());
+                    level.getBlockEntity(pos).load(cell.blockEntity().copy());
                     level.getBlockEntity(pos).setChanged();
                 }
             }

@@ -195,7 +195,7 @@ public final class ShippingOwnershipGameTests {
 
     private static void assertLedger(GameTestHelper helper, ServerPlayer player, int expectedCount, int expectedPrice) {
         CompoundTag ledger = OvernightSettlementTracker.get(helper.getLevel().getServer())
-                .save(new CompoundTag(), helper.getLevel().registryAccess());
+                .save(new CompoundTag());
         int count = 0;
         for (Tag entry : ledger.getList("Players", Tag.TAG_COMPOUND)) {
             CompoundTag data = (CompoundTag) entry;

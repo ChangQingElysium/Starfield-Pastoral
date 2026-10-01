@@ -86,7 +86,7 @@ public final class SandySoilGameTests {
         var manager = new FertilizerManager();
         for (FertilizerType type : FertilizerType.values()) {
             h.assertTrue(manager.tryApplyFertilizer(level, sandy, type), "Fertilizer rejected " + type);
-            var loaded = FertilizerManager.load(manager.save(new CompoundTag(), level.registryAccess()), level.registryAccess());
+            var loaded = FertilizerManager.load(manager.save(new CompoundTag()), level.registryAccess());
             h.assertTrue(loaded.getFertilizer(level, sandy) == type, "Saved fertilizer changed");
             h.assertTrue(level.getBlockState(sandy).is(ModBlocks.SANDY_FARMLAND.get()), "Fertilizer changed block identity");
             manager.removeFertilizer(level, sandy);

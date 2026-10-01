@@ -24,6 +24,7 @@ import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import org.joml.Matrix3f;
 import org.joml.Vector3f;
 
+import com.stardew.craft.port.PortVertex;
 /** Native rigid skeleton and hand-bound bone, without vanilla skeleton AI or model. */
 @SuppressWarnings({"null", "removal"})
 @EventBusSubscriber(modid = StardewCraft.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
@@ -118,12 +119,12 @@ public final class NativeSkeletonRenderer extends EntityRenderer<MineSkeletonEnt
             normal.set(quad.normal());matrices[quad.bone()].normal(normalMatrix).transform(normal).normalize();
             for(var v:quad.vertices()){
                 matrices[quad.bone()].transformPosition(vertex.set(v[0],v[1],v[2]));
-                consumer.addVertex(stack.last().pose(),vertex.x,vertex.y,vertex.z).setColor(255,255,255,255).setUv(v[3],v[4])
-                        .setOverlay(overlay).setLight(light).setNormal(stack.last(),normal.x,normal.y,normal.z);
+                PortVertex.of(consumer).addVertex(stack.last().pose(),vertex.x,vertex.y,vertex.z).setColor(255,255,255,255).setUv(v[3],v[4])
+                        .setOverlay(overlay).setLight(light).setNormal(stack.last(),normal.x,normal.y,normal.z).endVertex();
             }
         }
         if(entity.phase()==1&&entity.deathTime==0){
-            stack.pushPose();stack.mulPose(motion.pose().boneMatrix("throw_socket"));stack.translate(5,8.5,0);
+            stack.pushPose();PortVertex.mulPose(stack, motion.pose().boneMatrix("throw_socket"));stack.translate(5,8.5,0);
             drawBone(stack,buffers,light);stack.popPose();
         }
         stack.popPose();
@@ -131,6 +132,6 @@ public final class NativeSkeletonRenderer extends EntityRenderer<MineSkeletonEnt
     }
     static void drawBone(PoseStack stack,MultiBufferSource buffers,int light){
         var model=loaded.get("skeleton_bone");if(model==null)return;var consumer=buffers.getBuffer(RenderType.entityCutout(texture("skeleton_bone")));
-        for(var q:model.quads())for(var v:q.vertices())consumer.addVertex(stack.last().pose(),v[0],v[1],v[2]).setColor(255,255,255,255).setUv(v[3],v[4]).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(stack.last(),q.normal()[0],q.normal()[1],q.normal()[2]);
+        for(var q:model.quads())for(var v:q.vertices())PortVertex.of(consumer).addVertex(stack.last().pose(),v[0],v[1],v[2]).setColor(255,255,255,255).setUv(v[3],v[4]).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(stack.last(),q.normal()[0],q.normal()[1],q.normal()[2]).endVertex();
     }
 }

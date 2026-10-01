@@ -51,7 +51,7 @@ public final class LegacyLivestockMigration extends SavedData {
 
     public static LegacyLivestockMigration get(MinecraftServer server) {
         return server.overworld().getDataStorage().computeIfAbsent(
-                com.stardew.craft.port.PortSavedData.loader(new Factory<>(LegacyLivestockMigration::new, LegacyLivestockMigration::load)), com.stardew.craft.port.PortSavedData.constructor(new Factory<>(LegacyLivestockMigration::new, LegacyLivestockMigration::load)), DATA_NAME);
+                com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(LegacyLivestockMigration::new, LegacyLivestockMigration::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(LegacyLivestockMigration::new, LegacyLivestockMigration::load)), DATA_NAME);
     }
 
     @SubscribeEvent public static void started(ServerStartedEvent event) { LivestockService.recover(event.getServer()); }
@@ -69,7 +69,7 @@ public final class LegacyLivestockMigration extends SavedData {
                 // Read the raw source, before its old loader can clamp hay or discard unknown fields.
                 if (Files.exists(path)) {
                     try (var input = Files.newInputStream(path)) {
-                        var root = NbtIo.readCompressed(input, NbtAccounter.create(64L * 1024 * 1024));
+                        var root = com.stardew.craft.port.PortNbtIo.readCompressed(input, new net.minecraft.nbt.NbtAccounter(64L * 1024 * 1024));
                         if (!root.contains("data", Tag.TAG_COMPOUND)) throw new IllegalStateException("Invalid legacy animal save root");
                         migration.source = root.getCompound("data").copy();
                         if (migration.source.getInt("animalSchemaVersion") > com.stardew.craft.animal.data.AnimalWorldDataMigrations.CURRENT_VERSION)

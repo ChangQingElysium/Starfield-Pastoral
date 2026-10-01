@@ -78,7 +78,7 @@ public class EventSeenData extends SavedData {
     // ─── persistence ───
 
     @Override
-    public CompoundTag save(@javax.annotation.Nonnull CompoundTag tag, @javax.annotation.Nonnull HolderLookup.Provider provider) {
+    public CompoundTag save(@javax.annotation.Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         tag.putInt("PlayerCount", playerEvents.size());
         int index = 0;
         for (var entry : playerEvents.entrySet()) {

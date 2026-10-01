@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.stardew.craft.port.PortVertex;
 final class BlockbenchElementRenderer {
     private static final Gson GSON = new Gson();
     private static final Map<ResourceLocation, Optional<Model>> CACHE = new ConcurrentHashMap<>();
@@ -291,12 +292,12 @@ final class BlockbenchElementRenderer {
         y += faceOffset[1];
         z += faceOffset[2];
         float[] rotated = rotate(rotation, x, y, z);
-        consumer.addVertex(pose, rotated[0], rotated[1], rotated[2])
+        PortVertex.of(consumer).addVertex(pose, rotated[0], rotated[1], rotated[2])
                 .setColor(255, 255, 255, 255)
                 .setUv(u, v)
                 .setOverlay(packedOverlay == 0 ? OverlayTexture.NO_OVERLAY : packedOverlay)
                 .setLight(packedLight)
-                .setNormal(pose, normal[0], normal[1], normal[2]);
+                .setNormal(pose, normal[0], normal[1], normal[2]).endVertex();
     }
 
     private static float[] rotate(Rotation rotation, float x, float y, float z) {

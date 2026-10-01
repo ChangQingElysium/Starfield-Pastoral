@@ -154,7 +154,7 @@ public final class FacadeTemplateGameTests {
         var dir=java.nio.file.Path.of("build/reports/facade-templates");java.nio.file.Files.createDirectories(dir);
         var template=new net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate();
         template.fillFromWorld(level,origin.offset(0,0,-1),new net.minecraft.core.Vec3i(7,6,2),false,Blocks.STRUCTURE_VOID);
-        net.minecraft.nbt.NbtIo.writeCompressed(template.save(new net.minecraft.nbt.CompoundTag()),dir.resolve("facade-sample.nbt"));
+        com.stardew.craft.port.PortNbtIo.writeCompressed(template.save(new net.minecraft.nbt.CompoundTag()),dir.resolve("facade-sample.nbt"));
         var cells=new java.util.ArrayList<java.util.Map<String,Object>>();
         for(var p:BlockPos.betweenClosed(origin.offset(0,0,-1),origin.offset(6,5,0))) {
             var state=level.getBlockState(p);if(state.isAir())continue;

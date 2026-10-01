@@ -30,8 +30,8 @@ public class SmokedFishItem extends Item implements IStardewItem {
     private static FoodProperties createFoodProperties() {
         return new FoodProperties.Builder()
             .nutrition(2)
-            .saturationModifier(0.3f)
-            .alwaysEdible()
+            .saturationMod(0.3f)
+            .alwaysEat()
             .build();
     }
 

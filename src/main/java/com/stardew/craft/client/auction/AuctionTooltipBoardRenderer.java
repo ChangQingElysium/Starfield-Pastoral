@@ -16,6 +16,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 
+import com.stardew.craft.port.PortVertex;
 /** Physical auction ledger: concise live data, with full item tooltips available in the bid screen. */
 public final class AuctionTooltipBoardRenderer {
     private static final RenderType MATERIAL = RenderType.text(new ResourceLocation(
@@ -102,6 +103,6 @@ public final class AuctionTooltipBoardRenderer {
         vertex(vc, ps, 16, 188, u, v, color);
     }
     private static void vertex(VertexConsumer vc, PoseStack ps, float x, float y, float u, float v, int color) {
-        vc.addVertex(ps.last().pose(), x, y, 0).setColor(color).setUv(u, v).setLight(LIGHT);
+        PortVertex.of(vc).addVertex(ps.last().pose(), x, y, 0).setColor(color).setUv(u, v).setLight(LIGHT).endVertex();
     }
 }

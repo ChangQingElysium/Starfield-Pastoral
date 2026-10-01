@@ -11,7 +11,7 @@ import snownee.jade.api.WailaPlugin;
 public class SolarPanelJadePlugin implements IWailaPlugin {
     @Override
     public void register(IWailaCommonRegistration registration) {
-        registration.registerBlockDataProvider(SolarPanelJadeProvider.INSTANCE, SolarPanelBlock.class);
+        JadeBlockDataProviders.register(registration, SolarPanelJadeProvider.INSTANCE, SolarPanelBlock.class);
     }
 
     @Override

@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.stardew.craft.port.PortVertex;
 /**
  * Renders visual hints near portal interaction entities:
  * - A soft glowing outline around the door area
@@ -818,10 +819,10 @@ public final class PortalHintRenderer {
                           float ax, float ay, float az, float bx, float by, float bz,
                           float cx, float cy, float cz, float dx, float dy, float dz,
                           int r, int g, int b, int a) {
-        v.addVertex(p, ax, ay, az).setColor(r, g, b, a);
-        v.addVertex(p, bx, by, bz).setColor(r, g, b, a);
-        v.addVertex(p, cx, cy, cz).setColor(r, g, b, a);
-        v.addVertex(p, dx, dy, dz).setColor(r, g, b, a);
+        PortVertex.of(v).addVertex(p, ax, ay, az).setColor(r, g, b, a).endVertex();
+        PortVertex.of(v).addVertex(p, bx, by, bz).setColor(r, g, b, a).endVertex();
+        PortVertex.of(v).addVertex(p, cx, cy, cz).setColor(r, g, b, a).endVertex();
+        PortVertex.of(v).addVertex(p, dx, dy, dz).setColor(r, g, b, a).endVertex();
     }
 
     @SuppressWarnings("null")
@@ -878,10 +879,10 @@ public final class PortalHintRenderer {
         pz = pz / pl * halfW;
 
         PoseStack.Pose pose = ps.last();
-        vc.addVertex(pose, ax - px, ay - py, az - pz).setColor(r, g, b, a);
-        vc.addVertex(pose, ax + px, ay + py, az + pz).setColor(r, g, b, a);
-        vc.addVertex(pose, bx + px, by + py, bz + pz).setColor(r, g, b, a);
-        vc.addVertex(pose, bx - px, by - py, bz - pz).setColor(r, g, b, a);
+        PortVertex.of(vc).addVertex(pose, ax - px, ay - py, az - pz).setColor(r, g, b, a).endVertex();
+        PortVertex.of(vc).addVertex(pose, ax + px, ay + py, az + pz).setColor(r, g, b, a).endVertex();
+        PortVertex.of(vc).addVertex(pose, bx + px, by + py, bz + pz).setColor(r, g, b, a).endVertex();
+        PortVertex.of(vc).addVertex(pose, bx - px, by - py, bz - pz).setColor(r, g, b, a).endVertex();
     }
 
     // ======================== RenderType ========================
@@ -900,7 +901,7 @@ public final class PortalHintRenderer {
                 .setCullState(new RenderType.CullStateShard(false))
                 .setDepthTestState(xray
                     ? new RenderType.DepthTestStateShard("always", 519)
-                    : RenderType.LEQUAL_DEPTH_TEST)
+                    : com.stardew.craft.port.PortRenderStateShards.LEQUAL_DEPTH_TEST)
                 .createCompositeState(false));
     }
 

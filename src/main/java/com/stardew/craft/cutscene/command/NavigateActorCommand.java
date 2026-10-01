@@ -181,7 +181,7 @@ public class NavigateActorCommand implements EventCommand {
         verticalVelocity = actor.onGround() ? -0.04 : (verticalVelocity - 0.08) * 0.98;
         updateDoors(before.add(moveX, 0, moveZ));
         // Only step towards a higher route surface, never climb an unrelated side obstacle.
-        var stepAttribute = actor.getAttribute(Attributes.STEP_HEIGHT);
+        var stepAttribute = actor.getAttribute(com.stardew.craft.port.PortAttributes.STEP_HEIGHT.get());
         double oldStep = stepAttribute == null ? 0 : stepAttribute.getBaseValue();
         if (stepAttribute != null) stepAttribute.setBaseValue(Math.min(oldStep, Math.max(0, target.y - before.y + 1.0E-5)));
         try {

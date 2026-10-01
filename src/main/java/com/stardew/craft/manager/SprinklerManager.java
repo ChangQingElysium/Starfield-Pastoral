@@ -119,7 +119,7 @@ public class SprinklerManager extends SavedData {
         for (GlobalPos pos : sprinklerPositions) {
             CompoundTag posTag = new CompoundTag();
             posTag.putString("Dimension", pos.dimension().location().toString());
-            posTag.put("Pos", NbtUtils.writeBlockPos(pos.pos()));
+            posTag.put("Pos", com.stardew.craft.port.PortNbtUtils.writeBlockPos(pos.pos()));
             list.add(posTag);
         }
         tag.put("Sprinklers", list);
@@ -135,7 +135,7 @@ public class SprinklerManager extends SavedData {
                 CompoundTag posTag = list.getCompound(i);
                 ResourceKey<Level> dim = ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION,
                         new net.minecraft.resources.ResourceLocation(posTag.getString("Dimension")));
-                BlockPos pos = NbtUtils.readBlockPos(posTag, "Pos").orElse(BlockPos.ZERO);
+                BlockPos pos = com.stardew.craft.port.PortNbtUtils.readBlockPos(posTag, "Pos").orElse(BlockPos.ZERO);
                 manager.sprinklerPositions.add(GlobalPos.of(dim, pos));
             }
         }

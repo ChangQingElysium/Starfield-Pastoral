@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
+import com.stardew.craft.port.PortVertex;
 public final class DamageNumberClient {
 
     private static final List<DamageNumber> ACTIVE = new ArrayList<>();
@@ -489,22 +490,22 @@ public final class DamageNumberClient {
         int gR8 = (int) (gR * 255.0f);
         int bR8 = (int) (bR * 255.0f);
 
-        consumer.addVertex(pose, x0, y0, 0.0f)
+        PortVertex.of(consumer).addVertex(pose, x0, y0, 0.0f)
             .setColor(rL8, gL8, bL8, a8)
             .setUv(u0, v0)
-            .setLight(packedLight);
-        consumer.addVertex(pose, x0, y1, 0.0f)
+            .setLight(packedLight).endVertex();
+        PortVertex.of(consumer).addVertex(pose, x0, y1, 0.0f)
             .setColor(rL8, gL8, bL8, a8)
             .setUv(u0, v1)
-            .setLight(packedLight);
-        consumer.addVertex(pose, x1, y1, 0.0f)
+            .setLight(packedLight).endVertex();
+        PortVertex.of(consumer).addVertex(pose, x1, y1, 0.0f)
             .setColor(rR8, gR8, bR8, a8)
             .setUv(u1, v1)
-            .setLight(packedLight);
-        consumer.addVertex(pose, x1, y0, 0.0f)
+            .setLight(packedLight).endVertex();
+        PortVertex.of(consumer).addVertex(pose, x1, y0, 0.0f)
             .setColor(rR8, gR8, bR8, a8)
             .setUv(u1, v0)
-            .setLight(packedLight);
+            .setLight(packedLight).endVertex();
         return true;
     }
 

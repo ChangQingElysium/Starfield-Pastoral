@@ -9,6 +9,7 @@ import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
+import com.stardew.craft.port.PortVertex;
 /** Geometry submission and bone attachment share the exact sampled hierarchy. */
 public record BlockbenchFrame(NativeNpcModel model, NativeNpcPose pose) {
     public interface Material {
@@ -31,9 +32,9 @@ public record BlockbenchFrame(NativeNpcModel model, NativeNpcPose pose) {
             var consumer=buffers.getBuffer(material.type(quad.bone()));
             for(var v:quad.vertices()) {
                 matrix.transformPosition(vertex.set(v[0],v[1],v[2]));
-                consumer.addVertex(stack.last().pose(),vertex.x,vertex.y,vertex.z).setColor(color)
+                PortVertex.of(consumer).addVertex(stack.last().pose(),vertex.x,vertex.y,vertex.z).setColor(color)
                         .setUv(v[3],v[4]).setOverlay(overlay).setLight(material.light(quad.bone()))
-                        .setNormal(stack.last(),normal.x,normal.y,normal.z);
+                        .setNormal(stack.last(),normal.x,normal.y,normal.z).endVertex();
             }
         }
     }
@@ -41,7 +42,7 @@ public record BlockbenchFrame(NativeNpcModel model, NativeNpcPose pose) {
     public boolean attach(PoseStack stack,String bone) {
         if(!pose.hasBone(bone))return false;
         var origin=model.bones().stream().filter(b->b.name().equals(bone)).findFirst().orElseThrow().origin();
-        stack.mulPose(pose.boneMatrix(bone));stack.translate(origin[0],origin[1],origin[2]);
+        PortVertex.mulPose(stack, pose.boneMatrix(bone));stack.translate(origin[0],origin[1],origin[2]);
         stack.scale(16,16,16);return true;
     }
 }

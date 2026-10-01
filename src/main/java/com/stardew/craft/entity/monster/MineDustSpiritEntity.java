@@ -34,10 +34,11 @@ public final class MineDustSpiritEntity extends StardewMonsterEntity {
     private double groundY,pathPaused,lastPathX,lastPathZ;
     private boolean anchored;
     public MineDustSpiritEntity(EntityType<? extends MineDustSpiritEntity> type,Level level){super(type,level);setNoGravity(true);addTag("sd_mob_dust_sprite");}
-    public static AttributeSupplier.Builder createAttributes(){return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,40).add(Attributes.ATTACK_DAMAGE,6).add(Attributes.MOVEMENT_SPEED,.25).add(Attributes.FOLLOW_RANGE,64).add(Attributes.STEP_HEIGHT,0);}
+    public static AttributeSupplier.Builder createAttributes(){return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,40).add(Attributes.ATTACK_DAMAGE,6).add(Attributes.MOVEMENT_SPEED,.25).add(Attributes.FOLLOW_RANGE,64).add(com.stardew.craft.port.PortAttributes.STEP_HEIGHT.get(),0)
+            .add(com.stardew.craft.port.PortAttributes.SCALE.get());} // PORT(1.20.1): 1.21 living entities always have generic.scale
     @Override protected void registerGoals(){}
     @Override protected ResourceLocation definitionId(){return new ResourceLocation("stardewcraft:dust_sprite");}
-    @Override protected void configureSpawn(MonsterDefinition d,MonsterSpawnContext c){var r=MonsterStatResolver.base(d,c,random);setInitialHealth(r.initialHealth());replaceCombatStats(r.combat());getAttribute(Attributes.SCALE).setBaseValue((75+random.nextInt(26))/100.);motion.voice(1+random.nextInt(23));groundY=getY();anchored=true;}
+    @Override protected void configureSpawn(MonsterDefinition d,MonsterSpawnContext c){var r=MonsterStatResolver.base(d,c,random);setInitialHealth(r.initialHealth());replaceCombatStats(r.combat());getAttribute(com.stardew.craft.port.PortAttributes.SCALE.get()).setBaseValue((75+random.nextInt(26))/100.);motion.voice(1+random.nextInt(23));groundY=getY();anchored=true;}
     @Override protected void defineSynchedData(){super.defineSynchedData();this.entityData.define(OFFSET,0F);this.entityData.define(HIT,-100L);}
     public double sourceOffset(){return entityData.get(OFFSET);}
     public double hitTime(float p){return (level().getGameTime()-entityData.get(HIT)+p)/20.;}

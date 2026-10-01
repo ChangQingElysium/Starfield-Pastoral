@@ -74,7 +74,7 @@ public record FurnitureCataloguePurchasePayload(
             if (!allowed) return;
 
             // Clamp to max stack size
-            qty = Math.min(qty, mcItem.getDefaultMaxStackSize());
+            qty = Math.min(qty, mcItem.getMaxStackSize());
 
             // Grant items directly to inventory
             ItemStack grant = new ItemStack(mcItem, qty);

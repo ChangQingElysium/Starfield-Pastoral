@@ -12,8 +12,8 @@ import snownee.jade.api.WailaPlugin;
 public class AnimalUtilityJadePlugin implements IWailaPlugin {
     @Override
     public void register(IWailaCommonRegistration registration) {
-        registration.registerBlockDataProvider(AnimalUtilityJadeProvider.INSTANCE, AutoPetterBlock.class);
-        registration.registerBlockDataProvider(AnimalUtilityJadeProvider.INSTANCE, HeaterBlock.class);
+        JadeBlockDataProviders.register(registration, AnimalUtilityJadeProvider.INSTANCE, AutoPetterBlock.class);
+        JadeBlockDataProviders.register(registration, AnimalUtilityJadeProvider.INSTANCE, HeaterBlock.class);
     }
 
     @Override

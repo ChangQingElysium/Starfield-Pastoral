@@ -617,7 +617,7 @@ final class BuiltinSkillAppliedHitRules {
         );
         Holder<MobEffect> vulnerableHolder = Holder.direct(vulnerable);
         hit.target().addEffect(new MobEffectInstance(
-                vulnerableHolder,
+                vulnerableHolder.value(),
                 60,
                 1,
                 false,

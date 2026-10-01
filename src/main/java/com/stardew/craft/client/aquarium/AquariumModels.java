@@ -1,5 +1,6 @@
 package com.stardew.craft.client.aquarium;
 
+import com.stardew.craft.port.PortRenderStateShards;
 import com.google.gson.Gson;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -21,6 +22,7 @@ import org.joml.Matrix3f;
 import org.joml.Vector3f;
 import java.util.Map;
 
+import com.stardew.craft.port.PortVertex;
 @EventBusSubscriber(modid=StardewCraft.MODID, bus=EventBusSubscriber.Bus.MOD, value=Dist.CLIENT)
 public final class AquariumModels {
     private record Model(NativeNpcModel data, NativeNpcPose pose, RenderType solid, RenderType glass) {}
@@ -45,11 +47,11 @@ public final class AquariumModels {
     private static RenderType glass(ResourceLocation texture) {
         return RenderType.create("aquarium_glass_" + texture.getPath(), DefaultVertexFormat.NEW_ENTITY,
                 VertexFormat.Mode.QUADS, 4096, false, true, RenderType.CompositeState.builder()
-                        .setShaderState(RenderStateShard.RENDERTYPE_ENTITY_TRANSLUCENT_SHADER)
+                        .setShaderState(PortRenderStateShards.RENDERTYPE_ENTITY_TRANSLUCENT_SHADER)
                         .setTextureState(new RenderStateShard.TextureStateShard(texture, false, false))
-                        .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY).setCullState(RenderStateShard.CULL)
-                        .setLightmapState(RenderStateShard.LIGHTMAP).setOverlayState(RenderStateShard.OVERLAY)
-                        .setWriteMaskState(RenderStateShard.COLOR_WRITE).setOutputState(RenderStateShard.ITEM_ENTITY_TARGET)
+                        .setTransparencyState(PortRenderStateShards.TRANSLUCENT_TRANSPARENCY).setCullState(PortRenderStateShards.CULL)
+                        .setLightmapState(PortRenderStateShards.LIGHTMAP).setOverlayState(PortRenderStateShards.OVERLAY)
+                        .setWriteMaskState(PortRenderStateShards.COLOR_WRITE).setOutputState(PortRenderStateShards.ITEM_ENTITY_TARGET)
                         .createCompositeState(false));
     }
     public static void render(String name, boolean transparent, PoseStack pose, MultiBufferSource buffers, int light) {
@@ -64,9 +66,9 @@ public final class AquariumModels {
             for (var v : quad.vertices()) {
                 vertex.set(v[0], v[1], v[2]);
                 if (quad.bone() >= 0) matrices[quad.bone()].transformPosition(vertex);
-                consumer.addVertex(pose.last().pose(), vertex.x, vertex.y, vertex.z).setColor(255,255,255,255)
+                PortVertex.of(consumer).addVertex(pose.last().pose(), vertex.x, vertex.y, vertex.z).setColor(255,255,255,255)
                         .setUv(v[3],v[4]).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light)
-                        .setNormal(pose.last(), normal.x,normal.y,normal.z);
+                        .setNormal(pose.last(), normal.x,normal.y,normal.z).endVertex();
             }
         }
     }

@@ -173,7 +173,7 @@ public final class BeachFarmDailyService {
 
         static CounterData get(ServerLevel level) {
             return level.getServer().overworld().getDataStorage().computeIfAbsent(
-                    com.stardew.craft.port.PortSavedData.loader(new Factory<>(CounterData::new, CounterData::load)), com.stardew.craft.port.PortSavedData.constructor(new Factory<>(CounterData::new, CounterData::load)), NAME);
+                    com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(CounterData::new, CounterData::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(CounterData::new, CounterData::load)), NAME);
         }
 
         int next() {

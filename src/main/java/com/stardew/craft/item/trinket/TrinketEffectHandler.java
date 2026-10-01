@@ -206,13 +206,13 @@ public final class TrinketEffectHandler {
         player.clearFire();
         List<Holder<MobEffect>> negativeEffects = new ArrayList<>();
         for (MobEffectInstance effect : player.getActiveEffects()) {
-            Holder<MobEffect> holder = effect.getEffect();
+            Holder<MobEffect> holder = net.minecraft.core.registries.BuiltInRegistries.MOB_EFFECT.wrapAsHolder(effect.getEffect());
             if (!holder.value().isBeneficial()) {
                 negativeEffects.add(holder);
             }
         }
         for (Holder<MobEffect> effect : negativeEffects) {
-            player.removeEffect(effect);
+            player.removeEffect(effect.value());
         }
     }
 

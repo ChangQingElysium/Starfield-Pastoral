@@ -46,7 +46,7 @@ final class SchematicSnapshot {
                 return empty();
             }
 
-            CompoundTag root = NbtIo.readCompressed(stream, NbtAccounter.unlimitedHeap());
+            CompoundTag root = com.stardew.craft.port.PortNbtIo.readCompressed(stream, NbtAccounter.UNLIMITED);
             CompoundTag schematic = root;
             if ((readDimension(root, "Width") == 0 || readDimension(root, "Height") == 0 || readDimension(root, "Length") == 0)
                     && root.contains("Schematic", Tag.TAG_COMPOUND)) {

@@ -211,7 +211,7 @@ public class FlowerDanceDancersCommand implements EventCommand {
         actor.setPos(position);
         setYaw(actor, yaw);
         actor.setId(-((actorTag.hashCode() & 0x7FFFFFFF) + 3000));
-        level.addEntity(actor);
+        level.putNonPlayerEntity(actor.getId(), actor); // PORT(1.20.1): 1.21 ClientLevel#addEntity(entity)
         player.registerActor(actorTag, actor);
     }
 
@@ -230,7 +230,7 @@ public class FlowerDanceDancersCommand implements EventCommand {
         actor.setPos(position);
         setYaw(actor, yaw);
         actor.setId(-((actorTag.hashCode() & 0x7FFFFFFF) + 4000));
-        level.addEntity(actor);
+        level.putNonPlayerEntity(actor.getId(), actor); // PORT(1.20.1): 1.21 ClientLevel#addEntity(entity)
         player.registerActor(actorTag, actor);
     }
 

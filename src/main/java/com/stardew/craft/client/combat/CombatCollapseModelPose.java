@@ -78,17 +78,21 @@ public final class CombatCollapseModelPose {
         support.translate(0,-1.501,0);
         var minimum=new MinimumY();
         // Actual rendered vertices include inflated hat/sleeves/pants and both skin widths.
-        model.renderToBuffer(support,minimum,0,0);
+        model.renderToBuffer(support,minimum,0,0,1,1,1,1); // PORT(1.20.1): 1.21 default color -1 (opaque white)
         float weight=com.stardew.craft.port.PortJava.clamp(frame.pitch()/13,0,1);
         return (-minimum.y+.012f)*weight;
     }
     private static final class MinimumY implements VertexConsumer {
         float y=Float.POSITIVE_INFINITY;
-        public VertexConsumer addVertex(float x,float y,float z) { this.y=Math.min(this.y,y);return this; }
-        public VertexConsumer setColor(int r,int g,int b,int a) { return this; }
-        public VertexConsumer setUv(float u,float v) { return this; }
-        public VertexConsumer setUv1(int u,int v) { return this; }
-        public VertexConsumer setUv2(int u,int v) { return this; }
-        public VertexConsumer setNormal(float x,float y,float z) { return this; }
+        // PORT(1.20.1): 1.20.1 VertexConsumer API; ModelPart passes float positions widened to double.
+        public VertexConsumer vertex(double x,double y,double z) { this.y=Math.min(this.y,(float)y);return this; }
+        public VertexConsumer color(int r,int g,int b,int a) { return this; }
+        public VertexConsumer uv(float u,float v) { return this; }
+        public VertexConsumer overlayCoords(int u,int v) { return this; }
+        public VertexConsumer uv2(int u,int v) { return this; }
+        public VertexConsumer normal(float x,float y,float z) { return this; }
+        public void endVertex() { }
+        public void defaultColor(int r,int g,int b,int a) { }
+        public void unsetDefaultColor() { }
     }
 }

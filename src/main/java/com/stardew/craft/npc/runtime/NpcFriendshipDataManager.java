@@ -161,7 +161,7 @@ public final class NpcFriendshipDataManager extends SavedData {
 
     @Override
     @SuppressWarnings("null")
-    public @NotNull CompoundTag save(@NotNull CompoundTag tag, @NotNull HolderLookup.Provider provider) {
+    public @NotNull CompoundTag save(@NotNull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         tag.putInt("PlayerCount", playerState.size());
         int i = 0;
         for (Map.Entry<UUID, Map<String, FriendshipState>> pEntry : playerState.entrySet()) {

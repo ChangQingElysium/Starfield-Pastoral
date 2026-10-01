@@ -157,7 +157,7 @@ public final class CasinoAccessService {
                 QUESTION_CONTEXT,
                 0,
                 "",
-                Component.Serializer.toJson(question, player.registryAccess()),
+                Component.Serializer.toJson(question),
                 options));
         return InteractionResult.SUCCESS;
     }
@@ -191,7 +191,7 @@ public final class CasinoAccessService {
         return new OpenDesertFestivalQuestionPayload.ResponseOption(
                 id,
                 Component.Serializer.toJson(
-                        Component.translatable(translationKey), player.registryAccess()));
+                        Component.translatable(translationKey)));
     }
 
     public static void install(ServerLevel level) {

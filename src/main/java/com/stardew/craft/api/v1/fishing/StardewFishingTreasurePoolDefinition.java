@@ -17,7 +17,7 @@ public record StardewFishingTreasurePoolDefinition(
         List<StardewFishingTreasureEntry> entries,
         boolean replaceBase
 ) {
-    private static final Codec<String> CHEST_CODEC = Codec.STRING.validate(value -> switch (value) {
+    private static final Codec<String> CHEST_CODEC = com.stardew.craft.port.PortCodecs.validate(Codec.STRING, value -> switch (value) {
         case "any", "normal", "golden" -> DataResult.success(value);
         default -> DataResult.error(() -> "chest must be any, normal, or golden");
     });

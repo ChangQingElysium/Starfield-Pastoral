@@ -37,7 +37,7 @@ public final class MineBugEntity extends StardewMonsterEntity {
     }
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,1).add(Attributes.ATTACK_DAMAGE,8)
-                .add(Attributes.MOVEMENT_SPEED,.25).add(Attributes.STEP_HEIGHT,0);
+                .add(Attributes.MOVEMENT_SPEED,.25).add(com.stardew.craft.port.PortAttributes.STEP_HEIGHT.get(),0);
     }
     @Override protected void registerGoals() {}
     @Override protected ResourceLocation definitionId() { return new ResourceLocation("stardewcraft:"+variant()); }

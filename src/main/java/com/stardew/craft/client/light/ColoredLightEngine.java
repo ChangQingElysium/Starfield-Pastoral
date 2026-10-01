@@ -134,7 +134,7 @@ public final class ColoredLightEngine {
             Vec3 target = Vec3.atCenterOf(cell);
             double distance = target.distanceTo(emitter);
             if (distance >= radius) continue;
-            if (level.clip(new ClipContext(emitter,target,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,CollisionContext.empty())).getType() != HitResult.Type.MISS) continue;
+            if (level.clip(new com.stardew.craft.port.PortClipContext(emitter,target,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,CollisionContext.empty())).getType() != HitResult.Type.MISS) continue;
             float strength = (float)Math.pow(1-distance/radius,1.3);
             int red = Math.round((rgb>>16&255)*strength), green=Math.round((rgb>>8&255)*strength), blue=Math.round((rgb&255)*strength);
             int brightness=Math.round(source.luminance*16*strength);

@@ -43,7 +43,7 @@ public final class RockCrabEntity extends StardewMonsterEntity {
     public String variant() { return variant; }
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,30).add(Attributes.ATTACK_DAMAGE,5)
-                .add(Attributes.MOVEMENT_SPEED,.25).add(Attributes.FOLLOW_RANGE,64).add(Attributes.STEP_HEIGHT,0);
+                .add(Attributes.MOVEMENT_SPEED,.25).add(Attributes.FOLLOW_RANGE,64).add(com.stardew.craft.port.PortAttributes.STEP_HEIGHT.get(),0);
     }
     @Override protected void registerGoals() {}
     @Override protected ResourceLocation definitionId() { return new ResourceLocation("stardewcraft:"+variant); }

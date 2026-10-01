@@ -168,9 +168,9 @@ public final class PetService {
         if (pet == null || !pet.variant.available() || !manages(player, pet.farm)) return;
         ItemStack held = player.getMainHandItem();
         if (held.getItem() instanceof StardewHatItem && pet.variant.wearsHat()) {
-            ItemStack old = PortItemStacks.parseOptional(player.registryAccess(), pet.hat);
+            ItemStack old = PortItemStacks.parseOptional(player.level().registryAccess(), pet.hat);
             if (!old.isEmpty()) { pet.hat = new CompoundTag(); if (!player.getInventory().add(old)) player.drop(old, false); }
-            else { pet.hat = (CompoundTag) com.stardew.craft.port.PortItemStacks.save(held.copyWithCount(1), player.registryAccess()); held.shrink(1); }
+            else { pet.hat = (CompoundTag) com.stardew.craft.port.PortItemStacks.save(held.copyWithCount(1), player.level().registryAccess()); held.shrink(1); }
             entity.playSound(com.stardew.craft.sound.ModSounds.DIRTY_HIT.get(), .6f, 1);
             data.setDirty(); entity.refresh(pet); return;
         }

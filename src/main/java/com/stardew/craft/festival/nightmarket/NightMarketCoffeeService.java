@@ -70,7 +70,7 @@ public final class NightMarketCoffeeService {
             QUESTION_CONTEXT,
             0,
             "",
-            Component.Serializer.toJson(question, player.registryAccess()),
+            Component.Serializer.toJson(question),
             List.of(
                 response(CHOICE_YES, Component.translatable("stardewcraft.dialog.yes"), player),
                 response("no", Component.translatable("stardewcraft.dialog.no"), player)
@@ -138,7 +138,7 @@ public final class NightMarketCoffeeService {
     ) {
         return new OpenDesertFestivalQuestionPayload.ResponseOption(
             id,
-            Component.Serializer.toJson(label, player.registryAccess())
+            Component.Serializer.toJson(label)
         );
     }
 

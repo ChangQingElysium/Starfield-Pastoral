@@ -30,7 +30,7 @@ public final class MineGhostEntity extends StardewMonsterEntity {
     private double groundY;
     private int stunMilliseconds;
     public MineGhostEntity(EntityType<? extends MineGhostEntity> type,Level level,boolean carbon){super(type,level);this.carbon=carbon;setNoGravity(true);noPhysics=true;addTag("sd_mob_ghost");if(carbon)addTag("sd_mob_carbon_ghost");}
-    public static AttributeSupplier.Builder createAttributes(){return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,96).add(Attributes.ATTACK_DAMAGE,10).add(Attributes.MOVEMENT_SPEED,.25).add(Attributes.FOLLOW_RANGE,128).add(Attributes.STEP_HEIGHT,0);}
+    public static AttributeSupplier.Builder createAttributes(){return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,96).add(Attributes.ATTACK_DAMAGE,10).add(Attributes.MOVEMENT_SPEED,.25).add(Attributes.FOLLOW_RANGE,128).add(com.stardew.craft.port.PortAttributes.STEP_HEIGHT.get(),0);}
     @Override protected void registerGoals(){}
     public boolean carbon(){return carbon;}
     public boolean slowed(){return entityData.get(SLOWED);}

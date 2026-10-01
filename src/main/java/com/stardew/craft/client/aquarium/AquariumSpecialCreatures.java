@@ -16,6 +16,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import com.stardew.craft.port.net.minecraft.world.item.component.CustomData;
 
+import com.stardew.craft.port.PortVertex;
 @net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
 final class AquariumSpecialCreatures {
     private final ModelPart frog;
@@ -42,7 +43,9 @@ final class AquariumSpecialCreatures {
         body.getChild("left_arm").xRot = body.getChild("right_arm").xRot = .16f * jump;
         pose.pushPose(); pose.mulPose(Axis.YP.rotationDegrees(-yaw + 90));
         pose.translate(0, -3.5, 0); pose.scale(8.8f, -8.8f, -8.8f); pose.translate(0, -1.5, 0);
-        frog.render(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(FROG)), light, OverlayTexture.NO_OVERLAY, color);
+        // PORT(1.20.1): ModelPart#render takes float RGBA instead of a packed ARGB int (exact 8-bit round trip).
+        frog.render(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(FROG)), light, OverlayTexture.NO_OVERLAY,
+                (color >> 16 & 255) / 255.0F, (color >> 8 & 255) / 255.0F, (color & 255) / 255.0F, (color >>> 24) / 255.0F);
         pose.popPose();
     }
     void bubbles(long seed, double seconds, PoseStack pose, MultiBufferSource buffers, int light) {
@@ -56,8 +59,8 @@ final class AquariumSpecialCreatures {
             for (int axis = 0; axis < 2; axis++) {
                 pose.pushPose(); pose.translate(x, y, 2 + i % 2 * 3); pose.mulPose(Axis.YP.rotationDegrees(axis * 90));
                 float[][] corners = {{-size,-size,0,1},{size,-size,1,1},{size,size,1,0},{-size,size,0,0}};
-                for (var v : corners) consumer.addVertex(pose.last().pose(),v[0],v[1],0).setColor(220,245,255,alpha)
-                        .setUv(v[2],v[3]).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose.last(),0,0,1);
+                for (var v : corners) PortVertex.of(consumer).addVertex(pose.last().pose(),v[0],v[1],0).setColor(220,245,255,alpha)
+                        .setUv(v[2],v[3]).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose.last(),0,0,1).endVertex();
                 pose.popPose();
             }
         }

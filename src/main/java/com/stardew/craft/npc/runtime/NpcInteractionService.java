@@ -507,7 +507,7 @@ public final class NpcInteractionService {
                     String questTitleJson;
                     try {
                         questTitleJson = net.minecraft.network.chat.Component.Serializer.toJson(
-                            matchingQuest.getTitleComponent(), serverLevel.registryAccess());
+                            matchingQuest.getTitleComponent());
                     } catch (Exception e) {
                         questTitleJson = "\"" + matchingQuest.getTitleComponent().getString() + "\"";
                     }
@@ -1315,7 +1315,7 @@ public final class NpcInteractionService {
     private static String serializeGiftItemDisplayName(ItemStack held, ServerLevel level) {
         try {
             return net.minecraft.network.chat.Component.Serializer.toJson(
-                held.getHoverName(), level.registryAccess());
+                held.getHoverName());
         } catch (Exception e) {
             return held.getHoverName().getString();
         }

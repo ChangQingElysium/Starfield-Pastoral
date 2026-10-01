@@ -61,7 +61,7 @@ public class EventPlayerActorRenderer extends MobRenderer<EventPlayerActorEntity
                 return com.stardew.craft.port.net.minecraft.client.resources.PlayerSkin.of(info).texture();
             }
         }
-        if (mc.player instanceof AbstractClientPlayer clientPlayer) {
+        if (((Object) mc.player) instanceof AbstractClientPlayer clientPlayer) {
             return com.stardew.craft.port.net.minecraft.client.resources.PlayerSkin.of(clientPlayer).texture();
         }
         return STEVE_SKIN;
@@ -98,15 +98,16 @@ public class EventPlayerActorRenderer extends MobRenderer<EventPlayerActorEntity
     }
 
     @Override
+    // PORT(1.20.1): 1.20.1 setupRotations has no entity-scale argument (no SCALE attribute; 1.21 passes 1 here).
     protected void setupRotations(EventPlayerActorEntity entity, PoseStack stack, float bob,
-                                  float yaw, float partialTick, float scale) {
+                                  float yaw, float partialTick) {
         if (entity.isInHospitalBedScene()) {
             com.stardew.craft.client.combat.HospitalBedPose.root(stack,model,
                     com.stardew.craft.client.combat.HospitalBedPose.sample(entity.hospitalBedTime(partialTick),
                             com.stardew.craft.client.combat.HospitalBedPose.hasArmor(entity)));
             return;
         }
-        super.setupRotations(entity, stack, bob, yaw, partialTick, scale);
+        super.setupRotations(entity, stack, bob, yaw, partialTick);
         var frame = CombatCollapseModelPose.frame(entity, partialTick);
         if (frame != null) CombatCollapseModelPose.root(stack, model, frame, .9375F, entity);
     }

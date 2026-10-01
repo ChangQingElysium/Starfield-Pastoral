@@ -179,8 +179,7 @@ public final class QuestDataLoader {
         if (parts.length > 9 && !parts[9].isBlank()) {
             objectiveData.addProperty("target_message", parts[9].trim());
         }
-        StardewQuestObjective objective = StardewQuestObjectives.decode(objectiveType, objectiveData)
-                .getOrThrow(message -> new IllegalArgumentException("objective: " + message));
+        StardewQuestObjective objective = com.stardew.craft.port.PortDataResults.getOrThrow(StardewQuestObjectives.decode(objectiveType, objectiveData), message -> new IllegalArgumentException("objective: " + message));
 
         List<ResourceLocation> next = new ArrayList<>();
         String rawNext = parts[5].trim();

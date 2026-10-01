@@ -304,7 +304,7 @@ public class WildTreeSeedManager extends SavedData {
 			CompoundTag t = new CompoundTag();
 			GlobalPos gp = e.getKey();
 			t.putString("Dimension", gp.dimension().location().toString());
-			t.put("Pos", NbtUtils.writeBlockPos(gp.pos()));
+			t.put("Pos", com.stardew.craft.port.PortNbtUtils.writeBlockPos(gp.pos()));
 			Entry v = e.getValue();
 			t.putString("TreeId", v.treeId);
 			t.putBoolean("HasSeed", v.hasSeed);
@@ -327,7 +327,7 @@ public class WildTreeSeedManager extends SavedData {
 			}
 			@SuppressWarnings("null")
 			ResourceKey<net.minecraft.world.level.Level> dim = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(dimStr));
-			BlockPos pos = NbtUtils.readBlockPos(t, "Pos").orElse(BlockPos.ZERO);
+			BlockPos pos = com.stardew.craft.port.PortNbtUtils.readBlockPos(t, "Pos").orElse(BlockPos.ZERO);
 			@SuppressWarnings("null")
 			GlobalPos gp = GlobalPos.of(dim, pos);
 			String treeId = t.getString("TreeId");

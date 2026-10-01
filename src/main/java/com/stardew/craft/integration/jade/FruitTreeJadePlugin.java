@@ -13,9 +13,9 @@ import snownee.jade.api.WailaPlugin;
 public class FruitTreeJadePlugin implements IWailaPlugin {
     @Override
     public void register(IWailaCommonRegistration registration) {
-        registration.registerBlockDataProvider(FruitTreeJadeProvider.INSTANCE, FruitTreeSaplingBlock.class);
-        registration.registerBlockDataProvider(FruitTreeJadeProvider.INSTANCE, FruitTreeBlock.class);
-        registration.registerBlockDataProvider(FruitTreeJadeProvider.INSTANCE, FruitTreeExtensionBlock.class);
+        JadeBlockDataProviders.register(registration, FruitTreeJadeProvider.INSTANCE, FruitTreeSaplingBlock.class);
+        JadeBlockDataProviders.register(registration, FruitTreeJadeProvider.INSTANCE, FruitTreeBlock.class);
+        JadeBlockDataProviders.register(registration, FruitTreeJadeProvider.INSTANCE, FruitTreeExtensionBlock.class);
     }
 
     @Override

@@ -126,7 +126,7 @@ public final class SquidFestService {
             CONTEXT_BOOTH,
             0,
             "",
-            Component.Serializer.toJson(question, player.registryAccess()),
+            Component.Serializer.toJson(question),
             List.of(
                 response(CHOICE_REWARDS, Component.translatable("stardewcraft.squid_fest.booth.get_rewards"), player),
                 response(CHOICE_EXPLANATION, Component.translatable("stardewcraft.squid_fest.booth.explanation.choice"), player),
@@ -136,7 +136,7 @@ public final class SquidFestService {
     }
 
     private static OpenDesertFestivalQuestionPayload.ResponseOption response(String id, Component label, ServerPlayer player) {
-        return new OpenDesertFestivalQuestionPayload.ResponseOption(id, Component.Serializer.toJson(label, player.registryAccess()));
+        return new OpenDesertFestivalQuestionPayload.ResponseOption(id, Component.Serializer.toJson(label));
     }
 
     private static void tryClaimRewards(ServerPlayer player) {

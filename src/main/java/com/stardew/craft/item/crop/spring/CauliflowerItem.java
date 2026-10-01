@@ -25,8 +25,8 @@ public class CauliflowerItem extends Item implements IStardewItem {
     public CauliflowerItem(Item.Properties properties) {
         super(properties.food(Objects.requireNonNull(new FoodProperties.Builder()
             .nutrition(2)
-            .saturationModifier(0.3f)
-            .alwaysEdible()
+            .saturationMod(0.3f)
+            .alwaysEat()
             .build(), "food")));
     }
 

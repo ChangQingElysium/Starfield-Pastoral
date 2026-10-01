@@ -32,11 +32,15 @@ public final class TownDoorShaderPatcher {
     public static String transformVanilla(Program.Type type, String name, String source) {
         if (type != Program.Type.VERTEX) return source;
         String normalized = normalize(name);
+        // PORT(1.20.1): 1.21 vanilla vertices are camera-relative world positions for every patched program, but
+        // 1.20.1 entity/block-entity poses carry the view rotation (ModelViewMat = identity) while terrain and
+        // particles use ModelViewMat = view. Clipping the view-space position against the view-space plane gives
+        // the same clip distance as 1.21 for all of them.
         if (VANILLA_TERRAIN.contains(normalized)) {
-            return inject(source, "Position.xyz + ChunkOffset");
+            return inject(source, "(ModelViewMat * vec4(Position.xyz + ChunkOffset, 1.0)).xyz");
         }
         if (VANILLA_MODEL.contains(normalized)) {
-            return inject(source, "Position.xyz");
+            return inject(source, "(ModelViewMat * vec4(Position.xyz, 1.0)).xyz");
         }
         return source;
     }

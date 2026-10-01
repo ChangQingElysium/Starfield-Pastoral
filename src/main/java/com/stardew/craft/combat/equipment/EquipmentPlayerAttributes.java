@@ -81,7 +81,7 @@ public final class EquipmentPlayerAttributes {
                 CombatRingRules.weaponSpeedToAttackRateBonus(
                         equipment.getWeaponSpeedMultiplier()
                 ),
-                AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
+                AttributeModifier.Operation.MULTIPLY_TOTAL
         );
         WeaponCombatIdentity.Resolved weaponIdentity =
                 WeaponCombatIdentity.resolve(
@@ -109,7 +109,7 @@ public final class EquipmentPlayerAttributes {
                 attackSpeed,
                 WEAPON_STATS_SPEED_ID,
                 weaponStatsSpeedCorrection,
-                AttributeModifier.Operation.ADD_VALUE
+                AttributeModifier.Operation.ADDITION
         );
         MainHandInteractionRange itemRange = mainHandInteractionRangeParts(
                 player.getMainHandItem()
@@ -120,10 +120,10 @@ public final class EquipmentPlayerAttributes {
                         - itemRange.range()) / itemRange.addValueScale()
                 : 0.0D;
         syncModifier(
-                player.getAttribute(Attributes.ENTITY_INTERACTION_RANGE),
+                player.getAttribute(net.minecraftforge.common.ForgeMod.ENTITY_REACH.get()),
                 WEAPON_STATS_RANGE_ID,
                 weaponRangeCorrection,
-                AttributeModifier.Operation.ADD_VALUE
+                AttributeModifier.Operation.ADDITION
         );
 
         syncModifier(
@@ -133,7 +133,7 @@ public final class EquipmentPlayerAttributes {
                         data.getLuckLevel() + equipment.getLuck(),
                         PlayerStardewDataAPI.getDailyLuck(player)
                 ),
-                AttributeModifier.Operation.ADD_VALUE
+                AttributeModifier.Operation.ADDITION
         );
 
         boolean inStardewDimension = DimensionDamageMapper.isInStardewDimension(player);
@@ -159,7 +159,7 @@ public final class EquipmentPlayerAttributes {
                 player.getAttribute(Attributes.ARMOR),
                 DEFENSE_ID,
                 CrossDimensionAttributeRules.minecraftArmor(defense),
-                AttributeModifier.Operation.ADD_VALUE
+                AttributeModifier.Operation.ADDITION
         );
         syncModifier(
                 player.getAttribute(Attributes.ATTACK_DAMAGE),
@@ -170,7 +170,7 @@ public final class EquipmentPlayerAttributes {
                                         + data.getTempAttackBonus()
                         )
                         : 0.0D,
-                AttributeModifier.Operation.ADD_VALUE
+                AttributeModifier.Operation.ADDITION
         );
         syncModifier(
                 player.getAttribute(Attributes.ATTACK_DAMAGE),
@@ -187,7 +187,7 @@ public final class EquipmentPlayerAttributes {
                                         )
                                 )
                         : 0.0D,
-                AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
+                AttributeModifier.Operation.MULTIPLY_TOTAL
         );
         syncModifier(
                 player.getAttribute(Attributes.MAX_HEALTH),
@@ -195,7 +195,7 @@ public final class EquipmentPlayerAttributes {
                 CrossDimensionAttributeRules.minecraftMaximumHealthBonus(
                         data.getMaxHealth()
                 ),
-                AttributeModifier.Operation.ADD_VALUE
+                AttributeModifier.Operation.ADDITION
         );
         syncModifier(
                 player.getAttribute(Attributes.ATTACK_KNOCKBACK),
@@ -205,7 +205,7 @@ public final class EquipmentPlayerAttributes {
                                 equipment.getKnockbackBonus()
                         )
                         : 0.0D,
-                AttributeModifier.Operation.ADD_VALUE
+                AttributeModifier.Operation.ADDITION
         );
     }
 
@@ -220,10 +220,10 @@ public final class EquipmentPlayerAttributes {
                     if (!attribute.equals(Attributes.ATTACK_SPEED)) {
                         return;
                     }
-                    switch (modifier.operation()) {
-                        case ADD_VALUE -> parts[1] += modifier.amount();
-                        case ADD_MULTIPLIED_BASE -> parts[2] += modifier.amount();
-                        case ADD_MULTIPLIED_TOTAL -> parts[3] *= 1.0D + modifier.amount();
+                    switch (modifier.getOperation()) {
+                        case ADDITION -> parts[1] += modifier.getAmount();
+                        case MULTIPLY_BASE -> parts[2] += modifier.getAmount();
+                        case MULTIPLY_TOTAL -> parts[3] *= 1.0D + modifier.getAmount();
                     }
                 }
         );
@@ -244,14 +244,14 @@ public final class EquipmentPlayerAttributes {
         double[] parts = {3.0D, 0.0D, 0.0D, 1.0D};
         com.stardew.craft.port.PortItemStacks.forEachModifier(stack, EquipmentSlot.MAINHAND,
                 (attribute, modifier) -> {
-                    if (!attribute.equals(Attributes.ENTITY_INTERACTION_RANGE)) {
+                    if (!attribute.equals(net.minecraftforge.common.ForgeMod.ENTITY_REACH.get())) {
                         return;
                     }
-                    switch (modifier.operation()) {
-                        case ADD_VALUE -> parts[1] += modifier.amount();
-                        case ADD_MULTIPLIED_BASE -> parts[2] += modifier.amount();
-                        case ADD_MULTIPLIED_TOTAL ->
-                                parts[3] *= 1.0D + modifier.amount();
+                    switch (modifier.getOperation()) {
+                        case ADDITION -> parts[1] += modifier.getAmount();
+                        case MULTIPLY_BASE -> parts[2] += modifier.getAmount();
+                        case MULTIPLY_TOTAL ->
+                                parts[3] *= 1.0D + modifier.getAmount();
                     }
                 }
         );
@@ -277,24 +277,24 @@ public final class EquipmentPlayerAttributes {
         if (attribute == null) {
             return;
         }
-        AttributeModifier current = attribute.getModifier(id);
+        AttributeModifier current = com.stardew.craft.port.PortAttributeModifiers.getModifier(attribute, id);
         if (Math.abs(amount) < 1.0E-6D) {
             if (current != null) {
-                attribute.removeModifier(id);
+                com.stardew.craft.port.PortAttributeModifiers.removeModifier(attribute, id);
             }
             return;
         }
         if (current != null
-                && current.operation() == operation
-                && Math.abs(current.amount() - amount) < 1.0E-6D) {
+                && current.getOperation() == operation
+                && Math.abs(current.getAmount() - amount) < 1.0E-6D) {
             return;
         }
-        attribute.addOrUpdateTransientModifier(new AttributeModifier(id, amount, operation));
+        com.stardew.craft.port.PortAttributeModifiers.addOrUpdateTransientModifier(attribute, com.stardew.craft.port.PortAttributeModifiers.create(id, amount, operation));
     }
 
     private static void removeModifier(AttributeInstance attribute, ResourceLocation id) {
-        if (attribute != null && attribute.hasModifier(id)) {
-            attribute.removeModifier(id);
+        if (attribute != null && com.stardew.craft.port.PortAttributeModifiers.hasModifier(attribute, id)) {
+            com.stardew.craft.port.PortAttributeModifiers.removeModifier(attribute, id);
         }
     }
 }

@@ -44,7 +44,7 @@ public final class MineBatEntity extends StardewMonsterEntity {
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH, 24)
                 .add(Attributes.ATTACK_DAMAGE, 6).add(Attributes.MOVEMENT_SPEED, .25)
-                .add(Attributes.FOLLOW_RANGE, 64).add(Attributes.STEP_HEIGHT, 0);
+                .add(Attributes.FOLLOW_RANGE, 64).add(com.stardew.craft.port.PortAttributes.STEP_HEIGHT.get(), 0);
     }
     @Override protected void registerGoals() {}
     @Override protected net.minecraft.world.entity.ai.navigation.PathNavigation createNavigation(Level level) { return new MonsterFlightRoute(this,level); }

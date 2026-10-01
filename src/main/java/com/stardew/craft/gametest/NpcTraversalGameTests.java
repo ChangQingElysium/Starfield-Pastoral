@@ -491,7 +491,7 @@ public final class NpcTraversalGameTests {
         var target = Vec3.atBottomCenterOf(base.offset(7,0,3));
         npc.setNpcId("abigail");
         // Explicit low-step profile still routes around a full-block obstacle.
-        npc.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.STEP_HEIGHT).setBaseValue(.6);
+        npc.getAttribute(com.stardew.craft.port.PortAttributes.STEP_HEIGHT.get()).setBaseValue(.6);
         boolean[] detoured = {false};
         h.onEachTick(() -> {
             h.getLevel().tickNonPassenger(npc);
@@ -553,7 +553,7 @@ public final class NpcTraversalGameTests {
         npc.setPos(Vec3.atBottomCenterOf(base.offset(1,0,3)));
         npc.setOnGround(true);
         var target = Vec3.atBottomCenterOf(base.offset(8,2,3));
-        var stepHeight = npc.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.STEP_HEIGHT);
+        var stepHeight = npc.getAttribute(com.stardew.craft.port.PortAttributes.STEP_HEIGHT.get());
         double configuredStep = stepHeight.getBaseValue();
         stepHeight.setBaseValue(.6);
         var oldPath = npc.getNavigation().createPath(BlockPos.containing(target),0);

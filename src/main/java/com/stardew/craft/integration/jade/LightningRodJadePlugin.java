@@ -11,7 +11,7 @@ import snownee.jade.api.WailaPlugin;
 public class LightningRodJadePlugin implements IWailaPlugin {
     @Override
     public void register(IWailaCommonRegistration registration) {
-        registration.registerBlockDataProvider(LightningRodJadeProvider.INSTANCE, LightningRodBlock.class);
+        JadeBlockDataProviders.register(registration, LightningRodJadeProvider.INSTANCE, LightningRodBlock.class);
     }
 
     @Override

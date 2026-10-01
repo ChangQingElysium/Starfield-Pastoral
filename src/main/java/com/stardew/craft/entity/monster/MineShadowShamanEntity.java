@@ -29,7 +29,7 @@ public final class MineShadowShamanEntity extends StardewMonsterEntity {
     private final ShamanSpellClock spell=new ShamanSpellClock();
     private double fallSpeed;private int stunMilliseconds;private long suppressKnockbackTick=-1;private boolean decidingSuppression;
     public MineShadowShamanEntity(EntityType<? extends MineShadowShamanEntity> type,Level level){super(type,level);addTag("sd_mob_shadow_shaman");}
-    public static AttributeSupplier.Builder createAttributes(){return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,80).add(Attributes.ATTACK_DAMAGE,17).add(Attributes.MOVEMENT_SPEED,.25).add(Attributes.FOLLOW_RANGE,64).add(Attributes.STEP_HEIGHT,0);}
+    public static AttributeSupplier.Builder createAttributes(){return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,80).add(Attributes.ATTACK_DAMAGE,17).add(Attributes.MOVEMENT_SPEED,.25).add(Attributes.FOLLOW_RANGE,64).add(com.stardew.craft.port.PortAttributes.STEP_HEIGHT.get(),0);}
     @Override protected void registerGoals(){}
     @Override protected ResourceLocation definitionId(){return new ResourceLocation("stardewcraft:shadow_shaman");}
     @Override protected void configureSpawn(MonsterDefinition d,MonsterSpawnContext c){

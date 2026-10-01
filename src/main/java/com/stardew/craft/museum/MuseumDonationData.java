@@ -93,7 +93,7 @@ public class MuseumDonationData extends SavedData {
     }
 
     @Override
-    public @Nonnull CompoundTag save(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider provider) {
+    public @Nonnull CompoundTag save(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         CompoundTag playersTag = new CompoundTag();
         for (Map.Entry<String, PlayerMuseumData> entry : playerData.entrySet()) {
             if (entry.getKey() == null) continue;

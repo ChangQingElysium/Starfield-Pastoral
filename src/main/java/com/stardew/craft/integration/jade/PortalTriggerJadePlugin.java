@@ -11,7 +11,7 @@ import snownee.jade.api.WailaPlugin;
 public class PortalTriggerJadePlugin implements IWailaPlugin {
     @Override
     public void register(IWailaCommonRegistration registration) {
-        registration.registerBlockDataProvider(PortalTriggerJadeProvider.INSTANCE, PortalTriggerBlock.class);
+        JadeBlockDataProviders.register(registration, PortalTriggerJadeProvider.INSTANCE, PortalTriggerBlock.class);
     }
 
     @Override

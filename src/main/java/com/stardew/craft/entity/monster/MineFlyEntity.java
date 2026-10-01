@@ -30,7 +30,7 @@ public final class MineFlyEntity extends StardewMonsterEntity {
     private double flightLift;
     public MineFlyEntity(EntityType<? extends MineFlyEntity> type,Level level){super(type,level);setNoGravity(true);noPhysics=false;addTag("sd_mob_fly");}
     public static AttributeSupplier.Builder createAttributes(){return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,22)
-            .add(Attributes.ATTACK_DAMAGE,6).add(Attributes.MOVEMENT_SPEED,.25).add(Attributes.FOLLOW_RANGE,64).add(Attributes.STEP_HEIGHT,0);}
+            .add(Attributes.ATTACK_DAMAGE,6).add(Attributes.MOVEMENT_SPEED,.25).add(Attributes.FOLLOW_RANGE,64).add(com.stardew.craft.port.PortAttributes.STEP_HEIGHT.get(),0);}
     @Override protected void registerGoals(){}
     @Override protected net.minecraft.world.entity.ai.navigation.PathNavigation createNavigation(Level level){return new MonsterFlightRoute(this,level);}
     private MonsterFlightRoute route(){return (MonsterFlightRoute)getNavigation();}

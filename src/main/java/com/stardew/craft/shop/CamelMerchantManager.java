@@ -50,7 +50,7 @@ public final class CamelMerchantManager extends SavedData {
 
     @Override
     @SuppressWarnings("null")
-    public @NotNull CompoundTag save(@NotNull CompoundTag tag, @NotNull HolderLookup.Provider provider) {
+    public @NotNull CompoundTag save(@NotNull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         if (villagerUuid != null) {
             tag.putUUID("VillagerUUID", villagerUuid);
         }

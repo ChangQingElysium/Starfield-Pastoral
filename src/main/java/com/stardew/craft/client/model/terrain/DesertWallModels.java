@@ -69,8 +69,8 @@ public final class DesertWallModels {
                     Float.intBitsToFloat(vertices[at + 2]));
             float u = frame.x(p) > .5 ? 15.999f : .001f;
             float v = frame.y(p) > .5 ? 15.999f : .001f;
-            vertices[at + 4] = Float.floatToRawIntBits(sprite.getU((column * 16 + u) / 192f));
-            vertices[at + 5] = Float.floatToRawIntBits(sprite.getV((row * 16 + v) / 752f));
+            vertices[at + 4] = Float.floatToRawIntBits(com.stardew.craft.port.PortSprites.getU(sprite, (column * 16 + u) / 192f));
+            vertices[at + 5] = Float.floatToRawIntBits(com.stardew.craft.port.PortSprites.getV(sprite, (row * 16 + v) / 752f));
         }
         return new BakedQuad(vertices, source.getTintIndex(), source.getDirection(), sprite,
                 source.isShade(), source.hasAmbientOcclusion());

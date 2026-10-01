@@ -19,7 +19,8 @@ import net.minecraftforge.client.model.data.ModelData;
 
 import java.util.Map;
 
-public class IncubatorBlockEntityRenderer implements BlockEntityRenderer<IncubatorBlockEntity> {
+import com.stardew.craft.port.PortVertex;
+public class IncubatorBlockEntityRenderer implements BlockEntityRenderer<IncubatorBlockEntity>, com.stardew.craft.port.net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension<IncubatorBlockEntity> {
     private static final ResourceLocation BUBBLE_TEX = new ResourceLocation(StardewCraft.MODID, "textures/gui/bubble.png");
     private static final float PX = 1.0f / 32.0f;
     private static final ModelResourceLocation EGG = partModel("egg");
@@ -145,10 +146,10 @@ public class IncubatorBlockEntityRenderer implements BlockEntityRenderer<Incubat
 
         @SuppressWarnings("null")
         VertexConsumer bubble = buffer.getBuffer(RenderType.entityTranslucent(BUBBLE_TEX));
-        bubble.addVertex(poseStack.last().pose(), x0, y1, 0.0f).setColor(255, 255, 255, 255).setUv(0.0f, 0.0f).setOverlay(packedOverlay).setLight(packedLight).setNormal(0, 0, 1);
-        bubble.addVertex(poseStack.last().pose(), x1, y1, 0.0f).setColor(255, 255, 255, 255).setUv(1.0f, 0.0f).setOverlay(packedOverlay).setLight(packedLight).setNormal(0, 0, 1);
-        bubble.addVertex(poseStack.last().pose(), x1, y0, 0.0f).setColor(255, 255, 255, 255).setUv(1.0f, 1.0f).setOverlay(packedOverlay).setLight(packedLight).setNormal(0, 0, 1);
-        bubble.addVertex(poseStack.last().pose(), x0, y0, 0.0f).setColor(255, 255, 255, 255).setUv(0.0f, 1.0f).setOverlay(packedOverlay).setLight(packedLight).setNormal(0, 0, 1);
+        PortVertex.of(bubble).addVertex(poseStack.last().pose(), x0, y1, 0.0f).setColor(255, 255, 255, 255).setUv(0.0f, 0.0f).setOverlay(packedOverlay).setLight(packedLight).setNormal(0, 0, 1).endVertex();
+        PortVertex.of(bubble).addVertex(poseStack.last().pose(), x1, y1, 0.0f).setColor(255, 255, 255, 255).setUv(1.0f, 0.0f).setOverlay(packedOverlay).setLight(packedLight).setNormal(0, 0, 1).endVertex();
+        PortVertex.of(bubble).addVertex(poseStack.last().pose(), x1, y0, 0.0f).setColor(255, 255, 255, 255).setUv(1.0f, 1.0f).setOverlay(packedOverlay).setLight(packedLight).setNormal(0, 0, 1).endVertex();
+        PortVertex.of(bubble).addVertex(poseStack.last().pose(), x0, y0, 0.0f).setColor(255, 255, 255, 255).setUv(0.0f, 1.0f).setOverlay(packedOverlay).setLight(packedLight).setNormal(0, 0, 1).endVertex();
 
         float iconW = 14 * PX;
         float iconH = 14 * PX;
@@ -158,10 +159,10 @@ public class IncubatorBlockEntityRenderer implements BlockEntityRenderer<Incubat
         float iy0 = iy1 - iconH;
 
         VertexConsumer icon = buffer.getBuffer(RenderType.entityCutoutNoCull(iconTex));
-        icon.addVertex(poseStack.last().pose(), ix0, iy1, 0.001f).setColor(255, 255, 255, 255).setUv(0.0f, 0.0f).setOverlay(packedOverlay).setLight(packedLight).setNormal(0, 0, 1);
-        icon.addVertex(poseStack.last().pose(), ix1, iy1, 0.001f).setColor(255, 255, 255, 255).setUv(1.0f, 0.0f).setOverlay(packedOverlay).setLight(packedLight).setNormal(0, 0, 1);
-        icon.addVertex(poseStack.last().pose(), ix1, iy0, 0.001f).setColor(255, 255, 255, 255).setUv(1.0f, 1.0f).setOverlay(packedOverlay).setLight(packedLight).setNormal(0, 0, 1);
-        icon.addVertex(poseStack.last().pose(), ix0, iy0, 0.001f).setColor(255, 255, 255, 255).setUv(0.0f, 1.0f).setOverlay(packedOverlay).setLight(packedLight).setNormal(0, 0, 1);
+        PortVertex.of(icon).addVertex(poseStack.last().pose(), ix0, iy1, 0.001f).setColor(255, 255, 255, 255).setUv(0.0f, 0.0f).setOverlay(packedOverlay).setLight(packedLight).setNormal(0, 0, 1).endVertex();
+        PortVertex.of(icon).addVertex(poseStack.last().pose(), ix1, iy1, 0.001f).setColor(255, 255, 255, 255).setUv(1.0f, 0.0f).setOverlay(packedOverlay).setLight(packedLight).setNormal(0, 0, 1).endVertex();
+        PortVertex.of(icon).addVertex(poseStack.last().pose(), ix1, iy0, 0.001f).setColor(255, 255, 255, 255).setUv(1.0f, 1.0f).setOverlay(packedOverlay).setLight(packedLight).setNormal(0, 0, 1).endVertex();
+        PortVertex.of(icon).addVertex(poseStack.last().pose(), ix0, iy0, 0.001f).setColor(255, 255, 255, 255).setUv(0.0f, 1.0f).setOverlay(packedOverlay).setLight(packedLight).setNormal(0, 0, 1).endVertex();
 
         poseStack.popPose();
     }

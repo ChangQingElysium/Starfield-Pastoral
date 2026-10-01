@@ -39,7 +39,7 @@ public final class ShadowInsectVisuals {
         CASTS.put(key, new Cast(p, origin, level.getGameTime(), origin));
         while (CASTS.size() > 32) CASTS.remove(CASTS.keySet().iterator().next());
         var sound = INSECT_STANCE.equals(p.skillId()) ? SoundEvents.BEEHIVE_WORK
-                : SHADOW_EXECUTE.equals(p.skillId()) ? SoundEvents.TRIDENT_THROW.value() : SoundEvents.PLAYER_ATTACK_SWEEP;
+                : SHADOW_EXECUTE.equals(p.skillId()) ? SoundEvents.TRIDENT_THROW : SoundEvents.PLAYER_ATTACK_SWEEP;
         level.playLocalSound(origin.x, origin.y + .9, origin.z, sound, SoundSource.PLAYERS,
                 INSECT_STANCE.equals(p.skillId()) ? .22f : .3f, SHADOW_EXECUTE.equals(p.skillId()) ? 1.65f : 1.3f, false);
     }

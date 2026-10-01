@@ -1,5 +1,6 @@
 package com.stardew.craft.client.deco;
 
+import com.stardew.craft.port.PortRenderStateShards;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -20,6 +21,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 
+import com.stardew.craft.port.PortVertex;
 /**
  * Create-mod-style 3D selection box for paintbrush region-select mode.
  * Edges are rendered as camera-facing quad strips (not GL lines) so they
@@ -170,10 +172,10 @@ public final class PaintbrushSelectionRenderer {
 
         @SuppressWarnings("null") PoseStack.Pose pose = ps.last();
         // Quad: (A-p, A+p, B+p, B-p)
-        vc.addVertex(pose, ax - px, ay - py, az - pz).setColor(r, g, b, a);
-        vc.addVertex(pose, ax + px, ay + py, az + pz).setColor(r, g, b, a);
-        vc.addVertex(pose, bx + px, by + py, bz + pz).setColor(r, g, b, a);
-        vc.addVertex(pose, bx - px, by - py, bz - pz).setColor(r, g, b, a);
+        PortVertex.of(vc).addVertex(pose, ax - px, ay - py, az - pz).setColor(r, g, b, a).endVertex();
+        PortVertex.of(vc).addVertex(pose, ax + px, ay + py, az + pz).setColor(r, g, b, a).endVertex();
+        PortVertex.of(vc).addVertex(pose, bx + px, by + py, bz + pz).setColor(r, g, b, a).endVertex();
+        PortVertex.of(vc).addVertex(pose, bx - px, by - py, bz - pz).setColor(r, g, b, a).endVertex();
     }
 
     // ======================== 6 faces ========================
@@ -196,10 +198,10 @@ public final class PaintbrushSelectionRenderer {
                           float ax, float ay, float az, float bx, float by, float bz,
                           float cx, float cy, float cz, float dx, float dy, float dz,
                           int r, int g, int b, int a) {
-        v.addVertex(p, ax, ay, az).setColor(r, g, b, a);
-        v.addVertex(p, bx, by, bz).setColor(r, g, b, a);
-        v.addVertex(p, cx, cy, cz).setColor(r, g, b, a);
-        v.addVertex(p, dx, dy, dz).setColor(r, g, b, a);
+        PortVertex.of(v).addVertex(p, ax, ay, az).setColor(r, g, b, a).endVertex();
+        PortVertex.of(v).addVertex(p, bx, by, bz).setColor(r, g, b, a).endVertex();
+        PortVertex.of(v).addVertex(p, cx, cy, cz).setColor(r, g, b, a).endVertex();
+        PortVertex.of(v).addVertex(p, dx, dy, dz).setColor(r, g, b, a).endVertex();
     }
 
     // ======================== RenderType factory ========================
@@ -219,7 +221,7 @@ public final class PaintbrushSelectionRenderer {
                 .setCullState(new RenderType.CullStateShard(false))
                 .setDepthTestState(xray
                     ? new RenderType.DepthTestStateShard("always", 519)
-                    : RenderType.LEQUAL_DEPTH_TEST)
+                    : PortRenderStateShards.LEQUAL_DEPTH_TEST)
                 .createCompositeState(false));
     }
 }

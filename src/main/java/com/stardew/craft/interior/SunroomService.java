@@ -240,7 +240,7 @@ public final class SunroomService {
         private boolean removed;
 
         @Override
-        public @Nonnull CompoundTag save(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider provider) {
+        public @Nonnull CompoundTag save(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
             tag.putInt("AxeHits", axeHits);
             tag.putBoolean("Removed", removed);
             return tag;

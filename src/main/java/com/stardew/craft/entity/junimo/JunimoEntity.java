@@ -112,7 +112,7 @@ public class JunimoEntity extends PathfinderMob implements AnimatedModel {
                 .add(Attributes.MAX_HEALTH, 20.0D)
                 .add(Attributes.MOVEMENT_SPEED, 0.28D)
                 .add(Attributes.FOLLOW_RANGE, 64.0D)
-                .add(Attributes.STEP_HEIGHT, 1.0D);
+                .add(com.stardew.craft.port.PortAttributes.STEP_HEIGHT.get(), 1.0D);
     }
 
     @Override

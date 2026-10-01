@@ -242,6 +242,6 @@ public class EventActorEntity extends Mob implements AnimatedModel {
         return Mob.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, 20.0)
                 .add(Attributes.MOVEMENT_SPEED, 0.0)
-                .add(Attributes.STEP_HEIGHT, 1.0);
+                .add(com.stardew.craft.port.PortAttributes.STEP_HEIGHT.get(), 1.0);
     }
 }

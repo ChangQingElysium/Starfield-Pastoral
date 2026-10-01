@@ -50,9 +50,9 @@ public final class LegacyLivestockMigrationGameTests {
             var home = buildings.find(buildings.legacyImport(fixture.homeId));
             h.assertTrue(home.tier() == 2 && home.mode() == BuildingRecord.Mode.SELF_BUILT && home.phase() == BuildingRecord.Phase.READY, "Paid tier reset or construction replayed");
             h.assertTrue(raw.equals(original) && migration.sourceSnapshot().equals(original), "Archive mutated");
-            buildings = BuildingWorldData.load(buildings.save(new CompoundTag(), fixture.level.registryAccess()), fixture.level.registryAccess());
-            animals = LivestockWorldData.load(animals.save(new CompoundTag(), fixture.level.registryAccess()), fixture.level.registryAccess());
-            migration = LegacyLivestockMigration.load(migration.save(new CompoundTag(), fixture.level.registryAccess()), fixture.level.registryAccess());
+            buildings = BuildingWorldData.load(buildings.save(new CompoundTag()), fixture.level.registryAccess());
+            animals = LivestockWorldData.load(animals.save(new CompoundTag()), fixture.level.registryAccess());
+            migration = LegacyLivestockMigration.load(migration.save(new CompoundTag()), fixture.level.registryAccess());
             migration.apply(fixture.level.getServer(), buildings, animals);
             h.assertTrue(animals.all().size() == 3 && animals.eggs().size() == 1 && animals.hay(fixture.farm.getInstanceId()) == 517, "Reload replayed import");
         }
@@ -68,17 +68,17 @@ public final class LegacyLivestockMigrationGameTests {
             UUID id = animals.legacyImport(fixture.animalKey());
             // Simulate only the animal ledger surviving an interrupted cross-file save.
             buildings = new BuildingWorldData();
-            animals = LivestockWorldData.load(animals.save(new CompoundTag(), fixture.level.registryAccess()), fixture.level.registryAccess());
+            animals = LivestockWorldData.load(animals.save(new CompoundTag()), fixture.level.registryAccess());
             UUID movedHome = UUID.randomUUID(); animals.put(animals.find(id).rehome(movedHome).rename("Moved"));
             migration.apply(fixture.level.getServer(), buildings, animals);
             h.assertTrue(animals.find(id).home().equals(movedHome) && animals.find(id).name().equals("Moved"), "Replay reverted a rehome/rename");
             animals.remove(id); for (var product : animals.eggs()) animals.collect(product.id());
             animals.hay(fixture.farm.getInstanceId(), 0);
-            animals = LivestockWorldData.load(animals.save(new CompoundTag(), fixture.level.registryAccess()), fixture.level.registryAccess());
+            animals = LivestockWorldData.load(animals.save(new CompoundTag()), fixture.level.registryAccess());
             migration.apply(fixture.level.getServer(), buildings, animals);
             h.assertTrue(animals.find(id) == null && animals.eggs().isEmpty() && animals.hay(fixture.farm.getInstanceId()) == 0, "Sold animal/collected product/spent hay resurrected");
             // The opposite partial save must recover animals without repeating building registration.
-            var onlyBuildings = BuildingWorldData.load(buildings.save(new CompoundTag(), fixture.level.registryAccess()), fixture.level.registryAccess());
+            var onlyBuildings = BuildingWorldData.load(buildings.save(new CompoundTag()), fixture.level.registryAccess());
             var emptyAnimals = new LivestockWorldData();
             migration.apply(fixture.level.getServer(), onlyBuildings, emptyAnimals);
             h.assertTrue(onlyBuildings.all().size() == 1 && emptyAnimals.find(id) != null, "Building-only save could not resume");
@@ -154,7 +154,7 @@ public final class LegacyLivestockMigrationGameTests {
             long count = data.eggs().stream().filter(p -> p.animal().equals(id)).count();
             var path = fixture.level.getServer().getWorldPath(net.minecraft.world.level.storage.LevelResource.ROOT).resolve("data/stardew_livestock.dat");
             try {
-                var disk = net.minecraft.nbt.NbtIo.readCompressed(path, net.minecraft.nbt.NbtAccounter.unlimitedHeap()).getCompound("data");
+                var disk = com.stardew.craft.port.PortNbtIo.readCompressed(path, net.minecraft.nbt.NbtAccounter.UNLIMITED).getCompound("data");
                 var saved = LivestockWorldData.load(disk, fixture.level.registryAccess());
                 h.assertTrue(saved.eggs().stream().anyMatch(p -> p.animal().equals(id)), "Old floor block retired before its product reached disk");
             } catch (java.io.IOException exception) { throw new IllegalStateException(exception); }

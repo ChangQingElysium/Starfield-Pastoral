@@ -11,7 +11,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import snownee.jade.api.JadeIds;
+import snownee.jade.api.Identifiers;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.IBlockComponentProvider;
@@ -68,7 +68,7 @@ public enum PortalTriggerJadeProvider implements IBlockComponentProvider, IServe
                 .withStyle(ChatFormatting.GRAY));
         }
         if (DesertFestivalWillyFishingService.TARGET_ID.equals(targetId)) {
-            tooltip.remove(JadeIds.CORE_OBJECT_NAME);
+            tooltip.remove(Identifiers.CORE_OBJECT_NAME);
             tooltip.add(Component.translatable("stardewcraft.portal.hint.willy_challenge")
                 .withStyle(ChatFormatting.GRAY));
         }

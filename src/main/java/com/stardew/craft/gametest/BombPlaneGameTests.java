@@ -63,7 +63,9 @@ public final class BombPlaneGameTests {
         level.setBlockAndUpdate(mine, ModBlocks.MINE_EARTH_SOIL.get().defaultBlockState());
         var bomb = new StardewBombEntity(ModEntities.STARDEW_BOMB.get(), level);
         // Fixed seed + repeated attempts cover the intentional 10% no-op without timing.
-        bomb.getRandom().setSeed(147L);
+        // PORT(1.20.1): Entity#getRandom() is 1.20.2+; it returns this protected Entity.random field (SRG f_19796_).
+        net.minecraftforge.fml.util.ObfuscationReflectionHelper.<net.minecraft.util.RandomSource, net.minecraft.world.entity.Entity>getPrivateValue(
+                net.minecraft.world.entity.Entity.class, bomb, "f_19796_").setSeed(147L);
         for (int i = 0; i < 12; i++) till.invoke(bomb, level, center, 1, null);
         helper.assertTrue(level.getBlockState(dirt).is(ModBlocks.FARMLAND.get()), "Ordinary mod dirt was not tilled");
         helper.assertTrue(level.getBlockState(grass).is(ModBlocks.GRASS_BLOCK.get()), "Grass was tilled");

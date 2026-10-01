@@ -165,7 +165,7 @@ public final class PrefabDefinitions {
         return templates.computeIfAbsent(tier.structure(), id -> {
             ResourceLocation path = id.withPath("structures/" + id.getPath() + ".nbt");
             try (var input = level.getServer().getResourceManager().getResourceOrThrow(path).open()) {
-                CompoundTag tag = NbtIo.readCompressed(input, NbtAccounter.create(16_000_000L));
+                CompoundTag tag = com.stardew.craft.port.PortNbtIo.readCompressed(input, new net.minecraft.nbt.NbtAccounter(16_000_000L));
                 ListTag sizeTag = tag.getList("size", 3);
                 BlockPos size = new BlockPos(sizeTag.getInt(0), sizeTag.getInt(1), sizeTag.getInt(2));
                 if (!size.equals(tier.size())) throw new IllegalArgumentException("Prefab size mismatch: " + id);

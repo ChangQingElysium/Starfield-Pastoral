@@ -28,6 +28,7 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
 
+import com.stardew.craft.port.PortVertex;
 @EventBusSubscriber(modid = StardewCraft.MODID, value = Dist.CLIENT)
 public class WateringCanOverlayRenderer {
 
@@ -155,9 +156,9 @@ public class WateringCanOverlayRenderer {
         // 绘制一个面 (两个三角形)
         PoseStack.Pose last = poseStack.last();
         
-        consumer.addVertex(last, x, y, z).setUv(minU, minV).setColor(r, g, b, a);
-        consumer.addVertex(last, x, y, z + size).setUv(minU, maxV).setColor(r, g, b, a);
-        consumer.addVertex(last, x + size, y, z + size).setUv(maxU, maxV).setColor(r, g, b, a);
-        consumer.addVertex(last, x + size, y, z).setUv(maxU, minV).setColor(r, g, b, a);
+        PortVertex.of(consumer).addVertex(last, x, y, z).setUv(minU, minV).setColor(r, g, b, a).endVertex();
+        PortVertex.of(consumer).addVertex(last, x, y, z + size).setUv(minU, maxV).setColor(r, g, b, a).endVertex();
+        PortVertex.of(consumer).addVertex(last, x + size, y, z + size).setUv(maxU, maxV).setColor(r, g, b, a).endVertex();
+        PortVertex.of(consumer).addVertex(last, x + size, y, z).setUv(maxU, minV).setColor(r, g, b, a).endVertex();
     }
 }

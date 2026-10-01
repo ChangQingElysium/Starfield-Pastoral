@@ -145,4 +145,16 @@ public final class PortCodecs {
     private static FriendlyByteBuf wrap(ByteBuf buffer) {
         return buffer instanceof FriendlyByteBuf friendly ? friendly : new FriendlyByteBuf(buffer);
     }
+
+    /** DFU 8 (1.21) {@code Codec#validate(checker)} = {@code flatXmap(checker, checker)}; absent in DFU 6. */
+    public static <A> com.mojang.serialization.Codec<A> validate(com.mojang.serialization.Codec<A> codec,
+            java.util.function.Function<A, com.mojang.serialization.DataResult<A>> checker) {
+        return codec.flatXmap(checker, checker);
+    }
+
+    /** DFU 8 (1.21) {@code MapCodec#validate(checker)} = {@code flatXmap(checker, checker)}; absent in DFU 6. */
+    public static <A> com.mojang.serialization.MapCodec<A> validate(com.mojang.serialization.MapCodec<A> codec,
+            java.util.function.Function<A, com.mojang.serialization.DataResult<A>> checker) {
+        return codec.flatXmap(checker, checker);
+    }
 }
