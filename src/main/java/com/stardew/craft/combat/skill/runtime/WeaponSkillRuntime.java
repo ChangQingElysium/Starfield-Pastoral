@@ -26,7 +26,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * Server-authoritative lifecycle runtime for built-in original weapon skills.

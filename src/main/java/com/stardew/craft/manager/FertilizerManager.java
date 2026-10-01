@@ -17,7 +17,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.FarmBlock;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;

@@ -34,7 +34,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import com.stardew.craft.port.net.minecraft.world.scores.ScoreHolder;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
 import java.util.ArrayList;

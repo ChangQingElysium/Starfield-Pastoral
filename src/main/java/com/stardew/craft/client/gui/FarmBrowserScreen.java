@@ -18,7 +18,7 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 import java.util.List;
 
 /** Shared farm directory. Server-authored eligibility and identifiers remain authoritative. */

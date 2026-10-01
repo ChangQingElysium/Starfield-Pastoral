@@ -24,7 +24,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.*;
 
@@ -462,7 +462,7 @@ public final class BlacksmithService {
 
         // Send purchase result first (updates client money display)
         int newMoney = com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player);
-        net.minecraftforge.network.PacketDistributor.sendToPlayer(player,
+        com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
             new com.stardew.craft.network.payload.ShopPurchaseResultPayload(
                 true, "ClintUpgrade", newMoney, "", 0, itemIndex));
 
@@ -473,7 +473,7 @@ public final class BlacksmithService {
 
     private static void sendPurchaseResult(ServerPlayer player, boolean success) {
         int money = com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player);
-        net.minecraftforge.network.PacketDistributor.sendToPlayer(player,
+        com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
             new com.stardew.craft.network.payload.ShopPurchaseResultPayload(
                 success, "ClintUpgrade", money, "", 0, -1));
     }
@@ -622,7 +622,7 @@ public final class BlacksmithService {
     // ──── Geode Processing ────
 
     private static void openGeodeProcessing(ServerPlayer player) {
-        net.minecraftforge.network.PacketDistributor.sendToPlayer(player,
+        com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
             new com.stardew.craft.network.payload.OpenGeodeMenuPayload());
     }
 

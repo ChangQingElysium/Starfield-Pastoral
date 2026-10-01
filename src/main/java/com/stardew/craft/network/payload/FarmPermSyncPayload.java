@@ -93,7 +93,7 @@ public record FarmPermSyncPayload(
                     com.stardew.craft.player.PlayerDisplayName.get(online), override));
         }
 
-        net.minecraftforge.network.PacketDistributor.sendToPlayer(player,
+        com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
                 new FarmPermSyncPayload(defaultPerm, entries));
     }
 }

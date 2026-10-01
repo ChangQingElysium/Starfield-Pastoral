@@ -4,7 +4,7 @@ import com.stardew.craft.network.payload.AuctionCreateSubmitPayload;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 @SuppressWarnings("null")
 public class AuctionCreateScreen extends AuctionScreen {

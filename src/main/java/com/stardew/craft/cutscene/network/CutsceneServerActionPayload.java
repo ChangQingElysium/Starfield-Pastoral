@@ -229,7 +229,7 @@ public record CutsceneServerActionPayload(
                         net.minecraft.server.level.ServerLevel lvl = player.serverLevel();
                         net.minecraft.core.BlockPos origin = com.stardew.craft.interior.PlayerInteriorAllocator
                                 .get(lvl).getCCOrigin(player.getUUID());
-                        net.minecraftforge.network.PacketDistributor.sendToPlayer(player,
+                        com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
                                 new com.stardew.craft.cutscene.network.CutsceneAnchorPayload(
                                         "cc_interior",
                                         origin.getX(), origin.getY(), origin.getZ()));

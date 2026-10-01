@@ -5,7 +5,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredHolder;
-import net.minecraftforge.registries.DeferredRegister;
+import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredRegister;
 import com.stardew.craft.entity.projectile.MeowmereProjectileEntity;
 import com.stardew.craft.entity.projectile.ElfBladeLeafEntity;
 import com.stardew.craft.entity.projectile.TideAnchorProjectileEntity;

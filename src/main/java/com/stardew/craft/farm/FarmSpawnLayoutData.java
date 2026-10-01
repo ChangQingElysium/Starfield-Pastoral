@@ -55,37 +55,36 @@ public final class FarmSpawnLayoutData {
             if (stream == null) throw new IllegalStateException("Missing farm spawn layout " + path);
             JsonObject root = GSON.fromJson(
                     new InputStreamReader(stream, StandardCharsets.UTF_8), JsonObject.class);
-            if (root == null) {
+            if (root == null || root.get("format").getAsInt() != 1) {
                 throw new IllegalStateException("Unsupported farm spawn layout " + path);
             }
-            FarmSpawnLayoutRules.requireFormat(path, root.get("format").getAsInt());
             JsonArray size = root.getAsJsonArray("size");
-            if (size.size() != 3) {
+            if (size.size() != 3
+                    || size.get(0).getAsInt() != type.getLayout().schemWidth()
+                    || size.get(1).getAsInt() != type.getLayout().schemHeight()
+                    || size.get(2).getAsInt() != type.getLayout().schemLength()) {
                 throw new IllegalStateException("Farm spawn layout size does not match " + type.getId());
             }
-            FarmSpawnLayoutRules.Size actualSize = new FarmSpawnLayoutRules.Size(
-                    size.get(0).getAsInt(), size.get(1).getAsInt(), size.get(2).getAsInt());
-            FarmSpawnLayoutRules.Size expectedSize = new FarmSpawnLayoutRules.Size(
-                    type.getLayout().schemWidth(), type.getLayout().schemHeight(),
-                    type.getLayout().schemLength());
-            FarmSpawnLayoutRules.requireSize(path, type.getId(), actualSize, expectedSize);
 
             Map<String, List<BlockPos>> candidates = new HashMap<>();
             JsonObject runs = root.getAsJsonObject("runs");
             for (var entry : runs.entrySet()) {
-                java.util.ArrayList<FarmSpawnLayoutRules.Position> positions = new java.util.ArrayList<>();
+                java.util.ArrayList<BlockPos> positions = new java.util.ArrayList<>();
                 for (var element : entry.getValue().getAsJsonArray()) {
                     JsonArray run = element.getAsJsonArray();
-                    int[] encoded = new int[run.size()];
-                    for (int index = 0; index < run.size(); index++) {
-                        encoded[index] = run.get(index).getAsInt();
+                    if (run.size() != 4) throw new IllegalStateException("Malformed run in " + path);
+                    int y = run.get(0).getAsInt();
+                    int z = run.get(1).getAsInt();
+                    int minX = run.get(2).getAsInt();
+                    int maxX = run.get(3).getAsInt();
+                    if (minX < 0 || maxX < minX || maxX >= type.getLayout().schemWidth()
+                            || y < 0 || y >= type.getLayout().schemHeight()
+                            || z < 0 || z >= type.getLayout().schemLength()) {
+                        throw new IllegalStateException("Out-of-bounds run in " + path);
                     }
-                    FarmSpawnLayoutRules.Run decoded = FarmSpawnLayoutRules.decodeRun(path, encoded);
-                    positions.addAll(FarmSpawnLayoutRules.expandRun(path, actualSize, decoded));
+                    for (int x = minX; x <= maxX; x++) positions.add(new BlockPos(x, y, z));
                 }
-                candidates.put(entry.getKey(), positions.stream()
-                        .map(position -> new BlockPos(position.x(), position.y(), position.z()))
-                        .toList());
+                candidates.put(entry.getKey(), List.copyOf(positions));
             }
             return new Layout(candidates);
         } catch (Exception exception) {

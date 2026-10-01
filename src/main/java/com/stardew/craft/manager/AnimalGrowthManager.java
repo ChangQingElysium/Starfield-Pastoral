@@ -72,7 +72,7 @@ import java.util.UUID;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 @SuppressWarnings("null")
 public class AnimalGrowthManager extends SavedData {

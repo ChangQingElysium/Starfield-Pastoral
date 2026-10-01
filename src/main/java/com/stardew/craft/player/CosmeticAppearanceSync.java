@@ -2,7 +2,7 @@ package com.stardew.craft.player;
 
 import com.stardew.craft.network.payload.CosmeticAppearanceSyncPayload;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 public final class CosmeticAppearanceSync {
     private CosmeticAppearanceSync() {

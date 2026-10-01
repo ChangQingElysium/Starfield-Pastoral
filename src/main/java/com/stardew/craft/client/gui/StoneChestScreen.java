@@ -19,7 +19,7 @@ import java.util.List;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 @SuppressWarnings("null")
 public class StoneChestScreen extends AbstractContainerScreen<StoneChestMenu> {

@@ -5,7 +5,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredHolder;
-import net.minecraftforge.registries.DeferredRegister;
+import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
  * Stardew Valley cue -> Minecraft SoundEvent mapping.

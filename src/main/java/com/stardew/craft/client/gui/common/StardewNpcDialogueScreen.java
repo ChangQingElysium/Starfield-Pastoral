@@ -281,7 +281,7 @@ public class StardewNpcDialogueScreen extends Screen implements StardewCollectiv
                         openClientSideResponse(picked.nextNodeId());
                         return;
                     }
-                    net.minecraftforge.network.PacketDistributor.sendToServer(
+                    com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToServer(
                         new com.stardew.craft.network.payload.AnswerNpcQuestionPayload(
                             npcId, picked.nextNodeId(), picked.scoreDelta(), picked.answerId()
                         )
@@ -845,7 +845,7 @@ public class StardewNpcDialogueScreen extends Screen implements StardewCollectiv
     }
 
     private void closeScreen() {
-        net.minecraftforge.network.PacketDistributor.sendToServer(
+        com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToServer(
             new com.stardew.craft.network.payload.CloseNpcDialoguePayload(this.npcId)
         );
         if (this.minecraft != null) {

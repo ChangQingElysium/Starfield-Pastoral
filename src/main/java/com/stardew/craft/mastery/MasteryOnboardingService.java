@@ -11,7 +11,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.event.tick.PlayerTickEvent;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * 精通系统玩家上线/睡眠后的引导逻辑：

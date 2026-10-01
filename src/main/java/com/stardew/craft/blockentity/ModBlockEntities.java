@@ -4,7 +4,7 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.block.ModBlocks;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredHolder;
-import net.minecraftforge.registries.DeferredRegister;
+import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredRegister;
 
 public final class ModBlockEntities {
 	private ModBlockEntities() {

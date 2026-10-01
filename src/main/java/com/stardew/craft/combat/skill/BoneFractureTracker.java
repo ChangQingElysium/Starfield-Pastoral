@@ -58,7 +58,7 @@ public final class BoneFractureTracker {
 
     private static void spawnTrace(LivingEntity target) {
         long end = target.getPersistentData().getLong(TAG_END_TICK);
-        net.minecraftforge.network.PacketDistributor.sendToPlayersTrackingEntityAndSelf(target,
+        com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayersTrackingEntityAndSelf(target,
                 new com.stardew.craft.combat.network.BoneFractureTracePayload(target.getId(), end,
                         (int)Math.max(0, end - target.level().getGameTime())));
     }

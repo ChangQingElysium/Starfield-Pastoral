@@ -24,7 +24,7 @@ import com.stardew.craft.port.net.neoforged.neoforge.event.entity.player.CanCont
 import com.stardew.craft.port.net.neoforged.neoforge.event.entity.player.CanPlayerSleepEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerWakeUpEvent;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.Map;
 import java.util.UUID;

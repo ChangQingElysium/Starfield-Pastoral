@@ -5,7 +5,7 @@ import com.stardew.craft.festival.FairFestivalService;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 public final class FairWheelGameService {
     private FairWheelGameService() {

@@ -200,7 +200,7 @@ public final class DesertFestivalMineService {
     }
 
     private static void syncHud(ServerPlayer player, int displayRating, boolean shake) {
-        net.minecraftforge.network.PacketDistributor.sendToPlayer(
+        com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
             player,
             new com.stardew.craft.network.payload.DesertFestivalMineHudPayload(Math.max(0, displayRating), shake)
         );
@@ -391,7 +391,7 @@ public final class DesertFestivalMineService {
             player.sendSystemMessage(Component.translatable("stardewcraft.desert_festival.marlon.rating_1000"));
             return;
         }
-        net.minecraftforge.network.PacketDistributor.sendToPlayer(
+        com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
             player,
             new com.stardew.craft.network.payload.OpenDesertFestivalMarlonRatingPayload(rating)
         );

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import net.minecraft.world.item.Item;
 import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredItem;
-import net.minecraftforge.registries.DeferredRegister;
+import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredRegister;
 
 public final class CookingDishRegistrar {
     private CookingDishRegistrar() {}

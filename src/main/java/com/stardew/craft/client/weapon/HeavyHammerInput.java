@@ -10,7 +10,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 /** Normal attack input is held to pound. No second key, click-speed requirement or target lock. */
 @EventBusSubscriber(modid=StardewCraft.MODID,value=Dist.CLIENT)

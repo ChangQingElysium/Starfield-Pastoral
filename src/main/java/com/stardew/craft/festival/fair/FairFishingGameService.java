@@ -22,7 +22,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.event.tick.PlayerTickEvent;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.HashMap;
 import java.util.List;

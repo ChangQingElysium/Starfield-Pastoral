@@ -20,7 +20,7 @@ import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.minecraftforge.event.server.ServerStoppedEvent;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
 import net.minecraftforge.event.level.SleepFinishedTimeEvent;
@@ -578,7 +578,7 @@ public class DimensionEventHandler {
             // 同步层数到客户端（显示UI）
             com.stardew.craft.network.MiningFloorSyncPacket packet = 
                 new com.stardew.craft.network.MiningFloorSyncPacket(currentFloor);
-            net.minecraftforge.network.PacketDistributor.sendToPlayer(player, packet);
+            com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player, packet);
 
             // 首次进入矿井赠送矿洞图腾
             if (!playerData.hasReceivedMineTotem()) {

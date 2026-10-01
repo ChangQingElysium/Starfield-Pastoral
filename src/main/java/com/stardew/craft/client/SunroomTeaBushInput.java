@@ -14,7 +14,7 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 /** Converts a held attack key into exactly one central-tea-bush action per press. */
 @EventBusSubscriber(modid = StardewCraft.MODID, value = Dist.CLIENT)

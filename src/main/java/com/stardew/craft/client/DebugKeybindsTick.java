@@ -6,7 +6,7 @@ import com.stardew.craft.network.GrowTreesPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 public final class DebugKeybindsTick {
 	private DebugKeybindsTick() {

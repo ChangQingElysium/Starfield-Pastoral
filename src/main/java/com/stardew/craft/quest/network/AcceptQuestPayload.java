@@ -50,7 +50,7 @@ public record AcceptQuestPayload(String questId) implements CustomPacketPayload 
                 if (daily != null && daily.getId().equals(qid) && !mgr.hasQuest(qid)) {
                     mgr.acceptQuest(daily, serverPlayer);
                     // 让客户端的 dailyQuest 缓存 (accepted=true) 及时刷新 → 公告栏按钮变灰
-                    net.minecraftforge.network.PacketDistributor.sendToPlayer(serverPlayer,
+                    com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(serverPlayer,
                         DailyQuestSyncPayload.fromQuest(daily));
                 }
             } else {

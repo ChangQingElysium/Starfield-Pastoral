@@ -145,7 +145,7 @@ public class MineExitBlock extends Block {
             com.stardew.craft.mining.MiningPlayerData playerData = 
                 com.stardew.craft.mining.MiningDataManager.getPlayerData(serverPlayer);
             int currentFloor = playerData != null ? playerData.getCurrentFloor() : 0;
-            net.minecraftforge.network.PacketDistributor.sendToPlayer(
+            com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
                 serverPlayer,
                 new com.stardew.craft.network.payload.OpenMineExitDialogPayload(currentFloor)
             );

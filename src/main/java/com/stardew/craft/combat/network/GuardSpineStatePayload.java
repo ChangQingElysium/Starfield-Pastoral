@@ -5,7 +5,7 @@ import net.minecraft.network.codec.*;
 import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 public record GuardSpineStatePayload(int actor,long tick,int phase,int duration) implements CustomPacketPayload {
     public static final int WAIT=0,CHARGED=1,WEAK=2,CLEAR=3,GUARD_END=4;

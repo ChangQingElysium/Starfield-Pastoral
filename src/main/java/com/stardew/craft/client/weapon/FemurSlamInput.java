@@ -15,7 +15,7 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 /** Ground-targeted charge input must not depend on vanilla's entity/block interaction result. */
 @EventBusSubscriber(modid = StardewCraft.MODID, value = Dist.CLIENT)

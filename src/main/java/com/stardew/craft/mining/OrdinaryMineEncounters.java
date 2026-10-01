@@ -11,7 +11,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.event.tick.LevelTickEvent;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 import java.util.*;
 
 /** MineShaft ten-minute flying encounters and 30..40-second swarm fog. */

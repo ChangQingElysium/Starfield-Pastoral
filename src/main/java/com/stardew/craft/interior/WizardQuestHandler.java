@@ -17,7 +17,7 @@ import net.minecraft.world.item.Items;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.event.tick.PlayerTickEvent;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * 巫师塔枢纽任务逻辑：
@@ -300,7 +300,7 @@ public final class WizardQuestHandler {
                     player,
                     com.stardew.craft.farm.FarmJoinManager.hasPending(player.getUUID())
                 );
-                net.minecraftforge.network.PacketDistributor.sendToPlayer(player,
+                com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
                     new com.stardew.craft.network.payload.OpenFarmSelectionPayload());
             StardewCraft.LOGGER.info("[WIZARD] {} has no farm, opening farm selection screen",
                     player.getName().getString());

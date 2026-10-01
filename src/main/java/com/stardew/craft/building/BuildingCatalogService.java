@@ -6,7 +6,7 @@ import com.stardew.craft.player.PlayerStardewDataAPI;
 import com.stardew.craft.shop.CarpenterBlueprint;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.LinkedHashSet;
 import java.util.List;

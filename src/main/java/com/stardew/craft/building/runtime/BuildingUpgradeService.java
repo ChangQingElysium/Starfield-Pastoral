@@ -59,7 +59,7 @@ public final class BuildingUpgradeService {
         var tag=new net.minecraft.nbt.CompoundTag();var rows=new net.minecraft.nbt.ListTag();rows.addAll(obstacles.values());tag.put("Obstacles",rows);
         var building=record.save();var bounds=PrefabDefinitions.transform(PrefabDefinitions.get(record.family()).tier(record.tier()+1).bounds(),record.anchor(),PrefabDefinitions.rotation(record.facing()));
         building.putLong("TargetMin",bounds.min().asLong());building.putLong("TargetMax",bounds.maxExclusive().asLong());tag.put("Building",building);
-        net.minecraftforge.network.PacketDistributor.sendToPlayer(player,new com.stardew.craft.network.payload.BuildingWorkPayload(tag));
+        com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,new com.stardew.craft.network.payload.BuildingWorkPayload(tag));
     }
 
 }

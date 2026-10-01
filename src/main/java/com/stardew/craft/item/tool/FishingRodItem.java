@@ -531,7 +531,7 @@ public class FishingRodItem extends net.minecraft.world.item.FishingRodItem impl
 				mgr.retrieve(serverPlayer);
 				setCastActive(player.getMainHandItem(), false);
 				setCastActive(player.getOffhandItem(), false);
-				net.minecraftforge.network.PacketDistributor.sendToPlayer(serverPlayer, new com.stardew.craft.fishing.network.FishingRodCastStatePayload(FishingSessionManager.get(serverPlayer.server).useId(serverPlayer), false));
+				com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(serverPlayer, new com.stardew.craft.fishing.network.FishingRodCastStatePayload(FishingSessionManager.get(serverPlayer.server).useId(serverPlayer), false));
 				player.getCooldowns().addCooldown(this, CAST_COOLDOWN_TICKS);
 				return InteractionResultHolder.consume(stack);
 			}
@@ -610,7 +610,7 @@ public class FishingRodItem extends net.minecraft.world.item.FishingRodItem impl
             FishingSessionManager.get(serverPlayer.server).cancel(serverPlayer);
 			setCastActive(player.getMainHandItem(), false);
 			setCastActive(player.getOffhandItem(), false);
-			net.minecraftforge.network.PacketDistributor.sendToPlayer(
+			com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
 					serverPlayer,
 					new com.stardew.craft.fishing.network.FishingRodCastStatePayload(FishingSessionManager.get(serverPlayer.server).useId(serverPlayer), false));
 			return;
@@ -632,7 +632,7 @@ public class FishingRodItem extends net.minecraft.world.item.FishingRodItem impl
 			if (festivalBlocked) {
 				setCastActive(player.getMainHandItem(), false);
 				setCastActive(player.getOffhandItem(), false);
-				net.minecraftforge.network.PacketDistributor.sendToPlayer(
+				com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
 					serverPlayer,
 					new com.stardew.craft.fishing.network.FishingRodCastStatePayload(FishingSessionManager.get(serverPlayer.server).useId(serverPlayer), false)
 				);
@@ -642,7 +642,7 @@ public class FishingRodItem extends net.minecraft.world.item.FishingRodItem impl
 
 		// Server updates the main-hand rod.
 		setCastActive(player.getMainHandItem(), true);
-		net.minecraftforge.network.PacketDistributor.sendToPlayer(serverPlayer, new com.stardew.craft.fishing.network.FishingRodCastStatePayload(FishingSessionManager.get(serverPlayer.server).useId(serverPlayer), true));
+		com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(serverPlayer, new com.stardew.craft.fishing.network.FishingRodCastStatePayload(FishingSessionManager.get(serverPlayer.server).useId(serverPlayer), true));
 		// The cast cue is emitted with the physical hook release at the authored 350 ms mark.
 
 		player.getCooldowns().addCooldown(this, CAST_COOLDOWN_TICKS);

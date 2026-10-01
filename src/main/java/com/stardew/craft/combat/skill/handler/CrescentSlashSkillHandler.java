@@ -127,7 +127,7 @@ public final class CrescentSlashSkillHandler implements RuntimeWeaponSkillHandle
     }
 
     @Override public void finish(SkillExecutionContext context,SkillInstance instance,SkillInstance.EndReason reason){
-        if(reason!=SkillInstance.EndReason.COMPLETED)net.minecraftforge.network.PacketDistributor.sendToPlayersTrackingEntityAndSelf(context.player(),
+        if(reason!=SkillInstance.EndReason.COMPLETED)com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayersTrackingEntityAndSelf(context.player(),
                 new com.stardew.craft.combat.network.CrescentFalchionEndPayload(-1,context.player().getId(),"crescent_slash"));
     }
 

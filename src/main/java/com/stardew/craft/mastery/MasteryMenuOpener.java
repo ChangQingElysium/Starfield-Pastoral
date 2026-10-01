@@ -6,7 +6,7 @@ import com.stardew.craft.player.PlayerDataManager;
 import com.stardew.craft.player.PlayerStardewData;
 import com.stardew.craft.player.SkillType;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 public final class MasteryMenuOpener {
     private MasteryMenuOpener() {}

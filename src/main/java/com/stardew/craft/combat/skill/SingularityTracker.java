@@ -3,7 +3,7 @@ package com.stardew.craft.combat.skill;
 import com.stardew.craft.combat.network.SingularityPayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.HashMap;
 import java.util.Map;

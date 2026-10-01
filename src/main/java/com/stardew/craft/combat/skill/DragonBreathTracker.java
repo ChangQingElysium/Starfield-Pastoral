@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.UUID;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * 龙牙弯刀 - 龙息积攒

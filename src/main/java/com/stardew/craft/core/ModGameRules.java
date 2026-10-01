@@ -15,7 +15,7 @@ public final class ModGameRules {
             GameRules.register("stardewAllowPublicBuilding", GameRules.Category.PLAYER,
                     GameRules.BooleanValue.create(false, (server, value) -> {
                         if (server != null) {
-                            net.minecraftforge.network.PacketDistributor.sendToAllPlayers(
+                            com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToAllPlayers(
                                     new com.stardew.craft.network.payload.PublicBuildingRuleSyncPayload(value.get()));
                         }
                     }));

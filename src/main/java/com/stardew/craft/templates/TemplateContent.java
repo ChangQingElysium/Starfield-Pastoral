@@ -18,7 +18,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredBlock;
 import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredHolder;
 import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredItem;
-import net.minecraftforge.registries.DeferredRegister;
+import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredRegister;
 
 public final class TemplateContent {
     public static final DeferredRegister.Blocks BLOCKS =

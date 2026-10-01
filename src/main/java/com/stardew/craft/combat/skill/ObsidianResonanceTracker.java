@@ -4,7 +4,7 @@ import com.stardew.craft.combat.network.ObsidianResonanceSyncPayload;
 import com.stardew.craft.item.weapon.IStardewWeapon;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.HashMap;
 import java.util.Map;

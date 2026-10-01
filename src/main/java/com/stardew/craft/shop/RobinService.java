@@ -8,7 +8,7 @@ import com.stardew.craft.api.v1.building.StardewBuildingBuilders;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.List;

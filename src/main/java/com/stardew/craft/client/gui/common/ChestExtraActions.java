@@ -61,7 +61,7 @@ public final class ChestExtraActions {
             return true;
         }
         if (noteVisible() && hit(mx, my, fillY + 24, 18)) {
-            if (menu.getCarried().isEmpty()) net.minecraftforge.network.PacketDistributor.sendToServer(
+            if (menu.getCarried().isEmpty()) com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToServer(
                     new com.stardew.craft.communitycenter.network.OpenBundleViewerPayload());
             return true;
         }

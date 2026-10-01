@@ -22,7 +22,7 @@ import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.material.MapColor;
 import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredBlock;
-import net.minecraftforge.registries.DeferredRegister;
+import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
  * 方块注册管理器

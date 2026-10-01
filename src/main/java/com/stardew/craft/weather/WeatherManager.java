@@ -293,7 +293,7 @@ public class WeatherManager {
         );
         
         for (net.minecraft.server.level.ServerPlayer player : level.getServer().getPlayerList().getPlayers()) {
-            net.minecraftforge.network.PacketDistributor.sendToPlayer(player, packet);
+            com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player, packet);
         }
     }
 
@@ -365,7 +365,7 @@ public class WeatherManager {
                     state.getWeatherForTomorrow(),
                     state.isRaining(),
                     state.isThundering());
-            net.minecraftforge.network.PacketDistributor.sendToPlayer(player, packet);
+            com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player, packet);
         }
 
         public boolean isRaining() {

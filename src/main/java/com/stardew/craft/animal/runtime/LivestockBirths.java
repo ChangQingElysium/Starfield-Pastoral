@@ -7,7 +7,7 @@ import com.stardew.craft.util.StardewDeterministicRandom;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 import java.util.*;
 
 /** One personal-event draw per farm/day. Pending newborns reserve a real bed until named. */

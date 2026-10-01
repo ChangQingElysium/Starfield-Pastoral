@@ -7,7 +7,7 @@ import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
 import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * Server → Client: result of a purchase attempt.

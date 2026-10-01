@@ -139,7 +139,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Tiers;
 import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredBlock;
 import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredItem;
-import net.minecraftforge.registries.DeferredRegister;
+import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
  * 鐗╁搧娉ㄥ唽绠＄悊鍣?

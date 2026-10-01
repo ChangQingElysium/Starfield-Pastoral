@@ -6,7 +6,7 @@ import com.stardew.craft.player.PlayerStardewDataAPI;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 import java.util.*;
 
 /** Also lists animals whose self-built manager was removed, so they can be housed again. */

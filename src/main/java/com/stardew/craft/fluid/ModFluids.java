@@ -24,7 +24,7 @@ import com.stardew.craft.port.net.neoforged.neoforge.fluids.BaseFlowingFluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidType;
 import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredHolder;
-import net.minecraftforge.registries.DeferredRegister;
+import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredRegister;
 import com.stardew.craft.port.net.neoforged.neoforge.registries.NeoForgeRegistries;
 import org.joml.Vector3f;
 

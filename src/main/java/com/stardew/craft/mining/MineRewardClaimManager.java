@@ -42,7 +42,7 @@ public class MineRewardClaimManager extends SavedData {
     public void markOpened(UUID id, int floor) { openedFloorsByPlayer.computeIfAbsent(id, k -> new HashSet<>()).add(floor); setDirty(); }
     public void sync(net.minecraft.server.level.ServerPlayer player) {
         String floors = java.util.stream.Stream.concat(openedFloorsByPlayer.getOrDefault(player.getUUID(),Set.of()).stream(),claimedFloorsByPlayer.getOrDefault(player.getUUID(),Set.of()).stream()).distinct().sorted().map(Object::toString).collect(java.util.stream.Collectors.joining(","));
-        net.minecraftforge.network.PacketDistributor.sendToPlayer(player,new com.stardew.craft.network.MineRewardStatePacket(floors));
+        com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,new com.stardew.craft.network.MineRewardStatePacket(floors));
     }
 
     public MineRewardClaimManager() {

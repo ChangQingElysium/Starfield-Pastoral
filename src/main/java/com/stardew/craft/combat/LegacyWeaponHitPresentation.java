@@ -3,7 +3,7 @@ package com.stardew.craft.combat;
 import com.stardew.craft.combat.network.DamageNumberPayload;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * Frozen legacy feedback emitted by authoritative weapon impacts.

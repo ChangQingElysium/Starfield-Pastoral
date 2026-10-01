@@ -105,11 +105,11 @@ final class TemperedQuenchExecutionState
         clearHeat(); visualLevel=player.serverLevel();
         heat=new com.stardew.craft.combat.network.BloodForgeEffectPayload(player.getId(),target.getId(),tick,
                 com.stardew.craft.combat.network.BloodForgeEffectPayload.HEAT_START,duration,target.getX(),target.getY(),target.getZ());
-        net.minecraftforge.network.PacketDistributor.sendToPlayersInDimension(visualLevel,heat);
+        com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayersInDimension(visualLevel,heat);
     }
     private void clearHeat() {
         if(heat==null||visualLevel==null) return;
-        net.minecraftforge.network.PacketDistributor.sendToPlayersInDimension(visualLevel,
+        com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayersInDimension(visualLevel,
                 new com.stardew.craft.combat.network.BloodForgeEffectPayload(heat.casterId(),heat.targetId(),heat.castTick(),
                         com.stardew.craft.combat.network.BloodForgeEffectPayload.HEAT_END,0,heat.x(),heat.y(),heat.z()));
         heat=null; visualLevel=null;

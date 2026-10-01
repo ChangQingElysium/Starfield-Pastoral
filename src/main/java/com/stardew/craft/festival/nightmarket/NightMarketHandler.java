@@ -5,7 +5,7 @@ import com.stardew.craft.festival.FestivalSessionState;
 import com.stardew.craft.festival.PassiveFestivalHandler;
 import com.stardew.craft.network.payload.NightMarketStatePayload;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.HashSet;
 import java.util.Set;

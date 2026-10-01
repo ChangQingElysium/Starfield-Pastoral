@@ -7,7 +7,7 @@ import com.stardew.craft.player.PlayerStardewDataAPI;
 import com.stardew.craft.time.StardewTimeManager;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * Morris（Joja 超市经理）对话与入会流程。

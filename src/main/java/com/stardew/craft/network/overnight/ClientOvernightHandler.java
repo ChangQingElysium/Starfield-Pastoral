@@ -9,7 +9,7 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 import com.stardew.craft.client.gui.overnight.ShippingMenuScreen;
 import com.stardew.craft.client.gui.overnight.LevelUpMenuScreen;
 import com.stardew.craft.player.ProfessionType;

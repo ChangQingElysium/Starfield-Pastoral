@@ -5,7 +5,7 @@ import com.stardew.craft.combat.skill.runtime.SkillExecutionContext;
 import com.stardew.craft.combat.skill.runtime.SkillInstance;
 import com.stardew.craft.combat.skill.runtime.SkillTickResult;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 /** One server-authoritative Ley Line Rush window. */
 final class DwarfDaggerRushExecutionState

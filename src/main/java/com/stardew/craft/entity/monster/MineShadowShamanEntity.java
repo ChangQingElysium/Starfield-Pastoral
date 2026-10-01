@@ -82,7 +82,7 @@ public final class MineShadowShamanEntity extends StardewMonsterEntity {
         }
         if(selected!=null){selected.setHealth(Math.min(selected.monsterState().sourceMaxHealth(),selected.getHealth()+60));playSound(ModSounds.MONSTER_HEAL.get(),1,pitch(-.1,.171));
             ((ServerLevel)level()).sendParticles(com.stardew.craft.weather.ModParticles.MONSTER_HEAL.get(),selected.getX(),selected.getY()+.7,selected.getZ(),1,0,0,0,0);
-            net.minecraftforge.network.PacketDistributor.sendToPlayersTrackingEntityAndSelf(selected,new com.stardew.craft.combat.network.DamageNumberPayload((float)selected.getX(),(float)(selected.getY()+.9),(float)selected.getZ(),60,false,"monster_heal"));
+            com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayersTrackingEntityAndSelf(selected,new com.stardew.craft.combat.network.DamageNumberPayload((float)selected.getX(),(float)(selected.getY()+.9),(float)selected.getZ(),60,false,"monster_heal"));
         }
         return selected;
     }

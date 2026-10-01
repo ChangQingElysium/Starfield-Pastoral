@@ -436,7 +436,7 @@ public record OpenNpcDialogueScreenPayload(
                     output.add(segments[i + 1]);
                 }
                 com.stardew.craft.client.ClientPlayerDataCache.markMailFlagLocal(messageId);
-                net.minecraftforge.network.PacketDistributor.sendToServer(
+                com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToServer(
                         new MarkNpcDialogueFlagPayload(messageId));
                 i = segments.length;
                 continue;

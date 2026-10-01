@@ -205,7 +205,7 @@ public record ShopPurchasePayload(
     }
 
     private static void sendResult(ServerPlayer player, String shopId, boolean ok, int money, String itemId, int qty, int idx) {
-        net.minecraftforge.network.PacketDistributor.sendToPlayer(player,
+        com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
             new com.stardew.craft.network.payload.ShopPurchaseResultPayload(ok, shopId, money, itemId, qty, idx));
     }
 

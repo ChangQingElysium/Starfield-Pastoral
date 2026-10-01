@@ -6,7 +6,7 @@ import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
 import java.util.List;
 import java.util.Set;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 public final class WeaponSkillAnimationDispatcher {
     private static final Set<String> WORLD_PRESENTATION_SKILLS = Set.of(

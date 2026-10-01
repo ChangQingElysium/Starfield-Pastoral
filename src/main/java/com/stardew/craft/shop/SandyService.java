@@ -5,7 +5,7 @@ import com.stardew.craft.network.payload.OpenShopScreenPayload;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.List;

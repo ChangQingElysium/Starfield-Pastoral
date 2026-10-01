@@ -8,7 +8,7 @@ import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
 import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /** Server to client equivalent of SDV {@code Game1.showGlobalMessage}. */

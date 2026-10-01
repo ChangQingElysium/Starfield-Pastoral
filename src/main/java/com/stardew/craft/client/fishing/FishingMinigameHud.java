@@ -19,7 +19,7 @@ import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEven
 import net.minecraftforge.client.event.InputEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.client.event.RenderFrameEvent;
 import net.minecraftforge.client.event.RenderGuiEvent;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 /** The original simulator runs behind a non-modal, near-rod HUD. No screen, blur, or cursor capture. */
 @EventBusSubscriber(modid=StardewCraft.MODID,value=Dist.CLIENT)

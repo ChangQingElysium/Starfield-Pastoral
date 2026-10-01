@@ -9,7 +9,7 @@ import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.Custo
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record HayHarvestHudMessagePacket(int hayCount, boolean siloFull) implements CustomPacketPayload {

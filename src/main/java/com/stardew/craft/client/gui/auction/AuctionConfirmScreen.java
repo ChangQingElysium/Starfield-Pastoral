@@ -5,7 +5,7 @@ import com.stardew.craft.network.payload.LewisConfirmResponsePayload;
 import com.stardew.craft.network.payload.OpenLewisConfirmPayload;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 /** The two host decisions share auction materials and retain the server's confirmation protocol. */
 @SuppressWarnings("null")

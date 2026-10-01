@@ -64,7 +64,7 @@ public record FarmJoinListRequestPayload() implements CustomPacketPayload {
                 ));
             }
 
-            net.minecraftforge.network.PacketDistributor.sendToPlayer(player,
+            com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
                     new FarmListSyncPayload(entries, "farm_join"));
         });
     }

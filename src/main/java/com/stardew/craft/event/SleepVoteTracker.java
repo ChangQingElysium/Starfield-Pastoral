@@ -13,7 +13,7 @@ import java.util.*;
 
 import com.stardew.craft.network.payload.SleepVoteUpdatePayload;
 import com.stardew.craft.player.PlayerStardewDataAPI;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * 多人睡眠投票追踪器。

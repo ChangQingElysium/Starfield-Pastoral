@@ -155,7 +155,7 @@ public record FarmSelectionSubmitPayload(
             if (com.stardew.craft.farm.FarmJoinManager.hasPending(player.getUUID())) {
                 if (!payload.forceCancelPending()) {
                     com.stardew.craft.farm.FarmJoinManager.syncPendingState(player, true);
-                    net.minecraftforge.network.PacketDistributor.sendToPlayer(player,
+                    com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
                             new OpenFarmSelectionPayload());
                     player.sendSystemMessage(net.minecraft.network.chat.Component.translatable(
                             "stardewcraft.farm.join.confirm_cancel_before_create"));
@@ -231,7 +231,7 @@ public record FarmSelectionSubmitPayload(
                         invalidConfiguration.getMessage());
                 player.sendSystemMessage(net.minecraft.network.chat.Component.translatable(
                         "stardewcraft.farm_selection.invalid_configuration"));
-                net.minecraftforge.network.PacketDistributor.sendToPlayer(
+                com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
                         player, new OpenFarmSelectionPayload());
                 return;
             }

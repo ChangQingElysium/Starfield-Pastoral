@@ -24,7 +24,7 @@ import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -806,7 +806,7 @@ public final class FishingSessionManager {
 			com.stardew.craft.item.tool.FishingRodItem.setCastActive(off, false);
 		}
 		if (hadAny) {
-			net.minecraftforge.network.PacketDistributor.sendToPlayer(player, new com.stardew.craft.fishing.network.FishingRodCastStatePayload(useId(player), false));
+			com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player, new com.stardew.craft.fishing.network.FishingRodCastStatePayload(useId(player), false));
 		}
 	}
 
@@ -932,7 +932,7 @@ public final class FishingSessionManager {
 		pendingTreasureByPlayer.put(player.getUUID(), new PendingTreasureChest(chestId, loot, session.isGoldenTreasure()));
 
 		// 发送开箱提示到客户端：客户端只播放动画并在结束后请求服务端打开容器。
-		net.minecraftforge.network.PacketDistributor.sendToPlayer(
+		com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
 				player, 
 				new com.stardew.craft.network.payload.OpenTreasureChestPayload(session.id(), chestId, session.isGoldenTreasure())
 		);

@@ -168,7 +168,7 @@ public class MineLadderBlock extends Block {
         boolean isShaft = state.getValue(SHAFT);
         if (isShaft) {
             // 竖井：发送确认对话包到客户端
-            net.minecraftforge.network.PacketDistributor.sendToPlayer(
+            com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
                 serverPlayer,
                 new com.stardew.craft.network.ShaftConfirmPacket(pos)
             );
@@ -245,7 +245,7 @@ public class MineLadderBlock extends Block {
                     .grantTemporaryQiCaveRewardIfEligible(serverPlayer, nextFloor);
         }
 
-        net.minecraftforge.network.PacketDistributor.sendToPlayer(
+        com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
             serverPlayer, new MiningFloorSyncPacket(nextFloor));
 
         final int floor = nextFloor;
@@ -306,7 +306,7 @@ public class MineLadderBlock extends Block {
         com.stardew.craft.secretnote.SecretNoteStoryTriggerService
                 .grantTemporaryQiCaveRewardIfEligible(serverPlayer, targetFloor);
 
-        net.minecraftforge.network.PacketDistributor.sendToPlayer(
+        com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
                 serverPlayer, new MiningFloorSyncPacket(targetFloor));
 
         // SD 体力伤害：levelsDown × 3

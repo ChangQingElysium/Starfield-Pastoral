@@ -95,7 +95,7 @@ public record MineExitActionPayload(Action action) implements CustomPacketPayloa
 		playerData.setCurrentFloor(targetFloor);
 		MiningDataManager.savePlayerData(serverPlayer, playerData);
 
-		net.minecraftforge.network.PacketDistributor.sendToPlayer(
+		com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
 			serverPlayer,
 			new com.stardew.craft.network.MiningFloorSyncPacket(targetFloor)
 		);
@@ -120,7 +120,7 @@ public record MineExitActionPayload(Action action) implements CustomPacketPayloa
 		playerData.setCurrentFloor(0);
 		MiningDataManager.savePlayerData(serverPlayer, playerData);
 
-		net.minecraftforge.network.PacketDistributor.sendToPlayer(
+		com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
 			serverPlayer,
 			new com.stardew.craft.network.MiningFloorSyncPacket(0)
 		);

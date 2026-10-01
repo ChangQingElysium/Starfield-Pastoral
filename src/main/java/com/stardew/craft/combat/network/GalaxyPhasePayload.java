@@ -7,7 +7,7 @@ import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.Custo
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /** Exact starfall execution or completed teleport endpoints; never a schedule of future hits. */

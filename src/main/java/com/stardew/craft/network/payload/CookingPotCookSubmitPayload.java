@@ -114,7 +114,7 @@ public record CookingPotCookSubmitPayload(String recipeItemId, int craftCount) i
             }
             PlayerStardewDataAPI.recordRecipeCrafted(player, storageId, count);
 
-            net.minecraftforge.network.PacketDistributor.sendToPlayer(player, CookingPotIngredientAvailabilityPayload.fromPlayer(player));
+            com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player, CookingPotIngredientAvailabilityPayload.fromPlayer(player));
         });
     }
 

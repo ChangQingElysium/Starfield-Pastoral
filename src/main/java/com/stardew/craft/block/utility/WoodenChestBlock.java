@@ -133,7 +133,7 @@ public class WoodenChestBlock extends Block implements EntityBlock {
 
         // 打开箱子时清除初始物资 hint（如果有的话）
         if (player instanceof net.minecraft.server.level.ServerPlayer sp) {
-            net.minecraftforge.network.PacketDistributor.sendToPlayer(sp,
+            com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(sp,
                     new com.stardew.craft.network.payload.StarterChestHintPayload(pos, false));
         }
 

@@ -85,7 +85,7 @@ public record FurnitureCataloguePurchasePayload(
 
             // Send result back to client
             int money = com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player);
-            net.minecraftforge.network.PacketDistributor.sendToPlayer(player,
+            com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
                 new FurnitureCatalogueResultPayload(true, money, payload.itemId(), qty));
         });
     }

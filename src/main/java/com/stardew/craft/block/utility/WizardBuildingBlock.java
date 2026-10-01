@@ -231,7 +231,7 @@ public final class WizardBuildingBlock extends MapDecorStaticBlock implements En
 
         if (kind.isGoldClock()) {
             if (level.getBlockEntity(mainPos) instanceof WizardBuildingBlockEntity clock) {
-                net.minecraftforge.network.PacketDistributor.sendToPlayer(serverPlayer,
+                com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(serverPlayer,
                         new com.stardew.craft.network.payload.OpenGoldClockQuestionPayload(
                                 mainPos, clock.isGoldClockEnabled()));
             }

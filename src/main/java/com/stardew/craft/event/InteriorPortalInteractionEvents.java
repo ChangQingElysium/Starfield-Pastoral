@@ -24,7 +24,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
@@ -463,7 +463,7 @@ public class InteriorPortalInteractionEvents {
             com.stardew.craft.museum.MuseumDonationData museumData =
                 com.stardew.craft.museum.MuseumDonationData.get(player.serverLevel());
             if (museumData.isDonationModeActive(player.getUUID())) {
-                net.minecraftforge.network.PacketDistributor.sendToPlayer(player,
+                com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
                     new com.stardew.craft.network.payload.OpenNpcDialogueScreenPayload(
                         "gunther",
                         "stardewcraft.npc.gunther.donation_exit_blocked",
@@ -643,7 +643,7 @@ public class InteriorPortalInteractionEvents {
                 player,
                 com.stardew.craft.farm.FarmJoinManager.hasPending(player.getUUID())
             );
-            net.minecraftforge.network.PacketDistributor.sendToPlayer(player,
+            com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
                     new com.stardew.craft.network.payload.OpenFarmSelectionPayload());
             StardewCraft.LOGGER.info("[FARM_ENTRY] {} has no farm, opening selection screen",
                     player.getName().getString());
@@ -764,7 +764,7 @@ public class InteriorPortalInteractionEvents {
             pData.setCurrentFloor(0);
             com.stardew.craft.mining.MiningDataManager.savePlayerData(player, pData);
         }
-        net.minecraftforge.network.PacketDistributor.sendToPlayer(
+        com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
             player,
             new com.stardew.craft.network.MiningFloorSyncPacket(0)
         );

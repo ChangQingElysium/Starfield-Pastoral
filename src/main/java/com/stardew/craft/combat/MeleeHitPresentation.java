@@ -4,7 +4,7 @@ import com.stardew.craft.combat.network.MeleeImpactPayload;
 import com.stardew.craft.combat.network.MeleeImpactPayload.Kind;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 final class MeleeHitPresentation {
     private MeleeHitPresentation() {}

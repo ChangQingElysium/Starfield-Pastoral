@@ -106,7 +106,7 @@ public record ShopSellPayload(
     private static void sendResult(net.minecraft.server.level.ServerPlayer player, boolean success,
                                    int slot, int qty, int earned) {
         int money = com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player);
-        net.minecraftforge.network.PacketDistributor.sendToPlayer(player,
+        com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
             new ShopSellResultPayload(success, money, slot, qty, earned));
     }
 }

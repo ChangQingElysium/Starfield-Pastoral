@@ -11,7 +11,7 @@ import com.stardew.craft.combat.skill.runtime.WeaponSkillRuntime;
 import com.stardew.craft.effect.ModMobEffects;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * Server-authoritative lifecycle for Dwarf Sword's original Ley Fortress.

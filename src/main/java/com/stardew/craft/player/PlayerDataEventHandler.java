@@ -39,7 +39,7 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.event.tick.ServerTickEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.event.tick.PlayerTickEvent;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * 玩家数据事件处理器
@@ -107,7 +107,7 @@ public class PlayerDataEventHandler {
             // 旧存档没有性别/称呼/喜好字段：登录后单独补录，不伪造默认值。
             if (!data.isProfileComplete()
                     && com.stardew.craft.farm.FarmInstanceRegistry.get().getFarmForPlayer(player.getUUID()) != null) {
-                net.minecraftforge.network.PacketDistributor.sendToPlayer(player,
+                com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
                         new com.stardew.craft.network.payload.OpenPlayerProfileSetupPayload());
             }
             CosmeticAppearanceSync.syncAllTo(player);
@@ -130,7 +130,7 @@ public class PlayerDataEventHandler {
                         .enqueueAtNightSettlement(player);
                 com.stardew.craft.time.StardewTimePauseService
                         .beginOvernightSettlement(player);
-                net.minecraftforge.network.PacketDistributor.sendToPlayer(
+                com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
                         player, pendingOvernight);
             }
 
@@ -140,7 +140,7 @@ public class PlayerDataEventHandler {
             // 等剧情前置在真实进度很深的老存档上评估失败。
             {
                 com.stardew.craft.time.StardewTimeManager tmForSync = com.stardew.craft.time.StardewTimeManager.get();
-                net.minecraftforge.network.PacketDistributor.sendToPlayer(
+                com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
                     player,
                     com.stardew.craft.network.TimeSyncPacket.fromTimeManager(tmForSync));
             }
@@ -194,7 +194,7 @@ public class PlayerDataEventHandler {
 
             // 同步任务日志到客户端
             com.stardew.craft.quest.QuestManager qm = data.getQuestManager();
-            net.minecraftforge.network.PacketDistributor.sendToPlayer(player,
+            com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
                 com.stardew.craft.quest.network.QuestLogSyncPayload.fromQuests(
                     qm.getQuestLog(), qm.getBillboardQuestsDone(), qm.getDailyQuestCompletedDays()));
             com.stardew.craft.specialorder.SpecialOrderManager.syncState(player);

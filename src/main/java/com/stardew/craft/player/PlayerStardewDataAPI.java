@@ -8,7 +8,7 @@ import com.stardew.craft.network.payload.SkillExperienceGainPayload;
 import com.stardew.craft.deco.DecorationType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.Collection;
 import java.util.Collections;

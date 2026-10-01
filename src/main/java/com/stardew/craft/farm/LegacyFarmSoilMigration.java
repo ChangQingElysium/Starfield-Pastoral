@@ -20,7 +20,7 @@ import net.minecraftforge.event.level.ChunkEvent;
 import net.minecraftforge.event.level.LevelEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.event.tick.LevelTickEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredHolder;
-import net.minecraftforge.registries.DeferredRegister;
+import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredRegister;
 import com.stardew.craft.port.net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 import java.util.ArrayList;
