@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "stardewcraft:dirt"
+    }
+  },
+  "result": {
+    "item": "stardewcraft:dirt_slab",
+    "count": 6
+  }
+}

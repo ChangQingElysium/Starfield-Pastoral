@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "group": "stardew_checkerboard_planks",
+  "key": {
+    "#": {
+      "item": "stardewcraft:mystic_tree_planks"
+    }
+  },
+  "pattern": [
+    "# ",
+    " #"
+  ],
+  "result": {
+    "item": "stardewcraft:mystic_tree_checkerboard_planks",
+    "count": 2
+  }
+}

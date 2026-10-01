@@ -163,7 +163,7 @@ public final class PrefabDefinitions {
 
     public static Template template(ServerLevel level, Tier tier) {
         return templates.computeIfAbsent(tier.structure(), id -> {
-            ResourceLocation path = id.withPath("structure/" + id.getPath() + ".nbt");
+            ResourceLocation path = id.withPath("structures/" + id.getPath() + ".nbt");
             try (var input = level.getServer().getResourceManager().getResourceOrThrow(path).open()) {
                 CompoundTag tag = NbtIo.readCompressed(input, NbtAccounter.create(16_000_000L));
                 ListTag sizeTag = tag.getList("size", 3);

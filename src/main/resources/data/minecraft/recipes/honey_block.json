@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "#": {
+      "tag": "stardewcraft:vanilla_compat/honey_items"
+    }
+  },
+  "pattern": [
+    "##",
+    "##"
+  ],
+  "result": {
+    "item": "minecraft:honey_block"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "group": "stardew_log_stairs",
+  "key": {
+    "#": {
+      "item": "stardewcraft:mystic_tree_log"
+    }
+  },
+  "pattern": [
+    "#  ",
+    "## ",
+    "###"
+  ],
+  "result": {
+    "item": "stardewcraft:mystic_tree_log_stairs",
+    "count": 4
+  }
+}

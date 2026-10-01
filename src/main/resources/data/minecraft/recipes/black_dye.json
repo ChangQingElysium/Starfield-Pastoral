@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "black_dye",
+  "ingredients": [
+    {
+      "tag": "stardewcraft:vanilla_compat/ink_sacs"
+    }
+  ],
+  "result": {
+    "item": "minecraft:black_dye"
+  }
+}

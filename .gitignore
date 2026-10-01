@@ -128,6 +128,7 @@ scripts/*
 !scripts/generate_farm_special_spawn_layouts.py
 !scripts/check_model_atlas.py
 !scripts/setup_valley_pregen.ps1
+!scripts/port/
 !scripts/extract_ui_atlas_slices.sh
 !scripts/render_festival_actor_map.py
 !scripts/render_sam_schedule_points.py

@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    {
+      "item": "stardewcraft:wool"
+    }
+  ],
+  "result": {
+    "item": "minecraft:white_wool"
+  }
+}

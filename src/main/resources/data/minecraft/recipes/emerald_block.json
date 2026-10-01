@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "#": {
+      "tag": "stardewcraft:vanilla_compat/emeralds"
+    }
+  },
+  "pattern": [
+    "###",
+    "###",
+    "###"
+  ],
+  "result": {
+    "item": "minecraft:emerald_block"
+  }
+}

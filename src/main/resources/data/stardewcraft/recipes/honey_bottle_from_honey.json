@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "stardewcraft:honey"
+    }
+  ],
+  "result": {
+    "item": "minecraft:honey_bottle"
+  }
+}

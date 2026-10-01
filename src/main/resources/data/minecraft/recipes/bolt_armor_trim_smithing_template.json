@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": {
+      "tag": "stardewcraft:vanilla_compat/diamonds"
+    },
+    "C": [
+      {
+        "item": "minecraft:copper_block"
+      },
+      {
+        "item": "minecraft:waxed_copper_block"
+      }
+    ],
+    "S": {
+      "item": "minecraft:bolt_armor_trim_smithing_template"
+    }
+  },
+  "pattern": [
+    "#S#",
+    "#C#",
+    "###"
+  ],
+  "result": {
+    "item": "minecraft:bolt_armor_trim_smithing_template",
+    "count": 2
+  }
+}

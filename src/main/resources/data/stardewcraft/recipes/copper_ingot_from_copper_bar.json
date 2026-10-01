@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "stardewcraft:copper_bar"
+    }
+  ],
+  "result": {
+    "item": "minecraft:copper_ingot"
+  }
+}

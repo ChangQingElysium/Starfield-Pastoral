@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "group": "stardew_fishscale_planks",
+  "key": {
+    "#": {
+      "item": "stardewcraft:mystic_tree_planks"
+    }
+  },
+  "pattern": [
+    "###"
+  ],
+  "result": {
+    "item": "stardewcraft:mystic_tree_fishscale_planks",
+    "count": 3
+  }
+}

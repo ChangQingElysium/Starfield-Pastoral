@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "G": {
+      "item": "minecraft:gold_nugget"
+    },
+    "C": {
+      "item": "minecraft:compass"
+    }
+  },
+  "pattern": [
+    " G ",
+    "GCG",
+    " G "
+  ],
+  "result": {
+    "item": "stardewcraft:wizard_tower_compass"
+  }
+}

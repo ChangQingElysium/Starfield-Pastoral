@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "bonemeal",
+  "ingredients": [
+    {
+      "tag": "stardewcraft:vanilla_compat/bones"
+    }
+  ],
+  "result": {
+    "item": "minecraft:bone_meal",
+    "count": 3
+  }
+}

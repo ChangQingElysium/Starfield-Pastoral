@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "stardewcraft:dark_grass_block"
+    }
+  },
+  "result": {
+    "item": "stardewcraft:dark_grass_slab",
+    "count": 6
+  }
+}

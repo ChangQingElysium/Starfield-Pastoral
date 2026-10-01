@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "group": "stardew_fishscale_planks",
+  "key": {
+    "#": {
+      "item": "stardewcraft:pine_planks"
+    }
+  },
+  "pattern": [
+    "###"
+  ],
+  "result": {
+    "item": "stardewcraft:pine_fishscale_planks",
+    "count": 3
+  }
+}

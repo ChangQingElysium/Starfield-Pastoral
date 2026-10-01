@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "group": "wooden_slab",
+  "key": {
+    "#": {
+      "item": "stardewcraft:mystic_tree_fishscale_planks"
+    }
+  },
+  "pattern": [
+    "###"
+  ],
+  "result": {
+    "item": "stardewcraft:mystic_tree_fishscale_planks_slab",
+    "count": 6
+  }
+}

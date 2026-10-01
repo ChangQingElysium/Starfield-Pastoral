@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "stardewcraft:town_paving"
+  },
+  "result": "stardewcraft:town_paving_stairs",
+  "count": 1
+}

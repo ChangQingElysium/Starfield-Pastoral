@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "O": {
+      "tag": "stardewcraft:vanilla_compat/slime_balls"
+    },
+    "~": {
+      "item": "minecraft:string"
+    }
+  },
+  "pattern": [
+    "~~ ",
+    "~O ",
+    "  ~"
+  ],
+  "result": {
+    "item": "minecraft:lead",
+    "count": 2
+  }
+}

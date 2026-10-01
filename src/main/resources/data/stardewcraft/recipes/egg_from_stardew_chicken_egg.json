@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "tag": "stardewcraft:vanilla_compat/chicken_eggs"
+    }
+  ],
+  "result": {
+    "item": "minecraft:egg"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "group": "wooden_slab",
+  "key": {
+    "#": {
+      "item": "stardewcraft:mahogany_planks"
+    }
+  },
+  "pattern": [
+    "###"
+  ],
+  "result": {
+    "item": "stardewcraft:mahogany_planks_slab",
+    "count": 6
+  }
+}

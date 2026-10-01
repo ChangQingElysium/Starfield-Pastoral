@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "#": {
+      "item": "minecraft:copper_ingot"
+    },
+    "I": {
+      "item": "minecraft:stick"
+    },
+    "X": {
+      "tag": "stardewcraft:vanilla_compat/feathers"
+    }
+  },
+  "pattern": [
+    "X",
+    "#",
+    "I"
+  ],
+  "result": {
+    "item": "minecraft:brush"
+  }
+}

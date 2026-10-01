@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "minecraft:book"
+    },
+    {
+      "tag": "stardewcraft:vanilla_compat/ink_sacs"
+    },
+    {
+      "tag": "stardewcraft:vanilla_compat/feathers"
+    }
+  ],
+  "result": {
+    "item": "minecraft:writable_book"
+  }
+}

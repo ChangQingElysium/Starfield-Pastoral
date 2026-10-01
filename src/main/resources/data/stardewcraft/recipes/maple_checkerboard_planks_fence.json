@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "wooden_fence",
+  "key": {
+    "#": {
+      "item": "minecraft:stick"
+    },
+    "W": {
+      "item": "stardewcraft:maple_checkerboard_planks"
+    }
+  },
+  "pattern": [
+    "W#W",
+    "W#W"
+  ],
+  "result": {
+    "item": "stardewcraft:maple_checkerboard_planks_fence",
+    "count": 3
+  }
+}

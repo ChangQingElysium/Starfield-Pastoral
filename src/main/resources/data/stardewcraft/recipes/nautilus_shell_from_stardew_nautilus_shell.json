@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "stardewcraft:nautilus_shell"
+    }
+  ],
+  "result": {
+    "item": "minecraft:nautilus_shell"
+  }
+}

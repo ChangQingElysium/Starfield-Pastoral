@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "group": "stardew_log_stairs",
+  "key": {
+    "#": {
+      "item": "stardewcraft:pine_log"
+    }
+  },
+  "pattern": [
+    "#  ",
+    "## ",
+    "###"
+  ],
+  "result": {
+    "item": "stardewcraft:pine_log_stairs",
+    "count": 4
+  }
+}

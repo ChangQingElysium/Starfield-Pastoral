@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "group": "wooden_stairs",
+  "key": {
+    "#": {
+      "item": "stardewcraft:maple_fishscale_planks"
+    }
+  },
+  "pattern": [
+    "#  ",
+    "## ",
+    "###"
+  ],
+  "result": {
+    "item": "stardewcraft:maple_fishscale_planks_stairs",
+    "count": 4
+  }
+}

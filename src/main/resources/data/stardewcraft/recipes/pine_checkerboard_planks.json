@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "group": "stardew_checkerboard_planks",
+  "key": {
+    "#": {
+      "item": "stardewcraft:pine_planks"
+    }
+  },
+  "pattern": [
+    "# ",
+    " #"
+  ],
+  "result": {
+    "item": "stardewcraft:pine_checkerboard_planks",
+    "count": 2
+  }
+}

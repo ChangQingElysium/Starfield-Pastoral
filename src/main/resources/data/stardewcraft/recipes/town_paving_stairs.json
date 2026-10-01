@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "#": {
+      "item": "stardewcraft:town_paving"
+    }
+  },
+  "pattern": [
+    "#  ",
+    "## ",
+    "###"
+  ],
+  "result": {
+    "item": "stardewcraft:town_paving_stairs",
+    "count": 4
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "stardewcraft:squid_ink"
+    }
+  ],
+  "result": {
+    "item": "minecraft:ink_sac"
+  }
+}

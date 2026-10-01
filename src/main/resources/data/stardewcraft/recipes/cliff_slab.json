@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "stardewcraft:cliff"
+    }
+  },
+  "result": {
+    "item": "stardewcraft:cliff_slab",
+    "count": 6
+  }
+}

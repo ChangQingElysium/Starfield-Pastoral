@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": {
+      "tag": "stardewcraft:vanilla_compat/diamonds"
+    },
+    "C": {
+      "item": "minecraft:cobblestone"
+    },
+    "S": {
+      "item": "minecraft:coast_armor_trim_smithing_template"
+    }
+  },
+  "pattern": [
+    "#S#",
+    "#C#",
+    "###"
+  ],
+  "result": {
+    "item": "minecraft:coast_armor_trim_smithing_template",
+    "count": 2
+  }
+}

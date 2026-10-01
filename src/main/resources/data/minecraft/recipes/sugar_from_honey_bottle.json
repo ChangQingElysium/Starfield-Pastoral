@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "sugar",
+  "ingredients": [
+    {
+      "tag": "stardewcraft:vanilla_compat/honey_items"
+    }
+  ],
+  "result": {
+    "item": "minecraft:sugar",
+    "count": 3
+  }
+}

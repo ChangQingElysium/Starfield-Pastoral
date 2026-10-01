@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "#": {
+      "tag": "stardewcraft:vanilla_compat/slime_balls"
+    }
+  },
+  "pattern": [
+    "###",
+    "###",
+    "###"
+  ],
+  "result": {
+    "item": "minecraft:slime_block"
+  }
+}
