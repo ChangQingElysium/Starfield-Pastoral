@@ -210,7 +210,7 @@ public class JadePlugin implements IWailaPlugin {
 
         @Override
         public ResourceLocation getUid() {
-            return ResourceLocation.fromNamespaceAndPath("stardewcraft", "tree_sapling_info");
+            return new ResourceLocation("stardewcraft", "tree_sapling_info");
         }
     }
 
@@ -553,7 +553,7 @@ public class JadePlugin implements IWailaPlugin {
 
         @Override
         public ResourceLocation getUid() {
-            return ResourceLocation.fromNamespaceAndPath("stardewcraft", "crop_info");
+            return new ResourceLocation("stardewcraft", "crop_info");
         }
     }
 }

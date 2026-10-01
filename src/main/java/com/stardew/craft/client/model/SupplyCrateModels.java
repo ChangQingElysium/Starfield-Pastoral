@@ -4,10 +4,10 @@ import com.stardew.craft.StardewCraft;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ModelEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.ModelEvent;
 
 /** Native board models and their rotated centers, exported from the approved crate assets. */
 @EventBusSubscriber(modid = StardewCraft.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
@@ -23,7 +23,7 @@ public final class SupplyCrateModels {
     public static Vec3 center(int variant, int part) { return CENTERS[variant][part]; }
 
     public static ModelResourceLocation id(int variant, int part) {
-        return ModelResourceLocation.standalone(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,
+        return ModelResourceLocation.standalone(new ResourceLocation(StardewCraft.MODID,
                 "block/farm_debris/beach_supply_crates/" + MODELS[variant] + "/" + PARTS[part]));
     }
 

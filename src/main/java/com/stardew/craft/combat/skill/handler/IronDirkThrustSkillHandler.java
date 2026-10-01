@@ -120,7 +120,7 @@ public final class IronDirkThrustSkillHandler implements RuntimeWeaponSkillHandl
             );
             teleportPlayer(context.player(), behindPosition);
             faceTarget(context.player(), target);
-            net.neoforged.neoforge.network.PacketDistributor.sendToPlayersTrackingEntityAndSelf(context.player(),
+            net.minecraftforge.network.PacketDistributor.sendToPlayersTrackingEntityAndSelf(context.player(),
                     new com.stardew.craft.combat.network.IronWindMovePayload(context.player().getId(), context.nowTick(),
                             com.stardew.craft.combat.network.IronWindMovePayload.Mode.IRON_BLINK, visualOrigin, context.player().position()));
         });

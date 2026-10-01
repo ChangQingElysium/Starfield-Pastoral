@@ -22,8 +22,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.registries.DeferredHolder;
+import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredHolder;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -473,6 +473,6 @@ public final class MasteryTrackerMenuScreen extends Screen {
     }
 
     private static ResourceLocation mastery(String name) {
-        return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/mastery/" + name + ".png");
+        return new ResourceLocation(StardewCraft.MODID, "textures/gui/mastery/" + name + ".png");
     }
 }

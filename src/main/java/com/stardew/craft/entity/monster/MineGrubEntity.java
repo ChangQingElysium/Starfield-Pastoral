@@ -34,7 +34,7 @@ public final class MineGrubEntity extends StardewMonsterEntity {
     public static AttributeSupplier.Builder createAttributes(){return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,20)
             .add(Attributes.ATTACK_DAMAGE,4).add(Attributes.MOVEMENT_SPEED,.25).add(Attributes.FOLLOW_RANGE,64).add(Attributes.STEP_HEIGHT,.5);}
     @Override protected void registerGoals(){}
-    @Override protected ResourceLocation definitionId(){return ResourceLocation.parse("stardewcraft:grub");}
+    @Override protected ResourceLocation definitionId(){return new ResourceLocation("stardewcraft:grub");}
     @Override protected void configureSpawn(MonsterDefinition d,MonsterSpawnContext c){var r=MonsterStatResolver.base(d,c,random);setInitialHealth(r.initialHealth());replaceCombatStats(r.combat());facing=random.nextInt(4);face(facing);lastX=getX();lastZ=getZ();}
     @Override protected void defineSynchedData(SynchedEntityData.Builder b){super.defineSynchedData(b);b.define(MOVING,false);b.define(FORM_FRAME,16);b.define(HIT,-100L);}
     public boolean moving(){return entityData.get(MOVING);}

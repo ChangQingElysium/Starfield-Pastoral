@@ -493,7 +493,7 @@ public final class FishingDataManager {
 		if (chosen == null) {
 			// SDV: tutorial first-catch always falls back to Sunfish ((O)145).
 			if (isTutorialCatch) {
-				Item sunfish = BuiltInRegistries.ITEM.get(ResourceLocation.parse("stardewcraft:sunfish"));
+				Item sunfish = BuiltInRegistries.ITEM.get(new ResourceLocation("stardewcraft:sunfish"));
 				if (sunfish != null && sunfish != Items.AIR) {
 					return Optional.of(new FishSelection(new ItemStack(sunfish), 30, 0, 5, 15, false));
 				}
@@ -508,7 +508,7 @@ public final class FishingDataManager {
 		}
 		Item item;
 		try {
-			item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(resolvedItemId));
+			item = BuiltInRegistries.ITEM.get(new ResourceLocation(resolvedItemId));
 		} catch (Exception ex) {
 			item = Items.COD;
 		}
@@ -915,7 +915,7 @@ public final class FishingDataManager {
 	}
 
 	private static boolean hasBiomeId(Holder<Biome> biomeHolder, String biomeId) {
-		ResourceLocation expected = ResourceLocation.parse(biomeId);
+		ResourceLocation expected = new ResourceLocation(biomeId);
 		return biomeHolder.unwrapKey().map(key -> key.location().equals(expected)).orElse(false);
 	}
 
@@ -935,7 +935,7 @@ public final class FishingDataManager {
 		return level.registryAccess().registryOrThrow(Registries.BIOME).getHolderOrThrow(
 				net.minecraft.resources.ResourceKey.create(
 						Registries.BIOME,
-						ResourceLocation.fromNamespaceAndPath("stardewcraft", biomePath)));
+						new ResourceLocation("stardewcraft", biomePath)));
 	}
 
 	private String resolveVanillaFishAreaId(Holder<Biome> biomeHolder) {
@@ -971,7 +971,7 @@ public final class FishingDataManager {
 
 	@SuppressWarnings("null")
 	private static boolean hasBiomeTag(Holder<Biome> biomeHolder, String tagId) {
-		ResourceLocation id = ResourceLocation.parse(tagId);
+		ResourceLocation id = new ResourceLocation(tagId);
 		TagKey<Biome> tag = TagKey.create(Registries.BIOME, id);
 		return biomeHolder.is(tag);
 	}
@@ -1328,11 +1328,11 @@ public final class FishingDataManager {
 		};
 		String pick = ids[random.nextInt(ids.length)];
 		try {
-			Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(pick));
+			Item item = BuiltInRegistries.ITEM.get(new ResourceLocation(pick));
 			if (item != null && item != Items.AIR) {
 				return new ItemStack(item);
 			}
-			Item trash = BuiltInRegistries.ITEM.get(ResourceLocation.parse("stardewcraft:trash"));
+			Item trash = BuiltInRegistries.ITEM.get(new ResourceLocation("stardewcraft:trash"));
 			return new ItemStack(trash);
 		} catch (Exception e) {
 			StardewCraft.LOGGER.error("Failed to get trash item", e);

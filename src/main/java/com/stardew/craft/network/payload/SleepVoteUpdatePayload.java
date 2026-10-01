@@ -3,10 +3,10 @@ package com.stardew.craft.network.payload;
 import com.stardew.craft.StardewCraft;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * 服务端 → 客户端：广播睡眠投票进度。
@@ -16,7 +16,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 public record SleepVoteUpdatePayload(int votedCount, int requiredCount) implements CustomPacketPayload {
     @SuppressWarnings("null")
     public static final Type<SleepVoteUpdatePayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "sleep_vote_update"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "sleep_vote_update"));
 
     @SuppressWarnings("null")
     public static final StreamCodec<FriendlyByteBuf, SleepVoteUpdatePayload> STREAM_CODEC = StreamCodec.of(

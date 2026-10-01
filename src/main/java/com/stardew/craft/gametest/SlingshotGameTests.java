@@ -10,8 +10,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.*;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.gametest.*;
+import net.minecraftforge.common.util.FakePlayerFactory;
+import net.minecraftforge.gametest.*;
 import java.util.UUID;
 
 @GameTestHolder("stardewcraft_slingshot")
@@ -167,7 +167,7 @@ public final class SlingshotGameTests {
     public static void projectileKeepsItemDamageAndSpinThroughSave(GameTestHelper h) {
         var player=FakePlayerFactory.get(h.getLevel(),new GameProfile(UUID.randomUUID(),"Slingshot save"));
         var ammo=new ItemStack(ModItems.IRIDIUM_ORE.get());
-        ammo.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME,net.minecraft.network.chat.Component.literal("snapshot"));
+        ammo.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_NAME,net.minecraft.network.chat.Component.literal("snapshot"));
         var shot=new SlingshotProjectile(h.getLevel(),player,new ItemStack(ModItems.SLINGSHOT.get()),ammo,87);
         var tag=new net.minecraft.nbt.CompoundTag();shot.addAdditionalSaveData(tag);
         var loaded=new SlingshotProjectile(com.stardew.craft.entity.ModEntities.SLINGSHOT_PROJECTILE.get(),h.getLevel());

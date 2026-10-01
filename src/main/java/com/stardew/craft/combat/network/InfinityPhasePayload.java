@@ -2,19 +2,19 @@ package com.stardew.craft.combat.network;
 
 import com.stardew.craft.StardewCraft;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /** Cast identity keeps late cancellation from removing a newer field. */
 public record InfinityPhasePayload(int casterId, long castTick, long tick, Phase phase, Vec3 from, Vec3 to,
                                    int duration, boolean evolved) implements CustomPacketPayload {
     public enum Phase { EVOLVE, COLLAPSE, RELEASE, PULSE, FINISH, END_EVOLVE, END_COLLAPSE, LEAP }
-    public static final Type<InfinityPhasePayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "infinity_phase"));
+    public static final Type<InfinityPhasePayload> TYPE = new Type<>(new ResourceLocation(StardewCraft.MODID, "infinity_phase"));
     public static final StreamCodec<ByteBuf, InfinityPhasePayload> STREAM_CODEC = new StreamCodec<>() {
         @Override public InfinityPhasePayload decode(ByteBuf b) {
             return new InfinityPhasePayload(b.readInt(), b.readLong(), b.readLong(), Phase.values()[b.readUnsignedByte()],

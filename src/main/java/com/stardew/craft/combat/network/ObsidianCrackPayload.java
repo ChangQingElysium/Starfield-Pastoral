@@ -2,16 +2,16 @@ package com.stardew.craft.combat.network;
 
 import com.stardew.craft.StardewCraft;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /** Phase packets share an exact release identity, including cancellation in the original dimension. */
 public record ObsidianCrackPayload(int casterId, long castTick, int phase, double x, double y, double z,
         float yaw, float length, int durationTicks) implements CustomPacketPayload {
     public static final int START = 0, PULSE = 1, END = 2;
-    public static final Type<ObsidianCrackPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "obsidian_crack"));
+    public static final Type<ObsidianCrackPayload> TYPE = new Type<>(new ResourceLocation(StardewCraft.MODID, "obsidian_crack"));
     public static final StreamCodec<ByteBuf, ObsidianCrackPayload> STREAM_CODEC = new StreamCodec<>() {
         @Override public ObsidianCrackPayload decode(ByteBuf b) {
             return new ObsidianCrackPayload(b.readInt(), b.readLong(), b.readUnsignedByte(), b.readDouble(), b.readDouble(), b.readDouble(), b.readFloat(), b.readFloat(), b.readInt());

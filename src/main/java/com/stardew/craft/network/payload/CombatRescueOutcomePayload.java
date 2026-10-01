@@ -2,14 +2,14 @@ package com.stardew.craft.network.payload;
 
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.player.PassOutService;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
-import net.neoforged.neoforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.List;
 
@@ -21,7 +21,7 @@ public record CombatRescueOutcomePayload(
         List<ItemStack> lostItems
 ) implements CustomPacketPayload {
     public static final Type<CombatRescueOutcomePayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "combat_rescue_outcome"));
+            new ResourceLocation(StardewCraft.MODID, "combat_rescue_outcome"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, CombatRescueOutcomePayload> STREAM_CODEC =
             StreamCodec.composite(
@@ -31,7 +31,7 @@ public record CombatRescueOutcomePayload(
                             PassOutService.PassOutType::getId),
                     CombatRescueOutcomePayload::passOutType,
                     ByteBufCodecs.VAR_INT, CombatRescueOutcomePayload::moneyLost,
-                    ItemStack.OPTIONAL_STREAM_CODEC.apply(ByteBufCodecs.list()),
+                    com.stardew.craft.port.PortCodecs.OPTIONAL_ITEM_STACK.apply(ByteBufCodecs.list()),
                     CombatRescueOutcomePayload::lostItems,
                     CombatRescueOutcomePayload::new
             );
@@ -45,7 +45,7 @@ public record CombatRescueOutcomePayload(
         context.enqueueWork(() -> handleClient(payload));
     }
 
-    @net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+    @net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
     private static void handleClient(CombatRescueOutcomePayload payload) {
         com.stardew.craft.client.combat.CombatCollapseClientState.outcomeReady();
         net.minecraft.client.Minecraft.getInstance().setScreen(

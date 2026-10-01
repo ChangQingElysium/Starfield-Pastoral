@@ -13,13 +13,13 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 
 public final class FishingRodSlotsClientTooltipComponent implements ClientTooltipComponent {
-	private static final ResourceLocation BAIT_SLOT_TEX = ResourceLocation.fromNamespaceAndPath(
+	private static final ResourceLocation BAIT_SLOT_TEX = new ResourceLocation(
 			StardewCraft.MODID, "textures/gui/bait_slot.png"
 	);
-	private static final ResourceLocation TACKLE_SLOT_TEX = ResourceLocation.fromNamespaceAndPath(
+	private static final ResourceLocation TACKLE_SLOT_TEX = new ResourceLocation(
 			StardewCraft.MODID, "textures/gui/tackle_slot.png"
 	);
-	private static final ResourceLocation SLOT_EMPTY_TEX = ResourceLocation.fromNamespaceAndPath(
+	private static final ResourceLocation SLOT_EMPTY_TEX = new ResourceLocation(
 			StardewCraft.MODID, "textures/gui/fishing/slot_empty.png"
 	);
 

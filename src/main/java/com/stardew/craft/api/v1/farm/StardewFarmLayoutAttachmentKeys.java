@@ -26,7 +26,7 @@ public final class StardewFarmLayoutAttachmentKeys {
     }
 
     private static ResourceLocation core(String path) {
-        return ResourceLocation.fromNamespaceAndPath(
+        return new ResourceLocation(
                 StardewCraft.MODID, path);
     }
 }

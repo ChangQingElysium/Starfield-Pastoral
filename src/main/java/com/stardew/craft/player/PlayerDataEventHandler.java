@@ -32,14 +32,14 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.server.ServerStoppingEvent;
-import net.neoforged.neoforge.event.tick.ServerTickEvent;
-import net.neoforged.neoforge.event.tick.PlayerTickEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.server.ServerStoppingEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.event.tick.ServerTickEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.minecraftforge.network.PacketDistributor;
 
 /**
  * 玩家数据事件处理器
@@ -107,7 +107,7 @@ public class PlayerDataEventHandler {
             // 旧存档没有性别/称呼/喜好字段：登录后单独补录，不伪造默认值。
             if (!data.isProfileComplete()
                     && com.stardew.craft.farm.FarmInstanceRegistry.get().getFarmForPlayer(player.getUUID()) != null) {
-                net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
+                net.minecraftforge.network.PacketDistributor.sendToPlayer(player,
                         new com.stardew.craft.network.payload.OpenPlayerProfileSetupPayload());
             }
             CosmeticAppearanceSync.syncAllTo(player);
@@ -130,7 +130,7 @@ public class PlayerDataEventHandler {
                         .enqueueAtNightSettlement(player);
                 com.stardew.craft.time.StardewTimePauseService
                         .beginOvernightSettlement(player);
-                net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
+                net.minecraftforge.network.PacketDistributor.sendToPlayer(
                         player, pendingOvernight);
             }
 
@@ -140,7 +140,7 @@ public class PlayerDataEventHandler {
             // 等剧情前置在真实进度很深的老存档上评估失败。
             {
                 com.stardew.craft.time.StardewTimeManager tmForSync = com.stardew.craft.time.StardewTimeManager.get();
-                net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
+                net.minecraftforge.network.PacketDistributor.sendToPlayer(
                     player,
                     com.stardew.craft.network.TimeSyncPacket.fromTimeManager(tmForSync));
             }
@@ -194,7 +194,7 @@ public class PlayerDataEventHandler {
 
             // 同步任务日志到客户端
             com.stardew.craft.quest.QuestManager qm = data.getQuestManager();
-            net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
+            net.minecraftforge.network.PacketDistributor.sendToPlayer(player,
                 com.stardew.craft.quest.network.QuestLogSyncPayload.fromQuests(
                     qm.getQuestLog(), qm.getBillboardQuestsDone(), qm.getDailyQuestCompletedDays()));
             com.stardew.craft.specialorder.SpecialOrderManager.syncState(player);
@@ -412,7 +412,7 @@ public class PlayerDataEventHandler {
      * 玩家死亡时的处理
      */
     @SubscribeEvent
-    public static void onPlayerDeath(net.neoforged.neoforge.event.entity.living.LivingDeathEvent event) {
+    public static void onPlayerDeath(net.minecraftforge.event.entity.living.LivingDeathEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             // 星露谷维度：不走 MC 原版死亡（后续要接“晕倒/结算”流程）。
             if (player.level().dimension() == ModDimensions.STARDEW_VALLEY
@@ -472,7 +472,7 @@ public class PlayerDataEventHandler {
      * 星露谷维度：拦截原版受伤，并映射到星露谷生命值。
      */
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void onPlayerHurt(net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent event) {
+    public static void onPlayerHurt(com.stardew.craft.port.net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
         }

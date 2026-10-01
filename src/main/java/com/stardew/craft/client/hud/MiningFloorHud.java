@@ -11,10 +11,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderGuiEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.RenderGuiEvent;
 
 /**
  * 矿井层数显示 HUD - 显示在左上角
@@ -23,7 +23,7 @@ import net.neoforged.neoforge.client.event.RenderGuiEvent;
 public class MiningFloorHud {
     
     // empty_slot 背景图（16x16）
-    private static final ResourceLocation EMPTY_SLOT = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation EMPTY_SLOT = new ResourceLocation(
         StardewCraft.MODID, "textures/gui/jei/empty_slot.png"
     );
     private static final int SLOT_SIZE = 32;

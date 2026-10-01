@@ -2,7 +2,7 @@ package com.stardew.craft.festival;
 
 import com.stardew.craft.network.payload.OpenFestivalConfirmPayload;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.Collection;
 import java.util.EnumMap;

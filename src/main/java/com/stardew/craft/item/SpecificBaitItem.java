@@ -3,7 +3,7 @@ package com.stardew.craft.item;
 import com.stardew.craft.item.artisan.PreservesIngredientDataManager;
 import com.stardew.craft.item.catalog.StardewItemCatalog;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.component.DataComponents;
+import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -11,8 +11,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.component.CustomModelData;
-import net.minecraft.world.item.component.CustomData;
+import com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData;
+import com.stardew.craft.port.net.minecraft.world.item.component.CustomData;
 
 import java.util.List;
 
@@ -74,7 +74,7 @@ public class SpecificBaitItem extends Item implements IStardewItem {
         }
 
         try {
-            ResourceLocation fishId = ResourceLocation.parse(fishIdRaw);
+            ResourceLocation fishId = new ResourceLocation(fishIdRaw);
             return PreservesIngredientDataManager.getData(fishId)
                     .map(PreservesIngredientDataManager.IngredientData::getColorRgb)
                     .orElse(-1);
@@ -126,7 +126,7 @@ public class SpecificBaitItem extends Item implements IStardewItem {
             return ItemStack.EMPTY;
         }
         try {
-            ResourceLocation fishId = ResourceLocation.parse(raw);
+            ResourceLocation fishId = new ResourceLocation(raw);
             Item item = BuiltInRegistries.ITEM.get(fishId);
             ItemStack fish = new ItemStack(item);
             return fish.isEmpty() ? ItemStack.EMPTY : fish;

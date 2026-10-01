@@ -140,7 +140,7 @@ public final class PreservesIngredientDataManager {
 
     @SuppressWarnings("null")
     private static void applyVanillaOverrides(Map<String, IngredientData> loaded, ResourceManager resourceManager) {
-        ResourceLocation resourceId = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "preserves/vanilla_objects.json");
+        ResourceLocation resourceId = new ResourceLocation(StardewCraft.MODID, "preserves/vanilla_objects.json");
         resourceManager.getResource(resourceId).ifPresent(resource -> {
             try (var reader = resource.openAsReader()) {
                 JsonObject root = GSON.fromJson(reader, JsonObject.class);

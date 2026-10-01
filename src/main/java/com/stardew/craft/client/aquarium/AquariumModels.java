@@ -13,10 +13,10 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import org.joml.Matrix3f;
 import org.joml.Vector3f;
 import java.util.Map;
@@ -32,7 +32,7 @@ public final class AquariumModels {
             resources.listResources("aquarium", id -> id.getPath().endsWith(".json")).forEach((id, resource) -> {
                 try (var reader = resource.openAsReader()) {
                     var data = new Gson().fromJson(reader, NativeNpcModel.class);
-                    var texture = ResourceLocation.parse(data.texture());
+                    var texture = new ResourceLocation(data.texture());
                     resources.getResourceOrThrow(texture);
                     if (data.version() != 1 || data.quads().isEmpty()) throw new IllegalStateException("Invalid aquarium geometry");
                     String name = id.getPath().substring(9, id.getPath().length() - 5);

@@ -8,7 +8,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
-import net.neoforged.neoforge.client.event.ModelEvent;
+import net.minecraftforge.client.event.ModelEvent;
 
 /** Equal-rank soil families meet halfway, retaining the recipient's fertilizer. */
 final class FarmlandFamilyModels {
@@ -16,7 +16,7 @@ final class FarmlandFamilyModels {
     private FarmlandFamilyModels() {}
 
     private static ModelResourceLocation id(int family, int season, int wet) {
-        return new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,
+        return new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID,
                 "block/terrain/farmland_family_edges/" + family + "/" + SEASONS[season] + (wet == 1 ? "_wet" : "_dry")), "standalone");
     }
 

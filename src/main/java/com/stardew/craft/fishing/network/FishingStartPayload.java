@@ -2,11 +2,11 @@ package com.stardew.craft.fishing.network;
 
 import com.stardew.craft.StardewCraft;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
@@ -14,7 +14,7 @@ import java.util.UUID;
 public record FishingStartPayload(UUID sessionId, int difficulty, int motionTypeId, int durationTicks) implements CustomPacketPayload {
 	@SuppressWarnings("null")
 	public static final Type<FishingStartPayload> TYPE = new Type<>(
-			ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "fishing_start")
+			new ResourceLocation(StardewCraft.MODID, "fishing_start")
 	);
 
 	private static final StreamCodec<ByteBuf, UUID> UUID_STREAM_CODEC = new StreamCodec<>() {
@@ -54,7 +54,7 @@ public record FishingStartPayload(UUID sessionId, int difficulty, int motionType
 		context.enqueueWork(() -> handleClient(payload));
 	}
 
-	@net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+	@net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
 	private static void handleClient(FishingStartPayload payload) {
 		if (!com.stardew.craft.client.fishing.FishingInteractionState.accepts(payload.sessionId())) return;
 		net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();

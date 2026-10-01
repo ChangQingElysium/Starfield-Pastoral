@@ -8,7 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.*;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.gametest.*;
+import net.minecraftforge.gametest.*;
 @GameTestHolder("stardewcraft_bug")
 @PrefixGameTestTemplate(false)
 @SuppressWarnings("null")
@@ -50,5 +50,5 @@ public final class NativeShadowShamanGameTests {
         curse.tick();curse.tick();h.assertTrue(curse.bouncesLeft()==4,"Projectile collided before 100ms grace");curse.tick();h.assertTrue(curse.bouncesLeft()==1&&!curse.isRemoved(),"Source should consume three bounces in three substeps");curse.tick();
         h.assertTrue(curse.isRemoved()&&curse.bouncesLeft()==0&&curse.sourceFrames()==11,"Wrong four-bounce/fifth-impact boundary");h.succeed();
     }
-    private static net.neoforged.neoforge.common.util.FakePlayer player(net.minecraft.server.level.ServerLevel level,Vec3 pos){var p=new net.neoforged.neoforge.common.util.FakePlayer(level,new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(),"ShamanTest"));p.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);p.setPos(pos);level.addNewPlayer(p);return p;}
+    private static net.minecraftforge.common.util.FakePlayer player(net.minecraft.server.level.ServerLevel level,Vec3 pos){var p=new net.minecraftforge.common.util.FakePlayer(level,new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(),"ShamanTest"));p.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);p.setPos(pos);level.addNewPlayer(p);return p;}
 }

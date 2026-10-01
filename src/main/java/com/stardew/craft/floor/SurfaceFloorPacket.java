@@ -4,13 +4,13 @@ import com.stardew.craft.StardewCraft;
 import io.netty.buffer.ByteBuf;
 import java.util.List;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
 @EventBusSubscriber(modid = StardewCraft.MODID, bus = EventBusSubscriber.Bus.MOD)
 public record SurfaceFloorPacket(ResourceLocation dimension, long chunk, boolean replace, List<Entry> entries)
@@ -22,12 +22,12 @@ public record SurfaceFloorPacket(ResourceLocation dimension, long chunk, boolean
             return new Entry(pos.immutable(), cover == null ? -1 : cover.type().ordinal(), cover == null ? 0 : cover.variant());
         }
         private static final StreamCodec<ByteBuf, Entry> CODEC = StreamCodec.composite(
-                BlockPos.STREAM_CODEC, Entry::pos, ByteBufCodecs.VAR_INT, Entry::type,
+                com.stardew.craft.port.PortCodecs.BLOCK_POS, Entry::pos, ByteBufCodecs.VAR_INT, Entry::type,
                 ByteBufCodecs.VAR_INT, Entry::variant, Entry::new);
     }
-    public static final Type<SurfaceFloorPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "surface_floors"));
+    public static final Type<SurfaceFloorPacket> TYPE = new Type<>(new ResourceLocation(StardewCraft.MODID, "surface_floors"));
     public static final StreamCodec<ByteBuf, SurfaceFloorPacket> CODEC = StreamCodec.composite(
-            ResourceLocation.STREAM_CODEC, SurfaceFloorPacket::dimension,
+            com.stardew.craft.port.PortCodecs.RESOURCE_LOCATION, SurfaceFloorPacket::dimension,
             ByteBufCodecs.VAR_LONG, SurfaceFloorPacket::chunk,
             ByteBufCodecs.BOOL, SurfaceFloorPacket::replace,
             Entry.CODEC.apply(ByteBufCodecs.list(MAX_ENTRIES)), SurfaceFloorPacket::entries, SurfaceFloorPacket::new);

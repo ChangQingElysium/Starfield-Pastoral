@@ -5,13 +5,13 @@ import com.stardew.craft.block.mine.MineLadderBlock;
 import com.stardew.craft.core.ModMiningDimensions;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * 竖井跳入包 - 客户端 → 服务端
@@ -21,12 +21,12 @@ public record ShaftJumpPacket(BlockPos shaftPos) implements CustomPacketPayload 
 
     @SuppressWarnings("null")
     public static final CustomPacketPayload.Type<ShaftJumpPacket> TYPE =
-            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "shaft_jump"));
+            new CustomPacketPayload.Type<>(new ResourceLocation(StardewCraft.MODID, "shaft_jump"));
 
     @SuppressWarnings("null")
     public static final StreamCodec<ByteBuf, ShaftJumpPacket> STREAM_CODEC =
             StreamCodec.composite(
-                    BlockPos.STREAM_CODEC.cast(),
+                    com.stardew.craft.port.PortCodecs.BLOCK_POS.cast(),
                     ShaftJumpPacket::shaftPos,
                     ShaftJumpPacket::new
             );

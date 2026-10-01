@@ -28,7 +28,7 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 /** Applied-hit rules owned by built-in weapon resources and entity marks. */
 final class BuiltinWeaponPassiveAppliedHitRules {

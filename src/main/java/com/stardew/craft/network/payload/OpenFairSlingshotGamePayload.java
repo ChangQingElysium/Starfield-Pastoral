@@ -4,13 +4,13 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.gui.common.StardewConfirmDialogScreen;
 import com.stardew.craft.client.gui.common.StardewQuestionDialogSpec;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.List;
 
@@ -18,7 +18,7 @@ import java.util.List;
 public record OpenFairSlingshotGamePayload(int starTokens, boolean startImmediately)
     implements CustomPacketPayload {
     public static final Type<OpenFairSlingshotGamePayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "open_fair_slingshot_game"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "open_fair_slingshot_game"));
 
     public static final StreamCodec<ByteBuf, OpenFairSlingshotGamePayload> STREAM_CODEC =
         StreamCodec.composite(
@@ -38,7 +38,7 @@ public record OpenFairSlingshotGamePayload(int starTokens, boolean startImmediat
         context.enqueueWork(() -> handleClient(payload));
     }
 
-    @net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+    @net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
     private static void handleClient(OpenFairSlingshotGamePayload payload) {
         net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
         if (mc.player == null) {

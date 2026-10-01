@@ -24,9 +24,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.common.util.FakePlayerFactory;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -226,14 +226,14 @@ public final class MineRockClumpGameTests {
             player.setItemInHand(InteractionHand.MAIN_HAND, tool);
             data.setEnergy(mode == 2 ? 0 : 100);
             if (mode == 0) {
-                java.util.function.Consumer<net.neoforged.neoforge.event.level.BlockEvent.BreakEvent> cancel = event -> {
+                java.util.function.Consumer<net.minecraftforge.event.level.BlockEvent.BreakEvent> cancel = event -> {
                     if (event.getPlayer() == player && event.getPos().equals(hit)) event.setCanceled(true);
                 };
-                net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(cancel);
+                net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener(cancel);
                 try {
                     h.assertTrue(!player.gameMode.destroyBlock(hit), "Canceled clump break succeeded");
                 } finally {
-                    net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(cancel);
+                    net.minecraftforge.common.MinecraftForge.EVENT_BUS.unregister(cancel);
                 }
                 h.assertTrue(level.getBlockState(main).is(clump) && level.getBlockState(hit).is(clump)
                         && data.getEnergy() == 100 && level.getEntitiesOfClass(ItemEntity.class, area).isEmpty(),

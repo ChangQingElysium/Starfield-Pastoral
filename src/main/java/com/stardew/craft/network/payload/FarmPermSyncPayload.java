@@ -2,14 +2,14 @@ package com.stardew.craft.network.payload;
 
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.farm.FarmPermissionManager;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.*;
 
@@ -31,7 +31,7 @@ public record FarmPermSyncPayload(
     ) {}
 
     public static final Type<FarmPermSyncPayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "farm_perm_sync"));
+            new Type<>(new ResourceLocation(StardewCraft.MODID, "farm_perm_sync"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, FarmPermSyncPayload> STREAM_CODEC =
             new StreamCodec<>() {
@@ -93,7 +93,7 @@ public record FarmPermSyncPayload(
                     com.stardew.craft.player.PlayerDisplayName.get(online), override));
         }
 
-        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
+        net.minecraftforge.network.PacketDistributor.sendToPlayer(player,
                 new FarmPermSyncPayload(defaultPerm, entries));
     }
 }

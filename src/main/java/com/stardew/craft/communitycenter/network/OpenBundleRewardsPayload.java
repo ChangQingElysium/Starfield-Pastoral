@@ -8,13 +8,13 @@ import com.stardew.craft.communitycenter.state.CommunityCenterSavedData;
 import com.stardew.craft.api.v1.internal.communitycenter.StardewCommunityCenterVariantRegistry;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleMenuProvider;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * Client → Server: request to open the reward grab menu for a bundle area.
@@ -26,7 +26,7 @@ public record OpenBundleRewardsPayload(
 ) implements CustomPacketPayload {
 
     public static final Type<OpenBundleRewardsPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "open_bundle_rewards")
+            new ResourceLocation(StardewCraft.MODID, "open_bundle_rewards")
     );
 
     public static final StreamCodec<ByteBuf, OpenBundleRewardsPayload> STREAM_CODEC =

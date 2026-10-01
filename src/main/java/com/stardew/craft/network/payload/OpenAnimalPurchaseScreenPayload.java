@@ -2,12 +2,12 @@ package com.stardew.craft.network.payload;
 
 import com.stardew.craft.StardewCraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.List;
 
@@ -87,7 +87,7 @@ public record OpenAnimalPurchaseScreenPayload(
 
     @SuppressWarnings("null")
     public static final Type<OpenAnimalPurchaseScreenPayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "open_animal_purchase_screen"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "open_animal_purchase_screen"));
 
     @SuppressWarnings("null")
     public static final StreamCodec<RegistryFriendlyByteBuf, OpenAnimalPurchaseScreenPayload> STREAM_CODEC = StreamCodec.composite(
@@ -129,7 +129,7 @@ public record OpenAnimalPurchaseScreenPayload(
         context.enqueueWork(() -> handleClient(payload));
     }
 
-    @net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+    @net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
     private static void handleClient(OpenAnimalPurchaseScreenPayload payload) {
         net.minecraft.client.Minecraft minecraft = net.minecraft.client.Minecraft.getInstance();
         if (minecraft.player == null) {

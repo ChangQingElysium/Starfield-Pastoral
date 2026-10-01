@@ -12,8 +12,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.PalettedContainer;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 @GameTestHolder(StardewCraft.MODID)
 @PrefixGameTestTemplate(false)
@@ -53,7 +53,7 @@ public final class TerrainWorldUpgradeGameTests {
     @GameTest(templateNamespace = StardewCraft.MODID, template = "ring_utilities")
     public static void retirementRestoresGroundWithoutRegisteringOldBlocks(GameTestHelper helper) {
         for (String old : new String[]{"artifact_spot_dirt", "desert_artifact_spot", "beach_artifact_spot"}) {
-            var id = net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, old);
+            var id = new net.minecraft.resources.ResourceLocation(StardewCraft.MODID, old);
             helper.assertTrue(!net.minecraft.core.registries.BuiltInRegistries.BLOCK.containsKey(id)
                     && !net.minecraft.core.registries.BuiltInRegistries.ITEM.containsKey(id), "Retired block/item still registered");
             var root = chunk(id.toString()); TerrainWorldUpgrade.upgrade(root, 42);

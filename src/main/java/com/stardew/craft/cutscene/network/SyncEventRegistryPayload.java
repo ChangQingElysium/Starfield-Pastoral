@@ -3,11 +3,11 @@ package com.stardew.craft.cutscene.network;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.cutscene.data.EventRegistry;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.Map;
 
@@ -22,7 +22,7 @@ public record SyncEventRegistryPayload(
 ) implements CustomPacketPayload {
 
     public static final Type<SyncEventRegistryPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "sync_event_registry"));
+            new ResourceLocation(StardewCraft.MODID, "sync_event_registry"));
 
     public static final StreamCodec<ByteBuf, SyncEventRegistryPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.VAR_LONG, SyncEventRegistryPayload::version,

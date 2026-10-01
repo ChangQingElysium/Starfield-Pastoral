@@ -14,7 +14,7 @@ import snownee.jade.api.config.IPluginConfig;
 public enum StardewNpcJadeProvider implements IEntityComponentProvider, IServerDataProvider<EntityAccessor> {
     INSTANCE;
 
-    private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "stardew_npc");
+    private static final ResourceLocation UID = new ResourceLocation(StardewCraft.MODID, "stardew_npc");
     private static final String NBT_NPC_ID = "npcId";
 
     @Override

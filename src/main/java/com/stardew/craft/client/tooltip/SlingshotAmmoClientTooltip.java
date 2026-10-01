@@ -14,7 +14,7 @@ public final class SlingshotAmmoClientTooltip implements ClientTooltipComponent 
     @Override public int getHeight() { return 20; }
     @Override public int getWidth(Font font) { return 18; }
     @Override public void renderImage(Font font, int x, int y, GuiGraphics graphics) {
-        var texture = ResourceLocation.fromNamespaceAndPath("stardewcraft",
+        var texture = new ResourceLocation("stardewcraft",
                 "textures/gui/slingshot/" + (ammo.isEmpty() ? "ammo_slot" : "slot") + ".png");
         graphics.blit(texture, x, y, 0, 0, 16, 16, 16, 16);
         if (!ammo.isEmpty()) {

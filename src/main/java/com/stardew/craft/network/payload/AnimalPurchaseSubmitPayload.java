@@ -7,18 +7,18 @@ import com.stardew.craft.animal.service.AnimalShopService;
 import com.stardew.craft.animal.service.AnimalAcquireService;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
-import net.neoforged.neoforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.network.PacketDistributor;
 
 public record AnimalPurchaseSubmitPayload(String animalTypeId, String buildingId, String customName) implements CustomPacketPayload {
 
     @SuppressWarnings("null")
     public static final Type<AnimalPurchaseSubmitPayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "animal_purchase_submit"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "animal_purchase_submit"));
 
     @SuppressWarnings("null")
     public static final StreamCodec<FriendlyByteBuf, AnimalPurchaseSubmitPayload> STREAM_CODEC = StreamCodec.of(

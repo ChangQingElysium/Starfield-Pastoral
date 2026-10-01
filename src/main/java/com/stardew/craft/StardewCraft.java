@@ -19,19 +19,19 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.config.ModConfig;
-import net.neoforged.fml.ModList;
-import net.neoforged.fml.ModContainer;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.server.ServerStartingEvent;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.ModContainer;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.server.ServerStartingEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredHolder;
+import net.minecraftforge.registries.DeferredRegister;
 
 // The value here should match an entry in the META-INF/neoforge.mods.toml file
 @Mod(StardewCraft.MODID)
@@ -129,17 +129,17 @@ public class StardewCraft {
         // Register ourselves for server and other game events we are interested in.
         // Note that this is necessary if and only if we want *this* class (StardewCraft) to respond directly to events.
         // Do not add this line if there are no @SubscribeEvent-annotated functions in this class, like onServerStarting() below.
-        NeoForge.EVENT_BUS.register(this);
+        MinecraftForge.EVENT_BUS.register(this);
         
         // 手动注册事件（确保事件被正确注册）
-        NeoForge.EVENT_BUS.register(WildTreeChopEvents.class);
-        NeoForge.EVENT_BUS.register(com.stardew.craft.event.ResourceClumpEvents.class);
+        MinecraftForge.EVENT_BUS.register(WildTreeChopEvents.class);
+        MinecraftForge.EVENT_BUS.register(com.stardew.craft.event.ResourceClumpEvents.class);
         // WeaponCombatEvents 已有 @EventBusSubscriber 自动注册，不需要手动注册
 
         if (FMLEnvironment.dist == Dist.CLIENT) {
-            NeoForge.EVENT_BUS.register(com.stardew.craft.client.ModClientEvents.class);
+            MinecraftForge.EVENT_BUS.register(com.stardew.craft.client.ModClientEvents.class);
             if (ModList.get().isLoaded("appleskin")) {
-                NeoForge.EVENT_BUS.register(com.stardew.craft.compat.AppleSkinCompat.class);
+                MinecraftForge.EVENT_BUS.register(com.stardew.craft.compat.AppleSkinCompat.class);
             }
         }
 
@@ -174,7 +174,7 @@ public class StardewCraft {
      */
     @SuppressWarnings("null")
     @SubscribeEvent
-    public void onServerAboutToStart(net.neoforged.neoforge.event.server.ServerAboutToStartEvent event) {
+    public void onServerAboutToStart(net.minecraftforge.event.server.ServerAboutToStartEvent event) {
         var server = event.getServer();
         LOGGER.info("[VALLEY_MAP] Startup: trying prebuilt region install (ServerAboutToStart)");
         var result = com.stardew.craft.dimension.StardewValleyPrebuiltRegionInstaller.installIfAvailable(server);
@@ -250,11 +250,11 @@ public class StardewCraft {
         }
     }
 
-    @SubscribeEvent(priority = net.neoforged.bus.api.EventPriority.LOWEST)
+    @SubscribeEvent(priority = net.minecraftforge.eventbus.api.EventPriority.LOWEST)
     public void onServerStarted(
-            net.neoforged.neoforge.event.server.ServerStartedEvent event
+            net.minecraftforge.event.server.ServerStartedEvent event
     ) {
-        if (net.neoforged.neoforge.gametest.GameTestHooks
+        if (com.stardew.craft.port.net.neoforged.neoforge.gametest.GameTestHooks
                 .isGametestServer()) {
             LOGGER.info(
                     "Keeping extension registrations open for isolated GameTests");

@@ -10,11 +10,11 @@ import java.util.OptionalLong;
 /** Registration, discovery and server-authoritative balance facade for currencies. */
 public final class StardewCurrencies {
     public static final ResourceLocation MONEY =
-            ResourceLocation.fromNamespaceAndPath("stardewcraft", "money");
+            new ResourceLocation("stardewcraft", "money");
     public static final ResourceLocation FAIR_STAR_TOKENS =
-            ResourceLocation.fromNamespaceAndPath("stardewcraft", "fair_star_tokens");
+            new ResourceLocation("stardewcraft", "fair_star_tokens");
     public static final ResourceLocation QI_COINS =
-            ResourceLocation.fromNamespaceAndPath("stardewcraft", "qi_coins");
+            new ResourceLocation("stardewcraft", "qi_coins");
 
     private StardewCurrencies() {
     }

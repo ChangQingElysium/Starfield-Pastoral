@@ -28,7 +28,7 @@ import java.util.UUID;
  */
 public final class StardewFarmPersistentData {
     private static final ResourceLocation SCOPE =
-            ResourceLocation.fromNamespaceAndPath(
+            new ResourceLocation(
                     "stardewcraft", "state/farm");
 
     private final NamespacedStateContainer container;

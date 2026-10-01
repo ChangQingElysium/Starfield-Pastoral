@@ -37,6 +37,6 @@ public final class WizardBuildingCatalogGeoModel extends GeoModel<WizardBuilding
     }
 
     private static ResourceLocation resource(String path) {
-        return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, path);
+        return new ResourceLocation(StardewCraft.MODID, path);
     }
 }

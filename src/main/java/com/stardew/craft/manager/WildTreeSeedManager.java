@@ -326,7 +326,7 @@ public class WildTreeSeedManager extends SavedData {
 				continue;
 			}
 			@SuppressWarnings("null")
-			ResourceKey<net.minecraft.world.level.Level> dim = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(dimStr));
+			ResourceKey<net.minecraft.world.level.Level> dim = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(dimStr));
 			BlockPos pos = NbtUtils.readBlockPos(t, "Pos").orElse(BlockPos.ZERO);
 			@SuppressWarnings("null")
 			GlobalPos gp = GlobalPos.of(dim, pos);

@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.ArrayDeque;
 
-/** NeoForge payload scheduling can deliver the destination movement before the portal request. */
+/** MinecraftForge payload scheduling can deliver the destination movement before the portal request. */
 @Mixin(ServerGamePacketListenerImpl.class)
 public abstract class TownDoorMovementMixin implements DoorMovementQueue {
     @Shadow public ServerPlayer player;

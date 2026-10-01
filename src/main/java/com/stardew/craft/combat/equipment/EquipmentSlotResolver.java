@@ -11,9 +11,9 @@ import net.minecraft.world.item.ItemStack;
 
 /** Resolves public equipment slots while preserving the legacy built-in item classes. */
 public final class EquipmentSlotResolver {
-    public static final ResourceLocation RING = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "ring");
-    public static final ResourceLocation BOOTS = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "boots");
-    public static final ResourceLocation WEAPON = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "weapon");
+    public static final ResourceLocation RING = new ResourceLocation(StardewCraft.MODID, "ring");
+    public static final ResourceLocation BOOTS = new ResourceLocation(StardewCraft.MODID, "boots");
+    public static final ResourceLocation WEAPON = new ResourceLocation(StardewCraft.MODID, "weapon");
 
     private EquipmentSlotResolver() {
     }

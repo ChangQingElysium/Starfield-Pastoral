@@ -10,10 +10,10 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.ScreenEvent;
 
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -53,7 +53,7 @@ public final class StardewReadingZoom {
         return state == null ? null : state.zoom;
     }
 
-    @SubscribeEvent public static void tooltip(net.neoforged.neoforge.client.event.RenderTooltipEvent.GatherComponents event) {
+    @SubscribeEvent public static void tooltip(net.minecraftforge.client.event.RenderTooltipEvent.GatherComponents event) {
         var zoom = current(Minecraft.getInstance().screen);
         if (zoom == null || StardewGuiViewport.active() == null) return;
         var v = zoom.viewport();
@@ -104,7 +104,7 @@ public final class StardewReadingZoom {
         return null;
     }
 
-    @SubscribeEvent(priority = net.neoforged.bus.api.EventPriority.HIGHEST) public static void press(ScreenEvent.MouseButtonPressed.Pre event) {
+    @SubscribeEvent(priority = net.minecraftforge.eventbus.api.EventPriority.HIGHEST) public static void press(ScreenEvent.MouseButtonPressed.Pre event) {
         var zoom = current(event.getScreen());
         if (zoom == null) return;
         var bar = barAt(zoom, mouseX(), mouseY());
@@ -129,7 +129,7 @@ public final class StardewReadingZoom {
         else state.y = bar.fractionAt(pointer, state.grab);
     }
 
-    @SubscribeEvent(priority = net.neoforged.bus.api.EventPriority.HIGHEST) public static void drag(ScreenEvent.MouseDragged.Pre event) {
+    @SubscribeEvent(priority = net.minecraftforge.eventbus.api.EventPriority.HIGHEST) public static void drag(ScreenEvent.MouseDragged.Pre event) {
         var zoom = current(event.getScreen());
         if (zoom == null) return;
         var state = STATES.get(event.getScreen());
@@ -139,7 +139,7 @@ public final class StardewReadingZoom {
         event.setCanceled(true);
     }
 
-    @SubscribeEvent(priority = net.neoforged.bus.api.EventPriority.HIGHEST) public static void release(ScreenEvent.MouseButtonReleased.Pre event) {
+    @SubscribeEvent(priority = net.minecraftforge.eventbus.api.EventPriority.HIGHEST) public static void release(ScreenEvent.MouseButtonReleased.Pre event) {
         var state = STATES.get(event.getScreen());
         if (state != null && state.dragging != 0 && event.getButton() == 0) {
             state.dragging = 0;
@@ -147,7 +147,7 @@ public final class StardewReadingZoom {
         }
     }
 
-    @SubscribeEvent(priority = net.neoforged.bus.api.EventPriority.HIGHEST) public static void scroll(ScreenEvent.MouseScrolled.Pre event) {
+    @SubscribeEvent(priority = net.minecraftforge.eventbus.api.EventPriority.HIGHEST) public static void scroll(ScreenEvent.MouseScrolled.Pre event) {
         var zoom = current(event.getScreen());
         if (zoom == null) return;
         var bar = barAt(zoom, mouseX(), mouseY());
@@ -157,7 +157,7 @@ public final class StardewReadingZoom {
         if (pan(event.getScreen(), horizontal ? -delta * 64 : 0, horizontal ? 0 : -delta * 64)) event.setCanceled(true);
     }
 
-    @SubscribeEvent(priority = net.neoforged.bus.api.EventPriority.HIGHEST) public static void key(ScreenEvent.KeyPressed.Pre event) {
+    @SubscribeEvent(priority = net.minecraftforge.eventbus.api.EventPriority.HIGHEST) public static void key(ScreenEvent.KeyPressed.Pre event) {
         if ((event.getModifiers() & 4) == 0 || event.getScreen().getFocused() instanceof EditBox) return;
         int key = event.getKeyCode();
         double dx = key == 263 ? -64 : key == 262 ? 64 : 0;

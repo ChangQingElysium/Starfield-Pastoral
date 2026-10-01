@@ -15,12 +15,12 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import net.minecraftforge.client.model.data.ModelData;
 
 import java.util.Map;
 
 public class IncubatorBlockEntityRenderer implements BlockEntityRenderer<IncubatorBlockEntity> {
-    private static final ResourceLocation BUBBLE_TEX = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/bubble.png");
+    private static final ResourceLocation BUBBLE_TEX = new ResourceLocation(StardewCraft.MODID, "textures/gui/bubble.png");
     private static final float PX = 1.0f / 32.0f;
     private static final ModelResourceLocation EGG = partModel("egg");
     private static final ModelResourceLocation STRAW_FRONT = partModel("straw_front");
@@ -36,7 +36,7 @@ public class IncubatorBlockEntityRenderer implements BlockEntityRenderer<Incubat
     };
 
     private static ModelResourceLocation partModel(String name) {
-        return new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,
+        return new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID,
             "block/utility/incubator_" + name), "standalone");
     }
 
@@ -104,11 +104,11 @@ public class IncubatorBlockEntityRenderer implements BlockEntityRenderer<Incubat
     }
 
     private static final Map<String, ResourceLocation> ICONS = Map.of(
-        "white_chicken", ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/animal_query/icon_white_chicken.png"),
-        "golden_chicken", ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/animal_query/icon_golden_chicken.png"),
-        "duck", ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/animal_query/icon_duck.png"),
-        "void_chicken", ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/animal_query/icon_void_chicken.png"),
-        "dinosaur", ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/animal_query/icon_dinosaur.png")
+        "white_chicken", new ResourceLocation(StardewCraft.MODID, "textures/gui/animal_query/icon_white_chicken.png"),
+        "golden_chicken", new ResourceLocation(StardewCraft.MODID, "textures/gui/animal_query/icon_golden_chicken.png"),
+        "duck", new ResourceLocation(StardewCraft.MODID, "textures/gui/animal_query/icon_duck.png"),
+        "void_chicken", new ResourceLocation(StardewCraft.MODID, "textures/gui/animal_query/icon_void_chicken.png"),
+        "dinosaur", new ResourceLocation(StardewCraft.MODID, "textures/gui/animal_query/icon_dinosaur.png")
     );
 
     public IncubatorBlockEntityRenderer(BlockEntityRendererProvider.Context context) {

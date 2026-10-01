@@ -19,23 +19,23 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.component.DataComponents;
+import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemDisplayContext;
-import net.minecraft.world.item.component.BlockItemStateProperties;
+import com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ModelEvent;
-import net.neoforged.neoforge.client.model.BakedModelWrapper;
-import net.neoforged.neoforge.client.model.IDynamicBakedModel;
-import net.neoforged.neoforge.client.model.data.ModelData;
-import net.neoforged.neoforge.client.model.data.ModelProperty;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.ModelEvent;
+import net.minecraftforge.client.model.BakedModelWrapper;
+import net.minecraftforge.client.model.IDynamicBakedModel;
+import net.minecraftforge.client.model.data.ModelData;
+import net.minecraftforge.client.model.data.ModelProperty;
 
 /** Selects authored 16px cells on native cube faces. Borders are already composited: no overlay z-fighting. */
 @SuppressWarnings("removal")
@@ -50,12 +50,12 @@ public final class TownPavingModels {
     private TownPavingModels() {}
 
     private static ModelResourceLocation id(String family, int season) {
-        return new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,
+        return new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID,
                 "block/" + family + "/" + SEASONS[season]), "standalone");
     }
 
     private static ModelResourceLocation paleId(String part, int season) {
-        return new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,
+        return new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID,
                 "block/pale_paving/" + SEASONS[season] + "/" + part), "standalone");
     }
 
@@ -106,7 +106,7 @@ public final class TownPavingModels {
             event.getModels().put(BlockModelShaper.stateToModelLocation(state), variants[variant]);
         }
         ModelResourceLocation item = new ModelResourceLocation(
-                ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "pale_paving"), "inventory");
+                new ResourceLocation(StardewCraft.MODID, "pale_paving"), "inventory");
         event.getModels().put(item, new PalePavingItem(Objects.requireNonNull(event.getModels().get(item)), variants));
     }
 
@@ -131,7 +131,7 @@ public final class TownPavingModels {
             variants[variant] = new Surface(surfaces, tops, variant, transitions, compositor, pale);
             event.getModels().put(BlockModelShaper.stateToModelLocation(state), variants[variant]);
         }
-        ModelResourceLocation item = new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, family), "inventory");
+        ModelResourceLocation item = new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID, family), "inventory");
         event.getModels().put(item, new PavingItem(Objects.requireNonNull(event.getModels().get(item)), variants));
     }
 

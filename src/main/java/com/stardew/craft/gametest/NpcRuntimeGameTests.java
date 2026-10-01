@@ -14,8 +14,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import java.util.*;
 
 @GameTestHolder("stardewcraft_npc_runtime")
@@ -70,7 +70,7 @@ public final class NpcRuntimeGameTests {
         var level=helper.getLevel();
         var player=new net.minecraft.server.level.ServerPlayer(level.getServer(),level,
                 new com.mojang.authlib.GameProfile(UUID.randomUUID(),"NpcQuestionTest"),
-                net.minecraft.server.level.ClientInformation.createDefault());
+                com.stardew.craft.port.net.minecraft.server.level.ClientInformation.createDefault());
         NpcQuestionAuthority.open(player,"abigail","stardewcraft.npc.abigail.fall_sun");
         helper.assertTrue(NpcQuestionAuthority.consume(player,"abigail","27",99999,"Sun_27")==null,"Forged friendship delta accepted");
         helper.assertTrue(NpcQuestionAuthority.consume(player,"wizard","27",10,"Sun_27")==null,"Cross-NPC answer accepted");
@@ -97,7 +97,7 @@ public final class NpcRuntimeGameTests {
             point.addProperty("x",pos.getX());point.addProperty("y",pos.getY());point.addProperty("z",pos.getZ());point.addProperty("furniture","chair");
             points.add(id,point); var root=new JsonObject();root.add("points",points);
             var events=new LinkedHashMap<>(oldEvents);events.put("npc_route_points",root);NpcDataRegistry.replaceEvents(events);
-            var anchorId=ResourceLocation.parse("stardewcraft:"+id);
+            var anchorId=new ResourceLocation("stardewcraft:"+id);
             var anchors=new LinkedHashMap<>(oldAnchors);
             anchors.put(anchorId,new StardewWorldAnchor(anchorId,level.dimension().location(),Vec3.atBottomCenterOf(pos),0,true,false,null,Set.of()));
             WorldAnchorRegistry.replaceLegacyNpcAnchors(anchors);
@@ -243,10 +243,10 @@ public final class NpcRuntimeGameTests {
             helper.assertTrue(!npc.getScheduleActivityEvent().isEmpty() && npc.getScheduleActivityEvent().contains("exit"),
                     "Removing an activity definition skipped its recorded outro");
             helper.assertTrue(npc.getScheduleActivityEvent().getInt("exitTicks")==1,"Reload changed the active event's timing");
-            var actorId=ResourceLocation.parse("stardewcraft:sebastian");
-            com.stardew.craft.api.v1.npc.StardewNpcEntities.register(ResourceLocation.parse("stardewcraft_npc_runtime:resolver_"+UUID.randomUUID()),100,
+            var actorId=new ResourceLocation("stardewcraft:sebastian");
+            com.stardew.craft.api.v1.npc.StardewNpcEntities.register(new ResourceLocation("stardewcraft_npc_runtime:resolver_"+UUID.randomUUID()),100,
                     context->context.npcId().equals(actorId) && context.level()==level ? npc : null);
-            var lease=StardewNpcExecution.claim(level,actorId,ResourceLocation.parse("example:scene"),60,20).orElseThrow();
+            var lease=StardewNpcExecution.claim(level,actorId,new ResourceLocation("example:scene"),60,20).orElseThrow();
             helper.assertTrue(StardewNpcExecution.isCurrent(level,lease),"Addon lease is not current");
             StardewNpcExecution.release(level,lease);
             helper.assertTrue(!StardewNpcExecution.isCurrent(level,lease),"Released addon lease remains current");

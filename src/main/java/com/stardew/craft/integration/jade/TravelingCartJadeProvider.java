@@ -13,7 +13,7 @@ import snownee.jade.api.config.IPluginConfig;
 public enum TravelingCartJadeProvider implements IEntityComponentProvider {
     INSTANCE;
 
-    private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "traveling_cart");
+    private static final ResourceLocation UID = new ResourceLocation(StardewCraft.MODID, "traveling_cart");
 
     @Override
     public ResourceLocation getUid() {

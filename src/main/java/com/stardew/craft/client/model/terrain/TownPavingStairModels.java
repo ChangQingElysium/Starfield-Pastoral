@@ -19,13 +19,13 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ModelEvent;
-import net.neoforged.neoforge.client.model.BakedModelWrapper;
-import net.neoforged.neoforge.client.model.IDynamicBakedModel;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.ModelEvent;
+import net.minecraftforge.client.model.BakedModelWrapper;
+import net.minecraftforge.client.model.IDynamicBakedModel;
+import net.minecraftforge.client.model.data.ModelData;
 
 /** Retexture baked vanilla stairs: preserve every rotated UV, corner and culling face. */
 @SuppressWarnings("removal")
@@ -35,7 +35,7 @@ public final class TownPavingStairModels {
     private TownPavingStairModels() {}
 
     private static ModelResourceLocation id(String season) {
-        return new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,
+        return new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID,
                 "block/town_paving_stairs/" + season + "/stairs"), "standalone");
     }
 
@@ -56,7 +56,7 @@ public final class TownPavingStairModels {
             var key = BlockModelShaper.stateToModelLocation(state);
             event.getModels().put(key, new Seasonal(Objects.requireNonNull(event.getModels().get(key)), materials));
         }
-        var item = new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "town_paving_stairs"), "inventory");
+        var item = new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID, "town_paving_stairs"), "inventory");
         event.getModels().put(item, new Seasonal(Objects.requireNonNull(event.getModels().get(item)), materials));
     }
 

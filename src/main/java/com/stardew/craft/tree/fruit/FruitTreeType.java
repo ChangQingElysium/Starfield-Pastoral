@@ -157,6 +157,6 @@ public enum FruitTreeType {
     }
 
     private static ResourceLocation modLocation(String path) {
-        return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, path);
+        return new ResourceLocation(StardewCraft.MODID, path);
     }
 }

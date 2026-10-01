@@ -2,10 +2,10 @@ package com.stardew.craft.network.payload;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +15,7 @@ public record BuildingObstructionFlashPayload(ResourceLocation dimension, List<B
         implements CustomPacketPayload {
     private static final int MAX_POSITIONS = 256;
     public static final Type<BuildingObstructionFlashPayload> TYPE =
-            new Type<>(ResourceLocation.parse("stardewcraft:building_obstruction_flash"));
+            new Type<>(new ResourceLocation("stardewcraft:building_obstruction_flash"));
     public static final StreamCodec<FriendlyByteBuf, BuildingObstructionFlashPayload> STREAM_CODEC =
             StreamCodec.of(BuildingObstructionFlashPayload::encode, BuildingObstructionFlashPayload::decode);
 
@@ -47,7 +47,7 @@ public record BuildingObstructionFlashPayload(ResourceLocation dimension, List<B
         context.enqueueWork(() -> handleClient(payload));
     }
 
-    @net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+    @net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
     private static void handleClient(BuildingObstructionFlashPayload payload) {
         com.stardew.craft.client.building.BuildingPlacementPreview.flashObstructions(
                 payload.dimension(), payload.positions());

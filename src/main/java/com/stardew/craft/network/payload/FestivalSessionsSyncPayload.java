@@ -5,10 +5,10 @@ import com.stardew.craft.api.v1.festival.StardewFestivalClientSessionSnapshot;
 import com.stardew.craft.api.v1.festival.StardewFestivalSessionSnapshot;
 import com.stardew.craft.api.v1.internal.festival.StardewFestivalClientSessionCache;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +26,7 @@ public record FestivalSessionsSyncPayload(
     private static final int MAX_RUNTIME_ID_LENGTH = 128;
 
     public static final Type<FestivalSessionsSyncPayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(
+            new Type<>(new ResourceLocation(
                     StardewCraft.MODID, "festival_sessions_sync"));
     public static final StreamCodec<
             FriendlyByteBuf,
@@ -56,8 +56,8 @@ public record FestivalSessionsSyncPayload(
         context.enqueueWork(() -> handleClient(payload));
     }
 
-    @net.neoforged.api.distmarker.OnlyIn(
-            net.neoforged.api.distmarker.Dist.CLIENT)
+    @net.minecraftforge.api.distmarker.OnlyIn(
+            net.minecraftforge.api.distmarker.Dist.CLIENT)
     private static void handleClient(
             FestivalSessionsSyncPayload payload
     ) {

@@ -183,7 +183,7 @@ public final class ArtisanJeiRecipeFactory {
         }
 
         ResourceLocation inputId = BuiltInRegistries.ITEM.getKey(inputItem);
-        ResourceLocation displayId = ResourceLocation.fromNamespaceAndPath(
+        ResourceLocation displayId = new ResourceLocation(
                 definition.id().getNamespace(), definition.id().getPath() + "/" + inputId.getPath());
         return new ArtisanJeiRecipe(displayId, machine, inputs, outputs, com.stardew.craft.production.MachineProductionData.minutes(machine.id().toString(), definition.minutes()),
                 definition.keepInputQuality(), definition.outputQuality());
@@ -324,7 +324,7 @@ public final class ArtisanJeiRecipeFactory {
             ItemStack output = itemStack(definition.outputId(), Math.max(1, definition.outputCount()));
             PreservesItem.createFlavored(definition.preserveType(), source, output);
 
-            ResourceLocation displayId = ResourceLocation.fromNamespaceAndPath(
+            ResourceLocation displayId = new ResourceLocation(
                     definition.id().getNamespace(), definition.id().getPath() + "/roe/" + sourceId.getPath());
             result.add(new ArtisanJeiRecipe(
                     displayId,
@@ -399,6 +399,6 @@ public final class ArtisanJeiRecipeFactory {
     }
 
     private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, path);
+        return new ResourceLocation(StardewCraft.MODID, path);
     }
 }

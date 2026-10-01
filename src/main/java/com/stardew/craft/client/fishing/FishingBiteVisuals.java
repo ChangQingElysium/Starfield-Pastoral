@@ -7,10 +7,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderGuiEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.RenderGuiEvent;
 
 import java.io.InputStream;
 import java.util.Map;
@@ -28,7 +28,7 @@ public final class FishingBiteVisuals {
 
 	// NOTE: This texture should be provided by the project/resourcepack.
 	// If missing, we intentionally render nothing (no text fallback) to avoid deviating from the spec.
-	private static final ResourceLocation EXCLAMATION_TEX = ResourceLocation.fromNamespaceAndPath(
+	private static final ResourceLocation EXCLAMATION_TEX = new ResourceLocation(
 			StardewCraft.MODID,
 			"textures/gui/fishing/bite_exclamation.png"
 	);

@@ -7,10 +7,10 @@ import com.stardew.craft.client.hud.StardewHudMessageManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /** Server-authoritative completion for the SDV animal purchase flow. */
 public record AnimalPurchaseResultPayload(boolean success, String animalName, String messageKey)
@@ -18,7 +18,7 @@ public record AnimalPurchaseResultPayload(boolean success, String animalName, St
 
     @SuppressWarnings("null")
     public static final Type<AnimalPurchaseResultPayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "animal_purchase_result"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "animal_purchase_result"));
 
     @SuppressWarnings("null")
     public static final StreamCodec<FriendlyByteBuf, AnimalPurchaseResultPayload> STREAM_CODEC = StreamCodec.of(
@@ -47,7 +47,7 @@ public record AnimalPurchaseResultPayload(boolean success, String animalName, St
         context.enqueueWork(() -> handleClient(payload));
     }
 
-    @net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+    @net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
     private static void handleClient(AnimalPurchaseResultPayload payload) {
         Minecraft minecraft = Minecraft.getInstance();
         if (payload.success()) {

@@ -8,8 +8,8 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 @GameTestHolder("stardewcraft_roof_templates")
 @PrefixGameTestTemplate(false)
@@ -82,11 +82,11 @@ public final class FacadeTemplateGameTests {
                 for(int i=0,n=TemplateShapeCache.turnsFrom(Direction.NORTH,front);i<n;i++){double old=x;x=1-z;z=old;}
                 var hit=new net.minecraft.world.phys.BlockHitResult(new net.minecraft.world.phys.Vec3(p.getX()+x,p.getY()+.5,p.getZ()+z),front,p,false);
                 player.setShiftKeyDown(false);player.setItemInHand(hand,new net.minecraft.world.item.ItemStack(fill?Blocks.BRICKS:Blocks.OAK_PLANKS,3));
-                TemplateInteractionEvents.onRightClick(new net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.RightClickBlock(player,hand,p,hit));
+                TemplateInteractionEvents.onRightClick(new net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock(player,hand,p,hit));
                 h.assertTrue(player.getItemInHand(hand).getCount()==2,"Wrong consumption or target "+shape+" / "+front);
                 h.assertTrue(fill?entity.fillMaterial().is(Blocks.BRICKS):entity.material().is(Blocks.OAK_PLANKS),"Wrong material slot");
                 if(fill){player.setShiftKeyDown(true);player.setItemInHand(hand,net.minecraft.world.item.ItemStack.EMPTY);
-                    TemplateInteractionEvents.onRightClick(new net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.RightClickBlock(player,hand,p,hit));
+                    TemplateInteractionEvents.onRightClick(new net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock(player,hand,p,hit));
                     h.assertTrue(entity.fillMaterial()==null && entity.material()==null,"Shift removal must clear both slots");}
             }
         }
@@ -108,18 +108,18 @@ public final class FacadeTemplateGameTests {
             var hit=new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(p),Direction.DOWN,p,false);
             player.setShiftKeyDown(true);
             player.setItemInHand(hand,new net.minecraft.world.item.ItemStack(Blocks.BRICKS,3));
-            TemplateInteractionEvents.onRightClick(new net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.RightClickBlock(player,hand,p,hit));
+            TemplateInteractionEvents.onRightClick(new net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock(player,hand,p,hit));
             h.assertTrue(entity.material()==null && entity.fillMaterial().is(Blocks.BRICKS),"Secondary-only application failed: "+shape);
             h.assertTrue(player.getItemInHand(hand).getCount()==2,"Secondary consumed wrong count: "+shape);
             player.setShiftKeyDown(false);
-            TemplateInteractionEvents.onRightClick(new net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.RightClickBlock(player,hand,p,hit));
+            TemplateInteractionEvents.onRightClick(new net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock(player,hand,p,hit));
             h.assertTrue(entity.material().is(Blocks.BRICKS) && entity.fillMaterial().is(Blocks.BRICKS),"Primary could not be added after secondary: "+shape);
             player.setShiftKeyDown(true);
-            TemplateInteractionEvents.onRightClick(new net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.RightClickBlock(player,hand,p,hit));
+            TemplateInteractionEvents.onRightClick(new net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock(player,hand,p,hit));
             h.assertTrue(entity.material()==null && entity.fillMaterial()==null,"Held-item removal did not clear both: "+shape);
             h.assertTrue(player.getInventory().countItem(Blocks.BRICKS.asItem())==3,"Identical materials not refunded once per slot: "+shape);
             player.setItemInHand(hand,net.minecraft.world.item.ItemStack.EMPTY);
-            var empty=new net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.RightClickBlock(player,hand,p,hit);
+            var empty=new net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock(player,hand,p,hit);
             TemplateInteractionEvents.onRightClick(empty);
             h.assertTrue(!empty.isCanceled(),"Empty template consumed empty-hand interaction: "+shape);
         }

@@ -51,7 +51,7 @@ public final class StardewFestivalRewards {
         if (festivalId == null) {
             throw new NullPointerException("festivalId");
         }
-        return ResourceLocation.fromNamespaceAndPath(
+        return new ResourceLocation(
                 festivalId.getNamespace(),
                 "festival_reward/" + festivalId.getPath());
     }

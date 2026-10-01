@@ -16,10 +16,10 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ModelEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.ModelEvent;
 
 /** The approved Java JSON parts are baked normally; no custom geometry format. */
 @EventBusSubscriber(modid = StardewCraft.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
@@ -31,13 +31,13 @@ public final class PlaygroundModels {
     public static List<Part> parts(String name) { return assemblies.getOrDefault(name, List.of()); }
 
     private static JsonObject description(String name) {
-        var id = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "playground/" + name + ".json");
+        var id = new ResourceLocation(StardewCraft.MODID, "playground/" + name + ".json");
         try (var reader = new InputStreamReader(Minecraft.getInstance().getResourceManager().getResourceOrThrow(id).open(), StandardCharsets.UTF_8)) {
             return JsonParser.parseReader(reader).getAsJsonObject();
         } catch (IOException exception) { throw new IllegalStateException("Cannot load playground assembly " + name, exception); }
     }
     private static ModelResourceLocation id(String path) {
-        return new ModelResourceLocation(ResourceLocation.parse(path), "standalone");
+        return new ModelResourceLocation(new ResourceLocation(path), "standalone");
     }
     @SubscribeEvent public static void register(ModelEvent.RegisterAdditional event) {
         for (String name : NAMES) for (var entry : description(name).getAsJsonArray("parts"))

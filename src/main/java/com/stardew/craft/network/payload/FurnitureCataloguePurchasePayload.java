@@ -3,16 +3,16 @@ package com.stardew.craft.network.payload;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * Client → Server: player requested a free item from the Furniture Catalogue.
@@ -26,7 +26,7 @@ public record FurnitureCataloguePurchasePayload(
 ) implements CustomPacketPayload {
 
     public static final Type<FurnitureCataloguePurchasePayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "furniture_catalogue_purchase"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "furniture_catalogue_purchase"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, FurnitureCataloguePurchasePayload> STREAM_CODEC =
         StreamCodec.composite(
@@ -49,7 +49,7 @@ public record FurnitureCataloguePurchasePayload(
             // Validate: item must exist and be a furniture item or wallpaper/flooring
             ResourceLocation rl;
             try {
-                rl = ResourceLocation.parse(payload.itemId());
+                rl = new ResourceLocation(payload.itemId());
             } catch (Exception e) {
                 return;
             }
@@ -85,7 +85,7 @@ public record FurnitureCataloguePurchasePayload(
 
             // Send result back to client
             int money = com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player);
-            net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
+            net.minecraftforge.network.PacketDistributor.sendToPlayer(player,
                 new FurnitureCatalogueResultPayload(true, money, payload.itemId(), qty));
         });
     }

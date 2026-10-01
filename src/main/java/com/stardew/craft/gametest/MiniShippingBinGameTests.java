@@ -12,13 +12,13 @@ import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.server.level.ClientInformation;
+import com.stardew.craft.port.net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import java.util.UUID;
 
 @GameTestHolder("stardewcraft_mini_shipping")
@@ -83,7 +83,7 @@ public final class MiniShippingBinGameTests {
                 new GameProfile(UUID.randomUUID(), "Mini Shipper"), ClientInformation.createDefault());
         player.connection = new net.minecraft.server.network.ServerGamePacketListenerImpl(h.getLevel().getServer(),
                 new net.minecraft.network.Connection(net.minecraft.network.protocol.PacketFlow.SERVERBOUND), player,
-                net.minecraft.server.network.CommonListenerCookie.createInitial(player.getGameProfile(), false)) {
+                com.stardew.craft.port.net.minecraft.server.network.CommonListenerCookie.createInitial(player.getGameProfile(), false)) {
             @Override public void send(net.minecraft.network.protocol.Packet<?> packet) { }
         };
         PlayerDataManager.getPlayerData(player);

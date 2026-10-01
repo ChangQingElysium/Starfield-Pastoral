@@ -17,7 +17,7 @@ public final class StardewNpcEntityRegistry {
     private static final OrderedExtensionRegistry<
             StardewNpcEntities.Resolver> RESOLVERS =
             new OrderedExtensionRegistry<>(
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             StardewCraft.MODID, "npc/entity"));
 
     private StardewNpcEntityRegistry() {

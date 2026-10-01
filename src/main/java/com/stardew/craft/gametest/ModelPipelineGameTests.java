@@ -15,8 +15,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 @GameTestHolder(StardewCraft.MODID)
 @PrefixGameTestTemplate(false)
@@ -153,7 +153,7 @@ public final class ModelPipelineGameTests {
         items.forEach(net.minecraft.world.entity.Entity::discard);
         level.setBlock(origin, state, 2 | 16);
         block.placeExtensions(level, origin, state);
-        var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
+        var player = net.minecraftforge.common.util.FakePlayerFactory.getMinecraft(level);
         var gameModeBefore = player.gameMode.getGameModeForPlayer();
         try {
             player.setGameMode(net.minecraft.world.level.GameType.CREATIVE);

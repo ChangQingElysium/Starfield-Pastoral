@@ -26,7 +26,7 @@ import javax.annotation.Nonnull;
  * 小桶渲染：就绪气泡 + 产物图标
  */
 public class KegBlockEntityRenderer implements BlockEntityRenderer<KegBlockEntity> {
-	private static final ResourceLocation BUBBLE_TEX = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/bubble.png");
+	private static final ResourceLocation BUBBLE_TEX = new ResourceLocation(StardewCraft.MODID, "textures/gui/bubble.png");
 	private static final float PX = 1.0f / 32.0f;
 
 	public KegBlockEntityRenderer(BlockEntityRendererProvider.Context context) {

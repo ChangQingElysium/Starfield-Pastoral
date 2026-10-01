@@ -36,7 +36,7 @@ public final class ModTags {
 
 		@SuppressWarnings("null")
 		private static TagKey<Block> tag(String name) {
-			return TagKey.create(Registries.BLOCK, ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, name));
+			return TagKey.create(Registries.BLOCK, new ResourceLocation(StardewCraft.MODID, name));
 		}
 	}
 
@@ -50,7 +50,7 @@ public final class ModTags {
 
 		@SuppressWarnings("null")
 		private static TagKey<EntityType<?>> tag(String name) {
-			return TagKey.create(Registries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, name));
+			return TagKey.create(Registries.ENTITY_TYPE, new ResourceLocation(StardewCraft.MODID, name));
 		}
 	}
 
@@ -87,7 +87,7 @@ public final class ModTags {
 
 		@SuppressWarnings("null")
 		private static TagKey<Item> tag(String name) {
-			return TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, name));
+			return TagKey.create(Registries.ITEM, new ResourceLocation(StardewCraft.MODID, name));
 		}
 	}
 }

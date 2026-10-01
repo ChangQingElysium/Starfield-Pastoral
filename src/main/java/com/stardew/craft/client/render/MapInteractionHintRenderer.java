@@ -16,7 +16,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 /**
  * Unified crosshair-side indicator for readable points, NPCs, animals and
@@ -160,7 +160,7 @@ public final class MapInteractionHintRenderer {
 
     private static Icon icon(String name, int width, int height) {
         return new Icon(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         StardewCraft.MODID,
                         "textures/gui/interaction_hint/"
                                 + name + ".png"),

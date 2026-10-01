@@ -9,17 +9,17 @@ import com.stardew.craft.item.WizardBuildingItem;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import com.stardew.craft.shop.WizardBuildingService;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import com.stardew.craft.building.runtime.BuildingPurchasePlan;
 
@@ -35,7 +35,7 @@ public record CarpenterPurchasePayload(
         java.util.UUID requestId
 ) implements CustomPacketPayload {
     public static final Type<CarpenterPurchasePayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(
+            new Type<>(new ResourceLocation(
                     StardewCraft.MODID, "carpenter_purchase"));
 
     public static final StreamCodec<

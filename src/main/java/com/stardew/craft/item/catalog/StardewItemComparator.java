@@ -134,7 +134,7 @@ public final class StardewItemComparator {
     }
 
     private static int themeOrder(ItemStack stack) {
-        var state = stack.get(net.minecraft.core.component.DataComponents.BLOCK_STATE);
+        var state = stack.get(com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE);
         return state == null ? -1 : orderIndex(MINE_THEME_ORDER, state.properties().getOrDefault("theme", ""));
     }
 
@@ -160,7 +160,7 @@ public final class StardewItemComparator {
 
     private static Item itemFromId(String rawId) {
         try {
-            return BuiltInRegistries.ITEM.get(ResourceLocation.parse(rawId));
+            return BuiltInRegistries.ITEM.get(new ResourceLocation(rawId));
         } catch (Exception ignored) {
             return net.minecraft.world.item.Items.AIR;
         }

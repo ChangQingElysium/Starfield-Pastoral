@@ -6,10 +6,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.world.level.ChunkPos;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.common.world.chunk.RegisterTicketControllersEvent;
-import net.neoforged.neoforge.common.world.chunk.TicketController;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.neoforge.common.world.chunk.RegisterTicketControllersEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.common.world.chunk.TicketController;
 import java.util.*;
 
 /** Portal placement never changes vanilla /forceload or another system's ticket. */
@@ -17,7 +17,7 @@ import java.util.*;
 @EventBusSubscriber(modid=StardewCraft.MODID,bus=EventBusSubscriber.Bus.MOD)
 public final class InteriorPortalTickets {
     // Keep the old controller registered only to discard persisted leases from older saves.
-    private static final TicketController TICKETS=new TicketController(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,"portal_placement"),
+    private static final TicketController TICKETS=new TicketController(new ResourceLocation(StardewCraft.MODID,"portal_placement"),
             (level,helper)->{helper.getBlockTickets().keySet().forEach(helper::removeAllTickets);helper.getEntityTickets().keySet().forEach(helper::removeAllTickets);});
     private static final TicketType<BlockPos> PLACEMENT=TicketType.create("stardewcraft_portal_placement",BlockPos::compareTo);
     private record Lease(BlockPos owner,int x,int z) {}

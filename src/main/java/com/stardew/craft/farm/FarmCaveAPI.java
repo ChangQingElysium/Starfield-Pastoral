@@ -111,7 +111,7 @@ public final class FarmCaveAPI {
 
     @Nullable
     private static ServerLevel resolveStardewLevel() {
-        MinecraftServer server = net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer();
+        MinecraftServer server = net.minecraftforge.server.ServerLifecycleHooks.getCurrentServer();
         if (server == null) return null;
         return server.getLevel(com.stardew.craft.core.ModDimensions.STARDEW_VALLEY);
     }

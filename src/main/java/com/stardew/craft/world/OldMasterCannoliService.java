@@ -13,17 +13,17 @@ import com.stardew.craft.player.PlayerStardewData;
 import com.stardew.craft.sound.ModSounds;
 import com.stardew.craft.time.StardewSimulationTaskScheduler;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ColorParticleOption;
+import com.stardew.craft.port.net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.level.LevelEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.level.LevelEvent;
 
 /** Per-player Old Master Cannoli Statue reward with a lightweight source-inspired effect. */
 @EventBusSubscriber(modid = StardewCraft.MODID)

@@ -20,11 +20,11 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.util.FakePlayer;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
-import net.neoforged.neoforge.capabilities.Capabilities;
+import net.minecraftforge.common.util.FakePlayer;
+import net.minecraftforge.common.util.FakePlayerFactory;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import com.stardew.craft.port.net.neoforged.neoforge.capabilities.Capabilities;
 import java.util.List;
 import java.util.UUID;
 
@@ -137,15 +137,15 @@ public final class CraftablesModelIntegrationGameTests {
         level.setBlock(pos.above(),Blocks.STONE.defaultBlockState(),3);
         var chunk=level.getChunkAt(pos);
         com.stardew.craft.block.utility.FarmComputerFootprintMigration.loaded(
-                new net.neoforged.neoforge.event.level.ChunkEvent.Load(chunk,false));
+                new net.minecraftforge.event.level.ChunkEvent.Load(chunk,false));
         for(int i=0;i<100;i++) com.stardew.craft.block.utility.FarmComputerFootprintMigration.tick(
-                new net.neoforged.neoforge.event.tick.LevelTickEvent.Post(() -> true, level));
+                new com.stardew.craft.port.net.neoforged.neoforge.event.tick.LevelTickEvent.Post(() -> true, level));
         h.assertTrue(level.getBlockState(pos.above()).is(Blocks.STONE),"Chunk repair overwrote occupied space");
         level.setBlock(pos.above(),Blocks.AIR.defaultBlockState(),3);
         com.stardew.craft.block.utility.FarmComputerFootprintMigration.loaded(
-                new net.neoforged.neoforge.event.level.ChunkEvent.Load(chunk,false));
+                new net.minecraftforge.event.level.ChunkEvent.Load(chunk,false));
         for(int i=0;i<100;i++) com.stardew.craft.block.utility.FarmComputerFootprintMigration.tick(
-                new net.neoforged.neoforge.event.tick.LevelTickEvent.Post(() -> true, level));
+                new com.stardew.craft.port.net.neoforged.neoforge.event.tick.LevelTickEvent.Post(() -> true, level));
         h.assertTrue(level.getBlockState(pos.above()).is(computer),"Chunk repair left missing computer upper cell");
         h.succeed();
     }

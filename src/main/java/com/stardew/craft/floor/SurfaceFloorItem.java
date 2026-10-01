@@ -18,8 +18,8 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.registries.DeferredItem;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredItem;
+import net.minecraftforge.registries.DeferredRegister;
 
 public final class SurfaceFloorItem extends Item implements IStardewItem {
     public final SurfaceFloorType floor;

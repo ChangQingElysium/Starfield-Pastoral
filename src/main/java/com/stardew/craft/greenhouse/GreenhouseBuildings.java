@@ -25,15 +25,15 @@ import java.util.UUID;
 /** Exterior greenhouse integration and versioned old-farm migration. */
 public final class GreenhouseBuildings {
     public static final ResourceLocation FAMILY =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "greenhouse");
+            new ResourceLocation(StardewCraft.MODID, "greenhouse");
     private static final ResourceLocation MIGRATION =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "greenhouse_building");
+            new ResourceLocation(StardewCraft.MODID, "greenhouse_building");
     private static final ResourceLocation PORTAL_RECOVERY =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "greenhouse_portal_recovery");
+            new ResourceLocation(StardewCraft.MODID, "greenhouse_portal_recovery");
     private static final ResourceLocation RUINS_STRUCTURE =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "farm_buildings/greenhouse_ruins");
+            new ResourceLocation(StardewCraft.MODID, "farm_buildings/greenhouse_ruins");
     private static final ResourceLocation LEGACY_REPAIRED_STRUCTURE =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,
+            new ResourceLocation(StardewCraft.MODID,
                     "farm_buildings/greenhouse_legacy_refurbished");
     private static final int EXTERIOR_VERSION = 1;
     private static final BlockPos MANAGER = new BlockPos(12, 1, 11);

@@ -5,7 +5,7 @@ import com.stardew.craft.network.payload.AuctionEntryChoicePayload;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 public class AuctionEntryChoiceScreen extends AuctionScreen {
     private int choiceW, houseX, hintY;

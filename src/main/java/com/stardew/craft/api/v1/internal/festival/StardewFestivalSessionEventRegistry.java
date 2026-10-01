@@ -11,7 +11,7 @@ public final class StardewFestivalSessionEventRegistry {
     private static final OrderedExtensionRegistry<
             StardewFestivalSessionListener> LISTENERS =
             new OrderedExtensionRegistry<>(
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             StardewCraft.MODID, "festival/session_lifecycle"));
 
     private StardewFestivalSessionEventRegistry() {

@@ -38,11 +38,11 @@ public abstract class StardewMonsterEntity extends Monster {
         configureSpawn(definition, context);
         // Monster.InitializeForLocation, ordinary difficulty. Store the outcome, never reroll on load.
         if (definition.mineMonster() && context.bottomReached() && random.nextDouble() < .001) {
-            monsterState.addBornDrop(ResourceLocation.fromNamespaceAndPath("stardewcraft", random.nextBoolean() ? "diamond" : "prismatic_shard"));
+            monsterState.addBornDrop(new ResourceLocation("stardewcraft", random.nextBoolean() ? "diamond" : "prismatic_shard"));
         }
         if (level() instanceof net.minecraft.server.level.ServerLevel server) {
             int count = com.stardew.craft.festival.desert.DesertFestivalMineService.monsterEggCount(server, context.floor(), random);
-            for (int i = 0; i < count; i++) monsterState.addBornDrop(ResourceLocation.fromNamespaceAndPath("stardewcraft", "calico_egg"));
+            for (int i = 0; i < count; i++) monsterState.addBornDrop(new ResourceLocation("stardewcraft", "calico_egg"));
         }
     }
     public final void replaceCombatStats(MonsterStats stats) {

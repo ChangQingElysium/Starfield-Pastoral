@@ -23,12 +23,12 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ModelEvent;
-import net.neoforged.neoforge.client.model.BakedModelWrapper;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.ModelEvent;
+import net.minecraftforge.client.model.BakedModelWrapper;
+import net.minecraftforge.client.model.data.ModelData;
 
 /** Native JSON assemblies baked on reload; season swaps never change the placed structure. */
 @EventBusSubscriber(modid = StardewCraft.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
@@ -43,12 +43,12 @@ public final class ParkedVehicleModels {
         return variants == null ? List.of() : variants.get(Math.clamp(season, 0, variants.size() - 1));
     }
     private static JsonObject description(String vehicle, String season) {
-        var id = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "vehicles/" + vehicle + "/" + season + ".json");
+        var id = new ResourceLocation(StardewCraft.MODID, "vehicles/" + vehicle + "/" + season + ".json");
         try (var reader = new InputStreamReader(Minecraft.getInstance().getResourceManager().getResourceOrThrow(id).open(), StandardCharsets.UTF_8)) {
             return JsonParser.parseReader(reader).getAsJsonObject();
         } catch (IOException exception) { throw new IllegalStateException("Cannot load parked vehicle " + id, exception); }
     }
-    private static ModelResourceLocation id(String path) { return new ModelResourceLocation(ResourceLocation.parse(path), "standalone"); }
+    private static ModelResourceLocation id(String path) { return new ModelResourceLocation(new ResourceLocation(path), "standalone"); }
     @SubscribeEvent public static void register(ModelEvent.RegisterAdditional event) {
         var ids = new HashSet<ModelResourceLocation>();
         for (String vehicle : VEHICLES) for (String season : vehicle.equals("bus") ? new String[]{"spring"} : SEASONS) {

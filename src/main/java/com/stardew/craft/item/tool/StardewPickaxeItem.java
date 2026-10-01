@@ -1,13 +1,13 @@
 package com.stardew.craft.item.tool;
 
 import com.stardew.craft.item.IStardewItem;
-import net.minecraft.core.component.DataComponents;
+import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.PickaxeItem;
 import net.minecraft.world.item.Tier;
-import net.minecraft.world.item.component.Unbreakable;
+import com.stardew.craft.port.net.minecraft.world.item.component.Unbreakable;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;

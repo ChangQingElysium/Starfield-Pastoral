@@ -9,9 +9,9 @@ import com.stardew.craft.interior.InteriorPortalRegistry;
 import com.stardew.craft.mastery.MasteryRewardRegistry;
 import com.stardew.craft.player.ProfessionData;
 import com.stardew.craft.farm.FarmLayoutDataRegistry;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.AddReloadListenerEvent;
 
 @EventBusSubscriber(modid = StardewCraft.MODID)
 public final class WorldContentSystem {

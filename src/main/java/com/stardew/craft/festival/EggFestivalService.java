@@ -36,8 +36,8 @@ import net.minecraft.world.entity.Interaction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.scores.ScoreHolder;
-import net.neoforged.neoforge.network.PacketDistributor;
+import com.stardew.craft.port.net.minecraft.world.scores.ScoreHolder;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -51,10 +51,10 @@ import java.util.UUID;
 public final class EggFestivalService {
     public static final String FESTIVAL_ID = "spring13";
     private static final ResourceLocation PROGRESS_FESTIVAL_ID =
-            ResourceLocation.fromNamespaceAndPath(
+            new ResourceLocation(
                     StardewCraft.MODID, "spring13");
     private static final ResourceLocation EGG_HUNT_ACTIVITY_ID =
-            ResourceLocation.fromNamespaceAndPath(
+            new ResourceLocation(
                     StardewCraft.MODID, "egg_hunt");
     private static final String OVERLAY_ID = "Town-EggFestival";
     private static final String MAIN_EVENT_CUTSCENE_ID = "egg_festival_main_event";
@@ -280,7 +280,7 @@ public final class EggFestivalService {
         if (frozenMinute == null) {
             return false;
         }
-        var server = net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer();
+        var server = net.minecraftforge.server.ServerLifecycleHooks.getCurrentServer();
         ServerLevel stardewLevel = server == null ? null : server.getLevel(ModDimensions.STARDEW_VALLEY);
         return stardewLevel != null && hasOnlineParticipant(stardewLevel);
     }

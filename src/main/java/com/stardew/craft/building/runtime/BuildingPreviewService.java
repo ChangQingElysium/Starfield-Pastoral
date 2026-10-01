@@ -3,7 +3,7 @@ package com.stardew.craft.building.runtime;
 import com.stardew.craft.network.payload.BuildingPreviewPayload;
 import com.stardew.craft.network.payload.BuildingPreviewRequestPayload;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.Map;
 import java.util.UUID;

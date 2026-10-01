@@ -17,23 +17,23 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.component.DataComponents;
+import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.BlockItemStateProperties;
+import com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ModelEvent;
-import net.neoforged.neoforge.client.model.BakedModelWrapper;
-import net.neoforged.neoforge.client.model.IDynamicBakedModel;
-import net.neoforged.neoforge.client.model.data.ModelData;
-import net.neoforged.neoforge.client.model.data.ModelProperty;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.ModelEvent;
+import net.minecraftforge.client.model.BakedModelWrapper;
+import net.minecraftforge.client.model.IDynamicBakedModel;
+import net.minecraftforge.client.model.data.ModelData;
+import net.minecraftforge.client.model.data.ModelProperty;
 
 /** One solid top quad replaces the atlas; no raised overlay that can hide entity shadows. */
 @SuppressWarnings("removal")
@@ -43,7 +43,7 @@ public final class PlaygroundSandModels {
     private static final ModelProperty<Integer> CELL = new ModelProperty<>();
     private PlaygroundSandModels() {}
     private static ModelResourceLocation id(int season, int variant) {
-        return new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,
+        return new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID,
                 "block/playground_sand/" + SEASONS[season] + "_" + variant), "standalone");
     }
     @SubscribeEvent public static void register(ModelEvent.RegisterAdditional event) {
@@ -63,7 +63,7 @@ public final class PlaygroundSandModels {
             variants[v] = new Surface(surfaces, tops, v);
             event.getModels().put(BlockModelShaper.stateToModelLocation(state), variants[v]);
         }
-        var itemId = new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "playground_sand"), "inventory");
+        var itemId = new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID, "playground_sand"), "inventory");
         event.getModels().put(itemId, new SandItem(Objects.requireNonNull(event.getModels().get(itemId)), variants));
     }
     private static BakedQuad tile(BakedQuad source, int row) {

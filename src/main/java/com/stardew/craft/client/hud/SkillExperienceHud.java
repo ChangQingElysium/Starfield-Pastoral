@@ -13,11 +13,11 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
-import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -29,11 +29,11 @@ public final class SkillExperienceHud {
     private static final float FADE_STEP = 0.04f;
     private static final float BASE_FRAME_MS = 16.6667f;
             
-    private static final ResourceLocation TEX_FARMING = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/ui_info/farming.png");
-    private static final ResourceLocation TEX_FISHING = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/ui_info/fishing.png");
-    private static final ResourceLocation TEX_MINING = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/ui_info/mining.png");
-    private static final ResourceLocation TEX_FORAGING = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/ui_info/foraging.png");
-    private static final ResourceLocation TEX_COMBAT = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/ui_info/combat.png");
+    private static final ResourceLocation TEX_FARMING = new ResourceLocation(StardewCraft.MODID, "textures/gui/ui_info/farming.png");
+    private static final ResourceLocation TEX_FISHING = new ResourceLocation(StardewCraft.MODID, "textures/gui/ui_info/fishing.png");
+    private static final ResourceLocation TEX_MINING = new ResourceLocation(StardewCraft.MODID, "textures/gui/ui_info/mining.png");
+    private static final ResourceLocation TEX_FORAGING = new ResourceLocation(StardewCraft.MODID, "textures/gui/ui_info/foraging.png");
+    private static final ResourceLocation TEX_COMBAT = new ResourceLocation(StardewCraft.MODID, "textures/gui/ui_info/combat.png");
 
     // UI Info Suite constants
     private static final int BAR_RENDER_MS = 8000; // 480 ticks in SV

@@ -5,13 +5,13 @@ import com.stardew.craft.blockentity.WardrobeBlockEntity;
 import com.stardew.craft.wardrobe.WardrobeCategory;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 @SuppressWarnings("null")
 public record WardrobeActionPayload(BlockPos pos, int action, int index) implements CustomPacketPayload {
@@ -20,7 +20,7 @@ public record WardrobeActionPayload(BlockPos pos, int action, int index) impleme
     public static final int ACTION_STORE_ONE_INVENTORY_SLOT = 2;
 
     public static final Type<WardrobeActionPayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "wardrobe_action"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "wardrobe_action"));
 
     public static final StreamCodec<FriendlyByteBuf, WardrobeActionPayload> STREAM_CODEC = StreamCodec.of(
         (buf, payload) -> {

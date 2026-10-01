@@ -5,8 +5,8 @@ import com.stardew.craft.event.ScytheHarvestEvents;
 import com.stardew.craft.item.tool.ScytheItem;
 import com.stardew.craft.item.weapon.IStardewWeapon;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -15,7 +15,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.InteractionHand;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * 客户端左键挥舞（对空气/方块）时发到服务端，用于触发收割逻辑。
@@ -26,7 +26,7 @@ public record ScytheSwingPayload() implements CustomPacketPayload {
 
 	@SuppressWarnings("null")
 	public static final Type<ScytheSwingPayload> TYPE = new Type<>(
-			ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "scythe_swing"));
+			new ResourceLocation(StardewCraft.MODID, "scythe_swing"));
 	public static final StreamCodec<ByteBuf, ScytheSwingPayload> STREAM_CODEC = StreamCodec.unit(new ScytheSwingPayload());
 
 	@Override

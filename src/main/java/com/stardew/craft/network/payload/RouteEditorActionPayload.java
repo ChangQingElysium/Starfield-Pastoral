@@ -4,16 +4,16 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.item.tool.RouteEditorWandItem;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record RouteEditorActionPayload(String action, String routeId) implements CustomPacketPayload {
     public static final Type<RouteEditorActionPayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "route_editor_action"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "route_editor_action"));
 
     public static final StreamCodec<FriendlyByteBuf, RouteEditorActionPayload> STREAM_CODEC = StreamCodec.of(
         (buf, payload) -> {

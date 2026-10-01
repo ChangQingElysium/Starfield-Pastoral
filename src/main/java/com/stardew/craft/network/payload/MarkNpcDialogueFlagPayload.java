@@ -4,12 +4,12 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.player.PlayerDataEventHandler;
 import com.stardew.craft.player.PlayerDataManager;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.Set;
 
@@ -25,7 +25,7 @@ public record MarkNpcDialogueFlagPayload(String flag) implements CustomPacketPay
     );
 
     public static final Type<MarkNpcDialogueFlagPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "mark_npc_dialogue_flag"));
+            new ResourceLocation(StardewCraft.MODID, "mark_npc_dialogue_flag"));
     public static final StreamCodec<ByteBuf, MarkNpcDialogueFlagPayload> STREAM_CODEC =
             StreamCodec.composite(
                     ByteBufCodecs.STRING_UTF8, MarkNpcDialogueFlagPayload::flag,

@@ -2,20 +2,20 @@ package com.stardew.craft.combat.network;
 
 import com.stardew.craft.StardewCraft;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
 public record WeaponSkillUsePayload(boolean majorSkill) implements CustomPacketPayload {
 
     @SuppressWarnings("null")
     public static final Type<WeaponSkillUsePayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "weapon_skill_use")
+            new ResourceLocation(StardewCraft.MODID, "weapon_skill_use")
     );
 
     @SuppressWarnings("null")

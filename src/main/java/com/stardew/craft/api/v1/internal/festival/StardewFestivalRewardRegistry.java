@@ -40,12 +40,12 @@ public final class StardewFestivalRewardRegistry {
     private static final OrderedExtensionRegistry<
             StardewFestivalRewardHandler> HANDLERS =
             new OrderedExtensionRegistry<>(
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             StardewCraft.MODID, "festival/rewards"));
     private static final OrderedExtensionRegistry<
             StardewFestivalRewardDescriptor> DESCRIPTORS =
             new OrderedExtensionRegistry<>(
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             StardewCraft.MODID,
                             "festival/reward_descriptors"));
 

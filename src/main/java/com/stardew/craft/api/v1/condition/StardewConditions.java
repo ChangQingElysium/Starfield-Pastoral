@@ -125,7 +125,7 @@ public final class StardewConditions {
         Objects.requireNonNull(raw, "raw");
         ResourceLocation id = legacyType.indexOf(':') >= 0
                 ? ResourceLocation.tryParse(legacyType)
-                : ResourceLocation.fromNamespaceAndPath("stardewcraft", legacyType);
+                : new ResourceLocation("stardewcraft", legacyType);
         if (id == null) {
             return DataResult.error(() -> "Invalid Stardew condition type ID: " + legacyType);
         }

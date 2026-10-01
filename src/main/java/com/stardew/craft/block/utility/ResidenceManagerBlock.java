@@ -32,8 +32,8 @@ public class ResidenceManagerBlock extends BuildingManagerModelBlock {
         if(origin!=null){var pos=BlockPos.containing(origin);var data=BuildingWorldData.peek(level.getServer());
             if(data!=null)for(var record:data.all().reversed().stream().sorted(java.util.Comparator.comparing(r -> r.phase()==BuildingRecord.Phase.MISSING)).toList())if(record.mode()==BuildingRecord.Mode.SELF_BUILT && PrefabDefinitions.managerBlock(record.family())==this && record.dimension().equals(level.dimension().location()) && record.manager().equals(pos)){
                 var tag=new net.minecraft.nbt.CompoundTag();tag.putUUID("ResidenceIdentity",record.id());
-                stack.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA,net.minecraft.world.item.component.CustomData.of(tag));
-                stack.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME,record.title());break;
+                stack.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,com.stardew.craft.port.net.minecraft.world.item.component.CustomData.of(tag));
+                stack.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_NAME,record.title());break;
             }
         }
         return java.util.List.of(stack);

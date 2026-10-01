@@ -16,14 +16,14 @@ import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.status.ChunkStatus;
+import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.server.ServerStartedEvent;
-import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.server.ServerStartedEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 import java.util.Map;
 import java.util.Set;
@@ -44,7 +44,7 @@ public final class WizardTowerStructureHandler {
 
     private static final ResourceKey<Structure> WIZARD_TOWER_STRUCTURE =
         ResourceKey.create(Registries.STRUCTURE,
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "wizard_tower_overworld"));
+            new ResourceLocation(StardewCraft.MODID, "wizard_tower_overworld"));
 
     private static final int PORTAL_HEIGHT = 2;
 

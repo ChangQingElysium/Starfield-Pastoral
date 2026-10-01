@@ -8,9 +8,9 @@ import software.bernie.geckolib.model.GeoModel;
 public final class MiniShippingBinRenderer extends StardewGeoBlockRenderer<MiniShippingBinBlockEntity> {
     public MiniShippingBinRenderer(BlockEntityRendererProvider.Context context) {
         super(new GeoModel<MiniShippingBinBlockEntity>() {
-            private ResourceLocation path(String path) { return ResourceLocation.fromNamespaceAndPath("stardewcraft", path); }
+            private ResourceLocation path(String path) { return new ResourceLocation("stardewcraft", path); }
             @Override public void setCustomAnimations(MiniShippingBinBlockEntity bin, long id,
-                    software.bernie.geckolib.animation.AnimationState<MiniShippingBinBlockEntity> state) {
+                    software.bernie.geckolib.core.animation.AnimationState<MiniShippingBinBlockEntity> state) {
                 super.setCustomAnimations(bin, id, state);
                 getBone("lid").ifPresent(bone -> bone.setRotX(bin.lidMotion.radians(state.getPartialTick())));
             }

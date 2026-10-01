@@ -154,7 +154,7 @@ final class FarmInitialEcology {
 
     private static Profile load(ServerLevel level, FarmInstance farm) {
         String path = "farm_ecology/" + farm.getFarmLayoutId().getPath() + ".json";
-        ResourceLocation id = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, path);
+        ResourceLocation id = new ResourceLocation(StardewCraft.MODID, path);
         var resource = level.getServer().getResourceManager().getResource(id);
         if (resource.isEmpty()) {
             StardewCraft.LOGGER.error("Missing farm ecology profile {}", id);

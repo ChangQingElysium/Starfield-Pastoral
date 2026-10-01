@@ -3,7 +3,7 @@ package com.stardew.craft.item.equipment;
 import com.stardew.craft.item.ModItems;
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.core.component.DataComponents;
+import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -12,7 +12,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomData;
+import com.stardew.craft.port.net.minecraft.world.item.component.CustomData;
 
 public final class CombinedRingData {
     public static final String TAG_COMBINED_RING = "StardewCombinedRing";

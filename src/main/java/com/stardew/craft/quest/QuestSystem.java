@@ -1,9 +1,9 @@
 package com.stardew.craft.quest;
 
 import com.stardew.craft.StardewCraft;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.AddReloadListenerEvent;
 import com.stardew.craft.quest.data.DailyQuestPoolRegistry;
 
 /** Server hooks for the namespaced quest definition registry. */

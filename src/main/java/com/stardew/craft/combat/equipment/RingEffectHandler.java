@@ -17,9 +17,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +28,7 @@ import java.util.List;
  * Handles ring-specific on-kill and on-hit effects.
  * Registered as a Forge event subscriber.
  */
-@net.neoforged.fml.common.EventBusSubscriber(modid = com.stardew.craft.StardewCraft.MODID)
+@net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid = com.stardew.craft.StardewCraft.MODID)
 @SuppressWarnings("null")
 public class RingEffectHandler {
 
@@ -105,7 +105,7 @@ public class RingEffectHandler {
                     killed.spawnAtLocation(new ItemStack(com.stardew.craft.item.ModItems.COFFEE.get()));
                 } else if (player.getRandom().nextFloat() < 0.10f) {
                     Item espresso = BuiltInRegistries.ITEM.get(
-                            ResourceLocation.fromNamespaceAndPath(
+                            new ResourceLocation(
                                     com.stardew.craft.StardewCraft.MODID,
                                     "triple_shot_espresso"
                             )

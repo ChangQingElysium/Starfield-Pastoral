@@ -7,7 +7,7 @@ import com.stardew.craft.blockentity.ModBlockEntities;
 import com.stardew.craft.blockentity.UtilityDropHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.ItemInteractionResult;
+import com.stardew.craft.port.net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;

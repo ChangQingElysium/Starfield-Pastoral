@@ -5,14 +5,14 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.blockentity.CookingPlacedFoodBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.component.DataComponents;
+import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
+import com.stardew.craft.port.net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -171,7 +171,7 @@ public class CookingPlacedFoodBlock extends HorizontalDirectionalBlock implement
                 return stored;
             }
         }
-        Item item = BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, itemId));
+        Item item = BuiltInRegistries.ITEM.get(new ResourceLocation(StardewCraft.MODID, itemId));
         if (item == Items.AIR) {
             return ItemStack.EMPTY;
         }

@@ -1,7 +1,0 @@
-{
-    "parent":  "item/generated",
-    "textures":  {
-                     "layer0":  "stardewcraft:item/artifact/amphibian_fossil",
-                     "particle":  "stardewcraft:item/artifact/amphibian_fossil"
-                 }
-}

@@ -15,7 +15,7 @@ import java.util.List;
 @SuppressWarnings("null")
 public class FairGrangeDisplayScreen extends AbstractContainerScreen<FairGrangeDisplayMenu> {
     private static final ResourceLocation DISPENSER_TEXTURE =
-        ResourceLocation.withDefaultNamespace("textures/gui/container/dispenser.png");
+        new ResourceLocation("textures/gui/container/dispenser.png");
     private final TrashCanWidget.Controller trashCan = new TrashCanWidget.Controller();
 
     public FairGrangeDisplayScreen(FairGrangeDisplayMenu menu, Inventory playerInventory, Component title) {

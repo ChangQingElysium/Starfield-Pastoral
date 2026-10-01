@@ -18,11 +18,11 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientChatReceivedEvent;
-import net.neoforged.neoforge.client.event.RenderGuiEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.ClientChatReceivedEvent;
+import net.minecraftforge.client.event.RenderGuiEvent;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -31,10 +31,10 @@ import java.util.Objects;
 
 @EventBusSubscriber(modid = StardewCraft.MODID, value = Dist.CLIENT)
 public final class StardewHudMessageManager {
-	private static final ResourceLocation HUD_MESSAGE = ResourceLocation.fromNamespaceAndPath(
+	private static final ResourceLocation HUD_MESSAGE = new ResourceLocation(
 		StardewCraft.MODID, "textures/gui/hud_message.png"
 	);
-	private static final ResourceLocation MONEY_DIGITS = ResourceLocation.fromNamespaceAndPath(
+	private static final ResourceLocation MONEY_DIGITS = new ResourceLocation(
 		StardewCraft.MODID, "textures/gui/hud_message_digits.png"
 	);
 

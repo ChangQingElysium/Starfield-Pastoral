@@ -23,7 +23,7 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.neoforged.neoforge.common.ItemAbilities;
+import com.stardew.craft.port.net.neoforged.neoforge.common.ItemAbilities;
 
 /** SDV objects 294/295. Placement and clearing only; farm generation is a separate system. */
 public final class FarmTwigBlock extends Block {

@@ -20,7 +20,7 @@ import java.util.Objects;
 /** Built-in descriptions plus ordered, failure-isolated addon composition. */
 public final class StardewRequirementRegistry {
     private static final OrderedExtensionRegistry<StardewRequirementProvider> PROVIDERS =
-            new OrderedExtensionRegistry<>(ResourceLocation.fromNamespaceAndPath(
+            new OrderedExtensionRegistry<>(new ResourceLocation(
                     StardewCraft.MODID, "condition/requirements"));
 
     private StardewRequirementRegistry() {

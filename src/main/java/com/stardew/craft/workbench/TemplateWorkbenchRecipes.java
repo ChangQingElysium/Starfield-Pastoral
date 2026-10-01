@@ -37,7 +37,7 @@ public final class TemplateWorkbenchRecipes {
                     POLE, HORIZONTAL_POLE, FRAME_LEFT, FRAME_RIGHT -> 2;
             default -> 1;
         };
-        return new WorkbenchEntry(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, shape.registryPath()),
+        return new WorkbenchEntry(new ResourceLocation(StardewCraft.MODID, shape.registryPath()),
                 hardwood ? "template_hardwood" : "template_wood", cost, output, StardewCraft.MODID,
                 hardwood ? "stardewcraft:wood_hard" : "stardewcraft:wood_normal");
     }

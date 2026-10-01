@@ -13,7 +13,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -82,7 +82,7 @@ public class FurnitureCatalogueBlock extends MapDecorStaticBlock {
 
     private static void addIfExists(List<ShopItemEntry> items, String itemId) {
         try {
-            ResourceLocation rl = ResourceLocation.parse(itemId);
+            ResourceLocation rl = new ResourceLocation(itemId);
             Item item = BuiltInRegistries.ITEM.get(rl);
             if (item != null && item != net.minecraft.world.item.Items.AIR) {
                 items.add(new ShopItemEntry(

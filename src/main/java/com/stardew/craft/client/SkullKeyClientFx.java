@@ -8,10 +8,10 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderTooltipEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.RenderTooltipEvent;
 
 /**
  * 骷髅钥匙的 tooltip 高级视觉：
@@ -25,7 +25,7 @@ public final class SkullKeyClientFx {
 
     private SkullKeyClientFx() {}
 
-    // 边框两个关键色（ARGB，alpha=0xFF；NeoForge 期望 0xAARRGGBB）
+    // 边框两个关键色（ARGB，alpha=0xFF；MinecraftForge 期望 0xAARRGGBB）
     private static final int GOLD_BRIGHT = 0xFFFFE6A0; // 暖白金
     private static final int GOLD_DEEP   = 0xFF8A5A12; // 古铜
     private static final int GOLD_AMBER  = 0xFFD4A24A; // 琥珀

@@ -207,7 +207,7 @@ public final class StardewFonts {
     }
 
     private static ResourceLocation fontResource(String role) {
-        return ResourceLocation.fromNamespaceAndPath(
+        return new ResourceLocation(
                 StardewCraft.MODID, "stardew/" + role);
     }
 }

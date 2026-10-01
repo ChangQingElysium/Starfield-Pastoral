@@ -11,8 +11,8 @@ import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 /** Checks bound registries and the real creative inventory path, not source-text registrations. */
 @GameTestHolder(StardewCraft.MODID)
@@ -24,7 +24,7 @@ public final class WeaponCatalogGameTests {
         int clubs = 0;
         for (var weapon : WeaponRegistry.getAll()) {
             if (weapon.getWeaponType() != WeaponType.CLUB) continue;
-            var id = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, weapon.getId());
+            var id = new ResourceLocation(StardewCraft.MODID, weapon.getId());
             var item = BuiltInRegistries.ITEM.get(id);
             helper.assertTrue(item != Items.AIR, "Missing bound item: " + id);
             helper.assertTrue(visible.contains(item), "Hidden catalog item: " + id);

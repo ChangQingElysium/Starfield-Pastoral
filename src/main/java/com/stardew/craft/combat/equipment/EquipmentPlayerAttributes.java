@@ -22,47 +22,47 @@ import net.minecraft.world.item.ItemStack;
  */
 public final class EquipmentPlayerAttributes {
     private static final ResourceLocation WEAPON_SPEED_ID =
-            ResourceLocation.fromNamespaceAndPath(
+            new ResourceLocation(
                     StardewCraft.MODID,
                     "equipment.weapon_speed"
             );
     private static final ResourceLocation DEFENSE_ID =
-            ResourceLocation.fromNamespaceAndPath(
+            new ResourceLocation(
                     StardewCraft.MODID,
                     "equipment.stardew_defense"
             );
     private static final ResourceLocation LUCK_ID =
-            ResourceLocation.fromNamespaceAndPath(
+            new ResourceLocation(
                     StardewCraft.MODID,
                     "equipment.stardew_luck"
             );
     private static final ResourceLocation ATTACK_FLAT_ID =
-            ResourceLocation.fromNamespaceAndPath(
+            new ResourceLocation(
                     StardewCraft.MODID,
                     "equipment.stardew_attack"
             );
     private static final ResourceLocation ATTACK_MULTIPLIER_ID =
-            ResourceLocation.fromNamespaceAndPath(
+            new ResourceLocation(
                     StardewCraft.MODID,
                     "equipment.stardew_attack_multiplier"
             );
     private static final ResourceLocation MAX_HEALTH_ID =
-            ResourceLocation.fromNamespaceAndPath(
+            new ResourceLocation(
                     StardewCraft.MODID,
                     "equipment.stardew_max_health"
             );
     private static final ResourceLocation ATTACK_KNOCKBACK_ID =
-            ResourceLocation.fromNamespaceAndPath(
+            new ResourceLocation(
                     StardewCraft.MODID,
                     "equipment.stardew_attack_knockback"
             );
     private static final ResourceLocation WEAPON_STATS_SPEED_ID =
-            ResourceLocation.fromNamespaceAndPath(
+            new ResourceLocation(
                     StardewCraft.MODID,
                     "equipment.weapon_stats_speed"
             );
     private static final ResourceLocation WEAPON_STATS_RANGE_ID =
-            ResourceLocation.fromNamespaceAndPath(
+            new ResourceLocation(
                     StardewCraft.MODID,
                     "equipment.weapon_stats_range"
             );

@@ -3,7 +3,7 @@ package com.stardew.craft.combat;
 import java.util.IdentityHashMap;
 import java.util.UUID;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.neoforge.common.damagesource.DamageContainer;
+import com.stardew.craft.port.net.neoforged.neoforge.common.damagesource.DamageContainer;
 
 /**
  * Binds one authoritative weapon roll to the exact synchronous hurt call.

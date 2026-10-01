@@ -14,7 +14,7 @@ import java.util.List;
 
 @SuppressWarnings("null")
 public class ShippingBinScreen extends AbstractContainerScreen<ShippingBinMenu> {
-    private static final ResourceLocation CHEST_TEXTURE = ResourceLocation.withDefaultNamespace("textures/gui/container/generic_54.png");
+    private static final ResourceLocation CHEST_TEXTURE = new ResourceLocation("textures/gui/container/generic_54.png");
     private static final int ROWS = 1;
     private static final int SLOT_X = 80;
     private static final int SLOT_Y = 18;

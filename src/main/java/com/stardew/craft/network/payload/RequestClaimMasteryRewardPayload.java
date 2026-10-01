@@ -4,12 +4,12 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.mastery.MasteryService;
 import com.stardew.craft.player.SkillType;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * 客户端 → 服务端：玩家在 Mastery pedestal UI 上点击 Claim。
@@ -19,7 +19,7 @@ public record RequestClaimMasteryRewardPayload(int skillId) implements CustomPac
 
     @SuppressWarnings("null")
     public static final Type<RequestClaimMasteryRewardPayload> TYPE = new Type<>(
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "request_claim_mastery_reward")
+        new ResourceLocation(StardewCraft.MODID, "request_claim_mastery_reward")
     );
 
     public static final StreamCodec<ByteBuf, RequestClaimMasteryRewardPayload> STREAM_CODEC = StreamCodec.composite(

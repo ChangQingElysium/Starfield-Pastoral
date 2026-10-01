@@ -15,7 +15,7 @@ public final class SmokedOutputResolver {
     public static ItemStack resolve(ItemStack inputStack) {
         ResourceLocation id = BuiltInRegistries.ITEM.getKey(inputStack.getItem());
         if (id != null && StardewCraft.MODID.equals(id.getNamespace())) {
-            ResourceLocation smokedId = ResourceLocation.fromNamespaceAndPath(
+            ResourceLocation smokedId = new ResourceLocation(
                     StardewCraft.MODID, "smoked_" + id.getPath());
             if (BuiltInRegistries.ITEM.containsKey(smokedId)) {
                 Item smokedItem = BuiltInRegistries.ITEM.get(smokedId);

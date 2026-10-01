@@ -1,6 +1,6 @@
 package com.stardew.craft.client;
 
-import net.neoforged.fml.ModList;
+import net.minecraftforge.fml.ModList;
 
 /** Optional client integration hooks invoked after a server content snapshot is applied. */
 public final class ClientContentRefreshHooks {

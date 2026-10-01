@@ -26,7 +26,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 /**
  * Server-authoritative lifecycle runtime for built-in original weapon skills.
@@ -656,7 +656,7 @@ public final class WeaponSkillRuntime {
         }
 
         long nowTick = player.level().getGameTime();
-        ResourceLocation weaponId = ResourceLocation.fromNamespaceAndPath(
+        ResourceLocation weaponId = new ResourceLocation(
                 StardewCraft.MODID,
                 weaponItem.getWeaponId()
         );

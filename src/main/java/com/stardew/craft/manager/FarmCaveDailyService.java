@@ -16,7 +16,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
-import net.neoforged.neoforge.registries.DeferredBlock;
+import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredBlock;
 
 import java.util.List;
 import java.util.UUID;
@@ -56,11 +56,11 @@ public final class FarmCaveDailyService {
     public static final List<BlockPos> MUSHROOM_BOX_OFFSETS = com.stardew.craft.interior.FarmCaveLayout.BOXES;
 
     // 蘑菇产出 item id（对齐 SDV Content/Data/Machines.json (BC)128）
-    private static final ResourceLocation PURPLE_MUSHROOM = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "purple_mushroom");
-    private static final ResourceLocation CHANTERELLE     = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "chanterelle");
-    private static final ResourceLocation MOREL           = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "morel");
-    private static final ResourceLocation RED_MUSHROOM    = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "red_mushroom");
-    private static final ResourceLocation COMMON_MUSHROOM = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "common_mushroom");
+    private static final ResourceLocation PURPLE_MUSHROOM = new ResourceLocation(StardewCraft.MODID, "purple_mushroom");
+    private static final ResourceLocation CHANTERELLE     = new ResourceLocation(StardewCraft.MODID, "chanterelle");
+    private static final ResourceLocation MOREL           = new ResourceLocation(StardewCraft.MODID, "morel");
+    private static final ResourceLocation RED_MUSHROOM    = new ResourceLocation(StardewCraft.MODID, "red_mushroom");
+    private static final ResourceLocation COMMON_MUSHROOM = new ResourceLocation(StardewCraft.MODID, "common_mushroom");
 
     // ── 入口 ──
 

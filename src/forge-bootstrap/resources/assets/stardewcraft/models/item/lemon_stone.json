@@ -1,7 +1,0 @@
-{
-    "parent":  "item/generated",
-    "textures":  {
-                     "layer0":  "stardewcraft:item/mineral/lemon_stone",
-                     "particle":  "stardewcraft:item/mineral/lemon_stone"
-                 }
-}

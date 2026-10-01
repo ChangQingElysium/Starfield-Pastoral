@@ -12,7 +12,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
 import org.spongepowered.asm.mixin.Mixin;
 
-/** MouseHandler converts window coordinates before both NeoForge events and screen callbacks. */
+/** MouseHandler converts window coordinates before both MinecraftForge events and screen callbacks. */
 @Mixin(MouseHandler.class)
 public abstract class StardewGuiMouseMixin {
     @WrapMethod(method = "onPress")

@@ -19,12 +19,12 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ModelEvent;
-import net.neoforged.neoforge.client.model.BakedModelWrapper;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.ModelEvent;
+import net.minecraftforge.client.model.BakedModelWrapper;
+import net.minecraftforge.client.model.data.ModelData;
 
 /** Ordinary vanilla JSON models, baked once per resource reload; no custom geometry loader. */
 @EventBusSubscriber(modid = StardewCraft.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
@@ -35,13 +35,13 @@ public final class DoubleSwingModels {
     public record Part(int seat, double x, double y, double z, List<BakedQuad> quads) {}
     public static List<Part> parts(int season) { return seasons.isEmpty() ? List.of() : seasons.get(season); }
     private static JsonObject description(String season) {
-        var id = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "double_swing/" + season + ".json");
+        var id = new ResourceLocation(StardewCraft.MODID, "double_swing/" + season + ".json");
         try (var reader = new InputStreamReader(Minecraft.getInstance().getResourceManager().getResourceOrThrow(id).open(), StandardCharsets.UTF_8)) {
             return JsonParser.parseReader(reader).getAsJsonObject();
         } catch (IOException exception) { throw new IllegalStateException("Cannot load swing assembly", exception); }
     }
     private static ModelResourceLocation id(String path) {
-        return new ModelResourceLocation(ResourceLocation.parse(path), "standalone");
+        return new ModelResourceLocation(new ResourceLocation(path), "standalone");
     }
     @SubscribeEvent public static void register(ModelEvent.RegisterAdditional event) {
         for (String season : SEASONS) {

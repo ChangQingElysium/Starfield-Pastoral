@@ -13,7 +13,7 @@ public final class StardewFarmLifecycleRegistry {
     private static final OrderedExtensionRegistry<
             StardewFarmLifecycleListener> LISTENERS =
             new OrderedExtensionRegistry<>(
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             StardewCraft.MODID, "farm/lifecycle"));
 
     private StardewFarmLifecycleRegistry() {

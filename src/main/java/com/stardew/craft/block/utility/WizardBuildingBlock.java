@@ -17,7 +17,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
+import com.stardew.craft.port.net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -231,7 +231,7 @@ public final class WizardBuildingBlock extends MapDecorStaticBlock implements En
 
         if (kind.isGoldClock()) {
             if (level.getBlockEntity(mainPos) instanceof WizardBuildingBlockEntity clock) {
-                net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(serverPlayer,
+                net.minecraftforge.network.PacketDistributor.sendToPlayer(serverPlayer,
                         new com.stardew.craft.network.payload.OpenGoldClockQuestionPayload(
                                 mainPos, clock.isGoldClockEnabled()));
             }
@@ -243,8 +243,8 @@ public final class WizardBuildingBlock extends MapDecorStaticBlock implements En
     }
 
     @Override
-    public void initializeClient(@Nonnull Consumer<net.neoforged.neoforge.client.extensions.common.IClientBlockExtensions> consumer) {
-        consumer.accept(new net.neoforged.neoforge.client.extensions.common.IClientBlockExtensions() {
+    public void initializeClient(@Nonnull Consumer<net.minecraftforge.client.extensions.common.IClientBlockExtensions> consumer) {
+        consumer.accept(new net.minecraftforge.client.extensions.common.IClientBlockExtensions() {
             @Override
             @SuppressWarnings("null")
             public boolean addHitEffects(BlockState state, Level level, net.minecraft.world.phys.HitResult target,

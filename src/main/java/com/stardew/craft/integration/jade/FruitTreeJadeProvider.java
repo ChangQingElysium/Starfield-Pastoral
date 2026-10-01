@@ -27,7 +27,7 @@ import java.util.Objects;
 public enum FruitTreeJadeProvider implements IBlockComponentProvider, IServerDataProvider<BlockAccessor> {
     INSTANCE;
 
-    private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "fruit_tree_info");
+    private static final ResourceLocation UID = new ResourceLocation(StardewCraft.MODID, "fruit_tree_info");
 
     private static final String KIND = "Kind";
     private static final String KIND_SAPLING = "sapling";

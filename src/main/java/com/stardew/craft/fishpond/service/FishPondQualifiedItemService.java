@@ -103,11 +103,11 @@ public final class FishPondQualifiedItemService {
         }
 
         String normalizedPath = normalizeName(objectName);
-        ResourceLocation stardewcraftId = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, normalizedPath);
+        ResourceLocation stardewcraftId = new ResourceLocation(StardewCraft.MODID, normalizedPath);
         if (BuiltInRegistries.ITEM.containsKey(stardewcraftId)) {
             return stardewcraftId;
         }
-        ResourceLocation minecraftId = ResourceLocation.withDefaultNamespace(normalizedPath);
+        ResourceLocation minecraftId = new ResourceLocation(normalizedPath);
         if (BuiltInRegistries.ITEM.containsKey(minecraftId)) {
             return minecraftId;
         }

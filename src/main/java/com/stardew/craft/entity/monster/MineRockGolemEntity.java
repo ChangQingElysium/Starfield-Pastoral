@@ -44,7 +44,7 @@ public final class MineRockGolemEntity extends StardewMonsterEntity {
 
     public static AttributeSupplier.Builder createAttributes(){return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,45).add(Attributes.ATTACK_DAMAGE,5).add(Attributes.MOVEMENT_SPEED,.25).add(Attributes.FOLLOW_RANGE,64).add(Attributes.STEP_HEIGHT,0);}
     @Override protected void registerGoals(){}
-    @Override protected ResourceLocation definitionId(){return ResourceLocation.fromNamespaceAndPath("stardewcraft",visualVariant());}
+    @Override protected ResourceLocation definitionId(){return new ResourceLocation("stardewcraft",visualVariant());}
     @Override protected void configureSpawn(MonsterDefinition d,MonsterSpawnContext c){
         var r=MonsterStatResolver.base(d,c,random);var base=r.combat();
         if(isFarmGolem()){
@@ -57,7 +57,7 @@ public final class MineRockGolemEntity extends StardewMonsterEntity {
             replaceCombatStats(MonsterStats.builder().damage(base.getDamage()+farmCombatLevel+(isIridium()?10:0))
                     .resilience(base.getResilience()).missChance(base.getMissChance())
                     .experience(base.getExperience()+farmCombatLevel+(isIridium()?10:0)).build());
-            for(String drop:FarmGolemRules.constructorDrops(farmCombatLevel,isIridium(),random))monsterState().addBornDrop(ResourceLocation.fromNamespaceAndPath("stardewcraft",drop));
+            for(String drop:FarmGolemRules.constructorDrops(farmCombatLevel,isIridium(),random))monsterState().addBornDrop(new ResourceLocation("stardewcraft",drop));
             setSourceSpeed(isIridium()?4:2);movement.face(2);return;
         }
         double health=c.floor()>80?2.5:c.floor()>40?1.75:1,damage=c.floor()>80?2:c.floor()>40?1.5:1;

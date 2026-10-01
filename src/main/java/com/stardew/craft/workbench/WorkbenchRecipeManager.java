@@ -173,7 +173,7 @@ public final class WorkbenchRecipeManager {
     private static void addFromTag(List<WorkbenchEntry> list, String tagId,
                                     String category, int cost, int outputCount,
                                     Set<String> exclude) {
-        TagKey<Item> tag = TagKey.create(Registries.ITEM, ResourceLocation.parse(tagId));
+        TagKey<Item> tag = TagKey.create(Registries.ITEM, new ResourceLocation(tagId));
         BuiltInRegistries.ITEM.stream()
             .filter(item -> item != Items.AIR)
             .filter(item -> {
@@ -189,7 +189,7 @@ public final class WorkbenchRecipeManager {
 
     private static void addHardcoded(List<WorkbenchEntry> list, String category, int cost, int outputCount, String... itemIds) {
         for (String id : itemIds) {
-            ResourceLocation rl = ResourceLocation.parse(id);
+            ResourceLocation rl = new ResourceLocation(id);
             Item item = BuiltInRegistries.ITEM.get(rl);
             if (item != null && item != Items.AIR) {
                 list.add(new WorkbenchEntry(rl, category, cost, outputCount, rl.getNamespace()));
@@ -199,8 +199,8 @@ public final class WorkbenchRecipeManager {
 
     /** Stone slabs: items in #minecraft:slabs that are NOT wooden */
     private static void addStoneSlab(List<WorkbenchEntry> list) {
-        TagKey<Item> slabTag = TagKey.create(Registries.ITEM, ResourceLocation.parse("minecraft:slabs"));
-        TagKey<Item> woodenSlabTag = TagKey.create(Registries.ITEM, ResourceLocation.parse("minecraft:wooden_slabs"));
+        TagKey<Item> slabTag = TagKey.create(Registries.ITEM, new ResourceLocation("minecraft:slabs"));
+        TagKey<Item> woodenSlabTag = TagKey.create(Registries.ITEM, new ResourceLocation("minecraft:wooden_slabs"));
         BuiltInRegistries.ITEM.stream()
             .filter(item -> item != Items.AIR)
             .filter(item -> {
@@ -217,8 +217,8 @@ public final class WorkbenchRecipeManager {
 
     /** Stone stairs: items in #minecraft:stairs that are NOT wooden */
     private static void addStoneStairs(List<WorkbenchEntry> list) {
-        TagKey<Item> stairTag = TagKey.create(Registries.ITEM, ResourceLocation.parse("minecraft:stairs"));
-        TagKey<Item> woodenStairTag = TagKey.create(Registries.ITEM, ResourceLocation.parse("minecraft:wooden_stairs"));
+        TagKey<Item> stairTag = TagKey.create(Registries.ITEM, new ResourceLocation("minecraft:stairs"));
+        TagKey<Item> woodenStairTag = TagKey.create(Registries.ITEM, new ResourceLocation("minecraft:wooden_stairs"));
         BuiltInRegistries.ITEM.stream()
             .filter(item -> item != Items.AIR)
             .filter(item -> {

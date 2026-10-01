@@ -3,7 +3,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
-import net.minecraft.core.particles.ColorParticleOption;
+import com.stardew.craft.port.net.minecraft.core.particles.ColorParticleOption;
 /** Five row-five green source clouds; motion is away from the killer, with per-cloud falloff. */
 public final class SerpentPuffParticle extends TextureSheetParticle {
  private final SpriteSet sprites;private final int interval;

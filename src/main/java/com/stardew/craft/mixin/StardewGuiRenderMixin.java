@@ -6,10 +6,10 @@ import com.stardew.craft.client.gui.common.StardewGuiViewport;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.neoforged.neoforge.client.ClientHooks;
+import com.stardew.craft.port.net.neoforged.neoforge.client.ClientHooks;
 import org.spongepowered.asm.mixin.Mixin;
 
-/** Includes NeoForge's pre/post render events so extension overlays share the same coordinates. */
+/** Includes MinecraftForge's pre/post render events so extension overlays share the same coordinates. */
 @Mixin(ClientHooks.class)
 public abstract class StardewGuiRenderMixin {
     @WrapMethod(method = "drawScreenInternal", remap = false)

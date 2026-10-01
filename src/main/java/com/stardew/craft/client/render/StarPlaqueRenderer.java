@@ -12,7 +12,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 import org.joml.Matrix4f;
 
 /**
@@ -28,7 +28,7 @@ public final class StarPlaqueRenderer {
     private static final RenderType[] STAGE_RTS = new RenderType[7];
     static {
         for (int i = 0; i <= 6; i++) {
-            ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(
+            ResourceLocation tex = new ResourceLocation(
                 "stardewcraft", "textures/gui/star_plaque_" + i + "stars.png");
             STAGE_RTS[i] = RenderType.create(
                 "stardew_star_plaque_" + i,

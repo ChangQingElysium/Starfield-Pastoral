@@ -8,15 +8,15 @@ import software.bernie.geckolib.model.GeoModel;
 
 @SuppressWarnings("null")
 public class StoneChestGeoModel extends GeoModel<StoneChestBlockEntity> {
-    private static final ResourceLocation MODEL = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "geo/block/utility/stone_chest.geo.json");
-    private static final ResourceLocation ANIMATION = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "animations/block/utility/stone_chest.animation.json");
-    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/block/utility/stone_chest.png");
+    private static final ResourceLocation MODEL = new ResourceLocation(StardewCraft.MODID, "geo/block/utility/stone_chest.geo.json");
+    private static final ResourceLocation ANIMATION = new ResourceLocation(StardewCraft.MODID, "animations/block/utility/stone_chest.animation.json");
+    private static final ResourceLocation TEXTURE = new ResourceLocation(StardewCraft.MODID, "textures/block/utility/stone_chest.png");
     private static final ResourceLocation[] COLOR_TEXTURES = buildColorTextures();
 
     private static ResourceLocation[] buildColorTextures() {
         ResourceLocation[] textures = new ResourceLocation[WoodenChestColorPalette.size()];
         for (int i = 0; i < textures.length; i++) {
-            textures[i] = ResourceLocation.fromNamespaceAndPath(
+            textures[i] = new ResourceLocation(
                 StardewCraft.MODID,
                 String.format("textures/block/utility/stone_chest_color_%02d.png", i)
             );

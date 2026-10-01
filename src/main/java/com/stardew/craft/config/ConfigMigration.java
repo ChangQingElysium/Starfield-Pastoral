@@ -2,7 +2,7 @@ package com.stardew.craft.config;
 
 import com.stardew.craft.Config;
 import com.stardew.craft.StardewCraft;
-import net.neoforged.fml.event.config.ModConfigEvent;
+import net.minecraftforge.fml.event.config.ModConfigEvent;
 
 /** One-time migration from the historical common config to correctly scoped configs. */
 public final class ConfigMigration {

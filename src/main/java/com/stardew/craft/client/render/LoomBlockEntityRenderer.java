@@ -6,7 +6,7 @@ import com.mojang.math.Axis;
 import com.stardew.craft.block.utility.LoomBlock;
 import com.stardew.craft.client.model.LoomModels;
 import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import net.minecraftforge.client.model.data.ModelData;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.blockentity.LoomBlockEntity;
 import net.minecraft.client.Minecraft;
@@ -30,7 +30,7 @@ import javax.annotation.Nonnull;
  * Loom render: stable frame, independently rotating threaded wheel, and finished cloth.
  */
 public class LoomBlockEntityRenderer implements BlockEntityRenderer<LoomBlockEntity> {
-    private static final ResourceLocation BUBBLE_TEX = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/bubble.png");
+    private static final ResourceLocation BUBBLE_TEX = new ResourceLocation(StardewCraft.MODID, "textures/gui/bubble.png");
     private static final float PX = 1.0f / 32.0f;
 
     public LoomBlockEntityRenderer(BlockEntityRendererProvider.Context context) {

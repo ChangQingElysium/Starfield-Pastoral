@@ -14,14 +14,14 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 import org.joml.Matrix4f;
 
 import java.util.List;
 
 public final class YetiFreezeRenderer {
 
-    private static final ResourceLocation ICE_TEXTURE = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation ICE_TEXTURE = new ResourceLocation(
         "minecraft",
         "textures/block/ice.png"
     );

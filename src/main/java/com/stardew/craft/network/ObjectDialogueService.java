@@ -3,7 +3,7 @@ package com.stardew.craft.network;
 import com.stardew.craft.network.payload.OpenObjectDialoguePayload;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.List;
 

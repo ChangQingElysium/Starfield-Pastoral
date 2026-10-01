@@ -1,7 +1,0 @@
-{
-    "parent":  "item/generated",
-    "textures":  {
-                     "layer0":  "stardewcraft:item/artifact/ornamental_fan",
-                     "particle":  "stardewcraft:item/artifact/ornamental_fan"
-                 }
-}

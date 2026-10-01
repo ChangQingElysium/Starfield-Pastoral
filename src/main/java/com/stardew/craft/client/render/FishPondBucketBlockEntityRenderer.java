@@ -25,7 +25,7 @@ import net.minecraft.world.item.ItemStack;
 import javax.annotation.Nonnull;
 
 public class FishPondBucketBlockEntityRenderer implements BlockEntityRenderer<FishPondBucketBlockEntity> {
-    private static final ResourceLocation BUBBLE_TEX = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/bubble.png");
+    private static final ResourceLocation BUBBLE_TEX = new ResourceLocation(StardewCraft.MODID, "textures/gui/bubble.png");
     private static final float PX = 1.0f / 32.0f;
 
     public FishPondBucketBlockEntityRenderer(BlockEntityRendererProvider.Context context) {

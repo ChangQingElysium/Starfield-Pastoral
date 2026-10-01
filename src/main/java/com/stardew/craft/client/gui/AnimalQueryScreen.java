@@ -10,7 +10,7 @@ import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 /** Addon-backed animal queries retain their menu protocol and use the reviewed detail layout. */
 public final class AnimalQueryScreen extends FarmFolioScreen

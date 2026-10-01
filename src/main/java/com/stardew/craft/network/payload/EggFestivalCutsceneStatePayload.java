@@ -3,10 +3,10 @@ package com.stardew.craft.network.payload;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.festival.client.EggFestivalCutsceneClientState;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.List;
 import java.util.UUID;
@@ -25,7 +25,7 @@ public record EggFestivalCutsceneStatePayload(
     }
 
     public static final Type<EggFestivalCutsceneStatePayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "egg_festival_cutscene_state"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "egg_festival_cutscene_state"));
 
     public static final StreamCodec<FriendlyByteBuf, EggFestivalCutsceneStatePayload> STREAM_CODEC = StreamCodec.of(
         (buf, payload) -> {
@@ -62,7 +62,7 @@ public record EggFestivalCutsceneStatePayload(
         context.enqueueWork(() -> handleClient(payload));
     }
 
-    @net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+    @net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
     private static void handleClient(EggFestivalCutsceneStatePayload payload) {
         EggFestivalCutsceneClientState.set(payload.participantCount(), payload.playerWon(), payload.winnerMask(), payload.winnerText(), payload.participantIds());
     }

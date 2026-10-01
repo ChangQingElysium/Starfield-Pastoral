@@ -34,7 +34,7 @@ import java.util.Optional;
 public final class InteriorRegionRegistry {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final ResourceLocation BUILTIN_TABLE =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "fixed_interiors");
+            new ResourceLocation(StardewCraft.MODID, "fixed_interiors");
     private static final AtomicDefinitionStore<StardewLocationDefinition> STORE = new AtomicDefinitionStore<>();
     private static volatile Catalog catalog = Catalog.empty();
 

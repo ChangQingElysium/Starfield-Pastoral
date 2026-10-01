@@ -42,7 +42,7 @@ public final class BuildingRemovalJournal extends SavedData {
                     if(data.hasUUID("BuildingRefund") && data.getUUID("BuildingRefund").equals(record.id())){delivered=true;break;}
                 }
                 if(!delivered){
-                    var item=new ItemStack(PrefabDefinitions.managerItem(record.family()));var receipt=new CompoundTag();receipt.putUUID("BuildingRefund",record.id());item.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA,net.minecraft.world.item.component.CustomData.of(receipt));
+                    var item=new ItemStack(PrefabDefinitions.managerItem(record.family()));var receipt=new CompoundTag();receipt.putUUID("BuildingRefund",record.id());item.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,com.stardew.craft.port.net.minecraft.world.item.component.CustomData.of(receipt));
                     var plan=BuildingPurchasePlan.prepare(player.getInventory(),item,List.of());if(plan==null)continue;plan.apply(player.getInventory());
                 }
                 server.getPlayerList().saveAll();

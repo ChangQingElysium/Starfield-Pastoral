@@ -34,7 +34,7 @@ public final class EatItemCommand implements EventCommand {
             return;
         }
         previousItem = playerActor.getMainHandItem().copy();
-        var item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(itemId));
+        var item = BuiltInRegistries.ITEM.get(new ResourceLocation(itemId));
         playerActor.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(item));
         playerActor.setEatingItem(true);
     }

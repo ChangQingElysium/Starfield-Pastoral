@@ -13,8 +13,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.FarmBlock;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import java.util.*;
 
 @GameTestHolder("stardewcraft_giant_growth")
@@ -23,7 +23,7 @@ public final class GiantCropGrowthGameTests {
     private static final class Fixture {
         final Set<BlockPos> roots = new HashSet<>();
         final List<StardewCropDailyContext> dates = new ArrayList<>();
-        final ResourceLocation id = ResourceLocation.fromNamespaceAndPath("giant_test", UUID.randomUUID().toString());
+        final ResourceLocation id = new ResourceLocation("giant_test", UUID.randomUUID().toString());
         final BlockPos anchor;
         boolean irrigatesDuringUpdate;
         Fixture(GameTestHelper h, int age, double chance, boolean outside, boolean malformed) {
@@ -34,7 +34,7 @@ public final class GiantCropGrowthGameTests {
             StardewCropTypes.register(new StardewCropType(id, "block.minecraft.wheat", 8,
                     List.of(BuiltInRegistries.BLOCK.getKey(Blocks.WHEAT)), new StardewCropData(
                     List.of("spring", "summer", "fall", "winter"), List.of(1), -1, 0,
-                    ResourceLocation.parse("stardewcraft:grab"), id, ResourceLocation.parse("minecraft:wheat_seeds"))), 0,
+                    new ResourceLocation("stardewcraft:grab"), id, new ResourceLocation("minecraft:wheat_seeds"))), 0,
                     new StardewCropRuntimeAdapter() {
                 public StardewCropState inspect(net.minecraft.world.level.LevelReader level, BlockPos pos) {
                     var state = level.getBlockState(pos);
@@ -113,7 +113,7 @@ public final class GiantCropGrowthGameTests {
             for (int season = 0; season < 4; season++) {
                 scoped.set(new StardewCropDailyContext(true, season, false, season * 28 + 1, true));
                 for (var entry : Map.of("cauliflower", 0, "melon", 1, "pumpkin", 2, "powder_melon", 3, "qi_fruit", -1).entrySet()) {
-                    var block = BuiltInRegistries.BLOCK.get(ResourceLocation.parse("stardewcraft:" + entry.getKey() + "_crop"));
+                    var block = BuiltInRegistries.BLOCK.get(new ResourceLocation("stardewcraft:" + entry.getKey() + "_crop"));
                     h.assertTrue((boolean) method.invoke(block, h.getLevel()) == (entry.getValue() == -1 || entry.getValue() == season), "Native crop used the live season: " + entry.getKey());
                 }
             }
@@ -214,7 +214,7 @@ public final class GiantCropGrowthGameTests {
         var core = StardewGiantCrops.definitions().stream().filter(d -> d.id().getNamespace().equals("stardewcraft")).toList();
         int index = 0;
         for (var definition : core) {
-            var cropId = ResourceLocation.fromNamespaceAndPath("stardewcraft", definition.produce().getPath() + "_crop");
+            var cropId = new ResourceLocation("stardewcraft", definition.produce().getPath() + "_crop");
             var cropBlock = BuiltInRegistries.BLOCK.get(cropId);
             h.assertTrue(cropBlock instanceof com.stardew.craft.block.crop.StardewCropBlock, "Giant produce does not resolve a native crop: " + cropId);
             var anchor = h.absolutePos(new BlockPos(4 + index++ * 5, 3, 4));
@@ -227,7 +227,7 @@ public final class GiantCropGrowthGameTests {
             }
             var inspected = StardewCropRuntime.inspect(level, anchor);
             h.assertTrue(definition.produce().equals(GiantCropGrowth.produce(level, anchor, inspected)), "Native produce mapping differs from giant definition");
-            var testId = ResourceLocation.fromNamespaceAndPath("giant_test", "native_" + definition.produce().getPath());
+            var testId = new ResourceLocation("giant_test", "native_" + definition.produce().getPath());
             StardewGiantCrops.register(new StardewGiantCrops.Definition(testId, definition.produce(), 3, 3, definition.height(), 1, true, new StardewGiantCrops.Handler() {
                 public boolean allowsOutsideFarm(StardewGiantCrops.Context c) { return c.anchor().equals(anchor); }
                 public List<StardewGiantCrops.Cell> plan(StardewGiantCrops.Context c, List<StardewCropState> crops) { return definition.handler().plan(c, crops); }
@@ -249,13 +249,13 @@ public final class GiantCropGrowthGameTests {
 
     @GameTest(templateNamespace="stardewcraft_giant_growth", template="empty")
     public static void stableRandomAndDefaultCatalogKeepSourceParameters(GameTestHelper h) {
-        var id = ResourceLocation.parse("stardewcraft:giant_melon"); var dimension = ResourceLocation.parse("stardewcraft:stardew_valley");
+        var id = new ResourceLocation("stardewcraft:giant_melon"); var dimension = new ResourceLocation("stardewcraft:stardew_valley");
         int winners = 0, changedWorld = 0;
         for (int i = 0; i < 100000; i++) {
             var pos = new BlockPos(i % 1000, 64, i / 1000);
             boolean won = GiantCropGrowth.wins(42, dimension, pos, id, 20, .01);
             if (won) winners++;
-            h.assertTrue(won == GiantCropGrowth.wins(42, ResourceLocation.parse(dimension.toString()), pos.immutable(), ResourceLocation.parse(id.toString()), 20, .01), "Roll depends on object identity");
+            h.assertTrue(won == GiantCropGrowth.wins(42, new ResourceLocation(dimension.toString()), pos.immutable(), new ResourceLocation(id.toString()), 20, .01), "Roll depends on object identity");
             if (won != GiantCropGrowth.wins(43, dimension, pos, id, 20, .01)) changedWorld++;
         }
         h.assertTrue(winners > 850 && winners < 1150 && changedWorld > 1000, "Wrong chance or world seed ignored");

@@ -18,6 +18,6 @@ public final class QuestProgressEvents {
     }
 
     private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath("stardewcraft", path);
+        return new ResourceLocation("stardewcraft", path);
     }
 }

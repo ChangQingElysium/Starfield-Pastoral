@@ -17,11 +17,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.EntityRenderersEvent;
-import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import org.joml.Matrix3f;
 import org.joml.Vector3f;
 
@@ -51,7 +51,7 @@ public final class NativeBatRenderer extends EntityRenderer<MineBatEntity> {
         loaded = java.util.Map.copyOf(models);
     }
     private static NativeNpcModel loadVariant(ResourceManager resources, String variant) {
-        var modelId = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "monster_native/" + variant + ".json");
+        var modelId = new ResourceLocation(StardewCraft.MODID, "monster_native/" + variant + ".json");
         var texture = texture(variant);
         try (var reader = resources.getResourceOrThrow(modelId).openAsReader()) {
             NativeNpcModel model = new Gson().fromJson(reader, NativeNpcModel.class);
@@ -99,7 +99,7 @@ public final class NativeBatRenderer extends EntityRenderer<MineBatEntity> {
     }
     @Override protected boolean shouldShowName(MineBatEntity entity) { return false; }
     private static ResourceLocation texture(String variant) {
-        return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/entity/monster_native/" + variant + ".png");
+        return new ResourceLocation(StardewCraft.MODID, "textures/entity/monster_native/" + variant + ".png");
     }
     @Override public ResourceLocation getTextureLocation(MineBatEntity entity) { return texture(entity.variant()); }
     @Override public void render(MineBatEntity entity, float yaw, float partialTick, PoseStack stack,

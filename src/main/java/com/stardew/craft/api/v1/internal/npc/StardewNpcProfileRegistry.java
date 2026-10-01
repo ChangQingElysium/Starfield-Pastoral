@@ -18,7 +18,7 @@ import java.util.TreeSet;
 public final class StardewNpcProfileRegistry {
     private static final OrderedExtensionRegistry<StardewNpcDefinition> DEFINITIONS =
             new OrderedExtensionRegistry<>(
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             StardewCraft.MODID, "npc/profile"));
 
     private StardewNpcProfileRegistry() {

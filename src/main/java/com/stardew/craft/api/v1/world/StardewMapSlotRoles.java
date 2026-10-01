@@ -25,7 +25,7 @@ public final class StardewMapSlotRoles {
     }
 
     private static ResourceLocation core(String path) {
-        return ResourceLocation.fromNamespaceAndPath(
+        return new ResourceLocation(
                 "stardewcraft", path);
     }
 }

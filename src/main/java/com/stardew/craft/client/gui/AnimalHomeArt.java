@@ -8,7 +8,7 @@ final class AnimalHomeArt {
     static final int INK = 0xFF5C4834, MUTED = 0xFF7B6747, GREEN = 0xFF536545, RED = 0xFF9B4936;
     private AnimalHomeArt() { }
     private static ResourceLocation texture(String name) {
-        return ResourceLocation.fromNamespaceAndPath("stardewcraft", "textures/gui/animal_home/" + name + ".png");
+        return new ResourceLocation("stardewcraft", "textures/gui/animal_home/" + name + ".png");
     }
     static void sprite(GuiGraphics g, String name, int x, int y, int w, int h) {
         RenderSystem.enableBlend(); RenderSystem.defaultBlendFunc();

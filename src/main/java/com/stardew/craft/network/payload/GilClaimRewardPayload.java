@@ -3,11 +3,11 @@ package com.stardew.craft.network.payload;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.shop.MarlonService;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * Client -> Server: player wants to claim a monster slayer reward from Marlon.
@@ -16,7 +16,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 public record GilClaimRewardPayload(String goalKey) implements CustomPacketPayload {
 
     public static final Type<GilClaimRewardPayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "gil_claim_reward"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "gil_claim_reward"));
 
     public static final StreamCodec<FriendlyByteBuf, GilClaimRewardPayload> STREAM_CODEC = StreamCodec.of(
         (buf, payload) -> buf.writeUtf(payload.goalKey),

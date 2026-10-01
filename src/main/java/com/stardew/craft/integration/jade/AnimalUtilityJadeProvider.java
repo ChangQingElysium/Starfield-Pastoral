@@ -16,7 +16,7 @@ import snownee.jade.api.config.IPluginConfig;
 public enum AnimalUtilityJadeProvider implements IBlockComponentProvider, IServerDataProvider<BlockAccessor> {
     INSTANCE;
 
-    private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "animal_utility");
+    private static final ResourceLocation UID = new ResourceLocation(StardewCraft.MODID, "animal_utility");
     private static final String NBT_WORKING = "working";
 
     @Override

@@ -1,9 +1,9 @@
 package com.stardew.craft.combat;
 
-import net.minecraft.core.component.DataComponents;
+import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomData;
+import com.stardew.craft.port.net.minecraft.world.item.component.CustomData;
 import com.stardew.craft.api.v1.equipment.StardewEquipmentData;
 import com.stardew.craft.api.v1.equipment.StardewEquipmentDataApi;
 

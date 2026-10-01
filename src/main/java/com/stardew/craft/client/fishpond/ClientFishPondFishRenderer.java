@@ -14,10 +14,10 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import org.joml.Matrix3f;
 import org.joml.Vector3f;
 import java.util.Map;
@@ -33,7 +33,7 @@ public final class ClientFishPondFishRenderer {
         event.registerReloadListener((ResourceManagerReloadListener) resources -> {
             var next=new java.util.HashMap<ResourceLocation,FishModel>();
             Map<String,CatchAnchor> catchAnchors;
-            try(var reader=resources.openAsReader(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,"fishing_native/catch_anchors.json"))) {
+            try(var reader=resources.openAsReader(new ResourceLocation(StardewCraft.MODID,"fishing_native/catch_anchors.json"))) {
                 catchAnchors=new Gson().fromJson(reader,new com.google.gson.reflect.TypeToken<Map<String,CatchAnchor>>(){}.getType());
             } catch(Exception e){throw new IllegalStateException("Cannot load fish attachment surfaces",e);}
             resources.listResources("pond_fish",id->id.getPath().endsWith(".json")&&!id.getPath().endsWith("/manifest.json")).forEach((id,resource)->{
@@ -48,7 +48,7 @@ public final class ClientFishPondFishRenderer {
                         var p=new Vector3f(v[0],v[1],v[2]);if(q.bone()>=0)matrices[q.bone()].transformPosition(p);min.min(p);max.max(p);
                     }
                     var center=new Vector3f(min).add(max).mul(.5F);float radius=max.distance(min)*.5F;
-                    resources.getResourceOrThrow(ResourceLocation.parse(model.texture()));
+                    resources.getResourceOrThrow(new ResourceLocation(model.texture()));
                     String name=id.getPath().substring("pond_fish/".length(),id.getPath().length()-5);
                     var anchor=catchAnchors.get(name);
                     var mouth=anchor==null?new Vector3f(max.x-.15F,center.y,center.z):new Vector3f(anchor.point());
@@ -56,7 +56,7 @@ public final class ClientFishPondFishRenderer {
                     var wallPose=com.stardew.craft.fishing.PlacedFishLayout.hanging(
                             new double[]{min.x,min.y,min.z},new double[]{max.x,max.y,max.z},
                             new double[]{mouth.x,mouth.y,mouth.z},anchor!=null&&anchor.axis().equals("y"));
-                    next.put(ResourceLocation.fromNamespaceAndPath(id.getNamespace(),name),new FishModel(model,pose,center,radius,locomotion,mouth,anchor!=null&&anchor.axis().equals("y"),size,wallPose));
+                    next.put(new ResourceLocation(id.getNamespace(),name),new FishModel(model,pose,center,radius,locomotion,mouth,anchor!=null&&anchor.axis().equals("y"),size,wallPose));
                 } catch(Exception e) {throw new IllegalStateException("Cannot load pond fish "+id,e);}
             });
             models=Map.copyOf(next);ClientFishPondSwimVisuals.clear();
@@ -118,7 +118,7 @@ public final class ClientFishPondFishRenderer {
         // Approved fish face +X in authoring space. Heading zero swims east, positive heading turns south.
         stack.mulPose(Axis.YP.rotationDegrees(-yaw));stack.mulPose(Axis.ZP.rotationDegrees(-pitch));stack.mulPose(Axis.XP.rotationDegrees(roll));
         float factor=scale/(2*entry.radius());stack.scale(factor,factor,factor);stack.translate(-entry.center().x,-entry.center().y,-entry.center().z);
-        var texture=ResourceLocation.parse(model.texture());
+        var texture=new ResourceLocation(model.texture());
         for(int pass=0;pass<3;pass++) {
             var consumer=buffers.getBuffer(pass==2?RenderType.entityTranslucent(texture):pass==1?RenderType.entityCutout(texture):RenderType.entityCutoutNoCull(texture));
             for(var q:model.quads()) {

@@ -18,7 +18,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,15 +26,15 @@ import java.util.Random;
 
 @SuppressWarnings("null")
 public class PrizeTicketMachineScreen extends Screen {
-    private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation BACKGROUND = new ResourceLocation(
         StardewCraft.MODID, "textures/gui/prize_ticket/menu_background.png");
-    private static final ResourceLocation REWARD_TRACK = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation REWARD_TRACK = new ResourceLocation(
         StardewCraft.MODID, "textures/gui/prize_ticket/reward_track_overlay.png");
-    private static final ResourceLocation BUTTON = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation BUTTON = new ResourceLocation(
         StardewCraft.MODID, "textures/gui/prize_ticket/button.png");
-    private static final ResourceLocation BUTTON_HOVER = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation BUTTON_HOVER = new ResourceLocation(
         StardewCraft.MODID, "textures/gui/prize_ticket/button_hover.png");
-    private static final ResourceLocation BUTTON_PRESSED = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation BUTTON_PRESSED = new ResourceLocation(
         StardewCraft.MODID, "textures/gui/prize_ticket/button_pressed.png");
 
     private static final int SDV_W = 464;

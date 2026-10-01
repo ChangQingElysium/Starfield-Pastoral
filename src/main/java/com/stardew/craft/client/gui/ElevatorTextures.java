@@ -31,6 +31,6 @@ final class ElevatorTextures {
     }
 
     private static ResourceLocation elevator(String name) {
-        return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/elevator/" + name + ".png");
+        return new ResourceLocation(StardewCraft.MODID, "textures/gui/elevator/" + name + ".png");
     }
 }

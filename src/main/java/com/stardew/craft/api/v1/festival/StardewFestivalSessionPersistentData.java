@@ -28,7 +28,7 @@ import java.util.Set;
  */
 public final class StardewFestivalSessionPersistentData {
     private static final ResourceLocation SCOPE =
-            ResourceLocation.fromNamespaceAndPath(
+            new ResourceLocation(
                     "stardewcraft", "state/festival_session");
 
     private final NamespacedStateContainer container;

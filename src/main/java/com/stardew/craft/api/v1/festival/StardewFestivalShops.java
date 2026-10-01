@@ -149,7 +149,7 @@ public final class StardewFestivalShops {
                 .replaceAll("[^a-z0-9/._-]+", "_");
         ResourceLocation id = ResourceLocation.tryBuild(
                 festival.resourceId().getNamespace(), path);
-        return id != null ? id : ResourceLocation.fromNamespaceAndPath(
+        return id != null ? id : new ResourceLocation(
                 StardewCraft.MODID, "unknown_shop");
     }
 

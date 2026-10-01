@@ -31,7 +31,7 @@ public final class MineShadowShamanEntity extends StardewMonsterEntity {
     public MineShadowShamanEntity(EntityType<? extends MineShadowShamanEntity> type,Level level){super(type,level);addTag("sd_mob_shadow_shaman");}
     public static AttributeSupplier.Builder createAttributes(){return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,80).add(Attributes.ATTACK_DAMAGE,17).add(Attributes.MOVEMENT_SPEED,.25).add(Attributes.FOLLOW_RANGE,64).add(Attributes.STEP_HEIGHT,0);}
     @Override protected void registerGoals(){}
-    @Override protected ResourceLocation definitionId(){return ResourceLocation.parse("stardewcraft:shadow_shaman");}
+    @Override protected ResourceLocation definitionId(){return new ResourceLocation("stardewcraft:shadow_shaman");}
     @Override protected void configureSpawn(MonsterDefinition d,MonsterSpawnContext c){
         var r=MonsterStatResolver.base(d,c,random);setInitialHealth(r.initialHealth());var stats=r.combat();
         var server=level().getServer();var friendships=com.stardew.craft.npc.runtime.NpcFriendshipDataManager.get((ServerLevel)level());var host=server.getSingleplayerProfile();
@@ -82,7 +82,7 @@ public final class MineShadowShamanEntity extends StardewMonsterEntity {
         }
         if(selected!=null){selected.setHealth(Math.min(selected.monsterState().sourceMaxHealth(),selected.getHealth()+60));playSound(ModSounds.MONSTER_HEAL.get(),1,pitch(-.1,.171));
             ((ServerLevel)level()).sendParticles(com.stardew.craft.weather.ModParticles.MONSTER_HEAL.get(),selected.getX(),selected.getY()+.7,selected.getZ(),1,0,0,0,0);
-            net.neoforged.neoforge.network.PacketDistributor.sendToPlayersTrackingEntityAndSelf(selected,new com.stardew.craft.combat.network.DamageNumberPayload((float)selected.getX(),(float)(selected.getY()+.9),(float)selected.getZ(),60,false,"monster_heal"));
+            net.minecraftforge.network.PacketDistributor.sendToPlayersTrackingEntityAndSelf(selected,new com.stardew.craft.combat.network.DamageNumberPayload((float)selected.getX(),(float)(selected.getY()+.9),(float)selected.getZ(),60,false,"monster_heal"));
         }
         return selected;
     }

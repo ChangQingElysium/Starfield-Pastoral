@@ -775,7 +775,7 @@ public class PlayerStardewData {
             String dimStr = tag.getString("WizardSourceDim");
             if (!dimStr.isBlank()) {
                 @SuppressWarnings("null")
-                var parsedKey = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(dimStr));
+                var parsedKey = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(dimStr));
                 data.wizardSourceDimension = parsedKey;
             }
         }

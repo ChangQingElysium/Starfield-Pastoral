@@ -1,7 +1,7 @@
 package com.stardew.craft.blockentity;
 
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.minecraftforge.items.IItemHandler;
 
 @SuppressWarnings("null")
 public class UtilityItemHandler implements IItemHandler {

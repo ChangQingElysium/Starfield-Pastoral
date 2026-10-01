@@ -13,8 +13,8 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.client.model.data.ModelData;
-import net.neoforged.neoforge.client.model.data.ModelProperty;
+import net.minecraftforge.client.model.data.ModelData;
+import net.minecraftforge.client.model.data.ModelProperty;
 
 public final class TemplateBlockEntity extends BlockEntity {
     public static final ModelProperty<BlockState> MATERIAL_PROPERTY = new ModelProperty<>();
@@ -146,7 +146,7 @@ public final class TemplateBlockEntity extends BlockEntity {
     }
 
     public static ModelData itemMaterials(net.minecraft.world.item.ItemStack stack) {
-        var data = stack.get(net.minecraft.core.component.DataComponents.BLOCK_ENTITY_DATA);
+        var data = stack.get(com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_ENTITY_DATA);
         if (data == null) return ModelData.EMPTY;
         CompoundTag tag = data.copyTag();
         ModelData.Builder builder = ModelData.builder();

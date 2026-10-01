@@ -4,11 +4,11 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.player.PlayerStardewData;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -19,7 +19,7 @@ public record PlayerDataSyncPacket(CompoundTag data) implements CustomPacketPayl
     
     @SuppressWarnings("null")
     public static final Type<PlayerDataSyncPacket> TYPE = new Type<>(
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "player_data_sync")
+        new ResourceLocation(StardewCraft.MODID, "player_data_sync")
     );
     
     @SuppressWarnings("null")

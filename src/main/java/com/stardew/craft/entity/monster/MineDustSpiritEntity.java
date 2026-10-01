@@ -36,7 +36,7 @@ public final class MineDustSpiritEntity extends StardewMonsterEntity {
     public MineDustSpiritEntity(EntityType<? extends MineDustSpiritEntity> type,Level level){super(type,level);setNoGravity(true);addTag("sd_mob_dust_sprite");}
     public static AttributeSupplier.Builder createAttributes(){return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,40).add(Attributes.ATTACK_DAMAGE,6).add(Attributes.MOVEMENT_SPEED,.25).add(Attributes.FOLLOW_RANGE,64).add(Attributes.STEP_HEIGHT,0);}
     @Override protected void registerGoals(){}
-    @Override protected ResourceLocation definitionId(){return ResourceLocation.parse("stardewcraft:dust_sprite");}
+    @Override protected ResourceLocation definitionId(){return new ResourceLocation("stardewcraft:dust_sprite");}
     @Override protected void configureSpawn(MonsterDefinition d,MonsterSpawnContext c){var r=MonsterStatResolver.base(d,c,random);setInitialHealth(r.initialHealth());replaceCombatStats(r.combat());getAttribute(Attributes.SCALE).setBaseValue((75+random.nextInt(26))/100.);motion.voice(1+random.nextInt(23));groundY=getY();anchored=true;}
     @Override protected void defineSynchedData(SynchedEntityData.Builder b){super.defineSynchedData(b);b.define(OFFSET,0F);b.define(HIT,-100L);}
     public double sourceOffset(){return entityData.get(OFFSET);}

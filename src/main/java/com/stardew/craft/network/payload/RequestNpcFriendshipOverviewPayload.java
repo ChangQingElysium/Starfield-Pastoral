@@ -8,13 +8,13 @@ import com.stardew.craft.npc.data.NpcSocialRules;
 import com.stardew.craft.npc.runtime.NpcFriendshipDataManager;
 import com.stardew.craft.time.StardewTimeManager;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ import java.util.Map;
 public record RequestNpcFriendshipOverviewPayload() implements CustomPacketPayload {
     @SuppressWarnings("null")
     public static final Type<RequestNpcFriendshipOverviewPayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "request_npc_friendship_overview"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "request_npc_friendship_overview"));
 
     @SuppressWarnings("null")
     public static final StreamCodec<ByteBuf, RequestNpcFriendshipOverviewPayload> STREAM_CODEC = StreamCodec.of(

@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/slab",
-  "textures": {
-    "bottom": "stardewcraft:block/tree/maple/log_side",
-    "side": "stardewcraft:block/tree/maple/log_side",
-    "top": "stardewcraft:block/tree/maple/log_side"
-  }
-}

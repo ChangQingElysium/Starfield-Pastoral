@@ -1,7 +1,0 @@
-{
-    "parent":  "minecraft:item/generated",
-    "textures":  {
-                     "layer0":  "stardewcraft:item/resource/oak_resin",
-                     "particle":  "stardewcraft:item/resource/oak_resin"
-                 }
-}

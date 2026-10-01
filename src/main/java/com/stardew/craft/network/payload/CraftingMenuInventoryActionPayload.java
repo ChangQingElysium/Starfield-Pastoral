@@ -4,14 +4,14 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.inventory.TrashCanService;
 import com.stardew.craft.item.tool.FishingRodItem;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -34,7 +34,7 @@ public record CraftingMenuInventoryActionPayload(int action, int slotIndex, bool
 
     @SuppressWarnings("null")
     public static final Type<CraftingMenuInventoryActionPayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "crafting_menu_inventory_action"));
+            new Type<>(new ResourceLocation(StardewCraft.MODID, "crafting_menu_inventory_action"));
 
     @SuppressWarnings("null")
     public static final StreamCodec<FriendlyByteBuf, CraftingMenuInventoryActionPayload> STREAM_CODEC = StreamCodec.of(

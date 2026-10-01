@@ -3,11 +3,11 @@ package com.stardew.craft.network;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.time.StardewTimeManager;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -27,7 +27,7 @@ public record TimeSyncPacket(
     
     @SuppressWarnings("null")
     public static final Type<TimeSyncPacket> TYPE = new Type<>(
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "time_sync")
+        new ResourceLocation(StardewCraft.MODID, "time_sync")
     );
     
     @SuppressWarnings("null")
@@ -64,7 +64,7 @@ public record TimeSyncPacket(
      */
     public static TimeSyncPacket fromTimeManager(StardewTimeManager timeManager) {
         long vdt = timeManager.getVirtualDayTime();
-        var server = net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer();
+        var server = net.minecraftforge.server.ServerLifecycleHooks.getCurrentServer();
         return new TimeSyncPacket(
             timeManager.getCurrentTime(),
             timeManager.getCurrentDay(),

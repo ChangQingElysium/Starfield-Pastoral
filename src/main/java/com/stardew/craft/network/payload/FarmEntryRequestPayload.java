@@ -7,14 +7,14 @@ import com.stardew.craft.farm.FarmInstanceRegistry;
 import com.stardew.craft.farm.FarmPermissionManager;
 import com.stardew.craft.warp.ModTeleport;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.UUID;
 
@@ -28,7 +28,7 @@ public record FarmEntryRequestPayload(
 ) implements CustomPacketPayload {
 
     public static final Type<FarmEntryRequestPayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "farm_entry_request"));
+            new Type<>(new ResourceLocation(StardewCraft.MODID, "farm_entry_request"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, FarmEntryRequestPayload> STREAM_CODEC =
             new StreamCodec<>() {

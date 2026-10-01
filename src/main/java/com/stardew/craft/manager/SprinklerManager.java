@@ -135,7 +135,7 @@ public class SprinklerManager extends SavedData {
             for (int i = 0; i < list.size(); i++) {
                 CompoundTag posTag = list.getCompound(i);
                 ResourceKey<Level> dim = ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION,
-                        net.minecraft.resources.ResourceLocation.parse(posTag.getString("Dimension")));
+                        new net.minecraft.resources.ResourceLocation(posTag.getString("Dimension")));
                 BlockPos pos = NbtUtils.readBlockPos(posTag, "Pos").orElse(BlockPos.ZERO);
                 manager.sprinklerPositions.add(GlobalPos.of(dim, pos));
             }

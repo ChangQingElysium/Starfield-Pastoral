@@ -23,15 +23,15 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.BushBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ModelEvent;
-import net.neoforged.neoforge.client.model.BakedModelWrapper;
-import net.neoforged.neoforge.client.model.IDynamicBakedModel;
-import net.neoforged.neoforge.client.model.data.ModelData;
-import net.neoforged.neoforge.client.model.data.ModelProperty;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.ModelEvent;
+import net.minecraftforge.client.model.BakedModelWrapper;
+import net.minecraftforge.client.model.IDynamicBakedModel;
+import net.minecraftforge.client.model.data.ModelData;
+import net.minecraftforge.client.model.data.ModelProperty;
 
 /** Seasonal native parts retain cardinal/concave connections and isolated item geometry. */
 @SuppressWarnings("removal")
@@ -43,7 +43,7 @@ public final class GardenPlanterModels {
     private static final ModelProperty<Boolean> LOWERED = new ModelProperty<>();
     private GardenPlanterModels() {}
     private static ModelResourceLocation id(String season,String part) {
-        return new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,
+        return new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID,
                 "block/decor/garden_planter/"+season+"/"+part),"standalone");
     }
     @SubscribeEvent public static void register(ModelEvent.RegisterAdditional event) {
@@ -70,7 +70,7 @@ public final class GardenPlanterModels {
             var key=BlockModelShaper.stateToModelLocation(state);
             models.put(key,new Seasonal(Objects.requireNonNull(models.get(key)),List.copyOf(seasons)));
         }
-        var item=new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,"garden_planter"),"inventory");
+        var item=new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID,"garden_planter"),"inventory");
         List<List<BakedModel>> itemSeasons=new ArrayList<>();
         for(String season:SEASONS)itemSeasons.add(List.of(Objects.requireNonNull(models.get(id(season,"garden_planter")))));
         models.put(item,new Seasonal(Objects.requireNonNull(models.get(item)),List.copyOf(itemSeasons)));

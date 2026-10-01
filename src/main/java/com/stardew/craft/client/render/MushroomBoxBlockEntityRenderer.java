@@ -19,7 +19,7 @@ import net.minecraft.world.item.ItemStack;
  * 蘑菇培养盆就绪时显示气泡（与 Utility 设施一致）。
  */
 public class MushroomBoxBlockEntityRenderer implements BlockEntityRenderer<MushroomBoxBlockEntity> {
-    private static final ResourceLocation BUBBLE_TEX = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/bubble.png");
+    private static final ResourceLocation BUBBLE_TEX = new ResourceLocation(StardewCraft.MODID, "textures/gui/bubble.png");
     private static final float PX = 1.0f / 32.0f;
 
     public MushroomBoxBlockEntityRenderer(BlockEntityRendererProvider.Context context) {

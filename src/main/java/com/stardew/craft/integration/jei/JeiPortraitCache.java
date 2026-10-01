@@ -45,7 +45,7 @@ public final class JeiPortraitCache {
     public static void preload(IGuiHelper guiHelper, String... npcIds) {
         for (String npcId : npcIds) {
             if (PORTRAITS.containsKey(npcId)) continue;
-            ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(
+            ResourceLocation tex = new ResourceLocation(
                     StardewCraft.MODID, "textures/portraits/" + npcId + ".png");
             int[] size = TEX_SIZES.getOrDefault(npcId, new int[]{128, 128});
             int faceW = Math.min(64, size[0]);

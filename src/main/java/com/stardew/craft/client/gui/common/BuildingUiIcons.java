@@ -49,7 +49,7 @@ public final class BuildingUiIcons {
         sprite(g,"icon_"+name,x,y,size,size,32,32);
     }
     public static void sprite(GuiGraphics g,String name,int x,int y,int w,int h,int tw,int th) {
-        g.blit(ResourceLocation.parse("stardewcraft:textures/gui/animal_query/"+name+".png"),x,y,w,h,0,0,tw,th,tw,th);
+        g.blit(new ResourceLocation("stardewcraft:textures/gui/animal_query/"+name+".png"),x,y,w,h,0,0,tw,th,tw,th);
     }
     public static void hearts(GuiGraphics g,int x,int y,int friendship) {
         for(int i=0;i<10;i++)sprite(g,friendship>=(i+1)*100?"heart_filled":"heart_empty",x+i*8,y,7,6,7,6);

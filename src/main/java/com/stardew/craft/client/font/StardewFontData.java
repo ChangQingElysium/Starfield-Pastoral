@@ -92,7 +92,7 @@ final class StardewFontData {
         };
         List<ResourceLocation> pages = new ArrayList<>();
         for (JsonElement element : root.getAsJsonArray("pages")) {
-            pages.add(ResourceLocation.parse(element.getAsString()));
+            pages.add(new ResourceLocation(element.getAsString()));
         }
         Int2ObjectMap<Glyph> glyphs = new Int2ObjectOpenHashMap<>();
         JsonArray sourceGlyphs = root.getAsJsonArray("glyphs");

@@ -13,12 +13,12 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
-import net.neoforged.neoforge.registries.DeferredHolder;
+import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredHolder;
 
 final class DesertFestivalRaceUi {
-    static final ResourceLocation RACERS = ResourceLocation.fromNamespaceAndPath(
+    static final ResourceLocation RACERS = new ResourceLocation(
         StardewCraft.MODID, "textures/gui/desert_festival/race/desert_racers.png");
-    static final ResourceLocation RACE_BACKGROUND = ResourceLocation.fromNamespaceAndPath(
+    static final ResourceLocation RACE_BACKGROUND = new ResourceLocation(
         StardewCraft.MODID, "textures/gui/desert_festival/race/race_track_full.png");
     static final int BG_W = 672;
     static final int BG_H = 384;

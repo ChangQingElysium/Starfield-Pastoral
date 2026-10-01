@@ -2,15 +2,15 @@ package com.stardew.craft.fishing.network;
 
 import com.stardew.craft.StardewCraft;
 import net.minecraft.core.UUIDUtil;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.UUID;
 
@@ -18,10 +18,10 @@ import java.util.UUID;
 public record FishingCatchVisualPayload(UUID sessionId, ItemStack stack, boolean fish,
 		double x, double y, double z) implements CustomPacketPayload {
 	public static final Type<FishingCatchVisualPayload> TYPE = new Type<>(
-			ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "fishing_catch_visual"));
+			new ResourceLocation(StardewCraft.MODID, "fishing_catch_visual"));
 	public static final StreamCodec<RegistryFriendlyByteBuf, FishingCatchVisualPayload> STREAM_CODEC = StreamCodec.composite(
-			UUIDUtil.STREAM_CODEC, FishingCatchVisualPayload::sessionId,
-			ItemStack.STREAM_CODEC, FishingCatchVisualPayload::stack,
+			com.stardew.craft.port.PortCodecs.UUID, FishingCatchVisualPayload::sessionId,
+			com.stardew.craft.port.PortCodecs.ITEM_STACK, FishingCatchVisualPayload::stack,
 			ByteBufCodecs.BOOL, FishingCatchVisualPayload::fish,
 			ByteBufCodecs.DOUBLE, FishingCatchVisualPayload::x,
 			ByteBufCodecs.DOUBLE, FishingCatchVisualPayload::y,
@@ -35,7 +35,7 @@ public record FishingCatchVisualPayload(UUID sessionId, ItemStack stack, boolean
 		context.enqueueWork(() -> handleClient(payload));
 	}
 
-	@net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+	@net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
 	private static void handleClient(FishingCatchVisualPayload payload) {
 		if (!com.stardew.craft.client.fishing.FishingInteractionState.accepts(payload.sessionId()) || payload.stack().isEmpty()) return;
 		com.stardew.craft.client.hud.StardewHudMessageManager.showGlobalMessage(

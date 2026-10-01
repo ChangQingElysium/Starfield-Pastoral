@@ -22,7 +22,7 @@ public abstract class PlayerRendererCombatCollapseMixin extends net.minecraft.cl
         if (!com.stardew.craft.client.combat.CombatCollapseClientState.isCollapsing(player)) return;
         if (stardewcraft$collapseModel == null)
             stardewcraft$collapseModel = new com.stardew.craft.client.combat.CollapsePlayerModel<>(
-                    player.getSkin().model() == net.minecraft.client.resources.PlayerSkin.Model.SLIM);
+                    player.getSkin().model() == com.stardew.craft.port.net.minecraft.client.resources.PlayerSkin.Model.SLIM);
         stardewcraft$normalModel = model;
         model = stardewcraft$collapseModel;
     }

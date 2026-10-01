@@ -15,8 +15,8 @@ public final class SecretNote23Service {
     public static final double BERRY_PRICE_MULTIPLIER = 3.0;
 
     private static final Set<ResourceLocation> KNOWLEDGE_BERRIES = Set.of(
-            ResourceLocation.fromNamespaceAndPath("stardewcraft", "salmonberry"),
-            ResourceLocation.fromNamespaceAndPath("stardewcraft", "blackberry")
+            new ResourceLocation("stardewcraft", "salmonberry"),
+            new ResourceLocation("stardewcraft", "blackberry")
     );
 
     private SecretNote23Service() {

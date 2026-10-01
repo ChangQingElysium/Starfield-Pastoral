@@ -8,7 +8,7 @@ final class SiloArt {
     static final int INK = 0xFF594331, MUTED = 0xFF796344, GREEN = 0xFF536545, RED = 0xFF9B4936;
     private SiloArt() { }
     private static ResourceLocation texture(String name) {
-        return ResourceLocation.fromNamespaceAndPath("stardewcraft", "textures/gui/silo/" + name + ".png");
+        return new ResourceLocation("stardewcraft", "textures/gui/silo/" + name + ".png");
     }
     static void sprite(GuiGraphics g, String name, int x, int y, int w, int h) {
         RenderSystem.enableBlend(); RenderSystem.defaultBlendFunc();

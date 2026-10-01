@@ -1,9 +1,9 @@
 package com.stardew.craft.deco;
 
 import com.stardew.craft.item.ModItems;
-import net.minecraft.core.component.DataComponents;
+import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomModelData;
+import com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData;
 
 public final class DecorationIconItems {
     private DecorationIconItems() {

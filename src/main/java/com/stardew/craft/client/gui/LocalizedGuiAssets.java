@@ -29,7 +29,7 @@ public final class LocalizedGuiAssets {
     }
 
     public static ResourceLocation texture(String relativePath) {
-        return ResourceLocation.fromNamespaceAndPath(
+        return new ResourceLocation(
                 StardewCraft.MODID,
                 "textures/gui/localized/" + currentLanguage() + "/" + relativePath
         );

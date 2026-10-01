@@ -48,5 +48,5 @@ public final class PetDefaults {
         return switch (id.getPath()) { case "cat0" -> 0; case "cat1" -> 1; case "cat2" -> 2; case "cat3" -> 3; case "cat4" -> 4;
             case "dog0" -> 5; case "dog1" -> 6; case "dog2" -> 7; case "dog3" -> 8; case "dog4" -> 9; case "turtle0" -> 10; case "turtle1" -> 11; default -> 100; };
     }
-    private static ResourceLocation id(String path) { return ResourceLocation.fromNamespaceAndPath("stardewcraft", path); }
+    private static ResourceLocation id(String path) { return new ResourceLocation("stardewcraft", path); }
 }

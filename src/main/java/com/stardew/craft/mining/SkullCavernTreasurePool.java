@@ -49,7 +49,7 @@ public final class SkullCavernTreasurePool {
 
     public static void registerQuery() {
         com.stardew.craft.api.v1.query.StardewItemQueries.register(
-            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("stardewcraft","skull_treasure_slot"),
+            new net.minecraft.resources.ResourceLocation("stardewcraft","skull_treasure_slot"),
             com.mojang.serialization.Codec.intRange(0,25).fieldOf("slot").codec(),
             (context,slot)->{
                 var result=rollSlot(slot,net.minecraft.util.RandomSource.create(context.random().nextLong()),context.player());

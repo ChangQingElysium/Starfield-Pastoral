@@ -17,7 +17,7 @@ public final class StardewFarmDailyTaskRegistry {
     private static final OrderedExtensionRegistry<
             StardewFarmDailyTasks.Task> TASKS =
             new OrderedExtensionRegistry<>(
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             StardewCraft.MODID, "farm/daily_task"));
 
     private StardewFarmDailyTaskRegistry() {

@@ -2,15 +2,15 @@ package com.stardew.craft.network.payload;
 
 import com.stardew.craft.StardewCraft;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /** Server to client: reproduce MagicWarp's immediate white flash. */
 public record MagicWarpFlashPayload(byte unused) implements CustomPacketPayload {
     public static final Type<MagicWarpFlashPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "magic_warp_flash"));
+            new ResourceLocation(StardewCraft.MODID, "magic_warp_flash"));
 
     public static final StreamCodec<FriendlyByteBuf, MagicWarpFlashPayload> STREAM_CODEC = StreamCodec.of(
             (buf, payload) -> buf.writeByte(0),
@@ -26,7 +26,7 @@ public record MagicWarpFlashPayload(byte unused) implements CustomPacketPayload 
         context.enqueueWork(MagicWarpFlashPayload::handleClient);
     }
 
-    @net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+    @net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
     private static void handleClient() {
         com.stardew.craft.communitycenter.cutscene.ScreenFade.startFlashWhite();
     }

@@ -3,7 +3,7 @@ package com.stardew.craft.block.decor;
 import com.stardew.craft.block.shape.ModelVoxelShapeCache;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
+import com.stardew.craft.port.net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.core.BlockPos;

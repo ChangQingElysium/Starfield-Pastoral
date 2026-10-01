@@ -7,11 +7,11 @@ import com.stardew.craft.festival.desert.DesertFestivalWillyFishingService;
 import com.stardew.craft.festival.squid.SquidFestService;
 import com.stardew.craft.festival.trout.TroutDerbyService;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 @SuppressWarnings("null")
 public record DesertFestivalQuestionResponsePayload(
@@ -21,7 +21,7 @@ public record DesertFestivalQuestionResponsePayload(
 ) implements CustomPacketPayload {
 
     public static final Type<DesertFestivalQuestionResponsePayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "desert_festival_question_response"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "desert_festival_question_response"));
 
     public static final StreamCodec<FriendlyByteBuf, DesertFestivalQuestionResponsePayload> STREAM_CODEC = StreamCodec.of(
         (buf, payload) -> {

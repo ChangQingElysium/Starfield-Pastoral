@@ -20,7 +20,7 @@ import snownee.jade.api.config.IPluginConfig;
 public enum MailboxJadeProvider implements IBlockComponentProvider, IServerDataProvider<BlockAccessor> {
 	INSTANCE;
 
-	private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "mailbox");
+	private static final ResourceLocation UID = new ResourceLocation(StardewCraft.MODID, "mailbox");
 
 	private static final String NBT_OWNER_NAME = "OwnerName";
 	private static final String NBT_HAS_OWNER = "HasOwner";

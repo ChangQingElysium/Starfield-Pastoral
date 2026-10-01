@@ -18,8 +18,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import java.util.UUID;
 
 @GameTestHolder("stardewcraft_skull_lobby")
@@ -31,7 +31,7 @@ public final class SkullLobbyAssemblyGameTests {
         return root.offset(SkullLobbyAssemblyBlock.rotateOffset(new BlockPos(offset[0],offset[1],offset[2]),facing));
     }
     private static ServerPlayer player(GameTestHelper h) {
-        var p = net.neoforged.neoforge.common.util.FakePlayerFactory.get(h.getLevel(),new GameProfile(UUID.randomUUID(),"Shrine test"));
+        var p = net.minecraftforge.common.util.FakePlayerFactory.get(h.getLevel(),new GameProfile(UUID.randomUUID(),"Shrine test"));
         p.setGameMode(GameType.CREATIVE);
         return p;
     }

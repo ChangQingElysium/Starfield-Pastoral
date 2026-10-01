@@ -17,20 +17,20 @@ import java.util.Set;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 @SuppressWarnings("null")
 public record CookingPotIngredientAvailabilityPayload(Map<String, Integer> fridgeTokenCounts) implements CustomPacketPayload {
 
     public static final Type<CookingPotIngredientAvailabilityPayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "cooking_pot_ingredient_availability"));
+            new Type<>(new ResourceLocation(StardewCraft.MODID, "cooking_pot_ingredient_availability"));
 
     public static final StreamCodec<FriendlyByteBuf, CookingPotIngredientAvailabilityPayload> STREAM_CODEC = StreamCodec.of(
             (buf, payload) -> {

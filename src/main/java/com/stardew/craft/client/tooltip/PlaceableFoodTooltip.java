@@ -11,15 +11,15 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderTooltipEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.RenderTooltipEvent;
 
 /** A full-height pixel badge, so the 16px icon cannot collide with adjacent text lines. */
 @EventBusSubscriber(modid = StardewCraft.MODID, value = Dist.CLIENT)
 public final class PlaceableFoodTooltip implements TooltipComponent, ClientTooltipComponent {
-    private static final ResourceLocation ICON = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation ICON = new ResourceLocation(
             StardewCraft.MODID, "textures/gui/tooltip/placeable_food.png");
     private static final Component LABEL = Component.translatable("tooltip.stardewcraft.placeable_food")
             .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD);

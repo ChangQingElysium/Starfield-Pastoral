@@ -68,7 +68,7 @@ public class GroundItemCommand implements EventCommand {
             float scale,
             float yaw
     ) {
-        ResourceLocation loc = ResourceLocation.parse(itemId);
+        ResourceLocation loc = new ResourceLocation(itemId);
         Item item = BuiltInRegistries.ITEM.get(loc);
         if (item == net.minecraft.world.item.Items.AIR) {
             return null;

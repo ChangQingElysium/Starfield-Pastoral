@@ -5,10 +5,10 @@ import net.minecraft.resources.ResourceLocation;
 /** Built-in building catalog IDs. */
 public final class StardewBuildingBuilders {
     public static final ResourceLocation ROBIN =
-            ResourceLocation.fromNamespaceAndPath(
+            new ResourceLocation(
                     "stardewcraft", "robin");
     public static final ResourceLocation WIZARD =
-            ResourceLocation.fromNamespaceAndPath(
+            new ResourceLocation(
                     "stardewcraft", "wizard");
 
     private StardewBuildingBuilders() {

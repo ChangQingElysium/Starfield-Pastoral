@@ -7,16 +7,16 @@ import com.stardew.craft.api.v1.client.StardewToolUpgradeSnapshot;
 import com.stardew.craft.api.v1.client.StardewQueenOfSauceSnapshot;
 import com.stardew.craft.api.v1.internal.client.StardewDailyInfoCache;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 import java.util.Optional;
 
 /** Small replacement snapshot; sent only when the authoritative daily information changes. */
 public record DailyInfoSyncPayload(StardewDailyInfoSnapshot snapshot) implements CustomPacketPayload {
     public static final Type<DailyInfoSyncPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "daily_info"));
+            new ResourceLocation(StardewCraft.MODID, "daily_info"));
     public static final StreamCodec<FriendlyByteBuf, DailyInfoSyncPayload> CODEC = StreamCodec.of(
             (buf, payload) -> {
                 var info = payload.snapshot();

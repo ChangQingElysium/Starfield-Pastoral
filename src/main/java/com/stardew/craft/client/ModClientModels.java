@@ -4,10 +4,10 @@ import com.stardew.craft.StardewCraft;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ModelEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.ModelEvent;
 
 @SuppressWarnings("removal")
 @EventBusSubscriber(modid = StardewCraft.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
@@ -16,9 +16,9 @@ public final class ModClientModels {
 
     @SubscribeEvent
     public static void onRegisterGeometryLoaders(ModelEvent.RegisterGeometryLoaders event) {
-        event.register(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "crop_geometry"),
+        event.register(new ResourceLocation(StardewCraft.MODID, "crop_geometry"),
             com.stardew.craft.client.model.CropModelGeometry.LOADER);
-        event.register(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "geometry"),
+        event.register(new ResourceLocation(StardewCraft.MODID, "geometry"),
             com.stardew.craft.client.model.ImportedModelGeometry.LOADER);
     }
 
@@ -26,7 +26,7 @@ public final class ModClientModels {
     public static void onRegisterAdditional(ModelEvent.RegisterAdditional event) {
         @SuppressWarnings("null")
         ModelResourceLocation model = new ModelResourceLocation(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "entity/special_effect/ice_spine"),
+            new ResourceLocation(StardewCraft.MODID, "entity/special_effect/ice_spine"),
             "standalone"
         );
         event.register(model);
@@ -65,7 +65,7 @@ public final class ModClientModels {
     @SuppressWarnings("null")
     private static void registerStandalone(ModelEvent.RegisterAdditional event, String path) {
         ModelResourceLocation model = new ModelResourceLocation(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, path),
+            new ResourceLocation(StardewCraft.MODID, path),
             "standalone"
         );
         event.register(model);

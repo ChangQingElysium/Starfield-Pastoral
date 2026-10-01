@@ -13,7 +13,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import static com.stardew.craft.combat.skill.handler.DragonRapierRules.*;
 
 public final class DragonRapierSkillHandler implements PostServerRuntimeWeaponSkillHandler {
@@ -73,7 +73,7 @@ public final class DragonRapierSkillHandler implements PostServerRuntimeWeaponSk
         var source=event.getSource();
         if(!(source.getDirectEntity() instanceof LivingEntity attacker)||source.getEntity()!=attacker
                 ||source.is(DamageTypeTags.BYPASSES_SHIELD)||!p.hasLineOfSight(attacker)||Math.abs(attacker.getY()-p.getY())>2.5)return;
-        WeaponSkillRuntime.activeExecutionState(p.getUUID(),ResourceLocation.fromNamespaceAndPath("stardewcraft",RIPOSTE),State.class).ifPresent(s->{
+        WeaponSkillRuntime.activeExecutionState(p.getUUID(),new ResourceLocation("stardewcraft",RIPOSTE),State.class).ifPresent(s->{
             Vec3 d=attacker.position().subtract(p.position());
             if(s.valid(p)&&s.guard.consume(p.level().getGameTime()-s.started,d.dot(s.forward),d.dot(s.side),true)) {
                 event.setAmount(event.getAmount()*.5f);

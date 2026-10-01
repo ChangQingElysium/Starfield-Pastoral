@@ -15,9 +15,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.common.util.FakePlayerFactory;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 @GameTestHolder("stardewcraft_pets")
 @PrefixGameTestTemplate(false)
@@ -139,7 +139,7 @@ public final class PetGameTests {
         var stack = new net.minecraft.world.item.ItemStack(com.stardew.craft.item.ModItems.BUTTERFLY_POWDER.get());
         var metadata = com.stardew.craft.api.v1.item.StardewItemDataApi.resolve(stack).orElse(null);
         h.assertTrue(metadata != null, "Butterfly Powder is not registered as a Stardew item");
-        h.assertTrue(metadata.category().equals(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("stardewcraft", "misc")),
+        h.assertTrue(metadata.category().equals(new net.minecraft.resources.ResourceLocation("stardewcraft", "misc")),
                 "Butterfly Powder lost its original Basic/category-0 mapping");
         h.assertTrue(metadata.baseSellPrice() == 0
                         && com.stardew.craft.api.v1.item.StardewItemDataApi.getSellPrice(stack) == -1

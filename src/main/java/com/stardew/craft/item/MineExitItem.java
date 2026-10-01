@@ -2,10 +2,10 @@ package com.stardew.craft.item;
 
 import com.stardew.craft.block.mine.MineExitBlock;
 import com.stardew.craft.block.mine.MineLadderBlock;
-import net.minecraft.core.component.DataComponents;
+import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.BlockItemStateProperties;
+import com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties;
 import net.minecraft.world.level.block.Block;
 
 public final class MineExitItem extends StardewBlockItem {

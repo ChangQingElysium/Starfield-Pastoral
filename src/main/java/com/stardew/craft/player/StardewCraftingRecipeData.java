@@ -59,7 +59,7 @@ public final class StardewCraftingRecipeData {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final ResourceLocation LEGACY_TABLE =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "vanilla_crafting_recipes");
+            new ResourceLocation(StardewCraft.MODID, "vanilla_crafting_recipes");
     private static final AtomicDefinitionStore<RecipeEntry> STORE = new AtomicDefinitionStore<>();
     private static volatile Catalog catalog = Catalog.empty();
 
@@ -436,13 +436,13 @@ public final class StardewCraftingRecipeData {
     }
 
     private static StardewCraftingRecipeDefinition toDefinition(RecipeEntry recipe) {
-        ResourceLocation output = ResourceLocation.parse(recipe.output().item());
+        ResourceLocation output = new ResourceLocation(recipe.output().item());
         List<StardewCraftingIngredient> ingredients = recipe.ingredients().stream()
                 .map(entry -> new StardewCraftingIngredient(
-                        Optional.ofNullable(entry.item()).map(ResourceLocation::parse),
-                        Optional.ofNullable(entry.tag()).map(ResourceLocation::parse),
+                        Optional.ofNullable(entry.item()).map(ResourceLocation::new),
+                        Optional.ofNullable(entry.tag()).map(ResourceLocation::new),
                         Math.max(1, entry.count()),
-                        Optional.ofNullable(entry.displayItem()).map(ResourceLocation::parse),
+                        Optional.ofNullable(entry.displayItem()).map(ResourceLocation::new),
                         Optional.ofNullable(entry.displayName())))
                 .toList();
         return new StardewCraftingRecipeDefinition(

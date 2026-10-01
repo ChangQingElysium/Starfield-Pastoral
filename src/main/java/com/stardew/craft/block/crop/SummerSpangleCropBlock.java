@@ -63,12 +63,12 @@ public class SummerSpangleCropBlock extends TomatoCropBlock {
             @SuppressWarnings("null")
             int color = state.getValue(COLOR);
             @SuppressWarnings("null")
-            var customData = stack.getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_DATA,
-                    net.minecraft.world.item.component.CustomData.EMPTY);
+            var customData = stack.getOrDefault(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,
+                    com.stardew.craft.port.net.minecraft.world.item.component.CustomData.EMPTY);
             var tag = customData.copyTag();
             tag.putInt("FlowerColor", color);
-            stack.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA,
-                    net.minecraft.world.item.component.CustomData.of(tag));
+            stack.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,
+                    com.stardew.craft.port.net.minecraft.world.item.component.CustomData.of(tag));
             setFlowerVariantModelData(stack, color);
         }
         return stack;

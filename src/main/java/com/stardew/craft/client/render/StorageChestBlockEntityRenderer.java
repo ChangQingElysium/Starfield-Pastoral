@@ -9,7 +9,7 @@ public final class StorageChestBlockEntityRenderer extends StardewGeoBlockRender
     public StorageChestBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
         super(new GeoModel<>() {
             private ResourceLocation resource(StorageChestBlockEntity chest, String directory, String suffix) {
-                return ResourceLocation.fromNamespaceAndPath("stardewcraft", directory + chest.variant().id + suffix);
+                return new ResourceLocation("stardewcraft", directory + chest.variant().id + suffix);
             }
             @Override public ResourceLocation getModelResource(StorageChestBlockEntity chest) {
                 return resource(chest, "geo/block/utility/", ".geo.json");

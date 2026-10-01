@@ -5,13 +5,13 @@ import com.stardew.craft.client.gui.common.StardewConfirmDialogScreen;
 import com.stardew.craft.client.gui.common.StardewQuestionDialogSpec;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.List;
 
@@ -19,7 +19,7 @@ import java.util.List;
 @SuppressWarnings("null")
 public record OpenSecretNote20QuestionPayload() implements CustomPacketPayload {
     public static final Type<OpenSecretNote20QuestionPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "open_secret_note_20_question"));
+            new ResourceLocation(StardewCraft.MODID, "open_secret_note_20_question"));
     public static final StreamCodec<FriendlyByteBuf, OpenSecretNote20QuestionPayload> STREAM_CODEC = StreamCodec.of(
             (buf, payload) -> { }, buf -> new OpenSecretNote20QuestionPayload());
 

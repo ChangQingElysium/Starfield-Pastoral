@@ -3,10 +3,10 @@ package com.stardew.craft.network;
 import com.stardew.craft.StardewCraft;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * 竖井确认包 - 服务端 → 客户端
@@ -16,12 +16,12 @@ public record ShaftConfirmPacket(BlockPos shaftPos) implements CustomPacketPaylo
 
     @SuppressWarnings("null")
     public static final CustomPacketPayload.Type<ShaftConfirmPacket> TYPE =
-            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "shaft_confirm"));
+            new CustomPacketPayload.Type<>(new ResourceLocation(StardewCraft.MODID, "shaft_confirm"));
 
     @SuppressWarnings("null")
     public static final StreamCodec<ByteBuf, ShaftConfirmPacket> STREAM_CODEC =
             StreamCodec.composite(
-                    BlockPos.STREAM_CODEC.cast(),
+                    com.stardew.craft.port.PortCodecs.BLOCK_POS.cast(),
                     ShaftConfirmPacket::shaftPos,
                     ShaftConfirmPacket::new
             );
@@ -38,7 +38,7 @@ public record ShaftConfirmPacket(BlockPos shaftPos) implements CustomPacketPaylo
      */
     public static void handle(ShaftConfirmPacket packet, IPayloadContext context) {
         context.enqueueWork(() -> {
-            if (net.neoforged.fml.loading.FMLEnvironment.dist.isClient()) {
+            if (net.minecraftforge.fml.loading.FMLEnvironment.dist.isClient()) {
                 ShaftConfirmPacketClient.open(packet);
             }
         });

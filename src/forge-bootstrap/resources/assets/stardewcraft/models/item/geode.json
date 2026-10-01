@@ -1,7 +1,0 @@
-{
-    "parent":  "minecraft:item/generated",
-    "textures":  {
-                     "layer0":  "stardewcraft:item/resource/geode",
-                     "particle":  "stardewcraft:item/resource/geode"
-                 }
-}

@@ -5,17 +5,17 @@ import com.stardew.craft.blockentity.WizardBuildingBlockEntity;
 import com.stardew.craft.event.FarmAreaProtectionEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 @SuppressWarnings("null")
 public record GoldClockQuestionResponsePayload(BlockPos clockPos, boolean accepted)
         implements CustomPacketPayload {
     public static final Type<GoldClockQuestionResponsePayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "gold_clock_question_response"));
+            new ResourceLocation(StardewCraft.MODID, "gold_clock_question_response"));
     public static final StreamCodec<FriendlyByteBuf, GoldClockQuestionResponsePayload> STREAM_CODEC = StreamCodec.of(
             (buf, payload) -> {
                 buf.writeBlockPos(payload.clockPos());

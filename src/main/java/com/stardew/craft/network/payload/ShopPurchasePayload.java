@@ -11,13 +11,13 @@ import com.stardew.craft.shop.ShopCostService;
 import com.stardew.craft.shop.ShopItemEntry;
 import com.stardew.craft.shop.ShopRegistry;
 import com.stardew.craft.shop.ShopStockTracker;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.List;
 
@@ -37,7 +37,7 @@ public record ShopPurchasePayload(
 ) implements CustomPacketPayload {
 
     public static final Type<ShopPurchasePayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "shop_purchase"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "shop_purchase"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, ShopPurchasePayload> STREAM_CODEC =
         StreamCodec.composite(
@@ -196,7 +196,7 @@ public record ShopPurchasePayload(
 
     private static boolean isValidPhysicalItem(String itemId) {
         try {
-            ResourceLocation id = ResourceLocation.parse(itemId);
+            ResourceLocation id = new ResourceLocation(itemId);
             net.minecraft.world.item.Item item = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(id);
             return item != null && item != net.minecraft.world.item.Items.AIR;
         } catch (Exception ignored) {
@@ -205,7 +205,7 @@ public record ShopPurchasePayload(
     }
 
     private static void sendResult(ServerPlayer player, String shopId, boolean ok, int money, String itemId, int qty, int idx) {
-        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
+        net.minecraftforge.network.PacketDistributor.sendToPlayer(player,
             new com.stardew.craft.network.payload.ShopPurchaseResultPayload(ok, shopId, money, itemId, qty, idx));
     }
 
@@ -331,7 +331,7 @@ public record ShopPurchasePayload(
         }
 
         try {
-            ResourceLocation rl = ResourceLocation.parse(entry.itemId());
+            ResourceLocation rl = new ResourceLocation(entry.itemId());
             net.minecraft.world.item.Item mcItem =
                 net.minecraft.core.registries.BuiltInRegistries.ITEM.get(rl);
             if (mcItem == null || mcItem == net.minecraft.world.item.Items.AIR) {
@@ -392,7 +392,7 @@ public record ShopPurchasePayload(
 
         // Validate the item exists in MC registry
         try {
-            net.minecraft.resources.ResourceLocation rl = net.minecraft.resources.ResourceLocation.parse(entry.itemId());
+            net.minecraft.resources.ResourceLocation rl = new net.minecraft.resources.ResourceLocation(entry.itemId());
             net.minecraft.world.item.Item mcItem =
                     net.minecraft.core.registries.BuiltInRegistries.ITEM.get(rl);
             if (mcItem == null || mcItem == net.minecraft.world.item.Items.AIR) {

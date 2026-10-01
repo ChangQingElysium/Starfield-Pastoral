@@ -10,10 +10,10 @@ import net.minecraft.client.renderer.texture.*;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.*;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.*;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.*;
 import org.joml.*;
 import java.lang.Math;
 
@@ -25,7 +25,7 @@ public final class SlingshotRenderer {
         if(player!=null&&event.getItemStack().isEmpty()&&(player.getMainHandItem().getItem() instanceof SlingshotItem
                 ||player.getOffhandItem().getItem() instanceof SlingshotItem))event.setCanceled(true);
     }
-    public static ResourceLocation id(String s){return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,s);}
+    public static ResourceLocation id(String s){return new ResourceLocation(StardewCraft.MODID,s);}
     public static void renderHeld(net.minecraft.world.entity.LivingEntity entity,ItemStack item,ItemDisplayContext context,boolean left,
                                   PoseStack stack,MultiBufferSource buffers,int light){
         var mc=Minecraft.getInstance();float partial=mc.getTimer().getGameTimeDeltaPartialTick(false);
@@ -37,7 +37,7 @@ public final class SlingshotRenderer {
         float anchorY=slingshot.isMaster()?11.25f:10.5f;
         var model=mc.getItemRenderer().getModel(item,entity.level(),entity,entity.getId());
         stack.pushPose();
-        net.neoforged.neoforge.client.ClientHooks.handleCameraTransforms(stack,model,context,left);
+        com.stardew.craft.port.net.neoforged.neoforge.client.ClientHooks.handleCameraTransforms(stack,model,context,left);
         // ItemInHandLayer contributes -90 degrees around X. The raised vanilla bow
         // arm supplies the other quarter turn; a resting arm needs it on the item.
         if ((context == ItemDisplayContext.THIRD_PERSON_RIGHT_HAND

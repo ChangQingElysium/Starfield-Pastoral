@@ -2,12 +2,12 @@ package com.stardew.craft.network.payload;
 
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.shop.ShopPurchaseRequestTracker;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.UUID;
 
@@ -27,7 +27,7 @@ public record ShopPurchaseRequestPayload(
         int quantity
 ) implements CustomPacketPayload {
     public static final Type<ShopPurchaseRequestPayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(
+            new Type<>(new ResourceLocation(
                     StardewCraft.MODID, "shop_purchase_request"));
 
     public static final StreamCodec<

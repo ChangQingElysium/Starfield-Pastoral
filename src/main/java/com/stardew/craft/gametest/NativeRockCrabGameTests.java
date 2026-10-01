@@ -8,7 +8,7 @@ import net.minecraft.gametest.framework.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.gametest.*;
+import net.minecraftforge.gametest.*;
 
 @GameTestHolder("stardewcraft_crab")
 @PrefixGameTestTemplate(false)
@@ -24,7 +24,7 @@ public final class NativeRockCrabGameTests {
         var crab=(RockCrabEntity)MineMonsterSpawnHandler.spawnConfiguredMonster(level,"rock_crab",Vec3.atBottomCenterOf(origin),0,20);
         var save=new CompoundTag();crab.saveWithoutId(save);save.putBoolean("CrabWaiter",true);crab.load(save);
         h.assertTrue(crab.getHealth()==30&&crab.monsterState().stats().getResilience()==1,"Legacy stats overwrote source definition");
-        var player=new net.neoforged.neoforge.common.util.FakePlayer(level,new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(),"CrabTest"));
+        var player=new net.minecraftforge.common.util.FakePlayer(level,new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(),"CrabTest"));
         player.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
         var day=com.stardew.craft.time.StardewTimeManager.get();
         com.stardew.craft.player.PlayerDataManager.getPlayerData(player).setDailyLuckForDate(0,((day.getCurrentYear()*4)+day.getCurrentSeason())*28+day.getCurrentDay()-1);

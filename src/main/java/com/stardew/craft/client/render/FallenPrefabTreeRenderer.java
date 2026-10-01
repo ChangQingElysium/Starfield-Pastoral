@@ -21,7 +21,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import net.minecraftforge.client.model.data.ModelData;
 
 public class FallenPrefabTreeRenderer extends EntityRenderer<FallenPrefabTreeEntity> {
 	public FallenPrefabTreeRenderer(EntityRendererProvider.Context context) {

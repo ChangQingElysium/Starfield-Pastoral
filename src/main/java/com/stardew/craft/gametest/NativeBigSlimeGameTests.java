@@ -8,7 +8,7 @@ import net.minecraft.gametest.framework.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.gametest.*;
+import net.minecraftforge.gametest.*;
 @GameTestHolder("stardewcraft_bug")
 @PrefixGameTestTemplate(false)
 @SuppressWarnings("null")
@@ -30,6 +30,6 @@ public final class NativeBigSlimeGameTests {
  public static void normalAreasUseConstructorOrderAndIndependentSlimeRolls(GameTestHelper h){
   var level=h.getLevel();var pos=Vec3.atBottomCenterOf(h.absolutePos(new BlockPos(8,3,8)));int[] floors={10,45,85};int[] hp={60,120,180},damage={5,5,10},xp={7,14,21};
   for(int i=0;i<3;i++){var mob=(MineBigSlimeEntity)MineMonsterSpawnHandler.spawnConfiguredMonster(level,"big_slime",pos,0,new MonsterSpawnContext(MonsterSpawnContext.Source.COMMAND,floors[i],false,null),m->{});h.assertTrue(mob.getHealth()==hp[i]&&mob.monsterState().stats().getDamage()==damage[i]&&mob.monsterState().stats().getExperience()==xp[i],"Wrong ordinary-area Big Slime stats");mob.discard();}
-  var d=MonsterDefinitions.require(net.minecraft.resources.ResourceLocation.parse("stardewcraft:big_slime"));h.assertTrue(d.drops().size()==4&&d.drops().get(0).item().equals("stardewcraft:slime_item")&&d.drops().get(0).chance()==.99&&d.drops().get(1).chance()==.9&&d.drops().get(2).chance()==.4,"Source independent slime rolls changed");h.succeed();
+  var d=MonsterDefinitions.require(new net.minecraft.resources.ResourceLocation("stardewcraft:big_slime"));h.assertTrue(d.drops().size()==4&&d.drops().get(0).item().equals("stardewcraft:slime_item")&&d.drops().get(0).chance()==.99&&d.drops().get(1).chance()==.9&&d.drops().get(2).chance()==.4,"Source independent slime rolls changed");h.succeed();
  }
 }

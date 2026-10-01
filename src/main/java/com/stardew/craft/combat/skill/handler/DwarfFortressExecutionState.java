@@ -25,13 +25,13 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 /** One Ley Fortress activation, including its reactive shocks and echo. */
 final class DwarfFortressExecutionState
         implements SkillInstance.ExecutionState {
     private static final ResourceLocation KNOCKBACK_RESISTANCE_ID =
-            ResourceLocation.fromNamespaceAndPath(
+            new ResourceLocation(
                     StardewCraft.MODID,
                     "skill.dwarf_fortress_knockback_resistance"
             );

@@ -21,8 +21,8 @@ import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.material.MapColor;
-import net.neoforged.neoforge.registries.DeferredBlock;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredBlock;
+import net.minecraftforge.registries.DeferredRegister;
 
 /**
  * 方块注册管理器
@@ -586,7 +586,7 @@ public class ModBlocks {
                         () -> new com.stardew.craft.block.nature.ForageBlock(forageProps(seasons.length > 0))
                                 .setDrop(() -> new net.minecraft.world.item.ItemStack(
                                         net.minecraft.core.registries.BuiltInRegistries.ITEM.get(
-                                                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("stardewcraft", name))))
+                                                new net.minecraft.resources.ResourceLocation("stardewcraft", name))))
                                 .setAllowedSeasons(seasons));
         }
 
@@ -836,8 +836,8 @@ public class ModBlocks {
         public static final DeferredBlock<com.stardew.craft.block.decor.CeilingPendantBlock> HANGING_BASKET = BLOCKS.register("hanging_basket",
                         () -> new com.stardew.craft.block.decor.CeilingPendantBlock(Block.Properties.of().strength(0.5F).noOcclusion().sound(SoundType.WOOD),
                                         "stardewcraft:block/decor/house/hanging_basket", 2, -3, 4, 14, 16, 12));
-        public static final DeferredBlock<net.minecraft.world.level.block.TransparentBlock> PALE_BLUE_WINDOW_GLASS = BLOCKS.register("pale_blue_window_glass",
-                        () -> new net.minecraft.world.level.block.TransparentBlock(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.GLASS)));
+        public static final DeferredBlock<com.stardew.craft.port.net.minecraft.world.level.block.TransparentBlock> PALE_BLUE_WINDOW_GLASS = BLOCKS.register("pale_blue_window_glass",
+                        () -> new com.stardew.craft.port.net.minecraft.world.level.block.TransparentBlock(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.GLASS)));
 
         public static final DeferredBlock<Block> PALE_CYAN_PLASTER = BLOCKS.register("pale_cyan_plaster",
                         () -> new Block(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.TERRACOTTA).mapColor(MapColor.COLOR_LIGHT_BLUE)));

@@ -19,7 +19,7 @@ public final class StardewAcquisitionSourceRegistry {
     private static final OrderedExtensionRegistry<
             StardewAcquisitionSourceProvider> PROVIDERS =
             new OrderedExtensionRegistry<>(
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             StardewCraft.MODID,
                             "item/acquisition_source"));
 
@@ -97,7 +97,7 @@ public final class StardewAcquisitionSourceRegistry {
             StardewAcquisitionSourceProvider provider
     ) {
         PROVIDERS.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         StardewCraft.MODID, "core/" + path),
                 -1000,
                 provider);

@@ -46,7 +46,7 @@ public class FurnaceBlockEntity extends TimedProductionBlockEntity {
     }
 
     @Override
-    public net.neoforged.neoforge.items.IItemHandler getAutomationItemHandler() {
+    public net.minecraftforge.items.IItemHandler getAutomationItemHandler() {
         return super.getAutomationItemHandler();
     }
 

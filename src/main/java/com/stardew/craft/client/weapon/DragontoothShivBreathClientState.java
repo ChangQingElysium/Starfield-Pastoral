@@ -6,7 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
 
 /** Replicated stance windows; rendering separately verifies that the shiv is held. */
 public final class DragontoothShivBreathClientState {

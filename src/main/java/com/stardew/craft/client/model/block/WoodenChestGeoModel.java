@@ -8,15 +8,15 @@ import software.bernie.geckolib.model.GeoModel;
 
 @SuppressWarnings("null")
 public class WoodenChestGeoModel extends GeoModel<WoodenChestBlockEntity> {
-    private static final ResourceLocation DEFAULT_MODEL = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "geo/block/utility/wooden_chest_default.geo.json");
-    private static final ResourceLocation DEFAULT_ANIMATION = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "animations/block/utility/wooden_chest_default.animation.json");
-    private static final ResourceLocation DEFAULT_TEXTURE = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/block/utility/wooden_chest_default.png");
+    private static final ResourceLocation DEFAULT_MODEL = new ResourceLocation(StardewCraft.MODID, "geo/block/utility/wooden_chest_default.geo.json");
+    private static final ResourceLocation DEFAULT_ANIMATION = new ResourceLocation(StardewCraft.MODID, "animations/block/utility/wooden_chest_default.animation.json");
+    private static final ResourceLocation DEFAULT_TEXTURE = new ResourceLocation(StardewCraft.MODID, "textures/block/utility/wooden_chest_default.png");
     private static final ResourceLocation[] COLOR_TEXTURES = buildColorTextures();
 
     private static ResourceLocation[] buildColorTextures() {
         ResourceLocation[] textures = new ResourceLocation[WoodenChestColorPalette.size()];
         for (int i = 0; i < textures.length; i++) {
-            textures[i] = ResourceLocation.fromNamespaceAndPath(
+            textures[i] = new ResourceLocation(
                 StardewCraft.MODID,
                 String.format("textures/block/utility/wooden_chest_color_%02d.png", i)
             );

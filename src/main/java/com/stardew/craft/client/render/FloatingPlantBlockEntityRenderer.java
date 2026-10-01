@@ -14,8 +14,8 @@ import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.core.Direction;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.neoforged.neoforge.client.RenderTypeHelper;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import net.minecraftforge.client.RenderTypeHelper;
+import net.minecraftforge.client.model.data.ModelData;
 
 public final class FloatingPlantBlockEntityRenderer implements BlockEntityRenderer<FloatingPlantBlockEntity> {
     public FloatingPlantBlockEntityRenderer(BlockEntityRendererProvider.Context context) {}

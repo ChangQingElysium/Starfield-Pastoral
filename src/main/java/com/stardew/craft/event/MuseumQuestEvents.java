@@ -5,9 +5,9 @@ import com.stardew.craft.museum.MuseumDonationItems;
 import com.stardew.craft.museum.MuseumQuestService;
 import com.stardew.craft.player.PlayerDataManager;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 /** Catches direct-to-inventory artifact rewards that do not create an item entity. */
 @EventBusSubscriber(modid = StardewCraft.MODID)

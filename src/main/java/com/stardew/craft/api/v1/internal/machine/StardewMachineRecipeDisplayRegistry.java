@@ -15,7 +15,7 @@ public final class StardewMachineRecipeDisplayRegistry {
     private static final OrderedExtensionRegistry<
             StardewMachineRecipeDisplays.Provider> PROVIDERS =
             new OrderedExtensionRegistry<>(
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             StardewCraft.MODID, "machine/recipe_display"));
 
     private StardewMachineRecipeDisplayRegistry() {

@@ -82,13 +82,13 @@ import java.util.Optional;
  */
 public final class InteractionHintService {
     private static final ResourceLocation ENTITY_INTERACTION_ID =
-            ResourceLocation.fromNamespaceAndPath(
+            new ResourceLocation(
                     StardewCraft.MODID, "entity_interaction");
     private static final ResourceLocation LEWIS_BASEMENT_ID =
-            ResourceLocation.fromNamespaceAndPath(
+            new ResourceLocation(
                     StardewCraft.MODID, "lewis_basement");
     private static final ResourceLocation WILD_TREE_ID =
-            ResourceLocation.fromNamespaceAndPath(
+            new ResourceLocation(
                     StardewCraft.MODID, "wild_tree");
 
     private InteractionHintService() {
@@ -569,7 +569,7 @@ public final class InteractionHintService {
         ResourceLocation id =
                 BuiltInRegistries.BLOCK.getKey(state.getBlock());
         return id == null
-                ? ResourceLocation.fromNamespaceAndPath(
+                ? new ResourceLocation(
                         StardewCraft.MODID, "unknown_block")
                 : id;
     }

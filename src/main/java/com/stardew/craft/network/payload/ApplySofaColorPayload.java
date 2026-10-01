@@ -13,12 +13,12 @@ import com.stardew.craft.entity.seat.CushionEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.ArrayDeque;
 import java.util.HashSet;
@@ -31,7 +31,7 @@ public record ApplySofaColorPayload(BlockPos targetPos, int colorIndex, int targ
 
     @SuppressWarnings("null")
     public static final Type<ApplySofaColorPayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "apply_sofa_color"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "apply_sofa_color"));
 
     @SuppressWarnings("null")
     public static final StreamCodec<FriendlyByteBuf, ApplySofaColorPayload> STREAM_CODEC = StreamCodec.of(

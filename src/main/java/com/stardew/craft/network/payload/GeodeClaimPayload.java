@@ -3,11 +3,11 @@ package com.stardew.craft.network.payload;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.shop.GeodeLootService;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * Client → Server: claim the pending geode treasure after the crack animation finishes.
@@ -17,7 +17,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 public record GeodeClaimPayload() implements CustomPacketPayload {
 
     public static final Type<GeodeClaimPayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "geode_claim"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "geode_claim"));
 
     public static final StreamCodec<FriendlyByteBuf, GeodeClaimPayload> STREAM_CODEC = StreamCodec.of(
         (buf, payload) -> {},

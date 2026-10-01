@@ -29,7 +29,7 @@ import java.util.UUID;
 
 /** Installs the authored Meadowlands coop as a real completed Robin prefab. */
 public final class MeadowlandsStarterService {
-    private static final ResourceLocation STEP = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation STEP = new ResourceLocation(
             StardewCraft.MODID, "meadowlands_starter_coop");
     /** The raw tier-one template starts here in farm_8; the reservation anchor
      * is one block west and two blocks north, as declared by coop.json. */

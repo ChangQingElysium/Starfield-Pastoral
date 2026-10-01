@@ -352,12 +352,12 @@ public final class StardewTreeRuntimeRegistry {
     }
 
     private static ResourceLocation fruitId(FruitTreeType type) {
-        return ResourceLocation.fromNamespaceAndPath(
+        return new ResourceLocation(
                 StardewCraft.MODID, "fruit/" + type.id());
     }
 
     private static ResourceLocation wildId(WildTrees.Def def) {
-        return ResourceLocation.fromNamespaceAndPath(
+        return new ResourceLocation(
                 StardewCraft.MODID, "wild/" + def.id());
     }
 

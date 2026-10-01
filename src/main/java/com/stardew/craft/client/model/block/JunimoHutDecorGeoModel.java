@@ -6,8 +6,8 @@ import net.minecraft.resources.ResourceLocation;
 import software.bernie.geckolib.model.GeoModel;
 
 public class JunimoHutDecorGeoModel extends GeoModel<JunimoHutDecorBlockEntity> {
-    private static final ResourceLocation MODEL = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "geo/block/decor/junimo_hut_decor.geo.json");
-    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/block/decor/common/junimo_hut_decor.png");
+    private static final ResourceLocation MODEL = new ResourceLocation(StardewCraft.MODID, "geo/block/decor/junimo_hut_decor.geo.json");
+    private static final ResourceLocation TEXTURE = new ResourceLocation(StardewCraft.MODID, "textures/block/decor/common/junimo_hut_decor.png");
 
     @Override
     public ResourceLocation getModelResource(JunimoHutDecorBlockEntity animatable) {

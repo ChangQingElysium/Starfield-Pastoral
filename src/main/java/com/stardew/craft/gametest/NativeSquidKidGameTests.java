@@ -7,7 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.*;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.gametest.*;
+import net.minecraftforge.gametest.*;
 @GameTestHolder("stardewcraft_bug")
 @PrefixGameTestTemplate(false)
 @SuppressWarnings("null")

@@ -3,11 +3,11 @@ package com.stardew.craft.network.payload;
 import com.stardew.craft.StardewCraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +22,7 @@ public record OpenBlacksmithMenuPayload(
 ) implements CustomPacketPayload {
 
     public static final Type<OpenBlacksmithMenuPayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "open_blacksmith_menu"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "open_blacksmith_menu"));
 
     public static final StreamCodec<FriendlyByteBuf, OpenBlacksmithMenuPayload> STREAM_CODEC = StreamCodec.of(
         (buf, payload) -> buf.writeBoolean(payload.hasGeode()),
@@ -38,7 +38,7 @@ public record OpenBlacksmithMenuPayload(
         context.enqueueWork(() -> handleClient(payload));
     }
 
-    @net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+    @net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
     private static void handleClient(OpenBlacksmithMenuPayload payload) {
         net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
         if (mc.player == null) return;

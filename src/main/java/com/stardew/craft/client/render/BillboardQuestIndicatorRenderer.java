@@ -14,7 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -133,7 +133,7 @@ public final class BillboardQuestIndicatorRenderer {
         for (int cx=minX>>4;cx<=maxX>>4;cx++) {
             for (int cz=minZ>>4;cz<=maxZ>>4;cz++) {
                 var chunk=level.getChunkSource().getChunk(cx,cz,
-                        net.minecraft.world.level.chunk.status.ChunkStatus.FULL,false);
+                        net.minecraft.world.level.chunk.ChunkStatus.FULL,false);
                 if (chunk==null) continue;
                 for (int sy=minY>>4;sy<=maxY>>4;sy++) {
                     var section=chunk.getSection(level.getSectionIndexFromSectionY(sy));

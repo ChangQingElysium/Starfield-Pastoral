@@ -6,7 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 
 /** Tiles the existing container frame at native pixel size, with a centered player inventory. */
 public final class ChestMenuBackground {
-    private static final ResourceLocation TEXTURE = ResourceLocation.withDefaultNamespace("textures/gui/container/generic_54.png");
+    private static final ResourceLocation TEXTURE = new ResourceLocation("textures/gui/container/generic_54.png");
 
     private ChestMenuBackground() {}
 

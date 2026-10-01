@@ -16,13 +16,13 @@ public final class StardewMachineCycleRegistry {
     private static final OrderedExtensionRegistry<
             StardewMachineCycles.PlanProvider> PLANS =
             new OrderedExtensionRegistry<>(
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             StardewCraft.MODID,
                             "machine/cycle_plan"));
     private static final OrderedExtensionRegistry<
             StardewMachineCycles.Listener> LISTENERS =
             new OrderedExtensionRegistry<>(
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             StardewCraft.MODID,
                             "machine/cycle_event"));
 

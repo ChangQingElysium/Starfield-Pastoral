@@ -74,7 +74,7 @@ public record FarmAnimalDefinition(
         sourceHouse = normalize(sourceHouse, "source_house");
         family = normalize(family, "family");
         gender = requireText(gender, "gender");
-        ResourceLocation.parse(family.contains(":") ? family : "stardewcraft:" + family);
+        new ResourceLocation(family.contains(":") ? family : "stardewcraft:" + family);
         if (purchasePrice < -1 || sellPrice < 0) {
             throw new IllegalArgumentException("invalid economy values for " + id);
         }

@@ -33,7 +33,7 @@ public final class LivestockSpecies {
     public static LivestockSpecies parse(String id) {
         String normalized = Objects.requireNonNull(id).strip().toLowerCase(Locale.ROOT);
         if(normalized.equals("cow"))normalized="white_cow";
-        ResourceLocation.parse(normalized.contains(":") ? normalized : "stardewcraft:" + normalized);
+        new ResourceLocation(normalized.contains(":") ? normalized : "stardewcraft:" + normalized);
         return IDENTITIES.computeIfAbsent(normalized, LivestockSpecies::new);
     }
     public static LivestockSpecies[] values() {
@@ -50,7 +50,7 @@ public final class LivestockSpecies {
     public ResourceLocation family() {
         var d = definition(); var legacy = StardewAnimalTypes.definition(id);
         String family = d != null ? d.family() : legacy == null ? "stardewcraft:missing" : legacy.family();
-        return ResourceLocation.parse(family.contains(":") ? family : "stardewcraft:" + family);
+        return new ResourceLocation(family.contains(":") ? family : "stardewcraft:" + family);
     }
     public int minimumTier() { var d=definition(); var s=StardewAnimalShopEntries.entry(id); return d!=null?d.requiredBuildingTier():s==null?1:s.requiredTier(); }
     public int price() { var d=definition(); var s=StardewAnimalShopEntries.entry(id); return d!=null?(d.purchasePrice()<0?-1:Math.multiplyExact(d.purchasePrice(),2)):s==null?-1:s.price(); }
@@ -67,7 +67,7 @@ public final class LivestockSpecies {
         return switch(d.harvestType()) {
             case DROP_OVERNIGHT -> Harvest.DROP;
             case DIG_UP -> Harvest.DIG;
-            case HARVEST_WITH_TOOL -> ResourceLocation.parse("stardewcraft:shears").equals(d.harvestTool())?Harvest.SHEAR:Harvest.MILK;
+            case HARVEST_WITH_TOOL -> new ResourceLocation("stardewcraft:shears").equals(d.harvestTool())?Harvest.SHEAR:Harvest.MILK;
         };
     }
     public ProfessionType profession() { return profession(definition()==null?-1:definition().professionForHappinessBoost()); }

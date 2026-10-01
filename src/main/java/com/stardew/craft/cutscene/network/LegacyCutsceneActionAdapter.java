@@ -71,6 +71,6 @@ final class LegacyCutsceneActionAdapter {
     }
 
     private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, path);
+        return new ResourceLocation(StardewCraft.MODID, path);
     }
 }

@@ -18,12 +18,12 @@ public final class ModMiningDimensions {
 	@SuppressWarnings("null")
 	public static final ResourceKey<Level> STARDEW_MINING = ResourceKey.create(
 		Registries.DIMENSION,
-		ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "stardew_mining")
+		new ResourceLocation(StardewCraft.MODID, "stardew_mining")
 	);
 
 	@SuppressWarnings("null")
 	public static final ResourceKey<DimensionType> STARDEW_MINING_TYPE = ResourceKey.create(
 		Registries.DIMENSION_TYPE,
-		ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "stardew_mining")
+		new ResourceLocation(StardewCraft.MODID, "stardew_mining")
 	);
 }

@@ -17,13 +17,13 @@ import java.util.Map;
 
 @SuppressWarnings("null")
 public class DesertFestivalRaceScreen extends Screen implements DesertFestivalRaceSnapshotScreen {
-    private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation BACKGROUND = new ResourceLocation(
         StardewCraft.MODID, "textures/gui/desert_festival/race/race_track_full.png");
-    private static final ResourceLocation RACERS = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation RACERS = new ResourceLocation(
         StardewCraft.MODID, "textures/gui/desert_festival/race/desert_racers.png");
-    private static final ResourceLocation RACERS_LEFT = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation RACERS_LEFT = new ResourceLocation(
         StardewCraft.MODID, "textures/gui/desert_festival/race/desert_racers_left.png");
-    private static final ResourceLocation SHADOW = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation SHADOW = new ResourceLocation(
         StardewCraft.MODID, "textures/gui/desert_festival/race/shadow.png");
     private static final int BG_W = 672;
     private static final int BG_H = 384;

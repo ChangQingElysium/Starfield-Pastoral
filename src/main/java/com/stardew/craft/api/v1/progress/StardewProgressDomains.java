@@ -16,6 +16,6 @@ public final class StardewProgressDomains {
     }
 
     private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, path);
+        return new ResourceLocation(StardewCraft.MODID, path);
     }
 }

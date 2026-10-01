@@ -6,8 +6,8 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredHolder;
+import net.minecraftforge.registries.DeferredRegister;
 
 /**
  * 自定义 Buff（状态效果）。
@@ -39,7 +39,7 @@ public final class ModMobEffects {
             // 与原版 Speed 类似：每级 +20% 移速（乘算，随 amplifier 递增）。
             this.addAttributeModifier(
                 Attributes.MOVEMENT_SPEED,
-                ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "effect.speed"),
+                new ResourceLocation(StardewCraft.MODID, "effect.speed"),
                 AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL,
                 amplifier -> 0.2D * (amplifier + 1)
             );
@@ -56,7 +56,7 @@ public final class ModMobEffects {
             super(MobEffectCategory.BENEFICIAL, color);
             this.addAttributeModifier(
                 Attributes.MOVEMENT_SPEED,
-                ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "effect.statue_of_blessings_0"),
+                new ResourceLocation(StardewCraft.MODID, "effect.statue_of_blessings_0"),
                 AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL,
                 amplifier -> 0.25D
             );
@@ -73,7 +73,7 @@ public final class ModMobEffects {
     public static final DeferredHolder<MobEffect, MobEffect> SLIMED = MOB_EFFECTS.register(
             "slimed", () -> new SimpleHarmfulEffect(0x64BD43).addAttributeModifier(
                     Attributes.MOVEMENT_SPEED,
-                    ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "effect.slimed"),
+                    new ResourceLocation(StardewCraft.MODID, "effect.slimed"),
                     -.8D, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
 
     /**
@@ -237,7 +237,7 @@ public final class ModMobEffects {
                 MobEffect effect = new SimpleBeneficialEffect(0xD4AF37); // 金色
                 effect.addAttributeModifier(
                     Attributes.ATTACK_DAMAGE,
-                    ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "effect.fury"),
+                    new ResourceLocation(StardewCraft.MODID, "effect.fury"),
                     AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL,
                     amplifier -> 0.10D * (amplifier + 1)
                 );

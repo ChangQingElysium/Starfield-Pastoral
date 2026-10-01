@@ -7,10 +7,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ModelEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.ModelEvent;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -20,7 +20,7 @@ public final class ReclamationMachineModels {
     private static final Map<String, ModelResourceLocation> PARTS = java.util.stream.Stream.of(
         "deconstructor", "wood_chipper_stationary_housing", "wood_chipper_feed_apron", "wood_chipper_rotating_blades")
         .collect(java.util.stream.Collectors.toUnmodifiableMap(n -> n, n -> new ModelResourceLocation(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "block/utility/" + n), "standalone")));
+            new ResourceLocation(StardewCraft.MODID, "block/utility/" + n), "standalone")));
     private static final Map<String, ReclamationMachineAnimation> ANIMATIONS = new java.util.HashMap<>();
     private ReclamationMachineModels() {}
 
@@ -28,7 +28,7 @@ public final class ReclamationMachineModels {
     public static void register(ModelEvent.RegisterAdditional event) {
         PARTS.values().forEach(event::register);
         for (String name : new String[]{"deconstructor", "wood_chipper"}) {
-            var id = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "animations/utility/" + name + ".json");
+            var id = new ResourceLocation(StardewCraft.MODID, "animations/utility/" + name + ".json");
             try (var reader = new InputStreamReader(Minecraft.getInstance().getResourceManager().getResourceOrThrow(id).open(), StandardCharsets.UTF_8)) {
                 ANIMATIONS.put(name, new ReclamationMachineAnimation(JsonParser.parseReader(reader).getAsJsonObject()));
             } catch (java.io.IOException exception) { throw new IllegalStateException("Cannot load " + id, exception); }

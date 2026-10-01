@@ -5,7 +5,7 @@ import com.stardew.craft.entity.npc.StardewNpcEntity;
 import com.stardew.craft.sound.ModSounds;
 import com.stardew.craft.time.StardewSimulationTaskScheduler;
 import com.stardew.craft.world.MutantBugLairService;
-import net.minecraft.core.particles.ColorParticleOption;
+import com.stardew.craft.port.net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;

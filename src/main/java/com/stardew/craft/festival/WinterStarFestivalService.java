@@ -33,7 +33,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -711,7 +711,7 @@ public final class WinterStarFestivalService {
                 new GiftSpec("emerald", 1), new GiftSpec("jade", 1));
         }
         GiftSpec selected = gifts.get(random.nextInt(gifts.size()));
-        Item item = BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath("stardewcraft", selected.itemId()));
+        Item item = BuiltInRegistries.ITEM.get(new ResourceLocation("stardewcraft", selected.itemId()));
         return item == null || item == Items.AIR ? ItemStack.EMPTY : new ItemStack(item, selected.count());
     }
 

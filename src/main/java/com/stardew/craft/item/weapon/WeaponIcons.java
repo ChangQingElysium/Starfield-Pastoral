@@ -13,7 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 public class WeaponIcons {
     
     // 字体资源
-    public static final ResourceLocation WEAPON_ICONS_FONT = ResourceLocation.fromNamespaceAndPath("stardewcraft", "weapon_icons");
+    public static final ResourceLocation WEAPON_ICONS_FONT = new ResourceLocation("stardewcraft", "weapon_icons");
     
     // 属性图标字符 (Private Use Area)
     public static final String ICON_DAMAGE = "\uE001";      // 伤害

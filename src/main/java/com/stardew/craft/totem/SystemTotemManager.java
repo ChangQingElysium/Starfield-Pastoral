@@ -13,9 +13,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.level.LevelEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.level.LevelEvent;
 
 /**
  * 系统图腾柱管理器 — 在星露谷维度加载时确保主地图系统柱存在。
@@ -93,7 +93,7 @@ public class SystemTotemManager {
 
     @SuppressWarnings("null")
     private static void ensureSystemPole(ServerLevel level, BlockPos pos, TotemType type,
-                                         net.neoforged.neoforge.registries.DeferredBlock<Block> blockHolder,
+                                         com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredBlock<Block> blockHolder,
                                          int systemId, Direction facing) {
         String name = type.getDefaultNameKey();
         // 如果已经是该图腾柱，跳过

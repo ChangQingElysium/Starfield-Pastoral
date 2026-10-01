@@ -1,7 +1,0 @@
-{
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "stardewcraft:item/crops/tea_leaves",
-    "particle": "stardewcraft:item/crops/tea_leaves"
-  }
-}

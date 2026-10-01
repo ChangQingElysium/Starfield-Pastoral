@@ -12,10 +12,10 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.EntityRenderersEvent;
 
 @EventBusSubscriber(modid = StardewCraft.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class RobinConstructionRenderer extends EntityRenderer<RobinConstructionEntity> {
@@ -30,8 +30,8 @@ public final class RobinConstructionRenderer extends EntityRenderer<RobinConstru
 
     @Override public ResourceLocation getTextureLocation(RobinConstructionEntity entity) {
         var asset = NativeNpcAssets.robinConstruction();
-        return asset == null ? ResourceLocation.withDefaultNamespace("textures/misc/white.png")
-                : ResourceLocation.parse(asset.texture());
+        return asset == null ? new ResourceLocation("textures/misc/white.png")
+                : new ResourceLocation(asset.texture());
     }
 
     @Override public void render(RobinConstructionEntity entity, float yaw, float partialTick,

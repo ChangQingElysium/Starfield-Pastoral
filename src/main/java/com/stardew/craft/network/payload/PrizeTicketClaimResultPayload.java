@@ -2,10 +2,10 @@ package com.stardew.craft.network.payload;
 
 import com.stardew.craft.StardewCraft;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +22,7 @@ public record PrizeTicketClaimResultPayload(
     List<PrizeTicketRewardPreview> previews
 ) implements CustomPacketPayload {
     public static final Type<PrizeTicketClaimResultPayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "prize_ticket_claim_result"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "prize_ticket_claim_result"));
 
     public static final StreamCodec<FriendlyByteBuf, PrizeTicketClaimResultPayload> STREAM_CODEC = StreamCodec.of(
         (buf, payload) -> {
@@ -63,7 +63,7 @@ public record PrizeTicketClaimResultPayload(
         context.enqueueWork(() -> handleClient(payload));
     }
 
-    @net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+    @net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
     private static void handleClient(PrizeTicketClaimResultPayload payload) {
         net.minecraft.client.Minecraft minecraft = net.minecraft.client.Minecraft.getInstance();
         if (minecraft.screen instanceof com.stardew.craft.client.gui.PrizeTicketMachineScreen screen) {

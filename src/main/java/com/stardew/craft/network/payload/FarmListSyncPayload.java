@@ -1,13 +1,13 @@
 package com.stardew.craft.network.payload;
 
 import com.stardew.craft.StardewCraft;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.*;
 
@@ -32,7 +32,7 @@ public record FarmListSyncPayload(
     ) {}
 
     public static final Type<FarmListSyncPayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "farm_list_sync"));
+            new Type<>(new ResourceLocation(StardewCraft.MODID, "farm_list_sync"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, FarmListSyncPayload> STREAM_CODEC =
             new StreamCodec<>() {
@@ -115,7 +115,7 @@ public record FarmListSyncPayload(
             ));
         }
 
-        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
+        net.minecraftforge.network.PacketDistributor.sendToPlayer(player,
                 new FarmListSyncPayload(entries, entryTag));
     }
 }

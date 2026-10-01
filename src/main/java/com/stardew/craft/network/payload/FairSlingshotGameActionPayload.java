@@ -3,12 +3,12 @@ package com.stardew.craft.network.payload;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.festival.fair.FairSlingshotGameService;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 @SuppressWarnings("null")
 public record FairSlingshotGameActionPayload(int action, int score) implements CustomPacketPayload {
@@ -16,7 +16,7 @@ public record FairSlingshotGameActionPayload(int action, int score) implements C
     public static final int ACTION_COMPLETE = 1;
 
     public static final Type<FairSlingshotGameActionPayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "fair_slingshot_game_action"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "fair_slingshot_game_action"));
 
     public static final StreamCodec<ByteBuf, FairSlingshotGameActionPayload> STREAM_CODEC =
         StreamCodec.composite(

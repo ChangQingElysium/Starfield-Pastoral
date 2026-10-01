@@ -8,7 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.*;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Blocks;
-import net.neoforged.neoforge.gametest.*;
+import net.minecraftforge.gametest.*;
 import java.util.*;
 
 @GameTestHolder("stardewcraft_ordinary_mine")
@@ -152,7 +152,7 @@ public final class OrdinaryMineRuntimeGameTests {
             String name=id.getPath().substring("mine_layouts/".length(),id.getPath().length()-5);
             if(!name.startsWith("extra_") || name.contains("desert"))continue;
             var layout=OrdinaryMineLayout.loadNamed(level,name);
-            var template=level.getStructureManager().get(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("stardewcraft","mine_layouts/"+name)).orElseThrow();
+            var template=level.getStructureManager().get(new net.minecraft.resources.ResourceLocation("stardewcraft","mine_layouts/"+name)).orElseThrow();
             h.assertTrue(template.getSize().equals(layout.size),"Alternate missing/mismatched: "+name);count++;
         }
         h.assertTrue(count>0,"No approved alternate layouts packaged");
@@ -168,8 +168,8 @@ public final class OrdinaryMineRuntimeGameTests {
     @GameTest(templateNamespace="stardewcraft_ordinary_mine",template="ring_utilities")
     public static void realChestInventoriesRemainIndependentAfterReplacement(GameTestHelper h) {
         var level=h.getLevel();var pos=new BlockPos(256,70,4020);
-        var a=net.neoforged.neoforge.common.util.FakePlayerFactory.get(level,new com.mojang.authlib.GameProfile(UUID.randomUUID(),"Mine reward A"));
-        var b=net.neoforged.neoforge.common.util.FakePlayerFactory.get(level,new com.mojang.authlib.GameProfile(UUID.randomUUID(),"Mine reward B"));
+        var a=net.minecraftforge.common.util.FakePlayerFactory.get(level,new com.mojang.authlib.GameProfile(UUID.randomUUID(),"Mine reward A"));
+        var b=net.minecraftforge.common.util.FakePlayerFactory.get(level,new com.mojang.authlib.GameProfile(UUID.randomUUID(),"Mine reward B"));
         level.setBlock(pos,ModBlocks.MINE_CHEST.get().defaultBlockState(),3);
         var chest=(com.stardew.craft.blockentity.MineChestBlockEntity)level.getBlockEntity(pos);
         h.assertTrue(chest!=null,"Chest block entity missing");

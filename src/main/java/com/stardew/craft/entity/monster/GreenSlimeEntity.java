@@ -108,11 +108,11 @@ public final class GreenSlimeEntity extends StardewMonsterEntity {
     }
     private double walkPixels() { return GreenSlimeRules.WALK_PIXELS + (frostRush() ? 2 : 0); }
     @Override protected ResourceLocation definitionId() {
-        return offspringDefinition != null ? offspringDefinition : ResourceLocation.fromNamespaceAndPath("stardewcraft", variant().id());
+        return offspringDefinition != null ? offspringDefinition : new ResourceLocation("stardewcraft", variant().id());
     }
     void initializeOffspring(MonsterSpawnContext context, int color) {
         offspringColor = color;
-        offspringDefinition = ResourceLocation.fromNamespaceAndPath("stardewcraft", SlimeVariant.offspringStats(color).id());
+        offspringDefinition = new ResourceLocation("stardewcraft", SlimeVariant.offspringStats(color).id());
         initialize(context);
     }
     public void initialize(int floor) {
@@ -143,8 +143,8 @@ public final class GreenSlimeEntity extends StardewMonsterEntity {
         if (!offspring && variant().skull(floor)) {
             health *= 2;
             addTag("sd_tier_skull");
-            while (random.nextDouble() < .08) monsterState().addBornDrop(ResourceLocation.parse("stardewcraft:iridium_ore"));
-            if (random.nextDouble() < .009) monsterState().addBornDrop(ResourceLocation.parse("stardewcraft:iridium_bar"));
+            while (random.nextDouble() < .08) monsterState().addBornDrop(new ResourceLocation("stardewcraft:iridium_ore"));
+            if (random.nextDouble() < .009) monsterState().addBornDrop(new ResourceLocation("stardewcraft:iridium_bar"));
         }
         setInitialHealth(GreenSlimeRules.health(health, marked, male));
         replaceCombatStats(MonsterStats.builder().damage(GreenSlimeRules.damage(damage, marked, male))

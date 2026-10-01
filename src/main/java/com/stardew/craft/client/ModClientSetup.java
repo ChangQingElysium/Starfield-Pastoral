@@ -60,12 +60,12 @@ import com.stardew.craft.client.render.TableDisplayBlockEntityRenderer;
 import com.stardew.craft.client.render.OfficeStoolBlockEntityRenderer;
 import com.stardew.craft.client.render.StardewHatLayer;
 import com.stardew.craft.menu.ModMenuTypes;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.neoforge.client.event.EntityRenderersEvent;
-import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.client.event.EntityRenderersEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import com.stardew.craft.entity.ModEntities;
 import com.stardew.craft.client.renderer.entity.MeowmereProjectileRenderer;
 import com.stardew.craft.client.renderer.entity.ElfBladeLeafRenderer;
@@ -249,7 +249,7 @@ public final class ModClientSetup {
 			addFreezeLayer(renderer);
 		}
 
-		for (net.minecraft.client.resources.PlayerSkin.Model skin : event.getSkins()) {
+		for (com.stardew.craft.port.net.minecraft.client.resources.PlayerSkin.Model skin : event.getSkins()) {
 			net.minecraft.client.renderer.entity.EntityRenderer<? extends net.minecraft.world.entity.player.Player> renderer = event.getSkin(skin);
 			addFreezeLayer(renderer);
 			addHatLayer(renderer);

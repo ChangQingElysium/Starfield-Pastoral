@@ -6,7 +6,7 @@ import com.stardew.craft.time.StardewTimeManager;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 import java.util.*;
 
 public final class LivestockShop {

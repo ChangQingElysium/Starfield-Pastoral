@@ -6,10 +6,10 @@ import com.stardew.craft.api.v1.equipment.StardewEquipmentDataApi;
 import com.stardew.craft.item.weapon.IStardewWeapon;
 import com.stardew.craft.item.weapon.WeaponTooltipBuilder;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 
 /** Adds the shared combat-stat presentation to public API weapons. */
 @EventBusSubscriber(modid = StardewCraft.MODID, value = Dist.CLIENT)

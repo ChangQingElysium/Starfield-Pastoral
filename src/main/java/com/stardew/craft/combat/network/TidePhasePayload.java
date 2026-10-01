@@ -2,19 +2,19 @@ package com.stardew.craft.combat.network;
 
 import com.stardew.craft.StardewCraft;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /** Exact contact and displacement endpoints; short effects expire against server time. */
 public record TidePhasePayload(int casterId, long tick, Phase phase, Vec3 from, Vec3 to,
                                    int duration, boolean empowered) implements CustomPacketPayload {
     public enum Phase { ANCHOR, TRANSFER, REEL }
-    public static final Type<TidePhasePayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "tide_phase"));
+    public static final Type<TidePhasePayload> TYPE = new Type<>(new ResourceLocation(StardewCraft.MODID, "tide_phase"));
     public static final StreamCodec<ByteBuf, TidePhasePayload> STREAM_CODEC = new StreamCodec<>() {
         @Override public TidePhasePayload decode(ByteBuf b) {
             return new TidePhasePayload(b.readInt(), b.readLong(), Phase.values()[b.readUnsignedByte()],

@@ -186,7 +186,7 @@ public class MoneyDial {
     private void playMoneySound(int direction) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player != null && direction > 0) {  // 原版：只有加钱时播放！
-            ResourceLocation soundLocation = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "money_dial");
+            ResourceLocation soundLocation = new ResourceLocation(StardewCraft.MODID, "money_dial");
             @SuppressWarnings("null")
             SoundEvent soundEvent = SoundEvent.createVariableRangeEvent(soundLocation);
             mc.player.playSound(soundEvent, 0.5f, 1.0f);

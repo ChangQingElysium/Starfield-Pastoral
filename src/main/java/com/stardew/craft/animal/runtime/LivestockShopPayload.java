@@ -1,18 +1,18 @@
 package com.stardew.craft.animal.runtime;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record LivestockShopPayload(CompoundTag data) implements CustomPacketPayload {
-    public static final Type<LivestockShopPayload> TYPE = new Type<>(ResourceLocation.parse("stardewcraft:livestock_shop"));
+    public static final Type<LivestockShopPayload> TYPE = new Type<>(new ResourceLocation("stardewcraft:livestock_shop"));
     public static final StreamCodec<RegistryFriendlyByteBuf, LivestockShopPayload> CODEC = StreamCodec.of((b,p) -> b.writeNbt(p.data), b -> new LivestockShopPayload(b.readNbt()));
     @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
     public static void handle(LivestockShopPayload payload, IPayloadContext context) { context.enqueueWork(() -> client(payload)); }
-    @net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+    @net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
     private static void client(LivestockShopPayload payload) {
         var mc = net.minecraft.client.Minecraft.getInstance();
         if (payload.data.contains("Result")) {

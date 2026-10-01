@@ -10,7 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 public class GoldStarParticle {
     
     @SuppressWarnings("null")
-    private static final ResourceLocation STAR_TEXTURE = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/item/particle/gold_star.png");
+    private static final ResourceLocation STAR_TEXTURE = new ResourceLocation(StardewCraft.MODID, "textures/item/particle/gold_star.png");
     
     private static final int FRAME_SIZE = 5; // 每帧5x5像素
     private static final int TOTAL_FRAMES = 5; // 总共5帧

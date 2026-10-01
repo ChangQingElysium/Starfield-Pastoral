@@ -12,7 +12,7 @@ final class NativeFlyRenderTypes {
     static final RenderType MEMBRANE=RenderType.create("stardew_fly_membrane",DefaultVertexFormat.NEW_ENTITY,
             VertexFormat.Mode.QUADS,1536,true,true,RenderType.CompositeState.builder()
                     .setShaderState(RenderStateShard.RENDERTYPE_ENTITY_TRANSLUCENT_SHADER)
-                    .setTextureState(new RenderStateShard.TextureStateShard(ResourceLocation.parse("stardewcraft:textures/entity/monster_native/fly.png"),false,false))
+                    .setTextureState(new RenderStateShard.TextureStateShard(new ResourceLocation("stardewcraft:textures/entity/monster_native/fly.png"),false,false))
                     .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
                     .setCullState(RenderStateShard.CULL)
                     .setLightmapState(RenderStateShard.LIGHTMAP)

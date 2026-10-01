@@ -11,16 +11,16 @@ import net.minecraft.resources.ResourceLocation;
 @SuppressWarnings("null")
 public class StardewGuiUtil {
 
-    public static final ResourceLocation CURSORS = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/cursors.png");
+    public static final ResourceLocation CURSORS = new ResourceLocation(StardewCraft.MODID, "textures/gui/cursors.png");
     public static final int CURSORS_WIDTH = 704;
     public static final int CURSORS_HEIGHT = 2256;
-    public static final ResourceLocation CURSORS2 = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/mouse_cursors2.png");
+    public static final ResourceLocation CURSORS2 = new ResourceLocation(StardewCraft.MODID, "textures/gui/mouse_cursors2.png");
     public static final int CURSORS2_WIDTH = 256;
     public static final int CURSORS2_HEIGHT = 320;
-    public static final ResourceLocation CURSORS_1_6 = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/cursors_1_6.png");
+    public static final ResourceLocation CURSORS_1_6 = new ResourceLocation(StardewCraft.MODID, "textures/gui/cursors_1_6.png");
     public static final int CURSORS_1_6_WIDTH = 512;
     public static final int CURSORS_1_6_HEIGHT = 512;
-    public static final ResourceLocation MENU_TILES = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/animal_query/menu_tiles.png");
+    public static final ResourceLocation MENU_TILES = new ResourceLocation(StardewCraft.MODID, "textures/gui/animal_query/menu_tiles.png");
     public static final int MENU_TILES_WIDTH = 256;
     public static final int MENU_TILES_HEIGHT = 1152;
     private static final ResourceLocation COMMON_TEXTURE_BOX_18 = common("texture_box_18");
@@ -323,11 +323,11 @@ public class StardewGuiUtil {
     }
 
     private static ResourceLocation common(String name) {
-        return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/common/" + name + ".png");
+        return new ResourceLocation(StardewCraft.MODID, "textures/gui/common/" + name + ".png");
     }
 
     private static ResourceLocation animalQuery(String name) {
-        return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/animal_query/" + name + ".png");
+        return new ResourceLocation(StardewCraft.MODID, "textures/gui/animal_query/" + name + ".png");
     }
 
     private static ResourceLocation menuTile(int tileIndex) {

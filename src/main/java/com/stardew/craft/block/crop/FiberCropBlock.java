@@ -261,7 +261,7 @@ public class FiberCropBlock extends StardewCropBlock {
     private static int localSeason(ServerLevel level, BlockPos pos) {
         // The original Island and Desert location contexts stay in summer.
         for (var location : com.stardew.craft.api.v1.world.StardewLocations.hierarchy(level.dimension().location(), pos)) {
-            String override = location.properties().get(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("stardewcraft", "season_override"));
+            String override = location.properties().get(new net.minecraft.resources.ResourceLocation("stardewcraft", "season_override"));
             if (override != null) {
                 int season = switch (override.toLowerCase(java.util.Locale.ROOT)) {
                     case "spring" -> 0;

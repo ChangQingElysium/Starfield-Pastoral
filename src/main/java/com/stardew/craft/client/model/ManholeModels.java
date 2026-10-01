@@ -21,13 +21,13 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ModelEvent;
-import net.neoforged.neoforge.client.model.BakedModelWrapper;
-import net.neoforged.neoforge.client.model.IDynamicBakedModel;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.ModelEvent;
+import net.minecraftforge.client.model.BakedModelWrapper;
+import net.minecraftforge.client.model.IDynamicBakedModel;
+import net.minecraftforge.client.model.data.ModelData;
 
 /** Seasonal 3x3 covers, with invisible owned cells and centered items. */
 @SuppressWarnings("removal")
@@ -37,7 +37,7 @@ public final class ManholeModels {
     private ManholeModels() {}
 
     private static ModelResourceLocation id(String season) {
-        return new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,
+        return new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID,
                 "block/decor/manhole/" + season), "standalone");
     }
 
@@ -58,7 +58,7 @@ public final class ManholeModels {
             var key = BlockModelShaper.stateToModelLocation(state);
             event.getModels().put(key, new Seasonal(Objects.requireNonNull(event.getModels().get(key)), materials));
         }
-        var item = new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "manhole"), "inventory");
+        var item = new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID, "manhole"), "inventory");
         event.getModels().put(item, new Seasonal(Objects.requireNonNull(event.getModels().get(item)), materials));
     }
 

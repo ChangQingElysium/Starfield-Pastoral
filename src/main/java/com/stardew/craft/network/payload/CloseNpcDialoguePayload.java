@@ -3,17 +3,17 @@ package com.stardew.craft.network.payload;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.npc.runtime.NpcInteractionService;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record CloseNpcDialoguePayload(String npcId) implements CustomPacketPayload {
 
     @SuppressWarnings("null")
     public static final Type<CloseNpcDialoguePayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "close_npc_dialogue"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "close_npc_dialogue"));
 
     @SuppressWarnings("null")
     public static final StreamCodec<FriendlyByteBuf, CloseNpcDialoguePayload> STREAM_CODEC = StreamCodec.of(

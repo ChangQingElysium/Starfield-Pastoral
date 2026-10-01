@@ -8,12 +8,12 @@ import com.stardew.craft.animal.runtime.LivestockService;
 import com.stardew.craft.animal.runtime.LivestockWorldData;
 import com.stardew.craft.farm.FarmInstanceRegistry;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -23,7 +23,7 @@ import java.util.List;
 /** Client request for the authoritative animal list shown in the V menu. */
 public record RequestAnimalOverviewPayload() implements CustomPacketPayload {
     public static final Type<RequestAnimalOverviewPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "request_animal_overview"));
+            new ResourceLocation(StardewCraft.MODID, "request_animal_overview"));
     public static final StreamCodec<ByteBuf, RequestAnimalOverviewPayload> STREAM_CODEC =
             StreamCodec.unit(new RequestAnimalOverviewPayload());
 
@@ -108,7 +108,7 @@ public record RequestAnimalOverviewPayload() implements CustomPacketPayload {
             boolean baby = animal.baby() && !"dinosaur".equals(animalTypeId);
             String spriteName = ("white_cow".equals(animalTypeId) ? "cow" : animalTypeId)
                     + (baby ? "_baby" : "");
-            ResourceLocation sprite = ResourceLocation.fromNamespaceAndPath(
+            ResourceLocation sprite = new ResourceLocation(
                     StardewCraft.MODID,
                     "textures/gui/common/animal_page_sprite_" + spriteName + ".png");
             boolean compact = definition.sourceKey().contains("Chicken")

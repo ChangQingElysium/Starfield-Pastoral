@@ -16,7 +16,7 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 import java.util.UUID;
 
 public final class BobberStyleScreen extends Screen implements StardewGuiContentSize {
@@ -26,7 +26,7 @@ public final class BobberStyleScreen extends Screen implements StardewGuiContent
     private final UUID token;
     private int selected,fishSpecies,x0,y0;
     public BobberStyleScreen(BobberMenuPayload p){super(Component.translatable("stardewcraft.bobber.title"));token=p.token();selected=p.selected();fishSpecies=p.fishSpecies();}
-    private static ResourceLocation texture(String name){return ResourceLocation.fromNamespaceAndPath("stardewcraft","textures/gui/bobbers/"+name+".png");}
+    private static ResourceLocation texture(String name){return new ResourceLocation("stardewcraft","textures/gui/bobbers/"+name+".png");}
     @Override public int minimumCanvasWidth(){return 380;}
     @Override public int minimumCanvasHeight(){return 316;}
     @Override public boolean isPauseScreen(){return false;}

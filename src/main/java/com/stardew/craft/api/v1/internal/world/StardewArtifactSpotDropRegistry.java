@@ -28,7 +28,7 @@ public final class StardewArtifactSpotDropRegistry {
     private static final OrderedExtensionRegistry<
             StardewArtifactSpotDrops.Provider> PROVIDERS =
             new OrderedExtensionRegistry<>(
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             StardewCraft.MODID, "world/artifact_spot_drops"));
     private static final Map<ResourceLocation,
             StardewContentReferenceProvider> REFERENCE_PROVIDERS =

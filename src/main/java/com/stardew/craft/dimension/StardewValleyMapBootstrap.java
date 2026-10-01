@@ -644,7 +644,7 @@ public final class StardewValleyMapBootstrap {
             props = raw.substring(split + 1, raw.length() - 1);
         }
 
-        Block block = BuiltInRegistries.BLOCK.getOptional(net.minecraft.resources.ResourceLocation.parse(blockId)).orElse(Blocks.AIR);
+        Block block = BuiltInRegistries.BLOCK.getOptional(new net.minecraft.resources.ResourceLocation(blockId)).orElse(Blocks.AIR);
         BlockState state = block.defaultBlockState();
         if (props == null || props.isEmpty()) {
             return state;

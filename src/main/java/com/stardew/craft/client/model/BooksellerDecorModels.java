@@ -16,10 +16,10 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ModelEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.ModelEvent;
 
 /** Native Java model parts, baked once per resource reload. Original art is season independent. */
 @EventBusSubscriber(modid = StardewCraft.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
@@ -30,12 +30,12 @@ public final class BooksellerDecorModels {
     public record Part(double x, double y, double z, boolean emissive, List<BakedQuad> quads) {}
     public static List<Part> parts(String asset) { return models.getOrDefault(asset, List.of()); }
     private static JsonObject description(String asset) {
-        var id = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "bookseller/" + asset + ".json");
+        var id = new ResourceLocation(StardewCraft.MODID, "bookseller/" + asset + ".json");
         try (var reader = new InputStreamReader(Minecraft.getInstance().getResourceManager().getResourceOrThrow(id).open(), StandardCharsets.UTF_8)) {
             return JsonParser.parseReader(reader).getAsJsonObject();
         } catch (IOException exception) { throw new IllegalStateException("Cannot load bookseller decoration " + id, exception); }
     }
-    private static ModelResourceLocation id(String path) { return new ModelResourceLocation(ResourceLocation.parse(path), "standalone"); }
+    private static ModelResourceLocation id(String path) { return new ModelResourceLocation(new ResourceLocation(path), "standalone"); }
     @SubscribeEvent public static void register(ModelEvent.RegisterAdditional event) {
         for (String asset : ASSETS)
             for (var entry : description(asset).getAsJsonArray("parts")) event.register(id(entry.getAsJsonObject().get("model").getAsString()));

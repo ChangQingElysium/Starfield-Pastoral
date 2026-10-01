@@ -21,22 +21,22 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.Direction;
-import net.minecraft.core.component.DataComponents;
+import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.BlockItemStateProperties;
+import com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.ChunkRenderTypeSet;
-import net.neoforged.neoforge.client.event.ModelEvent;
-import net.neoforged.neoforge.client.model.BakedModelWrapper;
-import net.neoforged.neoforge.client.model.IDynamicBakedModel;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.ChunkRenderTypeSet;
+import net.minecraftforge.client.event.ModelEvent;
+import net.minecraftforge.client.model.BakedModelWrapper;
+import net.minecraftforge.client.model.IDynamicBakedModel;
+import net.minecraftforge.client.model.data.ModelData;
 
 /** Native models only; season selection never rewrites a saved block state. */
 @SuppressWarnings("removal")
@@ -54,7 +54,7 @@ public final class NaturalDecorModels {
     }
 
     public static ModelResourceLocation id(NaturalDecorKind kind, int season, int variantOrFrame) {
-        return new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,
+        return new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID,
                 "block/natural/" + kind.id + "/" + SEASONS[season] + "/" + variantOrFrame), "standalone");
     }
 
@@ -94,7 +94,7 @@ public final class NaturalDecorModels {
                 event.getModels().put(BlockModelShaper.stateToModelLocation(state),
                         state.getValue(NaturalPlantBlock.IN_PLANTER) ? new Surface(model.seasons, true) : model);
             }
-            var itemId = new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, kind.id), "inventory");
+            var itemId = new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID, kind.id), "inventory");
             // Dormant plants disappear only in the world; keep their items recognizable.
             if (kind.hiddenInWinter()) for (int variant = 0; variant < items.length; variant++) {
                 BakedModel[] itemSeasons = items[variant].seasons.clone();

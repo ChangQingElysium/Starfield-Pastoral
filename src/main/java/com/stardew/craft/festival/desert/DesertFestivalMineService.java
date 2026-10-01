@@ -200,7 +200,7 @@ public final class DesertFestivalMineService {
     }
 
     private static void syncHud(ServerPlayer player, int displayRating, boolean shake) {
-        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
+        net.minecraftforge.network.PacketDistributor.sendToPlayer(
             player,
             new com.stardew.craft.network.payload.DesertFestivalMineHudPayload(Math.max(0, displayRating), shake)
         );
@@ -391,7 +391,7 @@ public final class DesertFestivalMineService {
             player.sendSystemMessage(Component.translatable("stardewcraft.desert_festival.marlon.rating_1000"));
             return;
         }
-        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
+        net.minecraftforge.network.PacketDistributor.sendToPlayer(
             player,
             new com.stardew.craft.network.payload.OpenDesertFestivalMarlonRatingPayload(rating)
         );
@@ -465,7 +465,7 @@ public final class DesertFestivalMineService {
     }
 
     private static ItemStack stackByPath(String path, int count) {
-        net.minecraft.resources.ResourceLocation id = net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("stardewcraft", path);
+        net.minecraft.resources.ResourceLocation id = new net.minecraft.resources.ResourceLocation("stardewcraft", path);
         net.minecraft.world.item.Item item = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(id);
         if (item == net.minecraft.world.item.Items.AIR) {
             return ItemStack.EMPTY;

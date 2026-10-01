@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/slab_top",
-  "textures": {
-    "bottom": "stardewcraft:block/wood/oak_planks",
-    "side": "stardewcraft:block/wood/oak_planks",
-    "top": "stardewcraft:block/wood/oak_planks"
-  }
-}

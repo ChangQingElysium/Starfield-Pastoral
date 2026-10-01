@@ -11,7 +11,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public final class TemplateMaterials {
     public static final ResourceLocation DEFAULT_MATERIAL_ID =
-            ResourceLocation.fromNamespaceAndPath("stardewcraft", "oak_planks");
+            new ResourceLocation("stardewcraft", "oak_planks");
 
     public static BlockState effectiveMaterial(BlockGetter level, BlockPos pos) {
         if (level.getBlockEntity(pos) instanceof TemplateBlockEntity template && template.material() != null) {

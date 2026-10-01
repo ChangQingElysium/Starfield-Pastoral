@@ -140,7 +140,7 @@ public final class WorldRegionRegistry {
         ResourceLocation dimension = object.has("dimension")
                 ? readId(object.get("dimension"), "dimension",
                         id.getNamespace())
-                : ResourceLocation.fromNamespaceAndPath(
+                : new ResourceLocation(
                         StardewCraft.MODID, "stardew_valley");
         ResourceLocation locationId = object.has("location")
                 ? readId(object.get("location"), "location",

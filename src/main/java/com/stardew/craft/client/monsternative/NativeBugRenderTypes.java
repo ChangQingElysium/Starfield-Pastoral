@@ -14,7 +14,7 @@ final class NativeBugRenderTypes {
     private static RenderType membrane(String id){return RenderType.create("stardew_"+id+"_membrane",DefaultVertexFormat.NEW_ENTITY,
             VertexFormat.Mode.QUADS,1536,true,true,RenderType.CompositeState.builder()
                     .setShaderState(RenderStateShard.RENDERTYPE_ENTITY_TRANSLUCENT_SHADER)
-                    .setTextureState(new RenderStateShard.TextureStateShard(ResourceLocation.parse("stardewcraft:textures/entity/monster_native/"+id+".png"),false,false))
+                    .setTextureState(new RenderStateShard.TextureStateShard(new ResourceLocation("stardewcraft:textures/entity/monster_native/"+id+".png"),false,false))
                     .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
                     .setCullState(RenderStateShard.CULL)
                     .setLightmapState(RenderStateShard.LIGHTMAP)

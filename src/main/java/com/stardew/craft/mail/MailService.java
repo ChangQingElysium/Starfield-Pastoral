@@ -18,7 +18,7 @@ import com.stardew.craft.player.PlayerDataManager;
 import com.stardew.craft.player.PlayerStardewData;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -215,7 +215,7 @@ public class MailService {
         for (MailEntry.AttachedItem ai : entry.getAttachedItems()) {
             items.add(new OpenMailPayload.ItemAttachment(ai.id(), ai.count()));
             // 服务端直接给玩家物品
-            net.minecraft.resources.ResourceLocation itemRL = net.minecraft.resources.ResourceLocation.parse(ai.id());
+            net.minecraft.resources.ResourceLocation itemRL = new net.minecraft.resources.ResourceLocation(ai.id());
             net.minecraft.world.item.Item item = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(itemRL);
             if (item != net.minecraft.world.item.Items.AIR) {
                 net.minecraft.world.item.ItemStack stack = new net.minecraft.world.item.ItemStack(item, ai.count());

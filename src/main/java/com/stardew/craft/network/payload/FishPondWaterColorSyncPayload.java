@@ -4,11 +4,11 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.fishpond.ClientFishPondWaterColorCache;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -17,7 +17,7 @@ public record FishPondWaterColorSyncPayload(String dimensionId, Map<BlockPos, In
         implements CustomPacketPayload {
 
     public static final Type<FishPondWaterColorSyncPayload> TYPE = new Type<>(
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "fish_pond_water_color_sync")
+        new ResourceLocation(StardewCraft.MODID, "fish_pond_water_color_sync")
     );
 
     public static final StreamCodec<ByteBuf, FishPondWaterColorSyncPayload> STREAM_CODEC = StreamCodec.composite(
@@ -25,7 +25,7 @@ public record FishPondWaterColorSyncPayload(String dimensionId, Map<BlockPos, In
         FishPondWaterColorSyncPayload::dimensionId,
         ByteBufCodecs.map(
             LinkedHashMap::new,
-            BlockPos.STREAM_CODEC,
+            com.stardew.craft.port.PortCodecs.BLOCK_POS,
             ByteBufCodecs.INT
         ),
         FishPondWaterColorSyncPayload::colors,

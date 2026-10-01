@@ -11,15 +11,15 @@ import net.minecraft.world.level.block.Block;
 import software.bernie.geckolib.model.GeoModel;
 
 public class BushGeoModel extends GeoModel<BushBlockEntity> {
-    private static final ResourceLocation MODEL_SMALL = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "geo/block/nature/small_bush.geo.json");
-    private static final ResourceLocation MODEL_LARGE = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "geo/block/nature/berry_bush.geo.json");
-    private static final ResourceLocation MODEL_SALMONBERRY = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "geo/block/nature/berry_bush_salmonberry.geo.json");
-    private static final ResourceLocation MODEL_BLACKBERRY = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "geo/block/nature/berry_bush_blackberry.geo.json");
+    private static final ResourceLocation MODEL_SMALL = new ResourceLocation(StardewCraft.MODID, "geo/block/nature/small_bush.geo.json");
+    private static final ResourceLocation MODEL_LARGE = new ResourceLocation(StardewCraft.MODID, "geo/block/nature/berry_bush.geo.json");
+    private static final ResourceLocation MODEL_SALMONBERRY = new ResourceLocation(StardewCraft.MODID, "geo/block/nature/berry_bush_salmonberry.geo.json");
+    private static final ResourceLocation MODEL_BLACKBERRY = new ResourceLocation(StardewCraft.MODID, "geo/block/nature/berry_bush_blackberry.geo.json");
 
-    private static final ResourceLocation TEX_SMALL = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/block/bush/1.png");
-    private static final ResourceLocation TEX_LARGE = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/block/bush/2.png");
-    private static final ResourceLocation TEX_SALMONBERRY = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/block/bush/2_red.png");
-    private static final ResourceLocation TEX_BLACKBERRY = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/block/bush/2_black.png");
+    private static final ResourceLocation TEX_SMALL = new ResourceLocation(StardewCraft.MODID, "textures/block/bush/1.png");
+    private static final ResourceLocation TEX_LARGE = new ResourceLocation(StardewCraft.MODID, "textures/block/bush/2.png");
+    private static final ResourceLocation TEX_SALMONBERRY = new ResourceLocation(StardewCraft.MODID, "textures/block/bush/2_red.png");
+    private static final ResourceLocation TEX_BLACKBERRY = new ResourceLocation(StardewCraft.MODID, "textures/block/bush/2_black.png");
 
     @Override
     public ResourceLocation getModelResource(BushBlockEntity be) {

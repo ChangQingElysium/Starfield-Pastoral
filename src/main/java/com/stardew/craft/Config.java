@@ -1,14 +1,14 @@
 package com.stardew.craft;
 
-import net.neoforged.neoforge.common.ModConfigSpec;
+import net.minecraftforge.common.ForgeConfigSpec;
 
 import java.util.EnumMap;
 import java.util.Map;
 
 public final class Config {
-    private static final ModConfigSpec.Builder COMMON_BUILDER = new ModConfigSpec.Builder();
-    private static final ModConfigSpec.Builder CLIENT_BUILDER = new ModConfigSpec.Builder();
-    private static final ModConfigSpec.Builder SERVER_BUILDER = new ModConfigSpec.Builder();
+    private static final ForgeConfigSpec.Builder COMMON_BUILDER = new ForgeConfigSpec.Builder();
+    private static final ForgeConfigSpec.Builder CLIENT_BUILDER = new ForgeConfigSpec.Builder();
+    private static final ForgeConfigSpec.Builder SERVER_BUILDER = new ForgeConfigSpec.Builder();
 
     public static final Client CLIENT = new Client(CLIENT_BUILDER);
     public static final Server SERVER = new Server(SERVER_BUILDER);
@@ -16,40 +16,40 @@ public final class Config {
     public static final Mining MINING = new Mining(COMMON_BUILDER);
     public static final Fishing FISHING = new Fishing(COMMON_BUILDER);
 
-    public static final ModConfigSpec COMMON_SPEC = COMMON_BUILDER.build();
-    public static final ModConfigSpec CLIENT_SPEC = CLIENT_BUILDER.build();
-    public static final ModConfigSpec SERVER_SPEC = SERVER_BUILDER.build();
+    public static final ForgeConfigSpec COMMON_SPEC = COMMON_BUILDER.build();
+    public static final ForgeConfigSpec CLIENT_SPEC = CLIENT_BUILDER.build();
+    public static final ForgeConfigSpec SERVER_SPEC = SERVER_BUILDER.build();
 
-    public static final ModConfigSpec.BooleanValue ENABLE_WEAPON_SPECIAL_EFFECTS = CLIENT.ENABLE_WEAPON_SPECIAL_EFFECTS;
-    public static final ModConfigSpec.BooleanValue ENABLE_WEAPON_POST_EFFECTS = CLIENT.ENABLE_WEAPON_POST_EFFECTS;
-    public static final ModConfigSpec.BooleanValue SHOW_MONSTER_HP_BAR = CLIENT.SHOW_MONSTER_HP_BAR;
-    public static final ModConfigSpec.BooleanValue ENABLE_STARDEW_FONTS = CLIENT.ENABLE_STARDEW_FONTS;
-    public static final ModConfigSpec.BooleanValue USE_CHINESE_SMOOTH_FONT = CLIENT.USE_CHINESE_SMOOTH_FONT;
+    public static final ForgeConfigSpec.BooleanValue ENABLE_WEAPON_SPECIAL_EFFECTS = CLIENT.ENABLE_WEAPON_SPECIAL_EFFECTS;
+    public static final ForgeConfigSpec.BooleanValue ENABLE_WEAPON_POST_EFFECTS = CLIENT.ENABLE_WEAPON_POST_EFFECTS;
+    public static final ForgeConfigSpec.BooleanValue SHOW_MONSTER_HP_BAR = CLIENT.SHOW_MONSTER_HP_BAR;
+    public static final ForgeConfigSpec.BooleanValue ENABLE_STARDEW_FONTS = CLIENT.ENABLE_STARDEW_FONTS;
+    public static final ForgeConfigSpec.BooleanValue USE_CHINESE_SMOOTH_FONT = CLIENT.USE_CHINESE_SMOOTH_FONT;
 
-    public static final ModConfigSpec.DoubleValue TIME_SPEED_MULTIPLIER = SERVER.TIME_SPEED_MULTIPLIER;
-    public static final ModConfigSpec.BooleanValue ENABLE_FISHING_MINIGAME = SERVER.ENABLE_FISHING_MINIGAME;
-    public static final ModConfigSpec.BooleanValue ENABLE_UPDATE_CHECKS = SERVER.ENABLE_UPDATE_CHECKS;
-    public static final ModConfigSpec.BooleanValue SHOW_COMMUNITY_ANNOUNCEMENT = SERVER.SHOW_COMMUNITY_ANNOUNCEMENT;
+    public static final ForgeConfigSpec.DoubleValue TIME_SPEED_MULTIPLIER = SERVER.TIME_SPEED_MULTIPLIER;
+    public static final ForgeConfigSpec.BooleanValue ENABLE_FISHING_MINIGAME = SERVER.ENABLE_FISHING_MINIGAME;
+    public static final ForgeConfigSpec.BooleanValue ENABLE_UPDATE_CHECKS = SERVER.ENABLE_UPDATE_CHECKS;
+    public static final ForgeConfigSpec.BooleanValue SHOW_COMMUNITY_ANNOUNCEMENT = SERVER.SHOW_COMMUNITY_ANNOUNCEMENT;
 
     private Config() {
     }
 
     public static final class Client {
-        public final ModConfigSpec.BooleanValue ENABLE_WEAPON_SPECIAL_EFFECTS;
-        public final ModConfigSpec.BooleanValue ENABLE_WEAPON_POST_EFFECTS;
-        public final ModConfigSpec.BooleanValue SHOW_MONSTER_HP_BAR;
-        public final ModConfigSpec.BooleanValue ENABLE_STARDEW_FONTS;
-        public final ModConfigSpec.BooleanValue USE_CHINESE_SMOOTH_FONT;
-        public final ModConfigSpec.IntValue READING_TEXT_SCALE_PERCENT;
-        public final ModConfigSpec.BooleanValue LEGACY_COMMON_IMPORTED;
-        public final ModConfigSpec.IntValue HUD_SCALE_PERCENT;
-        public final ModConfigSpec.EnumValue<HudHorizontalAnchor> HUD_HORIZONTAL_ANCHOR;
-        public final ModConfigSpec.EnumValue<HudVerticalAnchor> HUD_VERTICAL_ANCHOR;
-        public final ModConfigSpec.IntValue HUD_OFFSET_X;
-        public final ModConfigSpec.IntValue HUD_OFFSET_Y;
+        public final ForgeConfigSpec.BooleanValue ENABLE_WEAPON_SPECIAL_EFFECTS;
+        public final ForgeConfigSpec.BooleanValue ENABLE_WEAPON_POST_EFFECTS;
+        public final ForgeConfigSpec.BooleanValue SHOW_MONSTER_HP_BAR;
+        public final ForgeConfigSpec.BooleanValue ENABLE_STARDEW_FONTS;
+        public final ForgeConfigSpec.BooleanValue USE_CHINESE_SMOOTH_FONT;
+        public final ForgeConfigSpec.IntValue READING_TEXT_SCALE_PERCENT;
+        public final ForgeConfigSpec.BooleanValue LEGACY_COMMON_IMPORTED;
+        public final ForgeConfigSpec.IntValue HUD_SCALE_PERCENT;
+        public final ForgeConfigSpec.EnumValue<HudHorizontalAnchor> HUD_HORIZONTAL_ANCHOR;
+        public final ForgeConfigSpec.EnumValue<HudVerticalAnchor> HUD_VERTICAL_ANCHOR;
+        public final ForgeConfigSpec.IntValue HUD_OFFSET_X;
+        public final ForgeConfigSpec.IntValue HUD_OFFSET_Y;
         public final Map<HudElement, HudElementSettings> HUD_ELEMENTS = new EnumMap<>(HudElement.class);
 
-        private Client(ModConfigSpec.Builder builder) {
+        private Client(ForgeConfigSpec.Builder builder) {
             builder.push("client");
             ENABLE_WEAPON_SPECIAL_EFFECTS = builder
                     .comment("Enable weapon special effects (rings, rifts, meteors, cores)")
@@ -113,19 +113,19 @@ public final class Config {
                     continue;
                 }
                 builder.push(element.configKey());
-                ModConfigSpec.IntValue scale = builder
+                ForgeConfigSpec.IntValue scale = builder
                         .comment("HUD element scale percentage")
                         .defineInRange("scalePercent", element.defaultScalePercent(), 25, 200);
-                ModConfigSpec.EnumValue<HudHorizontalAnchor> horizontalAnchor = builder
+                ForgeConfigSpec.EnumValue<HudHorizontalAnchor> horizontalAnchor = builder
                         .comment("Horizontal anchor used when the window size changes")
                         .defineEnum("horizontalAnchor", element.defaultHorizontalAnchor());
-                ModConfigSpec.EnumValue<HudVerticalAnchor> verticalAnchor = builder
+                ForgeConfigSpec.EnumValue<HudVerticalAnchor> verticalAnchor = builder
                         .comment("Vertical anchor used when the window size changes")
                         .defineEnum("verticalAnchor", element.defaultVerticalAnchor());
-                ModConfigSpec.IntValue offsetX = builder
+                ForgeConfigSpec.IntValue offsetX = builder
                         .comment("Horizontal offset from the selected anchor")
                         .defineInRange("offsetX", element.defaultOffsetX(), -9999, 9999);
-                ModConfigSpec.IntValue offsetY = builder
+                ForgeConfigSpec.IntValue offsetY = builder
                         .comment("Vertical offset from the selected anchor")
                         .defineInRange("offsetY", element.defaultOffsetY(), -9999, 9999);
                 HUD_ELEMENTS.put(element,
@@ -139,16 +139,16 @@ public final class Config {
 
     /** Settings owned by the logical server and stored with each world. */
     public static final class Server {
-        public final ModConfigSpec.IntValue GROUND_STONE_TICKS_PER_SWING;
-        public final ModConfigSpec.IntValue GROUND_STONE_MIN_TICKS;
-        public final ModConfigSpec.DoubleValue GROUND_STONE_ENERGY_PER_SWING;
-        public final ModConfigSpec.DoubleValue TIME_SPEED_MULTIPLIER;
-        public final ModConfigSpec.BooleanValue ENABLE_FISHING_MINIGAME;
-        public final ModConfigSpec.BooleanValue ENABLE_UPDATE_CHECKS;
-        public final ModConfigSpec.BooleanValue SHOW_COMMUNITY_ANNOUNCEMENT;
-        public final ModConfigSpec.BooleanValue LEGACY_COMMON_IMPORTED;
+        public final ForgeConfigSpec.IntValue GROUND_STONE_TICKS_PER_SWING;
+        public final ForgeConfigSpec.IntValue GROUND_STONE_MIN_TICKS;
+        public final ForgeConfigSpec.DoubleValue GROUND_STONE_ENERGY_PER_SWING;
+        public final ForgeConfigSpec.DoubleValue TIME_SPEED_MULTIPLIER;
+        public final ForgeConfigSpec.BooleanValue ENABLE_FISHING_MINIGAME;
+        public final ForgeConfigSpec.BooleanValue ENABLE_UPDATE_CHECKS;
+        public final ForgeConfigSpec.BooleanValue SHOW_COMMUNITY_ANNOUNCEMENT;
+        public final ForgeConfigSpec.BooleanValue LEGACY_COMMON_IMPORTED;
 
-        private Server(ModConfigSpec.Builder builder) {
+        private Server(ForgeConfigSpec.Builder builder) {
             builder.push("groundStoneMining");
             GROUND_STONE_TICKS_PER_SWING = builder.comment("Continuous mining ticks per required source swing. See docs/mine-node-mining.md.")
                     .translation("config.stardewcraft.server.ground_stone_ticks")
@@ -193,11 +193,11 @@ public final class Config {
         }
     }
 
-    public record HudElementSettings(ModConfigSpec.IntValue scalePercent,
-                                     ModConfigSpec.EnumValue<HudHorizontalAnchor> horizontalAnchor,
-                                     ModConfigSpec.EnumValue<HudVerticalAnchor> verticalAnchor,
-                                     ModConfigSpec.IntValue offsetX,
-                                     ModConfigSpec.IntValue offsetY) {
+    public record HudElementSettings(ForgeConfigSpec.IntValue scalePercent,
+                                     ForgeConfigSpec.EnumValue<HudHorizontalAnchor> horizontalAnchor,
+                                     ForgeConfigSpec.EnumValue<HudVerticalAnchor> verticalAnchor,
+                                     ForgeConfigSpec.IntValue offsetX,
+                                     ForgeConfigSpec.IntValue offsetY) {
     }
 
     public enum HudElement {
@@ -261,9 +261,9 @@ public final class Config {
     }
 
     public static final class General {
-        public final ModConfigSpec.DoubleValue LEGACY_TIME_SPEED_MULTIPLIER;
+        public final ForgeConfigSpec.DoubleValue LEGACY_TIME_SPEED_MULTIPLIER;
 
-        private General(ModConfigSpec.Builder builder) {
+        private General(ForgeConfigSpec.Builder builder) {
             builder.push("general");
             LEGACY_TIME_SPEED_MULTIPLIER = builder
                     .comment("Legacy value imported once into each world's server config.")
@@ -273,9 +273,9 @@ public final class Config {
     }
 
     public static final class Mining {
-        public final ModConfigSpec.BooleanValue LEGACY_SHOW_MONSTER_HP_BAR;
+        public final ForgeConfigSpec.BooleanValue LEGACY_SHOW_MONSTER_HP_BAR;
 
-        private Mining(ModConfigSpec.Builder builder) {
+        private Mining(ForgeConfigSpec.Builder builder) {
             builder.push("mining");
             LEGACY_SHOW_MONSTER_HP_BAR = builder
                     .comment("Legacy value imported once into the client config.")
@@ -286,9 +286,9 @@ public final class Config {
     }
 
     public static final class Fishing {
-        public final ModConfigSpec.BooleanValue LEGACY_ENABLE_MINIGAME;
+        public final ForgeConfigSpec.BooleanValue LEGACY_ENABLE_MINIGAME;
 
-        private Fishing(ModConfigSpec.Builder builder) {
+        private Fishing(ForgeConfigSpec.Builder builder) {
             builder.push("fishing");
             LEGACY_ENABLE_MINIGAME = builder
                     .comment("Legacy value imported once into each world's server config.")

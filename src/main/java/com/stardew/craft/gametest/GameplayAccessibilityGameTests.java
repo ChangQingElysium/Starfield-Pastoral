@@ -20,11 +20,11 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.util.FakePlayerFactory;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 import java.util.UUID;
 
@@ -77,7 +77,7 @@ public final class GameplayAccessibilityGameTests {
                     player.setShiftKeyDown(shift);
                     for (var hand : InteractionHand.values()) {
                         var event = new PlayerInteractEvent.RightClickBlock(player, hand, pos, hit);
-                        NeoForge.EVENT_BUS.post(event);
+                        MinecraftForge.EVENT_BUS.post(event);
                         h.assertTrue(event.isCanceled(), "Protected food use must stop before consumption");
                         // Exercise the block itself too: a vetoed removal must never award anything.
                         state.useWithoutItem(level, player, hit);
@@ -90,7 +90,7 @@ public final class GameplayAccessibilityGameTests {
             for (var cake : new net.minecraft.world.level.block.Block[]{Blocks.CAKE, Blocks.CANDLE_CAKE}) {
                 BuildingProtection.internal(() -> level.setBlock(pos, cake.defaultBlockState(), 3));
                 var event = new PlayerInteractEvent.RightClickBlock(player, InteractionHand.MAIN_HAND, pos, hit);
-                NeoForge.EVENT_BUS.post(event);
+                MinecraftForge.EVENT_BUS.post(event);
                 h.assertTrue(event.isCanceled(), "Native cake must not provide repeatable bites");
             }
 

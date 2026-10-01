@@ -50,6 +50,6 @@ public final class EmoteCatalog {
 	public static Component getChatIconComponent(EmoteType emote) {
 		int frame = getBubbleBaseIndex(emote);
 		char glyph = (char) (0xE300 + Math.max(0, Math.min(63, frame)));
-		return Component.literal(String.valueOf(glyph)).setStyle(Style.EMPTY.withFont(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "emote_icons")));
+		return Component.literal(String.valueOf(glyph)).setStyle(Style.EMPTY.withFont(new ResourceLocation(StardewCraft.MODID, "emote_icons")));
 	}
 }

@@ -5,12 +5,12 @@ import com.stardew.craft.client.gui.common.StardewNpcDialogueScreen;
 import com.stardew.craft.cutscene.runtime.EventScreenFade;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +18,7 @@ import java.util.List;
 @SuppressWarnings("null")
 public record OpenFairFortunePayload(List<String> fortuneJsons) implements CustomPacketPayload {
     public static final Type<OpenFairFortunePayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "open_fair_fortune"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "open_fair_fortune"));
 
     public static final StreamCodec<FriendlyByteBuf, OpenFairFortunePayload> STREAM_CODEC = StreamCodec.of(
         OpenFairFortunePayload::write,

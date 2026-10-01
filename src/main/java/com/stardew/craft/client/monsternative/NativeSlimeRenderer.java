@@ -16,11 +16,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.EntityRenderersEvent;
-import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import org.joml.Matrix3f;
 import org.joml.Vector3f;
 
@@ -28,8 +28,8 @@ import org.joml.Vector3f;
 @SuppressWarnings({"null", "removal"})
 @EventBusSubscriber(modid = StardewCraft.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class NativeSlimeRenderer extends EntityRenderer<GreenSlimeEntity> {
-    private static final ResourceLocation MODEL = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "monster_native/green_slime.json");
-    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/entity/monster_native/green_slime.png");
+    private static final ResourceLocation MODEL = new ResourceLocation(StardewCraft.MODID, "monster_native/green_slime.json");
+    private static final ResourceLocation TEXTURE = new ResourceLocation(StardewCraft.MODID, "textures/entity/monster_native/green_slime.png");
     private static volatile NativeNpcModel loaded;
     private NativeNpcModel posedModel;
     private final java.util.Map<GreenSlimeEntity, NativeSlimeMotion> motions = new java.util.WeakHashMap<>();

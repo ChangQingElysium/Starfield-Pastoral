@@ -5,9 +5,9 @@ import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.portal.PortalTriggerBlock;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.level.ExplosionEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.level.ExplosionEvent;
 
 /**
  * 爆炸保护：某些功能方块不应被任何 vanilla explosion 路径移除。

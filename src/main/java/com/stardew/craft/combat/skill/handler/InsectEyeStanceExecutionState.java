@@ -11,7 +11,7 @@ import java.util.Objects;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 /** One Compound Eye window, its first-hit token, and deferred cooldown. */
 final class InsectEyeStanceExecutionState

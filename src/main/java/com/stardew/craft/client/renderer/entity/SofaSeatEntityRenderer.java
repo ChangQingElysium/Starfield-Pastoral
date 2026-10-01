@@ -7,7 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 
 @SuppressWarnings("null")
 public class SofaSeatEntityRenderer extends EntityRenderer<SofaSeatEntity> {
-    private static final ResourceLocation EMPTY = ResourceLocation.withDefaultNamespace("textures/atlas/blocks.png");
+    private static final ResourceLocation EMPTY = new ResourceLocation("textures/atlas/blocks.png");
 
     public SofaSeatEntityRenderer(EntityRendererProvider.Context context) {
         super(context);

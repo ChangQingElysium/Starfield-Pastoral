@@ -19,7 +19,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.FarmBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -544,7 +544,7 @@ public class CropGrowthManager extends SavedData {
                 CompoundTag posTag = list.getCompound(i);
                 @SuppressWarnings("null")
                 ResourceKey<Level> dim = ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION, 
-                        net.minecraft.resources.ResourceLocation.parse(posTag.getString("Dimension")));
+                        new net.minecraft.resources.ResourceLocation(posTag.getString("Dimension")));
                 BlockPos pos = NbtUtils.readBlockPos(posTag, "Pos").orElse(BlockPos.ZERO);
                 @SuppressWarnings("null")
                 GlobalPos gp = GlobalPos.of(dim, pos);

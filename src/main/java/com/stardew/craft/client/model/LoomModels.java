@@ -8,10 +8,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ModelEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.ModelEvent;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -27,7 +27,7 @@ public final class LoomModels {
     private LoomModels() {}
 
     private static ModelResourceLocation id(String name) {
-        return new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,
+        return new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID,
             "block/utility/" + name), "standalone");
     }
 
@@ -35,9 +35,9 @@ public final class LoomModels {
     public static void register(ModelEvent.RegisterAdditional event) {
         event.register(FRAME);
         event.register(WHEEL);
-        var wheel = read(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,
+        var wheel = read(new ResourceLocation(StardewCraft.MODID,
             "models/block/utility/loom_working_wheel.json")).getAsJsonObject("stardewcraft:wheel");
-        motion = LoomWheelAnimation.read(wheel, read(ResourceLocation.parse(wheel.get("animation").getAsString())));
+        motion = LoomWheelAnimation.read(wheel, read(new ResourceLocation(wheel.get("animation").getAsString())));
     }
 
     private static JsonObject read(ResourceLocation id) {

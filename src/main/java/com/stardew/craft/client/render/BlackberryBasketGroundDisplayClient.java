@@ -10,10 +10,10 @@ import com.stardew.craft.quest.network.ClientQuestData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.Display;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
 
 /** Per-player client-side ground item display for quest #107. */
 @EventBusSubscriber(modid = StardewCraft.MODID, value = Dist.CLIENT)

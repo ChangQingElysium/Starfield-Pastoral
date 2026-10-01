@@ -6,15 +6,15 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.mixin.FontFontSetAccessor;
 import com.stardew.craft.mixin.FontSetProvidersAccessor;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.font.FontOption;
+import com.stardew.craft.port.net.minecraft.client.gui.font.FontOption;
 import net.minecraft.client.gui.font.FontSet;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -91,7 +91,7 @@ final class StardewFontManager implements ResourceManagerReloadListener {
         String definitionRole = role == StardewFonts.Role.SPRITE_TEXT_COLORED
                 ? StardewFonts.Role.SPRITE_TEXT.path()
                 : role.path();
-        ResourceLocation metrics = ResourceLocation.fromNamespaceAndPath(
+        ResourceLocation metrics = new ResourceLocation(
                 StardewCraft.MODID,
                 "stardew_font_metrics/" + definitionRole + "/" + variant + ".json");
         StardewFontData data = StardewFontData.load(resources, metrics);

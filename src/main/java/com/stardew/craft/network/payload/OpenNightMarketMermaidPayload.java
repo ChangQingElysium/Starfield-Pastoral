@@ -2,16 +2,16 @@ package com.stardew.craft.network.payload;
 
 import com.stardew.craft.StardewCraft;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 @SuppressWarnings("null")
 public record OpenNightMarketMermaidPayload(boolean gotPearl) implements CustomPacketPayload {
     public static final Type<OpenNightMarketMermaidPayload> TYPE = new Type<>(
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "open_night_market_mermaid")
+        new ResourceLocation(StardewCraft.MODID, "open_night_market_mermaid")
     );
     public static final StreamCodec<ByteBuf, OpenNightMarketMermaidPayload> STREAM_CODEC = StreamCodec.composite(
         ByteBufCodecs.BOOL,
@@ -28,7 +28,7 @@ public record OpenNightMarketMermaidPayload(boolean gotPearl) implements CustomP
         context.enqueueWork(() -> handleClient(payload));
     }
 
-    @net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+    @net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
     private static void handleClient(OpenNightMarketMermaidPayload payload) {
         net.minecraft.client.Minecraft minecraft = net.minecraft.client.Minecraft.getInstance();
         if (minecraft.player != null) {

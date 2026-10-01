@@ -4,10 +4,10 @@ import com.mojang.math.Axis;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.entity.seat.AnimatedDecorSeat;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderPlayerEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.RenderPlayerEvent;
 
 /** Vanilla passenger interpolation lags the freely swinging model by a tick. */
 @EventBusSubscriber(modid = StardewCraft.MODID, value = Dist.CLIENT)

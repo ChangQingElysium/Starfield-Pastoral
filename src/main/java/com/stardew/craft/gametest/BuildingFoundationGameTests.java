@@ -17,9 +17,9 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.common.util.FakePlayerFactory;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 import java.util.UUID;
 
@@ -30,7 +30,7 @@ import static com.stardew.craft.building.runtime.BuildingWorldData.Result.*;
 @PrefixGameTestTemplate(false)
 public final class BuildingFoundationGameTests {
     private static final ResourceLocation DIMENSION = ModDimensions.STARDEW_VALLEY.location();
-    private static final ResourceLocation COOP = ResourceLocation.parse("stardewcraft:coop");
+    private static final ResourceLocation COOP = new ResourceLocation("stardewcraft:coop");
 
     private BuildingFoundationGameTests() {}
 
@@ -57,7 +57,7 @@ public final class BuildingFoundationGameTests {
         helper.assertTrue(data.register(waiting(BuildingRecord.Mode.PREFAB, -3, DIMENSION)) == OVERLAP,
                 "One-block overlap was missed");
         helper.assertTrue(data.register(waiting(BuildingRecord.Mode.PREFAB, -12,
-                ResourceLocation.parse("minecraft:overworld"))) == SUCCESS, "Different dimensions collide");
+                new ResourceLocation("minecraft:overworld"))) == SUCCESS, "Different dimensions collide");
         helper.assertTrue(!first.claim().contains(first.claim().maxExclusive()), "Exclusive maximum included");
         helper.succeed();
     }

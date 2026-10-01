@@ -9,13 +9,13 @@ import net.minecraft.gametest.framework.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.gametest.*;
+import net.minecraftforge.gametest.*;
 import java.util.*;
 
 @GameTestHolder("stardewcraft_pond_prefab")
 @PrefixGameTestTemplate(false)
 public final class FishPondHusbandryGameTests {
-    private static ItemStack item(String name){return new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse("stardewcraft:"+name)));}
+    private static ItemStack item(String name){return new ItemStack(BuiltInRegistries.ITEM.get(new ResourceLocation("stardewcraft:"+name)));}
     private static FishPondRecord pond(GameTestHelper h) {
         var data=FishPondWorldData.get(h.getLevel());var p=h.absolutePos(new BlockPos(2,2,2));
         return data.getPond(data.createPond(UUID.randomUUID(),h.getLevel().dimension().location().toString(),p,p.offset(3,0,0),Set.of(),Set.of(p.asLong()),p.getX(),p.getY(),p.getZ(),p.getX(),p.getY(),p.getZ())).orElseThrow();

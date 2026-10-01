@@ -21,7 +21,7 @@ public final class StardewFishingLocationKeyRegistry {
     private static final OrderedExtensionRegistry<
             StardewFishingLocationKeys.Provider> PROVIDERS =
             new OrderedExtensionRegistry<>(
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             StardewCraft.MODID, "fishing/location_keys"));
 
     private StardewFishingLocationKeyRegistry() {

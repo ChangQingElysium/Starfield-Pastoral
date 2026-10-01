@@ -7,7 +7,7 @@ import com.stardew.craft.network.payload.BuildingDraftCancelPayload;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 /** No site permission is required to leave or unpin the player's own draft. */
 public final class BuildingPreviewControlsScreen extends FarmFolioScreen {

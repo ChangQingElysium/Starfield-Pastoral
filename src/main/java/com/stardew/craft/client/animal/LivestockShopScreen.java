@@ -8,7 +8,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.*;
 
@@ -67,7 +67,7 @@ public class LivestockShopScreen extends FarmFolioScreen {
                         ? ui("all_animals")
                         : Component.translatable(
                                 "stardewcraft.manager.building."
-                                        + net.minecraft.resources.ResourceLocation.parse(category)
+                                        + new net.minecraft.resources.ResourceLocation(category)
                                                 .getPath()),
                 x + 20,
                 y + 40,

@@ -2,17 +2,17 @@ package com.stardew.craft.combat.network;
 
 import com.stardew.craft.StardewCraft;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /** Actual teleport endpoints or the confirmed start of a continuous wind dash. No simulated damage path. */
 public record IronWindMovePayload(int caster,long tick,Mode mode,Vec3 from,Vec3 to) implements CustomPacketPayload {
     public enum Mode { IRON_BLINK, WIND_BLINK, WIND_DASH }
-    public static final Type<IronWindMovePayload> TYPE=new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,"iron_wind_move"));
+    public static final Type<IronWindMovePayload> TYPE=new Type<>(new ResourceLocation(StardewCraft.MODID,"iron_wind_move"));
     public static final StreamCodec<ByteBuf,IronWindMovePayload> STREAM_CODEC=new StreamCodec<>() {
         @Override public IronWindMovePayload decode(ByteBuf b) {
             return new IronWindMovePayload(ByteBufCodecs.VAR_INT.decode(b),ByteBufCodecs.VAR_LONG.decode(b),Mode.values()[b.readUnsignedByte()],

@@ -11,8 +11,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 /** Explicit namespace only: -PgameTestNamespaces=stardewcraft_bat. */
 @GameTestHolder("stardewcraft_bat")
@@ -74,9 +74,9 @@ public final class NativeBatGameTests {
             level.setBlock(origin.offset(x, 5, z), Blocks.STONE.defaultBlockState(), 3);
         }
         var bat = (MineBatEntity) MineMonsterSpawnHandler.spawnConfiguredMonster(level, "bat", Vec3.atBottomCenterOf(origin), 0, 30);
-        var player = new net.neoforged.neoforge.common.util.FakePlayer(level,
+        var player = new net.minecraftforge.common.util.FakePlayer(level,
                 new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(), "BatContactTest")) {
-            // NeoForge's default FakePlayer is unconditionally invulnerable.
+            // MinecraftForge's default FakePlayer is unconditionally invulnerable.
             @Override public boolean isInvulnerableTo(net.minecraft.world.damagesource.DamageSource source) { return false; }
         };
         player.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);

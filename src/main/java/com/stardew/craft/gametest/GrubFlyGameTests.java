@@ -10,7 +10,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.gametest.*;
+import net.minecraftforge.gametest.*;
 
 @GameTestHolder("stardewcraft_bug")
 @PrefixGameTestTemplate(false)
@@ -35,7 +35,7 @@ public final class GrubFlyGameTests {
         var grub=(MineGrubEntity)MineMonsterSpawnHandler.spawnConfiguredMonster(level,"grub",at,0,20);
         // Keep a non-targetable observer nearby: concurrent tests remove their
         // FakePlayers independently, otherwise vanilla distance despawn races this test.
-        var observer=new net.neoforged.neoforge.common.util.FakePlayer(level,new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(),"GrubObserver"));observer.setGameMode(net.minecraft.world.level.GameType.CREATIVE);observer.setPos(at.add(0,0,7));level.addNewPlayer(observer);
+        var observer=new net.minecraftforge.common.util.FakePlayer(level,new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(),"GrubObserver"));observer.setGameMode(net.minecraft.world.level.GameType.CREATIVE);observer.setPos(at.add(0,0,7));level.addNewPlayer(observer);
         grub.setPersistenceRequired();grub.setNoGravity(true);grub.setHealth(20);
         h.runAtTickTime(20,()->{
             h.assertTrue(grub.phase()==GrubLifecycle.MOBILE,"Healthy grub started pupating without damage");

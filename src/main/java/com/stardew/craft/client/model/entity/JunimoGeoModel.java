@@ -6,11 +6,11 @@ import net.minecraft.resources.ResourceLocation;
 import software.bernie.geckolib.model.GeoModel;
 
 public class JunimoGeoModel extends GeoModel<JunimoEntity> {
-    private static final ResourceLocation MODEL = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation MODEL = new ResourceLocation(
             StardewCraft.MODID, "geo/entity/junimo/junimo.geo.json");
-    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation TEXTURE = new ResourceLocation(
             StardewCraft.MODID, "textures/entity/junimo/junimo_forbidden.png");
-    private static final ResourceLocation ANIMATION = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation ANIMATION = new ResourceLocation(
             StardewCraft.MODID, "animations/entity/junimo/junimo.animation.json");
 
     @Override

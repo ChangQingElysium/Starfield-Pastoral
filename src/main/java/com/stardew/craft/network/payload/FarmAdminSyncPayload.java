@@ -4,11 +4,11 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.farm.FarmInstance;
 import com.stardew.craft.farm.FarmInstanceRegistry;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,7 +24,7 @@ public record FarmAdminSyncPayload(
 ) implements CustomPacketPayload {
 
     public static final Type<FarmAdminSyncPayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "farm_admin_sync"));
+            new Type<>(new ResourceLocation(StardewCraft.MODID, "farm_admin_sync"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, FarmAdminSyncPayload> STREAM_CODEC =
             new StreamCodec<>() {
@@ -74,7 +74,7 @@ public record FarmAdminSyncPayload(
 
     public static FarmAdminSyncPayload fromRegistry(FarmInstanceRegistry registry) {
         net.minecraft.server.MinecraftServer server =
-                net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer();
+                net.minecraftforge.server.ServerLifecycleHooks.getCurrentServer();
         Collection<FarmInstance> farms = registry.getAllFarms();
         List<FarmEntry> entries = new ArrayList<>(farms.size());
         for (FarmInstance farm : farms) {
@@ -99,7 +99,7 @@ public record FarmAdminSyncPayload(
         context.enqueueWork(() -> handleClient(payload));
     }
 
-    @net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+    @net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
     private static void handleClient(FarmAdminSyncPayload payload) {
         com.stardew.craft.client.gui.FarmAdminScreen.openFromPayload(payload);
     }

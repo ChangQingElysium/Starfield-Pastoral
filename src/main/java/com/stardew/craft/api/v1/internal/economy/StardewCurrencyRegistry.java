@@ -21,7 +21,7 @@ import java.util.OptionalLong;
 public final class StardewCurrencyRegistry {
     private static final OrderedExtensionRegistry<Registration> REGISTRY =
             new OrderedExtensionRegistry<>(
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             StardewCraft.MODID, "currencies"));
     private static boolean bootstrapped;
 

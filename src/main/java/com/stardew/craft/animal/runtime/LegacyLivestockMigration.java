@@ -20,10 +20,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.LevelResource;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
-import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.server.ServerStartedEvent;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -98,14 +98,14 @@ public final class LegacyLivestockMigration extends SavedData {
 
     /** SavedData.save queues writes and swallows I/O errors; projection retirement needs a checked barrier. */
     private static void checkpoint(MinecraftServer server, String name, SavedData data) {
-        net.neoforged.neoforge.common.IOUtilities.waitUntilIOWorkerComplete();
+        com.stardew.craft.port.net.neoforged.neoforge.common.IOUtilities.waitUntilIOWorkerComplete();
         if (!data.isDirty()) return;
         var root = new CompoundTag(); root.put("data", data.save(new CompoundTag(), server.registryAccess()));
         NbtUtils.addCurrentDataVersion(root);
         var path = server.getWorldPath(LevelResource.ROOT).resolve("data/" + name + ".dat");
         try {
             Files.createDirectories(path.getParent());
-            net.neoforged.neoforge.common.IOUtilities.writeNbtCompressed(root, path);
+            com.stardew.craft.port.net.neoforged.neoforge.common.IOUtilities.writeNbtCompressed(root, path);
             data.setDirty(false);
         } catch (IOException exception) { throw new IllegalStateException("Cannot checkpoint animal migration: " + name, exception); }
     }
@@ -225,11 +225,11 @@ public final class LegacyLivestockMigration extends SavedData {
         if (old.buildingId().isBlank()) throw new IllegalArgumentException("missing_building_id");
         var farm = resolveFarm(farms, old.ownerPlayerUuid());
         if (farm == null) throw new IllegalArgumentException("farm_unresolved");
-        var dimension = ResourceLocation.parse(old.dimensionId());
+        var dimension = new ResourceLocation(old.dimensionId());
         var level = server.getLevel(ResourceKey.create(Registries.DIMENSION, dimension));
         if (level == null) throw new IllegalArgumentException("dimension_unavailable");
         var manager = old.managerPos();
-        var family = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, old.buildingType().family());
+        var family = new ResourceLocation(StardewCraft.MODID, old.buildingType().family());
         // Old bounds describe interior air, which can exclude the manager and utility cells in walls.
         var min = new BlockPos(Math.min(manager.getX(), old.minX() - 1), Math.min(manager.getY(), old.minY() - 1), Math.min(manager.getZ(), old.minZ() - 1));
         var max = new BlockPos(Math.max(manager.getX() + 1, old.maxX() + 2), Math.max(manager.getY() + 1, old.maxY() + 2), Math.max(manager.getZ() + 1, old.maxZ() + 2));

@@ -1,7 +1,7 @@
 package com.stardew.craft.client.weapon.presentation;
 
 import com.stardew.craft.combat.network.WeaponSkillImpactPayload;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 
 /**
  * One client-side presentation instance. Gameplay never depends on this state.

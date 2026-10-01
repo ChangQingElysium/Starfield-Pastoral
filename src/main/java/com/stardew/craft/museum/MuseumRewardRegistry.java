@@ -30,7 +30,7 @@ public final class MuseumRewardRegistry {
     public static final String RUSTY_KEY_REWARD_ID = "museum60";
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final ResourceLocation LEGACY_TABLE =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "rewards");
+            new ResourceLocation(StardewCraft.MODID, "rewards");
     private static volatile Map<String, MuseumReward> rewards = Map.of();
 
     public record MuseumReward(

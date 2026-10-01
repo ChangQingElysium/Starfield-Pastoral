@@ -4,11 +4,11 @@ import com.mojang.logging.LogUtils;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.cutscene.server.WakeUpEventScheduler;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.slf4j.Logger;
 
 /**
@@ -21,7 +21,7 @@ public record PlayerWokeUpPayload() implements CustomPacketPayload {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public static final Type<PlayerWokeUpPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "player_woke_up"));
+            new ResourceLocation(StardewCraft.MODID, "player_woke_up"));
 
     public static final StreamCodec<ByteBuf, PlayerWokeUpPayload> STREAM_CODEC =
             StreamCodec.unit(new PlayerWokeUpPayload());

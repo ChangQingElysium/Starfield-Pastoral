@@ -21,7 +21,7 @@ import java.util.List;
 public enum TapperJadeProvider implements IBlockComponentProvider, IServerDataProvider<BlockAccessor> {
 	INSTANCE;
 
-	private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "tapper");
+	private static final ResourceLocation UID = new ResourceLocation(StardewCraft.MODID, "tapper");
 	private static final String NBT_READY = "ready";
 	private static final String NBT_ITEM = "item";
 	private static final String NBT_DAYS = "days";

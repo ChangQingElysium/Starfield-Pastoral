@@ -35,17 +35,17 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.util.Mth;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
-import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
-import net.neoforged.neoforge.client.event.RenderLivingEvent;
-import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
+import net.minecraftforge.client.event.RenderLivingEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.client.gui.VanillaGuiLayers;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.entity.player.ItemTooltipEvent;
+import net.minecraftforge.network.PacketDistributor;
 import com.stardew.craft.combat.network.WeaponSkillUsePayload;
 
 import java.util.List;
@@ -1088,215 +1088,215 @@ public class ModClientEvents {
     private record DurationRingInfo(float ratio, int argb) {}
 
     private static ResourceLocation getSkillIconTexture(String skillId) {
-        if ("dragontooth_club_jaw".equals(skillId)) return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/dragontooth_club_1.png");
-        if ("dragontooth_club_breath".equals(skillId)) return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/dragontooth_club_2.png");
-        if ("rapier_riposte".equals(skillId)) return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/rapier_1.png");
-        if ("slammer_upheaval".equals(skillId)) return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/the_slammer_1.png");
-        if ("slammer_rampage".equals(skillId)) return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/the_slammer_2.png");
-        if ("dwarf_hammer_rebound".equals(skillId)) return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/dwarf_hammer_1.png");
-        if ("dwarf_hammer_faultline".equals(skillId)) return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/dwarf_hammer_2.png");
-        if ("lead_rod_press".equals(skillId)) return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/lead_rod_1.png");
-        if ("kudgel_sweep".equals(skillId)) return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/kudgel_1.png");
-        if ("wood_club_whirl".equals(skillId)) return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/wood_club_1.png");
-        if ("wood_mallet_leap".equals(skillId)) return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/wood_mallet_1.png");
-        if ("galaxy_hammer_starshock_sweep".equals(skillId)) return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/galaxy_hammer_1.png");
-        if ("galaxy_hammer_starfall_quake".equals(skillId)) return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/galaxy_hammer_2.png");
-        if ("infinity_gavel_singularity_press".equals(skillId)) return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/infinity_gavel_1.png");
-        if ("infinity_gavel_endless_pounding".equals(skillId)) return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/infinity_gavel_2.png");
+        if ("dragontooth_club_jaw".equals(skillId)) return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/dragontooth_club_1.png");
+        if ("dragontooth_club_breath".equals(skillId)) return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/dragontooth_club_2.png");
+        if ("rapier_riposte".equals(skillId)) return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/rapier_1.png");
+        if ("slammer_upheaval".equals(skillId)) return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/the_slammer_1.png");
+        if ("slammer_rampage".equals(skillId)) return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/the_slammer_2.png");
+        if ("dwarf_hammer_rebound".equals(skillId)) return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/dwarf_hammer_1.png");
+        if ("dwarf_hammer_faultline".equals(skillId)) return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/dwarf_hammer_2.png");
+        if ("lead_rod_press".equals(skillId)) return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/lead_rod_1.png");
+        if ("kudgel_sweep".equals(skillId)) return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/kudgel_1.png");
+        if ("wood_club_whirl".equals(skillId)) return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/wood_club_1.png");
+        if ("wood_mallet_leap".equals(skillId)) return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/wood_mallet_1.png");
+        if ("galaxy_hammer_starshock_sweep".equals(skillId)) return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/galaxy_hammer_1.png");
+        if ("galaxy_hammer_starfall_quake".equals(skillId)) return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/galaxy_hammer_2.png");
+        if ("infinity_gavel_singularity_press".equals(skillId)) return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/infinity_gavel_1.png");
+        if ("infinity_gavel_endless_pounding".equals(skillId)) return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/infinity_gavel_2.png");
 
         if ("tetanus_strike".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/rusty_sword_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/rusty_sword_1.png");
         }
         if ("light_counter".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/steel_smallsword_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/steel_smallsword_1.png");
         }
         if ("tree_blessing".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/wooden_blade_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/wooden_blade_1.png");
         }
         if ("desperate_plunder".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/pirates_sword_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/pirates_sword_1.png");
         }
         if ("silver_foldback".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/silver_saber_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/silver_saber_1.png");
         }
         if ("crescent_slash".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/cutlass_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/cutlass_1.png");
         }
         if ("forest_blessing".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/forest_sword_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/forest_sword_1.png");
         }
         if ("steel_spine_fury".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/iron_edge_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/iron_edge_1.png");
         }
         if ("femur_slam".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/femur_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/femur_1.png");
         }
         if ("carving_thrust".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/carving_knife_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/carving_knife_1.png");
         }
         if ("iron_dirk_thrust".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/iron_dirk_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/iron_dirk_1.png");
         }
         if ("wind_spire_thrust".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/wind_spire_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/wind_spire_1.png");
         }
         if ("elf_blade_leaf".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/elf_blade_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/elf_blade_1.png");
         }
         if ("burglar_shank".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/burglars_shank_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/burglars_shank_1.png");
         }
         if ("crystal_dagger_layer".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/crystal_dagger_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/crystal_dagger_1.png");
         }
         if ("shadow_dagger_execute".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/shadow_dagger_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/shadow_dagger_1.png");
         }
         if ("wicked_kris_venom_ripple".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/wicked_kris_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/wicked_kris_1.png");
         }
         if ("wicked_kris_nest_burst".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/wicked_kris_2.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/wicked_kris_2.png");
         }
         if ("dwarf_dagger_thrust".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/dwarf_dagger_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/dwarf_dagger_1.png");
         }
         if ("dwarf_dagger_rush".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/dwarf_dagger_2.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/dwarf_dagger_2.png");
         }
         if ("dragontooth_shiv_stab".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/dragontooth_shiv_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/dragontooth_shiv_1.png");
         }
         if ("dragontooth_shiv_breath".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/dragontooth_shiv_2.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/dragontooth_shiv_2.png");
         }
         if ("iridium_needle_thrust".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/iridium_needle_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/iridium_needle_1.png");
         }
         if ("iridium_needle_frenzy".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/iridium_needle_2.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/iridium_needle_2.png");
         }
         if ("galaxy_dagger_starstab".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/galaxy_dagger_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/galaxy_dagger_1.png");
         }
         if ("galaxy_dagger_starleap".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/galaxy_dagger_2.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/galaxy_dagger_2.png");
         }
         if ("infinity_dagger_singularity_stab".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/infinity_dagger_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/infinity_dagger_1.png");
         }
         if ("infinity_dagger_singularity_backstab".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/infinity_dagger_2.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/infinity_dagger_2.png");
         }
         if ("meowmere_shot".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/meowmere_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/meowmere_1.png");
         }
         if ("meowmere_symphony".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/meowmere_2.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/meowmere_2.png");
         }
         if ("bone_fracture".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/bone_sword_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/bone_sword_1.png");
         }
         if ("claymore_foldback".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/claymore_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/claymore_1.png");
         }
         if ("tide_mark".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/tide_mark.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/tide_mark.png");
         }
         if ("tide_anchor".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/tide_anchor.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/tide_anchor.png");
         }
         if ("fishcatch_thrust".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/broken_trident_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/broken_trident_1.png");
         }
         if ("tide_reel".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/broken_trident_2.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/broken_trident_2.png");
         }
         if ("templar_vow".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/templars_blade_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/templars_blade_1.png");
         }
         if ("templar_judgement".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/templars_blade_2.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/templars_blade_2.png");
         }
         if ("insect_eye_stance".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/insect_head_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/insect_head_1.png");
         }
         if ("insect_dash".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/insect_head_2.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/insect_head_2.png");
         }
         if ("obsidian_resonance".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/obsidian_edge_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/obsidian_edge_1.png");
         }
         if ("obsidian_crack".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/obsidian_edge_2.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/obsidian_edge_2.png");
         }
         if ("ossified_mark".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/ossified_blade_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/ossified_blade_1.png");
         }
         if ("ossified_execution".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/ossified_blade_2.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/ossified_blade_2.png");
         }
         if ("holy_smite".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/holy_blade_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/holy_blade_1.png");
         }
         if ("holy_domain".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/holy_blade_2.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/holy_blade_2.png");
         }
         if ("tempered_quench".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/tempered_broadsword_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/tempered_broadsword_1.png");
         }
         if ("tempered_billet".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/tempered_broadsword_2.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/tempered_broadsword_2.png");
         }
         if ("yeti_tooth_mark".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/yeti_tooth_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/yeti_tooth_1.png");
         }
         if ("yeti_tooth_spine".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/yeti_tooth_2.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/yeti_tooth_2.png");
         }
         if ("steel_falchion_line".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/steel_falchion_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/steel_falchion_1.png");
         }
         if ("steel_falchion_trace".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/steel_falchion_2.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/steel_falchion_2.png");
         }
         if ("dark_sword_blood_debt".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/dark_sword_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/dark_sword_1.png");
         }
         if ("dark_sword_blood_moon".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/dark_sword_2.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/dark_sword_2.png");
         }
         if ("lava_katana_brand".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/lava_katana_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/lava_katana_1.png");
         }
         if ("lava_katana_reverb".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/lava_katana_2.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/lava_katana_2.png");
         }
         if ("dragon_breath_thrust".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/dragontooth_cutlass_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/dragontooth_cutlass_1.png");
         }
         if ("dragon_breath_judgement".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/dragontooth_cutlass_2.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/dragontooth_cutlass_2.png");
         }
         if ("dwarf_rune_guard".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/dwarf_sword_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/dwarf_sword_1.png");
         }
         if ("dwarf_fortress".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/dwarf_sword_2.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/dwarf_sword_2.png");
         }
         if ("startrail_rift".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/galaxy_sword_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/galaxy_sword_1.png");
         }
         if ("galaxy_judgement".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/galaxy_sword_2.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/galaxy_sword_2.png");
         }
         if ("singularity_evolve".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/infinity_blade_1.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/infinity_blade_1.png");
         }
         if ("eternal_collapse".equals(skillId)) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/infinity_blade_2.png");
+            return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/infinity_blade_2.png");
         }
-        return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/weapon_skill/icon_skill.png");
+        return new ResourceLocation(StardewCraft.MODID, "textures/gui/weapon_skill/icon_skill.png");
     }
 
     private static void drawFilledCircle(GuiGraphics gg, int cx, int cy, float r, int argb) {

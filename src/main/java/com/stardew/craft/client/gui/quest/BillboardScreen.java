@@ -24,7 +24,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -312,7 +312,7 @@ public class BillboardScreen extends Screen {
 
     /** 把 mugshot 画到指定矩形内（按源 16×24 比例）。 */
     private void drawNpcMugshotRect(GuiGraphics g, String npcId, int x, int y, int w, int h) {
-        ResourceLocation mugTex = ResourceLocation.fromNamespaceAndPath(
+        ResourceLocation mugTex = new ResourceLocation(
             StardewCraft.MODID, "textures/mugshots/" + npcId.toLowerCase() + ".png");
         g.blit(mugTex, x, y, w, h, 0f, 0f, 16, 24, 16, 24);
     }
@@ -576,11 +576,11 @@ public class BillboardScreen extends Screen {
     }
 
     private static ResourceLocation billboard(String name) {
-        return ResourceLocation.fromNamespaceAndPath("stardewcraft", "textures/gui/billboard/" + name + ".png");
+        return new ResourceLocation("stardewcraft", "textures/gui/billboard/" + name + ".png");
     }
 
     private static ResourceLocation gui(String name) {
-        return ResourceLocation.fromNamespaceAndPath("stardewcraft", "textures/gui/" + name + ".png");
+        return new ResourceLocation("stardewcraft", "textures/gui/" + name + ".png");
     }
 
     private int getCurrentDay() {

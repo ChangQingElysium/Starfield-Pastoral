@@ -4,8 +4,8 @@ import com.stardew.craft.client.sound.StardewMusicManager;
 import com.stardew.craft.cutscene.runtime.EventPlayer;
 import com.stardew.craft.sound.ModSounds;
 import net.minecraft.sounds.SoundEvent;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.lang.reflect.Field;
 import java.util.Locale;
@@ -45,7 +45,7 @@ public class MusicCommand implements EventCommand {
         try {
             Field f = ModSounds.class.getDeclaredField(fieldName);
             Object holder = f.get(null);
-            if (holder instanceof net.neoforged.neoforge.registries.DeferredHolder<?, ?> dh) {
+            if (holder instanceof com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredHolder<?, ?> dh) {
                 return (SoundEvent) dh.get();
             }
         } catch (NoSuchFieldException | IllegalAccessException | ClassCastException e) {
@@ -53,7 +53,7 @@ public class MusicCommand implements EventCommand {
             try {
                 Field f = ModSounds.class.getDeclaredField("MUSIC_" + fieldName);
                 Object holder = f.get(null);
-                if (holder instanceof net.neoforged.neoforge.registries.DeferredHolder<?, ?> dh) {
+                if (holder instanceof com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredHolder<?, ?> dh) {
                     return (SoundEvent) dh.get();
                 }
             } catch (Exception ignored) {}

@@ -219,7 +219,7 @@ final class CoreAcquisitionSourceProviders {
                 }
                 var root = encoded.getAsJsonObject();
                 if (!root.has("type")
-                        || !ResourceLocation.fromNamespaceAndPath(
+                        || !new ResourceLocation(
                                 StardewCraft.MODID, "add_item").toString()
                                 .equals(root.get("type").getAsString())
                         || !root.has("data")

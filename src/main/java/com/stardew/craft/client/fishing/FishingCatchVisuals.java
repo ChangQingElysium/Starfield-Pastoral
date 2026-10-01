@@ -8,12 +8,12 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.RenderGuiEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.minecraftforge.client.event.RenderGuiEvent;
+import net.minecraftforge.network.PacketDistributor;
 
 /** Catch items are rendered by the hand rig. Treasure follows stowing and survives packet ordering. */
 @EventBusSubscriber(modid=StardewCraft.MODID,value=Dist.CLIENT)

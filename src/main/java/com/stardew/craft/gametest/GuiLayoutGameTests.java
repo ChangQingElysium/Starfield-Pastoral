@@ -6,8 +6,8 @@ import com.stardew.craft.client.gui.common.GuiScissorMath;
 import org.joml.Matrix4f;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 @GameTestHolder(StardewCraft.MODID)
 @PrefixGameTestTemplate(false)

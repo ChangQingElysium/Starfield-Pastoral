@@ -1,9 +1,0 @@
-{
-  "multipart": [
-    {
-      "apply": {
-      "model": "stardewcraft:block/tree/maple/leaves"
-      }
-    }
-  ]
-}

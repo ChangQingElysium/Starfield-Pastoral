@@ -16,21 +16,21 @@ public class EventActorGeoModel extends GeoModel<EventActorEntity> {
     @Override
     public ResourceLocation getModelResource(EventActorEntity entity) {
         String id = resolveNpcId(entity);
-        return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,
+        return new ResourceLocation(StardewCraft.MODID,
                 "geo/entity/npc/" + id + ".geo.json");
     }
 
     @Override
     public ResourceLocation getTextureResource(EventActorEntity entity) {
         String id = resolveNpcId(entity);
-        return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,
+        return new ResourceLocation(StardewCraft.MODID,
                 "textures/entity/npc/" + id + ".png");
     }
 
     @Override
     public ResourceLocation getAnimationResource(EventActorEntity entity) {
         String id = resolveNpcId(entity);
-        return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,
+        return new ResourceLocation(StardewCraft.MODID,
                 "animations/entity/npc/" + id + ".animation.json");
     }
 

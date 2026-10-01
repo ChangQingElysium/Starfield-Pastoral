@@ -14,7 +14,7 @@ import java.util.Optional;
 /** Namespaced profession effect handlers registered by add-on mods. */
 public final class StardewProfessionEffectHandlers {
     public static final ResourceLocation SELL_PRICE_MULTIPLIER =
-            ResourceLocation.fromNamespaceAndPath("stardewcraft", "sell_price_multiplier");
+            new ResourceLocation("stardewcraft", "sell_price_multiplier");
 
     private static final Map<ResourceLocation, StardewProfessionEffectHandler> HANDLERS = new LinkedHashMap<>();
 

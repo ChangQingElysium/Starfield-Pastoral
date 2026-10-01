@@ -2,8 +2,8 @@ package com.stardew.craft.client.weapon;
 
 import com.stardew.craft.combat.network.ObsidianCrackPayload;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 
 public final class ObsidianCrackEffectClient {
     private static final MineralFieldClient FIELDS = new MineralFieldClient(false);

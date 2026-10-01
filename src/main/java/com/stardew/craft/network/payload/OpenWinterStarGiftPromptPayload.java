@@ -3,10 +3,10 @@ package com.stardew.craft.network.payload;
 import com.stardew.craft.StardewCraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.List;
 
@@ -14,7 +14,7 @@ import java.util.List;
 @SuppressWarnings("null")
 public record OpenWinterStarGiftPromptPayload(String npcId, String npcDisplayName, boolean female) implements CustomPacketPayload {
     public static final Type<OpenWinterStarGiftPromptPayload> TYPE = new Type<>(
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "open_winter_star_gift_prompt"));
+        new ResourceLocation(StardewCraft.MODID, "open_winter_star_gift_prompt"));
     public static final StreamCodec<FriendlyByteBuf, OpenWinterStarGiftPromptPayload> STREAM_CODEC = StreamCodec.of(
         (buf, value) -> {
             buf.writeUtf(value.npcId(), 64);
@@ -33,7 +33,7 @@ public record OpenWinterStarGiftPromptPayload(String npcId, String npcDisplayNam
         context.enqueueWork(() -> handleClient(payload));
     }
 
-    @net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+    @net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
     private static void handleClient(OpenWinterStarGiftPromptPayload payload) {
         net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
         if (mc.player == null) return;

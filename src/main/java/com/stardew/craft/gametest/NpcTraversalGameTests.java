@@ -8,8 +8,8 @@ import net.minecraft.gametest.framework.*;
 import net.minecraft.world.entity.ai.control.JumpControl;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import java.util.List;
 
 @GameTestHolder("stardewcraft_npc_runtime")

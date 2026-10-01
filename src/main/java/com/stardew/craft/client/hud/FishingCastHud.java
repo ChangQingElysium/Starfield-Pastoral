@@ -17,10 +17,10 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderGuiEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.RenderGuiEvent;
 import com.mojang.blaze3d.platform.NativeImage;
 
 import java.io.InputStream;
@@ -28,7 +28,7 @@ import java.util.Optional;
 
 @EventBusSubscriber(modid = StardewCraft.MODID, value = Dist.CLIENT)
 public final class FishingCastHud {
-	private static final ResourceLocation TIMING_CAST_TEX = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/fishing/timing_cast.png");
+	private static final ResourceLocation TIMING_CAST_TEX = new ResourceLocation(StardewCraft.MODID, "textures/gui/fishing/timing_cast.png");
 
 	// Stardew: background source is 47x12 at scale 4 => 188x48.
 	private static final int FALLBACK_BG_W = 47 * 4;
@@ -62,7 +62,7 @@ public final class FishingCastHud {
     public static void reset() {
         stopSinWave(Minecraft.getInstance());wasUsing=false;postReleaseCountdownMs=0;maxPopMs=0;lastFrameMs=0;
     }
-    @SubscribeEvent public static void chargeSoundTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
+    @SubscribeEvent public static void chargeSoundTick(com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
         var mc=Minecraft.getInstance();if(mc.player==null||!mc.player.isUsingItem()||!(mc.player.getUseItem().getItem() instanceof com.stardew.craft.item.tool.FishingRodItem)){stopSinWave(mc);return;}
         int used=mc.player.getUseItem().getUseDuration(mc.player)-mc.player.getUseItemRemainingTicks();
         ensureSinWavePlaying(mc,.8f+.6f*FishingCastPower.getCastPower01FromUsedTicks(used));

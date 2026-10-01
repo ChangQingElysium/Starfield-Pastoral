@@ -12,7 +12,7 @@ public final class FarmCaveLayout {
     public static final BlockPos SPAWN = new BlockPos(10, 3, 13);
     public static final BlockPos EXIT = new BlockPos(10, 3, 14);
     public static final BlockPos DEHYDRATOR = new BlockPos(12, 3, 7);
-    public static final ResourceLocation TEMPLATE = ResourceLocation.fromNamespaceAndPath("stardewcraft", "farm_layouts/cave");
+    public static final ResourceLocation TEMPLATE = new ResourceLocation("stardewcraft", "farm_layouts/cave");
     public static final List<BlockPos> BOXES = List.of(
             new BlockPos(6,3,7), new BlockPos(8,3,7), new BlockPos(10,3,7),
             new BlockPos(6,3,9), new BlockPos(8,3,9), new BlockPos(10,3,9));

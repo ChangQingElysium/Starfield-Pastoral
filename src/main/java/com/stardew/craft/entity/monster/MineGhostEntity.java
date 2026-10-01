@@ -34,7 +34,7 @@ public final class MineGhostEntity extends StardewMonsterEntity {
     @Override protected void registerGoals(){}
     public boolean carbon(){return carbon;}
     public boolean slowed(){return entityData.get(SLOWED);}
-    @Override protected ResourceLocation definitionId(){return ResourceLocation.parse("stardewcraft:"+(carbon?"carbon_ghost":"ghost"));}
+    @Override protected ResourceLocation definitionId(){return new ResourceLocation("stardewcraft:"+(carbon?"carbon_ghost":"ghost"));}
     @Override protected void configureSpawn(MonsterDefinition d,MonsterSpawnContext c){var r=MonsterStatResolver.base(d,c,random);setInitialHealth(r.initialHealth());replaceCombatStats(r.combat());groundY=getY();setPos(getX(),groundY+LIFT,getZ());}
     @Override protected void defineSynchedData(SynchedEntityData.Builder b){super.defineSynchedData(b);b.define(HIT,-100L);b.define(SLOWED,false);}
     public double hitTime(float p){return (level().getGameTime()-entityData.get(HIT)+p)/20.;}

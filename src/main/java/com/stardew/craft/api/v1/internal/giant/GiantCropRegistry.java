@@ -45,7 +45,7 @@ public final class GiantCropRegistry {
     }
 
     private static void core(List<Definition> definitions, String produce, GiantCropBlock block) {
-        definitions.add(new Definition(BuiltInRegistries.BLOCK.getKey(block), ResourceLocation.fromNamespaceAndPath("stardewcraft", produce),
+        definitions.add(new Definition(BuiltInRegistries.BLOCK.getKey(block), new ResourceLocation("stardewcraft", produce),
                 3, 3, block.footprintHeight(), .01, true, (context, crops) -> {
             var cells = new ArrayList<Cell>();
             for (int y = 0; y < context.definition().height(); y++) for (int z = 0; z < 3; z++) for (int x = 0; x < 3; x++)

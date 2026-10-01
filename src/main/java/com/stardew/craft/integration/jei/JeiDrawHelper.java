@@ -16,7 +16,7 @@ public final class JeiDrawHelper {
     public static final int TEXT_GOLD = 0xFFB8860B;
     public static final int TEXT_MUTED = 0xFF9E8E7E;
 
-    private static final ResourceLocation GOLD_ICON = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation GOLD_ICON = new ResourceLocation(
             StardewCraft.MODID, "textures/gui/gold_icon.png");
     private static IDrawable goldIconDrawable;
 

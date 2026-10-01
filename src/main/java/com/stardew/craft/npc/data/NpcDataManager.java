@@ -395,7 +395,7 @@ public final class NpcDataManager {
             Map<ResourceLocation, StardewWorldAnchor> anchors =
                     new HashMap<>();
             ResourceLocation scheduleRole =
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             StardewCraft.MODID, "npc_schedule");
             for (Map.Entry<String, JsonObject> event : events.entrySet()) {
                 String eventId = event.getKey();
@@ -439,7 +439,7 @@ public final class NpcDataManager {
                                     ? ResourceLocation.tryParse(
                                             object.get("dimension")
                                                     .getAsString())
-                                    : ResourceLocation.fromNamespaceAndPath(
+                                    : new ResourceLocation(
                                             StardewCraft.MODID,
                                             "stardew_valley");
                     if (dimension == null) {

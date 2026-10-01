@@ -88,8 +88,8 @@ public class MineLadderBlock extends Block {
                 && (context.getPlayer() == null || !context.getPlayer().getAbilities().instabuild)) {
             return null;
         }
-        var properties = context.getItemInHand().getOrDefault(net.minecraft.core.component.DataComponents.BLOCK_STATE,
-                net.minecraft.world.item.component.BlockItemStateProperties.EMPTY);
+        var properties = context.getItemInHand().getOrDefault(com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
+                com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties.EMPTY);
         Theme theme = properties.get(THEME);
         if (theme == null) {
             theme = Theme.EARTH;
@@ -106,8 +106,8 @@ public class MineLadderBlock extends Block {
 
     @Override public ItemStack getCloneItemStack(net.minecraft.world.level.LevelReader level, BlockPos pos, BlockState state) {
         var stack = new ItemStack(this);
-        stack.set(net.minecraft.core.component.DataComponents.BLOCK_STATE,
-                net.minecraft.world.item.component.BlockItemStateProperties.EMPTY.with(THEME, state).with(SHAFT, state));
+        stack.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
+                com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties.EMPTY.with(THEME, state).with(SHAFT, state));
         return stack;
     }
 
@@ -168,7 +168,7 @@ public class MineLadderBlock extends Block {
         boolean isShaft = state.getValue(SHAFT);
         if (isShaft) {
             // 竖井：发送确认对话包到客户端
-            net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
+            net.minecraftforge.network.PacketDistributor.sendToPlayer(
                 serverPlayer,
                 new com.stardew.craft.network.ShaftConfirmPacket(pos)
             );
@@ -186,7 +186,7 @@ public class MineLadderBlock extends Block {
      */
     @SuppressWarnings("null")
     @Override
-    protected net.minecraft.world.ItemInteractionResult useItemOn(
+    protected com.stardew.craft.port.net.minecraft.world.ItemInteractionResult useItemOn(
             @SuppressWarnings("null") net.minecraft.world.item.ItemStack stack,
             @SuppressWarnings("null") BlockState state,
             @SuppressWarnings("null") Level level,
@@ -196,10 +196,10 @@ public class MineLadderBlock extends Block {
             @SuppressWarnings("null") BlockHitResult hit) {
         InteractionResult r = useWithoutItem(state, level, pos, player, hit);
         return switch (r) {
-            case SUCCESS -> net.minecraft.world.ItemInteractionResult.sidedSuccess(level.isClientSide());
-            case CONSUME, CONSUME_PARTIAL -> net.minecraft.world.ItemInteractionResult.CONSUME;
-            case FAIL -> net.minecraft.world.ItemInteractionResult.FAIL;
-            default -> net.minecraft.world.ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            case SUCCESS -> com.stardew.craft.port.net.minecraft.world.ItemInteractionResult.sidedSuccess(level.isClientSide());
+            case CONSUME, CONSUME_PARTIAL -> com.stardew.craft.port.net.minecraft.world.ItemInteractionResult.CONSUME;
+            case FAIL -> com.stardew.craft.port.net.minecraft.world.ItemInteractionResult.FAIL;
+            default -> com.stardew.craft.port.net.minecraft.world.ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         };
     }
 
@@ -245,7 +245,7 @@ public class MineLadderBlock extends Block {
                     .grantTemporaryQiCaveRewardIfEligible(serverPlayer, nextFloor);
         }
 
-        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
+        net.minecraftforge.network.PacketDistributor.sendToPlayer(
             serverPlayer, new MiningFloorSyncPacket(nextFloor));
 
         final int floor = nextFloor;
@@ -306,7 +306,7 @@ public class MineLadderBlock extends Block {
         com.stardew.craft.secretnote.SecretNoteStoryTriggerService
                 .grantTemporaryQiCaveRewardIfEligible(serverPlayer, targetFloor);
 
-        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
+        net.minecraftforge.network.PacketDistributor.sendToPlayer(
                 serverPlayer, new MiningFloorSyncPacket(targetFloor));
 
         // SD 体力伤害：levelsDown × 3

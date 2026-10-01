@@ -26,7 +26,7 @@ public final class MineSquidKidEntity extends StardewMonsterEntity {
     public MineSquidKidEntity(EntityType<? extends MineSquidKidEntity> type,Level level){super(type,level);setNoGravity(true);addTag("sd_mob_squid_kid");}
     public static AttributeSupplier.Builder createAttributes(){return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,1).add(Attributes.ATTACK_DAMAGE,18).add(Attributes.MOVEMENT_SPEED,.25).add(Attributes.FOLLOW_RANGE,64).add(Attributes.STEP_HEIGHT,0);}
     @Override protected void registerGoals(){}
-    @Override protected ResourceLocation definitionId(){return ResourceLocation.parse("stardewcraft:squid_kid");}
+    @Override protected ResourceLocation definitionId(){return new ResourceLocation("stardewcraft:squid_kid");}
     @Override protected void configureSpawn(MonsterDefinition d,MonsterSpawnContext c){var r=MonsterStatResolver.base(d,c,random);setInitialHealth(r.initialHealth());replaceCombatStats(r.combat());groundY=getY();setPos(getX(),groundY+SquidKidBehavior.lift(level().getGameTime(),0),getZ());}
     @Override protected void defineSynchedData(SynchedEntityData.Builder b){super.defineSynchedData(b);b.define(EXPRESSION,0);b.define(HIT,-100L);b.define(FIRE,-100L);}
     public int expression(){return entityData.get(EXPRESSION);}public double groundY(){return groundY;}

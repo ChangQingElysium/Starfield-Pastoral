@@ -22,7 +22,7 @@ import java.util.UUID;
 /** Versioned namespaced state attached to one player's Community Center progress. */
 public final class StardewCommunityCenterPersistentData {
     private static final ResourceLocation SCOPE =
-            ResourceLocation.fromNamespaceAndPath(
+            new ResourceLocation(
                     "stardewcraft", "state/community_center_player");
 
     private StardewCommunityCenterPersistentData() {

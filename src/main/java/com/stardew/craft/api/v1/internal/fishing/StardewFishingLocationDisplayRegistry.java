@@ -11,7 +11,7 @@ public final class StardewFishingLocationDisplayRegistry {
     private static final OrderedExtensionRegistry<
             StardewFishingLocationDisplays.Provider> PROVIDERS =
             new OrderedExtensionRegistry<>(
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             StardewCraft.MODID, "fishing/location_display"));
 
     private StardewFishingLocationDisplayRegistry() {

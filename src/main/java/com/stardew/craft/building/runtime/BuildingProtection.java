@@ -29,7 +29,7 @@ public final class BuildingProtection {
         if (level.dimension() == com.stardew.craft.core.ModDimensions.STARDEW_VALLEY) {
             var pets = com.stardew.craft.pet.PetWorldData.peek(level.getServer());
             // During placement, onPlace has not yet committed bowl identity. Protect saved bowls only,
-            // so NeoForge can accept or roll back the item transaction before creating its building.
+            // so MinecraftForge can accept or roll back the item transaction before creating its building.
             if (pets != null && pets.bowl(pos) != null) return true;
             if (pets != null) for (int x = -1; x <= 0; x++) for (int z = -1; z <= 0; z++) {
                 var manager = pos.offset(x, 1, z);
@@ -88,11 +88,11 @@ public final class BuildingProtection {
                 || block instanceof com.stardew.craft.templates.TemplateBlock) && protects(level, pos);
     }
 
-    public static boolean blockInteraction(net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.RightClickBlock event) {
+    public static boolean blockInteraction(net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock event) {
         if (FishPondPrefabs.interact(event)) return true;
         if (event.getItemStack().getItem() instanceof BuildingBlueprintItem
                 || event.getItemStack().getItem() instanceof BuildingUpgradePermitItem) {
-            event.setUseBlock(net.neoforged.neoforge.common.util.TriState.FALSE);
+            event.setUseBlock(com.stardew.craft.port.net.neoforged.neoforge.common.util.TriState.FALSE);
             return false;
         }
         if (!(event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player)

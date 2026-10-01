@@ -11,7 +11,7 @@ public final class StardewLocationTransitionRegistry {
     private static final OrderedExtensionRegistry<
             StardewLocationTransitionListener> LISTENERS =
             new OrderedExtensionRegistry<>(
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             StardewCraft.MODID,
                             "world/location_transition"));
 

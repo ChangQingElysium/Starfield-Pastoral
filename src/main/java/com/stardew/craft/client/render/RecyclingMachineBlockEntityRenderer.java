@@ -23,7 +23,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import javax.annotation.Nonnull;
 
 public class RecyclingMachineBlockEntityRenderer implements BlockEntityRenderer<RecyclingMachineBlockEntity> {
-	private static final ResourceLocation BUBBLE_TEX = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/bubble.png");
+	private static final ResourceLocation BUBBLE_TEX = new ResourceLocation(StardewCraft.MODID, "textures/gui/bubble.png");
 	private static final float PX = 1.0f / 32.0f;
 
 	public RecyclingMachineBlockEntityRenderer(BlockEntityRendererProvider.Context context) {

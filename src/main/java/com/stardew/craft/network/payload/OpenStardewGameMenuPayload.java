@@ -4,17 +4,17 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.menu.StardewGameMenu;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleMenuProvider;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /** Client request to open the server-authoritative Stardew game menu. */
 public record OpenStardewGameMenuPayload() implements CustomPacketPayload {
     public static final Type<OpenStardewGameMenuPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "open_stardew_game_menu"));
+            new ResourceLocation(StardewCraft.MODID, "open_stardew_game_menu"));
     public static final StreamCodec<ByteBuf, OpenStardewGameMenuPayload> STREAM_CODEC =
             StreamCodec.unit(new OpenStardewGameMenuPayload());
 

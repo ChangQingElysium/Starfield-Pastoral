@@ -3,12 +3,12 @@ package com.stardew.craft.communitycenter.network;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.communitycenter.menu.BundleMenu;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * C→S: Client requests retrieving items from a partial donation.
@@ -27,7 +27,7 @@ public record BundlePartialRetrievePayload(
     public static final int MODE_RETURN_ONE = 1;
 
     public static final Type<BundlePartialRetrievePayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "bundle_partial_retrieve")
+            new ResourceLocation(StardewCraft.MODID, "bundle_partial_retrieve")
     );
 
     public static final StreamCodec<ByteBuf, BundlePartialRetrievePayload> STREAM_CODEC =

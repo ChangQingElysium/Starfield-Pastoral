@@ -4,12 +4,12 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.item.tool.PointPlanWandItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record PointPlanActionPayload(
     String action,
@@ -20,7 +20,7 @@ public record PointPlanActionPayload(
     String direction
 ) implements CustomPacketPayload {
     public static final Type<PointPlanActionPayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "point_plan_action"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "point_plan_action"));
 
     public static final StreamCodec<FriendlyByteBuf, PointPlanActionPayload> STREAM_CODEC = StreamCodec.of(
         (buf, payload) -> {

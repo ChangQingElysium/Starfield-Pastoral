@@ -4,12 +4,12 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.communitycenter.data.BundleAreaVisibility;
 import com.stardew.craft.communitycenter.menu.BundleMenu;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * C → S: cycle the read-only bundle viewer to the next/previous area.
@@ -21,7 +21,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 public record SwitchBundleViewerAreaPayload(int direction) implements CustomPacketPayload {
 
     public static final Type<SwitchBundleViewerAreaPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "switch_bundle_viewer_area")
+            new ResourceLocation(StardewCraft.MODID, "switch_bundle_viewer_area")
     );
 
     public static final StreamCodec<ByteBuf, SwitchBundleViewerAreaPayload> STREAM_CODEC =

@@ -15,7 +15,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -101,8 +101,8 @@ public class GeoFestivalDecorBlock extends MapDecorStaticBlock implements Entity
     }
 
     @Override
-    public void initializeClient(@Nonnull Consumer<net.neoforged.neoforge.client.extensions.common.IClientBlockExtensions> consumer) {
-        consumer.accept(new net.neoforged.neoforge.client.extensions.common.IClientBlockExtensions() {
+    public void initializeClient(@Nonnull Consumer<net.minecraftforge.client.extensions.common.IClientBlockExtensions> consumer) {
+        consumer.accept(new net.minecraftforge.client.extensions.common.IClientBlockExtensions() {
             @Override
             @SuppressWarnings("null")
             public boolean addHitEffects(BlockState state, Level level, net.minecraft.world.phys.HitResult target,

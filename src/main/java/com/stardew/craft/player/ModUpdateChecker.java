@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.stardew.craft.StardewCraft;
 import net.minecraft.SharedConstants;
-import net.neoforged.fml.ModList;
+import net.minecraftforge.fml.ModList;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 
 import java.net.URI;

@@ -18,9 +18,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.common.util.FakePlayerFactory;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import java.util.List;
 import java.util.UUID;
 
@@ -236,7 +236,7 @@ public final class BuildingDocumentGameTests {
         var stack=new ItemStack(ModItems.COOP_BLUEPRINT.get());BuildingBlueprintItem.bindMove(stack,record);
         player.setItemInHand(InteractionHand.MAIN_HAND,stack);
         var tag=BuildingBlueprintItem.draft(stack);tag.putLong("DraftAnchor",new BlockPos(500,90,500).asLong());tag.putString("DraftDimension","minecraft:the_nether");
-        stack.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA,net.minecraft.world.item.component.CustomData.of(tag));
+        stack.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,com.stardew.craft.port.net.minecraft.world.item.component.CustomData.of(tag));
         BuildingDrafts.get(player.server).write(stack);
         BuildingBlueprintItem.cancel(player,InteractionHand.MAIN_HAND,false);
         h.assertTrue(!BuildingBlueprintItem.draft(stack).contains("DraftAnchor") && stack.getCount()==1,"Unreachable cross-dimension pin cannot be reset");
@@ -313,7 +313,7 @@ public final class BuildingDocumentGameTests {
     }
     @GameTest(templateNamespace="stardewcraft_buildings",template="empty")
     public static void purchaseRepliesPreserveTheirRequestIdentity(GameTestHelper h) {
-        var buffer=new net.minecraft.network.RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer(),h.getLevel().registryAccess());
+        var buffer=new com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer(),h.getLevel().registryAccess());
         var id=UUID.randomUUID();
         try {
             var request=new com.stardew.craft.network.payload.CarpenterPurchasePayload("stardewcraft:robin",2,PrefabDefinitions.COOP.toString(),17,id);
@@ -358,7 +358,7 @@ public final class BuildingDocumentGameTests {
 
     @GameTest(templateNamespace="stardewcraft_buildings",template="empty")
     public static void obstructionFlashPayloadKeepsEveryReportedCell(GameTestHelper h) {
-        var buffer=new net.minecraft.network.RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer(),h.getLevel().registryAccess());
+        var buffer=new com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer(),h.getLevel().registryAccess());
         var expected=List.of(new BlockPos(1,2,3),new BlockPos(-4,5,-6),new BlockPos(7,8,9));
         try {
             var payload=new com.stardew.craft.network.payload.BuildingObstructionFlashPayload(

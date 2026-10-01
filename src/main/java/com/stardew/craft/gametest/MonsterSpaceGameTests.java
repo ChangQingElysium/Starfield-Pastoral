@@ -9,7 +9,7 @@ import net.minecraft.gametest.framework.*;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.gametest.*;
+import net.minecraftforge.gametest.*;
 
 /** Explicit -PgameTestNamespaces=stardewcraft_monster_space; no client or broad suite needed. */
 @GameTestHolder("stardewcraft_monster_space")

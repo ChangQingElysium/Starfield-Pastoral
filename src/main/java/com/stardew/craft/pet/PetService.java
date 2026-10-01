@@ -16,10 +16,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.server.ServerStoppedEvent;
-import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.server.ServerStoppedEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 @EventBusSubscriber(modid = StardewCraft.MODID)
 public final class PetService {
@@ -61,7 +61,7 @@ public final class PetService {
         if (!entity.position().equals(pet.position) || pet.yaw != entity.getYRot()) { pet.position = entity.position(); pet.yaw = entity.getYRot(); data.setDirty(); }
     }
     @SubscribeEvent public static void stopped(ServerStoppedEvent event) { farms.clear(); PetManagement.clear(); }
-    @SubscribeEvent public static void stopping(net.neoforged.neoforge.event.server.ServerStoppingEvent event) {
+    @SubscribeEvent public static void stopping(net.minecraftforge.event.server.ServerStoppingEvent event) {
         var level = event.getServer().getLevel(ModDimensions.STARDEW_VALLEY); if (level == null) return;
         for (var pet : PetWorldData.get(event.getServer()).all()) if (level.getEntity(pet.id) instanceof PetEntity entity) remember(level, entity);
     }

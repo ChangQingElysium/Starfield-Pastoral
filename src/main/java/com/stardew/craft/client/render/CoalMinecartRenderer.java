@@ -15,13 +15,13 @@ import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import net.minecraftforge.client.model.data.ModelData;
 
 @SuppressWarnings("null")
 public final class CoalMinecartRenderer extends EntityRenderer<CoalMinecartEntity> {
     private static final ModelResourceLocation EMPTY = model("empty"), LOADED = model("loaded");
     private static ModelResourceLocation model(String name) {
-        return new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,
+        return new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID,
                 "entity/minecart/" + name), "standalone");
     }
     public CoalMinecartRenderer(EntityRendererProvider.Context context) { super(context); shadowRadius = 0.6F; }

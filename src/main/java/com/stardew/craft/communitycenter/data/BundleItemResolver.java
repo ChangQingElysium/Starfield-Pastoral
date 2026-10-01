@@ -53,13 +53,13 @@ public final class BundleItemResolver {
         String path = resolve(sdvToken);
         if (path == null) return Items.AIR;
 
-        ResourceLocation modId = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, path);
+        ResourceLocation modId = new ResourceLocation(StardewCraft.MODID, path);
         if (BuiltInRegistries.ITEM.containsKey(modId)) {
             return BuiltInRegistries.ITEM.get(modId);
         }
 
         // Fallback to vanilla namespace
-        ResourceLocation vanillaId = ResourceLocation.withDefaultNamespace(path);
+        ResourceLocation vanillaId = new ResourceLocation(path);
         if (BuiltInRegistries.ITEM.containsKey(vanillaId)) {
             return BuiltInRegistries.ITEM.get(vanillaId);
         }
@@ -82,12 +82,12 @@ public final class BundleItemResolver {
             return new ItemStack(BuiltInRegistries.ITEM.get(namespacedId));
         }
 
-        ResourceLocation modId = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, modPath);
+        ResourceLocation modId = new ResourceLocation(StardewCraft.MODID, modPath);
         if (BuiltInRegistries.ITEM.containsKey(modId)) {
             return new ItemStack(BuiltInRegistries.ITEM.get(modId));
         }
 
-        ResourceLocation vanillaId = ResourceLocation.withDefaultNamespace(modPath);
+        ResourceLocation vanillaId = new ResourceLocation(modPath);
         if (BuiltInRegistries.ITEM.containsKey(vanillaId)) {
             return new ItemStack(BuiltInRegistries.ITEM.get(vanillaId));
         }

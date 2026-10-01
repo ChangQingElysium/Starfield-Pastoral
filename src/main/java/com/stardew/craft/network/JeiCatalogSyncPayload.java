@@ -19,14 +19,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /** S→C: display-only shop, custom-geode and fish-pond catalog for optional JEI. */
 public record JeiCatalogSyncPayload(
@@ -36,7 +36,7 @@ public record JeiCatalogSyncPayload(
         implements CustomPacketPayload {
     private static final int MAX_ENTRIES = 100_000;
     public static final Type<JeiCatalogSyncPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "jei_catalog_sync"));
+            new ResourceLocation(StardewCraft.MODID, "jei_catalog_sync"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, JeiCatalogSyncPayload> STREAM_CODEC =
             new StreamCodec<>() {
@@ -211,12 +211,12 @@ public record JeiCatalogSyncPayload(
     }
 
     private static void writeShop(RegistryFriendlyByteBuf buf, ShopEntry entry) {
-        ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, entry.item);
+        com.stardew.craft.port.PortCodecs.OPTIONAL_ITEM_STACK.encode(buf, entry.item);
         buf.writeUtf(entry.shopId, 512);
         buf.writeUtf(entry.ownerNpcId, 512);
         buf.writeVarInt(entry.price);
         buf.writeVarInt(entry.stock);
-        ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, entry.tradeItem);
+        com.stardew.craft.port.PortCodecs.OPTIONAL_ITEM_STACK.encode(buf, entry.tradeItem);
         buf.writeVarInt(entry.tradeItemCount);
         buf.writeVarInt(entry.purchaseStack);
         int seasonMask = 0;
@@ -234,12 +234,12 @@ public record JeiCatalogSyncPayload(
     }
 
     private static ShopEntry readShop(RegistryFriendlyByteBuf buf) {
-        ItemStack item = ItemStack.OPTIONAL_STREAM_CODEC.decode(buf);
+        ItemStack item = com.stardew.craft.port.PortCodecs.OPTIONAL_ITEM_STACK.decode(buf);
         String shopId = buf.readUtf(512);
         String ownerNpcId = buf.readUtf(512);
         int price = buf.readVarInt();
         int stock = buf.readVarInt();
-        ItemStack tradeItem = ItemStack.OPTIONAL_STREAM_CODEC.decode(buf);
+        ItemStack tradeItem = com.stardew.craft.port.PortCodecs.OPTIONAL_ITEM_STACK.decode(buf);
         int tradeItemCount = buf.readVarInt();
         int purchaseStack = buf.readVarInt();
         int seasonMask = buf.readUnsignedByte();
@@ -261,18 +261,18 @@ public record JeiCatalogSyncPayload(
     }
 
     private static void writeGeode(RegistryFriendlyByteBuf buf, GeodeEntry entry) {
-        ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, entry.geode);
-        ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, entry.output);
+        com.stardew.craft.port.PortCodecs.OPTIONAL_ITEM_STACK.encode(buf, entry.geode);
+        com.stardew.craft.port.PortCodecs.OPTIONAL_ITEM_STACK.encode(buf, entry.output);
     }
 
     private static GeodeEntry readGeode(RegistryFriendlyByteBuf buf) {
-        return new GeodeEntry(ItemStack.OPTIONAL_STREAM_CODEC.decode(buf),
-                ItemStack.OPTIONAL_STREAM_CODEC.decode(buf));
+        return new GeodeEntry(com.stardew.craft.port.PortCodecs.OPTIONAL_ITEM_STACK.decode(buf),
+                com.stardew.craft.port.PortCodecs.OPTIONAL_ITEM_STACK.decode(buf));
     }
 
     private static void writeFishPond(RegistryFriendlyByteBuf buf, FishPondEntry entry) {
-        ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, entry.fish);
-        ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, entry.output);
+        com.stardew.craft.port.PortCodecs.OPTIONAL_ITEM_STACK.encode(buf, entry.fish);
+        com.stardew.craft.port.PortCodecs.OPTIONAL_ITEM_STACK.encode(buf, entry.output);
         buf.writeVarInt(entry.requiredPopulation);
         buf.writeDouble(entry.outputChance);
         buf.writeDouble(entry.dailyMinChance);
@@ -284,8 +284,8 @@ public record JeiCatalogSyncPayload(
 
     private static FishPondEntry readFishPond(RegistryFriendlyByteBuf buf) {
         return new FishPondEntry(
-                ItemStack.OPTIONAL_STREAM_CODEC.decode(buf),
-                ItemStack.OPTIONAL_STREAM_CODEC.decode(buf),
+                com.stardew.craft.port.PortCodecs.OPTIONAL_ITEM_STACK.decode(buf),
+                com.stardew.craft.port.PortCodecs.OPTIONAL_ITEM_STACK.decode(buf),
                 buf.readVarInt(),
                 buf.readDouble(),
                 buf.readDouble(),

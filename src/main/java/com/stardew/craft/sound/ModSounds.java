@@ -4,8 +4,8 @@ import com.stardew.craft.StardewCraft;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredHolder;
+import net.minecraftforge.registries.DeferredRegister;
 
 /**
  * Stardew Valley cue -> Minecraft SoundEvent mapping.
@@ -293,7 +293,7 @@ public final class ModSounds {
 	@SuppressWarnings("null")
 	private static DeferredHolder<SoundEvent, SoundEvent> register(String path) {
 		@SuppressWarnings("null")
-		ResourceLocation id = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, path);
+		ResourceLocation id = new ResourceLocation(StardewCraft.MODID, path);
 		return SOUND_EVENTS.register(path, () -> SoundEvent.createVariableRangeEvent(id));
 	}
 }

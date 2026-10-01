@@ -8,8 +8,8 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 /** Isolated preview entities never have a level, inventory, position or network side effect. */
 @OnlyIn(Dist.CLIENT)
@@ -24,7 +24,7 @@ public final class ChestModelPreview {
     public void draw(GuiGraphics graphics, int x, int y, int color, com.stardew.craft.block.utility.ChestVariant variant) {
         if (variant == null) {
             // A reused chest menu may describe an addon's model. Do not pretend it is our wood chest.
-            graphics.blit(ResourceLocation.fromNamespaceAndPath("stardewcraft", "textures/gui/color_wheel.png"),
+            graphics.blit(new ResourceLocation("stardewcraft", "textures/gui/color_wheel.png"),
                     x - 12, y - 12, 0, 0, 24, 24, 24, 24);
             int rgb = com.stardew.craft.block.utility.WoodenChestColorPalette.rgbAt(color);
             graphics.fill(x - 13, y + 14, x + 13, y + 18, 0xFF000000 | rgb);

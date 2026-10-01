@@ -12,7 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public final class MaxChargeRangeClientTooltipComponent implements ClientTooltipComponent {
 
-    private static final ResourceLocation TILE_TEXTURE = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation TILE_TEXTURE = new ResourceLocation(
             StardewCraft.MODID, "textures/gui/range_overlay.png");
 
     private static final Component LABEL = Component.translatable("tooltip.stardewcraft.max_charge_range_label");

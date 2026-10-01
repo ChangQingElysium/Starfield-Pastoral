@@ -16,8 +16,8 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.List;
 import java.util.Locale;
@@ -215,7 +215,7 @@ public final class PreconditionEvaluator {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return false;
         try {
-            var item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(itemId));
+            var item = BuiltInRegistries.ITEM.get(new ResourceLocation(itemId));
             return item != Items.AIR && mc.player.getInventory().countItem(item) >= count;
         } catch (Exception ignored) {
             return false;

@@ -10,7 +10,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.gametest.*;
+import net.minecraftforge.gametest.*;
 
 @GameTestHolder("stardewcraft_farm_golem")
 @PrefixGameTestTemplate(false)
@@ -47,7 +47,7 @@ public final class FarmGolemGameTests {
                     m->((MineRockGolemEntity)m).setFarmCombatLevel(5));
             h.assertTrue(mob!=null && mob.farmCombatLevel()==5 && mob.isFarmGolem(),"Spawn initialized before difficulty was assigned");
             h.assertTrue(!mob.getTags().contains("sd_mob_rock_golem") && mob.getBbHeight()>=1.56,"Identity or full spawn clearance lost");
-            var d=MonsterDefinitions.require(ResourceLocation.parse("stardewcraft:"+id));
+            var d=MonsterDefinitions.require(new ResourceLocation("stardewcraft:"+id));
             h.assertTrue(d.drops().stream().filter(drop->drop.item().equals("stardewcraft:fiber")).count()==2,"Independent fiber rolls were merged");
             mob.discard();
         }

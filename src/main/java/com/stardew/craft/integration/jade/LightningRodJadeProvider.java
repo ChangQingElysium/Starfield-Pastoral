@@ -24,7 +24,7 @@ import java.util.List;
 public enum LightningRodJadeProvider implements IBlockComponentProvider, IServerDataProvider<BlockAccessor> {
     INSTANCE;
 
-    private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "lightning_rod");
+    private static final ResourceLocation UID = new ResourceLocation(StardewCraft.MODID, "lightning_rod");
 
     private static final String NBT_READY = "ready";
     private static final String NBT_PRODUCT_ITEM = "productItem";

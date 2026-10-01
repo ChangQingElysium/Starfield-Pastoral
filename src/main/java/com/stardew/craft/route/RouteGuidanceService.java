@@ -2,7 +2,7 @@ package com.stardew.craft.route;
 
 import com.stardew.craft.network.payload.RouteGuidanceStartPayload;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 public final class RouteGuidanceService {
     private RouteGuidanceService() {

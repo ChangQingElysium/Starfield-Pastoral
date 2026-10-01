@@ -3,10 +3,10 @@ package com.stardew.craft.client;
 import com.stardew.craft.StardewCraft;
 import net.minecraft.client.renderer.DimensionSpecialEffects;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RegisterDimensionSpecialEffectsEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.RegisterDimensionSpecialEffectsEvent;
 
 /**
  * 星露谷维度天空效果
@@ -57,7 +57,7 @@ public class StardewSkyEffects extends DimensionSpecialEffects {
         public static void registerDimensionEffects(RegisterDimensionSpecialEffectsEvent event) {
             // 不注册自定义效果，直接使用minecraft:overworld效果
             // event.register(
-            //     ResourceLocation.parse(StardewCraft.MODID + ":stardew_valley"),
+            //     new ResourceLocation(StardewCraft.MODID + ":stardew_valley"),
             //     new StardewSkyEffects()
             // );
             StardewCraft.LOGGER.info("Using vanilla overworld sky effects for Stardew Valley dimension");

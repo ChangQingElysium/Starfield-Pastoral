@@ -5,12 +5,12 @@ import com.stardew.craft.communitycenter.data.BundleAreaVisibility;
 import com.stardew.craft.communitycenter.menu.BundleMenu;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleMenuProvider;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * Client → Server: request to open the read-only bundle viewer from the
@@ -21,7 +21,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 public record OpenBundleViewerPayload() implements CustomPacketPayload {
 
     public static final Type<OpenBundleViewerPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "open_bundle_viewer")
+            new ResourceLocation(StardewCraft.MODID, "open_bundle_viewer")
     );
 
     public static final StreamCodec<ByteBuf, OpenBundleViewerPayload> STREAM_CODEC =

@@ -4,10 +4,10 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.core.ModGameRules;
 import com.stardew.craft.network.payload.PublicBuildingRuleSyncPayload;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.network.PacketDistributor;
 
 @EventBusSubscriber(modid = StardewCraft.MODID)
 public final class PublicBuildingRuleSyncEvents {

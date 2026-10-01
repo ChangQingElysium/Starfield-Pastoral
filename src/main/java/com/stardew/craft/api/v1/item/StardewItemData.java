@@ -22,7 +22,7 @@ public record StardewItemData(
         boolean hidden
 ) {
     public static final ResourceLocation UNKNOWN_CATEGORY =
-            ResourceLocation.fromNamespaceAndPath("stardewcraft", "unknown");
+            new ResourceLocation("stardewcraft", "unknown");
 
     public static final Codec<StardewItemData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ResourceLocation.CODEC.optionalFieldOf("category", UNKNOWN_CATEGORY)

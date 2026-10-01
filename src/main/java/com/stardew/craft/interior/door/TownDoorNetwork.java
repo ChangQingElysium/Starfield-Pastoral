@@ -2,12 +2,12 @@ package com.stardew.craft.interior.door;
 
 import com.stardew.craft.StardewCraft;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +31,7 @@ public final class TownDoorNetwork {
     }
 
     private static <T extends CustomPacketPayload> CustomPacketPayload.Type<T> type(String name) {
-        return new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, name));
+        return new CustomPacketPayload.Type<>(new ResourceLocation(StardewCraft.MODID, name));
     }
 
     public record DoorState(int id, int revision, boolean open, boolean enter, boolean exit,

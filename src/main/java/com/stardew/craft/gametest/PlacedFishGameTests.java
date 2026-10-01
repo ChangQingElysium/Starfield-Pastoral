@@ -8,7 +8,7 @@ import com.stardew.craft.item.ModItems;
 import com.stardew.craft.item.quality.QualityHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.component.DataComponents;
+import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -26,8 +26,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 @GameTestHolder("stardewcraft_fish_placement")
 @PrefixGameTestTemplate(false)
@@ -79,7 +79,7 @@ public final class PlacedFishGameTests {
         try(var reader=new java.io.InputStreamReader(java.util.Objects.requireNonNull(PlacedFishGameTests.class.getResourceAsStream("/assets/stardewcraft/pond_fish/manifest.json")),java.nio.charset.StandardCharsets.UTF_8)) {
             for(var record:JsonParser.parseReader(reader).getAsJsonArray()) {
                 String id=record.getAsJsonObject().get("id").getAsString();
-                var held=new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath("stardewcraft",id)),3);
+                var held=new ItemStack(BuiltInRegistries.ITEM.get(new ResourceLocation("stardewcraft",id)),3);
                 QualityHelper.setQuality(held,2);held.set(DataComponents.CUSTOM_NAME,Component.literal(id+" trophy"));var expected=held.copyWithCount(1);
                 h.assertTrue(place(h,player,pos.below(),Direction.UP,held).consumesAction(),"Cannot place "+id);
                 h.assertTrue(held.getCount()==2&&!level.getBlockState(pos).getValue(PlacedFishBlock.WALL),"Wrong consumption or attachment "+id);

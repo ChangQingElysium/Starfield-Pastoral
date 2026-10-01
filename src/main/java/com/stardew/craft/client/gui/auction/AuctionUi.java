@@ -11,7 +11,7 @@ final class AuctionUi {
     private AuctionUi() { }
 
     private static ResourceLocation texture(String name) {
-        return ResourceLocation.fromNamespaceAndPath("stardewcraft", "textures/gui/auction/" + name + ".png");
+        return new ResourceLocation("stardewcraft", "textures/gui/auction/" + name + ".png");
     }
     static void sprite(GuiGraphics g, String name, int x, int y, int w, int h) {
         RenderSystem.enableBlend();

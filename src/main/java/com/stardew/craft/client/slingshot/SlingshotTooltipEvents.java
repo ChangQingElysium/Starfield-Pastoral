@@ -3,10 +3,10 @@ package com.stardew.craft.client.slingshot;
 import com.stardew.craft.item.weapon.SlingshotItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 
 @EventBusSubscriber(modid="stardewcraft", value=Dist.CLIENT)
 public final class SlingshotTooltipEvents {

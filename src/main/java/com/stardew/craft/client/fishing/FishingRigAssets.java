@@ -6,10 +6,10 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.npcnative.NativeNpcModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -25,7 +25,7 @@ public final class FishingRigAssets {
     public record Rig(int version,List<Bone> bones,List<Face> faces) {}
     public static volatile Rig rig;
     public static volatile Map<String,NativeNpcModel.Clip> clips=Map.of();
-    public static ResourceLocation resource(String path) {return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,path);}
+    public static ResourceLocation resource(String path) {return new ResourceLocation(StardewCraft.MODID,path);}
     @SubscribeEvent public static void register(RegisterClientReloadListenersEvent event) {
         event.registerReloadListener((ResourceManagerReloadListener) resources->{
             try(var reader=resources.openAsReader(resource("fishing_native/rig.json"));

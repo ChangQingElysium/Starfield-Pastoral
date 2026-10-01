@@ -3,11 +3,11 @@ package com.stardew.craft.network.payload;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.mail.MailService;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * Client → Server: 玩家检查邮箱（右键邮箱方块）。
@@ -17,7 +17,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 public record CheckMailboxPayload() implements CustomPacketPayload {
 
     public static final Type<CheckMailboxPayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "check_mailbox"));
+            new Type<>(new ResourceLocation(StardewCraft.MODID, "check_mailbox"));
 
     public static final StreamCodec<ByteBuf, CheckMailboxPayload> STREAM_CODEC =
             StreamCodec.unit(new CheckMailboxPayload());

@@ -8,7 +8,7 @@ final class BuildingManagerArt {
     static final int INK = 0xFF493B2E, MUTED = 0xFF756347, GREEN = 0xFF4F6544, RED = 0xFF994D40;
     private BuildingManagerArt() { }
     private static ResourceLocation texture(String name) {
-        return ResourceLocation.fromNamespaceAndPath("stardewcraft", "textures/gui/building_manager/" + name + ".png");
+        return new ResourceLocation("stardewcraft", "textures/gui/building_manager/" + name + ".png");
     }
     static void sprite(GuiGraphics g, String name, int x, int y, int w, int h) {
         RenderSystem.enableBlend(); RenderSystem.defaultBlendFunc();

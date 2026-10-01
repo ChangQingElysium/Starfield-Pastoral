@@ -27,9 +27,9 @@ import com.stardew.craft.command.PointPlanDebugCommand;
 import com.stardew.craft.command.RouteEditorDebugCommand;
 import com.stardew.craft.command.ShopDebugCommand;
 import com.stardew.craft.command.StructureDebugCommand;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.RegisterCommandsEvent;
 
 /**
  * 命令注册事件 — 所有命令统一挂在 /stardew 主指令下

@@ -28,7 +28,7 @@ import java.util.Set;
  */
 public final class StardewAnimalPersistentData {
     private static final ResourceLocation SCOPE =
-            ResourceLocation.fromNamespaceAndPath(
+            new ResourceLocation(
                     "stardewcraft", "state/animal");
 
     private final NamespacedStateContainer container;

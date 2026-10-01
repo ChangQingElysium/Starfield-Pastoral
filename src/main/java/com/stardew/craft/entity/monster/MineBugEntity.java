@@ -40,7 +40,7 @@ public final class MineBugEntity extends StardewMonsterEntity {
                 .add(Attributes.MOVEMENT_SPEED,.25).add(Attributes.STEP_HEIGHT,0);
     }
     @Override protected void registerGoals() {}
-    @Override protected ResourceLocation definitionId() { return ResourceLocation.parse("stardewcraft:"+variant()); }
+    @Override protected ResourceLocation definitionId() { return new ResourceLocation("stardewcraft:"+variant()); }
     @Override protected void configureSpawn(MonsterDefinition definition,MonsterSpawnContext context) {
         var resolved=MonsterStatResolver.base(definition,context,random);
         setInitialHealth(armored?150:resolved.initialHealth());

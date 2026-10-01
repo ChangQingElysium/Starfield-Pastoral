@@ -46,7 +46,7 @@ public final class RockCrabEntity extends StardewMonsterEntity {
                 .add(Attributes.MOVEMENT_SPEED,.25).add(Attributes.FOLLOW_RANGE,64).add(Attributes.STEP_HEIGHT,0);
     }
     @Override protected void registerGoals() {}
-    @Override protected ResourceLocation definitionId() { return ResourceLocation.parse("stardewcraft:"+variant); }
+    @Override protected ResourceLocation definitionId() { return new ResourceLocation("stardewcraft:"+variant); }
     @Override protected void configureSpawn(MonsterDefinition definition,MonsterSpawnContext context) {
         var resolved=MonsterStatResolver.base(definition,context,random);
         setInitialHealth(resolved.initialHealth());replaceCombatStats(resolved.combat());

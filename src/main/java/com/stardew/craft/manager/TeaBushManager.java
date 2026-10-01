@@ -287,7 +287,7 @@ public final class TeaBushManager extends SavedData {
         }
         ResourceKey<Level> dimension = ResourceKey.create(
                 net.minecraft.core.registries.Registries.DIMENSION,
-                net.minecraft.resources.ResourceLocation.parse(tag.getString("Dimension")));
+                new net.minecraft.resources.ResourceLocation(tag.getString("Dimension")));
         BlockPos pos = NbtUtils.readBlockPos(tag, "Pos").orElse(null);
         return pos == null ? null : GlobalPos.of(dimension, pos);
     }

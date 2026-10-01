@@ -1,7 +1,7 @@
 package com.stardew.craft.item;
 
 import net.minecraft.world.level.block.Block;
-import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
+import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import java.util.function.Consumer;
 
 public class FishNetItem extends StardewBlockItem {

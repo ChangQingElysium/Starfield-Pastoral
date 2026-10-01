@@ -9,7 +9,7 @@ import com.stardew.craft.sound.ModSounds;
 import java.util.List;
 import javax.annotation.Nonnull;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.particles.ColorParticleOption;
+import com.stardew.craft.port.net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;

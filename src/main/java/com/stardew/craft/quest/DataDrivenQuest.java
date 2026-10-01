@@ -149,7 +149,7 @@ public final class DataDrivenQuest extends StardewQuest {
     }
 
     public ResourceLocation getObjectiveType() {
-        return objective == null ? ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "unavailable")
+        return objective == null ? new ResourceLocation(StardewCraft.MODID, "unavailable")
                 : objective.type();
     }
 

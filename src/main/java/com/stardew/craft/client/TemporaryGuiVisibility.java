@@ -8,12 +8,12 @@ import com.stardew.craft.client.gui.AnimalQueryScreen;
 import com.stardew.craft.cutscene.runtime.EventPlayer;
 import com.stardew.craft.cutscene.runtime.EventScreenFade;
 import net.minecraft.client.Minecraft;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
 
 import java.util.EnumSet;
 

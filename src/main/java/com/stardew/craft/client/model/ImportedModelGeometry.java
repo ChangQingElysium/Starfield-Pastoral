@@ -14,12 +14,12 @@ import net.minecraft.client.resources.model.Material;
 import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.core.Direction;
-import net.neoforged.neoforge.client.model.IModelBuilder;
-import net.neoforged.neoforge.client.model.QuadTransformers;
-import net.neoforged.neoforge.client.model.SimpleModelState;
-import net.neoforged.neoforge.client.model.geometry.IGeometryBakingContext;
-import net.neoforged.neoforge.client.model.geometry.IGeometryLoader;
-import net.neoforged.neoforge.client.model.geometry.SimpleUnbakedGeometry;
+import net.minecraftforge.client.model.IModelBuilder;
+import net.minecraftforge.client.model.QuadTransformers;
+import net.minecraftforge.client.model.SimpleModelState;
+import net.minecraftforge.client.model.geometry.IGeometryBakingContext;
+import net.minecraftforge.client.model.geometry.IGeometryLoader;
+import net.minecraftforge.client.model.geometry.SimpleUnbakedGeometry;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -50,8 +50,8 @@ public final class ImportedModelGeometry extends SimpleUnbakedGeometry<ImportedM
             BlockElement element = new BlockElement(ModelGeometry.vector(part.getAsJsonArray("from")),
                 ModelGeometry.vector(part.getAsJsonArray("to")), faces, null,
                 !part.has("shade") || part.get("shade").getAsBoolean(),
-                net.neoforged.neoforge.client.model.ExtraFaceData.read(part.get("neoforge_data"),
-                    net.neoforged.neoforge.client.model.ExtraFaceData.DEFAULT));
+                com.stardew.craft.port.net.neoforged.neoforge.client.model.ExtraFaceData.read(part.get("neoforge_data"),
+                    com.stardew.craft.port.net.neoforged.neoforge.client.model.ExtraFaceData.DEFAULT));
             // Convert pixel-space translation to block units; rotation and scale are unchanged.
             Matrix4f transform = ModelGeometry.transform(part);
             transform.m30(transform.m30() / 16).m31(transform.m31() / 16).m32(transform.m32() / 16);

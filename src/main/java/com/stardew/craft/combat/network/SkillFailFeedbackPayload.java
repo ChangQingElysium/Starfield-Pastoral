@@ -1,10 +1,10 @@
 package com.stardew.craft.combat.network;
 
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 import com.stardew.craft.StardewCraft;
 
 /**
@@ -14,7 +14,7 @@ public record SkillFailFeedbackPayload(boolean mainHand) implements CustomPacket
 
     @SuppressWarnings("null")
     public static final Type<SkillFailFeedbackPayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "skill_fail_feedback"));
+            new Type<>(new ResourceLocation(StardewCraft.MODID, "skill_fail_feedback"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, SkillFailFeedbackPayload> STREAM_CODEC =
             StreamCodec.of(

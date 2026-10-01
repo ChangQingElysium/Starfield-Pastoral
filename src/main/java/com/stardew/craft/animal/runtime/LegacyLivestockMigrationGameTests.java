@@ -19,9 +19,9 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.common.util.FakePlayerFactory;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 import java.util.*;
 
@@ -264,7 +264,7 @@ public final class LegacyLivestockMigrationGameTests {
             var row = animal.save(); row.putString("UnknownField", "keep me");
             var root = new CompoundTag(); list(root, "buildings", home.save()); list(root, "animals", row);
             list(root, "animalProduceLedger", new AnimalProduceLedgerEntry(animalId, homeId, animalId, day,
-                    net.minecraft.resources.ResourceLocation.parse("stardewcraft:egg_white"), 4, "", 0).save());
+                    new net.minecraft.resources.ResourceLocation("stardewcraft:egg_white"), 4, "", 0).save());
             list(root, "pendingAnimalBirths", new AnimalPendingBirth(animalId, owner.toString(), homeId, animalId, "cow", day).save());
             var hay = new CompoundTag(); hay.putString("ownerPlayerUuid", owner.toString()); hay.putInt("pieces", 500); list(root, "hayByOwner", hay);
             return root;

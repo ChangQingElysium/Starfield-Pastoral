@@ -14,16 +14,16 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.animal.Parrot;
 import net.minecraft.world.level.block.BedBlock;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.EntityTravelToDimensionEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.tick.LevelTickEvent;
-import net.neoforged.neoforge.event.server.ServerStoppedEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.event.tick.LevelTickEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
+import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
-import net.neoforged.neoforge.event.level.SleepFinishedTimeEvent;
+import net.minecraftforge.event.level.SleepFinishedTimeEvent;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
 
 /**
@@ -578,7 +578,7 @@ public class DimensionEventHandler {
             // 同步层数到客户端（显示UI）
             com.stardew.craft.network.MiningFloorSyncPacket packet = 
                 new com.stardew.craft.network.MiningFloorSyncPacket(currentFloor);
-            net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player, packet);
+            net.minecraftforge.network.PacketDistributor.sendToPlayer(player, packet);
 
             // 首次进入矿井赠送矿洞图腾
             if (!playerData.hasReceivedMineTotem()) {

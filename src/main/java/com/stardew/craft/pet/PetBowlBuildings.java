@@ -14,7 +14,7 @@ import net.minecraft.world.item.ItemStack;
 /** Bowls reuse building move previews, permission checks and durable transfer journals. */
 public final class PetBowlBuildings {
     private PetBowlBuildings() {}
-    public static ResourceLocation family(String style) { return ResourceLocation.parse("stardewcraft:pet_bowl_" + style); }
+    public static ResourceLocation family(String style) { return new ResourceLocation("stardewcraft:pet_bowl_" + style); }
     public static boolean isBowl(ResourceLocation family) {
         return family.getNamespace().equals("stardewcraft") && java.util.Set.of("pet_bowl_wood", "pet_bowl_stone", "pet_bowl_hay").contains(family.getPath());
     }

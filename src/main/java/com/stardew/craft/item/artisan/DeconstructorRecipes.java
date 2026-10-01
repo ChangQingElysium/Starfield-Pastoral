@@ -60,10 +60,10 @@ public final class DeconstructorRecipes {
                 var materials = new java.util.ArrayList<Material>();
                 for (var entry : recipe.getAsJsonArray("ingredients")) {
                     var material = entry.getAsJsonObject();
-                    materials.add(new Material(ResourceLocation.parse(material.get("item").getAsString()),
+                    materials.add(new Material(new ResourceLocation(material.get("item").getAsString()),
                             material.get("count").getAsInt(), material.get("unit_price").getAsInt()));
                 }
-                result.put(ResourceLocation.parse(recipe.get("input").getAsString()), List.copyOf(materials));
+                result.put(new ResourceLocation(recipe.get("input").getAsString()), List.copyOf(materials));
             }
             return Map.copyOf(result);
         } catch (java.io.IOException exception) {

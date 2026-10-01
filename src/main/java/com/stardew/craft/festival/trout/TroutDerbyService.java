@@ -22,7 +22,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.List;
 
@@ -64,7 +64,7 @@ public final class TroutDerbyService {
             return false;
         }
         ResourceLocation id = BuiltInRegistries.ITEM.getKey(fish.getItem());
-        if (!ResourceLocation.fromNamespaceAndPath("stardewcraft", "rainbow_trout").equals(id)) {
+        if (!new ResourceLocation("stardewcraft", "rainbow_trout").equals(id)) {
             return false;
         }
         return player.getRandom().nextDouble() < 0.33D * numberOfFishCaught;
@@ -211,7 +211,7 @@ public final class TroutDerbyService {
     }
 
     private static ItemStack stackByPath(String path, int count) {
-        ResourceLocation id = ResourceLocation.fromNamespaceAndPath("stardewcraft", path);
+        ResourceLocation id = new ResourceLocation("stardewcraft", path);
         Item item = BuiltInRegistries.ITEM.get(id);
         if (item == null || item == Items.AIR) {
             return ItemStack.EMPTY;

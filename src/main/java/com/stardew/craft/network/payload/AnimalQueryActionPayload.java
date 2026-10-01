@@ -3,11 +3,11 @@ package com.stardew.craft.network.payload;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.menu.AnimalQueryMenu;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 @SuppressWarnings("null")
 public record AnimalQueryActionPayload(Action action, boolean toggleValue) implements CustomPacketPayload {
@@ -21,7 +21,7 @@ public record AnimalQueryActionPayload(Action action, boolean toggleValue) imple
 
     @SuppressWarnings("null")
     public static final Type<AnimalQueryActionPayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "animal_query_action"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "animal_query_action"));
 
     @SuppressWarnings("null")
     public static final StreamCodec<FriendlyByteBuf, AnimalQueryActionPayload> STREAM_CODEC = StreamCodec.of(

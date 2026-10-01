@@ -12,7 +12,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
@@ -93,7 +93,7 @@ public class PublicAreaBlockTracker extends SavedData {
             for (int i = 0; i < list.size(); i++) {
                 CompoundTag blockTag = list.getCompound(i);
                 BlockPos pos = BlockPos.of(blockTag.getLong("Pos"));
-                ResourceLocation blockId = ResourceLocation.parse(blockTag.getString("Block"));
+                ResourceLocation blockId = new ResourceLocation(blockTag.getString("Block"));
                 Block block = BuiltInRegistries.BLOCK.get(blockId);
                 if (block != null) {
                     tracker.removedBlocks.put(pos, block.defaultBlockState());

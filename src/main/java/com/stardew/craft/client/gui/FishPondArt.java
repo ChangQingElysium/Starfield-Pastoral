@@ -8,7 +8,7 @@ final class FishPondArt {
     static final int INK = 0xFF474C39, MUTED = 0xFF6D7054, GREEN = 0xFF486C50, RED = 0xFFA2543E;
     private FishPondArt() { }
     private static ResourceLocation texture(String name) {
-        return ResourceLocation.fromNamespaceAndPath("stardewcraft", "textures/gui/fish_pond/" + name + ".png");
+        return new ResourceLocation("stardewcraft", "textures/gui/fish_pond/" + name + ".png");
     }
     static void sprite(GuiGraphics g, String name, int x, int y, int w, int h) {
         RenderSystem.enableBlend(); RenderSystem.defaultBlendFunc();

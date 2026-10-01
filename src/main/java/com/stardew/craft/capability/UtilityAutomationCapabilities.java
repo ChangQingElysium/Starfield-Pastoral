@@ -17,9 +17,9 @@ import com.stardew.craft.block.utility.MayonnaiseMachineBlock;
 import com.stardew.craft.block.utility.SolarPanelBlock;
 import com.stardew.craft.blockentity.ModBlockEntities;
 import com.stardew.craft.blockentity.UtilityAutomationAccess;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.items.IItemHandler;
+import com.stardew.craft.port.net.neoforged.neoforge.capabilities.Capabilities;
+import com.stardew.craft.port.net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.minecraftforge.items.IItemHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
@@ -34,12 +34,12 @@ public final class UtilityAutomationCapabilities {
     @SuppressWarnings("null")
     public static void registerCapabilities(RegisterCapabilitiesEvent event) {
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.WOODEN_CHEST.get(),
-            (be, ctx) -> new net.neoforged.neoforge.items.wrapper.InvWrapper(be));
+            (be, ctx) -> new net.minecraftforge.items.wrapper.InvWrapper(be));
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.STONE_CHEST.get(),
-            (be, ctx) -> new net.neoforged.neoforge.items.wrapper.InvWrapper(be));
+            (be, ctx) -> new net.minecraftforge.items.wrapper.InvWrapper(be));
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.STORAGE_CHEST.get(),
             (be, ctx) -> be.isSharedStorage() && be.sharedOwner() == null ? null
-                : new net.neoforged.neoforge.items.wrapper.InvWrapper(be));
+                : new net.minecraftforge.items.wrapper.InvWrapper(be));
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.KEG.get(),
             (be, ctx) -> be.getAutomationItemHandler());
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.PRESERVES_JAR.get(),

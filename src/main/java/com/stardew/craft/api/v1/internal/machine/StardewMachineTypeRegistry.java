@@ -68,7 +68,7 @@ public final class StardewMachineTypeRegistry {
         java.util.LinkedHashSet<ResourceLocation> ids =
                 new java.util.LinkedHashSet<>();
         BUILTIN_PATHS.stream().sorted().map(path ->
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft", path)).forEach(ids::add);
         snapshot.stream().map(StardewMachineType::id)
                 .forEach(ids::add);

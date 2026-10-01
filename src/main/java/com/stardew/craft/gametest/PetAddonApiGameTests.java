@@ -22,13 +22,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
-import net.neoforged.neoforge.network.connection.ConnectionType;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import com.stardew.craft.port.net.neoforged.neoforge.network.connection.ConnectionType;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 @GameTestHolder("stardewcraft_pets")
 @PrefixGameTestTemplate(false)
@@ -118,7 +118,7 @@ public final class PetAddonApiGameTests {
         h.succeed();
     }
 
-    private static ResourceLocation id(String value) { return ResourceLocation.parse(value); }
+    private static ResourceLocation id(String value) { return new ResourceLocation(value); }
     private static void reject(GameTestHelper h, Runnable action, String message) {
         boolean rejected = false; try { action.run(); } catch (IllegalArgumentException | IllegalStateException expected) { rejected = true; }
         h.assertTrue(rejected, message);

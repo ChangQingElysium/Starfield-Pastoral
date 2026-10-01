@@ -3,11 +3,11 @@ package com.stardew.craft.network;
 import com.stardew.craft.StardewCraft;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +20,7 @@ import java.util.Map;
 public record MuseumStandSyncPacket(Map<BlockPos, String> standItems) implements CustomPacketPayload {
 
     public static final CustomPacketPayload.Type<MuseumStandSyncPacket> TYPE =
-            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "museum_stand_sync"));
+            new CustomPacketPayload.Type<>(new ResourceLocation(StardewCraft.MODID, "museum_stand_sync"));
 
     public static final StreamCodec<ByteBuf, MuseumStandSyncPacket> STREAM_CODEC = new StreamCodec<>() {
         @Override
@@ -60,7 +60,7 @@ public record MuseumStandSyncPacket(Map<BlockPos, String> standItems) implements
         context.enqueueWork(() -> handleClient(packet));
     }
 
-    @net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+    @net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
     private static void handleClient(MuseumStandSyncPacket packet) {
         // The packet carries the full authoritative map for the player in the current
         // dimension, so we replace the cache wholesale. Stands whose chunks aren't loaded

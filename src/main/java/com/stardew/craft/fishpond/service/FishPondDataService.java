@@ -15,7 +15,7 @@ import com.stardew.craft.item.ModItems;
 import com.stardew.craft.item.artisan.PreserveType;
 import com.stardew.craft.item.artisan.PreservesItem;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.component.DataComponents;
+import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -24,7 +24,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.DyedItemColor;
+import com.stardew.craft.port.net.minecraft.world.item.component.DyedItemColor;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -43,7 +43,7 @@ public final class FishPondDataService {
     public static final int NO_OVERRIDE_WATER_COLOR = -1;
     private static final String RESOURCE_PATH = "/data/stardewcraft/fishpond/fish_pond_data.json";
     private static final ResourceLocation LEGACY_RESOURCE =
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "fishpond/fish_pond_data.json");
+        new ResourceLocation(StardewCraft.MODID, "fishpond/fish_pond_data.json");
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final int DEFAULT_MAX_POPULATION = 10;
     private static final FishPondDataService INSTANCE = new FishPondDataService(loadEntries());

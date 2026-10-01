@@ -24,7 +24,7 @@ import java.util.Map;
 public final class MonsterSlayerGoalRegistry {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final ResourceLocation LEGACY_TABLE =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "monster_slayer_goals");
+            new ResourceLocation(StardewCraft.MODID, "monster_slayer_goals");
     private static volatile Catalog catalog = Catalog.empty();
 
     public record SlayerGoal(

@@ -26,7 +26,7 @@ public final class HoldUpItemHandler {
         if (mc == null || mc.player == null) return;
 
         try {
-            ResourceLocation rl = ResourceLocation.parse(itemId);
+            ResourceLocation rl = new ResourceLocation(itemId);
             Item item = BuiltInRegistries.ITEM.get(rl);
             if (item == null || item == Items.AIR) return;
             ItemStack stack = new ItemStack(item);

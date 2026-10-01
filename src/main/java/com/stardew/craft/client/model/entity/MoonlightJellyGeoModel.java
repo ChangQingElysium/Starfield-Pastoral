@@ -6,9 +6,9 @@ import net.minecraft.resources.ResourceLocation;
 import software.bernie.geckolib.model.GeoModel;
 
 public class MoonlightJellyGeoModel extends GeoModel<MoonlightJellyEntity> {
-    private static final ResourceLocation MODEL = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "geo/entity/festival/moonlight_jelly.geo.json");
-    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/entity/festival/moonlight_jelly.png");
-    private static final ResourceLocation ANIMATION = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "animations/entity/festival/moonlight_jelly.animation.json");
+    private static final ResourceLocation MODEL = new ResourceLocation(StardewCraft.MODID, "geo/entity/festival/moonlight_jelly.geo.json");
+    private static final ResourceLocation TEXTURE = new ResourceLocation(StardewCraft.MODID, "textures/entity/festival/moonlight_jelly.png");
+    private static final ResourceLocation ANIMATION = new ResourceLocation(StardewCraft.MODID, "animations/entity/festival/moonlight_jelly.animation.json");
 
     @Override
     public ResourceLocation getModelResource(MoonlightJellyEntity animatable) {

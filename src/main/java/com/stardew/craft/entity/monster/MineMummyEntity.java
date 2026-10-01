@@ -28,7 +28,7 @@ public final class MineMummyEntity extends StardewMonsterEntity {
  @Override public void tick(){super.tick();setBoundingBox(MummyLifecycle.collisionBox(getX(),getY(),getZ(),getYRot(),getScale(),phase()));}
  @Override public net.minecraft.world.phys.AABB getBoundingBoxForCulling(){return super.getBoundingBoxForCulling().inflate(.5);}
  @Override protected void registerGoals(){}
- @Override protected ResourceLocation definitionId(){return ResourceLocation.parse("stardewcraft:mummy");}
+ @Override protected ResourceLocation definitionId(){return new ResourceLocation("stardewcraft:mummy");}
  @Override protected void configureSpawn(MonsterDefinition d,MonsterSpawnContext c){var base=MonsterStatResolver.base(d,c,random);setInitialHealth(base.initialHealth());replaceCombatStats(base.combat());contactDamage=Math.round(base.combat().getDamage());}
  @Override protected void defineSynchedData(SynchedEntityData.Builder b){super.defineSynchedData(b);b.define(MOVING,false);b.define(REMAINING,0);b.define(HIT,-100L);}
  public boolean moving(){return entityData.get(MOVING);}public boolean collapsed(){return phase()==MummyLifecycle.CRUMBLE||phase()==MummyLifecycle.DOWNED;}

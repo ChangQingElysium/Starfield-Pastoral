@@ -3,11 +3,11 @@ package com.stardew.craft.network.payload;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.npc.runtime.NpcInteractionService;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * Client → Server: player confirmed (or declined) giving a gift to an NPC.
@@ -19,7 +19,7 @@ public record ConfirmGiftPayload(
 ) implements CustomPacketPayload {
 
     public static final Type<ConfirmGiftPayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "confirm_gift"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "confirm_gift"));
 
     public static final StreamCodec<FriendlyByteBuf, ConfirmGiftPayload> STREAM_CODEC = StreamCodec.of(
         (buf, payload) -> {

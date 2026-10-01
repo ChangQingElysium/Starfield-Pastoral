@@ -3,7 +3,7 @@ package com.stardew.craft.mixin;
 import com.llamalad7.mixinextras.injector.WrapWithCondition;
 import com.stardew.craft.time.StardewTimePauseService;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.TickRateManager;
+import com.stardew.craft.port.net.minecraft.world.TickRateManager;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.entity.EntityTickList;
 import org.spongepowered.asm.mixin.Mixin;

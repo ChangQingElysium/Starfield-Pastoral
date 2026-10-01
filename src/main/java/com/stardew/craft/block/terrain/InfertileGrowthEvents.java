@@ -4,12 +4,12 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.block.crop.StardewCropBlock;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.level.BlockGrowFeatureEvent;
-import net.neoforged.neoforge.event.level.block.CropGrowEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.neoforge.event.level.BlockGrowFeatureEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.event.level.block.CropGrowEvent;
 
-/** Vanilla and cooperative mod plants use NeoForge growth hooks; our crops use saved daily progress. */
+/** Vanilla and cooperative mod plants use MinecraftForge growth hooks; our crops use saved daily progress. */
 @EventBusSubscriber(modid = StardewCraft.MODID)
 public final class InfertileGrowthEvents {
     private InfertileGrowthEvents() {}

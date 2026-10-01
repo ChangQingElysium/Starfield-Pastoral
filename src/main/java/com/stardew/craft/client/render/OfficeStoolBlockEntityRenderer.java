@@ -74,7 +74,7 @@ public class OfficeStoolBlockEntityRenderer implements BlockEntityRenderer<Offic
             buffer,
             packedLight,
             packedOverlay,
-            net.neoforged.neoforge.client.model.data.ModelData.EMPTY,
+            net.minecraftforge.client.model.data.ModelData.EMPTY,
             RenderType.cutout()
         );
 

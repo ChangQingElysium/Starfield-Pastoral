@@ -4,29 +4,29 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.auction.AuctionWorldData.AuctionLot;
 import com.stardew.craft.auction.AuctionWorldData.AuctionRecord;
 import com.stardew.craft.player.PlayerDisplayName;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 @SuppressWarnings("null")
 public record OpenAuctionBidPayload(String auctionName, int lotIndex, int lotCount, ItemStack stack,
                                     String sellerName, String highestBidderName, int currentPrice,
                                     int nextBid, int remainingSeconds, boolean canBid) implements CustomPacketPayload {
     public static final Type<OpenAuctionBidPayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "open_auction_bid"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "open_auction_bid"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, OpenAuctionBidPayload> STREAM_CODEC = StreamCodec.of(
         (buf, payload) -> {
             buf.writeUtf(payload.auctionName(), 64);
             buf.writeVarInt(payload.lotIndex());
             buf.writeVarInt(payload.lotCount());
-            ItemStack.STREAM_CODEC.encode(buf, payload.stack());
+            com.stardew.craft.port.PortCodecs.ITEM_STACK.encode(buf, payload.stack());
             buf.writeUtf(payload.sellerName(), 48);
             buf.writeUtf(payload.highestBidderName(), 48);
             buf.writeVarInt(payload.currentPrice());
@@ -35,7 +35,7 @@ public record OpenAuctionBidPayload(String auctionName, int lotIndex, int lotCou
             buf.writeBoolean(payload.canBid());
         },
         buf -> new OpenAuctionBidPayload(buf.readUtf(64), buf.readVarInt(), buf.readVarInt(),
-            ItemStack.STREAM_CODEC.decode(buf), buf.readUtf(48), buf.readUtf(48), buf.readVarInt(),
+            com.stardew.craft.port.PortCodecs.ITEM_STACK.decode(buf), buf.readUtf(48), buf.readUtf(48), buf.readVarInt(),
             buf.readVarInt(), buf.readVarInt(), buf.readBoolean()));
 
     public static OpenAuctionBidPayload from(MinecraftServer server, AuctionRecord auction, AuctionLot lot,

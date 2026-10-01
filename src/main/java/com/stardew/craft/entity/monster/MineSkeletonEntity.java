@@ -38,7 +38,7 @@ public final class MineSkeletonEntity extends StardewMonsterEntity {
     public MineSkeletonEntity(EntityType<? extends MineSkeletonEntity> type,Level level){super(type,level);addTag("sd_mob_skeleton");}
     public static AttributeSupplier.Builder createAttributes(){return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,140).add(Attributes.ATTACK_DAMAGE,10).add(Attributes.MOVEMENT_SPEED,.25).add(Attributes.FOLLOW_RANGE,64).add(Attributes.STEP_HEIGHT,0);}
     @Override protected void registerGoals(){}
-    @Override protected ResourceLocation definitionId(){return ResourceLocation.parse("stardewcraft:skeleton");}
+    @Override protected ResourceLocation definitionId(){return new ResourceLocation("stardewcraft:skeleton");}
     @Override protected void configureSpawn(MonsterDefinition d,MonsterSpawnContext c){var r=MonsterStatResolver.base(d,c,random);setInitialHealth(r.initialHealth());replaceCombatStats(r.combat());movement.face(random.nextInt(4));}
     @Override protected void defineSynchedData(SynchedEntityData.Builder b){super.defineSynchedData(b);b.define(MOVING,false);b.define(THROW_PROGRESS,0F);b.define(HIT,-100L);b.define(RELEASE,-100L);}
     public boolean moving(){return entityData.get(MOVING);}

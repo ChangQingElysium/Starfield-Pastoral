@@ -10,7 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 public final class StardewNpcLifecycleRegistry {
     private static final OrderedExtensionRegistry<StardewNpcLifecycleListener>
             LISTENERS = new OrderedExtensionRegistry<>(
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             StardewCraft.MODID, "npc/lifecycle"));
 
     private StardewNpcLifecycleRegistry() {

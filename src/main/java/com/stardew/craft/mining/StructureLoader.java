@@ -72,7 +72,7 @@ public final class StructureLoader {
             boolean farmBulk
     ) {
         ResourceLocation resourceId =
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         structureId.getNamespace(),
                         "structures/" + structureId.getPath());
         var resource = level.getServer().getResourceManager()

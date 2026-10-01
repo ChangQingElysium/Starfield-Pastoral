@@ -3,11 +3,11 @@ package com.stardew.craft.network.payload;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.fishpond.ClientFishPondJumpEffects;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record FishPondJumpSyncPayload(
     String dimensionId,
@@ -25,7 +25,7 @@ public record FishPondJumpSyncPayload(
 ) implements CustomPacketPayload {
 
     public static final Type<FishPondJumpSyncPayload> TYPE = new Type<>(
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "fish_pond_jump_sync")
+        new ResourceLocation(StardewCraft.MODID, "fish_pond_jump_sync")
     );
 
     public static final StreamCodec<ByteBuf, FishPondJumpSyncPayload> STREAM_CODEC = StreamCodec.of(

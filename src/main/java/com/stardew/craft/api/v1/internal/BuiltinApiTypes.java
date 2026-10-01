@@ -396,7 +396,7 @@ public final class BuiltinApiTypes {
     }
 
     private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, path);
+        return new ResourceLocation(StardewCraft.MODID, path);
     }
 
     private record AlwaysCondition(boolean value) {

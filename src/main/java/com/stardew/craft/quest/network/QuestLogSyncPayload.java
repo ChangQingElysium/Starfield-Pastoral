@@ -5,11 +5,11 @@ import com.stardew.craft.quest.StardewQuest;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ import java.util.Set;
 public record QuestLogSyncPayload(CompoundTag data) implements CustomPacketPayload {
 
     public static final Type<QuestLogSyncPayload> TYPE = new Type<>(
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "quest_log_sync")
+        new ResourceLocation(StardewCraft.MODID, "quest_log_sync")
     );
 
     public static final StreamCodec<ByteBuf, QuestLogSyncPayload> STREAM_CODEC = StreamCodec.composite(
@@ -59,7 +59,7 @@ public record QuestLogSyncPayload(CompoundTag data) implements CustomPacketPaylo
         context.enqueueWork(() -> handleClient(payload));
     }
 
-    @net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+    @net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
     private static void handleClient(QuestLogSyncPayload payload) {
         CompoundTag tag = payload.data();
         ListTag list = tag.getList("Quests", 10);

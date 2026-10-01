@@ -45,7 +45,7 @@ public class TemporaryBlockCommand implements EventCommand {
         if (!SAVED_BLOCKS.containsKey(id)) {
             SAVED_BLOCKS.put(id, new SavedBlock(pos, level.getBlockState(pos)));
         }
-        Block block = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(blockId));
+        Block block = BuiltInRegistries.BLOCK.get(new ResourceLocation(blockId));
         BlockState state = block.defaultBlockState();
         if (state.hasProperty(BlockStateProperties.HORIZONTAL_FACING)) {
             state = state.setValue(BlockStateProperties.HORIZONTAL_FACING, facing);

@@ -111,7 +111,7 @@ public final class UnlockSourceData {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final ResourceLocation LEGACY_TABLE =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "unlock_sources");
+            new ResourceLocation(StardewCraft.MODID, "unlock_sources");
     private static final AtomicDefinitionStore<UnlockBundle> STORE = new AtomicDefinitionStore<>();
     private static volatile Catalog catalog = Catalog.empty();
 

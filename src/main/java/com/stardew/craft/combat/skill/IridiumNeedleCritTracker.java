@@ -2,7 +2,7 @@ package com.stardew.craft.combat.skill;
 
 import com.stardew.craft.combat.network.IridiumNeedleCritPayload;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.HashMap;
 import java.util.Map;

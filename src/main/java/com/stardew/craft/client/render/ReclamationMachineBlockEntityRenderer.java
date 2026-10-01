@@ -6,7 +6,7 @@ import com.mojang.math.Axis;
 import com.stardew.craft.block.utility.ReclamationMachineBlock;
 import com.stardew.craft.client.model.ReclamationMachineModels;
 import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import net.minecraftforge.client.model.data.ModelData;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.blockentity.ReclamationMachineBlockEntity;
 import net.minecraft.client.Minecraft;
@@ -30,7 +30,7 @@ import javax.annotation.Nonnull;
  * Source-authored machine clips: root pulse, independent blades/apron, and actual feed item.
  */
 public class ReclamationMachineBlockEntityRenderer implements BlockEntityRenderer<ReclamationMachineBlockEntity> {
-    private static final ResourceLocation BUBBLE_TEX = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/bubble.png");
+    private static final ResourceLocation BUBBLE_TEX = new ResourceLocation(StardewCraft.MODID, "textures/gui/bubble.png");
     private static final float PX = 1.0f / 32.0f;
 
     public ReclamationMachineBlockEntityRenderer(BlockEntityRendererProvider.Context context) {

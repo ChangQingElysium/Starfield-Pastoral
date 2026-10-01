@@ -17,17 +17,17 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 import org.joml.Matrix4f;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public final class CutsceneTextAboveHeadRenderer {
-    private static final ResourceLocation LEFT = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/cutscene/text_above_head_left.png");
-    private static final ResourceLocation MID = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/cutscene/text_above_head_mid.png");
-    private static final ResourceLocation RIGHT = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/cutscene/text_above_head_right.png");
-    private static final ResourceLocation TAIL = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/cutscene/text_above_head_tail.png");
+    private static final ResourceLocation LEFT = new ResourceLocation(StardewCraft.MODID, "textures/gui/cutscene/text_above_head_left.png");
+    private static final ResourceLocation MID = new ResourceLocation(StardewCraft.MODID, "textures/gui/cutscene/text_above_head_mid.png");
+    private static final ResourceLocation RIGHT = new ResourceLocation(StardewCraft.MODID, "textures/gui/cutscene/text_above_head_right.png");
+    private static final ResourceLocation TAIL = new ResourceLocation(StardewCraft.MODID, "textures/gui/cutscene/text_above_head_tail.png");
 
     private static final int TEXT_COLOR = 0x4B2A12;
     private static final float WORLD_SCALE = 0.0125F;

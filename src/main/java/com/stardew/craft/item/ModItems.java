@@ -137,9 +137,9 @@ import com.stardew.craft.item.block.WildWeedsBlockItem;
 import com.stardew.craft.item.block.ShadowFootprintBlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Tiers;
-import net.neoforged.neoforge.registries.DeferredBlock;
-import net.neoforged.neoforge.registries.DeferredItem;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredBlock;
+import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredItem;
+import net.minecraftforge.registries.DeferredRegister;
 
 /**
  * 鐗╁搧娉ㄥ唽绠＄悊鍣?
@@ -3677,11 +3677,11 @@ public class ModItems {
     private static DeferredItem<Item> registerCasinoFirework(String id, int color) {
         return ITEMS.register(id, () -> new CasinoFireworkItem(
                 new Item.Properties().stacksTo(64).component(
-                        net.minecraft.core.component.DataComponents.FIREWORKS,
-                        new net.minecraft.world.item.component.Fireworks(
+                        com.stardew.craft.port.net.minecraft.core.component.DataComponents.FIREWORKS,
+                        new com.stardew.craft.port.net.minecraft.world.item.component.Fireworks(
                                 1,
-                                java.util.List.of(new net.minecraft.world.item.component.FireworkExplosion(
-                                        net.minecraft.world.item.component.FireworkExplosion.Shape.SMALL_BALL,
+                                java.util.List.of(new com.stardew.craft.port.net.minecraft.world.item.component.FireworkExplosion(
+                                        com.stardew.craft.port.net.minecraft.world.item.component.FireworkExplosion.Shape.SMALL_BALL,
                                         new it.unimi.dsi.fastutil.ints.IntArrayList(new int[]{color}),
                                         new it.unimi.dsi.fastutil.ints.IntArrayList(),
                                         false,
@@ -3731,14 +3731,14 @@ public class ModItems {
         items.put(legacyId, ITEMS.register(legacyId,
                 () -> new FlavoredArtisanDrinkItem(
                         type,
-                        net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, source),
+                        new net.minecraft.resources.ResourceLocation(StardewCraft.MODID, source),
                         new Item.Properties().stacksTo(999))));
     }
 
     private static DeferredItem<Item> registerHat(String itemId, String vanillaId) {
         return ITEMS.register(itemId,
                 () -> new com.stardew.craft.item.cosmetic.StardewHatItem(vanillaId, -1,
-                        net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(
+                        new net.minecraft.resources.ResourceLocation(
                                 StardewCraft.MODID, "native_models/entity/hat/" + itemId + ".json"),
                         new Item.Properties().stacksTo(1)));
     }

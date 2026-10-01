@@ -6,7 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.*;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.gametest.*;
+import net.minecraftforge.gametest.*;
 @GameTestHolder("stardewcraft_bug")
 @PrefixGameTestTemplate(false)
 @SuppressWarnings("null")
@@ -26,8 +26,8 @@ public final class NativeGhostGameTests {
     @GameTest(templateNamespace="stardewcraft_bug",template="ring_utilities",timeoutTicks=10)
     public static void ectoplasmPickupClosesTheTeamDropBranch(GameTestHelper h){
         var level=h.getLevel();var world=com.stardew.craft.specialorder.SpecialOrderWorldData.get(level);boolean before=world.sharedSpecialDropFlags().contains("ectoplasmDrop");
-        var a=new net.neoforged.neoforge.common.util.FakePlayer(level,new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(),"EctoA"));
-        var b=new net.neoforged.neoforge.common.util.FakePlayer(level,new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(),"EctoB"));
+        var a=new net.minecraftforge.common.util.FakePlayer(level,new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(),"EctoA"));
+        var b=new net.minecraftforge.common.util.FakePlayer(level,new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(),"EctoB"));
         var newMail=level.getServer().getPlayerList().getPlayers().stream().filter(p->!com.stardew.craft.player.PlayerDataManager.getPlayerData(p).hasMailFlagForTomorrow("ectoplasmDrop")).toList();
         try{
             com.stardew.craft.specialorder.SpecialOrderManager.markSpecialDropFlag(a,"ectoplasmDrop");

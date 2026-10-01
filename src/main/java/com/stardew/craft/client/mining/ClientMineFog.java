@@ -3,10 +3,10 @@ package com.stardew.craft.client.mining;
 import com.stardew.craft.core.ModMiningDimensions;
 import com.stardew.craft.mining.OrdinaryMineRuntime;
 import net.minecraft.client.Minecraft;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.*;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.*;
 
 /** Soft 3D counterpart to the source swarm overlay; local to the receiving player's floor. */
 @EventBusSubscriber(modid="stardewcraft",value=Dist.CLIENT)
@@ -15,7 +15,7 @@ public final class ClientMineFog {
     private static float alpha;
     public static void receive(int value,int ticks) {floor=value;remaining=ticks;}
     @SubscribeEvent public static void logout(ClientPlayerNetworkEvent.LoggingOut event) {floor=-1;remaining=0;alpha=0;}
-    @SubscribeEvent public static void tick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
+    @SubscribeEvent public static void tick(com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
         var mc=Minecraft.getInstance();
         if(mc.player==null || mc.level==null || mc.level.dimension()!=ModMiningDimensions.STARDEW_MINING
                 || OrdinaryMineRuntime.floorAt(mc.player.blockPosition())!=floor) {alpha=0;return;}

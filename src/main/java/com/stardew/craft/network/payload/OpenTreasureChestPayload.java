@@ -1,12 +1,12 @@
 package com.stardew.craft.network.payload;
 
 import com.stardew.craft.StardewCraft;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * 打开宝箱UI的网络数据包
@@ -21,11 +21,11 @@ public record OpenTreasureChestPayload(
 	
 	@SuppressWarnings("null")
 	public static final Type<OpenTreasureChestPayload> TYPE = 
-			new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "open_treasure_chest"));
+			new Type<>(new ResourceLocation(StardewCraft.MODID, "open_treasure_chest"));
 	
 	@SuppressWarnings("null")
 	public static final StreamCodec<RegistryFriendlyByteBuf, OpenTreasureChestPayload> STREAM_CODEC = StreamCodec.composite(
-			net.minecraft.core.UUIDUtil.STREAM_CODEC, OpenTreasureChestPayload::sessionId,
+			com.stardew.craft.port.PortCodecs.UUID, OpenTreasureChestPayload::sessionId,
 			ByteBufCodecs.VAR_LONG,
 			OpenTreasureChestPayload::chestId,
 			ByteBufCodecs.BOOL,
@@ -42,7 +42,7 @@ public record OpenTreasureChestPayload(
 		context.enqueueWork(() -> handleClient(payload));
 	}
 
-	@net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+	@net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
 	private static void handleClient(OpenTreasureChestPayload payload) {
 		if (!com.stardew.craft.client.fishing.FishingInteractionState.accepts(payload.sessionId())) return;
 		net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();

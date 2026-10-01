@@ -5,11 +5,11 @@ import com.stardew.craft.api.v1.internal.network.StardewNetworkCapabilityRegistr
 import com.stardew.craft.api.v1.network.StardewNetworkCapability;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.List;
 
@@ -18,7 +18,7 @@ public record CapabilityAckPayload(
         List<StardewNetworkCapability> capabilities
 ) implements CustomPacketPayload {
     public static final Type<CapabilityAckPayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(
+            new Type<>(new ResourceLocation(
                     StardewCraft.MODID, "capability_ack_v1"));
     public static final StreamCodec<FriendlyByteBuf, CapabilityAckPayload>
             STREAM_CODEC = StreamCodec.composite(

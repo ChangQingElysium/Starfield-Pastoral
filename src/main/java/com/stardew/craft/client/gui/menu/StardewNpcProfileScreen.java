@@ -31,9 +31,9 @@ import java.util.Set;
 /** Source-backed implementation of SDV {@code ProfileMenu}'s gift-log page. */
 @SuppressWarnings("null")
 public final class StardewNpcProfileScreen extends Screen {
-    private static final ResourceLocation LETTER_BG = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation LETTER_BG = new ResourceLocation(
             StardewCraft.MODID, "textures/gui/letter_bg.png");
-    private static final ResourceLocation DAY_BG = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation DAY_BG = new ResourceLocation(
             StardewCraft.MODID, "textures/gui/daybg.png");
     private static final int[][] CATEGORY_GROUPS = {
             {}, {-75, -79}, {-6, -5, -14, -18}, {-26}, {-7},

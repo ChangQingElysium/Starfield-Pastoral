@@ -1,7 +1,0 @@
-{
-    "parent":  "minecraft:item/generated",
-    "textures":  {
-                     "layer0":  "stardewcraft:item/resource/battery_pack",
-                     "particle":  "stardewcraft:item/resource/battery_pack"
-                 }
-}

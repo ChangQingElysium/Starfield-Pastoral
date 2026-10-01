@@ -37,10 +37,10 @@ public final class GardenPlanterBlock extends Block {
     }
 
     @Override
-    public net.neoforged.neoforge.common.util.TriState canSustainPlant(BlockState state, BlockGetter level,
+    public com.stardew.craft.port.net.neoforged.neoforge.common.util.TriState canSustainPlant(BlockState state, BlockGetter level,
             BlockPos soilPosition, Direction facing, BlockState plant) {
-        return facing == Direction.UP ? net.neoforged.neoforge.common.util.TriState.TRUE
-                : net.neoforged.neoforge.common.util.TriState.DEFAULT;
+        return facing == Direction.UP ? com.stardew.craft.port.net.neoforged.neoforge.common.util.TriState.TRUE
+                : com.stardew.craft.port.net.neoforged.neoforge.common.util.TriState.DEFAULT;
     }
 
     /** Both halves of tall flowers sink together to the open soil surface. */

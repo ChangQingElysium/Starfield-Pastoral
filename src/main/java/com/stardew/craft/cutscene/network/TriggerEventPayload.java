@@ -5,12 +5,12 @@ import com.stardew.craft.cutscene.data.EventData;
 import com.stardew.craft.cutscene.data.EventRegistry;
 import com.stardew.craft.cutscene.runtime.EventPlayer;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
-import net.neoforged.neoforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.network.PacketDistributor;
 import com.mojang.logging.LogUtils;
 import org.slf4j.Logger;
 
@@ -23,7 +23,7 @@ public record TriggerEventPayload(String eventId, long sessionId) implements Cus
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public static final Type<TriggerEventPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "trigger_event"));
+            new ResourceLocation(StardewCraft.MODID, "trigger_event"));
 
     public static final StreamCodec<ByteBuf, TriggerEventPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.STRING_UTF8, TriggerEventPayload::eventId,

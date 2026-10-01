@@ -12,14 +12,14 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.InputEvent;
-import net.neoforged.neoforge.client.event.RenderFrameEvent;
-import net.neoforged.neoforge.client.event.RenderGuiEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.minecraftforge.client.event.InputEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.client.event.RenderFrameEvent;
+import net.minecraftforge.client.event.RenderGuiEvent;
+import net.minecraftforge.network.PacketDistributor;
 
 /** The original simulator runs behind a non-modal, near-rod HUD. No screen, blur, or cursor capture. */
 @EventBusSubscriber(modid=StardewCraft.MODID,value=Dist.CLIENT)

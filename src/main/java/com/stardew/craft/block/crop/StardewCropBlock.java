@@ -22,7 +22,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
+import com.stardew.craft.port.net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -981,8 +981,8 @@ public abstract class StardewCropBlock extends Block {
     protected static void setFlowerVariantModelData(ItemStack stack, int color) {
         int quality = QualityHelper.getQuality(stack);
         int cmd = 100 + (quality * 10) + Math.max(0, color);
-        stack.set(net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA,
-                new net.minecraft.world.item.component.CustomModelData(cmd));
+        stack.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA,
+                new com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData(cmd));
     }
     
     /**

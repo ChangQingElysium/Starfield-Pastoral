@@ -4,11 +4,11 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.fishing.ClientFishSplashState;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -27,14 +27,14 @@ public record FishSplashSyncPayload(boolean fullSnapshot, Map<String, Optional<B
 		implements CustomPacketPayload {
 
 	public static final Type<FishSplashSyncPayload> TYPE = new Type<>(
-			ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "fish_splash_sync"));
+			new ResourceLocation(StardewCraft.MODID, "fish_splash_sync"));
 
 	public static final StreamCodec<ByteBuf, FishSplashSyncPayload> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.BOOL, FishSplashSyncPayload::fullSnapshot,
 			ByteBufCodecs.<ByteBuf, String, Optional<BlockPos>, Map<String, Optional<BlockPos>>>map(
 					LinkedHashMap::new,
 					ByteBufCodecs.STRING_UTF8,
-					BlockPos.STREAM_CODEC.apply(ByteBufCodecs::optional)),
+					com.stardew.craft.port.PortCodecs.BLOCK_POS.apply(ByteBufCodecs::optional)),
 			FishSplashSyncPayload::entries,
 			FishSplashSyncPayload::new);
 

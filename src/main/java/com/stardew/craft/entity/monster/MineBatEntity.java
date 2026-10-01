@@ -73,7 +73,7 @@ public final class MineBatEntity extends StardewMonsterEntity {
     }
     public String variant() { return net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(getType()).getPath(); }
     @Override protected ResourceLocation definitionId() {
-        return ResourceLocation.fromNamespaceAndPath("stardewcraft", variant());
+        return new ResourceLocation("stardewcraft", variant());
     }
     @Override protected void configureSpawn(MonsterDefinition definition, MonsterSpawnContext context) {
         var resolved = MonsterStatResolver.base(definition, context, random);

@@ -4,11 +4,11 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.quest.StardewQuest;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -20,7 +20,7 @@ import javax.annotation.Nullable;
 public record DailyQuestSyncPayload(CompoundTag data) implements CustomPacketPayload {
 
     public static final Type<DailyQuestSyncPayload> TYPE = new Type<>(
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "daily_quest_sync")
+        new ResourceLocation(StardewCraft.MODID, "daily_quest_sync")
     );
 
     public static final StreamCodec<ByteBuf, DailyQuestSyncPayload> STREAM_CODEC = StreamCodec.composite(
@@ -50,7 +50,7 @@ public record DailyQuestSyncPayload(CompoundTag data) implements CustomPacketPay
         context.enqueueWork(() -> handleClient(payload));
     }
 
-    @net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+    @net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
     private static void handleClient(DailyQuestSyncPayload payload) {
         CompoundTag tag = payload.data();
         if (tag.getBoolean("HasQuest") && tag.contains("Quest", 10)) {

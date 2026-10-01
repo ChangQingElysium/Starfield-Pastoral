@@ -1,12 +1,12 @@
 package com.stardew.craft.network.overnight;
 
 import com.stardew.craft.StardewCraft;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * S2C notification sent as soon as an overnight pass-out is accepted.
@@ -20,7 +20,7 @@ public record OvernightCollapseStartPayload(int settlementDay, Cause cause)
         implements CustomPacketPayload {
 
     public static final Type<OvernightCollapseStartPayload> TYPE = new Type<>(
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "overnight_collapse_start")
+        new ResourceLocation(StardewCraft.MODID, "overnight_collapse_start")
     );
 
     public static final StreamCodec<RegistryFriendlyByteBuf, OvernightCollapseStartPayload> STREAM_CODEC =
@@ -46,7 +46,7 @@ public record OvernightCollapseStartPayload(int settlementDay, Cause cause)
         context.enqueueWork(() -> handleClient(payload));
     }
 
-    @net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+    @net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
     private static void handleClient(OvernightCollapseStartPayload payload) {
         OvernightCollapseClientState.begin(payload.settlementDay(), payload.cause());
     }

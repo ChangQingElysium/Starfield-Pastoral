@@ -12,7 +12,7 @@ import net.minecraft.world.phys.Vec3;
 
 
 public class MeowmereProjectileRenderer extends EntityRenderer<MeowmereProjectileEntity> {
-    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("stardewcraft", "textures/gui/weapon_skill/meowmere_head.png");
+    private static final ResourceLocation TEXTURE = new ResourceLocation("stardewcraft", "textures/gui/weapon_skill/meowmere_head.png");
 
     public MeowmereProjectileRenderer(EntityRendererProvider.Context context) {
         super(context);

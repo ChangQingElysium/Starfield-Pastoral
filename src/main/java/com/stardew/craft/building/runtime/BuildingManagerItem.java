@@ -23,7 +23,7 @@ public final class BuildingManagerItem extends StardewBlockItem {
         var facing = context.getHorizontalDirection().getOpposite();
         var probe = BuildingPlacementService.probe(player.serverLevel(), player, pos, facing, true, family);
         if (!probe.valid()) { BuildingPlacementService.message(player, probe.issue()); return InteractionResult.FAIL; }
-        var identity = context.getItemInHand().getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.EMPTY).copyTag();
+        var identity = context.getItemInHand().getOrDefault(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA, com.stardew.craft.port.net.minecraft.world.item.component.CustomData.EMPTY).copyTag();
         if (identity.hasUUID("ResidenceIdentity")) {
             var data = BuildingWorldData.get(player.server); var old = data.find(identity.getUUID("ResidenceIdentity"));
             if (old == null || old.phase() != BuildingRecord.Phase.MISSING || !old.family().equals(family) || !old.farmId().equals(probe.farm().getInstanceId()) || !BuildingService.canManage(player, old)) {

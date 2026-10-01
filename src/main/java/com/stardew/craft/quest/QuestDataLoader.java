@@ -18,7 +18,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
 import javax.annotation.Nullable;
 import java.io.InputStream;
@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings("null")
 public final class QuestDataLoader {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static final ResourceLocation LEGACY_SOURCE = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation LEGACY_SOURCE = new ResourceLocation(
             StardewCraft.MODID, "legacy/quests.json");
     private static final AtomicDefinitionStore<StardewQuestDefinition> STORE = new AtomicDefinitionStore<>();
 
@@ -329,7 +329,7 @@ public final class QuestDataLoader {
     }
 
     private static ResourceLocation objectiveId(String path) {
-        return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, path);
+        return new ResourceLocation(StardewCraft.MODID, path);
     }
 
     private static void finishApply(

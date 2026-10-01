@@ -8,7 +8,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 public final class BuildingWorkScreen extends FarmFolioScreen {
     private CompoundTag data;
@@ -94,7 +94,7 @@ public final class BuildingWorkScreen extends FarmFolioScreen {
         init();
         PacketDistributor.sendToServer(
                 new BuildingWorkRequestPayload(
-                        ResourceLocation.parse(data.getString("Family")),
+                        new ResourceLocation(data.getString("Family")),
                         data.getLong("Catalog"),
                         row.getUUID("Id"),
                         row.getLong("Revision"),

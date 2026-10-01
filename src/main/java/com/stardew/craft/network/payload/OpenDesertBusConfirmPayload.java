@@ -3,11 +3,11 @@ package com.stardew.craft.network.payload;
 import com.stardew.craft.StardewCraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.List;
 
@@ -19,7 +19,7 @@ import java.util.List;
 public record OpenDesertBusConfirmPayload(int price) implements CustomPacketPayload {
 
     public static final Type<OpenDesertBusConfirmPayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "open_desert_bus_confirm"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "open_desert_bus_confirm"));
 
     public static final StreamCodec<FriendlyByteBuf, OpenDesertBusConfirmPayload> STREAM_CODEC = StreamCodec.of(
         (buf, p) -> buf.writeVarInt(p.price()),
@@ -35,7 +35,7 @@ public record OpenDesertBusConfirmPayload(int price) implements CustomPacketPayl
         context.enqueueWork(() -> handleClient(payload));
     }
 
-    @net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+    @net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
     private static void handleClient(OpenDesertBusConfirmPayload payload) {
         net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
         if (mc.player == null) return;

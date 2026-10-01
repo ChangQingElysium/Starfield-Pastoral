@@ -737,18 +737,18 @@ public final class CommonGuiTextures {
     }
 
     private static ResourceLocation common(String name) {
-        return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/common/" + name + ".png");
+        return new ResourceLocation(StardewCraft.MODID, "textures/gui/common/" + name + ".png");
     }
 
     private static ResourceLocation power(String name) {
-        return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/powers/" + name + ".png");
+        return new ResourceLocation(StardewCraft.MODID, "textures/gui/powers/" + name + ".png");
     }
 
     private static ResourceLocation animalQuery(String name) {
-        return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/animal_query/" + name + ".png");
+        return new ResourceLocation(StardewCraft.MODID, "textures/gui/animal_query/" + name + ".png");
     }
 
     private static ResourceLocation fairTargetGame(String name) {
-        return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/fair/target_game/" + name + ".png");
+        return new ResourceLocation(StardewCraft.MODID, "textures/gui/fair/target_game/" + name + ".png");
     }
 }

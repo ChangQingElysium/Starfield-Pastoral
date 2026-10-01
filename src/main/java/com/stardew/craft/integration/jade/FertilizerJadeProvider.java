@@ -28,7 +28,7 @@ public enum FertilizerJadeProvider
         implements IBlockComponentProvider, IServerDataProvider<BlockAccessor> {
     INSTANCE;
 
-    private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation UID = new ResourceLocation(
             StardewCraft.MODID, "fertilizer");
     private static final String DATA_CHECKED = "stardewcraft_fertilizer_checked";
     private static final String DATA_SOIL_POS = "stardewcraft_fertilizer_soil_pos";

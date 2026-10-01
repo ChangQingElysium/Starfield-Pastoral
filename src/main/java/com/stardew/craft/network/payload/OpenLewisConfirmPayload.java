@@ -3,13 +3,13 @@ package com.stardew.craft.network.payload;
 import com.stardew.craft.StardewCraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.List;
 import java.util.UUID;
@@ -25,7 +25,7 @@ public record OpenLewisConfirmPayload(UUID requestId, int kind, String questionK
     public static final int KIND_AUCTION_CANCEL = 4;
 
     public static final Type<OpenLewisConfirmPayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "open_lewis_confirm"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "open_lewis_confirm"));
 
     public static final StreamCodec<FriendlyByteBuf, OpenLewisConfirmPayload> STREAM_CODEC = StreamCodec.of(
         (buf, payload) -> {

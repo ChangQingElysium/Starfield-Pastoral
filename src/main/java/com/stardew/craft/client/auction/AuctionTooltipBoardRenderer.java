@@ -14,11 +14,11 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 
 /** Physical auction ledger: concise live data, with full item tooltips available in the bid screen. */
 public final class AuctionTooltipBoardRenderer {
-    private static final RenderType MATERIAL = RenderType.text(ResourceLocation.fromNamespaceAndPath(
+    private static final RenderType MATERIAL = RenderType.text(new ResourceLocation(
             StardewCraft.MODID, "textures/gui/auction/board.png"));
     private static final int LIGHT = 0xF000F0;
     private static final int INK = 0xFF472F2B, MUTED = 0xFF79563F, GOLD = 0xFF8A5429;

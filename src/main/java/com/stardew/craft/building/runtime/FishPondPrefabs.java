@@ -15,12 +15,12 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import java.util.*;
 
 /** The pond is an excavated prefab; its biological state remains in FishPondWorldData. */
 public final class FishPondPrefabs {
-    public static final ResourceLocation FAMILY = ResourceLocation.parse("stardewcraft:fish_pond");
+    public static final ResourceLocation FAMILY = new ResourceLocation("stardewcraft:fish_pond");
     private FishPondPrefabs() {}
     public static boolean isPond(ResourceLocation family) { return FAMILY.equals(family); }
     public static BuildingRecord at(ServerLevel level, BlockPos pos) {

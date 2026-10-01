@@ -4,12 +4,12 @@ import com.stardew.craft.StardewCraft;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
 public record TremorBlockPayload(float x, float y, float z, int blockStateId, float ySpeed)
@@ -17,7 +17,7 @@ public record TremorBlockPayload(float x, float y, float z, int blockStateId, fl
 
     @SuppressWarnings("null")
     public static final Type<TremorBlockPayload> TYPE = new Type<>(
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "tremor_block")
+        new ResourceLocation(StardewCraft.MODID, "tremor_block")
     );
 
     @SuppressWarnings("null")
@@ -44,7 +44,7 @@ public record TremorBlockPayload(float x, float y, float z, int blockStateId, fl
         context.enqueueWork(() -> handleClient(payload));
     }
 
-    @net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+    @net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
     private static void handleClient(TremorBlockPayload payload) {
         var mc = net.minecraft.client.Minecraft.getInstance();
         if (mc == null || mc.level == null) {

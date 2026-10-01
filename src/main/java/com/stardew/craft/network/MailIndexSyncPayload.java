@@ -4,11 +4,11 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.ClientMailIndex;
 import com.stardew.craft.mail.MailRegistry;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.Comparator;
 import java.util.List;
@@ -16,7 +16,7 @@ import java.util.List;
 /** S→C: safe mail metadata for the collections screen; deliberately excludes actions and rewards. */
 public record MailIndexSyncPayload(List<Entry> entries) implements CustomPacketPayload {
     public static final Type<MailIndexSyncPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "mail_index_sync"));
+            new ResourceLocation(StardewCraft.MODID, "mail_index_sync"));
 
     public static final StreamCodec<ByteBuf, Entry> ENTRY_STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.STRING_UTF8, Entry::mailId,

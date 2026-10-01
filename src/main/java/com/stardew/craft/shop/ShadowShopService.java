@@ -11,7 +11,7 @@ import com.stardew.craft.quest.QuestManager;
 import com.stardew.craft.sewer.SewerStoryFlags;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -74,7 +74,7 @@ public final class BuildingObstaclesScreen extends FarmFolioScreen {
         for (int i = page * count; i < Math.min(rows.size(), (page + 1) * count); i++) {
             var row = rows.getCompound(i);
             int yy = y + 118 + (i - page * count) * 45;
-            var block = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(row.getString("Block")));
+            var block = BuiltInRegistries.BLOCK.get(new ResourceLocation(row.getString("Block")));
             item(g, new ItemStack(block), x + 30, yy + 3, 1);
             label(g, block.getName(), x + 56, yy, w - 142, INK);
             label(

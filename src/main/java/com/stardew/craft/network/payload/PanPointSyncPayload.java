@@ -4,11 +4,11 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.render.ClientPanPointState;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * Server → Client: update this player's active ore-pan point.
@@ -20,11 +20,11 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 public record PanPointSyncPayload(boolean active, BlockPos pos) implements CustomPacketPayload {
 
     public static final Type<PanPointSyncPayload> TYPE = new Type<>(
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "pan_point_sync"));
+        new ResourceLocation(StardewCraft.MODID, "pan_point_sync"));
 
     public static final StreamCodec<ByteBuf, PanPointSyncPayload> STREAM_CODEC = StreamCodec.composite(
         ByteBufCodecs.BOOL, PanPointSyncPayload::active,
-        BlockPos.STREAM_CODEC, PanPointSyncPayload::pos,
+        com.stardew.craft.port.PortCodecs.BLOCK_POS, PanPointSyncPayload::pos,
         PanPointSyncPayload::new);
 
     @SuppressWarnings("null")

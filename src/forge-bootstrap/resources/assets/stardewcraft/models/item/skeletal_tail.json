@@ -1,7 +1,0 @@
-{
-    "parent":  "item/generated",
-    "textures":  {
-                     "layer0":  "stardewcraft:item/artifact/skeletal_tail",
-                     "particle":  "stardewcraft:item/artifact/skeletal_tail"
-                 }
-}

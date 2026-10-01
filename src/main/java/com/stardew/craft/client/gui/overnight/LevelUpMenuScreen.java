@@ -27,9 +27,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,12 +39,12 @@ import java.util.concurrent.ThreadLocalRandom;
 @SuppressWarnings("null")
 public class LevelUpMenuScreen extends Screen implements StardewGuiContentSize {
 
-    private static final ResourceLocation TEX_ICON_FARMING = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/overnight/icon_farming.png");
-    private static final ResourceLocation TEX_ICON_FISHING = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/overnight/icon_fishing.png");
-    private static final ResourceLocation TEX_ICON_FORAGING = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/overnight/icon_foraging.png");
-    private static final ResourceLocation TEX_ICON_MINING = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/overnight/icon_mining.png");
-    private static final ResourceLocation TEX_ICON_OTHER = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/overnight/icon_other.png");
-    private static final ResourceLocation TEX_LITTLE_STAR = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/overnight/little_star.png");
+    private static final ResourceLocation TEX_ICON_FARMING = new ResourceLocation(StardewCraft.MODID, "textures/gui/overnight/icon_farming.png");
+    private static final ResourceLocation TEX_ICON_FISHING = new ResourceLocation(StardewCraft.MODID, "textures/gui/overnight/icon_fishing.png");
+    private static final ResourceLocation TEX_ICON_FORAGING = new ResourceLocation(StardewCraft.MODID, "textures/gui/overnight/icon_foraging.png");
+    private static final ResourceLocation TEX_ICON_MINING = new ResourceLocation(StardewCraft.MODID, "textures/gui/overnight/icon_mining.png");
+    private static final ResourceLocation TEX_ICON_OTHER = new ResourceLocation(StardewCraft.MODID, "textures/gui/overnight/icon_other.png");
+    private static final ResourceLocation TEX_LITTLE_STAR = new ResourceLocation(StardewCraft.MODID, "textures/gui/overnight/little_star.png");
 
     private final List<Screen> siblingScreens;
 

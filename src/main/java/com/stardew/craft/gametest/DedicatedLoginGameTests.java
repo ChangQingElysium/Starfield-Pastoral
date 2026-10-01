@@ -11,22 +11,22 @@ import io.netty.buffer.Unpooled;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.Connection;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
-import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
-import net.minecraft.server.level.ClientInformation;
+import com.stardew.craft.port.net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.CommonListenerCookie;
+import com.stardew.craft.port.net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.OnDatapackSyncEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.tick.PlayerTickEvent;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
-import net.neoforged.neoforge.network.connection.ConnectionType;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.OnDatapackSyncEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import com.stardew.craft.port.net.neoforged.neoforge.network.connection.ConnectionType;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -135,13 +135,13 @@ public final class DedicatedLoginGameTests {
         };
         try {
             ClientContentSyncService.onDatapackSync(new OnDatapackSyncEvent(server.getPlayerList(), player));
-            NeoForge.EVENT_BUS.post(new PlayerEvent.PlayerLoggedInEvent(player));
+            MinecraftForge.EVENT_BUS.post(new PlayerEvent.PlayerLoggedInEvent(player));
             helper.assertTrue(sent.contains("stardewcraft:data_registry_sync"), "Missing login content snapshot");
             helper.assertTrue(sent.contains("stardewcraft:jei_catalog_sync"), "Missing login catalog snapshot");
             helper.assertTrue(sent.size() >= 10, "Login did not exercise player synchronization: " + sent);
             StardewCraft.LOGGER.info("[LOGIN_WIRE] Validated {} payload types", sent.size());
         } finally {
-            NeoForge.EVENT_BUS.post(new PlayerEvent.PlayerLoggedOutEvent(player));
+            MinecraftForge.EVENT_BUS.post(new PlayerEvent.PlayerLoggedOutEvent(player));
             player.discard();
         }
     }

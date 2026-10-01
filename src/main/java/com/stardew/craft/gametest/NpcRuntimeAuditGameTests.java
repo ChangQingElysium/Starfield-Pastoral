@@ -14,8 +14,8 @@ import net.minecraft.gametest.framework.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import java.util.*;
 
 @GameTestHolder("stardewcraft_npc_runtime")
@@ -346,8 +346,8 @@ public final class NpcRuntimeAuditGameTests {
             replacement.put("npc_route_profiles",json("{\"profiles\":{\"robin\":{\"town\":[{\"point\":\"audit_profile_end\"}]}}}"));
             NpcDataRegistry.replaceEvents(replacement);
             if(foreign) {
-                var a=new LinkedHashMap<>(oldAnchors);var id=ResourceLocation.parse("stardewcraft:audit_missing");
-                a.put(id,new StardewWorldAnchor(id,ResourceLocation.parse("minecraft:the_nether"),new Vec3(1,64,1),0,false,false,null,Set.of()));
+                var a=new LinkedHashMap<>(oldAnchors);var id=new ResourceLocation("stardewcraft:audit_missing");
+                a.put(id,new StardewWorldAnchor(id,new ResourceLocation("minecraft:the_nether"),new Vec3(1,64,1),0,false,false,null,Set.of()));
                 WorldAnchorRegistry.replaceLegacyNpcAnchors(a);
             }
             var state=new NpcRuntimeState("robin");state.setNamedPointId("audit_missing");
@@ -370,7 +370,7 @@ public final class NpcRuntimeAuditGameTests {
             var point=new JsonObject();point.addProperty("x",oldPos.getX());point.addProperty("y",oldPos.getY());point.addProperty("z",oldPos.getZ());point.addProperty("furniture","chair");
             var points=new JsonObject();points.add("audit_moved_chair",point);var root=new JsonObject();root.add("points",points);
             var replacement=new LinkedHashMap<>(events);replacement.put("npc_route_points",root);NpcDataRegistry.replaceEvents(replacement);
-            var a=new LinkedHashMap<>(oldAnchors);var id=ResourceLocation.parse("stardewcraft:audit_moved_chair");
+            var a=new LinkedHashMap<>(oldAnchors);var id=new ResourceLocation("stardewcraft:audit_moved_chair");
             a.put(id,new StardewWorldAnchor(id,level.dimension().location(),Vec3.atBottomCenterOf(pos),0,true,false,null,Set.of()));
             WorldAnchorRegistry.replaceLegacyNpcAnchors(a);
             var support=NpcSupportTarget.resolve(level,"audit_moved_chair");

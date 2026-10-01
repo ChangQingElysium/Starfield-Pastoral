@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/cube_column",
-  "textures": {
-    "side": "stardewcraft:block/building/blue_gray_timber",
-    "end": "stardewcraft:block/building/blue_gray_timber_end",
-    "particle": "stardewcraft:block/building/blue_gray_timber"
-  }
-}

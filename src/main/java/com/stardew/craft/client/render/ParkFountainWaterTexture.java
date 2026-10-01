@@ -12,7 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 
 /** One 256px texture upload per rendered time value, shared by all visible fountains. */
 final class ParkFountainWaterTexture {
-    static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "fountain/water_live");
+    static final ResourceLocation ID = new ResourceLocation(StardewCraft.MODID, "fountain/water_live");
     private static DynamicTexture texture;
     private static int[] base;
     private static int generation = -1;
@@ -68,7 +68,7 @@ final class ParkFountainWaterTexture {
         season = com.stardew.craft.client.model.terrain.TerrainSeasonTextures.currentTextureSet();
         if (texture != null) minecraft.getTextureManager().release(ID);
         String directory = new String[]{"spring", "summer", "fall", "winter"}[season];
-        var resource = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,
+        var resource = new ResourceLocation(StardewCraft.MODID,
                 "textures/block/park_fountain/" + directory + "/water.png");
         try (var stream = minecraft.getResourceManager().getResourceOrThrow(resource).open()) {
             NativeImage pixels = NativeImage.read(stream);

@@ -6,9 +6,9 @@ import com.stardew.craft.shop.MonsterSlayerGoalRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.*;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.entity.living.*;
-import net.neoforged.neoforge.gametest.*;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.living.*;
+import net.minecraftforge.gametest.*;
 @GameTestHolder("stardewcraft_bug")
 @PrefixGameTestTemplate(false)
 @SuppressWarnings("null")
@@ -19,8 +19,8 @@ public final class NativeMonsterSettlementGameTests {
   var killed=spawn(h,"pepper_rex");var cancelled=spawn(h,"pepper_rex");var seen=new java.util.ArrayList<MonsterState.Life>();
   java.util.function.Consumer<LivingDamageEvent.Post> post=e->{if(e.getEntity()==killed||e.getEntity()==cancelled){var m=(StardewMonsterEntity)e.getEntity();h.assertTrue(m.monsterState().life()==MonsterState.Life.ALIVE,"Death unexpectedly precedes damage Post");m.afterMortality(()->seen.add(m.monsterState().life()));}};
   java.util.function.Consumer<LivingDeathEvent> cancel=e->{if(e.getEntity()==cancelled){e.setCanceled(true);cancelled.setHealth(1);}};
-  NeoForge.EVENT_BUS.addListener(post);NeoForge.EVENT_BUS.addListener(cancel);
-  try{killed.hurt(h.getLevel().damageSources().generic(),10000);cancelled.hurt(h.getLevel().damageSources().generic(),10000);h.assertTrue(seen.equals(java.util.List.of(MonsterState.Life.DEAD,MonsterState.Life.ALIVE)),"Reward callback ran before mortality settled: "+seen);h.assertTrue(killed.claimSettlement(MonsterState.Settlement.WEAPON_REWARDS)&&!killed.claimSettlement(MonsterState.Settlement.WEAPON_REWARDS)&&!cancelled.claimSettlement(MonsterState.Settlement.WEAPON_REWARDS),"Duplicate or cancelled kill reward accepted");}finally{NeoForge.EVENT_BUS.unregister(post);NeoForge.EVENT_BUS.unregister(cancel);killed.discard();cancelled.discard();}h.succeed();
+  MinecraftForge.EVENT_BUS.addListener(post);MinecraftForge.EVENT_BUS.addListener(cancel);
+  try{killed.hurt(h.getLevel().damageSources().generic(),10000);cancelled.hurt(h.getLevel().damageSources().generic(),10000);h.assertTrue(seen.equals(java.util.List.of(MonsterState.Life.DEAD,MonsterState.Life.ALIVE)),"Reward callback ran before mortality settled: "+seen);h.assertTrue(killed.claimSettlement(MonsterState.Settlement.WEAPON_REWARDS)&&!killed.claimSettlement(MonsterState.Settlement.WEAPON_REWARDS)&&!cancelled.claimSettlement(MonsterState.Settlement.WEAPON_REWARDS),"Duplicate or cancelled kill reward accepted");}finally{MinecraftForge.EVENT_BUS.unregister(post);MinecraftForge.EVENT_BUS.unregister(cancel);killed.discard();cancelled.discard();}h.succeed();
  }
  @GameTest(templateNamespace="stardewcraft_bug",template="ring_utilities",timeoutTicks=20)
  public static void downedMummyCleanupNeverBecomesAKill(GameTestHelper h){var m=(MineMummyEntity)spawn(h,"mummy");m.hurt(h.getLevel().damageSources().generic(),10000);h.assertTrue(m.collapsed(),"Mummy failed to collapse");MonsterFactory.cleanup(m);h.assertTrue(m.isRemoved()&&m.monsterState().life()==MonsterState.Life.CLEANUP&&!m.claimSettlement(MonsterState.Settlement.DROPS_AND_PROGRESS),"Downed mummy survived floor cleanup or paid a kill");h.succeed();}

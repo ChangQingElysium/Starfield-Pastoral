@@ -104,7 +104,7 @@ final class CasinoGuiTextures {
     }
 
     private static ResourceLocation texture(String name) {
-        return ResourceLocation.fromNamespaceAndPath(
+        return new ResourceLocation(
                 StardewCraft.MODID, "textures/gui/casino/" + name + ".png");
     }
 }

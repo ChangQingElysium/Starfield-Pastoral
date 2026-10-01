@@ -45,7 +45,7 @@ public class HoldItemCommand implements EventCommand {
         if (level == null) return;
 
         // Resolve the item
-        ResourceLocation loc = ResourceLocation.parse(itemId);
+        ResourceLocation loc = new ResourceLocation(itemId);
         Item item = BuiltInRegistries.ITEM.get(loc);
 
         // Get actor position

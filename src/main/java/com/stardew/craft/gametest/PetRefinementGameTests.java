@@ -17,9 +17,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.common.util.FakePlayerFactory;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 @GameTestHolder("stardewcraft_pet_refinement")
 @PrefixGameTestTemplate(false)
@@ -68,11 +68,11 @@ public final class PetRefinementGameTests {
     @GameTest(templateNamespace = "stardewcraft_pet_refinement", template = "empty")
     public static void feedbackFollowsSourceFramesAndStopsAtTransitions(GameTestHelper h) throws Exception {
         var level = h.getLevel(); var sounds = new java.util.ArrayList<PetSoundPayload>();
-        var observer = new net.minecraft.server.level.ServerPlayer(level.getServer(),level,new GameProfile(UUID.randomUUID(),"PetListener"),net.minecraft.server.level.ClientInformation.createDefault());
-        observer.connection = new net.minecraft.server.network.ServerGamePacketListenerImpl(level.getServer(),new net.minecraft.network.Connection(net.minecraft.network.protocol.PacketFlow.SERVERBOUND),observer,net.minecraft.server.network.CommonListenerCookie.createInitial(observer.getGameProfile(),false)) {
+        var observer = new net.minecraft.server.level.ServerPlayer(level.getServer(),level,new GameProfile(UUID.randomUUID(),"PetListener"),com.stardew.craft.port.net.minecraft.server.level.ClientInformation.createDefault());
+        observer.connection = new net.minecraft.server.network.ServerGamePacketListenerImpl(level.getServer(),new net.minecraft.network.Connection(net.minecraft.network.protocol.PacketFlow.SERVERBOUND),observer,com.stardew.craft.port.net.minecraft.server.network.CommonListenerCookie.createInitial(observer.getGameProfile(),false)) {
             @Override public void send(net.minecraft.network.protocol.Packet<?> packet) {
-                if (packet instanceof net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket custom && custom.payload() instanceof PetSoundPayload cue) {
-                    var wire = new net.minecraft.network.RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer(),level.registryAccess(),net.neoforged.neoforge.network.connection.ConnectionType.NEOFORGE);
+                if (packet instanceof com.stardew.craft.port.net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket custom && custom.payload() instanceof PetSoundPayload cue) {
+                    var wire = new com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer(),level.registryAccess(),com.stardew.craft.port.net.neoforged.neoforge.network.connection.ConnectionType.NEOFORGE);
                     try { PetSoundPayload.CODEC.encode(wire,cue); sounds.add(PetSoundPayload.CODEC.decode(wire)); h.assertTrue(!wire.isReadable(),"Pet sound left unread wire data"); } finally { wire.release(); }
                 }
             }
@@ -126,7 +126,7 @@ public final class PetRefinementGameTests {
                 var item = new net.minecraft.world.item.ItemStack(com.stardew.craft.item.ModItems.PET_BOWL_WOOD.get());
                 player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, item);
                 var floorHit = new net.minecraft.world.phys.BlockHitResult(Vec3.atBottomCenterOf(pos), Direction.UP, pos.below(), false);
-                var placement = net.neoforged.neoforge.common.CommonHooks.onPlaceItemIntoWorld(new net.minecraft.world.item.context.UseOnContext(player, net.minecraft.world.InteractionHand.MAIN_HAND, floorHit));
+                var placement = com.stardew.craft.port.net.neoforged.neoforge.common.CommonHooks.onPlaceItemIntoWorld(new net.minecraft.world.item.context.UseOnContext(player, net.minecraft.world.InteractionHand.MAIN_HAND, floorHit));
                 h.assertTrue(placement.consumesAction() && level.getBlockState(pos).getBlock() instanceof PetBowlBlock && item.isEmpty(), "Bowl placement transaction rolled back or duplicated item");
                 var record = PetBowlBuildings.ensure(level, pos);
                 h.assertTrue(record != null && BuildingProtection.protects(level, pos), "Placement did not immediately register/protect building");
@@ -136,7 +136,7 @@ public final class PetRefinementGameTests {
                 player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, can);
                 var hit = new net.minecraft.world.phys.BlockHitResult(Vec3.atBottomCenterOf(pos).add(0,.2,0), Direction.NORTH, pos, false);
                 h.assertTrue(level.getBlockState(pos).useItemOn(can, level, player, net.minecraft.world.InteractionHand.MAIN_HAND, hit)
-                        == net.minecraft.world.ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION, "Bowl swallowed watering-can action");
+                        == com.stardew.craft.port.net.minecraft.world.ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION, "Bowl swallowed watering-can action");
                 for (var aim : new Vec3[]{Vec3.atBottomCenterOf(pos).add(0,.2,0), new Vec3(pos.getX()+.04,pos.getY()+.001,pos.getZ()+.04)}) {
                     player.getCooldowns().removeCooldown(tool); player.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, aim);
                     int before = tool.getWater(can);

@@ -17,12 +17,12 @@ import com.stardew.craft.quest.QuestManager;
 import com.stardew.craft.quest.QuestDataLoader;
 import com.stardew.craft.quest.StardewQuest;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -34,7 +34,7 @@ import java.util.Optional;
 public record ClaimRewardPayload(String questId) implements CustomPacketPayload {
 
     public static final Type<ClaimRewardPayload> TYPE = new Type<>(
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "claim_quest_reward")
+        new ResourceLocation(StardewCraft.MODID, "claim_quest_reward")
     );
 
     public static final StreamCodec<ByteBuf, ClaimRewardPayload> STREAM_CODEC = StreamCodec.composite(

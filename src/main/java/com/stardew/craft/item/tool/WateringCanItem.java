@@ -642,22 +642,22 @@ public class WateringCanItem extends Item implements IStardewItem {
 
     @SuppressWarnings("null")
     private static int getAction(@Nonnull ItemStack stack) {
-        return stack.getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.EMPTY)
+        return stack.getOrDefault(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA, com.stardew.craft.port.net.minecraft.world.item.component.CustomData.EMPTY)
                 .copyTag()
                 .getInt(TAG_ACTION);
     }
 
     @SuppressWarnings("null")
     private static void setAction(@Nonnull ItemStack stack, int action) {
-        var current = stack.getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.EMPTY).copyTag();
+        var current = stack.getOrDefault(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA, com.stardew.craft.port.net.minecraft.world.item.component.CustomData.EMPTY).copyTag();
         current.putInt(TAG_ACTION, action);
-        stack.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(current));
+        stack.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA, com.stardew.craft.port.net.minecraft.world.item.component.CustomData.of(current));
     }
 
     @SuppressWarnings("null")
     private static void clearAction(@Nonnull ItemStack stack) {
-        var current = stack.getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.EMPTY).copyTag();
+        var current = stack.getOrDefault(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA, com.stardew.craft.port.net.minecraft.world.item.component.CustomData.EMPTY).copyTag();
         current.remove(TAG_ACTION);
-        stack.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(current));
+        stack.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA, com.stardew.craft.port.net.minecraft.world.item.component.CustomData.of(current));
     }
 }

@@ -8,7 +8,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.neoforge.common.CommonHooks;
+import com.stardew.craft.port.net.neoforged.neoforge.common.CommonHooks;
 
 /**
  * Server-side entry point for a skill hit that must use the normal Stardew

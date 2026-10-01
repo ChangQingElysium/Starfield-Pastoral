@@ -54,30 +54,30 @@ import java.util.UUID;
 /** Shared registry and built-in read-only projections for the public progress facade. */
 public final class StardewProgressRegistry {
     private static final ResourceLocation OBJECTIVE_METRIC =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "objective");
+            new ResourceLocation(StardewCraft.MODID, "objective");
     private static final ResourceLocation BUNDLES_METRIC =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "bundles");
+            new ResourceLocation(StardewCraft.MODID, "bundles");
     private static final ResourceLocation DONATIONS_METRIC =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "donations");
+            new ResourceLocation(StardewCraft.MODID, "donations");
     private static final ResourceLocation MINERALS_METRIC =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "minerals");
+            new ResourceLocation(StardewCraft.MODID, "minerals");
     private static final ResourceLocation ARTIFACTS_METRIC =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "artifacts");
+            new ResourceLocation(StardewCraft.MODID, "artifacts");
     private static final ResourceLocation REQUIRED_ITEMS_METRIC =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "required_items");
+            new ResourceLocation(StardewCraft.MODID, "required_items");
     private static final ResourceLocation MUSEUM_COLLECTION_ID =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "collection");
+            new ResourceLocation(StardewCraft.MODID, "collection");
     private static final ResourceLocation EGG_FESTIVAL_ID =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "spring13");
+            new ResourceLocation(StardewCraft.MODID, "spring13");
     private static final ResourceLocation EGG_HUNT_ACTIVITY_ID =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "egg_hunt");
+            new ResourceLocation(StardewCraft.MODID, "egg_hunt");
     private static final ResourceLocation EGGS_METRIC =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "eggs");
+            new ResourceLocation(StardewCraft.MODID, "eggs");
     private static final OrderedExtensionRegistry<ProviderEntry> PROVIDERS =
-            new OrderedExtensionRegistry<>(ResourceLocation.fromNamespaceAndPath(
+            new OrderedExtensionRegistry<>(new ResourceLocation(
                     StardewCraft.MODID, "progress/provider"));
     private static final OrderedExtensionRegistry<StardewProgressListener> LISTENERS =
-            new OrderedExtensionRegistry<>(ResourceLocation.fromNamespaceAndPath(
+            new OrderedExtensionRegistry<>(new ResourceLocation(
                     StardewCraft.MODID, "progress/listener"));
 
     private StardewProgressRegistry() {
@@ -333,7 +333,7 @@ public final class StardewProgressRegistry {
         for (int index = 0; index < order.objectives().size(); index++) {
             SpecialOrderInstance.ObjectiveState objective = order.objectives().get(index);
             metrics.add(new StardewProgressMetric(
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             StardewCraft.MODID, "objective/" + index),
                     Math.min(objective.progress(), objective.requiredCount()),
                     objective.requiredCount()));
@@ -388,7 +388,7 @@ public final class StardewProgressRegistry {
         }
         return new StardewProgressKey(
                 StardewProgressDomains.COMMUNITY_CENTER,
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         StardewCraft.MODID, "bundle/" + bundleId));
     }
 
@@ -398,7 +398,7 @@ public final class StardewProgressRegistry {
         }
         return new StardewProgressKey(
                 StardewProgressDomains.COMMUNITY_CENTER,
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         StardewCraft.MODID, "area/" + areaId));
     }
 

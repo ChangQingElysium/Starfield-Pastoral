@@ -2,11 +2,11 @@ package com.stardew.craft.network;
 
 import com.stardew.craft.StardewCraft;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +22,7 @@ public record MuseumDonationSyncPacket(List<String> donatedIds) implements Custo
         }
     }
     public static final CustomPacketPayload.Type<MuseumDonationSyncPacket> TYPE =
-            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "museum_donations_sync"));
+            new CustomPacketPayload.Type<>(new ResourceLocation(StardewCraft.MODID, "museum_donations_sync"));
 
     public static final StreamCodec<ByteBuf, MuseumDonationSyncPacket> STREAM_CODEC = new StreamCodec<>() {
         @Override

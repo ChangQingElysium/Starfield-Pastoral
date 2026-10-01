@@ -22,7 +22,7 @@ public final class MuseumQuestService {
     public static void onItemReceived(ServerPlayer player, String itemId) {
         if (itemId == null || itemId.isBlank()) return;
         try {
-            var item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(itemId));
+            var item = BuiltInRegistries.ITEM.get(new ResourceLocation(itemId));
             if (item != Items.AIR) {
                 onItemReceived(player, new ItemStack(item));
             }

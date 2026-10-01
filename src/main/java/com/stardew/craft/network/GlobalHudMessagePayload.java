@@ -1,21 +1,21 @@
 package com.stardew.craft.network;
 
 import com.stardew.craft.StardewCraft;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentSerialization;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.chat.ComponentSerialization;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /** Server to client equivalent of SDV {@code Game1.showGlobalMessage}. */
 @SuppressWarnings("null")
 public record GlobalHudMessagePayload(Component message) implements CustomPacketPayload {
     public static final Type<GlobalHudMessagePayload> TYPE = new Type<>(
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "global_hud_message")
+        new ResourceLocation(StardewCraft.MODID, "global_hud_message")
     );
 
     public static final StreamCodec<RegistryFriendlyByteBuf, GlobalHudMessagePayload> STREAM_CODEC =

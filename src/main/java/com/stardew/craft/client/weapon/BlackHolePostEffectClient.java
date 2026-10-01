@@ -14,8 +14,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceProvider;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
 
@@ -26,7 +26,7 @@ import java.util.List;
 
 public final class BlackHolePostEffectClient {
 
-    private static final ResourceLocation SHADER_ID = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation SHADER_ID = new ResourceLocation(
         StardewCraft.MODID,
         "black_hole"
     );

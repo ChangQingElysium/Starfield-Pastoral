@@ -1,9 +1,9 @@
 package com.stardew.craft.item;
 
-import net.minecraft.core.component.DataComponents;
+import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomData;
+import com.stardew.craft.port.net.minecraft.world.item.component.CustomData;
 
 public class HoneyItem extends SimpleStardewItem {
 	private static final String TAG_HONEY_VALUE = "HoneyValue";

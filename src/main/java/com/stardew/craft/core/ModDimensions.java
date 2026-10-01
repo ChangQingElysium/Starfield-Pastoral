@@ -16,14 +16,14 @@ public class ModDimensions {
     @SuppressWarnings("null")
     public static final ResourceKey<Level> STARDEW_VALLEY = ResourceKey.create(
             Registries.DIMENSION,
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "stardew_valley")
+            new ResourceLocation(StardewCraft.MODID, "stardew_valley")
     );
     
     // 星露谷维度类型Key
     @SuppressWarnings("null")
     public static final ResourceKey<DimensionType> STARDEW_VALLEY_TYPE = ResourceKey.create(
             Registries.DIMENSION_TYPE,
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "stardew_valley")
+            new ResourceLocation(StardewCraft.MODID, "stardew_valley")
     );
     
     public static void register() {

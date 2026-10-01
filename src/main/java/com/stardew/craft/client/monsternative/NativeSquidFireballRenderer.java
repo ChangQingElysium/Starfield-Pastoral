@@ -12,20 +12,20 @@ import net.minecraft.client.renderer.entity.*;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.*;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.*;
 import net.minecraft.world.phys.Vec3;
 /** Small native cuboid core, six-sided inverted cyan hull and four source tail samples. */
 @SuppressWarnings({"null","removal"})
 @EventBusSubscriber(modid=StardewCraft.MODID,bus=EventBusSubscriber.Bus.MOD,value=Dist.CLIENT)
 public final class NativeSquidFireballRenderer extends EntityRenderer<SquidFireballEntity>{
-    private static final ResourceLocation TEXTURE=ResourceLocation.parse("stardewcraft:textures/entity/monster_native/squid_fireball.png");
+    private static final ResourceLocation TEXTURE=new ResourceLocation("stardewcraft:textures/entity/monster_native/squid_fireball.png");
     private static volatile NativeNpcModel model;
     public NativeSquidFireballRenderer(EntityRendererProvider.Context c){super(c);shadowRadius=0;}
     @SubscribeEvent public static void register(EntityRenderersEvent.RegisterRenderers e){e.registerEntityRenderer(ModEntities.SQUID_FIREBALL.get(),NativeSquidFireballRenderer::new);}
-    @SubscribeEvent public static void reload(RegisterClientReloadListenersEvent e){e.registerReloadListener((ResourceManagerReloadListener)r->{try(var reader=r.getResourceOrThrow(ResourceLocation.parse("stardewcraft:monster_native/squid_fireball.json")).openAsReader()){
+    @SubscribeEvent public static void reload(RegisterClientReloadListenersEvent e){e.registerReloadListener((ResourceManagerReloadListener)r->{try(var reader=r.getResourceOrThrow(new ResourceLocation("stardewcraft:monster_native/squid_fireball.json")).openAsReader()){
         var m=new Gson().fromJson(reader,NativeNpcModel.class);if(m==null||m.version()!=1||m.quads().size()!=12||!TEXTURE.toString().equals(m.texture()))throw new IllegalArgumentException("Invalid Squid fireball model");r.getResourceOrThrow(TEXTURE);model=m;
     }catch(Exception ex){throw new IllegalStateException("Cannot load Squid fireball model",ex);}});}
     @Override protected boolean shouldShowName(SquidFireballEntity e){return false;}@Override public ResourceLocation getTextureLocation(SquidFireballEntity e){return TEXTURE;}

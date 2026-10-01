@@ -4,16 +4,16 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.block.utility.WoodenChestColorPalette;
 import com.stardew.craft.menu.StoneChestMenu;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record StoneChestColorSelectPayload(int colorSelection) implements CustomPacketPayload {
     @SuppressWarnings("null")
     public static final Type<StoneChestColorSelectPayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "stone_chest_color_select"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "stone_chest_color_select"));
 
     @SuppressWarnings("null")
     public static final StreamCodec<FriendlyByteBuf, StoneChestColorSelectPayload> STREAM_CODEC = StreamCodec.of(

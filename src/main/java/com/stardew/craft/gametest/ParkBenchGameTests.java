@@ -20,10 +20,10 @@ import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.util.FakePlayer;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.common.util.FakePlayer;
+import net.minecraftforge.common.util.FakePlayerFactory;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 @GameTestHolder(StardewCraft.MODID)
 @PrefixGameTestTemplate(false)
@@ -41,7 +41,7 @@ public final class ParkBenchGameTests {
         var level = helper.getLevel(); var block = ModBlocks.PARK_BENCH.get();
         BlockPos origin = helper.absolutePos(new BlockPos(6, 1, 6));
         for (Direction facing : Direction.Plane.HORIZONTAL) {
-            // NeoForge FakePlayer disables riding. These mock players retain vanilla riding behavior.
+            // MinecraftForge FakePlayer disables riding. These mock players retain vanilla riding behavior.
             var first = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
             var second = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
             first.setYRot(facing.getOpposite().toYRot());

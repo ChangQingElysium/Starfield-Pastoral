@@ -4,9 +4,9 @@ import com.stardew.craft.network.AdvanceUtilitiesPayload;
 import com.stardew.craft.network.GrowCropsPayload;
 import com.stardew.craft.network.GrowTreesPayload;
 import net.minecraft.client.Minecraft;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.minecraftforge.network.PacketDistributor;
 
 public final class DebugKeybindsTick {
 	private DebugKeybindsTick() {

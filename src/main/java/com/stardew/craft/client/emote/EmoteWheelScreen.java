@@ -15,7 +15,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -23,7 +23,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 @SuppressWarnings("null")
 public final class EmoteWheelScreen extends Screen implements com.stardew.craft.client.gui.StardewRealtimeScreen {
 
-	private static final ResourceLocation EMOTES_TEXTURE = ResourceLocation.fromNamespaceAndPath("stardewcraft", "textures/gui/emotes.png");
+	private static final ResourceLocation EMOTES_TEXTURE = new ResourceLocation("stardewcraft", "textures/gui/emotes.png");
 	private static final int EMOTES_TEX_W = 64;
 	private static final int EMOTES_TEX_H = 256;
 	private static final int ICON_SIZE = 24;

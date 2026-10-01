@@ -14,13 +14,13 @@ import com.stardew.craft.item.artisan.PreservesCropTypeHelper;
 import com.stardew.craft.item.artisan.PreservesItem;
 import com.stardew.craft.item.artisan.SmokedFishItem;
 import com.stardew.craft.item.quality.QualityHelper;
-import net.minecraft.core.component.DataComponents;
+import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomData;
-import net.minecraft.world.item.component.CustomModelData;
+import com.stardew.craft.port.net.minecraft.world.item.component.CustomData;
+import com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +43,7 @@ public final class StardewItemDisplayStacks {
             List<ItemStack> variants = new ArrayList<>();
             for (int i = 0; i < plant.kind().variants; i++) {
                 ItemStack stack = new ItemStack(item);
-                stack.set(DataComponents.BLOCK_STATE, net.minecraft.world.item.component.BlockItemStateProperties.EMPTY
+                stack.set(DataComponents.BLOCK_STATE, com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties.EMPTY
                         .with(com.stardew.craft.block.decor.NaturalPlantBlock.VARIANT,
                                 plant.defaultBlockState().setValue(com.stardew.craft.block.decor.NaturalPlantBlock.VARIANT, i)));
                 variants.add(stack);
@@ -53,7 +53,7 @@ public final class StardewItemDisplayStacks {
 
         if (item == ModItems.MINE_CHEST.get()) {
             ItemStack special = new ItemStack(item);
-            special.set(DataComponents.BLOCK_STATE, new net.minecraft.world.item.component.BlockItemStateProperties(
+            special.set(DataComponents.BLOCK_STATE, new com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties(
                     java.util.Map.of("special", "true")));
             special.set(DataComponents.ITEM_NAME, net.minecraft.network.chat.Component.translatable("item.stardewcraft.special_mine_chest"));
             return List.of(new ItemStack(item), special);
@@ -62,7 +62,7 @@ public final class StardewItemDisplayStacks {
             List<ItemStack> variants = new ArrayList<>();
             for (int theme = 0; theme < 3; theme++) for (boolean open : new boolean[]{false, true}) {
                 ItemStack stack = new ItemStack(item);
-                stack.set(DataComponents.BLOCK_STATE, new net.minecraft.world.item.component.BlockItemStateProperties(
+                stack.set(DataComponents.BLOCK_STATE, new com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties(
                         java.util.Map.of("dark", Boolean.toString(theme == 1), "desert", Boolean.toString(theme == 2),
                                 "open", Boolean.toString(open))));
                 variants.add(stack);
@@ -74,7 +74,7 @@ public final class StardewItemDisplayStacks {
             List<ItemStack> variants = new ArrayList<>();
             for (int i = 0; i < 2; i++) {
                 ItemStack stack = new ItemStack(item);
-                stack.set(DataComponents.BLOCK_STATE, new net.minecraft.world.item.component.BlockItemStateProperties(
+                stack.set(DataComponents.BLOCK_STATE, new com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties(
                         java.util.Map.of("variant", Integer.toString(i))));
                 variants.add(stack);
             }
@@ -90,7 +90,7 @@ public final class StardewItemDisplayStacks {
                 if (themedItem.getBlock() instanceof com.stardew.craft.block.mine.MineTimberSupportBlock
                         && (theme.id().startsWith("frost") || theme.id().startsWith("desert"))) continue;
                 ItemStack stack = new ItemStack(item);
-                stack.set(DataComponents.BLOCK_STATE, new net.minecraft.world.item.component.BlockItemStateProperties(
+                stack.set(DataComponents.BLOCK_STATE, new com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties(
                         java.util.Map.of("theme", theme.id())));
                 variants.add(stack);
             }
@@ -101,13 +101,13 @@ public final class StardewItemDisplayStacks {
             List<ItemStack> variants = new ArrayList<>();
             for (var theme : com.stardew.craft.block.mine.MineLadderBlock.Theme.values()) {
                 ItemStack stack = new ItemStack(item);
-                stack.set(DataComponents.BLOCK_STATE, new net.minecraft.world.item.component.BlockItemStateProperties(
+                stack.set(DataComponents.BLOCK_STATE, new com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties(
                         java.util.Map.of("theme", theme.getSerializedName())));
                 variants.add(stack);
             }
             if (item == ModItems.MINE_LADDER.get()) for (String theme : java.util.List.of("desert", "desert_dark")) {
                 ItemStack stack = new ItemStack(item);
-                stack.set(DataComponents.BLOCK_STATE, new net.minecraft.world.item.component.BlockItemStateProperties(java.util.Map.of("theme", theme, "shaft", "true")));
+                stack.set(DataComponents.BLOCK_STATE, new com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties(java.util.Map.of("theme", theme, "shaft", "true")));
                 variants.add(stack);
             }
             return variants;
@@ -117,7 +117,7 @@ public final class StardewItemDisplayStacks {
             List<ItemStack> variants = new ArrayList<>();
             for (var theme : com.stardew.craft.block.mine.MineLampBlock.Theme.values()) {
                 ItemStack stack = new ItemStack(item);
-                stack.set(DataComponents.BLOCK_STATE, new net.minecraft.world.item.component.BlockItemStateProperties(
+                stack.set(DataComponents.BLOCK_STATE, new com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties(
                         java.util.Map.of("theme", theme.getSerializedName())));
                 variants.add(stack);
             }
@@ -212,7 +212,7 @@ public final class StardewItemDisplayStacks {
         for (int area = 0; area <= 6; area++) {
             ItemStack stack = new ItemStack(ModItems.JUNIMO_NOTE.get());
             stack.set(DataComponents.BLOCK_STATE,
-                    new net.minecraft.world.item.component.BlockItemStateProperties(
+                    new com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties(
                             java.util.Map.of("area", String.valueOf(area))));
             stacks.add(stack);
         }

@@ -10,15 +10,15 @@ import com.stardew.craft.player.PlayerDataManager;
 import com.stardew.craft.player.PlayerStardewData;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
-import net.neoforged.neoforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.network.PacketDistributor;
 
 /**
  * Client -> Server: player clicks an equipment slot in the inventory page.
@@ -36,7 +36,7 @@ public record EquipmentActionPayload(int slotType) implements CustomPacketPayloa
     public static final int SLOT_PANTS = 6;
 
     public static final Type<EquipmentActionPayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "equipment_action"));
+            new Type<>(new ResourceLocation(StardewCraft.MODID, "equipment_action"));
 
     public static final StreamCodec<FriendlyByteBuf, EquipmentActionPayload> STREAM_CODEC = StreamCodec.of(
             (buf, payload) -> buf.writeVarInt(payload.slotType),

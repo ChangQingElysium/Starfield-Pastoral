@@ -99,7 +99,7 @@ public class WoodenChestBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected net.minecraft.world.ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level,
+    protected com.stardew.craft.port.net.minecraft.world.ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level,
             BlockPos pos, Player player, net.minecraft.world.InteractionHand hand, BlockHitResult hit) {
         return com.stardew.craft.inventory.ChestInteractions.swap(stack, level, pos, player);
     }
@@ -133,7 +133,7 @@ public class WoodenChestBlock extends Block implements EntityBlock {
 
         // 打开箱子时清除初始物资 hint（如果有的话）
         if (player instanceof net.minecraft.server.level.ServerPlayer sp) {
-            net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(sp,
+            net.minecraftforge.network.PacketDistributor.sendToPlayer(sp,
                     new com.stardew.craft.network.payload.StarterChestHintPayload(pos, false));
         }
 

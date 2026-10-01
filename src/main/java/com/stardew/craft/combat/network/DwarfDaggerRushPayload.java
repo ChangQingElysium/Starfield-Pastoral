@@ -2,18 +2,18 @@ package com.stardew.craft.combat.network;
 
 import com.stardew.craft.StardewCraft;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
 public record DwarfDaggerRushPayload(boolean active, int durationTicks) implements CustomPacketPayload {
 
     @SuppressWarnings("null")
     public static final Type<DwarfDaggerRushPayload> TYPE = new Type<>(
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "dwarf_dagger_rush_state")
+        new ResourceLocation(StardewCraft.MODID, "dwarf_dagger_rush_state")
     );
 
     @SuppressWarnings("null")
@@ -34,7 +34,7 @@ public record DwarfDaggerRushPayload(boolean active, int durationTicks) implemen
         context.enqueueWork(() -> handleClient(payload));
     }
 
-    @net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+    @net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
     private static void handleClient(DwarfDaggerRushPayload payload) {
         com.stardew.craft.client.weapon.DwarfWeaponVisuals.ensureLevel();
         if (payload.active()) {

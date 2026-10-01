@@ -41,7 +41,7 @@ public final class OrdinaryMineLayout {
     public static OrdinaryMineLayout loadNamed(ServerLevel level, String name) {
         var cache=CACHE.computeIfAbsent(level,k->new HashMap<>());
         if(cache.containsKey(name)) return cache.get(name);
-        var id = ResourceLocation.fromNamespaceAndPath("stardewcraft", "mine_layouts/" + name + ".json");
+        var id = new ResourceLocation("stardewcraft", "mine_layouts/" + name + ".json");
         try (var reader = new InputStreamReader(level.getServer().getResourceManager().getResourceOrThrow(id).open(), StandardCharsets.UTF_8)) {
             var layout=new OrdinaryMineLayout(name, JsonParser.parseReader(reader).getAsJsonObject());
             cache.put(name,layout);return layout;

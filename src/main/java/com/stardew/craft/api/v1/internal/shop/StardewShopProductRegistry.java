@@ -26,7 +26,7 @@ public final class StardewShopProductRegistry {
     private static final OrderedExtensionRegistry<
             StardewShopProductHandler> REGISTRY =
             new OrderedExtensionRegistry<>(
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             StardewCraft.MODID, "shop_products"));
     private static boolean bootstrapped;
 
@@ -38,17 +38,17 @@ public final class StardewShopProductRegistry {
             return;
         }
         register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         StardewCraft.MODID, "data_actions"),
                 -500,
                 new StardewDataShopProductHandler());
         register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         StardewCraft.MODID, "decorations"),
                 -1000,
                 new DecorationProductHandler());
         register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         StardewCraft.MODID, "recipes"),
                 -1000,
                 new RecipeProductHandler());

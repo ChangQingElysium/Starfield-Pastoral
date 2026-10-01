@@ -61,7 +61,7 @@ public final class StardewCraftingCategory implements IRecipeCategory<StardewCra
 
     public StardewCraftingCategory(IGuiHelper guiHelper) {
         this.icon = guiHelper.drawableBuilder(
-                        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,
+                        new ResourceLocation(StardewCraft.MODID,
                                 "textures/gui/common/game_menu_tab_4.png"),
                         0, 0, 16, 16)
                 .setTextureSize(16, 16)

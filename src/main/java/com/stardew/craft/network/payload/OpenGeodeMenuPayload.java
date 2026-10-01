@@ -2,10 +2,10 @@ package com.stardew.craft.network.payload;
 
 import com.stardew.craft.StardewCraft;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.Objects;
 
@@ -16,7 +16,7 @@ import java.util.Objects;
 public record OpenGeodeMenuPayload() implements CustomPacketPayload {
 
     private static final ResourceLocation ID = Objects.requireNonNull(
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "open_geode_menu"));
+        new ResourceLocation(StardewCraft.MODID, "open_geode_menu"));
 
     public static final Type<OpenGeodeMenuPayload> TYPE = new Type<>(ID);
 
@@ -34,7 +34,7 @@ public record OpenGeodeMenuPayload() implements CustomPacketPayload {
         context.enqueueWork(() -> handleClient());
     }
 
-    @net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+    @net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
     private static void handleClient() {
         net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
         if (mc.player == null) return;

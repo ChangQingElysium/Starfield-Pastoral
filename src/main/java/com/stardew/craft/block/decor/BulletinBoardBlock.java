@@ -12,7 +12,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
 
@@ -72,7 +72,7 @@ public class BulletinBoardBlock extends MapDecorWallStaticBlock {
         return InteractionResult.sidedSuccess(level.isClientSide);
     }
 
-    @net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+    @net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
     private void openBillboardScreen(boolean calendar) {
         net.minecraft.client.Minecraft.getInstance().setScreen(
             new com.stardew.craft.client.gui.quest.BillboardScreen(calendar

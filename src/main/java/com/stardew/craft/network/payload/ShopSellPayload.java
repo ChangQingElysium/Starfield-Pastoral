@@ -1,12 +1,12 @@
 package com.stardew.craft.network.payload;
 
 import com.stardew.craft.StardewCraft;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * Client → Server: player wants to sell the item at inventorySlot.
@@ -22,7 +22,7 @@ public record ShopSellPayload(
 ) implements CustomPacketPayload {
 
     public static final Type<ShopSellPayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "shop_sell"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "shop_sell"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, ShopSellPayload> STREAM_CODEC =
         StreamCodec.composite(
@@ -106,7 +106,7 @@ public record ShopSellPayload(
     private static void sendResult(net.minecraft.server.level.ServerPlayer player, boolean success,
                                    int slot, int qty, int earned) {
         int money = com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player);
-        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
+        net.minecraftforge.network.PacketDistributor.sendToPlayer(player,
             new ShopSellResultPayload(success, money, slot, qty, earned));
     }
 }

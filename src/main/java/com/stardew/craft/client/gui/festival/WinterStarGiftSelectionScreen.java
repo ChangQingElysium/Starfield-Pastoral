@@ -7,13 +7,13 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 /** Direct-click ItemGrabMenu equivalent using the native Minecraft inventory panel. */
 @SuppressWarnings("null")
 public final class WinterStarGiftSelectionScreen extends Screen {
     private static final ResourceLocation INVENTORY_TEXTURE =
-        ResourceLocation.withDefaultNamespace("textures/gui/container/inventory.png");
+        new ResourceLocation("textures/gui/container/inventory.png");
     private static final int PANEL_WIDTH = 176;
     private static final int PANEL_HEIGHT = 83;
     private static final int INVENTORY_TEXTURE_Y = 83;

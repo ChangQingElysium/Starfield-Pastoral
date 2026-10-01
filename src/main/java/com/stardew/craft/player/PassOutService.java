@@ -17,8 +17,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.BedBlock;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
+import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -438,7 +438,7 @@ public final class PassOutService {
      */
     private static boolean isPassOutSafe(ServerPlayer player) {
         net.minecraft.resources.ResourceLocation passOutSafeProperty =
-                ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "pass_out_safe");
+                new ResourceLocation(StardewCraft.MODID, "pass_out_safe");
         boolean explicitSafe = com.stardew.craft.api.v1.world.StardewLocations
                 .find(player.level(), player.blockPosition())
                 .map(location -> {

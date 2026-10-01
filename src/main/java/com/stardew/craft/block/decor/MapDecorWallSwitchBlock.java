@@ -117,7 +117,7 @@ public class MapDecorWallSwitchBlock extends Block {
     }
 
     @Override
-    protected net.minecraft.world.ItemInteractionResult useItemOn(@Nonnull ItemStack stack,
+    protected com.stardew.craft.port.net.minecraft.world.ItemInteractionResult useItemOn(@Nonnull ItemStack stack,
                                                                   @Nonnull BlockState state,
                                                                   @Nonnull Level level,
                                                                   @Nonnull BlockPos pos,
@@ -125,10 +125,10 @@ public class MapDecorWallSwitchBlock extends Block {
                                                                   @Nonnull net.minecraft.world.InteractionHand hand,
                                                                   @Nonnull BlockHitResult hitResult) {
         if (level.isClientSide) {
-            return net.minecraft.world.ItemInteractionResult.sidedSuccess(true);
+            return com.stardew.craft.port.net.minecraft.world.ItemInteractionResult.sidedSuccess(true);
         }
         toggleState(level, pos, state);
-        return net.minecraft.world.ItemInteractionResult.sidedSuccess(false);
+        return com.stardew.craft.port.net.minecraft.world.ItemInteractionResult.sidedSuccess(false);
     }
 
     private void toggleState(Level level, BlockPos pos, BlockState state) {

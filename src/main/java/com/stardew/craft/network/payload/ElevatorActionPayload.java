@@ -3,11 +3,11 @@ package com.stardew.craft.network.payload;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.menu.ElevatorMenu;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.Objects;
 
@@ -18,7 +18,7 @@ import java.util.Objects;
 public record ElevatorActionPayload(int targetFloor) implements CustomPacketPayload {
 
     private static final ResourceLocation TYPE_ID =
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "elevator_action");
+        new ResourceLocation(StardewCraft.MODID, "elevator_action");
 
     public static final Type<ElevatorActionPayload> TYPE = new Type<>(Objects.requireNonNull(TYPE_ID, "typeId"));
 

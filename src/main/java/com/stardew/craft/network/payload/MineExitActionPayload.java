@@ -7,12 +7,12 @@ import com.stardew.craft.mining.MiningDataManager;
 import com.stardew.craft.mining.MiningPlayerData;
 import com.stardew.craft.warp.ModTeleport;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * 矿井出口操作数据包 — 客户端 → 服务端。
@@ -24,7 +24,7 @@ public record MineExitActionPayload(Action action) implements CustomPacketPayloa
 	
 	@SuppressWarnings("null")
 	public static final Type<MineExitActionPayload> TYPE = 
-			new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "mine_exit_action"));
+			new Type<>(new ResourceLocation(StardewCraft.MODID, "mine_exit_action"));
 	
 	@SuppressWarnings("null")
 	public static final StreamCodec<FriendlyByteBuf, MineExitActionPayload> STREAM_CODEC = StreamCodec.of(
@@ -95,7 +95,7 @@ public record MineExitActionPayload(Action action) implements CustomPacketPayloa
 		playerData.setCurrentFloor(targetFloor);
 		MiningDataManager.savePlayerData(serverPlayer, playerData);
 
-		net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
+		net.minecraftforge.network.PacketDistributor.sendToPlayer(
 			serverPlayer,
 			new com.stardew.craft.network.MiningFloorSyncPacket(targetFloor)
 		);
@@ -120,7 +120,7 @@ public record MineExitActionPayload(Action action) implements CustomPacketPayloa
 		playerData.setCurrentFloor(0);
 		MiningDataManager.savePlayerData(serverPlayer, playerData);
 
-		net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
+		net.minecraftforge.network.PacketDistributor.sendToPlayer(
 			serverPlayer,
 			new com.stardew.craft.network.MiningFloorSyncPacket(0)
 		);

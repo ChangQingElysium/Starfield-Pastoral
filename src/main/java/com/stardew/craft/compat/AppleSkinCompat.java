@@ -3,7 +3,7 @@ package com.stardew.craft.compat;
 import com.stardew.craft.client.hud.StardewPlayerHud;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.bus.api.SubscribeEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import squeek.appleskin.api.event.HUDOverlayEvent;
 
 public final class AppleSkinCompat {

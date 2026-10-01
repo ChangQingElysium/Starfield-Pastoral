@@ -21,7 +21,7 @@ import java.util.List;
 public enum CrabPotJadeProvider implements IBlockComponentProvider, IServerDataProvider<BlockAccessor> {
 	INSTANCE;
 
-	private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "crab_pot");
+	private static final ResourceLocation UID = new ResourceLocation(StardewCraft.MODID, "crab_pot");
 
 	private static final String NBT_HAS_BAIT = "hasBait";
 	private static final String NBT_BAIT_ITEM = "baitItem";

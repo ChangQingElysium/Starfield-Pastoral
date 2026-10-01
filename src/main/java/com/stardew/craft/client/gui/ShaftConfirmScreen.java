@@ -5,7 +5,7 @@ import com.stardew.craft.client.gui.common.StardewQuestionDialogSpec;
 import com.stardew.craft.network.ShaftJumpPacket;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.List;
 

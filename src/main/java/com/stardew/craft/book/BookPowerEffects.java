@@ -17,8 +17,8 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -46,13 +46,13 @@ public final class BookPowerEffects {
     private static final String BOOK_SPEED_2 = "Book_Speed2";
     private static final String BOOK_HORSE = "Book_Horse";
 
-    private static final ResourceLocation PLAYER_SPEED_MODIFIER = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation PLAYER_SPEED_MODIFIER = new ResourceLocation(
             StardewCraft.MODID, "book_speed"
     );
-    private static final ResourceLocation GRASS_PLAYER_SPEED_MODIFIER = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation GRASS_PLAYER_SPEED_MODIFIER = new ResourceLocation(
             StardewCraft.MODID, "book_grass_speed"
     );
-    private static final ResourceLocation HORSE_SPEED_MODIFIER = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation HORSE_SPEED_MODIFIER = new ResourceLocation(
             StardewCraft.MODID, "book_horse_speed"
     );
     private static final double PLAYER_SPEED_STEP = 0.05D;

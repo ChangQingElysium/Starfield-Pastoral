@@ -15,8 +15,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.sounds.SoundEvent;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -281,7 +281,7 @@ public class StardewNpcDialogueScreen extends Screen implements StardewCollectiv
                         openClientSideResponse(picked.nextNodeId());
                         return;
                     }
-                    net.neoforged.neoforge.network.PacketDistributor.sendToServer(
+                    net.minecraftforge.network.PacketDistributor.sendToServer(
                         new com.stardew.craft.network.payload.AnswerNpcQuestionPayload(
                             npcId, picked.nextNodeId(), picked.scoreDelta(), picked.answerId()
                         )
@@ -715,12 +715,12 @@ public class StardewNpcDialogueScreen extends Screen implements StardewCollectiv
         String id = normalizedNpcId();
         com.stardew.craft.api.v1.npc.StardewNpcDisplay display =
                 com.stardew.craft.api.v1.npc.StardewNpcDisplays.resolve(id);
-        ResourceLocation genericFallback = ResourceLocation.fromNamespaceAndPath(
+        ResourceLocation genericFallback = new ResourceLocation(
                 StardewCraft.MODID, "textures/portraits/lewis.png");
         String legacyPath =
                 com.stardew.craft.client.ClientDisplayFallbacks.stablePath(
                         id, "lewis");
-        ResourceLocation legacyFallback = ResourceLocation.fromNamespaceAndPath(
+        ResourceLocation legacyFallback = new ResourceLocation(
                 StardewCraft.MODID,
                 "textures/portraits/" + legacyPath + ".png");
         ResourceLocation availableFallback =
@@ -845,7 +845,7 @@ public class StardewNpcDialogueScreen extends Screen implements StardewCollectiv
     }
 
     private void closeScreen() {
-        net.neoforged.neoforge.network.PacketDistributor.sendToServer(
+        net.minecraftforge.network.PacketDistributor.sendToServer(
             new com.stardew.craft.network.payload.CloseNpcDialoguePayload(this.npcId)
         );
         if (this.minecraft != null) {

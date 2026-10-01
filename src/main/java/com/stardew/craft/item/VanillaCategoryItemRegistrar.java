@@ -1,8 +1,8 @@
 package com.stardew.craft.item;
 
 import net.minecraft.world.item.Item;
-import net.neoforged.neoforge.registries.DeferredItem;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredItem;
+import net.minecraftforge.registries.DeferredRegister;
 
 import java.util.LinkedHashMap;
 import java.util.List;

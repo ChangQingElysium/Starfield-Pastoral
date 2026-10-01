@@ -23,7 +23,7 @@ import java.util.UUID;
 public enum HayHopperJadeProvider implements IBlockComponentProvider, IServerDataProvider<BlockAccessor> {
     INSTANCE;
 
-    private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "hay_hopper");
+    private static final ResourceLocation UID = new ResourceLocation(StardewCraft.MODID, "hay_hopper");
 
     private static final String NBT_HAY = "hay";
     private static final String NBT_CAPACITY = "capacity";

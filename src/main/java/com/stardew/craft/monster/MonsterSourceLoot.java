@@ -65,7 +65,7 @@ public final class MonsterSourceLoot {
         public Reload() { super(new Gson(), "monster_loot"); }
         @Override protected void apply(Map<ResourceLocation, JsonElement> resources, ResourceManager manager, ProfilerFiller profiler) {
             try {
-                var id = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,"source_tables");
+                var id = new ResourceLocation(StardewCraft.MODID,"source_tables");
                 tables = decode(Objects.requireNonNull(resources.get(id), "Missing source_tables").getAsJsonObject());
             } catch (RuntimeException failure) { StardewCraft.LOGGER.error("Monster loot reload rejected; retaining previous table", failure); }
         }

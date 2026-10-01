@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.UUID;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
 
 /** Client projection of all target-scoped Wicked Kris states owned by us. */
 public final class WickedKrisPoisonClientState {

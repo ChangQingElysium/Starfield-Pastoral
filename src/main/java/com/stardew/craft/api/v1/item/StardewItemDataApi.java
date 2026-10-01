@@ -150,10 +150,10 @@ public final class StardewItemDataApi {
         }
         String prefix = "stardewcraft.type.";
         if (typeKey.startsWith(prefix) && typeKey.length() > prefix.length()) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, typeKey.substring(prefix.length()));
+            return new ResourceLocation(StardewCraft.MODID, typeKey.substring(prefix.length()));
         }
         if (typeKey.startsWith("stardewcraft.tool.")) {
-            return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "tool");
+            return new ResourceLocation(StardewCraft.MODID, "tool");
         }
         ResourceLocation parsed = ResourceLocation.tryParse(typeKey);
         return parsed != null ? parsed : StardewItemData.UNKNOWN_CATEGORY;

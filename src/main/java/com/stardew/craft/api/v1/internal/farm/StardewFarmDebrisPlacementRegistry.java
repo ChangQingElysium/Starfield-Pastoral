@@ -11,7 +11,7 @@ public final class StardewFarmDebrisPlacementRegistry {
     private static final OrderedExtensionRegistry<
             StardewFarmDebrisPlacements.Provider> PROVIDERS =
             new OrderedExtensionRegistry<>(
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             StardewCraft.MODID, "farm/debris_placement"));
 
     private StardewFarmDebrisPlacementRegistry() {

@@ -15,7 +15,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import javax.annotation.Nonnull;
 
 public class CookingPlacedFoodBlockEntityRenderer implements BlockEntityRenderer<CookingPlacedFoodBlockEntity> {
-    private static final ResourceLocation BAKED_FISH = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation BAKED_FISH = new ResourceLocation(
             StardewCraft.MODID, "native_models/block/cooking_blockbench/baked_fish.json");
 
     public CookingPlacedFoodBlockEntityRenderer(BlockEntityRendererProvider.Context context) {

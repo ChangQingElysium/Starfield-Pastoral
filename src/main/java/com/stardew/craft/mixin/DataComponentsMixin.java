@@ -1,9 +1,9 @@
 package com.stardew.craft.mixin;
 
 import com.mojang.serialization.Codec;
-import net.minecraft.core.component.DataComponentType;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.core.component.DataComponentType;
+import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;

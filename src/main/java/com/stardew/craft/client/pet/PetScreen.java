@@ -12,12 +12,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.network.PacketDistributor;
 
 @OnlyIn(Dist.CLIENT)
-@net.neoforged.fml.common.EventBusSubscriber(modid = com.stardew.craft.StardewCraft.MODID, value = Dist.CLIENT)
+@net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid = com.stardew.craft.StardewCraft.MODID, value = Dist.CLIENT)
 public final class PetScreen extends FarmFolioScreen implements com.stardew.craft.client.gui.common.StardewGuiContentSize {
     private static CompoundTag deferredInitial;
     @Override public int minimumCanvasWidth() { return preferredWidth() + 16; }
@@ -34,7 +34,7 @@ public final class PetScreen extends FarmFolioScreen implements com.stardew.craf
         selected = offer.hasUUID("Selected") ? offer.getUUID("Selected") : pets.isEmpty() ? null : pets.getFirst().getUUID("Id");
     }
     public static Component tr(String key, Object... args) { return Component.translatable("pet.stardewcraft." + key, args); }
-    public static ResourceLocation icon(PetVariant variant) { return variant.available() ? variant.breed().icon() : ResourceLocation.parse("stardewcraft:textures/gui/pet/pet_license.png"); }
+    public static ResourceLocation icon(PetVariant variant) { return variant.available() ? variant.breed().icon() : new ResourceLocation("stardewcraft:textures/gui/pet/pet_license.png"); }
     public static void receive(CompoundTag offer) {
         var mc = Minecraft.getInstance();
         if (offer.hasUUID("Reply") && (!(mc.screen instanceof PetScreen previous) || !previous.pending || !previous.offer.getUUID("Nonce").equals(offer.getUUID("Reply")))) return;
@@ -46,15 +46,15 @@ public final class PetScreen extends FarmFolioScreen implements com.stardew.craf
         if (mc.screen instanceof PetScreen previous) next.page = previous.page;
         mc.setScreen(next);
     }
-    @net.neoforged.bus.api.SubscribeEvent
-    public static void tick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
+    @net.minecraftforge.eventbus.api.SubscribeEvent
+    public static void tick(com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
         var mc = Minecraft.getInstance();
         if (deferredInitial != null && mc.player != null && mc.level != null && mc.screen == null) {
             var offer = deferredInitial; deferredInitial = null; receive(offer);
         }
     }
-    @net.neoforged.bus.api.SubscribeEvent
-    public static void logout(net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent.LoggingOut event) { deferredInitial = null; }
+    @net.minecraftforge.eventbus.api.SubscribeEvent
+    public static void logout(net.minecraftforge.client.event.ClientPlayerNetworkEvent.LoggingOut event) { deferredInitial = null; }
     private boolean initial() { return offer.getString("Kind").equals("initial"); }
     private CompoundTag pet() { return pets.stream().filter(p -> p.getUUID("Id").equals(selected)).findFirst().orElse(null); }
     private void send(String action, String value, BlockPos bowl) {

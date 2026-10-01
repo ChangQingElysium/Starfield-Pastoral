@@ -106,8 +106,8 @@ final class SlimeBreeding {
         if (!placed) return;
         baby.initializeOffspring(owner.monsterState().context().offspring(), color);
         if ((color >> 16 & 255) > 100 && (color & 255) > 100 && (color >> 8 & 255) < 50) {
-            while (random.nextDouble() < .1) baby.monsterState().addBornDrop(net.minecraft.resources.ResourceLocation.parse("stardewcraft:iridium_ore"));
-            if (random.nextDouble() < .01) baby.monsterState().addBornDrop(net.minecraft.resources.ResourceLocation.parse("stardewcraft:iridium_bar"));
+            while (random.nextDouble() < .1) baby.monsterState().addBornDrop(new net.minecraft.resources.ResourceLocation("stardewcraft:iridium_ore"));
+            if (random.nextDouble() < .01) baby.monsterState().addBornDrop(new net.minecraft.resources.ResourceLocation("stardewcraft:iridium_bar"));
         }
         var stats = MonsterStats.fromEntity(owner);
         random.nextInt(2); // Source Choose is overwritten, but still consumes a draw.

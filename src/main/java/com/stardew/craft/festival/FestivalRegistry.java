@@ -35,11 +35,11 @@ public final class FestivalRegistry {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Set<ResourceLocation> PLAYER_CONTEXT_CONDITIONS = Set.of(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "has_item"),
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "money"),
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "flag"),
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "skill"),
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "location")
+            new ResourceLocation(StardewCraft.MODID, "has_item"),
+            new ResourceLocation(StardewCraft.MODID, "money"),
+            new ResourceLocation(StardewCraft.MODID, "flag"),
+            new ResourceLocation(StardewCraft.MODID, "skill"),
+            new ResourceLocation(StardewCraft.MODID, "location")
     );
     private static final AtomicDefinitionStore<StardewFestivalDefinition> STORE = new AtomicDefinitionStore<>();
     private static volatile Catalog catalog = Catalog.empty();

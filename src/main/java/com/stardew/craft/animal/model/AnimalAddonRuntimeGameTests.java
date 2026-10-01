@@ -14,15 +14,15 @@ import com.stardew.craft.player.PlayerStardewDataAPI;
 import com.stardew.craft.time.StardewTimeManager;
 import com.stardew.craft.util.StardewDeterministicRandom;
 import net.minecraft.core.*;
-import net.minecraft.core.component.DataComponents;
+import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.gametest.framework.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.block.Blocks;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.gametest.*;
+import net.minecraftforge.common.util.FakePlayerFactory;
+import net.minecraftforge.gametest.*;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @GameTestHolder("stardewcraft_animal_addons")
 @PrefixGameTestTemplate(false)
 public final class AnimalAddonRuntimeGameTests {
-    private static ResourceLocation unique(String path){return ResourceLocation.fromNamespaceAndPath("addon_contract",path+"_"+UUID.randomUUID().toString().replace("-",""));}
+    private static ResourceLocation unique(String path){return new ResourceLocation("addon_contract",path+"_"+UUID.randomUUID().toString().replace("-",""));}
     private static JsonObject animal(String id){
         try(var in=AnimalAddonRuntimeGameTests.class.getResourceAsStream("/data/stardewcraft/stardewcraft/farm_animals/vanilla_1_6_15.json")){
             var json=JsonParser.parseReader(new InputStreamReader(Objects.requireNonNull(in),StandardCharsets.UTF_8)).getAsJsonObject().getAsJsonArray("animals").get(0).getAsJsonObject().deepCopy();
@@ -78,7 +78,7 @@ public final class AnimalAddonRuntimeGameTests {
             install(animal(id));var species=LivestockSpecies.parse(id);var home=home(h,farm);
             var player=FakePlayerFactory.get(level,new GameProfile(owner,"AddonBuyer"));PlayerStardewDataAPI.setMoney(player,1000);
             var limit=new AtomicInteger(1);
-            StardewAgricultureDataApi.registerBuildingProvider(unique("beds"),1000,(world,pos,state)->pos.equals(home.manager())?new StardewBuildingData(home.family(),limit.get(),List.of(ResourceLocation.parse("stardewcraft:duck")),List.of()):null);
+            StardewAgricultureDataApi.registerBuildingProvider(unique("beds"),1000,(world,pos,state)->pos.equals(home.manager())?new StardewBuildingData(home.family(),limit.get(),List.of(new ResourceLocation("stardewcraft:duck")),List.of()):null);
             h.assertTrue(species.matureDays()==7&&species.price()==246,"JSON values did not reach runtime identity");
             var row=new CompoundTag();LivestockHomes.describe(row,level,home);var type=new CompoundTag();LivestockUiData.describe(type,species);
             h.assertTrue(LivestockHomes.offered(row,type),"Client eligibility omits addon type");
@@ -158,7 +158,7 @@ public final class AnimalAddonRuntimeGameTests {
         eggs.clear();eggs.add(LivestockWorldData.Product.fromStack(level,animal,new ItemStack(Items.DIAMOND)));
         var plans=LivestockCollectors.collect(level,home,new ArrayList<>(),eggs);h.assertTrue(eggs.isEmpty()&&held.get(1).isEmpty(),"Collection was not staged");
         StardewAnimalFacilities.apply(level,pos,plans.get(pos));h.assertTrue(held.get(1).is(Items.DIAMOND),"Collector plan not applied");
-        StardewAnimalFacilities.registerUpgrade(unique("upgrade"),ResourceLocation.parse("minecraft:barrel"),ResourceLocation.parse("minecraft:chest"),tag->{tag.putBoolean("converted",true);return tag;});
+        StardewAnimalFacilities.registerUpgrade(unique("upgrade"),new ResourceLocation("minecraft:barrel"),new ResourceLocation("minecraft:chest"),tag->{tag.putBoolean("converted",true);return tag;});
         var converted=StardewAnimalFacilities.upgrade(Blocks.BARREL,Blocks.CHEST,state);
         h.assertTrue(converted.getBoolean("converted")&&!state.contains("converted"),"Upgrade converter was not isolated");
         h.succeed();
@@ -174,7 +174,7 @@ public final class AnimalAddonRuntimeGameTests {
             LivestockDayState.settle(level,home,animal,2,true,false,false,false,StardewDeterministicRandom.create(1,1,1),products,0);
             h.assertTrue(products.size()==1&&LivestockProductEntity.stack(products.getFirst(),level).is(Items.DIAMOND),"Definition produce override ignored");
             var entity=LivestockProjection.create(level,animal);entity.setUUID(animal.id());entity.moveTo(home.manager().getX(),home.manager().getY(),home.manager().getZ());level.addFreshEntity(entity);
-            StardewAgricultureDataApi.registerAnimalProvider(unique("produce"),1000,e->e.getUUID().equals(animal.id())?new StardewAnimalData(home.family(),0,0,ResourceLocation.parse("minecraft:emerald"),1):null);
+            StardewAgricultureDataApi.registerAnimalProvider(unique("produce"),1000,e->e.getUUID().equals(animal.id())?new StardewAnimalData(home.family(),0,0,new ResourceLocation("minecraft:emerald"),1):null);
             products.clear();LivestockDayState.settle(level,home,animal,3,true,false,false,false,StardewDeterministicRandom.create(1,1,1),products,0);
             h.assertTrue(products.size()==1&&LivestockProductEntity.stack(products.getFirst(),level).is(Items.EMERALD),"Loaded entity data provider ignored");
             definition.addProperty("purchase_price",222);definition.addProperty("days_to_mature",9);install(definition);
@@ -206,7 +206,7 @@ public final class AnimalAddonRuntimeGameTests {
     @GameTest(templateNamespace="stardewcraft_buildings",template="construction_site")
     public static void registeredFamilySupportsOneAndFourLevelsWithoutChickenFallback(GameTestHelper h) throws Exception {
         var family=unique("aviary");var builtin=PrefabDefinitions.get(PrefabDefinitions.COOP);var level=h.getLevel();
-        var bindings=new com.stardew.craft.api.v1.building.StardewBuildingFamilies.Binding(ModBlocks.COOP_MANAGER,com.stardew.craft.item.ModItems.COOP_BLUEPRINT,Map.of(),Map.of(1,new com.stardew.craft.api.v1.building.StardewBuildingFamilies.Display("example.aviary",ResourceLocation.parse("example:aviary.png"),64,48)));
+        var bindings=new com.stardew.craft.api.v1.building.StardewBuildingFamilies.Binding(ModBlocks.COOP_MANAGER,com.stardew.craft.item.ModItems.COOP_BLUEPRINT,Map.of(),Map.of(1,new com.stardew.craft.api.v1.building.StardewBuildingFamilies.Display("example.aviary",new ResourceLocation("example:aviary.png"),64,48)));
         com.stardew.craft.api.v1.building.StardewBuildingFamilies.register(family,bindings);
         h.assertTrue(PrefabDefinitions.supported(family)&&com.stardew.craft.api.v1.building.StardewBuildingFamilies.find(family).orElseThrow().displays().get(1).width()==64,"Family/display registration disconnected");
         boolean rejected=false;try{PrefabDefinitions.blueprintItem(unique("unknown"));}catch(IllegalArgumentException expected){rejected=true;}

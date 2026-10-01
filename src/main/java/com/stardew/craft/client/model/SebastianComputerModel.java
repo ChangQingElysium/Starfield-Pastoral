@@ -6,10 +6,10 @@ import com.stardew.craft.client.npcnative.NativeNpcModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 
 @SuppressWarnings("removal")
 @EventBusSubscriber(modid = StardewCraft.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
@@ -23,7 +23,7 @@ public final class SebastianComputerModel implements ResourceManagerReloadListen
 
     @Override public void onResourceManagerReload(ResourceManager resources) {
         model = null;
-        var id = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "furniture_native/sebastian_computer.json");
+        var id = new ResourceLocation(StardewCraft.MODID, "furniture_native/sebastian_computer.json");
         try (var reader = resources.openAsReader(id)) {
             var next = new Gson().fromJson(reader, NativeNpcModel.class);
             if (next.version() != 1 || next.bones().isEmpty() || next.quads().isEmpty())
@@ -55,7 +55,7 @@ public final class SebastianComputerModel implements ResourceManagerReloadListen
                     }
                 }
             }
-            if (resources.getResource(ResourceLocation.parse(next.texture())).isEmpty())
+            if (resources.getResource(new ResourceLocation(next.texture())).isEmpty())
                 throw new IllegalArgumentException("Missing furniture texture");
             model = next;
         } catch (Exception error) {

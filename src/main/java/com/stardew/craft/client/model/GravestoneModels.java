@@ -20,13 +20,13 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ModelEvent;
-import net.neoforged.neoforge.client.model.BakedModelWrapper;
-import net.neoforged.neoforge.client.model.IDynamicBakedModel;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.ModelEvent;
+import net.minecraftforge.client.model.BakedModelWrapper;
+import net.minecraftforge.client.model.IDynamicBakedModel;
+import net.minecraftforge.client.model.data.ModelData;
 
 /** Season selection preserves the placed variant and uses isolated geometry for items. */
 @SuppressWarnings("removal")
@@ -36,7 +36,7 @@ public final class GravestoneModels {
     private static final String[] KINDS = {"tall", "short"};
     private GravestoneModels() {}
     private static ModelResourceLocation id(String season,String kind) {
-        return new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,
+        return new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID,
                 "block/decor/gravestones/"+season+"/"+kind+"_gravestone"),"standalone");
     }
     @SubscribeEvent public static void register(ModelEvent.RegisterAdditional event) {
@@ -53,7 +53,7 @@ public final class GravestoneModels {
                 models.put(key,new Seasonal(Objects.requireNonNull(models.get(key)),seasons,
                         state.getValue(MapDecorStaticBlock.FACING),state.getValue(MapDecorStaticBlock.PART)==MapDecorStaticBlock.Part.MAIN));
             }
-            var item=new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,kind+"_gravestone"),"inventory");
+            var item=new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID,kind+"_gravestone"),"inventory");
             models.put(item,new Seasonal(Objects.requireNonNull(models.get(item)),seasons,Direction.NORTH,true));
         }
     }

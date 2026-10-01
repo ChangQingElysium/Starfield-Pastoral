@@ -184,7 +184,7 @@ public final class WorldAnchorRegistry {
                 "use_ground_height", "location", "roles"));
         ResourceLocation dimension = readId(
                 object, "dimension",
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         StardewCraft.MODID, "stardew_valley"));
         Vec3 position = readPosition(object.get("position"));
         float yaw = object.has("yaw")

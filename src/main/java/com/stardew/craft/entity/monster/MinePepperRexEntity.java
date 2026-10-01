@@ -27,7 +27,7 @@ public final class MinePepperRexEntity extends StardewMonsterEntity {
  public MinePepperRexEntity(EntityType<? extends MinePepperRexEntity> t,Level l){super(t,l);addTag("sd_mob_dino");}
  public static AttributeSupplier.Builder createAttributes(){return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,300).add(Attributes.ATTACK_DAMAGE,15).add(Attributes.MOVEMENT_SPEED,.25).add(Attributes.FOLLOW_RANGE,64).add(Attributes.STEP_HEIGHT,0);}
  @Override protected void registerGoals(){}
- @Override protected ResourceLocation definitionId(){return ResourceLocation.parse("stardewcraft:pepper_rex");}
+ @Override protected ResourceLocation definitionId(){return new ResourceLocation("stardewcraft:pepper_rex");}
  @Override protected void configureSpawn(MonsterDefinition d,MonsterSpawnContext c){var r=MonsterStatResolver.base(d,c,random);setInitialHealth(r.initialHealth());replaceCombatStats(r.combat());behavior.initialize(random);movement.face(2);}
  @Override protected void defineSynchedData(SynchedEntityData.Builder b){super.defineSynchedData(b);b.define(MOVING,false);b.define(HIT,-100L);}
  public boolean moving(){return entityData.get(MOVING);}public double hitTime(float p){return (level().getGameTime()-entityData.get(HIT)+p)/20.;}public PepperRexBehavior behavior(){return behavior;}public void stunFor(int ms){stunMilliseconds=Math.max(stunMilliseconds,ms);}

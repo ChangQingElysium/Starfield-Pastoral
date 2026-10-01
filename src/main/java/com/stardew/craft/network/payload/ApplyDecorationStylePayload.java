@@ -8,11 +8,11 @@ import com.stardew.craft.item.ModItems;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import javax.annotation.Nullable;
 
@@ -34,7 +34,7 @@ public record ApplyDecorationStylePayload(
 
     @SuppressWarnings("null")
     public static final Type<ApplyDecorationStylePayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "apply_decoration_style"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "apply_decoration_style"));
 
     @SuppressWarnings("null")
     public static final StreamCodec<FriendlyByteBuf, ApplyDecorationStylePayload> STREAM_CODEC = StreamCodec.of(

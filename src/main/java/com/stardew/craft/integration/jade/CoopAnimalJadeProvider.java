@@ -24,7 +24,7 @@ import java.util.Optional;
 public enum CoopAnimalJadeProvider implements IEntityComponentProvider, IServerDataProvider<EntityAccessor> {
     INSTANCE;
 
-    private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "coop_animal");
+    private static final ResourceLocation UID = new ResourceLocation(StardewCraft.MODID, "coop_animal");
 
     private static final String NBT_NAME_KEY = "animalNameKey";
     private static final String NBT_ANIMAL_TYPE = "animalType";

@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(FishingHookRenderer.class)
 public abstract class FishingHookRendererPurpleShortsBobberMixin {
-    private static final ResourceLocation SHORTS_BOBBER_TEXTURE = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation SHORTS_BOBBER_TEXTURE = new ResourceLocation(
             StardewCraft.MODID, "textures/item/lucky_purple_shorts.png");
 
     @Redirect(

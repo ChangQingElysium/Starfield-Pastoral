@@ -53,7 +53,7 @@ public final class WeaponCombatIdentity {
                 return parsed;
             }
         }
-        return ResourceLocation.fromNamespaceAndPath(
+        return new ResourceLocation(
                 StardewCraft.MODID,
                 weaponId == null || weaponId.isBlank()
                         ? "unknown_weapon"

@@ -13,7 +13,7 @@ public final class StardewProductionEventRegistry {
     private static final OrderedExtensionRegistry<
             StardewProductionListener> REGISTRY =
             new OrderedExtensionRegistry<>(
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             StardewCraft.MODID,
                             "machine/production_event"));
 

@@ -2,19 +2,19 @@ package com.stardew.craft.network.payload;
 
 import com.stardew.craft.StardewCraft;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.UUID;
 
 @SuppressWarnings("null")
 public record OpenMoneyContractTransferPayload(int money, UUID targetId, String targetName) implements CustomPacketPayload {
     public static final Type<OpenMoneyContractTransferPayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "open_money_contract_transfer"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "open_money_contract_transfer"));
 
     public static final StreamCodec<FriendlyByteBuf, OpenMoneyContractTransferPayload> STREAM_CODEC = StreamCodec.of(
         (buf, payload) -> {

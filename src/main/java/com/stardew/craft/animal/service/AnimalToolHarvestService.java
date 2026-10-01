@@ -148,8 +148,8 @@ public final class AnimalToolHarvestService {
     }
 
     public enum HarvestTool {
-        MILK_PAIL(ResourceLocation.fromNamespaceAndPath("stardewcraft", "milk_pail")),
-        SHEARS(ResourceLocation.fromNamespaceAndPath("stardewcraft", "shears"));
+        MILK_PAIL(new ResourceLocation("stardewcraft", "milk_pail")),
+        SHEARS(new ResourceLocation("stardewcraft", "shears"));
 
         private final ResourceLocation itemId;
 

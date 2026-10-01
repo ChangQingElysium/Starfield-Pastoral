@@ -151,13 +151,13 @@ final class DarkSwordBloodMoonExecutionState
 
     void startPresentation(net.minecraft.server.level.ServerPlayer player,long tick) {
         visualLevel=player.serverLevel(); visualCaster=player.getId(); visualTick=tick;
-        net.neoforged.neoforge.network.PacketDistributor.sendToPlayersInDimension(visualLevel,
+        net.minecraftforge.network.PacketDistributor.sendToPlayersInDimension(visualLevel,
                 new com.stardew.craft.combat.network.DarkSwordBloodMoonPayload(visualCaster,visualTick,true,DarkSwordBloodMoonSkillHandler.ACTIVE_DURATION_TICKS));
     }
 
     void cancel() {
         if(visualLevel != null) {
-            net.neoforged.neoforge.network.PacketDistributor.sendToPlayersInDimension(visualLevel,
+            net.minecraftforge.network.PacketDistributor.sendToPlayersInDimension(visualLevel,
                     new com.stardew.craft.combat.network.DarkSwordBloodMoonPayload(visualCaster,visualTick,false,0));
             visualLevel=null;
         }

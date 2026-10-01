@@ -15,7 +15,7 @@ public final class StardewNpcDisplayRegistry {
     private static final OrderedExtensionRegistry<
             StardewNpcDisplays.Provider> PROVIDERS =
             new OrderedExtensionRegistry<>(
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             StardewCraft.MODID, "npc/display"));
 
     private StardewNpcDisplayRegistry() {
@@ -79,9 +79,9 @@ public final class StardewNpcDisplayRegistry {
         String portraitPath = core && "mister_qi".equals(path)
                 ? "mrqi"
                 : path;
-        ResourceLocation portrait = ResourceLocation.fromNamespaceAndPath(
+        ResourceLocation portrait = new ResourceLocation(
                 namespace, "textures/portraits/" + portraitPath + ".png");
-        ResourceLocation mugshot = ResourceLocation.fromNamespaceAndPath(
+        ResourceLocation mugshot = new ResourceLocation(
                 namespace, "textures/mugshots/" + path + ".png");
         return new StardewNpcDisplay(
                 npcId,

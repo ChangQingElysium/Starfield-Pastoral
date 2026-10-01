@@ -6,8 +6,8 @@ import net.minecraft.resources.ResourceLocation;
 import software.bernie.geckolib.model.GeoModel;
 
 public class FairStrengthTesterGeoModel extends GeoModel<FairStrengthTesterBlockEntity> {
-    private static final ResourceLocation MODEL = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "geo/block/festival/fair_strength_tester.geo.json");
-    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/block/festival/fair_strength_tester.png");
+    private static final ResourceLocation MODEL = new ResourceLocation(StardewCraft.MODID, "geo/block/festival/fair_strength_tester.geo.json");
+    private static final ResourceLocation TEXTURE = new ResourceLocation(StardewCraft.MODID, "textures/block/festival/fair_strength_tester.png");
 
     @Override
     public ResourceLocation getModelResource(FairStrengthTesterBlockEntity animatable) {

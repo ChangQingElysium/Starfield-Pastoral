@@ -15,7 +15,7 @@ import net.minecraft.world.entity.player.Inventory;
 public class TreasureChestScreen extends AbstractContainerScreen<TreasureChestMenu> {
 	// 使用原版的54格箱子贴图（通用箱子GUI）
 	private static final ResourceLocation CHEST_TEXTURE = 
-			ResourceLocation.withDefaultNamespace("textures/gui/container/generic_54.png");
+			new ResourceLocation("textures/gui/container/generic_54.png");
 	
 	private static final int CHEST_ROWS = 4;
 	

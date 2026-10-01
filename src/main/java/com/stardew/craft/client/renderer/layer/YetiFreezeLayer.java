@@ -15,7 +15,7 @@ import net.minecraft.world.entity.LivingEntity;
 
 public class YetiFreezeLayer<T extends LivingEntity, M extends EntityModel<T>> extends RenderLayer<T, M> {
 
-    private static final ResourceLocation ICE_TEXTURE = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation ICE_TEXTURE = new ResourceLocation(
         "minecraft",
         "textures/block/ice.png"
     );

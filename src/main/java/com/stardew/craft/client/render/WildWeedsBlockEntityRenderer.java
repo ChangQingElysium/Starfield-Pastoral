@@ -48,6 +48,6 @@ public class WildWeedsBlockEntityRenderer implements BlockEntityRenderer<WildWee
 	}
 
 	private static ResourceLocation weedBlockbenchModel(String name) {
-		return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "models/block/weeds_blockbench/" + name + ".json");
+		return new ResourceLocation(StardewCraft.MODID, "models/block/weeds_blockbench/" + name + ".json");
 	}
 }

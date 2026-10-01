@@ -18,7 +18,7 @@ import net.minecraft.world.effect.MobEffects;
 /**
  * Server-authoritative lifecycle for Dragontooth Shiv's original breath stance.
  */
-@net.neoforged.fml.common.EventBusSubscriber(modid = com.stardew.craft.StardewCraft.MODID)
+@net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid = com.stardew.craft.StardewCraft.MODID)
 public final class DragontoothShivBreathSkillHandler
         implements RuntimeWeaponSkillHandler {
     public static final float ENERGY_COST = 10.0F;
@@ -27,8 +27,8 @@ public final class DragontoothShivBreathSkillHandler
     public static final int RESISTANCE_AMPLIFIER = 1;
     public static final int ANIMATION_TICKS = 8;
 
-    @net.neoforged.bus.api.SubscribeEvent
-    public static void onStartTracking(net.neoforged.neoforge.event.entity.player.PlayerEvent.StartTracking event) {
+    @net.minecraftforge.eventbus.api.SubscribeEvent
+    public static void onStartTracking(net.minecraftforge.event.entity.player.PlayerEvent.StartTracking event) {
         if (!(event.getEntity() instanceof ServerPlayer viewer) || !(event.getTarget() instanceof ServerPlayer caster)) return;
         WeaponSkillRuntime.activeExecutionState(caster.getUUID(), BuiltinWeaponSkillHandlers.DRAGONTOOTH_SHIV_BREATH,
                 DragontoothShivBreathExecutionState.class).ifPresent(state -> state.syncTo(caster, viewer));

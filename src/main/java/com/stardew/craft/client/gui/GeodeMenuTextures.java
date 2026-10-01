@@ -21,6 +21,6 @@ public final class GeodeMenuTextures {
     }
 
     private static ResourceLocation geode(String name) {
-        return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/geode/" + name + ".png");
+        return new ResourceLocation(StardewCraft.MODID, "textures/gui/geode/" + name + ".png");
     }
 }

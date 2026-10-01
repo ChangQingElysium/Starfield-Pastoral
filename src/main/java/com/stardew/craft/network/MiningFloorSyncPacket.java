@@ -2,11 +2,11 @@ package com.stardew.craft.network;
 
 import com.stardew.craft.StardewCraft;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * 矿井层数同步包 - 服务端 → 客户端
@@ -15,7 +15,7 @@ public record MiningFloorSyncPacket(int currentFloor) implements CustomPacketPay
     
     @SuppressWarnings("null")
     public static final CustomPacketPayload.Type<MiningFloorSyncPacket> TYPE =
-            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "mining_floor_sync"));
+            new CustomPacketPayload.Type<>(new ResourceLocation(StardewCraft.MODID, "mining_floor_sync"));
     
     @SuppressWarnings("null")
     public static final StreamCodec<ByteBuf, MiningFloorSyncPacket> STREAM_CODEC =

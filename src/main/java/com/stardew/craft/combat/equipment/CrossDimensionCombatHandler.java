@@ -17,11 +17,11 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
-import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.entity.living.LivingDamageEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
 /**
  * Maps reactive Stardew equipment effects onto Minecraft's native health and
@@ -98,15 +98,15 @@ public final class CrossDimensionCombatHandler {
                 damageEnteringNativeProtection(
                         event.getNewDamage(),
                         event.getContainer().getReduction(
-                                net.neoforged.neoforge.common.damagesource
+                                net.minecraftforge.common.damagesource
                                         .DamageContainer.Reduction.ARMOR
                         ),
                         event.getContainer().getReduction(
-                                net.neoforged.neoforge.common.damagesource
+                                net.minecraftforge.common.damagesource
                                         .DamageContainer.Reduction.ENCHANTMENTS
                         ),
                         event.getContainer().getReduction(
-                                net.neoforged.neoforge.common.damagesource
+                                net.minecraftforge.common.damagesource
                                         .DamageContainer.Reduction.MOB_EFFECTS
                         )
                 ),

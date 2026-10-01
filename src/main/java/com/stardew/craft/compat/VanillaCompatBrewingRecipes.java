@@ -2,20 +2,20 @@ package com.stardew.craft.compat;
 
 import com.stardew.craft.StardewCraft;
 import net.minecraft.core.Holder;
-import net.minecraft.core.component.DataComponents;
+import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.item.alchemy.PotionContents;
+import com.stardew.craft.port.net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.common.brewing.IBrewingRecipe;
-import net.neoforged.neoforge.event.brewing.RegisterBrewingRecipesEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.common.brewing.IBrewingRecipe;
+import com.stardew.craft.port.net.neoforged.neoforge.event.brewing.RegisterBrewingRecipesEvent;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
@@ -24,7 +24,7 @@ import java.util.Optional;
 public final class VanillaCompatBrewingRecipes {
 
     private static final TagKey<Item> RABBIT_FEET = ItemTags.create(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "vanilla_compat/rabbit_feet"));
+            new ResourceLocation(StardewCraft.MODID, "vanilla_compat/rabbit_feet"));
 
     private VanillaCompatBrewingRecipes() {}
 

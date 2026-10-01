@@ -3,10 +3,10 @@ package com.stardew.craft.combat.skill.runtime;
 import com.stardew.craft.StardewCraft;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.living.LivingKnockBackEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
 
 /** Lets an effective incoming knockback take ownership from skill movement. */
 @EventBusSubscriber(modid = StardewCraft.MODID)

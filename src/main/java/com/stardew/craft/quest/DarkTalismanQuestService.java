@@ -7,10 +7,10 @@ import com.stardew.craft.player.PlayerDataManager;
 import com.stardew.craft.sewer.SewerStoryFlags;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 /** Owns quest 28 completion handoff and repairs saves affected by a missing bundled definition. */
 @EventBusSubscriber(modid = StardewCraft.MODID)

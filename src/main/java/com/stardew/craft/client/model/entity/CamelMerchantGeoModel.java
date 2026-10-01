@@ -6,11 +6,11 @@ import net.minecraft.resources.ResourceLocation;
 import software.bernie.geckolib.model.GeoModel;
 
 public class CamelMerchantGeoModel extends GeoModel<CamelMerchantEntity> {
-    private static final ResourceLocation MODEL = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation MODEL = new ResourceLocation(
             StardewCraft.MODID, "geo/entity/camel_merchant/camel_merchant.geo.json");
-    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation TEXTURE = new ResourceLocation(
             StardewCraft.MODID, "textures/entity/camel_merchant/camel_merchant.png");
-    private static final ResourceLocation ANIMATION = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation ANIMATION = new ResourceLocation(
             StardewCraft.MODID, "animations/entity/camel_merchant/camel_merchant.animation.json");
 
     @Override

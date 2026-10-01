@@ -8,9 +8,9 @@ import java.util.Optional;
 /** Ordered and failure-isolated addon dispatch; empty means pass to the next resolver. */
 public final class StardewNpcExecutionRegistry {
     private static final OrderedExtensionRegistry<StardewNpcExecution.Condition> CONDITIONS=
-            new OrderedExtensionRegistry<>(ResourceLocation.parse("stardewcraft:npc/conditions"));
+            new OrderedExtensionRegistry<>(new ResourceLocation("stardewcraft:npc/conditions"));
     private static final OrderedExtensionRegistry<StardewNpcExecution.SupportResolver> SUPPORTS=
-            new OrderedExtensionRegistry<>(ResourceLocation.parse("stardewcraft:npc/supports"));
+            new OrderedExtensionRegistry<>(new ResourceLocation("stardewcraft:npc/supports"));
     private StardewNpcExecutionRegistry() {}
     public static void registerCondition(ResourceLocation id,int priority,StardewNpcExecution.Condition condition) { CONDITIONS.register(id,priority,condition); }
     public static void registerSupport(ResourceLocation id,int priority,StardewNpcExecution.SupportResolver support) { SUPPORTS.register(id,priority,support); }

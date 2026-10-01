@@ -192,7 +192,7 @@ public final class BuildingPlacementService {
 
     static void flashProblems(ServerPlayer player, java.util.List<BlockPos> problems) {
         if (problems.isEmpty()) return;
-        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
+        net.minecraftforge.network.PacketDistributor.sendToPlayer(player,
                 new com.stardew.craft.network.payload.BuildingObstructionFlashPayload(
                         player.level().dimension().location(), problems));
     }
@@ -319,7 +319,7 @@ public final class BuildingPlacementService {
         var state = level.getBlockState(pos);
         if (!state.is(PrefabDefinitions.managerBlock(record.family())))
             throw new IllegalStateException("Completed building is missing its manager: " + record.id());
-        net.neoforged.neoforge.network.PacketDistributor.sendToPlayersTrackingChunk(level,
+        net.minecraftforge.network.PacketDistributor.sendToPlayersTrackingChunk(level,
                 new net.minecraft.world.level.ChunkPos(pos),
                 new com.stardew.craft.network.payload.BuildingManagerReadyPayload(level.dimension().location(), pos, state));
     }

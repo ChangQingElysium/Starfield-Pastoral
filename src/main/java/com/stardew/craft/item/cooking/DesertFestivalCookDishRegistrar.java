@@ -4,8 +4,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.world.item.Item;
-import net.neoforged.neoforge.registries.DeferredItem;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredItem;
+import net.minecraftforge.registries.DeferredRegister;
 
 public final class DesertFestivalCookDishRegistrar {
     private static final String TYPE_KEY = "stardewcraft.type.festival_food";

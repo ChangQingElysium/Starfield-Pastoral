@@ -14,7 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.joml.Matrix4f;
 
 public class FairyCompanionRenderer extends EntityRenderer<FairyCompanionEntity> {
-    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation TEXTURE = new ResourceLocation(
         StardewCraft.MODID,
         "textures/entity/trinket/fairy_companion.png"
     );

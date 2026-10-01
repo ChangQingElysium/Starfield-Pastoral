@@ -8,259 +8,259 @@ import net.minecraft.resources.ResourceLocation;
  * Registers StardewCraft-owned original weapon skills with the shared handler API.
  */
 public final class BuiltinWeaponSkillHandlers {
-    public static final ResourceLocation CRESCENT_SLASH = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation CRESCENT_SLASH = new ResourceLocation(
             StardewCraft.MODID,
             "crescent_slash"
     );
-    public static final ResourceLocation TETANUS_STRIKE = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation TETANUS_STRIKE = new ResourceLocation(
             StardewCraft.MODID,
             "tetanus_strike"
     );
-    public static final ResourceLocation TREE_BLESSING = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation TREE_BLESSING = new ResourceLocation(
             StardewCraft.MODID,
             "tree_blessing"
     );
-    public static final ResourceLocation LIGHT_COUNTER = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation LIGHT_COUNTER = new ResourceLocation(
             StardewCraft.MODID,
             "light_counter"
     );
-    public static final ResourceLocation DESPERATE_PLUNDER = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation DESPERATE_PLUNDER = new ResourceLocation(
             StardewCraft.MODID,
             "desperate_plunder"
     );
-    public static final ResourceLocation BONE_FRACTURE = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation BONE_FRACTURE = new ResourceLocation(
             StardewCraft.MODID,
             "bone_fracture"
     );
-    public static final ResourceLocation STEEL_SPINE_FURY = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation STEEL_SPINE_FURY = new ResourceLocation(
             StardewCraft.MODID,
             "steel_spine_fury"
     );
-    public static final ResourceLocation CARVING_THRUST = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation CARVING_THRUST = new ResourceLocation(
             StardewCraft.MODID,
             "carving_thrust"
     );
-    public static final ResourceLocation IRON_DIRK_THRUST = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation IRON_DIRK_THRUST = new ResourceLocation(
             StardewCraft.MODID,
             "iron_dirk_thrust"
     );
-    public static final ResourceLocation WIND_SPIRE_THRUST = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation WIND_SPIRE_THRUST = new ResourceLocation(
             StardewCraft.MODID,
             "wind_spire_thrust"
     );
-    public static final ResourceLocation ELF_BLADE_LEAF = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation ELF_BLADE_LEAF = new ResourceLocation(
             StardewCraft.MODID,
             "elf_blade_leaf"
     );
-    public static final ResourceLocation BURGLAR_SHANK = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation BURGLAR_SHANK = new ResourceLocation(
             StardewCraft.MODID,
             "burglar_shank"
     );
-    public static final ResourceLocation FISHCATCH_THRUST = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation FISHCATCH_THRUST = new ResourceLocation(
             StardewCraft.MODID,
             "fishcatch_thrust"
     );
-    public static final ResourceLocation CRYSTAL_DAGGER_LAYER = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation CRYSTAL_DAGGER_LAYER = new ResourceLocation(
             StardewCraft.MODID,
             "crystal_dagger_layer"
     );
-    public static final ResourceLocation SHADOW_DAGGER_EXECUTE = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation SHADOW_DAGGER_EXECUTE = new ResourceLocation(
             StardewCraft.MODID,
             "shadow_dagger_execute"
     );
-    public static final ResourceLocation TIDE_REEL = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation TIDE_REEL = new ResourceLocation(
             StardewCraft.MODID,
             "tide_reel"
     );
-    public static final ResourceLocation DWARF_DAGGER_THRUST = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation DWARF_DAGGER_THRUST = new ResourceLocation(
             StardewCraft.MODID,
             "dwarf_dagger_thrust"
     );
-    public static final ResourceLocation HOLY_SMITE = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation HOLY_SMITE = new ResourceLocation(
             StardewCraft.MODID,
             "holy_smite"
     );
-    public static final ResourceLocation DWARF_DAGGER_RUSH = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation DWARF_DAGGER_RUSH = new ResourceLocation(
             StardewCraft.MODID,
             "dwarf_dagger_rush"
     );
-    public static final ResourceLocation HOLY_DOMAIN = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation HOLY_DOMAIN = new ResourceLocation(
             StardewCraft.MODID,
             "holy_domain"
     );
-    public static final ResourceLocation WICKED_KRIS_VENOM_RIPPLE = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation WICKED_KRIS_VENOM_RIPPLE = new ResourceLocation(
             StardewCraft.MODID,
             "wicked_kris_venom_ripple"
     );
-    public static final ResourceLocation WICKED_KRIS_NEST_BURST = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation WICKED_KRIS_NEST_BURST = new ResourceLocation(
             StardewCraft.MODID,
             "wicked_kris_nest_burst"
     );
-    public static final ResourceLocation IRIDIUM_NEEDLE_THRUST = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation IRIDIUM_NEEDLE_THRUST = new ResourceLocation(
             StardewCraft.MODID,
             "iridium_needle_thrust"
     );
-    public static final ResourceLocation OSSIFIED_MARK = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation OSSIFIED_MARK = new ResourceLocation(
             StardewCraft.MODID,
             "ossified_mark"
     );
-    public static final ResourceLocation OSSIFIED_EXECUTION = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation OSSIFIED_EXECUTION = new ResourceLocation(
             StardewCraft.MODID,
             "ossified_execution"
     );
-    public static final ResourceLocation INSECT_EYE_STANCE = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation INSECT_EYE_STANCE = new ResourceLocation(
             StardewCraft.MODID,
             "insect_eye_stance"
     );
-    public static final ResourceLocation IRIDIUM_NEEDLE_FRENZY = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation IRIDIUM_NEEDLE_FRENZY = new ResourceLocation(
             StardewCraft.MODID,
             "iridium_needle_frenzy"
     );
-    public static final ResourceLocation TEMPERED_QUENCH = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation TEMPERED_QUENCH = new ResourceLocation(
             StardewCraft.MODID,
             "tempered_quench"
     );
-    public static final ResourceLocation YETI_TOOTH_MARK = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation YETI_TOOTH_MARK = new ResourceLocation(
             StardewCraft.MODID,
             "yeti_tooth_mark"
     );
-    public static final ResourceLocation TEMPLAR_VOW = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation TEMPLAR_VOW = new ResourceLocation(
             StardewCraft.MODID,
             "templar_vow"
     );
-    public static final ResourceLocation INSECT_DASH = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation INSECT_DASH = new ResourceLocation(
             StardewCraft.MODID,
             "insect_dash"
     );
-    public static final ResourceLocation OBSIDIAN_RESONANCE = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation OBSIDIAN_RESONANCE = new ResourceLocation(
             StardewCraft.MODID,
             "obsidian_resonance"
     );
-    public static final ResourceLocation TEMPLAR_JUDGEMENT = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation TEMPLAR_JUDGEMENT = new ResourceLocation(
             StardewCraft.MODID,
             "templar_judgement"
     );
-    public static final ResourceLocation YETI_TOOTH_SPINE = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation YETI_TOOTH_SPINE = new ResourceLocation(
             StardewCraft.MODID,
             "yeti_tooth_spine"
     );
-    public static final ResourceLocation TEMPERED_BILLET = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation TEMPERED_BILLET = new ResourceLocation(
             StardewCraft.MODID,
             "tempered_billet"
     );
-    public static final ResourceLocation OBSIDIAN_CRACK = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation OBSIDIAN_CRACK = new ResourceLocation(
             StardewCraft.MODID,
             "obsidian_crack"
     );
-    public static final ResourceLocation TIDE_MARK = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation TIDE_MARK = new ResourceLocation(
             StardewCraft.MODID,
             "tide_mark"
     );
-    public static final ResourceLocation TIDE_ANCHOR = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation TIDE_ANCHOR = new ResourceLocation(
             StardewCraft.MODID,
             "tide_anchor"
     );
-    public static final ResourceLocation SILVER_FOLDBACK = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation SILVER_FOLDBACK = new ResourceLocation(
             StardewCraft.MODID,
             "silver_foldback"
     );
-    public static final ResourceLocation CLAYMORE_FOLDBACK = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation CLAYMORE_FOLDBACK = new ResourceLocation(
             StardewCraft.MODID,
             "claymore_foldback"
     );
-    public static final ResourceLocation DARK_SWORD_BLOOD_DEBT = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation DARK_SWORD_BLOOD_DEBT = new ResourceLocation(
             StardewCraft.MODID,
             "dark_sword_blood_debt"
     );
-    public static final ResourceLocation MEOWMERE_SHOT = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation MEOWMERE_SHOT = new ResourceLocation(
             StardewCraft.MODID,
             "meowmere_shot"
     );
-    public static final ResourceLocation STEEL_FALCHION_TRACE = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation STEEL_FALCHION_TRACE = new ResourceLocation(
             StardewCraft.MODID,
             "steel_falchion_trace"
     );
-    public static final ResourceLocation MEOWMERE_SYMPHONY = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation MEOWMERE_SYMPHONY = new ResourceLocation(
             StardewCraft.MODID,
             "meowmere_symphony"
     );
-    public static final ResourceLocation STEEL_FALCHION_LINE = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation STEEL_FALCHION_LINE = new ResourceLocation(
             StardewCraft.MODID,
             "steel_falchion_line"
     );
-    public static final ResourceLocation DARK_SWORD_BLOOD_MOON = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation DARK_SWORD_BLOOD_MOON = new ResourceLocation(
             StardewCraft.MODID,
             "dark_sword_blood_moon"
     );
-    public static final ResourceLocation DRAGONTOOTH_SHIV_STAB = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation DRAGONTOOTH_SHIV_STAB = new ResourceLocation(
             StardewCraft.MODID,
             "dragontooth_shiv_stab"
     );
-    public static final ResourceLocation DWARF_RUNE_GUARD = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation DWARF_RUNE_GUARD = new ResourceLocation(
             StardewCraft.MODID,
             "dwarf_rune_guard"
     );
-    public static final ResourceLocation LAVA_KATANA_BRAND = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation LAVA_KATANA_BRAND = new ResourceLocation(
             StardewCraft.MODID,
             "lava_katana_brand"
     );
-    public static final ResourceLocation DRAGON_BREATH_THRUST = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation DRAGON_BREATH_THRUST = new ResourceLocation(
             StardewCraft.MODID,
             "dragon_breath_thrust"
     );
-    public static final ResourceLocation DRAGONTOOTH_SHIV_BREATH = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation DRAGONTOOTH_SHIV_BREATH = new ResourceLocation(
             StardewCraft.MODID,
             "dragontooth_shiv_breath"
     );
-    public static final ResourceLocation LAVA_KATANA_REVERB = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation LAVA_KATANA_REVERB = new ResourceLocation(
             StardewCraft.MODID,
             "lava_katana_reverb"
     );
-    public static final ResourceLocation DRAGON_BREATH_JUDGEMENT = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation DRAGON_BREATH_JUDGEMENT = new ResourceLocation(
             StardewCraft.MODID,
             "dragon_breath_judgement"
     );
-    public static final ResourceLocation DWARF_FORTRESS = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation DWARF_FORTRESS = new ResourceLocation(
             StardewCraft.MODID,
             "dwarf_fortress"
     );
-    public static final ResourceLocation GALAXY_DAGGER_STARSTAB = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation GALAXY_DAGGER_STARSTAB = new ResourceLocation(
             StardewCraft.MODID,
             "galaxy_dagger_starstab"
     );
-    public static final ResourceLocation GALAXY_DAGGER_STARLEAP = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation GALAXY_DAGGER_STARLEAP = new ResourceLocation(
             StardewCraft.MODID,
             "galaxy_dagger_starleap"
     );
-    public static final ResourceLocation GALAXY_JUDGEMENT = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation GALAXY_JUDGEMENT = new ResourceLocation(
             StardewCraft.MODID,
             "galaxy_judgement"
     );
-    public static final ResourceLocation INFINITY_DAGGER_SINGULARITY_STAB = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation INFINITY_DAGGER_SINGULARITY_STAB = new ResourceLocation(
             StardewCraft.MODID,
             "infinity_dagger_singularity_stab"
     );
-    public static final ResourceLocation INFINITY_DAGGER_SINGULARITY_BACKSTAB = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation INFINITY_DAGGER_SINGULARITY_BACKSTAB = new ResourceLocation(
             StardewCraft.MODID,
             "infinity_dagger_singularity_backstab"
     );
-    public static final ResourceLocation SINGULARITY_EVOLVE = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation SINGULARITY_EVOLVE = new ResourceLocation(
             StardewCraft.MODID,
             "singularity_evolve"
     );
-    public static final ResourceLocation STARTRAIL_RIFT = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation STARTRAIL_RIFT = new ResourceLocation(
             StardewCraft.MODID,
             "startrail_rift"
     );
-    public static final ResourceLocation ETERNAL_COLLAPSE = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation ETERNAL_COLLAPSE = new ResourceLocation(
             StardewCraft.MODID,
             "eternal_collapse"
     );
-    public static final ResourceLocation FEMUR_SLAM = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation FEMUR_SLAM = new ResourceLocation(
             StardewCraft.MODID,
             "femur_slam"
     );
-    public static final ResourceLocation FOREST_BLESSING = ResourceLocation.fromNamespaceAndPath(
+    public static final ResourceLocation FOREST_BLESSING = new ResourceLocation(
             StardewCraft.MODID,
             "forest_blessing"
     );
@@ -340,20 +340,20 @@ public final class BuiltinWeaponSkillHandlers {
         WeaponSkillRuntime.register(SINGULARITY_EVOLVE, new SingularityEvolveSkillHandler());
         WeaponSkillRuntime.register(STARTRAIL_RIFT, new StartrailRiftSkillHandler());
         WeaponSkillRuntime.register(ETERNAL_COLLAPSE, new EternalCollapseSkillHandler());
-        WeaponSkillRuntime.register(ResourceLocation.fromNamespaceAndPath("stardewcraft", DragonRapierRules.JAW), new DragonRapierSkillHandler(DragonRapierRules.JAW));
-        WeaponSkillRuntime.register(ResourceLocation.fromNamespaceAndPath("stardewcraft", DragonRapierRules.BREATH), new DragonRapierSkillHandler(DragonRapierRules.BREATH));
-        WeaponSkillRuntime.register(ResourceLocation.fromNamespaceAndPath("stardewcraft", DragonRapierRules.RIPOSTE), new DragonRapierSkillHandler(DragonRapierRules.RIPOSTE));
-        WeaponSkillRuntime.register(ResourceLocation.fromNamespaceAndPath("stardewcraft", SlammerDwarfRules.LIFT), new SlammerDwarfSkillHandler(SlammerDwarfRules.LIFT));
-        WeaponSkillRuntime.register(ResourceLocation.fromNamespaceAndPath("stardewcraft", SlammerDwarfRules.RUSH), new SlammerDwarfSkillHandler(SlammerDwarfRules.RUSH));
-        WeaponSkillRuntime.register(ResourceLocation.fromNamespaceAndPath("stardewcraft", SlammerDwarfRules.PISTON), new SlammerDwarfSkillHandler(SlammerDwarfRules.PISTON));
-        WeaponSkillRuntime.register(ResourceLocation.fromNamespaceAndPath("stardewcraft", SlammerDwarfRules.FAULT), new SlammerDwarfSkillHandler(SlammerDwarfRules.FAULT));
-        WeaponSkillRuntime.register(ResourceLocation.fromNamespaceAndPath("stardewcraft", IronClubRules.PRESS), new IronClubSkillHandler(IronClubRules.PRESS));
-        WeaponSkillRuntime.register(ResourceLocation.fromNamespaceAndPath("stardewcraft", IronClubRules.SWEEP), new IronClubSkillHandler(IronClubRules.SWEEP));
-        WeaponSkillRuntime.register(ResourceLocation.fromNamespaceAndPath("stardewcraft", WoodWeaponRules.WHIRL), new WoodWeaponSkillHandler(WoodWeaponRules.WHIRL));
-        WeaponSkillRuntime.register(ResourceLocation.fromNamespaceAndPath("stardewcraft", WoodWeaponRules.LEAP), new WoodWeaponSkillHandler(WoodWeaponRules.LEAP));
+        WeaponSkillRuntime.register(new ResourceLocation("stardewcraft", DragonRapierRules.JAW), new DragonRapierSkillHandler(DragonRapierRules.JAW));
+        WeaponSkillRuntime.register(new ResourceLocation("stardewcraft", DragonRapierRules.BREATH), new DragonRapierSkillHandler(DragonRapierRules.BREATH));
+        WeaponSkillRuntime.register(new ResourceLocation("stardewcraft", DragonRapierRules.RIPOSTE), new DragonRapierSkillHandler(DragonRapierRules.RIPOSTE));
+        WeaponSkillRuntime.register(new ResourceLocation("stardewcraft", SlammerDwarfRules.LIFT), new SlammerDwarfSkillHandler(SlammerDwarfRules.LIFT));
+        WeaponSkillRuntime.register(new ResourceLocation("stardewcraft", SlammerDwarfRules.RUSH), new SlammerDwarfSkillHandler(SlammerDwarfRules.RUSH));
+        WeaponSkillRuntime.register(new ResourceLocation("stardewcraft", SlammerDwarfRules.PISTON), new SlammerDwarfSkillHandler(SlammerDwarfRules.PISTON));
+        WeaponSkillRuntime.register(new ResourceLocation("stardewcraft", SlammerDwarfRules.FAULT), new SlammerDwarfSkillHandler(SlammerDwarfRules.FAULT));
+        WeaponSkillRuntime.register(new ResourceLocation("stardewcraft", IronClubRules.PRESS), new IronClubSkillHandler(IronClubRules.PRESS));
+        WeaponSkillRuntime.register(new ResourceLocation("stardewcraft", IronClubRules.SWEEP), new IronClubSkillHandler(IronClubRules.SWEEP));
+        WeaponSkillRuntime.register(new ResourceLocation("stardewcraft", WoodWeaponRules.WHIRL), new WoodWeaponSkillHandler(WoodWeaponRules.WHIRL));
+        WeaponSkillRuntime.register(new ResourceLocation("stardewcraft", WoodWeaponRules.LEAP), new WoodWeaponSkillHandler(WoodWeaponRules.LEAP));
         WeaponSkillRuntime.register(FEMUR_SLAM, new FemurSlamSkillHandler());
         for (String id : new String[]{HeavyHammerRules.SWEEP, HeavyHammerRules.QUAKE, HeavyHammerRules.PRESS, HeavyHammerRules.ENDLESS})
-            WeaponSkillRuntime.register(ResourceLocation.fromNamespaceAndPath("stardewcraft", id), new HeavyHammerSkillHandler(id));
+            WeaponSkillRuntime.register(new ResourceLocation("stardewcraft", id), new HeavyHammerSkillHandler(id));
         WeaponSkillRuntime.register(CRESCENT_SLASH, new CrescentSlashSkillHandler());
         WeaponSkillRuntime.register(FOREST_BLESSING, new ForestBlessingSkillHandler());
         bootstrapped = true;

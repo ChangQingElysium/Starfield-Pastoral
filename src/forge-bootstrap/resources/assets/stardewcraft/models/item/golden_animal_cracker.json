@@ -1,7 +1,0 @@
-{
-    "parent":  "minecraft:item/generated",
-    "textures":  {
-                     "layer0":  "stardewcraft:item/misc/golden_animal_cracker",
-                     "particle":  "stardewcraft:item/misc/golden_animal_cracker"
-                 }
-}

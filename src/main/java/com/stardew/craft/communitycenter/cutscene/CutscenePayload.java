@@ -3,11 +3,11 @@ package com.stardew.craft.communitycenter.cutscene;
 import com.stardew.craft.StardewCraft;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * S→C: 触发/推进社区中心过场动画。
@@ -32,7 +32,7 @@ public record CutscenePayload(
     public static final byte PHASE_END     = 4;
 
     public static final Type<CutscenePayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "cc_cutscene")
+            new ResourceLocation(StardewCraft.MODID, "cc_cutscene")
     );
 
     public static CutscenePayload clearScreen() {
@@ -74,7 +74,7 @@ public record CutscenePayload(
         context.enqueueWork(() -> handleClient(payload));
     }
 
-    @net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+    @net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
     private static void handleClient(CutscenePayload payload) {
         ScreenFade.onCutscenePacket(payload);
     }

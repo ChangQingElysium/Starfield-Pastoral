@@ -24,7 +24,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -481,7 +481,7 @@ public final class QuestDebugCommand {
 
     private static void giveItem(ServerPlayer target, String itemId, int count) {
         try {
-            var item = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(ResourceLocation.parse(itemId));
+            var item = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(new ResourceLocation(itemId));
             if (item == Items.AIR) return;
             ItemStack stack = new ItemStack(item, count);
             if (!target.getInventory().add(stack)) {

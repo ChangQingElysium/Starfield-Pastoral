@@ -3,12 +3,12 @@ package com.stardew.craft.network.payload;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.farm.FarmJoinClientState;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * S→C: 同步当前玩家是否有待处理的加入农场申请。
@@ -17,7 +17,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 public record FarmJoinPendingStatePayload(boolean pending) implements CustomPacketPayload {
 
     public static final Type<FarmJoinPendingStatePayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "farm_join_pending_state"));
+            new Type<>(new ResourceLocation(StardewCraft.MODID, "farm_join_pending_state"));
 
     public static final StreamCodec<FriendlyByteBuf, FarmJoinPendingStatePayload> STREAM_CODEC = StreamCodec.of(
             (buf, payload) -> buf.writeBoolean(payload.pending),

@@ -2,15 +2,15 @@ package com.stardew.craft.client;
 
 import com.stardew.craft.StardewCraft;
 import net.minecraft.client.KeyMapping;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
-import net.neoforged.neoforge.client.settings.KeyConflictContext;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
+import net.minecraftforge.client.settings.KeyConflictContext;
 import com.mojang.blaze3d.platform.InputConstants;
 import org.lwjgl.glfw.GLFW;
 
-@SuppressWarnings("removal") // NeoForge 21.1 弃用 bus 参数，但功能仍正常
+@SuppressWarnings("removal") // MinecraftForge 21.1 弃用 bus 参数，但功能仍正常
 @EventBusSubscriber(modid = StardewCraft.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
 public final class ModKeyMappings {
 
@@ -65,13 +65,13 @@ public final class ModKeyMappings {
     );
 
     public static final KeyMapping BUILDING_ROTATE = new KeyMapping(
-            "key.stardewcraft.building_rotate", new net.neoforged.neoforge.client.settings.IKeyConflictContext() {
+            "key.stardewcraft.building_rotate", new net.minecraftforge.client.settings.IKeyConflictContext() {
                 @Override public boolean isActive() {
                     var mc = net.minecraft.client.Minecraft.getInstance();
                     return mc.screen == null && mc.player != null && (mc.player.getMainHandItem().getItem() instanceof com.stardew.craft.building.runtime.BuildingBlueprintItem
                             || mc.player.getOffhandItem().getItem() instanceof com.stardew.craft.building.runtime.BuildingBlueprintItem);
                 }
-                @Override public boolean conflicts(net.neoforged.neoforge.client.settings.IKeyConflictContext other) { return other == this; }
+                @Override public boolean conflicts(net.minecraftforge.client.settings.IKeyConflictContext other) { return other == this; }
             },
             InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, CATEGORY);
 

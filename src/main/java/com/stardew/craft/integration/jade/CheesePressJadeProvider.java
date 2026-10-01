@@ -25,7 +25,7 @@ import java.util.List;
 public enum CheesePressJadeProvider implements IBlockComponentProvider, IServerDataProvider<BlockAccessor> {
 	INSTANCE;
 
-	private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "cheese_press");
+	private static final ResourceLocation UID = new ResourceLocation(StardewCraft.MODID, "cheese_press");
 
 	private static final String NBT_READY = "ready";
 	private static final String NBT_INPUT_ITEM = "inputItem";

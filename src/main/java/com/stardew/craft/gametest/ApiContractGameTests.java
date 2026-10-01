@@ -198,30 +198,30 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import net.minecraft.core.component.DataComponents;
+import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ClientInformation;
+import com.stardew.craft.port.net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.block.Blocks;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.common.util.FakePlayerFactory;
 
 /** Runtime acceptance tests for contracts which require live registries. */
 @GameTestHolder(StardewCraft.MODID)
 @PrefixGameTestTemplate(false)
 public final class ApiContractGameTests {
     private static final ResourceLocation TEST_ANIMAL_TYPE_REGISTRATION =
-            ResourceLocation.fromNamespaceAndPath("stardewcraft_gametest", "managed_goose_type");
+            new ResourceLocation("stardewcraft_gametest", "managed_goose_type");
     private static final String TEST_ANIMAL_TYPE = "stardewcraft_gametest:managed_goose";
     private static final StardewAnimalPersistentData.Key TEST_ANIMAL_DATA =
             registerAnimalPersistentDataKey();
@@ -236,7 +236,7 @@ public final class ApiContractGameTests {
             GameTestHelper helper
     ) {
         ResourceLocation eventType =
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "orchard_blossom_" + UUID.randomUUID());
         UUID instanceId = UUID.randomUUID();
@@ -368,7 +368,7 @@ public final class ApiContractGameTests {
         List<String> observedKills = new ArrayList<>();
 
         StardewCombatEvents.registerDamageModifier(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "damage_throwing_" + suffix),
                 300,
@@ -381,7 +381,7 @@ public final class ApiContractGameTests {
                     return StardewCombatDamageDecision.pass();
                 });
         StardewCombatEvents.registerDamageModifier(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "damage_half_" + suffix),
                 200,
@@ -391,7 +391,7 @@ public final class ApiContractGameTests {
                                 context.amount() / 2.0F)
                         : StardewCombatDamageDecision.pass());
         StardewCombatEvents.registerDamageModifier(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "damage_add_one_" + suffix),
                 100,
@@ -414,7 +414,7 @@ public final class ApiContractGameTests {
                 "damage modifiers were not ordered and composed");
 
         StardewCombatEvents.registerKillListener(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "kill_throwing_" + suffix),
                 300,
@@ -426,7 +426,7 @@ public final class ApiContractGameTests {
                     }
                 });
         StardewCombatEvents.registerKillListener(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "kill_first_" + suffix),
                 200,
@@ -437,7 +437,7 @@ public final class ApiContractGameTests {
                     }
                 });
         StardewCombatEvents.registerKillListener(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "kill_second_" + suffix),
                 100,
@@ -456,7 +456,7 @@ public final class ApiContractGameTests {
                         player,
                         target,
                         player.damageSources().playerAttack(player),
-                        ResourceLocation.withDefaultNamespace("zombie"),
+                        new ResourceLocation("zombie"),
                         Set.of("stardewcraft_gametest"),
                         helper.getLevel().dimension(),
                         helper.absolutePos(BlockPos.ZERO)));
@@ -479,7 +479,7 @@ public final class ApiContractGameTests {
                 helper.getLevel().dimension(),
                 helper.absolutePos(BlockPos.ZERO),
                 helper.absolutePos(new BlockPos(1, 0, 0)),
-                Optional.of(ResourceLocation.withDefaultNamespace("cod")),
+                Optional.of(new ResourceLocation("cod")),
                 3,
                 5,
                 Optional.empty(),
@@ -494,7 +494,7 @@ public final class ApiContractGameTests {
                 false);
 
         StardewFishPondEvents.registerDailyListener(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "pond_daily_throwing_" + suffix),
                 200,
@@ -505,7 +505,7 @@ public final class ApiContractGameTests {
                     }
                 });
         StardewFishPondEvents.registerDailyListener(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "pond_daily_observer_" + suffix),
                 100,
@@ -515,7 +515,7 @@ public final class ApiContractGameTests {
                     }
                 });
         StardewFishPondEvents.registerRequestListener(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "pond_request_observer_" + suffix),
                 100,
@@ -593,7 +593,7 @@ public final class ApiContractGameTests {
                 new GameProfile(UUID.randomUUID(), "Progress API"));
         List<StardewProgressEvent> observed = new ArrayList<>();
         StardewProgressEvents.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "progress_throwing_" + suffix),
                 200,
@@ -605,7 +605,7 @@ public final class ApiContractGameTests {
                     }
                 });
         StardewProgressEvents.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "progress_observer_" + suffix),
                 100,
@@ -620,7 +620,7 @@ public final class ApiContractGameTests {
         helper.assertTrue(quests != null, "player quest manager was unavailable");
         StardewProgressKey questKey = new StardewProgressKey(
                 StardewProgressDomains.QUEST,
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft", "6"));
         helper.assertTrue(
                 StardewProgressRequirements.requirements(
@@ -654,12 +654,12 @@ public final class ApiContractGameTests {
                 new com.google.gson.JsonObject();
         neverData.addProperty("value", false);
         var neverCondition = StardewConditions.decode(
-                        ResourceLocation.fromNamespaceAndPath(
+                        new ResourceLocation(
                                 StardewCraft.MODID, "always"),
                         neverData)
                 .result().orElseThrow();
         StardewRequirements.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "requirement_display_" + suffix),
                 100,
@@ -688,7 +688,7 @@ public final class ApiContractGameTests {
         MailService.addMailForTomorrow(player, "guildQuest");
         StardewProgressKey mailKey = new StardewProgressKey(
                 StardewProgressDomains.MAIL,
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft", "guildquest"));
         StardewProgressSnapshot scheduledMail =
                 StardewProgress.inspect(player, mailKey);
@@ -708,7 +708,7 @@ public final class ApiContractGameTests {
                 "mail attachment did not reach unified acquisition sources");
         StardewProgressKey attachmentMailKey = new StardewProgressKey(
                 StardewProgressDomains.MAIL,
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft", "ccfishtankpan"));
         helper.assertTrue(
                 StardewRewardPreviews.preview(player, attachmentMailKey)
@@ -779,7 +779,7 @@ public final class ApiContractGameTests {
                         helper.getLevel());
         museum.donate(
                 player.getUUID(),
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         StardewCraft.MODID, "ancient_seed").toString());
         var ancientSeedReward =
                 com.stardew.craft.museum.MuseumRewardRegistry
@@ -867,13 +867,13 @@ public final class ApiContractGameTests {
                 "offered special order acceptance reported a blocker");
 
         ResourceLocation customDomain =
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest", "orchard_trial");
         ResourceLocation customEntry =
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest", "first_harvest");
         StardewProgress.registerProvider(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "orchard_listing_throwing_" + suffix),
                 200,
@@ -896,7 +896,7 @@ public final class ApiContractGameTests {
                     }
                 });
         StardewProgress.registerProvider(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "orchard_provider_" + suffix),
                 100,
@@ -1050,7 +1050,7 @@ public final class ApiContractGameTests {
                 new StardewCurrencyCost(
                         StardewCurrencies.MONEY, 125),
                 new StardewItemCost(
-                        ResourceLocation.withDefaultNamespace(
+                        new ResourceLocation(
                                 "diamond"),
                         2));
         helper.assertTrue(
@@ -1106,7 +1106,7 @@ public final class ApiContractGameTests {
         player.getInventory().add(
                 new ItemStack(Items.EMERALD, 2));
         StardewShopCosts.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "cost_throwing_" + UUID.randomUUID()),
                 200,
@@ -1118,7 +1118,7 @@ public final class ApiContractGameTests {
                     return proposed;
                 });
         StardewShopCosts.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "cost_replace_" + UUID.randomUUID()),
                 100,
@@ -1179,7 +1179,7 @@ public final class ApiContractGameTests {
         String productId =
                 "stardewcraft_gametest:orchard_blessing";
         StardewShopProducts.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "product_throwing_" + UUID.randomUUID()),
                 200,
@@ -1193,7 +1193,7 @@ public final class ApiContractGameTests {
                 });
         AtomicBoolean granted = new AtomicBoolean();
         StardewShopProducts.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "product_accept_" + UUID.randomUUID()),
                 100,
@@ -1236,11 +1236,11 @@ public final class ApiContractGameTests {
         String blockedProductId =
                 "stardewcraft_gametest:cooldown_service";
         ResourceLocation cooldownRequirement =
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "orchard_service_ready");
         StardewShopProducts.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "product_cooldown_"
                                 + UUID.randomUUID()),
@@ -1398,11 +1398,11 @@ public final class ApiContractGameTests {
             GameTestHelper helper
     ) {
         ResourceLocation machineId =
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "orchard_press_" + UUID.randomUUID());
         StardewProductionPlans.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "production_throwing_"
                                 + UUID.randomUUID()),
@@ -1415,7 +1415,7 @@ public final class ApiContractGameTests {
                     return Optional.of(proposed);
                 });
         StardewProductionPlans.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "production_replace_"
                                 + UUID.randomUUID()),
@@ -1462,7 +1462,7 @@ public final class ApiContractGameTests {
 
         AtomicInteger observed = new AtomicInteger();
         StardewProductionEvents.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "production_event_throwing_"
                                 + UUID.randomUUID()),
@@ -1474,7 +1474,7 @@ public final class ApiContractGameTests {
                     }
                 });
         StardewProductionEvents.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "production_event_observer_"
                                 + UUID.randomUUID()),
@@ -1508,11 +1508,11 @@ public final class ApiContractGameTests {
                 "production event leaked its output stack");
 
         ResourceLocation weatherMachineId =
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "rain_collector_" + UUID.randomUUID());
         StardewMachineCycles.registerPlan(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "cycle_plan_" + UUID.randomUUID()),
                 100,
@@ -1546,7 +1546,7 @@ public final class ApiContractGameTests {
                 "general cycle provider did not replace duration");
         AtomicInteger environmentalEvents = new AtomicInteger();
         StardewMachineCycles.registerListener(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "environmental_observer_"
                                 + UUID.randomUUID()),
@@ -1575,13 +1575,13 @@ public final class ApiContractGameTests {
                 "addon-owned machine could not announce a cycle");
 
         ResourceLocation baitMakerId =
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft", "bait_maker");
         AtomicInteger started = new AtomicInteger();
         AtomicInteger ready = new AtomicInteger();
         AtomicInteger collected = new AtomicInteger();
         StardewProductionEvents.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "production_machine_observer_"
                                 + UUID.randomUUID()),
@@ -1629,13 +1629,13 @@ public final class ApiContractGameTests {
                 "machine did not emit COLLECTED");
 
         ResourceLocation crystalariumId =
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft", "crystalarium");
         AtomicInteger repeatingStarted = new AtomicInteger();
         AtomicInteger repeatingReady = new AtomicInteger();
         AtomicInteger repeatingCollected = new AtomicInteger();
         StardewMachineCycles.registerPlan(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "crystalarium_cycle_"
                                 + UUID.randomUUID()),
@@ -1649,7 +1649,7 @@ public final class ApiContractGameTests {
                                                 proposed.output(), 0))
                                 : Optional.of(proposed));
         StardewMachineCycles.registerListener(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "crystalarium_observer_"
                                 + UUID.randomUUID()),
@@ -1708,16 +1708,16 @@ public final class ApiContractGameTests {
                 "repeating machine did not emit COLLECTED");
 
         ResourceLocation wormBinId =
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft", "worm_bin");
         ResourceLocation lightningRodId =
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft", "lightning_rod");
         AtomicInteger passiveTransitions = new AtomicInteger();
         AtomicInteger environmentalTransitions =
                 new AtomicInteger();
         StardewMachineCycles.registerPlan(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "autonomous_cycles_"
                                 + UUID.randomUUID()),
@@ -1731,7 +1731,7 @@ public final class ApiContractGameTests {
                                                 proposed.output(), 0))
                                 : Optional.of(proposed));
         StardewMachineCycles.registerListener(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "autonomous_observer_"
                                 + UUID.randomUUID()),
@@ -1820,7 +1820,7 @@ public final class ApiContractGameTests {
 
     @GameTest(templateNamespace = "minecraft", template = "bastion/mobs/empty")
     public static void addonEquipmentSlotControlsGameplayResolver(GameTestHelper helper) {
-        ResourceLocation providerId = ResourceLocation.fromNamespaceAndPath(
+        ResourceLocation providerId = new ResourceLocation(
                 "stardewcraft_gametest", "brick_ring");
         try {
             StardewEquipmentDataApi.registerProvider(providerId, 1000, stack ->
@@ -1919,11 +1919,11 @@ public final class ApiContractGameTests {
                 owner, "Farm Step Owner", "API Canary Farm", FarmType.STANDARD);
         List<String> calls = new ArrayList<>();
 
-        ResourceLocation firstStep = ResourceLocation.fromNamespaceAndPath(
+        ResourceLocation firstStep = new ResourceLocation(
                 "stardewcraft_gametest", "farm_first_" + suffix);
-        ResourceLocation failingStep = ResourceLocation.fromNamespaceAndPath(
+        ResourceLocation failingStep = new ResourceLocation(
                 "stardewcraft_gametest", "farm_failing_" + suffix);
-        ResourceLocation finalStep = ResourceLocation.fromNamespaceAndPath(
+        ResourceLocation finalStep = new ResourceLocation(
                 "stardewcraft_gametest", "farm_final_" + suffix);
         StardewFarmInitializationSteps.register(
                 firstStep, 1, 300,
@@ -1960,7 +1960,7 @@ public final class ApiContractGameTests {
                 "only the failed farm step should remain pending");
 
         StardewFarmPersistentData.Key stateKey = StardewFarmPersistentData.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest", "farm_state_" + suffix),
                 2);
         CompoundTag state = new CompoundTag();
@@ -1994,9 +1994,9 @@ public final class ApiContractGameTests {
             GameTestHelper helper
     ) {
         String suffix = UUID.randomUUID().toString();
-        ResourceLocation layoutId = ResourceLocation.fromNamespaceAndPath(
+        ResourceLocation layoutId = new ResourceLocation(
                 "stardewcraft_gametest", "layout_" + suffix);
-        ResourceLocation cabins = ResourceLocation.fromNamespaceAndPath(
+        ResourceLocation cabins = new ResourceLocation(
                 "stardewcraft_gametest", "cabins_" + suffix);
         ResourceLocation standardId =
                 com.stardew.craft.api.v1.internal.farm
@@ -2137,7 +2137,7 @@ public final class ApiContractGameTests {
         List<String> calls = new ArrayList<>();
 
         StardewFarmCaveDailyHandlers.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest", "cave_throwing_" + suffix),
                 300,
                 context -> {
@@ -2146,7 +2146,7 @@ public final class ApiContractGameTests {
                 }
         );
         StardewFarmCaveDailyHandlers.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest", "cave_selected_" + suffix),
                 200,
                 context -> {
@@ -2169,7 +2169,7 @@ public final class ApiContractGameTests {
         );
 
         StardewFarmCaveDailyHandlers.registerFruitProvider(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest", "cave_fruit_" + suffix),
                 100,
                 () -> List.of(Blocks.DIAMOND_BLOCK),
@@ -2194,7 +2194,7 @@ public final class ApiContractGameTests {
         );
 
         StardewFarmDebrisPlacements.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest", "debris_" + suffix),
                 100,
                 context -> Blocks.GOLD_BLOCK.defaultBlockState()
@@ -2214,7 +2214,7 @@ public final class ApiContractGameTests {
         );
 
         StardewFarmDailyTasks.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest", "daily_throwing_" + suffix),
                 300,
                 context -> {
@@ -2223,7 +2223,7 @@ public final class ApiContractGameTests {
                 }
         );
         StardewFarmDailyTasks.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest", "daily_after_" + suffix),
                 200,
                 context -> calls.add("daily-after")
@@ -2249,14 +2249,14 @@ public final class ApiContractGameTests {
     @GameTest(templateNamespace = "minecraft", template = "bastion/mobs/empty")
     public static void addonSpecialMachineResolversDriveRuntimeServices(GameTestHelper helper) {
         String suffix = UUID.randomUUID().toString();
-        ResourceLocation machineId = ResourceLocation.fromNamespaceAndPath(
+        ResourceLocation machineId = new ResourceLocation(
                 "stardewcraft_gametest", "machine_" + suffix);
         StardewMachineTypes.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest", "machine_registration_" + suffix),
                 new StardewMachineType(
                         machineId,
-                        ResourceLocation.withDefaultNamespace("barrel"),
+                        new ResourceLocation("barrel"),
                         "jei.stardewcraft_gametest.machine",
                         StardewMachineType.Layout.STANDARD,
                         true,
@@ -2264,13 +2264,13 @@ public final class ApiContractGameTests {
                 )
         );
         StardewArtisanResolvers.registerCaskAgingRate(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest", "cask_rate_" + suffix),
                 100,
                 input -> input.is(Items.BRICK) ? 2.0F : null
         );
         StardewArtisanResolvers.registerSmokedOutput(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest", "smoked_output_" + suffix),
                 100,
                 input -> input.is(Items.COD)
@@ -2278,7 +2278,7 @@ public final class ApiContractGameTests {
                         : ItemStack.EMPTY
         );
         StardewArtisanResolvers.registerSeedMakerOutput(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest", "seed_output_" + suffix),
                 100,
                 input -> input == Items.APPLE
@@ -2305,7 +2305,7 @@ public final class ApiContractGameTests {
     @GameTest(templateNamespace = "minecraft", template = "bastion/mobs/empty")
     public static void addonTreeAdapterDrivesGrowthFertilizerAndTapper(GameTestHelper helper) {
         String suffix = UUID.randomUUID().toString();
-        ResourceLocation treeId = ResourceLocation.fromNamespaceAndPath(
+        ResourceLocation treeId = new ResourceLocation(
                 "stardewcraft_gametest", "tree_" + suffix);
         int[] growthCalls = {0};
         int[] fertilizerCalls = {0};
@@ -2412,9 +2412,9 @@ public final class ApiContractGameTests {
     @GameTest(templateNamespace = "minecraft", template = "bastion/mobs/empty")
     public static void addonCropAdapterDrivesTrackedDailyGrowth(GameTestHelper helper) {
         String suffix = UUID.randomUUID().toString();
-        ResourceLocation cropId = ResourceLocation.fromNamespaceAndPath(
+        ResourceLocation cropId = new ResourceLocation(
                 "stardewcraft_gametest", "crop_" + suffix);
-        ResourceLocation failingId = ResourceLocation.fromNamespaceAndPath(
+        ResourceLocation failingId = new ResourceLocation(
                 "stardewcraft_gametest", "failing_crop_" + suffix);
         AtomicInteger growthCalls = new AtomicInteger();
         AtomicInteger harvestCalls = new AtomicInteger();
@@ -2427,7 +2427,7 @@ public final class ApiContractGameTests {
                         failingId,
                         "block.stardewcraft_gametest.failing_crop",
                         1,
-                        List.of(ResourceLocation.withDefaultNamespace("gold_block")),
+                        List.of(new ResourceLocation("gold_block")),
                         null),
                 200,
                 (level, position) -> {
@@ -2439,16 +2439,16 @@ public final class ApiContractGameTests {
                         cropId,
                         "block.stardewcraft_gametest.crop",
                         4,
-                        List.of(ResourceLocation.withDefaultNamespace("gold_block")),
+                        List.of(new ResourceLocation("gold_block")),
                         new com.stardew.craft.api.v1.agriculture.StardewCropData(
                                 List.of("spring"),
                                 List.of(1, 1, 1),
                                 -1,
                                 7,
-                                ResourceLocation.fromNamespaceAndPath(
+                                new ResourceLocation(
                                         "stardewcraft", "grab"),
-                                ResourceLocation.withDefaultNamespace("diamond"),
-                                ResourceLocation.withDefaultNamespace("gold_ingot"))),
+                                new ResourceLocation("diamond"),
+                                new ResourceLocation("gold_ingot"))),
                 100,
                 new StardewCropRuntimeAdapter() {
                     @Override
@@ -2636,10 +2636,10 @@ public final class ApiContractGameTests {
     public static void communityCenterVariantRewardAndPersistentStateCompose(GameTestHelper helper) {
         UUID playerId = UUID.randomUUID();
         String suffix = UUID.randomUUID().toString();
-        ResourceLocation variantId = ResourceLocation.fromNamespaceAndPath(
+        ResourceLocation variantId = new ResourceLocation(
                 "stardewcraft_gametest", "hard_catalog_" + suffix);
         StardewCommunityCenterVariants.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest", "variant_provider_" + suffix),
                 100,
                 (context, current) -> {
@@ -2676,7 +2676,7 @@ public final class ApiContractGameTests {
 
         StardewCommunityCenterPersistentData.Key key =
                 StardewCommunityCenterPersistentData.register(
-                        ResourceLocation.fromNamespaceAndPath(
+                        new ResourceLocation(
                                 "stardewcraft_gametest", "cc_state_" + suffix),
                         2
                 );
@@ -2706,7 +2706,7 @@ public final class ApiContractGameTests {
         );
 
         StardewCommunityCenterRewards.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest", "reward_" + suffix),
                 100,
                 context -> context.bundleId() == 987654
@@ -2719,10 +2719,10 @@ public final class ApiContractGameTests {
     @GameTest(templateNamespace = "minecraft", template = "bastion/mobs/empty")
     public static void npcSocialAndEntityProvidersCompose(GameTestHelper helper) {
         String suffix = UUID.randomUUID().toString();
-        ResourceLocation npcId = ResourceLocation.fromNamespaceAndPath(
+        ResourceLocation npcId = new ResourceLocation(
                 "stardewcraft_gametest", "archivist_" + suffix);
         StardewNpcProfiles.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest", "profile_" + suffix),
                 100,
                 new StardewNpcDefinition(
@@ -2733,12 +2733,12 @@ public final class ApiContractGameTests {
                         new StardewNpcDisplay(
                                 npcId,
                                 "entity.stardewcraft_gametest.npc.archivist",
-                                ResourceLocation.fromNamespaceAndPath(
+                                new ResourceLocation(
                                         "stardewcraft_gametest",
                                         "textures/portraits/archivist.png"),
                                 128,
                                 320,
-                                ResourceLocation.fromNamespaceAndPath(
+                                new ResourceLocation(
                                         "stardewcraft_gametest",
                                         "textures/mugshots/archivist.png"),
                                 16,
@@ -2754,7 +2754,7 @@ public final class ApiContractGameTests {
                 "addon NPC profile was absent from the content projection");
         int[] socialCalls = {0};
         StardewNpcSocialRules.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest", "social_throwing_" + suffix),
                 200,
                 (context, rule, proposed) -> {
@@ -2765,7 +2765,7 @@ public final class ApiContractGameTests {
                 }
         );
         StardewNpcSocialRules.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest", "social_allow_" + suffix),
                 100,
                 (context, rule, proposed) -> {
@@ -2791,7 +2791,7 @@ public final class ApiContractGameTests {
         helper.getLevel().addFreshEntity(marker);
         int[] lifecycleCounts = {0, 0};
         StardewNpcLifecycleEvents.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "npc_lifecycle_throwing_" + suffix),
                 200,
@@ -2802,7 +2802,7 @@ public final class ApiContractGameTests {
                     }
                 });
         StardewNpcLifecycleEvents.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "npc_lifecycle_observer_" + suffix),
                 100,
@@ -2820,7 +2820,7 @@ public final class ApiContractGameTests {
         StardewNpcLifecycleEvents.announceSpawned(
                 npcId, marker, "gametest_spawn");
         StardewNpcEntities.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest", "entity_" + suffix),
                 100,
                 context -> context.npcId().equals(npcId) ? marker : null
@@ -2833,7 +2833,7 @@ public final class ApiContractGameTests {
                 "NPC runtime diagnostics did not see the resolved addon entity");
 
         StardewNpcFriendshipRewards.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest", "friendship_reward_" + suffix),
                 100,
                 context -> context.npcId().equals(npcId) && context.points() >= 500
@@ -2855,12 +2855,12 @@ public final class ApiContractGameTests {
             GameTestHelper helper
     ) {
         String suffix = UUID.randomUUID().toString();
-        ResourceLocation festivalId = ResourceLocation.fromNamespaceAndPath(
+        ResourceLocation festivalId = new ResourceLocation(
                 "stardewcraft_gametest", "apple_day_" + suffix);
         int[] calls = {0, 0, 0, 0};
         List<StardewProgressEvent> progressEvents = new ArrayList<>();
         StardewProgressEvents.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "festival_progress_" + suffix),
                 100,
@@ -2871,7 +2871,7 @@ public final class ApiContractGameTests {
                     }
                 });
         StardewFestivalSessionEvents.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "festival_session_throwing_" + suffix),
                 200,
@@ -2882,7 +2882,7 @@ public final class ApiContractGameTests {
                     }
                 });
         StardewFestivalSessionEvents.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "festival_session_observer_" + suffix),
                 100,
@@ -2949,7 +2949,7 @@ public final class ApiContractGameTests {
                 .fromNamespaceAndPath("stardewcraft", "egg_hunt");
         int[] calls = {0};
         StardewFestivalMechanics.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "festival_mechanic_throwing_" + suffix),
                 200,
@@ -2968,7 +2968,7 @@ public final class ApiContractGameTests {
                     }
                 });
         StardewFestivalMechanics.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "festival_mechanic_observer_" + suffix),
                 100,
@@ -3065,7 +3065,7 @@ public final class ApiContractGameTests {
                         "orchard_prize_" + suffix);
         int[] grants = {0};
         StardewFestivalRewards.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "reward_throwing_" + suffix),
                 200,
@@ -3077,7 +3077,7 @@ public final class ApiContractGameTests {
                     return StardewFestivalRewardPreparation.pass();
                 });
         StardewFestivalRewards.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "reward_grant_" + suffix),
                 100,
@@ -3089,7 +3089,7 @@ public final class ApiContractGameTests {
                                 })
                         : StardewFestivalRewardPreparation.pass());
         StardewFestivalRewards.registerDescriptor(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "reward_descriptor_" + suffix),
                 100,
@@ -3098,7 +3098,7 @@ public final class ApiContractGameTests {
                         rewardId,
                         List.of(new StardewRewardComponent(
                                 StardewRewardComponent.Kind.ITEM,
-                                ResourceLocation.withDefaultNamespace(
+                                new ResourceLocation(
                                         "apple"),
                                 1,
                                 new ItemStack(Items.APPLE),
@@ -3123,7 +3123,7 @@ public final class ApiContractGameTests {
         List<StardewProgressEvent> rewardProgressEvents =
                 new ArrayList<>();
         StardewProgressEvents.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "festival_reward_progress_" + suffix),
                 100,
@@ -3178,7 +3178,7 @@ public final class ApiContractGameTests {
         StardewProgressKey eggHuntProgress =
                 StardewFestivalActivities.progressKey(
                         festivalId,
-                        ResourceLocation.fromNamespaceAndPath(
+                        new ResourceLocation(
                                 StardewCraft.MODID, "egg_hunt"));
         helper.assertTrue(
                 StardewProgress.inspect(
@@ -3250,7 +3250,7 @@ public final class ApiContractGameTests {
                         "apple_toss_" + suffix);
         List<String> calls = new ArrayList<>();
         StardewFestivalActivities.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "activity_low_" + suffix),
                 0,
@@ -3261,7 +3261,7 @@ public final class ApiContractGameTests {
                     return StardewFestivalActivityDecision.STARTED;
                 });
         StardewFestivalActivities.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "activity_high_" + suffix),
                 100,
@@ -3320,7 +3320,7 @@ public final class ApiContractGameTests {
         String suffix = UUID.randomUUID().toString();
         String addonPool = "stardewcraft_gametest:festival_pool_" + suffix;
         StardewFishingLocationKeys.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "fishing_keys_throwing_" + suffix),
                 200,
@@ -3330,7 +3330,7 @@ public final class ApiContractGameTests {
                 }
         );
         StardewFishingLocationKeys.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest", "fishing_keys_" + suffix),
                 100,
                 context -> {
@@ -3359,7 +3359,7 @@ public final class ApiContractGameTests {
                 .findFirst()
                 .orElseThrow();
         StardewFishingRuleConditions.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "fishing_condition_" + suffix),
                 100,
@@ -3383,7 +3383,7 @@ public final class ApiContractGameTests {
                 "addon fishing rule condition did not deny the candidate");
 
         StardewFishingLocationDisplays.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest", "fishing_display_" + suffix),
                 100,
                 raw -> raw.equals(addonPool)
@@ -3404,7 +3404,7 @@ public final class ApiContractGameTests {
         String suffix = UUID.randomUUID().toString();
         BlockPos target = helper.absolutePos(new BlockPos(2, 2, 2));
         StardewArtifactSpotDrops.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "artifact_spot_throwing_" + suffix),
                 200,
@@ -3418,7 +3418,7 @@ public final class ApiContractGameTests {
         );
         ItemStack source = new ItemStack(Items.DIAMOND, 2);
         ResourceLocation providerId =
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "artifact_spot_" + suffix);
         StardewArtifactSpotDrops.register(
@@ -3431,7 +3431,7 @@ public final class ApiContractGameTests {
                         StardewContentReferenceRoles.DROP_ITEM,
                         new StardewContentKey(
                                 StardewContentTypes.ITEM,
-                                ResourceLocation.withDefaultNamespace(
+                                new ResourceLocation(
                                         "diamond"))))
         );
 
@@ -3466,7 +3466,7 @@ public final class ApiContractGameTests {
     ) {
         String suffix = UUID.randomUUID().toString();
         ResourceLocation profileId =
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "clockwork_monster_" + suffix);
         AtomicBoolean configured = new AtomicBoolean();
@@ -3512,7 +3512,7 @@ public final class ApiContractGameTests {
         String suffix = UUID.randomUUID().toString();
         List<String> calls = new ArrayList<>();
         StardewLocationEvents.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "location_throwing_" + suffix),
                 200,
@@ -3521,13 +3521,13 @@ public final class ApiContractGameTests {
                             "expected location listener failure");
                 });
         StardewLocationEvents.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "location_high_" + suffix),
                 100,
                 transition -> calls.add("high"));
         StardewLocationEvents.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest",
                         "location_low_" + suffix),
                 0,
@@ -3539,7 +3539,7 @@ public final class ApiContractGameTests {
                 new GameProfile(UUID.randomUUID(), "Location API"),
                 ClientInformation.createDefault());
         ResourceLocation locationId =
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest", "orchard");
         BlockPos position = helper.absolutePos(new BlockPos(2, 2, 2));
         StardewLocationTransition transition =
@@ -3571,9 +3571,9 @@ public final class ApiContractGameTests {
     public static void coreOutdoorLocationsUseSharedExactGeometry(
             GameTestHelper helper
     ) {
-        ResourceLocation town = ResourceLocation.fromNamespaceAndPath(
+        ResourceLocation town = new ResourceLocation(
                 StardewCraft.MODID, "town");
-        ResourceLocation mountain = ResourceLocation.fromNamespaceAndPath(
+        ResourceLocation mountain = new ResourceLocation(
                 StardewCraft.MODID, "mountain");
         ResourceLocation dimension =
                 ModDimensions.STARDEW_VALLEY.location();
@@ -3592,7 +3592,7 @@ public final class ApiContractGameTests {
                 StardewLocations.get(town).orElseThrow().indoor(),
                 "core Town location was incorrectly marked as an interior");
         helper.assertTrue(
-                StardewLocations.get(ResourceLocation.fromNamespaceAndPath(
+                StardewLocations.get(new ResourceLocation(
                                 StardewCraft.MODID, "pierre_house"))
                         .orElseThrow().indoor(),
                 "fixed interior lost its indoor metadata");
@@ -3624,27 +3624,27 @@ public final class ApiContractGameTests {
     public static void contentCatalogResolvesProviderReferences(
             GameTestHelper helper
     ) {
-        ResourceLocation type = ResourceLocation.fromNamespaceAndPath(
+        ResourceLocation type = new ResourceLocation(
                 "stardewcraft_gametest", "orchard_feature");
         StardewContentKey root = new StardewContentKey(
                 type,
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest", "root"));
         StardewContentKey child = new StardewContentKey(
                 type,
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest", "child"));
         StardewContentKey missing = new StardewContentKey(
                 type,
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest", "missing"));
         StardewContentKey legacyChild = new StardewContentKey(
                 type,
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest", "legacy_child"));
-        ResourceLocation source = ResourceLocation.fromNamespaceAndPath(
+        ResourceLocation source = new ResourceLocation(
                 "stardewcraft_gametest", "content_projection");
-        ResourceLocation childRole = ResourceLocation.fromNamespaceAndPath(
+        ResourceLocation childRole = new ResourceLocation(
                 "stardewcraft_gametest", "child");
 
         if (CONTENT_PROVIDER_REGISTERED.compareAndSet(false, true)) {
@@ -3660,7 +3660,7 @@ public final class ApiContractGameTests {
                     new StardewContentDefinition(
                             child, source, List.of())));
             StardewContents.registerAliases(
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             "stardewcraft_gametest",
                             "content_aliases"),
                     0,
@@ -3751,7 +3751,7 @@ public final class ApiContractGameTests {
                         + projectedTypes);
         StardewContentKey townForage = new StardewContentKey(
                 StardewContentTypes.FORAGE_ZONE,
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         StardewCraft.MODID, "town"));
         var townForageNode = StardewContents.find(townForage)
                 .orElseThrow();
@@ -3773,7 +3773,7 @@ public final class ApiContractGameTests {
                 "forage block references were not resolved");
         StardewContentKey farmingMastery = new StardewContentKey(
                 StardewContentTypes.MASTERY_REWARD,
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         StardewCraft.MODID, "farming"));
         var farmingMasteryNode = StardewContents.find(farmingMastery)
                 .orElseThrow();
@@ -3795,7 +3795,7 @@ public final class ApiContractGameTests {
                 "mastery reward items were not resolved");
         StardewContentKey whiteChicken = new StardewContentKey(
                 StardewContentTypes.ANIMAL_TYPE,
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         StardewCraft.MODID, "white_chicken"));
         var whiteChickenNode = StardewContents.find(whiteChicken)
                 .orElseThrow();
@@ -3819,7 +3819,7 @@ public final class ApiContractGameTests {
                 "animal entity type was not resolved");
         StardewContentKey fishingRodEvent = new StardewContentKey(
                 StardewContentTypes.CUTSCENE_EVENT,
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         StardewCraft.MODID, "willy_fishing_rod"));
         var fishingRodEventNode = StardewContents.find(
                 fishingRodEvent).orElseThrow();
@@ -3858,7 +3858,7 @@ public final class ApiContractGameTests {
                 "cutscene quest command was not resolved");
         StardewContentKey dailyQuestPool = new StardewContentKey(
                 StardewContentTypes.DAILY_QUEST_POOL,
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         StardewCraft.MODID, "default"));
         var dailyQuestPoolNode = StardewContents.find(
                 dailyQuestPool).orElseThrow();
@@ -3890,7 +3890,7 @@ public final class ApiContractGameTests {
                 "daily quest pool item candidates were not resolved");
         StardewContentKey beachFishingPool = new StardewContentKey(
                 StardewContentTypes.FISHING_POOL,
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         StardewCraft.MODID, "legacy/beach"));
         var beachFishingPoolNode = StardewContents.find(
                 beachFishingPool).orElseThrow();
@@ -3913,7 +3913,7 @@ public final class ApiContractGameTests {
                 "legacy fishing pool did not expose its logical location");
         StardewContentKey sturgeonPond = new StardewContentKey(
                 StardewContentTypes.FISH_POND_RULE,
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         StardewCraft.MODID, "legacy/sturgeon"));
         var sturgeonPondNode = StardewContents.find(
                 sturgeonPond).orElseThrow();
@@ -3937,7 +3937,7 @@ public final class ApiContractGameTests {
                 "fish pond gate items were not resolved");
         StardewContentKey museumFive = new StardewContentKey(
                 StardewContentTypes.MUSEUM_REWARD,
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         StardewCraft.MODID, "legacy/museum5"));
         var museumFiveNode = StardewContents.find(
                 museumFive).orElseThrow();
@@ -3952,7 +3952,7 @@ public final class ApiContractGameTests {
                 "museum reward action items were not resolved");
         StardewContentKey slimeGoal = new StardewContentKey(
                 StardewContentTypes.MONSTER_SLAYER_GOAL,
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         StardewCraft.MODID, "legacy/slimes"));
         var slimeGoalNode = StardewContents.find(
                 slimeGoal).orElseThrow();
@@ -3976,7 +3976,7 @@ public final class ApiContractGameTests {
                 "monster-slayer reward items were not resolved");
         StardewContentKey townArtifactPool = new StardewContentKey(
                 StardewContentTypes.ARTIFACT_SPOT_POOL,
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         StardewCraft.MODID, "legacy/town"));
         var townArtifactPoolNode = StardewContents.find(
                 townArtifactPool).orElseThrow();
@@ -4015,7 +4015,7 @@ public final class ApiContractGameTests {
 
     private static StardewAnimalPersistentData.Key registerAnimalPersistentDataKey() {
         return StardewAnimalPersistentData.register(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         "stardewcraft_gametest", "managed_goose_state"),
                 1
         );

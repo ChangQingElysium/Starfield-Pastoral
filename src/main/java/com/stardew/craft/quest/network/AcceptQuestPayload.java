@@ -6,12 +6,12 @@ import com.stardew.craft.player.PlayerStardewData;
 import com.stardew.craft.quest.QuestManager;
 import com.stardew.craft.quest.StardewQuest;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -21,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 public record AcceptQuestPayload(String questId) implements CustomPacketPayload {
 
     public static final Type<AcceptQuestPayload> TYPE = new Type<>(
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "accept_quest")
+        new ResourceLocation(StardewCraft.MODID, "accept_quest")
     );
 
     public static final StreamCodec<ByteBuf, AcceptQuestPayload> STREAM_CODEC = StreamCodec.composite(
@@ -50,7 +50,7 @@ public record AcceptQuestPayload(String questId) implements CustomPacketPayload 
                 if (daily != null && daily.getId().equals(qid) && !mgr.hasQuest(qid)) {
                     mgr.acceptQuest(daily, serverPlayer);
                     // 让客户端的 dailyQuest 缓存 (accepted=true) 及时刷新 → 公告栏按钮变灰
-                    net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(serverPlayer,
+                    net.minecraftforge.network.PacketDistributor.sendToPlayer(serverPlayer,
                         DailyQuestSyncPayload.fromQuest(daily));
                 }
             } else {

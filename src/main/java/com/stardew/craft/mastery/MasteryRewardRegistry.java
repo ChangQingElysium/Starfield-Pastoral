@@ -200,7 +200,7 @@ public final class MasteryRewardRegistry {
             case STAT, PLACEHOLDER -> RewardKind.STAT;
         };
         StatBonus bonus = entry.statBonus()
-                .filter(id -> id.equals(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "trinket_slot")))
+                .filter(id -> id.equals(new ResourceLocation(StardewCraft.MODID, "trinket_slot")))
                 .map(ignored -> StatBonus.TRINKET_SLOT)
                 .orElse(StatBonus.NONE);
         return new RewardEntry(stack, entry.recipeId(), entry.nameKey(), entry.descKey(), bonus, kind);

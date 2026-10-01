@@ -14,7 +14,7 @@ public final class StardewShopCostRegistry {
     private static final OrderedExtensionRegistry<
             StardewShopCostProvider> REGISTRY =
             new OrderedExtensionRegistry<>(
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             StardewCraft.MODID, "shop_costs"));
 
     private StardewShopCostRegistry() {

@@ -3,7 +3,7 @@ package com.stardew.craft.enchantment;
 import com.stardew.craft.StardewCraft;
 import java.util.Set;
 import net.minecraft.core.Holder;
-import net.minecraft.core.component.DataComponents;
+import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -11,7 +11,7 @@ import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.ItemEnchantments;
+import com.stardew.craft.port.net.minecraft.world.item.enchantment.ItemEnchantments;
 
 public final class StardewEnchantments {
     public static final ResourceKey<Enchantment> ARTFUL = key("artful");
@@ -104,6 +104,6 @@ public final class StardewEnchantments {
     }
 
     private static ResourceKey<Enchantment> key(String name) {
-        return ResourceKey.create(Registries.ENCHANTMENT, ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, name));
+        return ResourceKey.create(Registries.ENCHANTMENT, new ResourceLocation(StardewCraft.MODID, name));
     }
 }

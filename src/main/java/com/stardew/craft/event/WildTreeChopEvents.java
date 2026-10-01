@@ -19,10 +19,10 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.common.ItemAbilities;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.level.BlockEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.common.ItemAbilities;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.level.BlockEvent;
 
 import java.util.Map;
 import java.util.UUID;
@@ -144,7 +144,7 @@ public final class WildTreeChopEvents {
 		if (tool.getItem() instanceof StardewAxeItem) {
 			return true;
 		}
-		// Recognize any other modded axe-like tool via NeoForge tool ability.
+		// Recognize any other modded axe-like tool via MinecraftForge tool ability.
 		return tool.canPerformAction(ItemAbilities.AXE_DIG);
 	}
 

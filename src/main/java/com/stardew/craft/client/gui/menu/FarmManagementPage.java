@@ -9,7 +9,7 @@ import com.stardew.craft.network.payload.FarmPermSyncPayload.PlayerPermEntry;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 import java.util.ArrayList;
 import java.util.UUID;
 

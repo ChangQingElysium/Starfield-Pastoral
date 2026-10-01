@@ -6,9 +6,9 @@ import net.minecraft.resources.ResourceLocation;
 import software.bernie.geckolib.model.GeoModel;
 
 public class GrandfatherClockGeoModel extends GeoModel<GrandfatherClockBlockEntity> {
-    private static final ResourceLocation MODEL = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "geo/block/decor/grandfather_clock.geo.json");
-    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/block/deco/misc/common/grandfather_clock.png");
-    private static final ResourceLocation ANIMATION = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "animations/block/decor/grandfather_clock.animation.json");
+    private static final ResourceLocation MODEL = new ResourceLocation(StardewCraft.MODID, "geo/block/decor/grandfather_clock.geo.json");
+    private static final ResourceLocation TEXTURE = new ResourceLocation(StardewCraft.MODID, "textures/block/deco/misc/common/grandfather_clock.png");
+    private static final ResourceLocation ANIMATION = new ResourceLocation(StardewCraft.MODID, "animations/block/decor/grandfather_clock.animation.json");
 
     @Override
     public ResourceLocation getModelResource(GrandfatherClockBlockEntity animatable) {

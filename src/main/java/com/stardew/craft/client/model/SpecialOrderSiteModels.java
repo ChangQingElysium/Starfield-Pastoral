@@ -20,13 +20,13 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ModelEvent;
-import net.neoforged.neoforge.client.model.BakedModelWrapper;
-import net.neoforged.neoforge.client.model.IDynamicBakedModel;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.ModelEvent;
+import net.minecraftforge.client.model.BakedModelWrapper;
+import net.minecraftforge.client.model.IDynamicBakedModel;
+import net.minecraftforge.client.model.data.ModelData;
 
 /** Four-season geometry for the automatically installed board and ticket box. */
 @SuppressWarnings("removal")
@@ -36,7 +36,7 @@ public final class SpecialOrderSiteModels {
     private static final String[] KINDS = {"special_orders_board", "prize_ticket_box"};
     private SpecialOrderSiteModels() {}
     private static ModelResourceLocation id(String season,String kind) {
-        return new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,
+        return new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID,
                 "block/decor/special_orders/"+kind+"/"+season),"standalone");
     }
     @SubscribeEvent public static void register(ModelEvent.RegisterAdditional event) {
@@ -53,7 +53,7 @@ public final class SpecialOrderSiteModels {
                 models.put(key,new Seasonal(Objects.requireNonNull(models.get(key)),seasons,
                         state.getValue(MapDecorStaticBlock.FACING),state.getValue(MapDecorStaticBlock.PART)==MapDecorStaticBlock.Part.MAIN));
             }
-            var item=new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,kind),"inventory");
+            var item=new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID,kind),"inventory");
             if (models.containsKey(item)) models.put(item,new Seasonal(models.get(item),seasons,Direction.NORTH,true));
         }
     }

@@ -35,7 +35,7 @@ public final class FestivalMapOverlayRegistry {
             DATA_DEFINITIONS = Map.of();
     private static final OrderedExtensionRegistry<StardewFestivalMapOverlay>
             ADDON_OVERLAYS = new OrderedExtensionRegistry<>(
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             StardewCraft.MODID, "festival/map_overlay"));
 
     static {

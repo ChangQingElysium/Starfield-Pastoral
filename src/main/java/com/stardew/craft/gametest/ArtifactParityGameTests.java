@@ -17,8 +17,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -70,7 +70,7 @@ public final class ArtifactParityGameTests {
         var previous = field.get(null);
         var publish = WorldRegionRegistry.class.getDeclaredMethod("publish", Map.class); publish.setAccessible(true);
         var ground = helper.absolutePos(new BlockPos(5, 1, 5));
-        var id = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "town");
+        var id = new ResourceLocation(StardewCraft.MODID, "town");
         var region = new StardewRegion(id, helper.getLevel().dimension().location(), id,
                 List.of(new StardewRegion.Box(ground.above(), ground.above(3))), List.of(), Set.of(), 0);
         try {

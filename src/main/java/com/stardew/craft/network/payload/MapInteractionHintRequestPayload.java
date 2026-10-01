@@ -4,14 +4,14 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.world.interaction.InteractionHintService;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /** Client query for the server-authoritative target under the crosshair. */
 public record MapInteractionHintRequestPayload(
@@ -21,7 +21,7 @@ public record MapInteractionHintRequestPayload(
     private static final double MAX_QUERY_DISTANCE_SQ = 64.0D;
 
     public static final Type<MapInteractionHintRequestPayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(
+            new Type<>(new ResourceLocation(
                     StardewCraft.MODID, "map_interaction_hint_request"));
 
     public static final StreamCodec<FriendlyByteBuf,

@@ -9,7 +9,7 @@ import net.minecraft.world.level.block.Rotation;
 
 /** Non-residential farm services share identity/claims, not the coop facility contract. */
 public final class UtilityBuildings {
-    public static final ResourceLocation SILO = ResourceLocation.parse("stardewcraft:silo");
+    public static final ResourceLocation SILO = new ResourceLocation("stardewcraft:silo");
     public static final int SILO_CAPACITY = 240;
     private UtilityBuildings() {}
     public static boolean supported(ResourceLocation family) { return SILO.equals(family); }

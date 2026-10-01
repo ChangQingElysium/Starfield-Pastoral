@@ -32,7 +32,7 @@ public final class CoalMinecartEntity extends Entity {
     private static final EntityDataAccessor<Boolean> LOADED =
             SynchedEntityData.defineId(CoalMinecartEntity.class, EntityDataSerializers.BOOLEAN);
     public static final ResourceKey<LootTable> COAL_LOOT = ResourceKey.create(Registries.LOOT_TABLE,
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "gameplay/mine_coal_cart"));
+            new ResourceLocation(StardewCraft.MODID, "gameplay/mine_coal_cart"));
 
     public CoalMinecartEntity(EntityType<? extends CoalMinecartEntity> type, Level level) {
         super(type, level);

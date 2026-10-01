@@ -6,9 +6,9 @@ import com.stardew.craft.festival.FestivalRegistry;
 import com.stardew.craft.festival.FestivalType;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.level.LevelEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.level.LevelEvent;
 
 import java.util.Random;
 
@@ -293,7 +293,7 @@ public class WeatherManager {
         );
         
         for (net.minecraft.server.level.ServerPlayer player : level.getServer().getPlayerList().getPlayers()) {
-            net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player, packet);
+            net.minecraftforge.network.PacketDistributor.sendToPlayer(player, packet);
         }
     }
 
@@ -365,7 +365,7 @@ public class WeatherManager {
                     state.getWeatherForTomorrow(),
                     state.isRaining(),
                     state.isThundering());
-            net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player, packet);
+            net.minecraftforge.network.PacketDistributor.sendToPlayer(player, packet);
         }
 
         public boolean isRaining() {

@@ -2,11 +2,11 @@ package com.stardew.craft.fishing.network;
 
 import com.stardew.craft.StardewCraft;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -15,12 +15,12 @@ import org.jetbrains.annotations.NotNull;
 public record FishingHookedAnimPayload(java.util.UUID sessionId, int durationTicks) implements CustomPacketPayload {
 	@SuppressWarnings("null")
 	public static final Type<FishingHookedAnimPayload> TYPE = new Type<>(
-			ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "fishing_hooked_anim")
+			new ResourceLocation(StardewCraft.MODID, "fishing_hooked_anim")
 	);
 
 	@SuppressWarnings("null")
 	public static final StreamCodec<ByteBuf, FishingHookedAnimPayload> STREAM_CODEC = StreamCodec.composite(
-			net.minecraft.core.UUIDUtil.STREAM_CODEC, FishingHookedAnimPayload::sessionId,
+			com.stardew.craft.port.PortCodecs.UUID, FishingHookedAnimPayload::sessionId,
 			ByteBufCodecs.VAR_INT, FishingHookedAnimPayload::durationTicks,
 			FishingHookedAnimPayload::new
 	);
@@ -34,7 +34,7 @@ public record FishingHookedAnimPayload(java.util.UUID sessionId, int durationTic
 		context.enqueueWork(() -> handleClient(payload));
 	}
 
-	@net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+	@net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
 	private static void handleClient(FishingHookedAnimPayload payload) {
 		if (!com.stardew.craft.client.fishing.FishingInteractionState.accepts(payload.sessionId())) return;
 		net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();

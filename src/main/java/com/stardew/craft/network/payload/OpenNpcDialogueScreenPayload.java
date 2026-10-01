@@ -3,15 +3,15 @@ package com.stardew.craft.network.payload;
 import com.stardew.craft.StardewCraft;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,7 +66,7 @@ public record OpenNpcDialogueScreenPayload(
 
     @SuppressWarnings("null")
     public static final Type<OpenNpcDialogueScreenPayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "open_npc_dialogue_screen"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "open_npc_dialogue_screen"));
 
     @SuppressWarnings("null")
     public static final StreamCodec<FriendlyByteBuf, OpenNpcDialogueScreenPayload> STREAM_CODEC = StreamCodec.of(
@@ -93,7 +93,7 @@ public record OpenNpcDialogueScreenPayload(
         context.enqueueWork(() -> handleClient(payload));
     }
 
-    @net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+    @net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
     private static void handleClient(OpenNpcDialogueScreenPayload payload) {
         net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
         if (mc.player == null) {
@@ -141,7 +141,7 @@ public record OpenNpcDialogueScreenPayload(
                 // SDV holdUpItemThenMessage: play totem animation + HUD after dialogue closes
                 com.stardew.craft.client.hud.HoldUpItemHandler.play(afterItemId);
                 try {
-                    ResourceLocation rl = ResourceLocation.parse(afterItemId);
+                    ResourceLocation rl = new ResourceLocation(afterItemId);
                     Item item = BuiltInRegistries.ITEM.get(rl);
                     if (item != null && item != Items.AIR) {
                         com.stardew.craft.client.hud.StardewHudMessageManager.showItemPickup(new ItemStack(item), 1, false);
@@ -436,7 +436,7 @@ public record OpenNpcDialogueScreenPayload(
                     output.add(segments[i + 1]);
                 }
                 com.stardew.craft.client.ClientPlayerDataCache.markMailFlagLocal(messageId);
-                net.neoforged.neoforge.network.PacketDistributor.sendToServer(
+                net.minecraftforge.network.PacketDistributor.sendToServer(
                         new MarkNpcDialogueFlagPayload(messageId));
                 i = segments.length;
                 continue;

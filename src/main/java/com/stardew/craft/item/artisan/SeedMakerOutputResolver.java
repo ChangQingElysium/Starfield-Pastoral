@@ -40,7 +40,7 @@ public final class SeedMakerOutputResolver {
             return seasonal;
         }
 
-        ResourceLocation seedId = ResourceLocation.fromNamespaceAndPath(id.getNamespace(), id.getPath() + "_seeds");
+        ResourceLocation seedId = new ResourceLocation(id.getNamespace(), id.getPath() + "_seeds");
         return BuiltInRegistries.ITEM.containsKey(seedId) ? BuiltInRegistries.ITEM.get(seedId) : null;
     }
 

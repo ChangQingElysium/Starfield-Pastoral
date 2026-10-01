@@ -17,7 +17,7 @@ import net.minecraft.resources.ResourceLocation;
  */
 @SuppressWarnings("null")
 public class MailboxBlockEntityRenderer implements BlockEntityRenderer<MailboxBlockEntity> {
-    private static final ResourceLocation BUBBLE_TEX = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/mailbox_bubble.png");
+    private static final ResourceLocation BUBBLE_TEX = new ResourceLocation(StardewCraft.MODID, "textures/gui/mailbox_bubble.png");
     private static final float PX = 1.0f / 32.0f;
     private static final float BUBBLE_RAISE = 6 * PX;
 

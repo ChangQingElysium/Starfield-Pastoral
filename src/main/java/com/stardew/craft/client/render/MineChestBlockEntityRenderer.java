@@ -15,11 +15,11 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ModelEvent;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.ModelEvent;
+import net.minecraftforge.client.model.data.ModelData;
 
 /** The native lid model rotates as one assembly: no swapped open-state geometry or UVs. */
 @SuppressWarnings("removal")
@@ -32,14 +32,14 @@ public final class MineChestBlockEntityRenderer implements BlockEntityRenderer<M
     private static final ModelResourceLocation SPECIAL_LID = specialModel("lid");
 
     private static ModelResourceLocation specialModel(String part) {
-        return new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,
+        return new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID,
                 "block/mine/desert_special_chest/" + part), "standalone");
     }
 
     public MineChestBlockEntityRenderer(BlockEntityRendererProvider.Context context) {}
 
     private static ModelResourceLocation model(String part) {
-        return new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,
+        return new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID,
                 "block/mine/reward_chest/" + part), "standalone");
     }
 

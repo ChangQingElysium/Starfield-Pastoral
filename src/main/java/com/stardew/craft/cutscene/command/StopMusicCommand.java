@@ -2,8 +2,8 @@ package com.stardew.craft.cutscene.command;
 
 import com.stardew.craft.client.sound.StardewMusicManager;
 import com.stardew.craft.cutscene.runtime.EventPlayer;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 /**
  * stop_music: stops all currently playing music.

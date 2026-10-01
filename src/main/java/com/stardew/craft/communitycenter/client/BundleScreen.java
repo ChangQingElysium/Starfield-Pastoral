@@ -35,7 +35,7 @@ import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.item.ItemDisplayContext;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -54,15 +54,15 @@ import java.util.List;
 public class BundleScreen extends AbstractContainerScreen<BundleMenu> {
 
     // ── Texture constants ──
-    private static final ResourceLocation JUNIMO_NOTE = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation JUNIMO_NOTE = new ResourceLocation(
             StardewCraft.MODID, "textures/gui/junimo_note.png");
     private static final int TEX_WIDTH = 640;
     private static final int TEX_HEIGHT = 308;
 
     // Area Next/Back arrows (SDV mouseCursors 352,495,12,11 / 365,495,12,11)
-    private static final ResourceLocation AREA_BACK_ARROW = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation AREA_BACK_ARROW = new ResourceLocation(
             StardewCraft.MODID, "textures/gui/area_back_arrow.png");
-    private static final ResourceLocation AREA_NEXT_ARROW = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation AREA_NEXT_ARROW = new ResourceLocation(
             StardewCraft.MODID, "textures/gui/area_next_arrow.png");
     private static final int AREA_ARROW_W = 12;
     private static final int AREA_ARROW_H = 11;
@@ -1459,7 +1459,7 @@ public class BundleScreen extends AbstractContainerScreen<BundleMenu> {
                 338, 318, 12, 18, scrollScale);
     }
 
-    private void playSound(net.neoforged.neoforge.registries.DeferredHolder<net.minecraft.sounds.SoundEvent, net.minecraft.sounds.SoundEvent> sound) {
+    private void playSound(com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredHolder<net.minecraft.sounds.SoundEvent, net.minecraft.sounds.SoundEvent> sound) {
         if (this.minecraft != null && this.minecraft.getSoundManager() != null) {
             this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(sound.get(), 1.0f));
         }
@@ -2078,7 +2078,7 @@ public class BundleScreen extends AbstractContainerScreen<BundleMenu> {
         float age;
         /** SDV: endSound — played when animation reaches last frame (null = none) */
         @javax.annotation.Nullable
-        net.neoforged.neoforge.registries.DeferredHolder<net.minecraft.sounds.SoundEvent, net.minecraft.sounds.SoundEvent> endSound;
+        com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredHolder<net.minecraft.sounds.SoundEvent, net.minecraft.sounds.SoundEvent> endSound;
         private boolean endSoundPlayed = false;
 
         TempSprite(int x, int y, int u, int v, int frameW, int frameH,

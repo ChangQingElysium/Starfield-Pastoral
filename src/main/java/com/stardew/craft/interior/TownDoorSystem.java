@@ -5,7 +5,7 @@ import com.stardew.craft.interior.door.TownDoorDefinitions;
 import com.stardew.craft.core.ModDimensions;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
-import net.neoforged.bus.api.IEventBus;
+import net.minecraftforge.eventbus.api.IEventBus;
 
 /** Bootstrap for the project-native town door connections. */
 public final class TownDoorSystem {

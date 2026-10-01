@@ -35,13 +35,13 @@ final class DarkSwordBloodDebtExecutionState
 
     void startPresentation(net.minecraft.server.level.ServerPlayer player,long tick) {
         visualLevel=player.serverLevel(); visualCaster=player.getId(); visualTick=tick;
-        net.neoforged.neoforge.network.PacketDistributor.sendToPlayersInDimension(visualLevel,
+        net.minecraftforge.network.PacketDistributor.sendToPlayersInDimension(visualLevel,
                 new com.stardew.craft.combat.network.DarkSwordBloodDebtPayload(visualCaster,visualTick,true,DarkSwordBloodDebtSkillHandler.ACTIVE_DURATION_TICKS));
     }
 
     void cancel() {
         if(visualLevel != null) {
-            net.neoforged.neoforge.network.PacketDistributor.sendToPlayersInDimension(visualLevel,
+            net.minecraftforge.network.PacketDistributor.sendToPlayersInDimension(visualLevel,
                     new com.stardew.craft.combat.network.DarkSwordBloodDebtPayload(visualCaster,visualTick,false,0));
             visualLevel=null;
         }

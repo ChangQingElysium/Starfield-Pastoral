@@ -98,12 +98,12 @@ public class FairyRoseCropBlock extends StardewCropBlock {
             int blockColor = state.getValue(COLOR);
             int itemColor = BLOCK_TO_ITEM_COLOR[blockColor];
             @SuppressWarnings("null")
-            var customData = stack.getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_DATA,
-                    net.minecraft.world.item.component.CustomData.EMPTY);
+            var customData = stack.getOrDefault(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,
+                    com.stardew.craft.port.net.minecraft.world.item.component.CustomData.EMPTY);
             var tag = customData.copyTag();
             tag.putInt("FlowerColor", itemColor);
-            stack.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA,
-                    net.minecraft.world.item.component.CustomData.of(tag));
+            stack.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,
+                    com.stardew.craft.port.net.minecraft.world.item.component.CustomData.of(tag));
             setFlowerVariantModelData(stack, itemColor);
         }
         return stack;

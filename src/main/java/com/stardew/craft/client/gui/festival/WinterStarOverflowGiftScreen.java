@@ -12,7 +12,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 /** Forced overflow menu: rearrange/drop inventory, then collect the queued gift. */
 @SuppressWarnings("null")
@@ -25,7 +25,7 @@ public final class WinterStarOverflowGiftScreen extends Screen {
 
     public WinterStarOverflowGiftScreen(String itemId, int count) {
         super(Component.translatable("stardewcraft.festival.winter_star.inventory_full"));
-        var item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(itemId));
+        var item = BuiltInRegistries.ITEM.get(new ResourceLocation(itemId));
         this.reward = item == Items.AIR ? ItemStack.EMPTY : new ItemStack(item, count);
     }
 

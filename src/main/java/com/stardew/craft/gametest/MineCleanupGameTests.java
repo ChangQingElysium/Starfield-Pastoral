@@ -13,8 +13,8 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -50,7 +50,7 @@ public final class MineCleanupGameTests {
         var carts=level.getEntitiesOfClass(MinecartStationEntity.class,bounds);
         h.assertTrue(carts.size()==1,"Lobby must contain exactly its authored station");
         h.assertTrue(carts.getFirst().position().distanceTo(new Vec3(-6.5,66.25,-1.5))<.1,"Station spawned at obsolete coordinates");
-        var resource=level.getServer().getResourceManager().getResource(ResourceLocation.fromNamespaceAndPath("stardewcraft","cutscene_events/marlon_mine_intro.json")).orElseThrow();
+        var resource=level.getServer().getResourceManager().getResource(new ResourceLocation("stardewcraft","cutscene_events/marlon_mine_intro.json")).orElseThrow();
         try(var reader=resource.openAsReader()) {
             var event=JsonParser.parseReader(reader).getAsJsonObject();
             var trigger=event.getAsJsonObject("trigger");

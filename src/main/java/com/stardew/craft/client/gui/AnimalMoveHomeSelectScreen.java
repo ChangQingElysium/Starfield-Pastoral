@@ -4,7 +4,7 @@ import com.stardew.craft.network.payload.*;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.nbt.CompoundTag;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 /** Public API adapter uses the named-home picker and its explicit confirmation. */
 public final class AnimalMoveHomeSelectScreen extends FarmFolioScreen {

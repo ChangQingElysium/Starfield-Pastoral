@@ -31,9 +31,9 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -727,7 +727,7 @@ public class TVScreen extends Screen {
 
     private String resolveFishingItemDisplayName(String itemId) {
         try {
-            Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(itemId));
+            Item item = BuiltInRegistries.ITEM.get(new ResourceLocation(itemId));
             if (item != null) {
                 return new ItemStack(item).getHoverName().getString();
             }
@@ -791,7 +791,7 @@ public class TVScreen extends Screen {
 
             int sortOrder = Integer.MAX_VALUE;
             try {
-                Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(itemId));
+                Item item = BuiltInRegistries.ITEM.get(new ResourceLocation(itemId));
                 if (item != null) {
                     sortOrder = BuiltInRegistries.ITEM.getId(item);
                 }

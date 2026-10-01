@@ -2,13 +2,13 @@ package com.stardew.craft.network.payload;
 
 import com.stardew.craft.StardewCraft;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.Map;
 import java.util.UUID;
@@ -24,7 +24,7 @@ public record HudHintPayload(String translationKey) implements CustomPacketPaylo
 
 	@SuppressWarnings("null")
 	public static final Type<HudHintPayload> TYPE = new Type<>(
-			ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "hud_hint"));
+			new ResourceLocation(StardewCraft.MODID, "hud_hint"));
 
 	@SuppressWarnings("null")
 	public static final StreamCodec<ByteBuf, HudHintPayload> STREAM_CODEC = StreamCodec.composite(

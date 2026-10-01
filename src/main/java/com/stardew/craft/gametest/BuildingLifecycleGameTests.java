@@ -15,8 +15,8 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import java.util.UUID;
 
 @GameTestHolder("stardewcraft_buildings")
@@ -83,14 +83,14 @@ public final class BuildingLifecycleGameTests {
             var level = h.getLevel(); var farms = FarmInstanceRegistry.get(level.getServer()); var owner = UUID.randomUUID();
             var farm = farms.createFarm(owner, "Lifecycle", "Lifecycle test", FarmType.STANDARD);
             var data = BuildingWorldData.get(level.getServer());
-            var player = net.neoforged.neoforge.common.util.FakePlayerFactory.get(level, new com.mojang.authlib.GameProfile(owner, "Lifecycle"));
+            var player = net.minecraftforge.common.util.FakePlayerFactory.get(level, new com.mojang.authlib.GameProfile(owner, "Lifecycle"));
             com.stardew.craft.building.BuildingCatalogService.open(player, com.stardew.craft.api.v1.building.StardewBuildingBuilders.ROBIN);
             long catalog = com.stardew.craft.building.BuildingBlueprintRegistry.revision();
             com.stardew.craft.player.PlayerStardewDataAPI.setMoney(player, 100000);
             player.getInventory().clearContent();
             player.getInventory().add(new ItemStack(com.stardew.craft.item.ModItems.WOOD_NORMAL.get(), 999));
             player.getInventory().add(new ItemStack(com.stardew.craft.item.ModItems.WOOD_NORMAL.get(), 999));
-            player.getInventory().add(new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.get(ResourceLocation.parse("stardewcraft:stone")), 999));
+            player.getInventory().add(new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.get(new ResourceLocation("stardewcraft:stone")), 999));
             var record = record(farm.getInstanceId(), farm.getSlotIndex(), family, h.absolutePos(new BlockPos(3, 0, 20)), level.dimension().location());
             try {
                 // Include the old and future site ground; the two reservations deliberately overlap.
@@ -104,7 +104,7 @@ public final class BuildingLifecycleGameTests {
                 int groundY=record.anchor().getY();
                 var floorCell=BuildingTransfer.nativeCells(level,record,1).values().stream().filter(cell->cell.pos().getY()==groundY).findFirst().orElseThrow();
                 h.assertTrue(level.getBlockState(floorCell.pos()).getBlock()==floorCell.state().getBlock(),"The schem floor did not replace the original ground layer");
-                var protectedBreak=new net.neoforged.neoforge.event.level.BlockEvent.BreakEvent(level,floorCell.pos(),level.getBlockState(floorCell.pos()),player);
+                var protectedBreak=new net.minecraftforge.event.level.BlockEvent.BreakEvent(level,floorCell.pos(),level.getBlockState(floorCell.pos()),player);
                 com.stardew.craft.event.FarmAreaProtectionEvents.onBlockBreak(protectedBreak);
                 h.assertTrue(protectedBreak.isCanceled(),"Native components bypass the shared public-area break handler");
                 h.assertTrue(level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, BuildingPlacementService.aabb(record.claim())).isEmpty(), "Initial construction dropped items");

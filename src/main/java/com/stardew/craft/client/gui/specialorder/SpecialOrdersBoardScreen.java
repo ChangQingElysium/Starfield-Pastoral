@@ -18,7 +18,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
@@ -31,11 +31,11 @@ import java.util.regex.Pattern;
 @SuppressWarnings("null")
 public class SpecialOrdersBoardScreen extends Screen {
     private static final ResourceLocation BOARD =
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/special_orders/board_normal.png");
+        new ResourceLocation(StardewCraft.MODID, "textures/gui/special_orders/board_normal.png");
     private static final ResourceLocation DUE =
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/special_orders/due_date_icon.png");
+        new ResourceLocation(StardewCraft.MODID, "textures/gui/special_orders/due_date_icon.png");
     private static final ResourceLocation CHECK =
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/special_orders/completed_check.png");
+        new ResourceLocation(StardewCraft.MODID, "textures/gui/special_orders/completed_check.png");
     private static final Pattern TOKEN = Pattern.compile("\\{([A-Za-z0-9_]+)(?::([A-Za-z0-9_]+))?}");
 
     private CompoundTag data;
@@ -171,7 +171,7 @@ public class SpecialOrdersBoardScreen extends Screen {
 
     private ResourceLocation requesterTexture(String requester) {
         String id = requester == null || requester.isBlank() ? "unknown" : requester.toLowerCase(java.util.Locale.ROOT);
-        return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/special_orders/requester_" + id + ".png");
+        return new ResourceLocation(StardewCraft.MODID, "textures/gui/special_orders/requester_" + id + ".png");
     }
 
     private String resolve(String text, CompoundTag order) {

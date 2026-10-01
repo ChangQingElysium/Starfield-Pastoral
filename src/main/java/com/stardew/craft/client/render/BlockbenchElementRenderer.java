@@ -434,11 +434,11 @@ final class BlockbenchElementRenderer {
     private static ResourceLocation textureLocation(String textureRef) {
         ResourceLocation ref = textureRef.contains(":")
                 ? ResourceLocation.tryParse(textureRef)
-                : ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, textureRef);
+                : new ResourceLocation(StardewCraft.MODID, textureRef);
         if (ref == null) {
-            ref = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, textureRef);
+            ref = new ResourceLocation(StardewCraft.MODID, textureRef);
         }
-        return ResourceLocation.fromNamespaceAndPath(ref.getNamespace(), "textures/" + ref.getPath() + ".png");
+        return new ResourceLocation(ref.getNamespace(), "textures/" + ref.getPath() + ".png");
     }
 
     private static float[] vector3(JsonArray array) {

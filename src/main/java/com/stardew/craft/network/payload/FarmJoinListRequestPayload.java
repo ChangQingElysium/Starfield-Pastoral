@@ -4,12 +4,12 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.core.ModGameRules;
 import com.stardew.craft.farm.FarmInstance;
 import com.stardew.craft.farm.FarmInstanceRegistry;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +21,7 @@ import java.util.List;
 public record FarmJoinListRequestPayload() implements CustomPacketPayload {
 
     public static final Type<FarmJoinListRequestPayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "farm_join_list_request"));
+            new Type<>(new ResourceLocation(StardewCraft.MODID, "farm_join_list_request"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, FarmJoinListRequestPayload> STREAM_CODEC =
             StreamCodec.unit(new FarmJoinListRequestPayload());
@@ -64,7 +64,7 @@ public record FarmJoinListRequestPayload() implements CustomPacketPayload {
                 ));
             }
 
-            net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
+            net.minecraftforge.network.PacketDistributor.sendToPlayer(player,
                     new FarmListSyncPayload(entries, "farm_join"));
         });
     }

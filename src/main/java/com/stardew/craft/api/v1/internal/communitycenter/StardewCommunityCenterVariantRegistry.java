@@ -9,7 +9,7 @@ import com.stardew.craft.communitycenter.data.BundleDefinition;
 import com.stardew.craft.communitycenter.data.BundleIngredient;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;

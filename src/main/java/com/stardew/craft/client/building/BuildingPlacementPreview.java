@@ -21,13 +21,13 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.RenderGuiEvent;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.minecraftforge.client.event.RenderGuiEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.List;
 
@@ -49,7 +49,7 @@ public final class BuildingPlacementPreview {
                 record.claim().min(), record.claim().maxExclusive(), BlockPos.of(tag.getLong("TargetMin")), BlockPos.of(tag.getLong("TargetMax")), record.manager(), record.family(), record.tier() + 1);
         upgradeDimension = record.dimension(); mc.setScreen(null);
     }
-    @SubscribeEvent public static void openPreviewControls(net.neoforged.neoforge.client.event.ScreenEvent.Opening event) {
+    @SubscribeEvent public static void openPreviewControls(net.minecraftforge.client.event.ScreenEvent.Opening event) {
         if(!(event.getNewScreen() instanceof net.minecraft.client.gui.screens.PauseScreen) || event.getCurrentScreen()!=null)return;
         var mc=Minecraft.getInstance();if(mc.player==null)return;
         if(upgradePreview!=null || managerRange!=null) {closeRanges();event.setCanceled(true);return;}
@@ -79,7 +79,7 @@ public final class BuildingPlacementPreview {
         if(!pinned || target==null || selected==null)return;
         for(var raw:tag.getList("Pins",10)){var pin=(net.minecraft.nbt.CompoundTag)raw;
             if(selected.equals(pin.getUUID("Id")) && target.asLong()==pin.getLong("Anchor") && facing.getName().equals(pin.getString("Facing"))) {
-                preview=new BuildingPreviewPayload(target,facing,false,sequence,pin.getString("Issue"),target,BlockPos.of(pin.getLong("Min")),BlockPos.of(pin.getLong("Max")),BlockPos.of(pin.getLong("InnerMin")),BlockPos.of(pin.getLong("InnerMax")),BlockPos.of(pin.getLong("Manager")),net.minecraft.resources.ResourceLocation.parse(pin.getString("Family")),pin.getInt("Tier"));break;
+                preview=new BuildingPreviewPayload(target,facing,false,sequence,pin.getString("Issue"),target,BlockPos.of(pin.getLong("Min")),BlockPos.of(pin.getLong("Max")),BlockPos.of(pin.getLong("InnerMin")),BlockPos.of(pin.getLong("InnerMax")),BlockPos.of(pin.getLong("Manager")),new net.minecraft.resources.ResourceLocation(pin.getString("Family")),pin.getInt("Tier"));break;
             }
         }
     }
@@ -222,7 +222,7 @@ public final class BuildingPlacementPreview {
                 if(preview!=null && id.equals(selected))continue;
                 boolean owned=false;for(int slot=0;slot<mc.player.getInventory().getContainerSize();slot++)if(id.equals(com.stardew.craft.building.runtime.BuildingDrafts.id(mc.player.getInventory().getItem(slot)))){owned=true;break;}
                 if(!owned)continue;
-                if(pin.hasUUID("Moving"))BuildingTemplatePreview.selectMove(pin.getUUID("Moving"));else BuildingTemplatePreview.select(net.minecraft.resources.ResourceLocation.parse(pin.getString("Family")),pin.getInt("Tier"));
+                if(pin.hasUUID("Moving"))BuildingTemplatePreview.selectMove(pin.getUUID("Moving"));else BuildingTemplatePreview.select(new net.minecraft.resources.ResourceLocation(pin.getString("Family")),pin.getInt("Tier"));
                 boolean valid=pin.getString("Issue").equals("valid");
                 BuildingTemplatePreview.drawWorld(pose,BlockPos.of(pin.getLong("Anchor")),com.stardew.craft.building.runtime.PrefabDefinitions.rotation(Direction.byName(pin.getString("Facing"))),valid);
                 var outer=box(BlockPos.of(pin.getLong("Min")),BlockPos.of(pin.getLong("Max")));var inner=box(BlockPos.of(pin.getLong("InnerMin")),BlockPos.of(pin.getLong("InnerMax")));

@@ -18,9 +18,9 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.PalettedContainer;
 import net.minecraft.world.level.chunk.PalettedContainerRO;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.level.ChunkEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.level.ChunkEvent;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -52,16 +52,16 @@ public final class StardewBiomePatcher {
     private static final boolean ENABLE_EAGER_PREGEN_MIGRATION = Boolean.getBoolean("stardewcraft.eagerPregenBiomeMigration");
 
     private static final ResourceKey<Biome> STARDEW_DEFAULT_KEY =
-            ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath("stardewcraft", "stardew_default"));
+            ResourceKey.create(Registries.BIOME, new ResourceLocation("stardewcraft", "stardew_default"));
 
     private static final ResourceKey<Biome> CALICO_DESERT_KEY =
-            ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath("stardewcraft", "calico_desert"));
+            ResourceKey.create(Registries.BIOME, new ResourceLocation("stardewcraft", "calico_desert"));
 
     private static final ResourceKey<Biome> MUTANT_BUG_LAIR_KEY =
-            ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath("stardewcraft", "mutant_bug_lair"));
+            ResourceKey.create(Registries.BIOME, new ResourceLocation("stardewcraft", "mutant_bug_lair"));
 
     private static final ResourceKey<Biome> WITCH_SWAMP_KEY =
-            ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath("stardewcraft", "witch_swamp"));
+            ResourceKey.create(Registries.BIOME, new ResourceLocation("stardewcraft", "witch_swamp"));
 
     // pregen 主地图内嵌沙漠包围盒（世界坐标）
     private static final int DESERT_MIN_X = DesertConstants.DESERT_BBOX_MIN_X;

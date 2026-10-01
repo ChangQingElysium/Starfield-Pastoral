@@ -11,7 +11,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -21,7 +21,7 @@ import java.util.List;
 @SuppressWarnings("null")
 public class DecorationSelectionScreen extends Screen {
 
-    private static final ResourceLocation LOCKED_ICON = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/locked.png");
+    private static final ResourceLocation LOCKED_ICON = new ResourceLocation(StardewCraft.MODID, "textures/gui/locked.png");
     private static final ResourceLocation WALLPAPER_FRAME = common("decoration_wallpaper_frame");
     private static final ResourceLocation FLOORING_FRAME = common("decoration_flooring_frame");
     
@@ -435,7 +435,7 @@ public class DecorationSelectionScreen extends Screen {
     }
     
     private void drawTiledPreview(GuiGraphics graphics, OpenDecorationScreenPayload.DecorationOption option, int areaX, int areaY, int areaW, int areaH, int alpha) {
-        ResourceLocation tex = ResourceLocation.parse(option.texture());
+        ResourceLocation tex = new ResourceLocation(option.texture());
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, showcaseAlpha);
         
         // 开启裁剪，防止预览溢出边框
@@ -494,7 +494,7 @@ public class DecorationSelectionScreen extends Screen {
         ResourceLocation frameTexture = isWallpaper ? WALLPAPER_FRAME : FLOORING_FRAME;
         graphics.blit(frameTexture, x, y, w, h, 0.0f, 0.0f, FRAME_SRC_SIZE, FRAME_SRC_SIZE, FRAME_SRC_SIZE, FRAME_SRC_SIZE);
 
-        ResourceLocation tex = ResourceLocation.parse(option.texture());
+        ResourceLocation tex = new ResourceLocation(option.texture());
         int srcW = option.sourceWidth();
         int srcH = option.sourceHeight();
         int innerW;
@@ -520,6 +520,6 @@ public class DecorationSelectionScreen extends Screen {
     }
 
     private static ResourceLocation common(String name) {
-        return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/common/" + name + ".png");
+        return new ResourceLocation(StardewCraft.MODID, "textures/gui/common/" + name + ".png");
     }
 }

@@ -20,14 +20,14 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ModelEvent;
-import net.neoforged.neoforge.client.model.BakedModelWrapper;
-import net.neoforged.neoforge.client.model.IDynamicBakedModel;
-import net.neoforged.neoforge.client.model.data.ModelData;
-import net.neoforged.neoforge.client.model.data.ModelProperty;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.ModelEvent;
+import net.minecraftforge.client.model.BakedModelWrapper;
+import net.minecraftforge.client.model.IDynamicBakedModel;
+import net.minecraftforge.client.model.data.ModelData;
+import net.minecraftforge.client.model.data.ModelProperty;
 
 /** Selects native 16px atlas cells on all six faces, before the existing mine-soil overlay wraps them. */
 @SuppressWarnings("removal")
@@ -35,7 +35,7 @@ import net.neoforged.neoforge.client.model.data.ModelProperty;
 public final class DesertWallModels {
     private static final ModelProperty<int[]> CELLS = new ModelProperty<>();
     private static final ModelResourceLocation ATLAS = new ModelResourceLocation(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "block/mine_desert_wall/connected"), "standalone");
+            new ResourceLocation(StardewCraft.MODID, "block/mine_desert_wall/connected"), "standalone");
 
     private DesertWallModels() {}
 

@@ -16,15 +16,15 @@ import net.minecraft.util.Mth;
 import org.joml.Matrix4f;
 
 public class PrismaticButterflyRenderer extends EntityRenderer<PrismaticButterflyEntity> {
-    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation TEXTURE = new ResourceLocation(
         StardewCraft.MODID,
         "textures/entity/mastery/critters.png"
     );
-    private static final ResourceLocation CURSORS = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation CURSORS = new ResourceLocation(
         StardewCraft.MODID,
         "textures/gui/cursors_1_6.png"
     );
-    private static final ResourceLocation POWDER_TEXTURE = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation POWDER_TEXTURE = new ResourceLocation(
         StardewCraft.MODID,
         "textures/entity/pet/butterfly_powder_effect.png"
     );

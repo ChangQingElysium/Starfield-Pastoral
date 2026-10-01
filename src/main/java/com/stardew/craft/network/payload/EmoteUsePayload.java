@@ -7,21 +7,21 @@ import com.stardew.craft.emote.EmoteCatalog;
 import com.stardew.craft.emote.EmoteType;
 
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 @SuppressWarnings("null")
 public record EmoteUsePayload(String emoteId) implements CustomPacketPayload {
 
 	@SuppressWarnings("null")
 	public static final Type<EmoteUsePayload> TYPE = new Type<>(
-		ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "emote_use")
+		new ResourceLocation(StardewCraft.MODID, "emote_use")
 	);
 
 	@SuppressWarnings("null")

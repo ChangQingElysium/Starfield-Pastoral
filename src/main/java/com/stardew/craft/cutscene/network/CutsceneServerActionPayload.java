@@ -7,15 +7,15 @@ import com.stardew.craft.player.PlayerStardewData;
 import com.stardew.craft.quest.QuestManager;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.slf4j.Logger;
 
 /**
@@ -32,7 +32,7 @@ public record CutsceneServerActionPayload(
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public static final Type<CutsceneServerActionPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "cutscene_server_action"));
+            new ResourceLocation(StardewCraft.MODID, "cutscene_server_action"));
 
     public static final StreamCodec<ByteBuf, CutsceneServerActionPayload> STREAM_CODEC = new StreamCodec<>() {
         @Override
@@ -167,7 +167,7 @@ public record CutsceneServerActionPayload(
                     if (sep > 0 && sep < payload.value.length() - 1) {
                         String[] parts = { payload.value.substring(0, sep), payload.value.substring(sep + 1) };
                         try {
-                            var rl = ResourceLocation.parse(parts[0]);
+                            var rl = new ResourceLocation(parts[0]);
                             int count = Integer.parseInt(parts[1]);
                             var item = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(rl);
                             if (item != net.minecraft.world.item.Items.AIR) {
@@ -185,7 +185,7 @@ public record CutsceneServerActionPayload(
                     int sep = payload.value.lastIndexOf(':');
                     if (sep > 0 && sep < payload.value.length() - 1) {
                         try {
-                            var rl = ResourceLocation.parse(payload.value.substring(0, sep));
+                            var rl = new ResourceLocation(payload.value.substring(0, sep));
                             int count = Integer.parseInt(payload.value.substring(sep + 1));
                             var item = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(rl);
                             if (item != net.minecraft.world.item.Items.AIR
@@ -206,7 +206,7 @@ public record CutsceneServerActionPayload(
                     if (sep > 0 && sep < payload.value.length() - 1) {
                         String[] parts = { payload.value.substring(0, sep), payload.value.substring(sep + 1) };
                         try {
-                            var rl = ResourceLocation.parse(parts[0]);
+                            var rl = new ResourceLocation(parts[0]);
                             int count = Integer.parseInt(parts[1]);
                             var item = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(rl);
                             if (item == net.minecraft.world.item.Items.AIR
@@ -229,7 +229,7 @@ public record CutsceneServerActionPayload(
                         net.minecraft.server.level.ServerLevel lvl = player.serverLevel();
                         net.minecraft.core.BlockPos origin = com.stardew.craft.interior.PlayerInteriorAllocator
                                 .get(lvl).getCCOrigin(player.getUUID());
-                        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
+                        net.minecraftforge.network.PacketDistributor.sendToPlayer(player,
                                 new com.stardew.craft.cutscene.network.CutsceneAnchorPayload(
                                         "cc_interior",
                                         origin.getX(), origin.getY(), origin.getZ()));

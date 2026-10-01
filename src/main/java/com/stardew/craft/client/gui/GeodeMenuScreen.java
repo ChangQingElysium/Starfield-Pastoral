@@ -27,7 +27,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,25 +58,25 @@ import java.util.Set;
 public class GeodeMenuScreen extends Screen {
 
     // ── Texture paths ──
-    private static final ResourceLocation CLINT_HAMMERING = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation CLINT_HAMMERING = new ResourceLocation(
         StardewCraft.MODID, "textures/gui/geode/clint_hammering.png");
-    private static final ResourceLocation GEODE_BREAK_REGULAR = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation GEODE_BREAK_REGULAR = new ResourceLocation(
         StardewCraft.MODID, "textures/gui/geode/geode_break_regular.png");
-    private static final ResourceLocation GEODE_BREAK_FROZEN = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation GEODE_BREAK_FROZEN = new ResourceLocation(
         StardewCraft.MODID, "textures/gui/geode/geode_break_frozen.png");
-    private static final ResourceLocation GEODE_BREAK_MAGMA = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation GEODE_BREAK_MAGMA = new ResourceLocation(
         StardewCraft.MODID, "textures/gui/geode/geode_break_magma.png");
-    private static final ResourceLocation ARTIFACT_TROVE_BREAK = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation ARTIFACT_TROVE_BREAK = new ResourceLocation(
         StardewCraft.MODID, "textures/gui/geode/artifact_trove_break.png");
-    private static final ResourceLocation MYSTERY_BOX_BREAK = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation MYSTERY_BOX_BREAK = new ResourceLocation(
         StardewCraft.MODID, "textures/gui/geode/mystery_box_break.png");
-    private static final ResourceLocation GOLDEN_MYSTERY_BOX_BREAK = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation GOLDEN_MYSTERY_BOX_BREAK = new ResourceLocation(
         StardewCraft.MODID, "textures/gui/geode/golden_mystery_box_break.png");
-    private static final ResourceLocation SPARKLE_TEX = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation SPARKLE_TEX = new ResourceLocation(
         StardewCraft.MODID, "textures/gui/geode/sparkle.png");
-    private static final ResourceLocation FLUFF_SMOKE = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation FLUFF_SMOKE = new ResourceLocation(
         StardewCraft.MODID, "textures/gui/geode/fluff_smoke.png");
-    private static final ResourceLocation FLUFF_ARTIFACT_SHARD = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation FLUFF_ARTIFACT_SHARD = new ResourceLocation(
         StardewCraft.MODID, "textures/gui/geode/fluff_artifact_shard.png");
 
     // ── SDV IClickableMenu constants (SDV screen px) ──
@@ -257,7 +257,7 @@ public class GeodeMenuScreen extends Screen {
         curGeoType = geodeType;
         this.treasureId = treasureItemId;
 
-        ResourceLocation rid = ResourceLocation.parse(treasureItemId);
+        ResourceLocation rid = new ResourceLocation(treasureItemId);
         var opt = BuiltInRegistries.ITEM.getOptional(rid);
         geoTreasure = opt.map(ItemStack::new).orElse(ItemStack.EMPTY);
 

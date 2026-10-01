@@ -2,7 +2,7 @@ package com.stardew.craft.mixin;
 
 import com.stardew.craft.time.StardewTimePauseService;
 import net.minecraft.server.level.ServerChunkCache;
-import net.minecraft.world.TickRateManager;
+import com.stardew.craft.port.net.minecraft.world.TickRateManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;

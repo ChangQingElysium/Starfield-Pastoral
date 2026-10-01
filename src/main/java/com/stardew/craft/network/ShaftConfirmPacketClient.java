@@ -1,8 +1,8 @@
 package com.stardew.craft.network;
 
 import net.minecraft.client.Minecraft;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 /**
  * 客户端独立类，包含 {@link ShaftConfirmPacket} 的实际客户端处理逻辑。

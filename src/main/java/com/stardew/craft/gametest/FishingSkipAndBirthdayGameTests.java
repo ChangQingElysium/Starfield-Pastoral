@@ -15,9 +15,9 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.common.util.FakePlayer;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.common.util.FakePlayer;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 import java.util.Map;
 import java.util.UUID;
@@ -87,7 +87,7 @@ public final class FishingSkipAndBirthdayGameTests {
     @GameTest(templateNamespace = "stardewcraft_fishing_rules", template = "ring_utilities")
     public static void krobusBirthdayReachesCalendarAndGiftRules(GameTestHelper h) throws Exception {
         var root = NpcDataRegistry.events().get("npc_birthdays");
-        var krobus = ResourceLocation.parse("stardewcraft:krobus");
+        var krobus = new ResourceLocation("stardewcraft:krobus");
         h.assertTrue(DailyInfoSyncEvents.birthdaysToday(root, new StardewCalendarDate(1, 3, 1)).contains(krobus),
                 "Shipped birthday registry omits Krobus on Winter 1");
         h.assertTrue(!DailyInfoSyncEvents.birthdaysToday(root, new StardewCalendarDate(1, 3, 2)).contains(krobus),

@@ -8,17 +8,17 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.world.item.component.CustomData;
+import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
+import com.stardew.craft.port.net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
@@ -34,7 +34,7 @@ public class WateringCanOverlayRenderer {
     private static final int ACTION_REFILL = 2;
 
     // 贴图位置：需要用户提供 textures/gui/range_overlay.png
-    private static final ResourceLocation RANGE_TEXTURE = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/range_overlay.png");
+    private static final ResourceLocation RANGE_TEXTURE = new ResourceLocation(StardewCraft.MODID, "textures/gui/range_overlay.png");
     
     // 自定义渲染类型
     @SuppressWarnings("null")

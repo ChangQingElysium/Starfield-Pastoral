@@ -23,7 +23,7 @@ import java.util.Map;
 
 /** Atomic registry for daily quest generator profiles. */
 public final class DailyQuestPoolRegistry {
-    public static final ResourceLocation DEFAULT_ID = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "default");
+    public static final ResourceLocation DEFAULT_ID = new ResourceLocation(StardewCraft.MODID, "default");
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final AtomicDefinitionStore<DailyQuestPoolDefinition> STORE = new AtomicDefinitionStore<>();
 

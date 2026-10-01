@@ -436,3 +436,7 @@ tools/npc/*
 
 # Reproducible model compiler dependencies.
 !/requirements-build.txt
+build/
+run/
+run-game-test/
+run-data/

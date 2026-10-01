@@ -7,9 +7,9 @@ import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.network.ItemPickupHudPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent;
 
 /**
  * Sends an item-pickup HUD notification (SDV parity) when a player picks up

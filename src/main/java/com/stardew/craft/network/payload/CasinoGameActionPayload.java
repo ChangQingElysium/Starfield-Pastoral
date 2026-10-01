@@ -3,12 +3,12 @@ package com.stardew.craft.network.payload;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.casino.CasinoService;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 @SuppressWarnings("null")
 public record CasinoGameActionPayload(long sessionId, int action) implements CustomPacketPayload {
@@ -23,7 +23,7 @@ public record CasinoGameActionPayload(long sessionId, int action) implements Cus
     public static final int CALICO_START = 8;
 
     public static final Type<CasinoGameActionPayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "casino_game_action"));
+            new Type<>(new ResourceLocation(StardewCraft.MODID, "casino_game_action"));
 
     public static final StreamCodec<ByteBuf, CasinoGameActionPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.VAR_LONG,

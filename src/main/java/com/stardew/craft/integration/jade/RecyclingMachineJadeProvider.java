@@ -24,7 +24,7 @@ import java.util.List;
 public enum RecyclingMachineJadeProvider implements IBlockComponentProvider, IServerDataProvider<BlockAccessor> {
 	INSTANCE;
 
-	private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "recycling_machine");
+	private static final ResourceLocation UID = new ResourceLocation(StardewCraft.MODID, "recycling_machine");
 	private static final String NBT_READY = "ready";
 	private static final String NBT_INPUT_ITEM = "inputItem";
 	private static final String NBT_PRODUCT_ITEM = "productItem";

@@ -220,7 +220,7 @@ public final class MailRegistry {
     @Nullable
     private static ResourceLocation resolveId(ResourceLocation source, JsonObject raw) {
         if (!raw.has("id")) {
-            return ResourceLocation.fromNamespaceAndPath(source.getNamespace(), source.getPath());
+            return new ResourceLocation(source.getNamespace(), source.getPath());
         }
         String value = raw.get("id").getAsString();
         if (value.indexOf(':') >= 0) return ResourceLocation.tryParse(value);

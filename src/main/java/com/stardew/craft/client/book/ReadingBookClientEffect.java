@@ -18,11 +18,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 import org.joml.Matrix4f;
 
 import java.util.ArrayList;
@@ -33,7 +33,7 @@ import java.util.Map;
 
 @EventBusSubscriber(modid = StardewCraft.MODID, value = Dist.CLIENT)
 public final class ReadingBookClientEffect {
-    private static final ResourceLocation BOOK_TEXTURE = ResourceLocation.withDefaultNamespace(
+    private static final ResourceLocation BOOK_TEXTURE = new ResourceLocation(
             "textures/entity/enchanting_table_book.png"
     );
     private static final ResourceLocation[] STAR_FRAMES = frames("star");
@@ -283,7 +283,7 @@ public final class ReadingBookClientEffect {
     private static ResourceLocation[] frames(String prefix) {
         ResourceLocation[] frames = new ResourceLocation[8];
         for (int index = 0; index < frames.length; index++) {
-            frames[index] = ResourceLocation.fromNamespaceAndPath(
+            frames[index] = new ResourceLocation(
                     StardewCraft.MODID,
                     "textures/particle/rainbow_star/" + prefix + "_0" + index + ".png"
             );

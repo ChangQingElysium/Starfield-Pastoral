@@ -5,18 +5,18 @@ import com.stardew.craft.blockentity.AdvanceableUtility;
 import com.stardew.craft.fishpond.service.FishPondHusbandry;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record AdvanceUtilitiesPayload() implements CustomPacketPayload {
 	@SuppressWarnings("null")
 	public static final Type<AdvanceUtilitiesPayload> TYPE = new Type<>(
-			ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "advance_utilities")
+			new ResourceLocation(StardewCraft.MODID, "advance_utilities")
 	);
 	public static final StreamCodec<ByteBuf, AdvanceUtilitiesPayload> STREAM_CODEC = StreamCodec.unit(new AdvanceUtilitiesPayload());
 

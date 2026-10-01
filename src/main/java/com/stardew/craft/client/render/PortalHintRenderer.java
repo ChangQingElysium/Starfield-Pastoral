@@ -48,7 +48,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 
 import java.util.ArrayList;
 import java.util.ArrayDeque;
@@ -342,7 +342,7 @@ public final class PortalHintRenderer {
         for (int cx = (center.getX()-range)>>4; cx <= (center.getX()+range)>>4; cx++) {
             for (int cz = (center.getZ()-range)>>4; cz <= (center.getZ()+range)>>4; cz++) {
                 var chunk = level.getChunkSource().getChunk(cx, cz,
-                        net.minecraft.world.level.chunk.status.ChunkStatus.FULL, false);
+                        net.minecraft.world.level.chunk.ChunkStatus.FULL, false);
                 if (!(chunk instanceof net.minecraft.world.level.chunk.LevelChunk loadedChunk)) continue;
                 for (BlockEntity be : loadedChunk.getBlockEntities().values()) {
                     if (!(be instanceof PortalTriggerBlockEntity ptbe)) continue;

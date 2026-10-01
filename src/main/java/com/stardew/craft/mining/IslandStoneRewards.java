@@ -13,11 +13,11 @@ import java.util.Set;
 
 /** Location rewards are separate from the appearance: placing a mussel stone in a mine does not make it an island. */
 public final class IslandStoneRewards {
-    private static final ResourceLocation ISLAND_TAG = ResourceLocation.fromNamespaceAndPath("stardewcraft", "ginger_island");
+    private static final ResourceLocation ISLAND_TAG = new ResourceLocation("stardewcraft", "ginger_island");
     private static final Set<String> ISLAND_LOCATIONS = Set.of("islandwest", "islandnorth", "islandsouth",
             "islandsoutheast", "islandsoutheastcave", "islandfarmcave", "islandsecret", "islandforestlocation",
             "islandhut", "islandwestcave1", "islandfieldoffice", "volcanodungeon", "caldera");
-    private static final ResourceLocation VOLCANO_TAG = ResourceLocation.fromNamespaceAndPath("stardewcraft", "volcano_dungeon");
+    private static final ResourceLocation VOLCANO_TAG = new ResourceLocation("stardewcraft", "volcano_dungeon");
     private IslandStoneRewards() {}
 
     public static boolean isWest(StardewLocation location) {

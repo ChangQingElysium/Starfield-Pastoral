@@ -21,7 +21,7 @@ import com.stardew.craft.player.PlayerDataManager;
 import com.stardew.craft.player.ProfessionType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -239,7 +239,7 @@ public class CrabPotBlockEntity extends BlockEntity implements UtilityAutomation
 		if (tagContents.isEmpty()) {
 			// 如果 tag 为空，返回默认物品
 			return new ItemStack(BuiltInRegistries.ITEM.get(
-				ResourceLocation.fromNamespaceAndPath("stardewcraft", "crab")
+				new ResourceLocation("stardewcraft", "crab")
 			));
 		}
 

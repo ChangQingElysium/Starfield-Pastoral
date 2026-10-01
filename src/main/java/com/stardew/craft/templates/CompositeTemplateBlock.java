@@ -14,8 +14,8 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
-import net.neoforged.neoforge.common.util.TriState;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.common.util.TriState;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 
 /** Shared two-material interaction and persistence contract for building templates. */
 public abstract class CompositeTemplateBlock extends MaterialTemplateBlock {

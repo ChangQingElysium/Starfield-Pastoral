@@ -6,16 +6,16 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.core.component.DataComponents;
+import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.BlockItemStateProperties;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ModelEvent;
-import net.neoforged.neoforge.client.model.BakedModelWrapper;
+import com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.ModelEvent;
+import net.minecraftforge.client.model.BakedModelWrapper;
 import javax.annotation.Nullable;
 import java.util.Objects;
 
@@ -24,7 +24,7 @@ import java.util.Objects;
 @EventBusSubscriber(modid = StardewCraft.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class MineSerpentPillarModels {
     private static ModelResourceLocation id(String color) {
-        return new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,
+        return new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID,
                 "item/mine_" + color + "_serpent_pillar"), "standalone");
     }
     @SubscribeEvent public static void register(ModelEvent.RegisterAdditional event) {
@@ -33,7 +33,7 @@ public final class MineSerpentPillarModels {
     @SubscribeEvent public static void bake(ModelEvent.ModifyBakingResult event) {
         BakedModel[] variants = {Objects.requireNonNull(event.getModels().get(id("purple"))),
                 Objects.requireNonNull(event.getModels().get(id("green")))};
-        var inventory = new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,
+        var inventory = new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID,
                 "mine_serpent_pillar"), "inventory");
         event.getModels().put(inventory, new PillarItem(variants));
     }

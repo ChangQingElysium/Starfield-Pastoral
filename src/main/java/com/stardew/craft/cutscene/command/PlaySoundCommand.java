@@ -25,7 +25,7 @@ public class PlaySoundCommand implements EventCommand {
     @Override
     public void start(EventPlayer player) {
         Minecraft mc = Minecraft.getInstance();
-        ResourceLocation loc = ResourceLocation.parse(soundId);
+        ResourceLocation loc = new ResourceLocation(soundId);
         SoundEvent event = SoundEvent.createVariableRangeEvent(loc);
         mc.getSoundManager().play(SimpleSoundInstance.forUI(event, pitch, volume));
     }

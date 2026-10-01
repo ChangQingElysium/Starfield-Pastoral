@@ -21,7 +21,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -176,7 +176,7 @@ public class FurnitureCatalogueScreen extends Screen {
 
     private static ItemStack resolveStack(String itemId) {
         try {
-            ResourceLocation rl = ResourceLocation.parse(itemId);
+            ResourceLocation rl = new ResourceLocation(itemId);
             Item mcItem = BuiltInRegistries.ITEM.get(rl);
             if (mcItem != null && mcItem != Items.AIR) return new ItemStack(mcItem);
         } catch (Exception ignored) {}
@@ -435,7 +435,7 @@ public class FurnitureCatalogueScreen extends Screen {
         int iconX = rowX + ui(24);
         int iconY = rowY + ui(24);
         try {
-            ResourceLocation rl = ResourceLocation.parse(item.itemId());
+            ResourceLocation rl = new ResourceLocation(item.itemId());
             Item mcItem = BuiltInRegistries.ITEM.get(rl);
             if (mcItem != null && mcItem != Items.AIR) {
                 CommonGuiTextures.drawItem(g, new ItemStack(mcItem), iconX, iconY, s4);

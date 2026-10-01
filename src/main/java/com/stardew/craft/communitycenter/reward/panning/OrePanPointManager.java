@@ -18,7 +18,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -207,7 +207,7 @@ public final class OrePanPointManager extends SavedData {
                 CompoundTag d = dimList.getCompound(j);
                 String dimId = d.getString("Dim");
                 ResourceKey<Level> key = ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION,
-                    ResourceLocation.parse(dimId));
+                    new ResourceLocation(dimId));
                 BlockPos pos = new BlockPos(d.getInt("X"), d.getInt("Y"), d.getInt("Z"));
                 byDim.put(key, pos);
             }

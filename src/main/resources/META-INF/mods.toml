@@ -1,0 +1,60 @@
+modLoader="javafml"
+loaderVersion="${loader_version_range}"
+license="${mod_license}"
+
+[[mods]]
+modId="${mod_id}"
+version="${mod_version}"
+displayName="${mod_name}"
+displayURL="https://modrinth.com/mod/starfield-pastoral"
+logoFile="assets/stardewcraft/icon.png"
+authors="${mod_authors}"
+description='''
+§6星野牧歌 / Starfield Pastoral§r
+Stardew Valley × Minecraft — Forge 1.20.1
+
+在 Minecraft 中还原星露谷物语的完整玩法。
+独立维度、四季更替、昼夜作息，支持多人联机。
+
+§e种植与加工§r
+30+ 种作物，品质星级，肥料，洒水器，酿酒桶、果酱罐等加工机器。
+
+§b钓鱼§r
+还原原作钓鱼小游戏，鱼饵、鱼钩、宝箱，按地点和季节出鱼。
+
+§a牧场§r
+鸡舍与畜棚，饲养动物，收获蛋奶毛，加工为高级产品。
+
+§d社交§r
+NPC 好感度系统，每日对话，送礼，节日活动。
+
+§c矿洞§r
+120 层矿洞，怪物战斗，矿石采集，冒险家公会。
+
+§5社区中心§r
+收集束捐赠，修复区域，解锁温室等奖励，含过场动画。
+
+§2多人§r
+每位玩家拥有独立农场实例，合作共享同一个星露谷世界。
+'''
+
+[[dependencies.${mod_id}]]
+    modId="forge"
+    mandatory=true
+    versionRange="${forge_version_range}"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="${minecraft_version_range}"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="jei"
+    mandatory=false
+    versionRange="[15.0.0,)"
+    ordering="AFTER"
+    side="CLIENT"

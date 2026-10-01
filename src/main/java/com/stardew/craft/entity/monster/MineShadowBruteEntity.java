@@ -27,7 +27,7 @@ public final class MineShadowBruteEntity extends StardewMonsterEntity {
     public MineShadowBruteEntity(EntityType<? extends MineShadowBruteEntity> type,Level level){super(type,level);addTag("sd_mob_shadow_brute");}
     public static AttributeSupplier.Builder createAttributes(){return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,160).add(Attributes.ATTACK_DAMAGE,18).add(Attributes.MOVEMENT_SPEED,.25).add(Attributes.FOLLOW_RANGE,64).add(Attributes.STEP_HEIGHT,0);}
     @Override protected void registerGoals(){}
-    @Override protected ResourceLocation definitionId(){return ResourceLocation.parse("stardewcraft:shadow_brute");}
+    @Override protected ResourceLocation definitionId(){return new ResourceLocation("stardewcraft:shadow_brute");}
     @Override protected void configureSpawn(MonsterDefinition d,MonsterSpawnContext c){var r=MonsterStatResolver.base(d,c,random);setInitialHealth(r.initialHealth());replaceCombatStats(r.combat());movement.face(2);}
     @Override protected void defineSynchedData(SynchedEntityData.Builder b){super.defineSynchedData(b);b.define(MOVING,false);b.define(HIT,-100L);}
     public boolean moving(){return entityData.get(MOVING);}

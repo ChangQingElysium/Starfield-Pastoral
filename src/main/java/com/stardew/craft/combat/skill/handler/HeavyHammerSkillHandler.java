@@ -52,7 +52,7 @@ public final class HeavyHammerSkillHandler implements RuntimeWeaponSkillHandler 
                 || !(p.getMainHandItem().getItem() instanceof IStardewWeapon w)
                 || !"infinity_gavel".equals(w.getWeaponId())) return null;
         return WeaponSkillRuntime.activeExecutionState(p.getUUID(),
-                ResourceLocation.fromNamespaceAndPath("stardewcraft", ENDLESS), HeavyHammerExecutionState.class)
+                new ResourceLocation("stardewcraft", ENDLESS), HeavyHammerExecutionState.class)
                 .filter(s -> s.validHeld(p) && s.buffActive(p.level().getGameTime())).orElse(null);
     }
     public static boolean isEmpowered(ServerPlayer p) { return buff(p) != null; }

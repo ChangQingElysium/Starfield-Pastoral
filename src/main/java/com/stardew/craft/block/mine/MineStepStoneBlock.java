@@ -64,8 +64,8 @@ public final class MineStepStoneBlock extends Block {
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        var theme = context.getItemInHand().getOrDefault(net.minecraft.core.component.DataComponents.BLOCK_STATE,
-                net.minecraft.world.item.component.BlockItemStateProperties.EMPTY).get(THEME);
+        var theme = context.getItemInHand().getOrDefault(com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
+                com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties.EMPTY).get(THEME);
         if (theme == null) {
             theme = MineLadderBlock.Theme.EARTH;
             for (var family : MineBuildingTheme.values()) if (family.rank(context.getLevel().getBlockState(context.getClickedPos().below())) >= 0) theme = MineLadderBlock.Theme.valueOf(family.name());
@@ -110,8 +110,8 @@ public final class MineStepStoneBlock extends Block {
 
     @Override public net.minecraft.world.item.ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
         var stack = new net.minecraft.world.item.ItemStack(this);
-        stack.set(net.minecraft.core.component.DataComponents.BLOCK_STATE,
-                net.minecraft.world.item.component.BlockItemStateProperties.EMPTY.with(THEME, state));
+        stack.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
+                com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties.EMPTY.with(THEME, state));
         return stack;
     }
 

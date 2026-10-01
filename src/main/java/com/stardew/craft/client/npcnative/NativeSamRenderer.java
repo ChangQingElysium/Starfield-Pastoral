@@ -47,8 +47,8 @@ public final class NativeSamRenderer<T extends Mob> extends EntityRenderer<T> {
                 ? NativeNpcAssets.model(npc.getScheduleActivityEvent().getString("action"))
                 : NativeNpcAssets.activity(activity(entity));
         var model = performance != null ? performance : NativeNpcAssets.model(npcId);
-        return model == null ? ResourceLocation.withDefaultNamespace("textures/misc/white.png")
-                : ResourceLocation.parse(model.texture());
+        return model == null ? new ResourceLocation("textures/misc/white.png")
+                : new ResourceLocation(model.texture());
     }
 
     @Override

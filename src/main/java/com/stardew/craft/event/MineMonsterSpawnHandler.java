@@ -14,10 +14,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
-import net.neoforged.neoforge.event.tick.EntityTickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.event.tick.EntityTickEvent;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -36,7 +36,7 @@ public final class MineMonsterSpawnHandler {
     }
     public static synchronized void ensureProfilesRegistered() {
         if(profilesRegistered)return;
-        for(String id:IDS)StardewMineMonsterProfiles.register(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,id),type(id),
+        for(String id:IDS)StardewMineMonsterProfiles.register(new ResourceLocation(StardewCraft.MODID,id),type(id),
                 MineMonsterNames.translationKey(id),progressTags(id),(mob,context)->{
                     var nativeMob=(StardewMonsterEntity)mob;
                     nativeMob.initialize(MonsterSpawnContext.capture(context.level(),MonsterSpawnContext.Source.WORLD,context.floor()));

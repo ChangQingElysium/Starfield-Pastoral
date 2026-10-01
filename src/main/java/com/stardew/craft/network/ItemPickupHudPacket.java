@@ -1,15 +1,15 @@
 package com.stardew.craft.network;
 
 import com.stardew.craft.StardewCraft;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * Server → Client: tells the client to show an item-pickup HUD message (SDV parity).
@@ -17,12 +17,12 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 public record ItemPickupHudPacket(ItemStack stack, int count, boolean expensive) implements CustomPacketPayload {
     @SuppressWarnings("null")
     public static final Type<ItemPickupHudPacket> TYPE = new Type<>(
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "item_pickup_hud")
+        new ResourceLocation(StardewCraft.MODID, "item_pickup_hud")
     );
 
     @SuppressWarnings("null")
     public static final StreamCodec<RegistryFriendlyByteBuf, ItemPickupHudPacket> STREAM_CODEC = StreamCodec.composite(
-        ItemStack.STREAM_CODEC, ItemPickupHudPacket::stack,
+        com.stardew.craft.port.PortCodecs.ITEM_STACK, ItemPickupHudPacket::stack,
         ByteBufCodecs.INT,         ItemPickupHudPacket::count,
         ByteBufCodecs.BOOL,        ItemPickupHudPacket::expensive,
         ItemPickupHudPacket::new

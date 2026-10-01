@@ -3,8 +3,8 @@ package com.stardew.craft.blockentity;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.block.ModBlocks;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredHolder;
+import net.minecraftforge.registries.DeferredRegister;
 
 public final class ModBlockEntities {
 	private ModBlockEntities() {
@@ -429,7 +429,7 @@ public final class ModBlockEntities {
 			BLOCK_ENTITIES.register("placed_cooking_food", () -> BlockEntityType.Builder.of(
 					CookingPlacedFoodBlockEntity::new,
 					ModBlocks.PLACED_COOKING_FOODS.values().stream()
-							.map(net.neoforged.neoforge.registries.DeferredBlock::get)
+							.map(com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredBlock::get)
 							.toArray(net.minecraft.world.level.block.Block[]::new)).build(null));
 
 	@SuppressWarnings("null")

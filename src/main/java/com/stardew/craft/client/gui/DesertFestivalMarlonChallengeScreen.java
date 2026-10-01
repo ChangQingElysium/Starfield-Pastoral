@@ -18,14 +18,14 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 @SuppressWarnings("null")
 public class DesertFestivalMarlonChallengeScreen extends Screen {
-    private static final ResourceLocation BOARD_BACKGROUND = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation BOARD_BACKGROUND = new ResourceLocation(
         StardewCraft.MODID, "textures/gui/desert_festival/special_orders_board.png");
     private static final int BOARD_W = 338;
     private static final int BOARD_H = 198;
@@ -127,7 +127,7 @@ public class DesertFestivalMarlonChallengeScreen extends Screen {
         int headerY = boardSdvY + 128;
         int portraitSize = px(36);
         graphics.setColor(1.0F, 1.0F, 1.0F, alpha);
-        graphics.blit(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/mugshots/marlon.png"),
+        graphics.blit(new ResourceLocation(StardewCraft.MODID, "textures/mugshots/marlon.png"),
             px(x), px(headerY), portraitSize, portraitSize, 0.0f, 0.0f, 16, 16, 16, 24);
         graphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 

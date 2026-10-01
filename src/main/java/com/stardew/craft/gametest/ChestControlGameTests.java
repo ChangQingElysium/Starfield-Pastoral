@@ -10,9 +10,9 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerSynchronizer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.common.util.FakePlayerFactory;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 @GameTestHolder("stardewcraft_chest_controls")
 @PrefixGameTestTemplate(false)
@@ -201,7 +201,7 @@ public final class ChestControlGameTests {
         bag.setItem(2, new ItemStack(Items.GOLD_INGOT, 2));
         bag.setItem(3, new ItemStack(Items.DIRT, 3));
         var named = new ItemStack(Items.DIAMOND, 4);
-        named.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, net.minecraft.network.chat.Component.literal("Different specimen"));
+        named.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_NAME, net.minecraft.network.chat.Component.literal("Different specimen"));
         bag.setItem(4, named);
         com.stardew.craft.inventory.ChestMenuActions.fillStacks(chest, 36, bag);
         h.assertTrue(chest.getItem(0).getCount() == 64 && chest.getItem(2).getCount() == 10
@@ -290,7 +290,7 @@ public final class ChestControlGameTests {
         level.setBlockAndUpdate(pos, state);
         var chest = (com.stardew.craft.blockentity.StorageChestBlockEntity) level.getBlockEntity(pos);
         chest.setItem(69, new ItemStack(Items.EMERALD, 13)); chest.setColorSelection(3);
-        var event = new net.neoforged.neoforge.event.level.BlockEvent.BreakEvent(level, pos, state, player);
+        var event = new net.minecraftforge.event.level.BlockEvent.BreakEvent(level, pos, state, player);
         com.stardew.craft.inventory.ChestInteractions.protectContentsAndMove(event);
         var destination = pos.south();
         var moved = level.getBlockEntity(destination);
@@ -298,7 +298,7 @@ public final class ChestControlGameTests {
                 "Full chest was broken or failed to move in the preferred direction");
         var result = (com.stardew.craft.blockentity.StorageChestBlockEntity) moved;
         h.assertTrue(result.getItem(69).getCount() == 13 && result.getColorSelection() == 3, "Moving lost items or color");
-        var handler = level.getCapability(net.neoforged.neoforge.capabilities.Capabilities.ItemHandler.BLOCK, destination, net.minecraft.core.Direction.UP);
+        var handler = level.getCapability(com.stardew.craft.port.net.neoforged.neoforge.capabilities.Capabilities.ItemHandler.BLOCK, destination, net.minecraft.core.Direction.UP);
         h.assertTrue(handler != null && handler.getSlots() == 70 && handler.extractItem(69, 2, false).getCount() == 2
                 && result.getItem(69).getCount() == 11, "Automation did not follow the moved chest");
         h.succeed();

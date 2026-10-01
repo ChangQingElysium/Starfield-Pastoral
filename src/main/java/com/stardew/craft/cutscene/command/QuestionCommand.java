@@ -8,8 +8,8 @@ import com.stardew.craft.cutscene.runtime.EventPlayer;
 import com.stardew.craft.network.payload.OpenNpcDialogueScreenPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.ArrayList;
 import java.util.List;

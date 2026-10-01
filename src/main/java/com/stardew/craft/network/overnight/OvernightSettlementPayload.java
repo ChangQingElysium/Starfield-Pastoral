@@ -1,13 +1,13 @@
 package com.stardew.craft.network.overnight;
 
 import com.stardew.craft.StardewCraft;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.List;
 
@@ -42,14 +42,14 @@ public record OvernightSettlementPayload(
         return passOutType >= 0;
     }
 
-    public static final Type<OvernightSettlementPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "overnight_settlement"));
+    public static final Type<OvernightSettlementPayload> TYPE = new Type<>(new ResourceLocation(StardewCraft.MODID, "overnight_settlement"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, OvernightSettlementPayload> STREAM_CODEC = StreamCodec.composite(
             ShippedItem.STREAM_CODEC.apply(ByteBufCodecs.list()), OvernightSettlementPayload::shippedItems,
             LevelUpData.STREAM_CODEC.apply(ByteBufCodecs.list()), OvernightSettlementPayload::levelUps,
             ByteBufCodecs.VAR_INT, OvernightSettlementPayload::passOutType,
             ByteBufCodecs.VAR_INT, OvernightSettlementPayload::passOutMoneyLost,
-            ItemStack.OPTIONAL_STREAM_CODEC.apply(ByteBufCodecs.list()), OvernightSettlementPayload::passOutLostItems,
+            com.stardew.craft.port.PortCodecs.OPTIONAL_ITEM_STACK.apply(ByteBufCodecs.list()), OvernightSettlementPayload::passOutLostItems,
             OvernightContext.STREAM_CODEC, OvernightSettlementPayload::context,
             OvernightSettlementPayload::new
     );
@@ -63,7 +63,7 @@ public record OvernightSettlementPayload(
         context.enqueueWork(() -> handleClient(payload));
     }
 
-    @net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+    @net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
     private static void handleClient(OvernightSettlementPayload payload) {
         OvernightCollapseClientState.acceptSettlement(payload);
     }
@@ -78,7 +78,7 @@ public record OvernightSettlementPayload(
 
     public record ShippedItem(ItemStack stack, int category, int pricePerItem) {
         public static final StreamCodec<RegistryFriendlyByteBuf, ShippedItem> STREAM_CODEC = StreamCodec.composite(
-                ItemStack.STREAM_CODEC, ShippedItem::stack,
+                com.stardew.craft.port.PortCodecs.ITEM_STACK, ShippedItem::stack,
                 ByteBufCodecs.VAR_INT, ShippedItem::category,
                 ByteBufCodecs.VAR_INT, ShippedItem::pricePerItem,
                 ShippedItem::new

@@ -268,7 +268,7 @@ public final class DailyQuestGenerator {
         JsonObject data = new JsonObject();
         data.add("items", items);
 
-        ResourceLocation type = ResourceLocation.fromNamespaceAndPath("stardewcraft", "one_of");
+        ResourceLocation type = new ResourceLocation("stardewcraft", "one_of");
         var query = StardewItemQueries.decode(type, data).result();
         if (query.isPresent()) {
             var stacks = StardewItemQueries.resolve(
@@ -296,7 +296,7 @@ public final class DailyQuestGenerator {
     /** Look up the sell price of a stardew item by registry id. Falls back to 50 if not found. */
     private static int getItemPrice(String itemId) {
         try {
-            ResourceLocation rl = ResourceLocation.parse(itemId);
+            ResourceLocation rl = new ResourceLocation(itemId);
             Item item = BuiltInRegistries.ITEM.get(rl);
             int price = StardewItemDataApi.getSellPrice(new ItemStack(item));
             if (price > 0) return price;

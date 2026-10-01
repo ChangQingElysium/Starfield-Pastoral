@@ -5,9 +5,9 @@ import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.core.ModDimensions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.tick.LevelTickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.neoforge.event.tick.LevelTickEvent;
 
 /** Maintains the fixed Wizard Tower catalog while its appearance stays player-specific. */
 @EventBusSubscriber(modid = StardewCraft.MODID)

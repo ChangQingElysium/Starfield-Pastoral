@@ -39,7 +39,7 @@ public final class PlacedFishBlockEntity extends BlockEntity {
     @Override public void onDataPacket(Connection connection, ClientboundBlockEntityDataPacket packet,
                                        HolderLookup.Provider provider) {
         // This is a full snapshot: an empty tag must clear the last displayed fish.
-        // NeoForge's default handler skips empty tags.
+        // MinecraftForge's default handler skips empty tags.
         loadWithComponents(packet.getTag(), provider);
     }
 }

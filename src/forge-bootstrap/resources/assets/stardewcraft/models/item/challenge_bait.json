@@ -1,7 +1,0 @@
-{
-    "parent":  "minecraft:item/generated",
-    "textures":  {
-                     "layer0":  "stardewcraft:item/tool/tackle/challenge_bait",
-                     "particle":  "stardewcraft:item/tool/tackle/challenge_bait"
-                 }
-}

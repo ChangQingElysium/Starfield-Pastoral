@@ -12,20 +12,20 @@ import com.stardew.craft.manager.TreeGrowthManager;
 import com.stardew.craft.tree.WildTrees;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record GrowTreesPayload() implements CustomPacketPayload {
 	@SuppressWarnings("null")
 	public static final Type<GrowTreesPayload> TYPE = new Type<>(
-			ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "grow_trees")
+			new ResourceLocation(StardewCraft.MODID, "grow_trees")
 	);
 	public static final StreamCodec<ByteBuf, GrowTreesPayload> STREAM_CODEC = StreamCodec.unit(new GrowTreesPayload());
 

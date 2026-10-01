@@ -2,12 +2,12 @@ package com.stardew.craft.network.payload;
 
 import com.stardew.craft.StardewCraft;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +17,7 @@ import java.util.List;
 public record OpenPrizeTicketMachinePayload(int ticketPrizesClaimed, List<PrizeTicketRewardPreview> previews)
     implements CustomPacketPayload {
     public static final Type<OpenPrizeTicketMachinePayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "open_prize_ticket_machine"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "open_prize_ticket_machine"));
 
     public static final StreamCodec<FriendlyByteBuf, OpenPrizeTicketMachinePayload> STREAM_CODEC = StreamCodec.of(
         (buf, payload) -> {

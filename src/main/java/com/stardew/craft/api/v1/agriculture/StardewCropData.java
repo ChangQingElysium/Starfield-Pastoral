@@ -34,7 +34,7 @@ public record StardewCropData(
             Codec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("farming_experience", 0)
                     .forGetter(StardewCropData::farmingExperience),
             ResourceLocation.CODEC.optionalFieldOf("harvest_method",
-                    ResourceLocation.fromNamespaceAndPath("stardewcraft", "grab"))
+                    new ResourceLocation("stardewcraft", "grab"))
                     .forGetter(StardewCropData::harvestMethod),
             ResourceLocation.CODEC.fieldOf("produce").forGetter(StardewCropData::produce),
             ResourceLocation.CODEC.fieldOf("seed").forGetter(StardewCropData::seed)

@@ -156,7 +156,7 @@ public class FishPondManagerMenu extends AbstractContainerMenu {
         goldenAnimalCracker = pond.goldenAnimalCracker() ? 1 : 0;
 
         if (!pond.fishTypeId().isBlank()) {
-            Item fishItem = BuiltInRegistries.ITEM.get(net.minecraft.resources.ResourceLocation.parse(pond.fishTypeId()));
+            Item fishItem = BuiltInRegistries.ITEM.get(new net.minecraft.resources.ResourceLocation(pond.fishTypeId()));
             if (fishItem != null) {
                 fishItemRawId = BuiltInRegistries.ITEM.getId(fishItem);
             }

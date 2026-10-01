@@ -10,7 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.ItemInteractionResult;
+import com.stardew.craft.port.net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -19,16 +19,16 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.level.BlockEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.level.BlockEvent;
 import java.util.ArrayList;
 
 @EventBusSubscriber(modid = "stardewcraft")
 public final class ChestInteractions {
     public static final TagKey<Item> SWAPPABLE = TagKey.create(Registries.ITEM,
-            ResourceLocation.fromNamespaceAndPath("stardewcraft", "swappable_chests"));
+            new ResourceLocation("stardewcraft", "swappable_chests"));
     private ChestInteractions() {}
     public static void message(Player player, String key) {
         if (player instanceof ServerPlayer server) GlobalHudMessagePayload.sendTo(server, Component.translatable(key));

@@ -162,7 +162,7 @@ public abstract class FarmFolioScreen extends Screen {
     protected final void icon(GuiGraphics g, String name, int px, int py, int size) {
         image(
                 g,
-                ResourceLocation.parse("stardewcraft:textures/gui/farm_buildings/" + name + ".png"),
+                new ResourceLocation("stardewcraft:textures/gui/farm_buildings/" + name + ".png"),
                 16,
                 16,
                 px,
@@ -233,7 +233,7 @@ public abstract class FarmFolioScreen extends Screen {
     protected final void money(GuiGraphics g, int amount, int px, int py, int color) {
         image(
                 g,
-                ResourceLocation.parse("stardewcraft:textures/gui/common/gold_coin_1_6.png"),
+                new ResourceLocation("stardewcraft:textures/gui/common/gold_coin_1_6.png"),
                 14,
                 13,
                 px,

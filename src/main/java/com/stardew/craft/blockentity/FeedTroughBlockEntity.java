@@ -11,7 +11,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -261,7 +261,7 @@ public class FeedTroughBlockEntity extends net.minecraft.world.level.block.entit
     }
 
     @Override
-    public net.neoforged.neoforge.items.IItemHandler getAutomationItemHandler() {
+    public net.minecraftforge.items.IItemHandler getAutomationItemHandler() {
         return automationItemHandler;
     }
 

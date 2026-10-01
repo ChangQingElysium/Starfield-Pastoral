@@ -8,8 +8,8 @@ import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,7 +61,7 @@ public final class ChestExtraActions {
             return true;
         }
         if (noteVisible() && hit(mx, my, fillY + 24, 18)) {
-            if (menu.getCarried().isEmpty()) net.neoforged.neoforge.network.PacketDistributor.sendToServer(
+            if (menu.getCarried().isEmpty()) net.minecraftforge.network.PacketDistributor.sendToServer(
                     new com.stardew.craft.communitycenter.network.OpenBundleViewerPayload());
             return true;
         }
@@ -79,6 +79,6 @@ public final class ChestExtraActions {
         return result;
     }
     private static void icon(GuiGraphics g, String name, int x, int y, int width, int height) {
-        g.blit(ResourceLocation.fromNamespaceAndPath("stardewcraft", "textures/gui/" + name + ".png"), x, y, 0, 0, width, height, width, height);
+        g.blit(new ResourceLocation("stardewcraft", "textures/gui/" + name + ".png"), x, y, 0, 0, width, height, width, height);
     }
 }

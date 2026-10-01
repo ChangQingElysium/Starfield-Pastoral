@@ -1,7 +1,0 @@
-{
-    "parent":  "item/generated",
-    "textures":  {
-                     "layer0":  "stardewcraft:item/mineral/ghost_crystal",
-                     "particle":  "stardewcraft:item/mineral/ghost_crystal"
-                 }
-}

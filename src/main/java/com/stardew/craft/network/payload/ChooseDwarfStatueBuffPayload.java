@@ -7,14 +7,14 @@ import com.stardew.craft.player.PlayerStardewData;
 import com.stardew.craft.player.SkillType;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.Holder;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.List;
 
@@ -27,7 +27,7 @@ public record ChooseDwarfStatueBuffPayload(int chosenIcon) implements CustomPack
 
     @SuppressWarnings("null")
     public static final Type<ChooseDwarfStatueBuffPayload> TYPE = new Type<>(
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "choose_dwarf_statue_buff"));
+        new ResourceLocation(StardewCraft.MODID, "choose_dwarf_statue_buff"));
 
     public static final StreamCodec<ByteBuf, ChooseDwarfStatueBuffPayload> STREAM_CODEC = StreamCodec.composite(
         ByteBufCodecs.VAR_INT, ChooseDwarfStatueBuffPayload::chosenIcon,

@@ -50,7 +50,7 @@ public class WeatherSavedData extends SavedData {
         for (String dimKey : weatherData.getAllKeys()) {
             try {
                 @SuppressWarnings("null")
-                ResourceLocation dimLoc = ResourceLocation.parse(dimKey);
+                ResourceLocation dimLoc = new ResourceLocation(dimKey);
                 @SuppressWarnings("null")
                 ResourceKey<Level> levelKey = ResourceKey.create(
                     net.minecraft.core.registries.Registries.DIMENSION,

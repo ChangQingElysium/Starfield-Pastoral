@@ -13,7 +13,7 @@ import java.util.Objects;
  * Synchronous server-side context for one incoming damage decision.
  *
  * <p>The amount is the result of higher-priority decisions and may differ
- * from the amount originally supplied by NeoForge.
+ * from the amount originally supplied by MinecraftForge.
  */
 public record StardewCombatDamageContext(
         LivingEntity target,

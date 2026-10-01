@@ -15,10 +15,10 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderGuiEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.RenderGuiEvent;
 
 /**
  * 星露谷物语原版风格HUD
@@ -29,30 +29,30 @@ public class StardewTimeHud {
     
     // 纹理资源
     @SuppressWarnings("null")
-    private static final ResourceLocation POINTER = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/cursor.png");
+    private static final ResourceLocation POINTER = new ResourceLocation(StardewCraft.MODID, "textures/gui/cursor.png");
     @SuppressWarnings("null")
-    private static final ResourceLocation SEASON_SPRING = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/spring.png");
+    private static final ResourceLocation SEASON_SPRING = new ResourceLocation(StardewCraft.MODID, "textures/gui/spring.png");
     @SuppressWarnings("null")
-    private static final ResourceLocation SEASON_SUMMER = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/summer.png");
+    private static final ResourceLocation SEASON_SUMMER = new ResourceLocation(StardewCraft.MODID, "textures/gui/summer.png");
     @SuppressWarnings("null")
-    private static final ResourceLocation SEASON_FALL = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/fall.png");
+    private static final ResourceLocation SEASON_FALL = new ResourceLocation(StardewCraft.MODID, "textures/gui/fall.png");
     @SuppressWarnings("null")
-    private static final ResourceLocation SEASON_WINTER = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/winter.png");
+    private static final ResourceLocation SEASON_WINTER = new ResourceLocation(StardewCraft.MODID, "textures/gui/winter.png");
     @SuppressWarnings("null")
-    private static final ResourceLocation WEATHER_SUNNY = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/sunny.png");
+    private static final ResourceLocation WEATHER_SUNNY = new ResourceLocation(StardewCraft.MODID, "textures/gui/sunny.png");
     @SuppressWarnings("null")
-    private static final ResourceLocation WEATHER_RAINY = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/rainy.png");
+    private static final ResourceLocation WEATHER_RAINY = new ResourceLocation(StardewCraft.MODID, "textures/gui/rainy.png");
     @SuppressWarnings("null")
-    private static final ResourceLocation WEATHER_STORMY = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/stormy.png");
+    private static final ResourceLocation WEATHER_STORMY = new ResourceLocation(StardewCraft.MODID, "textures/gui/stormy.png");
     @SuppressWarnings("null")
-    private static final ResourceLocation WEATHER_SNOWY = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/snowy.png");
+    private static final ResourceLocation WEATHER_SNOWY = new ResourceLocation(StardewCraft.MODID, "textures/gui/snowy.png");
     @SuppressWarnings("null")
-    private static final ResourceLocation WEATHER_WINDY_SPRING = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/windy_spring.png");
+    private static final ResourceLocation WEATHER_WINDY_SPRING = new ResourceLocation(StardewCraft.MODID, "textures/gui/windy_spring.png");
     @SuppressWarnings("null")
-    private static final ResourceLocation WEATHER_WINDY_FALL = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/windy_fall.png");
-    private static final ResourceLocation VANILLA_CURSORS = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/cursors.png");
+    private static final ResourceLocation WEATHER_WINDY_FALL = new ResourceLocation(StardewCraft.MODID, "textures/gui/windy_fall.png");
+    private static final ResourceLocation VANILLA_CURSORS = new ResourceLocation(StardewCraft.MODID, "textures/gui/cursors.png");
     @SuppressWarnings("null")
-    private static final ResourceLocation CALICO_RATING_ICON = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/desert_festival/calico_rating_icon.png");
+    private static final ResourceLocation CALICO_RATING_ICON = new ResourceLocation(StardewCraft.MODID, "textures/gui/desert_festival/calico_rating_icon.png");
     
     // UI尺寸
     private static final int BG_WIDTH = StardewHudLayout.TIME_BG_WIDTH;

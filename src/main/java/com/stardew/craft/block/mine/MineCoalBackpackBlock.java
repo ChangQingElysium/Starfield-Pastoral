@@ -4,7 +4,7 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.block.decor.MapDecorStaticBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.component.DataComponents;
+import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -15,7 +15,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.BlockItemStateProperties;
+import com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -40,7 +40,7 @@ public final class MineCoalBackpackBlock extends MapDecorStaticBlock {
     public static final BooleanProperty DESERT = BooleanProperty.create("desert");
     public static final BooleanProperty DARK = BooleanProperty.create("dark");
     private static final ResourceKey<LootTable> LOOT = ResourceKey.create(Registries.LOOT_TABLE,
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "gameplay/mine_coal_backpack"));
+            new ResourceLocation(StardewCraft.MODID, "gameplay/mine_coal_backpack"));
 
     public MineCoalBackpackBlock(Properties properties) {
         super(properties, "block/mine/backpack/frost_full");

@@ -251,7 +251,7 @@ public enum FarmType {
     public FarmLayout getLayout() { return layout; }
 
     public ResourceLocation getIconTexture() {
-        return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,
+        return new ResourceLocation(StardewCraft.MODID,
                 "textures/gui/farm_select/icon_" + id + ".png");
     }
 

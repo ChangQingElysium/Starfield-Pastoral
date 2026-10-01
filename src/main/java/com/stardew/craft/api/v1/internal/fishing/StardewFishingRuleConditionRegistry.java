@@ -19,7 +19,7 @@ public final class StardewFishingRuleConditionRegistry {
     private static final OrderedExtensionRegistry<
             StardewFishingRuleConditions.Provider> PROVIDERS =
             new OrderedExtensionRegistry<>(
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             StardewCraft.MODID, "fishing/rule_condition"));
 
     private StardewFishingRuleConditionRegistry() {

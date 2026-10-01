@@ -111,7 +111,7 @@ public final class ShopCostService {
                                 1, entry.tradeItemCount()),
                         quantity);
                 entries.add(new StardewItemCost(
-                        ResourceLocation.parse(
+                        new ResourceLocation(
                                 entry.tradeItemId()),
                         itemAmount));
             } catch (IllegalArgumentException

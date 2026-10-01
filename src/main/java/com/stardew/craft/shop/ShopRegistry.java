@@ -946,7 +946,7 @@ public final class ShopRegistry {
 
     private static boolean shopItemExists(String itemId) {
         try {
-            net.minecraft.resources.ResourceLocation id = net.minecraft.resources.ResourceLocation.parse(itemId);
+            net.minecraft.resources.ResourceLocation id = new net.minecraft.resources.ResourceLocation(itemId);
             net.minecraft.world.item.Item item = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(id);
             return item != null && item != net.minecraft.world.item.Items.AIR;
         } catch (Exception ignored) {

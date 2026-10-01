@@ -26,7 +26,7 @@ public record StardewEquipmentData(
 ) {
     public static final Codec<StardewEquipmentData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ResourceLocation.CODEC.optionalFieldOf("slot",
-                    ResourceLocation.fromNamespaceAndPath("stardewcraft", "other"))
+                    new ResourceLocation("stardewcraft", "other"))
                     .forGetter(StardewEquipmentData::slot),
             Codec.INT.optionalFieldOf("defense", 0).forGetter(StardewEquipmentData::defense),
             Codec.INT.optionalFieldOf("immunity", 0).forGetter(StardewEquipmentData::immunity),

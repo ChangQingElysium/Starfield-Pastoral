@@ -151,7 +151,7 @@ public class PlayerInteriorAllocator extends SavedData {
     }
 
     public BlockPos getCaveOrigin(UUID owner) {
-        var server=net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer();
+        var server=net.minecraftforge.server.ServerLifecycleHooks.getCurrentServer();
         var level=server==null?null:server.getLevel(com.stardew.craft.core.ModDimensions.STARDEW_VALLEY);
         var farm=com.stardew.craft.farm.FarmInstanceRegistry.get().getFarm(owner);
         return level!=null && farm!=null?FarmCaveRuntime.origin(level,farm):getLegacyCaveOrigin(owner);
@@ -281,7 +281,7 @@ public class PlayerInteriorAllocator extends SavedData {
     public boolean isLegacyCavePlaced(UUID playerUUID) { return cavePlaced.contains(playerUUID); }
 
     public boolean isCavePlaced(UUID owner) {
-        var server=net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer();
+        var server=net.minecraftforge.server.ServerLifecycleHooks.getCurrentServer();
         var level=server==null?null:server.getLevel(com.stardew.craft.core.ModDimensions.STARDEW_VALLEY);
         var farm=com.stardew.craft.farm.FarmInstanceRegistry.get().getFarm(owner);
         return level!=null && farm!=null && FarmCaveRuntime.installed(level,farm);
@@ -335,7 +335,7 @@ public class PlayerInteriorAllocator extends SavedData {
     /** 查找世界坐标所属的洞穴玩家 UUID，不在任何洞穴内返回 null */
     @Nullable
     public UUID findCaveOwner(BlockPos worldPos) {
-        var server=net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer();
+        var server=net.minecraftforge.server.ServerLifecycleHooks.getCurrentServer();
         var level=server==null?null:server.getLevel(com.stardew.craft.core.ModDimensions.STARDEW_VALLEY);
         var farm=level==null?null:FarmCaveRuntime.farmAt(level,worldPos);
         return farm!=null?farm.getOwnerUUID():findLegacyCaveOwner(worldPos);

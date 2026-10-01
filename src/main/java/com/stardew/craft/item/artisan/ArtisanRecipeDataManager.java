@@ -107,7 +107,7 @@ public final class ArtisanRecipeDataManager {
             ResourceLocation inputId = obj.has("inputId") && !obj.get("inputId").isJsonNull()
                     ? ResourceLocation.tryParse(obj.get("inputId").getAsString()) : null;
             TagKey<Item> inputTag = obj.has("inputTag") && !obj.get("inputTag").isJsonNull()
-                    ? TagKey.create(net.minecraft.core.registries.Registries.ITEM, ResourceLocation.parse(obj.get("inputTag").getAsString())) : null;
+                    ? TagKey.create(net.minecraft.core.registries.Registries.ITEM, new ResourceLocation(obj.get("inputTag").getAsString())) : null;
             InputMode inputMode = InputMode.valueOf(obj.get("inputMode").getAsString());
             ResourceLocation outputId = obj.has("outputId") && !obj.get("outputId").isJsonNull()
                     ? ResourceLocation.tryParse(obj.get("outputId").getAsString()) : null;
@@ -127,7 +127,7 @@ public final class ArtisanRecipeDataManager {
                         sm.get("seedMin").getAsInt(), sm.get("seedMax").getAsInt());
             }
             OutputMode outputMode = OutputMode.valueOf(obj.get("outputMode").getAsString());
-            ResourceLocation id = ResourceLocation.fromNamespaceAndPath(
+            ResourceLocation id = new ResourceLocation(
                     machineId.getNamespace(), "network/" + machineId.getPath() + "/" + index);
             return new Recipe(id, machineId, inputId, inputTag, inputMode, outputId, outputCount, minutes,
                     consumeCount, keepInputQuality, outputQuality, preserveType, seedMakerRule, outputMode,
@@ -216,11 +216,11 @@ public final class ArtisanRecipeDataManager {
                 .orElse(null);
         if (category == null) return false;
         return switch (mode) {
-            case CROP_TYPE -> category.equals(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "crop"));
-            case MINERAL_TYPE -> category.equals(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "mineral"));
-            case FISH_TYPE -> category.equals(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "fish"))
-                    || category.equals(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "crabpot"))
-                    || category.equals(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "legendary_fish"));
+            case CROP_TYPE -> category.equals(new ResourceLocation(StardewCraft.MODID, "crop"));
+            case MINERAL_TYPE -> category.equals(new ResourceLocation(StardewCraft.MODID, "mineral"));
+            case FISH_TYPE -> category.equals(new ResourceLocation(StardewCraft.MODID, "fish"))
+                    || category.equals(new ResourceLocation(StardewCraft.MODID, "crabpot"))
+                    || category.equals(new ResourceLocation(StardewCraft.MODID, "legendary_fish"));
             default -> false;
         };
     }
@@ -394,7 +394,7 @@ public final class ArtisanRecipeDataManager {
 
         private static ResourceLocation definitionId(ResourceLocation source, boolean grouped, int index) {
             return grouped
-                    ? ResourceLocation.fromNamespaceAndPath(source.getNamespace(), source.getPath() + "/" + index)
+                    ? new ResourceLocation(source.getNamespace(), source.getPath() + "/" + index)
                     : source;
         }
 

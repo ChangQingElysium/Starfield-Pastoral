@@ -49,7 +49,7 @@ public final class FarmAreaResolver {
     @Nullable
     public static UUID getOwnerAt(BlockPos pos) {
         if (!FarmInstanceAllocator.isInFarmInstanceRegion(pos)) {
-            var server=net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer();
+            var server=net.minecraftforge.server.ServerLifecycleHooks.getCurrentServer();
             var level=server==null?null:server.getLevel(ModDimensions.STARDEW_VALLEY);
             var cave=level==null?null:com.stardew.craft.interior.FarmCaveRuntime.farmAt(level,pos);
             return cave==null?null:cave.getOwnerUUID();

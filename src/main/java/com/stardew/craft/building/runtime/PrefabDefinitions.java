@@ -18,9 +18,9 @@ import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.AddReloadListenerEvent;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,8 +31,8 @@ import java.util.Map;
 
 @EventBusSubscriber(modid = StardewCraft.MODID)
 public final class PrefabDefinitions {
-    public static final ResourceLocation COOP = ResourceLocation.parse("stardewcraft:coop");
-    public static final ResourceLocation BARN = ResourceLocation.parse("stardewcraft:barn");
+    public static final ResourceLocation COOP = new ResourceLocation("stardewcraft:coop");
+    public static final ResourceLocation BARN = new ResourceLocation("stardewcraft:barn");
     public static boolean supported(ResourceLocation id) { return com.stardew.craft.api.v1.building.StardewBuildingFamilies.find(id).isPresent(); }
     public static net.minecraft.world.level.block.Block managerBlock(ResourceLocation id) {
         return com.stardew.craft.api.v1.building.StardewBuildingFamilies.find(id).orElseThrow(() -> new IllegalArgumentException("Unregistered building family "+id)).manager().get();
@@ -137,7 +137,7 @@ public final class PrefabDefinitions {
             int number = tier.get("tier").getAsInt();
             JsonObject facilities = tier.has("facilities") ? tier.getAsJsonObject("facilities") : new JsonObject();
             JsonObject upgrade = tier.has("upgrade") ? tier.getAsJsonObject("upgrade") : new JsonObject();
-            tiers.add(new Tier(number, ResourceLocation.parse(tier.get("structure").getAsString()),
+            tiers.add(new Tier(number, new ResourceLocation(tier.get("structure").getAsString()),
                     pos(tier, "size"), pos(tier, "anchor"), pos(tier.getAsJsonObject("manager"), "position"),
                     pos(tier, "animal_spawn"), bounds(tier.getAsJsonObject("bounds_from_anchor")),
                     new Facilities(integer(facilities, "troughs", 0), integer(facilities, "automatic_troughs", 0),
@@ -172,7 +172,7 @@ public final class PrefabDefinitions {
                 List<BlockState> palette = new ArrayList<>();
                 for (var entry : tag.getList("palette", 10)) {
                     CompoundTag value = (CompoundTag) entry;
-                    ResourceLocation block = ResourceLocation.parse(value.getString("Name"));
+                    ResourceLocation block = new ResourceLocation(value.getString("Name"));
                     if (!BuiltInRegistries.BLOCK.containsKey(block)) throw new IllegalArgumentException("Unknown prefab block: " + block);
                     var definition = BuiltInRegistries.BLOCK.get(block).getStateDefinition();
                     CompoundTag props = value.getCompound("Properties");

@@ -6,8 +6,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.*;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
-import net.neoforged.neoforge.gametest.*;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.gametest.*;
 import java.util.List;
 import java.util.UUID;
 

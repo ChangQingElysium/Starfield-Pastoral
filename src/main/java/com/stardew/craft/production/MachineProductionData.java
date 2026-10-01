@@ -54,7 +54,7 @@ public final class MachineProductionData {
     }
     public static Float agingRate(ResourceLocation item) { return profile("cask").agingRates().get(item); }
     public static ResourceLocation id(String value) {
-        return ResourceLocation.parse(value.contains(":") ? value : StardewCraft.MODID + ":" + value);
+        return new ResourceLocation(value.contains(":") ? value : StardewCraft.MODID + ":" + value);
     }
     private static synchronized void ensureLoaded() {
         if (STORE.snapshot().version() == 0) reload(Map.of());
@@ -145,7 +145,7 @@ public final class MachineProductionData {
         if (root.has("cycles")) for (var entry : root.getAsJsonObject("cycles").entrySet()) {
             JsonObject c = entry.getValue().getAsJsonObject();
             keys(c, Set.of("output", "min_count", "max_count", "duration"));
-            ResourceLocation output = c.has("output") ? ResourceLocation.parse(c.get("output").getAsString()) : null;
+            ResourceLocation output = c.has("output") ? new ResourceLocation(c.get("output").getAsString()) : null;
             if (output != null && (!BuiltInRegistries.ITEM.containsKey(output) || BuiltInRegistries.ITEM.get(output) == net.minecraft.world.item.Items.AIR))
                 throw new IllegalArgumentException("Unknown output " + output);
             int min = c.has("min_count") ? integer(c.get("min_count"), 1, 999) : 1;
@@ -159,7 +159,7 @@ public final class MachineProductionData {
         }
         Map<ResourceLocation, Float> rates = new LinkedHashMap<>();
         if (root.has("aging_rates")) for (var entry : root.getAsJsonObject("aging_rates").entrySet()) {
-            ResourceLocation item = ResourceLocation.parse(entry.getKey());
+            ResourceLocation item = new ResourceLocation(entry.getKey());
             if (!BuiltInRegistries.ITEM.containsKey(item)) throw new IllegalArgumentException("Unknown aging item " + item);
             rates.put(item, (float) number(entry.getValue(), 0.000001, 1000000));
         }

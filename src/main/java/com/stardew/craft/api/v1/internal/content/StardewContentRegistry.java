@@ -113,11 +113,11 @@ public final class StardewContentRegistry {
     private static final ResourceLocation ALIAS_EXTENSION_POINT =
             id("content/alias_providers");
     private static final ResourceLocation ITEM_REGISTRY_SOURCE =
-            ResourceLocation.fromNamespaceAndPath("minecraft", "item");
+            new ResourceLocation("minecraft", "item");
     private static final ResourceLocation BLOCK_REGISTRY_SOURCE =
-            ResourceLocation.fromNamespaceAndPath("minecraft", "block");
+            new ResourceLocation("minecraft", "block");
     private static final ResourceLocation ENTITY_TYPE_REGISTRY_SOURCE =
-            ResourceLocation.fromNamespaceAndPath(
+            new ResourceLocation(
                     "minecraft", "entity_type");
     private static final Set<String> VIRTUAL_PRODUCT_NAMESPACES = Set.of(
             "recipe", "wallpaper", "flooring", "random");
@@ -960,7 +960,7 @@ public final class StardewContentRegistry {
             ArrayList<StardewContentReference> references =
                     new ArrayList<>();
             if (!entry.getValue().npc().equals(
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             StardewCraft.MODID, "universal"))) {
                 StardewContentKey target = key(
                         StardewContentTypes.NPC,
@@ -1926,7 +1926,7 @@ public final class StardewContentRegistry {
     ) {
         for (var bundle : BundleDataManager.getAllBundles()) {
             ResourceLocation bundleId =
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             StardewCraft.MODID,
                             "bundle/" + bundle.bundleId());
             ArrayList<StardewContentReference> references =
@@ -2947,7 +2947,7 @@ public final class StardewContentRegistry {
     }
 
     private static ResourceLocation legacyOverlayId(String raw) {
-        return ResourceLocation.fromNamespaceAndPath(
+        return new ResourceLocation(
                 StardewCraft.MODID,
                 "legacy/" + safePath(raw));
     }
@@ -2960,7 +2960,7 @@ public final class StardewContentRegistry {
                 : null;
         return direct != null
                 ? direct
-                : ResourceLocation.fromNamespaceAndPath(
+                : new ResourceLocation(
                         StardewCraft.MODID,
                         "legacy/" + safePath(raw));
     }
@@ -3050,7 +3050,7 @@ public final class StardewContentRegistry {
             ResourceLocation layoutId,
             ResourceLocation attachmentId
     ) {
-        return ResourceLocation.fromNamespaceAndPath(
+        return new ResourceLocation(
                 layoutId.getNamespace(),
                 "layout_attachment/" + layoutId.getPath()
                         + "/" + attachmentId.getNamespace()
@@ -3065,7 +3065,7 @@ public final class StardewContentRegistry {
     }
 
     private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(
+        return new ResourceLocation(
                 StardewCraft.MODID, path);
     }
 }

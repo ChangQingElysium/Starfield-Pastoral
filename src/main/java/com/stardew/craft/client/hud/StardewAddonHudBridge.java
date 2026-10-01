@@ -6,11 +6,11 @@ import com.stardew.craft.api.v1.client.StardewHudRenderEvent;
 import com.stardew.craft.api.v1.internal.client.StardewDailyInfoCache;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
-import net.neoforged.neoforge.common.NeoForge;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
+import net.minecraftforge.common.MinecraftForge;
 import java.util.Optional;
 
 @EventBusSubscriber(modid = StardewCraft.MODID, value = Dist.CLIENT)
@@ -37,7 +37,7 @@ public final class StardewAddonHudBridge {
     static void renderPost(GuiGraphics graphics, int width, int height, StardewHudLayout.Placement placement) {
         graphics.pose().pushPose();
         try {
-            NeoForge.EVENT_BUS.post(new StardewHudRenderEvent(graphics, snapshot(true, width, height, placement)));
+            MinecraftForge.EVENT_BUS.post(new StardewHudRenderEvent(graphics, snapshot(true, width, height, placement)));
         } finally {
             graphics.pose().popPose();
         }

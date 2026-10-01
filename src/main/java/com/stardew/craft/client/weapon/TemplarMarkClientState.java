@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
 
 public final class TemplarMarkClientState {
     record Key(int caster, long cast, int target) {}

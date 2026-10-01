@@ -1,8 +1,8 @@
 package com.stardew.craft.client;
 
 import com.stardew.craft.network.payload.LeaderboardSyncPayload;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.ArrayList;
 import java.util.List;

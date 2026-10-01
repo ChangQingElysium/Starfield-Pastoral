@@ -9,17 +9,17 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.core.component.DataComponents;
+import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomData;
+import com.stardew.craft.port.net.minecraft.world.item.component.CustomData;
 
-@net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+@net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
 final class AquariumSpecialCreatures {
     private final ModelPart frog;
-    private static final ResourceLocation FROG = ResourceLocation.withDefaultNamespace("textures/entity/frog/warm_frog.png");
-    private static final ResourceLocation BUBBLE = ResourceLocation.withDefaultNamespace("textures/particle/bubble.png");
+    private static final ResourceLocation FROG = new ResourceLocation("textures/entity/frog/warm_frog.png");
+    private static final ResourceLocation BUBBLE = new ResourceLocation("textures/particle/bubble.png");
     private static final int[] COLORS = {0xff81bf58,0xffb29470,0xff65ba99,0xff669ccc,0xffd17e6d,0xffe2ca67,0xff665481};
     AquariumSpecialCreatures(BlockEntityRendererProvider.Context context) { frog = context.bakeLayer(ModelLayers.FROG).getChild("root"); }
 

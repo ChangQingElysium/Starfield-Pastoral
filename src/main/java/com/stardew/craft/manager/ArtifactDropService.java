@@ -27,7 +27,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.registries.DeferredItem;
+import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredItem;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;

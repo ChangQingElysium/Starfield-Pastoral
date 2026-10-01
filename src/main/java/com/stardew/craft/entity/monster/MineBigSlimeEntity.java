@@ -46,7 +46,7 @@ public final class MineBigSlimeEntity extends StardewMonsterEntity {
         } else super.setYRot(yaw);
     }
     @Override protected void registerGoals(){}
-    @Override protected ResourceLocation definitionId(){return ResourceLocation.parse("stardewcraft:big_slime");}
+    @Override protected ResourceLocation definitionId(){return new ResourceLocation("stardewcraft:big_slime");}
     @Override protected void configureSpawn(MonsterDefinition definition,MonsterSpawnContext context){
         var base=MonsterStatResolver.base(definition,context,random);int area=BigSlimeRules.area(context.floor());var stats=base.combat();
         setInitialHealth(base.initialHealth()*BigSlimeRules.healthMultiplier(area));replaceCombatStats(MonsterStats.builder().damage(stats.getDamage()*BigSlimeRules.damageMultiplier(area)).resilience(stats.getResilience()).missChance(stats.getMissChance()).experience(stats.getExperience()*BigSlimeRules.experienceMultiplier(area)).build());
@@ -89,7 +89,7 @@ public final class MineBigSlimeEntity extends StardewMonsterEntity {
         super.dropAllDeathLoot(level,source);
     }
     private void splash(double x,double z,boolean slow){
-        if(level() instanceof ServerLevel server){var type=slow?com.stardew.craft.weather.ModParticles.BIG_SLIME_SPLASH_SLOW.get():com.stardew.craft.weather.ModParticles.BIG_SLIME_SPLASH.get();server.sendParticles(net.minecraft.core.particles.ColorParticleOption.create(type,color()),getX()+x,getY()+.5,getZ()+z,1,0,0,0,0);}
+        if(level() instanceof ServerLevel server){var type=slow?com.stardew.craft.weather.ModParticles.BIG_SLIME_SPLASH_SLOW.get():com.stardew.craft.weather.ModParticles.BIG_SLIME_SPLASH.get();server.sendParticles(com.stardew.craft.port.net.minecraft.core.particles.ColorParticleOption.create(type,color()),getX()+x,getY()+.5,getZ()+z,1,0,0,0,0);}
     }
     @Override protected void onFinalDeath(DamageSource source){splash(0,0,false);}
     @Override protected void tickDeath(){super.tickDeath();if(deathTime==2)splash(-.5,0,false);if(deathTime==4)splash(.5,0,false);if(deathTime==6)splash(0,-.5,true);}

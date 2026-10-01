@@ -20,15 +20,15 @@ import com.stardew.craft.server.performance.ServerPerformanceRecorder;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Items;
-import net.neoforged.bus.api.EventPriority;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraft.server.level.ServerLevel;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.AddReloadListenerEvent;
-import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.event.server.ServerStoppedEvent;
-import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.AddReloadListenerEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 @EventBusSubscriber(modid = StardewCraft.MODID)
 @SuppressWarnings("null")
@@ -54,7 +54,7 @@ public final class NpcSystem {
     }
 
     @SubscribeEvent
-    public static void onServerStopping(net.neoforged.neoforge.event.server.ServerStoppingEvent event) {
+    public static void onServerStopping(net.minecraftforge.event.server.ServerStoppingEvent event) {
         for (ServerLevel level : event.getServer().getAllLevels()) {
             for (Entity entity : level.getAllEntities())
                 if (entity instanceof StardewNpcEntity npc) com.stardew.craft.npc.runtime.NpcActorPersistence.capture(npc);

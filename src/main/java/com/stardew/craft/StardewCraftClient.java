@@ -35,19 +35,19 @@ import net.minecraft.world.level.GrassColor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.item.Item;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.fml.loading.FMLLoader;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.client.event.TextureAtlasStitchedEvent;
-import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
-import net.neoforged.neoforge.client.event.EntityRenderersEvent;
-import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModContainer;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.loading.FMLLoader;
+import net.minecraftforge.common.MinecraftForge;
+import com.stardew.craft.port.net.neoforged.neoforge.client.event.TextureAtlasStitchedEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 
 import java.util.List;
 
@@ -66,10 +66,10 @@ public class StardewCraftClient {
         container.registerExtensionPoint(IConfigScreenFactory.class,
                 (minecraft, parent) -> new com.stardew.craft.client.gui.StardewSettingsScreen(parent));
         // Weapon shader registration — client only (moved from StardewCraft main class)
-    NeoForge.EVENT_BUS.register(TVScreenOverlayRenderer.class);
-    NeoForge.EVENT_BUS.register(SprinklerOverlayRenderer.class);
+    MinecraftForge.EVENT_BUS.register(TVScreenOverlayRenderer.class);
+    MinecraftForge.EVENT_BUS.register(SprinklerOverlayRenderer.class);
     if (!FMLLoader.isProduction()) {
-        NeoForge.EVENT_BUS.register(DebugKeybindsTick.class);
+        MinecraftForge.EVENT_BUS.register(DebugKeybindsTick.class);
     }
     }
 

@@ -24,7 +24,7 @@ import java.util.List;
 public enum BeeHouseJadeProvider implements IBlockComponentProvider, IServerDataProvider<BlockAccessor> {
 	INSTANCE;
 
-	private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "bee_house");
+	private static final ResourceLocation UID = new ResourceLocation(StardewCraft.MODID, "bee_house");
 
 	private static final String NBT_READY = "ready";
 	private static final String NBT_WORKING = "working";

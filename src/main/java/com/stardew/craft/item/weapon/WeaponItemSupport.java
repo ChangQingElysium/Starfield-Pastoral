@@ -5,11 +5,11 @@ import com.stardew.craft.combat.WeaponForgeData;
 import com.stardew.craft.combat.WeaponStats;
 import com.stardew.craft.combat.StardewWeaponSpeedRules;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.EquipmentSlotGroup;
+import com.stardew.craft.port.net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.ItemAttributeModifiers;
+import com.stardew.craft.port.net.minecraft.world.item.component.ItemAttributeModifiers;
 
 /**
  * Shared projection from one weapon definition to its Minecraft item state.
@@ -83,7 +83,7 @@ final class WeaponItemSupport {
 
     private static AttributeModifier modifier(String weaponId, String attribute, double value) {
         return new AttributeModifier(
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         StardewCraft.MODID,
                         "weapon." + weaponId + "." + attribute
                 ),

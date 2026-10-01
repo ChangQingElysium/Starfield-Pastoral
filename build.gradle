@@ -3,6 +3,7 @@ plugins {
     id 'idea'
     id 'maven-publish'
     id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id 'org.spongepowered.mixin' version '0.7.+'
 }
 
 version = mod_version
@@ -15,16 +16,16 @@ base {
 // Forge 1.20.1 targets the Java 17 runtime shipped with this Minecraft line.
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
-// The NeoForge source tree remains in src/main/java as a porting reference.
-// Forge-specific wiring stays in forge-bootstrap; API-compatible gameplay classes
-// move into forge-common one slice at a time.
+// src/main/java is the bulk-ported 1.21.1 tree. src/port/java holds the narrow
+// compatibility layer that re-creates the 1.21.1/NeoForge API surface the mod uses
+// (network payloads, events, registries, item data) on top of Forge 1.20.1.
 sourceSets {
     main {
         java {
-            srcDirs = ['src/forge-bootstrap/java', 'src/forge-common/java']
+            srcDirs = ['src/main/java', 'src/port/java']
         }
         resources {
-            srcDirs = ['src/forge-bootstrap/resources']
+            srcDirs = ['src/main/resources', 'src/generated/resources']
         }
     }
 }
@@ -32,6 +33,7 @@ sourceSets {
 minecraft {
     mappings channel: mapping_channel, version: mapping_version
     copyIdeResources = true
+    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
     def forgeRunDirectory = providers.gradleProperty('forgeRunDir').getOrElse('run')
 
@@ -40,6 +42,8 @@ minecraft {
             workingDirectory project.file(forgeRunDirectory)
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'info'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
             mods {
                 "${mod_id}" {
                     source sourceSets.main
@@ -57,7 +61,8 @@ minecraft {
         }
 
         gameTestServer {
-            property 'forge.enabledGameTestNamespaces', mod_id
+            workingDirectory project.file('run-game-test')
+            property 'forge.enabledGameTestNamespaces', providers.gradleProperty('gameTestNamespaces').getOrElse(mod_id)
         }
 
         data {
@@ -67,7 +72,10 @@ minecraft {
     }
 }
 
-sourceSets.main.resources { srcDir 'src/forge-bootstrap/generated-resources' }
+mixin {
+    add sourceSets.main, "${mod_id}.refmap.json"
+    config "${mod_id}.mixins.json"
+}
 
 repositories {
     flatDir {
@@ -85,11 +93,35 @@ repositories {
         name = 'AppleSkin'
         url = 'https://maven.ryanliptak.com/'
     }
+    maven {
+        name = 'Modrinth'
+        url = 'https://api.modrinth.com/maven'
+        content { includeGroup 'maven.modrinth' }
+    }
 }
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+
+    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:${mixinextras_version}"))
+    implementation(jarJar("io.github.llamalad7:mixinextras-forge:${mixinextras_version}")) {
+        jarJar.ranged(it, "[${mixinextras_version},)")
+    }
+
+    implementation fg.deobf("software.bernie.geckolib:geckolib-forge-1.20.1:${geckolib_version}")
+    jarJar(group: 'software.bernie.geckolib', name: 'geckolib-forge-1.20.1', version: "[${geckolib_version},)")
+
+    compileOnly fg.deobf("mezz.jei:jei-1.20.1-forge-api:${jei_version}")
+    compileOnly fg.deobf("mezz.jei:jei-1.20.1-common-api:${jei_version}")
+    runtimeOnly fg.deobf("mezz.jei:jei-1.20.1-forge:${jei_version}")
+
+    compileOnly fg.deobf("maven.modrinth:jade:${jade_version}")
+    compileOnly fg.deobf("squeek.appleskin:appleskin-forge:${appleskin_version}:api")
 }
+
+jarJar.enable()
 
 tasks.named('processResources', ProcessResources).configure {
     def replaceProperties = [
@@ -106,7 +138,7 @@ tasks.named('processResources', ProcessResources).configure {
             mod_description        : mod_description,
     ]
     inputs.properties replaceProperties
-    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+    filesMatching(['META-INF/mods.toml']) {
         expand replaceProperties + [project: project]
     }
 }
@@ -120,27 +152,15 @@ tasks.named('jar', Jar).configure {
                 'Implementation-Title'    : project.name,
                 'Implementation-Version'  : project.jar.archiveVersion,
                 'Implementation-Vendor'   : mod_authors,
-                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+                'MixinConfigs'            : "${mod_id}.mixins.json",
         ])
     }
     finalizedBy 'reobfJar'
 }
 
-publishing {
-    publications {
-        register('mavenJava', MavenPublication) {
-            artifact jar
-        }
-    }
-    repositories {
-        maven {
-            url "file://${project.projectDir}/mcmodsrepo"
-        }
-    }
-}
-
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+    options.compilerArgs << '-Xmaxerrs' << '100000'
 }
 
 def checkTranslations = tasks.register('checkTranslations', Exec) {
@@ -151,436 +171,12 @@ def checkTranslations = tasks.register('checkTranslations', Exec) {
     commandLine 'python3', layout.projectDirectory.file('compatibility/verify_translations.py').asFile.absolutePath
 }
 
-def checkForgePureSourceParity = tasks.register('checkForgePureSourceParity', Exec) {
-    group = 'verification'
-    description = 'Checks byte-for-byte parity and the loader-independent API closure for Forge source classes.'
-    inputs.dir(layout.projectDirectory.dir('src/main/java/com/stardew/craft'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-common/java/com/stardew/craft'))
-    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_pure_source_parity.py'))
-    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_pure_source_parity.py').asFile.absolutePath
-}
-
-def checkForgeMachineModelParity = tasks.register('checkForgeMachineModelParity', Exec) {
-    group = 'verification'
-    description = 'Checks exact parity and loader-independent closure for machine, production and recipe model classes.'
-    inputs.dir(layout.projectDirectory.dir('src/main/java/com/stardew/craft/api/v1/machine'))
-    inputs.dir(layout.projectDirectory.dir('src/main/java/com/stardew/craft/api/v1/production'))
-    inputs.dir(layout.projectDirectory.dir('src/main/java/com/stardew/craft/blockentity'))
-    inputs.dir(layout.projectDirectory.dir('src/main/java/com/stardew/craft/block/utility'))
-    inputs.dir(layout.projectDirectory.dir('src/main/java/com/stardew/craft/workbench'))
-    inputs.dir(layout.projectDirectory.dir('src/main/java/com/stardew/craft/model'))
-    inputs.dir(layout.projectDirectory.dir('src/main/java/com/stardew/craft/item/artisan'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-common/java/com/stardew/craft/api/v1/machine'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-common/java/com/stardew/craft/api/v1/production'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-common/java/com/stardew/craft/blockentity'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-common/java/com/stardew/craft/block/utility'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-common/java/com/stardew/craft/workbench'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-common/java/com/stardew/craft/model'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-common/java/com/stardew/craft/item/artisan'))
-    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_machine_models.py'))
-    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_machine_models.py').asFile.absolutePath
-}
-
-def checkForgeItemParity = tasks.register('checkForgeItemParity', Exec) {
-    group = 'verification'
-    description = 'Checks Forge SimpleStardewItem registrations and resources against the 1.21.1 source contract.'
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/item/ModItems.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeItems.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/item/ModItems.java'))
-    inputs.dir(layout.projectDirectory.dir('src/main/resources/assets/stardewcraft'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/assets/stardewcraft'))
-    inputs.file(layout.projectDirectory.file('src/main/resources/data/minecraft/tags/block/leaves.json'))
-    inputs.dir(layout.projectDirectory.dir('src/main/resources/data/stardewcraft/loot_table/blocks'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/resources/data/minecraft/tags/block/leaves.json'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/data/stardewcraft/loot_table/blocks'))
-    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_simple_items.py'))
-    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_simple_items.py').asFile.absolutePath
-}
-
-def checkForgeBuildingBlockParity = tasks.register('checkForgeBuildingBlockParity', Exec) {
-    group = 'verification'
-    description = 'Checks the Forge building-material block slice and its resources against the 1.21.1 source contract.'
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/block/ModBlocks.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/item/ModItems.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeBlocks.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeItems.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/block/ModBlocks.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/item/ModItems.java'))
-    inputs.dir(layout.projectDirectory.dir('src/main/resources/assets/stardewcraft'))
-    inputs.dir(layout.projectDirectory.dir('src/main/resources/data'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/assets/stardewcraft'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/data'))
-    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_building_blocks.py'))
-    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_building_blocks.py').asFile.absolutePath
-}
-
-def checkForgeMineBlockParity = tasks.register('checkForgeMineBlockParity', Exec) {
-    group = 'verification'
-    description = 'Checks the Forge mine backdrop block slice and its resources against the 1.21.1 source contract.'
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/block/ModBlocks.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/item/ModItems.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeBlocks.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeItems.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/block/ModBlocks.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/item/ModItems.java'))
-    inputs.dir(layout.projectDirectory.dir('src/main/resources/assets/stardewcraft'))
-    inputs.dir(layout.projectDirectory.dir('src/main/resources/data'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/assets/stardewcraft'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/data'))
-    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_mine_blocks.py'))
-    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_mine_blocks.py').asFile.absolutePath
-}
-
-def checkForgeSpecialBlockParity = tasks.register('checkForgeSpecialBlockParity', Exec) {
-    group = 'verification'
-    description = 'Checks the Forge plain special-block slice and its resources against the 1.21.1 source contract.'
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/block/ModBlocks.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/item/ModItems.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeBlocks.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeItems.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/block/ModBlocks.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/item/ModItems.java'))
-    inputs.dir(layout.projectDirectory.dir('src/main/resources/assets/stardewcraft'))
-    inputs.dir(layout.projectDirectory.dir('src/main/resources/data'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/assets/stardewcraft'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/data'))
-    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_special_blocks.py'))
-    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_special_blocks.py').asFile.absolutePath
-}
-
-def checkForgeWallpaperParity = tasks.register('checkForgeWallpaperParity', Exec) {
-    group = 'verification'
-    description = 'Checks the complete Forge stable-ID wallpaper block/item slice and resources against the 1.21.1 source contract.'
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/block/ModBlocks.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/item/ModItems.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeWallpaperRegistry.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/block/utility/WallpaperBlock.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/item/WallpaperBlockItem.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/block/ModBlocks.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/item/ModItems.java'))
-    inputs.dir(layout.projectDirectory.dir('src/main/resources/assets/stardewcraft'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/assets/stardewcraft'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/data/stardewcraft/tags'))
-    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_wallpaper.py'))
-    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_wallpaper.py').asFile.absolutePath
-}
-
-def checkForgeDecorationDataParity = tasks.register('checkForgeDecorationDataParity', Exec) {
-    group = 'verification'
-    description = 'Checks the Forge pure-Java decoration data classes against the 1.21.1 source contract.'
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/deco/DecorationType.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/deco/WallpaperStyles.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/deco/DecorationStyle.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/deco/DecorationStyleRegistry.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/deco/DecorationType.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/deco/WallpaperStyles.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/deco/DecorationStyle.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/deco/DecorationStyleRegistry.java'))
-    inputs.dir(layout.projectDirectory.dir('src/main/resources/assets/stardewcraft/textures/deco'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/assets/stardewcraft/textures/deco'))
-    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_deco_data.py'))
-    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_deco_data.py').asFile.absolutePath
-}
-
-def checkForgeLegacyDecorationParity = tasks.register('checkForgeLegacyDecorationParity', Exec) {
-    group = 'verification'
-    description = 'Checks the Forge legacy wallpaper/flooring runtime closure and source-identical decoration assets.'
-    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/block/utility/LegacyWallpaperBlock.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/block/utility/WallpaperBlock.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/block/utility/FlooringBlock.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/blockentity/DecorBlockEntity.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/deco/LegacyWallpaperMigration.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeWallpaperRegistry.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/block/ModBlocks.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/item/ModItems.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeItems.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeBlockEntities.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/blockentity/ModBlockEntities.java'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/assets/stardewcraft'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/data/stardewcraft'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/resources/data/minecraft/tags/blocks/mineable/axe.json'))
-    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_deco_runtime.py'))
-    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_deco_runtime.py').asFile.absolutePath
-}
-
-def checkForgeTreeCoreParity = tasks.register('checkForgeTreeCoreParity', Exec) {
-    group = 'verification'
-    description = 'Checks the Forge generated-tree core block slice and marker storage against the 1.21.1 source contract.'
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/block/ModBlocks.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/item/ModItems.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/block/tree/NewTreePartBlock.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/block/tree/NewTreeLogBlock.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/blockentity/NewTreePartBlockEntity.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/blockentity/ModBlockEntities.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeBlocks.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeItems.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeBlockEntities.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/client/ForgeClientSetup.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/blockentity/ModBlockEntities.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/block/ModBlocks.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/item/ModItems.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/block/tree/NewTreePartBlock.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/block/tree/NewTreeLogBlock.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/blockentity/NewTreePartBlockEntity.java'))
-    inputs.dir(layout.projectDirectory.dir('src/main/resources/assets/stardewcraft'))
-    inputs.dir(layout.projectDirectory.dir('src/main/resources/data'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/assets/stardewcraft'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/data'))
-    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_tree_core.py'))
-    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_tree_core.py').asFile.absolutePath
-}
-
-def checkForgeTreeLeavesParity = tasks.register('checkForgeTreeLeavesParity', Exec) {
-    group = 'verification'
-    description = 'Checks the Forge tree-leaves block/item/resource slice against the 1.21.1 source contract.'
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/block/ModBlocks.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/item/ModItems.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeBlocks.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeItems.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/block/ModBlocks.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/item/ModItems.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/client/ForgeClientSetup.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/block/tree/StardewLeavesBlock.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/tree/SeasonalLeafLighting.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/time/ForgeStardewTimeService.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/tree/ForestCanopySnow.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/tree/PineCanopyConnections.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/tree/ForestCanopySnow.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/tree/PineCanopyConnections.java'))
-    inputs.dir(layout.projectDirectory.dir('src/main/resources/assets/stardewcraft'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/assets/stardewcraft'))
-    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_tree_leaves.py'))
-    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_tree_leaves.py').asFile.absolutePath
-}
-
-def checkForgeTreeGrowthRulesParity = tasks.register('checkForgeTreeGrowthRulesParity', Exec) {
-    group = 'verification'
-    description = 'Checks the Forge wild-tree growth rule data against the 1.21.1 source contract.'
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/tree/WildTrees.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/tree/WildTreeGrowthRules.java'))
-    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_tree_growth_rules.py'))
-    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_tree_growth_rules.py').asFile.absolutePath
-}
-
-def checkForgeOvernightRulesParity = tasks.register('checkForgeOvernightRulesParity', Exec) {
-    group = 'verification'
-    description = 'Checks loader-independent overnight timing and screen-order rules against the 1.21.1 source contract.'
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/network/overnight/OvernightCollapseTimeline.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/network/overnight/OvernightSequencePlanner.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/network/overnight/OvernightCollapseTimeline.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/network/overnight/OvernightSequencePlanner.java'))
-    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_overnight_rules.py'))
-    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_overnight_rules.py').asFile.absolutePath
-}
-
-def checkForgeTreeBuildingParity = tasks.register('checkForgeTreeBuildingParity', Exec) {
-    group = 'verification'
-    description = 'Checks the complete 85-block generated-tree building slice and Forge 1.20.1 resource conversions.'
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/block/ModBlocks.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/item/ModItems.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeBlocks.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeItems.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/block/ModBlocks.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/item/ModItems.java'))
-    inputs.dir(layout.projectDirectory.dir('src/main/resources/assets/stardewcraft'))
-    inputs.dir(layout.projectDirectory.dir('src/main/resources/data/stardewcraft'))
-    inputs.dir(layout.projectDirectory.dir('src/main/resources/data/minecraft/tags'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/assets/stardewcraft'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/data/stardewcraft'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/data/minecraft/tags'))
-    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_tree_building.py'))
-    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_tree_building.py').asFile.absolutePath
-}
-
-def checkForgePrefabRegistryParity = tasks.register('checkForgePrefabRegistryParity', Exec) {
-    group = 'verification'
-    description = 'Checks the Forge prefab-tree registry and SavedData API adaptation against the 1.21.1 source contract.'
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/tree/prefab/PrefabTreeInstance.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/tree/prefab/PrefabTreeRegistry.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/tree/prefab/PrefabTreeInstance.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/tree/prefab/PrefabTreeRegistry.java'))
-    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_prefab_registry.py'))
-    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_prefab_registry.py').asFile.absolutePath
-}
-
-def checkForgeTreeStructureReaderParity = tasks.register('checkForgeTreeStructureReaderParity', Exec) {
-    group = 'verification'
-    description = 'Checks the standalone Forge prefab-tree NBT structure reader against the 1.21.1 source contract.'
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/mining/StructureLoader.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/tree/prefab/ForgeTreeStructureReader.java'))
-    inputs.dir(layout.projectDirectory.dir('src/main/resources/data/stardewcraft/structures/tree'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/data/stardewcraft/structures/tree'))
-    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_tree_structure_reader.py'))
-    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_tree_structure_reader.py').asFile.absolutePath
-}
-
-def checkForgeDimensionParity = tasks.register('checkForgeDimensionParity', Exec) {
-    group = 'verification'
-    description = 'Checks the Forge dimension-key slice and 1.20.1 ResourceLocation API adaptation.'
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/core/ModDimensions.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/StardewCraft.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/core/ModDimensions.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/ForgeBootstrap.java'))
-    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_dimensions.py'))
-    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_dimensions.py').asFile.absolutePath
-}
-
-def checkForgeMiningPlayerStateParity = tasks.register('checkForgeMiningPlayerStateParity', Exec) {
-    group = 'verification'
-    description = 'Checks the Forge mining player-state NBT contract.'
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/mining/MiningPlayerData.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/mining/MiningPlayerData.java'))
-    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_mining_player_state.py'))
-    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_mining_player_state.py').asFile.absolutePath
-}
-
-def checkForgeCombatRulesParity = tasks.register('checkForgeCombatRulesParity', Exec) {
-    group = 'verification'
-    description = 'Checks exact parity and pure-Java dependency closure for Forge combat rules.'
-    inputs.dir(layout.projectDirectory.dir('src/main/java/com/stardew/craft/combat'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-common/java/com/stardew/craft/combat'))
-    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_combat_rules.py'))
-    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_combat_rules.py').asFile.absolutePath
-}
-
-def checkForgeDomainModelsParity = tasks.register('checkForgeDomainModelsParity', Exec) {
-    group = 'verification'
-    description = 'Checks exact parity for loader-independent economy, weather and farm domain models.'
-    inputs.dir(layout.projectDirectory.dir('src/main/java/com/stardew/craft/economy/sell'))
-    inputs.dir(layout.projectDirectory.dir('src/main/java/com/stardew/craft/weather'))
-    inputs.dir(layout.projectDirectory.dir('src/main/java/com/stardew/craft/farm'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-common/java/com/stardew/craft/economy/sell'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-common/java/com/stardew/craft/weather'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-common/java/com/stardew/craft/farm'))
-    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_domain_models.py'))
-    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_domain_models.py').asFile.absolutePath
-}
-
-def checkForgeFarmSpawnLayoutParity = tasks.register('checkForgeFarmSpawnLayoutParity', Exec) {
-    group = 'verification'
-    description = 'Checks the loader-independent farm spawn-layout run contract and authoritative mask data.'
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/farm/FarmSpawnLayoutData.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/farm/FarmSpawnLayoutRules.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/farm/FarmSpawnLayoutRules.java'))
-    inputs.dir(layout.projectDirectory.dir('src/main/resources/data/stardewcraft/farm_spawn_layouts'))
-    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_farm_spawn_layout.py'))
-    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_farm_spawn_layout.py').asFile.absolutePath
-}
-
-def checkForgePureRulesParity = tasks.register('checkForgePureRulesParity', Exec) {
-    group = 'verification'
-    description = 'Checks exact parity for loader-independent gameplay rules, enums and geometry models.'
-    inputs.dir(layout.projectDirectory.dir('src/main/java/com/stardew/craft'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-common/java/com/stardew/craft'))
-    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_pure_rules.py'))
-    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_pure_rules.py').asFile.absolutePath
-}
-
-def checkForgeCropSliceAudit = tasks.register('checkForgeCropSliceAudit', Exec) {
-    group = 'verification'
-    description = 'Checks the source crop contract and ensures no partial Forge crop runtime is claimed.'
-    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_parsnip_crop_rules.py'))
-    inputs.file(layout.projectDirectory.file('compatibility/forge-crop-slice-audit.md'))
-    inputs.dir(layout.projectDirectory.dir('src/main/resources/assets/stardewcraft/lang'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/block/crop/ParsnipCropBlock.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/item/crop/spring/ParsnipSeedItem.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/item/crop/spring/ParsnipItem.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/block/crop/StardewCropBlock.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/manager/CropGrowthManager.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/item/quality/QualityHelper.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/farming/SeasonLocationRules.java'))
-    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_parsnip_crop_rules.py').asFile.absolutePath
-}
-
-def checkForgeRoadSliceParity = tasks.register('checkForgeRoadSliceParity', Exec) {
-    group = 'verification'
-    description = 'Checks the complete asphalt-road block, item, NBT placement and seasonal model slice.'
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/block/ModBlocks.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/item/ModItems.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/block/terrain/TerrainVariants.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/block/terrain/AsphaltRoadBlock.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/block/terrain/RoadMarkingBlock.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/client/model/terrain/AsphaltRoadModels.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/block/terrain/TownPavingConnections.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeBlocks.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeItems.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/block/ModBlocks.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/item/ModItems.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/block/terrain/TerrainVariants.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/block/terrain/AsphaltRoadBlock.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/block/terrain/RoadMarkingBlock.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/block/terrain/AsphaltRoadConnections.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/client/AsphaltRoadModels.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/client/TerrainSeasonTextures.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/client/ForgeClientSetup.java'))
-    inputs.dir(layout.projectDirectory.dir('src/main/resources/assets/stardewcraft'))
-    inputs.dir(layout.projectDirectory.dir('src/main/resources/data/stardewcraft/loot_table/blocks'))
-    inputs.file(layout.projectDirectory.file('src/main/resources/data/minecraft/tags/block/mineable/pickaxe.json'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/assets/stardewcraft'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/data/stardewcraft/loot_tables/blocks'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/resources/data/minecraft/tags/blocks/mineable/pickaxe.json'))
-    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_road_slice.py'))
-    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_road_slice.py').asFile.absolutePath
-}
-
-def checkForgePlaygroundSandSliceParity = tasks.register('checkForgePlaygroundSandSliceParity', Exec) {
-    group = 'verification'
-    description = 'Checks the complete playground-sand block, item, NBT placement and seasonal model slice.'
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/block/ModBlocks.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/item/ModItems.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/block/terrain/TerrainVariants.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/block/terrain/PlaygroundSandBlock.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/block/terrain/PlaygroundSandConnections.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/client/model/terrain/PlaygroundSandModels.java'))
-    inputs.file(layout.projectDirectory.file('src/main/java/com/stardew/craft/gametest/SandBirdGameTests.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeBlocks.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/registry/ForgeItems.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/block/ModBlocks.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/item/ModItems.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/block/terrain/TerrainVariants.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/block/terrain/PlaygroundSandBlock.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-common/java/com/stardew/craft/block/terrain/PlaygroundSandConnections.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/client/PlaygroundSandModels.java'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/java/com/stardew/craft/forge/client/TerrainSeasonTextures.java'))
-    inputs.dir(layout.projectDirectory.dir('src/main/resources/assets/stardewcraft'))
-    inputs.file(layout.projectDirectory.file('src/main/resources/data/stardewcraft/loot_table/blocks/playground_sand.json'))
-    inputs.file(layout.projectDirectory.file('src/main/resources/data/minecraft/tags/block/mineable/shovel.json'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/resources/assets/stardewcraft/blockstates/playground_sand.json'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/assets/stardewcraft/models/block/playground_sand'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/resources/assets/stardewcraft/models/item/playground_sand.json'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/assets/stardewcraft/textures/block/playground_sand'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/resources/data/stardewcraft/loot_tables/blocks/playground_sand.json'))
-    inputs.file(layout.projectDirectory.file('src/forge-bootstrap/resources/data/minecraft/tags/blocks/mineable/shovel.json'))
-    inputs.dir(layout.projectDirectory.dir('src/forge-bootstrap/resources/assets/stardewcraft/lang'))
-    inputs.file(layout.projectDirectory.file('compatibility/verify_forge_playground_sand_slice.py'))
-    commandLine 'python3', layout.projectDirectory.file('compatibility/verify_forge_playground_sand_slice.py').asFile.absolutePath
-}
-
-tasks.named('check').configure {
+tasks.named('check') {
     dependsOn checkTranslations
-    dependsOn checkForgePureSourceParity
-    dependsOn checkForgeMachineModelParity
-    dependsOn checkForgeItemParity
-    dependsOn checkForgeBuildingBlockParity
-    dependsOn checkForgeMineBlockParity
-    dependsOn checkForgeSpecialBlockParity
-    dependsOn checkForgeWallpaperParity
-    dependsOn checkForgeDecorationDataParity
-    dependsOn checkForgeLegacyDecorationParity
-    dependsOn checkForgeTreeCoreParity
-    dependsOn checkForgeTreeLeavesParity
-    dependsOn checkForgeTreeGrowthRulesParity
-    dependsOn checkForgeOvernightRulesParity
-    dependsOn checkForgeTreeBuildingParity
-    dependsOn checkForgePrefabRegistryParity
-    dependsOn checkForgeTreeStructureReaderParity
-    dependsOn checkForgeDimensionParity
-    dependsOn checkForgeMiningPlayerStateParity
-    dependsOn checkForgeCombatRulesParity
-    dependsOn checkForgeDomainModelsParity
-    dependsOn checkForgeFarmSpawnLayoutParity
-    dependsOn checkForgePureRulesParity
-    dependsOn checkForgeCropSliceAudit
-    dependsOn checkForgeRoadSliceParity
-    dependsOn checkForgePlaygroundSandSliceParity
+}
+
+// Prints the compile classpath for the fast direct-javac loop (scripts/port/javac_all.sh).
+tasks.register('printCompileClasspath') {
+    def cp = sourceSets.main.compileClasspath
+    doLast { file("${buildDir}/port-classpath.txt").text = cp.files.join(File.pathSeparator) }
 }

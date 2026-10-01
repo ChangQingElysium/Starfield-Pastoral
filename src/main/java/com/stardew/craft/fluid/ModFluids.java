@@ -18,14 +18,14 @@ import net.minecraft.world.level.block.PointedDripstoneBlock;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.neoforged.neoforge.common.SoundActions;
-import net.neoforged.neoforge.fluids.BaseFlowingFluid;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidType;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
-import net.neoforged.neoforge.registries.NeoForgeRegistries;
+import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.minecraftforge.common.SoundActions;
+import com.stardew.craft.port.net.neoforged.neoforge.fluids.BaseFlowingFluid;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidType;
+import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredHolder;
+import net.minecraftforge.registries.DeferredRegister;
+import com.stardew.craft.port.net.neoforged.neoforge.registries.NeoForgeRegistries;
 import org.joml.Vector3f;
 
 import javax.annotation.Nonnull;
@@ -74,22 +74,22 @@ public final class ModFluids {
 
                 @Override
                 public ResourceLocation getStillTexture() {
-                    return ResourceLocation.withDefaultNamespace("block/water_still");
+                    return new ResourceLocation("block/water_still");
                 }
 
                 @Override
                 public ResourceLocation getFlowingTexture() {
-                    return ResourceLocation.withDefaultNamespace("block/water_flow");
+                    return new ResourceLocation("block/water_flow");
                 }
 
                 @Override
                 public ResourceLocation getOverlayTexture() {
-                    return ResourceLocation.withDefaultNamespace("block/water_overlay");
+                    return new ResourceLocation("block/water_overlay");
                 }
 
                 @Override
                 public ResourceLocation getRenderOverlayTexture(@Nonnull Minecraft mc) {
-                    return ResourceLocation.withDefaultNamespace("textures/misc/underwater.png");
+                    return new ResourceLocation("textures/misc/underwater.png");
                 }
 
                 @Override

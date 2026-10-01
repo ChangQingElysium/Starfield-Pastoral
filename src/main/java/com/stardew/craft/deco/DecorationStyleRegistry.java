@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.Map;
 
 public final class DecorationStyleRegistry {
-    private static final ResourceLocation WALLS_AND_FLOORS = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/deco/walls_and_floors.png");
-    private static final ResourceLocation WALLPAPERS_2 = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/deco/wallpapers_2.png");
-    private static final ResourceLocation FLOORS_2 = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/deco/floors_2.png");
+    private static final ResourceLocation WALLS_AND_FLOORS = new ResourceLocation(StardewCraft.MODID, "textures/deco/walls_and_floors.png");
+    private static final ResourceLocation WALLPAPERS_2 = new ResourceLocation(StardewCraft.MODID, "textures/deco/wallpapers_2.png");
+    private static final ResourceLocation FLOORS_2 = new ResourceLocation(StardewCraft.MODID, "textures/deco/floors_2.png");
 
     private static final List<DecorationStyle> WALLPAPERS;
     private static final List<DecorationStyle> FLOORINGS;

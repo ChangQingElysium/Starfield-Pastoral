@@ -1,9 +1,9 @@
 package com.stardew.craft.api.v1.client;
 
 import net.minecraft.client.gui.GuiGraphics;
-import net.neoforged.bus.api.Event;
+import net.minecraftforge.eventbus.api.Event;
 
-/** CLIENT ONLY, NeoForge game event bus. Fired after the visible main HUD and its currency attachment.
+/** CLIENT ONLY, MinecraftForge game event bus. Fired after the visible main HUD and its currency attachment.
  * The pose has been restored to Minecraft GUI coordinates. Balance your own pose/scissor changes.
  * Not fired for hidden HUDs or the layout editor. Do not retain GuiGraphics outside this callback.
  */

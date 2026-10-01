@@ -2,9 +2,9 @@ package com.stardew.craft.animal;
 
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.animal.model.AnimalDefinitionReloadListener;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.AddReloadListenerEvent;
 
 /** Hooks the farm-animal data registry into server data-pack reloads. */
 @EventBusSubscriber(modid = StardewCraft.MODID)

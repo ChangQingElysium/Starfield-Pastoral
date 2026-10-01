@@ -20,9 +20,9 @@ public class DimensionDamageMapper {
     
     // 星露谷维度的资源路径
     private static final ResourceLocation STARDEW_VALLEY_DIMENSION =
-        ResourceLocation.fromNamespaceAndPath("stardewcraft", "stardew_valley");
+        new ResourceLocation("stardewcraft", "stardew_valley");
     private static final ResourceLocation STARDEW_MINING_DIMENSION =
-        ResourceLocation.fromNamespaceAndPath("stardewcraft", "stardew_mining");
+        new ResourceLocation("stardewcraft", "stardew_mining");
     
     // 生命映射比例
     private static final float HEALTH_RATIO = 5.0f;

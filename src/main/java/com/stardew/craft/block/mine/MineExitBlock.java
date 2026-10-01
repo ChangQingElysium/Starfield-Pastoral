@@ -60,8 +60,8 @@ public class MineExitBlock extends Block {
             if (tier > 0 && !level.getBlockState(cell).canBeReplaced(context)) return null;
             if (!level.getBlockState(wall).isFaceSturdy(level, wall, facing)) return null;
         }
-        var theme = context.getItemInHand().getOrDefault(net.minecraft.core.component.DataComponents.BLOCK_STATE,
-                net.minecraft.world.item.component.BlockItemStateProperties.EMPTY).get(THEME);
+        var theme = context.getItemInHand().getOrDefault(com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
+                com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties.EMPTY).get(THEME);
         if (theme == null) {
             theme = MineLadderBlock.Theme.EARTH;
             var wall = level.getBlockState(pos.relative(facing.getOpposite()));
@@ -112,8 +112,8 @@ public class MineExitBlock extends Block {
 
     @Override public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
         ItemStack stack = new ItemStack(this);
-        stack.set(net.minecraft.core.component.DataComponents.BLOCK_STATE,
-                net.minecraft.world.item.component.BlockItemStateProperties.EMPTY.with(THEME, state));
+        stack.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
+                com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties.EMPTY.with(THEME, state));
         return stack;
     }
 
@@ -145,7 +145,7 @@ public class MineExitBlock extends Block {
             com.stardew.craft.mining.MiningPlayerData playerData = 
                 com.stardew.craft.mining.MiningDataManager.getPlayerData(serverPlayer);
             int currentFloor = playerData != null ? playerData.getCurrentFloor() : 0;
-            net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
+            net.minecraftforge.network.PacketDistributor.sendToPlayer(
                 serverPlayer,
                 new com.stardew.craft.network.payload.OpenMineExitDialogPayload(currentFloor)
             );

@@ -40,11 +40,11 @@ public class ArtichokeItem extends Item implements IStardewItem {
                 .withStyle(ChatFormatting.WHITE);
 
         @SuppressWarnings("null")
-        var customData = stack.getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA,
-                net.minecraft.world.item.component.CustomModelData.DEFAULT);
-        if (quality != QualityHelper.NORMAL && customData.equals(net.minecraft.world.item.component.CustomModelData.DEFAULT)) {
-            stack.set(net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA,
-                    new net.minecraft.world.item.component.CustomModelData(quality));
+        var customData = stack.getOrDefault(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA,
+                com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData.DEFAULT);
+        if (quality != QualityHelper.NORMAL && customData.equals(com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData.DEFAULT)) {
+            stack.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA,
+                    new com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData(quality));
         }
 
         if (quality == QualityHelper.NORMAL) {

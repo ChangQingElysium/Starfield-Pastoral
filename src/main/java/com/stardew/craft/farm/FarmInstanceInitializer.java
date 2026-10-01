@@ -50,18 +50,18 @@ public class FarmInstanceInitializer {
     private static final Set<UUID> PREPARING_FARMS =
             ConcurrentHashMap.newKeySet();
     private static final ResourceLocation TOTEM_ORIENTATION_STEP =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "farm_totem_south");
+            new ResourceLocation(StardewCraft.MODID, "farm_totem_south");
     private static final ResourceLocation TOTEM_BUSHES_STEP =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "farm_totem_bushes");
+            new ResourceLocation(StardewCraft.MODID, "farm_totem_bushes");
     private static final ResourceLocation PATHS_ECOLOGY_STEP =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "farm_paths_ecology");
+            new ResourceLocation(StardewCraft.MODID, "farm_paths_ecology");
     private static final int PATHS_ECOLOGY_VERSION = 4;
     private static final ResourceLocation WILDERNESS_BOWL_SITE_STEP =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "wilderness_bowl_site_west");
+            new ResourceLocation(StardewCraft.MODID, "wilderness_bowl_site_west");
     private static final ResourceLocation EXIT_PROTECTION_STEP =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "farm_exit_protection");
+            new ResourceLocation(StardewCraft.MODID, "farm_exit_protection");
     private static final ResourceLocation LIGHTING_REBUILD_STEP =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "farm_lighting_rebuild");
+            new ResourceLocation(StardewCraft.MODID, "farm_lighting_rebuild");
     private static final int LIGHTING_REBUILD_VERSION = 1;
     private static final Set<Heightmap.Types> FARM_HEIGHTMAPS = EnumSet.of(
             Heightmap.Types.MOTION_BLOCKING,

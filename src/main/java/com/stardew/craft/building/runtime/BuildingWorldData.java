@@ -509,7 +509,7 @@ public final class BuildingWorldData extends SavedData {
             CompoundTag value = (CompoundTag) entry;
             data.permitTiers.put(value.getUUID("Id"), value.getInt("TargetTier"));
             data.permits.put(value.getUUID("Id"), value.getUUID("Farm"));
-            data.permitFamilies.put(value.getUUID("Id"), ResourceLocation.parse(value.getString("Family")));
+            data.permitFamilies.put(value.getUUID("Id"), new ResourceLocation(value.getString("Family")));
         }
         for (var entry : tag.getList("Purchases", Tag.TAG_COMPOUND)) data.purchases.add(((CompoundTag) entry).getUUID("Id"));
         return data;

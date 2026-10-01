@@ -4,8 +4,8 @@ import com.stardew.craft.StardewCraft;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.Registries;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredHolder;
+import net.minecraftforge.registries.DeferredRegister;
 
 /**
  * 自定义粒子类型注册
@@ -23,17 +23,17 @@ public class ModParticles {
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> BOMB_DUST =
         PARTICLES.register("bomb_dust", () -> new SimpleParticleType(false));
 
-    public static final DeferredHolder<ParticleType<?>, ParticleType<net.minecraft.core.particles.ColorParticleOption>> BIG_SLIME_SPLASH = PARTICLES.register("big_slime_splash", ModParticles::colorParticle);
-    public static final DeferredHolder<ParticleType<?>, ParticleType<net.minecraft.core.particles.ColorParticleOption>> BIG_SLIME_SPLASH_SLOW = PARTICLES.register("big_slime_splash_slow", ModParticles::colorParticle);
-    private static ParticleType<net.minecraft.core.particles.ColorParticleOption> colorParticle(){
+    public static final DeferredHolder<ParticleType<?>, ParticleType<com.stardew.craft.port.net.minecraft.core.particles.ColorParticleOption>> BIG_SLIME_SPLASH = PARTICLES.register("big_slime_splash", ModParticles::colorParticle);
+    public static final DeferredHolder<ParticleType<?>, ParticleType<com.stardew.craft.port.net.minecraft.core.particles.ColorParticleOption>> BIG_SLIME_SPLASH_SLOW = PARTICLES.register("big_slime_splash_slow", ModParticles::colorParticle);
+    private static ParticleType<com.stardew.craft.port.net.minecraft.core.particles.ColorParticleOption> colorParticle(){
         return new ParticleType<>(false){
-            @Override public com.mojang.serialization.MapCodec<net.minecraft.core.particles.ColorParticleOption> codec(){return net.minecraft.core.particles.ColorParticleOption.codec(this);}
-            @Override public net.minecraft.network.codec.StreamCodec<? super net.minecraft.network.RegistryFriendlyByteBuf,net.minecraft.core.particles.ColorParticleOption> streamCodec(){return net.minecraft.core.particles.ColorParticleOption.streamCodec(this);}
+            @Override public com.mojang.serialization.MapCodec<com.stardew.craft.port.net.minecraft.core.particles.ColorParticleOption> codec(){return com.stardew.craft.port.net.minecraft.core.particles.ColorParticleOption.codec(this);}
+            @Override public com.stardew.craft.port.net.minecraft.network.codec.StreamCodec<? super com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf,com.stardew.craft.port.net.minecraft.core.particles.ColorParticleOption> streamCodec(){return com.stardew.craft.port.net.minecraft.core.particles.ColorParticleOption.streamCodec(this);}
         };
     }
 
-    public static final DeferredHolder<ParticleType<?>, ParticleType<net.minecraft.core.particles.ColorParticleOption>> SERPENT_PUFF = PARTICLES.register("serpent_puff", ModParticles::colorParticle);
-    public static final DeferredHolder<ParticleType<?>, ParticleType<net.minecraft.core.particles.ColorParticleOption>> SERPENT_PUFF_SLOW = PARTICLES.register("serpent_puff_slow", ModParticles::colorParticle);
+    public static final DeferredHolder<ParticleType<?>, ParticleType<com.stardew.craft.port.net.minecraft.core.particles.ColorParticleOption>> SERPENT_PUFF = PARTICLES.register("serpent_puff", ModParticles::colorParticle);
+    public static final DeferredHolder<ParticleType<?>, ParticleType<com.stardew.craft.port.net.minecraft.core.particles.ColorParticleOption>> SERPENT_PUFF_SLOW = PARTICLES.register("serpent_puff_slow", ModParticles::colorParticle);
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> REX_DISSOLVE = PARTICLES.register("rex_dissolve", () -> new SimpleParticleType(false));
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> REX_BONE_FRAGMENT = PARTICLES.register("rex_bone_fragment", () -> new SimpleParticleType(false));
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> REX_BREATH_FRAGMENT = PARTICLES.register("rex_breath_fragment", () -> new SimpleParticleType(false));

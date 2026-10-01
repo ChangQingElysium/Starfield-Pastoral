@@ -15,7 +15,7 @@ final class WorkbenchArt {
     private WorkbenchArt() { }
 
     static ResourceLocation texture(String name) {
-        return ResourceLocation.fromNamespaceAndPath("stardewcraft", "textures/gui/workbench/" + name + ".png");
+        return new ResourceLocation("stardewcraft", "textures/gui/workbench/" + name + ".png");
     }
 
     static void sprite(GuiGraphics g, String name, int x, int y, int size) {

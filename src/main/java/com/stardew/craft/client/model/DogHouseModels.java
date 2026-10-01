@@ -21,13 +21,13 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ModelEvent;
-import net.neoforged.neoforge.client.model.BakedModelWrapper;
-import net.neoforged.neoforge.client.model.IDynamicBakedModel;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.ModelEvent;
+import net.minecraftforge.client.model.BakedModelWrapper;
+import net.minecraftforge.client.model.IDynamicBakedModel;
+import net.minecraftforge.client.model.data.ModelData;
 
 /** Preserve placed orientation while switching both world and item wood/snow materials. */
 @SuppressWarnings("removal")
@@ -37,7 +37,7 @@ public final class DogHouseModels {
     private DogHouseModels() {}
 
     private static ModelResourceLocation id(String season, String part) {
-        return new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,
+        return new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID,
                 "block/decor/dog_house/" + season + "/" + part), "standalone");
     }
 
@@ -59,7 +59,7 @@ public final class DogHouseModels {
             var key = BlockModelShaper.stateToModelLocation(state);
             event.getModels().put(key, new Seasonal(Objects.requireNonNull(event.getModels().get(key)), materials, state.getValue(com.stardew.craft.block.decor.DogHouseBlock.CELL) == 0));
         }
-        var item = new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "dog_house"), "inventory");
+        var item = new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID, "dog_house"), "inventory");
         event.getModels().put(item, new Seasonal(Objects.requireNonNull(event.getModels().get(item)), materials, false));
     }
 

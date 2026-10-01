@@ -21,7 +21,7 @@ public record MonsterDefinition(ResourceLocation id, String sourceName, String f
     public record Drop(String item, double chance) {
         public Drop(ResourceLocation item, double chance) { this(item.toString(), chance); }
         public Drop {
-            if (!item.equals("-4") && !item.equals("-6")) ResourceLocation.parse(item);
+            if (!item.equals("-4") && !item.equals("-6")) new ResourceLocation(item);
             if (!Double.isFinite(chance) || chance < 0 || chance > 1) throw new IllegalArgumentException("Invalid drop chance");
         }
     }

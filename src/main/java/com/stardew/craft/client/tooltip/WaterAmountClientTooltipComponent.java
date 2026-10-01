@@ -13,9 +13,9 @@ import net.minecraft.resources.ResourceLocation;
 
 public final class WaterAmountClientTooltipComponent implements ClientTooltipComponent {
 
-    private static final ResourceLocation BAR_TEXTURE = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation BAR_TEXTURE = new ResourceLocation(
             StardewCraft.MODID, "textures/gui/stardew_bars.png");
-    private static final ResourceLocation BAR_CONTENT_TEXTURE = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation BAR_CONTENT_TEXTURE = new ResourceLocation(
             StardewCraft.MODID, "textures/gui/bar_content.png");
 
     private static final int BAR_WIDTH = 108;

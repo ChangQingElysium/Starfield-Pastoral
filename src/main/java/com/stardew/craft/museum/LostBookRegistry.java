@@ -27,7 +27,7 @@ import java.util.Map;
 public final class LostBookRegistry {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final ResourceLocation BUILTIN_TABLE =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "lost_books");
+            new ResourceLocation(StardewCraft.MODID, "lost_books");
     private static final AtomicDefinitionStore<StardewLostBookDefinition> STORE =
             new AtomicDefinitionStore<>();
     private static volatile Catalog catalog = Catalog.empty();

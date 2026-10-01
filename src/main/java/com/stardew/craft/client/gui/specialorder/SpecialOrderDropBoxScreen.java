@@ -10,7 +10,7 @@ import net.minecraft.world.entity.player.Inventory;
 
 @SuppressWarnings("null")
 public class SpecialOrderDropBoxScreen extends AbstractContainerScreen<SpecialOrderDropBoxMenu> {
-    private static final ResourceLocation CHEST_TEXTURE = ResourceLocation.withDefaultNamespace("textures/gui/container/generic_54.png");
+    private static final ResourceLocation CHEST_TEXTURE = new ResourceLocation("textures/gui/container/generic_54.png");
 
     public SpecialOrderDropBoxScreen(SpecialOrderDropBoxMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);

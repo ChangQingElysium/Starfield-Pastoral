@@ -27,7 +27,7 @@ import javax.annotation.Nonnull;
  * Cheese press rendering: working animation + ready bubble + product icon.
  */
 public class CheesePressBlockEntityRenderer implements BlockEntityRenderer<CheesePressBlockEntity> {
-	private static final ResourceLocation BUBBLE_TEX = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/bubble.png");
+	private static final ResourceLocation BUBBLE_TEX = new ResourceLocation(StardewCraft.MODID, "textures/gui/bubble.png");
 	private static final float PX = 1.0f / 32.0f;
 
     @Override

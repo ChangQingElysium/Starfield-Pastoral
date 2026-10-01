@@ -111,7 +111,7 @@ public final class FarmAnimalDefinitions {
             JsonElement root = JsonParser.parseReader(
                     new InputStreamReader(stream, StandardCharsets.UTF_8));
             ResourceLocation id =
-                    ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "vanilla_1_6_15");
+                    new ResourceLocation(StardewCraft.MODID, "vanilla_1_6_15");
             return decodeSnapshot(Map.of(id, root), 0L);
         } catch (Exception exception) {
             throw new ExceptionInInitializerError(exception);
@@ -178,7 +178,7 @@ public final class FarmAnimalDefinitions {
                         throw new IllegalArgumentException(
                                 "animals[" + index + "] must be an object");
                     }
-                    ResourceLocation entryId = ResourceLocation.fromNamespaceAndPath(
+                    ResourceLocation entryId = new ResourceLocation(
                             resourceId.getNamespace(),
                             resourceId.getPath() + "/" + index
                     );

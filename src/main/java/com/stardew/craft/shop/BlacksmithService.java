@@ -24,7 +24,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.*;
 
@@ -106,7 +106,7 @@ public final class BlacksmithService {
 
         // Create the upgraded tool and give to player
         try {
-            ResourceLocation rl = ResourceLocation.parse(upgradedToolId);
+            ResourceLocation rl = new ResourceLocation(upgradedToolId);
             Item toolItem = BuiltInRegistries.ITEM.get(rl);
             if (toolItem != null && toolItem != Items.AIR) {
                 ItemStack stack = new ItemStack(toolItem);
@@ -430,7 +430,7 @@ public final class BlacksmithService {
                 sendPurchaseResult(player, false);
                 return;
             }
-            Item oldTool = BuiltInRegistries.ITEM.get(ResourceLocation.parse(oldToolId));
+            Item oldTool = BuiltInRegistries.ITEM.get(new ResourceLocation(oldToolId));
             if (oldTool == null || oldTool == Items.AIR
                     || player.getInventory().countItem(oldTool) < 1) {
                 sendPurchaseResult(player, false);
@@ -462,7 +462,7 @@ public final class BlacksmithService {
 
         // Send purchase result first (updates client money display)
         int newMoney = com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player);
-        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
+        net.minecraftforge.network.PacketDistributor.sendToPlayer(player,
             new com.stardew.craft.network.payload.ShopPurchaseResultPayload(
                 true, "ClintUpgrade", newMoney, "", 0, itemIndex));
 
@@ -473,7 +473,7 @@ public final class BlacksmithService {
 
     private static void sendPurchaseResult(ServerPlayer player, boolean success) {
         int money = com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player);
-        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
+        net.minecraftforge.network.PacketDistributor.sendToPlayer(player,
             new com.stardew.craft.network.payload.ShopPurchaseResultPayload(
                 success, "ClintUpgrade", money, "", 0, -1));
     }
@@ -509,7 +509,7 @@ public final class BlacksmithService {
         if (oldToolId == null) return true;
 
         // Find and remove the old tool from inventory
-        ResourceLocation oldRl = ResourceLocation.parse(oldToolId);
+        ResourceLocation oldRl = new ResourceLocation(oldToolId);
         Item oldItem = BuiltInRegistries.ITEM.get(oldRl);
         if (oldItem == null || oldItem == Items.AIR) return true;
 
@@ -609,7 +609,7 @@ public final class BlacksmithService {
 
         // Get tool display name for the message
         try {
-            ResourceLocation rl = ResourceLocation.parse(toolId);
+            ResourceLocation rl = new ResourceLocation(toolId);
             Item toolItem = BuiltInRegistries.ITEM.get(rl);
             if (toolItem != null && toolItem != Items.AIR) {
                 String toolName = new ItemStack(toolItem).getHoverName().getString();
@@ -622,7 +622,7 @@ public final class BlacksmithService {
     // ──── Geode Processing ────
 
     private static void openGeodeProcessing(ServerPlayer player) {
-        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
+        net.minecraftforge.network.PacketDistributor.sendToPlayer(player,
             new com.stardew.craft.network.payload.OpenGeodeMenuPayload());
     }
 

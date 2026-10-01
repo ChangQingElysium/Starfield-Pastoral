@@ -7,16 +7,16 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.core.component.DataComponents;
+import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.BlockItemStateProperties;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ModelEvent;
-import net.neoforged.neoforge.client.model.BakedModelWrapper;
+import com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.ModelEvent;
+import net.minecraftforge.client.model.BakedModelWrapper;
 import javax.annotation.Nullable;
 import java.util.Objects;
 
@@ -27,7 +27,7 @@ public final class MineThemeItemModels {
     private static final String[] ITEMS = {"mine_planks", "mine_masonry", "mine_blocked_entry", "elevator", "mine_barrel", "mine_crate", "mine_timber_support"};
     private static int variants(String item) { return item.equals("mine_planks") || item.equals("mine_masonry") || item.equals("mine_timber_support") ? 2 : 1; }
     private static ModelResourceLocation id(String item, MineBuildingTheme theme, int variant) {
-        return new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,
+        return new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID,
                 "item/mine_themes/" + item + "/" + theme.id() + "_" + variant), "standalone");
     }
 
@@ -43,7 +43,7 @@ public final class MineThemeItemModels {
             for (var theme : MineBuildingTheme.values()) for (int v = 0; v < variants(item); v++) {
                 models[theme.ordinal()][v] = Objects.requireNonNull(event.getModels().get(id(item, theme, v)));
             }
-            var inventory = new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, item), "inventory");
+            var inventory = new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID, item), "inventory");
             event.getModels().put(inventory, new Themed(Objects.requireNonNull(event.getModels().get(inventory)), models));
         }
     }

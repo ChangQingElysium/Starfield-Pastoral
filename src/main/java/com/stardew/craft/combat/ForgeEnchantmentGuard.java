@@ -4,16 +4,16 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.item.weapon.IStardewWeapon;
 import net.minecraft.core.Holder;
-import net.minecraft.core.component.DataComponents;
+import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.ItemEnchantments;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.AnvilUpdateEvent;
-import net.neoforged.neoforge.event.GrindstoneEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerEnchantItemEvent;
-import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import com.stardew.craft.port.net.minecraft.world.item.enchantment.ItemEnchantments;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.AnvilUpdateEvent;
+import net.minecraftforge.event.GrindstoneEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.event.entity.player.PlayerEnchantItemEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 @EventBusSubscriber(modid = StardewCraft.MODID)
 public final class ForgeEnchantmentGuard {
@@ -144,7 +144,7 @@ public final class ForgeEnchantmentGuard {
     }
 
     private static boolean filterEnchantments(ItemStack stack,
-            net.minecraft.core.component.DataComponentType<ItemEnchantments> component,
+            com.stardew.craft.port.net.minecraft.core.component.DataComponentType<ItemEnchantments> component,
             boolean keepProtected) {
         ItemEnchantments enchantments = stack.get(component);
         if (enchantments == null || enchantments.isEmpty()) {

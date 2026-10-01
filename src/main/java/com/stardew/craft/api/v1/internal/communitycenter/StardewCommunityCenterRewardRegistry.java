@@ -12,7 +12,7 @@ public final class StardewCommunityCenterRewardRegistry {
     private static final OrderedExtensionRegistry<
             StardewCommunityCenterRewards.Resolver> RESOLVERS =
             new OrderedExtensionRegistry<>(
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             StardewCraft.MODID, "community_center/reward"));
 
     private StardewCommunityCenterRewardRegistry() {

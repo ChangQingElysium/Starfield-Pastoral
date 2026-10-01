@@ -7,13 +7,13 @@ import com.stardew.craft.api.v1.internal.farm.StardewFarmLayoutRegistry;
 import com.stardew.craft.farm.FarmInstance;
 import com.stardew.craft.farm.FarmInstanceRegistry;
 import com.stardew.craft.interior.CrossDimensionTeleporter;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -37,7 +37,7 @@ public record FarmSelectionSubmitPayload(
     private static final int MAX_CONFIGURATION_FIELDS = 64;
 
     public static final Type<FarmSelectionSubmitPayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "farm_selection_submit"));
+            new Type<>(new ResourceLocation(StardewCraft.MODID, "farm_selection_submit"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, FarmSelectionSubmitPayload> STREAM_CODEC =
             StreamCodec.of(
@@ -85,7 +85,7 @@ public record FarmSelectionSubmitPayload(
         buffer.writeUtf(payload.petName(), 48);
         buffer.writeVarInt(payload.layoutConfiguration().size());
         payload.layoutConfiguration().forEach((id, value) -> {
-            ResourceLocation.STREAM_CODEC.encode(buffer, id);
+            com.stardew.craft.port.PortCodecs.RESOURCE_LOCATION.encode(buffer, id);
             buffer.writeUtf(value, 128);
         });
     }
@@ -110,7 +110,7 @@ public record FarmSelectionSubmitPayload(
                 new LinkedHashMap<>();
         for (int i = 0; i < count; i++) {
             ResourceLocation id =
-                    ResourceLocation.STREAM_CODEC.decode(buffer);
+                    com.stardew.craft.port.PortCodecs.RESOURCE_LOCATION.decode(buffer);
             if (configuration.putIfAbsent(id, buffer.readUtf(128)) != null) {
                 throw new IllegalArgumentException(
                         "Duplicate farm layout configuration field: " + id);
@@ -155,7 +155,7 @@ public record FarmSelectionSubmitPayload(
             if (com.stardew.craft.farm.FarmJoinManager.hasPending(player.getUUID())) {
                 if (!payload.forceCancelPending()) {
                     com.stardew.craft.farm.FarmJoinManager.syncPendingState(player, true);
-                    net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
+                    net.minecraftforge.network.PacketDistributor.sendToPlayer(player,
                             new OpenFarmSelectionPayload());
                     player.sendSystemMessage(net.minecraft.network.chat.Component.translatable(
                             "stardewcraft.farm.join.confirm_cancel_before_create"));
@@ -231,7 +231,7 @@ public record FarmSelectionSubmitPayload(
                         invalidConfiguration.getMessage());
                 player.sendSystemMessage(net.minecraft.network.chat.Component.translatable(
                         "stardewcraft.farm_selection.invalid_configuration"));
-                net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
+                net.minecraftforge.network.PacketDistributor.sendToPlayer(
                         player, new OpenFarmSelectionPayload());
                 return;
             }

@@ -31,7 +31,7 @@ import java.util.Optional;
 public final class ProfessionData {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final ResourceLocation BUILTIN_TABLE =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "vanilla");
+            new ResourceLocation(StardewCraft.MODID, "vanilla");
     private static final AtomicDefinitionStore<StardewProfessionDefinition> STORE =
             new AtomicDefinitionStore<>();
     private static volatile Catalog catalog = Catalog.empty();
@@ -44,7 +44,7 @@ public final class ProfessionData {
     }
 
     public static ResourceLocation id(ProfessionType profession) {
-        return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, profession.getName());
+        return new ResourceLocation(StardewCraft.MODID, profession.getName());
     }
 
     public static Optional<StardewProfessionDefinition> definition(ProfessionType profession) {

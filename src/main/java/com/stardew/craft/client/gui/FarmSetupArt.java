@@ -13,7 +13,7 @@ final class FarmSetupArt {
     static final int BAD = 0xFFA34335;
     private FarmSetupArt() { }
     private static ResourceLocation texture(String name) {
-        return ResourceLocation.fromNamespaceAndPath("stardewcraft", "textures/gui/farm_setup/" + name + ".png");
+        return new ResourceLocation("stardewcraft", "textures/gui/farm_setup/" + name + ".png");
     }
     static void sprite(GuiGraphics g, String name, int x, int y, int w, int h) {
         RenderSystem.enableBlend();

@@ -14,7 +14,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -37,7 +37,7 @@ import java.util.Random;
 public final class DwarfStatueChoiceScreen extends Screen implements StardewGuiContentSize {
 
     private static final ResourceLocation CURSORS_1_6 =
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/cursors_1_6.png");
+        new ResourceLocation(StardewCraft.MODID, "textures/gui/cursors_1_6.png");
     private static final int TEX_SIZE = 512;
 
     // SDV 常量（sdv-px = src px × 4）

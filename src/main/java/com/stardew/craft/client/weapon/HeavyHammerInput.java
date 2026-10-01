@@ -4,13 +4,13 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.combat.network.HeavyHammerInputPayload;
 import com.stardew.craft.item.weapon.IStardewWeapon;
 import net.minecraft.client.Minecraft;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.InputEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.network.PacketDistributor;
 
 /** Normal attack input is held to pound. No second key, click-speed requirement or target lock. */
 @EventBusSubscriber(modid=StardewCraft.MODID,value=Dist.CLIENT)

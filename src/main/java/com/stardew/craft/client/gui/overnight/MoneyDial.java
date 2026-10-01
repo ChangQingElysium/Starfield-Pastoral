@@ -10,8 +10,8 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +20,7 @@ import java.util.concurrent.ThreadLocalRandom;
 @OnlyIn(Dist.CLIENT)
 @SuppressWarnings("null")
 public class MoneyDial {
-    private static final ResourceLocation ORIGINAL_ANIMATIONS = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation ORIGINAL_ANIMATIONS = new ResourceLocation(
         StardewCraft.MODID, "textures/gui/overnight/animations.png");
     private static final int ANIMATION_TEXTURE_WIDTH = 640;
     private static final int ANIMATION_TEXTURE_HEIGHT = 3328;

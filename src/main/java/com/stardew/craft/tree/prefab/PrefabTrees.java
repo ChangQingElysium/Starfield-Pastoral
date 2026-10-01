@@ -5,7 +5,7 @@ import com.stardew.craft.item.ModItems;
 import com.stardew.craft.tree.WildTrees;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.neoforged.neoforge.registries.DeferredBlock;
+import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredBlock;
 
 /**
  * 预制树（结构树）的静态映射工具。

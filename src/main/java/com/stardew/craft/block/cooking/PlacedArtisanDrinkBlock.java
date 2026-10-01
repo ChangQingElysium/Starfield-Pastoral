@@ -77,6 +77,6 @@ public final class PlacedArtisanDrinkBlock extends CookingPlacedFoodBlock {
 
     private ItemStack defaultDrink() {
         return new ItemStack(BuiltInRegistries.ITEM.get(
-                ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, getItemId())));
+                new ResourceLocation(StardewCraft.MODID, getItemId())));
     }
 }

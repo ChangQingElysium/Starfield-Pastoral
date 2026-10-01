@@ -30,7 +30,7 @@ import java.util.Set;
 public final class StardewFestivalMechanicRegistry {
     private static final OrderedExtensionRegistry<Entry> ENTRIES =
             new OrderedExtensionRegistry<>(
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             StardewCraft.MODID, "festival/mechanics"));
 
     private StardewFestivalMechanicRegistry() {
@@ -194,7 +194,7 @@ public final class StardewFestivalMechanicRegistry {
         if (parsed != null && raw.indexOf(':') >= 0) {
             return parsed;
         }
-        return ResourceLocation.fromNamespaceAndPath(
+        return new ResourceLocation(
                 definition.resourceId().getNamespace(),
                 raw.toLowerCase(java.util.Locale.ROOT));
     }

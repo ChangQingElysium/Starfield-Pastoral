@@ -5,12 +5,12 @@ import com.stardew.craft.api.v1.interaction.StardewInteractionHint;
 import com.stardew.craft.api.v1.interaction.StardewInteractionHintType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /** Server response describing the target's resolved interaction semantics. */
 public record MapInteractionHintPayload(
@@ -22,11 +22,11 @@ public record MapInteractionHintPayload(
         boolean done
 ) implements CustomPacketPayload {
     private static final ResourceLocation EMPTY_ID =
-            ResourceLocation.fromNamespaceAndPath(
+            new ResourceLocation(
                     StardewCraft.MODID, "none");
 
     public static final Type<MapInteractionHintPayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(
+            new Type<>(new ResourceLocation(
                     StardewCraft.MODID, "map_interaction_hint"));
 
     public static final StreamCodec<FriendlyByteBuf,

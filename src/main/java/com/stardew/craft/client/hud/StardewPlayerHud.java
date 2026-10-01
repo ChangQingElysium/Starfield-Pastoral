@@ -10,11 +10,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
-import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
 /**
  * 星露谷物语玩家状态HUD
@@ -24,13 +24,13 @@ import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 public class StardewPlayerHud {
     
     // 材质资源
-    private static final ResourceLocation BAR_TEXTURE = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation BAR_TEXTURE = new ResourceLocation(
         StardewCraft.MODID, "textures/gui/stardew_bars.png");
-    private static final ResourceLocation BAR_CONTENT_TEXTURE = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation BAR_CONTENT_TEXTURE = new ResourceLocation(
         StardewCraft.MODID, "textures/gui/bar_content.png");
-    private static final ResourceLocation HEALTH_ICON = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation HEALTH_ICON = new ResourceLocation(
         StardewCraft.MODID, "textures/gui/health_icon.png");
-    private static final ResourceLocation ENERGY_ICON = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation ENERGY_ICON = new ResourceLocation(
         StardewCraft.MODID, "textures/gui/energy_icon.png");
     
     // 条形图尺寸（原始大小，和原版MC生命值差不多）

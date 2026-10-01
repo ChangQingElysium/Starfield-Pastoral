@@ -10,9 +10,9 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.material.PushReaction;
-import net.neoforged.neoforge.registries.DeferredBlock;
-import net.neoforged.neoforge.registries.DeferredItem;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredBlock;
+import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredItem;
+import net.minecraftforge.registries.DeferredRegister;
 
 public final class NaturalDecorRegistry {
     private NaturalDecorRegistry() {}

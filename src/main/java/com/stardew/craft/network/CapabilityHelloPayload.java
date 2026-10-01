@@ -6,11 +6,11 @@ import com.stardew.craft.api.v1.network.StardewNetworkCapability;
 import com.stardew.craft.api.v1.network.StardewNetworkCapabilityRequirement;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.List;
 
@@ -19,11 +19,11 @@ public record CapabilityHelloPayload(
         List<StardewNetworkCapability> capabilities
 ) implements CustomPacketPayload {
     public static final Type<CapabilityHelloPayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(
+            new Type<>(new ResourceLocation(
                     StardewCraft.MODID, "capability_hello_v1"));
     static final StreamCodec<FriendlyByteBuf, StardewNetworkCapability>
             CAPABILITY_CODEC = StreamCodec.composite(
-                    ResourceLocation.STREAM_CODEC,
+                    com.stardew.craft.port.PortCodecs.RESOURCE_LOCATION,
                     StardewNetworkCapability::id,
                     ByteBufCodecs.VAR_INT,
                     StardewNetworkCapability::version,

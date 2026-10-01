@@ -2,14 +2,14 @@ package com.stardew.craft.pet;
 
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record PetActionPayload(UUID nonce, UUID pet, String action, String value, BlockPos bowl) implements CustomPacketPayload {
-    public static final Type<PetActionPayload> TYPE = new Type<>(ResourceLocation.parse("stardewcraft:pet_action"));
+    public static final Type<PetActionPayload> TYPE = new Type<>(new ResourceLocation("stardewcraft:pet_action"));
     public static final StreamCodec<RegistryFriendlyByteBuf, PetActionPayload> CODEC = StreamCodec.of(
             (b, p) -> { b.writeUUID(p.nonce); b.writeUUID(p.pet); b.writeUtf(p.action, 16); b.writeUtf(p.value, 384); b.writeBlockPos(p.bowl); },
             b -> new PetActionPayload(b.readUUID(), b.readUUID(), b.readUtf(16), b.readUtf(384), b.readBlockPos()));

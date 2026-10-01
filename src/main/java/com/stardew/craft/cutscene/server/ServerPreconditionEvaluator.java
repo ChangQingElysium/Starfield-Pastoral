@@ -248,7 +248,7 @@ public final class ServerPreconditionEvaluator {
         int count = p.getInt("count", 1);
         if (itemId == null || itemId.isBlank() || count <= 0) return false;
         try {
-            var item = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(ResourceLocation.parse(itemId));
+            var item = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(new ResourceLocation(itemId));
             return item != Items.AIR && player.getInventory().countItem(item) >= count;
         } catch (Exception ignored) {
             return false;

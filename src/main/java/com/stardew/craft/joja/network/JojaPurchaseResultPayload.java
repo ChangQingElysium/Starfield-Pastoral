@@ -2,13 +2,13 @@ package com.stardew.craft.joja.network;
 
 import com.stardew.craft.StardewCraft;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.loading.FMLEnvironment;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * Server → Client: 购买结果。
@@ -22,7 +22,7 @@ public record JojaPurchaseResultPayload(int buttonIdx, int resultCode, int newMo
     implements CustomPacketPayload {
 
     public static final Type<JojaPurchaseResultPayload> TYPE = new Type<>(
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "joja_purchase_result"));
+        new ResourceLocation(StardewCraft.MODID, "joja_purchase_result"));
 
     public static final StreamCodec<ByteBuf, JojaPurchaseResultPayload> STREAM_CODEC = StreamCodec.composite(
         ByteBufCodecs.VAR_INT, JojaPurchaseResultPayload::buttonIdx,

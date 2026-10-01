@@ -11,19 +11,19 @@ public class NpcGeoModel extends GeoModel<StardewNpcEntity> {
     @Override
     public ResourceLocation getModelResource(StardewNpcEntity animatable) {
         String npcId = resolveNpcId(animatable);
-        return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "geo/entity/npc/" + npcId + ".geo.json");
+        return new ResourceLocation(StardewCraft.MODID, "geo/entity/npc/" + npcId + ".geo.json");
     }
 
     @Override
     public ResourceLocation getTextureResource(StardewNpcEntity animatable) {
         String npcId = resolveNpcId(animatable);
-        return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/entity/npc/" + npcId + ".png");
+        return new ResourceLocation(StardewCraft.MODID, "textures/entity/npc/" + npcId + ".png");
     }
 
     @Override
     public ResourceLocation getAnimationResource(StardewNpcEntity animatable) {
         String npcId = resolveNpcId(animatable);
-        return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "animations/entity/npc/" + npcId + ".animation.json");
+        return new ResourceLocation(StardewCraft.MODID, "animations/entity/npc/" + npcId + ".animation.json");
     }
 
     private static String resolveNpcId(StardewNpcEntity entity) {

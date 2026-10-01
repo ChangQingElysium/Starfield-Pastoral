@@ -19,7 +19,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemDisplayContext;
 
 public class SmokedFishItemRenderer extends BlockEntityWithoutLevelRenderer {
-    private static final ResourceLocation PUFF_TEXTURE = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation PUFF_TEXTURE = new ResourceLocation(
             StardewCraft.MODID, "textures/item/artisan/smoke_puff.png");
     private static final float PX = 1.0F / 16.0F;
 
@@ -44,12 +44,12 @@ public class SmokedFishItemRenderer extends BlockEntityWithoutLevelRenderer {
         ItemStack sourceStack = new ItemStack(smokedItem.getSourceItem());
         QualityHelper.setQuality(sourceStack, quality);
         if (quality != QualityHelper.NORMAL) {
-            sourceStack.set(net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA,
-                new net.minecraft.world.item.component.CustomModelData(quality));
+            sourceStack.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA,
+                new com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData(quality));
         }
 
         ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
-        ResourceLocation baseModelId = ResourceLocation.fromNamespaceAndPath(
+        ResourceLocation baseModelId = new ResourceLocation(
             itemId.getNamespace(), "item/" + itemId.getPath() + "_base"
         );
         BakedModel model = mc.getModelManager().getModel(new ModelResourceLocation(baseModelId, "standalone"));

@@ -35,7 +35,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -890,7 +890,7 @@ public final class SpecialOrderManager {
             .findFirst()
             .orElse(players.get(0));
         for (SpecialOrderInstance.DonatedItem donated : order.donatedItems()) {
-            Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(donated.itemId()));
+            Item item = BuiltInRegistries.ITEM.get(new ResourceLocation(donated.itemId()));
             if (item == net.minecraft.world.item.Items.AIR || donated.count() <= 0) continue;
             ItemStack stack = new ItemStack(item, donated.count());
             if (!target.getInventory().add(stack)) {
@@ -949,7 +949,7 @@ public final class SpecialOrderManager {
     private static List<ItemStack> donatedStacks(List<SpecialOrderInstance.DonatedItem> donatedItems) {
         List<ItemStack> stacks = new ArrayList<>();
         for (SpecialOrderInstance.DonatedItem donated : donatedItems) {
-            Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(donated.itemId()));
+            Item item = BuiltInRegistries.ITEM.get(new ResourceLocation(donated.itemId()));
             if (item != net.minecraft.world.item.Items.AIR && donated.count() > 0) {
                 stacks.add(new ItemStack(item, donated.count()));
             }
@@ -960,7 +960,7 @@ public final class SpecialOrderManager {
     private static void cleanupTemporaryOrderState(ServerLevel level,List<ServerPlayer> players, SpecialOrderDefinition definition) {
         if (definition == null) return;
         ResourceLocation itemId = definition.itemToRemoveOnEnd() == null || definition.itemToRemoveOnEnd().isBlank()
-            ? null : ResourceLocation.parse(definition.itemToRemoveOnEnd());
+            ? null : new ResourceLocation(definition.itemToRemoveOnEnd());
         String mailFlag = definition.mailToRemoveOnEnd();
         if("ectoplasmDrop".equals(mailFlag)){
             var world=SpecialOrderWorldData.get(level);if(world.sharedSpecialDropFlags().remove(mailFlag))world.setDirty();

@@ -6,16 +6,16 @@ import com.stardew.craft.api.v1.economy.StardewCurrencies;
 import com.stardew.craft.api.v1.economy.StardewCurrencyCost;
 import com.stardew.craft.api.v1.economy.StardewItemCost;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentSerialization;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.chat.ComponentSerialization;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -74,7 +74,7 @@ public record ShopCostSnapshotPayload(
     }
 
     public static final Type<ShopCostSnapshotPayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(
+            new Type<>(new ResourceLocation(
                     StardewCraft.MODID, "shop_cost_snapshot"));
     public static final StreamCodec<
             RegistryFriendlyByteBuf,
@@ -181,8 +181,8 @@ public record ShopCostSnapshotPayload(
         context.enqueueWork(() -> handleClient(payload));
     }
 
-    @net.neoforged.api.distmarker.OnlyIn(
-            net.neoforged.api.distmarker.Dist.CLIENT)
+    @net.minecraftforge.api.distmarker.OnlyIn(
+            net.minecraftforge.api.distmarker.Dist.CLIENT)
     private static void handleClient(
             ShopCostSnapshotPayload payload
     ) {
@@ -218,7 +218,7 @@ public record ShopCostSnapshotPayload(
                 buffer.writeVarLong(cost.available());
                 ComponentSerialization.TRUSTED_STREAM_CODEC
                         .encode(buffer, cost.displayName());
-                ItemStack.OPTIONAL_STREAM_CODEC
+                com.stardew.craft.port.PortCodecs.OPTIONAL_ITEM_STACK
                         .encode(buffer, cost.icon());
             }
         }
@@ -249,7 +249,7 @@ public record ShopCostSnapshotPayload(
                         ComponentSerialization
                                 .TRUSTED_STREAM_CODEC
                                 .decode(buffer),
-                        ItemStack.OPTIONAL_STREAM_CODEC
+                        com.stardew.craft.port.PortCodecs.OPTIONAL_ITEM_STACK
                                 .decode(buffer)));
             }
             rows.add(new Row(index, itemId, costs));

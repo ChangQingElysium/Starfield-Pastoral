@@ -18,7 +18,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nullable;
 import java.io.InputStream;
@@ -246,7 +246,7 @@ public final class DailyStatueBlockEntity extends BlockEntity
                     .replaceAll("[^a-z0-9]+", "_")
                     .replaceAll("^_+|_+$", "");
             Item item = BuiltInRegistries.ITEM.get(
-                    ResourceLocation.fromNamespaceAndPath("stardewcraft", path));
+                    new ResourceLocation("stardewcraft", path));
             if (item != null && item != net.minecraft.world.item.Items.AIR) {
                 return new ItemStack(item);
             }

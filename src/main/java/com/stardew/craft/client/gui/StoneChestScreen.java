@@ -19,12 +19,12 @@ import java.util.List;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 @SuppressWarnings("null")
 public class StoneChestScreen extends AbstractContainerScreen<StoneChestMenu> {
 
-    private static final ResourceLocation COLOR_WHEEL = ResourceLocation.fromNamespaceAndPath("stardewcraft", "textures/gui/color_wheel.png");
+    private static final ResourceLocation COLOR_WHEEL = new ResourceLocation("stardewcraft", "textures/gui/color_wheel.png");
     private static final int BUTTON_SIZE = 18;
 
     private int colorButtonX;

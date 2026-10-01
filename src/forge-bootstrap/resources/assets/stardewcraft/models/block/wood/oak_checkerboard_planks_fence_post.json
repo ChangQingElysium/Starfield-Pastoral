@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:block/fence_post",
-  "textures": {
-    "texture": "stardewcraft:block/wood/oak_checkerboard_planks"
-  }
-}

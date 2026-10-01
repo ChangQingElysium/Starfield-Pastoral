@@ -2,7 +2,7 @@ package com.stardew.craft.block.crop.giant;
 
 import com.stardew.craft.item.ModItems;
 import net.minecraft.world.item.Item;
-import net.neoforged.neoforge.registries.DeferredItem;
+import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredItem;
 
 public class GiantQiFruitBlock extends GiantCropBlock {
     public GiantQiFruitBlock(Properties properties) { super(properties); }

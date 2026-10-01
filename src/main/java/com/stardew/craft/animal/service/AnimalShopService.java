@@ -16,7 +16,7 @@ import com.stardew.craft.network.payload.OpenAnimalPurchaseScreenPayload;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;

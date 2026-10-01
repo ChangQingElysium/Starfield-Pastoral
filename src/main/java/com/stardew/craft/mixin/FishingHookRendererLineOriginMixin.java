@@ -55,7 +55,7 @@ public abstract class FishingHookRendererLineOriginMixin {
 
 		int i = player.getMainArm() == HumanoidArm.RIGHT ? 1 : -1;
 		// Keep vanilla handedness flip behavior.
-		if (!main.canPerformAction(net.neoforged.neoforge.common.ItemAbilities.FISHING_ROD_CAST)) {
+		if (!main.canPerformAction(com.stardew.craft.port.net.neoforged.neoforge.common.ItemAbilities.FISHING_ROD_CAST)) {
 			i = -i;
 		}
 

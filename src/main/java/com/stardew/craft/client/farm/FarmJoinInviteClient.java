@@ -5,9 +5,9 @@ import com.stardew.craft.client.gui.common.StardewQuestionDialogSpec;
 import com.stardew.craft.network.payload.FarmJoinResponsePayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.ArrayDeque;
 import java.util.List;

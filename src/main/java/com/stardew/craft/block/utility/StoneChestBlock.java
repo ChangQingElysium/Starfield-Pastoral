@@ -99,7 +99,7 @@ public class StoneChestBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected net.minecraft.world.ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level,
+    protected com.stardew.craft.port.net.minecraft.world.ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level,
             BlockPos pos, Player player, net.minecraft.world.InteractionHand hand, BlockHitResult hit) {
         return com.stardew.craft.inventory.ChestInteractions.swap(stack, level, pos, player);
     }

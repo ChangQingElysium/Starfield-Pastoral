@@ -17,7 +17,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.FarmBlock;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -297,7 +297,7 @@ public class FertilizerManager extends SavedData {
                 
                 try {
                     @SuppressWarnings("null")
-                    ResourceLocation dimLoc = ResourceLocation.parse(entryTag.getString("dimension"));
+                    ResourceLocation dimLoc = new ResourceLocation(entryTag.getString("dimension"));
                     @SuppressWarnings("null")
                     ResourceKey<Level> dimKey = ResourceKey.create(
                             net.minecraft.core.registries.Registries.DIMENSION,

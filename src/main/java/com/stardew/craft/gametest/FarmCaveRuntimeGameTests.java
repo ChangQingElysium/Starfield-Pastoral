@@ -16,7 +16,7 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.server.level.*;
-import net.minecraft.server.network.CommonListenerCookie;
+import com.stardew.craft.port.net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -24,8 +24,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -42,7 +42,7 @@ public final class FarmCaveRuntimeGameTests {
         farm.setCaveChoice(FarmCaveChoice.MUSHROOMS);
         BlockPos legacy=legacyOrigin(level,owner);
         // Real old template, ready produce, and a player inventory; the old room stays as backup.
-        level.getStructureManager().get(ResourceLocation.fromNamespaceAndPath("stardewcraft","farm_layouts/cave_legacy")).orElseThrow()
+        level.getStructureManager().get(new ResourceLocation("stardewcraft","farm_layouts/cave_legacy")).orElseThrow()
                 .placeInWorld(level,legacy,legacy,new StructurePlaceSettings(),level.random,3);
         BlockPos oldBox=legacy.offset(FarmCaveLayout.LEGACY_BOXES.getFirst());
         level.setBlock(oldBox,ModBlocks.MUSHROOM_BOX.get().defaultBlockState(),3);

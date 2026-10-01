@@ -3,11 +3,11 @@ package com.stardew.craft.event;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.farming.FertilizerApplicationService;
 import com.stardew.craft.item.FertilizerItem;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.common.util.TriState;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.neoforge.common.util.TriState;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 
 /** Ensures crop blocks cannot consume a fertilizer click before the held item handles it. */
 @EventBusSubscriber(modid = StardewCraft.MODID)

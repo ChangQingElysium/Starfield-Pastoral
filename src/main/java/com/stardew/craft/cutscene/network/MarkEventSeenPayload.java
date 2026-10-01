@@ -3,13 +3,13 @@ package com.stardew.craft.cutscene.network;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.cutscene.server.EventSeenData;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.ArrayList;
 
@@ -19,7 +19,7 @@ import java.util.ArrayList;
 public record MarkEventSeenPayload(String eventId, long sessionId) implements CustomPacketPayload {
 
     public static final Type<MarkEventSeenPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "mark_event_seen"));
+            new ResourceLocation(StardewCraft.MODID, "mark_event_seen"));
 
     public static final StreamCodec<ByteBuf, MarkEventSeenPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.STRING_UTF8, MarkEventSeenPayload::eventId,

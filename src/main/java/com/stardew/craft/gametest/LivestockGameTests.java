@@ -18,8 +18,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.gametest.*;
+import net.minecraftforge.common.util.FakePlayerFactory;
+import net.minecraftforge.gametest.*;
 import java.util.*;
 
 @GameTestHolder("stardewcraft_livestock")
@@ -442,7 +442,7 @@ public final class LivestockGameTests {
             h.assertTrue(data.find(id).produce().isEmpty(),"Zero-friendship pig retained repeat opportunity");
             h.assertTrue(!LivestockTruffles.dig(level,data.find(id),home,pos),"Pig repeated a spent daily opportunity");
             var replacements=new java.util.concurrent.atomic.AtomicInteger();
-            com.stardew.craft.api.v1.agriculture.StardewTruffleFoundHandlers.register(net.minecraft.resources.ResourceLocation.parse("addon_contract:truffle_"+id.toString().replace("-","")),100,context->{
+            com.stardew.craft.api.v1.agriculture.StardewTruffleFoundHandlers.register(new net.minecraft.resources.ResourceLocation("addon_contract:truffle_"+id.toString().replace("-","")),100,context->{
                 if(context.level()!=level||context.anchor().distSqr(pos)>4)return com.stardew.craft.api.v1.agriculture.StardewTruffleFoundHandlers.Result.PASS;
                 replacements.incrementAndGet();return com.stardew.craft.api.v1.agriculture.StardewTruffleFoundHandlers.Result.REPLACE_TRUFFLE;
             });

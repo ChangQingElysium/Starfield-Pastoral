@@ -396,7 +396,7 @@ public class TreeGrowthManager extends SavedData {
 				ResourceKey<Level> dimension = ResourceKey.create(
 					Objects.requireNonNull(net.minecraft.core.registries.Registries.DIMENSION, "DIMENSION"),
 					Objects.requireNonNull(
-						net.minecraft.resources.ResourceLocation.parse(
+						new net.minecraft.resources.ResourceLocation(
 							Objects.requireNonNull(entryTag.getString("Dimension"), "dimension")
 						),
 						"dimensionId"

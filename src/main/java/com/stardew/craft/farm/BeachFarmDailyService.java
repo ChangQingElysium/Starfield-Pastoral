@@ -16,7 +16,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.neoforged.neoforge.registries.DeferredBlock;
+import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredBlock;
 
 import java.util.List;
 import java.util.Set;

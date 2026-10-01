@@ -4,15 +4,15 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.api.v1.farm.StardewFarmLayoutConfigField;
 import com.stardew.craft.api.v1.farm.StardewFarmLayoutPreview;
 import com.stardew.craft.api.v1.farm.StardewFarmLayouts;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentSerialization;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.chat.ComponentSerialization;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +29,7 @@ public record OpenFarmSelectionPayload(
     private static final int MAX_CHOICES = 64;
 
     public static final Type<OpenFarmSelectionPayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(
+            new Type<>(new ResourceLocation(
                     StardewCraft.MODID, "open_farm_selection"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, OpenFarmSelectionPayload> STREAM_CODEC =
@@ -57,13 +57,13 @@ public record OpenFarmSelectionPayload(
     ) {
         buffer.writeVarInt(payload.layouts().size());
         for (StardewFarmLayoutPreview preview : payload.layouts()) {
-            ResourceLocation.STREAM_CODEC.encode(buffer, preview.id());
+            com.stardew.craft.port.PortCodecs.RESOURCE_LOCATION.encode(buffer, preview.id());
             buffer.writeBoolean(preview.selectable());
             ComponentSerialization.TRUSTED_STREAM_CODEC.encode(
                     buffer, preview.displayName());
             ComponentSerialization.TRUSTED_STREAM_CODEC.encode(
                     buffer, preview.description());
-            ResourceLocation.STREAM_CODEC.encode(buffer, preview.iconTexture());
+            com.stardew.craft.port.PortCodecs.RESOURCE_LOCATION.encode(buffer, preview.iconTexture());
             buffer.writeVarInt(preview.version());
             buffer.writeVarInt(preview.configurationFields().size());
             for (StardewFarmLayoutConfigField field
@@ -80,14 +80,14 @@ public record OpenFarmSelectionPayload(
         ArrayList<StardewFarmLayoutPreview> layouts =
                 new ArrayList<>(layoutCount);
         for (int i = 0; i < layoutCount; i++) {
-            ResourceLocation id = ResourceLocation.STREAM_CODEC.decode(buffer);
+            ResourceLocation id = com.stardew.craft.port.PortCodecs.RESOURCE_LOCATION.decode(buffer);
             boolean selectable = buffer.readBoolean();
             Component displayName =
                     ComponentSerialization.TRUSTED_STREAM_CODEC.decode(buffer);
             Component description =
                     ComponentSerialization.TRUSTED_STREAM_CODEC.decode(buffer);
             ResourceLocation icon =
-                    ResourceLocation.STREAM_CODEC.decode(buffer);
+                    com.stardew.craft.port.PortCodecs.RESOURCE_LOCATION.decode(buffer);
             int version = buffer.readVarInt();
             int fieldCount = readBoundedCount(
                     buffer, MAX_FIELDS, "farm layout fields");
@@ -107,7 +107,7 @@ public record OpenFarmSelectionPayload(
             RegistryFriendlyByteBuf buffer,
             StardewFarmLayoutConfigField field
     ) {
-        ResourceLocation.STREAM_CODEC.encode(buffer, field.id());
+        com.stardew.craft.port.PortCodecs.RESOURCE_LOCATION.encode(buffer, field.id());
         ComponentSerialization.TRUSTED_STREAM_CODEC.encode(
                 buffer, field.label());
         ComponentSerialization.TRUSTED_STREAM_CODEC.encode(
@@ -125,7 +125,7 @@ public record OpenFarmSelectionPayload(
     private static StardewFarmLayoutConfigField decodeField(
             RegistryFriendlyByteBuf buffer
     ) {
-        ResourceLocation id = ResourceLocation.STREAM_CODEC.decode(buffer);
+        ResourceLocation id = com.stardew.craft.port.PortCodecs.RESOURCE_LOCATION.decode(buffer);
         Component label =
                 ComponentSerialization.TRUSTED_STREAM_CODEC.decode(buffer);
         Component description =

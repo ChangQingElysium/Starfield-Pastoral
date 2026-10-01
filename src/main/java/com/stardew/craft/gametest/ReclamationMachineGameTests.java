@@ -23,11 +23,11 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.util.FakePlayer;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
-import net.neoforged.neoforge.capabilities.Capabilities;
+import net.minecraftforge.common.util.FakePlayer;
+import net.minecraftforge.common.util.FakePlayerFactory;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import com.stardew.craft.port.net.neoforged.neoforge.capabilities.Capabilities;
 import java.util.List;
 import java.util.UUID;
 
@@ -90,7 +90,7 @@ public final class ReclamationMachineGameTests {
 
     @GameTest(templateNamespace="stardewcraft_reclamation", template="machine_test")
     public static void originalDeconstructionRules(GameTestHelper h) {
-        var ringItem = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(net.minecraft.resources.ResourceLocation.parse("stardewcraft:iridium_band"));
+        var ringItem = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(new net.minecraft.resources.ResourceLocation("stardewcraft:iridium_band"));
         var ring = DeconstructorRecipes.output(new ItemStack(ringItem));
         h.assertTrue(ring.is(ModItems.IRIDIUM_BAR.get()) && ring.getCount() == 5, "Crafted rings retain original (O) item type and must be accepted");
         var crab = DeconstructorRecipes.output(new ItemStack(ModItems.CRAB_POT.get()));

@@ -3,12 +3,12 @@ package com.stardew.craft.communitycenter.network;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.api.v1.communitycenter.StardewCommunityCenterActions;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * C→S: Client requests purchasing a Vault bundle (money-only).
@@ -19,7 +19,7 @@ public record BundlePurchasePayload(
 ) implements CustomPacketPayload {
 
     public static final Type<BundlePurchasePayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "bundle_purchase")
+            new ResourceLocation(StardewCraft.MODID, "bundle_purchase")
     );
 
     public static final StreamCodec<ByteBuf, BundlePurchasePayload> STREAM_CODEC =

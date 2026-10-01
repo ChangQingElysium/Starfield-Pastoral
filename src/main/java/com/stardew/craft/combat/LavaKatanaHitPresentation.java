@@ -4,7 +4,7 @@ import com.stardew.craft.combat.network.LavaKatanaImpactPayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 /** Cosmetic feedback from the final health-damage boundary, including normal AoE hits. */
 final class LavaKatanaHitPresentation {

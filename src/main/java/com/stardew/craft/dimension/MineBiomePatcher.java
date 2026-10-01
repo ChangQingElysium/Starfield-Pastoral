@@ -14,9 +14,9 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.PalettedContainer;
 import net.minecraft.world.level.chunk.PalettedContainerRO;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.level.ChunkEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.level.ChunkEvent;
 
 /**
  * 矿井维度群系补丁器 — 根据区块 Z 坐标推算楼层号，
@@ -34,11 +34,11 @@ import net.neoforged.neoforge.event.level.ChunkEvent;
 public final class MineBiomePatcher {
 
     private static final ResourceKey<Biome> MINES_20_KEY =
-            ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath("stardewcraft", "mines_20"));
+            ResourceKey.create(Registries.BIOME, new ResourceLocation("stardewcraft", "mines_20"));
     private static final ResourceKey<Biome> MINES_60_KEY =
-            ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath("stardewcraft", "mines_60"));
+            ResourceKey.create(Registries.BIOME, new ResourceLocation("stardewcraft", "mines_60"));
     private static final ResourceKey<Biome> MINES_100_KEY =
-            ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath("stardewcraft", "mines_100"));
+            ResourceKey.create(Registries.BIOME, new ResourceLocation("stardewcraft", "mines_100"));
 
     private MineBiomePatcher() {}
 
@@ -96,7 +96,7 @@ public final class MineBiomePatcher {
     private static Holder<Biome> getBiomeForFloor(ServerLevel level, int floor) {
         ResourceKey<Biome> key;
         if (floor > 120 || floor == com.stardew.craft.mining.SkullCavernRuntime.LOBBY) {
-            key=ResourceKey.create(Registries.BIOME,ResourceLocation.fromNamespaceAndPath("stardewcraft","skull_cavern"));
+            key=ResourceKey.create(Registries.BIOME,new ResourceLocation("stardewcraft","skull_cavern"));
         } else if (floor >= 80) {
             key = MINES_100_KEY;
         } else if (floor >= 40) {

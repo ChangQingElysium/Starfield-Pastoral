@@ -14,7 +14,7 @@ import com.stardew.craft.api.v1.farm.StardewFarmLayoutRegistration;
 import com.stardew.craft.api.v1.internal.farm.StardewFarmLayoutRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentSerialization;
+import com.stardew.craft.port.net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
@@ -472,7 +472,7 @@ public final class FarmLayoutDataRegistry {
         if (manager == null) {
             return;
         }
-        ResourceLocation resource = ResourceLocation.fromNamespaceAndPath(
+        ResourceLocation resource = new ResourceLocation(
                 schematic.getNamespace(),
                 "structures/" + schematic.getPath());
         if (manager.getResource(resource).isEmpty()) {

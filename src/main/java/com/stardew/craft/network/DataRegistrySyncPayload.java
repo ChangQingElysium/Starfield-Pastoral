@@ -16,13 +16,13 @@ import com.stardew.craft.secretnote.SecretNoteRegistry;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.codec.EncoderException;
-import net.minecraft.network.VarInt;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.VarInt;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.nio.charset.StandardCharsets;
 
@@ -54,7 +54,7 @@ public record DataRegistrySyncPayload(
     static final int MAX_PAYLOAD_BYTES = 16 * 1024 * 1024;
 
     public static final Type<DataRegistrySyncPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "data_registry_sync")
+            new ResourceLocation(StardewCraft.MODID, "data_registry_sync")
     );
 
     public DataRegistrySyncPayload {

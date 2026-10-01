@@ -3,11 +3,11 @@ package com.stardew.craft.network.payload;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.shop.RobinService;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * Client → Server: player chose a Robin menu option.
@@ -19,7 +19,7 @@ public record RobinActionPayload(
 ) implements CustomPacketPayload {
 
     public static final Type<RobinActionPayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "robin_action"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "robin_action"));
 
     public static final StreamCodec<FriendlyByteBuf, RobinActionPayload> STREAM_CODEC = StreamCodec.of(
         (buf, payload) -> buf.writeInt(payload.choice()),

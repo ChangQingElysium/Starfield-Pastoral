@@ -16,14 +16,14 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FlowerPotBlock;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.common.ItemAbilities;
-import net.neoforged.neoforge.common.util.TriState;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.event.level.BlockEvent;
-import net.neoforged.neoforge.event.level.ExplosionEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.neoforge.common.ItemAbilities;
+import com.stardew.craft.port.net.neoforged.neoforge.common.util.TriState;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.level.BlockEvent;
+import net.minecraftforge.event.level.ExplosionEvent;
 
 /**
  * 农场区域保护：
@@ -102,7 +102,7 @@ public class FarmAreaProtectionEvents {
     }
 
     /**
-     * Placement cancellation is transactional in NeoForge: captured block snapshots are
+     * Placement cancellation is transactional in MinecraftForge: captured block snapshots are
      * restored and the pre-placement item stack is retained. Manual restore/destroy logic
      * bypasses that transaction and can consume or duplicate the held item.
      */
@@ -437,7 +437,7 @@ public class FarmAreaProtectionEvents {
             return;
         }
         // 水桶/岩浆桶等流体桶：在任何受保护区域都禁止放置流体
-        // （NeoForge 中 BucketItem.emptyContents → LiquidBlock.placeLiquid 不触发 EntityPlaceEvent，
+        // （MinecraftForge 中 BucketItem.emptyContents → LiquidBlock.placeLiquid 不触发 EntityPlaceEvent，
         //  必须在 RightClickBlock 阶段拦截）
         if (heldItem.getItem() instanceof net.minecraft.world.item.BucketItem bucket) {
             // 空桶（拾取流体）允许通过；有内容的桶才做放置保护

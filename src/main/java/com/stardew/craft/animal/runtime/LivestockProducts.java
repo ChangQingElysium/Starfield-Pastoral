@@ -15,7 +15,7 @@ import java.util.Random;
 public final class LivestockProducts {
     private LivestockProducts() {}
     public static ItemStack stack(String item, int count, int sourceQuality) {
-        var result = new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(item.contains(":") ? item : "stardewcraft:" + item)), count);
+        var result = new ItemStack(BuiltInRegistries.ITEM.get(new ResourceLocation(item.contains(":") ? item : "stardewcraft:" + item)), count);
         // The gameplay reducer keeps SDV's 4; this mod's item model/price helpers use 3 for iridium.
         QualityHelper.setQuality(result, sourceQuality == 4 ? QualityHelper.IRIDIUM : sourceQuality);
         return result;

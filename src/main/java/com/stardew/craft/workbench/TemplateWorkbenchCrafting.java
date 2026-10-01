@@ -44,7 +44,7 @@ public final class TemplateWorkbenchCrafting {
 
     static int craftInventory(Container inventory, WorkbenchEntry recipe, int requested, Consumer<ItemStack> deliver) {
         if (requested <= 0) return 0;
-        Item material = BuiltInRegistries.ITEM.get(ResourceLocation.parse(recipe.inputItemId(WorkbenchType.TEMPLATE)));
+        Item material = BuiltInRegistries.ITEM.get(new ResourceLocation(recipe.inputItemId(WorkbenchType.TEMPLATE)));
         Item item = BuiltInRegistries.ITEM.get(recipe.itemId());
         if (material == Items.AIR || item == Items.AIR) return 0;
         int batches = Math.min(Math.min(requested, 999), count(inventory, material) / recipe.cost());

@@ -1,9 +1,9 @@
 package com.stardew.craft.network;
 
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 
 /**
@@ -23,7 +23,7 @@ public record WeatherSyncPacket(
 
     @SuppressWarnings("null")
 public static final CustomPacketPayload.Type<WeatherSyncPacket> TYPE =
-            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath("stardewcraft", "weather_sync"));
+            new CustomPacketPayload.Type<>(new ResourceLocation("stardewcraft", "weather_sync"));
 
     @SuppressWarnings("null")
 public static final StreamCodec<ByteBuf, WeatherSyncPacket> STREAM_CODEC = StreamCodec.composite(

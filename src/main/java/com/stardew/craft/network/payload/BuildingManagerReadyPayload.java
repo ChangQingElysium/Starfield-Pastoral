@@ -2,17 +2,17 @@ package com.stardew.craft.network.payload;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /** Completion refresh for the manager, including an unchanged construction-time block. */
 public record BuildingManagerReadyPayload(ResourceLocation dimension, BlockPos pos, BlockState state)
         implements CustomPacketPayload {
-    public static final Type<BuildingManagerReadyPayload> TYPE = new Type<>(ResourceLocation.parse("stardewcraft:building_manager_ready"));
+    public static final Type<BuildingManagerReadyPayload> TYPE = new Type<>(new ResourceLocation("stardewcraft:building_manager_ready"));
     public static final StreamCodec<FriendlyByteBuf, BuildingManagerReadyPayload> STREAM_CODEC = StreamCodec.of(
             (buffer, value) -> {
                 buffer.writeResourceLocation(value.dimension());
@@ -26,7 +26,7 @@ public record BuildingManagerReadyPayload(ResourceLocation dimension, BlockPos p
     public static void handle(BuildingManagerReadyPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> handleClient(payload));
     }
-    @net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+    @net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
     private static void handleClient(BuildingManagerReadyPayload payload) {
         var mc = net.minecraft.client.Minecraft.getInstance();
         if (mc.level == null || !mc.level.dimension().location().equals(payload.dimension())

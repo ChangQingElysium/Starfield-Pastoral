@@ -2,14 +2,14 @@ package com.stardew.craft.network.payload;
 
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.festival.FairGrangeDisplayClientCache;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +17,7 @@ import java.util.List;
 @SuppressWarnings("null")
 public record FairGrangeDisplaySyncPayload(boolean active, List<ItemStack> display) implements CustomPacketPayload {
     public static final Type<FairGrangeDisplaySyncPayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "fair_grange_display_sync"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "fair_grange_display_sync"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, FairGrangeDisplaySyncPayload> STREAM_CODEC = StreamCodec.of(
         FairGrangeDisplaySyncPayload::write,
@@ -37,7 +37,7 @@ public record FairGrangeDisplaySyncPayload(boolean active, List<ItemStack> displ
         int count = Math.min(9, stacks == null ? 0 : stacks.size());
         buf.writeVarInt(count);
         for (int i = 0; i < count; i++) {
-            ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, stacks.get(i));
+            com.stardew.craft.port.PortCodecs.OPTIONAL_ITEM_STACK.encode(buf, stacks.get(i));
         }
     }
 
@@ -45,7 +45,7 @@ public record FairGrangeDisplaySyncPayload(boolean active, List<ItemStack> displ
         int count = Math.max(0, Math.min(9, buf.readVarInt()));
         List<ItemStack> stacks = new ArrayList<>(9);
         for (int i = 0; i < count; i++) {
-            stacks.add(ItemStack.OPTIONAL_STREAM_CODEC.decode(buf));
+            stacks.add(com.stardew.craft.port.PortCodecs.OPTIONAL_ITEM_STACK.decode(buf));
         }
         while (stacks.size() < 9) {
             stacks.add(ItemStack.EMPTY);

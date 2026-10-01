@@ -304,7 +304,7 @@ public class StardewBombEntity extends Entity {
                     new net.minecraft.world.phys.BlockHitResult(Vec3.atBottomCenterOf(pos.above()),
                             net.minecraft.core.Direction.UP, pos, false));
             BlockState tilled = state.getToolModifiedState(context,
-                    net.neoforged.neoforge.common.ItemAbilities.HOE_TILL, false);
+                    com.stardew.craft.port.net.neoforged.neoforge.common.ItemAbilities.HOE_TILL, false);
             if (tilled == null || !(tilled.getBlock() instanceof net.minecraft.world.level.block.FarmBlock)) continue;
             if (level.isRainingAt(pos.above())) {
                 tilled = tilled.setValue(net.minecraft.world.level.block.FarmBlock.MOISTURE, 7);

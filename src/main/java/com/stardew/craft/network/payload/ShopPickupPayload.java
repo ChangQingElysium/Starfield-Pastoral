@@ -3,16 +3,16 @@ package com.stardew.craft.network.payload;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.shop.ShopPendingPickupData;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.List;
 
@@ -28,7 +28,7 @@ public record ShopPickupPayload(
 ) implements CustomPacketPayload {
 
     public static final Type<ShopPickupPayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "shop_pickup"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "shop_pickup"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, ShopPickupPayload> STREAM_CODEC =
         StreamCodec.composite(
@@ -67,7 +67,7 @@ public record ShopPickupPayload(
             if (payload.itemId().startsWith("recipe:")) return;
             if (payload.itemId().startsWith("wallpaper:") || payload.itemId().startsWith("flooring:")) return;
             ResourceLocation rl;
-            try { rl = ResourceLocation.parse(payload.itemId()); }
+            try { rl = new ResourceLocation(payload.itemId()); }
             catch (Exception ignored) { return; }
 
             List<ItemStack> claimed = ShopPendingPickupData.get(player.server)

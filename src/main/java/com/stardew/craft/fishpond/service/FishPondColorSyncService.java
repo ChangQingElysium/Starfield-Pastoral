@@ -6,7 +6,7 @@ import com.stardew.craft.network.payload.FishPondWaterColorSyncPayload;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

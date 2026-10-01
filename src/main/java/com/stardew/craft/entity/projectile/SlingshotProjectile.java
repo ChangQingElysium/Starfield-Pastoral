@@ -69,7 +69,7 @@ public final class SlingshotProjectile extends net.minecraft.world.entity.projec
             HitResult hit = entityHit == null ? blockHit : new EntityHitResult(entityHit.getEntity(),
                     entityHit.getEntity().getBoundingBox().inflate(29/128d).clip(from, end).orElse(end));
             if (hit.getType() != HitResult.Type.MISS
-                    && !net.neoforged.neoforge.event.EventHooks.onProjectileImpact(this, hit)) {
+                    && !com.stardew.craft.port.net.neoforged.neoforge.event.EventHooks.onProjectileImpact(this, hit)) {
                 setPos(hit.getLocation());
                 if (hit instanceof EntityHitResult e) onHitEntity(e);
                 else onHitBlock((BlockHitResult) hit);

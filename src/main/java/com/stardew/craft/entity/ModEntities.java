@@ -4,8 +4,8 @@ import com.stardew.craft.StardewCraft;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredHolder;
+import net.minecraftforge.registries.DeferredRegister;
 import com.stardew.craft.entity.projectile.MeowmereProjectileEntity;
 import com.stardew.craft.entity.projectile.ElfBladeLeafEntity;
 import com.stardew.craft.entity.projectile.TideAnchorProjectileEntity;
@@ -36,7 +36,7 @@ import com.stardew.craft.entity.seat.SofaSeatEntity;
 import com.stardew.craft.entity.seat.CushionEntity;
 import com.stardew.craft.entity.decor.CarpetEntity;
 import com.stardew.craft.entity.minecart.MinecartStationEntity;
-import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
+import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 
 public final class ModEntities {
 	private ModEntities() {

@@ -8,8 +8,8 @@ import com.stardew.craft.player.RecipeIdNormalizer;
 import com.stardew.craft.player.StardewCraftingRecipeData;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -17,7 +17,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.List;
 
@@ -25,7 +25,7 @@ public record CraftingMenuCraftSubmitPayload(String recipeItemId, int craftCount
 
     @SuppressWarnings("null")
     public static final Type<CraftingMenuCraftSubmitPayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "crafting_menu_craft_submit"));
+            new Type<>(new ResourceLocation(StardewCraft.MODID, "crafting_menu_craft_submit"));
 
     @SuppressWarnings("null")
     public static final StreamCodec<FriendlyByteBuf, CraftingMenuCraftSubmitPayload> STREAM_CODEC = StreamCodec.of(

@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/outer_stairs",
-  "textures": {
-    "bottom": "stardewcraft:block/tree/oak/log_side",
-    "side": "stardewcraft:block/tree/oak/log_side",
-    "top": "stardewcraft:block/tree/oak/log_side"
-  }
-}

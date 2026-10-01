@@ -9,8 +9,8 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.properties.StairsShape;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 @GameTestHolder("stardewcraft_roof_templates")
 @PrefixGameTestTemplate(false)
@@ -128,17 +128,17 @@ public final class RoofTemplateGameTests {
         var top = new net.minecraft.world.phys.BlockHitResult(new net.minecraft.world.phys.Vec3(pos.getX()+0.5,pos.getY()+0.5,pos.getZ()+0.5),Direction.UP,pos,false);
         var bottom = new net.minecraft.world.phys.BlockHitResult(new net.minecraft.world.phys.Vec3(pos.getX()+0.5,pos.getY()+0.375,pos.getZ()+0.5),Direction.DOWN,pos,false);
         player.setItemInHand(hand,new net.minecraft.world.item.ItemStack(Blocks.GLASS,3));
-        TemplateInteractionEvents.onRightClick(new net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.RightClickBlock(player,hand,pos,top));
+        TemplateInteractionEvents.onRightClick(new net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock(player,hand,pos,top));
         h.assertTrue(entity.material().is(Blocks.GLASS) && entity.fillMaterial()==null && player.getItemInHand(hand).getCount()==2,"Roof application consumed wrong slot/count");
         player.setItemInHand(hand,new net.minecraft.world.item.ItemStack(Blocks.BRICKS,3));
-        TemplateInteractionEvents.onRightClick(new net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.RightClickBlock(player,hand,pos,bottom));
+        TemplateInteractionEvents.onRightClick(new net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock(player,hand,pos,bottom));
         h.assertTrue(entity.fillMaterial().is(Blocks.BRICKS) && entity.material().is(Blocks.GLASS) && player.getItemInHand(hand).getCount()==2,"Infill application changed roof");
-        var ordinary = new net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.RightClickBlock(player,hand,pos,bottom);
+        var ordinary = new net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock(player,hand,pos,bottom);
         TemplateInteractionEvents.onRightClick(ordinary);
         h.assertTrue(!ordinary.isCanceled() && player.getItemInHand(hand).getCount()==2,"Filled slot blocked normal placement");
         player.setShiftKeyDown(true);
         player.setItemInHand(hand,net.minecraft.world.item.ItemStack.EMPTY);
-        TemplateInteractionEvents.onRightClick(new net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.RightClickBlock(player,hand,pos,bottom));
+        TemplateInteractionEvents.onRightClick(new net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock(player,hand,pos,bottom));
         h.assertTrue(entity.fillMaterial()==null && entity.material()==null,"Shift removal must clear both slots");
         h.assertTrue(player.getInventory().countItem(Blocks.BRICKS.asItem())==1,"Infill refund duplicated or missing");
         h.assertTrue(player.getInventory().countItem(Blocks.GLASS.asItem())==1,"Primary refund duplicated or missing");

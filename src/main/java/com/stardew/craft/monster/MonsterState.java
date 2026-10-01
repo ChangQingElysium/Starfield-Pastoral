@@ -74,7 +74,7 @@ public final class MonsterState {
         }
         var drops = new ArrayList<String>();
         for (var element : tag.getList("BornDrops", Tag.TAG_STRING)) drops.add(element.getAsString());
-        var state = new MonsterState(ResourceLocation.parse(tag.getString("Identity")),
+        var state = new MonsterState(new ResourceLocation(tag.getString("Identity")),
                 MonsterSpawnContext.load(tag.getCompound("Context")), tag.getInt("SourceMaxHealth"), table, drops,
                 MonsterStats.fromNBT(tag.getCompound("Stats")));
         state.life = Life.valueOf(tag.getString("Life"));

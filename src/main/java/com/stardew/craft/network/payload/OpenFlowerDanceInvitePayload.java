@@ -3,18 +3,18 @@ package com.stardew.craft.network.payload;
 import com.stardew.craft.StardewCraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.List;
 
 @SuppressWarnings("null")
 public record OpenFlowerDanceInvitePayload(String npcId) implements CustomPacketPayload {
     public static final Type<OpenFlowerDanceInvitePayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "open_flower_dance_invite"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "open_flower_dance_invite"));
 
     public static final StreamCodec<FriendlyByteBuf, OpenFlowerDanceInvitePayload> STREAM_CODEC = StreamCodec.of(
         (buf, payload) -> buf.writeUtf(payload.npcId(), 64),
@@ -30,7 +30,7 @@ public record OpenFlowerDanceInvitePayload(String npcId) implements CustomPacket
         context.enqueueWork(() -> handleClient(payload));
     }
 
-    @net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+    @net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
     private static void handleClient(OpenFlowerDanceInvitePayload payload) {
         net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
         if (mc.player == null) {

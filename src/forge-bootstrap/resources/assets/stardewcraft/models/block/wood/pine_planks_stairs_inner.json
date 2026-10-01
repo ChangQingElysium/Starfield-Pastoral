@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/inner_stairs",
-  "textures": {
-    "bottom": "stardewcraft:block/wood/pine_planks",
-    "side": "stardewcraft:block/wood/pine_planks",
-    "top": "stardewcraft:block/wood/pine_planks"
-  }
-}

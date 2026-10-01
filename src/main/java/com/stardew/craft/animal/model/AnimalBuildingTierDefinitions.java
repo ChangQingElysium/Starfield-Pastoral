@@ -73,7 +73,7 @@ public final class AnimalBuildingTierDefinitions {
                     new InputStreamReader(
                             stream, StandardCharsets.UTF_8));
             ResourceLocation id =
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             StardewCraft.MODID, "vanilla_1_6_15");
             return decodeSnapshot(Map.of(id, root), 0L);
         } catch (Exception exception) {
@@ -149,7 +149,7 @@ public final class AnimalBuildingTierDefinitions {
         for (int index = 0; index < entries.size(); index++) {
             JsonObject value = entries.get(index).getAsJsonObject();
             ResourceLocation dataId =
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             resourceId.getNamespace(),
                             resourceId.getPath() + "/" + index);
             AnimalBuildingTierDefinition definition =

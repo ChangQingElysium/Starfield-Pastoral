@@ -134,8 +134,8 @@ public record BuildingRecord(UUID id, UUID farmId, int farmSlot, ResourceLocatio
 
     public static BuildingRecord load(CompoundTag tag) {
         return new BuildingRecord(tag.getUUID("Id"), tag.getUUID("FarmId"), tag.getInt("FarmSlot"),
-                ResourceLocation.parse(tag.getString("Family")), Mode.valueOf(tag.getString("Mode")),
-                ResourceLocation.parse(tag.getString("Dimension")), getPos(tag, "Anchor"),
+                new ResourceLocation(tag.getString("Family")), Mode.valueOf(tag.getString("Mode")),
+                new ResourceLocation(tag.getString("Dimension")), getPos(tag, "Anchor"),
                 getPos(tag, "Manager"), Objects.requireNonNull(Direction.byName(tag.getString("Facing"))),
                 new BuildingBounds(getPos(tag, "ClaimMin"), getPos(tag, "ClaimMaxExclusive")),
                 Phase.valueOf(tag.getString("Phase")), tag.getInt("Tier"),

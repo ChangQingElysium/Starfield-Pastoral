@@ -3,11 +3,11 @@ package com.stardew.craft.network.payload;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.fishing.server.FishingSessionManager;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 public record OpenTreasureChestRequestPayload(long chestId) implements CustomPacketPayload {
 	@SuppressWarnings("null")
 	public static final Type<OpenTreasureChestRequestPayload> TYPE =
-			new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "open_treasure_chest_request"));
+			new Type<>(new ResourceLocation(StardewCraft.MODID, "open_treasure_chest_request"));
 
 	@SuppressWarnings("null")
 	public static final StreamCodec<ByteBuf, OpenTreasureChestRequestPayload> STREAM_CODEC = StreamCodec.composite(

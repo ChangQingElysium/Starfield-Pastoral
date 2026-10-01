@@ -15,7 +15,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.phys.AABB;
 
-@net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+@net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
 public final class AquariumRenderer implements BlockEntityRenderer<AquariumBlockEntity> {
     private final AquariumSpecialCreatures special;
     public AquariumRenderer(BlockEntityRendererProvider.Context context) { special = new AquariumSpecialCreatures(context); }

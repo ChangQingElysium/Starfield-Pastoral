@@ -32,7 +32,7 @@ public final class NativeNpcPoseRenderer {
                                NativeNpcModel model, NativeNpcPose currentPose) {
         var matrices = currentPose.matrices();
         var surface = currentPose.surfaceVertices(matrices);
-        var texture = ResourceLocation.parse(model.texture());
+        var texture = new ResourceLocation(model.texture());
         for (int pass = 0; pass < 3; pass++) {
             boolean translucent = pass == 2;
             var consumer = buffers.getBuffer(translucent ? RenderType.entityTranslucent(texture)

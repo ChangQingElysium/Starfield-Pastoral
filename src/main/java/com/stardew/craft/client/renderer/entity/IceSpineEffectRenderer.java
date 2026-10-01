@@ -19,14 +19,14 @@ import net.minecraft.world.item.ItemStack;
 
 public class IceSpineEffectRenderer extends EntityRenderer<IceSpineEffectEntity> {
 
-    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation TEXTURE = new ResourceLocation(
         StardewCraft.MODID,
         "textures/entity/special_effect/ice_spine.png"
     );
 
     @SuppressWarnings("null")
     private static final ModelResourceLocation MODEL = new ModelResourceLocation(
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "entity/special_effect/ice_spine"),
+        new ResourceLocation(StardewCraft.MODID, "entity/special_effect/ice_spine"),
         "standalone"
     );
 

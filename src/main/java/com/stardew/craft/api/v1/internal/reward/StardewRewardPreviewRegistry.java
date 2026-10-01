@@ -36,21 +36,21 @@ import java.util.Objects;
 /** Built-in adapters plus ordered, failure-isolated add-on reward preview composition. */
 public final class StardewRewardPreviewRegistry {
     private static final ResourceLocation ADD_ITEM =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "add_item");
+            new ResourceLocation(StardewCraft.MODID, "add_item");
     private static final ResourceLocation FRIENDSHIP =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "friendship");
+            new ResourceLocation(StardewCraft.MODID, "friendship");
     private static final ResourceLocation MAIL =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "mail");
+            new ResourceLocation(StardewCraft.MODID, "mail");
     private static final ResourceLocation DESCRIPTION =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "description");
+            new ResourceLocation(StardewCraft.MODID, "description");
     private static final ResourceLocation RECIPE =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "recipe");
+            new ResourceLocation(StardewCraft.MODID, "recipe");
     private static final ResourceLocation START_QUEST =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "start_quest");
+            new ResourceLocation(StardewCraft.MODID, "start_quest");
     private static final ResourceLocation START_SPECIAL_ORDER =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "start_special_order");
+            new ResourceLocation(StardewCraft.MODID, "start_special_order");
     private static final OrderedExtensionRegistry<StardewRewardPreviewProvider> PROVIDERS =
-            new OrderedExtensionRegistry<>(ResourceLocation.fromNamespaceAndPath(
+            new OrderedExtensionRegistry<>(new ResourceLocation(
                     StardewCraft.MODID, "reward/preview"));
 
     private StardewRewardPreviewRegistry() {

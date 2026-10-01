@@ -1,9 +1,9 @@
 package com.stardew.craft.network;
 
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
-import net.neoforged.neoforge.network.registration.PayloadRegistrar;
-import net.neoforged.neoforge.network.event.RegisterConfigurationTasksEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.network.registration.PayloadRegistrar;
+import com.stardew.craft.port.net.neoforged.neoforge.network.event.RegisterConfigurationTasksEvent;
 import net.minecraft.network.chat.Component;
 import com.stardew.craft.api.v1.internal.network.StardewNetworkCapabilityRegistry;
 import com.stardew.craft.fishing.network.FishingStartPayload;
@@ -978,7 +978,7 @@ public class PacketHandler {
             WeatherSyncPacket.STREAM_CODEC,
             (packet, context) -> {
                 context.enqueueWork(() -> {
-                    if (net.neoforged.fml.loading.FMLEnvironment.dist.isClient()) {
+                    if (net.minecraftforge.fml.loading.FMLEnvironment.dist.isClient()) {
                         com.stardew.craft.network.WeatherSyncPacketClient.apply(packet);
                     }
                 });

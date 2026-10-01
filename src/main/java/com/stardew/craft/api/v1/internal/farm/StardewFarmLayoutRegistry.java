@@ -19,7 +19,7 @@ import java.util.Optional;
 public final class StardewFarmLayoutRegistry {
     private static final OrderedExtensionRegistry<StardewFarmLayoutRegistration> LAYOUTS =
             new OrderedExtensionRegistry<>(
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             StardewCraft.MODID, "farm/layout"));
     private static final Map<ResourceLocation, StardewFarmLayoutRegistration> BY_ID =
             new LinkedHashMap<>();
@@ -200,7 +200,7 @@ public final class StardewFarmLayoutRegistry {
     }
 
     public static ResourceLocation builtinId(FarmType type) {
-        return ResourceLocation.fromNamespaceAndPath(
+        return new ResourceLocation(
                 StardewCraft.MODID, type.getId());
     }
 
@@ -270,7 +270,7 @@ public final class StardewFarmLayoutRegistry {
                 type.getDisplayName(),
                 type.getDescription(),
                 type.getIconTexture(),
-                ResourceLocation.fromNamespaceAndPath(
+                new ResourceLocation(
                         StardewCraft.MODID,
                         "farm/" + type.getId() + ".schem"),
                 layout.originY(),

@@ -4,10 +4,10 @@ import com.stardew.craft.StardewCraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.common.world.chunk.RegisterTicketControllersEvent;
-import net.neoforged.neoforge.common.world.chunk.TicketController;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.neoforge.common.world.chunk.RegisterTicketControllersEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.common.world.chunk.TicketController;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -17,12 +17,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-/** Owned NeoForge tickets: never modifies vanilla /forceload or another module's tickets. */
+/** Owned MinecraftForge tickets: never modifies vanilla /forceload or another module's tickets. */
 @SuppressWarnings("removal")
 @EventBusSubscriber(modid=StardewCraft.MODID,bus=EventBusSubscriber.Bus.MOD)
 public final class NpcChunkForceManager {
     private static final TicketController TICKETS=new TicketController(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,"npc_navigation"),
+            new ResourceLocation(StardewCraft.MODID,"npc_navigation"),
             (level,helper)->{
                 // Navigation is reconstructed from logical actor state, so persisted leases are stale.
                 helper.getEntityTickets().keySet().forEach(helper::removeAllTickets);

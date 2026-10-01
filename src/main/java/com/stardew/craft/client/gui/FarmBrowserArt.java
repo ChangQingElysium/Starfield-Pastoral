@@ -9,7 +9,7 @@ public final class FarmBrowserArt {
     private FarmBrowserArt() { }
 
     public static void permission(GuiGraphics g, String state, int x, int y, int width, int height) {
-        var texture = ResourceLocation.fromNamespaceAndPath("stardewcraft", "textures/gui/farm_browser/access_" + state + ".png");
+        var texture = new ResourceLocation("stardewcraft", "textures/gui/farm_browser/access_" + state + ".png");
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         int[] sourceX = {0, 8, 56}, sourceY = {0, 6, 18};

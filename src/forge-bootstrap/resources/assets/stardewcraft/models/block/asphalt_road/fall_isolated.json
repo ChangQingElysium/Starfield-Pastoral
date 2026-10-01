@@ -1,6 +1,0 @@
-{
-  "parent": "stardewcraft:block/asphalt_road/fall",
-  "textures": {
-    "top": "stardewcraft:block/asphalt_road/fall/isolated"
-  }
-}

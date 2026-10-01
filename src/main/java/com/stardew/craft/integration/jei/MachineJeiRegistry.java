@@ -89,7 +89,7 @@ public final class MachineJeiRegistry {
     }
 
     private static Machine machine(String path, Layout layout, boolean producesItem) {
-        ResourceLocation id = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, path);
+        ResourceLocation id = new ResourceLocation(StardewCraft.MODID, path);
         RecipeType<ArtisanJeiRecipe> recipeType = RecipeType.create(
                 StardewCraft.MODID, "machine/" + path, ArtisanJeiRecipe.class);
         return new Machine(id, id, recipeType, layout, producesItem);

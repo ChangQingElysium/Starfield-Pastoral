@@ -13,11 +13,11 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.util.FakePlayerFactory;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 import java.util.UUID;
 
@@ -93,7 +93,7 @@ public final class PrefabInteractionGameTests {
                     var before=level.getBlockEntity(pos) instanceof com.stardew.craft.templates.TemplateBlockEntity be?be.material():null;
                     int flowers=player.getInventory().countItem(net.minecraft.world.item.Items.POPPY);
                     var event=new PlayerInteractEvent.RightClickBlock(player,hand,pos,new BlockHitResult(Vec3.atCenterOf(pos),Direction.UP,pos,false));
-                    NeoForge.EVENT_BUS.post(event);
+                    MinecraftForge.EVENT_BUS.post(event);
                     h.assertTrue(event.isCanceled(),"Protected extraction must cancel before normal hooks");
                     h.assertTrue(player.getInventory().countItem(net.minecraft.world.item.Items.POPPY)==flowers,"No extracted flower");
                     if(before!=null)h.assertTrue(before.equals(((com.stardew.craft.templates.TemplateBlockEntity)level.getBlockEntity(pos)).material()),"Template material remains");

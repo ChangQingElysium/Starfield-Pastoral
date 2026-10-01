@@ -20,7 +20,7 @@ import javax.annotation.Nonnull;
 public class BundleRewardScreen extends AbstractContainerScreen<BundleRewardMenu> {
 
     /** Vanilla container texture (9×6 chest texture, we only render 1 row portion) */
-    private static final ResourceLocation CONTAINER_BG = ResourceLocation.withDefaultNamespace(
+    private static final ResourceLocation CONTAINER_BG = new ResourceLocation(
             "textures/gui/container/generic_54.png");
 
     public BundleRewardScreen(BundleRewardMenu menu, Inventory playerInventory, Component title) {

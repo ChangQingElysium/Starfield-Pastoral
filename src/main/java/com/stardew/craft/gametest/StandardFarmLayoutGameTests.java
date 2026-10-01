@@ -26,8 +26,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Blocks;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 import java.util.UUID;
 import java.util.Map;
@@ -66,7 +66,7 @@ public final class StandardFarmLayoutGameTests {
         var resources = helper.getLevel().getServer().getResourceManager();
         for (var entry : expectedSourceMarkers.entrySet()) {
             FarmType type = entry.getKey();
-            ResourceLocation id = ResourceLocation.fromNamespaceAndPath(
+            ResourceLocation id = new ResourceLocation(
                     "stardewcraft", "farm_ecology/" + type.getId() + ".json");
             var resource = resources.getResource(id).orElseThrow();
             try (var reader = new java.io.InputStreamReader(
@@ -660,16 +660,16 @@ public final class StandardFarmLayoutGameTests {
                 biomeMethod.invoke(null, helper.getLevel(), "Town");
         helper.assertTrue(forestBiome.is(net.minecraft.tags.TagKey.create(
                         net.minecraft.core.registries.Registries.BIOME,
-                        ResourceLocation.parse("stardewcraft:is_forest_river")))
+                        new ResourceLocation("stardewcraft:is_forest_river")))
                         && beachBiome.is(net.minecraft.tags.TagKey.create(
                         net.minecraft.core.registries.Registries.BIOME,
-                        ResourceLocation.parse("stardewcraft:is_ocean")))
+                        new ResourceLocation("stardewcraft:is_ocean")))
                         && mountainBiome.is(net.minecraft.tags.TagKey.create(
                         net.minecraft.core.registries.Registries.BIOME,
-                        ResourceLocation.parse("stardewcraft:is_mountain_lake")))
+                        new ResourceLocation("stardewcraft:is_mountain_lake")))
                         && townBiome.is(net.minecraft.tags.TagKey.create(
                         net.minecraft.core.registries.Registries.BIOME,
-                        ResourceLocation.parse("stardewcraft:is_town_river"))),
+                        new ResourceLocation("stardewcraft:is_town_river"))),
                 "Farm LOCATION_FISH pools no longer receive their virtual fishing biome");
 
         RandomSource meadowRandom = RandomSource.create(0x4d4541444f574c41L);
@@ -789,7 +789,7 @@ public final class StandardFarmLayoutGameTests {
         helper.getLevel().setBlockAndUpdate(
                 referenceAir, Blocks.STONE.defaultBlockState());
 
-        ResourceLocation cave = ResourceLocation.fromNamespaceAndPath(
+        ResourceLocation cave = new ResourceLocation(
                 "stardewcraft", "farm/cave.schem");
         boolean referencePlaced = StructureLoader.loadAndPlaceWithResult(
                 helper.getLevel(), cave, referenceOrigin);

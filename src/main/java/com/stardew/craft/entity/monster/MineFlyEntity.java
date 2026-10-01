@@ -34,7 +34,7 @@ public final class MineFlyEntity extends StardewMonsterEntity {
     @Override protected void registerGoals(){}
     @Override protected net.minecraft.world.entity.ai.navigation.PathNavigation createNavigation(Level level){return new MonsterFlightRoute(this,level);}
     private MonsterFlightRoute route(){return (MonsterFlightRoute)getNavigation();}
-    @Override protected ResourceLocation definitionId(){return ResourceLocation.parse("stardewcraft:fly");}
+    @Override protected ResourceLocation definitionId(){return new ResourceLocation("stardewcraft:fly");}
     @Override protected void configureSpawn(MonsterDefinition d,MonsterSpawnContext c){var r=MonsterStatResolver.base(d,c,random);setInitialHealth(r.initialHealth());replaceCombatStats(r.combat());
         steering.initialize(random);entityData.set(BIRTH,level().getGameTime());
         flightLift=.04;setPos(getX(),getY()+flightLift,getZ());MonsterFlightPlacement.ensureSpawnAir(this);}

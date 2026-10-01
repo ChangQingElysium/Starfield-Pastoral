@@ -7,7 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
-import net.neoforged.neoforge.gametest.*;
+import net.minecraftforge.gametest.*;
 import java.util.*;
 
 @GameTestHolder("stardewcraft_skull_runtime")
@@ -55,7 +55,7 @@ public final class SkullCavernRuntimeGameTests {
         for(int f=121;f<1500;f++) {
             String name=SkullCavernRuntime.chooseLayout(level,f);
             var layout=OrdinaryMineLayout.loadNamed(level,name);
-            var template=level.getStructureManager().get(ResourceLocation.fromNamespaceAndPath("stardewcraft","mine_layouts/"+name)).orElseThrow();
+            var template=level.getStructureManager().get(new ResourceLocation("stardewcraft","mine_layouts/"+name)).orElseThrow();
             h.assertTrue(template.getSize().equals(layout.size),"Wrong template dimensions "+name);
         }
         h.assertTrue(SkullCavernRuntime.chooseLayout(level,220).equals("desert_reward_100"),"100 not forced");

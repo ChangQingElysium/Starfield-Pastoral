@@ -4,18 +4,18 @@ import com.stardew.craft.core.ModDimensions;
 import com.stardew.craft.interior.door.TownDoorDefinitions;
 import com.stardew.craft.interior.door.TownDoorNetwork;
 import net.minecraft.client.Camera;
-import net.minecraft.client.DeltaTracker;
+import com.stardew.craft.port.net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
-import net.neoforged.neoforge.event.level.LevelEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
+import net.minecraftforge.event.level.LevelEvent;
+import net.minecraftforge.network.PacketDistributor;
 import org.joml.Matrix4f;
 
 import java.util.ArrayDeque;
@@ -78,11 +78,11 @@ public final class TownDoorClient {
                 awaitingCorrection = true;
             }
         };
-        NeoForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingOut event) -> {
+        MinecraftForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingOut event) -> {
             resetLevel(null);
             sequence = 0;
         });
-        NeoForge.EVENT_BUS.addListener((LevelEvent.Unload event) -> {
+        MinecraftForge.EVENT_BUS.addListener((LevelEvent.Unload event) -> {
             if (event.getLevel() == level) resetLevel(null);
         });
     }

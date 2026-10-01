@@ -13,17 +13,17 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import com.mojang.math.Axis;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderGuiEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.RenderGuiEvent;
 
 import java.util.List;
 
 /** Source-faithful client presentation for {@code EventScript_GreenTea}. */
 @EventBusSubscriber(modid = StardewCraft.MODID, value = Dist.CLIENT)
 public final class GreenTeaVisionClientState {
-    private static final ResourceLocation SPRITES = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation SPRITES = new ResourceLocation(
             StardewCraft.MODID, "textures/gui/night_market/mermaid/temporary_sprites_1.png");
     private static final int TEXTURE_WIDTH = 512;
     private static final int TEXTURE_HEIGHT = 640;
@@ -342,7 +342,7 @@ public final class GreenTeaVisionClientState {
 
     private static void play(String path) {
         Minecraft minecraft = Minecraft.getInstance();
-        ResourceLocation id = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, path);
+        ResourceLocation id = new ResourceLocation(StardewCraft.MODID, path);
         SoundEvent event = SoundEvent.createVariableRangeEvent(id);
         minecraft.getSoundManager().play(SimpleSoundInstance.forUI(event, 1.0F, 1.0F));
     }

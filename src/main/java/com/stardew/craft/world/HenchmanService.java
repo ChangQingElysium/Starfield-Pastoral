@@ -20,11 +20,11 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.tick.PlayerTickEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.minecraftforge.network.PacketDistributor;
 
 /** Per-player implementation of the Witch's Swamp henchman story gate. */
 @EventBusSubscriber(modid = StardewCraft.MODID)
@@ -40,7 +40,7 @@ public final class HenchmanService {
 
     private static final String GATE_ID = "witch_swamp_henchman";
     private static final ResourceLocation STRANGE_BUN_ID =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "strange_bun");
+            new ResourceLocation(StardewCraft.MODID, "strange_bun");
 
     private HenchmanService() {
     }

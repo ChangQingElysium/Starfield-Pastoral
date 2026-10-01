@@ -35,7 +35,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -198,7 +198,7 @@ public class ShopScreen extends Screen {
         // Strip recipe: prefix so icon shows the actual dish item
         if (itemId.startsWith("recipe:")) itemId = itemId.substring("recipe:".length());
         try {
-            ResourceLocation rl = ResourceLocation.parse(itemId);
+            ResourceLocation rl = new ResourceLocation(itemId);
             Item mcItem = BuiltInRegistries.ITEM.get(rl);
             if (mcItem != null && mcItem != Items.AIR) return new ItemStack(mcItem);
         } catch (Exception ignored) {}
@@ -485,9 +485,9 @@ public class ShopScreen extends Screen {
         String legacyPath =
             com.stardew.craft.client.ClientDisplayFallbacks.stablePath(
                 npcId, "lewis");
-        ResourceLocation genericFallback = ResourceLocation.fromNamespaceAndPath(
+        ResourceLocation genericFallback = new ResourceLocation(
             StardewCraft.MODID, "textures/portraits/lewis.png");
-        ResourceLocation legacyPortrait = ResourceLocation.fromNamespaceAndPath(
+        ResourceLocation legacyPortrait = new ResourceLocation(
             StardewCraft.MODID,
             "textures/portraits/" + legacyPath + ".png");
         ResourceLocation availableLegacyPortrait =
@@ -822,7 +822,7 @@ public class ShopScreen extends Screen {
 
     /** SDV recipe overlay texture (objectSpriteSheet index 451 — the scroll/blueprint icon). */
     private static final ResourceLocation RECIPE_OVERLAY_TEXTURE =
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/recipe_overlay.png");
+        new ResourceLocation(StardewCraft.MODID, "textures/gui/recipe_overlay.png");
 
     private void drawItemIconAt(GuiGraphics g, String itemId,
                                  int x, int y, float s4, float alpha, boolean isRecipe) {
@@ -834,7 +834,7 @@ public class ShopScreen extends Screen {
         // Strip recipe: prefix so the dish icon is displayed
         if (itemId.startsWith("recipe:")) itemId = itemId.substring("recipe:".length());
         try {
-            ResourceLocation rl = ResourceLocation.parse(itemId);
+            ResourceLocation rl = new ResourceLocation(itemId);
             Item mcItem = BuiltInRegistries.ITEM.get(rl);
             if (mcItem == null || mcItem == Items.AIR) return;
 

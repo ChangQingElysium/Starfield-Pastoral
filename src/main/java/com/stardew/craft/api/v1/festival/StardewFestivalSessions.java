@@ -50,7 +50,7 @@ public final class StardewFestivalSessions {
                     ResourceLocation parsed = ResourceLocation.tryParse(
                             state.festivalId());
                     return parsed != null ? parsed
-                            : ResourceLocation.fromNamespaceAndPath(
+                            : new ResourceLocation(
                                     "stardewcraft",
                                     state.festivalId().toLowerCase(
                                             java.util.Locale.ROOT));

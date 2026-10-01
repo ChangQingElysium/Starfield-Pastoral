@@ -20,8 +20,8 @@ import com.stardew.craft.item.weapon.IStardewWeapon;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.Holder;
-import net.minecraft.core.component.DataComponentType;
-import net.minecraft.core.component.DataComponents;
+import com.stardew.craft.port.net.minecraft.core.component.DataComponentType;
+import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -29,16 +29,16 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.EquipmentSlotGroup;
+import com.stardew.craft.port.net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.ItemAttributeModifiers;
+import com.stardew.craft.port.net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.ItemEnchantments;
+import com.stardew.craft.port.net.minecraft.world.item.enchantment.ItemEnchantments;
 
 public final class ForgeRuleService {
     public static final int CRAFT_TIME_MS = 1600;
@@ -708,19 +708,19 @@ public final class ForgeRuleService {
         stack.set(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.builder()
                 .add(Attributes.ATTACK_DAMAGE,
                         new AttributeModifier(
-                                ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, modifierId + ".attack_damage"),
+                                new ResourceLocation(StardewCraft.MODID, modifierId + ".attack_damage"),
                                 avgDamage,
                                 AttributeModifier.Operation.ADD_VALUE),
                         EquipmentSlotGroup.MAINHAND)
                 .add(Attributes.ATTACK_SPEED,
                         new AttributeModifier(
-                                ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, modifierId + ".attack_speed"),
+                                new ResourceLocation(StardewCraft.MODID, modifierId + ".attack_speed"),
                                 attackSpeed,
                                 AttributeModifier.Operation.ADD_VALUE),
                         EquipmentSlotGroup.MAINHAND)
                 .add(Attributes.ENTITY_INTERACTION_RANGE,
                         new AttributeModifier(
-                                ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, modifierId + ".attack_range"),
+                                new ResourceLocation(StardewCraft.MODID, modifierId + ".attack_range"),
                                 attackRangeBonus,
                                 AttributeModifier.Operation.ADD_VALUE),
                         EquipmentSlotGroup.MAINHAND)

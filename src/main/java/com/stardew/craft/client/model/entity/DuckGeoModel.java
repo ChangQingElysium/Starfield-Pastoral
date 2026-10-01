@@ -6,9 +6,9 @@ import net.minecraft.resources.ResourceLocation;
 import software.bernie.geckolib.model.GeoModel;
 
 public class DuckGeoModel extends GeoModel<DuckEntity> {
-	private static final ResourceLocation MODEL = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "geo/entity/animal/duck.geo.json");
-	private static final ResourceLocation ANIMATION = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "animations/entity/animal/duck.animation.json");
-	private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/entity/animal/duck.png");
+	private static final ResourceLocation MODEL = new ResourceLocation(StardewCraft.MODID, "geo/entity/animal/duck.geo.json");
+	private static final ResourceLocation ANIMATION = new ResourceLocation(StardewCraft.MODID, "animations/entity/animal/duck.animation.json");
+	private static final ResourceLocation TEXTURE = new ResourceLocation(StardewCraft.MODID, "textures/entity/animal/duck.png");
 
 	@Override
 	public ResourceLocation getModelResource(DuckEntity animatable) {

@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentSerialization;
+import com.stardew.craft.port.net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nullable;
@@ -33,7 +33,7 @@ public record StardewLocationDefinition(
 ) {
     public static final Codec<StardewLocationDefinition> CODEC = RecordCodecBuilder.<StardewLocationDefinition>create(instance -> instance.group(
             ResourceLocation.CODEC.optionalFieldOf("dimension",
-                    ResourceLocation.fromNamespaceAndPath("stardewcraft", "stardew_valley"))
+                    new ResourceLocation("stardewcraft", "stardew_valley"))
                     .forGetter(StardewLocationDefinition::dimension),
             Codec.STRING.optionalFieldOf("ledger_id", "").forGetter(StardewLocationDefinition::ledgerId),
             Vec3i.CODEC.fieldOf("min").forGetter(StardewLocationDefinition::min),

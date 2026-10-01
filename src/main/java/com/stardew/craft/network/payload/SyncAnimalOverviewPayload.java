@@ -1,12 +1,12 @@
 package com.stardew.craft.network.payload;
 
 import com.stardew.craft.StardewCraft;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -59,7 +59,7 @@ public record SyncAnimalOverviewPayload(List<Entry> entries) implements CustomPa
     }
 
     public static final Type<SyncAnimalOverviewPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "sync_animal_overview"));
+            new ResourceLocation(StardewCraft.MODID, "sync_animal_overview"));
     public static final StreamCodec<RegistryFriendlyByteBuf, SyncAnimalOverviewPayload> STREAM_CODEC =
             StreamCodec.composite(
                     Entry.STREAM_CODEC.apply(ByteBufCodecs.list()),

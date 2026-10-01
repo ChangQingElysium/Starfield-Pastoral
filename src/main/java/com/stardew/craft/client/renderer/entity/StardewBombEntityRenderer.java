@@ -23,11 +23,11 @@ import net.minecraft.util.Mth;
 public class StardewBombEntityRenderer extends EntityRenderer<StardewBombEntity> {
 
     private static final ModelResourceLocation CHERRY_BOMB_MODEL = new ModelResourceLocation(
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "entity/bomb/cherry_bomb"), "standalone");
+        new ResourceLocation(StardewCraft.MODID, "entity/bomb/cherry_bomb"), "standalone");
     private static final ModelResourceLocation BOMB_MODEL = new ModelResourceLocation(
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "entity/bomb/bomb"), "standalone");
+        new ResourceLocation(StardewCraft.MODID, "entity/bomb/bomb"), "standalone");
     private static final ModelResourceLocation MEGA_BOMB_MODEL = new ModelResourceLocation(
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "entity/bomb/mega_bomb"), "standalone");
+        new ResourceLocation(StardewCraft.MODID, "entity/bomb/mega_bomb"), "standalone");
 
     @SuppressWarnings("deprecation")
     private static final ResourceLocation BLOCK_ATLAS =
@@ -81,14 +81,14 @@ public class StardewBombEntityRenderer extends EntityRenderer<StardewBombEntity>
         float blue = flash ? 230 / 255.0f * 0.85f : 1;
         RandomSource renderRand = RandomSource.create();
         java.util.List<net.minecraft.client.renderer.block.model.BakedQuad> quads = model.getQuads(null, null, renderRand,
-            net.neoforged.neoforge.client.model.data.ModelData.EMPTY, null);
+            net.minecraftforge.client.model.data.ModelData.EMPTY, null);
         PoseStack.Pose pose = poseStack.last();
         for (net.minecraft.client.renderer.block.model.BakedQuad quad : quads) {
             consumer.putBulkData(pose, quad, red, green, blue, 1.0f, packedLight, OverlayTexture.NO_OVERLAY);
         }
         for (net.minecraft.core.Direction dir : net.minecraft.core.Direction.values()) {
             java.util.List<net.minecraft.client.renderer.block.model.BakedQuad> dirQuads = model.getQuads(null, dir, renderRand,
-                net.neoforged.neoforge.client.model.data.ModelData.EMPTY, null);
+                net.minecraftforge.client.model.data.ModelData.EMPTY, null);
             for (net.minecraft.client.renderer.block.model.BakedQuad quad : dirQuads) {
                 consumer.putBulkData(pose, quad, red, green, blue, 1.0f, packedLight, OverlayTexture.NO_OVERLAY);
             }

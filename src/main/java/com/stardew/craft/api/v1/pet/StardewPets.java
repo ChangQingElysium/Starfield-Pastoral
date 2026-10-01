@@ -14,8 +14,8 @@ import net.minecraft.resources.ResourceLocation;
  * New-farm setup, initial adoption, shops, care and the native renderer consume this catalog.
  */
 public final class StardewPets {
-    private static final OrderedExtensionRegistry<StardewPetSpeciesDefinition> SPECIES = new OrderedExtensionRegistry<>(ResourceLocation.parse("stardewcraft:pet/species"));
-    private static final OrderedExtensionRegistry<StardewPetBreedDefinition> BREEDS = new OrderedExtensionRegistry<>(ResourceLocation.parse("stardewcraft:pet/breeds"));
+    private static final OrderedExtensionRegistry<StardewPetSpeciesDefinition> SPECIES = new OrderedExtensionRegistry<>(new ResourceLocation("stardewcraft:pet/species"));
+    private static final OrderedExtensionRegistry<StardewPetBreedDefinition> BREEDS = new OrderedExtensionRegistry<>(new ResourceLocation("stardewcraft:pet/breeds"));
     private static volatile Map<ResourceLocation, StardewPetSpeciesDefinition> species = Map.of();
     private static volatile Map<ResourceLocation, StardewPetBreedDefinition> breeds = Map.of();
     static { PetDefaults.register(); }

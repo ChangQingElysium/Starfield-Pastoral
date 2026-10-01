@@ -19,12 +19,12 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ModelEvent;
-import net.neoforged.neoforge.client.model.BakedModelWrapper;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.ModelEvent;
+import net.minecraftforge.client.model.BakedModelWrapper;
+import net.minecraftforge.client.model.data.ModelData;
 
 @EventBusSubscriber(modid = StardewCraft.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class IceCreamStandModels {
@@ -34,12 +34,12 @@ public final class IceCreamStandModels {
     public record Part(double x, double y, double z, List<BakedQuad> quads) {}
     public static List<Part> parts(int season) { return seasons.isEmpty() ? List.of() : seasons.get(Math.clamp(season, 0, 3)); }
     private static JsonObject description(String season) {
-        var id = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "ice_cream_stand/" + season + ".json");
+        var id = new ResourceLocation(StardewCraft.MODID, "ice_cream_stand/" + season + ".json");
         try (var reader = new InputStreamReader(Minecraft.getInstance().getResourceManager().getResourceOrThrow(id).open(), StandardCharsets.UTF_8)) {
             return JsonParser.parseReader(reader).getAsJsonObject();
         } catch (IOException exception) { throw new IllegalStateException("Cannot load ice cream stand " + id, exception); }
     }
-    private static ModelResourceLocation id(String path) { return new ModelResourceLocation(ResourceLocation.parse(path), "standalone"); }
+    private static ModelResourceLocation id(String path) { return new ModelResourceLocation(new ResourceLocation(path), "standalone"); }
     @SubscribeEvent public static void register(ModelEvent.RegisterAdditional event) {
         for (String season : SEASONS) {
             event.register(id("stardewcraft:block/ice_cream_stand/" + season + "/empty"));

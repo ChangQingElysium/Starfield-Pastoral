@@ -24,7 +24,7 @@ public final class StardewProgressCauses {
     }
 
     private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(
+        return new ResourceLocation(
                 StardewCraft.MODID, "progress/" + path);
     }
 }

@@ -8,7 +8,7 @@ final class CookingArt {
     static final int INK = 0xFF4C3D31, MUTED = 0xFF756047, GREEN = 0xFF536542, RED = 0xFF9A4936;
     private CookingArt() { }
     private static ResourceLocation texture(String name) {
-        return ResourceLocation.fromNamespaceAndPath("stardewcraft", "textures/gui/cooking/" + name + ".png");
+        return new ResourceLocation("stardewcraft", "textures/gui/cooking/" + name + ".png");
     }
     static void sprite(GuiGraphics g, String name, int x, int y, int w, int h) {
         RenderSystem.enableBlend(); RenderSystem.defaultBlendFunc();

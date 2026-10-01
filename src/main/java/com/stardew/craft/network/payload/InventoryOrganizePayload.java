@@ -5,11 +5,11 @@ import com.stardew.craft.inventory.InventoryOrganizeService;
 import com.stardew.craft.menu.StoneChestMenu;
 import com.stardew.craft.menu.WoodenChestMenu;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 @SuppressWarnings("null")
 public record InventoryOrganizePayload(int target) implements CustomPacketPayload {
@@ -17,7 +17,7 @@ public record InventoryOrganizePayload(int target) implements CustomPacketPayloa
     public static final int TARGET_OPEN_CONTAINER = 1;
 
     public static final Type<InventoryOrganizePayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "inventory_organize"));
+            new Type<>(new ResourceLocation(StardewCraft.MODID, "inventory_organize"));
 
     public static final StreamCodec<FriendlyByteBuf, InventoryOrganizePayload> STREAM_CODEC = StreamCodec.of(
             (buf, payload) -> buf.writeVarInt(payload.target),

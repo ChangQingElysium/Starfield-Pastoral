@@ -5,10 +5,10 @@ import com.stardew.craft.tooltip.BookTooltipComponent;
 import com.stardew.craft.tooltip.FishingRodSlotRowTooltipComponent;
 import com.stardew.craft.tooltip.FishingRodSlotsTooltipComponent;
 import com.stardew.craft.tooltip.MaxChargeRangeTooltipComponent;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
 
 @SuppressWarnings("removal")
 @EventBusSubscriber(modid = StardewCraft.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)

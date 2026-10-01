@@ -37,7 +37,7 @@ public record StardewLostBookDefinition(
     /** Exact server-side block interaction binding for a library book. */
     public record Interaction(ResourceLocation dimension, int x, int y, int z) {
         private static final ResourceLocation DEFAULT_DIMENSION =
-                ResourceLocation.fromNamespaceAndPath("stardewcraft", "stardew_valley");
+                new ResourceLocation("stardewcraft", "stardew_valley");
 
         public static final Codec<Interaction> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 ResourceLocation.CODEC.optionalFieldOf("dimension", DEFAULT_DIMENSION)

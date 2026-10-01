@@ -24,9 +24,9 @@ import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.common.util.FakePlayerFactory;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 import java.util.UUID;
 
@@ -96,7 +96,7 @@ public final class MineStoneGameTests {
                 "Road and its markings are separated");
         var planks = com.stardew.craft.item.catalog.StardewItemDisplayStacks.stacksForItem(ModItems.MINE_PLANKS.get())
                 .stream().sorted(com.stardew.craft.item.catalog.StardewItemComparator.STACK).toList();
-        h.assertTrue(planks.size() == 8 && planks.get(1).get(net.minecraft.core.component.DataComponents.BLOCK_STATE)
+        h.assertTrue(planks.size() == 8 && planks.get(1).get(com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE)
                 .properties().get("theme").equals("earth_dark"), "Normal/dark variants not adjacent");
         for (var tab : java.util.List.of(com.stardew.craft.item.catalog.StardewCatalogTab.BUILDING,
                 com.stardew.craft.item.catalog.StardewCatalogTab.NATURE)) {
@@ -927,16 +927,16 @@ public final class MineStoneGameTests {
             for(int i=0;i<player.getInventory().getContainerSize();i++) player.getInventory().setItem(i,new ItemStack(Items.STONE,64));
             var entity=new ItemEntity(level,pos.getX(),pos.getY(),pos.getZ(),new ItemStack(ModItems.GOLDEN_WALNUT.get(),2));
             level.addFreshEntity(entity);entity.setPickUpDelay(20);
-            com.stardew.craft.mining.GoldenWalnutPickup.onPickup(new net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent.Pre(player,entity));
+            com.stardew.craft.mining.GoldenWalnutPickup.onPickup(new com.stardew.craft.port.net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent.Pre(player,entity));
             h.assertTrue(walnuts.balance()==0 && entity.isAlive(),"Pickup delay was bypassed");
             entity.setNoPickUpDelay();
-            var event=new net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent.Pre(player,entity);
-            event.setCanPickup(net.neoforged.neoforge.common.util.TriState.FALSE);
+            var event=new com.stardew.craft.port.net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent.Pre(player,entity);
+            event.setCanPickup(com.stardew.craft.port.net.neoforged.neoforge.common.util.TriState.FALSE);
             com.stardew.craft.mining.GoldenWalnutPickup.onPickup(event);
             h.assertTrue(walnuts.balance()==0,"Prior pickup denial was bypassed");
-            var allowed=new net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent.Pre(player,entity);
+            var allowed=new com.stardew.craft.port.net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent.Pre(player,entity);
             com.stardew.craft.mining.GoldenWalnutPickup.onPickup(allowed);
-            com.stardew.craft.mining.GoldenWalnutPickup.onPickup(new net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent.Pre(player,entity));
+            com.stardew.craft.mining.GoldenWalnutPickup.onPickup(new com.stardew.craft.port.net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent.Pre(player,entity));
             h.assertTrue(walnuts.balance()==2 && walnuts.found()==2 && !entity.isAlive()
                     && !player.getInventory().contains(new ItemStack(ModItems.GOLDEN_WALNUT.get())),
                     "Currency pickup must bypass full inventory and credit once");
@@ -1018,8 +1018,8 @@ public final class MineStoneGameTests {
         for(String source:java.util.List.of("843","844","819","32")) h.assertTrue(
                 !com.stardew.craft.mining.IslandStoneRewards.rollVolcanoBat(source,new FixedRandom()),
                 "Non-volcanic-basic appearance consumed bat RNG");
-        var id=net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("stardewcraft","custom_volcano");
-        var tag=net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("stardewcraft","volcano_dungeon");
+        var id=new net.minecraft.resources.ResourceLocation("stardewcraft","custom_volcano");
+        var tag=new net.minecraft.resources.ResourceLocation("stardewcraft","volcano_dungeon");
         var location=new com.stardew.craft.api.v1.world.StardewLocation(id,h.getLevel().dimension().location(),
                 BlockPos.ZERO,new BlockPos(10,10,10),"",java.util.List.of(),1,false,null,
                 net.minecraft.network.chat.Component.empty(),net.minecraft.network.chat.Component.empty(),null,

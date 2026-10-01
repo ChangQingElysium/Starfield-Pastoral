@@ -7,11 +7,11 @@ import software.bernie.geckolib.model.GeoModel;
 
 public class CrowGeoModel extends GeoModel<CrowEntity> {
     private static final ResourceLocation MODEL =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "geo/entity/crow.geo.json");
+            new ResourceLocation(StardewCraft.MODID, "geo/entity/crow.geo.json");
     private static final ResourceLocation TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/entity/crow.png");
+            new ResourceLocation(StardewCraft.MODID, "textures/entity/crow.png");
     private static final ResourceLocation ANIMATION =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "animations/entity/crow.animation.json");
+            new ResourceLocation(StardewCraft.MODID, "animations/entity/crow.animation.json");
 
     @Override public ResourceLocation getModelResource(CrowEntity a) { return MODEL; }
     @Override public ResourceLocation getTextureResource(CrowEntity a) { return TEXTURE; }

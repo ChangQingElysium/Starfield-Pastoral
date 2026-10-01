@@ -3,16 +3,16 @@ package com.stardew.craft.network.payload;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.interior.SunroomService;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /** One physical primary-action press against Caroline's central tea bush. */
 public record SunroomTeaBushActionPayload() implements CustomPacketPayload {
     public static final Type<SunroomTeaBushActionPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "sunroom_tea_bush_action"));
+            new ResourceLocation(StardewCraft.MODID, "sunroom_tea_bush_action"));
     public static final StreamCodec<ByteBuf, SunroomTeaBushActionPayload> STREAM_CODEC =
             StreamCodec.unit(new SunroomTeaBushActionPayload());
 

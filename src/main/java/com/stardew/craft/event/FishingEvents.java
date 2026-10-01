@@ -3,9 +3,9 @@ package com.stardew.craft.event;
 import com.stardew.craft.StardewCraft;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.player.ItemFishedEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.entity.player.ItemFishedEvent;
 
 /**
  * 阻止使用 Stardew 钓竿时触发原版钓鱼战利品表

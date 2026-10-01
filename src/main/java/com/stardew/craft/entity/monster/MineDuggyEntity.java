@@ -35,7 +35,7 @@ public final class MineDuggyEntity extends StardewMonsterEntity {
     public static AttributeSupplier.Builder createAttributes(){return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,40).add(Attributes.ATTACK_DAMAGE,0)
             .add(Attributes.MOVEMENT_SPEED,0).add(Attributes.FOLLOW_RANGE,64).add(Attributes.KNOCKBACK_RESISTANCE,1);}
     @Override protected void registerGoals(){}
-    @Override protected ResourceLocation definitionId(){return ResourceLocation.parse("stardewcraft:duggy");}
+    @Override protected ResourceLocation definitionId(){return new ResourceLocation("stardewcraft:duggy");}
     @Override protected void configureSpawn(MonsterDefinition d,MonsterSpawnContext c){var r=MonsterStatResolver.base(d,c,random);setInitialHealth(r.initialHealth());replaceCombatStats(r.combat());syncDamage();}
     @Override protected void defineSynchedData(SynchedEntityData.Builder b){super.defineSynchedData(b);b.define(CURSOR,0F);b.define(HIT,-100L);}
     public double cursor(float p){double c=entityData.get(CURSOR),edge=c<2?2:c<4?4:c<8?8:10;return Math.min(edge-.00001,c+p*.05/(c<4?.1:.22));}

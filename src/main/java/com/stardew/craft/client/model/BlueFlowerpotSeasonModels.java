@@ -20,13 +20,13 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ModelEvent;
-import net.neoforged.neoforge.client.model.BakedModelWrapper;
-import net.neoforged.neoforge.client.model.IDynamicBakedModel;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.ModelEvent;
+import net.minecraftforge.client.model.BakedModelWrapper;
+import net.minecraftforge.client.model.IDynamicBakedModel;
+import net.minecraftforge.client.model.data.ModelData;
 
 /** Authored seasonal contents; the saved block and facing stay unchanged. */
 @SuppressWarnings("removal")
@@ -36,7 +36,7 @@ public final class BlueFlowerpotSeasonModels {
     private BlueFlowerpotSeasonModels() {}
 
     private static ModelResourceLocation id(String season) {
-        return new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,
+        return new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID,
                 "block/decor/house/blue_flowerpot/" + season + "/blue_flowerpot"), "standalone");
     }
 
@@ -56,7 +56,7 @@ public final class BlueFlowerpotSeasonModels {
                     state.getValue(MapDecorStaticBlock.FACING),
                     state.getValue(MapDecorStaticBlock.PART) == MapDecorStaticBlock.Part.MAIN));
         }
-        var item = new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(
+        var item = new ModelResourceLocation(new ResourceLocation(
                 StardewCraft.MODID, "blue_flowerpot"), "inventory");
         models.put(item, new Seasonal(Objects.requireNonNull(models.get(item)), seasons, Direction.NORTH, true));
     }
@@ -100,9 +100,9 @@ public final class BlueFlowerpotSeasonModels {
             if (side != null || (state != null && type != null && type != RenderType.cutout())) return List.of();
             return quads.get(TerrainSeasonTextures.currentTextureSet());
         }
-        @Override public net.neoforged.neoforge.client.ChunkRenderTypeSet getRenderTypes(
+        @Override public net.minecraftforge.client.ChunkRenderTypeSet getRenderTypes(
                 BlockState state, RandomSource random, ModelData data) {
-            return net.neoforged.neoforge.client.ChunkRenderTypeSet.of(RenderType.cutout());
+            return net.minecraftforge.client.ChunkRenderTypeSet.of(RenderType.cutout());
         }
         @Override public TextureAtlasSprite getParticleIcon() { return seasons[TerrainSeasonTextures.currentTextureSet()].getParticleIcon(); }
         @Override public TextureAtlasSprite getParticleIcon(ModelData data) { return getParticleIcon(); }

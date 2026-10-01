@@ -25,10 +25,10 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.*;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.gametest.*;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.util.FakePlayerFactory;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.gametest.*;
 import java.util.*;
 
 @GameTestHolder("stardewcraft_mine_break_feedback")
@@ -111,7 +111,7 @@ public final class MineBreakFeedbackGameTests {
                 boolean allowed=Math.max(0,tier-1)>=MineRockClumpMining.minimumTier(source);
                 h.assertTrue(MineRockClumpMining.canMine(source,tool)==allowed,"Source tier gate differs");
                 var event=new PlayerInteractEvent.LeftClickBlock(player,pos,Direction.UP,PlayerInteractEvent.LeftClickBlock.Action.START);
-                NeoForge.EVENT_BUS.post(event);
+                MinecraftForge.EVENT_BUS.post(event);
                 h.assertTrue(event.isCanceled()!=allowed,"Initial hit did not enforce gate on "+source+" "+part);
                 if(!allowed) {
                     String hint=MineRockClumpMining.failureHint(source,tool);
@@ -126,7 +126,7 @@ public final class MineBreakFeedbackGameTests {
             var tool=new ItemStack(clump.getRequiredTool()==ResourceClumpBlock.RequiredTool.AXE ? ModItems.AXE.get():ModItems.PICKAXE.get());
             player.setItemInHand(InteractionHand.MAIN_HAND,tool);
             var event=new PlayerInteractEvent.LeftClickBlock(player,pos,Direction.UP,PlayerInteractEvent.LeftClickBlock.Action.START);
-            NeoForge.EVENT_BUS.post(event);
+            MinecraftForge.EVENT_BUS.post(event);
             h.assertTrue(event.isCanceled() && sent.containsKey(player.getUUID()+"|"+clump.failureHint(tool)),"Stump/log/boulder omitted its initial rejection hint");
         }
         h.succeed();
@@ -141,7 +141,7 @@ public final class MineBreakFeedbackGameTests {
         for(Block block:new Block[]{ModBlocks.MINE_ROCK_CLUMP_672.get(),ModBlocks.MINE_ROCK_CLUMP_622.get(),ModBlocks.HOLLOW_LOG.get(),ModBlocks.LARGE_BOULDER.get()}) {
             level.setBlock(pos,block.defaultBlockState(),2);
             var event=new PlayerInteractEvent.RightClickBlock(player,InteractionHand.MAIN_HAND,pos,new BlockHitResult(Vec3.atCenterOf(pos),Direction.UP,pos,false));
-            NeoForge.EVENT_BUS.post(event);
+            MinecraftForge.EVENT_BUS.post(event);
             String hint=block instanceof MineRockClumpBlock rock ? MineRockClumpMining.inspectionHint(rock.sourceId()):((ResourceClumpBlock)block).inspectionHint();
             h.assertTrue(event.isCanceled() && sent.containsKey(player.getUUID()+"|"+hint),"Missing original inspection description");
         }

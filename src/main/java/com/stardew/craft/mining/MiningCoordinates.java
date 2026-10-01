@@ -66,7 +66,7 @@ public class MiningCoordinates {
         var miningData=MiningDataManager.getPlayerData(player);
         miningData.setCurrentFloor(floor);MiningDataManager.savePlayerData(player,miningData);
         ModTeleport.to(player, level, x, y, z_pos, yaw, 0.0f);
-        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,new com.stardew.craft.network.MiningFloorSyncPacket(floor));
+        net.minecraftforge.network.PacketDistributor.sendToPlayer(player,new com.stardew.craft.network.MiningFloorSyncPacket(floor));
 
         // 清除速度，防止残留 momentum 造成摔落伤害
         player.setDeltaMovement(0, 0, 0);

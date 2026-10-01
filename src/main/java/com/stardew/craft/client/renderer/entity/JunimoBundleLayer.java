@@ -65,7 +65,7 @@ public class JunimoBundleLayer extends BlockAndItemGeoLayer<JunimoEntity> {
     private ItemStack getOrangeItem() {
         if (orangeItem == null) {
             net.minecraft.world.item.Item item = BuiltInRegistries.ITEM.get(
-                    ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "orange"));
+                    new ResourceLocation(StardewCraft.MODID, "orange"));
             if (item == Items.AIR) {
                 orangeItem = getBundleItem();
             } else {

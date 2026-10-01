@@ -26,22 +26,22 @@ import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemDisplayContext;
-import net.neoforged.neoforge.client.ChunkRenderTypeSet;
-import net.neoforged.neoforge.client.model.BakedModelWrapper;
-import net.neoforged.neoforge.client.model.IDynamicBakedModel;
-import net.neoforged.neoforge.client.model.IQuadTransformer;
-import net.neoforged.neoforge.client.model.data.ModelData;
-import net.neoforged.neoforge.client.model.pipeline.QuadBakingVertexConsumer;
-import net.neoforged.neoforge.common.util.TriState;
+import net.minecraftforge.client.ChunkRenderTypeSet;
+import net.minecraftforge.client.model.BakedModelWrapper;
+import net.minecraftforge.client.model.IDynamicBakedModel;
+import net.minecraftforge.client.model.IQuadTransformer;
+import net.minecraftforge.client.model.data.ModelData;
+import net.minecraftforge.client.model.pipeline.QuadBakingVertexConsumer;
+import com.stardew.craft.port.net.neoforged.neoforge.common.util.TriState;
 import org.joml.Vector3f;
 
 final class TemplateBakedModel extends BakedModelWrapper<BakedModel> implements IDynamicBakedModel {
-    private static final net.neoforged.neoforge.client.model.data.ModelProperty<Integer> ROOF_PHASE =
-            new net.neoforged.neoforge.client.model.data.ModelProperty<>();
-    private static final net.neoforged.neoforge.client.model.data.ModelProperty<Integer> ROOF_EDGES =
-            new net.neoforged.neoforge.client.model.data.ModelProperty<>();
-    private static final net.neoforged.neoforge.client.model.data.ModelProperty<Integer> ROOF_HIDDEN_SECTIONS =
-            new net.neoforged.neoforge.client.model.data.ModelProperty<>();
+    private static final net.minecraftforge.client.model.data.ModelProperty<Integer> ROOF_PHASE =
+            new net.minecraftforge.client.model.data.ModelProperty<>();
+    private static final net.minecraftforge.client.model.data.ModelProperty<Integer> ROOF_EDGES =
+            new net.minecraftforge.client.model.data.ModelProperty<>();
+    private static final net.minecraftforge.client.model.data.ModelProperty<Integer> ROOF_HIDDEN_SECTIONS =
+            new net.minecraftforge.client.model.data.ModelProperty<>();
     static final int FILL_TINT_OFFSET = 1 << 16;
     private ModelData itemMaterials = ModelData.EMPTY;
     private volatile TemplateMesh mesh;
@@ -69,7 +69,7 @@ final class TemplateBakedModel extends BakedModelWrapper<BakedModel> implements 
 
     @Override
     public List<BakedModel> getRenderPasses(ItemStack stack, boolean fabulous) {
-        if (stack.has(net.minecraft.core.component.DataComponents.BLOCK_ENTITY_DATA)) {
+        if (stack.has(com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_ENTITY_DATA)) {
             ModelData data = TemplateBlockEntity.itemMaterials(stack);
             CacheKey key = new CacheKey(material(data), fillMaterial(data), null, null, 0, 0, 15, 0, usesStudy(data), null);
             return List.of(itemPassCache.computeIfAbsent(key, ignored -> {
@@ -85,7 +85,7 @@ final class TemplateBakedModel extends BakedModelWrapper<BakedModel> implements 
     public List<RenderType> getRenderTypes(ItemStack stack, boolean fabulous) {
         if (!shape.isComposite()) return super.getRenderTypes(stack, fabulous);
         var types = getRenderTypes(templateState, RandomSource.create(42L), itemMaterials);
-        return List.of(net.neoforged.neoforge.client.RenderTypeHelper.getEntityRenderType(
+        return List.of(net.minecraftforge.client.RenderTypeHelper.getEntityRenderType(
                 types.contains(RenderType.translucent()) ? RenderType.translucent() : RenderType.solid(), fabulous));
     }
 
@@ -160,7 +160,7 @@ final class TemplateBakedModel extends BakedModelWrapper<BakedModel> implements 
         if (supportsLayer(roofModel, roofState, key.renderType)) {
             if (windowArtwork) {
                 var sprite = Minecraft.getInstance().getTextureAtlas(net.minecraft.world.inventory.InventoryMenu.BLOCK_ATLAS)
-                        .apply(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("stardewcraft", "block/building/window_frame_finish"));
+                        .apply(new net.minecraft.resources.ResourceLocation("stardewcraft", "block/building/window_frame_finish"));
                 for (var quad : roofMesh.quads()) {
                     Direction cull = quad.cullFace();
                     if (itemModel ? key.side != null : (key.side == null ? cull != null : cull != key.side)) continue;
@@ -180,7 +180,7 @@ final class TemplateBakedModel extends BakedModelWrapper<BakedModel> implements 
         if (shape == TemplateShape.ROUND_WINDOW) {
             if (key.side == null && (key.renderType == null || key.renderType == RenderType.translucent())) {
                 var sprite = Minecraft.getInstance().getTextureAtlas(net.minecraft.world.inventory.InventoryMenu.BLOCK_ATLAS)
-                        .apply(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("stardewcraft", "block/material_templates/round_window_glass"));
+                        .apply(new net.minecraft.resources.ResourceLocation("stardewcraft", "block/material_templates/round_window_glass"));
                 for (var quad : TemplateMesh.roundWindowLayer(templateState, RoundWindowProfile.glass(), List.of(), true).quads())
                     result.add(bakeFallback(quad, sprite));
             }

@@ -4,9 +4,9 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.block.FertilizerType;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 
@@ -63,7 +63,7 @@ public record FertilizerSyncPacket(
         }
 
         private static final StreamCodec<ByteBuf, Entry> STREAM_CODEC = StreamCodec.composite(
-                BlockPos.STREAM_CODEC,
+                com.stardew.craft.port.PortCodecs.BLOCK_POS,
                 Entry::pos,
                 ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs::optional),
                 entry -> java.util.Optional.ofNullable(entry.fertilizerType()),
@@ -72,12 +72,12 @@ public record FertilizerSyncPacket(
 
     @SuppressWarnings("null")
     public static final Type<FertilizerSyncPacket> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "fertilizer_sync"));
+            new ResourceLocation(StardewCraft.MODID, "fertilizer_sync"));
 
     @SuppressWarnings("null")
     public static final StreamCodec<ByteBuf, FertilizerSyncPacket> STREAM_CODEC =
             StreamCodec.composite(
-                    ResourceLocation.STREAM_CODEC,
+                    com.stardew.craft.port.PortCodecs.RESOURCE_LOCATION,
                     FertilizerSyncPacket::dimension,
                     ByteBufCodecs.VAR_INT,
                     FertilizerSyncPacket::chunkX,

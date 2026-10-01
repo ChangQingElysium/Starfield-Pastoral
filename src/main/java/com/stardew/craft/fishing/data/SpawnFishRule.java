@@ -129,7 +129,7 @@ public record SpawnFishRule(
 				String tagName = tagStr.startsWith("#") ? tagStr.substring(1) : tagStr;
 				try {
 					@SuppressWarnings("null")
-					ResourceLocation tagLoc = ResourceLocation.parse(tagName);
+					ResourceLocation tagLoc = new ResourceLocation(tagName);
 					@SuppressWarnings("null")
 					TagKey<Biome> tag = TagKey.create(Registries.BIOME, tagLoc);
 					if (biomeHolder.is(tag)) {

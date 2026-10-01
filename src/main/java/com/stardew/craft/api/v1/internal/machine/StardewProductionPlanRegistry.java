@@ -15,7 +15,7 @@ public final class StardewProductionPlanRegistry {
     private static final OrderedExtensionRegistry<
             StardewProductionPlanProvider> REGISTRY =
             new OrderedExtensionRegistry<>(
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             StardewCraft.MODID, "machine/production_plan"));
 
     private StardewProductionPlanRegistry() {

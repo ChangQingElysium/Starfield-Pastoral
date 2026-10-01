@@ -5,7 +5,7 @@ import com.stardew.craft.combat.equipment.EquipmentResolver;
 import com.stardew.craft.entity.projectile.SlingshotProjectile;
 import com.stardew.craft.item.IStardewItem;
 import com.stardew.craft.sound.ModSounds;
-import net.minecraft.core.component.DataComponents;
+import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -16,7 +16,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.*;
-import net.minecraft.world.item.component.ItemContainerContents;
+import com.stardew.craft.port.net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.Level;
 import java.util.List;
 

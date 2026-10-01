@@ -22,7 +22,7 @@ import java.util.UUID;
 /** Internal authoritative runtime behind {@link StardewWorldEvents}. */
 public final class StardewWorldEventRegistry {
     private static final ResourceLocation EXTENSION_POINT =
-            ResourceLocation.fromNamespaceAndPath(
+            new ResourceLocation(
                     StardewCraft.MODID, "world_events");
     private static final OrderedExtensionRegistry<
             StardewWorldEvents.Handler> HANDLERS =

@@ -16,12 +16,12 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
-import net.neoforged.neoforge.client.extensions.common.IClientBlockExtensions;
-import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.client.extensions.common.IClientBlockExtensions;
+import com.stardew.craft.port.net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +40,7 @@ public final class SupplyCrateEffects {
         if (lastLevel != level) { BURSTS.clear(); lastLevel = level; }
     }
 
-    @SubscribeEvent public static void logout(net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent.LoggingOut event) {
+    @SubscribeEvent public static void logout(net.minecraftforge.client.event.ClientPlayerNetworkEvent.LoggingOut event) {
         ensureLevel(null);
     }
 
@@ -105,6 +105,6 @@ public final class SupplyCrateEffects {
             }
             pose.popPose();
         }
-        buffers.endBatch(net.neoforged.neoforge.client.RenderTypeHelper.getEntityRenderType(net.minecraft.client.renderer.RenderType.cutout(), false));
+        buffers.endBatch(net.minecraftforge.client.RenderTypeHelper.getEntityRenderType(net.minecraft.client.renderer.RenderType.cutout(), false));
     }
 }

@@ -15,10 +15,10 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ModelEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.ModelEvent;
 
 /** Native Java cuboids; seasonal materials and runtime transforms remain independent. */
 @EventBusSubscriber(modid = StardewCraft.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
@@ -31,13 +31,13 @@ public final class BirdSpringRiderModels {
         return assemblies.isEmpty() ? List.of() : assemblies.get(TerrainSeasonTextures.currentTextureSet());
     }
     private static JsonObject description() {
-        var id = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "playground/bird_spring_rider.json");
+        var id = new ResourceLocation(StardewCraft.MODID, "playground/bird_spring_rider.json");
         try (var reader = new InputStreamReader(Minecraft.getInstance().getResourceManager().getResourceOrThrow(id).open(), StandardCharsets.UTF_8)) {
             return JsonParser.parseReader(reader).getAsJsonObject();
         } catch (IOException e) { throw new IllegalStateException("Cannot load bird spring rider", e); }
     }
     private static ModelResourceLocation id(String season, String part) {
-        return new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,
+        return new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID,
                 "block/bird_spring_rider/" + season + "/" + part), "standalone");
     }
     @SubscribeEvent public static void register(ModelEvent.RegisterAdditional event) {

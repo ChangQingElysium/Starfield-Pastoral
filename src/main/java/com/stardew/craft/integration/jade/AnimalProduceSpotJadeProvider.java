@@ -24,7 +24,7 @@ import java.util.List;
 public enum AnimalProduceSpotJadeProvider implements IBlockComponentProvider, IServerDataProvider<BlockAccessor> {
     INSTANCE;
 
-    private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "animal_produce_spot");
+    private static final ResourceLocation UID = new ResourceLocation(StardewCraft.MODID, "animal_produce_spot");
     private static final String NBT_ITEM = "item";
     private static final String NBT_QUALITY = "quality";
 

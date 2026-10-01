@@ -2,10 +2,10 @@ package com.stardew.craft.quest.network;
 
 import com.stardew.craft.StardewCraft;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -15,13 +15,13 @@ import org.jetbrains.annotations.NotNull;
 public record QuestCompletePayload(String questId, int moneyReward) implements CustomPacketPayload {
 
     public static final Type<QuestCompletePayload> TYPE = new Type<>(
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "quest_complete")
+        new ResourceLocation(StardewCraft.MODID, "quest_complete")
     );
 
     public static final StreamCodec<ByteBuf, QuestCompletePayload> STREAM_CODEC = StreamCodec.composite(
-        net.minecraft.network.codec.ByteBufCodecs.STRING_UTF8,
+        com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs.STRING_UTF8,
         QuestCompletePayload::questId,
-        net.minecraft.network.codec.ByteBufCodecs.VAR_INT,
+        com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs.VAR_INT,
         QuestCompletePayload::moneyReward,
         QuestCompletePayload::new
     );
@@ -35,7 +35,7 @@ public record QuestCompletePayload(String questId, int moneyReward) implements C
         context.enqueueWork(() -> handleClient(payload));
     }
 
-    @net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+    @net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
     private static void handleClient(QuestCompletePayload payload) {
         net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
         if (mc.player == null) return;

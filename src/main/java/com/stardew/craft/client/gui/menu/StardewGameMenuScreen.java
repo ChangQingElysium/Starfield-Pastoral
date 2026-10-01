@@ -76,7 +76,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -119,7 +119,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
     private static final int CRAFTING_RECIPE_ROWS = 4;
     private static final int CRAFTING_RECIPES_PER_PAGE = CRAFTING_RECIPE_COLUMNS * CRAFTING_RECIPE_ROWS;
     private static final int CRAFTING_PARTITION_Y_SDV = 384;
-    private static final ResourceLocation VANILLA_BIG_CRAFTABLES = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation VANILLA_BIG_CRAFTABLES = new ResourceLocation(
             StardewCraft.MODID, "textures/gui/crafting/vanilla_big_craftables.png");
     private static final int VANILLA_BIG_CRAFTABLES_WIDTH = 128;
     private static final int VANILLA_BIG_CRAFTABLES_HEIGHT = 1472;
@@ -233,7 +233,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
     private static final int COLLECTION_LETTERS = 7;
     private static final int COLLECTION_COLUMNS = 10;
     private static final int COLLECTION_PAGE_SIZE = 80;
-    private static final ResourceLocation SECRET_NOTE_IMAGES = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation SECRET_NOTE_IMAGES = new ResourceLocation(
             StardewCraft.MODID, "textures/gui/secret_notes_images.png");
 
     private static final int SOCIAL_ROW_HEIGHT_SDV = 112;
@@ -2040,7 +2040,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         }
 
         drawSocialPortrait(graphics, recipient, x + ui(180), y, true);
-        ResourceLocation cursors = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/cursors.png");
+        ResourceLocation cursors = new ResourceLocation(StardewCraft.MODID, "textures/gui/cursors.png");
         graphics.blit(cursors, x + ui(244), y + ui(40), ui(40), ui(44),
             147, 412, 10, 11, 704, 2256);
     }
@@ -2825,13 +2825,13 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
 
     // Day/night player backgrounds (extracted from SDV LooseSprites)
     private static final ResourceLocation DAYBG =
-            ResourceLocation.fromNamespaceAndPath("stardewcraft", "textures/gui/daybg.png");
+            new ResourceLocation("stardewcraft", "textures/gui/daybg.png");
     private static final ResourceLocation NIGHTBG =
-            ResourceLocation.fromNamespaceAndPath("stardewcraft", "textures/gui/nightbg.png");
+            new ResourceLocation("stardewcraft", "textures/gui/nightbg.png");
 
     // Junimo Note icon (SDV mouseCursors rect 331,374,15,14 × scale 4 = 60×56 within a 64×64 hover slot)
     private static final ResourceLocation JUNIMO_NOTE_ICON =
-            ResourceLocation.fromNamespaceAndPath("stardewcraft", "textures/gui/junimo_note_icon.png");
+            new ResourceLocation("stardewcraft", "textures/gui/junimo_note_icon.png");
     private static final int JUNIMO_ICON_SRC_W = 15;
     private static final int JUNIMO_ICON_SRC_H = 14;
     private int junimoNotePulser = 0;

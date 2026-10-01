@@ -5,10 +5,10 @@ import com.stardew.craft.api.v1.client.StardewConstructionOrderSnapshot;
 import com.stardew.craft.api.v1.client.StardewConstructionProgressSnapshot;
 import com.stardew.craft.api.v1.internal.client.StardewConstructionProgressCache;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.ArrayList;
 
@@ -21,7 +21,7 @@ public record BuildingConstructionProgressSyncPayload(
     private static final int MAX_DISPLAY_NAME_LENGTH = 32;
 
     public static final Type<BuildingConstructionProgressSyncPayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(
+            new Type<>(new ResourceLocation(
                     StardewCraft.MODID, "building_construction_progress"));
     public static final StreamCodec<FriendlyByteBuf, BuildingConstructionProgressSyncPayload> STREAM_CODEC =
             StreamCodec.of(

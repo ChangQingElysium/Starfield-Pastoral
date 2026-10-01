@@ -361,7 +361,7 @@ public class MineBarrelBlock extends com.stardew.craft.block.decor.MapDecorStati
     }
 
     private static Item item(String name) {
-        var rl = net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, name);
+        var rl = new net.minecraft.resources.ResourceLocation(StardewCraft.MODID, name);
         Item found = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(rl);
         if (found == Items.AIR) {
             StardewCraft.LOGGER.warn("[MineBarrel] Item not found: {}", name);

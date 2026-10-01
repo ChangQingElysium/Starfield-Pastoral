@@ -26,15 +26,15 @@ import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.event.level.LevelEvent;
-import net.neoforged.neoforge.event.tick.LevelTickEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.level.LevelEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.event.tick.LevelTickEvent;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -66,10 +66,10 @@ public final class TownDoorRuntime {
 
     public static void register(IEventBus bus) {
         bus.addListener(TownDoorNetwork::register);
-        NeoForge.EVENT_BUS.addListener(TownDoorRuntime::tick);
-        NeoForge.EVENT_BUS.addListener(TownDoorRuntime::interact);
-        NeoForge.EVENT_BUS.addListener(TownDoorRuntime::unload);
-        NeoForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedOutEvent event) -> LEVELS.values().forEach(runtime -> {
+        MinecraftForge.EVENT_BUS.addListener(TownDoorRuntime::tick);
+        MinecraftForge.EVENT_BUS.addListener(TownDoorRuntime::interact);
+        MinecraftForge.EVENT_BUS.addListener(TownDoorRuntime::unload);
+        MinecraftForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedOutEvent event) -> LEVELS.values().forEach(runtime -> {
             runtime.sentStates.remove(event.getEntity().getUUID());
             runtime.sequences.remove(event.getEntity().getUUID());
         }));

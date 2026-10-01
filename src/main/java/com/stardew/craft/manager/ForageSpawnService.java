@@ -19,7 +19,7 @@ import net.minecraft.world.level.block.FlowerBlock;
 import net.minecraft.world.level.block.DoublePlantBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.neoforged.neoforge.registries.DeferredBlock;
+import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredBlock;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;

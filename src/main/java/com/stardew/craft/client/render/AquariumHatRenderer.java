@@ -7,7 +7,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.item.ItemStack;
 
 /** Reuses the same authored head display as the player cosmetic layer. */
-@net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+@net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
 public final class AquariumHatRenderer {
     private AquariumHatRenderer() {}
     public static void render(ItemStack stack, PoseStack pose, MultiBufferSource buffers, int light) {

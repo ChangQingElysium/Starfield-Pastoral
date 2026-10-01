@@ -12,7 +12,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
-import net.neoforged.neoforge.gametest.*;
+import net.minecraftforge.gametest.*;
 import java.util.*;
 
 @GameTestHolder("stardewcraft_buildings")
@@ -55,9 +55,9 @@ public final class BuildingResetGameTests {
     public static void copiedDocumentSharesDurablePinAndCancellation(GameTestHelper h){
         var data=new BuildingDrafts();var stack=new ItemStack(ModItems.COOP_BLUEPRINT.get());BuildingBlueprintItem.bind(stack,UUID.randomUUID());
         var tag=BuildingBlueprintItem.draft(stack);tag.putLong("DraftAnchor",new BlockPos(4,5,6).asLong());tag.putString("DraftDimension",h.getLevel().dimension().location().toString());tag.putString("DraftFacing","west");
-        stack.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA,net.minecraft.world.item.component.CustomData.of(tag));data.write(stack);var copy=stack.copy();
+        stack.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,com.stardew.craft.port.net.minecraft.world.item.component.CustomData.of(tag));data.write(stack);var copy=stack.copy();
         data=BuildingDrafts.load(data.save(new CompoundTag(),h.getLevel().registryAccess()),h.getLevel().registryAccess());
-        tag=BuildingBlueprintItem.draft(stack);tag.remove("DraftAnchor");stack.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA,net.minecraft.world.item.component.CustomData.of(tag));data.write(stack);data.apply(copy);
+        tag=BuildingBlueprintItem.draft(stack);tag.remove("DraftAnchor");stack.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,com.stardew.craft.port.net.minecraft.world.item.component.CustomData.of(tag));data.write(stack);data.apply(copy);
         h.assertTrue(BuildingBlueprintItem.pinned(copy,h.getLevel())==null && BuildingBlueprintItem.facing(copy)==Direction.WEST,"Copied item retained a conflicting pin after cancellation/reload");h.succeed();
     }
     @GameTest(template="construction_site",timeoutTicks=200)
@@ -100,7 +100,7 @@ public final class BuildingResetGameTests {
     public static void prefabDemolitionPreservesAdditionsAndRejectsAttachments(GameTestHelper h) {
         var level=h.getLevel();var server=level.getServer();var owner=UUID.randomUUID();
         var farms=FarmInstanceRegistry.get(server);var farm=farms.createFarm(owner,"Demolition","Demolition",FarmType.STANDARD);
-        var player=net.neoforged.neoforge.common.util.FakePlayerFactory.get(level,new com.mojang.authlib.GameProfile(owner,"Demolition"));
+        var player=net.minecraftforge.common.util.FakePlayerFactory.get(level,new com.mojang.authlib.GameProfile(owner,"Demolition"));
         try {
             var data=BuildingWorldData.get(server);var definition=PrefabDefinitions.get(PrefabDefinitions.COOP);var tier=definition.tier(1);
             var anchor=h.absolutePos(new BlockPos(3,1,20));

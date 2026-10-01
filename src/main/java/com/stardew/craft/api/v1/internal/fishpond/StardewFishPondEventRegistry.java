@@ -75,7 +75,7 @@ public final class StardewFishPondEventRegistry {
     }
 
     private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(
+        return new ResourceLocation(
                 StardewCraft.MODID, path);
     }
 }

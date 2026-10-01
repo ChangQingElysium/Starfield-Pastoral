@@ -20,16 +20,16 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.level.ChunkEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.level.ChunkEvent;
 import java.util.*;
 
 /** Location-level SDV lifecycle. Chunk loading only discovers markers; it never rolls spawns. */
 @EventBusSubscriber(modid = StardewCraft.MODID)
 public final class ArtifactSpotSpawnService {
     private ArtifactSpotSpawnService() {}
-    private static final ResourceLocation OUTDOOR = ResourceLocation.fromNamespaceAndPath("stardewcraft", "outdoor");
+    private static final ResourceLocation OUTDOOR = new ResourceLocation("stardewcraft", "outdoor");
     private static final Map<String, String> LOCATION_NAMES = Map.ofEntries(
             Map.entry("town", "Town"), Map.entry("forest", "Forest"), Map.entry("mountain", "Mountain"),
             Map.entry("bus_stop", "BusStop"), Map.entry("backwoods", "Backwoods"),

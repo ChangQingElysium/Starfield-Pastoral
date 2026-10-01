@@ -15,12 +15,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 
 @SuppressWarnings("null")
 public final class EmoteBubbleWorldRenderer {
 
-	private static final ResourceLocation EMOTES_TEXTURE = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/emotes.png");
+	private static final ResourceLocation EMOTES_TEXTURE = new ResourceLocation(StardewCraft.MODID, "textures/gui/emotes.png");
 	private static final int FRAME_SIZE = 16;
 	private static final int EMOTES_TEX_W = 64;
 	private static final int EMOTES_TEX_H = 256;

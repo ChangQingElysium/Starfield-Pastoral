@@ -22,7 +22,7 @@ import snownee.jade.api.config.IPluginConfig;
 public enum PortalTriggerJadeProvider implements IBlockComponentProvider, IServerDataProvider<BlockAccessor> {
     INSTANCE;
 
-    private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "portal_trigger");
+    private static final ResourceLocation UID = new ResourceLocation(StardewCraft.MODID, "portal_trigger");
     private static final String NBT_TARGET_ID = "TargetId";
 
     @Override

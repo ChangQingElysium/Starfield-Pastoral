@@ -15,7 +15,7 @@ public final class RobinCatalogArt {
         if (key == null) return false;
         String path=key.getPath();int tier=1;int split=path.lastIndexOf("_upgrade_");
         if(split>=0)try{tier=Integer.parseInt(path.substring(split+9));path=path.substring(0,split);}catch(NumberFormatException ignored){}
-        var binding=com.stardew.craft.api.v1.building.StardewBuildingFamilies.find(ResourceLocation.fromNamespaceAndPath(key.getNamespace(),path));
+        var binding=com.stardew.craft.api.v1.building.StardewBuildingFamilies.find(new ResourceLocation(key.getNamespace(),path));
         var display=binding.isEmpty()?null:binding.get().displays().get(tier);
         if(display!=null){com.stardew.craft.client.gui.FarmFolioScreen.image(graphics,display.texture(),display.width(),display.height(),x,y,width,height,false);return true;}
         if(!key.getNamespace().equals("stardewcraft"))return false;
@@ -28,7 +28,7 @@ public final class RobinCatalogArt {
         else return false;
         float scale = Math.min((float) width / w, (float) height / h);
         if (scale >= 1) scale = (float) Math.floor(scale);
-        ResourceLocation texture = ResourceLocation.fromNamespaceAndPath("stardewcraft", "textures/gui/robin_buildings/" + name + ".png");
+        ResourceLocation texture = new ResourceLocation("stardewcraft", "textures/gui/robin_buildings/" + name + ".png");
         graphics.pose().pushPose();
         graphics.pose().translate(x + (width - w * scale) / 2, y + (height - h * scale) / 2, 0);
         graphics.pose().scale(scale, scale, 1);

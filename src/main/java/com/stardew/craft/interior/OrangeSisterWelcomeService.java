@@ -22,9 +22,9 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 import java.util.UUID;
 
@@ -296,7 +296,7 @@ public final class OrangeSisterWelcomeService {
 
     private static ItemStack createIridiumOranges() {
         Item orangeItem = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(
-                ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "orange"));
+                new ResourceLocation(StardewCraft.MODID, "orange"));
         ItemStack stack = new ItemStack(orangeItem, 999);
         QualityHelper.setQuality(stack, QualityHelper.IRIDIUM);
         QualityHelper.ensureQualityModelData(stack);

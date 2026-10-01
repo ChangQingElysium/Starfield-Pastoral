@@ -10,7 +10,7 @@ import net.minecraft.gametest.framework.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.gametest.*;
+import net.minecraftforge.gametest.*;
 @GameTestHolder("stardewcraft_bug")
 @PrefixGameTestTemplate(false)
 @SuppressWarnings("null")
@@ -21,7 +21,7 @@ public final class NativeArmoredBugGameTests {
         for(int x=-5;x<=5;x++)for(int z=-3;z<=3;z++){level.setBlock(pos.offset(x,-1,z),Blocks.STONE.defaultBlockState(),3);for(int y=0;y<4;y++)level.setBlock(pos.offset(x,y,z),Blocks.AIR.defaultBlockState(),3);}
         var bug=(MineBugEntity)MineMonsterSpawnHandler.spawnConfiguredMonster(level,"bug",Vec3.atBottomCenterOf(pos),-90,new MonsterSpawnContext(MonsterSpawnContext.Source.SKULL_CAVERN,140,false,null),m->{});bug.setPersistenceRequired();
         h.assertTrue(bug.armored()&&bug.getHealth()==150&&bug.monsterState().stats().getDamage()==16,"Skull branch did not apply post-base armor attributes");
-        var player=new net.neoforged.neoforge.common.util.FakePlayer(level,new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(),"ArmorTest"));player.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);player.setPos(Vec3.atBottomCenterOf(pos.offset(0,0,3)));level.addNewPlayer(player);
+        var player=new net.minecraftforge.common.util.FakePlayer(level,new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(),"ArmorTest"));player.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);player.setPos(Vec3.atBottomCenterOf(pos.offset(0,0,3)));level.addNewPlayer(player);
         var weapon=new net.minecraft.world.item.ItemStack(ModItems.RUSTY_SWORD.get());player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,weapon);
         h.assertTrue(!bug.hurt(level.damageSources().playerAttack(player),20)&&bug.getHealth()==150,"Unenchanted sword pierced armor");
         var enchantment=level.registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT).getHolderOrThrow(StardewEnchantments.BUG_KILLER);weapon.enchant(enchantment,1);

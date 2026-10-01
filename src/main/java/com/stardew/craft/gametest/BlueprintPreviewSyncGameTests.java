@@ -7,17 +7,17 @@ import com.stardew.craft.building.runtime.PrefabDefinitions;
 import io.netty.buffer.Unpooled;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.component.DataComponents;
+import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomData;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import com.stardew.craft.port.net.minecraft.world.item.component.CustomData;
+import net.minecraftforge.common.util.FakePlayerFactory;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 import java.util.UUID;
 
@@ -53,8 +53,8 @@ public final class BlueprintPreviewSyncGameTests {
                 h.assertTrue(component == stack.get(DataComponents.CUSTOM_DATA), "Unchanged geometry rewrites inventory every tick");
                 var buffer = new RegistryFriendlyByteBuf(Unpooled.buffer(), h.getLevel().registryAccess());
                 try {
-                    ItemStack.STREAM_CODEC.encode(buffer, stack);
-                    var received = ItemStack.STREAM_CODEC.decode(buffer);
+                    com.stardew.craft.port.PortCodecs.ITEM_STACK.encode(buffer, stack);
+                    var received = com.stardew.craft.port.PortCodecs.ITEM_STACK.decode(buffer);
                     h.assertTrue(expected.equals(BuildingBlueprintItem.previewTargetAnchor(received, ground, facing)), "Inventory network sync lost geometry");
                 } finally { buffer.release(); }
                 // A stale/custom item component must never influence authoritative placement.

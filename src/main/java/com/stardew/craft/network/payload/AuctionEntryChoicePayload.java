@@ -4,16 +4,16 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.auction.AuctionService;
 import com.stardew.craft.event.InteriorPortalInteractionEvents;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 @SuppressWarnings("null")
 public record AuctionEntryChoicePayload(boolean enterAuction) implements CustomPacketPayload {
     public static final Type<AuctionEntryChoicePayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "auction_entry_choice"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "auction_entry_choice"));
 
     public static final StreamCodec<FriendlyByteBuf, AuctionEntryChoicePayload> STREAM_CODEC = StreamCodec.of(
         (buf, payload) -> buf.writeBoolean(payload.enterAuction()),

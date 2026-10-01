@@ -1,12 +1,12 @@
 package com.stardew.craft.network.payload;
 
 import com.stardew.craft.StardewCraft;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * Server -> Client: sync equipped items so client can render them in UI.
@@ -16,21 +16,21 @@ public record EquipmentSyncPayload(ItemStack leftRing, ItemStack rightRing, Item
                                    String hat, String shirt, String pants) implements CustomPacketPayload {
 
     public static final Type<EquipmentSyncPayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "equipment_sync"));
+            new Type<>(new ResourceLocation(StardewCraft.MODID, "equipment_sync"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, EquipmentSyncPayload> STREAM_CODEC = StreamCodec.of(
             (buf, payload) -> {
-                ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, payload.leftRing);
-                ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, payload.rightRing);
-                ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, payload.boots);
-                ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, payload.trinket);
+                com.stardew.craft.port.PortCodecs.OPTIONAL_ITEM_STACK.encode(buf, payload.leftRing);
+                com.stardew.craft.port.PortCodecs.OPTIONAL_ITEM_STACK.encode(buf, payload.rightRing);
+                com.stardew.craft.port.PortCodecs.OPTIONAL_ITEM_STACK.encode(buf, payload.boots);
+                com.stardew.craft.port.PortCodecs.OPTIONAL_ITEM_STACK.encode(buf, payload.trinket);
                 buf.writeUtf(payload.hat);
                 buf.writeUtf(payload.shirt);
                 buf.writeUtf(payload.pants);
             },
-            buf -> new EquipmentSyncPayload(ItemStack.OPTIONAL_STREAM_CODEC.decode(buf),
-                    ItemStack.OPTIONAL_STREAM_CODEC.decode(buf), ItemStack.OPTIONAL_STREAM_CODEC.decode(buf),
-                    ItemStack.OPTIONAL_STREAM_CODEC.decode(buf), buf.readUtf(), buf.readUtf(), buf.readUtf())
+            buf -> new EquipmentSyncPayload(com.stardew.craft.port.PortCodecs.OPTIONAL_ITEM_STACK.decode(buf),
+                    com.stardew.craft.port.PortCodecs.OPTIONAL_ITEM_STACK.decode(buf), com.stardew.craft.port.PortCodecs.OPTIONAL_ITEM_STACK.decode(buf),
+                    com.stardew.craft.port.PortCodecs.OPTIONAL_ITEM_STACK.decode(buf), buf.readUtf(), buf.readUtf(), buf.readUtf())
     );
 
     @Override

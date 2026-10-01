@@ -27,7 +27,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -1614,9 +1614,9 @@ public final class NpcInteractionService {
      */
     private static String resolveItemCategory(ItemStack held) {
         if (held.isEmpty()) return null;
-        net.minecraft.world.item.component.CustomData customData =
-            held.getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_DATA,
-                              net.minecraft.world.item.component.CustomData.EMPTY);
+        com.stardew.craft.port.net.minecraft.world.item.component.CustomData customData =
+            held.getOrDefault(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,
+                              com.stardew.craft.port.net.minecraft.world.item.component.CustomData.EMPTY);
         net.minecraft.nbt.CompoundTag tag = customData.copyTag();
         if (tag.contains("StardewCategory")) {
             String cat = tag.getString("StardewCategory");
@@ -1926,9 +1926,9 @@ public final class NpcInteractionService {
     /** Vanilla quality multiplier: silver=1.1, gold=1.25, iridium=1.5, otherwise 1.0 */
     private static float qualityMultiplier(ItemStack held) {
         if (held.isEmpty()) return 1f;
-        net.minecraft.world.item.component.CustomData customData =
-            held.getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_DATA,
-                              net.minecraft.world.item.component.CustomData.EMPTY);
+        com.stardew.craft.port.net.minecraft.world.item.component.CustomData customData =
+            held.getOrDefault(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,
+                              com.stardew.craft.port.net.minecraft.world.item.component.CustomData.EMPTY);
         net.minecraft.nbt.CompoundTag tag = customData.copyTag();
         if (tag.contains("StardewQuality")) {
             int q = tag.getInt("StardewQuality");

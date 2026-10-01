@@ -15,7 +15,7 @@ import software.bernie.geckolib.renderer.GeoEntityRenderer;
 
 @SuppressWarnings("null")
 public class CoopAnimalGeoRenderer<T extends BaseCoopAnimalEntity> extends GeoEntityRenderer<T> {
-	private static final ResourceLocation EMOTES_TEX = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/emotes.png");
+	private static final ResourceLocation EMOTES_TEX = new ResourceLocation(StardewCraft.MODID, "textures/gui/emotes.png");
 	private static final int TEX_WIDTH = 64;
 	private static final int TEX_HEIGHT = 256;
 	private static final int ICON_SIZE = 16;

@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.component.DataComponents;
+import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -37,9 +37,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.common.util.FakePlayerFactory;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 @GameTestHolder(StardewCraft.MODID)
 @PrefixGameTestTemplate(false)
@@ -66,7 +66,7 @@ public final class AsphaltRoadGameTests {
         level.setBlock(pos.east().above(),road,3);
         helper.assertTrue((AsphaltRoadConnections.mask(level,pos)&2)==0,"Road connected to paving or another elevation");
         for (String retired : new String[]{"building_road","building_road_center_line","building_road_double_line","building_road_left","building_road_right","building_tavern_bricks"}) {
-            var id=ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,retired);
+            var id=new ResourceLocation(StardewCraft.MODID,retired);
             helper.assertTrue(!BuiltInRegistries.BLOCK.containsKey(id) && !BuiltInRegistries.ITEM.containsKey(id),"Retired block/item remains registered: "+retired);
         }
         helper.succeed();

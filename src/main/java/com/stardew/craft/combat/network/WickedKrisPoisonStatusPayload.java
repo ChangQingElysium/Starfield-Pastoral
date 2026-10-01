@@ -4,11 +4,11 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.weapon.WickedKrisPoisonClientState;
 import io.netty.buffer.ByteBuf;
 import java.util.UUID;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
 /** Target-scoped poison status update for one Wicked Kris owner. */
@@ -25,7 +25,7 @@ public record WickedKrisPoisonStatusPayload(
 
     @SuppressWarnings("null")
     public static final Type<WickedKrisPoisonStatusPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(
+            new ResourceLocation(
                     StardewCraft.MODID,
                     "wicked_kris_poison_status"
             )
@@ -130,8 +130,8 @@ public record WickedKrisPoisonStatusPayload(
         context.enqueueWork(() -> handleClient(payload));
     }
 
-    @net.neoforged.api.distmarker.OnlyIn(
-            net.neoforged.api.distmarker.Dist.CLIENT
+    @net.minecraftforge.api.distmarker.OnlyIn(
+            net.minecraftforge.api.distmarker.Dist.CLIENT
     )
     private static void handleClient(WickedKrisPoisonStatusPayload payload) {
         net.minecraft.client.Minecraft minecraft =

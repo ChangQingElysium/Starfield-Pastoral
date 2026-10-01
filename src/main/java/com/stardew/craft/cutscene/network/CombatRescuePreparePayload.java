@@ -5,12 +5,12 @@ import com.stardew.craft.cutscene.runtime.CombatRescueCutsceneContext;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * Server -> client readiness probe for a combat-rescue destination.
@@ -27,13 +27,13 @@ public record CombatRescuePreparePayload(
         String dialogueKey
 ) implements CustomPacketPayload {
     public static final Type<CombatRescuePreparePayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "combat_rescue_prepare"));
+            new ResourceLocation(StardewCraft.MODID, "combat_rescue_prepare"));
 
     public static final StreamCodec<ByteBuf, CombatRescuePreparePayload> STREAM_CODEC =
             StreamCodec.composite(
                     ByteBufCodecs.VAR_LONG, CombatRescuePreparePayload::token,
-                    ResourceLocation.STREAM_CODEC, CombatRescuePreparePayload::dimension,
-                    BlockPos.STREAM_CODEC, CombatRescuePreparePayload::target,
+                    com.stardew.craft.port.PortCodecs.RESOURCE_LOCATION, CombatRescuePreparePayload::dimension,
+                    com.stardew.craft.port.PortCodecs.BLOCK_POS, CombatRescuePreparePayload::target,
                     ByteBufCodecs.STRING_UTF8, CombatRescuePreparePayload::rescuerNpcId,
                     ByteBufCodecs.STRING_UTF8, CombatRescuePreparePayload::dialogueKey,
                     CombatRescuePreparePayload::new);
@@ -47,7 +47,7 @@ public record CombatRescuePreparePayload(
         context.enqueueWork(() -> handleClient(payload));
     }
 
-    @net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+    @net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
     private static void handleClient(CombatRescuePreparePayload payload) {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.level == null || minecraft.player == null

@@ -3,11 +3,11 @@ package com.stardew.craft.cutscene.network;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.cutscene.runtime.CutsceneAnchorRegistry;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * Server → Client: register a named cutscene anchor origin for the current player.
@@ -24,7 +24,7 @@ public record CutsceneAnchorPayload(String name, double x, double y, double z)
 
 
     public static final Type<CutsceneAnchorPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "cutscene_anchor"));
+            new ResourceLocation(StardewCraft.MODID, "cutscene_anchor"));
 
     public static final StreamCodec<ByteBuf, CutsceneAnchorPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.STRING_UTF8, CutsceneAnchorPayload::name,

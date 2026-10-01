@@ -1,9 +1,9 @@
 package com.stardew.craft.mail;
 
 import com.stardew.craft.StardewCraft;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.AddReloadListenerEvent;
 
 /**
  * 邮件系统事件钩子：注册数据包重载监听器。

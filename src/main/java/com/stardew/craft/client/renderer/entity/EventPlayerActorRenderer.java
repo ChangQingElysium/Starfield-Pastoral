@@ -16,7 +16,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
-import net.minecraft.client.resources.PlayerSkin;
+import com.stardew.craft.port.net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.UUID;
@@ -28,7 +28,7 @@ import java.util.UUID;
 public class EventPlayerActorRenderer extends MobRenderer<EventPlayerActorEntity, PlayerModel<EventPlayerActorEntity>> {
 
     private static final ResourceLocation STEVE_SKIN =
-            ResourceLocation.withDefaultNamespace("textures/entity/player/wide/steve.png");
+            new ResourceLocation("textures/entity/player/wide/steve.png");
     private final PlayerModel<EventPlayerActorEntity> wideModel;
     private final PlayerModel<EventPlayerActorEntity> slimModel;
     private final PlayerModel<EventPlayerActorEntity> collapsedWide = new CollapsePlayerModel<>(false);

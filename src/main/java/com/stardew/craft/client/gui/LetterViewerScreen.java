@@ -23,7 +23,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,13 +43,13 @@ import java.util.Map;
 public class LetterViewerScreen extends Screen {
 
     // ── letterBG.png 纹理参数 ──
-    private static final ResourceLocation LETTER_BG = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation LETTER_BG = new ResourceLocation(
             StardewCraft.MODID, "textures/gui/letter_bg.png");
     private static final int LETTER_BG_WIDTH = 1280;
     private static final int LETTER_BG_HEIGHT = 512;
     private static final Map<String, CustomLetterBackground> CUSTOM_LETTER_BACKGROUNDS = Map.of(
             "LooseSprites/squidFestLetterBG", new CustomLetterBackground(
-                    ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/squid_fest_letter_bg.png"),
+                    new ResourceLocation(StardewCraft.MODID, "textures/gui/squid_fest_letter_bg.png"),
                     320,
                     204
             )
@@ -70,7 +70,7 @@ public class LetterViewerScreen extends Screen {
     private static final int CLOSE_BTN_W = 12, CLOSE_BTN_H = 12;
 
     // 金币图标纹理
-    private static final ResourceLocation GOLD_ICON = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation GOLD_ICON = new ResourceLocation(
             StardewCraft.MODID, "textures/gui/gold_icon.png");
     private static final int GOLD_ICON_SIZE = 16;
 
@@ -520,7 +520,7 @@ public class LetterViewerScreen extends Screen {
                 graphics.pose().popPose();
 
                 // 物品图标
-                ResourceLocation itemRL = ResourceLocation.parse(att.itemId());
+                ResourceLocation itemRL = new ResourceLocation(att.itemId());
                 net.minecraft.world.item.Item item = BuiltInRegistries.ITEM.get(itemRL);
                 if (item != Items.AIR) {
                     ItemStack stack = new ItemStack(item, att.count());
@@ -601,7 +601,7 @@ public class LetterViewerScreen extends Screen {
             }
             OpenMailPayload.ItemAttachment attachment = payload.items().get(index);
             net.minecraft.world.item.Item item = BuiltInRegistries.ITEM.get(
-                    ResourceLocation.parse(attachment.itemId()));
+                    new ResourceLocation(attachment.itemId()));
             if (item != Items.AIR) {
                 graphics.renderTooltip(Minecraft.getInstance().font,
                         new ItemStack(item, attachment.count()), mouseX, mouseY);

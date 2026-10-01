@@ -24,7 +24,7 @@ import java.util.Optional;
 public final class StardewFestivalActivityRegistry {
     private static final OrderedExtensionRegistry<Entry> ACTIVITIES =
             new OrderedExtensionRegistry<>(
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             StardewCraft.MODID, "festival/activities"));
 
     private StardewFestivalActivityRegistry() {

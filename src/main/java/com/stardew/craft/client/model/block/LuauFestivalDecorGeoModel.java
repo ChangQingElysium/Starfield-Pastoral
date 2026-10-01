@@ -9,21 +9,21 @@ import net.minecraft.resources.ResourceLocation;
 import software.bernie.geckolib.model.GeoModel;
 
 public class LuauFestivalDecorGeoModel extends GeoModel<LuauFestivalDecorBlockEntity> {
-    private static final ResourceLocation WIZARD_MODEL = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "geo/block/decor/wizard_cauldron.geo.json");
-    private static final ResourceLocation WIZARD_TEXTURE = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/block/decor/common/wizard_cauldron.png");
-    private static final ResourceLocation WIZARD_ANIMATION = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "animations/block/festival/wizard_cauldron.animation.json");
-    private static final ResourceLocation SOUP_ANIMATION = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "animations/block/festival/luau_soup_pot.animation.json");
-    private static final ResourceLocation SOUP_POT_MODEL = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "geo/block/festival/luau_soup_pot.geo.json");
-    private static final ResourceLocation SOUP_POT_TEXTURE = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/block/festival/luau_soup_pot.png");
-    private static final ResourceLocation TOTEM_MODEL = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "geo/block/festival/luau_totem.geo.json");
-    private static final ResourceLocation TOTEM_TEXTURE = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/block/festival/luau_totem.png");
-    private static final ResourceLocation WINTER_STAR_TREE_MODEL = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "geo/block/festival/winter_star_tree.geo.json");
-    private static final ResourceLocation WINTER_STAR_TREE_TEXTURE = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/block/festival/winter_star_tree.png");
-    private static final ResourceLocation SQUID_FEST_PROMO_POSTER_MODEL = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "geo/block/festival/squid_fest_promo_poster.geo.json");
-    private static final ResourceLocation SQUID_FEST_PROMO_POSTER_TEXTURE = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/block/festival/squid_fest_promo_poster.png");
-    private static final ResourceLocation SQUID_FEST_REQUIREMENT_POSTER_MODEL = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "geo/block/festival/squid_fest_requirement_poster.geo.json");
-    private static final ResourceLocation SQUID_FEST_REQUIREMENT_POSTER_TEXTURE_12 = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/block/festival/squid_fest_requirement_poster_12.png");
-    private static final ResourceLocation SQUID_FEST_REQUIREMENT_POSTER_TEXTURE_13 = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/block/festival/squid_fest_requirement_poster_13.png");
+    private static final ResourceLocation WIZARD_MODEL = new ResourceLocation(StardewCraft.MODID, "geo/block/decor/wizard_cauldron.geo.json");
+    private static final ResourceLocation WIZARD_TEXTURE = new ResourceLocation(StardewCraft.MODID, "textures/block/decor/common/wizard_cauldron.png");
+    private static final ResourceLocation WIZARD_ANIMATION = new ResourceLocation(StardewCraft.MODID, "animations/block/festival/wizard_cauldron.animation.json");
+    private static final ResourceLocation SOUP_ANIMATION = new ResourceLocation(StardewCraft.MODID, "animations/block/festival/luau_soup_pot.animation.json");
+    private static final ResourceLocation SOUP_POT_MODEL = new ResourceLocation(StardewCraft.MODID, "geo/block/festival/luau_soup_pot.geo.json");
+    private static final ResourceLocation SOUP_POT_TEXTURE = new ResourceLocation(StardewCraft.MODID, "textures/block/festival/luau_soup_pot.png");
+    private static final ResourceLocation TOTEM_MODEL = new ResourceLocation(StardewCraft.MODID, "geo/block/festival/luau_totem.geo.json");
+    private static final ResourceLocation TOTEM_TEXTURE = new ResourceLocation(StardewCraft.MODID, "textures/block/festival/luau_totem.png");
+    private static final ResourceLocation WINTER_STAR_TREE_MODEL = new ResourceLocation(StardewCraft.MODID, "geo/block/festival/winter_star_tree.geo.json");
+    private static final ResourceLocation WINTER_STAR_TREE_TEXTURE = new ResourceLocation(StardewCraft.MODID, "textures/block/festival/winter_star_tree.png");
+    private static final ResourceLocation SQUID_FEST_PROMO_POSTER_MODEL = new ResourceLocation(StardewCraft.MODID, "geo/block/festival/squid_fest_promo_poster.geo.json");
+    private static final ResourceLocation SQUID_FEST_PROMO_POSTER_TEXTURE = new ResourceLocation(StardewCraft.MODID, "textures/block/festival/squid_fest_promo_poster.png");
+    private static final ResourceLocation SQUID_FEST_REQUIREMENT_POSTER_MODEL = new ResourceLocation(StardewCraft.MODID, "geo/block/festival/squid_fest_requirement_poster.geo.json");
+    private static final ResourceLocation SQUID_FEST_REQUIREMENT_POSTER_TEXTURE_12 = new ResourceLocation(StardewCraft.MODID, "textures/block/festival/squid_fest_requirement_poster_12.png");
+    private static final ResourceLocation SQUID_FEST_REQUIREMENT_POSTER_TEXTURE_13 = new ResourceLocation(StardewCraft.MODID, "textures/block/festival/squid_fest_requirement_poster_13.png");
 
     @Override
     public ResourceLocation getModelResource(LuauFestivalDecorBlockEntity animatable) {

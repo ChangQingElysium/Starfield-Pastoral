@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/slab",
-  "textures": {
-    "bottom": "stardewcraft:block/wood/oak_checkerboard_planks",
-    "side": "stardewcraft:block/wood/oak_checkerboard_planks",
-    "top": "stardewcraft:block/wood/oak_checkerboard_planks"
-  }
-}

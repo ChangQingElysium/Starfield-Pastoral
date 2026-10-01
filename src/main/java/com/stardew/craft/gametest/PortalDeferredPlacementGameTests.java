@@ -4,8 +4,8 @@ import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.interior.InteriorSubspaceManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.*;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import java.util.Map;
 
 @GameTestHolder("stardewcraft_npc_runtime")

@@ -16,9 +16,9 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.tick.LevelTickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.neoforge.event.tick.LevelTickEvent;
 import java.util.*;
 
 /** The approved ordinary and Skull Cavern layout runtime.  */
@@ -60,13 +60,13 @@ public final class OrdinaryMineRuntime {
         String candidate="extra_"+theme+"_"+map;
         // Layouts lacking approved ordinary architecture (e.g. prehistoric 48/53) stay on
         // the normal layout. Never synthesize a special floor or substitute another roll.
-        var resource=ResourceLocation.fromNamespaceAndPath("stardewcraft","mine_layouts/"+candidate+".json");
+        var resource=new ResourceLocation("stardewcraft","mine_layouts/"+candidate+".json");
         return level.getServer().getResourceManager().getResource(resource).isPresent()?candidate:base;
     }
-    @SubscribeEvent public static void dataReload(net.neoforged.neoforge.event.OnDatapackSyncEvent event) {
+    @SubscribeEvent public static void dataReload(net.minecraftforge.event.OnDatapackSyncEvent event) {
         if(event.getPlayer()==null) OrdinaryMineLayout.clearCache();
     }
-    @SubscribeEvent public static void login(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent event) {
+    @SubscribeEvent public static void login(net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent event) {
         if(!(event.getEntity() instanceof ServerPlayer p))return;
         var mine=p.getServer().getLevel(ModMiningDimensions.STARDEW_MINING);
         if(mine==null)return;
@@ -83,7 +83,7 @@ public final class OrdinaryMineRuntime {
         if(p.serverLevel()==mine && MiningDataManager.getPlayerData(p).getCurrentFloor()>120)SkullCavernSessionManager.onPlayerEnter(p);
         MineRewardClaimManager.get(mine).sync(p);
     }
-    @SubscribeEvent public static void logout(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent event) {
+    @SubscribeEvent public static void logout(net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent event) {
         if(event.getEntity() instanceof ServerPlayer p && p.level().dimension()==ModMiningDimensions.STARDEW_MINING) {
             int floor=floorAt(p.blockPosition());
             if(handles(floor)) OrdinaryMineProgress.get(p.serverLevel()).disconnect(p.getUUID(),floor,StardewTimeManager.get().getAbsoluteDay());
@@ -98,7 +98,7 @@ public final class OrdinaryMineRuntime {
         }
         var layout=OrdinaryMineLayout.loadNamed(level,chooseLayout(level,floor));
         // Preflight both resources before touching a world.
-        var template=level.getStructureManager().get(ResourceLocation.fromNamespaceAndPath("stardewcraft","mine_layouts/"+layout.name))
+        var template=level.getStructureManager().get(new ResourceLocation("stardewcraft","mine_layouts/"+layout.name))
                 .orElseThrow(()->new IllegalStateException("Missing mine architecture " + layout.name));
         if(!template.getSize().equals(layout.size)) throw new IllegalStateException("Mine layout/template size mismatch " + layout.name);
         BlockPos origin=layout.origin(floor);
@@ -227,13 +227,13 @@ public final class OrdinaryMineRuntime {
         var layout=OrdinaryMineLayout.load(level,floor);
         return data.isArchitecture(architectureIndex(layout,layout.origin(floor),p));
     }
-    @SubscribeEvent public static void protectArchitecture(net.neoforged.neoforge.event.level.BlockEvent.BreakEvent event) {
+    @SubscribeEvent public static void protectArchitecture(net.minecraftforge.event.level.BlockEvent.BreakEvent event) {
         if(event.getLevel() instanceof ServerLevel level && !event.getPlayer().isCreative() && isArchitecture(level,event.getPos())) event.setCanceled(true);
     }
-    @SubscribeEvent public static void protectArchitectureClick(net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.LeftClickBlock event) {
+    @SubscribeEvent public static void protectArchitectureClick(net.minecraftforge.event.entity.player.PlayerInteractEvent.LeftClickBlock event) {
         if(event.getLevel() instanceof ServerLevel level && !event.getEntity().isCreative() && isArchitecture(level,event.getPos())) event.setCanceled(true);
     }
-    @SubscribeEvent public static void protectArchitectureExplosion(net.neoforged.neoforge.event.level.ExplosionEvent.Detonate event) {
+    @SubscribeEvent public static void protectArchitectureExplosion(net.minecraftforge.event.level.ExplosionEvent.Detonate event) {
         if(event.getLevel() instanceof ServerLevel level && level.dimension()==ModMiningDimensions.STARDEW_MINING)
             event.getAffectedBlocks().removeIf(p->isArchitecture(level,p));
     }

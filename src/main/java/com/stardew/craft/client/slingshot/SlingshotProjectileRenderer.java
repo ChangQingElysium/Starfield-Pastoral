@@ -20,7 +20,7 @@ public final class SlingshotProjectileRenderer extends EntityRenderer<SlingshotP
         stack.mulPose(Axis.ZP.rotationDegrees((e.tickCount+partial)*e.spinDegreesPerTick()));
         String id=com.stardew.craft.item.weapon.SlingshotAmmo.sourceId(e.getItem());
         if(java.util.Set.of("388","390","378","380","384","382","386").contains(id)) {
-            var texture=ResourceLocation.fromNamespaceAndPath("stardewcraft","textures/entity/slingshot/"+id+".png");
+            var texture=new ResourceLocation("stardewcraft","textures/entity/slingshot/"+id+".png");
             var out=buffers.getBuffer(RenderType.entityCutoutNoCull(texture));
             float[][] corners={{-.5f,-.5f,0,1},{.5f,-.5f,1,1},{.5f,.5f,1,0},{-.5f,.5f,0,0}};
             for(var v:corners) out.addVertex(stack.last().pose(),v[0],v[1],0).setColor(-1).setUv(v[2],v[3])

@@ -5,15 +5,15 @@ import com.stardew.craft.leaderboard.LeaderboardMetric;
 import com.stardew.craft.leaderboard.LeaderboardPeriod;
 import com.stardew.craft.leaderboard.LeaderboardService;
 import com.stardew.craft.leaderboard.LeaderboardSnapshot;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +34,7 @@ public record LeaderboardSyncPayload(
     }
 
     public static final Type<LeaderboardSyncPayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "leaderboard_sync"));
+            new Type<>(new ResourceLocation(StardewCraft.MODID, "leaderboard_sync"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, LeaderboardSyncPayload> STREAM_CODEC =
             new StreamCodec<>() {

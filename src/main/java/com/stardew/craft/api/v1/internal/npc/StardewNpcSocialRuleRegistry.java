@@ -11,7 +11,7 @@ public final class StardewNpcSocialRuleRegistry {
     private static final OrderedExtensionRegistry<
             StardewNpcSocialRules.Provider> PROVIDERS =
             new OrderedExtensionRegistry<>(
-                    ResourceLocation.fromNamespaceAndPath(
+                    new ResourceLocation(
                             StardewCraft.MODID, "npc/social_rule"));
 
     private StardewNpcSocialRuleRegistry() {

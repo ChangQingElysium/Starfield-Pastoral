@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.renderer.GeoRenderer;
 import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
-import software.bernie.geckolib.util.Color;
+import software.bernie.geckolib.core.object.Color;
 
 /**
  * Render layer that re-renders the Junimo model using the tint texture,
@@ -21,7 +21,7 @@ import software.bernie.geckolib.util.Color;
 @SuppressWarnings("null")
 public class JunimoTintLayer extends GeoRenderLayer<JunimoEntity> {
 
-    private static final ResourceLocation TINT_TEXTURE = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation TINT_TEXTURE = new ResourceLocation(
             StardewCraft.MODID, "textures/entity/junimo/junimo_tint.png");
 
     public JunimoTintLayer(GeoRenderer<JunimoEntity> renderer) {

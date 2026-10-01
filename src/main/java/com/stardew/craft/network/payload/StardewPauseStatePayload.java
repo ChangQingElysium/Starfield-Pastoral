@@ -3,12 +3,12 @@ package com.stardew.craft.network.payload;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.time.StardewTimePauseService;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
 public record StardewPauseStatePayload(
@@ -17,7 +17,7 @@ public record StardewPauseStatePayload(
 ) implements CustomPacketPayload {
 
     public static final Type<StardewPauseStatePayload> TYPE = new Type<>(
-        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "pause_state")
+        new ResourceLocation(StardewCraft.MODID, "pause_state")
     );
 
     public static final StreamCodec<ByteBuf, StardewPauseStatePayload> STREAM_CODEC = StreamCodec.composite(

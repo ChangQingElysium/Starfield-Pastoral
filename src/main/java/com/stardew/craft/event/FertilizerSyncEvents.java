@@ -4,11 +4,11 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.manager.FertilizerManager;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.level.ChunkWatchEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.level.ChunkWatchEvent;
 
 /**
  * 肥料数据同步事件处理器
@@ -74,7 +74,7 @@ public class FertilizerSyncEvents {
          */
         @SubscribeEvent
         public static void onClientDisconnect(
-                net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent.LoggingOut event
+                net.minecraftforge.client.event.ClientPlayerNetworkEvent.LoggingOut event
         ) {
             com.stardew.craft.client.ClientFertilizerCache.clear();
         }

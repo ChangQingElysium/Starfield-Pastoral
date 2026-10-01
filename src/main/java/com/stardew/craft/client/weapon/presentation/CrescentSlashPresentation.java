@@ -2,7 +2,7 @@ package com.stardew.craft.client.weapon.presentation;
 
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 
 /**
  * Audio and confirmed-hit accents for Crescent Slash. The blade path is rendered

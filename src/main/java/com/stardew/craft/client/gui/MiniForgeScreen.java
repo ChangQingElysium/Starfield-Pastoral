@@ -31,7 +31,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 @SuppressWarnings("null")
 public class MiniForgeScreen extends AbstractContainerScreen<MiniForgeMenu> {
@@ -45,9 +45,9 @@ public class MiniForgeScreen extends AbstractContainerScreen<MiniForgeMenu> {
     private static final ResourceLocation[] COSTS = { forge("cost_10"), forge("cost_15"), forge("cost_20") };
     private static final ResourceLocation RING_FILLED = forge("ring_filled");
     private static final ResourceLocation RING_EMPTY = forge("ring_empty");
-    private static final ResourceLocation CURSORS2 = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation CURSORS2 = new ResourceLocation(
             StardewCraft.MODID, "textures/gui/cursors2.png");
-    private static final ResourceLocation OK_BUTTON = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation OK_BUTTON = new ResourceLocation(
             StardewCraft.MODID, "textures/gui/geode/geode_ok_button.png");
 
     private static final int BORDER = 40;
@@ -897,6 +897,6 @@ public class MiniForgeScreen extends AbstractContainerScreen<MiniForgeMenu> {
     }
 
     private static ResourceLocation forge(String name) {
-        return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/forge/" + name + ".png");
+        return new ResourceLocation(StardewCraft.MODID, "textures/gui/forge/" + name + ".png");
     }
 }

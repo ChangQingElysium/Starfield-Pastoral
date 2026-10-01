@@ -37,7 +37,7 @@ public final class LivestockPortrait {
                         .isEmpty()) {
             FarmFolioScreen.image(
                     g,
-                    ResourceLocation.parse("stardewcraft:textures/gui/farm_buildings/pet.png"),
+                    new ResourceLocation("stardewcraft:textures/gui/farm_buildings/pet.png"),
                     16,
                     16,
                     x,

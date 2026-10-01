@@ -31,7 +31,7 @@ public final class StardewAnimalFacilities {
     private record Registered(ResourceLocation id,int priority,Provider provider){}
     private static final Map<ResourceLocation,Registered> registrations=new LinkedHashMap<>();
     private static volatile List<Registered> providers=List.of();
-    private static final ResourceLocation BUILTIN=ResourceLocation.parse("stardewcraft:builtin_facility");
+    private static final ResourceLocation BUILTIN=new ResourceLocation("stardewcraft:builtin_facility");
     private StardewAnimalFacilities(){}
     public static synchronized void register(ResourceLocation id,int priority,Provider provider){
         Objects.requireNonNull(id);Objects.requireNonNull(provider);

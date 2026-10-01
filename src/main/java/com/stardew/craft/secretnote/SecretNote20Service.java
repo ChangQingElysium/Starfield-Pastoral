@@ -27,12 +27,12 @@ import net.minecraft.world.entity.Interaction;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.event.level.LevelEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.level.LevelEvent;
+import net.minecraftforge.network.PacketDistributor;
 
 /** Vanilla secret note 20: trade a rabbit's foot to the truck driver for the Special Charm. */
 @EventBusSubscriber(modid = StardewCraft.MODID)
@@ -50,7 +50,7 @@ public final class SecretNote20Service {
     public static final AABB TRUCK_BOUNDS = new AABB(122, 67, -21, 124, 68, -20);
 
     private static final TagKey<Item> RABBIT_FEET = TagKey.create(
-            Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "rabbit_feet"));
+            Registries.ITEM, new ResourceLocation("c", "rabbit_feet"));
 
     private SecretNote20Service() {
     }

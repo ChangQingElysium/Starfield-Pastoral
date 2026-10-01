@@ -38,13 +38,13 @@ public final class VanillaCookingRecipeData {
     private static final ResourceLocation LEGACY_TOKENS = id("vanilla_cooking_ingredient_map");
     private static final ResourceLocation FISH = id("fish");
     private static final ResourceLocation LEGENDARY_FISH = id("legendary_fish");
-    private static final ResourceLocation EGGS = ResourceLocation.fromNamespaceAndPath("c", "eggs");
-    private static final ResourceLocation MILK = ResourceLocation.fromNamespaceAndPath("c", "milk");
+    private static final ResourceLocation EGGS = new ResourceLocation("c", "eggs");
+    private static final ResourceLocation MILK = new ResourceLocation("c", "milk");
     private static final AtomicDefinitionStore<StardewCookingRecipeDefinition> STORE = new AtomicDefinitionStore<>();
     private static final Map<String, ResourceLocation> FALLBACK_ITEMS = Map.of(
-            "sugar", ResourceLocation.fromNamespaceAndPath("minecraft", "sugar"),
-            "dandelion", ResourceLocation.fromNamespaceAndPath("minecraft", "dandelion"),
-            "moss", ResourceLocation.fromNamespaceAndPath("minecraft", "moss_block")
+            "sugar", new ResourceLocation("minecraft", "sugar"),
+            "dandelion", new ResourceLocation("minecraft", "dandelion"),
+            "moss", new ResourceLocation("minecraft", "moss_block")
     );
 
     private static volatile Catalog catalog = Catalog.empty();
@@ -304,7 +304,7 @@ public final class VanillaCookingRecipeData {
                 index++;
             }
             if (ingredients.size() != entry.getValue().getAsJsonArray().size()) continue;
-            ResourceLocation output = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, entry.getKey());
+            ResourceLocation output = new ResourceLocation(StardewCraft.MODID, entry.getKey());
             StardewCookingRecipeDefinition definition = new StardewCookingRecipeDefinition(output, 1, ingredients);
             definitions.put(recipeId, definition);
             sources.put(recipeId, encodeDefinition(definition));
@@ -404,7 +404,7 @@ public final class VanillaCookingRecipeData {
     }
 
     private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, path);
+        return new ResourceLocation(StardewCraft.MODID, path);
     }
 
     static Catalog catalog() {

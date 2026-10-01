@@ -2,13 +2,13 @@ package com.stardew.craft.network.payload;
 
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.player.PassOutService;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.List;
 
@@ -33,7 +33,7 @@ public record PassOutPayload(
     }
 
     public static final Type<PassOutPayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "pass_out"));
+            new Type<>(new ResourceLocation(StardewCraft.MODID, "pass_out"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, PassOutPayload> STREAM_CODEC =
             StreamCodec.composite(
@@ -41,7 +41,7 @@ public record PassOutPayload(
                     ByteBufCodecs.VAR_INT.map(PassOutService.PassOutType::fromId, PassOutService.PassOutType::getId),
                     PassOutPayload::passOutType,
                     ByteBufCodecs.VAR_INT, PassOutPayload::moneyLost,
-                    ItemStack.OPTIONAL_STREAM_CODEC.apply(ByteBufCodecs.list()), PassOutPayload::lostItems,
+                    com.stardew.craft.port.PortCodecs.OPTIONAL_ITEM_STACK.apply(ByteBufCodecs.list()), PassOutPayload::lostItems,
                     PassOutPayload::new
             );
 
@@ -54,7 +54,7 @@ public record PassOutPayload(
         context.enqueueWork(() -> handleClient(payload));
     }
 
-    @net.neoforged.api.distmarker.OnlyIn(net.neoforged.api.distmarker.Dist.CLIENT)
+    @net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
     private static void handleClient(PassOutPayload payload) {
         com.stardew.craft.client.gui.overnight.PassOutOverlayScreen.show(payload);
     }

@@ -10,7 +10,7 @@ import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.state.properties.Half;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.Node;
-import net.minecraft.world.level.pathfinder.PathType;
+import com.stardew.craft.port.net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import net.minecraft.world.phys.AABB;
 
@@ -67,7 +67,7 @@ public class NpcNodeEvaluator extends WalkNodeEvaluator {
     }
 
     @Override
-    public PathType getPathType(net.minecraft.world.level.pathfinder.PathfindingContext context, int x, int y, int z) {
+    public PathType getPathType(com.stardew.craft.port.net.minecraft.world.level.pathfinder.PathfindingContext context, int x, int y, int z) {
         PathType type = super.getPathType(context,x,y,z);
         if (type == PathType.FENCE && context.level().getBlockState(new BlockPos(x,y,z)).getBlock()
                 instanceof net.minecraft.world.level.block.FenceGateBlock) {

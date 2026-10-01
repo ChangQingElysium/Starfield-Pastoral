@@ -24,7 +24,7 @@ import java.util.List;
 public enum CrystalariumJadeProvider implements IBlockComponentProvider, IServerDataProvider<BlockAccessor> {
     INSTANCE;
 
-    private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "crystalarium");
+    private static final ResourceLocation UID = new ResourceLocation(StardewCraft.MODID, "crystalarium");
 
     private static final String NBT_READY = "ready";
     private static final String NBT_INPUT_ITEM = "inputItem";

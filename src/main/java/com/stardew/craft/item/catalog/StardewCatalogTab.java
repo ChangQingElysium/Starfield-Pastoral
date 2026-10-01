@@ -45,6 +45,6 @@ public enum StardewCatalogTab {
 
     public ResourceKey<net.minecraft.world.item.CreativeModeTab> key() {
         return ResourceKey.create(Registries.CREATIVE_MODE_TAB,
-                ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, registryName));
+                new ResourceLocation(StardewCraft.MODID, registryName));
     }
 }

@@ -20,13 +20,13 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ModelEvent;
-import net.neoforged.neoforge.client.model.BakedModelWrapper;
-import net.neoforged.neoforge.client.model.IDynamicBakedModel;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.ModelEvent;
+import net.minecraftforge.client.model.BakedModelWrapper;
+import net.minecraftforge.client.model.IDynamicBakedModel;
+import net.minecraftforge.client.model.data.ModelData;
 
 /** Season selection preserves the placed variant and uses isolated geometry for items. */
 @SuppressWarnings("removal")
@@ -37,7 +37,7 @@ public final class ParkBenchModels {
     private ParkBenchModels() {}
 
     private static ModelResourceLocation id(String season, String part, int variant) {
-        return new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,
+        return new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID,
                 "block/decor/park_bench/" + season + "/" + part + "_" + variant), "standalone");
     }
 
@@ -58,7 +58,7 @@ public final class ParkBenchModels {
             var key = BlockModelShaper.stateToModelLocation(state);
             models.put(key, new Seasonal(Objects.requireNonNull(models.get(key)), seasons, state.getValue(ParkBenchBlock.FACING), visible));
         }
-        var item = new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "park_bench"), "inventory");
+        var item = new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID, "park_bench"), "inventory");
         BakedModel[] seasons = new BakedModel[4];
         for (int s = 0; s < 4; s++) seasons[s] = Objects.requireNonNull(models.get(id(SEASONS[s], "single", 0)));
         models.put(item, new Seasonal(Objects.requireNonNull(models.get(item)), seasons, Direction.NORTH, true));

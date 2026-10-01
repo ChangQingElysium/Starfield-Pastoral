@@ -2,12 +2,12 @@ package com.stardew.craft.network.payload;
 
 import com.stardew.craft.StardewCraft;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +37,7 @@ public record CasinoGameStatePayload(
     public static final int PHASE_SLOTS_SPINNING = 3;
 
     public static final Type<CasinoGameStatePayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "casino_game_state"));
+            new Type<>(new ResourceLocation(StardewCraft.MODID, "casino_game_state"));
 
     public static final StreamCodec<FriendlyByteBuf, CasinoGameStatePayload> STREAM_CODEC = StreamCodec.of(
             CasinoGameStatePayload::write,

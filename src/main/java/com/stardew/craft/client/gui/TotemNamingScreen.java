@@ -12,7 +12,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
 import java.util.Random;
@@ -26,11 +26,11 @@ import java.util.Random;
 public class TotemNamingScreen extends Screen {
 
     // ---- 图标资源（复用 AnimalPurchaseScreen 的 rename/dice 图标） ----
-    private static final ResourceLocation RENAME_ICON = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation RENAME_ICON = new ResourceLocation(
             StardewCraft.MODID, "textures/gui/animal_query/rename.png");
-    private static final ResourceLocation DICE_ICON = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation DICE_ICON = new ResourceLocation(
             StardewCraft.MODID, "textures/gui/animal_query/dice_icon.png");
-    private static final ResourceLocation OK_ICON = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation OK_ICON = new ResourceLocation(
             StardewCraft.MODID, "textures/gui/animal_query/ok_yes_tile46.png");
 
     // ---- 随机名称池（完全复刻SDV Dialogue.randomName风格） ----

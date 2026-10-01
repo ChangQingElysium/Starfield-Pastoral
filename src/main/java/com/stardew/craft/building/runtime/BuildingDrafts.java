@@ -1,12 +1,12 @@
 package com.stardew.craft.building.runtime;
 
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.component.DataComponents;
+import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomData;
+import com.stardew.craft.port.net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.saveddata.SavedData;
 import java.util.*;
 
@@ -59,7 +59,7 @@ public final class BuildingDrafts extends SavedData {
             if(moving!=null)row.putUUID("Moving",moving.id());rows.add(row);
         }
         var tag=new CompoundTag();tag.putString("Dimension",player.level().dimension().location().toString());tag.put("Pins",rows);
-        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,new com.stardew.craft.network.payload.BuildingPinnedPreviewsPayload(tag));
+        net.minecraftforge.network.PacketDistributor.sendToPlayer(player,new com.stardew.craft.network.payload.BuildingPinnedPreviewsPayload(tag));
     }
     @Override public CompoundTag save(CompoundTag tag,HolderLookup.Provider registries){var all=new CompoundTag();drafts.forEach((id,value)->all.put(id.toString(),value.copy()));tag.put("Drafts",all);return tag;}
     public static BuildingDrafts load(CompoundTag tag,HolderLookup.Provider registries){var result=new BuildingDrafts();var all=tag.getCompound("Drafts");for(var key:all.getAllKeys())result.drafts.put(UUID.fromString(key),all.getCompound(key).copy());return result;}

@@ -25,7 +25,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -248,7 +248,7 @@ public class WorkbenchScreen extends Screen {
     }
 
     private int count(String id) {
-        Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(id));
+        Item item = BuiltInRegistries.ITEM.get(new ResourceLocation(id));
         int total = 0;
         for (int i = 0; i < minecraft.player.getInventory().getContainerSize(); i++) {
             ItemStack s = minecraft.player.getInventory().getItem(i);
@@ -376,7 +376,7 @@ public class WorkbenchScreen extends Screen {
     }
 
     private int drawMaterial(GuiGraphics g, String id, int count, int x, int y, boolean enough) {
-        CommonGuiTextures.drawItem(g, stack(ResourceLocation.parse(id)), x, y, 1);
+        CommonGuiTextures.drawItem(g, stack(new ResourceLocation(id)), x, y, 1);
         String text = Integer.toString(count);
         g.drawString(font, text, x + 18, y + 4, enough ? WorkbenchArt.INK : WorkbenchArt.BAD, false);
         return x + 23 + font.width(text);
@@ -386,8 +386,8 @@ public class WorkbenchScreen extends Screen {
         var item = stack(e.itemId());
         List<Component> lines = new ArrayList<>(item.getTooltipLines(Item.TooltipContext.EMPTY, minecraft.player,
                 net.minecraft.world.item.TooltipFlag.Default.NORMAL));
-        lines.add(tr("recipe_cost", stack(ResourceLocation.parse(e.inputItemId(type))).getHoverName(), e.cost(), e.outputCount()));
-        lines.add(tr("in_stock", stack(ResourceLocation.parse(e.inputItemId(type))).getHoverName(),
+        lines.add(tr("recipe_cost", stack(new ResourceLocation(e.inputItemId(type))).getHoverName(), e.cost(), e.outputCount()));
+        lines.add(tr("in_stock", stack(new ResourceLocation(e.inputItemId(type))).getHoverName(),
                 e.inputItemId(type).equals("stardewcraft:wood_hard") ? hardCount : normalCount));
         if (type.hasBonus()) lines.add(tr("hardwood_exchange", type.getBonusMultiplier()));
         g.renderTooltip(font, lines, Optional.empty(), mx, my);

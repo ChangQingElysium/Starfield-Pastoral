@@ -6,10 +6,10 @@ import com.stardew.craft.npc.data.NpcModelOwnership;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 
 @SuppressWarnings("removal")
 @EventBusSubscriber(modid = StardewCraft.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
@@ -30,7 +30,7 @@ public final class NativeNpcAssets implements ResourceManagerReloadListener {
         if (NpcModelOwnership.requiresNative(key) || models.containsKey(key)) return key;
         var resources = net.minecraft.client.Minecraft.getInstance().getResourceManager();
         if (!key.isEmpty() && key.matches("[a-z0-9_./-]+")
-                && resources.getResource(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID,
+                && resources.getResource(new ResourceLocation(StardewCraft.MODID,
                         "geo/entity/npc/" + key + ".geo.json")).isPresent()) return key;
         return "lewis";
     }
@@ -66,7 +66,7 @@ public final class NativeNpcAssets implements ResourceManagerReloadListener {
                     var loaded = new Gson().fromJson(reader,NativeNpcModel.class);
                     boolean legacyActivity = com.stardew.craft.npc.animation.SamActivity.fromAnimation(id) != null;
                     validate(loaded,legacyActivity,id);
-                    var texture = ResourceLocation.parse(loaded.texture());
+                    var texture = new ResourceLocation(loaded.texture());
                     if (!textures.containsKey(texture)) {
                         try (var input = resources.open(texture)) {
                             textures.put(texture,com.mojang.blaze3d.platform.NativeImage.read(input));
@@ -107,7 +107,7 @@ public final class NativeNpcAssets implements ResourceManagerReloadListener {
     private static void validate(NativeNpcModel model, boolean guitar, String id) {
         if (model == null || model.version() != 1 || model.bones().isEmpty())
             throw new IllegalArgumentException("Unsupported native model");
-        ResourceLocation.parse(model.texture());
+        new ResourceLocation(model.texture());
         var names=model.bones().stream().map(NativeNpcModel.Bone::name).collect(java.util.stream.Collectors.toSet());
         if (!names.containsAll(java.util.Set.of("root","body","head","arm_left","arm_right",
                 "leg_left","leg_right")))

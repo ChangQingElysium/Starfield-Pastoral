@@ -57,8 +57,8 @@ public class MineChestBlock extends Block implements EntityBlock {
 
     @Override
     public BlockState getStateForPlacement(net.minecraft.world.item.context.BlockPlaceContext context) {
-        var saved = context.getItemInHand().getOrDefault(net.minecraft.core.component.DataComponents.BLOCK_STATE,
-                net.minecraft.world.item.component.BlockItemStateProperties.EMPTY);
+        var saved = context.getItemInHand().getOrDefault(com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
+                com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties.EMPTY);
         return defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite())
                 .setValue(SPECIAL, Boolean.TRUE.equals(saved.get(SPECIAL)));
     }
@@ -67,8 +67,8 @@ public class MineChestBlock extends Block implements EntityBlock {
     public net.minecraft.world.item.ItemStack getCloneItemStack(net.minecraft.world.level.LevelReader level,
             BlockPos pos, BlockState state) {
         var stack = new net.minecraft.world.item.ItemStack(this);
-        stack.set(net.minecraft.core.component.DataComponents.BLOCK_STATE,
-                net.minecraft.world.item.component.BlockItemStateProperties.EMPTY.with(SPECIAL, state));
+        stack.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
+                com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties.EMPTY.with(SPECIAL, state));
         return stack;
     }
 

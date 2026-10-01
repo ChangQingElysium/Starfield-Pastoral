@@ -31,9 +31,9 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Rotation;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.common.util.FakePlayerFactory;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -69,7 +69,7 @@ public final class DailyInfoApiGameTests {
         var date = new StardewCalendarDate(4, 2, 9);
         var first = info(UUID.randomUUID(), date, -.08, Optional.empty());
         var second = info(UUID.randomUUID(), date, .08, Optional.of(new StardewToolUpgradeSnapshot(
-                ResourceLocation.parse("stardewcraft:iridium_axe"), 1, date.plusDays(1))));
+                new ResourceLocation("stardewcraft:iridium_axe"), 1, date.plusDays(1))));
         var unwatched = withCooking(first, new StardewQueenOfSauceSnapshot("stir_fry", false, false, false));
         var watched = withCooking(second, new StardewQueenOfSauceSnapshot("coleslaw", true, true, true));
         StardewDailyInfoCache.clear();
@@ -212,9 +212,9 @@ public final class DailyInfoApiGameTests {
     @GameTest(templateNamespace = "stardewcraft_daily_info", template = "ring_utilities")
     public static void personalCookingRerunsMatchTvAndStayPinnedAfterWatching(GameTestHelper h) {
         var date = new StardewCalendarDate(1, 0, 17); // Wednesday: two prior broadcasts.
-        var first = net.neoforged.neoforge.common.util.FakePlayerFactory.get(h.getLevel(),
+        var first = net.minecraftforge.common.util.FakePlayerFactory.get(h.getLevel(),
                 new com.mojang.authlib.GameProfile(UUID.randomUUID(), "CookingFirst"));
-        var second = net.neoforged.neoforge.common.util.FakePlayerFactory.get(h.getLevel(),
+        var second = net.minecraftforge.common.util.FakePlayerFactory.get(h.getLevel(),
                 new com.mojang.authlib.GameProfile(UUID.randomUUID(), "CookingSecond"));
         var a = com.stardew.craft.player.PlayerStardewDataAPI.getData(first);
         var b = com.stardew.craft.player.PlayerStardewDataAPI.getData(second);
@@ -259,8 +259,8 @@ public final class DailyInfoApiGameTests {
                 "Other":{"season":"fall","day":14},"Broken":{"season":{},"day":"bad"}}}
                 """).getAsJsonObject();
         var ids = DailyInfoSyncEvents.birthdaysToday(root, new StardewCalendarDate(2, 2, 13));
-        h.assertTrue(ids.size() == 2 && ids.contains(ResourceLocation.parse("stardewcraft:abigail"))
-                && ids.contains(ResourceLocation.parse("addon:visitor")), "Birthday data or namespace lost");
+        h.assertTrue(ids.size() == 2 && ids.contains(new ResourceLocation("stardewcraft:abigail"))
+                && ids.contains(new ResourceLocation("addon:visitor")), "Birthday data or namespace lost");
         var mutable = new ArrayList<>(ids);
         var snapshot = new StardewDailyInfoSnapshot(UUID.randomUUID(), new StardewCalendarDate(2, 2, 13),
                 0, "Rain", StardewDailyInfoSnapshot.BerrySeason.NONE, false, true, mutable, Optional.empty());
@@ -291,7 +291,7 @@ public final class DailyInfoApiGameTests {
     private static StardewDailyInfoSnapshot info(UUID player, StardewCalendarDate date, double luck,
                                                 Optional<StardewToolUpgradeSnapshot> tool) {
         return new StardewDailyInfoSnapshot(player, date, luck, "Storm", StardewDailyInfoSnapshot.BerrySeason.BLACKBERRY,
-                true, false, List.of(ResourceLocation.parse("stardewcraft:abigail")), tool);
+                true, false, List.of(new ResourceLocation("stardewcraft:abigail")), tool);
     }
 
     private static BuildingRecord buildingRecord(

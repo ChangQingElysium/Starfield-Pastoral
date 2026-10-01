@@ -36,7 +36,7 @@ import java.util.Random;
 public final class MineChestRewardData {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final ResourceLocation BUILTIN_TABLE =
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "rewards");
+            new ResourceLocation(StardewCraft.MODID, "rewards");
     private static final AtomicDefinitionStore<StardewMineChestRewardDefinition> STORE =
             new AtomicDefinitionStore<>();
     private static volatile Catalog catalog = Catalog.empty();

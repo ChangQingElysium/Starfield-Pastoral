@@ -15,11 +15,11 @@ import net.minecraft.world.entity.player.PlayerModelPart;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RenderHandEvent;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.RenderHandEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -127,7 +127,7 @@ public final class FishingPresentationRenderer {
         attachEquipment(pose,actor,bobberMatrix,mounted,attached);
         Vec3 mainLine=FishingBobberModels.anchor(bobberMatrix,bobber.mainLine());
         Vec3 leader=FishingBobberModels.anchor(bobberMatrix,bobber.leader());
-        boolean slim=player.getSkin().model()==net.minecraft.client.resources.PlayerSkin.Model.SLIM;
+        boolean slim=player.getSkin().model()==com.stardew.craft.port.net.minecraft.client.resources.PlayerSkin.Model.SLIM;
         stack.pushPose();stack.mulPose(actor);
         for(var face:pose.rig.faces()) {
             if(face.part().startsWith("rod_bobber"))continue;
@@ -160,16 +160,16 @@ public final class FishingPresentationRenderer {
             if(arm) {
                 var chest=player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.CHEST);
                 if(chest.getItem() instanceof net.minecraft.world.item.ArmorItem armor&&!FishingArmorVisibility.shouldHide(player,chest)) {
-                    var extensions=net.neoforged.neoforge.client.extensions.common.IClientItemExtensions.of(chest);
+                    var extensions=net.minecraftforge.client.extensions.common.IClientItemExtensions.of(chest);
                     var layers=armor.getMaterial().value().layers();
                     for(int layerIndex=0;layerIndex<layers.size();layerIndex++) {
                         var material=layers.get(layerIndex);int color=extensions.getArmorLayerTintColor(chest,player,material,layerIndex,extensions.getDefaultDyeColor(chest));
                         if(color==0)continue;
-                        var armorTexture=net.neoforged.neoforge.client.ClientHooks.getArmorTexture(player,chest,material,false,net.minecraft.world.entity.EquipmentSlot.CHEST);
+                        var armorTexture=com.stardew.craft.port.net.neoforged.neoforge.client.ClientHooks.getArmorTexture(player,chest,material,false,net.minecraft.world.entity.EquipmentSlot.CHEST);
                         var armorConsumer=buffers.getBuffer(RenderType.armorCutoutNoCull(armorTexture));
                         armorFace(pose,face,stack,armorConsumer,light,normal,left,color);
                     }
-                    var trim=chest.get(net.minecraft.core.component.DataComponents.TRIM);
+                    var trim=chest.get(com.stardew.craft.port.net.minecraft.core.component.DataComponents.TRIM);
                     if(trim!=null){var atlas=Minecraft.getInstance().getModelManager().getAtlas(net.minecraft.client.renderer.Sheets.ARMOR_TRIMS_SHEET);var sprite=atlas.getSprite(trim.outerTexture(armor.getMaterial()));armorFace(pose,face,stack,sprite.wrap(buffers.getBuffer(net.minecraft.client.renderer.Sheets.armorTrimsSheet(trim.pattern().value().decal()))),light,normal,left,-1);}
                     if(chest.hasFoil())armorFace(pose,face,stack,buffers.getBuffer(RenderType.armorEntityGlint()),light,normal,left,-1);
                 }

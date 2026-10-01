@@ -12,7 +12,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.server.level.ClientInformation;
+import com.stardew.craft.port.net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
@@ -29,9 +29,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SnowyDirtBlock;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.ItemAbilities;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import com.stardew.craft.port.net.neoforged.neoforge.common.ItemAbilities;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 import java.util.UUID;
 
@@ -345,7 +345,7 @@ public final class TerrainGrassGameTests {
                 var source = block.defaultBlockState().setValue(property, variant);
                 var ordinary = new ItemStack(block);
                 var fixed = com.stardew.craft.block.terrain.TerrainVariants.fixedCopy(ordinary, source);
-                helper.assertTrue(!ordinary.has(net.minecraft.core.component.DataComponents.BLOCK_STATE),
+                helper.assertTrue(!ordinary.has(com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE),
                         "Ctrl-copy mutated the normal random-placement item");
                 player.setItemInHand(InteractionHand.MAIN_HAND, fixed);
                 for (int repeat = 0; repeat < 5; repeat++) {
@@ -395,7 +395,7 @@ public final class TerrainGrassGameTests {
             for (int i = 0; i < 10000; i++) seen.add(block.getStateForPlacement(placement).getValue(terrainProperty));
             helper.assertTrue(seen.equals(java.util.Set.copyOf(terrainProperty.getPossibleValues())),
                     "Ordinary placement cannot reach every terrain variant");
-            helper.assertTrue(!ordinary.has(net.minecraft.core.component.DataComponents.BLOCK_STATE),
+            helper.assertTrue(!ordinary.has(com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE),
                     "Random placement permanently fixed the remaining stack");
         }
         helper.succeed();

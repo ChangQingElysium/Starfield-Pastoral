@@ -16,7 +16,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
@@ -1000,7 +1000,7 @@ public class FairSlingshotGameScreen extends Screen implements com.stardew.craft
     }
 
     private static ResourceLocation tex(String name) {
-        return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/fair/target_game/" + name + ".png");
+        return new ResourceLocation(StardewCraft.MODID, "textures/gui/fair/target_game/" + name + ".png");
     }
 
     private static final class Target {

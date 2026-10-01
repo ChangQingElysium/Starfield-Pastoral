@@ -6,7 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.*;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.*;
-import net.neoforged.neoforge.gametest.*;
+import net.minecraftforge.gametest.*;
 @GameTestHolder("stardewcraft_bug")
 @PrefixGameTestTemplate(false)
 @SuppressWarnings("null")
@@ -16,7 +16,7 @@ public final class NativeSkeletonGameTests {
         var level=h.getLevel();var origin=h.absolutePos(new BlockPos(8,2,8));var at=Vec3.atBottomCenterOf(origin);
         for(int x=-6;x<=6;x++)for(int z=-4;z<=4;z++){level.setBlock(origin.offset(x,-1,z),Blocks.STONE.defaultBlockState(),3);for(int y=0;y<4;y++)level.setBlock(origin.offset(x,y,z),Blocks.AIR.defaultBlockState(),3);}
         var skeleton=(MineSkeletonEntity)MineMonsterSpawnHandler.spawnConfiguredMonster(level,"skeleton",at,180,75);
-        var player=new net.neoforged.neoforge.common.util.FakePlayer(level,new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(),"BoneTest"));
+        var player=new net.minecraftforge.common.util.FakePlayer(level,new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(),"BoneTest"));
         h.runAtTickTime(3,()->{
             h.assertTrue(!skeleton.spotted()&&skeleton.position().distanceToSqr(at)<.001,"Unaware skeleton wandered");
             player.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);player.setPos(at.add(2.5,0,1.5));level.addNewPlayer(player);
@@ -36,7 +36,7 @@ public final class NativeSkeletonGameTests {
         h.runAtTickTime(2,()->{h.assertTrue(!bone.collisionReady()&&!bone.isRemoved(),"Projectile lost source 100ms grace");h.assertTrue(Math.abs(bone.getX()-at.x-.75)<.01,"Wrong source speed");});
         h.runAtTickTime(3,()->{
             h.assertTrue(bone.collisionReady(),"Projectile grace never ends");
-            var player=new net.neoforged.neoforge.common.util.FakePlayer(level,new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(),"ParryBone"));player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_SWORD));player.setPos(at.add(0,-.5,0));
+            var player=new net.minecraftforge.common.util.FakePlayer(level,new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(),"ParryBone"));player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_SWORD));player.setPos(at.add(0,-.5,0));
             com.stardew.craft.event.MineBarrelBreakHandler.breakInVolume(player,new AABB(at.add(-3,-3,-3),at.add(3,3,3)),at,v->true);
             h.assertTrue(bone.isRemoved(),"Authored melee volume did not intercept bone");h.succeed();
         });

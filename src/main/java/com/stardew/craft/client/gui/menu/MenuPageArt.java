@@ -9,7 +9,7 @@ public final class MenuPageArt {
     public static final int INK = 0xFF623E2A, MUTED = 0xFF80613F;
     private MenuPageArt() { }
     private static ResourceLocation texture(String name) {
-        return ResourceLocation.fromNamespaceAndPath("stardewcraft", "textures/gui/menu_pages/" + name + ".png");
+        return new ResourceLocation("stardewcraft", "textures/gui/menu_pages/" + name + ".png");
     }
     public static void sprite(GuiGraphics g, String name, int x, int y, int w, int h) {
         RenderSystem.enableBlend(); RenderSystem.defaultBlendFunc();

@@ -26,7 +26,7 @@ public final class JunimoTextRenderer {
 
     private JunimoTextRenderer() {}
 
-    private static final ResourceLocation FONT_BOLD = ResourceLocation.fromNamespaceAndPath(
+    private static final ResourceLocation FONT_BOLD = new ResourceLocation(
             StardewCraft.MODID, "textures/gui/font_bold.png");
     private static final int TEX_WIDTH = 128;
     private static final int TEX_HEIGHT = 592;

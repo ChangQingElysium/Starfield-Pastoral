@@ -5,17 +5,17 @@ import com.stardew.craft.workbench.WorkbenchEntry;
 import com.stardew.craft.workbench.WorkbenchRecipeManager;
 import com.stardew.craft.workbench.WorkbenchType;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * Client → Server: player requests crafting at a workbench.
@@ -28,7 +28,7 @@ public record WorkbenchCraftPayload(
 ) implements CustomPacketPayload {
 
     public static final Type<WorkbenchCraftPayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "workbench_craft"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "workbench_craft"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, WorkbenchCraftPayload> STREAM_CODEC =
         StreamCodec.composite(
@@ -50,7 +50,7 @@ public record WorkbenchCraftPayload(
 
             // Validate target item
             ResourceLocation targetRl;
-            try { targetRl = ResourceLocation.parse(payload.targetItemId()); }
+            try { targetRl = new ResourceLocation(payload.targetItemId()); }
             catch (Exception e) { sendResult(player, false, 0, 0, 0); return; }
 
             WorkbenchEntry entry = WorkbenchRecipeManager.findEntry(wbType, targetRl);
@@ -67,20 +67,20 @@ public record WorkbenchCraftPayload(
 
             if (wbType == WorkbenchType.TEMPLATE) {
                 int crafted = com.stardew.craft.workbench.TemplateWorkbenchCrafting.craft(player, targetRl, payload.count());
-                Item material = BuiltInRegistries.ITEM.get(ResourceLocation.parse(entry.inputItemId(wbType)));
+                Item material = BuiltInRegistries.ITEM.get(new ResourceLocation(entry.inputItemId(wbType)));
                 sendResult(player, crafted > 0, countItem(player, material), 0, crafted);
                 return;
             }
 
             // Count available materials
-            ResourceLocation inputRl = ResourceLocation.parse(wbType.getInputItemId());
+            ResourceLocation inputRl = new ResourceLocation(wbType.getInputItemId());
             Item inputItem = BuiltInRegistries.ITEM.get(inputRl);
             int inputCount = countItem(player, inputItem);
 
             int bonusCount = 0;
             Item bonusItem = null;
             if (wbType.hasBonus()) {
-                ResourceLocation bonusRl = ResourceLocation.parse(wbType.getBonusItemId());
+                ResourceLocation bonusRl = new ResourceLocation(wbType.getBonusItemId());
                 bonusItem = BuiltInRegistries.ITEM.get(bonusRl);
                 if (bonusItem != null && bonusItem != Items.AIR) {
                     bonusCount = countItem(player, bonusItem);

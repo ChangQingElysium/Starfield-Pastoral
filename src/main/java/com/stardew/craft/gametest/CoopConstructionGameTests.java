@@ -22,9 +22,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.common.util.FakePlayerFactory;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 import java.util.HashSet;
 import java.util.UUID;
@@ -38,7 +38,7 @@ public final class CoopConstructionGameTests {
     public static void sixTemplatesResolveRegisteredStatesAndRotateAroundTheSameDoor(GameTestHelper helper) {
         var level = helper.getLevel();
         for (String name : new String[]{"coop", "barn"}) {
-            var family = PrefabDefinitions.get(ResourceLocation.parse("stardewcraft:" + name));
+            var family = PrefabDefinitions.get(new ResourceLocation("stardewcraft:" + name));
             for (var tier : family.tiers()) {
                 var template = PrefabDefinitions.template(level, tier);
                 for (Direction facing : Direction.Plane.HORIZONTAL) {
@@ -135,7 +135,7 @@ public final class CoopConstructionGameTests {
     @GameTest(templateNamespace = "stardewcraft_buildings", template = "empty")
     public static void constructionClockAndConsumedBlueprintSurviveReload(GameTestHelper helper) {
         var data = new BuildingWorldData();
-        var record = record(UUID.randomUUID(), 0, BlockPos.ZERO.above(64), ResourceLocation.parse("minecraft:overworld"));
+        var record = record(UUID.randomUUID(), 0, BlockPos.ZERO.above(64), new ResourceLocation("minecraft:overworld"));
         UUID permit = UUID.randomUUID();
         data.recordPurchase(permit, record.farmId(), true, PrefabDefinitions.COOP);
         helper.assertTrue(data.beginPrefab(record, permit, 10) == BuildingWorldData.Result.SUCCESS, "Blueprint rejected");
@@ -228,8 +228,8 @@ public final class CoopConstructionGameTests {
             UUID prefabRequest = UUID.randomUUID();
             BuildingPurchaseService.purchase(player, revision, false, prefabRequest, PrefabDefinitions.COOP);
             helper.assertTrue(PlayerStardewDataAPI.getMoney(player) == 4000, "Missing materials partially charged money");
-            player.getInventory().add(new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse("stardewcraft:wood_normal")), 300));
-            player.getInventory().add(new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse("stardewcraft:stone")), 100));
+            player.getInventory().add(new ItemStack(BuiltInRegistries.ITEM.get(new ResourceLocation("stardewcraft:wood_normal")), 300));
+            player.getInventory().add(new ItemStack(BuiltInRegistries.ITEM.get(new ResourceLocation("stardewcraft:stone")), 100));
             BuildingPurchaseService.purchase(player, revision, false, prefabRequest, PrefabDefinitions.COOP);
             helper.assertTrue(PlayerStardewDataAPI.getMoney(player) == 0 && player.getInventory().countItem(ModItems.COOP_BLUEPRINT.get()) == 1,
                     "Prefab did not exchange exact cost for one blueprint");
@@ -248,7 +248,7 @@ public final class CoopConstructionGameTests {
             var decoded = com.stardew.craft.network.payload.BuildingTemplatePreviewPayload.STREAM_CODEC.decode(buffer);
             helper.assertTrue(decoded.template().equals(template), "Preview lost appearance data");
         } finally { buffer.release(); }
-        var registryBuffer = new net.minecraft.network.RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer(), helper.getLevel().registryAccess());
+        var registryBuffer = new com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer(), helper.getLevel().registryAccess());
         try {
             var offer = new com.stardew.craft.network.payload.OpenBuildingRoutesPayload(5000, 500, 11, 8, 4000,
                     net.minecraft.network.chat.Component.translatable("item.stardewcraft.wood_normal"), 17, PrefabDefinitions.COOP);

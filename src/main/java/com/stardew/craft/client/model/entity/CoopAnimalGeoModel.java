@@ -10,18 +10,18 @@ public class CoopAnimalGeoModel<T extends BaseCoopAnimalEntity> extends GeoModel
 	@Override
 	public ResourceLocation getModelResource(T animatable) {
 		String path = Objects.requireNonNull(animatable.getVariant().modelPath(animatable.isBaby()));
-		return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, path);
+		return new ResourceLocation(StardewCraft.MODID, path);
 	}
 
 	@Override
 	public ResourceLocation getTextureResource(T animatable) {
 		String path = Objects.requireNonNull(animatable.getVariant().texturePath(animatable.isBaby()));
-		return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, path);
+		return new ResourceLocation(StardewCraft.MODID, path);
 	}
 
 	@Override
 	public ResourceLocation getAnimationResource(T animatable) {
 		String path = Objects.requireNonNull(animatable.getVariant().animationPath(animatable.isBaby()));
-		return ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, path);
+		return new ResourceLocation(StardewCraft.MODID, path);
 	}
 }

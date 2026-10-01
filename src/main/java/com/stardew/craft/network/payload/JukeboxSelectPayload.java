@@ -5,14 +5,14 @@ import com.stardew.craft.sound.JukeboxData;
 import com.stardew.craft.sound.JukeboxTrackRegistry;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.ByteBufCodecs;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.network.PacketDistributor;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * 客户端 → 服务端：玩家在唱片机 GUI 中选择了一首曲目。
@@ -21,10 +21,10 @@ public record JukeboxSelectPayload(BlockPos pos, String trackId) implements Cust
 
     @SuppressWarnings("null")
     public static final Type<JukeboxSelectPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "jukebox_select"));
+            new ResourceLocation(StardewCraft.MODID, "jukebox_select"));
 
     public static final StreamCodec<ByteBuf, JukeboxSelectPayload> STREAM_CODEC = StreamCodec.composite(
-            BlockPos.STREAM_CODEC, JukeboxSelectPayload::pos,
+            com.stardew.craft.port.PortCodecs.BLOCK_POS, JukeboxSelectPayload::pos,
             ByteBufCodecs.STRING_UTF8, JukeboxSelectPayload::trackId,
             JukeboxSelectPayload::new
     );

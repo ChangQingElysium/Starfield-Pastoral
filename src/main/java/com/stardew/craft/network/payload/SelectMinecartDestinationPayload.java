@@ -2,11 +2,11 @@ package com.stardew.craft.network.payload;
 
 import com.stardew.craft.StardewCraft;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /** Client → Server：玩家选定了一个目的地。 */
 @SuppressWarnings("null")
@@ -14,7 +14,7 @@ public record SelectMinecartDestinationPayload(String currentStationId, String c
         implements CustomPacketPayload {
 
     public static final Type<SelectMinecartDestinationPayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "select_minecart_destination"));
+            new Type<>(new ResourceLocation(StardewCraft.MODID, "select_minecart_destination"));
 
     public static final StreamCodec<FriendlyByteBuf, SelectMinecartDestinationPayload> STREAM_CODEC = StreamCodec.of(
             (buf, p) -> {

@@ -8,7 +8,7 @@ import net.minecraft.gametest.framework.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.gametest.*;
+import net.minecraftforge.gametest.*;
 
 @GameTestHolder("stardewcraft_bug")
 @PrefixGameTestTemplate(false)
@@ -24,7 +24,7 @@ public final class NativeBugGameTests {
         var start=Vec3.atBottomCenterOf(origin);
         var bug=(MineBugEntity)MineMonsterSpawnHandler.spawnConfiguredMonster(level,"bug",start,-90,20);
         h.assertTrue(bug.getHealth()==1&&bug.monsterState().stats().getDamage()==8,"Old floor multiplier overwrote Bug source stats");
-        var player=new net.neoforged.neoforge.common.util.FakePlayer(level,new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(),"BugTest")) {
+        var player=new net.minecraftforge.common.util.FakePlayer(level,new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(),"BugTest")) {
             @Override public boolean isInvulnerableTo(net.minecraft.world.damagesource.DamageSource source) { return false; }
         };
         // Default FakePlayer is invulnerable and does not tick away its spawn immunity.

@@ -7,8 +7,8 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 /**
  * 客户端独立处理 {@link WeatherSyncPacket}，避免在专用服务器
@@ -21,7 +21,7 @@ public final class WeatherSyncPacketClient {
 
     public static void apply(WeatherSyncPacket packet) {
         try {
-            ResourceLocation dimLoc = ResourceLocation.parse(packet.dimension());
+            ResourceLocation dimLoc = new ResourceLocation(packet.dimension());
             ResourceKey<Level> dimKey = ResourceKey.create(Registries.DIMENSION, dimLoc);
             ClientWeatherCache.setWeather(dimKey, packet.weatherType(), packet.weatherForTomorrow());
 

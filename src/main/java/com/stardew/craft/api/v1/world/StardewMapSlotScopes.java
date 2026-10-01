@@ -13,7 +13,7 @@ public final class StardewMapSlotScopes {
     }
 
     private static ResourceLocation core(String path) {
-        return ResourceLocation.fromNamespaceAndPath(
+        return new ResourceLocation(
                 "stardewcraft", path);
     }
 }

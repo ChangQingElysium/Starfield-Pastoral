@@ -10,7 +10,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -27,7 +27,7 @@ public class WizardTowerCompassItem extends Item implements IStardewItem {
 
     /** 主世界法师塔结构 ID */
     private static final ResourceLocation STRUCTURE_ID =
-            ResourceLocation.fromNamespaceAndPath("stardewcraft", "wizard_tower_overworld");
+            new ResourceLocation("stardewcraft", "wizard_tower_overworld");
 
     // ── 客户端缓存（由网络包更新） ──
     private static volatile boolean hasTarget = false;

@@ -5,22 +5,22 @@ import com.stardew.craft.item.ModItems;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.stardew.craft.port.net.minecraft.network.codec.StreamCodec;
+import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record JojaVendingPurchasePayload(BlockPos pos) implements CustomPacketPayload {
     private static final int PRICE = 75;
 
     @SuppressWarnings("null")
     public static final Type<JojaVendingPurchasePayload> TYPE =
-        new Type<>(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "joja_vending_purchase"));
+        new Type<>(new ResourceLocation(StardewCraft.MODID, "joja_vending_purchase"));
 
     @SuppressWarnings("null")
     public static final StreamCodec<FriendlyByteBuf, JojaVendingPurchasePayload> STREAM_CODEC = StreamCodec.of(
