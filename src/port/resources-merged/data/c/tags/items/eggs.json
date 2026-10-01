@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:egg",
+    "#stardewcraft:vanilla_compat/chicken_eggs"
+  ]
+}

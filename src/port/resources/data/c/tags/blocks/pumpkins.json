@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "#c:pumpkins/normal",
+      "required": false
+    },
+    {
+      "id": "#c:pumpkins/carved",
+      "required": false
+    },
+    {
+      "id": "#c:pumpkins/jack_o_lanterns",
+      "required": false
+    }
+  ]
+}

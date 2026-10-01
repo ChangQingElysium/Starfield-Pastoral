@@ -300,12 +300,12 @@ public class ModBlocks {
 
                 @SuppressWarnings("null")
                 private static DeferredBlock<StairBlock> stairs(String name, DeferredBlock<Block> base, Block.Properties props) {
-                return BLOCKS.register(name, () -> new StairBlock(base.get().defaultBlockState(), props));
+                return BLOCKS.register(name, () -> new com.stardew.craft.port.PortStairBlock(base.get().defaultBlockState(), props)); // PORT(1.20.1): 1.21.1 stairs do not forward ticks/use to the base block
         }
 
                 @SuppressWarnings("null")
                 private static DeferredBlock<StairBlock> stairsFromAnyBlock(String name, DeferredBlock<? extends Block> base, Block.Properties props) {
-                return BLOCKS.register(name, () -> new StairBlock(base.get().defaultBlockState(), props));
+                return BLOCKS.register(name, () -> new com.stardew.craft.port.PortStairBlock(base.get().defaultBlockState(), props)); // PORT(1.20.1): 1.21.1 stairs do not forward ticks/use to the base block
         }
 
                 @SuppressWarnings("null")

@@ -40,3 +40,21 @@ def compileNativeFurnitureModels = tasks.register('compileNativeFurnitureModels'
             layout.buildDirectory.dir('generated/native-furniture').get().asFile.absolutePath
 }
 sourceSets.main.resources.srcDir(compileNativeFurnitureModels)
+
+// NeoForge 1.21.1 c: tags that the mod also defines are merged (1.21.1 pack order) by
+// scripts/port/import_neoforge_common_data.py into src/port/resources-merged. Those merged copies
+// replace the mod's own copy of exactly the same path; any other duplicate still fails the build.
+def portMergedDir = file('src/port/resources-merged')
+def mainResourcesDir = file('src/main/resources')
+sourceSets.main.resources.srcDir(portMergedDir)
+tasks.named('processResources', ProcessResources) {
+    def mergedPaths = providers.provider {
+        fileTree(portMergedDir).files.collect { portMergedDir.toPath().relativize(it.toPath()).toString().replace('\\', '/') } as Set
+    }
+    eachFile { details ->
+        if (mergedPaths.get().contains(details.relativePath.pathString)
+                && details.file.toPath().startsWith(mainResourcesDir.toPath())) {
+            details.exclude()
+        }
+    }
+}

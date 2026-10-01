@@ -79,6 +79,6 @@ public final class AquariumBlockEntity extends BlockEntity implements Container,
     }
     @Override public ClientboundBlockEntityDataPacket getUpdatePacket() { return ClientboundBlockEntityDataPacket.create(this); }
     @Override public void onDataPacket(Connection connection, ClientboundBlockEntityDataPacket packet) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
-        load(packet.getTag());
+        load(com.stardew.craft.port.PortBlockEntityPackets.tag(packet));
     }
 }

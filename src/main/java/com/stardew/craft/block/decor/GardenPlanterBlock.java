@@ -19,7 +19,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /** One independently removable planter cell; adjacent cells share an open soil bed. */
-public final class GardenPlanterBlock extends Block {
+public final class GardenPlanterBlock extends Block implements com.stardew.craft.port.PortPlantSupport.Soil {
     public static final Direction[] SIDES = {Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST};
     public static final BooleanProperty[] CONNECTIONS = {BlockStateProperties.NORTH, BlockStateProperties.EAST,
             BlockStateProperties.SOUTH, BlockStateProperties.WEST};
@@ -36,7 +36,15 @@ public final class GardenPlanterBlock extends Block {
         registerDefaultState(state);
     }
 
-    // PORT(1.20.1): MinecraftForge TriState TRUE -> true; DEFAULT -> Forge's default soil rules (plant's mayPlaceOn first).
+    // PORT(1.20.1): the 1.21.1 TriState hook, consulted by the vanilla plants through PortPlantSupport mixins.
+    @Override
+    public com.stardew.craft.port.net.neoforged.neoforge.common.util.TriState canSustainPlant(BlockState state, BlockGetter level,
+            BlockPos soilPosition, Direction facing, BlockState plant) {
+        return facing == Direction.UP ? com.stardew.craft.port.net.neoforged.neoforge.common.util.TriState.TRUE
+                : com.stardew.craft.port.net.neoforged.neoforge.common.util.TriState.DEFAULT;
+    }
+
+    // PORT(1.20.1): same answer through Forge's boolean hook for third-party plants (TRUE -> true; DEFAULT -> Forge defaults).
     @Override
     public boolean canSustainPlant(BlockState state, BlockGetter level,
             BlockPos soilPosition, Direction facing, net.minecraftforge.common.IPlantable plant) {

@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "#c:chests/ender",
+      "required": false
+    },
+    {
+      "id": "#c:chests/trapped",
+      "required": false
+    },
+    {
+      "id": "#c:chests/wooden",
+      "required": false
+    }
+  ]
+}

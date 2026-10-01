@@ -98,9 +98,11 @@ public class StardewWeaponItem extends SwordItem
                 weaponData
         ).portModifiers(slot);
     }
-
+    // PORT(1.20.1): NeoForge 1.21 only consults Item#isDamageable(stack) for repairability
+    // (Item#isRepairable = canRepair && isDamageable); durability loss follows the MAX_DAMAGE component.
+    // Forge 1.20.1 also routes ItemStack#isDamageableItem through it, so keep the 1.21 effect here only.
     @Override
-    public boolean isDamageable(@SuppressWarnings("null") ItemStack stack) {
+    public boolean isRepairable(@SuppressWarnings("null") ItemStack stack) {
         return false;
     }
 

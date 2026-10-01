@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:wooded_badlands",
+    "minecraft:savanna_plateau",
+    "minecraft:cherry_grove",
+    "minecraft:meadow"
+  ]
+}

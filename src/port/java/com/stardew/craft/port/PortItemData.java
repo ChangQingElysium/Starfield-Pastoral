@@ -13,6 +13,11 @@ import net.minecraft.world.item.ItemStack;
  * Every value returned is a fresh snapshot; mutating it does not change the stack.
  *
  * <p>Writes to the shared {@link ItemStack#EMPTY} instance are ignored so the singleton is never tagged.
+ *
+ * <p>Reads ({@code get/getOrDefault/has}) of an empty stack (air, or count {@code <= 0}, e.g. after {@code shrink})
+ * see no components, as 1.21 {@code ItemStack#getComponents()} returns {@code DataComponentMap.EMPTY} for empty
+ * stacks; the stored data stays on the stack and reappears if its count grows again. {@code set/remove} return the
+ * raw previous value, like 1.21 {@code PatchedDataComponentMap#set/remove}.
  */
 public final class PortItemData {
     private PortItemData() {
@@ -21,6 +26,9 @@ public final class PortItemData {
     @Nullable
     @SuppressWarnings("unchecked")
     public static <T> T get(ItemStack stack, DataComponentType<? extends T> type) {
+        if (stack == null || stack.isEmpty()) {
+            return null;
+        }
         return ((DataComponentType<T>) type).portRead(stack);
     }
 
@@ -30,7 +38,7 @@ public final class PortItemData {
     }
 
     public static boolean has(ItemStack stack, DataComponentType<?> type) {
-        return type.portRead(stack) != null;
+        return get(stack, type) != null;
     }
 
     @Nullable

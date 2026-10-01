@@ -135,9 +135,28 @@ def rewrite_json(files, fn) -> int:
     return changed
 
 
+def drop_unavailable_recipes() -> list[str]:
+    """Recipes that need vanilla items added after 1.20.1 cannot load there; remove them (logged)."""
+    import re as _re
+    sys.path.insert(0, str(ROOT / "scripts/port"))
+    from import_neoforge_common_data import known_ids
+    items = known_ids()["item"]
+    dropped = []
+    for path in sorted(DATA.glob("*/recipes/**/*.json")):
+        text = path.read_text(encoding="utf-8")
+        refs = set(_re.findall(r'"(?:item|result)"\s*:\s*"(minecraft:[a-z0-9_/]+)"', text))
+        missing = sorted(r for r in refs if r not in items)
+        if missing:
+            path.unlink()
+            dropped.append(f"{path.relative_to(DATA)}: {missing}")
+    return dropped
+
+
 def main() -> int:
     rename_dirs()
     recipes = rewrite_json(sorted(DATA.glob("*/recipes/**/*.json")), convert_recipe)
+    for line in drop_unavailable_recipes():
+        print("dropped recipe (needs 1.21-only vanilla items):", line)
     loot = rewrite_json(sorted(DATA.glob("*/loot_tables/**/*.json")), walk_loot)
     print(f"recipes converted: {recipes}, loot tables converted: {loot}")
     return 0

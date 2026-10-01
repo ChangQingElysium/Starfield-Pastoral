@@ -1,0 +1,69 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "#c:dyed/white",
+      "required": false
+    },
+    {
+      "id": "#c:dyed/orange",
+      "required": false
+    },
+    {
+      "id": "#c:dyed/magenta",
+      "required": false
+    },
+    {
+      "id": "#c:dyed/light_blue",
+      "required": false
+    },
+    {
+      "id": "#c:dyed/yellow",
+      "required": false
+    },
+    {
+      "id": "#c:dyed/lime",
+      "required": false
+    },
+    {
+      "id": "#c:dyed/pink",
+      "required": false
+    },
+    {
+      "id": "#c:dyed/gray",
+      "required": false
+    },
+    {
+      "id": "#c:dyed/light_gray",
+      "required": false
+    },
+    {
+      "id": "#c:dyed/cyan",
+      "required": false
+    },
+    {
+      "id": "#c:dyed/purple",
+      "required": false
+    },
+    {
+      "id": "#c:dyed/blue",
+      "required": false
+    },
+    {
+      "id": "#c:dyed/brown",
+      "required": false
+    },
+    {
+      "id": "#c:dyed/green",
+      "required": false
+    },
+    {
+      "id": "#c:dyed/red",
+      "required": false
+    },
+    {
+      "id": "#c:dyed/black",
+      "required": false
+    }
+  ]
+}

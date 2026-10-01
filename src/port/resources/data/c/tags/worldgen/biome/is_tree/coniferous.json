@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "#c:is_taiga",
+      "required": false
+    },
+    "minecraft:grove"
+  ]
+}

@@ -178,7 +178,7 @@ public final class TemplateBlockEntity extends BlockEntity {
 
     @Override
     public void onDataPacket(Connection connection, ClientboundBlockEntityDataPacket packet) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
-        readMaterial(packet.getTag(), registries);
+        readMaterial(com.stardew.craft.port.PortBlockEntityPackets.tag(packet), registries);
         markClientModelDirty();
     }
 

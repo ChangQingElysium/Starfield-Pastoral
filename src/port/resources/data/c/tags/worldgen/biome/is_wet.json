@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "#c:is_wet/overworld",
+      "required": false
+    },
+    {
+      "id": "#c:is_wet/nether",
+      "required": false
+    },
+    {
+      "id": "#c:is_wet/end",
+      "required": false
+    }
+  ]
+}

@@ -19,8 +19,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * (1.20.1 only disables mob spawning and the weather cycle).</li>
  * <li>1.21 {@code startTests} lays the test grid out at a random far position
  * ({@code level.random.nextIntBetweenInclusive(-14999992, 14999992)} for x and z), outside the always-loaded spawn
- * chunks; 1.20.1 uses x=z=0. The structures land at the same absolute y in both versions (1.21 puts the structure
- * block at {@code pos.below()} of y=-59, 1.20.1 at y=-60; both place the structure one block above it).</li>
+ * chunks; 1.20.1 uses x=z=0. The grid corner is the 1.21 one (y=-59, the structure origin): the 1.21 harness
+ * ({@code PortGameTestBatchRunnerHarnessMixin}) puts the structure block at {@code corner.below()}, so the structure
+ * block stays at y=-60 and the structure at y=-59 as in both vanilla versions.</li>
  * </ul>
  */
 @Mixin(GameTestServer.class)
@@ -42,6 +43,6 @@ public abstract class PortGameTestServerParityMixin {
         var random = ((GameTestServer) (Object) this).overworld().random;
         int x = random.nextIntBetweenInclusive(-14999992, 14999992);
         int z = random.nextIntBetweenInclusive(-14999992, 14999992);
-        return new BlockPos(x, original.getY(), z);
+        return new BlockPos(x, -59, z);
     }
 }

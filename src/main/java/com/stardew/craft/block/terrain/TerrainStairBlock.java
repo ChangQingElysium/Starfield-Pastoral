@@ -6,7 +6,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 
-public class TerrainStairBlock extends StairBlock implements TerrainShapeBlock {
+// PORT(1.20.1): 1.21.1 stairs do not forward ticks/use to the base block (grass base would randomly tick and decay).
+public class TerrainStairBlock extends com.stardew.craft.port.PortStairBlock implements TerrainShapeBlock {
     private final Kind kind;
     protected TerrainStairBlock(Kind kind, Properties properties) {
         super(kind.block().defaultBlockState(), properties);

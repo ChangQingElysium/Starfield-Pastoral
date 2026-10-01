@@ -64,7 +64,17 @@ public final class PortLevels {
      * 1.20.1 {@code IntegratedServer.paused} field, exposed by the client-only {@code PortIntegratedServerAccessor}).
      */
     public static boolean isPaused(net.minecraft.server.MinecraftServer server) {
-        return server instanceof com.stardew.craft.mixin.PortIntegratedServerAccessor integrated
-                && integrated.stardewcraft$isPaused();
+        // PORT(1.20.1): the accessor lives in the mixin package and is only registered by the client mixin list;
+        // on a dedicated/game test server, merely resolving it throws Mixin's IllegalClassLoadError (an Error).
+        return net.minecraftforge.fml.loading.FMLEnvironment.dist.isClient() && ClientPause.isPaused(server);
+    }
+
+    private static final class ClientPause {
+        private ClientPause() {}
+
+        static boolean isPaused(net.minecraft.server.MinecraftServer server) {
+            return server instanceof com.stardew.craft.mixin.PortIntegratedServerAccessor integrated
+                    && integrated.stardewcraft$isPaused();
+        }
     }
 }

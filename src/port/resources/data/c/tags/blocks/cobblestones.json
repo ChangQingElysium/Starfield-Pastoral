@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "#c:cobblestones/normal",
+      "required": false
+    },
+    {
+      "id": "#c:cobblestones/infested",
+      "required": false
+    },
+    {
+      "id": "#c:cobblestones/mossy",
+      "required": false
+    },
+    {
+      "id": "#c:cobblestones/deepslate",
+      "required": false
+    }
+  ]
+}
