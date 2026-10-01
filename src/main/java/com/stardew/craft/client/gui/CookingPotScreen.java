@@ -33,7 +33,7 @@ import java.util.Locale;
 
 /** A stable recipe selection, explicit cooking action and native inventory rendering. */
 @SuppressWarnings("null")
-public class CookingPotScreen extends AbstractContainerScreen<CookingPotMenu> {
+public class CookingPotScreen extends AbstractContainerScreen<CookingPotMenu> implements com.stardew.craft.port.PortContainerScreen {
     private enum View { CATALOGUE, RECIPE, INVENTORY }
     private record Recipe(ResourceLocation id, ItemStack output) { }
     private record Detail(Component text, ItemStack icon, int color, Component count) { }
@@ -46,7 +46,7 @@ public class CookingPotScreen extends AbstractContainerScreen<CookingPotMenu> {
     private CookingLayout.Page page;
     private Recipe selected;
     private View view = View.CATALOGUE, beforeInventory = View.CATALOGUE;
-    private EditBox search;
+    private com.stardew.craft.port.PortEditBox search;
     private String query = "";
     private boolean readyOnly, opened, filterDirty;
     private int line, listScroll, detailScroll, detailHeight, detailBottom, amount = 1, cooldown, ticks;
@@ -131,7 +131,7 @@ public class CookingPotScreen extends AbstractContainerScreen<CookingPotMenu> {
         button(leftPos + imageWidth - 36, topPos + 15, 24, navH, Component.translatable("gui.done"), "close", false, this::onClose);
         if (catalogueVisible()) {
             int gx = page.listX(), sw = page.listWidth() - 32;
-            search = new EditBox(font, gx + 16, toolbarY + (navH - line) / 2, sw - 20, line + 4, tr("search"));
+            search = new com.stardew.craft.port.PortEditBox(font, gx + 16, toolbarY + (navH - line) / 2, sw - 20, line + 4, tr("search"));
             search.setBordered(false); search.setTextColor(CookingArt.INK); search.setTextColorUneditable(CookingArt.MUTED);
             search.setMaxLength(80); search.setValue(query); search.setHint(tr("search").copy().withStyle(st -> st.withColor(CookingArt.MUTED)));
             search.setResponder(value -> { query = value; listScroll = 0; filterDirty = true; });

@@ -31,6 +31,7 @@ import java.util.Set;
 import java.util.function.IntConsumer;
 import java.util.function.LongSupplier;
 
+import com.stardew.craft.port.PortVertex;
 /** A popover owned by the existing container screen, with no screen or menu transition. */
 @OnlyIn(Dist.CLIENT)
 public final class ChestColorWheel {
@@ -246,7 +247,8 @@ public final class ChestColorWheel {
         graphics.flush();
         RenderSystem.enableBlend(); RenderSystem.defaultBlendFunc();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        BufferBuilder buffer = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        // PORT(1.20.1): Tesselator#begin returns void; an empty 1.20.1 buffer is skipped by BufferUploader like 1.21's null mesh.
+        BufferBuilder buffer = Tesselator.getInstance().getBuilder(); buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
         Matrix4f matrix = graphics.pose().last().pose();
         for (int i = 0; i < petals.size(); i++) {
             boolean focus = !closing && (keyboard ? options.get(page * 21 + i).id() == candidate : hovered == i);
@@ -256,7 +258,7 @@ public final class ChestColorWheel {
             float x = layout.x() + Math.round(Math.cos(angle) * shift), y = layout.y() + Math.round(Math.sin(angle) * shift);
             for (ColorWheelArt.Span span : petals.get(i)) quad(buffer, matrix, x + span.x(), y + span.y(), span.width(), alpha(span.color(), fade));
         }
-        var mesh = buffer.build(); if (mesh != null) BufferUploader.drawWithShader(mesh);
+        BufferUploader.drawWithShader(buffer.end());
         for (int i = 0; i < petals.size(); i++) {
             if (!closing && (keyboard ? options.get(page * 21 + i).id() == candidate : hovered == i)) {
                 double focusAngle = ColorWheelLayout.angle(i, petals.size());
@@ -308,7 +310,7 @@ public final class ChestColorWheel {
 
     private static int alpha(int rgb, float amount) { return ((int)(255 * amount) << 24) | (rgb & 0xFFFFFF); }
     private static void quad(BufferBuilder b, Matrix4f m, float x, float y, int width, int color) {
-        b.addVertex(m, x, y, 0).setColor(color); b.addVertex(m, x, y + 1, 0).setColor(color);
-        b.addVertex(m, x + width, y + 1, 0).setColor(color); b.addVertex(m, x + width, y, 0).setColor(color);
+        PortVertex.of(b).addVertex(m, x, y, 0).setColor(color).endVertex(); PortVertex.of(b).addVertex(m, x, y + 1, 0).setColor(color).endVertex();
+        PortVertex.of(b).addVertex(m, x + width, y + 1, 0).setColor(color).endVertex(); PortVertex.of(b).addVertex(m, x + width, y, 0).setColor(color).endVertex();
     }
 }

@@ -36,6 +36,7 @@ import org.joml.Vector3f;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.stardew.craft.port.PortVertex;
 /** Uses the world's baked models and tint handlers, with an isolated tablecloth entity. */
 @OnlyIn(Dist.CLIENT)
 public final class FurnitureModelPreview {
@@ -156,7 +157,7 @@ public final class FurnitureModelPreview {
             Lighting.setupFor3DItems();
             for (Face face : faces) {
                 int rgb = face.color();
-                buffers.getBuffer(face.layer()).putBulkData(pose.last(), face.quad(),
+                PortVertex.putBulkData(buffers.getBuffer(face.layer()), pose.last(), face.quad(),
                         (rgb >> 16 & 255) / 255F, (rgb >> 8 & 255) / 255F, (rgb & 255) / 255F,
                         1, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
             }

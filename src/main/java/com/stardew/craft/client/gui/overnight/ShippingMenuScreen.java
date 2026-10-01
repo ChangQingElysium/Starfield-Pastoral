@@ -29,7 +29,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @OnlyIn(Dist.CLIENT)
 @SuppressWarnings("null")
-public class ShippingMenuScreen extends Screen {
+public class ShippingMenuScreen extends Screen implements com.stardew.craft.port.PortScreen {
     private static final int INTRO_DURATION = 3500;
     private static final int OUTRO_FADE_DURATION = 800;
     private static final int OUTRO_DATE_PAUSE = 700;

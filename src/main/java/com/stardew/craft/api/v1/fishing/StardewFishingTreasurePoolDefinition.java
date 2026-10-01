@@ -23,17 +23,17 @@ public record StardewFishingTreasurePoolDefinition(
     });
 
     public static final Codec<StardewFishingTreasurePoolDefinition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            CHEST_CODEC.optionalFieldOf("chest", "any")
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(CHEST_CODEC, "chest", "any")
                     .forGetter(StardewFishingTreasurePoolDefinition::chest),
-            Codec.floatRange(0.0F, 1.0F).optionalFieldOf("chance", 1.0F)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.floatRange(0.0F, 1.0F), "chance", 1.0F)
                     .forGetter(StardewFishingTreasurePoolDefinition::chance),
-            Codec.intRange(1, 64).optionalFieldOf("rolls", 1)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(1, 64), "rolls", 1)
                     .forGetter(StardewFishingTreasurePoolDefinition::rolls),
-            StardewConditions.CODEC.listOf().optionalFieldOf("available_when", List.of())
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(StardewConditions.CODEC.listOf(), "available_when", List.of())
                     .forGetter(StardewFishingTreasurePoolDefinition::availableWhen),
             StardewFishingTreasureEntry.CODEC.listOf().fieldOf("entries")
                     .forGetter(StardewFishingTreasurePoolDefinition::entries),
-            Codec.BOOL.optionalFieldOf("replace_base", false).forGetter(StardewFishingTreasurePoolDefinition::replaceBase)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.BOOL, "replace_base", false).forGetter(StardewFishingTreasurePoolDefinition::replaceBase)
     ).apply(instance, StardewFishingTreasurePoolDefinition::new));
 
     public StardewFishingTreasurePoolDefinition {

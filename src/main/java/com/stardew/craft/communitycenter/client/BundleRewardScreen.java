@@ -17,7 +17,7 @@ import javax.annotation.Nonnull;
  * Uses the vanilla generic_54 container texture (cropped to 1 row).
  */
 @SuppressWarnings("null")
-public class BundleRewardScreen extends AbstractContainerScreen<BundleRewardMenu> {
+public class BundleRewardScreen extends AbstractContainerScreen<BundleRewardMenu> implements com.stardew.craft.port.PortContainerScreen {
 
     /** Vanilla container texture (9×6 chest texture, we only render 1 row portion) */
     private static final ResourceLocation CONTAINER_BG = new ResourceLocation(

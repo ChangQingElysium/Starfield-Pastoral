@@ -39,27 +39,27 @@ public record StardewFestivalDefinition(
     private static final Codec<StardewFestivalDefinition> RAW_CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
                     FestivalKind.CODEC.fieldOf("type").forGetter(StardewFestivalDefinition::type),
-                    Codec.STRING.optionalFieldOf("legacy_id", "").forGetter(StardewFestivalDefinition::legacyId),
+                    com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "legacy_id", "").forGetter(StardewFestivalDefinition::legacyId),
                     Codec.STRING.fieldOf("display_name").forGetter(StardewFestivalDefinition::displayName),
-                    Codec.STRING.optionalFieldOf("legacy_condition", "").forGetter(StardewFestivalDefinition::legacyCondition),
-                    StardewConditions.CODEC.listOf().optionalFieldOf("available_when", List.of())
+                    com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "legacy_condition", "").forGetter(StardewFestivalDefinition::legacyCondition),
+                    com.stardew.craft.port.PortCodecs.optionalFieldOf(StardewConditions.CODEC.listOf(), "available_when", List.of())
                             .forGetter(StardewFestivalDefinition::availableWhen),
                     Codec.intRange(0, 3).fieldOf("season").forGetter(StardewFestivalDefinition::season),
                     Codec.intRange(1, 28).fieldOf("start_day").forGetter(StardewFestivalDefinition::startDay),
                     Codec.intRange(1, 28).fieldOf("end_day").forGetter(StardewFestivalDefinition::endDay),
                     Codec.intRange(0, 2600).fieldOf("start_time").forGetter(StardewFestivalDefinition::startTime),
                     Codec.intRange(0, 2600).fieldOf("end_time").forGetter(StardewFestivalDefinition::endTime),
-                    Codec.BOOL.optionalFieldOf("show_on_calendar", true)
+                    com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.BOOL, "show_on_calendar", true)
                             .forGetter(StardewFestivalDefinition::showOnCalendar),
-                    Codec.BOOL.optionalFieldOf("only_show_start_message_on_first_day", false)
+                    com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.BOOL, "only_show_start_message_on_first_day", false)
                             .forGetter(StardewFestivalDefinition::onlyShowStartMessageOnFirstDay),
-                    Codec.STRING.optionalFieldOf("start_message_key", "")
+                    com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "start_message_key", "")
                             .forGetter(StardewFestivalDefinition::startMessageKey),
-                    Codec.STRING.optionalFieldOf("announcement_mail_id", "")
+                    com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "announcement_mail_id", "")
                             .forGetter(StardewFestivalDefinition::announcementMailId),
-                    Presentation.CODEC.optionalFieldOf("presentation", Presentation.EMPTY)
+                    com.stardew.craft.port.PortCodecs.optionalFieldOf(Presentation.CODEC, "presentation", Presentation.EMPTY)
                             .forGetter(StardewFestivalDefinition::presentation),
-                    WorldSettings.CODEC.optionalFieldOf("world", WorldSettings.EMPTY)
+                    com.stardew.craft.port.PortCodecs.optionalFieldOf(WorldSettings.CODEC, "world", WorldSettings.EMPTY)
                             .forGetter(StardewFestivalDefinition::world)
             ).apply(instance, StardewFestivalDefinition::new));
 
@@ -90,8 +90,8 @@ public record StardewFestivalDefinition(
     public record Presentation(String displayToken, String startMessageToken) {
         public static final Presentation EMPTY = new Presentation("", "");
         public static final Codec<Presentation> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                Codec.STRING.optionalFieldOf("display_token", "").forGetter(Presentation::displayToken),
-                Codec.STRING.optionalFieldOf("start_message_token", "").forGetter(Presentation::startMessageToken)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "display_token", "").forGetter(Presentation::displayToken),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "start_message_token", "").forGetter(Presentation::startMessageToken)
         ).apply(instance, Presentation::new));
 
         public Presentation {
@@ -109,11 +109,11 @@ public record StardewFestivalDefinition(
     ) {
         public static final WorldSettings EMPTY = new WorldSettings("", "", Map.of(), List.of(), "");
         public static final Codec<WorldSettings> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                Codec.STRING.optionalFieldOf("location", "").forGetter(WorldSettings::location),
-                Codec.STRING.optionalFieldOf("map_overlay", "").forGetter(WorldSettings::mapOverlay),
-                STRING_MAP_CODEC.optionalFieldOf("map_replacements", Map.of()).forGetter(WorldSettings::mapReplacements),
-                Codec.STRING.listOf().optionalFieldOf("shops", List.of()).forGetter(WorldSettings::shops),
-                Codec.STRING.optionalFieldOf("mechanic_id", "").forGetter(WorldSettings::mechanicId)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "location", "").forGetter(WorldSettings::location),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "map_overlay", "").forGetter(WorldSettings::mapOverlay),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(STRING_MAP_CODEC, "map_replacements", Map.of()).forGetter(WorldSettings::mapReplacements),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING.listOf(), "shops", List.of()).forGetter(WorldSettings::shops),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "mechanic_id", "").forGetter(WorldSettings::mechanicId)
         ).apply(instance, WorldSettings::new));
 
         public WorldSettings {

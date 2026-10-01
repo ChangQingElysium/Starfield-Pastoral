@@ -9,7 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 
 /** Stardew ItemGrab-style upper reward tray and lower player inventory; native ItemStack slots. */
-public final class GilRewardScreen extends AbstractContainerScreen<GilRewardMenu> implements StardewGuiContentSize {
+public final class GilRewardScreen extends AbstractContainerScreen<GilRewardMenu> implements StardewGuiContentSize, com.stardew.craft.port.PortContainerScreen {
     public GilRewardScreen(GilRewardMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
         imageWidth = 186; imageHeight = 166;

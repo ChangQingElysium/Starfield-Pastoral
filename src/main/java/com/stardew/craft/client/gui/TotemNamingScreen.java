@@ -23,7 +23,7 @@ import java.util.Random;
  * 布局：全屏黑色半透明背景，居中显示标题、文本输入区域、确认按钮、骰子按钮。
  */
 @SuppressWarnings({"null", "unused"})
-public class TotemNamingScreen extends Screen {
+public class TotemNamingScreen extends Screen implements com.stardew.craft.port.PortScreen {
 
     // ---- 图标资源（复用 AnimalPurchaseScreen 的 rename/dice 图标） ----
     private static final ResourceLocation RENAME_ICON = new ResourceLocation(

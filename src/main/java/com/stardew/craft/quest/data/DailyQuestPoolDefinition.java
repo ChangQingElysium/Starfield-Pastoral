@@ -24,12 +24,12 @@ public record DailyQuestPoolDefinition(
     private static final Codec<List<ResourceLocation>> ITEM_LIST = ResourceLocation.CODEC.listOf();
     private static final Codec<List<List<ResourceLocation>>> SEASONAL_ITEMS = ITEM_LIST.listOf();
     private static final Codec<DailyQuestPoolDefinition> BASE_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.doubleRange(0.0, 1.0).optionalFieldOf("resource_chance", 0.08).forGetter(DailyQuestPoolDefinition::resourceChance),
-            Codec.doubleRange(0.0, 1.0).optionalFieldOf("monster_chance", 0.20).forGetter(DailyQuestPoolDefinition::monsterChance),
-            Codec.doubleRange(0.0, 1.0).optionalFieldOf("empty_chance", 0.50).forGetter(DailyQuestPoolDefinition::emptyChance),
-            Codec.doubleRange(0.0, 1.0).optionalFieldOf("fishing_chance", 0.60).forGetter(DailyQuestPoolDefinition::fishingChance),
-            Codec.doubleRange(0.0, 1.0).optionalFieldOf("social_chance", 0.66).forGetter(DailyQuestPoolDefinition::socialChance),
-            Codec.intRange(1, 28).optionalFieldOf("duration_days", 2).forGetter(DailyQuestPoolDefinition::durationDays),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.doubleRange(0.0, 1.0), "resource_chance", 0.08).forGetter(DailyQuestPoolDefinition::resourceChance),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.doubleRange(0.0, 1.0), "monster_chance", 0.20).forGetter(DailyQuestPoolDefinition::monsterChance),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.doubleRange(0.0, 1.0), "empty_chance", 0.50).forGetter(DailyQuestPoolDefinition::emptyChance),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.doubleRange(0.0, 1.0), "fishing_chance", 0.60).forGetter(DailyQuestPoolDefinition::fishingChance),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.doubleRange(0.0, 1.0), "social_chance", 0.66).forGetter(DailyQuestPoolDefinition::socialChance),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(1, 28), "duration_days", 2).forGetter(DailyQuestPoolDefinition::durationDays),
             Codec.STRING.listOf().fieldOf("delivery_npcs").forGetter(DailyQuestPoolDefinition::deliveryNpcs),
             SEASONAL_ITEMS.fieldOf("delivery_items_by_season").forGetter(DailyQuestPoolDefinition::deliveryItemsBySeason),
             SEASONAL_ITEMS.fieldOf("fish_by_season").forGetter(DailyQuestPoolDefinition::fishBySeason),
@@ -69,8 +69,8 @@ public record DailyQuestPoolDefinition(
         public static final Codec<ResourceEntry> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 ResourceLocation.CODEC.fieldOf("item").forGetter(ResourceEntry::item),
                 Codec.intRange(1, Integer.MAX_VALUE).fieldOf("amount").forGetter(ResourceEntry::amount),
-                Codec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("reward", 0).forGetter(ResourceEntry::reward),
-                Codec.STRING.optionalFieldOf("target_npc", "clint").forGetter(ResourceEntry::targetNpc)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(0, Integer.MAX_VALUE), "reward", 0).forGetter(ResourceEntry::reward),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "target_npc", "clint").forGetter(ResourceEntry::targetNpc)
         ).apply(instance, ResourceEntry::new));
     }
 
@@ -78,8 +78,8 @@ public record DailyQuestPoolDefinition(
         public static final Codec<MonsterEntry> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 Codec.STRING.fieldOf("type").forGetter(MonsterEntry::type),
                 Codec.intRange(1, Integer.MAX_VALUE).fieldOf("count").forGetter(MonsterEntry::count),
-                Codec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("reward", 0).forGetter(MonsterEntry::reward),
-                Codec.STRING.optionalFieldOf("target_npc", "lewis").forGetter(MonsterEntry::targetNpc)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(0, Integer.MAX_VALUE), "reward", 0).forGetter(MonsterEntry::reward),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "target_npc", "lewis").forGetter(MonsterEntry::targetNpc)
         ).apply(instance, MonsterEntry::new));
     }
 }

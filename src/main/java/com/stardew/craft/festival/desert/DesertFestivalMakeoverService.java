@@ -54,9 +54,9 @@ public final class DesertFestivalMakeoverService {
         TrimPatterns.SHAPER,
         TrimPatterns.SILENCE,
         TrimPatterns.RAISER,
-        TrimPatterns.HOST,
-        TrimPatterns.FLOW,
-        TrimPatterns.BOLT
+        TrimPatterns.HOST
+        // PORT(1.20.1): TrimPatterns.FLOW / BOLT (1.21 trial-chamber trims) do not exist in 1.20.1
+        // (see docs/porting/bulk-port-gaps.md).
     );
 
     private static final List<ResourceKey<TrimMaterial>> TRIM_MATERIALS = List.of(
@@ -88,9 +88,8 @@ public final class DesertFestivalMakeoverService {
         Items.SHAPER_ARMOR_TRIM_SMITHING_TEMPLATE,
         Items.SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE,
         Items.RAISER_ARMOR_TRIM_SMITHING_TEMPLATE,
-        Items.HOST_ARMOR_TRIM_SMITHING_TEMPLATE,
-        Items.FLOW_ARMOR_TRIM_SMITHING_TEMPLATE,
-        Items.BOLT_ARMOR_TRIM_SMITHING_TEMPLATE
+        Items.HOST_ARMOR_TRIM_SMITHING_TEMPLATE
+        // PORT(1.20.1): FLOW / BOLT smithing templates do not exist in 1.20.1 (see bulk-port-gaps.md).
     };
 
     private DesertFestivalMakeoverService() {

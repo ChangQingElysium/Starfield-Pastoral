@@ -30,10 +30,10 @@ public record StardewForageZoneDefinition(
                     .forGetter(StardewForageZoneDefinition::maxDailySpawn),
             Codec.intRange(1, Integer.MAX_VALUE).fieldOf("max_spawned_at_once")
                     .forGetter(StardewForageZoneDefinition::maxSpawnedAtOnce),
-            Surface.CODEC.optionalFieldOf("surface", Surface.NATURAL)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Surface.CODEC, "surface", Surface.NATURAL)
                     .forGetter(StardewForageZoneDefinition::surface),
-            Codec.INT.optionalFieldOf("priority", 0).forGetter(StardewForageZoneDefinition::priority),
-            StardewConditions.CODEC.listOf().optionalFieldOf("available_when", List.of())
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.INT, "priority", 0).forGetter(StardewForageZoneDefinition::priority),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(StardewConditions.CODEC.listOf(), "available_when", List.of())
                     .forGetter(StardewForageZoneDefinition::availableWhen)
     ).apply(instance, StardewForageZoneDefinition::new)), StardewForageZoneDefinition::validate);
 
@@ -63,7 +63,7 @@ public record StardewForageZoneDefinition(
                 Codec.INT.fieldOf("max_x").forGetter(Rect::maxX),
                 Codec.INT.fieldOf("max_y").forGetter(Rect::maxY),
                 Codec.INT.fieldOf("max_z").forGetter(Rect::maxZ),
-                Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("weight", 1).forGetter(Rect::weight)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(1, Integer.MAX_VALUE), "weight", 1).forGetter(Rect::weight)
         ).apply(instance, Rect::new)), rect ->
                 rect.maxX() < rect.minX() || rect.maxY() < rect.minY() || rect.maxZ() < rect.minZ()
                         ? DataResult.error(() -> "forage area max values must be >= min values")
@@ -74,8 +74,8 @@ public record StardewForageZoneDefinition(
         private static final List<String> VALID_SEASONS = List.of("spring", "summer", "fall", "winter");
         public static final Codec<Entry> CODEC = com.stardew.craft.port.PortCodecs.validate(RecordCodecBuilder.<Entry>create(instance -> instance.group(
                 ResourceLocation.CODEC.fieldOf("block").forGetter(Entry::block),
-                Codec.STRING.listOf().optionalFieldOf("seasons", VALID_SEASONS).forGetter(Entry::seasons),
-                Codec.doubleRange(0.0, 1.0).optionalFieldOf("chance", 1.0).forGetter(Entry::chance)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING.listOf(), "seasons", VALID_SEASONS).forGetter(Entry::seasons),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.doubleRange(0.0, 1.0), "chance", 1.0).forGetter(Entry::chance)
         ).apply(instance, Entry::new)), Entry::validate);
 
         public Entry {

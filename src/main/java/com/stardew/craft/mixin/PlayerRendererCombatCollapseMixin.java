@@ -43,7 +43,8 @@ public abstract class PlayerRendererCombatCollapseMixin extends net.minecraft.cl
     }
 
     @Inject(
-        method = "setupRotations(Lnet/minecraft/client/player/AbstractClientPlayer;Lcom/mojang/blaze3d/vertex/PoseStack;FFFF)V",
+        // PORT(1.20.1): no trailing entity-scale parameter before 1.20.5
+        method = "setupRotations(Lnet/minecraft/client/player/AbstractClientPlayer;Lcom/mojang/blaze3d/vertex/PoseStack;FFF)V",
         at = @At("HEAD"), cancellable = true
     )
     private void stardewcraft$applyCombatCollapse(
@@ -52,9 +53,9 @@ public abstract class PlayerRendererCombatCollapseMixin extends net.minecraft.cl
             float bob,
             float yBodyRot,
             float partialTick,
-            float scale,
             CallbackInfo ci
     ) {
+        float scale = player.getScale(); // PORT(1.20.1): 1.21 passes LivingEntity#getScale() (no SCALE attribute on players here)
         var frame = com.stardew.craft.client.combat.CombatCollapseModelPose.frame(player, partialTick);
         if (frame == null) return;
         // Knockout owns the root pose even if the hit interrupted swimming/flying.

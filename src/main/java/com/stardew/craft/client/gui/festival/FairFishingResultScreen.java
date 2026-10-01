@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-public class FairFishingResultScreen extends Screen {
+public class FairFishingResultScreen extends Screen implements com.stardew.craft.port.PortScreen {
     private static final int RESULTS_MS = 11100;
 
     private final OpenFairFishingResultPayload payload;

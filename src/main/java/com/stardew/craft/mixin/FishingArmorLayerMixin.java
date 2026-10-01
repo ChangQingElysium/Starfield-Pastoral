@@ -18,8 +18,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(HumanoidArmorLayer.class)
 public class FishingArmorLayerMixin {
     @Unique private boolean fishing$arms;
-    @Inject(method="renderArmorPiece(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/entity/EquipmentSlot;ILnet/minecraft/client/model/HumanoidModel;FFFFFF)V",at=@At("HEAD"),cancellable=true)
-    private void fishing$armorOwner(PoseStack pose,MultiBufferSource buffers,LivingEntity entity,EquipmentSlot slot,int light,HumanoidModel<?> model,float a,float b,float c,float d,float e,float f,CallbackInfo ci) {
+    // PORT(1.20.1): Forge's renderArmorPiece has no NeoForge limb/age/head float parameters (unused here).
+    @Inject(method="renderArmorPiece(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/entity/EquipmentSlot;ILnet/minecraft/client/model/HumanoidModel;)V",at=@At("HEAD"),cancellable=true)
+    private void fishing$armorOwner(PoseStack pose,MultiBufferSource buffers,LivingEntity entity,EquipmentSlot slot,int light,HumanoidModel<?> model,CallbackInfo ci) {
         fishing$arms=entity instanceof AbstractClientPlayer p&&FishingPresentationClient.worldOwned(p);
         if(fishing$arms&&FishingArmorVisibility.shouldHide(entity,entity.getItemBySlot(slot)))ci.cancel();
     }

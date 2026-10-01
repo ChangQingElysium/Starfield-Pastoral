@@ -23,9 +23,9 @@ public record StardewBuildingData(
     public static final Codec<StardewBuildingData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("type").forGetter(StardewBuildingData::type),
             Codec.intRange(0, Integer.MAX_VALUE).fieldOf("capacity").forGetter(StardewBuildingData::capacity),
-            ResourceLocation.CODEC.listOf().optionalFieldOf("accepted_animals", List.of())
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(ResourceLocation.CODEC.listOf(), "accepted_animals", List.of())
                     .forGetter(StardewBuildingData::acceptedAnimals),
-            ResourceLocation.CODEC.listOf().optionalFieldOf("required_interior_blocks", List.of())
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(ResourceLocation.CODEC.listOf(), "required_interior_blocks", List.of())
                     .forGetter(StardewBuildingData::requiredInteriorBlocks)
     ).apply(instance, StardewBuildingData::new));
 

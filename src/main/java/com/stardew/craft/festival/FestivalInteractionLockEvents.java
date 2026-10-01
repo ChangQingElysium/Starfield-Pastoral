@@ -108,7 +108,7 @@ public final class FestivalInteractionLockEvents {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onBlockToolModification(BlockEvent.BlockToolModificationEvent event) {
-        if (event.getPlayer() instanceof Player player && (locked(player) || fairWorldLocked(player))) {
+        if ((Object) event.getPlayer() instanceof Player player && (locked(player) || fairWorldLocked(player))) {
             event.setCanceled(true);
         }
     }

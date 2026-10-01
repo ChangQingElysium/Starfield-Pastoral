@@ -36,7 +36,7 @@ import java.util.function.BooleanSupplier;
 
 /** One creation form: land, name, profile, and addon settings submit together. */
 @SuppressWarnings("null")
-public class FarmSelectionScreen extends Screen {
+public class FarmSelectionScreen extends Screen implements com.stardew.craft.port.PortScreen {
     protected final FarmSetupDraft draft;
     private final boolean profileOnly;
     private final List<StardewFarmSelectionOptions.Option> options;
@@ -320,7 +320,7 @@ public class FarmSelectionScreen extends Screen {
 
     private int field(String key, Component label, int x, int y, int w, int max, String value, Consumer<String> changed) {
         y = paragraph(label, x, y, w, FarmSetupArt.INK) + 4;
-        EditBox box = new EditBox(font, x + 6, y + 4, w - 12, lineHeight(), label);
+        com.stardew.craft.port.PortEditBox box = new com.stardew.craft.port.PortEditBox(font, x + 6, y + 4, w - 12, lineHeight(), label);
         box.setBordered(false); box.setTextShadow(false); box.setTextColor(FarmSetupArt.INK);
         box.setMaxLength(max); box.setValue(value);
         box.setResponder(s -> { changed.accept(s); error = Component.empty(); });

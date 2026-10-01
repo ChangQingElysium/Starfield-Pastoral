@@ -70,11 +70,11 @@ public class StardewPlayerHud {
         if (mc.player == null || !shouldRenderCustomHUD(mc.player)) return;
         if (event.getName().equals(VanillaGuiLayers.PLAYER_HEALTH)) {
             event.setCanceled(true);
-            mc.gui.leftHeight += 10;
+            ((net.minecraftforge.client.gui.overlay.ForgeGui) mc.gui).leftHeight += 10; // PORT(1.20.1): NeoForge Gui fields live on ForgeGui
         } else if (event.getName().equals(VanillaGuiLayers.FOOD_LEVEL)) {
             event.setCanceled(true);
             // The energy row remains present while riding, unlike vanilla hunger.
-            mc.gui.rightHeight += 10;
+            ((net.minecraftforge.client.gui.overlay.ForgeGui) mc.gui).rightHeight += 10; // PORT(1.20.1): NeoForge Gui fields live on ForgeGui
         }
     }
 

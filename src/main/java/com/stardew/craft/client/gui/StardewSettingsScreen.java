@@ -17,11 +17,11 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
 /** Readable, scrollable settings with native keyboard widgets and the menu's authored artwork. */
-public final class StardewSettingsScreen extends Screen {
+public final class StardewSettingsScreen extends Screen implements com.stardew.craft.port.PortScreen {
     private final Screen parent;
     private final List<Setting> settings = new ArrayList<>();
     private int x, y, panelW, panelH, listY, listBottom, scroll;
-    private EditBox clockInput;
+    private com.stardew.craft.port.PortEditBox clockInput;
     private int clockY, clockH;
     private String clockDraft;
     private record Setting(String key, BooleanSupplier getter, Runnable action, boolean clock) { }
@@ -79,7 +79,7 @@ public final class StardewSettingsScreen extends Screen {
             if (rowY + h > listBottom) break;
             if (setting.clock()) {
                 clockY = rowY; clockH = h;
-                clockInput = new EditBox(font, x + panelW - 108, rowY + (h - line()) / 2, 82, line(), Component.translatable(setting.key()));
+                clockInput = new com.stardew.craft.port.PortEditBox(font, x + panelW - 108, rowY + (h - line()) / 2, 82, line(), Component.translatable(setting.key()));
                 clockInput.setBordered(false); clockInput.setTextShadow(false); clockInput.setMaxLength(12);
                 clockInput.setValue(clockDraft);
                 clockInput.setTextColor(validSpeed(clockDraft) ? MenuPageArt.INK : 0xFFA13E30);

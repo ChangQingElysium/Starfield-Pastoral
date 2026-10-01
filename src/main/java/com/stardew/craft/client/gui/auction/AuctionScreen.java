@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 
 /** Shared viewport, native-size controls and final-pass tooltips for auction screens. */
 @SuppressWarnings("null")
-abstract class AuctionScreen extends Screen {
+abstract class AuctionScreen extends Screen implements com.stardew.craft.port.PortScreen {
     protected int left, top, panelW, panelH, bodyTop, bodyBottom, contentW, line, controlH;
     protected int contentHeight, scroll;
     protected int mx, my;
@@ -121,7 +121,7 @@ abstract class AuctionScreen extends Screen {
     }
     protected EditBox field(int x, int y, int w, Component label, String value, int max,
                             boolean numeric, Consumer<String> responder) {
-        EditBox box = new EditBox(font, left + 14 + x + 7, bodyTop + y + 7, w - 14, line, label);
+        com.stardew.craft.port.PortEditBox box = new com.stardew.craft.port.PortEditBox(font, left + 14 + x + 7, bodyTop + y + 7, w - 14, line, label);
         box.setBordered(false); box.setTextShadow(false);
         box.setTextColor(AuctionUi.INK); box.setTextColorUneditable(AuctionUi.MUTED);
         box.setMaxLength(max);

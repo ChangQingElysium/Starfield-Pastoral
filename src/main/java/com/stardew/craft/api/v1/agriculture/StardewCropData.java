@@ -26,14 +26,14 @@ public record StardewCropData(
         ResourceLocation seed
 ) {
     public static final Codec<StardewCropData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.STRING.listOf().optionalFieldOf("seasons", List.of("spring", "summer", "fall", "winter"))
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING.listOf(), "seasons", List.of("spring", "summer", "fall", "winter"))
                     .forGetter(StardewCropData::seasons),
-            Codec.INT.listOf().optionalFieldOf("phase_days", List.of())
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.INT.listOf(), "phase_days", List.of())
                     .forGetter(StardewCropData::phaseDays),
-            Codec.INT.optionalFieldOf("regrow_days", -1).forGetter(StardewCropData::regrowDays),
-            Codec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("farming_experience", 0)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.INT, "regrow_days", -1).forGetter(StardewCropData::regrowDays),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(0, Integer.MAX_VALUE), "farming_experience", 0)
                     .forGetter(StardewCropData::farmingExperience),
-            ResourceLocation.CODEC.optionalFieldOf("harvest_method",
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(ResourceLocation.CODEC, "harvest_method",
                     new ResourceLocation("stardewcraft", "grab"))
                     .forGetter(StardewCropData::harvestMethod),
             ResourceLocation.CODEC.fieldOf("produce").forGetter(StardewCropData::produce),

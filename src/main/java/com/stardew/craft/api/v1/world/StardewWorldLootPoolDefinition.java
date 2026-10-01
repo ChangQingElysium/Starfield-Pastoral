@@ -22,10 +22,10 @@ public record StardewWorldLootPoolDefinition(
 ) {
     public static final Codec<StardewWorldLootPoolDefinition> CODEC = com.stardew.craft.port.PortCodecs.validate(RecordCodecBuilder.<StardewWorldLootPoolDefinition>create(instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("source").forGetter(StardewWorldLootPoolDefinition::source),
-            Codec.STRING.optionalFieldOf("group", "default").forGetter(StardewWorldLootPoolDefinition::group),
-            Mode.CODEC.optionalFieldOf("mode", Mode.WEIGHTED).forGetter(StardewWorldLootPoolDefinition::mode),
-            Codec.INT.optionalFieldOf("priority", 0).forGetter(StardewWorldLootPoolDefinition::priority),
-            StardewConditions.CODEC.listOf().optionalFieldOf("available_when", List.of())
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "group", "default").forGetter(StardewWorldLootPoolDefinition::group),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Mode.CODEC, "mode", Mode.WEIGHTED).forGetter(StardewWorldLootPoolDefinition::mode),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.INT, "priority", 0).forGetter(StardewWorldLootPoolDefinition::priority),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(StardewConditions.CODEC.listOf(), "available_when", List.of())
                     .forGetter(StardewWorldLootPoolDefinition::availableWhen),
             Entry.CODEC.listOf().fieldOf("entries").forGetter(StardewWorldLootPoolDefinition::entries)
     ).apply(instance, StardewWorldLootPoolDefinition::new)), StardewWorldLootPoolDefinition::validate);
@@ -68,10 +68,10 @@ public record StardewWorldLootPoolDefinition(
     ) {
         public static final Codec<Entry> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 StardewItemQueries.CODEC.fieldOf("query").forGetter(Entry::query),
-                Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("weight", 1).forGetter(Entry::weight),
-                Codec.doubleRange(0.0, 1.0).optionalFieldOf("chance", 1.0).forGetter(Entry::chance),
-                Codec.BOOL.optionalFieldOf("continue_on_success", false).forGetter(Entry::continueOnSuccess),
-                StardewConditions.CODEC.listOf().optionalFieldOf("available_when", List.of())
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(1, Integer.MAX_VALUE), "weight", 1).forGetter(Entry::weight),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.doubleRange(0.0, 1.0), "chance", 1.0).forGetter(Entry::chance),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.BOOL, "continue_on_success", false).forGetter(Entry::continueOnSuccess),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(StardewConditions.CODEC.listOf(), "available_when", List.of())
                         .forGetter(Entry::availableWhen)
         ).apply(instance, Entry::new));
 

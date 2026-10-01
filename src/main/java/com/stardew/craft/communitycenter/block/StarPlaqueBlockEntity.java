@@ -103,7 +103,7 @@ public class StarPlaqueBlockEntity extends BlockEntity {
     // ── Client sync ──
 
     @Override
-    public @Nonnull CompoundTag getUpdateTag(@Nonnull HolderLookup.Provider provider) {
+    public @Nonnull CompoundTag getUpdateTag() { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         CompoundTag tag = super.getUpdateTag();
         tag.putInt(TAG_STARS, numberOfStars);
         return tag;

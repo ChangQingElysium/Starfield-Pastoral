@@ -15,7 +15,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
  * {@link CombatCollapseClientState}; this screen only captures GUI input and draws its overlays.</p>
  */
 @OnlyIn(Dist.CLIENT)
-public class PassOutOverlayScreen extends Screen {
+public class PassOutOverlayScreen extends Screen implements com.stardew.craft.port.PortScreen {
     private final long transactionId;
 
     public PassOutOverlayScreen(long transactionId) {

@@ -197,10 +197,9 @@ public final class BuiltinMapInteractionActions {
                 RecordCodecBuilder.create(instance -> instance.group(
                         Codec.STRING.fieldOf("text")
                                 .forGetter(OpenLetterAction::text),
-                        Codec.intRange(0, 7)
-                                .optionalFieldOf("background", 0)
+                        com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(0, 7), "background", 0)
                                 .forGetter(OpenLetterAction::background),
-                        Codec.STRING.optionalFieldOf("text_color", "")
+                        com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "text_color", "")
                                 .forGetter(OpenLetterAction::textColor)
                 ).apply(instance, OpenLetterAction::new));
 
@@ -233,15 +232,12 @@ public final class BuiltinMapInteractionActions {
                                 .forGetter(NpcMessageAction::nearby),
                         LocalizedText.CODEC.fieldOf("fallback")
                                 .forGetter(NpcMessageAction::fallback),
-                        Codec.doubleRange(0.0, 128.0)
-                                .optionalFieldOf("radius", 14.0)
+                        com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.doubleRange(0.0, 128.0), "radius", 14.0)
                                 .forGetter(NpcMessageAction::radius),
-                        Codec.intRange(0, 32)
-                                .optionalFieldOf("vertical_radius", 4)
+                        com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(0, 32), "vertical_radius", 4)
                                 .forGetter(
                                         NpcMessageAction::verticalRadius),
-                        Codec.BOOL.optionalFieldOf(
-                                        "announce_snooping", false)
+                        com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.BOOL, "announce_snooping", false)
                                 .forGetter(
                                         NpcMessageAction::announceSnooping)
                 ).apply(instance, NpcMessageAction::new));
@@ -276,13 +272,13 @@ public final class BuiltinMapInteractionActions {
     ) {
         private static final Codec<LocalizedText> RAW_CODEC =
                 RecordCodecBuilder.create(instance -> instance.group(
-                        Codec.STRING.optionalFieldOf("translate")
+                        com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "translate")
                                 .forGetter(value -> Optional.ofNullable(
                                         value.translationKey())),
-                        Codec.STRING.optionalFieldOf("fallback")
+                        com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "fallback")
                                 .forGetter(value -> Optional.ofNullable(
                                         value.fallback())),
-                        Codec.STRING.optionalFieldOf("literal")
+                        com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "literal")
                                 .forGetter(value -> Optional.ofNullable(
                                         value.literal()))
                 ).apply(instance, (translate, fallback, literal) ->

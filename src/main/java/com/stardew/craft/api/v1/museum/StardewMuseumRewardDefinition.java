@@ -23,11 +23,11 @@ public record StardewMuseumRewardDefinition(
 
     public static final Codec<StardewMuseumRewardDefinition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             CONDITION_CODEC.fieldOf("condition").forGetter(StardewMuseumRewardDefinition::condition),
-            Codec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("threshold", 0)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(0, Integer.MAX_VALUE), "threshold", 0)
                     .forGetter(StardewMuseumRewardDefinition::threshold),
-            ResourceLocation.CODEC.listOf().optionalFieldOf("required_items", List.of())
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(ResourceLocation.CODEC.listOf(), "required_items", List.of())
                     .forGetter(StardewMuseumRewardDefinition::requiredItems),
-            StardewActions.CODEC.listOf().optionalFieldOf("rewards", List.of())
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(StardewActions.CODEC.listOf(), "rewards", List.of())
                     .forGetter(StardewMuseumRewardDefinition::rewards)
     ).apply(instance, StardewMuseumRewardDefinition::new));
 

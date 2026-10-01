@@ -20,7 +20,7 @@ import java.util.List;
 
 /** Pond observation window. All population, requirements and permissions are server snapshots. */
 @SuppressWarnings("null")
-public class FishPondManagerScreen extends AbstractContainerScreen<FishPondManagerMenu> {
+public class FishPondManagerScreen extends AbstractContainerScreen<FishPondManagerMenu> implements com.stardew.craft.port.PortContainerScreen {
     private enum Confirm { NONE, CLEAR, DEMOLISH }
     private record Text(Component label, int x, int y, int width, int color) { }
     private record Icon(ItemStack item, int x, int y, int scale) { }

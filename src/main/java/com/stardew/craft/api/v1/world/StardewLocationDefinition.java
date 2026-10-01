@@ -32,32 +32,28 @@ public record StardewLocationDefinition(
         Map<ResourceLocation, String> properties
 ) {
     public static final Codec<StardewLocationDefinition> CODEC = com.stardew.craft.port.PortCodecs.validate(RecordCodecBuilder.<StardewLocationDefinition>create(instance -> instance.group(
-            ResourceLocation.CODEC.optionalFieldOf("dimension",
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(ResourceLocation.CODEC, "dimension",
                     new ResourceLocation("stardewcraft", "stardew_valley"))
                     .forGetter(StardewLocationDefinition::dimension),
-            Codec.STRING.optionalFieldOf("ledger_id", "").forGetter(StardewLocationDefinition::ledgerId),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "ledger_id", "").forGetter(StardewLocationDefinition::ledgerId),
             Vec3i.CODEC.fieldOf("min").forGetter(StardewLocationDefinition::min),
             Vec3i.CODEC.fieldOf("max").forGetter(StardewLocationDefinition::max),
-            Codec.STRING.listOf().optionalFieldOf("aliases", List.of()).forGetter(StardewLocationDefinition::aliases),
-            Codec.INT.optionalFieldOf("priority", 0).forGetter(StardewLocationDefinition::priority),
-            Codec.BOOL.optionalFieldOf("indoor", false).forGetter(StardewLocationDefinition::indoor),
-            ResourceLocation.CODEC.optionalFieldOf("parent")
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING.listOf(), "aliases", List.of()).forGetter(StardewLocationDefinition::aliases),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.INT, "priority", 0).forGetter(StardewLocationDefinition::priority),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.BOOL, "indoor", false).forGetter(StardewLocationDefinition::indoor),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(ResourceLocation.CODEC, "parent")
                     .forGetter(definition -> Optional.ofNullable(
                             definition.parentId())),
-            ComponentSerialization.CODEC.optionalFieldOf(
-                            "display_name", Component.empty())
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(ComponentSerialization.CODEC, "display_name", Component.empty())
                     .forGetter(StardewLocationDefinition::displayName),
-            ComponentSerialization.CODEC.optionalFieldOf(
-                            "description", Component.empty())
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(ComponentSerialization.CODEC, "description", Component.empty())
                     .forGetter(StardewLocationDefinition::description),
-            ResourceLocation.CODEC.optionalFieldOf("icon")
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(ResourceLocation.CODEC, "icon")
                     .forGetter(definition -> Optional.ofNullable(
                             definition.iconTexture())),
-            ResourceLocation.CODEC.listOf()
-                    .optionalFieldOf("tags", List.of())
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(ResourceLocation.CODEC.listOf(), "tags", List.of())
                     .forGetter(StardewLocationDefinition::tags),
-            Codec.unboundedMap(ResourceLocation.CODEC, Codec.STRING)
-                    .optionalFieldOf("properties", Map.of())
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.unboundedMap(ResourceLocation.CODEC, Codec.STRING), "properties", Map.of())
                     .forGetter(StardewLocationDefinition::properties)
     ).apply(instance, (dimension, ledgerId, min, max, aliases,
                         priority, indoor, parent, displayName,

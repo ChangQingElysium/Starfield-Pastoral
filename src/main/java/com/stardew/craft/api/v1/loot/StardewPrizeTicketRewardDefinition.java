@@ -21,11 +21,11 @@ public record StardewPrizeTicketRewardDefinition(
             instance.group(
                     Codec.intRange(0, Integer.MAX_VALUE).fieldOf("level")
                             .forGetter(StardewPrizeTicketRewardDefinition::level),
-                    Codec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("repeat_every", 0)
+                    com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(0, Integer.MAX_VALUE), "repeat_every", 0)
                             .forGetter(StardewPrizeTicketRewardDefinition::repeatEvery),
-                    Codec.INT.optionalFieldOf("priority", 0)
+                    com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.INT, "priority", 0)
                             .forGetter(StardewPrizeTicketRewardDefinition::priority),
-                    StardewConditions.CODEC.listOf().optionalFieldOf("available_when", List.of())
+                    com.stardew.craft.port.PortCodecs.optionalFieldOf(StardewConditions.CODEC.listOf(), "available_when", List.of())
                             .forGetter(StardewPrizeTicketRewardDefinition::availableWhen),
                     StardewItemQueries.CODEC.fieldOf("reward")
                             .forGetter(StardewPrizeTicketRewardDefinition::reward)

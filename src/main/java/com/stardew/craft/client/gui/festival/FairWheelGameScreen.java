@@ -22,7 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Random;
 
-public class FairWheelGameScreen extends Screen implements com.stardew.craft.client.gui.StardewRealtimeScreen {
+public class FairWheelGameScreen extends Screen implements com.stardew.craft.client.gui.StardewRealtimeScreen, com.stardew.craft.port.PortScreen {
     private static final int WHEEL_SDV_W = 640;
     private static final int WHEEL_SDV_H = 448;
     private static final int QUESTION_W = 1200;
@@ -82,7 +82,7 @@ public class FairWheelGameScreen extends Screen implements com.stardew.craft.cli
     private int noTokenW;
     private int noTokenH;
     private Rect noTokenOkButton = Rect.ZERO;
-    private EditBox wagerInput;
+    private com.stardew.craft.port.PortEditBox wagerInput;
 
     public FairWheelGameScreen(int starTokens, int luckLevel) {
         super(Component.translatable("stardewcraft.fair.wheel.title"));
@@ -96,7 +96,7 @@ public class FairWheelGameScreen extends Screen implements com.stardew.craft.cli
         guiScale = (float) StardewGuiViewport.REFERENCE_SCALE;
         s4 = 4.0F / guiScale;
         computeLayout();
-        wagerInput = new EditBox(com.stardew.craft.client.font.StardewFonts.small(),
+        wagerInput = new com.stardew.craft.port.PortEditBox(com.stardew.craft.client.font.StardewFonts.small(),
             numberBox.x() + ui(16),
             numberBox.y() + (numberBox.height() - StardewFonts.lineHeight(font)) / 2,
             Math.max(12, numberBox.width() - ui(32)),

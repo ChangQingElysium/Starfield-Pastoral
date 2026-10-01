@@ -20,7 +20,7 @@ import java.util.UUID;
  * 通过 /stardew admin 或 FarmAdminSyncPayload 打开。
  */
 @SuppressWarnings("null")
-public class FarmAdminScreen extends Screen {
+public class FarmAdminScreen extends Screen implements com.stardew.craft.port.PortScreen {
 
     // ── 颜色 ──
     private static final int BG_TINT       = 0xCC000000; // 深色背景遮罩
@@ -68,7 +68,7 @@ public class FarmAdminScreen extends Screen {
     private enum Action { NONE, RENAME, TRANSFER }
     private Action currentAction = Action.NONE;
     private FarmEntry actionTarget = null;
-    private EditBox inputBox = null;
+    private com.stardew.craft.port.PortEditBox inputBox = null;
 
     // 行按钮区域 (每行4个按钮)
     private static final int BTN_W_SM = 32;
@@ -117,7 +117,7 @@ public class FarmAdminScreen extends Screen {
             int inputW = Math.min(220, panelW / 2);
             int inputX = panelX + PANEL_PAD + 100;
             int inputY = listBottom + (BOTTOM_BAR_H - 20) / 2;
-            inputBox = new EditBox(StardewFonts.small(), inputX, inputY, inputW, 18,
+            inputBox = new com.stardew.craft.port.PortEditBox(StardewFonts.small(), inputX, inputY, inputW, 18,
                     Component.translatable(currentAction == Action.RENAME
                             ? "stardewcraft.farm.admin.new_name"
                             : "stardewcraft.farm.admin.target_player"));

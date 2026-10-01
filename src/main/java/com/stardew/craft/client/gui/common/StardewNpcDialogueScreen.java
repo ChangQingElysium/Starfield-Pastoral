@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
 
 @OnlyIn(Dist.CLIENT)
 @SuppressWarnings("null")
-public class StardewNpcDialogueScreen extends Screen implements StardewCollectivePauseScreen {
+public class StardewNpcDialogueScreen extends Screen implements StardewCollectivePauseScreen, com.stardew.craft.port.PortScreen {
     private static final Pattern NUMERIC_EMOTION = Pattern.compile("\\$([0-9]+)");
     private static final String[] PERCENT_TOKENS = new String[] {
         "%adj", "%noun", "%place", "%spouse", "%name", "%firstnameletter", "%time", "%band", "%book", "%pet",

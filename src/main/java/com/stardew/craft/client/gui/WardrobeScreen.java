@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Locale;
 
 @SuppressWarnings("null")
-public class WardrobeScreen extends Screen {
+public class WardrobeScreen extends Screen implements com.stardew.craft.port.PortScreen {
     private static final int WIN_W = 1080;
     private static final int WIN_H = 680;
     private static final int MAIN_H = WIN_H - 256 + 32 + 4;

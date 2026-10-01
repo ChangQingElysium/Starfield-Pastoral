@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Random;
 
 @SuppressWarnings("null")
-public final class NightMarketMermaidScreen extends Screen implements StardewRealtimeScreen {
+public final class NightMarketMermaidScreen extends Screen implements StardewRealtimeScreen, com.stardew.craft.port.PortScreen {
     private static final ResourceLocation MAP_TILES = texture("mermaid_house_tiles.png");
     private static final ResourceLocation MERMAID_SPRITES = texture("temporary_sprites_1.png");
     private static final ResourceLocation ANIMATIONS = texture("animations.png");

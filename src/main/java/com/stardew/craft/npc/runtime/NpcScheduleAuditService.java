@@ -70,7 +70,7 @@ public final class NpcScheduleAuditService {
                 NpcDataRegistry.capabilities().values().stream().filter(profile -> profile.implemented())
                         .forEach(profile -> actors.put(profile.npcId(), new Actor(profile.canRunPathing(),
                                 NpcDataRegistry.schedules().containsKey(profile.npcId()))));
-                server.tickRateManager().requestGameToSprint(WARMUP_TICKS + DAYS * DAY_TICKS + 100);
+                com.stardew.craft.port.PortTickRateManager.of(server).requestGameToSprint(WARMUP_TICKS + DAYS * DAY_TICKS + 100);
                 StardewCraft.LOGGER.info("[NPC_SCHEDULE_AUDIT] started actors={} winter days={} normalClockRatio=1000ticks/hour", actors.size(), DAYS);
             }
             ticks++;

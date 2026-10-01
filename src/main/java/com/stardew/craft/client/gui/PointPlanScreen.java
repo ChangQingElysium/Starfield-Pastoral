@@ -15,12 +15,12 @@ import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 import javax.annotation.Nonnull;
 import java.util.List;
 
-public class PointPlanScreen extends Screen {
+public class PointPlanScreen extends Screen implements com.stardew.craft.port.PortScreen {
     private static final int PANEL_W = 520;
     private static final int PANEL_H = 276;
     private static final int ROW_H = 14;
 
-    private EditBox planIdBox;
+    private com.stardew.craft.port.PortEditBox planIdBox;
     private int panelX;
     private int panelY;
     private int scroll;
@@ -37,7 +37,7 @@ public class PointPlanScreen extends Screen {
     protected void init() {
         panelX = (width - PANEL_W) / 2;
         panelY = (height - PANEL_H) / 2;
-        planIdBox = new EditBox(com.stardew.craft.client.font.StardewFonts.small(), panelX + 70, panelY + 27, 220, 18, Component.translatable("gui.stardewcraft.point_plan.plan_id"));
+        planIdBox = new com.stardew.craft.port.PortEditBox(com.stardew.craft.client.font.StardewFonts.small(), panelX + 70, panelY + 27, 220, 18, Component.translatable("gui.stardewcraft.point_plan.plan_id"));
         planIdBox.setTextShadow(false);
         planIdBox.setMaxLength(96);
         planIdBox.setValue(PointPlanClientState.selectedPlanId());

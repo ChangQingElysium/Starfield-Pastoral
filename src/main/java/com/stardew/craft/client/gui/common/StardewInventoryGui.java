@@ -95,7 +95,7 @@ public final class StardewInventoryGui {
         ResourceLocation name = original.contents().name();
         ResourceLocation replacement = resolve(name, TerrainSeasonTextures.currentTextureSet(), true);
         if (replacement == name) return false;
-        graphics.blitSprite(replacement, x, y, z, width, height);
+        com.stardew.craft.port.PortGuiSprites.blitSprite(graphics, replacement, x, y, z, width, height);
         return true;
     }
 
@@ -103,7 +103,7 @@ public final class StardewInventoryGui {
     public static boolean renderSlotHighlight(Screen screen, GuiGraphics graphics, Slot slot) {
         if (!isActive(screen)) return false;
         if (slot.isHighlightable()) {
-            graphics.blitSprite(HOVER[TerrainSeasonTextures.currentTextureSet()], slot.x - 1, slot.y - 1, 18, 18);
+            com.stardew.craft.port.PortGuiSprites.blitSprite(graphics, HOVER[TerrainSeasonTextures.currentTextureSet()], slot.x - 1, slot.y - 1, 18, 18);
         }
         return true;
     }

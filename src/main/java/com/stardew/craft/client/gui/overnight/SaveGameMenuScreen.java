@@ -25,7 +25,7 @@ import java.util.List;
  */
 @OnlyIn(Dist.CLIENT)
 @SuppressWarnings("null")
-public final class SaveGameMenuScreen extends Screen {
+public final class SaveGameMenuScreen extends Screen implements com.stardew.craft.port.PortScreen {
     private static final int SAVING_TICKS = 10;       // original post-save margin: 500 ms
     private static final int COMPLETE_PAUSE_TICKS = 30; // original completePause: 1500 ms
 

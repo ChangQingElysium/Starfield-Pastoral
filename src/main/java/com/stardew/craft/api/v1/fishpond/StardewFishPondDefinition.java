@@ -19,18 +19,17 @@ public record StardewFishPondDefinition(
 ) {
     public static final Codec<StardewFishPondDefinition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("fish").forGetter(StardewFishPondDefinition::fish),
-            Codec.intRange(-1, 100).optionalFieldOf("max_population", -1)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(-1, 100), "max_population", -1)
                     .forGetter(StardewFishPondDefinition::maxPopulation),
-            Codec.intRange(-1, 1000).optionalFieldOf("spawn_time", -1)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(-1, 1000), "spawn_time", -1)
                     .forGetter(StardewFishPondDefinition::spawnTime),
-            Codec.floatRange(0.0F, 1.0F).optionalFieldOf("base_min_produce_chance", 0.15F)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.floatRange(0.0F, 1.0F), "base_min_produce_chance", 0.15F)
                     .forGetter(StardewFishPondDefinition::baseMinProduceChance),
-            Codec.floatRange(0.0F, 1.0F).optionalFieldOf("base_max_produce_chance", 0.95F)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.floatRange(0.0F, 1.0F), "base_max_produce_chance", 0.95F)
                     .forGetter(StardewFishPondDefinition::baseMaxProduceChance),
             ProducedItem.CODEC.listOf().fieldOf("produced_items")
                     .forGetter(StardewFishPondDefinition::producedItems),
-            Codec.unboundedMap(Codec.STRING, GateItem.CODEC.listOf())
-                    .optionalFieldOf("population_gates", Map.of())
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.unboundedMap(Codec.STRING, GateItem.CODEC.listOf()), "population_gates", Map.of())
                     .forGetter(StardewFishPondDefinition::populationGates)
     ).apply(instance, StardewFishPondDefinition::new));
 
@@ -53,12 +52,12 @@ public record StardewFishPondDefinition(
     ) {
         public static final Codec<ProducedItem> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 ResourceLocation.CODEC.fieldOf("item").forGetter(ProducedItem::item),
-                Codec.intRange(0, 100).optionalFieldOf("required_population", 0)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(0, 100), "required_population", 0)
                         .forGetter(ProducedItem::requiredPopulation),
                 Codec.floatRange(0.0F, 1.0F).fieldOf("chance").forGetter(ProducedItem::chance),
-                Codec.INT.optionalFieldOf("precedence", 0).forGetter(ProducedItem::precedence),
-                Codec.intRange(1, 999).optionalFieldOf("min_count", 1).forGetter(ProducedItem::minCount),
-                Codec.intRange(1, 999).optionalFieldOf("max_count", 1).forGetter(ProducedItem::maxCount)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.INT, "precedence", 0).forGetter(ProducedItem::precedence),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(1, 999), "min_count", 1).forGetter(ProducedItem::minCount),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(1, 999), "max_count", 1).forGetter(ProducedItem::maxCount)
         ).apply(instance, ProducedItem::new));
 
         public ProducedItem {
@@ -71,9 +70,9 @@ public record StardewFishPondDefinition(
     public record GateItem(ResourceLocation item, int minCount, int maxCount, int weight) {
         public static final Codec<GateItem> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 ResourceLocation.CODEC.fieldOf("item").forGetter(GateItem::item),
-                Codec.intRange(1, 999).optionalFieldOf("min_count", 1).forGetter(GateItem::minCount),
-                Codec.intRange(1, 999).optionalFieldOf("max_count", 1).forGetter(GateItem::maxCount),
-                Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("weight", 1).forGetter(GateItem::weight)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(1, 999), "min_count", 1).forGetter(GateItem::minCount),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(1, 999), "max_count", 1).forGetter(GateItem::maxCount),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(1, Integer.MAX_VALUE), "weight", 1).forGetter(GateItem::weight)
         ).apply(instance, GateItem::new));
 
         public GateItem {

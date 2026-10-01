@@ -19,9 +19,9 @@ public record StardewPortalDefinition(
             Codec.DOUBLE.fieldOf("x").forGetter(StardewPortalDefinition::x),
             Codec.DOUBLE.fieldOf("y").forGetter(StardewPortalDefinition::y),
             Codec.DOUBLE.fieldOf("z").forGetter(StardewPortalDefinition::z),
-            Codec.FLOAT.optionalFieldOf("yaw", 0.0F).forGetter(StardewPortalDefinition::yaw),
-            Codec.FLOAT.optionalFieldOf("pitch", 0.0F).forGetter(StardewPortalDefinition::pitch),
-            Mode.CODEC.optionalFieldOf("mode", Mode.NONE).forGetter(StardewPortalDefinition::mode)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.FLOAT, "yaw", 0.0F).forGetter(StardewPortalDefinition::yaw),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.FLOAT, "pitch", 0.0F).forGetter(StardewPortalDefinition::pitch),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Mode.CODEC, "mode", Mode.NONE).forGetter(StardewPortalDefinition::mode)
     ).apply(instance, StardewPortalDefinition::new));
 
     public enum Mode {

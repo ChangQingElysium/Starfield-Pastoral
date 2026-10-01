@@ -19,7 +19,7 @@ import net.minecraft.resources.ResourceLocation;
 import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 import java.util.UUID;
 
-public final class BobberStyleScreen extends Screen implements StardewGuiContentSize {
+public final class BobberStyleScreen extends Screen implements StardewGuiContentSize, com.stardew.craft.port.PortScreen {
     private static final int CELL=36,COLUMNS=8,PANEL_W=328,PANEL_H=266;
     private static final ResourceLocation SLOT=texture("slot"),HOVER=texture("hover"),LOCK=texture("locked"),RANDOM=texture("random"),PANEL=texture("panel"),CLOSE=texture("close");
     private static final ResourceLocation[] ICONS=java.util.stream.IntStream.range(0,BobberStyles.COUNT).mapToObj(i->texture("styles/"+i)).toArray(ResourceLocation[]::new);

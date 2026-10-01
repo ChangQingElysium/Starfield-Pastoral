@@ -15,13 +15,13 @@ public record StardewCraftingIngredient(
         Optional<String> displayName
 ) {
     public static final Codec<StardewCraftingIngredient> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ResourceLocation.CODEC.optionalFieldOf("item").forGetter(StardewCraftingIngredient::item),
-            ResourceLocation.CODEC.optionalFieldOf("tag").forGetter(StardewCraftingIngredient::tag),
-            Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("count", 1)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(ResourceLocation.CODEC, "item").forGetter(StardewCraftingIngredient::item),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(ResourceLocation.CODEC, "tag").forGetter(StardewCraftingIngredient::tag),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(1, Integer.MAX_VALUE), "count", 1)
                     .forGetter(StardewCraftingIngredient::count),
-            ResourceLocation.CODEC.optionalFieldOf("display_item")
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(ResourceLocation.CODEC, "display_item")
                     .forGetter(StardewCraftingIngredient::displayItem),
-            Codec.STRING.optionalFieldOf("display_name").forGetter(StardewCraftingIngredient::displayName)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "display_name").forGetter(StardewCraftingIngredient::displayName)
     ).apply(instance, StardewCraftingIngredient::new));
 
     public StardewCraftingIngredient {

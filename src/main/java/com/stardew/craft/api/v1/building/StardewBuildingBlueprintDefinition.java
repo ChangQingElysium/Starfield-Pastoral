@@ -42,38 +42,31 @@ public record StardewBuildingBlueprintDefinition(
                     instance -> instance.group(
                             ResourceLocation.CODEC.fieldOf("builder")
                                     .forGetter(StardewBuildingBlueprintDefinition::builder),
-                            Codec.INT.optionalFieldOf("order", 0)
+                            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.INT, "order", 0)
                                     .forGetter(StardewBuildingBlueprintDefinition::order),
                             Codec.STRING.fieldOf("display_name")
                                     .forGetter(StardewBuildingBlueprintDefinition::displayNameKey),
                             Codec.STRING.fieldOf("description")
                                     .forGetter(StardewBuildingBlueprintDefinition::descriptionKey),
-                            Codec.intRange(0, Integer.MAX_VALUE)
-                                    .optionalFieldOf("money", 0)
+                            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(0, Integer.MAX_VALUE), "money", 0)
                                     .forGetter(StardewBuildingBlueprintDefinition::money),
-                            StardewBuildingMaterial.CODEC.listOf()
-                                    .optionalFieldOf("materials", List.of())
+                            com.stardew.craft.port.PortCodecs.optionalFieldOf(StardewBuildingMaterial.CODEC.listOf(), "materials", List.of())
                                     .forGetter(StardewBuildingBlueprintDefinition::materials),
                             ResourceLocation.CODEC.fieldOf("result_item")
                                     .forGetter(StardewBuildingBlueprintDefinition::resultItem),
-                            Codec.intRange(1, 64).optionalFieldOf("result_count", 1)
+                            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(1, 64), "result_count", 1)
                                     .forGetter(StardewBuildingBlueprintDefinition::resultCount),
-                            Codec.BOOL.optionalFieldOf("upgrade", false)
+                            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.BOOL, "upgrade", false)
                                     .forGetter(StardewBuildingBlueprintDefinition::upgrade),
-                            Codec.intRange(8, 512).optionalFieldOf(
-                                            "preview_canvas_size", 16)
+                            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(8, 512), "preview_canvas_size", 16)
                                     .forGetter(StardewBuildingBlueprintDefinition::previewCanvasSize),
-                            Codec.BOOL.optionalFieldOf(
-                                            "magical_construction", false)
+                            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.BOOL, "magical_construction", false)
                                     .forGetter(StardewBuildingBlueprintDefinition::magicalConstruction),
-                            StardewConditions.CODEC.listOf()
-                                    .optionalFieldOf("available_when", List.of())
+                            com.stardew.craft.port.PortCodecs.optionalFieldOf(StardewConditions.CODEC.listOf(), "available_when", List.of())
                                     .forGetter(StardewBuildingBlueprintDefinition::availableWhen),
-                            ResourceLocation.CODEC.listOf()
-                                    .optionalFieldOf("tags", List.of())
+                            com.stardew.craft.port.PortCodecs.optionalFieldOf(ResourceLocation.CODEC.listOf(), "tags", List.of())
                                     .forGetter(StardewBuildingBlueprintDefinition::tags),
-                            Codec.unboundedMap(ResourceLocation.CODEC, Codec.STRING)
-                                    .optionalFieldOf("properties", Map.of())
+                            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.unboundedMap(ResourceLocation.CODEC, Codec.STRING), "properties", Map.of())
                                     .forGetter(StardewBuildingBlueprintDefinition::properties)
                     ).apply(instance, StardewBuildingBlueprintDefinition::new)), StardewBuildingBlueprintDefinition::validate);
 

@@ -18,8 +18,7 @@ import java.util.Objects;
  */
 public record StardewFoodEffectData(Map<ResourceLocation, StardewFoodEffect> effects) {
     public static final Codec<StardewFoodEffectData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.unboundedMap(ResourceLocation.CODEC, StardewFoodEffect.CODEC)
-                    .optionalFieldOf("effects", Map.of())
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.unboundedMap(ResourceLocation.CODEC, StardewFoodEffect.CODEC), "effects", Map.of())
                     .forGetter(StardewFoodEffectData::effects)
     ).apply(instance, StardewFoodEffectData::new));
 

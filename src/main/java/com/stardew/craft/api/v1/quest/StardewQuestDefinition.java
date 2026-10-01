@@ -29,16 +29,16 @@ public record StardewQuestDefinition(
     public static final Codec<StardewQuestDefinition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             QuestText.CODEC.fieldOf("title").forGetter(StardewQuestDefinition::title),
             QuestText.CODEC.fieldOf("description").forGetter(StardewQuestDefinition::description),
-            QuestText.CODEC.optionalFieldOf("objective_text", QuestText.empty()).forGetter(StardewQuestDefinition::objectiveText),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(QuestText.CODEC, "objective_text", QuestText.empty()).forGetter(StardewQuestDefinition::objectiveText),
             StardewQuestObjectives.CODEC.fieldOf("objective").forGetter(StardewQuestDefinition::objective),
-            StardewConditions.CODEC.listOf().optionalFieldOf("available_when", List.of()).forGetter(StardewQuestDefinition::availableWhen),
-            StardewActions.CODEC.listOf().optionalFieldOf("on_accept", List.of()).forGetter(StardewQuestDefinition::onAccept),
-            StardewActions.CODEC.listOf().optionalFieldOf("on_complete", List.of()).forGetter(StardewQuestDefinition::onComplete),
-            ResourceLocation.CODEC.listOf().optionalFieldOf("next_quests", List.of()).forGetter(StardewQuestDefinition::nextQuests),
-            Codec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("money_reward", 0).forGetter(StardewQuestDefinition::moneyReward),
-            QuestText.CODEC.optionalFieldOf("reward_description").forGetter(StardewQuestDefinition::rewardDescription),
-            Codec.BOOL.optionalFieldOf("can_cancel", true).forGetter(StardewQuestDefinition::canCancel),
-            Codec.INT.optionalFieldOf("days", -1).forGetter(StardewQuestDefinition::days)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(StardewConditions.CODEC.listOf(), "available_when", List.of()).forGetter(StardewQuestDefinition::availableWhen),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(StardewActions.CODEC.listOf(), "on_accept", List.of()).forGetter(StardewQuestDefinition::onAccept),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(StardewActions.CODEC.listOf(), "on_complete", List.of()).forGetter(StardewQuestDefinition::onComplete),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(ResourceLocation.CODEC.listOf(), "next_quests", List.of()).forGetter(StardewQuestDefinition::nextQuests),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(0, Integer.MAX_VALUE), "money_reward", 0).forGetter(StardewQuestDefinition::moneyReward),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(QuestText.CODEC, "reward_description").forGetter(StardewQuestDefinition::rewardDescription),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.BOOL, "can_cancel", true).forGetter(StardewQuestDefinition::canCancel),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.INT, "days", -1).forGetter(StardewQuestDefinition::days)
     ).apply(instance, StardewQuestDefinition::new));
 
     public StardewQuestDefinition {

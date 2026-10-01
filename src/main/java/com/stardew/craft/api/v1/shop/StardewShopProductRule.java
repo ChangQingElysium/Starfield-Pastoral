@@ -23,15 +23,13 @@ public record StardewShopProductRule(
                             .forGetter(StardewShopProductRule::shop),
                     Codec.STRING.fieldOf("item")
                             .forGetter(StardewShopProductRule::item),
-                    Codec.INT.optionalFieldOf("priority", 0)
+                    com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.INT, "priority", 0)
                             .forGetter(
                                     StardewShopProductRule::priority),
                     StardewActions.CODEC.fieldOf("action")
                             .forGetter(
                                     StardewShopProductRule::action),
-                    StardewConditions.CODEC.listOf()
-                            .optionalFieldOf(
-                                    "available_when", List.of())
+                    com.stardew.craft.port.PortCodecs.optionalFieldOf(StardewConditions.CODEC.listOf(), "available_when", List.of())
                             .forGetter(
                                     StardewShopProductRule
                                             ::availableWhen)

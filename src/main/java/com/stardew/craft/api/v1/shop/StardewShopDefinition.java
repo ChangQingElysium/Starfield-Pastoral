@@ -16,14 +16,14 @@ public record StardewShopDefinition(
         List<ResourceLocation> inventoryProviders
 ) {
     public static final Codec<StardewShopDefinition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.STRING.optionalFieldOf("legacy_id", "").forGetter(StardewShopDefinition::legacyId),
-            Codec.STRING.optionalFieldOf("owner_npc", "").forGetter(StardewShopDefinition::ownerNpc),
-            Codec.STRING.optionalFieldOf("owner_dialogue", "").forGetter(StardewShopDefinition::ownerDialogue),
-            StardewShopEntry.CODEC.listOf().optionalFieldOf("entries", List.of())
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "legacy_id", "").forGetter(StardewShopDefinition::legacyId),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "owner_npc", "").forGetter(StardewShopDefinition::ownerNpc),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "owner_dialogue", "").forGetter(StardewShopDefinition::ownerDialogue),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(StardewShopEntry.CODEC.listOf(), "entries", List.of())
                     .forGetter(StardewShopDefinition::entries),
-            Codec.STRING.listOf().optionalFieldOf("accepted_sell_types", List.of())
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING.listOf(), "accepted_sell_types", List.of())
                     .forGetter(StardewShopDefinition::acceptedSellTypes),
-            ResourceLocation.CODEC.listOf().optionalFieldOf("inventory_providers", List.of())
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(ResourceLocation.CODEC.listOf(), "inventory_providers", List.of())
                     .forGetter(StardewShopDefinition::inventoryProviders)
     ).apply(instance, StardewShopDefinition::new));
 

@@ -51,7 +51,7 @@ import java.util.List;
  * 2. Bundle detail (specificBundlePage = true): shows ingredient slots + inventory
  */
 @SuppressWarnings("null")
-public class BundleScreen extends AbstractContainerScreen<BundleMenu> {
+public class BundleScreen extends AbstractContainerScreen<BundleMenu> implements com.stardew.craft.port.PortContainerScreen {
 
     // ── Texture constants ──
     private static final ResourceLocation JUNIMO_NOTE = new ResourceLocation(
@@ -373,8 +373,9 @@ public class BundleScreen extends AbstractContainerScreen<BundleMenu> {
      * SDV parity: InventoryMenu.cs line 558 — drawInMenu(transparency: 0.25f).
      * Non-matching items are rendered at 25% opacity using translucent render types.
      */
+    // PORT(1.20.1): 1.21 AbstractContainerScreen#renderSlot override, dispatched by PortContainerScreenMixin.
     @Override
-    protected void renderSlot(@Nonnull GuiGraphics g, @Nonnull net.minecraft.world.inventory.Slot slot) {
+    public void port$renderSlot(@Nonnull GuiGraphics g, @Nonnull net.minecraft.world.inventory.Slot slot) {
         // SDV renders inventory items at 64×64 screen pixels inside its 72×72
         // cells. Scale Minecraft's native 16×16 item renderer to the same size.
         g.pose().pushPose();
@@ -408,24 +409,25 @@ public class BundleScreen extends AbstractContainerScreen<BundleMenu> {
                 if (!matches && !stack.isEmpty()) {
                     renderDimmedSlot(g, slot, stack);
                 } else {
-                    super.renderSlot(g, slot);
+                    com.stardew.craft.port.PortContainerScreen.super.port$renderSlot(g, slot);
                 }
                 g.pose().popPose();
                 return;
             }
         }
-        super.renderSlot(g, slot);
+        com.stardew.craft.port.PortContainerScreen.super.port$renderSlot(g, slot);
         g.pose().popPose();
     }
 
+    // PORT(1.20.1): 1.21 per-slot renderSlotHighlight override, dispatched by PortContainerScreenMixin.
     @Override
-    protected void renderSlotHighlight(GuiGraphics g, net.minecraft.world.inventory.Slot slot,
+    public void port$renderSlotHighlight(GuiGraphics g, net.minecraft.world.inventory.Slot slot,
                                        int mouseX, int mouseY, float partialTick) {
         g.pose().pushPose();
         g.pose().translate(slot.x, slot.y, 0);
         g.pose().scale(s4, s4, 1.0f);
         g.pose().translate(-slot.x, -slot.y, 0);
-        super.renderSlotHighlight(g, slot, mouseX, mouseY, partialTick);
+        com.stardew.craft.port.PortContainerScreen.super.port$renderSlotHighlight(g, slot, mouseX, mouseY, partialTick);
         g.pose().popPose();
     }
 

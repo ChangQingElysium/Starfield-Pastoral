@@ -34,7 +34,7 @@ import net.minecraft.world.item.ItemStack;
 import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 @SuppressWarnings("null")
-public class MiniForgeScreen extends AbstractContainerScreen<MiniForgeMenu> {
+public class MiniForgeScreen extends AbstractContainerScreen<MiniForgeMenu> implements com.stardew.craft.port.PortContainerScreen {
     private static final ResourceLocation FORGE_MENU = forge("forge_menu");
     private static final ResourceLocation FORGE_BACKGROUND = forge("background");
     private static final ResourceLocation INGREDIENT_SLOT = forge("ingredient_slot");
@@ -156,8 +156,9 @@ public class MiniForgeScreen extends AbstractContainerScreen<MiniForgeMenu> {
     protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY) {
     }
 
+    // PORT(1.20.1): 1.21 AbstractContainerScreen#renderSlot override, dispatched by PortContainerScreenMixin.
     @Override
-    protected void renderSlot(@Nonnull GuiGraphics guiGraphics, @Nonnull Slot slot) {
+    public void port$renderSlot(@Nonnull GuiGraphics guiGraphics, @Nonnull Slot slot) {
     }
 
     @Override

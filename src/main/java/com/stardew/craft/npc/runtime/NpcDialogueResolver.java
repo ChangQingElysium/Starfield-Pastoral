@@ -22,7 +22,7 @@ final class NpcDialogueResolver {
 
     static Selection select(JsonObject dialogueRoot, JsonObject rainyRoot, Context context) {
         JsonObject entries = dialogueScope(dialogueRoot);
-        if (entries == null || entries.isEmpty()) {
+        if (entries == null || entries.size() == 0) {
             return Selection.NONE;
         }
 

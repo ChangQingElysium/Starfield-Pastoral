@@ -35,7 +35,7 @@ import java.util.Optional;
 
 /** Shared, original pixel workshop UI. No container inventory is moved on the client. */
 @SuppressWarnings("null")
-public class WorkbenchScreen extends Screen {
+public class WorkbenchScreen extends Screen implements com.stardew.craft.port.PortScreen {
     private final WorkbenchType type;
     private List<WorkbenchEntry> recipes = List.of();
     private final List<WorkbenchEntry> filtered = new ArrayList<>();
@@ -139,7 +139,7 @@ public class WorkbenchScreen extends Screen {
         plus.setTooltip(Tooltip.create(tr("more")));
         maximum = button(dx + dw - 37, qy, 32, 20, tr("maximum"), () -> setQuantity(limit()), false);
         maximum.setTooltip(Tooltip.create(tr("maximum_hint")));
-        quantityInput = new EditBox(font, dx + 28, qy + (20 - StardewFonts.lineHeight(font)) / 2,
+        quantityInput = new com.stardew.craft.port.PortEditBox(font, dx + 28, qy + (20 - StardewFonts.lineHeight(font)) / 2,
                 dw - 91, StardewFonts.lineHeight(font), tr("quantity"));
         quantityInput.setBordered(false);
         quantityInput.setTextColor(WorkbenchArt.INK);

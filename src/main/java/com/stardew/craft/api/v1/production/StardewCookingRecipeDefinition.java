@@ -14,7 +14,7 @@ public record StardewCookingRecipeDefinition(
 ) {
     public static final Codec<StardewCookingRecipeDefinition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("output").forGetter(StardewCookingRecipeDefinition::output),
-            Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("output_count", 1)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(1, Integer.MAX_VALUE), "output_count", 1)
                     .forGetter(StardewCookingRecipeDefinition::outputCount),
             StardewCookingIngredient.CODEC.listOf().fieldOf("ingredients")
                     .forGetter(StardewCookingRecipeDefinition::ingredients)

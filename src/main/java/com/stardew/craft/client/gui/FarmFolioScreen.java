@@ -13,7 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 /** Shared stationery and controls; each task owns its layout and server actions. */
-public abstract class FarmFolioScreen extends Screen {
+public abstract class FarmFolioScreen extends Screen implements com.stardew.craft.port.PortScreen {
     public static final int INK = 0xFF623E2A,
             MUTED = 0xFF805D3C,
             LIGHT = 0xFFFFF0C7,
@@ -357,7 +357,7 @@ public abstract class FarmFolioScreen extends Screen {
     protected final EditBox field(
             Component label, String value, int px, int py, int pw, int maxLength) {
         EditBox field =
-                new EditBox(font, px + 8, py + 7, pw - 16, 20, label) {
+                new com.stardew.craft.port.PortEditBox(font, px + 8, py + 7, pw - 16, 20, label) {
                     @Override
                     public void renderWidget(GuiGraphics g, int mx, int my, float tick) {
                         box(

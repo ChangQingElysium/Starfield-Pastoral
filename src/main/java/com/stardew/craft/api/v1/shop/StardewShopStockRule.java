@@ -24,17 +24,13 @@ public record StardewShopStockRule(
                             .forGetter(StardewShopStockRule::shop),
                     Codec.STRING.fieldOf("item")
                             .forGetter(StardewShopStockRule::item),
-                    Codec.INT.optionalFieldOf("priority", 0)
+                    com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.INT, "priority", 0)
                             .forGetter(StardewShopStockRule::priority),
-                    Scope.CODEC.optionalFieldOf(
-                                    "scope", Scope.PLAYER)
+                    com.stardew.craft.port.PortCodecs.optionalFieldOf(Scope.CODEC, "scope", Scope.PLAYER)
                             .forGetter(StardewShopStockRule::scope),
-                    Reset.CODEC.optionalFieldOf(
-                                    "reset", Reset.DAY)
+                    com.stardew.craft.port.PortCodecs.optionalFieldOf(Reset.CODEC, "reset", Reset.DAY)
                             .forGetter(StardewShopStockRule::reset),
-                    StardewConditions.CODEC.listOf()
-                            .optionalFieldOf(
-                                    "available_when", List.of())
+                    com.stardew.craft.port.PortCodecs.optionalFieldOf(StardewConditions.CODEC.listOf(), "available_when", List.of())
                             .forGetter(
                                     StardewShopStockRule::availableWhen)
             ).apply(instance, StardewShopStockRule::new));

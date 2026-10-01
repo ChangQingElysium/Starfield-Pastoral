@@ -20,9 +20,9 @@ public record StardewMonsterSlayerGoalDefinition(
             Codec.intRange(1, Integer.MAX_VALUE).fieldOf("required_kills")
                     .forGetter(StardewMonsterSlayerGoalDefinition::requiredKills),
             Codec.STRING.listOf().fieldOf("monster_tags").forGetter(StardewMonsterSlayerGoalDefinition::monsterTags),
-            StardewActions.CODEC.listOf().optionalFieldOf("rewards", List.of())
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(StardewActions.CODEC.listOf(), "rewards", List.of())
                     .forGetter(StardewMonsterSlayerGoalDefinition::rewards),
-            net.minecraft.resources.ResourceLocation.CODEC.optionalFieldOf("reward_preview")
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(net.minecraft.resources.ResourceLocation.CODEC, "reward_preview")
                     .forGetter(StardewMonsterSlayerGoalDefinition::rewardPreview)
     ).apply(instance, StardewMonsterSlayerGoalDefinition::new));
 

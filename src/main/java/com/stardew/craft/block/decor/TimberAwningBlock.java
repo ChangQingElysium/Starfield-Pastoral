@@ -86,7 +86,7 @@ public final class TimberAwningBlock extends MapDecorWallStaticBlock {
     }
 
     @Override
-    protected boolean canSurvive(@Nonnull BlockState state, @Nonnull LevelReader level, @Nonnull BlockPos pos) {
+    public boolean canSurvive(@Nonnull BlockState state, @Nonnull LevelReader level, @Nonnull BlockPos pos) {
         if (!super.canSurvive(state, level, pos)) return false;
         BlockPos main = findMainPos(level, pos, state);
         if (main == null) return false;

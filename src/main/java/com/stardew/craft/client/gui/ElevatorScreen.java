@@ -33,7 +33,7 @@ import java.util.List;
  *   4. 精灵 scale 用 s4() = 4/guiScale
  */
 @SuppressWarnings("null")
-public class ElevatorScreen extends AbstractContainerScreen<ElevatorMenu> {
+public class ElevatorScreen extends AbstractContainerScreen<ElevatorMenu> implements com.stardew.craft.port.PortContainerScreen {
 
     // ── SDV IClickableMenu 常量（SDV 像素） ──
     /** IClickableMenu.borderWidth = 40 */

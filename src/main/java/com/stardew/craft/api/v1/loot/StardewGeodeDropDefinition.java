@@ -21,12 +21,12 @@ public record StardewGeodeDropDefinition(
 ) {
     public static final Codec<StardewGeodeDropDefinition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ResourceLocation.CODEC.listOf().fieldOf("inputs").forGetter(StardewGeodeDropDefinition::inputs),
-            StardewConditions.CODEC.listOf().optionalFieldOf("available_when", List.of())
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(StardewConditions.CODEC.listOf(), "available_when", List.of())
                     .forGetter(StardewGeodeDropDefinition::availableWhen),
             Entry.CODEC.listOf().fieldOf("entries").forGetter(StardewGeodeDropDefinition::entries),
-            Codec.BOOL.optionalFieldOf("crusher_allowed", true).forGetter(StardewGeodeDropDefinition::crusherAllowed),
-            Codec.STRING.optionalFieldOf("animation", "geode").forGetter(StardewGeodeDropDefinition::animation),
-            Codec.INT.optionalFieldOf("priority", 0).forGetter(StardewGeodeDropDefinition::priority)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.BOOL, "crusher_allowed", true).forGetter(StardewGeodeDropDefinition::crusherAllowed),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "animation", "geode").forGetter(StardewGeodeDropDefinition::animation),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.INT, "priority", 0).forGetter(StardewGeodeDropDefinition::priority)
     ).apply(instance, StardewGeodeDropDefinition::new));
 
     public StardewGeodeDropDefinition {
@@ -55,7 +55,7 @@ public record StardewGeodeDropDefinition(
         }
         public static final Codec<Entry> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 StardewItemQueries.CODEC.fieldOf("query").forGetter(Entry::query),
-                Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("weight", 1).forGetter(Entry::weight)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(1, Integer.MAX_VALUE), "weight", 1).forGetter(Entry::weight)
         ).apply(instance, Entry::new));
     }
 }

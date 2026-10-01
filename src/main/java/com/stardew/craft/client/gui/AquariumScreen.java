@@ -14,7 +14,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 /** Native ItemStacks on the shared design canvas and separately extracted Stardew UI sprites. */
 @OnlyIn(Dist.CLIENT)
-public final class AquariumScreen extends AbstractContainerScreen<AquariumMenu> implements StardewGuiContentSize {
+public final class AquariumScreen extends AbstractContainerScreen<AquariumMenu> implements StardewGuiContentSize, com.stardew.craft.port.PortContainerScreen {
     public AquariumScreen(AquariumMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title); imageWidth = 194; imageHeight = 232;
     }

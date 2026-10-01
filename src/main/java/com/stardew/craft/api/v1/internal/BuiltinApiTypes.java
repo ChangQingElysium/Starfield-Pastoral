@@ -422,21 +422,21 @@ public final class BuiltinApiTypes {
 
     private record AlwaysCondition(boolean value) {
         private static final Codec<AlwaysCondition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                Codec.BOOL.optionalFieldOf("value", true).forGetter(AlwaysCondition::value)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.BOOL, "value", true).forGetter(AlwaysCondition::value)
         ).apply(instance, AlwaysCondition::new));
     }
 
     private record HasItemCondition(ResourceLocation item, int count) {
         private static final Codec<HasItemCondition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 ResourceLocation.CODEC.fieldOf("item").forGetter(HasItemCondition::item),
-                Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("count", 1).forGetter(HasItemCondition::count)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(1, Integer.MAX_VALUE), "count", 1).forGetter(HasItemCondition::count)
         ).apply(instance, HasItemCondition::new));
     }
 
     private record MoneyCondition(int min, int max) {
         private static final Codec<MoneyCondition> BASE_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                Codec.INT.optionalFieldOf("min", Integer.MIN_VALUE).forGetter(MoneyCondition::min),
-                Codec.INT.optionalFieldOf("max", Integer.MAX_VALUE).forGetter(MoneyCondition::max)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.INT, "min", Integer.MIN_VALUE).forGetter(MoneyCondition::min),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.INT, "max", Integer.MAX_VALUE).forGetter(MoneyCondition::max)
         ).apply(instance, MoneyCondition::new));
         private static final Codec<MoneyCondition> CODEC = com.stardew.craft.port.PortCodecs.validate(BASE_CODEC, data -> data.max() < data.min()
                 ? com.mojang.serialization.DataResult.error(() -> "money.max must be >= money.min")
@@ -446,7 +446,7 @@ public final class BuiltinApiTypes {
     private record FlagCondition(String id, boolean present) {
         private static final Codec<FlagCondition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 Codec.STRING.fieldOf("id").forGetter(FlagCondition::id),
-                Codec.BOOL.optionalFieldOf("present", true).forGetter(FlagCondition::present)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.BOOL, "present", true).forGetter(FlagCondition::present)
         ).apply(instance, FlagCondition::new));
     }
 
@@ -478,11 +478,9 @@ public final class BuiltinApiTypes {
         private static final Codec<TimeCondition> CODEC =
                 com.stardew.craft.port.PortCodecs.validate(RecordCodecBuilder.<TimeCondition>create(
                         instance -> instance.group(
-                        Codec.intRange(0, 2600).optionalFieldOf(
-                                        "start", 0)
+                        com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(0, 2600), "start", 0)
                                 .forGetter(TimeCondition::start),
-                        Codec.intRange(0, 2600).optionalFieldOf(
-                                        "end", 2600)
+                        com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(0, 2600), "end", 2600)
                                 .forGetter(TimeCondition::end)
                 ).apply(instance, TimeCondition::new)), value -> validHhmm(value.start())
                                         && validHhmm(value.end())
@@ -518,7 +516,7 @@ public final class BuiltinApiTypes {
         private static final Codec<SeenEventCondition> CODEC =
                 com.stardew.craft.port.PortCodecs.validate(RecordCodecBuilder.<SeenEventCondition>create(instance -> instance.group(
                         Codec.STRING.fieldOf("id").forGetter(SeenEventCondition::id),
-                        Codec.STRING.optionalFieldOf("scope", "current")
+                        com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "scope", "current")
                                 .forGetter(SeenEventCondition::scope)
                 ).apply(instance, SeenEventCondition::new)), value -> List.of("current", "host")
                                         .contains(value.scope())
@@ -535,25 +533,17 @@ public final class BuiltinApiTypes {
     ) {
         private static final Codec<LocationCondition> BASE_CODEC =
                 RecordCodecBuilder.create(instance -> instance.group(
-                        ResourceLocation.CODEC.listOf()
-                                .optionalFieldOf(
-                                        "locations", List.of())
+                        com.stardew.craft.port.PortCodecs.optionalFieldOf(ResourceLocation.CODEC.listOf(), "locations", List.of())
                                 .forGetter(LocationCondition::locations),
-                        ResourceLocation.CODEC.listOf()
-                                .optionalFieldOf(
-                                        "required_tags", List.of())
+                        com.stardew.craft.port.PortCodecs.optionalFieldOf(ResourceLocation.CODEC.listOf(), "required_tags", List.of())
                                 .forGetter(
                                         LocationCondition::requiredTags),
-                        ResourceLocation.CODEC.listOf()
-                                .optionalFieldOf(
-                                        "excluded_tags", List.of())
+                        com.stardew.craft.port.PortCodecs.optionalFieldOf(ResourceLocation.CODEC.listOf(), "excluded_tags", List.of())
                                 .forGetter(
                                         LocationCondition::excludedTags),
-                        Codec.unboundedMap(
+                        com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.unboundedMap(
                                         ResourceLocation.CODEC,
-                                        Codec.STRING)
-                                .optionalFieldOf(
-                                        "properties", Map.of())
+                                        Codec.STRING), "properties", Map.of())
                                 .forGetter(LocationCondition::properties)
                 ).apply(instance, LocationCondition::new));
         private static final Codec<LocationCondition> CODEC =
@@ -600,21 +590,21 @@ public final class BuiltinApiTypes {
     private record DirectItemQuery(ResourceLocation item, int count) {
         private static final Codec<DirectItemQuery> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 ResourceLocation.CODEC.fieldOf("item").forGetter(DirectItemQuery::item),
-                Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("count", 1).forGetter(DirectItemQuery::count)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(1, Integer.MAX_VALUE), "count", 1).forGetter(DirectItemQuery::count)
         ).apply(instance, DirectItemQuery::new));
     }
 
     private record RandomTagQuery(ResourceLocation tag, int count) {
         private static final Codec<RandomTagQuery> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 ResourceLocation.CODEC.fieldOf("tag").forGetter(RandomTagQuery::tag),
-                Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("count", 1).forGetter(RandomTagQuery::count)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(1, Integer.MAX_VALUE), "count", 1).forGetter(RandomTagQuery::count)
         ).apply(instance, RandomTagQuery::new));
     }
 
     private record OneOfItemQuery(List<ResourceLocation> items, int count) {
         private static final Codec<OneOfItemQuery> BASE_CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 ResourceLocation.CODEC.listOf().fieldOf("items").forGetter(OneOfItemQuery::items),
-                Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("count", 1).forGetter(OneOfItemQuery::count)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(1, Integer.MAX_VALUE), "count", 1).forGetter(OneOfItemQuery::count)
         ).apply(instance, OneOfItemQuery::new));
         private static final Codec<OneOfItemQuery> CODEC = com.stardew.craft.port.PortCodecs.validate(BASE_CODEC, data -> data.items().isEmpty()
                 ? com.mojang.serialization.DataResult.error(() -> "one_of.items must not be empty")
@@ -648,7 +638,7 @@ public final class BuiltinApiTypes {
     private record WeightedQueryEntry(StardewItemQuery query, int weight) {
         private static final Codec<WeightedQueryEntry> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 StardewItemQueries.CODEC.fieldOf("query").forGetter(WeightedQueryEntry::query),
-                Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("weight", 1)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(1, Integer.MAX_VALUE), "weight", 1)
                         .forGetter(WeightedQueryEntry::weight)
         ).apply(instance, WeightedQueryEntry::new));
     }
@@ -679,14 +669,14 @@ public final class BuiltinApiTypes {
     private record AddItemAction(ResourceLocation item, int count) {
         private static final Codec<AddItemAction> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 ResourceLocation.CODEC.fieldOf("item").forGetter(AddItemAction::item),
-                Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("count", 1).forGetter(AddItemAction::count)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(1, Integer.MAX_VALUE), "count", 1).forGetter(AddItemAction::count)
         ).apply(instance, AddItemAction::new));
     }
 
     private record RemoveItemAction(ResourceLocation item, int count) {
         private static final Codec<RemoveItemAction> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 ResourceLocation.CODEC.fieldOf("item").forGetter(RemoveItemAction::item),
-                Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("count", 1).forGetter(RemoveItemAction::count)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(1, Integer.MAX_VALUE), "count", 1).forGetter(RemoveItemAction::count)
         ).apply(instance, RemoveItemAction::new));
     }
 

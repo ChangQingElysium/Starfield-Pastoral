@@ -19,10 +19,10 @@ public record StardewProfessionDefinition(
             RecordCodecBuilder.<StardewProfessionDefinition>create(instance -> instance.group(
                     ResourceLocation.CODEC.fieldOf("skill").forGetter(StardewProfessionDefinition::skill),
                     Codec.intRange(1, 10).fieldOf("required_level").forGetter(StardewProfessionDefinition::requiredLevel),
-                    ResourceLocation.CODEC.optionalFieldOf("parent").forGetter(StardewProfessionDefinition::parent),
+                    com.stardew.craft.port.PortCodecs.optionalFieldOf(ResourceLocation.CODEC, "parent").forGetter(StardewProfessionDefinition::parent),
                     Codec.STRING.fieldOf("name_key").forGetter(StardewProfessionDefinition::nameKey),
                     Codec.STRING.fieldOf("desc_key").forGetter(StardewProfessionDefinition::descKey),
-                    ResourceLocation.CODEC.optionalFieldOf("effect_handler")
+                    com.stardew.craft.port.PortCodecs.optionalFieldOf(ResourceLocation.CODEC, "effect_handler")
                             .forGetter(StardewProfessionDefinition::effectHandler)
             ).apply(instance, StardewProfessionDefinition::new));
 

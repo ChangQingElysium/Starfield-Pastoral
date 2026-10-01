@@ -20,9 +20,9 @@ public record StardewMineChestRewardDefinition(
             instance.group(
                     Codec.intRange(1, Integer.MAX_VALUE).fieldOf("floor")
                             .forGetter(StardewMineChestRewardDefinition::floor),
-                    Codec.INT.optionalFieldOf("priority", 0)
+                    com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.INT, "priority", 0)
                             .forGetter(StardewMineChestRewardDefinition::priority),
-                    StardewConditions.CODEC.listOf().optionalFieldOf("available_when", List.of())
+                    com.stardew.craft.port.PortCodecs.optionalFieldOf(StardewConditions.CODEC.listOf(), "available_when", List.of())
                             .forGetter(StardewMineChestRewardDefinition::availableWhen),
                     StardewItemQueries.CODEC.fieldOf("reward")
                             .forGetter(StardewMineChestRewardDefinition::reward)

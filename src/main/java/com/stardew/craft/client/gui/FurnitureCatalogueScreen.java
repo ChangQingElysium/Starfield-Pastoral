@@ -33,7 +33,7 @@ import java.util.Locale;
  * All items are free with unlimited stock — no inventory panel needed.
  */
 @SuppressWarnings("null")
-public class FurnitureCatalogueScreen extends Screen {
+public class FurnitureCatalogueScreen extends Screen implements com.stardew.craft.port.PortScreen {
 
     // ── Layout constants (SDV screen-pixels) ────────────────────────────────
     private static final int BORDER = 40;

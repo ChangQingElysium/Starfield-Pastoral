@@ -17,7 +17,7 @@ public record StardewMasteryRewardDefinition(
 ) {
     public static final Codec<StardewMasteryRewardDefinition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("skill").forGetter(StardewMasteryRewardDefinition::skill),
-            Codec.INT.optionalFieldOf("priority", 0).forGetter(StardewMasteryRewardDefinition::priority),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.INT, "priority", 0).forGetter(StardewMasteryRewardDefinition::priority),
             Entry.CODEC.listOf().fieldOf("entries").forGetter(StardewMasteryRewardDefinition::entries)
     ).apply(instance, StardewMasteryRewardDefinition::new));
 
@@ -36,12 +36,12 @@ public record StardewMasteryRewardDefinition(
     ) {
         public static final Codec<Entry> CODEC = com.stardew.craft.port.PortCodecs.validate(RecordCodecBuilder.<Entry>create(instance -> instance.group(
                 Kind.CODEC.fieldOf("kind").forGetter(Entry::kind),
-                ResourceLocation.CODEC.optionalFieldOf("item").forGetter(Entry::item),
-                Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("count", 1).forGetter(Entry::count),
-                Codec.STRING.optionalFieldOf("recipe_id", "").forGetter(Entry::recipeId),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(ResourceLocation.CODEC, "item").forGetter(Entry::item),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(1, Integer.MAX_VALUE), "count", 1).forGetter(Entry::count),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "recipe_id", "").forGetter(Entry::recipeId),
                 Codec.STRING.fieldOf("name_key").forGetter(Entry::nameKey),
                 Codec.STRING.fieldOf("desc_key").forGetter(Entry::descKey),
-                ResourceLocation.CODEC.optionalFieldOf("stat_bonus").forGetter(Entry::statBonus)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(ResourceLocation.CODEC, "stat_bonus").forGetter(Entry::statBonus)
         ).apply(instance, Entry::new)), Entry::validate);
 
         public Entry {

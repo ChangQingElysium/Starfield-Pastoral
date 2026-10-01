@@ -15,7 +15,7 @@ import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 /** Furniture has no container page; its existing paintbrush host shares the same lightweight wheel. */
 @OnlyIn(Dist.CLIENT)
-public class SofaColorSelectionScreen extends Screen {
+public class SofaColorSelectionScreen extends Screen implements com.stardew.craft.port.PortScreen {
     private final BlockPos targetPos;
     private final int targetEntityId;
     private final int initialColor;

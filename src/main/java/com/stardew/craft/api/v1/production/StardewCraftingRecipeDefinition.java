@@ -19,13 +19,13 @@ public record StardewCraftingRecipeDefinition(
 ) {
     public static final Codec<StardewCraftingRecipeDefinition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("output").forGetter(StardewCraftingRecipeDefinition::output),
-            Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("output_count", 1)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(1, Integer.MAX_VALUE), "output_count", 1)
                     .forGetter(StardewCraftingRecipeDefinition::outputCount),
             StardewCraftingIngredient.CODEC.listOf().fieldOf("ingredients")
                     .forGetter(StardewCraftingRecipeDefinition::ingredients),
-            StardewConditions.CODEC.listOf().optionalFieldOf("unlock_when", List.of())
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(StardewConditions.CODEC.listOf(), "unlock_when", List.of())
                     .forGetter(StardewCraftingRecipeDefinition::unlockWhen),
-            Codec.STRING.optionalFieldOf("legacy_unlock_condition")
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "legacy_unlock_condition")
                     .forGetter(StardewCraftingRecipeDefinition::legacyUnlockCondition)
     ).apply(instance, StardewCraftingRecipeDefinition::new));
 

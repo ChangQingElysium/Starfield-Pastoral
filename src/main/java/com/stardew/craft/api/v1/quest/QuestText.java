@@ -10,12 +10,12 @@ import java.util.List;
 /** Localizable text stored in a quest definition. */
 public record QuestText(String translate, String literal, List<String> args) {
     private static final Codec<QuestText> OBJECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.STRING.optionalFieldOf("translate", "").forGetter(QuestText::translate),
-            Codec.STRING.optionalFieldOf("literal", "").forGetter(QuestText::literal),
-            Codec.STRING.listOf().optionalFieldOf("args", List.of()).forGetter(QuestText::args)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "translate", "").forGetter(QuestText::translate),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "literal", "").forGetter(QuestText::literal),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING.listOf(), "args", List.of()).forGetter(QuestText::args)
     ).apply(instance, QuestText::new));
 
-    public static final Codec<QuestText> CODEC = Codec.withAlternative(
+    public static final Codec<QuestText> CODEC = com.stardew.craft.port.PortCodecs.withAlternative(
             com.stardew.craft.port.PortCodecs.validate(OBJECT_CODEC, QuestText::validate),
             Codec.STRING.xmap(QuestText::translated, QuestText::translate)
     );

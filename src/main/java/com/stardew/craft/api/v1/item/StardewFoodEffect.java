@@ -25,13 +25,13 @@ public record StardewFoodEffect(
             ResourceLocation.CODEC.fieldOf("effect").forGetter(StardewFoodEffect::effect),
             Codec.intRange(1, Integer.MAX_VALUE).fieldOf("duration_ticks")
                     .forGetter(StardewFoodEffect::durationTicks),
-            Codec.intRange(0, 255).optionalFieldOf("amplifier", 0)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(0, 255), "amplifier", 0)
                     .forGetter(StardewFoodEffect::amplifier),
-            Codec.doubleRange(0.0D, 1.0D).optionalFieldOf("chance", 1.0D)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.doubleRange(0.0D, 1.0D), "chance", 1.0D)
                     .forGetter(StardewFoodEffect::chance),
-            Codec.BOOL.optionalFieldOf("ambient", false).forGetter(StardewFoodEffect::ambient),
-            Codec.BOOL.optionalFieldOf("show_particles", true).forGetter(StardewFoodEffect::showParticles),
-            Codec.BOOL.optionalFieldOf("show_icon", true).forGetter(StardewFoodEffect::showIcon)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.BOOL, "ambient", false).forGetter(StardewFoodEffect::ambient),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.BOOL, "show_particles", true).forGetter(StardewFoodEffect::showParticles),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.BOOL, "show_icon", true).forGetter(StardewFoodEffect::showIcon)
     ).apply(instance, StardewFoodEffect::new));
 
     public StardewFoodEffect {

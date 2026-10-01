@@ -57,7 +57,7 @@ import java.util.function.IntConsumer;
  */
 @OnlyIn(Dist.CLIENT)
 @SuppressWarnings("null")
-public class TVScreen extends Screen {
+public class TVScreen extends Screen implements com.stardew.craft.port.PortScreen {
 
     private final OpenTVScreenPayload data;
 

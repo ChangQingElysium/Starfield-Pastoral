@@ -37,7 +37,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @OnlyIn(Dist.CLIENT)
 @SuppressWarnings("null")
-public class LevelUpMenuScreen extends Screen implements StardewGuiContentSize {
+public class LevelUpMenuScreen extends Screen implements StardewGuiContentSize, com.stardew.craft.port.PortScreen {
 
     private static final ResourceLocation TEX_ICON_FARMING = new ResourceLocation(StardewCraft.MODID, "textures/gui/overnight/icon_farming.png");
     private static final ResourceLocation TEX_ICON_FISHING = new ResourceLocation(StardewCraft.MODID, "textures/gui/overnight/icon_fishing.png");

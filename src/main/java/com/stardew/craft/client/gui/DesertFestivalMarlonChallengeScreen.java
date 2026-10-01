@@ -24,7 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 @SuppressWarnings("null")
-public class DesertFestivalMarlonChallengeScreen extends Screen {
+public class DesertFestivalMarlonChallengeScreen extends Screen implements com.stardew.craft.port.PortScreen {
     private static final ResourceLocation BOARD_BACKGROUND = new ResourceLocation(
         StardewCraft.MODID, "textures/gui/desert_festival/special_orders_board.png");
     private static final int BOARD_W = 338;

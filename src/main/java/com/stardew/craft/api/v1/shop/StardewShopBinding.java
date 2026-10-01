@@ -20,11 +20,11 @@ public record StardewShopBinding(
 ) {
     public static final Codec<StardewShopBinding> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.fieldOf("shop").forGetter(StardewShopBinding::shop),
-            Codec.STRING.optionalFieldOf("npc").forGetter(StardewShopBinding::npc),
-            ResourceLocation.CODEC.optionalFieldOf("dimension").forGetter(StardewShopBinding::dimension),
-            BlockPoint.CODEC.optionalFieldOf("min").forGetter(StardewShopBinding::min),
-            BlockPoint.CODEC.optionalFieldOf("max").forGetter(StardewShopBinding::max),
-            StardewConditions.CODEC.listOf().optionalFieldOf("available_when", List.of())
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "npc").forGetter(StardewShopBinding::npc),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(ResourceLocation.CODEC, "dimension").forGetter(StardewShopBinding::dimension),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(BlockPoint.CODEC, "min").forGetter(StardewShopBinding::min),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(BlockPoint.CODEC, "max").forGetter(StardewShopBinding::max),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(StardewConditions.CODEC.listOf(), "available_when", List.of())
                     .forGetter(StardewShopBinding::availableWhen)
     ).apply(instance, StardewShopBinding::new));
 

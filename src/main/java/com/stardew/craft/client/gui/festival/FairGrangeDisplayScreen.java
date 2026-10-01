@@ -13,7 +13,7 @@ import net.minecraft.world.entity.player.Inventory;
 import java.util.List;
 
 @SuppressWarnings("null")
-public class FairGrangeDisplayScreen extends AbstractContainerScreen<FairGrangeDisplayMenu> {
+public class FairGrangeDisplayScreen extends AbstractContainerScreen<FairGrangeDisplayMenu> implements com.stardew.craft.port.PortContainerScreen {
     private static final ResourceLocation DISPENSER_TEXTURE =
         new ResourceLocation("textures/gui/container/dispenser.png");
     private final TrashCanWidget.Controller trashCan = new TrashCanWidget.Controller();

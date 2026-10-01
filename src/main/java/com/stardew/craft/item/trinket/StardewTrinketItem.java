@@ -108,7 +108,7 @@ public class StardewTrinketItem extends Item implements IStardewItem {
     }
 
     public static boolean canBeReforged(ItemStack stack) {
-        return getType(stack) instanceof TrinketType type && type.canBeReforged();
+        return (Object) getType(stack) instanceof TrinketType type && type.canBeReforged();
     }
 
     public static ItemStack createRandomNaturalTrinket(RandomSource random, ServerPlayer player) {

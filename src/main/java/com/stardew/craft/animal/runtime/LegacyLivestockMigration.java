@@ -101,7 +101,7 @@ public final class LegacyLivestockMigration extends SavedData {
     private static void checkpoint(MinecraftServer server, String name, SavedData data) {
         com.stardew.craft.port.net.neoforged.neoforge.common.IOUtilities.waitUntilIOWorkerComplete();
         if (!data.isDirty()) return;
-        var root = new CompoundTag(); root.put("data", data.save(new CompoundTag(), server.registryAccess()));
+        var root = new CompoundTag(); root.put("data", data.save(new CompoundTag()));
         NbtUtils.addCurrentDataVersion(root);
         var path = server.getWorldPath(LevelResource.ROOT).resolve("data/" + name + ".dat");
         try {

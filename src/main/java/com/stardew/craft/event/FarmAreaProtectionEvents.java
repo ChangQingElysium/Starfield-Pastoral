@@ -315,7 +315,7 @@ public class FarmAreaProtectionEvents {
                     level,
                     player,
                     snapshot.getPos(),
-                    snapshot.getState())) {
+                    snapshot.getReplacedBlock())) {
                 continue;
             }
 
@@ -441,7 +441,7 @@ public class FarmAreaProtectionEvents {
         //  必须在 RightClickBlock 阶段拦截）
         if (heldItem.getItem() instanceof net.minecraft.world.item.BucketItem bucket) {
             // 空桶（拾取流体）允许通过；有内容的桶才做放置保护
-            if (bucket.content != net.minecraft.world.level.material.Fluids.EMPTY) {
+            if (bucket.getFluid() != net.minecraft.world.level.material.Fluids.EMPTY) {
                 if (!canBuildAt(player, placePos)) {
                     event.setCanceled(true);
                     event.setCancellationResult(net.minecraft.world.InteractionResult.FAIL);

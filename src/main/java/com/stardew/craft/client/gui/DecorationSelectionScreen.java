@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("null")
-public class DecorationSelectionScreen extends Screen {
+public class DecorationSelectionScreen extends Screen implements com.stardew.craft.port.PortScreen {
 
     private static final ResourceLocation LOCKED_ICON = new ResourceLocation(StardewCraft.MODID, "textures/gui/locked.png");
     private static final ResourceLocation WALLPAPER_FRAME = common("decoration_wallpaper_frame");

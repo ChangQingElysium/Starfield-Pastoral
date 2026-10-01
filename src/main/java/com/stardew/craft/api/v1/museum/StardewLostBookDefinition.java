@@ -19,9 +19,9 @@ public record StardewLostBookDefinition(
             Codec.intRange(0, Integer.MAX_VALUE).fieldOf("unlock_at")
                     .forGetter(StardewLostBookDefinition::unlockAt),
             Codec.STRING.fieldOf("text").forGetter(StardewLostBookDefinition::text),
-            StardewConditions.CODEC.listOf().optionalFieldOf("available_when", List.of())
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(StardewConditions.CODEC.listOf(), "available_when", List.of())
                     .forGetter(StardewLostBookDefinition::availableWhen),
-            Interaction.CODEC.listOf().optionalFieldOf("interactions", List.of())
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Interaction.CODEC.listOf(), "interactions", List.of())
                     .forGetter(StardewLostBookDefinition::interactions)
     ).apply(instance, StardewLostBookDefinition::new));
 
@@ -40,7 +40,7 @@ public record StardewLostBookDefinition(
                 new ResourceLocation("stardewcraft", "stardew_valley");
 
         public static final Codec<Interaction> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                ResourceLocation.CODEC.optionalFieldOf("dimension", DEFAULT_DIMENSION)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(ResourceLocation.CODEC, "dimension", DEFAULT_DIMENSION)
                         .forGetter(Interaction::dimension),
                 Codec.INT.fieldOf("x").forGetter(Interaction::x),
                 Codec.INT.fieldOf("y").forGetter(Interaction::y),

@@ -34,7 +34,7 @@ import java.util.Random;
  *   标题 "选择一个" 居中放在 +20 sdv-px 处
  *   黑色 fade overlay 0.7 透明
  */
-public final class DwarfStatueChoiceScreen extends Screen implements StardewGuiContentSize {
+public final class DwarfStatueChoiceScreen extends Screen implements StardewGuiContentSize, com.stardew.craft.port.PortScreen {
 
     private static final ResourceLocation CURSORS_1_6 =
         new ResourceLocation(StardewCraft.MODID, "textures/gui/cursors_1_6.png");

@@ -91,7 +91,7 @@ import java.util.Comparator;
 
 @SuppressWarnings({"null", "unused"})
 public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMenu>
-        implements StardewCollectivePauseScreen {
+        implements StardewCollectivePauseScreen, com.stardew.craft.port.PortContainerScreen {
     /** Core GameMenu pages use Game1.smallFont unless their source page says otherwise. */
     private final Font font = StardewFonts.small();
 
@@ -563,8 +563,9 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
     }
 
+    // PORT(1.20.1): 1.21 AbstractContainerScreen#renderSlot override, dispatched by PortContainerScreenMixin.
     @Override
-    protected void renderSlot(GuiGraphics graphics, Slot slot) {
+    public void port$renderSlot(GuiGraphics graphics, Slot slot) {
         // Player slots are rendered by drawInvPageGrid/drawPlayerInventory with SDV assets.
     }
 
@@ -1726,7 +1727,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
 
             // Draw MC player entity
             int margin = ui(8);
-            net.minecraft.client.gui.screens.inventory.InventoryScreen
+            com.stardew.craft.port.PortInventoryScreen
                 .renderEntityInInventoryFollowsMouse(
                     graphics,
                     bgX + margin, bgY + margin,
@@ -3159,7 +3160,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
 
         // Render MC player entity inside the background frame
         int margin = ui(8);
-        net.minecraft.client.gui.screens.inventory.InventoryScreen
+        com.stardew.craft.port.PortInventoryScreen
                 .renderEntityInInventoryFollowsMouse(
                         graphics,
                         bgX + margin, bgY + margin,

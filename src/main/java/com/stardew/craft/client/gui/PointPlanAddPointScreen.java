@@ -16,13 +16,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class PointPlanAddPointScreen extends Screen {
+public class PointPlanAddPointScreen extends Screen implements com.stardew.craft.port.PortScreen {
     private static final int PANEL_W = 360;
     private static final int PANEL_H = 172;
     private static final int SUGGESTION_ROWS = 6;
     private static final int ROW_H = 13;
 
-    private EditBox npcBox;
+    private com.stardew.craft.port.PortEditBox npcBox;
     private int panelX;
     private int panelY;
 
@@ -41,7 +41,7 @@ public class PointPlanAddPointScreen extends Screen {
             PointPlanClientState.isMapInteractionEditor()
                 ? "gui.stardewcraft.point_plan.name"
                 : "gui.stardewcraft.point_plan.npc");
-        npcBox = new EditBox(
+        npcBox = new com.stardew.craft.port.PortEditBox(
             com.stardew.craft.client.font.StardewFonts.small(), panelX + 70, panelY + 52,
             PANEL_W - 92, 18, entryLabel);
         npcBox.setTextShadow(false);

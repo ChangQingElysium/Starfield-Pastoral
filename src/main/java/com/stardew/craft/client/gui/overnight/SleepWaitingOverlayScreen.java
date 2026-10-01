@@ -19,7 +19,7 @@ import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
  */
 @OnlyIn(Dist.CLIENT)
 @SuppressWarnings("null")
-public class SleepWaitingOverlayScreen extends Screen {
+public class SleepWaitingOverlayScreen extends Screen implements com.stardew.craft.port.PortScreen {
 
     private static final int FADE_IN_TICKS = 20; // 1s 渐入黑屏
 

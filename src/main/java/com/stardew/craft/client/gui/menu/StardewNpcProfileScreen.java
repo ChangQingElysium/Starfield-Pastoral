@@ -30,7 +30,7 @@ import java.util.Set;
 
 /** Source-backed implementation of SDV {@code ProfileMenu}'s gift-log page. */
 @SuppressWarnings("null")
-public final class StardewNpcProfileScreen extends Screen {
+public final class StardewNpcProfileScreen extends Screen implements com.stardew.craft.port.PortScreen {
     private static final ResourceLocation LETTER_BG = new ResourceLocation(
             StardewCraft.MODID, "textures/gui/letter_bg.png");
     private static final ResourceLocation DAY_BG = new ResourceLocation(
@@ -143,7 +143,7 @@ public final class StardewNpcProfileScreen extends Screen {
                         com.stardew.craft.entity.ModEntities.EVENT_ACTOR.get(), minecraft.level);
                 previewActor.setNpcId(npcId);
             }
-            net.minecraft.client.gui.screens.inventory.InventoryScreen.renderEntityInInventoryFollowsMouse(
+            com.stardew.craft.port.PortInventoryScreen.renderEntityInInventoryFollowsMouse(
                     graphics, sceneX, sceneY, sceneX + sceneW, sceneY + sceneH,
                     mapping.ui(64), .0625F, sceneX + sceneW / 2F, sceneY + sceneH / 2F, previewActor);
         }

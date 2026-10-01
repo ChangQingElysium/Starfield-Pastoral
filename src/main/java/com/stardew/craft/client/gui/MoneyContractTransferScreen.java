@@ -24,7 +24,7 @@ import java.util.Locale;
 import java.util.UUID;
 
 @SuppressWarnings("null")
-public class MoneyContractTransferScreen extends Screen {
+public class MoneyContractTransferScreen extends Screen implements com.stardew.craft.port.PortScreen {
     private static final int SDV_W = 620;
     private static final int SDV_H = 440;
     private static final int TEXT_DARK = 0x4E2A12;
@@ -49,7 +49,7 @@ public class MoneyContractTransferScreen extends Screen {
     private int fieldX, fieldY, fieldW, fieldH;
     private int sendX, sendY, sendW, sendH;
     private int iconX, iconY;
-    private EditBox amountField;
+    private com.stardew.craft.port.PortEditBox amountField;
 
     public MoneyContractTransferScreen(int money, UUID targetId, String targetName) {
         super(Component.translatable("stardewcraft.money_contract.transfer.title"));
@@ -94,7 +94,7 @@ public class MoneyContractTransferScreen extends Screen {
         fieldW = contentW - Math.max(12, contentW / 14) * 2;
         fieldX = contentX + Math.max(6, contentW / 28);
         fieldY = sendY - fieldH - Math.max(22, contentH / 9);
-        amountField = new EditBox(com.stardew.craft.client.font.StardewFonts.small(), fieldX + 28, fieldY + (fieldH - StardewFonts.lineHeight(font)) / 2,
+        amountField = new com.stardew.craft.port.PortEditBox(com.stardew.craft.client.font.StardewFonts.small(), fieldX + 28, fieldY + (fieldH - StardewFonts.lineHeight(font)) / 2,
             Math.max(1, fieldW - 40), StardewFonts.lineHeight(font),
             Component.translatable("stardewcraft.money_contract.transfer.amount"));
         amountField.setMaxLength(9);

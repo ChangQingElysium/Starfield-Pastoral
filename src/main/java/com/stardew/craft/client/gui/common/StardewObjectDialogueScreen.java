@@ -18,7 +18,7 @@ import java.util.List;
 
 @OnlyIn(Dist.CLIENT)
 @SuppressWarnings("null")
-public class StardewObjectDialogueScreen extends Screen implements StardewCollectivePauseScreen, StardewGuiContentSize {
+public class StardewObjectDialogueScreen extends Screen implements StardewCollectivePauseScreen, StardewGuiContentSize, com.stardew.craft.port.PortScreen {
     private final List<Component> rawMessages;
     private final List<String> messages = new ArrayList<>();
     private StardewRenderMapping mapping;

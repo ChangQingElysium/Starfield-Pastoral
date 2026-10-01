@@ -29,9 +29,9 @@ public final class UnlockSourceData {
     public record UnlockBundle(List<String> recipes, List<String> wallpapers, List<String> floorings) {
         public static final UnlockBundle EMPTY = new UnlockBundle(List.of(), List.of(), List.of());
         public static final Codec<UnlockBundle> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                Codec.STRING.listOf().optionalFieldOf("recipes", List.of()).forGetter(UnlockBundle::recipes),
-                Codec.STRING.listOf().optionalFieldOf("wallpapers", List.of()).forGetter(UnlockBundle::wallpapers),
-                Codec.STRING.listOf().optionalFieldOf("floorings", List.of()).forGetter(UnlockBundle::floorings)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING.listOf(), "recipes", List.of()).forGetter(UnlockBundle::recipes),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING.listOf(), "wallpapers", List.of()).forGetter(UnlockBundle::wallpapers),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING.listOf(), "floorings", List.of()).forGetter(UnlockBundle::floorings)
         ).apply(instance, UnlockBundle::new));
 
         public UnlockBundle {

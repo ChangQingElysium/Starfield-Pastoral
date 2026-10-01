@@ -2,7 +2,11 @@ package com.stardew.craft.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.stardew.craft.client.gui.common.GuiLayoutMath;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraftforge.client.ForgeHooksClient;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Unique;
@@ -12,9 +16,25 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
 import org.spongepowered.asm.mixin.Mixin;
 
-/** MouseHandler converts window coordinates before both MinecraftForge events and screen callbacks. */
+/**
+ * MouseHandler converts window coordinates before both MinecraftForge events and screen callbacks.
+ *
+ * <p>PORT(1.20.1): 1.21 dispatches mouseMoved/mouseDragged from {@code handleAccumulatedMovement}, reading the
+ * {@code xpos}/{@code ypos} fields and the accumulated delta. 1.20.1 dispatches them from {@code onMove} using the
+ * new raw position (method parameters) and {@code new - xpos} as the delta, inside lambdas. The viewport is entered
+ * around {@code onMove} and the screen-callback arguments are recomputed with the same formulas 1.21 uses:
+ * {@code windowMouseX(raw) * guiScaledWidth / screenWidth} and {@code windowDeltaX(delta) * guiScaledWidth / screenWidth}.
+ */
 @Mixin(MouseHandler.class)
 public abstract class StardewGuiMouseMixin {
+    @Shadow private double xpos;
+    @Shadow private double ypos;
+    @Shadow private boolean ignoreFirstMove;
+    @Unique private double stardewcraft$rawX;
+    @Unique private double stardewcraft$rawY;
+    @Unique private double stardewcraft$previousX;
+    @Unique private double stardewcraft$previousY;
+
     @WrapMethod(method = "onPress")
     private void stardewcraft$press(long window, int button, int action, int modifiers, Operation<Void> original) {
         var previous = stardewcraft$enter();
@@ -29,39 +49,100 @@ public abstract class StardewGuiMouseMixin {
         finally { StardewGuiViewport.restore(previous); }
     }
 
-    @WrapMethod(method = "handleAccumulatedMovement")
-    private void stardewcraft$move(Operation<Void> original) {
+    @WrapMethod(method = "onMove")
+    private void stardewcraft$move(long window, double x, double y, Operation<Void> original) {
         var previous = stardewcraft$enter();
-        try { original.call(); }
+        this.stardewcraft$rawX = x;
+        this.stardewcraft$rawY = y;
+        // onMove first snaps xpos/ypos to the new position when ignoreFirstMove is set (zero drag delta).
+        this.stardewcraft$previousX = this.ignoreFirstMove ? x : this.xpos;
+        this.stardewcraft$previousY = this.ignoreFirstMove ? y : this.ypos;
+        try { original.call(window, x, y); }
         finally { StardewGuiViewport.restore(previous); }
     }
 
-    @ModifyExpressionValue(method = {"onPress", "onScroll", "handleAccumulatedMovement"},
+    @ModifyExpressionValue(method = {"onPress", "onScroll"},
             at = @At(value = "FIELD", opcode = Opcodes.GETFIELD, target = "Lnet/minecraft/client/MouseHandler;xpos:D"))
     private double stardewcraft$mouseX(double x) {
         var layout = StardewGuiViewport.active();
         return layout == null ? x : layout.windowMouseX(x, Minecraft.getInstance().getWindow().getScreenWidth());
     }
 
-    @ModifyExpressionValue(method = {"onPress", "onScroll", "handleAccumulatedMovement"},
+    @ModifyExpressionValue(method = {"onPress", "onScroll"},
             at = @At(value = "FIELD", opcode = Opcodes.GETFIELD, target = "Lnet/minecraft/client/MouseHandler;ypos:D"))
     private double stardewcraft$mouseY(double y) {
         var layout = StardewGuiViewport.active();
         return layout == null ? y : layout.windowMouseY(y, Minecraft.getInstance().getWindow().getScreenHeight());
     }
 
-    @ModifyExpressionValue(method = "handleAccumulatedMovement",
-            at = @At(value = "FIELD", opcode = Opcodes.GETFIELD, target = "Lnet/minecraft/client/MouseHandler;accumulatedDX:D"))
-    private double stardewcraft$dragX(double x) {
+    // ---- onMove screen callbacks (1.20.1 lambdas) ----
+
+    @WrapOperation(method = "*", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/client/gui/screens/Screen;mouseMoved(DD)V"))
+    private void stardewcraft$moved(Screen screen, double mouseX, double mouseY, Operation<Void> original) {
         var layout = StardewGuiViewport.active();
-        return layout == null ? x : layout.windowDeltaX(x);
+        if (layout == null) { original.call(screen, mouseX, mouseY); return; }
+        original.call(screen, stardewcraft$guiX(layout), stardewcraft$guiY(layout));
     }
 
-    @ModifyExpressionValue(method = "handleAccumulatedMovement",
-            at = @At(value = "FIELD", opcode = Opcodes.GETFIELD, target = "Lnet/minecraft/client/MouseHandler;accumulatedDY:D"))
-    private double stardewcraft$dragY(double y) {
+    @WrapOperation(method = "*", at = @At(value = "INVOKE",
+            target = "Lnet/minecraftforge/client/ForgeHooksClient;onScreenMouseDragPre(Lnet/minecraft/client/gui/screens/Screen;DDIDD)Z",
+            remap = false))
+    private boolean stardewcraft$dragPre(Screen screen, double mouseX, double mouseY, int button, double dragX, double dragY,
+                                         Operation<Boolean> original) {
         var layout = StardewGuiViewport.active();
-        return layout == null ? y : layout.windowDeltaY(y);
+        if (layout == null) return original.call(screen, mouseX, mouseY, button, dragX, dragY);
+        return original.call(screen, stardewcraft$guiX(layout), stardewcraft$guiY(layout), button,
+                stardewcraft$dragX(layout), stardewcraft$dragY(layout));
+    }
+
+    @WrapOperation(method = "*", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/client/gui/screens/Screen;mouseDragged(DDIDD)Z"))
+    private boolean stardewcraft$dragged(Screen screen, double mouseX, double mouseY, int button, double dragX, double dragY,
+                                         Operation<Boolean> original) {
+        var layout = StardewGuiViewport.active();
+        if (layout == null) return original.call(screen, mouseX, mouseY, button, dragX, dragY);
+        return original.call(screen, stardewcraft$guiX(layout), stardewcraft$guiY(layout), button,
+                stardewcraft$dragX(layout), stardewcraft$dragY(layout));
+    }
+
+    @WrapOperation(method = "*", at = @At(value = "INVOKE",
+            target = "Lnet/minecraftforge/client/ForgeHooksClient;onScreenMouseDragPost(Lnet/minecraft/client/gui/screens/Screen;DDIDD)V",
+            remap = false))
+    private void stardewcraft$dragPost(Screen screen, double mouseX, double mouseY, int button, double dragX, double dragY,
+                                       Operation<Void> original) {
+        var layout = StardewGuiViewport.active();
+        if (layout == null) { original.call(screen, mouseX, mouseY, button, dragX, dragY); return; }
+        original.call(screen, stardewcraft$guiX(layout), stardewcraft$guiY(layout), button,
+                stardewcraft$dragX(layout), stardewcraft$dragY(layout));
+    }
+
+    @Unique
+    private double stardewcraft$guiX(GuiLayoutMath.Viewport layout) {
+        var window = Minecraft.getInstance().getWindow();
+        return layout.windowMouseX(this.stardewcraft$rawX, window.getScreenWidth())
+                * (double) window.getGuiScaledWidth() / (double) window.getScreenWidth();
+    }
+
+    @Unique
+    private double stardewcraft$guiY(GuiLayoutMath.Viewport layout) {
+        var window = Minecraft.getInstance().getWindow();
+        return layout.windowMouseY(this.stardewcraft$rawY, window.getScreenHeight())
+                * (double) window.getGuiScaledHeight() / (double) window.getScreenHeight();
+    }
+
+    @Unique
+    private double stardewcraft$dragX(GuiLayoutMath.Viewport layout) {
+        var window = Minecraft.getInstance().getWindow();
+        return layout.windowDeltaX(this.stardewcraft$rawX - this.stardewcraft$previousX)
+                * (double) window.getGuiScaledWidth() / (double) window.getScreenWidth();
+    }
+
+    @Unique
+    private double stardewcraft$dragY(GuiLayoutMath.Viewport layout) {
+        var window = Minecraft.getInstance().getWindow();
+        return layout.windowDeltaY(this.stardewcraft$rawY - this.stardewcraft$previousY)
+                * (double) window.getGuiScaledHeight() / (double) window.getScreenHeight();
     }
 
     @Unique

@@ -39,7 +39,7 @@ import java.util.Map;
  * 严格复刻 SDV Billboard.cs 布局
  */
 @SuppressWarnings("null")
-public class BillboardScreen extends Screen {
+public class BillboardScreen extends Screen implements com.stardew.craft.port.PortScreen {
 
     // ─── 纹理 ───
     private static final ResourceLocation QUEST_DONE_STAR = billboard("quest_done_star");

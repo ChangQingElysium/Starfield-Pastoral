@@ -22,7 +22,7 @@ import java.util.Random;
 import java.util.UUID;
 
 public final class FishingMinigameScreen extends Screen implements com.stardew.craft.client.gui.StardewRealtimeScreen,
-        com.stardew.craft.client.gui.common.StardewGuiContentSize {
+        com.stardew.craft.client.gui.common.StardewGuiContentSize, com.stardew.craft.port.PortScreen {
 	@Override public int minimumCanvasWidth() { return 480; }
 	@Override public int minimumCanvasHeight() { return 348; }
 	// Stardew values (see StardewValley.Menus.BobberBar)

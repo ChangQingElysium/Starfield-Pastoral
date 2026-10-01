@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Random;
 
 @SuppressWarnings("null")
-public class PrizeTicketMachineScreen extends Screen {
+public class PrizeTicketMachineScreen extends Screen implements com.stardew.craft.port.PortScreen {
     private static final ResourceLocation BACKGROUND = new ResourceLocation(
         StardewCraft.MODID, "textures/gui/prize_ticket/menu_background.png");
     private static final ResourceLocation REWARD_TRACK = new ResourceLocation(

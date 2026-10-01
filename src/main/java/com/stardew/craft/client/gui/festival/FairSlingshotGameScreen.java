@@ -27,7 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class FairSlingshotGameScreen extends Screen implements com.stardew.craft.client.gui.StardewRealtimeScreen {
+public class FairSlingshotGameScreen extends Screen implements com.stardew.craft.client.gui.StardewRealtimeScreen, com.stardew.craft.port.PortScreen {
     private static final ResourceLocation BACK = tex("back");
     private static final ResourceLocation BUILDINGS = tex("buildings");
     private static final ResourceLocation FRONT = tex("front");

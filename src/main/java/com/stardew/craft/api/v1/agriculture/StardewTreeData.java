@@ -24,14 +24,14 @@ public record StardewTreeData(
 ) {
     public static final Codec<StardewTreeData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("kind").forGetter(StardewTreeData::kind),
-            Codec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("days_to_mature", 28)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(0, Integer.MAX_VALUE), "days_to_mature", 28)
                     .forGetter(StardewTreeData::daysToMature),
             ResourceLocation.CODEC.fieldOf("product").forGetter(StardewTreeData::product),
-            Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("product_count", 1)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(1, Integer.MAX_VALUE), "product_count", 1)
                     .forGetter(StardewTreeData::productCount),
-            Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("max_stored_product", 3)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(1, Integer.MAX_VALUE), "max_stored_product", 3)
                     .forGetter(StardewTreeData::maxStoredProduct),
-            Codec.STRING.listOf().optionalFieldOf("fruit_seasons", List.of())
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING.listOf(), "fruit_seasons", List.of())
                     .forGetter(StardewTreeData::fruitSeasons)
     ).apply(instance, StardewTreeData::new));
 

@@ -16,15 +16,15 @@ public record StardewFishingTreasureEntry(
 ) {
     public static final Codec<StardewFishingTreasureEntry> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             StardewItemQueries.CODEC.fieldOf("query").forGetter(StardewFishingTreasureEntry::query),
-            Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("weight", 1)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(1, Integer.MAX_VALUE), "weight", 1)
                     .forGetter(StardewFishingTreasureEntry::weight),
-            Codec.intRange(0, 100).optionalFieldOf("min_fishing_level", 0)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(0, 100), "min_fishing_level", 0)
                     .forGetter(StardewFishingTreasureEntry::minFishingLevel),
-            Codec.intRange(0, 100).optionalFieldOf("max_fishing_level", 100)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(0, 100), "max_fishing_level", 100)
                     .forGetter(StardewFishingTreasureEntry::maxFishingLevel),
-            Codec.intRange(0, 5).optionalFieldOf("min_water_distance", 0)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(0, 5), "min_water_distance", 0)
                     .forGetter(StardewFishingTreasureEntry::minWaterDistance),
-            Codec.intRange(0, 5).optionalFieldOf("max_water_distance", 5)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(0, 5), "max_water_distance", 5)
                     .forGetter(StardewFishingTreasureEntry::maxWaterDistance)
     ).apply(instance, StardewFishingTreasureEntry::new));
 

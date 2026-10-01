@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("null")
-public class DesertFestivalShadyGuyScreen extends Screen implements DesertFestivalRaceSnapshotScreen {
+public class DesertFestivalShadyGuyScreen extends Screen implements DesertFestivalRaceSnapshotScreen, com.stardew.craft.port.PortScreen {
     private DesertFestivalRaceSnapshot snapshot;
     private final List<DesertFestivalRaceUi.ButtonHitbox> hitboxes = new ArrayList<>();
     private int selectedRacer = -1;

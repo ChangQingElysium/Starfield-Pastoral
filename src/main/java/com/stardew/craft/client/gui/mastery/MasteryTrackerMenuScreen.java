@@ -33,7 +33,7 @@ import java.util.List;
  * SDV 1.6 MasteryTrackerMenu parity screen.
  * Coordinates are held in SDV game pixels and converted through ui()/s4().
  */
-public final class MasteryTrackerMenuScreen extends Screen {
+public final class MasteryTrackerMenuScreen extends Screen implements com.stardew.craft.port.PortScreen {
     private static final ResourceLocation PANEL_BOX = mastery("panel_box_21");
     private static final ResourceLocation EXP_BOX = mastery("exp_box_15");
     private static final ResourceLocation CORNER_ORNAMENT = mastery("corner_ornament");

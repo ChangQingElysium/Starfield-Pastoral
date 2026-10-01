@@ -91,7 +91,7 @@ public final class NpcScheduleRules {
                     for(var item:value.getAsJsonArray()) if(item.getAsString().isBlank()) throw new IllegalArgumentException("Empty weather token");
                 }
                 case "any_hearts_min" -> {
-                    if(value.getAsJsonObject().isEmpty()) throw new IllegalArgumentException("Empty friendship rule");
+                    if(value.getAsJsonObject().size() == 0) throw new IllegalArgumentException("Empty friendship rule");
                     for(var item:value.getAsJsonObject().entrySet())
                         if(item.getKey().isBlank() || item.getValue().getAsBigDecimal().intValueExact()<0)
                             throw new IllegalArgumentException("Invalid friendship rule");

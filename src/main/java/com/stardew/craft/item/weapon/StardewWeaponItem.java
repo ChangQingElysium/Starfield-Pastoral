@@ -33,7 +33,8 @@ public class StardewWeaponItem extends SwordItem
     private final WeaponData weaponData;
 
     public StardewWeaponItem(String weaponId, Properties properties) {
-        super(createTier(weaponId), properties);
+        // PORT(1.20.1): 1.20.1 SwordItem takes attack damage/speed modifiers; unused, see getDefaultAttributeModifiers.
+        super(createTier(weaponId), 0, 0.0F, properties);
         this.weaponId = weaponId;
         this.weaponData = WeaponRegistry.get(weaponId);
     }
@@ -89,7 +90,8 @@ public class StardewWeaponItem extends SwordItem
             net.minecraft.world.entity.ai.attributes.AttributeModifier> getDefaultAttributeModifiers(
             net.minecraft.world.entity.EquipmentSlot slot) {
         if (weaponData == null) {
-            return super.getDefaultAttributeModifiers(slot);
+            // 1.21: bare Item.Properties -> empty attribute_modifiers (1.20.1 SwordItem would add tier modifiers).
+            return com.google.common.collect.ImmutableMultimap.of();
         }
         return WeaponItemSupport.createAttributeModifiers(
                 weaponId,

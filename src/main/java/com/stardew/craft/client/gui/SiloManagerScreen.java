@@ -18,7 +18,7 @@ import java.util.List;
 
 /** Shared hay tally, with numeric hierarchy and a separate confirmation state. */
 @SuppressWarnings("null")
-public class SiloManagerScreen extends AbstractContainerScreen<SiloManagerMenu> {
+public class SiloManagerScreen extends AbstractContainerScreen<SiloManagerMenu> implements com.stardew.craft.port.PortContainerScreen {
     private enum Confirm { NONE, DEMOLISH, RELOCATE }
     private record Text(Component label,int x,int y,int width,int color) { }
     private Confirm confirm=Confirm.NONE;

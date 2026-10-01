@@ -10,7 +10,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
  * Input-capturing, non-pausing screen used while the player collapses and waits for the new day.
  */
 @OnlyIn(Dist.CLIENT)
-final class OvernightCollapseScreen extends Screen {
+final class OvernightCollapseScreen extends Screen implements com.stardew.craft.port.PortScreen {
 
     OvernightCollapseScreen() {
         super(Component.empty());

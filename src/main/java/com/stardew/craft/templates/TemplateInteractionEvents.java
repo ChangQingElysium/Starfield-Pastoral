@@ -54,7 +54,7 @@ public final class TemplateInteractionEvents {
 
         event.setCanceled(true);
         event.setCancellationResult(InteractionResult.SUCCESS);
-        if (!(event.getLevel() instanceof Level level) || level.isClientSide()) {
+        if (!((Object) event.getLevel() instanceof Level level) || level.isClientSide()) {
             return;
         }
 

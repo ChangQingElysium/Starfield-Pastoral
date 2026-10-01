@@ -48,7 +48,7 @@ public final class WildTreeChopEvents {
 	@SuppressWarnings("null")
 	@SubscribeEvent
 	public static void onBreakSpeed(PlayerEvent.BreakSpeed event) {
-		if (!(event.getEntity() instanceof Player player)) {
+		if (!((Object) event.getEntity() instanceof Player player)) {
 			return;
 		}
 		if (player.isCreative()) {
@@ -166,7 +166,7 @@ public final class WildTreeChopEvents {
 
 	private static float applyMiningSpeedModifiers(Player player, ItemStack tool, float baseSpeed) {
 		float speed = baseSpeed;
-		int efficiency = getItemEnchantmentLevel(player, tool, Enchantments.EFFICIENCY);
+		int efficiency = getItemEnchantmentLevel(player, tool, Enchantments.BLOCK_EFFICIENCY);
 		if (efficiency > 0) {
 			speed += (float) (efficiency * efficiency + 1);
 		}
@@ -200,12 +200,10 @@ public final class WildTreeChopEvents {
 	}
 
 	@SuppressWarnings({ "null", "deprecation" })
-	private static int getItemEnchantmentLevel(Player player, ItemStack stack, net.minecraft.resources.ResourceKey<Enchantment> enchantmentKey) {
-		@SuppressWarnings("null")
-		var lookup = player.level().registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
-		@SuppressWarnings("null")
-		var holder = lookup.getOrThrow(enchantmentKey);
-		return EnchantmentHelper.getItemEnchantmentLevel(holder, stack);
+	// PORT(1.20.1): vanilla enchantments are code-registered singletons (no data-driven ResourceKey lookup);
+	// EnchantmentHelper.getItemEnchantmentLevel goes through Forge's ItemStack#getEnchantmentLevel like NeoForge's.
+	private static int getItemEnchantmentLevel(Player player, ItemStack stack, Enchantment enchantment) {
+		return EnchantmentHelper.getItemEnchantmentLevel(enchantment, stack);
 	}
 
 	private static boolean isHardwoodTree(WildTrees.Def def) {

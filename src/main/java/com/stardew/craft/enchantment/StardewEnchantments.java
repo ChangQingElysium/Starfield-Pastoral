@@ -8,7 +8,8 @@ import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -32,6 +33,13 @@ public final class StardewEnchantments {
     public static final ResourceKey<Enchantment> AUTO_HOOK = key("auto_hook");
     public static final ResourceKey<Enchantment> PRESERVING = key("preserving");
     public static final ResourceKey<Enchantment> FISHER = key("fisher");
+
+    // PORT(1.20.1): 1.20.5 entity type tags; shipped in src/port/resources with the 1.21.1 vanilla contents
+    // (nested #arthropod / #undead flattened; 1.21-only minecraft:bogged omitted, it does not exist in 1.20.1).
+    private static final TagKey<EntityType<?>> SENSITIVE_TO_BANE_OF_ARTHROPODS =
+            TagKey.create(Registries.ENTITY_TYPE, new ResourceLocation("minecraft", "sensitive_to_bane_of_arthropods"));
+    private static final TagKey<EntityType<?>> SENSITIVE_TO_SMITE =
+            TagKey.create(Registries.ENTITY_TYPE, new ResourceLocation("minecraft", "sensitive_to_smite"));
 
     private static final Set<String> BUG_MONSTER_TAGS = Set.of(
             "sd_mob_bug",
@@ -67,12 +75,12 @@ public final class StardewEnchantments {
     }
 
     public static boolean isBugKillerTarget(LivingEntity target) {
-        return target != null && (target.getType().is(EntityTypeTags.SENSITIVE_TO_BANE_OF_ARTHROPODS)
+        return target != null && (target.getType().is(SENSITIVE_TO_BANE_OF_ARTHROPODS)
                 || hasAnyTag(target, BUG_MONSTER_TAGS));
     }
 
     public static boolean isCrusaderTarget(LivingEntity target) {
-        return target != null && (target.getType().is(EntityTypeTags.SENSITIVE_TO_SMITE)
+        return target != null && (target.getType().is(SENSITIVE_TO_SMITE)
                 || hasAnyTag(target, UNDEAD_MONSTER_TAGS));
     }
 

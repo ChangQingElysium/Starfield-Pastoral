@@ -34,7 +34,7 @@ import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
  * </ul>
  */
 @SuppressWarnings("null")
-public class JukeboxScreen extends Screen {
+public class JukeboxScreen extends Screen implements com.stardew.craft.port.PortScreen {
 
     // ── SDV 常量（SDV 像素空间）──
     private static final int MENU_W = 640;

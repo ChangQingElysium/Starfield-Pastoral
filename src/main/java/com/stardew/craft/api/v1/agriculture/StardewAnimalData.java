@@ -24,7 +24,7 @@ public record StardewAnimalData(
             Codec.intRange(0, Integer.MAX_VALUE).fieldOf("purchase_price").forGetter(StardewAnimalData::purchasePrice),
             Codec.intRange(0, Integer.MAX_VALUE).fieldOf("days_to_mature").forGetter(StardewAnimalData::daysToMature),
             ResourceLocation.CODEC.fieldOf("produce").forGetter(StardewAnimalData::produce),
-            Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("produce_interval_days", 1)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(1, Integer.MAX_VALUE), "produce_interval_days", 1)
                     .forGetter(StardewAnimalData::produceIntervalDays)
     ).apply(instance, StardewAnimalData::new));
 }

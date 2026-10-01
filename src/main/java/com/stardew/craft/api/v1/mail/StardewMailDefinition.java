@@ -29,25 +29,25 @@ public record StardewMailDefinition(
 ) {
     public static final Codec<StardewMailDefinition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.fieldOf("text").forGetter(StardewMailDefinition::text),
-            Codec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("background", 0)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(0, Integer.MAX_VALUE), "background", 0)
                     .forGetter(StardewMailDefinition::background),
-            Codec.STRING.optionalFieldOf("custom_background_texture")
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "custom_background_texture")
                     .forGetter(StardewMailDefinition::customBackgroundTexture),
-            Codec.STRING.optionalFieldOf("text_color").forGetter(StardewMailDefinition::textColor),
-            AttachedItem.CODEC.listOf().optionalFieldOf("attached_items", List.of())
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "text_color").forGetter(StardewMailDefinition::textColor),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(AttachedItem.CODEC.listOf(), "attached_items", List.of())
                     .forGetter(StardewMailDefinition::attachedItems),
-            Codec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("money", 0)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(0, Integer.MAX_VALUE), "money", 0)
                     .forGetter(StardewMailDefinition::money),
-            Codec.STRING.optionalFieldOf("learned_recipe").forGetter(StardewMailDefinition::learnedRecipe),
-            Codec.BOOL.optionalFieldOf("recipe_is_cooking", false)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "learned_recipe").forGetter(StardewMailDefinition::learnedRecipe),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.BOOL, "recipe_is_cooking", false)
                     .forGetter(StardewMailDefinition::recipeIsCooking),
-            ResourceLocation.CODEC.optionalFieldOf("quest").forGetter(StardewMailDefinition::quest),
-            ResourceLocation.CODEC.optionalFieldOf("special_order").forGetter(StardewMailDefinition::specialOrder),
-            StardewConditions.CODEC.listOf().optionalFieldOf("available_when", List.of())
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(ResourceLocation.CODEC, "quest").forGetter(StardewMailDefinition::quest),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(ResourceLocation.CODEC, "special_order").forGetter(StardewMailDefinition::specialOrder),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(StardewConditions.CODEC.listOf(), "available_when", List.of())
                     .forGetter(StardewMailDefinition::availableWhen),
-            StardewActions.CODEC.listOf().optionalFieldOf("on_delivery", List.of())
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(StardewActions.CODEC.listOf(), "on_delivery", List.of())
                     .forGetter(StardewMailDefinition::onDelivery),
-            StardewActions.CODEC.listOf().optionalFieldOf("on_read", List.of())
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(StardewActions.CODEC.listOf(), "on_read", List.of())
                     .forGetter(StardewMailDefinition::onRead)
     ).apply(instance, StardewMailDefinition::new));
 
@@ -61,7 +61,7 @@ public record StardewMailDefinition(
     public record AttachedItem(ResourceLocation item, int count) {
         public static final Codec<AttachedItem> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 ResourceLocation.CODEC.fieldOf("id").forGetter(AttachedItem::item),
-                Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("count", 1)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(1, Integer.MAX_VALUE), "count", 1)
                         .forGetter(AttachedItem::count)
         ).apply(instance, AttachedItem::new));
     }

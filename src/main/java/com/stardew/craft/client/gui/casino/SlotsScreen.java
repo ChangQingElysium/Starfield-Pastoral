@@ -24,7 +24,7 @@ import org.lwjgl.glfw.GLFW;
  * Reel movement, stopping conditions, layout, controls and payout display
  * follow StardewValley.Minigames.Slots.
  */
-public final class SlotsScreen extends Screen {
+public final class SlotsScreen extends Screen implements com.stardew.craft.port.PortScreen {
     private static final int ICON_COUNT = 8;
     private static final float SLOT_TURN_RATE = 0.008F;
     private static final int[] PAYOUT_ICON_ORDER = {0, 1, 2, 3, 4, 7, 6, 5};

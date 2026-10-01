@@ -13,7 +13,7 @@ import net.minecraft.world.entity.player.Inventory;
 import java.util.List;
 
 @SuppressWarnings("null")
-public class ShippingBinScreen extends AbstractContainerScreen<ShippingBinMenu> {
+public class ShippingBinScreen extends AbstractContainerScreen<ShippingBinMenu> implements com.stardew.craft.port.PortContainerScreen {
     private static final ResourceLocation CHEST_TEXTURE = new ResourceLocation("textures/gui/container/generic_54.png");
     private static final int ROWS = 1;
     private static final int SLOT_X = 80;

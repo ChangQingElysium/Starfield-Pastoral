@@ -24,7 +24,7 @@ import java.util.List;
  * Layout, card dimensions, deal order, flip timing and result placement follow
  * StardewValley.Minigames.CalicoJack.
  */
-public final class CalicoJackScreen extends Screen {
+public final class CalicoJackScreen extends Screen implements com.stardew.craft.port.PortScreen {
     private static final int CARD_WIDTH = 96;
     private static final int CARD_HEIGHT = 144;
     private static final int CARD_STEP = 112;

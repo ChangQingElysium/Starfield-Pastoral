@@ -183,28 +183,28 @@ public final class ContextualLootQueries {
         }
         static final Codec<Branch> CODEC = RecordCodecBuilder.create(i -> i.group(
                 StardewItemQueries.CODEC.fieldOf("query").forGetter(Branch::query),
-                StardewItemQueries.CODEC.optionalFieldOf("otherwise").forGetter(Branch::otherwise),
-                StardewConditions.CODEC.listOf().optionalFieldOf("when", List.of()).forGetter(Branch::when),
-                NUMBERS.optionalFieldOf("minimum", Map.of()).forGetter(Branch::minimum),
-                NUMBERS.optionalFieldOf("maximum", Map.of()).forGetter(Branch::maximum),
-                FINITE.optionalFieldOf("chance", 1d).forGetter(Branch::chance),
-                NUMBERS.optionalFieldOf("chance_add", Map.of()).forGetter(Branch::chanceAdd),
-                Codec.STRING.listOf().optionalFieldOf("chance_scale", List.of()).forGetter(Branch::chanceScale)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(StardewItemQueries.CODEC, "otherwise").forGetter(Branch::otherwise),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(StardewConditions.CODEC.listOf(), "when", List.of()).forGetter(Branch::when),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(NUMBERS, "minimum", Map.of()).forGetter(Branch::minimum),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(NUMBERS, "maximum", Map.of()).forGetter(Branch::maximum),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(FINITE, "chance", 1d).forGetter(Branch::chance),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(NUMBERS, "chance_add", Map.of()).forGetter(Branch::chanceAdd),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING.listOf(), "chance_scale", List.of()).forGetter(Branch::chanceScale)
         ).apply(i, Branch::new));
     }
     public record Repeat(StardewItemQuery query, double chance, double decay, int limit) {
         static final Codec<Repeat> CODEC = RecordCodecBuilder.create(i -> i.group(
                 StardewItemQueries.CODEC.fieldOf("query").forGetter(Repeat::query),
-                Codec.doubleRange(0, 1).optionalFieldOf("chance", 1d).forGetter(Repeat::chance),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.doubleRange(0, 1), "chance", 1d).forGetter(Repeat::chance),
                 Codec.doubleRange(0, 1).fieldOf("decay").forGetter(Repeat::decay),
-                Codec.intRange(1, 256).optionalFieldOf("limit", 256).forGetter(Repeat::limit)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(1, 256), "limit", 256).forGetter(Repeat::limit)
         ).apply(i, Repeat::new));
     }
     public record Multiply(StardewItemQuery query, int factor, boolean lastOnly) {
         static final Codec<Multiply> CODEC = RecordCodecBuilder.create(i -> i.group(
                 StardewItemQueries.CODEC.fieldOf("query").forGetter(Multiply::query),
                 Codec.intRange(1, 64).fieldOf("factor").forGetter(Multiply::factor),
-                Codec.BOOL.optionalFieldOf("last_only", false).forGetter(Multiply::lastOnly)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.BOOL, "last_only", false).forGetter(Multiply::lastOnly)
         ).apply(i, Multiply::new));
     }
     public record WithActions(StardewItemQuery query, List<StardewAction> actions) {
@@ -222,7 +222,7 @@ public final class ContextualLootQueries {
     public record Qualified(String item, int count) {
         static final Codec<Qualified> CODEC = RecordCodecBuilder.create(i -> i.group(
                 Codec.STRING.fieldOf("item").forGetter(Qualified::item),
-                Codec.intRange(1, 4096).optionalFieldOf("count", 1).forGetter(Qualified::count)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(1, 4096), "count", 1).forGetter(Qualified::count)
         ).apply(i, Qualified::new));
     }
 }

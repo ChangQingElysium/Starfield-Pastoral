@@ -23,12 +23,12 @@ import java.util.List;
 
 /** Shared farm directory. Server-authored eligibility and identifiers remain authoritative. */
 @SuppressWarnings("null")
-public class FarmBrowserScreen extends Screen {
+public class FarmBrowserScreen extends Screen implements com.stardew.craft.port.PortScreen {
     final FarmBrowserModel model;
     private final String entryTag;
     private final Screen returnScreen;
     private FarmBrowserLayout layout;
-    private EditBox search;
+    private com.stardew.craft.port.PortEditBox search;
     private DirectoryButton confirm;
     private boolean submitted, pending, draggingScrollbar;
     private double scrollbarGrab;
@@ -64,7 +64,7 @@ public class FarmBrowserScreen extends Screen {
         layout = FarmBrowserLayout.fit(width, height, lineHeight(), actionHeight, model.filtered().size());
         shown = model.entries(layout.visibleRows());
         permissionWidth = layout.permissionWidth(model.farms.stream().mapToInt(f -> font.width(state(f))).max().orElse(0));
-        search = new EditBox(font, layout.left() + 7, layout.searchY() + 5, layout.innerWidth() - 14, lineHeight(), tr("search"));
+        search = new com.stardew.craft.port.PortEditBox(font, layout.left() + 7, layout.searchY() + 5, layout.innerWidth() - 14, lineHeight(), tr("search"));
         search.setBordered(false); search.setTextShadow(false);
         search.setTextColor(FarmSetupArt.INK); search.setMaxLength(96); search.setValue(model.query);
         // Hint follows the current language font and remains unscaled.

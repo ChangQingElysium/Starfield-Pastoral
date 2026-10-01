@@ -39,7 +39,7 @@ import java.util.List;
  * 所有位置、尺寸偏移量统一使用 mapping.ui()。
  */
 @SuppressWarnings("null")
-public class QuestLogScreen extends Screen {
+public class QuestLogScreen extends Screen implements com.stardew.craft.port.PortScreen {
 
     private static final int SDV_WIDTH = 832;
     private static final int SDV_HEIGHT = 576;

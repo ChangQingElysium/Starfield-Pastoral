@@ -17,7 +17,7 @@ import net.minecraft.network.chat.Component;
 import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 @SuppressWarnings("null")
-public class FairStarTokenNumberSelectionScreen extends Screen {
+public class FairStarTokenNumberSelectionScreen extends Screen implements com.stardew.craft.port.PortScreen {
     private static final int TEXT_DARK = 0xFF3E2723;
     private static final int TEXT_MUTED = 0xFF6D5942;
     private static final int PAPER_TINT = 0xFFF7DFAE;
@@ -30,7 +30,7 @@ public class FairStarTokenNumberSelectionScreen extends Screen {
     private final int maxValue;
     private final int defaultValue;
 
-    private EditBox amountField;
+    private com.stardew.craft.port.PortEditBox amountField;
     private int panelX;
     private int panelY;
     private int panelW;
@@ -66,7 +66,7 @@ public class FairStarTokenNumberSelectionScreen extends Screen {
     @Override
     protected void init() {
         recomputeLayout();
-        amountField = new EditBox(com.stardew.craft.client.font.StardewFonts.small(), fieldX, fieldY + (fieldH - StardewFonts.lineHeight(font)) / 2,
+        amountField = new com.stardew.craft.port.PortEditBox(com.stardew.craft.client.font.StardewFonts.small(), fieldX, fieldY + (fieldH - StardewFonts.lineHeight(font)) / 2,
             fieldW, StardewFonts.lineHeight(font), Component.empty());
         amountField.setBordered(false);
         amountField.setTextShadow(false);

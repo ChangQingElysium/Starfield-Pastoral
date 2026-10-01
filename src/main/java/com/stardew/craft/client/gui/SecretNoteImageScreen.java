@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 
 /** SDV LetterViewerMenu image-note branch: one 64x64 atlas cell rendered at 4x. */
 @SuppressWarnings("null")
-public final class SecretNoteImageScreen extends Screen {
+public final class SecretNoteImageScreen extends Screen implements com.stardew.craft.port.PortScreen {
     private static final ResourceLocation LETTER_BG = new ResourceLocation(
             StardewCraft.MODID, "textures/gui/letter_bg.png");
     private static final ResourceLocation NOTE_IMAGES = new ResourceLocation(

@@ -77,8 +77,7 @@ public final class MiningVanillaExperienceEvents {
 
     @SuppressWarnings({ "null", "deprecation" })
     private static boolean hasSilkTouch(net.minecraft.world.item.ItemStack tool, ServerPlayer player) {
-        var lookup = player.level().registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
-        var holder = lookup.getOrThrow(Enchantments.SILK_TOUCH);
-        return EnchantmentHelper.getItemEnchantmentLevel(holder, tool) > 0;
+        // PORT(1.20.1): Enchantments.SILK_TOUCH is the registered Enchantment itself, not a ResourceKey.
+        return EnchantmentHelper.getItemEnchantmentLevel(Enchantments.SILK_TOUCH, tool) > 0;
     }
 }

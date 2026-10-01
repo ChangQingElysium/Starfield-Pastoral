@@ -28,24 +28,24 @@ public record StardewShopEntry(
 ) {
     public static final Codec<StardewShopEntry> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.fieldOf("item").forGetter(StardewShopEntry::item),
-            Codec.STRING.optionalFieldOf("display_name", "").forGetter(StardewShopEntry::displayName),
-            Codec.STRING.optionalFieldOf("description", "").forGetter(StardewShopEntry::description),
-            Codec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("price", 0).forGetter(StardewShopEntry::price),
-            Codec.INT.optionalFieldOf("stock", Integer.MAX_VALUE).forGetter(StardewShopEntry::stock),
-            Codec.STRING.optionalFieldOf("trade_item").forGetter(StardewShopEntry::tradeItem),
-            Codec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("trade_item_count", 0)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "display_name", "").forGetter(StardewShopEntry::displayName),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "description", "").forGetter(StardewShopEntry::description),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(0, Integer.MAX_VALUE), "price", 0).forGetter(StardewShopEntry::price),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.INT, "stock", Integer.MAX_VALUE).forGetter(StardewShopEntry::stock),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "trade_item").forGetter(StardewShopEntry::tradeItem),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(0, Integer.MAX_VALUE), "trade_item_count", 0)
                     .forGetter(StardewShopEntry::tradeItemCount),
-            Codec.intRange(0, 3).listOf().optionalFieldOf("seasons", List.of()).forGetter(StardewShopEntry::seasons),
-            Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("min_year", 1).forGetter(StardewShopEntry::minYear),
-            Codec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("min_mine_level", 0)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(0, 3).listOf(), "seasons", List.of()).forGetter(StardewShopEntry::seasons),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(1, Integer.MAX_VALUE), "min_year", 1).forGetter(StardewShopEntry::minYear),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(0, Integer.MAX_VALUE), "min_mine_level", 0)
                     .forGetter(StardewShopEntry::minMineLevel),
-            Codec.STRING.optionalFieldOf("mail_flag").forGetter(StardewShopEntry::mailFlag),
-            Codec.intRange(-1, 6).optionalFieldOf("day_of_week", -1).forGetter(StardewShopEntry::dayOfWeek),
-            Codec.intRange(0, 2).optionalFieldOf("day_of_month_parity", 0)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "mail_flag").forGetter(StardewShopEntry::mailFlag),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(-1, 6), "day_of_week", -1).forGetter(StardewShopEntry::dayOfWeek),
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(0, 2), "day_of_month_parity", 0)
                     .forGetter(StardewShopEntry::dayOfMonthParity),
-            Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("purchase_stack", 1)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(1, Integer.MAX_VALUE), "purchase_stack", 1)
                     .forGetter(StardewShopEntry::purchaseStack),
-            StardewConditions.CODEC.listOf().optionalFieldOf("available_when", List.of())
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(StardewConditions.CODEC.listOf(), "available_when", List.of())
                     .forGetter(StardewShopEntry::availableWhen)
     ).apply(instance, StardewShopEntry::new));
 

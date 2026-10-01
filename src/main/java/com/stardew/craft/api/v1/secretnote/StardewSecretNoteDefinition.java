@@ -17,21 +17,21 @@ public record StardewSecretNoteDefinition(
         String implementationStatus
 ) {
     public static final Codec<StardewSecretNoteDefinition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.INT.optionalFieldOf("vanilla_number", -1)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.INT, "vanilla_number", -1)
                     .forGetter(StardewSecretNoteDefinition::vanillaNumber),
-            Codec.INT.optionalFieldOf("display_number", -1)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.INT, "display_number", -1)
                     .forGetter(StardewSecretNoteDefinition::displayNumber),
-            Codec.INT.optionalFieldOf("sort_order", 0)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.INT, "sort_order", 0)
                     .forGetter(StardewSecretNoteDefinition::sortOrder),
-            Codec.STRING.optionalFieldOf("text", "")
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "text", "")
                     .forGetter(StardewSecretNoteDefinition::text),
-            Codec.intRange(-1, Integer.MAX_VALUE).optionalFieldOf("image_index", -1)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(-1, Integer.MAX_VALUE), "image_index", -1)
                     .forGetter(StardewSecretNoteDefinition::imageIndex),
-            GiftReveal.CODEC.listOf().optionalFieldOf("gift_reveals", List.of())
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(GiftReveal.CODEC.listOf(), "gift_reveals", List.of())
                     .forGetter(StardewSecretNoteDefinition::giftReveals),
-            Codec.BOOL.optionalFieldOf("obtainable", true)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.BOOL, "obtainable", true)
                     .forGetter(StardewSecretNoteDefinition::obtainable),
-            Codec.STRING.optionalFieldOf("implementation_status", "complete")
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "implementation_status", "complete")
                     .forGetter(StardewSecretNoteDefinition::implementationStatus)
     ).apply(instance, StardewSecretNoteDefinition::new));
 

@@ -55,7 +55,7 @@ import java.util.Set;
  *   height = 600 + borderWidth*2 = 680
  */
 @SuppressWarnings({"null", "unused"})
-public class GeodeMenuScreen extends Screen {
+public class GeodeMenuScreen extends Screen implements com.stardew.craft.port.PortScreen {
 
     // ── Texture paths ──
     private static final ResourceLocation CLINT_HAMMERING = new ResourceLocation(

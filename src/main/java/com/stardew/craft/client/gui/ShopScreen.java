@@ -49,7 +49,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @SuppressWarnings("null")
-public class ShopScreen extends Screen {
+public class ShopScreen extends Screen implements com.stardew.craft.port.PortScreen {
 
     // SDV layout (screen-pixels = sprite-px × 4)
     private static final int BORDER   = 40;

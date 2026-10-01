@@ -44,22 +44,19 @@ public record StardewNpcGiftTastePatchDefinition(
                                             .forGetter(
                                                     StardewNpcGiftTastePatchDefinition
                                                             ::npc),
-                                    Codec.INT.optionalFieldOf("priority", 0)
+                                    com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.INT, "priority", 0)
                                             .forGetter(
                                                     StardewNpcGiftTastePatchDefinition
                                                             ::priority),
-                                    Codec.BOOL.optionalFieldOf(
-                                                    "required", true)
+                                    com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.BOOL, "required", true)
                                             .forGetter(
                                                     StardewNpcGiftTastePatchDefinition
                                                             ::required),
-                                    CATEGORY_ITEMS_CODEC.optionalFieldOf(
-                                                    "add", Map.of())
+                                    com.stardew.craft.port.PortCodecs.optionalFieldOf(CATEGORY_ITEMS_CODEC, "add", Map.of())
                                             .forGetter(
                                                     StardewNpcGiftTastePatchDefinition
                                                             ::add),
-                                    CATEGORY_ITEMS_CODEC.optionalFieldOf(
-                                                    "remove", Map.of())
+                                    com.stardew.craft.port.PortCodecs.optionalFieldOf(CATEGORY_ITEMS_CODEC, "remove", Map.of())
                                             .forGetter(
                                                     StardewNpcGiftTastePatchDefinition
                                                             ::remove)

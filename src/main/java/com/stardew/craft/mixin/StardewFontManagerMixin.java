@@ -6,18 +6,26 @@ import net.minecraft.client.gui.font.FontSet;
 import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 
-/** Makes styled Stardew font IDs resolvable by Minecraft's normal tooltip measurer. */
+import java.util.function.Function;
+
+/**
+ * Makes styled Stardew font IDs resolvable by Minecraft's normal tooltip measurer.
+ *
+ * <p>PORT(1.20.1): 1.21 hooks {@code FontManager#getFontSetRaw}, the lookup behind the font-set function of the
+ * Fonts made by {@code createFont}/{@code createFontFilterFishy}. 1.20.1 has no such method: those Fonts receive a
+ * lambda {@code id -> fontSets.getOrDefault(getActualId(id), missing)}. The same function is wrapped here so the
+ * Stardew resolution runs first for exactly the same Fonts.
+ */
 @Mixin(FontManager.class)
 public abstract class StardewFontManagerMixin {
-    @Inject(method = "getFontSetRaw", at = @At("HEAD"), cancellable = true)
-    private void stardewcraft$resolveAuthoredFont(
-            ResourceLocation id, CallbackInfoReturnable<FontSet> callback) {
-        FontSet fontSet = StardewFonts.resolveFontSet(id);
-        if (fontSet != null) {
-            callback.setReturnValue(fontSet);
-        }
+    @ModifyArg(method = {"createFont", "createFontFilterFishy"}, at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/client/gui/Font;<init>(Ljava/util/function/Function;Z)V"), index = 0)
+    private Function<ResourceLocation, FontSet> stardewcraft$resolveAuthoredFont(Function<ResourceLocation, FontSet> original) {
+        return id -> {
+            FontSet fontSet = StardewFonts.resolveFontSet(id);
+            return fontSet != null ? fontSet : original.apply(id);
+        };
     }
 }

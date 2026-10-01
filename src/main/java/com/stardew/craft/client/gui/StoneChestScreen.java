@@ -22,7 +22,7 @@ import net.minecraft.world.entity.player.Inventory;
 import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 @SuppressWarnings("null")
-public class StoneChestScreen extends AbstractContainerScreen<StoneChestMenu> {
+public class StoneChestScreen extends AbstractContainerScreen<StoneChestMenu> implements com.stardew.craft.port.PortContainerScreen {
 
     private static final ResourceLocation COLOR_WHEEL = new ResourceLocation("stardewcraft", "textures/gui/color_wheel.png");
     private static final int BUTTON_SIZE = 18;

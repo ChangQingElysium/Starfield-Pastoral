@@ -16,7 +16,7 @@ import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 /** Forced overflow menu: rearrange/drop inventory, then collect the queued gift. */
 @SuppressWarnings("null")
-public final class WinterStarOverflowGiftScreen extends Screen {
+public final class WinterStarOverflowGiftScreen extends Screen implements com.stardew.craft.port.PortScreen {
     private static final int SLOT = 36;
     private static final int GAP = 4;
     private final ItemStack reward;

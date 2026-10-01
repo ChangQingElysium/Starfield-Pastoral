@@ -14,12 +14,12 @@ import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 import javax.annotation.Nonnull;
 import java.util.List;
 
-public class RouteEditorScreen extends Screen {
+public class RouteEditorScreen extends Screen implements com.stardew.craft.port.PortScreen {
     private static final int PANEL_W = 420;
     private static final int PANEL_H = 236;
     private static final int ROW_H = 12;
 
-    private EditBox routeIdBox;
+    private com.stardew.craft.port.PortEditBox routeIdBox;
     private int panelX;
     private int panelY;
     private int scroll;
@@ -32,7 +32,7 @@ public class RouteEditorScreen extends Screen {
     protected void init() {
         panelX = (width - PANEL_W) / 2;
         panelY = (height - PANEL_H) / 2;
-        routeIdBox = new EditBox(com.stardew.craft.client.font.StardewFonts.small(), panelX + 74, panelY + 28, PANEL_W - 92, 18, Component.translatable("gui.stardewcraft.route_editor.route_id"));
+        routeIdBox = new com.stardew.craft.port.PortEditBox(com.stardew.craft.client.font.StardewFonts.small(), panelX + 74, panelY + 28, PANEL_W - 92, 18, Component.translatable("gui.stardewcraft.route_editor.route_id"));
         routeIdBox.setTextShadow(false);
         routeIdBox.setMaxLength(96);
         routeIdBox.setValue(RouteEditorClientState.routeId());

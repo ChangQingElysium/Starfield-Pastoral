@@ -69,7 +69,7 @@ public final class ArtifactSpotDigService {
         BlockPos pos = target(event.getLevel(), event.getPos());
         if (!isSpot(event.getLevel().getBlockState(pos))) return;
         if (event.getEntity() instanceof ServerPlayer player && dig(player.serverLevel(), pos, player, tool))
-            tool.hurtAndBreak(1, player, LivingEntity.getSlotForHand(event.getHand()));
+            tool.hurtAndBreak(1, player, p -> p.broadcastBreakEvent(event.getHand())); // PORT(1.20.1): 1.21 hurtAndBreak(amount, entity, slot) breaks via onEquippedItemBroken(slot)
         event.setCanceled(true);
         event.setCancellationResult(InteractionResult.sidedSuccess(event.getLevel().isClientSide));
     }

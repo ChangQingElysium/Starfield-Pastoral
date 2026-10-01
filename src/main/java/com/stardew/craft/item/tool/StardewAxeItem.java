@@ -38,7 +38,7 @@ public class StardewAxeItem extends AxeItem implements IStardewItem {
 	private final Tier tier;
 
 	public StardewAxeItem(Tier tier, Properties properties) {
-		super(toVanillaTier(tier), properties.stacksTo(1)); // PORT(1.20.1): unbreakable via isDamageable (no default components)
+		super(toVanillaTier(tier), 0.0F, 0.0F, properties.stacksTo(1)); // PORT(1.20.1): unbreakable via isDamageable (no default components)
 		this.tier = tier;
 	}
 
@@ -48,6 +48,15 @@ public class StardewAxeItem extends AxeItem implements IStardewItem {
 	@Override
 	public boolean isDamageable(net.minecraft.world.item.ItemStack stack) {
 		return false;
+	}
+
+	// PORT(1.20.1): 1.21 tools built from bare Item.Properties carry no attribute_modifiers component (the
+	// tier no longer contributes attack damage/speed); 1.20.1 DiggerItem/SwordItem always add tier modifiers.
+	@Override
+	public com.google.common.collect.Multimap<net.minecraft.world.entity.ai.attributes.Attribute,
+			net.minecraft.world.entity.ai.attributes.AttributeModifier> getDefaultAttributeModifiers(
+			net.minecraft.world.entity.EquipmentSlot slot) {
+		return com.google.common.collect.ImmutableMultimap.of();
 	}
 
 	private static net.minecraft.world.item.Tier toVanillaTier(Tier tier) {

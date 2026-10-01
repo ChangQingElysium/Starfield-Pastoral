@@ -61,7 +61,7 @@ public final class StardewHotbarHud {
     public static void renderOrnament(GuiGraphics graphics) {
         if (!enabled(Minecraft.getInstance())) return;
         // XP occupies H-29..H-25. The two exterior pixels end before the hotbar's H-22 top edge.
-        graphics.blitSprite(THEMES[TerrainSeasonTextures.currentTextureSet()][8],
+        com.stardew.craft.port.PortGuiSprites.blitSprite(graphics, THEMES[TerrainSeasonTextures.currentTextureSet()][8],
                 graphics.guiWidth() / 2 - 91, graphics.guiHeight() - 24, 182, 2);
     }
 
@@ -114,7 +114,7 @@ public final class StardewHotbarHud {
 
     private static void drawExperienceRange(GuiGraphics graphics, ResourceLocation sprite,
                                             int x, int y, int sourceX, int width) {
-        if (width > 0) graphics.blitSprite(sprite, 182, 5, sourceX, 0, x + sourceX, y, width, 5);
+        if (width > 0) com.stardew.craft.port.PortGuiSprites.blitSprite(graphics, sprite, 182, 5, sourceX, 0, x + sourceX, y, width, 5);
     }
 
     public static boolean renderExperienceLevel(GuiGraphics graphics) {
@@ -132,9 +132,9 @@ public final class StardewHotbarHud {
             for (int index = 0; index < text.length(); index++) {
                 int glyph = text.charAt(index) - '0';
                 graphics.setColor(0.25F, 0.25F, 0.25F, 1.0F);
-                graphics.blitSprite(digits, 48, 8, glyph * 4, 0, x + 1, y + 1, 3, 5);
+                com.stardew.craft.port.PortGuiSprites.blitSprite(graphics, digits, 48, 8, glyph * 4, 0, x + 1, y + 1, 3, 5);
                 graphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
-                graphics.blitSprite(digits, 48, 8, glyph * 4, 0, x, y, 3, 5);
+                com.stardew.craft.port.PortGuiSprites.blitSprite(graphics, digits, 48, 8, glyph * 4, 0, x, y, 3, 5);
                 x += 4;
             }
         } finally {

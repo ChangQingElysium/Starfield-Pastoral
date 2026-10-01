@@ -20,7 +20,7 @@ import java.util.List;
 
 @OnlyIn(Dist.CLIENT)
 @SuppressWarnings("null")
-public class StardewConfirmDialogScreen extends Screen implements StardewCollectivePauseScreen, StardewGuiContentSize {
+public class StardewConfirmDialogScreen extends Screen implements StardewCollectivePauseScreen, StardewGuiContentSize, com.stardew.craft.port.PortScreen {
     private final StardewQuestionDialogSpec spec;
     private final boolean dialogueContinuation;
     private StardewRenderMapping mapping;

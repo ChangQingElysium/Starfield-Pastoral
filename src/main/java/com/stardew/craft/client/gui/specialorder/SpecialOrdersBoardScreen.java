@@ -29,7 +29,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @SuppressWarnings("null")
-public class SpecialOrdersBoardScreen extends Screen {
+public class SpecialOrdersBoardScreen extends Screen implements com.stardew.craft.port.PortScreen {
     private static final ResourceLocation BOARD =
         new ResourceLocation(StardewCraft.MODID, "textures/gui/special_orders/board_normal.png");
     private static final ResourceLocation DUE =

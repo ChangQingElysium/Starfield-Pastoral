@@ -24,16 +24,16 @@ public final class ToolUpgradeData {
         public static final Codec<Definition> CODEC = RecordCodecBuilder.create(i -> i.group(
                 ResourceLocation.CODEC.fieldOf("family").forGetter(Definition::family),
                 Codec.intRange(1, 100).fieldOf("tier").forGetter(Definition::tier),
-                ResourceLocation.CODEC.optionalFieldOf("input").forGetter(Definition::input),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(ResourceLocation.CODEC, "input").forGetter(Definition::input),
                 ResourceLocation.CODEC.fieldOf("output").forGetter(Definition::output),
                 Codec.intRange(0, Integer.MAX_VALUE).fieldOf("price").forGetter(Definition::price),
                 ResourceLocation.CODEC.fieldOf("material").forGetter(Definition::material),
-                Codec.intRange(0, 4096).optionalFieldOf("material_count", 5).forGetter(Definition::materialCount),
-                Codec.intRange(0, 365).optionalFieldOf("days", 2).forGetter(Definition::days),
-                Codec.BOOL.optionalFieldOf("copy_components", true).forGetter(Definition::copyComponents),
-                Codec.BOOL.optionalFieldOf("reset_damage", true).forGetter(Definition::resetDamage),
-                Codec.intRange(0, 4).optionalFieldOf("trash_can_level", 0).forGetter(Definition::trashCanLevel),
-                StardewConditions.CODEC.listOf().optionalFieldOf("available_when", List.of()).forGetter(Definition::availableWhen)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(0, 4096), "material_count", 5).forGetter(Definition::materialCount),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(0, 365), "days", 2).forGetter(Definition::days),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.BOOL, "copy_components", true).forGetter(Definition::copyComponents),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.BOOL, "reset_damage", true).forGetter(Definition::resetDamage),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(0, 4), "trash_can_level", 0).forGetter(Definition::trashCanLevel),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(StardewConditions.CODEC.listOf(), "available_when", List.of()).forGetter(Definition::availableWhen)
         ).apply(i, Definition::new));
         public Definition { availableWhen = List.copyOf(availableWhen); }
         public ShopItemEntry shopEntry() {

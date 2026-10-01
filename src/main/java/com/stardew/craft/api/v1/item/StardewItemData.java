@@ -25,17 +25,17 @@ public record StardewItemData(
             new ResourceLocation("stardewcraft", "unknown");
 
     public static final Codec<StardewItemData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ResourceLocation.CODEC.optionalFieldOf("category", UNKNOWN_CATEGORY)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(ResourceLocation.CODEC, "category", UNKNOWN_CATEGORY)
                     .forGetter(StardewItemData::category),
-            Codec.intRange(-1, Integer.MAX_VALUE).optionalFieldOf("base_sell_price", -1)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(-1, Integer.MAX_VALUE), "base_sell_price", -1)
                     .forGetter(StardewItemData::baseSellPrice),
-            Codec.INT.optionalFieldOf("edibility", -300)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.INT, "edibility", -300)
                     .forGetter(StardewItemData::edibility),
-            Codec.INT.optionalFieldOf("energy", 0)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.INT, "energy", 0)
                     .forGetter(StardewItemData::energy),
-            Codec.INT.optionalFieldOf("health", 0)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.INT, "health", 0)
                     .forGetter(StardewItemData::health),
-            Codec.BOOL.optionalFieldOf("hidden", false)
+            com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.BOOL, "hidden", false)
                     .forGetter(StardewItemData::hidden)
     ).apply(instance, StardewItemData::new));
 

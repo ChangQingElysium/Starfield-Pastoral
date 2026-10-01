@@ -157,4 +157,105 @@ public final class PortCodecs {
             java.util.function.Function<A, com.mojang.serialization.DataResult<A>> checker) {
         return codec.flatXmap(checker, checker);
     }
+
+    /**
+     * DFU 8 (1.21) {@code Codec.either(first, second)}: decodes {@code first}, then {@code second}; when both fail it
+     * returns the first partial result, else the second partial result, else a combined error. DFU 6's
+     * {@code Codec.either} returns the second codec's result whenever the first one fails.
+     */
+    public static <F, S> com.mojang.serialization.Codec<com.mojang.datafixers.util.Either<F, S>> either(
+            com.mojang.serialization.Codec<F> first, com.mojang.serialization.Codec<S> second) {
+        return new com.mojang.serialization.Codec<>() {
+            @Override
+            public <T> com.mojang.serialization.DataResult<com.mojang.datafixers.util.Pair<
+                    com.mojang.datafixers.util.Either<F, S>, T>> decode(
+                    com.mojang.serialization.DynamicOps<T> ops, T input) {
+                com.mojang.serialization.DataResult<com.mojang.datafixers.util.Pair<
+                        com.mojang.datafixers.util.Either<F, S>, T>> firstRead = first.decode(ops, input)
+                        .map(pair -> pair.mapFirst(com.mojang.datafixers.util.Either::left));
+                if (firstRead.result().isPresent()) return firstRead;
+                com.mojang.serialization.DataResult<com.mojang.datafixers.util.Pair<
+                        com.mojang.datafixers.util.Either<F, S>, T>> secondRead = second.decode(ops, input)
+                        .map(pair -> pair.mapFirst(com.mojang.datafixers.util.Either::right));
+                if (secondRead.result().isPresent()) return secondRead;
+                if (firstRead.resultOrPartial(message -> { }).isPresent()) return firstRead;
+                if (secondRead.resultOrPartial(message -> { }).isPresent()) return secondRead;
+                String firstMessage = firstRead.error().orElseThrow().message();
+                String secondMessage = secondRead.error().orElseThrow().message();
+                return com.mojang.serialization.DataResult.error(
+                        () -> "Failed to parse either. First: " + firstMessage + "; Second: " + secondMessage);
+            }
+
+            @Override
+            public <T> com.mojang.serialization.DataResult<T> encode(com.mojang.datafixers.util.Either<F, S> input,
+                    com.mojang.serialization.DynamicOps<T> ops, T prefix) {
+                return input.map(value -> first.encode(value, ops, prefix), value -> second.encode(value, ops, prefix));
+            }
+
+            @Override
+            public String toString() {
+                return "Either[" + first + ", " + second + "]";
+            }
+        };
+    }
+
+    /** DFU 8 (1.21) {@code Codec.withAlternative(primary, alternative)}: encodes with {@code primary}. */
+    @SuppressWarnings("unchecked")
+    public static <T> com.mojang.serialization.Codec<T> withAlternative(com.mojang.serialization.Codec<T> primary,
+            com.mojang.serialization.Codec<? extends T> alternative) {
+        return either(primary, (com.mojang.serialization.Codec<T>) alternative)
+                .xmap(either -> either.map(value -> value, value -> value), com.mojang.datafixers.util.Either::left);
+    }
+
+    /** DFU 8 (1.21) {@code Codec.withAlternative(primary, alternative, converter)}. */
+    public static <T, U> com.mojang.serialization.Codec<T> withAlternative(com.mojang.serialization.Codec<T> primary,
+            com.mojang.serialization.Codec<U> alternative, java.util.function.Function<U, T> converter) {
+        return either(primary, alternative)
+                .xmap(either -> either.map(value -> value, converter), com.mojang.datafixers.util.Either::left);
+    }
+
+    /**
+     * DFU 8 (1.21) {@code codec.optionalFieldOf(name)}: a missing field decodes to empty, but a present field that
+     * fails to parse is an error (partial results are kept). DFU 6's {@code optionalFieldOf} silently turns such a
+     * field into empty; that lenient behaviour is DFU 8's {@code lenientOptionalFieldOf}.
+     */
+    public static <A> com.mojang.serialization.MapCodec<java.util.Optional<A>> optionalFieldOf(
+            com.mojang.serialization.Codec<A> elementCodec, String name) {
+        return new com.mojang.serialization.MapCodec<>() {
+            @Override
+            public <T> java.util.stream.Stream<T> keys(com.mojang.serialization.DynamicOps<T> ops) {
+                return java.util.stream.Stream.of(ops.createString(name));
+            }
+
+            @Override
+            public <T> com.mojang.serialization.DataResult<java.util.Optional<A>> decode(
+                    com.mojang.serialization.DynamicOps<T> ops, com.mojang.serialization.MapLike<T> input) {
+                T value = input.get(name);
+                if (value == null) {
+                    return com.mojang.serialization.DataResult.success(java.util.Optional.empty());
+                }
+                return elementCodec.parse(ops, value).map(java.util.Optional::of);
+            }
+
+            @Override
+            public <T> com.mojang.serialization.RecordBuilder<T> encode(java.util.Optional<A> input,
+                    com.mojang.serialization.DynamicOps<T> ops, com.mojang.serialization.RecordBuilder<T> prefix) {
+                return input.isPresent() ? prefix.add(name, elementCodec.encodeStart(ops, input.get())) : prefix;
+            }
+
+            @Override
+            public String toString() {
+                return "OptionalFieldCodec[" + name + ": " + elementCodec + ']';
+            }
+        };
+    }
+
+    /** DFU 8 (1.21) {@code codec.optionalFieldOf(name, defaultValue)} (strict; the default is omitted on encode). */
+    public static <A> com.mojang.serialization.MapCodec<A> optionalFieldOf(
+            com.mojang.serialization.Codec<A> elementCodec, String name, A defaultValue) {
+        return optionalFieldOf(elementCodec, name).xmap(
+                value -> value.orElse(defaultValue),
+                value -> java.util.Objects.equals(value, defaultValue) ? java.util.Optional.empty()
+                        : java.util.Optional.of(value));
+    }
 }

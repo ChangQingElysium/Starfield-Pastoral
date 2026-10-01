@@ -189,7 +189,7 @@ public final class BuiltinQuestObjectiveTypes {
     public record ItemCountData(ResourceLocation item, int count) {
         public static final Codec<ItemCountData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 ResourceLocation.CODEC.fieldOf("item").forGetter(ItemCountData::item),
-                Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("count", 1).forGetter(ItemCountData::count)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(1, Integer.MAX_VALUE), "count", 1).forGetter(ItemCountData::count)
         ).apply(instance, ItemCountData::new));
     }
 
@@ -221,9 +221,9 @@ public final class BuiltinQuestObjectiveTypes {
         public static final Codec<DeliveryData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 Codec.STRING.fieldOf("target_npc").forGetter(DeliveryData::targetNpc),
                 ResourceLocation.CODEC.fieldOf("item").forGetter(DeliveryData::item),
-                Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("count", 1).forGetter(DeliveryData::count),
-                Codec.STRING.optionalFieldOf("target_message", "").forGetter(DeliveryData::targetMessage),
-                Codec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("friendship", 255).forGetter(DeliveryData::friendship)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(1, Integer.MAX_VALUE), "count", 1).forGetter(DeliveryData::count),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "target_message", "").forGetter(DeliveryData::targetMessage),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(0, Integer.MAX_VALUE), "friendship", 255).forGetter(DeliveryData::friendship)
         ).apply(instance, DeliveryData::new));
     }
 
@@ -236,9 +236,9 @@ public final class BuiltinQuestObjectiveTypes {
         public static final Codec<LostItemData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 Codec.STRING.fieldOf("target_npc").forGetter(LostItemData::targetNpc),
                 ResourceLocation.CODEC.fieldOf("item").forGetter(LostItemData::item),
-                Codec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("friendship", 250)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(0, Integer.MAX_VALUE), "friendship", 250)
                         .forGetter(LostItemData::friendship),
-                Codec.STRING.optionalFieldOf("target_message", "").forGetter(LostItemData::targetMessage)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "target_message", "").forGetter(LostItemData::targetMessage)
         ).apply(instance, LostItemData::new));
     }
 
@@ -254,7 +254,7 @@ public final class BuiltinQuestObjectiveTypes {
                 ResourceLocation.CODEC.fieldOf("item").forGetter(SecretLostItemData::item),
                 Codec.intRange(0, Integer.MAX_VALUE).fieldOf("friendship").forGetter(SecretLostItemData::friendship),
                 Codec.STRING.fieldOf("exclusive_quest").forGetter(SecretLostItemData::exclusiveQuest),
-                Codec.STRING.optionalFieldOf("target_message", "").forGetter(SecretLostItemData::targetMessage)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "target_message", "").forGetter(SecretLostItemData::targetMessage)
         ).apply(instance, SecretLostItemData::new));
     }
 
@@ -262,7 +262,7 @@ public final class BuiltinQuestObjectiveTypes {
         public static final Codec<MonsterData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 Codec.STRING.fieldOf("monster").forGetter(MonsterData::monster),
                 Codec.intRange(1, Integer.MAX_VALUE).fieldOf("count").forGetter(MonsterData::count),
-                Codec.STRING.optionalFieldOf("target_npc", "").forGetter(MonsterData::targetNpc)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "target_npc", "").forGetter(MonsterData::targetNpc)
         ).apply(instance, MonsterData::new));
     }
 
@@ -270,7 +270,7 @@ public final class BuiltinQuestObjectiveTypes {
         public static final Codec<FishingData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 ResourceLocation.CODEC.fieldOf("item").forGetter(FishingData::item),
                 Codec.intRange(1, Integer.MAX_VALUE).fieldOf("count").forGetter(FishingData::count),
-                Codec.STRING.optionalFieldOf("target_npc", "").forGetter(FishingData::targetNpc)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "target_npc", "").forGetter(FishingData::targetNpc)
         ).apply(instance, FishingData::new));
     }
 
@@ -278,14 +278,14 @@ public final class BuiltinQuestObjectiveTypes {
         public static final Codec<ResourceData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 ResourceLocation.CODEC.fieldOf("item").forGetter(ResourceData::item),
                 Codec.intRange(1, Integer.MAX_VALUE).fieldOf("count").forGetter(ResourceData::count),
-                Codec.STRING.optionalFieldOf("target_npc", "").forGetter(ResourceData::targetNpc)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING, "target_npc", "").forGetter(ResourceData::targetNpc)
         ).apply(instance, ResourceData::new));
     }
 
     public record SocialData(List<String> npcs, int friendship) {
         public static final Codec<SocialData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                Codec.STRING.listOf().optionalFieldOf("npcs", List.of()).forGetter(SocialData::npcs),
-                Codec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("friendship", 100).forGetter(SocialData::friendship)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.STRING.listOf(), "npcs", List.of()).forGetter(SocialData::npcs),
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(0, Integer.MAX_VALUE), "friendship", 100).forGetter(SocialData::friendship)
         ).apply(instance, SocialData::new));
     }
 

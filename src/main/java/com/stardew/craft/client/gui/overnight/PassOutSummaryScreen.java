@@ -21,7 +21,7 @@ import java.util.List;
  */
 @OnlyIn(Dist.CLIENT)
 @SuppressWarnings("null")
-public class PassOutSummaryScreen extends Screen {
+public class PassOutSummaryScreen extends Screen implements com.stardew.craft.port.PortScreen {
 
     private static final int INPUT_GUARD_TICKS = 20;
 

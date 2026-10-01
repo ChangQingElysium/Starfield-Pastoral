@@ -33,7 +33,7 @@ import java.util.List;
  */
 @OnlyIn(Dist.CLIENT)
 @SuppressWarnings("null")
-public class JojaCDScreen extends Screen {
+public class JojaCDScreen extends Screen implements com.stardew.craft.port.PortScreen {
 
     // SDV geometry, expressed in SDV pixel space (the ×4 scale is applied by render mapping s4())
     private static final int SDV_W = JojaConstants.CD_MENU_WIDTH;   // 1280

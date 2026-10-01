@@ -22,7 +22,7 @@ public final class StardewMenuButton extends Button {
         int count=Math.min(lines.size(),Math.max(1,(getHeight()-4)/StardewFonts.lineHeight(font)));
         int yy=getY()+(getHeight()-count*StardewFonts.lineHeight(font))/2;
         for(var line:lines.subList(0,count)){g.drawString(font,line,getX()+inset+(getWidth()-inset-6-font.width(line))/2,yy,active?0xFF5C2B00:0xFF816A50,false);yy+=StardewFonts.lineHeight(font);}
-        if(lines.size()>count && isHoveredOrFocused()){var screen=net.minecraft.client.Minecraft.getInstance().screen;if(screen!=null)screen.setTooltipForNextRenderPass(getMessage());}
+        if(lines.size()>count && isHoveredOrFocused()){var screen=net.minecraft.client.Minecraft.getInstance().screen;if(screen!=null)screen.setTooltipForNextRenderPass(net.minecraft.client.gui.components.Tooltip.splitTooltip(net.minecraft.client.Minecraft.getInstance(), getMessage()));}
     }
     public static Builder builder(Component label,OnPress press) {return new Builder(label,press);}
     public static final class Builder extends Button.Builder {

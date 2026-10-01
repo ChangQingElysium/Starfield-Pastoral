@@ -1819,7 +1819,7 @@ public final class NpcCentralMovementService {
             state = state.setValue(FenceGateBlock.FACING,npc.getDirection());
         }
         level.setBlock(pos,state.setValue(FenceGateBlock.OPEN,open),10);
-        level.playSound(null,pos,open ? gate.openSound : gate.closeSound,
+        level.playSound(null,pos,open ? ((com.stardew.craft.mixin.PortFenceGateBlockAccessor) gate).stardewcraft$getOpenSound() : ((com.stardew.craft.mixin.PortFenceGateBlockAccessor) gate).stardewcraft$getCloseSound(),
                 net.minecraft.sounds.SoundSource.BLOCKS,1.0F,level.random.nextFloat()*.1F+.9F);
         level.gameEvent(npc,open ? net.minecraft.world.level.gameevent.GameEvent.BLOCK_OPEN
                 : net.minecraft.world.level.gameevent.GameEvent.BLOCK_CLOSE,pos);

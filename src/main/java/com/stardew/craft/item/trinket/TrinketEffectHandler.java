@@ -121,7 +121,7 @@ public final class TrinketEffectHandler {
         if (source.is(DamageTypes.ON_FIRE)
                 || source.is(DamageTypes.FREEZE)
                 || source.is(DamageTypes.WITHER)
-                || source.is(Tags.DamageTypes.IS_POISON)) {
+                || source.is(com.stardew.craft.port.PortDamageTypes.IS_POISON)) {
             player.clearFire();
             if (source.is(DamageTypes.FREEZE)) {
                 player.setTicksFrozen(0);
@@ -238,7 +238,7 @@ public final class TrinketEffectHandler {
         Vec3 from = player.getEyePosition().subtract(0.0D, 0.25D, 0.0D);
         Vec3 to = target.get().getBoundingBox().getCenter().subtract(from);
 
-        Arrow arrow = new Arrow(level, player, new ItemStack(Items.ARROW), null);
+        Arrow arrow = new Arrow(level, player); // PORT(1.20.1): 1.21 (level, owner, ARROW pickup stack, no weapon); 1.20.1 picks up a plain arrow by default
         arrow.setPos(from.x, from.y, from.z);
         // AbstractArrow multiplies base damage by its current velocity. Keep a
         // small positive trigger value here and restore the authored damage at
@@ -380,7 +380,7 @@ public final class TrinketEffectHandler {
     }
 
     private static void configureParrot(ServerPlayer player, Parrot parrot) {
-        parrot.setTame(true, true);
+        parrot.setTame(true); // PORT(1.20.1): Parrot has no taming side effects in 1.21 either
         parrot.setOwnerUUID(player.getUUID());
         parrot.setOrderedToSit(false);
         parrot.setNoAi(true);

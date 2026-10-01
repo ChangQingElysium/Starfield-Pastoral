@@ -15,7 +15,7 @@ import net.minecraft.util.FormattedCharSequence;
 import java.util.List;
 
 /** Local, immediately saved reading preference with a preview in the selected language. */
-public final class ReadingTextSettingsScreen extends Screen {
+public final class ReadingTextSettingsScreen extends Screen implements com.stardew.craft.port.PortScreen {
     private final Screen parent;
     private int x, y, panelW, panelH, previewY, previewBottom, previewScroll, previewHeight;
     private List<FormattedCharSequence> description;

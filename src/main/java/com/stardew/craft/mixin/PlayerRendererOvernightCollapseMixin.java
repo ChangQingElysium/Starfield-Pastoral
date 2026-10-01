@@ -18,7 +18,8 @@ public class PlayerRendererOvernightCollapseMixin {
     private static final float PIVOT_Y = 0.45F;
 
     @Inject(
-        method = "setupRotations(Lnet/minecraft/client/player/AbstractClientPlayer;Lcom/mojang/blaze3d/vertex/PoseStack;FFFF)V",
+        // PORT(1.20.1): no trailing entity-scale parameter before 1.20.5
+        method = "setupRotations(Lnet/minecraft/client/player/AbstractClientPlayer;Lcom/mojang/blaze3d/vertex/PoseStack;FFF)V",
         at = @At("TAIL")
     )
     private void stardewcraft$applyOvernightCollapse(
@@ -27,9 +28,9 @@ public class PlayerRendererOvernightCollapseMixin {
             float bob,
             float yBodyRot,
             float partialTick,
-            float scale,
             CallbackInfo ci
     ) {
+        float scale = player.getScale(); // PORT(1.20.1): 1.21 passes LivingEntity#getScale() (no SCALE attribute on players here)
         float degrees = OvernightCollapseClientState.collapseRotationDegrees(player, partialTick);
         if (degrees <= 0.0F) {
             return;

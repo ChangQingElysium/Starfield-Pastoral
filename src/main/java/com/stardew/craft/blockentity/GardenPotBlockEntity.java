@@ -547,7 +547,7 @@ public final class GardenPotBlockEntity extends BlockEntity
 
         @Override
         public boolean isFluidValid(int tank, FluidStack stack) {
-            return tank == 0 && stack.is(FluidTags.WATER);
+            return tank == 0 && stack.getFluid().is(FluidTags.WATER);
         }
 
         @Override

@@ -28,19 +28,14 @@ public record StardewShopCostRule(
                             .forGetter(StardewShopCostRule::shop),
                     Codec.STRING.fieldOf("item")
                             .forGetter(StardewShopCostRule::item),
-                    Codec.INT.optionalFieldOf("priority", 0)
+                    com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.INT, "priority", 0)
                             .forGetter(StardewShopCostRule::priority),
-                    CurrencyEntry.CODEC.listOf()
-                            .optionalFieldOf(
-                                    "currencies", List.of())
+                    com.stardew.craft.port.PortCodecs.optionalFieldOf(CurrencyEntry.CODEC.listOf(), "currencies", List.of())
                             .forGetter(
                                     StardewShopCostRule::currencies),
-                    ItemEntry.CODEC.listOf()
-                            .optionalFieldOf("items", List.of())
+                    com.stardew.craft.port.PortCodecs.optionalFieldOf(ItemEntry.CODEC.listOf(), "items", List.of())
                             .forGetter(StardewShopCostRule::items),
-                    StardewConditions.CODEC.listOf()
-                            .optionalFieldOf(
-                                    "available_when", List.of())
+                    com.stardew.craft.port.PortCodecs.optionalFieldOf(StardewConditions.CODEC.listOf(), "available_when", List.of())
                             .forGetter(
                                     StardewShopCostRule::availableWhen)
             ).apply(instance, StardewShopCostRule::new));

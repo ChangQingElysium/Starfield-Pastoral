@@ -12,7 +12,7 @@ import net.minecraft.world.entity.player.Inventory;
 /**
  * 钓鱼宝箱UI - 类似原版箱子界面，可以看到背包和拿取物品
  */
-public class TreasureChestScreen extends AbstractContainerScreen<TreasureChestMenu> {
+public class TreasureChestScreen extends AbstractContainerScreen<TreasureChestMenu> implements com.stardew.craft.port.PortContainerScreen {
 	// 使用原版的54格箱子贴图（通用箱子GUI）
 	private static final ResourceLocation CHEST_TEXTURE = 
 			new ResourceLocation("textures/gui/container/generic_54.png");

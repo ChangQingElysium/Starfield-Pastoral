@@ -40,7 +40,7 @@ import java.util.Map;
  * - 前进/后退按钮: cursors.png (352,495,12,11) / (365,495,12,11) scale 4
  */
 @SuppressWarnings("null")
-public class LetterViewerScreen extends Screen {
+public class LetterViewerScreen extends Screen implements com.stardew.craft.port.PortScreen {
 
     // ── letterBG.png 纹理参数 ──
     private static final ResourceLocation LETTER_BG = new ResourceLocation(

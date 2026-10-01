@@ -42,14 +42,8 @@ public abstract class StardewGuiScissorMixin {
         original.call(clip.left(), clip.top(), clip.right(), clip.bottom());
     }
 
-    @WrapMethod(method = "containsPointInScissor")
-    private boolean stardewcraft$clipHit(int x, int y, Operation<Boolean> original) {
-        var layout = StardewGuiViewport.active();
-        if (layout == null) return original.call(x, y);
-        var pose = ((GuiGraphics) (Object) this).pose().last().pose();
-        return original.call(GuiScissorMath.pointX(pose, layout.windowScale(), x, y),
-                GuiScissorMath.pointY(pose, layout.windowScale(), x, y));
-    }
+    // PORT(1.20.1): containsPointInScissor does not exist on 1.20.1; its Stardew point transform lives in
+    // PortGuiGraphicsScissorMixin together with the 1.21.1 method it wrapped.
 
     @WrapOperation(method = "applyScissor", at = @At(value = "INVOKE",
             target = "Lcom/mojang/blaze3d/platform/Window;getGuiScale()D"))

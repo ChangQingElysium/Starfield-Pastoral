@@ -14,7 +14,7 @@ import org.lwjgl.glfw.GLFW;
 import java.util.EnumMap;
 
 /** Direct-manipulation editor for the player-facing HUD groups selected for customization. */
-public final class StardewHudLayoutEditorScreen extends Screen {
+public final class StardewHudLayoutEditorScreen extends Screen implements com.stardew.craft.port.PortScreen {
     private static final Config.HudElement[] EDITABLE_ELEMENTS = {
             Config.HudElement.MAIN,
             Config.HudElement.PLAYER_BARS,

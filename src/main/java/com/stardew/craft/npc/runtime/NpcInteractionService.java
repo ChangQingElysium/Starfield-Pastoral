@@ -1447,7 +1447,7 @@ public final class NpcInteractionService {
 
         // SDV parity: gifting Dwarf without translation guide → friendship delta is 0
         boolean dwarfNoUnderstand = npcId.equals("dwarf")
-            && player instanceof ServerPlayer sp
+            && (Object) player instanceof ServerPlayer sp
             && !com.stardew.craft.shop.DwarfService.canUnderstandDwarves(sp);
         if (dwarfNoUnderstand && finalDelta > 0) {
             finalDelta = 0;

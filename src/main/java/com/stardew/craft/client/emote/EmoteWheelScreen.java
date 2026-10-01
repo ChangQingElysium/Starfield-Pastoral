@@ -21,7 +21,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 @SuppressWarnings("null")
-public final class EmoteWheelScreen extends Screen implements com.stardew.craft.client.gui.StardewRealtimeScreen {
+public final class EmoteWheelScreen extends Screen implements com.stardew.craft.client.gui.StardewRealtimeScreen, com.stardew.craft.port.PortScreen {
 
 	private static final ResourceLocation EMOTES_TEXTURE = new ResourceLocation("stardewcraft", "textures/gui/emotes.png");
 	private static final int EMOTES_TEX_W = 64;

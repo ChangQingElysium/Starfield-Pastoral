@@ -18,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Random;
 
-public class FairStrengthGameScreen extends Screen implements com.stardew.craft.client.gui.StardewRealtimeScreen {
+public class FairStrengthGameScreen extends Screen implements com.stardew.craft.client.gui.StardewRealtimeScreen, com.stardew.craft.port.PortScreen {
     private static final int BAR_WIDTH = 20;
     private static final int BAR_HEIGHT = 136;
     private static final int PANEL_WIDTH = 220;

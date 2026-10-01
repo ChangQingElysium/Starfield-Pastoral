@@ -11,7 +11,7 @@ import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 /** Direct-click ItemGrabMenu equivalent using the native Minecraft inventory panel. */
 @SuppressWarnings("null")
-public final class WinterStarGiftSelectionScreen extends Screen {
+public final class WinterStarGiftSelectionScreen extends Screen implements com.stardew.craft.port.PortScreen {
     private static final ResourceLocation INVENTORY_TEXTURE =
         new ResourceLocation("textures/gui/container/inventory.png");
     private static final int PANEL_WIDTH = 176;

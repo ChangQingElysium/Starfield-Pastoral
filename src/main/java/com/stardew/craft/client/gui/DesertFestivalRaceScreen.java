@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings("null")
-public class DesertFestivalRaceScreen extends Screen implements DesertFestivalRaceSnapshotScreen {
+public class DesertFestivalRaceScreen extends Screen implements DesertFestivalRaceSnapshotScreen, com.stardew.craft.port.PortScreen {
     private static final ResourceLocation BACKGROUND = new ResourceLocation(
         StardewCraft.MODID, "textures/gui/desert_festival/race/race_track_full.png");
     private static final ResourceLocation RACERS = new ResourceLocation(
