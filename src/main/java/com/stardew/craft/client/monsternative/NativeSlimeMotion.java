@@ -51,7 +51,7 @@ public final class NativeSlimeMotion {
         pose.apply("animation.slime." + clip, time);
         double targetLift = next == GreenSlimeEntity.WALK ? walkLift(time, growth)
                 : NativeMonsterPresentation.slimeLift(next == GreenSlimeEntity.DASH, dying, time, growth);
-        double t = transitionDuration == 0 ? 1 : Math.clamp((clock - transitionStart) / transitionDuration, 0, 1);
+        double t = transitionDuration == 0 ? 1 : com.stardew.craft.port.PortJava.clamp((clock - transitionStart) / transitionDuration, 0, 1);
         double weight = t * t * (3 - 2 * t);
         pose.blendFrom(outgoing, 1 - weight);
         lift = outgoingLift + (targetLift - outgoingLift) * weight;
@@ -60,7 +60,7 @@ public final class NativeSlimeMotion {
     /** Small ordinary hop is an explicit MC presentation choice, not source locomotion physics. */
     public static double walkLift(double time, float growth) {
         double phase = time - Math.floor(time / 1.05) * 1.05;
-        double t = Math.clamp((phase - .14) / .51, 0, 1);
+        double t = com.stardew.craft.port.PortJava.clamp((phase - .14) / .51, 0, 1);
         double arch = Math.sin(Math.PI * t);
         return growth * .14 * arch * arch;
     }

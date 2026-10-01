@@ -26,7 +26,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 STATE = ROOT / "scripts/port/main-sync-state.txt"
-SCRIPTS = [ROOT / "scripts/port/rewrite_1201.py", ROOT / "scripts/port/adapt_nbt_provider.py"]
+# Order matters: every later script expects the output of the earlier ones.
+SCRIPTS = [ROOT / "scripts/port/rewrite_1201.py", ROOT / "scripts/port/adapt_nbt_provider.py",
+           ROOT / "scripts/port/adapt_block_use.py", ROOT / "scripts/port/adapt_overrides_1201.py"]
 PORT_OWNED_RESOURCES = {
     "META-INF/mods.toml",
     "META-INF/accesstransformer.cfg",
@@ -140,10 +142,11 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--main", default=str(ROOT.parent / "StardewCraft"))
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--snapshot", help="use an existing snapshot commit instead of taking a new one")
     args = ap.parse_args()
     main_dir = Path(args.main).resolve()
     old = STATE.read_text().split()[0]
-    new = snapshot(main_dir, old)
+    new = git("rev-parse", args.snapshot) if args.snapshot else snapshot(main_dir, old)
     if git("rev-parse", f"{old}^{{tree}}") == git("rev-parse", f"{new}^{{tree}}"):
         print("main unchanged since last sync")
         return 0

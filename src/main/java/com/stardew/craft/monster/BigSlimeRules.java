@@ -16,7 +16,7 @@ public final class BigSlimeRules {
     public static int experienceMultiplier(int area){return area>=80?3:area==40?2:1;}
     public static int color(int area,RandomSource random){
         int base=switch(area){case 40->0x40e0d0;case 80->0xff0000;case 121->0x8a2be2;default->0x00ff00;};
-        int r=Math.clamp((base>>16&255)+random.nextInt(-20,21),0,255),g=Math.clamp((base>>8&255)+random.nextInt(-20,21),0,255),b=Math.clamp((base&255)+random.nextInt(-20,21),0,255);float brightness=random.nextInt(7,11)/10F;
+        int r=com.stardew.craft.port.PortJava.clamp((base>>16&255)+random.nextInt(-20,21),0,255),g=com.stardew.craft.port.PortJava.clamp((base>>8&255)+random.nextInt(-20,21),0,255),b=com.stardew.craft.port.PortJava.clamp((base&255)+random.nextInt(-20,21),0,255);float brightness=random.nextInt(7,11)/10F;
         return (int)(255*brightness)<<24|(int)(r*brightness)<<16|(int)(g*brightness)<<8|(int)(b*brightness);
     }
     public static boolean holdsCake(int area,RandomSource random){return random.nextDouble()<.01&&area>=40;}

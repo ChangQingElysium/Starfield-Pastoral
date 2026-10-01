@@ -36,6 +36,10 @@ public final class BuiltinMapInteractionActions {
         if (bootstrapped) {
             return;
         }
+        StardewMapInteractionActions.register(id("guild_board"), Codec.unit("guild_board"), (context, data) -> {
+            com.stardew.craft.shop.MarlonService.openGilGoals(context.player());
+            return InteractionResult.SUCCESS;
+        });
         StardewMapInteractionActions.register(
                 id("mr_qi_anchor"),
                 MrQiAnchorAction.CODEC,

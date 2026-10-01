@@ -10,7 +10,7 @@ import net.minecraft.world.level.GameRules;
 public final class ModGameRules {
     public static final int DEFAULT_MAX_FARMERS_PER_FARM = 4;
 
-    /** Allows player construction in public areas without granting farm or container permissions. */
+    /** Allows building and interacting in public areas while preserving private farm permissions. */
     public static final GameRules.Key<GameRules.BooleanValue> RULE_STARDEW_ALLOW_PUBLIC_BUILDING =
             GameRules.register("stardewAllowPublicBuilding", GameRules.Category.PLAYER,
                     GameRules.BooleanValue.create(false, (server, value) -> {

@@ -61,7 +61,7 @@ public final class SupplyCrateEffects {
                     ensureLevel(client);
                     double tick = client.getGameTime() + com.stardew.craft.port.net.minecraft.client.DeltaTracker.client().getGameTimeDeltaPartialTick(false);
                     double waterline = client.getFluidState(pos.below()).getHeight(client, pos.below()) - 1;
-                    if (BURSTS.size() >= 128) BURSTS.removeFirst();
+                    if (BURSTS.size() >= 128) com.stardew.craft.port.PortJava.removeFirst(BURSTS);
                     BURSTS.add(new Burst(state, pos.immutable(), tick, waterline, LevelRenderer.getLightColor(client, pos)));
                     return true;
                 }

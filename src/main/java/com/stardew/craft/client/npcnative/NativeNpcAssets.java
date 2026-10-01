@@ -150,7 +150,9 @@ public final class NativeNpcAssets implements ResourceManagerReloadListener {
             }
         }
         var action = com.stardew.craft.npc.animation.SamActivity.fromAnimation(id);
-        var required = "robin_construction".equals(id)
+        var required = "gil".equals(id)
+                ? java.util.Set.of("animation.gil.idle")
+                : "robin_construction".equals(id)
                 ? java.util.Set.of("animation.robin.construction", "animation.robin.construction_low")
                 : guitar && action!=null ? java.util.Set.of(action.playClip(),action.holdClip(),"animation.sam.idle")
                 : model.profile()!=null && !model.profile().visibleBlink()

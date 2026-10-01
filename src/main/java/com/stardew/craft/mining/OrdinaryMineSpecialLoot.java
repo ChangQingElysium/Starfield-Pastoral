@@ -24,7 +24,7 @@ public final class OrdinaryMineSpecialLoot {
         var layout=OrdinaryMineLayout.load(level,floor);var origin=layout.origin(floor);
         int x=pos.getX()-origin.getX()-layout.tileX,z=pos.getZ()-origin.getZ()-layout.tileZ;
         var random=StardewDeterministicRandom.createFromDoubles(floor,com.stardew.craft.time.StardewTimeManager.get().getAbsoluteDay(),x,z*9999.0,0);
-        String[] pool=POOLS[Math.clamp(floor/20,0,6)];String name=pool[random.nextInt(pool.length)];
+        String[] pool=POOLS[com.stardew.craft.port.PortJava.clamp(floor/20,0,6)];String name=pool[random.nextInt(pool.length)];
         var stack=new ItemStack(BuiltInRegistries.ITEM.get(new ResourceLocation("stardewcraft",name)));
         if(name.equals("holy_blade")) level.registryAccess().registryOrThrow(Registries.ENCHANTMENT)
                 .getHolder(com.stardew.craft.enchantment.StardewEnchantments.CRUSADER).ifPresent(e->com.stardew.craft.port.PortItemStacks.enchant(stack, e,1));

@@ -53,6 +53,22 @@ final class BlockbenchElementRenderer {
         render(modelLocation, poseStack, buffer, packedLight, packedOverlay, true, false, null);
     }
 
+    /** Sprite-only hats use Minecraft's normal HEAD item rendering until a dedicated element model exists. */
+    static void renderHat(com.stardew.craft.item.cosmetic.StardewHatItem hat, PoseStack pose, MultiBufferSource buffer,
+                          int light, int overlay) {
+        if (Minecraft.getInstance().getResourceManager().getResource(hat.getModelLocation()).isPresent()) {
+            renderHeadDisplay(hat.getModelLocation(), pose, buffer, light, overlay);
+            return;
+        }
+        pose.pushPose();
+        pose.translate(0, -0.25, 0);
+        pose.mulPose(Axis.YP.rotationDegrees(180));
+        pose.scale(0.625F, -0.625F, -0.625F);
+        Minecraft.getInstance().getItemRenderer().renderStatic(new net.minecraft.world.item.ItemStack(hat),
+                net.minecraft.world.item.ItemDisplayContext.HEAD, light, overlay, pose, buffer, Minecraft.getInstance().level, 0);
+        pose.popPose();
+    }
+
     static void renderHeadDisplay(ResourceLocation modelLocation, PoseStack poseStack, MultiBufferSource buffer,
                                   int packedLight, int packedOverlay) {
         Model model = CACHE.computeIfAbsent(modelLocation, BlockbenchElementRenderer::load).orElse(null);

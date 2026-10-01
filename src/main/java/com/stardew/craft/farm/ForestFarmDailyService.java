@@ -94,7 +94,7 @@ public final class ForestFarmDailyService {
             }
         }
         Collections.shuffle(weeds, new java.util.Random(level.getRandom().nextLong()));
-        int season = Math.clamp(StardewTimeManager.get().getCurrentSeason(), 0, 3);
+        int season = com.stardew.craft.port.PortJava.clamp(StardewTimeManager.get().getCurrentSeason(), 0, 3);
         int changed = 0;
         for (BlockPos pos : weeds.subList(0, Math.min(6, weeds.size()))) {
             BlockState state = level.getBlockState(pos);

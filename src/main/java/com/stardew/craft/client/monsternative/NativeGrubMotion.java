@@ -16,5 +16,5 @@ public final class NativeGrubMotion {
             low=Math.min(low,matrices[quad.bone()].transformPosition(point.set(v[0],v[1],v[2])).y);
         if(low<.4F)pose.addPosition("root",0,.4F-low,0);
     }
-    public static double smooth(double x) { x=Math.clamp(x,0,1);return x*x*(3-2*x); }
+    public static double smooth(double x) { x=com.stardew.craft.port.PortJava.clamp(x,0,1);return x*x*(3-2*x); }
 }

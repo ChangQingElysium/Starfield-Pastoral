@@ -11,7 +11,7 @@ public final class NativeGroundClip {
     private NativeGroundClip(){}
     public static List<Vertex> clip(List<Vertex> input,float floor){
         var out=new ArrayList<Vertex>(6);if(input.isEmpty())return out;
-        var previous=input.getLast();boolean wasInside=previous.y>=floor;
+        var previous=com.stardew.craft.port.PortJava.getLast(input);boolean wasInside=previous.y>=floor;
         for(var vertex:input){boolean inside=vertex.y>=floor;
             if(inside!=wasInside)out.add(previous.lerp(vertex,(floor-previous.y)/(vertex.y-previous.y)));
             if(inside)out.add(vertex);previous=vertex;wasInside=inside;

@@ -50,9 +50,9 @@ public final class PlazaDisplayBlock extends MapDecorStaticBlock implements Enti
         super(properties, "stardewcraft:block/plaza_display/spring/empty");
         registerDefaultState(defaultBlockState().setValue(CELL, 0));
     }
-    public static void updateClientSeason(int season) { clientSeason = Math.clamp(season, 0, 3); }
+    public static void updateClientSeason(int season) { clientSeason = com.stardew.craft.port.PortJava.clamp(season, 0, 3); }
     private static int season(BlockGetter level) {
-        return level instanceof ServerLevel ? Math.clamp(StardewTimeManager.get().getCurrentSeason(), 0, 3) : clientSeason;
+        return level instanceof ServerLevel ? com.stardew.craft.port.PortJava.clamp(StardewTimeManager.get().getCurrentSeason(), 0, 3) : clientSeason;
     }
     @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder); builder.add(CELL);

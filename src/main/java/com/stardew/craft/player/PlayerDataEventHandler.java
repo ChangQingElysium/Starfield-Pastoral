@@ -354,6 +354,7 @@ public class PlayerDataEventHandler {
 
             // Clean up any pending geode treasure (prevents memory leak + item loss)
             com.stardew.craft.shop.GeodeLootService.onPlayerLogout(player);
+            com.stardew.craft.shop.BlacksmithService.onLogout(player);
 
             // Clean up all combat tracker static maps (prevents memory leak)
             cleanupTransientCombat(player);

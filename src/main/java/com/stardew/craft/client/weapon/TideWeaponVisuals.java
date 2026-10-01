@@ -49,7 +49,7 @@ public final class TideWeaponVisuals {
         if (mc.level == null || mc.player == null || fade(mc.level.getGameTime() - p.tick(), p.duration()) <= 0
                 || Math.min(mc.player.distanceToSqr(p.from()), mc.player.distanceToSqr(p.to())) > 48 * 48
                 || BURSTS.stream().anyMatch(b -> b.event.equals(p))) return;
-        if (BURSTS.size() >= 48) BURSTS.removeFirst();
+        if (BURSTS.size() >= 48) com.stardew.craft.port.PortJava.removeFirst(BURSTS);
         List<Segment> boundary = new ArrayList<>();
         // The existing AOE is a box. Trace its actual square footprint instead of promising a circular range.
         if (p.phase() == Phase.ANCHOR && Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) {
@@ -88,7 +88,7 @@ public final class TideWeaponVisuals {
     }
     /** The moving glint indicates force direction, never predicts where the victim will end up. */
     static Vec3 reelPoint(Vec3 from, Vec3 to, double t) {
-        double p = Math.clamp(t, 0, 1);
+        double p = com.stardew.craft.port.PortJava.clamp(t, 0, 1);
         return from.lerp(to, p).add(0, -0.28 * Math.sin(p * Math.PI), 0);
     }
     @SubscribeEvent public static void tick(ClientTickEvent.Post event) {

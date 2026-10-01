@@ -88,8 +88,8 @@ public final class FarmTwigGameTests {
                 h.assertTrue(player.gameMode.destroyBlock(pos) && level.isEmptyBlock(pos), "Axe failed to clear twig");
                 h.assertTrue(data.getEnergy() == 98 && data.getSkillExperience(SkillType.FORAGING) == xp + 1, "Incorrect energy or foraging experience");
                 var drops = level.getEntitiesOfClass(ItemEntity.class, new AABB(pos).inflate(2));
-                h.assertTrue(drops.size() == 1 && drops.getFirst().getItem().is(ModItems.WOOD_NORMAL.get())
-                        && drops.getFirst().getItem().getCount() == 1, "Twig must yield exactly one wood");
+                h.assertTrue(drops.size() == 1 && com.stardew.craft.port.PortJava.getFirst(drops).getItem().is(ModItems.WOOD_NORMAL.get())
+                        && com.stardew.craft.port.PortJava.getFirst(drops).getItem().getCount() == 1, "Twig must yield exactly one wood");
                 player.gameMode.destroyBlock(pos);
                 h.assertTrue(data.getEnergy() == 98 && data.getSkillExperience(SkillType.FORAGING) == xp + 1, "Repeated destruction settled again");
                 h.assertTrue(level.getBlockState(pos.below()).is(Blocks.DIRT), "Clearing changed soil");

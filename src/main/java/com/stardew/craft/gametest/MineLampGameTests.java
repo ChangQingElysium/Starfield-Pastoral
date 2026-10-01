@@ -55,7 +55,7 @@ public final class MineLampGameTests {
             var saved=entity.saveWithFullMetadata();
             helper.assertTrue(BlockEntity.loadStatic(pos,state,saved) instanceof MineLampBlockEntity,"Light source lost after loading");
             var drops=Block.getDrops(state,level,pos,entity);
-            helper.assertTrue(drops.size()==1 && MineLampItem.theme(drops.getFirst())==theme,"Loot lost theme");
+            helper.assertTrue(drops.size()==1 && MineLampItem.theme(com.stardew.craft.port.PortJava.getFirst(drops))==theme,"Loot lost theme");
             level.setBlock(pos,state.setValue(MineLampBlock.LIT,false),3);
             helper.assertTrue(level.getBlockState(pos).getLightEmission(level,pos)==0 && level.getBlockEntity(pos)==entity,"Toggle left light on or recreated source identity");
         }

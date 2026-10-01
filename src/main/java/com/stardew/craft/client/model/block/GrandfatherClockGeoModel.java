@@ -3,9 +3,9 @@ package com.stardew.craft.client.model.block;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.blockentity.GrandfatherClockBlockEntity;
 import net.minecraft.resources.ResourceLocation;
-import software.bernie.geckolib.model.GeoModel;
+import com.stardew.craft.client.model.nativebb.BlockbenchModel;
 
-public class GrandfatherClockGeoModel extends GeoModel<GrandfatherClockBlockEntity> {
+public class GrandfatherClockGeoModel extends BlockbenchModel<GrandfatherClockBlockEntity> {
     private static final ResourceLocation MODEL = new ResourceLocation(StardewCraft.MODID, "geo/block/decor/grandfather_clock.geo.json");
     private static final ResourceLocation TEXTURE = new ResourceLocation(StardewCraft.MODID, "textures/block/deco/misc/common/grandfather_clock.png");
     private static final ResourceLocation ANIMATION = new ResourceLocation(StardewCraft.MODID, "animations/block/decor/grandfather_clock.animation.json");

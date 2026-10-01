@@ -58,7 +58,7 @@ public final class PetGameTests {
             first.getInventory().clearContent(); second.getInventory().clearContent();
             PetService.selectInitial(first, farm, "stardewcraft:cat0", "Mochi"); PetService.selectInitial(first, farm, "stardewcraft:dog0", "Duplicate");
             h.assertTrue(data.forFarm(farm.getInstanceId()).size() == 1, "Duplicate questionnaire created two pets");
-            var pet = data.forFarm(farm.getInstanceId()).getFirst(); var entity = ModEntities.PET.get().create(level); entity.setUUID(pet.id); entity.refresh(pet);
+            var pet = com.stardew.craft.port.PortJava.getFirst(data.forFarm(farm.getInstanceId())); var entity = ModEntities.PET.get().create(level); entity.setUUID(pet.id); entity.refresh(pet);
             PetService.interact(first, entity); PetService.interact(first, entity); PetService.interact(second, entity);
             h.assertTrue(pet.friendship == 12 && pet.timesPet == 1 && pet.petted.size() == 2, "Multiplayer granted daily friendship twice");
             var bowl = new BlockPos(2, 2, 2); data.bowl(new PetWorldData.Bowl(pet.farm, bowl, "wood", clock.getAbsoluteDay()));
@@ -129,7 +129,7 @@ public final class PetGameTests {
             h.assertTrue(level.getEntitiesOfClass(ItemEntity.class, entity.getBoundingBox().inflate(4)).isEmpty(), "Pet gifted before full friendship");
             pet.friendship = 1000; PetGifts.give(FakePlayerFactory.get(level, new GameProfile(UUID.randomUUID(), "GiftTester2")), entity, pet);
             var gifts = level.getEntitiesOfClass(ItemEntity.class, entity.getBoundingBox().inflate(4));
-            h.assertTrue(gifts.size() == 1 && !gifts.getFirst().getItem().isEmpty(), "Full-friendship pet gift did not spawn exactly one item stack");
+            h.assertTrue(gifts.size() == 1 && !com.stardew.craft.port.PortJava.getFirst(gifts).getItem().isEmpty(), "Full-friendship pet gift did not spawn exactly one item stack");
             gifts.forEach(ItemEntity::discard); h.succeed();
         } finally { clock.setCurrentDay(originalDay); entity.discard(); }
     }
@@ -174,7 +174,7 @@ public final class PetGameTests {
             PetManagement.submit(player, purchase); PetManagement.submit(player, purchase);
             var pets = data.forFarm(farm.getInstanceId());
             h.assertTrue(pets.size() == 1 && com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player) == 60000, "Purchase replay spent money or created another pet");
-            var pet = pets.getFirst();
+            var pet = com.stardew.craft.port.PortJava.getFirst(pets);
             h.assertTrue(pet.variant == PetVariant.DOG2 && pet.name.equals("豆包") && pet.bowl == null, "No-bowl adoption was blocked or assigned a nonexistent bowl");
             var bowl = farm.getOrigin().offset(4, 4, 4);
             data.bowl(new PetWorldData.Bowl(farm.getInstanceId(), bowl, "wood", -1));

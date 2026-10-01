@@ -124,7 +124,7 @@ public final class NativeNpcCloth {
         inverse.set(transforms[bone]).invert();clear(legs);clear(otherLeg);
         relative.set(inverse).mul(transforms[control]);relative.transformPosition(motion.set(0,0,0));
         // Optional activity-authored fold: preserve row order and solve contacts at lifted heights.
-        hemLift=settings.supportLift()?Math.clamp(motion.y,0,(settings.anchorY()-settings.hemY())*.49F):0;
+        hemLift=settings.supportLift()?com.stardew.craft.port.PortJava.clamp(motion.y,0,(settings.anchorY()-settings.hemY())*.49F):0;
         float blend=settings.contactBlend()==null?0:settings.contactBlend();
         for(var q:model.quads())if(legSide[q.bone()]!=0) {
             relative.set(inverse).mul(transforms[q.bone()]);

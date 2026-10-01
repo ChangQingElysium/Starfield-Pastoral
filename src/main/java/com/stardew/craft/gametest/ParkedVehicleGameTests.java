@@ -76,7 +76,7 @@ public final class ParkedVehicleGameTests {
                 helper.assertTrue(cells(helper, block, origin) == 0 && level.getBlockEntity(origin) == null, "Removal left vehicle fragments");
                 helper.assertTrue(cells(helper, block, neighbor) == expected, "Removal damaged adjacent vehicle");
                 var drops = level.getEntitiesOfClass(ItemEntity.class, new AABB(origin).inflate(12));
-                helper.assertTrue(drops.stream().mapToInt(e -> e.getItem().getCount()).sum() == 1 && drops.getFirst().getItem().is(block.asItem()), "Expected one whole vehicle item");
+                helper.assertTrue(drops.stream().mapToInt(e -> e.getItem().getCount()).sum() == 1 && com.stardew.craft.port.PortJava.getFirst(drops).getItem().is(block.asItem()), "Expected one whole vehicle item");
                 ParkedVehicleBlock.runWithDropsSuppressed(() -> level.removeBlock(neighbor, false));
             }
         }

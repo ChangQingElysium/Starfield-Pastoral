@@ -36,7 +36,7 @@ public final class GardenPlanterBlock extends Block {
         registerDefaultState(state);
     }
 
-    // PORT(1.20.1): NeoForge TriState TRUE -> true; DEFAULT -> Forge's default soil rules (plant's mayPlaceOn first).
+    // PORT(1.20.1): MinecraftForge TriState TRUE -> true; DEFAULT -> Forge's default soil rules (plant's mayPlaceOn first).
     @Override
     public boolean canSustainPlant(BlockState state, BlockGetter level,
             BlockPos soilPosition, Direction facing, net.minecraftforge.common.IPlantable plant) {

@@ -246,7 +246,7 @@ public final class ForageSpawnService {
             roll -= rect.weight();
             if (roll < 0) return rect;
         }
-        return rects.getLast();
+        return com.stardew.craft.port.PortJava.getLast(rects);
     }
 
     /**

@@ -5,7 +5,7 @@ public final class RockGolemAwakening {
     private boolean seen,walking,focused;private int frame=16;private float timer;
     public boolean seen(){return seen;}public boolean walking(){return walking;}public boolean focused(){return focused;}
     public boolean awake(){return seen&&frame<16;}
-    public double progress(){return awake()?1:Math.clamp((frame-16+timer/75.)/8,0,1);}
+    public double progress(){return awake()?1:com.stardew.craft.port.PortJava.clamp((frame-16+timer/75.)/8,0,1);}
     public boolean step(boolean within){
         if(!seen){if(within){seen=true;return true;}frame=16;}
         else if(frame>=16){timer+=1000F/60;if(timer>75){timer=0;if(++frame>=24){frame=0;walking=true;}}}

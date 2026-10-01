@@ -276,7 +276,7 @@ public final class DailyQuestGenerator {
                     StardewItemQueryContext.forPlayer(player, rng)
             ).result();
             if (stacks.isPresent() && !stacks.get().isEmpty()) {
-                return BuiltInRegistries.ITEM.getKey(stacks.get().getFirst().getItem()).toString();
+                return BuiltInRegistries.ITEM.getKey(com.stardew.craft.port.PortJava.getFirst(stacks.get()).getItem()).toString();
             }
         }
         return candidates.get(rng.nextInt(candidates.size())).toString();

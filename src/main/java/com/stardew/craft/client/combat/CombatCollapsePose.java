@@ -45,7 +45,7 @@ public final class CombatCollapsePose {
         return blend(RISE,STANDING,(ticks-37)/7);
     }
     private static Frame blend(Frame a,Frame b,float t) {
-        t=Math.clamp(t,0,1); return a.mix(b,t*t*(3-2*t));
+        t=com.stardew.craft.port.PortJava.clamp(t,0,1); return a.mix(b,t*t*(3-2*t));
     }
     private static float lerp(float a,float b,float t) { return a+(b-a)*t; }
 }

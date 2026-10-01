@@ -48,12 +48,12 @@ public final class ReclamationMachineAnimation {
         List<Key> keys = clip.tracks().get(bone + "/" + channel);
         if (keys == null) return new Vector3f(channel.equals("scale") ? 1 : 0);
         double time = clip.loop() ? ((seconds % clip.length()) + clip.length()) % clip.length()
-                : Math.clamp(seconds, 0, clip.length());
-        if (time <= keys.getFirst().time()) return new Vector3f(keys.getFirst().value());
+                : com.stardew.craft.port.PortJava.clamp(seconds, 0, clip.length());
+        if (time <= com.stardew.craft.port.PortJava.getFirst(keys).time()) return new Vector3f(com.stardew.craft.port.PortJava.getFirst(keys).value());
         for (int i = 1; i < keys.size(); i++) {
             Key a = keys.get(i - 1), b = keys.get(i);
             if (time <= b.time()) return new Vector3f(a.value()).lerp(b.value(), (float) ((time - a.time()) / (b.time() - a.time())));
         }
-        return new Vector3f(keys.getLast().value());
+        return new Vector3f(com.stardew.craft.port.PortJava.getLast(keys).value());
     }
 }

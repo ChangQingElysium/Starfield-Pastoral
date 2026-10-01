@@ -107,7 +107,7 @@ public final class NpcScheduleAuditService {
                 actor.maxInstances = Math.max(actor.maxInstances, entities.size());
                 NpcRuntimeState state = states.get(id);
                 if (entities.isEmpty()) { actor.absentSamples++; return; }
-                StardewNpcEntity npc = entities.getFirst();
+                StardewNpcEntity npc = com.stardew.craft.port.PortJava.getFirst(entities);
                 actor.samples++;
                 actor.dimension = npc.level().dimension().location().toString();
                 var snapshot = NpcCentralMovementService.getDebugSnapshot(id);

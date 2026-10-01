@@ -9,13 +9,13 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.client.event.EntityRenderersEvent;
-import software.bernie.geckolib.model.GeoModel;
-import software.bernie.geckolib.renderer.GeoEntityRenderer;
+import com.stardew.craft.client.model.nativebb.BlockbenchModel;
+import com.stardew.craft.client.model.nativebb.BlockbenchEntityRenderer;
 
 @EventBusSubscriber(modid = StardewCraft.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-public final class LivestockRenderer extends GeoEntityRenderer<LivestockEntity> {
+public final class LivestockRenderer extends BlockbenchEntityRenderer<LivestockEntity> {
     public LivestockRenderer(EntityRendererProvider.Context context) {
-        super(context, new GeoModel<>() {
+        super(context, new BlockbenchModel<>() {
             @Override public ResourceLocation getModelResource(LivestockEntity e) { return new ResourceLocation("stardewcraft", e.asset().modelPath(e.isBaby())); }
             @Override public ResourceLocation getTextureResource(LivestockEntity e) { return new ResourceLocation("stardewcraft", e.asset().texturePath(e.isBaby())); }
             @Override public ResourceLocation getAnimationResource(LivestockEntity e) { return new ResourceLocation("stardewcraft", e.asset().animationPath(e.isBaby())); }

@@ -92,7 +92,7 @@ public final class GardenPlanterModels {
             for(var part:seasons.get(TerrainSeasonTextures.currentTextureSet()))out.addAll(part.getQuads(state,side,random,data,type));
             return out;
         }
-        @Override public TextureAtlasSprite getParticleIcon(){return seasons.get(TerrainSeasonTextures.currentTextureSet()).getFirst().getParticleIcon();}
+        @Override public TextureAtlasSprite getParticleIcon(){return com.stardew.craft.port.PortJava.getFirst(seasons.get(TerrainSeasonTextures.currentTextureSet())).getParticleIcon();}
         @Override public TextureAtlasSprite getParticleIcon(ModelData data){return getParticleIcon();}
         @Override public BakedModel applyTransform(ItemDisplayContext context,PoseStack pose,boolean left){getTransforms().getTransform(context).apply(left,pose);return this;}
         @Override public List<BakedModel> getRenderPasses(ItemStack stack,boolean fabulous){return List.of(this);}

@@ -19,7 +19,7 @@ public final class TideMarkClientState {
     }
     public static java.util.Set<Integer> markedEntityIds() { ensureLevel(); return java.util.Set.copyOf(MARKS.keySet()); }
     public static float getRemainingRatio(int id, long tick) {
-        return Math.clamp((MARKS.getOrDefault(id, tick) - tick) / 100f, 0, 1);
+        return com.stardew.craft.port.PortJava.clamp((MARKS.getOrDefault(id, tick) - tick) / 100f, 0, 1);
     }
 
     public static void apply(int entityId, int durationTicks) {

@@ -137,7 +137,7 @@ public record OpenAnimalPurchaseScreenPayload(
         }
         if (payload.incubatorMode() && !payload.animalOptions().isEmpty()) {
             minecraft.setScreen(new com.stardew.craft.client.gui.AnimalPurchaseBuildingScreen(
-                payload, payload.animalOptions().getFirst()));
+                payload, com.stardew.craft.port.PortJava.getFirst(payload.animalOptions())));
         } else {
             minecraft.setScreen(new com.stardew.craft.client.gui.AnimalPurchaseScreen(payload));
         }

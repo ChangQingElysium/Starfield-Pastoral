@@ -518,6 +518,24 @@ public class ModItems {
                         () -> new StardewBlockItem(ModBlocks.TEAL_PAINTED_TIMBER.get(), "stardewcraft.type.building", -1, new Item.Properties().stacksTo(999)));
         public static final DeferredItem<Item> BLUE_GLASS_DOOR = ITEMS.register("blue_glass_door",
                         () -> new StardewBlockItem(ModBlocks.BLUE_GLASS_DOOR.get(), "stardewcraft.type.building", -1, new Item.Properties().stacksTo(999)));
+        public static final DeferredItem<Item> GRAY_METAL_SIDING = ITEMS.register("gray_metal_siding",
+                        () -> new StardewBlockItem(ModBlocks.GRAY_METAL_SIDING.get(), "stardewcraft.type.building", -1, new Item.Properties().stacksTo(999)));
+        public static final DeferredItem<Item> GRAY_BROWN_BRICKS = ITEMS.register("gray_brown_bricks",
+                        () -> new StardewBlockItem(ModBlocks.GRAY_BROWN_BRICKS.get(), "stardewcraft.type.building", -1, new Item.Properties().stacksTo(999)));
+        public static final DeferredItem<Item> CHESTNUT_ROOF_TILES = ITEMS.register("chestnut_roof_tiles",
+                        () -> new StardewBlockItem(ModBlocks.CHESTNUT_ROOF_TILES.get(), "stardewcraft.type.building", -1, new Item.Properties().stacksTo(999)));
+        public static final DeferredItem<Item> FOREST_GREEN_SIDING = ITEMS.register("forest_green_siding",
+                        () -> new StardewBlockItem(ModBlocks.FOREST_GREEN_SIDING.get(), "stardewcraft.type.building", -1, new Item.Properties().stacksTo(999)));
+        public static final DeferredItem<Item> BLACKSMITH_DOOR = ITEMS.register("blacksmith_door",
+                        () -> new StardewBlockItem(ModBlocks.BLACKSMITH_DOOR.get(), "stardewcraft.type.building", -1, new Item.Properties().stacksTo(999)));
+        public static final DeferredItem<Item> PURPLE_PANEL_DOOR = ITEMS.register("purple_panel_door",
+                        () -> new StardewBlockItem(ModBlocks.PURPLE_PANEL_DOOR.get(), "stardewcraft.type.building", -1, new Item.Properties().stacksTo(999)));
+        public static final DeferredItem<Item> LIBRARY_BOOK_SIGN = ITEMS.register("library_book_sign",
+                        () -> new StardewBlockItem(ModBlocks.LIBRARY_BOOK_SIGN.get(), "stardewcraft.type.building", -1, new Item.Properties().stacksTo(999)));
+        public static final DeferredItem<Item> WALL_MAGNIFYING_GLASS = ITEMS.register("wall_magnifying_glass",
+                        () -> new StardewBlockItem(ModBlocks.WALL_MAGNIFYING_GLASS.get(), "stardewcraft.type.building", -1, new Item.Properties().stacksTo(999)));
+        public static final DeferredItem<Item> TIMBER_AWNING = ITEMS.register("timber_awning",
+                        () -> new StardewBlockItem(ModBlocks.TIMBER_AWNING.get(), "stardewcraft.type.building", -1, new Item.Properties().stacksTo(999)));
         public static final DeferredItem<Item> CREAM_SIDING = ITEMS.register("cream_siding",
                         () -> new StardewBlockItem(ModBlocks.CREAM_SIDING.get(), "stardewcraft.type.building", -1, new Item.Properties().stacksTo(999)));
         public static final DeferredItem<Item> TERRACOTTA_ROOF_TILES = ITEMS.register("terracotta_roof_tiles",
@@ -528,8 +546,15 @@ public class ModItems {
                         () -> new StardewBlockItem(ModBlocks.IVORY_SIDING.get(), "stardewcraft.type.building", -1, new Item.Properties().stacksTo(999)));
         public static final DeferredItem<Item> BROWN_GLASS_DOOR = ITEMS.register("brown_glass_door",
                         () -> new StardewBlockItem(ModBlocks.BROWN_GLASS_DOOR.get(), "stardewcraft.type.building", -1, new Item.Properties().stacksTo(999)));
+
+        public static final DeferredItem<Item> RED_BROWN_DOOR = ITEMS.register("red_brown_door",
+                        () -> new StardewBlockItem(ModBlocks.RED_BROWN_DOOR.get(), "stardewcraft.type.building", -1, new Item.Properties().stacksTo(999)));
         public static final DeferredItem<Item> PIERRE_SIGN = ITEMS.register("pierre_sign",
                         () -> new StardewBlockItem(ModBlocks.PIERRE_SIGN.get(), "stardewcraft.type.building", -1, new Item.Properties().stacksTo(999)));
+        public static final DeferredItem<Item> SALOON_SIGN = ITEMS.register("saloon_sign",
+                        () -> new StardewBlockItem(ModBlocks.SALOON_SIGN.get(), "stardewcraft.type.building", -1, new Item.Properties().stacksTo(999)));
+        public static final DeferredItem<Item> FOOD_SPIRITS_SIGN = ITEMS.register("food_spirits_sign",
+                        () -> new StardewBlockItem(ModBlocks.FOOD_SPIRITS_SIGN.get(), "stardewcraft.type.building", -1, new Item.Properties().stacksTo(999)));
         public static final DeferredItem<Item> CLINIC_SIGN = ITEMS.register("clinic_sign",
                         () -> new StardewBlockItem(ModBlocks.CLINIC_SIGN.get(), "stardewcraft.type.building", -1, new Item.Properties().stacksTo(999)));
         public static final DeferredItem<Item> SHIP_WHEEL_ORNAMENT = ITEMS.register("ship_wheel_ornament",
@@ -3044,22 +3069,22 @@ public class ModItems {
 
     // 鏉傞」 - 铇戣弴
     public static final DeferredItem<Item> COMMON_MUSHROOM = ITEMS.register("common_mushroom",
-            () -> new StardewQualityItem("stardewcraft.type.misc", 40, 15, false, new Item.Properties().stacksTo(999)));
+            () -> new StardewQualityItem("stardewcraft.type.misc", 40, 15, true, new Item.Properties().stacksTo(999)));
 
     public static final DeferredItem<Item> RED_MUSHROOM = ITEMS.register("red_mushroom",
-            () -> new StardewQualityItem("stardewcraft.type.misc", 75, -20, false, new Item.Properties().stacksTo(999)));
+            () -> new StardewQualityItem("stardewcraft.type.misc", 75, -20, true, new Item.Properties().stacksTo(999)));
 
     public static final DeferredItem<Item> PURPLE_MUSHROOM = ITEMS.register("purple_mushroom",
-            () -> new StardewQualityItem("stardewcraft.type.misc", 250, 50, false, new Item.Properties().stacksTo(999)));
+            () -> new StardewQualityItem("stardewcraft.type.misc", 250, 50, true, new Item.Properties().stacksTo(999)));
 
     public static final DeferredItem<Item> MOREL = ITEMS.register("morel",
-            () -> new StardewQualityItem("stardewcraft.type.misc", 150, 8, false, new Item.Properties().stacksTo(999)));
+            () -> new StardewQualityItem("stardewcraft.type.misc", 150, 8, true, new Item.Properties().stacksTo(999)));
 
     public static final DeferredItem<Item> CHANTERELLE = ITEMS.register("chanterelle",
-            () -> new StardewQualityItem("stardewcraft.type.misc", 160, 30, false, new Item.Properties().stacksTo(999)));
+            () -> new StardewQualityItem("stardewcraft.type.misc", 160, 30, true, new Item.Properties().stacksTo(999)));
 
     public static final DeferredItem<Item> MAGMA_CAP = ITEMS.register("magma_cap",
-            () -> new StardewQualityItem("stardewcraft.type.misc", 400, 70, false, new Item.Properties().stacksTo(999)));
+            () -> new StardewQualityItem("stardewcraft.type.misc", 400, 70, true, new Item.Properties().stacksTo(999)));
 
     public static final DeferredItem<Item> SEA_JELLY = ITEMS.register("sea_jelly",
             () -> new SeaJellyItem(new Item.Properties().stacksTo(999)));
@@ -3352,6 +3377,8 @@ public class ModItems {
             () -> new StardewBlockItem(com.stardew.craft.block.ModBlocks.TRAIN_PHOTO.get(), "stardewcraft.type.furniture", -1, new Item.Properties().stacksTo(999)));
     public static final DeferredItem<Item> WALL_PHOTO_1 = ITEMS.register("wall_photo_1",
             () -> new StardewBlockItem(com.stardew.craft.block.ModBlocks.WALL_PHOTO_1.get(), "stardewcraft.type.furniture", -1, new Item.Properties().stacksTo(999)));
+    public static final DeferredItem<Item> GUILD_MONSTER_BOARD = ITEMS.register("guild_monster_board",
+            () -> new StardewBlockItem(ModBlocks.GUILD_MONSTER_BOARD.get(), "stardewcraft.type.furniture", -1, new Item.Properties().stacksTo(999)));
     public static final DeferredItem<Item> PAPER_CHECKLIST = ITEMS.register("paper_checklist",
             () -> new StardewBlockItem(com.stardew.craft.block.ModBlocks.PAPER_CHECKLIST.get(), "stardewcraft.type.furniture", -1, new Item.Properties().stacksTo(999)));
     public static final DeferredItem<Item> SINE_WAVE_POSTER = ITEMS.register("sine_wave_poster",
@@ -3559,6 +3586,11 @@ public class ModItems {
     public static final DeferredItem<Item> RED_COWBOY_HAT = registerHat("red_cowboy_hat", "38");
     public static final DeferredItem<Item> DARK_COWBOY_HAT = registerHat("dark_cowboy_hat", "83");
     public static final DeferredItem<Item> MAGIC_COWBOY_HAT = registerHat("magic_cowboy_hat", "73");
+
+    public static final DeferredItem<Item> SKELETON_MASK = registerHat("skeleton_mask", "8");
+    public static final DeferredItem<Item> HARD_HAT = registerHat("hard_hat", "27");
+    public static final DeferredItem<Item> ARCANE_HAT = registerHat("arcane_hat", "60");
+    public static final DeferredItem<Item> KNIGHTS_HELMET = registerHat("knights_helmet", "50");
 
     // ============ 靴子 (Boots) ============
     public static final DeferredItem<Item> SNEAKERS = ITEMS.register("sneakers",

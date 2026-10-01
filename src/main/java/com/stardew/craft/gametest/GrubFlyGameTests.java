@@ -62,7 +62,7 @@ public final class GrubFlyGameTests {
             for(var channel:MonsterState.Settlement.values())h.assertTrue(!grub.claimSettlement(channel),"Transformation allowed reward channel "+channel);
             var flies=level.getEntitiesOfClass(MineFlyEntity.class,grub.getBoundingBox().inflate(20));
             h.assertTrue(flies.size()==1,"Expected exactly one native fly, got "+flies.size());
-            var fly=flies.getFirst();h.assertTrue(fly.monsterState().context().equals(grub.monsterState().context().offspring()),"Lost floor context");
+            var fly=com.stardew.craft.port.PortJava.getFirst(flies);h.assertTrue(fly.monsterState().context().equals(grub.monsterState().context().offspring()),"Lost floor context");
             h.assertTrue(fly.getHealth()==22,"Wrong base Fly health");
             h.assertTrue(level.getEntitiesOfClass(ItemEntity.class,grub.getBoundingBox().inflate(6)).isEmpty(),"Metamorphosis dropped loot");
             h.assertTrue(level.getEntitiesOfClass(ExperienceOrb.class,grub.getBoundingBox().inflate(6)).isEmpty(),"Metamorphosis dropped XP");

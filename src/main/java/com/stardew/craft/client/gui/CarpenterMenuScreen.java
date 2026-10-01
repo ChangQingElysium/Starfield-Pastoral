@@ -50,8 +50,8 @@ public class CarpenterMenuScreen extends FarmFolioScreen {
     @Override protected int maximumTitleWidth() { return 212; }
     @Override protected void layout() {
         var rows=entries();int count=3;
-        page=Math.clamp(page,0,Math.max(0,(rows.size()-1)/count));
-        selected=Math.clamp(selected,page*count,Math.max(page*count,Math.min(rows.size()-1,(page+1)*count-1)));
+        page=com.stardew.craft.port.PortJava.clamp(page,0,Math.max(0,(rows.size()-1)/count));
+        selected=com.stardew.craft.port.PortJava.clamp(selected,page*count,Math.max(page*count,Math.min(rows.size()-1,(page+1)*count-1)));
         button(ui("new_building"),x+236,y+8,76,26,upgrades?"tab":"packet_selected",null,
                 ()->{upgrades=false;selected=page=materialsPage=0;init();}).active=!pending;
         if(blueprints.stream().anyMatch(CarpenterBlueprint::isUpgrade))
@@ -69,7 +69,7 @@ public class CarpenterMenuScreen extends FarmFolioScreen {
         button(Component.translatable("gui.back"),x+16,y+h-34,68,24,this::onClose);
         if(rows.isEmpty())return;
         var bp=rows.get(selected);var materials=FarmMaterialCosts.combined(bp.materials());
-        materialsPage=Math.clamp(materialsPage,0,Math.max(0,(materials.size()-1)/2));
+        materialsPage=com.stardew.craft.port.PortJava.clamp(materialsPage,0,Math.max(0,(materials.size()-1)/2));
         if(materials.size()>2) {
             arrow(false,x+326,y+276,materialsPage>0,()->{materialsPage--;init();});
             arrow(true,x+w-40,y+276,(materialsPage+1)*2<materials.size(),()->{materialsPage++;init();});

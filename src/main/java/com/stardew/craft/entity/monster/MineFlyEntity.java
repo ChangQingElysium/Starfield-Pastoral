@@ -60,7 +60,7 @@ public final class MineFlyEntity extends StardewMonsterEntity {
             steering.advance(i==2?18:16,waypoint==null?null:waypoint.subtract(position()),target!=null,!sourceHitRecoveryActive());
             if(emerging){
                 // Newly emerged flies rise continuously out of the cocoon, stopping below low ceilings.
-                double lift=.04+(FLIGHT_LIFT-.04)*Math.clamp(1-steering.spawnRemaining()/1000.,0,1);
+                double lift=.04+(FLIGHT_LIFT-.04)*com.stardew.craft.port.PortJava.clamp(1-steering.spawnRemaining()/1000.,0,1);
                 Vec3 delta=new Vec3(0,Math.max(0,lift-flightLift),0);
                 var wall=MonsterSpace.blocks(this,getBoundingBox().inflate(.025),delta);
                 move(MoverType.SELF,delta.scale(wall==null?1:Math.max(0,wall.fraction()-1e-5)));flightLift=lift;

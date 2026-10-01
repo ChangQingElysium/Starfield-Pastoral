@@ -84,6 +84,17 @@ public final class DesertConstants {
     public static final int DESERT_BBOX_MAX_Z = -113;
 
     /** 判断给定 XZ 坐标是否在沙漠包围盒内（不考虑 Y）。 */
+    public static boolean isInDesertRegion(net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dimension,
+                                           BlockPos pos) {
+        return com.stardew.craft.core.ModDimensions.STARDEW_VALLEY.equals(dimension) && isInDesertRegion(pos);
+    }
+
+    /** Retained solely to recognize and remove old saved bus triggers. */
+    public static boolean isLegacyBusTarget(String target) {
+        return "desert_bus".equals(target) || "desert_bus_return".equals(target)
+                || TAG_BUS_PORTAL_TARGET.equals(target) || TAG_BUS_RETURN_PORTAL_TARGET.equals(target);
+    }
+
     public static boolean isInDesertRegion(int x, int z) {
         return x >= DESERT_BBOX_MIN_X && x <= DESERT_BBOX_MAX_X
                 && z >= DESERT_BBOX_MIN_Z && z <= DESERT_BBOX_MAX_Z;

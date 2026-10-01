@@ -1,5 +1,7 @@
 package com.stardew.craft.entity.npc;
 
+import com.stardew.craft.model.AnimatedModel;
+import com.stardew.craft.model.ModelAnimation;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -7,15 +9,9 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
-import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.core.animation.AnimatableManager;
-import software.bernie.geckolib.core.animation.AnimationController;
-import software.bernie.geckolib.core.animation.RawAnimation;
-import software.bernie.geckolib.util.GeckoLibUtil;
 
 /**
- * 沙漠骆驼商人占位实体（GeckoLib 渲染）。
+ * 沙漠骆驼商人占位实体（Native model animation 渲染）。
  * <ul>
  *   <li>固定位置、无 AI、不可受伤、不可消失。逻辑全部由 {@code CamelMerchantEvents} 管理。</li>
  *   <li>右键交互拦截在 {@code CamelMerchantEvents}，直接打开 ShopRegistry "DesertTrade"。</li>
@@ -23,11 +19,7 @@ import software.bernie.geckolib.util.GeckoLibUtil;
  * </ul>
  */
 @SuppressWarnings("null")
-public class CamelMerchantEntity extends PathfinderMob implements GeoEntity {
-
-    private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("idle");
-
-    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
+public class CamelMerchantEntity extends PathfinderMob implements AnimatedModel {
 
     public CamelMerchantEntity(EntityType<? extends PathfinderMob> entityType, Level level) {
         super(entityType, level);
@@ -74,16 +66,13 @@ public class CamelMerchantEntity extends PathfinderMob implements GeoEntity {
         return false;
     }
 
-    // ── GeckoLib ────────────────────────────────────────────
+    // ── Native model animation ────────────────────────────────────────────
 
     @Override
-    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main", 0,
-                state -> state.setAndContinue(IDLE)));
+    public ModelAnimation modelAnimation(boolean moving, float partialTick) {
+        return ModelAnimation.loop("idle");
     }
 
-    @Override
-    public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return this.cache;
-    }
+    @Override public int modelTransitionTicks() { return 0; }
+
 }

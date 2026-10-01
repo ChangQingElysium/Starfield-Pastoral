@@ -60,7 +60,7 @@ final class ParkFountainWaterTexture {
     }
 
     private static int rgba(int r, int g, int b, int a) {
-        return Math.clamp(r, 0, 255) | Math.clamp(g, 0, 255) << 8 | Math.clamp(b, 0, 255) << 16 | a << 24;
+        return com.stardew.craft.port.PortJava.clamp(r, 0, 255) | com.stardew.craft.port.PortJava.clamp(g, 0, 255) << 8 | com.stardew.craft.port.PortJava.clamp(b, 0, 255) << 16 | a << 24;
     }
 
     private static void reload() {

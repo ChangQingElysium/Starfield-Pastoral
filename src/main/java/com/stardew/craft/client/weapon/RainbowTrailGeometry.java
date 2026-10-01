@@ -66,7 +66,7 @@ public final class RainbowTrailGeometry {
     }
     private static List<Sample> smooth(List<Sample> points) {
         var result = new java.util.ArrayList<Sample>();
-        result.add(points.getFirst());
+        result.add(com.stardew.craft.port.PortJava.getFirst(points));
         for (int i = 0; i < points.size() - 1; i++) {
             Sample a = points.get(i), b = points.get(i + 1);
             Vec3 before = points.get(Math.max(0, i - 1)).position, after = points.get(Math.min(points.size() - 1, i + 2)).position;
@@ -84,9 +84,9 @@ public final class RainbowTrailGeometry {
                     Vec3 m0 = b.position.subtract(before).scale(0.5), m1 = after.subtract(a.position).scale(0.5);
                     p = a.position.scale(2 * t3 - 3 * t2 + 1).add(m0.scale(t3 - 2 * t2 + t))
                             .add(b.position.scale(-2 * t3 + 3 * t2)).add(m1.scale(t3 - t2));
-                    p = new Vec3(Math.clamp(p.x, Math.min(a.position.x, b.position.x), Math.max(a.position.x, b.position.x)),
-                            Math.clamp(p.y, Math.min(a.position.y, b.position.y), Math.max(a.position.y, b.position.y)),
-                            Math.clamp(p.z, Math.min(a.position.z, b.position.z), Math.max(a.position.z, b.position.z)));
+                    p = new Vec3(com.stardew.craft.port.PortJava.clamp(p.x, Math.min(a.position.x, b.position.x), Math.max(a.position.x, b.position.x)),
+                            com.stardew.craft.port.PortJava.clamp(p.y, Math.min(a.position.y, b.position.y), Math.max(a.position.y, b.position.y)),
+                            com.stardew.craft.port.PortJava.clamp(p.z, Math.min(a.position.z, b.position.z), Math.max(a.position.z, b.position.z)));
                 }
                 result.add(new Sample(p, (float) (a.age + (b.age - a.age) * t)));
             }

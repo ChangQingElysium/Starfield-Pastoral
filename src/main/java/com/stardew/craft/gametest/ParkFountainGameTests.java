@@ -97,7 +97,7 @@ public final class ParkFountainGameTests {
             helper.assertTrue(cells(helper, neighbor) == 56, "Removal damaged the neighboring fountain");
             var drops = level.getEntitiesOfClass(ItemEntity.class, new AABB(origin).inflate(8));
             helper.assertTrue(drops.stream().mapToInt(e -> e.getItem().getCount()).sum() == 1
-                    && drops.getFirst().getItem().is(block.asItem()), "Expected exactly one fountain item");
+                    && com.stardew.craft.port.PortJava.getFirst(drops).getItem().is(block.asItem()), "Expected exactly one fountain item");
             ParkFountainBlock.runWithDropsSuppressed(() -> level.removeBlock(neighbor, false));
         }
         helper.succeed();

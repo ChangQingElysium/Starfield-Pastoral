@@ -20,7 +20,7 @@ public record LoomWheelAnimation(double x, double y, double z, double length, Li
             return new Key(Double.parseDouble(entry.getKey()), value.get(2).getAsDouble());
         }).sorted(Comparator.comparingDouble(Key::time)).toList();
         if (!Double.isFinite(length) || length <= 0 || keys.size() < 2
-                || keys.getFirst().time() != 0 || keys.getLast().time() < length - 0.0001
+                || com.stardew.craft.port.PortJava.getFirst(keys).time() != 0 || com.stardew.craft.port.PortJava.getLast(keys).time() < length - 0.0001
                 || keys.stream().anyMatch(k -> !Double.isFinite(k.time()) || !Double.isFinite(k.degrees())))
             throw new IllegalArgumentException("Invalid loom work animation");
         var origin = ModelGeometry.vector(pivot);

@@ -55,7 +55,7 @@ public final class OldTireGameTests {
                 for (var item : level.getEntitiesOfClass(ItemEntity.class, new AABB(pos).inflate(3))) item.discard();
                 level.destroyBlock(pos, true);
                 var drops = level.getEntitiesOfClass(ItemEntity.class, new AABB(pos).inflate(3));
-                h.assertTrue(drops.size() == 1 && drops.getFirst().getItem().is(block.asItem()) && drops.getFirst().getItem().getCount() == 1, "Expected one tire drop");
+                h.assertTrue(drops.size() == 1 && com.stardew.craft.port.PortJava.getFirst(drops).getItem().is(block.asItem()) && com.stardew.craft.port.PortJava.getFirst(drops).getItem().getCount() == 1, "Expected one tire drop");
             }
             level.removeBlock(pos.below(), false);
             h.assertTrue(!block.defaultBlockState().canSurvive(level, pos), "Tire can float without ground support");

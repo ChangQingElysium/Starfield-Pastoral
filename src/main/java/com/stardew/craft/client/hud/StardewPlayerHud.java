@@ -5,391 +5,314 @@ import com.stardew.craft.Config;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.ClientPlayerDataCache;
 import com.stardew.craft.core.ModDimensions;
-
+import com.stardew.craft.core.ModMiningDimensions;
+import com.stardew.craft.item.tool.WateringCanItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.minecraftforge.client.event.InputEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
-/**
- * 星露谷物语玩家状态HUD
- * 在星露谷维度替代MC原版的生命和饱食度显示
- */
+import java.util.Locale;
+
+/** Ten native-sized health/energy icons with precise, stationary side numbers. */
 @EventBusSubscriber(modid = StardewCraft.MODID, value = Dist.CLIENT)
 public class StardewPlayerHud {
-    
-    // 材质资源
-    private static final ResourceLocation BAR_TEXTURE = new ResourceLocation(
-        StardewCraft.MODID, "textures/gui/stardew_bars.png");
-    private static final ResourceLocation BAR_CONTENT_TEXTURE = new ResourceLocation(
-        StardewCraft.MODID, "textures/gui/bar_content.png");
-    private static final ResourceLocation HEALTH_ICON = new ResourceLocation(
-        StardewCraft.MODID, "textures/gui/health_icon.png");
-    private static final ResourceLocation ENERGY_ICON = new ResourceLocation(
-        StardewCraft.MODID, "textures/gui/energy_icon.png");
-    
-    // 条形图尺寸（原始大小，和原版MC生命值差不多）
-    private static final int BAR_WIDTH = 108;    // 原始宽度
-    private static final int BAR_HEIGHT = 12;    // 原始高度
-    
-    // 填充区域（相对于条形图左上角的偏移）
-    private static final int FILL_OFFSET_X = 3;  // 原始偏移
-    private static final int FILL_OFFSET_Y = 3;  // 原始偏移
-    private static final int FILL_WIDTH = 102;   // 原始填充宽度
-    private static final int FILL_HEIGHT = 6;    // 原始填充高度
-    
-    // 图标尺寸（略小于条高）
-    private static final int ICON_SIZE = 12;
-    
-    // 抖动计时器（毫秒）
-    private static int healthShakeTimer = 0;
-    private static int energyShakeTimer = 0;
-    
-    // 上一帧的数值，用于检测变化
+    private static final ResourceLocation[] HEARTS = {
+            texture("health_healthy"), texture("health_faded"), texture("health_pale")
+    };
+    private static final ResourceLocation[] LEAVES = {
+            texture("energy_green"), texture("energy_yellow"), texture("energy_red")
+    };
+    private static final ResourceLocation HEART_EMPTY = texture("health_empty");
+    private static final ResourceLocation LEAF_EMPTY = texture("energy_empty");
+    private static final ResourceLocation SWEAT_DROP = texture("sweat_drop");
+    private static final ResourceLocation RED_DROP = texture("red_drop");
+    private static final ResourceLocation DIGITS = texture("digits");
+    private static final int ICON_COUNT = 10;
+    private static final int ICON_SIZE = 9;
+    private static final int ICON_STEP = 8;
+    private static final int ICON_Y = 3;
+    private static final int TEXTURE_SIZE = 16;
+    private static final int SOURCE_OFFSET = 3;
+    private static final int MIN_NUMBER_WIDTH = 17;
+    private static final int CURRENT_COLOR = 0xF3EADC;
+    private static final int MAX_COLOR = 0xB1B3A5;
+    private static final int SEPARATOR_COLOR = 0xFF6F746B;
+
+    private static Player animationPlayer;
+    private static Object animationLevel;
+    private static int animationTick;
+    private static int healthShakeTicks;
+    private static int energyShakeTicks;
     private static int lastHealth = -1;
-    private static float lastEnergy = -1;
-    private static long lastUpdateTime = 0;
-    
-    /**
-     * 拦截原版生命值和饱食度渲染
-     */
+    private static float lastEnergy = Float.NaN;
+    private static int sweatBurstTick = -1000;
+    private static int redBurstTick = -1000;
+
+    private static ResourceLocation texture(String name) {
+        return new ResourceLocation(
+                StardewCraft.MODID, "textures/gui/player_vitals/" + name + ".png");
+    }
+
     @SubscribeEvent
     public static void onRenderHealthBar(RenderGuiLayerEvent.Pre event) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) return;
-        
-        // 只在星露谷维度禁用原版HUD
-        if (!shouldRenderCustomHUD(mc.player)) {
-            return;
-        }
-        
-        // 禁用原版的生命、饱食度、护甲、氧气条
-        if (event.getName().equals(VanillaGuiLayers.PLAYER_HEALTH) ||
-            event.getName().equals(VanillaGuiLayers.FOOD_LEVEL) ||
-            event.getName().equals(VanillaGuiLayers.ARMOR_LEVEL) ||
-            event.getName().equals(VanillaGuiLayers.AIR_LEVEL)) {
+        if (mc.player == null || !shouldRenderCustomHUD(mc.player)) return;
+        if (event.getName().equals(VanillaGuiLayers.PLAYER_HEALTH)) {
             event.setCanceled(true);
+            mc.gui.leftHeight += 10;
+        } else if (event.getName().equals(VanillaGuiLayers.FOOD_LEVEL)) {
+            event.setCanceled(true);
+            // The energy row remains present while riding, unlike vanilla hunger.
+            mc.gui.rightHeight += 10;
         }
     }
-    
-    /**
-     * 渲染自定义星露谷HUD
-     */
+
     @SubscribeEvent
     public static void onRenderCustomHUD(RenderGuiLayerEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) return;
-        if (mc.screen instanceof StardewHudLayoutEditorScreen) return;
-        
-        // 只在星露谷维度渲染自定义HUD
-        if (!shouldRenderCustomHUD(mc.player)) {
-            return;
-        }
-        
-        // 在HOTBAR层之后渲染（HOTBAR层总是会渲染）
-        if (event.getName().equals(VanillaGuiLayers.HOTBAR)) {
-            renderStardewBars(event.getGuiGraphics(), mc.player);
-        }
-    }
-    
-    /**
-     * 检查是否应该渲染自定义HUD
-     */
-    public static boolean shouldRenderCustomHUD(Player player) {
-        // F1 隐藏 HUD
-        if (Minecraft.getInstance().options.hideGui) {
-            return false;
-        }
-        // 创造模式和旁观模式不显示
-        if (player.isCreative() || player.isSpectator()) {
-            return false;
-        }
-        
-        // 检查是否在星露谷维度或矿井维度
-        if (player.level().dimension() != ModDimensions.STARDEW_VALLEY 
-            && player.level().dimension() != com.stardew.craft.core.ModMiningDimensions.STARDEW_MINING) {
-            return false;
-        }
-        return true;
-    }
-    
-    /**
-     * 渲染星露谷风格的能量和生命条
-     */
-    private static void renderStardewBars(GuiGraphics graphics, Player player) {
-        int screenWidth = graphics.guiWidth();
-        int screenHeight = graphics.guiHeight();
+        if (mc.player == null || mc.screen instanceof StardewHudLayoutEditorScreen
+                || !shouldRenderCustomHUD(mc.player)
+                || !event.getName().equals(VanillaGuiLayers.HOTBAR)) return;
+        GuiGraphics graphics = event.getGuiGraphics();
         StardewHudLayout.Placement placement = StardewHudLayout.current(
-                Config.HudElement.PLAYER_BARS, screenWidth, screenHeight);
-        
-        // 直接从客户端缓存获取数据（和金币HUD一样）
-        float currentEnergy = ClientPlayerDataCache.getEnergy();
-        float maxEnergy = ClientPlayerDataCache.getMaxEnergy();
-        int currentHealth = ClientPlayerDataCache.getHealth();
-        int maxHealth = ClientPlayerDataCache.getMaxHealth();
-        
-        // 检测数值变化并触发抖动
-        if (lastHealth >= 0 && currentHealth < lastHealth) {
-            float healthPercent = (float) currentHealth / maxHealth;
-            if (healthPercent < 0.2f) { 
-                healthShakeTimer = 300;
+                Config.HudElement.PLAYER_BARS, graphics.guiWidth(), graphics.guiHeight());
+        float partialTick = event.getPartialTick().getGameTimeDeltaPartialTick(false);
+        renderAt(graphics, placement.x(), placement.y(), placement.scale(),
+                ClientPlayerDataCache.getEnergy(), ClientPlayerDataCache.getMaxEnergy(),
+                ClientPlayerDataCache.isExhausted(), ClientPlayerDataCache.getHealth(),
+                ClientPlayerDataCache.getMaxHealth(), true, partialTick);
+
+        if (ClientPlayerDataCache.isExhausted()) {
+            int mouseX = (int) (mc.mouseHandler.xpos() * graphics.guiWidth() / mc.getWindow().getWidth());
+            int mouseY = (int) (mc.mouseHandler.ypos() * graphics.guiHeight() / mc.getWindow().getHeight());
+            double localX = (mouseX - placement.x()) / placement.scale();
+            double localY = (mouseY - placement.y()) / placement.scale();
+            int badgeX = fieldWidth(ClientPlayerDataCache.getMaxHealth(),
+                    ClientPlayerDataCache.getMaxEnergy()) + 97;
+            if (localX >= badgeX && localX < badgeX + 4 && localY >= 5 && localY < 10) {
+                // Tooltip coordinates are screen-space, after the HUD pose is restored.
+                graphics.renderTooltip(mc.font, Component.translatable(
+                        "stardewcraft.message.player.exhausted"), mouseX, mouseY);
             }
         }
-        
-        if (lastEnergy >= 0 && currentEnergy < lastEnergy - 1) {
-            if (currentEnergy <= 15) { 
-                energyShakeTimer = 300;
-            }
+    }
+
+    public static boolean shouldRenderCustomHUD(Player player) {
+        return !Minecraft.getInstance().options.hideGui && !player.isCreative() && !player.isSpectator()
+                && (player.level().dimension() == ModDimensions.STARDEW_VALLEY
+                || player.level().dimension() == ModMiningDimensions.STARDEW_MINING);
+    }
+
+    @SubscribeEvent
+    public static void onClientTick(ClientTickEvent.Post event) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player != animationPlayer || mc.level != animationLevel) {
+            resetAnimation();
+            animationPlayer = mc.player;
+            animationLevel = mc.level;
         }
-        
-        lastHealth = currentHealth;
-        lastEnergy = currentEnergy;
-        
-        // 创造模式下保持满值
-        if (player.isCreative()) {
-            currentEnergy = maxEnergy;
-            currentHealth = maxHealth;
+        if (mc.player == null || mc.isPaused() || !shouldRenderCustomHUD(mc.player)) return;
+        animationTick++;
+        healthShakeTicks = Math.max(0, healthShakeTicks - 1);
+        energyShakeTicks = Math.max(0, energyShakeTicks - 1);
+        if (!ClientPlayerDataCache.isSynced()) return;
+        int health = ClientPlayerDataCache.getHealth();
+        float energy = ClientPlayerDataCache.getEnergy();
+        if (lastHealth >= 0 && health < lastHealth) {
+            healthShakeTicks = Math.max(healthShakeTicks, Math.min(20, (lastHealth - health) * 2));
         }
-        
-        // 是否疲惫
-        boolean exhausted = ClientPlayerDataCache.isExhausted();
-        
-        graphics.pose().pushPose();
-        graphics.pose().translate(placement.x(), placement.y(), 0.0F);
-        graphics.pose().scale(placement.scale(), placement.scale(), 1.0F);
-        renderBarsAtCurrentPose(graphics, currentEnergy, (int) maxEnergy, exhausted, currentHealth, maxHealth);
-        graphics.pose().popPose();
-        
-        // 更新抖动计时器
-        long currentTime = System.currentTimeMillis();
-        if (lastUpdateTime > 0) {
-            int deltaMs = (int)(currentTime - lastUpdateTime);
-            if (healthShakeTimer > 0) {
-                healthShakeTimer -= deltaMs;
-                if (healthShakeTimer < 0) healthShakeTimer = 0;
-            }
-            if (energyShakeTimer > 0) {
-                energyShakeTimer -= deltaMs;
-                if (energyShakeTimer < 0) energyShakeTimer = 0;
-            }
+        if (energy < lastEnergy && energy <= 20.0F && isEnergyTool(mc.player.getMainHandItem().getItem())) {
+            triggerEnergyShake();
         }
-        lastUpdateTime = currentTime;
+        // SDV's danger thresholds are absolute values, independent of icon colour ratios.
+        if (health > 0 && health < 20 && animationTick % 20 == 0 && mc.screen == null) {
+            healthShakeTicks = Math.max(healthShakeTicks, health <= 10 ? 10 : 5);
+            if (health <= 10) redBurstTick = animationTick;
+        }
+        lastHealth = health;
+        lastEnergy = energy;
+    }
+
+    @SubscribeEvent
+    public static void onToolInput(InputEvent.InteractionKeyMappingTriggered event) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null || mc.screen != null || mc.isPaused()
+                || !shouldRenderCustomHUD(mc.player) || event.isPickBlock()
+                || ClientPlayerDataCache.getEnergy() > 20.0F) return;
+        if (isEnergyTool(mc.player.getItemInHand(event.getHand()).getItem())) triggerEnergyShake();
+    }
+
+    private static boolean isEnergyTool(Item item) {
+        return item instanceof net.minecraft.world.item.AxeItem
+                || item instanceof net.minecraft.world.item.PickaxeItem
+                || item instanceof net.minecraft.world.item.HoeItem
+                || item instanceof com.stardew.craft.item.tool.HoeItem
+                || item instanceof WateringCanItem
+                || item instanceof net.minecraft.world.item.FishingRodItem;
+    }
+
+    private static void resetAnimation() {
+        animationTick = healthShakeTicks = energyShakeTicks = 0;
+        lastHealth = -1;
+        lastEnergy = Float.NaN;
+        sweatBurstTick = redBurstTick = -1000;
+    }
+
+    public static int baseWidth() {
+        // Include the rightmost one-pixel numeral shadow in the draggable bounds.
+        return 189 + 2 * fieldWidth(ClientPlayerDataCache.getMaxHealth(), ClientPlayerDataCache.getMaxEnergy());
+    }
+
+    static int fieldWidth(int maxHealth, int maxEnergy) {
+        return Math.max(MIN_NUMBER_WIDTH, Math.max(numberWidth(Integer.toString(Math.max(1, maxHealth))),
+                numberWidth(formatEnergy(Math.max(1, maxEnergy)))));
+    }
+
+    static String formatEnergy(float energy) {
+        return String.format(Locale.ROOT, "%.1f", energy);
     }
 
     public static void renderPreview(GuiGraphics graphics, int x, int y, float scale) {
+        int maxHealth = Math.max(1, ClientPlayerDataCache.getMaxHealth());
+        int maxEnergy = Math.max(1, ClientPlayerDataCache.getMaxEnergy());
+        renderAt(graphics, x, y, scale, maxEnergy * 0.88F, maxEnergy, false,
+                Math.round(maxHealth * 0.93F), maxHealth, false, 0.0F);
+    }
+
+    private static void renderAt(GuiGraphics graphics, int x, int y, float scale, float energy,
+                                 int maxEnergy, boolean exhausted, int health, int maxHealth,
+                                 boolean animate, float partialTick) {
         graphics.pose().pushPose();
         graphics.pose().translate(x, y, 0.0F);
         graphics.pose().scale(scale, scale, 1.0F);
-        renderBarsAtCurrentPose(graphics, 270.0F, 270, false, 90, 100);
-        graphics.pose().popPose();
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        try {
+            int field = fieldWidth(maxHealth, maxEnergy);
+            int heartX = field + 3;
+            int leafX = heartX + 173;
+            float healthRatio = Mth.clamp(health / (float) Math.max(1, maxHealth), 0.0F, 1.0F);
+            float energyRatio = Mth.clamp(energy / Math.max(1, maxEnergy), 0.0F, 1.0F);
+            int healthDx = animate && healthShakeTicks > 0 ? animationTick % 3 - 1 : 0;
+            int energyDx = animate && energyShakeTicks > 0 ? animationTick % 3 - 1 : 0;
+            int energyDy = animate && energyShakeTicks > 0 ? (animationTick / 2) % 3 - 1 : 0;
+            float pulse = animate && health > 0 && health < 20
+                    ? 0.9F + 0.1F * (float) Math.sin((animationTick + partialTick) / (float) Math.max(1, health))
+                    : 1.0F;
+            renderIcons(graphics, HEART_EMPTY, HEARTS[colourStage(healthRatio)], heartX + healthDx,
+                    ICON_Y, healthRatio, 8, false, pulse);
+            renderIcons(graphics, LEAF_EMPTY, LEAVES[colourStage(energyRatio)], leafX + energyDx,
+                    ICON_Y + energyDy, energyRatio, 9, true, 1.0F);
+            if (exhausted) blitDrop(graphics, SWEAT_DROP, heartX + 94, 5, 1.0F);
+            if (animate) {
+                renderDrops(graphics, SWEAT_DROP, leafX, sweatBurstTick, 4, 0.03F, partialTick);
+                renderDrops(graphics, RED_DROP, heartX + 2, redBurstTick, 3, 0.15F, partialTick);
+            }
+            // Numbers stay anchored and readable while icons/particles move.
+            renderFraction(graphics, Integer.toString(health), Integer.toString(maxHealth), 0, field);
+            renderFraction(graphics, formatEnergy(energy), Integer.toString(maxEnergy), field + 188, field);
+        } finally {
+            graphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+            RenderSystem.disableBlend();
+            graphics.pose().popPose();
+        }
     }
 
-    private static void renderBarsAtCurrentPose(GuiGraphics graphics, float energy, int maxEnergy,
-                                                boolean exhausted, int health, int maxHealth) {
-        renderEnergyBar(graphics, 0, 16, 3, energy, maxEnergy, exhausted);
-        renderHealthBar(graphics, 154, 266, 3, health, maxHealth);
+    private static int colourStage(float ratio) {
+        return ratio >= 0.5F ? 0 : ratio >= 0.2F ? 1 : 2;
     }
-    
-    /**
-     * 渲染能量条
-     */
-    @SuppressWarnings("null")
-    private static void renderEnergyBar(GuiGraphics graphics, int iconX, int barX, int y, 
-                                        float current, int max, boolean exhausted) {
-        int shakeX = 0, shakeY = 0;
-        
-        // 抖动效果（和原版一样：random.Next(-3, 4) 即 -3 到 +3）
-        if (energyShakeTimer > 0) {
-            shakeX = (int)(Math.random() * 7) - 3;  // 0-6 => -3 to +3
-            shakeY = (int)(Math.random() * 7) - 3;
-        }
-        
-        // 计算填充宽度
-        float fillRatio = Math.min(1.0f, Math.max(0.0f, current / max));
-        int fillWidth = (int)(FILL_WIDTH * fillRatio);
-        
-        // 计算颜色（根据百分比从红到绿渐变）
-        int color = getColorForPercentage(fillRatio);
-        
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        
-        // 1. 渲染图标 (16x16)
-        graphics.blit(ENERGY_ICON, iconX + shakeX, y + shakeY, 0, 0, ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE);
-        
-        // 2. 渲染条形图背景 (108x12)
-        graphics.blit(BAR_TEXTURE, barX + shakeX, y + shakeY, 0, 0, BAR_WIDTH, BAR_HEIGHT, BAR_WIDTH, BAR_HEIGHT);
-        
-        // 3. 渲染填充（纯色，从左往右填充）
-        if (fillWidth > 0) {
-            // 设置颜色（绿色基调）
-            graphics.setColor(
-                ((color >> 16) & 0xFF) / 255f,
-                ((color >> 8) & 0xFF) / 255f,
-                (color & 0xFF) / 255f,
-                1.0f
-            );
-            
-            // 在填充区域内渲染 (从3,3开始，6*102区域)
-            // 使用blit进行UV拉伸实现平滑填充
-            graphics.blit(
-                BAR_CONTENT_TEXTURE,
-                barX + FILL_OFFSET_X + shakeX, 
-                y + FILL_OFFSET_Y + shakeY,
-                0, 0,
-                fillWidth, FILL_HEIGHT,
-                FILL_WIDTH, FILL_HEIGHT
-            );
-            
-            graphics.setColor(1.0f, 1.0f, 1.0f, 1.0f);
-        }
-        
-        // 4. 渲染疲惫效果（可选：让条变灰或显示图标）
-        if (exhausted) {
-            // 在条上覆盖半透明灰色
-            graphics.fill(barX + FILL_OFFSET_X + shakeX, y + FILL_OFFSET_Y + shakeY, 
-                         barX + FILL_OFFSET_X + FILL_WIDTH + shakeX, y + FILL_OFFSET_Y + FILL_HEIGHT + shakeY, 
-                         0x80808080);
-        }
-        
-        // 5. 渲染数值文本（在条的中间）
-        String text = String.format("%.0f/%d", current, max);
-        @SuppressWarnings("null")
-        int textWidth = Minecraft.getInstance().font.width(text);
-        int textX = barX + BAR_WIDTH / 2 - textWidth / 2;  // 居中
-        int textY = y + BAR_HEIGHT / 2 - 4;                // 垂直居中
-        
-        // 描边效果
-        graphics.drawString(Minecraft.getInstance().font, text, textX + 1, textY, 0x000000, false);
-        graphics.drawString(Minecraft.getInstance().font, text, textX - 1, textY, 0x000000, false);
-        graphics.drawString(Minecraft.getInstance().font, text, textX, textY + 1, 0x000000, false);
-        graphics.drawString(Minecraft.getInstance().font, text, textX, textY - 1, 0x000000, false);
-        
-        // 主文本
-        int textColor = exhausted ? 0xAAAAAA : 0xFFFFFF;
-        graphics.drawString(Minecraft.getInstance().font, text, textX, textY, textColor, false);
-        
-        RenderSystem.disableBlend();
+
+    static int fillRows(float fraction, int height) {
+        return Mth.clamp(Math.round(Mth.clamp(fraction, 0.0F, 1.0F) * height), 0, height);
     }
-    
-    /**
-     * 渲染生命条
-     */
-    @SuppressWarnings("null")
-    private static void renderHealthBar(GuiGraphics graphics, int barX, int iconX, int y, 
-                                        int current, int max) {
-        int shakeX = 0, shakeY = 0;
-        
-        // 抖动效果（和原版一样：random.Next(-3, 4) 即 -3 到 +3）
-        if (healthShakeTimer > 0) {
-            shakeX = (int)(Math.random() * 7) - 3;  // 0-6 => -3 to +3
-            shakeY = (int)(Math.random() * 7) - 3;
-            shakeY = (int)(Math.random() * 7) - 3;
+
+    private static void renderIcons(GuiGraphics graphics, ResourceLocation empty, ResourceLocation filled,
+                                    int x, int y, float ratio, int filledHeight, boolean rightToLeft, float alpha) {
+        for (int i = 0; i < ICON_COUNT; i++) {
+            int iconX = x + (rightToLeft ? -i : i) * ICON_STEP;
+            graphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+            graphics.blit(empty, iconX, y, SOURCE_OFFSET, SOURCE_OFFSET,
+                    ICON_SIZE, ICON_SIZE, TEXTURE_SIZE, TEXTURE_SIZE);
+            int rows = fillRows(ratio * ICON_COUNT - i, filledHeight);
+            if (rows > 0) {
+                int top = filledHeight - rows;
+                graphics.setColor(1.0F, 1.0F, 1.0F, alpha);
+                graphics.blit(filled, iconX, y + top, SOURCE_OFFSET, SOURCE_OFFSET + top,
+                        ICON_SIZE, rows, TEXTURE_SIZE, TEXTURE_SIZE);
+            }
         }
-        
-        // 计算填充宽度
-        float fillRatio = Math.min(1.0f, Math.max(0.0f, (float)current / max));
-        int fillWidth = (int)(FILL_WIDTH * fillRatio);
-        
-        // 计算颜色
-        int color = getColorForPercentage(fillRatio);
-        
-        // 低血量闪烁效果
-        float alpha = 1.0f;
-        if (fillRatio < 0.2f) {
-            alpha = 0.5f + 0.5f * (float)Math.sin(System.currentTimeMillis() / 200.0);
-        }
-        
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        
-        // 1. 渲染条形图背景 (108x12)
-        graphics.blit(BAR_TEXTURE, barX + shakeX, y + shakeY, 0, 0, BAR_WIDTH, BAR_HEIGHT, BAR_WIDTH, BAR_HEIGHT);
-        
-        // 2. 渲染填充（带颜色和透明度，从左往右填充）
-        if (fillWidth > 0) {
-            // 设置颜色和透明度（红色基调）
-            graphics.setColor(
-                ((color >> 16) & 0xFF) / 255f,
-                ((color >> 8) & 0xFF) / 255f,
-                (color & 0xFF) / 255f,
-                alpha
-            );
-            
-            // 在填充区域内渲染 (从3,3开始，6*102区域)
-            // 使用blit进行UV拉伸实现平滑填充
-            graphics.blit(
-                BAR_CONTENT_TEXTURE,
-                barX + FILL_OFFSET_X + shakeX, 
-                y + FILL_OFFSET_Y + shakeY,
-                0, 0,
-                fillWidth, FILL_HEIGHT,
-                FILL_WIDTH, FILL_HEIGHT
-            );
-            
-            graphics.setColor(1.0f, 1.0f, 1.0f, 1.0f);
-        }
-        
-        // 3. 渲染图标 (16x16，在条的右边)
-        graphics.blit(HEALTH_ICON, iconX + shakeX, y + shakeY, 0, 0, ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE);
-        
-        // 4. 渲染数值文本（在条的中间）
-        String text = String.format("%d/%d", current, max);
-        @SuppressWarnings("null")
-        int textWidth = Minecraft.getInstance().font.width(text);
-        int textX = barX + BAR_WIDTH / 2 - textWidth / 2;  // 居中
-        int textY = y + BAR_HEIGHT / 2 - 4;                // 垂直居中
-        
-        // 描边效果
-        graphics.drawString(Minecraft.getInstance().font, text, textX + 1, textY, 0x000000, false);
-        graphics.drawString(Minecraft.getInstance().font, text, textX - 1, textY, 0x000000, false);
-        graphics.drawString(Minecraft.getInstance().font, text, textX, textY + 1, 0x000000, false);
-        graphics.drawString(Minecraft.getInstance().font, text, textX, textY - 1, 0x000000, false);
-        
-        // 主文本（低血量时红色）
-        int textColor = fillRatio < 0.3f ? 0xFF5555 : 0xFFFFFF;
-        graphics.drawString(Minecraft.getInstance().font, text, textX, textY, textColor, false);
-        
-        RenderSystem.disableBlend();
+        graphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
-    
-    /**
-     * 根据百分比计算颜色
-     * 100%-50%: 绿色
-     * 49%-20%: 黄色
-     * 19%-0%: 红色
-     */
-    private static int getColorForPercentage(float percentage) {
-        percentage = Math.max(0, Math.min(1, percentage));
-        
-        if (percentage >= 0.5f) {
-            // 50%-100%: 纯绿色
-            return 0x00FF00;  // RGB(0, 255, 0)
-        } else if (percentage >= 0.2f) {
-            // 20%-49%: 纯黄色
-            return 0xFFFF00;  // RGB(255, 255, 0)
-        } else {
-            // 0%-19%: 纯红色
-            return 0xFF0000;  // RGB(255, 0, 0)
+
+    private static void renderFraction(GuiGraphics graphics, String current, String maximum, int x, int field) {
+        renderNumber(graphics, current, x + field - numberWidth(current), 0, CURRENT_COLOR);
+        graphics.fill(x, 6, x + field, 7, SEPARATOR_COLOR);
+        renderNumber(graphics, maximum, x + field - numberWidth(maximum), 8, MAX_COLOR);
+    }
+
+    static int numberWidth(String text) {
+        int width = 0;
+        for (int i = 0; i < text.length(); i++) width += text.charAt(i) == '.' ? 2 : 4;
+        return Math.max(0, width - 1);
+    }
+
+    private static void renderNumber(GuiGraphics graphics, String text, int x, int y, int rgb) {
+        int shadow = ((rgb >> 16 & 255) / 4 << 16) | ((rgb >> 8 & 255) / 4 << 8) | ((rgb & 255) / 4);
+        for (int i = 0; i < text.length(); i++) {
+            char ch = text.charAt(i);
+            int glyph = ch == '.' ? 10 : ch == '-' ? 11 : ch - '0';
+            int width = ch == '.' ? 1 : 3;
+            if (glyph >= 0 && glyph < 12) {
+                renderDigit(graphics, glyph, width, x + 1, y + 1, shadow);
+                renderDigit(graphics, glyph, width, x, y, rgb);
+            }
+            x += width + 1;
+        }
+        graphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+    }
+
+    private static void renderDigit(GuiGraphics graphics, int glyph, int width, int x, int y, int rgb) {
+        graphics.setColor((rgb >> 16 & 255) / 255.0F, (rgb >> 8 & 255) / 255.0F,
+                (rgb & 255) / 255.0F, 1.0F);
+        graphics.blit(DIGITS, x, y, glyph * 4, 0, width, 5, 48, 8);
+    }
+
+    private static void renderDrops(GuiGraphics graphics, ResourceLocation texture, int x, int burstTick,
+                                    int count, float delay, float partialTick) {
+        float elapsed = (animationTick - burstTick + partialTick) / 20.0F;
+        if (elapsed < 0.0F || elapsed > 1.2F) return;
+        for (int i = 0; i < count; i++) {
+            float age = elapsed - i * delay;
+            if (age < 0.0F || age >= 0.65F) continue;
+            int dropX = Math.round(x + i - age * 7.0F);
+            int dropY = Math.round(ICON_Y - 2 - age * 32.0F + age * age * 48.0F);
+            blitDrop(graphics, texture, dropX, dropY, 1.0F - age / 0.65F);
         }
     }
-    
-    /**
-     * 触发生命值抖动效果
-     */
+
+    private static void blitDrop(GuiGraphics graphics, ResourceLocation texture, int x, int y, float alpha) {
+        graphics.setColor(1.0F, 1.0F, 1.0F, alpha);
+        graphics.blit(texture, x, y, SOURCE_OFFSET, SOURCE_OFFSET, 4, 5, TEXTURE_SIZE, TEXTURE_SIZE);
+        graphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+    }
+
     public static void triggerHealthShake() {
-        healthShakeTimer = 10;  // 抖动10帧
+        healthShakeTicks = Math.max(healthShakeTicks, 5);
     }
-    
-    /**
-     * 触发能量抖动效果
-     */
+
     public static void triggerEnergyShake() {
-        energyShakeTimer = 10;  // 抖动10帧
+        energyShakeTicks = Math.max(energyShakeTicks, 20);
+        if (animationTick - sweatBurstTick >= 8) sweatBurstTick = animationTick;
     }
 }

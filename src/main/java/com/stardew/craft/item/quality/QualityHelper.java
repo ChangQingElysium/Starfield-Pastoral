@@ -38,62 +38,64 @@ public class QualityHelper {
      */
     @SuppressWarnings("null")
     public static void setQuality(ItemStack stack, int quality) {
-        if (stack.isEmpty()) {
-            return;
-        }
-        @SuppressWarnings("null")
-        var customData = PortItemData.getOrDefault(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,
-                com.stardew.craft.port.net.minecraft.world.item.component.CustomData.EMPTY);
-        var tag = customData.copyTag();
-        tag.putInt(QUALITY_NBT_KEY, quality);
-        PortItemData.set(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA, 
-                com.stardew.craft.port.net.minecraft.world.item.component.CustomData.of(tag));
-
-        // 花卉颜色变体：使用 quality + color 组合的 custom_model_data
-        if (tag.contains("FlowerColor")) {
-            int color = Math.max(0, tag.getInt("FlowerColor"));
-            int cmd = 100 + (quality * 10) + color;
-            PortItemData.set(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA,
-                    new com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData(cmd));
-            return;
-        }
-
-        // 如果没有 FlowerColor，但 CMD 处于花卉颜色范围(100~199)，推断颜色并同步品质
-        @SuppressWarnings("null")
-        var existingCmd = PortItemData.getOrDefault(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA,
-                com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData.DEFAULT);
-        if (!existingCmd.equals(com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData.DEFAULT)) {
-            int raw = existingCmd.value();
-            if (raw >= 100 && raw < 200) {
-                int color = Math.max(0, raw % 10);
-                int cmd = 100 + (quality * 10) + color;
-                PortItemData.set(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA,
-                        new com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData(cmd));
-                return;
-            }
-        }
-
-        // 视觉层（资源包/模型通常靠 custom_model_data 区分品质贴图）
-        // 以前很多物品是在 getName() 里“懒设置”，导致刚获得/刚拾取时外观不稳定。
-        @SuppressWarnings("null")
-        var cmd = PortItemData.getOrDefault(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA,
-                com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData.DEFAULT);
-        if (quality == NORMAL) {
-            // 仅当当前 CMD 看起来就是品质值时才回收，避免误伤其它系统的 CMD 用途。
-            if (cmd.equals(new com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData(SILVER))
-                    || cmd.equals(new com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData(GOLD))
-                    || cmd.equals(new com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData(IRIDIUM))) {
-                PortItemData.remove(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA);
-            }
-        } else {
-            // 只在默认值时写入，避免覆盖其它来源的 CMD。
-            if (cmd.equals(com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData.DEFAULT)) {
-                PortItemData.set(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA,
-                        new com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData(quality));
-            }
-        }
+        if (stack.isEmpty()) return;
+        quality = com.stardew.craft.port.PortJava.clamp(quality, NORMAL, IRIDIUM);
+        // Seaweed has fixed value/food stats and no quality variants, including beach pickups.
+        if (stack.getItem() instanceof com.stardew.craft.item.fish.misc.SeaweedItem) quality = NORMAL;
+        var tag = PortItemData.getOrDefault(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,
+                com.stardew.craft.port.net.minecraft.world.item.component.CustomData.EMPTY).copyTag();
+        // Absence is the canonical representation of normal quality, including plain machine drops.
+        if (quality == NORMAL) tag.remove(QUALITY_NBT_KEY);
+        else tag.putInt(QUALITY_NBT_KEY, quality);
+        writeCustomData(stack, tag);
+        ensureQualityModelData(stack);
     }
-    
+
+    private static void writeCustomData(ItemStack stack, net.minecraft.nbt.CompoundTag tag) {
+        if (tag.isEmpty()) PortItemData.remove(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA);
+        else PortItemData.set(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,
+                com.stardew.craft.port.net.minecraft.world.item.component.CustomData.of(tag));
+    }
+
+    /** Repair legacy redundant quality fields on load/copy; never discard other item components. */
+    public static void normalizeQualityComponents(ItemStack stack) {
+        if (stack.isEmpty()) return;
+        var data = PortItemData.get(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA);
+        var model = PortItemData.get(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA);
+        boolean seaweed = stack.getItem() instanceof com.stardew.craft.item.fish.misc.SeaweedItem;
+        if (data == null && model == null || !seaweed && !usesQualityComponents(stack.getItem())) return;
+        var tag = data == null ? new net.minecraft.nbt.CompoundTag() : data.copyTag();
+        // Leave malformed/addon data untouched rather than guessing its meaning.
+        if (tag.contains(QUALITY_NBT_KEY) && !tag.contains(QUALITY_NBT_KEY, net.minecraft.nbt.Tag.TAG_ANY_NUMERIC)) return;
+        int quality = getQuality(stack);
+        if (quality < NORMAL || quality > IRIDIUM) return;
+        if (seaweed) {
+            setQuality(stack, NORMAL);
+            return;
+        }
+        if (quality == NORMAL && tag.contains(QUALITY_NBT_KEY)) {
+            tag.remove(QUALITY_NBT_KEY);
+            writeCustomData(stack, tag);
+        } else if (data != null && tag.isEmpty()) {
+            PortItemData.remove(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA);
+        }
+        ensureQualityModelData(stack);
+    }
+
+    private static boolean usesQualityComponents(net.minecraft.world.item.Item item) {
+        if (item instanceof com.stardew.craft.item.StardewQualityItem quality) return quality.supportsQuality();
+        if (item instanceof com.stardew.craft.item.artisan.ArtisanDrinkItem drink) return drink.supportsQuality();
+        if (item instanceof com.stardew.craft.item.artisan.SmokedFishItem) return true;
+        if (!(item instanceof com.stardew.craft.item.IStardewItem stardew)) return false;
+        return switch (stardew.getItemTypeKey()) {
+            case "stardewcraft.type.crop", "stardewcraft.type.crop_seed", "stardewcraft.type.fruit",
+                    "stardewcraft.type.forage", "stardewcraft.type.fish", "stardewcraft.type.crabpot",
+                    "stardewcraft.type.legendary_fish", "stardewcraft.type.animal_product",
+                    "stardewcraft.type.artisan_animal_quality", "stardewcraft.type.artifact_quality" -> true;
+            default -> false;
+        };
+    }
+
     /**
      * 创建带品质的物品
      */
@@ -110,43 +112,24 @@ public class QualityHelper {
      */
     @SuppressWarnings("null")
     public static void ensureQualityModelData(ItemStack stack) {
-        if (stack.isEmpty()) {
-            return;
-        }
-
+        if (stack.isEmpty()) return;
         int quality = getQuality(stack);
-        @SuppressWarnings("null")
-        var customData = PortItemData.getOrDefault(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,
-                com.stardew.craft.port.net.minecraft.world.item.component.CustomData.EMPTY);
-        var tag = customData.copyTag();
-
-        if (tag.contains("FlowerColor")) {
-            int color = Math.max(0, tag.getInt("FlowerColor"));
-            int cmd = 100 + (quality * 10) + color;
+        var tag = PortItemData.getOrDefault(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,
+                com.stardew.craft.port.net.minecraft.world.item.component.CustomData.EMPTY).copyTag();
+        var model = PortItemData.get(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA);
+        int raw = model == null ? 0 : model.value();
+        if (tag.contains("FlowerColor") || raw >= 100 && raw < 200) {
+            int color = tag.contains("FlowerColor") ? Math.max(0, tag.getInt("FlowerColor")) : raw % 10;
             PortItemData.set(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA,
-                    new com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData(cmd));
-            return;
+                    new com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData(100 + quality * 10 + color));
+        } else if (raw >= NORMAL && raw <= IRIDIUM) {
+            if (quality == NORMAL) PortItemData.remove(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA);
+            else PortItemData.set(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA,
+                    new com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData(quality));
         }
-
-        @SuppressWarnings("null")
-        var cmd = PortItemData.getOrDefault(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA,
-                com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData.DEFAULT);
-
-        if (quality == NORMAL) {
-            if (cmd.equals(new com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData(SILVER))
-                    || cmd.equals(new com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData(GOLD))
-                    || cmd.equals(new com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData(IRIDIUM))) {
-                PortItemData.remove(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA);
-            }
-        } else if (cmd.equals(com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData.DEFAULT)
-            || cmd.equals(new com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData(SILVER))
-            || cmd.equals(new com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData(GOLD))
-            || cmd.equals(new com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData(IRIDIUM))) {
-            PortItemData.set(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA,
-                new com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData(quality));
-        }
+        // Values outside the established quality/flower ranges belong to other presentation systems.
     }
-    
+
     /**
      * 获取品质名称
      */

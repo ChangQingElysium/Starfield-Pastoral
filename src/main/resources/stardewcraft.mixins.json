@@ -19,6 +19,7 @@
     "InventoryMaxStackMixin",
     "ItemStackLargeCountMixin",
     "FriendlyByteBufLargeItemCountMixin",
+    "ItemStackQualityComponentsMixin",
     "ItemStackStardewFoodContextMixin",
     "PlayerStardewFoodMixin",
     "PlayerRingLightMixin",
@@ -82,6 +83,7 @@
     "StardewGuiTickMixin",
     "StardewGuiScissorMixin",
     "StardewReadingHudTextMixin",
+    "StardewHotbarSpriteMixin",
     "RingLightLevelRendererMixin",
     "RingLightEntityRendererMixin",
     "SodiumRingLightPipelineMixin",
@@ -140,7 +142,8 @@
     "PortBlockRenderPropertiesAccessor",
     "PortFluidTypeRenderPropertiesAccessor",
     "PortMobEffectRenderPropertiesAccessor",
-    "PortModelBakeryStandaloneMixin"
+    "PortModelBakeryStandaloneMixin",
+    "OptionalAnimatedArmorFishingMixin"
   ],
   "injectors": {
     "defaultRequire": 1

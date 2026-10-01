@@ -118,7 +118,8 @@ public final class ClientJeiCatalog {
         }
     }
 
-    public record GeodeEntry(ItemStack geode, ItemStack output) {
+    public record GeodeEntry(ItemStack geode, ItemStack output, boolean crusherAllowed) {
+        public GeodeEntry(ItemStack geode, ItemStack output) { this(geode, output, true); }
         public GeodeEntry {
             geode = geode == null ? ItemStack.EMPTY : geode.copy();
             output = output == null ? ItemStack.EMPTY : output.copy();

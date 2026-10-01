@@ -1,5 +1,7 @@
 package com.stardew.craft.entity.festival;
 
+import com.stardew.craft.model.AnimatedModel;
+import com.stardew.craft.model.ModelAnimation;
 import com.stardew.craft.entity.ModEntities;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -13,20 +15,10 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
-import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.core.animation.AnimatableManager;
-import software.bernie.geckolib.core.animation.AnimationController;
-import software.bernie.geckolib.core.object.PlayState;
-import software.bernie.geckolib.core.animation.RawAnimation;
-import software.bernie.geckolib.util.GeckoLibUtil;
 
 @SuppressWarnings("null")
-public class MoonlightJellyEntity extends Entity implements GeoEntity {
-    private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("animation");
+public class MoonlightJellyEntity extends Entity implements AnimatedModel {
     private static final EntityDataAccessor<Float> DATA_ALPHA = SynchedEntityData.defineId(MoonlightJellyEntity.class, EntityDataSerializers.FLOAT);
-
-    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
     public MoonlightJellyEntity(EntityType<?> type, Level level) {
         super(type, level);
@@ -61,16 +53,8 @@ public class MoonlightJellyEntity extends Entity implements GeoEntity {
     }
 
     @Override
-    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main", 5, state -> {
-            state.setAndContinue(IDLE);
-            return PlayState.CONTINUE;
-        }));
-    }
-
-    @Override
-    public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return cache;
+    public ModelAnimation modelAnimation(boolean moving, float partialTick) {
+        return ModelAnimation.loop("animation");
     }
 
     @Override

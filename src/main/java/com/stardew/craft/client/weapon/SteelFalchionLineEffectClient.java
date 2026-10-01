@@ -16,7 +16,7 @@ public final class SteelFalchionLineEffectClient {
     public static void ensureLevel(){var next=Minecraft.getInstance().level;if(next!=level){level=next;LINES.clear();SteelFalchionTraceClientState.clear();}}
     public static void create(int id,double x,double y,double z,int duration,float width){
         ensureLevel();Vec3 p=new Vec3(x,y,z);if(level==null||!finite(p)||duration<=0)return;
-        LINES.put(id,new Line(p,level.getGameTime(),Math.clamp(duration,1,120)));
+        LINES.put(id,new Line(p,level.getGameTime(),com.stardew.craft.port.PortJava.clamp(duration,1,120)));
         while(LINES.size()>32)LINES.remove(LINES.keySet().iterator().next());
     }
     public static void addPoint(int id,double x,double y,double z){
@@ -28,14 +28,14 @@ public final class SteelFalchionLineEffectClient {
         for(int i=0;i<=steps;i++){
             Vec3 probe=old.lerp(p,i/(double)steps);var hit=WeaponGroundContact.find(level,actor,probe);
             Vec3 point=hit==null?null:hit.getLocation().add(0,.026,0);
-            Vec3 prior=line.points.isEmpty()?null:line.points.getLast();
+            Vec3 prior=line.points.isEmpty()?null:com.stardew.craft.port.PortJava.getLast(line.points);
             if(point!=null&&prior!=null&&Math.abs(point.y-prior.y)>.55)line.points.add(null);
             if(point==null||prior==null||point.distanceToSqr(prior)>.0001)line.points.add(point);
         }
         trim(line);
     }
-    private static void trim(Line line){while(line.points.size()>256)line.points.removeFirst();}
-    public static void pulse(int id,int duration){ensureLevel();Line l=LINES.get(id);if(l!=null)l.pulseUntil=level.getGameTime()+Math.clamp(duration,0,10);}
+    private static void trim(Line line){while(line.points.size()>256)com.stardew.craft.port.PortJava.removeFirst(line.points);}
+    public static void pulse(int id,int duration){ensureLevel();Line l=LINES.get(id);if(l!=null)l.pulseUntil=level.getGameTime()+com.stardew.craft.port.PortJava.clamp(duration,0,10);}
     public static void burst(int id){ensureLevel();Line l=LINES.get(id);if(l!=null)l.burstUntil=level.getGameTime()+8;}
     public static void remove(int id){ensureLevel();LINES.remove(id);}
     public static void onClientTick(ClientTickEvent.Post event){ensureLevel();if(level==null||Minecraft.getInstance().isPaused())return;long now=level.getGameTime();LINES.values().removeIf(l->now>Math.max(l.end+4,l.burstUntil));}
@@ -46,7 +46,7 @@ public final class SteelFalchionLineEffectClient {
         double now=level.getGameTime()+partial;var buffers=mc.renderBuffers().bufferSource();var out=buffers.getBuffer(WeaponEffectRenderTypes.MOLTEN_GLOW);var pose=event.getPoseStack().last().pose();
         for(Line l:LINES.values()){
             if(l.points.stream().noneMatch(p->p!=null&&p.distanceToSqr(camera)<48*48))continue;
-            float burst=(float)Math.clamp((l.burstUntil-now)/8,0,1),pulse=(float)Math.clamp((l.pulseUntil-now)/8,0,1);
+            float burst=(float)com.stardew.craft.port.PortJava.clamp((l.burstUntil-now)/8,0,1),pulse=(float)com.stardew.craft.port.PortJava.clamp((l.pulseUntil-now)/8,0,1);
             float fade=Math.max(opacity((float)(now-l.start),(int)(l.end-l.start)),burst);
             if(fade<=0)continue;
             List<Vec3> chunk=new ArrayList<>();

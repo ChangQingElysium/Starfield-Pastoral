@@ -44,7 +44,7 @@ public final class MineralEffectGeometry {
     public static void chargedBlade(VertexConsumer out, Matrix4f pose, Vec3 base, Vec3 tip, float charge) {
         Vec3 axis = tip.subtract(base).normalize(), side = new Vec3(-axis.y,axis.x,0).normalize();
         for (int i = 0; i < 3; i++) {
-            float fill = Math.clamp(charge*3-i,0,1);
+            float fill = com.stardew.craft.port.PortJava.clamp(charge*3-i,0,1);
             if (fill <= 0) continue;
             for (int face : new int[]{-1,1}) {
                 Vec3 start = base.lerp(tip,0.38+i*0.19).add(0,0,face*0.034);

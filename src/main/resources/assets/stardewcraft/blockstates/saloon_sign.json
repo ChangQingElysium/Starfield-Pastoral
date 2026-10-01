@@ -1,0 +1,36 @@
+{
+  "variants": {
+    "facing=north,part=main": {
+      "model": "stardewcraft:block/decor/house/saloon_sign",
+      "y": 0
+    },
+    "facing=north,part=extension": {
+      "model": "stardewcraft:block/decor/house/saloon_sign_empty",
+      "y": 0
+    },
+    "facing=east,part=main": {
+      "model": "stardewcraft:block/decor/house/saloon_sign",
+      "y": 90
+    },
+    "facing=east,part=extension": {
+      "model": "stardewcraft:block/decor/house/saloon_sign_empty",
+      "y": 90
+    },
+    "facing=south,part=main": {
+      "model": "stardewcraft:block/decor/house/saloon_sign",
+      "y": 180
+    },
+    "facing=south,part=extension": {
+      "model": "stardewcraft:block/decor/house/saloon_sign_empty",
+      "y": 180
+    },
+    "facing=west,part=main": {
+      "model": "stardewcraft:block/decor/house/saloon_sign",
+      "y": 270
+    },
+    "facing=west,part=extension": {
+      "model": "stardewcraft:block/decor/house/saloon_sign_empty",
+      "y": 270
+    }
+  }
+}

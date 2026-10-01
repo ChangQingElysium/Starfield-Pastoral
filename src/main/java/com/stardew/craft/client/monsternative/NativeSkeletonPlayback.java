@@ -7,11 +7,11 @@ public final class NativeSkeletonPlayback {
     public NativeSkeletonPlayback(NativeNpcModel m){model=m;pose=new NativeNpcPose(m);capture=new NativeNpcPose(m);}
     public NativeNpcPose pose(){return pose;}
     public void sample(double clock,boolean moving,int action,double progress,double release,double hit,double death){
-        if(clock==previous)return;double dt=Double.isNaN(previous)?0:Math.clamp(clock-previous,0,.1);
+        if(clock==previous)return;double dt=Double.isNaN(previous)?0:com.stardew.craft.port.PortJava.clamp(clock-previous,0,.1);
         if(death>0){if(!dying){capture.copyFrom(pose);}pose.reset();pose.apply("animation.skeleton.death",death);pose.blendFrom(capture,1-NativeGrubMotion.smooth(death/.1));}
         else{
             if(action!=lastAction){capture.copyFrom(pose);transition=clock;}
-            weight+=Math.clamp((moving?1:0)-weight,-dt/.12,dt/.12);walkTime+=dt*weight;
+            weight+=com.stardew.craft.port.PortJava.clamp((moving?1:0)-weight,-dt/.12,dt/.12);walkTime+=dt*weight;
             pose.reset();pose.apply("animation.skeleton.idle",clock);pose.blend("animation.skeleton.walk",walkTime,NativeGrubMotion.smooth(weight));
             if(action==1){pose.blend("animation.skeleton.throw",progress*.6,1);pose.blendFrom(capture,1-NativeGrubMotion.smooth((clock-transition)/.08));}
             else if(release>=0&&release<.22)pose.blend("animation.skeleton.recover",release,1);

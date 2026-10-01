@@ -157,7 +157,7 @@ public final class GiantCropGrowthGameTests {
         var manager = CropGrowthManager.get(h.getLevel());
         var positions = f.positions(h);
         manager.settleCrops(h.getLevel(), positions, 100, 3, false);
-        manager.settleCrops(h.getLevel(), positions.reversed(), 100, 3, false);
+        manager.settleCrops(h.getLevel(), com.stardew.craft.port.PortJava.reversed(positions), 100, 3, false);
         h.assertTrue(f.dates.size() == 9, "A repeated day grew the same plants twice");
         var loaded = CropGrowthManager.load(manager.save(new CompoundTag(), h.getLevel().registryAccess()), h.getLevel().registryAccess());
         h.assertTrue(loaded.getState(h.getLevel(), f.anchor).lastDailyDay == 100 && loaded.getState(h.getLevel(), f.anchor).lastGiantDay == 100, "Daily stamp lost on save");
@@ -172,7 +172,7 @@ public final class GiantCropGrowthGameTests {
         var manager = CropGrowthManager.get(h.getLevel());
         int today = com.stardew.craft.farm.OfflineFarmCatchUp.computeAbsoluteDay();
         h.assertTrue(manager.settleCrops(h.getLevel(), f.positions(h), 29, 1, true).grown() == 0, "Giant grew before trigger maturity");
-        h.assertTrue(manager.settleCrops(h.getLevel(), f.positions(h).reversed(), 30, 1, true).grown() == 1, "Offline giant chance omitted");
+        h.assertTrue(manager.settleCrops(h.getLevel(), com.stardew.craft.port.PortJava.reversed(f.positions(h)), 30, 1, true).grown() == 1, "Offline giant chance omitted");
         h.assertTrue(f.dates.size() == 18 && f.dates.subList(0,9).stream().allMatch(d -> d.absoluteDay() == 29 && d.season() == 1 && d.offlineCatchUp())
                 && f.dates.subList(9,18).stream().allMatch(d -> d.absoluteDay() == 30), "Addon received live date during catch-up");
         h.assertTrue(com.stardew.craft.farm.OfflineFarmCatchUp.computeAbsoluteDay() == today, "Catch-up modified global calendar");

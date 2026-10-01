@@ -3,9 +3,9 @@ package com.stardew.craft.client.model.block;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.blockentity.FairStrengthTesterBlockEntity;
 import net.minecraft.resources.ResourceLocation;
-import software.bernie.geckolib.model.GeoModel;
+import com.stardew.craft.client.model.nativebb.BlockbenchModel;
 
-public class FairStrengthTesterGeoModel extends GeoModel<FairStrengthTesterBlockEntity> {
+public class FairStrengthTesterGeoModel extends BlockbenchModel<FairStrengthTesterBlockEntity> {
     private static final ResourceLocation MODEL = new ResourceLocation(StardewCraft.MODID, "geo/block/festival/fair_strength_tester.geo.json");
     private static final ResourceLocation TEXTURE = new ResourceLocation(StardewCraft.MODID, "textures/block/festival/fair_strength_tester.png");
 

@@ -95,8 +95,8 @@ public final class RoofTemplateGameTests {
             var copied = new net.minecraft.world.item.ItemStack(block);
             entity.saveToItem(copied);
             var drops = net.minecraft.world.level.block.Block.getDrops(state, level, pos, entity);
-            h.assertTrue(drops.size() == 1 && drops.getFirst().is(block.asItem()), "Roof drop duplicated or missing: " + shape);
-            h.assertTrue(net.minecraft.world.item.ItemStack.isSameItemSameTags(copied, drops.getFirst()), "Dropped roof lost a slot: " + shape);
+            h.assertTrue(drops.size() == 1 && com.stardew.craft.port.PortJava.getFirst(drops).is(block.asItem()), "Roof drop duplicated or missing: " + shape);
+            h.assertTrue(net.minecraft.world.item.ItemStack.isSameItemSameTags(copied, com.stardew.craft.port.PortJava.getFirst(drops)), "Dropped roof lost a slot: " + shape);
             level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
             level.setBlock(pos, block.defaultBlockState(), 3);
             h.assertTrue(net.minecraft.world.item.BlockItem.updateCustomBlockEntityTag(level, null, pos, copied), "Item placement rejected data");

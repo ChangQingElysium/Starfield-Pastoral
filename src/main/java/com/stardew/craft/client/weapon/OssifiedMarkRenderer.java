@@ -68,7 +68,7 @@ public final class OssifiedMarkRenderer {
             poseStack.translate(x, y, z);
             poseStack.mulPose(dispatcher.cameraOrientation());
             poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
-            float scale = Math.clamp(entity.getBbHeight()*0.65f, 0.55f, 1.4f);
+            float scale = com.stardew.craft.port.PortJava.clamp(entity.getBbHeight()*0.65f, 0.55f, 1.4f);
             poseStack.scale(scale, scale, scale);
 
             PoseStack.Pose last = poseStack.last();

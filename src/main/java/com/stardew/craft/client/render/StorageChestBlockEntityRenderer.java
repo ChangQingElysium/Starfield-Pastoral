@@ -3,11 +3,11 @@ package com.stardew.craft.client.render;
 import com.stardew.craft.blockentity.StorageChestBlockEntity;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
-import software.bernie.geckolib.model.GeoModel;
+import com.stardew.craft.client.model.nativebb.BlockbenchModel;
 
 public final class StorageChestBlockEntityRenderer extends StardewGeoBlockRenderer<StorageChestBlockEntity> {
     public StorageChestBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
-        super(new GeoModel<>() {
+        super(new BlockbenchModel<>() {
             private ResourceLocation resource(StorageChestBlockEntity chest, String directory, String suffix) {
                 return new ResourceLocation("stardewcraft", directory + chest.variant().id + suffix);
             }

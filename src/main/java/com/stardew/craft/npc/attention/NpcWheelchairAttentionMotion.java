@@ -11,11 +11,11 @@ public final class NpcWheelchairAttentionMotion {
         double chair=NpcAttentionMotion.bodyTarget(yaw)*progress;
         double headWeight=NpcAttentionMotion.smooth((time-.08)/.38)
                 *(1-NpcAttentionMotion.smooth((time-end-.10)/(.40+length)));
-        double shoulder=Math.clamp((yaw*headWeight-chair)*.08,-.8,.8);
+        double shoulder=com.stardew.craft.port.PortJava.clamp((yaw*headWeight-chair)*.08,-.8,.8);
         double angle=Math.toRadians(chair);
         var fixed=new NpcAttentionMotion.Foot(0,0,0,0,0);
         return new NpcAttentionMotion.Sample(chair,-2*Math.sin(angle),2-2*Math.cos(angle),shoulder,
-                Math.clamp(yaw*headWeight-chair-shoulder,-48,48),Math.clamp(pitch,-15,15)*headWeight,
+                com.stardew.craft.port.PortJava.clamp(yaw*headWeight-chair-shoulder,-48,48),com.stardew.craft.port.PortJava.clamp(pitch,-15,15)*headWeight,
                 0,0,head.blink(),fixed,fixed);
     }
 }

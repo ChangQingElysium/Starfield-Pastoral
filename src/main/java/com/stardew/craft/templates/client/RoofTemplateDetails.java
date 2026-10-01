@@ -35,7 +35,7 @@ final class RoofTemplateDetails {
                     if (band.size()<3 || area(band)<1E-9) continue;
                     var top=band.stream().map(v->new Vector3f(v).add(0,RoofTemplateForm.VERGE_HEIGHT,0)).toList();
                     for(int i=1;i<top.size()-1;i++) mapTexture(result,new MeshQuad(Direction.UP,Direction.UP,
-                            List.of(top.getFirst(),top.get(i),top.get(i+1),top.get(i+1)),null).withPart(RoofPart.CAP),phaseX,phaseZ,phaseY);
+                            List.of(com.stardew.craft.port.PortJava.getFirst(top),top.get(i),top.get(i+1),top.get(i+1)),null).withPart(RoofPart.CAP),phaseX,phaseZ,phaseY);
                     for(int i=0;i<band.size();i++) {
                         int j=(i+1)%band.size();var a=band.get(i);var b=band.get(j);var A=top.get(i);var B=top.get(j);
                         boolean wall=Math.abs(distance.applyAsDouble(a)-RoofTemplateForm.VERGE_WIDTH)<1E-6
@@ -133,7 +133,7 @@ final class RoofTemplateDetails {
                 if(b.size()<3 || area(b)<1E-10) continue;
                 int x=iu,y=iv;
                 for(int j=1;j<b.size()-1;j++) {
-                    var points=List.of(b.getFirst(),b.get(j),b.get(j+1),b.get(j+1));
+                    var points=List.of(com.stardew.craft.port.PortJava.getFirst(b),b.get(j),b.get(j+1),b.get(j+1));
                     out.add(new MeshQuad(q.direction(),q.textureDirection(),points,
                             points.stream().map(t->new TexturePoint(unit(u.applyAsDouble(t)/16-x),unit(v.applyAsDouble(t)/16-y))).toList(),q.part(),
                             points.stream().map(t->new TexturePoint(unit(su.applyAsDouble(t)),unit(sv.applyAsDouble(t)))).toList()));
@@ -174,14 +174,14 @@ final class RoofTemplateDetails {
     private static double max(List<Vector3f> p,ToDoubleFunction<Vector3f> f) {return p.stream().mapToDouble(f).max().orElse(0);}
     private static double area(List<Vector3f> p) {
         if(p.size()<3) return 0;
-        double a=0;for(int i=1;i<p.size()-1;i++)a+=new Vector3f(p.get(i)).sub(p.getFirst()).cross(new Vector3f(p.get(i+1)).sub(p.getFirst())).length();return a;
+        double a=0;for(int i=1;i<p.size()-1;i++)a+=new Vector3f(p.get(i)).sub(com.stardew.craft.port.PortJava.getFirst(p)).cross(new Vector3f(p.get(i+1)).sub(com.stardew.craft.port.PortJava.getFirst(p))).length();return a;
     }
     private static List<Vector3f> clip(List<Vector3f> p,ToDoubleFunction<Vector3f> f,double lo,double hi) {
         return clipSide(clipSide(p,v->lo-f.applyAsDouble(v)),v->f.applyAsDouble(v)-hi);
     }
     private static List<Vector3f> clipSide(List<Vector3f> p,ToDoubleFunction<Vector3f> f) {
         if(p.isEmpty())return p;
-        List<Vector3f> out=new ArrayList<>();Vector3f a=p.getLast();double fa=f.applyAsDouble(a);
+        List<Vector3f> out=new ArrayList<>();Vector3f a=com.stardew.craft.port.PortJava.getLast(p);double fa=f.applyAsDouble(a);
         for(Vector3f b:p) {double fb=f.applyAsDouble(b);boolean ai=fa<=1E-6,bi=fb<=1E-6;
             if(ai!=bi)out.add(new Vector3f(a).lerp(b,(float)Math.max(0,Math.min(1,fa/(fa-fb)))));
             if(bi)out.add(b);a=b;fa=fb;}

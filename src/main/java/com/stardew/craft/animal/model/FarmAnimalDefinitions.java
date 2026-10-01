@@ -199,13 +199,13 @@ public final class FarmAnimalDefinitions {
 
     private static Candidate selectCandidate(String animalTypeId, List<Candidate> candidates) {
         if (candidates.size() == 1) {
-            return candidates.getFirst();
+            return com.stardew.craft.port.PortJava.getFirst(candidates);
         }
         List<Candidate> replacements = candidates.stream()
                 .filter(candidate -> candidate.definition().replacesExisting())
                 .toList();
         if (replacements.size() == 1) {
-            Candidate selected = replacements.getFirst();
+            Candidate selected = com.stardew.craft.port.PortJava.getFirst(replacements);
             StardewCraft.LOGGER.info(
                     "[ANIMAL_DATA] {} explicitly replaces {} other definition(s) for {}",
                     selected.source(), candidates.size() - 1, animalTypeId);

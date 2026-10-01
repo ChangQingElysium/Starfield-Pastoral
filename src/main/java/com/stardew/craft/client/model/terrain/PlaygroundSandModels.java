@@ -55,7 +55,7 @@ public final class PlaygroundSandModels {
         BakedQuad[][][] tops = new BakedQuad[4][4][47];
         for (int s = 0; s < 4; s++) for (int v = 0; v < 4; v++) {
             surfaces[s][v] = Objects.requireNonNull(event.getModels().get(id(s, v)));
-            BakedQuad source = surfaces[s][v].getQuads(null, Direction.UP, RandomSource.create(0)).getFirst();
+            BakedQuad source = com.stardew.craft.port.PortJava.getFirst(surfaces[s][v].getQuads(null, Direction.UP, RandomSource.create(0)));
             for (int row = 0; row < 47; row++) tops[s][v][row] = tile(source, row);
         }
         Surface[] variants = new Surface[4];

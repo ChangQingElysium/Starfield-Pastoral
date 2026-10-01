@@ -54,7 +54,7 @@ public final class NeedleBurglarGeometry {
         if (age < 0 || age >= 10) return;
         Vec3 along = tip.subtract(base).normalize(), side = new Vec3(-along.y, along.x, 0).normalize();
         for (int i = 0; i < 4; i++) {
-            double t = Math.clamp((age - i * .7) / 7, 0, 1), sign = i % 2 == 0 ? -1 : 1;
+            double t = com.stardew.craft.port.PortJava.clamp((age - i * .7) / 7, 0, 1), sign = i % 2 == 0 ? -1 : 1;
             if (age < i * .7 || t >= 1) continue;
             Vec3 p = base.lerp(tip, .75 * (1 - t)).add(side.scale(sign * (.07 + .09 * Math.sin(t * Math.PI)) * (1 - t)));
             for (int face : new int[]{-1, 1}) {

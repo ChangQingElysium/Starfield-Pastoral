@@ -1,5 +1,7 @@
 package com.stardew.craft.entity.npc;
 
+import com.stardew.craft.model.AnimatedModel;
+import com.stardew.craft.model.ModelAnimation;
 import com.stardew.craft.npc.animation.SamActivity;
 
 import com.stardew.craft.StardewCraft;
@@ -26,16 +28,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.util.Mth;
-import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.core.animation.AnimatableManager;
-import software.bernie.geckolib.core.animation.AnimationController;
-import software.bernie.geckolib.core.object.PlayState;
-import software.bernie.geckolib.core.animation.RawAnimation;
-import software.bernie.geckolib.util.GeckoLibUtil;
 
 @SuppressWarnings("null")
-public class StardewNpcEntity extends PathfinderMob implements GeoEntity {
+public class StardewNpcEntity extends PathfinderMob implements AnimatedModel {
     private static final int INVALID_ID_GRACE_TICKS = 40;
     private static final EntityDataAccessor<String> DATA_NPC_ID = SynchedEntityData.defineId(StardewNpcEntity.class, EntityDataSerializers.STRING);
     private static final EntityDataAccessor<CompoundTag> DATA_MOTION_PROFILE = SynchedEntityData.defineId(StardewNpcEntity.class,EntityDataSerializers.COMPOUND_TAG);
@@ -48,10 +43,7 @@ public class StardewNpcEntity extends PathfinderMob implements GeoEntity {
     private static final EntityDataAccessor<CompoundTag> DATA_SCHEDULE_ACTIVITY = SynchedEntityData.defineId(StardewNpcEntity.class, EntityDataSerializers.COMPOUND_TAG);
     private final com.stardew.craft.npc.animation.NpcScheduleActivity scheduleActivity = new com.stardew.craft.npc.animation.NpcScheduleActivity(this);
     private final SamAttentionController attention = new SamAttentionController(this);
-    private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("idle");
-    private static final RawAnimation WALK = RawAnimation.begin().thenLoop("walk");
 
-    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private boolean hasLastServerWalkPosition;
     private double lastServerWalkX;
     private double lastServerWalkZ;
@@ -257,12 +249,21 @@ public class StardewNpcEntity extends PathfinderMob implements GeoEntity {
                 }
             }
         }
+        if ("gil".equals(getNpcId())) {
+            setNoAi(true);
+            super.tick();
+            if (!level().isClientSide) {
+                com.stardew.craft.shop.GilService.holdPosition(this);
+                setWalking(false);
+            }
+            return;
+        }
         super.tick();
         if (!this.level().isClientSide) {
             // Refresh after data-pack reloads as well as when an observer first tracks this NPC.
             syncAnimationCapabilities();
             if (tickCount % 20 == 0) com.stardew.craft.npc.runtime.NpcActorPersistence.capture(this);
-            // 同步行走状态到客户端（用于 GeckoLib 动画控制器）
+            // 同步行走状态到客户端（用于 Native model animation 动画控制器）
             boolean walking = false;
             if (hasLastServerWalkPosition) {
                 double dx = this.getX() - lastServerWalkX;
@@ -663,20 +664,8 @@ public class StardewNpcEntity extends PathfinderMob implements GeoEntity {
     }
 
     @Override
-    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main", 5, state -> {
-            if (isWalking() && hasWalkAnimation()) {
-                state.setAndContinue(WALK);
-                return PlayState.CONTINUE;
-            }
-            state.setAndContinue(IDLE);
-            return PlayState.CONTINUE;
-        }));
-    }
-
-    @Override
-    public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return cache;
+    public ModelAnimation modelAnimation(boolean moving, float partialTick) {
+        return ModelAnimation.loop(isWalking() && hasWalkAnimation() ? "walk" : "idle");
     }
 
     @Override
@@ -724,7 +713,8 @@ public class StardewNpcEntity extends PathfinderMob implements GeoEntity {
     @Override
     public boolean isPushable() {
         String npcId = getNpcId();
-        return !"henchman".equals(npcId)
+        return !"gil".equals(npcId)
+                && !"henchman".equals(npcId)
                 && !"bouncer".equals(npcId)
                 && super.isPushable();
     }
@@ -742,7 +732,7 @@ public class StardewNpcEntity extends PathfinderMob implements GeoEntity {
         // their shared NPC entity run LivingEntity#doPush would still apply
         // velocity to a player for whom the NPC has already been hidden.
         String npcId = getNpcId();
-        if ("henchman".equals(npcId) || "bouncer".equals(npcId)) {
+        if ("gil".equals(npcId) || "henchman".equals(npcId) || "bouncer".equals(npcId)) {
             return;
         }
         if (entity instanceof StardewNpcEntity other
@@ -754,7 +744,7 @@ public class StardewNpcEntity extends PathfinderMob implements GeoEntity {
     @Override
     public void push(double x, double y, double z) {
         String npcId = getNpcId();
-        if ("henchman".equals(npcId) || "bouncer".equals(npcId)) {
+        if ("gil".equals(npcId) || "henchman".equals(npcId) || "bouncer".equals(npcId)) {
             return;
         }
         super.push(x, y, z);

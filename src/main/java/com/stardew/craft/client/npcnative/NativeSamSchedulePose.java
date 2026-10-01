@@ -59,6 +59,6 @@ final class NativeSamSchedulePose {
     }
 
     private static double smooth(double x) {
-        x = Math.clamp(x,0,1); return x*x*x*(10+x*(-15+6*x));
+        x = com.stardew.craft.port.PortJava.clamp(x,0,1); return x*x*x*(10+x*(-15+6*x));
     }
 }

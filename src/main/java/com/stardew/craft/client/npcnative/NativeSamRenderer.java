@@ -248,7 +248,7 @@ public final class NativeSamRenderer<T extends Mob> extends EntityRenderer<T> {
     }
 
     private static double smooth(double value) {
-        double t = Math.clamp(value,0,1);
+        double t = com.stardew.craft.port.PortJava.clamp(value,0,1);
         return t*t*t*(10+t*(-15+6*t));
     }
 

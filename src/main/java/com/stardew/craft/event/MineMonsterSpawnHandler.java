@@ -89,9 +89,9 @@ public final class MineMonsterSpawnHandler {
         mob.moveTo(position.x,position.y,position.z,yaw,0);
         if(context.generation()==null) {
             int floor=switch(id){
-                case "green_slime","bat"->Math.clamp(context.floor(),1,39);
-                case "frost_jelly","frost_bat"->Math.clamp(context.floor(),40,79);
-                case "lava_bat"->Math.clamp(context.floor(),80,170);
+                case "green_slime","bat"->com.stardew.craft.port.PortJava.clamp(context.floor(),1,39);
+                case "frost_jelly","frost_bat"->com.stardew.craft.port.PortJava.clamp(context.floor(),40,79);
+                case "lava_bat"->com.stardew.craft.port.PortJava.clamp(context.floor(),80,170);
                 case "iridium_bat"->Math.max(171,context.floor());case "sludge"->Math.max(80,context.floor());default->context.floor();};
             context=new MonsterSpawnContext(context.source(),floor,context.bottomReached(),null);
         }

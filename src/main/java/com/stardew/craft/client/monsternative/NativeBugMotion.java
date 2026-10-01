@@ -25,7 +25,7 @@ public final class NativeBugMotion {
         result.reset();
         result.apply("animation.bug.death", elapsed);
         // Preserve the captured lateral sway; death must not snap back to the patrol axis.
-        double u = Math.clamp(elapsed / .12, 0, 1);
+        double u = com.stardew.craft.port.PortJava.clamp(elapsed / .12, 0, 1);
         double blend = u * u * (3 - 2 * u);
         result.blendFrom(captured, 1 - blend);
         var sourceRoot = captured.matrices()[0];

@@ -4,10 +4,10 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.block.utility.WoodenChestColorPalette;
 import com.stardew.craft.blockentity.WoodenChestBlockEntity;
 import net.minecraft.resources.ResourceLocation;
-import software.bernie.geckolib.model.GeoModel;
+import com.stardew.craft.client.model.nativebb.BlockbenchModel;
 
 @SuppressWarnings("null")
-public class WoodenChestGeoModel extends GeoModel<WoodenChestBlockEntity> {
+public class WoodenChestGeoModel extends BlockbenchModel<WoodenChestBlockEntity> {
     private static final ResourceLocation DEFAULT_MODEL = new ResourceLocation(StardewCraft.MODID, "geo/block/utility/wooden_chest_default.geo.json");
     private static final ResourceLocation DEFAULT_ANIMATION = new ResourceLocation(StardewCraft.MODID, "animations/block/utility/wooden_chest_default.animation.json");
     private static final ResourceLocation DEFAULT_TEXTURE = new ResourceLocation(StardewCraft.MODID, "textures/block/utility/wooden_chest_default.png");

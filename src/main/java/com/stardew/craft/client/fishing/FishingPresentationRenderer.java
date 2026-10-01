@@ -192,7 +192,7 @@ public final class FishingPresentationRenderer {
             line(stack,buffers,light,FishingPresentationClient.world(actor,a),FishingPresentationClient.world(actor,b),.0018f,lineColor);
         }
         Vec3 hook=FishingPresentationClient.world(actor,pose.anchor("rod_hook"));
-        if(!mounted.isEmpty()){var exit=FishingTackleModels.outlet(mounted.getLast(),bobberMatrix,tackleRotation,tackleTime);leader=new Vec3(exit.x,exit.y,exit.z);}
+        if(!mounted.isEmpty()){var exit=FishingTackleModels.outlet(com.stardew.craft.port.PortJava.getLast(mounted),bobberMatrix,tackleRotation,tackleTime);leader=new Vec3(exit.x,exit.y,exit.z);}
         line(stack,buffers,light,leader,hook,.0018f,lineColor);
         FishingBaitModels.render(s.bait.update(player.getMainHandItem()),FishingBaitModels.attachment(pose,actor),stack,buffers,bobberLight);
         if(s.catchVisible()) {

@@ -126,7 +126,7 @@ public final class ParkBenchGameTests {
             helper.assertTrue(level.getBlockState(seats[0]).getValue(ParkBenchBlock.VARIANT) == variant, "Connection update changed wood variant");
             var drops = level.getEntitiesOfClass(ItemEntity.class, new AABB(origin).inflate(6));
             helper.assertTrue(drops.stream().mapToInt(e -> e.getItem().getCount()).sum() == 1
-                    && drops.getFirst().getItem().is(block.asItem()), "Breaking upper cell did not drop exactly one bench");
+                    && com.stardew.craft.port.PortJava.getFirst(drops).getItem().is(block.asItem()), "Breaking upper cell did not drop exactly one bench");
             for (BlockPos pos : seats) ParkBenchBlock.runWithDropsSuppressed(() -> level.removeBlock(pos, false));
         }
         helper.succeed();

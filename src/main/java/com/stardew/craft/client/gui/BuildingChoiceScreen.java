@@ -48,8 +48,8 @@ public final class BuildingChoiceScreen extends FarmFolioScreen {
     protected void layout() {
         int side = Math.min(132, w / 3), count = Math.min(3, Math.max(1, (h - 112) / 48));
         int pages = Math.max(1, (homes.size() + count - 1) / count);
-        page = Math.clamp(page, 0, pages - 1);
-        selected = homes.isEmpty() ? -1 : Math.clamp(selected, page * count, Math.min(homes.size(), (page + 1) * count) - 1);
+        page = com.stardew.craft.port.PortJava.clamp(page, 0, pages - 1);
+        selected = homes.isEmpty() ? -1 : com.stardew.craft.port.PortJava.clamp(selected, page * count, Math.min(homes.size(), (page + 1) * count) - 1);
         for (int i = page * count; i < Math.min(homes.size(), (page + 1) * count); i++) {
             int index = i;
             button(

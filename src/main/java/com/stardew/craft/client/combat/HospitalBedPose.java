@@ -13,7 +13,7 @@ public final class HospitalBedPose {
     public record Sample(CombatCollapsePose.Frame frame,float hipX,float hipY,float hipZ,float yaw,float headZ) {}
     private HospitalBedPose() {}
     private static CombatCollapsePose.Rotation r(float x,float y,float z) {return new CombatCollapsePose.Rotation(x,y,z);}
-    private static float ease(float t) {t=Math.clamp(t,0,1);return t*t*(3-2*t);}
+    private static float ease(float t) {t=com.stardew.craft.port.PortJava.clamp(t,0,1);return t*t*(3-2*t);}
     private static float mix(float a,float b,float t) {return a+(b-a)*t;}
     private static CombatCollapsePose.Frame pose(float pitch,float thigh,float knee,float support) {
         return new CombatCollapsePose.Frame(pitch,0,0,r(pitch*.25f,0,0),r(support,0,-3),r(support,0,3),

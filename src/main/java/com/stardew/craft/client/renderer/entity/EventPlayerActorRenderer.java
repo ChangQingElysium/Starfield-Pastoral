@@ -73,7 +73,7 @@ public class EventPlayerActorRenderer extends MobRenderer<EventPlayerActorEntity
         // The hidden actor anchor is beside the bed. Do not cast a detached floor
         // shadow there while the visible body is still lying on the mattress.
         float bedsideShadow = entity.isInHospitalBedScene()
-                ? Math.clamp((entity.hospitalBedTime(partialTicks) - 80) / 24, 0, 1) : 1;
+                ? com.stardew.craft.port.PortJava.clamp((entity.hospitalBedTime(partialTicks) - 80) / 24, 0, 1) : 1;
         this.shadowRadius = .5F * bedsideShadow * bedsideShadow * (3 - 2 * bedsideShadow);
         this.model = CombatCollapseModelPose.frame(entity, partialTicks) != null
                 ? (entity.isSlimSkinModel() ? collapsedSlim : collapsedWide)

@@ -25,7 +25,7 @@ sourceSets {
             srcDirs = ['src/main/java', 'src/port/java']
         }
         resources {
-            srcDirs = ['src/main/resources', 'src/generated/resources']
+            srcDirs = ['src/main/resources', 'src/port/resources', 'src/generated/resources']
         }
     }
 }
@@ -86,10 +86,6 @@ repositories {
         url = 'https://maven.blamejared.com/'
     }
     maven {
-        name = 'GeckoLib'
-        url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
-    }
-    maven {
         name = 'AppleSkin'
         url = 'https://maven.ryanliptak.com/'
     }
@@ -109,9 +105,6 @@ dependencies {
     implementation(jarJar("io.github.llamalad7:mixinextras-forge:${mixinextras_version}")) {
         jarJar.ranged(it, "[${mixinextras_version},)")
     }
-
-    implementation fg.deobf("software.bernie.geckolib:geckolib-forge-1.20.1:${geckolib_version}")
-    jarJar(group: 'software.bernie.geckolib', name: 'geckolib-forge-1.20.1', version: "[${geckolib_version},)")
 
     compileOnly fg.deobf("mezz.jei:jei-1.20.1-forge-api:${jei_version}")
     compileOnly fg.deobf("mezz.jei:jei-1.20.1-common-api:${jei_version}")

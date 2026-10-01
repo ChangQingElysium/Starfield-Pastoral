@@ -82,9 +82,9 @@ public final class PastureGrassSeasonModels {
             var level = Minecraft.getInstance().level;
             if (level == null || !level.dimension().equals(ModDimensions.STARDEW_VALLEY) || !StardewTimeHud.isTimeSynced())
                 return originalModel;
-            int season = Math.clamp(TerrainSeasonTextures.currentTextureSet(), 0, 3);
+            int season = com.stardew.craft.port.PortJava.clamp(TerrainSeasonTextures.currentTextureSet(), 0, 3);
             int variant = state != null && state.hasProperty(PastureGrassBlock.VARIANT)
-                    ? Math.clamp(state.getValue(PastureGrassBlock.VARIANT), 0, 3) : 0;
+                    ? com.stardew.craft.port.PortJava.clamp(state.getValue(PastureGrassBlock.VARIANT), 0, 3) : 0;
             return seasons[season][variant];
         }
 

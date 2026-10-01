@@ -109,7 +109,7 @@ public final class GreenSlimeEntity extends StardewMonsterEntity {
     public float frostGlow(float partialTick) {
         if (!frostRush()) return 0;
         double step = ((level().getGameTime() - entityData.get(FROST_RUSH_START) + partialTick) * 3) % 14;
-        return (float) Math.clamp(step <= 7 ? step * .15 : 1 - (step - 7) * .15, 0, 1);
+        return (float) com.stardew.craft.port.PortJava.clamp(step <= 7 ? step * .15 : 1 - (step - 7) * .15, 0, 1);
     }
     private double walkPixels() { return GreenSlimeRules.WALK_PIXELS + (frostRush() ? 2 : 0); }
     @Override protected ResourceLocation definitionId() {
@@ -336,7 +336,7 @@ public final class GreenSlimeEntity extends StardewMonsterEntity {
         ageTicks = tag.getInt("SlimeAgeTicks");
         specialNumber = tag.getInt("SlimeSpecialNumber");
         firstGeneration = !tag.contains("SlimeFirstGeneration") || tag.getBoolean("SlimeFirstGeneration");
-        wanderDirection = tag.contains("SlimeWanderDirection") ? Math.clamp(tag.getInt("SlimeWanderDirection"), 0, 5) : 4;
+        wanderDirection = tag.contains("SlimeWanderDirection") ? com.stardew.craft.port.PortJava.clamp(tag.getInt("SlimeWanderDirection"), 0, 5) : 4;
         recoveryTicks = tag.getInt("SlimeRecoveryTicks");
         residualAnimation = tag.getInt("SlimeResidualAnimation");
         slideX = tag.getDouble("SlimeSlideX"); slideZ = tag.getDouble("SlimeSlideZ");

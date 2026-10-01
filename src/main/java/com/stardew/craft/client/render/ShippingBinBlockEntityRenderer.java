@@ -9,30 +9,29 @@ import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import software.bernie.geckolib.cache.object.GeoBone;
-import software.bernie.geckolib.renderer.layer.BlockAndItemGeoLayer;
 
 public class ShippingBinBlockEntityRenderer extends StardewGeoBlockRenderer<ShippingBinBlockEntity> {
     public ShippingBinBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
         super(new ShippingBinGeoModel());
-        addRenderLayer(new BlockAndItemGeoLayer<ShippingBinBlockEntity>(this,
-                (bone, bin) -> bone.getName().equals("shipment_item") && !bin.shipmentItem().isEmpty() ? bin.shipmentItem() : null,
-                (bone, bin) -> null) {
-            @Override protected ItemDisplayContext getTransformTypeForStack(GeoBone bone, ItemStack stack, ShippingBinBlockEntity bin) {
-                return ItemDisplayContext.NONE;
-            }
-            @Override protected void renderStackForBone(PoseStack pose, GeoBone bone, ItemStack stack,
-                    ShippingBinBlockEntity bin, MultiBufferSource buffers, float partialTick, int light, int overlay) {
-                float alpha = Math.max(0, 1 - bin.shipmentAge(partialTick) / .38f);
-                MultiBufferSource fading = type -> {
-                    // Item atlas quads need blending rather than alpha-test-only disappearance.
-                    var target = type == Sheets.cutoutBlockSheet() || type == Sheets.solidBlockSheet()
-                            ? Sheets.translucentItemSheet() : type;
-                    return new FadingVertexConsumer(buffers.getBuffer(target), alpha);
-                };
-                super.renderStackForBone(pose, bone, stack, bin, fading, partialTick, light, overlay);
-            }
-        });
+    }
+
+    @Override protected void renderExtras(ShippingBinBlockEntity bin,
+            com.stardew.craft.client.model.nativebb.BlockbenchFrame frame, PoseStack pose,
+            MultiBufferSource buffers, float partialTick, int light, int overlay) {
+        ItemStack item = bin.shipmentItem();
+        if (item.isEmpty()) return;
+        pose.pushPose();
+        try {
+            if (!frame.attach(pose, "shipment_item")) return;
+            float alpha = Math.max(0, 1 - bin.shipmentAge(partialTick) / .38f);
+            MultiBufferSource fading = type -> {
+                var target = type == Sheets.cutoutBlockSheet() || type == Sheets.solidBlockSheet()
+                        ? Sheets.translucentItemSheet() : type;
+                return new FadingVertexConsumer(buffers.getBuffer(target), alpha);
+            };
+            net.minecraft.client.Minecraft.getInstance().getItemRenderer().renderStatic(item,
+                    ItemDisplayContext.NONE, light, overlay, pose, fading, bin.getLevel(), 0);
+        } finally { pose.popPose(); }
     }
 
     private record FadingVertexConsumer(VertexConsumer delegate, float alpha) implements VertexConsumer {

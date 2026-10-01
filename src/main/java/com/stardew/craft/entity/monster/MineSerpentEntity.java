@@ -59,7 +59,7 @@ public final class MineSerpentEntity extends StardewMonsterEntity {
    if(actual.lengthSqr()>1e-7){
     float yaw=(float)Math.toDegrees(Math.atan2(-actual.x,actual.z));
     setYRot(net.minecraft.util.Mth.rotLerp(.22F,getYRot(),yaw));
-    float pitch=(float)Math.clamp(-Math.toDegrees(Math.atan2(actual.y,actual.horizontalDistance())),-MAX_FLIGHT_PITCH,MAX_FLIGHT_PITCH);
+    float pitch=(float)com.stardew.craft.port.PortJava.clamp(-Math.toDegrees(Math.atan2(actual.y,actual.horizontalDistance())),-MAX_FLIGHT_PITCH,MAX_FLIGHT_PITCH);
     setXRot(net.minecraft.util.Mth.lerp(.18F,getXRot(),pitch));
    }else setXRot(getXRot()*.9F);
    yBodyRot=getYRot();setYHeadRot(getYRot());

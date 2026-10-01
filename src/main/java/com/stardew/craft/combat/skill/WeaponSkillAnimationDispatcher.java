@@ -110,7 +110,7 @@ public final class WeaponSkillAnimationDispatcher {
                 Math.max(1, actionDurationTicks),
                 Math.max(actionDurationTicks, presentationDurationTicks),
                 player.level().getGameTime(),
-                Math.clamp(activeTickOffset, 0, Math.max(0, actionDurationTicks - 1)),
+                com.stardew.craft.port.PortJava.clamp(activeTickOffset, 0, Math.max(0, actionDurationTicks - 1)),
                 player.getX(),
                 player.getY(),
                 player.getZ(),

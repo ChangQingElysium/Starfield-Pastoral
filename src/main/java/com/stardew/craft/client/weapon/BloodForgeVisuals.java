@@ -38,7 +38,7 @@ public final class BloodForgeVisuals {
         StateKey key=new StateKey(caster,moon);DarkState prior=STATES.get(key);
         if(prior!=null && (cast<prior.cast || (cast==prior.cast && (!prior.active || active)))) return;
         if(!active && prior!=null && prior.cast!=cast) return;
-        STATES.put(key,new DarkState(cast,level.getGameTime()+Math.clamp(duration,0,101),active));trim(STATES,128);
+        STATES.put(key,new DarkState(cast,level.getGameTime()+com.stardew.craft.port.PortJava.clamp(duration,0,101),active));trim(STATES,128);
         var mc=Minecraft.getInstance();
         if(mc.player!=null && mc.player.getId()==caster) {
             if(moon) {if(active) DarkSwordBloodMoonClientState.start(level.getGameTime(),duration);else DarkSwordBloodMoonClientState.clear();}

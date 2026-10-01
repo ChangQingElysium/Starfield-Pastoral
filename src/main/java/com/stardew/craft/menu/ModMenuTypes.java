@@ -135,4 +135,7 @@ public class ModMenuTypes {
     public static final DeferredHolder<MenuType<?>, MenuType<com.stardew.craft.communitycenter.menu.BundleRewardMenu>> BUNDLE_REWARD =
         MENU_TYPES.register("bundle_reward",
             () -> new MenuType<>(com.stardew.craft.communitycenter.menu.BundleRewardMenu::new, FeatureFlags.DEFAULT_FLAGS));
+    public static final DeferredHolder<MenuType<?>, MenuType<com.stardew.craft.shop.GilRewardMenu>> GIL_REWARD =
+        MENU_TYPES.register("gil_reward",
+            () -> new MenuType<>(com.stardew.craft.shop.GilRewardMenu::new, FeatureFlags.DEFAULT_FLAGS));
 }

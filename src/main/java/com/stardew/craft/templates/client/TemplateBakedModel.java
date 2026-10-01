@@ -428,7 +428,7 @@ final class TemplateBakedModel extends BakedModelWrapper<BakedModel> implements 
     private static List<BakedQuad> representativeSurfaces(List<BakedQuad> candidates) {
         if (candidates.size() < 2) return candidates;
         BakedQuad largest = candidates.stream().max(java.util.Comparator.comparingDouble(TemplateBakedModel::faceArea))
-                .orElse(candidates.getFirst());
+                .orElse(com.stardew.craft.port.PortJava.getFirst(candidates));
         float[] bounds = faceBounds(largest);
         java.util.LinkedHashMap<SurfaceKey, BakedQuad> result = new java.util.LinkedHashMap<>();
         for (BakedQuad candidate : candidates) {

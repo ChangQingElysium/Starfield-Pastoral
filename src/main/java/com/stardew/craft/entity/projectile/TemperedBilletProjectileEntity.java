@@ -78,9 +78,9 @@ public class TemperedBilletProjectileEntity extends ThrowableProjectile {
     public void tick() {
         super.tick();
         if (this.level().isClientSide) {
-            if (!trail.isEmpty() && trail.getLast().position().distanceToSqr(position()) > 16) trail.clear();
+            if (!trail.isEmpty() && com.stardew.craft.port.PortJava.getLast(trail).position().distanceToSqr(position()) > 16) trail.clear();
             trail.add(new TrailPoint(position(), tickCount));
-            while (trail.size() > 8 || (!trail.isEmpty() && tickCount - trail.getFirst().tick() > 6)) trail.removeFirst();
+            while (trail.size() > 8 || (!trail.isEmpty() && tickCount - com.stardew.craft.port.PortJava.getFirst(trail).tick() > 6)) com.stardew.craft.port.PortJava.removeFirst(trail);
         }
 
         if (!this.level().isClientSide) {

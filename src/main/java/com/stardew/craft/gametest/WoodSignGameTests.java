@@ -53,8 +53,8 @@ public final class WoodSignGameTests {
         var recipe = StardewCraftingRecipeData.getRecipe("wood_sign").orElseThrow();
         h.assertTrue(recipe.output().item().equals("stardewcraft:wood_sign") && recipe.output().count() == 1,
                 "Incorrect output");
-        h.assertTrue(recipe.ingredients().size() == 1 && recipe.ingredients().getFirst().count() == 25
-                && recipe.ingredients().getFirst().item().equals("stardewcraft:wood_normal"), "Incorrect material cost");
+        h.assertTrue(recipe.ingredients().size() == 1 && com.stardew.craft.port.PortJava.getFirst(recipe.ingredients()).count() == 25
+                && com.stardew.craft.port.PortJava.getFirst(recipe.ingredients()).item().equals("stardewcraft:wood_normal"), "Incorrect material cost");
         h.assertTrue(StardewCraftingRecipeData.isBigCraftable("wood_sign"), "Missing big craftable metadata");
         h.assertTrue("default".equals(recipe.unlockCondition()) && recipe.unlockWhen().isEmpty(), "Recipe needs a purchase or skill level");
         h.assertTrue(StardewItemCatalog.typeKey(ModItems.WOOD_SIGN.get()).equals("stardewcraft.type.utility"), "Incorrect item category");
@@ -101,8 +101,8 @@ public final class WoodSignGameTests {
         h.getLevel().destroyBlock(pos.above(), true);
         h.assertTrue(h.getLevel().getBlockState(pos).isAir(), "Breaking the upper part left the base");
         items = h.getLevel().getEntitiesOfClass(ItemEntity.class, new AABB(pos).inflate(2));
-        h.assertTrue(items.size() == 1 && items.getFirst().getItem().is(ModItems.WOOD_SIGN.get())
-                && items.getFirst().getItem().getCount() == 1, "Upper-part destruction duplicated or lost the sign");
+        h.assertTrue(items.size() == 1 && com.stardew.craft.port.PortJava.getFirst(items).getItem().is(ModItems.WOOD_SIGN.get())
+                && com.stardew.craft.port.PortJava.getFirst(items).getItem().getCount() == 1, "Upper-part destruction duplicated or lost the sign");
         h.succeed();
     }
 
@@ -124,7 +124,7 @@ public final class WoodSignGameTests {
             h.assertTrue(stack.getCount() == 1 && h.getLevel().getBlockEntity(pos) instanceof WoodSignBlockEntity, "Wall placement did not consume exactly one sign/create its entity");
             h.getLevel().destroyBlock(pos, true);
             var drops = h.getLevel().getEntitiesOfClass(ItemEntity.class, new AABB(pos).inflate(1));
-            h.assertTrue(drops.size() == 1 && drops.getFirst().getItem().is(ModItems.WOOD_SIGN.get()), "Wall form dropped the wrong item");
+            h.assertTrue(drops.size() == 1 && com.stardew.craft.port.PortJava.getFirst(drops).getItem().is(ModItems.WOOD_SIGN.get()), "Wall form dropped the wrong item");
             drops.forEach(ItemEntity::discard);
         }
         h.succeed();

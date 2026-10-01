@@ -23,7 +23,7 @@ public final class AvoidMonstersEffectEvents {
             return;
         }
 
-        // PORT(1.20.1): Forge names NeoForge's getNewAboutToBeSetTarget() getNewTarget().
+        // PORT(1.20.1): Forge names MinecraftForge's getNewAboutToBeSetTarget() getNewTarget().
         LivingEntity target = event.getNewTarget();
         if (target instanceof Player player && player.hasEffect(ModMobEffects.AVOID_MONSTERS.get())) {
             event.setCanceled(true);

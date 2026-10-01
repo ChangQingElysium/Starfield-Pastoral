@@ -90,7 +90,7 @@ public final class BlacksmithVentilatorGameTests {
                 h.assertTrue(cells(h, origin) == 0 && level.getBlockEntity(origin) == null, "Removal left fragments");
                 h.assertTrue(cells(h, neighbor) == 18 && level.getBlockState(wall).is(Blocks.STONE), "Removal damaged neighbor or attachment wall");
                 var drops = level.getEntitiesOfClass(ItemEntity.class, new AABB(origin).inflate(8));
-                h.assertTrue(drops.size() == 1 && drops.getFirst().getItem().is(block.asItem()) && drops.getFirst().getItem().getCount() == 1, "Expected exactly one whole-machine drop");
+                h.assertTrue(drops.size() == 1 && com.stardew.craft.port.PortJava.getFirst(drops).getItem().is(block.asItem()) && com.stardew.craft.port.PortJava.getFirst(drops).getItem().getCount() == 1, "Expected exactly one whole-machine drop");
                 BlacksmithVentilatorBlock.runWithDropsSuppressed(() -> level.removeBlock(neighbor, false));
                 level.removeBlock(wall, false);
             }

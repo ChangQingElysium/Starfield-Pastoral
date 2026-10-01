@@ -68,7 +68,7 @@ public final class WeaponContactGeometry {
 
     private static void section(VertexConsumer out, Matrix4f pose, Vec3 a, Vec3 b, Vec3 sideA, Vec3 sideB,
                                 double widthA, double widthB, float fade, boolean edge, int r, int g, int blue) {
-        float visibility = Math.clamp(fade, 0, 1);
+        float visibility = com.stardew.craft.port.PortJava.clamp(fade, 0, 1);
         // Hold the broad silhouette as it fades, rather than collapsing it into a needle.
         double contraction = 0.65 + 0.35 * Math.sqrt(visibility);
         int steps = edge ? 2 : PROFILE.length - 1;

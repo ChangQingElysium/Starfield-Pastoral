@@ -60,7 +60,7 @@ public class FriendshipDoorItem extends DoubleHighBlockItem implements IStardewI
         CompoundTag tag = PortItemData.getOrDefault(stack, DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
         List<String> normalized = FriendshipDoorBlockEntity.normalizeNpcIds(npcIds);
         if (!normalized.isEmpty()) {
-            tag.putString(FriendshipDoorBlockEntity.TAG_NPC_ID, normalized.getFirst());
+            tag.putString(FriendshipDoorBlockEntity.TAG_NPC_ID, com.stardew.craft.port.PortJava.getFirst(normalized));
             ListTag list = new ListTag();
             for (String npcId : normalized) {
                 list.add(StringTag.valueOf(npcId));
@@ -73,7 +73,7 @@ public class FriendshipDoorItem extends DoubleHighBlockItem implements IStardewI
 
     public static String getNpcId(ItemStack stack) {
         List<String> npcIds = getNpcIds(stack);
-        return npcIds.isEmpty() ? "" : npcIds.getFirst();
+        return npcIds.isEmpty() ? "" : com.stardew.craft.port.PortJava.getFirst(npcIds);
     }
 
     public static List<String> getNpcIds(ItemStack stack) {

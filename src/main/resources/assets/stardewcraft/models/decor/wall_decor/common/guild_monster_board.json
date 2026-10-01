@@ -1,0 +1,587 @@
+{
+  "format_version": "26.3",
+  "credit": "Made with Blockbench",
+  "ambientocclusion": false,
+  "texture_size": [
+    64,
+    64
+  ],
+  "textures": {
+    "0": "stardewcraft:block/decor/common/guild_monster_board",
+    "particle": "minecraft:block/spruce_planks"
+  },
+  "elements": [
+    {
+      "name": "backing",
+      "from": [
+        2,
+        1,
+        15
+      ],
+      "to": [
+        14,
+        27,
+        16
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            3,
+            6.5
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            8,
+            0,
+            8.25,
+            6.5
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            3,
+            0,
+            6,
+            6.5
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            8.25,
+            0,
+            8.5,
+            6.5
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            0,
+            8.5,
+            3,
+            8.75
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            3,
+            8.5,
+            6,
+            8.75
+          ],
+          "texture": "#0"
+        }
+      }
+    },
+    {
+      "name": "top_rail",
+      "from": [
+        1,
+        27,
+        14
+      ],
+      "to": [
+        15,
+        28,
+        16
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            8.25,
+            3.5,
+            8.5
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            6,
+            8.5,
+            6.5,
+            8.75
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            3.5,
+            8.25,
+            7,
+            8.5
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            6.5,
+            8.5,
+            7,
+            8.75
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            1,
+            6.5,
+            4.5,
+            7
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            4.5,
+            6.5,
+            8,
+            7
+          ],
+          "texture": "#0"
+        }
+      }
+    },
+    {
+      "name": "bottom_rail",
+      "from": [
+        1,
+        0,
+        14
+      ],
+      "to": [
+        15,
+        1,
+        16
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            7,
+            8.25,
+            10.5,
+            8.5
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            7,
+            8.5,
+            7.5,
+            8.75
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            10.5,
+            8.25,
+            14,
+            8.5
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            7.5,
+            8.5,
+            8,
+            8.75
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            8,
+            6.5,
+            11.5,
+            7
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            11.5,
+            6.5,
+            15,
+            7
+          ],
+          "texture": "#0"
+        }
+      }
+    },
+    {
+      "name": "left_stile",
+      "from": [
+        1,
+        1,
+        14
+      ],
+      "to": [
+        2,
+        27,
+        16
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            8.5,
+            0,
+            8.75,
+            6.5
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            6,
+            0,
+            6.5,
+            6.5
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            8.75,
+            0,
+            9,
+            6.5
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            6.5,
+            0,
+            7,
+            6.5
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            15,
+            6.5,
+            15.25,
+            7
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            15.25,
+            6.5,
+            15.5,
+            7
+          ],
+          "texture": "#0"
+        }
+      }
+    },
+    {
+      "name": "right_stile",
+      "from": [
+        14,
+        1,
+        14
+      ],
+      "to": [
+        15,
+        27,
+        16
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            9,
+            0,
+            9.25,
+            6.5
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            7,
+            0,
+            7.5,
+            6.5
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            9.25,
+            0,
+            9.5,
+            6.5
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            7.5,
+            0,
+            8,
+            6.5
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            15.5,
+            6.5,
+            15.75,
+            7
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            15.75,
+            6.5,
+            16,
+            7
+          ],
+          "texture": "#0"
+        }
+      }
+    },
+    {
+      "name": "slime_tally",
+      "from": [
+        3,
+        19,
+        14.8
+      ],
+      "to": [
+        8,
+        26,
+        14.8
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            10.5,
+            0,
+            11.75,
+            1.75
+          ],
+          "texture": "#0"
+        }
+      }
+    },
+    {
+      "name": "bat_tally",
+      "from": [
+        9,
+        19,
+        14.75
+      ],
+      "to": [
+        13,
+        26,
+        14.75
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            14.25,
+            0,
+            15.25,
+            1.75
+          ],
+          "texture": "#0"
+        }
+      }
+    },
+    {
+      "name": "dust_tally",
+      "from": [
+        3,
+        11,
+        14.7
+      ],
+      "to": [
+        7,
+        18,
+        14.7
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            6.5,
+            1,
+            8.25
+          ],
+          "texture": "#0"
+        }
+      }
+    },
+    {
+      "name": "guild_seal",
+      "from": [
+        8,
+        11,
+        14.65
+      ],
+      "to": [
+        13,
+        18,
+        14.65
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            11.75,
+            0,
+            13,
+            1.75
+          ],
+          "texture": "#0"
+        }
+      }
+    },
+    {
+      "name": "skeleton_tally",
+      "from": [
+        3,
+        3,
+        14.75
+      ],
+      "to": [
+        8,
+        10,
+        14.75
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            13,
+            0,
+            14.25,
+            1.75
+          ],
+          "texture": "#0"
+        }
+      }
+    },
+    {
+      "name": "serpent_tally",
+      "from": [
+        9,
+        2,
+        14.7
+      ],
+      "to": [
+        13,
+        10,
+        14.7
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            9.5,
+            0,
+            10.5,
+            2
+          ],
+          "texture": "#0"
+        }
+      }
+    }
+  ],
+  "parent": "minecraft:block/block",
+  "display": {
+    "gui": {
+      "rotation": [
+        0,
+        165,
+        0
+      ],
+      "translation": [
+        0,
+        -3.3,
+        0
+      ],
+      "scale": [
+        0.52,
+        0.52,
+        0.52
+      ]
+    },
+    "ground": {
+      "translation": [
+        0,
+        2,
+        0
+      ],
+      "scale": [
+        0.25,
+        0.25,
+        0.25
+      ]
+    },
+    "fixed": {
+      "rotation": [
+        0,
+        180,
+        0
+      ],
+      "translation": [
+        0,
+        -3,
+        -4
+      ],
+      "scale": [
+        0.5,
+        0.5,
+        0.5
+      ]
+    },
+    "thirdperson_righthand": {
+      "rotation": [
+        75,
+        45,
+        0
+      ],
+      "translation": [
+        0,
+        1,
+        0
+      ],
+      "scale": [
+        0.3,
+        0.3,
+        0.3
+      ]
+    },
+    "firstperson_righthand": {
+      "rotation": [
+        0,
+        150,
+        0
+      ],
+      "translation": [
+        0,
+        -2,
+        0
+      ],
+      "scale": [
+        0.4,
+        0.4,
+        0.4
+      ]
+    }
+  }
+}

@@ -11,11 +11,11 @@ public final class MineChestLidMotion {
 
     public void tick(boolean open) {
         previous = progress;
-        progress = Math.clamp(progress + (open ? 1f : -1f) / TRAVEL_TICKS, 0f, 1f);
+        progress = com.stardew.craft.port.PortJava.clamp(progress + (open ? 1f : -1f) / TRAVEL_TICKS, 0f, 1f);
     }
 
     public float angle(float partialTick) {
-        float value = previous + (progress - previous) * Math.clamp(partialTick, 0f, 1f);
+        float value = previous + (progress - previous) * com.stardew.craft.port.PortJava.clamp(partialTick, 0f, 1f);
         float remaining = 1 - value;
         return OPEN_ANGLE * (1 - remaining * remaining * remaining);
     }

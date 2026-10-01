@@ -1,0 +1,214 @@
+{
+  "parent": "minecraft:block/block",
+  "render_type": "minecraft:solid",
+  "textures": {
+    "0": "stardewcraft:block/decor/house/red_brown_door",
+    "particle": "stardewcraft:block/decor/house/red_brown_door_particle"
+  },
+  "elements": [
+    {
+      "name": "门扇左边料",
+      "from": [
+        14,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        3
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0.0,
+            0.5,
+            4.0
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            8,
+            0.0,
+            8.75,
+            4.0
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            7.5,
+            0.0,
+            8,
+            4.0
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            9.5,
+            0.0,
+            10.25,
+            4.0
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            3.5,
+            8.5,
+            4,
+            9.25
+          ],
+          "texture": "#0"
+        }
+      }
+    },
+    {
+      "name": "门扇右边料",
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        2,
+        16,
+        3
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            3.5,
+            0.0,
+            4,
+            4.0
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            9.5,
+            0.0,
+            10.25,
+            4.0
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            4,
+            0.0,
+            4.5,
+            4.0
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            8.75,
+            0.0,
+            9.5,
+            4.0
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            0,
+            8.5,
+            0.5,
+            9.25
+          ],
+          "texture": "#0"
+        }
+      }
+    },
+    {
+      "name": "门扇顶横料",
+      "from": [
+        2,
+        15,
+        0
+      ],
+      "to": [
+        14,
+        16,
+        3
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0.5,
+            0.0,
+            3.5,
+            0.25
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            4.5,
+            0.0,
+            7.5,
+            0.25
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            0.5,
+            8.5,
+            3.5,
+            9.25
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            0.5,
+            9.5,
+            3.5,
+            10.25
+          ],
+          "texture": "#0"
+        }
+      }
+    },
+    {
+      "name": "内嵌竖板",
+      "from": [
+        2,
+        0,
+        1
+      ],
+      "to": [
+        14,
+        15,
+        2
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0.5,
+            0.25,
+            3.5,
+            4.0
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            4.5,
+            0.25,
+            7.5,
+            4.0
+          ],
+          "texture": "#0"
+        }
+      }
+    }
+  ]
+}

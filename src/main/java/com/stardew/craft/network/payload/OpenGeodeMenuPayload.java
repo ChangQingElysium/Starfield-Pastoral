@@ -13,7 +13,11 @@ import java.util.Objects;
  * Server → Client: open the geode processing screen.
  */
 @SuppressWarnings("null")
-public record OpenGeodeMenuPayload() implements CustomPacketPayload {
+public record OpenGeodeMenuPayload(java.util.List<ResourceLocation> inputs) implements CustomPacketPayload {
+
+    public OpenGeodeMenuPayload {
+        inputs = java.util.List.copyOf(inputs);
+    }
 
     private static final ResourceLocation ID = Objects.requireNonNull(
         new ResourceLocation(StardewCraft.MODID, "open_geode_menu"));
@@ -21,8 +25,8 @@ public record OpenGeodeMenuPayload() implements CustomPacketPayload {
     public static final Type<OpenGeodeMenuPayload> TYPE = new Type<>(ID);
 
     public static final StreamCodec<FriendlyByteBuf, OpenGeodeMenuPayload> STREAM_CODEC = StreamCodec.of(
-        (buf, payload) -> {},
-        buf -> new OpenGeodeMenuPayload()
+        (buf, payload) -> buf.writeCollection(payload.inputs(), FriendlyByteBuf::writeResourceLocation),
+        buf -> new OpenGeodeMenuPayload(buf.readList(FriendlyByteBuf::readResourceLocation))
     );
 
     @Override
@@ -31,13 +35,13 @@ public record OpenGeodeMenuPayload() implements CustomPacketPayload {
     }
 
     public static void handle(OpenGeodeMenuPayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> handleClient());
+        context.enqueueWork(() -> handleClient(payload));
     }
 
     @net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
-    private static void handleClient() {
+    private static void handleClient(OpenGeodeMenuPayload payload) {
         net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
         if (mc.player == null) return;
-        mc.setScreen(new com.stardew.craft.client.gui.GeodeMenuScreen());
+        mc.setScreen(new com.stardew.craft.client.gui.GeodeMenuScreen(payload.inputs()));
     }
 }

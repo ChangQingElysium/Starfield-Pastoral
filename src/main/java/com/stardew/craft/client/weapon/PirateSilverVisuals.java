@@ -76,7 +76,7 @@ public final class PirateSilverVisuals{
     static boolean valid(PirateSilverEffectPayload p){return finite(p.from())&&finite(p.to())&&p.duration()>=0&&p.duration()<=60;}
     private static boolean finite(Vec3 p){return Double.isFinite(p.x)&&Double.isFinite(p.y)&&Double.isFinite(p.z);}
     public static boolean ownsDash(Player player){ensureLevel();var dash=DASHES.get(player.getId());return level!=null&&dash!=null&&dash.actor.equals(player.getUUID())&&level.getGameTime()-dash.start<=5;}
-    private static void addWake(Vec3 from,Vec3 to,long now){WAKES.add(new Wake(from,to,now));while(WAKES.size()>96)WAKES.removeFirst();}
+    private static void addWake(Vec3 from,Vec3 to,long now){WAKES.add(new Wake(from,to,now));while(WAKES.size()>96)com.stardew.craft.port.PortJava.removeFirst(WAKES);}
     @SubscribeEvent public static void tick(ClientTickEvent.Post event){
         ensureLevel();var mc=Minecraft.getInstance();if(level==null||mc.player==null||mc.isPaused())return;long now=level.getGameTime();
         CASTS.values().removeIf(t->now-t>=60);EVENTS.values().removeIf(t->now-t>30);WAKES.removeIf(w->now-w.start>=6);
@@ -99,7 +99,7 @@ public final class PirateSilverVisuals{
         var buffers=mc.renderBuffers().bufferSource();var out=buffers.getBuffer(WeaponEffectRenderTypes.MOLTEN_GLOW);var pose=event.getPoseStack().last().pose();
         for(Anchor a:ANCHORS.values())for(Vec3[] path:a.paths)if(path[0].distanceToSqr(camera)<32*32){
             Vec3[] local=Arrays.stream(path).map(p->p.subtract(camera)).toArray(Vec3[]::new);
-            PirateSilverGeometry.anchorStroke(out,pose,local,Math.clamp((a.end-level.getGameTime()-partial)/5,0,1));}
+            PirateSilverGeometry.anchorStroke(out,pose,local,com.stardew.craft.port.PortJava.clamp((a.end-level.getGameTime()-partial)/5,0,1));}
         for(Wake w:WAKES)if(w.from.distanceToSqr(camera)<32*32)PirateSilverGeometry.wake(out,pose,w.from.subtract(camera),w.to.subtract(camera),fade(level.getGameTime()-w.start+partial));
         buffers.endBatch(WeaponEffectRenderTypes.MOLTEN_GLOW);
     }

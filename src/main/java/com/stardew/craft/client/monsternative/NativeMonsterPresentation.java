@@ -29,7 +29,7 @@ public final class NativeMonsterPresentation {
     public static int bigSlimeOutlineTint(int source){
         int rim=slimeTint(source,true),body=slimeTint(source,false);
         double rimLuma=luma(rim),target=Math.min(.85,luma(body)+.23);
-        double pale=Math.clamp((target-rimLuma)/(1-rimLuma),0,1);
+        double pale=com.stardew.craft.port.PortJava.clamp((target-rimLuma)/(1-rimLuma),0,1);
         return (int)Math.round((rim>>16&255)+(255-(rim>>16&255))*pale)<<16
                 |(int)Math.round((rim>>8&255)+(255-(rim>>8&255))*pale)<<8
                 |(int)Math.round((rim&255)+(255-(rim&255))*pale);
@@ -37,7 +37,7 @@ public final class NativeMonsterPresentation {
     private static double luma(int c){return ((c>>16&255)*.2126+(c>>8&255)*.7152+(c&255)*.0722)/255;}
     public static double slimeLift(boolean dashing, boolean dying, double time, float growth) {
         // Ordinary movement squashes on the ground; source yOffset is for trajectory-driven jumps.
-        return dashing && !dying ? growth * .48 * Math.sin(Math.PI * Math.clamp(time / .65, 0, 1)) : 0;
+        return dashing && !dying ? growth * .48 * Math.sin(Math.PI * com.stardew.craft.port.PortJava.clamp(time / .65, 0, 1)) : 0;
     }
     public static Matrix4f deathTransform(float deathTicks, float pivotY) {
         // LivingEntityRenderer's familiar 90-degree death roll, around the body's center.

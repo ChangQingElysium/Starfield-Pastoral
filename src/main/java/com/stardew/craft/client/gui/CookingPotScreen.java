@@ -93,7 +93,7 @@ public class CookingPotScreen extends AbstractContainerScreen<CookingPotMenu> {
         recipes.sort(Comparator.<Recipe>comparingInt(r -> available(r) > 0 ? 0 : unlocked(r) ? 1 : 2).thenComparing(r -> r.id.toString()));
         if (selected != null) selected = recipes.stream().filter(r -> r.id.equals(selected.id)).findFirst().orElse(null);
         filter();
-        if (selected == null && !filtered.isEmpty()) selected = filtered.getFirst();
+        if (selected == null && !filtered.isEmpty()) selected = com.stardew.craft.port.PortJava.getFirst(filtered);
         buildControls();
         if (!opened) {
             opened = true;

@@ -4998,7 +4998,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         RecipeCell current = page.stream()
                 .filter(cell -> cell.recipeIndex() == selectedCraftingIndex)
                 .findFirst()
-                .orElse(page.getFirst());
+                .orElse(com.stardew.craft.port.PortJava.getFirst(page));
         RecipeCell best = null;
         int bestScore = Integer.MAX_VALUE;
         for (RecipeCell candidate : page) {
@@ -5038,7 +5038,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
             return false;
         }
         List<RecipeCell> page = craftingPages.get(currentCraftingPage);
-        selectedCraftingIndex = page.isEmpty() ? -1 : page.getFirst().recipeIndex();
+        selectedCraftingIndex = page.isEmpty() ? -1 : com.stardew.craft.port.PortJava.getFirst(page).recipeIndex();
         hoveredCraftingIndex = keyboardFocus ? selectedCraftingIndex : -1;
         craftingKeyboardFocus = keyboardFocus;
         playUiSound(ModSounds.SHWIP.get(), 1.0f, 1.0f);

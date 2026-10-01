@@ -3,14 +3,14 @@ package com.stardew.craft.client.model.entity;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.cutscene.runtime.EventActorEntity;
 import net.minecraft.resources.ResourceLocation;
-import software.bernie.geckolib.model.GeoModel;
+import com.stardew.craft.client.model.nativebb.BlockbenchModel;
 
 /**
- * GeckoLib model for {@link EventActorEntity}.
+ * Native Blockbench resource selection for {@link EventActorEntity}.
  * Reuses the same NPC model/texture/animation files based on npcId,
  * identical to {@link NpcGeoModel}.
  */
-public class EventActorGeoModel extends GeoModel<EventActorEntity> {
+public class EventActorGeoModel extends BlockbenchModel<EventActorEntity> {
 
 
     @Override

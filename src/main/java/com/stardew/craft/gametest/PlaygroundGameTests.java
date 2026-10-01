@@ -76,7 +76,7 @@ public final class PlaygroundGameTests {
             level.destroyBlock(extension,true);
             h.assertTrue(count(h,main,block)==0&&count(h,neighbor,block)==expected,"Removal leaked parts or damaged adjacent structure");
             var drops=level.getEntitiesOfClass(ItemEntity.class,new AABB(main).inflate(6));
-            h.assertTrue(drops.stream().mapToInt(i->i.getItem().getCount()).sum()==1&&drops.getFirst().getItem().is(block.asItem()),"Expected exactly one whole item: "+block.modelName()+" "+facing+" "+drops.stream().map(i->i.getItem().toString()).toList());
+            h.assertTrue(drops.stream().mapToInt(i->i.getItem().getCount()).sum()==1&&com.stardew.craft.port.PortJava.getFirst(drops).getItem().is(block.asItem()),"Expected exactly one whole item: "+block.modelName()+" "+facing+" "+drops.stream().map(i->i.getItem().toString()).toList());
             PlaygroundBlock.runWithDropsSuppressed(()->level.removeBlock(neighbor,false));
         }
         h.succeed();

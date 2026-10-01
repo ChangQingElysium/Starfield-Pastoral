@@ -127,8 +127,8 @@ public final class AquariumGameTests {
             h.getLevel().destroyBlock(broken,true);
             var bounds=new AABB(pos).inflate(7);
             var drops=h.getLevel().getEntitiesOfClass(ItemEntity.class,bounds,e->e.getItem().is(ModItems.LARGE_FISH_TANK.get()));
-            h.assertTrue(drops.size()==1&&drops.getFirst().getItem().getCount()==1,"Furniture duplicated/lost after break "+direction+"/"+extension);
-            var packed=drops.getFirst().getItem().copy();drops.getFirst().discard();
+            h.assertTrue(drops.size()==1&&com.stardew.craft.port.PortJava.getFirst(drops).getItem().getCount()==1,"Furniture duplicated/lost after break "+direction+"/"+extension);
+            var packed=com.stardew.craft.port.PortJava.getFirst(drops).getItem().copy();com.stardew.craft.port.PortJava.getFirst(drops).discard();
             for(BlockPos cell:BlockPos.betweenClosed(pos.offset(-4,0,-4),pos.offset(4,3,4)))
                 h.assertTrue(!h.getLevel().getBlockState(cell).is(ModBlocks.LARGE_FISH_TANK.get()),"Orphan aquarium extension");
             var restored=place(h,pos,direction,packed);

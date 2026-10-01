@@ -1,0 +1,491 @@
+{
+  "priority": -100,
+  "inputs": [
+    "stardewcraft:mystery_box"
+  ],
+  "crusher_allowed": false,
+  "animation": "mystery_box",
+  "entries": [
+    {
+      "query": {
+        "type": "stardewcraft:with_actions",
+        "data": {
+          "query": {
+            "type": "stardewcraft:first_success",
+            "data": {
+              "queries": [
+                {
+                  "type": "stardewcraft:conditional",
+                  "data": {
+                    "query": {
+                      "type": "stardewcraft:first_success",
+                      "data": {
+                        "queries": [
+                          {
+                            "type": "stardewcraft:conditional",
+                            "data": {
+                              "query": {
+                                "type": "stardewcraft:item",
+                                "data": {
+                                  "item": "stardewcraft:magic_rock_candy",
+                                  "count": 1
+                                }
+                              },
+                              "chance": 0.002
+                            }
+                          },
+                          {
+                            "type": "stardewcraft:conditional",
+                            "data": {
+                              "query": {
+                                "type": "stardewcraft:item",
+                                "data": {
+                                  "item": "stardewcraft:prismatic_shard",
+                                  "count": 1
+                                }
+                              },
+                              "chance": 0.004
+                            }
+                          },
+                          {
+                            "type": "stardewcraft:conditional",
+                            "data": {
+                              "query": {
+                                "type": "stardewcraft:item",
+                                "data": {
+                                  "item": "stardewcraft:treasure_chest",
+                                  "count": 1
+                                }
+                              },
+                              "chance": 0.008
+                            }
+                          },
+                          {
+                            "type": "stardewcraft:conditional",
+                            "data": {
+                              "query": {
+                                "type": "stardewcraft:conditional",
+                                "data": {
+                                  "query": {
+                                    "type": "stardewcraft:one_of_queries",
+                                    "data": {
+                                      "queries": [
+                                        {
+                                          "type": "stardewcraft:item",
+                                          "data": {
+                                            "item": "stardewcraft:purple_book",
+                                            "count": 1
+                                          }
+                                        },
+                                        {
+                                          "type": "stardewcraft:item",
+                                          "data": {
+                                            "item": "stardewcraft:book_mystery",
+                                            "count": 1
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "chance": 0.01
+                                }
+                              },
+                              "otherwise": {
+                                "type": "stardewcraft:conditional",
+                                "data": {
+                                  "query": {
+                                    "type": "stardewcraft:with_actions",
+                                    "data": {
+                                      "query": {
+                                        "type": "stardewcraft:item",
+                                        "data": {
+                                          "item": "stardewcraft:book_mystery",
+                                          "count": 1
+                                        }
+                                      },
+                                      "actions": [
+                                        {
+                                          "type": "stardewcraft:set_flag",
+                                          "data": {
+                                            "id": "GotMysteryBook"
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "chance": 0.0104,
+                                  "chance_add": {
+                                    "stat:MysteryBoxesOpened": 0.0004
+                                  }
+                                }
+                              },
+                              "minimum": {
+                                "flag:GotMysteryBook": 1
+                              }
+                            }
+                          },
+                          {
+                            "type": "stardewcraft:conditional",
+                            "data": {
+                              "query": {
+                                "type": "stardewcraft:item",
+                                "data": {
+                                  "item": "stardewcraft:pearl",
+                                  "count": 1
+                                }
+                              },
+                              "chance": 0.01
+                            }
+                          },
+                          {
+                            "type": "stardewcraft:conditional",
+                            "data": {
+                              "query": {
+                                "type": "stardewcraft:one_of_queries",
+                                "data": {
+                                  "queries": [
+                                    {
+                                      "type": "stardewcraft:item",
+                                      "data": {
+                                        "item": "stardewcraft:mega_bomb",
+                                        "count": 5
+                                      }
+                                    },
+                                    {
+                                      "type": "stardewcraft:conditional",
+                                      "data": {
+                                        "query": {
+                                          "type": "stardewcraft:one_of_queries",
+                                          "data": {
+                                            "queries": [
+                                              {
+                                                "type": "stardewcraft:item",
+                                                "data": {
+                                                  "item": "stardewcraft:dressed_spinner",
+                                                  "count": 1
+                                                }
+                                              },
+                                              {
+                                                "type": "stardewcraft:item",
+                                                "data": {
+                                                  "item": "stardewcraft:cork_bobber",
+                                                  "count": 1
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        },
+                                        "otherwise": {
+                                          "type": "stardewcraft:item",
+                                          "data": {
+                                            "item": "stardewcraft:sprinkler",
+                                            "count": 1
+                                          }
+                                        },
+                                        "chance": 0.5,
+                                        "minimum": {
+                                          "skill:fishing": 6
+                                        }
+                                      }
+                                    },
+                                    {
+                                      "type": "stardewcraft:item",
+                                      "data": {
+                                        "item": "stardewcraft:melon_seeds",
+                                        "count": 20
+                                      }
+                                    },
+                                    {
+                                      "type": "stardewcraft:item",
+                                      "data": {
+                                        "item": "stardewcraft:pumpkin_seeds",
+                                        "count": 20
+                                      }
+                                    },
+                                    {
+                                      "type": "stardewcraft:item",
+                                      "data": {
+                                        "item": "stardewcraft:warp_totem_farm",
+                                        "count": 3
+                                      }
+                                    },
+                                    {
+                                      "type": "stardewcraft:one_of_queries",
+                                      "data": {
+                                        "queries": [
+                                          {
+                                            "type": "stardewcraft:item",
+                                            "data": {
+                                              "item": "stardewcraft:cherry_sapling",
+                                              "count": 1
+                                            }
+                                          },
+                                          {
+                                            "type": "stardewcraft:item",
+                                            "data": {
+                                              "item": "stardewcraft:apricot_sapling",
+                                              "count": 1
+                                            }
+                                          },
+                                          {
+                                            "type": "stardewcraft:item",
+                                            "data": {
+                                              "item": "stardewcraft:orange_sapling",
+                                              "count": 1
+                                            }
+                                          },
+                                          {
+                                            "type": "stardewcraft:item",
+                                            "data": {
+                                              "item": "stardewcraft:peach_sapling",
+                                              "count": 1
+                                            }
+                                          },
+                                          {
+                                            "type": "stardewcraft:item",
+                                            "data": {
+                                              "item": "stardewcraft:pomegranate_sapling",
+                                              "count": 1
+                                            }
+                                          },
+                                          {
+                                            "type": "stardewcraft:item",
+                                            "data": {
+                                              "item": "stardewcraft:apple_sapling",
+                                              "count": 1
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    {
+                                      "type": "stardewcraft:item",
+                                      "data": {
+                                        "item": "stardewcraft:mixed_seeds",
+                                        "count": 20
+                                      }
+                                    },
+                                    {
+                                      "type": "stardewcraft:item",
+                                      "data": {
+                                        "item": "stardewcraft:ossified_blade",
+                                        "count": 1
+                                      }
+                                    },
+                                    {
+                                      "type": "stardewcraft:item",
+                                      "data": {
+                                        "item": "stardewcraft:sprinkler",
+                                        "count": 1
+                                      }
+                                    },
+                                    {
+                                      "type": "stardewcraft:random_count",
+                                      "data": {
+                                        "query": {
+                                          "type": "stardewcraft:item",
+                                          "data": {
+                                            "item": "stardewcraft:mystery_box",
+                                            "count": 1
+                                          }
+                                        },
+                                        "min_count": 3,
+                                        "max_count": 5
+                                      }
+                                    },
+                                    {
+                                      "type": "stardewcraft:item",
+                                      "data": {
+                                        "item": "stardewcraft:quality_sprinkler",
+                                        "count": 1
+                                      }
+                                    },
+                                    {
+                                      "type": "stardewcraft:item",
+                                      "data": {
+                                        "item": "stardewcraft:iridium_sprinkler",
+                                        "count": 1
+                                      }
+                                    },
+                                    {
+                                      "type": "stardewcraft:item",
+                                      "data": {
+                                        "item": "stardewcraft:wild_bait",
+                                        "count": 10
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              "chance": 0.1
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "chance": 0.8
+                  }
+                },
+                {
+                  "type": "stardewcraft:one_of_queries",
+                  "data": {
+                    "queries": [
+                      {
+                        "type": "stardewcraft:item",
+                        "data": {
+                          "item": "stardewcraft:coffee_bean",
+                          "count": 3
+                        }
+                      },
+                      {
+                        "type": "stardewcraft:item",
+                        "data": {
+                          "item": "stardewcraft:mega_bomb",
+                          "count": 2
+                        }
+                      },
+                      {
+                        "type": "stardewcraft:item",
+                        "data": {
+                          "item": "stardewcraft:mixed_seeds",
+                          "count": 8
+                        }
+                      },
+                      {
+                        "type": "stardewcraft:item",
+                        "data": {
+                          "item": "stardewcraft:melon_seeds",
+                          "count": 5
+                        }
+                      },
+                      {
+                        "type": "stardewcraft:item",
+                        "data": {
+                          "item": "stardewcraft:warp_totem_farm",
+                          "count": 1
+                        }
+                      },
+                      {
+                        "type": "stardewcraft:item",
+                        "data": {
+                          "item": "stardewcraft:stone",
+                          "count": 10
+                        }
+                      },
+                      {
+                        "type": "stardewcraft:item",
+                        "data": {
+                          "item": "stardewcraft:melon_seeds",
+                          "count": 10
+                        }
+                      },
+                      {
+                        "type": "stardewcraft:item",
+                        "data": {
+                          "item": "stardewcraft:pumpkin_seeds",
+                          "count": 10
+                        }
+                      },
+                      {
+                        "type": "stardewcraft:item",
+                        "data": {
+                          "item": "stardewcraft:warp_totem_farm",
+                          "count": 1
+                        }
+                      },
+                      {
+                        "type": "stardewcraft:item",
+                        "data": {
+                          "item": "stardewcraft:warp_totem_mountain",
+                          "count": 1
+                        }
+                      },
+                      {
+                        "type": "stardewcraft:conditional",
+                        "data": {
+                          "query": {
+                            "type": "stardewcraft:one_of_queries",
+                            "data": {
+                              "queries": [
+                                {
+                                  "type": "stardewcraft:item",
+                                  "data": {
+                                    "item": "stardewcraft:small_glow_ring",
+                                    "count": 1
+                                  }
+                                },
+                                {
+                                  "type": "stardewcraft:item",
+                                  "data": {
+                                    "item": "stardewcraft:warrior_ring",
+                                    "count": 1
+                                  }
+                                },
+                                {
+                                  "type": "stardewcraft:item",
+                                  "data": {
+                                    "item": "stardewcraft:ring_of_yoba",
+                                    "count": 1
+                                  }
+                                },
+                                {
+                                  "type": "stardewcraft:item",
+                                  "data": {
+                                    "item": "stardewcraft:amethyst_ring",
+                                    "count": 1
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          "otherwise": {
+                            "type": "stardewcraft:item",
+                            "data": {
+                              "item": "stardewcraft:mystery_box",
+                              "count": 2
+                            }
+                          },
+                          "chance": 0.4
+                        }
+                      },
+                      {
+                        "type": "stardewcraft:item",
+                        "data": {
+                          "item": "stardewcraft:mixed_seeds",
+                          "count": 10
+                        }
+                      },
+                      {
+                        "type": "stardewcraft:item",
+                        "data": {
+                          "item": "stardewcraft:warp_totem_beach",
+                          "count": 1
+                        }
+                      },
+                      {
+                        "type": "stardewcraft:item",
+                        "data": {
+                          "item": "stardewcraft:coal",
+                          "count": 1
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "actions": [
+            {
+              "type": "stardewcraft:increment_stat",
+              "data": {
+                "stat": "MysteryBoxesOpened",
+                "amount": 1
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

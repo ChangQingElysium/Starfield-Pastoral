@@ -42,6 +42,7 @@ public final class Config {
         public final ForgeConfigSpec.BooleanValue USE_CHINESE_SMOOTH_FONT;
         public final ForgeConfigSpec.IntValue READING_TEXT_SCALE_PERCENT;
         public final ForgeConfigSpec.BooleanValue LEGACY_COMMON_IMPORTED;
+        public final ForgeConfigSpec.BooleanValue PLAYER_VITALS_LAYOUT_IMPORTED;
         public final ForgeConfigSpec.IntValue HUD_SCALE_PERCENT;
         public final ForgeConfigSpec.EnumValue<HudHorizontalAnchor> HUD_HORIZONTAL_ANCHOR;
         public final ForgeConfigSpec.EnumValue<HudVerticalAnchor> HUD_VERTICAL_ANCHOR;
@@ -85,6 +86,9 @@ public final class Config {
             LEGACY_COMMON_IMPORTED = builder
                     .comment("Internal marker: player-facing values were imported from the legacy common config")
                     .define("legacyCommonImported", false);
+            PLAYER_VITALS_LAYOUT_IMPORTED = builder
+                    .comment("Internal marker: the old default player bars were moved to the native icon row")
+                    .define("playerVitalsLayoutImported", false);
             builder.pop();
 
             builder.push("hud");
@@ -202,7 +206,7 @@ public final class Config {
 
     public enum HudElement {
         MAIN("main", 72, 90, 100, HudHorizontalAnchor.RIGHT, HudVerticalAnchor.TOP, 10, 10),
-        PLAYER_BARS("playerBars", 278, 18, 100, HudHorizontalAnchor.CENTER, HudVerticalAnchor.BOTTOM, 0, 31),
+        PLAYER_BARS("playerBars", 223, 14, 100, HudHorizontalAnchor.CENTER, HudVerticalAnchor.BOTTOM, 0, 28),
         MINING_FLOOR("miningFloor", 32, 32, 100, HudHorizontalAnchor.CENTER, HudVerticalAnchor.BOTTOM, -143, 1),
         FESTIVAL_SCORE("festivalScore", 220, 48, 100, HudHorizontalAnchor.LEFT, HudVerticalAnchor.TOP, 16, 32),
         FESTIVAL_CURRENCY("festivalCurrency", 96, 32, 100, HudHorizontalAnchor.CENTER, HudVerticalAnchor.BOTTOM, -159, 37),

@@ -55,7 +55,7 @@ public final class SandySoilGameTests {
                 var state = tilled.setValue(FarmBlock.MOISTURE, moisture);
                 h.assertTrue(state.getCollisionShape(level, pos).max(Direction.Axis.Y) == 15/16d, "Wrong soil height");
                 var drops = Block.getDrops(state, level, pos, null);
-                h.assertTrue(drops.size() == 1 && drops.getFirst().is(ModItems.SAND.get()), "Farmland dropped another substrate");
+                h.assertTrue(drops.size() == 1 && com.stardew.craft.port.PortJava.getFirst(drops).is(ModItems.SAND.get()), "Farmland dropped another substrate");
             }
             h.assertTrue(Blocks.SAND.defaultBlockState().getToolModifiedState(context, ToolActions.HOE_TILL, true) == null,
                     "Vanilla sand identity changed");
@@ -136,9 +136,9 @@ public final class SandySoilGameTests {
         for(int x=-1;x<=1;x++)for(int y=0;y<=2;y++)for(int z=-1;z<=1;z++)level.setBlock(pos.offset(x,y,z),Blocks.AIR.defaultBlockState(),3);
         level.setBlock(pos,order.get(1),3);level.setBlock(pos.north(),order.get(2),3);
         h.assertTrue(TerrainFaceConnections.collect(level,pos,order.get(1),Direction.UP).stream().anyMatch(c->c.state().is(ModBlocks.DIRT.get())&&!c.folded()),"No dirt-to-sand top edge");
-        level.setBlock(pos.north(),Blocks.AIR.defaultBlockState(),3);level.setBlock(pos.north().above(),order.get(1),3);level.setBlock(pos,order.getFirst(),3);
-        h.assertTrue(TerrainFaceConnections.collect(level,pos,order.getFirst(),Direction.UP).stream().anyMatch(c->c.folded()&&c.face()==Direction.SOUTH),"No sand-to-cliff floor/wall fold");
-        level.setBlock(pos,sandy,3);level.setBlock(pos.north().above(),order.getLast(),3);
+        level.setBlock(pos.north(),Blocks.AIR.defaultBlockState(),3);level.setBlock(pos.north().above(),order.get(1),3);level.setBlock(pos,com.stardew.craft.port.PortJava.getFirst(order),3);
+        h.assertTrue(TerrainFaceConnections.collect(level,pos,com.stardew.craft.port.PortJava.getFirst(order),Direction.UP).stream().anyMatch(c->c.folded()&&c.face()==Direction.SOUTH),"No sand-to-cliff floor/wall fold");
+        level.setBlock(pos,sandy,3);level.setBlock(pos.north().above(),com.stardew.craft.port.PortJava.getLast(order),3);
         h.assertTrue(TerrainFaceConnections.collect(level,pos,sandy,Direction.UP).isEmpty(),"Connection bridged the recessed top air gap");
         h.succeed();
     }

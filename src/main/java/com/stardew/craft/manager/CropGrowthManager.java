@@ -555,7 +555,7 @@ public class CropGrowthManager extends SavedData {
                 boolean regrowing = posTag.contains("Regrowing", Tag.TAG_BYTE) && posTag.getBoolean("Regrowing");
                 UUID planterUuid = posTag.hasUUID("PlanterUuid") ? posTag.getUUID("PlanterUuid") : null;
                 CropGrowthState growth = new CropGrowthState(dayInPhase, phase, regrowing, planterUuid);
-                growth.infertileProgress = Math.clamp(posTag.getInt("InfertileProgress"), 0, 2);
+                growth.infertileProgress = com.stardew.craft.port.PortJava.clamp(posTag.getInt("InfertileProgress"), 0, 2);
                 growth.sourcePhases = posTag.getBoolean("SourcePhases");
                 growth.sourcePhaseVersion = posTag.getInt("SourcePhaseVersion");
                 growth.lastDailyDay = posTag.contains("LastDailyDay") ? posTag.getInt("LastDailyDay") : -1;

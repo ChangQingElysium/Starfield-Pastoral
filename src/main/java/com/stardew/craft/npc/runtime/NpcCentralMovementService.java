@@ -429,7 +429,7 @@ public final class NpcCentralMovementService {
             if (plan != null && plan.currentStepIndex >= plan.steps.size() && !plan.steps.isEmpty()
                     && !plan.settledAtNearestReachable
                     && (plan.square==null || !plan.square.area.contains(npc.position(),npc.getBbWidth()/2.))) {
-                Vec3 goal=plan.steps.getLast().target;
+                Vec3 goal=com.stardew.craft.port.PortJava.getLast(plan.steps).target;
                 boolean holdWorkpoint = plan.exactWorkpoint && npc.position().distanceToSqr(goal) <= 9
                         && InteriorRegionRegistry.fixedInteriorIdAt(npc.blockPosition()).equals(
                             InteriorRegionRegistry.fixedInteriorIdAt(BlockPos.containing(goal)));
@@ -519,7 +519,7 @@ public final class NpcCentralMovementService {
         var behavior=NpcSquareMovement.parse(state.routeBehaviorToken());if(behavior==null)return false;
         if(!plan.squareAttempted) {
             plan.squareAttempted=true;var area=NpcSquareArea.forPoint(state.namedPointId());
-            var anchor=plan.steps.getLast().target;
+            var anchor=com.stardew.craft.port.PortJava.getLast(plan.steps).target;
             if(area!=null&&area.contains(anchor,npc.getBbWidth()/2.))plan.square=new NpcSquareMovement(area,behavior,BlockPos.containing(anchor));
         }
         if(plan.square==null) {
@@ -644,7 +644,7 @@ public final class NpcCentralMovementService {
         if (npcIndoors && destIndoors) {
             boolean sameFixedInterior = npcInFixedInterior && destInFixedInterior && npcFixedInterior.equals(destFixedInterior);
             if (sameFixedInterior) {
-                expanded.add(NpcRoutePlanner.NpcRouteStep.walk(route.destinationSteps.getLast().pointId, finalTarget));
+                expanded.add(NpcRoutePlanner.NpcRouteStep.walk(com.stardew.craft.port.PortJava.getLast(route.destinationSteps).pointId, finalTarget));
             } else {
                 Vec3 exitIndoor = NpcRoutePlanner.indoorExitForLocation(level,npcInteriorLocation);
                 Vec3 exitOutdoor = NpcRoutePlanner.outdoorExitForLocation(level,npcInteriorLocation);
@@ -682,7 +682,7 @@ public final class NpcCentralMovementService {
         // Schedule completion has one contract, shared by routing, activities and
         // the cursor. Authored scenes keep their stricter exact-walk semantics.
         plan.allowNearestReachableFinal = true;
-        var finalPoint = expanded.isEmpty() ? null : NpcSupportTarget.point(expanded.getLast().pointId);
+        var finalPoint = expanded.isEmpty() ? null : NpcSupportTarget.point(com.stardew.craft.port.PortJava.getLast(expanded).pointId);
         plan.exactWorkpoint = finalPoint != null && finalPoint.has("arrival")
                 && "exact_work".equals(finalPoint.get("arrival").getAsString());
         plan.progressCheckX = npc.getX();
@@ -759,7 +759,7 @@ public final class NpcCentralMovementService {
                                            NpcRoutePlan plan) {
         if (plan.currentStepIndex >= plan.steps.size()) {
             if (plan.exactWorkpoint && !plan.steps.isEmpty()) {
-                npc.setPos(plan.steps.getLast().target);
+                npc.setPos(com.stardew.craft.port.PortJava.getLast(plan.steps).target);
                 npc.setDeltaMovement(Vec3.ZERO);
             }
             closeOpenedDoors(level, npc, plan, true);
@@ -1430,7 +1430,7 @@ public final class NpcCentralMovementService {
         for (int index = 0; index < path.getNodeCount(); index++) {
             var node = path.getNode(index);
             if (!output.isEmpty()) {
-                var last = output.getLast();
+                var last = com.stardew.craft.port.PortJava.getLast(output);
                 if (last.x == node.x && last.y == node.y && last.z == node.z) continue;
             }
             output.add(node);
@@ -1573,25 +1573,25 @@ public final class NpcCentralMovementService {
     static boolean hasReachedScheduleTarget(ServerLevel level, StardewNpcEntity npc, NpcRuntimeState state) {
         var plan=ACTIVE_PLANS.get(npc.getNpcId());
         if (plan != null && plan.exactWorkpoint && plan.boundEntityUuid.equals(npc.getUUID())
-                && !plan.steps.isEmpty() && plan.steps.getLast().pointId.equals(state.namedPointId())) {
+                && !plan.steps.isEmpty() && com.stardew.craft.port.PortJava.getLast(plan.steps).pointId.equals(state.namedPointId())) {
             return plan.currentStepIndex >= plan.steps.size()
-                    && npc.position().distanceToSqr(plan.steps.getLast().target) <= 1.0E-6D;
+                    && npc.position().distanceToSqr(com.stardew.craft.port.PortJava.getLast(plan.steps).target) <= 1.0E-6D;
         }
         if (plan != null && plan.boundEntityUuid.equals(npc.getUUID())
                 && plan.currentStepIndex >= plan.steps.size() && !plan.steps.isEmpty()
                 && plan.arrivalPosition != null && npc.position().distanceToSqr(plan.arrivalPosition) <= 1
-                && plan.steps.getLast().pointId.equals(state.namedPointId())
+                && com.stardew.craft.port.PortJava.getLast(plan.steps).pointId.equals(state.namedPointId())
                 && InteriorRegionRegistry.fixedInteriorIdAt(npc.blockPosition()).equals(
-                    InteriorRegionRegistry.fixedInteriorIdAt(BlockPos.containing(plan.steps.getLast().target)))) {
+                    InteriorRegionRegistry.fixedInteriorIdAt(BlockPos.containing(com.stardew.craft.port.PortJava.getLast(plan.steps).target)))) {
             return true;
         }
         if(plan!=null&&plan.boundEntityUuid.equals(npc.getUUID())&&plan.square!=null
                 &&plan.square.behavior.equals(NpcSquareMovement.parse(state.routeBehaviorToken()))
-                &&plan.steps.getLast().pointId.equals(state.namedPointId())
+                &&com.stardew.craft.port.PortJava.getLast(plan.steps).pointId.equals(state.namedPointId())
                 &&plan.square.area.contains(npc.position(),npc.getBbWidth()/2.))return true;
         var route = NpcRoutePlanner.resolveRoute(level,npc.getNpcId(),state,npc.blockPosition());
         return route != null && route.ready() && !route.destinationSteps.isEmpty()
-                && arrivedAt(npc,route.destinationSteps.getLast().target,NpcNavigationPolicy.current().arrivalRadius());
+                && arrivedAt(npc,com.stardew.craft.port.PortJava.getLast(route.destinationSteps).target,NpcNavigationPolicy.current().arrivalRadius());
     }
 
     private static boolean arrivedAt(StardewNpcEntity npc, Vec3 target, double radius) {
@@ -1645,7 +1645,7 @@ public final class NpcCentralMovementService {
             + "#" + route.canonicalLocation + "#" + route.status + "#" + route.diagnosticReason + "#" + route.missingPointId + "#" + route.missingPortalLinkId
             // Intermediate portal steps depend on the actor's current position.
             // Crossing a cell/door must not replace an in-flight plan or restart roaming.
-            + "#" + (route.destinationSteps.isEmpty() ? "" : route.destinationSteps.getLast().target);
+            + "#" + (route.destinationSteps.isEmpty() ? "" : com.stardew.craft.port.PortJava.getLast(route.destinationSteps).target);
     }
 
     private static String pathSummary(StardewNpcEntity npc) {

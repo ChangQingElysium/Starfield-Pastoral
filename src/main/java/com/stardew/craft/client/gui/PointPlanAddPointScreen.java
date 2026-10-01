@@ -160,7 +160,7 @@ public class PointPlanAddPointScreen extends Screen {
     private void fillFirstSuggestion() {
         List<String> suggestions = suggestions();
         if (!suggestions.isEmpty()) {
-            npcBox.setValue(suggestions.getFirst());
+            npcBox.setValue(com.stardew.craft.port.PortJava.getFirst(suggestions));
             npcBox.setCursorPosition(npcBox.getValue().length());
         }
     }
@@ -215,7 +215,7 @@ public class PointPlanAddPointScreen extends Screen {
         }
         List<String> suggestions = suggestions();
         if (!suggestions.isEmpty()) {
-            return suggestions.getFirst();
+            return com.stardew.craft.port.PortJava.getFirst(suggestions);
         }
         return lower.replaceAll("[^a-z0-9_./-]", "_");
     }

@@ -50,7 +50,7 @@ public final class FacadeTemplateGameTests {
             entity.setMaterial(Blocks.OAK_PLANKS.defaultBlockState());entity.setFillMaterial(Blocks.BLUE_STAINED_GLASS.defaultBlockState());
             var copied=new net.minecraft.world.item.ItemStack(block);entity.saveToItem(copied);
             var drops=net.minecraft.world.level.block.Block.getDrops(level.getBlockState(p),level,p,entity);
-            h.assertTrue(drops.size()==1 && net.minecraft.world.item.ItemStack.isSameItemSameTags(copied,drops.getFirst()),"Composite drop lost or duplicated a material: "+shape);
+            h.assertTrue(drops.size()==1 && net.minecraft.world.item.ItemStack.isSameItemSameTags(copied,com.stardew.craft.port.PortJava.getFirst(drops)),"Composite drop lost or duplicated a material: "+shape);
             level.setBlock(p,Blocks.AIR.defaultBlockState(),3);level.setBlock(p,block.defaultBlockState(),3);
             h.assertTrue(net.minecraft.world.item.BlockItem.updateCustomBlockEntityTag(level,null,p,copied),"Item data rejected");
             entity=(TemplateBlockEntity)level.getBlockEntity(p);

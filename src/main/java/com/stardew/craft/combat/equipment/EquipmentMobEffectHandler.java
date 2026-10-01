@@ -41,7 +41,7 @@ public final class EquipmentMobEffectHandler {
 
         EquipmentStats equipment = EquipmentResolver.getMergedStats(player);
         if (ImmunitySystem.tryResistEffect(equipment.getImmunity())) {
-            event.setResult(net.minecraftforge.eventbus.api.Event.Result.DENY); // PORT(1.20.1): Forge DENY == NeoForge DO_NOT_APPLY
+            event.setResult(net.minecraftforge.eventbus.api.Event.Result.DENY); // PORT(1.20.1): Forge DENY == MinecraftForge DO_NOT_APPLY
             return;
         }
 
@@ -53,7 +53,7 @@ public final class EquipmentMobEffectHandler {
             return;
         }
 
-        event.setResult(net.minecraftforge.eventbus.api.Event.Result.DENY); // PORT(1.20.1): Forge DENY == NeoForge DO_NOT_APPLY
+        event.setResult(net.minecraftforge.eventbus.api.Event.Result.DENY); // PORT(1.20.1): Forge DENY == MinecraftForge DO_NOT_APPLY
         REAPPLYING_STURDY_EFFECT.set(true);
         try {
             player.addEffect(copyWithDuration(effect, adjustedDuration),

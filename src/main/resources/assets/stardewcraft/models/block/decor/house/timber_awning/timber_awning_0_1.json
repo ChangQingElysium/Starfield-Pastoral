@@ -1,0 +1,153 @@
+{
+  "credit": "Made with Blockbench",
+  "texture_size": [
+    64,
+    64
+  ],
+  "textures": {
+    "0": "stardewcraft:block/decor/house/timber_awning",
+    "particle": "stardewcraft:block/decor/house/timber_awning_particle"
+  },
+  "elements": [
+    {
+      "name": "post_0_16",
+      "from": [
+        4,
+        0,
+        13
+      ],
+      "to": [
+        12,
+        16,
+        16
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            6,
+            2,
+            10
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            5,
+            6,
+            5.75,
+            10
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            0,
+            6,
+            2,
+            10
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            5,
+            6,
+            5.75,
+            10
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            7,
+            8,
+            9,
+            8.75
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            7,
+            8,
+            9,
+            8.75
+          ],
+          "texture": "#0"
+        }
+      }
+    },
+    {
+      "name": "post_face_0_16",
+      "from": [
+        5,
+        0,
+        12
+      ],
+      "to": [
+        11,
+        16,
+        13
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0.25,
+            6,
+            1.75,
+            10
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            5,
+            6,
+            5.25,
+            10
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            0.25,
+            6,
+            1.75,
+            10
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            5,
+            6,
+            5.25,
+            10
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            7,
+            8,
+            8.5,
+            8.25
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            7,
+            8,
+            8.5,
+            8.25
+          ],
+          "texture": "#0"
+        }
+      }
+    }
+  ],
+  "parent": "minecraft:block/block",
+  "render_type": "minecraft:solid"
+}

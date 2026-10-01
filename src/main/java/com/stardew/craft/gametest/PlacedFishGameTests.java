@@ -54,7 +54,7 @@ public final class PlacedFishGameTests {
     }
     private static void assertFishDrop(GameTestHelper h, BlockPos pos, ItemStack expected) {
         var items=h.getLevel().getEntitiesOfClass(ItemEntity.class,new AABB(pos).inflate(3));
-        h.assertTrue(items.size()==1&&ItemStack.matches(expected.copyWithCount(1),items.getFirst().getItem()),"Lost, altered or duplicated catch");
+        h.assertTrue(items.size()==1&&ItemStack.matches(expected.copyWithCount(1),com.stardew.craft.port.PortJava.getFirst(items).getItem()),"Lost, altered or duplicated catch");
         items.forEach(ItemEntity::discard);
     }
     @GameTest(templateNamespace="stardewcraft_fish_placement",template="empty")

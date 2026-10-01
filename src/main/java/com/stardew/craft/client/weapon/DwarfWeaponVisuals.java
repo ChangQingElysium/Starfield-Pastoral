@@ -94,7 +94,7 @@ public final class DwarfWeaponVisuals {
     static List<Vec3[]> continuousGroundPaths(Vec3[] points) {
         List<Vec3[]> result = new ArrayList<>(); List<Vec3> current = new ArrayList<>();
         for (Vec3 p : points) {
-            if (p == null || (!current.isEmpty() && Math.abs(p.y - current.getLast().y) > .26)) {
+            if (p == null || (!current.isEmpty() && Math.abs(p.y - com.stardew.craft.port.PortJava.getLast(current).y) > .26)) {
                 if (current.size() > 1) result.add(current.toArray(Vec3[]::new)); current.clear();
             }
             if (p != null) current.add(p);
@@ -126,7 +126,7 @@ public final class DwarfWeaponVisuals {
                 }
                 if (!continuous) continue;
                 STEPS.add(new Step(now, a.getLocation().add(0, .03, 0), b.getLocation().add(0, .03, 0)));
-                while (STEPS.size() > 96) STEPS.removeFirst();
+                while (STEPS.size() > 96) com.stardew.craft.port.PortJava.removeFirst(STEPS);
             }
         }
         PREVIOUS.keySet().retainAll(walking);

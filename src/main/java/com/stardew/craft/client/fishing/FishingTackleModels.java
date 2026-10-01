@@ -103,7 +103,7 @@ public final class FishingTackleModels {
         return List.copyOf(result);
     }
     public static Vector3f hookPosition(List<Mounted> mounted) {
-        var last=mounted.getLast();return new Vector3f(last.x(),last.y()+last.model().min()[1]-.85f,last.z());
+        var last=com.stardew.craft.port.PortJava.getLast(mounted);return new Vector3f(last.x(),last.y()+last.model().min()[1]-.85f,last.z());
     }
     public static Vector3f outlet(Mounted mount,Matrix4f bobber,float rotation,double time) {
         return transform(mount,bobber,rotation,time).transformPosition(new Vector3f(mount.model().outlet()));

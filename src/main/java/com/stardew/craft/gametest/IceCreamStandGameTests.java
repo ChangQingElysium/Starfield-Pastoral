@@ -94,7 +94,7 @@ public final class IceCreamStandGameTests {
                 h.assertTrue(cells(h, origin) == 0 && level.getBlockEntity(origin) == null, "Removal left fragments");
                 h.assertTrue(cells(h, neighbor) == 40, "Removal damaged the neighboring arrangement");
                 var drops = level.getEntitiesOfClass(ItemEntity.class, new AABB(origin).inflate(8));
-                h.assertTrue(drops.size() == 1 && drops.getFirst().getItem().is(block.asItem()) && drops.getFirst().getItem().getCount() == 1, "Expected one complete display item");
+                h.assertTrue(drops.size() == 1 && com.stardew.craft.port.PortJava.getFirst(drops).getItem().is(block.asItem()) && com.stardew.craft.port.PortJava.getFirst(drops).getItem().getCount() == 1, "Expected one complete display item");
                 IceCreamStandBlock.runWithDropsSuppressed(() -> level.removeBlock(neighbor, false));
             }
         } finally { time.setCurrentSeason(previous); }

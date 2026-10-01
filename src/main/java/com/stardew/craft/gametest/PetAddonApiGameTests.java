@@ -52,7 +52,7 @@ public final class PetAddonApiGameTests {
             h.assertTrue(StardewPets.breeds().size() == originalCount + 3 && PetVariant.initialChoices().contains(first), "Addon absent from new-farm choices");
             var lastPage = PetChoicePage.of(true, 99);
             h.assertTrue(lastPage.page() == 1 && lastPage.pages() == 2 && lastPage.entries().size() == 1
-                    && lastPage.entries().getFirst().id().equals("pet_api_test:woodland_companion_2"), "Thirteenth starter choice was clipped or misindexed");
+                    && com.stardew.craft.port.PortJava.getFirst(lastPage.entries()).id().equals("pet_api_test:woodland_companion_2"), "Thirteenth starter choice was clipped or misindexed");
             h.assertTrue(PetChoicePage.of(false, 0).entries().stream().noneMatch(v -> v.id().equals(first.id()))
                     && PetChoicePage.of(false, 1).entries().size() == 2, "Shop ignored per-breed availability or paging");
             reject(h, () -> StardewPets.registerBreed(first.breed()), "Duplicate breed replaced existing content");
@@ -69,19 +69,19 @@ public final class PetAddonApiGameTests {
                 FarmSelectionSubmitPayload.STREAM_CODEC.encode(wire, form);
                 h.assertTrue(FarmSelectionSubmitPayload.STREAM_CODEC.decode(wire).equals(form), "Namespaced ID was truncated in the new-farm form");
                 PetManagement.openInitial(owner);
-                var request = new PetActionPayload(offers.getLast().getUUID("Nonce"), new UUID(0, 0), "initial", PetActionPayload.selection(first.id(), "团:团"), BlockPos.ZERO);
+                var request = new PetActionPayload(com.stardew.craft.port.PortJava.getLast(offers).getUUID("Nonce"), new UUID(0, 0), "initial", PetActionPayload.selection(first.id(), "团:团"), BlockPos.ZERO);
                 PetActionPayload.CODEC.encode(wire, request); var decoded = PetActionPayload.CODEC.decode(wire);
                 h.assertTrue(decoded.selection().variant().equals(first.id()) && decoded.selection().name().equals("团:团"), "Namespace/name delimiters collided");
                 PetManagement.submit(owner, decoded); PetManagement.submit(owner, decoded);
                 h.assertTrue(data.forFarm(farm.getInstanceId()).size() == 1, "Addon initial choice failed or replay duplicated it");
-                var pet = data.forFarm(farm.getInstanceId()).getFirst();
+                var pet = com.stardew.craft.port.PortJava.getFirst(data.forFarm(farm.getInstanceId()));
                 h.assertTrue(pet.variant.id().equals(first.id()) && pet.name.equals("团:团"), "Wrong addon breed or name granted");
                 var restored = PetRecord.load(pet.save()); h.assertTrue(restored.save().equals(pet.save()), "New namespaced pet did not persist");
                 var entity = ModEntities.PET.get().create(h.getLevel()); entity.setUUID(pet.id); entity.refresh(pet);
                 h.assertTrue(Math.abs(entity.getBbWidth() - .72) < 1e-5 && Math.abs(entity.getBbHeight() - .78) < 1e-5, "Addon dimensions were replaced by cat/dog defaults");
                 offers.clear(); PetService.interact(owner, entity); PetService.interact(owner, entity);
-                h.assertTrue(pet.friendship == 12 && pet.timesPet == 1 && offers.size() == 1 && offers.getFirst().getString("Kind").equals("manage")
-                        && offers.getFirst().getUUID("Selected").equals(pet.id), "Addon did not inherit petting and direct management");
+                h.assertTrue(pet.friendship == 12 && pet.timesPet == 1 && offers.size() == 1 && com.stardew.craft.port.PortJava.getFirst(offers).getString("Kind").equals("manage")
+                        && com.stardew.craft.port.PortJava.getFirst(offers).getUUID("Selected").equals(pet.id), "Addon did not inherit petting and direct management");
                 entity.discard();
 
                 data.markLoved(farm.getInstanceId());
@@ -89,9 +89,9 @@ public final class PetAddonApiGameTests {
                 PlayerStardewDataAPI.setMoney(owner, 1000);
                 data.bowl(new PetWorldData.Bowl(farm.getInstanceId(), farm.getOrigin().offset(3, 4, 3), "wood", -1));
                 offers.clear(); PetManagement.openShop(owner);
-                PetManagement.submit(owner, new PetActionPayload(offers.getLast().getUUID("Nonce"), new UUID(0, 0), "adopt", PetActionPayload.selection(first.id(), "Blocked"), BlockPos.ZERO));
+                PetManagement.submit(owner, new PetActionPayload(com.stardew.craft.port.PortJava.getLast(offers).getUUID("Nonce"), new UUID(0, 0), "adopt", PetActionPayload.selection(first.id(), "Blocked"), BlockPos.ZERO));
                 h.assertTrue(data.forFarm(farm.getInstanceId()).size() == 1 && PlayerStardewDataAPI.getMoney(owner) == 1000, "Client bypassed addon shop eligibility");
-                var purchase = new PetActionPayload(offers.getLast().getUUID("Nonce"), new UUID(0, 0), "adopt", PetActionPayload.selection("pet_api_test:woodland_companion_1", "Purchased"), BlockPos.ZERO);
+                var purchase = new PetActionPayload(com.stardew.craft.port.PortJava.getLast(offers).getUUID("Nonce"), new UUID(0, 0), "adopt", PetActionPayload.selection("pet_api_test:woodland_companion_1", "Purchased"), BlockPos.ZERO);
                 PetManagement.submit(owner, purchase); PetManagement.submit(owner, purchase);
                 h.assertTrue(data.forFarm(farm.getInstanceId()).size() == 2 && PlayerStardewDataAPI.getMoney(owner) == 863, "Addon price or replay protection failed");
                 h.assertTrue(!wire.isReadable(), "Pet API codecs left unread bytes");
@@ -105,7 +105,7 @@ public final class PetAddonApiGameTests {
                 PetCatalogHandshake.Offer.CODEC.encode(wire, new PetCatalogHandshake.Offer(fingerprint));
                 PetCatalogHandshake.Offer.handle(PetCatalogHandshake.Offer.CODEC.decode(wire), context);
                 h.assertTrue(replies.size() == 1 && disconnected.isEmpty(), "Matching addon catalog did not acknowledge");
-                PetCatalogHandshake.Ack.CODEC.encode(wire, (PetCatalogHandshake.Ack) replies.getFirst());
+                PetCatalogHandshake.Ack.CODEC.encode(wire, (PetCatalogHandshake.Ack) com.stardew.craft.port.PortJava.getFirst(replies));
                 PetCatalogHandshake.Ack.handle(PetCatalogHandshake.Ack.CODEC.decode(wire), context);
                 h.assertTrue(finished.equals(List.of(PetCatalogHandshake.TYPE)), "Catalog task did not finish");
                 PetCatalogHandshake.Offer.handle(new PetCatalogHandshake.Offer(originalFingerprint), context);

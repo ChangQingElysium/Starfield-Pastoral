@@ -58,7 +58,7 @@ public final class WorldLootPoolData {
                 .toList();
         if (matching.isEmpty()) return List.of();
 
-        StardewWorldLootPoolDefinition.Mode mode = matching.getFirst().getValue().mode();
+        StardewWorldLootPoolDefinition.Mode mode = com.stardew.craft.port.PortJava.getFirst(matching).getValue().mode();
         List<ResolvedEntry> entries = new ArrayList<>();
         for (Map.Entry<ResourceLocation, StardewWorldLootPoolDefinition> pool : matching) {
             if (pool.getValue().mode() != mode) {

@@ -25,8 +25,8 @@ public final class BuildingWorkScreen extends FarmFolioScreen {
         var entries = data.getList("Entries", 10);
         int count = Math.min(3, Math.max(1, (h - 112) / 48));
         int side = Math.min(140, w / 3);
-        page = Math.clamp(page, 0, Math.max(0, (entries.size() - 1) / count));
-        selected = entries.isEmpty() ? -1 : Math.clamp(selected, page * count, Math.min(entries.size(), (page + 1) * count) - 1);
+        page = com.stardew.craft.port.PortJava.clamp(page, 0, Math.max(0, (entries.size() - 1) / count));
+        selected = entries.isEmpty() ? -1 : com.stardew.craft.port.PortJava.clamp(selected, page * count, Math.min(entries.size(), (page + 1) * count) - 1);
         for (int i = page * count; i < Math.min(entries.size(), (page + 1) * count); i++) {
             int index = i;
             var record = BuildingRecord.load(entries.getCompound(i));

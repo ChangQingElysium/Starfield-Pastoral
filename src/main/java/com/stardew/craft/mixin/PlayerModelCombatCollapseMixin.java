@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class PlayerModelCombatCollapseMixin {
     @Inject(method="setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V",at=@At("TAIL"))
     private void stardewcraft$collapsePose(LivingEntity entity,float a,float b,float age,float d,float e,CallbackInfo ci) {
-        float partialTick=Math.clamp(age-entity.tickCount,0,1);
+        float partialTick=com.stardew.craft.port.PortJava.clamp(age-entity.tickCount,0,1);
         if(entity instanceof com.stardew.craft.cutscene.runtime.EventPlayerActorEntity actor && actor.isInHospitalBedScene()) {
             com.stardew.craft.client.combat.HospitalBedPose.apply((PlayerModel<?>)(Object)this,
                     com.stardew.craft.client.combat.HospitalBedPose.sample(actor.hospitalBedTime(partialTick)));

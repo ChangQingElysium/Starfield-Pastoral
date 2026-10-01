@@ -64,7 +64,7 @@ public final class IronWindVisuals {
             Vec3 direction=p.to().subtract(p.from());
             BLINKS.add(new Blink(p.from().add(0,.65,0),direction,now,wind));
             BLINKS.add(new Blink(p.to().add(0,.65,0),direction,now,wind));
-            while(BLINKS.size()>64) BLINKS.removeFirst();
+            while(BLINKS.size()>64) com.stardew.craft.port.PortJava.removeFirst(BLINKS);
         }
     }
     /** Suppress only this wind dash's old generic particle/sound layer, not its movement. */
@@ -86,7 +86,7 @@ public final class IronWindVisuals {
             Vec3 current=player.position().add(0,.65,0);
             if(Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get() && IronWindGeometry.validSegment(dash.previous,current)
                     && level.clip(new ClipContext(dash.previous,current,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,player)).getType()==HitResult.Type.MISS) {
-                WAKES.add(new Wake(dash.previous,current,now));while(WAKES.size()>96) WAKES.removeFirst();
+                WAKES.add(new Wake(dash.previous,current,now));while(WAKES.size()>96) com.stardew.craft.port.PortJava.removeFirst(WAKES);
             }
             entry.setValue(new Dash(dash.actor,dash.start,current));
         }

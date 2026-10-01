@@ -97,7 +97,7 @@ public final class TownPavingGameTests {
         helper.assertTrue(state.isCollisionShapeFullBlock(level, pos) && state.is(BlockTags.MINEABLE_WITH_PICKAXE), "Wrong collision/mining family");
         helper.assertTrue(state.getDestroySpeed(level, pos) == Blocks.STONE_BRICKS.defaultBlockState().getDestroySpeed(level, pos), "Wrong stone hardness");
         var drops = Block.getDrops(state, level, pos, null, null, new ItemStack(Items.IRON_PICKAXE));
-        helper.assertTrue(drops.size() == 1 && drops.getFirst().is(block.asItem()), "Paving did not drop itself");
+        helper.assertTrue(drops.size() == 1 && com.stardew.craft.port.PortJava.getFirst(drops).is(block.asItem()), "Paving did not drop itself");
         helper.assertTrue(StardewItemCatalog.tabForItem(block.asItem()) == StardewCatalogTab.BUILDING, "Missing building catalog entry");
         int[] counts = new int[6];
         for (int roll = 0; roll < 100; roll++) counts[TerrainVariantWeights.paving(roll)]++;

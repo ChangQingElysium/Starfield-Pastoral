@@ -80,7 +80,7 @@ public final class TownPavingModels {
         BakedQuad[][] transitions = new BakedQuad[4][47];
         for (int season = 0; season < 4; season++) {
             BakedModel model = Objects.requireNonNull(event.getModels().get(id("plaza_red_bricks/transition", season)));
-            BakedQuad source = model.getQuads(null, Direction.UP, RandomSource.create(0)).getFirst();
+            BakedQuad source = com.stardew.craft.port.PortJava.getFirst(model.getQuads(null, Direction.UP, RandomSource.create(0)));
             for (int row = 0; row < 47; row++) transitions[season][row] = tile(source, 0, row, 16);
         }
         bakeFamily(event, "town_paving", ModBlocks.TOWN_PAVING.get(), transitions);
@@ -121,7 +121,7 @@ public final class TownPavingModels {
         BakedQuad[][][][] tops = new BakedQuad[4][6][4][47];
         for (int season = 0; season < 4; season++) {
             surfaces[season] = Objects.requireNonNull(event.getModels().get(id(family, season)));
-            BakedQuad source = surfaces[season].getQuads(null, Direction.UP, RandomSource.create(0)).getFirst();
+            BakedQuad source = com.stardew.craft.port.PortJava.getFirst(surfaces[season].getQuads(null, Direction.UP, RandomSource.create(0)));
             for (int variant = 0; variant < 6; variant++) for (int phase = 0; phase < 4; phase++)
                 for (int row = 0; row < 47; row++) tops[season][variant][phase][row] = tile(source, phase * 6 + variant, row, 384);
         }

@@ -80,8 +80,8 @@ public final class FertilizedSoilModels {
         int count = FertilizerType.values().length;
         TerrainFarmlandQuads[][][] result = new TerrainFarmlandQuads[4][count][2];
         for (int season = 0; season < 4; season++) {
-            BakedQuad atlas = Objects.requireNonNull(models.get(id(prefix + SEASONS[season])))
-                    .getQuads(null, null, RandomSource.create(0)).getFirst();
+            BakedQuad atlas = com.stardew.craft.port.PortJava.getFirst(Objects.requireNonNull(models.get(id(prefix + SEASONS[season])))
+                    .getQuads(null, null, RandomSource.create(0)));
             for (int fertilizer = 0; fertilizer < count; fertilizer++) for (int wet = 0; wet < 2; wet++) {
                 BakedQuad[] blends = new BakedQuad[16];
                 for (int blend = 0; blend < (wet == 0 ? 16 : 4); blend++)

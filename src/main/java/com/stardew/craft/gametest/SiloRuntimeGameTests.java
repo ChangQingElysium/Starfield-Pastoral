@@ -119,8 +119,8 @@ public final class SiloRuntimeGameTests {
                 h.assertTrue(data.order(record.id()).remainingDays()==3,"User's three-day new construction rule changed");
                 BuildingPlacementService.scaffold(level,record);RisingConstruction.clear(level,record.id());BuildingPlacementService.scaffold(level,record);
                 var workers=level.getEntitiesOfClass(RobinConstructionEntity.class,BuildingPlacementService.aabb(claim));
-                h.assertTrue(workers.size()==1 && !workers.getFirst().blockPosition().equals(record.manager()),"Worker inside manager");
-                var worker=workers.getFirst();
+                h.assertTrue(workers.size()==1 && !com.stardew.craft.port.PortJava.getFirst(workers).blockPosition().equals(record.manager()),"Worker inside manager");
+                var worker=com.stardew.craft.port.PortJava.getFirst(workers);
                 h.assertTrue(level.getBlockState(worker.blockPosition().relative(worker.getDirection())).is(ModBlocks.CONSTRUCTION_FENCE.get()),"Rotated silo worker hits air");
                 h.assertTrue(FarmFeed.capacity(server,farm.getInstanceId())==0,"Construction added hay capacity early");
                 for(int day=11;day<=13;day++)data.constructionDay(day,true);

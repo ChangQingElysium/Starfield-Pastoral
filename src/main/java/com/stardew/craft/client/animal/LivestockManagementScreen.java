@@ -245,7 +245,7 @@ public final class LivestockManagementScreen extends FarmFolioScreen {
         rowButtons.clear();
         var list = entries();
         int count = rows() * columns(), cw = (w - 48) / columns();
-        page = Math.clamp(page, 0, Math.max(0, (list.size() - 1) / count));
+        page = com.stardew.craft.port.PortJava.clamp(page, 0, Math.max(0, (list.size() - 1) / count));
         for (int i = page * count; i < Math.min(list.size(), (page + 1) * count); i++) {
             var a = list.get(i);
             int j = i - page * count;

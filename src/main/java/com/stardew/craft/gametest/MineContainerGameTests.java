@@ -45,11 +45,11 @@ public final class MineContainerGameTests {
                 var r=new Draws(.1,.05, .01,.9); // empty branch, seeds, +1 lucky seed, stop
                 var roll=MineContainerRewards.roll(null,r);
                 h.assertTrue(!roll.continueToContents()&&roll.items().size()==1,"Season seeds also rolled the theme table");
-                h.assertTrue(roll.items().getFirst().is(seeds.get(s))&&roll.items().getFirst().getCount()==3,"Wrong seasonal seeds or quantity");
+                h.assertTrue(com.stardew.craft.port.PortJava.getFirst(roll.items()).is(seeds.get(s))&&com.stardew.craft.port.PortJava.getFirst(roll.items()).getCount()==3,"Wrong seasonal seeds or quantity");
                 r.exhausted(h);
                 time.setCurrentDay(s==0?24:21);
                 roll=MineContainerRewards.roll(null,new Draws(.1,.05,.9));
-                h.assertTrue(roll.items().getFirst().is(seeds.get((s+1)%4)),"Late season did not advance the seed type");
+                h.assertTrue(com.stardew.craft.port.PortJava.getFirst(roll.items()).is(seeds.get((s+1)%4)),"Late season did not advance the seed type");
             }
             var empty=MineContainerRewards.roll(null,new Draws(.1,.9));
             h.assertTrue(!empty.continueToContents()&&empty.items().isEmpty(),"Empty cache manufactured a fallback reward");
@@ -68,14 +68,14 @@ public final class MineContainerGameTests {
             var locked=new Draws(.5,.01); // .01 is the inactive Qi-bean check, not a mystery-box roll.
             h.assertTrue(MineContainerRewards.roll(a,locked).items().isEmpty(),"Mystery boxes dropped before unlock");locked.exhausted(h);
             data.addMailFlag("sawQiPlane");data.setDailyLuckForDate(0,112);
-            h.assertTrue(MineContainerRewards.roll(a,new Draws(.5,.9,.001)).items().getFirst().is(ModItems.MYSTERY_BOX.get()),"Unlocked ordinary box absent");
+            h.assertTrue(com.stardew.craft.port.PortJava.getFirst(MineContainerRewards.roll(a,new Draws(.5,.9,.001)).items()).is(ModItems.MYSTERY_BOX.get()),"Unlocked ordinary box absent");
             h.assertTrue(MineContainerRewards.roll(a,new Draws(.5,.9,.006)).items().isEmpty(),"Base mystery chance lost the .66 multiplier");
             data.setDailyLuckForDate(.1,112);
             h.assertTrue(!MineContainerRewards.roll(a,new Draws(.5,.9,.006)).items().isEmpty(),"Daily luck no longer affects mystery boxes");
             data.addMasteryExp(1000000);h.assertTrue(data.claimMasteryReward(SkillType.FORAGING),"Test could not grant foraging mastery");
-            h.assertTrue(MineContainerRewards.roll(a,new Draws(.5,.9,.001)).items().getFirst().is(ModItems.GOLDEN_MYSTERY_BOX.get()),"Foraging mastery still gives an ordinary box");
+            h.assertTrue(com.stardew.craft.port.PortJava.getFirst(MineContainerRewards.roll(a,new Draws(.5,.9,.001)).items()).is(ModItems.GOLDEN_MYSTERY_BOX.get()),"Foraging mastery still gives an ordinary box");
             var b=player(h,"other novice");PlayerDataManager.getPlayerData(b).addMailFlag("sawQiPlane");
-            h.assertTrue(MineContainerRewards.roll(b,new Draws(.5,.9,.001)).items().getFirst().is(ModItems.MYSTERY_BOX.get()),"Another player's mastery leaked into this reward");
+            h.assertTrue(com.stardew.craft.port.PortJava.getFirst(MineContainerRewards.roll(b,new Draws(.5,.9,.001)).items()).is(ModItems.MYSTERY_BOX.get()),"Another player's mastery leaked into this reward");
         } finally {time.setCurrentYear(year);time.setCurrentSeason(season);time.setCurrentDay(day);}
         h.succeed();
     }
@@ -198,7 +198,7 @@ public final class MineContainerGameTests {
                 com.stardew.craft.item.trinket.TrinketDropService.trySpawnContainerDrop(level,pos,10000,novice);
                 h.assertTrue(items(h,area).isEmpty(),"Nearby mastery granted a trinket to the novice's cache");
                 com.stardew.craft.item.trinket.TrinketDropService.trySpawnContainerDrop(level,pos,10000,master);
-                h.assertTrue(items(h,area).size()==1&&items(h,area).getFirst().getItem() instanceof
+                h.assertTrue(items(h,area).size()==1&&com.stardew.craft.port.PortJava.getFirst(items(h,area)).getItem() instanceof
                         com.stardew.craft.item.trinket.StardewTrinketItem,"Combat master could not receive their trinket");
                 clearItems(h,area);
                 com.stardew.craft.item.trinket.TrinketDropService.trySpawnContainerDrop(level,pos,10000,null);

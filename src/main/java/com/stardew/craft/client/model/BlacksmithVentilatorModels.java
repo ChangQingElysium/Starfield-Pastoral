@@ -32,7 +32,7 @@ public final class BlacksmithVentilatorModels {
     private static volatile List<List<Part>> seasons = List.of();
     private BlacksmithVentilatorModels() {}
     public record Part(double x, double y, double z, List<BakedQuad> quads) {}
-    public static List<Part> parts(int season) { return seasons.isEmpty() ? List.of() : seasons.get(Math.clamp(season, 0, 3)); }
+    public static List<Part> parts(int season) { return seasons.isEmpty() ? List.of() : seasons.get(com.stardew.craft.port.PortJava.clamp(season, 0, 3)); }
     private static JsonObject description(String season) {
         var id = new ResourceLocation(StardewCraft.MODID, "blacksmith_ventilator/" + season + ".json");
         try (var reader = new InputStreamReader(Minecraft.getInstance().getResourceManager().getResourceOrThrow(id).open(), StandardCharsets.UTF_8)) {

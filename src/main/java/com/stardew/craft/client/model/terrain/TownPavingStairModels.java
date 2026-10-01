@@ -50,7 +50,7 @@ public final class TownPavingStairModels {
         for (int s = 0; s < 4; s++) {
             var model = Objects.requireNonNull(event.getModels().get(id(SEASONS[s])));
             materials[s][1] = model.getParticleIcon();
-            materials[s][0] = model.getQuads(null, Direction.UP, RandomSource.create(0)).getFirst().getSprite();
+            materials[s][0] = com.stardew.craft.port.PortJava.getFirst(model.getQuads(null, Direction.UP, RandomSource.create(0))).getSprite();
         }
         for (BlockState state : ModBlocks.TOWN_PAVING_STAIRS.get().getStateDefinition().getPossibleStates()) {
             var key = BlockModelShaper.stateToModelLocation(state);

@@ -204,8 +204,11 @@ public class GeodeMenuScreen extends Screen {
 
     private final Random rng = new Random();
 
-    public GeodeMenuScreen() {
+    private final java.util.Set<ResourceLocation> processableInputs;
+
+    public GeodeMenuScreen(java.util.List<ResourceLocation> inputs) {
         super(Component.empty());
+        processableInputs = java.util.Set.copyOf(inputs);
     }
 
     // ── Coordinate conversion ──
@@ -909,13 +912,7 @@ public class GeodeMenuScreen extends Screen {
     // ── Helpers ──
 
     private boolean isGeode(ItemStack s) {
-        if (s.isEmpty()) return false;
-        ResourceLocation id = BuiltInRegistries.ITEM.getKey(s.getItem());
-        String p = id.getPath();
-        return "geode".equals(p) || "frozen_geode".equals(p)
-            || "magma_geode".equals(p) || "omni_geode".equals(p)
-            || "artifact_trove".equals(p) || "mystery_box".equals(p)
-            || "golden_mystery_box".equals(p);
+        return !s.isEmpty() && processableInputs.contains(BuiltInRegistries.ITEM.getKey(s.getItem()));
     }
 
     private int countFreeSlots() {

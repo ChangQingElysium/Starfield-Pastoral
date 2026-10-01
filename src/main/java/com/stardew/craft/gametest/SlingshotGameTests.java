@@ -91,10 +91,10 @@ public final class SlingshotGameTests {
         item.releaseUsing(bow,h.getLevel(),player,72000-6);
         var shots=h.getLevel().getEntitiesOfClass(SlingshotProjectile.class,player.getBoundingBox().inflate(2));
         h.assertTrue(shots.size()==1,"Master must spawn one shot");
-        h.assertTrue(shots.getFirst().releasedDamage()==expected,"Master release did not use its damage multiplier");
+        h.assertTrue(com.stardew.craft.port.PortJava.getFirst(shots).releasedDamage()==expected,"Master release did not use its damage multiplier");
         h.assertTrue(SlingshotItem.ammunition(bow).getCount()==2,"Master consumes one ammo");
         h.assertTrue(item.getWeaponId().equals("master_slingshot"),"Master weapon identity lost");
-        shots.getFirst().discard();h.succeed();
+        com.stardew.craft.port.PortJava.getFirst(shots).discard();h.succeed();
     }
     @GameTest(templateNamespace="stardewcraft_slingshot",template="ring_utilities",timeoutTicks=40)
     public static void ammunitionChargeAndConsumption(GameTestHelper h) {
@@ -109,7 +109,7 @@ public final class SlingshotGameTests {
         h.assertTrue(SlingshotItem.ammunition(bow).getCount()==15,"Successful shot must consume exactly one stone");
         var shots=h.getLevel().getEntitiesOfClass(SlingshotProjectile.class,player.getBoundingBox().inflate(2));
         h.assertTrue(shots.size()==1,"Exactly one projectile must be spawned");
-        var shot=shots.getFirst();h.assertTrue(shot.releasedDamage()>=3&&shot.releasedDamage()<=11,"Stone roll outside source interval");
+        var shot=com.stardew.craft.port.PortJava.getFirst(shots);h.assertTrue(shot.releasedDamage()>=3&&shot.releasedDamage()<=11,"Stone roll outside source interval");
         h.assertTrue(shot.getDeltaMovement().length()>=.8906&&shot.getDeltaMovement().length()<=.9376,"Source flight speed conversion");
         shot.discard();h.succeed();
     }

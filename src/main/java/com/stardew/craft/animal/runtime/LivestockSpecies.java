@@ -80,7 +80,7 @@ public final class LivestockSpecies {
     public int sellPrice(int friendship) {
         var query=StardewAnimalQueryDefinitions.definition(definitionId());
         if(query!=null)return query.sellPrice(friendship);
-        return definition()==null?0:(int)(definition().sellPrice()*(Math.clamp(friendship,0,1000)/1000.0+.3));
+        return definition()==null?0:(int)(definition().sellPrice()*(com.stardew.craft.port.PortJava.clamp(friendship,0,1000)/1000.0+.3));
     }
     public net.minecraft.world.entity.EntityType<?> entityType() {
         var d=definition();

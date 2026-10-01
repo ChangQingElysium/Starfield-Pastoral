@@ -100,8 +100,8 @@ public final class SupplyCrateGameTests {
             var pool = pools.get(season);
             for (int choice = 0; choice < pool.size(); choice++)
                 h.assertTrue(MixedFlowerSeedsItem.pickSeed(season, new BoundaryRandom(choice, false)) == pool.get(choice), "Incorrect source flower pool");
-            h.assertTrue(MixedFlowerSeedsItem.pickSeed(3, new BoundaryRandom(season, false)) == pool.getFirst()
-                    && MixedFlowerSeedsItem.pickSeed(3, new BoundaryRandom(season, true)) == pool.getLast(), "Winter did not choose a season first");
+            h.assertTrue(MixedFlowerSeedsItem.pickSeed(3, new BoundaryRandom(season, false)) == com.stardew.craft.port.PortJava.getFirst(pool)
+                    && MixedFlowerSeedsItem.pickSeed(3, new BoundaryRandom(season, true)) == com.stardew.craft.port.PortJava.getLast(pool), "Winter did not choose a season first");
         }
         var level = h.getLevel();
         var pos = h.absolutePos(new BlockPos(8, 3, 8));

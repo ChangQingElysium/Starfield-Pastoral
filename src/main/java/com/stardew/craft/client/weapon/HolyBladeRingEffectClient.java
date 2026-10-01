@@ -34,7 +34,7 @@ public final class HolyBladeRingEffectClient {
             probe(segments, new Vec3(x + Math.cos(a) * 1.15, y, z + Math.sin(a) * 1.15),
                     new Vec3(x + Math.cos(b) * 1.15, y, z + Math.sin(b) * 1.15));
         }
-        if (RINGS.size() >= 32) RINGS.removeFirst();
+        if (RINGS.size() >= 32) com.stardew.craft.port.PortJava.removeFirst(RINGS);
         RINGS.add(new Ring(List.copyOf(segments), mc.level.getGameTime(), Math.min(20, duration)));
         mc.level.playLocalSound(x, y, z, net.minecraft.sounds.SoundEvents.AMETHYST_BLOCK_RESONATE,
                 net.minecraft.sounds.SoundSource.PLAYERS, 0.3f, 1.4f, false);

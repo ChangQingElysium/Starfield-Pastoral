@@ -32,7 +32,8 @@ public final class MonsterSlayerGoalRegistry {
             String translationKey,
             int requiredKills,
             List<String> monsterTags,
-            List<StardewAction> rewards
+            List<StardewAction> rewards,
+            java.util.Optional<ResourceLocation> rewardPreview
     ) {
         public SlayerGoal {
             monsterTags = List.copyOf(monsterTags);
@@ -41,6 +42,10 @@ public final class MonsterSlayerGoalRegistry {
 
         public boolean hasReward() {
             return !rewards.isEmpty();
+        }
+        public SlayerGoal(String goalKey, String translationKey, int requiredKills,
+                List<String> monsterTags, List<StardewAction> rewards) {
+            this(goalKey, translationKey, requiredKills, monsterTags, rewards, java.util.Optional.empty());
         }
     }
 
@@ -51,7 +56,7 @@ public final class MonsterSlayerGoalRegistry {
     public static String getGoalKeyForTag(String monsterTag) {
         List<String> matches = catalog.tagToGoals()
                 .getOrDefault(monsterTag, List.of());
-        return matches.isEmpty() ? null : matches.getFirst();
+        return matches.isEmpty() ? null : com.stardew.craft.port.PortJava.getFirst(matches);
     }
 
     public static List<String> getGoalKeysForTag(String monsterTag) {
@@ -141,7 +146,7 @@ public final class MonsterSlayerGoalRegistry {
                 .resultOrPartial(message -> errors.add(source + " [" + id + "]: " + message))
                 .ifPresent(definition -> {
                     if (next.putIfAbsent(id, new SlayerGoal(id, definition.translationKey(),
-                            definition.requiredKills(), definition.monsterTags(), definition.rewards())) != null) {
+                            definition.requiredKills(), definition.monsterTags(), definition.rewards(), definition.rewardPreview())) != null) {
                         errors.add(source + ": duplicate goal ID " + id);
                     }
                 });

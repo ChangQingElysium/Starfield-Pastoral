@@ -49,7 +49,7 @@ public final class MineCleanupGameTests {
         var bounds=new AABB(Vec3.atLowerCornerOf(layout.origin(0)),Vec3.atLowerCornerOf(layout.origin(0).offset(layout.size)));
         var carts=level.getEntitiesOfClass(MinecartStationEntity.class,bounds);
         h.assertTrue(carts.size()==1,"Lobby must contain exactly its authored station");
-        h.assertTrue(carts.getFirst().position().distanceTo(new Vec3(-6.5,66.25,-1.5))<.1,"Station spawned at obsolete coordinates");
+        h.assertTrue(com.stardew.craft.port.PortJava.getFirst(carts).position().distanceTo(new Vec3(-6.5,66.25,-1.5))<.1,"Station spawned at obsolete coordinates");
         var resource=level.getServer().getResourceManager().getResource(new ResourceLocation("stardewcraft","cutscene_events/marlon_mine_intro.json")).orElseThrow();
         try(var reader=resource.openAsReader()) {
             var event=JsonParser.parseReader(reader).getAsJsonObject();

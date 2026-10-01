@@ -51,7 +51,7 @@ public final class YetiToothVisuals {
         Vec3 previous = LAST.get(spine.getId());
         if (previous != null && previous.distanceToSqr(spine.position()) < 0.4 * 0.4) return;
         LAST.put(spine.getId(), spine.position());
-        if (RIDGES.size() >= 80) RIDGES.removeFirst();
+        if (RIDGES.size() >= 80) com.stardew.craft.port.PortJava.removeFirst(RIDGES);
         RIDGES.add(new Ridge(spine.getId(), spine.position(), mc.level.getGameTime()));
     }
     static float height(float age) {

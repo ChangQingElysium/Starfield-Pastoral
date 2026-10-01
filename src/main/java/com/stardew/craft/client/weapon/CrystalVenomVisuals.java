@@ -77,8 +77,8 @@ public final class CrystalVenomVisuals {
             Vec3 point=box.clip(camera,center).orElse(center).add(normal.scale(.065)).subtract(camera);
             Vec3 right=normal.cross(new Vec3(0,1,0)).normalize();if(right.lengthSqr()<1e-6) right=new Vec3(1,0,0);
             float fuse=status.detonateTotalTicks()>0&&status.detonateEndTick()>=now
-                    ?(float)Math.clamp(1-(status.detonateEndTick()-now)/status.detonateTotalTicks(),0,1):-1;
-            float visibility=(float)Math.clamp((status.poisonEndTick()-now)/8,0,1)*.8f;
+                    ?(float)com.stardew.craft.port.PortJava.clamp(1-(status.detonateEndTick()-now)/status.detonateTotalTicks(),0,1):-1;
+            float visibility=(float)com.stardew.craft.port.PortJava.clamp((status.poisonEndTick()-now)/8,0,1)*.8f;
             CrystalVenomGeometry.poisonMark(out,stack.last().pose(),point,right,right.cross(normal).normalize(),normal,status.stacks(),fuse,visibility);
             if(++rendered>=32) break;
         }

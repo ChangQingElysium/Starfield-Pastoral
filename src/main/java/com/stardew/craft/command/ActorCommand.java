@@ -163,7 +163,7 @@ public final class ActorCommand {
         if (actors.isEmpty()) {
             return noActors(source);
         }
-        EventActorEntity actor = actors.getFirst();
+        EventActorEntity actor = com.stardew.craft.port.PortJava.getFirst(actors);
         Vec3 from = actor.position();
         Vec3 to = Vec3Argument.getVec3(context, "to");
         actor.walkTo(to, blocksPerTick(speedBlocksPerSecond));
@@ -270,7 +270,7 @@ public final class ActorCommand {
         if (actors.isEmpty()) {
             return noActors(source);
         }
-        EventActorEntity actor = actors.getFirst();
+        EventActorEntity actor = com.stardew.craft.port.PortJava.getFirst(actors);
         String npcId = actor.getNpcId();
         actor.discard();
         source.sendSuccess(() -> Component.literal("Removed nearest actor " + npcId + "."), false);
@@ -291,7 +291,7 @@ public final class ActorCommand {
         if (all || actors.isEmpty()) {
             return actors;
         }
-        return List.of(actors.getFirst());
+        return List.of(com.stardew.craft.port.PortJava.getFirst(actors));
     }
 
     private static List<EventActorEntity> photoActors(CommandSourceStack source) {

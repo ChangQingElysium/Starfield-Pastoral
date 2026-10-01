@@ -51,9 +51,9 @@ public final class TerrainFarmlandGameTests {
         helper.assertTrue(Blocks.PUMPKIN_STEM.defaultBlockState().canSurvive(level, pos.above()), "Vanilla stems rejected authored farmland");
         helper.assertTrue(!farm.setValue(FarmBlock.MOISTURE, 0).isFertile(level, pos), "Dry farmland must not get the wet bonus");
         var drops = Block.getDrops(farm, level, pos, null);
-        helper.assertTrue(drops.size() == 1 && drops.getFirst().is(ModBlocks.DIRT.get().asItem()), "Farmland drop lost its dirt identity");
+        helper.assertTrue(drops.size() == 1 && com.stardew.craft.port.PortJava.getFirst(drops).is(ModBlocks.DIRT.get().asItem()), "Farmland drop lost its dirt identity");
         var vanillaDrops = Block.getDrops(Blocks.FARMLAND.defaultBlockState(), level, pos, null);
-        helper.assertTrue(vanillaDrops.size() == 1 && vanillaDrops.getFirst().is(Blocks.DIRT.asItem()),
+        helper.assertTrue(vanillaDrops.size() == 1 && com.stardew.craft.port.PortJava.getFirst(vanillaDrops).is(Blocks.DIRT.asItem()),
                 "Vanilla farmland must keep its native dirt drop");
         helper.succeed();
     }

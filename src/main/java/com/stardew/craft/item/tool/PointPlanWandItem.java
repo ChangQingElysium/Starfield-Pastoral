@@ -124,7 +124,7 @@ public class PointPlanWandItem extends Item implements com.stardew.craft.item.IS
         List<Plan> plans = getPlans(stack);
         return plans.isEmpty()
                 ? defaultPlanId(stack)
-                : plans.getFirst().id();
+                : com.stardew.craft.port.PortJava.getFirst(plans).id();
     }
 
     public static void setSelectedPlanId(ItemStack stack, String planId) {
@@ -191,7 +191,7 @@ public class PointPlanWandItem extends Item implements com.stardew.craft.item.IS
             remaining.add(new Plan(defaultPlanId(stack), List.of()));
         }
         writePlans(stack, remaining);
-        setSelectedPlanId(stack, remaining.getFirst().id());
+        setSelectedPlanId(stack, com.stardew.craft.port.PortJava.getFirst(remaining).id());
     }
 
     public static void clearPlan(ItemStack stack, String planId) {

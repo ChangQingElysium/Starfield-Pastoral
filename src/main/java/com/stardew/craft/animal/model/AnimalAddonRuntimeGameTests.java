@@ -174,11 +174,11 @@ public final class AnimalAddonRuntimeGameTests {
             var animal=new LivestockRecord(UUID.randomUUID(),owner,farm.getInstanceId(),home.id(),"Data",2,1,new LivestockCare(20,20,1000,255,255,99,0,true)).species(LivestockSpecies.WHITE_CHICKEN);
             var products=new ArrayList<LivestockWorldData.Product>();
             LivestockDayState.settle(level,home,animal,2,true,false,false,false,StardewDeterministicRandom.create(1,1,1),products,0);
-            h.assertTrue(products.size()==1&&LivestockProductEntity.stack(products.getFirst(),level).is(Items.DIAMOND),"Definition produce override ignored");
+            h.assertTrue(products.size()==1&&LivestockProductEntity.stack(com.stardew.craft.port.PortJava.getFirst(products),level).is(Items.DIAMOND),"Definition produce override ignored");
             var entity=LivestockProjection.create(level,animal);entity.setUUID(animal.id());entity.moveTo(home.manager().getX(),home.manager().getY(),home.manager().getZ());level.addFreshEntity(entity);
             StardewAgricultureDataApi.registerAnimalProvider(unique("produce"),1000,e->e.getUUID().equals(animal.id())?new StardewAnimalData(home.family(),0,0,new ResourceLocation("minecraft:emerald"),1):null);
             products.clear();LivestockDayState.settle(level,home,animal,3,true,false,false,false,StardewDeterministicRandom.create(1,1,1),products,0);
-            h.assertTrue(products.size()==1&&LivestockProductEntity.stack(products.getFirst(),level).is(Items.EMERALD),"Loaded entity data provider ignored");
+            h.assertTrue(products.size()==1&&LivestockProductEntity.stack(com.stardew.craft.port.PortJava.getFirst(products),level).is(Items.EMERALD),"Loaded entity data provider ignored");
             definition.addProperty("purchase_price",222);definition.addProperty("days_to_mature",9);install(definition);
             h.assertTrue(animal.species().price()==444&&animal.species().matureDays()==9,"Record cached obsolete definition values");entity.discard();
         }finally{AnimalDefinitionSnapshot.publish(previous,tiers);farms.deleteFarm(owner);}
@@ -228,7 +228,7 @@ public final class AnimalAddonRuntimeGameTests {
             int eligible=BuildingResidence.scan(level,bounds,family).eligibleTier();h.assertTrue(eligible==4,"Custom tier requirements ignored");
             for(int n=1;n<=4;n++){var current=data.find(id);h.assertTrue(data.acceptSelf(id,current.revision(),eligible)==BuildingWorldData.Result.SUCCESS,"Self construction/upgrade failed at "+n);}
             h.assertTrue(data.find(id).tier()==4&&data.find(id).claim().equals(bounds),"Upgrade changed fixed residence bounds");
-            definitions.put(family,new PrefabDefinitions.Family(family,builtin.reservation(),List.of(tiers.getFirst()),1,4,500));field.set(null,Map.copyOf(definitions));
+            definitions.put(family,new PrefabDefinitions.Family(family,builtin.reservation(),List.of(com.stardew.craft.port.PortJava.getFirst(tiers)),1,4,500));field.set(null,Map.copyOf(definitions));
             h.assertTrue(PrefabDefinitions.maxTier(family)==1&&!PrefabDefinitions.available(data.find(id)),"Removed tier still operates");
             var single=BuildingRecord.waiting(UUID.randomUUID(),0,family,BuildingRecord.Mode.SELF_BUILT,level.dimension().location(),pos.east(6),pos.east(6),Direction.SOUTH,configured.selfBounds(pos.east(6)));
             h.assertTrue(data.register(single)==BuildingWorldData.Result.SUCCESS&&data.acceptSelf(single.id(),single.revision(),1)==BuildingWorldData.Result.SUCCESS,"Single-tier home cannot complete");

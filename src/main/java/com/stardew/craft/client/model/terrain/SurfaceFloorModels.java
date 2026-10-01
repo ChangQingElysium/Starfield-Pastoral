@@ -96,7 +96,7 @@ public final class SurfaceFloorModels {
     }
 
     private static BakedQuad[] cells(BakedModel model, int count, int columns) {
-        BakedQuad source = model.getQuads(null, Direction.UP, RandomSource.create(0)).getFirst();
+        BakedQuad source = com.stardew.craft.port.PortJava.getFirst(model.getQuads(null, Direction.UP, RandomSource.create(0)));
         BakedQuad[] result = new BakedQuad[count];
         TextureAtlasSprite sprite = source.getSprite();
         for (int index = 0; index < count; index++) {
@@ -153,7 +153,7 @@ public final class SurfaceFloorModels {
             var overlay = new ArrayList<BakedQuad>();
             TextureAtlasSprite particle;
             if (type == SurfaceFloorType.STONE_WALKWAY) {
-                int season = Math.clamp(TerrainSeasonTextures.currentTextureSet(), 0, 3);
+                int season = com.stardew.craft.port.PortJava.clamp(TerrainSeasonTextures.currentTextureSet(), 0, 3);
                 int row = TownPavingConnections.row(SurfaceFloorConnections.townMask(mask));
                 int roll = Math.floorMod(net.minecraft.util.Mth.getSeed(pos), 100);
                 int variant = roll < 28 ? 0 : roll < 38 ? 1 : roll < 52 ? 2 : roll < 75 ? 3 : roll < 97 ? 4 : 5;

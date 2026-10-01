@@ -78,8 +78,8 @@ public final class DogHouseGameTests {
                     for (int cell = 0; cell < 3; cell++)
                         h.assertTrue(level.getBlockState(pos.offset(DogHouseBlock.rotateOffset(DogHouseBlock.localOffset(cell), facing))).isAir(), "Orphaned part");
                     var drops = level.getEntitiesOfClass(ItemEntity.class, new AABB(pos).inflate(4));
-                    h.assertTrue(drops.size() == 1 && drops.getFirst().getItem().is(block.asItem())
-                            && drops.getFirst().getItem().getCount() == 1, "Expected exactly one doghouse drop");
+                    h.assertTrue(drops.size() == 1 && com.stardew.craft.port.PortJava.getFirst(drops).getItem().is(block.asItem())
+                            && com.stardew.craft.port.PortJava.getFirst(drops).getItem().getCount() == 1, "Expected exactly one doghouse drop");
                 }
             }
         } finally { time.setCurrentSeason(previous); }

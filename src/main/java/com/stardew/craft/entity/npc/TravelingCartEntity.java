@@ -1,5 +1,7 @@
 package com.stardew.craft.entity.npc;
 
+import com.stardew.craft.model.AnimatedModel;
+import com.stardew.craft.model.ModelAnimation;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -7,19 +9,9 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
-import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.core.animation.AnimatableManager;
-import software.bernie.geckolib.core.animation.AnimationController;
-import software.bernie.geckolib.core.animation.RawAnimation;
-import software.bernie.geckolib.util.GeckoLibUtil;
 
 @SuppressWarnings("null")
-public class TravelingCartEntity extends PathfinderMob implements GeoEntity {
-
-    private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("idle");
-
-    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
+public class TravelingCartEntity extends PathfinderMob implements AnimatedModel {
 
     public TravelingCartEntity(EntityType<? extends PathfinderMob> entityType, Level level) {
         super(entityType, level);
@@ -66,13 +58,10 @@ public class TravelingCartEntity extends PathfinderMob implements GeoEntity {
     }
 
     @Override
-    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main", 0,
-                state -> state.setAndContinue(IDLE)));
+    public ModelAnimation modelAnimation(boolean moving, float partialTick) {
+        return ModelAnimation.loop("animation.traveling_cart.idle");
     }
 
-    @Override
-    public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return this.cache;
-    }
+    @Override public int modelTransitionTicks() { return 0; }
+
 }

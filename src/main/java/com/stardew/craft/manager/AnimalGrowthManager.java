@@ -348,7 +348,7 @@ public class AnimalGrowthManager extends SavedData {
             if (pending.isEmpty()) {
                 continue;
             }
-            AnimalPendingBirth event = pending.getFirst();
+            AnimalPendingBirth event = com.stardew.craft.port.PortJava.getFirst(pending);
             if (!promptedBirthEvents.add(event.eventId())) {
                 continue;
             }
@@ -1071,7 +1071,7 @@ public class AnimalGrowthManager extends SavedData {
             return;
         }
 
-        FarmAnimalRecord victim = targetOutsideAnimals.getFirst();
+        FarmAnimalRecord victim = com.stardew.craft.port.PortJava.getFirst(targetOutsideAnimals);
         BaseCoopAnimalEntity entity =
                 findEntityByManagedId(level, victim.animalId());
         if (entity != null) {

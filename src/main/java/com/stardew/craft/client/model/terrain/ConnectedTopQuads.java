@@ -88,8 +88,8 @@ final class ConnectedTopQuads {
         }
         boolean opaque(float x, float z) {
             var sprite = quad.getSprite();
-            int px = Math.clamp((int) ((uv(4, x, z) - sprite.getU0()) / (sprite.getU1() - sprite.getU0()) * sprite.contents().width()), 0, sprite.contents().width() - 1);
-            int pz = Math.clamp((int) ((uv(5, x, z) - sprite.getV0()) / (sprite.getV1() - sprite.getV0()) * sprite.contents().height()), 0, sprite.contents().height() - 1);
+            int px = com.stardew.craft.port.PortJava.clamp((int) ((uv(4, x, z) - sprite.getU0()) / (sprite.getU1() - sprite.getU0()) * sprite.contents().width()), 0, sprite.contents().width() - 1);
+            int pz = com.stardew.craft.port.PortJava.clamp((int) ((uv(5, x, z) - sprite.getV0()) / (sprite.getV1() - sprite.getV0()) * sprite.contents().height()), 0, sprite.contents().height() - 1);
             return (sprite.getPixelRGBA(0, px, pz) >>> 24) != 0;
         }
         BakedQuad crop(float left, float north, float right, float southEdge, float height) {

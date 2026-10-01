@@ -165,19 +165,19 @@ public record JeiCatalogSyncPayload(
                     java.util.Random random = new java.util.Random(definitionId.toString().hashCode());
                     Set<ItemStackKey> seen = new LinkedHashSet<>();
                     for (var weightedEntry : definition.entries()) {
-                        List<ItemStack> outputs = StardewItemQueries.resolve(weightedEntry.query(),
+                        List<ItemStack> outputs = StardewItemQueries.preview(weightedEntry.query(),
                                         StardewItemQueryContext.forPlayer(player, random))
                                 .resultOrPartial(message -> StardewCraft.LOGGER.warn(
                                         "Unable to build JEI display for geode {}: {}", definitionId, message))
                                 .orElse(List.of());
-                        for (ResourceLocation inputId : definition.inputs()) {
+                        for (ResourceLocation inputId : GeodeDropData.inputsFor(definitionId)) {
                             if (!BuiltInRegistries.ITEM.containsKey(inputId)) continue;
                             ItemStack input = new ItemStack(BuiltInRegistries.ITEM.get(inputId));
                             for (ItemStack output : outputs) {
                                 if (output.isEmpty()) continue;
                                 ItemStackKey key = new ItemStackKey(inputId,
                                         BuiltInRegistries.ITEM.getKey(output.getItem()), output.getCount());
-                                if (seen.add(key)) result.add(new GeodeEntry(input, output));
+                                if (seen.add(key)) result.add(new GeodeEntry(input, output, definition.crusherAllowed()));
                             }
                         }
                     }
@@ -263,11 +263,12 @@ public record JeiCatalogSyncPayload(
     private static void writeGeode(RegistryFriendlyByteBuf buf, GeodeEntry entry) {
         com.stardew.craft.port.PortCodecs.OPTIONAL_ITEM_STACK.encode(buf, entry.geode);
         com.stardew.craft.port.PortCodecs.OPTIONAL_ITEM_STACK.encode(buf, entry.output);
+        buf.writeBoolean(entry.crusherAllowed);
     }
 
     private static GeodeEntry readGeode(RegistryFriendlyByteBuf buf) {
         return new GeodeEntry(com.stardew.craft.port.PortCodecs.OPTIONAL_ITEM_STACK.decode(buf),
-                com.stardew.craft.port.PortCodecs.OPTIONAL_ITEM_STACK.decode(buf));
+                com.stardew.craft.port.PortCodecs.OPTIONAL_ITEM_STACK.decode(buf), buf.readBoolean());
     }
 
     private static void writeFishPond(RegistryFriendlyByteBuf buf, FishPondEntry entry) {
@@ -370,7 +371,8 @@ public record JeiCatalogSyncPayload(
         }
     }
 
-    public record GeodeEntry(ItemStack geode, ItemStack output) {
+    public record GeodeEntry(ItemStack geode, ItemStack output, boolean crusherAllowed) {
+        public GeodeEntry(ItemStack geode, ItemStack output) { this(geode, output, true); }
         public GeodeEntry {
             geode = geode == null ? ItemStack.EMPTY : geode.copy();
             output = output == null ? ItemStack.EMPTY : output.copy();
@@ -387,7 +389,7 @@ public record JeiCatalogSyncPayload(
         }
 
         ClientJeiCatalog.GeodeEntry toClient() {
-            return new ClientJeiCatalog.GeodeEntry(geode, output);
+            return new ClientJeiCatalog.GeodeEntry(geode, output, crusherAllowed);
         }
     }
 

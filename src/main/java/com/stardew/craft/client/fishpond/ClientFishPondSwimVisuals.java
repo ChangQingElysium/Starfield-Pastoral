@@ -60,7 +60,7 @@ public final class ClientFishPondSwimVisuals {
             Set<Long> nextCells=new HashSet<>();for(long p:be.getPondWaterCells())nextCells.add(p);
             if(!cells.equals(nextCells)||!ItemStack.isSameItemSameTags(fish,next)){fishList.clear();cells=Set.copyOf(nextCells);fish=next;space=new PondSwimSpace(cells,p->!level.getFluidState(p).isEmpty());}
             int count=be.getFishPopulation();
-            while(fishList.size()>count)fishList.removeLast();
+            while(fishList.size()>count)com.stardew.craft.port.PortJava.removeLast(fishList);
             while(fishList.size()<count) {
                 Vec3 p=space.sample(random,ClientFishPondFishRenderer.bottomDweller(fish));if(p==null)break;
                 fishList.add(new Swimmer(p,random));

@@ -161,7 +161,7 @@ public final class RockCrabEntity extends StardewMonsterEntity {
         tag.put("CrabMovement",movement.save());tag.putInt("CrabSlipperiness",slipperiness);tag.putInt("CrabStun",stunMilliseconds);
     }
     @Override public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);entityData.set(SHELL,tag.contains("CrabShell")?Math.clamp(tag.getInt("CrabShell"),0,5):5);
+        super.readAdditionalSaveData(tag);entityData.set(SHELL,tag.contains("CrabShell")?com.stardew.craft.port.PortJava.clamp(tag.getInt("CrabShell"),0,5):5);
         entityData.set(SHELL_GONE,tag.getBoolean("CrabShellGone"));waiter=tag.getBoolean("CrabWaiter");
         movement.load(tag.getCompound("CrabMovement"));slipperiness=tag.contains("CrabSlipperiness")?tag.getInt("CrabSlipperiness"):2;stunMilliseconds=tag.getInt("CrabStun");
     }

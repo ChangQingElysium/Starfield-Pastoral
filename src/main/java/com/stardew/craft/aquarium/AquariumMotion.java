@@ -45,8 +45,8 @@ public final class AquariumMotion {
         double halfX = (Math.abs(Math.cos(a)) * rotatedWidth + Math.abs(Math.sin(a)) * depth) / 2;
         double halfZ = (Math.abs(Math.sin(a)) * rotatedWidth + Math.abs(Math.cos(a)) * depth) / 2;
         double halfY = (Math.abs(Math.sin(r)) * width + Math.abs(Math.cos(r)) * height) / 2;
-        return new Pose(Math.clamp(x, -28.8 + halfX, 28.8 - halfX),
-                Math.clamp(y, 7.2 + halfY, 30.8 - halfY), Math.clamp(z, -12.8 + halfZ, 12.8 - halfZ),
+        return new Pose(com.stardew.craft.port.PortJava.clamp(x, -28.8 + halfX, 28.8 - halfX),
+                com.stardew.craft.port.PortJava.clamp(y, 7.2 + halfY, 30.8 - halfY), com.stardew.craft.port.PortJava.clamp(z, -12.8 + halfZ, 12.8 - halfZ),
                 (float) yaw, (float) roll);
     }
 }

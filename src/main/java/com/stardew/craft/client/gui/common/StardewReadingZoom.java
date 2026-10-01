@@ -170,8 +170,8 @@ public final class StardewReadingZoom {
         var zoom = current(screen);
         if (zoom == null) return false;
         var state = STATES.get(screen);
-        if (zoom.overflowX() > 0) state.x = Math.clamp(state.x + dx / zoom.overflowX(), 0, 1);
-        if (zoom.overflowY() > 0) state.y = Math.clamp(state.y + dy / zoom.overflowY(), 0, 1);
+        if (zoom.overflowX() > 0) state.x = com.stardew.craft.port.PortJava.clamp(state.x + dx / zoom.overflowX(), 0, 1);
+        if (zoom.overflowY() > 0) state.y = com.stardew.craft.port.PortJava.clamp(state.y + dy / zoom.overflowY(), 0, 1);
         return dx != 0 && zoom.overflowX() > 0 || dy != 0 && zoom.overflowY() > 0;
     }
 

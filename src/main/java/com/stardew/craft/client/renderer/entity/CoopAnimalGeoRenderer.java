@@ -11,10 +11,10 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
-import software.bernie.geckolib.renderer.GeoEntityRenderer;
+import com.stardew.craft.client.model.nativebb.BlockbenchEntityRenderer;
 
 @SuppressWarnings("null")
-public class CoopAnimalGeoRenderer<T extends BaseCoopAnimalEntity> extends GeoEntityRenderer<T> {
+public class CoopAnimalGeoRenderer<T extends BaseCoopAnimalEntity> extends BlockbenchEntityRenderer<T> {
 	private static final ResourceLocation EMOTES_TEX = new ResourceLocation(StardewCraft.MODID, "textures/gui/emotes.png");
 	private static final int TEX_WIDTH = 64;
 	private static final int TEX_HEIGHT = 256;

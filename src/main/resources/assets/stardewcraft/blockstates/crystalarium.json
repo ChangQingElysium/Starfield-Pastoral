@@ -1,64 +1,64 @@
 {
   "variants": {
     "facing=south,part=main,working=false": {
-      "model": "stardewcraft:block/utility/crystalarium"
+      "model": "stardewcraft:block/utility/crystalarium",
+      "y": 180
     },
     "facing=south,part=main,working=true": {
-      "model": "stardewcraft:block/utility/crystalarium"
+      "model": "stardewcraft:block/utility/crystalarium",
+      "y": 180
     },
     "facing=west,part=main,working=false": {
       "model": "stardewcraft:block/utility/crystalarium",
-      "y": 90
+      "y": 270
     },
     "facing=west,part=main,working=true": {
       "model": "stardewcraft:block/utility/crystalarium",
-      "y": 90
+      "y": 270
     },
     "facing=north,part=main,working=false": {
-      "model": "stardewcraft:block/utility/crystalarium",
-      "y": 180
+      "model": "stardewcraft:block/utility/crystalarium"
     },
     "facing=north,part=main,working=true": {
-      "model": "stardewcraft:block/utility/crystalarium",
-      "y": 180
+      "model": "stardewcraft:block/utility/crystalarium"
     },
     "facing=east,part=main,working=false": {
       "model": "stardewcraft:block/utility/crystalarium",
-      "y": 270
+      "y": 90
     },
     "facing=east,part=main,working=true": {
       "model": "stardewcraft:block/utility/crystalarium",
-      "y": 270
+      "y": 90
     },
     "facing=south,part=extension,working=false": {
-      "model": "stardewcraft:block/utility/crystalarium_extension"
+      "model": "stardewcraft:block/utility/crystalarium_extension",
+      "y": 180
     },
     "facing=south,part=extension,working=true": {
-      "model": "stardewcraft:block/utility/crystalarium_extension"
+      "model": "stardewcraft:block/utility/crystalarium_extension",
+      "y": 180
     },
     "facing=west,part=extension,working=false": {
       "model": "stardewcraft:block/utility/crystalarium_extension",
-      "y": 90
+      "y": 270
     },
     "facing=west,part=extension,working=true": {
       "model": "stardewcraft:block/utility/crystalarium_extension",
-      "y": 90
+      "y": 270
     },
     "facing=north,part=extension,working=false": {
-      "model": "stardewcraft:block/utility/crystalarium_extension",
-      "y": 180
+      "model": "stardewcraft:block/utility/crystalarium_extension"
     },
     "facing=north,part=extension,working=true": {
-      "model": "stardewcraft:block/utility/crystalarium_extension",
-      "y": 180
+      "model": "stardewcraft:block/utility/crystalarium_extension"
     },
     "facing=east,part=extension,working=false": {
       "model": "stardewcraft:block/utility/crystalarium_extension",
-      "y": 270
+      "y": 90
     },
     "facing=east,part=extension,working=true": {
       "model": "stardewcraft:block/utility/crystalarium_extension",
-      "y": 270
+      "y": 90
     }
   }
 }

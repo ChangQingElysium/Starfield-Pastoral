@@ -185,6 +185,15 @@ public class PortalTriggerBlock extends Block implements EntityBlock, PortBlockI
         };
     }
 
+    @Override
+    public void tick(BlockState state, net.minecraft.server.level.ServerLevel level, BlockPos pos,
+                        net.minecraft.util.RandomSource random) {
+        if (com.stardew.craft.core.ModDimensions.STARDEW_VALLEY.equals(level.dimension())
+                && com.stardew.craft.desert.DesertConstants.isLegacyBusTarget(portalTargetId(level, pos))) {
+            level.removeBlock(pos, false);
+        }
+    }
+
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {

@@ -58,7 +58,7 @@ public final class NativeNpcPose {
     }
     public void blendFrom(NativeNpcPose other, double weight) {
         if (model != other.model) throw new IllegalArgumentException("Different pose models");
-        float w = (float) Math.clamp(weight, 0, 1);
+        float w = (float) com.stardew.craft.port.PortJava.clamp(weight, 0, 1);
         for (int i = 0; i < matrices.length; i++) for (int axis = 0; axis < 3; axis++) {
             positions[i][axis] += (other.positions[i][axis] - positions[i][axis]) * w;
             rotations[i][axis] += (other.rotations[i][axis] - rotations[i][axis]) * w;
@@ -88,6 +88,21 @@ public final class NativeNpcPose {
             };
             sample(track, t, sampled);
             for(int axis=0;axis<3;axis++)target[axis]+=(sampled[axis]-target[axis])*weight;
+        }
+    }
+
+    /** Sample an explicitly managed clock without applying the authored loop flag again. */
+    public void applyAt(String name, double time) {
+        var clip = model.clips().get(name);
+        if (clip == null) throw new IllegalArgumentException("Missing clip: " + name);
+        for (var track : clip.tracks()) {
+            float[] target = switch (track.channel()) {
+                case "position" -> positions[track.bone()];
+                case "rotation" -> rotations[track.bone()];
+                case "scale" -> scales[track.bone()];
+                default -> throw new IllegalArgumentException("Unsupported channel: " + track.channel());
+            };
+            sample(track, Math.max(0, Math.min(time, clip.length())), target);
         }
     }
 
@@ -151,7 +166,7 @@ public final class NativeNpcPose {
 
     public static void sample(NativeNpcModel.Track track, double time, float[] target) {
         var keys = track.keys();
-        var first = keys.getFirst();
+        var first = com.stardew.craft.port.PortJava.getFirst(keys);
         if (time < first.time()) {
             System.arraycopy(first.before(), 0, target, 0, 3);
             return;

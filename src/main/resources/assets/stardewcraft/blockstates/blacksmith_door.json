@@ -1,0 +1,580 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "facing": "north",
+        "half": "lower",
+        "hinge": "left",
+        "open": "false"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_lower_left",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "half": "lower",
+        "hinge": "left",
+        "open": "true"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_lower_left_open",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "half": "lower",
+        "hinge": "right",
+        "open": "false"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_lower_right",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "half": "lower",
+        "hinge": "right",
+        "open": "true"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_lower_right_open",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "half": "upper",
+        "hinge": "left",
+        "open": "false"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_upper_left",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "half": "upper",
+        "hinge": "left",
+        "open": "false"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_upper_left_glass",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "half": "upper",
+        "hinge": "left",
+        "open": "true"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_upper_left_open",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "half": "upper",
+        "hinge": "left",
+        "open": "true"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_upper_left_open_glass",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "half": "upper",
+        "hinge": "right",
+        "open": "false"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_upper_right",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "half": "upper",
+        "hinge": "right",
+        "open": "false"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_upper_right_glass",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "half": "upper",
+        "hinge": "right",
+        "open": "true"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_upper_right_open",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "half": "upper",
+        "hinge": "right",
+        "open": "true"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_upper_right_open_glass",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "half": "lower",
+        "hinge": "left",
+        "open": "false"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_lower_left",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "half": "lower",
+        "hinge": "left",
+        "open": "true"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_lower_left_open",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "half": "lower",
+        "hinge": "right",
+        "open": "false"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_lower_right",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "half": "lower",
+        "hinge": "right",
+        "open": "true"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_lower_right_open",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "half": "upper",
+        "hinge": "left",
+        "open": "false"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_upper_left",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "half": "upper",
+        "hinge": "left",
+        "open": "false"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_upper_left_glass",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "half": "upper",
+        "hinge": "left",
+        "open": "true"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_upper_left_open",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "half": "upper",
+        "hinge": "left",
+        "open": "true"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_upper_left_open_glass",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "half": "upper",
+        "hinge": "right",
+        "open": "false"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_upper_right",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "half": "upper",
+        "hinge": "right",
+        "open": "false"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_upper_right_glass",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "half": "upper",
+        "hinge": "right",
+        "open": "true"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_upper_right_open",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "half": "upper",
+        "hinge": "right",
+        "open": "true"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_upper_right_open_glass",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "half": "lower",
+        "hinge": "left",
+        "open": "false"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_lower_left",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "half": "lower",
+        "hinge": "left",
+        "open": "true"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_lower_left_open",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "half": "lower",
+        "hinge": "right",
+        "open": "false"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_lower_right",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "half": "lower",
+        "hinge": "right",
+        "open": "true"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_lower_right_open",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "half": "upper",
+        "hinge": "left",
+        "open": "false"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_upper_left",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "half": "upper",
+        "hinge": "left",
+        "open": "false"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_upper_left_glass",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "half": "upper",
+        "hinge": "left",
+        "open": "true"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_upper_left_open",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "half": "upper",
+        "hinge": "left",
+        "open": "true"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_upper_left_open_glass",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "half": "upper",
+        "hinge": "right",
+        "open": "false"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_upper_right",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "half": "upper",
+        "hinge": "right",
+        "open": "false"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_upper_right_glass",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "half": "upper",
+        "hinge": "right",
+        "open": "true"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_upper_right_open",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "half": "upper",
+        "hinge": "right",
+        "open": "true"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_upper_right_open_glass",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "half": "lower",
+        "hinge": "left",
+        "open": "false"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_lower_left",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "half": "lower",
+        "hinge": "left",
+        "open": "true"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_lower_left_open",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "half": "lower",
+        "hinge": "right",
+        "open": "false"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_lower_right",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "half": "lower",
+        "hinge": "right",
+        "open": "true"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_lower_right_open",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "half": "upper",
+        "hinge": "left",
+        "open": "false"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_upper_left",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "half": "upper",
+        "hinge": "left",
+        "open": "false"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_upper_left_glass",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "half": "upper",
+        "hinge": "left",
+        "open": "true"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_upper_left_open",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "half": "upper",
+        "hinge": "left",
+        "open": "true"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_upper_left_open_glass",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "half": "upper",
+        "hinge": "right",
+        "open": "false"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_upper_right",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "half": "upper",
+        "hinge": "right",
+        "open": "false"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_upper_right_glass",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "half": "upper",
+        "hinge": "right",
+        "open": "true"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_upper_right_open",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "half": "upper",
+        "hinge": "right",
+        "open": "true"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/blacksmith_door_upper_right_open_glass",
+        "y": 90
+      }
+    }
+  ]
+}

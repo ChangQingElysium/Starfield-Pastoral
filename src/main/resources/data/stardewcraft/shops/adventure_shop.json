@@ -191,6 +191,61 @@
           "data": "explosive_ammo"
         }
       ]
+    },
+    {
+      "item": "stardewcraft:slime_charmer_ring",
+      "price": 25000,
+      "mail_flag": "Gil_Slimes"
+    },
+    {
+      "item": "stardewcraft:savage_ring",
+      "price": 25000,
+      "mail_flag": "Gil_Shadows"
+    },
+    {
+      "item": "stardewcraft:vampire_ring",
+      "price": 15000,
+      "mail_flag": "Gil_Bats"
+    },
+    {
+      "item": "stardewcraft:skeleton_mask",
+      "price": 20000,
+      "mail_flag": "Gil_Skeletons"
+    },
+    {
+      "item": "stardewcraft:insect_head",
+      "price": 10000,
+      "mail_flag": "Gil_Insects"
+    },
+    {
+      "item": "stardewcraft:hard_hat",
+      "price": 20000,
+      "mail_flag": "Gil_Duggy"
+    },
+    {
+      "item": "stardewcraft:burglars_ring",
+      "price": 20000,
+      "mail_flag": "Gil_DustSpirits"
+    },
+    {
+      "item": "stardewcraft:crabshell_ring",
+      "price": 15000,
+      "mail_flag": "Gil_Crabs"
+    },
+    {
+      "item": "stardewcraft:arcane_hat",
+      "price": 20000,
+      "mail_flag": "Gil_Mummies"
+    },
+    {
+      "item": "stardewcraft:knights_helmet",
+      "price": 20000,
+      "mail_flag": "Gil_Dinos"
+    },
+    {
+      "item": "stardewcraft:napalm_ring",
+      "price": 30000,
+      "mail_flag": "Gil_Serpents"
     }
   ],
   "accepted_sell_types": [

@@ -1954,5 +1954,37 @@
         "stream": false
       }
     ]
+  },
+  "cowboy_gunload": {
+    "sounds": [
+      {
+        "name": "stardewcraft:cowboy_gunload",
+        "stream": false
+      }
+    ]
+  },
+  "magma_sprite_spot": {
+    "sounds": [
+      {
+        "name": "stardewcraft:monster/magma_sprite_spot",
+        "stream": false
+      }
+    ]
+  },
+  "fall_down": {
+    "sounds": [
+      {
+        "name": "stardewcraft:fall_down",
+        "stream": false
+      }
+    ]
+  },
+  "club_smash": {
+    "sounds": [
+      {
+        "name": "stardewcraft:clubsmash",
+        "stream": false
+      }
+    ]
   }
 }

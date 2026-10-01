@@ -60,7 +60,7 @@ public final class PrizeTicketRewardData {
                     .resultOrPartial(message -> StardewCraft.LOGGER.error(
                             "[Prize ticket] Definition {} failed: {}", entry.getKey(), message))
                     .orElse(List.of());
-            if (!stacks.isEmpty()) return Optional.of(stacks.getFirst().copy());
+            if (!stacks.isEmpty()) return Optional.of(com.stardew.craft.port.PortJava.getFirst(stacks).copy());
         }
         return Optional.empty();
     }

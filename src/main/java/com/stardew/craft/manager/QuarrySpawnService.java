@@ -185,7 +185,7 @@ public final class QuarrySpawnService {
     private static Block pickBlock(ServerLevel level, RandomSource random) {
         var rewards = WorldLootPoolData.resolve(
                 StardewWorldLootPools.QUARRY, "default", level, null, random);
-        if (rewards.isEmpty() || !(rewards.getFirst().getItem() instanceof BlockItem blockItem)) {
+        if (rewards.isEmpty() || !(com.stardew.craft.port.PortJava.getFirst(rewards).getItem() instanceof BlockItem blockItem)) {
             StardewCraft.LOGGER.error("[QUARRY] World-loot pool returned no placeable block");
             return null;
         }

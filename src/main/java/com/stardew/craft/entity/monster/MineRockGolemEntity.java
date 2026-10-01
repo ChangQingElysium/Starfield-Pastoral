@@ -38,7 +38,7 @@ public final class MineRockGolemEntity extends StardewMonsterEntity {
     public boolean isFarmGolem(){return variant!=null&&variant!=Variant.STONE;}
     public boolean isIridium(){return variant==Variant.IRIDIUM;}
     public String visualVariant(){return variant==Variant.WILDERNESS?"wilderness_golem":variant==Variant.IRIDIUM?"iridium_golem":"rock_golem";}
-    public void setFarmCombatLevel(int value){if(initialized())throw new IllegalStateException("Farm difficulty must precede initialization");farmCombatLevel=Math.clamp(value,0,100);}
+    public void setFarmCombatLevel(int value){if(initialized())throw new IllegalStateException("Farm difficulty must precede initialization");farmCombatLevel=com.stardew.craft.port.PortJava.clamp(value,0,100);}
     public int farmCombatLevel(){return farmCombatLevel;}
     private void setSourceSpeed(int speed){getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(.25*speed/2.);}
 

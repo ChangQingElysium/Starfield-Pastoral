@@ -91,7 +91,7 @@ public final class MineEntranceThemeGameTests {
             state = level.getBlockState(pos);
             helper.assertTrue(MineStepStoneItem.theme(stone.getCloneItemStack(level, pos, state)) == theme, "Step pick lost theme");
             var drops = Block.getDrops(state, level, pos, null);
-            helper.assertTrue(drops.size() == 1 && MineStepStoneItem.theme(drops.getFirst()) == theme, "Step drop lost theme");
+            helper.assertTrue(drops.size() == 1 && MineStepStoneItem.theme(com.stardew.craft.port.PortJava.getFirst(drops)) == theme, "Step drop lost theme");
         }
         helper.succeed();
     }

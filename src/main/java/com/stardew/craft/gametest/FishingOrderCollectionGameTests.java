@@ -133,7 +133,7 @@ public final class FishingOrderCollectionGameTests {
             data.active().add(order);
         }
 
-        private int progress() { return order.objectives().getFirst().progress(); }
+        private int progress() { return com.stardew.craft.port.PortJava.getFirst(order.objectives()).progress(); }
 
         private void reloadOrder() {
             data.active().remove(order);

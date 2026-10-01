@@ -103,12 +103,12 @@ public final class ShapedMaterialQuads {
             double t=((b.u-a.u)*(v-a.v)-(u-a.u)*(b.v-a.v))/det;
             return a.p.add(b.p.subtract(a.p).scale(s)).add(c.p.subtract(a.p).scale(t));
         }
-        return p.getFirst().p;
+        return com.stardew.craft.port.PortJava.getFirst(p).p;
     }
 
     public static boolean contains(BakedQuad q,Vec3 point){
         Vec3 normal=normal(q);List<Vertex> p=vertices(q,TerrainFaceConnections.frame(q.getDirection()));
-        if(Math.abs(point.subtract(p.getFirst().p).dot(normal))>EPS*8)return false;
+        if(Math.abs(point.subtract(com.stardew.craft.port.PortJava.getFirst(p).p).dot(normal))>EPS*8)return false;
         var frame=TerrainFaceConnections.frame(q.getDirection());double u=frame.x(point),v=frame.y(point),sign=0;
         for(int i=0;i<p.size();i++){Vertex a=p.get(i),b=p.get((i+1)%p.size());double cross=(b.u-a.u)*(v-a.v)-(b.v-a.v)*(u-a.u);if(Math.abs(cross)<EPS)continue;if(sign!=0&&sign*cross<0)return false;sign=cross;}
         return sign!=0;
@@ -120,17 +120,17 @@ public final class ShapedMaterialQuads {
     }
     private static Vec3 position(BakedQuad q,int i){int[] d=q.getVertices();int at=i*d.length/4;return new Vec3(Float.intBitsToFloat(d[at]),Float.intBitsToFloat(d[at+1]),Float.intBitsToFloat(d[at+2]));}
     private static Vec3 normal(BakedQuad q){for(int i=1;i<3;i++){Vec3 n=position(q,i).subtract(position(q,0)).cross(position(q,i+1).subtract(position(q,0)));if(n.lengthSqr()>EPS*EPS)return n.normalize();}return Vec3.atLowerCornerOf(q.getDirection().getNormal());}
-    private static List<Vertex> vertices(BakedQuad q,TerrainFaceConnections.Frame frame){List<Vertex> r=new ArrayList<>();for(int i=0;i<4;i++){Vec3 p=position(q,i);if(r.isEmpty()||r.getLast().p.distanceToSqr(p)>EPS*EPS)r.add(new Vertex(p,frame.x(p),frame.y(p)));}return r;}
+    private static List<Vertex> vertices(BakedQuad q,TerrainFaceConnections.Frame frame){List<Vertex> r=new ArrayList<>();for(int i=0;i<4;i++){Vec3 p=position(q,i);if(r.isEmpty()||com.stardew.craft.port.PortJava.getLast(r).p.distanceToSqr(p)>EPS*EPS)r.add(new Vertex(p,frame.x(p),frame.y(p)));}return r;}
     private static double area(List<Vertex> p){double a=0;for(int i=0;i<p.size();i++){Vertex b=p.get(i),c=p.get((i+1)%p.size());a+=b.u*c.v-c.u*b.v;}return Math.abs(a)/2;}
     private static List<Vertex> rect(List<Vertex> p,double x0,double y0,double x1,double y1){p=clip(p,x0,true,true);p=clip(p,x1,true,false);p=clip(p,y0,false,true);return clip(p,y1,false,false);}
     private static List<Vertex> clip(List<Vertex> p,double edge,boolean u,boolean lower){
         List<Vertex> out=new ArrayList<>();if(p.isEmpty())return out;
-        Vertex a=p.getLast();double da=((u?a.u:a.v)-edge)*(lower?1:-1);
+        Vertex a=com.stardew.craft.port.PortJava.getLast(p);double da=((u?a.u:a.v)-edge)*(lower?1:-1);
         for(Vertex b:p){double db=((u?b.u:b.v)-edge)*(lower?1:-1);if((da>=-EPS)!=(db>=-EPS))out.add(a.mix(b,da/(da-db)));if(db>=-EPS)out.add(b);a=b;da=db;}return out;
     }
     private static void emit(List<BakedQuad> out,BakedQuad target,BakedQuad source,List<Vertex> p){
         if(p.size()<=4){out.add(bake(target,source,p));return;}
-        for(int i=1;i<p.size()-1;i++)out.add(bake(target,source,List.of(p.getFirst(),p.get(i),p.get(i+1))));
+        for(int i=1;i<p.size()-1;i++)out.add(bake(target,source,List.of(com.stardew.craft.port.PortJava.getFirst(p),p.get(i),p.get(i+1))));
     }
     private static BakedQuad bake(BakedQuad target,BakedQuad source,List<Vertex> p){
         int[] data=target.getVertices().clone();int stride=data.length/4;
@@ -139,7 +139,7 @@ public final class ShapedMaterialQuads {
     }
     private static float[] uv(BakedQuad source,double u,double v){
         List<Vertex> p=vertices(source,TerrainFaceConnections.frame(source.getDirection()));int[] data=source.getVertices();int stride=data.length/4;
-        for(int i=1;i<p.size()-1;i++){Vertex a=p.getFirst(),b=p.get(i),c=p.get(i+1);double det=(b.u-a.u)*(c.v-a.v)-(c.u-a.u)*(b.v-a.v);if(Math.abs(det)<EPS)continue;double s=((u-a.u)*(c.v-a.v)-(c.u-a.u)*(v-a.v))/det,t=((b.u-a.u)*(v-a.v)-(u-a.u)*(b.v-a.v))/det;float[] out=new float[2];for(int j=0;j<2;j++){float av=Float.intBitsToFloat(data[4+j]),bv=Float.intBitsToFloat(data[i*stride+4+j]),cv=Float.intBitsToFloat(data[(i+1)*stride+4+j]);out[j]=(float)(av+(bv-av)*s+(cv-av)*t);}return out;}
+        for(int i=1;i<p.size()-1;i++){Vertex a=com.stardew.craft.port.PortJava.getFirst(p),b=p.get(i),c=p.get(i+1);double det=(b.u-a.u)*(c.v-a.v)-(c.u-a.u)*(b.v-a.v);if(Math.abs(det)<EPS)continue;double s=((u-a.u)*(c.v-a.v)-(c.u-a.u)*(v-a.v))/det,t=((b.u-a.u)*(v-a.v)-(u-a.u)*(b.v-a.v))/det;float[] out=new float[2];for(int j=0;j<2;j++){float av=Float.intBitsToFloat(data[4+j]),bv=Float.intBitsToFloat(data[i*stride+4+j]),cv=Float.intBitsToFloat(data[(i+1)*stride+4+j]);out[j]=(float)(av+(bv-av)*s+(cv-av)*t);}return out;}
         return new float[]{source.getSprite().getU((float)u),source.getSprite().getV((float)v)};
     }
 }

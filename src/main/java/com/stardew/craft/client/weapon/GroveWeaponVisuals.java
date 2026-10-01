@@ -71,7 +71,7 @@ public final class GroveWeaponVisuals {
         }
         if (!matches(p.castTick(), field) || fade(mc.level.getGameTime() - p.tick(), p.duration()) <= 0
                 || HEALS.stream().anyMatch(h -> h.casterId() == p.casterId() && h.tick() == p.tick())) return;
-        if (HEALS.size() >= 48) HEALS.removeFirst();
+        if (HEALS.size() >= 48) com.stardew.craft.port.PortJava.removeFirst(HEALS);
         HEALS.add(p);
         if (mc.level.getEntity(p.casterId()) instanceof LivingEntity caster && mc.player != null && caster.distanceToSqr(mc.player) <= 32 * 32) {
             mc.level.playLocalSound(caster.getX(), caster.getY() + 0.8, caster.getZ(), SoundEvents.EXPERIENCE_ORB_PICKUP,
@@ -102,8 +102,8 @@ public final class GroveWeaponVisuals {
         for (var field : FIELDS.values()) {
             if (!(mc.level.getEntity(field.casterId()) instanceof LivingEntity caster) || caster.distanceToSqr(camera) > 32 * 32) continue;
             Vec3 base = caster.getPosition(partial).subtract(camera);
-            float endFade = (float) Math.clamp((field.tick() + field.duration() - now) / 10, 0, 1);
-            float startFade = (float) Math.clamp((now - field.tick()) / 8, 0, 1);
+            float endFade = (float) com.stardew.craft.port.PortJava.clamp((field.tick() + field.duration() - now) / 10, 0, 1);
+            float startFade = (float) com.stardew.craft.port.PortJava.clamp((now - field.tick()) / 8, 0, 1);
             float opacity = endFade * startFade * (field.empowered() ? 1 : 0.7f);
             GroveEffectGeometry.wisp(out, stack.last().pose(), base, now * 0.028, 0.6, 0.14, opacity);
             GroveEffectGeometry.wisp(out, stack.last().pose(), base, now * 0.028 + 3.1, 0.52, 0.32, opacity * 0.65f);

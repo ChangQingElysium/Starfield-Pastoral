@@ -184,7 +184,7 @@ public record FarmAnimalDefinition(
                 friendship,
                 conditionEvaluator
         );
-        return eligible.isEmpty() ? null : eligible.getFirst();
+        return eligible.isEmpty() ? null : com.stardew.craft.port.PortJava.getFirst(eligible);
     }
 
     public int sellPriceAtFriendship(int friendship) {

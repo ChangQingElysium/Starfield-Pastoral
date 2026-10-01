@@ -38,7 +38,7 @@ public final class NativeRockCrabPlayback {
         if(reset&&next==RockCrabEntity.DISGUISE){clip="disguise";time=0;entered=clock-1;}
         NativeRockCrabMotion.sample(model,pose,clip,time);
         if(deathTime<=0) {
-            double p=Math.clamp((clock-transition)/.15,0,1);
+            double p=com.stardew.craft.port.PortJava.clamp((clock-transition)/.15,0,1);
             if(p<1)pose.blendFrom(outgoing,1-p*p*(3-2*p));
             if(hitTime>=0&&hitTime<.5&&next!=RockCrabEntity.BARE) {
                 double shake=Math.sin(hitTime*Math.PI*16)*Math.pow(1-hitTime/.5,2);

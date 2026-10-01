@@ -5,209 +5,766 @@
   "entries": [
     {
       "query": {
-        "type": "stardewcraft:skull_treasure_slot",
+        "type": "stardewcraft:qualified_item",
         "data": {
-          "slot": 0
+          "item": "(O)288",
+          "count": 5
         }
       }
     },
     {
       "query": {
-        "type": "stardewcraft:skull_treasure_slot",
+        "type": "stardewcraft:item",
         "data": {
-          "slot": 1
+          "item": "stardewcraft:bomb_item",
+          "count": 10
         }
       }
     },
     {
       "query": {
-        "type": "stardewcraft:skull_treasure_slot",
+        "type": "stardewcraft:conditional",
         "data": {
-          "slot": 2
+          "query": {
+            "type": "stardewcraft:multiply_count",
+            "data": {
+              "query": {
+                "type": "stardewcraft:random_count",
+                "data": {
+                  "query": {
+                    "type": "stardewcraft:qualified_item",
+                    "data": {
+                      "item": "(O)848",
+                      "count": 1
+                    }
+                  },
+                  "min_count": 2,
+                  "max_count": 4
+                }
+              },
+              "factor": 5,
+              "last_only": false
+            }
+          },
+          "otherwise": {
+            "type": "stardewcraft:qualified_item",
+            "data": {
+              "item": "(O)275",
+              "count": 5
+            }
+          },
+          "chance": 0.66,
+          "minimum": {
+            "host_volcano_shortcut": 1
+          }
         }
       }
     },
     {
       "query": {
-        "type": "stardewcraft:skull_treasure_slot",
+        "type": "stardewcraft:random_count",
         "data": {
-          "slot": 3
+          "query": {
+            "type": "stardewcraft:qualified_item",
+            "data": {
+              "item": "(O)773",
+              "count": 1
+            }
+          },
+          "min_count": 2,
+          "max_count": 4
         }
       }
     },
     {
       "query": {
-        "type": "stardewcraft:skull_treasure_slot",
+        "type": "stardewcraft:conditional",
         "data": {
-          "slot": 4
+          "query": {
+            "type": "stardewcraft:qualified_item",
+            "data": {
+              "item": "(O)749",
+              "count": 10
+            }
+          },
+          "otherwise": {
+            "type": "stardewcraft:qualified_item",
+            "data": {
+              "item": "(O)749",
+              "count": 5
+            }
+          },
+          "chance": 0.25
         }
       }
     },
     {
       "query": {
-        "type": "stardewcraft:skull_treasure_slot",
+        "type": "stardewcraft:qualified_item",
         "data": {
-          "slot": 5
+          "item": "(O)688",
+          "count": 5
         }
       }
     },
     {
       "query": {
-        "type": "stardewcraft:skull_treasure_slot",
+        "type": "stardewcraft:random_count",
         "data": {
-          "slot": 6
+          "query": {
+            "type": "stardewcraft:qualified_item",
+            "data": {
+              "item": "(O)681",
+              "count": 1
+            }
+          },
+          "min_count": 1,
+          "max_count": 3
         }
       }
     },
     {
       "query": {
-        "type": "stardewcraft:skull_treasure_slot",
+        "type": "stardewcraft:one_of_queries",
         "data": {
-          "slot": 7
+          "queries": [
+            {
+              "type": "stardewcraft:qualified_item",
+              "data": {
+                "item": "(O)628",
+                "count": 1
+              }
+            },
+            {
+              "type": "stardewcraft:qualified_item",
+              "data": {
+                "item": "(O)629",
+                "count": 1
+              }
+            },
+            {
+              "type": "stardewcraft:qualified_item",
+              "data": {
+                "item": "(O)630",
+                "count": 1
+              }
+            },
+            {
+              "type": "stardewcraft:qualified_item",
+              "data": {
+                "item": "(O)631",
+                "count": 1
+              }
+            },
+            {
+              "type": "stardewcraft:qualified_item",
+              "data": {
+                "item": "(O)632",
+                "count": 1
+              }
+            },
+            {
+              "type": "stardewcraft:qualified_item",
+              "data": {
+                "item": "(O)633",
+                "count": 1
+              }
+            }
+          ]
         }
       }
     },
     {
       "query": {
-        "type": "stardewcraft:skull_treasure_slot",
+        "type": "stardewcraft:random_count",
         "data": {
-          "slot": 8
+          "query": {
+            "type": "stardewcraft:qualified_item",
+            "data": {
+              "item": "(O)645",
+              "count": 1
+            }
+          },
+          "min_count": 1,
+          "max_count": 2
         }
       }
     },
     {
       "query": {
-        "type": "stardewcraft:skull_treasure_slot",
+        "type": "stardewcraft:qualified_item",
         "data": {
-          "slot": 9
+          "item": "(O)621",
+          "count": 4
         }
       }
     },
     {
       "query": {
-        "type": "stardewcraft:skull_treasure_slot",
+        "type": "stardewcraft:conditional",
         "data": {
-          "slot": 10
+          "query": {
+            "type": "stardewcraft:qualified_item",
+            "data": {
+              "item": "(O)802",
+              "count": 15
+            }
+          },
+          "otherwise": {
+            "type": "stardewcraft:multiply_count",
+            "data": {
+              "query": {
+                "type": "stardewcraft:random_count",
+                "data": {
+                  "query": {
+                    "type": "stardewcraft:one_of_queries",
+                    "data": {
+                      "queries": [
+                        {
+                          "type": "stardewcraft:qualified_item",
+                          "data": {
+                            "item": "(O)472",
+                            "count": 1
+                          }
+                        },
+                        {
+                          "type": "stardewcraft:qualified_item",
+                          "data": {
+                            "item": "(O)473",
+                            "count": 1
+                          }
+                        },
+                        {
+                          "type": "stardewcraft:qualified_item",
+                          "data": {
+                            "item": "(O)474",
+                            "count": 1
+                          }
+                        },
+                        {
+                          "type": "stardewcraft:qualified_item",
+                          "data": {
+                            "item": "(O)475",
+                            "count": 1
+                          }
+                        },
+                        {
+                          "type": "stardewcraft:qualified_item",
+                          "data": {
+                            "item": "(O)476",
+                            "count": 1
+                          }
+                        },
+                        {
+                          "type": "stardewcraft:qualified_item",
+                          "data": {
+                            "item": "(O)477",
+                            "count": 1
+                          }
+                        },
+                        {
+                          "type": "stardewcraft:qualified_item",
+                          "data": {
+                            "item": "(O)478",
+                            "count": 1
+                          }
+                        },
+                        {
+                          "type": "stardewcraft:qualified_item",
+                          "data": {
+                            "item": "(O)479",
+                            "count": 1
+                          }
+                        },
+                        {
+                          "type": "stardewcraft:qualified_item",
+                          "data": {
+                            "item": "(O)480",
+                            "count": 1
+                          }
+                        },
+                        {
+                          "type": "stardewcraft:qualified_item",
+                          "data": {
+                            "item": "(O)481",
+                            "count": 1
+                          }
+                        },
+                        {
+                          "type": "stardewcraft:qualified_item",
+                          "data": {
+                            "item": "(O)482",
+                            "count": 1
+                          }
+                        },
+                        {
+                          "type": "stardewcraft:qualified_item",
+                          "data": {
+                            "item": "(O)483",
+                            "count": 1
+                          }
+                        },
+                        {
+                          "type": "stardewcraft:qualified_item",
+                          "data": {
+                            "item": "(O)484",
+                            "count": 1
+                          }
+                        },
+                        {
+                          "type": "stardewcraft:qualified_item",
+                          "data": {
+                            "item": "(O)485",
+                            "count": 1
+                          }
+                        },
+                        {
+                          "type": "stardewcraft:qualified_item",
+                          "data": {
+                            "item": "(O)486",
+                            "count": 1
+                          }
+                        },
+                        {
+                          "type": "stardewcraft:qualified_item",
+                          "data": {
+                            "item": "(O)487",
+                            "count": 1
+                          }
+                        },
+                        {
+                          "type": "stardewcraft:qualified_item",
+                          "data": {
+                            "item": "(O)488",
+                            "count": 1
+                          }
+                        },
+                        {
+                          "type": "stardewcraft:qualified_item",
+                          "data": {
+                            "item": "(O)489",
+                            "count": 1
+                          }
+                        },
+                        {
+                          "type": "stardewcraft:qualified_item",
+                          "data": {
+                            "item": "(O)490",
+                            "count": 1
+                          }
+                        },
+                        {
+                          "type": "stardewcraft:qualified_item",
+                          "data": {
+                            "item": "(O)491",
+                            "count": 1
+                          }
+                        },
+                        {
+                          "type": "stardewcraft:qualified_item",
+                          "data": {
+                            "item": "(O)492",
+                            "count": 1
+                          }
+                        },
+                        {
+                          "type": "stardewcraft:qualified_item",
+                          "data": {
+                            "item": "(O)493",
+                            "count": 1
+                          }
+                        },
+                        {
+                          "type": "stardewcraft:qualified_item",
+                          "data": {
+                            "item": "(O)494",
+                            "count": 1
+                          }
+                        },
+                        {
+                          "type": "stardewcraft:qualified_item",
+                          "data": {
+                            "item": "(O)495",
+                            "count": 1
+                          }
+                        },
+                        {
+                          "type": "stardewcraft:qualified_item",
+                          "data": {
+                            "item": "(O)496",
+                            "count": 1
+                          }
+                        },
+                        {
+                          "type": "stardewcraft:qualified_item",
+                          "data": {
+                            "item": "(O)497",
+                            "count": 1
+                          }
+                        },
+                        {
+                          "type": "stardewcraft:qualified_item",
+                          "data": {
+                            "item": "(O)498",
+                            "count": 1
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "min_count": 1,
+                  "max_count": 4
+                }
+              },
+              "factor": 5,
+              "last_only": false
+            }
+          },
+          "chance": 0.33
         }
       }
     },
     {
       "query": {
-        "type": "stardewcraft:skull_treasure_slot",
+        "type": "stardewcraft:qualified_item",
         "data": {
-          "slot": 11
+          "item": "(O)286",
+          "count": 15
         }
       }
     },
     {
       "query": {
-        "type": "stardewcraft:skull_treasure_slot",
+        "type": "stardewcraft:one_of_queries",
         "data": {
-          "slot": 12
+          "queries": [
+            {
+              "type": "stardewcraft:qualified_item",
+              "data": {
+                "item": "(O)265",
+                "count": 1
+              }
+            },
+            {
+              "type": "stardewcraft:qualified_item",
+              "data": {
+                "item": "(O)437",
+                "count": 1
+              }
+            }
+          ]
         }
       }
     },
     {
       "query": {
-        "type": "stardewcraft:skull_treasure_slot",
+        "type": "stardewcraft:qualified_item",
         "data": {
-          "slot": 13
+          "item": "(O)439",
+          "count": 1
         }
       }
     },
     {
       "query": {
-        "type": "stardewcraft:skull_treasure_slot",
+        "type": "stardewcraft:conditional",
         "data": {
-          "slot": 14
+          "query": {
+            "type": "stardewcraft:one_of_queries",
+            "data": {
+              "queries": [
+                {
+                  "type": "stardewcraft:qualified_item",
+                  "data": {
+                    "item": "(O)226",
+                    "count": 5
+                  }
+                },
+                {
+                  "type": "stardewcraft:qualified_item",
+                  "data": {
+                    "item": "(O)732",
+                    "count": 5
+                  }
+                }
+              ]
+            }
+          },
+          "otherwise": {
+            "type": "stardewcraft:random_count",
+            "data": {
+              "query": {
+                "type": "stardewcraft:qualified_item",
+                "data": {
+                  "item": "(O)349",
+                  "count": 1
+                }
+              },
+              "min_count": 2,
+              "max_count": 4
+            }
+          },
+          "chance": 0.33
         }
       }
     },
     {
       "query": {
-        "type": "stardewcraft:skull_treasure_slot",
+        "type": "stardewcraft:random_count",
         "data": {
-          "slot": 15
+          "query": {
+            "type": "stardewcraft:qualified_item",
+            "data": {
+              "item": "(O)337",
+              "count": 1
+            }
+          },
+          "min_count": 2,
+          "max_count": 3
         }
       }
     },
     {
       "query": {
-        "type": "stardewcraft:skull_treasure_slot",
+        "type": "stardewcraft:conditional",
         "data": {
-          "slot": 16
+          "query": {
+            "type": "stardewcraft:one_of_queries",
+            "data": {
+              "queries": [
+                {
+                  "type": "stardewcraft:qualified_item",
+                  "data": {
+                    "item": "(O)226",
+                    "count": 5
+                  }
+                },
+                {
+                  "type": "stardewcraft:qualified_item",
+                  "data": {
+                    "item": "(O)732",
+                    "count": 5
+                  }
+                }
+              ]
+            }
+          },
+          "otherwise": {
+            "type": "stardewcraft:one_of_queries",
+            "data": {
+              "queries": [
+                {
+                  "type": "stardewcraft:qualified_item",
+                  "data": {
+                    "item": "(O)235",
+                    "count": 5
+                  }
+                },
+                {
+                  "type": "stardewcraft:qualified_item",
+                  "data": {
+                    "item": "(O)236",
+                    "count": 5
+                  }
+                },
+                {
+                  "type": "stardewcraft:qualified_item",
+                  "data": {
+                    "item": "(O)237",
+                    "count": 5
+                  }
+                },
+                {
+                  "type": "stardewcraft:qualified_item",
+                  "data": {
+                    "item": "(O)238",
+                    "count": 5
+                  }
+                },
+                {
+                  "type": "stardewcraft:qualified_item",
+                  "data": {
+                    "item": "(O)239",
+                    "count": 5
+                  }
+                },
+                {
+                  "type": "stardewcraft:qualified_item",
+                  "data": {
+                    "item": "(O)240",
+                    "count": 5
+                  }
+                },
+                {
+                  "type": "stardewcraft:qualified_item",
+                  "data": {
+                    "item": "(O)241",
+                    "count": 5
+                  }
+                },
+                {
+                  "type": "stardewcraft:qualified_item",
+                  "data": {
+                    "item": "(O)242",
+                    "count": 5
+                  }
+                },
+                {
+                  "type": "stardewcraft:qualified_item",
+                  "data": {
+                    "item": "(O)243",
+                    "count": 5
+                  }
+                },
+                {
+                  "type": "stardewcraft:qualified_item",
+                  "data": {
+                    "item": "(O)244",
+                    "count": 5
+                  }
+                }
+              ]
+            }
+          },
+          "chance": 0.33
         }
       }
     },
     {
       "query": {
-        "type": "stardewcraft:skull_treasure_slot",
+        "type": "stardewcraft:qualified_item",
         "data": {
-          "slot": 17
+          "item": "(O)74",
+          "count": 1
         }
       }
     },
     {
       "query": {
-        "type": "stardewcraft:skull_treasure_slot",
+        "type": "stardewcraft:item",
         "data": {
-          "slot": 18
+          "item": "stardewcraft:crystalarium",
+          "count": 1
         }
       }
     },
     {
       "query": {
-        "type": "stardewcraft:skull_treasure_slot",
+        "type": "stardewcraft:item",
         "data": {
-          "slot": 19
+          "item": "stardewcraft:seed_maker",
+          "count": 1
         }
       }
     },
     {
       "query": {
-        "type": "stardewcraft:skull_treasure_slot",
+        "type": "stardewcraft:item",
         "data": {
-          "slot": 20
+          "item": "stardewcraft:auto_grabber",
+          "count": 1
         }
       }
     },
     {
       "query": {
-        "type": "stardewcraft:skull_treasure_slot",
+        "type": "stardewcraft:one_of_queries",
         "data": {
-          "slot": 21
+          "queries": [
+            {
+              "type": "stardewcraft:item",
+              "data": {
+                "item": "stardewcraft:red_cowboy_hat",
+                "count": 1
+              }
+            },
+            {
+              "type": "stardewcraft:item",
+              "data": {
+                "item": "stardewcraft:blue_cowboy_hat",
+                "count": 1
+              }
+            }
+          ]
         }
       }
     },
     {
       "query": {
-        "type": "stardewcraft:skull_treasure_slot",
+        "type": "stardewcraft:conditional",
         "data": {
-          "slot": 22
+          "query": {
+            "type": "stardewcraft:conditional",
+            "data": {
+              "query": {
+                "type": "stardewcraft:item",
+                "data": {
+                  "item": "stardewcraft:golden_mystery_box",
+                  "count": 5
+                }
+              },
+              "otherwise": {
+                "type": "stardewcraft:item",
+                "data": {
+                  "item": "stardewcraft:mystery_box",
+                  "count": 5
+                }
+              },
+              "minimum": {
+                "mastery:foraging": 1
+              }
+            }
+          },
+          "otherwise": {
+            "type": "stardewcraft:conditional",
+            "data": {
+              "query": {
+                "type": "stardewcraft:qualified_item",
+                "data": {
+                  "item": "(O)749",
+                  "count": 10
+                }
+              },
+              "otherwise": {
+                "type": "stardewcraft:qualified_item",
+                "data": {
+                  "item": "(O)749",
+                  "count": 5
+                }
+              },
+              "chance": 0.25
+            }
+          },
+          "minimum": {
+            "flag:sawQiPlane": 1
+          }
         }
       }
     },
     {
       "query": {
-        "type": "stardewcraft:skull_treasure_slot",
+        "type": "stardewcraft:item",
         "data": {
-          "slot": 23
+          "item": "stardewcraft:white_turban",
+          "count": 1
         }
       }
     },
     {
       "query": {
-        "type": "stardewcraft:skull_treasure_slot",
+        "type": "stardewcraft:item",
         "data": {
-          "slot": 24
+          "item": "stardewcraft:auto_petter",
+          "count": 1
         }
       }
     },
     {
       "query": {
-        "type": "stardewcraft:skull_treasure_slot",
+        "type": "stardewcraft:item",
         "data": {
-          "slot": 25
+          "item": "stardewcraft:dark_cowboy_hat",
+          "count": 1
         }
       }
     }

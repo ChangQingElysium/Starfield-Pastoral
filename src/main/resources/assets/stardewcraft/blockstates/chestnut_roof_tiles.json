@@ -1,0 +1,15 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "stardewcraft:block/chestnut_roof_tiles"
+      },
+      {
+        "model": "stardewcraft:block/chestnut_roof_tiles_1"
+      },
+      {
+        "model": "stardewcraft:block/chestnut_roof_tiles_2"
+      }
+    ]
+  }
+}

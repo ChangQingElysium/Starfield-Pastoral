@@ -1,6 +1,8 @@
 package com.stardew.craft.blockentity;
 
 import com.stardew.craft.port.PortItemStacks;
+import com.stardew.craft.model.AnimatedModel;
+import com.stardew.craft.model.ModelAnimation;
 import com.stardew.craft.block.utility.WoodenChestBlock;
 import com.stardew.craft.block.utility.WoodenChestColorPalette;
 import com.stardew.craft.menu.WoodenChestMenu;
@@ -26,30 +28,18 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import software.bernie.geckolib.animatable.GeoBlockEntity;
-import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.core.animation.AnimatableManager;
-import software.bernie.geckolib.core.animation.AnimationController;
-import software.bernie.geckolib.core.object.PlayState;
-import software.bernie.geckolib.core.animation.RawAnimation;
-import software.bernie.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
 
 @SuppressWarnings("null")
-public class WoodenChestBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity implements Container, MenuProvider, GeoBlockEntity, com.stardew.craft.inventory.ChestStorage {
+public class WoodenChestBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity implements Container, MenuProvider, AnimatedModel, com.stardew.craft.inventory.ChestStorage {
     private static final String TAG_ITEMS = "items";
     private static final String TAG_COLOR_SELECTION = "colorSelection";
     private static final int SLOT_COUNT = com.stardew.craft.menu.ChestMenuLayout.NORMAL_CAPACITY;
 
-    private static final RawAnimation OPEN_ANIM = RawAnimation.begin().thenPlayAndHold("OPEN");
-    private static final RawAnimation CLOSE_ANIM = RawAnimation.begin().thenPlayAndHold("CLOSE");
-
     private final NonNullList<ItemStack> localItems;
-    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
     private int openCount;
-    private boolean lastAnimatedOpen;
     private int colorSelection = -1;
 
     public WoodenChestBlockEntity(BlockPos pos, BlockState state) {
@@ -315,22 +305,11 @@ public class WoodenChestBlockEntity extends net.minecraft.world.level.block.enti
     }
 
     @Override
-    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main", 0, state -> {
-            BlockState blockState = getBlockState();
-            boolean openNow = blockState.hasProperty(WoodenChestBlock.OPEN) && blockState.getValue(WoodenChestBlock.OPEN);
-            if (openNow != lastAnimatedOpen) {
-                state.setAndContinue(openNow ? OPEN_ANIM : CLOSE_ANIM);
-                lastAnimatedOpen = openNow;
-            }
-            return PlayState.CONTINUE;
-        }));
+    public ModelAnimation modelAnimation(boolean moving, float partialTick) {
+        return ModelAnimation.state(getBlockState().getValue(WoodenChestBlock.OPEN) ? "OPEN" : "CLOSE");
     }
 
-    @Override
-    public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return cache;
-    }
+    @Override public int modelTransitionTicks() { return 0; }
 
     @SuppressWarnings("null")
     public AABB getRenderBoundingBox() {

@@ -27,7 +27,7 @@ public class LivestockShopScreen extends FarmFolioScreen {
                 offer.getList("Catalog", Tag.TAG_COMPOUND).stream()
                         .map(t -> (CompoundTag) t)
                         .toList();
-        if (!catalog.isEmpty()) selected = catalog.getFirst().getString("Species");
+        if (!catalog.isEmpty()) selected = com.stardew.craft.port.PortJava.getFirst(catalog).getString("Species");
     }
 
     private List<CompoundTag> entries() {
@@ -142,7 +142,7 @@ public class LivestockShopScreen extends FarmFolioScreen {
         int count = columns() * rows(),
                 cw = (w - 48) / columns(),
                 ch = Math.max(58, (h - 170) / rows());
-        page = Math.clamp(page, 0, Math.max(0, (entries.size() - 1) / count));
+        page = com.stardew.craft.port.PortJava.clamp(page, 0, Math.max(0, (entries.size() - 1) / count));
         for (int i = page * count; i < Math.min(entries.size(), (page + 1) * count); i++) {
             var row = entries.get(i);
             int j = i - page * count,

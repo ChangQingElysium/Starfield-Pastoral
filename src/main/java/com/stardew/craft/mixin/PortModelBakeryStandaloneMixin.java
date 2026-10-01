@@ -14,11 +14,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * PORT(1.20.1): NeoForge 21.1 registers extra models through {@code ModelEvent.RegisterAdditional} as
+ * PORT(1.20.1): MinecraftForge 21.1 registers extra models through {@code ModelEvent.RegisterAdditional} as
  * {@code ModelResourceLocation(id, "standalone")} and loads them as plain model files. Forge 1.20.1 would treat any
  * non-"inventory" {@link ModelResourceLocation} as a blockstate variant and fall back to the missing model. This loads
  * "standalone" locations from {@code <namespace>:models/<path>.json} and keeps them keyed by the standalone location,
- * so {@code ModifyBakingResult#getModels()} and {@code ModelManager#getModel} lookups match NeoForge.
+ * so {@code ModifyBakingResult#getModels()} and {@code ModelManager#getModel} lookups match MinecraftForge.
  */
 @Mixin(ModelBakery.class)
 public abstract class PortModelBakeryStandaloneMixin {

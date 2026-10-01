@@ -13,7 +13,7 @@ public final class ReadingZoomMath {
         public double fractionAt(double pointer, double grabOffset) {
             double start = horizontal ? x : y;
             double length = horizontal ? width : height;
-            return Math.clamp((pointer - start - grabOffset) / Math.max(1, length - thumbLength), 0, 1);
+            return com.stardew.craft.port.PortJava.clamp((pointer - start - grabOffset) / Math.max(1, length - thumbLength), 0, 1);
         }
     }
 
@@ -31,7 +31,7 @@ public final class ReadingZoomMath {
             viewH = Math.max(1, pixelsHigh - (contentW > viewW + .001 ? RAIL_PIXELS : 0));
         }
         double overX = Math.max(0, contentW - viewW), overY = Math.max(0, contentH - viewH);
-        double fx = Math.clamp(scrollX, 0, 1), fy = Math.clamp(scrollY, 0, 1);
+        double fx = com.stardew.craft.port.PortJava.clamp(scrollX, 0, 1), fy = com.stardew.craft.port.PortJava.clamp(scrollY, 0, 1);
         double x = overX > 0 ? -overX * fx : (viewW - contentW) / 2;
         double y = overY > 0 ? -overY * fy : (viewH - contentH) / 2;
         var viewport = new GuiLayoutMath.Viewport(base.width(), base.height(),

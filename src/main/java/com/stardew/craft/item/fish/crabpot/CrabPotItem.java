@@ -1,6 +1,5 @@
 package com.stardew.craft.item.fish.crabpot;
 
-import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.item.IStardewItem;
 import com.stardew.craft.item.quality.QualityHelper;
 import net.minecraft.ChatFormatting;
@@ -53,14 +52,6 @@ public class CrabPotItem extends Item implements IStardewItem {
         Component baseName = Component.translatable(this.getDescriptionId(stack))
                 .withStyle(ChatFormatting.WHITE);
 
-        // 设置CustomModelData以便于材质变体
-        @SuppressWarnings("null")
-        var customData = PortItemData.getOrDefault(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA,
-                com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData.DEFAULT);
-        if (quality != QualityHelper.NORMAL && customData.equals(com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData.DEFAULT)) {
-            PortItemData.set(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA,
-                    new com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData(quality));
-        }
 
         if (quality == QualityHelper.NORMAL) {
             return baseName;

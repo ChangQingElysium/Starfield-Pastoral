@@ -17,7 +17,7 @@ import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 public final class SurfaceFloorEvents {
     private SurfaceFloorEvents() {}
 
-    // PORT(1.20.1): Forge fires ChunkWatchEvent.Watch after the chunk packet was sent (NeoForge: Sent).
+    // PORT(1.20.1): Forge fires ChunkWatchEvent.Watch after the chunk packet was sent (MinecraftForge: Sent).
     @SubscribeEvent public static void sent(ChunkWatchEvent.Watch event) {
         SurfaceFloorData.get(event.getLevel()).sendChunk(event.getLevel(), event.getPos(), event.getPlayer());
     }

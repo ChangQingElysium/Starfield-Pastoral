@@ -34,7 +34,7 @@ public final class IronClubVisuals {
         ensureLevel();var mc=Minecraft.getInstance();if(level==null||mc.player==null||p.phase()<0||p.phase()>3||!Double.isFinite(p.center().lengthSqr())||!Float.isFinite(p.yaw())||mc.player.distanceToSqr(p.center())>48*48)return;
         String key=p.caster()+":"+p.tick()+":"+p.phase()+":"+p.target();if(SEEN.putIfAbsent(key,level.getGameTime())!=null)return;
         while(SEEN.size()>256)SEEN.remove(SEEN.keySet().iterator().next());
-        if(Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()){EFFECTS.add(new Effect(p,level.getGameTime()));while(EFFECTS.size()>96)EFFECTS.removeFirst();}
+        if(Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()){EFFECTS.add(new Effect(p,level.getGameTime()));while(EFFECTS.size()>96)com.stardew.craft.port.PortJava.removeFirst(EFFECTS);}
         if(p.target()<0)level.playLocalSound(p.center().x,p.center().y+.6,p.center().z,SoundEvents.PLAYER_ATTACK_SWEEP,SoundSource.PLAYERS,.55f,p.phase()==0?.6f:.75f,false);
         else if(!Long.valueOf(p.tick()).equals(SOUNDS.put(p.caster(),p.tick()))) {
             level.playLocalSound(p.center().x,p.center().y,p.center().z,p.phase()==2?SoundEvents.ANVIL_HIT:SoundEvents.PLAYER_ATTACK_CRIT,SoundSource.PLAYERS,p.phase()==2?.36f:.65f,p.phase()==2?.55f:.65f,false);

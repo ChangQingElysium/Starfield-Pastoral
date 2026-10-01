@@ -35,7 +35,7 @@ public final class NativeRockCrabMotion {
 
     /** Capture the current walking pose at interruption, then ease to rest without snapping phase. */
     public static void stopFrom(NativeNpcPose pose, NativeNpcPose interrupted, double progress) {
-        double p = Math.clamp(progress, 0, 1);
+        double p = com.stardew.craft.port.PortJava.clamp(progress, 0, 1);
         pose.reset();
         pose.blendFrom(interrupted, 1 - p * p * (3 - 2 * p));
     }

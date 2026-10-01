@@ -27,7 +27,7 @@ public final class SupplyCrateRewards {
                     List.of(item("246", 4, 7), item("247", 2, 4), item("245", 4, 7)),
                     one("275", 2, 2), one("288", 3, 5), one("MixedFlowerSeeds", 5, 5)));
 
-    public static List<List<Reward>> table(int tier) { return TABLES.get(Math.clamp(tier, 0, 2)); }
+    public static List<List<Reward>> table(int tier) { return TABLES.get(com.stardew.craft.port.PortJava.clamp(tier, 0, 2)); }
 
     /** TODO farmhouse-upgrades: replace this date fallback with the breaking farmer's house level. */
     public static int tierForDate(int year, int season) {

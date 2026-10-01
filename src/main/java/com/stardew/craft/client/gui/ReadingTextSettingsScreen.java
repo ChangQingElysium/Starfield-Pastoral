@@ -54,7 +54,7 @@ public final class ReadingTextSettingsScreen extends Screen {
     private int percent() { return Config.CLIENT.READING_TEXT_SCALE_PERCENT.get(); }
 
     private void setPercent(int value) {
-        int next = Math.clamp(value, ReadingTextLayout.MIN_PERCENT, ReadingTextLayout.MAX_PERCENT);
+        int next = com.stardew.craft.port.PortJava.clamp(value, ReadingTextLayout.MIN_PERCENT, ReadingTextLayout.MAX_PERCENT);
         if (next == percent()) { updateControls(); return; }
         Config.CLIENT.READING_TEXT_SCALE_PERCENT.set(next);
         Config.CLIENT_SPEC.save();
@@ -87,7 +87,7 @@ public final class ReadingTextSettingsScreen extends Screen {
         var lines = previewFont.split(Component.translatable("stardewcraft.settings.reading.preview"),
                 Math.max(1, (int) ((panelW - 52) / textScale)));
         previewHeight = lines.size() * step;
-        previewScroll = Math.clamp(previewScroll, 0, Math.max(0, previewHeight - (previewBottom - previewY - 12)));
+        previewScroll = com.stardew.craft.port.PortJava.clamp(previewScroll, 0, Math.max(0, previewHeight - (previewBottom - previewY - 12)));
         g.enableScissor(x + 22, previewY + 6, x + panelW - 22, previewBottom - 6);
         g.pose().pushPose();
         g.pose().translate(x + 26, previewY + 6 - previewScroll, 0);
@@ -103,7 +103,7 @@ public final class ReadingTextSettingsScreen extends Screen {
     @Override public boolean mouseScrolled(double mx, double my, double dy) {
         double dx = 0.0D; // PORT(1.20.1): no horizontal scroll before 1.20.2
         if (mx >= x + 16 && mx < x + panelW - 16 && my >= previewY && my < previewBottom) {
-            previewScroll = Math.clamp(previewScroll - (int) (dy * 16), 0,
+            previewScroll = com.stardew.craft.port.PortJava.clamp(previewScroll - (int) (dy * 16), 0,
                     Math.max(0, previewHeight - (previewBottom - previewY - 12)));
             return true;
         }

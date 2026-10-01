@@ -54,7 +54,7 @@ public final class NativeGeorgePose {
         // Blend the contact point, then solve the joints. Blending Euler rotations directly
         // sweeps the forearm through the armrest during the first few moving frames.
         var hand=pose.boneMatrix("forearm_"+side).transformPosition(new Vector3f(sign*5.5F,10.8F,1));
-        double transfer=Math.clamp((weight-.15)/.70,0,1);
+        double transfer=com.stardew.craft.port.PortJava.clamp((weight-.15)/.70,0,1);
         transfer=transfer*transfer*(3-2*transfer);
         hand.lerp(handTarget(phase,sign),(float)transfer);
         // Lift off the forearm support before reaching outward; reverse to settle.
@@ -70,7 +70,7 @@ public final class NativeGeorgePose {
             hand.y=shoulder.y-(float)Math.sqrt(Math.max(.01,9.1*9.1-delta.x*delta.x-delta.z*delta.z));
             delta.set(hand).sub(shoulder);
         }
-        double length=Math.clamp(delta.length(),.801,9.199);
+        double length=com.stardew.craft.port.PortJava.clamp(delta.length(),.801,9.199);
         var direction=delta.normalize();hand.set(shoulder).fma((float)length,direction);
         double elbowTurn=Math.min(1,transfer*2);
         elbowTurn=elbowTurn*elbowTurn*(3-2*elbowTurn);
@@ -80,9 +80,9 @@ public final class NativeGeorgePose {
         var elbow=new Vector3f(shoulder).fma((float)along,direction).fma((float)height,pole);
         var upper=new Vector3f(elbow).sub(shoulder).normalize();var lower=new Vector3f(hand).sub(elbow).normalize();
         var x=new Vector3f(upper).cross(lower).normalize();var y=new Vector3f(upper).negate();var z=new Vector3f(x).cross(y);
-        double rx=Math.toDegrees(Math.atan2(y.z,z.z)),ry=Math.toDegrees(Math.asin(Math.clamp(-x.z,-1,1))),
+        double rx=Math.toDegrees(Math.atan2(y.z,z.z)),ry=Math.toDegrees(Math.asin(com.stardew.craft.port.PortJava.clamp(-x.z,-1,1))),
                 rz=Math.toDegrees(Math.atan2(x.y,x.x))-sign*35;
-        double bend=Math.toDegrees(Math.acos(Math.clamp(upper.dot(lower),-1,1)));
+        double bend=Math.toDegrees(Math.acos(com.stardew.craft.port.PortJava.clamp(upper.dot(lower),-1,1)));
         pose.blendRotation("arm_"+side,rx,ry,rz,1);
         pose.blendRotation("forearm_"+side,bend,0,0,1);
         pose.blendRotation("elbow_cover_"+side,bend*.5,0,0,1);

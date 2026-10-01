@@ -57,7 +57,7 @@ public final class WeaponTooltipEvents {
 
     @SubscribeEvent
     public static void render(RenderTooltipEvent.Pre event) {
-        if (event.getComponents().size() != 1 || !(event.getComponents().getFirst() instanceof WeaponClientTooltipComponent panel)) return;
+        if (event.getComponents().size() != 1 || !(com.stardew.craft.port.PortJava.getFirst(event.getComponents()) instanceof WeaponClientTooltipComponent panel)) return;
         var minecraft = net.minecraft.client.Minecraft.getInstance();
         var font = event.getFont();
         String language = minecraft.getLanguageManager().getSelected();

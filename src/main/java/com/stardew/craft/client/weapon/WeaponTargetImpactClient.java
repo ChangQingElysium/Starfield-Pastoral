@@ -143,7 +143,7 @@ public final class WeaponTargetImpactClient {
             if (style == Style.MOLTEN_FINISHER && casterId == mc.player.getId()) CameraShakeState.kick(0.23f, 3, 0.7f);
         }
         if (!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) return;
-        if (IMPACTS.size() >= 48) IMPACTS.removeFirst();
+        if (IMPACTS.size() >= 48) com.stardew.craft.port.PortJava.removeFirst(IMPACTS);
         IMPACTS.add(new Impact(casterId, targetId, serverTick, point, mc.level.getGameTime(), style));
         RandomSource random = RandomSource.create(serverTick * 31 + targetId);
         var bone = new ItemParticleOption(ParticleTypes.ITEM, new ItemStack(Items.BONE));

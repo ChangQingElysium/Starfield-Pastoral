@@ -85,7 +85,7 @@ public final class SandBirdGameTests {
         for(var item:level.getEntitiesOfClass(ItemEntity.class,new AABB(pos).inflate(5)))item.discard();
         level.setBlock(pos,base,3);level.destroyBlock(pos,true);
         var drops=level.getEntitiesOfClass(ItemEntity.class,new AABB(pos).inflate(2));
-        h.assertTrue(drops.size()==1&&drops.getFirst().getItem().is(block.asItem()),"Sand drops the wrong item");h.succeed();
+        h.assertTrue(drops.size()==1&&com.stardew.craft.port.PortJava.getFirst(drops).getItem().is(block.asItem()),"Sand drops the wrong item");h.succeed();
     }
     private static int count(GameTestHelper h, BlockPos main, PlaygroundBlock block) {
         int n=0;for(var p:BlockPos.betweenClosed(main.offset(-3,0,-3),main.offset(3,3,3)))
@@ -123,7 +123,7 @@ public final class SandBirdGameTests {
             level.destroyBlock(main.above(),true);
             h.assertTrue(count(h,main,block)==0&&count(h,neighbor,block)==expected,"Removal leaked parts or damaged adjacent bird");
             var drops=level.getEntitiesOfClass(ItemEntity.class,new AABB(main).inflate(4));
-            h.assertTrue(drops.size()==1&&drops.getFirst().getItem().getCount()==1&&drops.getFirst().getItem().is(block.asItem()),"Bird must drop once");
+            h.assertTrue(drops.size()==1&&com.stardew.craft.port.PortJava.getFirst(drops).getItem().getCount()==1&&com.stardew.craft.port.PortJava.getFirst(drops).getItem().is(block.asItem()),"Bird must drop once");
             PlaygroundBlock.runWithDropsSuppressed(()->level.removeBlock(neighbor,false));
         }
         h.succeed();

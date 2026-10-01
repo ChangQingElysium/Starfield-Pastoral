@@ -64,11 +64,11 @@ public final class TerrainGrassGameTests {
         helper.assertTrue(StardewItemCatalog.tabForItem(grassBlock.asItem()) == StardewCatalogTab.NATURE,
                 "Terrain grass is in the wrong catalog");
         var normal = Block.getDrops(grass, level, pos, null, null, new ItemStack(Items.IRON_SHOVEL));
-        helper.assertTrue(normal.size() == 1 && normal.getFirst().is(grassBlock.asItem()), "Ordinary mining must drop the grass itself without Silk Touch");
+        helper.assertTrue(normal.size() == 1 && com.stardew.craft.port.PortJava.getFirst(normal).is(grassBlock.asItem()), "Ordinary mining must drop the grass itself without Silk Touch");
         var silk = new ItemStack(Items.DIAMOND_SHOVEL);
         silk.enchant(level.registryAccess().registryOrThrow(Registries.ENCHANTMENT).getHolderOrThrow(Enchantments.SILK_TOUCH), 1);
         var silkDrops = Block.getDrops(grass, level, pos, null, null, silk);
-        helper.assertTrue(silkDrops.size() == 1 && silkDrops.getFirst().is(grassBlock.asItem()),
+        helper.assertTrue(silkDrops.size() == 1 && com.stardew.craft.port.PortJava.getFirst(silkDrops).is(grassBlock.asItem()),
                 "Silk Touch lost the terrain texture variant");
         helper.succeed();
     }
@@ -277,7 +277,7 @@ public final class TerrainGrassGameTests {
         helper.assertTrue(StardewItemCatalog.tabForItem(ModItems.DIRT.get()) == StardewCatalogTab.NATURE,
                 "Dirt is in the wrong catalog");
         var drops = Block.getDrops(dirt, level, pos, null, null, new ItemStack(Items.IRON_SHOVEL));
-        helper.assertTrue(drops.size() == 1 && drops.getFirst().is(ModItems.DIRT.get()),
+        helper.assertTrue(drops.size() == 1 && com.stardew.craft.port.PortJava.getFirst(drops).is(ModItems.DIRT.get()),
                 "Mining dirt lost its terrain texture");
         helper.assertTrue(StardewCropBlock.isNaturalSoil(dirt), "Natural soil logic rejected terrain dirt");
         for (Class<?> service : new Class<?>[]{com.stardew.craft.manager.PastureGrassGrowthManager.class,

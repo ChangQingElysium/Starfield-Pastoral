@@ -36,7 +36,7 @@ public class FriendshipDoorBlockEntity extends BlockEntity {
     }
 
     public String getNpcId() {
-        return npcIds.isEmpty() ? "" : npcIds.getFirst();
+        return npcIds.isEmpty() ? "" : com.stardew.craft.port.PortJava.getFirst(npcIds);
     }
 
     public List<String> getNpcIds() {
@@ -115,7 +115,7 @@ public class FriendshipDoorBlockEntity extends BlockEntity {
     protected void saveAdditional(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         super.saveAdditional(tag);
         if (!npcIds.isEmpty()) {
-            tag.putString(TAG_NPC_ID, npcIds.getFirst());
+            tag.putString(TAG_NPC_ID, com.stardew.craft.port.PortJava.getFirst(npcIds));
             ListTag list = new ListTag();
             for (String npcId : npcIds) {
                 list.add(StringTag.valueOf(npcId));

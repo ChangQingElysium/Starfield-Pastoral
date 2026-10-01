@@ -146,7 +146,7 @@ public final class StardewCropRuntimeRegistry {
         if (state.getBlock() instanceof StardewCropBlock) return 0;
         int radius = 0;
         for (var registration : catalog.byBlock().getOrDefault(BuiltInRegistries.BLOCK.getKey(state.getBlock()), List.of())) {
-            try { radius = Math.max(radius, Math.clamp(registration.adapter().dailyNeighborhoodRadius(), 0, 64)); }
+            try { radius = Math.max(radius, com.stardew.craft.port.PortJava.clamp(registration.adapter().dailyNeighborhoodRadius(), 0, 64)); }
             catch (RuntimeException exception) { radius = Math.max(radius, 8); }
         }
         return radius;

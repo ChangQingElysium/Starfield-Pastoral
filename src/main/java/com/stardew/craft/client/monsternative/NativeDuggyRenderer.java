@@ -121,7 +121,7 @@ public final class NativeDuggyRenderer extends EntityRenderer<MineDuggyEntity> {
                 face.add(new NativeGroundClip.Vertex(vertex.x,vertex.y,vertex.z,v[3],v[4]));
             }
             var clipped=NativeGroundClip.clip(face,quad.sourcePart().endsWith("_outline")?.3F:.05F);
-            for(int i=1;i+1<clipped.size();i++)for(var v:java.util.List.of(clipped.getFirst(),clipped.get(i),clipped.get(i+1),clipped.get(i+1))){
+            for(int i=1;i+1<clipped.size();i++)for(var v:java.util.List.of(com.stardew.craft.port.PortJava.getFirst(clipped),clipped.get(i),clipped.get(i+1),clipped.get(i+1))){
                 consumer.addVertex(stack.last().pose(),v.x(),v.y(),v.z()).setColor(255,255,255,255).setUv(v.u(),v.v())
                         .setOverlay(overlay).setLight(light).setNormal(stack.last(),normal.x,normal.y,normal.z);
             }

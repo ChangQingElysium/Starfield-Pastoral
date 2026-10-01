@@ -4,7 +4,7 @@ import net.minecraft.nbt.CompoundTag;
 public final class SkeletonThrowClock {
     private float timer;private int frame;private boolean throwing;
     public boolean throwing(){return throwing;}
-    public double progress(){return throwing?Math.clamp((frame-20+timer/150.)/4.,0,1):0;}
+    public double progress(){return throwing?com.stardew.craft.port.PortJava.clamp((frame-20+timer/150.)/4.,0,1):0;}
     public void begin(){throwing=true;frame=20;}
     public void interrupt(){throwing=false;frame-=Math.floorMod(frame,4);}
     public void walk(){timer+=1000F/60;if(timer>175){frame=(frame+1)%4;timer=0;}}

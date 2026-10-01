@@ -34,7 +34,7 @@ public class MonsterFlightMotion {
         Vec3 desired = offset.normalize();
         if (turningAllowed && hitMilliseconds == 0) heading = turnTowards(heading, desired, Math.PI / 64);
         // Species speed is a total 3D limit, not an independent allowance per axis.
-        double acceleration = Math.clamp(maxAcceleration - offset.length() / 2, minAcceleration, maxAcceleration) / 6;
+        double acceleration = com.stardew.craft.port.PortJava.clamp(maxAcceleration - offset.length() / 2, minAcceleration, maxAcceleration) / 6;
         double maximum = speedLimit * (chase ? 1 : idleRatio) * Math.min(1, offset.length() / .9);
         // Reduce powered motion while turning away from a wall; residual inertia still decays.
         maximum *= .2 + .8 * Math.max(0, heading.dot(desired));
@@ -51,7 +51,7 @@ public class MonsterFlightMotion {
     }
     public void stop() { velocity = Vec3.ZERO; }
     public static Vec3 turnTowards(Vec3 from, Vec3 to, double maxAngle) {
-        double dot = Math.clamp(from.dot(to), -1, 1), angle = Math.acos(dot);
+        double dot = com.stardew.craft.port.PortJava.clamp(from.dot(to), -1, 1), angle = Math.acos(dot);
         if (angle <= maxAngle) return to;
         Vec3 tangent = to.subtract(from.scale(dot));
         if (tangent.lengthSqr() < 1e-10) {
@@ -72,7 +72,7 @@ public class MonsterFlightMotion {
         if (!Double.isFinite(velocity.lengthSqr()) || velocity.length() > 32) velocity = Vec3.ZERO;
         if (!Double.isFinite(heading.lengthSqr()) || heading.lengthSqr() < .5) heading = new Vec3(0, 0, -1);
         else if (Math.abs(heading.lengthSqr()-1)>1e-6) heading=heading.normalize();
-        slipperiness = Math.clamp(tag.getInt("Slipperiness"), 14, 33);
-        hitMilliseconds = Math.clamp(tag.getInt("HitMillis"), 0, 500);
+        slipperiness = com.stardew.craft.port.PortJava.clamp(tag.getInt("Slipperiness"), 14, 33);
+        hitMilliseconds = com.stardew.craft.port.PortJava.clamp(tag.getInt("HitMillis"), 0, 500);
     }
 }

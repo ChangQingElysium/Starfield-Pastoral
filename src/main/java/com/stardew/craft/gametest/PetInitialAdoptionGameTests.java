@@ -50,27 +50,27 @@ public final class PetInitialAdoptionGameTests {
             try {
                 StardewTimePauseService.updateClientState(player, false, false);
                 PetInitialAdoption.login(new PlayerEvent.PlayerLoggedInEvent(player)); PetInitialAdoption.poll(player);
-                h.assertTrue(offers.size() == 1 && offers.getFirst().getString("Kind").equals("initial"), "Eligible old farm did not receive the pet questionnaire");
+                h.assertTrue(offers.size() == 1 && com.stardew.craft.port.PortJava.getFirst(offers).getString("Kind").equals("initial"), "Eligible old farm did not receive the pet questionnaire");
                 PetInitialAdoption.poll(player); h.assertTrue(offers.size() == 1, "Login repeatedly reopened the form");
-                var stale = offers.getLast().getUUID("Nonce");
+                var stale = com.stardew.craft.port.PortJava.getLast(offers).getUUID("Nonce");
                 PetInitialAdoption.logout(new PlayerEvent.PlayerLoggedOutEvent(player));
                 h.assertTrue(PetInitialAdoption.needed(player), "Closing without choosing lost the free pet");
                 // The bowl page now delegates its initial-choice button to this entry; its full block interaction is covered separately.
                 PetManagement.openInitial(player);
-                h.assertTrue(offers.getLast().getString("Kind").equals("initial"), "Initial-choice entry did not reopen the questionnaire");
+                h.assertTrue(com.stardew.craft.port.PortJava.getLast(offers).getString("Kind").equals("initial"), "Initial-choice entry did not reopen the questionnaire");
                 PetManagement.submit(player, request(stale, PetActionPayload.selection("stardewcraft:cat0", "Replay")));
                 h.assertTrue(data.forFarm(farm.getInstanceId()).isEmpty(), "Pre-disconnect nonce was accepted");
-                PetManagement.submit(player, request(offers.getLast().getUUID("Nonce"), PetActionPayload.selection("stardewcraft:turtle0", "Shell")));
+                PetManagement.submit(player, request(com.stardew.craft.port.PortJava.getLast(offers).getUUID("Nonce"), PetActionPayload.selection("stardewcraft:turtle0", "Shell")));
                 h.assertTrue(PetInitialAdoption.needed(player), "Invalid starter consumed eligibility");
-                PetManagement.submit(player, request(offers.getLast().getUUID("Nonce"), PetActionPayload.selection("stardewcraft:dog2", "   ")));
+                PetManagement.submit(player, request(com.stardew.craft.port.PortJava.getLast(offers).getUUID("Nonce"), PetActionPayload.selection("stardewcraft:dog2", "   ")));
                 h.assertTrue(PetInitialAdoption.needed(player), "Blank name consumed eligibility");
-                var claim = request(offers.getLast().getUUID("Nonce"), PetActionPayload.selection("stardewcraft:dog2", "豆包"));
+                var claim = request(com.stardew.craft.port.PortJava.getLast(offers).getUUID("Nonce"), PetActionPayload.selection("stardewcraft:dog2", "豆包"));
                 PetManagement.submit(player, claim); PetManagement.submit(player, claim);
                 var pets = data.forFarm(farm.getInstanceId());
-                h.assertTrue(pets.size() == 1 && pets.getFirst().variant == PetVariant.DOG2 && pets.getFirst().name.equals("豆包"), "Initial claim lost breed/name or duplicated");
-                h.assertTrue(profile.getMoney() == 0 && offers.getLast().getString("Kind").equals("initial_done"), "Free initial claim charged money or failed to close");
+                h.assertTrue(pets.size() == 1 && com.stardew.craft.port.PortJava.getFirst(pets).variant == PetVariant.DOG2 && com.stardew.craft.port.PortJava.getFirst(pets).name.equals("豆包"), "Initial claim lost breed/name or duplicated");
+                h.assertTrue(profile.getMoney() == 0 && com.stardew.craft.port.PortJava.getLast(offers).getString("Kind").equals("initial_done"), "Free initial claim charged money or failed to close");
                 var restored = PetWorldData.load(data.save(new CompoundTag(), h.getLevel().registryAccess()), h.getLevel().registryAccess());
-                h.assertTrue(!restored.needsInitialChoice(farm.getInstanceId()) && restored.find(pets.getFirst().id).name.equals("豆包"), "Save roundtrip lost claim receipt or pet");
+                h.assertTrue(!restored.needsInitialChoice(farm.getInstanceId()) && restored.find(com.stardew.craft.port.PortJava.getFirst(pets).id).name.equals("豆包"), "Save roundtrip lost claim receipt or pet");
                 int sent = offers.size(); PetInitialAdoption.login(new PlayerEvent.PlayerLoggedInEvent(player)); PetInitialAdoption.poll(player);
                 h.assertTrue(offers.size() == sent, "Claimed farm got another login questionnaire");
                 h.succeed();

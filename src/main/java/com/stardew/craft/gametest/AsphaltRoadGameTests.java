@@ -105,7 +105,7 @@ public final class AsphaltRoadGameTests {
         var state=block.defaultBlockState();
         helper.assertTrue(state.isCollisionShapeFullBlock(level,pos) && state.is(BlockTags.MINEABLE_WITH_PICKAXE),"Wrong road collision or mining family");
         var drops=Block.getDrops(state,level,pos,null,null,new ItemStack(Items.IRON_PICKAXE));
-        helper.assertTrue(drops.size()==1 && drops.getFirst().is(block.asItem()),"Road failed to drop itself");
+        helper.assertTrue(drops.size()==1 && com.stardew.craft.port.PortJava.getFirst(drops).is(block.asItem()),"Road failed to drop itself");
         helper.assertTrue(StardewItemCatalog.tabForItem(block.asItem())==StardewCatalogTab.BUILDING,"Road missing from building catalog");
         helper.succeed();
     }

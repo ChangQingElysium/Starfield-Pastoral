@@ -850,6 +850,36 @@ public class ModBlocks {
         public static final DeferredBlock<com.stardew.craft.block.decor.PaintedDoorBlock> BLUE_GLASS_DOOR = BLOCKS.register("blue_glass_door",
                         () -> new com.stardew.craft.block.decor.PaintedDoorBlock(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_DOOR)));
 
+        public static final DeferredBlock<Block> GRAY_METAL_SIDING = BLOCKS.register("gray_metal_siding",
+                        () -> new Block(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.IRON_BLOCK).mapColor(MapColor.METAL)));
+
+        public static final DeferredBlock<Block> GRAY_BROWN_BRICKS = BLOCKS.register("gray_brown_bricks",
+                        () -> new Block(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.STONE_BRICKS).mapColor(MapColor.TERRACOTTA_BROWN)));
+
+        public static final DeferredBlock<Block> CHESTNUT_ROOF_TILES = BLOCKS.register("chestnut_roof_tiles",
+                        () -> new Block(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.BRICKS).mapColor(MapColor.TERRACOTTA_BROWN)));
+
+        public static final DeferredBlock<Block> FOREST_GREEN_SIDING = BLOCKS.register("forest_green_siding",
+                        () -> new Block(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS).mapColor(MapColor.COLOR_GREEN)));
+
+        public static final DeferredBlock<com.stardew.craft.block.decor.PaintedDoorBlock> BLACKSMITH_DOOR = BLOCKS.register("blacksmith_door",
+                        () -> new com.stardew.craft.block.decor.PaintedDoorBlock(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_DOOR)));
+
+        public static final DeferredBlock<com.stardew.craft.block.decor.PaintedDoorBlock> PURPLE_PANEL_DOOR = BLOCKS.register("purple_panel_door",
+                        () -> new com.stardew.craft.block.decor.PaintedDoorBlock(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_DOOR)));
+
+        public static final DeferredBlock<com.stardew.craft.block.decor.MapDecorWallStaticBlock> LIBRARY_BOOK_SIGN = BLOCKS.register("library_book_sign",
+                        () -> new com.stardew.craft.block.decor.MapDecorWallStaticBlock(Block.Properties.of().strength(1.0F).sound(SoundType.WOOD).noOcclusion()
+                                        .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK), "stardewcraft:block/decor/house/library_book_sign"));
+
+        public static final DeferredBlock<com.stardew.craft.block.decor.MapDecorWallStaticBlock> WALL_MAGNIFYING_GLASS = BLOCKS.register("wall_magnifying_glass",
+                        () -> new com.stardew.craft.block.decor.MapDecorWallStaticBlock(Block.Properties.of().strength(1.0F).sound(SoundType.METAL).noOcclusion()
+                                        .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK), "stardewcraft:block/decor/house/wall_magnifying_glass"));
+
+        public static final DeferredBlock<com.stardew.craft.block.decor.TimberAwningBlock> TIMBER_AWNING = BLOCKS.register("timber_awning",
+                        () -> new com.stardew.craft.block.decor.TimberAwningBlock(Block.Properties.of().strength(2.0F).sound(SoundType.WOOD).noOcclusion()
+                                        .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK)));
+
         public static final DeferredBlock<Block> CREAM_SIDING = BLOCKS.register("cream_siding",
                         () -> new Block(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS).mapColor(MapColor.SAND)));
 
@@ -865,13 +895,24 @@ public class ModBlocks {
         public static final DeferredBlock<com.stardew.craft.block.decor.PaintedDoorBlock> BROWN_GLASS_DOOR = BLOCKS.register("brown_glass_door",
                         () -> new com.stardew.craft.block.decor.PaintedDoorBlock(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_DOOR)));
 
+        public static final DeferredBlock<com.stardew.craft.block.decor.PaintedDoorBlock> RED_BROWN_DOOR = BLOCKS.register("red_brown_door",
+                        () -> new com.stardew.craft.block.decor.PaintedDoorBlock(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_DOOR)));
+
         public static final DeferredBlock<com.stardew.craft.block.decor.MapDecorWallStaticBlock> PIERRE_SIGN = BLOCKS.register("pierre_sign",
                         () -> new com.stardew.craft.block.decor.MapDecorWallStaticBlock(Block.Properties.of().strength(1.0F).sound(SoundType.WOOD).noOcclusion()
                                         .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK), "stardewcraft:block/decor/house/pierre_sign", true));
 
+        public static final DeferredBlock<com.stardew.craft.block.decor.MapDecorWallStaticBlock> SALOON_SIGN = BLOCKS.register("saloon_sign",
+                        () -> new com.stardew.craft.block.decor.MapDecorWallStaticBlock(Block.Properties.of().strength(1.0F).sound(SoundType.WOOD).noOcclusion()
+                                        .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK), "stardewcraft:block/decor/house/saloon_sign", true));
+
         public static final DeferredBlock<com.stardew.craft.block.decor.MapDecorWallStaticBlock> CLINIC_SIGN = BLOCKS.register("clinic_sign",
                         () -> new com.stardew.craft.block.decor.MapDecorWallStaticBlock(Block.Properties.of().strength(1.0F).sound(SoundType.WOOD).noOcclusion()
                                         .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK), "stardewcraft:block/decor/house/clinic_sign", true));
+
+        public static final DeferredBlock<com.stardew.craft.block.decor.MapDecorWallStaticBlock> FOOD_SPIRITS_SIGN = BLOCKS.register("food_spirits_sign",
+                        () -> new com.stardew.craft.block.decor.MapDecorWallStaticBlock(Block.Properties.of().strength(1.0F).sound(SoundType.WOOD).noOcclusion()
+                                        .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK), "stardewcraft:block/decor/house/food_spirits_sign", true));
 
         public static final DeferredBlock<com.stardew.craft.block.decor.MapDecorWallStaticBlock> SHIP_WHEEL_ORNAMENT = BLOCKS.register("ship_wheel_ornament",
                         () -> new com.stardew.craft.block.decor.MapDecorWallStaticBlock(Block.Properties.of().strength(1.0F).sound(SoundType.WOOD).noOcclusion()
@@ -3713,7 +3754,7 @@ public static final DeferredBlock<Block> DEAD_CROP = BLOCKS.register("dead_crop"
                                         .mapColor(net.minecraft.world.level.material.MapColor.PLANT)
                                         .sound(net.minecraft.world.level.block.SoundType.WOOD)
                                         .noOcclusion()
-                                        .strength(1.5F, 6.0F), "stardewcraft:geo/block/decor/junimo_hut_decor.geo.json"));
+                                        .strength(1.5F, 6.0F), "stardewcraft:geo/block/utility/junimo_hut.geo.json"));
 
         // ── Wizard buildings: footprint and collision are derived from each GeckoLib model. ──
         @SuppressWarnings("null")
@@ -4200,6 +4241,13 @@ public static final DeferredBlock<Block> DEAD_CROP = BLOCKS.register("dead_crop"
                                         .sound(net.minecraft.world.level.block.SoundType.WOOD)
                                         .noOcclusion()
                                         .strength(0.3F, 0.5F)));
+        @SuppressWarnings("null")
+        public static final DeferredBlock<Block> GUILD_MONSTER_BOARD = BLOCKS.register("guild_monster_board",
+                        () -> new com.stardew.craft.block.decor.MapDecorWallStaticBlock(Block.Properties.of()
+                                        .mapColor(net.minecraft.world.level.material.MapColor.WOOD)
+                                        .sound(net.minecraft.world.level.block.SoundType.WOOD)
+                                        .noOcclusion()
+                                        .strength(0.6F, 1.0F), "stardewcraft:decor/wall_decor/common/guild_monster_board"));
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> PAPER_CHECKLIST = BLOCKS.register("paper_checklist",
                         () -> new com.stardew.craft.block.decor.MapDecorWallThinBlock(Block.Properties.of()

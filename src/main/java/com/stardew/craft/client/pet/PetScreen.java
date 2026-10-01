@@ -31,7 +31,7 @@ public final class PetScreen extends FarmFolioScreen implements com.stardew.craf
         super(offer.getString("Kind").equals("bowl") ? Component.translatable("block.stardewcraft.pet_bowl_" + offer.getString("BowlStyle")) : tr(offer.getString("Kind").equals("initial") ? "initial_title" : offer.getString("Kind").equals("adopt") ? "adopt" : offer.getString("Kind").equals("bowls") ? "buy_bowl" : "manage"), null); this.offer = offer;
         pets = offer.getList("Pets", 10).stream().map(t -> (CompoundTag) t).toList();
         bowls = offer.getList("Bowls", 10).stream().map(t -> (CompoundTag) t).toList();
-        selected = offer.hasUUID("Selected") ? offer.getUUID("Selected") : pets.isEmpty() ? null : pets.getFirst().getUUID("Id");
+        selected = offer.hasUUID("Selected") ? offer.getUUID("Selected") : pets.isEmpty() ? null : com.stardew.craft.port.PortJava.getFirst(pets).getUUID("Id");
     }
     public static Component tr(String key, Object... args) { return Component.translatable("pet.stardewcraft." + key, args); }
     public static ResourceLocation icon(PetVariant variant) { return variant.available() ? variant.breed().icon() : new ResourceLocation("stardewcraft:textures/gui/pet/pet_license.png"); }

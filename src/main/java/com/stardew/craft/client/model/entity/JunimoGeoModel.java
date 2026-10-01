@@ -3,9 +3,9 @@ package com.stardew.craft.client.model.entity;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.entity.junimo.JunimoEntity;
 import net.minecraft.resources.ResourceLocation;
-import software.bernie.geckolib.model.GeoModel;
+import com.stardew.craft.client.model.nativebb.BlockbenchModel;
 
-public class JunimoGeoModel extends GeoModel<JunimoEntity> {
+public class JunimoGeoModel extends BlockbenchModel<JunimoEntity> {
     private static final ResourceLocation MODEL = new ResourceLocation(
             StardewCraft.MODID, "geo/entity/junimo/junimo.geo.json");
     private static final ResourceLocation TEXTURE = new ResourceLocation(

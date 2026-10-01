@@ -23,6 +23,9 @@ public final class StardewCraftMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
+        if (mixinClassName.equals("com.stardew.craft.mixin.OptionalAnimatedArmorFishingMixin")) {
+            return hasRendererVersion("geckolib", "4.8.2");
+        }
         if (mixinClassName.equals("com.stardew.craft.mixin.CtmModelInitializationMixin")) {
             LoadingModList list = LoadingModList.get();
             return list != null && list.getModFileById("ctm") != null;

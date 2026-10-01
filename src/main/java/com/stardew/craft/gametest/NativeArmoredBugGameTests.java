@@ -32,7 +32,7 @@ public final class NativeArmoredBugGameTests {
         bug.knockback(2,1,0);var saved=new CompoundTag();bug.saveWithoutId(saved);h.assertTrue(saved.getDouble("BugSlideX")==0&&saved.getDouble("BugSlideZ")==0,"Armored Bug accepted knockback despite slipperiness -1");
         var copy=ModEntities.ARMORED_BUG.get().create(level);copy.load(saved);h.assertTrue(copy.armored()&&copy.getHealth()==bug.getHealth()&&copy.patrolFacing()==bug.patrolFacing()&&copy.getY()==bug.getY(),"Reload changed variant/flight lift/health");copy.discard();
         var zero=new net.minecraft.world.level.levelgen.LegacyRandomSource(0){@Override public double nextDouble(){return 0;}};
-        var extra=MonsterExtraLoot.roll(bug,player,zero);h.assertTrue(extra.size()==1&&extra.getFirst().is(ModItems.BUG_STEAK.get()),"Armored Bug extra steak rule was lost");
+        var extra=MonsterExtraLoot.roll(bug,player,zero);h.assertTrue(extra.size()==1&&com.stardew.craft.port.PortJava.getFirst(extra).is(ModItems.BUG_STEAK.get()),"Armored Bug extra steak rule was lost");
         var at=bug.position();h.runAtTickTime(10,()->{h.assertTrue(bug.getX()>at.x+.5&&Math.abs(bug.getZ()-at.z)<.001,"Armored Bug chased or stopped after damage");bug.discard();player.discard();h.succeed();});
     }
 }

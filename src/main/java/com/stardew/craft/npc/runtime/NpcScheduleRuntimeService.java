@@ -707,7 +707,7 @@ public final class NpcScheduleRuntimeService {
                 .filter(player->!player.isSpectator())
                 .sorted(java.util.Comparator.comparing(player->player.getUUID().toString())).toList();
         UUID selected=players.stream().filter(player->level.getServer().isSingleplayerOwner(player.getGameProfile()))
-                .map(ServerPlayer::getUUID).findFirst().orElse(players.isEmpty()?null:players.getFirst().getUUID());
+                .map(ServerPlayer::getUUID).findFirst().orElse(players.isEmpty()?null:com.stardew.craft.port.PortJava.getFirst(players).getUUID());
         if (selected!=null) data.setScheduleContextPlayer(selected);
         return selected;
     }

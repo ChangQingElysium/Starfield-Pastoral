@@ -38,7 +38,7 @@ public final class MineGrubEntity extends StardewMonsterEntity {
     @Override protected void configureSpawn(MonsterDefinition d,MonsterSpawnContext c){var r=MonsterStatResolver.base(d,c,random);setInitialHealth(r.initialHealth());replaceCombatStats(r.combat());facing=random.nextInt(4);face(facing);lastX=getX();lastZ=getZ();}
     @Override protected void defineSynchedData(){super.defineSynchedData();this.entityData.define(MOVING,false);this.entityData.define(FORM_FRAME,16);this.entityData.define(HIT,-100L);}
     public boolean moving(){return entityData.get(MOVING);}
-    public double formProgress(){return Math.clamp((entityData.get(FORM_FRAME)-16)/3.,0,1);}
+    public double formProgress(){return com.stardew.craft.port.PortJava.clamp((entityData.get(FORM_FRAME)-16)/3.,0,1);}
     public double hitTime(float p){return (level().getGameTime()-entityData.get(HIT)+p)/20.;}
     public GrubLifecycle lifecycle(){return lifecycle;}
     private boolean valid(Player p){return p.isAlive()&&!p.isCreative()&&!p.isSpectator()&&!p.hasEffect(ModMobEffects.AVOID_MONSTERS.get())

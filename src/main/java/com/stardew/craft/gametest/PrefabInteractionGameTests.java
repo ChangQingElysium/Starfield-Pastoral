@@ -48,7 +48,7 @@ public final class PrefabInteractionGameTests {
                 BuildingPlacementService.scaffold(level,record);
                 var workers=level.getEntitiesOfClass(RobinConstructionEntity.class,BuildingPlacementService.aabb(record.claim()));
                 h.assertTrue(workers.size()==1,"One worker for "+facing);
-                var worker=workers.getFirst();
+                var worker=com.stardew.craft.port.PortJava.getFirst(workers);
                 h.assertTrue(worker.getDirection()==facing && !worker.high(),"Actual entity yaw/low clip for "+facing);
                 h.assertTrue(level.getBlockState(worker.blockPosition().relative(worker.getDirection())).is(ModBlocks.CONSTRUCTION_FENCE.get()),"Worker must face real fence for "+facing);
                 // Finish the actual template, then verify the indoor high-strike target after rotation.

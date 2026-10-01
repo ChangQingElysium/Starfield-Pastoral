@@ -28,7 +28,7 @@ public final class GuardSpineVisuals {
         if(p.phase()==GuardSpineStatePayload.GUARD_END){WeaponSkillAnimationClient.stopMatching(p.actor(),LIGHT_GUARD);return;}
         if(p.phase()==GuardSpineStatePayload.CLEAR){STATES.remove(p.actor());return;}
         if(p.phase()<0||p.phase()>2||!(level.getEntity(p.actor()) instanceof LivingEntity actor))return;
-        STATES.put(p.actor(),new State(actor.getUUID(),p.phase(),p.phase()==0?level.getGameTime()+Math.clamp(p.duration(),1,80):Long.MAX_VALUE));
+        STATES.put(p.actor(),new State(actor.getUUID(),p.phase(),p.phase()==0?level.getGameTime()+com.stardew.craft.port.PortJava.clamp(p.duration(),1,80):Long.MAX_VALUE));
         while(STATES.size()>64)STATES.remove(STATES.keySet().iterator().next());
     }
     public static int bladePhase(LivingEntity actor){ensureLevel();State s=STATES.get(actor.getId());return s!=null&&s.owner.equals(actor.getUUID())&&level.getGameTime()<=s.end?s.phase:-1;}

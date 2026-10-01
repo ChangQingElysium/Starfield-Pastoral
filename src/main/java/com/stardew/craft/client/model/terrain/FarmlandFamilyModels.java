@@ -28,8 +28,8 @@ final class FarmlandFamilyModels {
     static void bind(Map<ResourceLocation, BakedModel> models, TerrainFarmlandQuads[][][] plain,
             TerrainFarmlandQuads[][][][] fertilizers) {
         for (int family=0;family<3;family++) for(int season=0;season<4;season++) for(int wet=0;wet<2;wet++) {
-            BakedQuad atlas=Objects.requireNonNull(models.get(id(family,season,wet)))
-                    .getQuads(null,null,RandomSource.create(0)).getFirst();
+            BakedQuad atlas=com.stardew.craft.port.PortJava.getFirst(Objects.requireNonNull(models.get(id(family,season,wet)))
+                    .getQuads(null,null,RandomSource.create(0)));
             for(int column=0;column<=fertilizers[family][season].length;column++) {
                 BakedQuad[] peers=new BakedQuad[9];
                 for(int row=0;row<9;row++) peers[row]=tile(atlas,column,row);

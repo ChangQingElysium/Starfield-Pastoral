@@ -57,9 +57,9 @@ public final class TemperedRingClient {
         var out=buffers.getBuffer(WeaponEffectRenderTypes.MOLTEN_GLOW);
         for(Ring ring:RINGS.values()) {
             var p=ring.payload;if(camera.distanceToSqr(p.x(),p.y(),p.z())>48*48) continue;
-            double age=now-ring.start,slice=Math.clamp(age/p.duration(),0,1)*SLICES;
+            double age=now-ring.start,slice=com.stardew.craft.port.PortJava.clamp(age/p.duration(),0,1)*SLICES;
             int lower=Math.min(SLICES-1,(int)slice);double t=slice-lower;
-            float fade=(float)Math.clamp(1-Math.max(0,age-p.duration())/6,0,1);
+            float fade=(float)com.stardew.craft.port.PortJava.clamp(1-Math.max(0,age-p.duration())/6,0,1);
             Vec3[] points=new Vec3[SEGMENTS];
             for(int a=0;a<SEGMENTS;a++) {
                 Vec3 before=ring.floor[lower][a],after=ring.floor[lower+1][a];

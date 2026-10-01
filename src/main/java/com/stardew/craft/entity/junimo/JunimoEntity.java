@@ -1,6 +1,8 @@
 package com.stardew.craft.entity.junimo;
 
 import com.stardew.craft.port.PortItemStacks;
+import com.stardew.craft.model.AnimatedModel;
+import com.stardew.craft.model.ModelAnimation;
 import com.stardew.craft.sound.ModSounds;
 import com.stardew.craft.entity.npc.NpcPathNavigation;
 import net.minecraft.core.BlockPos;
@@ -20,12 +22,6 @@ import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.damagesource.DamageSource;
-import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.core.animation.AnimatableManager;
-import software.bernie.geckolib.core.animation.AnimationController;
-import software.bernie.geckolib.core.animation.RawAnimation;
-import software.bernie.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -36,7 +32,7 @@ import java.util.List;
  * Color is applied via tint layer in the renderer; the entity stores a packed RGB color.
  */
 @SuppressWarnings("null")
-public class JunimoEntity extends PathfinderMob implements GeoEntity {
+public class JunimoEntity extends PathfinderMob implements AnimatedModel {
 
     private static final EntityDataAccessor<Integer> DATA_COLOR =
             SynchedEntityData.defineId(JunimoEntity.class, EntityDataSerializers.INT);
@@ -58,14 +54,6 @@ public class JunimoEntity extends PathfinderMob implements GeoEntity {
     public static final int HOLDING_STAR = 2;
     public static final int HOLDING_ORANGE = 3;
     public static final int HOLDING_ITEM = 4;
-
-    private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("idle");
-    private static final RawAnimation WALK = RawAnimation.begin().thenLoop("walk");
-    private static final RawAnimation HOLD_WALK = RawAnimation.begin().thenLoop("hold_walk");
-    @SuppressWarnings("unused")
-    private static final RawAnimation JUMP = RawAnimation.begin().thenPlayAndHold("jump");
-
-    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
     /** Default Junimo color: lime green (same as area 0 in original). */
     private static final int DEFAULT_COLOR = 0x32CD32; // LimeGreen
@@ -528,26 +516,13 @@ public class JunimoEntity extends PathfinderMob implements GeoEntity {
         }
     }
 
-    // ── GeckoLib Animation ──────────────────────────────────────
+    // ── Native model animation Animation ──────────────────────────────────────
 
     @Override
-    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        // Carrying is a discrete sprite state in SDV. Blending walk and hold_walk
-        // makes the item follow the arm downward during pickup/drop-off, so switch
-        // these poses on the same tick as the held-item data changes.
-        controllers.add(new AnimationController<>(this, "main", 0, state -> {
-            if (isHolding()) {
-                return state.setAndContinue(HOLD_WALK);
-            }
-            if (this.getDeltaMovement().horizontalDistanceSqr() > 1.0E-6) {
-                return state.setAndContinue(WALK);
-            }
-            return state.setAndContinue(IDLE);
-        }));
+    public ModelAnimation modelAnimation(boolean moving, float partialTick) {
+        return ModelAnimation.loop(isHolding() ? "hold_walk" : getDeltaMovement().horizontalDistanceSqr() > 1.0E-6 ? "walk" : "idle");
     }
 
-    @Override
-    public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return this.cache;
-    }
+    @Override public int modelTransitionTicks() { return 0; }
+
 }

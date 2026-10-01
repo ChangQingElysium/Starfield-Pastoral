@@ -3,10 +3,10 @@ package com.stardew.craft.client.model.block;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.blockentity.ShippingBinBlockEntity;
 import net.minecraft.resources.ResourceLocation;
-import software.bernie.geckolib.model.GeoModel;
+import com.stardew.craft.client.model.nativebb.BlockbenchModel;
 
 @SuppressWarnings("null")
-public class ShippingBinGeoModel extends GeoModel<ShippingBinBlockEntity> {
+public class ShippingBinGeoModel extends BlockbenchModel<ShippingBinBlockEntity> {
     private static final ResourceLocation MODEL = new ResourceLocation(StardewCraft.MODID, "geo/block/utility/shipping_bin.geo.json");
     private static final ResourceLocation ANIMATION = new ResourceLocation(StardewCraft.MODID, "animations/block/utility/shipping_bin.animation.json");
     private static final ResourceLocation TEXTURE = new ResourceLocation(StardewCraft.MODID, "textures/block/utility/shipping_bin.png");
@@ -26,16 +26,11 @@ public class ShippingBinGeoModel extends GeoModel<ShippingBinBlockEntity> {
         return ANIMATION;
     }
     @Override
-    public void setCustomAnimations(ShippingBinBlockEntity bin, long id,
-            software.bernie.geckolib.core.animation.AnimationState<ShippingBinBlockEntity> state) {
-        super.setCustomAnimations(bin, id, state);
-        // Old one-cell installations stay inside their existing cell if a neighbor blocks expansion.
+    public void pose(ShippingBinBlockEntity bin, com.stardew.craft.client.npcnative.NativeNpcPose pose, float partialTick) {
+        // Preserve the old one-cell footprint: animation-space X is reflected in world space.
         boolean compact = !bin.hasFullFootprint();
-        getBone("root").ifPresent(bone -> {
-            bone.setScaleX(compact ? .5f : 1);
-            bone.setPosX(compact ? 4 : 0);
-        });
-        getBone("lid").ifPresent(bone -> bone.setRotX(bin.lidMotion.radians(state.getPartialTick())));
+        pose.setScale("root", compact ? .5 : 1, 1, 1);
+        if (compact) pose.addPosition("root", -4, 0, 0);
+        pose.blendRotation("lid", Math.toDegrees(bin.lidMotion.radians(partialTick)), 0, 0, 1);
     }
-
 }

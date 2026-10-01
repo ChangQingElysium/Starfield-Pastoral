@@ -18,7 +18,7 @@ public final class NativeBatMotion {
     }
     public static float lift(NativeNpcModel model, Matrix4f[] matrices, int action, double time) {
         double progress = action == MineBatEntity.ROOST ? 0
-                : action == MineBatEntity.AWAKE ? Math.clamp(time / BatFlight.WAKE_SECONDS, 0, 1) : 1;
+                : action == MineBatEntity.AWAKE ? com.stardew.craft.port.PortJava.clamp(time / BatFlight.WAKE_SECONDS, 0, 1) : 1;
         double smooth = progress * progress * (3 - 2 * progress);
         float desired = (float) ((MineBatEntity.HEIGHT - .75 - .02) * (1 - smooth));
         float low = Float.POSITIVE_INFINITY, high = Float.NEGATIVE_INFINITY;

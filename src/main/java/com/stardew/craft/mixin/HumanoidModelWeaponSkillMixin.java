@@ -20,7 +20,7 @@ public class HumanoidModelWeaponSkillMixin {
             float headPitch,
             CallbackInfo ci
     ) {
-        float partialTick = Math.clamp(ageInTicks - entity.tickCount, 0.0f, 1.0f);
+        float partialTick = com.stardew.craft.port.PortJava.clamp(ageInTicks - entity.tickCount, 0.0f, 1.0f);
         WeaponSkillThirdPersonAnimator.apply(
                 (HumanoidModel<?>) (Object) this,
                 entity,

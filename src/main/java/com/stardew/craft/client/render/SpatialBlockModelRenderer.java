@@ -54,7 +54,7 @@ public final class SpatialBlockModelRenderer {
                 : CACHE.computeIfAbsent(model, ignored -> new IdentityHashMap<>())
                     .computeIfAbsent(state, ignored -> partition(model, state, random, seed));
         if (cells.isEmpty()) return;
-        if (cells.size() == 1 && cells.getFirst().offset.equals(BlockPos.ZERO)) {
+        if (cells.size() == 1 && com.stardew.craft.port.PortJava.getFirst(cells).offset.equals(BlockPos.ZERO)) {
             renderer.tesselateBlock(level, model, state, pos, pose, vertices, checkSides, random, seed, overlay, ModelData.EMPTY, null);
             return;
         }
@@ -131,7 +131,7 @@ public final class SpatialBlockModelRenderer {
                 result.add(new Fragment(offset, fragment(quad, clipped, offset)));
             } else {
                 for (int i = 1; i + 1 < clipped.size(); i++) {
-                    var triangle = List.of(clipped.getFirst(), clipped.get(i), clipped.get(i + 1), clipped.get(i + 1));
+                    var triangle = List.of(com.stardew.craft.port.PortJava.getFirst(clipped), clipped.get(i), clipped.get(i + 1), clipped.get(i + 1));
                     if (area(triangle) >= EPSILON) result.add(new Fragment(offset, fragment(quad, triangle, offset)));
                 }
             }
@@ -142,7 +142,7 @@ public final class SpatialBlockModelRenderer {
     private static List<double[]> clip(List<double[]> polygon, int axis, double plane, boolean above) {
         List<double[]> result = new ArrayList<>();
         if (polygon.isEmpty()) return result;
-        double[] previous = polygon.getLast();
+        double[] previous = com.stardew.craft.port.PortJava.getLast(polygon);
         boolean previousInside = above ? previous[axis] >= plane - EPSILON : previous[axis] <= plane + EPSILON;
         for (double[] current : polygon) {
             boolean inside = above ? current[axis] >= plane - EPSILON : current[axis] <= plane + EPSILON;
@@ -157,11 +157,11 @@ public final class SpatialBlockModelRenderer {
             previous = current;
             previousInside = inside;
         }
-        if (result.size() > 1 && samePosition(result.getFirst(), result.getLast())) result.removeLast();
+        if (result.size() > 1 && samePosition(com.stardew.craft.port.PortJava.getFirst(result), com.stardew.craft.port.PortJava.getLast(result))) com.stardew.craft.port.PortJava.removeLast(result);
         return result;
     }
     private static void addDistinct(List<double[]> result, double[] vertex) {
-        if (result.isEmpty() || !samePosition(result.getLast(), vertex)) result.add(vertex);
+        if (result.isEmpty() || !samePosition(com.stardew.craft.port.PortJava.getLast(result), vertex)) result.add(vertex);
     }
     private static boolean samePosition(double[] a, double[] b) {
         return Math.abs(a[0] - b[0]) < EPSILON && Math.abs(a[1] - b[1]) < EPSILON && Math.abs(a[2] - b[2]) < EPSILON;

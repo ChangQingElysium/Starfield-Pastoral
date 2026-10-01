@@ -3,9 +3,9 @@ package com.stardew.craft.client.model.entity;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.entity.npc.CamelMerchantEntity;
 import net.minecraft.resources.ResourceLocation;
-import software.bernie.geckolib.model.GeoModel;
+import com.stardew.craft.client.model.nativebb.BlockbenchModel;
 
-public class CamelMerchantGeoModel extends GeoModel<CamelMerchantEntity> {
+public class CamelMerchantGeoModel extends BlockbenchModel<CamelMerchantEntity> {
     private static final ResourceLocation MODEL = new ResourceLocation(
             StardewCraft.MODID, "geo/entity/camel_merchant/camel_merchant.geo.json");
     private static final ResourceLocation TEXTURE = new ResourceLocation(

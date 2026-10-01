@@ -44,5 +44,5 @@ public final class BoneClaymoreGeometry {
             WeaponContactGeometry.ribbon(out,pose,path,normal,.018,fade,false,218,207,174);
         }
     }
-    static float traceOpacity(float remaining) { return Math.clamp(remaining / 10, 0, 1) * .34f; }
+    static float traceOpacity(float remaining) { return com.stardew.craft.port.PortJava.clamp(remaining / 10, 0, 1) * .34f; }
 }

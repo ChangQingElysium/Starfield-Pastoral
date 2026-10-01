@@ -68,7 +68,7 @@ final class SlimeBreeding {
                         other -> other != owner && other.isAlive() && !other.male() && other.breeding().readyMs <= 0
                                 && other.breeding().childhoodMs == 0 && other.breeding().partner == null);
                 if (!candidates.isEmpty()) {
-                    mate = candidates.getFirst(); partner = mate.getUUID();
+                    mate = com.stardew.craft.port.PortJava.getFirst(candidates); partner = mate.getUUID();
                     mate.breeding().partner = owner.getUUID(); mate.breeding().avoiding = true;
                     contactMs = mate.breeding().contactMs = 2000;
                     return true;
@@ -92,7 +92,7 @@ final class SlimeBreeding {
                 int variation = (int) (channel * .25F);
                 value = channel + (variation == 0 ? 0 : random.nextInt(variation * 2) - variation);
             }
-            color |= Math.clamp(value, 0, 255) << shift;
+            color |= com.stardew.craft.port.PortJava.clamp(value, 0, 255) << shift;
         }
         var baby = owner.variant().type().create(level);
         if (baby == null) return;
@@ -121,13 +121,13 @@ final class SlimeBreeding {
         MonsterStats.builder().damage(attack).resilience(resilience).experience(baby.monsterState().stats().getExperience())
                 .missChance(Math.max(0, stats.getMissChance() + (random.nextInt(3) - 1) / 100F)).build().writeToEntity(baby);
         random.nextInt(2);
-        baby.breeding().adultScale = Math.clamp(adultScale + (random.nextInt(5) - 2) / 100F, .6F, 1.5F);
+        baby.breeding().adultScale = com.stardew.craft.port.PortJava.clamp(adultScale + (random.nextInt(5) - 2) / 100F, .6F, 1.5F);
         baby.startChild();
         double selectedSpeed = (random.nextInt(2) == 0 ? owner : mate).getAttributeValue(Attributes.MOVEMENT_SPEED);
         owner.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(selectedSpeed);
         if (random.nextDouble() < .015) {
             double speed = owner.getAttributeValue(Attributes.MOVEMENT_SPEED) / .25 * 2;
-            owner.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(Math.clamp(speed + random.nextInt(3) - 1, 1, 6) / 2 * .25);
+            owner.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(com.stardew.craft.port.PortJava.clamp(speed + random.nextInt(3) - 1, 1, 6) / 2 * .25);
         }
         MonsterFactory.addOffspring(level, baby);
     }

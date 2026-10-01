@@ -115,7 +115,7 @@ public class WateringCanOverlayRenderer {
         VertexConsumer consumer = mc.renderBuffers().bufferSource().getBuffer(OVERLAY_RENDER_TYPE);
 
         // 以“实际将要浇到的耕地”所在平面为准（对准作物时会修正到下方耕地）
-        int baseY = positions.isEmpty() ? blockHit.getBlockPos().getY() : positions.getFirst().getY();
+        int baseY = positions.isEmpty() ? blockHit.getBlockPos().getY() : com.stardew.craft.port.PortJava.getFirst(positions).getY();
 
         for (BlockPos pos : positions) {
             if (pos.getY() == baseY) {

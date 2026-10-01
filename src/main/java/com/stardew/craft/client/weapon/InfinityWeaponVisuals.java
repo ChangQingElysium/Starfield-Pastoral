@@ -70,7 +70,7 @@ public final class InfinityWeaponVisuals {
                 || mc.level.getGameTime() > p.tick() + p.duration()) return;
         if (BURSTS.stream().anyMatch(b -> b.casterId() == p.casterId() && b.castTick() == p.castTick()
                 && b.tick() == p.tick() && b.phase() == p.phase())) return;
-        if (BURSTS.size() >= 64) BURSTS.removeFirst();
+        if (BURSTS.size() >= 64) com.stardew.craft.port.PortJava.removeFirst(BURSTS);
         BURSTS.add(p);
         Vec3 point = p.to();
         mc.level.playLocalSound(point.x, point.y, point.z, p.phase() == Phase.LEAP ? SoundEvents.ENDERMAN_TELEPORT
@@ -90,7 +90,7 @@ public final class InfinityWeaponVisuals {
         if (age < 0 || age >= duration) return 0;
         float f = 1 - age / duration; return f * f;
     }
-    static double pullRadius(float progress) { return 3.6 - 2.7 * Math.clamp(progress, 0, 1); }
+    static double pullRadius(float progress) { return 3.6 - 2.7 * com.stardew.craft.port.PortJava.clamp(progress, 0, 1); }
     @SubscribeEvent public static void render(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
         var mc = Minecraft.getInstance(); ensureLevel(mc.level);

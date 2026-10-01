@@ -137,7 +137,7 @@ public final class FishMarketCrateGameTests {
         PortBlockInteraction.stateUseItemOn(level.getBlockState(hit.getBlockPos()), player.getMainHandItem(),level,player,InteractionHand.MAIN_HAND,hit);
         h.assertTrue(crate.fish(1).isEmpty()&&player.getMainHandItem().is(net.minecraft.world.item.Items.STONE),"Full inventory did not take safely");
         var drops=level.getEntitiesOfClass(ItemEntity.class,new AABB(main).inflate(8));
-        h.assertTrue(drops.size()==1&&ItemStack.matches(expected,drops.getFirst().getItem()),"Full inventory lost or duplicated catch");
+        h.assertTrue(drops.size()==1&&ItemStack.matches(expected,com.stardew.craft.port.PortJava.getFirst(drops).getItem()),"Full inventory lost or duplicated catch");
         // A second empty-handed player cannot obtain the removed catch.
         var other=PortGameTests.makeMockPlayer(h, GameType.SURVIVAL);other.setItemInHand(InteractionHand.MAIN_HAND,ItemStack.EMPTY);
         PortBlockInteraction.stateUseWithoutItem(level.getBlockState(hit.getBlockPos()), level,other,hit);

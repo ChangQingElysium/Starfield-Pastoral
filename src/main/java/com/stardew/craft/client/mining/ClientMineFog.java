@@ -20,7 +20,7 @@ public final class ClientMineFog {
         if(mc.player==null || mc.level==null || mc.level.dimension()!=ModMiningDimensions.STARDEW_MINING
                 || OrdinaryMineRuntime.floorAt(mc.player.blockPosition())!=floor) {alpha=0;return;}
         if(mc.isPaused())return;
-        float target=Math.min(1,remaining/100f);alpha+=Math.clamp(target-alpha,-.05f,.05f);
+        float target=Math.min(1,remaining/100f);alpha+=com.stardew.craft.port.PortJava.clamp(target-alpha,-.05f,.05f);
         if(remaining>0)remaining--;
     }
     @SubscribeEvent public static void color(ViewportEvent.ComputeFogColor event) {

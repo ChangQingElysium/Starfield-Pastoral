@@ -10,7 +10,7 @@ public final class ReadingTextLayout {
     private ReadingTextLayout() {}
 
     public static float scale(int percent) {
-        return Math.clamp(percent, MIN_PERCENT, MAX_PERCENT) / 100.0F;
+        return com.stardew.craft.port.PortJava.clamp(percent, MIN_PERCENT, MAX_PERCENT) / 100.0F;
     }
 
     public static float fitHudScale(float requested, int baseWidth, int baseHeight, int width, int height) {

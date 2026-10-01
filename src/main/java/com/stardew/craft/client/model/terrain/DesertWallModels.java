@@ -47,7 +47,7 @@ public final class DesertWallModels {
         BakedModel atlas = Objects.requireNonNull(event.getModels().get(ATLAS));
         BakedQuad[][][] quads = new BakedQuad[6][12][47];
         for (Direction face : Direction.values()) {
-            BakedQuad source = atlas.getQuads(null, face, RandomSource.create(0)).getFirst();
+            BakedQuad source = com.stardew.craft.port.PortJava.getFirst(atlas.getQuads(null, face, RandomSource.create(0)));
             for (int column = 0; column < 12; column++) for (int row = 0; row < 47; row++)
                 quads[face.ordinal()][column][row] = tile(source, column, row);
         }

@@ -10,7 +10,7 @@ public final class HeavyHammerRules {
     public static final int BURST_START = 3, BURST_DURATION = 100, BURST_INTERVAL = 7;
     public static final int POUND_WINDUP = 2;
     public static int poundAnimationTicks(double interval) {
-        return Math.clamp((int)Math.ceil(interval), 2, BURST_INTERVAL);
+        return com.stardew.craft.port.PortJava.clamp((int)Math.ceil(interval), 2, BURST_INTERVAL);
     }
     public static int poundContactTicks(int animationTicks) {
         return Math.max(1, Math.round(animationTicks * (2f / 7f)));

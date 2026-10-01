@@ -88,7 +88,7 @@ public final class RuralFenceGameTests {
             helper.assertTrue(!level.getBlockState(pos).getValue(RuralFenceBlock.CONNECTIONS.get(Direction.EAST)), "Material removal left rail behind");
             var drops = level.getEntitiesOfClass(ItemEntity.class, new AABB(pos).inflate(3));
             helper.assertTrue(drops.stream().mapToInt(e -> e.getItem().getCount()).sum() == 1
-                    && drops.getFirst().getItem().is(right.asItem()), "Material dropped wrong or duplicate item");
+                    && com.stardew.craft.port.PortJava.getFirst(drops).getItem().is(right.asItem()), "Material dropped wrong or duplicate item");
             drops.forEach(Entity::discard);
             clear(level, pos);
         }

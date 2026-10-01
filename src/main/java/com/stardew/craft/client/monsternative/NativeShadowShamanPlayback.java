@@ -7,11 +7,11 @@ public final class NativeShadowShamanPlayback {
     public NativeShadowShamanPlayback(NativeNpcModel m){model=m;pose=new NativeNpcPose(m);capture=new NativeNpcPose(m);}
     public NativeNpcPose pose(){return pose;}
     public void sample(double clock,boolean moving,boolean casting,double castTime,double release,double hit,double death){
-        if(clock==previous)return;double dt=Double.isNaN(previous)?0:Math.clamp(clock-previous,0,.1);
+        if(clock==previous)return;double dt=Double.isNaN(previous)?0:com.stardew.craft.port.PortJava.clamp(clock-previous,0,.1);
         if(death>0){if(!dying)capture.copyFrom(pose);pose.reset();pose.apply("animation.shadow_shaman.death",death);pose.blendFrom(capture,1-NativeGrubMotion.smooth(death/.1));}
         else{
             if(casting!=lastCast){capture.copyFrom(pose);transition=clock;}
-            weight+=Math.clamp((moving?1:0)-weight,-dt/.1,dt/.1);walkTime+=dt*weight;pose.reset();pose.apply("animation.shadow_shaman.idle",clock);pose.blend("animation.shadow_shaman.walk",walkTime,NativeGrubMotion.smooth(weight));
+            weight+=com.stardew.craft.port.PortJava.clamp((moving?1:0)-weight,-dt/.1,dt/.1);walkTime+=dt*weight;pose.reset();pose.apply("animation.shadow_shaman.idle",clock);pose.blend("animation.shadow_shaman.walk",walkTime,NativeGrubMotion.smooth(weight));
             if(casting)pose.apply("animation.shadow_shaman.cast",castTime);
             else if(release>=0&&release<.2)pose.blend("animation.shadow_shaman.recover",release,1-NativeGrubMotion.smooth(release/.2));
             if(!Double.isNaN(previous)&&clock-transition<.12)pose.blendFrom(capture,1-NativeGrubMotion.smooth((clock-transition)/.12));

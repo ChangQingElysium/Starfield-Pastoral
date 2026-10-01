@@ -44,7 +44,7 @@ public final class FarmCaveRuntimeGameTests {
         // Real old template, ready produce, and a player inventory; the old room stays as backup.
         level.getStructureManager().get(new ResourceLocation("stardewcraft","farm_layouts/cave_legacy")).orElseThrow()
                 .placeInWorld(level,legacy,legacy,new StructurePlaceSettings(),level.random,3);
-        BlockPos oldBox=legacy.offset(FarmCaveLayout.LEGACY_BOXES.getFirst());
+        BlockPos oldBox=legacy.offset(com.stardew.craft.port.PortJava.getFirst(FarmCaveLayout.LEGACY_BOXES));
         level.setBlock(oldBox,ModBlocks.MUSHROOM_BOX.get().defaultBlockState(),3);
         ((MushroomBoxBlockEntity)level.getBlockEntity(oldBox)).setProductIfEmpty(new ItemStack(Items.DIAMOND));
         BlockPos oldChest=legacy.offset(4,1,4);level.setBlock(oldChest,Blocks.CHEST.defaultBlockState(),3);
@@ -63,7 +63,7 @@ public final class FarmCaveRuntimeGameTests {
                 h.assertTrue(daily.get()==1,"Daily callback skipped or duplicated");
                 h.assertTrue(level.getBlockEntity(origin.offset(FarmCaveLayout.EXIT)) instanceof PortalTriggerBlockEntity be && be.getTargetId().equals("farm_cave_exit"),"Missing exit portal target");
                 h.assertTrue(!level.getBlockState(origin.offset(FarmCaveLayout.SPAWN).above()).is(ModBlocks.MINE_LAMP.get()),"Arrival lamp was not removed");
-                var box=(MushroomBoxBlockEntity)level.getBlockEntity(origin.offset(FarmCaveLayout.BOXES.getFirst()));
+                var box=(MushroomBoxBlockEntity)level.getBlockEntity(origin.offset(com.stardew.craft.port.PortJava.getFirst(FarmCaveLayout.BOXES)));
                 h.assertTrue(box!=null && box.isReady() && box.getProduct().is(Items.DIAMOND),"Ready mushroom output lost in migration");
                 boolean chest=false;
                 for(BlockPos p:BlockPos.betweenClosed(origin,origin.offset(15,12,17)))if(level.getBlockEntity(p) instanceof ChestBlockEntity c && c.getItem(0).is(Items.EMERALD) && c.getItem(0).getCount()==17)chest=true;
@@ -96,7 +96,7 @@ public final class FarmCaveRuntimeGameTests {
             .thenExecute(()->FarmCaveRuntime.request(level,FarmCaveRuntime.farm(farm.getInstanceId())))
             .thenWaitUntil(()->h.assertTrue(FarmCaveRuntime.ready(level,FarmCaveRuntime.farm(farm.getInstanceId())),"Missing floor was not repaired"))
             .thenExecute(()-> {
-                h.assertTrue(((MushroomBoxBlockEntity)level.getBlockEntity(origin.offset(FarmCaveLayout.BOXES.getFirst()))).getProduct().is(Items.DIAMOND),"Repair overwrote ready produce");
+                h.assertTrue(((MushroomBoxBlockEntity)level.getBlockEntity(origin.offset(com.stardew.craft.port.PortJava.getFirst(FarmCaveLayout.BOXES)))).getProduct().is(Items.DIAMOND),"Repair overwrote ready produce");
                 h.assertTrue(level.getBlockState(origin.offset(FarmCaveLayout.DEHYDRATOR)).isAir(),"Repair duplicated the one-time dehydrator");
                 reg.deleteFarm(FarmCaveRuntime.farm(farm.getInstanceId()).getOwnerUUID());
                 FarmInstance fresh=reg.createFarm(owner,"New farm","New cave",FarmType.STANDARD);

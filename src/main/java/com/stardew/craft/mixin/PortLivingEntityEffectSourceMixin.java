@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 /**
- * PORT(1.20.1): NeoForge's {@code MobEffectEvent.Applicable#getEffectSource()}. Forge fires Applicable from
+ * PORT(1.20.1): MinecraftForge's {@code MobEffectEvent.Applicable#getEffectSource()}. Forge fires Applicable from
  * {@code canBeAffected}, which has no source; the source passed to {@code addEffect}/{@code forceAddEffect} is
  * exposed for the duration of that check through {@link PortEventHooks#effectSource()}.
  */

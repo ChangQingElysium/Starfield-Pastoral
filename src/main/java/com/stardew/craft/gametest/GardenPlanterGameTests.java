@@ -93,7 +93,7 @@ public final class GardenPlanterGameTests {
         level.destroyBlock(pos.east(),true);
         helper.assertTrue(level.getBlockState(pos).is(block) && !level.getBlockState(pos).getValue(GardenPlanterBlock.CONNECTIONS[1]),"Neighbor did not reseal");
         var drops = level.getEntitiesOfClass(ItemEntity.class,new AABB(pos).inflate(3));
-        helper.assertTrue(drops.stream().mapToInt(e->e.getItem().getCount()).sum()==1 && drops.getFirst().getItem().is(block.asItem()),"Wrong planter drops");
+        helper.assertTrue(drops.stream().mapToInt(e->e.getItem().getCount()).sum()==1 && com.stardew.craft.port.PortJava.getFirst(drops).getItem().is(block.asItem()),"Wrong planter drops");
         helper.assertTrue(block.defaultBlockState().is(BlockTags.MINEABLE_WITH_AXE),"Planter missing axe tag");
         helper.assertTrue(StardewItemCatalog.tabForItem(block.asItem())==StardewCatalogTab.BUILDING,"Planter missing building catalog");
         helper.succeed();

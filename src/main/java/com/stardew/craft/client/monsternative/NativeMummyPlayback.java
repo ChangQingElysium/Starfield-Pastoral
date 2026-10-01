@@ -14,11 +14,11 @@ public final class NativeMummyPlayback {
  public boolean showRemains(){return showRemains;}
  public NativeNpcPose pose(){return pose;}
  public void sample(double clock,boolean moving,int phase,double actionTime,int remaining,double hit,double death){
-  if(clock==previous)return;double dt=Double.isNaN(previous)?0:Math.clamp(clock-previous,0,.1);
+  if(clock==previous)return;double dt=Double.isNaN(previous)?0:com.stardew.craft.port.PortJava.clamp(clock-previous,0,.1);
   if(death>0){if(!dying)capture.copyFrom(pose);pose.reset();if(phase==MummyLifecycle.DOWNED)pose.apply("animation.mummy.downed",0);else if(phase==MummyLifecycle.CRUMBLE)pose.apply("animation.mummy.crumble",actionTime);else pose.apply("animation.mummy.death",death);pose.blendFrom(capture,1-NativeGrubMotion.smooth(death/.07));}
   else {
    if(phase!=lastAction){capture.copyFrom(pose);transition=clock;}
-   weight+=Math.clamp((moving?1:0)-weight,-dt/.12,dt/.12);walkTime+=dt*weight;pose.reset();
+   weight+=com.stardew.craft.port.PortJava.clamp((moving?1:0)-weight,-dt/.12,dt/.12);walkTime+=dt*weight;pose.reset();
    switch(phase){
     case MummyLifecycle.CRUMBLE -> {pose.apply("animation.mummy.crumble",actionTime);pose.blendFrom(capture,1-NativeGrubMotion.smooth((clock-transition)/.045));}
     case MummyLifecycle.DOWNED -> {pose.apply("animation.mummy.downed",0);if(remaining<2000){float shake=(float)(.24*Math.sin(clock*62));pose.addPosition("root",shake,0,-shake*.5F);}}

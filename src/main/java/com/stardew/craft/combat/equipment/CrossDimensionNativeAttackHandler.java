@@ -111,7 +111,7 @@ public final class CrossDimensionNativeAttackHandler {
         );
     }
 
-    /** PORT(1.20.1): NeoForge's CriticalHitEvent#isCriticalHit, as decided by Forge's ForgeHooks#getCriticalHit. */
+    /** PORT(1.20.1): MinecraftForge's CriticalHitEvent#isCriticalHit, as decided by Forge's ForgeHooks#getCriticalHit. */
     private static boolean isCriticalHit(CriticalHitEvent event) {
         return event.getResult() == net.minecraftforge.eventbus.api.Event.Result.ALLOW
                 || event.isVanillaCritical() && event.getResult() == net.minecraftforge.eventbus.api.Event.Result.DEFAULT;

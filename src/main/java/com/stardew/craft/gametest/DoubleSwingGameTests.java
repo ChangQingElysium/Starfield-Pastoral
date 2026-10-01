@@ -67,7 +67,7 @@ public final class DoubleSwingGameTests {
             level.destroyBlock(pillar,true);
             h.assertTrue(count(h,main)==0,"Broken swing left cells");h.assertTrue(count(h,neighbor)==82,"Damaged adjacent swing");
             var drops=level.getEntitiesOfClass(ItemEntity.class,new AABB(main).inflate(4));
-            h.assertTrue(drops.stream().mapToInt(i->i.getItem().getCount()).sum()==1&&drops.getFirst().getItem().is(block.asItem()),"Expected one whole swing drop");
+            h.assertTrue(drops.stream().mapToInt(i->i.getItem().getCount()).sum()==1&&com.stardew.craft.port.PortJava.getFirst(drops).getItem().is(block.asItem()),"Expected one whole swing drop");
             DoubleSwingBlock.runWithDropsSuppressed(()->level.removeBlock(neighbor,false));
         }
         h.succeed();

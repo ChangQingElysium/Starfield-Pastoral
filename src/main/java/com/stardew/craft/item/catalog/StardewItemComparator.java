@@ -14,8 +14,8 @@ import java.util.Map;
 public final class StardewItemComparator {
     // Authoring workflow order, independent of translated names or registration order.
     private static final List<String> BUILDING_ORDER = List.of(
-            "pale_blue_siding", "blue_painted_planks", "blue_gray_timber", "teal_painted_timber", "pale_cyan_plaster", "cream_siding", "ivory_siding", "gray_violet_roof_tiles", "brick_red_roof_tiles", "terracotta_roof_tiles", "dark_brown_roof_tiles", "gray_green_masonry",
-            "green_panel_door", "red_glass_door", "brown_glass_door", "blue_glass_door", "shop_glass_door", "pale_blue_window_glass", "owl_pendant", "hanging_basket", "ship_wheel_ornament", "sun_wall_ornament", "pierre_sign", "clinic_sign",
+            "pale_blue_siding", "blue_painted_planks", "blue_gray_timber", "teal_painted_timber", "pale_cyan_plaster", "cream_siding", "ivory_siding", "gray_violet_roof_tiles", "brick_red_roof_tiles", "terracotta_roof_tiles", "dark_brown_roof_tiles", "gray_green_masonry", "gray_brown_bricks", "chestnut_roof_tiles", "forest_green_siding", "gray_metal_siding",
+            "green_panel_door", "red_glass_door", "brown_glass_door", "red_brown_door", "blue_glass_door", "shop_glass_door", "pale_blue_window_glass", "owl_pendant", "hanging_basket", "ship_wheel_ornament", "sun_wall_ornament", "pierre_sign", "clinic_sign", "saloon_sign", "food_spirits_sign", "blacksmith_door", "purple_panel_door", "library_book_sign", "wall_magnifying_glass", "timber_awning",
             "town_paving", "town_paving_stairs", "plaza_red_bricks",
             "wood_floor", "weathered_floor", "rustic_plank_floor", "wood_path",
             "stone_floor", "stone_walkway_floor", "cobblestone_path", "stepping_stone_path", "gravel_path",

@@ -12,7 +12,7 @@ public final class BloodForgeGeometry {
         return from.lerp(to,t).add(0,Math.sin(Math.PI*t)*0.22,0);
     }
     public static void recovery(VertexConsumer out,Matrix4f pose,Vec3 from,Vec3 to,float age) {
-        double head=Math.clamp(age/8,0,1), tail=Math.max(0,head-.3);
+        double head=com.stardew.craft.port.PortJava.clamp(age/8,0,1), tail=Math.max(0,head-.3);
         for(int i=0;i<12;i++) {
             double a=tail+(head-tail)*i/12,b=tail+(head-tail)*(i+1)/12;
             Vec3 p=recoveryPoint(from,to,a),q=recoveryPoint(from,to,b);
@@ -24,7 +24,7 @@ public final class BloodForgeGeometry {
         }
     }
     public static void heat(VertexConsumer out,Matrix4f pose,Vec3 p,Vec3 right,Vec3 up,float progress) {
-        float strength=Math.clamp(progress,0,1);
+        float strength=com.stardew.craft.port.PortJava.clamp(progress,0,1);
         Vec3 axis=right.add(up.scale(.3)).normalize();
         Vec3 a=p.subtract(axis.scale(.23)),b=p.add(axis.scale(.23));
         WeaponContactGeometry.blade(out,pose,a,b,right.cross(up),.038,0.6f+strength*.4f,false,
@@ -54,7 +54,7 @@ public final class BloodForgeGeometry {
         for(var sample:samples) {
             // Tick-end positions newer than the rendered projectile are omitted.
             if(sample.tick()>time) continue;
-            float fade=Math.clamp(1-(time-sample.tick())/6,0,1);
+            float fade=com.stardew.craft.port.PortJava.clamp(1-(time-sample.tick())/6,0,1);
             if(previous!=null) trailSegment(out,pose,previous.subtract(head),sample.position().subtract(head),prior,fade);
             previous=sample.position();prior=fade;
         }

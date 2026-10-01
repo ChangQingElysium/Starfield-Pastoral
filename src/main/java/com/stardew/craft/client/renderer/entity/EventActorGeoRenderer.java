@@ -10,7 +10,7 @@ import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
-import software.bernie.geckolib.renderer.GeoEntityRenderer;
+import com.stardew.craft.client.model.nativebb.BlockbenchEntityRenderer;
 
 /**
  * Renderer for {@link EventActorEntity}.
@@ -18,13 +18,13 @@ import software.bernie.geckolib.renderer.GeoEntityRenderer;
  * requests must never swap an available native character back to its legacy model.
  */
 public class EventActorGeoRenderer extends EntityRenderer<EventActorEntity> {
-    private final GeoEntityRenderer<EventActorEntity> legacy;
+    private final BlockbenchEntityRenderer<EventActorEntity> legacy;
     private final EntityRendererProvider.Context context;
     private final java.util.Map<String,NativeSamRenderer<EventActorEntity>> nativeRenderers;
 
     public EventActorGeoRenderer(EntityRendererProvider.Context context) {
         super(context);
-        legacy=new GeoEntityRenderer<>(context,new EventActorGeoModel());
+        legacy=new BlockbenchEntityRenderer<>(context,new EventActorGeoModel());
         this.context = context;
         nativeRenderers = new java.util.HashMap<>();
         this.shadowRadius = 0.35F;

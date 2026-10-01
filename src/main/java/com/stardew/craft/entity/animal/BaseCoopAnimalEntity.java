@@ -1,5 +1,7 @@
 package com.stardew.craft.entity.animal;
 
+import com.stardew.craft.model.AnimatedModel;
+import com.stardew.craft.model.ModelAnimation;
 import com.stardew.craft.animal.data.AnimalWorldData;
 import com.stardew.craft.animal.model.AnimalBuildingRecord;
 import com.stardew.craft.animal.model.AnimalBuildingDailyContext;
@@ -61,19 +63,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.EnumSet;
 import java.util.List;
-import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.core.animation.AnimatableManager;
-import software.bernie.geckolib.core.animation.AnimationController;
-import software.bernie.geckolib.core.object.PlayState;
-import software.bernie.geckolib.core.animation.RawAnimation;
-import software.bernie.geckolib.util.GeckoLibUtil;
 
 @SuppressWarnings("null")
-public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
-	private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("idle");
-	private static final RawAnimation WALK = RawAnimation.begin().thenLoop("walk");
-	private static final RawAnimation EAT = RawAnimation.begin().thenLoop("eat");
+public abstract class BaseCoopAnimalEntity extends Animal implements AnimatedModel {
 	private static final String TAG_MANAGED_ANIMAL_ID = "stardewManagedAnimalId";
 	private static final String TAG_MANAGED_ANIMAL_TYPE = "stardewManagedAnimalType";
 	private static final int EMOTE_POP_IN_TICKS = 4;
@@ -105,7 +97,6 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 	private static final EntityDataAccessor<Integer> DATA_EMOTE_TICKS_LEFT = SynchedEntityData.defineId(BaseCoopAnimalEntity.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Boolean> DATA_SLEEPING = SynchedEntityData.defineId(BaseCoopAnimalEntity.class, EntityDataSerializers.BOOLEAN);
 
-	private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 	private long managedAnimalId = -1L;
 	private String managedAnimalType = "";
 	private int eatAnimationTicks = 0;
@@ -393,30 +384,8 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 	}
 
 	@Override
-	public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-		controllers.add(new AnimationController<>(this, "main", 5, state -> {
-			if (isSleepingProjection()) {
-				state.setAndContinue(IDLE);
-				return PlayState.CONTINUE;
-			}
-			if (shouldPlayEatAnimation()) {
-				state.setAndContinue(EAT);
-				return PlayState.CONTINUE;
-			}
-
-			if (state.isMoving()) {
-				state.setAndContinue(WALK);
-				return PlayState.CONTINUE;
-			}
-
-			state.setAndContinue(IDLE);
-			return PlayState.CONTINUE;
-		}));
-	}
-
-	@Override
-	public AnimatableInstanceCache getAnimatableInstanceCache() {
-		return cache;
+	public ModelAnimation modelAnimation(boolean moving, float partialTick) {
+		return ModelAnimation.loop(isSleepingProjection() ? "idle" : shouldPlayEatAnimation() ? "eat" : moving ? "walk" : "idle");
 	}
 
 	private com.stardew.craft.animal.runtime.LivestockBrain livestockBrain;

@@ -40,7 +40,7 @@ public final class ParkedVehicleModels {
     public record Part(String group, boolean glass, double x, double y, double z, List<BakedQuad> quads) {}
     public static List<Part> parts(String vehicle, int season) {
         var variants = vehicles.get(vehicle);
-        return variants == null ? List.of() : variants.get(Math.clamp(season, 0, variants.size() - 1));
+        return variants == null ? List.of() : variants.get(com.stardew.craft.port.PortJava.clamp(season, 0, variants.size() - 1));
     }
     private static JsonObject description(String vehicle, String season) {
         var id = new ResourceLocation(StardewCraft.MODID, "vehicles/" + vehicle + "/" + season + ".json");

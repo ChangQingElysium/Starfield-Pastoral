@@ -4,9 +4,9 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.blockentity.FlowerDanceDecorBlockEntity;
 import net.minecraft.resources.ResourceLocation;
-import software.bernie.geckolib.model.GeoModel;
+import com.stardew.craft.client.model.nativebb.BlockbenchModel;
 
-public class FlowerDanceDecorGeoModel extends GeoModel<FlowerDanceDecorBlockEntity> {
+public class FlowerDanceDecorGeoModel extends BlockbenchModel<FlowerDanceDecorBlockEntity> {
     private static final ResourceLocation FLOWER_CLUSTER_MODEL = new ResourceLocation(StardewCraft.MODID, "geo/block/festival/flower_cluster.geo.json");
     private static final ResourceLocation FLOWER_CLUSTER_TEXTURE = new ResourceLocation(StardewCraft.MODID, "textures/block/festival/flower_cluster.png");
     private static final ResourceLocation SEASONAL_DECOR_MODEL = new ResourceLocation(StardewCraft.MODID, "geo/block/festival/seasonal_decor.geo.json");

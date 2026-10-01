@@ -254,9 +254,9 @@ public final class MineStoneGameTests {
                 "Source 40 must use 1.2 ore multiplier; source 38 must use 0.8");
         var stone = MineStoneMining.roll(c, new FixedRandom(0.5, 0.5));
         h.assertTrue(stone.miningExperience() == 0 && stone.drops().size() == 1
-                && stone.drops().getFirst().is(ModItems.STONE.get()), "Ordinary stone rewards differ");
+                && com.stardew.craft.port.PortJava.getFirst(stone.drops()).is(ModItems.STONE.get()), "Ordinary stone rewards differ");
         var geode = MineStoneMining.roll(c, new FixedRandom(0, 0.5));
-        h.assertTrue(geode.drops().getFirst().is(ModItems.GEODE.get()), "Earth geode missing");
+        h.assertTrue(com.stardew.craft.port.PortJava.getFirst(geode.drops()).is(ModItems.GEODE.get()), "Earth geode missing");
         var deep = new MineStoneMining.Context(32, 81, 0, 0, 0, false, true, false, false, false, false, 0, 0, false);
         var deepDrops = MineStoneMining.roll(deep, new FixedRandom(0, 0, 0.5));
         h.assertTrue(deepDrops.drops().get(0).is(ModItems.MAGMA_GEODE.get()) && deepDrops.drops().get(0).getCount() == 2
@@ -274,7 +274,7 @@ public final class MineStoneGameTests {
         var plain = new MineStoneMining.Context(668, 1, 0, 0, 0, false, false, true, true, true, false, 0, 0, false);
         var base = MineStoneMining.roll(plain, new FixedRandom(0.5, 0.5, 0.08));
         h.assertTrue(base.miningExperience() == 3 && base.drops().size() == 1
-                && base.drops().getFirst().is(ModItems.STONE.get()) && base.drops().getFirst().getCount() == 1,
+                && com.stardew.craft.port.PortJava.getFirst(base.drops()).is(ModItems.STONE.get()) && com.stardew.craft.port.PortJava.getFirst(base.drops()).getCount() == 1,
                 "Rich stone must stop before ordinary geode/ore rolls; coal blessings do not change its 8% branch");
         var bonuses = new MineStoneMining.Context(668, 1, 10, 10, 0, false, false, false, false, false, false, 0, 2, false);
         var coal = MineStoneMining.roll(bonuses, new FixedRandom(0.05, 0.05, 0.079));
@@ -302,16 +302,16 @@ public final class MineStoneGameTests {
         var copper = new MineStoneMining.Context(751, 1, 0, 0, 0, false, false, false, false, false, false, 0, 0, false);
         var base = MineStoneMining.roll(copper, new FixedRandom(0.5, 0.5));
         h.assertTrue(base.miningExperience() == 5 && base.drops().size() == 1
-                && base.drops().getFirst().is(ModItems.COPPER_ORE.get()) && base.drops().getFirst().getCount() == 1,
+                && com.stardew.craft.port.PortJava.getFirst(base.drops()).is(ModItems.COPPER_ORE.get()) && com.stardew.craft.port.PortJava.getFirst(base.drops()).getCount() == 1,
                 "Copper minimum or exclusive drop branch differs");
         var max = MineStoneMining.roll(copper, new LegacyRandomSource(0) {
             @Override public int nextInt(int bound) { return bound - 1; }
             @Override public double nextDouble() { return 0.5; }
         });
-        h.assertTrue(max.drops().getFirst().getCount() == 3, "Copper base range must include three ores");
+        h.assertTrue(com.stardew.craft.port.PortJava.getFirst(max.drops()).getCount() == 3, "Copper base range must include three ores");
         var bonus = new MineStoneMining.Context(751, 1, 10, 10, 0, false, false, false, false, false, false, 0, 2, false);
-        h.assertTrue(MineStoneMining.roll(bonus, new FixedRandom(0.099, 0.099)).drops().getFirst().getCount() == 5
-                && MineStoneMining.roll(bonus, new FixedRandom(0.1, 0.1)).drops().getFirst().getCount() == 3,
+        h.assertTrue(com.stardew.craft.port.PortJava.getFirst(MineStoneMining.roll(bonus, new FixedRandom(0.099, 0.099)).drops()).getCount() == 5
+                && com.stardew.craft.port.PortJava.getFirst(MineStoneMining.roll(bonus, new FixedRandom(0.1, 0.1)).drops()).getCount() == 3,
                 "Copper profession/statue and independent skill chance boundaries differ");
         for (boolean mastery : new boolean[]{false, true}) {
             for (boolean geologist : new boolean[]{false, true}) {
@@ -319,8 +319,8 @@ public final class MineStoneGameTests {
                     var gem = new MineStoneMining.Context(8, 1, 10, 10, 0, false, geologist, false, false, false, false, 0, 2, mastery);
                     var drop = MineStoneMining.roll(gem, new FixedRandom(triggered));
                     boolean extra = geologist && triggered;
-                    h.assertTrue(drop.drops().size() == 1 && drop.drops().getFirst().is(ModItems.AMETHYST.get())
-                            && drop.drops().getFirst().getCount() == (mastery ? 2 : 1) * (extra ? 2 : 1)
+                    h.assertTrue(drop.drops().size() == 1 && com.stardew.craft.port.PortJava.getFirst(drop.drops()).is(ModItems.AMETHYST.get())
+                            && com.stardew.craft.port.PortJava.getFirst(drop.drops()).getCount() == (mastery ? 2 : 1) * (extra ? 2 : 1)
                             && drop.miningExperience() == (extra ? 8 : 16), "Amethyst mastery/Geologist branch differs");
                 }
             }
@@ -341,7 +341,7 @@ public final class MineStoneGameTests {
     public static void topazAndMixedGemRules(GameTestHelper h) {
         var topaz = new MineStoneMining.Context(10, 1, 10, 10, 0, false, true, false, false, false, false, 0, 2, true);
         var t = MineStoneMining.roll(topaz, new FixedRandom(true));
-        h.assertTrue(t.drops().getFirst().is(ModItems.TOPAZ.get()) && t.drops().getFirst().getCount() == 4
+        h.assertTrue(com.stardew.craft.port.PortJava.getFirst(t.drops()).is(ModItems.TOPAZ.get()) && com.stardew.craft.port.PortJava.getFirst(t.drops()).getCount() == 4
                 && t.miningExperience() == 8, "Topaz mastery/Geologist differs");
         net.minecraft.world.item.Item[] gems = {ModItems.DIAMOND.get(), ModItems.RUBY.get(), ModItems.JADE.get(),
                 ModItems.AMETHYST.get(), ModItems.TOPAZ.get(), ModItems.EMERALD.get(), ModItems.AQUAMARINE.get()};
@@ -355,8 +355,8 @@ public final class MineStoneGameTests {
                     @Override public int nextInt(int bound) { h.assertTrue(bound == 7, "Mixed gem is not a uniform seven-way choice"); return choice; }
                     @Override public boolean nextBoolean() { return true; }
                 });
-                h.assertTrue(result.drops().size() == 1 && result.drops().getFirst().is(gems[index])
-                        && result.drops().getFirst().getCount() == (extra ? 4 : 1)
+                h.assertTrue(result.drops().size() == 1 && com.stardew.craft.port.PortJava.getFirst(result.drops()).is(gems[index])
+                        && com.stardew.craft.port.PortJava.getFirst(result.drops()).getCount() == (extra ? 4 : 1)
                         && result.miningExperience() == (extra ? extraXp[index] : normalXp[index]), "Mixed gem branch differs");
             }
         }
@@ -398,14 +398,14 @@ public final class MineStoneGameTests {
             h.assertTrue(geode.drops().stream().anyMatch(stack -> stack.is(ModItems.FROZEN_GEODE.get()))
                     && geode.miningExperience() == 0, "Frost ordinary stone used the wrong geode or XP branch");
             var iron = MineStoneMining.roll(c, new FixedRandom(0.5, 0.5, 0.039, 0.5, 0.74));
-            h.assertTrue(iron.drops().size() == 1 && iron.drops().getFirst().is(ModItems.IRON_ORE.get())
+            h.assertTrue(iron.drops().size() == 1 && com.stardew.craft.port.PortJava.getFirst(iron.drops()).is(ModItems.IRON_ORE.get())
                     && iron.miningExperience() == 5, "Floor 41 iron branch is wrong");
             var edge = MineStoneMining.roll(c, new FixedRandom(0.5, 0.5, 0.04001));
-            h.assertTrue(edge.miningExperience() == 0 && edge.drops().getFirst().is(ModItems.STONE.get()),
+            h.assertTrue(edge.miningExperience() == 0 && com.stardew.craft.port.PortJava.getFirst(edge.drops()).is(ModItems.STONE.get()),
                     "Frost ordinary rock used the rich-stone ore multiplier");
             var dark = new MineStoneMining.Context(source, 71, 0, 0, 0, false, false, false, false, false, false, 0, 0, false);
             var gold = MineStoneMining.roll(dark, new FixedRandom(0.5, 0.5, 0.039, 0.5, 0.099));
-            h.assertTrue(gold.drops().getFirst().is(ModItems.GOLD_ORE.get()), "Deep frost gold branch missing");
+            h.assertTrue(com.stardew.craft.port.PortJava.getFirst(gold.drops()).is(ModItems.GOLD_ORE.get()), "Deep frost gold branch missing");
         }
         h.succeed();
     }
@@ -432,21 +432,21 @@ public final class MineStoneGameTests {
         // Two level rolls only: geologist/coal/geode flags must not add a second drop branch.
         var iron = new MineStoneMining.Context(290, 41, 100, 100, 0, true, true, true, true, true, false, 0, 2, true);
         var boosted = MineStoneMining.roll(iron, new FixedRandom(0, 0));
-        h.assertTrue(boosted.drops().size() == 1 && boosted.drops().getFirst().is(ModItems.IRON_ORE.get())
-                && boosted.drops().getFirst().getCount() == 5 && boosted.miningExperience() == 12,
+        h.assertTrue(boosted.drops().size() == 1 && com.stardew.craft.port.PortJava.getFirst(boosted.drops()).is(ModItems.IRON_ORE.get())
+                && com.stardew.craft.port.PortJava.getFirst(boosted.drops()).getCount() == 5 && boosted.miningExperience() == 12,
                 "Iron added ores/level bonuses/XP differ from source 290");
         var base = MineStoneMining.roll(new MineStoneMining.Context(290, 121, 0, 0, 0, false, false, false,
                 false, false, false, 0, 0, false), new FixedRandom(1, 1));
-        h.assertTrue(base.drops().size() == 1 && base.drops().getFirst().getCount() == 1
-                && base.drops().getFirst().is(ModItems.IRON_ORE.get()) && base.miningExperience() == 12,
+        h.assertTrue(base.drops().size() == 1 && com.stardew.craft.port.PortJava.getFirst(base.drops()).getCount() == 1
+                && com.stardew.craft.port.PortJava.getFirst(base.drops()).is(ModItems.IRON_ORE.get()) && base.miningExperience() == 12,
                 "Iron node fell through to floor-based ore selection");
         var jade = new MineStoneMining.Context(6, 41, 100, 100, 0, true, true, true, true, true, false, 0, 99, true);
         var extra = MineStoneMining.roll(jade, new FixedRandom(true));
         var noExtra = MineStoneMining.roll(jade, new FixedRandom(false));
-        h.assertTrue(extra.drops().size() == 1 && extra.drops().getFirst().is(ModItems.JADE.get())
-                && extra.drops().getFirst().getCount() == 4 && extra.miningExperience() == 20,
+        h.assertTrue(extra.drops().size() == 1 && com.stardew.craft.port.PortJava.getFirst(extra.drops()).is(ModItems.JADE.get())
+                && com.stardew.craft.port.PortJava.getFirst(extra.drops()).getCount() == 4 && extra.miningExperience() == 20,
                 "Jade mastery/geologist quantities or replacement XP differ");
-        h.assertTrue(noExtra.drops().getFirst().getCount() == 2 && noExtra.miningExperience() == 40,
+        h.assertTrue(com.stardew.craft.port.PortJava.getFirst(noExtra.drops()).getCount() == 2 && noExtra.miningExperience() == 40,
                 "Jade wrongly used added ores or reduced XP without geologist extra");
         h.succeed();
     }
@@ -470,15 +470,15 @@ public final class MineStoneGameTests {
             var item = source == 14 ? ModItems.AQUAMARINE.get() : ModItems.DIAMOND.get();
             var base = new MineStoneMining.Context(source, 61, 0, 0, 0, false, false, false, false, false, false, 0, 0, false);
             var plain = MineStoneMining.roll(base, new FixedRandom());
-            h.assertTrue(plain.drops().size() == 1 && plain.drops().getFirst().is(item)
-                    && plain.drops().getFirst().getCount() == 1 && plain.miningExperience() == (source == 14 ? 40 : 150),
+            h.assertTrue(plain.drops().size() == 1 && com.stardew.craft.port.PortJava.getFirst(plain.drops()).is(item)
+                    && com.stardew.craft.port.PortJava.getFirst(plain.drops()).getCount() == 1 && plain.miningExperience() == (source == 14 ? 40 : 150),
                     "Gem produced wrong item/XP or fell through to ordinary rock drops");
             var boosted = new MineStoneMining.Context(source, 61, 100, 100, 1, true, true, true, true, true, false, 0, 99, true);
             var extra = MineStoneMining.roll(boosted, new FixedRandom(true));
             var noExtra = MineStoneMining.roll(boosted, new FixedRandom(false));
-            h.assertTrue(extra.drops().getFirst().getCount() == 4 && extra.drops().getFirst().is(item)
+            h.assertTrue(com.stardew.craft.port.PortJava.getFirst(extra.drops()).getCount() == 4 && com.stardew.craft.port.PortJava.getFirst(extra.drops()).is(item)
                     && extra.miningExperience() == (source == 14 ? 20 : 100), "Gem mastery/geologist replacement XP mismatch");
-            h.assertTrue(noExtra.drops().getFirst().getCount() == 2
+            h.assertTrue(com.stardew.craft.port.PortJava.getFirst(noExtra.drops()).getCount() == 2
                     && noExtra.miningExperience() == (source == 14 ? 40 : 150), "Gem incorrectly used ore bonuses");
         }
         h.succeed();
@@ -501,10 +501,10 @@ public final class MineStoneGameTests {
                 h.assertTrue(geode.drops().stream().anyMatch(s -> s.is(ModItems.MAGMA_GEODE.get()))
                         && geode.miningExperience() == 0, "Lava ordinary rock used wrong geode/XP branch");
                 var gold = MineStoneMining.roll(context, new FixedRandom(0.5, 0.5, 0.039, 0.5, 0.74));
-                h.assertTrue(gold.drops().size() == 1 && gold.drops().getFirst().is(ModItems.GOLD_ORE.get())
+                h.assertTrue(gold.drops().size() == 1 && com.stardew.craft.port.PortJava.getFirst(gold.drops()).is(ModItems.GOLD_ORE.get())
                         && gold.miningExperience() == 5, "Lava floor-based gold branch missing");
                 var edge = MineStoneMining.roll(context, new FixedRandom(0.5, 0.5, 0.04001));
-                h.assertTrue(edge.drops().size() == 1 && edge.drops().getFirst().is(ModItems.STONE.get())
+                h.assertTrue(edge.drops().size() == 1 && com.stardew.craft.port.PortJava.getFirst(edge.drops()).is(ModItems.STONE.get())
                         && edge.miningExperience() == 0, "Lava ordinary stone used a rich ore modifier");
             }
         }
@@ -533,8 +533,8 @@ public final class MineStoneGameTests {
         for (int floor : new int[]{1, 91, 115, 121}) {
             var base = MineStoneMining.roll(new MineStoneMining.Context(764, floor, 0, 0, 0, false, false, false,
                     false, false, false, 0, 0, false), new FixedRandom(1, 1));
-            h.assertTrue(base.drops().size() == 1 && base.drops().getFirst().is(ModItems.GOLD_ORE.get())
-                    && base.drops().getFirst().getCount() == 1 && base.miningExperience() == 18,
+            h.assertTrue(base.drops().size() == 1 && com.stardew.craft.port.PortJava.getFirst(base.drops()).is(ModItems.GOLD_ORE.get())
+                    && com.stardew.craft.port.PortJava.getFirst(base.drops()).getCount() == 1 && base.miningExperience() == 18,
                     "Gold fell through to ordinary floor-based drops or wrong XP");
         }
         int[] rolls = {0};
@@ -544,8 +544,8 @@ public final class MineStoneGameTests {
         };
         var boosted = MineStoneMining.roll(new MineStoneMining.Context(764, 121, 100, 100, 0,
                 true, true, true, true, true, false, 0, 2, true), high);
-        h.assertTrue(boosted.drops().size() == 1 && boosted.drops().getFirst().is(ModItems.GOLD_ORE.get())
-                && boosted.drops().getFirst().getCount() == 7 && boosted.miningExperience() == 18 && rolls[0] == 2,
+        h.assertTrue(boosted.drops().size() == 1 && com.stardew.craft.port.PortJava.getFirst(boosted.drops()).is(ModItems.GOLD_ORE.get())
+                && com.stardew.craft.port.PortJava.getFirst(boosted.drops()).getCount() == 7 && boosted.miningExperience() == 18 && rolls[0] == 2,
                 "Gold maximum amount, added ores, level bonuses or exclusive drop branch differs");
         h.succeed();
     }
@@ -563,11 +563,11 @@ public final class MineStoneGameTests {
             var extra = MineStoneMining.roll(context, new FixedRandom(true));
             var plain = MineStoneMining.roll(context, new FixedRandom(false));
             var item = source == 4 ? ModItems.RUBY.get() : ModItems.EMERALD.get();
-            h.assertTrue(extra.drops().size() == 1 && extra.drops().getFirst().is(item)
-                    && extra.drops().getFirst().getCount() == 4 && extra.miningExperience() == 50,
+            h.assertTrue(extra.drops().size() == 1 && com.stardew.craft.port.PortJava.getFirst(extra.drops()).is(item)
+                    && com.stardew.craft.port.PortJava.getFirst(extra.drops()).getCount() == 4 && extra.miningExperience() == 50,
                     "Ruby/emerald extra XP or mastery/geologist quantities differ");
-            h.assertTrue(plain.drops().size() == 1 && plain.drops().getFirst().is(item)
-                    && plain.drops().getFirst().getCount() == 2 && plain.miningExperience() == 80,
+            h.assertTrue(plain.drops().size() == 1 && com.stardew.craft.port.PortJava.getFirst(plain.drops()).is(item)
+                    && com.stardew.craft.port.PortJava.getFirst(plain.drops()).getCount() == 2 && plain.miningExperience() == 80,
                     "Ruby/emerald used ore bonuses or wrong base XP");
         }
         h.succeed();
@@ -626,8 +626,8 @@ public final class MineStoneGameTests {
                 && MineStoneMining.breakTicks(16, 6, 4, false) == 24, "Swift/Powerful iridium advantages drifted");
         var base = new MineStoneMining.Context(765, 121, 0, 0, 0, false, false, false, false, false, true, 999, 0, false);
         var miss = MineStoneMining.roll(base, new FixedRandom(1, 1, 0.035));
-        h.assertTrue(miss.drops().size() == 1 && miss.drops().getFirst().is(ModItems.IRIDIUM_ORE.get())
-                && miss.drops().getFirst().getCount() == 1 && miss.miningExperience() == 50,
+        h.assertTrue(miss.drops().size() == 1 && com.stardew.craft.port.PortJava.getFirst(miss.drops()).is(ModItems.IRIDIUM_ORE.get())
+                && com.stardew.craft.port.PortJava.getFirst(miss.drops()).getCount() == 1 && miss.miningExperience() == 50,
                 "Iridium base drop or 3.5 percent boundary differs");
         int[] rolls = {0};
         var high = new LegacyRandomSource(0) {
@@ -655,8 +655,8 @@ public final class MineStoneGameTests {
                     && MineStoneMining.energyCost(8, tier + 1, 0) == hits[tier] * 2, "Calico duration/energy drift");
             var base = MineStoneMining.roll(new MineStoneMining.Context(source, 1, 0, 0, 0, false, false,
                     false, false, false, false, 0, 99, false), new FixedRandom(1, 1));
-            h.assertTrue(base.drops().size() == 1 && base.drops().getFirst().is(ModItems.CALICO_EGG.get())
-                    && base.drops().getFirst().getCount() == 1 && base.miningExperience() == 50,
+            h.assertTrue(base.drops().size() == 1 && com.stardew.craft.port.PortJava.getFirst(base.drops()).is(ModItems.CALICO_EGG.get())
+                    && com.stardew.craft.port.PortJava.getFirst(base.drops()).getCount() == 1 && base.miningExperience() == 50,
                     "Calico node requires active festival or incorrectly applies added ores");
             int[] rolls = {0};
             var high = new LegacyRandomSource(0) {
@@ -665,8 +665,8 @@ public final class MineStoneGameTests {
             };
             var boosted = MineStoneMining.roll(new MineStoneMining.Context(source, 999, 100, 100, 0,
                     true, true, true, true, true, true, 999, 99, true), high);
-            h.assertTrue(boosted.drops().size() == 1 && boosted.drops().getFirst().is(ModItems.CALICO_EGG.get())
-                    && boosted.drops().getFirst().getCount() == 5 && boosted.miningExperience() == 50 && rolls[0] == 2,
+            h.assertTrue(boosted.drops().size() == 1 && com.stardew.craft.port.PortJava.getFirst(boosted.drops()).is(ModItems.CALICO_EGG.get())
+                    && com.stardew.craft.port.PortJava.getFirst(boosted.drops()).getCount() == 5 && boosted.miningExperience() == 50 && rolls[0] == 2,
                     "Calico max reward has ore/mastery/geologist/shard/festival extras");
         }
         h.assertTrue(!MineStoneMining.stateForSource("CalicoEggStone_0", 8).orElseThrow().getBlock()
@@ -705,8 +705,8 @@ public final class MineStoneGameTests {
                 };
                 var result = MineStoneMining.roll(new MineStoneMining.Context(source, boosted ? 999 : 1,
                         100, 100, 1, boosted, boosted, boosted, boosted, boosted, boosted, 999, 99, boosted), noRandom);
-                h.assertTrue(result.drops().size() == 1 && result.drops().getFirst().getCount() == 1
-                        && result.drops().getFirst().is(source == 75 ? ModItems.GEODE.get() : source == 76 ? ModItems.FROZEN_GEODE.get() : ModItems.MAGMA_GEODE.get())
+                h.assertTrue(result.drops().size() == 1 && com.stardew.craft.port.PortJava.getFirst(result.drops()).getCount() == 1
+                        && com.stardew.craft.port.PortJava.getFirst(result.drops()).is(source == 75 ? ModItems.GEODE.get() : source == 76 ? ModItems.FROZEN_GEODE.get() : ModItems.MAGMA_GEODE.get())
                         && result.miningExperience() == (source == 75 ? 8 : source == 76 ? 16 : 32), "Guaranteed geode drop or XP differs");
             }
         }
@@ -736,7 +736,7 @@ public final class MineStoneGameTests {
         var c = new MineStoneMining.Context(95, 131, 10, 0, 0, false, false, false, false, false, false, 0, 0, false);
         var miss = MineStoneMining.roll(c, new FixedRandom(1, 0.05));
         var hit = MineStoneMining.roll(c, new FixedRandom(1, 0.049999));
-        h.assertTrue(miss.drops().getFirst().getCount() == 1 && hit.drops().getFirst().getCount() == 2,
+        h.assertTrue(com.stardew.craft.port.PortJava.getFirst(miss.drops()).getCount() == 1 && com.stardew.craft.port.PortJava.getFirst(hit.drops()).getCount() == 2,
                 "Radioactive mining chance must be mining/200, strictly below boundary");
         var high = new LegacyRandomSource(0) {
             @Override public int nextInt(int bound) { return bound - 1; }
@@ -744,8 +744,8 @@ public final class MineStoneGameTests {
         };
         var rich = MineStoneMining.roll(new MineStoneMining.Context(95, 999, 100, 100, 1, true, true, true,
                 true, true, true, 999, 2, true), high);
-        h.assertTrue(rich.drops().size() == 1 && rich.drops().getFirst().is(ModItems.RADIOACTIVE_ORE.get())
-                && rich.drops().getFirst().getCount() == 6 && rich.miningExperience() == 18,
+        h.assertTrue(rich.drops().size() == 1 && com.stardew.craft.port.PortJava.getFirst(rich.drops()).is(ModItems.RADIOACTIVE_ORE.get())
+                && com.stardew.craft.port.PortJava.getFirst(rich.drops()).getCount() == 6 && rich.miningExperience() == 18,
                 "Radioactive base1..2/added ores/exclusive reward differs");
         h.succeed();
     }
@@ -754,28 +754,28 @@ public final class MineStoneGameTests {
     public static void surfaceStoneDateAndOutdoorBranches(GameTestHelper h) {
         var c = new MineStoneMining.Context(343, 1, 0, 0, 0, false, false, false, false, false, false, 0, 0, false);
         var dayOne = MineStoneMining.rollSurfaceStone(c, 1, true, true, new FixedRandom(0, 0, 0), new FixedRandom(1, 1));
-        h.assertTrue(dayOne.drops().size() == 1 && dayOne.drops().getFirst().is(ModItems.STONE.get())
+        h.assertTrue(dayOne.drops().size() == 1 && com.stardew.craft.port.PortJava.getFirst(dayOne.drops()).is(ModItems.STONE.get())
                 && dayOne.miningExperience() == 1, "First day has dated extras or lacks outdoor stone/XP");
         for (int day : new int[]{2, 60, 61, 120, 121}) {
             var early = MineStoneMining.rollSurfaceStone(c, day, false, true,
                     day > 60 ? new FixedRandom(0, 0, 1, 1) : new FixedRandom(0, 1, 1), new FixedRandom());
-            h.assertTrue(early.drops().size() == 1 && early.drops().getFirst().is(
+            h.assertTrue(early.drops().size() == 1 && com.stardew.craft.port.PortJava.getFirst(early.drops()).is(
                     day > 60 ? ModItems.FROZEN_GEODE.get() : ModItems.GEODE.get()) && early.miningExperience() == 0,
                     "Days60 boundary or indoor fixed stone differs");
         }
         var magma = MineStoneMining.rollSurfaceStone(c, 121, false, true,
                 new FixedRandom(0, 0.2, 0.19999, 1, 1), new FixedRandom());
-        h.assertTrue(magma.drops().size() == 1 && magma.drops().getFirst().is(ModItems.MAGMA_GEODE.get()),
+        h.assertTrue(magma.drops().size() == 1 && com.stardew.craft.port.PortJava.getFirst(magma.drops()).is(ModItems.MAGMA_GEODE.get()),
                 "Magma must follow failed frozen roll after day120");
         var neutral = MineStoneMining.rollSurfaceStone(c, 121, false, true,
                 new FixedRandom(0, 0.2, 0.2, 1, 1), new FixedRandom());
-        h.assertTrue(neutral.drops().getFirst().is(ModItems.GEODE.get()), "Geode strict20 percent edge differs");
+        h.assertTrue(com.stardew.craft.port.PortJava.getFirst(neutral.drops()).is(ModItems.GEODE.get()), "Geode strict20 percent edge differs");
         var boosted = new MineStoneMining.Context(343, 1, 0, 0, 0, true, true, true, true, true, false, 0, 99, true);
         var all = MineStoneMining.rollSurfaceStone(boosted, 2, true, true, new FixedRandom(0.04, 0.09, 0), new FixedRandom(0, 0));
         long coal = all.drops().stream().filter(s -> s.is(ModItems.COAL.get())).mapToInt(ItemStack::getCount).sum();
         long stone = all.drops().stream().filter(s -> s.is(ModItems.STONE.get())).mapToInt(ItemStack::getCount).sum();
         h.assertTrue(all.drops().size() == 6 && coal == 3 && stone == 2
-                && all.drops().getFirst().is(ModItems.GEODE.get()) && all.drops().getFirst().getCount() == 1
+                && com.stardew.craft.port.PortJava.getFirst(all.drops()).is(ModItems.GEODE.get()) && com.stardew.craft.port.PortJava.getFirst(all.drops()).getCount() == 1
                 && all.miningExperience() == 6, "Separate dated/profession/outdoor rolls or source XP differ");
         var noPlayer = MineStoneMining.rollSurfaceStone(c, 1, true, false, new FixedRandom(0, 0, 0), new FixedRandom(0));
         h.assertTrue(noPlayer.drops().size() == 2 && noPlayer.miningExperience() == 0, "Unowned outdoor destruction changed rewards");
@@ -829,8 +829,8 @@ public final class MineStoneGameTests {
             @Override public int nextInt(int bound) { return bound - 1; }
             @Override public double nextDouble() { throw new AssertionError("Mussel base reward consumed unrelated bonus roll"); }
         });
-        h.assertTrue(minimum.drops().size() == 1 && minimum.drops().getFirst().is(ModItems.MUSSEL.get())
-                && minimum.drops().getFirst().getCount() == 2 && maximum.drops().getFirst().getCount() == 4
+        h.assertTrue(minimum.drops().size() == 1 && com.stardew.craft.port.PortJava.getFirst(minimum.drops()).is(ModItems.MUSSEL.get())
+                && com.stardew.craft.port.PortJava.getFirst(minimum.drops()).getCount() == 2 && com.stardew.craft.port.PortJava.getFirst(maximum.drops()).getCount() == 4
                 && maximum.miningExperience() == 5, "Mussel amount/XP changed with unrelated bonuses");
         for (int boneSource : new int[]{816,817}) {
         var bone = new MineStoneMining.Context(boneSource, 1, 10, 10, 0, false, false, false, false, false, false, 0, 2, false);
@@ -838,20 +838,20 @@ public final class MineStoneGameTests {
         var ribs = MineStoneMining.roll(bone, new FixedRandom(0.1, 0.014999, 0.1, 0.1));
         var artifact = MineStoneMining.roll(bone, new FixedRandom(0.1, 0.015, 0.099999, 1, 1));
         var none = MineStoneMining.roll(bone, new FixedRandom(0.1, 0.015, 0.1, 1, 1));
-        h.assertTrue(leg.drops().size() == 2 && leg.drops().getFirst().is(ModItems.FOSSILIZED_LEG.get())
-                && leg.drops().getLast().is(ModItems.BONE_FRAGMENT.get()) && leg.drops().getLast().getCount() == 5,
+        h.assertTrue(leg.drops().size() == 2 && com.stardew.craft.port.PortJava.getFirst(leg.drops()).is(ModItems.FOSSILIZED_LEG.get())
+                && com.stardew.craft.port.PortJava.getLast(leg.drops()).is(ModItems.BONE_FRAGMENT.get()) && com.stardew.craft.port.PortJava.getLast(leg.drops()).getCount() == 5,
                 "Leg branch must stop later fossil rolls and still award fragments");
-        h.assertTrue(ribs.drops().size() == 2 && ribs.drops().getFirst().is(ModItems.FOSSILIZED_RIBS.get())
-                && ribs.drops().getLast().getCount() == 3, "Conditional ribs branch or skill boundary changed");
-        h.assertTrue(artifact.drops().getFirst().is(ModItems.PREHISTORIC_SCAPULA.get())
+        h.assertTrue(ribs.drops().size() == 2 && com.stardew.craft.port.PortJava.getFirst(ribs.drops()).is(ModItems.FOSSILIZED_RIBS.get())
+                && com.stardew.craft.port.PortJava.getLast(ribs.drops()).getCount() == 3, "Conditional ribs branch or skill boundary changed");
+        h.assertTrue(com.stardew.craft.port.PortJava.getFirst(artifact.drops()).is(ModItems.PREHISTORIC_SCAPULA.get())
                 && none.drops().size() == 1 && none.miningExperience() == 6, "Third rare branch must be conditional");
         var lastArtifact = MineStoneMining.roll(bone, new LegacyRandomSource(0) {
             private int index;
             @Override public double nextDouble() { return index++ == 2 ? 0 : 1; }
             @Override public int nextInt(int bound) { return bound - 1; }
         });
-        h.assertTrue(lastArtifact.drops().getFirst().is(ModItems.TRILOBITE.get())
-                && lastArtifact.drops().getLast().getCount() == 4, "Artifact579..589 range or fragment1..2 endpoint missing");
+        h.assertTrue(com.stardew.craft.port.PortJava.getFirst(lastArtifact.drops()).is(ModItems.TRILOBITE.get())
+                && com.stardew.craft.port.PortJava.getLast(lastArtifact.drops()).getCount() == 4, "Artifact579..589 range or fragment1..2 endpoint missing");
         }
         int[][] expectedTicks = {{12,11,10,9,8},{96,44,30,18,16},{48,22,20,9,8},{48,22,20,9,8},{48,22,20,9,8},{96,44,30,18,16}};
         int[][] expectedEnergy = {{2,2,2,2,2},{16,8,6,4,4},{8,4,4,2,2},{8,4,4,2,2},{8,4,4,2,2},{16,8,6,4,4}};
@@ -954,8 +954,8 @@ public final class MineStoneGameTests {
     public static void clayAndOmniGeodeSourceBranches(GameTestHelper h) {
         var plain = new MineStoneMining.Context(818, 1, 0, 0, 0, false, false, false, false, false, false, 0, 0, false);
         var base = MineStoneMining.roll(plain, new FixedRandom(0,0));
-        h.assertTrue(base.drops().size()==1 && base.drops().getFirst().is(ModItems.CLAY.get())
-                && base.drops().getFirst().getCount()==1 && base.miningExperience()==6,"Base clay reward changed");
+        h.assertTrue(base.drops().size()==1 && com.stardew.craft.port.PortJava.getFirst(base.drops()).is(ModItems.CLAY.get())
+                && com.stardew.craft.port.PortJava.getFirst(base.drops()).getCount()==1 && base.miningExperience()==6,"Base clay reward changed");
         var boosted = new MineStoneMining.Context(818, 150, 10, 10, 0.1, true, true, true, true, true, true, 99, 2, true);
         var edge = MineStoneMining.roll(boosted, new FixedRandom(0.1,0.1));
         var hit = MineStoneMining.roll(boosted, new FixedRandom(0.099999,0.099999));
@@ -963,13 +963,13 @@ public final class MineStoneGameTests {
             @Override public int nextInt(int bound) { return bound-1; }
             @Override public double nextDouble() { return 0; }
         });
-        h.assertTrue(edge.drops().getFirst().getCount()==3 && hit.drops().getFirst().getCount()==5
-                && maximum.drops().getFirst().getCount()==6 && maximum.miningExperience()==6,
+        h.assertTrue(com.stardew.craft.port.PortJava.getFirst(edge.drops()).getCount()==3 && com.stardew.craft.port.PortJava.getFirst(hit.drops()).getCount()==5
+                && com.stardew.craft.port.PortJava.getFirst(maximum.drops()).getCount()==6 && maximum.miningExperience()==6,
                 "Clay1..2 plus addedOres and strict luck/mining100 bonuses changed");
         var omni = new MineStoneMining.Context(819, 150, 10, 10, 0.1, true, true, true, true, true, true, 99, 99, true);
         var guaranteed = MineStoneMining.roll(omni, new FixedRandom());
-        h.assertTrue(guaranteed.drops().size()==1 && guaranteed.drops().getFirst().is(ModItems.OMNI_GEODE.get())
-                && guaranteed.drops().getFirst().getCount()==1 && guaranteed.miningExperience()==64,
+        h.assertTrue(guaranteed.drops().size()==1 && com.stardew.craft.port.PortJava.getFirst(guaranteed.drops()).is(ModItems.OMNI_GEODE.get())
+                && com.stardew.craft.port.PortJava.getFirst(guaranteed.drops()).getCount()==1 && guaranteed.miningExperience()==64,
                 "Omni node must give exactly one749 and64XP, without ordinary geode multiplier");
         h.succeed();
     }
@@ -984,9 +984,9 @@ public final class MineStoneGameTests {
                 @Override public int nextInt(int bound) { return bound-1; }
                 @Override public double nextDouble() { return 0; }
             });
-            h.assertTrue(edge.drops().size()==1 && edge.drops().getFirst().is(ModItems.CINDER_SHARD.get())
-                    && edge.drops().getFirst().getCount()==3 && hits.drops().getFirst().getCount()==5
-                    && max.drops().getFirst().getCount()==6 && max.miningExperience()==12,
+            h.assertTrue(edge.drops().size()==1 && com.stardew.craft.port.PortJava.getFirst(edge.drops()).is(ModItems.CINDER_SHARD.get())
+                    && com.stardew.craft.port.PortJava.getFirst(edge.drops()).getCount()==3 && com.stardew.craft.port.PortJava.getFirst(hits.drops()).getCount()==5
+                    && com.stardew.craft.port.PortJava.getFirst(max.drops()).getCount()==6 && max.miningExperience()==12,
                     "Cinder count1..2/addedOres/luck100/mining200 or XP12 changed for"+source);
             var state=MineStoneMining.stateForSource(Integer.toString(source),12).orElseThrow();
             h.assertTrue(state.getBlock().defaultBlockState().getValue(MineStoneBlock.STONE_HEALTH)==12,"Cinder HP must12");
@@ -995,10 +995,10 @@ public final class MineStoneGameTests {
         var volcanic=new MineStoneMining.Context(volcanicSource,10,10,10,0.1,true,true,true,true,true,true,99,2,true);
         var coal=MineStoneMining.roll(volcanic,new FixedRandom(0.09999,0.09999,0.07999));
         var dry=MineStoneMining.roll(volcanic,new FixedRandom(0.1,0.1,0.08));
-        h.assertTrue(coal.drops().size()==2 && coal.drops().getFirst().is(ModItems.STONE.get())
-                && coal.drops().getFirst().getCount()==5 && coal.drops().getLast().is(ModItems.COAL.get())
-                && coal.drops().getLast().getCount()==3 && coal.miningExperience()==4
-                && dry.drops().size()==1 && dry.drops().getFirst().getCount()==3 && dry.miningExperience()==3,
+        h.assertTrue(coal.drops().size()==2 && com.stardew.craft.port.PortJava.getFirst(coal.drops()).is(ModItems.STONE.get())
+                && com.stardew.craft.port.PortJava.getFirst(coal.drops()).getCount()==5 && com.stardew.craft.port.PortJava.getLast(coal.drops()).is(ModItems.COAL.get())
+                && com.stardew.craft.port.PortJava.getLast(coal.drops()).getCount()==3 && coal.miningExperience()==4
+                && dry.drops().size()==1 && com.stardew.craft.port.PortJava.getFirst(dry.drops()).getCount()==3 && dry.miningExperience()==3,
                 "Volcanic ordinary stone is source rich-stone branch, not MineShaft generic ore branch");
         }
         int[] cinderTicks={144,66,40,27,24};int[] cinderEnergy={24,12,8,6,6};
@@ -1040,9 +1040,9 @@ public final class MineStoneGameTests {
             @Override public int nextInt(int bound) { return bound-1; }
             @Override public double nextDouble() { return 0; }
         });
-        h.assertTrue(edge.drops().size()==1 && edge.drops().getFirst().is(ModItems.COPPER_ORE.get())
-                && edge.drops().getFirst().getCount()==3 && hit.drops().getFirst().getCount()==5
-                && max.drops().getFirst().getCount()==7 && max.miningExperience()==5,
+        h.assertTrue(edge.drops().size()==1 && com.stardew.craft.port.PortJava.getFirst(edge.drops()).is(ModItems.COPPER_ORE.get())
+                && com.stardew.craft.port.PortJava.getFirst(edge.drops()).getCount()==3 && com.stardew.craft.port.PortJava.getFirst(hit.drops()).getCount()==5
+                && com.stardew.craft.port.PortJava.getFirst(max.drops()).getCount()==7 && max.miningExperience()==5,
                 "849 copper1..3/addedOres/skills or XP5 differs from original branch");
         var dangerous=MineStoneMining.stateForSource("846",5).orElseThrow();
         var volcano=MineStoneMining.stateForSource("846",6).orElseThrow();
@@ -1076,9 +1076,9 @@ public final class MineStoneGameTests {
                 @Override public int nextInt(int bound) { return bound-1; }
                 @Override public double nextDouble() { return 0; }
             });
-            h.assertTrue(boundary.drops().size()==1 && boundary.drops().getFirst().is(items[i])
-                    && boundary.drops().getFirst().getCount()==3 && boundary.miningExperience()==xp[i]
-                    && bonuses.drops().getFirst().getCount()==5 && maximum.drops().getFirst().getCount()==7,
+            h.assertTrue(boundary.drops().size()==1 && com.stardew.craft.port.PortJava.getFirst(boundary.drops()).is(items[i])
+                    && com.stardew.craft.port.PortJava.getFirst(boundary.drops()).getCount()==3 && boundary.miningExperience()==xp[i]
+                    && com.stardew.craft.port.PortJava.getFirst(bonuses.drops()).getCount()==5 && com.stardew.craft.port.PortJava.getFirst(maximum.drops()).getCount()==7,
                     "Volcano ore1..3, skill thresholds, profession isolation or experience mismatch: "+sources[i]);
             var block=(MineStoneBlock)MineStoneMining.stateForSource(sources[i],health[i]).orElseThrow().getBlock();
             var placeContext=new net.minecraft.world.item.context.BlockPlaceContext(level,placer,InteractionHand.MAIN_HAND,
@@ -1109,9 +1109,9 @@ public final class MineStoneGameTests {
                 @Override public int nextInt(int bound) { return bound-1; }
                 @Override public double nextDouble() { return 0; }
             });
-            h.assertTrue(boundary.drops().size()==1 && boundary.drops().getFirst().is(ModItems.COAL.get())
-                    && boundary.drops().getFirst().getCount()==3 && boundary.miningExperience()==10
-                    && bonuses.drops().getFirst().getCount()==5 && maximum.drops().getFirst().getCount()==7,
+            h.assertTrue(boundary.drops().size()==1 && com.stardew.craft.port.PortJava.getFirst(boundary.drops()).is(ModItems.COAL.get())
+                    && com.stardew.craft.port.PortJava.getFirst(boundary.drops()).getCount()==3 && boundary.miningExperience()==10
+                    && com.stardew.craft.port.PortJava.getFirst(bonuses.drops()).getCount()==5 && com.stardew.craft.port.PortJava.getFirst(maximum.drops()).getCount()==7,
                     "Coal source quantity/skill threshold/XP10 or Prospector isolation mismatch: "+sources[i]);
             var block=(MineStoneBlock)MineStoneMining.stateForSource(sources[i],health[i]).orElseThrow().getBlock();
             for(var soil:java.util.List.of(ModBlocks.MINE_EARTH_SOIL.get(),ModBlocks.MINE_LAVA_SOIL.get(),ModBlocks.MINE_DESERT_SOIL.get())) {

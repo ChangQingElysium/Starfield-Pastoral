@@ -153,7 +153,7 @@ final class TemplateMesh {
 
     private static void emitRoofLayer(List<MeshQuad> out, List<PlanPoint> polygon, Scalar top, Scalar bottom, boolean fill) {
         if (polygon.size() < 3 || polygon.stream().noneMatch(p -> top.value(p)-bottom.value(p) > 1E-6F)) return;
-        PlanPoint a = polygon.getFirst();
+        PlanPoint a = com.stardew.craft.port.PortJava.getFirst(polygon);
         for (int i = 1; i < polygon.size()-1; i++) {
             PlanPoint b = polygon.get(i), c = polygon.get(i+1);
             if (Math.abs((b.x-a.x)*(c.z-a.z)-(b.z-a.z)*(c.x-a.x)) < 1E-8F) continue;
@@ -179,7 +179,7 @@ final class TemplateMesh {
 
     private static void tileRoofSurface(List<MeshQuad> out, MeshQuad quad, int phaseX, int phaseZ) {
         if (quad.studyPoints() != null) { out.add(quad); return; }
-        Vector3f a = quad.vertices().getFirst();
+        Vector3f a = com.stardew.craft.port.PortJava.getFirst(quad.vertices());
         Vector3f normal = new Vector3f(quad.vertices().get(1)).sub(a)
                 .cross(new Vector3f(quad.vertices().get(2)).sub(a));
         if (Math.abs(normal.y) < 1E-6F) { out.add(quad); return; }
@@ -198,12 +198,12 @@ final class TemplateMesh {
             List<PlanPoint> part = clip(polygon, p -> band - distance.value(p));
             part = clip(part, p -> distance.value(p) - band - 1F);
             if (part.size() < 3) continue;
-            PlanPoint first = part.getFirst();
+            PlanPoint first = com.stardew.craft.port.PortJava.getFirst(part);
             for (int i = 1; i < part.size()-1; i++) {
                 PlanPoint second = part.get(i), third = part.get(i+1);
                 List<PlanPoint> points = List.of(first, second, third, third);
                 List<Vector3f> vertices = points.stream().map(p -> v(p.x, a.y + gx*(p.x-a.x) + gz*(p.z-a.z), p.z)).toList();
-                if (new Vector3f(vertices.get(1)).sub(vertices.getFirst()).cross(new Vector3f(vertices.get(2)).sub(vertices.getFirst())).lengthSquared() < 1E-10F) continue;
+                if (new Vector3f(vertices.get(1)).sub(com.stardew.craft.port.PortJava.getFirst(vertices)).cross(new Vector3f(vertices.get(2)).sub(com.stardew.craft.port.PortJava.getFirst(vertices))).lengthSquared() < 1E-10F) continue;
                 out.add(new MeshQuad(quad.direction(), quad.textureDirection(), vertices,
                         points.stream().map(p -> uv(alongX ? p.z : p.x, Math.max(0,Math.min(1,distance.value(p)-band)))).toList(), quad.part(), null));
             }
@@ -278,7 +278,7 @@ final class TemplateMesh {
                 pieces=next;
             }
             for(var piece:pieces) for(int i=1;i<piece.size()-1;i++) {
-                Vector3f a=piece.getFirst(),b=piece.get(i),c=piece.get(i+1);
+                Vector3f a=com.stardew.craft.port.PortJava.getFirst(piece),b=piece.get(i),c=piece.get(i+1);
                 if(new Vector3f(b).sub(a).cross(new Vector3f(c).sub(a)).lengthSquared()>1E-10)
                     out.add(quad(front,a,b,c,c));
             }
@@ -288,7 +288,7 @@ final class TemplateMesh {
 
     private static List<Vector3f> clipFacade(List<Vector3f> p, java.util.function.ToDoubleFunction<Vector3f> f) {
         if(p.isEmpty())return p;
-        List<Vector3f> out=new ArrayList<>();Vector3f a=p.getLast();double fa=f.applyAsDouble(a);
+        List<Vector3f> out=new ArrayList<>();Vector3f a=com.stardew.craft.port.PortJava.getLast(p);double fa=f.applyAsDouble(a);
         for(Vector3f b:p) {
             double fb=f.applyAsDouble(b);
             if((fa<=1E-6)!=(fb<=1E-6))out.add(new Vector3f(a).lerp(b,(float)Math.max(0,Math.min(1,fa/(fa-fb)))));
@@ -301,8 +301,8 @@ final class TemplateMesh {
     int roofPhaseMask() {
         int mask = 0;
         for (MeshQuad q : quads) {
-            Vector3f normal = new Vector3f(q.vertices().get(1)).sub(q.vertices().getFirst())
-                    .cross(new Vector3f(q.vertices().get(2)).sub(q.vertices().getFirst()));
+            Vector3f normal = new Vector3f(q.vertices().get(1)).sub(com.stardew.craft.port.PortJava.getFirst(q.vertices()))
+                    .cross(new Vector3f(q.vertices().get(2)).sub(com.stardew.craft.port.PortJava.getFirst(q.vertices())));
             if (Math.abs(normal.y) < 1E-6F) continue;
             if (Math.abs(normal.x) > 1E-6F) mask |= 15;
             if (Math.abs(normal.z) > 1E-6F) mask |= 240;
@@ -520,7 +520,7 @@ final class TemplateMesh {
         float maximum = 0F;
         for (PlanPoint p : polygon) maximum = Math.max(maximum, height.value(p));
         if (maximum < 1E-6F) return;
-        PlanPoint origin = polygon.getFirst();
+        PlanPoint origin = com.stardew.craft.port.PortJava.getFirst(polygon);
         for (int i = 1; i < polygon.size() - 1; i++) {
             PlanPoint b = polygon.get(i), c = polygon.get(i + 1);
             Vector3f a3 = v(origin.x, height.value(origin), origin.z);
@@ -558,7 +558,7 @@ final class TemplateMesh {
             return polygon;
         }
         ArrayList<PlanPoint> result = new ArrayList<>();
-        PlanPoint previous = polygon.getLast();
+        PlanPoint previous = com.stardew.craft.port.PortJava.getLast(polygon);
         float previousValue = boundary.value(previous);
         boolean previousInside = previousValue <= 1.0E-5F;
         for (PlanPoint current : polygon) {
@@ -621,7 +621,7 @@ final class TemplateMesh {
         for (float[] p : profile) front.add(v(p[0], descending ? 1-p[1] : p[1], 0));
         if (!descending) java.util.Collections.reverse(front);
         for (int i = 1; i < front.size()-1; i++) {
-            Vector3f a = front.getFirst(), b = front.get(i), c = front.get(i+1);
+            Vector3f a = com.stardew.craft.port.PortJava.getFirst(front), b = front.get(i), c = front.get(i+1);
             out.add(quad(Direction.NORTH, a,b,c,c));
             out.add(quad(Direction.SOUTH, new Vector3f(c).add(0,0,3F/16F),
                     new Vector3f(b).add(0,0,3F/16F), new Vector3f(a).add(0,0,3F/16F),

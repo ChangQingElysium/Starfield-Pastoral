@@ -109,7 +109,7 @@ final class MineralFieldClient {
             var out = buffers.getBuffer(type);
             for (Field f : fields.values()) {
                 if (f.center.distanceToSqr(camera) > 48*48) continue;
-                float age = (float)(now-f.start), fade = Math.min(1, age/3)*Math.clamp((f.duration-age)/6, 0, 1);
+                float age = (float)(now-f.start), fade = Math.min(1, age/3)*com.stardew.craft.port.PortJava.clamp((f.duration-age)/6, 0, 1);
                 float pulse = f.pulse == Long.MIN_VALUE ? -1 : (float)(now-f.pulse);
                 for (int i = 0; i < f.segments.size(); i++) {
                     Segment segment = f.segments.get(i);

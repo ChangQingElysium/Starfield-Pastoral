@@ -9,7 +9,7 @@ public record LivestockCare(int age, int ownedDays, int friendship, int happines
     public LivestockCare(int age, int ownedDays, int friendship, int happiness, int fullness, int daysSinceLay, int quality, boolean petted) { this(age, ownedDays, friendship, happiness, fullness, daysSinceLay, quality, petted, false); }
     public static LivestockCare purchased() { return new LivestockCare(0, 0, 0, 255, 255, 0, 0, false); }
     public boolean baby() { return age < 3; }
-    public LivestockCare mood(int value) { return new LivestockCare(age, ownedDays, friendship, Math.clamp(value, 0, 255), fullness, daysSinceLay, quality, petted, autoPetted); }
+    public LivestockCare mood(int value) { return new LivestockCare(age, ownedDays, friendship, com.stardew.craft.port.PortJava.clamp(value, 0, 255), fullness, daysSinceLay, quality, petted, autoPetted); }
     public LivestockCare graze(boolean blue, boolean happy) {
         return new LivestockCare(age, ownedDays, happy ? Math.min(1000, friendship + (blue ? 16 : 8)) : friendship,
                 happy ? 255 : happiness, 255, daysSinceLay, quality, petted, autoPetted);

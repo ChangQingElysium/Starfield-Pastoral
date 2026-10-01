@@ -151,7 +151,7 @@ public final class LavaKatanaVisuals {
             return;
         }
         if (!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) return;
-        if (IMPACTS.size() >= MAX_IMPACTS) IMPACTS.removeFirst();
+        if (IMPACTS.size() >= MAX_IMPACTS) com.stardew.craft.port.PortJava.removeFirst(IMPACTS);
         IMPACTS.add(new Impact(point, mc.level.getGameTime(),
                 payload.brand() ? 1.25f : payload.critical() ? 1.0f : 0.68f));
         RandomSource random = RandomSource.create(payload.gameTick() * 31 + payload.targetId());

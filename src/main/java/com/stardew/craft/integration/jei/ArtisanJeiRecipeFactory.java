@@ -217,7 +217,7 @@ public final class ArtisanJeiRecipeFactory {
             List<ItemStack> flavored = new ArrayList<>();
             List<ItemStack> sources = keepsPreserveQuality(definition.preserveType())
                     ? inputStacks
-                    : List.of(inputStacks.getFirst());
+                    : List.of(com.stardew.craft.port.PortJava.getFirst(inputStacks));
             for (ItemStack source : sources) {
                 ItemStack output = itemStack(definition.outputId(), count);
                 if (!output.isEmpty()) {

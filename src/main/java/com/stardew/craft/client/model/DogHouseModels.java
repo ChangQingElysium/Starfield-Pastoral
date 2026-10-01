@@ -53,7 +53,7 @@ public final class DogHouseModels {
             var model = Objects.requireNonNull(event.getModels().get(id(SEASONS[s], "full")));
             materials[s][1] = model.getParticleIcon();
             materials[s][2] = Objects.requireNonNull(event.getModels().get(id(SEASONS[s], "cell_0"))).getParticleIcon();
-            materials[s][0] = model.getQuads(null, null, RandomSource.create(0)).getFirst().getSprite();
+            materials[s][0] = com.stardew.craft.port.PortJava.getFirst(model.getQuads(null, null, RandomSource.create(0))).getSprite();
         }
         for (BlockState state : ModBlocks.DOG_HOUSE.get().getStateDefinition().getPossibleStates()) {
             var key = BlockModelShaper.stateToModelLocation(state);

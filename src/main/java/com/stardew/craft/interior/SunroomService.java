@@ -248,7 +248,7 @@ public final class SunroomService {
 
         private static CentralTeaBushData load(CompoundTag tag, HolderLookup.Provider provider) {
             CentralTeaBushData data = new CentralTeaBushData();
-            data.axeHits = Math.clamp(tag.getInt("AxeHits"), 0, AXE_HITS_TO_TAKE);
+            data.axeHits = com.stardew.craft.port.PortJava.clamp(tag.getInt("AxeHits"), 0, AXE_HITS_TO_TAKE);
             data.removed = tag.getBoolean("Removed");
             return data;
         }

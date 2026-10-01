@@ -57,7 +57,7 @@ public final class PetInteractionGameTests {
                 hint(h, member, entity, StardewInteractionHintType.GRAB);
                 PetService.interact(owner, entity);
                 menu(h, ownerOffers, "manage", pet.id);
-                h.assertTrue(ownerOffers.getLast().getList("Pets", 10).stream().map(t -> (CompoundTag) t)
+                h.assertTrue(com.stardew.craft.port.PortJava.getLast(ownerOffers).getList("Pets", 10).stream().map(t -> (CompoundTag) t)
                         .anyMatch(row -> row.getUUID("Id").equals(pet.id) && row.getBoolean("Petted")), "Menu lost today's petting state");
                 PetService.interact(member, entity);
                 h.assertTrue(memberOffers.isEmpty(), "Another player's first petting opened a menu");
@@ -98,8 +98,8 @@ public final class PetInteractionGameTests {
         h.assertTrue(hint.type() == type && !hint.done(), "Wrong crosshair action for " + entity.variant() + ": " + hint);
     }
     private static void menu(GameTestHelper h, List<CompoundTag> offers, String kind, UUID pet) {
-        h.assertTrue(offers.size() == 1 && offers.getLast().getString("Kind").equals(kind)
-                && offers.getLast().getUUID("Selected").equals(pet), "Right-click did not open the targeted pet's " + kind + " menu");
+        h.assertTrue(offers.size() == 1 && com.stardew.craft.port.PortJava.getLast(offers).getString("Kind").equals(kind)
+                && com.stardew.craft.port.PortJava.getLast(offers).getUUID("Selected").equals(pet), "Right-click did not open the targeted pet's " + kind + " menu");
     }
     private static ServerPlayer player(GameTestHelper h, String name, List<CompoundTag> offers) {
         var server = h.getLevel().getServer();

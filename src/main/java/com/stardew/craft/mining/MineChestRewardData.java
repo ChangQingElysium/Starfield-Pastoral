@@ -72,7 +72,7 @@ public final class MineChestRewardData {
                     .resultOrPartial(message -> StardewCraft.LOGGER.error(
                             "[Mine chest] Definition {} failed: {}", entry.getKey(), message))
                     .orElse(List.of());
-            if (!stacks.isEmpty()) return Optional.of(stacks.getFirst().copy());
+            if (!stacks.isEmpty()) return Optional.of(com.stardew.craft.port.PortJava.getFirst(stacks).copy());
         }
         return Optional.empty();
     }

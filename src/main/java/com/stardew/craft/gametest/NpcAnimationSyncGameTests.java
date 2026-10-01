@@ -14,10 +14,6 @@ import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
-import software.bernie.geckolib.core.animation.AnimatableManager;
-import software.bernie.geckolib.core.animation.AnimationState;
-import software.bernie.geckolib.core.object.PlayState;
-import software.bernie.geckolib.core.animation.RawAnimation;
 
 import java.util.List;
 import java.util.Map;
@@ -124,17 +120,7 @@ public final class NpcAnimationSyncGameTests {
     }
 
     private static void assertAnimation(GameTestHelper helper, StardewNpcEntity observer, String expected) {
-        var selected = new RawAnimation[1];
-        var state = new AnimationState<StardewNpcEntity>(observer, 0, 0, 0, false) {
-            @Override
-            public PlayState setAndContinue(RawAnimation animation) {
-                selected[0] = animation;
-                return PlayState.CONTINUE;
-            }
-        };
-        var controller = new AnimatableManager<StardewNpcEntity>(observer).getAnimationControllers().get("main");
-        controller.getStateHandler().handle(state.withController(controller));
-        helper.assertTrue(RawAnimation.begin().thenLoop(expected).equals(selected[0]),
-                "Remote NPC controller selected the wrong animation; expected " + expected);
+        helper.assertTrue(com.stardew.craft.model.ModelAnimation.loop(expected).equals(observer.modelAnimation(false, 0)),
+                "Remote NPC selected the wrong animation; expected " + expected);
     }
 }

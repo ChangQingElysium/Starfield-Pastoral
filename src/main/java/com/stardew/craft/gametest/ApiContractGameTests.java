@@ -681,7 +681,7 @@ public final class ApiContractGameTests {
                         && requirementReport.blocking().size() == 1,
                 "condition report did not preserve authoritative blocker");
         PortGameTests.assertValueEqual(helper, 
-                requirementReport.requirements().getFirst()
+                com.stardew.craft.port.PortJava.getFirst(requirementReport.requirements())
                         .description().getString(),
                 "GameTest blocker",
                 "requirement provider did not compose display metadata");
@@ -743,7 +743,7 @@ public final class ApiContractGameTests {
                 StardewProgressPhase.ACTIVE,
                 "partially filled bundle did not project ACTIVE");
         PortGameTests.assertValueEqual(helper, 
-                activeBundle.metrics().getFirst().target(),
+                com.stardew.craft.port.PortJava.getFirst(activeBundle.metrics()).target(),
                 progressBundle.requiredCount(),
                 "bundle required count was not projected");
         communityCenter.markBundleAllSlotsComplete(
@@ -2565,8 +2565,8 @@ public final class ApiContractGameTests {
                 "addon automation harvest did not commit"
         );
         helper.assertTrue(automatedOutput.size() == 1
-                        && automatedOutput.getFirst().is(Items.DIAMOND)
-                        && automatedOutput.getFirst().getCount() == 2,
+                        && com.stardew.craft.port.PortJava.getFirst(automatedOutput).is(Items.DIAMOND)
+                        && com.stardew.craft.port.PortJava.getFirst(automatedOutput).getCount() == 2,
                 "addon automation harvest did not route copied outputs");
         PortGameTests.assertValueEqual(helper, 
                 StardewCropRuntime.growOneDay(
@@ -2620,7 +2620,7 @@ public final class ApiContractGameTests {
         liveSlots[0] = false;
         data.setRewardAvailable(playerId, definition.bundleId(), false);
 
-        helper.assertTrue(progress.slots().getFirst(),
+        helper.assertTrue(com.stardew.craft.port.PortJava.getFirst(progress.slots()),
                 "progress snapshot leaked the mutable slot array");
         helper.assertTrue(progress.rewardAvailable(),
                 "progress snapshot changed with live reward state");
@@ -2927,11 +2927,11 @@ public final class ApiContractGameTests {
         PortGameTests.assertValueEqual(helper, progressEvents.size(), 1,
                 "festival phase did not publish one unified progress event");
         PortGameTests.assertValueEqual(helper, 
-                progressEvents.getFirst().type(),
+                com.stardew.craft.port.PortJava.getFirst(progressEvents).type(),
                 StardewProgressEventType.MADE_AVAILABLE,
                 "festival OPEN phase did not project MADE_AVAILABLE");
         helper.assertTrue(
-                progressEvents.getFirst().actor().isEmpty(),
+                com.stardew.craft.port.PortJava.getFirst(progressEvents).actor().isEmpty(),
                 "world festival phase incorrectly attributed a player actor");
         helper.succeed();
     }
@@ -3023,10 +3023,10 @@ public final class ApiContractGameTests {
         var shops = StardewFestivalShops.list(festivalId);
         PortGameTests.assertValueEqual(helper, shops.size(), 1,
                 "egg festival shop was absent from the public directory");
-        PortGameTests.assertValueEqual(helper, shops.getFirst().shopId(), shopId,
+        PortGameTests.assertValueEqual(helper, com.stardew.craft.port.PortJava.getFirst(shops).shopId(), shopId,
                 "legacy festival shop did not resolve to its canonical ID");
         PortGameTests.assertValueEqual(helper, 
-                shops.getFirst().runtimeShopId(),
+                com.stardew.craft.port.PortJava.getFirst(shops).runtimeShopId(),
                 "Festival_EggFestival_Pierre",
                 "festival shop lost its purchase-compatible runtime ID");
 
@@ -3433,11 +3433,11 @@ public final class ApiContractGameTests {
                 ArtifactDropService.rollDrops(helper.getLevel(), target, null);
         PortGameTests.assertValueEqual(helper, drops.size(), 1,
                 "addon artifact-spot provider returned the wrong number of drops");
-        helper.assertTrue(drops.getFirst().is(Items.DIAMOND),
+        helper.assertTrue(com.stardew.craft.port.PortJava.getFirst(drops).is(Items.DIAMOND),
                 "addon artifact-spot provider returned the wrong item");
-        PortGameTests.assertValueEqual(helper, drops.getFirst().getCount(), 2,
+        PortGameTests.assertValueEqual(helper, com.stardew.craft.port.PortJava.getFirst(drops).getCount(), 2,
                 "addon artifact-spot stack count changed");
-        helper.assertTrue(drops.getFirst() != source,
+        helper.assertTrue(com.stardew.craft.port.PortJava.getFirst(drops) != source,
                 "artifact-spot provider leaked its source stack");
         var providerNode = StardewContents.find(
                 new StardewContentKey(

@@ -73,8 +73,8 @@ public final class AsphaltRoadModels {
             String name = SEASONS[season];
             roads[season] = Objects.requireNonNull(event.getModels().get(model("block/asphalt_road/" + name)));
             markings[season] = Objects.requireNonNull(event.getModels().get(model("block/asphalt_road/" + name + "_markings")));
-            BakedQuad road = roads[season].getQuads(null, Direction.UP, RandomSource.create(0)).getFirst();
-            BakedQuad paint = markings[season].getQuads(null, null, RandomSource.create(0)).getFirst();
+            BakedQuad road = com.stardew.craft.port.PortJava.getFirst(roads[season].getQuads(null, Direction.UP, RandomSource.create(0)));
+            BakedQuad paint = com.stardew.craft.port.PortJava.getFirst(markings[season].getQuads(null, null, RandomSource.create(0)));
             for (int row = 0; row < 47; row++) {
                 for (int v = 0; v < 3; v++) top[season][v][row] = tile(road, v, row, 48);
                 for (int c = 0; c < 8; c++) line[season][c][row] = tile(paint, c, row, 128);

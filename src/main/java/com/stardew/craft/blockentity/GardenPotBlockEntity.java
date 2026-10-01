@@ -115,7 +115,7 @@ public final class GardenPotBlockEntity extends BlockEntity
         if (outputs.isEmpty()) {
             return ItemStack.EMPTY;
         }
-        ItemStack result = outputs.removeFirst();
+        ItemStack result = com.stardew.craft.port.PortJava.removeFirst(outputs);
         syncToClient();
         return result;
     }
@@ -281,7 +281,7 @@ public final class GardenPotBlockEntity extends BlockEntity
 
     @Override
     public ItemStack getAutomationOutput() {
-        return outputs.isEmpty() ? getAutomationHarvestPreview() : outputs.getFirst();
+        return outputs.isEmpty() ? getAutomationHarvestPreview() : com.stardew.craft.port.PortJava.getFirst(outputs);
     }
 
     @Override
@@ -391,11 +391,11 @@ public final class GardenPotBlockEntity extends BlockEntity
         if (outputs.isEmpty()) {
             return ItemStack.EMPTY;
         }
-        ItemStack extracted = AutomationStackHelper.extractUpTo(outputs.getFirst(), amount);
+        ItemStack extracted = AutomationStackHelper.extractUpTo(com.stardew.craft.port.PortJava.getFirst(outputs), amount);
         if (!simulate) {
-            outputs.getFirst().shrink(extracted.getCount());
-            if (outputs.getFirst().isEmpty()) {
-                outputs.removeFirst();
+            com.stardew.craft.port.PortJava.getFirst(outputs).shrink(extracted.getCount());
+            if (com.stardew.craft.port.PortJava.getFirst(outputs).isEmpty()) {
+                com.stardew.craft.port.PortJava.removeFirst(outputs);
             }
             syncToClient();
         }
@@ -448,7 +448,7 @@ public final class GardenPotBlockEntity extends BlockEntity
         }
         if (crop.getBlock() instanceof CropBlock) {
             List<ItemStack> drops = Block.getDrops(crop, serverLevel, cropPos(), null);
-            return drops.isEmpty() ? ItemStack.EMPTY : drops.getFirst();
+            return drops.isEmpty() ? ItemStack.EMPTY : com.stardew.craft.port.PortJava.getFirst(drops);
         }
         return ItemStack.EMPTY;
     }

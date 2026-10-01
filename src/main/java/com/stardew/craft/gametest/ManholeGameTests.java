@@ -67,7 +67,7 @@ public final class ManholeGameTests {
                     h.assertTrue(level.getBlockState(at).is(block) && neighbor.equals(block.findMainPos(level, at, level.getBlockState(at))), "Removal damaged touching cover");
                 }
                 var drops = level.getEntitiesOfClass(ItemEntity.class, new AABB(main).inflate(6));
-                h.assertTrue(drops.size() == 1 && drops.getFirst().getItem().is(block.asItem()) && drops.getFirst().getItem().getCount() == 1, "Manhole must drop exactly once");
+                h.assertTrue(drops.size() == 1 && com.stardew.craft.port.PortJava.getFirst(drops).getItem().is(block.asItem()) && com.stardew.craft.port.PortJava.getFirst(drops).getItem().getCount() == 1, "Manhole must drop exactly once");
                 MapDecorStaticBlock.runWithDropsSuppressed(() -> level.removeBlock(neighbor, false));
             }
         }

@@ -1,5 +1,7 @@
 package com.stardew.craft.entity.passive;
 
+import com.stardew.craft.model.AnimatedModel;
+import com.stardew.craft.model.ModelAnimation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -17,12 +19,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.core.animation.AnimatableManager;
-import software.bernie.geckolib.core.animation.AnimationController;
-import software.bernie.geckolib.core.animation.RawAnimation;
-import software.bernie.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -44,10 +40,7 @@ import javax.annotation.Nullable;
  * 不可伤害、无 AI Goal、无碰撞推动、无 vanilla travel()（手动管理速度）。
  */
 @SuppressWarnings("null")
-public class CrowEntity extends Mob implements GeoEntity {
-    private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("idle");
-    private static final RawAnimation EAT  = RawAnimation.begin().thenLoop("eat");
-    private static final RawAnimation FLY  = RawAnimation.begin().thenLoop("fly");
+public class CrowEntity extends Mob implements AnimatedModel {
 
     private static final EntityDataAccessor<Integer> DATA_STATE =
             SynchedEntityData.defineId(CrowEntity.class, EntityDataSerializers.INT);
@@ -70,8 +63,6 @@ public class CrowEntity extends Mob implements GeoEntity {
     private static final double HOP_VY   = 0.32;  // 跳跃初速度
     private static final double GRAVITY  = 0.04;  // 自由下落
     private static final double AIR_FRIC = 0.7;   // 空中水平摩擦
-
-    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
     private int    lifetimeTicks    = DEFAULT_LIFETIME_TICKS;
     private int    stateTimer       = 0;
@@ -294,21 +285,11 @@ public class CrowEntity extends Mob implements GeoEntity {
     /* =================== 渲染 =================== */
 
     @Override
-    public void registerControllers(@Nonnull AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main", 4, state -> {
-            int s = getCrowState();
-            if (s == STATE_FLYING_AWAY || !isGroundedSync()) {
-                return state.setAndContinue(FLY);
-            }
-            if (s == STATE_PECKING) {
-                return state.setAndContinue(EAT);
-            }
-            return state.setAndContinue(IDLE);
-        }));
+    public ModelAnimation modelAnimation(boolean moving, float partialTick) {
+        return ModelAnimation.loop(getCrowState() == STATE_FLYING_AWAY || !isGroundedSync() ? "fly" : getCrowState() == STATE_PECKING ? "eat" : "idle");
     }
 
-    @Override
-    public AnimatableInstanceCache getAnimatableInstanceCache() { return cache; }
+    @Override public int modelTransitionTicks() { return 4; }
 
     @Override
     public AABB getBoundingBoxForCulling() {

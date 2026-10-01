@@ -50,7 +50,7 @@ public final class ClientContentSyncService {
             StardewContentRegistry.validateAndLog();
         }
         FestivalAvailabilitySyncPayload festivalSnapshot = FestivalAvailabilitySyncPayload.current();
-        // PORT(1.20.1): NeoForge's getRelevantPlayers(): the joining player, or everyone on a reload.
+        // PORT(1.20.1): MinecraftForge's getRelevantPlayers(): the joining player, or everyone on a reload.
         List<ServerPlayer> recipients = event.getPlayer() != null
                 ? List.of(event.getPlayer())
                 : List.copyOf(event.getPlayerList().getPlayers());

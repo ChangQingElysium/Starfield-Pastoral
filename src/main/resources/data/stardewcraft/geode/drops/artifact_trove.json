@@ -1,0 +1,290 @@
+{
+  "priority": -100,
+  "inputs": [
+    "stardewcraft:artifact_trove"
+  ],
+  "crusher_allowed": false,
+  "animation": "artifact_trove",
+  "entries": [
+    {
+      "weight": 1,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:chipped_amphora",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 1,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:arrowhead",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 1,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:ancient_doll",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 1,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:elvish_jewelry",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 1,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:chewing_stick",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 1,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:ornamental_fan",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 1,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:rare_disc",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 1,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:ancient_sword",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 1,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:rusty_spoon",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 1,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:rusty_spur",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 1,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:rusty_cog",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 1,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:chicken_statue",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 1,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:ancient_seed",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 1,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:prehistoric_tool",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 1,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:dried_starfish",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 1,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:anchor",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 1,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:glass_shards",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 1,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:bone_flute",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 1,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:prehistoric_handaxe",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 1,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:dwarvish_helm",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 1,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:dwarf_gadget",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 1,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:ancient_drum",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 1,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:golden_mask",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 1,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:golden_relic",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 1,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:treasure_chest",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 1,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:golden_pumpkin",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 1,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:pearl",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 1,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:book_artifact",
+          "count": 1
+        }
+      }
+    }
+  ]
+}

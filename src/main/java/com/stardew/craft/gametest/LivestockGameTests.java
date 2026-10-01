@@ -394,14 +394,14 @@ public final class LivestockGameTests {
             var residents=new ArrayList<>(List.of(cow));var eggs=new ArrayList<LivestockWorldData.Product>();
             eggs.add(new LivestockWorldData.Product(UUID.randomUUID(),id,home.id(),false,0,"duck_egg",2,null));
             var changed=LivestockCollectors.collect(level,home,residents,eggs);
-            h.assertTrue(box.isEmpty() && changed.size()==1 && eggs.isEmpty() && residents.getFirst().produce().isEmpty(),"Collector changed world before journal or failed to collect");
+            h.assertTrue(box.isEmpty() && changed.size()==1 && eggs.isEmpty() && com.stardew.craft.port.PortJava.getFirst(residents).produce().isEmpty(),"Collector changed world before journal or failed to collect");
             data.prepare(new LivestockWorldData.Batch(home.id(),residents,eggs,List.of(),List.of(),farm.getInstanceId(),0,8,changed));
             LivestockService.recover(server);LivestockService.recover(server);
             int milk=0,duck=0;for(int slot=0;slot<box.getContainerSize();slot++){var item=box.getItem(slot);if(item.is(ModItems.LARGE_MILK.get())){milk+=item.getCount();h.assertTrue(QualityHelper.getQuality(item)==3,"Collector iridium mapping failed");}if(item.is(ModItems.DUCK_EGG.get()))duck+=item.getCount();}
             h.assertTrue(milk==2 && duck==2,"Collector replay duplicated/lost products");
             for(int slot=0;slot<box.getContainerSize();slot++)box.setItem(slot,new ItemStack(net.minecraft.world.item.Items.STONE,64));
             residents=new ArrayList<>(List.of(cow));eggs=new ArrayList<>(List.of(new LivestockWorldData.Product(UUID.randomUUID(),id,home.id(),false,0)));
-            h.assertTrue(LivestockCollectors.collect(level,home,residents,eggs).isEmpty() && eggs.size()==1 && !residents.getFirst().produce().isEmpty(),"Full collector destroyed produce");
+            h.assertTrue(LivestockCollectors.collect(level,home,residents,eggs).isEmpty() && eggs.size()==1 && !com.stardew.craft.port.PortJava.getFirst(residents).produce().isEmpty(),"Full collector destroyed produce");
         } finally {farms.deleteFarm(owner);}
         h.succeed();
     }

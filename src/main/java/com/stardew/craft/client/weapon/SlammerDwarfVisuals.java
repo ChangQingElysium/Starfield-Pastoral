@@ -36,7 +36,7 @@ public final class SlammerDwarfVisuals {
         boolean dwarf=base.startsWith("dwarf_"),rush=base.equals("slammer_rampage");
         String key=p.caster()+":"+p.tick()+":"+p.skill()+":"+p.phase()+":"+p.target();if(SEEN.putIfAbsent(key,level.getGameTime())!=null)return;
         while(SEEN.size()>256)SEEN.remove(SEEN.keySet().iterator().next());
-        if(Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()){EFFECTS.add(new Effect(p,level.getGameTime()));while(EFFECTS.size()>96)EFFECTS.removeFirst();}
+        if(Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()){EFFECTS.add(new Effect(p,level.getGameTime()));while(EFFECTS.size()>96)com.stardew.craft.port.PortJava.removeFirst(EFFECTS);}
         if(p.target()<0)level.playLocalSound(p.center().x,p.center().y+.6,p.center().z,(rush||base.equals("dwarf_hammer_faultline"))?SoundEvents.STONE_HIT:SoundEvents.PLAYER_ATTACK_SWEEP,SoundSource.PLAYERS,.6f,rush?(p.phase()==3?.5f:.8f):dwarf?.75f+p.phase()*.12f:.6f,false);
         else if(!Long.valueOf(p.tick()).equals(SOUNDS.put(p.caster(),p.tick()))) {
             level.playLocalSound(p.center().x,p.center().y,p.center().z,dwarf?SoundEvents.ANVIL_HIT:SoundEvents.PLAYER_ATTACK_STRONG,SoundSource.PLAYERS,dwarf?.32f:.65f,rush&&p.phase()==3?.5f:dwarf?.85f:.7f,false);

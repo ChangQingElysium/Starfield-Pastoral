@@ -22,9 +22,9 @@ public final class RexBreathEntity extends Projectile {
  @Override protected void defineSynchedData(){this.entityData.define(DISTANCE,0F);}
  public void launch(MinePepperRexEntity owner,Vec3 origin,double angle){setOwner(owner);var c=owner.monsterState().context();owned=c.generation()!=null;floor=c.floor();generation=c.generation();setPos(origin);var target=owner.getTarget();
   double pitch=target==null?0:Math.atan2(target.getBoundingBox().getCenter().y-origin.y,Math.max(.001,target.position().subtract(origin).horizontalDistance()));
-  pitch=Math.clamp(pitch,-Math.PI/6,Math.PI/6);
+  pitch=com.stardew.craft.port.PortJava.clamp(pitch,-Math.PI/6,Math.PI/6);
   setDeltaMovement(Math.cos(angle)*Math.cos(pitch)*30/64.,Math.sin(pitch)*30/64.,-Math.sin(angle)*Math.cos(pitch)*30/64.);entityData.set(DISTANCE,0F);hurtMarked=true;}
- public float travelled(){return entityData.get(DISTANCE);}public float opacity(float partial){double dist=travelled()+partial*30;return (float)Math.clamp((256-dist)/128,0,1);}
+ public float travelled(){return entityData.get(DISTANCE);}public float opacity(float partial){double dist=travelled()+partial*30;return (float)com.stardew.craft.port.PortJava.clamp((256-dist)/128,0,1);}
  @Override public void tick(){
   super.tick();if(level().isClientSide)return;
   if(owned){var d=MineFloorDataManager.get((ServerLevel)level()).getFloorData(floor);if(d==null||!java.util.Objects.equals(generation,d.generationId())){discard();return;}}

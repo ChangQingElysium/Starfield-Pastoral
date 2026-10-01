@@ -45,7 +45,7 @@ public final class HeavyHammerVisuals {
     }
     public static float remainingRatio(int caster) {
         if (!empowered(caster)) return 0;
-        return Math.clamp((BUFFS.get(caster)-level.getGameTime())/(float)BURST_DURATION,0,1);
+        return com.stardew.craft.port.PortJava.clamp((BUFFS.get(caster)-level.getGameTime())/(float)BURST_DURATION,0,1);
     }
     public static void start(WeaponSkillAnimPayload p) {
         ensureLevel();if(level==null || Minecraft.getInstance().player==null
@@ -89,8 +89,8 @@ public final class HeavyHammerVisuals {
         boolean gold=p.skill().startsWith("infinity_");
         if(p.target()>=0) {
             if(Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) {
-                CONTACTS.add(new Contact(p.caster(),p.target(),level.getGameTime(),point,gold,p.phase()==HeavyHammerFxPayload.HIT_ECHO,Math.clamp(p.radius(),.3f,1.3f)));
-                while(CONTACTS.size()>128) CONTACTS.removeFirst();
+                CONTACTS.add(new Contact(p.caster(),p.target(),level.getGameTime(),point,gold,p.phase()==HeavyHammerFxPayload.HIT_ECHO,com.stardew.craft.port.PortJava.clamp(p.radius(),.3f,1.3f)));
+                while(CONTACTS.size()>128) com.stardew.craft.port.PortJava.removeFirst(CONTACTS);
             }
             if(!Long.valueOf(p.tick()).equals(SOUNDS.put(p.caster(),p.tick()))) {
                 level.playLocalSound(point.x,point.y,point.z,SoundEvents.PLAYER_ATTACK_CRIT,SoundSource.PLAYERS,.4f,gold?.8f:.65f,false);
@@ -120,7 +120,7 @@ public final class HeavyHammerVisuals {
     private static void addBurst(int caster,Vec3 center,HeavyHammerBurstGeometry.Shape shape,float radius,float yaw,long seed) {
         if(!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get())return;
         BURSTS.add(new Burst(caster,level.getGameTime(),center,shape,radius,yaw,seed));
-        while(BURSTS.size()>32)BURSTS.removeFirst();
+        while(BURSTS.size()>32)com.stardew.craft.port.PortJava.removeFirst(BURSTS);
     }
     private static void addWave(int caster,Vec3 center,float radius,boolean gold,boolean heavy,boolean inward,boolean sweep,float yaw) {
         if(!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get())return;
@@ -137,7 +137,7 @@ public final class HeavyHammerVisuals {
             }
             for(Vec3[] part:DwarfWeaponVisuals.continuousGroundPaths(points)) paths.add(new Band((inward?bands-1-band:band)*(sweep?4:2),part));
         }
-        WAVES.add(new Wave(caster,level.getGameTime(),center,gold,heavy,paths));while(WAVES.size()>32)WAVES.removeFirst();
+        WAVES.add(new Wave(caster,level.getGameTime(),center,gold,heavy,paths));while(WAVES.size()>32)com.stardew.craft.port.PortJava.removeFirst(WAVES);
     }
     @SubscribeEvent public static void tick(ClientTickEvent.Post e) {
         ensureLevel();if(level==null||Minecraft.getInstance().isPaused())return;long now=level.getGameTime();

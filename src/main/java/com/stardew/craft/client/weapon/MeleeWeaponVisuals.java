@@ -669,7 +669,7 @@ public final class MeleeWeaponVisuals {
             if (payload.casterId() == mc.player.getId()) freezeHit(payload, bone, strong);
         }
         if (!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) return;
-        if (IMPACTS.size() >= 48) IMPACTS.removeFirst();
+        if (IMPACTS.size() >= 48) com.stardew.craft.port.PortJava.removeFirst(IMPACTS);
         IMPACTS.add(new Impact(point, mc.level.getGameTime(), bone, strong, sword, material));
         Vec3 direction = mc.level.getEntity(payload.casterId()) instanceof LivingEntity caster
                 ? point.subtract(caster.getEyePosition()).normalize() : new Vec3(0, 0, 1);
@@ -874,7 +874,7 @@ public final class MeleeWeaponVisuals {
                 }
             }
         }
-        if (GROUND.size() >= 6) GROUND.removeFirst();
+        if (GROUND.size() >= 6) com.stardew.craft.port.PortJava.removeFirst(GROUND);
         GROUND.add(new GroundPulse(mc.level.getGameTime(), segments));
     }
 

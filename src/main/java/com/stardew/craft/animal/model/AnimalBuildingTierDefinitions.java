@@ -100,7 +100,7 @@ public final class AnimalBuildingTierDefinitions {
             List<AnimalBuildingTierDefinition> candidates =
                     entry.getValue();
             if (candidates.size() == 1) {
-                byKey.put(entry.getKey(), candidates.getFirst());
+                byKey.put(entry.getKey(), com.stardew.craft.port.PortJava.getFirst(candidates));
                 continue;
             }
             List<AnimalBuildingTierDefinition> replacements =
@@ -114,7 +114,7 @@ public final class AnimalBuildingTierDefinitions {
                                 + entry.getKey()
                                 + "; define exactly one replace=true entry");
             }
-            byKey.put(entry.getKey(), replacements.getFirst());
+            byKey.put(entry.getKey(), com.stardew.craft.port.PortJava.getFirst(replacements));
         }
         for (String required : List.of(
                 "coop:1", "coop:2", "coop:3",

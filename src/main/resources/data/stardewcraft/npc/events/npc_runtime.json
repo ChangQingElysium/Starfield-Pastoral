@@ -165,6 +165,11 @@
     "wizard": {
       "speed": 0.14069,
       "step_height": 1.0
+    },
+    "gil": {
+      "eye_height": 1.5,
+      "speed": 0.1,
+      "step_height": 1
     }
   }
 }

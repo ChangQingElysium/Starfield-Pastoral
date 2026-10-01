@@ -28,7 +28,7 @@ public final class StardewMobSpawnEvents {
     @SubscribeEvent
     public static void onSpawnPlacement(MobSpawnEvent.SpawnPlacementCheck event) {
         if (blocksSpawn(event.getLevel().getLevel().dimension(), event.getSpawnType())) {
-            event.setResult(net.minecraftforge.eventbus.api.Event.Result.DENY); // PORT(1.20.1): Forge DENY == NeoForge FAIL
+            event.setResult(net.minecraftforge.eventbus.api.Event.Result.DENY); // PORT(1.20.1): Forge DENY == MinecraftForge FAIL
         }
     }
 

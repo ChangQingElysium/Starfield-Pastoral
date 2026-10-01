@@ -1,6 +1,8 @@
 package com.stardew.craft.blockentity;
 
 import com.stardew.craft.port.PortItemStacks;
+import com.stardew.craft.model.AnimatedModel;
+import com.stardew.craft.model.ModelAnimation;
 import com.stardew.craft.block.utility.ShippingBinBlock;
 import com.stardew.craft.economy.sell.ProfessionSellPriceService;
 import com.stardew.craft.economy.sell.SellQuote;
@@ -36,41 +38,27 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import software.bernie.geckolib.animatable.GeoBlockEntity;
-import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.core.animation.AnimatableManager;
-import software.bernie.geckolib.core.animation.AnimationController;
-import software.bernie.geckolib.core.object.PlayState;
-import software.bernie.geckolib.core.animation.RawAnimation;
-import software.bernie.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
 
 @SuppressWarnings("null")
-public class ShippingBinBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity implements Container, MenuProvider, GeoBlockEntity {
+public class ShippingBinBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity implements Container, MenuProvider, AnimatedModel {
     private static final String TAG_ITEMS = "items";
     private static final String TAG_BUFFER_DAY = "bufferDay";
     private static final int SLOT_COUNT = 1;
-
-    private static final RawAnimation SHIP_ANIM = RawAnimation.begin().thenPlay("ship");
-    private static final RawAnimation OPEN_ANIM = RawAnimation.begin().thenPlayAndHold("open");
-    private static final RawAnimation CLOSE_ANIM = RawAnimation.begin().thenPlayAndHold("close");
 
     /** 所有已加载的出货箱实例，用于夜间结算时统一 flush buffer */
     private static final java.util.Set<ShippingBinBlockEntity> LOADED_BINS = java.util.Collections.newSetFromMap(new java.util.WeakHashMap<>());
 
     private final NonNullList<ItemStack> items = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
-    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
     public final com.stardew.craft.model.ShippingBinLidMotion lidMotion = new com.stardew.craft.model.ShippingBinLidMotion();
     private ItemStack shipmentItem = ItemStack.EMPTY;
     private long shipmentTick = Long.MIN_VALUE;
     private long shipmentSerial;
-    private long animatedShipmentSerial;
     private boolean footprintChecked;
     private boolean nearbyOpen;
-    private boolean lastAnimatedOpen;
     private int pendingCloseStepTicks;
     private int pendingShipSoundTicks;
     private int bufferAbsoluteDay = -1;
@@ -558,30 +546,11 @@ public class ShippingBinBlockEntity extends net.minecraft.world.level.block.enti
     }
 
     @Override
-    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main", 0, state -> {
-            BlockState blockState = getBlockState();
-            boolean openNow = blockState.hasProperty(ShippingBinBlock.OPEN) && blockState.getValue(ShippingBinBlock.OPEN);
-            if (openNow != lastAnimatedOpen) {
-                state.setAndContinue(openNow ? OPEN_ANIM : CLOSE_ANIM);
-                lastAnimatedOpen = openNow;
-            }
-            return PlayState.CONTINUE;
-        }));
-        controllers.add(new AnimationController<>(this, "shipment", 0, state -> {
-            if (shipmentAge(0) >= .5f) return PlayState.STOP;
-            if (animatedShipmentSerial != shipmentSerial) {
-                state.getController().forceAnimationReset();
-                animatedShipmentSerial = shipmentSerial;
-            }
-            return state.setAndContinue(SHIP_ANIM);
-        }));
+    public ModelAnimation modelAnimation(boolean moving, float partialTick) {
+        return shipmentAge(partialTick) < .5f ? ModelAnimation.at("ship", shipmentAge(partialTick)) : null;
     }
 
-    @Override
-    public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return cache;
-    }
+    @Override public int modelTransitionTicks() { return 0; }
 
     @SuppressWarnings("null")
     public AABB getRenderBoundingBox() {

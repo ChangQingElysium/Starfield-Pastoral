@@ -31,8 +31,8 @@ public final class DustSpiritMotion {
         if(ax==0&&ay==0){ax=playerFacing==3?-1:playerFacing==1?1:0;ay=playerFacing==0?1:playerFacing==2?-1:0;}
         double length=Math.hypot(ax,ay);ax/=length;ay/=length;
         ax*=50+r.nextInt(40)-20;ay*=50+r.nextInt(40)-20;
-        x=Math.clamp(x-ax/150+(r.nextDouble()<.01?(r.nextInt(100)-50)/10.:0),-5,5);
-        y=Math.clamp(y-ay/150+(r.nextDouble()<.01?(r.nextInt(100)-50)/10.:0),-5,5);
+        x=com.stardew.craft.port.PortJava.clamp(x-ax/150+(r.nextDouble()<.01?(r.nextInt(100)-50)/10.:0),-5,5);
+        y=com.stardew.craft.port.PortJava.clamp(y-ay/150+(r.nextDouble()<.01?(r.nextInt(100)-50)/10.:0),-5,5);
     }
     public void decay(boolean blocked){double divisor=blocked&&slipperiness>=8?slipperiness*4:slipperiness;
         x-=x/divisor;y-=y/divisor;if(Math.abs(x)<=.05)x=0;if(Math.abs(y)<=.05)y=0;

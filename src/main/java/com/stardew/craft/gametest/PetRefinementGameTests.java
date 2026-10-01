@@ -102,10 +102,10 @@ public final class PetRefinementGameTests {
             sounds.clear(); entity.tickCount=0; begin.invoke(feedback,"SitDownLick");
             for (int t=0;t<10;t++) { entity.tickCount=t; tick.invoke(feedback); }
             h.assertTrue(sounds.isEmpty(),"Lick sound occurred before tongue frame"); entity.tickCount=10; tick.invoke(feedback);
-            h.assertTrue(sounds.size()==1 && sounds.getFirst().sound().getPath().equals("cowboy_footstep") && !sounds.getFirst().voice(),"Cat lick effect was replaced by a voice");
+            h.assertTrue(sounds.size()==1 && com.stardew.craft.port.PortJava.getFirst(sounds).sound().getPath().equals("cowboy_footstep") && !com.stardew.craft.port.PortJava.getFirst(sounds).voice(),"Cat lick effect was replaced by a voice");
             sounds.clear(); entity.tickCount=0; begin.invoke(feedback,"Flop");
             for (int t=0;t<=40;t++) { entity.tickCount=t; tick.invoke(feedback); }
-            h.assertTrue(sounds.size()==1 && sounds.getFirst().sound().getPath().equals("thud_step"),"Held lying pose repeated its landing sound");
+            h.assertTrue(sounds.size()==1 && com.stardew.craft.port.PortJava.getFirst(sounds).sound().getPath().equals("thud_step"),"Held lying pose repeated its landing sound");
             for (var variant : PetVariant.values()) {
                 var walk = variant.species().feedback().states().get("Walk");
                 h.assertTrue(walk.loop() && walk.frames().size()==2 && walk.frames().stream().allMatch(f -> f.cue().rangeFromBorder()==1), "Ordinary walk lost original step phases/view margin");
@@ -255,7 +255,7 @@ public final class PetRefinementGameTests {
                 PetBowlBuildings.beginMove(player, source); PetBowlBuildings.beginMove(player, source);
                 var documents = player.getInventory().items.stream().filter(BuildingBlueprintItem::isMove).toList();
                 h.assertTrue(documents.size() == 1, "Move documents count="+documents.size()+" style="+style);
-                var record = BuildingBlueprintItem.moving(level, documents.getFirst());
+                var record = BuildingBlueprintItem.moving(level, com.stardew.craft.port.PortJava.getFirst(documents));
                 h.assertTrue(record != null && record.claim().maxExclusive().subtract(record.claim().min()).equals(new BlockPos(2, 1, 2)), "Bowl did not claim its 2x2 pad");
                 var target = source.east(6);
                 level.setBlock(target, Blocks.STONE.defaultBlockState(), 3);

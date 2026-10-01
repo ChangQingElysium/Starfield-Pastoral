@@ -6,9 +6,9 @@ import com.stardew.craft.blockentity.LuauFestivalDecorBlockEntity;
 import com.stardew.craft.client.hud.StardewTimeHud;
 import com.stardew.craft.time.StardewTimeManager;
 import net.minecraft.resources.ResourceLocation;
-import software.bernie.geckolib.model.GeoModel;
+import com.stardew.craft.client.model.nativebb.BlockbenchModel;
 
-public class LuauFestivalDecorGeoModel extends GeoModel<LuauFestivalDecorBlockEntity> {
+public class LuauFestivalDecorGeoModel extends BlockbenchModel<LuauFestivalDecorBlockEntity> {
     private static final ResourceLocation WIZARD_MODEL = new ResourceLocation(StardewCraft.MODID, "geo/block/decor/wizard_cauldron.geo.json");
     private static final ResourceLocation WIZARD_TEXTURE = new ResourceLocation(StardewCraft.MODID, "textures/block/decor/common/wizard_cauldron.png");
     private static final ResourceLocation WIZARD_ANIMATION = new ResourceLocation(StardewCraft.MODID, "animations/block/festival/wizard_cauldron.animation.json");

@@ -8,10 +8,9 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib.renderer.GeoEntityRenderer;
-import software.bernie.geckolib.core.object.Color;
+import com.stardew.craft.client.model.nativebb.BlockbenchEntityRenderer;
 
-public class MoonlightJellyRenderer extends GeoEntityRenderer<MoonlightJellyEntity> {
+public class MoonlightJellyRenderer extends BlockbenchEntityRenderer<MoonlightJellyEntity> {
     private static final int FULL_LIGHT = 0xF000F0;
 
     public MoonlightJellyRenderer(EntityRendererProvider.Context context) {
@@ -26,10 +25,8 @@ public class MoonlightJellyRenderer extends GeoEntityRenderer<MoonlightJellyEnti
     }
 
     @Override
-    public Color getRenderColor(MoonlightJellyEntity animatable, float partialTick, int packedLight) {
-        Color base = super.getRenderColor(animatable, partialTick, packedLight);
-        int alpha = Math.round(animatable.getAlpha() * 255.0F);
-        return Color.ofARGB(alpha, base.getRed(), base.getGreen(), base.getBlue());
+    public int getRenderColor(MoonlightJellyEntity animatable, float partialTick, int packedLight) {
+        return (com.stardew.craft.port.PortJava.clamp(Math.round(animatable.getAlpha() * 255), 0, 255) << 24) | 0xFFFFFF;
     }
 
     @Nullable

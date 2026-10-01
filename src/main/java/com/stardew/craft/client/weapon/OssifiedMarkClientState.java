@@ -36,7 +36,7 @@ public final class OssifiedMarkClientState {
 
     public static float fade(int id, double now) {
         Long end = MARKS.get(id);
-        return end == null ? 0 : (float)Math.clamp((end-now)/10, 0, 1);
+        return end == null ? 0 : (float)com.stardew.craft.port.PortJava.clamp((end-now)/10, 0, 1);
     }
     private static void ensureLevel(net.minecraft.client.multiplayer.ClientLevel level) {
         if (level != activeLevel) { activeLevel = level; MARKS.clear(); }

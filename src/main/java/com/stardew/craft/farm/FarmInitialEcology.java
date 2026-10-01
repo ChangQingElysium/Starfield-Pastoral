@@ -548,7 +548,7 @@ final class FarmInitialEcology {
                     clearInitialCover(level, place.offset(offset[0], offset[1], offset[2]));
                 }
             } else clearInitialCover(level, place);
-            int season = Math.clamp(StardewTimeManager.get().getCurrentSeason(), 0, 3);
+            int season = com.stardew.craft.port.PortJava.clamp(StardewTimeManager.get().getCurrentSeason(), 0, 3);
             boolean placed = switch (kind) {
                 case OAK -> PrefabTreeManager.tryPlaceRandomVariant(level, place, WildTrees.OAK);
                 case MAPLE -> PrefabTreeManager.tryPlaceRandomVariant(level, place, WildTrees.MAPLE);

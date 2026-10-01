@@ -99,7 +99,7 @@ public final class MineWallDecorationGameTests {
                 level.setBlock(donor, soil, 2);
                 var connections = MineGroundConnections.faceConnections(level, pos, wall, face);
                 helper.assertTrue(connections.size() == 1, "Missing wall-foot connection: " + theme.id() + " " + face);
-                var edge = connections.getFirst();
+                var edge = com.stardew.craft.port.PortJava.getFirst(connections);
                 helper.assertTrue(edge.folded() && edge.edge() == 2 && edge.face() == Direction.UP,
                         "Wall must sample the floor top around its lower edge");
                 helper.assertTrue(edge.state().equals(soil), "Wall-foot border lost soil variant");

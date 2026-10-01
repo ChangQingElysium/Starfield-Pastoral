@@ -61,7 +61,7 @@ public final class GalaxyWeaponVisuals {
         Vec3 bottom = p.to().add(0, 0.15, 0);
         Vec3 ceiling = mc.level.clip(new ClipContext(bottom, bottom.add(0, 3.8, 0),
                 ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mc.player)).getLocation();
-        if (BURSTS.size() >= 64) BURSTS.removeFirst();
+        if (BURSTS.size() >= 64) com.stardew.craft.port.PortJava.removeFirst(BURSTS);
         BURSTS.add(new Burst(p, mc.level.getGameTime(), ceiling));
         mc.level.playLocalSound(bottom.x, bottom.y, bottom.z,
                 p.leap() ? SoundEvents.ENDERMAN_TELEPORT : SoundEvents.AMETHYST_BLOCK_RESONATE,

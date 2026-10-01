@@ -36,7 +36,7 @@ public final class NativeGrubPlayback {
     }
     private void live(double clock,int phase,boolean moves,double age,double progress,double hitAge) {
         String clip=phase==3?"pupa":phase==2?"form":moves?"crawl":"idle";
-        double time=phase==3?age:phase==2?Math.clamp(progress,0,1)*.4:clock;
+        double time=phase==3?age:phase==2?com.stardew.craft.port.PortJava.clamp(progress,0,1)*.4:clock;
         NativeGrubMotion.sample(model,pose,clip,time);
         if(hitAge>=0&&hitAge<.26&&phase<2)NativeMonsterMotion.addRotationClip(model,pose,"animation.grub.hit",hitAge);
     }

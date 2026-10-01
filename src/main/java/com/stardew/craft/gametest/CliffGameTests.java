@@ -72,7 +72,7 @@ public final class CliffGameTests {
         helper.assertTrue(state.isCollisionShapeFullBlock(level,pos) && state.is(BlockTags.MINEABLE_WITH_PICKAXE)
                 && state.requiresCorrectToolForDrops(),"Wrong cliff collision/mining properties");
         var drops = Block.getDrops(state,level,pos,null,null,new ItemStack(Items.IRON_PICKAXE));
-        helper.assertTrue(drops.size() == 1 && drops.getFirst().is(block.asItem()),"Cliff requires silk touch or drops the wrong block");
+        helper.assertTrue(drops.size() == 1 && com.stardew.craft.port.PortJava.getFirst(drops).is(block.asItem()),"Cliff requires silk touch or drops the wrong block");
         helper.assertTrue(StardewItemCatalog.tabForItem(block.asItem()) == StardewCatalogTab.NATURE,"Cliff missing from nature catalog");
         helper.succeed();
     }
@@ -98,7 +98,7 @@ public final class CliffGameTests {
                 level.setBlock(pos,cliff,2); level.setBlock(neighbor,dirt,2);
                 var connections = TerrainFaceConnections.collect(level,pos,cliff,face);
                 helper.assertTrue(connections.size() == 1,"Missing/extra edge " + face + " " + edge + " folded=" + folded);
-                var source = connections.getFirst();
+                var source = com.stardew.craft.port.PortJava.getFirst(connections);
                 helper.assertTrue(source.edge() == edge && source.folded() == folded && !source.corner()
                         && source.face() == (folded ? tangent.getOpposite() : face),"Wrong donor face or orientation");
                 level.setBlock(pos.relative(face),Blocks.STONE.defaultBlockState(),2);
@@ -114,8 +114,8 @@ public final class CliffGameTests {
                         .relative(TerrainFaceConnections.tangent(face,(corner+1)%4));
                 level.setBlock(pos,cliff,2); level.setBlock(neighbor,dirt,2);
                 var connections = TerrainFaceConnections.collect(level,pos,cliff,face);
-                helper.assertTrue(connections.size() == 1 && connections.getFirst().corner()
-                        && connections.getFirst().edge() == corner,"Missing diagonal corner on " + face);
+                helper.assertTrue(connections.size() == 1 && com.stardew.craft.port.PortJava.getFirst(connections).corner()
+                        && com.stardew.craft.port.PortJava.getFirst(connections).edge() == corner,"Missing diagonal corner on " + face);
                 cases++;
             }
         }

@@ -46,7 +46,7 @@ public final class PointPlanClientState {
                 return plan;
             }
         }
-        return plans.isEmpty() ? new PointPlanWandItem.Plan(selectedPlanId, List.of()) : plans.getFirst();
+        return plans.isEmpty() ? new PointPlanWandItem.Plan(selectedPlanId, List.of()) : com.stardew.craft.port.PortJava.getFirst(plans);
     }
 
     public static List<String> npcIds() {

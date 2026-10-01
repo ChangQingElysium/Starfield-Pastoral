@@ -7,10 +7,10 @@ public final class NativeMetalHeadPlayback {
     public NativeMetalHeadPlayback(NativeNpcModel m){model=m;pose=new NativeNpcPose(m);capture=new NativeNpcPose(m);}
     public NativeNpcPose pose(){return pose;}
     public void sample(double clock,boolean moving,double hit,double death){
-        if(clock==previous)return;double dt=Double.isNaN(previous)?0:Math.clamp(clock-previous,0,.1);
+        if(clock==previous)return;double dt=Double.isNaN(previous)?0:com.stardew.craft.port.PortJava.clamp(clock-previous,0,.1);
         if(death>0){if(!dying)capture.copyFrom(pose);pose.reset();pose.apply("animation.metal_head.death",death);pose.blendFrom(capture,1-NativeGrubMotion.smooth(death/.09));}
         else{
-            weight+=Math.clamp((moving?1:0)-weight,-dt/.1,dt/.1);walkTime+=dt*weight;pose.reset();pose.apply("animation.metal_head.idle",clock);pose.blend("animation.metal_head.walk",walkTime,NativeGrubMotion.smooth(weight));
+            weight+=com.stardew.craft.port.PortJava.clamp((moving?1:0)-weight,-dt/.1,dt/.1);walkTime+=dt*weight;pose.reset();pose.apply("animation.metal_head.idle",clock);pose.blend("animation.metal_head.walk",walkTime,NativeGrubMotion.smooth(weight));
             if(hit>=0&&hit<.24)NativeMonsterMotion.addRotationClip(model,pose,"animation.metal_head.hit",hit);
         }
         float low=Float.POSITIVE_INFINITY;var point=new Vector3f();var matrices=pose.matrices();

@@ -124,6 +124,8 @@ CODE_RULES = [
     # 1.20.1 only has constructors.
     (re.compile(r"(?<![\w.])(" + RL + r")\.(?:fromNamespaceAndPath|withDefaultNamespace|parse)\s*\("), r"new \1("),
     (re.compile(r"(?<![\w.])(" + RL + r")::(?:parse|withDefaultNamespace)\b"), r"\1::new"),
+    # JDK 21-only Math.clamp -> exact re-implementation (same overloads and exceptions).
+    (re.compile(r"(?<![\w.])(?:java\.lang\.)?(?:Strict)?Math\.clamp\("), "com.stardew.craft.port.PortJava.clamp("),
     # NeoForge renamed Forge's default game bus to GAME.
     (re.compile(r"\bEventBusSubscriber\.Bus\.GAME\b"), "EventBusSubscriber.Bus.FORGE"),
     (re.compile(r"\bbus\s*=\s*Bus\.GAME\b"), "bus = Bus.FORGE"),

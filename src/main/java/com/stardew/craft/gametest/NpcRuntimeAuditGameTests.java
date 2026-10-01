@@ -54,7 +54,7 @@ public final class NpcRuntimeAuditGameTests {
             for(var step:steps) h.assertTrue(!field(step,"mode").toString().equals("WARP"),
                     "Building label routed an explicit outdoor stop back indoors");
             var target=NpcScheduleRuntimeService.resolveWorldTarget(h.getLevel(),state,null);
-            h.assertTrue(field(steps.getLast(),"target").equals(target.position()),"Outdoor stop lost its exact destination");
+            h.assertTrue(field(com.stardew.craft.port.PortJava.getLast(steps),"target").equals(target.position()),"Outdoor stop lost its exact destination");
         } finally {WorldAnchorRegistry.replaceLegacyNpcAnchors(original);}
         h.succeed();
     }
@@ -70,7 +70,7 @@ public final class NpcRuntimeAuditGameTests {
             var result=call(planner,"resolveRoute",new Class<?>[]{ServerLevel.class,String.class,NpcRuntimeState.class,BlockPos.class},
                     h.getLevel(),"abigail",state,BlockPos.containing(entry));
             var steps=(List<?>)field(result,"destinationSteps");
-            h.assertTrue(!field(steps.getLast(),"target").equals(entry),"Entrance position overrode the profile's actual stay target");
+            h.assertTrue(!field(com.stardew.craft.port.PortJava.getLast(steps),"target").equals(entry),"Entrance position overrode the profile's actual stay target");
         } finally {WorldAnchorRegistry.replaceLegacyNpcAnchors(original);}
         h.succeed();
     }
@@ -410,7 +410,7 @@ public final class NpcRuntimeAuditGameTests {
         var route=call(routeType,"ready",new Class<?>[]{String.class,List.class},"town",List.of(step));
         var plan=call(NpcCentralMovementService.class,"buildPlan",new Class<?>[]{ServerLevel.class,StardewNpcEntity.class,routeType,String.class,long.class},h.getLevel(),npc,route,"audit_exit",h.getLevel().getGameTime());
         var steps=(List<?>)field(plan,"steps");
-        h.assertTrue(steps.size()==3 && field(steps.getLast(),"target").equals(target),"Exit expansion deletes a real destination within two blocks of door");
+        h.assertTrue(steps.size()==3 && field(com.stardew.craft.port.PortJava.getLast(steps),"target").equals(target),"Exit expansion deletes a real destination within two blocks of door");
         } finally {WorldAnchorRegistry.replaceLegacyNpcAnchors(originalAnchors);}
         h.succeed();
     }

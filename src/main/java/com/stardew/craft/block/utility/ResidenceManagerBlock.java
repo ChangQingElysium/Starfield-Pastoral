@@ -40,7 +40,7 @@ public class ResidenceManagerBlock extends BuildingManagerModelBlock implements 
     @Override public java.util.List<ItemStack> getDrops(BlockState state,LootParams.Builder params){
         var stack=new ItemStack(this); var level=params.getLevel(); var origin=params.getOptionalParameter(LootContextParams.ORIGIN);
         if(origin!=null){var pos=BlockPos.containing(origin);var data=BuildingWorldData.peek(level.getServer());
-            if(data!=null)for(var record:data.all().reversed().stream().sorted(java.util.Comparator.comparing(r -> r.phase()==BuildingRecord.Phase.MISSING)).toList())if(record.mode()==BuildingRecord.Mode.SELF_BUILT && PrefabDefinitions.managerBlock(record.family())==this && record.dimension().equals(level.dimension().location()) && record.manager().equals(pos)){
+            if(data!=null)for(var record:com.stardew.craft.port.PortJava.reversed(data.all()).stream().sorted(java.util.Comparator.comparing(r -> r.phase()==BuildingRecord.Phase.MISSING)).toList())if(record.mode()==BuildingRecord.Mode.SELF_BUILT && PrefabDefinitions.managerBlock(record.family())==this && record.dimension().equals(level.dimension().location()) && record.manager().equals(pos)){
                 var tag=new net.minecraft.nbt.CompoundTag();tag.putUUID("ResidenceIdentity",record.id());
                 PortItemData.set(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,com.stardew.craft.port.net.minecraft.world.item.component.CustomData.of(tag));
                 PortItemData.set(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_NAME,record.title());break;

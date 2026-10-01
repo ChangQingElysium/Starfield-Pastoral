@@ -98,7 +98,7 @@ public final class BuildingLifecycleGameTests {
                 for (BlockPos pos : BlockPos.betweenClosed(h.absolutePos(new BlockPos(0, 0, 0)), h.absolutePos(new BlockPos(47, 0, 47)))) level.setBlock(pos, Blocks.STONE.defaultBlockState(), 3);
                 UUID permit = UUID.randomUUID(); data.recordPurchase(permit, farm.getInstanceId(), true, family); data.beginPrefab(record, permit, 10);
                 record = data.find(record.id()); BuildingPlacementService.scaffold(level, record); data.markScaffold(record.id());
-                var worker=level.getEntitiesOfClass(RobinConstructionEntity.class,BuildingPlacementService.aabb(record.claim())).getFirst();
+                var worker=com.stardew.craft.port.PortJava.getFirst(level.getEntitiesOfClass(RobinConstructionEntity.class,BuildingPlacementService.aabb(record.claim())));
                 h.assertTrue(worker.getY()==record.anchor().getY()+1 && worker.getLightProbePosition(1).y>record.anchor().getY()+2.5,"Worker or head light probe is buried in the floor");
                 for (int day = 11; day <= 13; day++) data.constructionDay(day, true);
                 BuildingPlacementService.finish(level, record); record = data.find(record.id());

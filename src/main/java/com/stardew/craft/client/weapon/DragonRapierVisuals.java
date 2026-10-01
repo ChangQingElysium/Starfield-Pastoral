@@ -37,7 +37,7 @@ public final class DragonRapierVisuals {
         boolean rapier=base.equals("rapier_riposte"),guard=p.skill().endsWith("_guard"),breath=base.equals("dragontooth_club_breath")&&p.phase()>0;
         String key=p.caster()+":"+p.tick()+":"+p.skill()+":"+p.phase()+":"+p.target();if(SEEN.putIfAbsent(key,level.getGameTime())!=null)return;
         while(SEEN.size()>256)SEEN.remove(SEEN.keySet().iterator().next());
-        if(Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()){EFFECTS.add(new Effect(p,level.getGameTime()));while(EFFECTS.size()>96)EFFECTS.removeFirst();}
+        if(Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()){EFFECTS.add(new Effect(p,level.getGameTime()));while(EFFECTS.size()>96)com.stardew.craft.port.PortJava.removeFirst(EFFECTS);}
         if(p.target()<0)level.playLocalSound(p.center().x,p.center().y+.6,p.center().z,guard?SoundEvents.SHIELD_BLOCK:breath?SoundEvents.FIRECHARGE_USE:SoundEvents.PLAYER_ATTACK_SWEEP,SoundSource.PLAYERS,breath?.22f:guard?.5f:.5f,rapier?1.2f:breath?.75f:.6f,false);
         else if(!Long.valueOf(p.tick()).equals(SOUNDS.put(p.caster(),p.tick()))) {
             level.playLocalSound(p.center().x,p.center().y,p.center().z,rapier?SoundEvents.TRIDENT_HIT:SoundEvents.PLAYER_ATTACK_STRONG,SoundSource.PLAYERS,rapier?.4f:breath?.3f:.65f,rapier?1.25f:breath?.9f:.55f,false);

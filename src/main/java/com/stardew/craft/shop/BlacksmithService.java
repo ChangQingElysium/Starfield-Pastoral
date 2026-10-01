@@ -4,11 +4,6 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.api.v1.economy.StardewCosts;
 import com.stardew.craft.api.v1.economy.StardewCurrencies;
 import com.stardew.craft.entity.npc.StardewNpcEntity;
-import com.stardew.craft.item.tool.HoeItem;
-import com.stardew.craft.item.tool.PanItem;
-import com.stardew.craft.item.tool.StardewAxeItem;
-import com.stardew.craft.item.tool.StardewPickaxeItem;
-import com.stardew.craft.item.tool.WateringCanItem;
 import com.stardew.craft.inventory.TrashCanTier;
 import com.stardew.craft.network.payload.OpenBlacksmithMenuPayload;
 import com.stardew.craft.network.payload.OpenNpcDialogueScreenPayload;
@@ -109,7 +104,8 @@ public final class BlacksmithService {
             ResourceLocation rl = new ResourceLocation(upgradedToolId);
             Item toolItem = BuiltInRegistries.ITEM.get(rl);
             if (toolItem != null && toolItem != Items.AIR) {
-                ItemStack stack = new ItemStack(toolItem);
+                ItemStack stack = data.getToolUpgradeStack(player.registryAccess());
+                if (stack.isEmpty()) stack = new ItemStack(toolItem);
                 player.getInventory().add(stack);
 
                 // Clear upgrade state
@@ -250,333 +246,83 @@ public final class BlacksmithService {
      * Build list of available tool upgrades for the player.
      * SDV parity: TOOL_UPGRADES ItemQuery — one entry per tool, showing next tier.
      */
+    private static final Map<UUID, List<Map.Entry<ResourceLocation, ToolUpgradeData.Definition>>> OPEN_UPGRADES = new HashMap<>();
+
     private static List<ShopItemEntry> buildToolUpgradeItems(ServerPlayer player) {
-        List<ShopItemEntry> items = new ArrayList<>();
-
-        // Check each of the 4 tool types
-        addUpgradeIfAvailable(items, player, "axe", StardewAxeItem.class);
-        addUpgradeIfAvailable(items, player, "pickaxe", StardewPickaxeItem.class);
-        addUpgradeIfAvailable(items, player, "hoe", HoeItem.class);
-        addUpgradeIfAvailable(items, player, "watering_can", WateringCanItem.class);
-        // Pan starts at Copper (tier 1) and goes to Iridium (tier 4) — uses
-        // a separate upgrade path because there is no "starter" pan and
-        // the id naming skips the "copper_" prefix on the base item.
-        addPanUpgradeIfAvailable(items, player);
-        addTrashCanUpgradeIfAvailable(items, PlayerDataManager.getPlayerData(player));
-
-        return items;
+        var offers = ToolUpgradeData.offers(player);
+        OPEN_UPGRADES.put(player.getUUID(), offers);
+        return offers.stream().map(e -> e.getValue().shopEntry()).toList();
     }
 
-    private static void addTrashCanUpgradeIfAvailable(List<ShopItemEntry> items, PlayerStardewData data) {
-        TrashCanTier.forLevel(data.getTrashCanLevel()).next().ifPresent(tier -> items.add(new ShopItemEntry(
-                tier.upgradeItemId(), "", "", tier.price(), 1, tier.barItemId(), tier.barCount(),
-                Set.of(), 1, 0, null, -1, 0, 1
-        )));
-    }
-
-    /**
-     * Pan upgrade variant — SDV: Copper (L1) → Steel (L2) → Gold (L3) → Iridium (L4).
-     * Unlike other tools, pan has no "starter" tier; the copper_pan is itself
-     * the base. Prices/bars match the standard SDV upgrade ladder.
-     */
-    private static void addPanUpgradeIfAvailable(List<ShopItemEntry> items, ServerPlayer player) {
-        int currentTier = findCurrentPanTier(player);
-        if (currentTier < 1 || currentTier >= 4) return; // No pan or already iridium
-
-        int nextTier = currentTier + 1;
-        String upgradedItemId = switch (nextTier) {
-            case 2 -> "stardewcraft:steel_pan";
-            case 3 -> "stardewcraft:gold_pan";
-            case 4 -> "stardewcraft:iridium_pan";
-            default -> null;
-        };
-        if (upgradedItemId == null) return;
-
-        int price = getUpgradePrice(nextTier);
-        String tradeItemId = getUpgradeBarId(nextTier);
-        int tradeCount = 5;
-
-        items.add(new ShopItemEntry(
-            upgradedItemId, "", "",
-            price, 1, tradeItemId, tradeCount,
-            Set.of(), 1, 0, null, -1, 0, 1
-        ));
-    }
-
-    private static int findCurrentPanTier(ServerPlayer player) {
-        int maxTier = -1;
-        for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
-            ItemStack stack = player.getInventory().getItem(i);
-            if (stack.isEmpty()) continue;
-            if (stack.getItem() instanceof PanItem pan) {
-                int t = pan.getUpgradeLevel();
-                if (t > maxTier) maxTier = t;
-            }
-        }
-        return maxTier;
-    }
-
-    private static void addUpgradeIfAvailable(List<ShopItemEntry> items, ServerPlayer player,
-                                               String toolBaseName, Class<?> toolClass) {
-        int currentTier = findCurrentToolTier(player, toolClass);
-        if (currentTier < 0 || currentTier >= 4) return; // No tool or already iridium
-
-        int nextTier = currentTier + 1;
-        String nextTierPrefix = switch (nextTier) {
-            case 1 -> "copper_";
-            case 2 -> "steel_";
-            case 3 -> "gold_";
-            case 4 -> "iridium_";
-            default -> "";
-        };
-
-        String upgradedItemId = "stardewcraft:" + nextTierPrefix + toolBaseName;
-        int price = getUpgradePrice(nextTier);
-        String tradeItemId = getUpgradeBarId(nextTier);
-        int tradeCount = 5; // SDV: always 5 bars
-
-        items.add(new ShopItemEntry(
-            upgradedItemId, "", "", // displayName and description resolved client-side
-            price, 1, tradeItemId, tradeCount,
-            Set.of(), 1, 0, null, -1, 0, 1
-        ));
-    }
-
-    /**
-     * Find the highest tier tool of a given type in the player's inventory.
-     * Returns -1 if not found.
-     */
-    private static int findCurrentToolTier(ServerPlayer player, Class<?> toolClass) {
-        int maxTier = -1;
-        for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
-            ItemStack stack = player.getInventory().getItem(i);
-            if (stack.isEmpty()) continue;
-            Item item = stack.getItem();
-            if (!toolClass.isInstance(item)) continue;
-
-            int tier = getToolTier(item);
-            if (tier > maxTier) maxTier = tier;
-        }
-        return maxTier;
-    }
-
-    /**
-     * Get the stardew tier level from a tool item.
-     */
-    private static int getToolTier(Item item) {
-        if (item instanceof StardewAxeItem axe) return axe.getTierLevel();
-        if (item instanceof StardewPickaxeItem pick) return pick.getStardewTier();
-        if (item instanceof HoeItem hoe) return hoe.getTier().getMaxChargeLevel();
-        if (item instanceof WateringCanItem can) return can.getTier().getMaxChargeLevel();
-        return -1;
-    }
-
-    /**
-     * SDV: ShopBuilder.GetToolUpgradeConventionalPrice
-     */
+    /** Legacy helpers now read the standard axe path from the same definitions. */
     public static int getUpgradePrice(int level) {
-        return switch (level) {
-            case 1 -> 2000;
-            case 2 -> 5000;
-            case 3 -> 10000;
-            case 4 -> 25000;
-            default -> 2000;
-        };
+        return standardUpgrade(level).map(ToolUpgradeData.Definition::price).orElse(0);
     }
-
-    /**
-     * SDV: ShopBuilder.GetToolUpgradeConventionalTradeItem → bar item IDs
-     */
     public static String getUpgradeBarId(int level) {
-        return switch (level) {
-            case 1 -> "stardewcraft:copper_bar";
-            case 2 -> "stardewcraft:iron_bar";
-            case 3 -> "stardewcraft:gold_bar";
-            case 4 -> "stardewcraft:iridium_bar";
-            default -> "stardewcraft:copper_bar";
-        };
+        return standardUpgrade(level).map(d -> d.material().toString()).orElse("");
+    }
+    private static Optional<ToolUpgradeData.Definition> standardUpgrade(int level) {
+        return ToolUpgradeData.snapshot().values().stream().filter(d -> d.family().toString().equals("stardewcraft:axe")
+                && d.tier() == level).findFirst();
     }
 
-    /**
-     * Called from ShopPurchasePayload when shopId == "ClintUpgrade".
-     * Rebuilds the dynamic item list for this player and processes the purchase.
-     */
     public static void handleToolUpgradePurchaseFromShop(ServerPlayer player, int itemIndex, int quantity) {
-        PlayerStardewData data = PlayerDataManager.getPlayerData(player);
-
-        // Can't upgrade if already upgrading
-        if (data.getToolBeingUpgraded() != null && !data.getToolBeingUpgraded().isEmpty()) {
-            sendPurchaseResult(player, false);
-            return;
+        var data = PlayerDataManager.getPlayerData(player);
+        var offers = OPEN_UPGRADES.getOrDefault(player.getUUID(), List.of());
+        if (quantity != 1 || !data.getToolBeingUpgraded().isEmpty() || itemIndex < 0 || itemIndex >= offers.size()) {
+            sendPurchaseResult(player, false); return;
         }
-
-        // Rebuild the same dynamic list that was sent to the client
-        List<ShopItemEntry> items = buildToolUpgradeItems(player);
-        if (itemIndex < 0 || itemIndex >= items.size()) {
-            sendPurchaseResult(player, false);
-            return;
+        var selected = offers.get(itemIndex);
+        // Never reinterpret a stale index after reload or after inventory changes.
+        if (!selected.getValue().equals(ToolUpgradeData.snapshot().get(selected.getKey()))
+                || ToolUpgradeData.offers(player).stream().noneMatch(e -> e.equals(selected))) {
+            sendPurchaseResult(player, false); return;
         }
-
-        ShopItemEntry entry = items.get(itemIndex);
-        Optional<TrashCanTier> trashCanTier = TrashCanTier.fromUpgradeItemId(entry.itemId());
-        if (trashCanTier.isPresent()) {
-            if (data.getTrashCanLevel() != trashCanTier.get().level() - 1) {
-                sendPurchaseResult(player, false);
-                return;
-            }
-        } else {
-            String oldToolId = getOldToolId(entry.itemId());
-            if (oldToolId == null) {
-                sendPurchaseResult(player, false);
-                return;
-            }
-            Item oldTool = BuiltInRegistries.ITEM.get(new ResourceLocation(oldToolId));
-            if (oldTool == null || oldTool == Items.AIR
-                    || player.getInventory().countItem(oldTool) < 1) {
-                sendPurchaseResult(player, false);
-                return;
-            }
+        var definition = selected.getValue();
+        int slot = definition.inputSlot(player);
+        var result = definition.result(slot < 0 ? ItemStack.EMPTY : player.getInventory().getItem(slot));
+        if (result.isEmpty()) { sendPurchaseResult(player, false); return; }
+        var cost = ShopCostService.resolve(player, "ClintUpgrade", definition.shopEntry(), 1, StardewCurrencies.MONEY);
+        var reserved = slot < 0 ? ItemStack.EMPTY : player.getInventory().getItem(slot).copy();
+        if (slot >= 0) player.getInventory().getItem(slot).shrink(1);
+        if (cost.isEmpty() || !StardewCosts.pay(player, cost.get().cost()).success()) {
+            if (slot >= 0) player.getInventory().setItem(slot, reserved);
+            sendPurchaseResult(player, false); return;
         }
-
-        var resolvedCost = ShopCostService.resolve(
-                player, "ClintUpgrade", entry, 1,
-                StardewCurrencies.MONEY);
-        if (resolvedCost.isEmpty()
-                || !StardewCosts.pay(
-                        player, resolvedCost.get().cost())
-                        .success()) {
-            sendPurchaseResult(player, false);
-            return;
-        }
-
-        // For the trash can, every remaining operation after payment is an
-        // unconditional state write. This keeps cost consumption and queue
-        // creation in one server-thread transaction with no post-payment
-        // validation that could strand the player without an upgrade order.
-        if (trashCanTier.isPresent()) {
-            beginUpgrade(player, data, entry.itemId());
-        } else {
-            // Process the upgrade (remove old tool, set upgrade state)
-            handleToolUpgradePurchase(player, entry);
-        }
-
-        // Send purchase result first (updates client money display)
-        int newMoney = com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player);
-        com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
-            new com.stardew.craft.network.payload.ShopPurchaseResultPayload(
-                true, "ClintUpgrade", newMoney, "", 0, itemIndex));
-
-        // SDV: Game1.exitActiveMenu() + Game1.DrawDialogue("Tool.cs.14317")
-        // Send dialogue — this opens the dialogue screen, replacing the shop screen
+        startOrder(player, definition, -1, result);
+        OPEN_UPGRADES.remove(player.getUUID());
+        PacketDistributor.sendToPlayer(player, new com.stardew.craft.network.payload.ShopPurchaseResultPayload(
+                true, "ClintUpgrade", PlayerStardewDataAPI.getMoney(player), "", 0, itemIndex));
         sendDialogue(player, "stardewcraft.npc.clint.upgrade_started", null);
     }
-
     private static void sendPurchaseResult(ServerPlayer player, boolean success) {
-        int money = com.stardew.craft.player.PlayerStardewDataAPI.getMoney(player);
-        com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
-            new com.stardew.craft.network.payload.ShopPurchaseResultPayload(
-                success, "ClintUpgrade", money, "", 0, -1));
+        PacketDistributor.sendToPlayer(player, new com.stardew.craft.network.payload.ShopPurchaseResultPayload(
+                success, "ClintUpgrade", PlayerStardewDataAPI.getMoney(player), "", 0, -1));
     }
-
-    /**
-     * Handle tool upgrade purchase from ClintUpgrade shop.
-     * SDV parity: Tool.actionWhenPurchased("ClintUpgrade")
-     * Called from ShopPurchasePayload when shopId == "ClintUpgrade".
-     *
-     * @return true if handled (caller should NOT do normal item delivery)
-     */
+    /** Compatibility hook for callers which already paid the displayed cost. */
     public static boolean handleToolUpgradePurchase(ServerPlayer player, ShopItemEntry entry) {
-        PlayerStardewData data = PlayerDataManager.getPlayerData(player);
-
-        // SDV: must not already have a tool being upgraded
-        if (data.getToolBeingUpgraded() != null && !data.getToolBeingUpgraded().isEmpty()) {
-            return true; // Block purchase
-        }
-
-        String upgradedItemId = entry.itemId();
-
-        Optional<TrashCanTier> trashCanTier = TrashCanTier.fromUpgradeItemId(upgradedItemId);
-        if (trashCanTier.isPresent()) {
-            if (data.getTrashCanLevel() != trashCanTier.get().level() - 1) {
-                return true;
-            }
-            beginUpgrade(player, data, upgradedItemId);
-            return true;
-        }
-
-        // Determine which old tool to remove
-        String oldToolId = getOldToolId(upgradedItemId);
-        if (oldToolId == null) return true;
-
-        // Find and remove the old tool from inventory
-        ResourceLocation oldRl = new ResourceLocation(oldToolId);
-        Item oldItem = BuiltInRegistries.ITEM.get(oldRl);
-        if (oldItem == null || oldItem == Items.AIR) return true;
-
-        boolean removed = false;
-        for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
-            ItemStack stack = player.getInventory().getItem(i);
-            if (!stack.isEmpty() && stack.is(oldItem)) {
-                player.getInventory().setItem(i, ItemStack.EMPTY);
-                removed = true;
-                break;
-            }
-        }
-        if (!removed) return true; // Old tool not found
-
-        // SDV: Game1.player.toolBeingUpgraded.Value = (Tool)getOne();
-        // SDV: Game1.player.daysLeftForToolUpgrade.Value = 2;
-        beginUpgrade(player, data, upgradedItemId);
-
-        // Note: dialogue is NOT sent here; caller (handleToolUpgradePurchaseFromShop) 
-        // handles closing the shop and sending the dialogue after the purchase result.
-
-        return true; // Handled — don't deliver the item to inventory
+        if (!PlayerDataManager.getPlayerData(player).getToolBeingUpgraded().isEmpty()) return true;
+        ToolUpgradeData.offers(player).stream().map(Map.Entry::getValue)
+                .filter(d -> d.output().toString().equals(entry.itemId())).findFirst().ifPresent(d -> {
+                    int slot = d.inputSlot(player);
+                    var result = d.result(slot < 0 ? ItemStack.EMPTY : player.getInventory().getItem(slot));
+                    if (!result.isEmpty()) startOrder(player, d, slot, result);
+                });
+        return true;
     }
-
-    private static void beginUpgrade(ServerPlayer player, PlayerStardewData data, String upgradedItemId) {
-        data.setToolBeingUpgraded(upgradedItemId);
-        data.setDaysLeftForToolUpgrade(2);
+    private static void startOrder(ServerPlayer player, ToolUpgradeData.Definition definition, int slot, ItemStack result) {
+        if (slot >= 0) player.getInventory().getItem(slot).shrink(1);
+        var data = PlayerDataManager.getPlayerData(player);
+        data.setToolBeingUpgraded(definition.output().toString());
+        data.setToolUpgradeStack(result, player.registryAccess());
+        data.setDaysLeftForToolUpgrade(definition.days());
         data.setToolUpgradeNotified(false);
         PlayerDataManager.get().setDirty();
-        player.level().playSound(null, player.blockPosition(),
-                net.minecraft.sounds.SoundEvents.ANVIL_USE,
-                net.minecraft.sounds.SoundSource.BLOCKS, 1.0f, 1.0f);
+        player.inventoryMenu.broadcastChanges();
+        player.level().playSound(null, player.blockPosition(), net.minecraft.sounds.SoundEvents.ANVIL_USE,
+                net.minecraft.sounds.SoundSource.BLOCKS, 1, 1);
     }
-
-    /**
-     * Get the old tool ID that should be removed when upgrading to the given new tool.
-     */
-    private static String getOldToolId(String newToolId) {
-        // Map: upgraded tool → previous tier tool
-        return switch (newToolId) {
-            // Axe
-            case "stardewcraft:copper_axe" -> "stardewcraft:axe";
-            case "stardewcraft:steel_axe" -> "stardewcraft:copper_axe";
-            case "stardewcraft:gold_axe" -> "stardewcraft:steel_axe";
-            case "stardewcraft:iridium_axe" -> "stardewcraft:gold_axe";
-            // Pickaxe
-            case "stardewcraft:copper_pickaxe" -> "stardewcraft:pickaxe";
-            case "stardewcraft:steel_pickaxe" -> "stardewcraft:copper_pickaxe";
-            case "stardewcraft:gold_pickaxe" -> "stardewcraft:steel_pickaxe";
-            case "stardewcraft:iridium_pickaxe" -> "stardewcraft:gold_pickaxe";
-            // Hoe
-            case "stardewcraft:copper_hoe" -> "stardewcraft:hoe";
-            case "stardewcraft:steel_hoe" -> "stardewcraft:copper_hoe";
-            case "stardewcraft:gold_hoe" -> "stardewcraft:steel_hoe";
-            case "stardewcraft:iridium_hoe" -> "stardewcraft:gold_hoe";
-            // Watering Can
-            case "stardewcraft:copper_watering_can" -> "stardewcraft:watering_can";
-            case "stardewcraft:steel_watering_can" -> "stardewcraft:copper_watering_can";
-            case "stardewcraft:gold_watering_can" -> "stardewcraft:steel_watering_can";
-            case "stardewcraft:iridium_watering_can" -> "stardewcraft:gold_watering_can";
-            // Pan (Copper → Steel → Gold → Iridium; no starter tier)
-            case "stardewcraft:steel_pan"    -> "stardewcraft:copper_pan";
-            case "stardewcraft:gold_pan"     -> "stardewcraft:steel_pan";
-            case "stardewcraft:iridium_pan"  -> "stardewcraft:gold_pan";
-            default -> null;
-        };
-    }
+    public static void onLogout(ServerPlayer player) { OPEN_UPGRADES.remove(player.getUUID()); }
 
     /**
      * Called each new day for every player. Decrements daysLeftForToolUpgrade.
@@ -623,23 +369,16 @@ public final class BlacksmithService {
 
     private static void openGeodeProcessing(ServerPlayer player) {
         com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
-            new com.stardew.craft.network.payload.OpenGeodeMenuPayload());
+            new com.stardew.craft.network.payload.OpenGeodeMenuPayload(GeodeLootService.clintInputs(player)));
     }
 
     // ──── Helpers ────
 
     private static boolean playerHasGeode(ServerPlayer player) {
+        var inputs = GeodeLootService.clintInputs(player);
         for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
             ItemStack stack = player.getInventory().getItem(i);
-            if (stack.isEmpty()) continue;
-            ResourceLocation id = BuiltInRegistries.ITEM.getKey(stack.getItem());
-            if (id != null) {
-                String path = id.getPath();
-                if (path.contains("geode") || path.contains("omni_geode")
-                    || path.contains("mystery_box") || path.contains("golden_coconut")) {
-                    return true;
-                }
-            }
+            if (!stack.isEmpty() && inputs.contains(BuiltInRegistries.ITEM.getKey(stack.getItem()))) return true;
         }
         return false;
     }
@@ -648,17 +387,7 @@ public final class BlacksmithService {
      * Check if the player has ANY stardew tool in inventory (even starter tier).
      */
     private static boolean playerHasAnyStardewTool(ServerPlayer player) {
-        for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
-            ItemStack stack = player.getInventory().getItem(i);
-            if (stack.isEmpty()) continue;
-            Item item = stack.getItem();
-            if (item instanceof StardewAxeItem || item instanceof StardewPickaxeItem
-                || item instanceof HoeItem || item instanceof WateringCanItem
-                || item instanceof PanItem) {
-                return true;
-            }
-        }
-        return false;
+        return ToolUpgradeData.hasTool(player);
     }
 
     private static void sendDialogue(ServerPlayer player, String langKey, PlayerStardewData data) {

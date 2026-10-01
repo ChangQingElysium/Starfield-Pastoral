@@ -79,7 +79,7 @@ public final class CombatCollapseModelPose {
         var minimum=new MinimumY();
         // Actual rendered vertices include inflated hat/sleeves/pants and both skin widths.
         model.renderToBuffer(support,minimum,0,0);
-        float weight=Math.clamp(frame.pitch()/13,0,1);
+        float weight=com.stardew.craft.port.PortJava.clamp(frame.pitch()/13,0,1);
         return (-minimum.y+.012f)*weight;
     }
     private static final class MinimumY implements VertexConsumer {

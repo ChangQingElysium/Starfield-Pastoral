@@ -45,7 +45,7 @@ public final class GravestoneGameTests {
                 for(var item:level.getEntitiesOfClass(ItemEntity.class,new AABB(main).inflate(3)))item.discard();
                 level.destroyBlock(hitPos,true);
                 var drops=level.getEntitiesOfClass(ItemEntity.class,new AABB(main).inflate(3));
-                h.assertTrue(drops.size()==1&&drops.getFirst().getItem().is(block.asItem())&&drops.getFirst().getItem().getCount()==1,"Grave must drop once");
+                h.assertTrue(drops.size()==1&&com.stardew.craft.port.PortJava.getFirst(drops).getItem().is(block.asItem())&&com.stardew.craft.port.PortJava.getFirst(drops).getItem().getCount()==1,"Grave must drop once");
                 h.assertTrue(level.getBlockState(main).isAir()&&level.getBlockState(main.above()).isAir(),"Grave removal leaked upper cell");
             }
         h.succeed();

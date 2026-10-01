@@ -81,7 +81,7 @@ public final class CrossDimensionAttributeRules {
             chance *= 1.5F;
         }
         chance += luckLevel * (chance / 40.0F);
-        return Math.clamp(chance, 0.0F, 1.0F);
+        return com.stardew.craft.port.PortJava.clamp(chance, 0.0F, 1.0F);
     }
 
     public static float minecraftCriticalMultiplier(

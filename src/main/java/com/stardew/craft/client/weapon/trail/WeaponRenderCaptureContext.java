@@ -87,7 +87,7 @@ public final class WeaponRenderCaptureContext {
                 BladeAnchors blade=SPRITE_ANCHORS.computeIfAbsent(model.getParticleIcon(),WeaponRenderCaptureContext::findAnchors);
                 float partial=com.stardew.craft.port.net.minecraft.client.DeltaTracker.client().getGameTimeDeltaPartialTick(false);
                 com.stardew.craft.client.weapon.RustWoodGeometry.shelter(buffers.getBuffer(com.stardew.craft.client.weapon.WeaponEffectRenderTypes.MOLTEN_GLOW),itemTransform,
-                        new Vec3(blade.base.x,blade.base.y,blade.base.z),new Vec3(blade.tip.x,blade.tip.y,blade.tip.z),Math.clamp((shelter.getDuration()-partial)/8,0,1));
+                        new Vec3(blade.base.x,blade.base.y,blade.base.z),new Vec3(blade.tip.x,blade.tip.y,blade.tip.z),com.stardew.craft.port.PortJava.clamp((shelter.getDuration()-partial)/8,0,1));
             }
         }
         if ("steel_smallsword".equals(weapon.getWeaponId()) && com.stardew.craft.Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) {
@@ -97,7 +97,7 @@ public final class WeaponRenderCaptureContext {
                 boolean guard="light_counter".equals(action.skillId()),blocked="light_counter_counter".equals(action.skillId());
                 if(guard||blocked){
                     BladeAnchors blade=SPRITE_ANCHORS.computeIfAbsent(model.getParticleIcon(),WeaponRenderCaptureContext::findAnchors);
-                    float fade=guard?Math.clamp(action.progress()/.1f,0,1)*Math.clamp((1-action.progress())/.15f,0,1):Math.clamp(1-action.progress()/.35f,0,1);
+                    float fade=guard?com.stardew.craft.port.PortJava.clamp(action.progress()/.1f,0,1)*com.stardew.craft.port.PortJava.clamp((1-action.progress())/.15f,0,1):com.stardew.craft.port.PortJava.clamp(1-action.progress()/.35f,0,1);
                     com.stardew.craft.client.weapon.GuardSpineGeometry.guard(buffers.getBuffer(com.stardew.craft.client.weapon.WeaponEffectRenderTypes.MOLTEN_GLOW),itemTransform,
                             new Vec3(blade.base.x,blade.base.y,blade.base.z),new Vec3(blade.tip.x,blade.tip.y,blade.tip.z),fade,blocked);
                 }
@@ -121,7 +121,7 @@ public final class WeaponRenderCaptureContext {
             var out = buffers.getBuffer(com.stardew.craft.client.weapon.WeaponEffectRenderTypes.MOLTEN_GLOW);
             var fury = player.getEffect(com.stardew.craft.effect.ModMobEffects.FURY.get());
             if (fury != null && com.stardew.craft.client.weapon.PirateSilverVisuals.recentPlunder(player.getId()))
-                com.stardew.craft.client.weapon.PirateSilverGeometry.furyBlade(out, itemTransform, base, tip, Math.clamp((fury.getDuration() - partial) / 8, 0, 1));
+                com.stardew.craft.client.weapon.PirateSilverGeometry.furyBlade(out, itemTransform, base, tip, com.stardew.craft.port.PortJava.clamp((fury.getDuration() - partial) / 8, 0, 1));
             com.stardew.craft.client.weapon.NeedleBurglarGeometry.loot(out, itemTransform, base, tip,
                     com.stardew.craft.client.weapon.PirateSilverVisuals.healAge(partial));
         }
@@ -135,7 +135,7 @@ public final class WeaponRenderCaptureContext {
                 BladeAnchors blade = SPRITE_ANCHORS.computeIfAbsent(model.getParticleIcon(), WeaponRenderCaptureContext::findAnchors);
                 com.stardew.craft.client.weapon.IronWindGeometry.galeBlade(
                         buffers.getBuffer(com.stardew.craft.client.weapon.WeaponEffectRenderTypes.MOLTEN_GLOW), itemTransform,
-                        new Vec3(blade.base.x, blade.base.y, blade.base.z), new Vec3(blade.tip.x, blade.tip.y, blade.tip.z), Math.clamp(remaining / 8, 0, 1));
+                        new Vec3(blade.base.x, blade.base.y, blade.base.z), new Vec3(blade.tip.x, blade.tip.y, blade.tip.z), com.stardew.craft.port.PortJava.clamp(remaining / 8, 0, 1));
             }
         }
 
@@ -146,7 +146,7 @@ public final class WeaponRenderCaptureContext {
             boolean dagger = "dwarf_dagger".equals(weapon.getWeaponId());
             float remaining = dagger ? com.stardew.craft.client.weapon.DwarfDaggerRushClientState.getRemainingTicks(player)
                     : com.stardew.craft.client.weapon.DwarfFortressClientState.getRemainingTicks(player);
-            float visibility = Math.clamp(remaining / 8, 0, 1);
+            float visibility = com.stardew.craft.port.PortJava.clamp(remaining / 8, 0, 1);
             if (!dagger && com.stardew.craft.client.weapon.DwarfWeaponVisuals.guarding(player.getId())
                     && player.hasEffect(com.stardew.craft.effect.ModMobEffects.SHELTER.get())) visibility = Math.max(visibility, .65f);
             if (visibility > 0) {
@@ -167,7 +167,7 @@ public final class WeaponRenderCaptureContext {
             if ("iridium_needle".equals(weapon.getWeaponId())) {
                 float remaining = com.stardew.craft.client.weapon.IridiumNeedleFrenzyClientState.getRemainingTicks(Minecraft.getInstance().player) - partial;
                 com.stardew.craft.client.weapon.NeedleBurglarGeometry.needleBlade(out, itemTransform, base, tip,
-                        Math.clamp(remaining / 8, 0, 1), com.stardew.craft.client.weapon.NeedleBurglarVisuals.hitAge(partial));
+                        com.stardew.craft.port.PortJava.clamp(remaining / 8, 0, 1), com.stardew.craft.client.weapon.NeedleBurglarVisuals.hitAge(partial));
             } else com.stardew.craft.client.weapon.NeedleBurglarGeometry.loot(out, itemTransform, base, tip,
                     com.stardew.craft.client.weapon.NeedleBurglarVisuals.lootAge(partial));
         }

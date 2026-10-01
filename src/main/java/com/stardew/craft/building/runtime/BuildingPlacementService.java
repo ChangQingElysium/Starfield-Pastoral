@@ -74,7 +74,7 @@ public final class BuildingPlacementService {
                 boolean following = moving != null && animal != null && animal.home().equals(moving.id()) && BuildingTransfer.contentBounds(moving).contains(entity.blockPosition());
                 if (!following && occupied.size() < 256) occupied.add(entity.blockPosition().immutable());
             }
-            if (!occupied.isEmpty()) return new Probe("occupied", occupied.getFirst(), occupied, claim, structure, manager, farm);
+            if (!occupied.isEmpty()) return new Probe("occupied", com.stardew.craft.port.PortJava.getFirst(occupied), occupied, claim, structure, manager, farm);
         }
         return new Probe("valid", anchor, java.util.List.of(), claim, structure, manager, farm);
     }
@@ -158,7 +158,7 @@ public final class BuildingPlacementService {
                 }
             }
         }
-        return problems.isEmpty() ? null : new SpaceIssue(issue, problems.getFirst(), problems);
+        return problems.isEmpty() ? null : new SpaceIssue(issue, com.stardew.craft.port.PortJava.getFirst(problems), problems);
     }
 
     public static boolean placePrefab(ServerPlayer player, BlockPos anchor, Direction facing, UUID permit, net.minecraft.resources.ResourceLocation familyId) {
@@ -250,7 +250,7 @@ public final class BuildingPlacementService {
         var tier = PrefabDefinitions.get(record.family()).tier(record.tier());
         var workers = level.getEntitiesOfClass(RobinConstructionEntity.class, aabb(record.claim()), entity -> record.id().equals(entity.buildingId()));
         for (int i = 1; i < workers.size(); i++) workers.get(i).discard();
-        var worker = workers.isEmpty() ? ModEntities.ROBIN_CONSTRUCTION.get().create(level) : workers.getFirst();
+        var worker = workers.isEmpty() ? ModEntities.ROBIN_CONSTRUCTION.get().create(level) : com.stardew.craft.port.PortJava.getFirst(workers);
         if (worker == null) return;
         var order = BuildingWorldData.get(level.getServer()).order(record.id());
         BlockPos pos = record.anchor().offset(PrefabDefinitions.rotateCell(new BlockPos((tier.bounds().min().getX() + tier.bounds().maxInclusive().getX()) / 2, 1, tier.bounds().maxInclusive().getZ() - 1), PrefabDefinitions.rotation(record.facing())));

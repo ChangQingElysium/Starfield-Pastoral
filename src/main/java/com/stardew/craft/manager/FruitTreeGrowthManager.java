@@ -316,7 +316,7 @@ public class FruitTreeGrowthManager extends SavedData {
                     FruitTreeType type = FruitTreeType.byId(entryTag.getString("Type"));
                     int days = Math.max(0, Math.min(FruitTreeType.DAYS_TO_MATURE, entryTag.getInt("DaysRemaining")));
                     SaplingEntry entry = new SaplingEntry(type, days);
-                    entry.infertileProgress = Math.clamp(entryTag.getInt("InfertileProgress"), 0, 4);
+                    entry.infertileProgress = com.stardew.craft.port.PortJava.clamp(entryTag.getInt("InfertileProgress"), 0, 4);
                     manager.saplings.put(globalPos, entry);
                 }
             }

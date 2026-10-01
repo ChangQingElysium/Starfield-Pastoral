@@ -47,7 +47,7 @@ public class FertilizerSyncEvents {
         }
     }
 
-    // PORT(1.20.1): Forge fires ChunkWatchEvent.Watch after the chunk packet was sent (NeoForge: Sent).
+    // PORT(1.20.1): Forge fires ChunkWatchEvent.Watch after the chunk packet was sent (MinecraftForge: Sent).
     @SubscribeEvent
     public static void onChunkSent(ChunkWatchEvent.Watch event) {
         ServerPlayer player = event.getPlayer();

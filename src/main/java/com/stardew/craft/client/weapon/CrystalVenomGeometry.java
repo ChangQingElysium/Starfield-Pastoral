@@ -24,10 +24,10 @@ public final class CrystalVenomGeometry {
         for(int sign:new int[]{-1,1}) {
             Vec3[] fang=new Vec3[9];
             for(int i=0;i<fang.length;i++) {double t=i/8.0;fang[i]=center.add(right.scale(sign*(.045+Math.sin(Math.PI*t)*.035))).add(up.scale(.09-.18*t));}
-            WeaponContactGeometry.ribbon(out,pose,fang,normal,.009+Math.clamp(stacks,1,5)*.0015,visibility,false,103,178,57);
+            WeaponContactGeometry.ribbon(out,pose,fang,normal,.009+com.stardew.craft.port.PortJava.clamp(stacks,1,5)*.0015,visibility,false,103,178,57);
         }
         if(fuse<0) return;
-        double radius=.13+.20*(1-Math.clamp(fuse,0,1));
+        double radius=.13+.20*(1-com.stardew.craft.port.PortJava.clamp(fuse,0,1));
         for(int sign:new int[]{-1,1}) {
             Vec3[] arc=new Vec3[17];
             for(int i=0;i<arc.length;i++) {double angle=-1.1+i*2.2/16;arc[i]=center.add(right.scale(sign*Math.cos(angle)*radius)).add(up.scale(Math.sin(angle)*radius));}
@@ -37,7 +37,7 @@ public final class CrystalVenomGeometry {
     public static void crystalLayers(VertexConsumer out,Matrix4f pose,Vec3 base,Vec3 tip,int stacks,float burstAge) {
         Vec3 along=tip.subtract(base).normalize(),side=new Vec3(-along.y,along.x,0).normalize(),normal=new Vec3(0,0,1);
         boolean burst=burstAge>=0&&burstAge<6;
-        for(int i=0;i<(burst?4:Math.clamp(stacks,0,4));i++) for(int face:new int[]{-1,1}) {
+        for(int i=0;i<(burst?4:com.stardew.craft.port.PortJava.clamp(stacks,0,4));i++) for(int face:new int[]{-1,1}) {
             Vec3 center=base.lerp(tip,.4+i*.14).add(0,0,.036*face);
             if(burst) center=center.add(side.scale((i%2==0?1:-1)*burstAge*.018));
             WeaponContactGeometry.blade(out,pose,center.subtract(along.scale(.03)),center.add(along.scale(.03)),normal,

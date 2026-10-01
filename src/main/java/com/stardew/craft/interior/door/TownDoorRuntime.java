@@ -353,8 +353,8 @@ public final class TownDoorRuntime {
         if (!validDoors(level, definition)) return false;
         boolean open = allDoorsOpen(level, definition);
         if (definition.outsideDoors().size() == 1 && definition.insideDoors().size() == 1) {
-            BlockPos outsidePos = definition.outsideDoors().getFirst();
-            BlockPos insidePos = definition.insideDoors().getFirst();
+            BlockPos outsidePos = com.stardew.craft.port.PortJava.getFirst(definition.outsideDoors());
+            BlockPos insidePos = com.stardew.craft.port.PortJava.getFirst(definition.insideDoors());
             BlockState outsideState = level.getBlockState(outsidePos);
             Direction outsideFacing = doorFacing(level, definition.outsideDoors());
             Direction insideFacing = doorFacing(level, definition.insideDoors());
@@ -537,8 +537,8 @@ public final class TownDoorRuntime {
     }
 
     private static Opening opening(Level level, List<BlockPos> doors) {
-        BlockPos first = doors.getFirst();
-        BlockPos last = doors.getLast();
+        BlockPos first = com.stardew.craft.port.PortJava.getFirst(doors);
+        BlockPos last = com.stardew.craft.port.PortJava.getLast(doors);
         if (doors.size() > 1) {
             double centerX = (first.getX() + last.getX() + 1) * .5;
             return new Opening(new Vec3(centerX, first.getY() + 1, first.getZ() + .5), doors.size() - 6.0 / 16.0);

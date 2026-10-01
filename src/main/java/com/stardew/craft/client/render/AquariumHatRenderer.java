@@ -13,7 +13,7 @@ public final class AquariumHatRenderer {
     public static void render(ItemStack stack, PoseStack pose, MultiBufferSource buffers, int light) {
         if (!(stack.getItem() instanceof StardewHatItem hat)) return;
         pose.pushPose(); pose.translate(0, .1, 0); pose.scale(8, -8, -8);
-        BlockbenchElementRenderer.renderHeadDisplay(hat.getModelLocation(), pose, buffers, light, OverlayTexture.NO_OVERLAY);
+        BlockbenchElementRenderer.renderHat(hat, pose, buffers, light, OverlayTexture.NO_OVERLAY);
         pose.popPose();
     }
 }

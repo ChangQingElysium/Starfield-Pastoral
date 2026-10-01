@@ -318,7 +318,7 @@ public final class ChestControlGameTests {
             h.assertTrue(recipe.output().item().equals("stardewcraft:" + id) && recipe.output().count() == 1
                     && com.stardew.craft.player.StardewCraftingRecipeData.isBigCraftable(id), "Recipe output or category differs");
             h.assertTrue(recipe.unlockCondition().equals(id.equals("wooden_chest") ? "default" : "null"), "Recipe unlocked without its source requirement");
-            h.assertTrue(recipe.ingredients().getFirst().count() == (id.equals("big_chest") ? 120 : id.equals("big_stone_chest") ? 250 : 50), "Incorrect material cost");
+            h.assertTrue(com.stardew.craft.port.PortJava.getFirst(recipe.ingredients()).count() == (id.equals("big_chest") ? 120 : id.equals("big_stone_chest") ? 250 : 50), "Incorrect material cost");
             if (id.equals("big_chest")) h.assertTrue(recipe.ingredients().size() == 2
                     && recipe.ingredients().get(1).item().equals("stardewcraft:copper_bar") && recipe.ingredients().get(1).count() == 2, "Big chest copper cost differs");
         }
