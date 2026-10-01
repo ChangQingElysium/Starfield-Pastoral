@@ -20,7 +20,7 @@
 | `scripts/port/javac_all.sh` | 全树快速编译（约 10 秒），远快于 Gradle |
 | `src/port/resources` | 仅移植版需要的资源（同步不会覆盖） |
 
-机械脚本顺序：`rewrite_1201.py` → `adapt_nbt_provider.py` → `adapt_block_use.py` → `adapt_overrides_1201.py`，全部幂等。
+机械脚本顺序：`rewrite_1201.py` → `adapt_nbt_provider.py` → `adapt_block_use.py` → `adapt_overrides_1201.py` → `adapt_vertex_api.py` → `strict_optional_fields_1201.py`，全部幂等。之后按 javac 日志运行 `fix_java21_errors.py`、`fix_errors_1201.py`，最后 `lint_port.py` 必须为 0（它检查“1.20.1 能编译但语义不同”的写法：贴图 UV 区间、NbtUtils 方块坐标格式、DFU 可选字段、JDK 21 方法、1.21 顶点链）。
 
 ## 快速编译循环
 

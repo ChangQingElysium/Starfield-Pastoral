@@ -28,7 +28,8 @@ ROOT = Path(__file__).resolve().parents[2]
 STATE = ROOT / "scripts/port/main-sync-state.txt"
 # Order matters: every later script expects the output of the earlier ones.
 SCRIPTS = [ROOT / "scripts/port/rewrite_1201.py", ROOT / "scripts/port/adapt_nbt_provider.py",
-           ROOT / "scripts/port/adapt_block_use.py", ROOT / "scripts/port/adapt_overrides_1201.py"]
+           ROOT / "scripts/port/adapt_block_use.py", ROOT / "scripts/port/adapt_overrides_1201.py",
+           ROOT / "scripts/port/adapt_vertex_api.py", ROOT / "scripts/port/strict_optional_fields_1201.py"]
 PORT_OWNED_RESOURCES = {
     "META-INF/mods.toml",
     "META-INF/accesstransformer.cfg",
@@ -161,6 +162,10 @@ def main() -> int:
             print("  ", c)
     if not args.dry_run:
         STATE.write_text(new + "\n")
+        # Silent-behaviour idioms that compile on 1.20.1 (sprite UVs, NBT block pos, DFU optionals...).
+        print("lint:")
+        subprocess.run([sys.executable, str(ROOT / "scripts/port/lint_port.py")])
+        print("next: scripts/port/javac_all.sh, then fix_java21_errors.py / fix_errors_1201.py on its log")
     return 1 if conflicts else 0
 
 
